@@ -54,6 +54,11 @@ let get_root ?(config=".hhconfig") path_opt =
   in Wwwroot.assert_www_directory ~config root;
   root
 
+(* *** *** NB *** *** ***
+ * Commonly-used options are documented in hphp/hack/src/man/hh_client.1 --
+ * if you are making significant changes you need to update the manpage as
+ * well. Experimental or otherwise volatile options need not be documented
+ * there, but keep what's there up to date please. *)
 let parse_check_args cmd =
   (* arg parse output refs *)
   let mode = ref MODE_UNSPECIFIED in

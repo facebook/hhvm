@@ -1,0 +1,231 @@
+.TH HH_CLIENT 1
+
+.SH NAME
+hh_client \- Interface to Hack language typechecker
+
+.SH SYNOPSIS
+.B hh_client
+.RI [ MODE ]
+.RI [ OPTIONS ]
+.RI [ DIRECTORY ]
+
+.SH DESCRIPTION
+
+.BR hh_client (1)
+is an interface to a static analysis tool which is what enforces most of the
+Hack language's type system. Code must pass validation of this tool in order to
+be considered valid code in the Hack language.
+
+There are several possible
+.IR MODE s
+for
+.BR hh_client (1)
+(see below). By default, it will invoke the
+.B check
+mode, with the current directory as
+.IR DIRECTORY .
+These are reasonable defaults, meaning that most users can
+simply invoke the command as
+
+.nf
+.RS
+hh_client
+.RE
+.fi
+
+with no arguments to get a list of type errors across the entire project.
+
+All of the
+.IR MODE s
+accept a
+.I DIRECTORY
+as an optional final argument. This denotes the project upon which to operate.
+.BR hh_client (1)
+walks up the filesystem from the
+.I DIRECTORY
+until it finds a file called
+.I .hhconfig
+and then operates on the body of Hack language code rooted in this directory.
+If no
+.I DIRECTORY
+is specified, it uses the current directory by default. This means you may run
+.BR hh_client (1)
+in any subdirectory of your project and get type errors for the whole project
+without ever specifying a
+.I DIRECTORY
+explicitly.
+
+.BR hh_client (1)
+implements very little logic itself, but rather serves as an interface to the
+.BR hh_server (1)
+daemon. The server will automatically be started and restarted as needed.
+
+.SH MODES
+
+.SS check
+
+The default
+.I MODE
+if none is specified. With no
+.I OPTIONS
+specified, it prints a list of type errors on standard out, or prints
+"No errors!" if there were none.
+
+Many
+.I OPTIONS
+affect the output of
+.B check
+mode, sometimes causing it to do completely different things. (Those can be
+considered "sub-modes" of
+.B check
+mode.) Many of these options are underdoing considerable revision and so are not
+documented here; read the source for a full list.
+
+Widely-useful
+.I OPTIONS
+for
+.B check
+mode include:
+
+.TP
+.BI \-\-color " FILE"
+Sub-mode which prints out information on what parts of
+.I FILE
+are actually typechecked and which are not. Due to Hack's partial mode and PHP
+interoperability, the type system may not know the types of parts of a program.
+In this case, it trusts the programmer and carries on. The
+.B \-\-color
+mode prints out a file with ANSI terminal colors, where green code is actually
+fully checked, and red code cannot be fully checked due to such missing type
+information.
+
+.TP
+.B \-\-help
+Prints information about
+.BR hh_client (1)
+and its command line options, and then exits. Many of the options described
+there are experimental, especially if they are not described in this man
+page.
+
+.TP
+.BI \-\-from " EDITOR"
+Print output in the format expected by a specific editor. Valid values of
+.I EDTIOR
+are
+.B emacs
+and
+.BR vim .
+For usage by other tools, try
+.B \-\-json
+instead.
+
+.TP
+.B \-\-json
+Print output in a JSON format intended for machine consumption, instead of the
+output intended for human consumption that is output by default.
+
+.TP
+.BI \-\-retries " NUM"
+If the typechecker daemon is busy, try
+.I NUM
+times to connect to it before giving up. Set
+.I NUM
+to 0 to disable retries if the server is not immediately available.
+
+.TP
+.B \-\-status
+Prints human-readable type error information to standard out and then exits.
+The default sub-mode of
+.B check
+if none is specified. This output is not intended for usage by tools, but
+only for human consumption. For output intended for tool usage, see the
+.B \-\-json
+and/or
+.B \-\-from
+options.
+
+.TP
+.B \-\-version
+Prints the current client version, including build ID and build date, and
+then exits.
+
+
+.SS start
+
+Explicitly starts the
+.BR hh_server (1)
+daemon if it is not already running. This is not normally necessary, since
+.B check
+mode will start it as needed if it is not running.
+
+.SS stop
+
+Explicitly stops the
+.BR hh_server (1)
+daemon if it is running. This is not normally necessary, since the daemon
+will exit if it has not been used for an extended period of time.
+
+.SS restart
+
+Explicitly stops and then starts again the
+.BR hh_server (1)
+daemon. Fails if the daemon is not currently running. Restarting the daemon
+is not normally necessary, since it updates its state in the background, and
+.BR hh_client (1)
+will restart it automatically if the typechecker binaries have been updated.
+
+.SH EXIT STATUS
+
+For
+.B check
+mode in the
+.B \-\-status
+sub-mode,
+.BR hh_client (1)
+returns 0 if there are no type errors, and non-zero otherwise.
+
+Exit statuses for any other invocations are currently undefined and subject to
+change.
+
+.SH ENVIRONMENT
+
+.TP
+.B USER
+Used in combination with the path to the project root in order to locate the
+socket for communicating with the running
+.BR hh_server (1)
+daemon. Normally set by your login enviornment, but may be unset in some
+nonstandard setups.
+
+.SH FILES
+
+.TP
+.I .hhconfig
+When determining where the project root is in order to figure out what files to
+actually typecheck,
+.BR hh_client (1)
+walks up the directory tree from the specified
+.I DIRECTORY
+until it finds this file. The set of files recursively included in the directory
+with the
+.I .hhconfig
+file is the set of files typechecked.
+
+.TP
+.IB /tmp/hh_server_ $USER /
+The client looks inside this directory for sockets to communicate with the
+.BR hh_server (1)
+daemon. The sockets are named based on a hash of the absolute path of the
+project root.
+
+.SH BUGS
+The Hack language is part of the HHVM project. Known bugs can be found at that
+tracker, and new ones should be reported there as well:
+.IR https://github.com/facebook/hhvm/issues
+
+.SH SEE ALSO
+.BR hh_server (1), \ hackificator (1), \ hack_remove_soft_types (1).
+.br
+.I http://docs.hhvm.com/manual/en/install.hack.bootstrapping.php
+.br
+.I http://www.hacklang.org/

@@ -48,76 +48,64 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const int64_t k_PHP_ROUND_HALF_UP;
-extern const int64_t k_PHP_ROUND_HALF_DOWN;
-extern const int64_t k_PHP_ROUND_HALF_EVEN;
-extern const int64_t k_PHP_ROUND_HALF_ODD;
+Variant HHVM_FUNCTION(abs, const Variant& number);
 
-double f_pi();
+bool HHVM_FUNCTION(is_finite, double val);
+bool HHVM_FUNCTION(is_infinite, double val);
+bool HHVM_FUNCTION(is_nan, double val);
 
-// min() and max() have a second parameter before argv to avoid allocating an
-// argv array in the common case where they're called with 2 args
-Variant f_min(int _argc, const Variant& value,
-              const Variant& second = null_variant,
-              const Array& _argv = null_array);
-Variant f_max(int _argc, const Variant& value,
-              const Variant& second = null_variant,
-              const Array& _argv = null_array);
-Variant f_abs(const Variant& number);
-
-bool f_is_finite(double val);
-bool f_is_infinite(double val);
-bool f_is_nan(double val);
-
-Variant f_ceil(const Variant& number);
-Variant f_floor(const Variant& number);
-Variant f_round(const Variant& val, int64_t precision = 0,
+Variant HHVM_FUNCTION(ceil, const Variant& number);
+Variant HHVM_FUNCTION(floor, const Variant& number);
+Variant HHVM_FUNCTION(round, const Variant& val, int64_t precision = 0,
                 int64_t mode = PHP_ROUND_HALF_UP);
 
-double f_deg2rad(double number);
-double f_rad2deg(double number);
+double HHVM_FUNCTION(deg2rad, double number);
+double HHVM_FUNCTION(rad2deg, double number);
 
 // departure from PHP: not using "double" for these conversions
-String f_decbin(int64_t number);
-String f_dechex(int64_t number);
-String f_decoct(int64_t number);
-Variant f_bindec(const String& binary_string);
-Variant f_hexdec(const String& hex_string);
-Variant f_octdec(const String& octal_string);
-Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase);
-Variant f_pow(const Variant& base, const Variant& exp);
-double f_exp(double arg);
-double f_expm1(double arg);
-double f_log10(double arg);
-double f_log1p(double number);
-double f_log(double arg, double base = 0);
+String HHVM_FUNCTION(decbin, int64_t number);
+String HHVM_FUNCTION(dechex, int64_t number);
+String HHVM_FUNCTION(decoct, int64_t number);
+Variant HHVM_FUNCTION(bindec, const String& binary_string);
+Variant HHVM_FUNCTION(hexdec, const String& hex_string);
+Variant HHVM_FUNCTION(octdec, const String& octal_string);
+Variant HHVM_FUNCTION(base_convert, 
+                      const String& number, int64_t frombase, int64_t tobase);
+Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp);
+double HHVM_FUNCTION(exp, double arg);
+double HHVM_FUNCTION(expm1, double arg);
+double HHVM_FUNCTION(log10, double arg);
+double HHVM_FUNCTION(log1p, double number);
+double HHVM_FUNCTION(log, double arg, double base = 0);
 
-double f_cos(double arg);
-double f_cosh(double arg);
-double f_sin(double arg);
-double f_sinh(double arg);
-double f_tan(double arg);
-double f_tanh(double arg);
-double f_acos(double arg);
-double f_acosh(double arg);
-double f_asin(double arg);
-double f_asinh(double arg);
-double f_atan(double arg);
-double f_atanh(double arg);
-double f_atan2(double y, double x);
+double HHVM_FUNCTION(cos, double arg);
+double HHVM_FUNCTION(cosh, double arg);
+double HHVM_FUNCTION(sin, double arg);
+double HHVM_FUNCTION(sinh, double arg);
+double HHVM_FUNCTION(tan, double arg);
+double HHVM_FUNCTION(tanh, double arg);
+double HHVM_FUNCTION(acos, double arg);
+double HHVM_FUNCTION(acosh, double arg);
+double HHVM_FUNCTION(asin, double arg);
+double HHVM_FUNCTION(asinh, double arg);
+double HHVM_FUNCTION(atan, double arg);
+double HHVM_FUNCTION(atanh, double arg);
+double HHVM_FUNCTION(atan2, double y, double x);
 
-double f_hypot(double x, double y);
-double f_fmod(double x, double y);
-double f_sqrt(double arg);
+double HHVM_FUNCTION(hypot, double x, double y);
+double HHVM_FUNCTION(fmod, double x, double y);
+double HHVM_FUNCTION(sqrt, double arg);
 
-int64_t f_getrandmax();
-void f_srand(const Variant& seed = null_variant);
-int64_t f_rand(int64_t min = 0, int64_t max = RAND_MAX);
-int64_t f_mt_getrandmax();
-void f_mt_srand(const Variant& seed = null_variant);
-int64_t f_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
-double f_lcg_value();
+int64_t HHVM_FUNCTION(getrandmax);
+void HHVM_FUNCTION(srand, const Variant& seed = null_variant);
+int64_t HHVM_FUNCTION(rand, int64_t min = 0, int64_t max = RAND_MAX);
+int64_t HHVM_FUNCTION(mt_getrandmax);
+void HHVM_FUNCTION(mt_srand, const Variant& seed = null_variant);
+int64_t HHVM_FUNCTION(mt_rand, int64_t min = 0, int64_t max = RAND_MAX);
+double HHVM_FUNCTION(lcg_value);
 
+
+Variant bla_abs(const Variant& number);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

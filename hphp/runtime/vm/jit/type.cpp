@@ -656,7 +656,7 @@ Type liveTVType(const TypedValue* tv) {
     // We only allow specialization on classes that can't be
     // overridden for now. If this changes, then this will need to
     // specialize on sub object types instead.
-    if (cls && !(cls->attrs() & AttrNoOverride)) cls = nullptr;
+    if (!cls || !(cls->attrs() & AttrNoOverride)) return Type::Obj;
     return Type::Obj.specializeExact(cls);
   }
   if (tv->m_type == KindOfArray) {
@@ -828,6 +828,11 @@ Type boxType(Type t) {
     t = Type::Str;
   } else if (t.subtypeOf(Type::Arr)) {
     t = Type::Arr;
+  }
+  // When boxing an Object, if the inner class does not have AttrNoOverride,
+  // drop the class specialization.
+  if (t < Type::Obj && !(t.getClass()->attrs() & AttrNoOverride)) {
+    t = t.unspecialize();
   }
   // Everything else is just a pure type-system boxing operation.
   return t.box();

@@ -6424,6 +6424,7 @@ void EmitterVisitor::emitPostponedMeths() {
 
       // Emit the new method that handles the memoization
       m_curFunc = memoizeFe;
+      m_curFunc->isMemoizeWrapper = true;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMemoizeMethod(meth, rewrittenName, propName);
 
@@ -6589,7 +6590,9 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   }
 
   // assign ids to local variables
-  assignLocalVariableIds(meth->getFunctionScope());
+  if (!fe->isMemoizeWrapper) {
+    assignLocalVariableIds(meth->getFunctionScope());
+  }
 
   // add parameter info
   fillFuncEmitterParams(fe, meth->getParams(),

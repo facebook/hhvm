@@ -284,6 +284,7 @@ public:
   bool isGenerator;
   bool isPairGenerator;
   bool isMemoizeImpl;
+  bool isMemoizeWrapper;
   bool containsCalls;
 
   LowStringPtr docComment;

@@ -126,6 +126,7 @@ public:
   // Called whenever we are breaking due to completion of a step in or step out
   virtual void onStepInBreak(const Unit* unit, int line) {}
   virtual void onStepOutBreak(const Unit* unit, int line) {}
+  virtual void onNextBreak(const Unit* unit, int line) {}
 
   // Called when we have hit a registered function entry breakpoint
   virtual void onFuncEntryBreak(const Func* f) {}
@@ -187,6 +188,10 @@ void phpDebuggerStepIn();
 // Steps until the current function returns. Breaks on the opcode following the
 // return site.
 void phpDebuggerStepOut();
+
+// Steps a single line, stepping over functions if necessary. If the current
+// site is invalid, the break will occur on the next valid opcode.
+void phpDebuggerNext();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Breakpoint manipulation

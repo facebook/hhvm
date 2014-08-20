@@ -108,8 +108,8 @@ public:
 private:
   bool m_debuggerStepIn;          // Whether the command step out is active
   StepOutState m_debuggerStepOut; // The actual step out state
-  int m_debuggerStepOutDepth;     // The stack depth the step out started at
   bool m_debuggerNext;            // Whether the command next is active
+  int m_debuggerFlowDepth;        // The stack depth used by step out and next
 
   // When the PC is currently over a line that has been registered for a line
   // break, the top element is the line. Otherwise the top element is -1.
@@ -194,15 +194,15 @@ private:
     updateJit();
   }
 
-  int getDebuggerStepOutDepth() const { return m_debuggerStepOutDepth; }
-  void setDebuggerStepOutDepth(int depth) {
-    m_debuggerStepOutDepth = depth;
-  }
-
   bool getDebuggerNext() const { return m_debuggerNext; }
   void setDebuggerNext(bool d) {
     m_debuggerNext = d;
     updateJit();
+  }
+
+  int getDebuggerFlowDepth() const { return m_debuggerFlowDepth; }
+  void setDebuggerFlowDepth(int depth) {
+    m_debuggerFlowDepth = depth;
   }
 
   int getActiveLineBreak() const {

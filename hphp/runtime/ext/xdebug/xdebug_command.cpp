@@ -179,6 +179,32 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// step_over -i #
+// steps to the next line. Steps over function calls.
+
+class StepOverCmd : public XDebugCommand {
+public:
+  StepOverCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StepOverCmd() {}
+
+  // Respond on next break
+  bool shouldRespond() const override { return false; }
+
+  bool isValidInStatus(Status status) const override {
+    return
+      status == Status::STARTING ||
+      status == Status::STOPPING ||
+      status == Status::BREAK;
+  }
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    phpDebuggerNext();
+    return true;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // breakpoint_set -i # [-t TYPE] [-s STATE] [-f FILENAME] [-n LINENO]
 //                     [-m FUNCTION] [-x EXCEPTION] [-h HIT_VALUE]
 //                     [-o HIT_CONDITION] [-r 0|1] [-- EXPRESSION]
@@ -377,6 +403,8 @@ const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
     cmd = new StepIntoCmd(server, cmdStr, args);
   } else if (cmdStr == s_CMD_STEP_OUT) {
     cmd = new StepOutCmd(server, cmdStr, args);
+  } else if (cmdStr == s_CMD_STEP_OVER) {
+    cmd = new StepOverCmd(server, cmdStr, args);
   } else {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }

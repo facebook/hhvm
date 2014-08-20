@@ -157,21 +157,47 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     req_data.setActiveLineBreak(-1);
   }
 
-  // If we got here and we we're stepping in, we've hit a step in breakpoint. We
-  // special case builtins as the site is meaningless to the user.
+  // Check if the step in command is active. Special case builtins because they
+  // are meaningless to the user
   if (UNLIKELY(req_data.getDebuggerStepIn() && !func->isBuiltin())) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepIn(false);
-    handler->onStepInBreak(unit, line);
+    req_data.setDebuggerStepIn(false);
+    if (!req_data.getDebuggerNext()) {
+      // Next command is not active, just break.
+      handler->onStepInBreak(unit, line);
+    } else if (req_data.getDebuggerStackDepth() <=
+                req_data.getDebuggerFlowDepth()) {
+      // Next command is active but we didn't step in. We are done.
+      req_data.setDebuggerNext(false);
+      handler->onNextBreak(unit, line);
+    } else {
+      // Next command is active and we stepped in. Step out, but save the filter
+      // first, as it is cleared when we step out.
+      PCFilter* filter = g_context->m_flowFilter;
+      g_context->m_flowFilter = nullptr;
+      phpDebuggerStepOut();
+
+      // Restore the saved filter and the next flag
+      delete g_context->m_flowFilter;
+      g_context->m_flowFilter = filter;
+      req_data.setDebuggerNext(true);
+    }
   }
 
   // If the current state is OUT and we are still at a stack level less than the
   // original, then we skip over the PopR opcode if it exists and then break
   // (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::OUT &&
-      req_data.getDebuggerStackDepth() < req_data.getDebuggerStepOutDepth() &&
+      req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth() &&
       *reinterpret_cast<const Op*>(pc) != OpPopR)) {
     req_data.setDebuggerStepOut(StepOutState::NONE);
-    handler->onStepOutBreak(unit, line);
+    if (!req_data.getDebuggerNext()) {
+      // Next command not active, break
+      handler->onStepOutBreak(unit, line);
+    } else {
+      // Next command is active, but it is done. Break.
+      req_data.setDebuggerNext(false);
+      handler->onNextBreak(unit, line);
+    }
   }
 
   // Check if we are hitting a call breakpoint
@@ -221,7 +247,7 @@ void phpDebuggerFuncExitHook(const ActRec* ar) {
   // If the step out command is active and if our stack depth has decreased,
   // we are out of the function being stepped out of
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::STEPPING &&
-      req_data.getDebuggerStackDepth() < req_data.getDebuggerStepOutDepth())) {
+      req_data.getDebuggerStackDepth() < req_data.getDebuggerFlowDepth())) {
       req_data.setDebuggerStepOut(StepOutState::OUT);
   }
 }
@@ -349,18 +375,7 @@ void phpDebuggerStepIn() {
     ranges.clear();
   }
 
-  // In resumable functions, we end the step on exit points
-  if (func->isResumable()) {
-    auto exclude_exits = [] (Op op) {
-      return (op != OpYield) &&
-             (op != OpYieldK) &&
-             (op != OpAwait) &&
-             (op != OpRetC);
-    };
-    flow_filter->addRanges(unit, ranges, exclude_exits);
-  } else {
-    flow_filter->addRanges(unit, ranges);
-  }
+  flow_filter->addRanges(unit, ranges);
 }
 
 void phpDebuggerStepOut() {
@@ -376,7 +391,26 @@ void phpDebuggerStepOut() {
   flow_filter->clear();
 
   // Store the current stack depth
-  req_data.setDebuggerStepOutDepth(req_data.getDebuggerStackDepth());
+  req_data.setDebuggerFlowDepth(req_data.getDebuggerStackDepth());
+}
+
+void phpDebuggerNext() {
+  // Grab the request data and set up a step in
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  phpDebuggerStepIn();
+
+  // Special case the top-level pseudo-main. What the user expects is a
+  // "step-in" into pseudo-main, but the implementation otherwise would just
+  // step over it.
+  int stack_depth = req_data.getDebuggerStackDepth();
+  if (stack_depth == 0) {
+    return;
+  }
+
+  // Turn the next flag on. This indicates that we should do a step out after
+  // our step completes if the stack depth has increased.
+  req_data.setDebuggerNext(true);
+  req_data.setDebuggerFlowDepth(stack_depth);
 }
 
 //////////////////////////////////////////////////////////////////////////

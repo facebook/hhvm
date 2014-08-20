@@ -193,6 +193,9 @@ public:
   void onStepOutBreak(const Unit* unit, int line) override {
     onFlowBreak(unit, line);
   }
+  void onNextBreak(const Unit* unit, int line) override {
+    onFlowBreak(unit, line);
+  }
 
   // Handle loading unmatched breakpoints
   void onFileLoad(Unit* efile) override;

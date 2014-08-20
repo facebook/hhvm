@@ -1,0 +1,35 @@
+<?php
+
+function foo($i) {
+  if ($i == 0) return;
+  var_dump(__FUNCTION__ . " $i enter");
+  foo($i - 1);
+  var_dump(__FUNCTION__ . " $i exit");
+}
+
+function gen($i) {
+  while ($i) {
+    $i--;
+    yield $i;
+  }
+}
+
+function fail() {
+  throw new Exception("Hello World 5");
+}
+
+var_dump("Hello World 1");
+var_dump("Hello World 2");
+foo(2);
+var_dump("Hello World 3");
+
+foreach (gen(2) as $i) {
+  var_dump($i);
+}
+
+var_dump("Hello World 4");
+try {
+  fail();
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}

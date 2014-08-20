@@ -260,7 +260,9 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     sval->size = size;
     APCStats::getAPCStats().addAPCValue(sval->var, size, true);
     return sval->var;
-  } catch (Exception &e) {
+  } catch (ResourceExceededException&) {
+    throw;
+  } catch (Exception& e) {
     raise_notice("APC Primed fetch failed: key %s (%s).",
                  key.c_str(), e.getMessage().c_str());
     return nullptr;

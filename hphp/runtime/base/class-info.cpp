@@ -192,7 +192,9 @@ Variant ClassInfo::ConstantInfo::getValue() const {
       VariableUnserializer vu(svalue.data(), svalue.size(),
                               VariableUnserializer::Type::Serialize);
       return vu.unserialize();
-    } catch (Exception &e) {
+    } catch (ResourceExceededException&) {
+      throw;
+    } catch (Exception&) {
       assert(false);
     }
   }
@@ -629,7 +631,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
                               VariableUnserializer::Type::Serialize);
       try {
         constant->setStaticValue(vu.unserialize());
-      } catch (Exception &e) {
+      } catch (ResourceExceededException&) {
+        throw;
+      } catch (Exception&) {
         assert(false);
       }
     } else if (constant->valueText) {

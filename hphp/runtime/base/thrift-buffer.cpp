@@ -201,6 +201,8 @@ static Variant unserialize_with_no_notice(const String& str) {
   Variant v;
   try {
     v = vu.unserialize();
+  } catch (ResourceExceededException &) {
+    throw;
   } catch (Exception &e) {
     Logger::Error("unserialize(): %s", e.getMessage().c_str());
   }

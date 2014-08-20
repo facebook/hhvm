@@ -1007,8 +1007,9 @@ public:
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           p = vu.head();
-        } catch (Exception &e) {
-        }
+        } catch (const ResourceExceededException&) {
+          throw;
+        } catch (const Exception&) {}
       }
     }
     return true;
@@ -1071,8 +1072,9 @@ public:
           forceToArray(sess).set(key, vu.unserialize());
           php_global_set(s__SESSION, std::move(sess));
           q = vu.head();
-        } catch (Exception &e) {
-        }
+        } catch (const ResourceExceededException&) {
+          throw;
+        } catch (const Exception&) {}
       }
       p = q;
     }

@@ -267,7 +267,9 @@ bool f_msg_receive(const Resource& queue, int64_t desiredmsgtype, VRefParam msgt
                             VariableUnserializer::Type::Serialize);
     try {
       message = vu.unserialize();
-    } catch (Exception &e) {
+    } catch (ResourceExceededException&) {
+      throw;
+    } catch (Exception&) {
       raise_warning("Message corrupted");
       return false;
     }

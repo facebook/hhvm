@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/profile-dump.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/repo.h"
@@ -454,6 +455,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
       rpath.get()->incRefCount();
     }
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
+    if (g_system_profiler) {
+      g_system_profiler->fileLoadCallBack(path->toCppString());
+    }
   }
 
   return cunit.unit;

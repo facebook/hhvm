@@ -44,6 +44,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_system_profiler.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -651,6 +652,9 @@ void ExecutionContext::handleError(const std::string& msg,
   bool handled = false;
   if (callUserHandler) {
     handled = callUserErrorHandler(ee, errnum, false);
+  }
+  if (g_system_profiler) {
+    g_system_profiler->errorCallBack(errnum, ee, msg);
   }
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {

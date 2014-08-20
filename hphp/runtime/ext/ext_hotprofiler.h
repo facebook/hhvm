@@ -107,7 +107,7 @@ public:
 };
 
 enum Flag {
-  TrackBuiltins         = 0x1,
+  NoTrackBuiltins       = 0x1,
   TrackCPU              = 0x2,
   TrackMemory           = 0x4,
   TrackVtsc             = 0x8,
@@ -168,6 +168,8 @@ public:
                         bool endMain = false) __attribute__ ((__noinline__)) ;
 
   virtual void endAllFrames();
+
+  virtual bool shouldSkipBuiltins() const { return false; }
 
   template<class phpret, class Name, class Counts>
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,

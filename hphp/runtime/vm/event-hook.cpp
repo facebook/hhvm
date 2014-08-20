@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_hotprofiler.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -292,7 +293,8 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
       runUserProfilerOnFunctionEnter(ar);
     }
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-    if (profiler != nullptr) {
+    if (profiler != nullptr &&
+        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       begin_profiler_frame(profiler,
                            GetFunctionNameForProfiler(ar->func(), funcType));
     }
@@ -321,7 +323,8 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // User profiler
   if (flags & RequestInjectionData::EventHookFlag) {
     Profiler* profiler = ThreadInfo::s_threadInfo->m_profiler;
-    if (profiler != nullptr) {
+    if (profiler != nullptr &&
+        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       // NB: we don't have a function type flag to match what we got in
       // onFunctionEnter. That's okay, though... we tolerate this in
       // TraceProfiler.

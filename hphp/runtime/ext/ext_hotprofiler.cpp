@@ -537,6 +537,10 @@ public:
     extractStats(ret, m_stats, m_flags, m_MHz);
   }
 
+  virtual bool shouldSkipBuiltins() const override {
+    return m_flags & NoTrackBuiltins;
+  }
+
 private:
   uint32_t m_flags;
 };
@@ -929,6 +933,10 @@ class TraceProfiler : public Profiler {
       my_end.peak_memory -= my_begin.peak_memory;
       returnVals(ret, "xhprof_post_processing()", my_end, m_flags, m_MHz);
     }
+  }
+
+  virtual bool shouldSkipBuiltins() const override {
+    return m_flags & NoTrackBuiltins;
   }
 
   TraceEntry* m_traceBuffer;
@@ -1366,10 +1374,10 @@ void f_hotprofiler_enable(int ikind) {
   auto kind = static_cast<ProfilerKind>(ikind);
   long flags = 0;
   if (kind == ProfilerKind::Hierarchical) {
-    flags = TrackBuiltins;
+    flags = NoTrackBuiltins;
   } else if (kind == ProfilerKind::Memory) {
     kind = ProfilerKind::Hierarchical;
-    flags = TrackBuiltins | TrackMemory;
+    flags = NoTrackBuiltins | TrackMemory;
   }
   if (RuntimeOption::EnableHotProfiler) {
     s_profiler_factory->start(kind, flags);
@@ -1448,7 +1456,7 @@ void f_xhprof_enable(int flags/* = 0 */,
     flags = 0;  /* flags are not used by MemoProfiler::MemoProfiler */
     s_profiler_factory->start(ProfilerKind::Memo, flags);
   } else if (flags & External) {
-    flags = TrackBuiltins;
+    flags = NoTrackBuiltins;
     for (ArrayIter iter(args); iter; ++iter) {
       if (iter.first().toInt32() == 0) {
          flags = iter.second().toInt32();
@@ -1487,7 +1495,7 @@ Variant f_xhprof_sample_disable() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // constants
-const int64_t k_XHPROF_FLAGS_NO_BUILTINS = TrackBuiltins;
+const int64_t k_XHPROF_FLAGS_NO_BUILTINS = NoTrackBuiltins;
 const int64_t k_XHPROF_FLAGS_CPU = TrackCPU;
 const int64_t k_XHPROF_FLAGS_MEMORY = TrackMemory;
 const int64_t k_XHPROF_FLAGS_VTSC = TrackVtsc;

@@ -58,12 +58,12 @@ struct RequestInjectionData {
         m_hasTimer(false),
         m_timerActive(false),
         m_debuggerAttached(false),
+        m_coverage(false),
+        m_jit(false),
         m_debuggerIntr(false),
         m_debuggerStepIn(false),
-        m_debuggerStepOut(false),
-        m_debuggerNext(false),
-        m_coverage(false),
-        m_jit(false) {
+        m_debuggerStepOut(StepOutState::NONE),
+        m_debuggerNext(false) {
     threadInit();
   }
 
@@ -89,12 +89,27 @@ struct RequestInjectionData {
                            // Set true when we activate a timer,
                            // cleared when the signal handler runs
   bool m_debuggerAttached; // whether there is a debugger attached.
-  bool m_debuggerIntr;     // indicating we should force interrupt for debugger
-  bool m_debuggerStepIn;   // These indicate whether or not the debugger is
-  bool m_debuggerStepOut;  // currently stepping in, stepping out, or stepping
-  bool m_debuggerNext;     // to the next line
   bool m_coverage;         // is coverage being collected
   bool m_jit;              // is the jit enabled
+
+  // Indicating we should force interrupts for debuggers. This is intended to be
+  // used by debuggers for forcing onOpcode events. It shouldn't be modified
+  // internally
+  bool m_debuggerIntr;
+
+public:
+  // The state of the step out command
+  enum class StepOutState {
+    NONE,     // Command is inactive
+    STEPPING, // Waiting for the corresponding function to exit
+    OUT       // We have stepped out and will break on the next valid opcode
+  };
+
+private:
+  bool m_debuggerStepIn;          // Whether the command step out is active
+  StepOutState m_debuggerStepOut; // The actual step out state
+  int m_debuggerStepOutDepth;     // The stack depth the step out started at
+  bool m_debuggerNext;            // Whether the command next is active
 
   // When the PC is currently over a line that has been registered for a line
   // break, the top element is the line. Otherwise the top element is -1.
@@ -125,35 +140,71 @@ struct RequestInjectionData {
   void resetTimer(int seconds = 0);
   void onTimeout();
   bool getJit() const { return m_jit; }
+  void updateJit();
+
+  bool getCoverage() const { return m_coverage; }
+  void setCoverage(bool flag) {
+    m_coverage = flag;
+    updateJit();
+  }
+
   bool getDebuggerAttached() { return m_debuggerAttached; }
   // Should only be set by DebuggerHookHandler::attach
   void setDebuggerAttached(bool d) {
     m_debuggerAttached = d;
     updateJit();
   }
+
+  // Uses the active line break stack to compute the size of the stack when
+  // in debug mode
+  int getDebuggerStackDepth() const { return m_activeLineBreaks.size(); }
+
+  // Returns true if the debugger should force interrupts due to any of the
+  // debugger interrupt conditions being true
+  bool getDebuggerForceIntr() const {
+    return
+      m_debuggerIntr ||
+      // Force interrupts when over an active line
+      getActiveLineBreak() != -1 ||
+      // Interrupts forced while stepping in
+      m_debuggerStepIn ||
+      // step out forces interrupts after we have exited the function
+      m_debuggerStepOut == StepOutState::OUT;
+  }
+
   static constexpr uint32_t debuggerReadOnlyOffset() {
     return offsetof(RequestInjectionData, m_debuggerAttached);
   }
+
   bool getDebuggerIntr() const { return m_debuggerIntr; }
   void setDebuggerIntr(bool d) {
     m_debuggerIntr = d;
     updateJit();
   }
+
   bool getDebuggerStepIn() const { return m_debuggerStepIn; }
   void setDebuggerStepIn(bool d) {
     m_debuggerStepIn = d;
     updateJit();
   }
-  bool getDebuggerStepOut() const { return m_debuggerStepOut; }
-  void setDebuggerStepOut(bool d) {
-    m_debuggerStepOut = d;
+
+  StepOutState getDebuggerStepOut() const { return m_debuggerStepOut; }
+  void setDebuggerStepOut(StepOutState state) {
+    m_debuggerStepOut = state;
     updateJit();
   }
+
+  int getDebuggerStepOutDepth() const { return m_debuggerStepOutDepth; }
+  void setDebuggerStepOutDepth(int depth) {
+    m_debuggerStepOutDepth = depth;
+  }
+
   bool getDebuggerNext() const { return m_debuggerNext; }
   void setDebuggerNext(bool d) {
     m_debuggerNext = d;
     updateJit();
   }
+
   int getActiveLineBreak() const {
     return m_activeLineBreaks.size() == 0 ? -1 : m_activeLineBreaks.top();
   }
@@ -169,13 +220,6 @@ struct RequestInjectionData {
     m_activeLineBreaks.push(line);
     updateJit();
   }
-  bool getCoverage() const { return m_coverage; }
-  void setCoverage(bool flag) {
-    m_coverage = flag;
-    updateJit();
-  }
-  void updateJit();
-
 
   // getters for user setable INI settings
   std::vector<std::string> getIncludePaths() { return m_include_paths; }

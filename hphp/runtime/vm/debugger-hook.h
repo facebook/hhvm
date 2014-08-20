@@ -35,7 +35,6 @@ namespace HPHP {
 
 struct Class;
 struct Func;
-struct Unit;
 struct ObjectData;
 
 // Is this thread being debugged?
@@ -44,6 +43,22 @@ inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
   return ti->m_reqInjectionData.getDebuggerAttached();
 }
 
+// Executes the passed code only if there is a debugger attached to the current
+// thread.
+#define DEBUGGER_ATTACHED_ONLY(code) do {                             \
+  if (isDebuggerAttached()) {                                         \
+    code;                                                             \
+  }                                                                   \
+} while(0)                                                            \
+
+// This flag ensures two things: first, that we stay in the interpreter and
+// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
+// debugger interrupts for every opcode executed (modulo filters.)
+#define DEBUGGER_FORCE_INTR \
+  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerForceIntr())
+
+////////////////////////////////////////////////////////////////////////////////
+// Hook Handler
 // A handler for debugger events. Any extension can subclass this class and
 // attach it to the thread in order to receive debugging events.
 class DebugHookHandler {
@@ -108,8 +123,9 @@ public:
   virtual void onRequestInit() {}
   virtual void onRequestShutdown() {}
 
-  // Called whenever we are breaking due to completion of a step in.
+  // Called whenever we are breaking due to completion of a step in or step out
   virtual void onStepInBreak(const Unit* unit, int line) {}
+  virtual void onStepOutBreak(const Unit* unit, int line) {}
 
   // Called when we have hit a registered function entry breakpoint
   virtual void onFuncEntryBreak(const Func* f) {}
@@ -136,34 +152,9 @@ inline bool isDebuggerAttachedProcess() {
   return DebugHookHandler::s_numAttached > 0;
 }
 
-#define DEBUGGER_ATTACHED_ONLY(code) do {                             \
-  if (isDebuggerAttached()) {                                         \
-    code;                                                             \
-  }                                                                   \
-} while(0)                                                            \
-
-// Flag that can be set by the client to force interrupts
-#define DEBUGGER_INTR \
-  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerIntr())
-
-// Whether or not there we are over an active line break
-#define DEBUGGER_ACTIVE_LINE_BREAK \
-  (ThreadInfo::s_threadInfo->m_reqInjectionData.getActiveLineBreak() != -1)
-
-// This flag is true if we are currently executing a flow command such as step
-// in, step out, or next.
-#define DEBUGGER_FLOW \
-  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerStepIn() || \
-   ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerStepOut() || \
-   ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerNext())
-
-// This flag ensures two things: first, that we stay in the interpreter and
-// out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
-// debugger interrupts for every opcode executed (modulo filters.)
-#define DEBUGGER_FORCE_INTR \
-  (DEBUGGER_INTR || DEBUGGER_ACTIVE_LINE_BREAK || DEBUGGER_FLOW)
-
-// "Hooks" called by the VM at various points during program execution while
+////////////////////////////////////////////////////////////////////////////////
+// Hooks
+// Called by the VM at various points during program execution while
 // debugging to give the debugger a chance to act. The debugger may block
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
@@ -181,9 +172,24 @@ void phpDebuggerFileLoadHook(Unit* efile);
 void phpDebuggerDefClassHook(const Class* cls);
 void phpDebuggerDefFuncHook(const Func* func);
 
+////////////////////////////////////////////////////////////////////////////////
+// Flow commands
+// Commands manipulating control flow. Calling any one of these short-cicruits
+// the others.
+
+// Continues execution until the next breakpoint or program exit
+void phpDebuggerContinue();
+
 // Steps a single line, stepping into functions if necessary. If the current
 // site is invalid, the break will occur on the next valid opcode.
 void phpDebuggerStepIn();
+
+// Steps until the current function returns. Breaks on the opcode following the
+// return site.
+void phpDebuggerStepOut();
+
+////////////////////////////////////////////////////////////////////////////////
+// Breakpoint manipulation
 
 // Add breakpoints of various types
 void phpAddBreakPoint(const Unit* unit, Offset offset);

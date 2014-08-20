@@ -321,7 +321,7 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
   }
 }
 
-void XDebugHookHandler::onStepInBreak(const Unit* unit, int line) {
+void XDebugHookHandler::onFlowBreak(const Unit* unit, int line) {
   if (XDEBUG_GLOBAL(Server) != nullptr) {
     // Translate the unit filepath and then break
     const String filepath = String(unit->filepath()->data(), CopyString);

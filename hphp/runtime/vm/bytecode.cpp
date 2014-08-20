@@ -2847,22 +2847,33 @@ void ExecutionContext::preventReturnsToTC() {
   if (RuntimeOption::EvalJit) {
     ActRec *ar = vmfp();
     while (ar) {
-      if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
-          (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
-        TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
-                 "func %s\n", ar, ar->m_savedRip,
-                 ar->m_func->fullName()->data());
-        if (ar->resumed()) {
-          ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.genRetHelper);
-        } else {
-          ar->m_savedRip =
-            reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.retHelper);
-        }
-        assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
-      }
+      preventReturnToTC(ar);
       ar = getPrevVMState(ar);
     }
+  }
+}
+
+// Bash the return address for the given actrec into the appropriate
+// RetFromInterpreted*Frame helper.
+void ExecutionContext::preventReturnToTC(ActRec* ar) {
+  assert(isDebuggerAttached());
+  if (!RuntimeOption::EvalJit) {
+    return;
+  }
+
+  if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
+      (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
+    TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
+             "func %s\n", ar, ar->m_savedRip,
+             ar->m_func->fullName()->data());
+    if (ar->resumed()) {
+      ar->m_savedRip =
+        reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.genRetHelper);
+    } else {
+      ar->m_savedRip =
+        reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.retHelper);
+    }
+    assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   }
 }
 

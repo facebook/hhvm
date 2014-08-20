@@ -31,6 +31,8 @@ namespace HPHP {
 TRACE_SET_MOD(debuggerflow);
 using JIT::mcg;
 
+typedef RequestInjectionData::StepOutState StepOutState;
+
 //////////////////////////////////////////////////////////////////////////
 // DebugHookHandler implementation
 
@@ -141,6 +143,12 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     return;
   }
 
+  // We can't set breakpoints in generated functions
+  if (UNLIKELY(func->line1() == 0)) {
+    TRACE(5, "In a generated function\n");
+    return;
+  }
+
   // If we are no longer on the active line breakpoint, clear it
   RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
   int active_line = req_data.getActiveLineBreak();
@@ -154,6 +162,16 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   if (UNLIKELY(req_data.getDebuggerStepIn() && !func->isBuiltin())) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepIn(false);
     handler->onStepInBreak(unit, line);
+  }
+
+  // If the current state is OUT and we are still at a stack level less than the
+  // original, then we skip over the PopR opcode if it exists and then break
+  // (matching hphpd).
+  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::OUT &&
+      req_data.getDebuggerStackDepth() < req_data.getDebuggerStepOutDepth() &&
+      *reinterpret_cast<const Op*>(pc) != OpPopR)) {
+    req_data.setDebuggerStepOut(StepOutState::NONE);
+    handler->onStepOutBreak(unit, line);
   }
 
   // Check if we are hitting a call breakpoint
@@ -194,10 +212,18 @@ void phpDebuggerFuncEntryHook(const ActRec* ar) {
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,
-// this just handles popping the active line breakpoint. This handles returns,
+// this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
 void phpDebuggerFuncExitHook(const ActRec* ar) {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.popActiveLineBreak();
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  req_data.popActiveLineBreak();
+
+  // If the step out command is active and if our stack depth has decreased,
+  // we are out of the function being stepped out of
+  if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::STEPPING &&
+      req_data.getDebuggerStackDepth() < req_data.getDebuggerStepOutDepth())) {
+      req_data.setDebuggerStepOut(StepOutState::OUT);
+  }
 }
 
 // Hook called from iopThrow to signal that we are about to throw an exception.
@@ -262,12 +288,25 @@ void phpDebuggerDefFuncHook(const Func* func) {
 //////////////////////////////////////////////////////////////////////////
 // Flow Control
 
+void phpDebuggerContinue() {
+  // Short-circuit other commands
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  req_data.setDebuggerStepIn(false);
+  req_data.setDebuggerStepOut(StepOutState::NONE);
+  req_data.setDebuggerNext(false);
+
+  // Clear the flow filter
+  PCFilter* flow_filter = getFlowFilter();
+  flow_filter->clear();
+}
+
 void phpDebuggerStepIn() {
   // If this is called in the middle of a flow command we short-circuit the
   // other commands
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepIn(true);
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerStepOut(false);
-  ThreadInfo::s_threadInfo->m_reqInjectionData.setDebuggerNext(false);
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  req_data.setDebuggerStepIn(true);
+  req_data.setDebuggerStepOut(StepOutState::NONE);
+  req_data.setDebuggerNext(false);
 
   // Ensure the flow filter is fresh
   PCFilter* flow_filter = getFlowFilter();
@@ -322,6 +361,22 @@ void phpDebuggerStepIn() {
   } else {
     flow_filter->addRanges(unit, ranges);
   }
+}
+
+void phpDebuggerStepOut() {
+  // If this is called in the middle of a flow command we short-circuit the
+  // other commands
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  req_data.setDebuggerStepIn(false);
+  req_data.setDebuggerStepOut(StepOutState::STEPPING);
+  req_data.setDebuggerNext(false);
+
+  // Clear the flow filter
+  PCFilter* flow_filter = getFlowFilter();
+  flow_filter->clear();
+
+  // Store the current stack depth
+  req_data.setDebuggerStepOutDepth(req_data.getDebuggerStackDepth());
 }
 
 //////////////////////////////////////////////////////////////////////////

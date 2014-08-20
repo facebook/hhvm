@@ -345,7 +345,7 @@ void RequestInjectionData::reset() {
   m_debuggerAttached = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
-  m_debuggerStepOut = false;
+  m_debuggerStepOut = StepOutState::NONE;
   m_debuggerNext = false;
   while (!m_activeLineBreaks.empty()) {
     m_activeLineBreaks.pop();
@@ -357,13 +357,9 @@ void RequestInjectionData::reset() {
 void RequestInjectionData::updateJit() {
   m_jit = RuntimeOption::EvalJit &&
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
-    !m_debuggerIntr &&
-    !m_debuggerStepIn &&
-    !m_debuggerStepOut &&
-    !m_debuggerNext &&
     !m_coverage &&
     !shouldProfile() &&
-    getActiveLineBreak() == -1;
+    !getDebuggerForceIntr();
 }
 
 void RequestInjectionData::setMemExceededFlag() {

@@ -33,6 +33,7 @@ static const StaticString
   s_CMD_FEATURE_SET("feature_set"),
   s_CMD_RUN("run"),
   s_CMD_STEP_INTO("step_into"),
+  s_CMD_STEP_OUT("step_out"),
   s_CMD_STEP_OVER("step_over"),
   s_CMD_STOP("stop"),
   s_CMD_DETACH("detach"),
@@ -116,6 +117,9 @@ public:
       default:
         throw Exception("Command 'run' invalid in this server state.");
     }
+
+    // Call the debugger hook and continue
+    phpDebuggerContinue();
     return true;
   }
 };
@@ -143,6 +147,33 @@ public:
 
   bool handleImpl(xdebug_xml_node& xml) const override {
     phpDebuggerStepIn();
+    return true;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// step_out -i #
+// steps out of the current scope and breaks on the statement after returning
+// from the current function.
+
+class StepOutCmd : public XDebugCommand {
+public:
+  StepOutCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StepOutCmd() {}
+
+  // Respond on step out break
+  bool shouldRespond() const override { return false; }
+
+  bool isValidInStatus(Status status) const override {
+    return
+      status == Status::STARTING ||
+      status == Status::STOPPING ||
+      status == Status::BREAK;
+  }
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    phpDebuggerStepOut();
     return true;
   }
 };
@@ -344,6 +375,8 @@ const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
     cmd = new BreakpointSetCmd(server, cmdStr, args);
   } else if (cmdStr == s_CMD_STEP_INTO) {
     cmd = new StepIntoCmd(server, cmdStr, args);
+  } else if (cmdStr == s_CMD_STEP_OUT) {
+    cmd = new StepOutCmd(server, cmdStr, args);
   } else {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }

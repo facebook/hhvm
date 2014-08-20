@@ -185,8 +185,14 @@ public:
     onBreak<XDebugBreakpoint::Type::EXCEPTION>(bi);
   }
 
-  // Flow control
-  void onStepInBreak(const Unit* unit, int line) override;
+  // Flow control. Each break type just calls the generic onFlowBreak
+  void onFlowBreak(const Unit* unit, int line);
+  void onStepInBreak(const Unit* unit, int line) override {
+    onFlowBreak(unit, line);
+  }
+  void onStepOutBreak(const Unit* unit, int line) override {
+    onFlowBreak(unit, line);
+  }
 
   // Handle loading unmatched breakpoints
   void onFileLoad(Unit* efile) override;

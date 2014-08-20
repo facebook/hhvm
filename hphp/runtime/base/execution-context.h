@@ -533,6 +533,7 @@ public:
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void preventReturnsToTC();
+  void preventReturnToTC(ActRec* ar);
   void destructObjects();
   int m_lambdaCounter;
   typedef TinyVector<VMState, 32> NestedVMVec;

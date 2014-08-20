@@ -26,6 +26,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Normalizes hdf string names to their ini counterparts
+ *
+ * We have special handling for a few hdf strings such as those containing
+ * MySQL, JitA, Eval and EnableHipHopSyntax
+ */
 static std::string normalize(const std::string &name) {
   std::string out = "";
   bool start = true;
@@ -53,6 +59,15 @@ static std::string normalize(const std::string &name) {
   boost::replace_first(out, ".eval.", ".");
   boost::replace_first(out, ".my_sql.", ".mysql.");
   boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
+  // Check for JitA, but be careful.
+  // Only replace if letter after JitA substring, exists and is uppercase
+  // e.g., JitAHotSize should be jit_a_hot_size, not jit_ahot_size
+  // BUT JitAlwaysInterpOne should be jit_always_interp_one
+  auto jita_pos = name.find("JitA");
+  if (jita_pos != std::string::npos && jita_pos + 4 < name.length() &&
+      isupper(name.at(jita_pos + 4))) {
+    boost::replace_first(out, "jit_a", "jit_a_");
+  }
   return out;
 }
 

@@ -688,8 +688,15 @@ bool f_shm_remove(int64_t shm_identifier) {
   sysvshm_shm *shm_list_ptr = *iter;
 
   if (shmctl(shm_list_ptr->id, IPC_RMID,NULL) < 0) {
-    raise_warning("failed for key 0x%x, id %" PRId64 ": %s", shm_list_ptr->key,
-                    shm_identifier, folly::errnoStr(errno).c_str());
+    raise_warning(
+#ifdef __CYGWIN__
+      // key is a long long int in cygwin
+      "failed for key 0x%lld, id %" PRId64 ": %s",
+#else
+      "failed for key 0x%x, id %" PRId64 ": %s",
+#endif
+      shm_list_ptr->key, shm_identifier, folly::errnoStr(errno).c_str()
+    );
     return false;
   }
   return true;

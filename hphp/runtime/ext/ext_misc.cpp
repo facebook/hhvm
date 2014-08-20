@@ -282,11 +282,15 @@ TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
   int num = ar->numArgs();
   String format(getArg<KindOfString>(ar,0));
   Array extra = Array::Create();
-  for (int i = 1; i<num; i++)
-  {
+  for (int i = 1; i<num; i++) {
     extra.append(getArg<KindOfAny>(ar,i));
   }
-  Variant strHolder = makeStaticString(ZendPack().pack(format, extra).toString());
+  Variant result = ZendPack().pack(format, extra);
+  // pack() returns false if there was an error
+  if (result.isBoolean()) {
+    return arReturn(ar, result.getBoolean());
+  }
+  Variant strHolder = makeStaticString(result.toString());
   return arReturn(ar, strHolder);
 }
 

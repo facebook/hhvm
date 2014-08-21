@@ -203,7 +203,7 @@ function sys_getloadavg(): array;
  * content of the original token in element 1 and the line number in element
  * 2.
  */
-<<__Native, __ParamCoerceModeNull>>
+<<__Native>>
 function token_get_all(string $source): array;
 
 /* token_name() gets the symbolic name for a PHP token value.

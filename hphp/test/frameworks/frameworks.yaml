@@ -399,8 +399,8 @@
       - mustache/test/Mustache/Test/Cache/FilesystemCacheTest.php
   paris:
     url: https://github.com/j4mie/paris.git
-    branch: v1.4.2
-    commit: dd1a87544127874dce367f0252dcc81246dfc83b
+    branch: v1.5.3
+    commit: 8d94afe0b39e29f2a84bf9ce7e06088d5b93bb5b
     install_root: paris
     test_root: paris
   pear:

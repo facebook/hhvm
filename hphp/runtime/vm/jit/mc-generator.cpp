@@ -238,8 +238,8 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   for (auto region : regions) {
     m_tx.setMode(TransKind::Optimize);
-    always_assert(region->blocks.size() > 0);
-    SrcKey regionSk = region->blocks[0]->start();
+    always_assert(!region->empty());
+    SrcKey regionSk = region->start();
     auto translArgs = TranslArgs(regionSk, align).region(region);
     if (setFuncBody && regionSk.offset() == func->base()) {
       translArgs.setFuncBody();
@@ -1597,13 +1597,13 @@ MCGenerator::translateWork(const TranslArgs& args) {
       assert(RuntimeOption::EvalJitPGO);
       region = args.m_region;
       if (region) {
-        assert(region->blocks.size() > 0);
+        assert(!region->empty());
       } else {
         TransID transId = args.m_transId;
         assert(transId != kInvalidTransID);
         region = selectHotRegion(transId, this);
         assert(region);
-        if (region && region->blocks.size() == 0) region = nullptr;
+        if (region && region->empty()) region = nullptr;
       }
     } else {
       assert(m_tx.mode() == TransKind::Profile ||
@@ -1617,7 +1617,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     Translator::TranslateResult result = Translator::Retry;
     Translator::RegionBlacklist regionInterps;
-    Offset const initSpOffset = region ? region->blocks[0]->initialSpOffset()
+    Offset const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
     bool bcControlFlow = RuntimeOption::EvalHHIRBytecodeControlFlow;
 

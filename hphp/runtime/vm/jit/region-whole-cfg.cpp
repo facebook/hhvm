@@ -74,14 +74,15 @@ struct DFS {
       // TODO(#2589970): Fix translateRegion to support mid-region reffiness
       // checks
       auto dstRegion = profData->transRegion(dst);
-      auto nRefDeps = dstRegion->blocks[0]->reffinessPreds().size();
+      auto nRefDeps = dstRegion->entry()->reffinessPreds().size();
       if (nRefDeps > 0) {
         continue;
       }
 
       // Add the block and arc to region.
-      auto predBlockId = profData->transRegion(tid)->blocks.back().get()->id();
-      auto dstBlockId = dstRegion->blocks.front().get()->id();
+      auto predBlockId =
+          profData->transRegion(tid)->blocks().back().get()->id();
+      auto dstBlockId = dstRegion->blocks().front().get()->id();
       region->addArc(predBlockId, dstBlockId);
 
       // Push the dst if we haven't already processed it.
@@ -98,12 +99,7 @@ struct DFS {
  private:
   void select(TransID tid) {
     auto transRegion = profData->transRegion(tid);
-    region->blocks.insert(region->blocks.begin(),
-                          transRegion->blocks.begin(),
-                          transRegion->blocks.end());
-    region->arcs.insert(region->arcs.begin(),
-                        transRegion->arcs.begin(),
-                        transRegion->arcs.end());
+    region->prepend(*transRegion);
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->insert(selectedVec->begin(), tid);
   }

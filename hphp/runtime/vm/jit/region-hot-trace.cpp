@@ -125,7 +125,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // Break if block is not the first and requires reffiness checks.
     // Task #2589970: fix translateRegion to support mid-region reffiness checks
     if (prevId != kInvalidTransID) {
-      auto nRefDeps = blockRegion->blocks[0]->reffinessPreds().size();
+      auto nRefDeps = blockRegion->entry()->reffinessPreds().size();
       if (nRefDeps > 0) {
         FTRACE(2, "selectHotTrace: breaking region because of refDeps ({}) at "
                "Translation {}\n", nRefDeps, tid);
@@ -177,17 +177,14 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
 
-    bool hasPredBlock = region->blocks.size() > 0;
+    bool hasPredBlock = !region->empty();
     RegionDesc::BlockId predBlockId = (hasPredBlock ?
-                                       region->blocks.back().get()->id() : 0);
+                                       region->blocks().back().get()->id() : 0);
 
     // Add blockRegion's blocks and arcs to region.
-    region->blocks.insert(region->blocks.end(), blockRegion->blocks.begin(),
-                          blockRegion->blocks.end());
-    region->arcs.insert(region->arcs.end(), blockRegion->arcs.begin(),
-                        blockRegion->arcs.end());
+    region->append(*blockRegion);
 
-    auto& newBlock       = blockRegion->blocks.front();
+    auto const& newBlock = blockRegion->entry();
     auto  newBlockId     = newBlock->id();
     auto  newBlockSrcKey = newBlock->start();
 
@@ -209,10 +206,11 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // This can go away once Task #4075822 is done.
     if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
       assert(hasTransId(newBlockId));
-      auto newBlockSrcKey = blockRegion->blocks.front().get()->start();
+      auto newBlockSrcKey = blockRegion->start();
       auto newTransId = getTransId(newBlockId);
-      for (auto iOther = 0; iOther < region->blocks.size(); iOther++) {
-        auto other = region->blocks[iOther];
+      auto& blocks = region->blocks();
+      for (auto iOther = 0; iOther < blocks.size(); iOther++) {
+        auto other = blocks[iOther];
         auto otherBlockId = other.get()->id();
         if (!hasTransId(otherBlockId)) continue;
         auto otherTransId = getTransId(otherBlockId);
@@ -240,7 +238,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     }
 
     if (cfg.outArcs(tid).size() > 1) {
-      region->setSideExitingBlock(blockRegion->blocks.front()->id());
+      region->setSideExitingBlock(blockRegion->entry()->id());
     }
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->push_back(tid);
@@ -259,16 +257,16 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       break;
     }
 
-    auto lastNewBlock = blockRegion->blocks.back();
+    auto lastNewBlock = blockRegion->blocks().back();
     discardPoppedTypes(accumPostConds,
-                       blockRegion->blocks[0]->initialSpOffset());
+                       blockRegion->entry()->initialSpOffset());
     mergePostConds(accumPostConds, lastNewBlock->postConds());
     blockPostConds[lastNewBlock->id()] = accumPostConds;
 
     TransCFG::ArcPtrVec possibleOutArcs;
     for (auto arc : outArcs) {
       RegionDesc::BlockPtr possibleNext =
-        profData->transRegion(arc->dst())->blocks[0];
+        profData->transRegion(arc->dst())->entry();
       if (preCondsAreSatisfied(possibleNext, accumPostConds)) {
         possibleOutArcs.emplace_back(arc);
       }

@@ -1465,8 +1465,9 @@ void Translator::createBlockMaps(const RegionDesc&        region,
   IRBuilder& irb = ht.irBuilder();
   blockIdToIRBlock.clear();
   blockIdToRegionBlock.clear();
-  for (unsigned i = 0; i < region.blocks.size(); i++) {
-    RegionDesc::Block* rBlock = region.blocks[i].get();
+  auto const& blocks = region.blocks();
+  for (unsigned i = 0; i < blocks.size(); i++) {
+    RegionDesc::Block* rBlock = blocks[i].get();
     auto id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
     assert(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
@@ -1517,11 +1518,8 @@ void Translator::setSuccIRBlocks(
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
   IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
   irb.resetOffsetMapping();
-  for (auto& arc : region.arcs) {
-    if (arc.src == srcBlockId) {
-      RegionDesc::BlockId dstBlockId = arc.dst;
-      setIRBlock(dstBlockId, blockIdToIRBlock, blockIdToRegionBlock);
-    }
+  for (auto dstBlockId : region.succs(srcBlockId)) {
+    setIRBlock(dstBlockId, blockIdToIRBlock, blockIdToRegionBlock);
   }
 }
 
@@ -1534,15 +1532,12 @@ static void findSuccOffsets(const RegionDesc&              region,
                             const BlockIdToRegionBlockMap& blockIdToRegionBlock,
                             OffsetSet&                     set) {
   set.clear();
-  for (auto& arc : region.arcs) {
-    if (arc.src == srcBlockId) {
-      RegionDesc::BlockId dstBlockId = arc.dst;
-      auto rit = blockIdToRegionBlock.find(dstBlockId);
-      assert(rit != blockIdToRegionBlock.end());
-      RegionDesc::Block* rDstBlock = rit->second;
-      Offset bcOffset = rDstBlock->start().offset();
-      set.insert(bcOffset);
-    }
+  for (auto dstBlockId : region.succs(srcBlockId)) {
+    auto rit = blockIdToRegionBlock.find(dstBlockId);
+    assert(rit != blockIdToRegionBlock.end());
+    RegionDesc::Block* rDstBlock = rit->second;
+    Offset bcOffset = rDstBlock->start().offset();
+    set.insert(bcOffset);
   }
 }
 
@@ -1550,15 +1545,12 @@ static void findSuccOffsets(const RegionDesc&              region,
  * Returns whether offset is a control-flow merge within region.
  */
 static bool isMergePoint(Offset offset, const RegionDesc& region) {
-  for (auto block : region.blocks) {
+  for (auto const block : region.blocks()) {
     auto const bid = block->id();
     if (block->start().offset() == offset) {
-      auto inCount = int{0};
-      for (auto arc : region.arcs) {
-        if (arc.dst == bid) inCount++;
-      }
+      auto inCount = region.preds(bid).size();
       // NB: The initial block has an invisible "entry arc".
-      if (block == region.blocks[0]) ++inCount;
+      if (block == region.entry()) ++inCount;
       if (inCount >= 2) return true;
     }
   }
@@ -1570,8 +1562,8 @@ static bool blockHasUnprocessedPred(
   RegionDesc::BlockId           blockId,
   const RegionDesc::BlockIdSet& processedBlocks)
 {
-  for (auto& arc : region.arcs) {
-    if (arc.dst == blockId && processedBlocks.count(arc.src) == 0) {
+  for (auto predId : region.preds(blockId)) {
+    if (processedBlocks.count(predId) == 0) {
       return true;
     }
   }
@@ -1600,23 +1592,12 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
-/*
- * True if there are no outgoing arcs from the block.
- */
-static bool blockEndsRegion(RegionDesc::BlockId blockId,
-                            const RegionDesc& region) {
-  for (auto const& arc : region.arcs) {
-    if (arc.src == blockId) return false;
-  }
-  return true;
-}
-
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
-  assert(!region.blocks.empty());
+  assert(!region.empty());
 
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
@@ -1626,7 +1607,7 @@ Translator::translateRegion(const RegionDesc& region,
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
-  auto const startSk = region.blocks.front()->start();
+  auto const startSk = region.start();
 
   BlockIdToIRBlockMap     blockIdToIRBlock;
   BlockIdToRegionBlockMap blockIdToRegionBlock;
@@ -1639,8 +1620,9 @@ Translator::translateRegion(const RegionDesc& region,
   RegionDesc::BlockIdSet processedBlocks;
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
-  for (auto b = 0; b < region.blocks.size(); b++) {
-    auto const& block  = region.blocks[b];
+  auto& blocks = region.blocks();
+  for (auto b = 0; b < blocks.size(); b++) {
+    auto const& block  = blocks[b];
     auto const blockId = block->id();
     auto sk            = block->start();
     auto typePreds     = makeMapWalker(block->typePreds());
@@ -1675,7 +1657,7 @@ Translator::translateRegion(const RegionDesc& region,
       // Emit prediction guards. If this is the first instruction in the region
       // the guards will go to a retranslate request. Otherwise, they'll go to
       // a side exit.
-      bool isFirstRegionInstr = (block == region.blocks.front() && i == 0);
+      bool isFirstRegionInstr = (block == region.entry() && i == 0);
       if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
 
       // Emit type guards.
@@ -1729,11 +1711,11 @@ Translator::translateRegion(const RegionDesc& region,
       NormalizedInstruction inst(sk, block->unit());
       inst.funcd = topFunc;
       if (i == block->length() - 1) {
-        inst.endsRegion = blockEndsRegion(blockId, region);
+        inst.endsRegion = region.isExit(blockId);
         inst.nextIsMerge = nextIsMerge(inst, region);
         if (instrIsNonCallControlFlow(inst.op()) &&
-            b < region.blocks.size() - 1) {
-          inst.nextOffset = region.blocks[b+1]->start().offset();
+            b < blocks.size() - 1) {
+          inst.nextOffset = blocks[b+1]->start().offset();
         }
       }
 
@@ -1800,7 +1782,7 @@ Translator::translateRegion(const RegionDesc& region,
         ht.beginInlining(inst.imm[0].u_IVA, callee, returnFuncOff,
                          doPrediction ? inst.outPred : Type::Gen);
         // "Fallthrough" into the callee's first block
-        ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
+        ht.endBlock(blocks[b + 1]->start().offset(), inst.nextIsMerge);
         continue;
       }
 
@@ -1877,7 +1859,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Insert a fallthrough jump
       if (ht.genMode() == IRGenMode::CFG &&
-          i == block->length() - 1 && block != region.blocks.back()) {
+          i == block->length() - 1 && block != blocks.back()) {
         if (instrAllowsFallThru(inst.op())) {
           auto nextOffset = inst.nextOffset != kInvalidOffset
             ? inst.nextOffset
@@ -1885,16 +1867,15 @@ Translator::translateRegion(const RegionDesc& region,
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack
           // after the fallthrough jump, which is just weird.
-          if (b < region.blocks.size() - 1
-              && region.isSideExitingBlock(blockId)) {
+          if (b < blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
         } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
           // "Fallthrough" from inlined return to the next block
-          ht.endBlock(region.blocks[b + 1]->start().offset(), inst.nextIsMerge);
+          ht.endBlock(blocks[b + 1]->start().offset(), inst.nextIsMerge);
         }
-        if (blockEndsRegion(blockId, region)) {
+        if (region.isExit(blockId)) {
           ht.end();
         }
       }
@@ -1908,7 +1889,7 @@ Translator::translateRegion(const RegionDesc& region,
     }
 
     if (ht.genMode() == IRGenMode::Trace) {
-      if (b < region.blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
+      if (b < blocks.size() - 1 && region.isSideExitingBlock(blockId)) {
         ht.prepareForSideExit();
       }
     }

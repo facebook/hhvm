@@ -94,29 +94,153 @@ void truncateMap(Container& c, SrcKey final) {
 
 //////////////////////////////////////////////////////////////////////
 
-void RegionDesc::addArc(BlockId src, BlockId dst) {
-  arcs.push_back({src, dst});
+bool RegionDesc::empty() const {
+  return m_blocks.empty();
+}
+
+RegionDesc::BlockPtr RegionDesc::entry() const {
+  assert(!empty());
+  return m_blocks[0];
+}
+
+bool RegionDesc::isExit(BlockId bid) const {
+  return succs(bid).empty();
+}
+
+SrcKey RegionDesc::start() const {
+  assert(!empty());
+  return m_blocks[0]->start();
+}
+
+RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
+                                        int    length,
+                                        Offset spOffset) {
+  m_blocks.push_back(
+    std::make_shared<Block>(sk.func(), sk.resumed(), sk.offset(), length,
+                            spOffset));
+  BlockPtr block = m_blocks.back();
+  m_data[block->id()] = BlockData(block);
+  return block.get();
+}
+
+void RegionDesc::deleteBlock(BlockId bid) {
+  auto it = std::find_if(m_blocks.begin(), m_blocks.end(),
+                         [&](const BlockPtr b) { return b->id() == bid; });
+  if (it == m_blocks.end()) return;
+  m_blocks.erase(it);
+  auto d = data(bid);
+  always_assert(d.succs.empty() && d.preds.empty() &&
+                "RegionDesc::deleteBlock needs support for blocks with arcs");
+  m_data.erase(bid);
+}
+
+const RegionDesc::BlockVec& RegionDesc::blocks() const {
+  return m_blocks;
+}
+
+RegionDesc::BlockData& RegionDesc::data(BlockId id) {
+  auto it = m_data.find(id);
+  assert(it != m_data.end());
+  return it->second;
+}
+
+bool RegionDesc::hasBlock(BlockId id) const {
+  return m_data.count(id);
+}
+
+RegionDesc::BlockPtr RegionDesc::block(BlockId id) {
+  return data(id).block;
+}
+
+const RegionDesc::BlockIdSet& RegionDesc::succs(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).succs;
+}
+
+const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
+  return const_cast<RegionDesc*>(this)->data(id).preds;
+}
+
+const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
+  return m_sideExitingBlocks;
+}
+
+void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
+  data(srcId).succs.insert(dstId);
+  data(dstId).preds.insert(srcId);
 }
 
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
-  for (auto& block : blocks) {
-    if (block->id() == oldId) {
-      block->setId(newId);
-      break;
-    }
+  assert( hasBlock(oldId));
+  assert(!hasBlock(newId));
+
+  block(oldId)->setId(newId);
+  m_data[newId] = m_data[oldId];
+  m_data.erase(oldId);
+
+  // Fix predecessor sets for the successors.
+  for (auto succId : m_data[newId].succs) {
+    BlockIdSet& succPreds = m_data[succId].preds;
+    assert(succPreds.count(oldId));
+    succPreds.erase(oldId);
+    succPreds.insert(newId);
   }
-  for (auto& arc : arcs) {
-    if (arc.src == oldId) arc.src = newId;
-    if (arc.dst == oldId) arc.dst = newId;
+
+  // Fix successor sets for the predecessors.
+  for (auto predId : m_data[newId].preds) {
+    BlockIdSet& predSuccs = m_data[predId].succs;
+    assert(predSuccs.count(oldId));
+    predSuccs.erase(oldId);
+    predSuccs.insert(newId);
   }
 }
 
 void RegionDesc::setSideExitingBlock(BlockId bid) {
-  sideExitingBlocks.insert(bid);
+  m_sideExitingBlocks.insert(bid);
 }
 
 bool RegionDesc::isSideExitingBlock(BlockId bid) const {
-  return sideExitingBlocks.count(bid);
+  return m_sideExitingBlocks.count(bid);
+}
+
+void RegionDesc::copyArcsFrom(const RegionDesc& srcRegion) {
+  for (auto const b : srcRegion.m_blocks) {
+    auto bid = b->id();
+    for (auto succId : srcRegion.succs(bid)) {
+      addArc(bid, succId);
+    }
+  }
+}
+
+void RegionDesc::copyBlocksFrom(const RegionDesc&  other,
+                                BlockVec::iterator where) {
+  auto otherBlocks = other.blocks();
+  m_blocks.insert(where, otherBlocks.begin(), otherBlocks.end());
+  for (auto b : otherBlocks) {
+    m_data[b->id()] = BlockData(b);
+  }
+}
+
+void RegionDesc::append(const RegionDesc& other) {
+  copyBlocksFrom(other, m_blocks.end());
+  copyArcsFrom(other);
+  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
+                             other.m_sideExitingBlocks.end());
+}
+
+void RegionDesc::prepend(const RegionDesc& other) {
+  copyBlocksFrom(other, m_blocks.begin());
+  copyArcsFrom(other);
+  m_sideExitingBlocks.insert(other.m_sideExitingBlocks.begin(),
+                             other.m_sideExitingBlocks.end());
+}
+
+std::string RegionDesc::toString() const {
+  auto ret = show(*this);
+  ret += "data:\n";
+  for (auto d : m_data) {
+    ret += folly::format("  block id: {}\n", d.first).str();
+  }
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -439,7 +563,6 @@ bool breaksRegion(Op opc) {
 
 //////////////////////////////////////////////////////////////////////
 
-
 namespace {
 template<typename T>
 struct Ignore {
@@ -659,25 +782,22 @@ std::string show(const RegionDesc::Block& b) {
   return ret;
 }
 
-std::string show(const RegionDesc::Arc& arc) {
-  return folly::format("{} -> {}\n", arc.src, arc.dst).str();
-}
-
 std::string show(const RegionDesc& region) {
   return folly::format(
     "Region ({} blocks):\n{}",
-    region.blocks.size(),
+    region.blocks().size(),
     [&]{
       std::string ret;
-      for (auto& b : region.blocks) {
+      std::string arcs;
+      for (auto& b : region.blocks()) {
         folly::toAppend(show(*b), &ret);
+        for (auto s : region.succs(b->id())) {
+          folly::toAppend(folly::format("{} -> {}\n", b->id(), s), &arcs);
+        }
       }
-      folly::toAppend("Arcs:\n", &ret);
-      for (auto& arc : region.arcs) {
-        folly::toAppend(show(arc), &ret);
-      }
+      folly::toAppend("Arcs:\n" + arcs, &ret);
       folly::toAppend("Side-exiting Blocks:\n",
-                      folly::join(", ", region.sideExitingBlocks),
+                      folly::join(", ", region.sideExitingBlocks()),
                       "\n",
                       &ret);
       return ret;

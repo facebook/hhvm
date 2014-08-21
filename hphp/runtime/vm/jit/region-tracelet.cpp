@@ -90,8 +90,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
-  , m_curBlock(m_region->addBlock(ctx.func, m_sk.resumed(), m_sk.offset(), 0,
-                                  ctx.spOffset))
+  , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset))
   , m_blockFinished(false)
   , m_irTrans(TransContext { kInvalidTransID,
                              ctx.bcOffset,
@@ -214,7 +213,7 @@ RegionDescPtr RegionFormer::go() {
   }
 
   // If we failed while trying to inline, trigger retry without inlining.
-  if (m_region && !m_region->blocks.empty() && m_ht.isInlining()) {
+  if (m_region && !m_region->empty() && m_ht.isInlining()) {
     // Abort in dbg builds. While we can recover from this situation just fine,
     // it's more often than not indicative of a real bug somewhere else in the
     // system.
@@ -234,7 +233,7 @@ RegionDescPtr RegionFormer::go() {
               : " after tracelet formation ",
             nullptr, nullptr, m_ht.irBuilder().guards());
 
-  if (m_region && !m_region->blocks.empty()) {
+  if (m_region && !m_region->empty()) {
     m_ht.end(m_sk.offset());
     recordDependencies();
     truncateLiterals();
@@ -315,10 +314,8 @@ void RegionFormer::addInstruction() {
   if (m_blockFinished) {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
-    RegionDesc::Block* newCurBlock = m_region->addBlock(curFunc(),
-                                                        m_sk.resumed(),
-                                                        m_sk.offset(), 0,
-                                                        curSpOffset());
+    always_assert(m_sk.func() == curFunc());
+    RegionDesc::Block* newCurBlock = m_region->addBlock(m_sk, 0, curSpOffset());
     m_region->addArc(m_curBlock->id(), newCurBlock->id());
     m_curBlock = newCurBlock;
     m_blockFinished = false;
@@ -443,13 +440,13 @@ bool RegionFormer::tryInline() {
 }
 
 void RegionFormer::truncateLiterals() {
-  if (!m_region || m_region->blocks.empty() ||
-      m_region->blocks.back()->empty()) return;
+  if (!m_region || m_region->empty() ||
+      m_region->blocks().back()->empty()) return;
 
   // Don't finish a region with literal values or values that have a class
   // related to the current context class. They produce valuable information
   // for optimizations that's lost across region boundaries.
-  auto& lastBlock = *m_region->blocks.back();
+  auto& lastBlock = *m_region->blocks().back();
   auto sk = lastBlock.start();
   auto endSk = sk;
   auto unit = lastBlock.unit();
@@ -474,7 +471,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   if (ii.dontGuard) return true;
 
   if (m_profiling && rtt.isBoxed() &&
-      (m_region->blocks.size() > 1 || !m_region->blocks[0]->empty())) {
+      (m_region->blocks().size() > 1 || !m_region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
     return false;
@@ -508,8 +505,8 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
  */
 void RegionFormer::recordDependencies() {
   // Record the incrementally constructed reffiness predictions.
-  assert(!m_region->blocks.empty());
-  auto& frontBlock = *m_region->blocks.front();
+  assert(!m_region->empty());
+  auto& frontBlock = *m_region->blocks().front();
   for (auto const& dep : m_refDeps.m_arMap) {
     frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,
                                             dep.second.m_vals,
@@ -517,7 +514,7 @@ void RegionFormer::recordDependencies() {
   }
 
   // Relax guards and record the ones that survived.
-  auto& firstBlock = *m_region->blocks.front();
+  auto& firstBlock = *m_region->blocks().front();
   auto blockStart = firstBlock.start();
   auto& unit = m_ht.unit();
   auto const doRelax = RuntimeOption::EvalHHIRRelaxGuards;
@@ -561,17 +558,17 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
     inl.resetState();
   }
 
-  if (region->blocks.size() == 0 || region->blocks.front()->length() == 0) {
+  if (region->empty() || region->blocks().front()->length() == 0) {
     FTRACE(1, "selectTracelet giving up after {} tries\n", tries);
     return RegionDescPtr { nullptr };
   }
 
   FTRACE(1, "selectTracelet returning, inlining {}, {} tries:\n{}\n",
          allowInlining ? "allowed" : "disallowed", tries, show(*region));
-  if (region->blocks.back()->length() == 0) {
+  if (region->blocks().back()->length() == 0) {
     // If the final block is empty because it would've only contained
     // instructions producing literal values, kill it.
-    region->blocks.pop_back();
+    region->deleteBlock(region->blocks().back()->id());
   }
   return region;
 }

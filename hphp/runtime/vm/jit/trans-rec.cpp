@@ -48,14 +48,14 @@ TransRec::TransRec(SrcKey                      _src,
 
   if (!region) return;
 
-  assert(!region->blocks.empty());
-  for (auto& block : region->blocks) {
+  assert(!region->empty());
+  for (auto& block : region->blocks()) {
     auto sk = block->start();
     blocks.emplace_back(Block{sk.unit()->md5(), sk.offset(),
                               block->last().advanced().offset()});
   }
 
-  auto& firstBlock = *region->blocks.front();
+  auto& firstBlock = *region->blocks().front();
   auto guardRange = firstBlock.typePreds().equal_range(firstBlock.start());
   for (; guardRange.first != guardRange.second; ++guardRange.first) {
     guards.emplace_back(show(guardRange.first->second));

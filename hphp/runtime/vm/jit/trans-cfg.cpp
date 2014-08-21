@@ -97,14 +97,14 @@ TransCFG::TransCFG(FuncId funcId,
   // add arcs
   for (TransID dstId : nodes()) {
     SrcKey dstSK = profData->transSrcKey(dstId);
-    RegionDesc::BlockPtr dstBlock = profData->transRegion(dstId)->blocks[0];
+    RegionDesc::BlockPtr dstBlock = profData->transRegion(dstId)->entry();
     const SrcRec* dstSR = srcDB.find(dstSK);
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
     TransIDSet predIDs = findPredTrans(dstSR, jmpToTransID);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
         auto predPostConds =
-          profData->transRegion(predId)->blocks.back()->postConds();
+          profData->transRegion(predId)->blocks().back()->postConds();
         SrcKey predSK = profData->transSrcKey(predId);
         if (preCondsAreSatisfied(dstBlock, predPostConds) &&
             predSK.resumed() == dstSK.resumed()) {

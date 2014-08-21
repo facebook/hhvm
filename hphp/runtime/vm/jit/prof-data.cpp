@@ -105,8 +105,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(lastBcOff)
     , m_region(region)
     , m_sk(sk) {
-  assert(region == nullptr ||
-         (region->blocks.size() > 0 && region->blocks[0]->start() == sk));
+  assert(region == nullptr || (!region->empty() && region->start() == sk));
 }
 
 ProfTransRec::ProfTransRec(TransID       id,
@@ -150,7 +149,7 @@ SrcKey ProfTransRec::srcKey() const {
 }
 
 Offset ProfTransRec::startBcOff() const {
-  return m_region->blocks[0]->start().offset();;
+  return m_region->start().offset();;
 }
 
 Offset ProfTransRec::lastBcOff() const {
@@ -322,8 +321,8 @@ RegionDescPtr ProfData::transRegion(TransID id) const {
  * returned.
  */
 static Offset findLastBcOffset(const RegionDescPtr region) {
-  assert(region->blocks.size() > 0);
-  auto& blocks = region->blocks;
+  assert(!region->empty());
+  auto& blocks = region->blocks();
   FuncId startFuncId = blocks[0]->start().getFuncId();
   for (int i = blocks.size() - 1; i >= 0; i--) {
     SrcKey sk = blocks[i]->last();
@@ -340,12 +339,12 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   Offset  lastBcOff = findLastBcOffset(region);
 
   assert(region);
-  DEBUG_ONLY size_t nBlocks = region->blocks.size();
-  assert(nBlocks == 1 || (nBlocks > 1 && region->blocks[0]->inlinedCallee()));
-  region->renumberBlock(region->blocks[0]->id(), transId);
+  DEBUG_ONLY size_t nBlocks = region->blocks().size();
+  assert(nBlocks == 1 || (nBlocks > 1 && region->entry()->inlinedCallee()));
+  region->renumberBlock(region->entry()->id(), transId);
 
-  region->blocks.back()->setPostConditions(pconds);
-  auto const startSk = region->blocks.front()->start();
+  region->blocks().back()->setPostConditions(pconds);
+  auto const startSk = region->start();
   m_transRecs.emplace_back(new ProfTransRec(transId,
                                             TransKind::Profile,
                                             lastBcOff,

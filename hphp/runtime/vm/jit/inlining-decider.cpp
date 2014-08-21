@@ -143,8 +143,9 @@ bool checkFPIRegion(const SrcKey& callSK, const Func* callee,
                         callSK.resumed() };
   int pushBlock = -1;
 
-  for (unsigned i = 0; i < region.blocks.size(); ++i) {
-    if (region.blocks[i]->contains(pushSK)) {
+  auto const& blocks = region.blocks();
+  for (unsigned i = 0; i < blocks.size(); ++i) {
+    if (blocks[i]->contains(pushSK)) {
       pushBlock = i;
       break;
     }
@@ -172,8 +173,8 @@ bool checkFPIRegion(const SrcKey& callSK, const Func* callee,
   }
 
   // Calls invalidate all live SSATmps, so don't allow any in the FPI region.
-  for (unsigned i = pushBlock; i < region.blocks.size(); ++i) {
-    auto const& block = *region.blocks[i];
+  for (unsigned i = pushBlock; i < blocks.size(); ++i) {
+    auto const& block = *blocks[i];
 
     auto iterSK = (i == pushBlock ? pushSK.advanced()
                                   : block.start());
@@ -331,8 +332,7 @@ bool isInliningVVSafe(Op op) {
 
 bool InliningDecider::shouldInline(const Func* callee,
                                    const RegionDesc& region) {
-  auto sk = region.blocks.size() ? region.blocks.front()->start()
-                                 : SrcKey();
+  auto sk = region.empty() ? SrcKey() : region.start();
   assert(callee);
   assert(sk.func() == callee);
 
@@ -392,7 +392,7 @@ bool InliningDecider::shouldInline(const Func* callee,
   int numRets = 0;
 
   // Iterate through the region, checking its suitability for inlining.
-  for (auto const& block : region.blocks) {
+  for (auto const& block : region.blocks()) {
     sk = block->start();
 
     for (auto i = 0, n = block->length(); i < n; ++i, sk.advance()) {

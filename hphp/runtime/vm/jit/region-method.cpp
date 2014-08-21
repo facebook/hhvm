@@ -79,15 +79,13 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
     auto const start  = unit->offsetOf(b->start);
     auto const length = numInstrs(b->start, b->end);
-    ret->blocks.emplace_back(
-      std::make_shared<RegionDesc::Block>(context.func, context.resumed,
-                                          start, length, spOffset)
-    );
+    SrcKey sk{context.func, start, context.resumed};
+    ret->addBlock(sk, length, spOffset);
     spOffset = -1; // flag SP offset as unknown for all but the first block
   }
 
-  assert(!ret->blocks.empty());
-  auto const startSK = ret->blocks.front()->start();
+  assert(!ret->empty());
+  auto const startSK = ret->start();
   for (auto& lt : context.liveTypes) {
     typedef RegionDesc::Location::Tag LTag;
 
@@ -100,7 +98,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
         auto const type = lt.type.strictSubtypeOf(Type::Obj)
                            ? Type::Obj
                            : lt.type;
-        ret->blocks.front()->addPredicted(startSK, {lt.location, type});
+        ret->entry()->addPredicted(startSK, {lt.location, type});
       }
       break;
     }

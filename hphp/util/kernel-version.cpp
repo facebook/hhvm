@@ -24,10 +24,18 @@
 namespace HPHP {
 
 void KernelVersion::parse(const char* s) {
-  DEBUG_ONLY int numFields = sscanf(s,
-                                    "%d.%d.%d-%d_fbk%d_",
-                                    &m_major, &m_dot, &m_dotdot, &m_dash,
-                                    &m_fbk);
+  int numFields = sscanf(s,
+                         "%d.%d.%d-%d_fbk%d_",
+                         &m_major, &m_dot, &m_dotdot, &m_dash,
+                         &m_fbk);
+  // The first release in each series is x.y, not x.y.0, so we need a different
+  // pattern.
+  if (numFields == 2) {
+    m_dotdot = 0;
+    numFields = sscanf(s,
+                       "%d.%d-%d_fbk%d_",
+                       &m_major, &m_dot, &m_dash, &m_fbk);
+  }
   assert(numFields >= 3);
 }
 

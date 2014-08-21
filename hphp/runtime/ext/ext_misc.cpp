@@ -253,22 +253,6 @@ bool f_defined(const String& name, bool autoload /* = true */) {
   }
 }
 
-Variant f_die(const Variant& status /* = null_variant */) {
-  return f_exit(status);
-}
-
-Variant f_exit(const Variant& status /* = null_variant */) {
-  if (status.isString()) {
-    g_context->write(status.toString());
-    throw ExitException(0);
-  }
-  throw ExitException(status.toInt32());
-}
-
-void f___halt_compiler() {
-  // do nothing
-}
-
 int64_t f_ignore_user_abort(bool setting /* = false */) {
   return 0;
 }

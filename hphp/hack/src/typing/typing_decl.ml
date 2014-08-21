@@ -771,7 +771,6 @@ and type_typedef_naming_and_decl nenv tdef =
     if is_abstract then Env.Typedef.Private else Env.Typedef.Public
   in
   let tdecl = visibility, params, tcstr, concrete_type, pos in
-  Typing.typedef_def env ntdef;
   Env.add_typedef tid tdecl;
   Naming_heap.TypedefHeap.add tid decl;
   ()

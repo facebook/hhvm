@@ -17,13 +17,3 @@ class X {
 }
 
 type myshape = shape(X::X1 => int, X::X2 => bool, X::X3 => bool);
-
-function test(): myshape {
-  $x = shape(X::X1 => 1, X::X2 => true, X::X3 => false);
-  return $x;
-}
-
-function test2(): void {
-  $y = test();
-  $z = $y[X::X1];
-}

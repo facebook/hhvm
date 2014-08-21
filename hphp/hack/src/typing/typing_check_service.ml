@@ -54,9 +54,7 @@ let check_typedef x =
      * slightly larger change than I want to deal with right now. *)
     let tenv = Typing_env.set_mode tenv Ast.Mdecl in
     let tenv = Typing_env.set_root tenv (Typing_deps.Dep.Class x) in
-    (* TODO It's pretty ugly that this try/catch is here whereas the others
-     * are in Typing.fun_def and friends. *)
-    NastCheck.typedef tenv x typedef
+    Typing.typedef_def tenv x typedef
   with Not_found ->
     ()
 

@@ -1342,11 +1342,6 @@ and check_shape_keys_validity env pos keys =
         let env, pos, info = get_field_info env witness in
         List.fold_left (check_field pos info) env rest_keys
 
-and typedef_def env = function
-  | _, _, (pos, Hshape fdm) ->
-    ignore (check_shape_keys_validity env pos (ShapeMap.keys fdm))
-  | _ -> ()
-
 and assign p env e1 ty2 =
   let env, ty2 = convert_array_as_tuple p env ty2 in
   match e1 with
@@ -3009,3 +3004,10 @@ and method_def env m =
       suggest_return env (fst m.m_name) ret
     | None
     | Some _ -> ()
+
+and typedef_def env_up x typedef =
+  NastCheck.typedef env_up x typedef;
+  match typedef with
+    | _, _, (pos, Hshape fdm) ->
+      ignore (check_shape_keys_validity env_up pos (ShapeMap.keys fdm))
+    | _ -> ()

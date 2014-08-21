@@ -9,9 +9,14 @@ class C {
   function goo(): int {
     return 0;
   }
+  function blah(): this {
+    return $this;
+  }
 }
 $rc = new ReflectionClass('C');
 $rm = $rc->getMethod('goo');
+var_dump($rm->getReturnTypeText());
+$rm = $rc->getMethod('blah');
 var_dump($rm->getReturnTypeText());
 class C1 extends C {
   function goo() {

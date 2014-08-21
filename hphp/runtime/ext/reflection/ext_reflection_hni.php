@@ -211,22 +211,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function returnsReference(): bool;
 
-  private static function stripHHPrefix($str) {
-    if (!is_string($str)) return $str;
-    return str_ireplace(
-      array('HH\\this'),
-      array('this'),
-      $str
-    );
-  }
-
   <<__Native, __HipHopSpecific>>
   private function getReturnTypeHint(): string;
 
   <<__HipHopSpecific>>
   public function getReturnTypeText() {
-    $hint = $this->getReturnTypeHint();
-    return ($hint) ? self::stripHHPrefix($hint) : false;
+    return $this->getReturnTypeHint() ?: false;
   }
 
   <<__Native>>

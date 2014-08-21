@@ -30,44 +30,45 @@ namespace HPHP {
  * Normalizes hdf string names to their ini counterparts
  *
  * We have special handling for a few hdf strings such as those containing
- * MySQL, JitA, Eval and EnableHipHopSyntax
+ * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
  */
 static std::string normalize(const std::string &name) {
-  std::string out = "";
-  bool start = true;
-  bool supress_next_underscore = false;
+  std::string out = ".";
+  size_t idx = 0;
   for (auto &c : name) {
-    if (start) {
-      out += ".";
+    // This is the first or last character
+    if (idx == 0 || idx == name.length() - 1) {
       out += tolower(c);
-      start = false;
-      supress_next_underscore = true;
     } else if (!isalpha(c)) {
+      // Any . or _ or numeral is just output with no special behavior
       out += c;
-      supress_next_underscore = true;
-    } else if (isupper(c)) {
-      if (!supress_next_underscore) {
-        out += "_";
-      }
-      out += tolower(c);
-      supress_next_underscore = true;
     } else {
-      out += c;
-      supress_next_underscore = false;
+      if (isupper(c) && isupper(name[idx - 1 ]) && islower(name[idx + 1])) {
+      // Handle something like "SSLPort", and c = "P", which will then put
+      // the underscore between the "L" and "P"
+        out += "_";
+        out += tolower(c);
+      } else if (islower(c) && isupper(name[idx + 1])) {
+      // Handle something like "PathDebug", and c = "h", which will then put
+      // the underscore between the "h" and "D"
+        out += tolower(c);
+        out += "_";
+      } else {
+      // Otherwise we just output as lower
+        out += tolower(c);
+      }
     }
+    idx++;
   }
+
+  // Make sure IPv6 or IPv4 are handled correctly
+  boost::replace_first(out, "_i_pv", "_ipv");
+  boost::replace_first(out, ".i_pv", ".ipv");
+  // No use of Eval in our ini strings
   boost::replace_first(out, ".eval.", ".");
   boost::replace_first(out, ".my_sql.", ".mysql.");
   boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
-  // Check for JitA, but be careful.
-  // Only replace if letter after JitA substring, exists and is uppercase
-  // e.g., JitAHotSize should be jit_a_hot_size, not jit_ahot_size
-  // BUT JitAlwaysInterpOne should be jit_always_interp_one
-  auto jita_pos = name.find("JitA");
-  if (jita_pos != std::string::npos && jita_pos + 4 < name.length() &&
-      isupper(name.at(jita_pos + 4))) {
-    boost::replace_first(out, "jit_a", "jit_a_");
-  }
+
   return out;
 }
 

@@ -129,13 +129,35 @@ and sub_type env ty_super ty_sub =
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty_super ty_sub in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply ((_, ("\\ImmVector" | "\\ConstVector" | "\\ImmSet" | "\\ConstSet" | "\\PrivacyPolicyBase")), [ty_super]))),
-    (_, (Tapply ((_, ("\\ImmVector" | "\\ConstVector" | "\\ImmSet" | "\\ConstSet" | "\\PrivacyPolicyBase")), [ty_sub]))) ->
+  | (_, (Tapply (
+      (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
+            "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
+            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase") as name_super)),
+      [ty_super]
+    ))),
+    (_, (Tapply (
+      (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
+            "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
+            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase") as name_sub)),
+      [ty_sub]
+    )))
+    when name_super = name_sub ->
       sub_type env ty_super ty_sub
-  | (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\ConstMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_super; vty_super]))),
-    (_, (Tapply ((_, ("\\Pair" | "\\ImmMap" | "\\ConstMap" | "\\GenReadApi" | "\\GenReadIdxApi")), [kty_sub; vty_sub]))) ->
-      let env = sub_type env kty_super kty_sub in
-      sub_type env vty_super vty_sub
+  | (_, (Tapply (
+      (_, (("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish" |
+            "\\KeyedIterable" | "\\KeyedIterator" | "\\ConstMap" | "\\ImmMap" |
+            "\\Pair" | "\\GenReadApi" | "\\GenReadIdxApi") as name_super)),
+      [tk_super; tv_super]
+    ))),
+    (_, (Tapply (
+      (_, (("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish" |
+            "\\KeyedIterable" | "\\KeyedIterator" | "\\ConstMap" | "\\ImmMap" |
+            "\\Pair" | "\\GenReadApi" | "\\GenReadIdxApi") as name_sub)),
+      [tk_sub; tv_sub]
+    )))
+    when name_super = name_sub ->
+      let env = sub_type env tk_super tk_sub in
+      sub_type env tv_super tv_sub
   | (_, (Tapply ((_, "\\Generator"), [tk_super; tv_super; ts_super]))),
     (_, (Tapply ((_, "\\Generator"), [tk_sub; tv_sub; ts_sub]))) ->
       (* Currently, we are only covariant in the type of the value yielded. I
@@ -211,46 +233,25 @@ and sub_type env ty_super ty_sub =
     end
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
-  | (_, Tapply ((_, "\\Traversable"), [ty_sub])), (r, Tarray (_, ty3, ty4))
-  | (_, Tapply ((_, "\\Container"), [ty_sub])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, ("\\Traversable" | "\\Container")), [tv_super])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3, ty4 with
       | None, _ -> env
       | Some ty3, None ->
-          let env, _ = Unify.unify env ty_sub ty3 in
-          env
+          sub_type env tv_super ty3
       | Some ty3, Some ty4 ->
-          let env, _ = Unify.unify env ty_sub ty4 in
-          env
+          sub_type env tv_super ty4
       )
-  | (_, Tapply ((_, "\\KeyedTraversable"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4))
-  | (_, Tapply ((_, "\\KeyedContainer"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, ("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish")), [tk_super; tv_super])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
           (match ty4 with
           | None ->
-              let env, _ = Unify.unify env ty_super (r, Tprim Nast.Tint) in
-              let env, _ = Unify.unify env ty_sub ty3 in
-              env
+              let env = sub_type env tk_super (r, Tprim Nast.Tint) in
+              sub_type env tv_super ty3
           | Some ty4 ->
-              let env, _ = Unify.unify env ty_super ty3 in
-              let env, _ = Unify.unify env ty_sub ty4 in
-              env
-          )
-      )
-  | (_, Tapply ((_, "\\Indexish"), [ty_super; ty_sub])), (r, Tarray (_, ty3, ty4)) ->
-      (match ty3 with
-      | None -> env
-      | Some ty3 ->
-          (match ty4 with
-          | None ->
-              let env, _ = Unify.unify env ty_super (r, Tprim Nast.Tint) in
-              let env, _ = Unify.unify env ty_sub ty3 in
-              env
-          | Some ty4 ->
-              let env, _ = Unify.unify env ty_super ty3 in
-              let env, _ = Unify.unify env ty_sub ty4 in
-              env
+              let env = sub_type env tk_super ty3 in
+              sub_type env tv_super ty4
           )
       )
   | (_, Tapply ((_, "\\Stringish"), _)), (_, Tprim Nast.Tstring) -> env
@@ -261,9 +262,9 @@ and sub_type env ty_super ty_sub =
   | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tnum) -> env
   | (_, (Tarray (_, Some ty_super, None))), (_, (Tarray (_, Some ty_sub, None))) ->
       sub_type env ty_super ty_sub
-  | (_, (Tarray (_, Some kty_super, Some vty_super))), (_, Tarray (_, Some kty_sub, Some vty_sub)) ->
-      let env = sub_type env kty_super kty_sub in
-      sub_type env vty_super vty_sub
+  | (_, (Tarray (_, Some tk_super, Some tv_super))), (_, Tarray (_, Some tk_sub, Some tv_sub)) ->
+      let env = sub_type env tk_super tk_sub in
+      sub_type env tv_super tv_sub
   | (_, Tarray (_, Some _, Some _)), (reason, Tarray (is_local, Some elt_ty, None)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in

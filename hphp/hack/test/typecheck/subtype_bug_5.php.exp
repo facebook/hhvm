@@ -1,0 +1,6 @@
+File "subtype_bug_5.php", line 6, characters 45-46:
+Invalid argument
+File "subtype_bug_5.php", line 5, characters 14-17:
+This is an object of type Pair
+File "subtype_bug_5.php", line 6, characters 15-20:
+It is incompatible with an object of type ImmMap

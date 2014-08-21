@@ -45,12 +45,12 @@ def vec_elm_sizes():
 
 @memoized
 def rata_arrs():
-    return [V('HPHP::RepoAuthType::Tag' + t) for t in
+    return [V('HPHP::RepoAuthType::' + t) for t in
             ['SArr', 'Arr', 'OptSArr', 'OptArr']]
 
 @memoized
 def rata_objs():
-    return [V('HPHP::RepoAuthType::Tag' + t) for t in
+    return [V('HPHP::RepoAuthType::' + t) for t in
             ['ExactObj', 'SubObj', 'OptExactObj', 'OptSubObj']]
 
 @memoized
@@ -110,7 +110,7 @@ class HHBC:
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
 
-            radb = K('HPHP::kRATArrayDataBig')
+            radb = V('HPHP::kRATArrayDataBit')
 
             tag = (imm & ~radb).cast(T('HPHP::RepoAuthType::Tag'))
             high_bit = (imm & radb)
@@ -122,7 +122,7 @@ class HHBC:
             else:
                 info['size'] = 1
 
-            info['value'] = 'RAT'
+            info['value'] = str(tag)[len('HPHP::RepoAuthType::'):]
 
         else:
             table_name = 'HPHP::immSize(HPHP::Op const*, int)::argTypeToSizes'
@@ -223,9 +223,11 @@ remains where it left off after the previous call.
 
             out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
             for imm in instr['imms']:
-                if imm.type == T('uint8_t'):
+                if type(imm) is str:
+                    pass
+                elif imm.type == T('uint8_t'):
                     imm = imm.cast(T('uint32_t'))
-                if imm.type == T('char').pointer():
+                elif imm.type == T('char').pointer():
                     imm = '"' + imm.string() + '"'
                 out += ' ' + str(imm)
             print(out)

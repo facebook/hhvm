@@ -218,6 +218,26 @@ public:
     return nullptr;
   }
 
+  static int64_t minTimeout(int64_t timeout) {
+    auto info = ThreadInfo::s_threadInfo.getNoCheck();
+    auto& data = info->m_reqInjectionData;
+    if (!data.getTimeout()) {
+      return timeout;
+    }
+    auto remaining = int64_t(data.getRemainingTime());
+    return std::min(remaining, timeout);
+  }
+
+  static int64_t minTimeoutMS(int64_t timeout) {
+    auto info = ThreadInfo::s_threadInfo.getNoCheck();
+    auto& data = info->m_reqInjectionData;
+    if (!data.getTimeout()) {
+      return timeout;
+    }
+    auto remaining = int64_t(data.getRemainingTime());
+    return std::min(1000 * remaining, timeout);
+  }
+
   void reset() {
     curl_easy_reset(m_cp);
 
@@ -239,9 +259,9 @@ public:
     curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
 
     curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
+                     minTimeout(RuntimeOption::HttpDefaultTimeout));
     curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
-                     RuntimeOption::HttpDefaultTimeout);
+                     minTimeout(RuntimeOption::HttpDefaultTimeout));
   }
 
   Variant execute() {
@@ -313,6 +333,18 @@ public:
     m_error_no = CURLE_OK;
 
     switch (option) {
+    case CURLOPT_TIMEOUT: {
+      auto timeout = minTimeout(value.toInt64());
+      m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, timeout);
+      break;
+    }
+#if LIBCURL_VERSION_NUM >= 0x071002
+    case CURLOPT_TIMEOUT_MS: {
+      auto timeout = minTimeoutMS(value.toInt64());
+      m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, timeout);
+      break;
+    }
+#endif
     case CURLOPT_INFILESIZE:
     case CURLOPT_VERBOSE:
     case CURLOPT_HEADER:
@@ -328,10 +360,6 @@ public:
     case CURLOPT_FTPAPPEND:
     case CURLOPT_NETRC:
     case CURLOPT_PUT:
-    case CURLOPT_TIMEOUT:
-#if LIBCURL_VERSION_NUM >= 0x071002
-    case CURLOPT_TIMEOUT_MS:
-#endif
     case CURLOPT_FTP_USE_EPSV:
     case CURLOPT_LOW_SPEED_LIMIT:
     case CURLOPT_SSLVERSION:

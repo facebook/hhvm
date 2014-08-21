@@ -276,6 +276,7 @@ class c_DOMText : public c_DOMCharacterData {
 
   public: void t___construct(const String& value = null_string);
   public: bool t_iswhitespaceinelementcontent();
+  public: bool t_iselementcontentwhitespace();
   public: Variant t_splittext(int64_t offset);
   public: Variant t___get(Variant name);
   public: Variant t___set(Variant name, Variant value);

@@ -63,17 +63,13 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 #include "gdcache.h"
 
 #ifdef HHVM
-# ifdef FACEBOOK
-#  include <freetype/config/ftheader.h>
-# else // HPHP_OSS
-#  ifdef HAVE_FT2BUILD
-#   include <ft2build.h>
+# ifdef HAVE_FT2BUILD
+#  include <ft2build.h>
+# else
+#  ifdef FREETYPE_PATH_FREETYPE2
+#   include <freetype2/config/ftheader.h>
 #  else
-#   ifdef FREETYPE_PATH_FREETYPE2
-#    include <freetype2/config/ftheader.h>
-#   else
-#    include <freetype/config/ftheader.h>
-#   endif
+#   include <freetype/config/ftheader.h>
 #  endif
 # endif
 #endif // HHVM

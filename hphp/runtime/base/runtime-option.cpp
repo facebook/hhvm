@@ -700,8 +700,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(Logger::UseSyslog, ini, logger["UseSyslog"], false);
     Config::Bind(Logger::UseLogFile, ini, logger["UseLogFile"], true);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.log.use_log_file", &Logger::UseLogFile);
     Config::Bind(Logger::UseCronolog, ini, logger["UseCronolog"], false);
     Config::Bind(Logger::UseRequestLog, ini, logger["UseRequestLog"], false);
     if (Logger::UseLogFile) {
@@ -910,8 +908,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
         Hdf repoCentral = repo["Central"];
         // Repo.Central.Path.
         Config::Bind(RepoCentralPath, ini, repoCentral["Path"]);
-        IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                         "hhvm.repo.central.path", &RepoCentralPath);
       }
       {
         Hdf repoEval = repo["Eval"];
@@ -947,16 +943,10 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(DefaultServerNameSuffix, ini,
                  server["DefaultServerNameSuffix"]);
     Config::Bind(ServerType, ini, server["Type"], ServerType);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.server.type", &ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.server.file_socket", &ServerFileSocket);
     ServerPrimaryIP = GetPrimaryIP();
     Config::Bind(ServerPort, ini, server["Port"], 80);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.server.port", &ServerPort);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);
     Config::Bind(ServerThreadCount, ini, server["ThreadCount"],
@@ -1069,8 +1059,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(FileCache, ini, server["FileCache"]);
     Config::Bind(DefaultDocument, ini, server["DefaultDocument"]);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.server.default_document", &DefaultDocument);
     Config::Bind(ErrorDocument404, ini, server["ErrorDocument404"]);
     normalizePath(ErrorDocument404);
     Config::Bind(ForbiddenAs404, ini, server["ForbiddenAs404"]);

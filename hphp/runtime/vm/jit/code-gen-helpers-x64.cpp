@@ -110,7 +110,6 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
   }
 }
 
-#ifdef USE_GCC_FAST_TLS
 void emitGetGContext(Vout& v, Vreg dest) {
   emitTLSLoad<ExecutionContext>(v, g_context, dest);
 }
@@ -118,11 +117,6 @@ void emitGetGContext(Vout& v, Vreg dest) {
 void emitGetGContext(Asm& as, PhysReg dest) {
   emitGetGContext(Vauto().main(as), dest);
 }
-#else
-void emitGetGContext(Asm& as, PhysReg dest) {
-  emitTLSLoad<ExecutionContext>(as, g_context, dest);
-}
-#endif
 
 // IfCountNotStatic --
 //   Emits if (%reg->_count < 0) { ... }.

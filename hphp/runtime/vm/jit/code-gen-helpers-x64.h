@@ -134,6 +134,23 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 reg) {
 
 template<typename T>
 inline void
+emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
+  PhysRegSaver(v, kGPCallerSaved); // we don't know for sure what's alive
+  v << ldimm{datum.m_key, argNumToRegName[0]};
+  const CodeAddress addr = (CodeAddress)pthread_getspecific;
+  if (deltaFits((uintptr_t)addr, sz::dword)) {
+    v << call{addr};
+  } else {
+    v << ldimm{addr, reg::rax};
+    v << callr{reg::rax};
+  }
+  if (dest != Vreg(reg::rax)) {
+    v << movq{reg::rax, dest};
+  }
+}
+
+template<typename T>
+inline void
 emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
   PhysRegSaver(a, kGPCallerSaved); // we don't know for sure what's alive
   a.    emitImmReg(datum.m_key, argNumToRegName[0]);

@@ -47,6 +47,8 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
+const double k_INF = std::numeric_limits<double>::infinity();
+const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
@@ -129,6 +131,35 @@ public:
 
   virtual void moduleInit() override {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FE(connection_aborted);
+    HHVM_FE(connection_status);
+    HHVM_FE(connection_timeout);
+    HHVM_FE(constant);
+    HHVM_FE(define);
+    HHVM_FE(defined);
+    HHVM_FE(ignore_user_abort);
+    HHVM_FE(pack);
+    HHVM_FE(sleep);
+    HHVM_FE(usleep);
+    HHVM_FE(time_nanosleep);
+    HHVM_FE(time_sleep_until);
+    HHVM_FE(uniqid);
+    HHVM_FE(unpack);
+    HHVM_FE(sys_getloadavg);
+    HHVM_FE(token_get_all);
+    HHVM_FE(token_name);
+    HHVM_FE(hphp_to_string);
+    Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
+    Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
+    Native::registerConstant<KindOfInt64>(
+        makeStaticString("PHP_MAXPATHLEN"), MAXPATHLEN);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("PHP_DEBUG"),
+      #if DEBUG
+        true
+      #else
+        false
+      #endif
+     );
     loadSystemlib();
   }
 } s_misc_extension;
@@ -136,29 +167,19 @@ public:
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(tokenizer, 0.1);
 
-const double k_INF = std::numeric_limits<double>::infinity();
-const double k_NAN = std::numeric_limits<double>::quiet_NaN();
-const bool k_PHP_DEBUG =
-#if DEBUG
-        true;
-#else
-        false;
-#endif
-
-const int64_t k_PHP_MAXPATHLEN = MAXPATHLEN;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_connection_aborted() {
-  return f_connection_status() == k_CONNECTION_ABORTED;
+int64_t HHVM_FUNCTION(connection_aborted) {
+  return HHVM_FN(connection_status)() == k_CONNECTION_ABORTED;
 }
 
-int64_t f_connection_status() {
+int64_t HHVM_FUNCTION(connection_status) {
   return k_CONNECTION_NORMAL;
 }
 
-int64_t f_connection_timeout() {
-  return f_connection_status() == k_CONNECTION_TIMEOUT;
+int64_t HHVM_FUNCTION(connection_timeout) {
+  return HHVM_FN(connection_status)() == k_CONNECTION_TIMEOUT;
 }
 
 static Class* getClassByName(const char* name, int len) {
@@ -196,7 +217,7 @@ static Class* getClassByName(const char* name, int len) {
   return cls;
 }
 
-Variant f_constant(const String& name) {
+Variant HHVM_FUNCTION(constant, const String& name) {
   if (!name.get()) return init_null();
   const char *data = name.data();
   int len = name.length();
@@ -223,7 +244,7 @@ Variant f_constant(const String& name) {
   return init_null();
 }
 
-bool f_define(const String& name, const Variant& value,
+bool HHVM_FUNCTION(define, const String& name, const Variant& value,
               bool case_insensitive /* = false */) {
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
@@ -231,7 +252,7 @@ bool f_define(const String& name, const Variant& value,
   return Unit::defCns(name.get(), value.asCell());
 }
 
-bool f_defined(const String& name, bool autoload /* = true */) {
+bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
   if (!name.get()) return false;
   const char *data = name.data();
   int len = name.length();
@@ -253,31 +274,27 @@ bool f_defined(const String& name, bool autoload /* = true */) {
   }
 }
 
-Variant f_die(const Variant& status /* = null_variant */) {
-  return f_exit(status);
-}
-
-Variant f_exit(const Variant& status /* = null_variant */) {
-  if (status.isString()) {
-    g_context->write(status.toString());
-    throw ExitException(0);
-  }
-  throw ExitException(status.toInt32());
-}
-
-void f___halt_compiler() {
-  // do nothing
-}
-
-int64_t f_ignore_user_abort(bool setting /* = false */) {
+int64_t HHVM_FUNCTION(ignore_user_abort, bool setting /* = false */) {
   return 0;
 }
 
-Variant f_pack(int _argc, const String& format, const Array& _argv /* = null_array */) {
-  return ZendPack().pack(format, _argv);
+TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
+  int num = ar->numArgs();
+  String format(getArg<KindOfString>(ar,0));
+  Array extra = Array::Create();
+  for (int i = 1; i<num; i++) {
+    extra.append(getArg<KindOfAny>(ar,i));
+  }
+  Variant result = ZendPack().pack(format, extra);
+  // pack() returns false if there was an error
+  if (result.isBoolean()) {
+    return arReturn(ar, result.getBoolean());
+  }
+  Variant strHolder = makeStaticString(result.toString());
+  return arReturn(ar, strHolder);
 }
 
-int64_t f_sleep(int seconds) {
+int64_t HHVM_FUNCTION(sleep, int seconds) {
   IOStatusHelper io("sleep");
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -287,7 +304,7 @@ int64_t f_sleep(int seconds) {
   return 0;
 }
 
-void f_usleep(int micro_seconds) {
+void HHVM_FUNCTION(usleep, int micro_seconds) {
   IOStatusHelper io("usleep");
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -327,7 +344,7 @@ const StaticString
   s_seconds("seconds"),
   s_nanoseconds("nanoseconds");
 
-Variant f_time_nanosleep(int seconds, int nanoseconds) {
+Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds) {
   if (seconds < 0) {
     throw_invalid_argument("seconds: cannot be negative");
     return false;
@@ -355,7 +372,7 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
   return false;
 }
 
-bool f_time_sleep_until(double timestamp) {
+bool HHVM_FUNCTION(time_sleep_until, double timestamp) {
   struct timeval tm;
   if (gettimeofday((struct timeval *)&tm, NULL) != 0) {
     return false;
@@ -383,8 +400,8 @@ bool f_time_sleep_until(double timestamp) {
   return true;
 }
 
-String f_uniqid(const String& prefix /* = null_string */,
-                bool more_entropy /* = false */) {
+String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
+                     bool more_entropy /* = false */) {
   if (!more_entropy) {
     Transport *transport = g_context->getTransport();
     if (transport) {
@@ -413,11 +430,11 @@ String f_uniqid(const String& prefix /* = null_string */,
   return uniqid;
 }
 
-Variant f_unpack(const String& format, const String& data) {
+Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
   return ZendPack().unpack(format, data);
 }
 
-Array f_sys_getloadavg() {
+Array HHVM_FUNCTION(sys_getloadavg) {
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
   return make_packed_array(0, 0, 0);
 #else
@@ -633,7 +650,7 @@ static int get_user_token_id(int internal_id) {
   return MaxUserTokenId;
 }
 
-Array f_token_get_all(const String& source) {
+Array HHVM_FUNCTION(token_get_all, const String& source) {
   Scanner scanner(source.data(), source.size(),
                   RuntimeOption::GetScannerType() | Scanner::ReturnAllTokens);
   ScannerToken tok;
@@ -711,7 +728,7 @@ static const char** getTokenNameTable() {
 }
 
 // Converts a user token ID to a token name
-String f_token_name(int64_t token) {
+String HHVM_FUNCTION(token_name, int64_t token) {
   static const char** table = getTokenNameTable();
   if (token >= 0 && token < MaxUserTokenId) {
     return table[token];
@@ -719,7 +736,7 @@ String f_token_name(int64_t token) {
   return "UNKNOWN";
 }
 
-String f_hphp_to_string(const Variant& v) {
+String HHVM_FUNCTION(hphp_to_string, const Variant& v) {
   return v.toString();
 }
 
@@ -741,3 +758,4 @@ extern const int64_t k_T_PAAMAYIM_NEKUDOTAYIM = k_T_DOUBLE_COLON;
 
 #undef YYTOKEN_MAP
 #undef YYTOKEN
+

@@ -165,11 +165,11 @@ class APCIterator implements Iterator{
       if ($this->search !== null) {
         if (is_array($this->search)) {
           while (!$this->preg_match_recursive($this->search, 
-                                              $key['entry_name'])) {
+                                              $list['entry_name'])) {
             continue;
           }
         } else {
-          if (!preg_match($this->search, $key['entry_name'])) {
+          if (!preg_match($this->search, $list['entry_name'])) {
             continue;
           }
         }

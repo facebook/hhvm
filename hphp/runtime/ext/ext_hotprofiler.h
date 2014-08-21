@@ -305,6 +305,9 @@ public:
     delete(m_external_profiler);
     m_external_profiler = p;
   }
+  Profiler *getExternalProfiler() {
+    return m_external_profiler;
+  }
 
 private:
   Profiler *m_profiler;

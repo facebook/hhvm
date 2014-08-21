@@ -1,5 +1,5 @@
 <?php
-error_reporting(E_ALL & ~E_USER_NOTICE);
+error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
 
 echo "== No Search ==\n";
 

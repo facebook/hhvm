@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
 
 $it = new APCIterator('user', NULL, APC_ITER_ALL, 10);
 for($i = 0; $i < 41; $i++) {

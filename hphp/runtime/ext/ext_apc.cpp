@@ -318,8 +318,12 @@ Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
       );
       return false;
     }
-    Variant ret = key.toObject()->o_invoke_few_args(s_delete, 0);
-    return ret;
+    TypedValue tvResult;
+    tvWriteUninit(&tvResult);
+    const Func* method =
+      SystemLib::s_APCIteratorClass->lookupMethod(s_delete.get());
+    g_context->invokeFuncFew(&tvResult, method, key.getObjectData());
+    return tvAsVariant(&tvResult);
   }
 
   return s_apc_store[cache_id].erase(key.toString());

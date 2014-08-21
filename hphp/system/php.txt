@@ -52,7 +52,7 @@ hphp/system/php/spl/iterators/RecursiveArrayIterator.php
 hphp/system/php/spl/iterators/CachingIterator.php
 hphp/system/php/spl/iterators/RecursiveCachingIterator.php
 
-hphp/system/php/spl/iterators/APCIterator.php
+hphp/system/php/apc/APCIterator.php
 
 hphp/system/php/stream/user-filters.php
 hphp/system/php/stream/default-filters.php

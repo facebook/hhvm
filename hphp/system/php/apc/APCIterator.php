@@ -1,29 +1,5 @@
 <?php
 
-define("APC_ITER_TYPE", 1);
-define("APC_ITER_KEY", 2);
-define("APC_ITER_FILENAME", 4);
-define("APC_ITER_DEVICE", 8);
-define("APC_ITER_INODE", 16);
-define("APC_ITER_VALUE", 32);
-define("APC_ITER_MD5", 64);
-define("APC_ITER_NUM_HITS", 128);
-define("APC_ITER_MTIME", 256);
-define("APC_ITER_CTIME", 512);
-define("APC_ITER_DTIME", 1024);
-define("APC_ITER_ATIME", 2048);
-define("APC_ITER_REFCOUNT", 4096);
-define("APC_ITER_MEM_SIZE", 8192);
-define("APC_ITER_TTL", 16384);
-
-
-define("APC_ITER_NONE", 0);
-define("APC_ITER_ALL", 0xffffffff);
-
-define("APC_LIST_ACTIVE", 1);
-define("APC_LIST_DELETED", 2);
-
-
 class APCIterator implements Iterator{
 
 
@@ -45,15 +21,15 @@ class APCIterator implements Iterator{
                               $chunk_size = 100, $list = APC_LIST_ACTIVE) {
 
     if(!function_exists('apc_add')) {
-      trigger_error("APC must be enabled to use APCIterator", E_USER_ERROR);
+      trigger_error("APC must be enabled to use APCIterator", E_ERROR);
     }
 
     if ($chunk_size < 0) {
       trigger_error("APCIterator chunk size must be 0 or greater.", 
-                    E_USER_ERROR);
+                    E_ERROR);
     }
     if ($format > APC_ITER_ALL) {
-      trigger_error("APCIterator format is invalid.", E_USER_ERROR);
+      trigger_error("APCIterator format is invalid.", E_ERROR);
     }
 
     if ($format & (
@@ -71,12 +47,12 @@ class APCIterator implements Iterator{
       trigger_error(
         "Format values FILENAME, DEVICE, INODE, MD5, NUM_HITS, MTIME,".
         " CTIME, DTIME, ATIME, REFCOUNT not supported yet.",
-        E_USER_NOTICE
+        E_NOTICE
       );
     }
 
     if ($list != APC_LIST_ACTIVE && $list != APC_LIST_DELETED) {
-        trigger_error("APCIterator invalid list type.", E_USER_WARNING);
+        trigger_error("APCIterator invalid list type.", E_WARNING);
         return;
     }
     if (strcasecmp($cache, 'user') === 0) {

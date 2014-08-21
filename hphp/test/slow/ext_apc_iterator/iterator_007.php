@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
+
 class foobar extends APCIterator {
   public function __construct() {}
 }

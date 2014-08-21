@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
 
 $vals = array();
 $vals2 = array();

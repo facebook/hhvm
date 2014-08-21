@@ -187,6 +187,7 @@ interface ConstVector<Tv> extends ConstCollection<Tv>,
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
   public function lastKey(): ?int;
+  public function linearSearch(Tv $search_value): int;
 }
 
 interface MutableVector<Tv> extends ConstVector<Tv>,
@@ -212,6 +213,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
   public function lastKey(): ?int;
+  public function linearSearch(Tv $search_value): int;
 }
 
 interface ConstMap<Tk, Tv> extends ConstCollection<Pair<Tk, Tv>>,

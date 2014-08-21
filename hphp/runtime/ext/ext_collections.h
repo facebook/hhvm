@@ -1988,6 +1988,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Array t_tovaluesarray();
   DECLARE_KEYEDITERABLE_MATERIALIZE_METHODS();
   Object t_getiterator();
+  int64_t t_linearsearch(const Variant& search_value);
   Object t_map(const Variant& callback);
   Object t_mapwithkey(const Variant& callback);
   Object t_filter(const Variant& callback);

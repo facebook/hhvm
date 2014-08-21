@@ -4451,6 +4451,21 @@
                     ]
                 },
                 {
+                    "name": "linearSearch",
+                    "flags": [
+                    ],
+                    "desc": "Returns index of the specified value if it is present, -1 otherwise.",
+                    "return": {
+                        "type": "Int64"
+                    },
+                    "args": [
+                        {
+                            "name": "search_value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
                     "name": "slice",
                     "flags": [
                     ],

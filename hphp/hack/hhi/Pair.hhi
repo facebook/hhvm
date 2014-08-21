@@ -28,7 +28,7 @@
  * Pairs only support integer keys. If a non-integer key is used, an
  * exception will be thrown.
  *
- * Pairs suoport "$m[$k]" style syntax for getting and setting values by
+ * Pairs support "$m[$k]" style syntax for getting and setting values by
  * key. Pairs also support "isset($m[$k])" and "empty($m[$k])" syntax, and
  * they provide similar semantics as arrays. Elements can be added to a Pair
  * using "$m[] = .." syntax.
@@ -84,6 +84,7 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
   public function firstKey(): int;
   public function lastValue(): Tv2;
   public function lastKey(): int;
+  public function linearSearch(mixed $search_value): int;
 
   /**
    * Returns true if the Pair is empty, false otherwise.

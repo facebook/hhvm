@@ -5233,6 +5233,16 @@ bool c_Pair::t_containskey(const Variant& key) {
   throwBadKeyType();
 }
 
+int64_t c_Pair::t_linearsearch(const Variant& value) {
+  assert(isFullyConstructed());
+  for (uint64_t i = 0; i < 2; ++i) {
+    if (same(value, tvAsCVarRef(&getElms()[i]))) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 Array c_Pair::t_toarray() {
   assert(isFullyConstructed());
   return toArrayImpl();

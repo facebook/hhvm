@@ -132,13 +132,15 @@ and sub_type env ty_super ty_sub =
   | (_, (Tapply (
       (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
             "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
-            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase") as name_super)),
+            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase" |
+            "\\DataTypeImplProvider") as name_super)),
       [ty_super]
     ))),
     (_, (Tapply (
       (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
             "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
-            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase") as name_sub)),
+            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase" |
+            "\\DataTypeImplProvider") as name_sub)),
       [ty_sub]
     )))
     when name_super = name_sub ->
@@ -158,6 +160,18 @@ and sub_type env ty_super ty_sub =
     when name_super = name_sub ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
+  | (_, (Tapply (
+      (_, (("\\DataType") as name_super)),
+      [t1_super; t2_super; t3_super]
+    ))),
+    (_, (Tapply (
+      (_, (("\\DataType") as name_sub)),
+      [t1_sub; t2_sub; t3_sub]
+    )))
+    when name_super = name_sub ->
+      let env = sub_type env t1_super t1_sub in
+      let env = sub_type env t2_super t2_sub in
+      sub_type env t3_super t3_sub
   | (_, (Tapply ((_, "\\Generator"), [tk_super; tv_super; ts_super]))),
     (_, (Tapply ((_, "\\Generator"), [tk_sub; tv_sub; ts_sub]))) ->
       (* Currently, we are only covariant in the type of the value yielded. I

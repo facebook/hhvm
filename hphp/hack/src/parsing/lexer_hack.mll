@@ -503,22 +503,6 @@ and header = parse
   | "<?php"                     { `php_mode }
   | _                           { `error }
 
-and ignore_body = parse
-  | eof                { Teof }
-  | ws+                { ignore_body lexbuf }
-  | '\n'               { Lexing.new_line lexbuf; ignore_body lexbuf }
-  | "//"               { line_comment lexbuf; ignore_body lexbuf }
-  | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
-                         ignore_body lexbuf }
-  | '{'                { Tlcb }
-  | '}'                { Trcb }
-  | '''                { Tquote }
-  | '\"'               { Tdquote }
-  | "<<<"              { Theredoc }
-  | '<'                { Tlt }
-  | word               { Tword }
-  | _                  { ignore_body lexbuf }
-
 and next_newline_or_close_cb = parse
   | eof                { () }
   | '\n'               { Lexing.new_line lexbuf }

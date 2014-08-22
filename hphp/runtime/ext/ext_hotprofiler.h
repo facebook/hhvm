@@ -115,9 +115,17 @@ enum Flag {
   MeasureXhprofDisable  = 0x20,
   Unused                = 0x40,
   TrackMalloc           = 0x80,
+
   // Allows profiling of multiple threads at the same time with TraceProfiler.
   // Requires a lot of memory.
   IHaveInfiniteMemory   = 0x100,
+
+  // A very slow profiler of function arguments and results
+  // to look for memoization opportunities.
+  Memo                  = 0x200,
+
+  // A hot profiler supplied by a call to HotProfiler::setExternalProfiler.
+  External              = 0x400,
 };
 
 /**
@@ -244,6 +252,7 @@ enum class ProfilerKind {
   Trace        = 3,
   Memo         = 4,
   XDebug       = 5,
+  External     = 6,
   Sample       = 620002, // Rockfort's zip code
 };
 
@@ -251,7 +260,7 @@ struct ProfilerFactory final : RequestEventHandler {
   static bool EnableNetworkProfiler;
 
 public:
-  ProfilerFactory() : m_profiler(nullptr) {
+  ProfilerFactory() : m_profiler(nullptr), m_external_profiler(nullptr) {
   }
 
   ~ProfilerFactory() {
@@ -289,8 +298,20 @@ public:
     m_artificialFrameNames.append(name);
   }
 
+  /**
+   * Registers a Profiler to use when ProfilerKind::External is used.
+   */
+  void setExternalProfiler(Profiler *p) {
+    delete(m_external_profiler);
+    m_external_profiler = p;
+  }
+  Profiler *getExternalProfiler() {
+    return m_external_profiler;
+  }
+
 private:
   Profiler *m_profiler;
+  Profiler *m_external_profiler;
   Array m_artificialFrameNames;
 };
 

@@ -649,6 +649,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_EXTENDS
 %token T_IMPLEMENTS
 %token T_OBJECT_OPERATOR
+%token T_NULLSAFE_OBJECT_OPERATOR
 %token T_DOUBLE_ARROW
 %token T_LIST
 %token T_ARRAY
@@ -2554,15 +2555,19 @@ optional_user_attributes:
   |                                    { $$.reset();}
 ;
 
-property_access:
-    property_access_without_variables  { $$ = $1;}
-  | T_OBJECT_OPERATOR
-    variable_without_objects           { $$ = $2;}
+object_operator:
+    T_OBJECT_OPERATOR                  { $$ = $1; $$ = 0;}
+  | T_NULLSAFE_OBJECT_OPERATOR         { $$ = $1; $$ = 1;}
 ;
 
-property_access_without_variables:
-    T_OBJECT_OPERATOR ident            { $$ = $2;}
-  | T_OBJECT_OPERATOR '{' expr '}'     { $$ = $3;}
+object_member_name_no_variables:
+    ident                              { $$ = $1;}
+  | '{' expr '}'                       { $$ = $2;}
+;
+
+object_member_name:
+    object_member_name_no_variables    { $$ = $1;}
+  | variable_no_objects                { $$ = $1;}
 ;
 
 array_access:
@@ -2584,17 +2589,19 @@ dimmable_variable_no_calls_access:
 ;
 
 variable:
-    variable_without_objects           { $$ = $1;}
+    variable_no_objects                { $$ = $1;}
   | simple_function_call               { $$ = $1;}
   | object_method_call                 { $$ = $1;}
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
-  | variable property_access           { _p->onObjectProperty($$,$1,$2);}
+  | variable object_operator
+    object_member_name              { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
-    property_access                    { _p->onObjectProperty($$,$2,$4);}
+    object_operator
+    object_member_name              { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | static_class_name
     T_DOUBLE_COLON
-    variable_without_objects           { _p->onStaticMember($$,$1,$3);}
+    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
@@ -2605,43 +2612,30 @@ dimmable_variable:
   | object_method_call                 { $$ = $1;}
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
-  | variable
-    property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
+  | variable object_operator
+    object_member_name_no_variables  { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
-    property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
+    object_operator
+    object_member_name_no_variables  { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
 callable_variable:
-    variable_without_objects           { $$ = $1;}
+    variable_no_objects                { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
 object_method_call:
-    variable T_OBJECT_OPERATOR
-    ident hh_typeargs_opt '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$6);}
-  | variable T_OBJECT_OPERATOR
-    variable_without_objects '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$3,$5);}
-  | variable T_OBJECT_OPERATOR
-    '{' expr '}' '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$1,$4,$7);}
+    variable object_operator
+    object_member_name hh_typeargs_opt '('
+    function_call_parameter_list ')' { _p->onObjectMethodCall($$,$1,$2.num(),$3,$6);}
   | '(' expr_with_parens ')'
-    T_OBJECT_OPERATOR
-    ident hh_typeargs_opt '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$8);}
-  | '(' expr_with_parens ')'
-    T_OBJECT_OPERATOR
-    variable_without_objects '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$5,$7);}
-  | '(' expr_with_parens ')'
-    T_OBJECT_OPERATOR
-    '{' expr '}' '('
-    function_call_parameter_list ')'   { _p->onObjectMethodCall($$,$2,$6,$9);}
+    object_operator
+    object_member_name hh_typeargs_opt '('
+    function_call_parameter_list ')' { _p->onObjectMethodCall($$,$2,$4.num(),$5,$8);}
 ;
 
 class_method_call:
@@ -2651,7 +2645,7 @@ class_method_call:
     function_call_parameter_list ')'   { _p->onCall($$,0,$3,$6,&$1);}
   | static_class_name
     T_DOUBLE_COLON
-    variable_without_objects '('
+    variable_no_objects '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
   | static_class_name
     T_DOUBLE_COLON
@@ -2659,7 +2653,7 @@ class_method_call:
     function_call_parameter_list ')'   { _p->onCall($$,1,$4,$7,&$1);}
 ;
 
-variable_without_objects:
+variable_no_objects:
     reference_variable                 { $$ = $1;}
   | simple_indirect_reference
     reference_variable                 { _p->onIndirectRef($$,$1,$2);}
@@ -2686,23 +2680,27 @@ simple_indirect_reference:
 ;
 
 variable_no_calls:
-    variable_without_objects           { $$ = $1;}
+    variable_no_objects                { $$ = $1;}
   | dimmable_variable_no_calls_access  { $$ = $1;}
-  | variable_no_calls property_access  { _p->onObjectProperty($$,$1,$2);}
+  | variable_no_calls
+    object_operator
+    object_member_name              { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
-    property_access                    { _p->onObjectProperty($$,$2,$4);}
+    object_operator
+    object_member_name              { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | static_class_name
     T_DOUBLE_COLON
-    variable_without_objects           { _p->onStaticMember($$,$1,$3);}
+    variable_no_objects                { _p->onStaticMember($$,$1,$3);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
 dimmable_variable_no_calls:
   | dimmable_variable_no_calls_access  { $$ = $1;}
-  | variable_no_calls
-    property_access_without_variables  { _p->onObjectProperty($$,$1,$2);}
+  | variable_no_calls object_operator
+    object_member_name_no_variables    { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
-    property_access_without_variables  { _p->onObjectProperty($$,$2,$4);}
+    object_operator
+    object_member_name_no_variables    { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
@@ -2822,8 +2820,8 @@ encaps_var:
     T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
   | T_VARIABLE '['
     encaps_var_offset ']'              { _p->encapRefDim($$, $1, $3);}
-  | T_VARIABLE T_OBJECT_OPERATOR
-    ident                              { _p->encapObjProp($$, $1, $3);}
+  | T_VARIABLE object_operator
+    ident                              { _p->encapObjProp($$, $1, $2.num(), $3);}
   | T_DOLLAR_OPEN_CURLY_BRACES
     expr '}'                           { _p->onDynamicVariable($$, $2, 1);}
   | T_DOLLAR_OPEN_CURLY_BRACES

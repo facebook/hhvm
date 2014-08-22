@@ -1,0 +1,4 @@
+object(D)#2 (0) {
+}
+
+Fatal error: Value returned from test() must be of type D, null given in %s on line 9

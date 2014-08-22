@@ -57,7 +57,7 @@
 .class Derived extends Base implements(IDunno IDunno2) {
   .method [public] some_junk {
     This
-    FPushObjMethodD 0 "prot_method"
+    FPushObjMethodD 0 "prot_method" NullThrows
     FCall 0
     PopR
 
@@ -138,12 +138,12 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "print_funk"
+  FPushObjMethodD 0 "print_funk" NullThrows 
   FCall 0
   PopR
 
   CGetL $obj
-  FPushObjMethodD 0 "print_defaulted"
+  FPushObjMethodD 0 "print_defaulted" NullThrows
   FCall 0
   PopR
 
@@ -174,22 +174,22 @@
   PopC
 
   CGetL $derived
-  FPushObjMethodD 0 "some_junk"
+  FPushObjMethodD 0 "some_junk" NullThrows
   FCall 0
   PopR
 
   CGetL $base
-  FPushObjMethodD 0 "overriden"
+  FPushObjMethodD 0 "overriden" NullThrows
   FCall 0
   PopR
 
   CGetL $derived
-  FPushObjMethodD 0 "overriden"
+  FPushObjMethodD 0 "overriden" NullThrows
   FCall 0
   PopR
 
   CGetL $derived
-  FPushObjMethodD 0 "abs_method"
+  FPushObjMethodD 0 "abs_method" NullThrows
   FCall 0
   PopR
 

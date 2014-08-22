@@ -448,8 +448,9 @@ OPCODES
   void asyncSuspendE(IOP_ARGS, int32_t iters);
   void asyncSuspendR(IOP_ARGS);
   void ret(IOP_ARGS);
-  void fPushObjMethodImpl(
-      Class* cls, StringData* name, ObjectData* obj, int numArgs);
+  void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
+                          int numArgs);
+  void fPushNullObjMethod(int numArgs);
   ActRec* fPushFuncImpl(const Func* func, int numArgs);
 
 public:

@@ -663,8 +663,9 @@ void group(ISS& env,
   auto const obj = locAsCell(env, cgetl.loc1);
   impl(env, cgetl, fpush);
   if (!is_specialized_obj(obj)) {
-    setLoc(env, cgetl.loc1, TObj);
-  } else if (is_opt(obj)) {
+    setLoc(env, cgetl.loc1,
+           fpush.subop == ObjMethodOp::NullThrows ? TObj : TOptObj);
+  } else if (is_opt(obj) && fpush.subop == ObjMethodOp::NullThrows) {
     setLoc(env, cgetl.loc1, unopt(obj));
   }
 }
@@ -1254,7 +1255,9 @@ void in(ISS& env, const bc::FPushFuncU& op) {
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto t1 = popC(env);
-  if (is_opt(t1)) t1 = unopt(t1);
+  if (is_opt(t1) && op.subop == ObjMethodOp::NullThrows) {
+    t1 = unopt(t1);
+  }
   auto const clsTy = t1.strictSubtypeOf(TObj) ? objcls(t1) : TCls;
   auto const rcls = [&]() -> folly::Optional<res::Class> {
     if (clsTy.strictSubtypeOf(TCls)) return dcls_of(clsTy).cls;
@@ -1272,8 +1275,11 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfStaticString) {
-    return reduce(env, bc::PopC {},
-                       bc::FPushObjMethodD { op.arg1, v1->m_data.pstr });
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop }
+    );
   }
   popC(env);
   popC(env);

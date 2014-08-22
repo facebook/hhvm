@@ -1134,6 +1134,12 @@ static const char* OODeclExistsOp_names[] = {
 #undef OO_DECL_EXISTS_OP
 };
 
+static const char* ObjMethodOp_names[] = {
+#define OBJMETHOD_OP(x) #x,
+  OBJMETHOD_OPS
+#undef OBJMETHOD_OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1182,6 +1188,7 @@ X(IncDecOp)
 X(BareThisOp)
 X(SilenceOp)
 X(OODeclExistsOp)
+X(ObjMethodOp)
 
 #undef X
 

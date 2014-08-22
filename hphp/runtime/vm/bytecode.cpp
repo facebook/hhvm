@@ -5668,9 +5668,18 @@ void ExecutionContext::fPushObjMethodImpl(
   if (res == LookupResult::MagicCallFound) {
     ar->setInvName(name);
   } else {
-    ar->setVarEnv(NULL);
+    ar->setVarEnv(nullptr);
     decRefStr(name);
   }
+}
+
+void ExecutionContext::fPushNullObjMethod(int numArgs) {
+  assert(SystemLib::s_nullFunc);
+  ActRec* ar = vmStack().allocA();
+  ar->m_func = SystemLib::s_nullFunc;
+  ar->setThis(nullptr);
+  ar->initNumArgs(numArgs);
+  ar->setVarEnv(nullptr);
 }
 
 static void throw_call_non_object(const char* methodName,
@@ -5689,14 +5698,21 @@ static void throw_call_non_object(const char* methodName,
 OPTBLD_INLINE void ExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
+  DECODE_OA(ObjMethodOp, op);
   Cell* c1 = vmStack().topC(); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
   Cell* c2 = vmStack().indC(1); // Object.
   if (c2->m_type != KindOfObject) {
-    throw_call_non_object(c1->m_data.pstr->data(),
-                          getDataTypeString(c2->m_type).get()->data());
+    if (UNLIKELY(op == ObjMethodOp::NullThrows || !IS_NULL_TYPE(c2->m_type))) {
+      throw_call_non_object(c1->m_data.pstr->data(),
+                            getDataTypeString(c2->m_type).get()->data());
+    }
+    vmStack().popC();
+    vmStack().popC();
+    fPushNullObjMethod(numArgs);
+    return;
   }
   ObjectData* obj = c2->m_data.pobj;
   Class* cls = obj->getVMClass();
@@ -5710,10 +5726,16 @@ OPTBLD_INLINE void ExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(name);
+  DECODE_OA(ObjMethodOp, op);
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject) {
-    throw_call_non_object(name->data(),
-                          getDataTypeString(c1->m_type).get()->data());
+    if (UNLIKELY(op == ObjMethodOp::NullThrows || !IS_NULL_TYPE(c1->m_type))) {
+      throw_call_non_object(name->data(),
+                            getDataTypeString(c1->m_type).get()->data());
+    }
+    vmStack().popC();
+    fPushNullObjMethod(numArgs);
+    return;
   }
   ObjectData* obj = c1->m_data.pobj;
   Class* cls = obj->getVMClass();

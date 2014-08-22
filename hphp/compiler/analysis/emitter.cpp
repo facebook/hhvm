@@ -4364,7 +4364,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             // the case.
             StringData* nameLiteral = makeStaticString(methStr);
             fpiStart = m_ue.bcPos();
-            e.FPushObjMethodD(numParams, nameLiteral);
+            e.FPushObjMethodD(
+              numParams,
+              nameLiteral,
+              om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+            );
             useDirectForm = true;
           }
         }
@@ -4374,7 +4378,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           visit(methName);
           emitConvertToCell(e);
           fpiStart = m_ue.bcPos();
-          e.FPushObjMethod(numParams);
+          e.FPushObjMethod(
+            numParams,
+            om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+          );
         }
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
@@ -4796,7 +4803,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         emitConvertToCell(e);
         auto fpiStart = m_ue.bcPos();
         StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(numArgs+1, executeQuery);
+        e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           e.String(query->getQueryString());
@@ -4839,7 +4846,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
   auto const nameLit = makeStaticString(name);
   auto const fpiStart = m_ue.bcPos();
-  e.FPushObjMethodD(0, nameLit);
+  e.FPushObjMethodD(0, nameLit, ObjMethodOp::NullThrows);
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
   }
@@ -6854,7 +6861,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   } else {
     e.This();
     fpiStart = m_ue.bcPos();
-    e.FPushObjMethodD(numParams, methName);
+    e.FPushObjMethodD(numParams, methName, ObjMethodOp::NullThrows);
   }
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);

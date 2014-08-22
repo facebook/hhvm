@@ -3041,7 +3041,8 @@ void HhbcTranslator::fpushObjMethodUnknown(SSATmp* obj,
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
-                                         int32_t methodNameStrId) {
+                                         int32_t methodNameStrId,
+                                         unsigned char subop) {
   auto const obj = popC();
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
   auto const methodName = lookupStringId(methodNameStrId);

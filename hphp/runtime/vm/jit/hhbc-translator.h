@@ -322,7 +322,8 @@ public:
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
   void emitFPushObjMethodD(int32_t numParams,
-                           int32_t methodNameStrId);
+                           int32_t methodNameStrId,
+                           unsigned char subop);
   void emitFPushObjMethodCommon(SSATmp* obj,
                                 const StringData* methodName,
                                 int32_t numParams,

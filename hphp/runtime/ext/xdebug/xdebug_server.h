@@ -88,11 +88,7 @@ public:
 
   // Assumes an xdebug server is attached to the thread and attempts to detach
   // it.
-  static void detach() {
-    assert(XDEBUG_GLOBAL(Server) != nullptr);
-    delete XDEBUG_GLOBAL(Server);
-    XDEBUG_GLOBAL(Server) = nullptr;
-  }
+  static void detach();
 
 /////////////////////////////////////////////////////////////////////////////
 // Error Codes
@@ -134,13 +130,6 @@ public:
 // Dbgp
 
 public:
-  // adds the status of the server to the given node
-  void addStatus(xdebug_xml_node& node);
-
-  // Adds the passed command to the given node
-  void addCommand(xdebug_xml_node& node, const XDebugCommand& cmd);
-
-private:
   // Called in construction. Helper for initializing the dbgp protocol with the
   // client. Returns true on success. False on failure.
   bool initDbgp();
@@ -148,6 +137,13 @@ private:
   // Called on destruction. Helper for shutting down the dbgp protocol
   void deinitDbgp();
 
+  // adds the status of the server to the given node
+  void addStatus(xdebug_xml_node& node);
+
+  // Adds the passed command to the given node
+  void addCommand(xdebug_xml_node& node, const XDebugCommand& cmd);
+
+private:
   // Adds the xdebug xmlns to the node
   void addXmnls(xdebug_xml_node& node);
 
@@ -172,6 +168,12 @@ public:
   // Grabs the appropriate breakpoint info from the passed breakpoint and calls
   // breakpoint(filename, exception, message, line)
   bool breakpoint(const XDebugBreakpoint& bp, const Variant& message);
+
+  // Remote debugging options. The defaults are taken from xdebug.
+  int m_maxChildren = 32;    // max number of array or object children
+  int m_maxData = 1024;      // max variable data (string length)
+  int m_maxDepth = 1;        // max depth of arrays/objects
+  bool m_showHidden = false; // whether hidden members are shown
 
 private:
   // Blocks waiting for commands from the client. Returns false if there was

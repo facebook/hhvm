@@ -20,40 +20,73 @@
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/ext/url/ext_url.h"
+#include "hphp/system/constants.h"
 
 namespace HPHP {
 
-///////////////////////////////////////////////////////////////////////////////
-// Helpers
+////////////////////////////////////////////////////////////////////////////////
+// Commands
 
-// Command strings
-static const StaticString
-  s_CMD_STATUS("status"),
-  s_CMD_FEATURE_GET("feature_get"),
-  s_CMD_FEATURE_SET("feature_set"),
-  s_CMD_RUN("run"),
-  s_CMD_STEP_INTO("step_into"),
-  s_CMD_STEP_OUT("step_out"),
-  s_CMD_STEP_OVER("step_over"),
-  s_CMD_STOP("stop"),
-  s_CMD_DETACH("detach"),
-  s_CMD_BREAKPOINT_SET("breakpoint_set"),
-  s_CMD_BREAKPOINT_GET("breakpoint_get"),
-  s_CMD_BREAKPOINT_UPDATE("breakpoint_update"),
-  s_CMD_BREAKPOINT_REMOVE("breakpoint_remove"),
-  s_CMD_STACK_DEPTH("stack_depth"),
-  s_CMD_STACK_GET("stack_get"),
-  s_CMD_CONTEXT_NAMES("context_names"),
-  s_CMD_CONTEXT_GET("context_get"),
-  s_CMD_PROPERTY_GET("property_get"),
-  s_CMD_PROPERTY_SET("property_set"),
-  s_CMD_PROPERTY_VALUE("property_value"),
-  s_CMD_SOURCE("source"),
-  s_CMD_STDOUT("stdout"),
-  s_CMD_STDERR("stderr"),
-  s_CMD_EVAL("eval"),
-  s_CMD_PROFILER_NAME_GET("xcmd_profiler_name_get"),
-  s_CMD_GET_EXECUTABLE_LINES("xcmd_get_executable_lines");
+// COMMAND(NAME, CLASS)
+//  NAME is the command name
+//  CLASS is the corresponding class
+#define COMMANDS \
+  COMMAND("status", StatusCmd)                                                 \
+  COMMAND("feature_get", FeatureGetCmd)                                        \
+  COMMAND("feature_set", FeatureSetCmd)                                        \
+  COMMAND("run", RunCmd)                                                       \
+  COMMAND("step_into", StepIntoCmd)                                            \
+  COMMAND("step_out", StepOutCmd)                                              \
+  COMMAND("step_over", StepOverCmd)                                            \
+  COMMAND("stop", StopCmd)                                                     \
+  COMMAND("detach", DetachCmd)                                                 \
+  COMMAND("breakpoint_set", BreakpointSetCmd)                                  \
+  COMMAND("breakpoint_get", BreakpointGetCmd)                                  \
+  COMMAND("breakpoint_update", BreakpointUpdateCmd)                            \
+  COMMAND("breakpoint_remove", BreakpointRemoveCmd)                            \
+  COMMAND("stack_depth", StackDepthCmd)                                        \
+  COMMAND("stack_get", StackGetCmd)                                            \
+  COMMAND("context_names", ContextNamesCmd)                                    \
+  COMMAND("context_get", ContextGetCmd)                                        \
+  COMMAND("property_get", PropertyGetCmd)                                      \
+  COMMAND("property_set", PropertySetCmd)                                      \
+  COMMAND("property_value", PropertyValueCmd)                                  \
+  COMMAND("source", SourceCmd)                                                 \
+  COMMAND("stdout", StdoutCmd)                                                 \
+  COMMAND("stderr", StderrCmd)                                                 \
+  COMMAND("eval", EvalCmd)                                                     \
+  COMMAND("xcmd_profiler_name_get", ProfilerNameGetCmd)                        \
+
+////////////////////////////////////////////////////////////////////////////////
+// Features
+// See http://xdebug.org/docs-dbgp.php#feature-names for a complete list
+
+// FEATURE(NAME, SUPPORTED, VALUE, FREE)
+//  NAME is the feature name
+//  SUPPORTED is whether or not the feature is supported
+//  VALUE is the value to add to the xml node
+//  FREE is whether or not the value should be freed
+#define FEATURES                                                               \
+  FEATURE("breakpoint_languages", "0", nullptr, false)                         \
+  FEATURE("breakpoint_types", "1",                                             \
+          "line conditional call return exception", false)                     \
+  FEATURE("data_encoding", "0", nullptr, false)                                \
+  FEATURE("encoding", "1", "iso-8859-1",  false)                               \
+  FEATURE("language_name", "1", "PHP", false)                                  \
+  FEATURE("language_supports_threads", "1", "0", false)                        \
+  FEATURE("language_version", "1", xdstrdup(k_HHVM_VERSION.c_str()), true)     \
+  FEATURE("max_children", "1",                                                 \
+          xdebug_sprintf("%d", m_server.m_maxChildren), true)                  \
+  FEATURE("max_data", "1", xdebug_sprintf("%d", m_server.m_maxData), true)     \
+  FEATURE("max_depth", "1", xdebug_sprintf("%d", m_server.m_maxDepth), true)   \
+  FEATURE("protocol_version", "1", DBGP_VERSION, false)                        \
+  FEATURE("supported_encodings", "1", "iso-8859-1", false)                     \
+  FEATURE("supports_async", "1", "0", false)                                   \
+  FEATURE("supports_postmortem", "1", "1", false)                              \
+  FEATURE("show_hidden", "1",                                                  \
+          xdebug_sprintf("%d", m_server.m_showHidden), true)                   \
+
+////////////////////////////////////////////////////////////////////////////////
 
 // These are used a lot, prevent unnecessary verbosity
 typedef XDebugServer::Status Status;
@@ -77,6 +110,124 @@ public:
     m_server.addStatus(xml);
     return false;
   }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// feature_get -i # -n NAME
+
+class FeatureGetCmd : public XDebugCommand {
+public:
+  FeatureGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {
+    // Feature name is required
+    if (args['n'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_feature = args['n'].toString().toCppString();
+  }
+
+  ~FeatureGetCmd() {}
+
+  bool isValidInStatus(Status status) const override {
+    return true;
+  }
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    // Set to true once we have a match. Const cast is needed due to xdebug
+    // xml api.
+    bool match = false;
+    xdebug_xml_add_attribute(&xml, "feature_name",
+                             const_cast<char*>(m_feature.c_str()));
+
+    // Check against the defined features
+    #define FEATURE(name, supported, val, free)                                \
+      if (!match && m_feature == name) {                                       \
+        if (val != nullptr) {                                                  \
+          xdebug_xml_add_text(&xml, val, free);                                \
+        }                                                                      \
+        xdebug_xml_add_attribute(&xml, "supported", supported);                \
+        match = true;                                                          \
+      }
+    FEATURES
+    #undef FEATURE
+
+    // Check against the commands
+    #define COMMAND(name, className)                                           \
+      if (!match && m_feature == name) {                                       \
+        xdebug_xml_add_text(&xml, "1", 0);                                     \
+        xdebug_xml_add_attribute(&xml, "supported", "1");                      \
+        match = true;                                                          \
+      }
+    COMMANDS
+    #undef COMMAND
+
+    // Unknown feature name
+    if (!match) {
+      xdebug_xml_add_text(&xml, "0", 0);
+      xdebug_xml_add_attribute(&xml, "supported", "0");
+    }
+    return false;
+  }
+
+private:
+  string m_feature;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// feature_set -i # -n NAME -v VALUE
+
+class FeatureSetCmd : public XDebugCommand {
+public:
+  FeatureSetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {
+    // Feature name is required
+    if (args['n'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_feature = args['n'].toString().toCppString();
+
+    // Value is required
+    if (args['v'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_value = args['v'].toString().toCppString();
+  }
+
+  ~FeatureSetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    const char* value_str = m_value.c_str();
+
+    // These could be thrown into a macro, but there aren't very many cases
+    if (m_feature == "max_children") {
+      m_server.m_maxChildren = strtol(value_str, nullptr, 10);
+    } else if (m_feature == "max_data") {
+      m_server.m_maxData = strtol(value_str, nullptr, 10);
+    } else if (m_feature == "max_depth") {
+      m_server.m_maxDepth = strtol(value_str, nullptr, 10);
+    } else if (m_feature == "show_hidden") {
+      m_server.m_showHidden = strtol(value_str, nullptr, 10);
+    } else if (m_feature == "multiple_sessions") {
+      // php5 xdebug doesn't do anything here with this value, but it is doesn't
+      // throw an error, either
+    } else if (m_feature == "encoding") {
+      if (m_value != "iso-8859-1") {
+        throw XDebugServer::ERROR_ENCODING_NOT_SUPPORTED;
+      }
+    } else {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+
+    // Const cast is needed due to xdebug xml api.
+    xdebug_xml_add_attribute(&xml, "feature",
+                             const_cast<char*>(m_feature.c_str()));
+    xdebug_xml_add_attribute(&xml, "success", "1");
+    return false;
+  }
+
+private:
+  string m_feature;
+  string m_value;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,6 +352,36 @@ public:
   bool handleImpl(xdebug_xml_node& xml) const override {
     phpDebuggerNext();
     return true;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// stop -i #
+// TODO(#4489053) Implement
+
+class StopCmd : public XDebugCommand {
+public:
+  StopCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StopCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// detach -i #
+// TODO(#4489053) Implement
+
+class DetachCmd : public XDebugCommand {
+public:
+  DetachCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~DetachCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
 
@@ -366,8 +547,236 @@ public:
   }
 
 private:
-  // Breakpoint manipulated by addopt
   XDebugBreakpoint m_breakpoint;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// breakpoint_get -i #
+// TODO(#4489053) Implement
+
+class BreakpointGetCmd : public XDebugCommand {
+public:
+  BreakpointGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~BreakpointGetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// breakpoint_update -i #
+// TODO(#4489053) Implement
+
+class BreakpointUpdateCmd : public XDebugCommand {
+public:
+  BreakpointUpdateCmd(XDebugServer& server,
+                      const String& cmd,
+                      const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~BreakpointUpdateCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// breakpoint_remove -i #
+// TODO(#4489053) Implement
+
+class BreakpointRemoveCmd : public XDebugCommand {
+public:
+  BreakpointRemoveCmd(XDebugServer& server,
+                      const String& cmd,
+                      const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~BreakpointRemoveCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// stack_depth -i #
+// TODO(#4489053) Implement
+
+class StackDepthCmd : public XDebugCommand {
+public:
+  StackDepthCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StackDepthCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// stack_get -i #
+// TODO(#4489053) Implement
+
+class StackGetCmd : public XDebugCommand {
+public:
+  StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StackGetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// context_names -i #
+// TODO(#4489053) Implement
+
+class ContextNamesCmd : public XDebugCommand {
+public:
+  ContextNamesCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~ContextNamesCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// context_get -i #
+// TODO(#4489053) Implement
+
+class ContextGetCmd : public XDebugCommand {
+public:
+  ContextGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~ContextGetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// property_get -i #
+// TODO(#4489053) Implement
+
+class PropertyGetCmd : public XDebugCommand {
+public:
+  PropertyGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~PropertyGetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// property_set -i #
+// TODO(#4489053) Implement
+
+class PropertySetCmd : public XDebugCommand {
+public:
+  PropertySetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~PropertySetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// property_value -i #
+// TODO(#4489053) Implement
+
+class PropertyValueCmd : public XDebugCommand {
+public:
+  PropertyValueCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~PropertyValueCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// source -i #
+// TODO(#4489053) Implement
+
+class SourceCmd : public XDebugCommand {
+public:
+  SourceCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~SourceCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// stdout -i #
+// TODO(#4489053) Implement
+
+class StdoutCmd : public XDebugCommand {
+public:
+  StdoutCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StdoutCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// stderr -i #
+// TODO(#4489053) Implement
+
+class StderrCmd : public XDebugCommand {
+public:
+  StderrCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~StderrCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// eval -i #
+// TODO(#4489053) Implement
+
+class EvalCmd : public XDebugCommand {
+public:
+  EvalCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~EvalCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// xcmd_profiler_name_get -i #
+// TODO(#4489053) Implement
+
+class ProfilerNameGetCmd : public XDebugCommand {
+public:
+  ProfilerNameGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~ProfilerNameGetCmd() {}
+
+  bool handleImpl(xdebug_xml_node& xml) const override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -392,20 +801,22 @@ bool XDebugCommand::handle(xdebug_xml_node& response) const {
 const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
                                                const String& cmdStr,
                                                const Array& args) {
+  // Match will be set true once there is a match.
+  bool match = false;
+  string cmd_cpp = cmdStr.toCppString();
+
+  // Check each command
   XDebugCommand* cmd;
-  if (cmdStr == s_CMD_STATUS) {
-    cmd = new StatusCmd(server, cmdStr, args);
-  } else if (cmdStr == s_CMD_RUN) {
-    cmd = new RunCmd(server, cmdStr, args);
-  } else if (cmdStr == s_CMD_BREAKPOINT_SET) {
-    cmd = new BreakpointSetCmd(server, cmdStr, args);
-  } else if (cmdStr == s_CMD_STEP_INTO) {
-    cmd = new StepIntoCmd(server, cmdStr, args);
-  } else if (cmdStr == s_CMD_STEP_OUT) {
-    cmd = new StepOutCmd(server, cmdStr, args);
-  } else if (cmdStr == s_CMD_STEP_OVER) {
-    cmd = new StepOverCmd(server, cmdStr, args);
-  } else {
+  #define COMMAND(name, className)                                             \
+    if (!match && cmd_cpp == name) {                                           \
+      cmd = new className(server, cmdStr, args);                               \
+      match = true;                                                            \
+    }
+  COMMANDS
+  #undef COMMAND
+
+  // php5 xdebug throws an unimplemented error when no valid match is found
+  if (!match) {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 

@@ -195,11 +195,6 @@ XDebugServer::XDebugServer(Mode mode) : m_mode(mode) {
         XDEBUG_GLOBAL(RemoteHandler).c_str());
     goto failure;
   }
-
-  // Try to initialize dbgp
-  if (!initDbgp()) {
-    goto failure;
-  }
   return;
 
 // Failure cleanup. A goto is used to prevent duplication
@@ -211,7 +206,6 @@ failure:
 }
 
 XDebugServer::~XDebugServer() {
-  deinitDbgp();
   destroySocket();
   closeLog();
 }
@@ -383,10 +377,20 @@ void XDebugServer::attach(Mode mode) {
   assert(XDEBUG_GLOBAL(Server) == nullptr);
   try {
     XDEBUG_GLOBAL(Server) = new XDebugServer(mode);
+    if (!XDEBUG_GLOBAL(Server)->initDbgp()) {
+      detach();
+    }
   } catch (...) {
     raise_warning("Could not start xdebug server. Check the remote debugging "
                   "log for details");
   }
+}
+
+void XDebugServer::detach() {
+  assert(XDEBUG_GLOBAL(Server) != nullptr);
+  XDEBUG_GLOBAL(Server)->deinitDbgp();
+  delete XDEBUG_GLOBAL(Server);
+  XDEBUG_GLOBAL(Server) = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

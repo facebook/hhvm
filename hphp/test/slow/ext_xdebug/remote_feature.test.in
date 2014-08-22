@@ -1,0 +1,47 @@
+feature_set -i 0 -n max_children -v 100
+feature_set -i 0 -n max_data -v 100
+feature_set -i 0 -n max_depth -v 100
+feature_set -i 0 -n show_hidden -v 1
+feature_set -i 0 -n multiple_sessions -v 1
+feature_get -i 0 -n breakpoint_languages
+feature_get -i 0 -n breakpoint_types
+feature_get -i 0 -n data_encoding
+feature_get -i 0 -n encoding
+feature_get -i 0 -n language_name
+feature_get -i 0 -n language_supports_threads
+feature_get -i 0 -n language_version
+feature_get -i 0 -n max_children
+feature_get -i 0 -n max_data
+feature_get -i 0 -n max_depth
+feature_get -i 0 -n protocol_version
+feature_get -i 0 -n supported_encodings
+feature_get -i 0 -n supports_async
+feature_get -i 0 -n supports_postmortem
+feature_get -i 0 -n show_hidden
+feature_get -i 0 -n status
+feature_get -i 0 -n feature_get
+feature_get -i 0 -n feature_set
+feature_get -i 0 -n run
+feature_get -i 0 -n step_into
+feature_get -i 0 -n step_out
+feature_get -i 0 -n step_over
+feature_get -i 0 -n stop
+feature_get -i 0 -n detach
+feature_get -i 0 -n breakpoint_set
+feature_get -i 0 -n breakpoint_get
+feature_get -i 0 -n breakpoint_update
+feature_get -i 0 -n breakpoint_remove
+feature_get -i 0 -n stack_depth
+feature_get -i 0 -n stack_get
+feature_get -i 0 -n context_names
+feature_get -i 0 -n context_get
+feature_get -i 0 -n property_get
+feature_get -i 0 -n property_set
+feature_get -i 0 -n property_value
+feature_get -i 0 -n source
+feature_get -i 0 -n stdout
+feature_get -i 0 -n stderr
+feature_get -i 0 -n eval
+feature_get -i 0 -n xcmd_profiler_name_get
+run -i 0
+run -i 0

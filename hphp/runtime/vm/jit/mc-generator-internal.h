@@ -254,10 +254,6 @@ inline void emitDerefIfVariant(X64::Vout& v, X64::Vreg reg) {
   }
 }
 
-inline void emitDerefIfVariant(X64Assembler &a, PhysReg reg) {
-  emitDerefIfVariant(X64::Vauto().main(a), reg);
-}
-
 // NB: leaves count field unmodified. Does not store to m_data if type
 // is a null type.
 static inline void

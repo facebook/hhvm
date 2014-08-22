@@ -337,7 +337,6 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(copy, Inone, U(s), D(d))\
   O(copy2, Inone, U(s0) U(s1), D(d0) D(d1))\
   O(copyargs, Inone, U(s), D(d))\
-  O(eagersync, I(pc), Un, Dn)\
   O(end, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
@@ -495,7 +494,6 @@ struct contenter { Vreg64 fp, target; };
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
-struct eagersync { const Op* pc; };
 struct end {};
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; };

@@ -137,7 +137,6 @@ private:
   void emit(contenter& i);
   void emit(copy i);
   void emit(copy2& i);
-  void emit(eagersync& i);
   void emit(copyargs& i) { always_assert(false); }
   void emit(end& i) {}
   void emit(ldimm& i);
@@ -597,10 +596,6 @@ void Vgen::emit(unwind& i) {
   // the edges to catch (unwinder) blocks and fall-through blocks.
   catches.push_back({a->frontier(), i.targets[1]});
   emit(jmp{i.targets[0]});
-}
-
-void Vgen::emit(eagersync& i) {
-  emitEagerSyncPoint(*a, i.pc);
 }
 
 // overall emitter

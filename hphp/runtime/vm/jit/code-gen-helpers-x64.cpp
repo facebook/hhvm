@@ -194,10 +194,6 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
   } // endif
 }
 
-void emitAssertFlagsNonNegative(Asm& as) {
-  emitAssertFlagsNonNegative(Vauto().main(as));
-}
-
 void emitAssertFlagsNonNegative(Vout& v) {
   ifThen(v, CC_NGE, [&](Vout& v) { v << ud2{}; });
 }
@@ -208,10 +204,6 @@ void emitAssertRefCount(Vout& v, Vreg base) {
     v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]};
     ifThen(v, CC_NBE, [&](Vout& v) { v << ud2{}; });
   });
-}
-
-void emitAssertRefCount(Asm& as, PhysReg base) {
-  emitAssertRefCount(Vauto().main(as), base);
 }
 
 // Logical register move: ensures the value in src will be in dest
@@ -256,18 +248,10 @@ void emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
                dstReg, sizeof(LowClassPtr));
 }
 
-void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg) {
-  emitLdObjClass(Vauto().main(as), objReg, dstReg);
-}
-
 void emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
   auto t = v.makeReg();
   v << copy{srcReg, t};
   v << decq{t, dstReg};
-}
-
-void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  emitLdClsCctx(Vauto().main(as), srcReg, dstReg);
 }
 
 void emitCall(Asm& a, TCA dest) {
@@ -395,11 +379,6 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
   v = done;
 }
 
-void emitLdLowPtr(Asm& as, MemoryRef mem, PhysReg reg, size_t size) {
-  assert(reg != InvalidReg && reg.isGP());
-  return emitLdLowPtr(Vauto().main(as), mem, reg, size);
-}
-
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
   if (size == 8) {
     v << load{mem, reg};
@@ -430,14 +409,6 @@ void emitCmpClass(Vout& v, const Class* c, Vptr mem) {
   }
 }
 
-void emitCmpClass(Asm& as, const Class* c, MemoryRef mem) {
-  emitCmpClass(Vauto().main(as), c, mem);
-}
-
-void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem) {
-  emitCmpClass(Vauto().main(as), reg, mem);
-}
-
 void emitCmpClass(Vout& v, Vreg reg, Vptr mem) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
@@ -447,10 +418,6 @@ void emitCmpClass(Vout& v, Vreg reg, Vptr mem) {
   } else {
     not_implemented();
   }
-}
-
-void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2) {
-  emitCmpClass(Vauto().main(as), reg1, reg2);
 }
 
 void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {

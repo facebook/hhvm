@@ -60,17 +60,13 @@ void emitIncRef(Vout&, Vreg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);
 
-void emitAssertFlagsNonNegative(Asm& as);
 void emitAssertFlagsNonNegative(Vout&);
-void emitAssertRefCount(Asm& as, PhysReg base);
 void emitAssertRefCount(Vout&, Vreg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
-void emitLdObjClass(Asm& as, PhysReg objReg, PhysReg dstReg);
 void emitLdObjClass(Vout&, Vreg objReg, Vreg dstReg);
-void emitLdClsCctx(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitLdClsCctx(Vout&, Vreg srcReg, Vreg dstReg);
 
 void emitCall(Asm& as, TCA dest);
@@ -174,13 +170,9 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
 #endif // USE_GCC_FAST_TLS
 
 // Emit a load of a low pointer.
-void emitLdLowPtr(Asm& as, MemoryRef mem, PhysReg reg, size_t size);
 void emitLdLowPtr(Vout&, Vptr mem, Vreg reg, size_t size);
 
-void emitCmpClass(Asm& as, const Class* c, MemoryRef mem);
 void emitCmpClass(Vout&, const Class* c, Vptr mem);
-void emitCmpClass(Asm& as, Reg64 reg, MemoryRef mem);
-void emitCmpClass(Asm& as, Reg64 reg1, PhysReg reg2);
 void emitCmpClass(Vout&, Vreg reg, Vptr mem);
 void emitCmpClass(Vout&, Vreg reg1, Vreg reg2);
 

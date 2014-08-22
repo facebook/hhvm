@@ -1004,7 +1004,7 @@ and hint_paren start env =
   | [_, Hfun _ as h] -> pos, snd h
   | [_] ->
       error_at env pos "Tuples of one element are not allowed";
-      pos, Happly ((pos, "*Unkown*"), [])
+      pos, Happly ((pos, "*Unknown*"), [])
   | hl  -> pos, Htuple hl
 
 and hint_list env =
@@ -2743,10 +2743,9 @@ and expr_cast env start_pos =
     let tok = L.token env.lb in
     let cast_type = Lexing.lexeme env.lb in
     assert (tok = Tword);
-    assert (is_cast_type cast_type);
+    let p = Pos.make env.lb in
     expect env Trp;
-    let ty = Pos.make env.lb, cast_type in
-    let ty = fst ty, Happly (ty, []) in
+    let ty = p, Happly ((p, cast_type), []) in
     let e = expr env in
     match cast_type with
     | "unset" -> e

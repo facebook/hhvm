@@ -1,4 +1,4 @@
 File "trait_require_error_noextend.php", line 23, characters 7-12:
-Failure to satisfy requirement: Super
+Typing[4111] Failure to satisfy requirement: Super
 File "trait_require_error_noextend.php", line 15, characters 19-23:
 Required here

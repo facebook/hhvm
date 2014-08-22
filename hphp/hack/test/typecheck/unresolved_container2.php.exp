@@ -1,5 +1,5 @@
 File "unresolved_container2.php", line 19, characters 10-14:
-Invalid return type
+Typing[4110] Invalid return type
 File "unresolved_container2.php", line 12, characters 51-53:
 This is an int
 File "unresolved_container2.php", line 12, characters 22-25:

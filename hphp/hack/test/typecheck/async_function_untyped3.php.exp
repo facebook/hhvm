@@ -1,5 +1,5 @@
 File "async_function_untyped3.php", line 11, characters 13-16:
-Invalid argument
+Typing[4110] Invalid argument
 File "async_function_untyped3.php", line 3, characters 20-22:
 This is an int
 File "async_function_untyped3.php", line 5, characters 16-16:

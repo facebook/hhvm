@@ -1,5 +1,5 @@
 File "IUseDynamicYield_interface6.php", line 24, characters 7-9:
-This object is of type Foo
+Typing[4054] This object is of type Foo
 File "IUseDynamicYield_interface6.php", line 24, characters 22-25:
 It is incompatible with this object of type IFoo
 because some of their methods are incompatible.

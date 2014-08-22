@@ -1,5 +1,5 @@
 File "test_foreach.php", line 14, characters 12-13:
-Invalid return type
+Typing[4110] Invalid return type
 File "test_foreach.php", line 12, characters 37-42:
 This is a string
 File "test_foreach.php", line 12, characters 19-21:

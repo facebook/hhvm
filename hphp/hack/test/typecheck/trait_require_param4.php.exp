@@ -1,5 +1,5 @@
 File "trait_require_param4.php", line 15, characters 7-8:
-Unable to satisfy trait/interface requirement
+Typing[4110] Unable to satisfy trait/interface requirement
 File "trait_require_param4.php", line 10, characters 25-29:
 This is a float
 File "trait_require_param4.php", line 13, characters 23-25:

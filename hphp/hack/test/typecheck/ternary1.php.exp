@@ -1,5 +1,5 @@
 File "ternary1.php", line 29, characters 10-27:
-Invalid return type
+Typing[4110] Invalid return type
 File "ternary1.php", line 28, characters 16-21:
 This is a string
 File "ternary1.php", line 20, characters 17-19:

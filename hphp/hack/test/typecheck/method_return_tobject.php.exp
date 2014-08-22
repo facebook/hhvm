@@ -1,5 +1,5 @@
 File "method_return_tobject.php", line 13, characters 10-31:
-Invalid return type
+Typing[4110] Invalid return type
 File "method_return_tobject.php", line 12, characters 17-19:
 This is an int
 File "method_return_tobject.php", line 13, characters 10-31:

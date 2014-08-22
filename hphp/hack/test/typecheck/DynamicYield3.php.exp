@@ -1,5 +1,5 @@
 File "DynamicYield3.php", line 25, characters 7-9:
-This object is of type Bar
+Typing[4110] This object is of type Bar
 File "DynamicYield3.php", line 25, characters 19-21:
 It is incompatible with this object of type Foo
 because some of their methods are incompatible.

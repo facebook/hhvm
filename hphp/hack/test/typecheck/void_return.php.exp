@@ -1,4 +1,4 @@
 File "void_return.php", line 13, characters 3-8:
-You cannot return a value
+Typing[4084] You cannot return a value
 File "void_return.php", line 12, characters 17-20:
 This is a void function

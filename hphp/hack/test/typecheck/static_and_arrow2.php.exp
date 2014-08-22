@@ -1,5 +1,5 @@
 File "static_and_arrow2.php", line 19, characters 11-12:
-The method f2 is undefined in an object of type Bar
+Typing[4053] The method f2 is undefined in an object of type Bar
 File "static_and_arrow2.php", line 18, characters 16-18:
 Check this out
 File "static_and_arrow2.php", line 13, characters 26-27:

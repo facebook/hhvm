@@ -1,5 +1,5 @@
 File "DynamicYield_gen1.php", line 28, characters 10-28:
-Invalid return type
+Typing[4110] Invalid return type
 File "DynamicYield_gen1.php", line 27, characters 20-22:
 This is an int
 File "DynamicYield_gen1.php", line 22, characters 35-43:

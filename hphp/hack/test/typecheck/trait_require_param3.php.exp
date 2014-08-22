@@ -1,5 +1,5 @@
 File "trait_require_param3.php", line 14, characters 7-8:
-Unable to satisfy trait/interface requirement
+Typing[4110] Unable to satisfy trait/interface requirement
 File "trait_require_param3.php", line 6, characters 25-27:
 This is an int
 File "trait_require_param3.php", line 13, characters 26-26:

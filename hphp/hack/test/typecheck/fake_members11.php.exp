@@ -1,5 +1,5 @@
 File "fake_members11.php", line 22, characters 7-19:
-You are trying to access an element of this container but the container could be null. 
+Typing[4063] You are trying to access an element of this container but the container could be null. 
 File "fake_members11.php", line 13, characters 11-17:
 This is what makes me believe it can be null
 File "fake_members11.php", line 21, characters 7-29:

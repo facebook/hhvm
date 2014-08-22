@@ -1,2 +1,2 @@
 File "functional_init2.php", line 17, characters 23-23:
-Read access to $this->x before initialization
+Typing[4083] Read access to $this->x before initialization

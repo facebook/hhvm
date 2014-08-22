@@ -1,4 +1,4 @@
 File "shapes_cc_3.php", line 18, characters 36-43:
-Shape uses literal string as field name
+Typing[4050] Shape uses literal string as field name
 File "shapes_cc_3.php", line 18, characters 22-26:
 But expected a class constant

@@ -1,5 +1,5 @@
 File "null_type.php", line 14, characters 8-9:
-Typing error
+Typing[4110] Typing error
 File "null_type.php", line 14, characters 8-9:
 This is a num (int/float) because this is used in an arithmetic operation
 File "null_type.php", line 12, characters 14-17:

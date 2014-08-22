@@ -1,5 +1,5 @@
 File "variadic_args4.php", line 7, characters 7-8:
-This object is of type C2
+Typing[4042] This object is of type C2
 File "variadic_args4.php", line 7, characters 18-19:
 It is incompatible with this object of type C1
 because some of their methods are incompatible.

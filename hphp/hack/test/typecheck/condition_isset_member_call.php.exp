@@ -1,5 +1,5 @@
 File "condition_isset_member_call.php", line 22, characters 14-21:
-Invalid return type
+Typing[4110] Invalid return type
 File "condition_isset_member_call.php", line 19, characters 26-28:
 This is an int
 File "condition_isset_member_call.php", line 13, characters 11-14:

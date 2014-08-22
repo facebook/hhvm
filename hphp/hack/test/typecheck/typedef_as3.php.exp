@@ -1,5 +1,5 @@
 File "typedef_as3.php", line 15, characters 9-12:
-Invalid constraint on newtype
+Typing[4110] Invalid constraint on newtype
 File "typedef_as3.php", line 15, characters 17-17:
 This is an object of type B
 File "typedef_as3.php", line 15, characters 21-21:

@@ -1,5 +1,5 @@
 File "test_array5.php", line 13, characters 10-17:
-Invalid return type
+Typing[4110] Invalid return type
 File "test_array5.php", line 12, characters 37-40:
 This is a bool
 File "test_array5.php", line 12, characters 27-29:

@@ -1,2 +1,2 @@
 File "functional_toposort.php", line 12, characters 7-7:
-Cyclic class definition : B A 
+Typing[4013] Cyclic class definition : B A 

@@ -1,4 +1,4 @@
 File "destructor_return1.php", line 14, characters 5-10:
-You cannot return a value
+Typing[4084] You cannot return a value
 File "destructor_return1.php", line 13, characters 19-28:
 This is a void function

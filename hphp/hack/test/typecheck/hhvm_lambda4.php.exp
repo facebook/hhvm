@@ -1,2 +1,2 @@
 File "hhvm_lambda4.php", line 24, characters 35-36:
-Undefined variable: $z
+Naming[2050] Undefined variable: $z

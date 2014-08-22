@@ -1,5 +1,5 @@
 File "yield_wait_forv_result_bad1.php", line 18, characters 10-23:
-Invalid return type
+Typing[4110] Invalid return type
 File "yield_wait_forv_result_bad1.php", line 12, characters 33-35:
 This is an int
 File "yield_wait_forv_result_bad1.php", line 16, characters 39-44:

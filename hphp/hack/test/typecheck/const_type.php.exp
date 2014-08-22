@@ -1,5 +1,5 @@
 File "const_type.php", line 13, characters 13-17:
-Wrong type hint
+Typing[4110] Wrong type hint
 File "const_type.php", line 13, characters 9-11:
 This is an int
 File "const_type.php", line 13, characters 21-23:

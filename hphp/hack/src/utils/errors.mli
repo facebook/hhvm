@@ -109,7 +109,6 @@ val abstract_instantiate : Pos.t -> string -> unit
 val pair_arity : Pos.t -> unit
 val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
 val undefined_parent : Pos.t -> unit
-val parent_construct_in_trait : Pos.t -> unit
 val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
 val dont_use_isset : Pos.t -> unit
@@ -118,7 +117,6 @@ val static_overflow : Pos.t -> unit
 val typing_error : Pos.t -> string -> unit
 val typing_error_l : error -> unit
 val undefined_field : Pos.t -> string -> unit
-val shape_access : Pos.t -> unit
 val array_access : Pos.t -> Pos.t -> string -> unit
 val array_append : Pos.t -> Pos.t -> string -> unit
 val const_mutation : Pos.t -> Pos.t -> string -> unit
@@ -126,11 +124,6 @@ val negative_tuple_index : Pos.t -> unit
 val tuple_index_too_large : Pos.t -> unit
 val expected_static_int : Pos.t -> unit
 val expected_class : Pos.t -> unit
-val snot_found_hint :
-  [< `closest of 'a * string | `did_you_mean of 'a * string | `no_hint ] ->
-  ('a * string) list
-val string_of_class_member_kind :
-  [< `class_constant | `class_variable | `static_method ] -> string
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method ] ->
   Pos.t ->
@@ -197,10 +190,8 @@ val no_construct_parent : Pos.t -> unit
 val not_initialized : Pos.t * string -> unit
 val call_before_init : Pos.t -> string -> unit
 val type_arity : Pos.t -> string -> string -> unit
-val abstract_outside : Pos.t * 'a -> unit
 val invalid_req_implements : Pos.t -> unit
 val invalid_req_extends : Pos.t -> unit
-val interface_with_body : Pos.t * 'a -> unit
 val abstract_with_body : Pos.t * 'a -> unit
 val not_abstract_without_body : Pos.t * 'a -> unit
 val return_in_gen : Pos.t -> unit

@@ -1,5 +1,5 @@
 File "do_while_condition_typechange.php", line 15, characters 10-11:
-Typing error
+Typing[4110] Typing error
 File "do_while_condition_typechange.php", line 15, characters 10-11:
 This is a num (int/float) because this is used in an arithmetic operation
 File "do_while_condition_typechange.php", line 16, characters 16-19:

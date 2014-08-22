@@ -1,5 +1,5 @@
 File "generic_incompatible_implementation.php", line 6, characters 7-9:
-This object is of type Foo
+Typing[4110] This object is of type Foo
 File "generic_incompatible_implementation.php", line 6, characters 22-24:
 It is incompatible with this object of type Bar
 because some of their methods are incompatible.

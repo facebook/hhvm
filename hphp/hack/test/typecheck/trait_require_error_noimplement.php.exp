@@ -1,4 +1,4 @@
 File "trait_require_error_noimplement.php", line 29, characters 7-12:
-Failure to satisfy requirement: I1
+Typing[4111] Failure to satisfy requirement: I1
 File "trait_require_error_noimplement.php", line 17, characters 22-23:
 Required here

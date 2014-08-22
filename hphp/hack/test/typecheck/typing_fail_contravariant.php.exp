@@ -1,5 +1,5 @@
 File "typing_fail_contravariant.php", line 22, characters 7-7:
-This object is of type D
+Typing[4110] This object is of type D
 File "typing_fail_contravariant.php", line 22, characters 17-17:
 It is incompatible with this object of type C
 because some of their methods are incompatible.

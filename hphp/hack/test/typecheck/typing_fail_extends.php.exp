@@ -1,5 +1,5 @@
 File "typing_fail_extends.php", line 31, characters 5-29:
-Typing error
+Typing[4110] Typing error
 File "typing_fail_extends.php", line 28, characters 22-27:
 This is an object of type Option
 File "typing_fail_extends.php", line 31, characters 25-28:

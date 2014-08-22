@@ -1,5 +1,5 @@
 File "await_on_illegal_value.php", line 13, characters 3-10:
-await can only operate on an Awaitable
+Typing[4110] await can only operate on an Awaitable
 File "await_on_illegal_value.php", line 13, characters 3-10:
 This is an object of type Awaitable
 File "await_on_illegal_value.php", line 13, characters 9-10:

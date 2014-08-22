@@ -1,2 +1,2 @@
 File "typing_fail_inherit1.php", line 18, characters 19-21:
-Method name already bound: bar
+Naming[2033] Method name already bound: bar

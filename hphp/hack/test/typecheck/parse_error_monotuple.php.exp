@@ -1,2 +1,2 @@
 File "parse_error_monotuple.php", line 12, characters 21-25:
-Tuples of one element are not allowed
+Parsing[1002] Tuples of one element are not allowed

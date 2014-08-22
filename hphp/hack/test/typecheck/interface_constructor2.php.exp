@@ -1,5 +1,5 @@
 File "interface_constructor2.php", line 16, characters 7-7:
-This object is of type A
+Typing[4110] This object is of type A
 File "interface_constructor2.php", line 16, characters 20-22:
 It is incompatible with this object of type Foo
 because some of their methods are incompatible.

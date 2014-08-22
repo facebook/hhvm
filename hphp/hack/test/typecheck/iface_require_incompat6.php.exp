@@ -1,5 +1,5 @@
 File "iface_require_incompat6.php", line 9, characters 21-22:
-Incompatible trait/interface requirements
+Typing[4110] Incompatible trait/interface requirements
 File "iface_require_incompat6.php", line 6, characters 25-29:
 This is a float
 File "iface_require_incompat6.php", line 10, characters 25-27:

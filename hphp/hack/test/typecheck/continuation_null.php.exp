@@ -1,5 +1,5 @@
 File "continuation_null.php", line 13, characters 3-7:
-Invalid yield
+Typing[4110] Invalid yield
 File "continuation_null.php", line 12, characters 30-33:
 This is void
 File "builtins.hhi", line 39, characters 40-41:

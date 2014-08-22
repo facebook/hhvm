@@ -1,2 +1,2 @@
 File "printf_crash.php--use.php", line 5, characters 21-32:
-The type FormatString expects 1 type parameter(s)
+Typing[4101] The type FormatString expects 1 type parameter(s)

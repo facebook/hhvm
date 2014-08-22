@@ -1,5 +1,5 @@
 File "switch_case_terminality1.php", line 20, characters 10-11:
-Invalid return type
+Typing[4110] Invalid return type
 File "switch_case_terminality1.php", line 12, characters 33-35:
 This is an int
 File "switch_case_terminality1.php", line 12, characters 14-17:

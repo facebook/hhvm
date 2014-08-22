@@ -1,5 +1,5 @@
 File "async_function_untyped4.php", line 7, characters 7-8:
-This object is of type C1
+Typing[4110] This object is of type C1
 File "async_function_untyped4.php", line 7, characters 21-22:
 It is incompatible with this object of type I1
 because some of their methods are incompatible.

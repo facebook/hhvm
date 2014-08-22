@@ -1,2 +1,2 @@
 File "typing_fail_interface_code.php", line 14, characters 19-21:
-This method shouldn't have a body
+NastCheck[3001] This method shouldn't have a body

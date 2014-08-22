@@ -1,2 +1,2 @@
 File "tuple_hints.php", line 12, characters 14-18:
-Did you want a tuple? Try (X,Y), not tuple<X,Y>
+Typing[4100] Did you want a tuple? Try (X,Y), not tuple<X,Y>

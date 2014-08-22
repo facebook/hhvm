@@ -1,2 +1,2 @@
 File "override_attr_06.php", line 18, characters 19-21:
-B::foo() is marked as override; no non-private parent definition found or overridden parent is defined in non-<?hh code
+Typing[4087] B::foo() is marked as override; no non-private parent definition found or overridden parent is defined in non-<?hh code

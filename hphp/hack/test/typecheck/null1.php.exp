@@ -1,5 +1,5 @@
 File "null1.php", line 21, characters 12-13:
-Invalid return type
+Typing[4110] Invalid return type
 File "null1.php", line 12, characters 17-19:
 This is an int
 File "null1.php", line 16, characters 12-15:

@@ -1,5 +1,5 @@
 File "this_tparam2.php", line 19, characters 10-17:
-Invalid return type
+Typing[4110] Invalid return type
 File "this_tparam2.php", line 18, characters 48-62:
 This is an object of type OtherPreparable
 File "this_tparam2.php", line 14, characters 7-18:

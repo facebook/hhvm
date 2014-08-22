@@ -1,2 +1,2 @@
 File "mixed_option.php", line 12, characters 31-36:
-?mixed is a redundant typehint - just use mixed
+Typing[4068] ?mixed is a redundant typehint - just use mixed

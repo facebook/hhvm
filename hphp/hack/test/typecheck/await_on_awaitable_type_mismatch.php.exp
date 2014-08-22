@@ -1,5 +1,5 @@
 File "await_on_awaitable_type_mismatch.php", line 13, characters 14-21:
-Typing error
+Typing[4110] Typing error
 File "await_on_awaitable_type_mismatch.php", line 12, characters 37-42:
 This is a string
 File "await_on_awaitable_type_mismatch.php", line 13, characters 14-21:

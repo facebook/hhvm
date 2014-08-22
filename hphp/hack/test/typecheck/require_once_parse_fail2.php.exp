@@ -1,2 +1,2 @@
 File "require_once_parse_fail2.php", line 13, characters 3-14:
-Parse error: require_once is supported only as a toplevel declaration
+Parsing[1002] Parse error: require_once is supported only as a toplevel declaration

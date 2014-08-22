@@ -1,5 +1,5 @@
 File "parse_ignore_newline.php", line 22, characters 10-14:
-Invalid return type
+Typing[4110] Invalid return type
 File "parse_ignore_newline.php", line 21, characters 15-17:
 This is an int
 File "parse_ignore_newline.php", line 22, characters 10-14:

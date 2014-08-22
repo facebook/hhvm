@@ -1,6 +1,6 @@
 App \CamelCase<>
 App \CamelCase<>
 File "capitalization1.php", line 7, characters 21-29:
-Could not find CAMELCASE
+Naming[2006] Could not find CAMELCASE
 File "capitalization1.php", line 3, characters 7-15:
 Did you mean CamelCase?

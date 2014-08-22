@@ -1,5 +1,5 @@
 File "awaitable_subtype_error.php", line 17, characters 10-23:
-Invalid return type
+Typing[4110] Invalid return type
 File "awaitable_subtype_error.php", line 12, characters 36-38:
 This is an int
 File "awaitable_subtype_error.php", line 16, characters 36-41:

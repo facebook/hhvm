@@ -1,5 +1,5 @@
 File "construct_consist3.php", line 11, characters 7-8:
-This object is of type C3
+Typing[4040] This object is of type C3
 File "construct_consist3.php", line 11, characters 18-19:
 It is incompatible with this object of type C2
 because some of their methods are incompatible.

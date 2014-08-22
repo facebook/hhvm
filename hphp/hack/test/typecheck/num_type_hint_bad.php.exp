@@ -1,5 +1,5 @@
 File "num_type_hint_bad.php", line 21, characters 5-6:
-Invalid argument
+Typing[4110] Invalid argument
 File "num_type_hint_bad.php", line 15, characters 12-14:
 This is a num (int/float)
 File "num_type_hint_bad.php", line 20, characters 8-14:

@@ -346,15 +346,28 @@ function run_install(
   ?Map $env,
   int $retries = NETWORK_RETRIES
 ): ?int {
-  while ($retries > 0) {
+  $tries = 0;
+  // We need to output something every once in a while - if we go quiet, fbmake
+  // kills us.
+  for ($try = 1; $try <= $retries; ++$try) {
+    $test_name = $proc.' - attempt '.++$try;
     try {
-      return run_install_impl($proc, $path, $env);
+      fbmake_json(Map {'op' => 'start', 'test' => $test_name});
+      $result = run_install_impl($proc, $path, $env);
+      fbmake_json(
+        Map {'op' => 'test_done', 'test' => $test_name, 'status' => 'passed' }
+      );
+      return $result;
     } catch (TimeoutException $e) {
       verbose((string) $e);
-      $retries--;
+      fbmake_json(
+        Map {'op' => 'test_done', 'test' => $test_name, 'status' => 'skipped' }
+      );
     }
   }
-  return run_install_impl($proc, $path, $env);
+
+  error_and_exit('Retries exceeded: '.$proc);
+  return null; // unrechable, but make the typechecker happy.
 }
 
 function run_install_impl(string $proc, string $path, ?Map $env): ?int

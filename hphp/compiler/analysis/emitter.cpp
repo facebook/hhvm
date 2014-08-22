@@ -6396,31 +6396,39 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->isGenerator = funcScope->isGenerator();
 
     if (funcScope->userAttributes().count("__Memoize")) {
-      if (meth->is(Statement::KindOfFunctionStatement)) {
-        throw IncludeTimeFatalException(meth,
-          "<<__Memoize>> does not support top-level functions yet");
-      }
-
-      PreClassEmitter *pce = fe->pce();
-
-      // Add a property to hold the memoized results
-      auto const propName = makeStaticString(
-        folly::sformat("{}$memoize_cache", fe->name->data()));
-      TypedValue tvNull;
-      tvWriteNull(&tvNull);
-      Attr attrs = AttrPrivate;
-      attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
-      pce->addProperty(propName, attrs, nullptr, nullptr,
-                       &tvNull, RepoAuthType{});
-
-      // Rename the method and create a new method with the original name
       auto const originalName = fe->name;
       auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));
-      pce->renameMethod(originalName, rewrittenName);
-      FuncEmitter* memoizeFe = m_ue.newMethodEmitter(originalName, pce);
-      bool added UNUSED = pce->addMethod(memoizeFe);
-      assert(added);
+      FuncEmitter* memoizeFe = nullptr;
+      auto const propName = makeStaticString(
+        folly::sformat("{}$memoize_cache", fe->name->data()));
+
+      if (meth->is(Statement::KindOfFunctionStatement)) {
+        if (!p.m_top) {
+          throw IncludeTimeFatalException(meth,
+            "<<__Memoize>> cannot be applied to closures and inline functions");
+        }
+
+        memoizeFe = new FuncEmitter(m_ue, -1, -1, originalName);
+        fe->name = rewrittenName;
+        top_fes.push_back(memoizeFe);
+      } else {
+        PreClassEmitter *pce = fe->pce();
+
+        // Add a property to hold the memoized results
+        TypedValue tvNull;
+        tvWriteNull(&tvNull);
+        Attr attrs = AttrPrivate;
+        attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
+        pce->addProperty(propName, attrs, nullptr, nullptr,
+                         &tvNull, RepoAuthType{});
+
+        // Rename the method and create a new method with the original name
+        pce->renameMethod(originalName, rewrittenName);
+        memoizeFe = m_ue.newMethodEmitter(originalName, pce);
+        bool added UNUSED = pce->addMethod(memoizeFe);
+        assert(added);
+      }
 
       // Emit the new method that handles the memoization
       m_curFunc = memoizeFe;
@@ -6791,8 +6799,11 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
 
 void EmitterVisitor::emitMemoizeProp(Emitter &e,
                                      MethodStatementPtr meth,
-                                     const StringData *propName) {
-  if (meth->getFunctionScope()->isStatic()) {
+                                     const StringData *propName,
+                                     int localID) {
+  if (meth->is(Statement::KindOfFunctionStatement)) {
+    emitVirtualLocal(localID);
+  } else if (meth->getFunctionScope()->isStatic()) {
     m_evalStack.push(StackSym::K);
     m_evalStack.setClsBaseType(SymbolicStack::CLS_SELF);
     e.String(propName);
@@ -6818,6 +6829,9 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       "<<__Memoize>> cannot be used on methods that return by reference");
   }
 
+  bool isFunc = meth->is(Statement::KindOfFunctionStatement);
+  int staticLocalID = 0;
+
   auto region = createRegion(meth, Region::Kind::FuncBody);
   enterRegion(region);
   SCOPE_EXIT { leaveRegion(region); };
@@ -6829,21 +6843,35 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   emitMethodPrologue(e, meth);
 
   // If the cache var is non-null return it
-  if (!meth->getFunctionScope()->isStatic()) {
-    e.CheckThis();
+  if (isFunc) {
+    staticLocalID = m_curFunc->allocUnnamedLocal();
+    emitVirtualLocal(staticLocalID, KindOfNull);
+    e.Null();
+    e.StaticLocInit(staticLocalID, propName);
+  } else {
+    if (!meth->getFunctionScope()->isStatic()) {
+      e.CheckThis();
+    }
   }
-  emitMemoizeProp(e, meth, propName);
-  emitCGet(e);
-  e.IsTypeC(IsTypeOp::Null);
+
+  emitMemoizeProp(e, meth, propName, staticLocalID);
+  emitIsType(e, IsTypeOp::Null);
   e.JmpNZ(cacheMiss);
-  emitMemoizeProp(e, meth, propName);
+
+  emitMemoizeProp(e, meth, propName, staticLocalID);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, meth, propName);
-  if (meth->getFunctionScope()->isStatic()) {
+  emitMemoizeProp(e, meth, propName, staticLocalID);
+  if (isFunc) {
+    auto fpiStart = m_ue.bcPos();
+    e.FPushFuncD(0, methName);
+    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
+    e.FCall(0);
+    emitConvertToCell(e);
+  } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
     auto fpiStart = m_ue.bcPos();
     e.FPushClsMethodD(0, methName, m_curFunc->pce()->name());

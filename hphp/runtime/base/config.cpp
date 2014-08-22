@@ -64,6 +64,9 @@ static std::string normalize(const std::string &name) {
   // Make sure IPv6 or IPv4 are handled correctly
   boost::replace_first(out, "_i_pv", "_ipv");
   boost::replace_first(out, ".i_pv", ".ipv");
+  // urls are special too. Let's not have "ur_ls"
+  boost::replace_first(out, "_ur_ls", "_urls");
+  boost::replace_first(out, ".ur_ls", ".urls");
   // No use of Eval in our ini strings
   boost::replace_first(out, ".eval.", ".");
   boost::replace_first(out, ".my_sql.", ".mysql.");

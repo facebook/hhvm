@@ -32,12 +32,7 @@ def moveAllFiles(old, new):
     ]
     for filesuffix in files:
         if os.path.isfile(old + filesuffix):
-            old_file = old + filesuffix
-            new_file = new + filesuffix
-            if args.git_mv:
-                subprocess.call(["git", "mv", old_file, new_file])
-            else:
-                shutil.move(old_file, new_file)
+            subprocess.call(["git", "mv", old + filesuffix, new + filesuffix])
 
 def moveTests(tests):
     for test in tests:
@@ -74,14 +69,6 @@ parser.add_argument(
     help="Don't move the tests. Only output them.",
     action="store_true"
 )
-
-parser.add_argument(
-    "--git-mv",
-    "-g",
-    help="Use git mv command to move.",
-    action="store_true"
-)
-
 
 args = parser.parse_args()
 

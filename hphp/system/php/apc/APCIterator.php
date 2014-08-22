@@ -72,11 +72,11 @@ class APCIterator implements Iterator{
 
   public function valid() {
     if (!$this->initialized) return false;
-    return (count($this->getInfo()) > $this->index);
+    return count($this->getInfo()) > $this->index;
   }
 
   public function next() {
-    if (!$this->initialized || !$this->valid()) return false;
+    if (!$this->valid()) return false;
     ++$this->index;
     if ($this->search !== null) {
       if (is_array($this->search)) {
@@ -100,12 +100,12 @@ class APCIterator implements Iterator{
   }
 
   public function key() {
-    if (!$this->initialized || !$this->valid()) return false;
+    if (!$this->valid()) return false;
     return $this->getInfo()[$this->index]['entry_name'];
   }
 
   public function current() {
-    if (!$this->initialized || !$this->valid()) return false;
+    if (!$this->valid()) return false;
     $info = $this->getInfo()[$this->index];
     $ret = array();
     if ($this->format & APC_ITER_TYPE) {

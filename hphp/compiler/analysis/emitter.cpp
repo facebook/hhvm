@@ -6558,20 +6558,25 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
         bif = nif;
         nif = nullptr;
       } else {
-        bool usesDouble = false;
+        bool usesDouble = false, variadic = funcScope->hasVariadicParam();
         auto params = meth->getParams();
         int numParams = params ? params->getCount() : 0;
+        // Ignore looking at the variadic capture param's type
+        // Since as far as the ABI is concerned, it's always array
+        if (variadic) numParams--;
+        assert(numParams >= 0);
+
+        // Does this method take doubles as arguments?
         for (int i = 0; i < numParams; ++i) {
           ParameterExpressionPtr par(
             static_pointer_cast<ParameterExpression>((*params)[i]));
-          if (auto const typeAnnotation = par->annotation()) {
-            if (typeAnnotation->dataType() == KindOfDouble) {
-              usesDouble = true;
-              break;
-            }
+          auto const typeAnnotation = par->annotation();
+          if (typeAnnotation && typeAnnotation->dataType() == KindOfDouble) {
+            usesDouble = true;
+            break;
           }
         }
-        bif = Native::getWrapper(pce, usesDouble);
+        bif = Native::getWrapper(pce, usesDouble, variadic);
       }
     }
   }
@@ -7241,7 +7246,8 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       !f->nativeFuncPtr() ||
       f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      (numParams > f->numParams())) return nullptr;
+      (numParams > f->numParams()) ||
+      f->hasVariadicCaptureParam()) return nullptr;
 
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;

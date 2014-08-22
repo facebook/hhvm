@@ -184,10 +184,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_info = m_info;
   f->shared()->m_returnType = returnType;
   std::vector<Func::ParamInfo> fParams;
-  bool usesDoubles = false;
+  bool usesDoubles = false, variadic = false;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
     if (pi.builtinType == KindOfDouble) usesDoubles = true;
+    if (pi.isVariadic()) variadic = true;
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
@@ -229,7 +230,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
         } else {
           f->shared()->m_nativeFuncPtr = nif;
           f->shared()->m_builtinFuncPtr =
-            Native::getWrapper(m_pce, usesDoubles);
+            Native::getWrapper(m_pce, usesDoubles, variadic);
         }
       }
     } else {

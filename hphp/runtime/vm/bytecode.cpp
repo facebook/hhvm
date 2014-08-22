@@ -6209,7 +6209,7 @@ OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-    Native::callFunc<true>(func, nullptr, args, ret);
+    Native::callFunc<true, false>(func, nullptr, args, ret);
   } else {
     if (func->attrs() & AttrParamCoerceModeNull) {
       ret.m_type = KindOfNull;

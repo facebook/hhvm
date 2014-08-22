@@ -337,11 +337,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     fs->setDynamicInvoke();
   }
   if (m_params) {
-    for (int i = 0; i < m_params->getCount(); i++) {
+    auto nParams = m_params->getCount();
+    for (int i = 0; i < nParams; i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       param->parseHandler(classScope);
-      if (isNative && !param->hasUserType()) {
+      // Variadic capture params don't need types because they'll
+      // be treated as Arrays as far as HNI is concerned.
+      if (isNative && !param->hasUserType() && !param->isVariadic()) {
         parseTimeFatal(Compiler::InvalidAttribute,
                        "Native method calls must have type hints on all args");
       }

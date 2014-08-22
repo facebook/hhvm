@@ -68,6 +68,7 @@ inline void* retPtrArg(DataType retType, TypedValue &ret) {
  * GP regs only contain integer arguments (when there are less than
  * numGPRegArgs INT args)
  */
+template<bool variadic>
 static void populateArgs(const Func* func,
                          TypedValue* args, const int numArgs,
                          int64_t* GP_args, int& GP_count,
@@ -77,7 +78,13 @@ static void populateArgs(const Func* func,
   int ntmp = 0;
 
   for (size_t i = 0; i < numArgs; ++i) {
-    auto type = func->params()[i].builtinType;
+    DataType type;
+    if (variadic) {
+      const auto pi = func->params()[i];
+      type = pi.isVariadic() ? KindOfArray : pi.builtinType;
+    } else {
+      type = func->params()[i].builtinType;
+    }
     if (type == KindOfDouble) {
       if (SIMD_count < kNumSIMDRegs) {
         SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
@@ -125,9 +132,12 @@ static void populateArgs(const Func* func,
 }
 
 /* A much simpler version of the above specialized for GP-arg-only methods */
+template<bool variadic>
 static void populateArgsNoDoubles(const Func* func,
-                                  TypedValue* args, const int numArgs,
+                                  TypedValue* args, int numArgs,
                                   int64_t* GP_args, int& GP_count) {
+  if (variadic) --numArgs;
+  assert(numArgs >= 0);
   for (int i = 0; i < numArgs; ++i) {
     auto dt = func->params()[i].builtinType;
     assert(dt != KindOfDouble);
@@ -139,12 +149,15 @@ static void populateArgsNoDoubles(const Func* func,
       GP_args[GP_count++] = args[-i].m_data.num;
     }
   }
+  if (variadic) {
+    GP_args[GP_count++] = (int64_t)&(args[-numArgs].m_data);
+  }
 }
 
-template<bool usesDoubles>
+template<bool usesDoubles, bool variadic>
 void callFunc(const Func* func, void *ctx,
               TypedValue *args, TypedValue& ret) {
-  assert(!func->hasVariadicCaptureParam());
+  assert(variadic == func->hasVariadicCaptureParam());
   int64_t GP_args[kMaxBuiltinArgs];
   double SIMD_args[kNumSIMDRegs];
   int GP_count = 0, SIMD_count = 0;
@@ -157,10 +170,10 @@ void callFunc(const Func* func, void *ctx,
     GP_args[GP_count++] = (int64_t)ctx;
   }
   if (usesDoubles) {
-    populateArgs(func, args, numArgs,
-                 GP_args, GP_count, SIMD_args, SIMD_count);
+    populateArgs<variadic>(func, args, numArgs,
+                           GP_args, GP_count, SIMD_args, SIMD_count);
   } else {
-    populateArgsNoDoubles(func, args, numArgs, GP_args, GP_count);
+    populateArgsNoDoubles<variadic>(func, args, numArgs, GP_args, GP_count);
   }
 
   BuiltinFunction f = func->nativeFuncPtr();
@@ -282,9 +295,10 @@ static const StringData* getInvokeName(ActRec *ar) {
   return makeStaticString(clsname + "::" + funcname);
 }
 
-static inline bool nativeWrapperCheckArgs(ActRec* ar) {
+template<bool variadic>
+bool nativeWrapperCheckArgs(ActRec* ar) {
   auto func = ar->m_func;
-  auto numArgs = func->numParams();
+  auto numArgs = func->numNonVariadicParams();
   auto numNonDefault = ar->numArgs();
 
   if (numNonDefault < numArgs) {
@@ -297,7 +311,7 @@ static inline bool nativeWrapperCheckArgs(ActRec* ar) {
         return false;
       }
     }
-  } else if (numNonDefault > numArgs) {
+  } else if (!variadic && (numNonDefault > numArgs)) {
     // Too many arguments passed, raise a warning ourselves this time
     throw_wrong_arguments_nr(getInvokeName(ar)->data(),
       numNonDefault, minNumArgs(ar), numArgs, 1);
@@ -307,21 +321,21 @@ static inline bool nativeWrapperCheckArgs(ActRec* ar) {
   return true;
 }
 
-template<bool usesDoubles>
+template<bool usesDoubles, bool variadic>
 TypedValue* functionWrapper(ActRec* ar) {
   assert(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
-  assert(!func->hasVariadicCaptureParam());
+  assert(variadic == func->hasVariadicCaptureParam());
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;
 
   if (LIKELY(numNonDefault == numArgs) ||
-      LIKELY(nativeWrapperCheckArgs(ar))) {
+      LIKELY(nativeWrapperCheckArgs<variadic>(ar))) {
     if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-      callFunc<usesDoubles>(func, nullptr, args, rv);
+      callFunc<usesDoubles, variadic>(func, nullptr, args, rv);
     } else if (func->attrs() & AttrParamCoerceModeFalse) {
       rv.m_type = KindOfBoolean;
       rv.m_data.num = 0;
@@ -334,20 +348,20 @@ TypedValue* functionWrapper(ActRec* ar) {
   return &ar->m_r;
 }
 
-template<bool usesDoubles>
+template<bool usesDoubles, bool variadic>
 TypedValue* methodWrapper(ActRec* ar) {
   assert(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
-  assert(!func->hasVariadicCaptureParam());
+  assert(variadic == func->hasVariadicCaptureParam());
   TypedValue* args = ((TypedValue*)ar) - 1;
   TypedValue rv;
   rv.m_type = KindOfNull;
 
   if (LIKELY(numNonDefault == numArgs) ||
-      LIKELY(nativeWrapperCheckArgs(ar))) {
+      LIKELY(nativeWrapperCheckArgs<variadic>(ar))) {
     if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
 
       // Prepend a context arg for methods
@@ -366,7 +380,7 @@ TypedValue* methodWrapper(ActRec* ar) {
         ctx = ar->getClass();
       }
 
-      callFunc<usesDoubles>(func, ctx, args, rv);
+      callFunc<usesDoubles, variadic>(func, ctx, args, rv);
     } else if (func->attrs() & AttrParamCoerceModeFalse) {
       rv.m_type = KindOfBoolean;
       rv.m_data.num = 0;
@@ -383,11 +397,18 @@ TypedValue* methodWrapper(ActRec* ar) {
   return &ar->m_r;
 }
 
-BuiltinFunction getWrapper(bool method, bool usesDoubles) {
-  if ( method &&  usesDoubles) return methodWrapper<true>;
-  if ( method && !usesDoubles) return methodWrapper<false>;
-  if (!method &&  usesDoubles) return functionWrapper<true>;
-  if (!method && !usesDoubles) return functionWrapper<false>;
+BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic) {
+  if (method) {
+    if ( usesDoubles &&  variadic) return methodWrapper<true,true>;
+    if ( usesDoubles && !variadic) return methodWrapper<true,false>;
+    if (!usesDoubles &&  variadic) return methodWrapper<false,true>;
+    if (!usesDoubles && !variadic) return methodWrapper<false,false>;
+  } else {
+    if ( usesDoubles &&  variadic) return functionWrapper<true,true>;
+    if ( usesDoubles && !variadic) return functionWrapper<true,false>;
+    if (!usesDoubles &&  variadic) return functionWrapper<false,true>;
+    if (!usesDoubles && !variadic) return functionWrapper<false,false>;
+  }
   not_reached();
   return nullptr;
 }

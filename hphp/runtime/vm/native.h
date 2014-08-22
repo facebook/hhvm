@@ -198,7 +198,7 @@ bool coerceFCallArgs(TypedValue* args,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-template<bool usesDoubles>
+template<bool usesDoubles, bool variadic>
 void callFunc(const Func* func, void* ctx,
               TypedValue* args, TypedValue& ret);
 
@@ -216,7 +216,7 @@ void callFunc(const Func* func, void* ctx,
  * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
  * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
  */
-BuiltinFunction getWrapper(bool method, bool usesDoubles);
+BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic);
 
 /**
  * Fallback method bound to declared methods with no matching

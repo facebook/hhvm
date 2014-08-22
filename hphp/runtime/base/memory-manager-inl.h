@@ -284,7 +284,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   // them on allocation, we also need to adjust for them negatively on free.
   JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
   FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  return smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ void* MemoryManager::objMalloc(size_t size) {
 ALWAYS_INLINE
 void MemoryManager::objFree(void* vp, size_t size) {
   if (LIKELY(size <= kMaxSmartSize)) return smartFreeSize(vp, size);
-  return smartFreeSizeBig(vp, size);
+  smartFreeSizeBig(vp, size);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -313,7 +313,7 @@ void* MemoryManager::smartMallocSizeLogged(uint32_t size) {
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   if (memory_profiling) { logDeallocation(p); }
-  return smartFreeSize(p, size);
+  smartFreeSize(p, size);
 }
 
 template<bool callerSavesActualSize>
@@ -327,7 +327,7 @@ std::pair<void*,size_t> MemoryManager::smartMallocSizeBigLogged(size_t size) {
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBigLogged(void* vp, size_t size) {
   if (memory_profiling) { logDeallocation(vp); }
-  return smartFreeSizeBig(vp, size);
+  smartFreeSizeBig(vp, size);
 }
 
 ALWAYS_INLINE
@@ -340,7 +340,7 @@ void* MemoryManager::objMallocLogged(size_t size) {
 ALWAYS_INLINE
 void MemoryManager::objFreeLogged(void* vp, size_t size) {
   if (memory_profiling) { logDeallocation(vp); }
-  return objFree(vp, size);
+  objFree(vp, size);
 }
 
 //////////////////////////////////////////////////////////////////////

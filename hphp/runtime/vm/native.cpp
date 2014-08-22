@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/native.h"
-
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP { namespace Native {
@@ -43,111 +42,158 @@ static size_t numGPRegArgs() {
 const size_t kNumSIMDRegs = 8;
 
 /////////////////////////////////////////////////////////////////////////////
-
-class NativeFuncCaller {
- public:
-  NativeFuncCaller(const Func* f,
-                   TypedValue* args, size_t numArgs,
-                   void* ctx = nullptr,
-                   void *retArg = nullptr) : m_func(f) {
-    auto numGP = numGPRegArgs();
-    int64_t tmp[kMaxBuiltinArgs];
-    int ntmp = 0;
-
-    // Prepend by-ref arg and/or context as needed
-    if (retArg) {
-      m_GP[m_GPcount++] = reinterpret_cast<int64_t>(retArg);
-    }
-    if (ctx) {
-      m_GP[m_GPcount++] = reinterpret_cast<int64_t>(ctx);
-    }
-
-    // Shuffle args into two vectors.
-    //
-    // m_SIMD contains at most 8 elements for the first 8 double args in the
-    // call which will end up in xmm0-xmm7 (or v0-v7)
-    //
-    // m_GP contains all remaining args optionally with padding to ensure the
-    // GP regs only contain integer arguments (when there are less than
-    // numGPRegArgs INT args)
-    for (size_t i = 0; i < numArgs; ++i) {
-      auto type = m_func->params()[i].builtinType;
-      if (type == KindOfDouble) {
-        if (m_SIMDcount < kNumSIMDRegs) {
-          m_SIMD[m_SIMDcount++] = args[-i].m_data.dbl;
-        } else if (m_GPcount < numGP) {
-          // We have enough double args to hit the stack
-          // but we haven't finished filling the GP regs yet.
-          // Stack these in tmp (autoboxed to int64_t)
-          // until we fill the GP regs, or we run out of args
-          // (in which case we'll pad them).
-          tmp[ntmp++] = args[-i].m_data.num;
-        } else {
-          // Additional SIMD args wind up on the stack
-          // and can autobox with integer types
-          m_GP[m_GPcount++] = args[-i].m_data.num;
-        }
-      } else {
-        assert((m_GPcount + 1) < kMaxBuiltinArgs);
-        if (type == KindOfUnknown) {
-          m_GP[m_GPcount++] = (int64_t)(args - i);
-        } else if (IsRefType(type)) {
-          m_GP[m_GPcount++] = (int64_t)&args[-i].m_data;
-        } else {
-          m_GP[m_GPcount++] = args[-i].m_data.num;
-        }
-        if ((m_GPcount == numGP) && ntmp) {
-          // GP regs are now full, bring tmp back to fill the initial stack
-          assert((m_GPcount + ntmp) <= kMaxBuiltinArgs);
-          memcpy(m_GP + m_GPcount, tmp, ntmp * sizeof(int64_t));
-          m_GPcount += ntmp;
-          ntmp = 0;
-        }
-      }
-    }
-    if (ntmp) {
-      assert((m_GPcount + ntmp) <= kMaxBuiltinArgs);
-      // We had more than kNumSIMDRegs doubles,
-      // but less than numGPRegArgs INTs.
-      // Push out the count and leave garbage behind.
-      if (m_GPcount < numGP) {
-        m_GPcount = numGP;
-      }
-      memcpy(m_GP + m_GPcount, tmp, ntmp * sizeof(int64_t));
-      m_GPcount += ntmp;
-    }
-  }
-
-  int64_t callInt64();
-  double callDouble();
-
-  static bool IsRefType(DataType dt) {
-    return (dt != KindOfNull)  && (dt != KindOfBoolean) &&
-           (dt != KindOfInt64) && (dt != KindOfDouble);
-  }
-
- private:
-  size_t numSIMDargs() const { return m_SIMDcount; }
-  size_t numGPargs()   const { return m_GPcount;   }
-
-  double simd(size_t i) const {
-    assert(i < m_SIMDcount);
-    return m_SIMD[i];
-  }
-  int64_t gp(size_t i) const {
-    assert(i < m_GPcount);
-    return m_GP[i];
-  }
-
-  double m_SIMD[kNumSIMDRegs];
-  int m_SIMDcount{0};
-  int64_t m_GP[kMaxBuiltinArgs];
-  int m_GPcount{0};
-  const Func* m_func;
-};
-
-// Defines NativeFuncCaller::callInt64(), NativeFuncCaller::callDouble(),
 #include "hphp/runtime/vm/native-func-caller.h"
+
+inline bool isRefType(DataType dt) {
+  return (dt != KindOfNull)  && (dt != KindOfBoolean) &&
+         (dt != KindOfInt64) && (dt != KindOfDouble);
+}
+
+inline void* retPtrArg(DataType retType, TypedValue &ret) {
+  if (retType == KindOfUnknown) {
+    return &ret;
+  }
+  if (isRefType(retType)) {
+    return &ret.m_data;
+  }
+  return nullptr;
+}
+
+/* Shuffle args into two vectors.
+ *
+ * SIMD_args contains at most 8 elements for the first 8 double args in the
+ * call which will end up in xmm0-xmm7 (or v0-v7)
+ *
+ * GP_args contains all remaining args optionally with padding to ensure the
+ * GP regs only contain integer arguments (when there are less than
+ * numGPRegArgs INT args)
+ */
+static void populateArgs(const Func* func,
+                         TypedValue* args, const int numArgs,
+                         int64_t* GP_args, int& GP_count,
+                         double* SIMD_args, int& SIMD_count) {
+  auto numGP = numGPRegArgs();
+  int64_t tmp[kMaxBuiltinArgs];
+  int ntmp = 0;
+
+  for (size_t i = 0; i < numArgs; ++i) {
+    auto type = func->params()[i].builtinType;
+    if (type == KindOfDouble) {
+      if (SIMD_count < kNumSIMDRegs) {
+        SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
+      } else if (GP_count < numGP) {
+      // We have enough double args to hit the stack
+      // but we haven't finished filling the GP regs yet.
+      // Stack these in tmp (autoboxed to int64_t)
+      // until we fill the GP regs, or we run out of args
+      // (in which case we'll pad them).
+      tmp[ntmp++] = args[-i].m_data.num;
+    } else {
+        // Additional SIMD args wind up on the stack
+        // and can autobox with integer types
+        GP_args[GP_count++] = args[-i].m_data.num;
+      }
+    } else {
+      assert((GP_count + 1) < kMaxBuiltinArgs);
+      if (type == KindOfUnknown) {
+        GP_args[GP_count++] = (int64_t)(args - i);
+      } else if (isRefType(type)) {
+        GP_args[GP_count++] = (int64_t)&args[-i].m_data;
+      } else {
+        GP_args[GP_count++] = args[-i].m_data.num;
+      }
+      if ((GP_count == numGP) && ntmp) {
+        // GP regs are now full, bring tmp back to fill the initial stack
+        assert((GP_count + ntmp) <= kMaxBuiltinArgs);
+        memcpy(GP_args + GP_count, tmp, ntmp * sizeof(int64_t));
+        GP_count += ntmp;
+        ntmp = 0;
+      }
+    }
+  }
+  if (ntmp) {
+    assert((GP_count + ntmp) <= kMaxBuiltinArgs);
+    // We had more than kNumSIMDRegs doubles,
+    // but less than numGPRegArgs INTs.
+    // Push out the count and leave garbage behind.
+    if (GP_count < numGP) {
+      GP_count = numGP;
+    }
+    memcpy(GP_args + GP_count, tmp, ntmp * sizeof(int64_t));
+    GP_count += ntmp;
+  }
+}
+
+/* A much simpler version of the above specialized for GP-arg-only methods */
+static void populateArgsNoDoubles(const Func* func,
+                                  TypedValue* args, const int numArgs,
+                                  int64_t* GP_args, int& GP_count) {
+  for (int i = 0; i < numArgs; ++i) {
+    auto dt = func->params()[i].builtinType;
+    assert(dt != KindOfDouble);
+    if (dt == KindOfUnknown) {
+      GP_args[GP_count++] = (int64_t)(args - i);
+    } else if (isRefType(dt)) {
+      GP_args[GP_count++] = (int64_t)&(args[-i].m_data);
+    } else {
+      GP_args[GP_count++] = args[-i].m_data.num;
+    }
+  }
+}
+
+template<bool usesDoubles>
+void callFunc(const Func* func, void *ctx,
+              TypedValue *args, TypedValue& ret) {
+  assert(!func->hasVariadicCaptureParam());
+  int64_t GP_args[kMaxBuiltinArgs];
+  double SIMD_args[kNumSIMDRegs];
+  int GP_count = 0, SIMD_count = 0;
+  const auto numArgs = func->numParams();
+  ret.m_type = func->returnType();
+  if (auto retArg = retPtrArg(ret.m_type, ret)) {
+    GP_args[GP_count++] = (int64_t)retArg;
+  }
+  if (ctx) {
+    GP_args[GP_count++] = (int64_t)ctx;
+  }
+  if (usesDoubles) {
+    populateArgs(func, args, numArgs,
+                 GP_args, GP_count, SIMD_args, SIMD_count);
+  } else {
+    populateArgsNoDoubles(func, args, numArgs, GP_args, GP_count);
+  }
+
+  BuiltinFunction f = func->nativeFuncPtr();
+  switch (ret.m_type) {
+    case KindOfUnknown:
+       callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+       if (ret.m_type == KindOfUninit) {
+         ret.m_type = KindOfNull;
+       }
+       return;
+    case KindOfNull:
+    case KindOfBoolean:
+      ret.m_data.num =
+        callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count) & 1;
+      return;
+    case KindOfInt64:
+      ret.m_data.num =
+        callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+      return;
+    case KindOfDouble:
+      ret.m_data.dbl =
+        callFuncDoubleImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+      return;
+    default:
+      assert(isRefType(ret.m_type));
+      callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+      if (ret.m_data.num == 0) {
+        ret.m_type = KindOfNull;
+      }
+      return;
+  }
+  not_reached();
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -210,49 +256,6 @@ bool coerceFCallArgs(TypedValue* args,
   return true;
 }
 
-void callFunc(const Func* func, void* ctx,
-              TypedValue* args, int32_t numArgs,
-              TypedValue& ret) {
-  ret.m_type = func->returnType();
-  void *retArg = nullptr;
-  if (ret.m_type == KindOfUnknown) {
-    retArg = &ret;
-  } else if (NativeFuncCaller::IsRefType(ret.m_type)) {
-    retArg = &ret.m_data;
-  }
-  NativeFuncCaller caller(func, args, numArgs, ctx, retArg);
-  switch (func->returnType()) {
-    case KindOfNull:
-    case KindOfBoolean:
-      ret.m_data.num = caller.callInt64() & 1;
-      break;
-    case KindOfInt64:
-      ret.m_data.num = caller.callInt64();
-      break;
-    case KindOfDouble:
-      ret.m_data.dbl = caller.callDouble();
-      break;
-    case KindOfString:
-    case KindOfStaticString:
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource:
-      caller.callInt64();
-      if (ret.m_data.num == 0) {
-        ret.m_type = KindOfNull;
-      }
-      break;
-    case KindOfUnknown:
-      caller.callInt64();
-      if (ret.m_type == KindOfUninit) {
-        ret.m_type = KindOfNull;
-      }
-    break;
-  default:
-    not_reached();
-  }
-}
-
 static inline int32_t minNumArgs(ActRec *ar) {
   auto func = ar->m_func;
   auto numArgs = func->numParams();
@@ -304,7 +307,9 @@ static inline bool nativeWrapperCheckArgs(ActRec* ar) {
   return true;
 }
 
+template<bool usesDoubles>
 TypedValue* functionWrapper(ActRec* ar) {
+  assert(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
@@ -316,7 +321,7 @@ TypedValue* functionWrapper(ActRec* ar) {
   if (LIKELY(numNonDefault == numArgs) ||
       LIKELY(nativeWrapperCheckArgs(ar))) {
     if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-      callFunc(func, nullptr, args, numArgs, rv);
+      callFunc<usesDoubles>(func, nullptr, args, rv);
     } else if (func->attrs() & AttrParamCoerceModeFalse) {
       rv.m_type = KindOfBoolean;
       rv.m_data.num = 0;
@@ -329,7 +334,9 @@ TypedValue* functionWrapper(ActRec* ar) {
   return &ar->m_r;
 }
 
+template<bool usesDoubles>
 TypedValue* methodWrapper(ActRec* ar) {
+  assert(ar);
   auto func = ar->m_func;
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
@@ -359,7 +366,7 @@ TypedValue* methodWrapper(ActRec* ar) {
         ctx = ar->getClass();
       }
 
-      callFunc(func, ctx, args, numArgs, rv);
+      callFunc<usesDoubles>(func, ctx, args, rv);
     } else if (func->attrs() & AttrParamCoerceModeFalse) {
       rv.m_type = KindOfBoolean;
       rv.m_data.num = 0;
@@ -374,6 +381,15 @@ TypedValue* methodWrapper(ActRec* ar) {
   }
   tvCopy(rv, ar->m_r);
   return &ar->m_r;
+}
+
+BuiltinFunction getWrapper(bool method, bool usesDoubles) {
+  if ( method &&  usesDoubles) return methodWrapper<true>;
+  if ( method && !usesDoubles) return methodWrapper<false>;
+  if (!method &&  usesDoubles) return functionWrapper<true>;
+  if (!method && !usesDoubles) return functionWrapper<false>;
+  not_reached();
+  return nullptr;
 }
 
 TypedValue* unimplementedWrapper(ActRec* ar) {

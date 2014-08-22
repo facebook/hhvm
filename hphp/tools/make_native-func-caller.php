@@ -44,23 +44,24 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
             ",\"Regenerate native-func-caller.h for updated ".
             "kNumSIMDRegs\");\n\n");
 
+$callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
+              'double* SIMD, int SIMD_count';
 foreach(['double'=>'Double','int64_t'=>'Int64'] as $ret => $name) {
-  fwrite($fp, "${ret} NativeFuncCaller::call${name}() {\n");
-  fwrite($fp, "  BuiltinFunction f = m_func->nativeFuncPtr();\n");
-  fwrite($fp, "  switch (numGPargs()) {\n");
+  fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
+  fwrite($fp, "  switch (GP_count) {\n");
   $gpargs = [];
   for($gp = 0; $gp <= NUM_GP_ARGS; ++$gp) {
     fwrite($fp, "    case ${gp}:\n");
-    fwrite($fp, "      switch (numSIMDargs()) {\n");
+    fwrite($fp, "      switch (SIMD_count) {\n");
     $simdargs = [];
     for($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
       $argsD = implode(',', array_merge($simdargs, $gpargs));
       $argsC = [];
       for ($i = 0; $i < $simd; ++$i) {
-        $argsC[] = "simd($i)";
+        $argsC[] = "SIMD[$i]";
       }
       for ($i = 0; $i < $gp; ++$i) {
-        $argsC[] = "gp($i)";
+        $argsC[] = "GP[$i]";
       }
       $argsC = implode(',', $argsC);
       fwrite($fp, "        case ${simd}:\n");

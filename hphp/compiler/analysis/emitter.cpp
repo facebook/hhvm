@@ -6558,7 +6558,20 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
         bif = nif;
         nif = nullptr;
       } else {
-        bif = pce ? Native::methodWrapper : Native::functionWrapper;
+        bool usesDouble = false;
+        auto params = meth->getParams();
+        int numParams = params ? params->getCount() : 0;
+        for (int i = 0; i < numParams; ++i) {
+          ParameterExpressionPtr par(
+            static_pointer_cast<ParameterExpression>((*params)[i]));
+          if (auto const typeAnnotation = par->annotation()) {
+            if (typeAnnotation->dataType() == KindOfDouble) {
+              usesDouble = true;
+              break;
+            }
+          }
+        }
+        bif = Native::getWrapper(pce, usesDouble);
       }
     }
   }

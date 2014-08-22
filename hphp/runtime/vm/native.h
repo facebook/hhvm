@@ -198,26 +198,25 @@ bool coerceFCallArgs(TypedValue* args,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
+template<bool usesDoubles>
 void callFunc(const Func* func, void* ctx,
-              TypedValue* args, int32_t numArgs,
-              TypedValue& ret);
-/**
- * ActRec to native function call wrapper
- *
- * Unpacks args and coerces types according to Func typehints
- * Calls C++ function in the form ret f_foo(type arg1, type arg2, ...)
- * Marshalls return into TypedValue
- */
-TypedValue* functionWrapper(ActRec* ar);
+              TypedValue* args, TypedValue& ret);
 
 /**
- * Method version of nativeFunctionWrapper() above.
+ * Returns a specialization of either functionWrapper or methodWrapper
  *
- * Also prepends a calling context:
- *   const Object& for instance methods
- *   Class* for static methods
+ * functionWrapper() Unpacks args and coerces types according
+ * to Func typehints. Calls C++ function in the form:
+ * ret f_foo(type arg1, type arg2, ...)
+ * Marshalls return into TypedValue.
+ *
+ * methodWrapper() behaves the same as functionWrapper(),
+ * but also prepends either an ObjectData* (instance) or Class* (static)
+ * argument to the signature. i.e.:
+ * ret c_class_ni_method(ObjectData* this_, type arg1, type arg2, ...)
+ * ret c_class_ns_method(Class* self_, type arg1, type arg2, ...)
  */
-TypedValue* methodWrapper(ActRec* ar);
+BuiltinFunction getWrapper(bool method, bool usesDoubles);
 
 /**
  * Fallback method bound to declared methods with no matching

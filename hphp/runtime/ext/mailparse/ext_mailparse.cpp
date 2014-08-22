@@ -15,7 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_mailparse.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/temp-file.h"
@@ -25,30 +24,6 @@
 #include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
-
-class MailparseExtension : public Extension {
- public:
-  MailparseExtension() : Extension("mailparse") { }
-  void moduleInit() {
-    HHVM_FE(mail);
-    HHVM_FE(ezmlm_hash);
-    HHVM_FE(mailparse_msg_create);
-    HHVM_FE(mailparse_msg_free);
-    HHVM_FE(mailparse_msg_parse_file);
-    HHVM_FE(mailparse_msg_parse);
-    HHVM_FE(mailparse_msg_extract_part_file);
-    HHVM_FE(mailparse_msg_extract_whole_part_file);
-    HHVM_FE(mailparse_msg_extract_part);
-    HHVM_FE(mailparse_msg_get_part_data);
-    HHVM_FE(mailparse_msg_get_part);
-    HHVM_FE(mailparse_msg_get_structure);
-    HHVM_FE(mailparse_rfc822_parse_addresses);
-    HHVM_FE(mailparse_stream_encode);
-    HHVM_FE(mailparse_uudecode_all);
-    HHVM_FE(mailparse_determine_best_xfer_encoding);
-    loadSystemlib();
-  }
-} s_mailparse_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 // utility functions
@@ -491,6 +466,30 @@ Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
   }
   return false;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+class MailparseExtension : public Extension {
+ public:
+  MailparseExtension() : Extension("mailparse") { }
+  void moduleInit() {
+    HHVM_FE(mailparse_msg_create);
+    HHVM_FE(mailparse_msg_free);
+    HHVM_FE(mailparse_msg_parse_file);
+    HHVM_FE(mailparse_msg_parse);
+    HHVM_FE(mailparse_msg_extract_part_file);
+    HHVM_FE(mailparse_msg_extract_whole_part_file);
+    HHVM_FE(mailparse_msg_extract_part);
+    HHVM_FE(mailparse_msg_get_part_data);
+    HHVM_FE(mailparse_msg_get_part);
+    HHVM_FE(mailparse_msg_get_structure);
+    HHVM_FE(mailparse_rfc822_parse_addresses);
+    HHVM_FE(mailparse_stream_encode);
+    HHVM_FE(mailparse_uudecode_all);
+    HHVM_FE(mailparse_determine_best_xfer_encoding);
+    loadSystemlib();
+  }
+} s_mailparse_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

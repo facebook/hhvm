@@ -345,7 +345,7 @@ Variant f_fgets(const Resource& handle, int64_t length /* = 0 */) {
     return false;
   }
   CHECK_HANDLE(handle, f);
-  String line = f->readLine(length);
+  String line = f->readLine(length - 1);
   if (!line.isNull()) {
     return line;
   }

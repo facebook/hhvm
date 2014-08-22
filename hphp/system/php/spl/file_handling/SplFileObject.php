@@ -174,7 +174,7 @@ class SplFileObject extends SplFileInfo
    *                     file, or FALSE on error.
    */
   public function fgets() {
-    $line = fgets($this->rsrc);
+    $line = fgets($this->rsrc, $this->maxLineLen);
     if ($this->flags & self::DROP_NEW_LINE) {
       $line = rtrim($line);
     }

@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include <limits>
 
 #include "hphp/runtime/server/server-stats.h"
@@ -79,10 +79,8 @@ static String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
-static class MiscExtension : public Extension {
-public:
-  MiscExtension() : Extension("misc", k_PHP_VERSION.c_str()) { }
-  void threadInit() {
+
+void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "highlight.string", "#DD0000",
@@ -129,7 +127,7 @@ public:
     );
   }
 
-  virtual void moduleInit() override {
+void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
@@ -160,9 +158,8 @@ public:
         false
       #endif
      );
-    loadSystemlib();
+    loadSystemlib("std_misc");
   }
-} s_misc_extension;
 
 // Make sure "tokenizer" gets added to the list of extensions
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(tokenizer, 0.1);

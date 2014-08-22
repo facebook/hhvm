@@ -28,7 +28,7 @@
 #include "folly/ScopeGuard.h"
 #include "folly/String.h"
 
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"

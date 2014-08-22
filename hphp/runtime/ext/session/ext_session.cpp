@@ -45,7 +45,7 @@
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

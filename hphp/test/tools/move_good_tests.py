@@ -35,7 +35,7 @@ def moveAllFiles(old, new):
             old_file = old + filesuffix
             new_file = new + filesuffix
             if args.git_mv:
-                os.system("git mv %s %s " % (old_file, new_file))
+                subprocess.call(["git", "mv", old_file, new_file])
             else:
                 shutil.move(old_file, new_file)
 

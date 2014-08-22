@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/request-local.h"
@@ -776,32 +775,6 @@ String f_str_repeat(const String& input, int multiplier) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-Variant f_printf(int _argc, const String& format, const Array& _argv /* = null_array */) {
-  String output = string_printf(format.data(), format.size(), _argv);
-  if (output.isNull()) return false;
-  g_context->write(output.data(), output.size());
-  return output.size();
-}
-
-Variant f_vprintf(const String& format, const Array& args) {
-  String output = string_printf(format.data(), format.size(), args);
-  if (output.isNull()) return false;
-  g_context->write(output.data(), output.size());
-  return output.size();
-}
-
-Variant f_sprintf(int _argc, const String& format, const Array& _argv /* = null_array */) {
-  String output = string_printf(format.data(), format.size(), _argv);
-  if (output.isNull()) return false;
-  return output;
-}
-
-Variant f_vsprintf(const String& format, const Array& args) {
-  String output = string_printf(format.data(), format.size(), args);
-  if (output.isNull()) return false;
-  return output;
-}
 
 Variant f_sscanf(int _argc,
                  const String& str,

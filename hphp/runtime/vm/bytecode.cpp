@@ -2674,8 +2674,9 @@ StrNR ExecutionContext::createFunction(const String& args,
   return lambda->nameStr();
 }
 
-bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
-                                         int frame) {
+bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
+                                       StringData* code,
+                                       int frame) {
   assert(retval);
   // The code has "<?php" prepended already
   Unit* unit = compile_string(code->data(), code->size());
@@ -2684,8 +2685,16 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval, StringData *code,
     tvWriteNull(retval);
     return true;
   }
+
   // Do not JIT this unit, we are using it exactly once.
   unit->setInterpretOnly();
+  return evalPHPDebugger(retval, unit, frame);
+}
+
+bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
+                                       Unit* unit,
+                                       int frame) {
+  assert(retval);
 
   bool failed = true;
   ActRec *fp = vmfp();

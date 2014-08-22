@@ -16,7 +16,9 @@
 */
 
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
+
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 
@@ -243,10 +245,20 @@ static bool is_breakpoint_hit(XDebugBreakpoint& bp) {
     return false;
   }
 
-  // TODO(#4489053) Check eval result
-  if (type == BreakType::LINE) {
-    String condition = bp.condition.toString();
-    (void) condition;
+  // Check the condition on line breakpoints. We disable then enable the
+  // breakpoints before/after the evaluation in order to prevent
+  // a breakpoint from being hit within this check
+  if (type == BreakType::LINE && bp.conditionUnit != nullptr) {
+    bool prev_disabled = g_context->m_dbgNoBreak;
+    g_context->m_dbgNoBreak = true;
+
+    Variant result;
+    bool failure = g_context->evalPHPDebugger((TypedValue*) &result,
+                                               bp.conditionUnit, 0);
+    g_context->m_dbgNoBreak = prev_disabled;
+    if (failure || !result.toBoolean()) {
+      return false;
+    }
   }
 
   // No hit value means the breakpoint is always hit

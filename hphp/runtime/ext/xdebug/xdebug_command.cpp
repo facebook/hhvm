@@ -18,8 +18,10 @@
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/runtime/ext/url/ext_url.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/constants.h"
 
 namespace HPHP {
@@ -87,10 +89,34 @@ namespace HPHP {
           xdebug_sprintf("%d", m_server.m_showHidden), true)                   \
 
 ////////////////////////////////////////////////////////////////////////////////
+// Helpers
 
 // These are used a lot, prevent unnecessary verbosity
 typedef XDebugServer::Status Status;
 typedef XDebugServer::Reason Reason;
+
+// Compiles the encoded base64 string expression and returns the corresponding
+// unit. Throws XDebugServer::ERROR_EVALUATING_CODE on failure.
+//
+// Note that php5 xdebug claims non-expressions are allowed in their eval code,
+// but the implementation calls zend_eval_string which wraps EXPR in
+// "return EXPR;"
+static Unit* xdebug_compile(const String& expr) {
+  // Decode the string then make it return
+  StringBuffer buf;
+  String decoded = StringUtil::Base64Decode(expr);
+  buf.printf("<?php return %s;", decoded.data());
+  String evalString = buf.detach();
+
+  // Try to compile the string, don't JIT the code since it is not likely to
+  // be used often
+  Unit* unit = compile_string(evalString.data(), evalString.size());
+  if (unit == nullptr) {
+    throw XDebugServer::ERROR_EVALUATING_CODE;
+  }
+  unit->setInterpretOnly();
+  return unit;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // status -i #
@@ -491,12 +517,9 @@ public:
       // Ensure consistency between filenames
       bp.fileName = File::TranslatePath(bp.fileName);
 
-      // Grab the condition string if one was provided
+      // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
-        Variant cond_var = HHVM_FN(base64_decode)(args['-'].toString(), false);
-        if (cond_var.isString()) {
-          bp.condition = cond_var.toString();
-        }
+        bp.conditionUnit = xdebug_compile(args['-'].toString());
       }
     }
 
@@ -750,18 +773,53 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// eval -i #
-// TODO(#4489053) Implement
+// eval -i # [-p PAGE] -- DATA
+// Evaluate a string within the given exeuction context.
 
 class EvalCmd : public XDebugCommand {
 public:
   EvalCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // An evaluation string must be provided
+    if (args['-'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_evalUnit = xdebug_compile(args['-'].toString());
+
+    // A page can optionally be provided
+    if (!args['p'].isNull()) {
+      m_page = strtol(args['p'].toString().data(), nullptr, 10);
+    }
+  }
+
   ~EvalCmd() {}
 
   bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    // Do the eval. Throw on failure.
+    Variant result;
+    if (g_context->evalPHPDebugger((TypedValue*) &result,
+                                   m_evalUnit, 0)) {
+      throw XDebugServer::ERROR_EVALUATING_CODE;
+    }
+
+    // Construct the exporter
+    XDebugExporter exporter;
+    exporter.max_depth = m_server.m_maxDepth;
+    exporter.max_children = m_server.m_maxChildren;
+    exporter.max_data = m_server.m_maxData;
+    exporter.page = m_page;
+
+    // Create the xml node
+    xdebug_xml_node* node = xdebug_get_value_xml_node(nullptr, result,
+                                                      XDebugVarType::Normal,
+                                                      exporter);
+    xdebug_xml_add_child(&xml, node);
+    return false;
   }
+
+private:
+  Unit* m_evalUnit;
+  int m_page = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

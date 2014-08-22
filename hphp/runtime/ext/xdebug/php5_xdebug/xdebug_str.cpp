@@ -106,7 +106,10 @@ char *xdebug_sprintf(const char* fmt, ...) {
 }
 
 char* xdstrdup(const char* str) {
-  assert(str != nullptr);
+  if (str == nullptr) {
+    return nullptr;
+  }
+
   size_t size = strlen(str) + 1;
   char* dup = (char*) xdmalloc(size);
   memcpy(dup, str, size);

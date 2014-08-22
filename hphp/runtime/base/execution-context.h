@@ -530,7 +530,15 @@ public:
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
+
+  // Compiles the passed string and evaluates it in the given frame. Returns
+  // false on failure.
   bool evalPHPDebugger(TypedValue* retval, StringData *code, int frame);
+
+  // Evaluates the a unit compiled via compile_string in the given frame.
+  // Returns false on failure.
+  bool evalPHPDebugger(TypedValue* retval, Unit* unit, int frame);
+
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void preventReturnsToTC();

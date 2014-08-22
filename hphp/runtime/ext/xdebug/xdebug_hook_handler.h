@@ -53,13 +53,13 @@ struct XDebugBreakpoint {
   HitCondition hitCondition = HitCondition::GREATER_OR_EQUAL;
 
   // A line breakpoint requires a filename and a line number. It has an
-  // optional condition (that should be null or a string php expression) that,
-  // if evaluated to true at the breakpoint, allows a break. php5 xdebug
-  // doesn't distinguish internally between this and a conditional breakpoint
-  // (which is in the spec)
+  // optional condition represented by the given unit where the pseud-main is
+  // called when over the given file/line. IT should returns true if we should
+  // break, false otherwise.  Note that php5 xdebug doesn't distinguish
+  // internally between this and a conditional breakpoint (which is in the spec)
   String fileName;
   int line = -1;
-  Variant condition = init_null();
+  Unit* conditionUnit = nullptr;
 
   // A call or return breakpoint occurs when the function in the given class
   // with the given name is called/returns. The class name and function name

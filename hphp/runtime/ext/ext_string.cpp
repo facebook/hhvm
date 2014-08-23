@@ -425,8 +425,7 @@ String stringTrim(String& str, const String& charlist) {
       char* sdata = str.bufferSlice().ptr;
       for (int idx = 0; start < len;) sdata[idx++] = sdata[start++];
     }
-    str.shrink(slen);
-    return str;
+    return String(str.get()->shrink(slen));
   }
 
   return str.substr(start, end - start + 1);

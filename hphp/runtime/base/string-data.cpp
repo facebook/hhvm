@@ -532,7 +532,7 @@ StringData* StringData::reserve(size_t cap) {
   return ret;
 }
 
-StringData* StringData::shrink(size_t len) {
+StringData* StringData::shrinkImpl(size_t len) {
   assert(!isImmutable() && !hasMultipleRefs() && len >= 0);
   assert(isFlat());
   assert(len <= m_len);
@@ -551,6 +551,15 @@ StringData* StringData::shrink(size_t len) {
   assert(ret == sd);
   assert(ret->checkSane());
   return ret;
+}
+
+StringData* StringData::shrink(size_t len) {
+  if (len < size() && size() - len > kMinShrinkThreshold) {
+    return shrinkImpl(len);
+  }
+  assert(len < MaxSize);
+  setSize(len);
+  return this;
 }
 
 // State transition from Mode::Shared to Mode::Flat.

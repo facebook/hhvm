@@ -242,9 +242,11 @@ struct StringData {
    * MakeStatic.
    *
    * Returns: possibly a new StringData, if we decided to reallocate. The
-   * returned pointer is not yet incref'd.
+   * returned pointer is not yet incref'd.  shrinkImpl always returns a new
+   * StringData.
    */
   StringData* shrink(size_t len);
+  StringData* shrinkImpl(size_t len);
 
   /*
    * Returns a slice with extents sized to the *string* that this

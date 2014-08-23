@@ -229,7 +229,7 @@ public:
   const String& shrink(size_t len) {
     assert(m_px);
     if (len < m_px->size() && m_px->size() - len > kMinShrinkThreshold) {
-      StringBase::operator=(m_px->shrink(len));
+      StringBase::operator=(m_px->shrinkImpl(len));
     } else {
       assert(len < StringData::MaxSize);
       m_px->setSize(len);

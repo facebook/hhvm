@@ -1,4 +1,4 @@
 object(X)#1 (0) {
 }
 
-Fatal error: Call to undefined method V::bar from anonymous context in %s/test/slow/redeclared_classes/1474.php on line 28
+Fatal error: Call to undefined method V::bar() in %s/test/slow/redeclared_classes/1474.php on line 28

@@ -69,7 +69,7 @@ Break at cls::meth() on line 13 of %s/eval1.php
   14     return $a.'-'.$b.'-'.$c;
 
 @ $this->pub = $x->seven()
-Hit fatal : Call to private method test2::seven from context cls
+Hit fatal : Call to private method test2::seven() from context 'cls'
     #0 at [:1]
     #1 include(), called at %s/eval1.php:13]
     #2 cls->meth(), called at [:%d]

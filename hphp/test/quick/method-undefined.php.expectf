@@ -1,2 +1,2 @@
 
-Fatal error: Call to undefined method c::foo from anonymous context in %s on line 8
+Fatal error: Call to undefined method c::foo() %s on line 8

@@ -51,7 +51,7 @@ def moveAllFiles(old, new):
     ]
     for filesuffix in files:
         if os.path.isfile(old + filesuffix):
-            shutil.move(old + filesuffix, new + filesuffix)
+            subprocess.call(["git", "mv", old + filesuffix, new + filesuffix])
 
 def moveTests(tests):
     for test in tests:
@@ -89,7 +89,6 @@ parser.add_argument(
     action="store_true"
 )
 
-
 args = parser.parse_args()
 
 print "Searching in ", os.path.realpath(args.folder)
@@ -106,5 +105,8 @@ if args.verbose or args.no_move:
         print test.replace(os.path.realpath(zend_dir), '')
 
 if not args.no_move:
-    print "\nMoving tests"
-    moveTests(good_tests)
+    if len(good_tests) == 0:
+        print "\nNo good tests found"
+    else:
+        print "\nMoving %d tests" % len(good_tests)
+        moveTests(good_tests)

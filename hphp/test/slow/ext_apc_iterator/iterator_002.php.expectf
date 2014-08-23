@@ -1,0 +1,11 @@
+array(4) {
+  ["key10"]=>
+  string(5) "key10"
+  ["key20"]=>
+  string(5) "key20"
+  ["key30"]=>
+  string(5) "key30"
+  ["key40"]=>
+  string(5) "key40"
+}
+===DONE===

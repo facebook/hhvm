@@ -1,6 +1,82 @@
 {
     "preamble": "",
-    "consts": [
+    "consts": [        
+        {
+            "name": "APC_ITER_TYPE",
+            "value": 1
+        },
+        {
+            "name": "APC_ITER_KEY",
+            "value": 2
+        },
+        {
+            "name": "APC_ITER_FILENAME",
+            "value": 4
+        },
+        {
+            "name": "APC_ITER_DEVICE",
+            "value": 8
+        },
+        {
+            "name": "APC_ITER_INODE",
+            "value": 16
+        },
+        {
+            "name": "APC_ITER_VALUE",
+            "value": 32
+        },
+        {
+            "name": "APC_ITER_MD5",
+            "value": 64
+        },
+        {
+            "name": "APC_ITER_NUM_HITS",
+            "value": 128
+        },
+        {
+            "name": "APC_ITER_MTIME",
+            "value": 256
+        },
+        {
+            "name": "APC_ITER_CTIME",
+            "value": 512
+        },
+        {
+            "name": "APC_ITER_DTIME",
+            "value": 1024
+        },
+        {
+            "name": "APC_ITER_ATIME",
+            "value": 2048
+        },
+        {
+            "name": "APC_ITER_REFCOUNT",
+            "value": 4096
+        },
+        {
+            "name": "APC_ITER_MEM_SIZE",
+            "value": 8192
+        },
+        {
+            "name": "APC_ITER_TTL",
+            "value": 16384
+        },
+        {
+            "name": "APC_ITER_NONE",
+            "value": 0
+        },
+        {
+            "name": "APC_ITER_ALL",
+            "value": 1099511627775
+        },
+        {
+            "name": "APC_LIST_ACTIVE",
+            "value": 1
+        },
+        {
+            "name": "APC_LIST_DELETED",
+            "value": 2
+        }
     ],
     "funcs": [
         {

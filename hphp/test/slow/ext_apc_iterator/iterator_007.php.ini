@@ -1,0 +1,2 @@
+apc.enabled=1
+apc.enable_cli=1

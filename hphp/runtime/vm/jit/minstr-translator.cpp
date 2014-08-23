@@ -1713,13 +1713,9 @@ static TypedValue arrayGetNotFound(const StringData* k) {
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,
-                                                             SSATmp* key,
-                                                             bool profiled
-                                                             /* = false*/) {
-  // We can call emitPackedArrayGet on arrays for which we do not statically
-  // know that they are packed, if we have profile information for the array.
+                                                             SSATmp* key) {
   assert(base->isA(Type::Arr) &&
-         (profiled || base->type().getArrayKind() == ArrayData::kPackedKind));
+         base->type().getArrayKind() == ArrayData::kPackedKind);
 
   return m_irb.cond(
     1,
@@ -1808,19 +1804,20 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
     auto const data = prof.data(NonPackedArrayProfile::reduce);
     // NonPackedArrayProfile data counts how many times a non-packed
     // array was observed.
-    if (data.count == 0) {
+    auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
+    if (data.count == 0 && m_base->type().maybe(typePackedArr)) {
       m_ht.emitIncStat(Stats::ArrayGet_Mono, 1, false);
       m_result = m_irb.cond(
         1,
         [&] (Block* taken) {
-          return gen(CheckType, Type::Arr.specialize(ArrayData::kPackedKind),
-                     taken, m_base);
+          return gen(CheckType, typePackedArr, taken, m_base);
         },
         [&] (SSATmp* base) { // Next
           m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
           m_irb.constrainValue(
             base, TypeConstraint(DataTypeSpecialized).setWantArrayKind());
-          return emitPackedArrayGet(base, key, true);
+          SSATmp* packedBase = gen(AssertType, typePackedArr, base);
+          return emitPackedArrayGet(packedBase, key);
         },
         [&] { // Taken
           m_irb.hint(Block::Hint::Unlikely);

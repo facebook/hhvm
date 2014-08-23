@@ -593,8 +593,7 @@ private:
     SSATmp* emitArrayGet(SSATmp* key);
     void emitProfiledArrayGet(SSATmp* key);
     void emitArrayIsset();
-    SSATmp* emitPackedArrayGet(SSATmp* base, SSATmp* key,
-                               bool profiled = false);
+    SSATmp* emitPackedArrayGet(SSATmp* base, SSATmp* key);
     void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
     void emitStringIsset();

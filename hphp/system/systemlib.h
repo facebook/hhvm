@@ -64,7 +64,8 @@ namespace Eval {
   x(LazyKeyedIterableView)                      \
   x(Phar)                                       \
   x(CURLFile)                                   \
-  x(__PHP_Incomplete_Class)
+  x(__PHP_Incomplete_Class)                     \
+  x(APCIterator)
 
 class SystemLib {
  public:

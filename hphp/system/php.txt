@@ -80,6 +80,7 @@ hphp/system/php/date/datetimeimmutable.php
 hphp/system/php/XhprofFrame.php
 hphp/system/php/array_filter.hhas
 hphp/system/php/array_map.hhas
+hphp/system/php/apc/APCIterator.php
 hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
 hphp/system/php/collections/collections.ns.php

@@ -409,7 +409,14 @@ const StaticString
   s_NAPTR("NAPTR"),
   s_IN("IN");
 
-static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
+#define CHECKCP(n) do { \
+  if ((cp + (n)) > end) { \
+    return nullptr; \
+  } \
+} while (0)
+
+static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
+                                  querybuf *answer,
                                   int type_to_fetch, bool store,
                                   Array &subarray) {
   unsigned short type, cls ATTRIBUTE_UNUSED, dlen;
@@ -426,10 +433,12 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   }
   cp += n;
 
+  CHECKCP(10);
   GETSHORT(type, cp);
   GETSHORT(cls, cp);
   GETLONG(ttl, cp);
   GETSHORT(dlen, cp);
+  CHECKCP(dlen);
   if (type_to_fetch != T_ANY && type != type_to_fetch) {
     cp += dlen;
     return cp;
@@ -443,12 +452,14 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   subarray.set(s_host, String(name, CopyString));
   switch (type) {
   case DNS_T_A:
+    CHECKCP(4);
     subarray.set(s_type, s_A);
     snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
     subarray.set(s_ip, String(name, CopyString));
     cp += dlen;
     break;
   case DNS_T_MX:
+    CHECKCP(2);
     subarray.set(s_type, s_MX);
     GETSHORT(n, cp);
     subarray.set(s_pri, n);
@@ -477,31 +488,36 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   case DNS_T_HINFO:
     /* See RFC 1010 for values */
     subarray.set(s_type, s_HINFO);
+    CHECKCP(1);
     n = *cp & 0xFF;
     cp++;
+    CHECKCP(n);
     subarray.set(s_cpu, String((const char *)cp, n, CopyString));
     cp += n;
+    CHECKCP(1);
     n = *cp & 0xFF;
     cp++;
+    CHECKCP(n);
     subarray.set(s_os, String((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_TXT: {
-    int ll = 0;
+    int l1 = 0, l2 = 0;
 
     String s = String(dlen, ReserveString);
     tp = (unsigned char *)s.bufferSlice().ptr;
 
-    while (ll < dlen) {
-      n = cp[ll];
-      if ((n + ll) > dlen) {
+    while (l1 < dlen) {
+      n = cp[l1];
+      if ((n + l1) > dlen) {
         // bad record, don't set anything
         break;
       }
-      memcpy(tp + ll , cp + ll + 1, n);
-      ll = ll + n + 1;
+      memcpy(tp + l1 , cp + l1 + 1, n);
+      l1 = l1 + n + 1;
+      l2 = l2 + n;
     }
-    s.setSize(dlen > 0 ? dlen - 1 : 0);
+    s.setSize(l2);
     cp += dlen;
 
     subarray.set(s_type, s_TXT);
@@ -510,18 +526,19 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   }
   case DNS_T_SOA:
     subarray.set(s_type, s_SOA);
-    n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
+    n = dn_expand(answer->qb2, end, cp, name, (sizeof name) -2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
     subarray.set(s_mname, String(name, CopyString));
-    n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
+    n = dn_expand(answer->qb2, end, cp, name, (sizeof name) -2);
     if (n < 0) {
       return NULL;
     }
     cp += n;
     subarray.set(s_rname, String(name, CopyString));
+    CHECKCP(5*4);
     GETLONG(n, cp);
     subarray.set(s_serial, n);
     GETLONG(n, cp);
@@ -535,6 +552,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     break;
   case DNS_T_AAAA:
     tp = (unsigned char *)name;
+    CHECKCP(8*2);
     for (i = 0; i < 8; i++) {
       GETSHORT(s, cp);
       if (s != 0) {
@@ -569,6 +587,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
   case DNS_T_A6:
     p = cp;
     subarray.set(s_type, s_A6);
+    CHECKCP(1);
     n = ((int)cp[0]) & 0xFF;
     cp++;
     subarray.set(s_masklen, n);
@@ -604,6 +623,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
       cp++;
     }
     for (i = (n + 8)/16; i < 8; i++) {
+      CHECKCP(2);
       GETSHORT(s, cp);
       if (s != 0) {
         if (tp > (u_char *)name) {
@@ -633,7 +653,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     tp[0] = '\0';
     subarray.set(s_ipv6, String(name, CopyString));
     if (cp < p + dlen) {
-      n = dn_expand(answer->qb2, answer->qb2+65536, cp, name,
+      n = dn_expand(answer->qb2, end, cp, name,
                     (sizeof name) - 2);
       if (n < 0) {
         return NULL;
@@ -643,6 +663,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     }
     break;
   case DNS_T_SRV:
+    CHECKCP(3*2);
     subarray.set(s_type, s_SRV);
     GETSHORT(n, cp);
     subarray.set(s_pri, n);
@@ -650,7 +671,7 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     subarray.set(s_weight, n);
     GETSHORT(n, cp);
     subarray.set(s_port, n);
-    n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
+    n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }
@@ -658,21 +679,35 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     subarray.set(s_target, String(name, CopyString));
     break;
   case DNS_T_NAPTR:
+    CHECKCP(2*2);
     subarray.set(s_type, s_NAPTR);
     GETSHORT(n, cp);
     subarray.set(s_order, n);
     GETSHORT(n, cp);
     subarray.set(s_pref, n);
+
+    CHECKCP(1);
     n = (cp[0] & 0xFF);
-    subarray.set(s_flags, String((const char *)(++cp), n, CopyString));
+    ++cp;
+    CHECKCP(n);
+    subarray.set(s_flags, String((const char *)cp, n, CopyString));
     cp += n;
+
+    CHECKCP(1);
     n = (cp[0] & 0xFF);
-    subarray.set(s_services, String((const char *)(++cp), n, CopyString));
+    ++cp;
+    CHECKCP(n);
+    subarray.set(s_services, String((const char *)cp, n, CopyString));
     cp += n;
+
+    CHECKCP(1);
     n = (cp[0] & 0xFF);
-    subarray.set(s_regex, String((const char *)(++cp), n, CopyString));
+    ++cp;
+    CHECKCP(n);
+    subarray.set(s_regex, String((const char *)cp, n, CopyString));
     cp += n;
-    n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
+
+    n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
     if (n < 0) {
       return NULL;
     }
@@ -779,7 +814,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
     /* YAY! Our real answers! */
     while (an-- && cp && cp < end) {
       Array retval;
-      cp = php_parserr(cp, &answer, type_to_fetch, store_results, retval);
+      cp = php_parserr(cp, end, &answer, type_to_fetch, store_results, retval);
       if (!retval.empty() && store_results) {
         ret.append(retval);
       }
@@ -794,7 +829,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
   /* List of Authoritative Name Servers */
   while (ns-- > 0 && cp && cp < end) {
     Array retval;
-    cp = php_parserr(cp, &answer, DNS_T_ANY, true, retval);
+    cp = php_parserr(cp, end, &answer, DNS_T_ANY, true, retval);
     if (!retval.empty()) {
       authns.append(retval);
     }
@@ -803,7 +838,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
   /* Additional records associated with authoritative name servers */
   while (ar-- > 0 && cp && cp < end) {
     Array retval;
-    cp = php_parserr(cp, &answer, DNS_T_ANY, true, retval);
+    cp = php_parserr(cp, end, &answer, DNS_T_ANY, true, retval);
     if (!retval.empty()) {
       addtl.append(retval);
     }

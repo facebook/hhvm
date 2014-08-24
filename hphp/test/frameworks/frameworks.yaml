@@ -622,6 +622,14 @@
     clowns:
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
+  typo3:
+    url: git://github.com/TYPO3/TYPO3.CMS.git
+    branch: master
+    commit: 1338779992cfd4cb88434e283b78d27ab9250c2b
+    install_root: typo3
+    test_root: typo3/typo3/sysext/core/Build
+    config_file: typo3/typo3/sysext/core/Build/HHVMUnitTests.xml
+    bootstrap_file: typo3/typo3/sysext/core/Build/UnitTestsBootstrap.php
   vfsstream:
     # We're using Graham's fork to unskip a couple of tests
     # The latest stable is v1.3.0 - the fork is slightly ahead

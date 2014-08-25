@@ -87,12 +87,12 @@ public:
   /**
    * Get offset from UTC at the specified timestamp under this timezone.
    */
-  int offset(int timestamp) const;
+  int offset(int64_t timestamp) const;
 
   /**
    * Test whether it was running under DST at specified timestamp.
    */
-  bool dst(int timestamp) const;
+  bool dst(int64_t timestamp) const;
 
   /**
    * Query transition times for DST.

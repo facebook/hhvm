@@ -241,7 +241,7 @@ String TimeZone::abbr(int type /* = 0 */) const {
   return String(&m_tzi->timezone_abbr[m_tzi->type[type].abbr_idx], CopyString);
 }
 
-int TimeZone::offset(int timestamp) const {
+int TimeZone::offset(int64_t timestamp) const {
   if (!m_tzi) return 0;
 
   timelib_time_offset *offset =
@@ -251,7 +251,7 @@ int TimeZone::offset(int timestamp) const {
   return ret;
 }
 
-bool TimeZone::dst(int timestamp) const {
+bool TimeZone::dst(int64_t timestamp) const {
   if (!m_tzi) return false;
 
   timelib_time_offset *offset =

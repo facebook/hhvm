@@ -238,7 +238,7 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
-                                           IRInstruction* typeSrc) {
+                                           const IRInstruction* typeSrc) {
   ITRACE(3, "preOptimizeAssertTypeOp({}, {}, {}, {})\n",
          *inst, oldType,
          oldVal ? oldVal->toString() : "nullptr",
@@ -315,7 +315,11 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   auto const stackInfo = getStackValue(prevSp, idx);
 
   return preOptimizeAssertTypeOp(
-    inst, stackInfo.knownType, stackInfo.value, stackInfo.typeSrc);
+    inst,
+    stackInfo.knownType,
+    stackInfo.value,
+    stackInfo.typeSrc
+  );
 }
 
 SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
@@ -326,12 +330,18 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
     return inst->src(0);
   }
 
-  auto* typeSrc = localTypeSource(locId);
+  auto const typeSrc = localTypeSource(locId);
+  auto const typeSrcInst =
+    typeSrc.isValue() ? typeSrc.value->inst() :
+    typeSrc.isGuard() ? typeSrc.guard :
+    nullptr;
+
   return preOptimizeAssertTypeOp(
     inst,
     localType(locId, DataTypeGeneric),
     localValue(locId, DataTypeGeneric),
-    typeSrc ? typeSrc->inst() : nullptr);
+    typeSrcInst
+  );
 }
 
 SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
@@ -747,7 +757,7 @@ void IRBuilder::reoptimize() {
  * than the guard's existing constraint. Note that this doesn't necessarily
  * mean that the guard was constrained: tc.weak might be true.
  */
-bool IRBuilder::constrainGuard(IRInstruction* inst, TypeConstraint tc) {
+bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
   if (!shouldConstrainGuards()) return false;
 
   auto& guard = m_constraints.guards[inst];
@@ -787,25 +797,23 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // Call. The value won't be live but it's ok to use it to track down the
     // guard.
 
-    auto source = get_required(m_constraints.typeSrcs, inst);
-    if (!source) {
+    auto const source = get_required(m_constraints.typeSrcs, inst);
+    if (source.isNone()) {
       // val was newly created in this trace. Nothing to constrain.
       ITRACE(2, "typeSrc is null, bailing\n");
       return false;
     }
 
-    // If typeSrc is a FramePtr, it represents the frame the value was
-    // originally loaded from. Look for the guard for this local.
-    if (source->isA(Type::FramePtr)) {
+    if (source.isGuard()) {
       return constrainLocal(inst->extra<LocalId>()->locId, source, tc,
                             "constrainValue");
     }
 
     // Otherwise, keep chasing down the source of val.
-    return constrainValue(source, tc);
+    assert(source.isValue());
+    return constrainValue(source.value, tc);
   } else if (inst->is(LdStack, LdStackAddr)) {
-    return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset,
-                          tc);
+    return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(AssertType)) {
     // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
     // but can tolerate a less specific value. If that happens, there's nothing
@@ -895,13 +903,15 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   // TODO(t2598894): Should be able to do something with LdMem<T> here
 }
 
-bool IRBuilder::constrainLocal(uint32_t locId, TypeConstraint tc,
+bool IRBuilder::constrainLocal(uint32_t locId,
+                               TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
   return constrainLocal(locId, localTypeSource(locId), tc, why);
 }
 
-bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* typeSrc,
+bool IRBuilder::constrainLocal(uint32_t locId,
+                               TypeSource typeSrc,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
@@ -909,25 +919,20 @@ bool IRBuilder::constrainLocal(uint32_t locId, SSATmp* typeSrc,
                         tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainLocal({}, {}, {}, {})\n",
-         locId, typeSrc ? typeSrc->inst()->toString() : "null", tc, why);
+         locId, show(typeSrc), tc, why);
   Indent _i;
 
-  if (!typeSrc) return false;
-  if (!typeSrc->isA(Type::FramePtr)) {
-    return constrainValue(typeSrc, tc);
-  }
+  if (typeSrc.isNone()) return false;
+  if (typeSrc.isValue()) return constrainValue(typeSrc.value, tc);
 
-  // When typeSrc is a FramePtr, that means we loaded the value the local had
-  // coming into the trace. Trace through the FramePtr chain, looking for a
-  // guard for this local id. If we find it, constrain the guard. If we don't
-  // find it, there wasn't a guard for this local so there's nothing to
-  // constrain.
-  auto guard = guardForLocal(locId, typeSrc);
-  if (!guard) return false;
+  assert(typeSrc.isGuard());
+  auto const guard = typeSrc.guard;
+
   if (guard->is(GuardLoc)) {
     ITRACE(2, "found guard to constrain\n");
     return constrainGuard(guard, tc);
   }
+
   always_assert(guard->is(AssertLoc, CheckLoc));
 
   // If the dest of the (Assert|Check)Loc doesn't fit tc there's no point in
@@ -1101,7 +1106,7 @@ void IRBuilder::insertLocalPhis() {
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
         if (shouldConstrainGuards()) {
-          m_constraints.typeSrcs[ldLoc] = local.typeSource;
+          m_constraints.typeSrcs[ldLoc] = local.typeSrc;
         }
 
         if (pred->numSuccs() > 1) {

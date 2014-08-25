@@ -100,18 +100,19 @@ struct IRBuilder {
    */
   void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
   bool shouldConstrainGuards()      const { return m_constrainGuards; }
-  bool constrainGuard(IRInstruction* inst, TypeConstraint tc);
+  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
   bool constrainValue(SSATmp* const val, TypeConstraint tc);
-  bool constrainLocal(uint32_t id, TypeConstraint tc,
-                      const std::string& why);
-  bool constrainLocal(uint32_t id, SSATmp* valSrc, TypeConstraint tc,
+  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
+  bool constrainLocal(uint32_t id,
+                      TypeSource typeSrc,
+                      TypeConstraint tc,
                       const std::string& why);
   bool constrainStack(int32_t offset, TypeConstraint tc);
   bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  SSATmp* localTypeSource(uint32_t id) const {
+  TypeSource localTypeSource(uint32_t id) const {
     return m_state.localTypeSource(id);
   }
   bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
@@ -419,14 +420,17 @@ private:
 
 private:
   using ConstrainBoxedFunc = std::function<SSATmp*(Type)>;
-  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType,
+  SSATmp*   preOptimizeCheckTypeOp(IRInstruction* inst,
+                                   Type oldType,
                                    ConstrainBoxedFunc func);
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
 
-  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst, Type oldType,
-                                    SSATmp* oldVal, IRInstruction* typeSrc);
+  SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
+                                    Type oldType,
+                                    SSATmp* oldVal,
+                                    const IRInstruction* typeSrc);
   SSATmp*   preOptimizeAssertType(IRInstruction*);
   SSATmp*   preOptimizeAssertStk(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);

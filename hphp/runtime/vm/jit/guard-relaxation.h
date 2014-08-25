@@ -35,7 +35,6 @@ enum RelaxGuardsFlags {
   RelaxReflow = 1 << 1,
 };
 
-IRInstruction* guardForLocal(uint32_t locId, SSATmp* fp);
 bool shouldHHIRRelaxGuards();
 
 /*

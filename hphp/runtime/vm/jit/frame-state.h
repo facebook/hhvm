@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/type-source.h"
 
 namespace HPHP {
 
@@ -104,9 +105,9 @@ struct LocalStateHook {
                                    SSATmp* oldRef, SSATmp* newRef) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
-  virtual void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {}
+  virtual void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {}
   virtual void setLocalType(uint32_t id, Type type) {}
-  virtual void setLocalTypeSource(uint32_t id, SSATmp* typeSource) {}
+  virtual void setLocalTypeSource(uint32_t id, TypeSource typeSrc) {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -216,7 +217,7 @@ struct FrameState final : private LocalStateHook {
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
-  SSATmp* localTypeSource(uint32_t id) const;
+  TypeSource localTypeSource(uint32_t id) const;
 
   typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
   // Call func for all enclosing frames, starting with the current one and
@@ -239,7 +240,7 @@ struct FrameState final : private LocalStateHook {
    */
   struct LocalState {
     /*
-     * The current value of the local. nullptr if unknown.
+     * The current value of the local.
      */
     SSATmp* value{nullptr};
 
@@ -249,14 +250,14 @@ struct FrameState final : private LocalStateHook {
     Type type{Type::Gen};
 
     /*
-     * The source of the currently known type: either the
-     * current value, a FramePtr with a guard, or nullptr
-     * if the value is new and unknown.
+     * The source of the currently known type. The source may be a value. If
+     * the value is unavailable, we won't hold onto it in the value field, but
+     * we'll keep it around in typeSrc.value for guard relaxation.
      */
-    SSATmp* typeSource{nullptr};
+    TypeSource typeSrc;
 
     bool operator==(const LocalState& b) const {
-      return value == b.value && type == b.type && typeSource == b.typeSource;
+      return value == b.value && type == b.type && typeSrc == b.typeSrc;
     }
   };
 
@@ -312,9 +313,9 @@ struct FrameState final : private LocalStateHook {
   void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
                            SSATmp* newRef) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
-  void refineLocalType(uint32_t id, Type type, SSATmp* typeSource) override;
+  void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
   void setLocalType(uint32_t id, Type type) override;
-  void setLocalTypeSource(uint32_t id, SSATmp* typeSource) override;
+  void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
 
   LocalVec& locals(unsigned inlineIdx);
 

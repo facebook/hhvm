@@ -218,14 +218,14 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
       auto const type = inst->typeParam().relaxToGuardable();
       auto id = inst->extra<LdGbl>()->locId;
       hook.setLocalType(id, type);
-      hook.setLocalTypeSource(id, inst->dst());
+      hook.setLocalTypeSource(id, TypeSource::makeValue(inst->dst()));
       break;
     }
     case StGbl: {
       auto const type = inst->src(1)->type().relaxToGuardable();
       auto id = inst->extra<StGbl>()->locId;
       hook.setLocalType(id, type);
-      hook.setLocalTypeSource(id, inst->src(1));
+      hook.setLocalTypeSource(id, TypeSource::makeValue(inst->src(1)));
       break;
     }
 
@@ -235,10 +235,11 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
 
     case AssertLoc:
     case GuardLoc:
-    case CheckLoc:
-      hook.refineLocalType(inst->extra<LocalId>()->locId, inst->typeParam(),
-                           inst->dst());
+    case CheckLoc: {
+      auto id = inst->extra<LocalId>()->locId;
+      hook.refineLocalType(id, inst->typeParam(), TypeSource::makeGuard(inst));
       break;
+    }
 
     case TrackLoc:
       hook.setLocalValue(inst->extra<LocalId>()->locId, inst->src(0));
@@ -567,8 +568,12 @@ void FrameState::merge(Snapshot& state) {
         local.value = nullptr;
       }
     }
-    if (local.typeSource != m_locals[i].typeSource) local.typeSource = nullptr;
-    if (local.value && !local.typeSource) local.typeSource = local.value;
+    if (local.typeSrc != m_locals[i].typeSrc) {
+      local.typeSrc = TypeSource{};
+    }
+    if (local.value != nullptr && local.typeSrc.isNone()) {
+      local.typeSrc = TypeSource::makeValue(local.value);
+    }
 
     local.type = Type::unionOf(local.type, m_locals[i].type);
   }
@@ -701,13 +706,9 @@ SSATmp* FrameState::localValue(uint32_t id) const {
   return m_locals[id].value;
 }
 
-SSATmp* FrameState::localTypeSource(uint32_t id) const {
+TypeSource FrameState::localTypeSource(uint32_t id) const {
   always_assert(id < m_locals.size());
-  auto const& local = m_locals[id];
-
-  always_assert(!local.value || local.value == local.typeSource ||
-                local.typeSource->isA(Type::FramePtr));
-  return local.typeSource;
+  return m_locals[id].typeSrc;
 }
 
 Type FrameState::localType(uint32_t id) const {
@@ -719,10 +720,10 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < m_locals.size());
   m_locals[id].value = value;
   m_locals[id].type = value ? value->type() : Type::Gen;
-  m_locals[id].typeSource = value;
+  m_locals[id].typeSrc = value ? TypeSource::makeValue(value) : TypeSource{};
 }
 
-void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
+void FrameState::refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
   Type newType = refineType(local.type, type);
@@ -732,19 +733,19 @@ void FrameState::refineLocalType(uint32_t id, Type type, SSATmp* typeSource) {
                      "Bad new type for local {}: {} & {} = {}",
                      id, local.type, type, newType);
   local.type = newType;
-  local.typeSource = typeSource;
+  local.typeSrc = typeSrc;
 }
 
 void FrameState::setLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
   m_locals[id].value = nullptr;
   m_locals[id].type = type;
-  m_locals[id].typeSource = nullptr;
+  m_locals[id].typeSrc = TypeSource{};
 }
 
-void FrameState::setLocalTypeSource(uint32_t id, SSATmp* typeSrc) {
+void FrameState::setLocalTypeSource(uint32_t id, TypeSource typeSrc) {
   always_assert(id < m_locals.size());
-  m_locals[id].typeSource = typeSrc;
+  m_locals[id].typeSrc = typeSrc;
 }
 
 /*
@@ -768,7 +769,7 @@ void FrameState::refineLocalValue(uint32_t id, unsigned inlineIdx,
   auto& local = locs[id];
   local.value = newVal;
   local.type = newVal->type();
-  local.typeSource = newVal;
+  local.typeSrc = TypeSource::makeValue(newVal);
 }
 
 void FrameState::killLocalForCall(uint32_t id, unsigned inlineIdx,
@@ -784,7 +785,7 @@ void FrameState::updateLocalRefValue(uint32_t id, unsigned inlineIdx,
   assert(local.value == oldRef);
   local.value = newRef;
   local.type  = newRef->type();
-  local.typeSource = newRef;
+  local.typeSrc = TypeSource::makeValue(newRef);
 }
 
 void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {

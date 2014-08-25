@@ -27,13 +27,13 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
 
         if len(argv) == 0:
             if curunit is None:
-                print 'unit: No Unit set.'
+                print('unit: No Unit set.')
             else:
                 gdb.execute('print (%s)%s' % (curunit.type, curunit))
             return
 
         if len(argv) > 1:
-            print 'Usage: unit [Unit*|none]'
+            print('Usage: unit [Unit*|none]')
             return
 
         if argv[0] == 'none':

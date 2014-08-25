@@ -1,7 +1,7 @@
 <?php
 if (!(
   extension_loaded('pcre_zend_compat')
-  && ini_get('hhvm.ext_zend_compat')
+  && ini_get('hhvm.enable_zend_compat')
 )) {
   echo 'Skip';
 }

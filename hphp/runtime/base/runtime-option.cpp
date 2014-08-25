@@ -718,19 +718,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       if (LogFile[0] == '|') Logger::IsPipeOutput = true;
       Config::Bind(LogFileSymLink, ini, logger["SymLink"]);
     }
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.log.file", IniSetting::SetAndGet<std::string>(
-      [](const std::string& value) {
-        LogFile = value;
-        if (!RuntimeOption::ServerExecutionMode()) {
-          LogFile.clear();
-        }
-        if (LogFile[0] == '|') Logger::IsPipeOutput = true;
-        return true;
-      }, []() {
-        return LogFile;
-      }
-    ));
     Config::Bind(LogFileFlusher::DropCacheChunkSize, ini,
                  logger["DropCacheChunkSize"], 1 << 20);
     Config::Bind(AlwaysEscapeLog, ini, logger["AlwaysEscapeLog"], false);
@@ -743,9 +730,9 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
                  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
-
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
-                                               "%h %l %u %t \"%r\" %>s %b");
+                 "%h %l %u %t \"%r\" %>s %b");
+
     {
       Hdf access = logger["Access"];
       for (Hdf hdf = access.firstChild(); hdf.exists();
@@ -1482,13 +1469,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                      [](const std::string& value) { return false; },
                      []() { return getHphpCompilerVersion(); }
                    ));
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
-                   "hhvm.ext_zend_compat",
-                   IniSetting::SetAndGet<bool>(
-                     [](const bool& value) { return false; },
-                     nullptr
-                   ),
-                   &RuntimeOption::EnableZendCompat),
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.build_id",
                    IniSetting::SetAndGet<std::string>(

@@ -14,8 +14,12 @@ var_dump(ini_get("hhvm.jit_always_interp_one"));
 var_dump(ini_get("hhvm.log.use_log_file"));
 var_dump(ini_get("hhvm.server.type"));
 var_dump(ini_get("hhvm.server.port"));
+var_dump(ini_get("hhvm.log.use_log_file"));
+var_dump(ini_get("hhvm.log.file"));
+var_dump(ini_get("hhvm.enable_zend_compat"));
 
 // Throw some bad apples in there. They should
 // all return false
 var_dump(ini_get("hhvm.this_should_not_work"));
 var_dump(ini_get("hhvm.jit_ahot_size"));
+var_dump(ini_get("hhvm.ext_zend_compat"));

@@ -28,7 +28,7 @@
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 namespace {
 

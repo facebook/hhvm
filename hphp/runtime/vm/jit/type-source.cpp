@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 std::string show(const TypeSource& typeSrc) {
   if (typeSrc.isNone()) return "None";

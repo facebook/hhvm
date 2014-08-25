@@ -20,7 +20,7 @@
 #include "hphp/util/bitops.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

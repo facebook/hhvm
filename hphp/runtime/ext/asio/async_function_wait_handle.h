@@ -61,7 +61,7 @@ class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
   }
   static c_AsyncFunctionWaitHandle* Create(const ActRec* origFp,
                                            size_t numSlots,
-                                           JIT::TCA resumeAddr,
+                                           jit::TCA resumeAddr,
                                            Offset resumeOffset,
                                            c_WaitableWaitHandle* child);
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);

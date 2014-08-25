@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 // Compute a sequence of moves and swaps that will fill the dest registers in
 // the moves map with their correct source values, even if some sources are

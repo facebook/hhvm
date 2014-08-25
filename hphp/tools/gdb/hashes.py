@@ -18,7 +18,7 @@ def hash_ctca(ctca):
 # Hash dispatcher.
 
 hashes = {
-    'HPHP::JIT::CTCA':  hash_ctca,
+    'HPHP::jit::CTCA': hash_ctca,
 }
 
 def hash_of(value):

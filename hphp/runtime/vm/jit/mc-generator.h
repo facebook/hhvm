@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 typedef X64Assembler Asm;
 typedef hphp_hash_map<TCA, TransID> TcaTransIDMap;
@@ -158,7 +158,7 @@ struct MCGenerator : private boost::noncopyable {
     return !mcg || Translator::WriteLease().amOwner();
   }
 
-  static JIT::CppCall getDtorCall(DataType type);
+  static jit::CppCall getDtorCall(DataType type);
   static bool isPseudoEvent(const char* event);
 
 public:

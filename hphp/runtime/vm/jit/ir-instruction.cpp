@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   : m_typeParam(inst->m_typeParam)
@@ -364,8 +364,8 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
 }
 
 void IRInstruction::setOpcode(Opcode newOpc) {
-  assert(hasEdges() || !JIT::hasEdges(newOpc)); // cannot allocate new edges
-  if (hasEdges() && !JIT::hasEdges(newOpc)) {
+  assert(hasEdges() || !jit::hasEdges(newOpc)); // cannot allocate new edges
+  if (hasEdges() && !jit::hasEdges(newOpc)) {
     clearEdges();
   }
   m_op = newOpc;

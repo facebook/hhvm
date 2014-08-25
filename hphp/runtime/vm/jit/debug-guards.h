@@ -18,11 +18,9 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP {
-namespace JIT { class SrcRec; }
-namespace JIT {
-
-void addDbgGuardImpl(SrcKey sk, JIT::SrcRec* srcRec);
+namespace HPHP { namespace jit {
+class SrcRec;
+void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec);
 
 }}
 

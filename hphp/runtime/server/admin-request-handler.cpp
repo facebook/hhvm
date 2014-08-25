@@ -609,7 +609,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    auto* mCGenerator = JIT::mcg;
+    auto* mCGenerator = jit::mcg;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     mCGenerator->code.forEachBlock([&](const char* name, const CodeBlock& a) {
       auto isMain = strncmp(name, "main", 4) == 0;
@@ -873,11 +873,11 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(JIT::mcg->getUsage());
+    transport->sendString(jit::mcg->getUsage());
     return true;
   }
   if (cmd == "vm-tcaddr") {
-    transport->sendString(JIT::mcg->getTCAddrs());
+    transport->sendString(jit::mcg->getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -887,7 +887,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (HPHP::JIT::tc_dump()) {
+    if (HPHP::jit::tc_dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");

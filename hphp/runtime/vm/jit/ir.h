@@ -47,12 +47,13 @@
 namespace HPHP {
 // forward declaration
 class StringData;
-namespace JIT {
 
-using HPHP::JIT::TCA;
-using HPHP::JIT::RegSet;
-using HPHP::JIT::PhysReg;
-using HPHP::JIT::ConditionCode;
+namespace jit {
+
+using HPHP::jit::TCA;
+using HPHP::jit::RegSet;
+using HPHP::jit::PhysReg;
+using HPHP::jit::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
@@ -1106,28 +1107,28 @@ struct GuardConstraints {
  */
 int32_t spillValueCells(const IRInstruction* spillStack);
 
-} // namespace JIT
+} // namespace jit
 } // namespace HPHP
 
 namespace std {
-  template<> struct hash<HPHP::JIT::Opcode> {
-    size_t operator()(HPHP::JIT::Opcode op) const { return uint16_t(op); }
+  template<> struct hash<HPHP::jit::Opcode> {
+    size_t operator()(HPHP::jit::Opcode op) const { return uint16_t(op); }
   };
-  template<> struct hash<HPHP::JIT::Type> {
-    size_t operator()(HPHP::JIT::Type t) const { return t.hash(); }
+  template<> struct hash<HPHP::jit::Type> {
+    size_t operator()(HPHP::jit::Type t) const { return t.hash(); }
   };
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::JIT::Opcode> {
-  explicit FormatValue(HPHP::JIT::Opcode op) : m_op(op) {}
+template<> struct FormatValue<HPHP::jit::Opcode> {
+  explicit FormatValue(HPHP::jit::Opcode op) : m_op(op) {}
 
   template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
     format_value::formatString(opcodeName(m_op), arg, cb);
   }
 
  private:
-  HPHP::JIT::Opcode m_op;
+  HPHP::jit::Opcode m_op;
 };
 }
 

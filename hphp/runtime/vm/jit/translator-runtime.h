@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 
 /* MInstrState is stored right above the reserved spill space on the C++

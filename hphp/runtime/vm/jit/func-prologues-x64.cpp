@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -147,22 +147,22 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     // Too many args; a weird case, so call out to an appropriate helper.
     // Stash ar somewhere callee-saved.
     if (false) { // typecheck
-      JIT::shuffleExtraArgsMayUseVV((ActRec*)nullptr);
-      JIT::shuffleExtraArgsVariadicAndVV((ActRec*)nullptr);
-      JIT::shuffleExtraArgsVariadic((ActRec*)nullptr);
-      JIT::trimExtraArgs((ActRec*)nullptr);
+      jit::shuffleExtraArgsMayUseVV((ActRec*)nullptr);
+      jit::shuffleExtraArgsVariadicAndVV((ActRec*)nullptr);
+      jit::shuffleExtraArgsVariadic((ActRec*)nullptr);
+      jit::trimExtraArgs((ActRec*)nullptr);
     }
     a.    movq   (rStashedAR, argNumToRegName[0]);
 
     if (LIKELY(func->discardExtraArgs())) {
-      emitCall(a, TCA(JIT::trimExtraArgs));
+      emitCall(a, TCA(jit::trimExtraArgs));
     } else if (func->attrs() & AttrMayUseVV) {
       emitCall(a, func->hasVariadicCaptureParam()
-               ? TCA(JIT::shuffleExtraArgsVariadicAndVV)
-               : TCA(JIT::shuffleExtraArgsMayUseVV));
+               ? TCA(jit::shuffleExtraArgsVariadicAndVV)
+               : TCA(jit::shuffleExtraArgsMayUseVV));
     } else {
       assert(func->hasVariadicCaptureParam());
-      emitCall(a, TCA(JIT::shuffleExtraArgsVariadic));
+      emitCall(a, TCA(jit::shuffleExtraArgsVariadic));
     }
     // We'll fix rVmSp below.
   } else if (nPassed < numNonVariadicParams) {
@@ -316,11 +316,11 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     for (int i = nPassed; i < numNonVariadicParams; ++i) {
       if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
         if (false) { // typecheck
-          JIT::raiseMissingArgument((const Func*) nullptr, 0);
+          jit::raiseMissingArgument((const Func*) nullptr, 0);
         }
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
         a.  emitImmReg(nPassed, argNumToRegName[1]);
-        emitCall(a, TCA(JIT::raiseMissingArgument));
+        emitCall(a, TCA(jit::raiseMissingArgument));
         mcg->recordSyncPoint(a.frontier(), fixup.m_pcOffset, fixup.m_spOffset);
         break;
       }

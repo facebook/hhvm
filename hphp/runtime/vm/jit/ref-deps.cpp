@@ -20,8 +20,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(trans);
 
@@ -151,4 +150,4 @@ ActRecState::currentState() {
   return m_arStack.back().m_state;
 }
 
-} } // HPHP::JIT
+} } // HPHP::jit

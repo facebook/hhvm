@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-using namespace HPHP::JIT;
+using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {

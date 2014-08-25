@@ -61,7 +61,7 @@ Filename and line number information is only included for C++ functions.
             rip = argv[1].cast(rip_type)
 
         try:
-            mcg = V('HPHP::JIT::mcg')
+            mcg = V('HPHP::jit::mcg')
             tc_base = mcg['code']['m_base']
             tc_end = tc_base + mcg['code']['m_codeSize']
         except:

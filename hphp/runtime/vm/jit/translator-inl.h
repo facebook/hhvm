@@ -18,11 +18,11 @@
 #error "translator-inl.h should only be included by translator.h"
 #endif
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator accessors.
 
-inline JIT::IRTranslator* Translator::irTrans() const {
+inline jit::IRTranslator* Translator::irTrans() const {
   return m_irTrans.get();
 }
 

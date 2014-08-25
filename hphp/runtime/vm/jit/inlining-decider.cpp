@@ -30,7 +30,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(inlining);

@@ -94,8 +94,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
@@ -2234,6 +2233,6 @@ emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   mcg->backEnd().emitIncStat(cb, disp, n);
 }
 
-} // HPHP::JIT
+} // HPHP::jit
 
 } // HPHP

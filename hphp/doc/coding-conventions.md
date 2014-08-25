@@ -233,7 +233,7 @@ rather than adopting an existing one.
 ### Namespaces ###
 
 All HHVM code should be scoped in `namespace HPHP { /* everything */ }`. Large
-submodules such as `HPHP::JIT` and `HPHP::RDS` may be contained in their own
+submodules such as `HPHP::jit` and `HPHP::RDS` may be contained in their own
 namespace within `HPHP`. We often use anonymous namespaces instead of the
 `static` keyword to keep symbols internal to their translation unit. This is
 mostly left up to the author; just keep in mind that classes and structs,
@@ -507,7 +507,7 @@ We don't nest namespaces very deeply, so prefer to keep the scoping to a single
 line:
 
 ```cpp
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

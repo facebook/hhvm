@@ -23,7 +23,7 @@
 
 #define EXPECT_MATCH(...) EXPECT_TRUE(match(__VA_ARGS__))
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 // match()

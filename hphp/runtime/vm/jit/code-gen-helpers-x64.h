@@ -33,7 +33,7 @@
 
 namespace HPHP {
 struct Func;
-namespace JIT {
+namespace jit {
 struct Fixup;
 struct SSATmp;
 namespace X64 {

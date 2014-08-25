@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct IRInstruction;
 

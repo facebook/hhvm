@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
   : m_id(opndId)

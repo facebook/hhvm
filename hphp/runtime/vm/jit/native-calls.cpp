@@ -30,7 +30,7 @@
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/ext_array.h"
 
-namespace HPHP {  namespace JIT { namespace NativeCalls {
+namespace HPHP { namespace jit { namespace NativeCalls {
 
 namespace {
 

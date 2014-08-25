@@ -23,15 +23,15 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
 constexpr size_t kCacheLineSize = 64;
 constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
-struct CodeGenerator : public JIT::CodeGenerator {
-  typedef JIT::X64Assembler Asm;
+struct CodeGenerator : public jit::CodeGenerator {
+  typedef jit::X64Assembler Asm;
 
   CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, Vout& frozen,
                 CodegenState& state)

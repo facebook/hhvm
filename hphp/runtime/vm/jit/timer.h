@@ -46,7 +46,7 @@
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_gen)                          \
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Timer is used to track how much CPU time we spend in the different stages of

@@ -24,8 +24,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 // insert inst after the point dst is defined
 static void insertAfter(IRInstruction* definer, IRInstruction* inst) {

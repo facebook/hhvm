@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "hphp/hhvm/process-init.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

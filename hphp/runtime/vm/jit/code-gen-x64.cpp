@@ -67,9 +67,9 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-using HPHP::JIT::TCA;
+using HPHP::jit::TCA;
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 TRACE_SET_MOD(hhir);
 
@@ -77,7 +77,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace JIT::reg;
+using namespace jit::reg;
 
 /*
  * It's not normally ok to directly use tracelet abi registers in
@@ -5097,7 +5097,7 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   auto ch = cgLdClsCachedCommon(inst);
   unlikelyIfBlock(vmain(), vcold(), CC_E, [&] (Vout& v) {
-    Class* (*const func)(Class**, const StringData*) = JIT::lookupKnownClass;
+    Class* (*const func)(Class**, const StringData*) = jit::lookupKnownClass;
     cgCallHelper(v,
                  CppCall::direct(func),
                  callDest(inst),
@@ -5147,7 +5147,7 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
   auto const extra = inst->extra<LookupClsCns>();
   auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
   cgCallHelper(vmain(),
-    CppCall::direct(JIT::lookupClassConstantTv),
+    CppCall::direct(jit::lookupClassConstantTv),
     callDestTV(inst),
     SyncOptions::kSyncPoint,
     argGroup()
@@ -6214,7 +6214,7 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  JIT::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
+  jit::print(std::cout, m_unit, &m_state.regs, m_state.asmInfo);
 }
 
 }}}

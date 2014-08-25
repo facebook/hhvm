@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 using namespace X64;
 
 int PhysReg::kNumGP = 0;

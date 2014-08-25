@@ -20,12 +20,9 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 struct NormalizedInstruction;
 struct Location;
-}
-namespace JIT {
 
 /*
  * IRTranslator is used to convert hhbc instructions to a cfg of Blocks

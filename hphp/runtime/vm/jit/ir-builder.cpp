@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 namespace {
 template<typename M>
@@ -77,7 +77,7 @@ IRBuilder::~IRBuilder() {
  * checked.
  */
 bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  return shouldConstrainGuards() && JIT::typeMightRelax(tmp);
+  return shouldConstrainGuards() && jit::typeMightRelax(tmp);
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {

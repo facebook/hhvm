@@ -31,7 +31,7 @@ namespace HPHP {
 
 struct Func;
 
-namespace JIT {
+namespace jit {
 
 struct IRInstruction;
 struct SSATmp;

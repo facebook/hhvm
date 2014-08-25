@@ -51,7 +51,7 @@ const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
   size_t begin, end;
-  JIT::mcg->codeEmittedThisRequest(begin, end);
+  jit::mcg->codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
   auto constexpr kMaxTCBytes = 25 << 10;
   if (diff > kMaxTCBytes) {
@@ -60,7 +60,7 @@ static String HHVM_FUNCTION(server_warmup_status) {
   }
 
   // Fail if we spent more than 0.5ms in the JIT.
-  auto const jittime = JIT::Timer::CounterValue(JIT::Timer::translate);
+  auto const jittime = jit::Timer::CounterValue(jit::Timer::translate);
   auto constexpr kMaxJitTimeNS = 500000;
   if (jittime.total > kMaxJitTimeNS) {
     return folly::format("Spent {}us in the JIT.", jittime.total / 1000).str();

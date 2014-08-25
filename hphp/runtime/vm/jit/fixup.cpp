@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 bool
 FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
@@ -129,7 +128,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   // uniqueStub.
   for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
     auto const* sim = ec->m_activeSims[i];
-    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(JIT::ARM::rVmFp.code()));
+    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(jit::ARM::rVmFp.code()));
     auto tca = reinterpret_cast<TCA>(sim->pc());
     TRACE(2, "considering frame %p, %p\n", rbp, tca);
 
@@ -207,6 +206,6 @@ FixupMap::eagerRecord(const Func* func) {
   return false;
 }
 
-} // HPHP::JIT
+} // HPHP::jit
 
 } // HPHP

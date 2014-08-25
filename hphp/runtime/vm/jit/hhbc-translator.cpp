@@ -41,7 +41,7 @@
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
@@ -5625,7 +5625,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
 folly::Optional<Type> HhbcTranslator::interpOutputType(
     const NormalizedInstruction& inst,
     folly::Optional<Type>& checkTypeType) const {
-  using namespace JIT::InstrFlags;
+  using namespace jit::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
     assert(locId >= 0 && locId < curFunc()->numLocals());
@@ -5727,7 +5727,7 @@ jit::vector<InterpOneData::LocalType>
 HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
                                    bool& smashesAllLocals,
                                    folly::Optional<Type> pushedType) {
-  using namespace JIT::InstrFlags;
+  using namespace jit::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
   jit::vector<InterpOneData::LocalType> locals;
@@ -5921,7 +5921,7 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
   auto op = unit->getOpcode(bcOff());
 
   auto& iInfo = getInstrInfo(op);
-  if (iInfo.type == JIT::InstrFlags::OutFDesc) {
+  if (iInfo.type == jit::InstrFlags::OutFDesc) {
     m_fpiStack.emplace(sp, m_irb->spOffset());
   } else if (isFCallStar(op) && !m_fpiStack.empty()) {
     m_fpiStack.pop();

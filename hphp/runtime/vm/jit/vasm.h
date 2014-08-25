@@ -21,7 +21,7 @@
 #include <folly/Range.h>
 #include <iosfwd>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 namespace X64 {
 struct Vunit;
 struct Vinstr;

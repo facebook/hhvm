@@ -26,9 +26,9 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
-struct CodeGenerator : public JIT::CodeGenerator {
+struct CodeGenerator : public jit::CodeGenerator {
 
   CodeGenerator(const IRUnit& unit, CodeBlock& mainCode, CodeBlock& coldCode,
                 CodeBlock& frozenCode, CodegenState& state)
@@ -127,7 +127,7 @@ struct CodeGenerator : public JIT::CodeGenerator {
     return ArgGroup(m_curInst, m_state.regs[m_curInst]);
   }
 
-  void recordHostCallSyncPoint(vixl::MacroAssembler& as, JIT::TCA tca);
+  void recordHostCallSyncPoint(vixl::MacroAssembler& as, jit::TCA tca);
   void cgInterpOneCommon(IRInstruction* inst);
 
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);

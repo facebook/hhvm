@@ -22,7 +22,7 @@
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Information about how to make different sorts of calls from the JIT

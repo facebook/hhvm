@@ -666,7 +666,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
 
   if (RuntimeOption::EvalDumpTC) {
-    HPHP::JIT::tc_dump();
+    HPHP::jit::tc_dump();
   }
 
   if (xhprof) {
@@ -1876,8 +1876,8 @@ void hphp_process_exit() {
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {
     in->func();
   }
-  delete JIT::mcg;
-  JIT::mcg = nullptr;
+  delete jit::mcg;
+  jit::mcg = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

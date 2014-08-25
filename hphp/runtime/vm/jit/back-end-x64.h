@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/back-end.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 constexpr int kJmpLen = 5;
 constexpr int kCallLen = 5;

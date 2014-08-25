@@ -47,8 +47,7 @@
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 using namespace reg;
 using namespace Trace;
@@ -64,19 +63,19 @@ TRACE_SET_MOD(hhir);
 
 #define HHIR_UNIMPLEMENTED_OP(op)                       \
   do {                                                  \
-    throw JIT::FailedIRGen(__FILE__, __LINE__, op);     \
+    throw jit::FailedIRGen(__FILE__, __LINE__, op);     \
   } while (0)
 
 
 #define HHIR_UNIMPLEMENTED(op)                          \
   do {                                                  \
-    throw JIT::FailedIRGen(__FILE__, __LINE__, #op);    \
+    throw jit::FailedIRGen(__FILE__, __LINE__, #op);    \
   } while (0)
 
 #define HHIR_UNIMPLEMENTED_WHEN(expr, op)               \
   do {                                                  \
     if (expr) {                                         \
-      throw JIT::FailedIRGen(__FILE__, __LINE__, #op);  \
+      throw jit::FailedIRGen(__FILE__, __LINE__, #op);  \
     }                                                   \
   } while (0)
 
@@ -470,7 +469,7 @@ IRTranslator::translateFCallBuiltin(const NormalizedInstruction& i) {
   Id funcId = i.imm[2].u_SA;
 
   HHIR_EMIT(FCallBuiltin, numArgs, numNonDefault, funcId,
-            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            jit::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void
@@ -483,7 +482,7 @@ IRTranslator::translateFCall(const NormalizedInstruction& i) {
     srcFunc->unit()->offsetOf(after - srcFunc->base());
 
   HHIR_EMIT(FCall, numArgs, returnBcOffset, i.funcd,
-            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            jit::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void IRTranslator::translateFCallD(const NormalizedInstruction& i) {
@@ -497,7 +496,7 @@ IRTranslator::translateFCallArray(const NormalizedInstruction& i) {
   const Offset after = next.offset();
 
   HHIR_EMIT(FCallArray, pcOffset, after,
-            JIT::callDestroysLocals(i, m_hhbcTrans.curFunc()));
+            jit::callDestroysLocals(i, m_hhbcTrans.curFunc()));
 }
 
 void

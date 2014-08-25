@@ -63,7 +63,7 @@ void c_AsyncGenerator::t_raise(const Object& exception) {always_assert(false);}
 
 c_AsyncGenerator* c_AsyncGenerator::Create(const ActRec* fp,
                                            size_t numSlots,
-                                           JIT::TCA resumeAddr,
+                                           jit::TCA resumeAddr,
                                            Offset resumeOffset) {
   assert(fp);
   assert(!fp->resumed());

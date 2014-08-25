@@ -41,7 +41,7 @@
 //  - #3098739 new features now possible with XLS
 //  - #3099647 support loops
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 TRACE_SET_MOD(xls);
 namespace {
 using namespace reg;
@@ -1453,11 +1453,11 @@ void XLS::print(const char* caption) {
       } else {
         str << folly::format(" {: <3} ", pos);
       }
-      JIT::printOpcode(str, &i, nullptr);
-      JIT::printSrcs(str, &i, &m_regs);
+      jit::printOpcode(str, &i, nullptr);
+      jit::printSrcs(str, &i, &m_regs);
       if (i.numDsts()) {
         str << " => ";
-        JIT::printDsts(str, &i, &m_regs);
+        jit::printDsts(str, &i, &m_regs);
       }
       if (&i == &b->back()) {
         if (auto next = b->next()) {

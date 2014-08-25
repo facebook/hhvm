@@ -30,7 +30,7 @@
 #include <cxxabi.h>
 #include <bfd.h>
 
-using namespace HPHP::JIT;
+using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {

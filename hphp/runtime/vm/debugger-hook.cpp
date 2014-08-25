@@ -29,7 +29,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
-using JIT::mcg;
+using jit::mcg;
 
 typedef RequestInjectionData::StepOutState StepOutState;
 

@@ -50,7 +50,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 

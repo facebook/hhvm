@@ -18,7 +18,7 @@
 
 #include "folly/Format.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 // These are in order according to the binary encoding of the X64
 // condition codes.

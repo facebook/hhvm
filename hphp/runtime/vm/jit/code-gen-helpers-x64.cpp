@@ -33,11 +33,11 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace JIT::reg;
+using namespace jit::reg;
 
 TRACE_SET_MOD(hhir);
 

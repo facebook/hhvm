@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct MCGenerator;
 struct ProfData;

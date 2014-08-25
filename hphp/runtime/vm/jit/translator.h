@@ -54,7 +54,7 @@ struct Func;
 
 namespace Debug { struct DebugInfo; }
 
-namespace JIT {
+namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Block;

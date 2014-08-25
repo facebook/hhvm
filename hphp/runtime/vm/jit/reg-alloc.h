@@ -26,7 +26,7 @@
 #undef VOID
 #endif
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 class IRUnit;
 

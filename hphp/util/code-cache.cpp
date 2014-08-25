@@ -173,7 +173,7 @@ CodeCache::~CodeCache() {
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
   always_assert(!m_lock);
-  return JIT::codeBlockChoose(addr, m_main, m_hot, m_prof,
+  return jit::codeBlockChoose(addr, m_main, m_hot, m_prof,
                               m_cold, m_frozen);
 }
 

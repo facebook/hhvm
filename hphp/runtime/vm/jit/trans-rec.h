@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Used to maintain a mapping from the bytecode to its corresponding x86.

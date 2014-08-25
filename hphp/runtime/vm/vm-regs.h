@@ -39,7 +39,7 @@
  * provided for these rare cases.
  *
  * In a C++ function potentially called from translated code, VMRegAnchor
- * should be used before accessing any of these registers. JIT::MCGenerator is
+ * should be used before accessing any of these registers. jit::MCGenerator is
  * currently responsible for doing the work required to sync the VM registers,
  * though this is an implementation detail and should not matter to users of
  * VMRegAnchor.

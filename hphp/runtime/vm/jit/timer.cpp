@@ -26,7 +26,7 @@
 
 TRACE_SET_MOD(jittime);
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 static __thread Timer::Counter s_counters[Timer::kNumTimers];
 

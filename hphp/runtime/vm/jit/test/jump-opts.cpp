@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TEST(JumpOpts, eliminateTrivial) {
   BCMarker marker = BCMarker::Dummy();

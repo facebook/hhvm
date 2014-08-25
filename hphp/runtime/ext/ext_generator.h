@@ -151,7 +151,7 @@ public:
 
   template <bool clone>
   static c_Generator* Create(const ActRec* fp, size_t numSlots,
-                             JIT::TCA resumeAddr, Offset resumeOffset) {
+                             jit::TCA resumeAddr, Offset resumeOffset) {
     assert(fp);
     assert(fp->resumed() == clone);
     assert(fp->func()->isNonAsyncGenerator());

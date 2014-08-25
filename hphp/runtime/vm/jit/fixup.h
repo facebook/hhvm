@@ -28,7 +28,7 @@ namespace HPHP {
 
 class ExecutionContext;
 
-namespace JIT {
+namespace jit {
 
 /*
  * The Fixup map allows us to reconstruct the state of the VM

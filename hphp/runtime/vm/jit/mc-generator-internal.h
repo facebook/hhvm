@@ -23,14 +23,13 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 static const DataType BitwiseKindOfString = KindOfString;
 
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
-void ifThen(JIT::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
   Label done;
   a.jcc8(ccNegate(cc), done);
   thenBlock(a);

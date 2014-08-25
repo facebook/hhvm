@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct IRInstruction;
 struct SSATmp;

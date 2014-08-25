@@ -33,7 +33,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/assertions.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

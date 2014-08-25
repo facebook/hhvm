@@ -22,7 +22,7 @@
 
 #include <boost/operators.hpp>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /**
  * A simple struct identifying a bytecode instruction in a given

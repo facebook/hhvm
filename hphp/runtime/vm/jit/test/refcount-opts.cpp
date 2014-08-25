@@ -25,7 +25,7 @@
 
 #include "hphp/runtime/vm/jit/test/test-context.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TEST(RefcountOpts, trivial) {
   BCMarker dummy = BCMarker::Dummy();

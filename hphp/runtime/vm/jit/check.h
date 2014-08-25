@@ -17,8 +17,7 @@
 #ifndef incl_HPHP_VM_CHECK_H_
 #define incl_HPHP_VM_CHECK_H_
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 class IRUnit;
 struct RegAllocInfo;

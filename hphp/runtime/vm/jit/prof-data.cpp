@@ -25,8 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 

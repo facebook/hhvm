@@ -23,7 +23,7 @@
 #include "hphp/util/code-cache.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct RegAllocInfo;
 

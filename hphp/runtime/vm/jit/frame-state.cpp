@@ -24,8 +24,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 using Trace::Indent;
 

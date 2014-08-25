@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/util/slice.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 using X64::Vunit;
 
 struct CycleInfo {

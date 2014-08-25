@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
 /*
  * Intelligently chooses between Add, Mov, and no-op.
@@ -49,7 +49,7 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
  * differently depending on whether we're simulating ARM or running native.
  * Returns the address at which to record a fixup, if you need to.
  */
-JIT::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
+jit::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
 
 /*
  * Swaps two registers. Uses XOR swap, so will not touch memory, flags, or any
@@ -69,7 +69,7 @@ void emitRegRegMove(vixl::MacroAssembler& a,
  * Check the surprise flags. If surprised, call functionEnterHelper.
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 JIT::Fixup fixup);
+                                 jit::Fixup fixup);
 
 /*
  * Increments the current (at translation time) translation counter.
@@ -140,7 +140,7 @@ inline void emitTLSLoad(vixl::MacroAssembler& a,
                         const ThreadLocalNoCheck<T>& datum,
                         const vixl::Register& destReg) {
   using namespace vixl;
-  a.   Mov  (rHostCallReg, JIT::tlsBaseNoInline);
+  a.   Mov  (rHostCallReg, jit::tlsBaseNoInline);
   a.   Push (x30, x29);
   a.   HostCall(0);
   // tlsBaseNoInline doesn't need a sync point

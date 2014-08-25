@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct Abi;
 struct Block;

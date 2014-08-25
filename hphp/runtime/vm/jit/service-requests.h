@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 #define SERVICE_REQUESTS \
   /*
@@ -148,7 +148,7 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
 // REQ_BIND_CALL
 struct ReqBindCall {
   SrcKey m_sourceInstr;
-  JIT::TCA m_toSmash;
+  jit::TCA m_toSmash;
   int m_nArgs;
   bool m_isImmutable; // call was to known func.
 };
@@ -162,7 +162,7 @@ struct ServiceReqArgInfo {
   } m_kind;
   union {
     uint64_t m_imm;
-    JIT::ConditionCode m_cc;
+    jit::ConditionCode m_cc;
   };
 };
 

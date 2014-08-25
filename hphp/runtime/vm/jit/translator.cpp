@@ -69,7 +69,7 @@
 
 TRACE_SET_MOD(trans);
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 Lease Translator::s_writeLease;

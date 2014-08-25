@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 std::string NewStructData::show() const {
   std::ostringstream os;
@@ -37,19 +37,19 @@ std::string NewStructData::show() const {
 
 const RawMemData::Info& RawMemData::info() const {
   static const Info infos[] = {
-    {c_WaitHandle::stateOff(),    sz::byte,  JIT::Type::Int},
+    {c_WaitHandle::stateOff(),    sz::byte,  jit::Type::Int},
     {c_AsyncFunctionWaitHandle::resumeAddrOff(),
-                                  sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
+                                  sz::qword, jit::Type::TCA|jit::Type::Nullptr},
     {c_AsyncFunctionWaitHandle::resumeOffsetOff(),
-                                  sz::dword, JIT::Type::Int},
+                                  sz::dword, jit::Type::Int},
     {c_Generator::resumeAddrOff(),
-                                  sz::qword, JIT::Type::TCA|JIT::Type::Nullptr},
+                                  sz::qword, jit::Type::TCA|jit::Type::Nullptr},
     {c_Generator::resumeOffsetOff(),
-                                  sz::dword, JIT::Type::Int},
-    {c_Generator::stateOff(),  sz::byte,  JIT::Type::Int},
-    {CONTOFF(m_index),            sz::qword, JIT::Type::Int},
-    {StringData::sizeOff(),       sz::dword, JIT::Type::Int},
-    {Func::paramCountsOff(),      sz::dword, JIT::Type::Int},
+                                  sz::dword, jit::Type::Int},
+    {c_Generator::stateOff(),  sz::byte,  jit::Type::Int},
+    {CONTOFF(m_index),            sz::qword, jit::Type::Int},
+    {StringData::sizeOff(),       sz::dword, jit::Type::Int},
+    {Func::paramCountsOff(),      sz::dword, jit::Type::Int},
   };
   static_assert(sizeof infos / sizeof infos[0] == kNumTypes,
                 "Incorrect size of infos array");

@@ -29,8 +29,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
@@ -2140,7 +2139,7 @@ SSATmp* Simplifier::simplifyIsWaitHandle(const IRInstruction* inst) {
 
 bool Simplifier::typeMightRelax(SSATmp* tmp) const {
   if (!m_typesMightRelax) return false;
-  return JIT::typeMightRelax(tmp);
+  return jit::typeMightRelax(tmp);
 }
 
 //////////////////////////////////////////////////////////////////////

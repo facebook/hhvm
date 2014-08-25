@@ -16,10 +16,9 @@
 
 #include "hphp/runtime/vm/jit/phys-loc.h"
 
-namespace HPHP {
-namespace JIT{
+namespace HPHP { namespace jit {
 
-using namespace JIT::reg;
+using namespace jit::reg;
 
 TRACE_SET_MOD(hhir);
 
@@ -45,4 +44,4 @@ RegSet PhysLoc::regs() const {
   return regs;
 }
 
-}} // HPHP::JIT
+}} // HPHP::jit

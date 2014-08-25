@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir_refcount);
 
@@ -957,12 +957,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
     m_frameState.update(m_inst);
   }
 
-  /* JIT::canonical() traces through passthrough instructions to get the root
+  /* jit::canonical() traces through passthrough instructions to get the root
    * of a value. Since we're tracking the state of inlined frames in the trace,
    * there are often cases where the root value for a LdThis is really a value
    * up in some enclosing frame. */
   SSATmp* canonical(SSATmp* value) {
-    auto* root = JIT::canonical(value);
+    auto* root = jit::canonical(value);
     auto* inst = root->inst();
     if (!inst->is(LdThis)) return root;
 
@@ -1056,7 +1056,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(InterpOne, InterpOneCF)) {
       // InterpOne can push and pop ActRecs.
       auto const op = m_inst->extra<InterpOneData>()->opcode;
-      if (JIT::getInstrInfo(op).type == JIT::InstrFlags::OutFDesc) {
+      if (jit::getInstrInfo(op).type == jit::InstrFlags::OutFDesc) {
         m_state.frames.pushPreLive();
       } else if (isFCallStar(op)) {
         resolveAllFrames();

@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * IRInstructions must be arena-allocatable.
@@ -305,7 +305,7 @@ struct IRInstruction {
   bool mayRaiseError() const;
   bool isEssential() const;
   bool isTerminal() const;
-  bool hasEdges() const { return JIT::hasEdges(op()); }
+  bool hasEdges() const { return jit::hasEdges(op()); }
   bool isPassthrough() const;
   bool isFramePassthrough() const;
   static SSATmp* framePassthroughRoot(SSATmp* ssa);

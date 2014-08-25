@@ -25,7 +25,7 @@ namespace HPHP {
 struct Func;
 struct SrcKey;
 
-namespace JIT {
+namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct RegionDesc;

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

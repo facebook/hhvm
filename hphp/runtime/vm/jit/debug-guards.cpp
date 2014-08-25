@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 static constexpr size_t dbgOff =
   offsetof(ThreadInfo, m_reqInjectionData) +

@@ -3,7 +3,7 @@
 HHVM's just-in-time compiler module is responsible for translating sequences of
 [HHBC](../bytecode.specification) into equivalent sequences of x86-64 or ARM64
 machine code. The vast majority of the code implementing the JIT lives in the
-namespace `HPHP::JIT`, in [hphp/runtime/vm/jit](../../runtime/vm/jit). Most
+namespace `HPHP::jit`, in [hphp/runtime/vm/jit](../../runtime/vm/jit). Most
 file and class names referenced in this document will be relative to that
 namespace and path.
 

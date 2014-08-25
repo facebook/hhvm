@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 namespace {
 
@@ -54,7 +54,7 @@ SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
     return slots[loc.slot(i)];
   }
   auto r = loc.reg(i);
-  assert(r != JIT::InvalidReg);
+  assert(r != jit::InvalidReg);
   return regs[r];
 }
 

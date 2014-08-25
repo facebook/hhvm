@@ -25,7 +25,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 using namespace reg;
 
 const char* vinst_names[] = {

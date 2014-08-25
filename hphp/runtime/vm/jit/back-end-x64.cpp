@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/print.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 using namespace reg;
 
@@ -51,7 +51,7 @@ namespace X64 {
 
 TRACE_SET_MOD(hhir);
 
-struct BackEnd : public JIT::BackEnd {
+struct BackEnd : public jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
@@ -111,12 +111,12 @@ struct BackEnd : public JIT::BackEnd {
     // register (aside from rbp). enterTCHelper does not save them.
     CALLEE_SAVED_BARRIER();
     auto& regs = vmRegsUnsafe();
-    JIT::enterTCHelper(regs.stack.top(), regs.fp, start,
+    jit::enterTCHelper(regs.stack.top(), regs.fp, start,
                        &info, vmFirstAR(), RDS::tl_base);
     CALLEE_SAVED_BARRIER();
   }
 
-  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
+  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                        CodeBlock& mainCode,
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
@@ -134,7 +134,7 @@ struct BackEnd : public JIT::BackEnd {
       x64Alignment = kJmpTargetAlign;
       break;
     case MoveToAlignFlags::kNonFallthroughAlign:
-      x64Alignment = JIT::kNonFallthroughAlign;
+      x64Alignment = jit::kNonFallthroughAlign;
       break;
     case MoveToAlignFlags::kCacheLineAlign:
       x64Alignment = kCacheLineSize;
@@ -663,8 +663,8 @@ struct BackEnd : public JIT::BackEnd {
   virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
 };
 
-std::unique_ptr<JIT::BackEnd> newBackEnd() {
-  return std::unique_ptr<JIT::BackEnd>{ folly::make_unique<BackEnd>() };
+std::unique_ptr<jit::BackEnd> newBackEnd() {
+  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
 using NativeCalls::CallMap;

@@ -34,11 +34,11 @@
 #include "hphp/util/assert-throw.h"
 #include "hphp/runtime/vm/jit/minstr-translator-internal.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
-using HPHP::JIT::Location;
+using HPHP::jit::Location;
 
 static bool wantPropSpecializedWarnings() {
   return !RuntimeOption::RepoAuthoritative ||

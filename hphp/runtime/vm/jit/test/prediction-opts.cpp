@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/test/match.h"
 #include "hphp/runtime/vm/jit/test/test-context.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TEST(PredictionOpts, basic) {
   UNUSED BCMarker marker = BCMarker::Dummy();

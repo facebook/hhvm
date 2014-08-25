@@ -25,8 +25,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(trans)
 
@@ -213,4 +212,4 @@ void SrcRec::patch(IncomingBranch branch, TCA dest) {
   }
 }
 
-} } // HPHP::JIT
+} } // HPHP::jit

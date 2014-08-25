@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
 inline vixl::Register x2a(PhysReg x64reg) {
   always_assert(!x64reg.isSIMD());
@@ -50,8 +50,8 @@ inline vixl::Register serviceReqArgReg(unsigned index) {
   return argReg(index + 1);
 }
 
-inline vixl::Condition convertCC(JIT::ConditionCode cc) {
-  if (cc == JIT::CC_P || cc == JIT::CC_NP) {
+inline vixl::Condition convertCC(jit::ConditionCode cc) {
+  if (cc == jit::CC_P || cc == jit::CC_NP) {
     // ARM has no parity flag
     always_assert(false);
   }

@@ -20,8 +20,7 @@
 
 #include <limits>
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 static const Trace::Module TRACEMOD = Trace::pgo;
 

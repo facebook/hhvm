@@ -29,7 +29,7 @@ struct Func;
 struct Class;
 }
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

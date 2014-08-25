@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/ir.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

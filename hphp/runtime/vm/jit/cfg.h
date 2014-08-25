@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /**
  * perform a depth-first postorder walk

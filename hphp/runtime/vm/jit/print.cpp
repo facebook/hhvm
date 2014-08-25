@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/util/text-util.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 namespace {
@@ -341,7 +341,7 @@ void print(std::ostream& os, const Block* block,
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
         auto dst = inst.dst(i);
-        JIT::print(os, dst, dstLoc(regs, &inst, i));
+        jit::print(os, dst, dstLoc(regs, &inst, i));
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;
@@ -357,7 +357,7 @@ void print(std::ostream& os, const Block* block,
     }
 
     os << std::string(kIndent, ' ');
-    JIT::print(os, &inst, regs, guards);
+    jit::print(os, &inst, regs, guards);
     os << '\n';
 
     if (asmInfo) {

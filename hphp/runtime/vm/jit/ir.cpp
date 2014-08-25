@@ -39,8 +39,7 @@
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
 
-namespace HPHP {  namespace JIT {
-
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 

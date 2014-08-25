@@ -20,7 +20,7 @@
 #include <boost/intrusive/list.hpp>
 #include <boost/noncopyable.hpp>
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 struct Block;
 struct IRInstruction;

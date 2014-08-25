@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/member-operations.h"
 
-namespace HPHP {  namespace JIT { namespace {
+namespace HPHP { namespace jit { namespace {
 
 #define CTX() cns(contextClass())
 

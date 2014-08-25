@@ -22,7 +22,7 @@
 #include "hphp/vixl/a64/simulator-a64.h"
 
 namespace HPHP {
-namespace JIT {
+namespace jit {
 
 static void setupAfterPrologue(ActRec* fp, void* sp) {
   auto& regs = vmRegsUnsafe();
@@ -141,4 +141,4 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   return true;
 }
 
-} } // HPHP::JIT
+} } // HPHP::jit

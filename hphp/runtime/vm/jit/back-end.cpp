@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/back-end-arm.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 std::unique_ptr<BackEnd> newBackEnd() {
   switch (arch()) {

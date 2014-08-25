@@ -48,7 +48,7 @@ public:
 public:
   static c_AsyncGenerator* Create(const ActRec* fp,
                                   size_t numSlots,
-                                  JIT::TCA resumeAddr,
+                                  jit::TCA resumeAddr,
                                   Offset resumeOffset);
 
   bool isEagerlyExecuted() const {

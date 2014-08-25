@@ -35,7 +35,7 @@
 namespace HPHP {
 struct Func;
 
-namespace JIT {
+namespace jit {
 struct DynLocation;
 
 namespace constToBits_detail {
@@ -221,7 +221,7 @@ class Type {
     const ArrayData* m_arrVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
-    JIT::TCA m_tcaVal;
+    jit::TCA m_tcaVal;
     RDS::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
@@ -348,7 +348,7 @@ public:
   }
   static Type forConst(const HPHP::Func*)        { return Func; }
   static Type forConst(const Class*)             { return Cls; }
-  static Type forConst(JIT::TCA)                 { return TCA; }
+  static Type forConst(jit::TCA)                 { return TCA; }
   static Type forConst(double)                   { return Dbl; }
   static Type forConst(const StringData* sd) {
     assert(sd->isStatic());
@@ -498,7 +498,7 @@ public:
     return m_rdsHandleVal;
   }
 
-  JIT::TCA tcaVal() const {
+  jit::TCA tcaVal() const {
     assert(subtypeOf(TCA) && m_hasConstVal);
     return m_tcaVal;
   }
@@ -833,10 +833,10 @@ inline bool operator<=(Type a, Type b) { return a.subtypeOf(b); }
 inline bool operator>=(Type a, Type b) { return b.subtypeOf(a); }
 
 /*
- * JIT::Type must be small enough for efficient pass-by-value.
+ * jit::Type must be small enough for efficient pass-by-value.
  */
 static_assert(sizeof(Type) <= 2 * sizeof(uint64_t),
-              "JIT::Type should fit in (2 * sizeof(uint64_t))");
+              "jit::Type should fit in (2 * sizeof(uint64_t))");
 
 /*
  * Return the most refined type that can be used to represent the type

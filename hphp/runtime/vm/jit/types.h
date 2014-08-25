@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/base/types.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * Core types.

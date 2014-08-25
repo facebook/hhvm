@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/datatype.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

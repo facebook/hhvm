@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 using NativeCalls::CallMap;
 

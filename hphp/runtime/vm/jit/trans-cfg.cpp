@@ -22,8 +22,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 static const Trace::Module TRACEMOD = Trace::pgo;
 

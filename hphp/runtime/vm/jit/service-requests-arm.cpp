@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
 using namespace vixl;
 
@@ -126,16 +126,16 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
 }
 
 void emitBindJmp(CodeBlock& cb, CodeBlock& frozen, SrcKey dest) {
-  emitBindJ(cb, frozen, dest, JIT::CC_None, REQ_BIND_JMP, TransFlags{});
+  emitBindJ(cb, frozen, dest, jit::CC_None, REQ_BIND_JMP, TransFlags{});
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, frozen, dest, cc, REQ_BIND_JCC, TransFlags{});
 }
 
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
-                      JIT::ConditionCode cc) {
+                      jit::ConditionCode cc) {
   emitBindJ(cb, frozen, dest, cc, REQ_BIND_SIDE_EXIT, TransFlags{});
 }
 

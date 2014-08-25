@@ -30,9 +30,9 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/ringbuffer.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
-using JIT::reg::rip;
+using jit::reg::rip;
 
 TRACE_SET_MOD(servicereq);
 
@@ -57,7 +57,7 @@ namespace {
  */
 ALWAYS_INLINE
 TCA emitBindJPre(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc) {
-  mcg->backEnd().prepareForSmash(cb, cc == JIT::CC_None ? kJmpLen : kJmpccLen);
+  mcg->backEnd().prepareForSmash(cb, cc == jit::CC_None ? kJmpLen : kJmpccLen);
 
   TCA toSmash = cb.frontier();
   if (cb.base() == frozen.base()) {
@@ -205,7 +205,7 @@ void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& frozenCode,
   packServiceReqArgs(argv, req);
 
   emitServiceReqImpl(start, cb.frontier(), end, spaceLeft,
-                     SRFlags::None, JIT::REQ_BIND_CALL, argv);
+                     SRFlags::None, jit::REQ_BIND_CALL, argv);
 
   if (start == frozenCode.frontier()) {
     frozenCode.skip(end - start);
@@ -272,12 +272,12 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
   }
   emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
   if (persist) {
-    as.  emitImmReg(0, JIT::X64::rAsm);
+    as.  emitImmReg(0, jit::X64::rAsm);
   } else {
-    as.  lea(rip[(int64_t)stubStart], JIT::X64::rAsm);
+    as.  lea(rip[(int64_t)stubStart], jit::X64::rAsm);
   }
   TRACE(3, ")\n");
-  as.    emitImmReg(req, JIT::reg::rdi);
+  as.    emitImmReg(req, jit::reg::rdi);
 
   /*
    * Weird hand-shaking with enterTC: reverse-call a service routine.
@@ -288,8 +288,8 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
    * SRJmpInsteadOfRet indicates to fake the return.
    */
   if (flags & SRFlags::JmpInsteadOfRet) {
-    as.  pop(JIT::reg::rax);
-    as.  jmp(JIT::reg::rax);
+    as.  pop(jit::reg::rax);
+    as.  jmp(jit::reg::rax);
   } else {
     as.  ret();
   }
@@ -332,12 +332,12 @@ emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   return ret;
 }
 
-void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                       SrcKey dest, TransFlags trflags) {
   emitBindJ(cb, frozen, cc, dest, REQ_BIND_SIDE_EXIT, trflags);
 }
 
-void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest) {
   emitBindJ(cb, frozen, cc, dest, REQ_BIND_JCC, TransFlags{});
 }
@@ -347,7 +347,7 @@ void emitBindJmp(CodeBlock& cb, CodeBlock& frozen,
   emitBindJ(cb, frozen, CC_None, dest, REQ_BIND_JMP, trflags);
 }
 
-TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, JIT::ConditionCode cc,
+TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                     SrcKey dest, TransFlags trflags) {
   auto toSmash = emitBindJPre(cb, frozen, cc);
   TCA sr = emitServiceReq(frozen, REQ_RETRANSLATE,

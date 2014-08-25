@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 struct IRInstruction;
 class  SSATmp;

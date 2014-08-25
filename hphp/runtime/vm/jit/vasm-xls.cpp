@@ -33,7 +33,7 @@
 
 TRACE_SET_MOD(xls);
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 using namespace X64;

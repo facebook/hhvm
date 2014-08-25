@@ -31,8 +31,7 @@
 #include <folly/Range.h>
 #include <boost/dynamic_bitset.hpp>
 
-namespace HPHP { namespace JIT {
-namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 struct Vptr;
 struct Vscaled;

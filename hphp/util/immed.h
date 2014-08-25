@@ -19,7 +19,7 @@
 
 #include "hphp/util/safe-cast.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 /*
  * When selecting encodings, we often need to assess a two's complement

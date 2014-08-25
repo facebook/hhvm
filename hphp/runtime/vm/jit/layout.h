@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/block.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

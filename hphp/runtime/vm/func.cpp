@@ -48,7 +48,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-using JIT::mcg;
+using jit::mcg;
 
 const StringData* Func::s___call       = makeStaticString("__call");
 const StringData* Func::s___callStatic = makeStaticString("__callStatic");
@@ -95,7 +95,7 @@ Func::~Func() {
     maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
                                          : kNumFixedPrologues;
   if (mcg != nullptr) {
-    mcg->smashPrologueGuards((JIT::TCA*)m_prologueTable,
+    mcg->smashPrologueGuards((jit::TCA*)m_prologueTable,
                              numPrologues, this);
   }
 #ifdef DEBUG
@@ -867,7 +867,7 @@ void Func::incProfCounter() {
 }
 
 bool Func::anyBlockEndsAt(Offset off) const {
-  assert(JIT::Translator::WriteLease().amOwner());
+  assert(jit::Translator::WriteLease().amOwner());
   // The empty() check relies on a Func's bytecode always being nonempty
   assert(base() != past());
   if (m_shared->m_blockEnds.empty()) {

@@ -59,7 +59,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   return val->m_data.pref;
 }
 
-namespace JIT {
+namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 

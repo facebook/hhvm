@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 class IRInstruction;
 class IRUnit;

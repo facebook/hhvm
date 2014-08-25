@@ -24,13 +24,9 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
-
-using boost::container::flat_set;
-using boost::container::flat_map;
 
 struct DFS {
   DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
@@ -113,8 +109,8 @@ struct DFS {
   RegionDescPtr region;
 
   std::unordered_set<TransID> visiting;
-  flat_set<TransID> visited;
-  flat_map<SrcKey, TransID> srcKeyToTransID;
+  boost::container::flat_set<TransID> visited;
+  boost::container::flat_map<SrcKey, TransID> srcKeyToTransID;
 };
 
 /*

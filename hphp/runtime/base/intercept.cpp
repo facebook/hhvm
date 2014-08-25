@@ -228,7 +228,7 @@ void rename_function(const String& old_name, const String& new_name) {
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {
-    JIT::invalidateForRenameFunction(old);
+    jit::invalidateForRenameFunction(old);
   }
 }
 

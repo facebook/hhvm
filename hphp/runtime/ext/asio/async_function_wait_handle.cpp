@@ -71,7 +71,7 @@ void checkCreateErrors(c_WaitableWaitHandle* child) {
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
-                                  JIT::TCA resumeAddr,
+                                  jit::TCA resumeAddr,
                                   Offset resumeOffset,
                                   c_WaitableWaitHandle* child) {
   assert(fp);

@@ -35,7 +35,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(targetcache);
 

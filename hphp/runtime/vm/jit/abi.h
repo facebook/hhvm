@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 // machine-specific register conventions
 struct Abi {

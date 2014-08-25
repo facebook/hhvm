@@ -27,8 +27,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 
-namespace HPHP {
-namespace JIT {
+namespace HPHP { namespace jit {
 
 struct CodeGenFixups;
 

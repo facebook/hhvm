@@ -20,7 +20,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT {
+namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(ustubs);
 

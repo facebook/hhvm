@@ -56,7 +56,7 @@ struct Resumable {
   }
 
   template <bool clone>
-  static void* Create(const ActRec* fp, size_t numSlots, JIT::TCA resumeAddr,
+  static void* Create(const ActRec* fp, size_t numSlots, jit::TCA resumeAddr,
                       Offset resumeOffset, size_t objSize) {
     assert(fp);
     DEBUG_ONLY auto const func = fp->func();
@@ -99,14 +99,14 @@ struct Resumable {
   }
 
   ActRec* actRec() { return &m_actRec; }
-  JIT::TCA resumeAddr() const { return m_resumeAddr; }
+  jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
     assert(m_actRec.func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
-  void setResumeAddr(JIT::TCA resumeAddr, Offset resumeOffset) {
+  void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
     assert(m_actRec.func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
@@ -124,7 +124,7 @@ private:
   ActRec m_actRec;
 
   // Resume address.
-  JIT::TCA m_resumeAddr;
+  jit::TCA m_resumeAddr;
 
   // Resume offset.
   Offset m_resumeOffset;

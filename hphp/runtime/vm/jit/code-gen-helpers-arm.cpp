@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
 void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
                            const vixl::Register& dstReg,
@@ -121,7 +121,7 @@ void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 JIT::Fixup fixup) {
+                                 jit::Fixup fixup) {
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler acold { coldCode };
 

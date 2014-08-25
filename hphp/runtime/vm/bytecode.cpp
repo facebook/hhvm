@@ -114,7 +114,7 @@ bool RuntimeOption::RepoAuthoritative = false;
 
 using std::string;
 
-using JIT::mcg;
+using jit::mcg;
 
 #if DEBUG
 #define OPTBLD_INLINE
@@ -126,7 +126,7 @@ TRACE_SET_MOD(bcinterp);
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
 static bool isReturnHelper(void* address) {
-  auto tcAddr = reinterpret_cast<JIT::TCA>(address);
+  auto tcAddr = reinterpret_cast<jit::TCA>(address);
   auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
@@ -1802,7 +1802,7 @@ void ExecutionContext::prepareFuncEntry(ActRec *ar, PC& pc,
   if (raiseMissingArgumentWarnings && !func->isCPPBuiltin()) {
     // need to sync vmpc() to pc for backtraces/re-entry
     SYNC();
-    HPHP::JIT::raiseMissingArgument(func, ar->numArgs());
+    HPHP::jit::raiseMissingArgument(func, ar->numArgs());
   }
 }
 
@@ -1858,7 +1858,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
     const int np = enterFnAr->m_func->numNonVariadicParams();
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
-    JIT::TCA start = enterFnAr->m_func->getPrologue(na);
+    jit::TCA start = enterFnAr->m_func->getPrologue(na);
     mcg->enterTCAtPrologue(enterFnAr, start);
     return;
   }
@@ -1869,7 +1869,7 @@ void ExecutionContext::enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(vmfp()->func()->contains(vmpc()));
 
   if (useJit) {
-    JIT::TCA start = enterFnAr->m_func->getFuncBody();
+    jit::TCA start = enterFnAr->m_func->getFuncBody();
     mcg->enterTCAfterPrologue(start);
   } else {
     dispatch();
@@ -2854,7 +2854,7 @@ void ExecutionContext::preventReturnToTC(ActRec* ar) {
   }
 
   if (!isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)) &&
-      (mcg->isValidCodeAddress((JIT::TCA)ar->m_savedRip))) {
+      (mcg->isValidCodeAddress((jit::TCA)ar->m_savedRip))) {
     TRACE_RB(2, "Replace RIP in fp %p, savedRip 0x%" PRIx64 ", "
              "func %s\n", ar, ar->m_savedRip,
              ar->m_func->fullName()->data());
@@ -5043,7 +5043,7 @@ OPTBLD_INLINE void ExecutionContext::iopIdx(IOP_ARGS) {
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
 
-  TypedValue result = JIT::genericIdx(*arr, *key, *def);
+  TypedValue result = jit::genericIdx(*arr, *key, *def);
   vmStack().popTV();
   vmStack().popTV();
   tvRefcountedDecRef(arr);

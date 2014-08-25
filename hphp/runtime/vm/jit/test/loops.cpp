@@ -30,7 +30,7 @@
 
 #include "hphp/runtime/vm/jit/test/test-context.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 // basic liveness of a use of a const inside a loop
 TEST(Loops, Counting) {

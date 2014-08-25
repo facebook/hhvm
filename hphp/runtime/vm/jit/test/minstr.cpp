@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/ir.h"
 
-namespace HPHP {  namespace JIT {
+namespace HPHP { namespace jit {
 
 #define EXPECT_TEQ(exp, act)                                            \
   EXPECT_EQ(exp, act)                                                   \

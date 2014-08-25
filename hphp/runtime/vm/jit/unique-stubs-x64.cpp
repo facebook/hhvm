@@ -29,11 +29,11 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/runtime.h"
 
-namespace HPHP { namespace JIT { namespace X64 {
+namespace HPHP { namespace jit { namespace X64 {
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace JIT::reg;
+using namespace jit::reg;
 using boost::implicit_cast;
 
 TRACE_SET_MOD(ustubs);
@@ -169,7 +169,7 @@ asm_label(a, doRelease);
 
   moveToAlign(mcg->code.main(), kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-(JIT::kNumFreeLocalsHelpers * sizeof(Cell))],
+  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
 
   auto emitDecLocal = [&] {

@@ -32,11 +32,11 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 
-namespace HPHP { namespace JIT { namespace ARM {
+namespace HPHP { namespace jit { namespace ARM {
 
 TRACE_SET_MOD(hhir);
 
-struct BackEnd : public JIT::BackEnd {
+struct BackEnd : public jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
@@ -158,7 +158,7 @@ struct BackEnd : public JIT::BackEnd {
     info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
   }
 
-  JIT::CodeGenerator* newCodeGenerator(const IRUnit& unit,
+  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
                                        CodeBlock& mainCode,
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
@@ -495,8 +495,8 @@ struct BackEnd : public JIT::BackEnd {
   }
 };
 
-std::unique_ptr<JIT::BackEnd> newBackEnd() {
-  return std::unique_ptr<JIT::BackEnd>{ folly::make_unique<BackEnd>() };
+std::unique_ptr<jit::BackEnd> newBackEnd() {
+  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
 RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {

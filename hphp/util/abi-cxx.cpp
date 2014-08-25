@@ -97,7 +97,7 @@ std::string getNativeFunctionName(void* codeAddr) {
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
     // and then pass this to abi::__cxa_demangle to get the demanged name:
-    // HPHP::JIT::interpOneIterInit()
+    // HPHP::jit::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
     // and ends up giving us a blank managled name, like this:

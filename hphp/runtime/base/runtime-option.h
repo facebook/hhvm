@@ -82,6 +82,7 @@ public:
 
   static int  MaxLoopCount;
   static int  MaxSerializedStringSize;
+  static size_t ArrUnserializeCheckSize;
   static bool NoInfiniteRecursionDetection;
   static bool WarnTooManyArguments;
   static bool EnableHipHopErrors;

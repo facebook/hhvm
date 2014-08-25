@@ -787,14 +787,12 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
-    constexpr size_t kArrUnserializeCheckSize = 10000;
-
     auto const cmret = computeCapAndMask(size);
     auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
 
     // For large arrays, do a naive pre-check for OOM.
-    if (UNLIKELY(allocsz > kArrUnserializeCheckSize &&
-                 MM().wouldOOM(allocsz))) {
+    if (UNLIKELY(allocsz > RuntimeOption::ArrUnserializeCheckSize &&
+                 MM().preAllocOOM(allocsz))) {
       check_request_surprise_unlikely();
     }
 

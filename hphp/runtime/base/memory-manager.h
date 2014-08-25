@@ -480,7 +480,7 @@ public:
    * would exceed the limit, we unset the flag and register an OOM fatal
    * (though we do not modify the MM's stats).
    */
-  bool wouldOOM(int64_t size);
+  bool preAllocOOM(int64_t size);
 
   /*
    * Reset whether or not we should raise an OOM fatal if we exceed the memory

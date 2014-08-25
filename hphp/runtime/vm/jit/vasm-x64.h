@@ -740,6 +740,9 @@ struct Vout {
   void setSrcKey(SrcKey sk) { m_sk = sk; }
   Vreg makeReg() { return m_unit.makeReg(); }
   AreaIndex area() const { return m_area; }
+  Vtuple makeTuple(const VregList& regs) const {
+    return m_unit.makeTuple(regs);
+  }
 
 private:
   void add(Vinstr&);

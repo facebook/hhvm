@@ -1463,12 +1463,17 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   auto& v = vmain();
 
   // spill rax and/or rdx
-  bool spillRax = dstReg != rax;
-  bool spillRdx = dstReg != rdx;
-  if (spillRax) v << push{rax};
-  if (spillRdx) v << push{rdx};
-  // put divisor in rCgGP if it would get clobbered
-  auto divisor = reg1 != rax && reg1 != rdx ? reg1 : PhysReg(rCgGP);
+  Vreg save_rax, save_rdx;
+  if (dstReg != rax) {
+    save_rax = v.makeReg();
+    v << copy{rax, save_rax};
+  }
+  if (dstReg != rdx) {
+    save_rdx = v.makeReg();
+    v << copy{rdx, save_rdx};
+  }
+  // put divisor in tmp if it would get clobbered
+  auto divisor = reg1 != rax && reg1 != rdx ? Vreg{reg1} : v.makeReg();
   v << copy{reg1, divisor};
   // put dividend in rax
   v << copy{reg0, rax};
@@ -1476,8 +1481,8 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   v << idiv{divisor};    // rdx:rax/divisor => quot:rax, rem:rdx
   v << copy{rdx, dstReg};
   // restore rax and/or rdx
-  if (spillRdx) v << pop{rdx};
-  if (spillRax) v << pop{rax};
+  if (save_rax.isValid()) v << copy{save_rax, rax};
+  if (save_rdx.isValid()) v << copy{save_rdx, rdx};
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
@@ -3781,8 +3786,9 @@ void CodeGenerator::cgCastStkIntToDbl(IRInstruction* inst) {
   auto spReg = srcLoc(0).reg();
   auto offset = cellsToBytes(inst->extra<CastStkIntToDbl>()->offset);
   auto& v = vmain();
-  v << cvtsi2sdm{refTVData(spReg[offset]), rCgXMM0};
-  v << store{rCgXMM0, refTVData(spReg[offset])};
+  auto tmp_dbl = v.makeReg();
+  v << cvtsi2sdm{refTVData(spReg[offset]), tmp_dbl};
+  v << store{tmp_dbl, refTVData(spReg[offset])};
   emitStoreTVType(v, KindOfDouble, refTVType(spReg[offset]));
 }
 

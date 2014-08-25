@@ -64,14 +64,6 @@ constexpr PhysReg rVmTl      = reg::r12;
  */
 constexpr Reg64 rAsm         = reg::r10;
 
-/*
- * Reserved for CodeGenerator.
- */
-constexpr Reg64 rCgGP        = reg::r11;
-constexpr RegXMM rCgXMM0     = reg::xmm6;
-constexpr RegXMM rCgXMM1     = reg::xmm7;
-constexpr RegXMM rCgXMM2     = reg::xmm5;
-
 //////////////////////////////////////////////////////////////////////
 /*
  * Registers used during a tracelet for program locations.
@@ -107,7 +99,7 @@ const RegSet kGPReserved = RegSet()
   | RegSet(reg::rsp)
   | RegSet(rVmFp)
   | RegSet(rVmTl)
-  | RegSet(rCgGP)
+  | RegSet(reg::r11)
   | RegSet(rAsm)
   ;
 
@@ -122,9 +114,9 @@ const RegSet kXMMCallerSaved = RegSet()
   | RegSet(reg::xmm2)
   | RegSet(reg::xmm3)
   | RegSet(reg::xmm4)
-  //| RegSet(reg::xmm5) rCgXmm2
-  //| RegSet(reg::xmm6) rCgXMM0
-  //| RegSet(reg::xmm7) rCgXMM1
+  //| RegSet(reg::xmm5) for vasm
+  //| RegSet(reg::xmm6) for vasm
+  //| RegSet(reg::xmm7) for vasm
   | RegSet(reg::xmm8)
   | RegSet(reg::xmm9)
   | RegSet(reg::xmm10)
@@ -132,7 +124,7 @@ const RegSet kXMMCallerSaved = RegSet()
   | RegSet(reg::xmm12)
   | RegSet(reg::xmm13)
   | RegSet(reg::xmm14)
-  | RegSet(reg::xmm15)
+  // | RegSet(reg::xmm15) for vasm
   ;
 
 const RegSet kXMMCalleeSaved = RegSet()
@@ -144,9 +136,10 @@ const RegSet kXMMUnreserved = RegSet()
   ;
 
 const RegSet kXMMReserved = RegSet()
-  | RegSet(rCgXMM0)
-  | RegSet(rCgXMM1)
-  | RegSet(rCgXMM2)
+  | RegSet(reg::xmm5) // for vasm
+  | RegSet(reg::xmm6) // for vasm
+  | RegSet(reg::xmm7) // for vasm
+  | RegSet(reg::xmm15) // for vasm
   ;
 
 const RegSet kCallerSaved = RegSet()
@@ -253,8 +246,8 @@ UNUSED const Abi abi {
   kCalleeSaved    // calleeSaved
 };
 
-auto const vasm_gp = RegSet(rAsm).add(rCgGP);
-auto const vasm_simd = RegSet(rCgXMM0).add(rCgXMM1).add(rCgXMM2);
+auto const vasm_gp = RegSet(rAsm).add(reg::r11);
+auto const vasm_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
 UNUSED const Abi vasm_abi {
   .gpUnreserved = vasm_gp,
   .gpReserved = X64::abi.gp() - vasm_gp,

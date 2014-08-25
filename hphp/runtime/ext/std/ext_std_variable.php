@@ -131,8 +131,19 @@ function print_r(mixed $expression,
 function var_export(mixed $expression,
                     bool $ret = false): mixed;
 
+/* Dumps information about a variable
+ *
+ * This function displays structured information about one or more expressions
+ * that includes its type and value. Arrays and objects are explored
+ * recursively with values indented to show structure.
+ *
+ * @param mixed $var - Variable to dump
+ */
 /* Dumps a string representation of an internal zend value to output.
  */
+<<__Native>>
+function var_dump(mixed $arg1, ...$argv): void;
+
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
 

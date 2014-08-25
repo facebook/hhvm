@@ -24,7 +24,7 @@ fn=php::xdebug_call_file
 
 fl=php:internal
 fn=php::var_dump
-0 %d
+145 %d
 
 fl=%s/test/slow/ext_xdebug/profiling_testee.inc
 fn=Baz::86ctor
@@ -60,7 +60,7 @@ calls=1 0 0
 
 fl=php:internal
 fn=php::var_dump
-0 %d
+145 %d
 
 fl=%s/test/slow/ext_xdebug/profiling_testee.inc
 fn=bar
@@ -92,7 +92,7 @@ calls=1 0 0
 
 fl=php:internal
 fn=php::var_dump
-0 %d
+145 %d
 
 fl=%s/test/slow/ext_xdebug/profiling_testee.inc
 fn={main}

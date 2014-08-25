@@ -159,20 +159,23 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
   return res;
 }
 
-void f_var_dump(const Variant& v) {
-  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
+static ALWAYS_INLINE void do_var_dump(VariableSerializer vs,
+                                      const Variant& expression) {
   // manipulate maxCount to match PHP behavior
-  if (!v.isObject()) {
+  if (!expression.isObject()) {
     vs.incMaxCount();
   }
-  vs.serialize(v, false);
+  vs.serialize(expression, false);
 }
 
-void f_var_dump(int _argc, const Variant& expression,
-                const Array& _argv /* = null_array */) {
-  f_var_dump(expression);
-  for (int i = 0; i < _argv.size(); i++) {
-    f_var_dump(_argv[i]);
+void HHVM_FUNCTION(var_dump, const Variant& expression,
+                             const Array& _argv /*=null_array */) {
+  VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
+  do_var_dump(vs, expression);
+
+  auto sz = _argv.size();
+  for (int i = 0; i < sz; i++) {
+    do_var_dump(vs, _argv[i]);
   }
 }
 
@@ -406,6 +409,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(print_r);
   HHVM_FE(var_export);
   HHVM_FE(debug_zval_dump);
+  HHVM_FE(var_dump);
   HHVM_FE(serialize);
   HHVM_FE(unserialize);
   HHVM_FE(get_defined_vars);

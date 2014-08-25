@@ -670,7 +670,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 
   if (xhprof) {
-    f_var_dump(HHVM_FN(json_encode)(f_xhprof_disable()));
+    HHVM_FN(var_dump)(HHVM_FN(json_encode)(f_xhprof_disable()));
   }
   g_context->onShutdownPostSend();
   Eval::Debugger::InterruptPSPEnded(program);

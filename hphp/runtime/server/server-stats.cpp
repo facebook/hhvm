@@ -847,7 +847,7 @@ void ServerStats::logBytes(int64_t bytes) {
 static void safe_copy(char *dest, const char *src, int max) {
   int len = strlen(src) + 1;
   dest[--max] = '\0';
-  mempcpy(dest, src, len > max ? max : len);
+  memcpy(dest, src, len > max ? max : len);
 }
 
 void ServerStats::startRequest(const char *url, const char *clientIP,

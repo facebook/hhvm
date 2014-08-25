@@ -2928,11 +2928,19 @@ hh_opt_return_type:
 
 hh_typevar_list:
     hh_typevar_list ','
-    ident                              { _p->addTypeVar($3.text()); }
- |  ident                              { _p->addTypeVar($1.text()); }
+    hh_typevar_variance ident          { _p->addTypeVar($4.text()); }
+ |  hh_typevar_variance ident          { _p->addTypeVar($2.text()); }
  |  hh_typevar_list ','
-    ident T_AS hh_type                 { _p->addTypeVar($3.text()); }
- |  ident T_AS hh_type                 { _p->addTypeVar($1.text()); }
+    hh_typevar_variance ident
+    T_AS hh_type                       { _p->addTypeVar($4.text()); }
+ |  hh_typevar_variance ident
+    T_AS hh_type                       { _p->addTypeVar($2.text()); }
+;
+
+hh_typevar_variance:
+    '+'           {}
+|   '-'           {}
+|   /* empty */   {}
 ;
 
 hh_shape_member_type:

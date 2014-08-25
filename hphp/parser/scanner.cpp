@@ -236,6 +236,9 @@ bool Scanner::nextIfToken(TokenStore::iterator& pos, int tok) {
 
 bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
   for (;;) {
+    if (pos->t == '+' || pos->t == '-') {
+      nextLookahead(pos);
+    }
     if (!tryParseNSType(pos)) return false;
     if (pos->t == T_AS) {
       nextLookahead(pos);

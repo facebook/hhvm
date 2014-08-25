@@ -731,9 +731,9 @@ static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
   return false;
 }
 
-void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
+static void toStringFrame(std::ostream& os, const ActRec* fp,
                           int offset, const TypedValue* ftop,
-                          const string& prefix) const {
+                          const string& prefix, bool isTop = true) {
   assert(fp);
 
   // Use depth-first recursion to output the most deeply nested stack frame
@@ -743,7 +743,7 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
     TypedValue* prevStackTop = nullptr;
     ActRec* prevFp = g_context->getPrevVMState(fp, &prevPc, &prevStackTop);
     if (prevFp != nullptr) {
-      toStringFrame(os, prevFp, prevPc, prevStackTop, prefix);
+      toStringFrame(os, prevFp, prevPc, prevStackTop, prefix, false);
     }
   }
 
@@ -760,15 +760,21 @@ void Stack::toStringFrame(std::ostream& os, const ActRec* fp,
   tv--;
 
   if (func->numLocals() > 0) {
-    os << "<";
-    int n = func->numLocals();
-    for (int i = 0; i < n; i++, tv--) {
-      if (i > 0) {
-        os << " ";
+    // Don't print locals for parent frames on a Ret(C|V) since some of them
+    // may already be destructed.
+    if (isRet(func->unit()->getOpcode(offset)) && !isTop) {
+      os << "<locals destroyed>";
+    } else {
+      os << "<";
+      int n = func->numLocals();
+      for (int i = 0; i < n; i++, tv--) {
+        if (i > 0) {
+          os << " ";
+        }
+        os << toStringElm(tv);
       }
-      os << toStringElm(tv);
+      os << ">";
     }
-    os << ">";
   }
 
   assert(!func->methInfo() || func->numIterators() == 0);

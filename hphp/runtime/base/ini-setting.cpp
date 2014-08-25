@@ -268,6 +268,14 @@ bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.push_back(v.data());
+  }
+  return true;
+}
+
 folly::dynamic ini_get(bool& p) {
   return p ? "1" : "";
 }
@@ -329,6 +337,15 @@ folly::dynamic ini_get(std::set<std::string>& p) {
   folly::dynamic ret = folly::dynamic::object;
   for (auto& s : p) {
     ret.push_back(s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::vector<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
+  for (auto& s : p) {
+    ret.insert(idx++, s);
   }
   return ret;
 }

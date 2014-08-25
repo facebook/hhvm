@@ -1,0 +1,8 @@
+string(2) "11"
+string(1) "2"
+array(2) {
+  [1]=>
+  string(2) "ls"
+  [0]=>
+  string(2) "cp"
+}

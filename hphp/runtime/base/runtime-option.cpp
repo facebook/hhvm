@@ -1098,8 +1098,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(WhitelistExec, ini, server["WhitelistExec"]);
     Config::Bind(WhitelistExecWarningOnly, ini,
                  server["WhitelistExecWarningOnly"]);
-    Config::Get(ini, server["AllowedExecCmds"], AllowedExecCmds);
-
+    Config::Bind(AllowedExecCmds, ini, server["AllowedExecCmds"]);
     Config::Bind(UnserializationWhitelistCheck, ini,
                  server["UnserializationWhitelistCheck"], false);
     Config::Bind(UnserializationWhitelistCheckWarningOnly, ini,

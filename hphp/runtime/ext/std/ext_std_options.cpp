@@ -767,11 +767,25 @@ static String HHVM_FUNCTION(cpu_get_model) {
 }
 
 Variant HHVM_FUNCTION(ini_get, const String& varname) {
-  String value = empty_string();
+  Variant value;
   bool ret = IniSetting::Get(varname, value);
+
+  // ret will be false if varname isn't a valid ini setting
   if (!ret) {
     return false;
   }
+
+  // Anything other than array for ini_get can be converted to
+  // the expected string result for this function call.
+  // If value is null, an empty string is returned, which is good
+  // and expected.
+  if (!value.isArray()) {
+    return value.toString();
+  }
+  // For arrays, this will return an array of values. It will also return
+  // an empty array if the values for a valid collection-like configuration
+  // has not been set. This is similar to returning an empty-string for
+  // standard configuration options.
   return value;
 }
 

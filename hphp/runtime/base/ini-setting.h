@@ -47,6 +47,7 @@ bool ini_on_update(const folly::dynamic& value, std::string& p);
 bool ini_on_update(const folly::dynamic& value, String& p);
 bool ini_on_update(const folly::dynamic& value, Array& p);
 bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p);
+bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p);
 folly::dynamic ini_get(bool& p);
 folly::dynamic ini_get(double& p);
 folly::dynamic ini_get(char& p);
@@ -61,6 +62,7 @@ folly::dynamic ini_get(std::string& p);
 folly::dynamic ini_get(String& p);
 folly::dynamic ini_get(Array& p);
 folly::dynamic ini_get(std::set<std::string>& p);
+folly::dynamic ini_get(std::vector<std::string>& p);
 
 class IniSetting {
   struct CallbackData {

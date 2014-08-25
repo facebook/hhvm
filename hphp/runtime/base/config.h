@@ -67,6 +67,8 @@ struct Config {
                    const Hdf& config, const double defValue = 0);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config);
+  static void Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
+                   const Hdf& config);
 
   /**
    * These Bind()s should be used for ini settings. Specifically, they should

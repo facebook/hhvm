@@ -3355,9 +3355,15 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
     return nullptr;
   }
 
-  std::string value;
+  Variant value;
   IniSetting::Get(settingName, value);
-  return cns(makeStaticString(value));
+  // ini_get() is now enhanced to return more than strings
+  // Only return a string, get out of here if we are something
+  // else like an array
+  if (value.isString()) {
+    return cns(makeStaticString(value.toString()));
+  }
+  return nullptr;
 }
 
 SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {

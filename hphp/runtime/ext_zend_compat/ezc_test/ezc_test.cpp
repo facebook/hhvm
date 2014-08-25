@@ -551,8 +551,8 @@ PHP_FUNCTION(ezc_get_error_reporting)
  */
 PHP_FUNCTION(ezc_set_error_reporting)
 {
-  int old_error_reporting = EG(error_reporting);
-  int new_error_reporting = 0;
+  long old_error_reporting = EG(error_reporting);
+  long new_error_reporting = 0;
 
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_error_reporting) == FAILURE) {
     RETURN_FALSE;

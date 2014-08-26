@@ -33,7 +33,7 @@
 #include "zend_globals.h"
 #include "SAPI.h"
 
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 
 PHPAPI php_basic_globals basic_globals;
 

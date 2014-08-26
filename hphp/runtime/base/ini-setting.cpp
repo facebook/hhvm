@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
 
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include "hphp/util/lock.h"

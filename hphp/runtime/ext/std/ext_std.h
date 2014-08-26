@@ -18,6 +18,11 @@ class StandardExtension : public Extension {
     initOutput();
     initString();
     initVariable();
+    initMisc();
+  }
+
+  void threadInit() {
+    threadInitMisc();
   }
 
  private:
@@ -28,6 +33,8 @@ class StandardExtension : public Extension {
   void initOutput();
   void initString();
   void initVariable();
+  void initMisc();
+  void threadInitMisc();
 };
 
 /////////////////////////////////////////////////////////////////////////////

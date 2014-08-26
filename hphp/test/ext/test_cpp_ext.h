@@ -19,7 +19,7 @@
 
 #include "hphp/test/ext/test_cpp_base.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/ext/ext_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

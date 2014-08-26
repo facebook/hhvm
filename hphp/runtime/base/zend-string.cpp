@@ -626,8 +626,14 @@ String string_chunk_split(const char *src, int srclen, const char *end,
   int chunks = srclen / chunklen; // complete chunks!
   int restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-  int out_len = (chunks + 1) * endlen + srclen;
-  String ret(out_len, ReserveString);
+  String ret(
+    safe_address(
+      chunks + 1,
+      endlen,
+      srclen
+    ),
+    ReserveString
+  );
   char *dest = ret.bufferSlice().ptr;
 
   const char *p; char *q;

@@ -588,9 +588,9 @@
   slim:
     url: https://github.com/fredemmott/Slim
     # This branch makes a test less flakey
-    # PR: https://github.com/codeguy/Slim/pull/796
-    branch: "v2.4.2-derace-testExpiresAsString"
-    commit: b86f11706b80972e3239c8ab0f24382b3b8dcf52
+    # https://github.com/codeguy/Slim/pull/884
+    branch: "v2.4.3-derace-testExpiresAsString"
+    commit: 340e658aec0b51df58cab4605578acf4c90c479c
     install_root: slim
     test_root: slim
   stash:

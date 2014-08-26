@@ -180,11 +180,15 @@ RequestTest::testGetHostWhenNotExists
 .
 RequestTest::testGetHostWithPort
 .
-RequestTest::testGetIp
+RequestTest::testGetIp with data set #0
 .
-RequestTest::testGetIpWithClientIp
+RequestTest::testGetIp with data set #1
 .
-RequestTest::testGetIpWithForwardedFor
+RequestTest::testGetIp with data set #2
+.
+RequestTest::testGetIp with data set #3
+.
+RequestTest::testGetIp with data set #4
 .
 RequestTest::testGetMediaTypeParams
 .
@@ -334,7 +338,11 @@ RouteTest::testGetCallable
 .
 RouteTest::testGetCallableAsClass
 .
+RouteTest::testGetCallableAsClassLazyInitialize
+.
 RouteTest::testGetCallableAsStaticMethod
+.
+RouteTest::testGetCallableWithOddCharsAsClass
 .
 RouteTest::testGetConditions
 .
@@ -532,6 +540,8 @@ SlimHttpUtilTest::testParsesCookieHeader
 .
 SlimHttpUtilTest::testParsesCookieHeaderWithCommaSeparator
 .
+SlimHttpUtilTest::testParsesCookieHeaderWithEqualSignInValue
+.
 SlimHttpUtilTest::testPrefersLeftmostCookieWhenManyCookiesWithSameName
 .
 SlimHttpUtilTest::testSerializeCookiesAndDecryptWithStringExpires
@@ -597,6 +607,8 @@ SlimTest::testEtagMatches
 SlimTest::testExpiresAsInteger
 .
 SlimTest::testExpiresAsString
+.
+SlimTest::testFailureWhenAddingCircularMiddleware
 .
 SlimTest::testGenericRoute
 .
@@ -709,6 +721,8 @@ SlimTest::testSetFlashForCurrentRequest
 SlimTest::testSetFlashForNextRequest
 .
 SlimTest::testSetSetting
+.
+SlimTest::testSetSettingsRecursively
 .
 SlimTest::testSetSlimViewFromInstance
 .

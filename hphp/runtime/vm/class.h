@@ -1068,6 +1068,7 @@ Attr classKindAsAttr(ClassKind kind);
 bool isTrait(const Class* cls);
 bool isInterface(const Class* cls);
 bool isEnum(const Class* cls);
+bool isAbstract(const Class* cls);
 bool isNormalClass(const Class* cls);
 
 /*

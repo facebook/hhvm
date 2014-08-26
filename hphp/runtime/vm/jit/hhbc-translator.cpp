@@ -2641,8 +2641,7 @@ void HhbcTranslator::emitFPushCtor(int32_t numParams) {
 }
 
 static bool canInstantiateClass(const Class* cls) {
-  return cls &&
-    !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait));
+  return cls && isNormalClass(cls) && !isAbstract(cls);
 }
 
 void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {

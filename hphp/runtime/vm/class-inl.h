@@ -365,6 +365,10 @@ inline bool isNormalClass(const Class* cls ) {
   return !(cls->attrs() & (AttrTrait | AttrInterface | AttrEnum));
 }
 
+inline bool isAbstract(const Class* cls) {
+  return cls->attrs() & AttrAbstract;
+}
+
 inline bool classHasPersistentRDS(const Class* cls) {
   return cls && RDS::isPersistentHandle(cls->classHandle());
 }

@@ -183,7 +183,7 @@ class BackEnd {
    * will adjust all references into the original src ranges to point into the
    * corresponding relocated ranges.
    */
-  virtual void adjustForRelocation(RelocationInfo& rel, CodeGenFixups& fixups) {
+  virtual void adjustForRelocation(RelocationInfo& rel) {
     always_assert(false);
   }
 

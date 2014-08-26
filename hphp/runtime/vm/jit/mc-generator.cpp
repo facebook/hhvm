@@ -471,7 +471,7 @@ MCGenerator::getCallArrayPrologue(Func* func) {
     if (!writer) return nullptr;
     tca = func->getFuncBody();
     if (tca != m_tx.uniqueStubs.funcBodyHelperThunk) return tca;
-    tca = mcg->backEnd().emitCallArrayPrologue(func, dvs);
+    tca = backEnd().emitCallArrayPrologue(func, dvs);
     func->setFuncBody(tca);
   } else {
     SrcKey sk(func, func->base(), false);
@@ -488,7 +488,7 @@ MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
         && backEnd().funcPrologueHasGuard(prologues[i], func)) {
-      mcg->backEnd().funcPrologueSmashGuard(prologues[i], func);
+      backEnd().funcPrologueSmashGuard(prologues[i], func);
     }
   }
 }
@@ -1020,7 +1020,7 @@ MCGenerator::enterTC(TCA start, void* data) {
       Trace::ringbufferEntry(RBTypeEnterTC, skData, (uint64_t)start);
     }
 
-    mcg->backEnd().enterTCHelper(start, info);
+    backEnd().enterTCHelper(start, info);
     assert(isValidVMStackAddress(vmRegsUnsafe().stack.top()));
 
     tl_regState = VMRegState::CLEAN; // Careful: pc isn't sync'ed yet.
@@ -1507,6 +1507,11 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
   mcg->literals().insert(m_literals.begin(), m_literals.end());
   ClearContainer(m_literals);
 
+  if (inProgressTailBranches) {
+    m_inProgressTailJumps.swap(*inProgressTailBranches);
+  }
+  assert(m_inProgressTailJumps.empty());
+
   /*
    * Currently these are only used by the relocator,
    * so there's nothing left to do here.
@@ -1520,10 +1525,6 @@ CodeGenFixups::process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
   ClearContainer(m_bcMap);
   ClearContainer(m_alignFixups);
 
-  if (inProgressTailBranches) {
-    m_inProgressTailJumps.swap(*inProgressTailBranches);
-  }
-  assert(m_inProgressTailJumps.empty());
   assert(empty());
 }
 
@@ -1715,7 +1716,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
     FTRACE(1, "emitting dispatchBB interp request for failed translation\n");
-    mcg->backEnd().emitInterpReq(code.main(), code.cold(), sk);
+    backEnd().emitInterpReq(code.main(), code.cold(), sk);
     // Fall through.
   }
 
@@ -1834,7 +1835,7 @@ void MCGenerator::initUniqueStubs() {
   // Put the following stubs into ahot, rather than a.
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code).
                             hot(m_tx.useAHot()));
-  m_tx.uniqueStubs = mcg->backEnd().emitUniqueStubs();
+  m_tx.uniqueStubs = backEnd().emitUniqueStubs();
   m_fixups.process(nullptr); // in case we generated literals
 }
 
@@ -2205,17 +2206,19 @@ void RelocationInfo::recordRange(TCA start, TCA end,
                                  TCA destStart, TCA destEnd) {
   m_srcRanges.emplace_back(start, end);
   m_dstRanges.emplace_back(destStart, destEnd);
+  m_adjustedAddresses[start].second = destStart;
+  m_adjustedAddresses[end].first = destEnd;
 }
 
 void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
-  m_adjustedAddresses.emplace(src, std::make_pair(dest, range));
+  m_adjustedAddresses.emplace(src, std::make_pair(dest, dest + range));
 }
 
 TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
   auto it = m_adjustedAddresses.find(addr);
   if (it == m_adjustedAddresses.end()) return nullptr;
 
-  return it->second.first + it->second.second;
+  return it->second.second;
 }
 
 TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
@@ -2223,6 +2226,18 @@ TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
   if (it == m_adjustedAddresses.end()) return nullptr;
 
   return it->second.first;
+}
+
+void RelocationInfo::rewind(TCA start, TCA end) {
+  // start and end could already exist (with start.first
+  // and end.second set respectively), so we shouldn't remove
+  // those nodes. And since they're added by recordRange,
+  // which is called after the failure-prone part of relocation
+  // is done, we can ignore them altogether.
+  auto it = m_adjustedAddresses.upper_bound(start);
+  while (it != m_adjustedAddresses.end() && it->first < end) {
+    m_adjustedAddresses.erase(it++);
+  }
 }
 
 void

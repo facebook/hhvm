@@ -124,6 +124,13 @@ struct RelocationInfo {
   CTCA adjustedAddressBefore(CTCA addr) const {
     return adjustedAddressBefore(const_cast<TCA>(addr));
   }
+  void rewind(TCA start, TCA end);
+  void markAddressImmediates(std::set<TCA> ai) {
+    m_addressImmediates.insert(ai.begin(), ai.end());
+  }
+  bool isAddressImmediate(TCA ip) {
+    return m_addressImmediates.count(ip);
+  }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
   RangeVec::iterator begin() { return m_dstRanges.begin(); }
   RangeVec::iterator end() { return m_dstRanges.end(); }
@@ -137,7 +144,8 @@ struct RelocationInfo {
    * instruction corresponding to the src instruction; but eg
    * the fixup map would want the address of the nop.
    */
-  std::map<TCA,std::pair<TCA,int>> m_adjustedAddresses;
+  std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
+  std::set<TCA> m_addressImmediates;
 };
 
 //////////////////////////////////////////////////////////////////////

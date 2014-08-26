@@ -725,32 +725,105 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   (* some common Xhp screw ups *)
   if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
   then Errors.disallowed_xhp_type p x;
+  match try_castable_hint ~allow_this env p x hl with
+  | Some h -> h
+  | None -> begin
+    match x with
+    | "\\void"
+    | "\\int"
+    | "\\bool"
+    | "\\float"
+    | "\\num"
+    | "\\string"
+    | "\\resource"
+    | "\\mixed"
+    | "\\array"
+    | "\\integer"
+    | "\\boolean"
+    | "\\double"
+    | "\\real" ->
+        Errors.primitive_toplevel p;
+        N.Hany
+    | "void"             -> N.Hprim N.Tvoid
+    | "num"              -> N.Hprim N.Tnum
+    | "resource"         -> N.Hprim N.Tresource
+    | "mixed"            -> N.Hmixed
+    | "this" when allow_this ->
+        if hl != []
+        then Errors.this_no_argument p;
+        (match (fst env).cclass with
+        | None ->
+          Errors.this_outside_of_class p;
+          N.Hany
+        | Some cid ->
+          let tparaml = (fst env).type_paraml in
+          let tparaml = List.map begin fun (param_pos, param_name) ->
+            let _, cstr = get_constraint env param_name in
+            let cstr = opt_map (hint env) cstr in
+            param_pos, N.Habstr (param_name, cstr)
+          end tparaml in
+          N.Habstr ("this", Some (fst cid, N.Happly (cid, tparaml))))
+    | "this" ->
+        (match (fst env).cclass with
+        | None ->
+            Errors.this_outside_of_class p
+        | Some _ ->
+            Errors.this_must_be_return p
+        );
+        N.Hany
+    | _ when String.lowercase x = "this" ->
+        Errors.lowercase_this p x;
+        N.Hany
+    | _ when SMap.mem x params ->
+        if hl <> [] then
+        Errors.tparam_with_tparam p x;
+        let env, gen_constraint = get_constraint env x in
+        N.Habstr (x, opt_map (hint env) gen_constraint)
+    | _ ->
+        (* In the future, when we have proper covariant support, we can
+         * allow "this" to instantiate any covariant type variable. For
+         * example, let us pretend that we have this defined:
+         *
+         *   interface IFoo<read Tread, write Twrite>
+         *
+         * IFoo<this, int> and IFoo<IFoo<this, int>, int> are ok
+         * IFoo<int, this> and IFoo<int, IFoo<this>> are not ok
+         *
+         * For now, we're hardcoding the fact that all type variables for
+         * Awaitable and WaitHandle are covariant (well, there's only one
+         * type variable, but yeah...). We turn on allow_this in
+         * Awaitable and WaitHandle cases to support members that look
+         * like:
+         *
+         *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
+         *)
+      let cname = snd (Env.class_name env id) in
+      let gen_read_api_covariance =
+        (cname = "\\GenReadApi" || cname = "\\GenReadIdxApi") in
+      let privacy_policy_base_covariance =
+        (cname = "\\PrivacyPolicyBase") in
+      let data_type_covariance =
+        (cname = "\\DataType" || cname = "\\DataTypeImplProvider") in
+      let awaitable_covariance =
+        (cname = "\\Awaitable" || cname = "\\WaitHandle") in
+      let allow_this = allow_this &&
+        (awaitable_covariance || gen_read_api_covariance ||
+         privacy_policy_base_covariance || data_type_covariance) in
+      N.Happly (Env.class_name env id, hintl ~allow_this env hl)
+  end
+
+(* Hints that are valid both as casts and type annotations.  Neither casts nor
+ * annotations are a strict subset of the other: For instance, 'object' is not
+ * a valid annotation.  Thus callers will have to handle the remaining cases. *)
+and try_castable_hint ?(allow_this=false) env p x hl =
+  let hint = hint ~allow_this in
   match x with
-  | "\\void"
-  | "\\int"
-  | "\\bool"
-  | "\\float"
-  | "\\num"
-  | "\\string"
-  | "\\resource"
-  | "\\mixed"
-  | "\\array"
-  | "\\integer"
-  | "\\boolean"
-  | "\\double"
-  | "\\real" ->
-      Errors.primitive_toplevel p;
-      N.Hany
-  | "void"             -> N.Hprim N.Tvoid
-  | "int"              -> N.Hprim N.Tint
-  | "bool"             -> N.Hprim N.Tbool
-  | "float"            -> N.Hprim N.Tfloat
-  | "num"              -> N.Hprim N.Tnum
-  | "string"           -> N.Hprim N.Tstring
-  | "resource"         -> N.Hprim N.Tresource
-  | "mixed"            -> N.Hmixed
-  | "array"            ->
-      (match hl with
+  | "int"    -> Some (N.Hprim N.Tint)
+  | "bool"   -> Some (N.Hprim N.Tbool)
+  | "float"  -> Some (N.Hprim N.Tfloat)
+  | "string" -> Some (N.Hprim N.Tstring)
+  | "array"  ->
+      Some (match hl with
       | [] -> N.Harray (None, None)
       | [x] -> N.Harray (Some (hint env x), None)
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
@@ -758,78 +831,17 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       )
   | "integer" ->
       Errors.integer_instead_of_int p;
-      N.Hprim N.Tint
+      Some (N.Hprim N.Tint)
   | "boolean" ->
       Errors.boolean_instead_of_bool p;
-      N.Hprim N.Tbool
+      Some (N.Hprim N.Tbool)
   | "double" ->
       Errors.double_instead_of_float p;
-      N.Hprim N.Tfloat
+      Some (N.Hprim N.Tfloat)
   | "real" ->
       Errors.real_instead_of_float p;
-       N.Hprim N.Tfloat
-  | "this" when allow_this ->
-      if hl != []
-      then Errors.this_no_argument p;
-      (match (fst env).cclass with
-      | None ->
-        Errors.this_outside_of_class p;
-        N.Hany
-      | Some cid ->
-        let tparaml = (fst env).type_paraml in
-        let tparaml = List.map begin fun (param_pos, param_name) ->
-          let _, cstr = get_constraint env param_name in
-          let cstr = opt_map (hint env) cstr in
-          param_pos, N.Habstr (param_name, cstr)
-        end tparaml in
-        N.Habstr ("this", Some (fst cid, N.Happly (cid, tparaml))))
-  | "this" ->
-      (match (fst env).cclass with
-      | None ->
-          Errors.this_outside_of_class p
-      | Some _ ->
-          Errors.this_must_be_return p
-      );
-      N.Hany
-  | _ when String.lowercase x = "this" ->
-      Errors.lowercase_this p x;
-      N.Hany
-  | _ when SMap.mem x params ->
-      if hl <> [] then
-      Errors.tparam_with_tparam p x;
-      let env, gen_constraint = get_constraint env x in
-      N.Habstr (x, opt_map (hint env) gen_constraint)
-  | _ ->
-      (* In the future, when we have proper covariant support, we can
-       * allow "this" to instantiate any covariant type variable. For
-       * example, let us pretend that we have this defined:
-       *
-       *   interface IFoo<read Tread, write Twrite>
-       *
-       * IFoo<this, int> and IFoo<IFoo<this, int>, int> are ok
-       * IFoo<int, this> and IFoo<int, IFoo<this>> are not ok
-       *
-       * For now, we're hardcoding the fact that all type variables for
-       * Awaitable and WaitHandle are covariant (well, there's only one
-       * type variable, but yeah...). We turn on allow_this in
-       * Awaitable and WaitHandle cases to support members that look
-       * like:
-       *
-       *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
-       *)
-    let cname = snd (Env.class_name env id) in
-    let gen_read_api_covariance =
-      (cname = "\\GenReadApi" || cname = "\\GenReadIdxApi") in
-    let privacy_policy_base_covariance =
-      (cname = "\\PrivacyPolicyBase") in
-    let data_type_covariance =
-      (cname = "\\DataType" || cname = "\\DataTypeImplProvider") in
-    let awaitable_covariance =
-      (cname = "\\Awaitable" || cname = "\\WaitHandle") in
-    let allow_this = allow_this &&
-      (awaitable_covariance || gen_read_api_covariance ||
-       privacy_policy_base_covariance || data_type_covariance) in
-    N.Happly (Env.class_name env id, hintl ~allow_this env hl)
+      Some (N.Hprim N.Tfloat)
+  | _ -> None
 
 and get_constraint env tparam =
   let params = (fst env).type_params in
@@ -1686,7 +1698,29 @@ and expr_ env = function
   | Expr_list el -> N.Expr_list (exprl env el)
   | Cast (ty, e2) ->
       hint_no_typedef env ty;
-      let ty = hint env ty in
+      let (p, x), hl = match ty with
+      | _, Happly (id, hl) -> (id, hl)
+      | _                  -> assert false in
+      let ty = match try_castable_hint env p x hl with
+      | Some ty -> p, ty
+      | None    -> begin
+      match x with
+      | "object" ->
+          (* (object) is a valid cast but not a valid type annotation *)
+          (* FIXME we are not modeling the correct runtime behavior here -- the
+           * runtime result type is an stdClass if the original type is
+           * primitive. But we should probably just disallow object casts
+           * altogether. *)
+          p, N.Hany
+      | "void"  ->
+          Errors.void_cast p;
+          p, N.Hany
+      | _       ->
+          (* Let's just assume that any other invalid cases are attempts to
+           * cast to specific objects *)
+          Errors.object_cast p x;
+          hint env ty
+      end in
       N.Cast (ty, expr env e2)
   | Unop (uop, e) -> N.Unop (uop, expr env e)
   | Binop (Eq None as op, lv, e2) ->

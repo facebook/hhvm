@@ -130,6 +130,8 @@ module Naming                               = struct
   let unexpected_arrow                      = 2051 (* DONT MODIFY!!!! *)
   let unexpected_typedef                    = 2052 (* DONT MODIFY!!!! *)
   let using_internal_class                  = 2053 (* DONT MODIFY!!!! *)
+  let void_cast                             = 2054 (* DONT MODIFY!!!! *)
+  let object_cast                           = 2055 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -441,6 +443,14 @@ let real_instead_of_float pos =
 
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"
+
+let void_cast pos =
+  add Naming.void_cast pos "Cannot cast to void."
+
+let object_cast pos x =
+  add Naming.object_cast pos ("Object casts are unsupported. "^
+    "Try 'if ($var instanceof "^x^")' or "^
+    "'invariant($var instanceof "^x^", ...)'.")
 
 let this_outside_of_class pos =
    add Naming.this_outside_of_class pos

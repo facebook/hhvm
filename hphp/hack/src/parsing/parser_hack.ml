@@ -2727,15 +2727,27 @@ and expr_new env pos_start =
 (*****************************************************************************)
 
 and is_cast_type = function
-  | "int" | "float" | "double" | "string"
-  | "array" | "object" | "bool" | "unset" -> true
-  | _ -> false
+    | "int" | "float" | "double" | "string"
+    | "array" | "object" | "bool" | "unset" -> true
+    | _ -> false
 
+(* (int), (float), etc are considered cast tokens by HHVM, so we will always
+ * interpret them as casts. I.e. (object) >> 1 is a parse error because it is
+ * trying to cast the malformed expression `>> 1` to an object. On the other
+ * hand, (x) >> 1 is parsed like `x >> 1`, because (x) is not a cast token. *)
 and is_cast env =
   look_ahead env begin fun env ->
-    let _ = L.token env.lb in
-    is_cast_type (Lexing.lexeme env.lb) &&
-    L.token env.lb = Trp
+    L.token env.lb = Tword &&
+    let cast_name = Lexing.lexeme env.lb in
+    L.token env.lb = Trp && begin
+      is_cast_type cast_name ||
+      match L.token env.lb with
+      (* We cannot be making a cast if the next token is a binary / ternary
+       * operator, or if it's the end of a statement (i.e. a semicolon.) *)
+      | Tqm | Tsc | Tstar | Tslash | Txor | Tpercent | Tlt | Tgt | Tltlt | Tgtgt
+      | Tlb | Trb | Tdot | Tlambda -> false
+      | _ -> true
+    end
   end
 
 and expr_cast env start_pos =

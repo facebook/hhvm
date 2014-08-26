@@ -410,7 +410,7 @@ const CallInfo& CallMap::info(Opcode op) {
 
 } // NativeCalls
 
-namespace X64 {
+namespace x64 {
 using namespace NativeCalls;
 ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
                     const IRInstruction* inst) {
@@ -440,7 +440,7 @@ ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
   return argGroup;
 }
 } // X64
-namespace ARM {
+namespace arm {
 using namespace NativeCalls;
 ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
                     const IRInstruction* inst) {

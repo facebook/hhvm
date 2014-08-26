@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 struct CodeGenerator : public jit::CodeGenerator {
 

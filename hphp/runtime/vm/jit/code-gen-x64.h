@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.

@@ -47,7 +47,7 @@ extern "C" void enterTCHelper(Cell* vm_sp,
                               ActRec* firstAR,
                               void* targetCacheBase);
 
-namespace X64 {
+namespace x64 {
 
 TRACE_SET_MOD(hhir);
 
@@ -56,7 +56,7 @@ struct BackEnd : public jit::BackEnd {
   ~BackEnd() {}
 
   Abi abi() override {
-    return X64::abi;
+    return x64::abi;
   }
 
   size_t cacheLineSize() override {
@@ -68,19 +68,19 @@ struct BackEnd : public jit::BackEnd {
   }
 
   PhysReg rVmSp() override {
-    return X64::rVmSp;
+    return x64::rVmSp;
   }
 
   PhysReg rVmFp() override {
-    return X64::rVmFp;
+    return x64::rVmFp;
   }
 
   Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return X64::srcConstraint(inst, i);
+    return x64::srcConstraint(inst, i);
   }
 
   Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return X64::dstConstraint(inst, i);
+    return x64::dstConstraint(inst, i);
   }
 
   RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
@@ -98,10 +98,10 @@ struct BackEnd : public jit::BackEnd {
    * enterTCHelper is a handwritten assembly function that transfers control in
    * and out of the TC.
    */
-  static_assert(X64::rVmSp == rbx &&
-                X64::rVmFp == rbp &&
-                X64::rVmTl == r12 &&
-                X64::rStashedAR == r15,
+  static_assert(x64::rVmSp == rbx &&
+                x64::rVmFp == rbp &&
+                x64::rVmTl == r12 &&
+                x64::rStashedAR == r15,
                 "__enterTCHelper needs to be modified to use the correct ABI");
   static_assert(REQ_BIND_CALL == 0x1,
                 "Update assembly test for REQ_BIND_CALL in __enterTCHelper");
@@ -140,17 +140,17 @@ struct BackEnd : public jit::BackEnd {
       x64Alignment = kCacheLineSize;
       break;
     }
-    X64::moveToAlign(cb, x64Alignment);
+    x64::moveToAlign(cb, x64Alignment);
   }
 
   UniqueStubs emitUniqueStubs() override {
-    return X64::emitUniqueStubs();
+    return x64::emitUniqueStubs();
   }
 
   TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return X64::emitServiceReqWork(cb, start, flags, req, argv);
+    return x64::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -158,33 +158,33 @@ struct BackEnd : public jit::BackEnd {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
-      X64::emitTransCounterInc(a);
+      x64::emitTransCounterInc(a);
     }
     a.    jmp(emitServiceReq(coldCode, REQ_INTERPRET, sk.offset()));
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
-    return X64::funcPrologueHasGuard(prologue, func);
+    return x64::funcPrologueHasGuard(prologue, func);
   }
 
   TCA funcPrologueToGuard(TCA prologue, const Func* func) override {
-    return X64::funcPrologueToGuard(prologue, func);
+    return x64::funcPrologueToGuard(prologue, func);
   }
 
   SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
                           bool funcIsMagic, int nPassed, TCA& start,
                           TCA& aStart) override {
     return funcIsMagic
-          ? X64::emitMagicFuncPrologue(func, nPassed, start)
-          : X64::emitFuncPrologue(func, nPassed, start);
+          ? x64::emitMagicFuncPrologue(func, nPassed, start)
+          : x64::emitFuncPrologue(func, nPassed, start);
   }
 
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {
-    return X64::emitCallArrayPrologue(func, dvs);
+    return x64::emitCallArrayPrologue(func, dvs);
   }
 
   void funcPrologueSmashGuard(TCA prologue, const Func* func) override {
-    X64::funcPrologueSmashGuard(prologue, func);
+    x64::funcPrologueSmashGuard(prologue, func);
   }
 
   void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
@@ -197,7 +197,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
-    X64::emitTraceCall(cb, pcOff);
+    x64::emitTraceCall(cb, pcOff);
   }
 
   void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
@@ -244,7 +244,7 @@ struct BackEnd : public jit::BackEnd {
 
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                               TestAndSmashFlags flags) override {
-    using namespace X64;
+    using namespace x64;
     switch (flags) {
       case TestAndSmashFlags::kAlignJcc:
         prepareForSmash(cb, testBytes + kJmpccLen, testBytes);
@@ -581,12 +581,12 @@ struct BackEnd : public jit::BackEnd {
     // first byte, but that means the delta is 1 byte, and we shouldn't be
     // encoding smashable jumps that way.
     assert(kJmpLen == kCallLen);
-    always_assert(isSmashable(addr, X64::kJmpLen));
+    always_assert(isSmashable(addr, x64::kJmpLen));
 
     auto& cb = mcg->code.blockFor(addr);
     CodeCursor cursor { cb, addr };
     X64Assembler a { cb };
-    if (dest > addr && dest - addr <= X64::kJmpLen) {
+    if (dest > addr && dest - addr <= x64::kJmpLen) {
       assert(!isCall);
       a.  emitNop(dest - addr);
     } else if (isCall) {
@@ -615,31 +615,31 @@ struct BackEnd : public jit::BackEnd {
     // Make sure the encoding is what we expect. It has to be a rip-relative jcc
     // with a 4-byte delta.
     assert(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
-    assert(isSmashable(jccAddr, X64::kJmpccLen));
+    assert(isSmashable(jccAddr, x64::kJmpccLen));
 
     // Can't use the assembler to write out a new instruction, because we have
     // to preserve the condition code.
-    auto newDelta = safe_cast<int32_t>(newDest - jccAddr - X64::kJmpccLen);
+    auto newDelta = safe_cast<int32_t>(newDest - jccAddr - x64::kJmpccLen);
     auto deltaAddr = reinterpret_cast<int32_t*>(jccAddr
-                                                + X64::kJmpccLen
-                                                - X64::kJmpImmBytes);
+                                                + x64::kJmpccLen
+                                                - x64::kJmpImmBytes);
     *deltaAddr = newDelta;
   }
 
   void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) override {
     X64Assembler a { cb };
     if (cc == CC_None) {
-      assert(isSmashable(cb.frontier(), X64::kJmpLen));
+      assert(isSmashable(cb.frontier(), x64::kJmpLen));
       a.  jmp(dest);
     } else {
-      assert(isSmashable(cb.frontier(), X64::kJmpccLen));
+      assert(isSmashable(cb.frontier(), x64::kJmpccLen));
       a.  jcc(cc, dest);
     }
   }
 
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
-    assert(isSmashable(cb.frontier(), X64::kCallLen));
+    assert(isSmashable(cb.frontier(), x64::kCallLen));
     a.  call(dest);
   }
 
@@ -872,14 +872,14 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
 static size_t ctr;
 const char* area_names[] = { "main", "cold", "frozen" };
 
-auto const vasm_gp = X64::abi.gpUnreserved | RegSet(rAsm).add(r11);
-auto const vasm_simd = X64::kXMMRegs;
+auto const vasm_gp = x64::abi.gpUnreserved | RegSet(rAsm).add(r11);
+auto const vasm_simd = x64::kXMMRegs;
 UNUSED const Abi vasm_abi {
   .gpUnreserved = vasm_gp,
-  .gpReserved = X64::abi.gp() - vasm_gp,
+  .gpReserved = x64::abi.gp() - vasm_gp,
   .simdUnreserved = vasm_simd,
-  .simdReserved = X64::abi.simd() - vasm_simd,
-  .calleeSaved = X64::kCalleeSaved
+  .simdReserved = x64::abi.simd() - vasm_simd,
+  .calleeSaved = x64::kCalleeSaved
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {

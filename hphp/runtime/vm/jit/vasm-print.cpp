@@ -24,7 +24,7 @@
 TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace jit {
-using namespace X64;
+using namespace x64;
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 

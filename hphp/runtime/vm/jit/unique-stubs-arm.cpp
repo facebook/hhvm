@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 namespace {
 

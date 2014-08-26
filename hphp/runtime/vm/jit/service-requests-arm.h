@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 #define incl_HPHP_JIT_SERVICE_REQUESTS_ARM_H
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 /*
  * See service-requests-x64.h for interface documentation.

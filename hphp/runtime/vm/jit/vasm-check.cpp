@@ -20,7 +20,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 namespace {
 

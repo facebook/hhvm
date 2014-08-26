@@ -42,7 +42,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* srcRec) {
   // Emit a jump to the actual code
   //
   // XXX kJmpLen access here is a layering violation.
-  mcg->backEnd().prepareForSmash(mcg->code.main(), X64::kJmpLen);
+  mcg->backEnd().prepareForSmash(mcg->code.main(), x64::kJmpLen);
   TCA dbgBranchGuardSrc = mcg->code.main().frontier();
   mcg->backEnd().emitSmashableJump(mcg->code.main(), realCode, CC_None);
 

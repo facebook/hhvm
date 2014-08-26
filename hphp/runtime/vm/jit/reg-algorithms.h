@@ -37,7 +37,7 @@ namespace HPHP { namespace jit {
 struct VMoveInfo {
   enum class Kind { Move, Xchg };
   Kind m_kind;
-  X64::Vreg m_src, m_dst;
+  x64::Vreg m_src, m_dst;
 };
 
 struct MoveInfo {
@@ -47,7 +47,7 @@ struct MoveInfo {
 };
 
 typedef PhysReg::Map<PhysReg> MovePlan;
-jit::vector<VMoveInfo> doVregMoves(X64::Vunit&, MovePlan& moves);
+jit::vector<VMoveInfo> doVregMoves(x64::Vunit&, MovePlan& moves);
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 }}

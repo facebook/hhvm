@@ -30,7 +30,7 @@ namespace HPHP {
 
 struct Func;
 
-namespace jit { namespace ARM {
+namespace jit { namespace arm {
 
 inline const Func** funcPrologueToGuardImmPtr(jit::TCA prologue) {
   assert(arch() == Arch::ARM);

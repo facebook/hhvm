@@ -22,7 +22,7 @@
 #include <iosfwd>
 
 namespace HPHP { namespace jit {
-namespace X64 {
+namespace x64 {
 struct Vunit;
 struct Vinstr;
 struct Vblock;
@@ -69,22 +69,22 @@ struct Vmeta {
   jit::vector<CodeAddress> points;
 };
 
-void allocateRegisters(X64::Vunit&, const Abi&);
-void optimizeJmps(X64::Vunit&);
-void removeDeadCode(X64::Vunit&);
-folly::Range<Vlabel*> succs(X64::Vinstr& inst);
-folly::Range<Vlabel*> succs(X64::Vblock& block);
-jit::vector<Vlabel> sortBlocks(X64::Vunit& unit);
-std::string formatInstr(X64::Vunit& unit, X64::Vinstr& inst);
-void printBlock(std::ostream& out, X64::Vunit& unit, Vlabel b);
+void allocateRegisters(x64::Vunit&, const Abi&);
+void optimizeJmps(x64::Vunit&);
+void removeDeadCode(x64::Vunit&);
+folly::Range<Vlabel*> succs(x64::Vinstr& inst);
+folly::Range<Vlabel*> succs(x64::Vblock& block);
+jit::vector<Vlabel> sortBlocks(x64::Vunit& unit);
+std::string formatInstr(x64::Vunit& unit, x64::Vinstr& inst);
+void printBlock(std::ostream& out, x64::Vunit& unit, Vlabel b);
 
 // print a dot-compatible digraph of the blocks (without contents)
-void printCfg(X64::Vunit& unit, jit::vector<Vlabel>& blocks);
-void printCfg(std::ostream& out, X64::Vunit& unit,
+void printCfg(x64::Vunit& unit, jit::vector<Vlabel>& blocks);
+void printCfg(std::ostream& out, x64::Vunit& unit,
               jit::vector<Vlabel>& blocks);
 
 // print the cfg digraph followed by a code listing
-void printUnit(std::string caption, X64::Vunit& unit);
+void printUnit(std::string caption, x64::Vunit& unit);
 
 }}
 #endif

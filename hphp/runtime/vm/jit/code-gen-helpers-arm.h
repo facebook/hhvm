@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 /*
  * Intelligently chooses between Add, Mov, and no-op.

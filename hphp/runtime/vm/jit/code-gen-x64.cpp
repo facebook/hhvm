@@ -69,7 +69,7 @@
 
 using HPHP::jit::TCA;
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 TRACE_SET_MOD(hhir);
 

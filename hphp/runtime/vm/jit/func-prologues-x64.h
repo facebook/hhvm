@@ -27,7 +27,7 @@ namespace HPHP {
 struct ActRec;
 class Func;
 
-namespace jit { namespace X64 {
+namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 

@@ -25,7 +25,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 using namespace reg;
 
 const char* vinst_names[] = {
@@ -784,10 +784,10 @@ auto const vauto_gp = RegSet(rAsm).add(reg::r11);
 auto const vauto_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
 UNUSED const Abi vauto_abi {
   .gpUnreserved = vauto_gp,
-  .gpReserved = X64::abi.gp() - vauto_gp,
+  .gpReserved = x64::abi.gp() - vauto_gp,
   .simdUnreserved = vauto_simd,
-  .simdReserved = X64::abi.simd() - vauto_simd,
-  .calleeSaved = X64::abi.calleeSaved
+  .simdReserved = x64::abi.simd() - vauto_simd,
+  .calleeSaved = x64::abi.calleeSaved
 };
 
 Vauto::~Vauto() {

@@ -28,7 +28,7 @@ namespace HPHP { namespace jit {
 
 using NativeCalls::CallMap;
 
-namespace X64 {
+namespace x64 {
 
 // okStore is true if cgStore can take c as an immediate without
 // using any scratch registers.

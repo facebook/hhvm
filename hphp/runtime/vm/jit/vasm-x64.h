@@ -32,7 +32,7 @@
 #include <folly/Range.h>
 #include <boost/dynamic_bitset.hpp>
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 struct Vptr;
 struct Vscaled;
@@ -665,14 +665,14 @@ struct Vinstr {
 #undef O
 
 #define O(name, imms, uses, defs) \
-  /* implicit */ Vinstr(X64::name i) : op(name), name##_(i) {}
+  /* implicit */ Vinstr(x64::name i) : op(name), name##_(i) {}
   X64_OPCODES
 #undef O
 
   Opcode op;
   unsigned pos;
   SrcKey sk;
-#define O(name, imms, uses, defs) X64::name name##_;
+#define O(name, imms, uses, defs) x64::name name##_;
   union { X64_OPCODES };
 #undef O
 };

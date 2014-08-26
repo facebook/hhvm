@@ -128,7 +128,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   // uniqueStub.
   for (int i = ec->m_activeSims.size() - 1; i >= 0; --i) {
     auto const* sim = ec->m_activeSims[i];
-    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(jit::ARM::rVmFp.code()));
+    auto* rbp = reinterpret_cast<ActRec*>(sim->xreg(jit::arm::rVmFp.code()));
     auto tca = reinterpret_cast<TCA>(sim->pc());
     TRACE(2, "considering frame %p, %p\n", rbp, tca);
 

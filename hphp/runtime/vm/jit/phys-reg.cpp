@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace jit {
-using namespace X64;
+using namespace x64;
 
 int PhysReg::kNumGP = 0;
 int PhysReg::kNumSIMD = 0;
@@ -39,7 +39,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
     , m_v(&v)
     , m_regs(regs)
 {
-  auto xmm = regs & X64::kXMMRegs;
+  auto xmm = regs & x64::kXMMRegs;
   auto gpr = regs - xmm;
   m_adjust = (parity & 0x1) == (gpr.size() & 0x1) ? 8 : 0;
   if (!xmm.empty()) {
@@ -82,7 +82,7 @@ PhysRegSaverParity::~PhysRegSaverParity() {
 }
 
 void PhysRegSaverParity::emitPops(Vout& v, RegSet regs) {
-  auto xmm = regs & X64::kXMMRegs;
+  auto xmm = regs & x64::kXMMRegs;
   auto gpr = regs - xmm;
   gpr.forEachR([&] (PhysReg pr) {
     v << pop{pr};

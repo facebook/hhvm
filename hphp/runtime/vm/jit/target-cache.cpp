@@ -506,7 +506,7 @@ void handlePrimeCacheInit(Entry* mce,
   // call to start doing real dispatch.
   //
   // XXX Use of kCallLen here is a layering violation.
-  mcg->backEnd().smashCall(retAddr - X64::kCallLen,
+  mcg->backEnd().smashCall(retAddr - x64::kCallLen,
                            reinterpret_cast<TCA>(handleSlowPath<fatal>));
 }
 

@@ -36,7 +36,7 @@ struct Func;
 namespace jit {
 struct Fixup;
 struct SSATmp;
-namespace X64 {
+namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
 

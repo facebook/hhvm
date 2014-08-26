@@ -507,7 +507,7 @@ We don't nest namespaces very deeply, so prefer to keep the scoping to a single
 line:
 
 ```cpp
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

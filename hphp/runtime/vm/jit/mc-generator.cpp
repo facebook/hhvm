@@ -858,7 +858,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
   assert(&cb != &code.frozen());
 
   // XXX Use of kJmp*Len here is a layering violation.
-  using namespace X64;
+  using namespace x64;
 
   // can we just directly fall through?
   // a jmp + jz takes 5 + 6 = 11 bytes

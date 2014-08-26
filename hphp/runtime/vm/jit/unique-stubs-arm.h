@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 //////////////////////////////////////////////////////////////////////
 

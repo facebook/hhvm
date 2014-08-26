@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-arm.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 TRACE_SET_MOD(hhir);
 
@@ -41,7 +41,7 @@ struct BackEnd : public jit::BackEnd {
   ~BackEnd() {}
 
   Abi abi() override {
-    return ARM::abi;
+    return arm::abi;
   }
 
   size_t cacheLineSize() override {
@@ -54,19 +54,19 @@ struct BackEnd : public jit::BackEnd {
   }
 
   PhysReg rVmSp() override {
-    return PhysReg(ARM::rVmSp);
+    return PhysReg(arm::rVmSp);
   }
 
   PhysReg rVmFp() override {
-    return PhysReg(ARM::rVmFp);
+    return PhysReg(arm::rVmFp);
   }
 
   Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return ARM::srcConstraint(inst, i);
+    return arm::srcConstraint(inst, i);
   }
 
   Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return ARM::dstConstraint(inst, i);
+    return arm::dstConstraint(inst, i);
   }
 
   RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
@@ -82,13 +82,13 @@ struct BackEnd : public jit::BackEnd {
    */
   uintptr_t setupSimRegsAndStack(vixl::Simulator& sim,
                                  uintptr_t saved_rStashedAr) {
-    sim.   set_xreg(ARM::rGContextReg.code(), g_context.getNoCheck());
+    sim.   set_xreg(arm::rGContextReg.code(), g_context.getNoCheck());
 
     auto& vmRegs = vmRegsUnsafe();
-    sim.   set_xreg(ARM::rVmFp.code(), vmRegs.fp);
-    sim.   set_xreg(ARM::rVmSp.code(), vmRegs.stack.top());
-    sim.   set_xreg(ARM::rVmTl.code(), RDS::tl_base);
-    sim.   set_xreg(ARM::rStashedAR.code(), saved_rStashedAr);
+    sim.   set_xreg(arm::rVmFp.code(), vmRegs.fp);
+    sim.   set_xreg(arm::rVmSp.code(), vmRegs.stack.top());
+    sim.   set_xreg(arm::rVmTl.code(), RDS::tl_base);
+    sim.   set_xreg(arm::rStashedAR.code(), saved_rStashedAr);
 
     // Leave space for register spilling and MInstrState.
     sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
@@ -124,7 +124,7 @@ struct BackEnd : public jit::BackEnd {
       Stats::inc(Stats::vixl_SimulatedStore, sim.store_count());
     };
 
-    sim.set_exception_hook(ARM::simulatorExceptionHook);
+    sim.set_exception_hook(arm::simulatorExceptionHook);
 
     g_context->m_activeSims.push_back(&sim);
     SCOPE_EXIT { g_context->m_activeSims.pop_back(); };
@@ -153,9 +153,9 @@ struct BackEnd : public jit::BackEnd {
     info.args[2] = sim.xreg(3);
     info.args[3] = sim.xreg(4);
     info.args[4] = sim.xreg(5);
-    info.saved_rStashedAr = sim.xreg(ARM::rStashedAR.code());
+    info.saved_rStashedAr = sim.xreg(arm::rStashedAR.code());
 
-    info.stubAddr = reinterpret_cast<TCA>(sim.xreg(ARM::rAsm.code()));
+    info.stubAddr = reinterpret_cast<TCA>(sim.xreg(arm::rAsm.code()));
   }
 
   jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
@@ -163,7 +163,7 @@ struct BackEnd : public jit::BackEnd {
                                        CodeBlock& coldCode,
                                        CodeBlock& frozenCode,
                                        CodegenState& state) override {
-    return new ARM::CodeGenerator(unit, mainCode, coldCode,
+    return new arm::CodeGenerator(unit, mainCode, coldCode,
                                   frozenCode, state);
   }
 
@@ -174,20 +174,20 @@ struct BackEnd : public jit::BackEnd {
   }
 
   UniqueStubs emitUniqueStubs() override {
-    return ARM::emitUniqueStubs();
+    return arm::emitUniqueStubs();
   }
 
   TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return ARM::emitServiceReqWork(cb, start, flags, req, argv);
+    return arm::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                      const SrcKey& sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
-      ARM::emitTransCounterInc(a);
+      arm::emitTransCounterInc(a);
     }
     // This jump won't be smashed, but a far jump on ARM requires the same code
     // sequence.
@@ -199,31 +199,31 @@ struct BackEnd : public jit::BackEnd {
   }
 
   bool funcPrologueHasGuard(TCA prologue, const Func* func) override {
-    return ARM::funcPrologueHasGuard(prologue, func);
+    return arm::funcPrologueHasGuard(prologue, func);
   }
 
   TCA funcPrologueToGuard(TCA prologue, const Func* func) override {
-    return ARM::funcPrologueToGuard(prologue, func);
+    return arm::funcPrologueToGuard(prologue, func);
   }
 
   SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
                           bool funcIsMagic, int nPassed, TCA& start,
                           TCA& aStart) override {
-    return ARM::emitFuncPrologue(mainCode, coldCode, func, funcIsMagic,
+    return arm::emitFuncPrologue(mainCode, coldCode, func, funcIsMagic,
                                  nPassed, start, aStart);
   }
 
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {
-    return ARM::emitCallArrayPrologue(func, dvs);
+    return arm::emitCallArrayPrologue(func, dvs);
   }
 
   void funcPrologueSmashGuard(TCA prologue, const Func* func) override {
-    ARM::funcPrologueSmashGuard(prologue, func);
+    arm::funcPrologueSmashGuard(prologue, func);
   }
 
   void emitIncStat(CodeBlock& cb, intptr_t disp, int n) override {
-    using ARM::rAsm;
-    using ARM::rAsm2;
+    using arm::rAsm;
+    using arm::rAsm2;
     vixl::MacroAssembler a { cb };
 
     a.    Mrs   (rAsm2, vixl::TPIDR_EL0);
@@ -341,8 +341,8 @@ struct BackEnd : public jit::BackEnd {
     // 26-bit jump offsets (not big enough). It does, however, entail an
     // indirect jump.
     if (cc == CC_None) {
-      a.    Ldr  (ARM::rAsm, &targetData);
-      a.    Br   (ARM::rAsm);
+      a.    Ldr  (arm::rAsm, &targetData);
+      a.    Br   (arm::rAsm);
       if (!cb.isFrontierAligned(8)) {
         a.  Nop  ();
         assert(cb.isFrontierAligned(8));
@@ -354,9 +354,9 @@ struct BackEnd : public jit::BackEnd {
       assert(targetData.target() == start + 8 ||
              targetData.target() == start + 12);
     } else {
-      a.    B    (&afterData, InvertCondition(ARM::convertCC(cc)));
-      a.    Ldr  (ARM::rAsm, &targetData);
-      a.    Br   (ARM::rAsm);
+      a.    B    (&afterData, InvertCondition(arm::convertCC(cc)));
+      a.    Ldr  (arm::rAsm, &targetData);
+      a.    Br   (arm::rAsm);
       if (!cb.isFrontierAligned(8)) {
         a.  Nop  ();
         assert(cb.isFrontierAligned(8));
@@ -377,8 +377,8 @@ struct BackEnd : public jit::BackEnd {
     vixl::Label targetData;
     DEBUG_ONLY auto start = cb.frontier();
 
-    a.  Ldr  (ARM::rAsm, &targetData);
-    a.  Blr  (ARM::rAsm);
+    a.  Ldr  (arm::rAsm, &targetData);
+    a.  Blr  (arm::rAsm);
     // When the call returns, jump over the data.
     a.  B    (&afterData);
     if (!cb.isFrontierAligned(8)) {

@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
                            const vixl::Register& dstReg,

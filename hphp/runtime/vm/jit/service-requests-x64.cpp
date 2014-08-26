@@ -30,7 +30,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/ringbuffer.h"
 
-namespace HPHP { namespace jit { namespace X64 {
+namespace HPHP { namespace jit { namespace x64 {
 
 using jit::reg::rip;
 
@@ -272,9 +272,9 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
   }
   emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
   if (persist) {
-    as.  emitImmReg(0, jit::X64::rAsm);
+    as.  emitImmReg(0, jit::x64::rAsm);
   } else {
-    as.  lea(rip[(int64_t)stubStart], jit::X64::rAsm);
+    as.  lea(rip[(int64_t)stubStart], jit::x64::rAsm);
   }
   TRACE(3, ")\n");
   as.    emitImmReg(req, jit::reg::rdi);

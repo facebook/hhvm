@@ -20,7 +20,7 @@
 #include "hphp/util/slice.h"
 
 namespace HPHP { namespace jit {
-using X64::Vunit;
+using x64::Vunit;
 
 struct CycleInfo {
   PhysReg node;
@@ -40,7 +40,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
 jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
   constexpr auto N = 64;
-  assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) == N);
   jit::vector<VMoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
@@ -134,7 +134,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
-  assert(std::max(X64::abi.all().size(), ARM::abi.all().size()) == N);
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) == N);
   jit::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);

@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-namespace HPHP { namespace jit { namespace ARM {
+namespace HPHP { namespace jit { namespace arm {
 
 inline vixl::Register x2a(PhysReg x64reg) {
   always_assert(!x64reg.isSIMD());

@@ -52,7 +52,7 @@ enum class DestType : unsigned {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace X64 {
+namespace x64 {
 struct CallDest {
   DestType type;
   Vreg reg0, reg1;
@@ -189,7 +189,7 @@ struct ArgGroup {
     // If there's exactly one register argument slot left, the whole TypedValue
     // goes on the stack instead of being split between a register and the
     // stack.
-    if (m_gpArgs.size() == X64::kNumRegisterArgs - 1) {
+    if (m_gpArgs.size() == x64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
     packed_tv ? type(i).ssa(i) : ssa(i).type(i);
@@ -211,7 +211,7 @@ private:
     // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
     ArgVec* args = m_override;
     if (!args) {
-      args = m_gpArgs.size() < X64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
+      args = m_gpArgs.size() < x64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
     }
     args->push_back(arg);
   }
@@ -220,7 +220,7 @@ private:
     // See push_arg above
     ArgVec* args = m_override;
     if (!args) {
-      args = m_simdArgs.size() < X64::kNumSIMDRegisterArgs
+      args = m_simdArgs.size() < x64::kNumSIMDRegisterArgs
            ? &m_simdArgs : &m_stkArgs;
     }
     args->push_back(arg);
@@ -260,7 +260,7 @@ ArgGroup toArgGroup(const NativeCalls::CallInfo&, const jit::vector<Vloc>& locs,
                     const IRInstruction*);
 } // X64
 
-namespace ARM {
+namespace arm {
 struct CallDest {
   DestType type;
   PhysReg reg0;
@@ -396,7 +396,7 @@ struct ArgGroup {
     // If there's exactly one register argument slot left, the whole TypedValue
     // goes on the stack instead of being split between a register and the
     // stack.
-    if (m_gpArgs.size() == X64::kNumRegisterArgs - 1) {
+    if (m_gpArgs.size() == x64::kNumRegisterArgs - 1) {
       m_override = &m_stkArgs;
     }
     packed_tv ? type(i).ssa(i) : ssa(i).type(i);
@@ -424,7 +424,7 @@ private:
     // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
     ArgVec* args = m_override;
     if (!args) {
-      args = m_gpArgs.size() < X64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
+      args = m_gpArgs.size() < x64::kNumRegisterArgs ? &m_gpArgs : &m_stkArgs;
     }
     args->push_back(arg);
   }
@@ -433,7 +433,7 @@ private:
     // See push_gp above
     ArgVec* args = m_override;
     if (!args) {
-      args = m_simdArgs.size() < X64::kNumSIMDRegisterArgs
+      args = m_simdArgs.size() < x64::kNumSIMDRegisterArgs
            ? &m_simdArgs : &m_stkArgs;
     }
     args->push_back(arg);

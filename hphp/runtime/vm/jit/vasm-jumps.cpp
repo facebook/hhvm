@@ -21,9 +21,9 @@
 TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace jit {
-using namespace X64;
+using namespace x64;
 
-namespace X64 {
+namespace x64 {
 
 PredVector computePreds(Vunit& unit) {
   PredVector preds(unit.blocks.size());

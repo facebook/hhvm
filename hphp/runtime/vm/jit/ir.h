@@ -512,6 +512,7 @@ O(NewInstanceRaw,            DAllocObj, NA,                              NNT) \
 O(InitObjProps,                     ND, S(Obj),                        E|NNT) \
 O(CustomInstanceInit,          DofS(0), S(Obj),                         Er|N) \
                                                                               \
+O(RegisterLiveObj,                  ND, S(Obj),                        E|NNT) \
 O(LdClsCtor,                   D(Func), S(Cls),                       C|Er|N) \
 O(LdClsName,              D(StaticStr), S(Cls),                            C) \
 O(StClosureFunc,                    ND, S(Obj),                            E) \

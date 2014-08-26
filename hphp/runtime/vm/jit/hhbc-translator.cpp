@@ -2671,10 +2671,17 @@ void HhbcTranslator::emitInitSProps(const Class* cls, Block* catchBlock) {
 }
 
 SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
+  auto registerObj = [this, cls](SSATmp* obj) {
+    if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
+      gen(RegisterLiveObj, obj);
+    }
+    return obj;
+  };
+
   // If it's an extension class with a custom instance initializer,
   // that init function does all the work.
   if (cls->instanceCtor()) {
-    return gen(ConstructInstance, makeCatch(), ClassData(cls));
+    return registerObj(gen(ConstructInstance, makeCatch(), ClassData(cls)));
   }
 
   // First, make sure our property init vectors are all set up
@@ -2694,10 +2701,10 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
 
   // Call a custom initializer if one exists
   if (cls->callsCustomInstanceInit()) {
-    return gen(CustomInstanceInit, ssaObj);
+    return registerObj(gen(CustomInstanceInit, ssaObj));
   }
 
-  return ssaObj;
+  return registerObj(ssaObj);
 }
 
 void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
@@ -2708,7 +2715,6 @@ void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
   bool persistentCls = classHasPersistentRDS(cls);
   bool canInstantiate = canInstantiateClass(cls);
   bool fastAlloc =
-    !RuntimeOption::EnableObjDestructCall &&
     persistentCls &&
     canInstantiate &&
     !cls->callsCustomInstanceInit();
@@ -2757,13 +2763,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
   auto const clonedFunc = invokeFunc->cloneAndSetClass(curClass());
   assert(cls && (cls->attrs() & AttrUnique));
 
-  // Although closures can't have destructors, destructing the
-  // captured values (or captured $this) can lead to user-visible
-  // side-effects, so we can't use AllocObjFast if
-  // EnableObjDestructCall is on.
-  auto const closure =
-    RuntimeOption::EnableObjDestructCall ? gen(AllocObj, makeCatch(), cns(cls))
-                                         : emitAllocObjFast(cls);
+  auto const closure = emitAllocObjFast(cls);
   gen(IncRef, closure);
 
   auto const ctx = [&]{

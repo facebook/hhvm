@@ -225,6 +225,12 @@ void raiseMissingArgument(const Func* func, int got);
 RDS::Handle lookupClsRDSHandle(const StringData* name);
 
 /*
+ * Insert obj into the set of live objects to be destructed at the end of the
+ * request.
+ */
+void registerLiveObj(ObjectData* obj);
+
+/*
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();

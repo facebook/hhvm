@@ -543,6 +543,9 @@ void Class::initSPropHandles() const {
   Class* parent = this->parent();
   if (parent) {
     parent->initSPropHandles();
+    if (!RDS::isPersistentHandle(parent->sPropInitHandle())) {
+      allPersistentHandles = false;
+    }
   }
 
   // Bind all the static prop handles.
@@ -554,10 +557,8 @@ void Class::initSPropHandles() const {
 
       if (sProp.m_class == this) {
         if (usePersistentHandles && (sProp.m_attrs & AttrPersistent)) {
-          RDS::Link<TypedValue> tmp{RDS::kInvalidHandle};
-          tmp.bind(RDS::Mode::Persistent);
-          *tmp = sProp.m_val;
-          propHandle = tmp;
+          propHandle.bind(RDS::Mode::Persistent);
+          *propHandle = sProp.m_val;
         } else {
           propHandle.bind(RDS::Mode::Local);
         }
@@ -577,6 +578,9 @@ void Class::initSPropHandles() const {
 
   // Bind the init handle; this indicates that all handles are bound.
   if (allPersistentHandles) {
+    // We must make sure the value stored at the handle is correct before
+    // setting m_sPropCacheInit in case another thread tries to read it at just
+    // the wrong time.
     RDS::Link<bool> tmp{RDS::kInvalidHandle};
     tmp.bind(RDS::Mode::Persistent);
     *tmp = true;

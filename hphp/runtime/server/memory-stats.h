@@ -19,15 +19,25 @@
 #define incl_HPHP_MEMORYSTATS_H_
 
 #include <iostream>
+#include <mutex>
+#include <memory>
 
 #include "hphp/runtime/server/writer.h"
 namespace HPHP{
 
 class MemoryStats{
   public:
-    static void ReportMemory(std::string &out, Writer::Format format);
+    void ReportMemory(std::string &out, Writer::Format format);
+    static MemoryStats* GetInstance();
+    void ResetStaticStringSize();
+    void LogStaticStringAlloc(size_t bytes);
+
   private:
-    static void getStaticStringSize() {};
+    MemoryStats() {}
+    size_t GetStaticStringSize();
+
+    std::atomic<size_t> m_staticStringSize;
+
 };
 }
 

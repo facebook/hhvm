@@ -682,19 +682,19 @@ bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
                                               Transport *transport){
   std::string out;
   if (cmd == "memory.xml") {
-      MemoryStats::ReportMemory(out, Writer::Format::XML);
+      MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::XML);
       transport->addHeader("Content-Type","application/xml");
       transport->sendString(out);
       return true;
   }
   if (cmd == "memory.json") {
-      MemoryStats::ReportMemory(out, Writer::Format::JSON);
+      MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::JSON);
       transport->addHeader("Content-Type","application/json");
       transport->sendString(out);
       return true;
   }
   if (cmd == "memory.html" || cmd == "memory.htm") {
-      MemoryStats::ReportMemory(out, Writer::Format::XML);
+      MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::XML);
       transport->addHeader("Content-Type","application/html");
       transport->sendString(out);
       return true;

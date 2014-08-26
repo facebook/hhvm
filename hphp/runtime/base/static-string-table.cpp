@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include "hphp/runtime/server/memory-stats.h"
+
 #include "folly/AtomicHashMap.h"
 
 namespace HPHP {
@@ -127,10 +129,15 @@ StringData* insertStaticString(StringData* sd) {
     make_intern_key(sd),
     RDS::Link<TypedValue>(RDS::kInvalidHandle)
   );
+
   if (!pair.second) {
     sd->destructStatic();
+  } else {
+    MemoryStats::GetInstance()->LogStaticStringAlloc(sd->size()
+        + sizeof(StringData));
   }
   assert(to_sdata(pair.first->first) != nullptr);
+
   return const_cast<StringData*>(to_sdata(pair.first->first));
 }
 
@@ -141,6 +148,8 @@ inline StringData* insertStaticStringSlice(StringSlice slice) {
 void create_string_data_map() {
   StringDataMap::Config config;
   config.growthFactor = 1;
+  MemoryStats::GetInstance()->ResetStaticStringSize();
+
   s_stringDataMap =
     new StringDataMap(RuntimeOption::EvalInitialStaticStringTableSize,
                       config);

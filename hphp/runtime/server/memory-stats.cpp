@@ -19,9 +19,7 @@
 #include <string>
 #include <sstream>
 
-#include "hphp/runtime/server/writer.h"
-
-
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP{
 
@@ -39,11 +37,34 @@ namespace HPHP{
 
     w->writeFileHeader();
     w->beginObject("Memory");
+    w->beginObject("Breakdown");
+    w->beginObject("Static Strings");
+    w->writeEntry("Bytes",GetStaticStringSize());
+    w->writeEntry("Count",makeStaticStringCount());
+    w->endObject("Static Strings");
+    w->endObject("Breakdown");
     w->endObject("Memory");
     w->writeFileFooter();
     delete w;
 
     output = out.str();
     return;
+  }
+
+  MemoryStats* MemoryStats::GetInstance(){
+    static MemoryStats memoryStatsInstance;
+    return &memoryStatsInstance;
+  }
+
+  void MemoryStats::ResetStaticStringSize(){
+    m_staticStringSize.store(0);
+  }
+
+  void MemoryStats::LogStaticStringAlloc(size_t bytes){
+    m_staticStringSize += bytes;
+  }
+
+  size_t MemoryStats::GetStaticStringSize(){
+    return m_staticStringSize.load();
   }
 }

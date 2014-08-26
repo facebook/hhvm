@@ -201,7 +201,8 @@ bool findWeakActRecUses(const BlockList& blocks,
   bool killedFrames = false;
 
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    auto const frameInst = frameRoot(src->inst());
+    assert(src->isA(Type::FramePtr));
+    auto const frameInst = src->inst();
     if (frameInst->op() == DefInlineFP) {
       ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
       state[frameInst].incWeakUse();
@@ -287,7 +288,7 @@ bool findWeakActRecUses(const BlockList& blocks,
           FTRACE(2, "strong due to EH: {}\n", inst->toString());
           break;
         }
-        auto const frameInst = frameRoot(inst->src(1)->inst());
+        auto const frameInst = inst->src(1)->inst();
         if (frameInst->is(DefInlineFP)) {
           // See above about the limit to 1.
           if (callCounts[inst->src(1)->inst()]++ < 1) {
@@ -300,7 +301,7 @@ bool findWeakActRecUses(const BlockList& blocks,
 
     case InlineReturn:
       {
-        auto const frameInst = frameRoot(inst->src(0)->inst());
+        auto const frameInst = inst->src(0)->inst();
         assert(frameInst->is(DefInlineFP));
         auto const frameUses = folly::get_default(uses, frameInst->dst(), 0);
         auto const weakUses  = state[frameInst].weakUseCount();

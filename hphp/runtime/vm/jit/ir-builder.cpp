@@ -40,6 +40,14 @@ const typename M::mapped_type& get_required(const M& m,
   always_assert(it != m.end());
   return it->second;
 }
+
+SSATmp* fwdGuardSource(IRInstruction* inst) {
+  if (inst->is(AssertType, CheckType, AssertStk, CheckStk)) return inst->src(0);
+
+  assert(inst->is(AssertLoc, CheckLoc));
+  inst->convertToNop();
+  return nullptr;
+}
 }
 
 using Trace::Indent;
@@ -164,7 +172,6 @@ void IRBuilder::appendBlock(Block* block) {
 SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
                                           Type oldType,
                                           ConstrainBoxedFunc constrainBoxed) {
-  SSATmp* src = inst->src(0);
   auto const typeParam = inst->typeParam();
 
   if (oldType.isBoxed() && typeParam.isBoxed() &&
@@ -181,7 +188,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
      * will be slightly off is ok because all the code after the Jmp is
      * unreachable. */
     gen(Jmp, inst->taken());
-    return inst->src(0);
+    return fwdGuardSource(inst);
   }
 
   auto const newType = refineType(oldType, inst->typeParam());
@@ -189,7 +196,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
   if (oldType <= newType) {
     /* The type of the src is the same or more refined than type, so the guard
      * is unnecessary. */
-    return src;
+    return fwdGuardSource(inst);
   }
 
   return nullptr;
@@ -224,7 +231,8 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
     gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
-    return inst->src(0);
+    inst->convertToNop();
+    return nullptr;
   }
 
   return preOptimizeCheckTypeOp(
@@ -275,7 +283,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
     if (!typeMightRelax(oldVal) ||
         (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
          typeSrc->typeParam() <= inst->typeParam())) {
-      return inst->src(0);
+      return fwdGuardSource(inst);
     }
 
     if (oldType < newType) {
@@ -295,7 +303,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
       if (oldType < Type::Arr && oldType.getArrayType() &&
           typeParam < Type::Arr && typeParam.getArrayType() &&
           !typeParam.hasArrayKind()) {
-        return inst->src(0);
+        return fwdGuardSource(inst);
       }
     }
   }
@@ -327,7 +335,8 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
 
   if (auto const prevValue = localValue(locId, DataTypeGeneric)) {
     gen(AssertType, inst->typeParam(), prevValue);
-    return inst->src(0);
+    inst->convertToNop();
+    return nullptr;
   }
 
   auto const typeSrc = localTypeSource(locId);
@@ -358,7 +367,7 @@ SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
   }
 
   if (m_state.thisAvailable()) {
-    auto fpInst = frameRoot(inst->src(0)->inst());
+    auto fpInst = inst->src(0)->inst();
 
     if (fpInst->is(DefInlineFP)) {
       if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp

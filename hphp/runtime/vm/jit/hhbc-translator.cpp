@@ -3819,8 +3819,7 @@ void HhbcTranslator::emitRetFromInlined(Type type) {
   auto const retVal = pop(type, DataTypeGeneric);
   // Before we leave the inlined frame, grab a type prediction from
   // our DefInlineFP.
-  auto const retPred = frameRoot(
-    m_irb->fp()->inst())->extra<DefInlineFP>()->retTypePred;
+  auto const retPred = m_irb->fp()->inst()->extra<DefInlineFP>()->retTypePred;
   emitEndInlinedCommon();
   push(retVal);
   if (retPred < retVal->type()) { // TODO: this if statement shouldn't

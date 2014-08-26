@@ -290,18 +290,6 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   return inst;
 }
 
-const IRInstruction* frameRoot(const IRInstruction* fpInst) {
-  return frameRoot(const_cast<IRInstruction*>(fpInst));
-}
-
-IRInstruction* frameRoot(IRInstruction* fpInst) {
-  while (!fpInst->is(DefFP, DefInlineFP)) {
-    assert(fpInst->dst()->isA(Type::FramePtr));
-    fpInst = fpInst->src(0)->inst();
-  }
-  return fpInst;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template<class... Args> SSATmp* Simplifier::cns(Args&&... cns) {

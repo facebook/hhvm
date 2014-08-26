@@ -209,9 +209,9 @@ class FailedCodeGen : public std::runtime_error {
 O(CheckType,               DRefineS(0), S(Gen),                        B|E|P) \
 O(AssertType,              DRefineS(0), S(Gen,Cls),                    C|E|P) \
 O(CheckTypeMem,                     ND, S(PtrToGen),                     B|E) \
-O(GuardLoc,                D(FramePtr), S(FramePtr),                       E) \
+O(GuardLoc,                         ND, S(FramePtr),                       E) \
 O(GuardStk,                  D(StkPtr), S(StkPtr),                         E) \
-O(CheckLoc,                D(FramePtr), S(FramePtr),                     B|E) \
+O(CheckLoc,                         ND, S(FramePtr),                     B|E) \
 O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
 O(EndGuards,                        ND, NA,                                E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
@@ -225,7 +225,7 @@ O(GuardRefs,                        ND, S(Func)                               \
                                           C(Int)                              \
                                           S(Int)                              \
                                           S(Int),                          E) \
-O(AssertLoc,               D(FramePtr), S(FramePtr),                       E) \
+O(AssertLoc,                        ND, S(FramePtr),                       E) \
 O(TrackLoc,                         ND, S(Gen),                            E) \
 O(BeginCatch,                       ND, NA,                                E) \
 O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
@@ -394,7 +394,7 @@ O(SideExitJmpNInstanceOfBitmask,                                              \
                                     ND, S(Cls) CStr,                       E) \
 O(SideExitJmpZero,                  ND, S(Int,Bool),                       E) \
 O(SideExitJmpNZero,                 ND, S(Int,Bool),                       E) \
-O(SideExitGuardLoc,        D(FramePtr), S(FramePtr),                       E) \
+O(SideExitGuardLoc,                 ND, S(FramePtr),                       E) \
 O(SideExitGuardStk,          D(StkPtr), S(StkPtr),                         E) \
 /*    name                      dstinfo srcinfo                      flags */ \
 O(JmpIndirect,                      ND, S(TCA),                          T|E) \

@@ -300,7 +300,7 @@ struct FrameStack {
   /* Pop an inlined frame to represent an InlineReturn, forgetting what we know
    * about its $this pointer. */
   void popInline(const IRInstruction* fpInst) {
-    assert(frameRoot(fpInst) == fpInst);
+    assert(fpInst->is(DefInlineFP));
     assert(live.size() >= 2);
     auto it = live.find(fpInst);
     assert(it != live.end());
@@ -938,7 +938,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeInputs();
       consumeCurrentLocals();
-      auto frame = frameRoot(m_inst->src(0)->inst());
+      auto frame = m_inst->src(0)->inst();
       consumeFrame(m_state.frames.live.at(frame));
       defineOutputs();
     } else if (m_inst->is(DecRefLoc)) {
@@ -946,7 +946,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst->is(DecRefThis)) {
       // This only happens during a RetC, and it happens instead of a normal
       // DecRef on $this.
-      auto frame = frameRoot(m_inst->src(0)->inst());
+      auto frame = m_inst->src(0)->inst();
       consumeFrame(m_state.frames.live.at(frame));
     } else {
       // All other instructions take the generic path.
@@ -966,7 +966,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     auto* inst = root->inst();
     if (!inst->is(LdThis)) return root;
 
-    auto* fpInst = frameRoot(inst->src(0)->inst());
+    auto* fpInst = inst->src(0)->inst();
     auto it = m_state.frames.live.find(fpInst);
     if (it == m_state.frames.live.end()) {
       it = m_state.frames.dead.find(fpInst);
@@ -1039,7 +1039,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       m_state.frames.pushInline(m_inst);
     } else if (m_inst->is(InlineReturn)) {
       FTRACE(3, "{}", show(m_state));
-      m_state.frames.popInline(frameRoot(m_inst->src(0)->inst()));
+      m_state.frames.popInline(m_inst->src(0)->inst());
     } else if (m_inst->is(RetAdjustStack)) {
       m_state.frames.pop();
     } else if (m_inst->is(Call, CallArray)) {
@@ -1350,7 +1350,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         return;
       }
 
-      auto* fpInst = frameRoot(m_inst->src(0)->inst());
+      auto* fpInst = m_inst->src(0)->inst();
       assert(m_state.frames.live.count(fpInst));
       auto& frame = m_state.frames.live[fpInst];
       frame.currentThis = m_inst->dst();

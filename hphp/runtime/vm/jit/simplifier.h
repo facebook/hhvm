@@ -295,14 +295,6 @@ SSATmp* canonical(SSATmp* tmp);
  */
 IRInstruction* findSpillFrame(SSATmp* sp);
 
-/*
- * Given an instruction defining a frame pointer, chase backwards in the
- * definition chain looking for the first DefFP or DefInlineFP. Never returns
- * nullptr.
- */
-const IRInstruction* frameRoot(const IRInstruction* inst);
-IRInstruction* frameRoot(IRInstruction* inst);
-
 //////////////////////////////////////////////////////////////////////
 
 }}

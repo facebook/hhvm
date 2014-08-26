@@ -167,37 +167,6 @@ bool IRInstruction::isPassthrough() const {
   return opcodeHasFlags(op(), Passthrough);
 }
 
-bool IRInstruction::isFramePassthrough() const {
-  return is(GuardLoc, CheckLoc, AssertLoc, SideExitGuardLoc);
-}
-
-SSATmp* IRInstruction::framePassthroughRoot(SSATmp* ssa) {
-  while (ssa->inst()->isFramePassthrough()) {
-    ssa = ssa->inst()->src(0);
-  }
-  return ssa;
-}
-
-SSATmp* IRInstruction::frameCommonRoot(SSATmp* fp1, SSATmp* fp2) {
-  std::set<SSATmp*> visited;
-
-  while (true) {
-    visited.insert(fp1);
-    if (!fp1->inst()->isFramePassthrough()) break;
-    fp1 = fp1->inst()->src(0);
-  }
-  // find the last frame point in the chain leading to fp2 that is
-  // also in visited.
-  while (visited.count(fp2) == 0) {
-    if (!fp2->inst()->isFramePassthrough()) {
-      // no common ancestor
-      return nullptr;
-    }
-    fp2 = fp2->inst()->src(0);
-  }
-  return fp2;
-}
-
 /*
  * Returns true if the instruction does nothing but load a PHP value from
  * memory, possibly with some straightforward computation beforehand to decide

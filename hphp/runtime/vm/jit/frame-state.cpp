@@ -141,12 +141,6 @@ void FrameState::update(const IRInstruction* inst) {
     break;
   }
 
-  case AssertLoc:
-  case GuardLoc:
-  case CheckLoc:
-    m_fpValue = inst->dst();
-    break;
-
   case LdThis:
     m_thisAvailable = true;
     break;
@@ -542,10 +536,11 @@ void FrameState::merge(Snapshot& state) {
     // because spOffset matched.
     state.spValue = nullptr;
   }
-  if (state.fpValue != m_fpValue) {
-    state.fpValue = IRInstruction::frameCommonRoot(state.fpValue, m_fpValue);
-    assert(state.fpValue);
-  }
+
+  // The only thing that can change the FP is inlining, but we can't have one
+  // of the predecessors in an inlined callee while the other isn't.
+  always_assert(state.fpValue == m_fpValue);
+
   // this is available iff it's available in both states
   state.thisAvailable &= m_thisAvailable;
 

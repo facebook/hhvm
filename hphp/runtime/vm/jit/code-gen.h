@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/code-cache.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace jit {
 
@@ -86,6 +86,7 @@ struct CodegenState {
     , catches(unit, CatchInfo())
     , pastGuards(false)
     , labels(unit, Vlabel())
+    , locs(unit, X64::Vloc{})
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -122,6 +123,7 @@ struct CodegenState {
 
   // vasm block labels, one for each hhir block
   StateVector<Block,Vlabel> labels;
+  StateVector<SSATmp,X64::Vloc> locs;
 };
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);

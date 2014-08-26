@@ -176,7 +176,7 @@ void emitCmpClass(Vout&, const Class* c, Vptr mem);
 void emitCmpClass(Vout&, Vreg reg, Vptr mem);
 void emitCmpClass(Vout&, Vreg reg1, Vreg reg2);
 
-void copyTV(Vout&, const PhysLoc& src, const PhysLoc& dst);
+void copyTV(Vout&, Vloc src, Vloc dst);
 void pack2(Vout&, Vreg s0, Vreg s1, Vreg d0);
 
 Vreg zeroExtendIfBool(Vout&, const SSATmp* src, Vreg reg);

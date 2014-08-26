@@ -50,8 +50,8 @@ struct CodeGenerator : public jit::CodeGenerator {
   void cgInst(IRInstruction* inst) override;
 
 private:
-  PhysLoc srcLoc(unsigned i) const;
-  PhysLoc dstLoc(unsigned i) const;
+  Vloc srcLoc(unsigned i) const;
+  Vloc dstLoc(unsigned i) const;
   ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -76,14 +76,14 @@ private:
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
-  void cgStore(MemoryRef dst, SSATmp* src, PhysLoc src_loc, Width);
-  void cgStoreTypedValue(Vptr dst, SSATmp* src, PhysLoc src_loc);
+  void cgStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
+  void cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  void cgLoad(SSATmp* dst, PhysLoc dstLoc, Vptr base,
+  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base,
               Block* label = nullptr);
-  void cgLoadTypedValue(SSATmp* dst, PhysLoc dstLoc, Vptr ref,
+  void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
                         Block* label = nullptr);
 
   template<class Loc1, class Loc2, class JmpFn>
@@ -97,11 +97,11 @@ private:
   template<class Loc>
   void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
 
-  void cgIncRefWork(Type type, SSATmp* src, PhysLoc srcLoc);
+  void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
   template<class OpInstr>
-  void cgUnaryIntOp(PhysLoc dst, SSATmp* src, PhysLoc src_loc);
+  void cgUnaryIntOp(Vloc dst, SSATmp* src, Vloc src_loc);
 
   enum Commutativity { Commutative, NonCommutative };
 
@@ -114,11 +114,9 @@ private:
 
   void emitVerifyCls(IRInstruction* inst);
 
-  void emitGetCtxFwdCallWithThis(PhysReg ctxReg,
-                                 bool    staticCallee);
+  void emitGetCtxFwdCallWithThis(Vreg ctxReg, bool staticCallee);
 
-  void emitGetCtxFwdCallWithThisDyn(PhysReg      destCtxReg,
-                                    PhysReg      thisReg,
+  void emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     RDS::Handle ch);
 
   void cgJcc(IRInstruction* inst);          // helper
@@ -145,15 +143,15 @@ private:
 
   void emitCompare(Vout&, IRInstruction* inst);
   void emitCompareInt(Vout&, IRInstruction* inst);
-  void emitTestZero(Vout&, SSATmp*, PhysLoc);
+  void emitTestZero(Vout&, SSATmp*, Vloc);
   template<class Inst>
-  bool emitIncDec(PhysLoc dst, SSATmp* src0, PhysLoc loc0,
-                  SSATmp* src1, PhysLoc loc1);
+  bool emitIncDec(Vloc dst, SSATmp* src0, Vloc loc0,
+                  SSATmp* src1, Vloc loc1);
 
 private:
-  PhysReg selectScratchReg(IRInstruction* inst);
+  Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  VregXMM prepXMM(Vout&, const SSATmp* src, const PhysLoc& srcLoc);
+  VregXMM prepXMM(Vout&, const SSATmp* src, Vloc srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
@@ -161,7 +159,7 @@ private:
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   void emitInstanceBitmaskCheck(Vout&, IRInstruction*);
   void emitTraceRet(Vout&);
-  void emitInitObjProps(PhysReg dstReg, const Class* cls, size_t nProps);
+  void emitInitObjProps(Vreg dstReg, const Class* cls, size_t nProps);
 
   bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
   template <typename F>
@@ -169,12 +167,12 @@ private:
                                  Vreg dataReg, F destroyImpl);
   void cgCheckStaticBitAndDecRef(Vout&, Vlabel done, Type type,
                                  Vreg dataReg);
-  void cgCheckRefCountedType(PhysReg typeReg, Vlabel done);
-  void cgCheckRefCountedType(PhysReg baseReg, int64_t offset, Vlabel done);
+  void cgCheckRefCountedType(Vreg typeReg, Vlabel done);
+  void cgCheckRefCountedType(Vreg baseReg, int64_t offset, Vlabel done);
   void cgDecRefStaticType(Vout&, Type type, Vreg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicType(PhysReg typeReg, PhysReg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicTypeMem(PhysReg baseReg, int64_t offset);
-  void cgDecRefMem(Type type, PhysReg baseReg, int64_t offset);
+  void cgDecRefDynamicType(Vreg typeReg, Vreg dataReg, bool genZeroCheck);
+  void cgDecRefDynamicTypeMem(Vreg baseReg, int64_t offset);
+  void cgDecRefMem(Type type, Vreg baseReg, int64_t offset);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);
@@ -193,7 +191,7 @@ private:
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);
 
-  void emitAdjustSp(PhysReg spReg, PhysReg dstReg, int adjustment);
+  void emitAdjustSp(Vreg spReg, Vreg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
@@ -247,26 +245,10 @@ private:
   Vout&               m_vfrozen;
   CodegenState&       m_state;
   IRInstruction*      m_curInst;  // current instruction being generated
-  jit::vector<PhysLoc> m_slocs, m_dlocs;
+  jit::vector<Vloc>   m_slocs, m_dlocs;
 };
 
 // Helpers to compute a reference to a TypedValue type and data
-inline MemoryRef refTVType(PhysReg reg) {
-  return reg[TVOFF(m_type)];
-}
-
-inline MemoryRef refTVData(PhysReg reg) {
-  return reg[TVOFF(m_data)];
-}
-
-inline MemoryRef refTVType(MemoryRef ref) {
-  return *(ref.r + TVOFF(m_type));
-}
-
-inline MemoryRef refTVData(MemoryRef ref) {
-  return *(ref.r + TVOFF(m_data));
-}
-
 inline Vptr refTVType(Vreg reg) {
   return reg[TVOFF(m_type)];
 }

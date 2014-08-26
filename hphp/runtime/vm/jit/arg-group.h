@@ -98,7 +98,7 @@ private: // These should be created using ArgGroup.
     : m_kind(kind)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, const PhysLoc&, bool val = true);
+  explicit ArgDesc(SSATmp* tmp, Vloc, bool val = true);
 
 private:
   Kind m_kind;
@@ -129,8 +129,8 @@ private:
 struct ArgGroup {
   typedef jit::vector<ArgDesc> ArgVec;
 
-  explicit ArgGroup(const IRInstruction* inst, const RegAllocInfo::RegMap& regs)
-    : m_inst(inst), m_regs(regs), m_override(nullptr)
+  explicit ArgGroup(const IRInstruction* inst, const jit::vector<Vloc>& locs)
+    : m_inst(inst), m_locs(locs), m_override(nullptr)
   {}
 
   size_t numGpArgs() const { return m_gpArgs.size(); }
@@ -173,7 +173,7 @@ struct ArgGroup {
   }
 
   ArgGroup& ssa(int i, bool isFP = false) {
-    ArgDesc arg(m_inst->src(i), m_regs.src(i));
+    ArgDesc arg(m_inst->src(i), m_locs[i]);
     if (isFP) {
       push_SIMDarg(arg);
     } else {
@@ -230,7 +230,7 @@ private:
    * For passing the m_type field of a TypedValue.
    */
   ArgGroup& type(int i) {
-    push_arg(ArgDesc(m_inst->src(i), m_regs.src(i), false));
+    push_arg(ArgDesc(m_inst->src(i), m_locs[i], false));
     return *this;
   }
 
@@ -249,14 +249,14 @@ private:
 
 private:
   const IRInstruction* m_inst;
-  const RegAllocInfo::RegMap& m_regs;
+  const jit::vector<Vloc>& m_locs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
 };
 
-ArgGroup toArgGroup(const NativeCalls::CallInfo&, const RegAllocInfo& regs,
+ArgGroup toArgGroup(const NativeCalls::CallInfo&, const jit::vector<Vloc>& locs,
                     const IRInstruction*);
 } // X64
 

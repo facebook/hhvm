@@ -438,7 +438,7 @@ void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
   }
 }
 
-void copyTV(Vout& v, const PhysLoc& src, const PhysLoc& dst) {
+void copyTV(Vout& v, Vloc src, Vloc dst) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
   if (dst_arity == 0) return;

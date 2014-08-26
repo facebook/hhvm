@@ -46,10 +46,12 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
     }
     for (auto& inst : unit.blocks[b].code) {
       visitUses(unit, inst, [&](Vreg v) {
+        assert_flog(v.isValid(), "invalid vreg used in B{}", size_t(b));
         assert_flog(!v.isVirt() || local_defs[v],
                     "%{} used before def in B{}", size_t(v), size_t(b));
       });
       visitDefs(unit, inst, [&](Vreg v) {
+        assert_flog(v.isValid(), "invalid vreg defined in B{}", size_t(b));
         // TODO: t4779057: require SSA
         assert_flog(!v.isVirt() || !consts.test(v),
                     "%{} const defined in B{}", size_t(v), size_t(b));

@@ -22,7 +22,7 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(hhir);
 
 namespace X64 {
-ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val) {
+ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
   if (tmp->isConst()) {
     // tmp is a constant
     if (val) {

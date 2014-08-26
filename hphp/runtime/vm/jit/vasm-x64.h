@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/phys-loc.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/util/asm-x64.h"
@@ -49,8 +50,9 @@ struct Vreg {
   /* implicit */ Vreg(Reg8 r) : rn(int(r)) {}
   /* implicit */ Vreg(RegXMM r) : rn(X0+int(r)) {}
   /* implicit */ Vreg(PhysReg r) {
-    assert(r != InvalidReg);
-    rn = r.isGP() ? G0+int(Reg64(r)) : X0+int(RegXMM(r));
+    rn = r == InvalidReg ? 0xffffffff :
+         r.isGP() ? G0+int(Reg64(r)) :
+         X0+int(RegXMM(r));
   }
   /* implicit */ operator size_t() const { return rn; }
   /* implicit */ operator Reg64() const {
@@ -66,14 +68,12 @@ struct Vreg {
     static_assert(G0 == 0, "");
     return rn < V0;
   }
-  bool isGP() const { assert(isPhys()); return rn < X0; }
-  bool isSIMD() const { assert(isPhys()); return rn >= X0 && rn < V0; }
-  bool isVirt() const { return !isPhys(); }
+  bool isGP() const { assert(!isVirt()); return rn < X0; }
+  bool isSIMD() const { assert(!isVirt()); return rn >= X0 && rn < V0; }
+  bool isVirt() const { return isValid() && rn >= V0; }
   bool isValid() const { return rn < 0xffffffff; }
   bool operator==(Vreg r) const { return rn == r.rn; }
   bool operator!=(Vreg r) const { return rn != r.rn; }
-  bool operator==(PhysReg) const = delete;
-  bool operator!=(PhysReg) const = delete;
   PhysReg physReg() const {
     assert(isPhys());
     return isGP() ? PhysReg(/* implicit */operator Reg64()) :
@@ -101,9 +101,9 @@ template<class Reg, VregKind k> struct Vr {
   explicit Vr(size_t rn) : rn(rn) {}
   /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
     if (kind == VregKind::Simd) {
-      assert(r.isVirt() || r.isSIMD() || !r.isValid());
+      assert(!r.isValid() || r.isVirt() || r.isSIMD());
     } else if (kind == VregKind::Gpr) {
-      assert(r.isVirt() || r.isGP() || !r.isValid());
+      assert(!r.isValid() || r.isVirt() || r.isGP());
     }
   }
   /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
@@ -119,9 +119,9 @@ template<class Reg, VregKind k> struct Vr {
     static_assert(Vreg::G0 == 0, "");
     return rn < Vreg::V0;
   }
-  bool isGP() const { assert(isPhys()); return rn < Vreg::X0; }
-  bool isSIMD() const { assert(isPhys());return rn>=Vreg::X0 && rn < Vreg::V0; }
-  bool isVirt() const { return !isPhys(); }
+  bool isGP() const { assert(!isVirt()); return rn < Vreg::X0; }
+  bool isSIMD() const { assert(!isVirt());return rn>=Vreg::X0 && rn<Vreg::V0; }
+  bool isVirt() const { return isValid() && rn >= Vreg::V0; }
   bool operator==(Vr<Reg,k> r) const { return rn == r.rn; }
   bool operator!=(Vr<Reg,k> r) const { return rn != r.rn; }
   bool operator==(PhysReg) const = delete;
@@ -206,45 +206,51 @@ inline Vptr operator+(Vreg64 base, int32_t d) {
 // there is no information about GPR or SIMD here; that's
 // a register allocator choice.
 struct Vloc {
-  enum Kind { kInvalid, kVal, kType, kWide, kPair };
-  Vloc() : m_kind(kInvalid) {}
-  Vloc(Kind k, Vreg r) : m_kind(k) { m_regs[0] = r; }
-  Vloc(Vreg r0, Vreg r1) : m_kind(kPair) { m_regs[0] = r0; m_regs[1] = r1; }
-  Kind kind() const { return m_kind; }
+  enum Kind { kPair, kWide };
+  Vloc() {}
+  explicit Vloc(Vreg r) { m_regs[0] = r; }
+  Vloc(Vreg r0, Vreg r1) { m_regs[0] = r0; m_regs[1] = r1; }
+  /* implicit */ Vloc(PhysLoc loc) {
+    assert(!loc.spilled());
+    if (loc.isFullSIMD()) {
+      m_kind = kWide;
+      m_regs[0] = loc.reg(0);
+    } else if (loc.numAllocated() == 1) {
+      m_regs[0] = loc.reg(0);
+    } else if (loc.numAllocated() == 2) {
+      m_regs[0] = loc.reg(0);
+      m_regs[1] = loc.reg(1);
+    }
+  }
   bool hasReg(int i = 0) const {
-    return i == 0 ? m_kind >= kVal :
-           i == 1 ? m_kind == kPair :
-           false;
+    return m_regs[i].isValid();
   }
   Vreg reg(int i = 0) const {
-    assert(hasReg(i));
     return m_regs[i];
   }
   int numAllocated() const {
-    return m_kind == kInvalid ? 0 :
-           m_kind < kPair ? 1 : 2;
+    return int(m_regs[0].isValid()) + int(m_regs[1].isValid());
   }
   int numWords() const {
-    return m_kind == kInvalid ? 0 :
-           m_kind < kWide ? 1 : 2;
+    return m_kind == kWide ? 2 : numAllocated();
   }
-  bool isFullSIMD() const { return m_kind == kWide; }
+  bool isFullSIMD() const {
+    return m_kind == kWide;
+  }
 
   bool operator==(Vloc other) const {
     return m_kind == other.m_kind &&
-           (m_kind == kInvalid ||
-           (m_kind != kPair && m_regs[0] == other.m_regs[0]) ||
-           (m_regs[0] == other.m_regs[0] && m_regs[1] == other.m_regs[1]));
+           m_regs[0] == other.m_regs[0] &&
+           m_regs[1] == other.m_regs[1];
   }
   bool operator!=(Vloc other) const {
     return !(*this == other);
   }
 
 private:
-  Kind m_kind; // whole typed-value in one simd register.
+  Kind m_kind{kPair};
   Vreg m_regs[2];
 };
-const Vloc InvalidVloc;
 
 inline Vscaled Vreg::operator*(int scale) const {
   return Vscaled{*this, scale};

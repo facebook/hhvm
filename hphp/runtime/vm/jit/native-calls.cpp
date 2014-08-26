@@ -412,9 +412,9 @@ const CallInfo& CallMap::info(Opcode op) {
 
 namespace X64 {
 using namespace NativeCalls;
-ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
+ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
                     const IRInstruction* inst) {
-  ArgGroup argGroup{inst, regs[inst]};
+  ArgGroup argGroup{inst, locs};
   for (auto const& arg : info.args) {
     switch (arg.type) {
     case ArgType::SSA:

@@ -615,6 +615,9 @@ struct UseVisitor {
   void use(Vtuple uses) {
     for (auto& r : m_tuples[uses]) use(r);
   }
+  void use(RegSet regs) {
+    regs.forEach([&](Vreg r) { use(r); });
+  }
 
   // An operand marked as UA means use-after or use-across. Mark it live
   // across the instruction so its lifetime conflicts with the destination,
@@ -660,7 +663,7 @@ void getEffects(const Abi& abi, const Vinstr& i, RegSet& uses, RegSet& defs) {
       break;
     case Vinstr::cqo:
       uses = RegSet(rax);
-      defs = RegSet(rdx);
+      defs = RegSet().add(rax).add(rdx);
       break;
     case Vinstr::idiv:
       uses = defs = RegSet(rax).add(rdx);
@@ -1034,6 +1037,7 @@ struct Renamer {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
   }
+  void use(RegSet r){}
 private:
   void rename(Vreg8& r) { r = lookup(r, VregKind::Gpr); }
   void rename(Vreg16& r) { r = lookup(r, VregKind::Gpr); }

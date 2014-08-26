@@ -480,7 +480,7 @@ void Vgen::emit(bindjmp& i) {
 }
 
 void Vgen::emit(callstub& i) {
-  emit(call{i.target});
+  emit(call{i.target, i.args});
   emit(syncpoint{i.fix});
 }
 
@@ -780,6 +780,16 @@ void Vasm::finish(const Abi& abi) {
   Vgen(m_unit, m_areas, m_meta).emit(blocks);
 }
 
+auto const vauto_gp = RegSet(rAsm).add(reg::r11);
+auto const vauto_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
+UNUSED const Abi vauto_abi {
+  .gpUnreserved = vauto_gp,
+  .gpReserved = X64::abi.gp() - vauto_gp,
+  .simdUnreserved = vauto_simd,
+  .simdReserved = X64::abi.simd() - vauto_simd,
+  .calleeSaved = X64::abi.calleeSaved
+};
+
 Vauto::~Vauto() {
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
@@ -788,7 +798,7 @@ Vauto::~Vauto() {
       assert(m_areas.size() < 2 || cold().empty() || cold().closed());
       assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
       printUnit("after vasm-auto", unit());
-      finish(vasm_abi);
+      finish(vauto_abi);
       return;
     }
   }

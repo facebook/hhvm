@@ -254,31 +254,31 @@ void emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
   v << decq{t, dstReg};
 }
 
-void emitCall(Asm& a, TCA dest) {
-  Vauto().main(a) << call{dest};
+void emitCall(Asm& a, TCA dest, RegSet args) {
+  Vauto().main(a) << call{dest, args};
 }
 
-void emitCall(Asm& a, CppCall call) {
-  emitCall(Vauto().main(a), call);
+void emitCall(Asm& a, CppCall call, RegSet args) {
+  emitCall(Vauto().main(a), call, args);
 }
 
-void emitCall(Vout& v, CppCall target) {
+void emitCall(Vout& v, CppCall target, RegSet args) {
   switch (target.kind()) {
   case CppCall::Kind::Direct:
-    v << call{static_cast<TCA>(target.address())};
+    v << call{static_cast<TCA>(target.address()), args};
     return;
   case CppCall::Kind::Virtual:
     // Virtual call.
     // Load method's address from proper offset off of object in rdi,
     // using rax as scratch.
     v << loadq{*rdi, rax};
-    v << callm{rax[target.vtableOffset()]};
+    v << callm{rax[target.vtableOffset()], args};
     return;
   case CppCall::Kind::IndirectReg:
-    v << callr{target.reg()};
+    v << callr{target.reg(), args};
     return;
   case CppCall::Kind::IndirectVreg:
-    v << callr{target.vreg()};
+    v << callr{target.vreg(), args};
     return;
   case CppCall::Kind::ArrayVirt: {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
@@ -288,14 +288,15 @@ void emitCall(Vout& v, CppCall target) {
       "segment, with addresses less than 2^31"
     );
     v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
-    v << callm{baseless(rax*8 + addr)};
+    v << callm{baseless(rax*8 + addr), args};
     return;
   }
   case CppCall::Kind::Destructor:
     // this movzbl is only needed because callers aren't
     // required to zero-extend the type.
     v << movzbl{target.reg(), target.reg()};
-    v << callm{lookupDestructor(v, target.reg())};
+    auto dtor_ptr = lookupDestructor(v, target.reg());
+    v << callm{dtor_ptr, args};
     return;
   }
   not_reached();
@@ -349,7 +350,8 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff) {
   a.    movq   (rVmSp, rsi);
   a.    movq   (pcOff, rdx);
   // do the call; may use a trampoline
-  emitCall(a, reinterpret_cast<TCA>(traceCallback));
+  emitCall(a, reinterpret_cast<TCA>(traceCallback),
+           RegSet().add(rcx).add(rdi).add(rsi).add(rdx));
 }
 
 void emitTestSurpriseFlags(Asm& a) {
@@ -380,7 +382,7 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
 
   vcold = cold;
   vcold << movq{rVmFp, argNumToRegName[0]};
-  vcold << call{mcg->tx().uniqueStubs.functionEnterHelper};
+  vcold << call{mcg->tx().uniqueStubs.functionEnterHelper, argSet(1)};
   vcold << syncpoint{Fixup{fixup.pcOffset, fixup.spOffset}};
   vcold << jmp{done};
   v = done;

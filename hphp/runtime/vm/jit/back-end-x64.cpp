@@ -872,6 +872,16 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
 static size_t ctr;
 const char* area_names[] = { "main", "cold", "frozen" };
 
+auto const vasm_gp = X64::abi.gpUnreserved | RegSet(rAsm).add(r11);
+auto const vasm_simd = X64::kXMMRegs;
+UNUSED const Abi vasm_abi {
+  .gpUnreserved = vasm_gp,
+  .gpReserved = X64::abi.gp() - vasm_gp,
+  .simdUnreserved = vasm_simd,
+  .simdReserved = X64::abi.simd() - vasm_simd,
+  .calleeSaved = X64::kCalleeSaved
+};
+
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   ctr++;
   auto regs = allocateRegs(unit);

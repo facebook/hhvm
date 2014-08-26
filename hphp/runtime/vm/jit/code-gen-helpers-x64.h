@@ -69,9 +69,9 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 void emitLdObjClass(Vout&, Vreg objReg, Vreg dstReg);
 void emitLdClsCctx(Vout&, Vreg srcReg, Vreg dstReg);
 
-void emitCall(Asm& as, TCA dest);
-void emitCall(Asm& as, CppCall call);
-void emitCall(Vout&, CppCall call);
+void emitCall(Asm& as, TCA dest, RegSet args);
+void emitCall(Asm& as, CppCall call, RegSet args);
+void emitCall(Vout&, CppCall call, RegSet args);
 
 // store imm to the 8-byte memory location at ref. Warning: don't use this
 // if you wanted an atomic store; large imms cause two stores.
@@ -140,10 +140,10 @@ emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
   v << ldimm{datum.m_key, argNumToRegName[0]};
   const CodeAddress addr = (CodeAddress)pthread_getspecific;
   if (deltaFits((uintptr_t)addr, sz::dword)) {
-    v << call{addr};
+    v << call{addr, argSet(1)};
   } else {
     v << ldimm{addr, reg::rax};
-    v << callr{reg::rax};
+    v << callr{reg::rax, argSet(1)};
   }
   if (dest != Vreg(reg::rax)) {
     v << movq{reg::rax, dest};

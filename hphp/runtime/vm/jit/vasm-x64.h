@@ -337,7 +337,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), Un, Dn)\
   O(bindjcc2, I(cc) I(target), Un, Dn)\
   O(bindjmp, I(target) I(trflags), Un, Dn)\
-  O(callstub, I(target) I(kills) I(fix), Un, Dn)\
+  O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target), Dn)\
   O(copy, Inone, U(s), D(d))\
   O(copy2, Inone, U(s0) U(s1), D(d0) D(d1))\
@@ -350,7 +350,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
   O(ldpoint, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
-  O(mccall, I(target), Un, Dn)\
+  O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(nop, Inone, Un, Dn)\
   O(nocatch, Inone, Un, Dn)\
@@ -374,9 +374,9 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(addq, Inone, U(s0) U(s1), D(d)) \
   O(addqi, I(s0), U(s1), D(d))\
   O(addsd, Inone, U(s0) U(s1), D(d))\
-  O(call, I(target), Un, Dn)\
-  O(callm, Inone, U(target), Dn)\
-  O(callr, Inone, U(target), Dn)\
+  O(call, I(target), U(args), Dn)\
+  O(callm, Inone, U(target) U(args), Dn)\
+  O(callr, Inone, U(target) U(args), Dn)\
   O(cloadq, I(cc), U(s), D(d))\
   O(cmovq, I(cc), U(f) U(t), D(d))\
   O(cmpb, Inone, U(s0) U(s1), Dn)\
@@ -494,7 +494,7 @@ struct bindexit { ConditionCode cc; SrcKey target; TransFlags trflags; };
 struct bindjcc1 { ConditionCode cc; Offset targets[2]; };
 struct bindjcc2 { ConditionCode cc; Offset target; };
 struct bindjmp { SrcKey target; TransFlags trflags; };
-struct callstub { CodeAddress target; RegSet kills; Fixup fix; };
+struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; };
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
@@ -507,7 +507,7 @@ struct incstat { Stats::StatCounter stat; int n; bool force; };
 struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex; };
 struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
-struct mccall { CodeAddress target; };
+struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
 struct nop {};
 struct nocatch {};
@@ -546,9 +546,9 @@ struct addlm { Vreg32 s0; Vptr m; };
 struct addq  { Vreg64 s0, s1, d; };
 struct addqi { Immed s0; Vreg64 s1, d; };
 struct addsd  { VregXMM s0, s1, d; };
-struct call { CodeAddress target; };
-struct callm { Vptr target; };
-struct callr { Vreg64 target; };
+struct call { CodeAddress target; RegSet args; };
+struct callm { Vptr target; RegSet args; };
+struct callr { Vreg64 target; RegSet args; };
 struct cloadq { ConditionCode cc; Vptr s; Vreg64 d; };
 struct cmovq { ConditionCode cc; Vreg64 f, t, d; };
 struct cmpb  { Vreg8  s0; Vreg8  s1; };
@@ -817,7 +817,10 @@ template<class F> void visit(const Vunit&, Vptr p, F f) {
   if (p.index.isValid()) f(p.index);
 }
 template<class F> void visit(const Vunit& unit, Vtuple t, F f) {
-  for (auto v : unit.tuples[t]) f(v);
+  for (auto r : unit.tuples[t]) f(r);
+}
+template<class F> void visit(const Vunit& unit, RegSet regs, F f) {
+  regs.forEach([&](Vreg r) { f(r); });
 }
 
 template<class Use>

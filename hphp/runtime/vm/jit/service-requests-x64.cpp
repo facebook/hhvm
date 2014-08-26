@@ -120,7 +120,7 @@ void emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   if (mcg->fixupMap().eagerRecord(func)) {
     emitEagerSyncPoint(a, reinterpret_cast<const Op*>(func->getEntry()));
   }
-  emitCall(a, (TCA)builtinFuncPtr);
+  emitCall(a, (TCA)builtinFuncPtr, argSet(1));
 
   /*
    * We're sometimes calling this while curFunc() isn't really the

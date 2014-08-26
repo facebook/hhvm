@@ -626,7 +626,7 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
 
 static void callUnwindResumeHelper(Vout& v) {
   v << loadq{rVmTl[unwinderScratchOff()], rdi};
-  v << call{(TCA)unwindResumeHelper}; // pass control back to the unwinder
+  v << call{(TCA)unwindResumeHelper, argSet(1)}; // call back to unwinder
   v << ud2{};
 }
 
@@ -646,7 +646,7 @@ void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
   auto& v = vmain();
   v << loadq{rVmTl[unwinderScratchOff()], rdi};
-  v << call{(TCA)_Unwind_DeleteException};
+  v << call{(TCA)_Unwind_DeleteException, argSet(1)};
 }
 
 void CodeGenerator::cgJcc(IRInstruction* inst) {
@@ -1075,20 +1075,25 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   PhysRegSaverParity regSaver(1 + args.numStackArgs(), v, toSave);
 
   // Assign registers to the arguments then prepare them for the call.
+  RegSet argRegs;
   for (size_t i = 0; i < args.numGpArgs(); i++) {
-    args.gpArg(i).setDstReg(argNumToRegName[i]);
+    auto r = argNumToRegName[i];
+    args.gpArg(i).setDstReg(r);
+    argRegs.add(r);
   }
   for (size_t i = 0; i < args.numSimdArgs(); i++) {
-    args.simdArg(i).setDstReg(argNumToSIMDRegName[i]);
+    auto r = argNumToSIMDRegName[i];
+    args.simdArg(i).setDstReg(r);
+    argRegs.add(r);
   }
   regSaver.bytesPushed(shuffleArgs(v, args, call));
 
   // do the call; may use a trampoline
   if (sync == SyncOptions::kSmashableAndSyncPoint) {
     assert(call.kind() == CppCall::Kind::Direct);
-    v << mccall{(TCA)call.address()};
+    v << mccall{(TCA)call.address(), argRegs};
   } else {
-    emitCall(v, call);
+    emitCall(v, call, argRegs);
   }
   if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // if we are profiling the heap, we always need to sync because
@@ -2644,7 +2649,7 @@ void CodeGenerator::emitTraceRet(Vout& v) {
   v << movq{rVmSp, rsi};
   v << loadq{*rsp, rdx}; // return ip from native stack
   // do the call; may use a trampoline
-  v << call{TCA(traceRet)};
+  v << call{TCA(traceRet), argSet(3)};
 }
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
@@ -3118,9 +3123,14 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
     ? mcg->tx().uniqueStubs.freeManyLocalsHelper
     : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
+  auto args = RegSet(r14) | RegSet(rVmFp);
+  auto kills = (abi.all() - abi.calleeSaved) | RegSet(r14) | RegSet(r15);
+
+  auto& marker = inst->marker();
+  auto fix = Fixup{marker.bcOff()-marker.func()->base(), marker.spOff()};
+
   v << lea{rFp[-numLocals * sizeof(TypedValue)], r14};
-  v << call{target};
-  recordSyncPoint(v);
+  v << callstub{target, args, kills, fix};
 }
 
 /*
@@ -3984,7 +3994,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   if (FixupMap::eagerRecord(func)) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()));
   }
-  v << call{(TCA)builtinFuncPtr};
+  v << call{(TCA)builtinFuncPtr, argSet(1)};
   recordSyncPoint(v);
 }
 

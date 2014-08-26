@@ -211,6 +211,14 @@ const PhysReg argNumToRegName[] = {
 };
 const int kNumRegisterArgs = sizeof(argNumToRegName) / sizeof(PhysReg);
 
+inline RegSet argSet(int n) {
+  RegSet regs;
+  for (int i = 0; i < n; i++) {
+    regs.add(argNumToRegName[i]);
+  }
+  return regs;
+}
+
 // x64 SSE class argument registers.
 const PhysReg argNumToSIMDRegName[] = {
   reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
@@ -244,16 +252,6 @@ UNUSED const Abi abi {
   kXMMUnreserved, // simdUnreserved
   kXMMReserved,   // simdReserved
   kCalleeSaved    // calleeSaved
-};
-
-auto const vasm_gp = RegSet(rAsm).add(reg::r11);
-auto const vasm_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
-UNUSED const Abi vasm_abi {
-  .gpUnreserved = vasm_gp,
-  .gpReserved = X64::abi.gp() - vasm_gp,
-  .simdUnreserved = vasm_simd,
-  .simdReserved = X64::abi.simd() - vasm_simd,
-  .calleeSaved = X64::abi.calleeSaved
 };
 
 //////////////////////////////////////////////////////////////////////

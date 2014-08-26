@@ -120,6 +120,10 @@ struct FormatVisitor {
     for (auto r : unit.tuples[t]) print(r);
   }
 
+  void print(RegSet regs) {
+    regs.forEach([&](Vreg r) { print(r); });
+  }
+
   template<class R> void print(R r) {
     str << sep();
     if (r.isVirt()) str << "%" << size_t(r);

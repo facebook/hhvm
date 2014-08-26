@@ -155,14 +155,15 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     a.    movq   (rStashedAR, argNumToRegName[0]);
 
     if (LIKELY(func->discardExtraArgs())) {
-      emitCall(a, TCA(jit::trimExtraArgs));
+      emitCall(a, TCA(jit::trimExtraArgs), argSet(1));
     } else if (func->attrs() & AttrMayUseVV) {
       emitCall(a, func->hasVariadicCaptureParam()
                ? TCA(jit::shuffleExtraArgsVariadicAndVV)
-               : TCA(jit::shuffleExtraArgsMayUseVV));
+               : TCA(jit::shuffleExtraArgsMayUseVV),
+               argSet(1));
     } else {
       assert(func->hasVariadicCaptureParam());
-      emitCall(a, TCA(jit::shuffleExtraArgsVariadic));
+      emitCall(a, TCA(jit::shuffleExtraArgsVariadic), argSet(1));
     }
     // We'll fix rVmSp below.
   } else if (nPassed < numNonVariadicParams) {
@@ -320,7 +321,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         }
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
         a.  emitImmReg(nPassed, argNumToRegName[1]);
-        emitCall(a, TCA(jit::raiseMissingArgument));
+        emitCall(a, TCA(jit::raiseMissingArgument), argSet(2));
         mcg->recordSyncPoint(a.frontier(), fixup.pcOffset, fixup.spOffset);
         break;
       }
@@ -447,7 +448,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     a.  shrq   (0x4, argNumToRegName[0]);
     a.  movq   (rVmSp, argNumToRegName[1]);
     emitCall(a, reinterpret_cast<CodeAddress>(
-      MkPacked{MixedArray::MakePacked}));
+      MkPacked{MixedArray::MakePacked}), argSet(2));
     callFixup = a.frontier();
   }
   if (nPassed != 2) {

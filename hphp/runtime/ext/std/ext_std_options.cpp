@@ -158,7 +158,8 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   return tvAsVariant(&retVal);
 }
 
-static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
+static Variant HHVM_FUNCTION(assert, const Variant& assertion,
+                                     const Variant& message/* = null */) {
   if (!s_option_data->assertActive) return true;
 
   CallerFrame cf;
@@ -188,12 +189,12 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion) {
     ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
     f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
   }
-
+  String name(message.isNull() ? "Assertion" : message.toString());
   if (s_option_data->assertWarning) {
     auto const str = !assertion.isString()
-      ? String("Assertion failed")
-      : concat3("Assertion \"", assertion.toString(), "\" failed");
-    raise_warning("%s", str.data());
+      ? " failed"
+      : concat3(" \"",  assertion.toString(), "\" failed");
+    raise_warning("%s%s", name.data(),  str.data());
   }
   if (s_option_data->assertBail) {
     throw ExtendedException("An assertion was raised.");

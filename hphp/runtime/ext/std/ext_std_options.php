@@ -39,7 +39,7 @@ function assert_options(int $what,
  * literal values such as 1 or "two" will not be passed via this argument)
  */
 <<__Native>>
-function assert(mixed $assertion): mixed;
+function assert(mixed $assertion, ?string $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available

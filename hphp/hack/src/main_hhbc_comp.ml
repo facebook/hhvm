@@ -517,7 +517,7 @@ and emit_binop : env -> Ast.expr_ -> env = fun env -> function
            | Ast.AMpamp  -> die "unexpected"
            | Ast.BArbar  -> die "unexpected"
         ) env
-  | _ -> invariant_failure env "emit_binop recieved non Binop"
+  | _ -> invariant_failure env "emit_binop received non Binop"
 
 and emit_unop : env -> Ast.expr_ -> Ast.uop -> env = fun env e -> function
   | Ast.Unot   -> emit_Not (emit_conv_cell (emit_expr env e))

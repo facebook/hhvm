@@ -66,7 +66,7 @@ module Dep = struct
         match e_ with
         | Lvar (_, x) ->
             add local (Ident.to_string x) acc
-        | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y))) ->
+        | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
             add local (Env.FakeMembers.make_id x y) acc
         | Class_get (x, (_, y)) ->
             add local (Env.FakeMembers.make_static_id x y) acc
@@ -92,13 +92,13 @@ end = struct
 
   let is_local = function
     | Lvar _
-    | Obj_get ((_, (This | Lvar _)), (_, Id _))
+    | Obj_get ((_, (This | Lvar _)), (_, Id _), _)
     | Class_get _  -> true
     | _ -> false
 
   let local_to_string = function
     | Lvar (_, x) -> Ident.to_string x
-    | Obj_get (x, (_, Id (_, y))) -> Env.FakeMembers.make_id x y
+    | Obj_get (x, (_, Id (_, y)), _) -> Env.FakeMembers.make_id x y
     | Class_get (x, (_, y)) -> Env.FakeMembers.make_static_id x y
     | _ -> assert false
 

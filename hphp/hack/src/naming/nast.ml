@@ -130,6 +130,10 @@ and visibility =
   | Public
   | Protected
 
+and og_null_flavor =
+  | OG_nullthrows
+  | OG_nullsafe
+
 and is_reference = bool
 and is_variadic = bool
 and fun_param = {
@@ -213,7 +217,7 @@ and expr_ =
   (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
   | Smethod_id of sid * pstring
-  | Obj_get of expr * expr
+  | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
   | Class_get of class_id * pstring
   | Class_const of class_id * pstring

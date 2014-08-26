@@ -223,7 +223,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Clone e     -> this#on_clone acc e
    | Expr_list el    -> this#on_expr_list acc el
    | Special_func sf -> this#on_special_func acc sf
-   | Obj_get     (e1, e2)    -> this#on_obj_get acc e1 e2
+   | Obj_get     (e1, e2, _) -> this#on_obj_get acc e1 e2
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
    | Class_get   (cid, id)   -> this#on_class_get acc cid id
    | Class_const (cid, id)   -> this#on_class_const acc cid id

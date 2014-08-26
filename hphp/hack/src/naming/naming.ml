@@ -1492,6 +1492,17 @@ and static_var env = function
   | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
   | e -> expr env e
 
+and expr_obj_get_name env = function
+  | p, Id x -> p, N.Id x
+  | p, e ->
+      (match (fst env).in_mode with
+        | Ast.Mstrict ->
+            Errors.dynamic_method_call p
+        | Ast.Mpartial | Ast.Mdecl ->
+            ()
+      );
+      expr env (p, e)
+
 and exprl env l = List.map (expr env) l
 and oexpr env e = opt_map (expr env) e
 and expr env (p, e) = p, expr_ env e
@@ -1557,16 +1568,14 @@ and expr_ env = function
   | Lvar x ->
       Naming_hooks.dispatch_lvar_hook x !((snd env).locals);
       N.Lvar (Env.lvar env x)
-  | Obj_get (e1, (p, Id x)) ->
-      N.Obj_get (expr env e1, (p, N.Id x))
-  | Obj_get (e1, (p, _ as e2)) ->
-      (match (fst env).in_mode with
-      | Ast.Mstrict ->
-          Errors.dynamic_method_call p
-      | Ast.Mpartial | Ast.Mdecl ->
-          ()
-      );
-      N.Obj_get (expr env e1, expr env e2)
+  | Obj_get (e1, (p, _ as e2), OG_nullthrows) ->
+      N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullthrows)
+  (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
+     is being used for instance property access; see the case below for
+     handling nullsafe instance method calls to see how this works *)
+  | Obj_get (_, (p, _), OG_nullsafe) ->
+      Errors.nullsafe_property_access p;
+      N.Any
   | Array_get ((p, Lvar x), None) ->
       let id = p, N.Lvar (Env.lvar env x) in
       N.Array_get (id, None)
@@ -1689,6 +1698,17 @@ and expr_ env = function
   | Call ((p, Id f), el) ->
       N.Call (N.Cnormal, (p, N.Id (Env.fun_id env f)),
         List.map (expr env) el)
+  (* Handle nullsafe instance method calls here. Because Obj_get is used
+     for both instance property access and instance method calls, we need
+     to match the entire "Call(Obj_get(..), ..)" pattern here so that we
+     only match instance method calls *)
+  | Call ((p, Obj_get (e1, e2, OG_nullsafe)), el) ->
+      N.Call
+        (N.Cnormal,
+         (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
+         List.map (expr env) el)
+  (* Handle all kinds of calls that weren't handled by any of
+     the cases above *)
   | Call (e, el) ->
       N.Call (N.Cnormal, expr env e, List.map (expr env) el)
   | Yield_break -> (snd env).has_yield := true; N.Yield_break

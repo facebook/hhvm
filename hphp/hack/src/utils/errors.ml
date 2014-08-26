@@ -143,6 +143,7 @@ module Naming                               = struct
   let void_cast                             = 2054 (* DONT MODIFY!!!! *)
   let object_cast                           = 2055 (* DONT MODIFY!!!! *)
   let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
+  let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -289,8 +290,8 @@ module Typing                               = struct
   let visibility_extends                    = 4113 (* DONT MODIFY!!!! *)
   let void_parameter                        = 4114 (* DONT MODIFY!!!! *)
   let wrong_extend_kind                     = 4115 (* DONT MODIFY!!!! *)
-
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
+  let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -521,6 +522,10 @@ let illegal_CLASS pos =
 let dynamic_method_call pos =
   add Naming.dynamic_method_call pos
     "Dynamic method call"
+
+let nullsafe_property_access pos =
+  add Naming.nullsafe_property_access pos
+  "The ?-> operator is not supported for property access"
 
 let illegal_fun pos =
   let msg = "The argument to fun() must be a single-quoted, constant "^
@@ -1403,6 +1408,12 @@ let private_override pos class_id id =
   add Typing.private_override pos ((Utils.strip_ns class_id)^"::"^id
           ^": combining private and override is nonsensical")
 
+let nullsafe_not_needed p nonnull_witness =
+  add_list Typing.nullsafe_not_needed (
+  [
+   p,
+   "You are using the ?-> operator but this object cannot be null. "
+ ] @ nonnull_witness)
 
 (*****************************************************************************)
 (* Printing *)

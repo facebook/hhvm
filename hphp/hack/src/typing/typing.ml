@@ -828,11 +828,13 @@ and expr_ is_lvalue env (p, e) =
     (* Method_id is used when creating a "method pointer" using the magic
      * inst_meth function.
      *
-     * Typing this is pretty simple, we just need to check that instance->meth is
-     * public+not static and then return its type.
+     * Typing this is pretty simple, we just need to check that instance->meth
+     * is public+not static and then return its type.
      *)
     let env, ty1 = expr env instance in
-    let env, result, vis = obj_get_with_visibility true env ty1 meth (fun x -> x) in
+    let env, result, vis =
+      obj_get_with_visibility ~is_method:true ~nullsafe:None env ty1
+                              meth (fun x -> x) in
     let has_lost_info = Env.FakeMembers.is_invalid env instance (snd meth) in
     if has_lost_info
     then
@@ -865,7 +867,9 @@ and expr_ is_lvalue env (p, e) =
         (* We need to instantiate the object because it could have
          * type parameters.
          *)
-        let env, fty = obj_get true env obj_type meth_name (fun x -> x) in
+        let env, fty =
+          obj_get ~is_method:true ~nullsafe:None env obj_type
+                  meth_name (fun x -> x) in
         (match fty with
         | reason, Tfun fty ->
             (* We are creating a fake closure:
@@ -1025,14 +1029,15 @@ and expr_ is_lvalue env (p, e) =
         let env, ty = Env.lost_info fake_name ISet.empty env ty in
         env, ty
       else env, ty
-  | Obj_get (e, (_, Id (_, y)))
+  | Obj_get (e, (_, Id (_, y)), _)
       when Env.FakeMembers.get env e y <> None ->
         let env, local = Env.FakeMembers.make p env e y in
         let local = p, Lvar (p, local) in
         expr env local
-  | Obj_get (e1, (_, Id m)) ->
+  | Obj_get (e1, (_, Id m), _) ->
       let env, ty1 = expr env e1 in
-      let env, result = obj_get false env ty1 m (fun x -> x) in
+      let env, result =
+        obj_get ~is_method:false ~nullsafe:None env ty1 m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
       if has_lost_info
       then
@@ -1040,7 +1045,7 @@ and expr_ is_lvalue env (p, e) =
         let env, result = Env.lost_info name ISet.empty env result in
         env, result
       else env, result
-  | Obj_get (e1, _) ->
+  | Obj_get (e1, _, _) ->
       let env, _ = expr env e1 in
       env, (Reason.Rwitness p, Tany)
   | Yield_break ->
@@ -1118,7 +1123,7 @@ and expr_ is_lvalue env (p, e) =
 and class_const env p = function
   | (CIparent, mid) ->
       let env, cty = static_class_id p env CIparent in
-      obj_get false env cty mid (fun x -> x)
+      obj_get ~is_method:false ~nullsafe:None env cty mid (fun x -> x)
   | (cid, mid) ->
       Typing_utils.process_static_find_ref cid mid;
       let env, cty = static_class_id p env cid in
@@ -1422,7 +1427,9 @@ and assign p env e1 ty2 =
         Type.sub_type p (Reason.URassign) env real_type ety2
       end env real_type_list in
       (match e1 with
-      | _, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name))) ->
+      | _, Obj_get ((_, This | _, Lvar _ as obj),
+                    (_, Id (_, member_name)),
+                    _) ->
           let env, local = Env.FakeMembers.make p env obj member_name in
           (match obj with
           | _, This ->
@@ -1574,13 +1581,17 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
             let k_lhs ty =
               Reason.Rwitness fpos, Tgeneric ("this", Some (Env.get_self env))
             in
-            let env, method_, _ = obj_get_ true env ty1 m begin fun (env, fty, _) ->
-              let env, fty = Env.expand_type env fty in
-              let env, fty = Inst.instantiate_fun env fty el in
-              let fty = check_abstract_parent_meth (snd m) p fty in
-              let env, method_ = call p env fty el in
-              env, method_, None
-            end k_lhs in
+            let env, method_, _ =
+              obj_get_ ~is_method:true ~nullsafe:None env ty1 m
+              begin fun (env, fty, _) ->
+                let env, fty = Env.expand_type env fty in
+                let env, fty = Inst.instantiate_fun env fty el in
+                let fty = check_abstract_parent_meth (snd m) p fty in
+                let env, method_ = call p env fty el in
+                env, method_, None
+              end
+              k_lhs
+            in
             env, method_
           | Some _ ->
             let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
@@ -1597,15 +1608,26 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in
       call p env fty el
-  | Obj_get(e1, (_, Id m)) ->
+  | Obj_get(e1, (_, Id m), nullflavor) ->
       let is_method = call_type = Cnormal in
       let env, ty1 = expr env e1 in
-      obj_get is_method env ty1 m begin fun (env, fty, _) ->
+      let nullsafe =
+        (match nullflavor with
+          | OG_nullthrows -> None
+          | OG_nullsafe -> Some p
+        ) in
+      let fn = (fun (env, fty, _) ->
         let env, fty = Env.expand_type env fty in
         let env, fty = Inst.instantiate_fun env fty el in
         let env, method_ = call p env fty el in
-        env, method_, None
-      end
+        env, method_, None) in
+      (if nullflavor == OG_nullsafe && not (type_could_be_null env ty1) then
+        let env, (r, _) = Env.expand_type env ty1 in
+        Errors.nullsafe_not_needed p
+          (Reason.to_string
+           "This is what makes me believe it cannot be null"
+           r));
+      obj_get ~is_method:is_method ~nullsafe:nullsafe env ty1 m fn
   | Fun_id x
   | Id x ->
       Typing_hooks.dispatch_id_hook x env;
@@ -2008,21 +2030,27 @@ and member_not_found pos ~is_method env class_ member_name class_name =
     | Some (def_pos, v) ->
         error (`did_you_mean (def_pos, v))
 
-and obj_get is_method env ty1 id k =
-  let env, method_, _ = obj_get_with_visibility is_method env ty1 id k in
+and obj_get ~is_method:is_method ~nullsafe:nullsafe env ty1 id k =
+  let env, method_, _ =
+    obj_get_with_visibility ~is_method:is_method ~nullsafe:nullsafe env ty1
+                            id k in
   env, method_
 
-and obj_get_with_visibility is_method env ty1 (p, s as id) k =
-  obj_get_ is_method env ty1 id k (fun ty -> ty)
+and obj_get_with_visibility ~is_method:is_method ~nullsafe:nullsafe env ty1
+                            (p, s as id) k =
+  obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k (fun ty -> ty)
 
-and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
+and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
+             k k_lhs =
   let env, ety1 = Env.expand_type env ty1 in
   match ety1 with
   | _, Tunresolved tyl ->
       let (env, vis), tyl =
         lfold
           (fun (env, vis) ty ->
-            let env, ty, vis' = obj_get_ is_method env ty id k k_lhs in
+            let env, ty, vis' =
+              obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id
+                       k k_lhs in
             (* There is one special case where we need to expose the
              * visibility outside of obj_get (checkout inst_meth special
              * function).
@@ -2038,11 +2066,27 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
       env, method_, vis
   | p, Tgeneric (x, Some ty) ->
       let k_lhs' ty = k_lhs (p, Tgeneric (x, Some ty)) in
-      obj_get_ is_method env ty id k k_lhs'
+      obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id k k_lhs'
   | p, Tapply ((_, x) as c, argl) when Typing_env.is_typedef env x ->
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       let k_lhs' ty = k_lhs (p, Tapply (c, argl)) in
-      obj_get_ is_method env ty1 id k k_lhs'
+      obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs'
+  | _, Toption ty -> begin match nullsafe with
+    | Some p1 ->
+        let k' (env, fty, x) = begin
+          let env, method_, x = k (env, fty, x) in
+          let env, method_ = non_null env method_ in
+          env, (Reason.Rwitness p1, Toption method_), x
+        end in
+        obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty id k' k_lhs
+    | None ->
+        Errors.null_member s p
+          (Reason.to_string
+             "This is what makes me believe it can be null"
+             (fst ety1)
+          );
+        k (env, (fst ety1, Tany), None)
+    end
   | _ -> k begin match snd ety1 with
     | Tgeneric (_, Some (_, Tapply (x, paraml)))
     | Tapply (x, paraml) ->
@@ -2068,7 +2112,9 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                   | env, None ->
                     member_not_found p ~is_method env class_ s x;
                     env, (Reason.Rnone, Tany), None
-                  | env, Some {ce_visibility = vis; ce_type = (r, Tfun ft); _}  ->
+                  | env, Some {ce_visibility = vis;
+                               ce_type = (r, Tfun ft);
+                               _}  ->
                     let meth_pos = Reason.to_pos r in
                     check_visibility p env (meth_pos, vis) None;
                     let new_name = "alpha_varied_this" in
@@ -2119,24 +2165,29 @@ and obj_get_ is_method env ty1 (p, s as id) k k_lhs =
                 let env, method_ = Inst.instantiate_this env method_ this_ty in
 
                 (* Now this has been substituted, we can de-alpha-vary *)
-                let env, method_ = Typing_generic.rename env new_name "this" method_ in
+                let env, method_ =
+                  Typing_generic.rename env new_name "this" method_ in
                 env, method_, Some (meth_pos, vis)
             )
         )
     | Tobject
     | Tany -> env, (fst ety1, Tany), None
-    | Toption _ ->
-      Errors.null_member s p
-        (Reason.to_string
-           "This is what makes me believe it can be null"
-           (fst ety1)
-        );
-      env, (fst ety1, Tany), None
     | ty ->
       Errors.non_object_member
           s p (Typing_print.error ty) (Reason.to_pos (fst ety1));
       env, (fst ety1, Tany), None
   end
+
+and type_could_be_null env ty1 =
+  let env, ety1 = Env.expand_type env ty1 in
+  match (snd ety1) with
+  | Tunresolved tyl -> List.exists (type_could_be_null env) tyl
+  | Tgeneric (x, Some ty) -> type_could_be_null env ty
+  | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
+      let env, ty = Typing_tdef.expand_typedef env (fst ety1) x argl in
+      type_could_be_null env ty
+  | Toption _ | Tgeneric _ | Tmixed | Tany -> true
+  | _ -> false
 
 and alpha_this ~new_name env paraml =
   (* Since a param might include a "this" type, let's alpha vary
@@ -2578,7 +2629,9 @@ and condition_var_non_null env = function
       let env = Env.set_local env local ty in
       let local = p, Lvar (p, local) in
       condition_var_non_null env local
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name))) as e ->
+  | p, Obj_get ((_, This | _, Lvar _ as obj),
+                (_, Id (_, member_name)),
+                _) as e ->
       let env, ty = expr env e in
       let env, local = Env.FakeMembers.make p env obj member_name in
       let env = Env.set_local env local ty in
@@ -2702,8 +2755,8 @@ and condition env tparamet = function
 
 and is_instance_var = function
   | _, (Lvar _ | This) -> true
-  | _, Obj_get ((_, This), (_, Id _)) -> true
-  | _, Obj_get ((_, Lvar _), (_, Id _)) -> true
+  | _, Obj_get ((_, This), (_, Id _), _) -> true
+  | _, Obj_get ((_, Lvar _), (_, Id _), _) -> true
   | _, Class_get (_, _) -> true
   | _ -> false
 
@@ -2711,7 +2764,7 @@ and get_instance_var env = function
   | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       env, (p, local)
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name))) ->
+  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
       env, (p, local)
   | _, Lvar (p, x) -> env, (p, x)
@@ -2738,7 +2791,7 @@ and is_type env e tprim =
   | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       Env.set_local env local (Reason.Rwitness p, Tprim tprim)
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name))) ->
+  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
       Env.set_local env local (Reason.Rwitness p, Tprim tprim)
   | _, Lvar (p, x) ->
@@ -2749,7 +2802,7 @@ and is_array env = function
   | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       Env.set_local env local (Reason.Rwitness p, Tarray (true, None, None))
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name))) ->
+  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
       Env.set_local env local (Reason.Rwitness p, Tarray (true, None, None))
   | _, Lvar (p, x) ->

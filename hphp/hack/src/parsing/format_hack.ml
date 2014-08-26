@@ -2043,8 +2043,8 @@ and expr_binop lowest str_op op env =
     expr_remain_loop lowest env
   end
 
-and expr_binop_arrow lowest str_op env =
-  with_priority env Tarrow begin fun env ->
+and expr_binop_arrow lowest str_op tok env =
+  with_priority env tok begin fun env ->
     if env.priority = env.break_on
     then begin
       newline env;
@@ -2104,8 +2104,8 @@ and expr_remain lowest env =
       expr_binop lowest tok_str op env
   | Tdot ->
       expr_binop_dot lowest tok_str env
-  | Tarrow ->
-      expr_binop_arrow lowest tok_str env
+  | Tarrow | Tnsarrow ->
+      expr_binop_arrow lowest tok_str tok env
   | Tgt when env.in_attr ->
       back env;
       lowest
@@ -2202,8 +2202,11 @@ and expr_atomic env =
   | Tlvar ->
       last_token env;
       (match next_token env with
-      | Tarrow ->
-          expect "->" env;
+      | Tarrow | Tnsarrow as tok ->
+          (match tok with
+          | Tarrow -> expect "->" env
+          | Tnsarrow -> expect "?->" env
+          | _ -> assert false);
           wrap env begin function
             | Tword ->
                 last_token env
@@ -2313,7 +2316,7 @@ and expr_atomic_word env last_tok = function
         space env;
         expr_atomic env
       end
-  | "function" when last_tok <> Tarrow ->
+  | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
       space env;
       fun_ env

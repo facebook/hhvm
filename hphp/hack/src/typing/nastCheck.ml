@@ -124,10 +124,10 @@ module CheckFunctionType = struct
         liter expr2 f_type fdl;
         ()
     | _, Clone e -> expr f_type e; ()
-    | _, Obj_get (e, (_, Id s)) ->
+    | _, Obj_get (e, (_, Id s), _) ->
         expr f_type e;
         ()
-    | _, Obj_get (e1, e2) ->
+    | _, Obj_get (e1, e2, _) ->
         expr2 f_type (e1, e2);
         ()
     | _, Array_get (e, eopt) ->
@@ -572,12 +572,12 @@ and expr_ env = function
       liter field env fdl;
       ()
   | Clone e -> expr env e; ()
-  | Obj_get (e, (_, Id s)) ->
+  | Obj_get (e, (_, Id s), _) ->
       if is_magic s && Env.is_strict env.tenv
       then Errors.magic s;
       expr env e;
       ()
-  | Obj_get (e1, e2) ->
+  | Obj_get (e1, e2, _) ->
       expr env e1;
       expr env e2;
       ()

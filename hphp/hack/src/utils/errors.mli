@@ -64,6 +64,7 @@ val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
 val dynamic_method_call : Pos.t -> unit
+val nullsafe_property_access : Pos.t -> unit
 val illegal_fun : Pos.t -> unit
 val illegal_meth_fun : Pos.t -> unit
 val illegal_inst_meth : Pos.t -> unit
@@ -239,6 +240,7 @@ val invalid_shape_field_const : Pos.t -> Pos.t -> unit
 val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
+val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

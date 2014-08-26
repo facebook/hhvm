@@ -275,7 +275,7 @@ let priorities = [
   (Right, [Teq; Tpluseq; Tminuseq; Tstareq;
            Tslasheq; Tdoteq; Tpercenteq;
            Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
-  (Left, [Tarrow]);
+  (Left, [Tarrow; Tnsarrow]);
   (Left, [Telseif]);
   (Left, [Telse]);
   (Left, [Tendif]);
@@ -1545,7 +1545,8 @@ and param_implicit_field vis p =
   let this = pos, "$this" in
   let stmt =
     Expr (pos, Binop (Eq None, (pos, Obj_get((pos, Lvar this),
-                                             (pos, Id cvname))),
+                                             (pos, Id cvname),
+                                             OG_nullthrows)),
                       (pos, Lvar p.param_id)))
   in
   member, stmt
@@ -2212,8 +2213,8 @@ and expr_remain env e1 =
       expr_binop env Txor Xor e1
   | Tincr | Tdecr as uop  ->
       expr_postfix_unary env uop e1
-  | Tarrow ->
-      expr_arrow env e1
+  | Tarrow | Tnsarrow as tok ->
+      expr_arrow env e1 tok
   | Tcolcol ->
       expr_colcol env e1
   | Tlp ->
@@ -2490,8 +2491,8 @@ and expr_binop env bop ast_bop e1 =
 (* Object Access ($obj->method) *)
 (*****************************************************************************)
 
-and expr_arrow env e1 =
-  reduce env e1 Tarrow begin fun e1 env ->
+and expr_arrow env e1 tok =
+  reduce env e1 tok begin fun e1 env ->
     let e2 =
       match L.token env.lb with
       | Tword ->
@@ -2500,7 +2501,10 @@ and expr_arrow env e1 =
           pos, Id (pos, name)
       | _ -> L.back env.lb; expr env
     in
-    btw e1 e2, Obj_get (e1, e2)
+    btw e1 e2, (match tok with
+      | Tarrow -> Obj_get (e1, e2, OG_nullthrows)
+      | Tnsarrow -> Obj_get (e1, e2, OG_nullsafe)
+      | _ -> assert false)
   end
 
 (*****************************************************************************)
@@ -2997,7 +3001,7 @@ and encapsed_expr_reduce_left start env e1 =
           L.back env.lb;
           let e2 = encapsed_expr env in
           let pos = Pos.btw start (Pos.make env.lb) in
-          (pos, Obj_get (e1, e2)), true
+          (pos, Obj_get (e1, e2, OG_nullthrows)), true
       | _ ->
           L.back env.lb;
           e1, false

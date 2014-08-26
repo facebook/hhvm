@@ -196,7 +196,7 @@ and assign env acc x =
 
 and assign_expr env acc e1 =
   match e1 with
-    | _, Obj_get ((_, This), (_, Id (_, y))) ->
+    | _, Obj_get ((_, This), (_, Id (_, y)), _) ->
       assign env acc y
     | _, List el ->
       List.fold_left (assign_expr env) acc el
@@ -307,12 +307,12 @@ and expr_ env acc p e =
   | Method_caller _
   | Id _ -> acc
   | Lvar _ -> acc
-  | Obj_get ((_, This), (_, Id (_, vx as v))) ->
+  | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
       if SSet.mem vx env.cvars && not (SSet.mem vx acc)
       then (Errors.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e
-  | Obj_get (e1, e2) ->
+  | Obj_get (e1, e2, _) ->
       let acc = expr acc e1 in
       expr acc e2
   | Array_get (e, eo) ->
@@ -322,7 +322,7 @@ and expr_ env acc p e =
       | Some e -> expr acc e)
   | Class_const _
   | Class_get _ -> acc
-  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)))), _) ->
+  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _) ->
       let method_ = Env.get_method env f in
       (match method_ with
       | None ->

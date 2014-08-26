@@ -93,6 +93,7 @@ type token =
   | Tltlt
   | Tgtgt
   | Tsarrow
+  | Tnsarrow
   | Tarrow
   | Tlambda
   | Tem
@@ -208,6 +209,7 @@ let token_to_string = function
   | Tltlt         -> "<<"
   | Tgtgt         -> ">>"
   | Tsarrow       -> "=>"
+  | Tnsarrow      -> "?->"
   | Tarrow        -> "->"
   | Tlambda       -> "==>"
   | Tem           -> "!"
@@ -365,6 +367,7 @@ rule token = parse
   | "<<"               { Tltlt        }
   | ">>"               { Tgtgt        }
   | "=>"               { Tsarrow      }
+  | "?->"              { Tnsarrow     }
   | "->"               { Tarrow       }
   | "==>"              { Tlambda      }
   | '!'                { Tem          }
@@ -651,6 +654,7 @@ and format_token = parse
   | ">="               { Tgte          }
   | "<<"               { Tltlt         }
   | "=>"               { Tsarrow       }
+  | "?->"              { Tnsarrow      }
   | "->"               { Tarrow        }
   | "==>"              { Tlambda       }
   | '!'                { Tem           }

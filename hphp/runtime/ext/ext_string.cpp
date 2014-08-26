@@ -912,12 +912,17 @@ Variant f_strstr(const String& haystack, const Variant& needle,
   }
 }
 
-Variant f_stristr(const String& haystack, const Variant& needle) {
+Variant f_stristr(const String& haystack, const Variant& needle,
+                  bool before_needle /* = false */) {
   Variant ret = f_stripos(haystack, needle);
   if (same(ret, false)) {
     return false;
   }
-  return haystack.substr(ret.toInt32());
+  if (before_needle) {
+    return haystack.substr(0, ret.toInt32());
+  } else {
+    return haystack.substr(ret.toInt32());
+  }
 }
 
 template<bool existence_only>

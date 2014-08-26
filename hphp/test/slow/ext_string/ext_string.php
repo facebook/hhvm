@@ -365,6 +365,8 @@ var_dump(strstr($email, "@", false));
 
 var_dump(stristr("Hello World!", "earth"));
 var_dump(stristr("APPLE", 97));
+var_dump(stristr("foo bar", "bar", true));
+var_dump(stristr("foo bar", "bar", false));
 
 $text = "This is a Simple text.";
 var_dump(strpbrk($text, "mi"));

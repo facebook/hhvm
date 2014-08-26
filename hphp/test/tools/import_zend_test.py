@@ -214,6 +214,8 @@ flaky_tests = (
     '/ext/sockets/tests/ipv6loop.php',
     '/ext/sockets/tests/socket_getpeername_ipv4loop.php',
     '/ext/standard/tests/network/fsockopen_variation2.php',
+    '/ext/sockets/tests/socket_create_listen.php',
+    '/ext/sockets/tests/socket_create_listen-win32.php',
 )
 
 # Tests that work but not in repo mode
@@ -1211,11 +1213,6 @@ def walk(filename, dest_subdir):
         test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_basic')
     if '/ext/dom/tests/DOMDocument_saveHTMLFile_formatOutput.php' in full_dest_filename:
         test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_formatOutput')
-    if ('/ext/sockets/tests/socket_create_listen.php' in full_dest_filename or
-       '/ext/sockets/tests/socket_create_listen-win32.php' in full_dest_filename):
-        test = test.replace("31338", "rand(1025, 65535)")
-        exp = exp.replace('31338', '%d')
-        file(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

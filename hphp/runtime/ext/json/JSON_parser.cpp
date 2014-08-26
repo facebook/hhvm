@@ -37,6 +37,7 @@ SOFTWARE.
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -860,6 +861,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           buf->clear();
           JSON_RESET_TYPE();
+          check_request_surprise_unlikely();
         }
         break;
 

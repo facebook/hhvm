@@ -124,6 +124,9 @@ int emulate_zend(int argc, char** argv) {
     }
     if (strcmp(argv[cnt], "-n") == 0) {
       ignore_default_configs = true;
+      cnt++;
+      newargv.push_back("--no-config");
+      continue;
     }
     if (strcmp(argv[cnt], "-c")  == 0) {
       if (cnt + 1 < argc && argv[cnt + 1][0] != '-') {
@@ -161,15 +164,6 @@ int emulate_zend(int argc, char** argv) {
       write(ini_fd, "\n", 1);
       cnt += 2;
       continue;
-    }
-    if (strcmp(argv[cnt], "-c")  == 0) {
-      cnt++;
-      newargv.push_back("-c");
-      newargv.push_back(argv[cnt++]);
-    }
-    if (strcmp(argv[cnt], "-n")  == 0) {
-      cnt++;
-      newargv.push_back("--no-config");
     }
     if (argv[cnt][0] != '-') {
       if (show) {

@@ -933,10 +933,10 @@ Cell ExecutionContext::lookupClsCns(const StringData* cls,
 const StaticString s_construct("__construct");
 
 const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
-                                                const StringData* methodName,
-                                                const Class* ctx,
-                                                CallType callType,
-                                                bool raise /* = false */) {
+                                              const StringData* methodName,
+                                              const Class* ctx,
+                                              CallType callType,
+                                              bool raise /* = false */) {
   const Func* method;
   if (callType == CallType::CtorMethod) {
     assert(methodName == nullptr);
@@ -955,11 +955,9 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
       // We didn't find any methods with the specified name in cls's method
       // table, handle the failure as appropriate.
       if (raise) {
-        raise_error("Call to undefined method %s::%s from %s%s",
+        raise_error("Call to undefined method %s::%s()",
                     cls->name()->data(),
-                    methodName->data(),
-                    ctx ? "context " : "anonymous context",
-                    ctx ? ctx->name()->data() : "");
+                    methodName->data());
       }
       return nullptr;
     }
@@ -977,11 +975,11 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
     if (ctx == baseClass) {
       return method;
     }
-    // The anonymous context cannot access protected or private methods,
+    // The invalid context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
       if (raise) {
-        raise_error("Call to %s method %s::%s from anonymous context",
+        raise_error("Call to %s %s::%s() from invalid context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
                     cls->name()->data(),
                     method->name()->data());
@@ -1010,7 +1008,7 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
         // we don't need to check if ctx declares a private method with this
         // name, so we can fail fast here.
         if (raise) {
-          raise_error("Call to protected method %s::%s from context %s",
+          raise_error("Call to protected method %s::%s() from context '%s'",
                       cls->name()->data(),
                       method->name()->data(),
                       ctx->name()->data());
@@ -1043,10 +1041,10 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
   // If we reach here it means we've found an inaccessible private method
   // in cls's method table, handle the failure as appropriate.
   if (raise) {
-    raise_error("Call to private method %s::%s from %s%s",
+    raise_error("Call to private method %s::%s() from %s'%s'",
                 method->baseCls()->name()->data(),
                 method->name()->data(),
-                ctx ? "context " : "anonymous context",
+                ctx ? "context " : "invalid context",
                 ctx ? ctx->name()->data() : "");
   }
   return nullptr;

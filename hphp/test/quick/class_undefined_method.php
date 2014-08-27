@@ -1,0 +1,2 @@
+<?php
+stdClass::undefinedMethod();

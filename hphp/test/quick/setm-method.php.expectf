@@ -1,2 +1,2 @@
 
-Fatal error: Call to undefined method stdClass::foo from anonymous context in %s/test/quick/setm-method.php on line 6
+Fatal error: Call to undefined method stdClass::foo() in %s/test/quick/setm-method.php on line 6

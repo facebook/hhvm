@@ -1,0 +1,3 @@
+
+Fatal error: Call to undefined method stdClass::undefinedMethod() in %s on line %d
+

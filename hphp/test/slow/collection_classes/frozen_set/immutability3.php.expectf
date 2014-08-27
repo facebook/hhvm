@@ -1,2 +1,2 @@
 
-Fatal error: Call to undefined method HH\ImmSet::addAll from anonymous context in %s/slow/collection_classes/frozen_set/immutability3.php on line 7
+Fatal error: Call to undefined method HH\ImmSet::addAll() in %s/slow/collection_classes/frozen_set/immutability3.php on line 7

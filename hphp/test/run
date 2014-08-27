@@ -335,8 +335,10 @@ function mode_cmd($options) {
     case 'llvm':
       return "$jit_args -vEval.JitLLVM=2";
     case 'pgo':
-      return "$jit_args -vEval.JitPGO=1 -vEval.JitRegionSelector=hottrace ".
-             "-vEval.JitPGOHotOnly=0";
+      return $jit_args.
+        ' -vEval.JitPGO=1'.
+        ' -vEval.JitPGORegionSelector=hottrace'.
+        ' -vEval.JitPGOHotOnly=0';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:

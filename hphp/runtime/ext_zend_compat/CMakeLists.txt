@@ -24,9 +24,15 @@ if (ENABLE_ZEND_COMPAT)
   file(GLOB ezc_projects RELATIVE ${EZC_DIR} "${EZC_DIR}/*")
   foreach(ezc_project ${ezc_projects})
     get_filename_component(ezc_name ${ezc_project} NAME)
-    if ((NOT ${ezc_name} STREQUAL "php-src") AND
-              (NOT ${ezc_name} STREQUAL "hhvm") AND
-              (IS_DIRECTORY "${EZC_DIR}/${ezc_name}"))
+    #
+    # The subdirectory dso_test is built using hphpize,
+    # and is NOT statically linked into hhvm.
+    # It is intended to be loaded as a DSO during test.
+    #
+    if ((NOT ${ezc_name} STREQUAL "dso_test") AND
+        (NOT ${ezc_name} STREQUAL "php-src") AND
+        (NOT ${ezc_name} STREQUAL "hhvm") AND
+        (IS_DIRECTORY "${EZC_DIR}/${ezc_name}"))
       list(APPEND ZEND_COMPAT_PROJECTS ${ezc_name})
     endif()
   endforeach()
@@ -62,3 +68,5 @@ endif()
 hphp_link(hphp_ext_zend_compat)
 
 HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})
+
+include(dso_test/dso_test.cmake)

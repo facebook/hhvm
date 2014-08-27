@@ -127,7 +127,7 @@ private:
  *   assert(args.size() == 3);
  */
 struct ArgGroup {
-  typedef smart::vector<ArgDesc> ArgVec;
+  typedef jit::vector<ArgDesc> ArgVec;
 
   explicit ArgGroup(const IRInstruction* inst, const RegAllocInfo::RegMap& regs)
     : m_inst(inst), m_regs(regs), m_override(nullptr)

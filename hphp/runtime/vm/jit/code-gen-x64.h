@@ -247,7 +247,7 @@ private:
   Vout&               m_vfrozen;
   CodegenState&       m_state;
   IRInstruction*      m_curInst;  // current instruction being generated
-  smart::vector<PhysLoc> m_slocs, m_dlocs;
+  jit::vector<PhysLoc> m_slocs, m_dlocs;
 };
 
 // Helpers to compute a reference to a TypedValue type and data

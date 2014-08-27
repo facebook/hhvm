@@ -1715,6 +1715,9 @@ and expr_ env = function
       | "void"  ->
           Errors.void_cast p;
           p, N.Hany
+      | "unset"  ->
+          Errors.unset_cast p;
+          p, N.Hany
       | _       ->
           (* Let's just assume that any other invalid cases are attempts to
            * cast to specific objects *)

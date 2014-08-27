@@ -132,6 +132,7 @@ module Naming                               = struct
   let using_internal_class                  = 2053 (* DONT MODIFY!!!! *)
   let void_cast                             = 2054 (* DONT MODIFY!!!! *)
   let object_cast                           = 2055 (* DONT MODIFY!!!! *)
+  let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -446,6 +447,9 @@ let this_no_argument pos =
 
 let void_cast pos =
   add Naming.void_cast pos "Cannot cast to void."
+
+let unset_cast pos =
+  add Naming.unset_cast pos "Don't use (unset), just assign null!"
 
 let object_cast pos x =
   add Naming.object_cast pos ("Object casts are unsupported. "^

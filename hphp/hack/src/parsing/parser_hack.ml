@@ -2759,9 +2759,7 @@ and expr_cast env start_pos =
     expect env Trp;
     let ty = p, Happly ((p, cast_type), []) in
     let e = expr env in
-    match cast_type with
-    | "unset" -> e
-    | _ -> Pos.btw start_pos (fst e), Cast (ty, e)
+    Pos.btw start_pos (fst e), Cast (ty, e)
   end
 
 (*****************************************************************************)

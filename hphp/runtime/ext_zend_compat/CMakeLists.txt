@@ -24,10 +24,17 @@ if (ENABLE_ZEND_COMPAT)
   file(GLOB ezc_projects RELATIVE ${EZC_DIR} "${EZC_DIR}/*")
   foreach(ezc_project ${ezc_projects})
     get_filename_component(ezc_name ${ezc_project} NAME)
-    if ((NOT ${ezc_name} STREQUAL "php-src") AND
-              (NOT ${ezc_name} STREQUAL "hhvm") AND
-              (IS_DIRECTORY "${EZC_DIR}/${ezc_name}"))
-      list(APPEND ZEND_COMPAT_PROJECTS ${ezc_name})
+    #
+    # The subdirectory dso_test is built using hphpize,
+    # and is NOT statically linked into hhvm.
+    # It is intended to be loaded as a DSO during test.
+    #
+    if (NOT ${ezc_name} STREQUAL "dso_test")
+      if ((NOT ${ezc_name} STREQUAL "php-src") AND
+                (NOT ${ezc_name} STREQUAL "hhvm") AND
+                (IS_DIRECTORY "${EZC_DIR}/${ezc_name}"))
+        list(APPEND ZEND_COMPAT_PROJECTS ${ezc_name})
+      endif()
     endif()
   endforeach()
 
@@ -62,3 +69,39 @@ endif()
 hphp_link(hphp_ext_zend_compat)
 
 HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})
+
+#
+# Build a DSO in dso_test, only to be used for testing
+# on linux of zend extensions loaded dynamically through a DSO.
+#
+# See http://www.cmake.org/cmake/help/v3.0/command/add_custom_command.html
+# See http://www.cmake.org/cmake/help/v3.0/command/add_custom_target.html
+#
+set(HPHPIZE_EXE "../../tools/hphpize/hphpize")
+
+if (LINUX)
+  add_custom_target(
+    build_test_zend_dso
+    ALL
+    DEPENDS dso_test/dso_test.so
+  )
+
+  add_custom_command(
+    OUTPUT dso_test/dso_test.so
+
+    #
+    # The output from hphpize and cmake is just discarded;
+    # the presumption is that it has been debugged and "just works".
+    #
+    COMMAND /bin/sh ../${HPHPIZE_EXE} > /dev/null 2>&1
+    COMMAND cmake .                   > /dev/null 2>&1
+
+    COMMAND make
+
+    WORKING_DIRECTORY dso_test
+
+    COMMENT "Making hphp/runtime/ext_zend_compat/dso_test/dso_test.so"
+    DEPENDS "${HPHPIZE_EXE}"
+  )
+
+endif()

@@ -848,6 +848,74 @@ RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
   return InvalidRegPair;
 }
 
+// Assign virtual registers to all SSATmps used or defined in reachable
+// blocks. This assigns a value register to constants defined by DefConst,
+// because some HHIR instructions require them. Ordinary Gen values with
+// a known DataType only get one register. Assign "wide" locations when
+// possible (when all uses and defs can be wide). These will be assigned
+// SIMD registers later.
+static void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
+                       const BlockList& blocks) {
+  // visit instructions to find tmps eligible to use SIMD registers
+  auto const try_wide = !packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs;
+  boost::dynamic_bitset<> not_wide(unit.numTmps());
+  StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
+  for (auto block : blocks) {
+    for (auto& inst : *block) {
+      for (uint32_t i = 0, n = inst.numSrcs(); i < n; i++) {
+        auto s = inst.src(i);
+        tmps[s] = s;
+        if (!try_wide || !storesCell(inst, i)) {
+          not_wide.set(s->id());
+        }
+      }
+      for (auto& d : inst.dsts()) {
+        tmps[&d] = &d;
+        if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
+          not_wide.set(d.id());
+        }
+      }
+    }
+  }
+  // visit each tmp, assign 1 or 2 registers to each.
+  auto cns = [&](uint64_t c) { return vunit.makeConst(c); };
+  for (auto tmp : tmps) {
+    if (!tmp) continue;
+    auto forced = forceAlloc(*tmp);
+    if (forced != InvalidReg) {
+      state.locs[tmp] = Vloc{forced};
+      UNUSED Reg64 r = forced;
+      FTRACE(kRegAllocLevel, "force t{} in {}\n", tmp->id(), reg::regname(r));
+      continue;
+    }
+    if (tmp->inst()->is(DefConst)) {
+      // null, uninit, and nullptr do not allow rawVal(); make them 0.
+      auto c = tmp->isA(Type::Null) || tmp->isA(Type::Nullptr) ? cns(0) :
+               cns(tmp->rawVal());
+      state.locs[tmp] = Vloc{c};
+      FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
+    } else {
+      if (tmp->numWords() == 2) {
+        if (!not_wide.test(tmp->id())) {
+          auto r = vunit.makeReg();
+          state.locs[tmp] = Vloc{Vloc::kWide, r};
+          FTRACE(kRegAllocLevel, "def t{} in wide %{}\n", tmp->id(), size_t(r));
+        } else {
+          auto data = vunit.makeReg();
+          auto type = vunit.makeReg();
+          state.locs[tmp] = Vloc{data, type};
+          FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
+                 size_t(data), size_t(type));
+        }
+      } else if (tmp->numWords() == 1) {
+        auto data = vunit.makeReg();
+        state.locs[tmp] = Vloc{data};
+        FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
+      }
+    }
+  }
+}
+
 static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
                        CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
@@ -962,6 +1030,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
+    // create vregs for all relevant SSATmps
+    assignRegs(unit, vunit, state, linfo.blocks);
     vunit.roots.push_back(state.labels[unit.entry()]);
     vasm.main(mainCode);
     vasm.cold(coldCode);

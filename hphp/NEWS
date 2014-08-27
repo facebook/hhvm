@@ -1,3 +1,6 @@
+NEXT 25-Sep-2014
+ - Use vasm virtual registers in x64 backend, transition fully to vasm-xls
+
 "Snoop Dogg" 11-Sep-2014
  - VASM phase 1: emit vasm instructions, with existing register allocation
  - More xdebug support

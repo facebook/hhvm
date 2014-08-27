@@ -210,6 +210,7 @@ struct Vloc {
   Vloc() {}
   explicit Vloc(Vreg r) { m_regs[0] = r; }
   Vloc(Vreg r0, Vreg r1) { m_regs[0] = r0; m_regs[1] = r1; }
+  Vloc(Kind kind, Vreg r) : m_kind(kind) { m_regs[0] = r; }
   /* implicit */ Vloc(PhysLoc loc) {
     assert(!loc.spilled());
     if (loc.isFullSIMD()) {

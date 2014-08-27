@@ -656,8 +656,9 @@ private:
 // Return the set of physical registers implicitly accessed (used or defined)
 // TODO: t4779515: replace this, and other switches, with logic using
 // attributes, instead of hardcoded opcode names.
-void getEffects(const Abi& abi, const Vinstr& i, RegSet& uses, RegSet& defs) {
-  uses = defs = RegSet();
+void getEffects(const Abi& abi, const Vinstr& i,
+                RegSet& uses, RegSet& across, RegSet& defs) {
+  uses = defs = across = RegSet();
   switch (i.op) {
     case Vinstr::mccall:
     case Vinstr::call:
@@ -681,7 +682,7 @@ void getEffects(const Abi& abi, const Vinstr& i, RegSet& uses, RegSet& defs) {
       break;
     case Vinstr::shlq:
     case Vinstr::sarq:
-      uses = RegSet(rcx);
+      across = RegSet(rcx);
       break;
     case Vinstr::resume:
     case Vinstr::retransopt:
@@ -789,8 +790,8 @@ void Vxls::buildIntervals() {
         }
         default: {
           visitOperands(inst, dv);
-          RegSet implicit_uses, implicit_defs;
-          getEffects(abi, inst, implicit_uses, implicit_defs);
+          RegSet implicit_uses, implicit_across, implicit_defs;
+          getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
           implicit_defs.forEach([&](Vreg r) {
             dv.def(r);
           });
@@ -798,6 +799,9 @@ void Vxls::buildIntervals() {
           visitOperands(inst, uv);
           implicit_uses.forEach([&](Vreg r) {
             uv.use(r);
+          });
+          implicit_across.forEach([&](Vreg r) {
+            uv.across(r);
           });
           break;
         }
@@ -830,6 +834,15 @@ void Vxls::buildIntervals() {
     assert(!ivl->ranges.empty()); // no empty intervals
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
+    if (debug) {
+      for (unsigned i = 1; i < ivl->uses.size(); i++) {
+        assert(ivl->uses[i].pos >= ivl->uses[i-1].pos); // monotonic
+      }
+      for (unsigned i = 1; i < ivl->ranges.size(); i++) {
+        assert(ivl->ranges[i].end > ivl->ranges[i].start); // no empty ranges
+        assert(ivl->ranges[i].start > ivl->ranges[i-1].end); // no empty gaps
+      }
+    }
   }
   if (dumpIREnabled(kRegAllocLevel)) {
     if (loops) HPHP::Trace::traceRelease("vasm-loops\n");

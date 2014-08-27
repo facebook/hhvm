@@ -52,6 +52,7 @@ struct CodeGenerator : public jit::CodeGenerator {
 private:
   Vloc srcLoc(unsigned i) const;
   Vloc dstLoc(unsigned i) const;
+  Vloc makeDstLoc(const SSATmp& d) const;
   ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -68,9 +69,6 @@ private:
   CallDest callDestDbl(const IRInstruction*) const;
 
   // Main call helper:
-  void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
-                    SyncOptions sync, ArgGroup& args, RegSet toSave);
-  // Overload to make the toSave RegSet optional:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
@@ -187,6 +185,7 @@ private:
   const Class* curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   bool resumed() const { return m_curInst->marker().resumed(); };
+  Fixup curFixup() const;
   void recordSyncPoint(Vout&, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);

@@ -111,7 +111,8 @@ struct FormatVisitor {
 
   template<class R> void print(R r) {
     str << sep();
-    if (r.isVirt()) str << "%" << size_t(r);
+    if (!r.isValid()) str << "%?";
+    else if (r.isVirt()) str << "%" << size_t(r);
     else str << name(r);
   }
   const char* name(Vreg64 r) { return reg::regname(r.asReg()); }

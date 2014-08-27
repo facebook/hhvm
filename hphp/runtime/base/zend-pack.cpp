@@ -16,10 +16,10 @@
 */
 
 #include "hphp/runtime/base/zend-pack.h"
-#include <vector>
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/util/tiny-vector.h"
 
 namespace HPHP {
 
@@ -108,8 +108,8 @@ void ZendPack::pack(const Variant& val, int size, int *map, char *output) {
 
 Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
-  std::vector<char> formatcodes;
-  std::vector<int> formatargs;
+  TinyVector<char, 32> formatcodes; // up to 32 codes on the stack
+  TinyVector<int, 32> formatargs;
   int argc = argv.size();
 
   const char *format = fmt.c_str();

@@ -72,7 +72,7 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
     return DebuggerWireHelpers::UnknownError;
   }
   VariableUnserializer vu(sdata.data(), sdata.size(),
-                          VariableUnserializer::Type::Serialize, true);
+                          VariableUnserializer::Type::DebuggerSerialize, true);
   try {
     data = vu.unserialize();
   } catch (Exception &e) {

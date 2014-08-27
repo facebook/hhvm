@@ -32,6 +32,7 @@ public:
   enum class Type {
     Serialize,
     APCSerialize,
+    DebuggerSerialize
   };
 
 public:

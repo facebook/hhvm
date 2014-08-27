@@ -1068,7 +1068,9 @@ void Variant::unserialize(VariableUnserializer *uns,
         throw Exception("Expected '}' but got '%c'", sep);
       }
 
-      obj->invokeWakeup();
+      if (uns->getType() != VariableUnserializer::Type::DebuggerSerialize) {
+        obj->invokeWakeup();
+      }
 
       check_request_surprise_unlikely();
 
@@ -1077,6 +1079,9 @@ void Variant::unserialize(VariableUnserializer *uns,
     break;
   case 'C':
     {
+      if (uns->getType() == VariableUnserializer::Type::DebuggerSerialize) {
+        raise_error("Debugger shouldn't call custom unserialize method");
+      }
       String clsName;
       clsName.unserialize(uns);
 

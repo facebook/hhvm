@@ -748,43 +748,11 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
-    if (instanceof(SystemLib::s_SerializableClass)) {
-      assert(!isCollection());
-      try {
-        Variant ret =
-          const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
-        if (ret.isString()) {
-          serializer->writeSerializableObject(o_getClassName(), ret.toString());
-        } else if (ret.isNull()) {
-          serializer->writeNull();
-        } else {
-          raise_warning("%s::serialize() must return a string or NULL",
-                        o_getClassName().data());
-          serializer->writeNull();
-        }
-      } catch (...) {
-        // serialize() throws exception
-        raise_warning("%s::serialize() throws exception",
-                      o_getClassName().data());
-        serializer->writeNull();
-      }
-      return;
-    }
     // Don't try to serialize a CPP extension class which doesn't
     // support serialization. Just send the class name instead.
     if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
       serializer->write(o_getClassName());
       return;
-    }
-    if (getAttribute(HasSleep)) {
-      try {
-        handleSleep = true;
-        ret = const_cast<ObjectData*>(this)->invokeSleep();
-      } catch (...) {
-        raise_warning("%s::sleep() throws exception", o_getClassName().data());
-        serializer->writeNull();
-        return;
-      }
     }
   }
 

@@ -66,9 +66,9 @@ void* reader(void* that) {
     while (!m->getFrameRegs(&ar1, 0, &vmr)) {
       // Has to succeed eventually.
     }
-    assert(vmr.m_pc == reinterpret_cast<const Op*>(u.entry() + i * kPcMul));
-    assert(vmr.m_fp == &ar2);
-    assert(vmr.m_sp == (TypedValue*)&ar2 - i * kSpMul);
+    assert(vmr.pc == reinterpret_cast<const Op*>(u.entry() + i * kPcMul));
+    assert(vmr.fp == &ar2);
+    assert(vmr.sp == (TypedValue*)&ar2 - i * kSpMul);
   }
   return nullptr;
 }

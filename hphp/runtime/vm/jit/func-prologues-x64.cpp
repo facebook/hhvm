@@ -321,7 +321,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
         a.  emitImmReg(nPassed, argNumToRegName[1]);
         emitCall(a, TCA(jit::raiseMissingArgument));
-        mcg->recordSyncPoint(a.frontier(), fixup.m_pcOffset, fixup.m_spOffset);
+        mcg->recordSyncPoint(a.frontier(), fixup.pcOffset, fixup.spOffset);
         break;
       }
     }

@@ -581,9 +581,9 @@ void Vgen::emit(store& i) {
 
 void Vgen::emit(syncpoint i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
-         i.fix.m_pcOffset, i.fix.m_spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix.m_pcOffset,
-                       i.fix.m_spOffset);
+         i.fix.pcOffset, i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
+                       i.fix.spOffset);
 }
 
 void Vgen::emit(nocatch& i) {

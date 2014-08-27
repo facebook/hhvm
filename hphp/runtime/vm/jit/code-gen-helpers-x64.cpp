@@ -381,7 +381,7 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
   vcold = cold;
   vcold << movq{rVmFp, argNumToRegName[0]};
   vcold << call{mcg->tx().uniqueStubs.functionEnterHelper};
-  vcold << syncpoint{Fixup{fixup.m_pcOffset, fixup.m_spOffset}};
+  vcold << syncpoint{Fixup{fixup.pcOffset, fixup.spOffset}};
   vcold << jmp{done};
   v = done;
 }

@@ -105,43 +105,41 @@ namespace jit {
  */
 
 struct Fixup {
-  int32_t m_pcOffset;
-  int32_t m_spOffset;
-
-  Fixup(int32_t pcOff, int32_t spOff) : m_pcOffset(pcOff), m_spOffset(spOff)
-  {
-    assert(m_pcOffset >= 0);
-    assert(m_spOffset >= 0);
+  Fixup(int32_t pcOff, int32_t spOff) : pcOffset{pcOff}, spOffset{spOff} {
+    assert(pcOffset >= 0);
+    assert(spOffset >= 0);
   }
-  Fixup() : m_pcOffset(-1), m_spOffset(-1) { }
+
+  Fixup() {}
+
+  int32_t pcOffset{-1};
+  int32_t spOffset{-1};
 };
 
 struct IndirectFixup {
-  explicit IndirectFixup(int returnIpDisp)
-    : magic(-1)
-    , returnIpDisp(returnIpDisp)
-  {}
+  explicit IndirectFixup(int retIpDisp) : returnIpDisp{retIpDisp} {}
 
-  int32_t magic;
+  /* FixupEntry uses magic to differentiate between IndirectFixup and Fixup. */
+  int32_t magic{-1};
   int32_t returnIpDisp;
 };
 
 class FixupMap {
-  static const uint kInitCapac = 128;
+  static constexpr unsigned kInitCapac = 128;
   TRACE_SET_MOD(fixup);
 
 public:
   struct VMRegs {
-    const Op* m_pc;
-    TypedValue* m_sp;
-    const ActRec* m_fp;
+    const Op* pc;
+    TypedValue* sp;
+    const ActRec* fp;
   };
 
   FixupMap() : m_fixups(kInitCapac) {}
 
   void recordFixup(CTCA tca, const Fixup& fixup) {
     TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
-          tca, fixup.m_pcOffset, fixup.m_spOffset);
+          tca, fixup.pcOffset, fixup.spOffset);
     m_fixups.insert(tca, FixupEntry(fixup));
   }
 
@@ -160,11 +158,19 @@ private:
     explicit FixupEntry(Fixup f) : fixup(f) {}
     explicit FixupEntry(IndirectFixup f) : indirect(f) {}
 
+    /* Depends on the magic field in an IndirectFixup being -1. */
+    bool isIndirect() const {
+      static_assert(
+        offsetof(IndirectFixup, magic) == offsetof(FixupEntry, firstElem),
+        "Differentiates between Fixup and IndirectFixup by looking at magic."
+      );
+
+      return firstElem < 0;
+    }
+
     int32_t firstElem;
     Fixup fixup;
     IndirectFixup indirect;
-
-    bool isIndirect() const { return firstElem < 0; }
   };
 
   void recordIndirectFixup(CTCA tca, const IndirectFixup& indirect) {
@@ -175,7 +181,7 @@ private:
 
   PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
     assert(f);
-    return f->getEntry() + fixup.m_pcOffset;
+    return f->getEntry() + fixup.pcOffset;
   }
 
   void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
@@ -183,16 +189,16 @@ private:
     const Func* f = ar->m_func;
     assert(f);
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
-          (void*)tca, fixup.m_pcOffset, fixup.m_spOffset);
-    assert(fixup.m_spOffset >= 0);
-    outRegs->m_pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
-    outRegs->m_fp = ar;
+          (void*)tca, fixup.pcOffset, fixup.spOffset);
+    assert(fixup.spOffset >= 0);
+    outRegs->pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
+    outRegs->fp = ar;
 
     if (UNLIKELY(ar->resumed())) {
       TypedValue* stackBase = Stack::resumableStackBase(ar);
-      outRegs->m_sp = stackBase - fixup.m_spOffset;
+      outRegs->sp = stackBase - fixup.spOffset;
     } else {
-      outRegs->m_sp = (TypedValue*)ar - fixup.m_spOffset;
+      outRegs->sp = (TypedValue*)ar - fixup.spOffset;
     }
   }
 

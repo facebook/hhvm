@@ -253,7 +253,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
         a.  Mov  (argReg(1), nPassed);
         auto fixupAddr = emitCall(a,
           CppCall::direct(jit::raiseMissingArgument));
-        mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
+        mcg->recordSyncPoint(fixupAddr, fixup.pcOffset, fixup.spOffset);
         break;
       }
     }

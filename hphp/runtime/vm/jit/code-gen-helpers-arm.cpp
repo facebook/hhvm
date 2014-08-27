@@ -132,7 +132,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
 
   auto fixupAddr =
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
-  mcg->recordSyncPoint(fixupAddr, fixup.m_pcOffset, fixup.m_spOffset);
+  mcg->recordSyncPoint(fixupAddr, fixup.pcOffset, fixup.spOffset);
   mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
 }
 

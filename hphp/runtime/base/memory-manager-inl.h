@@ -521,8 +521,6 @@ inline bool MemoryManager::preAllocOOM(int64_t size) {
   return false;
 }
 
-inline void MemoryManager::resetCouldOOM() { m_couldOOM = true; }
-
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////

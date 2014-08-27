@@ -653,6 +653,12 @@ void MemoryManager::logDeallocation(void* p) {
   MemoryProfile::logDeallocation(p);
 }
 
+void MemoryManager::resetCouldOOM() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  info->m_reqInjectionData.clearMemExceededFlag();
+  m_couldOOM = true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

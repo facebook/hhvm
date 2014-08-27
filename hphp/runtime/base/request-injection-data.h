@@ -50,6 +50,7 @@ struct RequestInjectionData {
                                      RequestInjectionData::DebuggerHookFlag |
                                      RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
+                                     RequestInjectionData::MemExceededFlag |
                                      RequestInjectionData::XenonSignalFlag;
 
   RequestInjectionData()
@@ -240,6 +241,7 @@ private:
   void reset();
 
   void setMemExceededFlag();
+  void clearMemExceededFlag();
   void setTimedOutFlag();
   void clearTimedOutFlag();
   void setSignaledFlag();

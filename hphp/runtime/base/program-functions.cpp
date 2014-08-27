@@ -1772,6 +1772,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     return false;
   }
 
+  MM().resetCouldOOM();
+
   LitstrTable::get().setReading();
 
   bool ret = true;

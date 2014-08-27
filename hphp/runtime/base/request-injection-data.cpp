@@ -366,6 +366,10 @@ void RequestInjectionData::setMemExceededFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::MemExceededFlag);
 }
 
+void RequestInjectionData::clearMemExceededFlag() {
+  getConditionFlags()->fetch_and(~RequestInjectionData::MemExceededFlag);
+}
+
 void RequestInjectionData::setTimedOutFlag() {
   getConditionFlags()->fetch_or(RequestInjectionData::TimedOutFlag);
 }

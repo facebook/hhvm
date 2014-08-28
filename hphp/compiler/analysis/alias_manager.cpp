@@ -2765,36 +2765,38 @@ private:
         {
           SimpleFunctionCallPtr p(spc(SimpleFunctionCall, from));
           ExpressionListPtr ep(p->getParams());
-          StringPosTypeMap::const_iterator it(
-             s_type_assertion_map.find(p->getName()));
-          if (it != s_type_assertion_map.end()) {
-            int pos = it->second.first;
-            TypePtr t(it->second.second);
-            if (ep->getCount() - 1 >= pos && isAllScalar(ep, pos + 1)) {
-              ExpressionPtr a0((*ep)[pos]);
-              if (a0) {
-                SimpleVariablePtr sv(extractAssertableVariable(a0));
-                if (sv) {
-                  bool passStmt;
-                  bool negate;
-                  createTypeAssertionsForKids(from, 2, passStmt, negate);
-                  return newTypeAssertion(sv, t);
+          if (ep) {
+            StringPosTypeMap::const_iterator it(
+               s_type_assertion_map.find(p->getName()));
+            if (it != s_type_assertion_map.end()) {
+              int pos = it->second.first;
+              TypePtr t(it->second.second);
+              if (ep->getCount() - 1 >= pos && isAllScalar(ep, pos + 1)) {
+                ExpressionPtr a0((*ep)[pos]);
+                if (a0) {
+                  SimpleVariablePtr sv(extractAssertableVariable(a0));
+                  if (sv) {
+                    bool passStmt;
+                    bool negate;
+                    createTypeAssertionsForKids(from, 2, passStmt, negate);
+                    return newTypeAssertion(sv, t);
+                  }
                 }
               }
+            } else if (p->getName() == "is_a" &&
+                       ep->getCount() >= 2 && isAllScalar(ep, 1)) {
+              Variant v;
+              if (ep->getCount() == 2 ||
+                  ((*ep)[2]->getScalarValue(v) && !v.toBoolean())) {
+                // special case is_a
+                bool passStmt;
+                bool negate;
+                createTypeAssertionsForKids(from, 2, passStmt, negate);
+                return newInstanceOfAssertion((*ep)[0], (*ep)[1]);
+              }
             }
-          } else if (p->getName() == "is_a" &&
-                     ep->getCount() >= 2 && isAllScalar(ep, 1)) {
-            Variant v;
-            if (ep->getCount() == 2 ||
-                ((*ep)[2]->getScalarValue(v) && !v.toBoolean())) {
-              // special case is_a
-              bool passStmt;
-              bool negate;
-              createTypeAssertionsForKids(from, 2, passStmt, negate);
-              return newInstanceOfAssertion((*ep)[0], (*ep)[1]);
-            }
+            startIdx = 2; // params
           }
-          startIdx = 2; // params
         }
         break;
       case Expression::KindOfQOpExpression:

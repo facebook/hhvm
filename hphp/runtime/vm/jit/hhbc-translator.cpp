@@ -50,19 +50,15 @@ TRACE_SET_MOD(hhir);
 namespace {
 
 bool classIsUnique(const Class* cls) {
-  return RuntimeOption::RepoAuthoritative &&
-    cls &&
-    (cls->attrs() & AttrUnique);
+  return RuntimeOption::RepoAuthoritative && cls && (cls->attrs() & AttrUnique);
 }
 
 bool classIsUniqueNormalClass(const Class* cls) {
-  return classIsUnique(cls) &&
-    !(cls->attrs() & (AttrInterface | AttrTrait));
+  return classIsUnique(cls) && isNormalClass(cls);
 }
 
 bool classIsUniqueInterface(const Class* cls) {
-  return classIsUnique(cls) &&
-    (cls->attrs() & AttrInterface);
+  return classIsUnique(cls) && isInterface(cls);
 }
 
 }

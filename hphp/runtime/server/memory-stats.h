@@ -23,9 +23,17 @@
 #include <memory>
 
 #include "hphp/runtime/server/writer.h"
-namespace HPHP{
+namespace HPHP {
 
-class MemoryStats{
+class MemoryStats {
+  struct StatM {
+    size_t m_vmSize;
+    size_t m_vmRss;
+    size_t m_share;
+    size_t m_text;
+    size_t m_data;
+  };
+
   public:
     void ReportMemory(std::string &out, Writer::Format format);
     static MemoryStats* GetInstance();
@@ -35,9 +43,8 @@ class MemoryStats{
   private:
     MemoryStats() {}
     size_t GetStaticStringSize();
-
+    bool FillProcessStatM(StatM* pStatM);
     std::atomic<size_t> m_staticStringSize;
-
 };
 }
 

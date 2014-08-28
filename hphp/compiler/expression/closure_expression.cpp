@@ -213,6 +213,11 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   if (m_vars) {
     assert(m_values && m_values->getCount() == m_vars->getCount());
 
+    // because of trait flattening, multiple ClosureExpression's can have
+    // the same m_func and m_vars. Since we're modifying the types on the
+    // vars here, we need to get the lock.
+    GET_LOCK(m_func->getFunctionScope());
+
     // containing function's variable table (not closure function's)
     VariableTablePtr variables = getScope()->getVariables();
 
@@ -248,22 +253,15 @@ TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       }
     }
 
-    {
-      // this lock isn't technically needed for thread-safety, since
-      // the dependencies are all set up. however, the lock assertions
-      // will fail if we don't acquire it.
-      GET_LOCK(m_func->getFunctionScope());
-
-      // bootstrap the closure function's variable table with
-      // the types from m_vars
-      for (int i = 0; i < m_vars->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-        const string &name = param->getName();
-        cvariables->addParamLike(name, param->getType(), ar,
-                                 shared_from_this(),
-                                 getScope()->isFirstPass());
-      }
+    // bootstrap the closure function's variable table with
+    // the types from m_vars
+    for (int i = 0; i < m_vars->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
+      const string &name = param->getName();
+      cvariables->addParamLike(name, param->getType(), ar,
+                               shared_from_this(),
+                               getScope()->isFirstPass());
     }
   }
   return s_ClosureType;

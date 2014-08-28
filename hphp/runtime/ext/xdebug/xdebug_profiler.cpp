@@ -241,6 +241,17 @@ void XDebugProfiler::writeTracingResultsHeader() {
       XDebugUtils::fprintTimestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile,
+        "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n"
+          "<tr>"
+            "<th>#</th>"
+            "<th>Time</th>"
+            "<th>Mem</th>"
+            "<th colspan='2'>Function</th>"
+            "<th>Location</th>"
+          "</tr>\n");
+      break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "
                             "currently supported.");
@@ -255,6 +266,9 @@ void XDebugProfiler::writeTracingResultsFooter() {
       XDebugUtils::fprintTimestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "</table>");
+      break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "
                             "currently supported.");
@@ -265,14 +279,18 @@ template<XDebugProfiler::TraceOutputType outputType>
 int64_t XDebugProfiler::writeTracingFrame(int64_t level,
                                           int64_t startIdx,
                                           const FrameData* parentBegin) {
+  uint64_t id = m_tracingNextFrameId++;
   FrameData& begin = m_frameBuffer[startIdx];
   assert(begin.is_func_begin);
 
+  writeTracingLinePrefix<outputType>();
+  writeTracingFrameId<outputType>(id);
   writeTracingTime<outputType>(begin.time);
   writeTracingMemory<outputType>(begin.memory_usage);
   writeTracingIndent<outputType>(level);
   writeTracingFuncName<outputType>(begin, level == 0);
   writeTracingCallsite<outputType>(begin, parentBegin);
+  writeTracingLineSuffix<outputType>();
   fprintf(m_tracingFile, "\n");
 
   // This is needed to determine the delta memory usage
@@ -300,11 +318,44 @@ int64_t XDebugProfiler::writeTracingFrame(int64_t level,
 }
 
 template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingLinePrefix() {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "\t<tr>");
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingFrameId(uint64_t id) {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "<td>%ld</td>", id);
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
 void XDebugProfiler::writeTracingTime(int64_t time) {
   // TODO(#4489053) Support other types of output types
   switch (outputType) {
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "%10.4f ", timeSinceBase(time));
+      break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "<td>%0.6f</td>", timeSinceBase(time));
       break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "
@@ -328,6 +379,9 @@ void XDebugProfiler::writeTracingMemory(int64_t memory) {
         }
       }
       break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "<td align='right'>%ld</td>", memory);
+      break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "
                             "currently supported.");
@@ -344,6 +398,13 @@ void XDebugProfiler::writeTracingIndent(int64_t level) {
       }
       fprintf(m_tracingFile, "-> ");
       break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "<td align='left'>");
+      for (int i = 0; i < level; i++) {
+        fprintf(m_tracingFile, "&nbsp; &nbsp;");
+      }
+      fprintf(m_tracingFile, "-&gt;</td>");
+      break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "
                             "currently supported.");
@@ -353,21 +414,22 @@ void XDebugProfiler::writeTracingIndent(int64_t level) {
 template<XDebugProfiler::TraceOutputType outputType>
 void XDebugProfiler::writeTracingFuncName(FrameData& frame,
                                           bool isTopPseudoMain) {
+  if (outputType == TraceOutputType::HTML) {
+    fprintf(m_tracingFile, "<td>");
+  }
+
+  // Unlike other cases, output is mostly shared here
   // TODO(#4489053) If collect_params, write the arguments
-  // TODO(#4489053) Support other types of output types
-  switch (outputType) {
-    case TraceOutputType::NORMAL:
-      if (isTopPseudoMain) {
-        fprintf(m_tracingFile, "{main} ");
-      } else if (frame.func->isPseudoMain()) {
-        fprintf(m_tracingFile, "include(%s) ", frame.func->filename()->data());
-      } else {
-        fprintf(m_tracingFile, "%s() ", frame.func->fullName()->data());
-      }
-      break;
-    default:
-      throw_not_implemented("Writing tracing results in this format is not "
-                            "currently supported.");
+  if (isTopPseudoMain) {
+    fprintf(m_tracingFile, "{main} ");
+  } else if (frame.func->isPseudoMain()) {
+    fprintf(m_tracingFile, "include(%s) ", frame.func->filename()->data());
+  } else {
+    fprintf(m_tracingFile, "%s() ", frame.func->fullName()->data());
+  }
+
+  if (outputType == TraceOutputType::HTML) {
+    fprintf(m_tracingFile, "</td>");
   }
 }
 
@@ -383,6 +445,27 @@ void XDebugProfiler::writeTracingCallsite(FrameData& frame,
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "%s", parent->func->filename()->data());
       fprintf(m_tracingFile, ":%d", frame.line);
+      break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "<td>");
+      fprintf(m_tracingFile, "%s", parent->func->filename()->data());
+      fprintf(m_tracingFile, ":%d", frame.line);
+      fprintf(m_tracingFile, "</td>");
+      break;
+    default:
+      throw_not_implemented("Writing tracing results in this format is not "
+                            "currently supported.");
+  }
+}
+
+template<XDebugProfiler::TraceOutputType outputType>
+void XDebugProfiler::writeTracingLineSuffix() {
+  // TODO(#4489053) Support other types of output types
+  switch (outputType) {
+    case TraceOutputType::NORMAL:
+      break;
+    case TraceOutputType::HTML:
+      fprintf(m_tracingFile, "</tr>");
       break;
     default:
       throw_not_implemented("Writing tracing results in this format is not "

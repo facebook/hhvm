@@ -169,6 +169,12 @@ private:
                             const FrameData* parentBegin);
 
   template <TraceOutputType outputType>
+  void writeTracingLinePrefix();
+
+  template <TraceOutputType outputType>
+  void writeTracingFrameId(uint64_t id);
+
+  template <TraceOutputType outputType>
   void writeTracingTime(int64_t time);
 
   template<TraceOutputType outputType>
@@ -182,6 +188,9 @@ private:
 
   template <TraceOutputType outputType>
   void writeTracingCallsite(FrameData& frame, const FrameData* parent);
+
+  template <TraceOutputType outputType>
+  void writeTracingLineSuffix();
 
   // Used when we have both the beginning and end frame data
   struct Frame {
@@ -230,6 +239,10 @@ private:
   std::vector<FrameData> m_tracingStartFrameData;
   String m_tracingFilename;
   FILE* m_tracingFile;
+
+  // When writing the tracing file in computerized and html output we need to
+  // assign each begin/end frame pair an id.
+  uint64_t m_tracingNextFrameId = 0;
 
   // When writing the tracing file with show_mem_delta we need a reference to
   // the previous begin frame

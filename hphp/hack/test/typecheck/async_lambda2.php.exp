@@ -1,0 +1,6 @@
+File "async_lambda2.php", line 13, characters 10-14:
+Typing[4110] Invalid return type
+File "async_lambda2.php", line 12, characters 31-33:
+This is an int
+File "async_lambda2.php", line 13, characters 23-24:
+It is incompatible with an object of type Awaitable

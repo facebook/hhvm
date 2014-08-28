@@ -2277,7 +2277,7 @@ and lambda_expr_body : env -> block = fun env ->
   let (p, e1) = expr env in
   [Return (p, (Some (p, e1)))]
 
-and lambda_body env params ret =
+and lambda_body env params ret ~sync =
   let body =
     if peek env = Tlcb
     then function_body env
@@ -2290,7 +2290,7 @@ and lambda_body env params ret =
     f_ret = ret;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
-    f_fun_kind = FSync;
+    f_fun_kind = sync;
     f_mode = env.mode;
     f_mtime = 0.0;
     f_namespace = Namespace_env.empty;
@@ -2308,9 +2308,9 @@ and make_lambda_param : id -> fun_param = fun var_id ->
     param_user_attributes = Utils.SMap.empty;
   }
 
-and lambda_single_arg env var_id =
+and lambda_single_arg env var_id ~sync =
   expect env Tlambda;
-  lambda_body env [make_lambda_param var_id] None
+  lambda_body env [make_lambda_param var_id] None ~sync
 
 and try_short_lambda env =
   try_parse env begin fun env ->
@@ -2328,7 +2328,7 @@ and try_short_lambda env =
       then None
       else begin
         drop env;
-        Some (lambda_body env param_list ret)
+        Some (lambda_body env param_list ret ~sync:FSync)
       end
     end
   end
@@ -2356,7 +2356,7 @@ and expr_atomic ?(allow_class=false) env  =
       let tok_value = Lexing.lexeme env.lb in
       let var_id = (pos, tok_value) in
       pos, if peek env = Tlambda
-           then lambda_single_arg env var_id
+           then lambda_single_arg env var_id ~sync:FSync
            else Lvar var_id
   | Tcolon ->
       L.back env.lb;
@@ -2630,20 +2630,21 @@ and expr_php_list env start =
 (* Anonymous functions *)
 (*****************************************************************************)
 
-and is_function env =
-  look_ahead env begin fun env ->
-    let tok = L.token env.lb in
-    tok = Tword &&
-    Lexing.lexeme env.lb = "function"
-  end
-
 and expr_anon_async env pos =
-  if is_function env
-  then begin
-    expect_word env "function";
-    expr_anon_fun env pos ~sync:FAsync
-  end
-  else pos, Id (pos, "async")
+  match L.token env.lb with
+  | Tword when Lexing.lexeme env.lb = "function" ->
+      expr_anon_fun env pos ~sync:FAsync
+  | Tlvar ->
+      let var_pos = Pos.make env.lb in
+      pos, lambda_single_arg env (var_pos, Lexing.lexeme env.lb) ~sync:FAsync
+  | Tlp ->
+      let param_list = parameter_list_remain env in
+      let ret = hint_return_opt env in
+      expect env Tlambda;
+      pos, lambda_body env param_list ret ~sync:FAsync
+  | _ ->
+      L.back env.lb;
+      pos, Id (pos, "async")
 
 and expr_anon_fun env pos ~sync =
   let env = { env with priority = 0 } in

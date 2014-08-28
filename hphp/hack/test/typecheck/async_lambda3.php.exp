@@ -1,0 +1,4 @@
+File "async_lambda3.php", line 14, characters 7-14:
+Typing[4015] This expression is of type Awaitable, but it's either being discarded or used in a dangerous way before being awaited
+File "async_lambda3.php", line 13, characters 21-22:
+This is why I think it is Awaitable

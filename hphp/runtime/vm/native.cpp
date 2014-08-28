@@ -332,14 +332,13 @@ TypedValue* functionWrapper(ActRec* ar) {
   TypedValue rv;
   rv.m_type = KindOfNull;
 
-  if (LIKELY(numNonDefault == numArgs) ||
-      LIKELY(nativeWrapperCheckArgs<variadic>(ar))) {
-    if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-      callFunc<usesDoubles, variadic>(func, nullptr, args, rv);
-    } else if (func->attrs() & AttrParamCoerceModeFalse) {
-      rv.m_type = KindOfBoolean;
-      rv.m_data.num = 0;
-    }
+  if (((numNonDefault == numArgs) ||
+       (nativeWrapperCheckArgs<variadic>(ar))) &&
+      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
+    callFunc<usesDoubles, variadic>(func, nullptr, args, rv);
+  } else if (func->attrs() & AttrParamCoerceModeFalse) {
+    rv.m_type = KindOfBoolean;
+    rv.m_data.num = 0;
   }
 
   assert(rv.m_type != KindOfUninit);
@@ -360,31 +359,29 @@ TypedValue* methodWrapper(ActRec* ar) {
   TypedValue rv;
   rv.m_type = KindOfNull;
 
-  if (LIKELY(numNonDefault == numArgs) ||
-      LIKELY(nativeWrapperCheckArgs<variadic>(ar))) {
-    if (coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-
-      // Prepend a context arg for methods
-      // KindOfClass when it's being called statically Foo::bar()
-      // KindOfObject when it's being called on an instance $foo->bar()
-      void* ctx;  // ObjectData* or Class*
-      if (ar->hasThis()) {
-        if (isStatic) {
-          throw_instance_method_fatal(getInvokeName(ar)->data());
-        }
-        ctx = ar->getThis();
-      } else {
-        if (!isStatic) {
-          throw_instance_method_fatal(getInvokeName(ar)->data());
-        }
-        ctx = ar->getClass();
+  if (((numNonDefault == numArgs) ||
+       (nativeWrapperCheckArgs<variadic>(ar))) &&
+      (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
+    // Prepend a context arg for methods
+    // KindOfClass when it's being called statically Foo::bar()
+    // KindOfObject when it's being called on an instance $foo->bar()
+    void* ctx;  // ObjectData* or Class*
+    if (ar->hasThis()) {
+      if (isStatic) {
+        throw_instance_method_fatal(getInvokeName(ar)->data());
       }
-
-      callFunc<usesDoubles, variadic>(func, ctx, args, rv);
-    } else if (func->attrs() & AttrParamCoerceModeFalse) {
-      rv.m_type = KindOfBoolean;
-      rv.m_data.num = 0;
+      ctx = ar->getThis();
+    } else {
+      if (!isStatic) {
+        throw_instance_method_fatal(getInvokeName(ar)->data());
+      }
+      ctx = ar->getClass();
     }
+
+    callFunc<usesDoubles, variadic>(func, ctx, args, rv);
+  } else if (func->attrs() & AttrParamCoerceModeFalse) {
+    rv.m_type = KindOfBoolean;
+    rv.m_data.num = 0;
   }
 
   assert(rv.m_type != KindOfUninit);

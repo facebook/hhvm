@@ -20,7 +20,7 @@
 #include <fstream>
 #include <string>
 
-namespace HPHP { namespace FileBrander {
+namespace HPHP { namespace FileBrand {
 
 void makeInvocationTrace(std::string& invocation_trace,
                          int argc,

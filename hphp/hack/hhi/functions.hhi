@@ -31,6 +31,7 @@ function func_get_args(): array;
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
 function is_array(mixed $arg): bool;
 function isset(ArrayAccess $x): bool;
+function unset(mixed $arg): void;
 function ord(string $string): int;
 function strip_tags(string $str, string $allowable_tags = ''): string;
 

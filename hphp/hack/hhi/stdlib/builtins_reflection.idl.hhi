@@ -31,7 +31,7 @@ interface Reflector  {
     function __toString();
 }
 abstract class ReflectionFunctionAbstract implements Reflector {
-	public $name;
+    public $name;
     final private function __clone() {}
     abstract public function __toString();
     public function inNamespace() {}
@@ -57,8 +57,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     public function returnsReference() {}
 }
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {
-	const IS_DEPRECATED = 262144;
-	public $name;
+    const IS_DEPRECATED = 262144;
+    public $name;
     public function __construct($name) {}
     public function __toString() {}
     public static function export($name, $return = null) {}
@@ -68,7 +68,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
     public function getClosure() {}
 }
 class ReflectionParameter implements Reflector {
-	public $name;
+    public $name;
     final private function __clone() {}
     public static function export($function, $parameter, $return = null) {}
     public function __construct($function, $parameter) {}
@@ -86,18 +86,18 @@ class ReflectionParameter implements Reflector {
     public function isOptional() {}
     public function isDefaultValueAvailable() {}
     public function getDefaultValue() {}
-	public function isDefaultValueConstant() {}
-	public function getDefaultValueConstantName() {}
+    public function isDefaultValueConstant() {}
+    public function getDefaultValueConstantName() {}
 }
 class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
-	const IS_STATIC = 1;
-	const IS_PUBLIC = 256;
-	const IS_PROTECTED = 512;
-	const IS_PRIVATE = 1024;
-	const IS_ABSTRACT = 2;
-	const IS_FINAL = 4;
-	public $name;
-	public $class;
+    const IS_STATIC = 1;
+    const IS_PUBLIC = 256;
+    const IS_PROTECTED = 512;
+    const IS_PRIVATE = 1024;
+    const IS_ABSTRACT = 2;
+    const IS_FINAL = 4;
+    public $name;
+    public $class;
     public static function export($class, $name, $return = false) {}
     public function __construct($class, $name) {}
     public function __toString() {}
@@ -110,7 +110,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public function isConstructor() {}
     public function isDestructor() {}
     public function getClosure($object) {}
-	public function getModifiers() {}
+    public function getModifiers() {}
     public function invoke($object, $parameter = null, $_ = null) {}
     public function invokeArgs($object, array $args) {}
     public function getDeclaringClass() {}
@@ -118,10 +118,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public function setAccessible($accessible) {}
 }
 class ReflectionClass implements Reflector {
-	const IS_IMPLICIT_ABSTRACT = 16;
-	const IS_EXPLICIT_ABSTRACT = 32;
-	const IS_FINAL = 64;
-	public $name;
+    const IS_IMPLICIT_ABSTRACT = 16;
+    const IS_EXPLICIT_ABSTRACT = 32;
+    const IS_FINAL = 64;
+    public $name;
     final private function __clone() {}
     public static function export($argument, $return = false) {}
     public function __construct($argument) {}
@@ -178,12 +178,12 @@ class ReflectionObject extends ReflectionClass implements Reflector {
     public function __construct($argument) {}
 }
 class ReflectionProperty implements Reflector {
-	const IS_STATIC = 1;
-	const IS_PUBLIC = 256;
-	const IS_PROTECTED = 512;
-	const IS_PRIVATE = 1024;
-	public $name;
-	public $class;
+    const IS_STATIC = 1;
+    const IS_PUBLIC = 256;
+    const IS_PROTECTED = 512;
+    const IS_PRIVATE = 1024;
+    public $name;
+    public $class;
     final private function __clone() {}
     public static function export($class, $name, $return = null) {}
     public function __construct($class, $name) {}
@@ -202,7 +202,7 @@ class ReflectionProperty implements Reflector {
     public function setAccessible($accessible) {}
 }
 class ReflectionExtension implements Reflector {
-	public $name;
+    public $name;
     final private function __clone() {}
     public static function export($name, $return = false) {}
     public function __construct($name) {}
@@ -221,7 +221,7 @@ class ReflectionExtension implements Reflector {
 
 }
 class ReflectionZendExtension implements Reflector {
-	public $name;
+    public $name;
     final private function __clone() {}
     public static function export($name, $return = null) {}
     public function __construct($name) {}

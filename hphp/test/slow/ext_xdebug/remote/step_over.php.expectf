@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file://%s/test/slow/ext_xdebug/remote/step_over.php.test" language="PHP" protocol_version="" appid="%S"><engine version=""><![CDATA[xdebug-not-done]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) step_over -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="0"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 1
+string(13) "Hello World 1"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="1"><xdebug:message lineno="22" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 2
+string(13) "Hello World 2"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="2"><xdebug:message lineno="23" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_into -i 3
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="3"><xdebug:message lineno="4" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 4
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="4"><xdebug:message lineno="5" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 5
+string(11) "foo 2 enter"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="5"><xdebug:message lineno="6" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 6
+string(11) "foo 1 enter"
+string(10) "foo 1 exit"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="6"><xdebug:message lineno="7" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 7
+string(10) "foo 2 exit"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="7"><xdebug:message lineno="8" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 8
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="8"><xdebug:message lineno="23" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 9
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="9"><xdebug:message lineno="24" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 10
+string(13) "Hello World 3"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="10"><xdebug:message lineno="26" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 11
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="11"><xdebug:message lineno="27" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 13
+int(1)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="13"><xdebug:message lineno="145" filename="%s/test/slow/ext_xdebug/remote/systemlib.phpstd_variable"></xdebug:message></response>
+(cmd) step_over -i 14
+int(0)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="14"><xdebug:message lineno="27" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 15
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="15"><xdebug:message lineno="30" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 16
+string(13) "Hello World 4"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="16"><xdebug:message lineno="32" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 17
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="17"><xdebug:message lineno="34" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 18
+string(13) "Hello World 5"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="step_over" transaction_id="18"></response>
+(cmd) step_over -i 19

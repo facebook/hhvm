@@ -1,6 +1,6 @@
 <?php
 // Test non-main file line breaks
-require('remote_breakpoint_set_helper.inc');
+require('breakpoint_set_helper.inc');
 
 // Large-line line breakpoints
 var_dump(bar(new Foo()));

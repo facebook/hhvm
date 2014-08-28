@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file://%s/test/slow/ext_xdebug/remote/feature.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug-not-done]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) feature_set -i 0 -n max_children -v 100
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="0" feature="max_children" success="1"></response>
+(cmd) feature_set -i 0 -n max_data -v 100
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="0" feature="max_data" success="1"></response>
+(cmd) feature_set -i 0 -n max_depth -v 100
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="0" feature="max_depth" success="1"></response>
+(cmd) feature_set -i 0 -n show_hidden -v 1
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="0" feature="show_hidden" success="1"></response>
+(cmd) feature_set -i 0 -n multiple_sessions -v 1
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="0" feature="multiple_sessions" success="1"></response>
+(cmd) feature_get -i 0 -n breakpoint_languages
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_languages" supported="0"></response>
+(cmd) feature_get -i 0 -n breakpoint_types
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_types" supported="1"><![CDATA[line conditional call return exception]]></response>
+(cmd) feature_get -i 0 -n data_encoding
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="data_encoding" supported="0"></response>
+(cmd) feature_get -i 0 -n encoding
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="encoding" supported="1"><![CDATA[iso-8859-1]]></response>
+(cmd) feature_get -i 0 -n language_name
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_name" supported="1"><![CDATA[PHP]]></response>
+(cmd) feature_get -i 0 -n language_supports_threads
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_supports_threads" supported="1"><![CDATA[0]]></response>
+(cmd) feature_get -i 0 -n language_version
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_version" supported="1"><![CDATA[3.3.0-dev]]></response>
+(cmd) feature_get -i 0 -n max_children
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="max_children" supported="1"><![CDATA[100]]></response>
+(cmd) feature_get -i 0 -n max_data
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="max_data" supported="1"><![CDATA[100]]></response>
+(cmd) feature_get -i 0 -n max_depth
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="max_depth" supported="1"><![CDATA[100]]></response>
+(cmd) feature_get -i 0 -n protocol_version
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="protocol_version" supported="1"><![CDATA[1.0]]></response>
+(cmd) feature_get -i 0 -n supported_encodings
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="supported_encodings" supported="1"><![CDATA[iso-8859-1]]></response>
+(cmd) feature_get -i 0 -n supports_async
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="supports_async" supported="1"><![CDATA[0]]></response>
+(cmd) feature_get -i 0 -n supports_postmortem
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="supports_postmortem" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n show_hidden
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="show_hidden" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n status
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="status" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n feature_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="feature_get" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n feature_set
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="feature_set" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n run
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="run" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n step_into
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="step_into" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n step_out
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="step_out" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n step_over
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="step_over" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n stop
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="stop" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n detach
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="detach" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n breakpoint_set
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_set" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n breakpoint_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_get" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n breakpoint_update
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_update" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n breakpoint_remove
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="breakpoint_remove" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n stack_depth
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="stack_depth" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n stack_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="stack_get" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n context_names
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="context_names" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n context_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="context_get" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n property_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="property_get" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n property_set
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="property_set" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n property_value
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="property_value" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n source
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="source" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n stdout
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="stdout" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n stderr
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="stderr" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n eval
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="eval" supported="1"><![CDATA[1]]></response>
+(cmd) feature_get -i 0 -n xcmd_profiler_name_get
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="xcmd_profiler_name_get" supported="1"><![CDATA[1]]></response>
+(cmd) run -i 0
+string(3) "bar"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="0"></response>
+(cmd) run -i 0

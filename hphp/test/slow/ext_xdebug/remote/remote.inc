@@ -17,9 +17,16 @@ function bind_random_port($socket) {
 
 // Starts a server on the given port running the given file.
 function start_server($file, $port, $socket) {
+  // Choose the config file
+  $config = __DIR__."/test.ini";
+  if (file_exists("$file.ini")) {
+    $config = "$file.ini";
+  }
+
+  // Setup the command line opts
   $hhvm = PHP_BINARY;
   $env =  $_ENV + ["XDEBUG_CONFIG" => "remote_port=$port"];
-  $opts = [__DIR__, $hhvm, "-c", "$file.ini", $file];
+  $opts = [__DIR__, $hhvm, "-c", $config, $file];
 
   // Fork and start the server
   $pid = pcntl_fork();
@@ -27,7 +34,6 @@ function start_server($file, $port, $socket) {
     socket_close($socket);
     pcntl_exec(__DIR__."/remote.sh", $opts, $env);
   } else {
-    echo "Started server process $pid\n";
     return $pid;
   }
 }
@@ -37,8 +43,26 @@ function start_client() {
   $socket = socket_create(AF_INET, SOCK_STREAM, 0);
   $port = bind_random_port($socket);
   assert(socket_listen($socket));
-  echo "Client listening on port $port\n";
   return array($socket, $port);
+}
+
+// Formats the given message for output
+function format_msg($message) {
+  // Remove # of bytes + null characters
+  $message = str_replace("\0", "", $message);
+  $message = preg_replace("/^[0-9]+?(?=<)/", "", $message);
+
+  // Remove strings that could change between runs
+  $message = preg_replace('/appid="[0-9]+"/',
+                          'appid=""', $message);
+  $message = preg_replace('/engine version=".*?"/',
+                          'engine version=""', $message);
+  $message = preg_replace('/protocol_version=".*?"/',
+                          'protocol_version=""', $message);
+  $message = preg_replace('/address="[0-9]+"/',
+                          'address=""', $message);
+
+  return $message;
 }
 
 // Reads a dbgp message from the socket
@@ -55,14 +79,13 @@ function read_msg($socket) {
     $bytes += $result;
     $message .= $buffer;
   } while ($message[$bytes - 1] !== "\0");
-  return $message;
+
+  return format_msg($message);
 }
 
 function test($filename) {
   if (!file_exists($filename)) {
     trigger_error("File $filename does not exists.", E_USER_ERROR);
-  } else if (!file_exists("$filename.ini")) {
-    trigger_error("File $filename.ini must exist.", E_USER_ERROR);
   } else if (!file_exists("$filename.in")) {
     trigger_error("File $filename.in must exist.", E_USER_ERROR);
   }
@@ -72,28 +95,29 @@ function test($filename) {
   $server = start_server($filename, $port, $socket);
 
   // Accept a connection
-  echo "Accepting connections...\n";
   do {
     $fd = @socket_accept($socket);
   } while ($fd === false);
   socket_close($socket);
-  echo "Connection established\n";
 
   // socket read, write loop
   $input = file("$filename.in");
   foreach ($input as $response) {
-    $response = trim($response)."\0";
+    $response = trim($response);
+    if (count($response) === 0 || $response[0] === "#") {
+      continue;
+    }
+
     echo read_msg($fd) . "\n";
     echo "(cmd) $response\n";
-    socket_write($fd, $response);
+    socket_write($fd, $response."\0");
   }
 
   // Close the socket then kill the server
   socket_close($fd);
-  posix_kill($server, SIGTERM);
 
-  // Wait for the server to die
-  echo "No more commands. Waiting for server to die...\n";
+  // NOTE: This will hang if the server is waiting for commands
   pcntl_waitpid($server, $status);
-  echo "Server exited with status $status\n";
 }
+
+test(realpath($_SERVER['SCRIPT_FILENAME'] . '.test'));

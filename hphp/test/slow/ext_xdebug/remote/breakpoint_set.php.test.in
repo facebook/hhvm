@@ -1,0 +1,30 @@
+breakpoint_set -i 0 -t line -f breakpoint_set_helper.inc -n 25
+breakpoint_set -i 1 -t line -f breakpoint_set.php.test -n 6
+breakpoint_set -i 2 -t call -m call
+breakpoint_set -i 3 -t call -a Foo -m method
+breakpoint_set -i 4 -t call -m Foo::method2
+breakpoint_set -i 5 -t return -m ret 
+breakpoint_set -i 6 -t line -f breakpoint_set.php.test -n 21 -r 1
+breakpoint_set -i 7 -t line -f breakpoint_set.php.test -n 21 -s disabled
+breakpoint_set -i 8 -t line -f breakpoint_set.php.test -n 21 -o >= -h 9
+breakpoint_set -i 9 -t line -f breakpoint_set.php.test -n 21 -o == -h 2
+breakpoint_set -i 10 -t line -f breakpoint_set.php.test -n 21 -o % -h 7
+breakpoint_set -i 11 -t exception -x Exception
+# $i === 3
+breakpoint_set -i 12 -t conditional -f breakpoint_set.php.test -n 21 -- JGkgPT09IDM=
+run -i 0
+run -i 1
+run -i 2
+run -i 3
+run -i 4
+run -i 5
+run -i 6
+run -i 7
+run -i 8
+run -i 9
+run -i 10
+run -i 11
+run -i 12
+run -i 13
+run -i 14
+run -i 15

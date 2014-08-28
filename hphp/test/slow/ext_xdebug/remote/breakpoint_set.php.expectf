@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file://%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug-not-done]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) breakpoint_set -i 0 -t line -f breakpoint_set_helper.inc -n 25
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="0" id="0" state="enabled"></response>
+(cmd) breakpoint_set -i 1 -t line -f breakpoint_set.php.test -n 6
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="1" state="enabled"></response>
+(cmd) breakpoint_set -i 2 -t call -m call
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="2" state="enabled"></response>
+(cmd) breakpoint_set -i 3 -t call -a Foo -m method
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="3" state="enabled"></response>
+(cmd) breakpoint_set -i 4 -t call -m Foo::method2
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="4" state="enabled"></response>
+(cmd) breakpoint_set -i 5 -t return -m ret
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id="5" state="enabled"></response>
+(cmd) breakpoint_set -i 6 -t line -f breakpoint_set.php.test -n 21 -r 1
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="6" id="6" state="enabled"></response>
+(cmd) breakpoint_set -i 7 -t line -f breakpoint_set.php.test -n 21 -s disabled
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="7" id="7" state="disabled"></response>
+(cmd) breakpoint_set -i 8 -t line -f breakpoint_set.php.test -n 21 -o >= -h 9
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="8" id="8" state="enabled"></response>
+(cmd) breakpoint_set -i 9 -t line -f breakpoint_set.php.test -n 21 -o == -h 2
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="9" id="9" state="enabled"></response>
+(cmd) breakpoint_set -i 10 -t line -f breakpoint_set.php.test -n 21 -o % -h 7
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="10" id="10" state="enabled"></response>
+(cmd) breakpoint_set -i 11 -t exception -x Exception
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="11" id="11" state="enabled"></response>
+(cmd) breakpoint_set -i 12 -t conditional -f breakpoint_set.php.test -n 21 -- JGkgPT09IDM=
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="12" id="12" state="enabled"></response>
+(cmd) run -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="0"><xdebug:message lineno="25" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set_helper.inc"></xdebug:message></response>
+(cmd) run -i 1
+string(%d) "%s/test/slow/ext_xdebug/remote/breakpoint_set_helper.inc"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="1"><xdebug:message lineno="6" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 2
+string(3) "bar"
+object(Foo)#1 (0) {
+}
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="2"><xdebug:message lineno="9" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 3
+string(4) "call"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="3"><xdebug:message lineno="12" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 4
+string(6) "method"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="4"><xdebug:message lineno="13" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 5
+string(7) "method2"
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="5"><xdebug:message lineno="16" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 6
+int(100)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="6"><xdebug:message lineno="17" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 7
+int(100)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="7"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 8
+int(1)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="8"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 9
+int(2)
+int(3)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="9"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 10
+int(4)
+int(5)
+int(6)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="10"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 11
+int(7)
+int(8)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="11"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 12
+int(9)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="12"><xdebug:message lineno="21" filename="%s/test/slow/ext_xdebug/remote/breakpoint_set.php.test"></xdebug:message></response>
+(cmd) run -i 13
+int(10)
+About to throw an exception
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="13"><xdebug:message lineno="27" exception="Exception"><![CDATA[Hello world!]]></xdebug:message></response>
+(cmd) run -i 14
+Caught the exception!
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="14"></response>
+(cmd) run -i 15

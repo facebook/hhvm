@@ -19,9 +19,11 @@
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
+#include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -430,8 +432,16 @@ static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
   return vars.toArray();
 }
 
-static Array HHVM_FUNCTION(xdebug_get_function_stack)
-  XDEBUG_NOTIMPLEMENTED
+static Array HHVM_FUNCTION(xdebug_get_function_stack) {
+  // Need to reverse the backtrace to match php5 xdebug
+  Array bt = createBacktrace(BacktraceArgs()
+                             .skipTop()
+                             .withPseudoMain()
+                             .withArgNames()
+                             .withArgValues(*XDebugExtension::CollectParams));
+
+  return ArrayUtil::Reverse(bt).toArray();
+}
 
 static Array HHVM_FUNCTION(xdebug_get_headers)
   XDEBUG_NOTIMPLEMENTED
@@ -713,7 +723,8 @@ void XDebugExtension::moduleInit() {
   HHVM_FE(xdebug_get_code_coverage);
   HHVM_FE(xdebug_get_collected_errors);
   HHVM_FE(xdebug_get_declared_vars);
-  HHVM_FE(xdebug_get_function_stack);
+  HHVM_NAMED_FE(__SystemLib\\xdebug_get_function_stack,
+                HHVM_FN(xdebug_get_function_stack));
   HHVM_FE(xdebug_get_headers);
   HHVM_FE(xdebug_get_profiler_filename);
   HHVM_FE(xdebug_get_stack_depth);

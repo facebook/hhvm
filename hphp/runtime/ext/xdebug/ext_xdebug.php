@@ -85,8 +85,36 @@ function xdebug_get_collected_errors(bool $clean = false): array<string>;
 <<__Native("NoFCallBuiltin")>>
 function xdebug_get_declared_vars(): array<string>;
 
-<<__Native>>
-function xdebug_get_function_stack(): array<mixed>;
+/**
+ * Returns an array which resembles the stack trace up to this point.
+ *
+ * Known differences with PHP5 xdebug:
+ *   - In PHP5 xdebug the function arguments, if collect_params is nonzero,
+ *     are provided as an array<string, string>. The key is the argument name
+ *     and the value is the xdebug-specific serialization of the argument
+ *     value. This serialization matches the output of xdebug_var_dump, but
+ *     isn't useful because there isn't a way to unserialize the string.
+ *
+ *     This implementation provides arguments as an array<string, mixed> where
+ *     the key is the argument name and the value is the actual argument.
+ *
+ * @return array - Returns information about the stack
+ */
+function xdebug_get_function_stack(): array<array<string, mixed>> {
+  $st = \__SystemLib\xdebug_get_function_stack();
+
+  // Make the trace match php5 xdebug:
+  //  Remove the call to xdebug_get_function_stack, add a file and
+  //  line to the main frame, and change args -> params,
+  $st[0]["line"] = 0;
+  $st[0]["file"] = $st[1]["file"]; // Frame 1 is within pseudo-main
+  array_pop($st);
+  foreach ($st as &$frame) {
+    $frame["params"] = $frame["args"];
+    unset($frame["args"]);
+  }
+  return $st;
+}
 
 <<__Native>>
 function xdebug_get_headers(): array<string>;
@@ -236,3 +264,13 @@ function xdebug_var_dump(mixed $var, ...): void;
  */
 <<__Native>>
 function _xdebug_check_trigger_vars(): void;
+
+namespace __SystemLib {
+  /**
+   * Native helper for xdebug_get_function_stack
+   *
+   * @return array - The not formatted stack trace
+   */
+  <<__Native>>
+  function xdebug_get_function_stack(): array<array<string, mixed>>;
+}

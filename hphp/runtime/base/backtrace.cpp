@@ -34,6 +34,7 @@ const StaticString s_class("class");
 const StaticString s_object("object");
 const StaticString s_type("type");
 const StaticString s_include("include");
+const StaticString s_main("{main}");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   ActRec* prevFp;
@@ -188,8 +189,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     // check for pseudomain
     if (funcname.empty()) {
-      if (!prevFp) continue;
-      funcname = s_include;
+      if (!prevFp && !btArgs.m_withPseudoMain) continue;
+      else if (!prevFp) funcname = s_main;
+      else funcname = s_include;
     }
 
     frame.set(s_function, funcname);
@@ -211,7 +213,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     Array args = Array::Create();
-    if (btArgs.m_ignoreArgs) {
+    bool withNames = btArgs.m_withArgNames;
+    bool withValues = btArgs.m_withArgValues;
+    if (!btArgs.m_withArgNames && !btArgs.m_withArgValues) {
       // do nothing
     } else if (funcname.same(s_include)) {
       if (depth) {
@@ -232,13 +236,26 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto varEnv = fp->getVarEnv();
         auto func = fp->func();
         for (int i = 0; i < nformals; i++) {
-          TypedValue *arg = varEnv->lookup(func->localVarName(i));
-          args.append(tvAsVariant(arg));
+          const StringData* argname = func->localVarName(i);
+          Variant val = withValues ? tvAsVariant(varEnv->lookup(argname)) : "";
+
+          if (withNames) {
+            args.set(String(argname->data(), CopyString), val);
+          } else {
+            args.append(val);
+          }
         }
       } else {
         for (int i = 0; i < nformals; i++) {
-          TypedValue *arg = frame_local(fp, i);
-          args.append(tvAsVariant(arg));
+          const StringData* argname = withNames ? fp->func()->localVarName(i)
+                                                : nullptr;
+          Variant val = withValues ? tvAsVariant(frame_local(fp, i)) : "";
+
+          if (withNames) {
+            args.set(String(argname->data(), CopyString), val);
+          } else {
+            args.append(val);
+          }
         }
       }
 

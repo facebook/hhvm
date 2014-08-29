@@ -198,12 +198,6 @@ const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
 const StaticString s_line("line");
-const StaticString s_function("function");
-const StaticString s_args("args");
-const StaticString s_class("class");
-const StaticString s_object("object");
-const StaticString s_type("type");
-const StaticString s_include("include");
 
 ///////////////////////////////////////////////////////////////////////////////
 

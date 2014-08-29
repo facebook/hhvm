@@ -1,0 +1,137 @@
+array(4) {
+  [0]=>
+  array(4) {
+    ["function"]=>
+    string(6) "{main}"
+    ["line"]=>
+    int(0)
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["params"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(6) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["line"]=>
+    int(16)
+    ["function"]=>
+    string(7) "foofunk"
+    ["class"]=>
+    string(3) "Foo"
+    ["type"]=>
+    string(2) "->"
+    ["params"]=>
+    array(1) {
+      ["arg"]=>
+      int(10)
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["line"]=>
+    int(6)
+    ["function"]=>
+    string(1) "f"
+    ["params"]=>
+    array(3) {
+      ["arg1"]=>
+      int(10)
+      ["arg2"]=>
+      string(4) "Test"
+      ["arg3"]=>
+      object(Foo)#1 (1) {
+        ["bar":"Foo":private]=>
+        int(10)
+      }
+    }
+  }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(1) "g"
+    ["params"]=>
+    array(1) {
+      ["arg4"]=>
+      int(8)
+    }
+  }
+}
+array(3) {
+  [0]=>
+  array(4) {
+    ["function"]=>
+    string(6) "{main}"
+    ["line"]=>
+    int(0)
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["params"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["line"]=>
+    int(17)
+    ["function"]=>
+    string(7) "include"
+    ["params"]=>
+    array(1) {
+      [0]=>
+      string(%d) "%s/test/slow/ext_xdebug/get_function_stack_helper.php"
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack_helper.php"
+    ["line"]=>
+    int(7)
+    ["function"]=>
+    string(6) "helper"
+    ["params"]=>
+    array(1) {
+      ["arg"]=>
+      int(10000)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  array(4) {
+    ["function"]=>
+    string(6) "{main}"
+    ["line"]=>
+    int(0)
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["params"]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php"
+    ["line"]=>
+    int(18)
+    ["function"]=>
+    string(7) "include"
+    ["params"]=>
+    array(1) {
+      [0]=>
+      string(%d) "%s/test/slow/ext_xdebug/get_function_stack.php(18) : eval()'d code"
+    }
+  }
+}

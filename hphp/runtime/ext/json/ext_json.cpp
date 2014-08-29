@@ -147,6 +147,20 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
     return p;
   } else if (type == KindOfDouble) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
+    if ((options & k_JSON_BIGINT_AS_STRING) &&
+        (json.toInt64() == LLONG_MAX || json.toInt64() == LLONG_MIN)
+        && errno == ERANGE) { // Overflow
+      bool is_float = false;
+      for (int i = (trimmed[0] == '-' ? 1 : 0); i < trimmed.size(); ++i) {
+        if (trimmed[i] < '0' || trimmed[i] > '9') {
+          is_float = true;
+          break;
+        }
+      }
+      if (!is_float) {
+        return trimmed;
+      }
+    }
     return d;
   }
 

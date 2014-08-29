@@ -510,15 +510,21 @@ void VariableSerializer::write(const Object& v) {
     if (v.instanceof(s_JsonSerializable)) {
       assert(!v->isCollection());
       Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
-      // for non objects or when $this is returned
+      // for non objects or when $this is not returned
       if (!ret.isObject() || (ret.isObject() && !same(ret, v))) {
-        write(ret);
+        if (ret.isArray() || ret.isObject()) {
+          preventOverflow(v, [&ret, this]() {
+            write(ret);
+          });
+        } else {
+          // Don't need to check for overflows if ret is of primitive type
+          // because the depth does not change.
+          write(ret);
+        }
         return;
       }
     }
-    if (incNestedLevel(v.get(), true)) {
-      writeOverflow(v.get(), true);
-    } else {
+    preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
         collectionSerialize(v.get(), this);
       } else {
@@ -526,11 +532,20 @@ void VariableSerializer::write(const Object& v) {
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');
         props.serialize(this);
       }
-    }
-    decNestedLevel(v.get());
+    });
   } else {
     v.serialize(this);
   }
+}
+
+void VariableSerializer::preventOverflow(const Object& v,
+                                         const std::function<void()>& func) {
+  if (incNestedLevel(v.get(), true)) {
+    writeOverflow(v.get(), true);
+  } else {
+    func();
+  }
+  decNestedLevel(v.get());
 }
 
 void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) {

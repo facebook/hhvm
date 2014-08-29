@@ -143,6 +143,9 @@ private:
   };
   smart::vector<ArrayInfo> m_arrayInfos;
 
+  // The func parameter will be invoked only if there is no overflow.
+  // Otherwise, writeOverflow will be invoked instead.
+  void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
 };
 

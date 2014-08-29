@@ -43,20 +43,31 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry *ini_entry, int modu
       TSRMLS_FETCH();
       // TODO Who is supposed to free this?
       char* data = estrndup(value.data(), value.size());
-      auto ret = p->on_modify(
-        const_cast<zend_ini_entry*>(p), data, value.size(),
-        p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC
-      );
-      return ret;
+      int ret = FAILURE;
+      if (p->on_modify) {
+        ret = p->on_modify(
+          const_cast<zend_ini_entry*>(p), data, value.size(),
+          p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP TSRMLS_CC
+        );
+      }
+      return (ret == SUCCESS);
     };
     auto getCallback = [p]() {
       return std::string(p->value, p->value_length);
     };
-    HPHP::IniSetting::Mode mode =
-      p->modifiable == ZEND_INI_USER   ? HPHP::IniSetting::Mode::PHP_INI_USER :
-      p->modifiable == ZEND_INI_PERDIR ? HPHP::IniSetting::Mode::PHP_INI_PERDIR :
-      p->modifiable == ZEND_INI_SYSTEM ? HPHP::IniSetting::Mode::PHP_INI_SYSTEM :
-                                         HPHP::IniSetting::Mode::PHP_INI_NONE;
+
+    int mode_mask = 0;
+    assert(HPHP::IniSetting::Mode::PHP_INI_NONE == 0);
+    if (p->modifiable & ZEND_INI_USER) {
+      mode_mask |= HPHP::IniSetting::Mode::PHP_INI_USER;
+    }
+    if (p->modifiable & ZEND_INI_PERDIR) {
+      mode_mask |= HPHP::IniSetting::Mode::PHP_INI_PERDIR;
+    }
+    if (p->modifiable & ZEND_INI_SYSTEM) {
+      mode_mask |= HPHP::IniSetting::Mode::PHP_INI_SYSTEM;
+    }
+    HPHP::IniSetting::Mode mode = (HPHP::IniSetting::Mode) mode_mask;
     HPHP::IniSetting::Bind(
         extension, mode,
         p->name, p->value,

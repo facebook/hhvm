@@ -17,7 +17,7 @@ var_dump(dso_test_null());
  * yet work; the value remains sticky at 1, and every access to
  * dso_test_long post-increments the value.
  */
-// ini_set("dso_test.direction", 0);
-// var_dump(dso_test_long());
-// var_dump(dso_test_long());
-// var_dump(dso_test_long());
+ini_set("dso_test.direction", 0);
+var_dump(dso_test_long());
+var_dump(dso_test_long());
+var_dump(dso_test_long());

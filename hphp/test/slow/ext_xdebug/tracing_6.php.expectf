@@ -1,0 +1,40 @@
+string(%d) "/tmp/trace.%d.xt"
+string(%d) "Version: 
+File format: %d
+TRACE START [%d-%d-%d %d:%d:%d]
+2	0	0	%f	%d	xdebug_start_trace	0		%s/test/slow/ext_xdebug/tracing_6.php	4	
+2	0	1	%f	%d
+1	1	0	%f	%d	include	1	%s/test/slow/ext_xdebug/tracing.inc	%s/test/slow/ext_xdebug/tracing_6.php	8	
+2	2	0	%f	%d	var_dump	0		%s/test/slow/ext_xdebug/tracing.inc	3	
+2	2	1	%f	%d
+2	3	0	%f	%d	include	1	%s/test/slow/ext_xdebug/tracing_helper.inc	%s/test/slow/ext_xdebug/tracing.inc	4	
+3	4	0	%f	%d	bee	1		%s/test/slow/ext_xdebug/tracing_helper.inc	7	
+3	4	1	%f	%d
+2	3	1	%f	%d
+2	5	0	%f	%d	Foo::86ctor	1		%s/test/slow/ext_xdebug/tracing.inc	21	
+2	5	1	%f	%d
+2	6	0	%f	%d	Foo::bar	1		%s/test/slow/ext_xdebug/tracing.inc	21	
+3	7	0	%f	%d	Foo::bar	1		%s/test/slow/ext_xdebug/tracing.inc	9	
+4	8	0	%f	%d	Foo::bar	1		%s/test/slow/ext_xdebug/tracing.inc	9	
+5	9	0	%f	%d	Foo::bar	1		%s/test/slow/ext_xdebug/tracing.inc	9	
+6	10	0	%f	%d	baz	1		%s/test/slow/ext_xdebug/tracing.inc	8	
+7	11	0	%f	%d	boo	1		%s/test/slow/ext_xdebug/tracing.inc	14	
+7	11	1	%f	%d
+7	12	0	%f	%d	boo	1		%s/test/slow/ext_xdebug/tracing.inc	14	
+7	12	1	%f	%d
+7	13	0	%f	%d	boo	1		%s/test/slow/ext_xdebug/tracing.inc	15	
+7	13	1	%f	%d
+6	10	1	%f	%d
+5	9	1	%f	%d
+4	8	1	%f	%d
+3	7	1	%f	%d
+2	6	1	%f	%d
+2	14	0	%f	%d	boo	1		%s/test/slow/ext_xdebug/tracing.inc	22	
+2	14	1	%f	%d
+2	15	0	%f	%d	bee	1		%s/test/slow/ext_xdebug/tracing.inc	23	
+2	15	1	%f	%d
+1	1	1	%f	%d
+1	16	0	%f	%d	xdebug_stop_trace	0		%s/test/slow/ext_xdebug/tracing_6.php	9	
+1	16	1	%f	%d
+TRACE END   [%d-%d-%d %d:%d:%d]
+"

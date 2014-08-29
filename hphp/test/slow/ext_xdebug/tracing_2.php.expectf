@@ -1,6 +1,6 @@
 string(%d) "/tmp/trace.%d.xt"
-string(%d) "TRACE START[%d-%d-%d %d:%d:%d]
-%w%f%w%d   -> {main} 
+string(%d) "TRACE START [%d-%d-%d %d:%d:%d]
+%w%f%w%d   -> main() 
 %w%f%w%d     -> start_trace() %s/test/slow/ext_xdebug/tracing_2.php:7
 %w%f%w%d       -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_2.php:4
 %w%f%w%d     -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_2.php:8
@@ -19,5 +19,5 @@ string(%d) "TRACE START[%d-%d-%d %d:%d:%d]
 %w%f%w%d       -> boo() %s/test/slow/ext_xdebug/tracing.inc:22
 %w%f%w%d       -> bee() %s/test/slow/ext_xdebug/tracing.inc:23
 %w%f%w%d     -> xdebug_stop_trace() %s/test/slow/ext_xdebug/tracing_2.php:9
-TRACE END[%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d]
 "

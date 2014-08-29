@@ -172,6 +172,9 @@ private:
   void writeTracingLinePrefix();
 
   template <TraceOutputType outputType>
+  void writeTracingLevel(int64_t level);
+
+  template <TraceOutputType outputType>
   void writeTracingFrameId(uint64_t id);
 
   template <TraceOutputType outputType>
@@ -183,14 +186,19 @@ private:
   template <TraceOutputType outputType>
   void writeTracingIndent(int64_t level);
 
+  void writeTracingFuncName(const Func* func, bool isTopPseudoMain);
+
   template<TraceOutputType outputType>
-  void writeTracingFuncName(FrameData& frame, bool isTopPseudoMain);
+  void writeTracingFunc(FrameData& frame, bool isTopPseudoMain);
 
   template <TraceOutputType outputType>
   void writeTracingCallsite(FrameData& frame, const FrameData* parent);
 
   template <TraceOutputType outputType>
   void writeTracingLineSuffix();
+
+  template <TraceOutputType outputType>
+  void writeTracingEndFrame(FrameData& frame, int64_t level, int64_t id);
 
   // Used when we have both the beginning and end frame data
   struct Frame {

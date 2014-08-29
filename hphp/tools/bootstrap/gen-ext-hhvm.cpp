@@ -28,6 +28,7 @@
 #include "folly/Format.h"
 #include "folly/ScopeGuard.h"
 
+#include "hphp/tools/bootstrap/filebrand.h"
 #include "hphp/tools/bootstrap/idl.h"
 
 using folly::fbstring;
@@ -757,10 +758,16 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
+  std::string invocation_trace;
+  FileBrand::makeInvocationTrace(invocation_trace, argc, argv);
+
   g_armMode = (strcmp(argv[1], "arm") == 0);
 
   std::ofstream header(argv[2]);
   std::ofstream cpp(argv[3]);
+
+  FileBrand::brandOutputFile(header, "gen-ext-hhvm.cpp", invocation_trace);
+  FileBrand::brandOutputFile(cpp, "gen-ext-hhvm.cpp", invocation_trace);
 
   fbvector<PhpFunc> funcs;
   fbvector<PhpClass> classes;

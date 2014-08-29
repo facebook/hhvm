@@ -23,6 +23,7 @@
 #include "folly/FBString.h"
 #include "folly/FBVector.h"
 
+#include "hphp/tools/bootstrap/filebrand.h"
 #include "hphp/tools/bootstrap/idl.h"
 
 using folly::fbstring;
@@ -38,6 +39,9 @@ int main(int argc, const char* argv[]) {
   fbvector<PhpFunc> funcs;
   fbvector<PhpClass> classes;
 
+  std::string invocation_trace;
+  HPHP::FileBrand::makeInvocationTrace(invocation_trace, argc, argv);
+
   for (auto i = 2; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes);
@@ -48,6 +52,8 @@ int main(int argc, const char* argv[]) {
   }
 
   std::ofstream cpp(argv[1]);
+
+  HPHP::FileBrand::brandOutputFile(cpp, "gen-infotabs.cpp", invocation_trace);
 
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"

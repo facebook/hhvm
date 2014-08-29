@@ -30,6 +30,14 @@ using folly::fbvector;
 namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
+void makeInvocationTrace(fbstring& invocation_trace,
+                         int argc,
+                         const char* argv[]);
+
+void brandOutputFile(std::ostream& out,
+                     const char* short_name,
+                     const fbstring& invocation_trace);
+
 enum FuncFlags {
   ParamCoerceModeNull           = (1 <<  0),
   CppCustomDelete               = (1 <<  1),

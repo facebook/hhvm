@@ -757,10 +757,16 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
+  fbstring invocation_trace;
+  makeInvocationTrace(invocation_trace, argc, argv);
+
   g_armMode = (strcmp(argv[1], "arm") == 0);
 
   std::ofstream header(argv[2]);
   std::ofstream cpp(argv[3]);
+
+  brandOutputFile(header, "gen-ext-hhvm.cpp", invocation_trace);
+  brandOutputFile(cpp, "gen-ext-hhvm.cpp", invocation_trace);
 
   fbvector<PhpFunc> funcs;
   fbvector<PhpClass> classes;

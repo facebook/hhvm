@@ -964,6 +964,12 @@ Offset* instrJumpOffset(const Op* instr);
 //   cannot jump
 Offset instrJumpTarget(const Op* instrs, Offset pos);
 
+/*
+ * Returns the set of bytecode offsets for the instructions that may
+ * be executed immediately after opc.
+ */
+OffsetSet instrSuccOffsets(Op* opc, const Unit* unit);
+
 struct StackTransInfo {
   enum class Kind {
     PushPop,

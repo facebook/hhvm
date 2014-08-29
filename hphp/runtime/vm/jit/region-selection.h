@@ -71,6 +71,7 @@ struct RegionDesc {
   SrcKey            start() const;
   BlockPtr          entry() const;
   const BlockVec&   blocks() const;
+  BlockPtr          block(BlockId id) const;
   const BlockIdSet& succs(BlockId bid) const;
   const BlockIdSet& preds(BlockId bid) const;
   const BlockIdSet& sideExitingBlocks() const;
@@ -96,7 +97,6 @@ struct RegionDesc {
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
-  BlockPtr   block(BlockId id);
   bool       hasBlock(BlockId id) const;
   BlockData& data(BlockId id);
   void       copyBlocksFrom(const RegionDesc& other,
@@ -490,6 +490,11 @@ void regionizeFunc(const Func*  func,
  */
 bool    hasTransId(RegionDesc::BlockId blockId);
 TransID getTransId(RegionDesc::BlockId blockId);
+
+/*
+ * Checks if the given region is well-formed.
+ */
+bool check(const RegionDesc& region, std::string& error);
 
 /*
  * Debug stringification for various things.

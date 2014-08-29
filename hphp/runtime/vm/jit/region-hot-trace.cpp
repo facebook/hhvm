@@ -25,38 +25,6 @@ namespace HPHP { namespace jit {
 static const Trace::Module TRACEMOD = Trace::pgo;
 
 /**
- * Returns the set of bytecode offsets for the instructions that may
- * be executed immediately after opc.
- */
-static OffsetSet findSuccOffsets(Op* opc, const Unit* unit) {
-  OffsetSet succBcOffs;
-  Op* bcStart = (Op*)(unit->entry());
-
-  if (!instrIsControlFlow(*opc)) {
-    Offset succOff = opc + instrLen(opc) - bcStart;
-    succBcOffs.insert(succOff);
-    return succBcOffs;
-  }
-
-  if (instrAllowsFallThru(*opc)) {
-    Offset succOff = opc + instrLen(opc) - bcStart;
-    succBcOffs.insert(succOff);
-  }
-
-  if (isSwitch(*opc)) {
-    foreachSwitchTarget(opc, [&](Offset& offset) {
-        succBcOffs.insert(offset);
-      });
-  } else {
-    Offset target = instrJumpTarget(bcStart, opc - bcStart);
-    if (target != InvalidAbsoluteOffset) {
-      succBcOffs.insert(target);
-    }
-  }
-  return succBcOffs;
-}
-
-/**
  * Remove from pConds the elements that correspond to stack positions
  * that have been popped given the current SP offset from FP.
  */
@@ -163,7 +131,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     if (prevId != kInvalidTransID) {
       Op* lastInstr = profData->transLastInstr(prevId);
       const Unit* unit = profData->transFunc(prevId)->unit();
-      OffsetSet succOffs = findSuccOffsets(lastInstr, unit);
+      OffsetSet succOffs = instrSuccOffsets(lastInstr, unit);
       if (!succOffs.count(profData->transSrcKey(tid).offset())) {
         if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 2)) {
           FTRACE(2, "selectHotTrace: WARNING: Breaking region @: {}\n",
@@ -179,25 +147,30 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     bool hasPredBlock = !region->empty();
     RegionDesc::BlockId predBlockId = (hasPredBlock ?
                                        region->blocks().back().get()->id() : 0);
-
-    // Add blockRegion's blocks and arcs to region.
-    region->append(*blockRegion);
-
     auto const& newFirstBlock = blockRegion->entry();
     auto newFirstBlockId = newFirstBlock->id();
     auto newFirstBlockSk = newFirstBlock->start();
     auto newLastBlockId  = blockRegion->blocks().back()->id();
 
+    // Make sure we don't end up with multiple successors for the same
+    // SrcKey. Task #4157613 will allow the following check to go away.
+    // This needs to be done before we insert blockRegion into region,
+    // to avoid creating unreachable blocks.
+    if (RuntimeOption::EvalHHIRBytecodeControlFlow && hasPredBlock &&
+        succSKSet[predBlockId].count(newFirstBlockSk)) {
+      break;
+    }
+
+    // Add blockRegion's blocks and arcs to region.
+    region->append(*blockRegion);
+
     if (hasPredBlock) {
       if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-        // Make sure we don't end up with multiple successors for the same
-        // SrcKey. Task #4157613 will allow the following check to go away.
-        if (succSKSet[predBlockId].count(newFirstBlockSk)) break;
-        region->addArc(predBlockId, newFirstBlockId);
+        // This is checked above.
+        assert(succSKSet[predBlockId].count(newFirstBlockSk) == 0);
         succSKSet[predBlockId].insert(newFirstBlockSk);
-      } else {
-        region->addArc(predBlockId, newFirstBlockId);
       }
+      region->addArc(predBlockId, newFirstBlockId);
     }
 
     // With bytecode control-flow, we add all forward arcs in the TransCFG

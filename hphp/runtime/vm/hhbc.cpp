@@ -382,6 +382,34 @@ Offset instrJumpTarget(const Op* instrs, Offset pos) {
   }
 }
 
+OffsetSet instrSuccOffsets(Op* opc, const Unit* unit) {
+  OffsetSet succBcOffs;
+  Op* bcStart = (Op*)(unit->entry());
+
+  if (!instrIsControlFlow(*opc)) {
+    Offset succOff = opc + instrLen(opc) - bcStart;
+    succBcOffs.insert(succOff);
+    return succBcOffs;
+  }
+
+  if (instrAllowsFallThru(*opc)) {
+    Offset succOff = opc + instrLen(opc) - bcStart;
+    succBcOffs.insert(succOff);
+  }
+
+  if (isSwitch(*opc)) {
+    foreachSwitchTarget(opc, [&](Offset& offset) {
+        succBcOffs.insert(offset);
+      });
+  } else {
+    Offset target = instrJumpTarget(bcStart, opc - bcStart);
+    if (target != InvalidAbsoluteOffset) {
+      succBcOffs.insert(target);
+    }
+  }
+  return succBcOffs;
+}
+
 /**
  * Return the number of successor-edges including fall-through paths but not
  * implicit exception paths.

@@ -1597,13 +1597,15 @@ Translator::translateRegion(const RegionDesc& region,
                             bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
-  assert(!region.empty());
-
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
   m_region = &region;
   SCOPE_EXIT { m_region = nullptr; };
+
+  std::string errorMsg;
+  always_assert_log(check(region, errorMsg),
+                    [&] { return errorMsg + "\n" + show(region); });
 
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();

@@ -72,6 +72,7 @@ module Parsing = struct
   let unexpected_eof                        = 1003 (* DONT MODIFY!!!! *)
   let unterminated_comment                  = 1004 (* DONT MODIFY!!!! *)
   let unterminated_xhp_comment              = 1005 (* DONT MODIFY!!!! *)
+  let function_hints_need_parens            = 1006 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -301,6 +302,10 @@ let unterminated_comment pos =
 
 let unterminated_xhp_comment pos =
   add Parsing.unterminated_xhp_comment pos "unterminated xhp comment"
+
+let function_hints_need_parens pos =
+  add Parsing.function_hints_need_parens pos
+    "Function hints must be parenthesized"
 
 let parsing_error (p, msg) =
   add Parsing.parsing_error p msg

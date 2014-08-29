@@ -961,17 +961,21 @@ and hint env =
       let start = Pos.make env.lb in
       let e = hint env in
       Pos.btw start (fst e), Hoption e
-  (* A<_> | function(_):_ *)
-  | Tword ->
+  (* A<_> *)
+  | Tword when Lexing.lexeme env.lb <> "function" ->
       let pos = Pos.make env.lb in
       let word = Lexing.lexeme env.lb in
-      hint_word env pos word
+      class_hint_with_name env (pos, word)
+  | Tword ->
+      let h = hint_function env in
+      Errors.function_hints_need_parens (fst h);
+      h
   (* :XHPNAME *)
   | Tcolon ->
       L.back env.lb;
       let cname = identifier env in
       class_hint_with_name env cname
-  (* (_) *)
+  (* (_) | (function(_): _) *)
   | Tlp ->
       let start_pos = Pos.make env.lb in
       hint_paren start_pos env
@@ -985,27 +989,25 @@ and hint env =
       let pos = Pos.make env.lb in
       pos, Happly ((pos, "*Unknown*"), [])
 
-and hint_word env pos word =
- (* function(_): _ *)
-  match word with
-  | "function" ->
-      hint_function pos env
-  (* A<_> *)
-  | name ->
-      class_hint_with_name env (pos, name)
-
-(* (_) *)
+(* (_) | (function(_): _) *)
 and hint_paren start env =
-  let hintl = hint_list env in
-  let end_ = Pos.make env.lb in
-  let pos = Pos.btw start end_ in
-  match hintl with
-  | []  -> assert false
-  | [_, Hfun _ as h] -> pos, snd h
-  | [_] ->
-      error_at env pos "Tuples of one element are not allowed";
-      pos, Happly ((pos, "*Unknown*"), [])
-  | hl  -> pos, Htuple hl
+  match L.token env.lb with
+  | Tword when Lexing.lexeme env.lb = "function" ->
+      let h = hint_function env in
+      if L.token env.lb <> Trp
+      then Errors.function_hints_need_parens (fst h);
+      Pos.btw start (Pos.make env.lb), (snd h)
+  | _ ->
+      L.back env.lb;
+      let hintl = hint_list env in
+      let end_ = Pos.make env.lb in
+      let pos = Pos.btw start end_ in
+      match hintl with
+      | []  -> assert false
+      | [_] ->
+          error_at env pos "Tuples of one element are not allowed";
+          pos, Happly ((pos, "*Unknown*"), [])
+      | hl  -> pos, Htuple hl
 
 and hint_list env =
   let error_state = !(env.errors) in
@@ -1042,7 +1044,8 @@ and hint_list_remain env =
 (*****************************************************************************)
 
 (* function(_): _ *)
-and hint_function start env =
+and hint_function env =
+  let start = Pos.make env.lb in
   expect env Tlp;
   let params, has_dots = hint_function_params env in
   let ret = hint_return env in

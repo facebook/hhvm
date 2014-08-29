@@ -968,7 +968,7 @@ and hint env =
       class_hint_with_name env (pos, word)
   | Tword ->
       let h = hint_function env in
-      Errors.function_hints_need_parens (fst h);
+      error_at env (fst h) "Function hints must be parenthesized";
       h
   (* :XHPNAME *)
   | Tcolon ->
@@ -995,7 +995,7 @@ and hint_paren start env =
   | Tword when Lexing.lexeme env.lb = "function" ->
       let h = hint_function env in
       if L.token env.lb <> Trp
-      then Errors.function_hints_need_parens (fst h);
+      then error_at env (fst h) "Function hints must be parenthesized";
       Pos.btw start (Pos.make env.lb), (snd h)
   | _ ->
       L.back env.lb;

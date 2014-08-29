@@ -1087,7 +1087,7 @@ and expr_ is_lvalue env (p, e) =
       (* check for recursive function calls *)
       let anon = anon_make env.Env.lenv p f in
       let env, anon_id = Env.add_anonymous env anon in
-      if Env.is_strict env then () else ignore (anon env ft.ft_params);
+      ignore (anon env ft.ft_params);
       env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let env, obj = expr env (fst sid, New (CI sid, [])) in

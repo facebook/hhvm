@@ -472,8 +472,9 @@ static Variant HHVM_FUNCTION(xdebug_get_tracefile_name) {
   return false;
 }
 
-static bool HHVM_FUNCTION(xdebug_is_enabled)
-  XDEBUG_NOTIMPLEMENTED
+static bool HHVM_FUNCTION(xdebug_is_enabled) {
+  return false;
+}
 
 static int64_t HHVM_FUNCTION(xdebug_memory_usage) {
   // With jemalloc, the usage can go negative (see ext_std_options.cpp:831)

@@ -2275,9 +2275,15 @@ and is_visible env vis cid =
   | Vprivate x ->
     (match cid with
       | Some CIstatic ->
-          Some ("Private members cannot be accessed"
-          ^" with static:: since a child class may also have an identically"
-          ^" named private member", "This member is private")
+          let env, my_class = Env.get_class env self_id in
+          begin match my_class with
+            | Some {tc_final = true; _} -> None
+            | _ -> Some (
+              ("Private members cannot be accessed with static:: since"
+               ^" a child class may also have an identically"
+               ^" named private member"),
+              "This member is private")
+          end
       | Some CIparent ->
           Some (
             "You cannot access a private member with parent::",

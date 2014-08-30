@@ -462,8 +462,10 @@ inline static bool decode_entity(char *entity, int *len,
   if (entity[0] == '#') {
     int code;
     if (entity[1] == 'x' || entity[1] == 'X') {
+      if (!isxdigit(entity[2])) return false;
       code = strtol(entity + 2, nullptr, 16);
     } else {
+      if (!isdigit(entity[1])) return false;
       code = strtol(entity + 1, nullptr, 10);
     }
 

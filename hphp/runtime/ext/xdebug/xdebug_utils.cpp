@@ -139,8 +139,8 @@ String XDebugUtils::pathFromUrl(const String& fileurl) {
 int XDebugUtils::stackDepth() {
   int depth = 0;
   for (ActRec* fp = g_context->getStackFrame();
-      (fp = g_context->getPrevVMState(fp)) != nullptr;
-      depth++) {}
+      fp != nullptr;
+      fp = g_context->getPrevVMState(fp), depth++) {}
   return depth;
 }
 

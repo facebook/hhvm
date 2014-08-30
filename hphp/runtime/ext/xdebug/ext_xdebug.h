@@ -159,6 +159,8 @@ const int64_t k_XDEBUG_TRACE_HTML = 4;
 const int64_t k_XDEBUG_TRACE_NAKED_FILENAME = 8;
 const int64_t k_XDEBUG_PROFILE_APPEND = 1;
 ///////////////////////////////////////////////////////////////////////////////
+Variant HHVM_FUNCTION(xdebug_get_profiler_filename);
+///////////////////////////////////////////////////////////////////////////////
 
 class XDebugExtension : public Extension {
 public:

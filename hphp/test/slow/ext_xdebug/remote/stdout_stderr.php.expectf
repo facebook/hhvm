@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file://%s/test/slow/ext_xdebug/remote/stdout_stderr.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug-not-done]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) step_over -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="0"><xdebug:message lineno="2" filename="file://%s/test/slow/ext_xdebug/remote/stdout_stderr.php.test"></xdebug:message></response>
+(cmd) stdout -i 0 -c 1
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stdout" transaction_id="0" success="1"></response>
+(cmd) step_over -i 0
+Both<?xml version="1.0" encoding="iso-8859-1"?>
+<stream xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" type="stdout" encoding="base64"><![CDATA[Qm90aA==]]></stream>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="0"><xdebug:message lineno="3" filename="file://%s/test/slow/ext_xdebug/remote/stdout_stderr.php.test"></xdebug:message></response>
+(cmd) stdout -i 0 -c 2
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stdout" transaction_id="0" success="1"></response>
+(cmd) step_over -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<stream xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" type="stdout" encoding="base64"><![CDATA[Q2xpZW50IG9ubHk=]]></stream>
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="0"><xdebug:message lineno="4" filename="file://%s/test/slow/ext_xdebug/remote/stdout_stderr.php.test"></xdebug:message></response>
+(cmd) stdout -i 0 -c 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stdout" transaction_id="0" success="1"></response>
+(cmd) stderr -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stderr" transaction_id="0" success="0"></response>
+(cmd) run -i 0
+Server only<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="0"></response>
+(cmd) run -i 0

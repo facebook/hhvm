@@ -1,0 +1,3 @@
+<?php
+var_dump("HELLO WORLD");
+var_dump("SHOULD STILL GET HERE");

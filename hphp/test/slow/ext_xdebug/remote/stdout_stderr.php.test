@@ -1,0 +1,4 @@
+<?php
+echo "Both";
+echo "Client only";
+echo "Server only";

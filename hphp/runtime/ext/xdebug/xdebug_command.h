@@ -23,14 +23,15 @@
 namespace HPHP {
 
 // Base class of all commands
+// An instance of an xdebug command is alive until the next command is received.
 class XDebugCommand {
 public:
   // Given an xdebug server, a command string, and command arguments, constructs
   // and returns a new XDebugCommand corresponding to the given string. This is
   // how commands should be created
-  static const XDebugCommand* fromString(XDebugServer& server,
-                                         const String& cmdStr,
-                                         const Array& args);
+  static XDebugCommand* fromString(XDebugServer& server,
+                                   const String& cmdStr,
+                                   const Array& args);
   // internal constructor used by fromString. It should never be
   // called explicitly. This is where arguments should be parsed. Note
   // that php5 xdebug doesn't actually raise an error on extra/invalid args.
@@ -42,12 +43,16 @@ public:
   // should override and implement handleImpl. If the xdebug should continue
   // script exection after after this command completes (as in break out of
   // the command loop), this should return true. Otherwise, this return false.
-  bool handle(xdebug_xml_node& response) const;
-  virtual bool handleImpl(xdebug_xml_node& response) const = 0;
+  bool handle(xdebug_xml_node& response);
+  virtual void handleImpl(xdebug_xml_node& response) = 0;
 
   // Returns true if this command should return a response to the client.
   // For almost all commands, this is true, so it defaults to true
   virtual bool shouldRespond() const { return true; }
+
+  // Returns true if this command should cause the server to continue execution.
+  // This will always be called after handleImpl.
+  virtual bool shouldContinue() const { return false; }
 
   String getCommandStr() const { return m_commandStr; }
   String getTransactionId() const { return m_transactionId; }

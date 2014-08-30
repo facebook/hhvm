@@ -446,7 +446,7 @@ static Array HHVM_FUNCTION(xdebug_get_function_stack) {
 static Array HHVM_FUNCTION(xdebug_get_headers)
   XDEBUG_NOTIMPLEMENTED
 
-static Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
+Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
   if (!XDEBUG_GLOBAL(ProfilerAttached)) {
     return false;
   }

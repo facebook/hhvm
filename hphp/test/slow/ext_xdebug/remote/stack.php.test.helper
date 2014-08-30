@@ -1,0 +1,14 @@
+<?php
+
+function foo($i) {
+  var_dump(__FUNCTION__);
+  if ($i == 0) {
+    return;
+  }
+  bar($i);
+}
+
+function bar($i) {
+  var_dump(__FUNCTION__);
+  foo($i - 1);
+}

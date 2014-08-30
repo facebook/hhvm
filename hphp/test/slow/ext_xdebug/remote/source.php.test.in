@@ -1,0 +1,5 @@
+source -i 0 -f source.php.test
+step_over -i 0
+source -i 0 -b 2 -e 3
+run -i 0
+run -i 0

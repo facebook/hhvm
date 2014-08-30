@@ -105,7 +105,7 @@ const char* getXDebugStatusString(XDebugServer::Status status) {
     case XDebugServer::Status::BREAK:
       return "break";
     case XDebugServer::Status::DETACHED:
-      return nullptr;
+      return "detached";
     default:
       throw Exception("Invalid xdebug server status");
   }
@@ -402,7 +402,7 @@ void XDebugServer::detach() {
 // Needed $_SERVER variables
 static const StaticString s_SCRIPT_FILENAME("SCRIPT_FILENAME");
 
-void XDebugServer::addXmnls(xdebug_xml_node& node) {
+void XDebugServer::addXmlns(xdebug_xml_node& node) {
   xdebug_xml_add_attribute(&node, "xmlns", "urn:debugger_protocol_v1");
   xdebug_xml_add_attribute(&node, "xmlns:xdebug",
                            "http://xdebug.org/dbgp/xdebug");
@@ -443,6 +443,19 @@ void XDebugServer::addError(xdebug_xml_node& node, ErrorCode code) {
   xdebug_xml_add_child(error, message);
 }
 
+void XDebugServer::sendStream(const char* name, const char* bytes, int len) {
+  // Casts are necessary due to xml api
+  char* name_str = const_cast<char*>(name);
+  char* bytes_str = const_cast<char*>(bytes);
+
+  xdebug_xml_node* message = xdebug_xml_node_init("stream");
+  addXmlns(*message);
+  xdebug_xml_add_attribute(message, "type", name_str);
+  xdebug_xml_add_text_ex(message, bytes_str, len, 0, 1);
+  sendMessage(*message);
+  xdebug_xml_node_dtor(message);
+}
+
 bool XDebugServer::initDbgp() {
   // Initialize the status and reason
   switch (m_mode) {
@@ -455,7 +468,7 @@ bool XDebugServer::initDbgp() {
   }
   // Create the response
   xdebug_xml_node* response = xdebug_xml_node_init("init");
-  addXmnls(*response);
+  addXmlns(*response);
 
   // Add the engine info
   xdebug_xml_node* child = xdebug_xml_node_init("engine");
@@ -518,21 +531,24 @@ bool XDebugServer::initDbgp() {
 }
 
 void XDebugServer::deinitDbgp() {
-  setStatus(Status::STOPPING, Reason::OK);
+  // Unless we've already stopped, send the shutdown message
+  if (m_status != Status::STOPPED) {
+    setStatus(Status::STOPPING, Reason::OK);
 
-  // Send the xml shutdown response
-  xdebug_xml_node* response = xdebug_xml_node_init("response");
-  addXmnls(*response);
-  addStatus(*response);
-  if (m_lastCommand != nullptr) {
-    addCommand(*response, *m_lastCommand);
+    // Send the xml shutdown response
+    xdebug_xml_node* response = xdebug_xml_node_init("response");
+    addXmlns(*response);
+    addStatus(*response);
+    if (m_lastCommand != nullptr) {
+      addCommand(*response, *m_lastCommand);
+    }
+    sendMessage(*response);
+    xdebug_xml_node_dtor(response);
+
+    // Wait for a response from the client. Regardless of the command loop
+    // result, we exit.
+    doCommandLoop();
   }
-  sendMessage(*response);
-  xdebug_xml_node_dtor(response);
-
-  // Wait for a response from the client. Regardless of the command loop result,
-  // we exit.
-  doCommandLoop();
 
   // Free the input buffer & the last command
   smart_free(m_buffer);
@@ -580,7 +596,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
 
   // Initialize the response node
   xdebug_xml_node* response = xdebug_xml_node_init("response");
-  addXmnls(*response);
+  addXmlns(*response);
   addStatus(*response);
   if (m_lastCommand != nullptr) {
     addCommand(*response, *m_lastCommand);
@@ -599,7 +615,8 @@ bool XDebugServer::breakpoint(const Variant& filename,
   xdebug_xml_node* msg = xdebug_xml_node_init("xdebug:message");
   xdebug_xml_add_attribute_ex(msg, "lineno", line_str, 0, 1);
   if (filename_str != nullptr) {
-    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 0);
+    filename_str = XDebugUtils::pathToUrl(filename_str); // output file format
+    xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 1);
   }
   if (exception_str != nullptr) {
     xdebug_xml_add_attribute_ex(msg, "exception", exception_str, 0, 0);
@@ -619,8 +636,14 @@ bool XDebugServer::breakpoint(const Variant& filename,
 
 bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
                               const Variant& message) {
+  // If we are detached, short circuit
+  Status status; Reason reason;
+  getStatus(status, reason);
+  if (status == Status::DETACHED) {
+    return true;
+  }
+
   // Initialize the breakpoint message node
-  // TODO(#4489053) Check if file is evaled
   switch (bp.type) {
     // Add the file/line # for line breakpoints
     case XDebugBreakpoint::Type::LINE:
@@ -648,6 +671,11 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
 bool XDebugServer::doCommandLoop() {
   bool should_continue = false;
   do {
+    // If we are detached, short circuit
+    if (m_status == Status::DETACHED) {
+      return true;
+    }
+
     // Read from socket, store into m_buffer. On failure, return.
     if (!readInput()) {
       return false;
@@ -655,11 +683,11 @@ bool XDebugServer::doCommandLoop() {
 
     // Initialize the response
     xdebug_xml_node* response = xdebug_xml_node_init("response");
-    addXmnls(*response);
+    addXmlns(*response);
 
     try {
       // Parse the command and store it as the last command
-      const XDebugCommand* cmd = parseCommand();
+      XDebugCommand* cmd = parseCommand();
       if (m_lastCommand != nullptr) {
         delete m_lastCommand;
       }
@@ -704,7 +732,7 @@ bool XDebugServer::readInput() {
   return true;
 }
 
-const XDebugCommand* XDebugServer::parseCommand() {
+XDebugCommand* XDebugServer::parseCommand() {
   // Log the passed in command
   log("<- %s\n", m_buffer);
   logFlush();

@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
+#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/constants.h"
@@ -44,12 +45,14 @@ namespace HPHP {
   COMMAND("detach", DetachCmd)                                                 \
   COMMAND("breakpoint_set", BreakpointSetCmd)                                  \
   COMMAND("breakpoint_get", BreakpointGetCmd)                                  \
+  COMMAND("breakpoint_list", BreakpointListCmd)                                \
   COMMAND("breakpoint_update", BreakpointUpdateCmd)                            \
   COMMAND("breakpoint_remove", BreakpointRemoveCmd)                            \
   COMMAND("stack_depth", StackDepthCmd)                                        \
   COMMAND("stack_get", StackGetCmd)                                            \
   COMMAND("context_names", ContextNamesCmd)                                    \
   COMMAND("context_get", ContextGetCmd)                                        \
+  COMMAND("typemap_get", TypemapGetCmd)                                        \
   COMMAND("property_get", PropertyGetCmd)                                      \
   COMMAND("property_set", PropertySetCmd)                                      \
   COMMAND("property_value", PropertyValueCmd)                                  \
@@ -132,9 +135,8 @@ public:
     return true;
   }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     m_server.addStatus(xml);
-    return false;
   }
 };
 
@@ -154,11 +156,9 @@ public:
 
   ~FeatureGetCmd() {}
 
-  bool isValidInStatus(Status status) const override {
-    return true;
-  }
+  bool isValidInStatus(Status status) const override { return true; }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     // Set to true once we have a match. Const cast is needed due to xdebug
     // xml api.
     bool match = false;
@@ -192,7 +192,6 @@ public:
       xdebug_xml_add_text(&xml, "0", 0);
       xdebug_xml_add_attribute(&xml, "supported", "0");
     }
-    return false;
   }
 
 private:
@@ -221,7 +220,7 @@ public:
 
   ~FeatureSetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     const char* value_str = m_value.c_str();
 
     // These could be thrown into a macro, but there aren't very many cases
@@ -248,7 +247,6 @@ public:
     xdebug_xml_add_attribute(&xml, "feature",
                              const_cast<char*>(m_feature.c_str()));
     xdebug_xml_add_attribute(&xml, "success", "1");
-    return false;
   }
 
 private:
@@ -268,6 +266,7 @@ public:
 
   // run never responds immediately
   bool shouldRespond() const override { return false; }
+  bool shouldContinue() const override { return true; }
 
   bool isValidInStatus(Status status) const override {
     return
@@ -276,7 +275,7 @@ public:
       status == Status::BREAK;
   }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     // Get the server status
     Status status;
     Reason reason;
@@ -297,7 +296,6 @@ public:
 
     // Call the debugger hook and continue
     phpDebuggerContinue();
-    return true;
   }
 };
 
@@ -314,6 +312,7 @@ public:
 
   // Respond on step break
   bool shouldRespond() const override { return false; }
+  bool shouldContinue() const override { return true; }
 
   bool isValidInStatus(Status status) const override {
     return
@@ -322,9 +321,8 @@ public:
       status == Status::BREAK;
   }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     phpDebuggerStepIn();
-    return true;
   }
 };
 
@@ -341,6 +339,7 @@ public:
 
   // Respond on step out break
   bool shouldRespond() const override { return false; }
+  bool shouldContinue() const override { return true; }
 
   bool isValidInStatus(Status status) const override {
     return
@@ -349,9 +348,8 @@ public:
       status == Status::BREAK;
   }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     phpDebuggerStepOut();
-    return true;
   }
 };
 
@@ -367,6 +365,7 @@ public:
 
   // Respond on next break
   bool shouldRespond() const override { return false; }
+  bool shouldContinue() const override { return true; }
 
   bool isValidInStatus(Status status) const override {
     return
@@ -375,15 +374,14 @@ public:
       status == Status::BREAK;
   }
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     phpDebuggerNext();
-    return true;
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // stop -i #
-// TODO(#4489053) Implement
+// Stops execution of the script by exiting
 
 class StopCmd : public XDebugCommand {
 public:
@@ -391,14 +389,22 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~StopCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  bool isValidInStatus(Status status) const override { return true; }
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    m_server.setStatus(Status::STOPPED, Reason::OK);
+
+    // We need to throw an exception, so this needs to be sent manually
+    m_server.addStatus(xml);
+    m_server.sendMessage(xml);
+    throw ExitException(0);
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // detach -i #
-// TODO(#4489053) Implement
+// Detaches the xdebug server. In php5 xdebug this just means the user cannot
+// input commands.
 
 class DetachCmd : public XDebugCommand {
 public:
@@ -406,8 +412,9 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~DetachCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    m_server.setStatus(Status::DETACHED, Reason::OK);
+    m_server.addStatus(xml);
   }
 };
 
@@ -555,7 +562,7 @@ public:
 
   ~BreakpointSetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     // Add the breakpoint, write out the id
     int id = XDEBUG_ADD_BREAKPOINT(m_breakpoint);
     xdebug_xml_add_attribute_ex(&xml, "id", xdebug_sprintf("%d", id), 0, 1);
@@ -566,7 +573,6 @@ public:
     } else {
       xdebug_xml_add_attribute(&xml, "state", "disabled");
     }
-    return false;
   }
 
 private:
@@ -583,11 +589,27 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~BreakpointGetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// breakpoint_list -i #
+// TODO(#4489053) Implement
+
+class BreakpointListCmd : public XDebugCommand {
+public:
+  BreakpointListCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~BreakpointListCmd() {}
+
+  bool isValidInStatus(Status status) const override { return true; }
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  }
+};
 ////////////////////////////////////////////////////////////////////////////////
 // breakpoint_update -i #
 // TODO(#4489053) Implement
@@ -600,7 +622,7 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~BreakpointUpdateCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
@@ -617,14 +639,14 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~BreakpointRemoveCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // stack_depth -i #
-// TODO(#4489053) Implement
+// Returns the current stack depth
 
 class StackDepthCmd : public XDebugCommand {
 public:
@@ -632,29 +654,103 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~StackDepthCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    int depth = XDebugUtils::stackDepth();
+    xdebug_xml_add_attribute_ex(&xml, "depth",
+                                xdebug_sprintf("%u", depth), 0, 1);
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// stack_get -i #
-// TODO(#4489053) Implement
+// stack_get -i # [-d DEPTH]
+// Returns the stack at the given depth, or the entire stack if no depth is
+// provided
+
+const static StaticString s_FILE("file");
 
 class StackGetCmd : public XDebugCommand {
 public:
   StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Compute the maximum depth
+    m_maxDepth = XDebugUtils::stackDepth();
+
+    // Grab the optional depth argument
+    if (!args['d'].isNull()) {
+      m_clientDepth = strtol(args['d'].toString().data(), nullptr, 10);
+      if (m_clientDepth < 0 || m_clientDepth > m_maxDepth) {
+        throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+      }
+    }
+  }
+
   ~StackGetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  bool isValidInStatus(Status status) const override { return true; }
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    // Iterate up the stack. We need to keep track of both the frame actrec and
+    // our current depth in case the client passed us a depth
+    int depth = m_maxDepth;
+    for (const ActRec* fp = g_context->getStackFrame();
+         fp != nullptr && depth >= m_clientDepth;
+         fp = g_context->getPrevVMState(fp), depth--) {
+      // If a depth was provided, we're only interested in that depth
+      if (m_clientDepth < 0 || depth == m_clientDepth) {
+        xdebug_xml_node* frame = getFrame(fp, depth);
+        xdebug_xml_add_child(&xml, frame);
+      }
+    }
   }
+
+private:
+  // Returns the xml node for the given stack frame
+  xdebug_xml_node* getFrame(const ActRec* fp, int level) {
+    Offset call_offset;
+    const Func* func = fp->func();
+    const ActRec* prev_fp = g_context->getPrevVMState(fp, &call_offset);
+
+    // Compute the function name. php5 xdebug includes names for each type of
+    // include, we don't have access to that
+    const char* func_name = func->isPseudoMain() ?
+      (prev_fp == nullptr ? "{main}" : "include") : func->fullName()->data();
+
+    // Create the frame node
+    xdebug_xml_node* node = xdebug_xml_node_init("stack");
+    xdebug_xml_add_attribute_ex(node, "where",
+                                const_cast<char*>(func_name), 0, 0);
+    xdebug_xml_add_attribute_ex(node, "level",
+                                xdebug_sprintf("%d", level), 0, 1);
+    xdebug_xml_add_attribute_ex(node, "type", "file", 0, 0);
+
+    // Grab the callsite
+    String call_file; int call_line;
+    if (prev_fp != nullptr) {
+      const Unit* prev_unit = prev_fp->func()->unit();
+      call_file = String(prev_unit->filepath()->data(), CopyString);
+      call_line = prev_unit->getLineNumber(call_offset);
+    } else {
+      // fp must be top level main, just grab its file and use an invalid line
+      call_file = String(fp->func()->filename()->data(), CopyString);
+      call_line = -1;
+    }
+    call_file = XDebugUtils::pathToUrl(call_file); // file output format
+
+    // Add the call file/line. Duplications are necessary due to xml api
+    xdebug_xml_add_attribute_ex(node, "filename",
+                                xdstrdup(call_file.data()), 0, 1);
+    xdebug_xml_add_attribute_ex(node, "lineno",
+                                xdebug_sprintf("%d", call_line), 0, 1);
+    return node;
+  }
+
+  int m_maxDepth;   // Depth when the command is constructed
+  int m_clientDepth = -1; // If >= 0, depth of the stack frame the client wants
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// context_names -i #
-// TODO(#4489053) Implement
+// context_names -i # [-d DEPTH]
+// Returns the names of the currently available contexts at the given depth
 
 class ContextNamesCmd : public XDebugCommand {
 public:
@@ -662,8 +758,23 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~ContextNamesCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  bool isValidInStatus(Status status) const override { return true; }
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    xdebug_xml_node* child = xdebug_xml_node_init("context");
+    xdebug_xml_add_attribute(child, "name", "Locals");
+    xdebug_xml_add_attribute(child, "id", "0");
+    xdebug_xml_add_child(&xml, child);
+
+    child = xdebug_xml_node_init("context");
+    xdebug_xml_add_attribute(child, "name", "Superglobals");
+    xdebug_xml_add_attribute(child, "id", "1");
+    xdebug_xml_add_child(&xml, child);
+
+    child = xdebug_xml_node_init("context");
+    xdebug_xml_add_attribute(child, "name", "User defined constants");
+    xdebug_xml_add_attribute(child, "id", "2");
+    xdebug_xml_add_child(&xml, child);
   }
 };
 
@@ -677,13 +788,66 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~ContextGetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// property_get -i #
+// typemap_get -i #
+// Returns the types supported as well their corresponding xml schema
+
+// Taken from php5 xdebug
+// Fields are common name, lang name, and schema
+#define XDEBUG_TYPES_COUNT 8
+static const char* s_TYPEMAP[XDEBUG_TYPES_COUNT][3] = {
+  {"bool",     "bool",     "xsd:boolean"},
+  {"int",      "int",      "xsd:decimal"},
+  {"float",    "float",    "xsd:double"},
+  {"string",   "string",   "xsd:string"},
+  {"null",     "null",     nullptr},
+  {"hash",     "array",    nullptr},
+  {"object",   "object",   nullptr},
+  {"resource", "resource", nullptr}
+};
+
+class TypemapGetCmd : public XDebugCommand {
+public:
+  TypemapGetCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args) {}
+  ~TypemapGetCmd() {}
+
+  bool isValidInStatus(Status status) const override { return true; }
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    // Add the schema
+    xdebug_xml_add_attribute(&xml, "xmlns:xsi",
+                             "http://www.w3.org/2001/XMLSchema-instance");
+    xdebug_xml_add_attribute(&xml, "xmlns:xsd",
+                             "http://www.w3.org/2001/XMLSchema");
+
+    // Add the types. Casts are necessary due to xml api
+    for (int i = 0; i < XDEBUG_TYPES_COUNT; i++) {
+      xdebug_xml_node* type = xdebug_xml_node_init("map");
+      xdebug_xml_add_attribute(type, "name",
+                               const_cast<char*>(s_TYPEMAP[i][1]));
+      xdebug_xml_add_attribute(type, "type",
+                               const_cast<char*>(s_TYPEMAP[i][0]));
+      if (s_TYPEMAP[i][2]) {
+        xdebug_xml_add_attribute(type, "xsi:type",
+                                 const_cast<char*>(s_TYPEMAP[i][2]));
+      }
+      xdebug_xml_add_child(&xml, type);
+    }
+  }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// property_get -i # -n LONGNAME [-d DEPTH] [-c CONTEXT] [-m MAX_DATA] [-p PAGE]
+//              [-a ADDRESS]
+// Note that the spec mentioned a 'k', php5 xdebug does not support it
+// Gets the specified property value
 // TODO(#4489053) Implement
 
 class PropertyGetCmd : public XDebugCommand {
@@ -692,7 +856,7 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~PropertyGetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
@@ -707,7 +871,7 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~PropertySetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
@@ -722,44 +886,156 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~PropertyValueCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     throw XDebugServer::ERROR_UNIMPLEMENTED;
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// source -i #
-// TODO(#4489053) Implement
+// source -i # [-f FILE] [-b BEGIN] [-e END]
+// Grabs the given source file starting at the optionally given begin and end
+// lines.
 
 class SourceCmd : public XDebugCommand {
 public:
   SourceCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Either grab the passed filename or get the current one
+    if (args['f'].isNull()) {
+      StringData* filename_data = g_context->getContainingFileName();
+      if (filename_data == staticEmptyString()) {
+        throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+      }
+      m_filename = String(filename_data);
+    } else {
+      m_filename = XDebugUtils::pathFromUrl(args['f'].toString());
+    }
+    m_filename = File::TranslatePath(m_filename); // canonicolize path
+
+
+    // Grab and 0-index the begin line
+    if (!args['b'].isNull()) {
+      m_beginLine = strtol(args['b'].toString().data(), nullptr, 10) - 1;
+    }
+
+    // Grab and 0-index the end line
+    if (!args['e'].isNull()) {
+      m_endLine = strtol(args['e'].toString().data(), nullptr, 10) - 1;
+    }
+  }
+
   ~SourceCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    // Grab the file as an array
+    Variant file = f_file(m_filename);
+    if (!file.isArray()) {
+      throw XDebugServer::ERROR_CANT_OPEN_FILE;
+    }
+    Array source = file.toArray();
+
+    // Compute the begin/end line
+    if (m_beginLine < 0) {
+      m_beginLine = 0;
+    }
+    if (m_endLine < 0) {
+      m_endLine = source.size() - 1;
+    }
+
+    // Compute the source string. The initial size is arbitrary, we just guess
+    // 80 chracters per line
+    StringBuffer buf((m_endLine - m_beginLine) * 80);
+    ArrayIter iter(source); iter.setPos(m_beginLine);
+    for (int i = m_beginLine; i <= m_endLine && iter; i++, ++iter) {
+      buf.append(iter.second());
+    }
+    m_source = buf.detach(); // To keep alive as long as command is alive
+
+    // Attach the source, const cast is due to xml interface
+    xdebug_xml_add_text_ex(&xml, const_cast<char*>(m_source.data()),
+                           m_source.size(), 0, 1);
   }
+
+private:
+  String m_filename;
+  String m_source;
+  int m_beginLine = 0;
+  int m_endLine = -1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// stdout -i #
-// TODO(#4489053) Implement
+// stdout -i # -c 0|1|2
+// Redirect or copy stdout to the client
+
+// Helper called on stdout write when we have redirected it with the stdout
+// command. Once installed, this continues until it is either explicitly
+// uninstalled, or if there is no longer an xdebug server.
+static void onStdoutWrite(const char* bytes, int len, void* copy) {
+  if (XDEBUG_GLOBAL(Server) == nullptr) {
+    g_context->setStdout(nullptr, nullptr);
+  }
+  XDEBUG_GLOBAL(Server)->sendStream("stdout", bytes, len);
+
+  // If copy is true, we also copy the data to stdout
+  if ((bool) copy) {
+    write(fileno(stdout), bytes, len);
+  }
+}
 
 class StdoutCmd : public XDebugCommand {
 public:
   StdoutCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // "c" must be provided
+    if (args['c'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+
+    // Only several types of modes are allowed
+    int mode = strtol(args['c'].toString().data(), nullptr, 10);
+    switch (mode) {
+      case MODE_DISABLE:
+      case MODE_COPY:
+      case MODE_REDIRECT:
+        m_mode = static_cast<Mode>(mode);
+        break;
+      default:
+        throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+  }
+
   ~StdoutCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    switch (m_mode) {
+      case MODE_DISABLE:
+        g_context->setStdout(nullptr, nullptr);
+        break;
+      case MODE_COPY:
+        g_context->setStdout(onStdoutWrite, (void*) true);
+        break;
+      case MODE_REDIRECT:
+        g_context->setStdout(onStdoutWrite, (void*) false);
+        break;
+      default:
+        throw Exception("Invalid mode type");
+    }
+
+    xdebug_xml_add_attribute(&xml, "success", "1");
   }
+
+private:
+  enum Mode {
+    MODE_DISABLE = 0,
+    MODE_COPY = 1,
+    MODE_REDIRECT = 2
+  };
+  Mode m_mode;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // stderr -i #
-// TODO(#4489053) Implement
+// This "required" dbgp-core feature is not implemented by php5 xdebug :)
 
 class StderrCmd : public XDebugCommand {
 public:
@@ -767,8 +1043,8 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~StderrCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    xdebug_xml_add_attribute(&xml, "success", "0");
   }
 };
 
@@ -794,7 +1070,7 @@ public:
 
   ~EvalCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
+  void handleImpl(xdebug_xml_node& xml) override {
     // Do the eval. Throw on failure.
     Variant result;
     if (g_context->evalPHPDebugger((TypedValue*) &result,
@@ -814,7 +1090,6 @@ public:
                                                       XDebugVarType::Normal,
                                                       exporter);
     xdebug_xml_add_child(&xml, node);
-    return false;
   }
 
 private:
@@ -824,7 +1099,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 // xcmd_profiler_name_get -i #
-// TODO(#4489053) Implement
+// Returns the profiler filename if profiling has started
 
 class ProfilerNameGetCmd : public XDebugCommand {
 public:
@@ -832,8 +1107,12 @@ public:
     : XDebugCommand(server, cmd, args) {}
   ~ProfilerNameGetCmd() {}
 
-  bool handleImpl(xdebug_xml_node& xml) const override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+  void handleImpl(xdebug_xml_node& xml) override {
+    Variant filename = HHVM_FN(xdebug_get_profiler_filename)();
+    if (!filename.isString()) {
+      throw XDebugServer::ERROR_PROFILING_NOT_STARTED;
+    }
+    xdebug_xml_add_text(&xml, xdstrdup(filename.toString().data()));
   }
 };
 
@@ -851,14 +1130,15 @@ XDebugCommand::XDebugCommand(XDebugServer& server,
   m_transactionId = args['i'].toString();
 }
 
-bool XDebugCommand::handle(xdebug_xml_node& response) const {
+bool XDebugCommand::handle(xdebug_xml_node& response) {
   m_server.addCommand(response, *this);
-  return handleImpl(response);
+  handleImpl(response);
+  return shouldContinue();
 }
 
-const XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
-                                               const String& cmdStr,
-                                               const Array& args) {
+XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
+                                         const String& cmdStr,
+                                         const Array& args) {
   // Match will be set true once there is a match.
   bool match = false;
   string cmd_cpp = cmdStr.toCppString();

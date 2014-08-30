@@ -65,6 +65,14 @@ function format_msg($message) {
   return $message;
 }
 
+// Returns true if the given message is a stream
+function is_stream($msg) {
+  // This is hacky, but it works in all cases and doesn't require
+  // parsing xml
+  $prefix = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<stream";
+  return strpos($msg, $prefix) === 0;
+}
+
 // Reads a dbgp message from the socket
 function read_msg($socket) {
   $bytes = 0;
@@ -107,8 +115,14 @@ function test($filename) {
     if (count($response) === 0 || $response[0] === "#") {
       continue;
     }
+  
+    // We should always receive a single response, we may also receive
+    // streams, which we do not want to respond to
+    do {
+      $msg = read_msg($fd);
+      echo $msg . "\n";
+    } while (is_stream($msg));
 
-    echo read_msg($fd) . "\n";
     echo "(cmd) $response\n";
     socket_write($fd, $response."\0");
   }

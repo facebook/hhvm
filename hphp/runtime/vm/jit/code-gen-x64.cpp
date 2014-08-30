@@ -248,6 +248,7 @@ Vloc CodeGenerator::makeDstLoc(const SSATmp& d) const {
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
+  assert(!inst->is(Shuffle));
   Opcode opc = inst->op();
   m_curInst = inst;
   SCOPE_EXIT {
@@ -255,15 +256,11 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
     m_slocs.clear();
     m_dlocs.clear();
   };
-  if (!inst->is(Shuffle)) {
-    // copy Vlocs all instructions except Shuffle. Shuffles still
-    // exist in the code stream from running XLS but we ignore them.
-    for (auto s : inst->srcs()) {
-      m_slocs.push_back(m_state.locs[s]);
-    }
-    for (auto& d : inst->dsts()) {
-      m_dlocs.push_back(makeDstLoc(d));
-    }
+  for (auto s : inst->srcs()) {
+    m_slocs.push_back(m_state.locs[s]);
+  }
+  for (auto& d : inst->dsts()) {
+    m_dlocs.push_back(makeDstLoc(d));
   }
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \

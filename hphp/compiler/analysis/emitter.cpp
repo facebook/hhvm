@@ -863,24 +863,7 @@ void SymbolicStack::setKnownCls(const StringData* s, bool nonNull) {
   assert(m_symStack.size());
   SymEntry& se = m_symStack.back();
   assert(!se.className || se.className == s);
-  if (se.metaType == META_DATA_TYPE) {
-    assert(se.metaData.dt == KindOfObject);
-    nonNull = true;
-  }
   se.className = s;
-  se.notNull = se.notNull || nonNull;
-}
-
-void SymbolicStack::setNotRef() {
-  assert(m_symStack.size());
-  SymEntry& se = m_symStack.back();
-  se.notRef = true;
-}
-
-bool SymbolicStack::getNotRef() const {
-  assert(m_symStack.size());
-  const SymEntry& se = m_symStack.back();
-  return se.notRef;
 }
 
 void SymbolicStack::setInt(int64_t v) {
@@ -888,45 +871,10 @@ void SymbolicStack::setInt(int64_t v) {
   m_symStack.back().intval = v;
 }
 
-void SymbolicStack::setKnownType(DataType dt, bool predicted /* = false */) {
-  assert(m_symStack.size());
-  SymEntry& se = m_symStack.back();
-  if (se.className) {
-    assert(dt == KindOfObject);
-    se.notNull = true;
-  } else {
-    assert(se.metaType == META_NONE);
-    se.metaType = META_DATA_TYPE;
-    se.metaData.dt = dt;
-  }
-  se.dtPredicted = predicted;
-}
-
-DataType SymbolicStack::getKnownType(int index, bool noRef) const {
-  if (index < 0) index += m_symStack.size();
-  assert((unsigned)index < m_symStack.size());
-  const SymEntry& se = m_symStack[index];
-  if (!noRef || se.notRef) {
-    if (se.className && se.notNull) {
-      return KindOfObject;
-    } else if (se.metaType == META_DATA_TYPE) {
-      return se.metaData.dt;
-    }
-  }
-  return KindOfUnknown;
-}
-
-bool SymbolicStack::isTypePredicted(int index /* = -1, stack top */) const {
-  if (index < 0) index += m_symStack.size();
-  assert((unsigned)index < m_symStack.size());
-  return m_symStack[index].dtPredicted;
-}
-
 void SymbolicStack::cleanTopMeta() {
   SymEntry& se = m_symStack.back();
   se.clsBaseType = CLS_INVALID;
   se.metaType = META_NONE;
-  se.notRef = false;
 }
 
 void SymbolicStack::setClsBaseType(ClassBaseType type) {
@@ -1625,7 +1573,6 @@ void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
   // Now that we have our vector of Label*'s ready, we can emit a
   // Switch instruction and/or conditional branches, and we can
   // emit the body of each case.
-  auto& evalStack = getEvalStack();
   Id stateLocal = getStateLocal();
   emitVirtualLocal(stateLocal);
   e.IssetL(stateLocal);
@@ -1633,7 +1580,6 @@ void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
   if (count >= 3) {
     // A switch is needed since there are more than two cases.
     emitVirtualLocal(stateLocal);
-    evalStack.setKnownType(KindOfInt64);
     e.CGetL(stateLocal);
     e.Switch(cases, 0, 0);
   }
@@ -2673,19 +2619,6 @@ static StringData* getClassName(ExpressionPtr e) {
   return nullptr;
 }
 
-static DataType getPredictedDataType(ExpressionPtr expr) {
-  if (!expr->maybeInited()) {
-    return KindOfUninit;
-  }
-  // Note that expr->isNonNull() may be false,
-  // but that's ok since this is just a prediction.
-  TypePtr act = expr->getActualType();
-  if (!act) {
-    return KindOfUnknown;
-  }
-  return act->getDataType();
-}
-
 void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
                                    Func* builtinFunc) {
   int ref = -1;
@@ -2696,15 +2629,10 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
                         Expression::UnsetContext)) {
     return;
   }
-  bool voidReturn = false;
   if (builtinFunc) {
     ref = (builtinFunc->attrs() & AttrReference) != 0;
-    voidReturn = builtinFunc->returnType() == KindOfNull;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-    if (!(fn->getActualType()) && !fn->getFuncScope()->isNative()) {
-      voidReturn = true;
-    }
   } else if (!fn->getName().empty()) {
     FunctionScope::FunctionInfoPtr fi =
       FunctionScope::GetFunctionInfo(fn->getName());
@@ -2723,37 +2651,6 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     } else {
       e.UnboxRNop();
     }
-  }
-
-  if (voidReturn) {
-    m_evalStack.setKnownType(KindOfNull, false /* inferred */);
-    m_evalStack.setNotRef();
-  } else if (!ref) {
-    DataType dt = builtinFunc ?
-      builtinFunc->returnType() :
-      getPredictedDataType(fn);
-
-    if (dt != KindOfUnknown) {
-      // If we're in ParamCoerceMode, then predict the statically-known type
-      // instead of trying to infer the return type + Null/False.
-      if (builtinFunc && !builtinFunc->isParamCoerceMode()) {
-        switch (dt) {
-          case KindOfBoolean:
-          case KindOfInt64:
-          case KindOfDouble:
-            /* inferred */
-            m_evalStack.setKnownType(dt, false);
-            break;
-          default:
-            /* predicted */
-            m_evalStack.setKnownType(dt, true);
-            break;
-        }
-      } else {
-        m_evalStack.setKnownType(dt, true /* predicted */);
-      }
-    }
-    m_evalStack.setNotRef();
   }
 }
 
@@ -4615,9 +4512,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
           Id i = m_curFunc->lookupVarId(nLiteral);
           emitVirtualLocal(i);
-          if (!sv->couldBeAliased()) {
-            m_evalStack.setNotRef();
-          }
           if (sv->getAlwaysStash() &&
               !sv->hasAnyContext(Expression::ExistContext |
                                  Expression::RefValue |
@@ -6804,7 +6698,7 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
     if (par->isOptional()) {
       hasOptional = true;
       Label entryPoint(e);
-      emitVirtualLocal(i, KindOfUninit);
+      emitVirtualLocal(i);
       visit(par->defaultValue());
       emitCGet(e);
       emitSet(e);
@@ -6863,7 +6757,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   // If the cache var is non-null return it
   if (isFunc) {
     staticLocalID = m_curFunc->allocUnnamedLocal();
-    emitVirtualLocal(staticLocalID, KindOfNull);
+    emitVirtualLocal(staticLocalID);
     e.Null();
     e.StaticLocInit(staticLocalID, propName);
   } else {
@@ -7039,16 +6933,11 @@ void EmitterVisitor::emitPostponedCinits() {
   }
 }
 
-void EmitterVisitor::emitVirtualLocal(int localId,
-                                      DataType dt /* = KindOfUnknown */) {
+void EmitterVisitor::emitVirtualLocal(int localId) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::L);
   m_evalStack.setInt(localId);
-  if (dt != KindOfUnknown) {
-    m_evalStack.setKnownType(dt);
-    m_evalStack.setNotRef();
-  }
 }
 
 static bool isNormalLocalVariable(const ExpressionPtr& expr) {

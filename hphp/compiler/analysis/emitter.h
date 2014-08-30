@@ -157,7 +157,6 @@ struct SymbolicStack {
   enum MetaType {
     META_NONE,
     META_LITSTR,
-    META_DATA_TYPE
   };
 
 private:
@@ -180,9 +179,6 @@ private:
     explicit SymEntry(char s = 0)
       : sym(s)
       , metaType(META_NONE)
-      , notRef(false)
-      , notNull(false)
-      , dtPredicted(false)
       , className(nullptr)
       , intval(-1)
       , unnamedLocalStart(InvalidAbsoluteOffset)
@@ -190,12 +186,8 @@ private:
     {}
     char sym;
     MetaType metaType;
-    bool notRef:1;
-    bool notNull:1;
-    bool dtPredicted:1;
     union {
       const StringData* name;   // META_LITSTR
-      DataType dt;              // META_DATA_TYPE
     }   metaData;
     const StringData* className;
     int64_t intval; // used for L and I symbolic flavors
@@ -238,11 +230,7 @@ public:
   void setInt(int64_t v);
   void setString(const StringData* s);
   void setKnownCls(const StringData* s, bool nonNull);
-  void setNotRef();
-  bool getNotRef() const;
-  void setKnownType(DataType dt, bool predicted = false);
   void cleanTopMeta();
-  DataType getKnownType(int index = -1, bool noRef = true) const;
   void setClsBaseType(ClassBaseType);
   void setUnnamedLocal(int index, int localId, Offset startOffset);
   void pop();
@@ -714,7 +702,7 @@ public:
   void emitConvertSecondToCell(Emitter& e);
   void emitConvertToVar(Emitter& e);
   void emitFPass(Emitter& e, int paramID, PassByRefKind passByRefKind);
-  void emitVirtualLocal(int localId, DataType dt = KindOfUnknown);
+  void emitVirtualLocal(int localId);
   template<class Expr> void emitVirtualClassBase(Emitter&, Expr* node);
   void emitResolveClsBase(Emitter& e, int pos);
   void emitClsIfSPropBase(Emitter& e);

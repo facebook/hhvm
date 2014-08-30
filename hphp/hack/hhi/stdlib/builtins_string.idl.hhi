@@ -27,7 +27,6 @@ function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function chop($str, $charlist = HPHP_TRIM_CHARLIST) { }
-function explode($delimiter, $str, $limit = 0x7FFFFFFF) { }
 function join($glue, $pieces = null_variant) { }
 function str_split($str, $split_length = 1) { }
 function chunk_split($body, $chunklen = 76, $end = "\r\n") { }

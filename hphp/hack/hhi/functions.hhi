@@ -29,6 +29,7 @@ function fb_bspatch(
 ): string;
 function func_get_args(): array;
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
+function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 function is_array(mixed $arg): bool;
 function isset(ArrayAccess $x): bool;
 function ord(string $string): int;

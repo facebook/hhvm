@@ -79,6 +79,14 @@ handler:
   RetC
 }
 
+# We do this in a separate scope to avoid
+# having the $k_* locals in test_unwind_dirty_stack_regs()
+# getting caught in the $context parameter to handler()
+.function get_undefined_var() {
+  CGetL $k_99  # undefined variable
+  RetC
+}
+
 # This test is dependent on the register allocator implementation, but
 # probably better than nothing and unlikely to significantly change.
 # It seems fairly hard to get a EMIT_CALL to happen while a Stack
@@ -113,8 +121,9 @@ handler:
   CGetL $k_1
   CGetL $k_2
 
-  CGetL $k_99  # undefined variable
-  PopC
+  FPushFuncD 0 "get_undefined_var"
+  FCall 0
+  PopR
 
   # This code isn't reached---but let's Pop this junk just so
   # theoretically we could pass verification some day.

@@ -724,27 +724,18 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
   }
   if (!m_userErrorHandlers.empty() &&
       (m_userErrorHandlers.back().second & errnum) != 0) {
-    int errline = 0;
-    String errfile;
-    Array backtrace;
+    auto fileAndLine = std::make_pair(empty_string(), 0);
     if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
-      Array arr = ee->getBacktrace();
-      if (!arr.isNull()) {
-        backtrace = arr;
-        Array top = backtrace.rvalAt(0).toArray();
-        if (!top.isNull()) {
-          errfile = top.rvalAt(s_file);
-          errline = top.rvalAt(s_line).toInt64();
-        }
-      }
+      fileAndLine = ee->getFileAndLine();
     }
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
-      Array dummyContext = Array::Create();
+      VarEnv* v = g_context->getVarEnv();
+      Array context = v ? v->getDefinedVariables() : empty_array();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
-                 make_packed_array(errnum, String(e.getMessage()), errfile,
-                     errline, dummyContext, backtrace)),
+                 make_packed_array(errnum, String(e.getMessage()),
+                     fileAndLine.first, fileAndLine.second, context)),
                 false)) {
         return true;
       }

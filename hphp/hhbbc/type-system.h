@@ -378,6 +378,7 @@ private:
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
+  friend Type promote_emptyish(Type, Type);
   friend Type widening_union(const Type&, const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
@@ -393,7 +394,9 @@ private:
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
-
+  friend Type unspecialize(const Type&t) {
+    return Type { t.m_bits };
+  }
 private:
   union Data {
     Data() {}

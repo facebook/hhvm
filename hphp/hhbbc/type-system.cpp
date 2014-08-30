@@ -1849,6 +1849,29 @@ Type union_of(Type a, Type b) {
   return TTop;
 }
 
+// Union of a-with-emptyish-types-removed and b
+Type promote_emptyish(Type a, Type b) {
+  if (is_opt(a)) a = unopt(a);
+  if (a.subtypeOf(sempty())) {
+    return b;
+  }
+  auto t = trep(a.m_bits & ~(BNull | BFalse));
+  if (!isPredefined(t)) {
+    if (trep(t & BInitPrim) == t) {
+      t = BInitPrim;
+    } else if (trep(t & BInitUnc) == t) {
+      t = BInitUnc;
+    } else if (trep(t & BInitCell) == t) {
+      t = BInitCell;
+    } else {
+      t = BInitGen;
+    }
+    return union_of(Type { t }, b);
+  }
+  a.m_bits = t;
+  return union_of(a, b);
+}
+
 Type widening_union(const Type& a, const Type& b) {
   if (a == b) return a;
 

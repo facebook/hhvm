@@ -500,7 +500,7 @@ void handleBasePropD(MIS& env) {
     return;
   }
   if (propCouldPromoteToObj(ty)) {
-    ty = union_of(ty, TObj);
+    ty = promote_emptyish(ty, TObj);
     return;
   }
 }
@@ -520,7 +520,7 @@ void handleBaseElemD(MIS& env) {
     return;
   }
   if (elemCouldPromoteToArr(ty)) {
-    ty = union_of(ty, counted_aempty());
+    ty = promote_emptyish(ty, counted_aempty());
   }
 }
 
@@ -1159,6 +1159,11 @@ void pessimisticFinalNewElem(MIS& env, Type ty) {
   if (env.base.loc == BaseLoc::LocalArrChain &&
       env.base.type.subtypeOf(TArr)) {
     env.base.type = array_newelem(env.base.type, ty);
+    return;
+  }
+  if (env.base.type.couldBe(TArr) && is_specialized_array(env.base.type)) {
+    env.base.type = unspecialize(env.base.type);
+    return;
   }
 }
 
@@ -1188,6 +1193,10 @@ void miFinalSetNewElem(MIS& env) {
     env.base.type = array_newelem(env.base.type, t1);
     push(env, t1);
     return;
+  }
+
+  if (env.base.type.couldBe(TArr) && is_specialized_array(env.base.type)) {
+    env.base.type = unspecialize(env.base.type);
   }
 
   // ArrayAccess on $this will always push the rhs.

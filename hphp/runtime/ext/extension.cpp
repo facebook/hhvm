@@ -328,23 +328,10 @@ void Extension::ShutdownModules() {
   s_extensions_sorted = false;
 }
 
-const StaticString
-  s_apache("apache"),
-  s_apc("apc"),
-  s_xhp("xhp");
-
 bool Extension::IsLoaded(const String& name) {
-  if (name == s_apache) {
-    return ApacheExtension::Enable;
-  }
-  if (name == s_apc) {
-    return apcExtension::Enable;
-  } else if (name == s_xhp) {
-    return RuntimeOption::EnableXHP;
-  }
   assert(s_registered_extensions);
-  return s_registered_extensions->find(name.data()) !=
-    s_registered_extensions->end();
+  auto it = s_registered_extensions->find(name.data());
+  return (it != s_registered_extensions->end()) && it->second->moduleEnabled();
 }
 
 const static std::string
@@ -369,13 +356,9 @@ Array Extension::GetLoadedExtensions() {
   assert(s_registered_extensions);
   Array ret = Array::Create();
   for (auto& kv : *s_registered_extensions) {
-    if (!apcExtension::Enable && kv.second->m_name == s_apc.toCppString()) {
-      continue;
+    if (kv.second->moduleEnabled()) {
+      ret.append(String(kv.second->m_name));
     }
-    if (!RuntimeOption::EnableXHP && kv.second->m_name == s_xhp.toCppString()) {
-      continue;
-    }
-    ret.append(String(kv.second->m_name));
   }
   return ret;
 }

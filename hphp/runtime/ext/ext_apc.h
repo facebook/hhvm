@@ -63,9 +63,10 @@ class apcExtension : public Extension {
   static bool Stat;
   static bool EnableCLI;
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config);
-  virtual void moduleInit();
-  virtual void moduleShutdown();
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
+  void moduleInit() override;
+  void moduleShutdown() override;
+  bool moduleEnabled() const override { return Enable; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

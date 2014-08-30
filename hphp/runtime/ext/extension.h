@@ -98,6 +98,9 @@ public:
   virtual void requestInit() {}
   virtual void requestShutdown() {}
 
+  // override this to control extension_loaded() return value
+  virtual bool moduleEnabled() const { return true; }
+
   typedef std::set<std::string> DependencySet;
   typedef std::map<Extension*, DependencySet> DependencySetMap;
   virtual const DependencySet getDeps() const {
@@ -125,7 +128,7 @@ private:
   std::string m_dsoName;
 };
 
-#define HHVM_API_VERSION 20140702L
+#define HHVM_API_VERSION 20140829L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

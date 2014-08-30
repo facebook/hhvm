@@ -51,6 +51,10 @@ ZendExtension* ZendExtension::GetByModuleNumber(int module_number) {
   return nullptr;
 }
 
+bool ZendExtension::moduleEnabled() const {
+  return RuntimeOption::EnableZendCompat;
+}
+
 void ZendExtension::moduleInit() {
   if (!RuntimeOption::EnableZendCompat) {
     return;

@@ -64,6 +64,7 @@ static class HHExtension : public Extension {
 static class XHPExtension : public Extension {
  public:
   XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET) { }
+  bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }
 } s_xhp_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

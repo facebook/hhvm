@@ -64,6 +64,8 @@ public:
   // opcodes.
   void addRanges(const Unit* unit, const OffsetRangeVec& offsets,
                  OpcodeFilter isOpcodeAllowed = [] (Op) { return true; });
+  void removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
+                    OpcodeFilter isOpcodeAllowed = [] (Op) { return true; });
   void removeOffset(const Unit* unit, Offset offset);
 
   // Add/remove/check explicit PCs.

@@ -1,0 +1,39 @@
+step_into -i 0
+# Break every iteration of the loop: id = 0
+breakpoint_set -i 0 -t line -n 11
+# Break on entry/exit foo: id = 1, 2
+breakpoint_set -i 0 -t call -m foo
+breakpoint_set -i 0 -t return -m foo
+# The 5th iteration of the loop: id = 3
+breakpoint_set -i 0 -t line -n 11 -o >= -h 5
+# Continue to foo exit
+run -i 0
+run -i 0
+# Test getting the breakpoints
+breakpoint_list -i 0
+breakpoint_get -i 0 -d 0
+breakpoint_get -i 0 -d 1
+# Invalid
+breakpoint_get -i 0 -d 10
+# Remove foo's entry/exit breakpoints
+breakpoint_remove -i 0 -d 1
+breakpoint_remove -i 0 -d 2
+breakpoint_list -i 0
+# Enter the loop and update the breakpoint so that we only break after iteration
+# 9
+run -i 0
+breakpoint_update -i 0 -d 0 -o >= -h 9
+# continue until iteration 5 then disable the breakpoint on 5
+run -i 0
+breakpoint_update -i 0 -d 3 -s disabled
+# continue to iteraton 9 and 10
+run -i 0
+run -i 0
+# Move the line breakpoint to the second loop and run to it
+breakpoint_update -i 0 -d 0 -n 14 -o == -h 12
+run -i 0
+# Remove the breakpoint
+breakpoint_remove -i 0 -d 0
+run -i 0
+# Stopping
+run -i 0

@@ -71,7 +71,6 @@ public:
   // The template parameter should be an instance of DebugHookHandler.
   // Returns true on success, false on failure (for instance, if another debug
   // hook handler is already attached).
-  // TODO(#4489053) This should create the pc filters
   template<class HandlerClass>
   static bool attach(ThreadInfo* ti = nullptr) {
     ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
@@ -79,9 +78,13 @@ public:
       return false;
     }
 
-    s_numAttached++;
+    // Attach to the thread
     ti->m_reqInjectionData.setDebuggerAttached(true);
     ti->m_debugHookHandler = new HandlerClass();
+
+    // Increment the number of attached handlers
+    Lock lock(s_lock);
+    s_numAttached++;
 
     // Event hooks need to be enabled to receive function entry and exit events.
     // This comes at the cost of a small bit of performance, however, it makes
@@ -96,7 +99,6 @@ public:
   }
 
   // If a handler is attached to the thread, detaches it
-  // TODO(#4489053) This should clear the pc filters
   static void detach(ThreadInfo* ti = nullptr);
 
   // Debugger events. Subclasses can override these methods to receive
@@ -139,7 +141,10 @@ public:
   virtual void onLineBreak(const Unit* unit, int line) {}
 
   // The number of DebugHookHandlers that are currently attached to the process.
-  static std::atomic_int s_numAttached;
+  // The mutex is needed because we need to perform work when we are sure there
+  // are no handlers attached
+  static Mutex s_lock;
+  static int s_numAttached;
 };
 
 // Returns the current hook handler
@@ -204,11 +209,23 @@ void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
 bool phpAddBreakPointLine(const Unit* unit, int line);
 
-// FIXME: Internally, there is no distinction between the types of breakpoints,
-// so there is no good way to remove added breakpoints. Furthermore, there is
-// no exposed undoing of the JIT opcode blacklisting, so there is little benefit
-// to removal (as opposed to debug hook handlers ignoring deleted breakpoints).
+// Breakpoint removal functions.
+// FIXME Note that internally there is a global PCFilter for all breakpoints.
+// This is checked against every opcode to determine if we should break. While
+// good for performance, this allows no distinction between the types of
+// breakpoints. That is, we can never remove breakpoints from the
+// global filter because there could be overlap.
+//
+// If the new style of breakpoints is used (function breakpoints and lines),
+// we can at least prevent the appropriate breakpoint hooks from being called.
+// This means once added, we will always interrupt on that breakpoint until
+// the hook handler is detached. This isn't a huge deal as it just means we
+// can't jit those opcodes, but it should be fixed since it's just a design
+// issue.
 void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+void phpRemoveBreakPointFuncEntry(const Func* f);
+void phpRemoveBreakPointFuncExit(const Func* f);
+void phpRemoveBreakPointLine(const Unit* unit, int line);
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
 

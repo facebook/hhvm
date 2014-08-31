@@ -27,7 +27,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-using namespace HPHP;
+namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
 
 // Xml encode the passed string
 String xdebug_xmlize(char *string, int len) {
@@ -223,4 +224,7 @@ void xdebug_xml_node_dtor(xdebug_xml_node* xml) {
     xdebug_xml_text_node_dtor(xml->text);
   }
   xdfree(xml);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 }

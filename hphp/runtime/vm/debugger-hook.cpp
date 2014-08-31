@@ -43,14 +43,34 @@ void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
     return;
   }
 
+  // Delete the handler
   delete ti->m_debugHookHandler;
   ti->m_debugHookHandler = nullptr;
   ti->m_reqInjectionData.setDebuggerAttached(false);
-  s_numAttached--;
+
+  // Clear the pc filters
+  if (g_context->m_breakPointFilter != nullptr) {
+    g_context->m_breakPointFilter->clear();
+  }
+  if (g_context->m_flowFilter != nullptr) {
+    g_context->m_flowFilter->clear();
+  }
+  g_context->m_lineBreakPointFilter.clear();
+  g_context->m_callBreakPointFilter.clear();
+  g_context->m_retBreakPointFilter.clear();
+
+  // Disble function entry/exit events
   EventHook::DisableDebug();
+
+  // If there are no more handlers attached, clear the blacklist
+  Lock lock(s_lock);
+  if (--s_numAttached == 0) {
+    mcg->tx().clearDbgBL();
+  }
 }
 
-std::atomic_int DebugHookHandler::s_numAttached(0);
+Mutex DebugHookHandler::s_lock;
+int DebugHookHandler::s_numAttached = 0;
 
 //////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -504,6 +524,34 @@ void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
   if (g_context->m_breakPointFilter) {
     PC pc = unit->at(offset);
     g_context->m_breakPointFilter->removePC(pc);
+  }
+}
+
+void phpRemoveBreakPointFuncEntry(const Func* f) {
+  // See note in debugger-hook.h. This can only remove from the function entry
+  // filter
+  auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
+  auto pc = f->unit()->at(base);
+  g_context->m_callBreakPointFilter.removePC(pc);
+}
+
+void phpRemoveBreakPointFuncExit(const Func* f) {
+  // See note in debugger-hook.h. This can only remove from the function exit
+  // filter
+  const Unit* unit = f->unit();
+  for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
+       pc += instrLen((Op*) pc)) {
+    if (*reinterpret_cast<const Op*>(pc) == OpRetC) {
+      g_context->m_retBreakPointFilter.removePC(pc);
+    }
+  }
+}
+
+void phpRemoveBreakPointLine(const Unit* unit, int line) {
+  // See note in debugger-hook.h. This can only remove from the line filter
+  OffsetRangeVec offsets;
+  if (unit->getOffsetRanges(line, offsets)) {
+    g_context->m_lineBreakPointFilter.removeRanges(unit, offsets);
   }
 }
 

@@ -115,6 +115,25 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
   }
 }
 
+// Removes a range of PCs to the filter given a collection of offset ranges.
+// Omit PCs which have opcodes that don't pass the given opcode filter.
+void PCFilter::removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
+                            OpcodeFilter isOpcodeAllowed) {
+  for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
+    TRACE(3, "\toffsets [%d, %d) (remove)\n", range->m_base, range->m_past);
+    for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
+         pc += instrLen((Op*) pc)) {
+      if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
+        TRACE(3, "\t\tpc %p (remove)\n", pc);
+        removePC(pc);
+      } else {
+        TRACE(3, "\t\tpc %p -- skipping (offset %d) (remove)\n", pc,
+              unit->offsetOf(pc));
+      }
+    }
+  }
+}
+
 void PCFilter::removeOffset(const Unit* unit, Offset offset) {
   removePC(unit->at(offset));
 }

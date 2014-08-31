@@ -54,19 +54,25 @@ struct XDebugBreakpoint {
 
   // A line breakpoint requires a filename and a line number. It has an
   // optional condition represented by the given unit where the pseud-main is
-  // called when over the given file/line. IT should returns true if we should
+  // called when over the given file/line. It should returns true if we should
   // break, false otherwise.  Note that php5 xdebug doesn't distinguish
   // internally between this and a conditional breakpoint (which is in the spec)
+  // The encoded condition is kept around for display purposes. The unit is
+  // updated to the matched unit once the breakpoint has been matched.
   String fileName;
   int line = -1;
   Unit* conditionUnit = nullptr;
+  String condition;
+  const Unit* unit = nullptr;
 
   // A call or return breakpoint occurs when the function in the given class
   // with the given name is called/returns. The class name and function name
-  // are kept around for listing breakpoint info.
+  // are kept around for listing breakpoint info. The function id is added
+  // once the breakpoint has been matched with a function
   Variant className = init_null(); // optional
   String funcName;
   String fullFuncName;
+  int funcId = -1;
 
   // An exception breakpoint occurs when an exception with a given name is
   // thrown.
@@ -79,10 +85,27 @@ struct XDebugBreakpoint {
 struct XDebugThreadBreakpoints {
   // Adding a breakpoint. Returns a unique id for the breakpoint. Throws an
   // XDebugServer::ErrorCode on failure.
-  int addBreakpoint(const XDebugBreakpoint& bp);
+  int addBreakpoint(XDebugBreakpoint& bp);
 
-  // Removing a breakpoint with the given id.
+  // Removing a breakpoint with the given id. If the id does not exit, does
+  // nothing
   void removeBreakpoint(int id);
+
+  // Gets the breakpoint with the given id. Returns nullptr if the breakpoint
+  // does not exist
+  inline const XDebugBreakpoint* getBreakpoint(int id) {
+    auto iter = m_breakMap.find(id);
+    return iter != m_breakMap.end() ? &iter->second : nullptr;
+  }
+
+  // Breakpoint update methods. Some of these modify internal state, so it's
+  // better to use these to update breakpoints. There could be more update
+  // methods, but these are the only ones needed by the xdebug commmands right
+  // now. These return true on success, false on failure.
+  bool updateBreakpointLine(int id, int newLine);
+  bool updateBreakpointState(int id, bool enabled);
+  bool updateBreakpointHitCondition(int id, XDebugBreakpoint::HitCondition con);
+  bool updateBreakpointHitValue(int id, int hitValue);
 
   // Map from id => breakpoint. This where breakpoints are stored
   hphp_hash_map<int, XDebugBreakpoint> m_breakMap;
@@ -109,11 +132,15 @@ struct XDebugThreadBreakpoints {
 
 extern DECLARE_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 
-// Add/remove breakpoint entrypoints for other files
+// Breakpoint entrypoints for other files
 #define XDEBUG_ADD_BREAKPOINT(bp) \
   (s_xdebug_breakpoints->addBreakpoint(bp));
 #define XDEBUG_REMOVE_BREAKPOINT(id) \
   (s_xdebug_breakpoints->removeBreakpoint(id))
+#define XDEBUG_GET_BREAKPOINT(id) \
+  (s_xdebug_breakpoints->getBreakpoint(id))
+#define XDEBUG_BREAKPOINTS \
+  (s_xdebug_breakpoints->m_breakMap)
 
 ////////////////////////////////////////////////////////////////////////////////
 // XDebugHookHandler

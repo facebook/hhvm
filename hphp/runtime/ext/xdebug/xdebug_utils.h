@@ -45,7 +45,7 @@ public:
 
   // Translated from xdebug.
   // xdebug desc: fake URI's per IETF RFC 1738 and 2396 format
-  static char* pathToUrl(char* fileurl);
+  static char* pathToUrl(const char* fileurl);
 
   // HHVM interface for pathToUrl
   static String pathToUrl(const String& fileurl) {

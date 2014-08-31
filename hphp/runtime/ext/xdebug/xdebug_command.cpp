@@ -121,6 +121,84 @@ static Unit* xdebug_compile(const String& expr) {
   return unit;
 }
 
+// Helper for the breakpoint commands that returns an xml node containing
+// breakpoint information
+static xdebug_xml_node* breakpoint_xml_node(int id,
+                                            const XDebugBreakpoint& bp) {
+  // Initialize the xml node
+  xdebug_xml_node* xml = xdebug_xml_node_init("breakpoint");
+  xdebug_xml_add_attribute(xml, "id", id);
+
+  // It looks like php5 xdebug used to consider "temporary" as a state. It's
+  // changed everywhere except here in xdebug's code. An obvious improvement
+  // would to output an extra "temporary" attribute, but for now this logic
+  // just follows xdebug
+  if (bp.temporary) {
+    xdebug_xml_add_attribute(xml, "state", "temporary");
+  } else if (bp.enabled) {
+    xdebug_xml_add_attribute(xml, "state", "enabled");
+  } else {
+    xdebug_xml_add_attribute(xml, "state", "disabled");
+  }
+
+  // Add the hit condition and count
+  switch (bp.hitCondition) {
+    case XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL:
+      xdebug_xml_add_attribute(xml, "hit_condition", ">=");
+      break;
+    case XDebugBreakpoint::HitCondition::EQUAL:
+      xdebug_xml_add_attribute(xml, "hit_condition", "==");
+      break;
+    case XDebugBreakpoint::HitCondition::MULTIPLE:
+      xdebug_xml_add_attribute(xml, "hit_condition", "%");
+      break;
+  }
+  xdebug_xml_add_attribute(xml, "hit_count", bp.hitCount);
+
+  // Add type specific info
+  switch (bp.type) {
+    // Line breakpoints add a file, line, and possibly a condition
+    case XDebugBreakpoint::Type::LINE:
+      xdebug_xml_add_attribute(xml, "type", "line");
+      xdebug_xml_add_attribute_ex(xml, "filename",
+                                  XDebugUtils::pathToUrl(bp.fileName.data()),
+                                  0, 1);
+      xdebug_xml_add_attribute(xml, "lineno", bp.line);
+
+      // Add the condition. cast is due to xml api
+      if (bp.conditionUnit != nullptr) {
+        xdebug_xml_node* expr_xml = xdebug_xml_node_init("expression");
+        xdebug_xml_add_text(expr_xml,
+                            const_cast<char*>(bp.condition.data()), 0);
+        xdebug_xml_add_child(xml, expr_xml);
+      }
+      break;
+    // Exception breakpoints just add the type
+    case XDebugBreakpoint::Type::EXCEPTION:
+      xdebug_xml_add_attribute(xml, "type", "exception");
+      break;
+    // Call breakpoints add function + class (optionally)
+    case XDebugBreakpoint::Type::CALL:
+      xdebug_xml_add_attribute(xml, "type", "call");
+      xdebug_xml_add_attribute(xml, "function", bp.funcName.data());
+      if (!bp.className.isNull()) {
+        xdebug_xml_add_attribute_dup(xml, "class",
+                                     bp.className.toString().data());
+      }
+      break;
+    // Return breakpoints add function + class (optionally)
+    case XDebugBreakpoint::Type::RETURN:
+      xdebug_xml_add_attribute(xml, "type", "return");
+      xdebug_xml_add_attribute(xml, "function", bp.funcName.data());
+      if (!bp.className.isNull()) {
+        xdebug_xml_add_attribute_dup(xml, "class",
+                                     bp.className.toString().data());
+      }
+      break;
+  }
+  return xml;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // status -i #
 // Returns the status of the server
@@ -162,8 +240,7 @@ public:
     // Set to true once we have a match. Const cast is needed due to xdebug
     // xml api.
     bool match = false;
-    xdebug_xml_add_attribute(&xml, "feature_name",
-                             const_cast<char*>(m_feature.c_str()));
+    xdebug_xml_add_attribute(&xml, "feature_name", m_feature.c_str());
 
     // Check against the defined features
     #define FEATURE(name, supported, val, free)                                \
@@ -244,8 +321,7 @@ public:
     }
 
     // Const cast is needed due to xdebug xml api.
-    xdebug_xml_add_attribute(&xml, "feature",
-                             const_cast<char*>(m_feature.c_str()));
+    xdebug_xml_add_attribute(&xml, "feature", m_feature.c_str());
     xdebug_xml_add_attribute(&xml, "success", "1");
   }
 
@@ -526,7 +602,9 @@ public:
 
       // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
-        bp.conditionUnit = xdebug_compile(args['-'].toString());
+        String condition = args['-'].toString();
+        bp.condition = condition;
+        bp.conditionUnit = xdebug_compile(condition);
       }
     }
 
@@ -565,7 +643,7 @@ public:
   void handleImpl(xdebug_xml_node& xml) override {
     // Add the breakpoint, write out the id
     int id = XDEBUG_ADD_BREAKPOINT(m_breakpoint);
-    xdebug_xml_add_attribute_ex(&xml, "id", xdebug_sprintf("%d", id), 0, 1);
+    xdebug_xml_add_attribute(&xml, "id", id);
 
     // Add the breakpoint state
     if (m_breakpoint.enabled) {
@@ -580,23 +658,37 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// breakpoint_get -i #
-// TODO(#4489053) Implement
+// breakpoint_get -i # -d ID
+// Returns information about the breakpoint with the given id
 
 class BreakpointGetCmd : public XDebugCommand {
 public:
   BreakpointGetCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Breakpoint id must be provided
+    if (args['d'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_id = strtol(args['d'].toString().data(), nullptr, 10);
+  }
+
   ~BreakpointGetCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
+    if (bp == nullptr) {
+      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+    }
+    xdebug_xml_add_child(&xml, breakpoint_xml_node(m_id, *bp));
   }
+
+private:
+  int m_id;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // breakpoint_list -i #
-// TODO(#4489053) Implement
+// Returns all the registered breakpoints
 
 class BreakpointListCmd : public XDebugCommand {
 public:
@@ -607,41 +699,158 @@ public:
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    for (auto iter = XDEBUG_BREAKPOINTS.begin();
+         iter != XDEBUG_BREAKPOINTS.end(); ++iter) {
+      int id = iter->first;
+      const XDebugBreakpoint& bp = iter->second;
+      xdebug_xml_add_child(&xml, breakpoint_xml_node(id, bp));
+    }
   }
 };
+
 ////////////////////////////////////////////////////////////////////////////////
-// breakpoint_update -i #
-// TODO(#4489053) Implement
+// breakpoint_update -i # -d id [-s STATE] [-n LINE] [-h HIT_VALUE]
+//                              [-o HIT_CONDITION]
+// Updates the breakpoint with the given id using the given arguments
 
 class BreakpointUpdateCmd : public XDebugCommand {
 public:
   BreakpointUpdateCmd(XDebugServer& server,
                       const String& cmd,
                       const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Breakpoint id must be provided
+    if (args['d'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_id = strtol(args['d'].toString().data(), nullptr, 10);
+
+    // Grab the new state if it was passed
+    if (!args['s'].isNull()) {
+      String state = args['s'].toString();
+      if (state == s_ENABLED) {
+        m_enabled = true;
+      } else if (state == s_DISABLED) {
+        m_enabled = false;
+      } else {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      m_hasEnabled = true;
+    }
+
+    // Grab the new line if it was passed
+    if (!args['n'].isNull()) {
+      m_hasLine = true;
+      m_line = strtol(args['n'].toString().data(), nullptr, 10);
+    }
+
+    // Grab the new hit value if it was passed
+    if (!args['h'].isNull()) {
+      m_hasHitValue = true;
+      m_hitValue = strtol(args['h'].toString().data(), nullptr, 10);
+    }
+
+    // Grab the hit condition if it was passed
+    if (!args['o'].isNull()) {
+      String condition = args['o'].toString();
+      if (condition == s_GREATER_OR_EQUAL) {
+        m_hitCondition = XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL;
+      } else if (condition == s_EQUAL) {
+        m_hitCondition = XDebugBreakpoint::HitCondition::EQUAL;
+      } else if (condition == s_MOD) {
+        m_hitCondition = XDebugBreakpoint::HitCondition::MULTIPLE;
+      } else {
+        throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+      m_hasHitCondition = true;
+    }
+  }
+
   ~BreakpointUpdateCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    // Need to grab the breakpoint to send back the breakpoint info
+    const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
+    if (bp == nullptr) {
+      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+    }
+
+    // If any of the updates fails an error is thrown
+    if (m_hasEnabled &&
+        !s_xdebug_breakpoints->updateBreakpointState(m_id, m_enabled)) {
+      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+    }
+    if (m_hasHitCondition &&
+        !s_xdebug_breakpoints->updateBreakpointHitCondition(m_id,
+                                                            m_hitCondition)) {
+      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+    }
+    if (m_hasHitValue &&
+        !s_xdebug_breakpoints->updateBreakpointHitValue(m_id, m_hitValue)) {
+      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+    }
+    if (m_hasLine &&
+        !s_xdebug_breakpoints->updateBreakpointLine(m_id, m_line)) {
+      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+    }
+
+    // Add the breakpoint info. php5 xdebug does this, the spec does
+    // not specify this.
+    xdebug_xml_node* node = breakpoint_xml_node(m_id, *bp);
+    xdebug_xml_add_child(&xml, node);
   }
+
+private:
+  int m_id;
+
+  // Options that can be passed
+  bool m_hasEnabled = false;
+  bool m_hasLine = false;
+  bool m_hasHitValue = false;
+  bool m_hasHitCondition = false;
+
+  // Valid if the corresponding boolean is true
+  bool m_enabled;
+  int m_line;
+  int m_hitValue;
+  XDebugBreakpoint::HitCondition m_hitCondition;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// breakpoint_remove -i #
-// TODO(#4489053) Implement
+// breakpoint_remove -i # -d ID
+// Removes the breakpoint with the given id
 
 class BreakpointRemoveCmd : public XDebugCommand {
 public:
   BreakpointRemoveCmd(XDebugServer& server,
                       const String& cmd,
                       const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Breakpoint id must be provided
+    if (args['d'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_id = strtol(args['d'].toString().data(), nullptr, 10);
+  }
+
   ~BreakpointRemoveCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
+    if (bp == nullptr) {
+      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+    }
+
+    // spec doesn't specify this, but php5 xdebug sends back breakpoint info
+    xdebug_xml_node* node = breakpoint_xml_node(m_id, *bp);
+    xdebug_xml_add_child(&xml, node);
+
+    // The breakpoint is deleted, so this has to be last
+    XDEBUG_REMOVE_BREAKPOINT(m_id);
   }
+
+private:
+  int m_id;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -656,8 +865,7 @@ public:
 
   void handleImpl(xdebug_xml_node& xml) override {
     int depth = XDebugUtils::stackDepth();
-    xdebug_xml_add_attribute_ex(&xml, "depth",
-                                xdebug_sprintf("%u", depth), 0, 1);
+    xdebug_xml_add_attribute(&xml, "depth", depth);
   }
 };
 
@@ -717,11 +925,9 @@ private:
 
     // Create the frame node
     xdebug_xml_node* node = xdebug_xml_node_init("stack");
-    xdebug_xml_add_attribute_ex(node, "where",
-                                const_cast<char*>(func_name), 0, 0);
-    xdebug_xml_add_attribute_ex(node, "level",
-                                xdebug_sprintf("%d", level), 0, 1);
-    xdebug_xml_add_attribute_ex(node, "type", "file", 0, 0);
+    xdebug_xml_add_attribute(node, "where", func_name);
+    xdebug_xml_add_attribute(node, "level", level);
+    xdebug_xml_add_attribute(node, "type", "file");
 
     // Grab the callsite
     String call_file; int call_line;
@@ -737,10 +943,8 @@ private:
     call_file = XDebugUtils::pathToUrl(call_file); // file output format
 
     // Add the call file/line. Duplications are necessary due to xml api
-    xdebug_xml_add_attribute_ex(node, "filename",
-                                xdstrdup(call_file.data()), 0, 1);
-    xdebug_xml_add_attribute_ex(node, "lineno",
-                                xdebug_sprintf("%d", call_line), 0, 1);
+    xdebug_xml_add_attribute_dup(node, "filename", call_file.data());
+    xdebug_xml_add_attribute(node, "lineno", call_line);
     return node;
   }
 
@@ -829,13 +1033,10 @@ public:
     // Add the types. Casts are necessary due to xml api
     for (int i = 0; i < XDEBUG_TYPES_COUNT; i++) {
       xdebug_xml_node* type = xdebug_xml_node_init("map");
-      xdebug_xml_add_attribute(type, "name",
-                               const_cast<char*>(s_TYPEMAP[i][1]));
-      xdebug_xml_add_attribute(type, "type",
-                               const_cast<char*>(s_TYPEMAP[i][0]));
+      xdebug_xml_add_attribute(type, "name", s_TYPEMAP[i][1]);
+      xdebug_xml_add_attribute(type, "type", s_TYPEMAP[i][0]);
       if (s_TYPEMAP[i][2]) {
-        xdebug_xml_add_attribute(type, "xsi:type",
-                                 const_cast<char*>(s_TYPEMAP[i][2]));
+        xdebug_xml_add_attribute(type, "xsi:type", s_TYPEMAP[i][2]);
       }
       xdebug_xml_add_child(&xml, type);
     }

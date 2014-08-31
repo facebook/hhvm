@@ -70,7 +70,7 @@ static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
 }
 
 // TODO(#4489053) Clean this up-- this was taken from php5 xdebug
-char* XDebugUtils::pathToUrl(char* fileurl) {
+char* XDebugUtils::pathToUrl(const char* fileurl) {
   int l, i, new_len;
   char *tmp = nullptr;
   char *encoded_fileurl;

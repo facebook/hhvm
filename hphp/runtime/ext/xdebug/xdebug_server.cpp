@@ -415,31 +415,27 @@ void XDebugServer::addCommand(xdebug_xml_node& node, const XDebugCommand& cmd) {
 
   // We can't assume the passed command will stick around before the node is
   // sent
-  char* command = xdstrdup(cmd_str.data());
-  char* trans = xdstrdup(trans_str.data());
-  xdebug_xml_add_attribute_ex(&node, "command", command, 0, 1);
-  xdebug_xml_add_attribute_ex(&node, "transaction_id", trans, 0, 1);
+  xdebug_xml_add_attribute_dup(&node, "command", cmd_str.data());
+  xdebug_xml_add_attribute_dup(&node, "transaction_id", trans_str.data());
 }
 
 void XDebugServer::addStatus(xdebug_xml_node& node) {
-  // TODO(#4489053) Change this when xml api is changed
-  char* status = const_cast<char*>(getXDebugStatusString(m_status));
-  char* reason = const_cast<char*>(getXDebugReasonString(m_reason));
-  xdebug_xml_add_attribute_ex(&node, "status", status, 0, 0);
-  xdebug_xml_add_attribute_ex(&node, "reason", reason, 0, 0);
+  const char* status = getXDebugStatusString(m_status);
+  const char* reason = getXDebugReasonString(m_reason);
+  xdebug_xml_add_attribute(&node, "status", status);
+  xdebug_xml_add_attribute(&node, "reason", reason);
 }
 
 void XDebugServer::addError(xdebug_xml_node& node, ErrorCode code) {
   // Create the error node
   xdebug_xml_node* error = xdebug_xml_node_init("error");
-  xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", code), 0, 1);
+  xdebug_xml_add_attribute(error, "code", code);
   xdebug_xml_add_child(&node, error);
 
   // Add the error code's error message
-  // TODO(#4489053) Change this when xml api is changed
   xdebug_xml_node* message = xdebug_xml_node_init("message");
-  char* error_str = const_cast<char*>(getXDebugErrorString(code));
-  xdebug_xml_add_text_ex(message, error_str, strlen(error_str), 0, 0);
+  xdebug_xml_add_text(message,
+                      const_cast<char*>(getXDebugErrorString(code)), 0);
   xdebug_xml_add_child(error, message);
 }
 
@@ -498,28 +494,21 @@ bool XDebugServer::initDbgp() {
   char* scriptname = scriptname_var.toString().get()->mutableData();
   char* fileuri = XDebugUtils::pathToUrl(scriptname);
 
-  // Grab the app id (pid)
-  // TODO(#4489053) Specification mentions the parent app id as well, xdebug
-  //                doesn't include it.
-  char* appid = xdebug_sprintf("%d", getpid());
-
   // Add attributes to the root init node
   xdebug_xml_add_attribute_ex(response, "fileuri", fileuri, 0, 1);
-  xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
-  xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
-  xdebug_xml_add_attribute_ex(response, "appid", appid, 0, 1);
+  xdebug_xml_add_attribute(response, "language", "PHP");
+  xdebug_xml_add_attribute(response, "protocol_version", DBGP_VERSION);
+  xdebug_xml_add_attribute(response, "appid", getpid());
 
   // Add the DBGP_COOKIE environment variable
   char* dbgp_cookie = getenv("DBGP_COOKIE");
   if (dbgp_cookie != nullptr) {
-    xdebug_xml_add_attribute_ex(response, "session", dbgp_cookie, 0, 0);
+    xdebug_xml_add_attribute(response, "session", dbgp_cookie);
   }
 
   // Add the idekey
   if (XDEBUG_GLOBAL(IdeKey).size() > 0) {
-    // TODO(#4489053) Change this when xml api is changed
-    char* idekey = const_cast<char*>(XDEBUG_GLOBAL(IdeKey).c_str());
-    xdebug_xml_add_attribute_ex(response, "idekey", idekey, 0, 0);
+    xdebug_xml_add_attribute(response, "idekey", XDEBUG_GLOBAL(IdeKey).c_str());
   }
 
   // Sent the response
@@ -619,7 +608,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
     xdebug_xml_add_attribute_ex(msg, "filename", filename_str, 0, 1);
   }
   if (exception_str != nullptr) {
-    xdebug_xml_add_attribute_ex(msg, "exception", exception_str, 0, 0);
+    xdebug_xml_add_attribute(msg, "exception", exception_str);
   }
   if (message_str != nullptr) {
     xdebug_xml_add_text(msg, message_str, 0);

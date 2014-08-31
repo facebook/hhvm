@@ -26,8 +26,8 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
 
 namespace HPHP {
-
 ////////////////////////////////////////////////////////////////////////////////
+
 struct XDebugExporter {
   typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
   SmartPtrCtrMap counts; // Map of pointer -> # of times we've seen this object

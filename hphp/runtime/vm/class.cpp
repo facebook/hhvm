@@ -570,6 +570,15 @@ void Class::initSPropHandles() const {
         auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
         propHandle = sProp.m_class->m_sPropCache[realSlot];
       }
+    } else if (propHandle.isPersistent()) {
+      /*
+       * Avoid a weird race: two threads come through at once, the first
+       * gets as far as binding propHandle, but then sleeps. Meanwhile the
+       * second sees that its been bound, finishes up, and then tries to
+       * read the property, but sees uninit-null for the value (and asserts
+       * in a dbg build)
+       */
+      *propHandle = m_staticProperties[slot].m_val;
     }
     if (!propHandle.isPersistent()) {
       allPersistentHandles = false;

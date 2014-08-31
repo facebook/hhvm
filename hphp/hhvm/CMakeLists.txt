@@ -20,8 +20,15 @@ if(CYGWIN OR MSVC OR MING)
       PROPERTIES GENERATED TRUE)
 endif()
 
-add_executable(hhvm ${CXX_SOURCES})
-target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES})
+if (LINUX)
+  SET(LINKER_SCRIPT -Wl,-script,../tools/linker_script)
+  add_executable(hhvm ${CXX_SOURCES})
+  target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${LINKER_SCRIPT})
+else()
+  add_executable(hhvm ${CXX_SOURCES})
+  target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES})
+endif()
+
 
 # cygwin has an issue with linking to crypt and intl
 # this is the only way the redirection stuff works

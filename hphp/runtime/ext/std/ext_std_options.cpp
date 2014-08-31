@@ -710,8 +710,24 @@ const StaticString
 static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
   struct rusage usg;
   memset(&usg, 0, sizeof(struct rusage));
+  int actual_who;
+  switch (who) {
+  case 1:
+    actual_who = RUSAGE_CHILDREN;
+    break;
+  case 2:
+#ifdef RUSAGE_THREAD
+    actual_who = RUSAGE_THREAD;
+#else
+    throw_not_supported(__func__, "RUSAGE_THREAD is not defined on this sytem");
+#endif
+    break;
+  default:
+    actual_who = RUSAGE_SELF;
+    break;
+  }
 
-  if (getrusage(who == 1 ? RUSAGE_CHILDREN : RUSAGE_SELF, &usg) == -1) {
+  if (getrusage(actual_who, &usg) == -1) {
     raise_error("getrusage returned %d: %s", errno,
       folly::errnoStr(errno).c_str());
   }

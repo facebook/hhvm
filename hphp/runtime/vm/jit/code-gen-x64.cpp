@@ -1033,14 +1033,8 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
                             SyncOptions sync, ArgGroup& args) {
   assert(m_curInst->isNative());
 
-  auto const destType = dstInfo.type;
-  auto const dstReg0  = dstInfo.reg0;
-  auto const dstReg1  = dstInfo.reg1;
-
-  // Save the caller-saved registers that are live across this
-  // instruction. The number of regs to save and the number of args
-  // being passed on the stack affect the parity of the PhysRegSaver,
-  // so we use the generic version here.
+  // Adjust rsp based on the number of stack args. vasm-xls takes care
+  // of preserving caller-saved registers live across this call.
   PhysRegSaverParity regSaver(1 + args.numStackArgs(), v, RegSet());
 
   // Assign registers to the arguments then prepare them for the call.
@@ -1057,7 +1051,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   }
   regSaver.bytesPushed(shuffleArgs(v, args, call));
 
-  // do the call; may use a trampoline
+  // do the call
   if (sync == SyncOptions::kSmashableAndSyncPoint) {
     assert(call.kind() == CppCall::Kind::Direct);
     v << mccall{(TCA)call.address(), argRegs};
@@ -1106,14 +1100,14 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   }
 
   // copy the call result to the destination register(s)
-  switch (destType) {
+  switch (dstInfo.type) {
   case DestType::TV: {
       // rax contains m_type and m_aux but we're expecting just the
       // type in the lower bits, so shift the type result register.
       auto rval = packed_tv ? reg::rdx : reg::rax;
       auto rtyp = packed_tv ? reg::rax : reg::rdx;
       if (kTypeShiftBits > 0) v << shrqi{kTypeShiftBits, rtyp, rtyp};
-      v << copy2{rval, rtyp, dstReg0, dstReg1};
+      v << copy2{rval, rtyp, dstInfo.reg0, dstInfo.reg1};
     }
     break;
   case DestType::SIMD: {
@@ -1122,20 +1116,20 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
       auto rval = packed_tv ? reg::rdx : reg::rax;
       auto rtyp = packed_tv ? reg::rax : reg::rdx;
       if (kTypeShiftBits > 0) v << shrqi{kTypeShiftBits, rtyp, rtyp};
-      pack2(v, rval, rtyp, dstReg0);
+      pack2(v, rval, rtyp, dstInfo.reg0);
     }
     break;
   case DestType::SSA:
-    // copy the single-register result to dstReg0
-    assert(!dstReg1.isValid());
-    if (dstReg0.isValid()) v << copy{reg::rax, dstReg0};
+    // copy the single-register result to dstInfo.reg0
+    assert(!dstInfo.reg1.isValid());
+    if (dstInfo.reg0.isValid()) v << copy{reg::rax, dstInfo.reg0};
     break;
   case DestType::None:
     break;
   case DestType::Dbl:
-    // copy the single-register result to dstReg0
-    assert(!dstReg1.isValid());
-    if (dstReg0.isValid()) v << copy{reg::xmm0, dstReg0};
+    // copy the single-register result to dstInfo.reg0
+    assert(!dstInfo.reg1.isValid());
+    if (dstInfo.reg0.isValid()) v << copy{reg::xmm0, dstInfo.reg0};
     break;
   }
 }
@@ -3942,8 +3936,7 @@ void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label) {
     emitTypeCheck(type, refTVType(base), refTVData(base), label);
   }
   auto dstReg = dstLoc.reg();
-  // if dstReg == InvalidReg then there's nothing to load.
-  if (!dstReg.isValid()) return;
+  if (!dstReg.isValid()) return; // e.g. dest is known const.
   if (type <= Type::Bool) {
     vmain() << loadl{refTVData(base), dstReg};
   } else {
@@ -3951,71 +3944,26 @@ void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label) {
   }
 }
 
-Vptr resolveRegCollision(Vout& v, Vreg dst, Vptr memRef) {
-  assert(memRef.scale == 1);
-  Vreg base = memRef.base;
-  Vreg index = memRef.index;
-  if (!index.isValid()) {
-    if (base == dst) {
-      // use a scratch register instead
-      auto tmp = v.makeReg();
-      v << copy{base, tmp};
-      return tmp[memRef.disp];
-    }
-    return memRef;
-  }
-  if (base == dst) {
-    // use a scratch register instead
-    auto tmp = v.makeReg();
-    v << copy{base, tmp};
-    return tmp[index + memRef.disp];
-  }
-  if (index == dst) {
-    // use a scratch register instead
-    auto tmp = v.makeReg();
-    v << copy{index, tmp};
-    return tmp[base + memRef.disp];
-  }
-  return memRef;
-}
-
 // If label is not null and type is not Gen, this method generates a check
 // that bails to the label if the loaded typed value doesn't match dst type.
-void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc,
-                                     Vptr origRef, Block* label) {
-  Type type = dst->type();
+void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
+                                     Block* label) {
   auto valueDstReg = dstLoc.reg(0);
-  auto typeDstReg  = dstLoc.reg(1);
   auto& v = vmain();
   if (dstLoc.isFullSIMD()) {
-    assert(!label);
     // Whole typed value is stored in single SIMD reg valueDstReg
-    assert(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    assert(!typeDstReg.isValid());
-    v << loaddqu{refTVData(origRef), valueDstReg};
+    assert(!label);
+    v << loaddqu{refTVData(ref), valueDstReg};
     return;
   }
-
-  if (!valueDstReg.isValid() && !typeDstReg.isValid() &&
-      (!label || type == Type::Gen)) {
-    // a dead load
-    return;
+  auto typeDstReg = dstLoc.reg(1);
+  Type type = dst->type();
+  // Load type
+  emitLoadTVType(v, refTVType(ref), typeDstReg);
+  if (label) {
+    emitTypeCheck(type, typeDstReg, valueDstReg, label);
   }
-
-  auto ref = !typeDstReg.isValid() ? origRef :
-             resolveRegCollision(v, typeDstReg, origRef);
-  // Load type if it's not dead
-  if (typeDstReg.isValid()) {
-    emitLoadTVType(v, refTVType(ref), typeDstReg);
-    if (label) {
-      emitTypeCheck(type, typeDstReg, valueDstReg, label);
-    }
-  } else if (label) {
-    emitTypeCheck(type, refTVType(ref), refTVData(ref), label);
-  }
-
-  // Load value if it's not dead
-  if (!valueDstReg.isValid()) return;
+  // Load value
   v << loadq{refTVData(ref), valueDstReg};
 }
 
@@ -5086,7 +5034,6 @@ void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
 
 void CodeGenerator::emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc) {
   auto reg = srcLoc.reg();
-  assert(reg.isValid());
   if (src->isA(Type::Bool)) {
     v << testb{reg, reg};
   } else {

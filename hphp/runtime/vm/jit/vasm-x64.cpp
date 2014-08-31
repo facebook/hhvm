@@ -783,6 +783,7 @@ void Vasm::finish(const Abi& abi, bool useLLVM) {
 
   if (m_unit.hasVrs()) {
     Timer _t(Timer::vasm_xls);
+    removeDeadCode(m_unit);
     allocateRegisters(m_unit, abi);
   }
   if (m_unit.blocks.size() > 1) {

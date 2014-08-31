@@ -888,6 +888,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
     printUnit("after code-gen", vasm.unit());
+    assert(check(vunit));
     vasm.finish(vasm_abi, useLLVM);
     if (state.asmInfo) {
       auto block = unit.entry();

@@ -38,6 +38,7 @@ std::string show(const x64::Vunit& unit);
 
 // Tracing level constants.
 constexpr int kInitialVasmLevel = 1;
+constexpr int kVasmImmsLevel = 2;
 constexpr int kVasmRegAllocLevel = 3;
 constexpr int kVasmJumpsLevel = 4;
 constexpr int kVasmDCELevel = 4;

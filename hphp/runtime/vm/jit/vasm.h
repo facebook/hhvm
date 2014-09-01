@@ -71,9 +71,11 @@ struct Vmeta {
   jit::vector<CodeAddress> points;
 };
 
+// passes
 void allocateRegisters(x64::Vunit&, const Abi&);
 void optimizeJmps(x64::Vunit&);
 void removeDeadCode(x64::Vunit&);
+void foldImms(x64::Vunit&);
 
 /*
  * Get the successors of a block or instruction. If given a non-const

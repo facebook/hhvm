@@ -93,7 +93,8 @@ if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
   ENDMACRO(CHECK_LIBDWARF_INIT)
 
   # Order is important, last one is used.
-  CHECK_LIBDWARF_INIT("dwarf_producer_init"   "0, dwarfCallback, nullptr, nullptr, nullptr"          0)
+  CHECK_LIBDWARF_INIT("dwarf_producer_init"  
+	"0, dwarfCallback, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr" 0)
   CHECK_LIBDWARF_INIT("dwarf_producer_init_c" "0, dwarfCallback, nullptr, nullptr, nullptr, nullptr" 1)
 endif()
 

@@ -1,3 +1,63 @@
+"Snoop Dogg" 11-Sep-2014
+ - VASM phase 1: emit vasm instructions, with existing register allocation
+ - More xdebug support
+ - [hack] Implement async lambdas.
+ - add process memory and code segment size to admin memory page
+ - Overhauled xdebug remote debugging testing
+ - Add a mechanism for building and testing a zend extension as a DSO.
+ - Support fast object allocation path when Eval.EnableObjDestruct call is on
+ - Static string table memory usage
+ - Implement parallel repo preloading.
+ - Add mcrypt constants to hhi
+ - Move var_dump() to HNI, kill off variable.idl.json
+ - JIT: Use std, boost, and folly instead of smart containers.
+ - Hack: Support for variance (+/-) annotations on type-parameters
+ - Implement APCIterator
+ - Convert v?s?printf() to HNI using Variadics
+ - Enable variadics for HNI functions/methods
+ - Smooth a wrinkle in HHVM's safesort impl
+ - Make Set implement KeyedIterable and support bracket syntax for reading
+ - Covariance fixes
+
+"RBX" 28-Aug-2014
+ - Make MemExceeded flag sticky
+ - Check for OOM during json decoding
+ - Check surprise flags when unserializing arrays and objects
+ - Limit curl timeout to remaining request timeout
+ - Add variant of openssl_pkcs7_verify that ignores cert expiration
+ - Numerous changes to support xdebug
+ - Remove use of non-threadsafe strtok()
+ - Numerous changes to normalize INI setting names
+ - update to new sqlite
+ - <<__Memoize>> support
+ - Hack: Print backtrace when worker dies
+ - Parser support for "varray(..)"
+ - Introduce kVPackedKind for vector-like arrays
+ - Move mailparse to HNI
+ - VASM start phase 1; emit vasm for some instructions
+ - Fix in headers defines for cygwin
+ - [hack] Parser: Fix decl mode's confusion of type hints and xhp.
+ - Create a unified stack for Xenon
+ - Move debugger from IDL to HNI
+ - Fix mcrypt_create_iv(..., MCRYPT_RAND) to auto-seed RNG
+ - Fix information leak in hash_equals() implementation
+ - don't statically link libgcc/libstdc++ by default on OSX
+ - Adds ssdeep module to HHVM
+ - added new raise_error family functions that skip the top frame of the backtrace.
+ - Add initial support for -d outside of --php mode
+ - Fix covariance for Const{Vector,Map,Set}, add tests
+ - GMP cleanup/fixes
+ - Implement SplDoublyLinkedList::add
+ - Link against LLVM library if present.
+ - Disallow multiple 'default:' blocks in a single switch
+ - Introduce async function lambdas
+ - Document the PHP profilers
+ - Fix sample profiler output; make it more efficient
+ - Properly shut down fastcgi worker threads when connection is closed
+ - Delete SimpleProfiler
+ - Create HHVM man page
+ - Improved PHP compatibility in the reflection API.
+
 "Queen Latifah" 14-Aug-2014
  - Implement RecursiveCallbackFilterIterator
  - cmake installations should no longer put files in hphp and now put them in hhvm
@@ -40,7 +100,7 @@
  - Relax restrictions on the typing of class constant shape field names.
  - Fix file:// URL decoding in libxml functions and elsewhere
 
-NEXT
+"Public Enemy" 31-July-2014
  - Interface requirements (similar to trait requirements) enforced
  - Initial support for PHP5.6 argument unpacking: f($x, $y, ...$args)
  - Hack: hhi files are embedded in the hh_server binary
@@ -50,7 +110,7 @@ NEXT
  - Cleanup of PHP-level profilers
  - Change default for Eval.EnableObjDestructCall to true
 
-"Outkast" 17-July 2014
+"Outkast" 17-July-2014
   - PHP_VERSION is now 5.6
   - Introduce Dbl specific relational IR opcodes
   - Expose APC info to admin port

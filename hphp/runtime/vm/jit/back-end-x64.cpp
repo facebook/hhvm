@@ -901,7 +901,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       assert(vasm.cold().empty() || vasm.cold().closed());
       assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
-    printUnit(kInitialVasmLevel, "after initial vasm generation", vasm.unit());
+    printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
     vasm.finish(vasm_abi, useLLVM);
     if (state.asmInfo) {

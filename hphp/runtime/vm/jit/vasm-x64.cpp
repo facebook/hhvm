@@ -786,7 +786,9 @@ void Vasm::finish(const Abi& abi, bool useLLVM) {
              e.what());
     }
   }
-
+  if (!m_unit.cpool.empty()) {
+    foldImms(m_unit);
+  }
   if (m_unit.hasVrs()) {
     Timer _t(Timer::vasm_xls);
     removeDeadCode(m_unit);

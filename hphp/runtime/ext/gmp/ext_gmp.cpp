@@ -60,34 +60,42 @@ static bool variantToGMPData(const char* fnCaller,
         isNegative = true;
         negativeSign = "-";
       } else if (strNum[0] == '+') {
-        /* Our "isNumeric" function considers '+' a valid lead to a number,
-         * php does not agree.
-         */
-        return false;
+          /* Our "isNumeric" function considers '+' a valid lead to a number,
+           * php does not agree.
+           */
+          return false;
       } else {
         isNegative = false;
         negativeSign = "";
-      }
-
-      //Figure out what Base to use based on the data
-      if (strLength > (isNegative + 2) && strNum[isNegative] == '0') {
-        if (strNum[isNegative + 1] == 'x' || strNum[isNegative + 1] == 'X') {
-          base = 16;
-          strNum = negativeSign + strNum.substr(isNegative + 2);
-        } else if (base != 16 && (strNum[isNegative + 1] == 'b' ||
-                                  strNum[isNegative + 1] == 'B')) {
-          base = 2;
-          strNum = negativeSign + strNum.substr(isNegative + 2);
-        } else {
-          base = 8;
-          strNum = negativeSign + strNum.substr(isNegative + 1);
         }
-      }
+
+        /* Figure out what base to use based on the data.
+         *
+         * We can't rely on GMP's auto-base detection as it doesn't handle cases
+         * where a base is specified AND a prefix is specified. So, we strip out
+         * all prefixes and detect the bases ourselves.
+         */
+        if (strLength > (isNegative + 2) && strNum[isNegative] == '0') {
+          if ((base == 0 || base == 16)
+              && (strNum[isNegative + 1] == 'x'
+                  || strNum[isNegative + 1] == 'X')) {
+            base = 16;
+            strNum = negativeSign + strNum.substr(isNegative + 2);
+          } else if ((base == 0 || base == 2)
+                     && (strNum[isNegative + 1] == 'b'
+                         || strNum[isNegative + 1] == 'B')) {
+            base = 2;
+            strNum = negativeSign + strNum.substr(isNegative + 2);
+          } else if (base == 0 || base == 8) {
+            base = 8;
+            strNum = negativeSign + strNum.substr(isNegative + 1);
+          }
+        }
 
       if (mpz_init_set_str(gmpData, strNum.c_str(), base) == -1) {
         mpz_clear(gmpData);
 
-        if ((base == 10 || base == 0) && strNum.get()->isNumeric()) {
+        if (base == 0 && strNum.get()->isNumeric()) {
           mpz_init_set_si(gmpData, strNum.toInt64());
         } else {
           return false;
@@ -584,9 +592,8 @@ static Variant HHVM_FUNCTION(gmp_hamdist,
 
 static Variant HHVM_FUNCTION(gmp_init,
                              const Variant& data,
-                             const int64_t base /* = 10 */) {
+                             const int64_t base /* = 0 */) {
   mpz_t gmpData;
-
 
   if (base < GMP_MIN_BASE || base == -1 || base == 1 || base > GMP_MAX_BASE) {
     raise_warning(cs_GMP_INVALID_BASE_VALUE,
@@ -1107,7 +1114,7 @@ static Variant HHVM_FUNCTION(gmp_strval,
                             const int64_t base /* = 10 */) {
   mpz_t gmpData;
 
-  if (base < GMP_MIN_BASE || base == -1 || base == 1 || base > GMP_MAX_BASE) {
+  if (base < GMP_MIN_BASE || (base > -2 && base < 2) || base > GMP_MAX_BASE) {
     raise_warning(cs_GMP_INVALID_BASE_VALUE,
                   cs_GMP_FUNC_NAME_GMP_STRVAL,
                   base,

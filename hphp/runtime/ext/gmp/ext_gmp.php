@@ -77,7 +77,7 @@ function gmp_hamdist(mixed $a,
 
 <<__Native>>
 function gmp_init(mixed $number,
-                  int $base = 10): mixed;
+                  int $base = 0): mixed;
 
 
 <<__Native>>

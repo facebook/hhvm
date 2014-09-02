@@ -127,7 +127,6 @@ public:
   CLASSNAME_IS("GMP integer")
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-public:
   explicit GMPResource(mpz_t data) { mpz_init_set(m_gmpMpz, data); }
   virtual ~GMPResource() { close(); }
   void     close() { mpz_clear(m_gmpMpz); }

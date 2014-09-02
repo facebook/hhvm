@@ -1734,7 +1734,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
       PDOBoundParam *param =
         iter.second().toResource().getTyped<PDOBoundParam>();
       if (param->paramno >= 0) {
-        param->parameter.unset();
+        param->parameter.setNull();
         /* set new value */
         fetch_value(stmt, param->parameter, param->paramno,
                     (int *)&param->param_type);

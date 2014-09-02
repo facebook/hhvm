@@ -73,10 +73,12 @@ int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::NoSilencer = false;
+int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
+int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
 
@@ -732,6 +734,8 @@ void RuntimeOption::Load(IniSetting::Map& ini,
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
                  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
+    Config::Bind(ForceErrorReportingLevel, ini,
+                 logger["ForceErrorReportingLevel"], 0);
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
                  "%h %l %u %t \"%r\" %>s %b");
 
@@ -759,6 +763,7 @@ void RuntimeOption::Load(IniSetting::Map& ini,
     /* Remove this, once its removed from production configs */
     (void)Config::GetBool(ini, error["NoInfiniteLoopDetection"]);
 
+    Config::Bind(ErrorUpgradeLevel, ini, error["UpgradeLevel"], 0);
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,

@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-// TODO(#4489053) This should use hhvm constructs as well as be cleaned up
+// TODO(#3704) This should use hhvm constructs as well as be cleaned up
 
 #ifndef incl_XDEBUG_VAR_H_
 #define incl_XDEBUG_VAR_H_
@@ -27,6 +27,12 @@
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
+// Errors
+
+const String xdebug_error_type(int errnum);
+
+////////////////////////////////////////////////////////////////////////////////
+// Variable Exporting
 
 struct XDebugExporter {
   typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;

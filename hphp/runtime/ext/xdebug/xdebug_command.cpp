@@ -20,7 +20,11 @@
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/constants.h"
@@ -197,6 +201,29 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
       break;
   }
   return xml;
+}
+
+// Helper that adds the property with the given name, looking it up from the
+// given frame, to the given xml node, using the given exporter. If the symbol
+// is invalid, an error code is thrown.
+void xdebug_add_property_xml(xdebug_xml_node& root,
+                             const String& name,
+                             int depth,
+                             XDebugVarType type,
+                             XDebugExporter exporter) {
+  String decoded = StringUtil::Base64Decode(name);
+
+  ActRec* fp = g_context->getStackFrame();
+  Variant val = xdebug_get_php_symbol(fp, decoded.get());
+
+  if (!val.isInitialized()) {
+    throw XDebugServer::ERROR_PROPERTY_NON_EXISTANT;
+  }
+
+  // Success, add the property xml
+  xdebug_xml_node* xml =
+    xdebug_get_value_xml_node(decoded.data(), val, type, exporter);
+  xdebug_xml_add_child(&root, xml);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -512,7 +539,8 @@ static const StaticString
   s_DISABLED("disabled"),
   s_GREATER_OR_EQUAL(">="),
   s_EQUAL("=="),
-  s_MOD("%");
+  s_MOD("%"),
+  s_user("user");
 
 class BreakpointSetCmd : public XDebugCommand {
 public:
@@ -880,13 +908,10 @@ class StackGetCmd : public XDebugCommand {
 public:
   StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
-    // Compute the maximum depth
-    m_maxDepth = XDebugUtils::stackDepth();
-
     // Grab the optional depth argument
     if (!args['d'].isNull()) {
       m_clientDepth = strtol(args['d'].toString().data(), nullptr, 10);
-      if (m_clientDepth < 0 || m_clientDepth > m_maxDepth) {
+      if (m_clientDepth < 0 || m_clientDepth > XDebugUtils::stackDepth()) {
         throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
       }
     }
@@ -899,21 +924,24 @@ public:
   void handleImpl(xdebug_xml_node& xml) override {
     // Iterate up the stack. We need to keep track of both the frame actrec and
     // our current depth in case the client passed us a depth
-    int depth = m_maxDepth;
+    int depth = 0;
+    const ActRec* last_fp = nullptr;
     for (const ActRec* fp = g_context->getStackFrame();
-         fp != nullptr && depth >= m_clientDepth;
-         fp = g_context->getPrevVMState(fp), depth--) {
+         fp != nullptr && (m_clientDepth == -1 || depth <= m_clientDepth);
+         fp = g_context->getPrevVMState(fp), depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
-        xdebug_xml_node* frame = getFrame(fp, depth);
+        xdebug_xml_node* frame = getFrame(fp, last_fp, depth);
         xdebug_xml_add_child(&xml, frame);
       }
+      last_fp = fp;
     }
   }
 
 private:
-  // Returns the xml node for the given stack frame
-  xdebug_xml_node* getFrame(const ActRec* fp, int level) {
+  // Returns the xml node for the given stack frame. The lastFp, if provided,
+  // is the frame "below" the passed fp.
+  xdebug_xml_node* getFrame(const ActRec* fp, const ActRec* lastFp, int level) {
     Offset call_offset;
     const Func* func = fp->func();
     const ActRec* prev_fp = g_context->getPrevVMState(fp, &call_offset);
@@ -929,16 +957,20 @@ private:
     xdebug_xml_add_attribute(node, "level", level);
     xdebug_xml_add_attribute(node, "type", "file");
 
-    // Grab the callsite
+    // Grab the callsite. php5 xdebug returns the current line/file for the
+    // top level.
     String call_file; int call_line;
     if (prev_fp != nullptr) {
       const Unit* prev_unit = prev_fp->func()->unit();
       call_file = String(prev_unit->filepath()->data(), CopyString);
       call_line = prev_unit->getLineNumber(call_offset);
+    } else if (lastFp != nullptr) {
+      call_file = String(func->filename()->data(), CopyString);
+      call_line = func->unit()->getLineNumber(func->base() + lastFp->m_soff);
     } else {
-      // fp must be top level main, just grab its file and use an invalid line
-      call_file = String(fp->func()->filename()->data(), CopyString);
-      call_line = -1;
+      // Currently at the top level
+      call_file = String(func->filename()->data(), CopyString);
+      call_line = g_context->getLine();
     }
     call_file = XDebugUtils::pathToUrl(call_file); // file output format
 
@@ -948,13 +980,21 @@ private:
     return node;
   }
 
-  int m_maxDepth;   // Depth when the command is constructed
+private:
   int m_clientDepth = -1; // If >= 0, depth of the stack frame the client wants
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // context_names -i # [-d DEPTH]
 // Returns the names of the currently available contexts at the given depth
+
+// This a really weird set of contexts. But they match php5 xdebug. Adding
+// contexts such as class would make sense
+enum class XDebugContext : int {
+  LOCAL = 1,
+  SUPERGLOBALS = 2,
+  USER_CONSTANTS = 3
+};
 
 class ContextNamesCmd : public XDebugCommand {
 public:
@@ -967,34 +1007,120 @@ public:
   void handleImpl(xdebug_xml_node& xml) override {
     xdebug_xml_node* child = xdebug_xml_node_init("context");
     xdebug_xml_add_attribute(child, "name", "Locals");
-    xdebug_xml_add_attribute(child, "id", "0");
+    xdebug_xml_add_attribute(child, "id",
+                             static_cast<int>(XDebugContext::LOCAL));
     xdebug_xml_add_child(&xml, child);
 
     child = xdebug_xml_node_init("context");
     xdebug_xml_add_attribute(child, "name", "Superglobals");
-    xdebug_xml_add_attribute(child, "id", "1");
+    xdebug_xml_add_attribute(child, "id",
+                             static_cast<int>(XDebugContext::SUPERGLOBALS));
     xdebug_xml_add_child(&xml, child);
 
     child = xdebug_xml_node_init("context");
     xdebug_xml_add_attribute(child, "name", "User defined constants");
-    xdebug_xml_add_attribute(child, "id", "2");
+    xdebug_xml_add_attribute(child, "id",
+                             static_cast<int>(XDebugContext::USER_CONSTANTS));
     xdebug_xml_add_child(&xml, child);
   }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// context_get -i #
-// TODO(#4489053) Implement
+// context_get -i # [-d DEPTH] [-c CONTEXT]
 
 class ContextGetCmd : public XDebugCommand {
 public:
   ContextGetCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // Grab the context if it was passed
+    if (!args['c'].isNull()) {
+      int context = args['c'].toInt32();
+      switch (context) {
+        case static_cast<int>(XDebugContext::LOCAL):
+        case static_cast<int>(XDebugContext::SUPERGLOBALS):
+        case static_cast<int>(XDebugContext::USER_CONSTANTS):
+          m_context = static_cast<XDebugContext>(context);
+          break;
+        default:
+          throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+    }
+
+    // Grab the depth if it was provided
+    if (!args['d'].isNull()) {
+      m_depth = strtol(args['d'].toString().data(), nullptr, 10);
+    } else {
+      m_depth = 0;
+    }
+  }
+
   ~ContextGetCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    // Setup the variable exporter
+    // TODO(#4489053) This may or may not match php5 xdebug as far as the format
+    XDebugExporter exporter;
+    exporter.max_depth = m_server.m_maxDepth;
+    exporter.max_children = m_server.m_maxChildren;
+    exporter.max_data = m_server.m_maxData;
+    exporter.page = 0;
+
+    // Grab from the requested context
+    switch (m_context) {
+      case XDebugContext::SUPERGLOBALS: {
+        Array globals = php_globals_as_array();
+        for (ArrayIter iter(globals); iter; ++iter) {
+          if (!BuiltinSymbols::IsSuperGlobal(iter.first().toString().data())) {
+            continue;
+          }
+
+          xdebug_xml_node* node =
+            xdebug_get_value_xml_node(iter.first().toString().data(),
+                                      iter.second(), XDebugVarType::Normal,
+                                      exporter);
+          xdebug_xml_add_child(&xml, node);
+        }
+        break;
+      }
+      case XDebugContext::USER_CONSTANTS: {
+        Array allConstants = lookupDefinedConstants(true);
+
+        Array constants = allConstants[s_user].toArray();
+        for (ArrayIter iter(constants); iter; ++iter) {
+          xdebug_xml_node* node =
+            xdebug_get_value_xml_node(iter.first().toString().data(),
+                                      iter.second(), XDebugVarType::Normal,
+                                      exporter);
+          xdebug_xml_add_child(&xml, node);
+        }
+        break;
+      }
+      // TODO(#4489053) This may or may not match php5 xdebug as far as which
+      // variables are in scope
+      case XDebugContext::LOCAL: {
+        // Grab the in scope variables
+        VarEnv* var_env = g_context->getVarEnv(m_depth);
+        if (var_env == nullptr) {
+          throw XDebugServer::ERROR_INVALID_ARGS;
+        }
+
+        // Add each variable
+        Array vars = var_env->getDefinedVariables();
+        for (ArrayIter iter(vars); iter; ++iter) {
+          xdebug_xml_node* node =
+            xdebug_get_value_xml_node(iter.first().toString().data(),
+                                      iter.second(), XDebugVarType::Normal,
+                                      exporter);
+          xdebug_xml_add_child(&xml, node);
+        }
+        break;
+      }
+    }
   }
+
+private:
+  XDebugContext m_context = XDebugContext::LOCAL;
+  int m_depth = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1046,20 +1172,102 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // property_get -i # -n LONGNAME [-d DEPTH] [-c CONTEXT] [-m MAX_DATA] [-p PAGE]
-//              [-a ADDRESS]
-// Note that the spec mentioned a 'k', php5 xdebug does not support it
+// Note that the spec mentioned a 'k' and 'a', php5 xdebug does not support it
 // Gets the specified property value
-// TODO(#4489053) Implement
 
 class PropertyGetCmd : public XDebugCommand {
 public:
   PropertyGetCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : XDebugCommand(server, cmd, args) {}
+    : XDebugCommand(server, cmd, args) {
+    // A name is required
+    if (args['n'].isNull()) {
+      throw XDebugServer::ERROR_INVALID_ARGS;
+    }
+    m_name = args['n'].toString();
+
+    // Grab the context if it provided
+    if (!args['c'].isNull()) {
+      int context = strtol(args['c'].toString().data(), nullptr, 10);
+      switch (context) {
+        case static_cast<int>(XDebugContext::LOCAL):
+        case static_cast<int>(XDebugContext::SUPERGLOBALS):
+        case static_cast<int>(XDebugContext::USER_CONSTANTS):
+          m_context = static_cast<XDebugContext>(context);
+          break;
+        default:
+          throw XDebugServer::ERROR_INVALID_ARGS;
+      }
+    }
+
+    // Grab the depth if it is provided
+    if (!args['d'].isNull()) {
+      m_depth = strtol(args['d'].toString().data(), nullptr, 10);
+    }
+
+    // Grab the page if it was provided
+    if (!args['p'].isNull()) {
+      m_page = strtol(args['p'].toString().data(), nullptr, 10);
+    }
+
+    // Grab the max data if it was provided
+    if (!args['m'].isNull()) {
+      m_maxData= strtol(args['m'].toString().data(), nullptr, 10);
+    }
+  }
+
   ~PropertyGetCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
-  }
+    // Get the correct stack frame
+    ActRec* fp = g_context->getStackFrame();
+    for (int depth = 0; fp != nullptr && depth < m_depth;
+         depth++, fp = g_context->getPrevVMState(fp)) {}
+
+    // If we don't have an actrec, the stack depth was invalid
+    if (fp == nullptr) {
+      throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+    }
+
+    // Setup the variable exporter
+    XDebugExporter exporter;
+    exporter.max_depth = m_maxDepth;
+    exporter.max_children = m_maxChildren;
+    exporter.max_data = m_maxData;
+    exporter.page = m_page;
+
+    switch (m_context) {
+      // Globals and superglobals can be fetched via xdebug_get_php_symbol
+      case XDebugContext::LOCAL:
+      case XDebugContext::SUPERGLOBALS:
+        xdebug_add_property_xml(xml, m_name, m_depth,
+                                XDebugVarType::Normal, exporter);
+        break;
+      // Grab the the constant, f_constant throws a warning on failure so
+      // we ensure it's defined before grabbing it
+      case XDebugContext::USER_CONSTANTS: {
+        if (!f_defined(m_name)) {
+          throw XDebugServer::ERROR_PROPERTY_NON_EXISTANT;
+        }
+
+        // php5 xdebug adds "constant" facet, but this is not in the spec
+        xdebug_xml_node* node =
+          xdebug_get_value_xml_node(m_name.data(), f_constant(m_name),
+                                    XDebugVarType::Constant, exporter);
+        xdebug_xml_add_attribute(node, "facet", "constant");
+        xdebug_xml_add_child(&xml, node);
+        break;
+      }
+    }
+}
+
+private:
+  String m_name;
+  XDebugContext m_context = XDebugContext::LOCAL;
+  int m_depth = 0; // desired stack depth
+  int m_maxDepth = m_server.m_maxDepth; // max property depth
+  int m_maxData = m_server.m_maxData;
+  int m_maxChildren = m_server.m_maxChildren;
+  int m_page = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

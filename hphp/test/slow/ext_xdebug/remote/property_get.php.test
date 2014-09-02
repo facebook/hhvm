@@ -1,0 +1,11 @@
+<?php
+
+function foo() {
+  $x = array(1,2,3);
+  $y = 12;
+  $z = new stdClass();
+  return $y;
+}
+
+foo();
+

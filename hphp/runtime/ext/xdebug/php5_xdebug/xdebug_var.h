@@ -64,6 +64,10 @@ xdebug_xml_node* xdebug_get_value_xml_node(const char* name,
                                            XDebugVarType type,
                                            XDebugExporter& exporter);
 
+// Lookup a PHP symbol based on the current frame. Supports a limited parsing
+// of symbol names.
+Variant xdebug_get_php_symbol(ActRec* ar, StringData* name);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

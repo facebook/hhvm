@@ -74,7 +74,8 @@ static bool variantToGMPData(const char* fnCaller,
         if (strNum[isNegative + 1] == 'x' || strNum[isNegative + 1] == 'X') {
           base = 16;
           strNum = negativeSign + strNum.substr(isNegative + 2);
-        } else if (base != 16 && (strNum[isNegative + 1] == 'b' || strNum[isNegative + 1] == 'B')) {
+        } else if (base != 16 && (strNum[isNegative + 1] == 'b' ||
+                                  strNum[isNegative + 1] == 'B')) {
           base = 2;
           strNum = negativeSign + strNum.substr(isNegative + 2);
         } else {
@@ -616,7 +617,8 @@ static Variant HHVM_FUNCTION(gmp_intval,
   } else if (data.isArray()) {
     return 0;
   } else if (data.isObject()) {
-    raise_notice(cs_GMP_INVALID_OBJECT, data.toObject()->o_getClassName()->toCppString().c_str());
+    raise_notice(cs_GMP_INVALID_OBJECT,
+                 data.toObject()->o_getClassName()->toCppString().c_str());
     return 1;
   } else if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
     return false;

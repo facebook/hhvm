@@ -16,7 +16,7 @@
  */
 
 #ifndef HPHP_RUNTIME_EXT_GMP_GMP_H
-#define	HPHP_RUNTIME_EXT_GMP_GMP_H
+#define HPHP_RUNTIME_EXT_GMP_GMP_H
 
 #include "hphp/runtime/base/base-includes.h"
 
@@ -47,8 +47,6 @@ namespace HPHP {
 const StaticString s_gmp_s("s");
 const StaticString s_gmp_t("t");
 const StaticString s_gmp_g("g");
-const StaticString s_gmp_0("0");
-const StaticString s_gmp_1("1");
 const StaticString s_GMP_MAX_BASE("GMP_MAX_BASE");
 const StaticString s_GMP_ROUND_ZERO("GMP_ROUND_ZERO");
 const StaticString s_GMP_ROUND_PLUSINF("GMP_ROUND_PLUSINF");
@@ -143,4 +141,4 @@ void GMPResource::sweep() { close(); }
 
 } /* namespace HPHP */
 
-#endif	/* HPHP_RUNTIME_EXT_GMP_GMP_H */
+#endif /* HPHP_RUNTIME_EXT_GMP_GMP_H */

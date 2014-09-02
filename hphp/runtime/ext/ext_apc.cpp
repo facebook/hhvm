@@ -423,7 +423,7 @@ static PFUNC_APC_LOAD apc_load_func(void *handle, const char *name) {
   dlerror(); // clear errors
   PFUNC_APC_LOAD p = (PFUNC_APC_LOAD)dlsym(handle, name);
   const char *error = dlerror();
-  if (error || p == NULL) {
+  if (error || p == nullptr) {
     throw Exception("Unable to find %s in %s: %s", name,
                     apcExtension::PrimeLibrary.c_str(),
                     error ? error : "(unknown error)");
@@ -452,7 +452,7 @@ static size_t s_const_map_size = 0;
 
 EXTERNALLY_VISIBLE
 void apc_load(int thread) {
-  static void *handle = NULL;
+  static void *handle = nullptr;
   if (handle ||
       apcExtension::PrimeLibrary.empty() ||
       !apcExtension::Enable) {
@@ -467,19 +467,21 @@ void apc_load(int thread) {
       info.a_name = "dummy";
       info.use_const = true;
 
-      const_load();
-      const_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      const_load_impl(&info, (const char**)const_load,
+                      nullptr, nullptr, nullptr, nullptr,
+                      nullptr, nullptr, nullptr);
       const_load_impl_compressed(&info,
-                                 NULL, NULL, NULL,
-                                 NULL, NULL, NULL,
-                                 NULL, NULL, NULL, NULL,
-                                 NULL, NULL, NULL, NULL);
-      apc_load_impl(&info, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                 nullptr, nullptr, nullptr,
+                                 nullptr, nullptr, nullptr,
+                                 nullptr, nullptr, nullptr, nullptr,
+                                 nullptr, nullptr, nullptr, nullptr);
+      apc_load_impl(&info, nullptr, nullptr, nullptr, nullptr,
+                    nullptr, nullptr, nullptr, nullptr);
       apc_load_impl_compressed(&info,
-                               NULL, NULL, NULL,
-                               NULL, NULL, NULL,
-                               NULL, NULL, NULL, NULL,
-                               NULL, NULL, NULL, NULL);
+                               nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr);
     }
     return;
   }
@@ -513,22 +515,22 @@ void apc_load(int thread) {
     size_t sz = sizeof(size_t);
     if (mallctl) {
       uint64_t epoch = 1;
-      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
-      mallctl("stats.allocated", &allocated_before, &sz, NULL, 0);
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
       // Ignore the first result because it may be inaccurate due to internal
       // allocation.
       epoch = 1;
-      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
-      mallctl("stats.allocated", &allocated_before, &sz, NULL, 0);
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, nullptr, 0);
     }
 #endif
     apc_load_func(handle, "_hphp_const_load_all")();
 #ifdef USE_JEMALLOC
     if (mallctl) {
       uint64_t epoch = 1;
-      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+      mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
       sz = sizeof(size_t);
-      mallctl("stats.allocated", &allocated_after, &sz, NULL, 0);
+      mallctl("stats.allocated", &allocated_after, &sz, nullptr, 0);
       s_const_map_size = allocated_after - allocated_before;
     }
 #endif
@@ -792,7 +794,7 @@ void const_load_impl_compressed
     int len = int_lens[1];
     if (count) {
       char *keys = gzdecode(int_keys, len);
-      if (keys == NULL) throw Exception("bad compressed const archive.");
+      if (keys == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       long long* v = int_values;
@@ -810,7 +812,7 @@ void const_load_impl_compressed
     int len = char_lens[1];
     if (count) {
       char *keys = gzdecode(char_keys, len);
-      if (keys == NULL) throw Exception("bad compressed const archive.");
+      if (keys == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
@@ -835,7 +837,7 @@ void const_load_impl_compressed
     int len = string_lens[1];
     if (count) {
       char *decoded = gzdecode(strings, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      if (decoded == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -855,7 +857,7 @@ void const_load_impl_compressed
     int len = object_lens[1];
     if (count) {
       char *decoded = gzdecode(objects, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      if (decoded == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -873,7 +875,7 @@ void const_load_impl_compressed
     int len = thrift_lens[1];
     if (count) {
       char *decoded = gzdecode(thrifts, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      if (decoded == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -896,7 +898,7 @@ void const_load_impl_compressed
     int len = other_lens[1];
     if (count) {
       char *decoded = gzdecode(others, len);
-      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      if (decoded == nullptr) throw Exception("bad compressed const archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -934,7 +936,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(int_keys, len);
-      if (keys == NULL) throw Exception("bad compressed apc archive.");
+      if (keys == nullptr) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       long long* v = int_values;
@@ -955,7 +957,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *keys = gzdecode(char_keys, len);
-      if (keys == NULL) throw Exception("bad compressed apc archive.");
+      if (keys == nullptr) throw Exception("bad compressed apc archive.");
       ScopedMem holder(keys);
       const char *k = keys;
       char *v = char_values;
@@ -982,7 +984,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(strings, len);
-      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      if (decoded == nullptr) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -1006,7 +1008,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(objects, len);
-      if (decoded == NULL) throw Exception("bad compressed APC archive.");
+      if (decoded == nullptr) throw Exception("bad compressed APC archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -1028,7 +1030,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(thrifts, len);
-      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      if (decoded == nullptr) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -1055,7 +1057,7 @@ void apc_load_impl_compressed
     if (count) {
       std::vector<KeyValuePair> vars(count);
       char *decoded = gzdecode(others, len);
-      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      if (decoded == nullptr) throw Exception("bad compressed apc archive.");
       ScopedMem holder(decoded);
       const char *p = decoded;
       for (int i = 0; i < count; i++) {
@@ -1084,7 +1086,7 @@ void apc_load_impl_compressed
 static double my_time() {
   struct timeval a;
   double t;
-  gettimeofday(&a, NULL);
+  gettimeofday(&a, nullptr);
   t = a.tv_sec + (a.tv_usec/1000000.00);
   return t;
 }

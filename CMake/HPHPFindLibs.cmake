@@ -81,7 +81,7 @@ include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 
 # pcre checks
 find_package(PCRE REQUIRED)
-include_directories(${PCRE_INCLUDE_DIRS})
+include_directories(${PCRE_INCLUDE_DIR})
 
 # libevent checks
 find_package(LibEvent REQUIRED)
@@ -187,7 +187,7 @@ if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
   FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
   FIND_PATH(GOOGLE_PROFILER_INCLUDE_DIR NAMES google/profiler.h)
   if (GOOGLE_PROFILER_INCLUDE_DIR)
-    include_directories(${GOOGLE_PROFILER_INCLUDE_DIR}) 
+    include_directories(${GOOGLE_PROFILER_INCLUDE_DIR})
   endif()
   if (GOOGLE_PROFILER_LIB)
     message(STATUS "Found Google profiler: ${GOOGLE_PROFILER_LIB}")
@@ -478,7 +478,7 @@ macro(hphp_link target)
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
- 
+
   target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
 
@@ -495,10 +495,10 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} sqlite3)
   endif()
-  
+
   if (DOUBLE_CONVERSION_LIBRARY)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
-  else() 
+  else()
     target_link_libraries(${target} double-conversion)
   endif()
 
@@ -507,11 +507,17 @@ macro(hphp_link target)
   else()
     target_link_libraries(${target} lz4)
   endif()
-  
+
   if (LIBZIP_LIBRARY)
     target_link_libraries(${target} ${LIBZIP_LIBRARY})
   else()
     target_link_libraries(${target} zip_static)
+  endif()
+
+  if (PCRE_LIBRARY)
+    target_link_libraries(${target} ${PCRE_LIBRARY})
+  else()
+    target_link_libraries(${target} pcre)
   endif()
 
   target_link_libraries(${target} fastlz)

@@ -109,6 +109,7 @@
  - Documentation of PHP-level profiling in doc/profiling.md
  - Cleanup of PHP-level profilers
  - Change default for Eval.EnableObjDestructCall to true
+ - Bundle PCRE 8.32 with open-source HHVM, so we can use the JIT
 
 "Outkast" 17-July-2014
   - PHP_VERSION is now 5.6

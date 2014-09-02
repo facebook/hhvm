@@ -2655,6 +2655,7 @@ void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {
 
 void HhbcTranslator::emitInitSProps(const Class* cls, Block* catchBlock) {
   cls->initSPropHandles();
+  if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
   m_irb->ifThen(
     [&](Block* taken) {
       gen(CheckInitSProps, taken, ClassData(cls));

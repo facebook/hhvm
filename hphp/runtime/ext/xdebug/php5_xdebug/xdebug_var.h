@@ -31,7 +31,13 @@ namespace HPHP {
 struct XDebugExporter {
   typedef smart::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
   SmartPtrCtrMap counts; // Map of pointer -> # of times we've seen this object
-  int level = 0;         // Current level we are at
+  int level;            // Current level we are at
+
+  // Resets the state of the exporter. Called automatically before each export
+  void reset() {
+    counts.clear();
+    level = 0;
+  }
 
   // These all must be provided
   uint32_t max_depth;         // Max depth to print for arrays/objects

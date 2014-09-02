@@ -81,7 +81,7 @@ struct XDebugServer;
   XDEBUG_OPT(uint64_t, "framebuf_size", FramebufSize, 100000) \
   XDEBUG_OPT(double, "framebuf_expansion", FramebufExpansion, 1.5) \
   XDEBUG_OPT(int, "halt_level", HaltLevel, 0) \
-  XDEBUG_OPT(string, "ide_key", IdeKey, "") \
+  XDEBUG_OPT(string, "idekey", IdeKey, "") \
   XDEBUG_OPT(string, "manual_url", ManualUrl, "http://www.php.net") \
   XDEBUG_OPT(int, "max_nesting_level", MaxNestingLevel, 100) \
   XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, true) \

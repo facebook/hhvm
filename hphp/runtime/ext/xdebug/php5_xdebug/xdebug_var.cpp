@@ -510,7 +510,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // Compute the page and the start/end indices
     // Note that php xdebug doesn't support pages except for at the top level
-    uint32_t page = exporter.level == 0 ? exporter.page : 0;
+    uint32_t page = exporter.level == 1 ? exporter.page : 0;
     uint32_t start = page * exporter.max_children;
     uint32_t end = (page + 1) * exporter.max_children;
     xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", page), 0, 1);
@@ -546,6 +546,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
 
     // If we've already seen this object, return
     if (exporter.counts[obj]++ > 0) {
+      xdebug_xml_add_attribute(node, "recursive", "1");
       return node;
     }
 
@@ -597,6 +598,10 @@ xdebug_xml_node* xdebug_get_value_xml_node(const char* name,
                                            XDebugVarType type
                                             /* = XDebugVarType::Normal */,
                                            XDebugExporter& exporter) {
+  // Ensure there all state is cleared in the exporter. This allows the same
+  // exporter to be used in multiple exports.
+  exporter.reset();
+
   // Compute the short and full name of the passed value
   char* short_name = nullptr;
   char* full_name = nullptr;

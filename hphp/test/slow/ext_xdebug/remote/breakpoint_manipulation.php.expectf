@@ -36,10 +36,10 @@ string(11) "Hello World"
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_get" transaction_id="0"><error code="205"><message><![CDATA[no such breakpoint]]></message></error></response>
 (cmd) breakpoint_remove -i 0 -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_remove" transaction_id="0"><breakpoint id="1" state="enabled" hit_condition="&gt;=" hit_count="1" type="call" function="call"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_remove" transaction_id="0"><breakpoint id="1" state="enabled" hit_condition="&gt;=" hit_count="1" type="call" function="foo"></breakpoint></response>
 (cmd) breakpoint_remove -i 0 -d 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_remove" transaction_id="0"><breakpoint id="2" state="enabled" hit_condition="&gt;=" hit_count="1" type="return" function="return"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_remove" transaction_id="0"><breakpoint id="2" state="enabled" hit_condition="&gt;=" hit_count="1" type="return" function="foo"></breakpoint></response>
 (cmd) breakpoint_list -i 0
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="0"><breakpoint id="3" state="enabled" hit_condition="&gt;=" hit_count="0" type="line" filename="file://%s/test/slow/ext_xdebug/remote/breakpoint_manipulation.php.test" lineno="11"></breakpoint><breakpoint id="0" state="enabled" hit_condition="&gt;=" hit_count="0" type="line" filename="file://%s/test/slow/ext_xdebug/remote/breakpoint_manipulation.php.test" lineno="11"></breakpoint></response>

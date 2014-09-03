@@ -216,6 +216,9 @@ flaky_tests = (
     '/ext/standard/tests/network/fsockopen_variation2.php',
     '/ext/sockets/tests/socket_create_listen.php',
     '/ext/sockets/tests/socket_create_listen-win32.php',
+
+    # it references a whole directory with *
+    '/ext/standard/tests/file/copy_variation6.php',
 )
 
 # Tests that work but not in repo mode

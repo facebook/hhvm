@@ -775,8 +775,6 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
   return hhir_count;
 }
 
-static size_t ctr;
-
 auto const vasm_gp = x64::abi.gpUnreserved | RegSet(rAsm).add(r11);
 auto const vasm_simd = x64::kXMMRegs;
 UNUSED const Abi vasm_abi {
@@ -788,7 +786,6 @@ UNUSED const Abi vasm_abi {
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
-  ctr++;
   Timer _t(Timer::codeGen);
   RegAllocInfo no_regs(unit);
   LiveRegs no_live_regs(unit, RegSet());
@@ -800,8 +797,10 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   CodeBlock mainCode;
   CodeBlock coldCode;
+  const bool useLLVM = RuntimeOption::EvalJitLLVM;
   bool relocate = false;
-  if (RuntimeOption::EvalJitRelocationSize &&
+  if (!useLLVM &&
+      RuntimeOption::EvalJitRelocationSize &&
       supportsRelocation() &&
       coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
@@ -889,7 +888,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
     printUnit("after code-gen", vasm.unit());
-    vasm.finish(vasm_abi);
+    vasm.finish(vasm_abi, useLLVM);
     if (state.asmInfo) {
       auto block = unit.entry();
       state.asmInfo->asmRanges[block] = {main_start, mainCode.frontier()};
@@ -903,7 +902,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
   }
   auto bcMap = &mcg->cgFixups().m_bcMap;
-  if (!bcMap->empty()) {
+  if (relocate && !bcMap->empty()) {
     TRACE(1, "BCMAPS before relocation\n");
     for (UNUSED auto& map : *bcMap) {
       TRACE(1, "%s %-6d %p %p %p\n", map.md5.toString().c_str(),

@@ -772,7 +772,7 @@ struct Vasm {
   explicit Vasm(Vmeta* meta) : m_meta(meta) {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
-  void finish(const Abi&);
+  void finish(const Abi&, bool useLLVM = false);
 
   // get an existing area
   Vout& main() { return area(AreaIndex::Main).out; }

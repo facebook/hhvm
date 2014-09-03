@@ -336,12 +336,12 @@ if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
 endif()
 
-# LLVM
-find_package(LLVM)
-if (LIBLLVM_INCLUDE_DIR)
-  include_directories(LIBLLVM_INCLUDE_DIR)
-  add_definitions("-DUSE_LLVM")
-endif()
+# LLVM. Disabled in OSS for now: t5056266
+# find_package(LLVM)
+# if (LIBLLVM_INCLUDE_DIR)
+#   include_directories(LIBLLVM_INCLUDE_DIR)
+#   add_definitions("-DUSE_LLVM")
+# endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)

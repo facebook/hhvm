@@ -14,28 +14,34 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/back-end.h"
+#ifndef incl_HPHP_JIT_VASM_LLVM_H_
+#define incl_HPHP_JIT_VASM_LLVM_H_
 
-#include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/vm/jit/back-end-x64.h"
-#include "hphp/runtime/vm/jit/back-end-arm.h"
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP { namespace jit {
 
-std::unique_ptr<BackEnd> newBackEnd() {
-  switch (arch()) {
-  case Arch::X64:
-    return x64::newBackEnd();
-  case Arch::ARM:
-    return arm::newBackEnd();
-  }
-  not_reached();
-}
+/*
+ * Thrown when the LLVM backend encounters something it doesn't support.
+ */
+struct FailedLLVMCodeGen : public std::runtime_error {
+ public:
+  explicit FailedLLVMCodeGen(const std::string& msg)
+    : std::runtime_error(msg)
+  {}
+};
 
-BackEnd::BackEnd() {
-}
+/*
+ * Emit machine code for unit using the LLVM backend.
+ *
+ * Throws FailedLLVMCodeGen on failure.
+ */
+void genCodeLLVM(const x64::Vunit& unit, jit::vector<x64::Vasm::Area>& areas,
+                 const jit::vector<Vlabel>& labels);
 
-BackEnd::~BackEnd() {
-}
+} }
 
-}}
+#endif

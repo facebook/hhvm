@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/vasm-llvm.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 TRACE_SET_MOD(hhir);
@@ -672,6 +673,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     assert(deltaFits(d, sz::dword));
     ((int32_t*)after_lea)[-1] = d;
   }
+
   if (dumpIREnabled(kCodeGenLevel+1)) {
     std::ostringstream str;
     for (auto b : labels) {
@@ -751,7 +753,7 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
 }
 
 // copy of layoutBlocks in layout.cpp
-jit::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
+jit::vector<Vlabel> layoutBlocks(const Vunit& m_unit) {
   auto blocks = sortBlocks(m_unit);
   // partition into main/cold/frozen areas without changing relative order,
   // and the end{} block will be last.
@@ -768,7 +770,17 @@ jit::vector<Vlabel> layoutBlocks(Vunit& m_unit) {
   return blocks;
 }
 
-void Vasm::finish(const Abi& abi) {
+void Vasm::finish(const Abi& abi, bool useLLVM) {
+  if (useLLVM) {
+    try {
+      genCodeLLVM(m_unit, m_areas, layoutBlocks(m_unit));
+      return;
+    } catch (const FailedLLVMCodeGen& e) {
+      FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
+             e.what());
+    }
+  }
+
   if (m_unit.hasVrs()) {
     Timer _t(Timer::vasm_xls);
     allocateRegisters(m_unit, abi);
@@ -777,6 +789,7 @@ void Vasm::finish(const Abi& abi) {
     Timer _t(Timer::vasm_jumps);
     optimizeJmps(m_unit);
   }
+
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
   Vgen(m_unit, m_areas, m_meta).emit(blocks);

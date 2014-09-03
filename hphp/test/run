@@ -318,6 +318,8 @@ function mode_cmd($options) {
     case 'jit':
     case 'automain':
       return "$jit_args";
+    case 'llvm':
+      return "$jit_args -vEval.JitLLVM=2";
     case 'pgo':
       return "$jit_args -vEval.JitPGO=1 -vEval.JitRegionSelector=hottrace ".
              "-vEval.JitPGOHotOnly=0";

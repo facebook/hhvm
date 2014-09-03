@@ -3,7 +3,7 @@
 namespace __SystemLib {
   final class TarArchiveHandler extends ArchiveHandler {
     private Map<string, ArchiveEntryData> $entries;
-    private $path = '';
+    private string $path = '';
     private $fp = null;
 
     public function __construct(string $path) {

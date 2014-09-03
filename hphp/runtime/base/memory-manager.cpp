@@ -302,6 +302,23 @@ void MemoryManager::resetAllocator() {
   resetCouldOOM();
 }
 
+void MemoryManager::iterate(iterate_callback callback, void* user_data) {
+  // Iterate smart alloc slabs
+  for (auto slab : m_slabs) {
+    callback(slab, kSlabSize, false, user_data);
+  }
+
+  // Iterate large alloc slabs (Size N/A for now)
+  for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
+    next = n->next;
+    size_t size = 16;
+#ifdef USE_JEMALLOC
+    size = malloc_usable_size(n) - sizeof(SweepNode);
+#endif
+    callback(n + 1, size, true, user_data);
+  }
+}
+
 /*
  * smart_malloc & friends implementation notes
  *
@@ -633,13 +650,13 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
   if (bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
-      begin(m_slabs), end(m_slabs),
+      std::begin(m_slabs), std::end(m_slabs),
       [&] (void* base) {
         auto const baseInt = reinterpret_cast<uintptr_t>(base);
         return ptrInt >= baseInt && ptrInt < baseInt + kSlabSize;
       }
     );
-    assert(it != end(m_slabs));
+    assert(it != std::end(m_slabs));
   }
 
   return true;

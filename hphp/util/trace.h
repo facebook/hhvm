@@ -145,6 +145,7 @@ namespace Trace {
       TM(unwind)        \
       TM(ustubs)        \
       TM(xenon)         \
+      TM(objprof)       \
       TM(xls)           \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \

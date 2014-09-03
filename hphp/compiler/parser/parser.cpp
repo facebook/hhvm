@@ -488,6 +488,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
            stripped == "xenon_get_data" ||
+           stripped == "objprof_get_data" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;

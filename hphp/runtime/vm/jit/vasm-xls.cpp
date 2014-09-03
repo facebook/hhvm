@@ -14,13 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/util/ringbuffer.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/ringbuffer.h"
+
 #include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 
@@ -45,7 +47,7 @@ using namespace Stats;
 // Sort blocks in reverse postorder, and try to arrange fall-through
 // blocks in the same area to be close together.
 struct BlockSorter {
-  explicit BlockSorter(Vunit& unit)
+  explicit BlockSorter(const Vunit& unit)
     : unit(unit)
     , visited(unit.blocks.size()) {
     blocks.reserve(unit.blocks.size());
@@ -70,7 +72,7 @@ struct BlockSorter {
     }
     blocks.push_back(b);
   }
-  Vunit& unit;
+  const Vunit& unit;
   jit::vector<Vlabel> blocks;
   boost::dynamic_bitset<> visited;
 };
@@ -1444,7 +1446,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     str << "     ";
   }
   if (inst) {
-    str << formatInstr(unit, *inst);
+    str << show(unit, *inst);
   }
   str << "\n";
 }
@@ -1475,7 +1477,7 @@ void Vxls::print(const char* caption) {
 
 }
 
-jit::vector<Vlabel> sortBlocks(Vunit& unit) {
+jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   BlockSorter s(unit);
   for (auto it = unit.roots.end(); it != unit.roots.begin();) {
     s.dfs(*--it);
@@ -1495,8 +1497,6 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   a.allocate();
 }
 
-// return a range pointing to the successor Vlabels within inst.
-// callers are able to read or modify successors indirectly via this range.
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::jcc: return {inst.jcc_.targets, 2};
@@ -1506,10 +1506,16 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     default: return {nullptr, nullptr};
   }
 }
+folly::Range<const Vlabel*> succs(const Vinstr& inst) {
+  return succs(const_cast<Vinstr&>(inst)).castToConst();
+}
 
 folly::Range<Vlabel*> succs(Vblock& block) {
   if (block.code.empty()) return {nullptr, nullptr};
   return succs(block.code.back());
+}
+folly::Range<const Vlabel*> succs(const Vblock& block) {
+  return succs(const_cast<Vblock&>(block)).castToConst();
 }
 
 }}

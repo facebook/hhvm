@@ -14,9 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
-#include <boost/dynamic_bitset.hpp>
+
 #include <algorithm>
+#include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(hhir);
 

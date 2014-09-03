@@ -175,7 +175,7 @@ struct Vptr {
     assert(seg == DS);
     return mr();
   }
-public:
+
   Vreg64 base; // optional, for baseless mode
   Vreg64 index; // optional
   uint8_t scale; // 1,2,4,8
@@ -861,8 +861,21 @@ void visitDefs(const Vunit& unit, Vinstr& inst, Def def) {
   }
 }
 
-template<class Visitor>
-void visitOperands(Vinstr& inst, Visitor& visitor) {
+/*
+ * visitOperands visits all operands of the given instruction, calling
+ * visitor.imm(), visitor.use(), visitor.across(), and visitor.def() as defined
+ * in the X64_OPCODES macro.
+ *
+ * The template spew is necessary to support callers that only have a const
+ * Vinstr& as well as callers with a Vinstr& that wish to mutate the
+ * instruction in the visitor.
+ */
+template<class MaybeConstVinstr, class Visitor>
+typename std::enable_if<
+  std::is_same<MaybeConstVinstr, Vinstr>::value ||
+  std::is_same<MaybeConstVinstr, const Vinstr>::value
+>::type
+visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
   switch (inst.op) {
 #define O(name, imms, uses, defs) \
     case Vinstr::name: { \
@@ -904,11 +917,11 @@ struct PostorderWalker {
   template<class Fn> void dfs(Fn fn) {
     for (auto b : unit.roots) dfs(b, fn);
   }
-  explicit PostorderWalker(Vunit& u)
+  explicit PostorderWalker(const Vunit& u)
     : unit(u)
     , visited(u.blocks.size())
   {}
-  Vunit& unit;
+  const Vunit& unit;
   boost::dynamic_bitset<> visited;
 };
 
@@ -921,7 +934,7 @@ bool check(Vunit&);
 Vtuple findDefs(const Vunit& unit, Vlabel b);
 
 typedef jit::vector<jit::vector<Vlabel>> PredVector;
-PredVector computePreds(Vunit& unit);
+PredVector computePreds(const Vunit& unit);
 
 }
 

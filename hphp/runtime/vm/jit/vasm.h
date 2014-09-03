@@ -72,19 +72,17 @@ struct Vmeta {
 void allocateRegisters(x64::Vunit&, const Abi&);
 void optimizeJmps(x64::Vunit&);
 void removeDeadCode(x64::Vunit&);
+
+/*
+ * Get the successors of a block or instruction. If given a non-const
+ * reference, the resulting Range will allow mutation of the Vlabels.
+ */
 folly::Range<Vlabel*> succs(x64::Vinstr& inst);
 folly::Range<Vlabel*> succs(x64::Vblock& block);
-jit::vector<Vlabel> sortBlocks(x64::Vunit& unit);
-std::string formatInstr(x64::Vunit& unit, x64::Vinstr& inst);
-void printBlock(std::ostream& out, x64::Vunit& unit, Vlabel b);
+folly::Range<const Vlabel*> succs(const x64::Vinstr& inst);
+folly::Range<const Vlabel*> succs(const x64::Vblock& block);
 
-// print a dot-compatible digraph of the blocks (without contents)
-void printCfg(x64::Vunit& unit, jit::vector<Vlabel>& blocks);
-void printCfg(std::ostream& out, x64::Vunit& unit,
-              jit::vector<Vlabel>& blocks);
-
-// print the cfg digraph followed by a code listing
-void printUnit(std::string caption, x64::Vunit& unit);
+jit::vector<Vlabel> sortBlocks(const x64::Vunit& unit);
 
 }}
 #endif

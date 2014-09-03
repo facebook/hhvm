@@ -22,19 +22,20 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
-#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
+#include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit {
 
@@ -692,7 +693,7 @@ struct BackEnd : public jit::BackEnd {
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
-  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
+  return folly::make_unique<BackEnd>();
 }
 
 using NativeCalls::CallMap;
@@ -848,7 +849,7 @@ RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
 }
 
 static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
-                     CodegenState& state, Block* block) {
+                       CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
   CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
   size_t hhir_count{0};

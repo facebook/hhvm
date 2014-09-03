@@ -15,8 +15,11 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm-x64.h"
-#include <boost/dynamic_bitset.hpp>
+
 #include <algorithm>
+#include <boost/dynamic_bitset.hpp>
+
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 TRACE_SET_MOD(hhir);
 
@@ -25,7 +28,7 @@ using namespace x64;
 
 namespace x64 {
 
-PredVector computePreds(Vunit& unit) {
+PredVector computePreds(const Vunit& unit) {
   PredVector preds(unit.blocks.size());
   PostorderWalker walker(unit);
   walker.dfs([&](Vlabel b) {

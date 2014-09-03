@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
   <<__Memoize>>
   public function testPublic() { static $i = 100; return $i++; }

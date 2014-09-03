@@ -1,0 +1,2 @@
+
+Fatal error: <<__Memoize>> is in development. It currently only support args with the following typehints: int, ?int, bool, ?bool, string in %s/test/slow/memoize/untyped.php on line 4

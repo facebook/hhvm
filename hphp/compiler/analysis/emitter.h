@@ -748,7 +748,8 @@ public:
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
   void emitMemoizeProp(Emitter &e, MethodStatementPtr meth,
-                       const StringData *propName, int localID);
+                       const StringData *propName, Id localID,
+                       uint numParams);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData *methName,
                          const StringData *propName);
   void emitConstMethodCallNoParams(Emitter& e, string name);

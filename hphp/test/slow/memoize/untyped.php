@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
   <<__Memoize>>
   public function testArgs($a) { return $a; }

@@ -6310,12 +6310,16 @@ void EmitterVisitor::emitPostponedMeths() {
         PreClassEmitter *pce = fe->pce();
 
         // Add a property to hold the memoized results
-        TypedValue tvNull;
-        tvWriteNull(&tvNull);
+        TypedValue tvProp;
+        if (!meth->getParams() || meth->getParams()->getCount() == 0) {
+          tvWriteNull(&tvProp);
+        } else {
+          tvProp = make_tv<KindOfArray>(staticEmptyArray());
+        }
         Attr attrs = AttrPrivate;
         attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
         pce->addProperty(propName, attrs, nullptr, nullptr,
-                         &tvNull, RepoAuthType{});
+                         &tvProp, RepoAuthType{});
 
         // Rename the method and create a new method with the original name
         pce->renameMethod(originalName, rewrittenName);
@@ -6638,11 +6642,14 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
     emitVirtualLocal(thisId);
     e.InitThisLoc(thisId);
   }
-  for (uint i = 0; i < m_curFunc->params.size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
-    if (!tc.hasConstraint()) continue;
-    emitVirtualLocal(i);
-    e.VerifyParamType(i);
+
+  if (!m_curFunc->isMemoizeImpl) {
+    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+      const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
+      if (!tc.hasConstraint()) continue;
+      emitVirtualLocal(i);
+      e.VerifyParamType(i);
+    }
   }
 
   if (funcScope->isAbstract()) {
@@ -6683,7 +6690,9 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   }
 
   FuncFinisher ff(this, e, m_curFunc);
-  emitMethodDVInitializers(e, meth, topOfBody);
+  if (!m_curFunc->isMemoizeImpl) {
+    emitMethodDVInitializers(e, meth, topOfBody);
+  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
@@ -6712,7 +6721,8 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
 void EmitterVisitor::emitMemoizeProp(Emitter &e,
                                      MethodStatementPtr meth,
                                      const StringData *propName,
-                                     int localID) {
+                                     Id localID,
+                                     uint numParams) {
   if (meth->is(Statement::KindOfFunctionStatement)) {
     emitVirtualLocal(localID);
   } else if (meth->getFunctionScope()->isStatic()) {
@@ -6727,21 +6737,43 @@ void EmitterVisitor::emitMemoizeProp(Emitter &e,
     m_evalStack.setString(propName);
     markProp(e);
   }
+
+  for (uint i = 0; i < numParams; i++) {
+    emitVirtualLocal(i);
+    markElem(e);
+  }
 }
 
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
                                        const StringData *methName,
                                        const StringData *propName) {
-  if (meth->getParams() && meth->getParams()->getCount() != 0) {
-    throw IncludeTimeFatalException(meth,
-      "<<__Memoize>> currently only supports methods with zero args");
-  }
   if (meth->getFunctionScope()->isRefReturn()) {
     throw IncludeTimeFatalException(meth,
-      "<<__Memoize>> cannot be used on methods that return by reference");
+      "<<__Memoize>> cannot be used on functions that return by reference");
+  }
+
+  for (int i = 0; i < m_curFunc->params.size(); i++) {
+    if (m_curFunc->params[i].byRef) {
+      throw IncludeTimeFatalException(meth,
+        "<<__Memoize>> cannot be used on functions with args passed by "
+        "reference");
+    }
+
+    const TypeConstraint &tc = m_curFunc->params[i].typeConstraint;
+    bool typeOK =
+      tc.underlyingDataType() == DataType::KindOfBoolean ||
+      tc.underlyingDataType() == DataType::KindOfInt64 ||
+      (tc.underlyingDataType() == DataType::KindOfString && !tc.isNullable());
+
+    if (!tc.hasConstraint() || !tc.isPrecise() || tc.isSoft() || !typeOK) {
+      throw IncludeTimeFatalException(meth,
+        "<<__Memoize>> is in development. It currently only support args with "
+        "the following typehints: int, ?int, bool, ?bool, string");
+    }
   }
 
   bool isFunc = meth->is(Statement::KindOfFunctionStatement);
+  int numParams = m_curFunc->params.size();
   int staticLocalID = 0;
 
   auto region = createRegion(meth, Region::Kind::FuncBody);
@@ -6754,46 +6786,86 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   emitMethodPrologue(e, meth);
 
-  // If the cache var is non-null return it
+  // Function start
   if (isFunc) {
+    // static ${propName} = {numParams > 0 ? array() : null};
     staticLocalID = m_curFunc->allocUnnamedLocal();
     emitVirtualLocal(staticLocalID);
-    e.Null();
+    if (numParams == 0) {
+      e.Null();
+    } else {
+      e.Array(staticEmptyArray());
+    }
     e.StaticLocInit(staticLocalID, propName);
+  } else if (!meth->getFunctionScope()->isStatic()) {
+    e.CheckThis();
+  }
+
+  if (numParams == 0) {
+    // if (${propName} !== null)
+    emitMemoizeProp(e, meth, propName, staticLocalID, numParams);
+    emitIsType(e, IsTypeOp::Null);
+    e.JmpNZ(cacheMiss);
   } else {
-    if (!meth->getFunctionScope()->isStatic()) {
-      e.CheckThis();
+    // isset returns false for null values. Given that:
+    //  - If we know that we can't return null, we can do a single isset check
+    //  - If we could return null, but there's only one arg, we can do a single
+    //    array_key_exists() check
+    //  - Otherwise we need an isset check to make sure we can dereference the
+    //    first N - 1 args, and then an array_key_exists() check
+    bool noRetNull =
+      m_curFunc->retTypeConstraint.hasConstraint() &&
+      !m_curFunc->retTypeConstraint.isSoft() &&
+      !m_curFunc->retTypeConstraint.isNullable();
+
+    if (numParams > 1 || noRetNull) {
+      // if (isset(${propName}[$param1]...[noRetNull ? $paramN : $paramN-1]))
+      emitMemoizeProp(e, meth, propName, staticLocalID,
+                      noRetNull ? numParams : numParams - 1);
+      emitIsset(e);
+      e.JmpZ(cacheMiss);
+    }
+
+    if (!noRetNull) {
+        // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1])
+      emitVirtualLocal(numParams - 1);
+      emitCGet(e);
+      emitMemoizeProp(e, meth, propName, staticLocalID, numParams - 1);
+      emitCGet(e);
+      e.AKExists();
+      e.JmpZ(cacheMiss);
     }
   }
 
-  emitMemoizeProp(e, meth, propName, staticLocalID);
-  emitIsType(e, IsTypeOp::Null);
-  e.JmpNZ(cacheMiss);
-
-  emitMemoizeProp(e, meth, propName, staticLocalID);
+  // return $<propName>[$param1][...][$paramN]
+  emitMemoizeProp(e, meth, propName, staticLocalID, numParams);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, meth, propName, staticLocalID);
+  emitMemoizeProp(e, meth, propName, staticLocalID, numParams);
+  auto fpiStart = m_ue.bcPos();
   if (isFunc) {
-    auto fpiStart = m_ue.bcPos();
-    e.FPushFuncD(0, methName);
-    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
-    e.FCall(0);
-    emitConvertToCell(e);
+    e.FPushFuncD(numParams, methName);
   } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
-    auto fpiStart = m_ue.bcPos();
-    e.FPushClsMethodD(0, methName, m_curFunc->pce()->name());
-    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
-    e.FCall(0);
-    emitConvertToCell(e);
+    e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
   } else {
     e.This();
-    emitConstMethodCallNoParams(e, methName->toCppString());
+    fpiStart = m_ue.bcPos();
+    e.FPushObjMethodD(numParams, methName);
   }
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+      emitVirtualLocal(i);
+      emitFPass(e, i, PassByRefKind::ErrorOnCell);
+    }
+  }
+  e.FCall(numParams);
+  emitConvertToCell(e);
+
   emitSet(e);
   e.RetC();
 

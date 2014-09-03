@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__Memoize>>
 function test_top_level() { static $i = 100; return $i++; }
 

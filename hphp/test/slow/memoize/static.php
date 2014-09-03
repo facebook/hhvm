@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
   public static function testNotMemoized() { static $i = 100; return $i++; }
   <<__Memoize>>

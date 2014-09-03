@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/ext_file.h"
 
+#include "folly/FBVector.h"
+
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
@@ -43,7 +45,7 @@ TRACE_SET_MOD(libxml);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class xmlErrorVec : public std::vector<xmlError> {
+class xmlErrorVec : public folly::fbvector<xmlError> {
 public:
   ~xmlErrorVec() {
     clearErrors();
@@ -65,6 +67,7 @@ private:
 struct LibXmlRequestData final : RequestEventHandler {
   void requestInit() override {
     m_use_error = false;
+    m_suppress_error = false;
     m_errors.reset();
     m_entity_loader_disabled = false;
     m_streams_context = uninit_null();
@@ -77,6 +80,7 @@ struct LibXmlRequestData final : RequestEventHandler {
   }
 
   bool m_entity_loader_disabled;
+  bool m_suppress_error;
   bool m_use_error;
   xmlErrorVec m_errors;
   Variant m_streams_context;
@@ -303,6 +307,9 @@ bool libxml_use_internal_error() {
 }
 
 void libxml_add_error(const std::string &msg) {
+  if (tl_libxml_request_data->m_suppress_error) {
+    return;
+  }
   xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
 
   error_list->resize(error_list->size() + 1);
@@ -452,6 +459,9 @@ String libxml_get_valid_file_path(const String& source) {
 }
 
 static void libxml_error_handler(void* userData, xmlErrorPtr error) {
+  if (tl_libxml_request_data->m_suppress_error) {
+    return;
+  }
   xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
 
   error_list->resize(error_list->size() + 1);
@@ -477,13 +487,17 @@ static Object create_libxmlerror(xmlError &error) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(libxml_get_errors) {
+Array HHVM_FUNCTION(libxml_get_errors) {
   xmlErrorVec* error_list = &tl_libxml_request_data->m_errors;
-  Array ret = Array::Create();
-  for (int64_t i = 0; i < error_list->size(); i++) {
+  const auto length = error_list->size();
+  if (!length) {
+    return empty_array();
+  }
+  PackedArrayInit ret(length);
+  for (int64_t i = 0; i < length; i++) {
     ret.append(create_libxmlerror(error_list->at(i)));
   }
-  return ret;
+  return ret.toArray();
 }
 
 Variant HHVM_FUNCTION(libxml_get_last_error) {
@@ -504,12 +518,18 @@ bool HHVM_FUNCTION(libxml_use_internal_errors, bool use_errors) {
   if (!use_errors) {
     xmlSetStructuredErrorFunc(nullptr, nullptr);
     tl_libxml_request_data->m_use_error = false;
+    tl_libxml_request_data->m_suppress_error = false;
     tl_libxml_request_data->m_errors.reset();
   } else {
     xmlSetStructuredErrorFunc(nullptr, libxml_error_handler);
     tl_libxml_request_data->m_use_error = true;
+    tl_libxml_request_data->m_suppress_error = false;
   }
   return ret;
+}
+
+void HHVM_FUNCTION(libxml_suppress_errors, bool suppress_errors) {
+  tl_libxml_request_data->m_suppress_error = suppress_errors;
 }
 
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
@@ -552,6 +572,7 @@ class LibXMLExtension : public Extension {
       auto whitelistStr = Config::GetString(ini, libxml["ExtEntityWhitelist"]);
       folly::split(',', whitelistStr, whitelist, true);
 
+      s_ext_entity_whitelist.reserve(1 + whitelist.size());
       s_ext_entity_whitelist.insert(makeStaticString("data"));
       for (auto const& str : whitelist) {
         s_ext_entity_whitelist.insert(makeStaticString(str));
@@ -605,6 +626,7 @@ class LibXMLExtension : public Extension {
       HHVM_FE(libxml_get_last_error);
       HHVM_FE(libxml_clear_errors);
       HHVM_FE(libxml_use_internal_errors);
+      HHVM_FE(libxml_suppress_errors);
       HHVM_FE(libxml_disable_entity_loader);
       HHVM_FE(libxml_set_streams_context);
 

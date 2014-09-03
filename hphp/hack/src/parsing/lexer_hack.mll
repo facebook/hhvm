@@ -262,9 +262,10 @@ let ws = [' ' '\t' '\r' '\x0c']
 let wsnl = [' ' '\t' '\r' '\x0c''\n']
 let hex = digit | ['a'-'f''A'-'F']
 let hex_number = '0' 'x' hex+
+let bin_number = '0' 'b' ['0'-'1']+
 let decimal_number = '0' | ['1'-'9'] digit*
-let octal_number = '0' ['1'-'7']+ ['0'-'7']*
-let int = decimal_number | hex_number | octal_number
+let octal_number = '0' ['0'-'7']+
+let int = decimal_number | hex_number | bin_number | octal_number
 let float =
   (digit* ('.' digit+) ((('e'|'E') ('+'?|'-') digit+))?) |
   (digit+ ('.' digit*) ((('e'|'E') ('+'?|'-') digit+))?) |

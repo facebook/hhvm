@@ -524,13 +524,8 @@ NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-#ifdef USE_JEMALLOC_MALLOCX
   ptr = mallocx(debugAddExtra(bytes + sizeof(SweepNode)), 0);
   szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(SweepNode));
-#else
-  allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
-  szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
-#endif
 
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;

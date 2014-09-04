@@ -393,15 +393,19 @@ let ref_param env =
 let rec program content =
   is_hh_file := false;
   L.comment_list := [];
+  L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env lb in
   let ast = header env in
   let comments = !L.comment_list in
+  let fixmes = !L.fixmes in
   L.comment_list := [];
+  L.fixmes := Utils.IMap.empty;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
   let is_hh_file = !is_hh_file in
   let ast = Namespaces.elaborate_defs ast in
+  Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   {is_hh_file; comments; ast}
 
 (*****************************************************************************)

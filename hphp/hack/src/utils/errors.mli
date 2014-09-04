@@ -11,6 +11,7 @@
 type error
 type t = error list
 
+val is_hh_fixme : (Pos.t -> int -> bool) ref
 val to_list : error -> (Pos.t * string) list
 val get_pos : error -> Pos.t
 val filename : error -> string

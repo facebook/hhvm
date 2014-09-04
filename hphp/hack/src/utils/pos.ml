@@ -96,3 +96,10 @@ let inside p line char_pos =
 
 let compare x y =
   String.compare (string x) (string y)
+
+let set_line pos value =
+  let pos_start = pos.pos_start in
+  let pos_end = pos.pos_end in
+  let pos_start = { pos_start with pos_lnum = value } in
+  let pos_end = { pos_end with pos_lnum = value } in
+  { pos with pos_start; pos_end }

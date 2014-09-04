@@ -20,15 +20,24 @@ type error = error_code * message list
 type t = error list
 
 (*****************************************************************************)
+(* HH_FIXMEs hook *)
+(*****************************************************************************)
+
+let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
+
+(*****************************************************************************)
 (* Errors accumulator. *)
 (*****************************************************************************)
 
 let (error_list: t ref) = ref []
 
 let add code pos msg =
+  if !is_hh_fixme pos code then () else
   error_list := (code, [pos, msg]) :: !error_list
 
 let add_list code pos_msg_l =
+  let pos = fst (List.hd pos_msg_l) in
+  if !is_hh_fixme pos code then () else
   error_list := (code, pos_msg_l) :: !error_list
 
 let add_error error =

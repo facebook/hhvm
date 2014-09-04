@@ -9,8 +9,8 @@
  *
  */
 function preg_grep($pattern, $input, $flags = 0) { }
-function preg_match($pattern, $subject, &$matches = null, $flags = 0, $offset = 0): int { }
-function preg_match_all($pattern, $subject, &$matches, $flags = 0, $offset = 0) { }
+function preg_match($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0): int { }
+function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0) { }
 function preg_replace($pattern, $replacement, $subject, $limit = -1, &$count = null) { }
 function preg_replace_callback($pattern, $callback, $subject, $limit = -1, &$count = null) { }
 function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }

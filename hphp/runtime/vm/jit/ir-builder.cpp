@@ -1202,6 +1202,11 @@ void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
 
   if (block == m_curBlock) return;
 
+  // There's no reason for us to be starting on the entry block when it's not
+  // our current block.
+  always_assert(!block->isEntry());
+  always_assert(fp() != nullptr);
+
   auto& lastInst = m_curBlock->back();
   always_assert(lastInst.isBlockEnd());
   always_assert(lastInst.isTerminal() || m_curBlock->next() != nullptr);
@@ -1209,18 +1214,14 @@ void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   m_state.pauseBlock(m_curBlock);
   m_curBlock = block;
 
-  if (m_state.hasStateFor(m_curBlock)) {
-    m_state.startBlock(m_curBlock, marker);
-    insertLocalPhis();
-  } else {
-    m_state.resetCurrentState(marker);
-  }
+  always_assert(m_state.hasStateFor(block));
+  m_state.startBlock(m_curBlock, marker);
+  insertLocalPhis();
+
+  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));
-
-  if (fp() == nullptr) gen(DefFP);
-  if (sp() == nullptr) gen(DefSP, StackOffset(spOffset()), fp());
 }
 
 void IRBuilder::clearBlockState(Block* block) {

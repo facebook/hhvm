@@ -435,7 +435,7 @@ void FrameState::startBlock(Block* block, BCMarker marker) {
       Indent _;
       ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",
              block->id(), pred->id());
-      resetCurrentState(marker);
+      unprocessedPredClear(marker);
       break;
     }
   }
@@ -460,10 +460,17 @@ void FrameState::pauseBlock(Block* block) {
 
 void FrameState::clearBlock(Block* block) {
   auto it = m_snapshots.find(block);
-  if (it != m_snapshots.end()) {
-    ITRACE(4, "Clearing state for B{}\n", block->id());
-    m_snapshots.erase(it);
-  }
+  if (it == m_snapshots.end()) return;
+
+  ITRACE(4, "Clearing state for B{}\n", block->id());
+
+  auto& snap = it->second;
+
+  // Empty the fields that could change further down in the control flow graph.
+  snap.spValue = nullptr;
+  snap.stackDeficit = 0;
+  snap.evalStack = EvalStack();
+  snap.locals = LocalVec(m_locals.size());
 }
 
 FrameState::Snapshot FrameState::createSnapshot() const {
@@ -683,6 +690,16 @@ void FrameState::clearCurrentState() {
   m_marker         = BCMarker();
   m_thisAvailable  = false;
   m_frameSpansCall = false;
+  m_stackDeficit   = 0;
+  m_evalStack      = EvalStack();
+  clearLocals(*this);
+}
+
+void FrameState::unprocessedPredClear(BCMarker marker) {
+  m_spValue        = nullptr;
+  m_marker         = marker;
+  m_spOffset       = marker.spOff();
+  m_curFunc        = marker.func();
   m_stackDeficit   = 0;
   m_evalStack      = EvalStack();
   clearLocals(*this);

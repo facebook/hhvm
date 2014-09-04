@@ -175,12 +175,6 @@ struct FrameState final : private LocalStateHook {
   void clearBlock(Block*);
 
   /*
-   * Clear the current state, but keeps the state associated with all
-   * other blocks intact.
-   */
-  void clearCurrentState();
-
-  /*
    * Clear all tracked state, including both the current state and the
    * state associated with all blocks.
    */
@@ -301,6 +295,17 @@ struct FrameState final : private LocalStateHook {
         inlineSavedStates == b.inlineSavedStates;
     }
   };
+
+  /*
+   * Clear the current state, but keeps the state associated with all
+   * other blocks intact.
+   */
+  void clearCurrentState();
+
+  /*
+   * Clears state upon hitting an unprocessed predecessor.
+   */
+  void unprocessedPredClear(BCMarker);
 
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();

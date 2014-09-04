@@ -1859,9 +1859,8 @@ Translator::translateRegion(const RegionDesc& region,
 
       skipTrans = false;
 
-      // Insert a fallthrough jump
-      if (ht.genMode() == IRGenMode::CFG &&
-          i == block->length() - 1 && block != blocks.back()) {
+      // In CFG mode, insert a fallthrough jump at the end of each block.
+      if (ht.genMode() == IRGenMode::CFG && i == block->length() - 1) {
         if (instrAllowsFallThru(inst.op())) {
           auto nextOffset = inst.nextOffset != kInvalidOffset
             ? inst.nextOffset
@@ -1873,7 +1872,8 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
-        } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
+        } else if (b < blocks.size() - 1 &&
+                   (isRet(inst.op()) || inst.op() == OpNativeImpl)) {
           // "Fallthrough" from inlined return to the next block
           ht.endBlock(blocks[b + 1]->start().offset(), inst.nextIsMerge);
         }

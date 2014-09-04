@@ -4556,9 +4556,9 @@ OPTBLD_INLINE void ExecutionContext::iopAGetC(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopAGetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  TypedValue* top = vmStack().allocTV();
+  vmStack().pushUninit();
   TypedValue* fr = frame_local_inner(vmfp(), local);
-  lookupClsRef(fr, top);
+  lookupClsRef(fr, vmStack().top());
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {

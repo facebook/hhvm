@@ -44,6 +44,7 @@ final class Siege extends Process {
           '-c', (string) PerfSettings::WarmupConcurrency(),
           '-r', (string) PerfSettings::WarmupRequests(),
           '-f', $urls_file,
+          '--log=/dev/null',
         };
       case RequestModes::BENCHMARK:
         return Vector {

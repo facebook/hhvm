@@ -19,8 +19,10 @@ how the interpreters are built/installed first.
 Usage
 =====
 
-  hhvm perf.php --wordpress --php5=/path/to/bin/php # also works with php 7
-  hhvm perf.php --wordpress --hhvm=/path/to/hhvm
+As a regular user:
+
+    hhvm perf.php --wordpress --php5=/path/to/bin/php-cgi # also works with php7
+    hhvm perf.php --wordpress --hhvm=/path/to/hhvm
 
 Running with --hhvm gives some additional server-side statistics. It is usual
 for HHVM to report more requests than siege - some frameworks do call-back

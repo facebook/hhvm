@@ -9,10 +9,13 @@ require_once('ToysTarget.php');
 require_once('WordpressTarget.php');
 
 function print_progress(string $out): void {
+  $timestamp = strftime('%Y-%m-%d %H:%M:%S');
+  $len = max(strlen($out), strlen($timestamp));
   fprintf(
     STDERR,
-    "\n%s\n** %s\n",
-    str_repeat('*', strlen($out) + 3),
+    "\n%s\n** %s\n** %s\n",
+    str_repeat('*', $len + 3), // +3 for '** '
+    $timestamp,
     $out,
   );
 }

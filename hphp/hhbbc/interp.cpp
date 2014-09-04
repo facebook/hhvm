@@ -475,6 +475,7 @@ void in(ISS& env, const bc::Xor&) {
 void castBoolImpl(ISS& env, bool negate) {
   nothrow(env);
   constprop(env);
+
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
@@ -482,6 +483,10 @@ void castBoolImpl(ISS& env, bool negate) {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
     }));
   }
+
+  if (t.subtypeOf(TArrE)) return push(env, TFalse);
+  if (t.subtypeOf(TArrN)) return push(env, TTrue);
+
   push(env, TBool);
 }
 

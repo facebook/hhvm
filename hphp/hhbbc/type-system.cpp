@@ -1849,7 +1849,6 @@ Type union_of(Type a, Type b) {
   return TTop;
 }
 
-// Union of a-with-emptyish-types-removed and b
 Type promote_emptyish(Type a, Type b) {
   if (is_opt(a)) a = unopt(a);
   if (a.subtypeOf(sempty())) {

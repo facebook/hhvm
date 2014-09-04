@@ -109,7 +109,8 @@ and sub_type env ty_super ty_sub =
       fst (Unify.unify env ty_super ty_sub)
   | _, (_, Tunresolved tyl) ->
       List.fold_left (fun env x -> sub_type env ty_super x) env tyl
-  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub)) ->
+  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub))
+  | (_, Tprim _), (r_sub, Tgeneric (x, Some ty_sub)) ->
       (Errors.try_
          (fun () -> sub_type env ty_super ty_sub)
          (fun l -> Reason.explain_generic_constraint r_sub x l; env)

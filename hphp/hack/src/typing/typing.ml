@@ -2473,7 +2473,9 @@ and binop p env bop p1 ty1 p2 ty2 =
       | rty1, _ ->
           (* Either side is unknown, unknown *)
           (* TODO um, what? This seems very wrong, particularly where "newtype
-           * as" is concerned. *)
+           * as" is concerned.
+           * This also causes issues with primitive constraints on generics.
+           * See test/typecheck/generic_primitive_invariant.php as an example *)
           env, rty1)
   | Ast.Slash ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in

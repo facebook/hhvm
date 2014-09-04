@@ -43,7 +43,8 @@ let add_list code pos_msg_l =
 let add_error error =
   error_list := error :: !error_list
 
-let to_list (error: error) = ((snd error): (Pos.t * string) list)
+let get_code (error: error) = ((fst error): error_code)
+let to_list (error: error) = ((snd error): message list)
 let get_pos (error: error) = fst (List.hd (snd error))
 let filename (error: error) = Pos.filename (get_pos error)
 let make_error (x: (Pos.t * string) list) = ((0, x): error)

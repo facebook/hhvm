@@ -12,13 +12,19 @@ open ClientExceptions
 
 module C = Tty
 
-let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
+let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.t * string) =
   let line, start, end_ = Pos.info_pos p in
+  let code_clr = C.Normal C.Yellow in
   let err_clr  = if first then C.Bold C.Red else C.Normal C.Green in
   let file_clr = if first then C.Bold C.Red else C.Normal C.Red in
   let line_clr = C.Normal C.Yellow in
   let col_clr  = C.Normal C.Cyan in
 
+  let to_print_code = if not first then [] else [
+    (C.Normal C.Default, " (");
+    (code_clr,       Errors.error_code_to_string code);
+    (C.Normal C.Default, ")");
+  ] in
   let to_print = [
     (file_clr,           p.Pos.pos_file);
     (C.Normal C.Default, ":");
@@ -29,8 +35,7 @@ let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
     (col_clr,            string_of_int end_);
     (C.Normal C.Default, ": ");
     (err_clr,            s);
-    (C.Normal C.Default, "\n");
-  ] in
+  ] @ to_print_code @ [(C.Normal C.Default, "\n")] in
 
   if not first then Printf.printf "  " else ();
   if Unix.isatty Unix.stdout
@@ -41,9 +46,10 @@ let print_reason_color ~(first:bool) ((p, s): Pos.t * string) =
     List.iter (Printf.printf "%s") strings
 
 let print_error_color (e:Errors.error) =
-  let e = Errors.to_list e in
-  print_reason_color ~first:true (List.hd e);
-  List.iter (print_reason_color ~first:false) (List.tl e)
+  let code = Errors.get_code e in
+  let msg_list = Errors.to_list e in
+  print_reason_color ~first:true ~code (List.hd msg_list);
+  List.iter (print_reason_color ~first:false ~code) (List.tl msg_list)
 
 let check_status connect (args:client_check_env) =
   Sys.set_signal Sys.sigalrm (Sys.Signal_handle (fun _ -> raise Server_busy));
@@ -75,10 +81,10 @@ let check_status connect (args:client_check_env) =
   | ServerMsg.NO_ERRORS ->
     ServerError.print_errorl args.output_json [] stdout;
     exit 0
-  | ServerMsg.ERRORS e ->
+  | ServerMsg.ERRORS error_list ->
     if args.output_json || args.from <> ""
-    then ServerError.print_errorl args.output_json e stdout
-    else List.iter print_error_color e;
+    then ServerError.print_errorl args.output_json error_list stdout
+    else List.iter print_error_color error_list;
     exit 2
   | ServerMsg.DIRECTORY_MISMATCH d ->
     Printf.printf "%s is running on a different directory.\n" name;
@@ -94,4 +100,3 @@ let check_status connect (args:client_check_env) =
   | ServerMsg.PONG ->
       Printf.printf "Why on earth did the server respond with a pong?\n%!";
       exit 2
-

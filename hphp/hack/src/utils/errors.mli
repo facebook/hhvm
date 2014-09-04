@@ -13,9 +13,12 @@ type t = error list
 
 val is_hh_fixme : (Pos.t -> int -> bool) ref
 val to_list : error -> (Pos.t * string) list
+val get_code : error -> int
 val get_pos : error -> Pos.t
 val filename : error -> string
 val make_error : (Pos.t * string) list -> error
+
+val error_code_to_string : int -> string
 
 val fixme_format : Pos.t -> unit
 val alok : Pos.t * string -> unit

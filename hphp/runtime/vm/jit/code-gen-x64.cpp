@@ -5460,7 +5460,7 @@ void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
   int64_t off = CONTOFF(m_index) - c_Generator::arOff();
-  auto newIdx = inst->src(0);
+  auto newIdx = inst->src(1);
   auto newIdxReg = srcLoc(1).reg();
   assert(contArReg != InvalidReg);
   assert(newIdxReg != InvalidReg);

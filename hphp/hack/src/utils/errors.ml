@@ -1408,14 +1408,15 @@ let private_override pos class_id id =
 (* Printing *)
 (*****************************************************************************)
 
-let to_json ((_, msgl) : error) = Hh_json.(
+let to_json ((error_code, msgl) : error) = Hh_json.(
   let elts = List.map (fun (p, w) ->
                         let line, scol, ecol = Pos.info_pos p in
                         JAssoc [ "descr", JString w;
                                  "path",  JString p.Pos.pos_file;
                                  "line",  JInt line;
                                  "start", JInt scol;
-                                 "end",   JInt ecol
+                                 "end",   JInt ecol;
+                                 "code",  JInt error_code
                                ]
                       ) msgl
   in

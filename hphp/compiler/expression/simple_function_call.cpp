@@ -120,7 +120,6 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_changedToBytecode(false)
   , m_optimizable(false)
   , m_safe(0)
-  , m_extra(nullptr)
 {
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
@@ -647,7 +646,6 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     string varName = name->getIdentifier();
     if (varName.empty()) return false;
     if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
-      always_assert(!m_extra);
       return true;
     }
     ExpressionPtr value = (*m_params)[1];
@@ -894,7 +892,6 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
             constants = block->getConstants();
             const Symbol *sym = constants->getSymbol(symbol);
             always_assert(sym);
-            m_extra = (void *)sym;
             Lock lock(BlockScope::s_constMutex);
             if (!sym->isDynamic()) {
               if (sym->getValue() != (*m_params)[1]) {
@@ -1142,7 +1139,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                 constants->add(varName, varType, value, ar, self);
                 sym = constants->getSymbol(varName);
                 always_assert(sym);
-                m_extra = (void *)sym;
               } else {
                 constants->setType(ar, varName, varType, true);
               }

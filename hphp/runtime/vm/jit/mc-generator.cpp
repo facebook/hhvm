@@ -67,6 +67,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
@@ -1995,6 +1996,8 @@ std::string MCGenerator::getUsage() {
          RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
   addRow("persistentRDS", RDS::usedPersistentBytes(),
          RuntimeOption::EvalJitTargetCacheSize / 4);
+  addRow("cloned-closures", Func::s_totalClonedClosures,
+         RuntimeOption::EvalMaxClonedClosures);
   addRow("total",
           totalBlockSize + code.data().used()
           + RDS::usedPersistentBytes(),

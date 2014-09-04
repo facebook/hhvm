@@ -1687,6 +1687,7 @@ function main($argv) {
       );
     }
     $results = array_merge($results, $json);
+    unlink($bad_test_file);
   }
 
   if (isset($options['fbmake'])) {

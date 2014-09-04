@@ -1,2 +1,2 @@
 File "type__toString.php", line 13, characters 33-35:
-NastCheck[3020] __toString should return a string
+__toString should return a string (NastCheck[3020])

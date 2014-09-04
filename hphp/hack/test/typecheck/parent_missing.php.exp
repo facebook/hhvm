@@ -1,2 +1,2 @@
 File "parent_missing.php", line 14, characters 5-17:
-Typing[4076] parent is undefined
+parent is undefined (Typing[4076])

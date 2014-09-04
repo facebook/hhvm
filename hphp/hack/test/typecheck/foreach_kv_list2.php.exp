@@ -1,5 +1,5 @@
 File "foreach_kv_list2.php", line 17, characters 9-10:
-Typing[4110] Invalid argument
+Invalid argument (Typing[4110])
 File "foreach_kv_list2.php", line 12, characters 14-19:
 This is a string
 File "foreach_kv_list2.php", line 15, characters 12-12:

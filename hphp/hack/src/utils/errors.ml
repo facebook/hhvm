@@ -1428,7 +1428,7 @@ let to_string ((error_code, msgl) : error) : string =
   | (pos1, msg1) :: rest_of_error ->
       Buffer.add_string buf begin
         let error_code = error_code_to_string error_code in
-        Printf.sprintf "%s\n%s %s\n" (Pos.string pos1) error_code msg1
+        Printf.sprintf "%s\n%s (%s)\n" (Pos.string pos1) msg1 error_code
       end;
       List.iter begin fun (p, w) ->
         let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in

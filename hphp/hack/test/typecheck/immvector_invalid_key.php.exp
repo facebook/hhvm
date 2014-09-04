@@ -1,5 +1,5 @@
 File "immvector_invalid_key.php", line 15, characters 8-22:
-Typing[4110] Invalid index type for this ImmVector
+Invalid index type for this ImmVector (Typing[4110])
 File "immvector_invalid_key.php", line 15, characters 12-21:
 This is a string
 File "immvector_invalid_key.php", line 15, characters 12-21:

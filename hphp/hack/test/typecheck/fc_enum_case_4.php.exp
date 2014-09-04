@@ -1,2 +1,2 @@
 File "fc_enum_case_4.php", line 23, characters 10-17:
-Typing[4023] Switching on enum Bar but using constant from Baz
+Switching on enum Bar but using constant from Baz (Typing[4023])

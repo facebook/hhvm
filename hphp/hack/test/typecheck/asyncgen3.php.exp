@@ -3,4 +3,4 @@ Tstring
 Tint
 Tstring
 File "asyncgen3.php", line 8, characters 8-18:
-NastCheck[3003] await can only be used inside async functions
+await can only be used inside async functions (NastCheck[3003])

@@ -1,2 +1,2 @@
 File "compile_test_cast.php", line 28, characters 10-10:
-Naming[2055] Object casts are unsupported. Try 'if ($var instanceof A)' or 'invariant($var instanceof A, ...)'.
+Object casts are unsupported. Try 'if ($var instanceof A)' or 'invariant($var instanceof A, ...)'. (Naming[2055])

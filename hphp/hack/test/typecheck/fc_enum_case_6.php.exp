@@ -1,2 +1,2 @@
 File "fc_enum_case_6.php", line 12, characters 10-11:
-Typing[4020] Case in switch on enum is not an enum constant
+Case in switch on enum is not an enum constant (Typing[4020])

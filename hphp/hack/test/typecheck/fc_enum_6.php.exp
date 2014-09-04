@@ -1,5 +1,5 @@
 File "fc_enum_6.php", line 4, characters 6-8:
-Typing[4110] Invalid constraint on enum
+Invalid constraint on enum (Typing[4110])
 File "fc_enum_6.php", line 4, characters 19-24:
 This is a string
 File "fc_enum_6.php", line 4, characters 12-14:

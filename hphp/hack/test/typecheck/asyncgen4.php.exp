@@ -3,7 +3,7 @@ X
 X
 X
 File "asyncgen4.php", line 9, characters 3-7:
-Typing[4110] Invalid yield
+Invalid yield (Typing[4110])
 File "asyncgen4.php", line 7, characters 21-29:
 This is an object of type Generator
 File "asyncgen4.php", line 9, characters 3-7:

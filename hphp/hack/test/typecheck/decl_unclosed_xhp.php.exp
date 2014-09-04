@@ -1,2 +1,2 @@
 File "decl_unclosed_xhp.php", line 13, characters 4-5:
-Parsing[1002] Xhp tag not closed
+Xhp tag not closed (Parsing[1002])

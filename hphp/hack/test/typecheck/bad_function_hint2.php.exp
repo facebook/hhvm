@@ -1,2 +1,2 @@
 File "bad_function_hint2.php", line 12, characters 16-29:
-Parsing[1002] Function hints must be parenthesized
+Function hints must be parenthesized (Parsing[1002])

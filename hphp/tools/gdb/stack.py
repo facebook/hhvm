@@ -106,7 +106,7 @@ Filename and line number information is only included for C++ functions.
                     if len(name):
                         func = '[PHP] ' + name + '()'
                     else:
-                        func = '[PHP] <psuedomain>'
+                        func = '[PHP] <pseudomain>'
                 except:
                     if mcg is None:
                         skip_tc = True

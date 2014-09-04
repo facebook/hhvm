@@ -281,7 +281,7 @@ struct Func {
   // Basic info.                                                        [const]
 
   /*
-   * Whether this function was defined in a psuedomain.
+   * Whether this function was defined in a pseudomain.
    */
   bool top() const;
 

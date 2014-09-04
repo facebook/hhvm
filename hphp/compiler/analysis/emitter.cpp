@@ -7054,7 +7054,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     }
   } else if (!node->getOriginalClass() ||
              node->getOriginalClass()->isTrait()) {
-    // In a trait or psuedo-main, we can't resolve self:: or parent::
+    // In a trait or pseudo-main, we can't resolve self:: or parent::
     // yet, so we emit special instructions that do those lookups.
     if (node->isParent()) {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);

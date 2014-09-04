@@ -63,7 +63,7 @@ void RefDict::visit(ExpressionPtr e) {
   }
 
   if (e->getScope()->inPseudoMain()) {
-    // bail out for psuedomain
+    // bail out for pseudomain
     return;
   }
 

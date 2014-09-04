@@ -8,6 +8,10 @@ final class WordpressTarget extends PerfTarget {
   ) {
   }
 
+  public function getSanityCheckString(): string {
+    return 'Recent Comments';
+  }
+
   public function install(): void {
     shell_exec($this->safeCommand(Vector {
       'tar',

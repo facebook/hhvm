@@ -3,8 +3,24 @@
 abstract class PerfTarget {
   public function install(): void { }
 
-
+  abstract protected function getSanityCheckString(): string;
   abstract public function getSourceRoot(): string;
+
+  protected function getSanityCheckPath(): string {
+    return '/';
+  }
+
+  final public function sanityCheck(): void {
+    $url = 'http://'.gethostname().':'.PerfSettings::HttpPort().
+      $this->getSanityCheckPath();
+    $content = file_get_contents($url);
+    invariant(
+      strstr($content, $this->getSanityCheckString()) !== false,
+      'Failed to find string "'.$this->getSanityCheckString().'" in '.
+      $url
+    );
+  }
+
   final public function getURLsFile(): string {
     return __DIR__.'/'.get_class($this).'.urls';
   }

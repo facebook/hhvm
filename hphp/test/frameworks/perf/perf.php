@@ -24,6 +24,7 @@ function run_benchmark(
   PerfTarget $target,
   PHPEngine $php_engine,
   string $temp_dir,
+  bool $skip_sanity_check,
 ) {
   print_progress('Installing framework');
   $target->install();
@@ -40,6 +41,13 @@ function run_benchmark(
   if ($target->needsUnfreeze()) {
     print_progress('Unfreezing framework');
     $target->unfreeze();
+  }
+
+  if ($skip_sanity_check) {
+    print_progress('Skipping sanity check');
+  } else {
+    print_progress('Running sanity check');
+    $target->sanityCheck();
   }
 
   print_progress('Starting Siege for warmup');
@@ -91,6 +99,7 @@ function perf_main($argv) {
     [
       'php5:', 'hhvm:',
       'toys', 'wordpress',
+      'skip-sanity-check',
       'help'
     ]
   );
@@ -111,6 +120,7 @@ function perf_main($argv) {
 
   $target = null;
   $engine = null;
+  $skip_sanity_check = array_key_exists('skip-sanity-check', $options);
 
   if (array_key_exists('wordpress', $options)) {
     $target = new WordpressTarget($temp_dir);
@@ -135,7 +145,7 @@ function perf_main($argv) {
     );
   }
 
-  run_benchmark($target, $engine, $temp_dir);
+  run_benchmark($target, $engine, $temp_dir, $skip_sanity_check);
 }
 
 perf_main($argv);

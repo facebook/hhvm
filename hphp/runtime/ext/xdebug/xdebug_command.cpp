@@ -59,7 +59,7 @@ namespace HPHP {
   COMMAND("typemap_get", TypemapGetCmd)                                        \
   COMMAND("property_get", PropertyGetCmd)                                      \
   COMMAND("property_set", PropertySetCmd)                                      \
-  COMMAND("property_value", PropertyValueCmd)                                  \
+  COMMAND("property_value", PropertyGetCmd)                                    \
   COMMAND("source", SourceCmd)                                                 \
   COMMAND("stdout", StdoutCmd)                                                 \
   COMMAND("stderr", StderrCmd)                                                 \
@@ -102,27 +102,49 @@ namespace HPHP {
 typedef XDebugServer::Status Status;
 typedef XDebugServer::Reason Reason;
 
-// Compiles the encoded base64 string expression and returns the corresponding
-// unit. Throws XDebugServer::ERROR_EVALUATING_CODE on failure.
-//
-// Note that php5 xdebug claims non-expressions are allowed in their eval code,
-// but the implementation calls zend_eval_string which wraps EXPR in
-// "return EXPR;"
-static Unit* xdebug_compile(const String& expr) {
-  // Decode the string then make it return
-  StringBuffer buf;
-  String decoded = StringUtil::Base64Decode(expr);
-  buf.printf("<?php return %s;", decoded.data());
-  String evalString = buf.detach();
-
-  // Try to compile the string, don't JIT the code since it is not likely to
-  // be used often
-  Unit* unit = compile_string(evalString.data(), evalString.size());
+// Compiles the given evaluation string and returns its unit. Throws
+// XDebugServer::ERROR_EVALUATING_CODE on failure.
+static Unit* compile(const String& evalStr) {
+  Unit* unit = compile_string(evalStr.data(), evalStr.size());
   if (unit == nullptr) {
     throw XDebugServer::ERROR_EVALUATING_CODE;
   }
   unit->setInterpretOnly();
   return unit;
+}
+
+// Compiles the given expression so that when evaluated the expression result
+// is returned. Returns the corresponding unit.
+static Unit* compile_expression(const String& expr) {
+  StringBuffer buf;
+  buf.printf("<?php return %s;", expr.data());
+  return compile(buf.detach());
+}
+
+// Evaluates the given unit at the given depth and returns the result or throws
+// and error on failure.
+static Variant do_eval(Unit* evalUnit, int depth) {
+  // Set the error reporting level to 0 to ensure non-fatal errors are hidden
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  int64_t old_level = req_data.getErrorReportingLevel();
+  req_data.setErrorReportingLevel(0);
+
+  // Do the eval
+  Variant result;
+  bool failure = g_context->evalPHPDebugger((TypedValue*) &result,
+                                            evalUnit, depth);
+
+  // Restore the error reporting level and then either return or throw
+  req_data.setErrorReportingLevel(old_level);
+  if (failure) {
+    throw XDebugServer::ERROR_EVALUATING_CODE;
+  }
+  return result;
+}
+
+// Same as do_eval(const Unit*, int) except that this evaluates a string
+static Variant do_eval(const String& evalStr, int depth) {
+  return do_eval(compile(evalStr), depth);
 }
 
 // Helper for the breakpoint commands that returns an xml node containing
@@ -202,45 +224,22 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
   return xml;
 }
 
-// Given a symbol name and a depth, returns the symbol's value
-Variant find_symbol(const String& name, int depth) {
+// Given a symbol name and a depth, returns the symbol's value. Throws an error
+// if the symbol is not found
+static Variant find_symbol(const String& name, int depth) {
+  // Retrieve the symbol by treating it as an expression.
   // NOTE: This does not match php5 xdebug. php5 xdebug allows 'special'
   // semantics to select the symbol. However, there is no evidence so far of an
-  // IDE using these, plus they are not documented anywhere. Given these facts
-  // plus current bugs in the implementation of xdebug_get_php_symbol, this
-  // implementation just accepts php expressions. If there is an IDE that uses
-  // these semantics, getting it working will require getting
-  // xdebug_get_php_symbol to work.
-  StringBuffer buf;
-  buf.printf("<?php return %s;", name.data());
-  String eval_str = buf.detach();
+  // IDE using these, plus they are not documented anywhere. Thus, this
+  // implementation just accepts php expressions.
+  Unit* eval_unit = compile_expression(name);
 
-  // Perform the evaluation, storing the result in val
-  Variant val;
-  if (g_context->evalPHPDebugger((TypedValue*) &val, eval_str.get(), depth)) {
-    return uninit_null();
-  }
-  return val;
-}
-
-// Helper that adds the property with the given name, looking it up from the
-// given frame, to the given xml node, using the given exporter. If the symbol
-// is invalid, an error code is thrown.
-void xdebug_add_property_xml(xdebug_xml_node& root,
-                             const String& name,
-                             int depth,
-                             XDebugVarType type,
-                             XDebugExporter exporter) {
-  // Find the symbol
-  Variant val = find_symbol(name, depth);
-  if (!val.isInitialized()) {
+  // If the result is unitialized, the property must be undefined
+  Variant result = do_eval(eval_unit, depth);
+  if (!result.isInitialized()) {
     throw XDebugServer::ERROR_PROPERTY_NON_EXISTANT;
   }
-
-  // Success, add the property xml
-  xdebug_xml_node* xml =
-    xdebug_get_value_xml_node(name.data(), val, type, exporter);
-  xdebug_xml_add_child(&root, xml);
+  return result;
 }
 
 // $GLOBALS variable
@@ -655,9 +654,9 @@ public:
 
       // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
-        String condition = args['-'].toString();
+        String condition = StringUtil::Base64Decode(args['-'].toString());
         bp.condition = condition;
-        bp.conditionUnit = xdebug_compile(condition);
+        bp.conditionUnit = compile_expression(condition);
       }
     }
 
@@ -949,7 +948,8 @@ public:
   void handleImpl(xdebug_xml_node& xml) override {
     // Iterate up the stack. We need to keep track of both the frame actrec and
     // our current depth in case the client passed us a depth
-    Offset offset; int depth = 0;
+    Offset offset;
+    int depth = 0;
     for (const ActRec* fp = g_context->getStackFrame();
          fp != nullptr && (m_clientDepth == -1 || depth <= m_clientDepth);
          fp = g_context->getPrevVMState(fp, &offset), depth++) {
@@ -965,8 +965,8 @@ private:
   // Returns the xml node for the given stack frame. If level is non-zero,
   // offset is the current offset within the frame
   xdebug_xml_node* getFrame(const ActRec* fp, Offset offset, int level) {
-    const Func* func = fp->func();
-    const Unit* unit = fp->unit();
+    const auto func = fp->func();
+    const auto unit = fp->unit();
 
     // Compute the function name. php5 xdebug includes names for each type of
     // include, we don't have access to that
@@ -1190,6 +1190,14 @@ public:
 // property_get -i # -n LONGNAME [-d DEPTH] [-c CONTEXT] [-m MAX_DATA] [-p PAGE]
 // Note that the spec mentioned a 'k' and 'a', php5 xdebug does not support it
 // Gets the specified property value
+//
+// property_value
+// The dbgp spec specifies property_value as property_get, except that the
+// entire value is always returned. But in php5 xdebug, property_value is
+// exactly the same as property_get, without support for the constant context.
+// Presumably because that context was added later, as the constant context
+// is left out in other arbitrary places as well. So in this implementation,
+// property_value is implemented as property_get
 
 class PropertyGetCmd : public XDebugCommand {
 public:
@@ -1254,10 +1262,14 @@ public:
     switch (m_context) {
       // Globals and superglobals can be fetched by finding the symbol
       case XDebugContext::LOCAL:
-      case XDebugContext::SUPERGLOBALS:
-        xdebug_add_property_xml(xml, m_name, m_depth,
-                                XDebugVarType::Normal, exporter);
+      case XDebugContext::SUPERGLOBALS: {
+        Variant val = find_symbol(m_name, m_depth);
+        xdebug_xml_node* node = xdebug_get_value_xml_node(m_name.data(), val,
+                                                          XDebugVarType::Normal,
+                                                          exporter);
+        xdebug_xml_add_child(&xml, node);
         break;
+      }
       // Grab the the constant, f_constant throws a warning on failure so
       // we ensure it's defined before grabbing it
       case XDebugContext::USER_CONSTANTS: {
@@ -1291,9 +1303,7 @@ private:
 // Sets the given property to the given value. In php5 xdebug, the semantics of
 // this command relating to whether or a not a datatype (-t) is passed are very
 // strange, but in this implementation the IDE can assume DATA can be any
-// expression and LONGNAME must be some (possibly new) variable. Note that like
-// in property_get, this means the xdebug_get_php_symbol 'special' semantics
-// cannot be used.
+// expression and LONGNAME must be some (possibly new) variable.
 
 // Allowed datatypes for property_set
 static const StaticString
@@ -1353,12 +1363,14 @@ public:
     buf.printf("(%s);", m_newValue.data());
     String eval_str = buf.detach();
 
-    // Perform the evaluation at the given depth
-    TypedValue result;
-    if (g_context->evalPHPDebugger(&result, eval_str.get(), m_depth)) {
-      xdebug_xml_add_attribute(&xml, "success", "0");
-    } else {
+    // Perform the evaluation at the given depth. Though this is inconsistent
+    // with errors in property_get and eval, php5 xdebug sends back success = 0
+    // on failure, not an error.
+    try {
+      do_eval(eval_str, m_depth);
       xdebug_xml_add_attribute(&xml, "success", "1");
+    } catch (...) {
+      xdebug_xml_add_attribute(&xml, "success", "0");
     }
   }
 
@@ -1367,21 +1379,6 @@ private:
   String m_newValue;
   Variant m_type ; // datatype name
   int m_depth = 0; // desired stack depth
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// property_value -i # -n LONGNAME [-d DEPTH] [-c CONTEXT]
-// The dbgp spec specifies property_value as property_get, except that the
-// entire value is always returned. But in php5 xdebug, property_value is
-// exactly the same as property_get, without support for the constant context.
-// Presumably because that context was added later, as the constant context
-// is left out in other arbitrary places as well.
-
-class PropertyValueCmd : public PropertyGetCmd {
-public:
-  PropertyValueCmd(XDebugServer& server, const String& cmd, const Array& args)
-    : PropertyGetCmd(server, cmd, args) {}
-  ~PropertyValueCmd() {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1543,7 +1540,9 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 // eval -i # [-p PAGE] -- DATA
-// Evaluate a string within the given exeuction context.
+// Evaluate an expression within the given exeuction context. Note that php5
+// xdebug claims non-expressions are allowed in their eval code, but the
+// implementation calls zend_eval_string which wraps EXPR in "return EXPR;"
 
 class EvalCmd : public XDebugCommand {
 public:
@@ -1553,7 +1552,8 @@ public:
     if (args['-'].isNull()) {
       throw XDebugServer::ERROR_INVALID_ARGS;
     }
-    m_evalUnit = xdebug_compile(args['-'].toString());
+    String encoded_expr = args['-'].toString();
+    m_evalUnit = compile_expression(StringUtil::Base64Decode(encoded_expr));
 
     // A page can optionally be provided
     if (!args['p'].isNull()) {
@@ -1564,12 +1564,7 @@ public:
   ~EvalCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    // Do the eval. Throw on failure.
-    Variant result;
-    if (g_context->evalPHPDebugger((TypedValue*) &result,
-                                   m_evalUnit, 0)) {
-      throw XDebugServer::ERROR_EVALUATING_CODE;
-    }
+    Variant result = do_eval(m_evalUnit, 0);
 
     // Construct the exporter
     XDebugExporter exporter;

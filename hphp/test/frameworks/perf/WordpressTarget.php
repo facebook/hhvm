@@ -71,8 +71,9 @@ final class WordpressTarget extends PerfTarget {
     fprintf(
       STDERR,
       '%s',
-      "Can't connect to the wp_bench MySQL database. You can manually fix ".
-      "this, or enter your MySQL admin details.\nUsername: "
+      "Can't connect to database ".
+      "(mysql -h 127.0.0.1 -pwp_bench -u wp_bench wp_bench). This can be ".
+      "fixed for you.\nMySQL admin user (probably 'root'): "
     );
     $username = trim(fgets(STDIN));
     if (!$username) {
@@ -80,7 +81,7 @@ final class WordpressTarget extends PerfTarget {
         'Invalid user - set up the wp_bench database and user manually.'
       );
     }
-    fprintf(STDERR, '%s', 'Password: ');
+    fprintf(STDERR, '%s', 'MySQL admin password: ');
     $password = trim(fgets(STDIN));
     if (!$password) {
       throw new Exception(
@@ -95,8 +96,20 @@ final class WordpressTarget extends PerfTarget {
     }
     mysql_query('DROP DATABASE IF EXISTS wp_bench', $conn);
     mysql_query('CREATE DATABASE wp_bench', $conn);
+    /* In theory, either one of these works, with 127.0.0.1 being the minimal
+     * one.
+     * - do % so that if someone debugs with localhost, hostname, or ::1 (IPv6)
+     *   it works as expectedd
+     * - do 127.0.0.1 as well, just in case there's a pre-existing incompatible
+     *   grant
+     */
     mysql_query(
       'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@"%" '.
+      'IDENTIFIED BY "wp_bench"',
+      $conn
+    );
+    mysql_query(
+      'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@127.0.0.1 '.
       'IDENTIFIED BY "wp_bench"',
       $conn
     );

@@ -302,7 +302,8 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
       PreClass *ppcls = ourParent->m_preClass.get();
-      parent = Unit::getClass(ppcls->namedEntity(), ppcls->name(), tryAutoload);
+      parent = Unit::getClass(ppcls->namedEntity(),
+                              m_preClass.get()->parent(), tryAutoload);
       if (!parent) {
         parent = ourParent;
         return Avail::Fail;
@@ -315,26 +316,30 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       return Avail::False;
     }
   }
-  for (auto const& di : declInterfaces()) {
-    Class* declInterface = di.get();
-    PreClass *pint = declInterface->m_preClass.get();
-    Class* interface = Unit::getClass(pint->namedEntity(), pint->name(),
+  for (size_t i = 0; i < m_numDeclInterfaces; i++) {
+    auto di = m_declInterfaces.get()[i].get();
+    const StringData* pdi = m_preClass.get()->interfaces()[i];
+    assert(pdi->isame(di->name()));
+
+    PreClass *pint = di->m_preClass.get();
+    Class* interface = Unit::getClass(pint->namedEntity(), pdi,
                                       tryAutoload);
-    if (interface != declInterface) {
+    if (interface != di) {
       if (interface == nullptr) {
-        parent = declInterface;
+        parent = di;
         return Avail::Fail;
       }
-      if (UNLIKELY(declInterface->isZombie())) {
+      if (UNLIKELY(di->isZombie())) {
         const_cast<Class*>(this)->destroy();
       }
       return Avail::False;
     }
   }
-  for (auto const& ut : m_usedTraits) {
-    Class* usedTrait = ut.get();
+  for (size_t i = 0, num = m_usedTraits.size(); i < num; ++i) {
+    auto usedTrait = m_usedTraits[i].get();
+    const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
     PreClass* ptrait = usedTrait->m_preClass.get();
-    Class* trait = Unit::getClass(ptrait->namedEntity(), ptrait->name(),
+    Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
                                   tryAutoload);
     if (trait != usedTrait) {
       if (trait == nullptr) {

@@ -8,6 +8,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+define('MB_OVERLOAD_MAIL', 1);
+define('MB_OVERLOAD_STRING', 2);
+define('MB_OVERLOAD_REGEX', 4);
+define('MB_CASE_UPPER', 0);
+define('MB_CASE_LOWER', 1);
+define('MB_CASE_TITLE', 2);
 function mb_list_encodings() { }
 function mb_list_encodings_alias_names($name = null) { }
 function mb_list_mime_names($name = null) { }

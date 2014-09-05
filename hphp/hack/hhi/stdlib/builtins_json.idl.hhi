@@ -21,6 +21,14 @@ const int JSON_FB_LOOSE = 0;
 const int JSON_FB_UNLIMITED = 0;
 const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
+define('JSON_ERROR_NONE', 0);
+define('JSON_ERROR_DEPTH', 1);
+define('JSON_ERROR_STATE_MISMATCH', 2);
+define('JSON_ERROR_CTRL_CHAR', 3);
+define('JSON_ERROR_SYNTAX', 4);
+define('JSON_ERROR_UTF8', 5);
+define('JSON_OBJECT_AS_ARRAY', 1);
+define('JSON_BIGINT_AS_STRING', 2);
 function json_encode($value, $options = 0) { }
 function json_decode($json, $assoc = false, $depth = 512, $options = 0) { }
 function json_last_error() { }

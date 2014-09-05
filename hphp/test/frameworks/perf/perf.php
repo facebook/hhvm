@@ -94,6 +94,8 @@ function run_benchmark(
 }
 
 function perf_main($argv) {
+  PerfSettings::Validate();
+
   $options = getopt(
     '',
     [

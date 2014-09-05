@@ -747,11 +747,11 @@ public:
                              bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void emitMemoizeProp(Emitter &e, MethodStatementPtr meth,
-                       const StringData *propName, Id localID,
-                       uint numParams);
-  void emitMemoizeMethod(MethodStatementPtr meth, const StringData *methName,
-                         const StringData *propName);
+  void emitMemoizeProp(Emitter& e, MethodStatementPtr meth,
+                       const StringData* propName, Id localID,
+                       const std::vector<Id>& paramIDs, uint numParams);
+  void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName,
+                         const StringData* propName);
   void emitConstMethodCallNoParams(Emitter& e, string name);
   void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
                                   std::function<void()> emitParam);

@@ -1,2 +1,6 @@
 
-Fatal error: <<__Memoize>> is in development. It currently only support args with the following typehints: int, ?int, bool, ?bool, string in %s/test/slow/memoize/unsupported.php on line 4
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot serialize object of type T because it does not implement HH\IMemoizeParam' in :
+Stack trace:
+#0 %s/test/slow/memoize/unsupported.php(5): HH\serialize_memoize_param()
+#1 %s/test/slow/memoize/unsupported.php(7): testInvalidObject()
+#2 {main}

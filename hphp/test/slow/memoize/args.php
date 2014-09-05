@@ -65,7 +65,13 @@ function defaultArgs(int $a, int $b = 5) {
   return ($a * $b) + $i++;
 }
 
-// Test each kind of function call with one and many args
+<<__Memoize>>
+function generics<T>(T $a, T $b): T {
+  static $i = 130;
+  return $i++ % 2 ? $a : $b;
+}
+
+echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';
 echo $a->oneArgMeth(1).' ';
@@ -97,13 +103,13 @@ echo multiArgTopLevel(1, 2, 3).' ';
 echo multiArgTopLevel(4, 5, 6).' ';
 echo multiArgTopLevel(4, 5, 6)."\n";
 
-// Show that arg order matters in caching
+echo "Test that arg order matters in caching\n";
 echo multiArgTopLevel(3, 1, 2).' ';
 echo multiArgTopLevel(3, 1, 2).' ';
 echo multiArgTopLevel(2, 3, 1).' ';
 echo multiArgTopLevel(2, 3, 1)."\n";
 
-// Test each of the types currently supported
+echo "Test each of the types currently supported\n";
 echo nullIntFn(0).' ';
 echo nullIntFn(0).' ';
 echo nullIntFn(null).' ';
@@ -126,7 +132,7 @@ echo stringFn('b').' ';
 echo stringFn('').' ';
 echo stringFn('')."\n";
 
-// Show nullable/unspecified return types
+echo "Test nullable/unspecified return types\n";
 echo (nullRet(1) ?: 'null').' ';
 echo (nullRet(1) ?: 'null').' ';
 echo (nullRet(20) ?: 'null').' ';
@@ -137,9 +143,15 @@ echo (noRetType(1,2) ?: 'null').' ';
 echo (noRetType(4,5) ?: 'null').' ';
 echo (noRetType(4,5) ?: 'null')."\n";
 
-// Show default args
+echo "Test default args\n";
 echo defaultArgs(1).' ';
 echo defaultArgs(1,5).' ';
 echo defaultArgs(1,5).' ';
 echo defaultArgs(2,6).' ';
-echo defaultArgs(2,6);
+echo defaultArgs(2,6)."\n";
+
+echo "Test generics\n";
+echo generics(1,2).' ';
+echo generics(1,2).' ';
+echo generics('a','b').' ';
+echo generics('a','b');

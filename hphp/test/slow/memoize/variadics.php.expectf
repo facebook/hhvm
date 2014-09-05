@@ -1,0 +1,2 @@
+
+Fatal error: <<__Memoize>> cannot be used on functions with variable arguments in %s/test/slow/memoize/variadics.php on line 5

@@ -1,7 +1,7 @@
 <?hh
-class A {
-  <<__Memoize>>
-  public function testArgs(?string $a) { return $a; }
-}
+class T{}
 
-echo (new A())->testArgs('foo');
+<<__Memoize>>
+function testInvalidObject(mixed $a) { return $a; }
+
+echo testInvalidObject(new T());

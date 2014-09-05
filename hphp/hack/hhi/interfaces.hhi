@@ -329,3 +329,16 @@ interface XHPChild {}
 interface Stringish {
   public function __toString(): string;
 }
+
+/**
+  * Classes that implement IMemoizeParam may be passed to
+  * serialize_memoize_param() and may be used as params on
+  * <<__Memoize>> functions
+  */
+interface IMemoizeParam {
+   /**
+   * Serialize this object to a string that can be used as a
+   * dictionary key to differentiate instances of this class.
+   */
+  public function getInstanceKey(): string;
+}

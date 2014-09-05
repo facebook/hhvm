@@ -26,18 +26,18 @@ final class PerfSettings {
   ///// Server Settings /////
 
   public static function HttpPort(): int {
-    return 8080;
+    return 8090;
   }
 
   public static function HttpAdminPort(): int {
-    return 8081;
+    return 8091;
   }
 
   public static function FastCGIPort(): int {
-    return 8082;
+    return 8092;
   }
 
   public static function FastCGIAdminPort(): int {
-    return 8100;
+    return 8093;
   }
 }

@@ -211,11 +211,8 @@ struct ActRec {
     // dependency.
     TypedValue _dummyA;
     struct {
-      union {
-        ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-        uint64_t m_savedRbp;   // TODO: Remove. Used by debugger macros.
-      };
-      uint64_t m_savedRip;     // In-TC address to return to.
+      ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
+      uint64_t m_savedRip;   // In-TC address to return to.
     };
   };
   union {

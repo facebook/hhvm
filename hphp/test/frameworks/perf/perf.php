@@ -4,6 +4,7 @@ require_once('HHVMDaemon.php');
 require_once('HHVMStats.php');
 require_once('PHP5Daemon.php');
 require_once('NginxDaemon.php');
+require_once('PerfOptions.php');
 require_once('Siege.php');
 require_once('ToysTarget.php');
 require_once('WordpressTarget.php');
@@ -100,16 +101,9 @@ function perf_main($argv) {
     exit(1);
   }
 
-  $options = getopt(
-    '',
-    [
-      'php5:', 'hhvm:',
-      'toys', 'wordpress',
-      'skip-sanity-check',
-      'help'
-    ]
-  );
-  if (array_key_exists('help', $options)) {
+  $options = new PerfOptions();
+
+  if ($options->help) {
     fprintf(
       STDERR,
       "Usage: %s --<php5=/path/to/php-cgi|hhvm=/path/to/hhvm> ".
@@ -126,23 +120,22 @@ function perf_main($argv) {
 
   $target = null;
   $engine = null;
-  $skip_sanity_check = array_key_exists('skip-sanity-check', $options);
 
-  if (array_key_exists('wordpress', $options)) {
+  if ($options->wordpress) {
     $target = new WordpressTarget($temp_dir);
   }
-  if (array_key_exists('toys', $options)) {
+  if ($options->toys) {
     $target = new ToysTarget();
   }
   if ($target === null) {
     throw new Exception('Either --wordpress or --toys must be specified');
   }
 
-  if (array_key_exists('php5', $options)) {
-    $engine = new PHP5Daemon($temp_dir, $target, $options['php5']);
+  if ($options->php5) {
+    $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
   }
-  if (array_key_exists('hhvm', $options)) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options['hhvm']);
+  if ($options->hhvm) {
+    $engine = new HHVMDaemon($temp_dir, $target, $options->hhvm);
   }
   if ($engine === null) {
     throw new Exception(
@@ -151,7 +144,7 @@ function perf_main($argv) {
     );
   }
 
-  run_benchmark($target, $engine, $temp_dir, $skip_sanity_check);
+  run_benchmark($target, $engine, $temp_dir, $options->skipSanityCheck);
 }
 
 perf_main($argv);

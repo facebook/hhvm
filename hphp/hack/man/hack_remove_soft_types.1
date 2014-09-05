@@ -1,0 +1,49 @@
+.TH HACK_REMOVE_SOFT_TYPES 1
+
+.SH NAME
+hack_remove_soft_types \- Remove "soft types" from a Hack codebase
+
+.SH SYNOPSIS
+.B hack_remove_soft_types
+.RI [ \-\-remove-from-log " | " \-\-harden ] " FILE"
+
+.SH DESCRIPTION
+
+Removes so-called "soft" type annotations from a Hack codebase. Soft type
+annotations are parameter or return type annotations prefixed with an "@" so
+that they log a warning instead of a recoverable error.
+
+This tool is part of the PHP to Hack conversion process. See
+.I http://docs.hhvm.com/manual/en/install.hack.conversion.php
+for detailed information and documentation on that process, including how
+.BR hack_remove_soft_types (1)
+fits into it.
+
+.SH OPTIONS
+
+.TP
+.B \-\-remove-from-log
+Read
+.I FILE
+as an HHVM logfile. For any warnings in that logfile that appear to come from
+failures to match a soft type annotation, remove the offending soft type
+annotation from the file indicated inside the log message.
+
+.TP
+.B \-\-harden
+Read
+.I FILE
+as a Hack source file. For any soft type annotations appearing in that source
+file, remove the "@" prefix and thus convert it into a hard failure.
+
+.SH BUGS
+The Hack language is part of the HHVM project. Known bugs can be found at that
+tracker, and new ones should be reported there as well:
+.I https://github.com/facebook/hhvm/issues
+
+.SH SEE ALSO
+.BR hh_client (1), \ hh_server (1), \ hackificator (1).
+.br
+.I http://docs.hhvm.com/manual/en/install.hack.conversion.php
+.br
+.I http://www.hacklang.org/

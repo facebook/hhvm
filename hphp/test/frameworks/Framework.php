@@ -574,11 +574,64 @@ class Framework {
     // path. The tests files file would have the wrong path information then.
     unlink($this->tests_file);
     unlink($this->test_files_file);
+
+    $cache_tarball = null;
+    if (Options::$cache_directory) {
+      $cache_tarball = Options::$cache_directory.'/'.
+        $this->name.'-'.$this->git_commit.'.tar.bz2';
+      if (file_exists($cache_tarball)) {
+        $pd = new PharData($cache_tarball);
+        $pd->extractTo(dirname($this->install_root));
+        $this->disableTestFiles();
+        return;
+      }
+    }
+
+    if (Options::$local_source_only) {
+      error_and_exit(
+        '--local-source-only specified, but no local source for '.
+        $this->name,
+        'aborted'
+      );
+    }
+
     $this->installCode();
     $this->installDependencies();
     if ($this->pull_requests != null) {
       $this->installPullRequests();
     }
+
+    if ($cache_tarball !== null) {
+      // Remove data we don't need as otherwise the caches get huge.
+      rename($this->install_root, $this->install_root.'-orig');
+      // prepend file:// as git refuses to do a shallow clone of 'local' repos
+      run_install(
+        'git clone --depth 1 '.
+        'file://'.$this->install_root.'-orig '.
+        $this->install_root,
+        __DIR__
+      );
+      remove_dir_recursive(nullthrows($this->install_root).'-orig');
+
+      if (file_exists($this->install_root.'/vendor')) {
+        $rdi = new RecursiveDirectoryIterator(
+          $this->install_root.'/vendor'
+        );
+        $rii = new RecursiveIteratorIterator($rdi);
+        foreach ($rii as $path => $info) {
+          $path = $info->getRealPath();
+          $basename = basename($path); // $info->getBasename() will be '.'
+          if ($basename === '.git') {
+            remove_dir_recursive($path);
+          }
+        }
+      }
+      run_install(
+        'tar jcf '.$cache_tarball.' '.basename($this->install_root),
+        dirname($this->install_root)
+      );
+    }
+
     $this->disableTestFiles();
   }
 

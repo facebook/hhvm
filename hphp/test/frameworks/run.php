@@ -616,6 +616,9 @@ function oss_test_option_map(): OptionInfoMap {
                                          "fail"},
     'toran-proxy:'        => Pair {'',   "URL of Toran Proxy to use for ".
                                          "dependencies"},
+    'cache-directory:'    => Pair {'',   'Directory to store source tarballs'},
+    'local-source-only'   => Pair {'',   'Fail if git or composer calls are '.
+                                         'needed'},
   };
 }
 
@@ -625,6 +628,7 @@ function main(array $argv): void {
     help();
     return;
   }
+
   // Parse all the options passed to run.php and come out with a list of
   // frameworks passed into test (or --all or --allexcept)
   $passed_frameworks = Options::parse($options, $argv);

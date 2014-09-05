@@ -144,7 +144,7 @@ bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
 int Option::AutoInline = 0;
-bool Option::ControlFlow = true;
+bool Option::ControlFlow = false;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
@@ -289,7 +289,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LocalCopyProp            = Config::GetBool(ini, config["LocalCopyProp"], true);
   StringLoopOpts           = Config::GetBool(ini, config["StringLoopOpts"], true);
   AutoInline               = Config::GetInt32(ini, config["AutoInline"], 0);
-  ControlFlow              = Config::GetBool(ini, config["ControlFlow"], true);
+  ControlFlow              = Config::GetBool(ini, config["ControlFlow"], ControlFlow);
   VariableCoalescing       = Config::GetBool(ini, config["VariableCoalescing"], false);
   ArrayAccessIdempotent    = Config::GetBool(ini, config["ArrayAccessIdempotent"], false);
   DumpAst                  = Config::GetBool(ini, config["DumpAst"], false);

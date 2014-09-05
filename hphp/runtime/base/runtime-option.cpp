@@ -1420,6 +1420,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY, "expose_php",
                    &RuntimeOption::ExposeHPHP);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
+                   "short_open_tag", &RuntimeOption::EnableShortTags);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "auto_prepend_file", &RuntimeOption::AutoPrependFile);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
                    "auto_append_file", &RuntimeOption::AutoAppendFile);

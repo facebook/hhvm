@@ -811,7 +811,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%="|"<?=" {
         if ((yytext[1]=='%' && _scanner->aspTags()) ||
-            (yytext[1]=='?' && _scanner->shortTags())) {
+            (yytext[1]=='?')) {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
           } else {

@@ -9,6 +9,7 @@ class ImagickPixelIteratorException extends RuntimeException { }
 class Imagick implements Countable, Iterator {
   private ?resource $wand = null;
   private bool $nextOutOfBound = false;
+  private bool $imagePending = false;
 
   function __get($name) {
     switch ($name) {

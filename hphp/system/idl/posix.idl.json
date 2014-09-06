@@ -159,6 +159,18 @@
             ]
         },
         {
+            "name": "posix_errno",
+            "desc": "Retrieve the error number set by the last posix function that failed. The system error message associated with the errno may be checked with posix_strerror().",
+            "flags": [
+            ],
+            "return": {
+                "type": "Int64",
+                "desc": "Returns the errno (error number) set by the last posix function that failed. If no errors exist, 0 is returned."
+            },
+            "args": [
+            ]
+        },
+        {
             "name": "posix_getcwd",
             "desc": "Gets the absolute pathname of the script's current working directory. On error, it sets errno which can be checked using posix_get_last_error()",
             "flags": [

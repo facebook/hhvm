@@ -60,6 +60,8 @@ String f_posix_ctermid();
 
 int64_t f_posix_get_last_error();
 
+int64_t f_posix_errno();
+
 String f_posix_getcwd();
 
 int64_t f_posix_getegid();

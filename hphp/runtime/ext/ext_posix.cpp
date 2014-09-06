@@ -89,6 +89,10 @@ int64_t f_posix_get_last_error() {
   return errno;
 }
 
+int64_t f_posix_errno() {
+  return errno;
+}
+
 String f_posix_getcwd() {
   String s = String(PATH_MAX, ReserveString);
   char *buffer = s.bufferSlice().ptr;

@@ -478,8 +478,9 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
-inline TypedValue* arReturn(ActRec* ar, const Variant& value) {
+inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
   ar->m_r = *value.asTypedValue();
+  tvWriteNull(value.asTypedValue());
   return &ar->m_r;
 }
 

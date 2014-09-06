@@ -298,6 +298,58 @@ and do nothing else.
 .BI \-\-xhprof\-flags " FLAGS"
 Set the XHProf run flags.
 
+.SH PHP-OPTIONS
+These are the options you can specify to the
+.BR hhvm (1)
+executable when explicitly specifying the
+.I \-\-php
+flag, or when the binary is named
+.B php .
+All PHP 5.x options are not supported at this point in time; we are
+planning to continue to add more option support.
+
+.TP
+.B \-a, \-\-interactive
+Similar to the same option when not specifying
+.I \-\-php .
+Run HHVM interactively. This lets you enter snippets of PHP code that directly get executed.
+
+.TP
+.BI \-c " FILE"
+Use the specified
+.I FILE
+for configuration options. The file should be .ini format.
+
+.TP
+.BI \-d " SETTING"
+Define INI entry specified by
+.I SETTING
+of the form
+.B foo=[bar] .
+
+.TP
+.B \-n
+Do not use any configuration (e.g., .ini) file when executing.
+
+.TP
+.BI \-r " CODE"
+Run HHVM code without using script tags, directly on the command line.
+
+.TP
+.B \-v
+Output the current HHVM build version number.
+
+.TP
+.B \-w
+Output source with stripped comments and whitespace.
+
+.TP
+.BI \-z " FILE"
+Load a dynamic extension file.
+
+
+
+
 .SH EXAMPLES
 
 .TP

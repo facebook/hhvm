@@ -151,7 +151,7 @@ static Variant php_posix_group_to_array(int gid,
     return false;
   }
 
-  Array members;
+  PackedArrayInit members(1);
   for (int count=0; gr.gr_mem[count] != NULL; count++) {
     members.append(String(gr.gr_mem[count], CopyString));
   }
@@ -159,7 +159,7 @@ static Variant php_posix_group_to_array(int gid,
   return make_map_array(
     s_name, String(gr.gr_name, CopyString),
     s_passwd, String(gr.gr_passwd, CopyString),
-    s_members, members,
+    s_members, members.toArray(),
     s_gid, (int)gr.gr_gid
   );
 }

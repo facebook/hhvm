@@ -95,6 +95,10 @@ function run_benchmark(
 
 function perf_main($argv) {
   PerfSettings::Validate();
+  if (getmyuid() === 0) {
+    fwrite(STDERR, "Run this script as a regular user.\n");
+    exit(1);
+  }
 
   $options = getopt(
     '',

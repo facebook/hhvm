@@ -207,9 +207,8 @@ static TypedValue* serialize_vars_helper(ActRec* ar) {
     auto const tv = getArg(ar, i);
     find_var_recursive(tv, wddxPacket);
   }
-  const std::string packet = wddxPacket->packet_end();
-  Variant strHolder = makeStaticString(packet);
-  return arReturn(ar, strHolder);
+  Variant packet = wddxPacket->packet_end();
+  return arReturn(ar, std::move(packet));
 }
 
 //////////////////////////////////////////////////////////////////////////////

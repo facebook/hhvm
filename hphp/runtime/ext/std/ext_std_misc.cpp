@@ -284,11 +284,10 @@ TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
   }
   Variant result = ZendPack().pack(format, extra);
   // pack() returns false if there was an error
-  if (result.isBoolean()) {
-    return arReturn(ar, result.getBoolean());
+  if (!result.isBoolean()) {
+    tvCastToStringInPlace(result.asTypedValue());
   }
-  Variant strHolder = makeStaticString(result.toString());
-  return arReturn(ar, strHolder);
+  return arReturn(ar, std::move(result));
 }
 
 int64_t HHVM_FUNCTION(sleep, int seconds) {

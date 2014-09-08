@@ -27,7 +27,6 @@
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
-#include <sys/time.h>
 #include <unistd.h>
 #include <pwd.h>
 

@@ -281,7 +281,7 @@ void print(std::ostream& os, const Block* block,
   if (!preds.empty()) {
     os << " (preds";
     for (auto const& edge : preds) {
-      os << " B" << edge.inst()->block()->id();
+      os << " B" << edge.from()->id();
     }
     os << ')';
   }

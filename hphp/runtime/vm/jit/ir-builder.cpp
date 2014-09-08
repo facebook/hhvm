@@ -1093,7 +1093,7 @@ void IRBuilder::insertLocalPhis() {
     jit::hash_set<SSATmp*> incomingValues;
 
     for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.inst()->block();
+      Block* pred = e.from();
       auto local = m_state.localsForBlock(pred)[i].value;
       if (local == nullptr) missingPreds.insert(&e);
       incomingValues.insert(local);
@@ -1106,7 +1106,7 @@ void IRBuilder::insertLocalPhis() {
     localIds.push_back(i);
 
     for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.inst()->block();
+      Block* pred = e.from();
       auto& local = m_state.localsForBlock(pred)[i];
       if (missingPreds.count(&e)) {
         // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
@@ -1169,7 +1169,7 @@ repeat:
 
   // Modify the incoming Jmps to set the phi inputs.
   for (auto& e : m_curBlock->preds()) {
-    Block* pred = e.inst()->block();
+    Block* pred = e.from();
     jit::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
     auto& jmp = pred->back();
     always_assert_log(

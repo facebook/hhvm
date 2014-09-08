@@ -430,7 +430,7 @@ void FrameState::startBlock(Block* block, BCMarker marker) {
 
   // Reset state if the block has an unprocessed predecessor.
   for (auto const& edge : block->preds()) {
-    auto const pred = edge.inst()->block();
+    auto const pred = edge.from();
     if (!isVisited(pred)) {
       Indent _;
       ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",

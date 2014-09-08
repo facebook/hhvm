@@ -295,8 +295,8 @@ inline void Block::push_back(IRInstruction* inst) {
   return m_instrs.push_back(*inst);
 }
 
-template <class Predicate> inline
-void Block::remove_if(Predicate p) {
+template <class Predicate>
+inline void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
 }
 
@@ -323,6 +323,10 @@ inline BCMarker Block::catchMarker() const {
 // defined here to avoid circular dependencies
 inline void Edge::setTo(Block* to) {
   m_to = Block::updatePreds(this, to);
+}
+
+inline Block* Edge::from() const {
+  return inst() != nullptr ? inst()->block() : nullptr;
 }
 
 }}

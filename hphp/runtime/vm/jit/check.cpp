@@ -160,7 +160,7 @@ bool checkCfg(const IRUnit& unit) {
   std::unordered_set<const Edge*> edges;
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
-      assert(e->inst()->block() == b);
+      assert(e->from() == b);
       edges.insert(e);
       for (auto& p : e->to()->preds()) if (&p == e) return;
       assert(false); // did not find edge.

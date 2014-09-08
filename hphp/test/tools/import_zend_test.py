@@ -802,6 +802,8 @@ other_files = (
     '/ext/xsl/tests/xslt.xml',
     '/ext/xsl/tests/xslt.xsl',
     '/ext/xsl/tests/xslt.xsl.gz',
+    '/ext/zip/tests/utils.inc',
+    '/ext/zip/tests/test_with_comment.zip',
     '/ext/zlib/tests/004.txt.gz',
     '/ext/zlib/tests/data.inc',
     '/ext/zlib/tests/gzopen_include_path.inc',

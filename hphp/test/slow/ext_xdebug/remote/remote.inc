@@ -59,6 +59,7 @@ function format_msg($message) {
                           'engine version=""', $message);
   $message = preg_replace('/protocol_version=".*?"/',
                           'protocol_version=""', $message);
+  $message = preg_replace('/ idekey=".*?"/', '', $message);
   $message = preg_replace('/address="[0-9]+"/',
                           'address=""', $message);
 

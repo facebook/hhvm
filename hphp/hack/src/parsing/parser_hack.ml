@@ -401,11 +401,11 @@ let rec program content =
   let fixmes = !L.fixmes in
   L.comment_list := [];
   L.fixmes := Utils.IMap.empty;
+  Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
   let is_hh_file = !is_hh_file in
   let ast = Namespaces.elaborate_defs ast in
-  Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   {is_hh_file; comments; ast}
 
 (*****************************************************************************)

@@ -2,7 +2,9 @@
 
 namespace __SystemLib {
   final class TarArchiveHandler extends ArchiveHandler {
-    private Map<string, ArchiveEntryData> $entries;
+    private Map<string, ArchiveEntryData> $entries = Map { };
+    private Map<string, string> $contents = Map { };
+    private Map<string, string> $symlinks = Map { };
     private string $path = '';
     private $fp = null;
 
@@ -16,6 +18,12 @@ namespace __SystemLib {
     }
 
     private function readTar() {
+      /* If you have GNU Tar installed, you should be able to find
+       * the file format documentation (including header byte offsets) at:
+       * - /usr/include/tar.h
+       * - the tar info page (Top/Tar Internals/Standard)
+       */
+
       $path = $this->path;
       $fp = fopen($path, 'rb');
       $data = fread($fp, 2);
@@ -70,6 +78,12 @@ namespace __SystemLib {
             $this->contents[$filename] = $data;
             break;
 
+          case '2':
+            // Assuming this is from GNU Tar
+            $target = trim(substr($header, 157, 100), "\0");
+            $this->symlinks[$filename] = $target;
+            break;
+
           case '5':
             // Directory, ignore
             break;
@@ -98,14 +112,27 @@ namespace __SystemLib {
       }
     }
 
+    private function createFullPath(
+      string $root,
+      string $partial_path,
+    ): string {
+      $full_path = $root.'/'.$partial_path;
+      $dir = dirname($full_path);
+      if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+      }
+      return $full_path;
+    }
+
     public function extractAllTo(string $root): bool {
       foreach ($this->contents as $path => $data) {
-        $path = $root.'/'.$path;
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-          mkdir($dir, 0777, true);
-        }
-        file_put_contents($path, $data);
+        file_put_contents($this->createFullPath($root, $path), $data);
+      }
+
+      // Intentional difference to PHP5: PHP5 just creates an empty
+      // file.
+      foreach ($this->symlinks as $path => $target) {
+        symlink($target, $this->createFullPath($root, $path));
       }
     }
 

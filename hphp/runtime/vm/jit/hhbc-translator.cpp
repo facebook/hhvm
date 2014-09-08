@@ -3326,7 +3326,7 @@ const StaticString
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
-  auto const val = top(Type::Gen, 1);
+  auto const val = topC(1);
 
   // Bail if we're trying to do a recursive count()
   if (!mode->isConst(0)) return nullptr;

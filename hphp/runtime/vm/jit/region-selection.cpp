@@ -611,7 +611,7 @@ struct DFSChecker {
  *   5) Each block contains at most one successor corresponding to a
  *      given SrcKey.
  *
- *   6) The region doesn't contains any loops, unless JitLoops is
+ *   6) The region doesn't contain any loops, unless JitLoops is
  *      enabled.
  *
  *   7) All blocks are reachable from the entry block.

@@ -152,12 +152,17 @@ bool checkBlock(Block* b) {
  * 4. Treat tmps defined by DefConst as always defined.
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
+ * 6. The entry block must not have any predecessors.
  */
 bool checkCfg(const IRUnit& unit) {
-  // Check valid successor/predecessor edges.
   auto const blocksIds = rpoSortCfgWithIds(unit);
   auto const& blocks = blocksIds.blocks;
-  std::unordered_set<const Edge*> edges;
+  jit::hash_set<const Edge*> edges;
+
+  // Entry block can't have predecessors.
+  assert(unit.entry()->numPreds() == 0);
+
+  // Check valid successor/predecessor edges.
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
       assert(e->from() == b);

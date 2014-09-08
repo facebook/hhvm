@@ -121,10 +121,7 @@ struct Block : boost::noncopyable {
   EdgeList& preds()             { return m_preds; }
   const EdgeList& preds() const { return m_preds; }
 
-  size_t numPreds() const {
-    // NB: The entry block has an invisible predecessor.
-    return m_preds.size() + safe_cast<size_t>(isEntry());
-  }
+  size_t numPreds() const { return m_preds.size(); }
 
   // Remove edge from its destination's predecessor list and insert it in
   // new_to's predecessor list.

@@ -2650,6 +2650,12 @@
                             "name": "source",
                             "type": "String",
                             "desc": "The HTML string."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Since PHP 5.4.0 and libxml 2.6.0, you may also use the options parameter to specify additional Libxml parameters"
                         }
                     ]
                 },
@@ -2667,6 +2673,12 @@
                             "name": "filename",
                             "type": "String",
                             "desc": "The path to the HTML file."
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0",
+                            "desc": "Since PHP 5.4.0 and libxml 2.6.0, you may also use the options parameter to specify additional Libxml parameters"
                         }
                     ]
                 },

@@ -80,9 +80,7 @@ static void bt_handler(int sig) {
   st.log(strsignal(sig), fd, kCompilerId, debuggerCount);
 
   // flush so if php crashes us we still have this output so far
-  ::close(fd);
-  fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
-              O_APPEND|O_WRONLY, S_IRUSR|S_IWUSR);
+  ::fsync(fd);
 
   if (fd >= 0) {
     if (!g_context.isNull()) {

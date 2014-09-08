@@ -144,6 +144,7 @@ module Naming                               = struct
   let object_cast                           = 2055 (* DONT MODIFY!!!! *)
   let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
   let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
+  let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -517,7 +518,11 @@ let expected_collection pos cn =
 
 let illegal_CLASS pos =
   add Naming.illegal_CLASS pos
-    "Using __CLASS__ outside a class"
+    "Using __CLASS__ outside a class or trait"
+
+let illegal_TRAIT pos =
+  add Naming.illegal_TRAIT pos
+    "Using __TRAIT__ outside a trait"
 
 let dynamic_method_call pos =
   add Naming.dynamic_method_call pos

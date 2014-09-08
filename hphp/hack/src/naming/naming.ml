@@ -54,9 +54,6 @@ type genv = {
   (* are we in the body of a non-static member function? *)
   in_member_fun: bool;
 
-  (* are we in the body of an enum? *)
-  in_enum: bool;
-
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -79,8 +76,8 @@ type genv = {
   (* Set of constant names defined, and their position *)
   gconsts: map ref;
 
-  (* The name of the current class, None if we are in a function *)
-  cclass: Ast.id option;
+  (* The current class, None if we are in a function *)
+  cclass: Ast.class_ option;
 
   (* Normally we don't need to add dependencies at this stage, but there
    * are edge cases when we do.  *)
@@ -225,7 +222,6 @@ module Env = struct
     in_mode       = Ast.Mstrict;
     in_try        = false;
     in_member_fun = false;
-    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref env.iclasses;
@@ -242,14 +238,13 @@ module Env = struct
       (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
     in_try        = false;
     in_member_fun = false;
-    in_enum       = c.c_kind = Cenum;
     type_params   = params;
     type_paraml   = List.map fst c.c_tparams;
     classes       = ref genv.iclasses;
     funs          = ref genv.ifuns;
     typedefs      = ref genv.itypedefs;
     gconsts       = ref genv.iconsts;
-    cclass        = Some c.c_name;
+    cclass        = Some c;
     droot         = Some (Typing_deps.Dep.Class (snd c.c_name));
     namespace     = c.c_namespace;
   }
@@ -264,7 +259,6 @@ module Env = struct
     in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
     in_try        = false;
     in_member_fun = false;
-    in_enum       = false;
     type_params   = cstrs;
     type_paraml   = List.map fst tdef.t_tparams;
     classes       = ref genv.iclasses;
@@ -286,7 +280,6 @@ module Env = struct
     in_mode       = f.f_mode;
     in_try        = false;
     in_member_fun = false;
-    in_enum       = false;
     type_params   = params;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -302,7 +295,6 @@ module Env = struct
     in_mode       = cst.cst_mode;
     in_try        = false;
     in_member_fun = false;
-    in_enum       = false;
     type_params   = SMap.empty;
     type_paraml   = [];
     classes       = ref genv.iclasses;
@@ -755,14 +747,14 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         | None ->
           Errors.this_outside_of_class p;
           N.Hany
-        | Some cid ->
+        | Some c ->
           let tparaml = (fst env).type_paraml in
           let tparaml = List.map begin fun (param_pos, param_name) ->
             let _, cstr = get_constraint env param_name in
             let cstr = opt_map (hint env) cstr in
             param_pos, N.Habstr (param_name, cstr)
           end tparaml in
-          N.Habstr ("this", Some (fst cid, N.Happly (cid, tparaml))))
+          N.Habstr ("this", Some (fst c.c_name, N.Happly (c.c_name, tparaml))))
     | "this" ->
         (match (fst env).cclass with
         | None ->
@@ -1151,9 +1143,10 @@ and const_def h env (x, e) =
               None, Env.new_const env x, expr env e
           | _ ->
             (* Missing annotation fine if this is an enum. *)
-            if (fst env).in_enum then
+            match (fst env).cclass with
+            | Some c when c.c_kind = Cenum ->
               (None, Env.new_const env x, expr env e)
-            else
+            | _ ->
               (Errors.missing_typehint (fst x);
                None, Env.new_const env x, (fst e, N.Any))
           )
@@ -1547,7 +1540,7 @@ and expr_ env = function
   | Id x ->
     (match snd x with
       | "__LINE__" -> N.Int x
-      | "__CLASS__" | "__TRAIT__" ->
+      | "__CLASS__" ->
         (match (fst env).cclass with
           | None -> Errors.illegal_CLASS (fst x); N.Any
           | Some c ->
@@ -1556,7 +1549,11 @@ and expr_ env = function
              * sufficient for typechecking purposes (we require
              * subclass to be compatible with the trait member/method
              * declarations) *)
-            N.String c)
+            N.String c.c_name)
+      | "__TRAIT__" ->
+        (match (fst env).cclass with
+          | Some c when c.c_kind = Ctrait -> N.String c.c_name
+          | _ -> Errors.illegal_TRAIT (fst x); N.Any)
       | "__FILE__" | "__DIR__"
       (* could actually check that we are in a function, method, etc *)
       | "__FUNCTION__" | "__METHOD__"
@@ -1641,7 +1638,7 @@ and expr_ env = function
           | (p, N.Class_const ((N.CIself|N.CIstatic), (_, "class"))),
             (_, N.String meth) ->
             (match (fst env).cclass with
-              | Some cl -> N.Smethod_id (cl, meth)
+              | Some cl -> N.Smethod_id (cl.c_name, meth)
               | None -> Errors.illegal_class_meth p; N.Any)
           | (p, _), (_) -> Errors.illegal_class_meth p; N.Any
           )

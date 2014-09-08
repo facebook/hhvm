@@ -63,6 +63,7 @@ val naming_too_few_arguments : Pos.t -> unit
 val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
+val illegal_TRAIT : Pos.t -> unit
 val dynamic_method_call : Pos.t -> unit
 val nullsafe_property_access : Pos.t -> unit
 val illegal_fun : Pos.t -> unit

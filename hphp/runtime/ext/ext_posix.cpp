@@ -27,7 +27,6 @@
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
-#include <sys/time.h>
 #include <unistd.h>
 #include <pwd.h>
 
@@ -151,7 +150,7 @@ static Variant php_posix_group_to_array(int gid,
     return false;
   }
 
-  PackedArrayInit members(1);
+  Array members = Array::Create();
   for (int count=0; gr.gr_mem[count] != NULL; count++) {
     members.append(String(gr.gr_mem[count], CopyString));
   }
@@ -159,7 +158,7 @@ static Variant php_posix_group_to_array(int gid,
   return make_map_array(
     s_name, String(gr.gr_name, CopyString),
     s_passwd, String(gr.gr_passwd, CopyString),
-    s_members, members.toArray(),
+    s_members, members,
     s_gid, (int)gr.gr_gid
   );
 }

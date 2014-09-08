@@ -33,11 +33,14 @@ function run_benchmark(
   print_progress('Starting Nginx');
   $nginx = new NginxDaemon($temp_dir, $target);
   $nginx->start();
-  assert($nginx->isRunning());
+  invariant($nginx->isRunning(), 'Failed to start nginx');
 
   print_progress('Starting PHP Engine');
   $php_engine->start();
-  assert($php_engine->isRunning());
+  invariant(
+    $php_engine->isRunning(),
+    'Failed to start '.get_class($php_engine)
+  );
 
   if ($target->needsUnfreeze()) {
     print_progress('Unfreezing framework');
@@ -54,11 +57,11 @@ function run_benchmark(
   print_progress('Starting Siege for warmup');
   $siege = new Siege($temp_dir, $target, RequestModes::WARMUP, $options);
   $siege->start();
-  assert($siege->isRunning());
+  invariant($siege->isRunning(), 'Failed to start siege');
   $siege->wait();
 
-  assert(!$siege->isRunning());
-  assert($php_engine->isRunning());
+  invariant(!$siege->isRunning(), 'Siege is still running :/');
+  invariant($php_engine->isRunning(), get_class($php_engine).' crashed');
 
   print_progress('Waiting 30s for server to stabilize');
   sleep(30);
@@ -69,7 +72,7 @@ function run_benchmark(
   print_progress('Running Siege for benchmark');
   $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
   $siege->start();
-  assert($siege->isRunning());
+  invariant($siege->isRunning(), 'Siege failed to start');
   $siege->wait();
 
   print_progress('Collecting results');

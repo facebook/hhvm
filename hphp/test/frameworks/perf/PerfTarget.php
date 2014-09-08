@@ -50,6 +50,8 @@ abstract class PerfTarget {
   }
 
   public function unfreeze(): void {
-    assert(false);
+    invariant_violation(
+      'If you override needsUnfreeze(), you must override unfreeze() too.'
+    );
   }
 }

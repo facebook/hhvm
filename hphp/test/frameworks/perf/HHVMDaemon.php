@@ -31,7 +31,7 @@ final class HHVMDaemon extends PHPEngine {
 
   public function start(): void {
     parent::start();
-    assert($this->isRunning());
+    invariant($this->isRunning(), 'Failed to start HHVM');
     for ($i = 0; $i < 10; ++$i) {
       sleep(1);
       $health = $this->adminRequest('/check-health');
@@ -50,7 +50,7 @@ final class HHVMDaemon extends PHPEngine {
     $health = $this->adminRequest('/check-health');
     if ($health && json_decode($health)) {
       $this->adminRequest('/stop');
-      assert(!$this->isRunning());
+      invariant(!$this->isRunning(), 'Failed to stop HHVM');
     } else {
       parent::stop();
     }

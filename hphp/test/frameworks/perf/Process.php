@@ -33,13 +33,19 @@ abstract class Process {
     $env = new Map($_ENV);
     $env->setAll($this->getEnvironmentVariables());
     $proc = proc_open($cmd, $spec, $pipes, null, $env);
-    if ($proc) {
-      $this->process = $proc;
-      $this->stdin = $pipes[0];
-      $this->stdout = $pipes[1];
-    } else {
-      invariant_violation('failed to start process');
-    }
+
+    // Give the shell some time to figure out if it could actually launch the
+    // process
+    usleep(100000 /* = 100ms */);
+    invariant(
+      $proc && proc_get_status($proc)['running'] === true,
+      'failed to start process: %s',
+      $cmd
+    );
+
+    $this->process = $proc;
+    $this->stdin = $pipes[0];
+    $this->stdout = $pipes[1];
   }
 
   public function isRunning(): bool {

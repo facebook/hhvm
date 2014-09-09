@@ -221,15 +221,21 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
     INCLUDE(CheckCXXSourceCompiles)
     CHECK_CXX_SOURCE_COMPILES("
 #include <jemalloc/jemalloc.h>
-int main(void) {
-#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
-# error \"jemalloc version >= 3.0.0 required\"
+
+#define JEMALLOC_VERSION_NUMERIC \
+  ((JEMALLOC_VERSION_MAJOR << 24) | \
+   (JEMALLOC_VERSION_MINOR << 16) | \
+   (JEMALLOC_VERSION_BUGFIX << 8) | \
+    JEMALLOC_VERSION_NDEV)
+
+#if JEMALLOC_VERSION_NUMERIC < 03050100
+# error \"jemalloc version >= 3.5.1 required\"
 #endif
-  return 0;
-}" JEMALLOC_VERSION_3)
+
+int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
     set (CMAKE_REQUIRED_INCLUDES)
 
-    if (JEMALLOC_VERSION_3)
+    if (JEMALLOC_VERSION_MINIMUM)
       message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
       set(JEMALLOC_ENABLED 1)
     else()

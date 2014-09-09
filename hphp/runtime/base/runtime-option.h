@@ -169,6 +169,7 @@ public:
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool EnableUploadProgress;
+  static int64_t MaxFileUploads;
   static int Rfc1867Freq;
   static std::string Rfc1867Prefix;
   static std::string Rfc1867Name;

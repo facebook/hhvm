@@ -171,6 +171,7 @@ int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
 bool RuntimeOption::EnableUploadProgress = false;
+int64_t RuntimeOption::MaxFileUploads = 20;
 int RuntimeOption::Rfc1867Freq = 256 * 1024;
 std::string RuntimeOption::Rfc1867Prefix = "vupload_";
 std::string RuntimeOption::Rfc1867Name = "video_ptoken";
@@ -1136,6 +1137,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(UploadTmpDir, ini, upload["UploadTmpDir"], "/tmp");
     Config::Bind(EnableFileUploads, ini, upload["EnableFileUploads"], true);
+    Config::Bind(MaxFileUploads, ini, "max_file_uploads", 20);
     Config::Bind(EnableUploadProgress, ini, upload["EnableUploadProgress"]);
     Config::Bind(Rfc1867Freq, ini, upload["Rfc1867Freq"], 256 * 1024);
     if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;

@@ -559,6 +559,16 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 int RuntimeOption::EnableAlternative = 0;
 
+#ifdef NDEBUG
+  #ifdef ALWAYS_ASSERT
+    const StaticString s_hhvm_build_type("Release with asserts");
+  #else
+    const StaticString s_hhvm_build_type("Release");
+  #endif
+#else
+  const StaticString s_hhvm_build_type("Debug");
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
@@ -1488,6 +1498,16 @@ void RuntimeOption::Load(IniSetting::Map& ini,
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.build_type",
+                   IniSetting::SetAndGet<std::string>(
+    [](const std::string&) {
+      return false;
+    },
+    []() {
+      return s_hhvm_build_type.c_str();
+    }
+  ));
 
   // Extensions
   Config::Bind(RuntimeOption::ExtensionDir, ini, "extension_dir",

@@ -17,7 +17,11 @@
 
 #include "ext_gmp.h"
 
+#include <cstdlib>
+
 namespace HPHP {
+
+using std::abs;
 
 ///////////////////////////////////////////////////////////////////////////////
 // functions

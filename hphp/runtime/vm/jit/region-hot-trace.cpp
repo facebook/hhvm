@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-static const Trace::Module TRACEMOD = Trace::pgo;
+TRACE_SET_MOD(pgo);
 
 /**
  * Remove from pConds the elements that correspond to stack positions

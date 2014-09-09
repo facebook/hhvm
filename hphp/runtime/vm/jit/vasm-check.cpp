@@ -25,6 +25,7 @@ namespace HPHP { namespace jit { namespace x64 {
 namespace {
 
 typedef boost::dynamic_bitset<> Bits;
+bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
 bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   using namespace reg;
   jit::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]

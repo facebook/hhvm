@@ -407,6 +407,7 @@ void LLVMEmitter::emit(const ud2& inst) {
 void LLVMEmitter::emit(const unwind& inst) {
 }
 
+std::string showNewCode(const jit::vector<Vasm::Area>& areas) DEBUG_ONLY;
 std::string showNewCode(const jit::vector<Vasm::Area>& areas) {
   std::ostringstream str;
   Disasm disasm(Disasm::Options().indent(2));

@@ -172,7 +172,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const opAtPrevPc =
         *reinterpret_cast<const Op*>(prevUnit->at(prevPc));
       Offset pcAdjust = 0;
-      if (opAtPrevPc == OpPopR || opAtPrevPc == OpUnboxR) {
+      if (opAtPrevPc == Op::PopR ||
+          opAtPrevPc == Op::UnboxR ||
+          opAtPrevPc == Op::UnboxRNop) {
         pcAdjust = 1;
       }
       frame.set(s_line,

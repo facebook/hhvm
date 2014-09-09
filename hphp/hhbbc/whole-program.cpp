@@ -136,6 +136,9 @@ std::vector<Context> all_function_contexts(const php::Program& program) {
     for (auto& f : u->funcs) {
       ret.push_back(Context { borrow(u), borrow(f) });
     }
+    if (options.AnalyzePseudomains) {
+      ret.push_back(Context { borrow(u), borrow(u->pseudomain) });
+    }
   }
   return ret;
 }
@@ -169,6 +172,12 @@ std::vector<WorkItem> initial_work(const php::Program& program) {
     }
     for (auto& f : u->funcs) {
       ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
+    }
+    if (options.AnalyzePseudomains) {
+      ret.emplace_back(
+        WorkType::Func,
+        Context { borrow(u), borrow(u->pseudomain) }
+      );
     }
   }
   return ret;

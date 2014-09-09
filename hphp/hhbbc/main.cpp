@@ -123,6 +123,7 @@ void parse_options(int argc, char** argv) {
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
     ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
+    ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ;
 
   po::options_description all;

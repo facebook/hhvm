@@ -30,6 +30,7 @@
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/func-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -577,6 +578,11 @@ std::string show(Type t) {
 
 std::string show(Context ctx) {
   auto ret = std::string{};
+  if (is_pseudomain(ctx.func)) {
+    ret = ctx.func->unit->filename->data();
+    ret += ";pseudomain";
+    return ret;
+  }
   if (ctx.cls) {
     ret = ctx.cls->name->data();
     ret += "::";

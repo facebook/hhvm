@@ -25,7 +25,7 @@ function run_benchmark(
   PerfTarget $target,
   PHPEngine $php_engine,
   string $temp_dir,
-  bool $skip_sanity_check,
+  PerfOptions $options,
 ) {
   print_progress('Installing framework');
   $target->install();
@@ -44,7 +44,7 @@ function run_benchmark(
     $target->unfreeze();
   }
 
-  if ($skip_sanity_check) {
+  if ($options->skipSanityCheck) {
     print_progress('Skipping sanity check');
   } else {
     print_progress('Running sanity check');
@@ -52,7 +52,7 @@ function run_benchmark(
   }
 
   print_progress('Starting Siege for warmup');
-  $siege = new Siege($temp_dir, $target, RequestModes::WARMUP);
+  $siege = new Siege($temp_dir, $target, RequestModes::WARMUP, $options);
   $siege->start();
   assert($siege->isRunning());
   $siege->wait();
@@ -67,7 +67,7 @@ function run_benchmark(
   $php_engine->enableStats();
 
   print_progress('Running Siege for benchmark');
-  $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK);
+  $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
   $siege->start();
   assert($siege->isRunning());
   $siege->wait();
@@ -144,7 +144,7 @@ function perf_main($argv) {
     );
   }
 
-  run_benchmark($target, $engine, $temp_dir, $options->skipSanityCheck);
+  run_benchmark($target, $engine, $temp_dir, $options);
 }
 
 perf_main($argv);

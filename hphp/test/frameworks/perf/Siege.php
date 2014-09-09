@@ -1,5 +1,6 @@
 <?hh
 
+require_once('PerfOptions.php');
 require_once('PerfSettings.php');
 require_once('Process.php');
 require_once('RequestMode.php');
@@ -14,8 +15,29 @@ final class Siege extends Process {
     private string $tempDir,
     private PerfTarget $target,
     private RequestMode $mode,
+    PerfOptions $options,
   ) {
-    parent::__construct('siege');
+    parent::__construct($options->siege);
+
+    if (!$options->skipVersionChecks) {
+      $version_line = trim(
+        exec(escapeshellarg($options->siege).' --version 2>&1 | head -n 1')
+      );
+      if (preg_match('/^SIEGE 3\.0\.[0-7]$/', $version_line)) {
+        fprintf(
+          STDERR,
+          "WARNING: Siege 3.0.0-3.0.7 send an incorrect HOST header to ports ".
+          "other than :80 and :443. You are using '%s'.\n\n".
+          "You can specify a path to siege 2.7x or >= 3.0.8 with the ".
+          "--siege=/path/to/siege option. If you have patched siege to fix ".
+          "issue, pass --skip-version-checks.\n",
+          $version_line
+        );
+        exit(1);
+      }
+    }
+
+
     if ($mode === RequestModes::BENCHMARK) {
       $this->logfile = tempnam($tempDir, 'siege');
     }

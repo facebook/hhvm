@@ -116,6 +116,17 @@ function perf_main($argv) {
     exit(0);
   }
 
+  // If we exit cleanly, Process::__destruct() gets called, but it doesn't
+  // if we're killed by Ctrl-C. This tends to leak php-cgi or hhvm processes -
+  // trap the signal so we can clean them up.
+  pcntl_signal(
+    SIGINT,
+    function() {
+      Process::cleanupAll();
+      exit();
+    }
+  );
+
   $temp_dir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
   // Currently a file - change to a dir
   unlink($temp_dir);

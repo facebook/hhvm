@@ -5,7 +5,16 @@ abstract class Process {
   protected ?resource $stdin;
   protected ?resource $stdout;
 
+  private static Vector<Process> $processes = Vector {};
+
   public function __construct(private string $executablePath) {
+    self::$processes[] = $this;
+  }
+
+  final public static function cleanupAll() {
+    foreach (self::$processes as $process) {
+      $process->__destruct();
+    }
   }
 
   abstract protected function getArguments(): Vector<string>;
@@ -62,8 +71,12 @@ abstract class Process {
       return;
     }
 
-    pclose($this->stdin);
-    pclose($this->stdout);
+    if (is_resource($this->stdin)) {
+      pclose($this->stdin);
+    }
+    if (is_resource($this->stdout)) {
+      pclose($this->stdout);
+    }
     proc_terminate($this->process);
   }
 

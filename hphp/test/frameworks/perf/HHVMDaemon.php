@@ -47,11 +47,13 @@ final class HHVMDaemon extends PHPEngine {
   }
 
   public function stop(): void {
-    $health = $this->adminRequest('/check-health');
-    if ($health && json_decode($health)) {
-      $this->adminRequest('/stop');
-      invariant(!$this->isRunning(), 'Failed to stop HHVM');
-    } else {
+    try {
+      $health = $this->adminRequest('/check-health');
+      if ($health && json_decode($health)) {
+        $this->adminRequest('/stop');
+        invariant(!$this->isRunning(), 'Failed to stop HHVM');
+      }
+    } catch (Exception $e) {
       parent::stop();
     }
   }

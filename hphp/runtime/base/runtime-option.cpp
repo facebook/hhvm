@@ -282,12 +282,7 @@ bool RuntimeOption::ClearInputOnSuccess = true;
 std::string RuntimeOption::ProfilerOutputDir = "/tmp";
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
-std::string RuntimeOption::CoreDumpReportDirectory
-#if defined(HPHP_OSS)
-  ("/tmp");
-#else
-  ("/var/tmp/cores");
-#endif
+std::string RuntimeOption::StackTraceFilename;
 bool RuntimeOption::LocalMemcache = false;
 bool RuntimeOption::MemcacheReadOnly = false;
 
@@ -1297,8 +1292,20 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    Config::Bind(CoreDumpReportDirectory, ini,
-                 debug["CoreDumpReportDirectory"], CoreDumpReportDirectory);
+
+    auto core_dump_report_dir =
+      Config::Get(ini, debug["CoreDumpReportDirectory"],
+#if defined(HPHP_OSS)
+  "/tmp"
+#else
+  "/var/tmp/cores"
+#endif
+      );
+    std::ostringstream stack_trace_stream;
+    stack_trace_stream << core_dump_report_dir << "/stacktrace."
+                       << Process::GetProcessId() << ".log";
+    StackTraceFilename = stack_trace_stream.str();
+
     Config::Bind(LocalMemcache, ini, debug["LocalMemcache"]);
     Config::Bind(MemcacheReadOnly, ini, debug["MemcacheReadOnly"]);
 

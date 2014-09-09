@@ -124,6 +124,7 @@ void parse_options(int argc, char** argv) {
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
     ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
+    ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
 
   po::options_description all;
@@ -160,14 +161,21 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
+  options.InterceptableFunctions.insert(begin(interceptable),
+                                        end(interceptable));
+  logging = !no_logging;
+}
+
+void validate_options() {
   if (parallel::work_chunk <= 10 || parallel::num_threads < 1) {
     std::cerr << "Invalid parallelism configuration.\n";
     std::exit(1);
   }
 
-  options.InterceptableFunctions.insert(begin(interceptable),
-                                        end(interceptable));
-  logging = !no_logging;
+  if (options.AnalyzePublicStatics && !options.AnalyzePseudomains) {
+    std::cerr << "-fanalyze-public-statics requires -fanalyze-pseudomains\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

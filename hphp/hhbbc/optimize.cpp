@@ -251,7 +251,7 @@ void insert_assertions(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  CollectedInfo collect { index, ctx, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
@@ -368,7 +368,7 @@ void first_pass(const Index& index,
 
   BytecodeAccumulator accumulator(newBCs);
 
-  CollectedInfo collect { index, ctx, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);

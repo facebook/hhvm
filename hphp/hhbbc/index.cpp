@@ -20,15 +20,14 @@
 #include <map>
 #include <cstdio>
 #include <cstdlib>
-
-#include <boost/next_prior.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_unordered_map.h>
 #include <algorithm>
 #include <memory>
 #include <unordered_set>
 #include <vector>
+
+#include <boost/next_prior.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <tbb/concurrent_hash_map.h>
 
 #include "folly/String.h"
 #include "folly/Format.h"
@@ -144,6 +143,23 @@ using DepMap =
   >;
 
 //////////////////////////////////////////////////////////////////////
+
+enum class PublicSPropState {
+  Unrefined,    // refine_public_statics never called
+  Invalid,      // analyzed, but we know nothing (m_everything_bad case)
+  Valid,
+};
+
+/*
+ * Each ClassInfo has a table of public static properties with these entries.
+ * The `initializerType' is for use during refine_public_statics, and
+ * inferredType will always be a supertype of initializerType.
+ */
+struct PublicSPropEntry {
+  Type inferredType;
+  Type initializerType;
+  bool everModified;
+};
 
 /*
  * Entries in the ClassInfo method table need to track some additional
@@ -344,6 +360,21 @@ struct ClassInfo {
    * order.
    */
   std::vector<borrowed_ptr<ClassInfo>> baseList;
+
+  /*
+   * Property types for public static properties, declared on this exact class
+   * (i.e. not flattened in the hierarchy).
+   *
+   * These maps always have an entry for each public static property declared
+   * in this class, so it can also be used to check if this class declares a
+   * public static property of a given name.
+   *
+   * Note: the effective type we can assume a given static property may hold is
+   * not just the value in these maps.  To handle mutations of public statics
+   * where the name is known, but not which class was affected, these always
+   * need to be unioned with values from IndexData::unknownClassSProps.
+   */
+  std::unordered_map<SString,PublicSPropEntry> publicStaticProps;
 
   /*
    * Flags about the existence of various magic methods, or whether
@@ -572,6 +603,23 @@ struct IndexData {
     PropState
   > privateStaticPropInfo;
 
+  /*
+   * Public static property information.
+   *
+   * We have state for whether any of it is valid (before we've analyzed for
+   * it, or if the program contains /any/ modifications of static properties
+   * where both the name and class are unknown).
+   *
+   * Each ClassInfo has a map of known largest static property types, valid if
+   * PublicSPropState is true, but we also have information here about types
+   * that may exist in static properties by name, when we didn't know the
+   * class.  The Type we're allowed to assume any static property contains is
+   * the union of the ClassInfo-specific type with the unknown class type for
+   * that property name that's stored here.
+   */
+  PublicSPropState publicSPropState;
+  PropState unknownClassSProps;
+
   std::unordered_map<
     borrowed_ptr<const php::Class>,
     std::vector<Type>
@@ -737,7 +785,25 @@ borrowed_ptr<const php::Func> find_constructor(borrowed_ptr<ClassInfo> cinfo) {
  */
 bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
   if (!build_cls_info_rec(cinfo, cinfo)) return false;
+
   cinfo->ctor = find_constructor(cinfo);
+
+  for (auto& prop : cinfo->cls->properties) {
+    if (!(prop.attrs & AttrPublic) || !(prop.attrs & AttrStatic)) {
+      continue;
+    }
+
+    /*
+     * If the initializer type is TUninit, it means an 86sinit provides the
+     * actual initialization type.  So we don't want to include the Uninit
+     * (which isn't really a user-visible type for the property) or by the time
+     * we union things in we'll have inferred nothing much.
+     */
+    auto const tyRaw = from_cell(prop.val);
+    auto const ty = tyRaw.subtypeOf(TUninit) ? TBottom : tyRaw;
+    cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
+  }
+
   return true;
 }
 
@@ -1852,6 +1918,76 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
   );
 }
 
+Type Index::lookup_public_static(Type cls, Type name) const {
+  if (m_data->publicSPropState != PublicSPropState::Valid) {
+    return TInitGen;
+  }
+
+  auto const cinfo = [&] () -> borrowed_ptr<const ClassInfo> {
+    if (!cls.strictSubtypeOf(TCls)) {
+      return nullptr;
+    }
+    auto const dcls = dcls_of(cls);
+    switch (dcls.type) {
+    case DCls::Sub:   return nullptr;
+    case DCls::Exact: return dcls.cls.val.right();
+    }
+    not_reached();
+  }();
+  if (!cinfo) return TInitGen;
+
+  auto const vname = tv(name);
+  if (!vname || (vname && vname->m_type != KindOfStaticString)) {
+    return TInitGen;
+  }
+  auto const sname = vname->m_data.pstr;
+
+  auto const knownClsPart = [&] {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      auto const it = ci->publicStaticProps.find(sname);
+      if (it != end(ci->publicStaticProps)) {
+        return it->second.inferredType;
+      }
+    }
+    return TInitGen;
+  }();
+  auto const unkPart = [&]() -> Type {
+    auto unkIt = m_data->unknownClassSProps.find(sname);
+    if (unkIt != end(m_data->unknownClassSProps)) {
+      return unkIt->second;
+    }
+    return TBottom;
+  }();
+
+  always_assert_flog(
+    !knownClsPart.subtypeOf(TBottom),
+    "A public static property had type TBottom; probably "
+    "was marked uninit but didn't show up in the class 86sinit."
+  );
+
+  return union_of(unkPart, knownClsPart);
+}
+
+bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
+                                           SString name) const {
+  if (m_data->publicSPropState != PublicSPropState::Valid) {
+    return false;
+  }
+  if (m_data->unknownClassSProps.count(name)) return false;
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  if (begin(classes) == end(classes) ||
+      boost::next(begin(classes)) != end(classes)) {
+    return false;
+  }
+  auto const cinfo = begin(classes)->second;
+  auto const it = cinfo->publicStaticProps.find(name);
+  if (it == end(cinfo->publicStaticProps)) {
+    // Presumably protected or private.
+    return false;
+  }
+  return !it->second.everModified;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::vector<Context>
@@ -1937,6 +2073,92 @@ void Index::refine_private_statics(borrowed_ptr<const php::Class> cls,
   refine_propstate(m_data->privateStaticPropInfo, cls, state);
 }
 
+/*
+ * Note: this routine is implemented to support refining the public static
+ * types repeatedly (we could get plausibly better types for them sometimes by
+ * doing that), but currently the tradeoff with compile time is probably not
+ * worth it, and we're only doing one pass (see whole-program.cpp).  If we add
+ * other 'whole program' passes that want to iterate, iterating this one at the
+ * same time would probably be mostly free, so we can consider that later.
+ */
+void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
+  if (indexer.m_everything_bad ||
+      m_data->publicSPropState == PublicSPropState::Invalid) {
+    m_data->publicSPropState = PublicSPropState::Invalid;
+    return;
+  }
+  auto const firstRefinement =
+    m_data->publicSPropState == PublicSPropState::Unrefined;
+  m_data->publicSPropState = PublicSPropState::Valid;
+
+  for (auto& kv : indexer.m_unknown) {
+    auto it = m_data->unknownClassSProps.find(kv.first);
+    if (it == end(m_data->unknownClassSProps)) {
+      m_data->unknownClassSProps.emplace(kv.first, kv.second);
+      continue;
+    }
+
+    assert(!firstRefinement);
+    always_assert_flog(
+      kv.second.subtypeOf(it->second),
+      "Static property index invariant violated for name {}:\n"
+      "  {} was not a subtype of {}",
+      kv.first->data(),
+      show(kv.second),
+      show(it->second)
+    );
+
+    it->second = kv.second;
+  }
+
+  for (auto& knownInfo : indexer.m_known) {
+    auto const cinfo   = knownInfo.first.cinfo;
+    auto const name    = knownInfo.first.prop;
+    auto const newType = knownInfo.second;
+    auto const it      = cinfo->publicStaticProps.find(name);
+
+    FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
+      cinfo->cls->name->data(),
+      name->data(),
+      show(newType));
+
+    // Cases where it's not public should've already been filtered out in the
+    // indexer.
+    always_assert_flog(
+      it != end(cinfo->publicStaticProps),
+      "Attempt to merge a public static property ({}) that wasn't declared "
+      "on class {}",
+      name->data(),
+      cinfo->cls->name->data()
+    );
+
+    // The type from the indexer doesn't contain the in-class initializer
+    // types.  Add that here.
+    auto const effectiveType = union_of(newType, it->second.initializerType);
+
+    /*
+     * If refine_public_statics is called more than once, the subsequent calls
+     * may only shrink the types we recorded for each property.  (If a property
+     * type ever grows, the interpreter could infer something incorrect at some
+     * step.)
+     */
+    if (!firstRefinement) {
+      always_assert_flog(
+        effectiveType.subtypeOf(it->second.inferredType),
+        "Static property index invariant violated on {}::{}:\n"
+        "  {} is not a subtype of {}",
+        cinfo->cls->name->data(),
+        name->data(),
+        show(newType),
+        show(it->second.inferredType)
+      );
+    }
+
+    it->second.inferredType = effectiveType;
+    it->second.everModified = true;
+  }
+}
+
 bool Index::frozen() const {
   return m_data->frozen;
 }
@@ -1990,6 +2212,115 @@ Index::could_be_related(borrowed_ptr<const php::Class> cls,
     }
   }
   return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
+  auto const vname = tv(name);
+
+  FTRACE(2, "merge_public_static: {} {} {}\n",
+    show(tcls), show(name), show(val));
+
+  // Figure out which class this can affect.  If we have a DCls::Sub we assume
+  // it could affect any class (we could chase the inheritance hierarchy
+  // downward to try to limit it, but don't currently).
+  auto const cinfo = [&]() -> borrowed_ptr<ClassInfo> {
+    if (!tcls.strictSubtypeOf(TCls)) {
+      return nullptr;
+    }
+    auto const dcls = dcls_of(tcls);
+    switch (dcls.type) {
+    case DCls::Exact:
+      return dcls.cls.val.right();
+    case DCls::Sub:
+      return nullptr;
+    }
+    not_reached();
+  }();
+
+  bool const unknownName = !vname ||
+    (vname && vname->m_type != KindOfStaticString);
+
+  if (!cinfo) {
+    if (unknownName) {
+      /*
+       * We have a case here where we know neither the class nor the static
+       * property name.  This means we have to pessimize public static property
+       * types for the entire program.
+       *
+       * We could limit it to pessimizing them by merging the `val' type, but
+       * instead we just throw everything away---this optimization is not
+       * expected to be particularly useful on programs that contain any
+       * instances of this situation.
+       */
+      std::fprintf(
+        stderr,
+        "NOTE: had to mark everything unknown for public static "
+        "property types due to dynamic code.  -fanalyze-public-statics "
+        "will not help for this program.\n"
+      );
+      m_everything_bad = true;
+      return;
+    }
+
+    UnknownMap::accessor acc;
+    if (m_unknown.insert(acc, vname->m_data.pstr)) {
+      acc->second = val;
+    } else {
+      acc->second = union_of(acc->second, val);
+    }
+    return;
+  }
+
+  /*
+   * We don't know the name, but we know something about the class.  We need to
+   * merge the type for every property in the class hierarchy.
+   */
+  if (unknownName) {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      for (auto& kv : ci->publicStaticProps) {
+        merge(tcls, sval(kv.first), val);
+      }
+    }
+    return;
+  }
+
+  /*
+   * Here we know both the ClassInfo and the static property name, but it may
+   * not actually be on this ClassInfo.  In php, you can access base class
+   * static properties through derived class names, and the access affects the
+   * property with that name on the most-recently-inherited-from base class.
+   *
+   * If the property is not found as a public property anywhere in the
+   * hierarchy, we don't want to merge this type.  Note we don't have to worry
+   * about the case that there is a protected property in between, because this
+   * is a fatal at class declaration time (you can't redeclare a public static
+   * property with narrower access in a subclass).
+   */
+  auto const affectedCInfo = [&]() -> borrowed_ptr<ClassInfo> {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      if (ci->publicStaticProps.count(vname->m_data.pstr)) {
+        return ci;
+      }
+    }
+    return nullptr;
+  }();
+
+  if (!affectedCInfo) {
+    // Either this was a mutation that's going to fatal (property doesn't
+    // exist), or it's a private static or a protected static.  We aren't in
+    // that business here, so we don't need to record anything.
+    return;
+  }
+
+  // Merge the property type.
+  KnownMap::accessor acc;
+  if (m_known.insert(acc, KnownKey { affectedCInfo, vname->m_data.pstr })) {
+    acc->second = val;
+  } else {
+    acc->second = union_of(acc->second, val);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

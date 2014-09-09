@@ -4509,6 +4509,10 @@
             "type": "Int64"
         },
         {
+            "name": "T_FINALLY",
+            "type": "Int64"
+        },
+        {
             "name": "T_FMT",
             "value": 3
         },

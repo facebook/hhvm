@@ -1595,6 +1595,7 @@ bool validateDeltas(BlockMap& orig, BlockMap& opt) {
   return true;
 }
 
+std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) DEBUG_ONLY;
 std::string show(const SinkPointsMap& sinkPoints, const IdMap& ids) {
   std::string ret;
 

@@ -51,13 +51,15 @@ TODO:
  - Add scale support for a portion only of an image (equivalent of copyresized/resampled)
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
 
 #include "gd.h"
 #include "gdhelpers.h"
+
+using std::abs;
 
 #ifdef _MSC_VER
 # pragma optimize("t", on)
@@ -2202,8 +2204,8 @@ int gdTransformAffineCopy(gdImagePtr dst,
 
 	gdImageGetClip(dst, &c1x, &c1y, &c2x, &c2y);
 
-	end_x = bbox.width  + (int) fabs(bbox.x);
-	end_y = bbox.height + (int) fabs(bbox.y);
+	end_x = bbox.width  + abs(bbox.x);
+	end_y = bbox.height + abs(bbox.y);
 
 	/* Get inverse affine to let us work with destination -> source */
 	gdAffineInvert(inv, affine);

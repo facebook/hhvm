@@ -8,8 +8,9 @@ final class NginxDaemon extends Process {
   public function __construct(
     private string $tempDir,
     private PerfTarget $target,
+    private PerfOptions $options,
   ) {
-    parent::__construct('nginx');
+    parent::__construct($options->nginx);
   }
 
   protected function getArguments(): Vector<string> {

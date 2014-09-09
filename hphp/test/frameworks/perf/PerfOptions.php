@@ -7,6 +7,7 @@ final class PerfOptions {
   public ?string $hhvm;
 
   public string $siege;
+  public string $nginx;
 
   public bool $wordpress;
   public bool $toys;
@@ -20,7 +21,7 @@ final class PerfOptions {
       [
         'help',
         'php5:', 'hhvm:',
-        'siege:',
+        'siege:', 'nginx:',
         'toys', 'wordpress',
         'skip-sanity-check',
         'skip-version-checks',
@@ -32,6 +33,7 @@ final class PerfOptions {
     $this->hhvm = hphp_array_idx($o, 'hhvm', null);
 
     $this->siege = hphp_array_idx($o, 'siege', 'siege');
+    $this->nginx = hphp_array_idx($o, 'nginx', 'nginx');
 
     $this->wordpress = array_key_exists('wordpress', $o);
     $this->toys = array_key_exists('toys', $o);

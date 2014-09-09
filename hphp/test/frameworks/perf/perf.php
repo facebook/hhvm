@@ -31,7 +31,7 @@ function run_benchmark(
   $target->install();
 
   print_progress('Starting Nginx');
-  $nginx = new NginxDaemon($temp_dir, $target);
+  $nginx = new NginxDaemon($temp_dir, $target, $options);
   $nginx->start();
   invariant($nginx->isRunning(), 'Failed to start nginx');
 

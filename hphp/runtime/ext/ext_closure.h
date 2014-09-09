@@ -59,6 +59,12 @@ class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
 public: // ObjectData overrides
   void t___construct(); // must not be called for Closures
 
+  // closure object can't have properties
+  Variant t___get(Variant member);
+  Variant t___set(Variant member, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+
   Array t___debuginfo();
 
 public:

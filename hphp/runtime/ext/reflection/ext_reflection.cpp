@@ -825,7 +825,9 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
 
   for (Slot i = 0; i < size; ++i) {
     auto const& prop = cls->declProperties()[i];
-    auto val = closure.o_get(StrNR(prop.m_name), false /* error */, clsName);
+    auto val = closure.get()->o_realProp(StrNR(prop.m_name),
+                                         ObjectData::RealPropExist, clsName);
+    assert(val);
 
     // Closure static locals are represented as special instance properties
     // with a mangled name.
@@ -835,9 +837,9 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       String strippedName(prop.m_name->data() + sizeof prefix - 1,
                           prop.m_name->size() - sizeof prefix + 1,
                           CopyString);
-      ai.setKeyUnconverted(VarNR(strippedName), val);
+      ai.setKeyUnconverted(VarNR(strippedName), *val);
     } else {
-      ai.setKeyUnconverted(VarNR(prop.m_name), val);
+      ai.setKeyUnconverted(VarNR(prop.m_name), *val);
     }
   }
   return ai.toArray();

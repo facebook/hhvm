@@ -2224,12 +2224,17 @@ void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
  *
  * 1. Objects compared with strings may involve calling a user-defined
  * __toString function.
- * 2. Array comparisons can throw if recursion is detected.
+ *
+ * 2. Objects compared with ints or doubles raises a notice when the object is
+ * converted to a number.
+ *
+ * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
-  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
-         (t0.maybe(Type::Str) && t1.maybe(Type::Obj)) ||
+  auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
+  return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
+         (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
 }

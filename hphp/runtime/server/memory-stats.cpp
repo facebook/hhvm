@@ -22,10 +22,14 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
+
+  MemoryStats g_memoryStats;
 
   void MemoryStats::ReportMemory(std::string &output, Writer::Format format) {
     std::ostringstream out;
@@ -56,7 +60,7 @@ namespace HPHP {
     size_t totalBytes = GetStaticStringSize();
     totalBytes += procStatM.m_text;
 
-   w->beginObject("Memory");
+    w->beginObject("Memory");
 
     // process memory statistics
     w->beginObject("Process Stats (bytes)");
@@ -73,13 +77,44 @@ namespace HPHP {
     // static string stats
     w->beginObject("Static Strings");
     w->writeEntry("Bytes", GetStaticStringSize());
+    w->beginObject("Details");
     w->writeEntry("Count", makeStaticStringCount());
+    w->endObject("Details");
     w->endObject("Static Strings");
 
     // code segment stats
     w->beginObject("Code");
+    w->beginObject("Details");
     w->writeEntry("Bytes", procStatM.m_text);
+    w->endObject("Details");
     w->endObject("Code");
+
+    // TC/Jit
+    w->beginObject("TC/Jit");
+    {
+      size_t globalTCUsed = 0;
+      size_t globalTCSize = 0;
+
+      auto processUsageInfo = [&](jit::UsageInfo blockUsageInfo) {
+        if (blockUsageInfo.m_global) {
+          globalTCSize += blockUsageInfo.m_capacity;
+          globalTCUsed += blockUsageInfo.m_used;
+          w->beginObject(blockUsageInfo.m_name.c_str());
+          w->writeEntry("Used", blockUsageInfo.m_used);
+          w->writeEntry("Capacity", blockUsageInfo.m_capacity);
+          w->endObject(blockUsageInfo.m_name.c_str());
+        }
+      };
+      auto usageInfo = jit::mcg->getUsageInfo();
+      w->beginObject("Details");
+      for_each( usageInfo.begin(), usageInfo.end(), processUsageInfo);
+      w->writeEntry("Total Used", globalTCUsed);
+      w->writeEntry("Total Capacity", globalTCSize);
+      w->endObject("Details");
+      w->writeEntry("Bytes", globalTCSize);
+      totalBytes += globalTCSize;
+    }
+    w->endObject("TC/Jit");
 
     // currently unknown portion of vmSize
     w->writeEntry("Unknown", procStatM.m_vmSize - totalBytes);
@@ -96,8 +131,7 @@ namespace HPHP {
   }
 
   MemoryStats* MemoryStats::GetInstance() {
-    static MemoryStats memoryStatsInstance;
-    return &memoryStatsInstance;
+    return &g_memoryStats;
   }
 
   void MemoryStats::ResetStaticStringSize() {

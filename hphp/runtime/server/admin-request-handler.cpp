@@ -878,7 +878,7 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(jit::mcg->getUsage());
+    transport->sendString(jit::mcg->getUsageString());
     return true;
   }
   if (cmd == "vm-tcaddr") {

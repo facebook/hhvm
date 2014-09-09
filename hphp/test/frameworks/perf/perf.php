@@ -149,7 +149,7 @@ function perf_main($argv) {
     $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
   }
   if ($options->hhvm) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options->hhvm);
+    $engine = new HHVMDaemon($temp_dir, $target, $options);
   }
   if ($engine === null) {
     throw new Exception(

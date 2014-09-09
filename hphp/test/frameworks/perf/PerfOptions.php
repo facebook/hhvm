@@ -15,6 +15,8 @@ final class PerfOptions {
   public bool $skipSanityCheck;
   public bool $skipVersionChecks;
 
+  public bool $notBenchmarking;
+
   public function __construct() {
     $o = getopt(
       '',
@@ -23,6 +25,7 @@ final class PerfOptions {
         'php5:', 'hhvm:',
         'siege:', 'nginx:',
         'toys', 'wordpress',
+        'i-am-not-benchmarking',
         'skip-sanity-check',
         'skip-version-checks',
       ]
@@ -40,5 +43,6 @@ final class PerfOptions {
 
     $this->skipSanityCheck = array_key_exists('skip-sanity-check', $o);
     $this->skipVersionChecks = array_key_exists('skip-version-checks', $o);
+    $this->notBenchmarking = array_key_exists('i-am-not-benchmarking', $o);
   }
 }

@@ -28,6 +28,10 @@ uint32_t closure_num_use_vars(borrowed_ptr<const php::Func> f) {
   return f->cls->properties.size() - f->staticLocals.size();
 }
 
+bool is_pseudomain(borrowed_ptr<const php::Func> f) {
+  return borrow(f->unit->pseudomain) == f;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

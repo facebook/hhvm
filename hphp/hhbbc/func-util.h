@@ -32,6 +32,11 @@ namespace php { struct Func; }
  */
 uint32_t closure_num_use_vars(borrowed_ptr<const php::Func>);
 
+/*
+ * Returns whether a given php::Func is the pseudomain of its unit.
+ */
+bool is_pseudomain(borrowed_ptr<const php::Func>);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

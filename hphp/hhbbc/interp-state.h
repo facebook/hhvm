@@ -158,12 +158,17 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
  * a series of step operations (possibly cross block).
  */
 struct CollectedInfo {
-  explicit CollectedInfo(const Index& index, Context ctx, ClassAnalysis* cls)
+  explicit CollectedInfo(const Index& index,
+                         Context ctx,
+                         ClassAnalysis* cls,
+                         PublicSPropIndexer* publicStatics)
     : props{index, ctx, cls}
+    , publicStatics{publicStatics}
   {}
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
+  PublicSPropIndexer* const publicStatics;
 };
 
 //////////////////////////////////////////////////////////////////////

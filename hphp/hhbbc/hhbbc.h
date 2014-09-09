@@ -179,16 +179,24 @@ struct Options {
    */
   bool AnalyzePseudomains = true;
 
+  /*
+   * Should we do an extra whole-program pass to try to determine the types of
+   * public static properties.  This will not yield any useful information for
+   * programs that contain any sets to static properties with both a dynamic
+   * property name and an unknown class type.
+   */
+  bool AnalyzePublicStatics = true;
+
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally
   // may have user-visible changes to program behavior.
   //////////////////////////////////////////////////////////////////////
 
   /*
-   * If true, we'll propagate global constants and class constants
-   * "unsoundly".  I.e., it is visible to the user that we may not
-   * invoke autoload at places where we would have without this
-   * optimization.
+   * If true, we'll propagate global defined constants, class constants, and
+   * constant static class properties "unsoundly".  I.e., it is visible to the
+   * user that we may not invoke autoload at places where we would have without
+   * this optimization.
    */
   bool HardConstProp = true;
 

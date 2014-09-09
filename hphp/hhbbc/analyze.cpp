@@ -232,10 +232,11 @@ Context adjust_closure_context(Context ctx) {
   return ctx;
 }
 
-FuncAnalysis do_analyze(const Index& index,
-                        Context const inputCtx,
-                        ClassAnalysis* clsAnalysis,
-                        const std::vector<Type>* knownArgs) {
+FuncAnalysis do_analyze_collect(const Index& index,
+                                Context const inputCtx,
+                                CollectedInfo& collect,
+                                ClassAnalysis* clsAnalysis,
+                                const std::vector<Type>* knownArgs) {
   auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai(ctx);
   FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
@@ -268,9 +269,6 @@ FuncAnalysis do_analyze(const Index& index,
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
-
-  // Accumulated information crossing blocks goes here.
-  CollectedInfo collect { index, inputCtx, clsAnalysis };
 
   /*
    * Iterate until a fixed point.
@@ -384,6 +382,14 @@ FuncAnalysis do_analyze(const Index& index,
   return ai;
 }
 
+FuncAnalysis do_analyze(const Index& index,
+                        Context const ctx,
+                        ClassAnalysis* clsAnalysis,
+                        const std::vector<Type>* knownArgs) {
+  CollectedInfo collect { index, ctx, clsAnalysis, nullptr };
+  return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -465,6 +471,14 @@ FuncAnalysis analyze_func(const Index& index, Context const ctx) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ctx.unit)};
   return do_analyze(index, ctx, nullptr, nullptr);
+}
+
+FuncAnalysis analyze_func_collect(const Index& index,
+                                  Context const ctx,
+                                  CollectedInfo& collect) {
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+    is_systemlib_part(*ctx.unit)};
+  return do_analyze_collect(index, ctx, collect, nullptr, nullptr);
 }
 
 FuncAnalysis analyze_func_inline(const Index& index,
@@ -702,7 +716,7 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  CollectedInfo collect { index, ctx, nullptr};
+  CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});

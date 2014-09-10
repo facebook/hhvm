@@ -143,14 +143,16 @@ static Variant php_posix_group_to_array(int gid,
   struct group *retgrptr = NULL;
 
   // If we somehow reach this point and both gname and gid were
-  // passed, then the gid values will override the game values,
+  // passed, then the gid values will override the gname values,
   // but it will otherwise function just fine.
   // The assert() clause above should prevent that, however.
   if ((gname.size() > 0) &&
-      getgrnam_r(gname.data(), &gr, grbuf.get(), grbuflen, &retgrptr)) {
+      (getgrnam_r(gname.data(), &gr, grbuf.get(), grbuflen, &retgrptr) != 0 ||
+      retgrptr == nullptr)) {
     return false;
   } else if ((gid >= 0) &&
-      getgrgid_r(gid, &gr, grbuf.get(), grbuflen, &retgrptr)) {
+      (getgrgid_r(gid, &gr, grbuf.get(), grbuflen, &retgrptr) != 0 ||
+      retgrptr == nullptr)) {
     return false;
   }
 

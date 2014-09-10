@@ -17,7 +17,16 @@ array(3) {
 }
 string(1) "1"
 string(1) "&"
-array(2) {
+array(3) {
+  ["hhvm.pcre.jit"]=>
+  array(3) {
+    ["global_value"]=>
+    string(1) "1"
+    ["local_value"]=>
+    string(1) "1"
+    ["access"]=>
+    int(4)
+  }
   ["pcre.backtrack_limit"]=>
   array(3) {
     ["global_value"]=>
@@ -37,7 +46,9 @@ array(2) {
     int(7)
   }
 }
-array(2) {
+array(3) {
+  ["hhvm.pcre.jit"]=>
+  string(1) "1"
   ["pcre.backtrack_limit"]=>
   string(7) "1000000"
   ["pcre.recursion_limit"]=>
@@ -50,4 +61,4 @@ array(2) {
   bool(false)
 }
 
-Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s on line %d
+Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 21

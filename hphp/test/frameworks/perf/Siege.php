@@ -66,6 +66,7 @@ final class Siege extends Process {
           '-c', (string) PerfSettings::WarmupConcurrency(),
           '-r', (string) PerfSettings::WarmupRequests(),
           '-f', $urls_file,
+          '--benchmark',
           '--log=/dev/null',
         };
       case RequestModes::BENCHMARK:
@@ -73,6 +74,7 @@ final class Siege extends Process {
           '-c', (string) PerfSettings::BenchmarkConcurrency(),
           '-t', PerfSettings::BenchmarkTime(),
           '-f', $urls_file,
+          '--benchmark',
           '--log='.$this->logfile,
         };
       default:

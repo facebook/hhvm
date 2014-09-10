@@ -974,24 +974,21 @@ class Redis {
   }
 
   protected function sockReadLine() {
-    if (!$this->checkConnection()) {
-      return false;
-    }
-    $line = fgets($this->connection);
-    if (substr($line, -2) == "\r\n") {
-      $line = substr($line, 0, -2);
-    } else if (substr($line, -1) == "\r") {
-      $line = substr($line, 0, -1);
-      $lf = fgetc($this->connection);
-      if ($lf === false) {
-        // A response must terminate with both CR and LF. Refuse to guess.
-        return false;
-      } else if ($lf !== "\n") {
-        throw new RedisException("Protocol error: CR not followed by LF");
-      }
-    }
+   if (!$this->checkConnection()) {
+     return false;
+   }
 
-    return $line;
+   $line = '';
+   while(1) {
+     $c = fgetc($this->connection);
+     $line .= $c;
+     if (substr($line, -2) == "\r\n") {
+       $line = substr($line, 0, -2);
+       return $line;
+     }
+   }
+
+   return false;
   }
 
   protected function sockReadData(&$type) {

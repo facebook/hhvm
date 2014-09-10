@@ -1507,6 +1507,73 @@ String f_sha1(const String& str, bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 
+bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
+                const char*s, int& pos, int minlen, int maxlen) {
+
+  memcpy(key.bufferSlice().ptr, s + pos, maxlen);
+  for (int len = maxlen; len >= minlen; len--) {
+    key.setSize(len);
+    auto const& var = arr->get(key.toKey());
+    if (&var != &null_variant) {
+      String replace = var.toString();
+      if (!replace.empty()) {
+        result.append(replace);
+      }
+      pos += len;
+      return true;
+    }
+  }
+  return false;
+}
+
+Variant strtr_fast(const String& str, const Array& arr,
+                   int minlen, int maxlen) {
+  uint64_t mask[maxlen][256];
+
+  memset(&mask[0][0], 0, sizeof(mask));
+
+  int pattern_id = 0;
+  for (ArrayIter iter(arr); iter; ++iter, pattern_id++) {
+    String search = iter.first();
+    StringSlice slice = search.slice();
+
+    for (auto i = 0; i < slice.len; i++) {
+      mask[i][(unsigned char)slice.ptr[i]] |= (1 << pattern_id);
+    }
+  }
+  const char* s = str.data();
+  int slen = str.size();
+  StringBuffer result(slen);
+  String key(maxlen, ReserveString);
+
+  for (auto i = 0; i < slen;) {
+    if ((i + maxlen) > slen) {
+      maxlen = slen - i;
+    }
+    uint64_t match = ~0x0ULL;
+    bool possible_match = false;
+
+    for (auto pos = 0; pos < maxlen; pos++) {
+      match &= mask[pos][(unsigned char)s[i + pos]];
+      if (!match) break;
+      if (pos >= minlen - 1) {
+        possible_match = true;
+        break;
+      }
+    }
+    bool found = false;
+    if (possible_match) {
+      found = strtr_slow(arr, result, key, s, i, minlen, maxlen);
+    }
+    if (!found) {
+      result.append(s[i++]);
+    }
+  }
+  return result.detach();
+}
+
+static constexpr int kBitsPerQword = CHAR_BIT * sizeof(uint64_t);
+
 Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = null_variant */) {
   if (str.empty()) {
     return str;
@@ -1538,29 +1605,21 @@ Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = n
     if (minlen == -1 || minlen > len) minlen = len;
   }
 
+  if (arr.size() <= kBitsPerQword && maxlen <= 16) {
+    return strtr_fast(str, arr, minlen, maxlen);
+  }
+
   const char *s = str.data();
   int slen = str.size();
-  String key(maxlen, ReserveString);
 
   StringBuffer result(slen);
+  String key(maxlen, ReserveString);
+
   for (int pos = 0; pos < slen; ) {
     if ((pos + maxlen) > slen) {
       maxlen = slen - pos;
     }
-    bool found = false;
-    memcpy(key.bufferSlice().ptr, s + pos, maxlen);
-    for (int len = maxlen; len >= minlen; len--) {
-      key.setSize(len);
-      if (arr.exists(key)) {
-        String replace = arr[key].toString();
-        if (!replace.empty()) {
-          result.append(replace);
-        }
-        pos += len;
-        found = true;
-        break;
-      }
-    }
+    bool found = strtr_slow(arr, result, key, s, pos, minlen, maxlen);
     if (!found) {
       result.append(s[pos++]);
     }

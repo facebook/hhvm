@@ -54,11 +54,11 @@ typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Hdf apc = config["Server"]["APC"];
 
-  Enable = Config::GetBool(ini, apc["EnableApc"], true);
-  EnableConstLoad = Config::GetBool(ini, apc["EnableConstLoad"], false);
-  ForceConstLoadToAPC = Config::GetBool(ini, apc["ForceConstLoadToAPC"], true);
-  PrimeLibrary = Config::GetString(ini, apc["PrimeLibrary"]);
-  LoadThread = Config::GetInt16(ini, apc["LoadThread"], 2);
+  Config::Bind(Enable, ini, apc["EnableApc"], true);
+  Config::Bind(EnableConstLoad, ini, apc["EnableConstLoad"], false);
+  Config::Bind(ForceConstLoadToAPC, ini, apc["ForceConstLoadToAPC"], true);
+  Config::Bind(PrimeLibrary, ini, apc["PrimeLibrary"]);
+  Config::Bind(LoadThread, ini, apc["LoadThread"], 2);
   Config::Get(ini, apc["CompletionKeys"], CompletionKeys);
   std::string tblType = Config::GetString(ini, apc["TableType"], "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
@@ -66,39 +66,36 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   } else {
     throw std::runtime_error("invalid apc table type");
   }
-  EnableApcSerialize = Config::GetBool(ini, apc["EnableApcSerialize"], true);
-  ExpireOnSets = Config::GetBool(ini, apc["ExpireOnSets"]);
-  PurgeFrequency = Config::GetInt32(ini, apc["PurgeFrequency"], 4096);
-  PurgeRate = Config::GetInt32(ini, apc["PurgeRate"], -1);
+  Config::Bind(EnableApcSerialize, ini, apc["EnableApcSerialize"], true);
+  Config::Bind(ExpireOnSets, ini, apc["ExpireOnSets"]);
+  Config::Bind(PurgeFrequency, ini, apc["PurgeFrequency"], 4096);
+  Config::Bind(PurgeRate, ini, apc["PurgeRate"], -1);
 
-  AllowObj = Config::GetBool(ini, apc["AllowObject"]);
-  TTLLimit = Config::GetInt32(ini, apc["TTLLimit"], -1);
+  Config::Bind(AllowObj, ini, apc["AllowObject"]);
+  Config::Bind(TTLLimit, ini, apc["TTLLimit"], -1);
 
   Hdf fileStorage = apc["FileStorage"];
-  UseFileStorage = Config::GetBool(ini, fileStorage["Enable"]);
+  Config::Bind(UseFileStorage, ini, fileStorage["Enable"]);
   FileStorageChunkSize = Config::GetInt64(ini, fileStorage["ChunkSize"],
                                           1LL << 29);
   FileStorageMaxSize = Config::GetInt64(ini, fileStorage["MaxSize"], 1LL << 32);
-  FileStoragePrefix = Config::GetString(ini, fileStorage["Prefix"],
-                                        "/tmp/apc_store");
-  FileStorageFlagKey = Config::GetString(ini, fileStorage["FlagKey"],
-                                         "_madvise_out");
-  FileStorageAdviseOutPeriod =
-    Config::GetInt32(ini, fileStorage["AdviseOutPeriod"], 1800);
-  FileStorageKeepFileLinked =
-    Config::GetBool(ini, fileStorage["KeepFileLinked"]);
+  Config::Bind(FileStoragePrefix, ini, fileStorage["Prefix"], "/tmp/apc_store");
+  Config::Bind(FileStorageFlagKey, ini, fileStorage["FlagKey"], "_madvise_out");
+  Config::Bind(FileStorageAdviseOutPeriod, ini, fileStorage["AdviseOutPeriod"],
+               1800);
+  Config::Bind(FileStorageKeepFileLinked, ini, fileStorage["KeepFileLinked"]);
 
-  ConcurrentTableLockFree =
-    Config::GetBool(ini, apc["ConcurrentTableLockFree"], false);
-  KeyMaturityThreshold = Config::GetInt32(ini, apc["KeyMaturityThreshold"], 20);
-  MaximumCapacity = Config::GetInt64(ini, apc["MaximumCapacity"], 0);
-  KeyFrequencyUpdatePeriod =
-    Config::GetInt32(ini, apc["KeyFrequencyUpdatePeriod"], 1000);
+  Config::Bind(ConcurrentTableLockFree, ini, apc["ConcurrentTableLockFree"],
+               false);
+  Config::Bind(KeyMaturityThreshold, ini, apc["KeyMaturityThreshold"], 20);
+  Config::Bind(MaximumCapacity, ini, apc["MaximumCapacity"], 0);
+  Config::Bind(KeyFrequencyUpdatePeriod, ini, apc["KeyFrequencyUpdatePeriod"],
+               1000);
 
   Config::Get(ini, apc["NoTTLPrefix"], NoTTLPrefix);
 
-  UseUncounted = Config::GetBool(ini, apc["MemModelTreadmill"],
-                                 RuntimeOption::ServerExecutionMode());
+  Config::Bind(UseUncounted, ini, apc["MemModelTreadmill"],
+               RuntimeOption::ServerExecutionMode());
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",

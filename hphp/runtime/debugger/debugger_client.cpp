@@ -2445,7 +2445,9 @@ void DebuggerClient::loadConfig() {
 
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
-  process_ini_file(m_configFileName);
+  // We are guaranteed to have an ini file given how m_configFileName is set
+  // above
+  Config::ParseIniFile(m_configFileName);
 
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options

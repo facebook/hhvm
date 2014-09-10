@@ -235,6 +235,12 @@ public:
   Hdf next(bool markVisited = true) const;
 
   /**
+   * Get the full name or value of the last read hdf string
+   */
+  std::string getLastFullName() const;
+  std::string getLastValue() const;
+
+  /**
    * Comparisons
    */
   int compare(const char *v) const;

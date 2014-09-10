@@ -14,8 +14,10 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/replay-transport.h"
-
 #include "folly/Conv.h"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -69,7 +71,8 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
 }
 
 void ReplayTransport::replayInput(const char *filename) {
-  Config::Parse(filename, m_ini, m_hdf);
+  std::string fname = filename;
+  Config::ParseConfigFile(fname, m_ini, m_hdf);
   replayInputImpl();
 }
 

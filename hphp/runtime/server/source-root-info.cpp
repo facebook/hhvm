@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/config.h"
+#include <boost/algorithm/string/predicate.hpp>
 
 using std::map;
 
@@ -128,13 +129,13 @@ void SourceRootInfo::createFromUserConfig() {
     }
   }
 
-  std::string confpath = std::string(homePath.c_str()) +
+  std::string confFileName = std::string(homePath.c_str()) +
     RuntimeOption::SandboxConfFile;
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config, serverVars;
   String sp, lp, alp, userOverride;
   try {
-  Config::Parse(confpath, ini, config);
+    Config::ParseConfigFile(confFileName, ini, config);
     userOverride = Config::Get(ini, config["user_override"]);
     Hdf sboxConf = config[m_sandbox.c_str()];
     if (sboxConf.exists()) {
@@ -144,7 +145,7 @@ void SourceRootInfo::createFromUserConfig() {
       serverVars = sboxConf["ServerVars"];
     }
   } catch (HdfException &e) {
-    Logger::Error("%s ignored: %s", confpath.c_str(),
+    Logger::Error("%s ignored: %s", confFileName.c_str(),
                   e.getMessage().c_str());
   }
   if (serverVars.exists()) {

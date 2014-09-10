@@ -22,6 +22,7 @@
 
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,20 +77,74 @@ static std::string normalize(const std::string &name) {
 }
 
 std::string Config::IniName(const Hdf& config) {
-  return "hhvm" + normalize(config.getFullPath());
+  return Config::IniName(config.getFullPath());
 }
 
-void Config::Parse(const std::string &config, IniSetting::Map &ini, Hdf &hdf) {
-  if (boost::ends_with(config, "ini")) {
-    std::ifstream ifs(config);
+std::string Config::IniName(const std::string config) {
+  return "hhvm" + normalize(config);
+}
+
+void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {
+  Config::SetParsedIni(ini, iniStr, "", false);
+}
+
+void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf,
+                            IniSetting::Map &ini) {
+  hdf.fromString(hdfStr.c_str());
+  // Make sure we update any provided `-v` option with
+  // an equivalent change to an ini setting, if it
+  // existed already. This way a call in IniSetting::Get
+  // such as ResetSystemDefault(name) has the correct
+  // info.
+  std::string cname = Config::IniName(hdf.getLastFullName());
+  std::string cval = hdf.getLastValue();
+  Config::ParseIniString(cname + "=" + cval, ini);
+}
+
+void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
+                             Hdf &hdf) {
+  // We don't allow a filename of just ".ini"
+  if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
+    Config::ParseIniFile(filename, ini);
+  } else if (boost::ends_with(filename, ".hdf") && filename.length() > 4) {
+    Config::ParseHdfFile(filename, hdf);
+  } else {
+    raise_warning("Config files should end with .ini or .hdf. Parsing as .hdf");
+    Config::ParseHdfFile(filename, hdf);
+  }
+}
+
+void Config::ParseIniFile(const std::string &filename) {
+  IniSetting::Map nul = nullptr;
+  Config::ParseIniFile(filename, nul, false);
+}
+
+void Config::ParseIniFile(const std::string &filename, IniSetting::Map &ini,
+                          const bool constants_only /* = false */) {
+    std::ifstream ifs(filename);
     const std::string str((std::istreambuf_iterator<char>(ifs)),
                           std::istreambuf_iterator<char>());
-    auto parsed_ini = IniSetting::FromStringAsMap(str, config);
-    for (auto &pair : parsed_ini.items()) {
+    Config::SetParsedIni(ini, str, filename, constants_only);
+}
+
+void Config::ParseHdfFile(const std::string &filename, Hdf &hdf) {
+  hdf.append(filename);
+}
+
+void Config::SetParsedIni(IniSetting::Map &ini, const std::string confStr,
+                          const std::string filename, bool constants_only) {
+  auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
+  for (auto &pair : parsed_ini.items()) {
+    if (!ini.isNull()) {
       ini[pair.first] = pair.second;
     }
-  } else {
-    hdf.append(config);
+    if (constants_only) {
+      IniSetting::FillInConstant(pair.first.data(), pair.second,
+                                 IniSetting::FollyDynamic());
+    } else {
+      IniSetting::Set(pair.first.data(), pair.second,
+                      IniSetting::FollyDynamic());
+    }
   }
 }
 

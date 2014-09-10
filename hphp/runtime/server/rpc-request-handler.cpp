@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/constants.h"
@@ -80,6 +81,7 @@ void RPCRequestHandler::cleanupState() {
 
 bool RPCRequestHandler::needReset() const {
   return (m_reset ||
+          !vmStack().isAllocated() ||
           m_serverInfo->alwaysReset() ||
           ((time(0) - m_lastReset) > m_serverInfo->getMaxDuration()) ||
           (m_requestsSinceReset >= m_serverInfo->getMaxRequest()));
@@ -87,7 +89,7 @@ bool RPCRequestHandler::needReset() const {
 
 void RPCRequestHandler::handleRequest(Transport *transport) {
   if (needReset()) {
-    cleanupState();
+    if (vmStack().isAllocated()) cleanupState();
     initState();
   }
   ++m_requestsSinceReset;

@@ -45,6 +45,8 @@ public:
   virtual void handleRequest(Transport *transport);
   virtual void abortRequest(Transport *transport);
 
+  static void cleanupState();
+
   /**
    * Force a reset before the next request.
    */
@@ -64,7 +66,6 @@ private:
   time_t m_lastReset;
 
   void initState();
-  void cleanupState();
   bool needReset() const;
   bool executePHPFunction(Transport *transport,
                           SourceRootInfo &sourceRootInfo,

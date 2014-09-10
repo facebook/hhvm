@@ -21,6 +21,9 @@
 
 #include "folly/Conv.h"
 
+#include <unistd.h>
+#include <boost/lexical_cast.hpp>
+
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
 #include "hphp/runtime/base/file-util.h"
@@ -115,6 +118,8 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   memcpy(&mw->s[mw->slen], s, slen+1);
   mw->slen += slen;
 }
+
+extern unsigned low_arena;
 #endif
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
@@ -454,23 +459,52 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint64_t epoch = 1;
-        mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+        uint32_t error = 0;
+        if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) != 0) {
+          error = 1;
+        }
 
-        size_t allocated = 0; // Initialize in case stats aren't enabled.
-        size_t sz = sizeof(size_t);
-        mallctl("stats.allocated", &allocated, &sz, nullptr, 0);
+        auto call_mallctl = [&](const char* statName) {
+          size_t value = 0;
+          size_t sz = sizeof(value);
+          if (mallctl(statName, &value, &sz, nullptr, 0) != 0){
+            error = 1;
+          }
+          return value;
+        };
+        size_t allocated = call_mallctl("stats.allocated");
+        size_t active = call_mallctl("stats.active");
+        size_t mapped = call_mallctl("stats.mapped");
+        size_t low_mapped = call_mallctl(
+            folly::format("stats.arenas.{}.mapped",
+              low_arena).str().c_str());
+        size_t low_small_allocated = call_mallctl(
+            folly::format("stats.arenas.{}.small.allocated",
+              low_arena).str().c_str());
+        size_t low_large_allocated = call_mallctl(
+            folly::format("stats.arenas.{}.large.allocated",
+              low_arena).str().c_str());
+        size_t low_active = call_mallctl(
+            folly::format("stats.arenas.{}.pactive",
+              low_arena).str().c_str()) *
+            sysconf(_SC_PAGESIZE);
 
-        size_t active = 0;
-        mallctl("stats.active", &active, &sz, nullptr, 0);
-
-        size_t mapped = 0;
-        mallctl("stats.mapped", &mapped, &sz, nullptr, 0);
 
         std::ostringstream stats;
         stats << "<jemalloc-stats>" << endl;
-        stats << "  <allocated>" << allocated << "</allocated>" << endl;
-        stats << "  <active>" << active << "</active>" << endl;
-        stats << "  <mapped>" << mapped << "</mapped>" << endl;
+        if (error != 0){
+          stats << "  <allocated>" << allocated << "</allocated>" << endl;
+          stats << "  <active>" << active << "</active>" << endl;
+          stats << "  <mapped>" << mapped << "</mapped>" << endl;
+          stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
+          stats << "  <low_allocated>"
+            << (low_small_allocated + low_large_allocated)
+            << "<low_allocated>" << endl;
+          stats << "  <low_active>"
+            << low_active
+            << "</low_active>" << endl;
+        }
+        stats << "  <error>" << error << "</error>" << endl;
         stats << "</jemalloc-stats>" << endl;
         transport->sendString(stats.str());
         break;

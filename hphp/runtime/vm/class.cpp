@@ -557,8 +557,12 @@ void Class::initSPropHandles() const {
 
       if (sProp.m_class == this) {
         if (usePersistentHandles && (sProp.m_attrs & AttrPersistent)) {
-          propHandle.bind(RDS::Mode::Persistent);
-          *propHandle = sProp.m_val;
+          //propHandle.bind(RDS::Mode::Persistent);
+          //*propHandle = sProp.m_val;
+          RDS::Link<TypedValue> tmp{RDS::kInvalidHandle};
+          tmp.bind(RDS::Mode::Persistent);
+          *tmp = sProp.m_val;
+          propHandle = tmp;
         } else {
           propHandle.bind(RDS::Mode::Local);
         }

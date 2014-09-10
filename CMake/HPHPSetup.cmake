@@ -39,11 +39,15 @@ else()
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
+if (LINUX)
+  set(HHVM_WRAP_SYMS -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+else ()
+  set(HHVM_WRAP_SYMS)
+endif ()
+
 set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
-  -Wl,--wrap=pthread_create
-  -Wl,--wrap=pthread_exit
-  -Wl,--wrap=pthread_join
+  ${HHVM_WRAP_SYMS}
   hphp_analysis
   ext_hhvm_static
   hphp_system

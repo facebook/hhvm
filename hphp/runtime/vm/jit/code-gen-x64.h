@@ -104,10 +104,6 @@ private:
   template<class OpInstr>
   void cgUnaryIntOp(Vloc dst, SSATmp* src, Vloc src_loc);
 
-  enum Commutativity { Commutative, NonCommutative };
-
-  void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
-
   template<class Op, class Opi>
   void cgBinaryIntOp(IRInstruction*);
   template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
@@ -152,7 +148,6 @@ private:
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  VregXMM prepXMM(Vout&, const SSATmp* src, Vloc srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);

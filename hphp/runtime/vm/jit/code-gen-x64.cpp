@@ -470,29 +470,6 @@ void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Block* target) {
   v = next;
 }
 
-VregXMM CodeGenerator::prepXMM(Vout& v, const SSATmp* src, Vloc srcLoc) {
-  assert(src->isA(Type::Bool) || src->isA(Type::Int) || src->isA(Type::Dbl));
-  always_assert(srcLoc.reg().isValid());
-  auto rsrc = srcLoc.reg();
-
-  if (src->isA(Type::Dbl)) {
-    if (rsrc.isPhys() && rsrc.isGP()) {
-      // double val in gpr
-      auto tmp = v.makeReg();
-      v << copy{rsrc, tmp};
-      return tmp;
-    }
-    // src already in simd or vreg
-    return rsrc;
-  }
-
-  // Case 2.b: Bool or Int stored in GP reg
-  auto s2 = zeroExtendIfBool(v, src, rsrc);
-  auto rtmp = v.makeReg();
-  v << cvtsi2sd{s2, rtmp};
-  return rtmp;
-}
-
 void CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   auto src0 = inst->src(0);
   auto src1 = inst->src(1);
@@ -1251,28 +1228,6 @@ void CodeGenerator::cgBinaryIntOp(IRInstruction* inst) {
   }
 }
 
-template<class Emit>
-void CodeGenerator::cgBinaryDblOp(IRInstruction* inst, Emit emit) {
-  assert(inst == m_curInst);
-  const SSATmp* src0  = inst->src(0);
-  const SSATmp* src1  = inst->src(1);
-  auto loc0 = srcLoc(0);
-  auto loc1 = srcLoc(1);
-  assert(src0->isA(Type::Dbl) && src1->isA(Type::Dbl));
-
-  auto& v = vmain();
-  auto dstReg = dstLoc(0).reg();
-  auto resReg = (dstReg.isVirt() || dstReg.isSIMD()) && dstReg != loc1.reg() ?
-                Vreg(dstReg) : v.makeReg();
-  assert(resReg.isVirt() || resReg.isSIMD());
-
-  auto srcReg0 = prepXMM(v, src0, loc0);
-  auto srcReg1 = prepXMM(v, src1, loc1);
-
-  emit(v, srcReg1, srcReg0, resReg);
-  if (resReg != Vreg(dstReg)) v << copy{resReg, dstReg};
-}
-
 void CodeGenerator::cgAddIntO(IRInstruction* inst) {
   cgAddInt(inst);
   vmain() << jcc{CC_O, {label(inst->next()), label(inst->taken())}};
@@ -1306,22 +1261,16 @@ bool CodeGenerator::emitIncDec(Vloc dst, SSATmp* src1, Vloc loc1,
   return false;
 }
 
-void CodeGenerator::cgRoundCommon(IRInstruction* inst, RoundDirection dir) {
-  auto src = inst->src(0);
-  auto dstReg = dstLoc(0).reg();
-  auto& v = vmain();
-  auto inReg  = prepXMM(v, src, srcLoc(0));
-  auto outReg = dstReg.isVirt() || dstReg.isSIMD() ? Vreg(dstReg) : v.makeReg();
-  v << roundsd{dir, inReg, outReg};
-  v << copy{outReg, dstReg};
-}
-
 void CodeGenerator::cgFloor(IRInstruction* inst) {
-  cgRoundCommon(inst, RoundDirection::floor);
+  auto srcReg = srcLoc(0).reg();
+  auto dstReg = dstLoc(0).reg();
+  vmain() << roundsd{RoundDirection::floor, srcReg, dstReg};
 }
 
 void CodeGenerator::cgCeil(IRInstruction* inst) {
-  cgRoundCommon(inst, RoundDirection::ceil);
+  auto srcReg = srcLoc(0).reg();
+  auto dstReg = dstLoc(0).reg();
+  vmain() << roundsd{RoundDirection::ceil, srcReg, dstReg};
 }
 
 void CodeGenerator::cgAddInt(IRInstruction* inst) {
@@ -1388,52 +1337,39 @@ void CodeGenerator::cgMulInt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAddDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
-    v << addsd{s0, s1, res};
-  });
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << addsd{s1, s0, d};
 }
 
 void CodeGenerator::cgSubDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
-    v << subsd{s0, s1, res};
-  });
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << subsd{s1, s0, d};
 }
 
 void CodeGenerator::cgMulDbl(IRInstruction* inst) {
-  cgBinaryDblOp(inst, [&](Vout& v, VregXMM s0, VregXMM s1, VregXMM res) {
-    v << mulsd{s0, s1, res};
-  });
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << mulsd{s1, s0, d};
 }
 
 void CodeGenerator::cgDivDbl(IRInstruction* inst) {
-  const SSATmp* src0  = inst->src(0);
-  const SSATmp* src1  = inst->src(1);
-  auto loc0 = srcLoc(0);
-  auto loc1 = srcLoc(1);
+  auto srcReg0 = srcLoc(0).reg(); // dividend
+  auto srcReg1 = srcLoc(1).reg(); // divisor
+  auto dstReg  = dstLoc(0).reg();
   auto exit = inst->taken();
   auto& v = vmain();
-  auto dstReg  = dstLoc(0).reg();
-  auto resReg = dstReg;
-  if ((dstReg.isPhys() && !dstReg.isSIMD()) || dstReg == loc1.reg()) {
-    resReg = v.makeReg();
-  }
-
-  // only load divisor
-  auto srcReg1 = prepXMM(v, src1, loc1);
 
   // divide by zero check
-  auto zero = v.makeReg();
-  v << ldimm{0, zero};
-  v << ucomisd{zero, srcReg1};
+  v << ucomisd{v.cns(0), srcReg1};
   unlikelyIfBlock(v, vcold(), CC_NP, [&] (Vout& v) {
     emitFwdJcc(v, CC_E, exit);
   });
-
-  // now load dividend
-  auto srcReg0 = prepXMM(v, src0, loc0);
-
-  v << divsd{srcReg1, srcReg0, resReg};
-  v << copy{resReg, dstReg};
+  v << divsd{srcReg1, srcReg0, dstReg};
 }
 
 void CodeGenerator::cgAndInt(IRInstruction* inst) {
@@ -1758,27 +1694,23 @@ void CodeGenerator::cgGteInt(IRInstruction* inst) { emitCmpInt(inst, CC_GE); }
 
 void CodeGenerator::emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred) {
   auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = srcLoc(0).reg();
+  auto srcReg1 = srcLoc(1).reg();
   auto& v = vmain();
-  auto srcReg0 = prepXMM(v, inst->src(0), srcLoc(0));
-  auto srcReg1 = prepXMM(v, inst->src(1), srcLoc(1));
   auto tmp = v.makeReg();
-  v << copy{srcReg1, tmp};
-  v << cmpsd{pred, srcReg0, tmp, tmp};
-  v << copy{tmp, dstReg};
-  v << andbi{1, dstReg, dstReg};
+  v << cmpsd{pred, srcReg0, srcReg1, tmp};
+  v << andbi{1, tmp, dstReg};
 }
 
 void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
                                   bool flipOperands) {
   auto dstReg = dstLoc(0).reg();
+  auto srcReg0 = srcLoc(0).reg();
+  auto srcReg1 = srcLoc(1).reg();
   auto& v = vmain();
-  auto srcReg0 = prepXMM(v, inst->src(0), srcLoc(0));
-  auto srcReg1 = prepXMM(v, inst->src(1), srcLoc(1));
-
   if (flipOperands) {
     std::swap(srcReg0, srcReg1);
   }
-
   v << ucomisd{srcReg0, srcReg1};
   v << setcc{cc, dstReg};
 }
@@ -2204,11 +2136,9 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
-  auto src = inst->src(0);
   auto dstReg = dstLoc(0).reg();
+  auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
-
-  auto srcReg = prepXMM(v, src, srcLoc(0));
 
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;

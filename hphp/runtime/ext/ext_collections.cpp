@@ -6106,7 +6106,7 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
       ret = c_Pair::OffsetAt<true>(obj, key);
       break;
     case Collection::InvalidType:
-      assert(false);
+      always_assert(false);
       break;
   }
   // Value-type elements (anything other than objects and resources) of

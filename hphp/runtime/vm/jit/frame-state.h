@@ -211,7 +211,7 @@ struct FrameState final : private LocalStateHook {
 
   Type localType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
-  TypeSource localTypeSource(uint32_t id) const;
+  TypeSourceSet localTypeSources(uint32_t id) const;
 
   typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
   // Call func for all enclosing frames, starting with the current one and
@@ -244,14 +244,22 @@ struct FrameState final : private LocalStateHook {
     Type type{Type::Gen};
 
     /*
-     * The source of the currently known type. The source may be a value. If
+     * The sources of the currently known type. They may be values. If
      * the value is unavailable, we won't hold onto it in the value field, but
-     * we'll keep it around in typeSrc.value for guard relaxation.
+     * we'll keep it around in typeSrcs for guard relaxation.
      */
-    TypeSource typeSrc;
+    TypeSourceSet typeSrcs;
 
     bool operator==(const LocalState& b) const {
-      return value == b.value && type == b.type && typeSrc == b.typeSrc;
+      if (value != b.value || type != b.type ||
+          typeSrcs.size() != b.typeSrcs.size()) {
+        return false;
+      }
+      for (auto it = typeSrcs.begin(), itb = b.typeSrcs.begin();
+           it != typeSrcs.end(); it++, itb++) {
+        if (*it != *itb) return false;
+      }
+      return true;
     }
   };
 

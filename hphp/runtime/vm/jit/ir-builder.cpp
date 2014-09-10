@@ -104,7 +104,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     // to be recorded in side tables.
     if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdGbl)) {
       auto const locId = inst->extra<LocalId>()->locId;
-      m_constraints.typeSrcs[inst] = localTypeSource(locId);
+      m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
@@ -330,6 +330,16 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   );
 }
 
+static const IRInstruction* singleTypeSrcInst(const TypeSourceSet& typeSrcs) {
+  if (typeSrcs.size() == 1) {
+    auto typeSrc = *typeSrcs.begin();
+    return typeSrc.isValue() ? typeSrc.value->inst() :
+           typeSrc.isGuard() ? typeSrc.guard :
+                               nullptr;
+  }
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   auto const locId = inst->extra<AssertLoc>()->locId;
 
@@ -339,11 +349,10 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
     return nullptr;
   }
 
-  auto const typeSrc = localTypeSource(locId);
-  auto const typeSrcInst =
-    typeSrc.isValue() ? typeSrc.value->inst() :
-    typeSrc.isGuard() ? typeSrc.guard :
-    nullptr;
+  // If the local has a single type-source instruction, pass it along
+  // to preOptimizeAssertTypeOp, which may be able to use it to
+  // optimize away the AssertLoc.
+  auto const typeSrcInst = singleTypeSrcInst(localTypeSources(locId));
 
   return preOptimizeAssertTypeOp(
     inst,
@@ -806,21 +815,20 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // Call. The value won't be live but it's ok to use it to track down the
     // guard.
 
-    auto const source = get_required(m_constraints.typeSrcs, inst);
-    if (source.isNone()) {
-      // val was newly created in this trace. Nothing to constrain.
-      ITRACE(2, "typeSrc is null, bailing\n");
-      return false;
-    }
+    auto const typeSrcs = get_required(m_constraints.typeSrcs, inst);
 
-    if (source.isGuard()) {
-      return constrainLocal(inst->extra<LocalId>()->locId, source, tc,
-                            "constrainValue");
+    bool changed = false;
+    for (auto typeSrc : typeSrcs) {
+      if (typeSrc.isGuard()) {
+        changed = constrainLocal(inst->extra<LocalId>()->locId, typeSrc, tc,
+                                  "constrainValue") || changed;
+      } else {
+        // Keep chasing down the source of val.
+        assert(typeSrc.isValue());
+        changed = constrainValue(typeSrc.value, tc) || changed;
+      }
     }
-
-    // Otherwise, keep chasing down the source of val.
-    assert(source.isValue());
-    return constrainValue(source.value, tc);
+    return changed;
   } else if (inst->is(LdStack, LdStackAddr)) {
     return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(AssertType)) {
@@ -916,7 +924,11 @@ bool IRBuilder::constrainLocal(uint32_t locId,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  return constrainLocal(locId, localTypeSource(locId), tc, why);
+  bool changed = false;
+  for (auto typeSrc : localTypeSources(locId)) {
+    changed = constrainLocal(locId, typeSrc, tc, why) || changed;
+  }
+  return changed;
 }
 
 bool IRBuilder::constrainLocal(uint32_t locId,
@@ -931,7 +943,6 @@ bool IRBuilder::constrainLocal(uint32_t locId,
          locId, show(typeSrc), tc, why);
   Indent _i;
 
-  if (typeSrc.isNone()) return false;
   if (typeSrc.isValue()) return constrainValue(typeSrc.value, tc);
 
   assert(typeSrc.isGuard());
@@ -959,8 +970,12 @@ bool IRBuilder::constrainLocal(uint32_t locId,
     auto const newTc = relaxConstraint(tc, typeParam, prevType);
     ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
            *guard, tc, newTc);
-    return constrainLocal(locId, get_required(m_constraints.typeSrcs, guard),
-                          newTc, why);
+    bool changed = false;
+    auto typeSrcs = get_required(m_constraints.typeSrcs, guard);
+    for (auto typeSrc : typeSrcs) {
+      changed = constrainLocal(locId, typeSrc, newTc, why) || changed;
+    }
+    return changed;
   }
 
   // guard is a CheckLoc
@@ -981,8 +996,10 @@ bool IRBuilder::constrainLocal(uint32_t locId,
     auto const newTc = relaxConstraint(tc, knownType, prevType);
     ITRACE(1, "tracing through {}, orig tc: {}, new tc: {}\n",
            *guard, tc, newTc);
-    changed = constrainLocal(locId, get_required(m_constraints.typeSrcs, guard),
-                             newTc, why) || changed;
+    auto typeSrcs = get_required(m_constraints.typeSrcs, guard);
+    for (auto typeSrc : typeSrcs) {
+      changed = constrainLocal(locId, typeSrc, newTc, why) || changed;
+    }
   }
   return changed;
 }
@@ -1115,7 +1132,9 @@ void IRBuilder::insertLocalPhis() {
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
         if (shouldConstrainGuards()) {
-          m_constraints.typeSrcs[ldLoc] = local.typeSrc;
+          for (auto typeSrc : local.typeSrcs) {
+            m_constraints.typeSrcs[ldLoc].insert(typeSrc);
+          }
         }
 
         if (pred->numSuccs() > 1) {

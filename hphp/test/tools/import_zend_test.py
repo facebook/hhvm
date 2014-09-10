@@ -904,9 +904,6 @@ def walk(filename, dest_subdir):
     if not '.phpt' in filename:
         data = file(full_dest_filename).read()
 
-        if '/ext/ftp/tests/server.inc' in full_dest_filename:
-            data = data.replace('stream_socket_server', '@stream_socket_server')
-
         if '/ext/mysqli/tests/table.inc' in full_dest_filename:
             data = data.replace(
                 'DROP TABLE IF EXISTS test\'',
@@ -1017,13 +1014,8 @@ def walk(filename, dest_subdir):
     elif 'EXPECTF' in sections:
         exp = sections['EXPECTF']
 
-        if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
-            exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
         if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
             exp = exp.replace('to be long', 'to be integer')
-        if '/ext/curl/tests/curl_basic_008.php' in full_dest_filename or \
-           '/ext/curl/tests/curl_basic_010.php' in full_dest_filename:
-            exp = exp.replace('host:)', 'host:|Could not resolve:)')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:
@@ -1102,10 +1094,8 @@ def walk(filename, dest_subdir):
     if '/tests/classes/bug63462.php' in full_dest_filename:
         exp = exp.replace("Notice:", "\nNotice:")
         file(full_dest_filename + '.expectf', 'w').write(exp)
-    if '/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename:
-        exp = exp.replace("resource(6)", "resource(%d)")
-        file(full_dest_filename + '.expectf', 'w').write(exp)
-    if '/ext/ldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename:
+    if ('/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename) or \
+       ('extldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename):
         exp = exp.replace("resource(6)", "resource(%d)")
         file(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/standard/tests/math/pow.php' in full_dest_filename) or \
@@ -1165,6 +1155,7 @@ def walk(filename, dest_subdir):
         test = test.replace(pseudomain,
                             'function main() {\n' + pseudomain + '}\nmain();\n')
     if '/Zend/tests/bug55007.php' in full_dest_filename:
+        # Fixed in php-src@0ec49bba (probably PHP7)
         test = test.replace('$a[]', '$a[];')
     if '/ext/phar/tests/' in full_dest_filename:
         test = test.replace('.clean', '')

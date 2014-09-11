@@ -5148,18 +5148,21 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
   always_assert(arity == def.numDsts());
   VregList args;
   for (unsigned i = 0; i < arity; i++) {
+    auto src = inst->src(i);
     auto sloc = srcLoc(i);
     auto dloc = makeDstLoc(*def.dst(i));
-    if (dloc.numAllocated() == 1) {
-      always_assert(sloc.numAllocated() == 1);
-      args.push_back(sloc.reg(0));
-    } else {
-      always_assert(dloc.numAllocated() == 2);
-      always_assert(sloc.numAllocated() == 1 || sloc.numAllocated() == 2);
-      args.push_back(sloc.reg(0));
-      auto t = sloc.numAllocated() == 2 ? sloc.reg(1) :
-               v.cns(inst->src(i)->type().toDataType());
-      args.push_back(t);
+    always_assert(sloc.numAllocated() <= dloc.numAllocated());
+    if (dloc.numAllocated() >= 1) { // handle value
+      // Task 5133071: We shouldn't need to handle the case src
+      // doesn't have a register here.
+      auto val = sloc.numAllocated() >= 1 ? sloc.reg(0) :
+                 v.cns(src->type().hasRawVal() ? src->rawVal() : 0);
+      args.push_back(val);
+    }
+    if (dloc.numAllocated() == 2) { // handle type
+      auto type = sloc.numAllocated() == 2 ? sloc.reg(1) :
+                  v.cns(src->type().toDataType());
+      args.push_back(type);
     }
   }
   v << phijmp{target, v.makeTuple(args)};

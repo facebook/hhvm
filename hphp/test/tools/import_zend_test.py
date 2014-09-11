@@ -18,7 +18,7 @@ import urllib2
 
 # The version that we will be importing the tests from.
 # Must be a valid, released version from php download site
-zend_version = "5.5.15"
+zend_version = "5.5.16"
 
 # Don't even pull these into the repo.
 # We want running the bad tests to still complete.

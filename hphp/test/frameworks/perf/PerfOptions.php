@@ -55,6 +55,7 @@ final class PerfOptions {
         'help',
 
         'verbose',
+
         'php5:',
         'hhvm:',
         'siege:',

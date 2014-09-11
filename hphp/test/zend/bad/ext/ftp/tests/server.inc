@@ -7,7 +7,7 @@ $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__
 for ($i=0; $i<100 && !$socket; ++$i) {
 	$port = rand(1025, 65535);
 	
-	$socket = stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+	$socket = @stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 }
 //set anther random port that is not the same as $port
 do{
@@ -30,7 +30,7 @@ function pasv_listen($action){
 	$tmp_file = 'nm2.php';
 	$pid = pcntl_fork();
 	if($pid === 0){
-		$soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
+		$soc  = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
 		$fs = stream_socket_accept($soc, 3);
 		switch ($action) {
 			case 'fget':

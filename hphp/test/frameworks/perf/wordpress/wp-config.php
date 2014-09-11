@@ -18,6 +18,19 @@
 ///// START CHANGES TO DEFAULT CONFIG FILE /////
 ////////////////////////////////////////////////
 
+// On most real requests, this will be a no-op, or cheap - however, it's
+// incredibly variable. It makes the performance of the benchmark depend on:
+// - rpc.pingomatic.com
+// - wordpress.org
+//
+// It also automatically installs updates, so turns this thing into a moving
+// target.
+//
+// Additionally, in real world usage, it will be a complete no-op except for one
+// request every few hours, so disabling it should still be fairly reflective
+// of real performance
+define('DISABLE_WP_CRON', 'true');
+
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
 define('DB_NAME', 'wp_bench');

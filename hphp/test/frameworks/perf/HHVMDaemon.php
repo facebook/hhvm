@@ -19,17 +19,18 @@ final class HHVMDaemon extends PHPEngine {
       return;
     }
     $output = [];
-    exec(
-      implode(
-        ' ',
-        (Vector {
-            $options->hhvm,
-            '-v', 'Eval.Jit=1',
-            __DIR__.'/hhvm_config_check.php',
-        })->map($x ==> escapeshellarg($x))
-      ),
-      $output
+    $checkCommand = implode(
+      ' ',
+      (Vector {
+          $options->hhvm,
+          '-v', 'Eval.Jit=1',
+          __DIR__.'/hhvm_config_check.php',
+      })->map($x ==> escapeshellarg($x))
     );
+    if ($options->traceSubProcess) {
+      printf("%s\n", $checkCommand);
+    }
+    exec($checkCommand, $output);
     $checks = json_decode(implode("\n", $output), /* as array = */ true);
     invariant($checks, 'Got invalid output from hhvm_config_check.php');
     $failed = 0;

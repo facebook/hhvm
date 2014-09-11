@@ -1173,23 +1173,13 @@ void CodeGenerator::cgUnaryIntOp(Vloc dst_loc, SSATmp* src, Vloc src_loc) {
 }
 
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
+  auto src = srcLoc(0).reg();
+  auto dst = dstLoc(0).reg();
   auto& v = vmain();
-
   // clear the high bit
-  auto resReg = dstReg.isVirt() || dstReg.isSIMD() ? Vreg(dstReg) : v.makeReg();
-  Vreg tmp_src;
-  if (srcReg.isVirt() || srcReg.isSIMD()) {
-    tmp_src = srcReg;
-  } else {
-    tmp_src = v.makeReg();
-    v << copy{srcReg, tmp_src};
-  }
-  auto tmp1 = v.makeReg();
-  v << psllq{1, tmp_src, tmp1};
-  v << psrlq{1, tmp1, resReg};
-  if (resReg != Vreg(dstReg)) v << copy{resReg, dstReg};
+  auto tmp = v.makeReg();
+  v << psllq{1, src, tmp};
+  v << psrlq{1, tmp, dst};
 }
 
 template<class Op, class Opi>
@@ -1386,46 +1376,22 @@ void CodeGenerator::cgXorBool(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
-  auto const dstReg = dstLoc(0).reg();
-  auto const reg0 = srcLoc(0).reg();
-  auto const reg1 = srcLoc(1).reg();
+  auto const dst = dstLoc(0).reg();
+  auto const dividend = srcLoc(0).reg();
+  auto const divisor = srcLoc(1).reg();
   auto& v = vmain();
 
-  // spill rax and/or rdx
-  Vreg save_rax, save_rdx;
-  if (dstReg != rax) {
-    save_rax = v.makeReg();
-    v << copy{rax, save_rax};
-  }
-  if (dstReg != rdx) {
-    save_rdx = v.makeReg();
-    v << copy{rdx, save_rdx};
-  }
-  // put divisor in tmp if it would get clobbered
-  auto divisor = reg1;
-  if (reg1 == rax || reg1 == rdx) {
-    divisor = v.makeReg();
-    v << copy{reg1, divisor};
-  }
-  // put dividend in rax
-  v << copy{reg0, rax};
+  v << copy{dividend, rax};
   v << cqo{};            // sign-extend rax => rdx:rax
   v << idiv{divisor};    // rdx:rax/divisor => quot:rax, rem:rdx
-  v << copy{rdx, dstReg};
-  // restore rax and/or rdx
-  if (save_rax.isValid()) v << copy{save_rax, rax};
-  if (save_rdx.isValid()) v << copy{save_rdx, rdx};
+  v << copy{rdx, dst};
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
+  auto src = srcLoc(0).reg();
+  auto dst = dstLoc(0).reg();
   auto& v = vmain();
-  auto tmp1 = v.makeReg();
-  auto tmp2 = v.makeReg();
-  v << copy{srcReg, tmp1};
-  v << sqrtsd{tmp1, tmp2};
-  v << copy{tmp2, dstReg};
+  v << sqrtsd{src, dst};
 }
 
 template<class Op, class Opi>
@@ -2180,13 +2146,14 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
-  auto dstReg = dstLoc(0).reg();
-  auto srcReg = srcLoc(0).reg();
+  auto dst = dstLoc(0).reg();
+  auto src = srcLoc(0).reg();
   auto& v = vmain();
-  v << copy{srcReg, dstReg};
-  v << shlqi{1, dstReg, dstReg}; // 0.0 stays zero and -0.0 is now 0.0
-  v << setcc{CC_NE, dstReg}; // lower byte becomes 1 if dstReg != 0
-  v << movzbl{dstReg, dstReg};
+  auto t1 = v.makeReg();
+  auto t2 = v.makeReg();
+  v << shlqi{1, src, t1}; // 0.0 stays zero and -0.0 is now 0.0
+  v << setcc{CC_NE, t2}; // lower byte becomes 1 if dstReg != 0
+  v << movzbl{t2, dst};
 }
 
 void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
@@ -2294,9 +2261,7 @@ void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
   // in. Break the dependency chain by zeroing out the XMM reg.
   auto& v = vmain();
   auto s2 = zeroExtendIfBool(v, src, srcReg);
-  auto tmp_dbl = v.makeReg();
-  v << cvtsi2sd{s2, tmp_dbl};
-  v << copy{tmp_dbl, dstReg};
+  v << cvtsi2sd{s2, dstReg};
 }
 
 void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {

@@ -408,6 +408,10 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                                              const String& prop, const Variant& value,
                                              bool force) {
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    raise_error("Setting static properties through reflection is not "
+      "allowed in RepoAuthoritative mode");
+  }
   StringData* sd = cls.get();
   Class* class_ = Unit::lookupClass(sd);
   if (!class_) {

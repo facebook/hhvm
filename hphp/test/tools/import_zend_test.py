@@ -1649,6 +1649,7 @@ for root, dirs, files in os.walk(all_dir):
                     if '/ext/ftp/tests/server.inc' in filename:
                         data = data.replace('<10', '<100')
                         data = data.replace('50000', '1025')
+                        data = data.replace('stream_socket_server', '@stream_socket_server')
 
                     file(dest, 'w').write(data)
 

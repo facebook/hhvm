@@ -219,6 +219,9 @@ flaky_tests = (
 
     # it references a whole directory with *
     '/ext/standard/tests/file/copy_variation6.php',
+
+    # clowny, bug in php
+    '/ext/gmp/tests/014.php',
 )
 
 # Tests that work but not in repo mode

@@ -65,7 +65,6 @@ struct RequestInjectionData {
         m_debuggerStepIn(false),
         m_debuggerStepOut(StepOutState::NONE),
         m_debuggerNext(false) {
-    threadInit();
   }
 
   ~RequestInjectionData();

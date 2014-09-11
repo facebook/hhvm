@@ -57,7 +57,7 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_server_note();
   g_persistentResources.getCheck();
   MemoryManager::TlsWrapper::getCheck();
-  ThreadInfo::s_threadInfo.getCheck();
+  ThreadInfo::s_threadInfo.getCheck()->init();
   g_context.getCheck();
   AsioSession::Init();
   HardwareCounter::s_counter.getCheck();

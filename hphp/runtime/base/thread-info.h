@@ -77,6 +77,12 @@ struct ThreadInfo {
   ThreadInfo();
   ~ThreadInfo();
 
+  /**
+   * Since this is often used as a static global, we want to do anything that
+   * might try to access ThreadInfo::s_threadInfo here instead of in the
+   * constructor */
+  void init();
+
   void onSessionInit();
   void onSessionExit();
   void setPendingException(Exception* e);

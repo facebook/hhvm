@@ -269,11 +269,14 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 
 interface ConstSet<Tv> extends ConstCollection<Tv>,
                                ConstSetAccess<Tv>,
-                               Container<Tv>,
-                               Iterable<Tv> {
+                               KeyedIterable<Tv, Tv>,
+                               Container<Tv> {
   public function values(): ConstVector<Tv>;
+  public function keys(): ConstVector<Tv>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstSet<Tu>;
+  public function mapWithKey<Tu>((function(Tv, Tv): Tu) $fn): ConstSet<Tu>;
   public function filter((function(Tv): bool) $fn): ConstSet<Tv>;
+  public function filterWithKey((function(Tv, Tv): bool) $fn): ConstSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
   public function take(int $n): ConstSet<Tv>;
   public function takeWhile((function(Tv): bool) $fn): ConstSet<Tv>;
@@ -282,7 +285,9 @@ interface ConstSet<Tv> extends ConstCollection<Tv>,
   public function slice(int $start, int $len): ConstSet<Tv>;
   public function concat(Traversable<Tv> $traversable): ConstVector<Tv>;
   public function firstValue(): ?Tv;
+  public function firstKey(): ?Tv;
   public function lastValue(): ?Tv;
+  public function lastKey(): ?Tv;
 }
 
 interface MutableSet<Tv> extends ConstSet<Tv>,

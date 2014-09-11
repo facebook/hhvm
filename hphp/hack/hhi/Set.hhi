@@ -63,18 +63,24 @@ final class Set<Tv> implements MutableSet<Tv> {
 
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;
+  public function toMap(): Map<Tv, Tv>;
+  public function toImmMap(): ImmMap<Tv, Tv>;
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
   public function lazy(): Iterable<Tv>;
   public function values(): Vector<Tv>;
+  public function keys(): Vector<Tv>;
   public function map<Tu>((function(Tv): Tu) $callback): Set<Tu>;
+  public function mapWithKey<Tu>((function(Tv, Tv): Tu) $callback): Set<Tu>;
   public function filter((function(Tv): bool) $callback): Set<Tv>;
+  public function filterWithKey((function(Tv, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Ensures that this Set contains only members for which
    * the $callback returns a truthy result.
    */
   public function retain((function(Tv): bool) $callback): Set<Tv>;
+  public function retainWithKey((function(Tv, Tv): bool) $callback): Set<Tv>;
 
   public function zip<Tu>(Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
   public function take(int $n): Set<Tv>;
@@ -84,7 +90,9 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function slice(int $start, int $len): Set<Tv>;
   public function concat(Traversable<Tv> $traversable): Vector<Tv>;
   public function firstValue(): ?Tv;
+  public function firstKey(): ?Tv;
   public function lastValue(): ?Tv;
+  public function lastKey(): ?Tv;
 
   /**
    * Returns true if the Set is empty, false otherwise.

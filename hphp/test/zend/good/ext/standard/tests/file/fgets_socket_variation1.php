@@ -20,12 +20,6 @@ if (!$client) {
 /* Accept that connection */
 $socket = stream_socket_accept($server);
 
-echo 'Write some data with no \\n';
-fwrite($socket, "line1");
-
-echo "\n\nRead a line from the client:\n";
-var_dump(fgets($client));
-
 
 echo "Write some data:\n";
 fwrite($socket, "line1\nline2\nline3\n");

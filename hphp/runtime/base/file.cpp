@@ -611,6 +611,9 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       }
       m_writepos = filteredReadToBuffer();
       m_readpos = 0;
+      if (bufferedLen() == 0) {
+        break;
+      }
     }
   }
 

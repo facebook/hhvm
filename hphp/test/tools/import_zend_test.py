@@ -1630,7 +1630,13 @@ for root, dirs, files in os.walk(all_dir):
                     dest = filename.replace('all', subdir, 1)
                     dir = os.path.dirname(dest)
                     mkdir_p(dir)
-                    shutil.copyfile(filename, dest)
+                    data = file(filename).read()
+
+                    if '/ext/ftp/tests/server.inc' in filename:
+                        data = data.replace('<10', '<100')
+                        data = data.replace('50000', '1025')
+
+                    file(dest, 'w').write(data)
 
 if not args.dirty:
     shutil.rmtree(all_dir)

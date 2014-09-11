@@ -4,7 +4,7 @@
 
 worker_processes  5;
 error_log __NGINX_TEMP_DIR__/error.log;
-pid __NGINX_TEMP_DIR__/nginx.pid;
+pid       __NGINX_TEMP_DIR__/nginx.pid;
 daemon off;
 
 events {
@@ -22,19 +22,19 @@ http {
   sendfile        on;
   #tcp_nopush     on;
 
-  #keepalive_timeout  0;
-  keepalive_timeout  65;
+  keepalive_timeout    __NGINX_KEEPALIVE_TIMEOUT__;
+  fastcgi_read_timeout __NGINX_FASTCGI_READ_TIMEOUT__;
 
   #gzip  on;
 
   server {
     listen __HTTP_PORT__ default_server;
-    access_log __NGINX_TEMP_DIR__/access.log main;
+    access_log            __NGINX_TEMP_DIR__/access.log main;
     client_body_temp_path __NGINX_TEMP_DIR__/client_temp;
-    proxy_temp_path __NGINX_TEMP_DIR__/proxy_temp;
-    fastcgi_temp_path __NGINX_TEMP_DIR__/fastcgi_temp;
-    uwsgi_temp_path __NGINX_TEMP_DIR__/uwsgi_temp;
-    scgi_temp_path __NGINX_TEMP_DIR__/scgi_temp;
+    proxy_temp_path       __NGINX_TEMP_DIR__/proxy_temp;
+    fastcgi_temp_path     __NGINX_TEMP_DIR__/fastcgi_temp;
+    uwsgi_temp_path       __NGINX_TEMP_DIR__/uwsgi_temp;
+    scgi_temp_path        __NGINX_TEMP_DIR__/scgi_temp;
     root __FRAMEWORK_ROOT__;
     index index.php;
 
@@ -62,12 +62,12 @@ http {
 
   server {
     listen __HTTP_ADMIN_PORT__ default_server;
-    access_log __NGINX_TEMP_DIR__/admin-access.log main;
+    access_log            __NGINX_TEMP_DIR__/admin-access.log main;
     client_body_temp_path __NGINX_TEMP_DIR__/admin-client_temp;
-    proxy_temp_path __NGINX_TEMP_DIR__/admin-proxy_temp;
-    fastcgi_temp_path __NGINX_TEMP_DIR__/admin-fastcgi_temp;
-    uwsgi_temp_path __NGINX_TEMP_DIR__/admin-uwsgi_temp;
-    scgi_temp_path __NGINX_TEMP_DIR__/admin-scgi_temp;
+    proxy_temp_path       __NGINX_TEMP_DIR__/admin-proxy_temp;
+    fastcgi_temp_path     __NGINX_TEMP_DIR__/admin-fastcgi_temp;
+    uwsgi_temp_path       __NGINX_TEMP_DIR__/admin-uwsgi_temp;
+    scgi_temp_path        __NGINX_TEMP_DIR__/admin-scgi_temp;
 
     location / {
       fastcgi_pass 127.0.0.1:__FASTCGI_ADMIN_PORT__;

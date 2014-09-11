@@ -26,26 +26,38 @@ abstract class Process {
     return $this->executablePath;
   }
 
-  public function start(): void {
+  public function start(string $outputFileName = null,
+                        double $delayProcessLaunch = 0.1,
+                        bool $trace = false): void {
     $executable = $this->getExecutablePath();
 
     $cmd = $executable.' '.implode(
       ' ',
       $this->getArguments()->map($x ==> escapeshellarg($x)),
     );
+    $use_pipe = ($outputFileName === null);
     $spec = [
       0 => ['pipe', 'r'], // stdin
-      1 => ['pipe', 'w'], // stdout
-      // not currently using 2 (stderr)
+      1 => $use_pipe ? ['pipe', 'w'] : ['file', $outputFileName, 'a'], // stdout
+      // not currently using file descriptor 2 (stderr)
     ];
     $pipes = [];
     $env = new Map($_ENV);
     $env->setAll($this->getEnvironmentVariables());
+
+    if ($trace) {
+      if ($use_pipe) {
+        printf("%s\n", $cmd);
+      } else {
+        printf("%s >> %s\n", $cmd, $outputFileName);
+      }
+    }
+
     $proc = proc_open($cmd, $spec, $pipes, null, $env);
 
     // Give the shell some time to figure out if it could actually launch the
     // process
-    usleep(100000 /* = 100ms */);
+    Process::sleepSeconds($delayProcessLaunch);
     invariant(
       $proc && proc_get_status($proc)['running'] === true,
       'failed to start process: %s',
@@ -54,7 +66,9 @@ abstract class Process {
 
     $this->process = $proc;
     $this->stdin = $pipes[0];
-    $this->stdout = $pipes[1];
+    if ($use_pipe) {
+      $this->stdout = $pipes[1];
+    }
   }
 
   public function isRunning(): bool {
@@ -105,5 +119,10 @@ abstract class Process {
     if ($this->isRunning()) {
       $this->stop();
     }
+  }
+
+  public static function sleepSeconds(double $secs): void {
+    // printf("Sleeping for %gs\n", $secs);
+    usleep($secs * 1e06);
   }
 }

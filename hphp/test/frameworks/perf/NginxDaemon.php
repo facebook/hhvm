@@ -1,16 +1,22 @@
 <?hh
 
+require_once('PerfOptions.php');
 require_once('PerfSettings.php');
 require_once('Process.php');
 
 final class NginxDaemon extends Process {
 
   public function __construct(
-    private string $tempDir,
-    private PerfTarget $target,
     private PerfOptions $options,
+    private PerfTarget $target
   ) {
-    parent::__construct($options->nginx);
+    parent::__construct($this->options->nginx);
+  }
+
+  public function start(): void {
+    parent::start($this->options->daemonOutputFileName('nginx'),
+                  $this->options->delayProcessLaunch,
+                  $this->options->traceSubProcess);
   }
 
   protected function getArguments(): Vector<string> {
@@ -20,7 +26,7 @@ final class NginxDaemon extends Process {
   }
 
   protected function getGeneratedConfigFile(): string {
-    $path = $this->tempDir.'/nginx.conf';
+    $path = $this->options->tempDir.'/nginx.conf';
     if (file_exists($path)) {
       return $path;
     }
@@ -31,7 +37,9 @@ final class NginxDaemon extends Process {
       '__FASTCGI_ADMIN_PORT__' => PerfSettings::FastCGIAdminPort(),
       '__HTTP_ADMIN_PORT__' => PerfSettings::HttpAdminPort(),
       '__NGINX_CONFIG_ROOT__' => __DIR__.'/nginx',
-      '__NGINX_TEMP_DIR__' => $this->tempDir,
+      '__NGINX_TEMP_DIR__' => $this->options->tempDir,
+      '__NGINX_KEEPALIVE_TIMEOUT__' => (int)$this->options->maxdelayNginxKeepAlive,
+      '__NGINX_FASTCGI_READ_TIMEOUT__' => (int)$this->options->maxdelayNginxFastCGI,
       '__FRAMEWORK_ROOT__' => $this->target->getSourceRoot(),
     };
 

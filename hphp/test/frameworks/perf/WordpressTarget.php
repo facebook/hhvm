@@ -3,8 +3,9 @@
 require_once('PerfTarget.php');
 
 final class WordpressTarget extends PerfTarget {
+
   public function __construct(
-    private string $tempDir
+    private PerfOptions $options
   ) {
   }
 
@@ -15,7 +16,7 @@ final class WordpressTarget extends PerfTarget {
   public function install(): void {
     shell_exec($this->safeCommand(Vector {
       'tar',
-      '-C', $this->tempDir,
+      '-C', $this->options->tempDir,
       '-zxf',
       __DIR__.'/wordpress/wordpress-3.9.1.tar.gz',
     }));
@@ -120,7 +121,7 @@ final class WordpressTarget extends PerfTarget {
   }
 
   public function getSourceRoot(): string {
-    return $this->tempDir.'/wordpress';
+    return $this->options->tempDir.'/wordpress';
   }
 
   // See PerfTarget::ignorePath() for documentation
@@ -138,28 +139,30 @@ final class WordpressTarget extends PerfTarget {
 
   // Contact rpc.pingomatic.com, upgrade to latest .z release, other periodic
   // tasks
-  public function unfreeze(): void {
+  public function unfreeze(PerfOptions $options): void {
     // Need internet access or wordpress will keep on retrying this stuff
     if (!file_get_contents('http://www.example.com')) {
       throw new Exception('Wordpress requires internet access');
     }
     // Does basic bookeeping...
-    $this->unfreezeRequest();
+    $this->unfreezeRequest($options);
     // Does more involved stuff like upgrading wordpress...
-    $this->unfreezeRequest();
+    $this->unfreezeRequest($options);
     // Let's just be paranoid and do it again.
-    $this->unfreezeRequest();
+    $this->unfreezeRequest($options);
   }
 
-  private function unfreezeRequest(): void {
+  private function unfreezeRequest(PerfOptions $options): void {
+    $url = 'http://'.gethostname().':'.PerfSettings::HttpPort().'/';
     $ctx = stream_context_create(
-      ['http' => ['timeout' => 120]]
+      ['http' => ['timeout' => $options->maxdelayUnfreeze]]
     );
     $data = file_get_contents(
-      'http://'.gethostname().':'.PerfSettings::HttpPort().'/',
+      $url,
       /* include path = */ false,
-      $ctx
-    );
-    invariant($data !== false, 'Failed to unfreeze');
+      $ctx);
+    invariant(
+      $data !== false,
+      'Failed to unfreeze '.$url.' after '.$options->maxdelayUnfreeze.' secs');
   }
 }

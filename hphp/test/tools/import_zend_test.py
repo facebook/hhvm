@@ -532,12 +532,24 @@ other_files = (
     '/ext/date/tests/examine_diff.inc',
     '/ext/dba/tests/skipif.inc',
     '/ext/dom/tests/book.xml',
+    '/ext/dom/tests/book.xml.gz',
     '/ext/dom/tests/book.xsd',
     '/ext/dom/tests/book-attr.xml',
     '/ext/dom/tests/book-non-conforming-schema.xsd',
+    '/ext/dom/tests/book-not-a-schema.xsd',
+    '/ext/dom/tests/bug67081_0.xml',
+    '/ext/dom/tests/bug67081_1.xml',
+    '/ext/dom/tests/bug67081_2.xml',
     '/ext/dom/tests/dom_test.inc',
+    '/ext/dom/tests/dom.xml',
+    '/ext/dom/tests/dom.ent',
+    '/ext/dom/tests/empty.html',
+    '/ext/dom/tests/note.xml',
+    '/ext/dom/tests/not_well.html',
     '/ext/dom/tests/nsdoc.xml',
     '/ext/dom/tests/skipif.inc',
+    '/ext/dom/tests/test.html',
+    '/ext/dom/tests/xinclude.xml',
     '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
     '/ext/exif/tests/bug60150.jpg',
@@ -1193,7 +1205,9 @@ def walk(filename, dest_subdir):
         file(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/xmlreader/tests/007.php' in full_dest_filename or
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
-       '/ext/xmlreader/tests/012.php' in full_dest_filename):
+       '/ext/xmlreader/tests/012.php' in full_dest_filename or
+       '/ext/dom/tests/bug37456.php' in full_dest_filename or
+       '/ext/dom/tests/bug67081.php' in full_dest_filename):
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "file"')
     if '/ext/xsl/tests/xslt008.php' in full_dest_filename:
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "compress.zlib"')

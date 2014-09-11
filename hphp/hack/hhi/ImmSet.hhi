@@ -72,11 +72,6 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function __toString(): string;
 
   /**
-   * Returns a copy of this ImmSet.
-   */
-  public function toImmSet(): ImmSet<Tv>;
-
-  /**
    * Returns a Vector containing the elements of this ImmSet.
    */
   public function toVector(): Vector<Tv>;
@@ -87,15 +82,33 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function toImmVector(): ImmVector<Tv>;
 
   /**
+   * Returns a Map containing the elements of this ImmSet.
+   */
+  public function toMap(): Map<Tv, Tv>;
+
+  /**
+   * Returns an ImmMap containing the elements of this ImmSet.
+   */
+  public function toImmMap(): ImmMap<Tv, Tv>;
+
+  /**
    * Returns a Set containing the elements of this ImmSet.
    */
   public function toSet(): Set<Tv>;
 
+  /**
+   * Returns a copy of this ImmSet.
+   */
+  public function toImmSet(): ImmSet<Tv>;
+
   public function items(): Iterable<Tv>;
   public function values(): ImmVector<Tv>;
+  public function keys(): ImmVector<Tv>;
   public function lazy(): Iterable<Tv>;
   public function map<Tu>((function(Tv): Tu) $callback): ImmSet<Tu>;
+  public function mapWithKey<Tu>((function(Tv, Tv): Tu) $callback): ImmSet<Tu>;
   public function filter((function(Tv): bool) $callback): ImmSet<Tv>;
+  public function filterWithKey((function(Tv, Tv): bool) $callback): ImmSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
   public function take(int $n): ImmSet<Tv>;
   public function takeWhile((function(Tv): bool) $fn): ImmSet<Tv>;
@@ -104,5 +117,7 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
   public function slice(int $start, int $len): ImmSet<Tv>;
   public function concat(Traversable<Tv> $traversable): ImmVector<Tv>;
   public function firstValue(): ?Tv;
+  public function firstKey(): ?Tv;
   public function lastValue(): ?Tv;
+  public function lastKey(): ?Tv;
 }

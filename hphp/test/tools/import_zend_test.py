@@ -503,6 +503,9 @@ norepo_tests = (
     # This creates an interface with the same name as a builtin, which
     # hphpc doesn't correctly support AttrUnique flags on.
     '/Zend/tests/inter_06.php',
+
+    # Tests use banned reflection features
+    '/ext/reflection/tests/bug30146.php',
 )
 
 # Random other files that zend wants

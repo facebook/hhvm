@@ -749,7 +749,7 @@ bool IniSetting::FillInConstant(const std::string& name,
 }
 
 bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
-                     FollyDynamic, bool constants_only) {
+                     FollyDynamic) {
   // Need to make sure to update the value if the pair exists already
   // A general insert(make_pair) won't actually update new values.
   bool found = false;
@@ -764,11 +764,6 @@ bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
     s_system_settings.insert(make_pair(name, value));
   }
   return ini_set(name, value, PHP_INI_SET_EVERY);
-}
-
-bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
-                     FollyDynamic) {
-  return Set(name, value, FollyDynamic(), false);
 }
 
 bool IniSetting::Set(const String& name, const Variant& value) {

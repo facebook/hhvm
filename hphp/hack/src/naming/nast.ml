@@ -64,6 +64,7 @@ and tprim =
   | Tstring
   | Tnum
   | Tresource
+  | Tarraykey
 
 and class_ = {
   c_mode           : Ast.mode         ;

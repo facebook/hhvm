@@ -359,10 +359,14 @@ public:
     return StaticArr.specialize(ad->kind());
   }
 
+  bool isZeroValType() const {
+    return subtypeOfAny(Uninit, InitNull, Nullptr);
+  }
+
  public:
   // Returns true iff this Type represents a known value.
   bool isConst() const {
-    return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
+    return m_hasConstVal || isZeroValType();
   }
 
   // Returns true iff this Type is a constant value of type t.
@@ -448,13 +452,9 @@ public:
   // Relaxes the type to one that we can check in codegen
   Type relaxToGuardable() const;
 
-  bool hasRawVal() const {
-    return m_hasConstVal;
-  }
-
   uint64_t rawVal() const {
-    assert(m_hasConstVal);
-    return m_intVal;
+    assert(isConst());
+    return isZeroValType() ? 0 : m_intVal;
   }
 
   bool boolVal() const {

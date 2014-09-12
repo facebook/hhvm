@@ -726,9 +726,7 @@ static void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
-      // null, uninit, and nullptr do not allow rawVal(); make them 0.
-      auto c = tmp->isA(Type::Null) || tmp->isA(Type::Nullptr) ? cns(0) :
-               cns(tmp->rawVal());
+      auto c = cns(tmp->rawVal());
       state.locs[tmp] = Vloc{c};
       FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {

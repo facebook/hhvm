@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;

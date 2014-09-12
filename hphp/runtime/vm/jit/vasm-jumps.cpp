@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;

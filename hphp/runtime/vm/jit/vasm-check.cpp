@@ -18,7 +18,7 @@
 #include "hphp/util/assertions.h"
 #include <boost/dynamic_bitset.hpp>
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit { namespace x64 {
 

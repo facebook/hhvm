@@ -70,6 +70,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function toImmMap(): ImmMap<int, Tv>;
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
+  public function immutable(): ImmVector<Tv>;
   public function lazy(): KeyedIterable<int, Tv>;
   public function values(): Vector<Tv>;
   public function keys(): Vector<int>;

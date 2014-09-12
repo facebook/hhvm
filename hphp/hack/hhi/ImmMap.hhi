@@ -62,6 +62,7 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   public function toImmMap(): ImmMap<Tk, Tv>;
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
+  public function immutable(): ImmMap<Tk, Tv>;
   public function lazy(): KeyedIterable<Tk, Tv>;
   public function values(): ImmVector<Tv>;
   public function keys(): ImmVector<Tk>;

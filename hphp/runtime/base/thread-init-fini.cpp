@@ -49,6 +49,7 @@ InitFiniNode::InitFiniNode(void(*f)(), When init) {
   ifn = this;
 }
 
+// Beware: this is actually called once per request, not as the name suggests
 void init_thread_locals(void *arg /* = NULL */) {
   Sweepable::InitSweepableList();
   ServerStats::GetLogger();
@@ -57,7 +58,10 @@ void init_thread_locals(void *arg /* = NULL */) {
   get_server_note();
   g_persistentResources.getCheck();
   MemoryManager::TlsWrapper::getCheck();
-  ThreadInfo::s_threadInfo.getCheck()->init();
+  if (ThreadInfo::s_threadInfo.isNull()) {
+    // Only call init() when there isn't a s_threadInfo already
+    ThreadInfo::s_threadInfo.getCheck()->init();
+  }
   g_context.getCheck();
   AsioSession::Init();
   HardwareCounter::s_counter.getCheck();
@@ -67,6 +71,7 @@ void init_thread_locals(void *arg /* = NULL */) {
   }
 }
 
+// Beware: this is correctly called once per thread, as the name suggests
 void finish_thread_locals(void *arg /* = NULL */) {
   for (InitFiniNode *in = extra_fini; in; in = in->next) {
     in->func();

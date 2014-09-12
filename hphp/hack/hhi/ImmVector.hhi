@@ -135,6 +135,7 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
 
+  public function immutable(): ImmVector<Tv>;
   public function lazy(): KeyedIterable<int, Tv>;
   public function values(): ImmVector<Tv>;
   public function keys(): ImmVector<int>;

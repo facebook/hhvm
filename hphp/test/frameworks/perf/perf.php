@@ -130,7 +130,7 @@ function perf_main($argv) {
   );
 
   if ($options->tempDir === null) {
-    $options->tempDir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
+    $options->tempDir = tempnam('/dev/shm', 'hhvm-nginx');
     // Currently a file - change to a dir
     unlink($options->tempDir);
     mkdir($options->tempDir);

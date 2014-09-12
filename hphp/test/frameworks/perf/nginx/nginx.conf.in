@@ -56,6 +56,16 @@ http {
       fastcgi_pass 127.0.0.1:__FASTCGI_PORT__;
       fastcgi_index index.php;
       fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+      # Siege sets Accept-Encoding: gzip. php5 and php-ng ignore it, but
+      # HHVM automatically compresses the output.
+      #
+      # This means that it's not a like-for-like comparison, and also means
+      # that we can't compare bytes sent (nginx) or received (siege) as a
+      # sanity check between the two; this sucks, so remove the header.
+      #
+      # Issue for making HHVM match PHP behavior:
+      #   https://github.com/facebook/hhvm/issues/3744
+      fastcgi_param HTTP_ACCEPT_ENCODING "";
       include __NGINX_CONFIG_ROOT__/fastcgi_params;
     }
   }

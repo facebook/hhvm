@@ -127,7 +127,7 @@ function perf_main($argv) {
     }
   );
 
-  $temp_dir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
+  $temp_dir = tempnam('/dev/shm', 'hhvm-nginx');
   // Currently a file - change to a dir
   unlink($temp_dir);
   mkdir($temp_dir);

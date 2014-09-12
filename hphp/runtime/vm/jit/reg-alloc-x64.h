@@ -47,7 +47,7 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     double cdouble;
   };
   auto type = inst.src(i)->type();
-  cint = type.hasRawVal() ? type.rawVal() : 0;
+  cint = type.rawVal();
   switch (inst.op()) {
   case GuardRefs:
   case CheckRefs:

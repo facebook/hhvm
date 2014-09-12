@@ -1148,11 +1148,8 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   if (sreg != InvalidReg && dreg != InvalidReg) {
     v << copy{sreg, dreg};
   } else if (sreg == InvalidReg && dreg != InvalidReg) {
-    // It won't have a raw value if it's null.
-    auto const stype = src->type();
-    assert(stype.hasRawVal() || stype <= Type::Null);
-    auto const raw = stype.hasRawVal() ? src->rawVal() : 0;
-    v << ldimm{raw, dreg};
+    assert(src->type().isConst());
+    v << ldimm{src->rawVal(), dreg};
   } else {
     assert(sreg == InvalidReg && dreg == InvalidReg);
   }
@@ -5068,7 +5065,7 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
       // Task 5133071: We shouldn't need to handle the case src
       // doesn't have a register here.
       auto val = sloc.numAllocated() >= 1 ? sloc.reg(0) :
-                 v.cns(src->type().hasRawVal() ? src->rawVal() : 0);
+                 v.cns(src->rawVal());
       args.push_back(val);
     }
     if (dloc.numAllocated() == 2) { // handle type
@@ -5382,7 +5379,7 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
 
   auto& v = vmain();
   if (srcReg == InvalidReg) {
-    auto val = Immed64(src->type().hasRawVal() ? src->rawVal() : 0);
+    auto val = Immed64(src->rawVal());
     switch (size) {
       case sz::byte:  v << storebim{val.b(), dst}; break;
       case sz::dword: v << storelim{val.l(), dst}; break;

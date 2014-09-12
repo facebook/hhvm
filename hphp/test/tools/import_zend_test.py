@@ -68,7 +68,6 @@ no_import = (
     '/ext/pdo_odbc',
     '/ext/pdo_pgsql',
     '/ext/pspell',
-    '/ext/readline',
     '/ext/recode',
     '/ext/shmop',
     '/ext/skeleton',

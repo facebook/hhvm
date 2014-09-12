@@ -1,1 +1,1 @@
-http://localhost:__HTTP_PORT__/fibonacci.php
+http://__HTTP_HOST__:__HTTP_PORT__/fibonacci.php

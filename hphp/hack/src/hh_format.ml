@@ -128,6 +128,8 @@ let parse_args() =
   let to_ = ref max_int in
   let files = ref [] in
   let in_place = ref false in
+  let diff = ref false in
+  let root = ref None in
   let debug = ref false in
   Arg.parse
     [
@@ -143,11 +145,17 @@ let parse_args() =
      "--in-place", Arg.Unit (fun () -> in_place := true),
      "modify the files in place";
 
-     "--debug", Arg.Unit (fun () -> debug := true), "";
+     "--diff", Arg.Unit (fun () -> diff := true),
+     "formats a diff in place (example: git diff | hh_format --diff)";
+
+     "--root", Arg.String (fun x -> root := Some x),
+     "specifies a root directory (useful in diff mode)";
+
+     "--debug", Arg.Unit (fun () -> debug := true), ""
    ]
     (fun file -> files := file :: !files)
     (Printf.sprintf "Usage: %s (filename|directory)" Sys.argv.(0));
-  !files, !from, !to_, !in_place, !debug
+  !files, !from, !to_, !in_place, !debug, !diff, !root
 
 (*****************************************************************************)
 (* Formats a file in place *)
@@ -215,27 +223,48 @@ let format_string from to_ content =
 (* Helpers *)
 (*****************************************************************************)
 
-let format_stdin from to_ =
+let read_stdin () =
   let buf = Buffer.create 256 in
-  (try
+  try
     while true do
       Buffer.add_string buf (read_line());
       Buffer.add_char buf '\n';
     done;
     assert false
   with End_of_file ->
-    let content = Buffer.contents buf in
-    format_string from to_ content
-  )
+    Buffer.contents buf
+
+let format_stdin from to_ =
+  let content = read_stdin () in
+  format_string from to_ content
 
 (*****************************************************************************)
 (* The main entry point. *)
 (*****************************************************************************)
 
 let () =
+  SharedMem.init();
   PidLog.log_oc := Some (open_out "/dev/null");
-  let files, from, to_, in_place, debug = parse_args() in
+  let files, from, to_, in_place, debug, diff, root = parse_args() in
+  let root =
+    match root with
+    | None ->
+        Printf.printf "No root specified, trying to guess one\n";
+        let root = ClientArgs.get_root None in
+        let root = Path.string_of_path root in
+        Printf.printf "Guessed root: %s\n" root;
+        root
+    | Some root -> root
+  in
+  let in_place = in_place || diff in
   match files with
+  | [] when diff ->
+      let diff = read_stdin () in
+      let file_and_modified_lines = Format_diff.parse_diff diff in
+     Format_diff.apply ~root ~diff:file_and_modified_lines
+  | _ when diff ->
+      Printf.fprintf stderr "--diff mode expects no files\n";
+      exit 2
   | [] when in_place ->
       Printf.fprintf stderr "Cannot modify stdin in-place\n";
       exit 2

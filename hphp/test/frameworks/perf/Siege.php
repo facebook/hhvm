@@ -62,6 +62,11 @@ final class Siege extends Process {
       (string) PerfSettings::HttpPort(),
       $urls,
     );
+    $urls = str_replace(
+      '__HTTP_HOST__',
+      gethostname(),
+      $urls
+    );
     file_put_contents($urls_file, $urls);
 
     switch ($this->mode) {

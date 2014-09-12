@@ -39,6 +39,21 @@ type char_kind =
   (* Everything else *)
   | Other
 
+(* Absolute character position in the input file. *)
+type char_pos = int
+
+type source_tag =
+  (* Line number in the input file *)
+  | Line of int
+
+  (* Beginning of an indivisible formatting block *)
+  | Block
+
+(* Meta-data to be able to reconcile the input file and the
+ * formatted output (useful for Format_diff)
+ *)
+type source_pos = char_pos * source_tag
+
 type env = {
     (* The number of spaces for the margin *)
     margin     : int ref              ;
@@ -122,6 +137,34 @@ type env = {
 
     (* The end of the region we are trying to format. *)
     to_        : int                  ;
+
+    (* When the "keep_source_pos" option is turned on,
+     * the formatter outputs extra tags in the field source_pos.
+     * There are 2 kinds of tags 'Line and 'Block'
+     * (these tags are used by Format_diff).
+     *
+     * The tags of the form 'Line' should be read as: at this
+     * point in the text, the input line number was LINE_NUMBER
+     * (useful to reconcile input/output line numbers).
+     *
+     * The tags of the form 'Block' should be read as: we have reached the
+     * beginning or the end of an indivisible block.
+     *
+     * This information is useful to know which pieces can be formatted
+     * separately. For example, let's consider the following diff:
+     *  $x = array(
+     * -  1,
+     * +  23,
+     *    2,
+     *  );
+     * It doesn't make sense to only format the line that changed.
+     * The formatter is probably going to regroup the entire array on
+     * one line (because it fits).
+     * Thanks to these extra tags, we know that we have to treat the entire
+     * array as an indivisible entity.
+     *)
+    keep_source_pos : bool             ;
+    source_pos_l : source_pos list ref ;
   }
 
 (*****************************************************************************)
@@ -143,9 +186,10 @@ type saved_env = {
     sv_failed     : int                  ;
     sv_spaces     : int                  ;
     sv_silent     : bool                 ;
+    sv_source_pos_l  : source_pos list     ;
   }
 
-let empty lexbuf from to_ = {
+let empty lexbuf from to_ keep_source_pos = {
   margin     = ref 0             ;
   last       = ref Newline       ;
   last_token = ref Terror        ;
@@ -171,6 +215,8 @@ let empty lexbuf from to_ = {
   silent     = ref false         ;
   from                           ;
   to_                            ;
+  keep_source_pos                ;
+  source_pos_l  = ref []         ;
 }
 
 (* Saves all the references of the environment *)
@@ -178,7 +224,7 @@ let save_env env =
   let { margin; last; last_token; buffer; lexbuf; lb_line;
         priority; char_pos; abs_pos; char_break;
         char_size; silent; one_line;
-        last_str; last_out;
+        last_str; last_out; keep_source_pos; source_pos_l;
         break_on; line; failed; try_depth; spaces;
         report_fit; in_attr; stop; from; to_} = env in
   { sv_margin = !margin;
@@ -195,6 +241,7 @@ let save_env env =
     sv_failed = !failed;
     sv_spaces = !spaces;
     sv_silent = !silent;
+    sv_source_pos_l = !source_pos_l;
   }
 
 let restore_env env saved_env =
@@ -211,6 +258,7 @@ let restore_env env saved_env =
   env.failed := saved_env.sv_failed;
   env.spaces := saved_env.sv_spaces;
   env.silent := saved_env.sv_silent;
+  env.source_pos_l := saved_env.sv_source_pos_l;
   { env with buffer = saved_env.sv_buffer }
 
 (*****************************************************************************)
@@ -256,7 +304,7 @@ let make_tokenizer next_token env =
   else env.last_out := str_value;
   (match tok with
   | Tnewline ->
-      env.lb_line := !(env.lb_line) + 1;
+      env.lb_line := !(env.lb_line) + 1
   | _ -> ()
   );
   tok
@@ -487,7 +535,11 @@ end = struct
     env.last := Newline;
     env.line := !(env.line) + 1;
     env.spaces := 0;
-    add_char env '\n'
+    add_char env '\n';
+    if env.keep_source_pos then begin
+      let source_pos = !(env.abs_pos), Line !(env.lb_line) in
+      env.source_pos_l := source_pos :: !(env.source_pos_l)
+    end
 
   let newline env =
     if env.one_line then raise One_line;
@@ -583,6 +635,24 @@ let with_priority env op f =
   f env
 
 (*****************************************************************************)
+(* Add block tag.
+ * We don't have to worry about Opening or Closing blocks, because the logic
+ * is: whatever is in between 2 blocks is indivisible.
+ * Why is that? Because the place where we add the block tag are the places
+ * where we know it's acceptable to break the indentation.
+ * Think of it this way: block tags tell us where we can break the formatting
+ * given that, whatever is in between two block tags is indivisible.
+ *)
+(*****************************************************************************)
+
+let add_block_tag env =
+  assert (!(env.last) = Newline);
+  if env.keep_source_pos then begin
+    let source_pos = !(env.abs_pos), Block in
+    env.source_pos_l := source_pos :: !(env.source_pos_l)
+  end
+
+(*****************************************************************************)
 (* Comments *)
 (*****************************************************************************)
 
@@ -651,7 +721,8 @@ let rec keep_comment env =
       if !(env.last) <> Newline then space env;
       last_token env;
       line_comment_loop env;
-      newline env
+      newline env;
+      add_block_tag env
   | _ -> back env
 
 let rec generic_nsc env =
@@ -670,7 +741,8 @@ let rec generic_nsc env =
       then space env;
       last_token env;
       line_comment_loop env;
-      newline env
+      newline env;
+      add_block_tag env
   | Tspace
   | Tnewline ->
       ignore (token env);
@@ -897,6 +969,7 @@ let rec preserve_nl env f =
   | Topen_comment ->
       generic_nsc env;
       newline env;
+      add_block_tag env;
       preserve_nl env f
   | Tspace when is_empty_line env ->
       preserve_nl_space env;
@@ -918,7 +991,7 @@ let rec preserve_nl env f =
 
 let rec list env element = preserve_nl env begin fun env ->
   if has_consumed env element
-  then (newline env; list env element)
+  then (newline env; add_block_tag env; list env element)
 end
 
 (*****************************************************************************)
@@ -1035,13 +1108,13 @@ let semi_colon env =
 (* The entry point *)
 (*****************************************************************************)
 
-type return =
+type 'a return =
   | Php_or_decl
   | Parsing_error of Errors.error list
   | Internal_error
-  | Success of string
+  | Success of 'a
 
-let rec entry from to_ content =
+let rec entry ~keep_source_metadata from to_ content k =
   let errorl, () = Errors.do_ begin fun () ->
     let _ = Parser_hack.program content in
     ()
@@ -1050,9 +1123,9 @@ let rec entry from to_ content =
   then Parsing_error errorl
   else try
     let lb = Lexing.from_string content in
-    let env = empty lb from to_ in
+    let env = empty lb from to_ keep_source_metadata in
     header env;
-    Success (Buffer.contents env.buffer)
+    Success (k env)
   with
   | PHP -> Php_or_decl
   | _ -> Internal_error
@@ -1329,6 +1402,7 @@ and class_body env =
   then expect "}" env
   else begin
     newline env;
+    add_block_tag env;
     right env begin fun env ->
       list env class_element;
     end;
@@ -1703,6 +1777,7 @@ and stmt ~is_toplevel env = wrap env begin function
       stmt_word ~is_toplevel env word
   | Tlcb ->
       seq env [last_token; space; keep_comment; newline];
+      add_block_tag env;
       right env (stmt_list ~is_toplevel);
       expect "}" env;
   | Tsc ->
@@ -1783,7 +1858,7 @@ and stmt_toplevel_word env = function
   | "use" ->
       seq env [last_token; space; name; semi_colon]
   | _ ->
-      back env;
+      back env
 
 and stmt_list ~is_toplevel env =
   let env = { env with char_break = env.char_break - 1 } in
@@ -1792,6 +1867,7 @@ and stmt_list ~is_toplevel env =
 and block ?(is_toplevel=false) env = wrap env begin function
   | Tlcb ->
       seq env [space; last_token; space; keep_comment; newline];
+      add_block_tag env;
       right env (stmt_list ~is_toplevel);
       expect "}" env
   | _ ->
@@ -1887,6 +1963,7 @@ and for_loop env =
 and switch env =
   seq env  [space; expr_paren; space];
   line env [expect "{"];
+  add_block_tag env;
   case_list env;
   line env [expect "}"]
 
@@ -2472,7 +2549,15 @@ and arrow_opt env =
 (*****************************************************************************)
 
 let region ~start ~end_ content =
-  entry start end_ content
+  entry ~keep_source_metadata:false start end_ content
+    (fun env -> Buffer.contents env.buffer)
 
 let program content =
-  entry 0 max_int content
+  entry ~keep_source_metadata:false 0 max_int content
+    (fun env -> Buffer.contents env.buffer)
+
+let program_with_source_metadata content =
+  entry ~keep_source_metadata:true 0 max_int content begin
+    fun env ->
+      Buffer.contents env.buffer, List.rev !(env.source_pos_l)
+  end

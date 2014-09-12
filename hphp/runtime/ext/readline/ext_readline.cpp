@@ -50,6 +50,10 @@ static bool HHVM_FUNCTION(readline_add_history, const String& line) {
 }
 
 static bool HHVM_FUNCTION(readline_clear_history) {
+#ifdef USE_EDITLINE
+  // libedit needs this to ensure correct allocation
+  using_history();
+#endif
   clear_history();
   return true;
 }

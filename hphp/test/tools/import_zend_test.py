@@ -817,6 +817,7 @@ other_files = (
     '/ext/zip/tests/utils.inc',
     '/ext/zip/tests/test_with_comment.zip',
     '/ext/zlib/tests/004.txt.gz',
+    '/ext/zlib/tests/bug_52944_corrupted_data.inc',
     '/ext/zlib/tests/data.inc',
     '/ext/zlib/tests/gzopen_include_path.inc',
     '/ext/zlib/tests/reading_include_path.inc',
@@ -1026,7 +1027,10 @@ def walk(filename, dest_subdir):
     elif 'EXPECTF' in sections:
         exp = sections['EXPECTF']
 
-        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+        if ('/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename or
+          '/ext/zlib/tests/gzfile_variation13.php' in full_dest_filename or
+          '/ext/zlib/tests/gzopen_variation3.php' in full_dest_filename or
+          '/ext/zlib/tests/readgzfile_variation13.php' in full_dest_filename):
             exp = exp.replace('to be long', 'to be integer')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
@@ -1057,6 +1061,11 @@ def walk(filename, dest_subdir):
 
         if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
             skipif = skipif.replace('dump.txt', dest_filename + '.txt')
+        # php-src#817
+        if ('/ext/zlib/tests/gzfile_variation4.php' in full_dest_filename or
+            '/ext/zlib/tests/readgzfile_variation4.php' in full_dest_filename):
+            skipif = skipif.replace("extension_loaded(zlib)", 
+                                    "extension_loaded('zlib')")
 
         file(full_dest_filename + '.skipif', 'w').write(skipif)
 

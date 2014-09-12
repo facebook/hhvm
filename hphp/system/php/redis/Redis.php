@@ -974,21 +974,15 @@ class Redis {
   }
 
   protected function sockReadLine() {
-   if (!$this->checkConnection()) {
-     return false;
-   }
+    $line = '';
+    do {
+      if (!$this->checkConnection()) {
+        return false;
+      }
+      $line .= fgets($this->connection);
+    } while (substr($line, -2) !== "\r\n");
 
-   $line = '';
-   while(1) {
-     $c = fgetc($this->connection);
-     $line .= $c;
-     if (substr($line, -2) == "\r\n") {
-       $line = substr($line, 0, -2);
-       return $line;
-     }
-   }
-
-   return false;
+    return substr($line, 0, -2);
   }
 
   protected function sockReadData(&$type) {

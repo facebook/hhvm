@@ -154,8 +154,6 @@ public:
    * Change an INI setting as if it was in the php.ini file
    */
   static bool Set(const std::string& name, const folly::dynamic& value,
-                  FollyDynamic, bool constants_only);
-  static bool Set(const std::string& name, const folly::dynamic& value,
                   FollyDynamic);
   static bool Set(const String& name, const Variant& value);
   /**

@@ -1,6 +1,7 @@
 <?hh
 
 require_once('NoEngineStats.php');
+require_once('PerfOptions.php');
 require_once('PerfSettings.php');
 require_once('PHPEngine.php');
 
@@ -8,11 +9,16 @@ final class PHP5Daemon extends PHPEngine {
   use NoEngineStats;
 
   public function __construct(
-    private string $tempDir,
+    private PerfOptions $options,
     private PerfTarget $target,
-    string $executable_path,
   ) {
-    parent::__construct($executable_path);
+    parent::__construct($this->options->php5);
+  }
+
+  public function start(): void {
+    parent::start($this->options->daemonOutputFileName('php5'),
+                  $this->options->delayProcessLaunch,
+                  $this->options->traceSubProcess);
   }
 
   protected function getArguments(): Vector<string> {

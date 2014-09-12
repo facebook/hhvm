@@ -22,21 +22,22 @@ function print_progress(string $out): void {
 }
 
 function run_benchmark(
-  PerfTarget $target,
-  PHPEngine $php_engine,
-  string $temp_dir,
   PerfOptions $options,
+  PerfTarget $target,
+  PHPEngine $php_engine
 ) {
   print_progress('Installing framework');
   $target->install();
 
   print_progress('Starting Nginx');
-  $nginx = new NginxDaemon($temp_dir, $target, $options);
+  $nginx = new NginxDaemon($options, $target);
   $nginx->start();
+  Process::sleepSeconds($options->delayNginxStartup);
   invariant($nginx->isRunning(), 'Failed to start nginx');
 
   print_progress('Starting PHP Engine');
   $php_engine->start();
+  Process::sleepSeconds($options->delayPhpStartup);
   invariant(
     $php_engine->isRunning(),
     'Failed to start '.get_class($php_engine)
@@ -44,7 +45,7 @@ function run_benchmark(
 
   if ($target->needsUnfreeze()) {
     print_progress('Unfreezing framework');
-    $target->unfreeze();
+    $target->unfreeze($options);
   }
 
   if ($options->skipSanityCheck) {
@@ -55,7 +56,7 @@ function run_benchmark(
   }
 
   print_progress('Starting Siege for warmup');
-  $siege = new Siege($temp_dir, $target, RequestModes::WARMUP, $options);
+  $siege = new Siege($options, $target, RequestModes::WARMUP);
   $siege->start();
   invariant($siege->isRunning(), 'Failed to start siege');
   $siege->wait();
@@ -63,14 +64,15 @@ function run_benchmark(
   invariant(!$siege->isRunning(), 'Siege is still running :/');
   invariant($php_engine->isRunning(), get_class($php_engine).' crashed');
 
-  print_progress('Waiting 30s for server to stabilize');
-  sleep(30);
+  print_progress(sprintf('Waiting %gs for server to stabilize',
+                         $options->delayServerStabilize));
+  Process::sleepSeconds($options->delayServerStabilize);
 
   print_progress('Enabling engine stats collection');
   $php_engine->enableStats();
 
   print_progress('Running Siege for benchmark');
-  $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
+  $siege = new Siege($options, $target, RequestModes::BENCHMARK);
   $siege->start();
   invariant($siege->isRunning(), 'Siege failed to start');
   $siege->wait();
@@ -127,16 +129,18 @@ function perf_main($argv) {
     }
   );
 
-  $temp_dir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
-  // Currently a file - change to a dir
-  unlink($temp_dir);
-  mkdir($temp_dir);
+  if ($options->tempDir === null) {
+    $options->tempDir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
+    // Currently a file - change to a dir
+    unlink($options->tempDir);
+    mkdir($options->tempDir);
+  }
 
   $target = null;
   $engine = null;
 
   if ($options->wordpress) {
-    $target = new WordpressTarget($temp_dir);
+    $target = new WordpressTarget($options);
   }
   if ($options->toys) {
     $target = new ToysTarget();
@@ -146,10 +150,10 @@ function perf_main($argv) {
   }
 
   if ($options->php5) {
-    $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
+    $engine = new PHP5Daemon($options, $target);
   }
   if ($options->hhvm) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options);
+    $engine = new HHVMDaemon($options, $target);
   }
   if ($engine === null) {
     throw new Exception(
@@ -158,7 +162,7 @@ function perf_main($argv) {
     );
   }
 
-  run_benchmark($target, $engine, $temp_dir, $options);
+  run_benchmark($options, $target, $engine);
 }
 
 perf_main($argv);

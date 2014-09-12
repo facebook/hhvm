@@ -739,6 +739,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | "void"             -> N.Hprim N.Tvoid
     | "num"              -> N.Hprim N.Tnum
     | "resource"         -> N.Hprim N.Tresource
+    | "arraykey"         -> N.Hprim N.Tarraykey
     | "mixed"            -> N.Hmixed
     | "this" when allow_this ->
         if hl != []

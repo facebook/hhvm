@@ -620,11 +620,15 @@ and case_list_ parent_lenv ty env = function
     (* The way we handle terminal/nonterminal here is not quite right, you
      * can still break the type system with things like P3131824. *)
     let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
+    let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
+    let both_are_sub_types env tprim ty1 ty2 =
+      (SubType.is_sub_type env tprim ty1) &&
+      (SubType.is_sub_type env tprim ty2) in
     if Nast_terminality.Terminal.block b then
       let env, ty2 = expr env e in
       let env, _ =
-        if (SubType.is_sub_type env ty_num ty) &&
-          (SubType.is_sub_type env ty_num ty2)
+        if (both_are_sub_types env ty_num ty ty2) ||
+          (both_are_sub_types env ty_arraykey ty ty2)
         then env, ty
         else Type.unify (fst e) Reason.URnone env ty ty2 in
       let env = block env b in
@@ -634,8 +638,8 @@ and case_list_ parent_lenv ty env = function
     else
       let env, ty2 = expr env e in
       let env, _ =
-        if (SubType.is_sub_type env ty_num ty) &&
-          (SubType.is_sub_type env ty_num ty2)
+        if (both_are_sub_types env ty_num ty ty2) ||
+          (both_are_sub_types env ty_arraykey ty ty2)
         then env, ty
         else Type.unify (fst e) Reason.URnone env ty ty2 in
       let env = block env b in

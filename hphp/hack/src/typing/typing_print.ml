@@ -36,6 +36,7 @@ module ErrorString = struct
     | Nast.Tstring     -> "a string"
     | Nast.Tnum        -> "a num (int/float)"
     | Nast.Tresource   -> "a resource"
+    | Nast.Tarraykey   -> "an array key (int/string)"
 
   let rec type_ = function
     | Tany               -> "an untyped value"
@@ -125,6 +126,7 @@ module Suggest = struct
     | Nast.Tstring -> "string"
     | Nast.Tnum    -> "num (int/float)"
     | Nast.Tresource -> "resource"
+    | Nast.Tarraykey -> "arraykey (int/string)"
 
 end
 
@@ -188,6 +190,7 @@ module Full = struct
     | Nast.Tstring -> "string"
     | Nast.Tnum    -> "num"
     | Nast.Tresource -> "resource"
+    | Nast.Tarraykey -> "arraykey"
     )
 
   and fun_type st env o ft =

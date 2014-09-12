@@ -709,6 +709,15 @@ function skip_test($options, $test) {
   $output = stream_get_contents($pipes[1]);
   fclose($pipes[1]);
   proc_close($process);
+
+  // The standard php5 .skipif semantics is if the .skipif outputs ANYTHING
+  // then it should be skipped. This is a poor design, but I'll just add a
+  // small blacklist of things that are really bad if they are output so we
+  // surface the errors in the tests themselves.
+  if (stripos($output, 'segmentation fault') !== false) {
+    return false;
+  }
+
   return strlen($output) != 0;
 }
 

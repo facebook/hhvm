@@ -77,6 +77,7 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
 
 // make sure syncpoint{}, nocatch{}, or unwind{} only appear immediately
 // after a call.
+bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
 bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
   for (auto b: blocks) {
     bool unwind_valid = false;

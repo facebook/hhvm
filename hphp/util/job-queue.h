@@ -242,7 +242,6 @@ public:
         true : (m_healthStatus->getStatus() != HealthLevel::BackOff));
 
     while (m_jobCount == 0 || !ableToDeque) {
-
       uint32_t kNumPriority = m_jobQueues.size();
       if (m_jobQueues[kNumPriority - 1].size() > 0) {
         // we do not block HealthMon requests (with the highest priority)
@@ -265,6 +264,9 @@ public:
           DropCachePolicy::dropCache();
           flushed = true;
         }
+      }
+      if (!ableToDeque) {
+        ableToDeque = m_healthStatus->getStatus() != HealthLevel::BackOff;
       }
     }
     if (inc) incActiveWorker();

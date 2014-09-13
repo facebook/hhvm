@@ -136,11 +136,11 @@ struct Func {
   struct ParamInfo {
     ParamInfo()
       : builtinType(KindOfInvalid)
+      , variadic(false)
       , funcletOff(InvalidAbsoluteOffset)
       , defaultValue(make_tv<KindOfUninit>())
       , phpCode(nullptr)
       , userType(nullptr)
-      , variadic(false)
     {}
 
     template<class SerDe>
@@ -166,13 +166,13 @@ struct Func {
 
   public:
     DataType builtinType;     // Typehint for builtins.
+    bool variadic;
     Offset funcletOff;
     TypedValue defaultValue;  // Set to Uninit if there is no DV,
                               // or if there's a nonscalar DV.
     LowStringPtr phpCode;     // Eval'able PHP code.
     LowStringPtr userType;    // User-annotated type.
     TypeConstraint typeConstraint;
-    bool variadic;
     UserAttributeMap userAttributes;
   };
 

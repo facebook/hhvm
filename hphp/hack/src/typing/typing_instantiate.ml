@@ -40,9 +40,9 @@ let rec make_subst tparams tyl =
   !subst
 
 and make_subst_with_this ~this tparams tyl =
-  make_subst (((Pos.none, "this"), None)::tparams) (this::tyl)
+  make_subst ((Ast.Invariant, (Pos.none, "this"), None)::tparams) (this::tyl)
 
-and make_subst_tparam subst tyl ((_, tparam_name), _) =
+and make_subst_tparam subst tyl (_, (_, tparam_name), _) =
   let ty =
     match !tyl with
     | [] -> Reason.Rnone, Tany
@@ -71,11 +71,11 @@ let rec instantiate_fun env fty el =
   | _ -> env, fty
 
 and instantiate_ft env ft =
-  let env, tvarl = List.fold_left begin fun (env, vars) tparam ->
+  let env, tvarl = List.fold_left begin fun (env, vars) (_, (pos, _), _) ->
     (* Set the instantiated type parameter to initially point to unresolved, so
      * that it can grow and eventually be a subtype of something like "mixed".
      *)
-    let r = Reason.Rwitness (fst (fst tparam)) in
+    let r = Reason.Rwitness pos in
     let env, var = TUtils.in_var env (r, Tunresolved []) in
     env, var :: vars
   end (env, []) ft.ft_tparams in
@@ -169,7 +169,7 @@ and instantiate_ p subst env = function
       then env, snd ty
       else env, Toption ty
   | Tfun ft ->
-      let subst = List.fold_left begin fun subst ((_, x), _) ->
+      let subst = List.fold_left begin fun subst (_, (_, x), _) ->
         SMap.remove x subst
       end subst ft.ft_tparams in
       let names, params = List.split ft.ft_params in

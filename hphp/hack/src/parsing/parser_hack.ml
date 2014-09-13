@@ -892,15 +892,34 @@ and class_param_list_remain env =
 
 and class_param env =
   match L.token env.lb with
+  | Tplus ->
+      if L.token env.lb <> Tword
+      then class_param_error env
+      else
+        let parameter_name, parameter_constraint = class_param_name env in
+        Covariant, parameter_name, parameter_constraint
+  | Tminus ->
+      if L.token env.lb <> Tword
+      then class_param_error env
+      else
+        let parameter_name, parameter_constraint = class_param_name env in
+        Contravariant, parameter_name, parameter_constraint
   | Tword ->
-      let parameter_name = Pos.make env.lb, Lexing.lexeme env.lb in
-      let parameter_constraint = class_parameter_constraint env in
-      parameter_name, parameter_constraint
+      let parameter_name, parameter_constraint = class_param_name env in
+      let variance = Invariant in
+      variance, parameter_name, parameter_constraint
   | _ ->
-      error_expect env "type parameter";
-      let parameter_name = Pos.make env.lb, "T*unknown*" in
-      parameter_name, None
+      class_param_error env
 
+and class_param_error env =
+  error_expect env "type parameter";
+  let parameter_name = Pos.make env.lb, "T*unknown*" in
+  Invariant, parameter_name, None
+
+and class_param_name env =
+  let parameter_name = Pos.make env.lb, Lexing.lexeme env.lb in
+  let parameter_constraint = class_parameter_constraint env in
+  parameter_name, parameter_constraint
 
 and class_parameter_constraint env =
   match L.token env.lb with

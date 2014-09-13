@@ -94,7 +94,7 @@ and enum_ = {
   e_constraint : hint option;
 }
 
-and tparam = sid * hint option
+and tparam = Ast.variance * sid * hint option
 
 and class_const = hint option * sid * expr
 and class_var = {

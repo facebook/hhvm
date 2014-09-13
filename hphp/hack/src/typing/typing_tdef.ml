@@ -40,7 +40,7 @@ let rec expand_typedef_ ?force_expand:(force_expand=false) seen env r x argl =
     Errors.type_param_arity pos x n
   end;
   let subst = ref SMap.empty in
-  Utils.iter2_shortest begin fun ((_, param), _) ty ->
+  Utils.iter2_shortest begin fun (_, (_, param), _) ty ->
     subst := SMap.add param ty !subst
   end tparaml argl;
   let env, expanded_ty =
@@ -128,7 +128,7 @@ and check_typedef_fun_param seen env (_, ty) =
 and check_typedef_tparam_list seen env x =
   List.iter (check_typedef_tparam seen env) x
 
-and check_typedef_tparam seen env (_, x) =
+and check_typedef_tparam seen env (_, _, x) =
   check_typedef_opt seen env x
 
 and check_typedef_opt seen env = function

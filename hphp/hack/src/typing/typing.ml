@@ -161,9 +161,9 @@ and fun_decl_in_env env f =
   } in
   env, ft
 
-and type_param env (x, y) =
+and type_param env (variance, x, y) =
   let env, y = opt Typing_hint.hint env y in
-  env, (x, y)
+  env, (variance, x, y)
 
 and check_default pos mandatory e =
   if not mandatory && e = None
@@ -879,7 +879,7 @@ and expr_ is_lvalue env (p, e) =
             (* We are creating a fake closure:
              * function<T as Class>(T $x): return_type_of(Class:meth_name)
              *)
-            let tparam = pos_cname, Some obj_type in
+            let tparam = Ast.Invariant, pos_cname, Some obj_type in
             let param = Tgeneric (class_name, Some obj_type) in
             let param = Reason.Rwitness pos, param in
             let fty = { fty with
@@ -2839,7 +2839,7 @@ and get_implements ~with_checks ~this (env: Typing_env.env) ht =
           let this_ty = fst this, Tgeneric ("this", Some this) in
           let subst =
             Inst.make_subst_with_this ~this:this_ty class_.tc_tparams paraml in
-          iter2_shortest begin fun ((p, x), cstr) ty ->
+          iter2_shortest begin fun (_, (p, x), cstr) ty ->
             if with_checks
             then match cstr with
             | None -> ()
@@ -2928,13 +2928,14 @@ and class_def env_up _ c =
 
 and get_self_from_c env c =
   let env, tparams = lfold type_param env c.c_tparams in
-  let tparams = List.map begin fun ((p, s), param) ->
+  let tparams = List.map begin fun (_, (p, s), param) ->
     Reason.Rwitness p, Tgeneric (s, param)
   end tparams in
   let ret = Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)in
   ret
 
 and class_def_ env_up c tc =
+  Typing_variance.class_ (snd c.c_name) tc;
   let env = Env.set_self_id env_up (snd c.c_name) in
   let env = Env.set_mode env c.c_mode in
   let env = Env.set_root env (Dep.Class (snd c.c_name)) in
@@ -3005,7 +3006,7 @@ and class_implements env c1 h =
   class_implements_type env c1 ctype2
 
 and class_implements_type env c1 ctype2 =
-  let env, params = lfold begin fun env ((p, s), param) ->
+  let env, params = lfold begin fun env (_, (p, s), param) ->
     let env, param = opt Typing_hint.hint env param in
     env, (Reason.Rwitness p, Tgeneric (s, param))
   end env c1.c_tparams

@@ -239,7 +239,7 @@ module Env = struct
     in_try        = false;
     in_member_fun = false;
     type_params   = params;
-    type_paraml   = List.map fst c.c_tparams;
+    type_paraml   = List.map (fun (_, x, _) -> x) c.c_tparams;
     classes       = ref genv.iclasses;
     funs          = ref genv.ifuns;
     typedefs      = ref genv.itypedefs;
@@ -260,7 +260,7 @@ module Env = struct
     in_try        = false;
     in_member_fun = false;
     type_params   = cstrs;
-    type_paraml   = List.map fst tdef.t_tparams;
+    type_paraml   = List.map (fun (_, x, _) -> x) tdef.t_tparams;
     classes       = ref genv.iclasses;
     funs          = ref genv.ifuns;
     typedefs      = ref genv.itypedefs;
@@ -634,7 +634,7 @@ let remove_decls env (funs, classes, typedefs, consts) =
 *)
 let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 
-let check_constraint ((pos, name), _) =
+let check_constraint (_, (pos, name), _) =
   (* TODO refactor this in a seperate module for errors *)
   if String.lowercase name = "this"
   then Errors.this_reserved pos
@@ -881,7 +881,7 @@ let check_name_collision methods =
 
 let check_method_tparams class_tparam_names { N.m_tparams = tparams; _ } =
   List.iter
-    (fun ((p,x),_) -> List.iter
+    (fun (_, (p,x),_) -> List.iter
        (fun (pc,xc) -> if (x = xc) then Errors.shadowed_type_param p pc x)
        class_tparam_names)
     tparams
@@ -937,7 +937,7 @@ and class_ genv c =
   let constructor = List.fold_left (constructor env) None c.c_body in
   let constructor, methods, smethods =
     interface c constructor methods smethods in
-  let class_tparam_names = List.map (fun (x,_) -> x) c.c_tparams in
+  let class_tparam_names = List.map (fun (_, x,_) -> x) c.c_tparams in
   let enum = opt_map (enum_ env) c.c_enum in
   check_name_collision methods;
   check_tparams_shadow class_tparam_names methods;
@@ -971,7 +971,7 @@ and enum_ env e =
 
 and type_paraml env tparams =
   let _, ret = List.fold_left
-    (fun (seen, tparaml) (((p, name), _) as tparam) ->
+    (fun (seen, tparaml) ((_, (p, name), _) as tparam) ->
       match SMap.get name seen with
       | None -> (SMap.add name p seen, (type_param env tparam)::tparaml)
       | Some pos ->
@@ -982,7 +982,8 @@ and type_paraml env tparams =
     tparams in
   List.rev ret
 
-and type_param env (x, y) = x, opt_map (hint env) y
+and type_param env (variance, param_name, param_constraint) =
+  variance, param_name, opt_map (hint env) param_constraint
 
 and class_use env x acc =
   match x with
@@ -1283,12 +1284,12 @@ and fun_param env param =
   }
 
 and make_constraints paraml =
-  List.fold_right begin fun ((_, x), hl) acc ->
+  List.fold_right begin fun (_, (_, x), hl) acc ->
     SMap.add x hl acc
   end paraml SMap.empty
 
 and extend_params genv paraml =
-  let params = List.fold_right begin fun ((_, x), hopt) acc ->
+  let params = List.fold_right begin fun (_, (_, x), hopt) acc ->
     SMap.add x hopt acc
   end paraml genv.type_params in
   { genv with type_params = params }
@@ -1887,7 +1888,7 @@ let typedef genv tdef =
   List.iter check_constraint tdef.t_tparams;
   let tparaml = type_paraml env tdef.t_tparams in
   List.iter begin function
-    | (_, Some (pos, _)) ->
+    | (_, _, Some (pos, _)) ->
         Errors.typedef_constraint pos;
     | _ -> ()
   end tparaml;

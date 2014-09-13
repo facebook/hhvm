@@ -410,7 +410,7 @@ bool Func::isFuncIdValid(FuncId id) {
 // Bytecode.
 
 DVFuncletsVec Func::getDVFunclets() const {
- DVFuncletsVec dvs;
+  DVFuncletsVec dvs;
   int nParams = numParams();
   for (int i = 0; i < nParams; ++i) {
     const ParamInfo& pi = params()[i];

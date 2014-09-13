@@ -38,7 +38,7 @@ namespace HPHP {
  * function or method parameter typehint at runtime.
  */
 struct TypeConstraint {
-  enum Flags {
+  enum Flags : uint8_t {
     NoFlags = 0x0,
 
     /*
@@ -81,7 +81,8 @@ struct TypeConstraint {
    *
    * See underlyingDataType().
    */
-  enum class MetaType { Precise, Self, Parent, Callable, Number, ArrayKey };
+  enum class MetaType : uint8_t { Precise, Self, Parent, Callable, Number,
+                                  ArrayKey };
 
   static const int32_t ReturnId = -1;
 

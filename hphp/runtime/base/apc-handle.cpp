@@ -194,7 +194,7 @@ void APCTypedValue::deleteUncounted() {
   DataType type = m_handle.getType();
   assert(type == KindOfString || type == KindOfArray);
   if (type == KindOfString) {
-    m_data.str->destructStatic();
+    m_data.str->destructUncounted();
   } else if (type == KindOfArray) {
     if (m_data.arr->isPacked()) {
       MixedArray::ReleaseUncountedPacked(m_data.arr);

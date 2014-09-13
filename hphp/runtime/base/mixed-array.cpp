@@ -491,8 +491,8 @@ void MixedArray::Release(ArrayData* in) {
 static void release_unk_tv(TypedValue& tv) {
   if (tv.m_type == KindOfString) {
     assert(!tv.m_data.pstr->isRefCounted());
-    if (!tv.m_data.pstr->isStatic()) {
-      tv.m_data.pstr->destructStatic();
+    if (tv.m_data.pstr->isUncounted()) {
+      tv.m_data.pstr->destructUncounted();
     }
     return;
   }
@@ -525,8 +525,8 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
       if (isTombstone(ptr->data.m_type)) continue;
       if (ptr->hasStrKey()) {
         assert(!ptr->skey->isRefCounted());
-        if (!ptr->skey->isStatic()) {
-          ptr->skey->destructStatic();
+        if (ptr->skey->isUncounted()) {
+          ptr->skey->destructUncounted();
         }
       }
 

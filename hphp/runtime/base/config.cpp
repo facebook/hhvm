@@ -106,10 +106,10 @@ void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
   // We don't allow a filename of just ".ini"
   if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
     Config::ParseIniFile(filename, ini);
-  } else if (boost::ends_with(filename, ".hdf") && filename.length() > 4) {
-    Config::ParseHdfFile(filename, hdf);
   } else {
-    raise_warning("Config files should end with .ini or .hdf. Parsing as .hdf");
+    // For now, assume anything else is an hdf file
+    // TODO(#5151773): Have a non-invasive warning if HDF file does not end
+    // .hdf
     Config::ParseHdfFile(filename, hdf);
   }
 }

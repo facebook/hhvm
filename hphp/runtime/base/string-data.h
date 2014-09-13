@@ -161,8 +161,8 @@ struct StringData {
 
   /*
    * Same as MakeStatic but the string alloated will *not* be in the static
-   * string table and will be deleted once the root goes out of scope.
-   * Currently only used by APC.
+   * string table, will not be in low-memory, and will be deleted once the
+   * root goes out of scope. Currently only used by APC.
    */
   static StringData* MakeUncounted(StringSlice);
 
@@ -202,6 +202,12 @@ struct StringData {
    * using this function.
    */
   void destructStatic();
+
+  /*
+   * StringData objects allocated with MakeUncounted should be freed
+   * using this function.
+   */
+  void destructUncounted();
 
   /*
    * Reference-counting related.

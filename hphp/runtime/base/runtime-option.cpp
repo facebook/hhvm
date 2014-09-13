@@ -784,6 +784,17 @@ void RuntimeOption::Load(IniSetting::Map& ini,
     }
     setResourceLimit(RLIMIT_NOFILE, ini, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA, ini, rlimit, "RSS");
+    // These don't have RuntimeOption::xxx bindings, but we still want to be
+    // able to use ini_xxx functionality on them; so directly bind to a local
+    // static via Config::Bind.
+    static int64_t s_core_file_size_override, s_core_file_size, s_rss = 0;
+    static int32_t s_max_socket = 0;
+    Config::Bind(s_core_file_size_override, ini, rlimit["CoreFileSizeOverride"],
+                 0);
+    Config::Bind(s_core_file_size, ini, rlimit["CoreFileSize"], 0);
+    Config::Bind(s_max_socket, ini, rlimit["MaxSocket"], 0);
+    Config::Bind(s_rss, ini, rlimit["RSS"], 0);
+
     Config::Bind(MaxRSS, ini, rlimit["MaxRSS"], 0);
     Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 5);
     Config::Bind(MaxRSSPollingCycle, ini, rlimit["MaxRSSPollingCycle"], 0);

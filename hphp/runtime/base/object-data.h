@@ -83,6 +83,10 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    if (cls->needInitialization()) {
+      // Needs to happen before we assign this object an o_id.
+      cls->initialize();
+    }
     o_id = ++os_max_id;
     instanceInit(cls);
   }
@@ -94,6 +98,10 @@ class ObjectData {
     , m_count(0)
   {
     assert(uintptr_t(this) % sizeof(TypedValue) == 0);
+    if (cls->needInitialization()) {
+      // Needs to happen before we assign this object an o_id.
+      cls->initialize();
+    }
     o_id = ++os_max_id;
     instanceInit(cls);
   }
@@ -166,9 +174,6 @@ class ObjectData {
   void instanceInit(Class* cls) {
     setAttributes(cls->getODAttrs());
     size_t nProps = cls->numDeclProperties();
-    if (cls->needInitialization()) {
-      cls->initialize();
-    }
     if (nProps > 0) {
       if (cls->pinitVec().size() > 0) {
         const Class::PropInitVec* propInitVec = m_cls->getPropData();

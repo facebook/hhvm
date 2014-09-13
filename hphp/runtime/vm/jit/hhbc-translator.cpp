@@ -2686,7 +2686,7 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
     return registerObj(gen(ConstructInstance, makeCatch(), ClassData(cls)));
   }
 
-  // First, make sure our property init vectors are all set up
+  // Make sure our property init vectors are all set up.
   bool props = cls->pinitVec().size() > 0;
   bool sprops = cls->numStaticProperties() > 0;
   assert((props || sprops) == cls->needInitialization());
@@ -2695,7 +2695,12 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
     if (sprops) emitInitSProps(cls, makeCatch());
   }
 
-  // Next, allocate the object
+  /*
+   * Allocate the object.  This must happen after we do sinits for consistency
+   * with the interpreter about o_id assignments.  Also, the prop
+   * initialization above can throw, so we don't want to have the object
+   * allocated already.
+   */
   auto const ssaObj = gen(NewInstanceRaw, ClassData(cls));
 
   // Initialize the properties
@@ -3617,35 +3622,35 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
    * eagerly sync VM regs to represent that stack depth.
    */
   auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
-        // TODO(#4323657): this is generating generic DecRefs at the time
-        // of this writing---probably we're not handling the stack chain
-        // correctly in a catch block.
-        for (auto i = uint32_t{0}; i < numArgs; ++i) {
-          if (paramThroughStack[i]) {
-            popDecRef(Type::Gen);
-          } else {
-            gen(DecRef, paramSSAs[i]);
-          }
-        }
-        if (inlining) {
-          emitFPushActRec(cns(callee),
-                          paramThis ? paramThis : cns(Type::Nullptr),
-                          ActRec::encodeNumArgs(numArgs,
-                                                false /* localsDecRefd */,
-                                                false /* resumed */,
-                                                wasInliningConstructor),
-                          nullptr);
-        }
-        for (auto i = uint32_t{0}; i < numArgs; ++i) {
-          // TODO(#4313939): it's not actually necessary to push these
-          // nulls.
-          push(cns(Type::InitNull));
-        }
-        auto const stack = spillStack();
-        gen(SyncABIRegs, m_irb->fp(), stack);
-        gen(EagerSyncVMRegs, m_irb->fp(), stack);
-        return stack;
-      }); };
+    // TODO(#4323657): this is generating generic DecRefs at the time
+    // of this writing---probably we're not handling the stack chain
+    // correctly in a catch block.
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (paramThroughStack[i]) {
+        popDecRef(Type::Gen);
+      } else {
+        gen(DecRef, paramSSAs[i]);
+      }
+    }
+    if (inlining) {
+      emitFPushActRec(cns(callee),
+                      paramThis ? paramThis : cns(Type::Nullptr),
+                      ActRec::encodeNumArgs(numArgs,
+                                            false /* localsDecRefd */,
+                                            false /* resumed */,
+                                            wasInliningConstructor),
+                      nullptr);
+    }
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      // TODO(#4313939): it's not actually necessary to push these
+      // nulls.
+      push(cns(Type::InitNull));
+    }
+    auto const stack = spillStack();
+    gen(SyncABIRegs, m_irb->fp(), stack);
+    gen(EagerSyncVMRegs, m_irb->fp(), stack);
+    return stack;
+  }); };
 
   /*
    * Prepare the actual arguments to the CallBuiltin instruction.  If

@@ -19,7 +19,7 @@ use to determine which type guards can be loosened is called guard relaxation.
 
 There are two parts to guard relaxation: value constraining and the relaxation
 itself. Value constraining happens during the initial IR generation pass, and
-is managed by the [IRBuilder](../../runtime/vm/jit/trace-builder.h) class. The
+is managed by the [IRBuilder](../../runtime/vm/jit/ir-builder.h) class. The
 important methods in this process are `IRBuilder::constrainValue()`,
 `IRBuilder::constrainLocal()`, and `IRBuilder::constrainStack()`. Whenever
 the behavior of a sequence of HHIR depends on the types of one or more values,

@@ -245,8 +245,8 @@ std::string show(const Vunit& unit) {
   return out.str();
 }
 
-void printUnit(std::string caption, const Vunit& unit) {
-  if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, 1)) return;
+void printUnit(int level, const std::string& caption, const Vunit& unit) {
+  if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
   Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
 }
 

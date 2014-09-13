@@ -459,7 +459,7 @@ void Vxls::allocate() {
     });
     code.erase(end, code.end());
   }
-  printUnit("after vasm-xls", unit);
+  printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
 }
 
 void Vxls::splitCritEdges() {

@@ -88,7 +88,8 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // of its typeParam with whatever type preceded it.
     if (inst->extra<StackOffset>()->offset == index) {
       Type prevType = getStackValue(inst->src(0), index).knownType;
-      return StackValueInfo { inst, refineType(prevType, inst->typeParam())};
+      return StackValueInfo { inst,
+                              refineTypeNoCheck(prevType, inst->typeParam())};
     }
     return getStackValue(inst->src(0), index);
 

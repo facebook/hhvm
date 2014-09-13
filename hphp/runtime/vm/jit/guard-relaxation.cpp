@@ -104,7 +104,13 @@ namespace {
 void retypeLoad(IRInstruction* load, Type newType) {
   newType = load->is(LdLocAddr, LdStackAddr) ? newType.ptr() : newType;
 
-  if (!newType.equals(load->typeParam())) {
+  // Set new typeParam of 'load' if different from previous one,
+  // but avoid doing it if newType is Bottom.  Note that we may end up
+  // here with newType == Bottom, in case there's a type-check
+  // instruction that is always going to fail but wasn't simplified
+  // during IR generation.  In this case, this code is unreacheble and
+  // will be eliminated later.
+  if (!newType.equals(load->typeParam()) && newType != Type::Bottom) {
     ITRACE(2, "retypeLoad changing type param of {} to {}\n",
            *load, newType);
     load->setTypeParam(newType);

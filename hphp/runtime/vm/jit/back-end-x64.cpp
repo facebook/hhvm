@@ -742,7 +742,7 @@ static void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
           FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
                  size_t(data), size_t(type));
         }
-      } else if (tmp->numWords() == 1) {
+      } else {
         auto data = vunit.makeReg();
         state.locs[tmp] = Vloc{data};
         FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));

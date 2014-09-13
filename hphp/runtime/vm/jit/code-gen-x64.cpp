@@ -237,15 +237,6 @@ ArgGroup CodeGenerator::argGroup() const {
   return ArgGroup(m_curInst, m_slocs);
 }
 
-// Use either the full loc already assigned to d, or a subset of it,
-// based on its type.
-Vloc CodeGenerator::makeDstLoc(const SSATmp& d) const {
-  auto t = d.type();
-  return t.needsReg() ? m_state.locs[d] :
-         t.needsValueReg() ? Vloc{m_state.locs[d].reg(0)} :
-         Vloc{};
-}
-
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
   assert(!inst->is(Shuffle));
@@ -258,9 +249,11 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
   };
   for (auto s : inst->srcs()) {
     m_slocs.push_back(m_state.locs[s]);
+    assert(m_slocs.back().reg(0).isValid());
   }
   for (auto& d : inst->dsts()) {
-    m_dlocs.push_back(makeDstLoc(d));
+    m_dlocs.push_back(m_state.locs[d]);
+    assert(m_dlocs.back().reg(0).isValid());
   }
   switch (opc) {
 #define O(name, dsts, srcs, flags)                                \
@@ -5059,15 +5052,10 @@ void CodeGenerator::cgJmp(IRInstruction* inst) {
   for (unsigned i = 0; i < arity; i++) {
     auto src = inst->src(i);
     auto sloc = srcLoc(i);
-    auto dloc = makeDstLoc(*def.dst(i));
+    auto dloc = m_state.locs[def.dst(i)];
     always_assert(sloc.numAllocated() <= dloc.numAllocated());
-    if (dloc.numAllocated() >= 1) { // handle value
-      // Task 5133071: We shouldn't need to handle the case src
-      // doesn't have a register here.
-      auto val = sloc.numAllocated() >= 1 ? sloc.reg(0) :
-                 v.cns(src->rawVal());
-      args.push_back(val);
-    }
+    always_assert(dloc.numAllocated() >= 1);
+    args.push_back(sloc.reg(0)); // handle value
     if (dloc.numAllocated() == 2) { // handle type
       auto type = sloc.numAllocated() == 2 ? sloc.reg(1) :
                   v.cns(src->type().toDataType());

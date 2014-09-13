@@ -1159,20 +1159,6 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   }
 }
 
-template<class OpInstr>
-void CodeGenerator::cgUnaryIntOp(Vloc dst_loc, SSATmp* src, Vloc src_loc) {
-  assert(src->isA(Type::Int));
-  assert(dst_loc.reg().isValid());
-  assert(src_loc.reg().isValid());
-  auto dstReg = dst_loc.reg();
-  auto srcReg = src_loc.reg();
-  auto& v = vmain();
-
-  // Integer operations require 64-bit representations
-  auto s2 = zeroExtendIfBool(v, src, srcReg);
-  v << OpInstr{s2, dstReg};
-}
-
 void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = srcLoc(0).reg();
   auto dst = dstLoc(0).reg();
@@ -1181,36 +1167,6 @@ void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto tmp = v.makeReg();
   v << psllq{1, src, tmp};
   v << psrlq{1, tmp, dst};
-}
-
-template<class Op, class Opi>
-void CodeGenerator::cgBinaryIntOp(IRInstruction* inst) {
-  assert(m_curInst == inst); // could remove the inst param
-  UNUSED const SSATmp* src0  = inst->src(0);
-  UNUSED const SSATmp* src1  = inst->src(1);
-
-  // inputs must be ints, or a (bool,bool) operation that ends up behaving
-  // like an int anyway (e.g. XorBool)
-  assert((src0->isA(Type::Int) && src1->isA(Type::Int)) ||
-         (src0->isA(Type::Bool) && src1->isA(Type::Bool)));
-
-  auto const dstReg      = dstLoc(0).reg();
-  auto const src0Reg     = srcLoc(0).reg();
-  auto const src1Reg     = srcLoc(1).reg();
-  auto& v                = vmain();
-
-  // LHS must always be assigned a register.
-  assert(src0Reg != InvalidReg);
-
-  if (src1Reg != InvalidReg) {
-    // Two registers
-    v << Op{src1Reg, src0Reg, dstReg};
-  } else {
-    // One register, one immediate
-    auto imm = src1->isA(Type::Int) ? safe_cast<int32_t>(src1->intVal()) :
-               int32_t(src1->boolVal());
-    v << Opi{imm, src0Reg, dstReg};
-  }
 }
 
 void CodeGenerator::cgAddIntO(IRInstruction* inst) {
@@ -1228,24 +1184,6 @@ void CodeGenerator::cgMulIntO(IRInstruction* inst) {
   vmain() << jcc{CC_O, {label(inst->next()), label(inst->taken())}};
 }
 
-/*
- * If src2 is 1, this generates dst = src1 - 1 or src1 + 1 using the inc
- * or dec x86 instructions. The return value is whether or not the
- * instruction could be generated.
- */
-template<class Inst>
-bool CodeGenerator::emitIncDec(Vloc dst, SSATmp* src1, Vloc loc1,
-                               SSATmp* src2, Vloc loc2) {
-  auto& v = vmain();
-  if (loc1.reg().isValid() && loc2.reg().isValid() &&
-      src2->isConst(1)) {
-    v << copy{loc1.reg(), dst.reg()};
-    v << Inst{dst.reg(), dst.reg()};
-    return true;
-  }
-  return false;
-}
-
 void CodeGenerator::cgFloor(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
@@ -1261,64 +1199,44 @@ void CodeGenerator::cgCeil(IRInstruction* inst) {
 void CodeGenerator::cgAddInt(IRInstruction* inst) {
   SSATmp* src0 = inst->src(0);
   SSATmp* src1 = inst->src(1);
-  auto loc0 = srcLoc(0);
-  auto loc1 = srcLoc(1);
-  auto dst = dstLoc(0);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto& v = vmain();
 
   // Special cases: x = y + 1, x = 1 + y
-  if (emitIncDec<incq>(dst, src0, loc0, src1, loc1) ||
-      emitIncDec<incq>(dst, src1, loc1, src0, loc1)) {
-    return;
+  if (src1->isConst(1)) {
+    v << incq{s0, d};
+  } else if (src0->isConst(1)) {
+    v << incq{s1, d};
+  } else {
+    v << addq{s1, s0, d};
   }
-
-  cgBinaryIntOp<addq,addqi>(inst);
 }
 
 void CodeGenerator::cgSubInt(IRInstruction* inst) {
   auto src0 = inst->src(0);
   auto src1 = inst->src(1);
-  auto loc0 = srcLoc(0);
-  auto loc1 = srcLoc(1);
-  auto dst = dstLoc(0);
-
-  if (emitIncDec<decq>(dst, src0, loc0, src1, loc1)) return;
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto& v = vmain();
 
   if (src0->isConst(0)) {
     // There is no unary negate HHIR instruction, so handle that here.
-    cgUnaryIntOp<neg>(dst, src1, loc1);
-    return;
-  }
-
-  // not using cgBinaryIntOp because sub is not commutative, and we can do
-  // r1=r0-r1 by doing neg r1; addq r1+=r0 without a scratch register.
-  auto s0 = loc0.reg();
-  auto s1 = loc1.reg();
-  auto d = dst.reg();
-  assert(s0 != InvalidReg && d != InvalidReg);
-  auto& v = vmain();
-  if (s1 == d) {
     v << neg{s1, d};
-    v << addq{s0, s1, d};
-  } else if (s1 == InvalidReg) {
-    auto imm = src1->isA(Type::Int) ? safe_cast<int32_t>(src1->intVal()) :
-               int32_t(src1->boolVal());
-    v << subqi{imm, s0, d};
+  } else if (src1->isConst(1)) {
+    v << decq{s0, d};
   } else {
     v << subq{s1, s0, d};
   }
 }
 
 void CodeGenerator::cgMulInt(IRInstruction* inst) {
-  // not using cgBinaryIntOp() here because x64 imul does not have
-  // an immediate form. This means we can't provide a well-formed
-  // Op class, and most of the complicated logic in cgBinaryIntOp
-  // isn't necessary anyway.
-  auto src0 = srcLoc(0).reg();
-  auto src1 = srcLoc(1).reg();
-  auto dst = dstLoc(0).reg();
-  auto& v = vmain();
-  assert(src0 != InvalidReg && src1 != InvalidReg && dst != InvalidReg);
-  v << imul{src1, src0, dst};
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << imul{s1, s0, d};
 }
 
 void CodeGenerator::cgAddDbl(IRInstruction* inst) {
@@ -1358,22 +1276,36 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAndInt(IRInstruction* inst) {
-  cgBinaryIntOp<andq,andqi>(inst);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << andq{s1, s0, d};
 }
 
 void CodeGenerator::cgOrInt(IRInstruction* inst) {
-  cgBinaryIntOp<orq,orqi>(inst);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << orq{s1, s0, d};
 }
 
 void CodeGenerator::cgXorInt(IRInstruction* inst) {
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto& v = vmain();
   if (inst->src(1)->isConst(-1)) {
-    return cgUnaryIntOp<not>(dstLoc(0), inst->src(0), srcLoc(0));
+    v << not{s0, d};
+  } else {
+    v << xorq{s1, s0, d};
   }
-  cgBinaryIntOp<xorq,xorqi>(inst);
 }
 
 void CodeGenerator::cgXorBool(IRInstruction* inst) {
-  cgBinaryIntOp<xorb,xorbi>(inst);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  vmain() << xorb{s1, s0, d};
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
@@ -1391,22 +1323,21 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
   auto src = srcLoc(0).reg();
   auto dst = dstLoc(0).reg();
-  auto& v = vmain();
-  v << sqrtsd{src, dst};
+  vmain() << sqrtsd{src, dst};
 }
 
 template<class Op, class Opi>
 void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
+  auto const src1 = inst->src(1);
   auto const srcReg0 = srcLoc(0).reg();
   auto const srcReg1 = srcLoc(1).reg();
   auto const dstReg  = dstLoc(0).reg();
   assert(srcReg0 != InvalidReg);
   auto& v = vmain();
 
-  if (srcReg1 == InvalidReg) {
-    // one immediate (right hand side)
-    v << copy{srcReg0, dstReg};
-    v << Opi{safe_cast<int32_t>(inst->src(1)->intVal()), dstReg, dstReg};
+  if (src1->isConst()) {
+    int n = src1->intVal() & 0x3f; // only use low 6 bits.
+    v << Opi{n, srcReg0, dstReg};
   } else {
     // assume srcs and dsts are vregs and rcx isn't live
     v << copy{srcReg1, rcx};

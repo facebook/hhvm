@@ -52,7 +52,6 @@ struct CodeGenerator : public jit::CodeGenerator {
 private:
   Vloc srcLoc(unsigned i) const;
   Vloc dstLoc(unsigned i) const;
-  Vloc makeDstLoc(const SSATmp& d) const;
   ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h

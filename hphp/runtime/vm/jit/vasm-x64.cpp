@@ -813,7 +813,6 @@ Vauto::~Vauto() {
       if (!main().closed()) main() << end{};
       assert(m_areas.size() < 2 || cold().empty() || cold().closed());
       assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
-      printUnit("after vasm-auto", unit());
       finish(vauto_abi);
       return;
     }

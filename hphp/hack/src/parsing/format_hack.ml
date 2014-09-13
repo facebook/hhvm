@@ -1219,10 +1219,10 @@ and hint_list_paren env =
   expect ")" env
 
 and hint env = wrap env begin function
-  | Tqm | Tat ->
+  | Tplus | Tminus | Tqm | Tat ->
       last_token env;
       hint env
-  | Tpercent | Tcolon | Tminus ->
+  | Tpercent | Tcolon ->
       last_token env;
       name_loop env;
       hint_parameter env

@@ -294,6 +294,9 @@ module Typing                               = struct
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
   let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
 
+  let declared_covariant                    = 4117 (* DONT MODIFY!!!! *)
+  let declared_contravariant                = 4118 (* DONT MODIFY!!!! *)
+
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1368,6 +1371,24 @@ let null_container p null_witness =
 let option_mixed pos =
   add Typing.option_mixed pos
     "?mixed is a redundant typehint - just use mixed"
+
+let declared_covariant pos1 pos2 emsg =
+  add_list Typing.declared_covariant (
+  [pos2, "Illegal usage of a covariant type parameter";
+   pos1, "This is where the parameter was declared as covariant (+)"
+ ] @ emsg
+ )
+
+let declared_contravariant pos1 pos2 emsg =
+  add_list Typing.declared_contravariant (
+  [pos2, "Illegal usage of a contravariant type parameter";
+   pos1, "This is where the parameter was declared as contravariant (-)"
+ ] @ emsg
+ )
+
+(*****************************************************************************)
+(* Typing decl errors *)
+(*****************************************************************************)
 
 let wrong_extend_kind child_pos child parent_pos parent =
   let msg1 = child_pos, child^" cannot extend "^parent in

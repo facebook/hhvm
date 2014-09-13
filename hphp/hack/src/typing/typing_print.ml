@@ -210,7 +210,7 @@ module Full = struct
     | Some param_name, param_type ->
         ty st env o param_type; o " "; o param_name
 
-  and tparam o ((_, x), _) = o x
+  and tparam o (_, (_, x), _) = o x
 
   let to_string env x =
     let buf = Buffer.create 50 in
@@ -259,8 +259,13 @@ module PrintClass = struct
     | None -> ""
     | Some ty -> Full.to_string tenv ty
 
-  let tparam ((position, name), cstr) =
-    pos position^" "^name^" "^ty_opt cstr
+  let variance = function
+    | Ast.Covariant -> "+"
+    | Ast.Contravariant -> "-"
+    | Ast.Invariant -> ""
+
+  let tparam (var, (position, name), cstr) =
+    variance var^pos position^" "^name^" "^ty_opt cstr
 
   let tparam_list l =
     List.fold_right (fun x acc -> tparam x^", "^acc) l ""

@@ -156,7 +156,7 @@ and enum_type = {
   te_constraint : ty option;
 }
 
-and tparam = Ast.id * ty option
+and tparam = Ast.variance * Ast.id * ty option
 
 (* The identifier for this *)
 let this = Ident.make "$this"

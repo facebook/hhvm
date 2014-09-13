@@ -173,7 +173,7 @@ void removeDeadCode(Vunit& unit) {
       });
       code.erase(end, code.end());
     }
-    printUnit("after vasm-dead", unit);
+    printUnit(kVasmDCELevel, "after vasm-dead", unit);
   }
 }
 

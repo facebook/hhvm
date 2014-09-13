@@ -101,7 +101,7 @@ void optimizeJmps(Vunit& unit) {
     ever_changed |= changed;
   } while (changed);
   if (ever_changed) {
-    printUnit("after vasm-jumps", unit);
+    printUnit(kVasmJumpsLevel, "after vasm-jumps", unit);
   }
 }
 

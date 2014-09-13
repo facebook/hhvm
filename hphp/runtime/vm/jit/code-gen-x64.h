@@ -101,12 +101,6 @@ private:
   void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
-  template<class OpInstr>
-  void cgUnaryIntOp(Vloc dst, SSATmp* src, Vloc src_loc);
-
-  template<class Op, class Opi>
-  void cgBinaryIntOp(IRInstruction*);
-  template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
   template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
 
   void emitVerifyCls(IRInstruction* inst);
@@ -141,9 +135,6 @@ private:
   void emitCompare(Vout&, IRInstruction* inst);
   void emitCompareInt(Vout&, IRInstruction* inst);
   void emitTestZero(Vout&, SSATmp*, Vloc);
-  template<class Inst>
-  bool emitIncDec(Vloc dst, SSATmp* src0, Vloc loc0,
-                  SSATmp* src1, Vloc loc1);
 
 private:
   Vreg selectScratchReg(IRInstruction* inst);

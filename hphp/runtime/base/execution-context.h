@@ -170,6 +170,11 @@ public:
   ExecutionContext(const ExecutionContext&) = delete;
   ExecutionContext& operator=(const ExecutionContext&) = delete;
   ~ExecutionContext();
+  void sweep();
+
+  void* operator new(size_t s)  { return smart_malloc(s); }
+  void* operator new(size_t s, void* p) { return p; }
+  void operator delete(void* p) { smart_free(p); }
 
   // For RPCRequestHandler
   void backupSession();
@@ -299,14 +304,11 @@ public:
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
-  // This has to appear before m_userErrorHandlers since C++ destructs objects
-  // from last declared to first declared. If it was after, we would destroy
-  // the property table before the error handlers ran.
-  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 private:
   class OutputBuffer {
   public:
-    OutputBuffer() : oss(8192) {}
+    explicit OutputBuffer(Variant&& h) :
+        oss(8192), handler(std::move(h)) {}
     StringBuffer oss;
     Variant handler;
   };
@@ -318,7 +320,7 @@ private:
 
   // output buffering
   StringBuffer *m_out;                // current output buffer
-  std::list<OutputBuffer*> m_buffers; // a stack of output buffers
+  smart::list<OutputBuffer> m_buffers; // a stack of output buffers
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
@@ -328,13 +330,13 @@ private:
   String m_rawPostData;
 
   // request handlers
-  std::set<RequestEventHandler*> m_requestEventHandlerSet;
-  std::vector<RequestEventHandler*> m_requestEventHandlers;
+  smart::set<RequestEventHandler*> m_requestEventHandlerSet;
+  smart::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
 
   // error handling
-  std::vector<std::pair<Variant,int> > m_userErrorHandlers;
-  std::vector<Variant> m_userExceptionHandlers;
+  smart::vector<std::pair<Variant,int> > m_userErrorHandlers;
+  smart::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
   String m_lastError;
   int m_lastErrorNum;
@@ -349,8 +351,8 @@ private:
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
-  std::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
-  std::vector<Variant> m_userExceptionHandlersBackup;
+  smart::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
+  smart::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
 
@@ -369,7 +371,7 @@ public:
   // (due to a transitional period where we had two subclasses of a
   // ExecutionContext, for hphpc and hhvm).
 public:
-  typedef std::set<ObjectData*> LiveObjSet;
+  typedef smart::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
 public:
@@ -382,6 +384,7 @@ public:
 private:
   struct APCHandles {
     size_t m_memSize = 0;
+    // gets moved to treadmill, can't be smart::
     std::vector<APCHandle*> m_handles;
   } m_apcHandles;
   void manageAPCHandle();
@@ -390,6 +393,8 @@ private:
     ConsumeAll,
     LeaveLast
   };
+  void cleanup();
+
   template <bool setMember, bool warn, bool define, bool unset, bool reffy,
             unsigned mdepth, VectorLeaveCode mleave, bool saveResult>
   bool memberHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
@@ -454,8 +459,13 @@ OPCODES
   ActRec* fPushFuncImpl(const Func* func, int numArgs);
 
 public:
-  typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
-                        string_data_hash, string_data_same> ConstInfoMap;
+  // Although the error handlers may want to access dynamic properties,
+  // we cannot *call* the error handlers (or their destructors) while
+  // destroying the context, so C++ order of destruction is not an issue.
+  smart::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+
+  typedef smart::hash_map<const StringData*, ClassInfo::ConstantInfo*,
+                          string_data_hash, string_data_same> ConstInfoMap;
   ConstInfoMap m_constInfo;
 
   const Func* lookupMethodCtx(const Class* cls,
@@ -508,16 +518,16 @@ public:
 
   VarEnv* m_globalVarEnv;
 
-  hphp_hash_map<
+  smart::hash_map<
     StringData*,
     Unit*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<const StringData*> m_evaledFilesOrder;
-  std::vector<Unit*> m_createdFuncs;
+  smart::vector<const StringData*> m_evaledFilesOrder;
+  smart::vector<Unit*> m_createdFuncs;
 
-  std::vector<Fault> m_faults;
+  smart::vector<Fault> m_faults;
 
   ActRec* getStackFrame();
   ObjectData* getThis();
@@ -660,11 +670,14 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
+  template<typename T> using SmartStringIMap =
+    smart::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
+
   // VM ClassInfo support
-  StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_interfaceInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
+  SmartStringIMap<AtomicSmartPtr<MethodInfoVM>> m_functionInfos;
+  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_classInfos;
+  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_interfaceInfos;
+  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_traitInfos;
   Array getConstantsInfo();
   const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
   const ClassInfo* findClassInfo(const String& name);
@@ -687,10 +700,12 @@ public:
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
 
-  std::vector<vixl::Simulator*> m_activeSims;
+  smart::vector<vixl::Simulator*> m_activeSims;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<> void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 

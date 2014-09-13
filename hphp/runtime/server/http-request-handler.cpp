@@ -119,6 +119,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
 }
 
 void HttpRequestHandler::handleRequestImpl(Transport *transport) {
+  g_context.getCheck();
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
@@ -329,6 +330,7 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
+  SCOPE_EXIT { always_assert(MM().empty()); };
   handleRequestImpl(transport);
   // Don't flatten handleRequestImpl into handleRequest
   //
@@ -339,6 +341,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 }
 
 void HttpRequestHandler::abortRequest(Transport *transport) {
+  SCOPE_EXIT { always_assert(MM().empty()); };
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
   assert(vhost);

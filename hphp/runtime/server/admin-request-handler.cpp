@@ -123,6 +123,8 @@ extern unsigned low_arena;
 #endif
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
+  g_context.getCheck();
+  SCOPE_EXIT { hphp_memory_cleanup(); };
   GetAccessLog().onNewRequest();
   transport->addHeader("Content-Type", "text/plain");
   std::string cmd = transport->getCommand();
@@ -594,6 +596,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 }
 
 void AdminRequestHandler::abortRequest(Transport *transport) {
+  g_context.getCheck();
+  SCOPE_EXIT { hphp_memory_cleanup(); };
+
   GetAccessLog().onNewRequest();
   transport->sendString("Service Unavailable", 503);
   GetAccessLog().log(transport, nullptr);

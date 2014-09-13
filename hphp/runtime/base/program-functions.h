@@ -105,6 +105,7 @@ void hphp_context_shutdown();
 void hphp_context_exit(bool shutdown = true);
 
 void hphp_thread_exit();
+void hphp_memory_cleanup();
 void hphp_session_exit();
 void hphp_process_exit();
 std::string get_systemlib(std::string* hhas = nullptr,

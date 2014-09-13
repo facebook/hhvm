@@ -1460,6 +1460,11 @@ static int execute_program_impl(int argc, char** argv) {
           // go unused until we finally stop it when the user quits the
           // debugger.
           g_context->setSandboxId(localProxy->getDummyInfo().id());
+          if (restart) {
+            // Systemlib.php is not loaded again, so we need this if we
+            // are to hit any breakpoints in systemlib.
+            proxySetBreakPoints(localProxy.get());
+          }
           Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());
@@ -1472,9 +1477,6 @@ static int execute_program_impl(int argc, char** argv) {
             free(new_argv);
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
-          // Systemlib.php is not loaded again, so we need this if we
-          // are to hit any breakpoints in systemlib.
-          proxySetBreakPoints(localProxy.get());
           restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, nullptr);
@@ -1840,49 +1842,49 @@ void hphp_thread_exit() {
   finish_thread_locals();
 }
 
+void hphp_memory_cleanup() {
+  auto& mm = MM();
+  // sweep functions are allowed to access g_context,
+  // so we can't destroy it yet
+  mm.sweep();
+
+  // But its smart allocated, and has some members that need
+  // cleanup, so destroy it before its too late
+  g_context.destroy();
+
+  mm.resetAllocator();
+}
+
 void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
-  g_context.destroy();
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  auto& mm = MM();
-
   {
     ServerStatsHelper ssh("rollback");
-    // sweep functions are allowed to call g_context->, so we need to
-    // reinitialize g_context here.
-    g_context.getCheck();
 
     // Clean up pcre state at the end of the request.
     pcre_session_exit();
 
-    mm.sweep();
-
-    // Destroy g_context again because ExecutionContext has
-    // SmartAllocated data members. These members cannot survive over
-    // resetAllocator(), so we need to destroy g_context before
-    // calling resetAllocator().
-    g_context.destroy();
-
-    mm.resetAllocator();
-
+    hphp_memory_cleanup();
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
-    g_context.getCheck();
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();
-  assert(mm.empty());
+  assert(MM().empty());
 }
 
 void hphp_process_exit() {
   Xenon::getInstance().stop();
   PageletServer::Stop();
   XboxServer::Stop();
+  // Debugger::Stop() needs an execution context
+  g_context.getCheck();
   Eval::Debugger::Stop();
+  g_context.destroy();
   Extension::ShutdownModules();
   LightProcess::Close();
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {

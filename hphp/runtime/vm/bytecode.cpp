@@ -52,6 +52,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/text-util.h"
@@ -574,10 +575,22 @@ void flush_evaluation_stack() {
     RPCRequestHandler::cleanupState();
   }
 
+  if (!g_context.isNull()) {
+    /*
+     * It is possible to create a new thread, but then not use it
+     * because another thread became available and stole the job.
+     * If that thread becomes idle, it will have a g_context, and
+     * some smart allocated memory
+     */
+    hphp_memory_cleanup();
+  }
+
   if (!t_se.isNull()) {
     t_se->flush();
   }
   RDS::flush();
+
+  always_assert(MM().empty());
 }
 
 static std::string toStringElm(const TypedValue* tv) {
@@ -2576,11 +2589,12 @@ public:
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
   if (m_apcHandles.m_handles.size() > 0) {
+    std::vector<APCHandle*> handles;
+    handles.swap(m_apcHandles.m_handles);
     Treadmill::enqueue(
-        FreedAPCHandle(std::move(m_apcHandles.m_handles),
+        FreedAPCHandle(std::move(handles),
                        m_apcHandles.m_memSize));
     APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
-    m_apcHandles.m_handles.clear();
   }
 }
 

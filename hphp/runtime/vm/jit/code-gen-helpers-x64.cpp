@@ -433,7 +433,6 @@ void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
 void copyTV(Vout& v, Vloc src, Vloc dst) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
-  if (dst_arity == 0) return;
   if (dst_arity == 2) {
     assert(src_arity == 2);
     v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
@@ -445,8 +444,7 @@ void copyTV(Vout& v, Vloc src, Vloc dst) {
     return;
   }
   assert(src_arity >= 1);
-  if (dst.reg(0) != InvalidReg) v << copy{src.reg(0), dst.reg(0)};
-  if (dst.reg(1) != InvalidReg) v << copy{src.reg(1), dst.reg(1)};
+  v << copy{src.reg(0), dst.reg(0)};
 }
 
 // move 2 gpr to 1 xmm

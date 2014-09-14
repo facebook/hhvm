@@ -543,12 +543,8 @@ void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
 
   auto& v = vmain();
   v << testq{srcReg, srcReg};
-  if (dstReg != InvalidReg) {
-    emitFwdJcc(v, CC_Z, taken);
-    v << copy{srcReg, dstReg};
-  } else {
-    v << jcc{CC_Z, {label(inst->next()), label(taken)}};
-  }
+  emitFwdJcc(v, CC_Z, taken);
+  v << copy{srcReg, dstReg};
 }
 
 void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
@@ -1126,14 +1122,14 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   case DestType::SSA:
     // copy the single-register result to dstInfo.reg0
     assert(!dstInfo.reg1.isValid());
-    if (dstInfo.reg0.isValid()) v << copy{reg::rax, dstInfo.reg0};
+    v << copy{reg::rax, dstInfo.reg0};
     break;
   case DestType::None:
     break;
   case DestType::Dbl:
     // copy the single-register result to dstInfo.reg0
     assert(!dstInfo.reg1.isValid());
-    if (dstInfo.reg0.isValid()) v << copy{reg::xmm0, dstInfo.reg0};
+    v << copy{reg::xmm0, dstInfo.reg0};
     break;
   }
 }
@@ -1143,19 +1139,8 @@ void CodeGenerator::cgMov(IRInstruction* inst) {
   auto& v = vmain();
   if (srcLoc(0).hasReg(1)) {
     copyTV(v, srcLoc(0), dstLoc(0));
-    return;
-  }
-  auto const src = inst->src(0);
-
-  auto sreg = srcLoc(0).reg();
-  auto dreg = dstLoc(0).reg();
-  if (sreg != InvalidReg && dreg != InvalidReg) {
-    v << copy{sreg, dreg};
-  } else if (sreg == InvalidReg && dreg != InvalidReg) {
-    assert(src->type().isConst());
-    v << ldimm{src->rawVal(), dreg};
   } else {
-    assert(sreg == InvalidReg && dreg == InvalidReg);
+    v << copy{srcLoc(0).reg(), dstLoc(0).reg()};
   }
 }
 
@@ -2224,12 +2209,8 @@ void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
-  if (dst == InvalidReg) {
-    v << cmpqim{0, rVmTl[ch]};
-  } else {
-    v << loadq{rVmTl[ch], dst};
-    v << testq{dst, dst};
-  }
+  v << loadq{rVmTl[ch], dst};
+  v << testq{dst, dst};
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
@@ -2623,7 +2604,7 @@ void CodeGenerator::cgStRef(IRInstruction* inst) {
   auto ptr = srcLoc(0).reg();
   auto off = RefData::tvOffset();
   cgStore(ptr[off], inst->src(1), srcLoc(1), Width::Full);
-  if (destReg != InvalidReg) vmain() << copy{ptr, destReg};
+  vmain() << copy{ptr, destReg};
 }
 
 int CodeGenerator::iterOffset(uint32_t id) {
@@ -3567,7 +3548,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // For primitive return types (int, bool, double), the return value
   // is already in dstReg (the builtin call returns in rax or xmm0).
-  if (dstReg == InvalidReg || returnType.isSimpleType()) {
+  if (returnType.isSimpleType()) {
     return;
   }
 
@@ -3762,11 +3743,8 @@ void CodeGenerator::cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc loc) {
   }
 
   if (src->type().needsValueReg()) {
-    assert(srcReg0.isValid());
     v << storeq{srcReg0, refTVData(dst)};
   }
-
-  assert(srcReg1.isValid());
   emitStoreTVType(v, srcReg1, refTVType(dst));
 }
 
@@ -3785,7 +3763,7 @@ void CodeGenerator::cgStore(Vptr dst, SSATmp* src, Vloc srcLoc, Width width) {
 
   auto memRef = refTVData(dst);
   auto srcReg = srcLoc.reg();
-  if (!srcReg.isValid()) {
+  if (src->isConst()) {
     always_assert(type <= (Type::Bool | Type::Int | Type::Dbl |
                   Type::Arr | Type::StaticStr | Type::Cls));
     emitImmStoreq(v, src->rawVal(), memRef);
@@ -3804,7 +3782,6 @@ void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label) {
     emitTypeCheck(type, refTVType(base), refTVData(base), label);
   }
   auto dstReg = dstLoc.reg();
-  if (!dstReg.isValid()) return; // e.g. dest is known const.
   if (type <= Type::Bool) {
     vmain() << loadl{refTVData(base), dstReg};
   } else {
@@ -4259,11 +4236,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&]() {
     auto const valDst = dstLoc(0).reg(0);
     auto const typeDst = dstLoc(0).reg(1);
-    // TODO: #3626251: XLS: Let Uses say whether a constant is
-    // allowed, and if not, assign a register.
-    if (valDst != InvalidReg) {
-      v << copy{rData, valDst};
-    }
+    v << copy{rData, valDst};
     if (typeDst != InvalidReg) {
       if (rType != InvalidReg) v << copy{rType, typeDst};
       else v << ldimm{src->type().toDataType(), typeDst};
@@ -4476,7 +4449,6 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   auto const prop = inst->src(1);
   auto& v = vmain();
   always_assert(objReg != InvalidReg);
-  always_assert(dstReg != InvalidReg);
   v << lea{objReg[prop->intVal()], dstReg};
 }
 
@@ -4484,9 +4456,6 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto clsReg = srcLoc(0).reg();
   int32_t mSlotVal = inst->src(1)->rawVal();
-
-  assert(dstReg != InvalidReg);
-
   auto methOff = int32_t(mSlotVal * sizeof(Func*));
   auto& v = vmain();
   v << loadq{clsReg[methOff], dstReg};
@@ -4529,16 +4498,12 @@ void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {
 
 void CodeGenerator::cgLdClsMethodCacheCommon(IRInstruction* inst, Offset off) {
   auto dstReg = dstLoc(0).reg();
-  if (dstReg == InvalidReg) return;
-
   auto const& extra = *inst->extra<ClsMethodData>();
   auto const clsName = extra.clsName;
   auto const methodName = extra.methodName;
   auto const ch = StaticMethodCache::alloc(clsName, methodName,
                                            getContextName(curClass()));
-  if (dstReg != InvalidReg) {
-    vmain() << loadq{rVmTl[ch + off], dstReg};
-  }
+  vmain() << loadq{rVmTl[ch + off], dstReg};
 }
 
 void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
@@ -4606,13 +4571,10 @@ void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
   auto const clsName    = extra.clsName;
   auto const methodName = extra.methodName;
   auto const dstReg     = dstLoc(0).reg();
-
   auto const ch = StaticMethodFCache::alloc(
     clsName, methodName, getContextName(curClass())
   );
-  if (dstReg != InvalidReg) {
-    vmain() << loadq{rVmTl[ch], dstReg};
-  }
+  vmain() << loadq{rVmTl[ch], dstReg};
 }
 
 void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
@@ -4716,14 +4678,10 @@ void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
 RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  auto dstReg = dstLoc(0).reg();
+  auto dst = dstLoc(0).reg();
   auto& v = vmain();
-  if (dstReg == InvalidReg) {
-    v << cmpqim{0, rVmTl[ch]};
-  } else {
-    v << loadq{rVmTl[ch], dstReg};
-    v << testq{dstReg, dstReg};
-  }
+  v << loadq{rVmTl[ch], dst};
+  v << testq{dst, dst};
   return ch;
 }
 
@@ -4751,7 +4709,6 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   auto const dreg = dstLoc(0).reg();
   auto const ch   = inst->src(0);
   const Vreg rds = rVmTl;
-  if (dreg == InvalidReg) return;
   auto& v = vmain();
   if (ch->isConst()) {
     v << loadq{rds[ch->rdsHandleVal()], dreg};

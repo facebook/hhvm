@@ -811,9 +811,7 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
         break;
 
       case ArgDesc::Kind::Imm: {
-        auto tmp = v.makeReg();
-        v << ldimm{arg.imm(), tmp};
-        v << push{tmp};
+        v << push{v.cns(arg.imm())};
         break;
       }
 
@@ -1909,7 +1907,7 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   if (typeReg == InvalidReg) {
     auto const type = inst->src(0)->type();
     auto const imm = type <= (Type::Bool | Type::Int | Type::Dbl | Type::Str);
-    v << ldimm{imm, dstReg};
+    v << copy{v.cns(imm), dstReg};
     return;
   }
   v << movzbl{typeReg, dstReg};
@@ -2035,6 +2033,7 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
  */
 void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   auto const rObjClass     = srcLoc(0).reg();
+  auto const rTestClass    = srcLoc(1).reg();
   auto const testClass     = inst->src(1)->clsVal();
   auto const rdst          = dstLoc(0).reg();
   auto& v = vmain();
@@ -2042,17 +2041,6 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   auto done = v.makeBlock();
   auto notExact = v.makeBlock();
   auto falseLabel = v.makeBlock();
-
-  Vreg rTestClass;
-  auto s1 = srcLoc(1).reg();
-  if (s1 != InvalidReg) {
-    rTestClass = s1;
-  } else {
-    // even though src 1 is C(Cls), another use of the same tmp might
-    // have given it a register. If that happened, use the register.
-    rTestClass = v.makeReg();
-    v << ldimm{testClass, rTestClass};
-  }
 
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
@@ -2106,34 +2094,26 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   constexpr uint64_t maxULongAsDouble  = 0x43F0000000000000LL;
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
-  auto rIndef = v.makeReg();
-  v << ldimm{0x8000000000000000LL, rIndef};
+  auto rIndef = v.cns(0x8000000000000000L);
   v << cvttsd2siq{srcReg, dstReg};
   v << cmpq{rIndef, dstReg};
 
   unlikelyIfBlock(v, vcold(), CC_E, [&] (Vout& v) {
     // result > max signed int or unordered
-    auto tmp = v.makeReg();
-    v << ldimm{0, tmp};
-    v << ucomisd{tmp, srcReg};
+    v << ucomisd{v.cns(0), srcReg};
     ifThen(v, CC_B, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
       ifThen(v, CC_NP, [&](Vout& v) {
-        auto max_ulong = v.makeReg();
-        v << ldimm{maxULongAsDouble, max_ulong};
-        v << ucomisd{max_ulong, srcReg};
+        v << ucomisd{v.cns(maxULongAsDouble), srcReg};
         ifThenElse(v, CC_B, [&](Vout& v) {
           // src0 > ULONG_MAX
           v << ldimm{0, dstReg};
         }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
-          auto max_long = v.makeReg();
-          v << ldimm{maxLongAsDouble, max_long};
-
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
           // 0 < src0 - ULONG_MAX <= LONG_MAX
           auto tmp_sub = v.makeReg();
-          v << subsd{max_long, srcReg, tmp_sub};
+          v << subsd{v.cns(maxLongAsDouble), srcReg, tmp_sub};
           v << cvttsd2siq{tmp_sub, dstReg};
 
           // We want to simulate integer overflow so we take the resulting
@@ -2285,11 +2265,9 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
-  auto f = v.makeReg();
-  auto t = v.makeReg();
+  auto f = v.cns(makeStaticString(""));
+  auto t = v.cns(makeStaticString("1"));
   v << testb{srcReg, srcReg};
-  v << ldimm{makeStaticString(""), f};
-  v << ldimm{makeStaticString("1"), t};
   v << cmovq{CC_NZ, f, t, dstReg};
 }
 
@@ -2553,13 +2531,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       if (data->base) {
         //XXX it is unsound to mutate indexReg
-        if (deltaFits(data->base, sz::dword)) {
-          v << subqi{safe_cast<int32_t>(data->base), indexReg, indexReg};
-        } else {
-          auto t = v.makeReg();
-          v << ldimm{data->base, t};
-          v << subq{t, indexReg, indexReg};
-        }
+        v << subq{v.cns(data->base), indexReg, indexReg};
       }
       v << cmpqi{data->cases - 2, indexReg};
       v << bindjcc2{CC_AE, data->defaultOff};
@@ -3678,11 +3650,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType.isReferenceType()) {
     assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull
-    auto rtype = v.makeReg();
-    auto nulltype = v.makeReg();
+    auto rtype = v.cns(returnType.toDataType());
+    auto nulltype = v.cns(KindOfNull);
     v << loadq{misReg[returnOffset], dstReg};
-    v << ldimm{returnType.toDataType(), rtype};
-    v << ldimm{KindOfNull, nulltype};
     v << testq{dstReg, dstReg};
     v << cmovq{CC_Z, rtype, nulltype, dstType};
     return;
@@ -3691,11 +3661,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // return type is Variant; fold KindOfUninit to KindOfNull
     assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     assert(misReg != Vreg{dstType});
+    auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();
-    auto nulltype = v.makeReg();
     emitLoadTVType(v, misReg[returnOffset + TVOFF(m_type)], tmp_type);
     v << loadq{misReg[returnOffset + TVOFF(m_data)], dstReg};
-    v << ldimm{KindOfNull, nulltype};
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
     v << testb{tmp_type, tmp_type};
     v << cmovq{CC_Z, tmp_type, nulltype, dstType};
@@ -4438,15 +4407,8 @@ void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
   auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
   auto const ch      = NamedEntity::get(clsName)->getClassHandle();
-  auto clsImm = Immed64(cls);
   auto& v = vmain();
-  if (clsImm.fits(sz::dword)) {
-    v << cmpqim{clsImm.l(), rVmTl[ch]};
-  } else {
-    auto clsReg = v.makeReg();
-    v << ldimm{cls, clsReg};
-    v << cmpqm{clsReg, rVmTl[ch]};
-  }
+  v << cmpqm{v.cns(cls), rVmTl[ch]};
   v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
 }
 
@@ -5140,9 +5102,7 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   TransID  transId = inst->extra<CheckCold>()->transId;
   auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
-  auto addr = v.makeReg();
-  v << ldimm{counterAddr, addr};
-  v << decqm{addr[0]};
+  v << decqm{v.cns(counterAddr)[0]};
   v << jcc{CC_LE, {label(inst->next()), label(taken)}};
 }
 
@@ -5317,25 +5277,15 @@ void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
 
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
-  int64_t off = CONTOFF(m_index) - c_Generator::arOff();
-  auto newIdx = inst->src(1);
   auto newIdxReg = srcLoc(1).reg();
-  assert(contArReg != InvalidReg);
-  assert(newIdxReg != InvalidReg);
-
+  int64_t off = CONTOFF(m_index) - c_Generator::arOff();
   // this is hacky and awful oh god
   auto& v = vmain();
+  auto mem_index = v.makeReg();
   auto res = v.makeReg();
-  if (newIdx->isConst()) {
-    v << ldimm{newIdx->rawVal(), res};
-    v << cmpqm{res, contArReg[off]};
-    v << cloadq{CC_G, res, contArReg[off], res};
-  } else {
-    auto mem_index = v.makeReg();
-    v << loadq{contArReg[off], mem_index};
-    v << cmpq{mem_index, newIdxReg};
-    v << cmovq{CC_G, mem_index, newIdxReg, res};
-  }
+  v << loadq{contArReg[off], mem_index};
+  v << cmpq{mem_index, newIdxReg};
+  v << cmovq{CC_G, mem_index, newIdxReg, res};
   v << storeq{res, contArReg[off]};
 }
 
@@ -5789,9 +5739,7 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   TransID  transId = inst->extra<TransIDData>()->transId;
   auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
-  auto ptr = v.makeReg();
-  v << ldimm{uint64_t(counterAddr), ptr};
-  v << decqm{ptr[0]};
+  v << decqm{v.cns(counterAddr)[0]};
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -5821,14 +5769,7 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
   auto v = vmain();
-  Immed64 imm = (uintptr_t)enterTCServiceReq;
-  if (imm.fits(sz::dword)) {
-    v << cmpqim{imm.l(), *rsp};
-  } else {
-    auto funcptr = v.makeReg();
-    v << ldimm{imm, funcptr};
-    v << cmpqm{funcptr, *rsp};
-  }
+  v << cmpqm{v.cns(enterTCServiceReq), *rsp};
   ifThen(v, CC_NE, [&](Vout& v) {
      v << ud2{};
   });
@@ -5839,37 +5780,18 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
   auto const objClassReg = srcLoc(0).reg();
   auto const constraint = inst->src(1);
   auto const constraintReg = srcLoc(1).reg();
-
   auto& v = vmain();
-  if (constraintReg == InvalidReg) {
-    if (objClassReg != InvalidReg) {
-      auto constraintCls = constraint->clsVal();
-      auto constraintImm = Immed64(constraintCls);
-      if (constraintImm.fits(sz::dword)) {
-        v << cmpqi{constraintImm.l(), objClassReg};
-      } else {
-        auto constraintTmp = v.makeReg();
-        v << ldimm{constraintCls, constraintTmp};
-        v << cmpq{constraintTmp, objClassReg};
-      }
-    } else {
-      // Both constant.
-      if (objClass->clsVal() == constraint->clsVal()) return;
-      return cgCallNative(v, inst);
+  if (constraint->isConst() && objClass->isConst()) {
+    if (objClass->clsVal() != constraint->clsVal()) {
+      cgCallNative(v, inst);
     }
-  } else if (objClassReg != InvalidReg) {
-    v << cmpq{constraintReg, objClassReg};
-  } else {
+    return;
+  }
+  if (!constraint->isConst() && objClass->isConst()) {
     // Reverse the args because cmpq can only have a constant in the LHS.
-    auto objCls = objClass->clsVal();
-    auto objImm = Immed64(objCls);
-    if (objImm.fits(sz::dword)) {
-      v << cmpqi{objImm.l(), constraintReg};
-    } else {
-      auto objTmp = v.makeReg();
-      v << ldimm{objCls, objTmp};
-      v << cmpq{objTmp, constraintReg};
-    }
+    v << cmpq{objClassReg, constraintReg};
+  } else {
+    v << cmpq{constraintReg, objClassReg};
   }
 
   // The native call for this instruction is the slow path that does

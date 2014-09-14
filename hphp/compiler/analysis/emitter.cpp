@@ -3510,6 +3510,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         switch (op) {
           case T_INC:
           case T_DEC: {
+            // $this++ is a no-op
+            if (auto var = dynamic_pointer_cast<SimpleVariable>(exp)) {
+              if (var->isThis()) break;
+            }
+
             auto const cop = [&] {
               if (op == T_INC) {
                 if (RuntimeOption::IntsOverflowToInts) {

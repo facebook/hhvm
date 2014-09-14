@@ -151,8 +151,7 @@ struct IfCountNotStatic {
 
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
-  auto t = v.makeReg();
-  v << ldimm{mcg->tx().getTransCounterAddr(), t};
+  auto t = v.cns(mcg->tx().getTransCounterAddr());
   v << incqmlock{*t};
 }
 
@@ -400,19 +399,10 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
 
 void emitCmpClass(Vout& v, const Class* c, Vptr mem) {
   auto size = sizeof(LowClassPtr);
-  auto imm = Immed64(c);
-
   if (size == 8) {
-    if (imm.fits(sz::dword)) {
-      v << cmpqim{imm.l(), mem};
-    } else {
-      // Use a scratch.  We could do this without rAsm using two immediate
-      // 32-bit compares (and two branches).
-      v << ldimm{imm, rAsm};
-      v << cmpqm{rAsm, mem};
-    }
+    v << cmpqm{v.cns(c), mem};
   } else if (size == 4) {
-    v << cmplim{imm.l(), mem};
+    v << cmplm{v.cns(c), mem};
   } else {
     not_implemented();
   }

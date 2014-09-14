@@ -6631,7 +6631,8 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
 void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
-  if (funcScope->needsLocalThis() && !funcScope->isStatic()) {
+  if (!m_curFunc->isMemoizeWrapper &&
+      funcScope->needsLocalThis() && !funcScope->isStatic()) {
     assert(!m_curFunc->top);
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);

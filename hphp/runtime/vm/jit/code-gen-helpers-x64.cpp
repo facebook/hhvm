@@ -284,8 +284,8 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
     always_assert_flog(
       deltaFits(addr, sz::dword),
-      "Array data vtables are expected to be in the data "
-      "segment, with addresses less than 2^31"
+      "deltaFits on ArrayData vtable calls needs to be checked before "
+      "emitting them"
     );
     v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
     v << callm{baseless(rax*8 + addr), args};

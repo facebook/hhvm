@@ -99,8 +99,10 @@ struct CppCall {
    *
    *   CppCall::array(&g_array_funcs.nvGetInt)
    *
-   * The call mechanism assumes that the first argument to the
-   * function is an ArrayData*, and loads the kind from there.
+   * The call mechanism assumes that the first argument to the function is an
+   * ArrayData*, and loads the kind from there.  This should only be used if
+   * you know that the array data vtable is in low memory---e.g. in
+   * code-gen-x64 you should go through arrayCallIfLowMem() first.
    */
   template<class Ret, class... Args>
   static CppCall array(Ret (*const (*p)[ArrayData::kNumKinds])(Args...)) {

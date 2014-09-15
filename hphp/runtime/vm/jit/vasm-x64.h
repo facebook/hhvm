@@ -175,7 +175,7 @@ struct Vptr {
     assert(seg == DS);
     return mr();
   }
-public:
+
   Vreg64 base; // optional, for baseless mode
   Vreg64 index; // optional
   uint8_t scale; // 1,2,4,8
@@ -210,6 +210,7 @@ struct Vloc {
   Vloc() {}
   explicit Vloc(Vreg r) { m_regs[0] = r; }
   Vloc(Vreg r0, Vreg r1) { m_regs[0] = r0; m_regs[1] = r1; }
+  Vloc(Kind kind, Vreg r) : m_kind(kind) { m_regs[0] = r; }
   /* implicit */ Vloc(PhysLoc loc) {
     assert(!loc.spilled());
     if (loc.isFullSIMD()) {
@@ -677,8 +678,6 @@ struct Vinstr {
 #undef O
 };
 
-enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
-
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
   AreaIndex area;
@@ -773,7 +772,7 @@ struct Vasm {
   explicit Vasm(Vmeta* meta) : m_meta(meta) {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
-  void finish(const Abi&);
+  void finish(const Abi&, bool useLLVM = false);
 
   // get an existing area
   Vout& main() { return area(AreaIndex::Main).out; }
@@ -861,8 +860,21 @@ void visitDefs(const Vunit& unit, Vinstr& inst, Def def) {
   }
 }
 
-template<class Visitor>
-void visitOperands(Vinstr& inst, Visitor& visitor) {
+/*
+ * visitOperands visits all operands of the given instruction, calling
+ * visitor.imm(), visitor.use(), visitor.across(), and visitor.def() as defined
+ * in the X64_OPCODES macro.
+ *
+ * The template spew is necessary to support callers that only have a const
+ * Vinstr& as well as callers with a Vinstr& that wish to mutate the
+ * instruction in the visitor.
+ */
+template<class MaybeConstVinstr, class Visitor>
+typename std::enable_if<
+  std::is_same<MaybeConstVinstr, Vinstr>::value ||
+  std::is_same<MaybeConstVinstr, const Vinstr>::value
+>::type
+visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
   switch (inst.op) {
 #define O(name, imms, uses, defs) \
     case Vinstr::name: { \
@@ -904,11 +916,11 @@ struct PostorderWalker {
   template<class Fn> void dfs(Fn fn) {
     for (auto b : unit.roots) dfs(b, fn);
   }
-  explicit PostorderWalker(Vunit& u)
+  explicit PostorderWalker(const Vunit& u)
     : unit(u)
     , visited(u.blocks.size())
   {}
-  Vunit& unit;
+  const Vunit& unit;
   boost::dynamic_bitset<> visited;
 };
 
@@ -921,7 +933,7 @@ bool check(Vunit&);
 Vtuple findDefs(const Vunit& unit, Vlabel b);
 
 typedef jit::vector<jit::vector<Vlabel>> PredVector;
-PredVector computePreds(Vunit& unit);
+PredVector computePreds(const Vunit& unit);
 
 }
 

@@ -64,6 +64,7 @@ and tprim =
   | Tstring
   | Tnum
   | Tresource
+  | Tarraykey
 
 and class_ = {
   c_mode           : Ast.mode         ;
@@ -93,7 +94,7 @@ and enum_ = {
   e_constraint : hint option;
 }
 
-and tparam = sid * hint option
+and tparam = Ast.variance * sid * hint option
 
 and class_const = hint option * sid * expr
 and class_var = {
@@ -129,6 +130,10 @@ and visibility =
   | Private
   | Public
   | Protected
+
+and og_null_flavor =
+  | OG_nullthrows
+  | OG_nullsafe
 
 and is_reference = bool
 and is_variadic = bool
@@ -213,7 +218,7 @@ and expr_ =
   (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
   | Smethod_id of sid * pstring
-  | Obj_get of expr * expr
+  | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
   | Class_get of class_id * pstring
   | Class_const of class_id * pstring

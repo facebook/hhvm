@@ -16,8 +16,6 @@
 */
 #include "hphp/runtime/ext/ext_socket.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -583,7 +581,7 @@ bool f_socket_connect(const Resource& socket, const String& address, int port /*
     std::string msg = "unable to connect to ";
     msg += addr;
     msg += ":";
-    msg += boost::lexical_cast<std::string>(port);
+    msg += folly::to<std::string>(port);
     SOCKET_ERROR(sock, msg.c_str(), errno);
     return false;
   }
@@ -607,7 +605,7 @@ bool f_socket_bind(const Resource& socket, const String& address, int port /* = 
     std::string msg = "unable to bind address";
     msg += addr;
     msg += ":";
-    msg += boost::lexical_cast<std::string>(port);
+    msg += folly::to<std::string>(port);
     SOCKET_ERROR(sock, msg.c_str(), errno);
     return false;
   }
@@ -1079,7 +1077,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   std::string key;
   if (persistent) {
     key = hosturl.getHostURL() + ":" +
-          boost::lexical_cast<std::string>(hosturl.getPort());
+          folly::to<std::string>(hosturl.getPort());
     Socket *sock =
       dynamic_cast<Socket*>(g_persistentResources->get("socket", key.c_str()));
     if (sock) {
@@ -1151,7 +1149,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
           }
         } else {
           std::string msg = "timed out after ";
-          msg += boost::lexical_cast<std::string>(timeout);
+          msg += folly::to<std::string>(timeout);
           msg += " seconds when connecting to " + hosturl.getHostURL();
           SOCKET_ERROR(sock, msg.c_str(), ETIMEDOUT);
           errnum = sock->getError();

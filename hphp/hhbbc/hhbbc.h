@@ -173,6 +173,12 @@ struct Options {
    */
   bool FuncFamilies = true;
 
+  /*
+   * Whether or not hhbbc should attempt to do anything intelligent to
+   * pseudomains.
+   */
+  bool AnalyzePseudomains = true;
+
   //////////////////////////////////////////////////////////////////////
   // Flags below this line perform optimizations that intentionally
   // may have user-visible changes to program behavior.

@@ -430,12 +430,12 @@ void FrameState::startBlock(Block* block, BCMarker marker) {
 
   // Reset state if the block has an unprocessed predecessor.
   for (auto const& edge : block->preds()) {
-    auto const pred = edge.inst()->block();
+    auto const pred = edge.from();
     if (!isVisited(pred)) {
       Indent _;
       ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",
              block->id(), pred->id());
-      resetCurrentState(marker);
+      unprocessedPredClear(marker);
       break;
     }
   }
@@ -460,10 +460,17 @@ void FrameState::pauseBlock(Block* block) {
 
 void FrameState::clearBlock(Block* block) {
   auto it = m_snapshots.find(block);
-  if (it != m_snapshots.end()) {
-    ITRACE(4, "Clearing state for B{}\n", block->id());
-    m_snapshots.erase(it);
-  }
+  if (it == m_snapshots.end()) return;
+
+  ITRACE(4, "Clearing state for B{}\n", block->id());
+
+  auto& snap = it->second;
+
+  // Empty the fields that could change further down in the control flow graph.
+  snap.spValue = nullptr;
+  snap.stackDeficit = 0;
+  snap.evalStack = EvalStack();
+  snap.locals = LocalVec(m_locals.size());
 }
 
 FrameState::Snapshot FrameState::createSnapshot() const {
@@ -562,11 +569,9 @@ void FrameState::merge(Snapshot& state) {
         local.value = nullptr;
       }
     }
-    if (local.typeSrc != m_locals[i].typeSrc) {
-      local.typeSrc = TypeSource{};
-    }
-    if (local.value != nullptr && local.typeSrc.isNone()) {
-      local.typeSrc = TypeSource::makeValue(local.value);
+    // merge the typeSrcs
+    for (auto newTypeSrc : m_locals[i].typeSrcs) {
+      local.typeSrcs.insert(newTypeSrc);
     }
 
     local.type = Type::unionOf(local.type, m_locals[i].type);
@@ -688,6 +693,16 @@ void FrameState::clearCurrentState() {
   clearLocals(*this);
 }
 
+void FrameState::unprocessedPredClear(BCMarker marker) {
+  m_spValue        = nullptr;
+  m_marker         = marker;
+  m_spOffset       = marker.spOff();
+  m_curFunc        = marker.func();
+  m_stackDeficit   = 0;
+  m_evalStack      = EvalStack();
+  clearLocals(*this);
+}
+
 void FrameState::resetCurrentState(BCMarker marker) {
   clearCurrentState();
   m_marker   = marker;
@@ -700,9 +715,9 @@ SSATmp* FrameState::localValue(uint32_t id) const {
   return m_locals[id].value;
 }
 
-TypeSource FrameState::localTypeSource(uint32_t id) const {
+TypeSourceSet FrameState::localTypeSources(uint32_t id) const {
   always_assert(id < m_locals.size());
-  return m_locals[id].typeSrc;
+  return m_locals[id].typeSrcs;
 }
 
 Type FrameState::localType(uint32_t id) const {
@@ -714,7 +729,8 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < m_locals.size());
   m_locals[id].value = value;
   m_locals[id].type = value ? value->type() : Type::Gen;
-  m_locals[id].typeSrc = value ? TypeSource::makeValue(value) : TypeSource{};
+  m_locals[id].typeSrcs.clear();
+  if (value) m_locals[id].typeSrcs.insert(TypeSource::makeValue(value));
 }
 
 void FrameState::refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {
@@ -727,19 +743,21 @@ void FrameState::refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {
                      "Bad new type for local {}: {} & {} = {}",
                      id, local.type, type, newType);
   local.type = newType;
-  local.typeSrc = typeSrc;
+  local.typeSrcs.clear();
+  local.typeSrcs.insert(typeSrc);
 }
 
 void FrameState::setLocalType(uint32_t id, Type type) {
   always_assert(id < m_locals.size());
   m_locals[id].value = nullptr;
   m_locals[id].type = type;
-  m_locals[id].typeSrc = TypeSource{};
+  m_locals[id].typeSrcs.clear();
 }
 
 void FrameState::setLocalTypeSource(uint32_t id, TypeSource typeSrc) {
   always_assert(id < m_locals.size());
-  m_locals[id].typeSrc = typeSrc;
+  m_locals[id].typeSrcs.clear();
+  m_locals[id].typeSrcs.insert(typeSrc);
 }
 
 /*
@@ -763,7 +781,8 @@ void FrameState::refineLocalValue(uint32_t id, unsigned inlineIdx,
   auto& local = locs[id];
   local.value = newVal;
   local.type = newVal->type();
-  local.typeSrc = TypeSource::makeValue(newVal);
+  local.typeSrcs.clear();
+  local.typeSrcs.insert(TypeSource::makeValue(newVal));
 }
 
 void FrameState::killLocalForCall(uint32_t id, unsigned inlineIdx,
@@ -779,7 +798,8 @@ void FrameState::updateLocalRefValue(uint32_t id, unsigned inlineIdx,
   assert(local.value == oldRef);
   local.value = newRef;
   local.type  = newRef->type();
-  local.typeSrc = TypeSource::makeValue(newRef);
+  local.typeSrcs.clear();
+  local.typeSrcs.insert(TypeSource::makeValue(newRef));
 }
 
 void FrameState::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {

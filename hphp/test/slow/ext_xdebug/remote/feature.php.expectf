@@ -35,7 +35,7 @@
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_supports_threads" supported="1"><![CDATA[0]]></response>
 (cmd) feature_get -i 0 -n language_version
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_version" supported="1"><![CDATA[3.3.0-dev]]></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="language_version" supported="1"><![CDATA[%s]]></response>
 (cmd) feature_get -i 0 -n max_children
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_get" transaction_id="0" feature_name="max_children" supported="1"><![CDATA[100]]></response>

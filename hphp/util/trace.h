@@ -109,9 +109,11 @@ namespace Trace {
       TM(hhbbc_index)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
+      TM(vasm)          \
       TM(hhir)          \
       TM(hhirTracelets) \
       TM(hhir_dce)      \
+      TM(llvm)          \
       TM(hhir_refcount) \
       TM(inlining)      \
       TM(instancebits)  \
@@ -145,6 +147,7 @@ namespace Trace {
       TM(unwind)        \
       TM(ustubs)        \
       TM(xenon)         \
+      TM(objprof)       \
       TM(xls)           \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \

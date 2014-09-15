@@ -1,4 +1,4 @@
 File "immvector_immutable1.php", line 16, characters 3-7:
-Typing[4006] an object of type ImmVector does not allow array append
+an object of type ImmVector does not allow array append (Typing[4006])
 File "immvector_immutable1.php", line 15, characters 9-27:
 You might want to check this out

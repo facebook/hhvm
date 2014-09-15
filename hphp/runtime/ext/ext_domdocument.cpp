@@ -763,7 +763,7 @@ static Variant dom_parse_document(c_DOMDocument *domdoc, const String& source,
 }
 
 static Variant dom_load_html(c_DOMDocument *domdoc, const String& source,
-                             int mode) {
+                             int options, int mode) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
@@ -776,6 +776,9 @@ static Variant dom_load_html(c_DOMDocument *domdoc, const String& source,
   }
   if (!ctxt) {
     return false;
+  }
+  if (options) {
+    htmlCtxtUseOptions(ctxt, options);
   }
   ctxt->vctxt.error = php_libxml_ctx_error;
   ctxt->vctxt.warning = php_libxml_ctx_warning;
@@ -3378,14 +3381,16 @@ Variant c_DOMDocument::t_load(const String& filename,
   return dom_parse_document(this, filename, options, DOM_LOAD_FILE);
 }
 
-Variant c_DOMDocument::t_loadhtml(const String& source) {
+Variant c_DOMDocument::t_loadhtml(const String& source,
+                                  int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  return dom_load_html(this, source, DOM_LOAD_STRING);
+  return dom_load_html(this, source, options, DOM_LOAD_STRING);
 }
 
-Variant c_DOMDocument::t_loadhtmlfile(const String& filename) {
+Variant c_DOMDocument::t_loadhtmlfile(const String& filename,
+                                      int64_t options /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
-  return dom_load_html(this, filename, DOM_LOAD_FILE);
+  return dom_load_html(this, filename, options, DOM_LOAD_FILE);
 }
 
 Variant c_DOMDocument::t_loadxml(const String& source,

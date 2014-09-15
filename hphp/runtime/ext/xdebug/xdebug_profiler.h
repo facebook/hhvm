@@ -62,7 +62,7 @@ public:
     return
       XDEBUG_GLOBAL(ProfilerEnable) ||
       (XDEBUG_GLOBAL(ProfilerEnableTrigger) &&
-       XDebugUtils::isTriggerSet("XDEBUG_TRACE"));
+       XDebugUtils::isTriggerSet("XDEBUG_PROFILE"));
   }
 
   // Returns true if tracing is required by the extension settings or the

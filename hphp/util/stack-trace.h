@@ -153,8 +153,8 @@ public:
   /**
    * Log stacktrace into the given file.
    */
-  void log(const char *errorType, const char * fname, const char *pid,
-           const char *buildId, int debuggerCount) const;
+  void log(const char *errorType, int fd, const char *buildId,
+           int debuggerCount) const;
 
   /**
    * Add extra information to log together with a crash stacktrace log.

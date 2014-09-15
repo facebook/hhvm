@@ -16,8 +16,6 @@
 */
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <netinet/in.h>
 #include <netdb.h>
 #include <poll.h>

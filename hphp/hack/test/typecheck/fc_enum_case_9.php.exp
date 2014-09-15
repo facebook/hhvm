@@ -1,4 +1,4 @@
 File "fc_enum_case_9.php", line 13, characters 11-12:
-Typing[4019] Switch statement nonexhaustive; the following cases are missing: BAZ, BAR
+Switch statement nonexhaustive; the following cases are missing: BAZ, BAR (Typing[4019])
 File "fc_enum_case_9.php", line 3, characters 6-8:
 Enum declared here

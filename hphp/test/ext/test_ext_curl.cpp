@@ -15,6 +15,9 @@
 */
 
 #include "hphp/test/ext/test_ext_curl.h"
+
+#include "folly/Conv.h"
+
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
@@ -50,8 +53,7 @@ public:
 static int s_server_port = 0;
 
 static std::string get_request_uri() {
-  return "http://localhost:" + boost::lexical_cast<string>(s_server_port) +
-    "/request";
+  return "http://localhost:" + folly::to<string>(s_server_port) + "/request";
 }
 
 static ServerPtr runServer() {

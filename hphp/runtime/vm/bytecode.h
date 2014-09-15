@@ -211,11 +211,8 @@ struct ActRec {
     // dependency.
     TypedValue _dummyA;
     struct {
-      union {
-        ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-        uint64_t m_savedRbp;   // TODO: Remove. Used by debugger macros.
-      };
-      uint64_t m_savedRip;     // In-TC address to return to.
+      ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
+      uint64_t m_savedRip;   // In-TC address to return to.
     };
   };
   union {
@@ -478,8 +475,9 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
-inline TypedValue* arReturn(ActRec* ar, const Variant& value) {
+inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
   ar->m_r = *value.asTypedValue();
+  tvWriteNull(value.asTypedValue());
   return &ar->m_r;
 }
 
@@ -570,6 +568,7 @@ class Stack {
                       // m_elms.
 
 public:
+  bool isAllocated() { return m_elms != nullptr; }
   void* getStackLowAddress() const { return m_elms; }
   void* getStackHighAddress() const { return m_base; }
   bool isValidAddress(uintptr_t v) {

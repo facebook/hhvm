@@ -89,6 +89,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -562,24 +563,21 @@ Stack::requestInit() {
 
 void
 Stack::requestExit() {
-  if (m_elms != nullptr) {
-    m_elms = nullptr;
-  }
+  m_elms = nullptr;
 }
 
 void flush_evaluation_stack() {
-  if (g_context.isNull()) {
+  if (vmStack().isAllocated()) {
     // For RPCRequestHandler threads, the ExecutionContext can stay
-    // alive across requests, and hold references to the VM stack, and
-    // the RDS needs to keep track of which classes are live etc So
-    // only flush the VM stack and the RDS if the execution context is
-    // dead.
-
-    if (!t_se.isNull()) {
-      t_se->flush();
-    }
-    RDS::flush();
+    // alive across requests, but its always ok to kill it between
+    // requests, so do so now
+    RPCRequestHandler::cleanupState();
   }
+
+  if (!t_se.isNull()) {
+    t_se->flush();
+  }
+  RDS::flush();
 }
 
 static std::string toStringElm(const TypedValue* tv) {
@@ -4556,9 +4554,9 @@ OPTBLD_INLINE void ExecutionContext::iopAGetC(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopAGetL(IOP_ARGS) {
   NEXT();
   DECODE_LA(local);
-  TypedValue* top = vmStack().allocTV();
+  vmStack().pushUninit();
   TypedValue* fr = frame_local_inner(vmfp(), local);
-  lookupClsRef(fr, top);
+  lookupClsRef(fr, vmStack().top());
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
@@ -5668,9 +5666,18 @@ void ExecutionContext::fPushObjMethodImpl(
   if (res == LookupResult::MagicCallFound) {
     ar->setInvName(name);
   } else {
-    ar->setVarEnv(NULL);
+    ar->setVarEnv(nullptr);
     decRefStr(name);
   }
+}
+
+void ExecutionContext::fPushNullObjMethod(int numArgs) {
+  assert(SystemLib::s_nullFunc);
+  ActRec* ar = vmStack().allocA();
+  ar->m_func = SystemLib::s_nullFunc;
+  ar->setThis(nullptr);
+  ar->initNumArgs(numArgs);
+  ar->setVarEnv(nullptr);
 }
 
 static void throw_call_non_object(const char* methodName,
@@ -5689,14 +5696,21 @@ static void throw_call_non_object(const char* methodName,
 OPTBLD_INLINE void ExecutionContext::iopFPushObjMethod(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
+  DECODE_OA(ObjMethodOp, op);
   Cell* c1 = vmStack().topC(); // Method name.
   if (!IS_STRING_TYPE(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
   Cell* c2 = vmStack().indC(1); // Object.
   if (c2->m_type != KindOfObject) {
-    throw_call_non_object(c1->m_data.pstr->data(),
-                          getDataTypeString(c2->m_type).get()->data());
+    if (UNLIKELY(op == ObjMethodOp::NullThrows || !IS_NULL_TYPE(c2->m_type))) {
+      throw_call_non_object(c1->m_data.pstr->data(),
+                            getDataTypeString(c2->m_type).get()->data());
+    }
+    vmStack().popC();
+    vmStack().popC();
+    fPushNullObjMethod(numArgs);
+    return;
   }
   ObjectData* obj = c2->m_data.pobj;
   Class* cls = obj->getVMClass();
@@ -5710,10 +5724,16 @@ OPTBLD_INLINE void ExecutionContext::iopFPushObjMethodD(IOP_ARGS) {
   NEXT();
   DECODE_IVA(numArgs);
   DECODE_LITSTR(name);
+  DECODE_OA(ObjMethodOp, op);
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject) {
-    throw_call_non_object(name->data(),
-                          getDataTypeString(c1->m_type).get()->data());
+    if (UNLIKELY(op == ObjMethodOp::NullThrows || !IS_NULL_TYPE(c1->m_type))) {
+      throw_call_non_object(name->data(),
+                            getDataTypeString(c1->m_type).get()->data());
+    }
+    vmStack().popC();
+    fPushNullObjMethod(numArgs);
+    return;
   }
   ObjectData* obj = c1->m_data.pobj;
   Class* cls = obj->getVMClass();

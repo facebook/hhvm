@@ -171,7 +171,7 @@ struct Class : AtomicCountable {
      */
     static PropInitVec* allocWithSmartAllocator(const PropInitVec& src);
 
-    static size_t dataOff() {
+    static constexpr size_t dataOff() {
       return offsetof(PropInitVec, m_data);
     }
 
@@ -345,7 +345,7 @@ public:
    * Whether we can load this class once and persist it across requests.
    *
    * Persistence is possible when a Class is uniquely named and is defined in a
-   * psuedomain that has no side-effects (except other persistent definitions).
+   * pseudomain that has no side-effects (except other persistent definitions).
    *
    * A class which satisfies isPersistent() may not actually /be/ persistent,
    * if we had to allocate its RDS handle before we loaded the class.

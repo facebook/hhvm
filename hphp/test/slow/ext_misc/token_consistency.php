@@ -52,6 +52,7 @@ $expected_exceptions = array(
   'T_LAMBDA_ARROW' => true,
   'T_LAMBDA_OP' => true,
   'T_LAMBDA_CP' => true,
+  'T_NULLSAFE_OBJECT_OPERATOR' => true,
   'T_UNRESOLVED_OP' => true,
 );
 

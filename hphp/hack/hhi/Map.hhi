@@ -76,6 +76,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function toImmMap(): ImmMap<Tk, Tv>;
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
+  public function immutable(): ImmMap<Tk, Tv>;
   public function lazy(): KeyedIterable<Tk, Tv>;
   public function values(): Vector<Tv>;
   public function keys(): Vector<Tk>;

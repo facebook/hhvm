@@ -63,8 +63,8 @@ function class_meth(string $cls_name, string $meth_name); // becomes:
  *
  * Example:
  *   class C {
- *     private function isOdd(int $i): bool { return $i % 2 == 1; }
- *     private function filter(Vector<int> $data): Vector<int> {
+ *     public function isOdd(int $i): bool { return $i % 2 == 1; }
+ *     public function filter(Vector<int> $data): Vector<int> {
  *       $callback = inst_meth($this, 'isOdd');
  *       return $data->filter($callback);
  *     }

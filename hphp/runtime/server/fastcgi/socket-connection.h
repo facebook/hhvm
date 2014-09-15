@@ -27,7 +27,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SocketConnection : public facebook::proxygen::ManagedConnection {
+class SocketConnection : public ::proxygen::ManagedConnection {
 public:
   SocketConnection(
     apache::thrift::async::TAsyncTransport::UniquePtr sock,

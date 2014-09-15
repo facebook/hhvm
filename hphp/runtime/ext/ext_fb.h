@@ -74,7 +74,14 @@ extern const int64_t k_XHPROF_FLAGS_I_HAVE_INFINITE_MEMORY;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum FBCompactSerializeBehavior {
+  Base,
+  MemoizeParam,
+};
+
 Variant fb_unserialize(const char* str, int len, VRefParam success);
+String fb_compact_serialize(const Variant& thing,
+                            FBCompactSerializeBehavior behavior);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
                                VRefParam errcode = null_variant);

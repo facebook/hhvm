@@ -27,20 +27,12 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-NameValueTable::NameValueTable()
-  : m_fp(nullptr)
-  , m_table(nullptr)
-  , m_tabMask(0)
-  , m_elms(0)
-{
+NameValueTable::NameValueTable() {
   allocate(folly::nextPowTwo(RuntimeOption::EvalVMInitialGlobalTableSize));
 }
 
 NameValueTable::NameValueTable(ActRec* fp)
   : m_fp(fp)
-  , m_table(nullptr)
-  , m_tabMask(0)
-  , m_elms(0)
 {
   assert(m_fp);
   const auto func = m_fp->m_func;
@@ -64,8 +56,6 @@ NameValueTable::NameValueTable(ActRec* fp)
 
 NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
   : m_fp(fp)
-  , m_table(nullptr)
-  , m_tabMask(0)
   , m_elms(nvTable.m_elms)
 {
   allocate(nvTable.m_tabMask + 1);
@@ -99,7 +89,7 @@ NameValueTable::~NameValueTable() {
       }
     }
   }
-  free(m_table);
+  smart_free(m_table);
 }
 
 void NameValueTable::suspend(const ActRec* oldFP, ActRec* newFP) {
@@ -155,7 +145,7 @@ void NameValueTable::detach(ActRec* fp) {
 void NameValueTable::leak() {
   m_elms = 0;
   m_tabMask = 0;
-  free(m_table);
+  smart_free(m_table);
   m_table = nullptr;
 }
 
@@ -218,12 +208,12 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(calloc(sizeof(Elm), newCapac));
+  m_table = static_cast<Elm*>(smart_calloc(sizeof(Elm), newCapac));
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {
     rehash(oldTab, oldMask);
-    free(oldTab);
+    smart_free(oldTab);
   }
 }
 

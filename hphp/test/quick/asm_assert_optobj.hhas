@@ -8,7 +8,7 @@
   PopC
 
   CGetL $object
-  FPushObjMethodD 1 "main"
+  FPushObjMethodD 1 "main" NullThrows
    FPushCtorD 0 "Foo"
    FCall 0
    PopR
@@ -17,7 +17,7 @@
   PopR
 
   CGetL $object
-  FPushObjMethodD 1 "main"
+  FPushObjMethodD 1 "main" NullThrows
    Null
    FPassC 0
   FCall 1

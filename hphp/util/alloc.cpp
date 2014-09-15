@@ -414,12 +414,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
-#ifdef USE_JEMALLOC_MALLOCX
   void* ptr = mallocx(size, MALLOCX_ARENA(low_arena));
-#else
-  void* ptr = nullptr;
-  allocm(&ptr, nullptr, size, ALLOCM_ARENA(low_arena));
-#endif
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
 }

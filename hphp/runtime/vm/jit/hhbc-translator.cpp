@@ -2224,12 +2224,17 @@ void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
  *
  * 1. Objects compared with strings may involve calling a user-defined
  * __toString function.
- * 2. Array comparisons can throw if recursion is detected.
+ *
+ * 2. Objects compared with ints or doubles raises a notice when the object is
+ * converted to a number.
+ *
+ * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
-  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
-         (t0.maybe(Type::Str) && t1.maybe(Type::Obj)) ||
+  auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
+  return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
+         (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
 }
@@ -2655,6 +2660,7 @@ void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {
 
 void HhbcTranslator::emitInitSProps(const Class* cls, Block* catchBlock) {
   cls->initSPropHandles();
+  if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
   m_irb->ifThen(
     [&](Block* taken) {
       gen(CheckInitSProps, taken, ClassData(cls));
@@ -3040,7 +3046,8 @@ void HhbcTranslator::fpushObjMethodUnknown(SSATmp* obj,
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
-                                         int32_t methodNameStrId) {
+                                         int32_t methodNameStrId,
+                                         unsigned char subop) {
   auto const obj = popC();
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
   auto const methodName = lookupStringId(methodNameStrId);
@@ -3324,7 +3331,7 @@ const StaticString
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
-  auto const val = top(Type::Gen, 1);
+  auto const val = topC(1);
 
   // Bail if we're trying to do a recursive count()
   if (!mode->isConst(0)) return nullptr;
@@ -4347,10 +4354,13 @@ static uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   return retval;
 }
 
-void HhbcTranslator::guardRefs(int64_t entryArDelta,
-                               const std::vector<bool>& mask,
-                               const std::vector<bool>& vals) {
-  int32_t actRecOff = cellsToBytes(entryArDelta);
+void HhbcTranslator::refCheckHelper(int64_t entryArDelta,
+                                    const std::vector<bool>& mask,
+                                    const std::vector<bool>& vals,
+                                    Offset dest /* = -1 */) {
+   int32_t actRecOff = cellsToBytes(entryArDelta +
+                                    m_irb->stackDeficit() -
+                                    m_irb->evalStack().size());
   SSATmp* funcPtr = gen(LdARFuncPtr, m_irb->sp(), cns(actRecOff));
   SSATmp* nParams = nullptr;
 
@@ -4369,15 +4379,26 @@ void HhbcTranslator::guardRefs(int64_t entryArDelta,
     }
 
     uint64_t vals64 = packBitVec(vals, i);
-    gen(
-      GuardRefs,
-      funcPtr,
-      nParams,
-      cns(i),
-      cns(mask64),
-      cns(vals64)
-    );
+    if (dest == -1) {
+      gen(GuardRefs, funcPtr, nParams, cns(i), cns(mask64), cns(vals64));
+    } else {
+      gen(CheckRefs, makeExit(dest), funcPtr, nParams, cns(i),
+          cns(mask64), cns(vals64));
+    }
   }
+}
+
+void HhbcTranslator::guardRefs(int64_t entryArDelta,
+                               const std::vector<bool>& mask,
+                               const std::vector<bool>& vals) {
+  refCheckHelper(entryArDelta, mask, vals);
+}
+
+void HhbcTranslator::checkRefs(int64_t entryArDelta,
+                               const std::vector<bool>& mask,
+                               const std::vector<bool>& vals,
+                               Offset dest) {
+  refCheckHelper(entryArDelta, mask, vals, dest);
 }
 
 void HhbcTranslator::endGuards() {

@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-static const Trace::Module TRACEMOD = Trace::pgo;
+TRACE_SET_MOD(pgo);
 
 /**
  * Remove from pConds the elements that correspond to stack positions
@@ -87,17 +87,6 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       FTRACE(2, "selectHotTrace: breaking region at Translation {} "
              "because of debugger is attached\n", tid);
       break;
-    }
-
-    // Break if block is not the first and requires reffiness checks.
-    // Task #2589970: fix translateRegion to support mid-region reffiness checks
-    if (prevId != kInvalidTransID) {
-      auto nRefDeps = blockRegion->entry()->reffinessPreds().size();
-      if (nRefDeps > 0) {
-        FTRACE(2, "selectHotTrace: breaking region because of refDeps ({}) at "
-               "Translation {}\n", nRefDeps, tid);
-        break;
-      }
     }
 
     // Break if block is not the first and it corresponds to the main

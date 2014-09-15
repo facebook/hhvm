@@ -50,7 +50,6 @@ static int parse_arg_object_to_string(zval **arg, const char **p, int *pl, int t
   HPHP::StringData *sd = tvCastToString((*arg)->tv());
   *p = sd->data();
   *pl = sd->size();
-  zval_ptr_dtor(arg);
   return sd->empty();
 }
 

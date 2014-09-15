@@ -1450,7 +1450,8 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
+template <class JmpFn>
+void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
   assert(inst->numSrcs() == 5);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
@@ -1480,9 +1481,6 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
   uint64_t vals64 = vals64Tmp->intVal();
   assert(vals64Reg.IsValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
-
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-  auto const destSR = mcg->tx().getSrcRec(destSK);
 
   auto thenBody = [&] {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -1519,7 +1517,7 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
     } else {
       m_as.  Cmp  (bitsReg, vals64);
     }
-    destSR->emitFallbackJump(m_mainCode, cond);
+    doJcc(cond);
   };
 
   if (firstBitNum == 0) {
@@ -1537,17 +1535,33 @@ void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
       // are refs, or all params are non-refs, so if vals64
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
-      destSR->emitFallbackJump(m_mainCode, CC_LE);
+      doJcc(CC_LE);
       thenBody();
     } else {
       ifThenElse(m_as, vixl::gt, thenBody, /* else */ [&] {
           //   If not special builtin...
           m_as.  Ldr  (rAsm, funcPtrReg[Func::attrsOff()]);
           m_as.  Tst  (rAsm, AttrVariadicByRef);
-          destSR->emitFallbackJump(m_mainCode, vals64 ? CC_Z : CC_NZ);
+          doJcc(vals64 ? CC_Z : CC_NZ);
         });
     }
   }
+}
+
+void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
+  emitReffinessTest(inst,
+    [&](ConditionCode cc) {
+      auto const destSK = SrcKey(curFunc(), inst->marker().bcOff(), resumed());
+      auto const destSR = mcg->tx().getSrcRec(destSK);
+      destSR->emitFallbackJump(m_mainCode, cc);
+    });
+}
+
+void CodeGenerator::cgCheckRefs(IRInstruction* inst) {
+  emitReffinessTest(inst,
+    [&](ConditionCode cc) {
+      emitJumpToBlock(m_mainCode, inst->taken(), cc, m_state);
+    });
 }
 
 //////////////////////////////////////////////////////////////////////

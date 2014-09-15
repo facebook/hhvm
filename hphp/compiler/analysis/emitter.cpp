@@ -3510,6 +3510,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         switch (op) {
           case T_INC:
           case T_DEC: {
+            // $this++ is a no-op
+            if (auto var = dynamic_pointer_cast<SimpleVariable>(exp)) {
+              if (var->isThis()) break;
+            }
+
             auto const cop = [&] {
               if (op == T_INC) {
                 if (RuntimeOption::IntsOverflowToInts) {
@@ -4364,7 +4369,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             // the case.
             StringData* nameLiteral = makeStaticString(methStr);
             fpiStart = m_ue.bcPos();
-            e.FPushObjMethodD(numParams, nameLiteral);
+            e.FPushObjMethodD(
+              numParams,
+              nameLiteral,
+              om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+            );
             useDirectForm = true;
           }
         }
@@ -4374,7 +4383,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           visit(methName);
           emitConvertToCell(e);
           fpiStart = m_ue.bcPos();
-          e.FPushObjMethod(numParams);
+          e.FPushObjMethod(
+            numParams,
+            om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+          );
         }
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
@@ -4796,7 +4808,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         emitConvertToCell(e);
         auto fpiStart = m_ue.bcPos();
         StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(numArgs+1, executeQuery);
+        e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           e.String(query->getQueryString());
@@ -4839,7 +4851,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
   auto const nameLit = makeStaticString(name);
   auto const fpiStart = m_ue.bcPos();
-  e.FPushObjMethodD(0, nameLit);
+  e.FPushObjMethodD(0, nameLit, ObjMethodOp::NullThrows);
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
   }
@@ -6310,12 +6322,16 @@ void EmitterVisitor::emitPostponedMeths() {
         PreClassEmitter *pce = fe->pce();
 
         // Add a property to hold the memoized results
-        TypedValue tvNull;
-        tvWriteNull(&tvNull);
+        TypedValue tvProp;
+        if (!meth->getParams() || meth->getParams()->getCount() == 0) {
+          tvWriteNull(&tvProp);
+        } else {
+          tvProp = make_tv<KindOfArray>(staticEmptyArray());
+        }
         Attr attrs = AttrPrivate;
         attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
         pce->addProperty(propName, attrs, nullptr, nullptr,
-                         &tvNull, RepoAuthType{});
+                         &tvProp, RepoAuthType{});
 
         // Rename the method and create a new method with the original name
         pce->renameMethod(originalName, rewrittenName);
@@ -6631,18 +6647,22 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
 void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
-  if (funcScope->needsLocalThis() && !funcScope->isStatic()) {
+  if (!m_curFunc->isMemoizeWrapper &&
+      funcScope->needsLocalThis() && !funcScope->isStatic()) {
     assert(!m_curFunc->top);
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
     emitVirtualLocal(thisId);
     e.InitThisLoc(thisId);
   }
-  for (uint i = 0; i < m_curFunc->params.size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
-    if (!tc.hasConstraint()) continue;
-    emitVirtualLocal(i);
-    e.VerifyParamType(i);
+
+  if (!m_curFunc->isMemoizeImpl) {
+    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+      const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
+      if (!tc.hasConstraint()) continue;
+      emitVirtualLocal(i);
+      e.VerifyParamType(i);
+    }
   }
 
   if (funcScope->isAbstract()) {
@@ -6683,7 +6703,9 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   }
 
   FuncFinisher ff(this, e, m_curFunc);
-  emitMethodDVInitializers(e, meth, topOfBody);
+  if (!m_curFunc->isMemoizeImpl) {
+    emitMethodDVInitializers(e, meth, topOfBody);
+  }
 }
 
 void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
@@ -6709,10 +6731,12 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
   if (hasOptional) e.JmpNS(topOfBody);
 }
 
-void EmitterVisitor::emitMemoizeProp(Emitter &e,
+void EmitterVisitor::emitMemoizeProp(Emitter& e,
                                      MethodStatementPtr meth,
-                                     const StringData *propName,
-                                     int localID) {
+                                     const StringData* propName,
+                                     Id localID,
+                                     const std::vector<Id>& paramIDs,
+                                     uint numParams) {
   if (meth->is(Statement::KindOfFunctionStatement)) {
     emitVirtualLocal(localID);
   } else if (meth->getFunctionScope()->isStatic()) {
@@ -6727,21 +6751,28 @@ void EmitterVisitor::emitMemoizeProp(Emitter &e,
     m_evalStack.setString(propName);
     markProp(e);
   }
+
+  assert(numParams <= paramIDs.size());
+  for (uint i = 0; i < numParams; i++) {
+    emitVirtualLocal(paramIDs[i]);
+    markElem(e);
+  }
 }
 
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
-                                       const StringData *methName,
-                                       const StringData *propName) {
-  if (meth->getParams() && meth->getParams()->getCount() != 0) {
-    throw IncludeTimeFatalException(meth,
-      "<<__Memoize>> currently only supports methods with zero args");
-  }
+                                       const StringData* methName,
+                                       const StringData* propName) {
   if (meth->getFunctionScope()->isRefReturn()) {
     throw IncludeTimeFatalException(meth,
-      "<<__Memoize>> cannot be used on methods that return by reference");
+      "<<__Memoize>> cannot be used on functions that return by reference");
+  }
+  if (meth->getFunctionScope()->allowsVariableArguments()) {
+    throw IncludeTimeFatalException(meth,
+      "<<__Memoize>> cannot be used on functions with variable arguments");
   }
 
   bool isFunc = meth->is(Statement::KindOfFunctionStatement);
+  int numParams = m_curFunc->params.size();
   int staticLocalID = 0;
 
   auto region = createRegion(meth, Region::Kind::FuncBody);
@@ -6754,46 +6785,147 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   emitMethodPrologue(e, meth);
 
-  // If the cache var is non-null return it
+  // Function start
   if (isFunc) {
+    // static ${propName} = {numParams > 0 ? array() : null};
     staticLocalID = m_curFunc->allocUnnamedLocal();
     emitVirtualLocal(staticLocalID);
-    e.Null();
+    if (numParams == 0) {
+      e.Null();
+    } else {
+      e.Array(staticEmptyArray());
+    }
     e.StaticLocInit(staticLocalID, propName);
+  } else if (!meth->getFunctionScope()->isStatic()) {
+    e.CheckThis();
+  }
+
+  std::vector<Id> paramNumToLocalID(numParams);
+
+  if (numParams == 0) {
+    // if (${propName} !== null)
+    emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID, 0);
+    emitIsType(e, IsTypeOp::Null);
+    e.JmpNZ(cacheMiss);
   } else {
-    if (!meth->getFunctionScope()->isStatic()) {
-      e.CheckThis();
+    auto serMethName = makeStaticString("HH\\serialize_memoize_param");
+
+    // Serialize all the params into something we can use for the key
+    for (int i = 0; i < numParams; i++) {
+      if (m_curFunc->params[i].byRef) {
+        throw IncludeTimeFatalException(meth,
+          "<<__Memoize>> cannot be used on functions with args passed by "
+          "reference");
+      }
+
+      const TypeConstraint &tc = m_curFunc->params[i].typeConstraint;
+      bool blessedType =
+        tc.underlyingDataType() == DataType::KindOfBoolean ||
+        tc.underlyingDataType() == DataType::KindOfInt64 ||
+        (tc.underlyingDataType() == DataType::KindOfString && !tc.isNullable());
+      blessedType &= tc.hasConstraint() && tc.isPrecise() && !tc.isSoft();
+
+      if (blessedType) {
+        paramNumToLocalID[i] = i;
+        continue;
+      }
+
+      // We don't know statically that the param is useable as a key. So:
+      //  1: Check if it's an int. If so, use it directly
+      //  2: Otherwise, call the serialization function
+      //  3: In either case, store the result in a new local
+      Label notInt, storeLocal;
+      paramNumToLocalID[i] = m_curFunc->allocUnnamedLocal();
+
+      // $valN = is_int($paramN) ?
+      //   $paramN : HH\serialize_memoize_param($paramN);
+      emitVirtualLocal(paramNumToLocalID[i]);
+      emitVirtualLocal(i);
+      emitIsType(e, IsTypeOp::Int);
+      e.JmpZ(notInt);
+
+      emitVirtualLocal(i);
+      emitCGet(e);
+      e.Jmp(storeLocal);
+
+      notInt.set(e);
+      auto fpiStart = m_ue.bcPos();
+      e.FPushFuncD(1, serMethName);
+      {
+        FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+        emitVirtualLocal(i);
+        emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+      }
+      e.FCall(1);
+      emitConvertToCell(e);
+
+      storeLocal.set(e);
+      emitSet(e);
+      emitPop(e);
+    }
+
+    // isset returns false for null values. Given that:
+    //  - If we know that we can't return null, we can do a single isset check
+    //  - If we could return null, but there's only one arg, we can do a single
+    //    array_key_exists() check
+    //  - Otherwise we need an isset check to make sure we can dereference the
+    //    first N - 1 args, and then an array_key_exists() check
+    bool noRetNull =
+      m_curFunc->retTypeConstraint.hasConstraint() &&
+      !m_curFunc->retTypeConstraint.isSoft() &&
+      !m_curFunc->retTypeConstraint.isNullable();
+
+    if (numParams > 1 || noRetNull) {
+      // if (isset(${propName}[$param1]...[noRetNull ? $paramN : $paramN-1]))
+      emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
+                      noRetNull ? numParams : numParams - 1);
+      emitIsset(e);
+      e.JmpZ(cacheMiss);
+    }
+
+    if (!noRetNull) {
+      // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1]))
+      emitVirtualLocal(paramNumToLocalID[numParams - 1]);
+      emitCGet(e);
+      emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
+                      numParams - 1);
+      emitCGet(e);
+      e.AKExists();
+      e.JmpZ(cacheMiss);
     }
   }
 
-  emitMemoizeProp(e, meth, propName, staticLocalID);
-  emitIsType(e, IsTypeOp::Null);
-  e.JmpNZ(cacheMiss);
-
-  emitMemoizeProp(e, meth, propName, staticLocalID);
+  // return $<propName>[$param1][...][$paramN]
+  emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
+                  numParams);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, meth, propName, staticLocalID);
+  emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
+                  numParams);
+  auto fpiStart = m_ue.bcPos();
   if (isFunc) {
-    auto fpiStart = m_ue.bcPos();
-    e.FPushFuncD(0, methName);
-    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
-    e.FCall(0);
-    emitConvertToCell(e);
+    e.FPushFuncD(numParams, methName);
   } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
-    auto fpiStart = m_ue.bcPos();
-    e.FPushClsMethodD(0, methName, m_curFunc->pce()->name());
-    { FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart); }
-    e.FCall(0);
-    emitConvertToCell(e);
+    e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
   } else {
     e.This();
-    emitConstMethodCallNoParams(e, methName->toCppString());
+    fpiStart = m_ue.bcPos();
+    e.FPushObjMethodD(numParams, methName, ObjMethodOp::NullThrows);
   }
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+      emitVirtualLocal(i);
+      emitFPass(e, i, PassByRefKind::ErrorOnCell);
+    }
+  }
+  e.FCall(numParams);
+  emitConvertToCell(e);
+
   emitSet(e);
   e.RetC();
 
@@ -6982,7 +7114,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     }
   } else if (!node->getOriginalClass() ||
              node->getOriginalClass()->isTrait()) {
-    // In a trait or psuedo-main, we can't resolve self:: or parent::
+    // In a trait or pseudo-main, we can't resolve self:: or parent::
     // yet, so we emit special instructions that do those lookups.
     if (node->isParent()) {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);

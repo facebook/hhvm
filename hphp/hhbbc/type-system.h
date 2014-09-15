@@ -378,8 +378,8 @@ private:
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
-  friend Type promote_emptyish(Type, Type);
   friend Type widening_union(const Type&, const Type&);
+  friend Type promote_emptyish(Type, Type);
   friend Type opt(Type);
   friend Type unopt(Type);
   friend bool is_opt(Type);
@@ -394,9 +394,7 @@ private:
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
-  friend Type unspecialize(const Type&t) {
-    return Type { t.m_bits };
-  }
+
 private:
   union Data {
     Data() {}
@@ -749,6 +747,18 @@ Type union_of(Type a, Type b);
  * analyze.cpp.
  */
 Type widening_union(const Type& a, const Type& b);
+
+/*
+ * A sort of union operation that also attempts to remove "emptyish" types from
+ * union_of(a, b).  This is useful for promoting emptyish types (sempty(),
+ * false, and null) to stdClass or to arrays, in member instructions.
+ *
+ * This function currently doesn't give specific guarantees about exactly when
+ * the emptyish types will not be part of the return type (informally it only
+ * happens in the "easy" cases right now), so you should not use it in
+ * situations where union_of(a, b) would not also be correct.
+ */
+Type promote_emptyish(Type a, Type b);
 
 /*
  * Returns the smallest type that `a' is a subtype of, from the

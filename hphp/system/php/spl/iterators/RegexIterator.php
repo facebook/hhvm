@@ -11,6 +11,7 @@ class RegexIterator extends FilterIterator
   const REPLACE = 4;
 
   const USE_KEY = 1;
+  const INVERT_MATCH = 2;
 
 
   /* Properties */
@@ -109,48 +110,59 @@ class RegexIterator extends FilterIterator
 
     switch ($this->mode) {
       case self::MATCH:
-        return (preg_match($this->regex, $subject, $matches,
+        $ret = (preg_match($this->regex, $subject, $matches,
                            $this->pregFlags) > 0);
+        break;
       case self::GET_MATCH:
         $this->current = array();
 
-        return (preg_match($this->regex, $subject, $this->current,
+        $ret = (preg_match($this->regex, $subject, $this->current,
                            $this->pregFlags) > 0);
-
+        break;
       case self::ALL_MATCHES:
         $this->current = array();
 
         preg_match_all($this->regex, $subject, $this->current,
                        $this->pregFlags);
 
-        return count($this->current) > 0;
+        $ret = count($this->current) > 0;
+        break;
       case self::SPLIT:
         $this->current = preg_split($this->regex, $subject, null,
                                     $this->pregFlags);
 
-        return ($this->current && count($this->current) > 1);
-
+        $ret = ($this->current && count($this->current) > 1);
+        break;
       case self::REPLACE:
         $replace_count = 0;
         $result = preg_replace($this->regex, $this->replacement,
                                $subject, -1, $replace_count);
 
         if ($result === null || $replace_count == 0) {
-          return false;
+          $ret = false;
+          break;
         }
 
         if ($useKey) {
           $this->key = $result;
 
-          return true;
+          $ret = true;
+          break;
         }
 
         $this->current = $result;
 
-        return true;
+        $ret = true;
+        break;
+      default:
+        $ret = false;
+        break;
     }
-
-    return false;
+    if ($this->flags & self::INVERT_MATCH) {
+      return !$ret;
+    } else {
+      return $ret;
+    }
   }
 
   /**

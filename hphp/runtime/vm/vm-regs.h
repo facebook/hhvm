@@ -65,8 +65,6 @@ inline bool vmRegStateIsDirty() {
   return tl_regState == VMRegState::DIRTY;
 }
 
-void syncVMRegs();
-
 inline VMRegs& vmRegsUnsafe() {
   return RDS::header()->vmRegs;
 }

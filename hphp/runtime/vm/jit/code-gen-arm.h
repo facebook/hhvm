@@ -102,6 +102,9 @@ struct CodeGenerator : public jit::CodeGenerator {
   void emitDecRefStaticType(Type type, vixl::Register reg);
   void emitDecRefMem(Type type, vixl::Register baseReg, int offset);
 
+  template <class JmpFn>
+  void emitReffinessTest(IRInstruction* inst, JmpFn doJcc);
+
   template<class Loc, class JmpFn>
   void emitTypeTest(Type type, vixl::Register typeReg, Loc dataSrc,
                     JmpFn doJcc);

@@ -90,7 +90,9 @@ const std::string ParameterExpression::getTypeHintDisplayName() const {
       case 4: strip = !strcasecmp(stripped, "bool"); break;
       case 5: strip = !strcasecmp(stripped, "float"); break;
       case 6: strip = !strcasecmp(stripped, "string"); break;
-      case 8: strip = !strcasecmp(stripped, "resource"); break;
+      case 8: strip = (!strcasecmp(stripped, "resource") ||
+                       !strcasecmp(stripped, "arraykey"));
+              break;
       default:
         break;
     }
@@ -290,6 +292,7 @@ void ParameterExpression::compatibleDefault() {
     case KindOfInt64:
       compat = (!strcasecmp(hint, "HH\\int") ||
                 !strcasecmp(hint, "HH\\num") ||
+                !strcasecmp(hint, "HH\\arraykey") ||
                 interface_supports_int(hint));
       break;
     case KindOfDouble:
@@ -300,6 +303,7 @@ void ParameterExpression::compatibleDefault() {
     case KindOfString:  /* fall through */
     case KindOfStaticString:
       compat = (!strcasecmp(hint, "HH\\string") ||
+                !strcasecmp(hint, "HH\\arraykey") ||
                 interface_supports_string(hint));
       break;
     case KindOfArray:

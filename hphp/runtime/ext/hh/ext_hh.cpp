@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/ext/ext_fb.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,12 +52,18 @@ bool HHVM_FUNCTION(could_include, const String& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */) != nullptr;
 }
 
+String HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
+  return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);
+}
+
 static class HHExtension : public Extension {
  public:
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   virtual void moduleInit() {
     HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
+    HHVM_NAMED_FE(HH\\serialize_memoize_param,
+                  HHVM_FN(serialize_memoize_param));
     loadSystemlib();
   }
 } s_hh_extension;

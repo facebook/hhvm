@@ -69,6 +69,7 @@ public:
 
   static const KindOf KindOfInteger = (KindOf)(KindOfInt64 | KindOfInt32);
   static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInteger);
+  static const KindOf KindOfArrayKey = (KindOf)(KindOfString | KindOfInteger);
   static const KindOf KindOfPrimitive = (KindOf)(KindOfNumeric | KindOfString);
   static const KindOf KindOfPlusOperand = (KindOf)(KindOfNumeric | KindOfArray);
   static const KindOf KindOfSequence = (KindOf)(KindOfString | KindOfArray);
@@ -97,6 +98,7 @@ public:
   static TypePtr PlusOperand;
   static TypePtr Primitive;
   static TypePtr Sequence;
+  static TypePtr ArrayKey;
 
   static TypePtr AutoSequence;
   static TypePtr AutoObject;

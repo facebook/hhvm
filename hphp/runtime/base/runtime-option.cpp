@@ -171,6 +171,7 @@ int64_t RuntimeOption::UploadMaxFileSize = 100;
 std::string RuntimeOption::UploadTmpDir = "/tmp";
 bool RuntimeOption::EnableFileUploads = true;
 bool RuntimeOption::EnableUploadProgress = false;
+int64_t RuntimeOption::MaxFileUploads = 20;
 int RuntimeOption::Rfc1867Freq = 256 * 1024;
 std::string RuntimeOption::Rfc1867Prefix = "vupload_";
 std::string RuntimeOption::Rfc1867Name = "video_ptoken";
@@ -281,12 +282,7 @@ bool RuntimeOption::ClearInputOnSuccess = true;
 std::string RuntimeOption::ProfilerOutputDir = "/tmp";
 std::string RuntimeOption::CoreDumpEmail;
 bool RuntimeOption::CoreDumpReport = true;
-std::string RuntimeOption::CoreDumpReportDirectory
-#if defined(HPHP_OSS)
-  ("/tmp");
-#else
-  ("/var/tmp/cores");
-#endif
+std::string RuntimeOption::StackTraceFilename;
 bool RuntimeOption::LocalMemcache = false;
 bool RuntimeOption::MemcacheReadOnly = false;
 
@@ -437,6 +433,19 @@ static inline bool jitPseudomainDefault() {
   return !RuntimeOption::EvalSimulateARM;
 }
 
+/*
+ * 0: never use LLVM
+ * 1: use LLVM for TransOptimize translations
+ * 2: use LLVM for all translations
+ */
+static inline uint32_t jitLLVMDefault() {
+#ifdef HHVM_JIT_LLVM_BY_DEFAULT
+  return 2;
+#else
+  return 0;
+#endif
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
@@ -550,6 +559,16 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 int RuntimeOption::EnableAlternative = 0;
 
+#ifdef NDEBUG
+  #ifdef ALWAYS_ASSERT
+    const StaticString s_hhvm_build_type("Release with asserts");
+  #else
+    const StaticString s_hhvm_build_type("Release");
+  #endif
+#else
+  const StaticString s_hhvm_build_type("Debug");
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
@@ -581,7 +600,8 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini, Hdf hdfPattern) {
+static bool matchHdfPattern(const std::string &value,
+                            const IniSetting::Map& ini, Hdf hdfPattern) {
   string pattern = Config::GetString(ini, hdfPattern);
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
@@ -595,20 +615,8 @@ static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini
   return true;
 }
 
-void RuntimeOption::Load(const IniSetting::Map& ini,
-                         Hdf& config,
-                         std::vector<std::string> *overwrites /* = nullptr */) {
-  if (overwrites) {
-    // Do these first, mainly so we can override Tier.*.machine,
-    // Tier.*.tier and Tier.*.cpu on the command line. But it can
-    // also make sense to override fields within a Tier (
-    // eg if you are using the same command line across a lot
-    // of different machines)
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
-    }
-  }
-
+void RuntimeOption::Load(IniSetting::Map& ini,
+                         Hdf& config) {
   // Machine metrics
   string hostname, tier, cpu;
   {
@@ -639,14 +647,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
         // no break here, so we can continue to match more overwrites
       }
       hdf["overwrite"].setVisited(); // avoid lint complaining
-    }
-  }
-
-  if (overwrites) {
-    // Do the command line overrides again, so we override
-    // any tier overwrites
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
     }
   }
 
@@ -784,6 +784,17 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     }
     setResourceLimit(RLIMIT_NOFILE, ini, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA, ini, rlimit, "RSS");
+    // These don't have RuntimeOption::xxx bindings, but we still want to be
+    // able to use ini_xxx functionality on them; so directly bind to a local
+    // static via Config::Bind.
+    static int64_t s_core_file_size_override, s_core_file_size, s_rss = 0;
+    static int32_t s_max_socket = 0;
+    Config::Bind(s_core_file_size_override, ini, rlimit["CoreFileSizeOverride"],
+                 0);
+    Config::Bind(s_core_file_size, ini, rlimit["CoreFileSize"], 0);
+    Config::Bind(s_max_socket, ini, rlimit["MaxSocket"], 0);
+    Config::Bind(s_rss, ini, rlimit["RSS"], 0);
+
     Config::Bind(MaxRSS, ini, rlimit["MaxRSS"], 0);
     Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 5);
     Config::Bind(MaxRSSPollingCycle, ini, rlimit["MaxRSSPollingCycle"], 0);
@@ -862,8 +873,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     }
     {
       Hdf lang = config["Hack"]["Lang"];
-      IntsOverflowToInts =
-        Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+      Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
+                   EnableHipHopSyntax);
       Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);
@@ -1123,6 +1134,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(UploadTmpDir, ini, upload["UploadTmpDir"], "/tmp");
     Config::Bind(EnableFileUploads, ini, upload["EnableFileUploads"], true);
+    Config::Bind(MaxFileUploads, ini, "max_file_uploads", 20);
     Config::Bind(EnableUploadProgress, ini, upload["EnableUploadProgress"]);
     Config::Bind(Rfc1867Freq, ini, upload["Rfc1867Freq"], 256 * 1024);
     if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;
@@ -1282,8 +1294,20 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    Config::Bind(CoreDumpReportDirectory, ini,
-                 debug["CoreDumpReportDirectory"], CoreDumpReportDirectory);
+
+    auto core_dump_report_dir =
+      Config::Get(ini, debug["CoreDumpReportDirectory"],
+#if defined(HPHP_OSS)
+  "/tmp"
+#else
+  "/var/tmp/cores"
+#endif
+      );
+    std::ostringstream stack_trace_stream;
+    stack_trace_stream << core_dump_report_dir << "/stacktrace."
+                       << Process::GetProcessId() << ".log";
+    StackTraceFilename = stack_trace_stream.str();
+
     Config::Bind(LocalMemcache, ini, debug["LocalMemcache"]);
     Config::Bind(MemcacheReadOnly, ini, debug["MemcacheReadOnly"]);
 
@@ -1485,6 +1509,16 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.build_type",
+                   IniSetting::SetAndGet<std::string>(
+    [](const std::string&) {
+      return false;
+    },
+    []() {
+      return s_hhvm_build_type.c_str();
+    }
+  ));
 
   // Extensions
   Config::Bind(RuntimeOption::ExtensionDir, ini, "extension_dir",

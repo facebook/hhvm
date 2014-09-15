@@ -223,7 +223,7 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
 
   // Swap in the $this or late bound class or null if it is ony from a plain
-  // function or psuedomain
+  // function or pseudomain
   ar->setThisOrClassAllowNull(closure->getThisOrClass());
 
   if (ar->hasThis()) {

@@ -47,9 +47,10 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     double cdouble;
   };
   auto type = inst.src(i)->type();
-  cint = type.hasRawVal() ? type.rawVal() : 0;
+  cint = type.rawVal();
   switch (inst.op()) {
   case GuardRefs:
+  case CheckRefs:
     if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) return isU32(cint); // mask64
     if (i == 4) return isU32(cint); // vals64

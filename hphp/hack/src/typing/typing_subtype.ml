@@ -72,6 +72,22 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub orig_ft_su
   let env, _ = Unify.unify_funs env r_sub ft_sub r_sub orig_ft_sub in
   env
 
+and subtype_tparams env variancel super_tyl children_tyl =
+  match variancel, super_tyl, children_tyl with
+  | [], [], [] -> env
+  | [], _, _
+  | _, [], _
+  | _, _, [] -> env
+  | variance :: variancel, super :: superl, child :: childrenl ->
+      let env = subtype_tparam env variance super child in
+      subtype_tparams env variancel superl childrenl
+
+and subtype_tparam env variance super child =
+  match variance with
+  | Ast.Covariant -> sub_type env super child
+  | Ast.Contravariant -> sub_type env child super
+  | Ast.Invariant -> fst (Unify.unify env super child)
+
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
  *
@@ -109,7 +125,8 @@ and sub_type env ty_super ty_sub =
       fst (Unify.unify env ty_super ty_sub)
   | _, (_, Tunresolved tyl) ->
       List.fold_left (fun env x -> sub_type env ty_super x) env tyl
-  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub)) ->
+  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub))
+  | (_, Tprim _), (r_sub, Tgeneric (x, Some ty_sub)) ->
       (Errors.try_
          (fun () -> sub_type env ty_super ty_sub)
          (fun l -> Reason.explain_generic_constraint r_sub x l; env)
@@ -195,9 +212,21 @@ and sub_type env ty_super ty_sub =
           (fun _ -> sub_type env ty_super base)
       | None -> assert false)
 
-  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)), (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_)) ->
+  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)),
+      (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_)) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
-    if cid_super = cid_sub then fst (Unify.unify env ety_super ety_sub)
+    if cid_super = cid_sub then
+      if tyl_super <> [] && List.length tyl_super = List.length tyl_sub
+      then
+        let env, c = Env.get_class env cid_super in
+        match c with
+        | None -> fst (Unify.unify env ety_super ety_sub)
+        | Some { tc_tparams; _} ->
+            let variancel =
+              List.map (fun (variance, _, _) -> variance) tc_tparams
+            in
+            subtype_tparams env variancel tyl_super tyl_sub
+      else fst (Unify.unify env ety_super ety_sub)
     else begin
       let env, class_ = Env.get_class env cid_sub in
       (match class_ with
@@ -247,6 +276,7 @@ and sub_type env ty_super ty_sub =
     end
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
+  | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
   | (_, Tapply ((_, ("\\Traversable" | "\\Container")), [tv_super])), (r, Tarray (_, ty3, ty4)) ->
       (match ty3, ty4 with
       | None, _ -> env
@@ -303,6 +333,18 @@ and sub_type env ty_super ty_sub =
           Errors.field_missing (TUtils.get_shape_field_name k) p_super p_sub
       end fdm_sub;
       TUtils.apply_shape sub_type env (r_super, fdm_super) (r_sub, fdm_sub)
+  | (_, Tabstract ((_, name_super), tyl_super, _)),
+      (_, Tabstract ((_, name_sub), tyl_sub, _))
+    when name_super = name_sub ->
+      let env, td = Env.get_typedef env name_super in
+      (match td with
+      | Some (Env.Typedef.Ok (_, tparams, _, _, _)) ->
+          let variancel =
+            List.map (fun (variance, _, _) -> variance) tparams
+          in
+          subtype_tparams env variancel tyl_super tyl_sub
+      | _ -> env
+      )
   | _, (_, Tabstract (_, _, Some x)) ->
       Errors.try_
          (fun () -> fst (Unify.unify env ty_super ty_sub))

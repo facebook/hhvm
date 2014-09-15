@@ -46,7 +46,7 @@ function mktime($hour = PHP_INT_MAX, $minute = PHP_INT_MAX, $second = PHP_INT_MA
 function strftime($format, $timestamp = null) { }
 function strptime($date, $format) { }
 function strtotime($input, $timestamp = null) { }
-function time() { }
+function time(): int { }
 function timezone_abbreviations_list() { }
 function timezone_identifiers_list() { }
 function timezone_location_get($timezone) { }

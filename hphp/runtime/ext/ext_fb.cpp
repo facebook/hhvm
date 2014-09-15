@@ -70,6 +70,13 @@ const int64_t k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE =
   FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 
 ///////////////////////////////////////////////////////////////////////////////
+// static strings
+
+const StaticString
+  s_IMemoizeParam("HH\\IMemoizeParam"),
+  s_getInstanceKey("getInstanceKey");
+
+///////////////////////////////////////////////////////////////////////////////
 
 /* Linux and other systems don't currently support a ntohx or htonx
    set of functions for 64-bit values.  We've implemented our own here
@@ -354,14 +361,15 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
 }
 
 static int fb_compact_serialize_variant(StringBuffer& sd,
-  const Variant& var, int depth);
+  const Variant& var, int depth, FBCompactSerializeBehavior behavior);
 
 static void fb_compact_serialize_array_as_list_map(
-    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
+    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth,
+    FBCompactSerializeBehavior behavior) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sb, arr[i], depth + 1);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1, behavior);
     } else {
       fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
@@ -370,7 +378,8 @@ static void fb_compact_serialize_array_as_list_map(
 }
 
 static void fb_compact_serialize_array_as_map(
-    StringBuffer& sb, const Array& arr, int depth) {
+    StringBuffer& sb, const Array& arr, int depth,
+    FBCompactSerializeBehavior behavior) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   for (ArrayIter it(arr); it; ++it) {
     Variant key = it.first();
@@ -379,15 +388,22 @@ static void fb_compact_serialize_array_as_map(
     } else {
       fb_compact_serialize_string(sb, key.toString());
     }
-    fb_compact_serialize_variant(sb, it.second(), depth + 1);
+    fb_compact_serialize_variant(sb, it.second(), depth + 1, behavior);
   }
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 
 static int fb_compact_serialize_variant(
-    StringBuffer& sb, const Variant& var, int depth) {
+    StringBuffer& sb, const Variant& var, int depth,
+    FBCompactSerializeBehavior behavior) {
   if (depth > 256) {
+    if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
+        "Array depth exceeded"));
+      throw e;
+    }
+
     return 1;
   }
 
@@ -427,21 +443,57 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth);
+        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth,
+                                               behavior);
       } else {
-        fb_compact_serialize_array_as_map(sb, arr, depth);
+        fb_compact_serialize_array_as_map(sb, arr, depth, behavior);
       }
       break;
     }
 
+    case KindOfObject:
+    {
+      if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+        Object obj = var.toObject();
+
+        if (obj->isCollection()) {
+          fb_compact_serialize_variant(sb, obj->o_toArray(), depth, behavior);
+          break;
+        }
+
+        if (!obj.instanceof(s_IMemoizeParam)) {
+          auto msg = folly::format(
+            "Cannot serialize object of type {} because it does not implement "
+            "HH\\IMemoizeParam",
+            obj->o_getClassName().data()).str();
+
+          Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
+          throw e;
+        }
+
+        Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
+        fb_compact_serialize_string(sb, ser.toString());
+        break;
+      }
+    }
+    // If not FBCompactSerializeBehavior::MemoizeParam fall-through to default
+
     default:
+      if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
+        auto msg = folly::format(
+          "Cannot Serialize unexpected type {}", tname(var.getType()).c_str());
+        Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg.str()));
+        throw e;
+      }
+
       return 1;
   }
 
   return 0;
 }
 
-Variant f_fb_compact_serialize(const Variant& thing) {
+String fb_compact_serialize(const Variant& thing,
+                            FBCompactSerializeBehavior behavior) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -462,11 +514,15 @@ Variant f_fb_compact_serialize(const Variant& thing) {
   }
 
   StringBuffer sb;
-  if (fb_compact_serialize_variant(sb, thing, 0)) {
+  if (fb_compact_serialize_variant(sb, thing, 0, behavior)) {
     return init_null();
   }
 
   return sb.detach();
+}
+
+Variant f_fb_compact_serialize(const Variant& thing) {
+  return fb_compact_serialize(thing, FBCompactSerializeBehavior::Base);
 }
 
 /* Check if there are enough bytes left in the buffer */

@@ -339,8 +339,8 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
     const String& namespaceuri, const String& localname);
   public: Variant t_importnode(const Object& importednode, bool deep = false);
   public: Variant t_load(const String& filename, int64_t options = 0);
-  public: Variant t_loadhtml(const String& source);
-  public: Variant t_loadhtmlfile(const String& filename);
+  public: Variant t_loadhtml(const String& source, int64_t options = 0);
+  public: Variant t_loadhtmlfile(const String& filename, int64_t options = 0);
   public: Variant t_loadxml(const String& source, int64_t options = 0);
   public: void t_normalizedocument();
   public: bool t_registernodeclass(

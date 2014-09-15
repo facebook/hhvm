@@ -284,11 +284,10 @@ TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
   }
   Variant result = ZendPack().pack(format, extra);
   // pack() returns false if there was an error
-  if (result.isBoolean()) {
-    return arReturn(ar, result.getBoolean());
+  if (!result.isBoolean()) {
+    tvCastToStringInPlace(result.asTypedValue());
   }
-  Variant strHolder = makeStaticString(result.toString());
-  return arReturn(ar, strHolder);
+  return arReturn(ar, std::move(result));
 }
 
 int64_t HHVM_FUNCTION(sleep, int seconds) {
@@ -624,7 +623,8 @@ const int UserTokenId_T_POW_EQUAL = 433;
 const int UserTokenId_T_MIARRAY = 434;
 const int UserTokenId_T_MSARRAY = 435;
 const int UserTokenId_T_VARRAY = 436;
-const int MaxUserTokenId = 437; // Marker, not a real user token ID
+const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 437;
+const int MaxUserTokenId = 438; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

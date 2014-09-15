@@ -37,6 +37,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <iterator>
+#include "folly/Conv.h"
 
 using namespace HPHP;
 
@@ -445,12 +446,12 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
 
 void TestFastCGIServer::RunServer() {
   string out, err;
-  string portConfig = "-vServer.Port=" + lexical_cast<string>(m_serverPort);
+  string portConfig = "-vServer.Port=" + folly::to<string>(m_serverPort);
   string adminConfig = "-vAdminServer.Port=" +
-    lexical_cast<string>(m_adminPort);
+    folly::to<string>(m_adminPort);
   string rpcConfig = "-vSatellites.rpc.Port=" +
-    lexical_cast<string>(m_rpcPort);
-  string fd = lexical_cast<string>(m_inheritFd);
+    folly::to<string>(m_rpcPort);
+  string fd = folly::to<string>(m_inheritFd);
 
   const char *argv[] = {
     "", "--mode=server", "--config=test/ext/config-server.hdf",

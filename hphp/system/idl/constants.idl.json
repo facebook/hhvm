@@ -728,11 +728,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.3.0-dev"
+            "value": "3.4.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.3.0-dev"
+            "value": "3.4.0-dev"
         },
         {
             "name": "HTML_ENTITIES",
@@ -4506,6 +4506,10 @@
         },
         {
             "name": "T_FINAL",
+            "type": "Int64"
+        },
+        {
+            "name": "T_FINALLY",
             "type": "Int64"
         },
         {

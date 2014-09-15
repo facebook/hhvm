@@ -15,8 +15,9 @@
 */
 #include "hphp/util/dataset.h"
 
+#include "folly/Conv.h"
+
 #include <cstdlib>
-#include <boost/lexical_cast.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -58,7 +59,7 @@ std::string DataSet::getRowString() const {
       ret += fieldName;
     } else {
       ret += "Noname";
-      ret += boost::lexical_cast<std::string>(nonameCount++);
+      ret += folly::to<std::string>(nonameCount++);
     }
     ret += "' => ";
     const char *s = getField(i);

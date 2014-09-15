@@ -33,7 +33,7 @@ namespace {
 // Pointer to StringData, or pointer to StringSlice.
 typedef intptr_t StrInternKey;
 
-constexpr intptr_t kAhmMagicThreshold = -3;
+DEBUG_ONLY constexpr intptr_t kAhmMagicThreshold = -3;
 
 StrInternKey make_intern_key(const StringData* sd) {
   auto const ret = reinterpret_cast<StrInternKey>(sd);

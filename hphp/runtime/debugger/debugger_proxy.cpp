@@ -15,11 +15,12 @@
 */
 #include "hphp/runtime/debugger/debugger_proxy.h"
 
-#include <boost/lexical_cast.hpp>
 #include <exception>
 #include <map>
 #include <stack>
 #include <vector>
+
+#include "folly/Conv.h"
 
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
@@ -694,7 +695,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     if (res) {
       TRACE_RB(2, "Proxy got cmd type %d\n", res->getType());
       Debugger::UsageLog("server", getSandboxId(),
-                         boost::lexical_cast<std::string>(res->getType()));
+                         folly::to<std::string>(res->getType()));
       // Any control flow command gets installed here and we continue execution.
       m_flow = std::dynamic_pointer_cast<CmdFlowControl>(res);
       if (m_flow) {

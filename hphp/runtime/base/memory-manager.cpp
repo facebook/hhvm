@@ -194,13 +194,13 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     m_stats.peakIntervalAlloc = 0;
 #ifdef USE_JEMALLOC
     m_enableStatsSync = false;
-#endif
+  } else if (!m_enableStatsSync) {
+#else
   } else {
+#endif
     // This is only set by the jemalloc stats sync which we don't enable until
     // after this has been called.
     assert(m_stats.totalAlloc == 0);
-    // We expect some thread local initialization to have been done already.
-    assert(m_slabs.size() > 0);
 #ifdef USE_JEMALLOC
     assert(m_stats.jemallocDebt >= m_stats.alloc);
 #endif
@@ -219,10 +219,6 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
     // for each thread.
     m_stats.totalAlloc = s_statsEnabled ? m_stats.jemallocDebt : 0;
 
-    // Ignore any attempt to sync jemalloc stats before this point since if we
-    // do before this it is impossible to tell what the former usage was before
-    // the sync.
-    assert(!m_enableStatsSync);
     m_enableStatsSync = s_statsEnabled;
 #else
     m_stats.totalAlloc = 0;
@@ -270,6 +266,124 @@ void MemoryManager::refreshStatsHelperStop() {
 }
 #endif
 
+/*
+ * Refresh stats to reflect directly malloc()ed memory, and determine
+ * whether the request memory limit has been exceeded.
+ *
+ * The stats parameter allows the updates to be applied to either
+ * m_stats as in refreshStats() or to a separate MemoryUsageStats
+ * struct as in getStatsSafe().
+ *
+ * The template variable live controls whether or not MemoryManager
+ * member variables are updated and whether or not to call helper
+ * methods in response to memory anomalies.
+ */
+template<bool live>
+void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
+#ifdef USE_JEMALLOC
+  // Incrementally incorporate the difference between the previous and current
+  // deltas into the memory usage statistic.  For reference, the total
+  // malloced memory usage could be calculated as such, if delta0 were
+  // recorded in resetStatsImpl():
+  //
+  //   int64 musage = delta - delta0;
+  //
+  // Note however, that SmartAllocator adds to m_stats.jemallocDebt
+  // when it calls malloc(), so that this function can avoid
+  // double-counting the malloced memory. Thus musage in the example
+  // code may well substantially exceed m_stats.usage.
+  if (m_enableStatsSync) {
+    uint64_t jeDeallocated = *m_deallocated;
+    uint64_t jeAllocated = *m_allocated;
+
+    // We can't currently handle wrapping so make sure this isn't happening.
+    assert(jeAllocated >= 0 &&
+           jeAllocated <= std::numeric_limits<int64_t>::max());
+    assert(jeDeallocated >= 0 &&
+           jeDeallocated <= std::numeric_limits<int64_t>::max());
+
+    // Since these deltas potentially include memory allocated from another
+    // thread but deallocated on this one, it is possible for these nubmers to
+    // go negative.
+    int64_t jeDeltaAllocated =
+      int64_t(jeAllocated) - int64_t(jeDeallocated);
+    int64_t mmDeltaAllocated =
+      int64_t(m_prevAllocated) - int64_t(m_prevDeallocated);
+
+    // This is the delta between the current and the previous jemalloc reading.
+    int64_t jeMMDeltaAllocated =
+      int64_t(jeAllocated) - int64_t(m_prevAllocated);
+
+    FTRACE(1, "Before stats sync:\n");
+    FTRACE(1, "je alloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
+      jeAllocated, m_prevAllocated, jeAllocated - m_prevAllocated);
+    FTRACE(1, "je dealloc:\ncurrent: {}\nprevious: {}\ndelta with MM: {}\n",
+      jeDeallocated, m_prevDeallocated, jeDeallocated - m_prevDeallocated);
+    FTRACE(1, "je delta:\ncurrent: {}\nprevious: {}\n",
+      jeDeltaAllocated, mmDeltaAllocated);
+    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\nje debt: {}\n",
+      stats.usage, stats.totalAlloc, stats.jemallocDebt);
+
+    // Subtract the old jemalloc adjustment (delta0) and add the current one
+    // (delta) to arrive at the new combined usage number.
+    stats.usage += jeDeltaAllocated - mmDeltaAllocated;
+    // Remove the "debt" accrued from allocating the slabs so we don't double
+    // count the slab-based allocations.
+    stats.usage -= stats.jemallocDebt;
+
+    stats.jemallocDebt = 0;
+    // We need to do the calculation instead of just setting it to jeAllocated
+    // because of the MaskAlloc capability.
+    stats.totalAlloc += jeMMDeltaAllocated;
+    if (live) {
+      m_prevAllocated = jeAllocated;
+      m_prevDeallocated = jeDeallocated;
+    }
+
+    FTRACE(1, "After stats sync:\n");
+    FTRACE(1, "usage: {}\ntotal (je) alloc: {}\n\n",
+      stats.usage, stats.totalAlloc);
+  }
+#endif
+  if (stats.usage > stats.peakUsage) {
+    // NOTE: the peak memory usage monotonically increases, so there cannot
+    // be a second OOM exception in one request.
+    assert(stats.maxBytes > 0);
+    if (live && m_couldOOM && stats.usage > stats.maxBytes) {
+      refreshStatsHelperExceeded();
+    }
+    // Check whether the process's active memory limit has been exceeded, and
+    // if so, stop the server.
+    //
+    // Only check whether the total memory limit was exceeded if this request
+    // is at a new high water mark.  This check could be performed regardless
+    // of this request's current memory usage (because other request threads
+    // could be to blame for the increased memory usage), but doing so would
+    // measurably increase computation for little benefit.
+#ifdef USE_JEMALLOC
+    // (*m_cactive) consistency is achieved via atomic operations.  The fact
+    // that we do not use an atomic operation here means that we could get a
+    // stale read, but in practice that poses no problems for how we are
+    // using the value.
+    if (live && s_statsEnabled && *m_cactive > m_cactiveLimit) {
+      refreshStatsHelperStop();
+    }
+#endif
+    stats.peakUsage = stats.usage;
+  }
+  if (live && m_statsIntervalActive) {
+    if (stats.usage > stats.peakIntervalUsage) {
+      stats.peakIntervalUsage = stats.usage;
+    }
+    if (stats.alloc > stats.peakIntervalAlloc) {
+      stats.peakIntervalAlloc = stats.alloc;
+    }
+  }
+}
+
+template void MemoryManager::refreshStatsImpl<true>(MemoryUsageStats& stats);
+template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
+
 void MemoryManager::sweep() {
   assert(!sweeping());
   m_sweeping = true;
@@ -300,6 +414,23 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
 
   resetCouldOOM();
+}
+
+void MemoryManager::iterate(iterate_callback callback, void* user_data) {
+  // Iterate smart alloc slabs
+  for (auto slab : m_slabs) {
+    callback(slab, kSlabSize, false, user_data);
+  }
+
+  // Iterate large alloc slabs (Size N/A for now)
+  for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
+    next = n->next;
+    size_t size = 16;
+#ifdef USE_JEMALLOC
+    size = malloc_usable_size(n) - sizeof(SweepNode);
+#endif
+    callback(n + 1, size, true, user_data);
+  }
 }
 
 /*
@@ -511,13 +642,8 @@ NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-#ifdef USE_JEMALLOC_MALLOCX
   ptr = mallocx(debugAddExtra(bytes + sizeof(SweepNode)), 0);
   szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(SweepNode));
-#else
-  allocm(&ptr, &szOut, debugAddExtra(bytes + sizeof(SweepNode)), 0);
-  szOut = debugRemoveExtra(szOut - sizeof(SweepNode));
-#endif
 
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
@@ -633,13 +759,13 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
   if (bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
-      begin(m_slabs), end(m_slabs),
+      std::begin(m_slabs), std::end(m_slabs),
       [&] (void* base) {
         auto const baseInt = reinterpret_cast<uintptr_t>(base);
         return ptrInt >= baseInt && ptrInt < baseInt + kSlabSize;
       }
     );
-    assert(it != end(m_slabs));
+    assert(it != std::end(m_slabs));
   }
 
   return true;

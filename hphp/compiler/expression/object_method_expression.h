@@ -29,7 +29,7 @@ class ObjectMethodExpression : public FunctionCall {
 public:
   ObjectMethodExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr object, ExpressionPtr method,
-                         ExpressionListPtr params);
+                         ExpressionListPtr params, bool nullsafe);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual ConstructPtr getNthKid(int n) const;
@@ -39,8 +39,10 @@ public:
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
   ExpressionPtr getObject() const { return m_object; }
+  bool isNullSafe() const { return m_nullsafe; }
 private:
   ExpressionPtr m_object;
+  bool m_nullsafe;
   int m_objTemp;
 
   void setInvokeParams(AnalysisResultPtr ar);

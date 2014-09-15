@@ -132,7 +132,7 @@ enum Type : uint16_t { // stored in ObjectData::o_subclassData
   ImmMapType = 6,
   ImmSetType = 7,
 };
-const size_t MaxNumTypes = 8;
+constexpr size_t MaxNumTypes = 8;
 
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
@@ -284,7 +284,7 @@ typedef hphp_hash_set<Offset> OffsetSet;
  * be used for one of these.
  */
 typedef uint32_t Slot;
-const Slot kInvalidSlot = Slot(-1);
+constexpr Slot kInvalidSlot = Slot(-1);
 
 /*
  * Handles into Request Data Segment.  These are offsets from

@@ -36,6 +36,7 @@ module ErrorString = struct
     | Nast.Tstring     -> "a string"
     | Nast.Tnum        -> "a num (int/float)"
     | Nast.Tresource   -> "a resource"
+    | Nast.Tarraykey   -> "an array key (int/string)"
 
   let rec type_ = function
     | Tany               -> "an untyped value"
@@ -125,6 +126,7 @@ module Suggest = struct
     | Nast.Tstring -> "string"
     | Nast.Tnum    -> "num (int/float)"
     | Nast.Tresource -> "resource"
+    | Nast.Tarraykey -> "arraykey (int/string)"
 
 end
 
@@ -188,6 +190,7 @@ module Full = struct
     | Nast.Tstring -> "string"
     | Nast.Tnum    -> "num"
     | Nast.Tresource -> "resource"
+    | Nast.Tarraykey -> "arraykey"
     )
 
   and fun_type st env o ft =
@@ -207,7 +210,7 @@ module Full = struct
     | Some param_name, param_type ->
         ty st env o param_type; o " "; o param_name
 
-  and tparam o ((_, x), _) = o x
+  and tparam o (_, (_, x), _) = o x
 
   let to_string env x =
     let buf = Buffer.create 50 in
@@ -256,8 +259,13 @@ module PrintClass = struct
     | None -> ""
     | Some ty -> Full.to_string tenv ty
 
-  let tparam ((position, name), cstr) =
-    pos position^" "^name^" "^ty_opt cstr
+  let variance = function
+    | Ast.Covariant -> "+"
+    | Ast.Contravariant -> "-"
+    | Ast.Invariant -> ""
+
+  let tparam (var, (position, name), cstr) =
+    variance var^pos position^" "^name^" "^ty_opt cstr
 
   let tparam_list l =
     List.fold_right (fun x acc -> tparam x^", "^acc) l ""

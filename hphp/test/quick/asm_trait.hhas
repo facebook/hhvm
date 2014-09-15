@@ -69,7 +69,7 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "frob"
+  FPushObjMethodD 0 "frob" NullThrows
   FCall 0
   PopR
 
@@ -80,7 +80,7 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "heh"
+  FPushObjMethodD 0 "heh" NullThrows
   FCall 0
   PopR
 
@@ -91,7 +91,7 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "foo"
+  FPushObjMethodD 0 "foo" NullThrows
   FCall 0
   PopR
 
@@ -102,12 +102,12 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "frob"
+  FPushObjMethodD 0 "frob" NullThrows
   FCall 0
   PopR
 
   CGetL $obj
-  FPushObjMethodD 0 "yo"
+  FPushObjMethodD 0 "yo" NullThrows
   FCall 0
   PopR
 

@@ -1,2 +1,2 @@
 File "yield_return2.php", line 6, characters 5-10:
-NastCheck[3019] You cannot return a value in a generator (a generator is a function that uses yield)
+You cannot return a value in a generator (a generator is a function that uses yield) (NastCheck[3019])

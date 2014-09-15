@@ -488,6 +488,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
            stripped == "xenon_get_data" ||
+           stripped == "objprof_get_data" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;
@@ -521,15 +522,19 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 ///////////////////////////////////////////////////////////////////////////////
 // object property and method calls
 
-void Parser::onObjectProperty(Token &out, Token &base, Token &prop) {
+void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
+                              Token &prop) {
+  if (nullsafe) {
+    PARSE_ERROR("?-> is not supported for property access");
+  }
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
   out->exp = NEW_EXP(ObjectPropertyExpression, base->exp, prop->exp);
 }
 
-void Parser::onObjectMethodCall(Token &out, Token &base, Token &prop,
-                                Token &params) {
+void Parser::onObjectMethodCall(Token &out, Token &base, bool nullsafe,
+                                Token &prop, Token &params) {
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
@@ -539,7 +544,8 @@ void Parser::onObjectMethodCall(Token &out, Token &base, Token &prop,
   } else {
     paramsExp = NEW_EXP0(ExpressionList);
   }
-  out->exp = NEW_EXP(ObjectMethodExpression, base->exp, prop->exp, paramsExp);
+  out->exp = NEW_EXP(ObjectMethodExpression, base->exp, prop->exp, paramsExp,
+                     nullsafe);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -588,7 +594,10 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
   out->exp = NEW_EXP(ArrayElementExpression, arr, dim);
 }
 
-void Parser::encapObjProp(Token &out, Token &var, Token &name) {
+void Parser::encapObjProp(Token &out, Token &var, bool nullsafe, Token &name) {
+  if (nullsafe) {
+    PARSE_ERROR("?-> is not supported for property access");
+  }
   ExpressionPtr obj = NEW_EXP(SimpleVariable, var->text());
 
   ExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name->text());
@@ -2247,6 +2256,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"double", "HH\\float"},
     (AliasEntry){"real", "HH\\float"},
     (AliasEntry){"num", "HH\\num"},
+    (AliasEntry){"arraykey", "HH\\arraykey"},
     (AliasEntry){"string", "HH\\string"},
     (AliasEntry){"classname", "HH\\string"}, // for ::class
     (AliasEntry){"resource", "HH\\resource"},

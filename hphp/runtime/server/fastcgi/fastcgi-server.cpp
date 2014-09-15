@@ -53,7 +53,7 @@ void FastCGIAcceptor::onNewConnection(
     apache::thrift::async::TAsyncSocket::UniquePtr sock,
     const apache::thrift::transport::TSocketAddress* peerAddress,
     const std::string& nextProtocolName,
-    const facebook::proxygen::TransportInfo& tinfo)
+    const ::proxygen::TransportInfo& tinfo)
 {
   TSocketAddress localAddress;
   try {
@@ -206,8 +206,8 @@ FastCGIServer::FastCGIServer(const std::string &address,
   } else {
     sock_addr.setFromHostPort(address, port);
   }
-  m_socketConfig.setAddress(sock_addr);
-  m_socketConfig.setAcceptBacklog(RuntimeOption::ServerBacklog);
+  m_socketConfig.bindAddress = sock_addr;
+  m_socketConfig.acceptBacklog = RuntimeOption::ServerBacklog;
   std::chrono::seconds timeout;
   if (RuntimeOption::ConnectionTimeoutSeconds > 0) {
     timeout = std::chrono::seconds(RuntimeOption::ConnectionTimeoutSeconds);
@@ -215,7 +215,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
     // default to 2 minutes
     timeout = std::chrono::seconds(120);
   }
-  m_socketConfig.setConnectionIdleTime(timeout);
+  m_socketConfig.connectionIdleTimeout = timeout;
 }
 
 void FastCGIServer::addTakeoverListener(TakeoverListener* lisener) {
@@ -229,14 +229,14 @@ void FastCGIServer::removeTakeoverListener(TakeoverListener* lisener) {
 void FastCGIServer::start() {
   m_socket.reset(new TAsyncServerSocket(m_worker.getEventBase()));
   try {
-    m_socket->bind(m_socketConfig.getAddress());
+    m_socket->bind(m_socketConfig.bindAddress);
   } catch (const apache::thrift::transport::TTransportException& ex) {
     LOG(ERROR) << ex.what();
-    if (m_socketConfig.getAddress().getFamily() == AF_UNIX) {
-      throw FailedToListenException(m_socketConfig.getAddress().getPath());
+    if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
+      throw FailedToListenException(m_socketConfig.bindAddress.getPath());
     } else {
-      throw FailedToListenException(m_socketConfig.getAddress().getAddressStr(),
-                                    m_socketConfig.getAddress().getPort());
+      throw FailedToListenException(m_socketConfig.bindAddress.getAddressStr(),
+                                    m_socketConfig.bindAddress.getPort());
     }
   }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
@@ -246,7 +246,7 @@ void FastCGIServer::start() {
         // Someone called stop before we got here
         return;
       }
-      m_socket->listen(m_socketConfig.getAcceptBacklog());
+      m_socket->listen(m_socketConfig.acceptBacklog);
       m_socket->startAccepting();
     });
   setStatus(RunStatus::RUNNING);
@@ -320,4 +320,3 @@ void FastCGIServer::handleRequest(
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

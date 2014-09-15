@@ -50,9 +50,10 @@ TRACE_SET_MOD(hhbc);
 
 using jit::mcg;
 
-const StringData* Func::s___call       = makeStaticString("__call");
-const StringData* Func::s___callStatic = makeStaticString("__callStatic");
-std::atomic<bool> Func::s_treadmill;
+const StringData*     Func::s___call       = makeStaticString("__call");
+const StringData*     Func::s___callStatic = makeStaticString("__callStatic");
+std::atomic<bool>     Func::s_treadmill;
+std::atomic<uint32_t> Func::s_totalClonedClosures;
 
 /*
  * This size hint will create a ~6MB vector and is rarely hit in practice.
@@ -118,6 +119,12 @@ void* Func::allocFuncMem(
     sizeof(Func) +
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
+
+  if (needsNextClonedClosure) {
+    s_totalClonedClosures++;
+    always_assert(
+      s_totalClonedClosures <= RuntimeOption::EvalMaxClonedClosures);
+  }
 
   void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 

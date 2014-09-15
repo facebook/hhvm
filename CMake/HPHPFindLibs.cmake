@@ -221,15 +221,17 @@ if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
     INCLUDE(CheckCXXSourceCompiles)
     CHECK_CXX_SOURCE_COMPILES("
 #include <jemalloc/jemalloc.h>
-int main(void) {
-#if !defined(JEMALLOC_VERSION_MAJOR) || (JEMALLOC_VERSION_MAJOR < 3)
-# error \"jemalloc version >= 3.0.0 required\"
+
+#define JEMALLOC_VERSION_NUMERIC ((JEMALLOC_VERSION_MAJOR << 24) | (JEMALLOC_VERSION_MINOR << 16) | (JEMALLOC_VERSION_BUGFIX << 8) | JEMALLOC_VERSION_NDEV)
+
+#if JEMALLOC_VERSION_NUMERIC < 0x03050100
+# error jemalloc version >= 3.5.1 required
 #endif
-  return 0;
-}" JEMALLOC_VERSION_3)
+
+int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
     set (CMAKE_REQUIRED_INCLUDES)
 
-    if (JEMALLOC_VERSION_3)
+    if (JEMALLOC_VERSION_MINIMUM)
       message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
       set(JEMALLOC_ENABLED 1)
     else()
@@ -336,12 +338,12 @@ if (PAM_INCLUDE_PATH)
   include_directories(${PAM_INCLUDE_PATH})
 endif()
 
-# LLVM
-find_package(LLVM)
-if (LIBLLVM_INCLUDE_DIR)
-  include_directories(LIBLLVM_INCLUDE_DIR)
-  add_definitions("-DUSE_LLVM")
-endif()
+# LLVM. Disabled in OSS for now: t5056266
+# find_package(LLVM)
+# if (LIBLLVM_INCLUDE_DIR)
+#   include_directories(LIBLLVM_INCLUDE_DIR)
+#   add_definitions("-DUSE_LLVM")
+# endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
@@ -542,5 +544,9 @@ macro(hphp_link target)
 
   if (LIBLLVM_LIBRARY)
     target_link_libraries(${target} ${LIBLLVM_LIBRARY})
+  endif()
+
+  if (LINUX)
+    target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
   endif()
 endmacro()

@@ -38,11 +38,12 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
     double cdouble;
   };
   auto type = inst.src(i)->type();
-  cint = type.hasRawVal() ? type.rawVal() : 0;
+  cint = type.rawVal();
   // (almost?) any instruction that accepts a GPR, can accept XZR in
   // place of an immediate zero. TODO #3827905
   switch (inst.op()) {
   case GuardRefs:
+  case CheckRefs:
     if (i == 1) return inst.src(2)->intVal() == 0; // nParams
     if (i == 3) { // mask64
       return vixl::Assembler::IsImmLogical(cint, vixl::kXRegSize);

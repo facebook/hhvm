@@ -492,6 +492,18 @@ public:
    */
   void resetCouldOOM();
 
+  /*
+   * Iterator to the allocated slabs. Used to traverse the memory
+   * in profiling extensions.
+   */
+  typedef void (*iterate_callback)(
+    void* slab,
+    int slab_size,
+    bool is_big,
+    void* callback_data
+  );
+
+  void iterate(iterate_callback p_callback, void* user_data);
 private:
   friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);

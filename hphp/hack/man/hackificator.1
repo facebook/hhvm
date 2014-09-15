@@ -1,0 +1,41 @@
+.TH HACKIFICATOR 1
+
+.SH NAME
+hackificator \- convert PHP code to Hack
+
+.SH SYNOPSIS
+.B hackificator
+.I DIRECTORY
+
+.SH DESCRIPTION
+
+.BR hackificator (1)
+recursively converts
+.I DIRECTORY
+from PHP code into Hack code. The
+.I DIRECTORY
+must have already been set up as a Hack project and have
+.BR hh_client (1)
+run inside it.
+
+This conversion process simply converts the headers of files from the PHP header
+to the Hack header, making only very trivial syntactic tweaks along the way.  It
+does not add type annotations or change code to take advantage of any Hack
+features.
+
+See
+.I http://docs.hhvm.com/manual/en/install.hack.conversion.php
+for detailed information and documentation on the PHP to Hack conversion
+tools.
+
+.SH BUGS
+The Hack language is part of the HHVM project. Known bugs can be found at that
+tracker, and new ones should be reported there as well:
+.I https://github.com/facebook/hhvm/issues
+
+.SH SEE ALSO
+.BR hh_client (1), \ hh_server (1), \ hack_remove_soft_types (1).
+.br
+.I http://docs.hhvm.com/manual/en/install.hack.conversion.php
+.br
+.I http://www.hacklang.org/

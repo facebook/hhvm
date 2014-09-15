@@ -24,6 +24,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/func-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -48,10 +49,10 @@ const StaticString s_php_errormsg("php_errormsg");
 /*
  * Interpreter Step State.
  *
- * This struct gives interpreter functions access to shared state.
- * It's not in interp-state.h because it's part of the internal
- * implementation of interpreter routines.  The publicized state as
- * results of interpretation are in that header and interp.h.
+ * This struct gives interpreter functions access to shared state.  It's not in
+ * interp-state.h because it's part of the internal implementation of
+ * interpreter routines.  The publicized state as results of interpretation are
+ * in that header and interp.h.
  */
 struct ISS {
   explicit ISS(Interp& bag,
@@ -95,40 +96,16 @@ void never_taken(ISS& env)       {
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 
-void doRet(ISS& env, Type t) {
-  readAllLocals(env);
-  assert(env.state.stack.empty());
-  env.flags.returned = t;
-}
-
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
   for (auto& l : env.state.locals) l = TGen;
 }
 
-// Force non-ref locals to TCell.  Used when something modifies an
-// unknown local's value, without changing reffiness.
-void loseNonRefLocalTypes(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "    loseNonRefLocalTypes\n");
-  for (auto& l : env.state.locals) {
-    if (l.subtypeOf(TCell)) l = TCell;
-  }
-}
-
-void boxUnknownLocal(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "   boxUnknownLocal\n");
-  for (auto& l : env.state.locals) {
-    if (!l.subtypeOf(TRef)) l = TGen;
-  }
-}
-
-void unsetUnknownLocal(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "  unsetUnknownLocal\n");
-  for (auto& l : env.state.locals) l = union_of(l, TUninit);
+void doRet(ISS& env, Type t) {
+  readAllLocals(env);
+  assert(env.state.stack.empty());
+  env.flags.returned = t;
 }
 
 void specialFunctionEffects(ISS& env, SString name) {
@@ -279,6 +256,22 @@ PrepKind prepKind(ISS& env, uint32_t paramId) {
 //////////////////////////////////////////////////////////////////////
 // locals
 
+/*
+ * Locals with certain special names can be set in the enclosing scope by
+ * various php routines.  We don't attempt to track their types.  Furthermore,
+ * in a pseudomain effectively all 'locals' are volatile, because any re-entry
+ * could modify them through $GLOBALS, so in a pseudomain we don't track any
+ * local types.
+ */
+bool isVolatileLocal(ISS& env, borrowed_ptr<const php::Local> l) {
+  if (is_pseudomain(env.ctx.func)) return true;
+  // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
+  // changed through $GLOBALS), but for now we don't bother.
+  if (!l->name) return false;
+  return l->name->same(s_http_response_header.get()) ||
+         l->name->same(s_php_errormsg.get());
+}
+
 void mayReadLocal(ISS& env, uint32_t id) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
@@ -287,15 +280,18 @@ void mayReadLocal(ISS& env, uint32_t id) {
 
 Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
   mayReadLocal(env, l->id);
-  return env.state.locals[l->id];
+  auto ret = env.state.locals[l->id];
+  if (isVolatileLocal(env, l)) {
+    always_assert_flog(ret == TGen, "volatile local was not TGen");
+  }
+  return ret;
 }
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
-  if (l->name && (l->name->same(s_http_response_header.get()) ||
-                  l->name->same(s_php_errormsg.get()))) {
+  if (isVolatileLocal(env, l)) {
     auto current = env.state.locals[l->id];
-    assert(current == TGen || current == TCell);
+    always_assert_flog(current == TGen, "volatile local was not TGen");
     return;
   }
   env.state.locals[l->id] = t;
@@ -321,6 +317,10 @@ Type derefLoc(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void ensureInit(ISS& env, borrowed_ptr<const php::Local> l) {
   auto t = locRaw(env, l);
+  if (isVolatileLocal(env, l)) {
+    always_assert_flog(t == TGen, "volatile local was not TGen");
+    return;
+  }
   if (t.couldBe(TUninit)) {
     if (t.subtypeOf(TUninit)) return setLocRaw(env, l, TInitNull);
     if (t.subtypeOf(TCell))   return setLocRaw(env, l, remove_uninit(t));
@@ -339,6 +339,10 @@ bool locCouldBeUninit(ISS& env, borrowed_ptr<const php::Local> l) {
  */
 void setLoc(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   auto v = locRaw(env, l);
+  if (isVolatileLocal(env, l)) {
+    always_assert_flog(v == TGen, "volatile local was not TGen");
+    return;
+  }
   if (v.subtypeOf(TCell)) env.state.locals[l->id] = t;
 }
 
@@ -350,6 +354,30 @@ borrowed_ptr<php::Local> findLocal(ISS& env, SString name) {
     }
   }
   return nullptr;
+}
+
+// Force non-ref locals to TCell.  Used when something modifies an
+// unknown local's value, without changing reffiness.
+void loseNonRefLocalTypes(ISS& env) {
+  readUnknownLocals(env);
+  FTRACE(2, "    loseNonRefLocalTypes\n");
+  for (auto& l : env.state.locals) {
+    if (l.subtypeOf(TCell)) l = TCell;
+  }
+}
+
+void boxUnknownLocal(ISS& env) {
+  readUnknownLocals(env);
+  FTRACE(2, "   boxUnknownLocal\n");
+  for (auto& l : env.state.locals) {
+    if (!l.subtypeOf(TRef)) l = TGen;
+  }
+}
+
+void unsetUnknownLocal(ISS& env) {
+  readUnknownLocals(env);
+  FTRACE(2, "  unsetUnknownLocal\n");
+  for (auto& l : env.state.locals) l = union_of(l, TUninit);
 }
 
 //////////////////////////////////////////////////////////////////////

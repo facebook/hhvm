@@ -24,6 +24,7 @@ if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,-u,_register_fastcgi_server
+    -Wl,-segaddr __text 0
     -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
@@ -39,8 +40,15 @@ else()
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)
 endif()
 
+if (LINUX)
+  set(HHVM_WRAP_SYMS -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+else ()
+  set(HHVM_WRAP_SYMS)
+endif ()
+
 set(HHVM_LINK_LIBRARIES
   ${HHVM_ANCHOR_SYMS}
+  ${HHVM_WRAP_SYMS}
   hphp_analysis
   ext_hhvm_static
   hphp_system

@@ -33,7 +33,7 @@ constexpr auto F = static_cast<ContextMask>(AttrContext::Func);
 constexpr auto P = static_cast<ContextMask>(AttrContext::Prop);
 constexpr auto T = static_cast<ContextMask>(AttrContext::TraitImport);
 
-bool supported(ContextMask mask, AttrContext a) {
+constexpr bool supported(ContextMask mask, AttrContext a) {
   return mask & static_cast<ContextMask>(a);
 }
 

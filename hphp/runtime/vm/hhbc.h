@@ -457,6 +457,16 @@ enum class OODeclExistsOp : uint8_t {
 #undef OO_DECL_EXISTS_OP
 };
 
+#define OBJMETHOD_OPS                             \
+  OBJMETHOD_OP(NullThrows)                        \
+  OBJMETHOD_OP(NullSafe)
+
+enum class ObjMethodOp : uint8_t {
+#define OBJMETHOD_OP(x) x,
+  OBJMETHOD_OPS
+#undef OBJMETHOD_OP
+};
+
 constexpr int32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -622,8 +632,10 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
   O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        NF) \
-  O(FPushObjMethod,  ONE(IVA),         TWO(CV,CV),      NOV,        NF) \
-  O(FPushObjMethodD, TWO(IVA,SA),      ONE(CV),         NOV,        NF) \
+  O(FPushObjMethod,  TWO(IVA,                                           \
+                       OA(ObjMethodOp)), TWO(CV,CV),    NOV,        NF) \
+  O(FPushObjMethodD, THREE(IVA,SA,                                      \
+                       OA(ObjMethodOp)), ONE(CV),       NOV,        NF) \
   O(FPushClsMethod,  ONE(IVA),         TWO(AV,CV),      NOV,        NF) \
   O(FPushClsMethodF, ONE(IVA),         TWO(AV,CV),      NOV,        NF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
@@ -945,6 +957,7 @@ const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
 const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
+const char* subopToName(ObjMethodOp);
 
 /*
  * Try to parse a string into a subop name of a given type.

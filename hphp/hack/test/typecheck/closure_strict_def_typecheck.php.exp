@@ -1,2 +1,2 @@
 File "closure_strict_def_typecheck.php", line 17, characters 28-29:
-Typing[4090] Could not find static method f1
+Could not find static method f1 (Typing[4090])

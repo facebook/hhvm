@@ -59,6 +59,7 @@ SRC = \
   typing_lenv.ml\
   typing.ml\
   typing_inherit.ml\
+  typing_variance.ml\
   typing_decl.ml\
   pp.ml\
   colorFile.ml\
@@ -94,7 +95,7 @@ lexer_hack.ml: $(TOP)/parsing/lexer_hack.ml
 	cp $(TOP)/parsing/lexer_hack.ml .
 
 format_hack.ml: $(TOP)/parsing/format_hack.ml
-        cp $(TOP)/parsing/format_hack.ml .
+	cp $(TOP)/parsing/format_hack.ml .
 
 parser_hack.ml: $(TOP)/parsing/parser_hack.ml
 	cp $(TOP)/parsing/parser_hack.ml .
@@ -179,6 +180,9 @@ typing_extends.ml: $(TOP)/typing/typing_extends.ml
 
 typing.ml: $(TOP)/typing/typing.ml
 	cp $(TOP)/typing/typing.ml .
+
+typing_variance.ml: $(TOP)/typing/typing_variance.ml
+	cp $(TOP)/typing/typing_variance.ml .
 
 typing_decl.ml: $(TOP)/typing/typing_decl.ml
 	cp $(TOP)/typing/typing_decl.ml .

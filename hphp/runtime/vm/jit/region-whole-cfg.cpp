@@ -66,14 +66,7 @@ struct DFS {
         continue;
       }
 
-      // Break if dst requires reffiness checks.
-      // TODO(#2589970): Fix translateRegion to support mid-region reffiness
-      // checks
       auto dstRegion = profData->transRegion(dst);
-      auto nRefDeps = dstRegion->entry()->reffinessPreds().size();
-      if (nRefDeps > 0) {
-        continue;
-      }
 
       // Add the block and arc to region.
       auto predBlockId =

@@ -87,6 +87,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
   if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
   if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return KindOfUnknown;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;

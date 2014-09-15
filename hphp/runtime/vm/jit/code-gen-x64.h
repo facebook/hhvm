@@ -52,6 +52,7 @@ struct CodeGenerator : public jit::CodeGenerator {
 private:
   Vloc srcLoc(unsigned i) const;
   Vloc dstLoc(unsigned i) const;
+  Vloc makeDstLoc(const SSATmp& d) const;
   ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -69,9 +70,6 @@ private:
 
   // Main call helper:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
-                    SyncOptions sync, ArgGroup& args, RegSet toSave);
-  // Overload to make the toSave RegSet optional:
-  void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
                     SyncOptions sync, ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
@@ -85,6 +83,9 @@ private:
               Block* label = nullptr);
   void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
                         Block* label = nullptr);
+
+  template <class JmpFn>
+  void emitReffinessTest(IRInstruction* inst, JmpFn doJcc);
 
   template<class Loc1, class Loc2, class JmpFn>
   void emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc, JmpFn doJcc);
@@ -102,10 +103,6 @@ private:
 
   template<class OpInstr>
   void cgUnaryIntOp(Vloc dst, SSATmp* src, Vloc src_loc);
-
-  enum Commutativity { Commutative, NonCommutative };
-
-  void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
 
   template<class Op, class Opi>
   void cgBinaryIntOp(IRInstruction*);
@@ -151,7 +148,6 @@ private:
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  VregXMM prepXMM(Vout&, const SSATmp* src, Vloc srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);
@@ -187,6 +183,7 @@ private:
   const Class* curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   bool resumed() const { return m_curInst->marker().resumed(); };
+  Fixup curFixup() const;
   void recordSyncPoint(Vout&, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);

@@ -11,10 +11,14 @@
 type error
 type t = error list
 
+val is_hh_fixme : (Pos.t -> int -> bool) ref
 val to_list : error -> (Pos.t * string) list
+val get_code : error -> int
 val get_pos : error -> Pos.t
 val filename : error -> string
 val make_error : (Pos.t * string) list -> error
+
+val error_code_to_string : int -> string
 
 val fixme_format : Pos.t -> unit
 val alok : Pos.t * string -> unit
@@ -59,7 +63,9 @@ val naming_too_few_arguments : Pos.t -> unit
 val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
+val illegal_TRAIT : Pos.t -> unit
 val dynamic_method_call : Pos.t -> unit
+val nullsafe_property_access : Pos.t -> unit
 val illegal_fun : Pos.t -> unit
 val illegal_meth_fun : Pos.t -> unit
 val illegal_inst_meth : Pos.t -> unit
@@ -181,6 +187,8 @@ val null_member : string -> Pos.t -> (Pos.t * string) list -> unit
 val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 val option_mixed : Pos.t -> unit
+val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
+val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
 val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : Utils.SSet.t -> Pos.t -> unit
@@ -235,6 +243,7 @@ val invalid_shape_field_const : Pos.t -> Pos.t -> unit
 val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
+val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

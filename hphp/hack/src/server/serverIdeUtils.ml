@@ -19,14 +19,12 @@ let report_error exn =
   flush stdout;
   ()
 
-let oldify_fun (_, fname) =
-  let names = SSet.singleton fname in
+let oldify_funs names =
   Naming_heap.FunHeap.oldify_batch names;
   Typing_env.Funs.oldify_batch names;
   ()
 
-let oldify_class (_, cname) =
-  let names = SSet.singleton cname in
+let oldify_classes names =
   Naming_heap.ClassHeap.oldify_batch names;
   Typing_env.Classes.oldify_batch names;
   ()
@@ -43,14 +41,21 @@ let declare content =
   Autocomplete.auto_complete_for_global := "";
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
-  try 
+  try
     let {Parser_hack.is_hh_file; comments; ast} =
       Parser_hack.program content
     in
+    let funs, classes = List.fold_left begin fun (funs, classes) def ->
+      match def with
+        | Ast.Fun f -> SSet.add (snd f.Ast.f_name) funs, classes
+        | Ast.Class c -> funs, SSet.add (snd c.Ast.c_name) classes
+        | _ -> funs, classes
+    end (SSet.empty, SSet.empty) ast in
+    oldify_funs funs;
+    oldify_classes classes;
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
-          oldify_fun f.Ast.f_name;
           let nenv = Naming.empty in
           let f = Naming.fun_ nenv f in
           if !Find_refs.find_method_at_cursor_target <> None then
@@ -60,7 +65,6 @@ let declare content =
           Typing.fun_decl f;
           declared_funs := SSet.add fname !declared_funs;
       | Ast.Class c ->
-          oldify_class c.Ast.c_name;
           let nenv = Naming.empty in
           let c = Naming.class_ nenv c in
           if !Find_refs.find_method_at_cursor_target <> None then

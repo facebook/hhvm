@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/ext_server.h"
 
-#include <boost/lexical_cast.hpp>
+#include "folly/Conv.h"
 
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -54,7 +54,7 @@ bool f_dangling_server_proxy_old_request() {
   }
 
   std::string url = "http://localhost:" +
-    boost::lexical_cast<std::string>(SatelliteServerInfo::DanglingServerPort) +
+    folly::to<std::string>(SatelliteServerInfo::DanglingServerPort) +
     transport->getServerObject();
 
   int code = 0;

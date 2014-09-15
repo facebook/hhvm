@@ -270,9 +270,11 @@ class BaseVector : public ExtCollectionObjectData {
 
   void reserve(int64_t sz);
 
-  static size_t sizeOffset() { return offsetof(BaseVector, m_size); }
-  static size_t dataOffset() { return offsetof(BaseVector, m_data); }
-  static size_t immCopyOffset() { return offsetof(BaseVector, m_immCopy); }
+  static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
+  static constexpr size_t dataOffset() { return offsetof(BaseVector, m_data); }
+  static constexpr size_t immCopyOffset() {
+    return offsetof(BaseVector, m_immCopy);
+  }
 
   void addFront(const TypedValue* val);
 
@@ -910,7 +912,7 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  static uint32_t sizeOffset() {
+  static constexpr uint32_t sizeOffset() {
     return offsetof(HashCollection, m_size);
   }
 
@@ -2086,7 +2088,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     return 2;
   }
 
-  static uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
+  static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
  private:
   static void throwBadKeyType() ATTRIBUTE_NORETURN;

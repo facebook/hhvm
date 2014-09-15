@@ -1,2 +1,2 @@
 File "toplevel_continue.php", line 13, characters 3-10:
-NastCheck[3023] continue can only be used inside loops
+continue can only be used inside loops (NastCheck[3023])

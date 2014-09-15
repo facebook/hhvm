@@ -1,5 +1,5 @@
 File "reset_after_foreach.php", line 16, characters 5-22:
-Typing[4110] Invalid assignment
+Invalid assignment (Typing[4110])
 File "reset_after_foreach.php", line 13, characters 11-13:
 This is an object of type Map
 File "reset_after_foreach.php", line 16, characters 19-22:

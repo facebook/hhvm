@@ -481,6 +481,23 @@ void moveBase(MIS& env, folly::Optional<Base> base) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * The following handleBase{Elem,Prop}* functions are used to implement the
+ * 'normal' portion of the effects on base types, which are mostly what are
+ * done by intermediate dims.  (Contrast with the handleInXXX{Elem,Prop}
+ * functions, which handle the effects on the type of the thing that's
+ * /containing/ the base.)
+ *
+ * The contract with these functions is that they should handle all the effects
+ * on the base type /except/ for the case of the base being a subtype of
+ * TArr---the caller is responsible for that.  The reason for this is that for
+ * tracking effects on specialized array types (e.g. LocalArrChain), the final
+ * ops generally need to do completely different things to the array, so this
+ * allows reuse of this shared part of the type transitions.  The
+ * miIntermediate routines must handle subtypes of TArr outside of calls to
+ * this as well.
+ */
+
 void handleBaseElemU(MIS& env) {
   auto& ty = env.base.type;
   if (ty.couldBe(TArr)) {
@@ -507,7 +524,11 @@ void handleBasePropD(MIS& env) {
 
 void handleBaseElemD(MIS& env) {
   auto& ty = env.base.type;
+
+  // When the base is actually a subtype of array, we handle it in the callers
+  // of these functions.
   if (ty.subtypeOf(TArr)) return;
+
   if (elemMustPromoteToArr(ty)) {
     ty = counted_aempty();
     return;
@@ -522,12 +543,24 @@ void handleBaseElemD(MIS& env) {
   if (elemCouldPromoteToArr(ty)) {
     ty = promote_emptyish(ty, counted_aempty());
   }
+
+  /*
+   * If the base still couldBe some kind of array (but isn't a subtype of TArr,
+   * which would be handled outside this routine), we need to give up on any
+   * information better than TArr here (or track the effects, but we're not
+   * doing that yet).
+   */
+  if (ty.couldBe(TArr)) {
+    ty = union_of(ty, TArr);
+  }
 }
 
 void handleBaseNewElem(MIS& env) {
   handleBaseElemD(env);
   // Technically we don't need to do TStr case.
 }
+
+//////////////////////////////////////////////////////////////////////
 
 Type mcodeKey(MIS& env) {
   auto const melem = env.mvec.mcodes[env.mInd];
@@ -706,9 +739,9 @@ void miProp(MIS& env) {
     if (name) {
       auto const propTy = thisPropAsCell(env, name);
       moveBase(env, Base { propTy ? *propTy : TInitCell,
-                             BaseLoc::PostProp,
-                             thisTy,
-                             name });
+                           BaseLoc::PostProp,
+                           thisTy,
+                           name });
     } else {
       moveBase(env, Base { TInitCell, BaseLoc::PostProp, thisTy });
     }
@@ -718,9 +751,9 @@ void miProp(MIS& env) {
   // We know for sure we're going to be in an object property.
   if (env.base.type.subtypeOf(TObj)) {
     moveBase(env, Base { TInitCell,
-                           BaseLoc::PostProp,
-                           env.base.type,
-                           name });
+                         BaseLoc::PostProp,
+                         env.base.type,
+                         name });
     return;
   }
 
@@ -773,18 +806,18 @@ void miElem(MIS& env) {
     if (couldDoChain && env.base.type.subtypeOf(TArr)) {
       env.arrayChain.emplace_back(env.base.type, key);
       moveBase(env, Base { array_elem(env.base.type, key),
-                             BaseLoc::LocalArrChain,
-                             TBottom,
-                             env.base.locName,
-                             env.base.local });
+                           BaseLoc::LocalArrChain,
+                           TBottom,
+                           env.base.locName,
+                           env.base.local });
       return;
     }
   }
 
   if (env.base.type.subtypeOf(TArr)) {
     moveBase(env, Base { array_elem(env.base.type, key),
-                           BaseLoc::PostElem,
-                           env.base.type });
+                         BaseLoc::PostElem,
+                         env.base.type });
     return;
   }
   if (env.base.type.subtypeOf(TStr)) {
@@ -819,10 +852,10 @@ void miNewElem(MIS& env) {
     env.arrayChain.push_back(
       array_newelem_key(env.base.type, TInitNull));
     moveBase(env, Base { TInitNull,
-                           BaseLoc::LocalArrChain,
-                           TBottom,
-                           env.base.locName,
-                           env.base.local });
+                         BaseLoc::LocalArrChain,
+                         TBottom,
+                         env.base.locName,
+                         env.base.local });
     return;
   }
 
@@ -1051,6 +1084,9 @@ void miFinalSetElem(MIS& env) {
   } else {
     auto& ty = env.base.type;
     if (ty.couldBe(TStr)) {
+      // Note here that a string type stays a string (with a changed character,
+      // and loss of staticness), unless it was the empty string, where it
+      // becomes an array.  Do it conservatively for now:
       ty = union_of(loosen_statics(ty), counted_aempty());
     }
     if (!ty.subtypeOf(TStr)) {
@@ -1161,10 +1197,6 @@ void pessimisticFinalNewElem(MIS& env, Type ty) {
     env.base.type = array_newelem(env.base.type, ty);
     return;
   }
-  if (env.base.type.couldBe(TArr) && is_specialized_array(env.base.type)) {
-    env.base.type = unspecialize(env.base.type);
-    return;
-  }
 }
 
 void miFinalVGetNewElem(MIS& env) {
@@ -1193,10 +1225,6 @@ void miFinalSetNewElem(MIS& env) {
     env.base.type = array_newelem(env.base.type, t1);
     push(env, t1);
     return;
-  }
-
-  if (env.base.type.couldBe(TArr) && is_specialized_array(env.base.type)) {
-    env.base.type = unspecialize(env.base.type);
   }
 
   // ArrayAccess on $this will always push the rhs.

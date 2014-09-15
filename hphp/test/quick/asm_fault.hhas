@@ -143,7 +143,7 @@ resume2: True
 
 catcher: String "top-level catch handler got: "
          Catch
-         FPushObjMethodD 0 "getMessage"
+         FPushObjMethodD 0 "getMessage" NullThrows
          FCall 0
          UnboxR
          Concat

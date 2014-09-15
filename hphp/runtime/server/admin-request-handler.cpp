@@ -19,6 +19,9 @@
 #include <sstream>
 #include <iomanip>
 
+#include "folly/Conv.h"
+
+#include <unistd.h>
 #include <boost/lexical_cast.hpp>
 
 #ifdef GOOGLE_CPU_PROFILER
@@ -42,6 +45,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -56,7 +60,6 @@
 namespace HPHP {
 
 using std::endl;
-using boost::lexical_cast;
 using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,6 +118,8 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
   memcpy(&mw->s[mw->slen], s, slen+1);
   mw->slen += slen;
 }
+
+extern unsigned low_arena;
 #endif
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
@@ -209,6 +214,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
+        "/thread-mem-usage:show memory usage per thread\n"
         ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
@@ -354,6 +360,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleVMRequest(cmd, transport)) {
       break;
     }
+    if (!strcmp(cmd.c_str(), "thread-mem")) {
+      transport->sendString(get_thread_mem_usage());
+      break;
+    }
 
     if (cmd == "pcre-cache-size") {
       std::ostringstream size;
@@ -449,23 +459,52 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint64_t epoch = 1;
-        mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch));
+        uint32_t error = 0;
+        if (mallctl("epoch", nullptr, nullptr, &epoch, sizeof(epoch)) != 0) {
+          error = 1;
+        }
 
-        size_t allocated = 0; // Initialize in case stats aren't enabled.
-        size_t sz = sizeof(size_t);
-        mallctl("stats.allocated", &allocated, &sz, nullptr, 0);
+        auto call_mallctl = [&](const char* statName) {
+          size_t value = 0;
+          size_t sz = sizeof(value);
+          if (mallctl(statName, &value, &sz, nullptr, 0) != 0){
+            error = 1;
+          }
+          return value;
+        };
+        size_t allocated = call_mallctl("stats.allocated");
+        size_t active = call_mallctl("stats.active");
+        size_t mapped = call_mallctl("stats.mapped");
+        size_t low_mapped = call_mallctl(
+            folly::format("stats.arenas.{}.mapped",
+              low_arena).str().c_str());
+        size_t low_small_allocated = call_mallctl(
+            folly::format("stats.arenas.{}.small.allocated",
+              low_arena).str().c_str());
+        size_t low_large_allocated = call_mallctl(
+            folly::format("stats.arenas.{}.large.allocated",
+              low_arena).str().c_str());
+        size_t low_active = call_mallctl(
+            folly::format("stats.arenas.{}.pactive",
+              low_arena).str().c_str()) *
+            sysconf(_SC_PAGESIZE);
 
-        size_t active = 0;
-        mallctl("stats.active", &active, &sz, nullptr, 0);
-
-        size_t mapped = 0;
-        mallctl("stats.mapped", &mapped, &sz, nullptr, 0);
 
         std::ostringstream stats;
         stats << "<jemalloc-stats>" << endl;
-        stats << "  <allocated>" << allocated << "</allocated>" << endl;
-        stats << "  <active>" << active << "</active>" << endl;
-        stats << "  <mapped>" << mapped << "</mapped>" << endl;
+        if (error != 0){
+          stats << "  <allocated>" << allocated << "</allocated>" << endl;
+          stats << "  <active>" << active << "</active>" << endl;
+          stats << "  <mapped>" << mapped << "</mapped>" << endl;
+          stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
+          stats << "  <low_allocated>"
+            << (low_small_allocated + low_large_allocated)
+            << "<low_allocated>" << endl;
+          stats << "  <low_active>"
+            << low_active
+            << "</low_active>" << endl;
+        }
+        stats << "  <error>" << error << "</error>" << endl;
         stats << "</jemalloc-stats>" << endl;
         transport->sendString(stats.str());
         break;
@@ -583,18 +622,18 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
-    transport->sendString(boost::lexical_cast<std::string>(count));
+    transport->sendString(folly::to<std::string>(count));
     return true;
   }
   if (cmd == "check-ev") {
     int count =
       HttpServer::Server->getPageServer()->getLibEventConnectionCount();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-queued") {
     int count = HttpServer::Server->getPageServer()->getQueuedJobs();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-health") {
@@ -627,12 +666,12 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
   }
   if (cmd == "check-pl-load") {
     int count = PageletServer::GetActiveWorker();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-pl-queued") {
     int count = PageletServer::GetQueuedJobs();
-    transport->sendString(lexical_cast<string>(count));
+    transport->sendString(folly::to<string>(count));
     return true;
   }
   if (cmd == "check-sat") {
@@ -796,8 +835,8 @@ bool AdminRequestHandler::handleProfileRequest(const std::string &cmd,
     string res = "[ ";
     for (std::map<ThreadInfo::Executing, int>::const_iterator iter =
            counts.begin(); iter != counts.end(); ++iter) {
-      res += lexical_cast<string>(iter->first) + ", " +
-        lexical_cast<string>(iter->second) + ", ";
+      res += folly::to<string>(iter->first) + ", " +
+        folly::to<string>(iter->second) + ", ";
     }
     res += "-1 ]";
     transport->sendString(res);
@@ -873,7 +912,7 @@ typedef std::map<int, PCInfo> InfoMap;
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(jit::mcg->getUsage());
+    transport->sendString(jit::mcg->getUsageString());
     return true;
   }
   if (cmd == "vm-tcaddr") {

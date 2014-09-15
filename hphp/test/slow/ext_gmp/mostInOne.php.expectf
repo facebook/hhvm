@@ -55,7 +55,7 @@ bool(true)
 2147483648
 1
 
-Warning: gmp_pow(): Exponent must not be positive negative in %s on line %d
+Warning: %s in %s on line %d
 0
 2147483648
 0

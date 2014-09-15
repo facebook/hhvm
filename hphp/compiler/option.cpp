@@ -144,7 +144,7 @@ bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
 int Option::AutoInline = 0;
-bool Option::ControlFlow = true;
+bool Option::ControlFlow = false;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
@@ -174,7 +174,8 @@ void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
   }
 }
 
-void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots, vector<string> &vec) {
+void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
+                         vector<string> &vec) {
   if (roots.exists()) {
     for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
       vec.push_back(Config::GetString(ini, hdf,""));
@@ -192,10 +193,13 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Get(ini, config["PackageExcludeDirs"], PackageExcludeDirs);
   Config::Get(ini, config["PackageExcludeFiles"], PackageExcludeFiles);
   Config::Get(ini, config["PackageExcludePatterns"], PackageExcludePatterns);
-  Config::Get(ini, config["PackageExcludeStaticDirs"], PackageExcludeStaticDirs);
-  Config::Get(ini, config["PackageExcludeStaticFiles"], PackageExcludeStaticFiles);
-  Config::Get(ini, config["PackageExcludeStaticPatterns"], PackageExcludeStaticPatterns);
-  CachePHPFile = Config::GetBool(ini, config["CachePHPFile"]);
+  Config::Get(ini, config["PackageExcludeStaticDirs"],
+              PackageExcludeStaticDirs);
+  Config::Get(ini, config["PackageExcludeStaticFiles"],
+              PackageExcludeStaticFiles);
+  Config::Get(ini, config["PackageExcludeStaticPatterns"],
+              PackageExcludeStaticPatterns);
+  Config::Bind(CachePHPFile, ini, config["CachePHPFile"]);
 
   Config::Get(ini, config["ParseOnDemandDirs"], ParseOnDemandDirs);
 
@@ -232,9 +236,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Hdf repo = config["Repo"];
     {
       Hdf repoCentral = repo["Central"];
-      RepoCentralPath = Config::GetString(ini, repoCentral["Path"]);
+      Config::Bind(RepoCentralPath, ini, repoCentral["Path"]);
     }
-    RepoDebugInfo = Config::GetBool(ini, repo["DebugInfo"], false);
+    Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], false);
   }
 
   {
@@ -242,31 +246,31 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::Get(ini, autoloadMap["class"], AutoloadClassMap);
     Config::Get(ini, autoloadMap["function"], AutoloadFuncMap);
     Config::Get(ini, autoloadMap["constant"], AutoloadConstMap);
-    AutoloadRoot = Config::GetString(ini, autoloadMap["root"]);
+    Config::Bind(AutoloadRoot, ini, autoloadMap["root"]);
   }
 
-  HardTypeHints = Config::GetBool(ini, config["HardTypeHints"], true);
-  HardConstProp = Config::GetBool(ini, config["HardConstProp"], true);
+  Config::Bind(HardTypeHints, ini, config["HardTypeHints"], true);
+  Config::Bind(HardConstProp, ini, config["HardConstProp"], true);
 
-  EnableHipHopSyntax = Config::GetBool(ini, config["EnableHipHopSyntax"]);
-  EnableZendCompat = Config::GetBool(ini, config["EnableZendCompat"]);
-  JitEnableRenameFunction = Config::GetBool(ini, config["JitEnableRenameFunction"]);
-  EnableHipHopExperimentalSyntax =
-    Config::GetBool(ini, config["EnableHipHopExperimentalSyntax"]);
-  EnableShortTags = Config::GetBool(ini, config["EnableShortTags"], true);
+  Config::Bind(EnableHipHopSyntax, ini, config["EnableHipHopSyntax"]);
+  Config::Bind(EnableZendCompat, ini, config["EnableZendCompat"]);
+  Config::Bind(JitEnableRenameFunction, ini, config["JitEnableRenameFunction"]);
+  Config::Bind(EnableHipHopExperimentalSyntax, ini,
+               config["EnableHipHopExperimentalSyntax"]);
+  Config::Bind(EnableShortTags, ini, config["EnableShortTags"], true);
 
   {
     const Hdf& lang = config["Hack"]["Lang"];
-    IntsOverflowToInts =
-      Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+    Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
+                 EnableHipHopSyntax);
     Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
     Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                  lang["DisallowDynamicVarEnvFuncs"]);
   }
 
-  EnableAspTags = Config::GetBool(ini, config["EnableAspTags"]);
+  Config::Bind(EnableAspTags, ini, config["EnableAspTags"]);
 
-  EnableXHP = Config::GetBool(ini, config["EnableXHP"], false);
+  Config::Bind(EnableXHP, ini, config["EnableXHP"], false);
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -274,30 +278,31 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     EnableXHP = true;
   }
 
-  ParserThreadCount = Config::GetInt32(ini, config["ParserThreadCount"], 0);
+  Config::Bind(ParserThreadCount, ini, config["ParserThreadCount"], 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
   EnableEval = (EvalLevel) Config::GetByte(ini, config["EnableEval"], 0);
-  AllDynamic = Config::GetBool(ini, config["AllDynamic"], true);
-  AllVolatile = Config::GetBool(ini, config["AllVolatile"]);
+  Config::Bind(AllDynamic, ini, config["AllDynamic"], true);
+  Config::Bind(AllVolatile, ini, config["AllVolatile"]);
 
-  GenerateDocComments      = Config::GetBool(ini, config["GenerateDocComments"], true);
-  EliminateDeadCode        = Config::GetBool(ini, config["EliminateDeadCode"], true);
-  CopyProp                 = Config::GetBool(ini, config["CopyProp"], false);
-  LocalCopyProp            = Config::GetBool(ini, config["LocalCopyProp"], true);
-  StringLoopOpts           = Config::GetBool(ini, config["StringLoopOpts"], true);
-  AutoInline               = Config::GetInt32(ini, config["AutoInline"], 0);
-  ControlFlow              = Config::GetBool(ini, config["ControlFlow"], true);
-  VariableCoalescing       = Config::GetBool(ini, config["VariableCoalescing"], false);
-  ArrayAccessIdempotent    = Config::GetBool(ini, config["ArrayAccessIdempotent"], false);
-  DumpAst                  = Config::GetBool(ini, config["DumpAst"], false);
-  WholeProgram             = Config::GetBool(ini, config["WholeProgram"], true);
-  UseHHBBC                 = Config::GetBool(ini, config["UseHHBBC"], UseHHBBC);
+  Config::Bind(GenerateDocComments, ini, config["GenerateDocComments"], true);
+  Config::Bind(EliminateDeadCode, ini, config["EliminateDeadCode"], true);
+  Config::Bind(CopyProp, ini, config["CopyProp"], false);
+  Config::Bind(LocalCopyProp, ini, config["LocalCopyProp"], true);
+  Config::Bind(StringLoopOpts, ini, config["StringLoopOpts"], true);
+  Config::Bind(AutoInline, ini, config["AutoInline"], 0);
+  Config::Bind(ControlFlow, ini, config["ControlFlow"], true);
+  Config::Bind(VariableCoalescing, ini, config["VariableCoalescing"], false);
+  Config::Bind(ArrayAccessIdempotent, ini, config["ArrayAccessIdempotent"],
+               false);
+  Config::Bind(DumpAst, ini, config["DumpAst"], false);
+  Config::Bind(WholeProgram, ini, config["WholeProgram"], true);
+  Config::Bind(UseHHBBC, ini, config["UseHHBBC"], UseHHBBC);
 
   // Temporary, during file-cache migration.
-  FileCache::UseNewCache   = Config::GetBool(ini, config["UseNewCache"], false);
+  Config::Bind(FileCache::UseNewCache, ini, config["UseNewCache"], false);
 
   OnLoad();
 }

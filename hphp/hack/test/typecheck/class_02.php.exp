@@ -1,2 +1,2 @@
 File "class_02.php", line 16, characters 23-23:
-NastCheck[3013] Cannot implement A - it is not an interface
+Cannot implement A - it is not an interface (NastCheck[3013])

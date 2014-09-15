@@ -20,21 +20,31 @@ type error = error_code * message list
 type t = error list
 
 (*****************************************************************************)
+(* HH_FIXMEs hook *)
+(*****************************************************************************)
+
+let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
+
+(*****************************************************************************)
 (* Errors accumulator. *)
 (*****************************************************************************)
 
 let (error_list: t ref) = ref []
 
 let add code pos msg =
+  if !is_hh_fixme pos code then () else
   error_list := (code, [pos, msg]) :: !error_list
 
 let add_list code pos_msg_l =
+  let pos = fst (List.hd pos_msg_l) in
+  if !is_hh_fixme pos code then () else
   error_list := (code, pos_msg_l) :: !error_list
 
 let add_error error =
   error_list := error :: !error_list
 
-let to_list (error: error) = ((snd error): (Pos.t * string) list)
+let get_code (error: error) = ((fst error): error_code)
+let to_list (error: error) = ((snd error): message list)
 let get_pos (error: error) = fst (List.hd (snd error))
 let filename (error: error) = Pos.filename (get_pos error)
 let make_error (x: (Pos.t * string) list) = ((0, x): error)
@@ -133,6 +143,8 @@ module Naming                               = struct
   let void_cast                             = 2054 (* DONT MODIFY!!!! *)
   let object_cast                           = 2055 (* DONT MODIFY!!!! *)
   let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
+  let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
+  let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -279,8 +291,11 @@ module Typing                               = struct
   let visibility_extends                    = 4113 (* DONT MODIFY!!!! *)
   let void_parameter                        = 4114 (* DONT MODIFY!!!! *)
   let wrong_extend_kind                     = 4115 (* DONT MODIFY!!!! *)
-
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
+  let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
+
+  let declared_covariant                    = 4117 (* DONT MODIFY!!!! *)
+  let declared_contravariant                = 4118 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -506,11 +521,19 @@ let expected_collection pos cn =
 
 let illegal_CLASS pos =
   add Naming.illegal_CLASS pos
-    "Using __CLASS__ outside a class"
+    "Using __CLASS__ outside a class or trait"
+
+let illegal_TRAIT pos =
+  add Naming.illegal_TRAIT pos
+    "Using __TRAIT__ outside a trait"
 
 let dynamic_method_call pos =
   add Naming.dynamic_method_call pos
     "Dynamic method call"
+
+let nullsafe_property_access pos =
+  add Naming.nullsafe_property_access pos
+  "The ?-> operator is not supported for property access"
 
 let illegal_fun pos =
   let msg = "The argument to fun() must be a single-quoted, constant "^
@@ -1349,6 +1372,24 @@ let option_mixed pos =
   add Typing.option_mixed pos
     "?mixed is a redundant typehint - just use mixed"
 
+let declared_covariant pos1 pos2 emsg =
+  add_list Typing.declared_covariant (
+  [pos2, "Illegal usage of a covariant type parameter";
+   pos1, "This is where the parameter was declared as covariant (+)"
+ ] @ emsg
+ )
+
+let declared_contravariant pos1 pos2 emsg =
+  add_list Typing.declared_contravariant (
+  [pos2, "Illegal usage of a contravariant type parameter";
+   pos1, "This is where the parameter was declared as contravariant (-)"
+ ] @ emsg
+ )
+
+(*****************************************************************************)
+(* Typing decl errors *)
+(*****************************************************************************)
+
 let wrong_extend_kind child_pos child parent_pos parent =
   let msg1 = child_pos, child^" cannot extend "^parent in
   let msg2 = parent_pos, "This is "^parent in
@@ -1393,19 +1434,26 @@ let private_override pos class_id id =
   add Typing.private_override pos ((Utils.strip_ns class_id)^"::"^id
           ^": combining private and override is nonsensical")
 
+let nullsafe_not_needed p nonnull_witness =
+  add_list Typing.nullsafe_not_needed (
+  [
+   p,
+   "You are using the ?-> operator but this object cannot be null. "
+ ] @ nonnull_witness)
 
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 
-let to_json ((_, msgl) : error) = Hh_json.(
+let to_json ((error_code, msgl) : error) = Hh_json.(
   let elts = List.map (fun (p, w) ->
                         let line, scol, ecol = Pos.info_pos p in
                         JAssoc [ "descr", JString w;
                                  "path",  JString p.Pos.pos_file;
                                  "line",  JInt line;
                                  "start", JInt scol;
-                                 "end",   JInt ecol
+                                 "end",   JInt ecol;
+                                 "code",  JInt error_code
                                ]
                       ) msgl
   in
@@ -1419,7 +1467,7 @@ let to_string ((error_code, msgl) : error) : string =
   | (pos1, msg1) :: rest_of_error ->
       Buffer.add_string buf begin
         let error_code = error_code_to_string error_code in
-        Printf.sprintf "%s\n%s %s\n" (Pos.string pos1) error_code msg1
+        Printf.sprintf "%s\n%s (%s)\n" (Pos.string pos1) msg1 error_code
       end;
       List.iter begin fun (p, w) ->
         let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in

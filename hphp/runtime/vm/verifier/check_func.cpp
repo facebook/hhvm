@@ -583,6 +583,14 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
           error("invalid operation for OODeclExists: %d\n", op);
         ok = false;
         break;
+      case OpFPushObjMethodD:
+      case OpFPushObjMethod:
+#define OBJMETHOD_OP(x) if (op == static_cast<uint8_t>(ObjMethodOp::x)) break;
+        OBJMETHOD_OPS
+#undef OBJMETHOD_OP
+          error("invalid operation for FPushObjMethod*: %d\n", op);
+        ok = false;
+        break;
       }
     }
     case RATA:

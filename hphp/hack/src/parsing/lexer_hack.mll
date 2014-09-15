@@ -9,11 +9,28 @@
  *
  *)
 
+open Utils
+
 (*****************************************************************************)
 (* Comments accumulator. *)
 (*****************************************************************************)
 
 let (comment_list: (Pos.t * string) list ref) = ref []
+
+(*****************************************************************************)
+(* Fixmes accumulators *)
+(*****************************************************************************)
+let (fixmes: Pos.t IMap.t IMap.t ref) = ref IMap.empty
+
+let add_fixme err_nbr pos =
+  let line, _, _ = Pos.info_pos pos in
+  let line_value =
+    match IMap.get line !fixmes with
+    | None -> IMap.empty
+    | Some x -> x
+  in
+  fixmes := IMap.add line (IMap.add err_nbr pos line_value) !fixmes;
+  ()
 
 (*****************************************************************************)
 (* The type for tokens. Some of them don't represent "real" tokens comming
@@ -76,6 +93,7 @@ type token =
   | Tltlt
   | Tgtgt
   | Tsarrow
+  | Tnsarrow
   | Tarrow
   | Tlambda
   | Tem
@@ -191,6 +209,7 @@ let token_to_string = function
   | Tltlt         -> "<<"
   | Tgtgt         -> ">>"
   | Tsarrow       -> "=>"
+  | Tnsarrow      -> "?->"
   | Tarrow        -> "->"
   | Tlambda       -> "==>"
   | Tem           -> "!"
@@ -262,15 +281,17 @@ let ws = [' ' '\t' '\r' '\x0c']
 let wsnl = [' ' '\t' '\r' '\x0c''\n']
 let hex = digit | ['a'-'f''A'-'F']
 let hex_number = '0' 'x' hex+
+let bin_number = '0' 'b' ['0'-'1']+
 let decimal_number = '0' | ['1'-'9'] digit*
-let octal_number = '0' ['1'-'7']+ ['0'-'7']*
-let int = decimal_number | hex_number | octal_number
+let octal_number = '0' ['0'-'7']+
+let int = decimal_number | hex_number | bin_number | octal_number
 let float =
   (digit* ('.' digit+) ((('e'|'E') ('+'?|'-') digit+))?) |
   (digit+ ('.' digit*) ((('e'|'E') ('+'?|'-') digit+))?) |
   (digit+ ('e'|'E') ('+'?|'-') digit+)
 let unsafe = "//" ws* "UNSAFE" [^'\n']*
 let unsafeexpr_start = "/*" ws* "UNSAFE_EXPR"
+let fixme_start = "/*" ws* "HH_FIXME"
 let fallthrough = "//" ws* "FALLTHROUGH" [^'\n']*
 
 rule token = parse
@@ -280,6 +301,9 @@ rule token = parse
   | unsafeexpr_start   { let buf = Buffer.create 256 in
                          ignore (comment buf lexbuf);
                          Tunsafeexpr
+                       }
+  | fixme_start        { fixme_state0 lexbuf;
+                         token lexbuf
                        }
   | "/*"               { let buf = Buffer.create 256 in
                          comment_list := comment buf lexbuf :: !comment_list;
@@ -343,6 +367,7 @@ rule token = parse
   | "<<"               { Tltlt        }
   | ">>"               { Tgtgt        }
   | "=>"               { Tsarrow      }
+  | "?->"              { Tnsarrow     }
   | "->"               { Tarrow       }
   | "==>"              { Tlambda      }
   | '!'                { Tem          }
@@ -423,6 +448,57 @@ and comment buf = parse
   | _                  { Buffer.add_string buf (Lexing.lexeme lexbuf);
                          comment buf lexbuf
                        }
+
+(* HH_FIXME... *)
+and fixme_state0 = parse
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.unterminated_comment pos;
+                       }
+  | ws+                { fixme_state0 lexbuf
+                       }
+  | '\n'               { Lexing.new_line lexbuf;                        
+                         fixme_state0 lexbuf
+                       }
+  | '['                { fixme_state1 lexbuf }
+  | _                  { Errors.fixme_format (Pos.make lexbuf);
+                         ignore (comment (Buffer.create 256) lexbuf)
+                       }
+
+(* HH_FIXME[... *)
+and fixme_state1 = parse
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.unterminated_comment pos
+                       }
+  | ws+                { fixme_state1 lexbuf }
+  | '\n'               { Lexing.new_line lexbuf;
+                         fixme_state1 lexbuf
+                       }
+  | int                { let err_nbr = Lexing.lexeme lexbuf in
+                         let err_nbr = int_of_string err_nbr in
+                         fixme_state2 err_nbr lexbuf }
+  | _                  { Errors.fixme_format (Pos.make lexbuf);
+                         ignore (comment (Buffer.create 256) lexbuf)
+                       }
+
+(* HH_FIXME[NUMBER... *)
+and fixme_state2 err_nbr = parse
+  | eof                { let pos = Pos.make lexbuf in
+                         Errors.unterminated_comment pos
+                       }
+  | "*/" ws* '\n'      { Lexing.new_line lexbuf;
+                         let pos = Pos.make lexbuf in
+                         let line, _, _ = Pos.info_pos pos in
+                         let pos = Pos.set_line pos (line+1) in
+                         (* Nothing after */, the HH_FIXME applies to the
+                          * next line.
+                          *)
+                         add_fixme err_nbr pos
+                       }
+  | "*/"               { add_fixme err_nbr (Pos.make lexbuf) }
+  | '\n'               { Lexing.new_line lexbuf;
+                         fixme_state2 err_nbr lexbuf
+                       }
+  | _                  { fixme_state2 err_nbr lexbuf }
 
 and line_comment = parse
   | eof                { () }
@@ -578,6 +654,7 @@ and format_token = parse
   | ">="               { Tgte          }
   | "<<"               { Tltlt         }
   | "=>"               { Tsarrow       }
+  | "?->"              { Tnsarrow      }
   | "->"               { Tarrow        }
   | "==>"              { Tlambda       }
   | '!'                { Tem           }

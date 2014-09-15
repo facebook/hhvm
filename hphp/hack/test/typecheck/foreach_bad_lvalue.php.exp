@@ -1,2 +1,2 @@
 File "foreach_bad_lvalue.php", line 13, characters 24-25:
-Parsing[1002] Invalid lvalue
+Invalid lvalue (Parsing[1002])

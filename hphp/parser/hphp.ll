@@ -306,6 +306,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"children"             { XHP_ONLY_KEYWORD(T_XHP_CHILDREN); }
 <ST_IN_SCRIPTING>"required"             { XHP_ONLY_KEYWORD(T_XHP_REQUIRED); }
 
+<ST_IN_SCRIPTING>"?->" {
+        if (_scanner->isHHSyntaxEnabled()) {
+          STEPPOS(T_NULLSAFE_OBJECT_OPERATOR);
+          yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
+          return T_NULLSAFE_OBJECT_OPERATOR;
+        }
+        yyless(1);
+        RETSTEP('?');
+}
+
 <ST_IN_SCRIPTING>"->" {
         STEPPOS(T_OBJECT_OPERATOR);
         yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);

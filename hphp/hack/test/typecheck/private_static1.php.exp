@@ -1,0 +1,4 @@
+File "private_static1.php", line 7, characters 20-24:
+Private members cannot be accessed with static:: since a child class may also have an identically named private member (Typing[4112])
+File "private_static1.php", line 4, characters 18-20:
+This member is private

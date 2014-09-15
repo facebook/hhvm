@@ -60,7 +60,6 @@
 #include <exception>
 #include <functional>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -79,7 +78,6 @@
 namespace HPHP {
   using std::string;
   using std::vector;
-  using boost::lexical_cast;
   using std::dynamic_pointer_cast;
   using std::static_pointer_cast;
 }

@@ -30,6 +30,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static int s_pcre_has_jit = 0;
+
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
                                  int flags /* = 0 */) {
   return preg_grep(pattern, input, flags);
@@ -221,6 +223,11 @@ public:
     HHVM_FE(sql_regcase);
 
     loadSystemlib();
+
+    pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
+    IniSetting::Bind(this, IniSetting::PHP_INI_ONLY,
+                     "hhvm.pcre.jit",
+                     &s_pcre_has_jit);
   }
 
   virtual void threadInit() {

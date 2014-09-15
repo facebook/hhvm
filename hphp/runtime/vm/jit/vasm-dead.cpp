@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
-#include <boost/dynamic_bitset.hpp>
-#include <algorithm>
 
-TRACE_SET_MOD(hhir);
+#include <algorithm>
+#include <boost/dynamic_bitset.hpp>
+
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;
@@ -171,7 +173,7 @@ void removeDeadCode(Vunit& unit) {
       });
       code.erase(end, code.end());
     }
-    printUnit("after vasm-dead", unit);
+    printUnit(kVasmDCELevel, "after vasm-dead", unit);
   }
 }
 

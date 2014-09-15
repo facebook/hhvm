@@ -59,6 +59,7 @@ struct Resumable {
   static void* Create(const ActRec* fp, size_t numSlots, jit::TCA resumeAddr,
                       Offset resumeOffset, size_t objSize) {
     assert(fp);
+    assert(fp->resumed() == clone);
     DEBUG_ONLY auto const func = fp->func();
     assert(func);
     assert(func->isResumable());
@@ -76,6 +77,9 @@ struct Resumable {
       auto src = (void *)((uintptr_t)fp - frameSize);
       memcpy(mem, src, frameSize + sizeof(ActRec));
 
+      // Set resumed flag.
+      actRec->setResumed();
+
       // Suspend VarEnv if needed
       if (UNLIKELY(fp->hasVarEnv())) {
         fp->getVarEnv()->suspend(fp, actRec);
@@ -85,9 +89,6 @@ struct Resumable {
       // caller will take care of copying locals, setting the VarEnv, etc.
       memcpy(actRec, fp, sizeof(ActRec));
     }
-
-    // Set resumed flag.
-    actRec->setResumed();
 
     // Populate Resumable.
     resumable->m_resumeAddr = resumeAddr;

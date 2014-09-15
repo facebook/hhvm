@@ -143,7 +143,6 @@ private:
   void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   std::string m_localThis;
-  void *m_extra; // e.g., raw pointer to the symbol defined
 };
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(

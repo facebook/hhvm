@@ -103,17 +103,13 @@ struct IRBuilder {
   bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
   bool constrainValue(SSATmp* const val, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainLocal(uint32_t id,
-                      TypeSource typeSrc,
-                      TypeConstraint tc,
-                      const std::string& why);
   bool constrainStack(int32_t offset, TypeConstraint tc);
   bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
-  TypeSource localTypeSource(uint32_t id) const {
-    return m_state.localTypeSource(id);
+  TypeSourceSet localTypeSources(uint32_t id) const {
+    return m_state.localTypeSources(id);
   }
   bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
 
@@ -444,6 +440,11 @@ private:
   SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
+
+  bool      constrainLocal(uint32_t id,
+                           TypeSource typeSrc,
+                           TypeConstraint tc,
+                           const std::string& why);
 
   enum class CloneFlag { Yes, No };
   SSATmp*   optimizeInst(IRInstruction* inst,

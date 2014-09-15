@@ -711,6 +711,7 @@ void rfc1867PostHandler(Transport* transport,
   int fd=-1;
   void *event_extra_data = nullptr;
   unsigned int llen = 0;
+  int upload_count = RuntimeOption::MaxFileUploads;
 
   /* Initialize the buffer */
   if (!(mbuff = multipart_buffer_new(transport,
@@ -831,6 +832,11 @@ void rfc1867PostHandler(Transport* transport,
       /* If file_uploads=off, skip the file part */
       if (!RuntimeOption::EnableFileUploads) {
         skip_upload = 1;
+      } else if (upload_count <= 0) {
+        Logger::Warning(
+          "Maximum number of allowable file uploads has been exceeded"
+        );
+        skip_upload = 1;
       }
 
       /* Return with an error if the posted data is garbled */
@@ -880,6 +886,7 @@ void rfc1867PostHandler(Transport* transport,
         snprintf(path, sizeof(path), "%s/XXXXXX",
                  RuntimeOption::UploadTmpDir.c_str());
         fd = mkstemp(path);
+        upload_count--;
         if (fd == -1) {
           Logger::Warning("Unable to open temporary file");
           Logger::Warning("File upload error - unable to create a "

@@ -1434,45 +1434,6 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
 
 namespace {
 
-class AllCachedClasses {
-  NamedEntity::Map::iterator m_next, m_end;
-
-  void skip() {
-    Class* cls;
-    while (!empty()) {
-      cls = m_next->second.clsList();
-      if (cls && cls->getCached() &&
-          (cls->parent() != SystemLib::s_ClosureClass)) break;
-      ++m_next;
-    }
-  }
-
-public:
-  AllCachedClasses()
-    : m_next(NamedEntity::table()->begin())
-    , m_end(NamedEntity::table()->end())
-  {
-    skip();
-  }
-  bool empty() const {
-    return m_next == m_end;
-  }
-  Class* front() {
-    assert(!empty());
-    Class* c = m_next->second.clsList();
-    assert(c);
-    c = c->getCached();
-    assert(c);
-    return c;
-  }
-  Class* popFront() {
-    Class* c = front();
-    ++m_next;
-    skip();
-    return c;
-  }
-};
-
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   Array a = Array::Create();
   if (NamedEntity::table()) {
@@ -1682,6 +1643,45 @@ Class* AllClasses::popFront() {
   Class* cls = front();
   next();
   return cls;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void AllCachedClasses::skip() {
+  Class* cls;
+  while (!empty()) {
+    cls = m_next->second.clsList();
+    if (cls && cls->getCached() &&
+        (cls->parent() != SystemLib::s_ClosureClass)) break;
+    ++m_next;
+  }
+}
+
+AllCachedClasses::AllCachedClasses()
+    : m_next(NamedEntity::table()->begin())
+    , m_end(NamedEntity::table()->end())
+{
+  skip();
+}
+
+bool AllCachedClasses::empty() const {
+  return m_next == m_end;
+}
+
+Class* AllCachedClasses::front() {
+  assert(!empty());
+  Class* c = m_next->second.clsList();
+  assert(c);
+  c = c->getCached();
+  assert(c);
+  return c;
+}
+
+Class* AllCachedClasses::popFront() {
+  Class* c = front();
+  ++m_next;
+  skip();
+  return c;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

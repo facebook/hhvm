@@ -41,6 +41,11 @@ type cst_kind =
 type id = Pos.t * string
 type pstring = Pos.t * string
 
+type variance =
+  | Covariant
+  | Contravariant
+  | Invariant
+
 type program = def list
 
 and def =
@@ -70,7 +75,7 @@ and gconst = {
     cst_namespace: Namespace_env.env;
   }
 
-and tparam = id * hint option
+and tparam = variance * id * hint option
 
 and tconstraint = hint option
 
@@ -142,6 +147,10 @@ and kind =
   | Private
   | Public
   | Protected
+
+and og_null_flavor =
+  | OG_nullthrows
+  | OG_nullsafe
 
 (* id without $ *)
 and class_var = id * expr option
@@ -241,7 +250,7 @@ and expr_ =
   | Id of id
   | Lvar of id
   | Clone of expr
-  | Obj_get of expr * expr
+  | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
   | Class_get of id * pstring
   | Class_const of id * pstring

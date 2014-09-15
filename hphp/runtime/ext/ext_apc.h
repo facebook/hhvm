@@ -42,8 +42,8 @@ class apcExtension : public Extension {
   };
   static TableTypes TableType;
   static bool EnableApcSerialize;
-  static time_t KeyMaturityThreshold;
-  static size_t MaximumCapacity;
+  static int64_t KeyMaturityThreshold;
+  static int64_t MaximumCapacity;
   static int KeyFrequencyUpdatePeriod;
   static bool ExpireOnSets;
   static int PurgeFrequency;

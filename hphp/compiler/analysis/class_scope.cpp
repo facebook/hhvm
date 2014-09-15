@@ -45,6 +45,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/text-util.h"
 
+#include "folly/Conv.h"
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
@@ -131,8 +132,7 @@ std::string ClassScope::getDocName() const {
   if (m_redeclaring < 0) {
     return name;
   }
-  return name + Option::IdPrefix +
-    boost::lexical_cast<std::string>(m_redeclaring);
+  return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
 }
 
 bool ClassScope::NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func) {

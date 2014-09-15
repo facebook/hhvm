@@ -1471,8 +1471,12 @@ void Translator::createBlockMaps(const RegionDesc&        region,
     auto id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
     assert(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
-    Block* iBlock = i == 0 ? irb.unit().entry()
-                           : irb.unit().defBlock();
+
+    // NB: This maps the region entry block to a new IR block, even though
+    // we've already constructed an IR entry block. We'll make the IR entry
+    // block jump to this block.
+    Block* iBlock = irb.unit().defBlock();
+
     blockIdToIRBlock[id]     = iBlock;
     blockIdToRegionBlock[id] = rBlock;
     FTRACE(1,
@@ -1549,7 +1553,7 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
     auto const bid = block->id();
     if (block->start().offset() == offset) {
       auto inCount = region.preds(bid).size();
-      // NB: The initial block has an invisible "entry arc".
+      // NB: The entry block is a merge point if it has one predecessor.
       if (block == region.entry()) ++inCount;
       if (inCount >= 2) return true;
     }
@@ -1617,6 +1621,17 @@ Translator::translateRegion(const RegionDesc& region,
   if (bcControlFlow) {
     ht.setGenMode(IRGenMode::CFG);
     createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
+
+    // Make the IR entry block jump to the IR block we mapped the region entry
+    // block to (they are not the same!).
+
+    auto const entry = irb.unit().entry();
+    irb.startBlock(entry, entry->front().marker());
+
+    auto const irBlock = blockIdToIRBlock[region.entry()->id()];
+    always_assert(irBlock != entry);
+
+    irb.gen(Jmp, irBlock);
   }
 
   RegionDesc::BlockIdSet processedBlocks;
@@ -1679,12 +1694,13 @@ Translator::translateRegion(const RegionDesc& region,
         }
       }
 
-      // Emit reffiness guards. For now, we only support reffiness guards at
-      // the beginning of the region.
       while (refPreds.hasNext(sk)) {
-        assert(sk == startSk);
         auto const& pred = refPreds.next();
-        ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+        if (isFirstRegionInstr) {
+          ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
+        } else {
+          ht.checkRefs(pred.arSpOffset, pred.mask, pred.vals, sk.offset());
+        }
       }
 
       // Finish emitting guards, and emit profiling counters.
@@ -1859,9 +1875,8 @@ Translator::translateRegion(const RegionDesc& region,
 
       skipTrans = false;
 
-      // Insert a fallthrough jump
-      if (ht.genMode() == IRGenMode::CFG &&
-          i == block->length() - 1 && block != blocks.back()) {
+      // In CFG mode, insert a fallthrough jump at the end of each block.
+      if (ht.genMode() == IRGenMode::CFG && i == block->length() - 1) {
         if (instrAllowsFallThru(inst.op())) {
           auto nextOffset = inst.nextOffset != kInvalidOffset
             ? inst.nextOffset
@@ -1873,7 +1888,8 @@ Translator::translateRegion(const RegionDesc& region,
             ht.prepareForSideExit();
           }
           ht.endBlock(nextOffset, inst.nextIsMerge);
-        } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
+        } else if (b < blocks.size() - 1 &&
+                   (isRet(inst.op()) || inst.op() == OpNativeImpl)) {
           // "Fallthrough" from inlined return to the next block
           ht.endBlock(blocks[b + 1]->start().offset(), inst.nextIsMerge);
         }

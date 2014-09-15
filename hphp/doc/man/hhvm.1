@@ -1,0 +1,391 @@
+.TH HHVM 1
+
+.SH NAME
+hhvm \- Execute PHP and Hack files
+
+.SH SYNOPSIS
+.B hhvm
+.RI [ OPTIONS ]
+.RI [ \-f ]
+.RI file
+.RI [ [ \-\- ] args \.\.\. ]
+.br
+.B hhvm
+.RI \-\-php
+.RI [ PHP-OPTIONS ]
+.RI [ \-f ]
+.RI file
+.RI [ [ \-\- ] args \.\.\. ]
+
+.SH DESCRIPTION
+.BR hhvm (1)
+(aka the HipHop Virtual Machine) is an open-source virtual machine designed for executing programs written in Hack and PHP. HHVM uses a just-in-time compilation approach to run programs. HHVM should be used standalone for command line (CLI) scripts or together with a FastCGI-based web server like nginx or apache to serve websites.
+
+This is the command line interface to HHVM.
+
+The simplest way to parse and execute a program is providing a single parameter of a filename. Specifying
+.B \-f
+before the filename does this in a more explicit fashion, and allows other
+.IR OPTIONS
+to follow.
+
+HHVM has its own set of
+.IR OPTIONS
+, but also has the ability to behave like PHP 5.x
+as well. When the
+.B \-\-php
+flag is specified to
+.BR hhvm (1)
+(or the binary is named
+.B php
+), options available to PHP 5.x can be used.
+
+You may use:
+
+.nf
+.RS
+sudo /usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60
+.RE
+.fi
+
+to force
+.BR hhvm (1)
+to be used even if PHP 5.x is installed on the system.
+
+.SH FILES
+These are the default configuration files for HHVM. Right now both
+.B \.ini
+and
+.B \.hdf
+are supported as HHVM continues to migrate completely to
+.B \.ini
+.
+
+.SS php\.ini
+
+The default ini settings for
+.BR hhvm (1)
+are found in
+.B /etc/hhvm/php\.ini
+
+.SS config\.hdf
+
+The default hdf options for
+.BR hhvm (1)
+are found in
+.B /etc/hhvm/config\.hdf
+
+
+.SH OPTIONS
+These are the options you can specify to the
+.BR hhvm (1)
+executable.
+
+.TP
+.B \-a, \-\-interactive
+Shortcut for the
+.B \-\-mode
+.I debug
+command line option.
+
+.TP
+.BI \-\-admin\-port " PORT"
+Start admin listener at a specified port. The default value for
+.I PORT
+is
+.BR \-1 .
+
+.TP
+.BI \-\-arg " ARG"
+Other arguments.
+
+.TP
+.BI \-\-build\-id " ID"
+Unique identifier to compiled server code.
+
+.TP
+.B \-c ", " \-\-config " FILE"
+Load specified config (.hdf or .ini)
+.I FILE
+. Use multiple
+.B \-c
+to specify multiple config files.
+
+.TP
+.B \-\-compiler\-id
+Display the git hash for the compiler.
+
+.TP
+.BI \-\-count " NUM"
+How many times to repeat execution. The default value for
+.I NUM
+is
+.BR 1 .
+
+.TP
+.B \-d ", " \-\-define " SETTING"
+Define an ini setting in the same format ( foo[=bar] ) as provided in a .ini file.
+
+.TP
+.BI \-\-debug\-cmd " ARG"
+In
+.B \-\-mode
+.I debug
+, this executes the debugger command specified by
+.I ARG
+and returns its output in stdout. Multiple
+.B \-\-debug\-cmd
+can be specified to execute more than one command.
+
+.TP
+.BI \-\-debug\-config " FILE"
+In
+.B \-\-mode
+.I debug
+, load the specified debugger configuration
+.IR FILE .
+
+.TP
+.BI \-\-debug\-extension " ARG"
+In
+.B \-\-mode
+.I debug
+,
+.I ARG
+specifies which debugger extension PHP file to load.
+
+
+.TP
+.BI \-\-debug\-port " PORT"
+In
+.B \-\-mode
+.I debug
+, connect to the debugger server at specified
+.IR PORT .
+
+.TP
+.BI \-\-debug\-sandbox " ARG"
+In
+.B \-\-mode
+.I debug
+, initial sandbox to attach to when the debugger is started. The default for
+.I ARG
+is "default".
+
+.TP
+.BI \-\-extra\-header " ARG"
+An extra-header to add to the front of each line of logging.
+
+.TP
+.B \-f ", " \-\-file " FILE"
+In
+.B \-\-mode
+.I run
+, execute the specified
+.I FILE .
+
+.TP
+.B \-h ", " \-\-debug\-host " ADDRESS"
+In
+.B \-\-mode
+.I debug
+, connect to debugger server at specified address. The default for
+.I ADDRESS
+is
+.BR localhost .
+
+.TP
+.B \-\-help
+Display the list of command line options with short descriptions.
+
+.TP
+.BI \-\-instance\-id " ID"
+Unique identifier of server instance.
+
+.TP
+.B \-l ", " \-\-lint " FILE"
+Run lint on the specified
+.IR FILE .
+
+.TP
+.B \-m ", " \-\-mode " MODE"
+.I MODE
+can be any of the following values:
+.RS
+.IP \[bu] 2
+run (default): directly executes the program from the command line.
+.IP \[bu]
+debug (d): starts the debugger.
+.IP \[bu]
+server (s): starts an HTTP server from command line.
+.IP \[bu]
+daemon:  starts an HTTP server and runs it as a daemon.
+.IP \[bu]
+replay: replays a previously recorded HTTP request file.
+.IP \[bu]
+translate (t): translates a hex-encoded stacktrace.
+.RE
+
+.TP
+.B \-\-no\-config
+Do not use the default php.ini
+
+.TP
+.BI \-\-no\-safe\-access\-check " BOOL"
+Whether to allow any file or directory access without security checking. The default value is
+.B 0
+(or false).
+
+.TP
+.B \-p ", " \-\-port " PORT"
+Start an HTTP server at the specified port. The default
+.I PORT
+is
+.BR \-1 .
+
+.TP
+.B \-\-php
+Emulate the standard
+.BR php(1)
+command line. You can specify the options allowed in PHP 5.x.
+
+.TP
+.B \-\-port\-fd " FD"
+Use the specified
+.I FD
+for HTTP instead of creating a socket. The default value is
+.BR \-1 .
+
+.TP
+.B \-\-ssl\-port\-fd " FD"
+Use the specified
+.I FD
+for SSL instead of creating a socket. The default value is
+.BR \-1 .
+
+.TP
+.B \-\-repo\-schema
+Display the repository schema id.
+
+.TP
+.BI \-\-temp\-file " FILE"
+.I FILE
+specified is temporary and removed after execution.
+
+.TP
+.B \-u ", " \-\-user " USER"
+Run server under the specified
+.I USER
+account.
+
+.TP
+.B \-v ", " \-\-config\-value " SETTING"
+Individual configuration string in HDF format (name=value), where name can be any valid configuration for a config file. e.g., Section.Name=Value.
+
+.TP
+.B \-\-version
+Display the
+.BR hhvm (1)
+version number.
+
+.TP
+.B \-w ", " \-\-show " FILE"
+Directly output the specified
+.I FILE
+and do nothing else.
+
+.TP
+.BI \-\-xhprof\-flags " FLAGS"
+Set the XHProf run flags.
+
+.SH PHP-OPTIONS
+These are the options you can specify to the
+.BR hhvm (1)
+executable when explicitly specifying the
+.I \-\-php
+flag, or when the binary is named
+.B php .
+All PHP 5.x options are not supported at this point in time; we are
+planning to continue to add more option support.
+
+.TP
+.B \-a, \-\-interactive
+Similar to the same option when not specifying
+.I \-\-php .
+Run HHVM interactively. This lets you enter snippets of PHP code that directly get executed.
+
+.TP
+.BI \-c " FILE"
+Use the specified
+.I FILE
+for configuration options. The file should be .ini format.
+
+.TP
+.BI \-d " SETTING"
+Define INI entry specified by
+.I SETTING
+of the form
+.B foo=[bar] .
+
+.TP
+.B \-n
+Do not use any configuration (e.g., .ini) file when executing.
+
+.TP
+.BI \-r " CODE"
+Run HHVM code without using script tags, directly on the command line.
+
+.TP
+.B \-v
+Output the current HHVM build version number.
+
+.TP
+.B \-w
+Output source with stripped comments and whitespace.
+
+.TP
+.BI \-z " FILE"
+Load a dynamic extension file.
+
+
+
+
+.SH EXAMPLES
+
+.TP
+\fIhhvm foo\.php\fP
+Execute a PHP file.
+
+.TP
+\fIhhvm \-c custom\.ini foo\.php\fP
+Execute a PHP file given a certain configuration.
+
+.TP
+\fIhhvm \-\-php \-r 'echo "Hello Everyone!";'\fP
+Execute code from the command line using the --php option and -r.
+
+.TP
+\fIhhvm \-m server \-\-port 9090\fP
+Execute HHVM in server mode using a specified port.
+
+.SH BUGS
+The list of current known HHVM issues are found at:
+.IR https://github.com/facebook/hhvm/issues
+
+.SH AUTHORS
+The contributors to HHVM can be found here:
+.IR https://github\.com/facebook/hhvm/graphs/contributors
+
+.SH VERSION INFORMATION
+This manpage describes
+.BR hhvm (1)
+, version 3.0 and greater
+
+.SH COPYRIGHT
+HHVM is licensed under the PHP and Zend licenses except as otherwise noted. The full license can be found at:
+.IR https://github\.com/facebook/hhvm
+
+.SH SEE ALSO
+.BR hphpize (1)
+.br
+.I http://docs\.hhvm\.com

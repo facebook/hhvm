@@ -1698,6 +1698,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
     break;
   case TypeConstraint::MetaType::Number:
     return TNum;
+  case TypeConstraint::MetaType::ArrayKey:
+    // TODO(3774082): Support TInt | TStr type constraint
+    return TInitCell;
   }
 
   return TCell;

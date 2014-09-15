@@ -82,7 +82,8 @@ interface MutableMap extends ConstMap,
 
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
-                           \HH\KeyedIterable {
+                           \HH\KeyedIterable,
+                           \HH\Container {
 }
 
 interface MutableSet extends ConstSet,

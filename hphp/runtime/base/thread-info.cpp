@@ -59,12 +59,6 @@ ThreadInfo::ThreadInfo()
   m_pendingException = nullptr;
   m_coverage = new CodeCoverage();
   m_debugHookHandler = nullptr;
-
-  RDS::threadInit();
-  onSessionInit();
-
-  Lock lock(s_thread_info_mutex);
-  s_thread_infos.insert(this);
 }
 
 ThreadInfo::~ThreadInfo() {
@@ -74,6 +68,15 @@ ThreadInfo::~ThreadInfo() {
   s_thread_infos.erase(this);
   delete m_coverage;
   RDS::threadExit();
+}
+
+void ThreadInfo::init() {
+  m_reqInjectionData.threadInit();
+  RDS::threadInit();
+  onSessionInit();
+
+  Lock lock(s_thread_info_mutex);
+  s_thread_infos.insert(this);
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {

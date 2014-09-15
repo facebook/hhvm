@@ -903,7 +903,7 @@ Type convertToType(RepoAuthType ty) {
   not_reached();
 }
 
-Type refineType(Type oldType, Type newType) {
+Type refineTypeNoCheck(Type oldType, Type newType) {
   // It's OK for the old and new inner types of boxed values not to
   // intersect, since the inner type is really just a prediction.
   // But if they do intersect, we keep the intersection.  This is
@@ -913,8 +913,11 @@ Type refineType(Type oldType, Type newType) {
   if (oldType.isBoxed() && newType.isBoxed() && oldType.not(newType)) {
     return oldType < newType ? oldType : newType;
   }
+  return oldType & newType;
+}
 
-  auto const result = oldType & newType;
+Type refineType(Type oldType, Type newType) {
+  Type result = refineTypeNoCheck(oldType, newType);
   always_assert_flog(result != Type::Bottom,
                      "refineType({}, {}) failed", oldType, newType);
   return result;

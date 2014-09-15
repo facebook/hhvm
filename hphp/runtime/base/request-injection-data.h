@@ -65,7 +65,6 @@ struct RequestInjectionData {
         m_debuggerStepIn(false),
         m_debuggerStepOut(StepOutState::NONE),
         m_debuggerNext(false) {
-    threadInit();
   }
 
   ~RequestInjectionData();
@@ -210,12 +209,16 @@ private:
     return m_activeLineBreaks.size() == 0 ? -1 : m_activeLineBreaks.top();
   }
   void setActiveLineBreak(int line) {
-    m_activeLineBreaks.top() = line;
-    updateJit();
+    if (m_activeLineBreaks.size()) {
+      m_activeLineBreaks.top() = line;
+      updateJit();
+    }
   }
   void popActiveLineBreak() {
-    m_activeLineBreaks.pop();
-    updateJit();
+    if (m_activeLineBreaks.size()) {
+      m_activeLineBreaks.pop();
+      updateJit();
+    }
   }
   void pushActiveLineBreak(int line) {
     m_activeLineBreaks.push(line);

@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <array>
-#include <boost/lexical_cast.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/exception.h"

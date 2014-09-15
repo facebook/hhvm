@@ -166,7 +166,7 @@ module HintCycle = struct
 
   and hintl stack params l = List.iter (hint stack params) l
 
-  let check_constraint cstrs (_, hopt) =
+  let check_constraint cstrs (_, _, hopt) =
     match hopt with
     | None -> ()
     | Some h -> hint SSet.empty cstrs h

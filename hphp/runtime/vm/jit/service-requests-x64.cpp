@@ -47,6 +47,8 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
 
 namespace {
 
+static constexpr int kMovSize = 0xa;
+
 /*
  * Work to be done for jmp-smashing service requests before the service request
  * is emitted.
@@ -161,15 +163,11 @@ void emitNativeImpl(CodeBlock& mainCode, const Func* func) {
   }
 }
 
-static int maxStubSpace() {
+static constexpr int maxStubSpace() {
   /* max space for moving to align, saving VM regs plus emitting args */
-  static constexpr int
-    kVMRegSpace = 0x14,
-    kMovSize = 0xa,
-    kNumServiceRegs = sizeof(serviceReqArgRegs) / sizeof(PhysReg),
-    kMaxStubSpace = kJmpTargetAlign - 1 + kVMRegSpace +
-      kNumServiceRegs * kMovSize;
-  return kMaxStubSpace;
+  return
+    kJmpTargetAlign - 1 + (0x14 /*kVMRegSpace*/) +
+    kNumServiceReqArgRegs * kMovSize;
 }
 
 void emitBindCallHelper(CodeBlock& mainCode, CodeBlock& frozenCode,
@@ -232,7 +230,6 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
   const bool align   = flags & SRFlags::Align;
   const bool persist = flags & SRFlags::Persist;
 
-  DEBUG_ONLY static constexpr int kMovSize = 0xa;
 
   CodeBlock cb;
   cb.init(start, maxStubSpace, "stubTemp");

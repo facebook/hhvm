@@ -14,27 +14,30 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/vasm-x64.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/util/ringbuffer.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/abi-cxx.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
-TRACE_SET_MOD(hhir);
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/ringbuffer.h"
+#include "hphp/util/stack-trace.h"
+
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;
 using Trace::RingBufferType;
 using Trace::ringbufferName;
 
+const char* area_names[] = { "main", "cold", "frozen" };
 namespace {
 
 // Visitor class to format the operands of a Vinstr. There are
 // imm() overloaded methods for each type of operand used by any Vinstr.
 // If we are missing an overload, the templated catch-all prints "?".
 struct FormatVisitor {
-  FormatVisitor(Vunit& unit, std::ostringstream& str)
+  FormatVisitor(const Vunit& unit, std::ostringstream& str)
     : unit(unit), str(str)
   {}
   template<class T> void imm(T imm) {
@@ -70,10 +73,13 @@ struct FormatVisitor {
       str << "nullptr";
     }
   }
+  void imm(TransFlags f) {
+    if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
+  }
 
   template<class R> void across(R r) { print(r); }
   template<class R> void use(R r) { print(r); }
-  void use(Vptr& m) { print(m.base, m.index, m.scale, m.disp); }
+  void use(Vptr m) { print(m); }
   void use(Vtuple uses) { print(uses); }
 
   void defSep() {
@@ -87,29 +93,8 @@ struct FormatVisitor {
   void def(Vtuple defs) { defSep(); print(defs); }
   template<class R> void def(R r) { defSep(); print(r); }
 
-  std::string format(Vreg64 r) {
-    if (r.isPhys()) return reg::regname(r);
-    std::ostringstream str;
-    str << "%" << size_t(r);
-    return str.str();
-  }
-
-  void print(Vreg64 base, Vreg64 index, int scale, int disp) {
-    if (!index.isValid()) {
-      if (!base.isValid()) {
-        str << sep() << '[' << disp << ']';
-      } else {
-        str << sep() << '[' << format(base) <<
-               (disp >= 0 ? "+" : "") << disp << ']';
-      }
-    } else if (!base.isValid()) {
-      str << sep() << '[' << disp <<
-        '+' << format(index) << '*' << scale << ']';
-    } else {
-      str << sep() << '[' << format(base) <<
-             (disp >= 0 ? "+" : "") << disp <<
-             '+' << format(index) << '*' << scale << ']';
-    }
+  void print(Vptr p) {
+    str << sep() << show(p);
   }
 
   void print(Reg64 r) {
@@ -126,7 +111,8 @@ struct FormatVisitor {
 
   template<class R> void print(R r) {
     str << sep();
-    if (r.isVirt()) str << "%" << size_t(r);
+    if (!r.isValid()) str << "%?";
+    else if (r.isVirt()) str << "%" << size_t(r);
     else str << name(r);
   }
   const char* name(Vreg64 r) { return reg::regname(r.asReg()); }
@@ -145,13 +131,55 @@ struct FormatVisitor {
   }
   const char* sep() { return comma ? ", " : (comma = true, ""); }
   const Vunit& unit;
+
   std::ostringstream& str;
   bool seen_def{false};
   bool comma{false};
 };
 }
 
-std::string formatInstr(Vunit& unit, Vinstr& inst) {
+std::string show(Vreg r) {
+  if (!r.isValid()) return "%?";
+  if (r.isPhys()) {
+    if (r.isGP()) {
+      Reg64 gpr = r;
+      return reg::regname(gpr);
+    }
+    RegXMM xmm = r;
+    return reg::regname(xmm);
+  }
+  std::ostringstream str;
+  str << "%" << size_t(r);
+  return str.str();
+}
+
+std::string show(Vptr p) {
+  // [%fs + %base + disp + %index * scale]
+  std::string str = "[";
+  auto prefix = false;
+  if (p.seg == Vptr::FS) {
+    str += "%fs";
+    prefix = true;
+  }
+  if (p.base.isValid()) {
+    folly::toAppend(prefix ? " + " : "", show(p.base), &str);
+    prefix = true;
+  }
+  if (p.disp) {
+    folly::format(&str, "{}{:#x}",
+                  prefix ? p.disp < 0 ? " - " : " + " : "",
+                  prefix ? std::abs(p.disp) : p.disp);
+    prefix = true;
+  }
+  if (p.index.isValid()) {
+    folly::toAppend(prefix ? " + " : "", show(p.index), &str);
+    if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
+  }
+  str += ']';
+  return str;
+}
+
+std::string show(const Vunit& unit, const Vinstr& inst) {
   std::ostringstream out;
   out << folly::format("{: <10} ", vinst_names[inst.op]);
   FormatVisitor pv(unit, out);
@@ -170,21 +198,19 @@ std::string formatInstr(Vunit& unit, Vinstr& inst) {
   return out.str();
 }
 
-void printBlock(std::ostream& out, Vunit& unit, PredVector& preds, Vlabel b) {
+void printBlock(std::ostream& out, const Vunit& unit,
+                const PredVector& preds, Vlabel b) {
   auto& block = unit.blocks[b];
-  out << folly::format("B{: <11} area={}, preds=", size_t(b), int(block.area));
-  auto delim = "";
-  for (auto p: preds[b]) {
-    out << delim << 'B' << size_t(p);
-    delim = ",";
-  }
+  out << folly::format("B{: <11} {}", size_t(b), area_names[int(block.area)]);
+  for (auto p : preds[b]) out << ", B" << size_t(p);
   out << "\n";
   for (auto& inst : block.code) {
-    out << "  " << formatInstr(unit, inst) << "\n";
+    out << "  " << show(unit, inst) << "\n";
   }
 }
 
-void printCfg(std::ostream& out, Vunit& unit, jit::vector<Vlabel>& blocks) {
+void printCfg(std::ostream& out, const Vunit& unit,
+              const jit::vector<Vlabel>& blocks) {
   out << "digraph G {\n";
   for (auto b: blocks) {
     auto& block = unit.blocks[b];
@@ -200,24 +226,28 @@ void printCfg(std::ostream& out, Vunit& unit, jit::vector<Vlabel>& blocks) {
   out << "}\n";
 }
 
-void printCfg(Vunit& unit, jit::vector<Vlabel>& blocks) {
+void printCfg(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   std::ostringstream out;
   out << "vunit cfg\n";
   printCfg(out, unit, blocks);
   HPHP::Trace::traceRelease("%s\n", out.str().c_str());
 }
 
-void printUnit(std::string caption, Vunit& unit) {
-  if (!dumpIREnabled(1)) return;
-  std::ostringstream out;
-  out << "\n" << caption << "\n";
+std::string show(const Vunit& unit) {
   auto preds = computePreds(unit);
   auto blocks = sortBlocks(unit);
+
+  std::ostringstream out;
   printCfg(out, unit, blocks);
   for (auto b : blocks) {
     printBlock(out, unit, preds, b);
   }
-  HPHP::Trace::traceRelease("%s\n", out.str().c_str());
+  return out.str();
+}
+
+void printUnit(int level, const std::string& caption, const Vunit& unit) {
+  if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
+  Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
 }
 
 }}

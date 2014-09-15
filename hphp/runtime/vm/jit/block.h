@@ -121,10 +121,7 @@ struct Block : boost::noncopyable {
   EdgeList& preds()             { return m_preds; }
   const EdgeList& preds() const { return m_preds; }
 
-  size_t numPreds() const {
-    // NB: The entry block has an invisible predecessor.
-    return m_preds.size() + safe_cast<size_t>(isEntry());
-  }
+  size_t numPreds() const { return m_preds.size(); }
 
   // Remove edge from its destination's predecessor list and insert it in
   // new_to's predecessor list.
@@ -295,8 +292,8 @@ inline void Block::push_back(IRInstruction* inst) {
   return m_instrs.push_back(*inst);
 }
 
-template <class Predicate> inline
-void Block::remove_if(Predicate p) {
+template <class Predicate>
+inline void Block::remove_if(Predicate p) {
   m_instrs.remove_if(p);
 }
 
@@ -323,6 +320,10 @@ inline BCMarker Block::catchMarker() const {
 // defined here to avoid circular dependencies
 inline void Edge::setTo(Block* to) {
   m_to = Block::updatePreds(this, to);
+}
+
+inline Block* Edge::from() const {
+  return inst() != nullptr ? inst()->block() : nullptr;
 }
 
 }}

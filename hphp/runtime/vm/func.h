@@ -281,7 +281,7 @@ struct Func {
   // Basic info.                                                        [const]
 
   /*
-   * Whether this function was defined in a psuedomain.
+   * Whether this function was defined in a pseudomain.
    */
   bool top() const;
 
@@ -1118,7 +1118,8 @@ private:
   static constexpr int kMagic = 0xba5eba11;
 
 public:
-  static std::atomic<bool> s_treadmill;
+  static std::atomic<bool>     s_treadmill;
+  static std::atomic<uint32_t> s_totalClonedClosures;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

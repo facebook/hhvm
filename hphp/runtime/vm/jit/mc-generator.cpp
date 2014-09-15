@@ -67,6 +67,7 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h" // XXX Layering violation.
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
@@ -1772,7 +1773,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   TRACE(1, "mcg: %zd-byte tracelet\n", code.main().frontier() - start);
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-    Trace::traceRelease("%s", getUsage().c_str());
+    Trace::traceRelease("%s", getUsageString().c_str());
   }
 }
 
@@ -1792,11 +1793,9 @@ void MCGenerator::traceCodeGen() {
     "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
   );
 
-  // Task #4075847: enable optimizations with loops
-  if (!(RuntimeOption::EvalJitLoops && m_tx.mode() == TransKind::Optimize)) {
-    optimize(unit, ht.irBuilder(), m_tx.mode());
-    finishPass(" after optimizing ", kOptLevel);
-  }
+  optimize(unit, ht.irBuilder(), m_tx.mode());
+  finishPass(" after optimizing ", kOptLevel);
+
   if (m_tx.mode() == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
     unit.collectPostConditions();
@@ -1967,40 +1966,67 @@ void MCGenerator::recordGdbStub(const CodeBlock& cb,
   }
 }
 
-std::string MCGenerator::getUsage() {
-  std::string usage;
-  size_t totalBlockSize = 0;
-  size_t totalBlockCapacity = 0;
-
-  auto addRow = [&](const std::string& name, size_t used, size_t capacity) {
-    auto percent = capacity ? 100 * used / capacity : 0;
-    usage += folly::format("mcg: {:9} bytes ({}%) in {}\n",
-                           used, percent, name).str();
-  };
+std::vector<UsageInfo> MCGenerator::getUsageInfo() {
+  std::vector<UsageInfo> tcUsageInfo;
   code.forEachBlock([&](const char* name, const CodeBlock& a) {
-    addRow(std::string("code.") + name, a.used(), a.capacity());
-    totalBlockSize += a.used();
-    totalBlockCapacity += a.capacity();
+    tcUsageInfo.emplace_back(UsageInfo{std::string("code.") + name,
+                             a.used(),
+                             a.capacity(),
+                             true});
   });
   // Report code.stubs usage = code.cold + code.frozen usage, so
   // ODS doesn't break.
-  auto const stubsUsed = code.realCold().used() + code.realFrozen().used();
-  auto const stubsCapacity = code.realCold().capacity() +
-    code.realFrozen().capacity();
-  addRow(std::string("code.stubs"), stubsUsed, stubsCapacity);
-  addRow("data", code.data().used(), code.data().capacity());
-  addRow("RDS", RDS::usedBytes(),
-         RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
-  addRow("RDSLocal", RDS::usedLocalBytes(),
-         RuntimeOption::EvalJitTargetCacheSize * 3 / 4);
-  addRow("persistentRDS", RDS::usedPersistentBytes(),
-         RuntimeOption::EvalJitTargetCacheSize / 4);
-  addRow("total",
-          totalBlockSize + code.data().used()
-          + RDS::usedPersistentBytes(),
-          totalBlockCapacity + code.data().capacity()
-          + (RuntimeOption::EvalJitTargetCacheSize / 4));
+  tcUsageInfo.emplace_back(UsageInfo{
+      std::string("code.stubs"),
+      code.realCold().used() + code.realFrozen().used(),
+      code.realCold().capacity() + code.realFrozen().capacity(),
+      false});
+  tcUsageInfo.emplace_back(UsageInfo{
+      "data",
+      code.data().used(),
+      code.data().capacity(),
+      true});
+  tcUsageInfo.emplace_back(UsageInfo{
+      "RDS",
+      RDS::usedBytes(),
+      RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
+      false});
+  tcUsageInfo.emplace_back(UsageInfo{
+      "RDSLocal",
+      RDS::usedLocalBytes(),
+      RuntimeOption::EvalJitTargetCacheSize * 3 / 4,
+      false});
+  tcUsageInfo.emplace_back(UsageInfo{
+      "persistentRDS",
+      RDS::usedPersistentBytes(),
+      RuntimeOption::EvalJitTargetCacheSize / 4,
+      false});
+  tcUsageInfo.emplace_back(UsageInfo{
+      "cloned-closuers",
+      Func::s_totalClonedClosures,
+      RuntimeOption::EvalMaxClonedClosures});
+  return tcUsageInfo;
+}
 
+std::string MCGenerator::getUsageString() {
+  std::string usage;
+  size_t totalBlockSize = 0;
+  size_t totalBlockCapacity = 0;
+  auto addRow = [&](UsageInfo blockUsageInfo) {
+    auto percent = blockUsageInfo.m_capacity ?
+      100 * blockUsageInfo.m_used / blockUsageInfo.m_capacity : 0;
+    usage += folly::format("mcg: {:9} bytes ({}%) in {}\n",
+                           blockUsageInfo.m_used,
+                           percent,
+                           blockUsageInfo.m_name).str();
+    if (blockUsageInfo.m_global) {
+      totalBlockSize += blockUsageInfo.m_used;
+      totalBlockCapacity += blockUsageInfo.m_capacity;
+    }
+  };
+  auto tcUsageInfo = getUsageInfo();
+  for_each(tcUsageInfo.begin(), tcUsageInfo.end(), addRow);
+  addRow(UsageInfo{"total", totalBlockSize, totalBlockCapacity, false});
   return usage;
 }
 

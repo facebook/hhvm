@@ -233,14 +233,12 @@ void StackTraceNoHeap::ClearAllExtraLogging() {
   StackTraceLog::s_logData->data.clear();
 }
 
-void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
-                           const char *pid, const char *buildId,
+void StackTraceNoHeap::log(const char *errorType, int fd, const char *buildId,
                            int debuggerCount) const {
-  int fd = ::open(tracefn, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
-  if (fd < 0) return;
+  assert(fd >= 0);
 
   dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
-  dprintf(fd, "ProcessID: %s\n", pid);
+  dprintf(fd, "ProcessID: %u\n", Process::GetProcessId());
   dprintf(fd, "ThreadID: %" PRIx64"\n", (int64_t)Process::GetThreadId());
   dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
   dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
@@ -256,8 +254,6 @@ void StackTraceNoHeap::log(const char *errorType, const char *tracefn,
   dprintf(fd, "\n");
 
   printStackTrace(fd);
-
-  ::close(fd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

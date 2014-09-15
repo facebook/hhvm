@@ -148,6 +148,13 @@ struct RelocationInfo {
   std::set<TCA> m_addressImmediates;
 };
 
+struct UsageInfo {
+  std::string m_name;
+  size_t m_used;
+  size_t m_capacity;
+  bool m_global;
+} ;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -278,8 +285,9 @@ public:
   /*
    * Return cache usage information as a string
    */
-  std::string getUsage();
+  std::string getUsageString();
   std::string getTCAddrs();
+  std::vector<UsageInfo> getUsageInfo();
 
   /*
    * Returns the total size of the TC now and at the beginning of this request,

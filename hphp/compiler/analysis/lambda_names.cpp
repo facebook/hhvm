@@ -96,7 +96,7 @@ private:
 
     if (dynamic_pointer_cast<MethodStatement>(node)) {
       // Don't descend into nested non-closure functions, or functions
-      // in the psuedo-main.
+      // in the pseudo-main.
       return;
     }
 

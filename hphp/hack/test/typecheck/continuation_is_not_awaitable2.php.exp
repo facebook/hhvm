@@ -1,5 +1,5 @@
 File "continuation_is_not_awaitable2.php", line 13, characters 3-7:
-Typing[4110] Invalid yield
+Invalid yield (Typing[4110])
 File "continuation_is_not_awaitable2.php", line 12, characters 17-25:
 This is an object of type Awaitable
 File "continuation_is_not_awaitable2.php", line 13, characters 3-7:

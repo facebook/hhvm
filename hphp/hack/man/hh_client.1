@@ -149,6 +149,12 @@ options.
 Prints the current client version, including build ID and build date, and
 then exits.
 
+.TP
+.B \-\-auto-complete
+Autocompletes text on STDIN where the cursor is replaced with
+.I AUTO332.
+Returns a newline-separated list.
+
 
 .SS start
 
@@ -221,7 +227,7 @@ project root.
 .SH BUGS
 The Hack language is part of the HHVM project. Known bugs can be found at that
 tracker, and new ones should be reported there as well:
-.IR https://github.com/facebook/hhvm/issues
+.I https://github.com/facebook/hhvm/issues
 
 .SH SEE ALSO
 .BR hh_server (1), \ hackificator (1), \ hack_remove_soft_types (1).

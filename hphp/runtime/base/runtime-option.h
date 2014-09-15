@@ -51,9 +51,8 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  */
 class RuntimeOption {
 public:
-  static void Load(const IniSettingMap &ini,
-                   Hdf& config,
-                   std::vector<std::string>* overwrites = nullptr);
+  static void Load(IniSettingMap &ini,
+                   Hdf& config);
 
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;
@@ -169,6 +168,7 @@ public:
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool EnableUploadProgress;
+  static int64_t MaxFileUploads;
   static int Rfc1867Freq;
   static std::string Rfc1867Prefix;
   static std::string Rfc1867Name;
@@ -280,7 +280,7 @@ public:
   static std::string ProfilerOutputDir;
   static std::string CoreDumpEmail;
   static bool CoreDumpReport;
-  static std::string CoreDumpReportDirectory;
+  static std::string StackTraceFilename;
   static bool LocalMemcache;
   static bool MemcacheReadOnly;
 
@@ -377,6 +377,7 @@ public:
     kEvalVMInitialGlobalTableSizeDefault)                               \
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
+  F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             4 << 20)                         \
   F(uint64_t, JitASize,                60 << 20)                        \
@@ -474,6 +475,7 @@ public:
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
+  F(uint32_t, MaxClonedClosures,       100000)                          \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

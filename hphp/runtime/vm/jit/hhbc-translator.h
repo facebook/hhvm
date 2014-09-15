@@ -117,9 +117,17 @@ struct HhbcTranslator {
   void guardTypeLocal(uint32_t locId,      Type type, bool outerOnly);
   void guardTypeLocation(const RegionDesc::Location& loc, Type type,
                          bool outerOnly);
+  void refCheckHelper(int64_t entryArDelta,
+                      const std::vector<bool>& mask,
+                      const std::vector<bool>& vals,
+                      Offset dest = -1);
   void guardRefs(int64_t entryArDelta,
                  const std::vector<bool>& mask,
                  const std::vector<bool>& vals);
+  void checkRefs(int64_t entryArDelta,
+                 const std::vector<bool>& mask,
+                 const std::vector<bool>& vals,
+                 Offset dest);
   void endGuards();
 
   // Interface to irtranslator for predicted and inferred types.
@@ -322,7 +330,8 @@ public:
                            int32_t methodNameStrId,
                            int32_t clssNamedEntityPairId);
   void emitFPushObjMethodD(int32_t numParams,
-                           int32_t methodNameStrId);
+                           int32_t methodNameStrId,
+                           unsigned char subop);
   void emitFPushObjMethodCommon(SSATmp* obj,
                                 const StringData* methodName,
                                 int32_t numParams,

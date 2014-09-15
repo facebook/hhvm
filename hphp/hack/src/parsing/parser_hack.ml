@@ -275,7 +275,7 @@ let priorities = [
   (Right, [Teq; Tpluseq; Tminuseq; Tstareq;
            Tslasheq; Tdoteq; Tpercenteq;
            Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
-  (Left, [Tarrow]);
+  (Left, [Tarrow; Tnsarrow]);
   (Left, [Telseif]);
   (Left, [Telse]);
   (Left, [Tendif]);
@@ -393,11 +393,15 @@ let ref_param env =
 let rec program content =
   is_hh_file := false;
   L.comment_list := [];
+  L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env lb in
   let ast = header env in
   let comments = !L.comment_list in
+  let fixmes = !L.fixmes in
   L.comment_list := [];
+  L.fixmes := Utils.IMap.empty;
+  Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
   let is_hh_file = !is_hh_file in
@@ -888,15 +892,34 @@ and class_param_list_remain env =
 
 and class_param env =
   match L.token env.lb with
+  | Tplus ->
+      if L.token env.lb <> Tword
+      then class_param_error env
+      else
+        let parameter_name, parameter_constraint = class_param_name env in
+        Covariant, parameter_name, parameter_constraint
+  | Tminus ->
+      if L.token env.lb <> Tword
+      then class_param_error env
+      else
+        let parameter_name, parameter_constraint = class_param_name env in
+        Contravariant, parameter_name, parameter_constraint
   | Tword ->
-      let parameter_name = Pos.make env.lb, Lexing.lexeme env.lb in
-      let parameter_constraint = class_parameter_constraint env in
-      parameter_name, parameter_constraint
+      let parameter_name, parameter_constraint = class_param_name env in
+      let variance = Invariant in
+      variance, parameter_name, parameter_constraint
   | _ ->
-      error_expect env "type parameter";
-      let parameter_name = Pos.make env.lb, "T*unknown*" in
-      parameter_name, None
+      class_param_error env
 
+and class_param_error env =
+  error_expect env "type parameter";
+  let parameter_name = Pos.make env.lb, "T*unknown*" in
+  Invariant, parameter_name, None
+
+and class_param_name env =
+  let parameter_name = Pos.make env.lb, Lexing.lexeme env.lb in
+  let parameter_constraint = class_parameter_constraint env in
+  parameter_name, parameter_constraint
 
 and class_parameter_constraint env =
   match L.token env.lb with
@@ -1541,7 +1564,8 @@ and param_implicit_field vis p =
   let this = pos, "$this" in
   let stmt =
     Expr (pos, Binop (Eq None, (pos, Obj_get((pos, Lvar this),
-                                             (pos, Id cvname))),
+                                             (pos, Id cvname),
+                                             OG_nullthrows)),
                       (pos, Lvar p.param_id)))
   in
   member, stmt
@@ -2208,8 +2232,8 @@ and expr_remain env e1 =
       expr_binop env Txor Xor e1
   | Tincr | Tdecr as uop  ->
       expr_postfix_unary env uop e1
-  | Tarrow ->
-      expr_arrow env e1
+  | Tarrow | Tnsarrow as tok ->
+      expr_arrow env e1 tok
   | Tcolcol ->
       expr_colcol env e1
   | Tlp ->
@@ -2486,8 +2510,8 @@ and expr_binop env bop ast_bop e1 =
 (* Object Access ($obj->method) *)
 (*****************************************************************************)
 
-and expr_arrow env e1 =
-  reduce env e1 Tarrow begin fun e1 env ->
+and expr_arrow env e1 tok =
+  reduce env e1 tok begin fun e1 env ->
     let e2 =
       match L.token env.lb with
       | Tword ->
@@ -2496,7 +2520,10 @@ and expr_arrow env e1 =
           pos, Id (pos, name)
       | _ -> L.back env.lb; expr env
     in
-    btw e1 e2, Obj_get (e1, e2)
+    btw e1 e2, (match tok with
+      | Tarrow -> Obj_get (e1, e2, OG_nullthrows)
+      | Tnsarrow -> Obj_get (e1, e2, OG_nullsafe)
+      | _ -> assert false)
   end
 
 (*****************************************************************************)
@@ -2993,7 +3020,7 @@ and encapsed_expr_reduce_left start env e1 =
           L.back env.lb;
           let e2 = encapsed_expr env in
           let pos = Pos.btw start (Pos.make env.lb) in
-          (pos, Obj_get (e1, e2)), true
+          (pos, Obj_get (e1, e2, OG_nullthrows)), true
       | _ ->
           L.back env.lb;
           e1, false

@@ -157,15 +157,16 @@ public:
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
-  void encapObjProp(Token &out, Token &var, Token &name);
+  void encapObjProp(Token &out, Token &var, bool nullsafe, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);
   void onConst(Token &out, Token &name, Token &value);
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
 
-  void onObjectProperty(Token &out, Token &base, Token &prop);
-  void onObjectMethodCall(Token &out, Token &base, Token &prop, Token &params);
+  void onObjectProperty(Token &out, Token &base, bool nullsafe, Token &prop);
+  void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
+                          Token &params);
 
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);

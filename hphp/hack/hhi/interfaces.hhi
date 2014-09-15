@@ -269,11 +269,14 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 
 interface ConstSet<Tv> extends ConstCollection<Tv>,
                                ConstSetAccess<Tv>,
-                               Container<Tv>,
-                               Iterable<Tv> {
+                               KeyedIterable<mixed, Tv>,
+                               Container<Tv> {
   public function values(): ConstVector<Tv>;
+  public function keys(): ConstVector<mixed>;
   public function map<Tu>((function(Tv): Tu) $fn): ConstSet<Tu>;
+  public function mapWithKey<Tu>((function(mixed, Tv): Tu) $fn): ConstSet<Tu>;
   public function filter((function(Tv): bool) $fn): ConstSet<Tv>;
+  public function filterWithKey((function(mixed, Tv): bool) $fn): ConstSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
   public function take(int $n): ConstSet<Tv>;
   public function takeWhile((function(Tv): bool) $fn): ConstSet<Tv>;
@@ -282,15 +285,20 @@ interface ConstSet<Tv> extends ConstCollection<Tv>,
   public function slice(int $start, int $len): ConstSet<Tv>;
   public function concat(Traversable<Tv> $traversable): ConstVector<Tv>;
   public function firstValue(): ?Tv;
+  public function firstKey(): mixed;
   public function lastValue(): ?Tv;
+  public function lastKey(): mixed;
 }
 
 interface MutableSet<Tv> extends ConstSet<Tv>,
                                  Collection<Tv>,
                                  SetAccess<Tv> {
   public function values(): MutableVector<Tv>;
+  public function keys(): MutableVector<mixed>;
   public function map<Tu>((function(Tv): Tu) $fn): MutableSet<Tu>;
+  public function mapWithKey<Tu>((function(mixed, Tv): Tu) $fn): MutableSet<Tu>;
   public function filter((function(Tv): bool) $fn): MutableSet<Tv>;
+  public function filterWithKey((function(mixed, Tv): bool) $fn): MutableSet<Tv>;
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableSet<Pair<Tv, Tu>>;
   public function take(int $n): MutableSet<Tv>;
@@ -300,7 +308,9 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
   public function slice(int $start, int $len): MutableSet<Tv>;
   public function concat(Traversable<Tv> $traversable): MutableVector<Tv>;
   public function firstValue(): ?Tv;
+  public function firstKey(): mixed;
   public function lastValue(): ?Tv;
+  public function lastKey(): mixed;
 }
 
 /**
@@ -328,4 +338,17 @@ interface XHPChild {}
  */
 interface Stringish {
   public function __toString(): string;
+}
+
+/**
+  * Classes that implement IMemoizeParam may be passed to
+  * serialize_memoize_param() and may be used as params on
+  * <<__Memoize>> functions
+  */
+interface IMemoizeParam {
+   /**
+   * Serialize this object to a string that can be used as a
+   * dictionary key to differentiate instances of this class.
+   */
+  public function getInstanceKey(): string;
 }

@@ -1,0 +1,25 @@
+test1:
+object(D)#2 (0) {
+}
+NULL
+test2:
+object(F)#4 (0) {
+}
+NULL
+test3:
+object(E)#5 (0) {
+}
+NULL
+test4:
+object(F)#7 (0) {
+}
+object(F)#8 (0) {
+}
+NULL
+NULL
+NULL
+NULL
+test5:
+int(123)
+int(123)
+Done

@@ -146,3 +146,6 @@ methods. N.B.: exit() is a fatal.
 for security reasons. It can be re-enabled on a per-protocol basis (file, http,
 compress.zlib, etc...) with a comma-separated list in the ini setting
 hhvm.libxml.ext_entity_whitelist.
+
+(9) Under HHVM, PharData will extract symlinks from tar files. PHP5 will create
+empty files instead.

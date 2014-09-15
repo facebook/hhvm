@@ -22,19 +22,20 @@
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
-#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
+#include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/unique-stubs-x64.h"
+#include "hphp/runtime/vm/jit/unwind-x64.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit {
 
@@ -76,15 +77,20 @@ struct BackEnd : public jit::BackEnd {
   }
 
   Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return x64::srcConstraint(inst, i);
+    always_assert(false);
   }
 
   Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return x64::dstConstraint(inst, i);
+    always_assert(false);
   }
 
-  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
-  RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
+  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override {
+    always_assert(false);
+  }
+
+  RegPair precolorDst(const IRInstruction& inst, unsigned i) override {
+    always_assert(false);
+  }
 
   /*
    * enterTCHelper does not save callee-saved registers except %rbp. This means
@@ -205,17 +211,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
-    void* list = state.patches[block];
-    Address labelAddr = cb.frontier();
-    while (list) {
-      int32_t* toPatch = (int32_t*)list;
-      int32_t diffToNext = *toPatch;
-      ssize_t diff = labelAddr - ((Address)list + sizeof(int32_t));
-      *toPatch = safe_cast<int32_t>(diff); // patch the jump address
-      if (diffToNext == 0) break;
-      void* next = (TCA)list - diffToNext;
-      list = next;
-    }
+    always_assert(false);
   }
 
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
@@ -692,163 +688,71 @@ struct BackEnd : public jit::BackEnd {
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
-  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
+  return folly::make_unique<BackEnd>();
 }
 
-using NativeCalls::CallMap;
-using NativeCalls::Arg;
-using NativeCalls::ArgType;
-
-// return the number of registers needed to pass this arg
-int argSize(const Arg& arg, const IRInstruction& inst) {
-  switch (arg.type) {
-    case ArgType::SSA:
-    case ArgType::Imm:
-    case ArgType::ExtraImm:
-      return 1;
-    case ArgType::TV:
-      return 2;
-    case ArgType::MemberKeyS:
-      return inst.src(arg.ival)->isA(Type::Str) ? 1 : 2;
-    case ArgType::MemberKeyIS:
-      return inst.src(arg.ival)->isA(Type::Str) ? 1 :
-             inst.src(arg.ival)->isA(Type::Int) ? 1 : 2;
-  }
-  return 1;
-}
-
-// Return the argument-register hint for a native-call opcode.
-RegPair hintNativeCallSrc(const IRInstruction& inst, unsigned i) {
-  auto const& args = CallMap::info(inst.op()).args;
-  auto pos = 0;
-  for (auto& arg : args) {
-    if (argSize(arg, inst) == 1) {
-      if (arg.ival == i && pos < kNumRegisterArgs) {
-        return {argNumToRegName[pos], InvalidReg};
+static void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
+                       const BlockList& blocks) {
+  // visit instructions to find tmps eligible to use SIMD registers
+  auto const try_wide = !packed_tv && RuntimeOption::EvalHHIRAllocSIMDRegs;
+  boost::dynamic_bitset<> not_wide(unit.numTmps());
+  StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
+  for (auto block : blocks) {
+    for (auto& inst : *block) {
+      for (uint32_t i = 0, n = inst.numSrcs(); i < n; i++) {
+        auto s = inst.src(i);
+        tmps[s] = s;
+        if (!try_wide || !storesCell(inst, i)) {
+          not_wide.set(s->id());
+        }
       }
-      pos++;
+      for (auto& d : inst.dsts()) {
+        tmps[&d] = &d;
+        if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
+          not_wide.set(d.id());
+        }
+      }
+    }
+  }
+  // visit each tmp, assign 1 or 2 registers to each.
+  auto cns = [&](uint64_t c) { return vunit.makeConst(c); };
+  for (auto tmp : tmps) {
+    if (!tmp) continue;
+    auto forced = forceAlloc(*tmp);
+    if (forced != InvalidReg) {
+      state.locs[tmp] = Vloc{forced};
+      UNUSED Reg64 r = forced;
+      FTRACE(kRegAllocLevel, "force t{} in {}\n", tmp->id(), reg::regname(r));
+      continue;
+    }
+    if (tmp->inst()->is(DefConst)) {
+      auto c = cns(tmp->rawVal());
+      state.locs[tmp] = Vloc{c};
+      FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {
-      if (arg.ival == i && pos + 1 < kNumRegisterArgs) {
-        return {argNumToRegName[pos], argNumToRegName[pos + 1]};
-      }
-      pos += 2;
-    }
-  }
-  return InvalidRegPair;
-}
-
-// return the return-value register hint for a NativeCall opcode.
-RegPair hintNativeCallDst(const IRInstruction& inst, unsigned i) {
-  if (i != 0) return InvalidRegPair;
-  auto const& info = CallMap::info(inst.op());
-  switch (info.dest) {
-    case DestType::SSA:
-      return {rax, InvalidReg};
-    case DestType::Dbl:
-    case DestType::SIMD:
-      return {xmm0, InvalidReg};
-    case DestType::TV:
-      return {rax, rdx};
-    case DestType::None:
-      return InvalidRegPair;
-  }
-  return InvalidRegPair;
-}
-
-// Return the arg-register hint for a CallBuiltin instruction.
-RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
-  auto callee = inst.extra<CallBuiltin>()->callee;
-  auto ipos = 0, dpos = 0, spos = 0;
-  if (isCppByRef(callee->returnType())) {
-    if (srcNum == 0) {
-      return {argNumToRegName[0], InvalidReg};
-    }
-    ipos = spos = 1;
-  }
-  // Iterate through the builtin params, keeping track of the HHIR src
-  // pos (spos) and the corresponding int (ipos) and double (dpos)
-  // register argument positions.  When spos == srcNum, return a hint.
-  auto& params = callee->params();
-  int i = 0, n = callee->numParams();
-  for (; i < n && spos < srcNum; ++i, ++spos) {
-    if (params[i].builtinType == KindOfDouble) {
-      dpos++;
-    } else {
-      ipos++;
-    }
-  }
-  if (i < n && spos == srcNum) {
-    if (params[i].builtinType == KindOfDouble) {
-      if (dpos < kNumSIMDRegisterArgs) {
-        return {argNumToSIMDRegName[dpos], InvalidReg};
-      }
-    } else {
-      if (ipos < kNumRegisterArgs) {
-        return {argNumToRegName[ipos], InvalidReg};
+      if (tmp->numWords() == 2) {
+        if (!not_wide.test(tmp->id())) {
+          auto r = vunit.makeReg();
+          state.locs[tmp] = Vloc{Vloc::kWide, r};
+          FTRACE(kRegAllocLevel, "def t{} in wide %{}\n", tmp->id(), size_t(r));
+        } else {
+          auto data = vunit.makeReg();
+          auto type = vunit.makeReg();
+          state.locs[tmp] = Vloc{data, type};
+          FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
+                 size_t(data), size_t(type));
+        }
+      } else if (tmp->numWords() == 1) {
+        auto data = vunit.makeReg();
+        state.locs[tmp] = Vloc{data};
+        FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
       }
     }
   }
-  return InvalidRegPair;
-}
-
-// return the return-register hint for a CallBuiltin instruction
-RegPair hintCallBuiltinDst(const IRInstruction& inst, unsigned i) {
-  // the decision logic here is distilled from CodeGenerator::cgCallBuiltin()
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (i != 0) return InvalidRegPair;
-  auto returnType = inst.typeParam();
-  if (returnType <= Type::Dbl) {
-    return {xmm0, InvalidReg};
-  }
-  if (returnType.isSimpleType()) {
-    return {rax, InvalidReg};
-  }
-  // other return types are passed via stack; generated code reloads
-  // them, so using the ABI assigned registers doesn't matter.
-  return InvalidRegPair;
-}
-
-RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (CallMap::hasInfo(inst.op())) {
-    return hintNativeCallSrc(inst, i);
-  }
-  switch (inst.op()) {
-    case CallBuiltin:
-      return hintCallBuiltinSrc(inst, i);
-    case Shl:
-    case Shr:
-      if (i == 1) return {PhysReg(rcx), InvalidReg};
-      break;
-    case Mod:
-      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
-      if (i == 0) return {PhysReg(rax), InvalidReg};
-    default:
-      break;
-  }
-  return InvalidRegPair;
-}
-
-RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (CallMap::hasInfo(inst.op())) {
-    return hintNativeCallDst(inst, i);
-  }
-  switch (inst.op()) {
-    case CallBuiltin:
-      return hintCallBuiltinDst(inst, i);
-    case Mod:
-      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
-      if (i == 0) return {PhysReg(rdx), InvalidReg};
-      break;
-    default:
-      break;
-  }
-  return InvalidRegPair;
 }
 
 static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
-                     CodegenState& state, Block* block) {
+                       CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
   CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
   size_t hhir_count{0};
@@ -869,9 +773,6 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
   return hhir_count;
 }
 
-static size_t ctr;
-const char* area_names[] = { "main", "cold", "frozen" };
-
 auto const vasm_gp = x64::abi.gpUnreserved | RegSet(rAsm).add(r11);
 auto const vasm_simd = x64::kXMMRegs;
 UNUSED const Abi vasm_abi {
@@ -883,12 +784,10 @@ UNUSED const Abi vasm_abi {
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
-  ctr++;
-  auto regs = allocateRegs(unit);
-  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
   Timer _t(Timer::codeGen);
-  LiveRegs live_regs = computeLiveRegs(unit, regs);
-  CodegenState state(unit, regs, live_regs, asmInfo);
+  RegAllocInfo no_regs(unit);
+  LiveRegs no_live_regs(unit, RegSet());
+  CodegenState state(unit, no_regs, no_live_regs, asmInfo);
 
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
@@ -896,8 +795,10 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   CodeBlock mainCode;
   CodeBlock coldCode;
+  const bool useLLVM = RuntimeOption::EvalJitLLVM;
   bool relocate = false;
-  if (RuntimeOption::EvalJitRelocationSize &&
+  if (!useLLVM &&
+      RuntimeOption::EvalJitRelocationSize &&
       supportsRelocation() &&
       coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
@@ -962,6 +863,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
+    // create vregs for all relevant SSATmps
+    assignRegs(unit, vunit, state, linfo.blocks);
     vunit.roots.push_back(state.labels[unit.entry()]);
     vasm.main(mainCode);
     vasm.cold(coldCode);
@@ -982,8 +885,9 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       assert(vasm.cold().empty() || vasm.cold().closed());
       assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
-    printUnit("after code-gen", vasm.unit());
-    vasm.finish(vasm_abi);
+    printUnit(kInitialVasmLevel, "after initial vasm generation", vasm.unit());
+    assert(check(vunit));
+    vasm.finish(vasm_abi, useLLVM);
     if (state.asmInfo) {
       auto block = unit.entry();
       state.asmInfo->asmRanges[block] = {main_start, mainCode.frontier()};
@@ -997,7 +901,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
   }
   auto bcMap = &mcg->cgFixups().m_bcMap;
-  if (!bcMap->empty()) {
+  if (relocate && !bcMap->empty()) {
     TRACE(1, "BCMAPS before relocation\n");
     for (UNUSED auto& map : *bcMap) {
       TRACE(1, "%s %-6d %p %p %p\n", map.md5.toString().c_str(),
@@ -1010,7 +914,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   if (relocate) {
     if (asmInfo) {
-      printUnit(kRelocationLevel, unit, " before relocation ", &regs, asmInfo);
+      printUnit(kRelocationLevel, unit, " before relocation ", nullptr,
+                asmInfo);
     }
 
     auto& be = mcg->backEnd();
@@ -1066,7 +971,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   }
 
   if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, asmInfo);
+    printUnit(kCodeGenLevel, unit, " after code gen ", nullptr, asmInfo);
   }
 }
 

@@ -63,7 +63,7 @@ and map_ty f = map_snd (map_ty_ f)
 let fresh_tvars (env:Env.env) (ts:tparam list) (ps:fun_params) (uniq:int) : Env.env * fun_params * tparam list =
   let append_id s = Printf.sprintf "%s_%d" s uniq in
   let rename_str s =
-    match List.find_all (fun ((pos,str),_) -> str = s) ts with
+    match List.find_all (fun (_, (pos,str),_) -> str = s) ts with
       | [_] -> append_id s
       | _ -> s in
   let rename_ty = function
@@ -73,7 +73,7 @@ let fresh_tvars (env:Env.env) (ts:tparam list) (ps:fun_params) (uniq:int) : Env.
         Tgeneric (rename_str name, ot)
     | s -> s in
   let ps' = List.map (map_snd (map_ty rename_ty)) ps in
-  let ts' = List.map (map_fst (map_snd rename_str)) ts in
+  let ts' = List.map (fun (x, y, z) -> x, map_snd rename_str y, z) ts in
   env, ps', ts'
 
 

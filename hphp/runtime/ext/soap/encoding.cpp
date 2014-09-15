@@ -16,9 +16,11 @@
 */
 #include "hphp/runtime/ext/soap/encoding.h"
 
-#include <boost/lexical_cast.hpp>
+#include <cstdlib>
 #include <map>
 #include <memory>
+
+#include "folly/Conv.h"
 
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
@@ -29,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-using boost::lexical_cast;
+using std::abs;
 
 bool php_libxml_xmlCheckUTF8(const unsigned char *s) {
   int i;
@@ -508,7 +510,7 @@ static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
         } else {
           SOAP_GLOBAL(cur_uniq_ref)++;
           prefix = "#ref";
-          prefix += lexical_cast<string>(SOAP_GLOBAL(cur_uniq_ref));
+          prefix += folly::to<string>(SOAP_GLOBAL(cur_uniq_ref));
           id = prefix.c_str();
           xmlSetProp(node_ptr, BAD_CAST("id"), BAD_CAST(id+1));
         }
@@ -522,7 +524,7 @@ static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
         } else {
           SOAP_GLOBAL(cur_uniq_ref)++;
           prefix = "#ref";
-          prefix += lexical_cast<string>(SOAP_GLOBAL(cur_uniq_ref));
+          prefix += folly::to<string>(SOAP_GLOBAL(cur_uniq_ref));
           id = prefix.c_str();
           set_ns_prop(node_ptr, SOAP_1_2_ENC_NAMESPACE, "id", id+1);
         }
@@ -2183,10 +2185,10 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
         }
       }
 
-      array_size += lexical_cast<string>(dims[0]);
+      array_size += folly::to<string>(dims[0]);
       for (i=1; i<dimension; i++) {
         array_size += ',';
-        array_size += lexical_cast<string>(dims[i]);
+        array_size += folly::to<string>(dims[i]);
       }
 
     } else if ((ext = get_extra_attributes
@@ -2211,16 +2213,16 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
           dims = get_position_12(dimension, ext->val.c_str());
           if (dims[0] == 0) {dims[0] = i;}
 
-          array_size += lexical_cast<string>(dims[0]);
+          array_size += folly::to<string>(dims[0]);
           for (i=1; i<dimension; i++) {
             array_size += ',';
-            array_size += lexical_cast<string>(dims[i]);
+            array_size += folly::to<string>(dims[i]);
           }
         }
       } else {
         dims = (int*)malloc(sizeof(int));
         *dims = 0;
-        array_size += lexical_cast<string>(i);
+        array_size += folly::to<string>(i);
       }
     } else if ((ext = get_extra_attributes
                 (sdl_type,
@@ -2230,10 +2232,10 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
       dims = get_position_12(dimension, ext->val.c_str());
       if (dims[0] == 0) {dims[0] = i;}
 
-      array_size += lexical_cast<string>(dims[0]);
+      array_size += folly::to<string>(dims[0]);
       for (i=1; i<dimension; i++) {
         array_size += ',';
-        array_size += lexical_cast<string>(dims[i]);
+        array_size += folly::to<string>(dims[i]);
       }
 
       if (sdl_type && sdl_type->elements.size() == 1 &&
@@ -2259,13 +2261,13 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, const Variant& data_, int sty
       get_type_str(xmlParam, elementType->encode->details.ns.c_str(),
                    elementType->encode->details.type_str.c_str(), array_type);
 
-      array_size += lexical_cast<string>(i);
+      array_size += folly::to<string>(i);
       dims = (int*)malloc(sizeof(int) * dimension);
       dims[0] = i;
     } else {
 
       enc = get_array_type(xmlParam, data, array_type);
-      array_size += lexical_cast<string>(i);
+      array_size += folly::to<string>(i);
       dims = (int*)malloc(sizeof(int) * dimension);
       dims[0] = i;
     }
@@ -3184,7 +3186,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns) {
       string prefix;
       while (1) {
         prefix = "ns";
-        prefix += lexical_cast<string>(num);
+        prefix += folly::to<string>(num);
         if (xmlSearchNs(node->doc, node, BAD_CAST(prefix.c_str())) == NULL) {
           break;
         }

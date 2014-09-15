@@ -42,12 +42,12 @@ class FastCGIServer;
  * FastCGIAcceptor accepts new connections from a listening socket, wrapping
  * each one in a FastCGIConnection.
  */
-class FastCGIAcceptor : public facebook::proxygen::Acceptor {
+class FastCGIAcceptor : public ::proxygen::Acceptor {
 public:
   explicit FastCGIAcceptor(
-      const facebook::proxygen::AcceptorConfiguration& config,
+      const ::proxygen::AcceptorConfiguration& config,
       FastCGIServer *server)
-      : facebook::proxygen::Acceptor(config),
+      : ::proxygen::Acceptor(config),
         m_server(server) {}
   virtual ~FastCGIAcceptor() {}
 
@@ -57,7 +57,7 @@ public:
     apache::thrift::async::TAsyncSocket::UniquePtr sock,
     const apache::thrift::transport::TSocketAddress* peerAddress,
     const std::string& nextProtocolName,
-    const facebook::proxygen::TransportInfo& tinfo) override;
+    const ::proxygen::TransportInfo& tinfo) override;
   virtual void onConnectionsDrained() override;
 
 private:
@@ -209,8 +209,8 @@ private:
   apache::thrift::async::TAsyncServerSocket::UniquePtr m_socket;
   apache::thrift::async::TEventBaseManager m_eventBaseManager;
   bool m_done{true};
-  facebook::proxygen::WorkerThread m_worker;
-  facebook::proxygen::AcceptorConfiguration m_socketConfig;
+  ::proxygen::WorkerThread m_worker;
+  ::proxygen::AcceptorConfiguration m_socketConfig;
   std::unique_ptr<FastCGIAcceptor> m_acceptor;
   JobQueueDispatcher<FastCGIWorker> m_dispatcher;
 };

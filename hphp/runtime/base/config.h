@@ -37,8 +37,23 @@ enum class HackStrictOption {
 };
 
 struct Config {
+  static void ParseConfigFile(const std::string &filename, IniSettingMap &ini,
+                              Hdf &hdf);
 
-  static void Parse(const std::string &config, IniSettingMap &ini, Hdf &hdf);
+  static void ParseIniFile(const std::string &filename);
+  static void ParseIniFile(const std::string &filename, IniSettingMap &ini,
+                           const bool constants_only = false);
+
+  static void ParseHdfFile(const std::string &filename, Hdf &hdf);
+
+  // Parse and process a .ini string (e.g., -d)
+  static void ParseIniString(const std::string iniStr, IniSettingMap &ini);
+
+  // Parse and process a .hdf string (e.g., -v), while also maintaining a
+  // 1:1 relationship with its equivalent ini setting
+  static void ParseHdfString(const std::string hdfStr, Hdf &hdf,
+                             IniSettingMap &ini);
+
 
   /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too. */
   static void Bind(bool& loc, const IniSettingMap &ini,
@@ -149,6 +164,10 @@ struct Config {
   private:
 
   static std::string IniName(const Hdf& config);
+  static std::string IniName(const std::string config);
+
+  static void SetParsedIni(IniSettingMap &ini, const std::string confStr,
+                           const std::string filename, bool extensions_only);
 
   static void StringInsert(std::vector<std::string> &values,
                            const std::string &key,

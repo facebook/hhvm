@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include <pcre.h>
+#include "folly/Conv.h"
 
 using std::istringstream;
 using std::ostringstream;
@@ -237,7 +238,7 @@ bool TestCodeRun::RecordMulti(const char *input, const char *output,
                               const char *file, int line, bool nowarnings,
                               bool fileoutput) {
   string fullPath = "runtime/tmp/" + Test::s_suite + "/" + test_name + "/tcr-" +
-    boost::lexical_cast<string>(m_test++);
+    folly::to<string>(m_test++);
 
   if (!GenerateMainPHP(fullPath + "/main.php", file, line, input)) return false;
   if (nowarnings) {

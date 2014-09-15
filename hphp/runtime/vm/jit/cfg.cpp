@@ -178,11 +178,11 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
       // p1 = any already-processed predecessor
       auto predIter = block->preds().begin();
       auto predEnd = block->preds().end();
-      auto p1 = predIter->inst()->block();
-      while (!idom[p1]) p1 = (++predIter)->inst()->block();
+      auto p1 = predIter->from();
+      while (!idom[p1]) p1 = (++predIter)->from();
       // for all other already-processed predecessors p2 of block
       for (++predIter; predIter != predEnd; ++predIter) {
-        auto p2 = predIter->inst()->block();
+        auto p2 = predIter->from();
         if (p2 == p1 || !idom[p2]) continue;
         // find earliest common predecessor of p1 and p2
         // (higher postIds are earlier in flow and in dom-tree).

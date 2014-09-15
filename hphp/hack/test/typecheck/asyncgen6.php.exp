@@ -1,5 +1,5 @@
 File "asyncgen6.php", line 13, characters 3-11:
-Typing[4110] await can only operate on an Awaitable
+await can only operate on an Awaitable (Typing[4110])
 File "asyncgen6.php", line 13, characters 3-11:
 This is an object of type Awaitable
 File "asyncgen6.php", line 7, characters 21-34:

@@ -882,8 +882,15 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
     auto const repoTy = [&] (const PropState& ps) -> RepoAuthType {
-      // TODO(#3599292): we don't currently infer closure use var types.
+      /*
+       * Skip closures, because the types of their used vars can be
+       * communicated via assert opcodes right now.  At the time of this
+       * writing there was nothing to gain by including RAT's for the
+       * properties, since closure properties are only used internally by the
+       * runtime, not directly via opcodes like CGetM.
+       */
       if (is_closure(cls)) return RepoAuthType{};
+
       auto it = ps.find(prop.name);
       if (it == end(ps)) return RepoAuthType{};
       auto const rat = make_repo_type(*state.index.array_table_builder(),

@@ -3849,67 +3849,61 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
-  if (inst->src(0)->isConst()) {
-    // This would require two scratch registers and should be very
-    // rare. t3626251
-    CG_PUNT(LdPackedArrayElem-ConstArray);
-  }
-
+  auto const idx = inst->src(1);
   auto const rArr = srcLoc(0).reg();
   auto const rIdx = srcLoc(1).reg();
   auto& v = vmain();
 
-  // We don't know if we have the last use of rIdx, so we can't
-  // clobber it.
-  if (rIdx != InvalidReg) {
-    /*
-     * gcc 4.8 did something more like:
-     *
-     *    lea 1(%base), %scratch   ; sizeof(ArrayData) == sizeof(TypedValue)
-     *    salq $4, %scratch
-     *    movq (%base,%scratch,1), %r1
-     *    movzxb 8(%base,%scratch,1), %r2
-     *
-     * Using this way for now (which is more like what clang produced)
-     * just because it was 2 bytes smaller.
-     */
-    static_assert(sizeof(TypedValue) == 16, "");
-    Vreg base = rArr;
-    auto idx = v.makeReg();
-    v << shlqi{0x4, rIdx, idx}; // multiply by 16
-    cgLoad(inst->dst(), dstLoc(0), base[idx + sizeof(ArrayData)]);
-    return;
+  if (idx->isConst()) {
+    auto const offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
+    if (deltaFits(offset, sz::dword)) {
+      cgLoad(inst->dst(), dstLoc(0), rArr[offset]);
+      return;
+    }
   }
 
-  auto const idx    = inst->src(1)->intVal();
-  auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
-  cgLoad(inst->dst(), dstLoc(0), rArr[offset]);
+  /*
+   * gcc 4.8 did something more like:
+   *
+   *    lea 1(%base), %scratch   ; sizeof(ArrayData) == sizeof(TypedValue)
+   *    salq $4, %scratch
+   *    movq (%base,%scratch,1), %r1
+   *    movzxb 8(%base,%scratch,1), %r2
+   *
+   * Using this way for now (which is more like what clang produced)
+   * just because it was 2 bytes smaller.
+   */
+  static_assert(sizeof(TypedValue) == 16, "");
+  auto scaled_idx = v.makeReg();
+  v << shlqi{0x4, rIdx, scaled_idx}; // multiply by 16
+  cgLoad(inst->dst(), dstLoc(0), rArr[scaled_idx + sizeof(ArrayData)]);
 }
 
 void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
-  if (inst->src(0)->isConst()) {
-    // This would require two scratch registers and should be very
-    // rare. t3626251
-    CG_PUNT(LdPackedArrayElemAddr-ConstArray);
-  }
-
+  auto const idx = inst->src(1);
   auto const rArr = srcLoc(0).reg();
   auto const rIdx = srcLoc(1).reg();
   auto const dst = dstLoc(0).reg();
   auto& v = vmain();
 
-  if (rIdx != InvalidReg) {
-    static_assert(sizeof(TypedValue) == 16, "");
-    auto idx = v.makeReg();
-    Vreg base = rArr;
-    v << shlqi{0x4, rIdx, idx};
-    emitCmpTVType(v, KindOfNull, base[idx + sizeof(ArrayData) + TVOFF(m_type)]);
-  } else {
-    auto const idx    = inst->src(1)->intVal();
-    auto const offset = sizeof(ArrayData) + idx * sizeof(TypedValue);
-    emitCmpTVType(v, KindOfNull, rArr[offset + TVOFF(m_type)]);
+  if (idx->isConst()) {
+    auto elem_offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
+    auto type_offset = elem_offset + TVOFF(m_type);
+    if (deltaFits(type_offset, sz::dword)) {
+      emitCmpTVType(v, KindOfNull, rArr[type_offset]);
+      goto do_check;
+    }
   }
 
+  {
+    static_assert(sizeof(TypedValue) == 16, "");
+    auto scaled_idx = v.makeReg();
+    auto type_offset = sizeof(ArrayData) + TVOFF(m_type);
+    v << shlqi{0x4, rIdx, scaled_idx};
+    emitCmpTVType(v, KindOfNull, rArr[scaled_idx + type_offset]);
+  }
+
+do_check:
   auto b = v.makeReg();
   v << setcc{CC_NE, b};
   v << movzbl{b, dst};
@@ -4007,7 +4001,7 @@ void CodeGenerator::cgLdElem(IRInstruction* inst) {
   auto baseReg = srcLoc(0).reg();
   auto idx = inst->src(1);
   auto idxReg = srcLoc(1).reg();
-  if (idx->isConst()) {
+  if (idx->isConst() && deltaFits(idx->intVal(), sz::dword)) {
     cgLoad(inst->dst(), dstLoc(0), baseReg[idx->intVal()]);
   } else {
     cgLoad(inst->dst(), dstLoc(0), baseReg[idxReg]);

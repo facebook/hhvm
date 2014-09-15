@@ -44,6 +44,8 @@ namespace {
 using namespace reg;
 using namespace Stats;
 
+size_t s_counter;
+
 // Sort blocks in reverse postorder, and try to arrange fall-through
 // blocks in the same area to be close together.
 struct BlockSorter {
@@ -185,6 +187,7 @@ struct Vxls {
   unsigned constrain(Interval*, RegSet&);
   void insertSpill(Interval*);
   Vlabel findBlock(unsigned pos);
+  LiveRange findBlockRange(unsigned pos);
   void spill(Interval*);
   void spillAfter(Interval* ivl, unsigned pos);
   void spillOthers(Interval* current, PhysReg r);
@@ -194,6 +197,7 @@ struct Vxls {
   void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
+  unsigned nearestSplitBefore(unsigned pos);
   // debugging
   void print(const char* caption);
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
@@ -895,8 +899,15 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
   return kMaxPos;
 }
 
-// return the closest odd split position on or before pos.
-unsigned nearestSplitBefore(unsigned pos) {
+// return the closest split position on or before pos.
+// the result might be exactly on an edge, or inbetween normal positions.
+unsigned Vxls::nearestSplitBefore(unsigned pos) {
+  auto b = findBlock(pos);
+  auto range = block_ranges[b];
+  if (pos <= range.start + 2 &&
+      unit.blocks[b].code.front().op == Vinstr::phidef) {
+    return range.start;
+  }
   return (pos - 1) | 1;
 }
 
@@ -963,11 +974,10 @@ void Vxls::allocate(Interval* current) {
   if (pos > current->start()) {
     // r is free for the first part of current
     auto prev_use = current->lastUseBefore(pos);
-    auto min_split = std::max(prev_use, current->start() + 1);
+    UNUSED auto min_split = std::max(prev_use, current->start() + 1);
     auto max_split = pos;
     assert(min_split <= max_split);
-    auto split_pos = std::max(min_split, max_split); // todo: find good spot
-    split_pos = nearestSplitBefore(split_pos);
+    auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
       auto second = current->split(split_pos, true);
       pending.push(second);
@@ -1019,11 +1029,10 @@ void Vxls::allocBlocked(Interval* current) {
   auto block_pos = blocked[r];
   if (block_pos < current->end()) {
     auto prev_use = current->lastUseBefore(block_pos);
-    auto min_split = std::max(prev_use, cur_start + 1);
+    UNUSED auto min_split = std::max(prev_use, cur_start + 1);
     auto max_split = block_pos;
     assert(cur_start < min_split && min_split <= max_split);
-    auto split_pos = std::max(min_split, max_split);
-    split_pos = nearestSplitBefore(split_pos);
+    auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
       auto second = current->split(split_pos, true);
       pending.push(second);
@@ -1056,7 +1065,7 @@ void Vxls::spill(Interval* ivl) {
     auto split_pos = nearestSplitBefore(first_use);
     if (split_pos <= ivl->start()) {
       // this only can happen if we need more than the available registers
-      // at a single position. I can happen in phijmp or callargs.
+      // at a single position. It can happen in phijmp or callargs.
       TRACE(1, "vxls-punt RegSpill\n");
       PUNT(RegSpill); // cannot split before first_use
     }
@@ -1257,10 +1266,13 @@ void Vxls::resolveEdges() {
         if (i1) i1 = i1->childAt(p1);
         auto i2 = intervals[defs[i]];
         if (i2->reg != i1->reg) {
+          assert((edge_copies[{b1,0}][i2->reg] == nullptr));
           edge_copies[{b1,0}][i2->reg] = i1;
         }
       }
+      auto tmp_pos = inst1.pos;
       inst1 = jmp{target};
+      inst1.pos = tmp_pos;
     }
     for (unsigned i = 0, n = succlist.size(); i < n; i++) {
       auto b2 = succlist[i];
@@ -1276,6 +1288,7 @@ void Vxls::resolveEdges() {
         }
         // i2 can be unallocated if the tmp is a constant or is spilled.
         if (i2->reg != InvalidReg && i2->reg != i1->reg) {
+          assert((edge_copies[{b1,i}][i2->reg] == nullptr));
           edge_copies[{b1,i}][i2->reg] = i1;
         }
       });
@@ -1328,12 +1341,12 @@ void Vxls::insertCopies() {
       // copies will go at start of successor
       for (int i = 0, n = succlist.size(); i < n; i++) {
         auto s = succlist[i];
-        auto& code = unit.blocks[s].code;
-        auto m = edge_copies.find({b, i});
-        if (m != edge_copies.end()) {
+        auto c = edge_copies.find({b, i});
+        if (c != edge_copies.end()) {
           auto slots = rsp[spill_offsets[s]];
+          auto& code = unit.blocks[s].code;
           unsigned j = 0;
-          insertCopiesAt(code, j, m->second, slots, block_ranges[b].start);
+          insertCopiesAt(code, j, c->second, slots, block_ranges[s].start);
         }
       }
     }
@@ -1410,6 +1423,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
   }
 }
 
+// Return the [start,end) range for the block enclosing pos.
 Vlabel Vxls::findBlock(unsigned pos) {
   // could binary search in blocks?
   auto n = block_ranges.size();
@@ -1418,7 +1432,12 @@ Vlabel Vxls::findBlock(unsigned pos) {
       return Vlabel{i};
     }
   }
-  return Vlabel{n};
+  always_assert(false);
+  return Vlabel{unit.blocks.size()};
+}
+
+LiveRange Vxls::findBlockRange(unsigned pos) {
+  return block_ranges[findBlock(pos)];
 }
 
 template<class F>
@@ -1535,7 +1554,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     return fixed_covers[p-pos];
   });
   if (pos == block_ranges[b].start) {
-    str << folly::format(" B{: <2} ", size_t(b));
+    str << folly::format(" B{: <3}", size_t(b));
   } else {
     str << "     ";
   }
@@ -1552,7 +1571,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
 
 void Vxls::print(const char* caption) {
   std::ostringstream str;
-  str << "Intervals " << caption << "\n";
+  str << "Intervals " << caption << " " << s_counter << "\n";
   forEachInterval(intervals, [&] (Interval* ivl) {
     if (ivl->fixed()) {
       if (ignore_reserved && !abi.unreserved().contains(ivl->vreg)) {
@@ -1592,6 +1611,7 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
+  s_counter++;
   Vxls a(unit, abi);
   a.allocate();
 }

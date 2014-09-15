@@ -464,12 +464,8 @@ void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Block* target) {
 }
 
 void CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
-  auto src0 = inst->src(0);
-  auto src1 = inst->src(1);
-  auto loc0 = srcLoc(0);
-  auto loc1 = srcLoc(1);
-  auto const type0 = src0->type();
-  auto const type1 = src1->type();
+  auto const type0 = inst->src(0)->type();
+  auto const type1 = inst->src(1)->type();
 
   // can't generate CMP instructions correctly for anything that isn't
   // a bool or a numeric, and we can't mix bool/numerics because
@@ -479,36 +475,21 @@ void CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
         (type0 <= Type::Cls  && type1 <= Type::Cls))) {
     CG_PUNT(emitCompare);
   }
-  auto reg0 = loc0.reg();
-  auto reg1 = loc1.reg();
-
-  if (reg1 == InvalidReg) {
-    if (type0 <= Type::Bool) {
-      v << cmpbi{src1->boolVal(), reg0};
-    } else {
-      v << cmpqi{safe_cast<int32_t>(src1->intVal()), reg0};
-    }
+  auto reg0 = srcLoc(0).reg();
+  auto reg1 = srcLoc(1).reg();
+  if (type0 <= Type::Bool) {
+    v << cmpb{reg1, reg0};
   } else {
-    // Note the reverse syntax in the assembler.
-    // This cmp will compute reg0 - reg1
-    if (type0 <= Type::Bool) {
-      v << cmpb{reg1, reg0};
-    } else {
-      v << cmpq{reg1, reg0};
-    }
+    v << cmpq{reg1, reg0};
   }
 }
 
 void CodeGenerator::emitCompareInt(Vout& v, IRInstruction* inst) {
   auto srcReg0 = srcLoc(0).reg();
   auto srcReg1 = srcLoc(1).reg();
-  if (srcReg1 == InvalidReg) {
-    v << cmpqi{safe_cast<int32_t>(inst->src(1)->intVal()), srcReg0};
-  } else {
-    // Note the reverse syntax in the assembler.
-    // This cmp will compute srcReg0 - srcReg1
-    v << cmpq{srcReg1, srcReg0};
-  }
+  // Note the reverse syntax in the assembler.
+  // This cmp will compute srcReg0 - srcReg1
+  v << cmpq{srcReg1, srcReg0};
 }
 
 void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc,
@@ -1317,7 +1298,6 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
   auto const srcReg0 = srcLoc(0).reg();
   auto const srcReg1 = srcLoc(1).reg();
   auto const dstReg  = dstLoc(0).reg();
-  assert(srcReg0 != InvalidReg);
   auto& v = vmain();
 
   if (src1->isConst()) {
@@ -2201,7 +2181,6 @@ void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
-  assert(srcReg != InvalidReg);
   auto& v = vmain();
   v << copy{srcReg, dstReg};
   emitDerefIfVariant(v, dstReg);
@@ -2376,7 +2355,6 @@ void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg(0);
-  assert(fpReg != InvalidReg);
   vmain() << pushm{fpReg[AROFF(m_savedRip)]};
 }
 
@@ -3216,7 +3194,6 @@ void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
     v << storeqim{0, obj[c_Closure::ctxOffset()]};
   } else {
     auto const ctx = srcLoc(1).reg();
-    always_assert(ctx != InvalidReg);
     v << storeq{ctx, obj[c_Closure::ctxOffset()]};
   }
 }
@@ -3534,8 +3511,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
-      assert(inst->src(srcNum)->type().isPtr() &&
-             srcLoc(srcNum).reg() != InvalidReg);
+      assert(inst->src(srcNum)->type().isPtr());
       callArgs.addr(srcLoc(srcNum).reg(), TVOFF(m_data));
     } else {
       callArgs.ssa(srcNum, pi.builtinType == KindOfDouble);
@@ -3839,12 +3815,7 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto idxReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
   auto& v = vmain();
-  if (idxReg == InvalidReg) {
-    v << cmplim{safe_cast<int32_t>(inst->src(1)->intVal()),
-                strReg[StringData::sizeOff()]};
-  } else {
-    v << cmplm{idxReg, strReg[StringData::sizeOff()]};
-  }
+  v << cmplm{idxReg, strReg[StringData::sizeOff()]};
   v << setcc{CC_NBE, dstReg};
 }
 
@@ -3869,16 +3840,11 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   auto arrReg = srcLoc(0).reg();
   auto idxReg = srcLoc(1).reg();
   auto& v = vmain();
-  if (idxReg == InvalidReg) {
-    v << cmplim{safe_cast<int32_t>(inst->src(1)->intVal()),
-                arrReg[ArrayData::offsetofSize()]};
-  } else {
-    // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
-    // since idx is KindOfInt64.
-    auto tmp_size = v.makeReg();
-    v << loadl{arrReg[ArrayData::offsetofSize()], tmp_size};
-    v << cmpq{idxReg, tmp_size};
-  }
+  // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
+  // since idx is KindOfInt64.
+  auto tmp_size = v.makeReg();
+  v << loadl{arrReg[ArrayData::offsetofSize()], tmp_size};
+  v << cmpq{idxReg, tmp_size};
   v << jcc{CC_BE, {label(inst->next()), label(inst->taken())}};
 }
 
@@ -3952,11 +3918,8 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
   auto idx = inst->src(0);
   auto idxReg = srcLoc(0).reg();
-  auto size = inst->src(1);
   auto sizeReg = srcLoc(1).reg();
-  // caller made the check if both sources are constant and never
-  // generate this opcode
-  assert(!(idx->isConst() && size->isConst()));
+
   auto throwHelper = [&](Vout& v) {
       auto args = argGroup();
       args.ssa(0/*idx*/);
@@ -3965,22 +3928,15 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
 
     };
 
-  if (idxReg == InvalidReg) {
-    assert(idx->intVal() >= 0); // we would have punted otherwise
-    auto idxVal = safe_cast<int32_t>(idx->intVal());
-    vmain() << cmpqi{idxVal, sizeReg};
-    unlikelyIfBlock(vmain(), vcold(), CC_LE, throwHelper);
+  auto& v = vmain();
+  if (idx->isConst()) {
+    v << cmpq{idxReg, sizeReg};
+    unlikelyIfBlock(v, vcold(), CC_BE, throwHelper);
     return;
   }
 
-  if (sizeReg == InvalidReg) {
-    assert(size->intVal() >= 0);
-    auto sizeVal = safe_cast<int32_t>(size->intVal());
-    vmain() << cmpqi{sizeVal, idxReg};
-  } else {
-    vmain() << cmpq{sizeReg, idxReg};
-  }
-  unlikelyIfBlock(vmain(), vcold(), CC_AE, throwHelper);
+  v << cmpq{sizeReg, idxReg};
+  unlikelyIfBlock(v, vcold(), CC_AE, throwHelper);
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
@@ -4063,7 +4019,7 @@ void CodeGenerator::cgStElem(IRInstruction* inst) {
   auto srcValue = inst->src(2);
   auto idx = inst->src(1);
   auto idxReg = srcLoc(1).reg();
-  if (idxReg == InvalidReg) {
+  if (idx->isConst() && deltaFits(idx->intVal(), sz::dword)) {
     cgStore(baseReg[idx->intVal()], srcValue, srcLoc(2), Width::Full);
   } else {
     cgStore(baseReg[idxReg], srcValue, srcLoc(2), Width::Full);
@@ -4233,7 +4189,6 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const src   = inst->src(0);
   auto const rData = srcLoc(0).reg(0);
   auto const rType = srcLoc(0).reg(1);
-  assert(rData != InvalidReg);
   auto& v = vmain();
   auto doJcc = [&](ConditionCode cc) {
     emitFwdJcc(v, ccNegate(cc), inst->taken());
@@ -4336,19 +4291,13 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
   auto vals64Reg = srcLoc(4).reg();
 
   // Get values in place
-  assert(funcPtrReg != InvalidReg);
-
-  assert(nParamsReg != InvalidReg || nParamsTmp->isConst());
-
   assert(firstBitNumTmp->isConst(Type::Int));
   auto firstBitNum = safe_cast<int32_t>(firstBitNumTmp->intVal());
 
   uint64_t mask64 = mask64Tmp->intVal();
-  assert(mask64Reg != InvalidReg || mask64 == uint32_t(mask64));
   assert(mask64);
 
   uint64_t vals64 = vals64Tmp->intVal();
-  assert(vals64Reg != InvalidReg || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto& v = vmain();
@@ -4369,14 +4318,12 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
       // If vals64 is zero, or we're testing a single
       // bit, we can get away with a single test,
       // rather than mask-and-compare
-      if (mask64Reg != InvalidReg) {
-        v << testqm{mask64Reg, bitsPtrReg[bitsOff]};
+      if (mask64 <= 0xff) {
+        v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff]};
+      } else if (mask64 <= 0xffffffff) {
+        v << testlim{(int32_t)mask64, bitsPtrReg[bitsOff]};
       } else {
-        if (mask64 < 256) {
-          v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff]};
-        } else {
-          v << testlim{(int32_t)mask64, bitsPtrReg[bitsOff]};
-        }
+        v << testqm{mask64Reg, bitsPtrReg[bitsOff]};
       }
       if (vals64) cond = CC_E;
     } else {
@@ -4385,22 +4332,21 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
 
       //     bitsVal2 <- bitsValReg & mask64
       auto bitsVal2 = v.makeReg();
-      if (mask64Reg != InvalidReg) {
-        v << andq{mask64Reg, bitsValReg, bitsVal2};
-      } else if (mask64 < 256) {
+      if (mask64 <= 0xff) {
         v << andbi{(int8_t)mask64, bitsValReg, bitsVal2};
-      } else {
+      } else if (mask64 <= 0xffffffff) {
         v << andli{(int32_t)mask64, bitsValReg, bitsVal2};
+      } else {
+        v << andq{mask64Reg, bitsValReg, bitsVal2};
       }
 
       //   If bitsVal2 != vals64, then goto Exit
-      if (vals64Reg != InvalidReg) {
-        v << cmpq{vals64Reg, bitsVal2};
-      } else if (mask64 < 256) {
-        assert(vals64 < 256);
+      if (vals64 <= 0xff) {
         v << cmpbi{(int8_t)vals64, bitsVal2};
-      } else {
+      } else if (vals64 <= 0xffffffff) {
         v << cmpli{(int32_t)vals64, bitsVal2};
+      } else {
+        v << cmpq{vals64Reg, bitsVal2};
       }
     }
     doJcc(v, cond);
@@ -4412,7 +4358,6 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
     // nParams.
     thenBody(v);
   } else {
-    assert(nParamsReg != InvalidReg);
     // Check number of args...
     v << cmpqi{firstBitNum, nParamsReg};
 
@@ -4453,7 +4398,6 @@ void CodeGenerator::cgLdPropAddr(IRInstruction* inst) {
   auto const objReg = srcLoc(0).reg();
   auto const prop = inst->src(1);
   auto& v = vmain();
-  always_assert(objReg != InvalidReg);
   v << lea{objReg[prop->intVal()], dstReg};
 }
 
@@ -5226,7 +5170,7 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
   auto srcReg = srcLoc(1).reg();
 
   auto& v = vmain();
-  if (srcReg == InvalidReg) {
+  if (src->isConst()) {
     auto val = Immed64(src->rawVal());
     switch (size) {
       case sz::byte:  v << storebim{val.b(), dst}; break;

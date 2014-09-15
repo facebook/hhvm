@@ -202,8 +202,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     numLocals += numUseVars + 1;
   }
 
+  assert(func->numLocals() >= numLocals);
   auto numUninitLocals = func->numLocals() - numLocals;
-  assert(numUninitLocals >= 0);
   if (numUninitLocals > 0) {
     if (numUninitLocals > kLocalsToInitializeInline) {
       auto const& loopReg = rAsm2;

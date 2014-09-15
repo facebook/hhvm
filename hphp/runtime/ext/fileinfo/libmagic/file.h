@@ -114,7 +114,7 @@
 #define  MAX(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
-#define OFFSET_OOB(n, o, i)    ((n) < (o) || (i) > ((n) - (o)))
+#define OFFSET_OOB(n, o, i)    ((n) < (o) || (i) > ssize_t((n) - (o)))
 
 #ifndef HOWMANY
 # define HOWMANY (256 * 1024)  /* how much of the file to look at */

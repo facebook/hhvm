@@ -2098,16 +2098,17 @@ static bool generic_stmt_attr_get(sp_PDOStatement stmt, Variant &ret,
 
 #define YYCTYPE         unsigned char
 #define YYCURSOR        cursor
-#define YYLIMIT         cursor
+#define YYLIMIT         limit
 #define YYMARKER        s->ptr
-#define YYFILL(n)
+#define YYFILL(n)       RET(PDO_PARSER_EOI)
 
 typedef struct Scanner {
-  char *ptr, *cur, *tok;
+  char *ptr, *cur, *lim, *tok;
 } Scanner;
 
 static int scan(Scanner *s) {
-  char *cursor = s->cur;
+  char* cursor = s->cur;
+  char* limit = s->lim;
   s->tok = cursor;
 
 {
@@ -2380,6 +2381,7 @@ int pdo_parse_params(PDOStatement *stmt, const String& in, String &out) {
   struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
 
   s.cur = (char*)in.data();
+  s.lim = (char*)in.data() + in.size() + 1;
 
   /* phase 1: look for args */
   while ((t = scan(&s)) != PDO_PARSER_EOI) {

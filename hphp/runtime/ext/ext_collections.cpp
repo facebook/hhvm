@@ -5806,9 +5806,10 @@ Variant c_PairIterator::t_key() {
 }
 
 bool c_PairIterator::t_valid() {
-  assert(m_pos >= 0);
+  static_assert(std::is_unsigned<typeof(m_pos)>::value,
+                "m_pos should be unsigned");
   c_Pair* pair = m_obj.get();
-  return pair && (m_pos < ssize_t(2));
+  return pair && (m_pos < 2);
 }
 
 void c_PairIterator::t_next() {

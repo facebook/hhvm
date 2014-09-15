@@ -14,14 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/util/atomic-vector.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/trace.h"
-
-#include "folly/String.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -30,9 +22,25 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <tbb/concurrent_hash_map.h>
+
+#include "folly/String.h"
+
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/trace.h"
+
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/treadmill.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(typeProfile);
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * It is useful at translation time to have a hunch as to the types a given
@@ -46,6 +54,8 @@ TRACE_SET_MOD(typeProfile);
 typedef uint16_t Counter;
 static const Counter kMaxCounter = USHRT_MAX;
 
+namespace {
+
 struct ValueProfile {
   uint32_t m_tag;
   // All of these saturate at 255.
@@ -57,6 +67,8 @@ struct ValueProfile {
     }
   }
 };
+
+}
 
 /*
  * Magic tunables.
@@ -164,6 +176,13 @@ bool __thread standardRequest = true;
 static std::atomic<bool> singleJitLock;
 static std::atomic<int> singleJitRequests;
 
+namespace {
+
+using FuncProfileCounters = tbb::concurrent_hash_map<FuncId,uint32_t>;
+FuncProfileCounters s_func_counters;
+
+}
+
 void profileWarmupStart() {
   warmingUp = true;
 }
@@ -173,23 +192,27 @@ void profileWarmupEnd() {
 }
 
 typedef std::pair<const Func*, uint32_t> FuncHotness;
-bool comp(const FuncHotness& a, const FuncHotness& b) {
+static bool comp(const FuncHotness& a, const FuncHotness& b) {
   return a.second > b.second;
 }
 
 /*
- * Set AttrHot on hot functions. Sort all functions by
- * their profile count, and set AttrHot to the top
- * Eval.HotFuncCount functions.
+ * Set AttrHot on hot functions. Sort all functions by their profile count, and
+ * set AttrHot to the top Eval.HotFuncCount functions.
  */
 static Mutex syncLock;
-void setHotFuncAttr() {
+static void setHotFuncAttr() {
   static bool synced = false;
   if (synced) return;
 
   Lock lock(syncLock);
   if (synced) return;
 
+  /*
+   * s_treadmill forces any Funcs that are being destroyed to go through a
+   * treadmill pass, to make sure we won't try to dereference something that's
+   * being pulled out from under us.
+   */
   Func::s_treadmill = true;
   SCOPE_EXIT {
     Func::s_treadmill = false;
@@ -202,14 +225,21 @@ void setHotFuncAttr() {
       queue(comp);
 
     Func::getFuncVec().foreach([&](const Func* f) {
-        if (!f) return;
-        auto fh = FuncHotness(f, f->profCounter());
-        if (queue.size() >= RuntimeOption::EvalHotFuncCount) {
-          if (!comp(fh, queue.top())) return;
-          queue.pop();
+      if (!f) return;
+      auto const profCounter = [&]() -> uint32_t {
+        FuncProfileCounters::const_accessor acc;
+        if (s_func_counters.find(acc, f->getFuncId())) {
+          return acc->second;
         }
-        queue.push(fh);
-      });
+        return 0;
+      }();
+      auto fh = FuncHotness(f, profCounter);
+      if (queue.size() >= RuntimeOption::EvalHotFuncCount) {
+        if (!comp(fh, queue.top())) return;
+        queue.pop();
+      }
+      queue.push(fh);
+    });
 
     while (queue.size()) {
       auto f = queue.top().first;
@@ -217,7 +247,24 @@ void setHotFuncAttr() {
       const_cast<Func*>(f)->setHot();
     }
   }
+
+  // We won't need the counters anymore.  But there might be requests in flight
+  // that still thought they were profiling, so we need to clear it on the
+  // treadmill.
+  Treadmill::enqueue([&] {
+    FuncProfileCounters newMap(0);
+    swap(s_func_counters, newMap);
+  });
+
   synced = true;
+}
+
+void profileIncrementFuncCounter(const Func* f) {
+  FuncProfileCounters::accessor acc;
+  auto const value = FuncProfileCounters::value_type(f->getFuncId(), 0);
+  if (!s_func_counters.insert(acc, value)) {
+    __sync_fetch_and_add(&acc->second, 1);
+  }
 }
 
 int64_t requestCount() {
@@ -381,5 +428,6 @@ PredVal predictType(TypeProfileKey key) {
   if (maxProb > 1.0) maxProb = 1.0;
   return std::make_pair(pred, maxProb);
 }
+//////////////////////////////////////////////////////////////////////
 
 }

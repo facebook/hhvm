@@ -1366,8 +1366,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  0);
   }
   {
-    Config::Get(ini, config["ServerVariables"], ServerVariables);
-    Config::Get(ini, config["EnvVariables"], EnvVariables);
+    Config::Bind(ServerVariables, ini, config["ServerVariables"]);
+    Config::Bind(EnvVariables, ini, config["EnvVariables"]);
   }
   {
     Hdf sandbox = config["Sandbox"];

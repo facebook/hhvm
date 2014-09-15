@@ -2,8 +2,8 @@
 require_once __DIR__.'/../Framework.php';
 
 class Kohana extends Framework {
-  protected function install(): void {
-    parent::install();
+  <<Override>>
+  protected function extraPreComposer(): void {
     $root = nullthrows($this->getInstallRoot());
 
     verbose("Initialize submodules.\n");

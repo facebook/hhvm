@@ -2,9 +2,8 @@
 require_once __DIR__.'/../Framework.php';
 
 class Mustache extends Framework {
-  protected function install(): void {
-    parent::install();
-
+  <<Override>>
+  protected function extraPostComposer(): void {
     verbose("Initialize submodules.\n");
     $git_command = "git submodule update --init";
     $git_ret = run_install($git_command, nullthrows($this->getInstallRoot()),

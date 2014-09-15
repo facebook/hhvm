@@ -63,11 +63,11 @@ function run_benchmark(
   invariant(!$siege->isRunning(), 'Siege is still running :/');
   invariant($php_engine->isRunning(), get_class($php_engine).' crashed');
 
-  print_progress('Waiting 30s for server to stabilize');
-  sleep(30);
-
   print_progress('Enabling engine stats collection');
   $php_engine->enableStats();
+
+  print_progress('Clearing nginx access.log');
+  $nginx->clearAccessLog();
 
   print_progress('Running Siege for benchmark');
   $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
@@ -78,6 +78,7 @@ function run_benchmark(
   print_progress('Collecting results');
   $php_engine_stats = $php_engine->collectStats();
   $siege_stats = $siege->collectStats();
+  $nginx_stats = $nginx->collectStats();
 
   $combined_stats = Map { };
   foreach ($php_engine_stats as $page => $stats) {
@@ -90,7 +91,15 @@ function run_benchmark(
       $combined_stats[$page] = $stats;
     }
   }
+  foreach ($nginx_stats as $page => $stats) {
+    if ($combined_stats->containsKey($page)) {
+      $combined_stats[$page]->setAll($stats);
+    } else {
+      $combined_stats[$page] = $stats;
+    }
+  }
 
+  ksort($combined_stats);
   print(json_encode($combined_stats, JSON_PRETTY_PRINT)."\n");
 
   print_progress('All done');

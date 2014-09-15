@@ -15,9 +15,7 @@ http {
   include       __NGINX_CONFIG_ROOT__/mime.types;
   default_type  application/octet-stream;
 
-  log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-    '$status $body_bytes_sent "$http_referer" '
-    '"$http_user_agent" "$http_x_forwarded_for"';
+  log_format main '$status $body_bytes_sent $request_time "$request"';
 
   sendfile        on;
   #tcp_nopush     on;

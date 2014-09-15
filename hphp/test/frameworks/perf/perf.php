@@ -104,7 +104,13 @@ function run_benchmark(
     }
   }
 
-  ksort($combined_stats);
+  if (!$options->verbose) {
+    $combined_stats = $combined_stats->filterWithKey(
+      ($k, $v) ==> $k === 'Combined'
+    );
+  } else {
+    ksort($combined_stats);
+  }
   print(json_encode($combined_stats, JSON_PRETTY_PRINT)."\n");
 
   print_progress('All done');

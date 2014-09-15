@@ -66,6 +66,7 @@ private:
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
+  template<class Arg> CppCall arrayCallIfLowMem(Arg vtable) const;
 
   // Main call helper:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,

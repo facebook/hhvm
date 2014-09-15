@@ -2320,22 +2320,22 @@ void DebuggerClient::loadConfig() {
 
   m_neverSaveConfigOverride = true; // Prevent saving config while reading it
 
-  Config::Bind(s_use_utf8, ini, config["UTF8"], true);
+  s_use_utf8 = Config::GetBool(ini, config["UTF8"], true);
   config["UTF8"] = s_use_utf8; // for starter
   BIND(utf8, &s_use_utf8);
 
   Hdf color = config["Color"];
-  Config::Bind(UseColor, ini, color, true);
+  UseColor = Config::GetBool(ini, color, true);
   color = UseColor; // for starter
   BIND(color, &UseColor);
   if (UseColor && RuntimeOption::EnableDebuggerColor) {
     LoadColors(ini, color);
   }
 
-  Config::Bind(m_tutorial, ini, config["Tutorial"], 0);
+  m_tutorial = Config::GetInt32(ini, config["Tutorial"], 0);
   BIND(tutorial, &m_tutorial);
 
-  Config::Bind(m_scriptMode, ini, config["ScriptMode"]);
+  m_scriptMode = Config::GetBool(ini, config["ScriptMode"]);
   BIND(script_mode, &m_scriptMode);
 
   setDebuggerClientSmallStep(Config::GetBool(ini, config["SmallStep"]));
@@ -2434,20 +2434,18 @@ void DebuggerClient::loadConfig() {
     }
   ));
 
-  Config::Bind(m_sourceRoot, ini, config["SourceRoot"]);
+  m_sourceRoot = Config::GetString(ini, config["SourceRoot"]);
   BIND(source_root, &m_sourceRoot);
 
-  Config::Bind(m_zendExe, ini, config["ZendExecutable"], "php");
+  m_zendExe = Config::GetString(ini, config["ZendExecutable"], "php");
   BIND(zend_executable, &m_zendExe);
 
-  Config::Bind(m_neverSaveConfig, ini, config["NeverSaveConfig"], false);
+  m_neverSaveConfig = Config::GetBool(ini, config["NeverSaveConfig"], false);
   BIND(never_save_config, &m_neverSaveConfig);
 
   IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
-  // We are guaranteed to have an ini file given how m_configFileName is set
-  // above
-  Config::ParseIniFile(m_configFileName);
+  process_ini_file(m_configFileName);
 
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options

@@ -636,18 +636,6 @@ Hdf Hdf::next(bool markVisited /* = true */) const {
   return ret;
 }
 
-//////////////////////////////////////////////////////////
-// last string info
-std::string Hdf::getLastFullName() const {
-  HDF *hdf = getRaw();
-  return hdf_get_last_fullname(hdf);
-}
-
-std::string Hdf::getLastValue() const {
-  HDF *hdf = getRaw();
-  return hdf_get_last_value(hdf);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 

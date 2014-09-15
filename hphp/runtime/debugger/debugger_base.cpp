@@ -208,7 +208,7 @@ std::string Macro::desc(const char *indent) {
 
 void Macro::load(const IniSetting::Map& ini, Hdf node) {
   TRACE(2, "Macro::load\n");
-  Config::Bind(m_name, ini, node["name"]);
+  m_name = Config::GetString(ini, node["name"]);
   Config::Get(ini, node["cmds"], m_cmds);
 }
 

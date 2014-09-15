@@ -41,9 +41,6 @@ const Extension* IniSetting::CORE = (Extension*)(-1);
 
 bool IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 
-bool IniSetting::s_config_is_a_constant = false;
-std::set<std::string> IniSetting::config_names_that_use_constants;
-
 const StaticString
   s_global_value("global_value"),
   s_local_value("local_value"),
@@ -499,12 +496,6 @@ void IniSetting::SystemParserCallback::onLabel(const std::string &name,
 void IniSetting::SystemParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
   assert(!key.empty());
-  // onConstant will always be called before onEntry, so we can check
-  // here
-  if (IniSetting::s_config_is_a_constant) {
-    IniSetting::config_names_that_use_constants.insert(key);
-    IniSetting::s_config_is_a_constant = false;
-  }
   auto& arr = *(IniSetting::Map*)arg;
   arr[key] = value;
 }
@@ -514,10 +505,6 @@ void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
                                                   const std::string& offset,
                                                   void* arg) {
   assert(!key.empty());
-  if (IniSetting::s_config_is_a_constant) {
-    IniSetting::config_names_that_use_constants.insert(key);
-    IniSetting::s_config_is_a_constant = false;
-  }
   auto& arr = *(IniSetting::Map*)arg;
   auto* ptr = arr.get_ptr(key);
   if (!ptr || !ptr->isObject()) {
@@ -563,7 +550,6 @@ void IniSetting::SystemParserCallback::makeArray(Map &hash,
 }
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {
-  IniSetting::s_config_is_a_constant = true;
   if (MemoryManager::TlsWrapper::isNull()) {
     // We can't load constants before the memory manger is up, so lets just
     // pretend they are strings I guess
@@ -584,8 +570,6 @@ static Mutex s_mutex;
 Variant IniSetting::FromString(const String& ini, const String& filename,
                                bool process_sections, int scanner_mode) {
   Lock lock(s_mutex); // ini parser is not thread-safe
-  // We are parsing something new, so reset this flag
-  s_config_is_a_constant = false;
   auto ini_cpp = ini.toCppString();
   auto filename_cpp = filename.toCppString();
   if (process_sections) {
@@ -609,8 +593,6 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
 IniSetting::Map IniSetting::FromStringAsMap(const std::string& ini,
                                             const std::string& filename) {
   Lock lock(s_mutex); // ini parser is not thread-safe
-  // We are parsing something new, so reset this flag
-  s_config_is_a_constant = false;
   SystemParserCallback cb;
   Map ret = IniSetting::Map::object;
   zend_parse_ini_string(ini, filename, NormalScanner, cb, &ret);
@@ -737,32 +719,9 @@ static bool ini_set(const std::string& name, const folly::dynamic& value,
   return cb->updateCallback(value);
 }
 
-bool IniSetting::FillInConstant(const std::string& name,
-                                const folly::dynamic& value,
-                                FollyDynamic) {
-
-  if (config_names_that_use_constants.find(name) ==
-      config_names_that_use_constants.end()) {
-    return false;
-  }
-  return IniSetting::Set(name, value, FollyDynamic());
-}
-
 bool IniSetting::Set(const std::string& name, const folly::dynamic& value,
                      FollyDynamic) {
-  // Need to make sure to update the value if the pair exists already
-  // A general insert(make_pair) won't actually update new values.
-  bool found = false;
-  for (auto& pair : s_system_settings) {
-    if (pair.first == name) {
-      pair.second = value;
-      found = true;
-      break;
-    }
-  }
-  if (!found) {
-    s_system_settings.insert(make_pair(name, value));
-  }
+  s_system_settings.insert(make_pair(name, value));
   return ini_set(name, value, PHP_INI_SET_EVERY);
 }
 

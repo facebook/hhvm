@@ -34,26 +34,19 @@ std::set<std::string> SatelliteServerInfo::InternalURLs;
 int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
-  // Since this could be activated when calling fb_gen_user_func() or similar.
-  // Those type of calls spawn async, and after extensions have
-  // been loaded.
-  // So, pretend extensions haven't been loaded for this PHP_INI_SYSTEM
-  // setting and then stop pretending after these binds.
-  // Something similar is being done in virtual-host.cpp as well.
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
   m_name = hdf.getName();
-  Config::Bind(m_port, ini, hdf["Port"], 0);
-  Config::Bind(m_threadCount, ini, hdf["ThreadCount"], 5);
-  Config::Bind(m_maxRequest, ini, hdf["MaxRequest"], 500);
-  Config::Bind(m_maxDuration, ini, hdf["MaxDuration"], 120);
+  m_port = Config::GetUInt16(ini, hdf["Port"], 0);
+  m_threadCount = Config::GetInt32(ini, hdf["ThreadCount"], 5);
+  m_maxRequest = Config::GetInt32(ini, hdf["MaxRequest"], 500);
+  m_maxDuration = Config::GetInt32(ini, hdf["MaxDuration"], 120);
   m_timeoutSeconds = std::chrono::seconds(
     Config::GetInt32(ini, hdf["TimeoutSeconds"],
                       RuntimeOption::RequestTimeoutSeconds));
-  Config::Bind(m_reqInitFunc, ini, hdf["RequestInitFunction"], "");
-  Config::Bind(m_reqInitDoc, ini, hdf["RequestInitDocument"], "");
-  Config::Bind(m_password, ini, hdf["Password"], "");
+  m_reqInitFunc = Config::GetString(ini, hdf["RequestInitFunction"], "");
+  m_reqInitDoc = Config::GetString(ini, hdf["RequestInitDocument"], "");
+  m_password = Config::GetString(ini, hdf["Password"], "");
   Config::Get(ini, hdf["Passwords"], m_passwords);
-  Config::Bind(m_alwaysReset, ini, hdf["AlwaysReset"], false);
+  m_alwaysReset = Config::GetBool(ini, hdf["AlwaysReset"], false);
 
   std::string type = Config::GetString(ini, hdf["Type"]);
   if (type == "InternalPageServer") {
@@ -74,7 +67,6 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
   } else {
     m_type = SatelliteServer::Type::Unknown;
   }
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 }
 
 bool SatelliteServerInfo::checkMainURL(const std::string& path) {

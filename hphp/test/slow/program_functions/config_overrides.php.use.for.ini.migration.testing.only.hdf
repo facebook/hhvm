@@ -1,4 +1,0 @@
-Log.Level=Verbose
-Server {
-  ThreadCount=111
-}

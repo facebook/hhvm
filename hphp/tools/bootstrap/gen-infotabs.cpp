@@ -57,7 +57,7 @@ int main(int argc, const char* argv[]) {
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
-      << "#include \"ext_hhvm_infotabs.h\"\n"
+      << "#include \"hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h\"\n"
       << "namespace HPHP {\n"
       << "  struct TypedValue;\n"
       << "  struct ActRec;\n"

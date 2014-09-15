@@ -138,6 +138,7 @@ int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
+int64_t RuntimeOption::MaxRequestAgeFactor = 0;
 int64_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
@@ -1013,6 +1014,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(RequestTimeoutSeconds, ini, server["RequestTimeoutSeconds"],
                  0);
+    Config::Bind(MaxRequestAgeFactor, ini, server["MaxRequestAgeFactor"], 0);
     Config::Bind(PspTimeoutSeconds, ini, server["PspTimeoutSeconds"], 0);
     Config::Bind(ServerMemoryHeadRoom, ini, server["MemoryHeadRoom"], 0);
     Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"],

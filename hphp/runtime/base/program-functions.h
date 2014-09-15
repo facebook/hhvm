@@ -39,6 +39,20 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program);
 void process_env_variables(Array& variables);
 
 /**
+ * Read and process all the ini settings from the ini configuration file
+ */
+void process_ini_file(const std::string& filename);
+
+/**
+ * Process one or more ini settings in the form of key=value
+ * Provide an optional filename from where the settings were retrieved.
+ * Function normally called directly when -d is used and called from
+ * process_ini_file() when the settings were from a file.
+ */
+void process_ini_settings(const std::string& name,
+                          const std::string& filename = "");
+
+/**
  * Inserting a variable into specified symbol table.
  *
  * "overwrite" parameter is only for cookies:

@@ -107,30 +107,24 @@ void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, Hdf overwrite) {
-  // See comment in SatelliteServerInfo::SatelliteServerInfo()
-  // for the reasoning to pretend extensions have not been loaded here.
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = true;
-  Config::Bind(m_runtimeOption.requestTimeoutSeconds, ini,
-               overwrite["Server.RequestTimeoutSeconds"], -1);
-  Config::Bind(m_runtimeOption.maxPostSize, ini,
-               overwrite["Server.MaxPostSize"], -1);
-  if (m_runtimeOption.maxPostSize != -1) {
-    m_runtimeOption.maxPostSize *= (1LL << 20);
-  }
-  Config::Bind(m_runtimeOption.uploadMaxFileSize, ini,
-               overwrite["Server.Upload.UploadMaxFileSize"], -1);
-  if (m_runtimeOption.uploadMaxFileSize != -1) {
-    m_runtimeOption.uploadMaxFileSize *= (1LL << 20);
-  }
-  Config::Get(ini, overwrite["Server.AllowedDirectories"],
-              m_runtimeOption.allowedDirectories);
+  int requestTimeoutSeconds =
+    Config::GetInt32(ini, overwrite["Server.RequestTimeoutSeconds"], -1);
+  int64_t maxPostSize =
+    Config::GetInt32(ini, overwrite["Server.MaxPostSize"], -1);
+  if (maxPostSize != -1) maxPostSize *= (1LL << 20);
+  int64_t uploadMaxFileSize =
+    Config::GetInt32(ini, overwrite["Server.Upload.UploadMaxFileSize"], -1);
+  if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
+  Config::Get(ini, overwrite["Server.AllowedDirectories"], m_runtimeOption.allowedDirectories);
+  m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
+  m_runtimeOption.maxPostSize = maxPostSize;
+  m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
 
   m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
   if (!m_documentRoot.empty() &&
       m_documentRoot[m_documentRoot.length() - 1] == '/') {
     m_documentRoot = m_documentRoot.substr(0, m_documentRoot.length() - 1);
   }
-  IniSetting::s_pretendExtensionsHaveNotBeenLoaded = false;
 }
 
 void VirtualHost::addAllowedDirectories(const std::vector<std::string>& dirs) {
@@ -181,10 +175,10 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
   }
   initRuntimeOption(ini, overwrite);
 
-  Config::Bind(m_disabled, ini, vh["Disabled"], false);
+  m_disabled = Config::GetBool(ini, vh["Disabled"], false);
 
-  Config::Bind(m_checkExistenceBeforeRewrite, ini,
-               vh["CheckExistenceBeforeRewrite"], true);
+  m_checkExistenceBeforeRewrite =
+    Config::GetBool(ini, vh["CheckExistenceBeforeRewrite"], true);
 
   Hdf rewriteRules = vh["RewriteRules"];
   for (Hdf hdf = rewriteRules.firstChild(); hdf.exists(); hdf = hdf.next()) {
@@ -192,10 +186,10 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
     rule.pattern = format_pattern(Config::GetString(ini, hdf["pattern"], ""), true);
-    Config::Bind(rule.to, ini, hdf["to"], "");
-    Config::Bind(rule.qsa, ini, hdf["qsa"], false);
-    Config::Bind(rule.redirect, ini, hdf["redirect"], 0);
-    Config::Bind(rule.encode_backrefs, ini, hdf["encode_backrefs"], false);
+    rule.to = Config::GetString(ini, hdf["to"], "");
+    rule.qsa = Config::GetBool(ini, hdf["qsa"], false);
+    rule.redirect = Config::GetInt16(ini, hdf["redirect"], 0);
+    rule.encode_backrefs = Config::GetBool(ini, hdf["encode_backrefs"], false);
 
     if (rule.pattern.empty() || rule.to.empty()) {
       throw std::runtime_error("Invalid rewrite rule: (empty pattern or to)");
@@ -223,7 +217,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
       } else {
         cond.type = RewriteCond::Type::Request;
       }
-      Config::Bind(cond.negate, ini, chdf["negate"], false);
+      cond.negate = Config::GetBool(ini, chdf["negate"], false);
     }
 
   }
@@ -237,7 +231,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
   for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
     QueryStringFilter filter;
     filter.urlPattern = format_pattern(Config::GetString(ini, hdf["url"], ""), true);
-    Config::Bind(filter.replaceWith, ini, hdf["value"], "");
+    filter.replaceWith = Config::GetString(ini, hdf["value"], "");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
     std::string pattern = Config::GetString(ini, hdf["pattern"], "");
@@ -267,7 +261,7 @@ void VirtualHost::init(const IniSetting::Map& ini, Hdf vh) {
   }
 
   Config::Get(ini, vh["ServerVariables"], m_serverVars);
-  Config::Bind(m_serverName, ini, vh["ServerName"]);
+  m_serverName = Config::GetString(ini, vh["ServerName"]);
 }
 
 bool VirtualHost::match(const std::string &host) const {

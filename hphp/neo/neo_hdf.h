@@ -51,8 +51,6 @@ struct _hdf
   char *name;
   int name_len;
   char *value;
-  char *last_fullname;
-  char *last_value;
   struct _attr *attr;
   struct _hdf *top;
   struct _hdf *next;
@@ -598,24 +596,6 @@ NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len);
  */
 
 void hdf_register_fileload(HDF *hdf, void *ctx, HDFFILELOAD fileload);
-
-/*
- * Function: hdf_get_last_fullname - gets the full name of the last HDF string
- * Input: hdf - pointer to a head HDF node
- *
- * Return: a string containing the full name
- *
- */
-char * hdf_get_last_fullname(HDF *hdf);
-
-/*
- * Function: hdf_get_last_value - gets the value of the last HDF string
- * Input: hdf - pointer to a head HDF node
- *
- * Return: a string containing the value
- *
- */
-char * hdf_get_last_value(HDF *hdf);
 
 __END_DECLS
 

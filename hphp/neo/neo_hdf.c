@@ -186,14 +186,6 @@ static void _dealloc_hdf (HDF **hdf)
   {
     ne_hash_destroy(&myhdf->hash);
   }
-  if (myhdf->last_fullname != NULL) {
-    free (myhdf->last_fullname);
-    myhdf->last_fullname = NULL;
-  }
-  if (myhdf->last_value != NULL) {
-    free (myhdf->last_value);
-    myhdf->last_value = NULL;
-  }
   free(myhdf);
   *hdf = NULL;
 }
@@ -1616,8 +1608,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
   NEOERR *err;
   HDF *lower;
   char *s;
-  char *name = NULL;
-  char *value = NULL;
+  char *name, *value;
   HDF_ATTR *attr = NULL;
 
   while (**str != '\0')
@@ -1913,14 +1904,6 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     err = nerr_raise(NERR_PARSE, "[%s:%d] Missing matching }", path, *lineno);
     return err;
   }
-
-  if (name != NULL) {
-    hdf->last_fullname = strdup(name);
-  }
-  if (value != NULL) {
-    hdf->last_value = strdup(value);
-  }
-
   return STATUS_OK;
 }
 
@@ -2037,18 +2020,3 @@ void hdf_register_fileload(HDF *hdf, void *ctx, HDFFILELOAD fileload)
   hdf->fileload = fileload;
 }
 
-char* hdf_get_last_fullname(HDF *hdf)
-{
-  if (hdf == NULL || hdf->last_fullname == NULL) {
-    return NULL;
-  }
-  return hdf->last_fullname;
-}
-
-char* hdf_get_last_value(HDF *hdf)
-{
-  if (hdf == NULL || hdf->last_value == NULL) {
-    return NULL;
-  }
-  return hdf->last_value;
-}

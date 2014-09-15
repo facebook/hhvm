@@ -198,7 +198,6 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     f->m_cls = cls;
   }
   f->setFullName(numParams);
-  f->m_profCounter = 0;
   return f;
 }
 
@@ -866,11 +865,6 @@ bool Func::shouldPGO() const {
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
   return attrs() & AttrHot;
-}
-
-void Func::incProfCounter() {
-  assert(isProfileRequest());
-  __sync_fetch_and_add(&m_profCounter, 1);
 }
 
 

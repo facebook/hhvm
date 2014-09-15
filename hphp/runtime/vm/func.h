@@ -989,8 +989,6 @@ public:
    * Profile-guided optimization linkage.
    */
   bool shouldPGO() const;
-  void incProfCounter();
-  uint32_t profCounter() const { return m_profCounter; }
   void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
 
 
@@ -1133,12 +1131,10 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  LowStringPtr m_fullName;
-  // Profile counter used to detect hot functions.
-  uint32_t m_profCounter{0};
   unsigned char* volatile m_funcBody;
   mutable RDS::Link<Func*> m_cachedFunc{RDS::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
+  LowStringPtr m_fullName;
   LowStringPtr m_name;
   // The first Class in the inheritance hierarchy that declared this method.
   // Note that this may be an abstract class that did not provide an

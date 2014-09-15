@@ -15,8 +15,8 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-// TODO(#4489053) This is almost a direct copy-paste, but it could be abstracted
-//                and cleaned up relatively easily
+// TODO(#3704) This is can be completely eliminated once the xml api is
+//             refactored
 
 #ifndef incl_XDEBUG_STR_H_
 #define incl_XDEBUG_STR_H_

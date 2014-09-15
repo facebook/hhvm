@@ -58,9 +58,6 @@ void XDebugProfiler::ensureBufferSpace() {
 
 void XDebugProfiler::collectFrameData(FrameData& frameData,
                                       const TypedValue* retVal) {
-  // If we're not collecting any data, this shouldn't be running
-  assert(isCollecting());
-
   VMRegAnchor _; // Ensure consistent state for vmfp and vmpc
   ActRec* fp = vmfp();
   bool is_func_begin = retVal == nullptr;
@@ -72,17 +69,17 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
     frameData.func = fp->func();
 
     // Need the previous frame in order to get the call line. If we cannot
-    // get the previous frame, default to 0
+    // get the previous frame, default to 1
     Offset offset;
     const ActRec* prevFp = g_context->getPrevVMState(fp, &offset);
     if (prevFp != nullptr) {
       frameData.line = prevFp->unit()->getLineNumber(offset);
     } else {
-      frameData.line = 0;
+      frameData.line = 1;
     }
   } else {
     frameData.func = nullptr;
-    frameData.line = 0;
+    frameData.line = 1;
   }
 
   // Time is stored if profiling, tracing, or collect_time is enabled, but it
@@ -108,14 +105,11 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
   // If tracing is enabled, we may need to collect a serialized version of
   // the arguments or the return value.
   if (m_tracingEnabled && is_func_begin && XDEBUG_GLOBAL(CollectParams) > 0) {
-    // TODO(#4489053) This is either going to require a bunch of copied and
-    //                pasted code or a refactor of debugBacktrace to pull the
-    //                arguments list from the more general location.
-    //                This relies on xdebug_var_dump anyways.
+    // TODO(#3704) This relies on xdebug_var_dump
     throw_not_implemented("Tracing with collect_params enabled");
   } else if (m_tracingEnabled && !is_func_begin &&
              XDEBUG_GLOBAL(CollectReturn)) {
-    // TODO(#4489053) This relies on xdebug_var_dump
+    // TODO(#3704) This relies on xdebug_var_dump
     throw_not_implemented("Tracing with collect_return enabled");
   } else {
     frameData.context_str = nullptr;
@@ -129,18 +123,35 @@ void XDebugProfiler::recordFrame(const TypedValue* retVal) {
 }
 
 void XDebugProfiler::beginFrame(const char *symbol) {
-  recordFrame(nullptr);
+  assert(isNeeded());
+
+  // Check the stack depth, abort if we've reached the limit
+  m_depth++;
+  if (m_maxDepth != 0 && m_depth >= m_maxDepth) {
+    raise_error("Maximum function nesting level of '%lu' reached, aborting!",
+                m_maxDepth);
+  }
+
+  // Record the frame if we are collecting
+  if (isCollecting()) {
+    recordFrame(nullptr);
+  }
 }
 
 void XDebugProfiler::endFrame(const TypedValue* retVal,
                               const char *symbol,
                               bool endMain /* = false */) {
-  // If tracing or profiling are enabled, we need to store end frames as well.
-  // Otherwise we can just overwrite the most recent begin frame
-  if (m_tracingEnabled || m_profilingEnabled) {
-    recordFrame(retVal);
-  } else {
-    m_nextFrameIdx--;
+  assert(isNeeded());
+  m_depth--;
+
+  if (isCollecting()) {
+    // If tracing or profiling are enabled, we need to store end frames as well.
+    // Otherwise we can just overwrite the most recent begin frame
+    if (m_tracingEnabled || m_profilingEnabled) {
+      recordFrame(retVal);
+    } else {
+      m_nextFrameIdx--;
+    }
   }
 }
 
@@ -188,7 +199,7 @@ void XDebugProfiler::enableTracing(const String& filename, int64_t opts) {
   }
 }
 
-// TODO(#4489053) If we aren't profiling, we should try to save space by
+// TODO(#3704) If we aren't profiling, we should try to save space by
 // removing unneeded trace data
 void XDebugProfiler::disableTracing() {
   if (m_tracingOpts & k_XDEBUG_TRACE_COMPUTERIZED) {
@@ -302,7 +313,7 @@ int64_t XDebugProfiler::writeTracingFrame(int64_t level,
   // Iterate over children
   int64_t buf_idx = startIdx + 1;
   while (buf_idx < m_nextFrameIdx) {
-    // TODO(#4489053) If collect_return and !is_func_begin, write return value
+    // TODO(#3704) If collect_return and !is_func_begin, write return value
     FrameData& cur_frame = m_frameBuffer[buf_idx];
     if (!cur_frame.is_func_begin) {
       writeTracingEndFrame<outputType>(cur_frame, level, id);
@@ -428,7 +439,7 @@ void XDebugProfiler::writeTracingFunc(FrameData& frame,
     fprintf(m_tracingFile, "<td>");
   }
 
-  // TODO(#4489053) Support collect_params output
+  // TODO(#3704) Support collect_params output
   writeTracingFuncName(frame.func, isTopPseudoMain);
   switch (outputType) {
     case TraceOutputType::HTML:

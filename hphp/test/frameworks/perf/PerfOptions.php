@@ -2,6 +2,7 @@
 
 final class PerfOptions {
   public bool $help;
+  public bool $verbose;
 
   public ?string $php5;
   public ?string $hhvm;
@@ -22,6 +23,7 @@ final class PerfOptions {
       '',
       [
         'help',
+        'verbose',
         'php5:', 'hhvm:',
         'siege:', 'nginx:',
         'toys', 'wordpress',
@@ -31,6 +33,7 @@ final class PerfOptions {
       ]
     );
     $this->help = array_key_exists('help', $o);
+    $this->verbose = array_key_exists('verbose', $o);
 
     $this->php5 = hphp_array_idx($o, 'php5', null);
     $this->hhvm = hphp_array_idx($o, 'hhvm', null);

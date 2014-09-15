@@ -1489,8 +1489,14 @@ and class_member_word env ~attrs ~modifiers = function
   | _ ->
       L.back env.lb;
       let h = hint env in
-      let cvars = class_var_list env in
-      ClassVars (modifiers, Some h, cvars)
+      let cvars =
+        match L.token env.lb with
+        | Tword when Lexing.lexeme env.lb = "function" ->
+            error env ("Expected variable. "^
+              "Perhaps you meant 'function (...): return-type'?");
+            []
+        | _ -> L.back env.lb; class_var_list env
+      in ClassVars (modifiers, Some h, cvars)
 
 and method_ env ~modifiers ~attrs ~sync pname =
   let pos, name = pname in

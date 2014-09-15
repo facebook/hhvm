@@ -1,0 +1,2 @@
+File "return_hint_parse_bad.php", line 13, characters 15-22:
+Expected variable. Perhaps you meant 'function (...): return-type'? (Parsing[1002])

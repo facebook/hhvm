@@ -358,7 +358,13 @@ void Vgen::emit(call i) {
 }
 
 void Vgen::emit(cloadq& i) {
-  a->cload_reg64_disp_reg64(i.cc, i.s.base, i.s.disp, i.d);
+  auto m = i.t;
+  always_assert(!m.index.isValid()); // not supported, but could be later.
+  if (i.f != i.d) {
+    always_assert(i.d != m.base); // don't clobber base
+    a->movq(i.f, i.d);
+  }
+  a->cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
 }
 
 // add s0 s1 d => mov s1->d; d += s0

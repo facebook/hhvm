@@ -5328,7 +5328,7 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   if (newIdx->isConst()) {
     v << ldimm{newIdx->rawVal(), res};
     v << cmpqm{res, contArReg[off]};
-    v << cloadq{CC_G, contArReg[off], res};
+    v << cloadq{CC_G, res, contArReg[off], res};
   } else {
     auto mem_index = v.makeReg();
     v << loadq{contArReg[off], mem_index};

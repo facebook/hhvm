@@ -378,7 +378,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(call, I(target), U(args), Dn)\
   O(callm, Inone, U(target) U(args), Dn)\
   O(callr, Inone, U(target) U(args), Dn)\
-  O(cloadq, I(cc), U(s), D(d))\
+  O(cloadq, I(cc), U(f) U(t), D(d))\
   O(cmovq, I(cc), U(f) U(t), D(d))\
   O(cmpb, Inone, U(s0) U(s1), Dn)\
   O(cmpbi, I(s0), U(s1), Dn)\
@@ -550,7 +550,7 @@ struct addsd  { VregXMM s0, s1, d; };
 struct call { CodeAddress target; RegSet args; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
-struct cloadq { ConditionCode cc; Vptr s; Vreg64 d; };
+struct cloadq { ConditionCode cc; Vreg64 f; Vptr t; Vreg64 d; };
 struct cmovq { ConditionCode cc; Vreg64 f, t, d; };
 struct cmpb  { Vreg8  s0; Vreg8  s1; };
 struct cmpbi { Immed  s0; Vreg8  s1; };

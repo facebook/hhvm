@@ -50,8 +50,7 @@ from executing as the fatal propagates. This includes other __destruct methods.
 (2) Exceptions thrown from __toString()
 
 PHP5 does not allow exceptions to be thrown from __toString(). HipHop VM
-does. Also, PHP5 doesn't allow __toString() to return anything other than a
-string. HipHop VM will just convert return value to string.
+does.
 
 (3) __call/__callStatic() handling
 

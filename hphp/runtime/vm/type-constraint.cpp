@@ -53,6 +53,7 @@ void TypeConstraint::init() {
       { makeStaticString("HH\\resource"), { KindOfResource,
                                                          MetaType::Precise }},
       { makeStaticString("HH\\num"),    { KindOfDouble,  MetaType::Number }},
+      { makeStaticString("HH\\arraykey"), { KindOfString, MetaType::ArrayKey }},
       { makeStaticString("self"),       { KindOfObject,  MetaType::Self }},
       { makeStaticString("parent"),     { KindOfObject,  MetaType::Parent }},
       { makeStaticString("callable"),   { KindOfObject,  MetaType::Callable }},
@@ -130,7 +131,10 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
         case 4: strip = !strcasecmp(stripped, "bool"); break;
         case 5: strip = !strcasecmp(stripped, "float"); break;
         case 6: strip = !strcasecmp(stripped, "string"); break;
-        case 8: strip = !strcasecmp(stripped, "resource"); break;
+        case 8:
+          strip = (!strcasecmp(stripped, "resource") ||
+                   !strcasecmp(stripped, "arraykey"));
+          break;
         default:
           break;
       }
@@ -317,6 +321,10 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
     return IS_INT_TYPE(tv->m_type) || IS_DOUBLE_TYPE(tv->m_type);
   }
 
+  if (isArrayKey()) {
+    return IS_INT_TYPE(tv->m_type) || IS_STRING_TYPE(tv->m_type);
+  }
+
   if (tv->m_type == KindOfObject) {
     if (!isObjectOrTypeAlias()) return false;
     // Perfect match seems common enough to be worth skipping the hash
@@ -393,6 +401,7 @@ TypeConstraint::checkPrimitive(DataType dt) const {
   assert(dt != KindOfRef);
   if (isNullable() && dt == KindOfNull) return true;
   if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
+  if (isArrayKey()) { return IS_INT_TYPE(dt) || IS_STRING_TYPE(dt); }
   return equivDataTypes(m_type.dt, dt);
 }
 

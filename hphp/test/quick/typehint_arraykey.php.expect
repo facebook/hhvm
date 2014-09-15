@@ -1,0 +1,8 @@
+int(10)
+string(3) "abc"
+string(3) "100"
+string(4) "10.5"
+Argument 1 passed to takes_arraykey() must be an instance of arraykey, float given
+Argument 1 passed to takes_arraykey() must be an instance of arraykey, bool given
+Argument 1 passed to takes_arraykey() must be an instance of arraykey, null given
+Argument 1 passed to takes_arraykey() must be an instance of arraykey, stdClass given

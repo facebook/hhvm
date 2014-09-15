@@ -15,14 +15,61 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-// TODO(#4489053) This should be refactored after xml api is refactored.
-// TODO(#4489053) Only the xml code has been pulled in for now
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
+
+////////////////////////////////////////////////////////////////////////////////
+// PHP Errors
+
+static const StaticString
+  s_FATAL_ERROR("Fatal error"),
+  s_CATCHABLE_FATAL_ERROR("Catchable fatal error"),
+  s_WARNING("Warning"),
+  s_PARSE_ERROR("Parse error"),
+  s_NOTICE("Notice"),
+  s_STRICT_STANDARDS("Strict standards"),
+  s_DEPRECATED("Deprecated"),
+  s_XDEBUG("Xdebug"),
+  s_UNKNOWN_ERROR("Unknown error");
+
+// Errors are generally passed around as errnum ints corresponding to an enum
+// ErrorModes value
+typedef ErrorConstants::ErrorModes ErrType;
+
+// String name for the given error type, as defined by php5 xdebug in
+// xdebug_var.c
+const String xdebug_error_type(int errnum) {
+  switch (static_cast<ErrType>(errnum)) {
+    case ErrType::ERROR:
+    case ErrType::CORE_ERROR:
+    case ErrType::COMPILE_ERROR:
+    case ErrType::USER_ERROR:
+      return s_FATAL_ERROR;
+    case ErrType::RECOVERABLE_ERROR:
+      return s_CATCHABLE_FATAL_ERROR;
+    case ErrType::WARNING:
+    case ErrType::CORE_WARNING:
+    case ErrType::COMPILE_WARNING:
+    case ErrType::USER_WARNING:
+      return s_WARNING;
+    case ErrType::PARSE:
+      return s_PARSE_ERROR;
+    case ErrType::NOTICE:
+    case ErrType::USER_NOTICE:
+      return s_NOTICE;
+    case ErrType::STRICT:
+      return s_STRICT_STANDARDS;
+    case ErrType::PHP_DEPRECATED:
+    case ErrType::USER_DEPRECATED:
+      return s_DEPRECATED;
+    default:
+      return s_UNKNOWN_ERROR;
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // XML node printing routines
@@ -250,7 +297,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     exporter.level--;
     exporter.counts[arr.get()]--;
   } else if (var.isObject()) {
-    // TODO(#4489053) This could be merged into the above array code. For now,
+    // TODO(#3704) This could be merged into the above array code. For now,
     // it's separate as this was pulled originally from xdebug
     ObjectData* obj = var.toObject().get();
     Class* cls = obj->getVMClass();

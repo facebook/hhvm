@@ -74,9 +74,11 @@ public:
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool NoSilencer;
+  static int ErrorUpgradeLevel; // Bitmask of errors to upgrade to E_USER_ERROR
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
   static int RuntimeErrorReportingLevel;
+  static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
 

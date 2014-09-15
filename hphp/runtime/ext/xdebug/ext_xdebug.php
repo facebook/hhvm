@@ -1,6 +1,11 @@
 <?hh
-// TODO(#4489053) docs, override var_dump
 
+/**
+ * This function makes the debugger break on the specific line as if a normal
+ * file/line breakpoint was set on this line.
+ *
+ * @return bool - True on success, false on failure
+ */
 <<__Native>>
 function xdebug_break(): bool;
 
@@ -55,12 +60,18 @@ function xdebug_debug_zval(string $varname, ...): void;
 <<__Native("ActRec")>>
 function xdebug_debug_zval_stdout(string $varname, ...): void;
 
+/**
+ * Disable showing stack traces on error conditions.
+ */
 <<__Native>>
 function xdebug_disable(): void;
 
 <<__Native>>
 function xdebug_dump_superglobals(): void;
 
+/**
+ * Enable showing stack traces on error conditions.
+ */
 <<__Native>>
 function xdebug_enable(): void;
 
@@ -128,6 +139,12 @@ function xdebug_get_headers(): array<string>;
 <<__Native>>
 function xdebug_get_profiler_filename(): mixed;
 
+/**
+ * Returns the stack depth level. The main body of a script is level 0 and each
+ * include and/or function call adds one to the stack depth level.
+ *
+ * @return int - Returns the current stack depth level
+ */
 <<__Native>>
 function xdebug_get_stack_depth(): int;
 
@@ -141,6 +158,9 @@ function xdebug_get_stack_depth(): int;
 <<__Native>>
 function xdebug_get_tracefile_name(): mixed;
 
+/**
+ * Return whether stack traces would be shown in case of an error or not.
+ */
 <<__Native>>
 function xdebug_is_enabled(): bool;
 

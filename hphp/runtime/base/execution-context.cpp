@@ -630,8 +630,9 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
 }
 
 bool ExecutionContext::errorNeedsLogging(int errnum) {
-  auto level = ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getErrorReportingLevel();
+  auto level =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.getErrorReportingLevel() |
+    RuntimeOption::ForceErrorReportingLevel;
   return RuntimeOption::NoSilencer || (level & errnum) != 0;
 }
 
@@ -674,6 +675,13 @@ void ExecutionContext::handleError(const std::string& msg,
     break;
   default:
     break;
+  }
+
+  // Potentially upgrade the error to E_USER_ERROR
+  if (errnum & RuntimeOption::ErrorUpgradeLevel &
+      static_cast<int>(ErrorConstants::ErrorModes::UPGRADEABLE_ERROR)) {
+    errnum = static_cast<int>(ErrorConstants::ErrorModes::USER_ERROR);
+    mode = ErrorThrowMode::IfUnhandled;
   }
 
   ErrorStateHelper esh(this, newErrorState);

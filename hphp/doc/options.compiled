@@ -11,18 +11,22 @@ node's purpose. Listed values are defaults, unless examples.
     NoSilencer = false
     AlwaysLogUnhandledExceptions = true
     RuntimeErrorReportingLevel = 8191
+    ForceErrorReportingLevel = 0
     Header = false
     HeaderMangle = 0
     NativeStackTrace = true
     MaxMessagesPerRequest = -1
 
-- Level, NoSilencer, AlwaysLogUnhandledExceptions, RuntimeErrorReportingLevel
+- Level, NoSilencer, AlwaysLogUnhandledExceptions, RuntimeErrorReportingLevel,
+  ForceErrorReportingLevel
 
 These settings control different logging levels. NoSilencer means even when
 silencer operator @ is used, still output errors. Unhandled exceptions are
 PHP fatal errors, and AlwaysLogUnhandledExceptions will make sure they get
 logged even if a user's error handler is installed for them. We also provided
-RuntimeErrorReportingLevel for compatibility with PHP.
+RuntimeErrorReportingLevel for compatibility with PHP. ForceErrorReportingLevel
+is a bitmask that will be ORed with RuntimeErrorReportingLevel to determine the
+actual error reporting level.
 
 - Header, NativeStackTrace
 
@@ -78,6 +82,9 @@ flood error logs.
 = Error Handling
 
   ErrorHandling {
+    # Bitmask of error constants to upgrade to E_USER_ERROR. Only E_WARNING,
+    # E_USER_WARNING, E_NOTICE, and E_USER_NOTICE are supported.
+    UpgradeLevel = 0 (default)
     CallUserHandlerOnFatals = true
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false

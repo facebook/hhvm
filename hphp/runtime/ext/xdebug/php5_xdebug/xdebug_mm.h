@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-// TODO(#4489053) This is probably unnecessary in the long run
+// TODO(#3704) This should be removed
 
 #ifndef incl_XDEBUG_MM_H_
 #define incl_XDEBUG_MM_H_

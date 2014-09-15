@@ -265,7 +265,7 @@ constexpr bool IS_STRING_TYPE(DataType t) {
 #define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)
 // Other type check macros
 #define IS_INT_TYPE(t) ((t) == KindOfInt64)
-#define IS_ARRAY_TYPE(t) ((t) == KindOfArray)
+constexpr bool IS_ARRAY_TYPE(DataType t) { return t == KindOfArray; }
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
 

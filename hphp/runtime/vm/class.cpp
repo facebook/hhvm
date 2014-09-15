@@ -375,8 +375,7 @@ const Class* Class::commonAncestor(const Class* cls) const {
   // Walk up m_classVec for both classes to look for a common ancestor.
   auto vecIdx = std::min(m_classVecLen, cls->m_classVecLen) - 1;
   do {
-    assert(vecIdx >= 0 &&
-           vecIdx < m_classVecLen && vecIdx < cls->m_classVecLen);
+    assert(vecIdx < m_classVecLen && vecIdx < cls->m_classVecLen);
     if (m_classVec[vecIdx] == cls->m_classVec[vecIdx]) {
       return m_classVec[vecIdx];
     }
@@ -863,7 +862,8 @@ const Class::TraitAliasVec& Class::traitAliases() {
 // Objects.
 
 size_t Class::declPropOffset(Slot index) const {
-  assert(index >= 0);
+  static_assert(std::is_unsigned<Slot>::value,
+                "Slot is supposed to be unsigned");
   return sizeof(ObjectData) + m_builtinODTailSize + index * sizeof(TypedValue);
 }
 

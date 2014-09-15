@@ -488,7 +488,7 @@ StringData* StringData::append(StringSlice r1,
 //////////////////////////////////////////////////////////////////////
 
 StringData* StringData::reserve(size_t cap) {
-  assert(!isImmutable() && !hasMultipleRefs() && cap >= 0);
+  assert(!isImmutable() && !hasMultipleRefs());
   assert(isFlat());
 
   if (cap + 1 <= capacity()) return this;
@@ -511,7 +511,7 @@ StringData* StringData::reserve(size_t cap) {
 }
 
 StringData* StringData::shrinkImpl(size_t len) {
-  assert(!isImmutable() && !hasMultipleRefs() && len >= 0);
+  assert(!isImmutable() && !hasMultipleRefs());
   assert(isFlat());
   assert(len <= m_len);
   assert(len < capacity());

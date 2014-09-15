@@ -361,7 +361,9 @@ void CstrBuffer::append(StringSlice slice) {
   auto const data = slice.ptr;
   auto const len = slice.len;
 
-  assert(m_buffer && len >= 0);
+  static_assert(std::is_unsigned<typeof(len)>::value,
+                "len is supposed to be unsigned");
+  assert(m_buffer);
 
   unsigned newlen = m_len + len;
   if (newlen + 1 > m_cap) {

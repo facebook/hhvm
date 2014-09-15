@@ -5660,7 +5660,9 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
   using namespace jit::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
-    assert(locId >= 0 && locId < curFunc()->numLocals());
+    static_assert(std::is_unsigned<typeof(locId)>::value,
+                  "locId should be unsigned");
+    assert(locId < curFunc()->numLocals());
     return m_irb->localType(locId, DataTypeSpecific);
   };
   auto boxed = [](Type t) {

@@ -401,7 +401,9 @@ bool testAndSetBit(size_t bit) {
 }
 
 bool isPersistentHandle(Handle handle) {
-  assert(handle >= 0 && handle < RuntimeOption::EvalJitTargetCacheSize);
+  static_assert(std::is_unsigned<Handle>::value,
+                "Handle is supposed to be unsigned");
+  assert(handle < RuntimeOption::EvalJitTargetCacheSize);
   return handle >= (unsigned)s_persistent_base;
 }
 

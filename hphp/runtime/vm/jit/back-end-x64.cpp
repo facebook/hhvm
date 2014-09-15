@@ -954,7 +954,6 @@ UNUSED const Abi vasm_abi {
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
-  allocateRegs(unit); // TODO: t5167970 remove this. we need it's PUNTs.
   Timer _t(Timer::codeGen);
   RegAllocInfo no_regs(unit);
   LiveRegs no_live_regs(unit, RegSet());

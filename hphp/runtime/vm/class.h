@@ -442,24 +442,6 @@ public:
    */
   Func* lookupMethod(const StringData* methName) const;
 
-  /*
-   * Find the first class in the inheritance hierarchy which defines the method
-   * called `methName'.  Return null if no such method is defined anywhere in
-   * the hierarchy.
-   *
-   * For trait methods, the base class is the one that uses/imports the trait.
-   */
-  Class* findMethodBaseClass(const StringData* methName);
-
-  /*
-   * Whether this class (as opposed to some parent class) declared the given
-   * method.
-   *
-   * For trait methods, the class declaring the method is the one that
-   * uses/imports the trait.
-   */
-  bool declaredMethod(const Func* method);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]

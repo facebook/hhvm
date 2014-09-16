@@ -416,23 +416,6 @@ bool Class::isCollectionClass() const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Methods.
-
-Class* Class::findMethodBaseClass(const StringData* methName) {
-  const Func* f = lookupMethod(methName);
-  if (f == nullptr) return nullptr;
-  return f->baseCls();
-}
-
-bool Class::declaredMethod(const Func* method) {
-  if (method->preClass()->attrs() & AttrTrait) {
-    return findMethodBaseClass(method->name()) == this;
-  }
-  return method->preClass() == m_preClass.get();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Property initialization.
 
 void Class::initialize() const {
@@ -980,7 +963,12 @@ void Class::getClassInfo(ClassInfoVM* ci) {
     }
     if (func->isGenerated()) continue;
     assert(func);
-    assert(declaredMethod(func));
+    // Assert this func is declared on this class.
+    if (func->attrs() & AttrTrait) {
+      assert(func->baseCls() == this);
+    } else {
+      assert(func->preClass() == m_preClass.get());
+    }
     SET_FUNCINFO_BODY;
   }
 

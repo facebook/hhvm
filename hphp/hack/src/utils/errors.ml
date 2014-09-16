@@ -1034,7 +1034,7 @@ let new_static_inconsistent new_pos (cpos, cname) =
   "; __construct arguments are not \
     guaranteed to be consistent in child classes";
     cpos, ("This declaration neither defines an abstract/final __construct"
-           ^" nor uses <<ConsistentConstruct>> attribute")]
+           ^" nor uses <<__ConsistentConstruct>> attribute")]
 
 let abstract_instantiate pos cname =
   add Typing.abstract_instantiate pos

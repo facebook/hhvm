@@ -106,25 +106,12 @@ HipHop VM does not support case-insensitive constants, for example:
 
 HipHop VM may return variables/classes in a different order than PHP5.
 
-(3) XMLWriter
-
-Under PHP5, XMLWriter class and its functions returned different types of
-objects,
-
-  <?php
-  function foo(XMLWriter $w) {}
-  $obj = new XMLWriter();
-  foo($obj); // <-- this one is actually okay
-  $obj2 = xmlwriter_open_memory(); // <-- just not this one
-  var_dump($obj, $obj2);
-  foo($obj2);
-
 Under HipHop VM, they are the same.
 
-(4) HipHop VM only supports preg_replace /e in limited cases.
+(3) HipHop VM only supports preg_replace /e in limited cases.
 Example unsupported case: phpt...bug24403
 
-(5) Under PHP5, you can assign to $GLOBALS:
+(4) Under PHP5, you can assign to $GLOBALS:
 
   $GLOBALS = 0;
   $x = $GLOBALS - 5;
@@ -134,14 +121,14 @@ Example unsupported case: phpt...bug24403
 
 Under HipHop VM, this is not allowed or not working at present.
 
-(6) Converting $GLOBALS to bool will always evaluate to true, even if $GLOBALS
+(5) Converting $GLOBALS to bool will always evaluate to true, even if $GLOBALS
 is empty. Converting to bool can mean an explicit cast, or an implicit
 conversion inside the condition of an if statement or similar.
 
-(7) All fatals prevent further PHP code from executing, including __destruct
+(6) All fatals prevent further PHP code from executing, including __destruct
 methods. N.B.: exit() is a fatal.
 
-(8) Loading of external entities in the libxml extension is disabled by default
+(7) Loading of external entities in the libxml extension is disabled by default
 for security reasons. It can be re-enabled on a per-protocol basis (file, http,
 compress.zlib, etc...) with a comma-separated list in the ini setting
 hhvm.libxml.ext_entity_whitelist.

@@ -92,5 +92,12 @@ Directory* UserStreamWrapper::opendir(const String& path) {
   return dir;
 }
 
+bool UserStreamWrapper::touch(const String& path,
+                              int64_t mtime, int64_t atime) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->touch(path, mtime, atime);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -261,6 +261,7 @@ function get_options($argv) {
     'cores' => '',
     'no-clean' => '',
     'list-tests' => '',
+    'relocate:' => '',
     'hhvm-binary-path:' => 'b:',
   );
   $options = array();
@@ -503,6 +504,14 @@ function hhvm_cmd_impl() {
     isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
     extra_args($options),
   );
+
+  if (isset($options['relocate'])) {
+    $args[] = '--count='.($options['relocate'] * 2);
+    $args[] = '-vEval.JitAHotSize=6000000';
+    $args[] = '-vEval.HotFuncCount=0';
+    $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+  }
+
   if (!isset($options['cores'])) {
     $args[] = '-vResourceLimit.CoreFileSize=0';
   }
@@ -1098,7 +1107,27 @@ function generate_diff($wanted, $wanted_re, $output)
 {
   $w = explode("\n", $wanted);
   $o = explode("\n", $output);
-  $r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
+  if (is_null($wanted_re)) {
+    $r = $w;
+  } else {
+    if (preg_match('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, $m)) {
+      $t = explode("\n", $m[1]);
+      $r = array();
+      $w2 = array();
+      for ($i = 0; $i < $m[2]; $i++) {
+        foreach ($t as $v) {
+          $r[] = $v;
+        }
+        foreach ($w as $v) {
+          $w2[] = $v;
+        }
+      }
+      $w = $wanted === $wanted_re ? $r : $w2;
+    } else {
+      echo "Wanted re: $wanted_re\n";
+      $r = explode("\n", $wanted_re);
+    }
+  }
   $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
 
   return implode("\r\n", $diff);
@@ -1179,7 +1208,8 @@ function run_config_cli($options, $test, $hhvm, $hhvm_env) {
   }
 
   fclose($pipes[0]);
-  $output = trim(stream_get_contents($pipes[1]));
+  $output = stream_get_contents($pipes[1]);
+  $output = trim($output);
   $stderr = stream_get_contents($pipes[2]);
   fclose($pipes[1]);
   fclose($pipes[2]);
@@ -1208,6 +1238,8 @@ function run_config_post($outputs, $test, $options) {
     return true;
   }
 
+  $repeats = isset($options['relocate']) ? $options['relocate'] * 2 : 0;
+
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
     file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
@@ -1217,13 +1249,14 @@ function run_config_post($outputs, $test, $options) {
 
   if ($type === 'expect') {
     $wanted = trim(file_get_contents($file));
-    $passed = !strcmp($output, $wanted);
-
-    if (!$passed) {
-      file_put_contents("$test.diff", generate_diff($wanted, null, $output));
+    if (!$repeats) {
+      $passed = !strcmp($output, $wanted);
+      if (!$passed) {
+        file_put_contents("$test.diff", generate_diff($wanted, null, $output));
+      }
+      return $passed;
     }
-
-    return $passed;
+    $wanted_re = preg_quote($wanted);
   } else if ($type === 'expectf') {
     $wanted = trim(file_get_contents($file));
     $wanted_re = $wanted;
@@ -1297,28 +1330,27 @@ function run_config_post($outputs, $test, $options) {
     // Normalize newlines
     $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
     $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
-
-    $passed = preg_match("/^$wanted_re\$/s", $output);
-
-    if (!$passed) {
-      file_put_contents("$test.diff", generate_diff($wanted, $wanted_re, $output));
-    }
-
-    return $passed;
-
   } else if ($type === 'expectregex') {
     $wanted_re = trim(file_get_contents($file));
-
-    $passed = preg_match("/^$wanted_re\$/s", $output);
-
-    if (!$passed) {
-      file_put_contents("$test.diff", generate_diff($wanted_re, $wanted_re, $output));
-    }
-
-    return $passed;
   } else {
     throw new Exception("Unsupported expect file type: ".$type);
   }
+
+  if ($repeats) {
+    $wanted_re = "($wanted_re\s*)".'{'.$repeats.'}';
+  }
+  if (!isset($wanted)) $wanted = $wanted_re;
+  $passed = @preg_match("/^$wanted_re\$/s", $output);
+  if ($passed === false && $repeats) {
+    // $repeats can cause the regex to become too big, and fail
+    // to compile
+    return 'skip';
+  }
+  if (!$passed) {
+    file_put_contents("$test.diff",
+                      generate_diff($wanted_re, $wanted_re, $output));
+  }
+  return $passed;
 }
 
 function run_one_config($options, $test, $hhvm, $hhvm_env) {
@@ -1341,6 +1373,10 @@ function run_test($options, $test) {
 
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
+  if (isset($options['relocate']) &&
+      preg_match('/ --count[ =].* --count[ =]/', $hhvm)) {
+    return 'skip';
+  }
 
   if (is_executable('/usr/bin/timeout')) {
     $hhvm = '/usr/bin/timeout 300 '.$hhvm;

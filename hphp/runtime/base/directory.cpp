@@ -28,6 +28,32 @@ IMPLEMENT_OBJECT_ALLOCATION(PlainDirectory)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_wrapper_type("wrapper_type"),
+  s_stream_type("stream_type"),
+  s_mode("mode"),
+  s_unread_bytes("unread_bytes"),
+  s_seekable("seekable"),
+  s_timed_out("timed_out"),
+  s_blocked("blocked"),
+  s_eof("eof"),
+  s_plainfile("plainfile"),
+  s_dir("dir"),
+  s_r("r");
+
+Array Directory::getMetaData() {
+  return make_map_array(
+    s_wrapper_type, s_plainfile, // PHP5 compatibility
+    s_stream_type,  s_dir,
+    s_mode,         s_r,
+    s_unread_bytes, 0,
+    s_seekable,     false,
+    s_timed_out,    false,
+    s_blocked,      true,
+    s_eof,          isEof()
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 PlainDirectory::PlainDirectory(const String& path) {
@@ -76,6 +102,10 @@ Variant ArrayDirectory::read() {
 
 void ArrayDirectory::rewind() {
   m_it.setPos(0);
+}
+
+bool ArrayDirectory::isEof() const {
+  return m_it.end();
 }
 
 String ArrayDirectory::path() {

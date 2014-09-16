@@ -278,7 +278,12 @@ rule token = parse
   | ws+                { token lexbuf }
   | '\n'               { Lexing.new_line lexbuf; token lexbuf }
   | unsafeexpr_start   { let buf = Buffer.create 256 in
+                         let start = lexbuf.Lexing.lex_start_p in
                          ignore (comment buf lexbuf);
+                         (* unsafeexpr is technically made up of multiple
+                          * tokens, but we want to treat it as a single token
+                          * as far as start / end positions are concerned *)
+                         lexbuf.Lexing.lex_start_p <- start;
                          Tunsafeexpr
                        }
   | "/*"               { let buf = Buffer.create 256 in

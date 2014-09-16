@@ -8,9 +8,10 @@
  *
  *)
 
-(* 300s was chosen because it was the p90 of hack server startup times
- * as observed here: https://fburl.com/29184831 *)
-let num_build_retries = 300
+(* 800s was chosen because it was above most of the historical p95 of
+ * hack server startup times as observed here:
+ * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
+let num_build_retries = 800
 
 type env = ServerMsg.build_opts
 
@@ -44,8 +45,11 @@ let rec connect env retries =
     end
     else begin
       if Tty.spinner_used() then Tty.print_clear_line stdout;
-      Printf.printf "Waited >%ds for hack server initialization. Try again.\n%!"
-        num_build_retries;
+      Printf.printf "Waited >%ds for hack server initialization.\n%s\n%s\n%s\n%!"
+        num_build_retries
+        "Your hack server is still initializing. This is an IO-bound"
+        "operation and may take a while if your disk cache is cold."
+        "Trying the build again may work; the server may be caught up now.";
       exit 2
     end
 

@@ -203,20 +203,21 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   return f;
 }
 
-Func* Func::cloneAndSetClass(Class* cls) const {
-  if (Func* ret = findCachedClone(cls)) {
+Func* Func::cloneAndModify(Class* cls, Attr attrs) const {
+  if (Func* ret = findCachedClone(cls, attrs)) {
     return ret;
   }
 
   static Mutex s_clonedFuncListMutex;
   Lock l(s_clonedFuncListMutex);
   // Check again now that I'm the writer
-  if (Func* ret = findCachedClone(cls)) {
+  if (Func* ret = findCachedClone(cls, attrs)) {
     return ret;
   }
 
   Func* clonedFunc = clone(cls);
   clonedFunc->setNewFuncId();
+  clonedFunc->setAttrs(attrs);
 
   // Save it so we don't have to keep cloning it and retranslating
   Func** nextFunc = &this->nextClonedClosure();
@@ -546,11 +547,11 @@ bool Func::isClonedClosure() const {
   return cls()->lookupMethod(name()) != this;
 }
 
-Func* Func::findCachedClone(Class* cls) const {
+Func* Func::findCachedClone(Class* cls, Attr attrs) const {
   Func* nextFunc = const_cast<Func*>(this);
   while (nextFunc) {
     if (nextFunc->cls() == cls) {
-      return nextFunc;
+      if (LIKELY(nextFunc->attrs() == attrs)) return nextFunc;
     }
     nextFunc = nextFunc->nextClonedClosure();
   }

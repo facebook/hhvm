@@ -7084,6 +7084,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::K);
+  auto const func = node->getOriginalFunction();
 
   if (node->isStatic()) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
@@ -7113,9 +7114,11 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
       emitPop(e);
     }
   } else if (!node->getOriginalClass() ||
-             node->getOriginalClass()->isTrait()) {
-    // In a trait or pseudo-main, we can't resolve self:: or parent::
-    // yet, so we emit special instructions that do those lookups.
+             node->getOriginalClass()->isTrait() ||
+             (func && func->isClosure())) {
+    // In a trait, a potentially rebound closure or psuedo-main, we can't
+    // resolve self:: or parent:: yet, so we emit special instructions that do
+    // those lookups.
     if (node->isParent()) {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);
     } else if (node->isSelf()) {

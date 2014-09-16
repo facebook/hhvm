@@ -91,6 +91,49 @@
                             "type": "Variant"
                         }
                     ]
+                },
+                {
+                    "name": "bind",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "flags": [
+                      "IsStatic"
+                    ],
+                    "args": [
+                        {
+                            "name": "closure",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newthis",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newscope",
+                            "type": "Variant",
+                            "value": "\"static\""
+                        }
+                    ]
+                },
+                {
+                    "name": "bindto",
+                    "return": {
+                        "type": "Object"
+                    },
+                    "flags": [
+                    ],
+                    "args": [
+                        {
+                            "name": "newthis",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newscope",
+                            "type": "Variant",
+                            "value": "\"static\""
+                        }
+                    ]
                 }
             ],
             "consts": [

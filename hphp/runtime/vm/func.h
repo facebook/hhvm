@@ -225,7 +225,10 @@ struct Func {
    * class's copy of the method.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
-  Func* cloneAndSetClass(Class* cls) const;
+  Func* cloneAndModify(Class* cls, Attr attrs) const;
+  Func* cloneAndSetClass(Class* cls) const {
+    return cloneAndModify(cls, attrs());
+  }
 
   /*
    * Rename a function and reload it.
@@ -536,6 +539,11 @@ struct Func {
    */
   int maxStackCells() const;
 
+  /*
+   * Checks if $this belong to a class that is not a subclass of cls().
+   */
+  bool hasForeignThis() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
@@ -687,7 +695,7 @@ private:
    *
    * Return nullptr if this is not a closure or if no such clone exists.
    */
-  Func* findCachedClone(Class* cls) const;
+  Func* findCachedClone(Class* cls, Attr attrs) const;
 
 public:
 

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP { namespace jit {
 
@@ -432,6 +433,32 @@ void ProfData::freeFuncData(FuncId funcId) {
       m_transRecs[tid].reset();
     }
   }
+
+  // We don't need the cached block offsets anymore.  They are only used when
+  // generating profiling translations.
+  m_blockEndOffsets.erase(funcId);
+}
+
+bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
+  auto const mapIt = m_blockEndOffsets.find(func->getFuncId());
+  if (mapIt != end(m_blockEndOffsets)) {
+    return mapIt->second.count(offset);
+  }
+
+  using namespace Verifier;
+
+  Arena arena;
+  GraphBuilder builder{arena, func};
+  Graph* cfg = builder.build();
+
+  auto& offsets = m_blockEndOffsets[func->getFuncId()];
+
+  for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
+    auto last = blocks.popFront()->last - func->unit()->entry();
+    offsets.insert(last);
+  }
+
+  return offsets.count(offset);
 }
 
 } }

@@ -268,7 +268,8 @@ public:
                   Token& ref,
                   Token& params,
                   Token& cparams,
-                  Token& stmts);
+                  Token& stmts,
+                  Token& ret);
   Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
 

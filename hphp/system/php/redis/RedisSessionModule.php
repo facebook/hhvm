@@ -70,7 +70,7 @@ class RedisSessionModule implements SessionHandlerInterface {
         $args['weight'] = 1;
       }
 
-      if ($url['scheme'] == 'file') {
+      if (isset($url['scheme']) && ($url['scheme'] == 'file')) {
         $args['host'] = "unix://{$url['path']}";
         $args['port'] = null;
       } else {

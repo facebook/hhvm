@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/filter/logical_filters.h"
+#include "hphp/runtime/ext/filter/ext_filter.h"
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
-#include "hphp/runtime/ext/ext_filter.h"
 #include "hphp/runtime/base/zend-php-config.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/complex-types.h"

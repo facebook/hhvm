@@ -256,7 +256,7 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   return *this;
 }
 
-bool ArrayIter::endHelper() {
+bool ArrayIter::endHelper() const  {
   switch (getCollectionType()) {
     case Collection::VectorType: {
       return m_pos >= getVector()->size();

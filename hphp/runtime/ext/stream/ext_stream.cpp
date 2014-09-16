@@ -232,6 +232,10 @@ Variant f_stream_get_line(const Resource& handle, int length /* = 0 */,
 Variant f_stream_get_meta_data(const Resource& stream) {
   File *f = stream.getTyped<File>(true, true);
   if (f) return f->getMetaData();
+  Directory *d = stream.getTyped<Directory>(true, true);
+  if (d) {
+    return d->getMetaData();
+  }
   return false;
 }
 

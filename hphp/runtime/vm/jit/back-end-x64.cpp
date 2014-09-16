@@ -532,15 +532,31 @@ struct BackEnd : public jit::BackEnd {
       }
     }
 
-    for (auto& tbc : fixups.m_bcMap) {
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.aStart)) {
-        tbc.aStart = adjusted;
-      }
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.acoldStart)) {
-        tbc.acoldStart = adjusted;
-      }
-      if (TCA adjusted = rel.adjustedAddressBefore(tbc.afrozenStart)) {
-        tbc.afrozenStart = adjusted;
+    /*
+     * Most of the time we want to adjust to a corresponding "before" address
+     * with the exception of the start of the range where "before" can point to
+     * the end of a previous range.
+     */
+    if (!fixups.m_bcMap.empty()) {
+      auto const aStart = fixups.m_bcMap[0].aStart;
+      auto const acoldStart = fixups.m_bcMap[0].acoldStart;
+      auto const afrozenStart = fixups.m_bcMap[0].afrozenStart;
+      for (auto& tbc : fixups.m_bcMap) {
+        if (TCA adjusted = (tbc.aStart == aStart
+                              ? rel.adjustedAddressAfter(aStart)
+                              : rel.adjustedAddressBefore(tbc.aStart))) {
+          tbc.aStart = adjusted;
+        }
+        if (TCA adjusted = (tbc.acoldStart == acoldStart
+                              ? rel.adjustedAddressAfter(acoldStart)
+                              : rel.adjustedAddressBefore(tbc.acoldStart))) {
+          tbc.acoldStart = adjusted;
+        }
+        if (TCA adjusted = (tbc.afrozenStart == afrozenStart
+                              ? rel.adjustedAddressAfter(afrozenStart)
+                              : rel.adjustedAddressBefore(tbc.afrozenStart))) {
+          tbc.afrozenStart = adjusted;
+        }
       }
     }
 

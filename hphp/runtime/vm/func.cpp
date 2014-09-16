@@ -81,9 +81,7 @@ Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
   , m_attrs(attrs)
 {
   m_hasPrivateAncestor = false;
-  m_shared = new SharedData(preClass, base, past,
-                            line1, line2, top, docComment);
-  init(numParams);
+  m_shared = nullptr;
 }
 
 Func::~Func() {
@@ -876,23 +874,23 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
                              const StringData* docComment)
   : m_base(base)
   , m_preClass(preClass)
-  , m_past(past)
   , m_numLocals(0)
   , m_numIterators(0)
   , m_line1(line1)
-  , m_line2(line2)
-  , m_info(nullptr)
-  , m_refBitPtr(0)
-  , m_builtinFuncPtr(nullptr)
   , m_docComment(docComment)
+  , m_refBitPtr(0)
   , m_top(top)
   , m_isClosureBody(false)
   , m_isAsync(false)
   , m_isGenerator(false)
   , m_isPairGenerator(false)
   , m_isGenerated(false)
+  , m_hasExtendedSharedData(false)
   , m_originalFilename(nullptr)
-{}
+{
+  m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
+  m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
+}
 
 Func::SharedData::~SharedData() {
   free(m_refBitPtr);

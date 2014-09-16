@@ -181,8 +181,33 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
                          past, name, attrs, top, docComment,
                          params.size(), isClosureBody);
 
-  f->shared()->m_info = m_info;
-  f->shared()->m_returnType = returnType;
+  bool const needsExtendedSharedData =
+    m_info ||
+    m_builtinFuncPtr ||
+    m_nativeFuncPtr ||
+    (attrs & AttrNative) ||
+    line2 - line1 >= Func::kSmallDeltaLimit ||
+    past - base >= Func::kSmallDeltaLimit;
+
+  f->m_shared.reset(
+    needsExtendedSharedData
+      ? new Func::ExtendedSharedData(preClass, base, past, line1, line2,
+                                     top, docComment)
+      : new Func::SharedData(preClass, base, past,
+                             line1, line2, top, docComment)
+  );
+
+  f->init(params.size());
+
+  if (auto const ex = f->extShared()) {
+    ex->m_hasExtendedSharedData = true;
+    ex->m_builtinFuncPtr = m_builtinFuncPtr;
+    ex->m_nativeFuncPtr = m_nativeFuncPtr;
+    ex->m_info = m_info;
+    ex->m_line2 = line2;
+    ex->m_past = past;
+  }
+
   std::vector<Func::ParamInfo> fParams;
   bool usesDoubles = false, variadic = false;
   for (unsigned i = 0; i < params.size(); ++i) {
@@ -192,6 +217,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
+  f->shared()->m_returnType = returnType;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -204,8 +230,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isGenerator = isGenerator;
   f->shared()->m_isPairGenerator = isPairGenerator;
   f->shared()->m_userAttributes = userAttributes;
-  f->shared()->m_builtinFuncPtr = m_builtinFuncPtr;
-  f->shared()->m_nativeFuncPtr = m_nativeFuncPtr;
   f->shared()->m_retTypeConstraint = retTypeConstraint;
   f->shared()->m_retUserType = retUserType;
   f->shared()->m_originalFilename = originalFilename;
@@ -214,29 +238,34 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->finishedEmittingParams(fParams);
 
   if (attrs & AttrNative) {
-    auto nif = Native::GetBuiltinFunction(name,
-                                          m_pce ? m_pce->name() : nullptr,
-                                          f->isStatic());
+    auto const ex = f->extShared();
+
+    auto const nif = Native::GetBuiltinFunction(
+      name,
+      m_pce ? m_pce->name() : nullptr,
+      f->isStatic()
+    );
     if (nif) {
       Attr dummy = AttrNone;
       int nativeAttrs = parseNativeAttributes(dummy);
       if (nativeAttrs & Native::AttrZendCompat) {
-        f->shared()->m_nativeFuncPtr = nif;
-        f->shared()->m_builtinFuncPtr = zend_wrap_func;
+        ex->m_nativeFuncPtr = nif;
+        ex->m_builtinFuncPtr = zend_wrap_func;
       } else {
         if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-          f->shared()->m_builtinFuncPtr = nif;
-          f->shared()->m_nativeFuncPtr = nullptr;
+          ex->m_builtinFuncPtr = nif;
+          ex->m_nativeFuncPtr = nullptr;
         } else {
-          f->shared()->m_nativeFuncPtr = nif;
-          f->shared()->m_builtinFuncPtr =
+          ex->m_nativeFuncPtr = nif;
+          ex->m_builtinFuncPtr =
             Native::getWrapper(m_pce, usesDoubles, variadic);
         }
       }
     } else {
-      f->shared()->m_builtinFuncPtr = Native::unimplementedWrapper;
+      ex->m_builtinFuncPtr = Native::unimplementedWrapper;
     }
   }
+
   return f;
 }
 

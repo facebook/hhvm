@@ -201,12 +201,17 @@ module Program : Server.SERVER_PROGRAM = struct
       Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos)
     )
 
+  let make_next_files dir =
+    let php_next_files = Find.make_next_files_php dir in
+    let js_next_files = Find.make_next_files_js ~filter:(fun _ -> true) dir in
+    fun () -> php_next_files () @ js_next_files ()
+
   let init genv env root =
     let next_files_hhi =
       match Hhi.get_hhi_root () with
-      | Some hhi_root -> Find.make_next_files_php hhi_root
+      | Some hhi_root -> make_next_files hhi_root
       | None -> print_endline "Could not locate hhi files"; exit 1 in
-    let next_files_root = Find.make_next_files_php root in
+    let next_files_root = make_next_files root in
     let next_files = fun () ->
       match next_files_hhi () with
       | [] -> next_files_root ()
@@ -222,10 +227,11 @@ module Program : Server.SERVER_PROGRAM = struct
         Server.Exit 0
 
   let recheck genv env updates report =
-    let diff_php, _ = updates in
-    if not (SSet.is_empty diff_php)
+    let diff_php, diff_js = updates in
+    let diff = SSet.union diff_php diff_js in
+    if not (SSet.is_empty diff)
     then
-      let failed_parsing = SSet.union diff_php env.failed_parsing in
+      let failed_parsing = SSet.union diff env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
       Server.Continue (ServerTypeCheck.check genv check_env);
     else

@@ -38,6 +38,7 @@ struct UserStreamWrapper final : Stream::Wrapper {
   int mkdir(const String& path, int mode, int options) override;
   int rmdir(const String& path, int options) override;
   Directory* opendir(const String& path) override;
+  bool touch(const String& path, int64_t mtime, int64_t atime);
 
 private:
   String m_name;

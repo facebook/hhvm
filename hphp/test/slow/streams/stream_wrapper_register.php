@@ -182,7 +182,11 @@ chmod('abc://c', 0123);
 unlink('abc://d');
 is_file('abc://e');
 is_link('abc://f');
+
 touch('abc://g');
+touch('abc://g', 15);
+touch('abc://g', 15, 25);
+
 mkdir('abc://dir', 0755, true);
 rmdir('abc://dir');
 rename('abc://dir', 'abc://dir2');

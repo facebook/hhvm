@@ -483,6 +483,11 @@ public:
   bool preAllocOOM(int64_t size);
 
   /*
+   * Unconditionally register an OOM fatal. Still respects the m_couldOOM flag.
+   */
+  void forceOOM();
+
+  /*
    * Reset whether or not we should raise an OOM fatal if we exceed the memory
    * limit for the request.
    *

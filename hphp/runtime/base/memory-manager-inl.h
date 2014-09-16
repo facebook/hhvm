@@ -406,6 +406,12 @@ inline bool MemoryManager::preAllocOOM(int64_t size) {
   return false;
 }
 
+inline void MemoryManager::forceOOM() {
+  if (m_couldOOM) {
+    refreshStatsHelperExceeded();
+  }
+}
+
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////

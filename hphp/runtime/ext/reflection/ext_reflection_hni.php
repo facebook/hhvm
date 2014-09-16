@@ -2058,7 +2058,7 @@ class ReflectionClass implements Reflector, Serializable {
    *                     core or in a PHP extension, FALSE is returned.
    */
   <<__Native>>
-  public function getFileName(): string;
+  public function getFileName(): mixed;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php

@@ -904,8 +904,11 @@ static int HHVM_METHOD(ReflectionClass, getModifiers) {
   return get_modifiers(cls->attrs(), true);
 }
 
-static String HHVM_METHOD(ReflectionClass, getFileName) {
+static Variant HHVM_METHOD(ReflectionClass, getFileName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->attrs() & AttrBuiltin) {
+    return false_varNR;
+  }
   auto file = cls->preClass()->unit()->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {

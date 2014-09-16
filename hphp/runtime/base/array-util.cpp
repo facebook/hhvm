@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/thread-info.h"
 
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_string.h"
@@ -155,6 +156,24 @@ Variant ArrayUtil::Range(unsigned char low, unsigned char high,
 
 #define DOUBLE_DRIFT_FIX 0.000000000000001
 
+namespace {
+// Some inputs can cause us to allocate gigantic arrays, so we have to make sure
+// we're not exceeding the memory limit.
+void rangeCheckAlloc(double estNumSteps) {
+  // An array can hold at most INT_MAX elements
+  if (estNumSteps > std::numeric_limits<int32_t>::max()) {
+    MM().forceOOM();
+    check_request_surprise_unlikely();
+    return;
+  }
+
+  int32_t numElms = static_cast<int32_t>(estNumSteps);
+  if (MM().preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
+    check_request_surprise_unlikely();
+  }
+}
+}
+
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   Array ret;
   if (low > high) { // Negative steps
@@ -162,6 +181,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((low - high) / step);
     for (; low >= (high - DOUBLE_DRIFT_FIX); low -= step) {
       ret.append(low);
     }
@@ -170,6 +190,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((high - low) / step);
     for (; low <= (high + DOUBLE_DRIFT_FIX); low += step) {
       ret.append(low);
     }
@@ -186,6 +207,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((low - high) / step);
     for (; low >= high; low -= step) {
       ret.append((int64_t)low);
     }
@@ -194,6 +216,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
+    rangeCheckAlloc((high - low) / step);
     for (; low <= high; low += step) {
       ret.append((int64_t)low);
     }

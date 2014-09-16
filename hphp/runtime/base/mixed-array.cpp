@@ -346,6 +346,15 @@ MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
   return ret;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+size_t MixedArray::computeAllocBytesFromMaxElms(uint32_t maxElms) {
+  auto const cam = computeCapAndMask(maxElms);
+  return computeAllocBytes(cam.first, cam.second);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 Variant CreateVarForUncountedArray(const Variant& source) {

@@ -806,14 +806,10 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
 static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
                           const Object& closure) {
   auto clos = closure.getTyped<c_Closure>();
-  if (auto const cls = clos->getClass()) { // closure without $this
-    auto ret = const_cast<StringData*>(cls->name());
-    return String(ret);
-  } else if (auto const thiz = clos->getThis()) { // closure with $this
-    return String(thiz->o_getClassName());
-  } else {
-    return String();
+  if (clos->getScope()) {
+    return String(const_cast<StringData*>(clos->getScope()->name()));
   }
+  return String();
 }
 
 // helper for getStaticVariables

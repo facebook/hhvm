@@ -746,6 +746,11 @@ Type thisReturn(const IRInstruction* inst) {
                                       : fpInst->extra<DefInlineFP>()->target;
   func->validate();
   assert(func->isMethod() || func->isPseudoMain());
+
+  // If the function is a cloned closure which may have a re-bound $this which
+  // is not a subclass of the context return an unspecialized type.
+  if (func->hasForeignThis()) return Type::Obj;
+
   return Type::Obj.specialize(func->cls());
 }
 

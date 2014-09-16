@@ -4334,6 +4334,8 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
     case Location::Litint:
       return Type::cns(loc.offset);
     case Location::This:
+      // Don't specialize $this for cloned closures which may have been re-bound
+      if (curFunc()->hasForeignThis()) return Type::Obj;
       return Type::Obj.specialize(curFunc()->cls());
 
     default:

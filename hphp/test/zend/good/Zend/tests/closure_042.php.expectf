@@ -1,7 +1,7 @@
 object(stdClass)#%d (0) {
 }
-string(%d) "Closure%s"
+string(%d) "Closure%S"
 object(stdClass)#%d (0) {
 }
-string(%d) "Closure%s"
+string(%d) "Closure%S"
 Done.

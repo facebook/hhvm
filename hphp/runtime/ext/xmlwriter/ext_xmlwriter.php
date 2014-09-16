@@ -358,42 +358,28 @@ class XMLWriter {
  * @return mixed - Returns a new xmlwriter resource for later use with the
  * xmlwriter functions on success, FALSE on error.
  */
-function xmlwriter_open_memory(): mixed {
-  $ret = new XMLWriter();
-  if (! $ret->openMemory()) {
-    return false;
-  }
-  return $ret;
-}
+<<__Native>>
+function xmlwriter_open_memory(): mixed;
 
 /* Creates a new XMLWriter using uri for the output.
  * @param string $uri - The URI of the resource for the output.
  * @return mixed - Returns a new xmlwriter resource for later use with the
  * xmlwriter functions on success, FALSE on error.
  */
-function xmlwriter_open_uri(string $uri): mixed {
-  $ret = new XMLWriter();
-  if (! $ret->openURI($uri)) {
-    return false;
-  }
-  return $ret;
-}
+<<__Native>>
+function xmlwriter_open_uri(string $uri): mixed;
 
 /* Sets the string which will be used to indent each element/attribute of the
  * resulting xml.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
  * This resource comes from a call to xmlwriter_open_uri() or
  * xmlwriter_open_memory().
- * @param string $indentstring - The indentation string.
+ * @param string $indentString - The indentation string.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_set_indent_string(XMLWriter $xmlwriter,
-                                     $indentstring): ?bool {
-  if (!isset($indentstring)) {
-    return null;
-  }
-  return $xmlwriter->setIndentString($indentstring);
-}
+<<__Native>>
+function xmlwriter_set_indent_string(resource $xmlwriter,
+                                     mixed $indentString): mixed;
 
 /* Toggles indentation on or off.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -402,10 +388,9 @@ function xmlwriter_set_indent_string(XMLWriter $xmlwriter,
  * @param bool $indent - Whether indentation is enabled.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_set_indent(XMLWriter $xmlwriter,
-                              bool $indent): bool {
-  return $xmlwriter->setIndent($indent);
-}
+<<__Native>>
+function xmlwriter_set_indent(resource $xmlwriter,
+                              bool $indent): bool;
 
 /* Starts a document.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -418,12 +403,11 @@ function xmlwriter_set_indent(XMLWriter $xmlwriter,
  * @param string $standalone - yes or no.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_document(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_start_document(resource $xmlwriter,
                                   ?string $version = "1.0",
                                   ?string $encoding = "",
-                                  ?string $standalone = ""): bool {
-  return $xmlwriter->startDocument($version, $encoding, $standalone);
-}
+                                  ?string $standalone = ""): bool;
 
 /* Starts an element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -432,10 +416,9 @@ function xmlwriter_start_document(XMLWriter $xmlwriter,
  * @param string $name - The element name.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_element(XMLWriter $xmlwriter,
-                                 string $name): bool {
-  return $xmlwriter->startElement($name);
-}
+<<__Native>>
+function xmlwriter_start_element(resource $xmlwriter,
+                                 string $name): bool;
 
 /* Starts a namespaced element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -446,12 +429,11 @@ function xmlwriter_start_element(XMLWriter $xmlwriter,
  * @param string $uri - The namespace URI.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_element_ns(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_start_element_ns(resource $xmlwriter,
                                     mixed $prefix,
                                     string $name,
-                                    string $uri): bool {
-  return $xmlwriter->startElementNS($prefix, $name, $uri);
-}
+                                    mixed $uri): bool;
 
 /* Writes a full namespaced element tag.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -463,13 +445,12 @@ function xmlwriter_start_element_ns(XMLWriter $xmlwriter,
  * @param string $content - The element contents.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_element_ns(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_element_ns(resource $xmlwriter,
                                     ?string $prefix,
                                     string $name,
                                     ?string $uri,
-                                    ?string $content = null): bool {
-  return $xmlwriter->writeElementNS($prefix, $name, $uri, $content);
-}
+                                    ?string $content = null): bool;
 
 /* Writes a full element tag.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -479,11 +460,10 @@ function xmlwriter_write_element_ns(XMLWriter $xmlwriter,
  * @param string $content - The element contents.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_element(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_element(resource $xmlwriter,
                                  string $name,
-                                 ?string $content = null): bool {
-  return $xmlwriter->writeElement($name, $content);
-}
+                                 ?string $content = null): bool;
 
 /* Ends the current element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -491,9 +471,8 @@ function xmlwriter_write_element(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_element(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endElement();
-}
+<<__Native>>
+function xmlwriter_end_element(resource $xmlwriter): bool;
 
 /* End the current xml element. Writes an end tag even if the element is
  * empty.
@@ -502,9 +481,8 @@ function xmlwriter_end_element(XMLWriter $xmlwriter): bool {
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_full_end_element(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->fullEndElement();
-}
+<<__Native>>
+function xmlwriter_full_end_element(resource $xmlwriter): bool;
 
 /* Starts a namespaced attribute.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -515,12 +493,11 @@ function xmlwriter_full_end_element(XMLWriter $xmlwriter): bool {
  * @param string $uri - The namespace URI.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_attribute_ns(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_start_attribute_ns(resource $xmlwriter,
                                       string $prefix,
                                       string $name,
-                                      string $uri): bool {
-  return $xmlwriter->startAttributeNS($prefix, $name, $uri);
-}
+                                      string $uri): bool;
 
 /* Starts an attribute.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -529,10 +506,9 @@ function xmlwriter_start_attribute_ns(XMLWriter $xmlwriter,
  * @param string $name - The attribute name.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_attribute(XMLWriter $xmlwriter,
-                                   string $name): bool {
-  return $xmlwriter->startAttribute($name);
-}
+<<__Native>>
+function xmlwriter_start_attribute(resource $xmlwriter,
+                                   string $name): bool;
 
 /* Writes a full namespaced attribute.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -544,13 +520,12 @@ function xmlwriter_start_attribute(XMLWriter $xmlwriter,
  * @param string $content - The attribute value.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_attribute_ns(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_attribute_ns(resource $xmlwriter,
                                       string $prefix,
                                       string $name,
                                       string $uri,
-                                      string $content): bool {
-  return $xmlwriter->writeAttributeNS($prefix, $name, $uri, $content);
-}
+                                      string $content): bool;
 
 /* Writes a full attribute.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -560,11 +535,10 @@ function xmlwriter_write_attribute_ns(XMLWriter $xmlwriter,
  * @param string $value - The value of the attribute.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_attribute(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_attribute(resource $xmlwriter,
                                    string $name,
-                                   string $value): bool {
-  return $xmlwriter->writeAttribute($name, $value);
-}
+                                   string $value): bool;
 
 /* Ends the current attribute.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -572,9 +546,8 @@ function xmlwriter_write_attribute(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_attribute(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endAttribute();
-}
+<<__Native>>
+function xmlwriter_end_attribute(resource $xmlwriter): bool;
 
 /* Starts a CDATA.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -582,9 +555,8 @@ function xmlwriter_end_attribute(XMLWriter $xmlwriter): bool {
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_cdata(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->startCData();
-}
+<<__Native>>
+function xmlwriter_start_cdata(resource $xmlwriter): bool;
 
 /* Writes a full CDATA.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -593,10 +565,9 @@ function xmlwriter_start_cdata(XMLWriter $xmlwriter): bool {
  * @param string $content - The contents of the CDATA.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_cdata(XMLWriter $xmlwriter,
-                               string $content): bool {
-  return $xmlwriter->writeCData($content);
-}
+<<__Native>>
+function xmlwriter_write_cdata(resource $xmlwriter,
+                               string $content): bool;
 
 /* Ends the current CDATA section.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -604,9 +575,8 @@ function xmlwriter_write_cdata(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_cdata(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endCData();
-}
+<<__Native>>
+function xmlwriter_end_cdata(resource $xmlwriter): bool;
 
 /* Starts a comment.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -614,9 +584,8 @@ function xmlwriter_end_cdata(XMLWriter $xmlwriter): bool {
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_comment(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->startComment();
-}
+<<__Native>>
+function xmlwriter_start_comment(resource $xmlwriter): bool;
 
 /* Writes a full comment.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -625,10 +594,9 @@ function xmlwriter_start_comment(XMLWriter $xmlwriter): bool {
  * @param string $content - The contents of the comment.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_comment(XMLWriter $xmlwriter,
-                                 string $content): bool {
-  return $xmlwriter->writeComment($content);
-}
+<<__Native>>
+function xmlwriter_write_comment(resource $xmlwriter,
+                                 string $content): bool;
 
 /* Ends the current comment.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -636,9 +604,8 @@ function xmlwriter_write_comment(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_comment(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endComment();
-}
+<<__Native>>
+function xmlwriter_end_comment(resource $xmlwriter): bool;
 
 /* Ends the current document.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -646,9 +613,8 @@ function xmlwriter_end_comment(XMLWriter $xmlwriter): bool {
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_document(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endDocument();
-}
+<<__Native>>
+function xmlwriter_end_document(resource $xmlwriter): bool;
 
 /* Starts a processing instruction tag.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -657,10 +623,9 @@ function xmlwriter_end_document(XMLWriter $xmlwriter): bool {
  * @param string $target - The target of the processing instruction.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_pi(XMLWriter $xmlwriter,
-                            string $target): bool {
-  return $xmlwriter->startPI($target);
-}
+<<__Native>>
+function xmlwriter_start_pi(resource $xmlwriter,
+                            string $target): bool;
 
 /* Writes a processing instruction.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -670,11 +635,10 @@ function xmlwriter_start_pi(XMLWriter $xmlwriter,
  * @param string $content - The content of the processing instruction.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_pi(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_pi(resource $xmlwriter,
                             string $target,
-                            string $content): bool {
-  return $xmlwriter->writePI($target, $content);
-}
+                            string $content): bool;
 
 /* Ends the current processing instruction.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -682,9 +646,8 @@ function xmlwriter_write_pi(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_pi(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endPI();
-}
+<<__Native>>
+function xmlwriter_end_pi(resource $xmlwriter): bool;
 
 /* Writes a text.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -693,10 +656,9 @@ function xmlwriter_end_pi(XMLWriter $xmlwriter): bool {
  * @param string $content - The contents of the text.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_text(XMLWriter $xmlwriter,
-                        string $content): bool {
-  return $xmlwriter->text($content);
-}
+<<__Native>>
+function xmlwriter_text(resource $xmlwriter,
+                        string $content): bool;
 
 /* Writes a raw xml text.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -705,10 +667,9 @@ function xmlwriter_text(XMLWriter $xmlwriter,
  * @param string $content - The text string to write.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_raw(XMLWriter $xmlwriter,
-                             string $content): bool {
-  return $xmlwriter->writeRaw($content);
-}
+<<__Native>>
+function xmlwriter_write_raw(resource $xmlwriter,
+                             string $content): bool;
 
 /* Starts a DTD.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -720,12 +681,11 @@ function xmlwriter_write_raw(XMLWriter $xmlwriter,
  * @param string $systemid - The external subset system identifier.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_dtd(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_start_dtd(resource $xmlwriter,
                              string $qualifiedname,
                              ?string $publicid = "",
-                             ?string $systemid = ""): bool {
-  return $xmlwriter->startDTD($qualifiedname, $publicid, $systemid);
-}
+                             ?string $systemid = ""): bool;
 
 /* Writes a full DTD.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -737,13 +697,12 @@ function xmlwriter_start_dtd(XMLWriter $xmlwriter,
  * @param string $subset - The content of the DTD.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_dtd(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_dtd(resource $xmlwriter,
                              string $name,
                              ?string $publicid = "",
                              ?string $systemid = "",
-                             ?string $subset = ""): bool {
-  return $xmlwriter->writeDTD($name, $publicid, $systemid, $subset);
-}
+                             ?string $subset = ""): bool;
 
 /* Starts a DTD element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -753,10 +712,9 @@ function xmlwriter_write_dtd(XMLWriter $xmlwriter,
  * create.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_dtd_element(XMLWriter $xmlwriter,
-                                     string $qualifiedname): bool {
-  return $xmlwriter->startDTDElement($qualifiedname);
-}
+<<__Native>>
+function xmlwriter_start_dtd_element(resource $xmlwriter,
+                                     string $qualifiedname): bool;
 
 /* Writes a full DTD element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -766,11 +724,10 @@ function xmlwriter_start_dtd_element(XMLWriter $xmlwriter,
  * @param string $content - The content of the element.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_dtd_element(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_dtd_element(resource $xmlwriter,
                                      string $name,
-                                     string $content): bool {
-  return $xmlwriter->writeDTDElement($name, $content);
-}
+                                     string $content): bool;
 
 /* Ends the current DTD element.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -778,9 +735,8 @@ function xmlwriter_write_dtd_element(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_dtd_element(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endDTDElement();
-}
+<<__Native>>
+function xmlwriter_end_dtd_element(resource $xmlwriter): bool;
 
 /* Starts a DTD attribute list.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -789,10 +745,9 @@ function xmlwriter_end_dtd_element(XMLWriter $xmlwriter): bool {
  * @param string $name - The attribute list name.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_dtd_attlist(XMLWriter $xmlwriter,
-                                     string $name): bool {
-  return $xmlwriter->startDTDAttlist($name);
-}
+<<__Native>>
+function xmlwriter_start_dtd_attlist(resource $xmlwriter,
+                                     string $name): bool;
 
 /* Writes a DTD attribute list.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -802,11 +757,10 @@ function xmlwriter_start_dtd_attlist(XMLWriter $xmlwriter,
  * @param string $content - The content of the DTD attribute list.
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_dtd_attlist(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_dtd_attlist(resource $xmlwriter,
                                      string $name,
-                                     string $content): bool {
-  return $xmlwriter->writeDTDAttlist($name, $content);
-}
+                                     string $content): bool;
 
 /* Ends the current DTD attribute list.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -814,9 +768,8 @@ function xmlwriter_write_dtd_attlist(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_dtd_attlist(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endDTDAttlist();
-}
+<<__Native>>
+function xmlwriter_end_dtd_attlist(resource $xmlwriter): bool;
 
 /* Starts a DTD entity.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -826,11 +779,10 @@ function xmlwriter_end_dtd_attlist(XMLWriter $xmlwriter): bool {
  * @param bool $isparam
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_start_dtd_entity(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_start_dtd_entity(resource $xmlwriter,
                                     string $name,
-                                    bool $isparam): bool {
-  return $xmlwriter->startDTDEntity($name, $isparam);
-}
+                                    bool $isparam): bool;
 
 /* Writes a full DTD entity.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -844,16 +796,14 @@ function xmlwriter_start_dtd_entity(XMLWriter $xmlwriter,
  * @param string $ndataid
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter,
+<<__Native>>
+function xmlwriter_write_dtd_entity(resource $xmlwriter,
                                     string $name,
                                     string $content,
                                     bool $pe = false,
                                     string $publicid = "",
                                     string $systemid = "",
-                                    string $ndataid = ""): bool {
-  return $xmlwriter->writeDTDEntity($name, $content, $pe, $publicid,
-                                    $systemid, $ndataid);
-}
+                                    string $ndataid = ""): bool;
 
 /* Ends the current DTD entity.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -861,9 +811,8 @@ function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter,
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_dtd_entity(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endDTDEntity();
-}
+<<__Native>>
+function xmlwriter_end_dtd_entity(resource $xmlwriter): bool;
 
 /* Ends the DTD of the document.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -871,9 +820,8 @@ function xmlwriter_end_dtd_entity(XMLWriter $xmlwriter): bool {
  * xmlwriter_open_memory().
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
-function xmlwriter_end_dtd(XMLWriter $xmlwriter): bool {
-  return $xmlwriter->endDTD();
-}
+<<__Native>>
+function xmlwriter_end_dtd(resource $xmlwriter): bool;
 
 /* Flushes the current buffer.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -884,10 +832,9 @@ function xmlwriter_end_dtd(XMLWriter $xmlwriter): bool {
  * the generated XML buffer, Else, if using URI, this function will write the
  * buffer and return the number of written bytes.
  */
-function xmlwriter_flush(XMLWriter $xmlwriter,
-                         ?bool $empty = true): mixed {
-  return $xmlwriter->flush($empty);
-}
+<<__Native>>
+function xmlwriter_flush(resource $xmlwriter,
+                         ?bool $empty = true): mixed;
 
 /* Returns the current buffer.
  * @param object $xmlwriter - The XMLWriter resource that is being modified.
@@ -897,7 +844,6 @@ function xmlwriter_flush(XMLWriter $xmlwriter,
  * TRUE.
  * @return string - Returns the current buffer as a string.
  */
-function xmlwriter_output_memory(XMLWriter $xmlwriter,
-                                 ?bool $flush = true): string {
-  return $xmlwriter->outputMemory($flush);
-}
+<<__Native>>
+function xmlwriter_output_memory(resource $xmlwriter,
+                                 ?bool $flush = true): string;

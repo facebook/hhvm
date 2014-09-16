@@ -115,6 +115,7 @@
             "name": "posix_access",
             "desc": "posix_access() checks the user's permission of a file.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -222,6 +223,7 @@
             "name": "posix_getgrgid",
             "desc": "Gets information about a group provided its id.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -239,6 +241,7 @@
             "name": "posix_getgrnam",
             "desc": "Gets information about a group provided its name.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -332,6 +335,7 @@
             "name": "posix_getpwnam",
             "desc": "Returns an array of information about the given user.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -349,6 +353,7 @@
             "name": "posix_getpwuid",
             "desc": "Returns an array of information about the user referenced by the given user ID.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -378,6 +383,7 @@
             "name": "posix_getsid",
             "desc": "Return the session id of the process pid. The session id of a process is the process group id of the session leader.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -407,6 +413,7 @@
             "name": "posix_initgroups",
             "desc": "Calculates the group access list for the user specified in name.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -429,6 +436,7 @@
             "name": "posix_isatty",
             "desc": "Determines if the file descriptor fd refers to a valid terminal type device.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -446,6 +454,7 @@
             "name": "posix_kill",
             "desc": "Send the signal sig to the process with the process identifier pid.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -468,6 +477,7 @@
             "name": "posix_mkfifo",
             "desc": "posix_mkfifo() creates a special FIFO file which exists in the file system and acts as a bidirectional communication endpoint for processes.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -490,6 +500,7 @@
             "name": "posix_mknod",
             "desc": "Creates a special or ordinary file.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -524,6 +535,7 @@
             "name": "posix_setegid",
             "desc": "Set the effective group ID of the current process. This is a privileged function and needs appropriate privileges (usually root) on the system to be able to perform this function.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -541,6 +553,7 @@
             "name": "posix_seteuid",
             "desc": "Set the real user ID of the current process. This is a privileged function and needs appropriate privileges (usually root) on the system to be able to perform this function.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -558,6 +571,7 @@
             "name": "posix_setgid",
             "desc": "Set the real group ID of the current process. This is a privileged function and needs appropriate privileges (usually root) on the system to be able to perform this function. The appropriate order of function calls is posix_setgid() first, posix_setuid() last.\n\nIf the caller is a super user, this will also set the effective group id.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -575,6 +589,7 @@
             "name": "posix_setpgid",
             "desc": "Let the process pid join the process group pgid.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -609,6 +624,7 @@
             "name": "posix_setuid",
             "desc": "Set the real user ID of the current process. This is a privileged function that needs appropriate privileges (usually root) on the system to be able to perform this function.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -626,6 +642,7 @@
             "name": "posix_strerror",
             "desc": "Returns the POSIX system error message associated with the given errno. You may get the errno parameter by calling posix_get_last_error().",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String",
@@ -655,6 +672,7 @@
             "name": "posix_ttyname",
             "desc": "Returns a string for the absolute path to the current terminal device that is open on the file descriptor fd.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",

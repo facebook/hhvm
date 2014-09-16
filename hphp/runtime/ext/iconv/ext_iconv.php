@@ -42,7 +42,7 @@ function iconv_get_encoding(string $type = "all"): mixed;
  *   present, iconv_mime_decode_headers() automatically incorporates them
  *   into a numerically indexed array in the order of occurrence.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_mime_decode_headers(string $encoded_headers,
                                    int $mode = 0,
                                    ?string $charset = null): mixed;
@@ -69,7 +69,7 @@ function iconv_mime_decode_headers(string $encoded_headers,
  * @return string - Returns a decoded MIME field on success, or FALSE if
  *   an error occurs during the decoding.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_mime_decode(string $encoded_header,
                            int $mode = 0,
                            ?string $charset = null): mixed;
@@ -108,7 +108,7 @@ function iconv_mime_decode(string $encoded_header,
  * @return string - Returns an encoded MIME field on success, or FALSE if
  *   an error occurs during the encoding.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_mime_encode(string $field_name,
                            string $field_value,
                            ?array $preferences = null): mixed;
@@ -135,7 +135,7 @@ function iconv_set_encoding(string $type,
  *
  * @return int - Returns the character count of str, as an integer.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_strlen(string $str,
                       ?string $charset = null): mixed;
 
@@ -153,7 +153,7 @@ function iconv_strlen(string $str,
  *   needle in haystack.   If needle is not found, iconv_strpos() will
  *   return FALSE.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_strpos(string $haystack,
                       string $needle,
                       int $offset = 0,
@@ -171,7 +171,7 @@ function iconv_strpos(string $haystack,
  *   needle in haystack.   If needle is not found, iconv_strrpos() will
  *   return FALSE.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_strrpos(string $haystack,
                        string $needle,
                        ?string $charset = null): mixed;
@@ -202,7 +202,7 @@ function iconv_strrpos(string $haystack,
  *   and length parameters.   If str is shorter than offset characters
  *   long, FALSE will be returned.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function iconv_substr(string $str,
                       int $offset,
                       int $length = PHP_INT_MAX,

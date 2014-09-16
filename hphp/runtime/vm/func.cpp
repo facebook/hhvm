@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/verifier/cfg.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
@@ -874,28 +873,6 @@ void Func::incProfCounter() {
   __sync_fetch_and_add(&m_profCounter, 1);
 }
 
-bool Func::anyBlockEndsAt(Offset off) const {
-  assert(jit::Translator::WriteLease().amOwner());
-  // The empty() check relies on a Func's bytecode always being nonempty
-  assert(base() != past());
-  if (m_shared->m_blockEnds.empty()) {
-    using namespace Verifier;
-
-    Arena arena;
-    GraphBuilder builder{arena, this};
-    Graph* cfg = builder.build();
-
-    for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
-      auto last = blocks.popFront()->last - m_unit->entry();
-      m_shared->m_blockEnds.insert(last);
-    }
-
-    assert(!m_shared->m_blockEnds.empty());
-  }
-
-  return m_shared->m_blockEnds.count(off) != 0;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // SharedData.
@@ -903,8 +880,8 @@ bool Func::anyBlockEndsAt(Offset off) const {
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
                              int line1, int line2, bool top,
                              const StringData* docComment)
-  : m_preClass(preClass)
-  , m_base(base)
+  : m_base(base)
+  , m_preClass(preClass)
   , m_past(past)
   , m_numLocals(0)
   , m_numIterators(0)

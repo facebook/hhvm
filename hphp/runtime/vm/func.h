@@ -993,11 +993,6 @@ public:
   uint32_t profCounter() const { return m_profCounter; }
   void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
 
-  /*
-   * Does any HHBC block end at `off'?
-   */
-  bool anyBlockEndsAt(Offset off) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Public setters.
@@ -1059,8 +1054,8 @@ private:
     /*
      * Properties shared by all clones of a Func.
      */
-    PreClass* m_preClass;
     Offset m_base;
+    PreClass* m_preClass;
     Offset m_past;
     Id m_numLocals;
     Id m_numIterators;
@@ -1078,8 +1073,6 @@ private:
     SVInfoVec m_staticVars;
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
-    // Cache for the anyBlockEndsAt() method.
-    hphp_hash_set<Offset> m_blockEnds;
     LowStringPtr m_docComment;
     bool m_top : 1;
     bool m_isClosureBody : 1;

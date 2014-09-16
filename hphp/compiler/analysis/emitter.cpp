@@ -1657,7 +1657,7 @@ void EmitterVisitor::emitGotoTrampoline(Emitter& e,
   for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
     assert(region->m_gotoTargets.count(name));
     auto t = region->m_gotoTargets[name].target;
-    if (region->m_parent->m_gotoLabels.count(name)) {
+    if (region->m_gotoLabels.count(name)) {
       // If only there is the appropriate label inside the current region
       // perform a jump.
       Id stateLocal = getStateLocal();

@@ -33,7 +33,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
-#include "hphp/util/stack-trace.h"
+#include "hphp/util/service-data.h"
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
@@ -139,6 +139,12 @@ void checkOldest() {
   }
 }
 
+void refreshStats() {
+  static ServiceData::ExportedCounter* s_oldestRequestAgeStat =
+    ServiceData::createCounter("treadmill.age");
+  s_oldestRequestAgeStat->setValue(getAgeOldestRequest());
+}
+
 }
 
 typedef std::list<std::unique_ptr<WorkItem>> PendingTriggers;
@@ -162,6 +168,7 @@ void startRequest() {
   GenCount startTime = getTime();
   {
     GenCountGuard g;
+    refreshStats();
     checkOldest();
     if (threadIdx >= s_inflightRequests.size()) {
       s_inflightRequests.resize(threadIdx + 1, {kIdleGenCount, 0});

@@ -61,6 +61,13 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker);
 bool splitCriticalEdges(IRUnit&);
 
 /*
+ * Inserts a loop pre-header before every loop header that doesn't have one.
+ *
+ * Returns: true iff the unit was changed.
+ */
+bool insertLoopPreHeaders(IRUnit&);
+
+/*
  * Remove unreachable blocks from the given unit.
  *
  * Returns: true iff one or more blocks were deleted.
@@ -96,6 +103,25 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
  * Return true iff the CFG has a backedge.
  */
 bool cfgHasLoop(const IRUnit&);
+
+/*
+ * Finds all the back-edges in a unit.
+ */
+EdgeSet findBackEdges(const IRUnit&);
+
+/*
+ * Finds all the loop headers in a unit.
+ */
+BlockSet findLoopHeaders(const IRUnit&);
+
+/*
+ * Inserts a pre-header before every loop header.
+ *
+ * If the loop header already has a pre-header, then it will not be modified.
+ *
+ * Returns true iff the CFG is changed.
+ */
+bool insertLoopPreHeaders(IRUnit&);
 
 /*
  * Visit basic blocks in a preorder traversal over the dominator tree.

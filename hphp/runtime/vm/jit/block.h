@@ -174,7 +174,8 @@ struct Block : boost::noncopyable {
   Hint m_hint;              // execution frequency hint
 };
 
-typedef jit::vector<Block*> BlockList;
+using BlockList = jit::vector<Block*>;
+using BlockSet = jit::flat_set<Block*>;
 
 inline Block::reference Block::front() {
   assert(!m_instrs.empty());

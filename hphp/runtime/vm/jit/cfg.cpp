@@ -218,37 +218,127 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
   return false;
 }
 
-static bool loopVisit(const Block* b,
-                      boost::dynamic_bitset<>& visited,
-                      boost::dynamic_bitset<>& path) {
-  if (b == nullptr) return false;
+namespace {
 
-  auto const id = b->id();
+// Visits all back-edges in a CFG.
+template <class Visitor>
+struct BackEdgeVisitor {
+  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
+    : m_path(unit.numBlocks())
+    , m_visited(unit.numBlocks())
+    , m_visitor(visitor)
+  {}
 
-  // If we're revisiting a block in our current search, then we've
-  // found a backedge.
-  if (path.test(id)) return true;
+  using BitSet = boost::dynamic_bitset<>;
 
-  // Otherwise if we're getting back to a block that's already been
-  // visited, but it hasn't been visited in this path, then we can
-  // prune this search.
-  if (visited.test(id)) return false;
+  void walk(Edge* e) {
+    if (e == nullptr) return;
 
-  visited.set(id);
-  path.set(id);
+    auto const block = e->to();
+    auto const id = block->id();
 
-  bool res = loopVisit(b->taken(), visited, path) ||
-             loopVisit(b->next(), visited, path);
+    // If we're revisiting a block in our current search, then we've
+    // found a backedge.
+    if (m_path.test(id)) {
+      // The entry block can't be a loop header.
+      assert(!block->isEntry());
 
-  path.set(id, false);
+      m_visitor(e);
+    }
 
-  return res;
+    // Otherwise if we're getting back to a block that's already been
+    // visited, but it hasn't been visited in this path, then we can
+    // prune this search.
+    if (m_visited.test(id)) return;
+
+    m_visited.set(id);
+    m_path.set(id);
+
+    walk(block->takenEdge());
+    walk(block->nextEdge());
+
+    m_path.set(id, false);
+  }
+
+private:
+  BitSet m_path;
+  BitSet m_visited;
+  Visitor& m_visitor;
+};
+
+template <class Visitor>
+void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
+  BackEdgeVisitor<Visitor> bev(unit, visitor);
+
+  auto const entry = unit.entry();
+  bev.walk(entry->takenEdge());
+  bev.walk(entry->nextEdge());
+}
+
+}
+
+bool insertLoopPreHeaders(IRUnit& unit) {
+  ITRACE(2, "making preheaders");
+  Trace::Indent _i;
+
+  bool changed = false;
+
+  auto const backEdges = findBackEdges(unit);
+
+  for (auto header : findLoopHeaders(unit)) {
+    // Compute the set of forward predecessors for the loop header.
+    EdgeSet fwdPreds;
+    for (auto& pred : header->preds()) {
+      if (backEdges.find(&pred) == backEdges.end()) fwdPreds.insert(&pred);
+    }
+
+    // Header can't be the entry block.
+    assert(fwdPreds.size() != 0);
+
+    // Already have a pre-header, so do nothing.
+    if (fwdPreds.size() == 1) continue;
+
+    auto const preheader = unit.defBlock();
+    preheader->push_back(unit.gen(Jmp, header->front().marker(), header));
+
+    ITRACE(4, "making pre-header B{} for header B{}\n",
+           preheader->id(), header->id());
+
+    auto constexpr unlikely = Block::Hint::Unlikely;
+    if (header->hint() == unlikely) preheader->setHint(unlikely);
+
+    // Point all forward preds at pre-header.
+    for (auto const pred : fwdPreds) {
+      auto& branch = pred->from()->back();
+
+      assert(branch.taken() == header || branch.next() == header);
+
+      if (branch.taken() == header) branch.setTaken(preheader);
+      if (branch.next() == header) branch.setNext(preheader);
+
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+EdgeSet findBackEdges(const IRUnit& unit) {
+  EdgeSet edges;
+  backEdgeWalk(unit, [&] (Edge* e) { edges.insert(e); });
+  return edges;
+}
+
+BlockSet findLoopHeaders(const IRUnit& unit) {
+  BlockSet headers;
+  backEdgeWalk(unit, [&] (Edge* e) { headers.insert(e->to()); });
+  return headers;
 }
 
 bool cfgHasLoop(const IRUnit& unit) {
-  boost::dynamic_bitset<> path(unit.numBlocks());
-  boost::dynamic_bitset<> visited(unit.numBlocks());
-  return loopVisit(unit.entry(), path, visited);
+  bool hasLoop = false;
+  backEdgeWalk(unit, [&] (Edge*) { hasLoop = true; });
+  return hasLoop;
 }
 
 }}

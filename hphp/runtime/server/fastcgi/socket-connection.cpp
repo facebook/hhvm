@@ -20,7 +20,7 @@
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "thrift/lib/cpp/transport/TSocketAddress.h"
 #include "thrift/lib/cpp/transport/TTransportException.h"
-#include "proxygen/lib/services/ManagedConnection.h"
+#include "folly/experimental/wangle/ManagedConnection.h"
 
 namespace HPHP {
 

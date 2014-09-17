@@ -18,16 +18,16 @@
 #define incl_HPHP_RUNTIME_SERVER_FASTCGI_SOCKET_CONNECTION_H_
 
 #include "folly/io/IOBuf.h"
+#include "folly/experimental/wangle/ManagedConnection.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "thrift/lib/cpp/transport/TSocketAddress.h"
 #include "thrift/lib/cpp/transport/TTransportException.h"
-#include "proxygen/lib/services/ManagedConnection.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SocketConnection : public ::proxygen::ManagedConnection {
+class SocketConnection : public ::folly::wangle::ManagedConnection {
 public:
   SocketConnection(
     apache::thrift::async::TAsyncTransport::UniquePtr sock,

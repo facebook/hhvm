@@ -196,6 +196,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
         "                  /tmp/apc_dump_meta\n"
+        "/advise-out-apc:  forcibly madvise out APC prime data\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
 
@@ -375,6 +376,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "start-stacktrace-profiler") {
       enable_stacktrace_profiler = true;
       transport->sendString("OK\n");
+      break;
+    }
+
+    if (cmd == "advise-out-apc") {
+      if (!apcExtension::Enable) {
+        transport->sendString("No APC\n");
+        break;
+      }
+      s_apc_file_storage.adviseOut();
+      transport->sendString("Done\n");
       break;
     }
 

@@ -752,6 +752,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
+  public function __debuginfo() {
+    return array('name' => $this->name, 'class' => $this->class);
+  }
+
   /**
    * ( excerpt from http://php.net/manual/en/reflectionmethod.export.php )
    *

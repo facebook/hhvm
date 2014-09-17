@@ -111,9 +111,9 @@ let declare_file fn content =
       Parser_hack.program content
     in
     let is_php = not is_hh_file in
+    Parser_heap.ParserHeap.add fn ast;
     if is_hh_file
     then begin
-      Parser_heap.ParserHeap.add fn ast;
       let funs, classes, typedefs, consts = make_funs_classes ast in
       Hashtbl.replace globals fn (is_php, funs, classes);
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
@@ -168,11 +168,8 @@ let hh_check ?(check_mode=true) fn =
 
 let hh_auto_complete fn =
   AutocompleteService.attach_hooks();
-  let content = Hashtbl.find files fn in
   try
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -215,11 +212,8 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
   Find_refs.find_method_at_cursor_target := Some (line, char);
-  let content = Hashtbl.find files fn in
   try
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->
@@ -367,8 +361,8 @@ let hh_infer_pos file line char =
 
 let hh_file_summary fn =
   try
-    let content = Hashtbl.find files fn in
-    let outline = FileOutline.outline content in
+    let ast = Parser_heap.ParserHeap.find_unsafe fn in
+    let outline = FileOutline.outline_ast ast in
     let res_list = List.map begin fun (pos, name, type_) ->
       JAssoc [ "name", JString name;
                "type", JString type_;

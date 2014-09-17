@@ -596,13 +596,11 @@ class Framework {
     }
 
     $this->installCode();
-    $this->installDependencies();
-    if ($this->pull_requests != null) {
-      $this->installPullRequests();
-    }
 
     if ($cache_tarball !== null) {
       // Remove data we don't need as otherwise the caches get huge.
+      // We switch to the shallow clone first so that generated files like
+      // vendor/ go into the new checkout, not the original one.
       rename($this->install_root, $this->install_root.'-orig');
       // prepend file:// as git refuses to do a shallow clone of 'local' repos
       run_install(
@@ -612,7 +610,14 @@ class Framework {
         __DIR__
       );
       remove_dir_recursive(nullthrows($this->install_root).'-orig');
+    }
 
+    $this->installDependencies();
+    if ($this->pull_requests != null) {
+      $this->installPullRequests();
+    }
+
+    if ($cache_tarball !== null) {
       if (file_exists($this->install_root.'/vendor')) {
         $rdi = new RecursiveDirectoryIterator(
           $this->install_root.'/vendor'

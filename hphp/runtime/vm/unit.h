@@ -193,7 +193,6 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 struct Unit {
   friend class UnitEmitter;
   friend class UnitRepoProxy;
-  friend class FuncDict;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.

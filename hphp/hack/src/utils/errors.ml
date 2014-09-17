@@ -296,6 +296,7 @@ module Typing                               = struct
 
   let declared_covariant                    = 4117 (* DONT MODIFY!!!! *)
   let declared_contravariant                = 4118 (* DONT MODIFY!!!! *)
+  let unset_in_strict                       = 4119 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1440,6 +1441,11 @@ let nullsafe_not_needed p nonnull_witness =
    p,
    "You are using the ?-> operator but this object cannot be null. "
  ] @ nonnull_witness)
+
+let unset_in_strict pos =
+  add Typing.unset_in_strict pos
+    ("unset cannot be used in a completely type safe way and so is banned in "
+    ^"strict mode")
 
 (*****************************************************************************)
 (* Printing *)

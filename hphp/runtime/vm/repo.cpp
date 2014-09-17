@@ -218,7 +218,7 @@ void Repo::saveGlobalData(GlobalData newData) {
   txn.commit();
 }
 
-Unit* Repo::loadUnit(const std::string& name, const MD5& md5) {
+std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const MD5& md5) {
   if (m_dbc == nullptr) {
     return nullptr;
   }

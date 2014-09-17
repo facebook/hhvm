@@ -93,7 +93,7 @@ public:
 
   static void setCliFile(const std::string& cliFile);
 
-  Unit* loadUnit(const std::string& name, const MD5& md5);
+  std::unique_ptr<Unit> loadUnit(const std::string& name, const MD5& md5);
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);

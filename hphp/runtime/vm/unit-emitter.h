@@ -17,6 +17,12 @@
 #ifndef incl_HPHP_VM_UNIT_EMITTER_H_
 #define incl_HPHP_VM_UNIT_EMITTER_H_
 
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/types.h"
@@ -30,12 +36,6 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
-
-#include <list>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ struct UnitEmitter {
   /*
    * Instatiate a runtime Unit*.
    */
-  Unit* create();
+  std::unique_ptr<Unit> create();
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
@@ -440,7 +440,7 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
-  Unit* load(const std::string& name, const MD5& md5);
+  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
                                            const MD5& md5);
 

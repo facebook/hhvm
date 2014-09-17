@@ -9161,19 +9161,18 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     }
     Repo::get().commitUnit(ue.get(), unitOrigin);
 
-    auto const unit = ue->create();
+    auto unit = ue->create();
     ue.reset();
 
     if (unit->sn() == -1) {
       // the unit was not committed to the Repo, probably because
       // another thread did it first. Try to use the winner.
-      Unit* u = Repo::get().loadUnit(filename ? filename : "", md5);
+      auto u = Repo::get().loadUnit(filename ? filename : "", md5);
       if (u != nullptr) {
-        delete unit;
-        return u;
+        return u.release();
       }
     }
-    return unit;
+    return unit.release();
   } catch (const std::exception&) {
     // extern "C" function should not be throwing exceptions...
     return nullptr;
@@ -9182,7 +9181,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
 
 Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                   ssize_t numBuiltinFuncs) {
-  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs)->create();
+  return emitHHBCNativeFuncUnit(builtinFuncs, numBuiltinFuncs)->create()
+    .release();
 }
 
 Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
@@ -9199,12 +9199,12 @@ Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
    * HNI conversion is completed.  We only pull things out of the repo
    * here that we've explicitly decided we want.
    */
-  if (!RuntimeOption::RepoAuthoritative) return ue->create();
+  if (!RuntimeOption::RepoAuthoritative) return ue->create().release();
   auto const staticAnalysisUnit = Repo::get().urp().loadEmitter(
     "/:systemlib:static_analysis",
     s_nativeClassMD5
   );
-  if (!staticAnalysisUnit) return ue->create();
+  if (!staticAnalysisUnit) return ue->create().release();
 
   // Make a map of the preclasses in `ue', so we can find them.
   std::map<const StringData*,PreClassEmitter*> uePreClasses;
@@ -9240,7 +9240,7 @@ Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
     uePce->setAttrs(staticAnalysisPce->attrs());
   }
 
-  return ue->create();
+  return ue->create().release();
 }
 
 } // extern "C"

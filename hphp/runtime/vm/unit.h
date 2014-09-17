@@ -795,10 +795,6 @@ private:
   //
   // These are organized in reverse order of frequency of use.  Do not re-order
   // without checking perf!
-
-public:
-  static Mutex s_classesMutex;
-
 private:
   unsigned char const* m_bc{nullptr};
   size_t m_bclen{0};

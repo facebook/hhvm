@@ -657,8 +657,6 @@ function oss_test_option_map(): OptionInfoMap {
     'isolate'             => Pair {'',   "Try to make tests that have ".
                                          "external dependencies automatically ".
                                          "fail"},
-    'toran-proxy:'        => Pair {'',   "URL of Toran Proxy to use for ".
-                                         "dependencies"},
     'cache-directory:'    => Pair {'',   'Directory to store source tarballs'},
     'local-source-only'   => Pair {'',   'Fail if git or composer calls are '.
                                          'needed'},

@@ -74,6 +74,8 @@ struct UnitEmitter {
    */
   Unit* create();
 
+  template<class SerDe> void serdeMetaData(SerDe&);
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic data.
@@ -454,26 +456,17 @@ struct UnitRepoProxy : public RepoProxy {
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
-  URP_GOP(SourceLoc) \
-  URP_GOP(SourceLocTab) \
-  URP_GOP(SourceLocPastOffsets) \
-  URP_GOP(SourceLocBaseOffset) \
-  URP_GOP(BaseOffsetAtPCLoc) \
-  URP_GOP(BaseOffsetAfterPCLoc)
+  URP_GOP(SourceLocTab)
+
   class InsertUnitStmt : public RepoProxy::Stmt {
    public:
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn,
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
                 int64_t& unitSn,
                 const MD5& md5,
                 const unsigned char* bc,
-                size_t bclen,
-                const TypedValue* mainReturn,
-                bool mergeOnly,
-                bool isHHFile,
-                int preloadPriority,
-                const LineTable& lines,
-                const std::vector<TypeAlias>&);
+                size_t bclen);
   };
   class GetUnitStmt : public RepoProxy::Stmt {
    public:
@@ -520,35 +513,10 @@ struct UnitRepoProxy : public RepoProxy {
     void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
                 int char0, int line1, int char1);
   };
-  class GetSourceLocStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, SourceLoc& sLoc);
-  };
   class GetSourceLocTabStmt : public RepoProxy::Stmt {
    public:
     GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
-  };
-  class GetSourceLocPastOffsetsStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocPastOffsetsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, int line, OffsetRangeVec& ranges);
-  };
-  class GetSourceLocBaseOffsetStmt : public RepoProxy::Stmt {
-   public:
-    GetSourceLocBaseOffsetStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, OffsetRange& range);
-  };
-  class GetBaseOffsetAtPCLocStmt : public RepoProxy::Stmt {
-   public:
-    GetBaseOffsetAtPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, Offset& offset);
-  };
-  class GetBaseOffsetAfterPCLocStmt : public RepoProxy::Stmt {
-   public:
-    GetBaseOffsetAfterPCLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, Offset pc, Offset& offset);
   };
 
 private:

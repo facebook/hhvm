@@ -815,6 +815,9 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     // Call. The value won't be live but it's ok to use it to track down the
     // guard.
 
+    always_assert_flog(m_constraints.typeSrcs.count(inst),
+                       "No typeSrcs found for {}\n\n{}", *inst, m_unit);
+
     auto const typeSrcs = get_required(m_constraints.typeSrcs, inst);
 
     bool changed = false;
@@ -1132,6 +1135,7 @@ void IRBuilder::insertLocalPhis() {
         auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
                                  local.type, LocalId(i), m_state.fp());
         if (shouldConstrainGuards()) {
+          m_constraints.typeSrcs[ldLoc] = TypeSourceSet();
           for (auto typeSrc : local.typeSrcs) {
             m_constraints.typeSrcs[ldLoc].insert(typeSrc);
           }

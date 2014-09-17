@@ -141,7 +141,6 @@ let hh_add_file fn content =
     ()
 
 let hh_check ?(check_mode=true) fn =
-  declare_file fn (Hashtbl.find files fn);
   Pos.file := fn;
   Autocomplete.auto_complete := false;
   let content = Hashtbl.find files fn in

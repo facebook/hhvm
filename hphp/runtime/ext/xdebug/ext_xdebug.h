@@ -30,7 +30,7 @@ struct XDebugServer;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define XDEBUG_NAME "xdebug-not-done"
+#define XDEBUG_NAME "xdebug"
 #define XDEBUG_VERSION NO_EXTENSION_VERSION_YET
 #define XDEBUG_AUTHOR "HHVM"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2013 by Derick Rethans"
@@ -165,8 +165,7 @@ struct XDebugServer;
 #define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
 
 // Returns the ini name for the given hhvm configuration option.
-// TODO(#3704) This should not be hhvm. Need to change tests.
-#define XDEBUG_INI(name) (("hhvm." XDEBUG_NAME ".") + string(name))
+#define XDEBUG_INI(name) ((XDEBUG_NAME ".") + string(name))
 
 // TODO(#3704) Remove when xdebug fully implemented
 #define XDEBUG_NOTIMPLEMENTED  { throw_not_implemented(__FUNCTION__); }

@@ -745,8 +745,10 @@ static void loadEnvConfig(map<string, string>& envCfg) {
 }
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
-  Hdf hdf = xdebug_hdf[XDEBUG_NAME];
-  Enable = Config::GetBool(ini, hdf["enable"], false);
+  const auto* ini_val = ini.get_ptr(XDEBUG_INI("enable"));
+  if (ini_val != nullptr) {
+    ini_on_update(*ini_val, Enable);
+  }
 }
 
 void XDebugExtension::moduleInit() {
@@ -826,7 +828,7 @@ void XDebugExtension::requestInit() {
   XDEBUG_CFG
   #undef XDEBUG_OPT
 
-  // hhvm.xdebug.dump.*
+  // xdebug.dump.*
   #define XDEBUG_OPT(T, name, sym, val) { \
     XDEBUG_GLOBAL(sym) = xdebug_init_opt<T>(name, val, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, \

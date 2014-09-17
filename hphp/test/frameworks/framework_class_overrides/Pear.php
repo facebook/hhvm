@@ -28,6 +28,7 @@ XML;
     file_put_contents($this->getTestPath()."/phpunit.xml", $phpunit_xml);
   }
 
+  <<Override>>
   protected function isInstalled(): bool {
     $extra_files = Set {
       $this->getTestPath()."/phpunit.xml",

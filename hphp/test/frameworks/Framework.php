@@ -877,7 +877,10 @@ class Framework {
     return $updated_tests;
   }
 
-  protected function installDependencies(): void {
+  /* If you think you need to override this, look at extraPreComposer() and
+   * extraPostComposer() instead.
+   */
+  final private function installDependencies(): void {
     $composer_json_path = find_first_file_recursive(
       Set {"composer.json"},
       nullthrows($this->install_root),

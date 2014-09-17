@@ -111,7 +111,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
     return acc->second;
   }
 
-  acc->second.unit = Repo::get().loadUnit(path->data(), md5);
+  acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
   if (acc->second.unit) {
     acc->second.rdsBitId = RDS::allocBit();
   }
@@ -185,8 +185,8 @@ CachedUnit createUnitFromString(const char* path,
     mangleUnitMd5(string_md5(contents.data(), contents.size())).c_str()
   };
   // Try the repo; if it's not already there, invoke the compiler.
-  if (auto const unit = Repo::get().loadUnit(path, md5)) {
-    return CachedUnit { unit, RDS::allocBit() };
+  if (auto unit = Repo::get().loadUnit(path, md5)) {
+    return CachedUnit { unit.release(), RDS::allocBit() };
   }
   auto const unit = compile_file(contents.data(), contents.size(), md5, path);
   return CachedUnit { unit, RDS::allocBit() };

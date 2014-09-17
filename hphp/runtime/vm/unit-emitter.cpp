@@ -520,8 +520,8 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-Unit* UnitEmitter::create() {
-  Unit* u = new Unit();
+std::unique_ptr<Unit> UnitEmitter::create() {
+  auto u = folly::make_unique<Unit>();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
@@ -658,7 +658,7 @@ Unit* UnitEmitter::create() {
     Trace::traceRelease("%s", u->toString().c_str());
   }
   if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
-    std::printf("%s", disassemble(u).c_str());
+    std::printf("%s", disassemble(u.get()).c_str());
     std::fflush(stdout);
     _Exit(0);
   }
@@ -675,7 +675,7 @@ Unit* UnitEmitter::create() {
     kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
     Verifier::checkUnit(
-      u,
+      u.get(),
       isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose
     );
   }
@@ -798,7 +798,8 @@ UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
   return ue;
 }
 
-Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
+std::unique_ptr<Unit>
+UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
   if (!loadHelper(ue, name, md5)) return nullptr;
   return ue.create();

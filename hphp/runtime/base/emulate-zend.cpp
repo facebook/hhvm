@@ -229,12 +229,12 @@ int emulate_zend(int argc, char** argv) {
 
     // If the -c option is specified without a -n, php behavior is to
     // load the default ini/hdf
-    auto default_config_file = INSTALL_PREFIX "/etc/hhvm/php.ini";
+    auto default_config_file = "/etc/hhvm/php.ini";
     if (access(default_config_file, R_OK) != -1) {
       newargv.push_back("-c");
       newargv.push_back(default_config_file);
     }
-    default_config_file = INSTALL_PREFIX "/etc/hhvm/config.hdf";
+    default_config_file = "/etc/hhvm/config.hdf";
     if (access(default_config_file, R_OK) != -1) {
       newargv.push_back("-c");
       newargv.push_back(default_config_file);

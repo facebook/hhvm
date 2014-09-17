@@ -49,9 +49,8 @@ struct ReadOnlyArena : private boost::noncopyable {
   static constexpr size_t kMinimalAlignment = 8;
 
   /*
-   * Create a ReadOnlyArena that uses chunkSize bytes for each call to
-   * mmap.  `chunkSize' must be a multiple of the page size
-   * (s_pageSize).
+   * Create a ReadOnlyArena that uses chunkSize bytes for each call to the
+   * allocator.  `chunkSize' must be a multiple of the page size (s_pageSize).
    *
    * Note: s_pageSize is a dynamically initialized static, so do not
    * create global ReadOnlyArenas.
@@ -66,7 +65,7 @@ struct ReadOnlyArena : private boost::noncopyable {
   ~ReadOnlyArena();
 
   /*
-   * Returns: the number of bytes we've mmaped in this arena.
+   * Returns: the number of bytes we've allocated (from malloc) in this arena.
    */
   size_t capacity() const;
 
@@ -76,7 +75,7 @@ struct ReadOnlyArena : private boost::noncopyable {
    * Returns: a pointer to a read only memory region that contains a
    * copy of [data, data + dataLen).
    *
-   * Throws: if we fail to mmap.
+   * Throws: if we fail to allocate memory.
    */
   const void* allocate(const void* data, size_t dataLen);
 

@@ -23,6 +23,8 @@
 #include <functional>
 #include <string>
 
+#include <folly/Format.h>
+
 //////////////////////////////////////////////////////////////////////
 
 #define IMPLIES(a, b) (!(a) || (b))

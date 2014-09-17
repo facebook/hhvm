@@ -1826,11 +1826,15 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
     v << copy{v.cns(imm), dstReg};
     return;
   }
-  v << movzbl{typeReg, dstReg};
-  v << subli{KindOfBoolean, dstReg, dstReg};
-  v << subli{KindOfString - KindOfBoolean + 1, dstReg, dstReg};
-  v << sbbl{dstReg, dstReg, dstReg};
-  v << neg{dstReg, dstReg};
+  auto t1 = v.makeReg();
+  auto t2 = v.makeReg();
+  auto t3 = v.makeReg();
+  auto t4 = v.makeReg();
+  v << movzbl{typeReg, t1};
+  v << subli{KindOfBoolean, t1, t2};
+  v << subli{KindOfString - KindOfBoolean + 1, t2, t3};
+  v << sbbl{t3, t3, t4};
+  v << neg{t4, dstReg};
 }
 
 void CodeGenerator::cgIsNType(IRInstruction* inst) {
@@ -2059,9 +2063,10 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
+  auto b = v.makeReg();
   v << testq{srcReg, srcReg};
-  v << setcc{CC_NE, dstReg};
-  v << movzbl{dstReg, dstReg};
+  v << setcc{CC_NE, b};
+  v << movzbl{b, dstReg};
 }
 
 void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
@@ -2190,9 +2195,7 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
 void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
   auto const sreg = srcLoc(0).reg();
   auto const dreg = dstLoc(0).reg();
-  auto& v = vmain();
-  v << copy{sreg, dreg};
-  v << orqi{1, dreg, dreg};
+  vmain() << orqi{1, sreg, dreg};
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
@@ -2440,19 +2443,20 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto& vf = vfrozen();
 
   if (!index->isConst()) {
+    auto idx = indexReg;
     if (data->bounded) {
       if (data->base) {
-        //XXX it is unsound to mutate indexReg
-        v << subq{v.cns(data->base), indexReg, indexReg};
+        idx = v.makeReg();
+        v << subq{v.cns(data->base), indexReg, idx};
       }
-      v << cmpqi{data->cases - 2, indexReg};
+      v << cmpqi{data->cases - 2, idx};
       v << bindjcc2{CC_AE, data->defaultOff};
     }
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
     auto t = v.makeReg();
     v << leap{rip[(intptr_t)table], t};
-    v << jmpm{t[indexReg*8]};
+    v << jmpm{t[idx*8]};
     for (int i = 0; i < data->cases; i++) {
       auto sk = SrcKey(curFunc(), data->targets[i], resumed());
       vf = vf.makeEntry();
@@ -3680,9 +3684,9 @@ void CodeGenerator::cgLdClsName(IRInstruction* inst) {
   auto const dstReg = dstLoc(0).reg();
   auto const srcReg = srcLoc(0).reg();
   auto& v = vmain();
-
-  v << loadq{srcReg[Class::preClassOff()], dstReg};
-  emitLdLowPtr(v, dstReg[PreClass::nameOffset()],
+  auto preclass = v.makeReg();
+  v << loadq{srcReg[Class::preClassOff()], preclass};
+  emitLdLowPtr(v, preclass[PreClass::nameOffset()],
                dstReg, sizeof(LowStringPtr));
 }
 
@@ -3925,6 +3929,7 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
 
   auto const rArr = srcLoc(0).reg();
   auto const rIdx = srcLoc(1).reg();
+  auto const dst = dstLoc(0).reg();
   auto& v = vmain();
 
   if (rIdx != InvalidReg) {
@@ -3939,9 +3944,9 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
     emitCmpTVType(v, KindOfNull, rArr[offset + TVOFF(m_type)]);
   }
 
-  auto const dst = dstLoc(0).reg();
-  v << setcc{CC_NE, dst};
-  v << movzbl{dst, dst};
+  auto b = v.makeReg();
+  v << setcc{CC_NE, b};
+  v << movzbl{b, dst};
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
@@ -5152,9 +5157,10 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto& v = vmain();
 
   // Return 1 if generator state is not Done.
+  auto b = v.makeReg();
   v << cmpbim{int8_t(BaseGenerator::State::Done), contReg[stateOff]};
-  v << setcc{CC_NE, dstReg};
-  v << movzbl{dstReg, dstReg};
+  v << setcc{CC_NE, b};
+  v << movzbl{b, dstReg};
 }
 
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
@@ -5192,10 +5198,13 @@ void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
   switch (inst->extra<RawMemData>()->info().size) {
     case sz::byte:  v << loadzbl{src, destReg}; break;
     case sz::dword:
-      v << loadl{src, destReg};
       if (inst->extra<RawMemData>()->type == RawMemData::FuncNumParams) {
         // See Func::finishedEmittingParams and Func::numParams for rationale
-        v << shrli{1, destReg, destReg};
+        auto tmp = v.makeReg();
+        v << loadl{src, tmp};
+        v << shrli{1, tmp, destReg};
+      } else {
+        v << loadl{src, destReg};
       }
       break;
     case sz::qword: v << loadq{src, destReg}; break;
@@ -5355,8 +5364,9 @@ void CodeGenerator::cgLdWHState(IRInstruction* inst) {
   auto const robj = srcLoc(0).reg();
   auto const rdst = dstLoc(0).reg();
   auto& v = vmain();
-  v << loadzbl{robj[ObjectData::whStateOffset()], rdst};
-  v << andbi{0x0F, rdst, rdst};
+  auto state = v.makeReg();
+  v << loadzbl{robj[ObjectData::whStateOffset()], state};
+  v << andbi{0x0F, state, rdst};
 }
 
 void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
@@ -5732,9 +5742,11 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto offset = Class::propDataCacheOff() +
                 RDS::Link<Class::PropInitVec*>::handleOff();
   auto& v = vmain();
-  v << loadl{clsReg[offset], dstReg};
-  v << loadq{rds[dstReg], dstReg};
-  v << loadq{dstReg[Class::PropInitVec::dataOff()], dstReg};
+  auto handle = v.makeReg();
+  auto vec = v.makeReg();
+  v << loadl{clsReg[offset], handle};
+  v << loadq{rds[handle], vec};
+  v << loadq{vec[Class::PropInitVec::dataOff()], dstReg};
 }
 
 void CodeGenerator::cgConjure(IRInstruction* inst) {

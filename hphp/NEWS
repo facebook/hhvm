@@ -1,6 +1,46 @@
-NEXT 25-Sep-2014
+NEXT 9-Oct-2014
+
+"T-Pain" 25-Sep-2014
  - Use vasm virtual registers in x64 backend, transition fully to vasm-xls
  - 'arraykey' scalar typehint that accepts both ints and strings
+ - Add OSS benchmarking suite
+ - Fix PDO::bindColumn
+ - [resumable] Set resumed flag before suspending VarEnv
+ - Objprof for HHVM (Approx. instance counter)
+ - Make RUSAGE_THREAD available to getrusage PHP function
+ - clean up /tmp/test-run- files
+ - VASM register-coalescing via hinting
+ - Be more conservative about HNI types when there are InterceptableFunctions
+ - Add runtime support for null-safe method call operator "?->"
+ - Add sanity test system to OSS benchmarker
+ - Fix double deallocation of object in zend conversion of object to string
+ - [hhvm|memoize] Makes <<__Memoize>> work with arbitrary args
+ - Use raw troff encoding for official HHVM man page
+ - Add --php options to HHVM man page
+ - Fix GMP tests/crashes
+ - Implement posix_errno
+ - Xdebug remote debugging compatibility and bug fixes
+ - Add options parameter to DOMDocument::load/loadHTML()
+ - Add support for GNU tar symlinks to PharData
+ - Add max_file_uploads support
+ - Improve process error checking in perf runner
+ - posix_getgrgid()['members'] should be empty array if no users found
+ - Convert from jemalloc's obsolete *allocm() to *allocx()
+ - Use EqX instead of Eq for Obj/Num comparisons.
+ - make class closure consist with PHP
+ - Fix guard relaxation to work with bytecode control flow
+ - Allow vm-stack flushing in rpc threads
+ - stop killing LightProcesses while writing out stacktrace.log
+ - Get hhvm compiling with clang-3.5
+ - Update .hhi files for ConstSet, Set, and ImmSet
+ - Force the linker to keep symbols in lowmem on MacOSX
+ - Make guard relaxation work with unreachable code
+ - Add minimal hdf support to test runner
+ - Analyze/optimize pseudomains in hhbbc
+ - [hhvm|memoize] Fix segfault on certain memoized functions
+ - Support mappy ini configuration
+ - Xdebug cleanup and trivial features
+ - Abort the server if a request gets stuck
 
 "Snoop Dogg" 11-Sep-2014
  - VASM phase 1: emit vasm instructions, with existing register allocation

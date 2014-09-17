@@ -51,6 +51,7 @@ val real_instead_of_float : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit
+val unset_in_strict: Pos.t -> unit
 val this_no_argument : Pos.t -> unit
 val this_outside_of_class : Pos.t -> unit
 val this_must_be_return : Pos.t -> unit

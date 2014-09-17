@@ -72,6 +72,8 @@ let builtins = "<?hh // decl\n"^
   "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
   "}\n"^
+  "function isset($x): bool;"^
+  "function unset($x): void;"^
   "namespace HH {\n"^
   "abstract class BuiltinEnum<T> {\n"^
   "  final public static function getValues(): array<string, T>;\n"^

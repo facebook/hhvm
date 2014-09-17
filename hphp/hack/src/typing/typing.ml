@@ -1556,6 +1556,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       if Env.is_strict env
       then Errors.dont_use_isset p;
       env, (Reason.Rwitness p, Tprim Tbool)
+  | Id (_, "\\unset") ->
+      if Env.is_strict env then Errors.unset_in_strict p;
+      env, (Reason.Rwitness p, Tprim Tvoid)
   | Id (_, x) when SSet.mem x Naming.predef_tests ->
       let env, ty = expr env (List.hd el) in
       env, (Reason.Rwitness p, Tprim Tbool)

@@ -84,9 +84,6 @@ const StaticString s_stdin("STDIN");
 const StaticString s_stdout("STDOUT");
 const StaticString s_stderr("STDERR");
 
-Mutex Unit::s_classesMutex;
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -174,7 +171,7 @@ SourceLocTable Unit::getSourceLocTable() const {
   if (m_sourceLocTable.size() > 0 || m_repoId == RepoIdInvalid) {
     return m_sourceLocTable;
   }
-  Lock lock(s_classesMutex);
+  Lock lock(g_classesMutex);
   UnitRepoProxy& urp = Repo::get().urp();
   urp.getSourceLocTab(m_repoId).get(m_sn, ((Unit*)this)->m_sourceLocTable);
   return m_sourceLocTable;
@@ -279,7 +276,7 @@ const Func* Unit::getFunc(Offset pc) const {
 
 Func* Unit::getMain(Class* cls /* = nullptr */) const {
   if (!cls) return *m_mergeInfo->funcBegin();
-  Lock lock(s_classesMutex);
+  Lock lock(g_classesMutex);
   if (!m_pseudoMainCache) {
     m_pseudoMainCache = new PseudoMainCacheMap;
   }
@@ -498,7 +495,7 @@ Class* Unit::defClass(const PreClass* preClass,
       FrameRestore fr(preClass);
       newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
     }
-    Lock l(Unit::s_classesMutex);
+    Lock l(g_classesMutex);
 
     if (UNLIKELY(top != nameList->clsList())) {
       top = nameList->clsList();

@@ -18,7 +18,7 @@ import urllib2
 
 # The version that we will be importing the tests from.
 # Must be a valid, released version from php download site
-zend_version = "5.5.15"
+zend_version = "5.6.0"
 
 # Don't even pull these into the repo.
 # We want running the bad tests to still complete.
@@ -218,6 +218,9 @@ flaky_tests = (
 
     # it references a whole directory with *
     '/ext/standard/tests/file/copy_variation6.php',
+
+    # Tests for a bug in PHP
+    '/ext/gmp/tests/014.php',
 )
 
 # Tests that work but not in repo mode
@@ -664,6 +667,7 @@ other_files = (
     '/ext/openssl/tests/openssl.cnf',
     '/ext/openssl/tests/private.key',
     '/ext/openssl/tests/public.key',
+    '/ext/openssl/tests/ServerClientTestCase.inc',
     '/ext/pdo_firebird/tests/skipif.inc',
     '/ext/pdo_mysql/tests/common.phpt',
     '/ext/pdo_mysql/tests/config.inc',
@@ -874,6 +878,14 @@ other_files = (
     '/Zend/tests/ns_067.inc',
     '/Zend/tests/ns_069.inc',
     '/Zend/tests/unset.inc',
+    '/Zend/tests/use_const/includes/foo_bar.php',
+    '/Zend/tests/use_const/includes/foo_php_version.php',
+    '/Zend/tests/use_const/includes/global_bar.php',
+    '/Zend/tests/use_const/includes/global_baz.php',
+    '/Zend/tests/use_function/includes/foo_bar.php',
+    '/Zend/tests/use_function/includes/foo_strlen.php',
+    '/Zend/tests/use_function/includes/global_bar.php',
+    '/Zend/tests/use_function/includes/global_baz.php',
 )
 
 parser = argparse.ArgumentParser()
@@ -937,6 +949,12 @@ def walk(filename, dest_subdir):
             data = data.replace(
                 'DROP TABLE IF EXISTS test\'',
                 'DROP TABLE IF EXISTS \'.$test_table_name'
+            )
+
+        if '/tests/security/open_basedir.inc' in full_dest_filename:
+            data = data.replace(
+                'getcwd()',
+                '__DIR__',
             )
 
         file(full_dest_filename, 'w').write(data)

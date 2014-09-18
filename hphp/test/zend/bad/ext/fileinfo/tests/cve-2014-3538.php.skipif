@@ -1,0 +1,3 @@
+<?php
+if (!class_exists('finfo'))
+	die('skip no fileinfo extension');

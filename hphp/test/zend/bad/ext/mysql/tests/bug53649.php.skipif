@@ -16,4 +16,4 @@ if (false === file_put_contents('bug53649.data', "1\n2\n3\n"))
 if (!mysql_query("LOAD DATA LOCAL INFILE 'bug53649.data' INTO TABLE test", $link) &&
 	1148 == mysql_errno($link))
 		die("skip LOAD DATA LOAD INFILE not allowed\n");
-?>
+?>

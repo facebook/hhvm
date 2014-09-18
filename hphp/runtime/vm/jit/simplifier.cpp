@@ -501,15 +501,29 @@ SSATmp* Simplifier::simplifySpillStack(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyLdCtx(const IRInstruction* inst) {
   auto const func = inst->extra<LdCtx>()->func;
   if (func->isStatic()) {
+    auto const src = inst->src(0);
+    auto const srcInst = src->inst();
+    if (srcInst->is(DefInlineFP)) {
+      auto const stackPtr = srcInst->src(0);
+      if (auto const spillFrame = findSpillFrame(stackPtr)) {
+        auto const cls = spillFrame->src(2);
+        if (cls->isConst(Type::Cls)) {
+          return cns(ConstCctx::cctx(cls->clsVal()));
+        }
+      }
+    }
     // ActRec->m_cls of a static function is always a valid class pointer with
     // the bottom bit set
-    return gen(LdCctx, inst->src(0));
+    return gen(LdCctx, src);
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyLdClsCtx(const IRInstruction* inst) {
   SSATmp* ctx = inst->src(0);
+  if (ctx->isConst(Type::Cctx)) {
+    return cns(ctx->cctxVal().cls());
+  }
   Type ctxType = ctx->type();
   if (ctxType <= Type::Obj) {
     // this pointer... load its class ptr

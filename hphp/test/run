@@ -579,6 +579,13 @@ class Status {
   }
 
   public static function utf8Sanitize($str) {
+    if (!is_string($str)) {
+      // We sometimes get called with the
+      // return value of file_get_contents()
+      // when fgc() has failed.
+      return '';
+    }
+
     if (class_exists('UConverter')) {
       return UConverter::transcode($str, 'UTF-8', 'UTF-8');
     }

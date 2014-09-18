@@ -570,8 +570,8 @@ and build_constructor env class_ method_ =
 and class_const_decl c (env, acc) (h, id, e) =
   let env, ty =
     match h with
-      | None ->
-        (match snd e with
+      | None -> begin
+        let rec infer_const e = match snd e with
           | String _
           | String2 ([], _)
           | True
@@ -579,9 +579,8 @@ and class_const_decl c (env, acc) (h, id, e) =
           | Int _
           | Float _
           | Array _ ->
-            let _, ty = Typing.expr env e in
             (* We don't want to keep the environment of the inference
-             * CAREFULL, right now, array is just Tarray, with no
+             * CAREFUL, right now, array is just Tarray, with no
              * type variable, if we were to add parameters array<T>,
              * we would have to: make a full expansion, that is,
              * replace all the type variables in ty by their "true" type,
@@ -590,10 +589,19 @@ and class_const_decl c (env, acc) (h, id, e) =
              * I would search for it if I was changing the way arrays are
              * typed.
              *)
-            env, ty
+            snd (Typing.expr env e)
+          | Unop ((Ast.Uminus | Ast.Uplus), e2) ->
+            infer_const e2
           | _ ->
-            env, (Reason.Rwitness (fst id), Tany)
-        )
+            (* We can't infer the type of everything here. Notably, if you
+             * define a const in terms of another const, we need an annotation,
+             * since the other const may not have been declared yet. *)
+            if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
+            then Errors.missing_typehint (fst id);
+            Reason.Rwitness (fst id), Tany
+          in
+          (env, infer_const e)
+        end
       | Some h -> Typing_hint.hint env h
   in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;

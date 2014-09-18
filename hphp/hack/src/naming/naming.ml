@@ -1124,43 +1124,15 @@ and check_constant_expr (pos, e) =
 and const_defl h env l = List.map (const_def h env) l
 and const_def h env (x, e) =
   check_constant_expr e;
+  let new_const = Env.new_const env x in
   match (fst env).in_mode with
-  | Ast.Mstrict ->
-      (* TODO THIS IS A BUG!!!! You should always try to guess the type of
-       * constant, not only in strict mode. What an idiot!
-       *)
-      (match h with
-      | None ->
-          (* Whenever the type is "obvious", no need to add a
-             type-hint if you add a case here, make sure you add it in
-             the type-checker too cf class_const_decl in typing.ml *)
-          (match snd e with
-          | String _
-          | String2 ([], _)
-          | True
-          | False
-          | Int _
-          | Float _
-          | Array _ ->
-              None, Env.new_const env x, expr env e
-          | _ ->
-            (* Missing annotation fine if this is an enum. *)
-            match (fst env).cclass with
-            | Some c when c.c_kind = Cenum ->
-              (None, Env.new_const env x, expr env e)
-            | _ ->
-              (Errors.missing_typehint (fst x);
-               None, Env.new_const env x, (fst e, N.Any))
-          )
-      | Some h ->
-          let h = Some (hint env h) in
-          h, Env.new_const env x, expr env e)
+  | Ast.Mstrict
   | Ast.Mpartial ->
       let h = opt_map (hint env) h in
-      h, Env.new_const env x, expr env e
+      h, new_const, expr env e
   | Ast.Mdecl ->
       let h = opt_map (hint env) h in
-      h, Env.new_const env x, (fst e, N.Null)
+      h, new_const, (fst e, N.Any)
 
 and class_var_ env (x, e) =
   let id = Env.new_const env x in

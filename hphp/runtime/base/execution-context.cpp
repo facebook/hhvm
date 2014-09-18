@@ -704,7 +704,9 @@ void ExecutionContext::handleError(const std::string& msg,
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));
-    auto exn = FatalErrorException(msg, ee.getBacktrace());
+    bool isRecoverable =
+      errnum == static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+    auto exn = FatalErrorException(msg, ee.getBacktrace(), isRecoverable);
     exn.setSilent(!errorNeedsLogging(errnum));
     throw exn;
   }
@@ -779,7 +781,14 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   MM().resetCouldOOM();
 
+  auto prefix = "\nFatal error: ";
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  auto const fatal = dynamic_cast<const FatalErrorException*>(&e);
+  if (fatal && fatal->isRecoverable()) {
+     prefix = "\nCatchable fatal error: ";
+     errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+  }
+
   recordLastError(e, errnum);
 
   bool silenced = false;
@@ -790,16 +799,16 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                fileAndLine.first.c_str(), fileAndLine.second);
+    Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
+                fileAndLine.second);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                fileAndLine.first.c_str(), fileAndLine.second);
+    Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
+                fileAndLine.second);
   }
   return handled;
 }

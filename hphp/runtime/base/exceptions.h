@@ -90,9 +90,15 @@ struct FatalErrorException : ExtendedException {
     : ExtendedException("%s", msg)
   {}
   FatalErrorException(int, const char *msg, ...) ATTRIBUTE_PRINTF(3,4);
-  FatalErrorException(const std::string&, const Array& backtrace);
+  FatalErrorException(const std::string&, const Array& backtrace,
+                      bool isRecoverable = false);
 
   EXCEPTION_COMMON_IMPL(FatalErrorException);
+
+  bool isRecoverable() const { return m_recoverable; }
+
+private:
+  bool m_recoverable{false};
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -18,4 +18,4 @@ string(3) "a C"
 string(5) "Array"
 string(5) "Array"
 
-Fatal error: Object of class D could not be converted to string in %s on line 7
+Catchable fatal error: Object of class D could not be converted to string in %s on line 7

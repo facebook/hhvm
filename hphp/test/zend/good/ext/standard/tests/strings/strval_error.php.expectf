@@ -12,4 +12,4 @@ NULL
 
 -- Testing strval() function with object which has not toString() method  --
 
-Fatal error: %s
+Catchable fatal error: %s

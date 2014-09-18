@@ -26,4 +26,4 @@ string(1) "a"
 Arg value is /[a-zA-Z]/
 string(1) "1"
 
-Fatal error: %s
+Catchable fatal error: %s

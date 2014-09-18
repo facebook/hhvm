@@ -1096,7 +1096,7 @@ struct GuardConstraints {
    * local's type coming into the instruction: usually either a guard or the
    * last known value of the local.
    */
-  jit::hash_map<const IRInstruction*, TypeSource> typeSrcs;
+  jit::hash_map<const IRInstruction*, TypeSourceSet> typeSrcs;
 
   /*
    * Maps AssertLoc/CheckLoc instructions to the type of the local coming into

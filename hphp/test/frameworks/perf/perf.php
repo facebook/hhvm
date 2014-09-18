@@ -31,7 +31,7 @@ function run_benchmark(
   $target->install();
 
   print_progress('Starting Nginx');
-  $nginx = new NginxDaemon($temp_dir, $target);
+  $nginx = new NginxDaemon($temp_dir, $target, $options);
   $nginx->start();
   invariant($nginx->isRunning(), 'Failed to start nginx');
 
@@ -63,11 +63,11 @@ function run_benchmark(
   invariant(!$siege->isRunning(), 'Siege is still running :/');
   invariant($php_engine->isRunning(), get_class($php_engine).' crashed');
 
-  print_progress('Waiting 30s for server to stabilize');
-  sleep(30);
-
   print_progress('Enabling engine stats collection');
   $php_engine->enableStats();
+
+  print_progress('Clearing nginx access.log');
+  $nginx->clearAccessLog();
 
   print_progress('Running Siege for benchmark');
   $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
@@ -78,6 +78,7 @@ function run_benchmark(
   print_progress('Collecting results');
   $php_engine_stats = $php_engine->collectStats();
   $siege_stats = $siege->collectStats();
+  $nginx_stats = $nginx->collectStats();
 
   $combined_stats = Map { };
   foreach ($php_engine_stats as $page => $stats) {
@@ -90,7 +91,21 @@ function run_benchmark(
       $combined_stats[$page] = $stats;
     }
   }
+  foreach ($nginx_stats as $page => $stats) {
+    if ($combined_stats->containsKey($page)) {
+      $combined_stats[$page]->setAll($stats);
+    } else {
+      $combined_stats[$page] = $stats;
+    }
+  }
 
+  if (!$options->verbose) {
+    $combined_stats = $combined_stats->filterWithKey(
+      ($k, $v) ==> $k === 'Combined'
+    );
+  } else {
+    ksort($combined_stats);
+  }
   print(json_encode($combined_stats, JSON_PRETTY_PRINT)."\n");
 
   print_progress('All done');
@@ -116,7 +131,18 @@ function perf_main($argv) {
     exit(0);
   }
 
-  $temp_dir = tempnam(sys_get_temp_dir(), 'hhvm-nginx');
+  // If we exit cleanly, Process::__destruct() gets called, but it doesn't
+  // if we're killed by Ctrl-C. This tends to leak php-cgi or hhvm processes -
+  // trap the signal so we can clean them up.
+  pcntl_signal(
+    SIGINT,
+    function() {
+      Process::cleanupAll();
+      exit();
+    }
+  );
+
+  $temp_dir = tempnam('/dev/shm', 'hhvm-nginx');
   // Currently a file - change to a dir
   unlink($temp_dir);
   mkdir($temp_dir);
@@ -138,7 +164,7 @@ function perf_main($argv) {
     $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
   }
   if ($options->hhvm) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options->hhvm);
+    $engine = new HHVMDaemon($temp_dir, $target, $options);
   }
   if ($engine === null) {
     throw new Exception(

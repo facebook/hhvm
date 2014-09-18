@@ -16,7 +16,7 @@ SRC= typing_reason.ml typing_defs.ml \
  typing_ops.ml typing_suggest.ml typing_dynamic_yield.ml \
  nast_terminality.ml nastCheck.ml nastInitCheck.ml typing_alias.ml \
  typing_extends.ml typing_async.ml typing_lenv.ml typing_hooks.ml \
- typing_enum.ml \
+ typing_enum.ml typing_variance.ml \
  typing.ml typing_inherit.ml typing_decl.ml \
  typing_suggest_service.ml typing_decl_service.ml \
  typing_check_service.ml typing_redecl_service.ml

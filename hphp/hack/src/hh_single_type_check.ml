@@ -38,7 +38,7 @@ let builtins = "<?hh // decl\n"^
   "interface Awaitable<T> {}\n"^
   "interface WaitHandle<T> extends Awaitable<T> {}\n"^
   "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{}\n"^
-  "interface ConstSet<Tv> extends Iterable<Tv>, Container<Tv>{}\n"^
+  "interface ConstSet<Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
   "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{}\n"^
   "final class Vector<Tv> implements ConstVector<Tv>{\n"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
@@ -72,6 +72,8 @@ let builtins = "<?hh // decl\n"^
   "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
   "}\n"^
+  "function isset($x): bool;"^
+  "function unset($x): void;"^
   "namespace HH {\n"^
   "abstract class BuiltinEnum<T> {\n"^
   "  final public static function getValues(): array<string, T>;\n"^

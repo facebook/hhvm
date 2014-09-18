@@ -105,6 +105,17 @@ ExecutionContext::ExecutionContext()
 }
 
 ExecutionContext::~ExecutionContext() {
+  // When we destroy the execution context will call destructors on any objects
+  // in the userErrorHandlers and userExceptionHandlers vectors. If these
+  // destructors call restore_*_handler() they can trigger a pop_back() on the
+  // vector resulting in double destruction. There's no reason for code to do
+  // this but we should still avoid crashing.
+  // N.B.: This is already taken care of for us if EnableObjDestructCall is on
+  if (!RuntimeOption::EnableObjDestructCall) {
+    while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
+    while (!m_userExceptionHandlers.empty()) m_userExceptionHandlers.pop_back();
+  }
+
   // Discard any ConstInfo objects that were created to support reflection.
   for (ConstInfoMap::const_iterator it = m_constInfo.begin();
        it != m_constInfo.end(); ++it) {
@@ -619,8 +630,9 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
 }
 
 bool ExecutionContext::errorNeedsLogging(int errnum) {
-  auto level = ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getErrorReportingLevel();
+  auto level =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.getErrorReportingLevel() |
+    RuntimeOption::ForceErrorReportingLevel;
   return RuntimeOption::NoSilencer || (level & errnum) != 0;
 }
 
@@ -663,6 +675,13 @@ void ExecutionContext::handleError(const std::string& msg,
     break;
   default:
     break;
+  }
+
+  // Potentially upgrade the error to E_USER_ERROR
+  if (errnum & RuntimeOption::ErrorUpgradeLevel &
+      static_cast<int>(ErrorConstants::ErrorModes::UPGRADEABLE_ERROR)) {
+    errnum = static_cast<int>(ErrorConstants::ErrorModes::USER_ERROR);
+    mode = ErrorThrowMode::IfUnhandled;
   }
 
   ErrorStateHelper esh(this, newErrorState);

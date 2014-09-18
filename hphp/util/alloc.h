@@ -46,16 +46,9 @@
 #  include "malloc.h"
 # endif
 #else
-# undef ALLOCM_ZERO
-# undef ALLOCM_NO_MOVE
+# undef MALLOCX_LG_ALIGN
+# undef MALLOCX_ZERO
 # include <jemalloc/jemalloc.h>
-# ifndef ALLOCM_ARENA
-#  define ALLOCM_ARENA(a) 0
-# endif
-# if JEMALLOC_VERSION_MAJOR > 3 || \
-     (JEMALLOC_VERSION_MAJOR == 3 && JEMALLOC_VERSION_MINOR >= 5)
-#  define USE_JEMALLOC_MALLOCX
-# endif
 #endif
 
 #include "hphp/util/maphuge.h"
@@ -118,10 +111,8 @@ inline void* low_malloc(size_t size) {
 inline void low_free(void* ptr) {
 #ifndef USE_JEMALLOC
   free(ptr);
-#elif defined(USE_JEMALLOC_MALLOCX)
-  dallocx(ptr, MALLOCX_ARENA(low_arena));
 #else
-  dallocm(ptr, ALLOCM_ARENA(low_arena));
+  dallocx(ptr, MALLOCX_ARENA(low_arena));
 #endif
 }
 

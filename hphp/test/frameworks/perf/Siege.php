@@ -58,6 +58,11 @@ final class Siege extends Process {
       (string) PerfSettings::HttpPort(),
       $urls,
     );
+    $urls = str_replace(
+      '__HTTP_HOST__',
+      gethostname(),
+      $urls
+    );
     file_put_contents($urls_file, $urls);
 
     switch ($this->mode) {
@@ -66,6 +71,7 @@ final class Siege extends Process {
           '-c', (string) PerfSettings::WarmupConcurrency(),
           '-r', (string) PerfSettings::WarmupRequests(),
           '-f', $urls_file,
+          '--benchmark',
           '--log=/dev/null',
         };
       case RequestModes::BENCHMARK:
@@ -73,6 +79,7 @@ final class Siege extends Process {
           '-c', (string) PerfSettings::BenchmarkConcurrency(),
           '-t', PerfSettings::BenchmarkTime(),
           '-f', $urls_file,
+          '--benchmark',
           '--log='.$this->logfile,
         };
       default:

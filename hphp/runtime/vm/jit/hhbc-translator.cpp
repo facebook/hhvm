@@ -2224,12 +2224,17 @@ void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
  *
  * 1. Objects compared with strings may involve calling a user-defined
  * __toString function.
- * 2. Array comparisons can throw if recursion is detected.
+ *
+ * 2. Objects compared with ints or doubles raises a notice when the object is
+ * converted to a number.
+ *
+ * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
   assert(!t0.equals(Type::Gen) && !t1.equals(Type::Gen));
-  return (t0.maybe(Type::Obj) && t1.maybe(Type::Str)) ||
-         (t0.maybe(Type::Str) && t1.maybe(Type::Obj)) ||
+  auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
+  return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
+         (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
          (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
 }
@@ -2681,7 +2686,7 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
     return registerObj(gen(ConstructInstance, makeCatch(), ClassData(cls)));
   }
 
-  // First, make sure our property init vectors are all set up
+  // Make sure our property init vectors are all set up.
   bool props = cls->pinitVec().size() > 0;
   bool sprops = cls->numStaticProperties() > 0;
   assert((props || sprops) == cls->needInitialization());
@@ -2690,7 +2695,12 @@ SSATmp* HhbcTranslator::emitAllocObjFast(const Class* cls) {
     if (sprops) emitInitSProps(cls, makeCatch());
   }
 
-  // Next, allocate the object
+  /*
+   * Allocate the object.  This must happen after we do sinits for consistency
+   * with the interpreter about o_id assignments.  Also, the prop
+   * initialization above can throw, so we don't want to have the object
+   * allocated already.
+   */
   auto const ssaObj = gen(NewInstanceRaw, ClassData(cls));
 
   // Initialize the properties
@@ -3612,35 +3622,35 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
    * eagerly sync VM regs to represent that stack depth.
    */
   auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
-        // TODO(#4323657): this is generating generic DecRefs at the time
-        // of this writing---probably we're not handling the stack chain
-        // correctly in a catch block.
-        for (auto i = uint32_t{0}; i < numArgs; ++i) {
-          if (paramThroughStack[i]) {
-            popDecRef(Type::Gen);
-          } else {
-            gen(DecRef, paramSSAs[i]);
-          }
-        }
-        if (inlining) {
-          emitFPushActRec(cns(callee),
-                          paramThis ? paramThis : cns(Type::Nullptr),
-                          ActRec::encodeNumArgs(numArgs,
-                                                false /* localsDecRefd */,
-                                                false /* resumed */,
-                                                wasInliningConstructor),
-                          nullptr);
-        }
-        for (auto i = uint32_t{0}; i < numArgs; ++i) {
-          // TODO(#4313939): it's not actually necessary to push these
-          // nulls.
-          push(cns(Type::InitNull));
-        }
-        auto const stack = spillStack();
-        gen(SyncABIRegs, m_irb->fp(), stack);
-        gen(EagerSyncVMRegs, m_irb->fp(), stack);
-        return stack;
-      }); };
+    // TODO(#4323657): this is generating generic DecRefs at the time
+    // of this writing---probably we're not handling the stack chain
+    // correctly in a catch block.
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (paramThroughStack[i]) {
+        popDecRef(Type::Gen);
+      } else {
+        gen(DecRef, paramSSAs[i]);
+      }
+    }
+    if (inlining) {
+      emitFPushActRec(cns(callee),
+                      paramThis ? paramThis : cns(Type::Nullptr),
+                      ActRec::encodeNumArgs(numArgs,
+                                            false /* localsDecRefd */,
+                                            false /* resumed */,
+                                            wasInliningConstructor),
+                      nullptr);
+    }
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      // TODO(#4313939): it's not actually necessary to push these
+      // nulls.
+      push(cns(Type::InitNull));
+    }
+    auto const stack = spillStack();
+    gen(SyncABIRegs, m_irb->fp(), stack);
+    gen(EagerSyncVMRegs, m_irb->fp(), stack);
+    return stack;
+  }); };
 
   /*
    * Prepare the actual arguments to the CallBuiltin instruction.  If
@@ -4329,6 +4339,8 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
     case Location::Litint:
       return Type::cns(loc.offset);
     case Location::This:
+      // Don't specialize $this for cloned closures which may have been re-bound
+      if (curFunc()->hasForeignThis()) return Type::Obj;
       return Type::Obj.specialize(curFunc()->cls());
 
     default:

@@ -18,6 +18,7 @@ final class PHP5Daemon extends PHPEngine {
   protected function getArguments(): Vector<string> {
     return Vector {
       '-b', '127.0.0.1:'.PerfSettings::FastCGIPort(),
+      '-c', __DIR__,
     };
   }
 

@@ -38,7 +38,7 @@ let is_private = function
 (*****************************************************************************)
 
 let use_parent_for_known = false
-let check_partially_known_method_returns = false
+let check_partially_known_method_returns = true
 let check_partially_known_method_params = false
 let check_partially_known_method_visibility = true
 

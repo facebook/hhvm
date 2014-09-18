@@ -94,7 +94,8 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   }
 
   auto const sd = static_cast<StringData*>(
-    low_malloc(sizeof(StringData) + sl.len + 1)
+    trueStatic ? low_malloc(sizeof(StringData) + sl.len + 1)
+               : malloc(sizeof(StringData) + sl.len + 1)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -151,9 +152,15 @@ StringData* StringData::MakeEmpty() {
 }
 
 void StringData::destructStatic() {
-  assert(checkSane());
+  assert(checkSane() && isStatic());
   assert(isFlat());
   low_free(this);
+}
+
+void StringData::destructUncounted() {
+  assert(checkSane() && isUncounted());
+  assert(isFlat());
+  free(this);
 }
 
 //////////////////////////////////////////////////////////////////////

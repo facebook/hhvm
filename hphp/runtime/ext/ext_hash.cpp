@@ -327,9 +327,16 @@ bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data) {
   return true;
 }
 
-String HHVM_FUNCTION(hash_final, const Resource& context,
+Variant HHVM_FUNCTION(hash_final, const Resource& context,
                                  bool raw_output /* = false */) {
   HashContext *hash = context.getTyped<HashContext>();
+
+  if (hash->context == nullptr) {
+    raise_warning(
+      "hash_final(): supplied resource is not a valid Hash Context resource"
+    );
+    return false;
+  }
 
   String raw = String(hash->ops->digest_size, ReserveString);
   char *digest = raw.bufferSlice().ptr;

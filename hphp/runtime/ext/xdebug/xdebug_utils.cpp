@@ -40,7 +40,7 @@ bool XDebugUtils::isTriggerSet(const String& trigger) {
   return cookies.exists(trigger) || get.exists(trigger) || post.exists(trigger);
 }
 
-// TODO(#4489053) Clean this up-- this was taken from php5 xdebug
+// TODO(#3704) Clean this up-- this was taken from php5 xdebug
 static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
                                    int skip_slash) {
   static unsigned char hexchars[] = "0123456789ABCDEF";
@@ -69,7 +69,7 @@ static char *xdebug_raw_url_encode(char const *s, int len, int *new_length,
   return ((char *) str);
 }
 
-// TODO(#4489053) Clean this up-- this was taken from php5 xdebug
+// TODO(#3704) Clean this up-- this was taken from php5 xdebug
 char* XDebugUtils::pathToUrl(const char* fileurl) {
   int l, i, new_len;
   char *tmp = nullptr;

@@ -154,7 +154,7 @@ static Variant php_posix_group_to_array(int gid,
     return false;
   }
 
-  Array members;
+  Array members = Array::Create();
   for (int count=0; gr.gr_mem[count] != NULL; count++) {
     members.append(String(gr.gr_mem[count], CopyString));
   }

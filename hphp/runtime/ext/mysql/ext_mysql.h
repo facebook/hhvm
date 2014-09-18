@@ -70,21 +70,19 @@ public:
 
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
     Hdf mysql = config["MySQL"];
-    ReadOnly = Config::GetBool(ini, mysql["ReadOnly"]);
+    Config::Bind(ReadOnly, ini, mysql["ReadOnly"], false);
 #ifdef FACEBOOK
-    Localize = Config::GetBool(ini, mysql["Localize"]);
+    Config::Bind(Localize, ini, mysql["Localize"], false);
 #endif
-    ConnectTimeout = Config::GetInt32(ini, mysql["ConnectTimeout"], 1000);
-    ReadTimeout = Config::GetInt32(ini, mysql["ReadTimeout"], 60000);
-    WaitTimeout = Config::GetInt32(ini, mysql["WaitTimeout"], -1);
-    SlowQueryThreshold = Config::GetInt32(ini, mysql["SlowQueryThreshold"], 1000);
-    KillOnTimeout = Config::GetBool(ini, mysql["KillOnTimeout"]);
-    MaxRetryOpenOnFail = Config::GetInt32(ini, mysql["MaxRetryOpenOnFail"], 1);
-    MaxRetryQueryOnFail = Config::GetInt32(ini, mysql["MaxRetryQueryOnFail"], 1);
-    Socket = Config::GetString(ini, mysql["Socket"]);
-    TypedResults = Config::GetBool(ini, mysql["TypedResults"], true);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
-                     "hhvm.mysql.typed_results", &TypedResults);
+    Config::Bind(ConnectTimeout, ini, mysql["ConnectTimeout"], 1000);
+    Config::Bind(ReadTimeout, ini, mysql["ReadTimeout"], 60000);
+    Config::Bind(WaitTimeout, ini, mysql["WaitTimeout"], -1);
+    Config::Bind(SlowQueryThreshold, ini, mysql["SlowQueryThreshold"], 1000);
+    Config::Bind(KillOnTimeout, ini, mysql["KillOnTimeout"], false);
+    Config::Bind(MaxRetryOpenOnFail, ini, mysql["MaxRetryOpenOnFail"], 1);
+    Config::Bind(MaxRetryQueryOnFail, ini, mysql["MaxRetryQueryOnFail"], 1);
+    Config::Bind(Socket, ini, mysql["Socket"], "");
+    Config::Bind(TypedResults, ini, mysql["TypedResults"], true);
   }
 
   void moduleInit();

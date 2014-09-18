@@ -566,7 +566,7 @@ class Framework {
   // delete the framework from your repo). The proxy could make things a bit
   // adventurous, so we will see how this works out after some time to test it
   // out
-  protected function install(): void {
+  final private function install(): void {
     human("Installing ".$this->name.
           ". You will see white dots during install.....\n");
     // Get rid of any test file and test information. Why? Well, for example,
@@ -596,13 +596,11 @@ class Framework {
     }
 
     $this->installCode();
-    $this->installDependencies();
-    if ($this->pull_requests != null) {
-      $this->installPullRequests();
-    }
 
     if ($cache_tarball !== null) {
       // Remove data we don't need as otherwise the caches get huge.
+      // We switch to the shallow clone first so that generated files like
+      // vendor/ go into the new checkout, not the original one.
       rename($this->install_root, $this->install_root.'-orig');
       // prepend file:// as git refuses to do a shallow clone of 'local' repos
       run_install(
@@ -612,14 +610,31 @@ class Framework {
         __DIR__
       );
       remove_dir_recursive(nullthrows($this->install_root).'-orig');
+    }
 
+    if ($this->pull_requests != null) {
+      $this->installPullRequests();
+    }
+    $this->extraPreComposer();
+    $this->installDependencies();
+    $this->extraPostComposer();
+
+    if ($cache_tarball !== null) {
       if (file_exists($this->install_root.'/vendor')) {
         $rdi = new RecursiveDirectoryIterator(
           $this->install_root.'/vendor'
         );
-        $rii = new RecursiveIteratorIterator($rdi);
+        $rii = new RecursiveIteratorIterator(
+          $rdi,
+          RecursiveIteratorIterator::CHILD_FIRST
+        );
         foreach ($rii as $path => $info) {
           $path = $info->getRealPath();
+          if (!$info->isDir()) {
+            // submodules end up with a file called .git. Directory
+            // iterators don't work so well on them :p
+            continue;
+          }
           $basename = basename($path); // $info->getBasename() will be '.'
           if ($basename === '.git') {
             remove_dir_recursive($path);
@@ -634,6 +649,23 @@ class Framework {
 
     $this->disableTestFiles();
   }
+
+  /** Extension point for subclasses to execute code before Composer.
+   *
+   * The main code (and any pull requests) are already fetched, but no
+   * dependencies have been yet; any code that should affect the
+   * autoload map should be done here.
+   */
+  protected function extraPreComposer(): void {
+  }
+  /** Extension point for subclasses to execute code after Composer.
+   *
+   * The main code, pull requests, and dependencies have been fetched
+   * at this point, and the autoload map will have been generated.
+   */
+  protected function extraPostComposer(): void {
+  }
+
 
   protected function isInstalled(): bool {
     /*****************************************

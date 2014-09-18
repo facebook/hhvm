@@ -10,9 +10,51 @@ final class HHVMDaemon extends PHPEngine {
   public function __construct(
     private string $tempDir,
     private PerfTarget $target,
-    string $executable_path
+    PerfOptions $options
   ) {
-    parent::__construct($executable_path);
+    parent::__construct((string) $options->hhvm);
+
+    if ($options->notBenchmarking) {
+      return;
+    }
+    $output = [];
+    exec(
+      implode(
+        ' ',
+        (Vector {
+            $options->hhvm,
+            '-v', 'Eval.Jit=1',
+            __DIR__.'/hhvm_config_check.php',
+        })->map($x ==> escapeshellarg($x))
+      ),
+      $output
+    );
+    $checks = json_decode(implode("\n", $output), /* as array = */ true);
+    invariant($checks, 'Got invalid output from hhvm_config_check.php');
+    $failed = 0;
+    foreach ($checks as $name => $data) {
+      if (!$data['OK']) {
+        $failed++;
+        fprintf(
+          STDERR,
+          "HHVM build is not suitable for benchmarking:\n".
+          "  %s: %s\n".
+          "  Required: %s\n",
+          $name,
+          $data['Value'],
+          $data['Required Value'],
+        );
+      }
+    }
+    if ($failed !== 0) {
+      fwrite(
+        STDERR,
+        "Exiting due to invalid config. You can run anyway with ".
+        "--i-am-not-benchmarking, but the results will not be suitable for ".
+        "any kind of comparison.\n"
+      );
+      exit(1);
+    }
   }
 
   protected function getTarget(): PerfTarget {
@@ -47,11 +89,13 @@ final class HHVMDaemon extends PHPEngine {
   }
 
   public function stop(): void {
-    $health = $this->adminRequest('/check-health');
-    if ($health && json_decode($health)) {
-      $this->adminRequest('/stop');
-      invariant(!$this->isRunning(), 'Failed to stop HHVM');
-    } else {
+    try {
+      $health = $this->adminRequest('/check-health');
+      if ($health && json_decode($health)) {
+        $this->adminRequest('/stop');
+        invariant(!$this->isRunning(), 'Failed to stop HHVM');
+      }
+    } catch (Exception $e) {
       parent::stop();
     }
   }

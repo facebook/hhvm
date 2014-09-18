@@ -24,7 +24,7 @@
 
 namespace HPHP { namespace jit {
 
-static const Trace::Module TRACEMOD = Trace::pgo;
+TRACE_SET_MOD(pgo);
 
 static TransIDSet findPredTrans(const SrcRec* sr,
                                 const TcaTransIDMap& jmpToTransID) {

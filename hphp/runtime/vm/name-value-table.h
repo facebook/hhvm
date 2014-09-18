@@ -173,11 +173,10 @@ private:
   Elm* findElm(const StringData* name) const;
 
 private:
-  ActRec* m_fp;
-  // Power of two sized hashtable.
-  Elm* m_table;
-  uint32_t m_tabMask;
-  uint32_t m_elms;
+  ActRec* m_fp{nullptr};
+  Elm* m_table{nullptr}; // Power of two sized hashtable.
+  uint32_t m_tabMask{0};
+  uint32_t m_elms{0};
 };
 
 //////////////////////////////////////////////////////////////////////

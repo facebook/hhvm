@@ -151,8 +151,7 @@ struct IfCountNotStatic {
 
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
-  auto t = v.makeReg();
-  v << ldimm{mcg->tx().getTransCounterAddr(), t};
+  auto t = v.cns(mcg->tx().getTransCounterAddr());
   v << incqmlock{*t};
 }
 
@@ -284,8 +283,8 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
     always_assert_flog(
       deltaFits(addr, sz::dword),
-      "Array data vtables are expected to be in the data "
-      "segment, with addresses less than 2^31"
+      "deltaFits on ArrayData vtable calls needs to be checked before "
+      "emitting them"
     );
     v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
     v << callm{baseless(rax*8 + addr), args};
@@ -400,19 +399,10 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
 
 void emitCmpClass(Vout& v, const Class* c, Vptr mem) {
   auto size = sizeof(LowClassPtr);
-  auto imm = Immed64(c);
-
   if (size == 8) {
-    if (imm.fits(sz::dword)) {
-      v << cmpqim{imm.l(), mem};
-    } else {
-      // Use a scratch.  We could do this without rAsm using two immediate
-      // 32-bit compares (and two branches).
-      v << ldimm{imm, rAsm};
-      v << cmpqm{rAsm, mem};
-    }
+    v << cmpqm{v.cns(c), mem};
   } else if (size == 4) {
-    v << cmplim{imm.l(), mem};
+    v << cmplm{v.cns(c), mem};
   } else {
     not_implemented();
   }
@@ -443,7 +433,6 @@ void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
 void copyTV(Vout& v, Vloc src, Vloc dst) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
-  if (dst_arity == 0) return;
   if (dst_arity == 2) {
     assert(src_arity == 2);
     v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
@@ -455,8 +444,7 @@ void copyTV(Vout& v, Vloc src, Vloc dst) {
     return;
   }
   assert(src_arity >= 1);
-  if (dst.reg(0) != InvalidReg) v << copy{src.reg(0), dst.reg(0)};
-  if (dst.reg(1) != InvalidReg) v << copy{src.reg(1), dst.reg(1)};
+  v << copy{src.reg(0), dst.reg(0)};
 }
 
 // move 2 gpr to 1 xmm

@@ -109,6 +109,7 @@ namespace Trace {
       TM(hhbbc_index)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
+      TM(vasm)          \
       TM(hhir)          \
       TM(hhirTracelets) \
       TM(hhir_dce)      \

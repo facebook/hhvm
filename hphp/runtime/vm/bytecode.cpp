@@ -89,6 +89,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -562,24 +563,21 @@ Stack::requestInit() {
 
 void
 Stack::requestExit() {
-  if (m_elms != nullptr) {
-    m_elms = nullptr;
-  }
+  m_elms = nullptr;
 }
 
 void flush_evaluation_stack() {
-  if (g_context.isNull()) {
+  if (vmStack().isAllocated()) {
     // For RPCRequestHandler threads, the ExecutionContext can stay
-    // alive across requests, and hold references to the VM stack, and
-    // the RDS needs to keep track of which classes are live etc So
-    // only flush the VM stack and the RDS if the execution context is
-    // dead.
-
-    if (!t_se.isNull()) {
-      t_se->flush();
-    }
-    RDS::flush();
+    // alive across requests, but its always ok to kill it between
+    // requests, so do so now
+    RPCRequestHandler::cleanupState();
   }
+
+  if (!t_se.isNull()) {
+    t_se->flush();
+  }
+  RDS::flush();
 }
 
 static std::string toStringElm(const TypedValue* tv) {

@@ -1657,7 +1657,7 @@ void EmitterVisitor::emitGotoTrampoline(Emitter& e,
   for (region = region->m_parent.get(); true; region = region->m_parent.get()) {
     assert(region->m_gotoTargets.count(name));
     auto t = region->m_gotoTargets[name].target;
-    if (region->m_parent->m_gotoLabels.count(name)) {
+    if (region->m_gotoLabels.count(name)) {
       // If only there is the appropriate label inside the current region
       // perform a jump.
       Id stateLocal = getStateLocal();
@@ -3510,6 +3510,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         switch (op) {
           case T_INC:
           case T_DEC: {
+            // $this++ is a no-op
+            if (auto var = dynamic_pointer_cast<SimpleVariable>(exp)) {
+              if (var->isThis()) break;
+            }
+
             auto const cop = [&] {
               if (op == T_INC) {
                 if (RuntimeOption::IntsOverflowToInts) {
@@ -4395,9 +4400,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           e.FCallUnpack(numParams);
         } else {
           e.FCall(numParams);
-        }
-        if (Option::WholeProgram) {
-          fixReturnType(e, om);
         }
         return true;
       }
@@ -6642,7 +6644,8 @@ void EmitterVisitor::fillFuncEmitterParams(FuncEmitter* fe,
 void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
 
-  if (funcScope->needsLocalThis() && !funcScope->isStatic()) {
+  if (!m_curFunc->isMemoizeWrapper &&
+      funcScope->needsLocalThis() && !funcScope->isStatic()) {
     assert(!m_curFunc->top);
     static const StringData* thisStr = makeStaticString("this");
     Id thisId = m_curFunc->lookupVarId(thisStr);
@@ -7078,6 +7081,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::K);
+  auto const func = node->getOriginalFunction();
 
   if (node->isStatic()) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
@@ -7107,9 +7111,11 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
       emitPop(e);
     }
   } else if (!node->getOriginalClass() ||
-             node->getOriginalClass()->isTrait()) {
-    // In a trait or pseudo-main, we can't resolve self:: or parent::
-    // yet, so we emit special instructions that do those lookups.
+             node->getOriginalClass()->isTrait() ||
+             (func && func->isClosure())) {
+    // In a trait, a potentially rebound closure or psuedo-main, we can't
+    // resolve self:: or parent:: yet, so we emit special instructions that do
+    // those lookups.
     if (node->isParent()) {
       m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);
     } else if (node->isSelf()) {
@@ -7450,7 +7456,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       e.FCall(numParams);
     }
   }
-  if (Option::WholeProgram || fcallBuiltin) {
+  if (fcallBuiltin) {
     fixReturnType(e, node, fcallBuiltin);
   }
 }
@@ -7684,11 +7690,6 @@ void EmitterVisitor::emitClass(Emitter& e,
             var = static_pointer_cast<SimpleVariable>(exp);
           }
 
-          auto sym = var->getSymbol();
-          bool maybePersistent = Option::WholeProgram &&
-            pce->attrs() & AttrPersistent &&
-            sym && !sym->isIndirectAltered() && sym->isStatic();
-
           auto const propName = makeStaticString(var->getName());
           auto const propDoc = Option::GenerateDocComments ?
             makeStaticString(var->getDocComment()) : staticEmptyString();
@@ -7703,7 +7704,6 @@ void EmitterVisitor::emitClass(Emitter& e,
             if (vNode->isScalar()) {
               initScalar(tvVal, vNode);
             } else {
-              maybePersistent = false;
               tvWriteUninit(&tvVal);
               if (!(declAttrs & AttrStatic)) {
                 if (requiresDeepInit(vNode)) {
@@ -7723,7 +7723,6 @@ void EmitterVisitor::emitClass(Emitter& e,
           } else {
             tvWriteNull(&tvVal);
           }
-          if (maybePersistent) propAttrs = propAttrs | AttrPersistent;
           bool added UNUSED =
             pce->addProperty(propName, propAttrs, typeConstraint,
                              propDoc, &tvVal, RepoAuthType{});

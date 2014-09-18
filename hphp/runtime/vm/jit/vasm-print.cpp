@@ -23,7 +23,7 @@
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;
@@ -245,8 +245,8 @@ std::string show(const Vunit& unit) {
   return out.str();
 }
 
-void printUnit(std::string caption, const Vunit& unit) {
-  if (!dumpIREnabled(1)) return;
+void printUnit(int level, const std::string& caption, const Vunit& unit) {
+  if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
   Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
 }
 

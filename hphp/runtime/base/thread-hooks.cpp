@@ -24,6 +24,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 
+#ifdef __linux__
 extern "C" {
 
 int __wrap_pthread_create(pthread_t* thread, const pthread_attr_t* attr,
@@ -46,6 +47,7 @@ int __wrap_pthread_join(pthread_t thread, void **retval) {
 }
 
 }
+#endif // __linux__
 
 namespace HPHP {
 

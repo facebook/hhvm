@@ -18,13 +18,14 @@
 #include "hphp/util/assertions.h"
 #include <boost/dynamic_bitset.hpp>
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit { namespace x64 {
 
 namespace {
 
 typedef boost::dynamic_bitset<> Bits;
+bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
 bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   using namespace reg;
   jit::vector<Bits> block_defs(unit.blocks.size()); // index by [Vlabel]
@@ -73,11 +74,50 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   }
   return true;
 }
+
+// make sure syncpoint{}, nocatch{}, or unwind{} only appear immediately
+// after a call.
+bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
+bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
+  for (auto b: blocks) {
+    bool unwind_valid = false;
+    bool nocatch_valid = false;
+    bool sync_valid = false;
+    for (auto& inst : unit.blocks[b].code) {
+      switch (inst.op) {
+        case Vinstr::call:
+        case Vinstr::callm:
+        case Vinstr::callr:
+        case Vinstr::mccall:
+          sync_valid = unwind_valid = nocatch_valid = true;
+          break;
+        case Vinstr::syncpoint:
+          assert(sync_valid);
+          sync_valid = false;
+          break;
+        case Vinstr::unwind:
+          assert(unwind_valid);
+          unwind_valid = nocatch_valid = false;
+          break;
+        case Vinstr::nocatch:
+          assert(nocatch_valid);
+          unwind_valid = nocatch_valid = false;
+          break;
+        default:
+          unwind_valid = nocatch_valid = sync_valid = false;
+          break;
+      }
+    }
+  }
+  return true;
+}
+
 }
 
 bool check(Vunit& unit) {
   auto blocks = sortBlocks(unit);
   assert(checkSSA(unit, blocks));
+  assert(checkCalls(unit, blocks));
   return true;
 }
 

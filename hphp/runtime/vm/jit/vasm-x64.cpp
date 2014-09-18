@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-llvm.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit { namespace x64 {
 using namespace reg;
@@ -358,7 +358,13 @@ void Vgen::emit(call i) {
 }
 
 void Vgen::emit(cloadq& i) {
-  a->cload_reg64_disp_reg64(i.cc, i.s.base, i.s.disp, i.d);
+  auto m = i.t;
+  always_assert(!m.index.isValid()); // not supported, but could be later.
+  if (i.f != i.d) {
+    always_assert(i.d != m.base); // don't clobber base
+    a->movq(i.f, i.d);
+  }
+  a->cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
 }
 
 // add s0 s1 d => mov s1->d; d += s0
@@ -780,9 +786,12 @@ void Vasm::finish(const Abi& abi, bool useLLVM) {
              e.what());
     }
   }
-
+  if (!m_unit.cpool.empty()) {
+    foldImms(m_unit);
+  }
   if (m_unit.hasVrs()) {
     Timer _t(Timer::vasm_xls);
+    removeDeadCode(m_unit);
     allocateRegisters(m_unit, abi);
   }
   if (m_unit.blocks.size() > 1) {
@@ -812,7 +821,6 @@ Vauto::~Vauto() {
       if (!main().closed()) main() << end{};
       assert(m_areas.size() < 2 || cold().empty() || cold().closed());
       assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
-      printUnit("after vasm-auto", unit());
       finish(vauto_abi);
       return;
     }

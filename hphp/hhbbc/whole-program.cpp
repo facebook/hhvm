@@ -136,6 +136,9 @@ std::vector<Context> all_function_contexts(const php::Program& program) {
     for (auto& f : u->funcs) {
       ret.push_back(Context { borrow(u), borrow(f) });
     }
+    if (options.AnalyzePseudomains) {
+      ret.push_back(Context { borrow(u), borrow(u->pseudomain) });
+    }
   }
   return ret;
 }
@@ -169,6 +172,12 @@ std::vector<WorkItem> initial_work(const php::Program& program) {
     }
     for (auto& f : u->funcs) {
       ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
+    }
+    if (options.AnalyzePseudomains) {
+      ret.emplace_back(
+        WorkType::Func,
+        Context { borrow(u), borrow(u->pseudomain) }
+      );
     }
   }
   return ret;
@@ -294,6 +303,38 @@ void analyze_iteratively(Index& index, php::Program& program) {
   }
 }
 
+void analyze_public_statics(Index& index, php::Program& program) {
+  PublicSPropIndexer publicStatics;
+
+  {
+    trace_time timer("analyze public statics");
+    parallel::for_each(
+      all_function_contexts(program),
+      [&] (Context ctx) {
+        auto info = CollectedInfo { index, ctx, nullptr, &publicStatics };
+        analyze_func_collect(index, ctx, info);
+      }
+    );
+  }
+
+  trace_time update("update public statics");
+  index.refine_public_statics(publicStatics);
+}
+
+void mark_persistent_static_properties(const Index& index,
+                                       php::Program& program) {
+  trace_time update("mark persistent static properties");
+  for (auto& unit : program.units) {
+    for (auto& cls : unit->classes) {
+      for (auto& prop : cls->properties) {
+        if (index.lookup_public_static_immutable(borrow(cls), prop.name)) {
+          prop.attrs |= AttrPersistent;
+        }
+      }
+    }
+  }
+}
+
 /*
  * Finally, use the results of all these iterations to perform
  * optimization.  This reanalyzes every function using our
@@ -367,8 +408,16 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
   if (!options.NoOptimizations) {
     assert(check(*program));
     analyze_iteratively(index, *program);
+    if (options.AnalyzePublicStatics) {
+      analyze_public_statics(index, *program);
+      analyze_iteratively(index, *program);
+    }
     final_pass(index, *program);
     state_after("optimize", *program);
+  }
+
+  if (options.AnalyzePublicStatics) {
+    mark_persistent_static_properties(index, *program);
   }
 
   debug_dump_program(index, *program);

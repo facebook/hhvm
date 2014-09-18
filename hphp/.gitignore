@@ -23,9 +23,12 @@ cotire
 .*.swp
 .*.swo
 
+# vim config
+.vimrc
+
 # tags files
-*/tags
-*/TAGS
+tags
+TAGS
 
 # logs
 *.log

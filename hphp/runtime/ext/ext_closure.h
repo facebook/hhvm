@@ -59,6 +59,12 @@ class c_Closure : public ExtObjectDataFlags<ObjectData::HasClone> {
 public: // ObjectData overrides
   void t___construct(); // must not be called for Closures
 
+  // closure object can't have properties
+  Variant t___get(Variant member);
+  Variant t___set(Variant member, Variant value);
+  bool t___isset(Variant name);
+  Variant t___unset(Variant name);
+
   Array t___debuginfo();
 
 public:
@@ -76,6 +82,8 @@ public:
   void setThis(ObjectData* od) { m_thisOrClass = ActRec::encodeThis(od); }
   bool hasThis() { return getThis() != nullptr; }
 
+  Class* getScope() { return m_func->cls(); }
+
   Class* getClass() { return ActRec::decodeClass(m_thisOrClass); }
   void setClass(Class* cls) { m_thisOrClass = ActRec::encodeClass(cls); }
   bool hasClass() { return getClass() != nullptr; }
@@ -84,6 +92,12 @@ public:
   static constexpr size_t ctxOffset() { return offsetof(c_Closure, m_thisOrClass); }
 
   static c_Closure* Clone(ObjectData* obj);
+
+  static Object ti_bind(const Variant& closure, const Variant& newthis,
+                        const Variant& scope);
+
+  Object t_bindto(const Variant& newthis, const Variant& scope);
+
 
 private:
   void* m_thisOrClass;

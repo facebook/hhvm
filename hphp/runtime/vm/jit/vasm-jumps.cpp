@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 using namespace x64;
@@ -101,7 +101,7 @@ void optimizeJmps(Vunit& unit) {
     ever_changed |= changed;
   } while (changed);
   if (ever_changed) {
-    printUnit("after vasm-jumps", unit);
+    printUnit(kVasmJumpsLevel, "after vasm-jumps", unit);
   }
 }
 

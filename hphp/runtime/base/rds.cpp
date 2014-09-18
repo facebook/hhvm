@@ -31,6 +31,7 @@
 #include "folly/Bits.h"
 
 #include "hphp/util/maphuge.h"
+#include "hphp/util/logger.h"
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -344,8 +345,14 @@ void requestExit() {
 
 void flush() {
   if (madvise(tl_base, s_normal_frontier, MADV_DONTNEED) == -1) {
-    fprintf(stderr, "RDS madvise failure: %s\n",
-      folly::errnoStr(errno).c_str());
+    Logger::Warning("RDS madvise failure: %s\n",
+                    folly::errnoStr(errno).c_str());
+  }
+  size_t offset = s_local_frontier & ~0xfff;
+  if (madvise(static_cast<char*>(tl_base) + offset,
+              s_persistent_base - offset, MADV_DONTNEED)) {
+    Logger::Warning("RDS local madvise failure: %s\n",
+                    folly::errnoStr(errno).c_str());
   }
 }
 
@@ -413,6 +420,7 @@ static void initPersistentCache() {
 }
 
 void threadInit() {
+  assert(tl_base == nullptr);
   if (!s_tc_fd) {
     initPersistentCache();
   }
@@ -421,7 +429,8 @@ void threadInit() {
                  PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
   always_assert_flog(
     tl_base != MAP_FAILED,
-    "Failed to mmap persistent RDS region"
+    "Failed to mmap persistent RDS region. errno = {}",
+    folly::errnoStr(errno).c_str()
   );
   numa_bind_to(tl_base, s_persistent_base, s_numaNode);
   if (RuntimeOption::EvalMapTgtCacheHuge) {

@@ -655,7 +655,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     if (count($args) == 1) {
       $arr = explode('::', $args[0], 3);
       if (count($arr) !== 2) {
-        throw new ReflectionException("$cls is not a valid method name");
+        $name = $args[0];
+        throw new ReflectionException("$name is not a valid method name");
       }
       list($cls, $name) = $arr;
       $classname = $cls;
@@ -749,6 +750,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     }
 
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
+  }
+
+  public function __debuginfo() {
+    return array('name' => $this->name, 'class' => $this->class);
   }
 
   /**
@@ -2058,7 +2063,7 @@ class ReflectionClass implements Reflector, Serializable {
    *                     core or in a PHP extension, FALSE is returned.
    */
   <<__Native>>
-  public function getFileName(): string;
+  public function getFileName(): mixed;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getstartline.php

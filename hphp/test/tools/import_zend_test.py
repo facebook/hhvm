@@ -68,7 +68,6 @@ no_import = (
     '/ext/pdo_odbc',
     '/ext/pdo_pgsql',
     '/ext/pspell',
-    '/ext/readline',
     '/ext/recode',
     '/ext/shmop',
     '/ext/skeleton',
@@ -504,6 +503,9 @@ norepo_tests = (
     # This creates an interface with the same name as a builtin, which
     # hphpc doesn't correctly support AttrUnique flags on.
     '/Zend/tests/inter_06.php',
+
+    # Tests use banned reflection features
+    '/ext/reflection/tests/bug30146.php',
 )
 
 # Random other files that zend wants
@@ -532,12 +534,24 @@ other_files = (
     '/ext/date/tests/examine_diff.inc',
     '/ext/dba/tests/skipif.inc',
     '/ext/dom/tests/book.xml',
+    '/ext/dom/tests/book.xml.gz',
     '/ext/dom/tests/book.xsd',
     '/ext/dom/tests/book-attr.xml',
     '/ext/dom/tests/book-non-conforming-schema.xsd',
+    '/ext/dom/tests/book-not-a-schema.xsd',
+    '/ext/dom/tests/bug67081_0.xml',
+    '/ext/dom/tests/bug67081_1.xml',
+    '/ext/dom/tests/bug67081_2.xml',
     '/ext/dom/tests/dom_test.inc',
+    '/ext/dom/tests/dom.xml',
+    '/ext/dom/tests/dom.ent',
+    '/ext/dom/tests/empty.html',
+    '/ext/dom/tests/note.xml',
+    '/ext/dom/tests/not_well.html',
     '/ext/dom/tests/nsdoc.xml',
     '/ext/dom/tests/skipif.inc',
+    '/ext/dom/tests/test.html',
+    '/ext/dom/tests/xinclude.xml',
     '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
     '/ext/exif/tests/bug60150.jpg',
@@ -805,6 +819,7 @@ other_files = (
     '/ext/zip/tests/utils.inc',
     '/ext/zip/tests/test_with_comment.zip',
     '/ext/zlib/tests/004.txt.gz',
+    '/ext/zlib/tests/bug_52944_corrupted_data.inc',
     '/ext/zlib/tests/data.inc',
     '/ext/zlib/tests/gzopen_include_path.inc',
     '/ext/zlib/tests/reading_include_path.inc',
@@ -903,9 +918,6 @@ def walk(filename, dest_subdir):
 
     if not '.phpt' in filename:
         data = file(full_dest_filename).read()
-
-        if '/ext/ftp/tests/server.inc' in full_dest_filename:
-            data = data.replace('stream_socket_server', '@stream_socket_server')
 
         if '/ext/mysqli/tests/table.inc' in full_dest_filename:
             data = data.replace(
@@ -1017,13 +1029,11 @@ def walk(filename, dest_subdir):
     elif 'EXPECTF' in sections:
         exp = sections['EXPECTF']
 
-        if '/ext/standard/tests/file/tempnam_variation5.php' in full_dest_filename:
-            exp = exp.replace('tempnam_variation6', 'tempnam_variation5')
-        if '/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename:
+        if ('/ext/standard/tests/url/parse_url_variation_002_64bit.php' in full_dest_filename or
+          '/ext/zlib/tests/gzfile_variation13.php' in full_dest_filename or
+          '/ext/zlib/tests/gzopen_variation3.php' in full_dest_filename or
+          '/ext/zlib/tests/readgzfile_variation13.php' in full_dest_filename):
             exp = exp.replace('to be long', 'to be integer')
-        if '/ext/curl/tests/curl_basic_008.php' in full_dest_filename or \
-           '/ext/curl/tests/curl_basic_010.php' in full_dest_filename:
-            exp = exp.replace('host:)', 'host:|Could not resolve:)')
 
         file(full_dest_filename+'.expectf', 'w').write(exp)
     else:
@@ -1053,6 +1063,11 @@ def walk(filename, dest_subdir):
 
         if '/ext/standard/tests/strings/fprintf_' in full_dest_filename:
             skipif = skipif.replace('dump.txt', dest_filename + '.txt')
+        # php-src#817
+        if ('/ext/zlib/tests/gzfile_variation4.php' in full_dest_filename or
+            '/ext/zlib/tests/readgzfile_variation4.php' in full_dest_filename):
+            skipif = skipif.replace("extension_loaded(zlib)",
+                                    "extension_loaded('zlib')")
 
         file(full_dest_filename + '.skipif', 'w').write(skipif)
 
@@ -1102,10 +1117,8 @@ def walk(filename, dest_subdir):
     if '/tests/classes/bug63462.php' in full_dest_filename:
         exp = exp.replace("Notice:", "\nNotice:")
         file(full_dest_filename + '.expectf', 'w').write(exp)
-    if '/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename:
-        exp = exp.replace("resource(6)", "resource(%d)")
-        file(full_dest_filename + '.expectf', 'w').write(exp)
-    if '/ext/ldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename:
+    if ('/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename) or \
+       ('extldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename):
         exp = exp.replace("resource(6)", "resource(%d)")
         file(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/standard/tests/math/pow.php' in full_dest_filename) or \
@@ -1165,6 +1178,7 @@ def walk(filename, dest_subdir):
         test = test.replace(pseudomain,
                             'function main() {\n' + pseudomain + '}\nmain();\n')
     if '/Zend/tests/bug55007.php' in full_dest_filename:
+        # Fixed in php-src@0ec49bba (probably PHP7)
         test = test.replace('$a[]', '$a[];')
     if '/ext/phar/tests/' in full_dest_filename:
         test = test.replace('.clean', '')
@@ -1202,7 +1216,9 @@ def walk(filename, dest_subdir):
         file(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/xmlreader/tests/007.php' in full_dest_filename or
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
-       '/ext/xmlreader/tests/012.php' in full_dest_filename):
+       '/ext/xmlreader/tests/012.php' in full_dest_filename or
+       '/ext/dom/tests/bug37456.php' in full_dest_filename or
+       '/ext/dom/tests/bug67081.php' in full_dest_filename):
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "file"')
     if '/ext/xsl/tests/xslt008.php' in full_dest_filename:
         file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "compress.zlib"')
@@ -1639,7 +1655,14 @@ for root, dirs, files in os.walk(all_dir):
                     dest = filename.replace('all', subdir, 1)
                     dir = os.path.dirname(dest)
                     mkdir_p(dir)
-                    shutil.copyfile(filename, dest)
+                    data = file(filename).read()
+
+                    if '/ext/ftp/tests/server.inc' in filename:
+                        data = data.replace('<10', '<100')
+                        data = data.replace('50000', '1025')
+                        data = data.replace('stream_socket_server', '@stream_socket_server')
+
+                    file(dest, 'w').write(data)
 
 if not args.dirty:
     shutil.rmtree(all_dir)

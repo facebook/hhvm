@@ -44,6 +44,7 @@ StaticString s_stream_flush("stream_flush");
 StaticString s_stream_truncate("stream_truncate");
 StaticString s_stream_lock("stream_lock");
 StaticString s_stream_stat("stream_stat");
+StaticString s_stream_metadata("stream_metadata");
 StaticString s_url_stat("url_stat");
 StaticString s_unlink("unlink");
 StaticString s_rename("rename");
@@ -69,6 +70,8 @@ UserFile::UserFile(Class *cls, const Variant& context /*= null */) : UserFSNode(
   m_Rename      = lookupMethod(s_rename.get());
   m_Mkdir       = lookupMethod(s_mkdir.get());
   m_Rmdir       = lookupMethod(s_rmdir.get());
+  m_StreamMetadata = lookupMethod(s_stream_metadata.get());
+
   m_isLocal = true;
 
   // UserFile, to match Zend, should not call stream_close() unless it was ever
@@ -489,6 +492,29 @@ bool UserFile::rmdir(const String& filename, int options) {
   }
 
   raise_warning("\"%s::rmdir\" call failed", m_cls->name()->data());
+  return false;
+}
+
+bool UserFile::touch(const String& path, int64_t mtime, int64_t atime) {
+  if (atime == 0) {
+    atime = mtime;
+  }
+  bool invoked = false;
+  Variant ret = invoke(
+    m_StreamMetadata,
+    s_stream_metadata,
+    PackedArrayInit(3)
+      .append(path)
+      .append(1) // STREAM_META_TOUCH
+      .append(atime ? make_packed_array(mtime, atime) : Array::Create())
+      .toArray(),
+    invoked
+  );
+  if (invoked && (ret.toBoolean() == true)) {
+    return true;
+  }
+
+  raise_warning("\"%s::touch\" call failed", m_cls->name()->data());
   return false;
 }
 

@@ -84,6 +84,10 @@ enum Attr {
   // FIXME: I have no documentation.    //       |          |         //
   AttrNoExpandTrait        = (1 << 12), //    X  |          |         //
                                         //       |          |         //
+  // Set on functions where the $this class may not be a subclass of the
+  // context (scope) class.
+  AttrHasForeignThis       = (1 << 12), //       |          |    X    //
+                                        //       |          |         //
   // Only valid in WholeProgram mode.  Indicates on a class that the class is
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1 << 13), //    X  |          |    X    //

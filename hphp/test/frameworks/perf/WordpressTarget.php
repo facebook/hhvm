@@ -143,9 +143,23 @@ final class WordpressTarget extends PerfTarget {
     if (!file_get_contents('http://www.example.com')) {
       throw new Exception('Wordpress requires internet access');
     }
-    file_get_contents(
-      'http://'.gethostname().':'.PerfSettings::HttpPort().
-      '/wp-cron.php?doing_wp_cron='.microtime(true)
+    // Does basic bookeeping...
+    $this->unfreezeRequest();
+    // Does more involved stuff like upgrading wordpress...
+    $this->unfreezeRequest();
+    // Let's just be paranoid and do it again.
+    $this->unfreezeRequest();
+  }
+
+  private function unfreezeRequest(): void {
+    $ctx = stream_context_create(
+      ['http' => ['timeout' => 120]]
     );
+    $data = file_get_contents(
+      'http://'.gethostname().':'.PerfSettings::HttpPort().'/',
+      /* include path = */ false,
+      $ctx
+    );
+    invariant($data !== false, 'Failed to unfreeze');
   }
 }

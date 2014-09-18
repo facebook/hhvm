@@ -244,7 +244,7 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
 inline void emitDerefIfVariant(x64::Vout& v, x64::Vreg reg) {
   emitCmpTVType(v, KindOfRef, reg[TVOFF(m_type)]);
   if (RefData::tvOffset() == 0) {
-    v << x64::cloadq{CC_E, reg[TVOFF(m_data)], reg};
+    v << x64::cloadq{CC_E, reg, reg[TVOFF(m_data)], reg};
   } else {
     ifThen(v, CC_E, [&](x64::Vout& v) {
       v << x64::loadq{reg[TVOFF(m_data)], reg};

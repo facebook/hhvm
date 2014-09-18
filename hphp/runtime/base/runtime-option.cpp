@@ -73,10 +73,12 @@ int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::NoSilencer = false;
+int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
+int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
 
@@ -113,7 +115,7 @@ int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
-int RuntimeOption::ServerThreadCount = 50;
+int RuntimeOption::ServerThreadCount = 0; // Config::Bind has default of 2*CPUs
 int RuntimeOption::ProdServerPort = 80;
 int RuntimeOption::QueuedJobsReleaseRate = 3;
 bool RuntimeOption::ServerThreadRoundRobin = false;
@@ -136,6 +138,7 @@ int RuntimeOption::PageletServerQueueLimit = 0;
 bool RuntimeOption::PageletServerThreadDropStack = false;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int RuntimeOption::PspTimeoutSeconds = 0;
+int64_t RuntimeOption::MaxRequestAgeFactor = 0;
 int64_t RuntimeOption::ServerMemoryHeadRoom = 0;
 int64_t RuntimeOption::RequestMemoryMaxBytes =
   std::numeric_limits<int64_t>::max();
@@ -559,6 +562,16 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 int RuntimeOption::EnableAlternative = 0;
 
+#ifdef NDEBUG
+  #ifdef ALWAYS_ASSERT
+    const StaticString s_hhvm_build_type("Release with asserts");
+  #else
+    const StaticString s_hhvm_build_type("Release");
+  #endif
+#else
+  const StaticString s_hhvm_build_type("Debug");
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
@@ -741,6 +754,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
                  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
+    Config::Bind(ForceErrorReportingLevel, ini,
+                 logger["ForceErrorReportingLevel"], 0);
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
                  "%h %l %u %t \"%r\" %>s %b");
 
@@ -768,6 +783,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     /* Remove this, once its removed from production configs */
     (void)Config::GetBool(ini, error["NoInfiniteLoopDetection"]);
 
+    Config::Bind(ErrorUpgradeLevel, ini, error["UpgradeLevel"], 0);
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,
@@ -793,6 +809,17 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     }
     setResourceLimit(RLIMIT_NOFILE, ini, rlimit, "MaxSocket");
     setResourceLimit(RLIMIT_DATA, ini, rlimit, "RSS");
+    // These don't have RuntimeOption::xxx bindings, but we still want to be
+    // able to use ini_xxx functionality on them; so directly bind to a local
+    // static via Config::Bind.
+    static int64_t s_core_file_size_override, s_core_file_size, s_rss = 0;
+    static int32_t s_max_socket = 0;
+    Config::Bind(s_core_file_size_override, ini, rlimit["CoreFileSizeOverride"],
+                 0);
+    Config::Bind(s_core_file_size, ini, rlimit["CoreFileSize"], 0);
+    Config::Bind(s_max_socket, ini, rlimit["MaxSocket"], 0);
+    Config::Bind(s_rss, ini, rlimit["RSS"], 0);
+
     Config::Bind(MaxRSS, ini, rlimit["MaxRSS"], 0);
     Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 5);
     Config::Bind(MaxRSSPollingCycle, ini, rlimit["MaxRSSPollingCycle"], 0);
@@ -987,6 +1014,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
     Config::Bind(RequestTimeoutSeconds, ini, server["RequestTimeoutSeconds"],
                  0);
+    Config::Bind(MaxRequestAgeFactor, ini, server["MaxRequestAgeFactor"], 0);
     Config::Bind(PspTimeoutSeconds, ini, server["PspTimeoutSeconds"], 0);
     Config::Bind(ServerMemoryHeadRoom, ini, server["MemoryHeadRoom"], 0);
     Config::Bind(RequestMemoryMaxBytes, ini, server["RequestMemoryMaxBytes"],
@@ -1345,8 +1373,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  0);
   }
   {
-    Config::Get(ini, config["ServerVariables"], ServerVariables);
-    Config::Get(ini, config["EnvVariables"], EnvVariables);
+    Config::Bind(ServerVariables, ini, config["ServerVariables"]);
+    Config::Bind(EnvVariables, ini, config["EnvVariables"]);
   }
   {
     Hdf sandbox = config["Sandbox"];
@@ -1507,6 +1535,16 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "warning_frequency",
                    &RuntimeOption::WarningFrequency);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
+                   "hhvm.build_type",
+                   IniSetting::SetAndGet<std::string>(
+    [](const std::string&) {
+      return false;
+    },
+    []() {
+      return s_hhvm_build_type.c_str();
+    }
+  ));
 
   // Extensions
   Config::Bind(RuntimeOption::ExtensionDir, ini, "extension_dir",

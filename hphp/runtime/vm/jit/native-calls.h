@@ -75,7 +75,10 @@ struct FuncPtr {
   /* implicit */ FuncPtr(Ret (*const (*p)[ArrayData::kNumKinds])(Args...))
     : type(FuncType::Call)
     , call(CppCall::array(p))
-  {}
+  {
+    always_assert(0 && "This code needs to be conditional on "
+                       "deltaFits(p, sz::dword) before using it");
+  }
 
   FuncPtr(FuncType t, uint64_t i) : type(t), srcIdx(i) {
     assert(t == FuncType::SSA);

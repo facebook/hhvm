@@ -36,8 +36,18 @@ void printCfg(std::ostream& out, const x64::Vunit& unit,
 
 std::string show(const x64::Vunit& unit);
 
-// print the cfg digraph followed by a code listing
-void printUnit(std::string caption, const x64::Vunit& unit);
+// Tracing level constants.
+constexpr int kInitialVasmLevel = 1;
+constexpr int kVasmImmsLevel = 2;
+constexpr int kVasmRegAllocLevel = 3;
+constexpr int kVasmJumpsLevel = 4;
+constexpr int kVasmDCELevel = 4;
+
+// Print the cfg digraph followed by a vasm code listing, if the trace level is
+// above `level'.
+void printUnit(int level,
+               const std::string& caption,
+               const x64::Vunit& unit);
 
 // main, cold, frozen
 extern const char* area_names[];

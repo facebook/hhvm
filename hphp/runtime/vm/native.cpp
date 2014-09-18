@@ -413,10 +413,10 @@ BuiltinFunction getWrapper(bool method, bool usesDoubles, bool variadic) {
 TypedValue* unimplementedWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto cls = func->cls();
-  ar->m_r.m_type = KindOfNull;
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
+    ar->m_r.m_type = KindOfNull;
     if (func->isStatic()) {
       frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
     } else {
@@ -425,6 +425,7 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->name()->data());
+    ar->m_r.m_type = KindOfNull;
     frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
   }
   return &ar->m_r;

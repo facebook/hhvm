@@ -30,9 +30,8 @@ class SilverStripe extends Framework {
     parent::installDependencies();
   }
 
-  protected function install(): void {
-    parent::install();
-
+  <<Override>>
+  protected function extraPostComposer(): void {
     verbose("Creating a _ss_environment file for setting SQLite adapter.\n");
 
     $contents = <<<'ENV_FILE'

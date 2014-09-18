@@ -285,7 +285,6 @@ protected:
   ContentLength m_contentLeft;
   PaddingLength m_paddingLength;
   PaddingLength m_paddingLeft;
-  bool m_keepConn;
   int m_maxConns;
   int m_maxRequests;
 

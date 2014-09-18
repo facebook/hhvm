@@ -177,7 +177,15 @@ module CompareTypes = struct
     then default
     else List.fold_left2 tparam acc tpl1 tpl2
 
-  and tparam acc (sid1, x1) (sid2, x2) =
+  and variance acc x1 x2 =
+    match x1, x2 with
+    | Ast.Covariant, Ast.Covariant -> acc
+    | Ast.Contravariant, Ast.Contravariant -> acc
+    | Ast.Invariant, Ast.Invariant -> acc
+    | _ -> default
+
+  and tparam acc (variance1, sid1, x1) (variance2, sid2, x2) =
+    let acc = variance acc variance1 variance2 in
     let acc = string_id acc sid1 sid2 in
     let acc = ty_opt acc x1 x2 in
     acc
@@ -336,8 +344,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       ce_origin      = ce.ce_origin     ;
     }
 
-  and type_param (sid, y) =
-    string_id sid, ty_opt y
+  and type_param (variance, sid, y) =
+    variance, string_id sid, ty_opt y
 
   and class_type tc =
     { tc_final                 = tc.tc_final                          ;

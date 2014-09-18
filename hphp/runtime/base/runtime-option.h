@@ -74,9 +74,11 @@ public:
   static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool NoSilencer;
+  static int ErrorUpgradeLevel; // Bitmask of errors to upgrade to E_USER_ERROR
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
   static int RuntimeErrorReportingLevel;
+  static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
 
@@ -135,6 +137,7 @@ public:
 
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
+  static int64_t MaxRequestAgeFactor;
   static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
   static int64_t ImageMemoryMaxBytes;
@@ -402,6 +405,7 @@ public:
      [1-UINT32_MAX] - raise warning every X times
   */                                                                    \
   F(uint32_t, HackArrayWarnFrequency,  0)                               \
+  F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -423,7 +427,7 @@ public:
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
-  F(uint32_t, NumSingleJitRequests,    20)                              \
+  F(uint32_t, NumSingleJitRequests,    5)                              \
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \

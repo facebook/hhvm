@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -57,6 +58,7 @@
 #include <fnmatch.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <vector>
+
 
 #define CHECK_HANDLE_BASE(handle, f, ret)               \
   File *f = handle.getTyped<File>(true, true);          \
@@ -1172,6 +1174,14 @@ bool f_lchgrp(const String& filename, const Variant& group) {
 bool f_touch(const String& filename, int64_t mtime /* = 0 */,
              int64_t atime /* = 0 */) {
   CHECK_PATH_FALSE(filename, 1);
+
+  // If filename points to a user file, invoke UserStreamWrapper::touch(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    return usw->touch(filename, mtime, atime);
+  }
+
   String translated = File::TranslatePath(filename);
 
   /* create the file if it doesn't exist already */

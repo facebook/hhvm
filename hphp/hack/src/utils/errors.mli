@@ -51,6 +51,7 @@ val real_instead_of_float : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit
+val unset_in_strict: Pos.t -> unit
 val this_no_argument : Pos.t -> unit
 val this_outside_of_class : Pos.t -> unit
 val this_must_be_return : Pos.t -> unit
@@ -187,6 +188,8 @@ val null_member : string -> Pos.t -> (Pos.t * string) list -> unit
 val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 val option_mixed : Pos.t -> unit
+val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
+val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
 val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
 val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 val cyclic_class_def : Utils.SSet.t -> Pos.t -> unit

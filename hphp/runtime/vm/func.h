@@ -136,11 +136,11 @@ struct Func {
   struct ParamInfo {
     ParamInfo()
       : builtinType(KindOfInvalid)
+      , variadic(false)
       , funcletOff(InvalidAbsoluteOffset)
       , defaultValue(make_tv<KindOfUninit>())
       , phpCode(nullptr)
       , userType(nullptr)
-      , variadic(false)
     {}
 
     template<class SerDe>
@@ -166,13 +166,13 @@ struct Func {
 
   public:
     DataType builtinType;     // Typehint for builtins.
+    bool variadic;
     Offset funcletOff;
     TypedValue defaultValue;  // Set to Uninit if there is no DV,
                               // or if there's a nonscalar DV.
     LowStringPtr phpCode;     // Eval'able PHP code.
     LowStringPtr userType;    // User-annotated type.
     TypeConstraint typeConstraint;
-    bool variadic;
     UserAttributeMap userAttributes;
   };
 
@@ -225,7 +225,10 @@ struct Func {
    * class's copy of the method.
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
-  Func* cloneAndSetClass(Class* cls) const;
+  Func* cloneAndModify(Class* cls, Attr attrs) const;
+  Func* cloneAndSetClass(Class* cls) const {
+    return cloneAndModify(cls, attrs());
+  }
 
   /*
    * Rename a function and reload it.
@@ -536,6 +539,11 @@ struct Func {
    */
   int maxStackCells() const;
 
+  /*
+   * Checks if $this belong to a class that is not a subclass of cls().
+   */
+  bool hasForeignThis() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
@@ -687,7 +695,7 @@ private:
    *
    * Return nullptr if this is not a closure or if no such clone exists.
    */
-  Func* findCachedClone(Class* cls) const;
+  Func* findCachedClone(Class* cls, Attr attrs) const;
 
 public:
 

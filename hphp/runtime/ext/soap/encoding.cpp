@@ -16,6 +16,7 @@
 */
 #include "hphp/runtime/ext/soap/encoding.h"
 
+#include <cstdlib>
 #include <map>
 #include <memory>
 
@@ -30,6 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
+using std::abs;
 
 bool php_libxml_xmlCheckUTF8(const unsigned char *s) {
   int i;

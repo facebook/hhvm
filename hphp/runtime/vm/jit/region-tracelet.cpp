@@ -354,7 +354,7 @@ bool RegionFormer::traceThroughJmp() {
   auto offset = m_inst.imm[0].u_BA;
   // Only trace through backwards jumps if it's a JmpNS and we're
   // inlining. This is to get DV funclets.
-  if (offset < 0 && (m_inst.op() != OpJmpNS || !inlining)) {
+  if (offset <= 0 && (m_inst.op() != OpJmpNS || !inlining)) {
     return false;
   }
 

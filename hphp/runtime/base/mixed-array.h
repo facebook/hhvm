@@ -382,6 +382,7 @@ public:
   size_t hashSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
+  static size_t computeAllocBytesFromMaxElms(uint32_t maxElms);
 
 private:
   friend struct ArrayInit;

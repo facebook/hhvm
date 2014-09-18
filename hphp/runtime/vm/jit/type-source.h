@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_TYPE_SOURCE_H_
 #define incl_HPHP_JIT_TYPE_SOURCE_H_
 
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/util/assertions.h"
 
 #include <string>
@@ -34,7 +35,6 @@ struct SSATmp;
  */
 struct TypeSource {
   enum class Kind : uint8_t {
-    None,
     Value,
     Guard,
   };
@@ -55,7 +55,6 @@ struct TypeSource {
     return src;
   }
 
-  bool isNone() const { return kind == Kind::None; }
   bool isGuard() const { return kind == Kind::Guard; }
   bool isValue() const { return kind == Kind::Value; }
 
@@ -65,6 +64,9 @@ struct TypeSource {
   bool operator!=(const TypeSource& rhs) const {
     return !operator==(rhs);
   }
+  bool operator<(const TypeSource& rhs) const;
+
+  std::string toString() const;
 
   // Members.
   union {
@@ -72,10 +74,13 @@ struct TypeSource {
     const IRInstruction* guard;
   };
 
-  Kind kind{Kind::None};
+  Kind kind;
 };
 
+typedef jit::flat_set<TypeSource> TypeSourceSet;
+
 std::string show(const TypeSource&);
+std::string show(const TypeSourceSet&);
 
 }}
 

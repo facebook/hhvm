@@ -399,8 +399,9 @@ void XDebugServer::detach() {
 // Header for sent messages
 #define XML_MSG_HEADER "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n"
 
-// Needed $_SERVER variables
-static const StaticString s_SCRIPT_FILENAME("SCRIPT_FILENAME");
+static const StaticString
+  s_SCRIPT_FILENAME("SCRIPT_FILENAME"), // Needed $_SERVER variable
+  s_DBGP_COOKIE("DBGP_COOKIE"); // Needed $_ENV variable
 
 void XDebugServer::addXmlns(xdebug_xml_node& node) {
   xdebug_xml_add_attribute(&node, "xmlns", "urn:debugger_protocol_v1");
@@ -501,9 +502,9 @@ bool XDebugServer::initDbgp() {
   xdebug_xml_add_attribute(response, "appid", getpid());
 
   // Add the DBGP_COOKIE environment variable
-  char* dbgp_cookie = getenv("DBGP_COOKIE");
-  if (dbgp_cookie != nullptr) {
-    xdebug_xml_add_attribute(response, "session", dbgp_cookie);
+  const String dbgp_cookie = g_context->getenv(s_DBGP_COOKIE);
+  if (!dbgp_cookie.empty()) {
+    xdebug_xml_add_attribute(response, "session", dbgp_cookie.data());
   }
 
   // Add the idekey

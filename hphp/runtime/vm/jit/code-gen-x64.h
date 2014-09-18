@@ -52,7 +52,6 @@ struct CodeGenerator : public jit::CodeGenerator {
 private:
   Vloc srcLoc(unsigned i) const;
   Vloc dstLoc(unsigned i) const;
-  Vloc makeDstLoc(const SSATmp& d) const;
   ArgGroup argGroup() const;
 
   // Autogenerate function declarations for each IR instruction in ir.h
@@ -67,6 +66,7 @@ private:
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
+  template<class Arg> CppCall arrayCallIfLowMem(Arg vtable) const;
 
   // Main call helper:
   void cgCallHelper(Vout&, CppCall call, const CallDest& dstInfo,
@@ -101,16 +101,6 @@ private:
   void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
 
-  template<class OpInstr>
-  void cgUnaryIntOp(Vloc dst, SSATmp* src, Vloc src_loc);
-
-  enum Commutativity { Commutative, NonCommutative };
-
-  void cgRoundCommon(IRInstruction* inst, RoundDirection dir);
-
-  template<class Op, class Opi>
-  void cgBinaryIntOp(IRInstruction*);
-  template<class Emit> void cgBinaryDblOp(IRInstruction*, Emit);
   template<class Op, class Opi> void cgShiftCommon(IRInstruction*);
 
   void emitVerifyCls(IRInstruction* inst);
@@ -145,14 +135,10 @@ private:
   void emitCompare(Vout&, IRInstruction* inst);
   void emitCompareInt(Vout&, IRInstruction* inst);
   void emitTestZero(Vout&, SSATmp*, Vloc);
-  template<class Inst>
-  bool emitIncDec(Vloc dst, SSATmp* src0, Vloc loc0,
-                  SSATmp* src1, Vloc loc1);
 
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);
-  VregXMM prepXMM(Vout&, const SSATmp* src, Vloc srcLoc);
   void emitSetCc(IRInstruction*, ConditionCode);
   template<class JmpFn>
   void emitIsTypeTest(IRInstruction* inst, JmpFn doJcc);

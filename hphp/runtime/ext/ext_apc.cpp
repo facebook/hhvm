@@ -131,8 +131,8 @@ std::set<std::string> apcExtension::CompletionKeys;
 apcExtension::TableTypes apcExtension::TableType =
   TableTypes::ConcurrentTable;
 bool apcExtension::EnableApcSerialize = true;
-time_t apcExtension::KeyMaturityThreshold = 20;
-size_t apcExtension::MaximumCapacity = 0;
+int64_t apcExtension::KeyMaturityThreshold = 20;
+int64_t apcExtension::MaximumCapacity = 0;
 int apcExtension::KeyFrequencyUpdatePeriod = 1000;
 bool apcExtension::ExpireOnSets = false;
 int apcExtension::PurgeFrequency = 4096;

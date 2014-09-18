@@ -367,9 +367,16 @@ function hhvm_cmd($options, $test, $test_run = null) {
       ? __DIR__.'/tools/pseudomain_wrapper.php'
       : $test;
   }
+  // hdf support is only temporary until we fully migrate to ini
+  // Discourage broad use.
+  $hdf_suffix = ".use.for.ini.migration.testing.only.hdf";
+  $hdf = file_exists($test.$hdf_suffix)
+       ? '-c ' . $test . $hdf_suffix
+       : "";
   $cmd = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
+    $hdf,
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
     '--file',
@@ -382,6 +389,12 @@ function hhvm_cmd($options, $test, $test_run = null) {
                       str_replace('{PWD}', dirname($test),
                                   file_get_contents($test.'.ini')));
     $cmd .= " -c $test_ini";
+  }
+  if ($hdf !== "") {
+    file_put_contents($test_hdf = tempnam('/tmp', $test).$hdf_suffix,
+                      str_replace('{PWD}', dirname($test),
+                                  file_get_contents($test.$hdf_suffix)));
+    $cmd .= " -c $test_hdf";
   }
 
   if (isset($options['repo'])) {
@@ -709,6 +722,15 @@ function skip_test($options, $test) {
   $output = stream_get_contents($pipes[1]);
   fclose($pipes[1]);
   proc_close($process);
+
+  // The standard php5 .skipif semantics is if the .skipif outputs ANYTHING
+  // then it should be skipped. This is a poor design, but I'll just add a
+  // small blacklist of things that are really bad if they are output so we
+  // surface the errors in the tests themselves.
+  if (stripos($output, 'segmentation fault') !== false) {
+    return false;
+  }
+
   return strlen($output) != 0;
 }
 

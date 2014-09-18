@@ -416,23 +416,6 @@ bool Class::isCollectionClass() const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Methods.
-
-Class* Class::findMethodBaseClass(const StringData* methName) {
-  const Func* f = lookupMethod(methName);
-  if (f == nullptr) return nullptr;
-  return f->baseCls();
-}
-
-bool Class::declaredMethod(const Func* method) {
-  if (method->preClass()->attrs() & AttrTrait) {
-    return findMethodBaseClass(method->name()) == this;
-  }
-  return method->preClass() == m_preClass.get();
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Property initialization.
 
 void Class::initialize() const {
@@ -556,10 +539,9 @@ void Class::initSPropHandles() const {
   // Bind all the static prop handles.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto& propHandle = m_sPropCache[slot];
+    auto const& sProp = m_staticProperties[slot];
+
     if (!propHandle.bound()) {
-
-      auto const& sProp = m_staticProperties[slot];
-
       if (sProp.m_class == this) {
         if (usePersistentHandles && (sProp.m_attrs & AttrPersistent)) {
           propHandle.bind(RDS::Mode::Persistent);
@@ -575,7 +557,7 @@ void Class::initSPropHandles() const {
         auto realSlot = sProp.m_class->lookupSProp(sProp.m_name);
         propHandle = sProp.m_class->m_sPropCache[realSlot];
       }
-    } else if (propHandle.isPersistent()) {
+    } else if (propHandle.isPersistent() && sProp.m_class == this) {
       /*
        * Avoid a weird race: two threads come through at once, the first
        * gets as far as binding propHandle, but then sleeps. Meanwhile the
@@ -583,7 +565,7 @@ void Class::initSPropHandles() const {
        * read the property, but sees uninit-null for the value (and asserts
        * in a dbg build)
        */
-      *propHandle = m_staticProperties[slot].m_val;
+      *propHandle = sProp.m_val;
     }
     if (!propHandle.isPersistent()) {
       allPersistentHandles = false;
@@ -981,7 +963,12 @@ void Class::getClassInfo(ClassInfoVM* ci) {
     }
     if (func->isGenerated()) continue;
     assert(func);
-    assert(declaredMethod(func));
+    // Assert this func is declared on this class.
+    if (func->attrs() & AttrTrait) {
+      assert(func->baseCls() == this);
+    } else {
+      assert(func->preClass() == m_preClass.get());
+    }
     SET_FUNCINFO_BODY;
   }
 

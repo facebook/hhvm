@@ -61,6 +61,7 @@ public:
   bool rename(const String& oldname, const String& newname);
   bool mkdir(const String& path, int mode, int options);
   bool rmdir(const String& path, int options);
+  bool touch(const String& path, int64_t mtime, int64_t atime);
 
 private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
@@ -78,6 +79,7 @@ protected:
   const Func* m_StreamTruncate;
   const Func* m_StreamLock;
   const Func* m_StreamStat;
+  const Func* m_StreamMetadata;
   const Func* m_UrlStat;
   const Func* m_Unlink;
   const Func* m_Rename;

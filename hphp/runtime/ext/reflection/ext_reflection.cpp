@@ -408,6 +408,10 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
                                              const String& prop, const Variant& value,
                                              bool force) {
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    raise_error("Setting static properties through reflection is not "
+      "allowed in RepoAuthoritative mode");
+  }
   StringData* sd = cls.get();
   Class* class_ = Unit::lookupClass(sd);
   if (!class_) {
@@ -802,14 +806,10 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
 static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
                           const Object& closure) {
   auto clos = closure.getTyped<c_Closure>();
-  if (auto const cls = clos->getClass()) { // closure without $this
-    auto ret = const_cast<StringData*>(cls->name());
-    return String(ret);
-  } else if (auto const thiz = clos->getThis()) { // closure with $this
-    return String(thiz->o_getClassName());
-  } else {
-    return String();
+  if (clos->getScope()) {
+    return String(const_cast<StringData*>(clos->getScope()->name()));
   }
+  return String();
 }
 
 // helper for getStaticVariables
@@ -825,7 +825,9 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
 
   for (Slot i = 0; i < size; ++i) {
     auto const& prop = cls->declProperties()[i];
-    auto val = closure.o_get(StrNR(prop.m_name), false /* error */, clsName);
+    auto val = closure.get()->o_realProp(StrNR(prop.m_name),
+                                         ObjectData::RealPropExist, clsName);
+    assert(val);
 
     // Closure static locals are represented as special instance properties
     // with a mangled name.
@@ -835,9 +837,9 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
       String strippedName(prop.m_name->data() + sizeof prefix - 1,
                           prop.m_name->size() - sizeof prefix + 1,
                           CopyString);
-      ai.setKeyUnconverted(VarNR(strippedName), val);
+      ai.setKeyUnconverted(VarNR(strippedName), *val);
     } else {
-      ai.setKeyUnconverted(VarNR(prop.m_name), val);
+      ai.setKeyUnconverted(VarNR(prop.m_name), *val);
     }
   }
   return ai.toArray();
@@ -902,8 +904,11 @@ static int HHVM_METHOD(ReflectionClass, getModifiers) {
   return get_modifiers(cls->attrs(), true);
 }
 
-static String HHVM_METHOD(ReflectionClass, getFileName) {
+static Variant HHVM_METHOD(ReflectionClass, getFileName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->attrs() & AttrBuiltin) {
+    return false_varNR;
+  }
   auto file = cls->preClass()->unit()->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {

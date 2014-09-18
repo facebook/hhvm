@@ -129,6 +129,7 @@ struct Stats {
   std::atomic<uint64_t> uniqueFunctions;
   std::atomic<uint64_t> totalClasses;
   std::atomic<uint64_t> totalFunctions;
+  std::atomic<uint64_t> totalMethods;
   std::atomic<uint64_t> persistentSPropsPub;
   std::atomic<uint64_t> persistentSPropsProt;
   std::atomic<uint64_t> persistentSPropsPriv;
@@ -202,6 +203,7 @@ std::string show(const Stats& stats) {
 
   folly::format(
     &ret,
+    "       total_methods:  {: >8}\n"
     "         total_funcs:  {: >8}\n"
     "        unique_funcs:  {: >8}\n"
     "    persistent_funcs:  {: >8}\n"
@@ -213,6 +215,7 @@ std::string show(const Stats& stats) {
     "   persistent_sprops_pub:  {: >8}\n"
     "   persistent_sprops_prot: {: >8}\n"
     "   persistent_sprops_priv: {: >8}\n",
+    stats.totalMethods.load(),
     stats.totalFunctions.load(),
     stats.uniqueFunctions.load(),
     stats.persistentFunctions.load(),
@@ -446,7 +449,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
-      CollectedInfo collect { index, ctx, nullptr };
+      CollectedInfo collect { index, ctx, nullptr, nullptr };
       Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (php::Block&, const State&) {};
@@ -467,12 +470,15 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   if (cls.attrs & AttrUnique) {
     ++stats.uniqueClasses;
   }
+  stats.totalMethods += cls.methods.size();
+
   for (auto& kv : index.lookup_private_props(&cls)) {
     add_type(stats.privateProps, kv.second);
   }
   for (auto& kv : index.lookup_private_statics(&cls)) {
     add_type(stats.privateStatics, kv.second);
   }
+
   for (auto& prop : cls.properties) {
     if (prop.attrs & AttrStatic) {
       ++stats.totalSProps;

@@ -252,6 +252,10 @@ inline int Func::maxStackCells() const {
   return m_maxStackCells;
 }
 
+inline bool Func::hasForeignThis() const {
+  return attrs() & AttrHasForeignThis;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Static locals.
 

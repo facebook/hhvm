@@ -329,10 +329,9 @@ void in(ISS& env, const bc::ClsCns& op) {
 }
 
 void in(ISS& env, const bc::ClsCnsD& op) {
-  if (!options.HardConstProp) return push(env, TInitCell);
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
     auto const t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1);
-    constprop(env);
+    if (options.HardConstProp) constprop(env);
     push(env, t);
     return;
   }
@@ -785,6 +784,20 @@ void in(ISS& env, const bc::CGetS&) {
     }
   }
 
+  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  if (indexTy.subtypeOf(TInitCell)) {
+    /*
+     * Constant propagation here can change when we invoke autoload, so it's
+     * considered HardConstProp.  It's safe not to check anything about private
+     * or protected static properties, because you can't override a public
+     * static property with a private or protected one---if the index gave us
+     * back a constant type, it's because it found a public static and it must
+     * be the property this would have read dynamically.
+     */
+    if (options.HardConstProp) constprop(env);
+    return push(env, indexTy);
+  }
+
   push(env, TInitCell);
 }
 
@@ -815,6 +828,7 @@ void in(ISS& env, const bc::VGetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfStaticString) {
       boxSelfProp(env, vname->m_data.pstr);
@@ -822,6 +836,11 @@ void in(ISS& env, const bc::VGetS&) {
       killSelfProps(env);
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TRef);
+  }
+
   push(env, TRef);
 }
 
@@ -887,6 +906,7 @@ void in(ISS& env, const bc::IssetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (self && tcls.subtypeOf(*self) &&
       vname && vname->m_type == KindOfStaticString) {
     if (auto const t = selfPropAsCell(env, vname->m_data.pstr)) {
@@ -894,6 +914,15 @@ void in(ISS& env, const bc::IssetS&) {
       if (!t->couldBe(TNull))   { constprop(env); return push(env, TTrue); }
     }
   }
+
+  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  if (indexTy.subtypeOf(TInitCell)) {
+    // See the comments in CGetS about constprop for public statics.
+    if (options.HardConstProp) constprop(env);
+    if (indexTy.subtypeOf(TNull))  { return push(env, TFalse); }
+    if (!indexTy.couldBe(TNull))   { return push(env, TTrue); }
+  }
+
   push(env, TBool);
 }
 
@@ -1026,6 +1055,7 @@ void in(ISS& env, const bc::SetS&) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfStaticString) {
       nothrow(env);
@@ -1034,6 +1064,11 @@ void in(ISS& env, const bc::SetS&) {
       mergeEachSelfPropRaw(env, [&] (Type) { return t1; });
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, t1);
+  }
+
   push(env, t1);
 }
 
@@ -1095,6 +1130,10 @@ void in(ISS& env, const bc::SetOpS&) {
     }
   }
 
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TInitCell);
+  }
+
   push(env, TInitCell);
 }
 
@@ -1144,6 +1183,11 @@ void in(ISS& env, const bc::IncDecS&) {
       loseNonRefSelfPropTypes(env);
     }
   }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TInitCell);
+  }
+
   push(env, TInitCell);
 }
 
@@ -1189,6 +1233,10 @@ void in(ISS& env, const bc::BindS&) {
     } else {
       killSelfProps(env);
     }
+  }
+
+  if (auto c = env.collect.publicStatics) {
+    c->merge(tcls, tname, TRef);
   }
 
   push(env, TRef);
@@ -1420,6 +1468,9 @@ void in(ISS& env, const bc::FPassS& op) {
         } else {
           killSelfProps(env);
         }
+      }
+      if (auto c = env.collect.publicStatics) {
+        c->merge(tcls, tname, TInitGen);
       }
     }
     return push(env, TInitGen);
@@ -1775,9 +1826,14 @@ void in(ISS& env, const bc::IterBreak& op) {
   env.propagate(*op.target, env.state);
 }
 
+/*
+ * Any include/require (or eval) op kills all locals, and private properties.
+ *
+ * We don't need to do anything for collect.publicStatics because we'll analyze
+ * the included pseudo-main separately and see any effects it may have on
+ * public statics.
+ */
 void inclOpImpl(ISS& env) {
-  // Any include/require (or eval) op kills all locals, and private
-  // properties.
   popC(env);
   killLocals(env);
   killThisProps(env);
@@ -2031,11 +2087,17 @@ void in(ISS& env, const bc::Ceil&)  { floatFnImpl(env, ceil, TDbl); }
 void in(ISS& env, const bc::Sqrt&)  { floatFnImpl(env, sqrt, TInitUnc); }
 
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
+
 void in(ISS& env, const bc::InitProp& op) {
   auto const t = popC(env);
   switch (op.subop) {
   case InitPropOp::Static:
     mergeSelfProp(env, op.str1, t);
+    if (auto c = env.collect.publicStatics) {
+      auto const cls = selfClsExact(env);
+      always_assert(!!cls);
+      c->merge(*cls, sval(op.str1), t);
+    }
     break;
   case InitPropOp::NonStatic:
     mergeThisProp(env, op.str1, t);

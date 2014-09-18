@@ -40,13 +40,6 @@ static void bt_handler(int sig) {
   int fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
                   O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
-  // Generating a stack dumps significant time, try to stop threads
-  // from flushing bad data or generating more faults meanwhile
-  if (sig==SIGQUIT || sig==SIGILL || sig==SIGSEGV || sig==SIGBUS) {
-    LightProcess::Close();
-    // leave running for SIGTERM SIGFPE SIGABRT
-  }
-
   if (RuntimeOption::EvalDumpRingBufferOnCrash) {
     Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash);
   }

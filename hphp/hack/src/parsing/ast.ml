@@ -41,6 +41,11 @@ type cst_kind =
 type id = Pos.t * string
 type pstring = Pos.t * string
 
+type variance =
+  | Covariant
+  | Contravariant
+  | Invariant
+
 type program = def list
 
 and def =
@@ -70,7 +75,7 @@ and gconst = {
     cst_namespace: Namespace_env.env;
   }
 
-and tparam = id * hint option
+and tparam = variance * id * hint option
 
 and tconstraint = hint option
 

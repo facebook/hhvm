@@ -38,7 +38,7 @@ namespace HPHP {
  * function or method parameter typehint at runtime.
  */
 struct TypeConstraint {
-  enum Flags {
+  enum Flags : uint8_t {
     NoFlags = 0x0,
 
     /*
@@ -81,7 +81,8 @@ struct TypeConstraint {
    *
    * See underlyingDataType().
    */
-  enum class MetaType { Precise, Self, Parent, Callable, Number };
+  enum class MetaType : uint8_t { Precise, Self, Parent, Callable, Number,
+                                  ArrayKey };
 
   static const int32_t ReturnId = -1;
 
@@ -162,11 +163,13 @@ struct TypeConstraint {
   bool isCallable() const { return metaType() == MetaType::Callable; }
   bool isNumber()   const { return metaType() == MetaType::Number; }
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
+  bool isArrayKey() const { return metaType() == MetaType::ArrayKey; }
 
   bool isArray()    const { return m_type.dt == KindOfArray; }
 
   bool isObjectOrTypeAlias() const {
     assert(IMPLIES(isNumber(), m_type.dt != KindOfObject));
+    assert(IMPLIES(isArrayKey(), m_type.dt != KindOfObject));
     assert(IMPLIES(isParent(), m_type.dt == KindOfObject));
     assert(IMPLIES(isSelf(), m_type.dt == KindOfObject));
     assert(IMPLIES(isCallable(), m_type.dt == KindOfObject));

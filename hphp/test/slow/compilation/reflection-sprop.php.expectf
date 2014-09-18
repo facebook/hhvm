@@ -1,0 +1,1 @@
+Fatal error: Setting static properties through reflection is not allowed in RepoAuthoritative mode in %s/test/slow/compilation/reflection-sprop.php on line 8

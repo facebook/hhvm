@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 
+#ifdef __linux__
 extern "C" {
   int __wrap_pthread_create (pthread_t* thread, const pthread_attr_t* attr,
                              void *(*start_routine) (void *), void* arg);
@@ -34,6 +35,7 @@ extern "C" {
   int __wrap_pthread_join (pthread_t thread, void **retval);
   int __real_pthread_join (pthread_t thread, void **retval);
 }
+#endif // __linux__
 
 namespace HPHP {
 

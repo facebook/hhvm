@@ -26,7 +26,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
   if (tmp->isConst()) {
     // tmp is a constant
     if (val) {
-      m_imm64 = tmp->type() <= Type::Null ? 0 : tmp->rawVal();
+      m_imm64 = tmp->rawVal();
     } else {
       m_imm64 = toDataTypeForCall(tmp->type());
     }
@@ -63,7 +63,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, const PhysLoc& loc, bool val) {
     // tmp is a constant
     m_srcReg = InvalidReg;
     if (val) {
-      m_imm64 = tmp->type().hasRawVal() ? tmp->rawVal() : 0;
+      m_imm64 = tmp->rawVal();
     } else {
       m_imm64 = toDataTypeForCall(tmp->type());
     }

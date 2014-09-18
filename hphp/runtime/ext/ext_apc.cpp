@@ -88,8 +88,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   FileStorageKeepFileLinked =
     Config::GetBool(ini, fileStorage["KeepFileLinked"]);
 
-  ConcurrentTableLockFree =
-    Config::GetBool(ini, apc["ConcurrentTableLockFree"], false);
   KeyMaturityThreshold = Config::GetInt32(ini, apc["KeyMaturityThreshold"], 20);
   MaximumCapacity = Config::GetInt64(ini, apc["MaximumCapacity"], 0);
   KeyFrequencyUpdatePeriod =
@@ -145,7 +143,6 @@ int64_t apcExtension::FileStorageMaxSize = int64_t(1LL << 32);
 std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
 std::string apcExtension::FileStorageFlagKey = "_madvise_out";
-bool apcExtension::ConcurrentTableLockFree = false;
 bool apcExtension::FileStorageKeepFileLinked = false;
 std::vector<std::string> apcExtension::NoTTLPrefix;
 bool apcExtension::UseUncounted = false;

@@ -110,9 +110,6 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
 }
 
 bool ConcurrentTableSharedStore::clear() {
-  if (apcExtension::ConcurrentTableLockFree) {
-    return false;
-  }
   WriteLock l(m_lock);
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
@@ -141,8 +138,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
                                            bool expired,
                                            int64_t oldestLive) {
   if (key.isNull()) return false;
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   Map::accessor acc;
   if (m_vars.find(acc, tagStringData(key.get()))) {
     if (expired && !acc->second.expired()) {
@@ -286,8 +282,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
 bool ConcurrentTableSharedStore::get(const String& key, Variant &value) {
   const StoreValue *sval;
   APCHandle *svar = nullptr;
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   bool expired = false;
   bool promoteObj = false;
   {
@@ -358,8 +353,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
                                         bool &found) {
   found = false;
   int64_t ret = 0;
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   StoreValue *sval;
   {
     Map::accessor acc;
@@ -385,8 +379,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
 bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
                                      int64_t val) {
   bool success = false;
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   StoreValue *sval;
   {
     Map::accessor acc;
@@ -409,8 +402,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
 
 bool ConcurrentTableSharedStore::exists(const String& key) {
   const StoreValue *sval;
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   bool expired = false;
   {
     Map::const_accessor acc;
@@ -450,8 +442,7 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
   size_t size = 0;
   APCHandle* svar = construct(value, size);
   auto keyLen = key.size();
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   const char *kcp = strdup(key.data());
   bool present;
   time_t expiry = 0;
@@ -511,8 +502,7 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
 }
 
 void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
-  ConditionalReadLock l(m_lock, !apcExtension::ConcurrentTableLockFree ||
-                                lockingFlagSet());
+  ReadLock l(m_lock);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {
     const KeyValuePair &item = vars[i];
@@ -691,14 +681,6 @@ void ConcurrentTableSharedStore::dumpKeyAndMeta(
 void ConcurrentTableSharedStore::dump(std::ostream & out,
                                       enum DumpMode dumpMode,
                                       int waitSeconds) {
-  if (apcExtension::ConcurrentTableLockFree) {
-    m_lockingFlag.store(true, std::memory_order_relaxed);
-    int begin = time(nullptr);
-    Logger::Info("waiting %d seconds before dump", waitSeconds);
-    while (time(nullptr) - begin < waitSeconds) {
-      sleep(1);                 // XXX!
-    }
-  }
   Logger::Info("dumping apc");
   if (dumpMode == DumpMode::keyAndValue) {
     dumpKeyAndValue(out);
@@ -713,9 +695,6 @@ void ConcurrentTableSharedStore::dump(std::ostream & out,
     }
   }
   Logger::Info("dumping apc done");
-  if (apcExtension::ConcurrentTableLockFree) {
-    m_lockingFlag.store(false, std::memory_order_relaxed);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

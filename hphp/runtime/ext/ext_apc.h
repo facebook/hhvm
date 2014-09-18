@@ -56,7 +56,6 @@ class apcExtension : public Extension {
   static std::string FileStoragePrefix;
   static int FileStorageAdviseOutPeriod;
   static std::string FileStorageFlagKey;
-  static bool ConcurrentTableLockFree;
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;

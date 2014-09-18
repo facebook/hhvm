@@ -137,7 +137,6 @@ struct ConcurrentTableSharedStore {
 
   explicit ConcurrentTableSharedStore(int id)
     : m_id(id)
-    , m_lockingFlag(false)
     , m_purgeCounter(0)
   {}
 
@@ -224,10 +223,6 @@ private:
     return APCHandle::Create(v, size, false);
   }
 
-  bool lockingFlagSet() const {
-    return m_lockingFlag.load(std::memory_order_relaxed);
-  }
-
   bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
 
   void eraseAcc(Map::accessor &acc) {
@@ -265,9 +260,6 @@ private:
   // Read lock is acquired whenever using concurrent ops
   // Write lock is acquired for whole table operations
   ReadWriteMutex m_lock;
-  std::atomic<bool> m_lockingFlag; // flag to enable temporary locking (FIXME:
-                                   // this doesn't work)
-
   tbb::concurrent_priority_queue<ExpirationPair,
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;

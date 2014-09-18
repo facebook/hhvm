@@ -245,6 +245,8 @@ val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
+val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list -> (Pos.t * string) list -> unit
+val void_usage : Pos.t -> (Pos.t * string) list -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

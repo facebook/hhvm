@@ -293,10 +293,11 @@ module Typing                               = struct
   let wrong_extend_kind                     = 4115 (* DONT MODIFY!!!! *)
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
   let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
-
-  let declared_covariant                    = 4117 (* DONT MODIFY!!!! *)
-  let declared_contravariant                = 4118 (* DONT MODIFY!!!! *)
-  let unset_in_strict                       = 4119 (* DONT MODIFY!!!! *)
+  let trivial_strict_eq                     = 4118 (* DONT MODIFY!!!! *)
+  let void_usage                            = 4119 (* DONT MODIFY!!!! *)
+  let declared_covariant                    = 4120 (* DONT MODIFY!!!! *)
+  let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
+  let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1446,6 +1447,14 @@ let unset_in_strict pos =
   add Typing.unset_in_strict pos
     ("unset cannot be used in a completely type safe way and so is banned in "
     ^"strict mode")
+
+let trivial_strict_eq p b left right =
+  let msg = "This expression is always "^b in
+  add_list Typing.trivial_strict_eq ((p, msg) :: left @ right)
+
+let void_usage p reason =
+  let msg = "You are attempting to use the return value of a void function" in
+  add_list Typing.void_usage ((p, msg) :: reason)
 
 (*****************************************************************************)
 (* Printing *)

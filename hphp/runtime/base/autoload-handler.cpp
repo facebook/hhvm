@@ -520,7 +520,7 @@ Array AutoloadHandler::getHandlers() {
     HPHP::Class* cls = nullptr;
     const HPHP::Func* f = cufIter->func();
 
-    if (hb.m_handler.isObject() || f->isClosureBody()) {
+    if (hb.m_handler.isObject()) {
       handlers.append(hb.m_handler);
     } else if (cufIter->ctx()) {
       PackedArrayInit callable(2);

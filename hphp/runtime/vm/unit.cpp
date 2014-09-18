@@ -16,6 +16,27 @@
 
 #include "hphp/runtime/vm/unit.h"
 
+#include <algorithm>
+#include <atomic>
+#include <cstdlib>
+#include <cstring>
+#include <iomanip>
+#include <map>
+#include <ostream>
+#include <sstream>
+#include <vector>
+
+#include <folly/Format.h>
+
+#include <tbb/concurrent_hash_map.h>
+
+#include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/compilation-flags.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/functional.h"
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -56,44 +77,68 @@
 
 #include "hphp/system/systemlib.h"
 
-#include "hphp/util/alloc.h"
-#include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/trace.h"
-
-#include <folly/Format.h>
-
-#include <algorithm>
-#include <atomic>
-#include <cstdlib>
-#include <cstring>
-#include <iomanip>
-#include <map>
-#include <ostream>
-#include <sstream>
-#include <vector>
-
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
 
 const StaticString s_stdin("STDIN");
 const StaticString s_stdout("STDOUT");
 const StaticString s_stderr("STDERR");
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Read typed data from an offset relative to a base address
  */
-template <class T>
+template<class T>
 T& getDataRef(void* base, unsigned offset) {
-  return *(T*)((char*)base + offset);
+  return *reinterpret_cast<T*>(static_cast<char*>(base) + offset);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * We store 'detailed' line number information on a table on the side, because
+ * in production modes for HHVM it's generally not useful (which keeps Unit
+ * smaller in that case)---this stuff is only used for the debugger, where we
+ * can afford the lookup here.  The normal Unit m_lineTable is capable of
+ * producing enough line number information for things needed in production
+ * modes (backtraces, warnings, etc).
+ */
+
+using LineToOffsetRangeVecMap = std::map<int,OffsetRangeVec>;
+
+struct ExtendedLineInfo {
+  SourceLocTable sourceLocTable;
+
+  /*
+   * Map from source lines to a collection of all the bytecode ranges the line
+   * encompasses.
+   *
+   * The value type of the map is a list of offset ranges, so a single line
+   * with several sub-statements may correspond to the bytecodes of all of the
+   * sub-statements.
+   *
+   * May not be initialized.  Lookups need to check if it's empty() and if so
+   * compute it from sourceLocTable.
+   */
+  LineToOffsetRangeVecMap lineToOffsetRange;
+};
+
+using ExtendedLineInfoCache = tbb::concurrent_hash_map<
+  const Unit*,
+  ExtendedLineInfo,
+  pointer_hash<Unit>
+>;
+ExtendedLineInfoCache s_extendedLineInfo;
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // MergeInfo.
@@ -112,9 +157,16 @@ Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 // Construction and destruction.
 
-Unit::Unit() : m_mainReturn(make_tv<KindOfUninit>()) {}
+Unit::Unit()
+  : m_mergeOnly(false)
+  , m_interpretOnly(false)
+  , m_isHHFile(false)
+  , m_mainReturn(make_tv<KindOfUninit>())
+{}
 
 Unit::~Unit() {
+  s_extendedLineInfo.erase(this);
+
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
       // poison released bytecode
@@ -163,28 +215,52 @@ void Unit::operator delete(void* p, size_t sz) {
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 
+static SourceLocTable loadSourceLocTable(const Unit* unit) {
+  auto ret = SourceLocTable{};
+  if (unit->repoID() == RepoIdInvalid) return ret;
+
+  Lock lock(g_classesMutex);
+  auto& urp = Repo::get().urp();
+  urp.getSourceLocTab(unit->repoID()).get(unit->sn(), ret);
+  return ret;
+}
+
 /*
  * Return a copy of the Unit's SourceLocTable, extracting it from the repo if
  * necessary.
  */
-SourceLocTable Unit::getSourceLocTable() const {
-  if (m_sourceLocTable.size() > 0 || m_repoId == RepoIdInvalid) {
-    return m_sourceLocTable;
+SourceLocTable getSourceLocTable(const Unit* unit) {
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, unit)) {
+      return acc->second.sourceLocTable;
+    }
   }
-  Lock lock(g_classesMutex);
-  UnitRepoProxy& urp = Repo::get().urp();
-  urp.getSourceLocTab(m_repoId).get(m_sn, ((Unit*)this)->m_sourceLocTable);
-  return m_sourceLocTable;
+
+  // Try to load it while we're not holding the lock.
+  auto newTable = loadSourceLocTable(unit);
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, unit)) {
+    acc->second.sourceLocTable = std::move(newTable);
+  }
+  return acc->second.sourceLocTable;
 }
 
 /*
  * Return a copy of the Unit's line to OffsetRangeVec table.
  */
-LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
-  if (m_lineToOffsetRangeVecMap.size() > 0) {
-    return m_lineToOffsetRangeVecMap;
+static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
+  {
+    ExtendedLineInfoCache::const_accessor acc;
+    if (s_extendedLineInfo.find(acc, unit)) {
+      if (!acc->second.lineToOffsetRange.empty()) {
+        return acc->second.lineToOffsetRange;
+      }
+    }
   }
-  auto srcLoc = this->getSourceLocTable();
+
+  auto const srcLoc = getSourceLocTable(unit);
+
   LineToOffsetRangeVecMap map;
   Offset baseOff = 0;
   for (size_t i = 0; i < srcLoc.size(); ++i) {
@@ -204,8 +280,16 @@ LineToOffsetRangeVecMap Unit::getLineToOffsetRangeVecMap() const {
     }
     baseOff = pastOff;
   }
-  const_cast<Unit*>(this)->m_lineToOffsetRangeVecMap = map;
-  return m_lineToOffsetRangeVecMap;
+
+  ExtendedLineInfoCache::accessor acc;
+  if (!s_extendedLineInfo.find(acc, unit)) {
+    always_assert_flog(0, "ExtendedLineInfoCache was not found when it should "
+      "have been");
+  }
+  if (acc->second.lineToOffsetRange.empty()) {
+    acc->second.lineToOffsetRange = std::move(map);
+  }
+  return acc->second.lineToOffsetRange;
 }
 
 int getLineNumber(const LineTable& table, Offset pc) {
@@ -234,7 +318,7 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
 }
 
 bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  auto sourceLocTable = getSourceLocTable();
+  auto sourceLocTable = getSourceLocTable(this);
   return HPHP::getSourceLoc(sourceLocTable, pc, sLoc);
 }
 
@@ -253,7 +337,7 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
   assert(offsets.size() == 0);
-  auto map = getLineToOffsetRangeVecMap();
+  auto map = getLineToOffsetRangeVecMap(this);
   auto it = map.find(line);
   if (it == map.end()) return false;
   offsets = it->second;

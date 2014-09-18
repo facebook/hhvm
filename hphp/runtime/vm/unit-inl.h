@@ -220,7 +220,8 @@ inline size_t Unit::numArrays() const {
 }
 
 inline ArrayData* Unit::lookupArrayId(Id id) const {
-  return const_cast<ArrayData*>(m_arrays.at(id));
+  assert(id < m_arrays.size());
+  return const_cast<ArrayData*>(m_arrays[id]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

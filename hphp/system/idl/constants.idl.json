@@ -736,7 +736,7 @@
         },
         {
             "name": "HHVM_VERSION_ID",
-            "value": "30400"
+            "value": 30400
         },
         {
             "name": "HTML_ENTITIES",

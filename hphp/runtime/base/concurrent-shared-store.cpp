@@ -36,10 +36,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void StoreValue::set(APCHandle *v, int64_t ttl) {
+void StoreValue::set(APCHandle* v, int64_t ttl) {
   var = v;
   expiry = ttl ? time(nullptr) + ttl : 0;
 }
+
 bool StoreValue::expired() const {
   return expiry && time(nullptr) >= expiry;
 }
@@ -256,6 +257,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
 
 APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
                                                    const StoreValue* sval) {
+  assert(sval->inFile());
   try {
     VariableUnserializer::Type sType =
       apcExtension::EnableApcSerialize ?
@@ -460,6 +462,7 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
         if (sval->inMem()) {
           current = sval->var;
         } else {
+          // Was inFile, but not anymore.
           sval->sAddr = nullptr;
           sval->sSize = 0;
         }
@@ -501,17 +504,31 @@ bool ConcurrentTableSharedStore::store(const String& key, const Variant& value,
   return true;
 }
 
-void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair> &vars) {
+void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair>& vars) {
   ReadLock l(m_lock);
   // we are priming, so we are not checking existence or expiration
   for (unsigned int i = 0; i < vars.size(); i++) {
     const KeyValuePair &item = vars[i];
     Map::accessor acc;
-    auto keyLen = strlen(item.key);
-    const char *copy = strdup(item.key);
+    auto const keyLen = strlen(item.key);
+    auto const copy = strdup(item.key);
     if (m_vars.insert(acc, copy)) {
       APCStats::getAPCStats().addPrimedKey(keyLen);
+    } else {
+      free(copy);
+
+      // We're going to overwrite what was there.
+      auto& sval = acc->second;
+      if (sval.var) {
+        sval.var->unreferenceRoot(sval.size);
+      }
+      sval.sAddr  = nullptr;
+      sval.sSize  = 0;
+      sval.var    = 0;
+      sval.size   = 0;
+      sval.expiry = 0;
     }
+
     if (item.inMem()) {
       APCStats::getAPCStats().addAPCValue(item.value, item.sSize, true);
       acc->second.set(item.value, 0);
@@ -587,14 +604,16 @@ void ConcurrentTableSharedStore::primeDone() {
   for (auto iter = apcExtension::CompletionKeys.begin();
        iter != apcExtension::CompletionKeys.end(); ++iter) {
     Map::accessor acc;
-    const char *copy = strdup(iter->c_str());
-    if (m_vars.insert(acc, copy)) {
-      size_t size = 0;
-      auto handle = this->construct(1, size);
-      acc->second.set(handle, 0);
-      acc->second.size = size;
-      APCStats::getAPCStats().addAPCValue(handle, size, true);
+    auto const copy = strdup(iter->c_str());
+    if (!m_vars.insert(acc, copy)) {
+      free(copy);
+      return;
     }
+    size_t size = 0;
+    auto handle = this->construct(1, size);
+    acc->second.set(handle, 0);
+    acc->second.size = size;
+    APCStats::getAPCStats().addAPCValue(handle, size, true);
   }
 }
 

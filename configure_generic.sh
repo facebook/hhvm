@@ -109,7 +109,7 @@ case $DISTRO in
         git clone git://github.com/libevent/libevent.git --quiet &
         git clone git://github.com/bagder/curl.git --quiet &
         svn checkout http://google-glog.googlecode.com/svn/trunk/ google-glog --quiet &
-        wget -nc http://www.canonware.com/download/jemalloc/jemalloc-3.5.1.tar.bz2 --quiet &
+        wget -nc http://www.canonware.com/download/jemalloc/jemalloc-3.6.0.tar.bz2 --quiet &
         ;;
     *)
         echo "Unknown distribution. Please update packages in this section."
@@ -179,15 +179,15 @@ if [[ "x$DISTRO" == "xubuntu" ]];then
     cd ..
 
     # jemaloc
-    tar xjvf jemalloc-3.5.1.tar.bz2
-    cd jemalloc-3.5.1
+    tar xjvf jemalloc-3.6.0.tar.bz2
+    cd jemalloc-3.6.0
     ./configure --prefix=$CMAKE_PREFIX_PATH
     make -j $CPUS
     make install
     cd ..
 
     # cleanup
-    rm -rf google-glog jemalloc-3.5.1.tar.bz2 jemalloc-3.5.1
+    rm -rf google-glog jemalloc-3.6.0.tar.bz2 jemalloc-3.6.0
 fi
 
 # cleanup

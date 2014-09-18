@@ -502,7 +502,7 @@ let debug_env env =
  * if($this->x) {
  *   ... $this->x ...
  * }
- * The trick consists in relplacing $this->x with a "fake" local. So that
+ * The trick consists in replacing $this->x with a "fake" local. So that
  * all the logic that normally applies to locals is applied in cases like
  * this. Hence the name: FakeMembers.
  * All the fake members are thrown away at the first call.
@@ -667,7 +667,7 @@ let get_local env x =
 
 (*****************************************************************************)
 (* This function is called when we are about to type-check a block that will
- * later be fully_integrated (cf Typing.fully_integrage).
+ * later be fully_integrated (cf Typing.fully_integrate).
  * Integration is about keeping track of all the types that a local had in
  * its lifetime. It's necessary to correctly type-check catch blocks.
  * After we type-check a block, we want to take all the types that the local

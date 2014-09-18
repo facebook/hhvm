@@ -2083,7 +2083,7 @@ and make_param_ellipsis pos =
     param_user_attributes = SMap.empty;
   }
 
-and param ~variadic env  =
+and param ~variadic env =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
@@ -2370,7 +2370,7 @@ and try_short_lambda env =
 (* Expressions *)
 (*****************************************************************************)
 
-and expr_atomic ?(allow_class=false) env  =
+and expr_atomic ?(allow_class=false) env =
   let tok = L.token env.lb in
   let pos = Pos.make env.lb in
   match tok with

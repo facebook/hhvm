@@ -143,6 +143,18 @@ namespace constToBits_detail {
 #define IR_TYPES IRT_USERLAND(IRT_BOXES_WITH_ANY) IRT_RUNTIME IRT_UNIONS \
   IRT_SPECIAL
 
+struct ConstCctx {
+  static ConstCctx cctx(const Class* c) {
+    return ConstCctx { reinterpret_cast<uintptr_t>(c) | 0x1 };
+  }
+
+  const Class* cls() const {
+    return reinterpret_cast<const Class*>(m_val & ~0x1);
+  }
+
+  uintptr_t m_val;
+};
+
 /*
  * Type is used to represent the types of values in the jit. Every Type
  * represents a set of types, with Type::Top being a superset of all Types and
@@ -221,6 +233,7 @@ class Type {
     const ArrayData* m_arrVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
+    ConstCctx m_cctxVal;
     jit::TCA m_tcaVal;
     RDS::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
@@ -350,6 +363,7 @@ public:
   static Type forConst(const Class*)             { return Cls; }
   static Type forConst(jit::TCA)                 { return TCA; }
   static Type forConst(double)                   { return Dbl; }
+  static Type forConst(ConstCctx)                { return Cctx; }
   static Type forConst(const StringData* sd) {
     assert(sd->isStatic());
     return StaticStr;
@@ -491,6 +505,11 @@ public:
   const Class* clsVal() const {
     assert(subtypeOf(Cls) && m_hasConstVal);
     return m_clsVal;
+  }
+
+  ConstCctx cctxVal() const {
+    assert(subtypeOf(Cctx) && m_hasConstVal);
+    return m_cctxVal;
   }
 
   RDS::Handle rdsHandleVal() const {

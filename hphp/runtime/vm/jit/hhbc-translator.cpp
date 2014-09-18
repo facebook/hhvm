@@ -3154,29 +3154,39 @@ void HhbcTranslator::emitFPushClsMethod(int32_t numParams) {
     PUNT(FPushClsMethod-unknownType);
   }
 
-  if (methVal->isConst() && clsVal->inst()->op() == LdClsCctx) {
-    /*
-     * Optimize FPushClsMethod when the method is a known static
-     * string and the input class is the context.  The common bytecode
-     * pattern here is LateBoundCls ; FPushClsMethod.
-     *
-     * This logic feels like it belongs in the simplifier, but the
-     * generated code for this case is pretty different, since we
-     * don't need the pre-live ActRec trick.
-     */
-    auto const cls = curClass();
-    const Func* func;
-    auto res =
-      g_context->lookupClsMethod(func,
-                                   cls,
-                                   methVal->strVal(),
-                                   nullptr,
-                                   cls,
-                                   false);
-    if (res == LookupResult::MethodFoundNoThis) {
-      auto funcTmp = gen(LdClsMethod, clsVal, cns(-(func->methodSlot() + 1)));
-      emitFPushActRec(funcTmp, clsVal, numParams, nullptr);
-      return;
+  if (methVal->isConst()) {
+    const Class* cls = nullptr;
+    if (clsVal->isConst()) {
+      cls = clsVal->clsVal();
+    } else if (clsVal->inst()->op() == LdClsCctx) {
+      /*
+       * Optimize FPushClsMethod when the method is a known static
+       * string and the input class is the context.  The common bytecode
+       * pattern here is LateBoundCls ; FPushClsMethod.
+       *
+       * This logic feels like it belongs in the simplifier, but the
+       * generated code for this case is pretty different, since we
+       * don't need the pre-live ActRec trick.
+       */
+      cls = curClass();
+    }
+
+    if (cls) {
+      const Func* func;
+      auto res =
+        g_context->lookupClsMethod(func,
+                                     cls,
+                                     methVal->strVal(),
+                                     nullptr,
+                                     cls,
+                                     false);
+      if (res == LookupResult::MethodFoundNoThis && func->isStatic()) {
+        auto funcTmp = clsVal->isConst()
+          ? cns(func)
+          : gen(LdClsMethod, clsVal, cns(-(func->methodSlot() + 1)));
+        emitFPushActRec(funcTmp, clsVal, numParams, nullptr);
+        return;
+      }
     }
   }
 

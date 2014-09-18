@@ -74,6 +74,12 @@ std::string Type::constValString() const {
   } else if (subtypeOf(Cls)) {
     return folly::format("Cls({})", m_clsVal ? m_clsVal->name()->data()
                                              : "nullptr").str();
+  } else if (subtypeOf(Cctx)) {
+    if (!m_intVal) {
+      return "Cctx(Cls(nullptr))";
+    }
+    const Class* cls = m_cctxVal.cls();
+    return folly::format("Cctx(Cls({}))", cls->name()->data()).str();
   } else if (subtypeOf(TCA)) {
     auto name = getNativeFunctionName(m_tcaVal);
     const char* hphp = "HPHP::";

@@ -27,11 +27,6 @@ namespace HPHP {
 extern const int64_t k_STREAM_SERVER_BIND;
 extern const int64_t k_STREAM_SERVER_LISTEN;
 
-const int64_t k_STREAM_FILTER_READ  = 1;
-const int64_t k_STREAM_FILTER_WRITE = 2;
-const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
-                                      k_STREAM_FILTER_WRITE;
-
 class StreamContext : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamContext);

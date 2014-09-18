@@ -345,8 +345,8 @@ void HttpServer::runOrExitProcess() {
   }
 
   waitForServers();
-  hphp_process_exit();
   m_watchDog.waitForEnd();
+  hphp_process_exit();
   Logger::Info("all servers stopped");
 }
 

@@ -67,19 +67,6 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline void StringData::destruct() {
-  assert(checkSane());
-
-  // N.B. APC code assumes it is legal to call destruct() on a static
-  // string.  Probably it shouldn't do that....
-  if (!isStatic()) {
-    assert(m_data == static_cast<void*>(this + 1));
-    free(this);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 inline void StringData::setRefCount(RefCount n) { m_count = n; }
 inline bool StringData::isStatic() const {
   return m_count == StaticValue;

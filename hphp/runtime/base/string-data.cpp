@@ -227,35 +227,6 @@ StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
   return Make(StringSlice(data, len), CopyString);
 }
 
-StringData* StringData::MakeMalloced(const char* data, size_t len) {
-  if (UNLIKELY(len > MaxSize)) {
-    throw_string_too_large(len);
-  }
-
-  auto const cap = static_cast<uint32_t>(len) + 1;
-  auto const sd = static_cast<StringData*>(
-    std::malloc(sizeof(StringData) + cap)
-  );
-
-  sd->m_lenAndCount = len;
-  sd->m_cap         = cap;
-  sd->m_data        = reinterpret_cast<char*>(sd + 1);
-
-  sd->m_data[len] = 0;
-  auto const mcret = memcpy(sd->m_data, data, len);
-  auto const ret   = reinterpret_cast<StringData*>(mcret) - 1;
-  // Recalculating ret from mcret avoids a spill.
-
-  ret->preCompute();
-
-  assert(ret == sd);
-  assert(ret->m_hash != 0);
-  assert(ret->m_count == 0);
-  assert(ret->isFlat());
-  assert(ret->checkSane());
-  return ret;
-}
-
 StringData* StringData::Make(size_t reserveLen) {
   auto const allocRet = allocFlatForLen(reserveLen);
   auto const sd       = allocRet.first;

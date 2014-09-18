@@ -133,23 +133,6 @@ struct StringData {
   static StringData* Make(APCString* shared);
 
   /*
-   * Create a StringData that is allocated by malloc, instead of the
-   * smart allocator.
-   *
-   * This is essentially only used for APC, for non-request local
-   * StringDatas.
-   *
-   * StringDatas allocated with this function must be freed by calling
-   * destruct(), instead of release().
-   *
-   * Important: no string functions which change the StringData may be
-   * called on the returned pointer (e.g. append).  These functions
-   * below are marked by saying they require the string to be request
-   * local.
-   */
-  static StringData* MakeMalloced(const char* data, size_t len);
-
-  /*
    * Allocate a string with malloc, using the low-memory allocator if
    * jemalloc is available, and setting it as a static string.
    *
@@ -192,12 +175,6 @@ struct StringData {
   void release();
 
   /*
-   * StringData objects allocated with MakeMalloced should be freed
-   * using this function instead of release().
-   */
-  void destruct();
-
-  /*
    * StringData objects allocated with MakeStatic should be freed
    * using this function.
    */
@@ -233,7 +210,7 @@ struct StringData {
    * Reserve space for a string of length `maxLen' (not counting null
    * terminator).
    *
-   * May not be called for strings created with MakeMalloced or
+   * May not be called for strings created with MakeUncounted or
    * MakeStatic.
    *
    * Returns: possibly a new StringData, if we had to reallocate.  The
@@ -244,7 +221,7 @@ struct StringData {
   /*
    * Shrink a string down to length `len` (not counting null terminator).
    *
-   * May not be called for strings created with MakeMalloced or
+   * May not be called for strings created with MakeUncounted or
    * MakeStatic.
    *
    * Returns: possibly a new StringData, if we decided to reallocate. The
@@ -518,10 +495,6 @@ const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 /*
  * DecRef a string s, calling release if its reference count goes to
  * zero.
- *
- * Pre: either s must have been allocated as a request-local string,
- * or it must be a static string.  (I.e. it can not be created with
- * MakeMalloced.)
  */
 void decRefStr(StringData* s);
 

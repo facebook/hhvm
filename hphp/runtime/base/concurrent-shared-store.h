@@ -27,7 +27,9 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
 
+#include "hphp/util/either.h"
 #include "hphp/util/smalllocks.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -44,36 +46,38 @@ namespace HPHP {
  * This is the in-APC representation of a value, in ConcurrentTableSharedStore.
  */
 struct StoreValue {
-  StoreValue() : var(nullptr), sAddr(nullptr), expiry(0), size(0), sSize(0) {}
-  StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
-                                    expiry(v.expiry), size(v.size),
-                                    sSize(v.sSize) {}
+  StoreValue() = default;
+  StoreValue(const StoreValue& o)
+    : data{o.data}
+    , expiry{o.expiry}
+    , dataSize{o.dataSize}
+    // Copy everything except the lock
+  {}
 
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;
 
-  bool inMem() const {
-    return var != nullptr;
-  }
-  bool inFile() const {
-    return sAddr != nullptr;
+  int32_t getSerializedSize() const {
+    assert(data.right() != nullptr);
+    return abs(dataSize);
   }
 
-  int32_t getSerializedSize() const {
-    return abs(sSize);
-  }
   bool isSerializedObj() const {
-    return sSize < 0;
+    assert(data.right() != nullptr);
+    return dataSize < 0;
   }
 
   // Mutable fields here are so that we can deserialize the object from disk
-  // while holding a const pointer to the StoreValue. Mostly a hacky workaround
-  // for how we use TBB
-  mutable APCHandle* var;
-  char* sAddr; // For file storage
-  int64_t expiry;
-  mutable int32_t size;
-  int32_t sSize; // For file storage, negative means serialized object
+  // while holding a const pointer to the StoreValue.
+
+  /*
+   * Each entry in APC is either an APCHandle or a pointer to serialized prime
+   * data.  The meaning of the following fields partially depends on which mode
+   * the StoreValue is in.
+   */
+  mutable Either<APCHandle*,char*> data;
+  int64_t expiry{0};
+  int32_t dataSize{0};  // For file storage, negative means serialized object
   mutable SmallLock lock;
 };
 
@@ -239,7 +243,7 @@ private:
   bool handleUpdate(const String& key, APCHandle* svar);
   bool handlePromoteObj(
       const String& key, APCHandle* svar, const Variant& value);
-  APCHandle* unserialize(const String& key, const StoreValue* sval);
+  APCHandle* unserialize(const String& key, StoreValue* sval);
 
   // helpers for dumping APC
   static void dumpKeyOnly(std::ostream& out, std::vector<EntryInfo>& entries);

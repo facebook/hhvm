@@ -60,7 +60,7 @@ function hash_file(string $algo, string $filename,
  *                  of the message digest is returned.
  */
 <<__Native>>
-function hash_final(resource $context, bool $raw_output = false): string;
+function hash_final(resource $context, bool $raw_output = false): mixed;
 
 /**
  * hash() - http://php.net/function.hash

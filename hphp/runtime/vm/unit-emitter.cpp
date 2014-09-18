@@ -321,32 +321,6 @@ LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
   return lines;
 }
 
-/*
- * Create a LineToOffsetRangeVecMap from `srcLoc'.
- */
-LineToOffsetRangeVecMap createLineToOffsetMap(SrcLoc& srcLoc,
-                                              Offset bclen) {
-  LineToOffsetRangeVecMap map;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset baseOff = srcLoc[i].first;
-    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
-    OffsetRange range(baseOff, endOff);
-    auto line0 = srcLoc[i].second.line0;
-    auto line1 = srcLoc[i].second.line1;
-    for (int line = line0; line <= line1; line++) {
-      auto it = map.find(line);
-      if (it != map.end()) {
-        it->second.push_back(range);
-      } else {
-        OffsetRangeVec v(1);
-        v.push_back(range);
-        map[line] = v;
-      }
-    }
-  }
-  return map;
-}
-
 }
 
 void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
@@ -542,9 +516,13 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     np.second = nullptr;
     u->m_namedInfo.push_back(np);
   }
-  for (unsigned i = 0; i < m_arrays.size(); ++i) {
-    u->m_arrays.push_back(m_arrays[i].array);
-  }
+  u->m_arrays = [&]() -> std::vector<const ArrayData*> {
+    auto ret = std::vector<const ArrayData*>{};
+    for (unsigned i = 0; i < m_arrays.size(); ++i) {
+      ret.push_back(m_arrays[i].array);
+    }
+    return ret;
+  }();
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
@@ -561,7 +539,8 @@ std::unique_ptr<Unit> UnitEmitter::create() {
           u->m_mergeOnly = false;
           break;
         }
-      } else switch (mergeable.first) {
+      } else {
+        switch (mergeable.first) {
           case MergeKind::PersistentDefine:
           case MergeKind::Define:
           case MergeKind::Global:
@@ -570,6 +549,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
           default:
             break;
         }
+      }
     }
     ix += extra;
   }
@@ -633,13 +613,24 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   }
   assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)MergeKind::Done;
-  u->m_sourceLocTable = createSourceLocTable();
+
+  /*
+   * What's going on is we're going to have a m_lineTable if this UnitEmitter
+   * was loaded from the repo, and no m_sourceLocTab (it's demand-loaded by
+   * unit.cpp because it's only used for the debugger).
+   *
+   * On the other hand, if this unit was just created by parsing a php file (or
+   * whatnot), we'll have a m_sourceLocTab.  We'll normally have a m_lineTable
+   * also, because of side-effects of UnitEmitter::insert, but this code still
+   * needs to check in case commit() was not called, because you're required to
+   * always have a m_lineTable.
+   */
   if (m_lineTable.size() == 0) {
     u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   } else {
     u->m_lineTable = m_lineTable;
   }
-  u->m_lineToOffsetRangeVecMap = createLineToOffsetMap(m_sourceLocTab, m_bclen);
+
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     assert(m_feTab[i].second->past == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());

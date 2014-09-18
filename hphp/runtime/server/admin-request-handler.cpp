@@ -201,6 +201,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  /tmp/const_map_dump\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
+        "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
 
 #ifdef GOOGLE_CPU_PROFILER
@@ -345,7 +346,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleProfileRequest(cmd, transport)) {
       break;
     }
-    if (strncmp(cmd.c_str(), "dump", 4) == 0 &&
+    if (strncmp(cmd.c_str(), "dump-apc", 8) == 0 &&
         handleDumpCacheRequest(cmd, transport)) {
       break;
     }
@@ -370,6 +371,14 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       std::ostringstream size;
       size << preg_pcre_cache_size() << endl;
       transport->sendString(size.str());
+      break;
+    }
+
+    if (cmd == "dump-pcre-cache") {
+      auto filename = transport->getParam("file");
+      if (filename == "") filename = "/tmp/pcre_cache";
+      pcre_dump_cache(filename);
+      transport->sendString("OK\n");
       break;
     }
 

@@ -34,6 +34,7 @@
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/container-functions.h"
 #include <tbb/concurrent_hash_map.h>
+#include <fstream>
 #include <utility>
 
 /* Only defined in pcre >= 8.32 */
@@ -113,6 +114,14 @@ void pcre_reinit() {
     PCREStringMap::destroy(s_pcreCacheMap);
   }
   s_pcreCacheMap = newMap;
+}
+
+void pcre_dump_cache(const std::string& filename) {
+  std::ofstream out(filename.c_str());
+  for (auto& it : *s_pcreCacheMap) {
+    out << it.first->data() << "\n";
+  }
+  out.close();
 }
 
 static const pcre_cache_entry* lookup_cached_pcre(const String& regex) {

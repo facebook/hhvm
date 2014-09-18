@@ -49,6 +49,8 @@ This is a list of available URLs:
     keys          optional, <key>,<key/hit>,<key/sec>,<:regex:>
     url           optional, only stats of this page or URL
     code          optional, only stats of pages returning this code
+/pcre-cache-size: get pcre cache map size
+/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache
 
 If program was compiled with GOOGLE_CPU_PROFILER, these commands will become available,
 

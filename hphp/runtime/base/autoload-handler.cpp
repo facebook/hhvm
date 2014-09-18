@@ -515,7 +515,27 @@ Array AutoloadHandler::getHandlers() {
   PackedArrayInit handlers(m_handlers.size());
 
   for (const HandlerBundle& hb : m_handlers) {
-    handlers.append(hb.m_handler);
+    CufIter* cufIter = hb.m_cufIter.get();
+    ObjectData* obj = nullptr;
+    HPHP::Class* cls = nullptr;
+    const HPHP::Func* f = cufIter->func();
+
+    if (hb.m_handler.isObject()) {
+      handlers.append(hb.m_handler);
+    } else if (cufIter->ctx()) {
+      PackedArrayInit callable(2);
+      if (uintptr_t(cufIter->ctx()) & 1) {
+        cls = (Class*)(uintptr_t(cufIter->ctx()) & ~1);
+        callable.append(String(cls->nameStr()));
+      } else {
+        obj = (ObjectData*)cufIter->ctx();
+        callable.append(obj);
+      }
+      callable.append(String(f->nameStr()));
+      handlers.append(callable.toArray());
+    } else {
+      handlers.append(String(f->nameStr()));
+    }
   }
 
   return handlers.toArray();

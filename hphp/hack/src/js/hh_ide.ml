@@ -25,11 +25,8 @@ let globals = Hashtbl.create 23
 (* helpers *)
 (*****************************************************************************)
 
-(* Javascript function that turns a Mlstring object into a javscript string *)
-external to_byte_jsstring: string -> Js.js_string Js.t = "caml_js_from_byte_string"
-
 let output_json json =
-  to_byte_jsstring (json_to_string json)
+  Js.string (json_to_string json)
 
 let error el =
   let res =
@@ -442,61 +439,33 @@ let hh_format contents start end_ =
                         "internal_error",   JBool internal_error;
                       ])
 
+(* Helpers to turn JavaScript strings into OCaml strings *)
+let js_wrap_string_1 func =
+  let f str = begin
+    let str = Js.to_string str in
+    func str
+  end in
+  Js.wrap_callback f
 
-let (hh_check: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_check
-let (hh_add_file: (string, string -> string -> unit) Js.meth_callback) = Js.wrap_callback hh_add_file
-let (hh_auto_complete: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_auto_complete
-let (hh_get_deps: (string, unit -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_deps
-let (hh_infer_type: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_infer_type
-let (hh_infer_pos: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_infer_pos
-let (hh_file_summary: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_file_summary
-let (hh_hack_coloring: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_hack_coloring
-let (hh_find_lvar_refs: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_find_lvar_refs
-let (hh_get_method_calls: (string, string -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_calls
-let (hh_get_method_name: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_get_method_at_position
-let (hh_arg_info: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_arg_info
-let (hh_format: (string, string -> int -> int -> Js.js_string Js.t) Js.meth_callback) = Js.wrap_callback hh_format
+let js_wrap_string_2 func =
+  let f str1 str2 = begin
+    let str1 = Js.to_string str1 in
+    let str2 = Js.to_string str2 in
+    func str1 str2
+  end in
+  Js.wrap_callback f
 
-
-let export_fun0 f fname =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def = "self."^fname^" = function(x) { return hh_ide."^fname^"[1](); };" in
-  Js.Unsafe.eval_string js_def
-
-let export_fun1 f fname farg =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x) { return hh_ide."^fname^"[1]("^farg^"); };" in
-  Js.Unsafe.eval_string js_def
-
-let export_fun2 f fname farg1 farg2 =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x, y) { return hh_ide."^fname
-    ^"[1]("^farg1^", "^farg2^"); };"
-  in
-  Js.Unsafe.eval_string js_def
-
-let export_fun3 f fname farg1 farg2 farg3 =
-  Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") fname [|Js.Unsafe.inject f|];
-  let js_def =
-    "self."^fname^" = function(x, y, z) { return hh_ide."^fname
-    ^"[1]("^farg1^", "^farg2^", "^farg3^"); };"
-  in
-  Js.Unsafe.eval_string js_def
-
-let () = Js.Unsafe.eval_string "self.hh_ide = { };"
-let () = Js.Unsafe.set (Js.Unsafe.eval_string "hh_ide") "str" [|Js.Unsafe.inject (Js.wrap_callback Js.to_string)|]
-let () = export_fun1 hh_check "hh_check_file" "hh_ide.str[1](x)"
-let () = export_fun2 hh_add_file "hh_add_file" "hh_ide.str[1](x)" "hh_ide.str[1](y)"
-let () = export_fun1 hh_auto_complete "hh_auto_complete" "hh_ide.str[1](x)"
-let () = export_fun0 hh_get_deps "hh_get_deps"
-let () = export_fun3 hh_infer_type "hh_infer_type" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_infer_pos "hh_infer_pos" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun1 hh_file_summary "hh_file_summary" "hh_ide.str[1](x)"
-let () = export_fun1 hh_hack_coloring "hh_hack_coloring" "hh_ide.str[1](x)"
-let () = export_fun3 hh_find_lvar_refs "hh_find_lvar_refs" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun1 hh_get_method_calls "hh_get_method_calls" "hh_ide.str[1](x)"
-let () = export_fun3 hh_get_method_name "hh_get_method_name" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_arg_info "hh_arg_info" "hh_ide.str[1](x)" "y" "z"
-let () = export_fun3 hh_format "hh_format" "hh_ide.str[1](x)" "y" "z"
+let () =
+  Js.Unsafe.set Js.Unsafe.global "hh_check_file" (js_wrap_string_1 hh_check);
+  Js.Unsafe.set Js.Unsafe.global "hh_add_file" (js_wrap_string_2 hh_add_file);
+  Js.Unsafe.set Js.Unsafe.global "hh_auto_complete" (js_wrap_string_1 hh_auto_complete);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_deps" (Js.wrap_callback hh_get_deps);
+  Js.Unsafe.set Js.Unsafe.global "hh_infer_type" (js_wrap_string_1 hh_infer_type);
+  Js.Unsafe.set Js.Unsafe.global "hh_infer_pos" (js_wrap_string_1 hh_infer_pos);
+  Js.Unsafe.set Js.Unsafe.global "hh_file_summary" (js_wrap_string_1 hh_file_summary);
+  Js.Unsafe.set Js.Unsafe.global "hh_hack_coloring" (js_wrap_string_1 hh_hack_coloring);
+  Js.Unsafe.set Js.Unsafe.global "hh_find_lvar_refs" (js_wrap_string_1 hh_find_lvar_refs);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_method_calls" (js_wrap_string_1 hh_get_method_calls);
+  Js.Unsafe.set Js.Unsafe.global "hh_get_method_name" (js_wrap_string_1 hh_get_method_at_position);
+  Js.Unsafe.set Js.Unsafe.global "hh_arg_info" (js_wrap_string_1 hh_arg_info);
+  Js.Unsafe.set Js.Unsafe.global "hh_format" (js_wrap_string_1 hh_format)

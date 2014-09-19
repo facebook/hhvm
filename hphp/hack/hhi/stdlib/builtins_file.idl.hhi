@@ -8,15 +8,15 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-const int STDIN = 0;
-const int STDOUT = 0;
-const int STDERR = 0;
-const int PATHINFO_DIRNAME = 0;
-const int PATHINFO_BASENAME = 0;
-const int PATHINFO_EXTENSION = 0;
-const int PATHINFO_FILENAME = 0;
-const string DIRECTORY_SEPARATOR = "/";
-const string PATH_SEPARATOR = ":";
+const STDIN = 0;
+const STDOUT = 0;
+const STDERR = 0;
+const PATHINFO_DIRNAME = 0;
+const PATHINFO_BASENAME = 0;
+const PATHINFO_EXTENSION = 0;
+const PATHINFO_FILENAME = 0;
+const DIRECTORY_SEPARATOR = "/";
+const PATH_SEPARATOR = ":";
 function fopen($filename, $mode, $use_include_path = false, $context = null) { }
 function popen($command, $mode) { }
 function fclose($handle) { }

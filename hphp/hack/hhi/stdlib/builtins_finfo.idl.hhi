@@ -8,15 +8,15 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-const int FILEINFO_NONE = 0;
-const int FILEINFO_SYMLINK = 2;
-const int FILEINFO_MIME = 1040;
-const int FILEINFO_MIME_TYPE = 16;
-const int FILEINFO_MIME_ENCODING = 1024;
-const int FILEINFO_DEVICES = 8;
-const int FILEINFO_CONTINUE = 32;
-const int FILEINFO_PRESERVE_ATIME = 128;
-const int FILEINFO_RAW = 256;
+const FILEINFO_NONE = 0;
+const FILEINFO_SYMLINK = 2;
+const FILEINFO_MIME = 1040;
+const FILEINFO_MIME_TYPE = 16;
+const FILEINFO_MIME_ENCODING = 1024;
+const FILEINFO_DEVICES = 8;
+const FILEINFO_CONTINUE = 32;
+const FILEINFO_PRESERVE_ATIME = 128;
+const FILEINFO_RAW = 256;
 function finfo_open($options = null, $magic_file = null) {}
 function finfo_close($finfo) {}
 function finfo_set_flags($finfo, $options) {}

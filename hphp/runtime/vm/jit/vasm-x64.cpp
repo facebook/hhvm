@@ -121,7 +121,7 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta, AsmInfo* asmInfo)
+  Vgen(Vunit& u, Vasm::AreaList& areas, Vmeta* meta, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
@@ -319,7 +319,7 @@ private:
   struct PointPatch { CodeAddress instr; Vpoint pos; };
   Vunit& unit;
   BackEnd& backend;
-  jit::vector<Vasm::Area>& areas;
+  Vasm::AreaList& areas;
   Vmeta* meta;
   AsmInfo* m_asmInfo;
   X64Assembler* a;

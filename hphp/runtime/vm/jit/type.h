@@ -722,7 +722,23 @@ public:
   /*
    * Returns true iff this represents a non-strict subset of t2.
    */
-  bool subtypeOf(Type t2) const;
+  bool subtypeOf(Type t2) const {
+    // First, check for any members in m_bits that aren't in t2.m_bits.
+    if ((m_bits & t2.m_bits) != m_bits) {
+      return false;
+    }
+    // If t2 is a constant, we must be the same constant or Bottom.
+    if (t2.m_hasConstVal) {
+      assert(!t2.isUnion());
+      return m_bits == kBottom || (m_hasConstVal && m_extra == t2.m_extra);
+    }
+    if (!t2.isSpecialized()) {
+      return true;
+    }
+    return subtypeOfSpecialized(t2);
+  }
+
+  bool subtypeOfSpecialized(Type t2) const;
 
   template<typename... Types>
   bool subtypeOfAny(Type t2, Types... ts) const {

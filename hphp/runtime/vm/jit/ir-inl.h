@@ -14,34 +14,30 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_LLVM_H_
-#define incl_HPHP_JIT_VASM_LLVM_H_
+namespace HPHP {
+namespace jit {
 
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
-
-#include "hphp/runtime/vm/jit/vasm-x64.h"
-
-namespace HPHP { namespace jit {
-
-/*
- * Thrown when the LLVM backend encounters something it doesn't support.
- */
-struct FailedLLVMCodeGen : public std::runtime_error {
- public:
-  explicit FailedLLVMCodeGen(const std::string& msg)
-    : std::runtime_error(msg)
-  {}
+struct OpInfo {
+  const char* name;
+  uint64_t flags;
 };
+extern OpInfo g_opInfo[];
 
-/*
- * Emit machine code for unit using the LLVM backend.
- *
- * Throws FailedLLVMCodeGen on failure.
- */
-void genCodeLLVM(const x64::Vunit& unit, x64::Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels);
+inline const char* opcodeName(Opcode opcode) {
+  return g_opInfo[uint16_t(opcode)].name;
+}
 
-} }
+inline bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
+  return g_opInfo[uint16_t(opcode)].flags & flags;
+}
 
-#endif
+inline bool hasEdges(Opcode opcode) {
+  return opcodeHasFlags(opcode, Branch | MayRaiseError);
+}
+
+inline bool opHasExtraData(Opcode op) {
+  return opcodeHasFlags(op, HasExtra);
+}
+
+} // namespace jit
+} // namespace HPHP

@@ -43,8 +43,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
-namespace {
-
 #define NF     0
 #define C      CanCSE
 #define E      Essential
@@ -82,10 +80,7 @@ namespace {
 #define DLdRaw         HasDest
 #define DCns           HasDest
 
-struct {
-  const char* name;
-  uint64_t flags;
-} OpInfo[] = {
+OpInfo g_opInfo[] = {
 #define O(name, dsts, srcs, flags)                    \
     { #name,                                          \
        (OpHasExtraData<name>::value ? HasExtra : 0) | \
@@ -131,25 +126,7 @@ struct {
 #undef DLdRaw
 #undef DCns
 
-} // namespace
-
 //////////////////////////////////////////////////////////////////////
-
-const char* opcodeName(Opcode opcode) {
-  return OpInfo[uint16_t(opcode)].name;
-}
-
-bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
-  return OpInfo[uint16_t(opcode)].flags & flags;
-}
-
-bool hasEdges(Opcode opcode) {
-  return opcodeHasFlags(opcode, Branch | MayRaiseError);
-}
-
-bool opHasExtraData(Opcode op) {
-  return opcodeHasFlags(op, HasExtra);
-}
 
 Opcode getStackModifyingOpcode(Opcode opc) {
   assert(opcodeHasFlags(opc, HasStackVersion));

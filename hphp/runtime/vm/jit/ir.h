@@ -1138,4 +1138,6 @@ template<> struct FormatValue<HPHP::jit::Opcode> {
 };
 }
 
+#include "hphp/runtime/vm/jit/ir-inl.h"
+
 #endif

@@ -75,7 +75,7 @@ struct RegAllocInfo {
     }
   private:
     mutable unsigned m_dstOff { 0 };
-    mutable std::vector<PhysLoc> m_locs;
+    mutable jit::vector<PhysLoc> m_locs;
   };
   explicit RegAllocInfo(const IRUnit& unit) : m_regs(unit, RegMap()) {}
   RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}

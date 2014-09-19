@@ -87,8 +87,8 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef jit::hash_map<SSATmp*, uint32_t> UseCounts;
-typedef jit::list<const IRInstruction*> WorkList;
+typedef StateVector<SSATmp, uint32_t> UseCounts;
+typedef jit::vector<const IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   postorderWalk(unit, [&](Block* block) {
@@ -167,10 +167,12 @@ BlockList prepareBlocks(IRUnit& unit) {
   return blocks;
 }
 
-WorkList initInstructions(const BlockList& blocks, DceState& state) {
+WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
+                          DceState& state) {
   TRACE(1, "DCE(initInstructions):vvvvvvvvvvvvvvvvvvvv\n");
   // Mark reachable, essential, instructions live and enqueue them.
   WorkList wl;
+  wl.reserve(unit.numInsts());
   forEachInst(blocks, [&] (IRInstruction* inst) {
     if (inst->isEssential()) {
       state[inst].setLive();
@@ -303,7 +305,7 @@ bool findWeakActRecUses(const BlockList& blocks,
       {
         auto const frameInst = inst->src(0)->inst();
         assert(frameInst->is(DefInlineFP));
-        auto const frameUses = folly::get_default(uses, frameInst->dst(), 0);
+        auto const frameUses = uses[frameInst->dst()];
         auto const weakUses  = state[frameInst].weakUseCount();
         /*
          * We can kill the frame if all uses of the frame are counted
@@ -367,8 +369,7 @@ void performActRecFixups(const BlockList& blocks,
       switch (inst.op()) {
       case DefInlineFP:
         ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-             inst, state[inst].weakUseCount(),
-             folly::get_default(uses, inst.dst(), 0));
+             inst, state[inst].weakUseCount(), uses[inst.dst()]);
         break;
 
       /*
@@ -474,12 +475,6 @@ void optimizeActRecs(const BlockList& blocks,
                      const UseCounts& uses) {
   FTRACE(1, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
-  if (do_assert) {
-    for (UNUSED auto const& pair : uses) {
-      assert(pair.first->isA(Type::FramePtr) &&
-             pair.first->inst()->is(DefInlineFP));
-    }
-  }
 
   // Make a pass to find if we can kill any of the frames.  If so, we
   // have to do some fixups.  These two routines are coupled---most
@@ -508,19 +503,16 @@ void eliminateDeadCode(IRUnit& unit) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(unit, DceFlags());
-  UseCounts uses;
-  WorkList wl = initInstructions(blocks, state);
+  UseCounts uses(unit, 0);
+  WorkList wl = initInstructions(unit, blocks, state);
 
   // process the worklist
   while (!wl.empty()) {
-    auto* inst = wl.front();
-    wl.pop_front();
-    for (uint32_t i = 0; i < inst->numSrcs(); i++) {
-      SSATmp* src = inst->src(i);
+    auto* inst = wl.back();
+    wl.pop_back();
+    for (auto src : inst->srcs()) {
       IRInstruction* srcInst = src->inst();
-      if (srcInst->op() == DefConst) {
-        continue;
-      }
+      if (srcInst->op() == DefConst) continue;
 
       if (RuntimeOption::EvalHHIRInlineFrameOpts) {
         if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {

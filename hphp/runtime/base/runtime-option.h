@@ -389,7 +389,7 @@ public:
   F(uint64_t, JitAColdSize,            24 << 20)                        \
   F(uint64_t, JitAFrozenSize,          40 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
-  F(uint64_t, JitRelocationSize,       1 << 20)                         \
+  F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:

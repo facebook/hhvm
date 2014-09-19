@@ -785,9 +785,10 @@ struct Vasm {
     CodeBlock& code;
     CodeAddress start;
   };
+  typedef jit::vector<Area> AreaList;
+
   explicit Vasm(Vmeta* meta)
-    : m_meta(meta)
-  {
+    : m_meta(meta) {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
   void finish(const Abi&, bool useLLVM = false, AsmInfo* asmInfo = nullptr);

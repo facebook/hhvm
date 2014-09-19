@@ -17,7 +17,7 @@
 
 class Exception {
   protected string $message;
-  protected int $code;
+  protected $code;
   protected ?Exception $previous = null;
   protected string $file;
   protected int $line;

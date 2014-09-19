@@ -139,5 +139,4 @@ class PDOStatement {
 }
 class PDOException extends RuntimeException{
   public array $errorInfo;
-  protected string $code;
 }

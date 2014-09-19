@@ -156,39 +156,36 @@ static apcExtension s_apc_extension;
 Variant f_apc_store(const Variant& key_or_array,
                     const Variant& var /* = null_variant */,
                     int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
-  if (!apcExtension::Enable) return false;
+  if (!apcExtension::Enable) return Variant(false);
 
   if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
     throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
+    return Variant(false);
   }
 
   if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
 
-    // errors stores all keys corresponding to entries that could not be cached
-    ArrayInit errors(valuesArr.size(), ArrayInit::Map{});
-
     for (ArrayIter iter(valuesArr); iter; ++iter) {
       Variant key = iter.first();
       if (!key.isString()) {
         throw_invalid_argument("apc key: (not a string)");
-        return false;
+        return Variant(false);
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl))) {
-        errors.add(key, -1);
-      }
+      s_apc_store[cache_id].set(key.toString(), v, ttl);
     }
-    return errors.toVariant();
+
+    return Variant(staticEmptyArray());
   }
 
   if (!key_or_array.isString()) {
     throw_invalid_argument("apc key: (not a string)");
-    return false;
+    return Variant(false);
   }
   String strKey = key_or_array.toString();
-  return s_apc_store[cache_id].store(strKey, var, ttl);
+  s_apc_store[cache_id].set(strKey, var, ttl);
+  return Variant(true);
 }
 
 /**
@@ -204,7 +201,8 @@ bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
     return false;
   }
 
-  return s_apc_store[cache_id].store(key, var, 0, true, false);
+  s_apc_store[cache_id].setWithoutTTL(key, var);
+  return true;
 }
 
 Variant f_apc_add(const Variant& key_or_array,
@@ -230,7 +228,7 @@ Variant f_apc_add(const Variant& key_or_array,
         return false;
       }
       Variant v = iter.second();
-      if (!(s_apc_store[cache_id].store(key.toString(), v, ttl, false))) {
+      if (!s_apc_store[cache_id].add(key.toString(), v, ttl)) {
         errors.add(key, -1);
       }
     }
@@ -242,7 +240,7 @@ Variant f_apc_add(const Variant& key_or_array,
     return false;
   }
   String strKey = key_or_array.toString();
-  return s_apc_store[cache_id].store(strKey, var, ttl, false);
+  return s_apc_store[cache_id].add(strKey, var, ttl);
 }
 
 Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
@@ -439,10 +437,9 @@ Variant f_apc_cache_info(const String& cache_type,
     info.add(Variant(it->first, Variant::StaticStrInit{}), it->second);
   }
   if (!limited) {
-    std::vector<EntryInfo> entries;
-    s_apc_store[0].getEntriesInfo(entries);
+    auto const entries = s_apc_store[0].getEntriesInfo();
     PackedArrayInit ents(entries.size());
-    for (auto& entry: entries) {
+    for (auto& entry : entries) {
       ArrayInit ent(kEntryInfoSize, ArrayInit::Map{});
       ent.add(s_entry_name, StringData::Make(entry.key.c_str()));
       ent.add(s_in_memory, entry.inMem);
@@ -1509,14 +1506,14 @@ bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
   }
 
   if (keyOnly) {
-    mode = DumpMode::keyOnly;
+    mode = DumpMode::KeyOnly;
   } else if (metaDump) {
-    mode = DumpMode::keyAndMeta;
+    mode = DumpMode::KeyAndMeta;
   } else {
-    mode = DumpMode::keyAndValue;
+    mode = DumpMode::KeyAndValue;
   }
 
-  s_apc_store[CACHE_ID].dump(out, mode, waitSeconds);
+  s_apc_store[CACHE_ID].dump(out, mode);
   out.close();
   return true;
 }

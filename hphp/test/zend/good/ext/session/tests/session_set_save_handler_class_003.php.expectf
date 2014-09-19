@@ -5,8 +5,10 @@ array(1) {
 }
 int(4)
 string(%d) "%s"
-array(1) {
+array(2) {
   ["foo"]=>
+  string(5) "hello"
+  ["bar"]=>
   string(5) "hello"
 }
 string(3) "hai"

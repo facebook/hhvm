@@ -2,7 +2,7 @@
 
 $fname   = dirname(__FILE__) . '/files/bogus.zip';
 $fname2  = dirname(__FILE__) . '/files/notbogus.zip';
-$extract = dirname(__FILE__) . '/test';
+$extract = dirname(__FILE__) . '/test-extract3';
 
 $phar = new PharData($fname);
 
@@ -26,7 +26,7 @@ try {
 ?>
 ===DONE===
 <?php
-$dir = dirname(__FILE__) . '/test/';
+$dir = dirname(__FILE__) . '/test-extract3/';
 @unlink($dir . 'stuff.txt');
 @unlink($dir . 'nonsense.txt');
 @rmdir($dir);

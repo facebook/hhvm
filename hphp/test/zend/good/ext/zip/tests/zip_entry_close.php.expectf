@@ -1,0 +1,6 @@
+entry_open:  bool(true)
+entry_close: bool(true)
+entry_close: 
+Warning: %s
+bool(false)
+Done

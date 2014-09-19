@@ -1,7 +1,7 @@
-%sextract%cfile1.txt
-%sextract%cfile2.txt
-%sextract%cone
-%sextract%csubdir
-%sextract%csubdir%cectory
-%sextract%csubdir%cectory%cfile.txt
+%sextract2%cfile1.txt
+%sextract2%cfile2.txt
+%sextract2%cone
+%sextract2%csubdir
+%sextract2%csubdir%cectory
+%sextract2%csubdir%cectory%cfile.txt
 ===DONE===

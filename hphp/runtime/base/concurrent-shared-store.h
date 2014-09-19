@@ -48,7 +48,7 @@ struct StoreValue {
   StoreValue() = default;
   StoreValue(const StoreValue& o)
     : data{o.data}
-    , expiry{o.expiry}
+    , expire{o.expire}
     , dataSize{o.dataSize}
     // Copy everything except the lock
   {}
@@ -71,13 +71,16 @@ struct StoreValue {
 
   /*
    * Each entry in APC is either an APCHandle or a pointer to serialized prime
-   * data.  The meaning of the following fields partially depends on which mode
-   * the StoreValue is in.
+   * data.  All primed keys have an expiration time of zero, but make use of a
+   * lock during their initial file-data-to-APCHandle conversion, so these two
+   * fields are unioned.
+   *
+   * Note: expiration times are stored in 32-bits as seconds since the Epoch.
+   * HHVM might get confused after 2106 :)
    */
   mutable Either<APCHandle*,char*> data;
-  int64_t expiry{0};
+  union { uint32_t expire; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
-  mutable SmallLock lock;
 };
 
 //////////////////////////////////////////////////////////////////////

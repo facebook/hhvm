@@ -1,0 +1,6 @@
+<?php
+$support = gd_info();
+if (!isset($support['GIF Create Support']) || $support['GIF Create Support'] === false) {
+	print 'skip gif support not available';
+}
+?>

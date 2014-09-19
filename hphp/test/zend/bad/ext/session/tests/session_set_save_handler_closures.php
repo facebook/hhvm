@@ -34,6 +34,7 @@ echo "Starting session again..!\n";
 session_id($session_id);
 session_set_save_handler($open_closure, $close_closure, $read_closure, $write_closure, $destroy_closure, $gc_closure);
 session_start();
+$_SESSION['Bar'] = 'Foo';
 var_dump($_SESSION);
 session_write_close();
 

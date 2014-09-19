@@ -15,7 +15,7 @@ echo "\n-- Testing ucwords() function with more than expected no. of arguments -
 $str = 'string_val';
 $extra_arg = 10;
 
-var_dump( ucwords($str, $extra_arg) );
+var_dump( ucwords($str, $extra_arg, $extra_arg) );
 
 // check if there were any changes made to $str
 var_dump($str);

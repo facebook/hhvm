@@ -1,0 +1,1 @@
+<?php if ((1 << 31) < 0) print "skip Running on 32-bit target"; ?>

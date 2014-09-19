@@ -1020,7 +1020,7 @@ Type buildUnion(Type t, Args... ts) {
  * increments curSrc, and at the end we can check that the argument
  * count was also correct.
  */
-void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
+bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   int curSrc = 0;
 
   auto bail = [&] (const std::string& msg) {
@@ -1056,7 +1056,7 @@ void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   // If expected is not nullptr, it will be used. Otherwise, t.toString() will
   // be used as the expected string.
   auto check = [&] (bool cond, const Type t, const char* expected) {
-    if (cond) return;
+    if (cond) return true;
 
     std::string expectStr = expected ? expected : t.toString();
 
@@ -1071,20 +1071,22 @@ void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
         inst->src(curSrc)->type().toString()
       ).str()
     );
+    return true;
   };
 
   auto checkNoArgs = [&]{
-    if (inst->numSrcs() == 0) return;
+    if (inst->numSrcs() == 0) return true;
     bail(folly::format(
       "Error: instruction expected no operands\n"
       "   instruction: {}\n",
         inst->toString()
       ).str()
     );
+    return true;
   };
 
   auto countCheck = [&]{
-    if (inst->numSrcs() == curSrc) return;
+    if (inst->numSrcs() == curSrc) return true;
     bail(folly::format(
       "Error: instruction had too many operands\n"
       "   instruction: {}\n"
@@ -1093,16 +1095,18 @@ void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
         curSrc
       ).str()
     );
+    return true;
   };
 
   auto checkDst = [&] (bool cond, const std::string& errorMessage) {
-    if (cond) return;
+    if (cond) return true;
 
     bail(folly::format("Error: failed type check on dest operand\n"
                        "   instruction: {}\n"
                        "   message: {}\n",
                        inst->toString(),
                        errorMessage).str());
+    return true;
   };
 
   auto requireTypeParam = [&] {
@@ -1171,11 +1175,11 @@ void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DCns
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
-  case opcode: dstinfo srcinfo countCheck(); return;
+  case opcode: dstinfo srcinfo countCheck(); return true;
 
   switch (inst->op()) {
     IR_OPCODES
-  default: always_assert(0);
+  default: always_assert(false);
   }
 
 #undef O
@@ -1207,6 +1211,7 @@ void assertOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DLdRaw
 #undef DCns
 
+  return true;
 }
 
 std::string TypeConstraint::toString() const {

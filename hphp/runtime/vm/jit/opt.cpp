@@ -111,10 +111,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     printUnit(6, unit, folly::format("after {}", msg).str().c_str());
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
-    forEachInst(rpoSortCfg(unit),
-                [&](IRInstruction* inst) {
-                  assertOperandTypes(inst, &unit);
-                });
+    if (debug) {
+      forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
+        assert(checkOperandTypes(inst, &unit));
+      });
+    }
   };
 
   auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {

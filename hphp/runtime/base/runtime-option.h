@@ -77,6 +77,7 @@ public:
   static int ErrorUpgradeLevel; // Bitmask of errors to upgrade to E_USER_ERROR
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
+  static bool LogNativeStackOnOOM;
   static int RuntimeErrorReportingLevel;
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 

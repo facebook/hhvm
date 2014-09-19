@@ -131,7 +131,7 @@ void retypeDests(IRInstruction* inst, const IRUnit* unit) {
     }
   }
 
-  assertOperandTypes(inst, unit);
+  assert(checkOperandTypes(inst, unit));
 }
 
 /*

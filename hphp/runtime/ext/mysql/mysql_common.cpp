@@ -1319,7 +1319,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                         "(update|set|show)\\s+([^\\s\\(,]+)|"
                         "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
                         "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
-                        "(select).*?[\\s`]+from\\s+([^\\s\\(,]+))/is",
+                        "(select).*?[\\s`]+from\\s+([^\\s\\(,]+)|"
+                        "(create|alter|drop).*?\\s+table\\s+([^\\s\\(,]+))/is",
                         q, ref(matches));
     int size = matches.toArray().size();
     if (size > 2) {
@@ -1347,7 +1348,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       }
     } else {
       HHVM_FN(preg_match)("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
-                          "(begin|commit|rollback)/is",
+                          "(begin|commit|rollback|select)/is",
                           query, ref(matches));
       size = matches.toArray().size();
       auto marray = matches.toArray();

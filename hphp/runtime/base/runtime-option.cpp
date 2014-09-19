@@ -454,6 +454,10 @@ static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
 
+static inline bool nsjrDefault() {
+  return RuntimeOption::ServerExecutionMode() ? 5 : 0;
+}
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800

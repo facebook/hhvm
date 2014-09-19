@@ -26,13 +26,11 @@ class Reflection  {
     public static function export(Reflector $reflector, $return = false) {}
 }
 interface Reflector  {
-    static function export();
-    function __toString();
+    public function __toString();
 }
 abstract class ReflectionFunctionAbstract implements Reflector {
     public $name;
     final private function __clone() {}
-    abstract public function __toString();
     public function inNamespace() {}
     public function isClosure() {}
     public function isDeprecated() {}
@@ -59,7 +57,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
     const IS_DEPRECATED = 262144;
     public $name;
     public function __construct($name) {}
-    public function __toString() {}
     public static function export($name, $return = null) {}
     public function isDisabled() {}
     public function invoke($args = null) {}
@@ -71,7 +68,6 @@ class ReflectionParameter implements Reflector {
     final private function __clone() {}
     public static function export($function, $parameter, $return = null) {}
     public function __construct($function, $parameter) {}
-    public function __toString() {}
     public function getName() {}
     public function isPassedByReference() {}
     public function canBePassedByValue() {}
@@ -99,7 +95,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public $class;
     public static function export($class, $name, $return = false) {}
     public function __construct($class, $name) {}
-    public function __toString() {}
     public function isPublic() {}
     public function isPrivate() {}
     public function isProtected() {}
@@ -124,7 +119,6 @@ class ReflectionClass implements Reflector {
     final private function __clone() {}
     public static function export($argument, $return = false) {}
     public function __construct($argument) {}
-    public function __toString() {}
     public function getName() {}
     public function isInternal() {}
     public function isUserDefined() {}
@@ -186,7 +180,6 @@ class ReflectionProperty implements Reflector {
     final private function __clone() {}
     public static function export($class, $name, $return = null) {}
     public function __construct($class, $name) {}
-    public function __toString() {}
     public function getName() {}
     public function getValue($object) {}
     public function setValue($object, $value) {}
@@ -205,7 +198,6 @@ class ReflectionExtension implements Reflector {
     final private function __clone() {}
     public static function export($name, $return = false) {}
     public function __construct($name) {}
-    public function __toString() {}
     public function getName() {}
     public function getVersion() {}
     public function getFunctions() {}
@@ -223,7 +215,6 @@ class ReflectionZendExtension implements Reflector {
     final private function __clone() {}
     public static function export($name, $return = null) {}
     public function __construct($name) {}
-    public function __toString() {}
     public function getName() {}
     public function getVersion() {}
     public function getAuthor() {}

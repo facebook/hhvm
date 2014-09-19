@@ -1252,6 +1252,8 @@ def walk(filename, dest_subdir):
         test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_basic')
     if '/ext/dom/tests/DOMDocument_saveHTMLFile_formatOutput.php' in full_dest_filename:
         test = test.replace('tmp_savehtmlfile', 'DOMDocument_saveHTMLFile_formatOutput')
+    if '/ext/standard/tests/file/fscanf_variation53.php' in full_dest_filename:
+        test = test.replace('fscanf_variation52.tmp', 'fscanf_variation53.tmp')
     if '/ext/mysqli/tests/' in full_dest_filename:
 
         (testname, _) = os.path.splitext(os.path.basename(full_dest_filename))

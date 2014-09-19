@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_CONCURRENT_SHARED_STORE_H_
 #define incl_HPHP_CONCURRENT_SHARED_STORE_H_
 
-#define TBB_PREVIEW_CONCURRENT_PRIORITY_QUEUE 1
-
 #include <atomic>
 #include <utility>
 #include <vector>

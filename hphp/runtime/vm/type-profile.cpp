@@ -28,12 +28,14 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
@@ -294,10 +296,13 @@ void profileRequestStart() {
   profileOn = p;
 
   bool okToJit = !warmingUp && !p;
-  if (okToJit && singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
-    bool flag = false;
-    if (!singleJitLock.compare_exchange_strong(flag, true)) {
-      okToJit = false;
+  if (okToJit) {
+    jit::Lease::mayLock(true);
+    if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
+      bool flag = false;
+      if (!singleJitLock.compare_exchange_strong(flag, true)) {
+        jit::Lease::mayLock(false);
+      }
     }
   }
   if (standardRequest != okToJit) {
@@ -312,10 +317,14 @@ void profileRequestEnd() {
   if (warmingUp) return;
   numRequests++; // racy RMW; ok to miss a rare few.
   if (standardRequest &&
-      singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
+      singleJitRequests < RuntimeOption::EvalNumSingleJitRequests &&
+      jit::Lease::mayLock(true)) {
     assert(singleJitLock);
     ++singleJitRequests;
     singleJitLock = false;
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Warning("Finished singleJitRequest %d", singleJitRequests.load());
+    }
   }
 }
 

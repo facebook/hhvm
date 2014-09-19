@@ -670,7 +670,7 @@ class Redis {
   }
 
   public function getTimeout() {
-    return $this->getReadTimeout();
+    return $this->timeout_connect;
   }
 
   public function getReadTimeout() {
@@ -1602,7 +1602,7 @@ class Redis {
       return false;
     }
     stream_set_blocking($conn, true);
-    stream_set_timeout($conn, $this->timeout_seconds, $this->timeout_useconds);
+    $this->setOption(Redis::OPT_READ_TIMEOUT,$timeout);
 
     return true;
   }

@@ -1126,7 +1126,7 @@ static Variant HHVM_FUNCTION(gmp_strval,
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_STRVAL, gmpData, data, base)) {
+  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_STRVAL, gmpData, data)) {
     return false;
   }
 

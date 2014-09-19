@@ -137,6 +137,13 @@ let hh_add_file fn content =
   with e ->
     ()
 
+let hh_add_dep fn content =
+  try
+    declare_file fn content;
+    Parser_heap.ParserHeap.remove fn
+  with e ->
+    ()
+
 let hh_check ?(check_mode=true) fn =
   Pos.file := fn;
   Autocomplete.auto_complete := false;
@@ -458,6 +465,7 @@ let js_wrap_string_2 func =
 let () =
   Js.Unsafe.set Js.Unsafe.global "hh_check_file" (js_wrap_string_1 hh_check);
   Js.Unsafe.set Js.Unsafe.global "hh_add_file" (js_wrap_string_2 hh_add_file);
+  Js.Unsafe.set Js.Unsafe.global "hh_add_dep" (js_wrap_string_2 hh_add_dep);
   Js.Unsafe.set Js.Unsafe.global "hh_auto_complete" (js_wrap_string_1 hh_auto_complete);
   Js.Unsafe.set Js.Unsafe.global "hh_get_deps" (Js.wrap_callback hh_get_deps);
   Js.Unsafe.set Js.Unsafe.global "hh_infer_type" (js_wrap_string_1 hh_infer_type);

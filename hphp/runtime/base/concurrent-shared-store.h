@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <iosfwd>
 
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_priority_queue.h>
@@ -121,6 +122,15 @@ struct EntryInfo {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * This is the backing store for APC.  Maintains a key to value mapping, where
+ * each value optionally has a time-to-live.
+ *
+ * After a value reaches its TTL, it's considered "expired", and most
+ * operations on the table will act like it's not present (exceptions to this
+ * should be documented below).  TTL function arguments to this module are
+ * specified in seconds.
+ */
 struct ConcurrentTableSharedStore {
   struct KeyValuePair {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
@@ -135,52 +145,116 @@ struct ConcurrentTableSharedStore {
     }
   };
 
-  static std::string GetSkeleton(const String& key);
-
-  explicit ConcurrentTableSharedStore(int id)
-    : m_id(id)
-    , m_purgeCounter(0)
-  {}
-
+  ConcurrentTableSharedStore() = default;
   ConcurrentTableSharedStore(const ConcurrentTableSharedStore&) = delete;
   ConcurrentTableSharedStore&
     operator=(const ConcurrentTableSharedStore&) = delete;
 
-  int size() const { return m_vars.size(); }
-  bool get(const String& key, Variant &value);
-  bool store(const String& key, const Variant& val, int64_t ttl,
-                     bool overwrite = true, bool limit_ttl = true);
-  int64_t inc(const String& key, int64_t step, bool &found);
-  bool cas(const String& key, int64_t old, int64_t val);
+  /*
+   * Retrieve a value from the store.  Returns false if the value wasn't
+   * contained in the table (or was expired).
+   */
+  bool get(const String& key, Variant& value);
+
+  /*
+   * Add a value to the store if no (unexpired) value with this key is already
+   * present.
+   *
+   * The requested ttl is limited by the ApcTTLLimit.
+   *
+   * Returns: true if the value was added, including if we've replaced an
+   * expired value.
+   */
+  bool add(const String& key, const Variant& val, int64_t ttl);
+
+  /*
+   * Set the value for `key' to `val'.  If there was an existing value, it is
+   * overwritten.
+   *
+   * The requested ttl is limited by the ApcTTLLimit, unless we're overwriting
+   * a primed key.
+   */
+  void set(const String& key, const Variant& val, int64_t ttl);
+
+  /*
+   * Set the value for `key' to `val', without any TTL, even if it wasn't
+   * a primed key.
+   */
+  void setWithoutTTL(const String& key, const Variant& val);
+
+  /*
+   * Increment the value for the key `key' by step, iff it is present,
+   * non-expired, and a numeric key.  Sets `found' to true if the increment is
+   * performed, false otherwise.
+   *
+   * Returns: the new value for the key, or zero if the key was not found.
+   */
+  int64_t inc(const String& key, int64_t step, bool& found);
+
+  /*
+   * Attempt to atomically compare and swap the value for the key `key' from
+   * `oldVal' to `newVal'.  If the key is present, non-expired, and has the
+   * same value as `oldVal' (after conversions), set it to `newVal' and return
+   * true.  Otherwise returns false.
+   */
+  bool cas(const String& key, int64_t oldVal, int64_t newVal);
+
+  /*
+   * Returns: true if this key exists in the store, and is not expired.
+   */
   bool exists(const String& key);
-  bool erase(const String& key, bool expired = false);
+
+  /*
+   * Remove the specified key, if it exists in the table.
+   *
+   * Returns: false if the key was not in the table, true if the key was in the
+   * table **even if it was expired**.
+   */
+  bool erase(const String& key);
+
+  /*
+   * Clear the entire APC table.
+   */
   bool clear();
 
-  void prime(const std::vector<KeyValuePair> &vars);
+  /*
+   * The API for priming APC.  Not yet documented.
+   */
+  void prime(const std::vector<KeyValuePair>& vars);
   bool constructPrime(const String& v, KeyValuePair& item, bool serialized);
   bool constructPrime(const Variant& v, KeyValuePair& item);
   void primeDone();
 
-  // This functionality is for debugging and should not be called regularly
+  /*
+   * Debugging.  Dump information about the table to an output stream.
+   *
+   * This is extremely expensive and not recommended for use outside of
+   * development scenarios.
+   */
   enum class DumpMode {
-    keyOnly=0,
-    keyAndValue=1,
-    keyAndMeta=2
+    KeyOnly,
+    KeyAndValue,
+    KeyAndMeta
   };
-  void dump(std::ostream& out, DumpMode dumpMode, int waitSeconds);
-  void getEntriesInfo(std::vector<EntryInfo>& entries);
+  void dump(std::ostream& out, DumpMode dumpMode);
+
+  /*
+   * Debugging.  Access information about all the entries in this table.
+   *
+   * This is extremely expensive and not recommended for use outside of
+   * development scenarios.
+   */
+  std::vector<EntryInfo> getEntriesInfo();
 
 private:
-
-  // Fake a StringData as a char* with the high bit set.
-  // charHashCompare below will properly handle the value and reuse the
-  // hash value of the StringData
+  // Fake a StringData as a char* with the high bit set.  charHashCompare below
+  // will properly handle the value and reuse the hash value of the StringData.
 
   static char* tagStringData(StringData* s) {
     return reinterpret_cast<char*>(-reinterpret_cast<intptr_t>(s));
   }
 
-   static StringData* getStringData(const char* s) {
+  static StringData* getStringData(const char* s) {
     assert(reinterpret_cast<intptr_t>(s) < 0);
     return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
   }
@@ -189,6 +263,7 @@ private:
     return reinterpret_cast<intptr_t>(s) < 0;
   }
 
+private:
   struct CharHashCompare {
     bool equal(const char* s1, const char* s2) const {
       assert(s1 && s2);
@@ -208,64 +283,33 @@ private:
   };
 
 private:
-  typedef tbb::concurrent_hash_map<const char*, StoreValue, CharHashCompare>
-    Map;
-  typedef std::pair<const char*, time_t> ExpirationPair;
-  typedef tbb::concurrent_hash_map<const char*, int, CharHashCompare>
-    ExpMap;
+  using Map = tbb::concurrent_hash_map<const char*,StoreValue,CharHashCompare>;
+  using ExpirationPair = std::pair<const char*,time_t>;
+  using ExpMap = tbb::concurrent_hash_map<const char*,int,CharHashCompare>;
 
   struct ExpirationCompare {
-    bool operator()(const ExpirationPair& p1, const ExpirationPair& p2) {
+    bool operator()(const ExpirationPair& p1, const ExpirationPair& p2) const {
       return p1.second > p2.second;
     }
   };
 
 private:
-  APCHandle* construct(const Variant& v, size_t& size) {
-    return APCHandle::Create(v, size, false);
-  }
-
-  bool eraseImpl(const String& key, bool expired, int64_t oldestTime = 0);
-
-  void eraseAcc(Map::accessor &acc) {
-    const char *pkey = acc->first;
-    APCStats::getAPCStats().removeKey(strlen(pkey));
-    m_vars.erase(acc);
-    free((void *)pkey);
-  }
-
-  // Should be called outside m_lock
+  bool eraseImpl(const String&, bool, int64_t);
+  bool storeImpl(const String&, const Variant&, int64_t, bool, bool);
+  void eraseAcc(Map::accessor&);
   void purgeExpired();
-  void addToExpirationQueue(const char* key, int64_t etime);
-
-  bool handleUpdate(const String& key, APCHandle* svar);
-  bool handlePromoteObj(
-      const String& key, APCHandle* svar, const Variant& value);
-  APCHandle* unserialize(const String& key, StoreValue* sval);
-
-  // helpers for dumping APC
-  static void dumpKeyOnly(std::ostream& out, std::vector<EntryInfo>& entries);
-  static void dumpKeyAndMeta(
-    std::ostream& out, std::vector<EntryInfo>& entries);
-  // this call is outrageously expensive and hooked up to an admin command
-  // to be used for rare debugging cases.
-  // Do NOT use it for regular debugging or monitoring particularly on
-  // production given it keeps the APC table locked for more than 30 seconds.
-  // That is, the machine will not be able to respond to any request for more
-  // than 30 seconds.
-  // You have to be really desperate to dump few G of data to disk!!
-  void dumpKeyAndValue(std::ostream& out);
+  void addToExpirationQueue(const char*, int64_t);
+  bool handlePromoteObj(const String&, APCHandle*, const Variant&);
+  APCHandle* unserialize(const String&, StoreValue*);
+  void dumpKeyAndValue(std::ostream&);
 
 private:
-  int m_id;
   Map m_vars;
-  // Read lock is acquired whenever using concurrent ops
-  // Write lock is acquired for whole table operations
   ReadWriteMutex m_lock;
   tbb::concurrent_priority_queue<ExpirationPair,
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
-  std::atomic<uint64_t> m_purgeCounter;
+  std::atomic<uint64_t> m_purgeCounter{0};
 };
 
 //////////////////////////////////////////////////////////////////////

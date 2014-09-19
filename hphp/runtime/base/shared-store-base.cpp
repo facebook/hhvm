@@ -47,7 +47,7 @@ void SharedStores::create() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
     switch (apcExtension::TableType) {
       case apcExtension::TableTypes::ConcurrentTable:
-        m_stores[i] = new ConcurrentTableSharedStore(i);
+        m_stores[i] = new ConcurrentTableSharedStore();
         break;
       default:
         assert(false);

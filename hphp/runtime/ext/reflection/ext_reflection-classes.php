@@ -129,7 +129,7 @@ class ReflectionParameter implements Reflector {
     if ($this->isOptional()) {
       $default = var_export($this->getDefaultValue(), true);
       $out .= '<optional> '.$type.$reference.'$'.$this->getName().' = '.
-	      $default;
+              $default;
     } else {
       $out .= '<required> '.$type.$reference.'$'.$this->getName();
     }

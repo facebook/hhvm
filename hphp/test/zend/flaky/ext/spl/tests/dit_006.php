@@ -1,5 +1,5 @@
 <?php
-$di = new DirectoryIterator(__DIR__);
+$di = new DirectoryIterator(__DIR__."/..");
 $di->seek(2);
 
 $n = 0;

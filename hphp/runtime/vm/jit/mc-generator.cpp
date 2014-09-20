@@ -36,6 +36,7 @@
 
 #include "folly/Format.h"
 #include "folly/MapUtil.h"
+#include "folly/Optional.h"
 #include "folly/String.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -485,7 +486,6 @@ MCGenerator::getCallArrayPrologue(Func* func) {
 void
 MCGenerator::smashPrologueGuards(TCA* prologues, int numPrologues,
                                  const Func* func) {
-  DEBUG_ONLY std::unique_ptr<LeaseHolder> writer;
   for (int i = 0; i < numPrologues; i++) {
     if (prologues[i] != m_tx.uniqueStubs.fcallHelperThunk
         && backEnd().funcPrologueHasGuard(prologues[i], func)) {
@@ -1865,9 +1865,7 @@ void MCGenerator::requestInit() {
 }
 
 void MCGenerator::requestExit() {
-  if (Translator::WriteLease().amOwner()) {
-    Translator::WriteLease().drop();
-  }
+  always_assert(!Translator::WriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
             Process::GetThreadIdForTrace(), Translator::WriteLease().m_hintKept,
@@ -2040,31 +2038,32 @@ std::string MCGenerator::getTCAddrs() {
 
 bool MCGenerator::addDbgGuards(const Unit* unit) {
   // TODO refactor
-  // It grabs the write lease and iterating through whole SrcDB...
-  bool locked = Translator::WriteLease().acquire(true);
-  if (!locked) {
-    return false;
-  }
-  assert(mcg->cgFixups().empty());
+  // It grabs the write lease and iterates through whole SrcDB...
   struct timespec tsBegin, tsEnd;
-  HPHP::Timer::GetMonotonicTime(tsBegin);
-  // Doc says even find _could_ invalidate iterator, in pactice it should
-  // be very rare, so go with it now.
-  for (SrcDB::const_iterator it = m_tx.getSrcDB().begin();
-       it != m_tx.getSrcDB().end(); ++it) {
-    SrcKey const sk = SrcKey::fromAtomicInt(it->first);
-    // We may have a SrcKey to a deleted function. NB: this may miss a
-    // race with deleting a Func. See task #2826313.
-    if (!Func::isFuncIdValid(sk.getFuncId())) continue;
-    SrcRec* sr = it->second;
-    if (sr->unitMd5() == unit->md5() &&
-        !sr->hasDebuggerGuard() &&
-        m_tx.isSrcKeyInBL(sk)) {
-      addDbgGuardImpl(sk, sr);
+  {
+    BlockingLeaseHolder writer(Translator::WriteLease());
+    if (!writer) {
+      return false;
     }
+    assert(mcg->cgFixups().empty());
+    HPHP::Timer::GetMonotonicTime(tsBegin);
+    // Doc says even find _could_ invalidate iterator, in pactice it should
+    // be very rare, so go with it now.
+    for (SrcDB::const_iterator it = m_tx.getSrcDB().begin();
+         it != m_tx.getSrcDB().end(); ++it) {
+      SrcKey const sk = SrcKey::fromAtomicInt(it->first);
+      // We may have a SrcKey to a deleted function. NB: this may miss a
+      // race with deleting a Func. See task #2826313.
+      if (!Func::isFuncIdValid(sk.getFuncId())) continue;
+      SrcRec* sr = it->second;
+      if (sr->unitMd5() == unit->md5() &&
+          !sr->hasDebuggerGuard() &&
+          m_tx.isSrcKeyInBL(sk)) {
+        addDbgGuardImpl(sk, sr);
+      }
+    }
+    mcg->cgFixups().process(nullptr);
   }
-  mcg->cgFixups().process(nullptr);
-  Translator::WriteLease().drop();
   HPHP::Timer::GetMonotonicTime(tsEnd);
   int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
   if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
@@ -2091,8 +2090,8 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
       return false;
     }
   }
-  bool locked = Translator::WriteLease().acquire(true);
-  if (!locked) {
+  BlockingLeaseHolder writer(Translator::WriteLease());
+  if (!writer) {
     return false;
   }
   assert(mcg->cgFixups().empty());
@@ -2102,7 +2101,6 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
     }
   }
   mcg->cgFixups().process(nullptr);
-  Translator::WriteLease().drop();
   return true;
 }
 
@@ -2146,12 +2144,15 @@ bool MCGenerator::dumpTCCode(const char* filename) {
 
 // Returns true on success
 bool MCGenerator::dumpTC(bool ignoreLease) {
-  if (!ignoreLease && !Translator::WriteLease().acquire(true)) return false;
+  folly::Optional<BlockingLeaseHolder> writer;
+  if (!ignoreLease) {
+    writer.emplace(Translator::WriteLease());
+    if (!*writer) return false;
+  }
   bool success = dumpTCData();
   if (success) {
     success = dumpTCCode("/tmp/tc_dump");
   }
-  if (!ignoreLease) Translator::WriteLease().drop();
   return success;
 }
 

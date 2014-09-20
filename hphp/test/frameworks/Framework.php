@@ -877,7 +877,10 @@ class Framework {
     return $updated_tests;
   }
 
-  protected function installDependencies(): void {
+  /* If you think you need to override this, look at extraPreComposer() and
+   * extraPostComposer() instead.
+   */
+  final private function installDependencies(): void {
     $composer_json_path = find_first_file_recursive(
       Set {"composer.json"},
       nullthrows($this->install_root),
@@ -886,31 +889,6 @@ class Framework {
     verbose("composer.json found in: $composer_json_path\n");
     // Check to see if composer dependencies are necessary to run the test
     if ($composer_json_path !== null) {
-      if (Options::$toran_proxy !== null) {
-        verbose("Modifying composer.json to use Toran Proxy");
-        $composer_config = json_decode(
-          file_get_contents($composer_json_path.'/composer.json'),
-          /* assoc = */ true,
-        );
-        $repos = [
-          ['packagist' => false],
-          ['type' => 'composer', 'url' => Options::$toran_proxy],
-        ];
-        foreach ($composer_config['repositories'] as $repo) {
-          if (array_key_exists('packagist', $repo)) {
-            continue;
-          }
-          if (isset($repo['type']) && $repo['type'] === 'composer') {
-            continue;
-          }
-          $repos[] = $repo;
-        }
-        $composer_config['repositories'] = $repos;
-        file_put_contents(
-          $composer_json_path.'/composer.json',
-          json_encode($composer_config)
-        );
-      }
       verbose("Retrieving dependencies for framework ".$this->name.".....\n");
       // Use the timeout to avoid curl SlowTimer timeouts and problems
       $dependencies_install_cmd = get_runtime_build();

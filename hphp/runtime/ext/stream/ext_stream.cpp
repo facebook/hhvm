@@ -671,34 +671,4 @@ Array StreamContext::getParams() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_STREAM_FILTER_READ("STREAM_FILTER_READ"),
-  s_STREAM_FILTER_WRITE("STREAM_FILTER_WRITE"),
-  s_STREAM_FILTER_ALL("STREAM_FILTER_ALL");
-
-class StreamExtension : public Extension {
- public:
-  StreamExtension() : Extension("stream") {}
-  void moduleInit() override {
-#define SFCNS(v) Native::registerConstant<KindOfInt64> \
-                         (s_STREAM_FILTER_##v.get(), k_STREAM_FILTER_##v)
-    SFCNS(READ);
-    SFCNS(WRITE);
-    SFCNS(ALL);
-#undef SFCNS
-
-    HHVM_FE(stream_get_filters);
-    HHVM_FE(stream_filter_register);
-    HHVM_FE(stream_filter_append);
-    HHVM_FE(stream_filter_prepend);
-    HHVM_FE(stream_filter_remove);
-    HHVM_FE(stream_bucket_make_writeable);
-    HHVM_FE(stream_bucket_append);
-    HHVM_FE(stream_bucket_prepend);
-    loadSystemlib("stream-user-filters");
-  }
-} s_stream_extension;
-
-///////////////////////////////////////////////////////////////////////////////
 }

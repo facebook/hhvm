@@ -37,16 +37,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-void StoreValue::set(APCHandle *v, int64_t ttl) {
-  var = v;
-  expiry = ttl ? time(nullptr) + ttl : 0;
-}
-bool StoreValue::expired() const {
-  return expiry && time(nullptr) >= expiry;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 SharedStores s_apc_store;
 
 SharedStores::SharedStores() {

@@ -238,8 +238,8 @@ struct AtomicSmartPtr {
   /**
    * Reset the raw pointer.
    */
-  void reset() {
-    operator=((T*)nullptr);
+  void reset(T* p = nullptr) {
+    operator=(p);
   }
 
 protected:

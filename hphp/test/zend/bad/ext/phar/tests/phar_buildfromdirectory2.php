@@ -1,6 +1,6 @@
 <?php
 try {
-	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory.phar');
+	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory2.phar');
 	$phar->buildFromDirectory(1);
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -9,6 +9,6 @@ try {
 ?>
 ===DONE===
 <?php 
-unlink(dirname(__FILE__) . '/buildfromdirectory.phar');
+unlink(dirname(__FILE__) . '/buildfromdirectory2.phar');
 __HALT_COMPILER();
 ?>

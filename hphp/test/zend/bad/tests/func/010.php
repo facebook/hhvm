@@ -1,7 +1,7 @@
 <?php
 
 // the stack size + some random constant
-$boundary = 64*1024;
+$boundary = 16*1024-16;
 $limit    = $boundary+42;
 
 

@@ -1,0 +1,38 @@
+string(1) "0"
+string(1) "5"
+string(1) "5"
+string(1) "5"
+string(1) "5"
+string(3) "533"
+string(3) "331"
+string(3) "171"
+string(3) "371"
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+NULL
+
+Warning: %s
+bool(false)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(1) "1"
+}
+Done

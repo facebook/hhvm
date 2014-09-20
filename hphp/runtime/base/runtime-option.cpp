@@ -76,6 +76,7 @@ bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
+bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
 int RuntimeOption::ForceErrorReportingLevel = 0;
@@ -453,6 +454,10 @@ static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
 
+static inline bool nsjrDefault() {
+  return RuntimeOption::ServerExecutionMode() ? 5 : 0;
+}
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800
@@ -790,6 +795,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
                  error["CallUserHandlerOnFatals"], true);
     Config::Bind(ThrowExceptionOnBadMethodCall, ini,
                  error["ThrowExceptionOnBadMethodCall"], true);
+    Config::Bind(LogNativeStackOnOOM, ini,
+                 error["LogNativeStackOnOOM"], false);
     Config::Bind(MaxLoopCount, ini, error["MaxLoopCount"], 0);
     Config::Bind(NoInfiniteRecursionDetection, ini,
                  error["NoInfiniteRecursionDetection"]);

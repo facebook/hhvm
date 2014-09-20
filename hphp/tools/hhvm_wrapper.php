@@ -32,10 +32,8 @@ function my_option_map(): OptionInfoMap {
                             'Disable global object destructors in CLI mode' },
 'zend'            => Pair { '',  'Enable ZendCompat functions and classes' },
 'arm'             => Pair { '',  'Emit ARM code and simulate it' },
-'ini-file[]'      => Pair { '',  'An .ini configuration file' },
-'hdf-file[]'      => Pair { '',  'An .hdf configuration file' },
-'ini-option[]'    => Pair { '',  'An ini command line option' },
-'hdf-option[]'    => Pair { '',  'An hdf command line option' },
+'ini[]'           => Pair { '',  'An .ini configuration file or CLI option' },
+'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
   };
 }
 
@@ -52,16 +50,21 @@ function get_paths(): Map<string,string> {
 
 function determine_flags(OptionMap $opts): string {
   $flags = '';
+  $has_file = false;
 
-  if ($opts->containsKey('ini-file')) {
-    $flags .= parse_config_files($opts['ini-file']);
+  if ($opts->containsKey('ini')) {
+    $ret = parse_config_options($opts['ini'], "ini");
+    $flags .= $ret[0];
+    $has_file = $ret[1];
   }
-  if ($opts->containsKey('hdf-file')) {
-    $flags .= parse_config_files($opts['hdf-file']);
+  if ($opts->containsKey('hdf')) {
+    $ret = parse_config_options($opts['hdf'], "hdf");
+    $flags .= $ret[0];
+    // Don't override if we have an ini file already
+    $has_file = $has_file || $ret[1];
   }
-  // If $flags is still empty, we had no custom config files
-  // Use a default
-  if ($flags === "") {
+  // If no config files were given at the command line, use a default
+  if (!$has_file) {
     #
     # The cli.hdf file is where Facebook puts its in-house
     # default configuration information.
@@ -70,13 +73,6 @@ function determine_flags(OptionMap $opts): string {
     if (file_exists($facebook_cli_config_file_name)) {
       $flags .= "-c $facebook_cli_config_file_name ";
     }
-  }
-
-  if ($opts->containsKey('ini-option')) {
-    $flags .= parse_cli_options($opts['ini-option'], "ini");
-  }
-  if ($opts->containsKey('hdf-option')) {
-    $flags .= parse_cli_options($opts['hdf-option'], "hdf");
   }
 
   $flags .=
@@ -132,21 +128,19 @@ function determine_flags(OptionMap $opts): string {
   return $flags;
 }
 
-function parse_config_files(Set $files): string {
+function parse_config_options(Set $options, string $kind): Pair<string, bool> {
   $flags = "";
-  foreach ($files as $file) {
-      $flags .= "-c " . $file . " ";
-  }
-  return $flags;
-}
-
-function parse_cli_options(Set $options, string $type): string {
-  $flags = "";
-  $dashwhat = $type === "ini" ? "-d " : "-v ";
+  $has_file = false;
   foreach ($options as $option) {
+    if (file_exists($option)) {
+      $flags .= "-c " . $option . " ";
+      $has_file = true;
+    } else {
+      $dashwhat = $kind === "ini" ? "-d " : "-v ";
       $flags .= $dashwhat . $option . " ";
+    }
   }
-  return $flags;
+  return Pair {$flags, $has_file};
 }
 
 function determine_env(OptionMap $opts): string {
@@ -308,13 +302,13 @@ function help(): void {
 "   % hhvm --repo hhvm.hhbbc test.php\n".
 "\n".
 "   # Specify a configuration file to be used when running your code:\n".
-"   % hhvm --ini-file test.ini test.php\n".
+"   % hhvm --ini test.ini test.php\n".
 "\n".
 "   # Specify multiple config files to be used when running your code:\n".
-"   % hhvm --ini-file a.ini --hdf-file b.hdf --ini-file c.ini test.php\n".
+"   % hhvm --ini a.ini --hdf b.hdf --ini c.ini test.php\n".
 "\n".
 "   # Specify config option(s) to be used when running your code:\n".
-"   % hhvm --ini-option hhvm.jit_a_size=15728640 test.php\n".
+"   % hhvm --ini hhvm.jit_a_size=15728640 test.php\n".
 "\n"
     ;
 }

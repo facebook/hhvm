@@ -165,7 +165,7 @@ let check_constructors env parent_class class_ psubst subst =
       | Some parent_cstr, None ->
         let pos = fst parent_cstr.ce_type in
         Errors.missing_constructor (Reason.to_pos pos)
-      | _, Some cstr when cstr.ce_override -> (* <<UNSAFE_Construct>> *)
+      | _, Some cstr when cstr.ce_override -> (* <<__UNSAFE_Construct>> *)
         ()
       | Some parent_cstr, Some cstr ->
         let env, parent_cstr = Inst.instantiate_ce psubst env parent_cstr in

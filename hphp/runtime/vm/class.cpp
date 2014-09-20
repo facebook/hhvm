@@ -42,6 +42,7 @@ hphp_hash_map<const StringData*, const HhbcExtClassInfo*,
 
 void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
 
+Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -210,7 +211,7 @@ void Class::destroy() {
    */
   if (!m_cachedClass.bound()) return;
 
-  Lock l(Unit::s_classesMutex);
+  Lock l(g_classesMutex);
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
@@ -1726,7 +1727,7 @@ void Class::setMethods() {
       f->setNewFuncId();
       if (RuntimeOption::EvalPerfDataMap) {
         if (!s_funcIdToClassMap) {
-          Lock l(Unit::s_classesMutex);
+          Lock l(g_classesMutex);
           if (!s_funcIdToClassMap) {
             s_funcIdToClassMap = new FuncIdToClassMap;
           }

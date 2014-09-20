@@ -78,6 +78,8 @@ private:
   smart::vector<const pcre_cache_entry*> m_overflow;
 };
 
+void pcre_dump_cache(const std::string& filename);
+
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 
 Variant preg_match(const String& pattern, const String& subject,

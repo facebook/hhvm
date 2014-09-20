@@ -399,6 +399,21 @@ end = struct
 
 end
 
+(* Used by HasBreak and HasContinue. Does not traverse nested loops, since the
+ * breaks / continues in those loops do not affect the control flow of the
+ * outermost loop. *)
+
+class loop_visitor =
+  object
+    inherit [bool] nast_visitor
+    method on_expr acc _ = acc
+    method on_for acc _ _ _ _ = acc
+    method on_foreach acc _ _ _ = acc
+    method on_do acc _ _ = acc
+    method on_while acc _ _ = acc
+    method on_switch acc _ _ = acc
+  end
+
 (*****************************************************************************)
 (* Returns true if a block has a continue statement.
  * It is necessary to properly handle the type of locals.
@@ -417,9 +432,28 @@ end = struct
 
   let visitor =
     object
-      inherit [bool] nast_visitor
-      method on_expr acc _ = acc
+      inherit loop_visitor
       method on_continue _ _ = true
+    end
+
+  let block b = visitor#on_block false b
+
+end
+
+(*****************************************************************************)
+(* Returns true if a block has a continue statement.
+ * Useful for checking if a while(true) {...} loop is non-terminating.
+ *)
+(*****************************************************************************)
+
+module HasBreak: sig
+  val block: block -> bool
+end = struct
+
+  let visitor =
+    object
+      inherit loop_visitor
+      method on_break _ _ = true
     end
 
   let block b = visitor#on_block false b

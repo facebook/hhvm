@@ -1337,7 +1337,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point
-  if (inst->func()->anyBlockEndsAt(inst->offset())) {
+  if (mcg->tx().profData()->anyBlockEndsAt(inst->func(), inst->offset())) {
     return true;
   }
   return false;

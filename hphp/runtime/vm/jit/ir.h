@@ -1045,9 +1045,9 @@ const StringData* findClassName(SSATmp* cls);
 Type outputType(const IRInstruction*, int dstId = 0);
 
 /*
- * Assert that an instruction has operands of allowed types.
+ * Check that an instruction has operands of allowed types.
  */
-void assertOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
+bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
 
 int minstrBaseIdx(Opcode opc);

@@ -103,7 +103,7 @@ let gconst_decl cst =
 (* Handling function/method arguments *)
 (*****************************************************************************)
 
-let rec wfold_left_default f (env, def1) l1 l2  =
+let rec wfold_left_default f (env, def1) l1 l2 =
   match l1, def1, l2 with
   | _, _, [] -> env
   | [], None, _ -> env
@@ -412,12 +412,12 @@ and stmt env = function
       let env, ty = expr env e in
       Typing_async.enforce_not_awaitable env (fst e) ty;
       let parent_lenv = env.Env.lenv in
-      let env  = condition env true e in
-      let env  = block env b1 in
+      let env   = condition env true e in
+      let env   = block env b1 in
       let lenv1 = env.Env.lenv in
-      let env = { env with Env.lenv = parent_lenv } in
-      let env  = condition env false e in
-      let env  = block env b2 in
+      let env   = { env with Env.lenv = parent_lenv } in
+      let env   = condition env false e in
+      let env   = block env b2 in
       let lenv2 = env.Env.lenv in
       let terminal1 = Nast_terminality.Terminal.block b1 in
       let terminal2 = Nast_terminality.Terminal.block b2 in
@@ -654,7 +654,7 @@ and catch parent_lenv after_try env (ety, exn, b) =
   (* Only keep the local bindings if this catch is non-terminal *)
   env, env.Env.lenv
 
-and as_expr env pe  = function
+and as_expr env pe = function
   | As_v e ->
       let ty = Env.fresh_type() in
       let tvector = Tapply ((pe, "\\Traversable"), [ty]) in
@@ -2934,7 +2934,7 @@ and get_self_from_c env c =
   let tparams = List.map begin fun (_, (p, s), param) ->
     Reason.Rwitness p, Tgeneric (s, param)
   end tparams in
-  let ret = Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)in
+  let ret = Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams) in
   ret
 
 and class_def_ env_up c tc =
@@ -3061,7 +3061,7 @@ and method_def env m =
   if Env.is_strict env then begin
     List.iter2 (check_param env) m_params params;
   end;
-  let env  = List.fold_left2 bind_param env params m_params in
+  let env = List.fold_left2 bind_param env params m_params in
   let env = fun_ ~abstract:m.m_abstract env m.m_unsafe (m.m_ret <> None)
       ret (fst m.m_name) m.m_body m.m_fun_kind in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in

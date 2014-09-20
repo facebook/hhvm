@@ -1034,6 +1034,13 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Global lock used during class loading.
+ */
+extern Mutex g_classesMutex;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Class kinds---classes, interfaces, traits, and enums.
  *
  * "Normal class" refers to any classes that are not interfaces, traits, enums.

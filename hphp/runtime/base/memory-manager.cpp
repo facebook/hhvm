@@ -27,9 +27,14 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "folly/ScopeGuard.h"
+#ifdef FACEBOOK
+#include "folly/experimental/symbolizer/StackTrace.h"
+#include "folly/experimental/symbolizer/Symbolizer.h"
+#endif
 
 namespace HPHP {
 
@@ -252,6 +257,22 @@ void MemoryManager::refreshStatsHelper() {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
+#ifdef FACEBOOK
+  if (RuntimeOption::LogNativeStackOnOOM) {
+    using namespace folly::symbolizer;
+    constexpr size_t kMaxFrames = 128;
+
+    uintptr_t addresses[kMaxFrames];
+    auto nframes = getStackTrace(addresses, kMaxFrames);
+    std::vector<SymbolizedFrame> frames(nframes);
+    Symbolizer symbolizer;
+    symbolizer.symbolize(addresses, frames.data(), nframes);
+    StringSymbolizePrinter printer;
+    printer.println(addresses, frames.data(), nframes);
+    Logger::Error("Exceeded memory limit\n\nC++ stack:\n%s",
+                  printer.str().c_str());
+  }
+#endif
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.setMemExceededFlag();
   m_couldOOM = false;

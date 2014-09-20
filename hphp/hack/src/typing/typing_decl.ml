@@ -48,6 +48,11 @@ let report_class_ready class_name =
 let remove_classes class_set =
   ClassStatus.remove_batch class_set
 
+(* For somewhat silly historical reasons having to do with the lack of
+ * .hhi's for fairly core XHP classes, we unfortunately mark all XHP
+ * classes as not having their members fully known *)
+let xhp_is_not_strict = true
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -453,7 +458,12 @@ and class_decl c =
   in
   let env, m = if dy_check then DynamicYield.decl env m else env, m in
   let ext_strict = List.fold_left (trait_exists env) ext_strict c.c_uses in
-  let ext_strict = not c.c_is_xhp && ext_strict in
+  let not_strict_because_xhp = xhp_is_not_strict && c.c_is_xhp in
+  if not ext_strict && not not_strict_because_xhp && (Env.is_strict env) then
+    let p, name = c.c_name in
+    Errors.strict_members_not_known p name
+  else ();
+  let ext_strict = if not_strict_because_xhp then false else ext_strict in
   let self_dimpl = if is_abstract then impl else SMap.empty in
   let dimpl =
     if is_abstract
@@ -531,7 +541,9 @@ and check_static_method obj method_name { ce_type = (reason_for_type, _); _ } =
 
 and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
-  let cconsist = class_.c_final || SMap.mem "ConsistentConstruct" class_.c_user_attributes in
+  let cconsist =
+    class_.c_final ||
+    SMap.mem "__ConsistentConstruct" class_.c_user_attributes in
   match class_.c_constructor, pcstr with
     | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
@@ -553,10 +565,11 @@ and build_constructor env class_ method_ =
   let mconsist = match ty with
     | (_, Tfun ({ft_abstract = true; _})) -> true
     | _ -> mconsist in
-  (* the alternative to overriding <<ConsistentConstruct>> is marking
+  (* the alternative to overriding <<__ConsistentConstruct>> is marking
    * the corresponding 'new static()' UNSAFE, potentially impacting the safety
    * of a large type hierarchy. *)
-  let consist_override = SMap.mem "UNSAFE_Construct" method_.m_user_attributes in
+  let consist_override =
+    SMap.mem "__UNSAFE_Construct" method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
     ce_override = consist_override;
@@ -570,8 +583,8 @@ and build_constructor env class_ method_ =
 and class_const_decl c (env, acc) (h, id, e) =
   let env, ty =
     match h with
-      | None ->
-        (match snd e with
+      | None -> begin
+        let rec infer_const e = match snd e with
           | String _
           | String2 ([], _)
           | True
@@ -579,9 +592,8 @@ and class_const_decl c (env, acc) (h, id, e) =
           | Int _
           | Float _
           | Array _ ->
-            let _, ty = Typing.expr env e in
             (* We don't want to keep the environment of the inference
-             * CAREFULL, right now, array is just Tarray, with no
+             * CAREFUL, right now, array is just Tarray, with no
              * type variable, if we were to add parameters array<T>,
              * we would have to: make a full expansion, that is,
              * replace all the type variables in ty by their "true" type,
@@ -590,10 +602,19 @@ and class_const_decl c (env, acc) (h, id, e) =
              * I would search for it if I was changing the way arrays are
              * typed.
              *)
-            env, ty
+            snd (Typing.expr env e)
+          | Unop ((Ast.Uminus | Ast.Uplus), e2) ->
+            infer_const e2
           | _ ->
-            env, (Reason.Rwitness (fst id), Tany)
-        )
+            (* We can't infer the type of everything here. Notably, if you
+             * define a const in terms of another const, we need an annotation,
+             * since the other const may not have been declared yet. *)
+            if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
+            then Errors.missing_typehint (fst id);
+            Reason.Rwitness (fst id), Tany
+          in
+          (env, infer_const e)
+        end
       | Some h -> Typing_hint.hint env h
   in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -695,7 +716,7 @@ and method_decl c env m =
 and method_check_override c m acc =
   let pos, id = m.m_name in
   let class_pos, class_id = c.c_name in
-  let override = SMap.mem "Override" m.m_user_attributes in
+  let override = SMap.mem "__Override" m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with

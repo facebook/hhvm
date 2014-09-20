@@ -106,7 +106,7 @@ and fun_params = fun_param list
 and class_elt = {
   ce_final       : bool;
   ce_override    : bool;
-  (* true if this elt arose from require-extends or other mechnaisms
+  (* true if this elt arose from require-extends or other mechanisms
      of hack "synthesizing" methods that were not written by the
      programmer. The eventual purpose of this is to make sure that
      elts that *are* written by the programmer take precedence over

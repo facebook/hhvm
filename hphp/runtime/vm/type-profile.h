@@ -21,7 +21,12 @@
 
 namespace HPHP {
 
-class StringData;
+//////////////////////////////////////////////////////////////////////
+
+struct StringData;
+struct Func;
+
+//////////////////////////////////////////////////////////////////////
 
 struct TypeProfileKey {
   enum KeyType {
@@ -50,6 +55,11 @@ void recordType(TypeProfileKey sk, DataType dt);
 std::pair<DataType, double> predictType(TypeProfileKey key);
 int64_t requestCount();
 
+/*
+ * Profiling for func hotness goes through this module.
+ */
+void profileIncrementFuncCounter(const Func*);
+
 extern __thread bool profileOn;
 inline bool isProfileRequest() {
   return profileOn;
@@ -60,6 +70,8 @@ inline bool isStandardRequest() {
   return standardRequest;
 }
 
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif // TYPE_PROFILE_H_
+#endif

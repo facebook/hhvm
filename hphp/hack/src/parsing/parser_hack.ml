@@ -666,7 +666,14 @@ and attribute env =
 and attribute_remain env acc =
   match L.token env.lb with
   | Tword ->
-      let attr_name = Lexing.lexeme env.lb in
+      (* Temporary backwards compat for renaming these attributes.
+       * TODO #4890694 remove this. *)
+      let attr_compat = function
+        | "ConsistentConstruct" -> "__ConsistentConstruct"
+        | "Override" -> "__Override"
+        | "UNSAFE_Construct" -> "__UNSAFE_Construct"
+        | x -> x in
+      let attr_name = attr_compat (Lexing.lexeme env.lb) in
       let acc = attribute_parameter attr_name acc env in
       attribute_list_remain acc env
   | _ ->
@@ -2083,7 +2090,7 @@ and make_param_ellipsis pos =
     param_user_attributes = SMap.empty;
   }
 
-and param ~variadic env  =
+and param ~variadic env =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
@@ -2370,7 +2377,7 @@ and try_short_lambda env =
 (* Expressions *)
 (*****************************************************************************)
 
-and expr_atomic ?(allow_class=false) env  =
+and expr_atomic ?(allow_class=false) env =
   let tok = L.token env.lb in
   let pos = Pos.make env.lb in
   match tok with

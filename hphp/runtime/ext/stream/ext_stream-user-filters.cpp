@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/ext_array.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
@@ -328,6 +329,30 @@ void HHVM_FUNCTION(stream_bucket_prepend, const Resource& bb_res, const Object& 
   brigade->prependBucket(bucket);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+const StaticString
+  s_STREAM_FILTER_READ("STREAM_FILTER_READ"),
+  s_STREAM_FILTER_WRITE("STREAM_FILTER_WRITE"),
+  s_STREAM_FILTER_ALL("STREAM_FILTER_ALL");
 
+void StandardExtension::initStreamUserFilters() {
+#define SFCNS(v) Native::registerConstant<KindOfInt64> \
+                         (s_STREAM_FILTER_##v.get(), k_STREAM_FILTER_##v)
+  SFCNS(READ);
+  SFCNS(WRITE);
+  SFCNS(ALL);
+#undef SFCNS
+
+  HHVM_FE(stream_get_filters);
+  HHVM_FE(stream_filter_register);
+  HHVM_FE(stream_filter_append);
+  HHVM_FE(stream_filter_prepend);
+  HHVM_FE(stream_filter_remove);
+  HHVM_FE(stream_bucket_make_writeable);
+  HHVM_FE(stream_bucket_append);
+  HHVM_FE(stream_bucket_prepend);
+
+  loadSystemlib("stream-user-filters");
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

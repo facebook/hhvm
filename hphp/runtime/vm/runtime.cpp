@@ -189,7 +189,7 @@ Unit* compile_string(const char* s,
                      const char* fname /* = nullptr */) {
   auto md5string = string_md5(s, sz);
   MD5 md5(md5string.c_str());
-  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5);
+  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
   if (u != nullptr) {
     return u;
   }
@@ -207,8 +207,8 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5)) {
-      if (auto const u = Repo::get().loadUnit(fname, md5)) {
-        return u;
+      if (auto u = Repo::get().loadUnit(fname, md5)) {
+        return u.release();
       }
     }
   }

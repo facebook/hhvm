@@ -24,9 +24,15 @@
 namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);
 
-bool
-Lease::amOwner() const {
+static __thread bool threadCanAcquire = true;
+
+bool Lease::amOwner() const {
   return m_held && m_owner == pthread_self();
+}
+
+bool Lease::mayLock(bool f) {
+  std::swap(threadCanAcquire, f);
+  return f;
 }
 
 /*
@@ -53,8 +59,7 @@ void Lease::gremlinLock() {
   m_owner = gremlinize_threadid(pthread_self());
 }
 
-void
-Lease::gremlinUnlockImpl() {
+void Lease::gremlinUnlockImpl() {
   if (m_held && m_owner == gremlinize_threadid(pthread_self())) {
     TRACE(2, "Lease: gremlin dropping lock\n ");
     pthread_mutex_unlock(&m_lock);
@@ -66,6 +71,9 @@ Lease::gremlinUnlockImpl() {
 bool Lease::acquire(bool blocking /* = false */ ) {
   if (amOwner()) {
     return true;
+  }
+  if (!threadCanAcquire && !blocking) {
+    return false;
   }
   int64_t expire = m_hintExpire;
   int64_t expireDiff = expire - Timer::GetCurrentTimeMicros();

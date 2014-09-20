@@ -88,7 +88,7 @@ end
 
 module Naming                               = struct
   let add_a_typehint                        = 2001 (* DONT MODIFY!!!! *)
-  let alok                                  = 2002 (* DONT MODIFY!!!! *)
+  let typeparam_alok                        = 2002 (* DONT MODIFY!!!! *)
   let assert_arity                          = 2003 (* DONT MODIFY!!!! *)
   let boolean_instead_of_bool               = 2004 (* DONT MODIFY!!!! *)
   let cyclic_constraint                     = 2005 (* DONT MODIFY!!!! *)
@@ -293,10 +293,12 @@ module Typing                               = struct
   let wrong_extend_kind                     = 4115 (* DONT MODIFY!!!! *)
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
   let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
-
-  let declared_covariant                    = 4117 (* DONT MODIFY!!!! *)
-  let declared_contravariant                = 4118 (* DONT MODIFY!!!! *)
-  let unset_in_strict                       = 4119 (* DONT MODIFY!!!! *)
+  let trivial_strict_eq                     = 4118 (* DONT MODIFY!!!! *)
+  let void_usage                            = 4119 (* DONT MODIFY!!!! *)
+  let declared_covariant                    = 4120 (* DONT MODIFY!!!! *)
+  let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
+  let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
+  let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -325,12 +327,11 @@ let parsing_error (p, msg) =
 (* Naming errors *)
 (*****************************************************************************)
 
-let alok (pos, x) =
-  add Naming.alok pos (
+let typeparam_alok (pos, x) =
+  add Naming.typeparam_alok pos (
   "You probably forgot to bind this type parameter right?\nAdd <"^x^
   "> somewhere (after the function name definition, \
     or after the class name)\nExamples: "^"function foo<T> or class A<T>")
-
 
 let generic_class_var pos =
   add Naming.generic_class_var pos
@@ -911,6 +912,12 @@ let generic_array_strict p =
   add Typing.generic_array_strict p
     "You cannot have an array without generics in strict mode"
 
+let strict_members_not_known p name =
+  let name = Utils.strip_ns name in
+  add Typing.strict_members_not_known p
+    (name^" has a non-<?hh grandparent; this is not allowed in strict mode"
+     ^" because that parent may define methods of unknowable name and type")
+
 let nullable_void p =
   add Typing.nullable_void p "?void is a nonsensical typehint"
 
@@ -1033,7 +1040,7 @@ let new_static_inconsistent new_pos (cpos, cname) =
   "; __construct arguments are not \
     guaranteed to be consistent in child classes";
     cpos, ("This declaration neither defines an abstract/final __construct"
-           ^" nor uses <<ConsistentConstruct>> attribute")]
+           ^" nor uses <<__ConsistentConstruct>> attribute")]
 
 let abstract_instantiate pos cname =
   add Typing.abstract_instantiate pos
@@ -1446,6 +1453,14 @@ let unset_in_strict pos =
   add Typing.unset_in_strict pos
     ("unset cannot be used in a completely type safe way and so is banned in "
     ^"strict mode")
+
+let trivial_strict_eq p b left right =
+  let msg = "This expression is always "^b in
+  add_list Typing.trivial_strict_eq ((p, msg) :: left @ right)
+
+let void_usage p reason =
+  let msg = "You are attempting to use the return value of a void function" in
+  add_list Typing.void_usage ((p, msg) :: reason)
 
 (*****************************************************************************)
 (* Printing *)

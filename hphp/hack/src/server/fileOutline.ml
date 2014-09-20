@@ -27,8 +27,7 @@ let get_class_summary class_ =
       class_name ^ "::" ^ snd method_.Nast.m_name, "method"):: res_list in
   res_list
 
-let outline content =
-  let {Parser_hack.ast; _} = Parser_hack.program content in
+let outline_ast ast =
   let funs, classes = List.fold_left begin fun (funs, classes) def ->
     match def with
     | Ast.Fun f ->
@@ -47,3 +46,7 @@ let outline content =
   List.fold_left begin fun acc f_name ->
       (fst f_name, Utils.strip_ns (snd f_name), "function") :: acc
     end res_list funs
+
+let outline content =
+  let {Parser_hack.ast; _} = Parser_hack.program content in
+  outline_ast ast

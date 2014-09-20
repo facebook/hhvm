@@ -33,7 +33,7 @@ let add_fixme err_nbr pos =
   ()
 
 (*****************************************************************************)
-(* The type for tokens. Some of them don't represent "real" tokens comming
+(* The type for tokens. Some of them don't represent "real" tokens coming
  * from the buffer. For example Terror can be used to tag an error, or Tyield
  * doesn't really correspond to a string, it's just there to encode the
  * priority.

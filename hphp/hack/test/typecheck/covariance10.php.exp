@@ -1,5 +1,5 @@
 File "covariance10.php", line 4, characters 46-46:
-Illegal usage of a contravariant type parameter (Typing[4118])
+Illegal usage of a contravariant type parameter (Typing[4121])
 File "covariance10.php", line 3, characters 10-10:
 This is where the parameter was declared as contravariant (-)
 File "covariance10.php", line 4, characters 46-46:

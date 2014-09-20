@@ -492,7 +492,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${RT_LIB})
   endif()
 
-  if (LIBSQLITE3_LIBRARY)
+  if (LIBSQLITE3_FOUND AND LIBSQLITE3_LIBRARY)
     target_link_libraries(${target} ${LIBSQLITE3_LIBRARY})
   else()
     target_link_libraries(${target} sqlite3)

@@ -35,6 +35,7 @@ session_id($session_id);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 session_start();
 var_dump($_SESSION);
+$_SESSION['Bar'] = 'Foo';
 session_write_close();
 
 ob_end_flush();

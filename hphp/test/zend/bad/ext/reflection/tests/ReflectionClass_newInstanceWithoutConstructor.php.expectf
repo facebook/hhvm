@@ -2,6 +2,8 @@ object(Foo)#%d (0) {
 }
 object(stdClass)#%d (0) {
 }
+object(DateTime)#%d (0) {
+}
 
 Fatal error: %s
 Stack trace:

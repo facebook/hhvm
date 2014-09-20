@@ -17,6 +17,6 @@ var_dump(isset($phar['f.php']));
 ?>
 ===DONE===
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_012.phar.php');
 __halt_compiler();
 ?>

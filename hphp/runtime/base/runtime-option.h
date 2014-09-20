@@ -77,6 +77,7 @@ public:
   static int ErrorUpgradeLevel; // Bitmask of errors to upgrade to E_USER_ERROR
   static bool CallUserHandlerOnFatals;
   static bool ThrowExceptionOnBadMethodCall;
+  static bool LogNativeStackOnOOM;
   static int RuntimeErrorReportingLevel;
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
@@ -419,15 +420,16 @@ public:
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
-  F(string, ProfileHWEvents,      std::string(""))                      \
+  F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
-  F(string, JitProfilePath,       std::string(""))                      \
+  F(string, JitProfilePath,            std::string(""))                 \
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
-  F(uint32_t, NumSingleJitRequests,    5)                              \
+  F(bool, JitProfileWarmupRequests,    false)                           \
+  F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \

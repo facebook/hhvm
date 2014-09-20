@@ -66,6 +66,6 @@ foreach($it as $name => $ent)
 ?>
 ===DONE===
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_004.phar.php');
 __halt_compiler();
 ?>

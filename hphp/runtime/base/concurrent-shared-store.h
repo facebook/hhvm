@@ -19,6 +19,14 @@
 
 #define TBB_PREVIEW_CONCURRENT_PRIORITY_QUEUE 1
 
+#include <atomic>
+#include <utility>
+#include <vector>
+#include <string>
+
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_priority_queue.h>
+
 #include "hphp/util/smalllocks.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/apc-handle.h"
@@ -27,33 +35,22 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/server/server-stats.h"
-#include <tbb/concurrent_hash_map.h>
-#include <tbb/concurrent_priority_queue.h>
-#include <atomic>
-#include <utility>
-#include <vector>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * This is the in-APC representation of a value, in ConcurrentTableSharedStore.
+ */
 struct StoreValue {
   StoreValue() : var(nullptr), sAddr(nullptr), expiry(0), size(0), sSize(0) {}
   StoreValue(const StoreValue& v) : var(v.var), sAddr(v.sAddr),
                                     expiry(v.expiry), size(v.size),
                                     sSize(v.sSize) {}
-  void set(APCHandle *v, int64_t ttl);
-  bool expired() const;
 
-  // Mutable fields here are so that we can deserialize the object from disk
-  // while holding a const pointer to the StoreValue. Mostly a hacky workaround
-  // for how we use TBB
-  mutable APCHandle *var;
-  char *sAddr; // For file storage
-  int64_t expiry;
-  mutable int32_t size;
-  int32_t sSize; // For file storage, negative means serailized object
-  mutable SmallLock lock;
+  void set(APCHandle* v, int64_t ttl);
+  bool expired() const;
 
   bool inMem() const {
     return var != nullptr;
@@ -68,16 +65,26 @@ struct StoreValue {
   bool isSerializedObj() const {
     return sSize < 0;
   }
+
+  // Mutable fields here are so that we can deserialize the object from disk
+  // while holding a const pointer to the StoreValue. Mostly a hacky workaround
+  // for how we use TBB
+  mutable APCHandle* var;
+  char* sAddr; // For file storage
+  int64_t expiry;
+  mutable int32_t size;
+  int32_t sSize; // For file storage, negative means serialized object
+  mutable SmallLock lock;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * Hold info about an entry in APC.
- * Typically used as a temporary holder to collect info or stats around
- * APC entries.
+ * Hold info about an entry in APC.  Used as a temporary holder to expose
+ * information about APC entries.
  */
 struct EntryInfo {
-
-  enum class EntryType {
+  enum class Type {
     Unknown,
     Uncounted,
     UncountedString,
@@ -88,38 +95,37 @@ struct EntryInfo {
     APCObject,
     SerializedObject,
   };
-  static EntryType getAPCType(const APCHandle* handle);
 
   EntryInfo(const char* apckey,
             bool inMem,
             int32_t size,
             int64_t ttl,
-            EntryType type)
-      : key(strdup(apckey))
-      , inMem(inMem)
-      , size(size)
-      , ttl(ttl)
-      , type(type)
+            Type type)
+    : key(apckey)
+    , inMem(inMem)
+    , size(size)
+    , ttl(ttl)
+    , type(type)
   {}
 
-  ~EntryInfo() {
-    free((void*)key);
-  }
+  static Type getAPCType(const APCHandle* handle);
 
-  const char* key;
+  std::string key;
   bool inMem;
   int32_t size;
   int64_t ttl;
-  EntryType type;
+  Type type;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 struct ConcurrentTableSharedStore {
   struct KeyValuePair {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
-    litstr key;
+    const char* key;
     int len;
-    APCHandle *value;
-    char *sAddr;
+    APCHandle* value;
+    char* sAddr;
     int32_t sSize;
 
     bool inMem() const {
@@ -131,7 +137,6 @@ struct ConcurrentTableSharedStore {
 
   explicit ConcurrentTableSharedStore(int id)
     : m_id(id)
-    , m_lockingFlag(false)
     , m_purgeCounter(0)
   {}
 
@@ -169,11 +174,11 @@ private:
   // charHashCompare below will properly handle the value and reuse the
   // hash value of the StringData
 
-  inline static char* tagStringData(StringData* s) {
+  static char* tagStringData(StringData* s) {
     return reinterpret_cast<char*>(-reinterpret_cast<intptr_t>(s));
   }
 
-  inline static StringData* getStringData(const char* s) {
+   static StringData* getStringData(const char* s) {
     assert(reinterpret_cast<intptr_t>(s) < 0);
     return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
   }
@@ -182,8 +187,8 @@ private:
     return reinterpret_cast<intptr_t>(s) < 0;
   }
 
-  struct charHashCompare {
-    bool equal(const char *s1, const char *s2) const {
+  struct CharHashCompare {
+    bool equal(const char* s1, const char* s2) const {
       assert(s1 && s2);
       // tbb implementation call equal with the second pointer being the
       // value in the table and thus not a StringData*. We are asserting
@@ -194,21 +199,21 @@ private:
       }
       return strcmp(s1, s2) == 0;
     }
-    size_t hash(const char *s) const {
+    size_t hash(const char* s) const {
       assert(s);
       return isTaggedStringData(s) ? getStringData(s)->hash() : hash_string(s);
     }
   };
 
-  typedef tbb::concurrent_hash_map<const char*, StoreValue, charHashCompare>
+private:
+  typedef tbb::concurrent_hash_map<const char*, StoreValue, CharHashCompare>
     Map;
   typedef std::pair<const char*, time_t> ExpirationPair;
-  typedef tbb::concurrent_hash_map<const char*, int, charHashCompare>
+  typedef tbb::concurrent_hash_map<const char*, int, CharHashCompare>
     ExpMap;
 
-  class ExpirationCompare {
-  public:
-    bool operator()(const ExpirationPair &p1, const ExpirationPair &p2) {
+  struct ExpirationCompare {
+    bool operator()(const ExpirationPair& p1, const ExpirationPair& p2) {
       return p1.second > p2.second;
     }
   };
@@ -239,7 +244,7 @@ private:
   // helpers for dumping APC
   static void dumpKeyOnly(std::ostream& out, std::vector<EntryInfo>& entries);
   static void dumpKeyAndMeta(
-      std::ostream& out, std::vector<EntryInfo>& entries);
+    std::ostream& out, std::vector<EntryInfo>& entries);
   // this call is outrageously expensive and hooked up to an admin command
   // to be used for rare debugging cases.
   // Do NOT use it for regular debugging or monitoring particularly on
@@ -255,8 +260,6 @@ private:
   // Read lock is acquired whenever using concurrent ops
   // Write lock is acquired for whole table operations
   ReadWriteMutex m_lock;
-  bool m_lockingFlag; // flag to enable temporary locking
-
   tbb::concurrent_priority_queue<ExpirationPair,
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;

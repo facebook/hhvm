@@ -1,0 +1,8 @@
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(1) "2"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(1) "3"
+}

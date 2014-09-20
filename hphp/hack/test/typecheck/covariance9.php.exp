@@ -1,5 +1,5 @@
 File "covariance9.php", line 6, characters 41-41:
-Illegal usage of a covariant type parameter (Typing[4117])
+Illegal usage of a covariant type parameter (Typing[4120])
 File "covariance9.php", line 5, characters 10-10:
 This is where the parameter was declared as covariant (+)
 File "covariance9.php", line 6, characters 41-41:

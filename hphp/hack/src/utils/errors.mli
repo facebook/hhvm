@@ -21,7 +21,7 @@ val make_error : (Pos.t * string) list -> error
 val error_code_to_string : int -> string
 
 val fixme_format : Pos.t -> unit
-val alok : Pos.t * string -> unit
+val typeparam_alok : Pos.t * string -> unit
 val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val generic_class_var : Pos.t -> unit
@@ -88,6 +88,7 @@ val format_string :
   Pos.t -> string -> string -> Pos.t -> string -> string -> unit
 val expected_literal_string : Pos.t -> unit
 val generic_array_strict : Pos.t -> unit
+val strict_members_not_known : Pos.t -> string -> unit
 val nullable_void : Pos.t -> unit
 val tuple_syntax : Pos.t -> unit
 val class_arity : Pos.t -> string -> int -> unit
@@ -245,6 +246,8 @@ val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
+val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list -> (Pos.t * string) list -> unit
+val void_usage : Pos.t -> (Pos.t * string) list -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

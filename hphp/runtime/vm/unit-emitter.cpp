@@ -321,32 +321,6 @@ LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
   return lines;
 }
 
-/*
- * Create a LineToOffsetRangeVecMap from `srcLoc'.
- */
-LineToOffsetRangeVecMap createLineToOffsetMap(SrcLoc& srcLoc,
-                                              Offset bclen) {
-  LineToOffsetRangeVecMap map;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset baseOff = srcLoc[i].first;
-    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
-    OffsetRange range(baseOff, endOff);
-    auto line0 = srcLoc[i].second.line0;
-    auto line1 = srcLoc[i].second.line1;
-    for (int line = line0; line <= line1; line++) {
-      auto it = map.find(line);
-      if (it != map.end()) {
-        it->second.push_back(range);
-      } else {
-        OffsetRangeVec v(1);
-        v.push_back(range);
-        map[line] = v;
-      }
-    }
-  }
-  return map;
-}
-
 }
 
 void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
@@ -444,10 +418,8 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
 
   try {
     {
-      auto lines = createLineTable(m_sourceLocTab, m_bclen);
-      urp.insertUnit(repoId).insert(txn, m_sn, m_md5, m_bc, m_bclen,
-                                    &m_mainReturn, m_mergeOnly, m_isHHFile,
-                                    m_preloadPriority, lines, m_typeAliases);
+      m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+      urp.insertUnit(repoId).insert(*this, txn, m_sn, m_md5, m_bc, m_bclen);
     }
     int64_t usn = m_sn;
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
@@ -522,8 +494,8 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-Unit* UnitEmitter::create() {
-  Unit* u = new Unit();
+std::unique_ptr<Unit> UnitEmitter::create() {
+  auto u = folly::make_unique<Unit>();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
@@ -544,9 +516,13 @@ Unit* UnitEmitter::create() {
     np.second = nullptr;
     u->m_namedInfo.push_back(np);
   }
-  for (unsigned i = 0; i < m_arrays.size(); ++i) {
-    u->m_arrays.push_back(m_arrays[i].array);
-  }
+  u->m_arrays = [&]() -> std::vector<const ArrayData*> {
+    auto ret = std::vector<const ArrayData*>{};
+    for (unsigned i = 0; i < m_arrays.size(); ++i) {
+      ret.push_back(m_arrays[i].array);
+    }
+    return ret;
+  }();
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
@@ -563,7 +539,8 @@ Unit* UnitEmitter::create() {
           u->m_mergeOnly = false;
           break;
         }
-      } else switch (mergeable.first) {
+      } else {
+        switch (mergeable.first) {
           case MergeKind::PersistentDefine:
           case MergeKind::Define:
           case MergeKind::Global:
@@ -572,6 +549,7 @@ Unit* UnitEmitter::create() {
           default:
             break;
         }
+      }
     }
     ix += extra;
   }
@@ -635,13 +613,24 @@ Unit* UnitEmitter::create() {
   }
   assert(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)MergeKind::Done;
-  u->m_sourceLocTable = createSourceLocTable();
+
+  /*
+   * What's going on is we're going to have a m_lineTable if this UnitEmitter
+   * was loaded from the repo, and no m_sourceLocTab (it's demand-loaded by
+   * unit.cpp because it's only used for the debugger).
+   *
+   * On the other hand, if this unit was just created by parsing a php file (or
+   * whatnot), we'll have a m_sourceLocTab.  We'll normally have a m_lineTable
+   * also, because of side-effects of UnitEmitter::insert, but this code still
+   * needs to check in case commit() was not called, because you're required to
+   * always have a m_lineTable.
+   */
   if (m_lineTable.size() == 0) {
     u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
   } else {
     u->m_lineTable = m_lineTable;
   }
-  u->m_lineToOffsetRangeVecMap = createLineToOffsetMap(m_sourceLocTab, m_bclen);
+
   for (size_t i = 0; i < m_feTab.size(); ++i) {
     assert(m_feTab[i].second->past == m_feTab[i].first);
     assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());
@@ -660,7 +649,7 @@ Unit* UnitEmitter::create() {
     Trace::traceRelease("%s", u->toString().c_str());
   }
   if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
-    std::printf("%s", disassemble(u).c_str());
+    std::printf("%s", disassemble(u.get()).c_str());
     std::fflush(stdout);
     _Exit(0);
   }
@@ -677,12 +666,23 @@ Unit* UnitEmitter::create() {
     kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
     Verifier::checkUnit(
-      u,
+      u.get(),
       isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose
     );
   }
 
   return u;
+}
+
+template<class SerDe>
+void UnitEmitter::serdeMetaData(SerDe& sd) {
+  sd(m_mainReturn)
+    (m_mergeOnly)
+    (m_isHHFile)
+    (m_lineTable)
+    (m_typeAliases)
+    (m_preloadPriority)
+    ;
 }
 
 
@@ -710,8 +710,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
-             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, preload INTEGER, "
-                "bc BLOB, data BLOB, "
+             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, data BLOB, "
                 "UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
@@ -790,36 +789,29 @@ UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
   return ue;
 }
 
-Unit* UnitRepoProxy::load(const std::string& name, const MD5& md5) {
+std::unique_ptr<Unit>
+UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
   if (!loadHelper(ue, name, md5)) return nullptr;
   return ue.create();
 }
 
 void UnitRepoProxy::InsertUnitStmt
-                  ::insert(RepoTxn& txn, int64_t& unitSn, const MD5& md5,
-                           const unsigned char* bc, size_t bclen,
-                           const TypedValue* mainReturn, bool mergeOnly,
-                           bool isHHFile, int preloadPriority,
-                           const LineTable& lines,
-                           const std::vector<TypeAlias>& typeAliases) {
+                  ::insert(const UnitEmitter& ue,
+                           RepoTxn& txn, int64_t& unitSn, const MD5& md5,
+                           const unsigned char* bc, size_t bclen) {
   BlobEncoder dataBlob;
 
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @preload, @bc, @data);";
+             << " VALUES(NULL, @md5, @bc, @data);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
-  query.bindInt("@preload", preloadPriority);
   query.bindBlob("@bc", (const void*)bc, bclen);
-  dataBlob(*mainReturn)
-          (mergeOnly)
-          (isHHFile)
-          (lines)
-          (typeAliases);
+  const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
   unitSn = query.getInsertedRowid();
@@ -831,7 +823,7 @@ bool UnitRepoProxy::GetUnitStmt
     RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,preload,bc,data FROM "
+      ssSelect << "SELECT unitSn,bc,data FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
       txn.prepare(*this, ssSelect.str());
@@ -843,30 +835,13 @@ bool UnitRepoProxy::GetUnitStmt
       return true;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
-    int preloadPriority;                /**/ query.getInt(1, preloadPriority);
-    const void* bc; size_t bclen;       /**/ query.getBlob(2, bc, bclen);
-    BlobDecoder dataBlob =              /**/ query.getBlob(3);
+    const void* bc; size_t bclen;       /**/ query.getBlob(1, bc, bclen);
+    BlobDecoder dataBlob =              /**/ query.getBlob(2);
 
     ue.m_repoId = m_repoId;
     ue.m_sn = unitSn;
-    ue.m_preloadPriority = preloadPriority;
-    ue.setBc((const unsigned char*)bc, bclen);
-
-    TypedValue mainReturn;
-    bool mergeOnly;
-    bool isHHFile;
-    LineTable lines;
-
-    dataBlob(mainReturn)
-            (mergeOnly)
-            (isHHFile)
-            (lines)
-            (ue.m_typeAliases);
-
-    ue.m_mainReturn = mainReturn;
-    ue.m_mergeOnly = mergeOnly;
-    ue.m_isHHFile = isHHFile;
-    ue.m_lineTable = lines;
+    ue.setBc(static_cast<const unsigned char*>(bc), bclen);
+    ue.serdeMetaData(dataBlob);
 
     txn.commit();
   } catch (RepoExc& re) {

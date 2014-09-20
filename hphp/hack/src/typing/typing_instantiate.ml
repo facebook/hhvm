@@ -24,9 +24,10 @@ type subst = ty SMap.t
  *   class Y<T> { ... }
  *   class X extends Y<int>
  *
- * To build the type of X, we to replace all the occurrences of T in Y by int.
- * The function make_subst, builds the substition (the map associating types
- * to a type parameter name), in this case, it would build the map(T => int).
+ * To build the type of X, we need to replace all the occurrences of T in Y by
+ * int. The function make_subst, builds the substitution (the map associating
+ * types to a type parameter name), in this case, it would build the map(T =>
+ * int).
  *)
 (*****************************************************************************)
 
@@ -58,7 +59,7 @@ let rec instantiate_fun env fty el =
   let env, efty = Env.expand_type env fty in
   match efty with
   | r, Tfun ft ->
-      (* TODO: this is a horrible hack, instantianting a function should not
+      (* TODO: this is a horrible hack, instantiating a function should not
        * require the arguments (el).
        *)
       let env, ft = Typing_exts.retype_magic_func env ft el in

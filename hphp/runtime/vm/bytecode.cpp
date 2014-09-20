@@ -4456,8 +4456,8 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   }
 
   if (isProfileRequest()) {
-    auto f = const_cast<Func*>(vmfp()->func());
-    f->incProfCounter();
+    auto const f = vmfp()->func();
+    profileIncrementFuncCounter(f);
     if (!(f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
           Func::isSpecial(f->name()))) {
       recordType(TypeProfileKey(TypeProfileKey::MethodName, f->name()),

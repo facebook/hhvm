@@ -21,6 +21,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -32,8 +33,8 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 /**
- * A simple class of a growable number of profiling counters with
- * fixed addresses, suitable for being incremented from the TC.
+ * A simple class of a growable number of profiling counters with fixed
+ * addresses, suitable for being incremented from the TC.
  */
 template<typename T>
 class ProfCounters {
@@ -64,13 +65,12 @@ class ProfCounters {
 typedef std::vector<TCA> PrologueCallersVec;
 
 /**
- * A record with the callers for each profiling prologue.  Besides
- * their main entry points, prologues optionally have a guard entry
- * point that checks that we're in the right function before falling
- * through to the main prologue entry (see
- * MCGenerator::emitFuncGuard).  We need to keep track of both kinds
- * of callers for each prologue, so that we can smash them
- * appropriately when regenerating prologues.
+ * A record with the callers for each profiling prologue.  Besides their main
+ * entry points, prologues optionally have a guard entry point that checks that
+ * we're in the right function before falling through to the main prologue
+ * entry (see MCGenerator::emitFuncGuard).  We need to keep track of both kinds
+ * of callers for each prologue, so that we can smash them appropriately when
+ * regenerating prologues.
  */
 class PrologueCallersRec : private boost::noncopyable {
  public:
@@ -217,7 +217,21 @@ public:
   void                    setOptimized(FuncId funcId);
   bool                    profiling(FuncId funcId) const;
   void                    setProfiling(FuncId funcId);
-  void                    freeFuncData(FuncId funcId);
+
+  /*
+   * Called when we've finished promoting all the profiling translations for
+   * `funcId' to optimized translations.  This means we can throw away any
+   * allocations we made that we won't need any more for this Func.
+   */
+  void freeFuncData(FuncId funcId);
+
+  /*
+   * Returns whether any block in the given func ends at the supplied offset.
+   * This is provided in this format because the region selector wants to
+   * terminate profiling translations at block ends (so it doesn't care where
+   * blocks start, just where they end).
+   */
+  bool anyBlockEndsAt(const Func*, Offset offset);
 
 private:
   uint32_t                m_numTrans;
@@ -231,6 +245,8 @@ private:
   PrologueToTransMap      m_prologueDB;  // maps (Func,nArgs) => prolog TransID
   PrologueToTransMap      m_dvFuncletDB; // maps (Func,nArgs) => DV funclet
                                          //                      TransID
+  hphp_hash_map<FuncId,hphp_hash_set<Offset>>
+                          m_blockEndOffsets;  // func -> block end offsets
 };
 
 //////////////////////////////////////////////////////////////////////

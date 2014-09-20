@@ -929,7 +929,7 @@ def walk(filename, dest_subdir):
     full_dest_filename = full_dest_filename.replace('.phpt', '.php')
 
     if not '.phpt' in filename:
-        data = file(full_dest_filename).read()
+        data = open(full_dest_filename).read()
 
         if '/ext/mysqli/tests/table.inc' in full_dest_filename:
             data = data.replace(
@@ -957,15 +957,15 @@ def walk(filename, dest_subdir):
                 '__DIR__',
             )
 
-        file(full_dest_filename, 'w').write(data)
+        open(full_dest_filename, 'w').write(data)
 
         if full_dest_filename.endswith('.php'):
-            f = file(full_dest_filename.replace('.php', '.php.skipif'), 'w')
+            f = open(full_dest_filename.replace('.php', '.php.skipif'), 'w')
             f.write('always skip - not a test')
 
         return
 
-    print "Importing %s" % full_dest_filename
+    print("Importing %s" % full_dest_filename)
 
     def split(pattern, str):
         return re.split(r'\n\s*--'+pattern+'--\s*\n', str, 1)
@@ -982,18 +982,18 @@ def walk(filename, dest_subdir):
                 sections[cur_header].append(line)
         return sections
 
-    sections = parse_headers(file(filename).read())
-    for i in sections.keys():
+    sections = parse_headers(open(filename).read())
+    for i in list(sections.keys()):
         sections[i] = '\n'.join(sections[i])
 
     unsupported_sections = ('POST_RAW')
     for name in unsupported_sections:
         if name in sections:
-            print "Unsupported test with section --%s--: " % name, filename
+            print("Unsupported test with section --%s--: " % name, filename)
             return
 
     if not 'FILE' in sections:
-        print "Malformed test, no --FILE--: ", filename
+        print("Malformed test, no --FILE--: ", filename)
         return
 
     for key in ('EXPECT', 'EXPECTF', 'EXPECTREGEX'):
@@ -1036,14 +1036,14 @@ def walk(filename, dest_subdir):
             exp = exp.replace('100000', '1000')
 
         # we use %a for error messages so always write expectf
-        file(full_dest_filename+'.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     elif 'EXPECTREGEX' in sections:
         exp = sections['EXPECTREGEX']
 
         if '/ext/standard/tests/strings/004.php' in full_dest_filename:
             exp = exp.replace(': 3', ': [3-4]')
 
-        file(full_dest_filename+'.expectregex', 'w').write(exp)
+        open(full_dest_filename + '.expectregex', 'w').write(exp)
     elif 'EXPECTF' in sections:
         exp = sections['EXPECTF']
 
@@ -1053,9 +1053,9 @@ def walk(filename, dest_subdir):
           '/ext/zlib/tests/readgzfile_variation13.php' in full_dest_filename):
             exp = exp.replace('to be long', 'to be integer')
 
-        file(full_dest_filename+'.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     else:
-        print "Malformed test, no --EXPECT*--: ", filename
+        print("Malformed test, no --EXPECT*--: ", filename)
         return
 
     if 'INI' in sections:
@@ -1072,7 +1072,7 @@ def walk(filename, dest_subdir):
            '/ext/soap/tests/bugs/bug36999.php' in full_dest_filename:
             ini = ini + '\n' + 'hhvm.enable_zend_compat = true'
 
-        file(full_dest_filename + '.ini', 'w').write(ini)
+        open(full_dest_filename + '.ini', 'w').write(ini)
 
     if 'SKIPIF' in sections:
         skipif = sections['SKIPIF'].strip()
@@ -1087,7 +1087,7 @@ def walk(filename, dest_subdir):
             skipif = skipif.replace("extension_loaded(zlib)",
                                     "extension_loaded('zlib')")
 
-        file(full_dest_filename + '.skipif', 'w').write(skipif)
+        open(full_dest_filename + '.skipif', 'w').write(skipif)
 
     test = sections['FILE'] + "\n"
 
@@ -1134,11 +1134,11 @@ def walk(filename, dest_subdir):
     # php-src. Then when it gets merged kill your hack.
     if '/tests/classes/bug63462.php' in full_dest_filename:
         exp = exp.replace("Notice:", "\nNotice:")
-        file(full_dest_filename + '.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/ldap/tests/ldap_control_paged_results_variation1.php' in full_dest_filename) or \
        ('extldap/tests/ldap_control_paged_results_variation2.php' in full_dest_filename):
         exp = exp.replace("resource(6)", "resource(%d)")
-        file(full_dest_filename + '.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/standard/tests/math/pow.php' in full_dest_filename) or \
        ('/ext/standard/tests/math/abs.php' in full_dest_filename):
         # HHVM handles int->double promotion differently than Zend
@@ -1228,23 +1228,25 @@ def walk(filename, dest_subdir):
     if '/Zend/tests/closure_016.php' in full_dest_filename:
         # undo closure% only for first two instances
         exp = exp.replace('Closure%s::', 'Closure::', 2)
-        file(full_dest_filename + '.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/json/tests/unsupported_type_error.php' in full_dest_filename:
         exp = exp.replace('resource(5)', 'resource(%d)')
-        file(full_dest_filename + '.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     if ('/ext/xmlreader/tests/007.php' in full_dest_filename or
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
        '/ext/xmlreader/tests/012.php' in full_dest_filename or
        '/ext/dom/tests/bug37456.php' in full_dest_filename or
        '/ext/dom/tests/bug67081.php' in full_dest_filename):
-        file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "file"')
+        open(full_dest_filename + '.ini', 'w').write(
+                'hhvm.libxml.ext_entity_whitelist = "file"')
     if '/ext/xsl/tests/xslt008.php' in full_dest_filename:
-        file(full_dest_filename + '.ini', 'w').write('hhvm.libxml.ext_entity_whitelist = "compress.zlib"')
+        open(full_dest_filename + '.ini', 'w').write(
+                'hhvm.libxml.ext_entity_whitelist = "compress.zlib"')
     if '/ext/standard/tests/file/realpath_basic' in full_dest_filename:
         root_dest_filenname = os.path.splitext(dest_filename)[0]
         test = test.replace('realpath_basic', root_dest_filenname)
         exp = exp.replace('realpath_basic', root_dest_filenname)
-        file(full_dest_filename + '.expectf', 'w').write(exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
     if '/ext/standard/tests/network/bug20134.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(1025, 65535);")
         test = test.replace("65534", "$port")
@@ -1506,10 +1508,10 @@ def walk(filename, dest_subdir):
                        re.MULTILINE)
         test = r.sub('', test)
 
-        for t, t_replace_config in replace_configs.iteritems():
+        for t, t_replace_config in replace_configs.items():
             for i, replace_id in enumerate(t_replace_config.get(testname, [])):
                 new_id = 'test_%s_%s_%d' % (testname, t, i + 1)
-                if isinstance(replace_id, basestring):
+                if isinstance(replace_id, str):
                     test = test.replace(replace_id, new_id)
                 else:
                     test = replace_id.sub(new_id, test)
@@ -1518,7 +1520,7 @@ def walk(filename, dest_subdir):
         test = re.sub('(require(_once)*[ (][\'"](clean_)?table.inc[\'"]\)?)',
                       '$test_table_name = \'%s\'; \\1' % (new_id, ), test)
 
-    file(full_dest_filename, 'w').write(test)
+    open(full_dest_filename, 'w').write(test)
 
 def should_import(filename):
     for bad in no_import:
@@ -1536,14 +1538,14 @@ zend_release_archive = os.path.join(zend_dir, zend_release_filename)
 zend_release_path = os.path.join(zend_dir, zend_release_name)
 
 if not os.path.isfile(zend_release_archive):
-    print 'Downloading ' + zend_release_name + '...'
+    print('Downloading ' + zend_release_name + '...')
     zend_release_url = "http://php.net/get/" + zend_release_filename + "/from/this/mirror"
     zend_release_request = urllib2.Request(zend_release_url)
     zend_release_response = urllib2.urlopen(zend_release_request)
-    file(zend_release_archive, 'wb').write(zend_release_response.read())
+    open(zend_release_archive, 'wb').write(zend_release_response.read())
 
 if not os.path.isdir(zend_release_path):
-    print 'Extracting ' + zend_release_name + '...'
+    print('Extracting ' + zend_release_name + '...')
     zend_release_tar = tarfile.open(zend_release_archive, 'r:gz')
     zend_release_tar.extractall(zend_dir)
 
@@ -1570,12 +1572,13 @@ for root, dirs, files in os.walk(zend_release_path):
 
 if not os.path.isdir(all_dir):
     if args.only:
-        print "No test/zend/all. Your --only arg didn't match any test that should be imported."
+        print("No test/zend/all. " +
+              "Your --only arg didn't match any test that should be imported.")
     else:
-        print "No test/zend/all. Maybe no tests were imported?"
+        print("No test/zend/all. Maybe no tests were imported?")
     sys.exit(0)
 else:
-    print "Running all tests from zend/all"
+    print("Running all tests from zend/all")
 
 stdout = subprocess.Popen(
     [
@@ -1596,9 +1599,9 @@ last_line = stdout.strip().split("\n")[-1]
 results = json.loads(last_line)['results']
 
 if args.verbose:
-    print results
+    print(results)
 else:
-    print "Test run done, moving files"
+    print("Test run done, moving files")
 
 for test in results:
     filename = test['name']
@@ -1643,12 +1646,12 @@ for test in results:
     source_file_exp = exps[0]
     _, dest_ext = os.path.splitext(source_file_exp)
     shutil.copyfile(filename, dest_file)
-    file(dest_file + dest_ext, 'w').write(
-        file(source_file_exp).read().replace('/all', '/' + subpath)
+    open(dest_file + dest_ext, 'w').write(
+        open(source_file_exp).read().replace('/all', '/' + subpath)
     )
 
     if needs_norepo:
-        file(dest_file + '.norepo', 'w')
+        open(dest_file + '.norepo', 'w')
     if os.path.exists(filename + '.skipif'):
         shutil.copyfile(filename + '.skipif', dest_file + '.skipif')
     if os.path.exists(filename + '.ini'):
@@ -1675,14 +1678,14 @@ for root, dirs, files in os.walk(all_dir):
                     dest = filename.replace('all', subdir, 1)
                     dir = os.path.dirname(dest)
                     mkdir_p(dir)
-                    data = file(filename).read()
+                    data = open(filename).read()
 
                     if '/ext/ftp/tests/server.inc' in filename:
                         data = data.replace('<10', '<100')
                         data = data.replace('50000', '1025')
                         data = data.replace('stream_socket_server', '@stream_socket_server')
 
-                    file(dest, 'w').write(data)
+                    open(dest, 'w').write(data)
 
 if not args.dirty:
     shutil.rmtree(all_dir)

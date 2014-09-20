@@ -12,6 +12,16 @@
 function test(): int {
   $x = null;
   do {
+    for ($i = 0; i < 10; ++$i) {
+      continue;
+    }
+    $i = 0;
+    while ($i++ < 10) {
+      continue;
+    }
+    do {
+      continue;
+    } while ($i-- > 0);
     $x = 0;
   } while (true);
   return $x;

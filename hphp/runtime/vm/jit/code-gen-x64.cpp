@@ -189,6 +189,22 @@ void cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
   v << phidef{v.makeTuple(VregList{dst})};
 }
 
+template <class T, class F>
+void unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
+  auto fblock = v.makeBlock();
+  auto tblock = vc.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {fblock, tblock}};
+  vc = tblock;
+  auto treg = t(vc);
+  vc << phijmp{done, vc.makeTuple(VregList{treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v = done;
+  v << phidef{v.makeTuple(VregList{d})};
+}
+
 /*
  * Generate an if-block that branches around some unlikely code, handling
  * the cases when a == astubs and a != astubs.  cc is the branch condition
@@ -5758,12 +5774,18 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto& v = vmain();
 
   v << cmpbim{ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]};
-  unlikelyIfThenElse(v, vcold(), CC_Z,
+  unlikelyCond(v, vcold(), CC_Z, dstReg,
     [&](Vout& v) {
-      cgCallNative(v, inst);
+      auto dst1 = v.makeReg();
+      cgCallHelper(v, CppCall::method(&ArrayData::size),
+                   callDest(dst1), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0/*base*/));
+      return dst1;
     },
     [&](Vout& v) {
-      v << loadl{baseReg[ArrayData::offsetofSize()], dstReg};
+      auto dst2 = v.makeReg();
+      v << loadl{baseReg[ArrayData::offsetofSize()], dst2};
+      return dst2;
     }
   );
 }

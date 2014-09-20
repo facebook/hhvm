@@ -1937,27 +1937,31 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
+  auto test = inst->src(1);
   auto testReg = srcLoc(1).reg();
   auto destReg = dstLoc(0).reg();
   auto& v = vmain();
 
-  if (testReg == InvalidReg) {
+  auto call_classof = [&](Vreg dst) {
+    cgCallHelper(v, CppCall::method(&Class::classof),
+    callDest(dst), SyncOptions::kNoSyncPoint, argGroup().ssa(0).ssa(1));
+    return dst;
+  };
+
+  if (test->isConst()) {
     // Don't need to do the null check when the class is const.
-    assert(inst->src(1)->clsVal() != nullptr);
-    cgCallNative(v, inst);
+    assert(test->clsVal() != nullptr);
+    call_classof(destReg);
     return;
   }
 
   v << testq{testReg, testReg};
-  ifThenElse(v, CC_NZ,
-    [&](Vout& v) {
-      cgCallNative(v, inst);
-    },
-    [&](Vout& v) {
-      // testReg == 0, set dest to false (0)
-      v << copy{testReg, destReg};
-    }
-  );
+  cond(v, CC_NZ, destReg, [&](Vout& v) {
+    return call_classof(v.makeReg());
+  }, [&](Vout& v) {
+    // testReg == 0, set dest to false (0)
+    return testReg;
+  });
 }
 
 /*
@@ -3679,10 +3683,12 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   // Context could be either a this object or a class ptr
   auto& v = vmain();
   v << testbi{1, srcReg};
-  ifThenElse(v, CC_NZ,
-    [&](Vout& v) { emitLdClsCctx(v, srcReg, dstReg);  }, // ctx is a class
-    [&](Vout& v) { emitLdObjClass(v, srcReg, dstReg); }  // ctx is this ptr
-  );
+  cond(v, CC_NZ, dstReg,
+    [&](Vout& v) { // ctx is a class
+      return emitLdClsCctx(v, srcReg, v.makeReg());
+    }, [&](Vout& v) { // ctx is this ptr
+      return emitLdObjClass(v, srcReg, v.makeReg());
+    });
 }
 
 void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {

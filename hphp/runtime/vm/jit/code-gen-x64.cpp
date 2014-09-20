@@ -173,7 +173,7 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
 }
 
 template <class T, class F>
-void cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
+Vreg cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
   using namespace x64;
   auto fblock = v.makeBlock();
   auto tblock = v.makeBlock();
@@ -187,10 +187,12 @@ void cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
   v << phijmp{done, v.makeTuple(VregList{freg})};
   v = done;
   v << phidef{v.makeTuple(VregList{dst})};
+  return dst;
 }
 
+// emit an if-then-else condition where the true case is unlikely.
 template <class T, class F>
-void unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
   auto fblock = v.makeBlock();
   auto tblock = vc.makeBlock();
   auto done = v.makeBlock();
@@ -203,6 +205,7 @@ void unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
   v << phijmp{done, v.makeTuple(VregList{freg})};
   v = done;
   v << phidef{v.makeTuple(VregList{d})};
+  return d;
 }
 
 /*
@@ -2032,36 +2035,44 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
   auto rIndef = v.cns(0x8000000000000000L);
-  v << cvttsd2siq{srcReg, dstReg};
-  v << cmpq{rIndef, dstReg};
-
-  unlikelyIfBlock(v, vcold(), CC_E, [&] (Vout& v) {
+  auto dst1 = v.makeReg();
+  v << cvttsd2siq{srcReg, dst1};
+  v << cmpq{rIndef, dst1};
+  unlikelyCond(v, vcold(), CC_E, dstReg, [&](Vout& v) {
     // result > max signed int or unordered
     v << ucomisd{v.cns(0), srcReg};
-    ifThen(v, CC_B, [&](Vout& v) {
+    return cond(v, CC_NB, v.makeReg(), [&](Vout& v) {
+      return dst1;
+    }, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      ifThen(v, CC_NP, [&](Vout& v) {
+      return cond(v, CC_P, v.makeReg(), [&](Vout& v) {
+        return dst1;
+      }, [&](Vout& v) {
         v << ucomisd{v.cns(maxULongAsDouble), srcReg};
-        ifThenElse(v, CC_B, [&](Vout& v) {
-          // src0 > ULONG_MAX
-          v << ldimm{0, dstReg};
+        return cond(v, CC_B, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
+          return v.cns(0);
         }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
           // 0 < src0 - ULONG_MAX <= LONG_MAX
           auto tmp_sub = v.makeReg();
+          auto tmp_int = v.makeReg();
+          auto dst5 = v.makeReg();
           v << subsd{v.cns(maxLongAsDouble), srcReg, tmp_sub};
-          v << cvttsd2siq{tmp_sub, dstReg};
+          v << cvttsd2siq{tmp_sub, tmp_int};
 
           // We want to simulate integer overflow so we take the resulting
           // integer and flip its sign bit (NB: we don't use orq here
           // because it's possible that src0 == LONG_MAX in which case
-          // cvttsd2siq will yeild an indefiniteInteger, which we would
+          // cvttsd2siq will yield an indefiniteInteger, which we would
           // like to make zero)
-          v << xorq{rIndef, dstReg, dstReg};
+          v << xorq{rIndef, tmp_int, dst5};
+          return dst5;
         });
       });
     });
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
@@ -2143,31 +2154,28 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   auto& v = vmain();
 
   testimm(v, ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()]);
-  unlikelyIfThenElse(v, vcold(),
-    CC_NZ,
+  unlikelyCond(v, vcold(), CC_NZ, rdst,
     [&] (Vout& v) {
       testimm(v,
               ObjectData::IsCollection,
               rsrc[ObjectData::attributeOff()]);
-      ifThenElse(
-        v,
-        CC_NZ,
+      return cond(v, CC_NZ, v.makeReg(),
         [&] (Vout& v) { // rsrc points to native collection
+          auto dst2 = v.makeReg();
           v << cmplim{0, rsrc[FAST_COLLECTION_SIZE_OFFSET]};
-          v << setcc{CC_NE, rdst}; // true iff size not zero
-        },
-        [&] (Vout& v) { // rsrc is not a native collection
-          cgCallHelper(
-            v,
+          v << setcc{CC_NE, dst2}; // true iff size not zero
+          return dst2;
+        }, [&] (Vout& v) { // rsrc is not a native collection
+          auto dst3 = v.makeReg();
+          cgCallHelper(v,
             CppCall::method(&ObjectData::o_toBoolean),
-            callDest(inst),
+            callDest(dst3),
             SyncOptions::kSyncPoint,
             argGroup().ssa(0));
-        }
-      );
-    },
-    [&] (Vout& v) {
-      v << ldimm{1, rdst};
+          return dst3;
+        });
+    }, [&] (Vout& v) {
+      return v.cns(1);
     }
   );
 }

@@ -242,15 +242,17 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
   }
 }
 
-void emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
+Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
   emitLdLowPtr(v, objReg[ObjectData::getVMClassOffset()],
                dstReg, sizeof(LowClassPtr));
+  return dstReg;
 }
 
-void emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
+Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
   auto t = v.makeReg();
   v << copy{srcReg, t};
   v << decq{t, dstReg};
+  return dstReg;
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {

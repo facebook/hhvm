@@ -172,6 +172,23 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
   v = done;
 }
 
+template <class T, class F>
+void cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
+  using namespace x64;
+  auto fblock = v.makeBlock();
+  auto tblock = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {fblock, tblock}};
+  v = tblock;
+  auto treg = t(v);
+  v << phijmp{done, v.makeTuple(VregList{treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v = done;
+  v << phidef{v.makeTuple(VregList{dst})};
+}
+
 /*
  * Generate an if-block that branches around some unlikely code, handling
  * the cases when a == astubs and a != astubs.  cc is the branch condition
@@ -2179,11 +2196,23 @@ void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
+  auto src = srcLoc(0).reg();
+  auto dst = dstLoc(0).reg();
   auto& v = vmain();
-  v << copy{srcReg, dstReg};
-  emitDerefIfVariant(v, dstReg);
+  emitCmpTVType(v, KindOfRef, src[TVOFF(m_type)]);
+  if (RefData::tvOffset() == 0) {
+    v << cloadq{CC_E, src, src[TVOFF(m_data)], dst};
+    return;
+  }
+  cond(v, CC_E, dst, [&](Vout& v) {
+    auto ref_ptr = v.makeReg();
+    auto cell_ptr = v.makeReg();
+    v << loadq{src[TVOFF(m_data)], ref_ptr};
+    v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr};
+    return cell_ptr;
+  }, [&](Vout& v) {
+    return src;
+  });
 }
 
 void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {

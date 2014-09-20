@@ -29,6 +29,17 @@ function readline_clear_history(): bool;
 <<__Native>>
 function readline_completion_function(mixed $function): bool;
 
+
+/**
+ * Gets/sets various internal readline variables
+ * @param string $varname - A variable name.
+ * @param string $newvalue - If provided, this will be the new value of setting
+ * @return mixed -
+ */
+<<__Native>>
+function readline_info(string $varname = null,
+                       string $newvalue = null): mixed;
+
 /**
  * Reads the history
  *

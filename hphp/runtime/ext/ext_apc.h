@@ -70,23 +70,20 @@ class apcExtension : public Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_add(const Variant& key_or_array, const Variant& var = null_variant,
-                  int64_t ttl = 0, int64_t cache_id = 0);
+                  int64_t ttl = 0);
 Variant f_apc_store(const Variant& key_or_array, const Variant& var = null_variant,
-                    int64_t ttl = 0, int64_t cache_id = 0);
-bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
-                                      int64_t cache_id = 0);
+                    int64_t ttl = 0);
+bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var);
 
-Variant f_apc_fetch(const Variant& key, VRefParam success = uninit_null(),
-                    int64_t cache_id = 0);
-Variant f_apc_delete(const Variant& key, int64_t cache_id = 0);
-bool f_apc_clear_cache(int64_t cache_id = 0);
+Variant f_apc_fetch(const Variant& key, VRefParam success = uninit_null());
+Variant f_apc_delete(const Variant& key);
+bool f_apc_clear_cache(const String& cache_type = "");
 Variant f_apc_inc(const String& key, int64_t step = 1,
-                  VRefParam success = uninit_null(), int64_t cache_id = 0);
+                  VRefParam success = uninit_null());
 Variant f_apc_dec(const String& key, int64_t step = 1,
-                  VRefParam success = uninit_null(), int64_t cache_id = 0);
-bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas,
-               int64_t cache_id = 0);
-Variant f_apc_exists(const String& cache_type, int64_t cache_id = 0);
+                  VRefParam success = uninit_null());
+bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas);
+Variant f_apc_exists(const String& cache_type);
 
 ///////////////////////////////////////////////////////////////////////////////
 

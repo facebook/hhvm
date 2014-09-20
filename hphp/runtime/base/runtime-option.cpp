@@ -316,9 +316,6 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
-bool RuntimeOption::EnableDnsCache = false;
-int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
-
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
@@ -1159,10 +1156,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(UseDirectCopy, ini, server["UseDirectCopy"], false);
     Config::Bind(AlwaysUseRelativePath, ini, server["AlwaysUseRelativePath"],
                  false);
-
-    Hdf dns = server["DnsCache"];
-    Config::Bind(EnableDnsCache, ini, dns["Enable"]);
-    Config::Bind(DnsCacheTTL, ini, dns["TTL"], 600); // 10 minutes
 
     Hdf upload = server["Upload"];
     Config::Bind(UploadMaxFileSize, ini, upload["UploadMaxFileSize"], 100);

@@ -857,7 +857,7 @@ static int start_server(const std::string &username) {
   // If we have any warmup requests, replay them before listening for
   // real connections
   {
-    profileWarmupStart();
+    if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
     for (auto& file : RuntimeOption::ServerWarmupRequests) {
       HttpRequestHandler handler(0);

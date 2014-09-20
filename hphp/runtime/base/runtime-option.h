@@ -428,7 +428,8 @@ public:
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
-  F(uint32_t, NumSingleJitRequests,    5)                              \
+  F(bool, JitProfileWarmupRequests,    false)                           \
+  F(uint32_t, NumSingleJitRequests,    5)                               \
   F(uint32_t, JitProfileRequests,      kDefaultProfileRequests)         \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \

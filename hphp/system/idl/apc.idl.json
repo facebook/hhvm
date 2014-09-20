@@ -106,11 +106,6 @@
                     "type": "Int64",
                     "value": "0",
                     "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -141,11 +136,6 @@
                     "type": "Int64",
                     "value": "0",
                     "desc": "Time To Live; store var in the cache for ttl seconds. After the ttl has passed, the stored variable will be expunged from the cache (on the next request). If no ttl is supplied (or if the ttl is 0), the value will persist until it is removed from the cache manually, or otherwise fails to exist in the cache (clear, restart, etc.)."
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -169,11 +159,6 @@
                     "name": "var",
                     "type": "Variant",
                     "desc": "The variable to store"
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -199,11 +184,6 @@
                     "value": "null",
                     "desc": "Set to TRUE in success and FALSE in failure.",
                     "ref": true
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -222,11 +202,6 @@
                     "name": "key",
                     "type": "Variant",
                     "desc": "The key used to store the value (with apc_store())."
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -265,9 +240,9 @@
             },
             "args": [
                 {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0",
+                    "name": "cache_type",
+                    "type": "String",
+                    "value": "\"\"",
                     "desc": "If cache_type is \"user\", the user cache will be cleared; otherwise, the system cache (cached files) will be cleared."
                 }
             ]
@@ -318,11 +293,6 @@
                     "value": "null",
                     "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
                     "ref": true
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -354,11 +324,6 @@
                     "value": "null",
                     "desc": "Optionally pass the success or fail boolean value to this referenced variable.",
                     "ref": true
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -384,11 +349,6 @@
                 {
                     "name": "new_cas",
                     "type": "Int64"
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         },
@@ -407,11 +367,6 @@
                     "name": "key",
                     "type": "Variant",
                     "desc": "The key to check existence. If an array is passed then each element is checked."
-                },
-                {
-                    "name": "cache_id",
-                    "type": "Int64",
-                    "value": "0"
                 }
             ]
         }

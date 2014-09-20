@@ -320,9 +320,6 @@ public:
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
 
-  static bool EnableDnsCache;
-  static int DnsCacheTTL;
-
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;

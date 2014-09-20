@@ -155,13 +155,8 @@ static apcExtension s_apc_extension;
 ///////////////////////////////////////////////////////////////////////////////
 Variant f_apc_store(const Variant& key_or_array,
                     const Variant& var /* = null_variant */,
-                    int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                    int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return Variant(false);
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return Variant(false);
-  }
 
   if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
@@ -173,7 +168,7 @@ Variant f_apc_store(const Variant& key_or_array,
         return Variant(false);
       }
       Variant v = iter.second();
-      s_apc_store[cache_id].set(key.toString(), v, ttl);
+      s_apc_store[0].set(key.toString(), v, ttl);
     }
 
     return Variant(staticEmptyArray());
@@ -184,7 +179,7 @@ Variant f_apc_store(const Variant& key_or_array,
     return Variant(false);
   }
   String strKey = key_or_array.toString();
-  s_apc_store[cache_id].set(strKey, var, ttl);
+  s_apc_store[0].set(strKey, var, ttl);
   return Variant(true);
 }
 
@@ -192,28 +187,16 @@ Variant f_apc_store(const Variant& key_or_array,
  * Stores the key in a similar fashion as "priming" would do (no TTL limit).
  * Using this function is equivalent to adding your key to apc_prime.so.
  */
-bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var,
-                                      int64_t cache_id /* = 0 */) {
+bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
-
-  s_apc_store[cache_id].setWithoutTTL(key, var);
+  s_apc_store[0].setWithoutTTL(key, var);
   return true;
 }
 
 Variant f_apc_add(const Variant& key_or_array,
                   const Variant& var /* = null_variant */,
-                  int64_t ttl /* = 0 */, int64_t cache_id /* = 0 */) {
+                  int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
 
   if (key_or_array.is(KindOfArray)) {
     Array valuesArr = key_or_array.toArray();
@@ -228,7 +211,7 @@ Variant f_apc_add(const Variant& key_or_array,
         return false;
       }
       Variant v = iter.second();
-      if (!s_apc_store[cache_id].add(key.toString(), v, ttl)) {
+      if (!s_apc_store[0].add(key.toString(), v, ttl)) {
         errors.add(key, -1);
       }
     }
@@ -240,17 +223,11 @@ Variant f_apc_add(const Variant& key_or_array,
     return false;
   }
   String strKey = key_or_array.toString();
-  return s_apc_store[cache_id].add(strKey, var, ttl);
+  return s_apc_store[0].add(strKey, var, ttl);
 }
 
-Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
-                    int64_t cache_id /* = 0 */) {
+Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
 
   Variant v;
 
@@ -265,7 +242,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
         return false;
       }
       String strKey = k.toString();
-      if (s_apc_store[cache_id].get(strKey, v)) {
+      if (s_apc_store[0].get(strKey, v)) {
         tmp = true;
         init.set(strKey, v);
       }
@@ -274,7 +251,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
     return init.create();
   }
 
-  if (s_apc_store[cache_id].get(key.toString(), v)) {
+  if (s_apc_store[0].get(key.toString(), v)) {
     success = true;
   } else {
     success = false;
@@ -283,13 +260,8 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */,
   return v;
 }
 
-Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
+Variant f_apc_delete(const Variant& key) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
@@ -299,7 +271,7 @@ Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
       if (!k.isString()) {
         raise_warning("apc key is not a string");
         init.append(k);
-      } else if (!s_apc_store[cache_id].erase(k.toString())) {
+      } else if (!s_apc_store[0].erase(k.toString())) {
         init.append(k);
       }
     }
@@ -321,67 +293,43 @@ Variant f_apc_delete(const Variant& key, int64_t cache_id /* = 0 */) {
     return tvAsVariant(&tvResult);
   }
 
-  return s_apc_store[cache_id].erase(key.toString());
+  return s_apc_store[0].erase(key.toString());
 }
 
-bool f_apc_clear_cache(int64_t cache_id /* = 0 */) {
+bool f_apc_clear_cache(const String& cache_type /* = "" */) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
-  return s_apc_store[cache_id].clear();
+  return s_apc_store[0].clear();
 }
 
 Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
-                  VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
+                  VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
 
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
   bool found = false;
-  int64_t newValue = s_apc_store[cache_id].inc(key, step, found);
+  int64_t newValue = s_apc_store[0].inc(key, step, found);
   success = found;
   if (!found) return false;
   return newValue;
 }
 
 Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
-                  VRefParam success /* = null */, int64_t cache_id /* = 0 */) {
+                  VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
 
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
   bool found = false;
-  int64_t newValue = s_apc_store[cache_id].inc(key, -step, found);
+  int64_t newValue = s_apc_store[0].inc(key, -step, found);
   success = found;
   if (!found) return false;
   return newValue;
 }
 
-bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas,
-               int64_t cache_id /* = 0 */) {
+bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
-  return s_apc_store[cache_id].cas(key, old_cas, new_cas);
+  return s_apc_store[0].cas(key, old_cas, new_cas);
 }
 
-Variant f_apc_exists(const Variant& key, int64_t cache_id /* = 0 */) {
+Variant f_apc_exists(const Variant& key) {
   if (!apcExtension::Enable) return false;
-
-  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
-    throw_invalid_argument("cache_id: %" PRId64, cache_id);
-    return false;
-  }
 
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
@@ -393,14 +341,14 @@ Variant f_apc_exists(const Variant& key, int64_t cache_id /* = 0 */) {
         return false;
       }
       String strKey = k.toString();
-      if (s_apc_store[cache_id].exists(strKey)) {
+      if (s_apc_store[0].exists(strKey)) {
         init.append(strKey);
       }
     }
     return init.create();
   }
 
-  return s_apc_store[cache_id].exists(key.toString());
+  return s_apc_store[0].exists(key.toString());
 }
 
 

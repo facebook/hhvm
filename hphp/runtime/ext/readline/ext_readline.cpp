@@ -127,6 +127,14 @@ static bool HHVM_FUNCTION(readline_read_history,
   }
 }
 
+static char* convert_null_to_empty(char* str) {
+  if (str) {
+    return str;
+  } else {
+    return "";
+  }
+}
+
 const StaticString
   s_line_buffer("line_buffer"),
   s_point("point"),
@@ -141,33 +149,31 @@ const StaticString
   s_readline_name("readline_name"),
   s_attempted_completion_over("attempted_completion_over");
 
-#define SAVE_STRING(s) (s ? (char *) s : "")
-
 Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
                                      const String& newvalue /* = null */) {
   if (varname.isNull()) {
     Array ret = Array::Create();
-    ret.add(s_line_buffer, SAVE_STRING(rl_line_buffer));
+    ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
     ret.add(s_point, rl_point);
     ret.add(s_end, rl_end);
 #ifdef HAVE_LIBREADLINE
     ret.add(s_mark, rl_mark);
     ret.add(s_done, rl_done);
     ret.add(s_pending_input, rl_pending_input);
-    ret.add(s_prompt, SAVE_STRING(rl_prompt));
-    ret.add(s_terminal_name, SAVE_STRING(rl_terminal_name));
+    ret.add(s_prompt, convert_null_to_empty(rl_prompt));
+    ret.add(s_terminal_name, convert_null_to_empty(rl_terminal_name));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
     ret.add(s_erase_empty_line, rl_erase_empty_line);
 #endif
-    ret.add(s_library_version, SAVE_STRING(rl_library_version));
-    ret.add(s_readline_name, SAVE_STRING(rl_readline_name));
+    ret.add(s_library_version, convert_null_to_empty(rl_library_version));
+    ret.add(s_readline_name, convert_null_to_empty(rl_readline_name));
     ret.add(s_attempted_completion_over, rl_attempted_completion_over);
     return ret;
   } else {
     Variant oldval;
     if (varname == s_line_buffer) {
-      oldval = String(SAVE_STRING(rl_line_buffer));
+      oldval = String(convert_null_to_empty(rl_line_buffer));
       if (!newvalue.isNull()) {
         rl_line_buffer = (char *) newvalue.data();
       }
@@ -192,7 +198,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       }
       return oldval;
     } else if (varname == s_prompt) {
-      return SAVE_STRING(rl_prompt);
+      return convert_null_to_empty(rl_prompt);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
     } else if (varname == s_erase_empty_line) {
@@ -203,9 +209,9 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       return oldval;
 #endif
     } else if (varname == s_library_version) {
-      return SAVE_STRING(rl_library_version);
+      return convert_null_to_empty(rl_library_version);
     } else if (varname == s_readline_name) {
-      oldval = String(SAVE_STRING(rl_readline_name));
+      oldval = String(convert_null_to_empty(rl_readline_name));
       if (!newvalue.isNull()) {
         rl_readline_name = (char *) newvalue.data();
       }

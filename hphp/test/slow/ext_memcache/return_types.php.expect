@@ -1,0 +1,4 @@
+string(11) "Some string"
+int(1234567)
+float(120.88)
+bool(true)

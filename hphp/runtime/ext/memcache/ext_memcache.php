@@ -159,11 +159,11 @@ class Memcache {
    * memcache_increment() function.
    * @param string $key - Key of the item to increment.
    * @param int $offset - Increment the item by value.
-   * @return int - Returns new items value on success or FALSE on failure.
+   * @return mixed - Returns new items value on success or FALSE on failure.
    */
   <<__Native>>
   function increment(string $key,
-                     int $offset = 1): int;
+                     int $offset = 1): mixed;
 
   /* Memcache::decrement() decrements value of the item by value. Similarly to
    * Memcache::increment(), current value of the item is being converted to
@@ -174,11 +174,11 @@ class Memcache {
    * can use memcache_decrement() function.
    * @param string $key - Key of the item do decrement.
    * @param int $offset - Decrement the item by value.
-   * @return int - Returns item's new value on success or FALSE on failure.
+   * @return mixed - Returns item's new value on success or FALSE on failure.
    */
   <<__Native>>
   function decrement(string $key,
-                     int $offset = 1): int;
+                     int $offset = 1): mixed;
 
   /* Memcache::getVersion() returns a string with server's version number. Also
    * you can use memcache_get_version() function.

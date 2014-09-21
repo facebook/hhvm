@@ -187,8 +187,8 @@ struct ConcurrentTableSharedStore {
 
   /*
    * Increment the value for the key `key' by step, iff it is present,
-   * non-expired, and a numeric key.  Sets `found' to true if the increment is
-   * performed, false otherwise.
+   * non-expired, and a numeric (KindOfInt64 or KindOfDouble) value.  Sets
+   * `found' to true if the increment is performed, false otherwise.
    *
    * Returns: the new value for the key, or zero if the key was not found.
    */

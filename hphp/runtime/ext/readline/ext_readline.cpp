@@ -127,7 +127,7 @@ static bool HHVM_FUNCTION(readline_read_history,
   }
 }
 
-static char* convert_null_to_empty(char* str) {
+static inline const char* convert_null_to_empty(const char* str) {
   if (str) {
     return str;
   } else {
@@ -156,7 +156,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
     ret.add(s_point, rl_point);
     ret.add(s_end, rl_end);
-#ifdef HAVE_LIBREADLINE
+#ifndef USE_EDITLINE
     ret.add(s_mark, rl_mark);
     ret.add(s_done, rl_done);
     ret.add(s_pending_input, rl_pending_input);
@@ -182,7 +182,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       return rl_point;
     } else if (varname == s_end) {
       return rl_end; 
-#if HAVE_LIBREADLINE
+#ifndef USE_EDITLINE
     } else if (varname == s_mark) {
       return rl_mark;
     } else if (varname == s_done) {
@@ -192,9 +192,9 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       }
       return oldval;
     } else if (varname == s_pending_input) {
-      oldval = String(rl_pending_input);
+      oldval = rl_pending_input;
       if (!newvalue.isNull()) {
-        rl_pending_input = (char *) newvalue.data();
+        rl_pending_input = newvalue.toInt64();
       }
       return oldval;
     } else if (varname == s_prompt) {

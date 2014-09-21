@@ -2243,8 +2243,7 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
-  auto const dst  = dstLoc(0).reg();
+void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
@@ -2253,21 +2252,27 @@ void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst);
-  unlikelyIfBlock(vmain(), vcold(), CC_Z, [&] (Vout& v) {
+  auto& v = vmain();
+  auto dst1 = v.makeReg();
+  cgLdFuncCachedCommon(inst, dst1);
+  unlikelyCond(v, vcold(), CC_Z, dstLoc(0).reg(), [&] (Vout& v) {
+    auto dst2 = v.makeReg();
     const Func* (*const func)(const StringData*) = lookupUnknownFunc;
     cgCallHelper(v,
       CppCall::direct(func),
-      callDest(inst),
+      callDest(dst2),
       SyncOptions::kSyncPoint,
       argGroup()
         .immPtr(inst->extra<LdFuncCached>()->name)
     );
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst);
+  cgLdFuncCachedCommon(inst, dstLoc(0).reg());
   if (auto const taken = inst->taken()) {
     vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
   }
@@ -4526,9 +4531,10 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg ctxReg, bool staticCallee) {
   auto& v = vmain();
   if (staticCallee) {
     // Load (this->m_cls | 0x1) into ctxReg.
+    auto vmclass = v.makeReg();
     emitLdLowPtr(v, ctxReg[ObjectData::getVMClassOffset()],
-                 ctxReg, sizeof(LowClassPtr));
-    v << orqi{1, ctxReg, ctxReg};
+                 vmclass, sizeof(LowClassPtr));
+    v << orqi{1, vmclass, ctxReg};
   } else {
     // Just incref $this.
     emitIncRef(v, ctxReg);
@@ -4677,10 +4683,9 @@ void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
   vmain() << lea{rVmTl[ch], dstReg};
 }
 
-RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
+RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst, Vreg dst) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  auto dst = dstLoc(0).reg();
   auto& v = vmain();
   v << loadq{rVmTl[ch], dst};
   v << testq{dst, dst};
@@ -4688,20 +4693,24 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
-  auto ch = cgLdClsCachedCommon(inst);
-  unlikelyIfBlock(vmain(), vcold(), CC_E, [&] (Vout& v) {
+  auto& v = vmain();
+  auto dst1 = v.makeReg();
+  auto ch = cgLdClsCachedCommon(inst, dst1);
+  unlikelyCond(v, vcold(), CC_E, dstLoc(0).reg(), [&] (Vout& v) {
+    auto dst2 = v.makeReg();
     Class* (*const func)(Class**, const StringData*) = jit::lookupKnownClass;
-    cgCallHelper(v,
-                 CppCall::direct(func),
-                 callDest(inst),
+    cgCallHelper(v, CppCall::direct(func), callDest(dst2),
                  SyncOptions::kSyncPoint,
                  argGroup().addr(rVmTl, safe_cast<int32_t>(ch))
                            .ssa(0));
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
 void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
-  cgLdClsCachedCommon(inst);
+  cgLdClsCachedCommon(inst, dstLoc(0).reg());
   if (Block* taken = inst->taken()) {
     vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
   }
@@ -5043,15 +5052,16 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto base    = srcLoc(0).reg();
   auto dstReg  = dstLoc(0).reg();
   auto& v = vmain();
-  v << copy{base, dstReg};
   emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
     [&](ConditionCode cc) {
-      ifThen(v, ccNegate(cc), [&](Vout& v) {
-        cgCallHelper(v,
-                     CppCall::direct(tvBox),
-                     callDest(dstReg),
+      cond(v, cc, dstReg, [&](Vout& v) {
+        return base;
+      }, [&](Vout& v) {
+        auto dst2 = v.makeReg();
+        cgCallHelper(v, CppCall::direct(tvBox), callDest(dst2),
                      SyncOptions::kNoSyncPoint,
                      argGroup().ssa(0/*addr*/));
+        return dst2;
       });
     });
 }

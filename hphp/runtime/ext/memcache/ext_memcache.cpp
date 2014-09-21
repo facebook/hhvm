@@ -32,6 +32,8 @@
 #define MMC_TYPE_LONG   0x0300
 #define MMC_TYPE_DOUBLE 0x0700
 
+#define MMC_TYPE_MASK   0x0F00
+
 namespace HPHP {
 
 const int64_t k_MEMCACHE_COMPRESSED = MMC_COMPRESSED;
@@ -143,7 +145,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
 }
 
 static void memcache_set_type_from_flag(Variant& var, uint32_t flags) {
-  switch (flags & 0x0F00) {
+  switch (flags & MMC_TYPE_MASK) {
   case MMC_TYPE_BOOL:
     var = var.toBoolean();
     break;

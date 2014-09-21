@@ -18,8 +18,7 @@
 #define incl_HPHP_ATOMIC_H_
 
 #include <stdint.h>
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/is_pointer.hpp>
+#include <type_traits>
 
 #include "hphp/util/assertions.h"
 
@@ -36,7 +35,7 @@ inline void assert_address_is_atomically_accessible(T* address) {
     sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
     "T must be a 1, 2, 4, or 8 byte object for atomic access");
   static_assert(
-    boost::is_arithmetic<T>::value || boost::is_pointer<T>::value,
+    std::is_arithmetic<T>::value || std::is_pointer<T>::value,
     "Atomic operations only supported for built in integer, floating point "
     "and pointer types.");
 

@@ -105,9 +105,9 @@ private:
 
   void emitVerifyCls(IRInstruction* inst);
 
-  void emitGetCtxFwdCallWithThis(Vreg ctxReg, bool staticCallee);
+  void emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx, bool staticCallee);
 
-  void emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
+  Vreg emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                     RDS::Handle ch);
 
   void cgJcc(IRInstruction* inst);          // helper

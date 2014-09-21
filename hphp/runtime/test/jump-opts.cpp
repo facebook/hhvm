@@ -18,8 +18,8 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include "hphp/runtime/vm/jit/test/match.h"
-#include "hphp/runtime/vm/jit/test/test-context.h"
+#include "hphp/runtime/test/match.h"
+#include "hphp/runtime/test/test-context.h"
 
 #include <gtest/gtest.h>
 

@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   std::string buf = HPHP::current_executable_path();
   if (!buf.empty()) {
     size_t idx = buf.length();
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 2; i++) {
       idx = buf.find_last_of('/', idx - 1);
       assert(idx != std::string::npos);
     }

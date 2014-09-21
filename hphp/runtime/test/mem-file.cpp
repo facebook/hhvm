@@ -23,7 +23,11 @@
 
 using std::string;
 
-static bool makeTempFile(const string& contents, string* fn) {
+namespace HPHP {
+
+namespace {
+
+bool makeTempFile(const string& contents, string* fn) {
   char fn_tmpl[] = "/tmp/hhvm_unit_test.XXXXXX";
   int fd = mkstemp(fn_tmpl);
 
@@ -42,7 +46,7 @@ static bool makeTempFile(const string& contents, string* fn) {
   return true;
 }
 
-namespace HPHP {
+}
 
 TEST(TestMemFile, DataConstructor) {
   const char* test_data = "some test data";

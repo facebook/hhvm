@@ -3563,7 +3563,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{0};
-  if (callee->isMethod() && !(callee->attrs() & AttrStatic)) {
+  if (callee->isMethod() && !callee->isStatic()) {
     // Note, we don't support objects with vtables here (if they may
     // need a this pointer adjustment).  This should be filtered out
     // earlier right now.
@@ -4527,17 +4527,19 @@ void CodeGenerator::cgLdClsMethodCacheCls(IRInstruction* inst) {
  * from a This pointer depending on whether the callee method is
  * static or not.
  */
-void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg ctxReg, bool staticCallee) {
+void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
+                                              bool staticCallee) {
   auto& v = vmain();
   if (staticCallee) {
     // Load (this->m_cls | 0x1) into ctxReg.
     auto vmclass = v.makeReg();
-    emitLdLowPtr(v, ctxReg[ObjectData::getVMClassOffset()],
+    emitLdLowPtr(v, srcCtx[ObjectData::getVMClassOffset()],
                  vmclass, sizeof(LowClassPtr));
-    v << orqi{1, vmclass, ctxReg};
+    v << orqi{1, vmclass, dstCtx};
   } else {
     // Just incref $this.
-    emitIncRef(v, ctxReg);
+    emitIncRef(v, srcCtx);
+    v << copy{srcCtx, dstCtx};
   }
 }
 
@@ -4553,25 +4555,25 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   auto srcCtxReg = srcLoc(0).reg(0);
   const Func* callee = inst->src(1)->funcVal();
   bool      withThis = srcCtxTmp->isA(Type::Obj);
-
-  // Eagerly move src into the dest reg
   auto& v = vmain();
-  v << copy{srcCtxReg, destCtxReg};
 
-  auto done = v.makeBlock();
   // If we don't know whether we have a This, we need to check dynamically
   if (!withThis) {
-    v << testbi{1, destCtxReg};
-    auto next = v.makeBlock();
-    v << jcc{CC_NZ, {next, done}};
-    v = next;
+    v << testbi{1, srcCtxReg};
+    cond(v, CC_Z, destCtxReg, [&](Vout& v) {
+      // If we have a This pointer in destCtxReg, then select either This
+      // or its Class based on whether callee is static or not
+      auto dst1 = v.makeReg();
+      emitGetCtxFwdCallWithThis(srcCtxReg, dst1, callee->isStatic());
+      return dst1;
+    }, [&](Vout& v) {
+      return srcCtxReg;
+    });
+  } else {
+    // If we have a This pointer in destCtxReg, then select either This
+    // or its Class based on whether callee is static or not
+    emitGetCtxFwdCallWithThis(srcCtxReg, destCtxReg, callee->isStatic());
   }
-
-  // If we have a This pointer in destCtxReg, then select either This
-  // or its Class based on whether callee is static or not
-  emitGetCtxFwdCallWithThis(destCtxReg, (callee->attrs() & AttrStatic));
-  v << jmp{done};
-  v = done;
 }
 
 void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
@@ -4611,31 +4613,25 @@ void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
                  .reg(fpReg));
 }
 
-void CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
+Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                                  RDS::Handle ch) {
   auto& v = vmain();
-  auto NonStaticCall = v.makeBlock();
-  auto End = v.makeBlock();
-
   // thisReg is holding $this. Should we pass it to the callee?
   v << cmplim{1, rVmTl[ch + offsetof(StaticMethodFCache, m_static)]};
-  auto next = v.makeBlock();
-  v << jcc{CC_NE, {next, NonStaticCall}};
-  v = next;
-
-  // If calling a static method...
-  // Load (this->m_cls | 0x1) into destCtxReg
-  emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
-               destCtxReg, sizeof(LowClassPtr));
-  v << orqi{1, destCtxReg, destCtxReg};
-  v << jmp{End};
-
-  // Else: calling non-static method
-  v = NonStaticCall;
-  v << copy{thisReg, destCtxReg};
-  emitIncRef(v, destCtxReg);
-  v << jmp{End};
-  v = End;
+  return cond(v, CC_E, destCtxReg, [&](Vout& v) {
+    // If calling a static method...
+    // Load (this->m_cls | 0x1) into destCtxReg
+    auto vmclass = v.makeReg();
+    auto dst1 = v.makeReg();
+    emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
+                 vmclass, sizeof(LowClassPtr));
+    v << orqi{1, vmclass, dst1};
+    return dst1;
+  }, [&](Vout& v) {
+    // Else: calling non-static method
+    emitIncRef(v, thisReg);
+    return thisReg;
+  });
 }
 
 void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
@@ -4643,34 +4639,36 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   auto srcCtxReg  = srcLoc(0).reg();
   auto destCtxReg = dstLoc(0).reg();
   auto& v = vmain();
-  v << copy{srcCtxReg, destCtxReg};
   auto const t = srcCtxTmp->type();
+
+  // Allocate a StaticMethodFCache and return its RDS handle.
+  auto make_cache = [&] {
+    auto const& extra = *inst->extra<ClsMethodData>();
+    return StaticMethodFCache::alloc(extra.clsName, extra.methodName,
+                                     getContextName(curClass()));
+  };
+
   if (t <= Type::Cctx) {
     // Nothing to do. Forward the context as is.
+    v << copy{srcCtxReg, destCtxReg};
     return;
   }
-  auto End = v.makeBlock();
   if (t <= Type::Obj) {
     // We definitely have $this, so always run code emitted by
     // emitGetCtxFwdCallWithThisDyn
-  } else {
-    assert(t <= Type::Ctx);
-    // dynamically check if we have a This pointer and call
-    // emitGetCtxFwdCallWithThisDyn below
-    v << testbi{1, destCtxReg};
-    auto next = v.makeBlock();
-    v << jcc{CC_NZ, {next, End}};
-    v = next;
+    emitGetCtxFwdCallWithThisDyn(destCtxReg, srcCtxReg, make_cache());
+    return;
   }
-
-  // If we have a 'this' pointer ...
-  auto const& extra = *inst->extra<ClsMethodData>();
-  auto const ch = StaticMethodFCache::alloc(
-    extra.clsName, extra.methodName, getContextName(curClass())
-  );
-  emitGetCtxFwdCallWithThisDyn(destCtxReg, destCtxReg, ch);
-  v << jmp{End};
-  v = End;
+  assert(t <= Type::Ctx);
+  // dynamically check if we have a This pointer and call
+  // emitGetCtxFwdCallWithThisDyn below
+  v << testbi{1, srcCtxReg};
+  cond(v, CC_Z, destCtxReg, [&](Vout& v) {
+    // If we have a 'this' pointer ...
+    return emitGetCtxFwdCallWithThisDyn(v.makeReg(), srcCtxReg, make_cache());
+  }, [&](Vout& v) {
+    return srcCtxReg;
+  });
 }
 
 void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {

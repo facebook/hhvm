@@ -30,8 +30,6 @@
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-using std::set;
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -348,24 +346,8 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant& value) {
   return true;
 }
 
-
-static Variant get_Variant_value(StoreValue* sval) {
-  return sval->data.match(
-    [&] (APCHandle* handle) {
-      return handle->toLocal();
-    },
-    [&] (char* file) {
-      return apc_unserialize(file, sval->getSerializedSize());
-    }
-  );
-}
-
-static int64_t get_int64_value(StoreValue* sval) {
-  return get_Variant_value(sval).toInt64();
-}
-
 int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
-                                        bool &found) {
+                                        bool& found) {
   found = false;
   ReadLock l(m_lock);
 
@@ -373,23 +355,31 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   if (!m_vars.find(acc, tagStringData(key.get()))) {
     return 0;
   }
-
-  int64_t ret = 0;
   auto& sval = acc->second;
-  auto const sval_variant = get_Variant_value(&sval);
-  if (!sval.expired() && sval_variant.isNumeric()) {
-    ret = get_int64_value(&sval) + step;
-    size_t size = 0;
-    auto const oldHandle = sval.data.left();
-    auto const handle = APCHandle::Create(Variant(ret), size, false);
-    APCStats::getAPCStats().updateAPCValue(
-        handle, size, oldHandle, sval.dataSize, sval.expire == 0, false);
-    oldHandle->unreferenceRoot(sval.dataSize);
-    sval.data = handle;
-    sval.dataSize = size;
-    found = true;
+  if (sval.expired()) return 0;
+
+  /*
+   * Inc only works on KindOfDouble or KindOfInt64, which are never kept in
+   * file-backed storage from priming.  So we don't need to try to deserialize
+   * anything or handle the case that sval.data is file-backed.
+   */
+  auto const oldHandle = sval.data.left();
+  if (oldHandle == nullptr) return 0;
+  if (oldHandle->getType() != KindOfInt64 &&
+      oldHandle->getType() != KindOfDouble) {
+    return 0;
   }
 
+  auto const ret = oldHandle->toLocal().toInt64() + step;
+  size_t size = 0;
+  auto const handle = APCHandle::Create(Variant(ret), size, false);
+  APCStats::getAPCStats().updateAPCValue(
+      handle, size, oldHandle, sval.dataSize, sval.expire == 0, false);
+  oldHandle->unreferenceRoot(sval.dataSize);
+  sval.data = handle;
+  sval.dataSize = size;
+
+  found = true;
   return ret;
 }
 
@@ -403,19 +393,28 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   }
 
   auto& sval = acc->second;
-  if (!sval.expired() && get_int64_value(&sval) == old) {
-    size_t size = 0;
-    auto const oldHandle = sval.data.left();
-    auto const handle = APCHandle::Create(Variant(val), size, false);
-    APCStats::getAPCStats().updateAPCValue(
-        handle, size, oldHandle, sval.dataSize, sval.expire == 0, false);
-    oldHandle->unreferenceRoot(sval.dataSize);
-    sval.data = handle;
-    sval.dataSize = size;
-    return true;
+  if (sval.expired()) return false;
+
+  auto const oldHandle = sval.data.match(
+    [&] (APCHandle* h) {
+      return h;
+    },
+    [&] (char* file) {
+      return unserialize(key, &sval);
+    }
+  );
+  if (!oldHandle || oldHandle->toLocal().toInt64() != old) {
+    return false;
   }
 
-  return false;
+  size_t size = 0;
+  auto const handle = APCHandle::Create(Variant(val), size, false);
+  APCStats::getAPCStats().updateAPCValue(
+    handle, size, oldHandle, sval.dataSize, sval.expire == 0, false);
+  oldHandle->unreferenceRoot(sval.dataSize);
+  sval.data = handle;
+  sval.dataSize = size;
+  return true;
 }
 
 bool ConcurrentTableSharedStore::exists(const String& key) {

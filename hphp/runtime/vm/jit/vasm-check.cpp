@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/util/assertions.h"
 #include <boost/dynamic_bitset.hpp>
 
@@ -47,19 +48,24 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
     }
     for (auto& inst : unit.blocks[b].code) {
       visitUses(unit, inst, [&](Vreg v) {
-        assert_flog(v.isValid(), "invalid vreg used in B{}", size_t(b));
+        assert_flog(v.isValid(), "invalid vreg used in B{}\n{}",
+                                 size_t(b), show(unit));
         assert_flog(!v.isVirt() || local_defs[v],
-                    "%{} used before def in B{}", size_t(v), size_t(b));
+                    "%{} used before def in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
       });
       visitDefs(unit, inst, [&](Vreg v) {
-        assert_flog(v.isValid(), "invalid vreg defined in B{}", size_t(b));
-        // TODO: t4779057: require SSA
+        assert_flog(v.isValid(), "invalid vreg defined in B{}\n{}",
+                    size_t(b), show(unit));
         assert_flog(!v.isVirt() || !consts.test(v),
-                    "%{} const defined in B{}", size_t(v), size_t(b));
-        //assert_flog(!v.isVirt() || !local_defs[v],
-        //            "%{} locally redefined in B{}", size_t(v), size_t(b));
-        //assert_flog(!v.isVirt() || !global_defs[v],
-        //            "%{} redefined in B{}", size_t(v), size_t(b));
+                    "%{} const defined in B{}\n",
+                    size_t(v), size_t(b), show(unit));
+        assert_flog(!v.isVirt() || !local_defs[v],
+                    "%{} locally redefined in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
+        assert_flog(!v.isVirt() || !global_defs[v],
+                    "%{} redefined in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
         local_defs.set(v);
         global_defs.set(v);
       });

@@ -1972,58 +1972,54 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
  * Class entry.
  */
 void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
+  auto const rdst          = dstLoc(0).reg();
   auto const rObjClass     = srcLoc(0).reg();
   auto const rTestClass    = srcLoc(1).reg();
   auto const testClass     = inst->src(1)->clsVal();
-  auto const rdst          = dstLoc(0).reg();
   auto& v = vmain();
 
-  auto done = v.makeBlock();
-  auto notExact = v.makeBlock();
-  auto falseLabel = v.makeBlock();
+  // check whether rObjClass points to a strict subclass of rTestClass,
+  // set dst with the bool true/false result, and return dst.
+  auto check_strict_subclass = [&](Vreg dst) {
+    // Check the length of the class vectors. If the candidate's is at
+    // least as long as the potential base (testClass) it might be a
+    // subclass.
+    v << cmplim{safe_cast<int32_t>(testClass->classVecLen()),
+                rObjClass[Class::classVecLenOff()]};
+    return cond(v, CC_NB, dst, [&](Vout& v) {
+      // If it's a subclass, rTestClass must be at the appropriate index.
+      auto const vecOffset = Class::classVecOff() +
+        sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
+      auto const b = v.makeReg();
+      emitCmpClass(v, rTestClass, rObjClass[vecOffset]);
+      v << setcc{CC_E, b};
+      return b;
+    }, [&](Vout& v) {
+      return v.cns(0);
+    });
+  };
+
+  if (testClass->attrs() & AttrAbstract) {
+    // If the test must be extended, don't check for the same class.
+    check_strict_subclass(rdst);
+    return;
+  }
 
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
-  if (!(testClass->attrs() & AttrAbstract)) {
-    emitCmpClass(v, rTestClass, rObjClass);
+  emitCmpClass(v, rTestClass, rObjClass);
+  if (testClass->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the
-    // exact check.
-    if (testClass->attrs() & AttrNoOverride) {
-      v << setcc{CC_E, rdst};
-      return;
-    }
-    auto next = v.makeBlock();
-    v << jcc{CC_NE, {next, notExact}};
-    v = next;
-    v << ldimm{1, rdst};
-    v << jmp{done};
-  } else {
-    v << jmp{notExact};
+    // same-class check, never the strict-subclass check.
+    v << setcc{CC_E, rdst};
+    return;
   }
 
-  auto const vecOffset = Class::classVecOff() +
-    sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
-
-  // Check the length of the class vectors---if the candidate's is at
-  // least as long as the potential base (testClass) it might be a
-  // subclass.
-  v = notExact;
-  v << cmplim{safe_cast<int32_t>(testClass->classVecLen()),
-              rObjClass[Class::classVecLenOff()]};
-  auto next = v.makeBlock();
-  v << jcc{CC_B, {next, falseLabel}};
-  v = next;
-
-  // If it's a subclass, rTestClass must be at the appropriate index.
-  emitCmpClass(v, rTestClass, rObjClass[vecOffset]);
-  v << setcc{CC_E, rdst};
-  v << jmp{done};
-
-  v = falseLabel;
-  v << ldimm{0, rdst};
-  v << jmp{done};
-
-  v = done;
+  cond(v, CC_E, rdst, [&](Vout& v) {
+    return v.cns(1);
+  }, [&](Vout& v) {
+    return check_strict_subclass(v.makeReg());
+  });
 }
 
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
@@ -2301,27 +2297,25 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   auto& v = vmain();
 
   // Check the first function handle, otherwise try to autoload.
-  if (dstReg == InvalidReg) {
-    v << cmpqim{0, rVmTl[hFunc]};
-  } else {
-    v << loadq{rVmTl[hFunc], dstReg};
-    v << testq{dstReg, dstReg};
-  }
+  auto dst1 = v.makeReg();
+  v << loadq{rVmTl[hFunc], dst1};
+  v << testq{dst1, dst1};
 
-  unlikelyIfBlock(v, vcold(), CC_Z, [&] (Vout& v) {
+  unlikelyCond(v, vcold(), CC_Z, dstReg, [&] (Vout& v) {
     // If we get here, things are going to be slow anyway, so do all the
     // autoloading logic in lookupFallbackFunc instead of ASM
     const Func* (*const func)(const StringData*, const StringData*) =
         lookupFallbackFunc;
-    cgCallHelper(
-      v,
-      CppCall::direct(func),
-      callDest(inst),
+    auto dst2 = v.makeReg();
+    cgCallHelper(v, CppCall::direct(func), callDest(dst2),
       SyncOptions::kSyncPoint,
       argGroup()
         .immPtr(extra->name)
         .immPtr(extra->fallback)
     );
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 

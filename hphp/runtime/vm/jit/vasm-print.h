@@ -27,14 +27,13 @@ namespace HPHP { namespace jit {
 
 std::string show(x64::Vreg r);
 std::string show(x64::Vptr p);
+std::string show(const x64::Vunit& unit);
 std::string show(const x64::Vunit& unit, const x64::Vinstr& inst);
 
 // print a dot-compatible digraph of the blocks (without contents)
 void printCfg(const x64::Vunit& unit, const jit::vector<Vlabel>& blocks);
 void printCfg(std::ostream& out, const x64::Vunit& unit,
               const jit::vector<Vlabel>& blocks);
-
-std::string show(const x64::Vunit& unit);
 
 // Tracing level constants.
 constexpr int kInitialVasmLevel = 1;

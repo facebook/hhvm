@@ -125,11 +125,13 @@ class ReflectionParameter implements Reflector {
       $type .= ' ';
     }
     $out = 'Parameter #'.$this->getPosition().' [ ';
+    $reference = $this->isPassedByReference() ? '&' : '';
     if ($this->isOptional()) {
       $default = var_export($this->getDefaultValue(), true);
-      $out .= '<optional> '.$type.'$'.$this->getName().' = '.$default;
+      $out .= '<optional> '.$type.$reference.'$'.$this->getName().' = '.
+              $default;
     } else {
-      $out .= '<required> '.$type.'$'.$this->getName();
+      $out .= '<required> '.$type.$reference.'$'.$this->getName();
     }
     $out .= ' ]';
     return $out;

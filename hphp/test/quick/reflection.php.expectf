@@ -169,7 +169,7 @@ Function [ <user> function &f ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
-    Parameter #1 [ <required> $b ]
+    Parameter #1 [ <required> &$b ]
     Parameter #2 [ <optional> $c = NULL ]
     Parameter #3 [ <optional> $d = array (
     0 => 1,
@@ -240,15 +240,9 @@ Class [ <user> class B extends A implements I, K, H, J ] {
   - Static methods [2] {
     Method [ <user> static public method smethB0 ] {
       @@ %s/test/quick/reflection.php 141 - 141
-
-      - Parameters [0] {
-      }
     }
     Method [ <user> static private method smethB1 ] {
       @@ %s/test/quick/reflection.php 142 - 142
-
-      - Parameters [0] {
-      }
     }
   }
 
@@ -262,39 +256,21 @@ Class [ <user> class B extends A implements I, K, H, J ] {
   - Methods [6] {
     Method [ <user, implements I> public method methI ] {
       @@ %s/test/quick/reflection.php 143 - 143
-
-      - Parameters [0] {
-      }
     }
     Method [ <user, implements J> public method methJ ] {
       @@ %s/test/quick/reflection.php 144 - 144
-
-      - Parameters [0] {
-      }
     }
     Method [ <user, implements K> public method methK ] {
       @@ %s/test/quick/reflection.php 145 - 145
-
-      - Parameters [0] {
-      }
     }
     Method [ <user> private method methB ] {
       @@ %s/test/quick/reflection.php 146 - 146
-
-      - Parameters [0] {
-      }
     }
     Method [ <user, inherits A> public method methH ] {
       @@ %s/test/quick/reflection.php 125 - 125
-
-      - Parameters [0] {
-      }
     }
     Method [ <user, inherits A> protected method methA ] {
       @@ %s/test/quick/reflection.php 126 - 126
-
-      - Parameters [0] {
-      }
     }
   }
 }

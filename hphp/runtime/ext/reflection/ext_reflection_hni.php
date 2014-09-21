@@ -386,11 +386,13 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     }
 
     $params = $this->getParameters();
-    $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
-    foreach ($params as $param) {
-      $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
+    if (count($params) > 0) {
+      $ret .= "\n  - Parameters [" . count($params) . "] {\n  ";
+      foreach ($params as $param) {
+        $ret .= '  '.str_replace("\n", "\n  ", $param."\n");
+      }
+      $ret .= "}\n";
     }
-    $ret .= "}\n";
 
     $ret .= "}\n";
     return $ret;

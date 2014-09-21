@@ -221,6 +221,9 @@ flaky_tests = (
 
     # Tests for a bug in PHP
     '/ext/gmp/tests/014.php',
+
+    # Another process can be created in the meantime
+    '/ext/posix/tests/posix_errno_variation2.php',
 )
 
 # Tests that work but not in repo mode

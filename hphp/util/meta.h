@@ -16,29 +16,29 @@
 #ifndef META_H_
 #define META_H_
 
-#include <boost/type_traits.hpp>
-#include <boost/mpl/if.hpp>
-
+#include <type_traits>
 
 namespace HPHP {
 
 // is_const_iterator: by analogy with is_const et al.
 template<typename Iter>
 struct is_const_iterator {
-  typedef typename std::iterator_traits<Iter>::pointer pointer;
-  typedef typename boost::is_const<
-      typename boost::remove_pointer<pointer>::type
-    >::type type;
-  static bool const value = type::value;
+  using pointer = typename std::iterator_traits<Iter>::pointer;
+  using type = typename std::is_const<
+    typename std::remove_pointer<pointer>::type
+  >::type;
+
+  static bool constexpr value = type::value;
 };
 
 // match_iterator: return Value with the same const-ness as Iter.
 template<typename Iter,
          typename Value = typename std::iterator_traits<Iter>::type>
-struct match_iterator : boost::mpl::eval_if<
-  is_const_iterator<Iter>,
-  boost::add_const<Value>,
-  boost::remove_const<Value> > {};
+struct match_iterator : std::conditional<
+  is_const_iterator<Iter>::value,
+  std::add_const<Value>,
+  std::remove_const<Value>
+  >::type {};
 
 // hphp_field_type: provide the type of a struct field.
 #define hphp_field_type(strct, fld) decltype(((strct*)0)->fld)

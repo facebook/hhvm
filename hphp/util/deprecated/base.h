@@ -64,7 +64,6 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/type_traits.hpp>
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/hash.h"

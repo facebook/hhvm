@@ -138,5 +138,5 @@ class PDOStatement {
   public function __sleep() { }
 }
 class PDOException extends RuntimeException{
-  public array $errorInfo;
+  public array $errorInfo = [];
 }

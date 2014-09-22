@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_mb.h"
+#include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 #include "hphp/runtime/ext/ext_file.h"
 
 using namespace HPHP;

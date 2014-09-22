@@ -133,5 +133,16 @@ for security reasons. It can be re-enabled on a per-protocol basis (file, http,
 compress.zlib, etc...) with a comma-separated list in the ini setting
 hhvm.libxml.ext_entity_whitelist.
 
+(8) If the value of a local variable containing a parameter changes,
+func_get_args() returns the new value. This behavior matches PHP7, but not PHP5.
+
+  class Foo {
+    function bar($baz) {
+      $baz = 'herpderp';
+      // Always outputs array('herpderp')
+      var_dump(func_get_args());
+    }
+  }
+
 (9) Under HHVM, PharData will extract symlinks from tar files. PHP5 will create
 empty files instead.

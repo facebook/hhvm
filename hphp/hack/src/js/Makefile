@@ -22,7 +22,6 @@ SRC = \
   ast.ml\
   namespaces.ml\
   parser_heap.ml\
-  preprocessor.ml\
   lexing_modes.ml\
   lexer_hack.ml\
   parser_hack.ml\
@@ -126,9 +125,6 @@ namespaces.ml: $(TOP)/parsing/namespaces.ml
 
 parser_heap.ml: $(TOP)/parsing/parser_heap.ml
 	cp $(TOP)/parsing/parser_heap.ml .
-
-preprocessor.ml: $(TOP)/parsing/preprocessor.ml
-	cp $(TOP)/parsing/preprocessor.ml .
 
 parser.ml: $(TOP)/parsing/parser.ml
 	cp $(TOP)/parsing/parser.ml .
@@ -299,7 +295,6 @@ clean::
 	rm -f typing_env.ml
 	rm -f typing_ops.ml
 	rm -f fix_file.ml
-	rm -f preprocessor.ml
 	rm -f typing_async.ml
 	rm -f typing_expand.ml
 	rm -f typing_alias.ml

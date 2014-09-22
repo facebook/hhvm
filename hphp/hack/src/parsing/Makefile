@@ -6,7 +6,7 @@ TARGET=lib
 
 SRC= ast.ml \
   namespace_env.ml namespaces.ml \
-  lexing_modes.ml preprocessor.ml parser_heap.ml \
+  lexing_modes.ml parser_heap.ml \
   lexer_hack.ml parser_hack.ml format_hack.ml \
   parsing_hooks.ml parsing_service.ml
 

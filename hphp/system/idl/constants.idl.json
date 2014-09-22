@@ -735,6 +735,10 @@
             "value": "3.4.0-dev"
         },
         {
+            "name": "HHVM_VERSION_ID",
+            "value": 30400
+        },
+        {
             "name": "HTML_ENTITIES",
             "value": 1
         },

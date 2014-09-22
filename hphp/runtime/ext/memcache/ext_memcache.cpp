@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include <vector>
 
+//MMC values must match pecl-memcache for compatibility
 #define MMC_SERIALIZED  0x0001
 #define MMC_COMPRESSED  0x0002
 

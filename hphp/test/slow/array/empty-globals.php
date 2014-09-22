@@ -6,7 +6,6 @@ function main() {
   }
 
   var_dump($g);
-  // This will say "true", which is intentionally divergent from PHP5.
   var_dump((bool)$g);
 }
 

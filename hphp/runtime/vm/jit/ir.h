@@ -260,7 +260,7 @@ O(ConvObjToArr,                 D(Arr), S(Obj),               Er|N|PRc|CRc|K) \
 O(ConvStrToArr,                 D(Arr), S(Str),                  NNT|PRc|CRc) \
 O(ConvCellToArr,                D(Arr), S(Cell),              Er|N|PRc|CRc|K) \
                                                                               \
-O(ConvArrToBool,               D(Bool), S(Arr),                           NF) \
+O(ConvArrToBool,               D(Bool), S(Arr),                          NNT) \
 O(ConvDblToBool,               D(Bool), S(Dbl),                            C) \
 O(ConvIntToBool,               D(Bool), S(Int),                            C) \
 O(ConvStrToBool,               D(Bool), S(Str),                          NNT) \

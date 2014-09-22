@@ -172,6 +172,26 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
   v = done;
 }
 
+// emit an if-then-else condition where the true case is unlikely.
+template <class T, class F>
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
+    auto fblock = v.makeBlock();
+    auto tblock = vc.makeBlock();
+    auto done = v.makeBlock();
+    v << jcc{cc, {fblock, tblock}};
+    vc = tblock;
+    auto treg = t(vc);
+    vc << phijmp{done, vc.makeTuple(VregList{treg})};
+    v = fblock;
+    auto freg = f(v);
+    v << phijmp{done, v.makeTuple(VregList{freg})};
+    v = done;
+    v << phidef{v.makeTuple(VregList{d})};
+    return d;
+}
+
+
+
 /*
  * Generate an if-block that branches around some unlikely code, handling
  * the cases when a == astubs and a != astubs.  cc is the branch condition
@@ -2317,11 +2337,27 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
 
-  // This will incorrectly result in "true" for a NameValueTableWrapper that is
-  // empty. You can only get such a thing through very contrived PHP, so the
-  // savings of a branch and a block of cold code outweights the edge-case bug.
-  v << cmplim{0, srcReg[ArrayData::offsetofSize()]};
-  v << setcc{CC_NZ, dstReg};
+  auto size = v.makeReg();
+  v << loadl{srcReg[ArrayData::offsetofSize()], size};
+  v << testl{size, size};
+
+  unlikelyCond(v, vcold(), CC_S, dstReg,
+    [&](Vout& v) {
+      auto vsize = v.makeReg();
+      auto dst1 = v.makeReg();
+      cgCallHelper(v, CppCall::method(&ArrayData::vsize),
+                   callDest(vsize), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0));
+      v << testl{vsize, vsize};
+      v << setcc{CC_NZ, dst1};
+      return dst1;
+    },
+    [&](Vout& v) {
+      auto dst2 = v.makeReg();
+      v << setcc{CC_NZ, dst2};
+      return dst2;
+    }
+  );
 }
 
 /*
@@ -6203,14 +6239,21 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(0).reg();
   auto const dstReg  = dstLoc(0).reg();
   auto& v = vmain();
+  auto dst1 = v.makeReg();
 
-  v << cmpbim{ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]};
-  unlikelyIfThenElse(v, vcold(), CC_Z,
+  v << loadl{baseReg[ArrayData::offsetofSize()], dst1};
+  v << testl{dst1, dst1};
+
+  unlikelyCond(v, vcold(), CC_S, dstReg,
     [&](Vout& v) {
-      cgCallNative(v, inst);
+      auto dst2 = v.makeReg();
+      cgCallHelper(v, CppCall::method(&ArrayData::vsize),
+                   callDest(dst2), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0/*base*/));
+      return dst2;
     },
     [&](Vout& v) {
-      v << loadl{baseReg[ArrayData::offsetofSize()], dstReg};
+       return dst1;
     }
   );
 }

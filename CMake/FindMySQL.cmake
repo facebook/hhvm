@@ -38,6 +38,8 @@ FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
   /opt/mysql/mysql/include/mysql
   /opt/mysql/include
   /opt/local/include/mysql5
+  /opt/local/include/mysql55
+  /opt/local/include/mysql56
   /usr/local/mysql/include
   /usr/local/mysql/include/mysql
   $ENV{ProgramFiles}/MySQL/*/include

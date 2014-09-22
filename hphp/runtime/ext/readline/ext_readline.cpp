@@ -152,7 +152,7 @@ const StaticString
 Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
                                      const String& newvalue /* = null */) {
   if (varname.isNull()) {
-    Array ret = Array::Create();
+    ArrayInit ret(12, ArrayInit::Map{});
     ret.add(s_line_buffer, convert_null_to_empty(rl_line_buffer));
     ret.add(s_point, rl_point);
     ret.add(s_end, rl_end);
@@ -169,7 +169,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     ret.add(s_library_version, convert_null_to_empty(rl_library_version));
     ret.add(s_readline_name, convert_null_to_empty(rl_readline_name));
     ret.add(s_attempted_completion_over, rl_attempted_completion_over);
-    return ret;
+    return ret.toArray();
   } else {
     Variant oldval;
     if (varname == s_line_buffer) {

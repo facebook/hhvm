@@ -98,10 +98,6 @@ inline KeyType getKeyType(const SSATmp* key) {
   DEBUG_ONLY auto const keyType = key->type();
   assert(keyType.notBoxed());
 
-  assert(keyType.isKnownDataType() ||
-         keyType == Type::InitCell ||
-         keyType == Type::Cell);
-
   if (key->isA(Type::Str)) return KeyType::Str;
   if (key->isA(Type::Int)) return KeyType::Int;
   return KeyType::Any;

@@ -19,6 +19,7 @@
 
 #include <iosfwd>
 #include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -56,6 +57,7 @@ void print(const SSATmp*);
 
 // Block
 void print(std::ostream& os, const Block* block,
+           AreaIndex area,
            const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
@@ -80,8 +82,8 @@ static inline bool dumpIREnabled(int level = 1) {
 
 constexpr int kIRLevel = 1;
 constexpr int kCodeGenLevel = 2;
-constexpr int kTraceletLevel = 3;
 constexpr int kOptLevel = 3;
+constexpr int kTraceletLevel = 4;
 constexpr int kRegAllocLevel = 4;
 constexpr int kRelocationLevel = 4;
 constexpr int kExtraLevel = 6;
@@ -97,6 +99,8 @@ inline std::ostream& operator<<(std::ostream& os, Type t) {
 inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
   return os << tc.toString();
 }
+
+std::string banner(const char* caption);
 
 void disasmRange(std::ostream& os, TCA begin, TCA end);
 inline void disasmRange(std::ostream& os, TcaRange r) {

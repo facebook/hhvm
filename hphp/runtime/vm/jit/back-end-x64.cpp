@@ -575,10 +575,12 @@ struct BackEnd : public jit::BackEnd {
     }
 
     if (asmInfo) {
-      fixupStateVector(asmInfo->instRanges, rel);
-      fixupStateVector(asmInfo->asmRanges, rel);
-      fixupStateVector(asmInfo->acoldRanges, rel);
-      fixupStateVector(asmInfo->afrozenRanges, rel);
+      fixupStateVector(asmInfo->asmInstRanges, rel);
+      fixupStateVector(asmInfo->asmBlockRanges, rel);
+      fixupStateVector(asmInfo->coldInstRanges, rel);
+      fixupStateVector(asmInfo->coldBlockRanges, rel);
+      fixupStateVector(asmInfo->frozenInstRanges, rel);
+      fixupStateVector(asmInfo->frozenBlockRanges, rel);
     }
   }
 
@@ -931,13 +933,11 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
     hhir_count++;
 
     if (instr.is(EndGuards)) state.pastGuards = true;
-    if (state.pastGuards &&
-        (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
-      SrcKey sk = inst->marker().sk();
-      vasm.main().setSrcKey(sk);
-      vasm.cold().setSrcKey(sk);
-      vasm.frozen().setSrcKey(sk);
-    }
+
+    vasm.main().setOrigin(inst);
+    vasm.cold().setOrigin(inst);
+    vasm.frozen().setOrigin(inst);
+
     cg.cgInst(inst);
   }
   return hhir_count;
@@ -1007,10 +1007,12 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   if (frozenCode == &coldCodeIn) {
     frozenCode = &coldCode;
   }
+
   auto frozenStart = frozenCode->frontier();
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
   size_t hhir_count{0};
+
   {
     mcg->code.lock();
     mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
@@ -1025,9 +1027,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
 
     auto const linfo = layoutBlocks(unit);
-    auto main_start = mainCode.frontier();
-    auto cold_start = coldCode.frontier();
-    auto frozen_start = frozenCode->frontier();
     Vasm vasm(&state.meta);
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
@@ -1042,7 +1041,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     vasm.frozen(*frozenCode);
     for (auto it = linfo.blocks.begin(); it != linfo.blocks.end(); ++it) {
       auto block = *it;
-      auto v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
+      auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();
       FTRACE(6, "genBlock {} on {}\n", block->id(),
@@ -1058,19 +1057,9 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
-    vasm.finish(vasm_abi, useLLVM);
-    if (state.asmInfo) {
-      auto block = unit.entry();
-      state.asmInfo->asmRanges[block] = {main_start, mainCode.frontier()};
-      if (mainCode.base() != coldCode.base() && frozenCode != &coldCode) {
-        state.asmInfo->acoldRanges[block] = {cold_start, coldCode.frontier()};
-      }
-      if (mainCode.base() != frozenCode->base()) {
-        state.asmInfo->afrozenRanges[block] = {frozen_start,
-                                               frozenCode->frontier()};
-      }
-    }
+    vasm.finish(vasm_abi, useLLVM, state.asmInfo);
   }
+
   auto bcMap = &mcg->cgFixups().m_bcMap;
   if (relocate && !bcMap->empty()) {
     TRACE(1, "BCMAPS before relocation\n");

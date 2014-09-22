@@ -45,7 +45,6 @@
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/ext_posix.h"
 #include "hphp/runtime/ext/ext_process.h"

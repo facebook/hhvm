@@ -3,11 +3,19 @@ array(1) {
   [0]=>
   string(6) "qprint"
 }
+array(1) {
+  [0]=>
+  string(6) "qprint"
+}
 string(10) "x-uuencode"
+string(10) "x-uuencode"
+bool(true)
+bool(true)
 bool(true)
 string(7) "Pr‹fung"
 string(7) "Pr‹fung"
 string(7) "Pr‹fung"
+string(3) "foo"
 string(3) "foo"
 string(5) "UTF-8"
 string(5) "UTF-8"

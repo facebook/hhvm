@@ -152,6 +152,7 @@ public:
   static int ServerShutdownListenNoWork;
   static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
+  static int GzipMaxCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;
   static std::string ForceCompressionParam;

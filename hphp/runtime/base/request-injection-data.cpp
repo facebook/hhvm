@@ -228,6 +228,10 @@ void RequestInjectionData::threadInit() {
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
                    &m_socketDefaultTimeout);
+
+  // Response handling.
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "zlib.output_compression_level", &m_gzipCompressionLevel);
 }
 
 

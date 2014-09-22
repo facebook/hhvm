@@ -94,71 +94,13 @@ bool HHVM_FUNCTION(trait_exists, const String& trait_name,
   return Unit::classExists(trait_name.get(), autoload, ClassKind::Trait);
 }
 
-static void getMethodNamesImpl(const Class* cls,
-                               const Class* ctx,
-                               Array& out) {
-
-  // The order of these methods is so that the first ones win on
-  // case insensitive name conflicts.
-
-  auto const numMethods = cls->numMethods();
-
-  for (Slot i = 0; i < numMethods; ++i) {
-    auto const meth = cls->getMethod(i);
-    auto const declCls = meth->cls();
-    auto addMeth = [&]() {
-      auto const methName = Variant(meth->name(), Variant::StaticStrInit{});
-      auto const lowerName = f_strtolower(methName.toString());
-      if (!out.exists(lowerName)) {
-        out.add(lowerName, methName);
-      }
-    };
-
-    // Only pick methods declared in this class, in order to match
-    // Zend's order.  Inherited methods will be inserted in the
-    // recursive call later.
-    if (declCls != cls) continue;
-
-    // Skip generated, internal methods.
-    if (meth->isGenerated()) continue;
-
-    // Public methods are always visible.
-    if ((meth->attrs() & AttrPublic)) {
-      addMeth();
-      continue;
-    }
-
-    // In anonymous contexts, only public methods are visible.
-    if (!ctx) continue;
-
-    // All methods are visible if the context is the class that
-    // declared them.  If the context is not the declCls, protected
-    // methods are visible in context classes related the declCls.
-    if (declCls == ctx ||
-        ((meth->attrs() & AttrProtected) &&
-         (ctx->classof(declCls) || declCls->classof(ctx)))) {
-      addMeth();
-    }
-  }
-
-  // Now add the inherited methods.
-  if (auto const parent = cls->parent()) {
-    getMethodNamesImpl(parent, ctx, out);
-  }
-
-  // Add interface methods that the class may not have implemented yet.
-  for (auto& iface : cls->declInterfaces()) {
-    getMethodNamesImpl(iface.get(), ctx, out);
-  }
-}
-
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
   VMRegAnchor _;
 
   auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
-  getMethodNamesImpl(
+  Class::getMethodNames(
     cls,
     arGetContextClassFromBuiltin(vmfp()),
     retVal

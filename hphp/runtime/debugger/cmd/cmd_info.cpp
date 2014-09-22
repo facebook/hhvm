@@ -221,13 +221,106 @@ String CmdInfo::GetProtoType(DebuggerClient &client, const std::string &cls,
   return String();
 }
 
+namespace {
+StaticString s_propSep{"::$"}, s_constSep{"::"};
+
+void getClassSymbolNames(bool interface,
+                         std::vector<String> &classes,
+                         std::vector<String> *clsMethods,
+                         std::vector<String> *clsProperties,
+                         std::vector<String> *clsConstants) {
+  bool details = clsMethods || clsProperties || clsConstants;
+  for (AllCachedClasses ac; !ac.empty(); ) {
+    Class* c = ac.popFront();
+    if (interface ? !(c->attrs() & AttrInterface) :
+        c->attrs() & (AttrInterface | AttrTrait)) {
+      continue;
+    }
+    classes.push_back(c->nameStr());
+    if (!details) continue;
+    if (clsMethods) {
+      for (Slot i = 0; i < c->numMethods(); i++) {
+        auto* f = c->getMethod(i);
+        if (f->isGenerated() || f->cls() != c) continue;
+        clsMethods->push_back(c->getMethod(i)->fullNameStr());
+      }
+    }
+    if (clsProperties) {
+      for (Slot i = 0; i < c->numDeclProperties(); i++) {
+        auto& prop = c->declProperties()[i];
+        if (prop.m_class != c) continue;
+        clsProperties->push_back(c->nameStr() + s_propSep + StrNR(prop.m_name));
+      }
+    }
+    if (clsConstants) {
+      for (Slot i = 0; i < c->numConstants(); i++) {
+        auto& cns = c->constants()[i];
+        if (cns.m_class != c) continue;
+        clsConstants->push_back(c->nameStr() + s_constSep + StrNR(cns.m_name));
+      }
+    }
+  }
+}
+
+void getSymbolNames(std::vector<String> &classes,
+                    std::vector<String> &functions,
+                    std::vector<String> &constants,
+                    std::vector<String> *clsMethods,
+                    std::vector<String> *clsProperties,
+                    std::vector<String> *clsConstants) {
+  static unsigned int methodSize = 128;
+  static unsigned int propSize   = 128;
+  static unsigned int constSize  = 128;
+
+  if (clsMethods) {
+    clsMethods->reserve(methodSize);
+  }
+  if (clsProperties) {
+    clsProperties->reserve(propSize);
+  }
+  if (clsConstants) {
+    clsConstants->reserve(constSize);
+  }
+
+  getClassSymbolNames(false, classes,
+                      clsMethods, clsProperties, clsConstants);
+  getClassSymbolNames(true, classes,
+                      clsMethods, clsProperties, clsConstants);
+
+  if (clsMethods && methodSize < clsMethods->size()) {
+    methodSize = clsMethods->size();
+  }
+  if (clsProperties && propSize < clsProperties->size()) {
+    propSize = clsProperties->size();
+  }
+  if (constSize && constSize < clsConstants->size()) {
+    constSize = clsConstants->size();
+  }
+
+  Array funcs1 = Unit::getSystemFunctions();
+  Array funcs2 = Unit::getUserFunctions();
+  functions.reserve(funcs1.size() + funcs2.size());
+  for (ArrayIter iter(funcs1); iter; ++iter) {
+    functions.push_back(iter.second().toString());
+  }
+  for (ArrayIter iter(funcs2); iter; ++iter) {
+    functions.push_back(iter.second().toString());
+  }
+  Array consts = lookupDefinedConstants();
+  constants.reserve(consts.size());
+  for (ArrayIter iter(consts); iter; ++iter) {
+    constants.push_back(iter.first().toString());
+  }
+}
+}
+
 bool CmdInfo::onServer(DebuggerProxy &proxy) {
   if (m_type == KindOfLiveLists) {
     std::vector<String> tmpAcLiveLists[DebuggerClient::AutoCompleteCount];
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
 
     try {
-      ClassInfo::GetSymbolNames(
+      getSymbolNames(
         tmpAcLiveLists[DebuggerClient::AutoCompleteClasses],
         tmpAcLiveLists[DebuggerClient::AutoCompleteFunctions],
         tmpAcLiveLists[DebuggerClient::AutoCompleteConstants],

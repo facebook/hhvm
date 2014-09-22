@@ -115,21 +115,10 @@ template<> void ThreadLocalNoCheck<ExecutionContext>::destroy() {
 void ExecutionContext::cleanup() {
   manageAPCHandle();
 
-  // Discard any ConstInfo objects that were created to support reflection.
-  for (ConstInfoMap::const_iterator it = m_constInfo.begin();
-       it != m_constInfo.end(); ++it) {
-    delete it->second;
-  }
-
   // Discard all units that were created via create_function().
   for (auto& v : m_createdFuncs) delete v;
 
   always_assert(m_activeSims.empty());
-
-  m_functionInfos.clear();
-  m_classInfos.clear();
-  m_interfaceInfos.clear();
-  m_traitInfos.clear();
 
   delete m_breakPointFilter;
   delete m_flowFilter;

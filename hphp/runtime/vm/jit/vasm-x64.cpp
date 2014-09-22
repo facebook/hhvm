@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
 #include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -88,19 +90,19 @@ Vtuple Vunit::makeTuple(const VregList& regs) {
 
 Vout& Vout::operator<<(Vinstr inst) {
   assert(!closed());
-  inst.sk = m_sk;
+  inst.origin = m_origin;
   m_unit.blocks[m_block].code.push_back(inst);
   return *this;
 }
 
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_sk};
+  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_origin};
 }
 
 Vout Vout::makeEntry() {
   auto label = m_unit.makeBlock(m_area);
   m_unit.roots.push_back(label); // save entry label
-  return {m_meta, m_unit, label, m_area, m_sk};
+  return {m_meta, m_unit, label, m_area, m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -119,11 +121,12 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta)
+  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
     , meta(meta)
+    , m_asmInfo(asmInfo)
     , addrs(u.blocks.size(), nullptr)
   {}
   void emit(jit::vector<Vlabel>&);
@@ -318,6 +321,7 @@ private:
   BackEnd& backend;
   jit::vector<Vasm::Area>& areas;
   Vmeta* meta;
+  AsmInfo* m_asmInfo;
   X64Assembler* a;
   Vlabel next{0}; // in linear order
   jit::vector<CodeAddress> addrs;
@@ -609,22 +613,43 @@ void Vgen::emit(unwind& i) {
 
 // overall emitter
 void Vgen::emit(jit::vector<Vlabel>& labels) {
+  // Some structures here track where we put things just for debug printing.
+  struct Snippet {
+    const IRInstruction* origin;
+    TcaRange range;
+  };
+  struct BlockInfo {
+    jit::vector<Snippet> snippets;
+  };
+
+  // This is under the printir tracemod because it mostly shows you IR and
+  // machine code, not vasm and machine code (not implemented).
+  bool shouldUpdateAsmInfo = !!m_asmInfo
+    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
     bcmap = &mcg->cgFixups().m_bcMap;
   }
-  jit::vector<jit::vector<TcaRange>> block_ranges(areas.size());
-  for (auto& r : block_ranges) r.resize(unit.blocks.size());
+
+  jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
+  if (shouldUpdateAsmInfo) {
+    areaToBlockInfos.resize(areas.size());
+    for (auto& r : areaToBlockInfos) {
+      r.resize(unit.blocks.size());
+    }
+  }
+
   for (int i = 0, n = labels.size(); i < n; ++i) {
     assert(check(unit.blocks[labels[i]]));
+
     auto b = labels[i];
     auto& block = unit.blocks[b];
     X64Assembler as { area(block.area).code };
     a = &as;
-    addrs[b] = a->frontier();
-    for (int j = 0; j < areas.size(); j++) {
-      block_ranges[j][b] = TcaRange{areas[j].code.frontier(), nullptr};
-    }
+    auto blockStart = a->frontier();
+    addrs[b] = blockStart;
+
     {
       // Compute the next block we will emit into the current area.
       auto cur_start = start(labels[i]);
@@ -634,30 +659,56 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
       }
       next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
     }
-    for (auto& inst : block.code) {
-      if (bcmap && inst.sk.valid() && (bcmap->empty() ||
-          bcmap->back().md5 != inst.sk.unit()->md5() ||
-          bcmap->back().bcStart != inst.sk.offset())) {
-        bcmap->push_back(TransBCMapping{
-          inst.sk.unit()->md5(),
-          inst.sk.offset(),
-          main().frontier(),
-          cold().frontier(),
-          frozen().frontier()
-        });
+
+    const IRInstruction* currentOrigin = nullptr;
+    auto blockInfo = shouldUpdateAsmInfo
+      ? &areaToBlockInfos[unsigned(block.area)][b]
+      : nullptr;
+    auto start_snippet = [&](Vinstr& inst) {
+      if (!shouldUpdateAsmInfo) return;
+
+      blockInfo->snippets.push_back(
+        Snippet { inst.origin, TcaRange { a->code().frontier(), nullptr } }
+      );
+    };
+    auto finish_snippet = [&] {
+      if (!shouldUpdateAsmInfo) return;
+
+      if (!blockInfo->snippets.empty()) {
+        auto& snip = blockInfo->snippets.back();
+        snip.range = TcaRange { snip.range.start(), a->code().frontier() };
       }
+    };
+
+    for (auto& inst : block.code) {
+      if (currentOrigin != inst.origin) {
+        finish_snippet();
+        start_snippet(inst);
+        currentOrigin = inst.origin;
+      }
+
+      if (bcmap && inst.origin) {
+        auto sk = inst.origin->marker().sk();
+        if (bcmap->empty() ||
+            bcmap->back().md5 != sk.unit()->md5() ||
+            bcmap->back().bcStart != sk.offset()) {
+          bcmap->push_back(TransBCMapping{sk.unit()->md5(), sk.offset(),
+                                          main().frontier(), cold().frontier(),
+                                          frozen().frontier()});
+        }
+      }
+
       switch (inst.op) {
-#define O(name, imms, uses, defs)\
+#define O(name, imms, uses, defs) \
         case Vinstr::name: emit(inst.name##_); break;
         X64_OPCODES
 #undef O
       }
     }
-    for (int j = 0; j < areas.size(); j++) {
-      auto start = block_ranges[j][b].start();
-      block_ranges[j][b] = TcaRange{start, areas[j].code.frontier()};
-    }
+
+    finish_snippet();
   }
+
   for (auto& p : jccs) {
     assert(addrs[p.target]);
     X64Assembler::patchJcc(p.instr, addrs[p.target]);
@@ -680,18 +731,29 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     ((int32_t*)after_lea)[-1] = d;
   }
 
-  if (dumpIREnabled(kCodeGenLevel+1)) {
-    std::ostringstream str;
-    for (auto b : labels) {
-      str << "B" << size_t(b) << "\n";
-      for (int j = 0; j < areas.size(); j++) {
-        if (!block_ranges[j][b].empty()) {
-          disasmRange(str, block_ranges[j][b]);
-          str << "\n";
+  if (!shouldUpdateAsmInfo) {
+    return;
+  }
+
+  for (auto i = 0; i < areas.size(); ++i) {
+    const IRInstruction* currentOrigin = nullptr;
+    auto& blockInfos = areaToBlockInfos[i];
+    for (auto const blockID : labels) {
+      auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
+      if (blockInfo.snippets.empty()) continue;
+
+      for (auto const& snip : blockInfo.snippets) {
+        if (currentOrigin != snip.origin && snip.origin) {
+          currentOrigin = snip.origin;
         }
+
+        m_asmInfo->updateForInstruction(
+          currentOrigin,
+          static_cast<AreaIndex>(i),
+          snip.range.start(),
+          snip.range.end());
       }
     }
-    HPHP::Trace::traceRelease("%s\n", str.str().c_str());
   }
 }
 
@@ -776,7 +838,7 @@ jit::vector<Vlabel> layoutBlocks(const Vunit& m_unit) {
   return blocks;
 }
 
-void Vasm::finish(const Abi& abi, bool useLLVM) {
+void Vasm::finish(const Abi& abi, bool useLLVM, AsmInfo* asmInfo) {
   if (useLLVM) {
     try {
       genCodeLLVM(m_unit, m_areas, layoutBlocks(m_unit));
@@ -801,7 +863,7 @@ void Vasm::finish(const Abi& abi, bool useLLVM) {
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, m_meta).emit(blocks);
+  Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
 }
 
 auto const vauto_gp = RegSet(rAsm).add(reg::r11);
@@ -821,6 +883,7 @@ Vauto::~Vauto() {
       if (!main().closed()) main() << end{};
       assert(m_areas.size() < 2 || cold().empty() || cold().closed());
       assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
+      Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
       finish(vauto_abi);
       return;
     }

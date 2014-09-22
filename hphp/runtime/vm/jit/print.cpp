@@ -266,13 +266,14 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
 }
 
 void print(std::ostream& os, const Block* block,
+           AreaIndex area,
            const RegAllocInfo* regs, const AsmInfo* asmInfo,
            const GuardConstraints* guards, BCMarker* markerPtr) {
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
-  TcaRange blockRange = asmInfo ? asmInfo->asmRanges[block] :
-    TcaRange(nullptr, nullptr);
+  TcaRange blockRange = asmInfo ? asmInfo->blockRangesForArea(area)[block]
+                                : TcaRange { nullptr, nullptr };
 
   os << '\n' << std::string(kIndent - 3, ' ');
   printLabel(os, block);
@@ -361,36 +362,22 @@ void print(std::ostream& os, const Block* block,
     os << '\n';
 
     if (asmInfo) {
-      TcaRange instRange = asmInfo->instRanges[inst];
+      TcaRange instRange = asmInfo->instRangesForArea(area)[inst];
       if (!instRange.empty()) {
         disasmRange(os, instRange.begin(), instRange.end());
         os << '\n';
-        assert(instRange.end() >= blockRange.start() &&
-               instRange.end() <= blockRange.end());
+        assert(instRange.end() >= blockRange.start());
+        assert(instRange.end() <= blockRange.end());
         blockRange = TcaRange(instRange.end(), blockRange.end());
       }
     }
   }
 
   if (asmInfo) {
-    // print code associated with this block that isn't tied to any
-    // instruction.  This includes code after the last isntruction (e.g.
-    // jmp to next block), and ACold or AFrozen code.
+    // Print code associated with the block that isn't tied to any instruction.
     if (!blockRange.empty()) {
       os << std::string(kIndent, ' ') << punc("A:") << "\n";
       disasmRange(os, blockRange.start(), blockRange.end());
-    }
-    auto acoldRange = asmInfo->acoldRanges[block];
-    if (!acoldRange.empty()) {
-      os << std::string(kIndent, ' ') << punc("ACold:") << "\n";
-      disasmRange(os, acoldRange.start(), acoldRange.end());
-    }
-    auto afrozenRange = asmInfo->afrozenRanges[block];
-    if (!afrozenRange.empty()) {
-      os << std::string(kIndent, ' ') << punc("AFrozen:") << "\n";
-      disasmRange(os, afrozenRange.start(), afrozenRange.end());
-    }
-    if (!blockRange.empty() || !acoldRange.empty() || !afrozenRange.empty()) {
       os << '\n';
     }
   }
@@ -407,13 +394,13 @@ void print(std::ostream& os, const Block* block,
 }
 
 void print(const Block* block) {
-  print(std::cerr, block);
+  print(std::cerr, block, AreaIndex::Main);
   std::cerr << std::endl;
 }
 
 std::string Block::toString() const {
   std::ostringstream out;
-  print(out, this);
+  print(out, this, AreaIndex::Main);
   return out.str();
 }
 
@@ -458,7 +445,7 @@ void print(std::ostream& os, const IRUnit& unit,
         block->hint() != Block::Hint::Unused) {
       // Include the IR in the body of the node
       std::ostringstream out;
-      print(out, block, regs, asmInfo, guards, &curMarker);
+      print(out, block, AreaIndex::Main, regs, asmInfo, guards, &curMarker);
       auto bodyRaw = out.str();
       std::string body;
       body.reserve(bodyRaw.size() * 1.25);
@@ -484,15 +471,18 @@ void print(std::ostream& os, const IRUnit& unit,
   }
   os << "}\n";
 
+  AreaIndex currentArea = AreaIndex::Main;
   curMarker = BCMarker();
   for (auto it = blocks.begin(); it != blocks.end(); ++it) {
     if (it == layout.acoldIt) {
       os << folly::format("\n{:-^60}", "cold blocks");
+      currentArea = AreaIndex::Cold;
     }
     if (it == layout.afrozenIt) {
       os << folly::format("\n{:-^60}", "frozen blocks");
+      currentArea = AreaIndex::Frozen;
     }
-    print(os, *it, regs, asmInfo, guards, &curMarker);
+    print(os, *it, currentArea, regs, asmInfo, guards, &curMarker);
   }
 }
 
@@ -507,6 +497,15 @@ std::string IRUnit::toString() const {
   return out.str();
 }
 
+std::string banner(const char* caption) {
+  return folly::sformat(
+    "{}{:-^80}{}\n",
+    color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+    caption,
+    color(ANSI_COLOR_END)
+  );
+}
+
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
 void printUnit(int level, const IRUnit& unit, const char* caption,
@@ -514,16 +513,9 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
                const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
-    auto bannerFmt = "{:-^80}\n";
-    str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
-        << folly::format(bannerFmt, caption)
-        << color(ANSI_COLOR_END)
-        ;
+    str << banner(caption);
     print(str, unit, regs, ai, guards);
-    str << color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN)
-        << folly::format(bannerFmt, "")
-        << color(ANSI_COLOR_END)
-        ;
+    str << banner("");
     HPHP::Trace::traceRelease("%s\n", str.str().c_str());
   }
 }

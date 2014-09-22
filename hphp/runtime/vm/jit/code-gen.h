@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_CODE_GEN_H_
 #define incl_HPHP_JIT_CODE_GEN_H_
 
+#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -32,23 +33,6 @@ enum class SyncOptions {
   kSyncPoint,
   kSyncPointAdjustOne,
   kSmashableAndSyncPoint,
-};
-
-// Information about where code was generated, for pretty-printing.
-struct AsmInfo {
-  explicit AsmInfo(const IRUnit& unit)
-    : instRanges(unit, TcaRange(nullptr, nullptr))
-    , asmRanges(unit, TcaRange(nullptr, nullptr))
-    , acoldRanges(unit, TcaRange(nullptr, nullptr))
-    , afrozenRanges(unit, TcaRange(nullptr, nullptr))
-  {}
-  void updateForInstruction(IRInstruction* inst, TCA start, TCA end);
-
-  // Asm address info for each instruction and block
-  StateVector<IRInstruction,TcaRange> instRanges;
-  StateVector<Block,TcaRange> asmRanges;
-  StateVector<Block,TcaRange> acoldRanges;
-  StateVector<Block,TcaRange> afrozenRanges;
 };
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;

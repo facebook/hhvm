@@ -32,6 +32,11 @@
 #include <folly/Range.h>
 #include <boost/dynamic_bitset.hpp>
 
+namespace HPHP { namespace jit {
+struct IRInstruction;
+struct AsmInfo;
+}}
+
 namespace HPHP { namespace jit { namespace x64 {
 
 struct Vptr;
@@ -672,7 +677,7 @@ struct Vinstr {
 
   Opcode op;
   unsigned pos;
-  SrcKey sk;
+  const IRInstruction* origin{nullptr};
 #define O(name, imms, uses, defs) x64::name name##_;
   union { X64_OPCODES };
 #undef O
@@ -709,20 +714,21 @@ struct Vunit {
 // writer stream to add instructions to a block
 struct Vout {
   Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area)
-    : m_meta(m), m_unit(u), m_block(b), m_area(area)
+    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_origin(nullptr)
   {}
-  Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area, SrcKey sk)
-    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_sk(sk)
+  Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area,
+       const IRInstruction* origin)
+    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_origin(origin)
   {}
   Vout(const Vout& v)
     : m_meta(v.m_meta), m_unit(v.m_unit), m_block(v.m_block), m_area(v.m_area)
-    , m_sk(v.m_sk)
+    , m_origin(v.m_origin)
   {}
 
   Vout& operator=(const Vout& v) {
     assert(&v.m_unit == &m_unit && v.m_area == m_area);
     m_block = v.m_block;
-    m_sk = v.m_sk;
+    m_origin = v.m_origin;
     return *this;
   }
 
@@ -742,7 +748,7 @@ struct Vout {
   Vunit& unit() { return m_unit; }
   template<class T> Vreg cns(T v) { return m_unit.makeConst(v); }
   void use(Vlabel b) { m_block = b; }
-  void setSrcKey(SrcKey sk) { m_sk = sk; }
+  void setOrigin(const IRInstruction* i) { m_origin = i; }
   Vreg makeReg() { return m_unit.makeReg(); }
   AreaIndex area() const { return m_area; }
   Vtuple makeTuple(const VregList& regs) const {
@@ -757,7 +763,7 @@ private:
   Vunit& m_unit;
   Vlabel m_block;
   AreaIndex m_area;
-  SrcKey m_sk;
+  const IRInstruction* m_origin;
 };
 
 // Similar to X64Assembler, but buffers instructions as they
@@ -769,10 +775,12 @@ struct Vasm {
     CodeBlock& code;
     CodeAddress start;
   };
-  explicit Vasm(Vmeta* meta) : m_meta(meta) {
+  explicit Vasm(Vmeta* meta)
+    : m_meta(meta)
+  {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
-  void finish(const Abi&, bool useLLVM = false);
+  void finish(const Abi&, bool useLLVM = false, AsmInfo* asmInfo = nullptr);
 
   // get an existing area
   Vout& main() { return area(AreaIndex::Main).out; }
@@ -803,7 +811,9 @@ protected:
 };
 
 struct Vauto : Vasm {
-  explicit Vauto(Vmeta* meta = nullptr) : Vasm{meta} {}
+  explicit Vauto(Vmeta* meta = nullptr)
+    : Vasm(meta)
+  {}
   ~Vauto();
   RegSet params;
 };

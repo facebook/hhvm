@@ -201,11 +201,21 @@ std::string show(const Vunit& unit, const Vinstr& inst) {
 void printBlock(std::ostream& out, const Vunit& unit,
                 const PredVector& preds, Vlabel b) {
   auto& block = unit.blocks[b];
-  out << folly::format("B{: <11} {}", size_t(b), area_names[int(block.area)]);
+  out << '\n' << color(ANSI_COLOR_MAGENTA);
+  out << folly::format(" B{: <11} {}", size_t(b),
+           area_names[int(block.area)]);
   for (auto p : preds[b]) out << ", B" << size_t(p);
-  out << "\n";
+  out << color(ANSI_COLOR_END);
+
+  if (!block.code.empty() && !block.code.front().origin) out << '\n';
+
+  const IRInstruction* currentOrigin = nullptr;
   for (auto& inst : block.code) {
-    out << "  " << show(unit, inst) << "\n";
+    if (currentOrigin != inst.origin && inst.origin) {
+      currentOrigin = inst.origin;
+      out << "\n    " << currentOrigin->toString() << '\n';
+    }
+    out << "        " << show(unit, inst) << '\n';
   }
 }
 
@@ -238,7 +248,6 @@ std::string show(const Vunit& unit) {
   auto blocks = sortBlocks(unit);
 
   std::ostringstream out;
-  printCfg(out, unit, blocks);
   for (auto b : blocks) {
     printBlock(out, unit, preds, b);
   }
@@ -247,7 +256,12 @@ std::string show(const Vunit& unit) {
 
 void printUnit(int level, const std::string& caption, const Vunit& unit) {
   if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
-  Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
+  Trace::ftraceRelease(
+    "\n{}{}\n{}",
+    banner(caption.c_str()),
+    show(unit),
+    banner("")
+  );
 }
 
 }}

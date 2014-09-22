@@ -31,12 +31,6 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-void AsmInfo::updateForInstruction(IRInstruction* inst, TCA start, TCA end) {
-  auto* block = inst->block();
-  instRanges[inst] = TcaRange(start, end);
-  asmRanges[block] = TcaRange(asmRanges[block].start(), end);
-}
-
 /*
  * Compute and save registers that are live *across* each inst, not including
  * registers whose lifetimes end at inst, nor registers defined by inst.
@@ -95,7 +89,8 @@ static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
     auto* start = cb.frontier();
     cg->cgInst(inst);
     if (state.asmInfo && start < cb.frontier()) {
-      state.asmInfo->updateForInstruction(inst, start, cb.frontier());
+      state.asmInfo->updateForInstruction(inst, AreaIndex::Main,
+        start, cb.frontier());
     }
   }
 }
@@ -167,7 +162,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.noTerminalJmp = last->op() == Jmp && nextLinear == last->taken();
 
       if (state.asmInfo) {
-        state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
+        state.asmInfo->asmBlockRanges[block] = TcaRange(aStart, cb.frontier());
       }
 
       genBlock(unit, cb, coldCode, *frozenCode, state, block, bcMap);
@@ -177,13 +172,13 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       }
 
       if (state.asmInfo) {
-        state.asmInfo->asmRanges[block] = TcaRange(aStart, cb.frontier());
+        state.asmInfo->asmBlockRanges[block] = TcaRange(aStart, cb.frontier());
         if (cb.base() != coldCode.base() && frozenCode != &coldCode) {
-          state.asmInfo->acoldRanges[block] = TcaRange(acoldStart,
+          state.asmInfo->coldBlockRanges[block] = TcaRange(acoldStart,
                                                        coldCode.frontier());
         }
         if (cb.base() != frozenCode->base()) {
-          state.asmInfo->afrozenRanges[block] = TcaRange(afrozenStart,
+          state.asmInfo->frozenBlockRanges[block] = TcaRange(afrozenStart,
                                                         frozenCode->frontier());
         }
       }

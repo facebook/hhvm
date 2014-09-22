@@ -98,6 +98,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
 }
 class AsyncMysqlRowBlock extends Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }
+  public function at(int $row, mixed $field): mixed { }
   public function getFieldAsInt(int $row, mixed $field): int { }
   public function getFieldAsDouble(int $row, mixed $field): float { }
   public function getFieldAsString(int $row, mixed $field): string { }
@@ -123,6 +124,7 @@ class AsyncMysqlRowBlockIterator implements Iterator, Traversable {
 */
 class AsyncMysqlRow implements MysqlRow {
   public function __construct() { }
+  public function at(mixed $field): mixed { }
   public function getFieldAsInt(mixed $field): int { }
   public function getFieldAsDouble(mixed $field): float { }
   public function getFieldAsString(mixed $field): string { }

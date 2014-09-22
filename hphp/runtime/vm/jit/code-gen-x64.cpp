@@ -2102,11 +2102,27 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
 
-  // This will incorrectly result in "true" for a NameValueTableWrapper that is
-  // empty. You can only get such a thing through very contrived PHP, so the
-  // savings of a branch and a block of cold code outweights the edge-case bug.
-  v << cmplim{0, srcReg[ArrayData::offsetofSize()]};
-  v << setcc{CC_NZ, dstReg};
+  auto size = v.makeReg();
+  v << loadl{srcReg[ArrayData::offsetofSize()], size};
+  v << testl{size, size};
+
+  unlikelyCond(v, vcold(), CC_S, dstReg,
+    [&](Vout& v) {
+      auto vsize = v.makeReg();
+      auto dst1 = v.makeReg();
+      cgCallHelper(v, CppCall::method(&ArrayData::vsize),
+                   callDest(vsize), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0));
+      v << testl{vsize, vsize};
+      v << setcc{CC_NZ, dst1};
+      return dst1;
+    },
+    [&](Vout& v) {
+      auto dst2 = v.makeReg();
+      v << setcc{CC_NZ, dst2};
+      return dst2;
+    }
+  );
 }
 
 /*
@@ -5796,20 +5812,21 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(0).reg();
   auto const dstReg  = dstLoc(0).reg();
   auto& v = vmain();
+  auto dst1 = v.makeReg();
 
-  v << cmpbim{ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]};
-  unlikelyCond(v, vcold(), CC_Z, dstReg,
-    [&](Vout& v) {
-      auto dst1 = v.makeReg();
-      cgCallHelper(v, CppCall::method(&ArrayData::size),
-                   callDest(dst1), SyncOptions::kNoSyncPoint,
-                   argGroup().ssa(0/*base*/));
-      return dst1;
-    },
+  v << loadl{baseReg[ArrayData::offsetofSize()], dst1};
+  v << testl{dst1, dst1};
+
+  unlikelyCond(v, vcold(), CC_S, dstReg,
     [&](Vout& v) {
       auto dst2 = v.makeReg();
-      v << loadl{baseReg[ArrayData::offsetofSize()], dst2};
+      cgCallHelper(v, CppCall::method(&ArrayData::vsize),
+                   callDest(dst2), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0/*base*/));
       return dst2;
+    },
+    [&](Vout& v) {
+      return dst1;
     }
   );
 }

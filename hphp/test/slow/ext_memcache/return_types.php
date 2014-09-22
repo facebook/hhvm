@@ -7,20 +7,26 @@ $memcache->addServer('127.0.0.1', 11211);
 
 $memcache->delete($key);
 
-$string = "Some string";
-$memcache->set($key, $string);
-var_dump($memcache->get($key));
+$stdClass = new stdClass();
+$stdClass->prop1 = 1;
+$stdClass->prop2 = '2';
 
-$integer = 1234567;
-$memcache->set($key, $integer);
-var_dump($memcache->get($key));
+$testValueList = array(
+  'Some string',
+  '1234567',
+  1234567,
+  '120.88',
+  120.88,
+  'true',
+  'false',
+  true,
+  false,
+  $stdClass
+);
 
-$double = 120.88;
-$memcache->set($key, $double);
-var_dump($memcache->get($key));
-
-$boolean = true;
-$memcache->set($key, $boolean);
-var_dump($memcache->get($key));
+foreach ($testValueList as $value) {
+  $memcache->set($key, $value);
+  var_dump($memcache->get($key));
+}
 
 $memcache->delete($key);

@@ -154,6 +154,7 @@ int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
+int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
@@ -1046,6 +1047,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
     Config::Bind(GzipCompressionLevel, ini, server["GzipCompressionLevel"], 3);
+    Config::Bind(GzipMaxCompressionLevel, ini,
+                 server["GzipMaxCompressionLevel"], 9);
 
     Config::Bind(ForceCompressionURL, ini, server["ForceCompression"]["URL"]);
     Config::Bind(ForceCompressionCookie, ini,

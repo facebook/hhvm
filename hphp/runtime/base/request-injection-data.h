@@ -122,6 +122,7 @@ private:
   std::string m_argSeparatorInput;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
+  std::string m_gzipCompressionLevel;
   std::vector<std::string> m_include_paths;
   int64_t m_errorReportingLevel;
   bool m_logErrors;

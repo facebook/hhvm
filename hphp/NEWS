@@ -42,6 +42,7 @@ NEXT 9-Oct-2014
  - Support mappy ini configuration
  - Xdebug cleanup and trivial features
  - Abort the server if a request gets stuck
+ - Added support for Closure::bind()
 
 "Snoop Dogg" 11-Sep-2014
  - VASM phase 1: emit vasm instructions, with existing register allocation

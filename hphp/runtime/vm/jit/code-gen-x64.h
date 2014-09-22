@@ -165,9 +165,9 @@ private:
   void cgIterInitCommon(IRInstruction* inst);
   void cgMIterNextCommon(IRInstruction* inst);
   void cgMIterInitCommon(IRInstruction* inst);
-  void cgLdFuncCachedCommon(IRInstruction* inst);
+  void cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst);
   void cgLookupCnsCommon(IRInstruction* inst);
-  RDS::Handle cgLdClsCachedCommon(IRInstruction* inst);
+  RDS::Handle cgLdClsCachedCommon(IRInstruction* inst, Vreg dst);
   Vlabel label(Block*);
   void emitFwdJcc(Vout&, ConditionCode cc, Block* target);
   const Func* curFunc() const { return m_curInst->marker().func(); };

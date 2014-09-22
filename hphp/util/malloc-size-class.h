@@ -16,8 +16,7 @@
 #ifndef incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
 #define incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
 
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/int.hpp>
+#include <type_traits>
 
 #include "hphp/util/assertions.h"
 
@@ -47,14 +46,10 @@ namespace HPHP {
 #ifndef USE_JEMALLOC
 
 template<size_t Size>
-struct is_malloc_size_class
-  : boost::mpl::true_
-{};
+struct is_malloc_size_class : std::true_type {};
 
 template<size_t Size>
-struct next_malloc_size_class
-  : boost::mpl::int_<Size>
-{};
+struct next_malloc_size_class : std::integral_constant<size_t, Size> {};
 
 #else
 
@@ -64,7 +59,7 @@ struct next_malloc_size_class
 
 template<size_t Size>
 struct is_malloc_size_class
-  : boost::mpl::bool_<
+  : std::integral_constant<bool,
       // Small classes:
          Size == 8
      || (Size <=  128 && !(Size % 16))
@@ -84,12 +79,12 @@ template<size_t Size>
 class next_malloc_size_class {
   template<size_t Multiple>
   struct round {
-    static const size_t value =
+    static constexpr size_t value =
       !(Size % Multiple) ? Size : Size + Multiple - Size % Multiple;
   };
 
 public:
-  typedef typename boost::mpl::int_<
+  using type = typename std::integral_constant<size_t,
     // Small classes:
     Size <= 8    ? 8 :
     Size <= 16   ? 16 :
@@ -103,8 +98,8 @@ public:
     Size <= 4096 * 1024 ? round<4096>::value :
     // Huge:
     round<4096 * 1024>::value
-  >::type type;
-  static const size_t value = type::value;
+  >::type;
+  static constexpr size_t value = type::value;
 
   static_assert(is_malloc_size_class<value>::value,
                 "Bug in malloc-size-class.h");

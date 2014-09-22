@@ -66,8 +66,8 @@ void emitAssertRefCount(Vout&, Vreg base);
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
-void emitLdObjClass(Vout&, Vreg objReg, Vreg dstReg);
-void emitLdClsCctx(Vout&, Vreg srcReg, Vreg dstReg);
+Vreg emitLdObjClass(Vout&, Vreg objReg, Vreg dstReg);
+Vreg emitLdClsCctx(Vout&, Vreg srcReg, Vreg dstReg);
 
 void emitCall(Asm& as, TCA dest, RegSet args);
 void emitCall(Asm& as, CppCall call, RegSet args);

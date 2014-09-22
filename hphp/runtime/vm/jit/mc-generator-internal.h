@@ -241,18 +241,6 @@ emitDeref(X64Assembler &a, PhysReg src, PhysReg dest) {
   a.    loadq (src[TVOFF(m_data)], dest);
 }
 
-inline void emitDerefIfVariant(x64::Vout& v, x64::Vreg reg) {
-  emitCmpTVType(v, KindOfRef, reg[TVOFF(m_type)]);
-  if (RefData::tvOffset() == 0) {
-    v << x64::cloadq{CC_E, reg, reg[TVOFF(m_data)], reg};
-  } else {
-    ifThen(v, CC_E, [&](x64::Vout& v) {
-      v << x64::loadq{reg[TVOFF(m_data)], reg};
-      v << x64::addqi{RefData::tvOffset(), reg, reg};
-    });
-  }
-}
-
 // NB: leaves count field unmodified. Does not store to m_data if type
 // is a null type.
 static inline void

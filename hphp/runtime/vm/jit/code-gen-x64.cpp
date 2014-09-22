@@ -172,6 +172,42 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
   v = done;
 }
 
+template <class T, class F>
+Vreg cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
+  using namespace x64;
+  auto fblock = v.makeBlock();
+  auto tblock = v.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {fblock, tblock}};
+  v = tblock;
+  auto treg = t(v);
+  v << phijmp{done, v.makeTuple(VregList{treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v = done;
+  v << phidef{v.makeTuple(VregList{dst})};
+  return dst;
+}
+
+// emit an if-then-else condition where the true case is unlikely.
+template <class T, class F>
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
+  auto fblock = v.makeBlock();
+  auto tblock = vc.makeBlock();
+  auto done = v.makeBlock();
+  v << jcc{cc, {fblock, tblock}};
+  vc = tblock;
+  auto treg = t(vc);
+  vc << phijmp{done, vc.makeTuple(VregList{treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v = done;
+  v << phidef{v.makeTuple(VregList{d})};
+  return d;
+}
+
 /*
  * Generate an if-block that branches around some unlikely code, handling
  * the cases when a == astubs and a != astubs.  cc is the branch condition
@@ -1904,27 +1940,31 @@ void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
+  auto test = inst->src(1);
   auto testReg = srcLoc(1).reg();
   auto destReg = dstLoc(0).reg();
   auto& v = vmain();
 
-  if (testReg == InvalidReg) {
+  auto call_classof = [&](Vreg dst) {
+    cgCallHelper(v, CppCall::method(&Class::classof),
+    callDest(dst), SyncOptions::kNoSyncPoint, argGroup().ssa(0).ssa(1));
+    return dst;
+  };
+
+  if (test->isConst()) {
     // Don't need to do the null check when the class is const.
-    assert(inst->src(1)->clsVal() != nullptr);
-    cgCallNative(v, inst);
+    assert(test->clsVal() != nullptr);
+    call_classof(destReg);
     return;
   }
 
   v << testq{testReg, testReg};
-  ifThenElse(v, CC_NZ,
-    [&](Vout& v) {
-      cgCallNative(v, inst);
-    },
-    [&](Vout& v) {
-      // testReg == 0, set dest to false (0)
-      v << copy{testReg, destReg};
-    }
-  );
+  cond(v, CC_NZ, destReg, [&](Vout& v) {
+    return call_classof(v.makeReg());
+  }, [&](Vout& v) {
+    // testReg == 0, set dest to false (0)
+    return testReg;
+  });
 }
 
 /*
@@ -1995,36 +2035,44 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   constexpr uint64_t maxLongAsDouble   = 0x43E0000000000000LL;
 
   auto rIndef = v.cns(0x8000000000000000L);
-  v << cvttsd2siq{srcReg, dstReg};
-  v << cmpq{rIndef, dstReg};
-
-  unlikelyIfBlock(v, vcold(), CC_E, [&] (Vout& v) {
+  auto dst1 = v.makeReg();
+  v << cvttsd2siq{srcReg, dst1};
+  v << cmpq{rIndef, dst1};
+  unlikelyCond(v, vcold(), CC_E, dstReg, [&](Vout& v) {
     // result > max signed int or unordered
     v << ucomisd{v.cns(0), srcReg};
-    ifThen(v, CC_B, [&](Vout& v) {
+    return cond(v, CC_NB, v.makeReg(), [&](Vout& v) {
+      return dst1;
+    }, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      ifThen(v, CC_NP, [&](Vout& v) {
+      return cond(v, CC_P, v.makeReg(), [&](Vout& v) {
+        return dst1;
+      }, [&](Vout& v) {
         v << ucomisd{v.cns(maxULongAsDouble), srcReg};
-        ifThenElse(v, CC_B, [&](Vout& v) {
-          // src0 > ULONG_MAX
-          v << ldimm{0, dstReg};
+        return cond(v, CC_B, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
+          return v.cns(0);
         }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
           // 0 < src0 - ULONG_MAX <= LONG_MAX
           auto tmp_sub = v.makeReg();
+          auto tmp_int = v.makeReg();
+          auto dst5 = v.makeReg();
           v << subsd{v.cns(maxLongAsDouble), srcReg, tmp_sub};
-          v << cvttsd2siq{tmp_sub, dstReg};
+          v << cvttsd2siq{tmp_sub, tmp_int};
 
           // We want to simulate integer overflow so we take the resulting
           // integer and flip its sign bit (NB: we don't use orq here
           // because it's possible that src0 == LONG_MAX in which case
-          // cvttsd2siq will yeild an indefiniteInteger, which we would
+          // cvttsd2siq will yield an indefiniteInteger, which we would
           // like to make zero)
-          v << xorq{rIndef, dstReg, dstReg};
+          v << xorq{rIndef, tmp_int, dst5};
+          return dst5;
         });
       });
     });
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
@@ -2106,31 +2154,28 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   auto& v = vmain();
 
   testimm(v, ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()]);
-  unlikelyIfThenElse(v, vcold(),
-    CC_NZ,
+  unlikelyCond(v, vcold(), CC_NZ, rdst,
     [&] (Vout& v) {
       testimm(v,
               ObjectData::IsCollection,
               rsrc[ObjectData::attributeOff()]);
-      ifThenElse(
-        v,
-        CC_NZ,
+      return cond(v, CC_NZ, v.makeReg(),
         [&] (Vout& v) { // rsrc points to native collection
+          auto dst2 = v.makeReg();
           v << cmplim{0, rsrc[FAST_COLLECTION_SIZE_OFFSET]};
-          v << setcc{CC_NE, rdst}; // true iff size not zero
-        },
-        [&] (Vout& v) { // rsrc is not a native collection
-          cgCallHelper(
-            v,
+          v << setcc{CC_NE, dst2}; // true iff size not zero
+          return dst2;
+        }, [&] (Vout& v) { // rsrc is not a native collection
+          auto dst3 = v.makeReg();
+          cgCallHelper(v,
             CppCall::method(&ObjectData::o_toBoolean),
-            callDest(inst),
+            callDest(dst3),
             SyncOptions::kSyncPoint,
             argGroup().ssa(0));
-        }
-      );
-    },
-    [&] (Vout& v) {
-      v << ldimm{1, rdst};
+          return dst3;
+        });
+    }, [&] (Vout& v) {
+      return v.cns(1);
     }
   );
 }
@@ -2179,15 +2224,26 @@ void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
-  auto srcReg = srcLoc(0).reg();
-  auto dstReg = dstLoc(0).reg();
+  auto src = srcLoc(0).reg();
+  auto dst = dstLoc(0).reg();
   auto& v = vmain();
-  v << copy{srcReg, dstReg};
-  emitDerefIfVariant(v, dstReg);
+  emitCmpTVType(v, KindOfRef, src[TVOFF(m_type)]);
+  if (RefData::tvOffset() == 0) {
+    v << cloadq{CC_E, src, src[TVOFF(m_data)], dst};
+    return;
+  }
+  cond(v, CC_E, dst, [&](Vout& v) {
+    auto ref_ptr = v.makeReg();
+    auto cell_ptr = v.makeReg();
+    v << loadq{src[TVOFF(m_data)], ref_ptr};
+    v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr};
+    return cell_ptr;
+  }, [&](Vout& v) {
+    return src;
+  });
 }
 
-void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
-  auto const dst  = dstLoc(0).reg();
+void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
@@ -2196,21 +2252,27 @@ void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst);
-  unlikelyIfBlock(vmain(), vcold(), CC_Z, [&] (Vout& v) {
+  auto& v = vmain();
+  auto dst1 = v.makeReg();
+  cgLdFuncCachedCommon(inst, dst1);
+  unlikelyCond(v, vcold(), CC_Z, dstLoc(0).reg(), [&] (Vout& v) {
+    auto dst2 = v.makeReg();
     const Func* (*const func)(const StringData*) = lookupUnknownFunc;
     cgCallHelper(v,
       CppCall::direct(func),
-      callDest(inst),
+      callDest(dst2),
       SyncOptions::kSyncPoint,
       argGroup()
         .immPtr(inst->extra<LdFuncCached>()->name)
     );
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst);
+  cgLdFuncCachedCommon(inst, dstLoc(0).reg());
   if (auto const taken = inst->taken()) {
     vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
   }
@@ -3634,10 +3696,12 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   // Context could be either a this object or a class ptr
   auto& v = vmain();
   v << testbi{1, srcReg};
-  ifThenElse(v, CC_NZ,
-    [&](Vout& v) { emitLdClsCctx(v, srcReg, dstReg);  }, // ctx is a class
-    [&](Vout& v) { emitLdObjClass(v, srcReg, dstReg); }  // ctx is this ptr
-  );
+  cond(v, CC_NZ, dstReg,
+    [&](Vout& v) { // ctx is a class
+      return emitLdClsCctx(v, srcReg, v.makeReg());
+    }, [&](Vout& v) { // ctx is this ptr
+      return emitLdObjClass(v, srcReg, v.makeReg());
+    });
 }
 
 void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
@@ -4467,9 +4531,10 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg ctxReg, bool staticCallee) {
   auto& v = vmain();
   if (staticCallee) {
     // Load (this->m_cls | 0x1) into ctxReg.
+    auto vmclass = v.makeReg();
     emitLdLowPtr(v, ctxReg[ObjectData::getVMClassOffset()],
-                 ctxReg, sizeof(LowClassPtr));
-    v << orqi{1, ctxReg, ctxReg};
+                 vmclass, sizeof(LowClassPtr));
+    v << orqi{1, vmclass, ctxReg};
   } else {
     // Just incref $this.
     emitIncRef(v, ctxReg);
@@ -4618,10 +4683,9 @@ void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
   vmain() << lea{rVmTl[ch], dstReg};
 }
 
-RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
+RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst, Vreg dst) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  auto dst = dstLoc(0).reg();
   auto& v = vmain();
   v << loadq{rVmTl[ch], dst};
   v << testq{dst, dst};
@@ -4629,20 +4693,24 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
-  auto ch = cgLdClsCachedCommon(inst);
-  unlikelyIfBlock(vmain(), vcold(), CC_E, [&] (Vout& v) {
+  auto& v = vmain();
+  auto dst1 = v.makeReg();
+  auto ch = cgLdClsCachedCommon(inst, dst1);
+  unlikelyCond(v, vcold(), CC_E, dstLoc(0).reg(), [&] (Vout& v) {
+    auto dst2 = v.makeReg();
     Class* (*const func)(Class**, const StringData*) = jit::lookupKnownClass;
-    cgCallHelper(v,
-                 CppCall::direct(func),
-                 callDest(inst),
+    cgCallHelper(v, CppCall::direct(func), callDest(dst2),
                  SyncOptions::kSyncPoint,
                  argGroup().addr(rVmTl, safe_cast<int32_t>(ch))
                            .ssa(0));
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
   });
 }
 
 void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
-  cgLdClsCachedCommon(inst);
+  cgLdClsCachedCommon(inst, dstLoc(0).reg());
   if (Block* taken = inst->taken()) {
     vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
   }
@@ -4984,15 +5052,16 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto base    = srcLoc(0).reg();
   auto dstReg  = dstLoc(0).reg();
   auto& v = vmain();
-  v << copy{base, dstReg};
   emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
     [&](ConditionCode cc) {
-      ifThen(v, ccNegate(cc), [&](Vout& v) {
-        cgCallHelper(v,
-                     CppCall::direct(tvBox),
-                     callDest(dstReg),
+      cond(v, cc, dstReg, [&](Vout& v) {
+        return base;
+      }, [&](Vout& v) {
+        auto dst2 = v.makeReg();
+        cgCallHelper(v, CppCall::direct(tvBox), callDest(dst2),
                      SyncOptions::kNoSyncPoint,
                      argGroup().ssa(0/*addr*/));
+        return dst2;
       });
     });
 }
@@ -5729,12 +5798,18 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto& v = vmain();
 
   v << cmpbim{ArrayData::kNvtwKind, baseReg[ArrayData::offsetofKind()]};
-  unlikelyIfThenElse(v, vcold(), CC_Z,
+  unlikelyCond(v, vcold(), CC_Z, dstReg,
     [&](Vout& v) {
-      cgCallNative(v, inst);
+      auto dst1 = v.makeReg();
+      cgCallHelper(v, CppCall::method(&ArrayData::size),
+                   callDest(dst1), SyncOptions::kNoSyncPoint,
+                   argGroup().ssa(0/*base*/));
+      return dst1;
     },
     [&](Vout& v) {
-      v << loadl{baseReg[ArrayData::offsetofSize()], dstReg};
+      auto dst2 = v.makeReg();
+      v << loadl{baseReg[ArrayData::offsetofSize()], dst2};
+      return dst2;
     }
   );
 }

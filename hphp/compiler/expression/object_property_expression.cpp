@@ -259,6 +259,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     m_objectClass = cls;
     ClassScopePtr parent;
     m_propSym = cls->findProperty(parent, name, ar);
+    m_propSymValid = false;
     if (m_propSym) {
       if (!parent) {
         parent = cls;

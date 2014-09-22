@@ -788,6 +788,7 @@ private:
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
+  SSATmp* emitInstanceOfDImpl(SSATmp*, const StringData*);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
                                          folly::Optional<Type>&) const;
@@ -801,6 +802,7 @@ private:
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
+  SSATmp* optimizedCallIsA();
   SSATmp* optimizedCallIniGet();
   SSATmp* optimizedCallCount();
   SSATmp* optimizedCallGetClass(uint32_t);

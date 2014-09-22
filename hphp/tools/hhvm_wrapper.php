@@ -34,6 +34,8 @@ function my_option_map(): OptionInfoMap {
 'arm'             => Pair { '',  'Emit ARM code and simulate it' },
 'ini[]'           => Pair { '',  'An .ini configuration file or CLI option' },
 'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
+'no-defaults'     => Pair { '',
+                            'Do not use the default wrapper runtime options'},
   };
 }
 
@@ -75,13 +77,15 @@ function determine_flags(OptionMap $opts): string {
     }
   }
 
-  $flags .=
-    '-v Eval.EnableHipHopSyntax=true '.
-    '-v Eval.EnableHipHopExperimentalSyntax=true '.
-    '-v Eval.JitEnableRenameFunction=0 '.
-    '-v Eval.GdbSyncChunks=1 '.
-    '-v Eval.AllowHhas=true '.
-    '';
+  if (!$opts->containsKey('no-defaults')) {
+    $flags .=
+      '-v Eval.EnableHipHopSyntax=true '.
+      '-v Eval.EnableHipHopExperimentalSyntax=true '.
+      '-v Eval.JitEnableRenameFunction=0 '.
+      '-v Eval.GdbSyncChunks=1 '.
+      '-v Eval.AllowHhas=true '.
+      '';
+  }
 
   if ($opts->containsKey('interp')) {
     $flags .=

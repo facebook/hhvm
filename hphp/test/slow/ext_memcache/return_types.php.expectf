@@ -13,3 +13,5 @@ object(stdClass)#%d (2) {
   ["prop2"]=>
   string(1) "2"
 }
+string(4) "null"
+NULL

@@ -21,7 +21,9 @@ $testValueList = array(
   'false',
   true,
   false,
-  $stdClass
+  $stdClass,
+  'null',
+  null
 );
 
 foreach ($testValueList as $value) {

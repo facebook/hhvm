@@ -3339,10 +3339,41 @@ void HhbcTranslator::emitNameA() {
 }
 
 const StaticString
+  s_is_a("is_a"),
   s_count("count"),
   s_ini_get("ini_get"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class");
+
+SSATmp* HhbcTranslator::optimizedCallIsA() {
+  // The last param of is_a has a default argument of false, which makes it
+  // behave the same as instanceof (which doesn't allow a string as the tested
+  // object). Don't do the conversion if we're not sure this arg is false.
+  auto const allowStringType = topType(0);
+  if (!(allowStringType <= Type::Bool)
+      || !allowStringType.isConst()
+      || allowStringType.boolVal()) {
+    return nullptr;
+  }
+
+  // Unlike InstanceOfD, is_a doesn't support interfaces like Stringish, so e.g.
+  // "is_a('x', 'Stringish')" is false even though "'x' instanceof Stringish" is
+  // true. So if the first arg is not an object, the return is always false.
+  auto const objType = topType(2);
+  if (!objType.maybe(Type::Obj)) {
+    return cns(false);
+  }
+
+  if (objType <= Type::Obj) {
+    auto const classnameType = topType(1);
+    if (classnameType <= Type::StaticStr && classnameType.isConst()) {
+      return emitInstanceOfDImpl(topC(2), top(Type::Str, 1)->strVal());
+    }
+  }
+
+  // The LHS is a strict superset of Obj; bail.
+  return nullptr;
+}
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3426,6 +3457,9 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
       break;
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
+      break;
+    case 3:
+      if (func->name()->isame(s_is_a.get())) res = optimizedCallIsA();
       break;
     default: break;
   }
@@ -4608,10 +4642,8 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
 
 const StaticString s_WaitHandle("WaitHandle");
 
-void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
-  const StringData* className = lookupStringId(classNameStrId);
-  SSATmp* src = popC();
-
+SSATmp* HhbcTranslator::emitInstanceOfDImpl(SSATmp* src,
+                                            const StringData* className) {
   /*
    * InstanceOfD is always false if it's not an object.
    *
@@ -4627,15 +4659,11 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       (src->isA(Type::Str) && interface_supports_string(className)) ||
       (src->isA(Type::Int) && interface_supports_int(className)) ||
       (src->isA(Type::Dbl) && interface_supports_double(className));
-    push(cns(res));
-    gen(DecRef, src);
-    return;
+    return cns(res);
   }
 
   if (s_WaitHandle.get()->isame(className)) {
-    push(gen(IsWaitHandle, src));
-    gen(DecRef, src);
-    return;
+    return gen(IsWaitHandle, src);
   }
 
   SSATmp* objClass     = gen(LdObjClass, src);
@@ -4653,9 +4681,7 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
    * interfaces map and call it a day.
    */
   if (!haveBit && classIsUniqueInterface(maybeCls)) {
-    push(gen(InstanceOfIface, objClass, ssaClassName));
-    gen(DecRef, src);
-    return;
+    return gen(InstanceOfIface, objClass, ssaClassName);
   }
 
   /*
@@ -4671,11 +4697,17 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       ? cns(maybeCls)
       : gen(LdClsCachedSafe, ssaClassName);
 
-  push(
+  return
       haveBit ? gen(InstanceOfBitmask, objClass, ssaClassName)
     : isUnique && isNormalClass ? gen(ExtendsClass, objClass, checkClass)
-    : gen(InstanceOf, objClass, checkClass)
-  );
+    : gen(InstanceOf, objClass, checkClass);
+}
+
+void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
+  const StringData* className = lookupStringId(classNameStrId);
+  SSATmp* src = popC();
+
+  push(emitInstanceOfDImpl(src, className));
   gen(DecRef, src);
 }
 

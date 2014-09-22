@@ -335,6 +335,16 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
 }
 
+// Field actions:
+// I(f)     immediate
+// Inone    no immediates
+// U(s)     use s
+// UA(s)    use s, but s lifetime extends across the instruction
+// UH(s,h)  use s, try assigning same register as h
+// D(d)     define d
+// DH(d,h)  define d, try assigning same register as h
+// Un,Dn    no uses, defs
+
 #define X64_OPCODES\
   /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
@@ -345,9 +355,9 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(bindjmp, I(target) I(trflags), Un, Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target), Dn)\
-  O(copy, Inone, U(s), D(d))\
-  O(copy2, Inone, U(s0) U(s1), D(d0) D(d1))\
-  O(copyargs, Inone, U(s), D(d))\
+  O(copy, Inone, UH(s,d), DH(d,s))\
+  O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
+  O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(end, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
@@ -370,15 +380,15 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(unwind, Inone, Un, Dn)\
   /* x64 instructions */\
   O(andb, Inone, U(s0) U(s1), D(d)) \
-  O(andbi, I(s0), U(s1), D(d)) \
+  O(andbi, I(s0), UH(s1,d), DH(d,s1)) \
   O(andbim, I(s), U(m), Dn) \
   O(andl, Inone, U(s0) U(s1), D(d)) \
-  O(andli, I(s0), U(s1), D(d)) \
+  O(andli, I(s0), UH(s1,d), DH(d,s1)) \
   O(andq, Inone, U(s0) U(s1), D(d)) \
-  O(andqi, I(s0), U(s1), D(d)) \
+  O(andqi, I(s0), UH(s1,d), DH(d,s1)) \
   O(addlm, Inone, U(s0) U(m), Dn) \
   O(addq, Inone, U(s0) U(s1), D(d)) \
-  O(addqi, I(s0), U(s1), D(d))\
+  O(addqi, I(s0), UH(s1,d), DH(d,s1)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(call, I(target), U(args), Dn)\
   O(callm, Inone, U(target) U(args), Dn)\
@@ -401,17 +411,17 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
   O(cvtsi2sdm, Inone, U(s), D(d))\
-  O(decl, Inone, U(s), D(d))\
+  O(decl, Inone, UH(s,d), DH(d,s))\
   O(declm, Inone, U(m), Dn)\
-  O(decq, Inone, U(s), D(d))\
+  O(decq, Inone, UH(s,d), DH(d,s))\
   O(decqm, Inone, U(m), Dn)\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
   O(incwm, Inone, U(m), Dn)\
   O(idiv, Inone, U(s), Dn)\
   O(imul, Inone, U(s0) U(s1), D(d))\
-  O(incl, Inone, U(s), D(d))\
+  O(incl, Inone, UH(s,d), DH(d,s))\
   O(inclm, Inone, U(m), Dn)\
-  O(incq, Inone, U(s), D(d))\
+  O(incq, Inone, UH(s,d), DH(d,s))\
   O(incqm, Inone, U(m), Dn)\
   O(incqmlock, Inone, U(m), Dn)\
   O(jcc, I(cc), Un, Dn)\
@@ -426,40 +436,40 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(loadqp, I(s), Un, D(d))\
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
-  O(movb, Inone, U(s), D(d))\
+  O(movb, Inone, UH(s,d), DH(d,s))\
   O(movbi, I(s), Un, D(d))\
-  O(movdqa, Inone, U(s), D(d))\
-  O(movl, Inone, U(s), D(d))\
-  O(movq, Inone, U(s), D(d))\
+  O(movdqa, Inone, UH(s,d), DH(d,s))\
+  O(movl, Inone, UH(s,d), DH(d,d))\
+  O(movq, Inone, UH(s,d), DH(d,s))\
   O(movqrx, Inone, U(s), D(d))\
   O(movqxr, Inone, U(s), D(d))\
-  O(movsbl, Inone, U(s), D(d))\
-  O(movzbl, Inone, U(s), D(d))\
+  O(movsbl, Inone, UH(s,d), DH(d,s))\
+  O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
-  O(neg, Inone, U(s), D(d))\
-  O(not, Inone, U(s), D(d))\
+  O(neg, Inone, UH(s,d), DH(d,s))\
+  O(not, Inone, UH(s,d), DH(d,s))\
   O(orq, Inone, U(s0) U(s1), D(d))\
-  O(orqi, I(s0), U(s1), D(d))\
+  O(orqi, I(s0), UH(s1,d), DH(d,s1)) \
   O(orqim, I(s0), U(m), Dn)\
   O(pop, Inone, Un, D(d))\
   O(popm, Inone, U(m), Dn)\
-  O(psllq, I(s0), U(s1), D(d))\
-  O(psrlq, I(s0), U(s1), D(d))\
+  O(psllq, I(s0), UH(s1,d), DH(d,s1))\
+  O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
   O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, Un, Dn)\
-  O(rorqi, I(s0), U(s1), D(d))\
+  O(rorqi, I(s0), UH(s1,d), DH(d,s1))\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, U(s), D(d))\
-  O(sarqi, I(s0), U(s1), D(d))\
+  O(sarqi, I(s0), UH(s1,d), DH(d,s1))\
   O(sbbl, Inone, UA(s0) U(s1), D(d))\
   O(setcc, I(cc), Un, D(d))\
-  O(shlli, I(s0), U(s1), D(d))\
+  O(shlli, I(s0), UH(s1,d), DH(d,s1))\
   O(shlq, Inone, U(s), D(d))\
-  O(shlqi, I(s0), U(s1), D(d))\
-  O(shrli, I(s0), U(s1), D(d))\
-  O(shrqi, I(s0), U(s1), D(d))\
+  O(shlqi, I(s0), UH(s1,d), DH(d,s1))\
+  O(shrli, I(s0), UH(s1,d), DH(d,s1))\
+  O(shrqi, I(s0), UH(s1,d), DH(d,s1))\
   O(sqrtsd, Inone, U(s), D(d))\
   O(storeb, Inone, U(s) U(m), Dn)\
   O(storebim, I(s), U(m), Dn)\
@@ -472,9 +482,9 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(storesd, Inone, U(s) U(m), Dn)\
   O(storewim, I(s), U(m), Dn)\
   O(subl, Inone, UA(s0) U(s1), D(d))\
-  O(subli, I(s0), U(s1), D(d))\
+  O(subli, I(s0), UH(s1,d), DH(d,s1))\
   O(subq, Inone, UA(s0) U(s1), D(d))\
-  O(subqi, I(s0), U(s1), D(d))\
+  O(subqi, I(s0), UH(s1,d), DH(d,s1))\
   O(subsd, Inone, UA(s0) U(s1), D(d))\
   O(testb, Inone, U(s0) U(s1), Dn)\
   O(testbi, I(s0), U(s1), Dn)\
@@ -489,9 +499,9 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(ud2, Inone, Un, Dn)\
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, Inone, U(s0) U(s1), D(d))\
-  O(xorbi, I(s0), U(s1), D(d))\
+  O(xorbi, I(s0), UH(s1,d), DH(d,s1))\
   O(xorq, Inone, U(s0) U(s1), D(d))\
-  O(xorqi, I(s0), U(s1), D(d))\
+  O(xorqi, I(s0), UH(s1,d), DH(d,s1))\
 
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
@@ -841,13 +851,15 @@ void visitUses(const Vunit& unit, Vinstr& inst, Use use) {
       uses \
       break; \
     }
-#define U(f) visit(unit, i.f, use);
-#define UA(f) visit(unit, i.f, use);
+#define U(s) visit(unit, i.s, use);
+#define UA(s) visit(unit, i.s, use);
+#define UH(s,h) visit(unit, i.s, use);
 #define Un
     X64_OPCODES
 #undef Un
-#undef U
+#undef UH
 #undef UA
+#undef U
 #undef O
   }
 }
@@ -861,10 +873,12 @@ void visitDefs(const Vunit& unit, Vinstr& inst, Def def) {
       defs \
       break; \
     }
-#define D(f) visit(unit, i.f, def);
+#define D(d) visit(unit, i.d, def);
+#define DH(d,h) visit(unit, i.d, def);
 #define Dn
     X64_OPCODES
 #undef Dn
+#undef DH
 #undef D
 #undef O
   }
@@ -895,9 +909,11 @@ visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
       break; \
     }
 #define I(f) visitor.imm(i.f);
-#define U(f) visitor.use(i.f);
-#define UA(f) visitor.across(i.f);
-#define D(f) visitor.def(i.f);
+#define U(s) visitor.use(i.s);
+#define UA(s) visitor.across(i.s);
+#define UH(s,h) visitor.useHint(i.s, i.h);
+#define D(d) visitor.def(i.d);
+#define DH(d,h) visitor.defHint(i.d, i.h);
 #define Inone
 #define Un
 #define Dn
@@ -905,9 +921,11 @@ visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
 #undef Dn
 #undef Un
 #undef Inone
+#undef DH
 #undef D
-#undef U
+#undef UH
 #undef UA
+#undef U
 #undef I
 #undef O
   }

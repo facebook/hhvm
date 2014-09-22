@@ -79,6 +79,7 @@ struct FormatVisitor {
 
   template<class R> void across(R r) { print(r); }
   template<class R> void use(R r) { print(r); }
+  template<class R, class H> void useHint(R r, H) { print(r); }
   void use(Vptr m) { print(m); }
   void use(Vtuple uses) { print(uses); }
 
@@ -92,6 +93,7 @@ struct FormatVisitor {
   }
   void def(Vtuple defs) { defSep(); print(defs); }
   template<class R> void def(R r) { defSep(); print(r); }
+  template<class R, class H> void defHint(R r, H) { defSep(); print(r); }
 
   void print(Vptr p) {
     str << sep() << show(p);

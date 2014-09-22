@@ -566,6 +566,8 @@ void Vxls::analyzeRsp() {
   }
 }
 
+// Visits defs of an instruction, updates their liveness, adds live
+// ranges, and adds Uses with appropriate hints.
 struct DefVisitor {
   DefVisitor(LiveSet& live, Vxls& vxls, unsigned pos)
     : m_intervals(vxls.intervals)
@@ -573,14 +575,24 @@ struct DefVisitor {
     , m_live(live)
     , m_pos(pos)
   {}
-  template<class V> void imm(V&){} // skip immediates
-  template<class V> void use(V&){} // skip uses
-  template<class V> void across(V&){} // skip uses
+  template<class F> void imm(const F&){} // skip immediates
+  template<class R> void use(R){} // skip uses
+  template<class S, class H> void useHint(S, H){} // skip uses
+  template<class R> void across(R){} // skip uses
   void def(Vtuple defs) {
-    for (auto& r : m_tuples[defs]) def(r);
+    for (auto r : m_tuples[defs]) def(r);
   }
-  template<class V> void def(V r, Vreg hint) { def(r, r.kind, hint); }
-  template<class V> void def(V r) { def(r, r.kind); }
+  void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
+    auto& defs = m_tuples[def_tuple];
+    auto& hints = m_tuples[hint_tuple];
+    for (int i = 0; i < defs.size(); i++) {
+      defHint(defs[i], hints[i]);
+    }
+  }
+  template<class D, class H> void defHint(D dst, H hint) {
+    def(dst, dst.kind, hint);
+  }
+  template<class R> void def(R r) { def(r, r.kind); }
   void def(Vreg r, VregKind kind, Vreg hint = Vreg{}) {
     auto ivl = m_intervals[r];
     if (m_live.test(r)) {
@@ -614,14 +626,22 @@ struct UseVisitor {
     , m_live(live)
     , m_range(range)
   {}
-  template<class V> void imm(V&){} // skip immediates
-  template<class V> void def(V&){} // skip defs
-  void use(Vptr& m) {
+  template<class F> void imm(const F&){} // skip immediates
+  template<class R> void def(R){} // skip defs
+  template<class D, class H> void defHint(D, H){} // skip defs
+  void use(Vptr m) {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
   }
   void use(Vtuple uses) {
-    for (auto& r : m_tuples[uses]) use(r);
+    for (auto r : m_tuples[uses]) use(r);
+  }
+  void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
+    auto& uses = m_tuples[src_tuple];
+    auto& hints = m_tuples[hint_tuple];
+    for (int i = 0, n = uses.size(); i < n; i++) {
+      useHint(uses[i], hints[i]);
+    }
   }
   void use(RegSet regs) {
     regs.forEach([&](Vreg r) { use(r); });
@@ -632,10 +652,10 @@ struct UseVisitor {
   // which ensures it will be assigned a different register than the
   // destination. This isn't necessary if *both* operands of a binary
   // instruction are the same virtual register, but is still correct.
-  template<class V> void across(V r) { use(r, r.kind, m_range.end + 1); }
-  template<class V> void use(V r) { use(r, r.kind, m_range.end); }
-  template<class V> void use(V r, Vreg hint) {
-    use(r, r.kind, m_range.end, hint);
+  template<class R> void across(R r) { use(r, r.kind, m_range.end + 1); }
+  template<class R> void use(R r) { use(r, r.kind, m_range.end); }
+  template<class S, class H> void useHint(S src, H hint) {
+    use(src, src.kind, m_range.end, hint);
   }
   void use(Vreg r, VregKind kind, unsigned end, Vreg hint = Vreg{}) {
     m_live.set(r);
@@ -698,18 +718,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
   }
 }
 
-template<class Instr>
-void hint_unary(DefVisitor& dv, UseVisitor& uv, Instr& i) {
-  dv.def(i.d, i.s);
-  uv.use(i.s, i.d);
-}
-
-template<class Instr>
-void hint_binary(DefVisitor& dv, UseVisitor& uv, Instr& i) {
-  dv.def(i.d, i.s1);
-  uv.use(i.s1, i.d);
-}
-
 // Compute lifetime intervals and use positions of all intervals by walking
 // the code bottom-up once. Loops aren't handled yet.
 void Vxls::buildIntervals() {
@@ -744,68 +752,19 @@ void Vxls::buildIntervals() {
       pos -= 2;
       DefVisitor dv(live, *this, pos);
       UseVisitor uv(live, *this, {block_range.start, pos});
-      switch (inst.op) {
-        case Vinstr::copy: hint_unary(dv, uv, inst.copy_); break;
-        case Vinstr::decl: hint_unary(dv, uv, inst.decl_); break;
-        case Vinstr::decq: hint_unary(dv, uv, inst.decq_); break;
-        case Vinstr::incl: hint_unary(dv, uv, inst.incl_); break;
-        case Vinstr::incq: hint_unary(dv, uv, inst.incq_); break;
-        case Vinstr::movb: hint_unary(dv, uv, inst.movb_); break;
-        case Vinstr::movdqa: hint_unary(dv, uv, inst.movdqa_); break;
-        case Vinstr::movl: hint_unary(dv, uv, inst.movl_); break;
-        case Vinstr::movq: hint_unary(dv, uv, inst.movq_); break;
-        case Vinstr::movzbl: hint_unary(dv, uv, inst.movzbl_); break;
-        case Vinstr::movsbl: hint_unary(dv, uv, inst.movsbl_); break;
-        case Vinstr::neg: hint_unary(dv, uv, inst.neg_); break;
-        case Vinstr::not: hint_unary(dv, uv, inst.not_); break;
-        case Vinstr::andbi: hint_binary(dv, uv, inst.andbi_); break;
-        case Vinstr::andli: hint_binary(dv, uv, inst.andli_); break;
-        case Vinstr::andqi: hint_binary(dv, uv, inst.andqi_); break;
-        case Vinstr::addqi: hint_binary(dv, uv, inst.addqi_); break;
-        case Vinstr::orqi: hint_binary(dv, uv, inst.orqi_); break;
-        case Vinstr::psllq: hint_binary(dv, uv, inst.psllq_); break;
-        case Vinstr::psrlq: hint_binary(dv, uv, inst.psrlq_); break;
-        case Vinstr::rorqi: hint_binary(dv, uv, inst.rorqi_); break;
-        case Vinstr::sarqi: hint_binary(dv, uv, inst.sarqi_); break;
-        case Vinstr::shlli: hint_binary(dv, uv, inst.shlli_); break;
-        case Vinstr::shlqi: hint_binary(dv, uv, inst.shlqi_); break;
-        case Vinstr::shrli: hint_binary(dv, uv, inst.shrli_); break;
-        case Vinstr::shrqi: hint_binary(dv, uv, inst.shrqi_); break;
-        case Vinstr::subli: hint_binary(dv, uv, inst.subli_); break;
-        case Vinstr::subqi: hint_binary(dv, uv, inst.subqi_); break;
-        case Vinstr::xorbi: hint_binary(dv, uv, inst.xorbi_); break;
-        case Vinstr::xorqi: hint_binary(dv, uv, inst.xorqi_); break;
-        case Vinstr::copy2:
-          dv.def(inst.copy2_.d0, inst.copy2_.s0);
-          dv.def(inst.copy2_.d1, inst.copy2_.s1);
-          uv.use(inst.copy2_.s0, inst.copy2_.d0);
-          uv.use(inst.copy2_.s1, inst.copy2_.d1);
-          break;
-        case Vinstr::copyargs: {
-          auto& ss = unit.tuples[inst.copy_.s];
-          auto& ds = unit.tuples[inst.copy_.d];
-          for (int i = 0; i < ds.size(); i++) dv.def(ds[i], ss[i]);
-          for (int i = 0; i < ss.size(); i++) uv.use(ss[i], ds[i]);
-          break;
-        }
-        default: {
-          visitOperands(inst, dv);
-          RegSet implicit_uses, implicit_across, implicit_defs;
-          getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
-          implicit_defs.forEach([&](Vreg r) {
-            dv.def(r);
-          });
-          UseVisitor uv(live, *this, {block_range.start, pos});
-          visitOperands(inst, uv);
-          implicit_uses.forEach([&](Vreg r) {
-            uv.use(r);
-          });
-          implicit_across.forEach([&](Vreg r) {
-            uv.across(r);
-          });
-          break;
-        }
-      }
+      visitOperands(inst, dv);
+      RegSet implicit_uses, implicit_across, implicit_defs;
+      getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
+      implicit_defs.forEach([&](Vreg r) {
+        dv.def(r);
+      });
+      visitOperands(inst, uv);
+      implicit_uses.forEach([&](Vreg r) {
+        uv.use(r);
+      });
+      implicit_across.forEach([&](Vreg r) {
+        uv.across(r);
+      });
     }
     // save live set so it can propagate to predecessors
     livein[vlabel] = live;
@@ -1157,11 +1116,15 @@ void Vxls::assignSpill(Interval* ivl) {
   ivl->slot = leader->slot;
 }
 
+// Visitor class for renaming registers. Visit every virtual-register
+// typed operand, and rename it to its assigned physical register.
 struct Renamer {
   Renamer(Vxls& xls, unsigned pos) : xls(xls), pos(pos) {}
-  template<class T> void imm(T& r) {}
+  template<class T> void imm(const T& r) {}
   template<class R> void def(R& r) { rename(r); }
+  template<class D, class H> void defHint(D& dst, H) { rename(dst); }
   template<class R> void use(R& r) { rename(r); }
+  template<class S, class H> void useHint(S& src, H) { rename(src); }
   template<class R> void across(R& r) { rename(r); }
   void use(Vptr& m) {
     if (m.base.isValid()) rename(m.base);

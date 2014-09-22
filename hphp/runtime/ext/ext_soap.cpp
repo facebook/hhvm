@@ -2067,16 +2067,10 @@ Variant c_SoapServer::t_getfunctions() {
     return f_array_keys(m_soap_functions.ftOriginal);
   }
 
-  ClassInfo::MethodVec methods;
-  ClassInfo::GetClassMethods(methods, class_name.data());
-  Array ret = Array::Create();
-  for (unsigned int i = 0; i < methods.size(); i++) {
-    ClassInfo::MethodInfo *info = methods[i];
-    if (info->attribute & ClassInfo::IsPublic) {
-      ret.append(info->name);
-    }
-  }
-  return ret;
+  Class* cls = Unit::lookupClass(class_name.get());
+  auto ret = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
+  Class::getMethodNames(cls, nullptr, ret);
+  return f_array_values(ret);
 }
 
 static bool valid_function(c_SoapServer *server, Object &soap_obj,

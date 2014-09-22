@@ -58,52 +58,6 @@ struct VMState {
   TypedValue *sp;
 };
 
-class MethodInfoVM : public ClassInfo::MethodInfo,
-                     public AtomicCountable {
- public:
-  ~MethodInfoVM();
-  void atomicRelease() { delete this; }
-};
-
-class ClassInfoVM : public ClassInfo,
-                    public AtomicCountable {
- public:
-  ~ClassInfoVM();
-  void atomicRelease() { delete this; }
-  virtual const String& getParentClass() const { return m_parentClass; }
-
-  const InterfaceSet  &getInterfaces()      const { return m_interfaces;}
-  const InterfaceVec  &getInterfacesVec()   const { return m_interfacesVec;}
-  const MethodMap     &getMethods()         const { return m_methods;}
-  const MethodVec     &getMethodsVec()      const { return m_methodsVec;}
-  const PropertyMap   &getProperties()      const { return m_properties;}
-  const PropertyVec   &getPropertiesVec()   const { return m_propertiesVec;}
-  const ConstantMap   &getConstants()       const { return m_constants;}
-  const ConstantVec   &getConstantsVec()    const { return m_constantsVec;}
-  const UserAttributeVec &getUserAttributeVec() const { return m_userAttrVec;}
-  const TraitSet      &getTraits()          const { return m_traits;}
-  const TraitVec      &getTraitsVec()       const { return m_traitsVec;}
-  const TraitAliasVec &getTraitAliasesVec() const { return m_traitAliasesVec;}
-
- private:
-  String        m_parentClass;
-  InterfaceSet  m_interfaces;      // all interfaces
-  InterfaceVec  m_interfacesVec;   // all interfaces
-  TraitSet      m_traits;          // all used traits
-  TraitVec      m_traitsVec;       // all used traits
-  TraitAliasVec m_traitAliasesVec; // all trait aliases
-  MethodMap     m_methods;         // all methods
-  MethodVec     m_methodsVec;      // in source order
-  PropertyMap   m_properties;      // all properties
-  PropertyVec   m_propertiesVec;   // in source order
-  ConstantMap   m_constants;       // all constants
-  ConstantVec   m_constantsVec;    // in source order
-  UserAttributeVec m_userAttrVec;
-
- public:
-  friend class Class;
-};
-
 enum class CallType {
   ClsMethod,
   ObjMethod,
@@ -464,10 +418,6 @@ public:
   // destroying the context, so C++ order of destruction is not an issue.
   smart::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
-  typedef smart::hash_map<const StringData*, ClassInfo::ConstantInfo*,
-                          string_data_hash, string_data_same> ConstInfoMap;
-  ConstInfoMap m_constInfo;
-
   const Func* lookupMethodCtx(const Class* cls,
                                         const StringData* methodName,
                                         const Class* pctx,
@@ -672,18 +622,6 @@ public:
 
   template<typename T> using SmartStringIMap =
     smart::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
-
-  // VM ClassInfo support
-  SmartStringIMap<AtomicSmartPtr<MethodInfoVM>> m_functionInfos;
-  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_classInfos;
-  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_interfaceInfos;
-  SmartStringIMap<AtomicSmartPtr<ClassInfoVM>>  m_traitInfos;
-  Array getConstantsInfo();
-  const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
-  const ClassInfo* findClassInfo(const String& name);
-  const ClassInfo* findInterfaceInfo(const String& name);
-  const ClassInfo* findTraitInfo(const String& name);
-  const ClassInfo::ConstantInfo* findConstantInfo(const String& name);
 
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \

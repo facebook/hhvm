@@ -42,7 +42,6 @@ namespace HPHP {
 
 struct Class;
 struct ClassInfo;
-struct ClassInfoVM;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
@@ -442,6 +441,7 @@ public:
    */
   Func* lookupMethod(const StringData* methName) const;
 
+  static void getMethodNames(const Class* cls, const Class* ctx, Array& result);
 
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]
@@ -752,11 +752,6 @@ public:
    * and all parents, interfaces, and traits for this class are persistent.
    */
   bool verifyPersistent() const;
-
-  /*
-   * Populate the ClassInfoVM for this class in `ci'.
-   */
-  void getClassInfo(ClassInfoVM* ci);
 
   /*
    * Get and set the RDS handle for the class with this class's name.

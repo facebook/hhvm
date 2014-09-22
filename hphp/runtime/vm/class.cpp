@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -888,155 +889,6 @@ bool Class::verifyPersistent() const {
     }
   }
   return true;
-}
-
-void Class::getClassInfo(ClassInfoVM* ci) {
-  assert(ci);
-
-  // Miscellaneous.
-  Attr clsAttrs = attrs();
-  int attr = 0;
-  if (clsAttrs & AttrInterface) attr |= ClassInfo::IsInterface;
-  if (clsAttrs & AttrAbstract)  attr |= ClassInfo::IsAbstract;
-  if (clsAttrs & AttrFinal)     attr |= ClassInfo::IsFinal;
-  if (clsAttrs & AttrTrait)     attr |= ClassInfo::IsTrait;
-  if (attr == 0)                attr  = ClassInfo::IsNothing;
-  ci->m_attribute = (ClassInfo::Attribute)attr;
-
-  ci->m_name = m_preClass->name()->data();
-
-  ci->m_file = m_preClass->unit()->filepath()->data();
-  ci->m_line1 = m_preClass->line1();
-  ci->m_line2 = m_preClass->line2();
-  ci->m_docComment = (m_preClass->docComment() != nullptr)
-                     ? m_preClass->docComment()->data() : "";
-
-  // Parent class.
-  ci->m_parentClass = (m_parent.get()) ? m_parent->name()->data() : "";
-
-  // Interfaces.
-  for (auto const& ifaceName: m_preClass->interfaces()) {
-    ci->m_interfacesVec.push_back(ifaceName->data());
-    ci->m_interfaces.insert(ifaceName->data());
-  }
-  if (m_interfaces.size() > m_preClass->interfaces().size()) {
-    for (int i = 0; i < m_interfaces.size(); ++i) {
-      auto const& ifaceName = m_interfaces[i]->name();
-
-      if (ci->m_interfaces.find(ifaceName->data()) == ci->m_interfaces.end()) {
-        ci->m_interfacesVec.push_back(ifaceName->data());
-        ci->m_interfaces.insert(ifaceName->data());
-      }
-    }
-  }
-  assert(ci->m_interfaces.size() == ci->m_interfacesVec.size());
-
-  // Used traits.
-  for (auto const& traitName : m_preClass->usedTraits()) {
-    // Use the preclass list of trait names to avoid accounting for
-    // trait flattening.
-    const char* traitNameChars = traitName->data();
-    ci->m_traitsVec.push_back(traitNameChars);
-    ci->m_traits.insert(traitNameChars);
-  }
-
-  // Trait aliases.
-  for (unsigned a = 0; a < m_traitAliases.size(); a++) {
-    ci->m_traitAliasesVec.push_back(std::pair<String, String>
-                                    (m_traitAliases[a].first->data(),
-                                     m_traitAliases[a].second->data()));
-  }
-
-#define SET_FUNCINFO_BODY                                       \
-  ClassInfo::MethodInfo *m = new ClassInfo::MethodInfo;         \
-  func->getFuncInfo(m);                                         \
-  ci->m_methods[func->name()->data()] = m;                      \
-  ci->m_methodsVec.push_back(m);
-
-  // Methods: in source order (from our PreClass), then traits.
-  for (size_t i = 0; i < m_preClass->numMethods(); ++i) {
-    Func* func = lookupMethod(m_preClass->methods()[i]->name());
-    // Filter out special methods
-    if (!func) {
-      DEBUG_ONLY const StringData* name = m_preClass->methods()[i]->name();
-      assert(!strcmp(name->data(), "86ctor"));
-      continue;
-    }
-    if (func->isGenerated()) continue;
-    assert(func);
-    // Assert this func is declared on this class.
-    if (func->attrs() & AttrTrait) {
-      assert(func->baseCls() == this);
-    } else {
-      assert(func->preClass() == m_preClass.get());
-    }
-    SET_FUNCINFO_BODY;
-  }
-
-  for (Slot i = m_traitsBeginIdx; i < m_traitsEndIdx; ++i) {
-    Func* func = getMethod(i);
-    assert(func);
-    if (!func->isGenerated()) {
-      SET_FUNCINFO_BODY;
-    }
-  }
-#undef SET_FUNCINFO_BODY
-
-  // Properties.
-  for (Slot i = 0; i < m_declProperties.size(); ++i) {
-    if (m_declProperties[i].m_class != this) continue;
-    ClassInfo::PropertyInfo *pi = new ClassInfo::PropertyInfo;
-    pi->owner = ci;
-    pi->name = m_declProperties[i].m_name->data();
-    Attr propAttrs = m_declProperties[i].m_attrs;
-    attr = 0;
-    if (propAttrs & AttrProtected) attr |= ClassInfo::IsProtected;
-    if (propAttrs & AttrPrivate) attr |= ClassInfo::IsPrivate;
-    if (attr == 0) attr |= ClassInfo::IsPublic;
-    if (propAttrs & AttrStatic) attr |= ClassInfo::IsStatic;
-    pi->attribute = (ClassInfo::Attribute)attr;
-    pi->docComment = (m_declProperties[i].m_docComment != nullptr)
-                     ? m_declProperties[i].m_docComment->data() : "";
-
-    ci->m_properties[pi->name] = pi;
-    ci->m_propertiesVec.push_back(pi);
-  }
-
-  for (Slot i = 0; i < m_staticProperties.size(); ++i) {
-    if (m_staticProperties[i].m_class != this) continue;
-    ClassInfo::PropertyInfo *pi = new ClassInfo::PropertyInfo;
-    pi->owner = ci;
-    pi->name = m_staticProperties[i].m_name->data();
-    Attr propAttrs = m_staticProperties[i].m_attrs;
-    attr = 0;
-    if (propAttrs & AttrProtected) attr |= ClassInfo::IsProtected;
-    if (propAttrs & AttrPrivate) attr |= ClassInfo::IsPrivate;
-    if (attr == 0) attr |= ClassInfo::IsPublic;
-    if (propAttrs & AttrStatic) attr |= ClassInfo::IsStatic;
-    pi->attribute = (ClassInfo::Attribute)attr;
-    pi->docComment = (m_staticProperties[i].m_docComment != nullptr)
-                     ? m_staticProperties[i].m_docComment->data() : "";
-
-    ci->m_properties[pi->name] = pi;
-    ci->m_propertiesVec.push_back(pi);
-  }
-
-  // Constants.
-  for (Slot i = 0; i < m_constants.size(); ++i) {
-    // Only include constants declared on this class
-    if (m_constants[i].m_class != this) continue;
-
-    ClassInfo::ConstantInfo *ki = new ClassInfo::ConstantInfo;
-    ki->name = m_constants[i].m_name->data();
-    ki->valueLen = m_constants[i].m_phpCode->size();
-    ki->valueText = m_constants[i].m_phpCode->data();
-    auto const cell = clsCnsGet(m_constants[i].m_name);
-    assert(cell.m_type != KindOfUninit);
-    ki->setValue(cellAsCVarRef(cell));
-
-    ci->m_constants[ki->name] = ki;
-    ci->m_constantsVec.push_back(ki);
-  }
 }
 
 void Class::setInstanceBits() {
@@ -2702,6 +2554,64 @@ void Class::setFuncVec(MethodMapBuilder& builder) {
   for (Slot i = 0; i < builder.size(); i++) {
     assert(builder[i]->methodSlot() < builder.size());
     funcVec[-((int32_t)builder[i]->methodSlot() + 1)] = builder[i];
+  }
+}
+
+void Class::getMethodNames(const Class* cls,
+                           const Class* ctx,
+                           Array& out) {
+
+  // The order of these methods is so that the first ones win on
+  // case insensitive name conflicts.
+
+  auto const numMethods = cls->numMethods();
+
+  for (Slot i = 0; i < numMethods; ++i) {
+    auto const meth = cls->getMethod(i);
+    auto const declCls = meth->cls();
+    auto addMeth = [&]() {
+      auto const methName = Variant(meth->name(), Variant::StaticStrInit{});
+      auto const lowerName = f_strtolower(methName.toString());
+      if (!out.exists(lowerName)) {
+        out.add(lowerName, methName);
+      }
+    };
+
+    // Only pick methods declared in this class, in order to match
+    // Zend's order.  Inherited methods will be inserted in the
+    // recursive call later.
+    if (declCls != cls) continue;
+
+    // Skip generated, internal methods.
+    if (meth->isGenerated()) continue;
+
+    // Public methods are always visible.
+    if ((meth->attrs() & AttrPublic)) {
+      addMeth();
+      continue;
+    }
+
+    // In anonymous contexts, only public methods are visible.
+    if (!ctx) continue;
+
+    // All methods are visible if the context is the class that
+    // declared them.  If the context is not the declCls, protected
+    // methods are visible in context classes related the declCls.
+    if (declCls == ctx ||
+        ((meth->attrs() & AttrProtected) &&
+         (ctx->classof(declCls) || declCls->classof(ctx)))) {
+      addMeth();
+    }
+  }
+
+  // Now add the inherited methods.
+  if (auto const parent = cls->parent()) {
+    getMethodNames(parent, ctx, out);
+  }
+
+  // Add interface methods that the class may not have implemented yet.
+  for (auto& iface : cls->declInterfaces()) {
+    getMethodNames(iface.get(), ctx, out);
   }
 }
 

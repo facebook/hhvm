@@ -162,7 +162,7 @@ let process_client_msg env oc = function
 (*****************************************************************************)
 
 let server_socket, client_socket =
-  let tmp = Tmp.temp_dir_name in
+  let tmp = Filename.get_temp_dir_name () in
   let user = Sys.getenv "USER" in
   let sock_name = tmp ^ "/dfind_"^user^".sock" in
   begin fun () -> (* Server side *)
@@ -204,7 +204,7 @@ let server_socket, client_socket =
 (*****************************************************************************)
 
 let get_pid_file () =
-  let tmp = Tmp.temp_dir_name in
+  let tmp = Filename.get_temp_dir_name () in
   let user = Sys.getenv "USER" in
   let fn = tmp ^ "/dfind_"^user^".pid" in
   fn

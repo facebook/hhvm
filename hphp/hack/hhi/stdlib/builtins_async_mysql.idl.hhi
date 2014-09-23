@@ -84,6 +84,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct();}
   public function numRowsAffected(): int { }
   public function lastInsertId(): int { }
+  public function numRows(): int { }
   public function mapRows() { }
   public function vectorRows() { }
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }

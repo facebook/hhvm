@@ -15,10 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/asio/ext_asio.h"
+
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
@@ -67,9 +68,11 @@ class AsioExtension : public Extension {
    AsioExtension() : Extension("asio", "0.1") {}
 
    void moduleInit() override {
-     HHVM_FE(asio_get_current_context_idx);
-     HHVM_FE(asio_get_running_in_context);
-     HHVM_FE(asio_get_running);
+     HHVM_FALIAS(
+        HH\\asio_get_current_context_idx,
+        asio_get_current_context_idx);
+     HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
+     HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
      loadSystemlib();
    }
 

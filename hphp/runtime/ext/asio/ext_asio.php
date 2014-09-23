@@ -1,5 +1,7 @@
 <?hh
 
+namespace HH {
+
 /**
  * Get index of the current scheduler context, or 0 if there is none.
  */
@@ -17,3 +19,5 @@ function asio_get_running_in_context(int $ctx_idx): ResumableWaitHandle;
  */
 <<__Native>>
 function asio_get_running(): ResumableWaitHandle;
+
+} // namespace

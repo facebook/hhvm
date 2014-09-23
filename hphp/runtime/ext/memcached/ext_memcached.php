@@ -562,6 +562,14 @@ class Memcached {
                                int $expiration = 0): bool;
 
   /**
+   * Clears all servers from the server list
+   *
+   * @return bool always true
+   */
+  <<__Native>>
+  public function resetServerList(): bool;
+
+  /**
    * Store an item
    *
    * @param string $key -

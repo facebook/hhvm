@@ -161,6 +161,10 @@ const int64_t q_Memcached$$RES_NOT_SUPPORTED
           = MEMCACHED_NOT_SUPPORTED;
 const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
           = MEMCACHED_INVALID_HOST_PROTOCOL;
+const int64_t q_Memcached$$OPT_VERIFY_KEY
+          = MEMCACHED_BEHAVIOR_VERIFY_KEY;
+const int64_t q_Memcached$$OPT_SORT_HOSTS
+          = MEMCACHED_BEHAVIOR_SORT_HOSTS;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -775,6 +779,12 @@ bool HHVM_METHOD(Memcached, addserver, const String& host, int port,
   }
 }
 
+bool HHVM_METHOD(Memcached, resetserverlist) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_servers_reset(&data->m_impl->memcached);
+  return true;
+}
+
 namespace {
 
 const StaticString s_host("host"), s_port("port");
@@ -1131,7 +1141,9 @@ const StaticString s_OPT_SERIALIZER("OPT_SERIALIZER");
 const StaticString s_OPT_SERVER_FAILURE_LIMIT("OPT_SERVER_FAILURE_LIMIT");
 const StaticString s_OPT_SOCKET_RECV_SIZE("OPT_SOCKET_RECV_SIZE");
 const StaticString s_OPT_SOCKET_SEND_SIZE("OPT_SOCKET_SEND_SIZE");
+const StaticString s_OPT_SORT_HOSTS("OPT_SORT_HOSTS");
 const StaticString s_OPT_TCP_NODELAY("OPT_TCP_NODELAY");
+const StaticString s_OPT_VERIFY_KEY("OPT_VERIFY_KEY");
 const StaticString s_RES_BAD_KEY_PROVIDED("RES_BAD_KEY_PROVIDED");
 const StaticString s_RES_BUFFERED("RES_BUFFERED");
 const StaticString s_RES_CLIENT_ERROR("RES_CLIENT_ERROR");
@@ -1191,6 +1203,7 @@ class MemcachedExtension : public Extension {
     HHVM_ME(Memcached, setoption);
     HHVM_ME(Memcached, getresultcode);
     HHVM_ME(Memcached, getresultmessage);
+    HHVM_ME(Memcached, resetserverlist);
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 
@@ -1394,6 +1407,13 @@ class MemcachedExtension : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_SERIALIZER_PHP.get(), q_Memcached$$SERIALIZER_PHP
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_VERIFY_KEY.get(), q_Memcached$$OPT_VERIFY_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SORT_HOSTS.get(), q_Memcached$$OPT_SORT_HOSTS
+    );
+
 
     loadSystemlib();
   }

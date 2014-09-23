@@ -5,7 +5,7 @@ object(Memcached)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(42) {
+array(43) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -79,16 +79,18 @@ array(42) {
   [35]=>
   string(12) "replaceByKey"
   [36]=>
-  string(3) "set"
+  string(15) "resetServerList"
   [37]=>
-  string(8) "setByKey"
+  string(3) "set"
   [38]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [39]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [40]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [41]=>
+  string(9) "setOption"
+  [42]=>
   string(10) "setOptions"
 }
 ================
@@ -101,7 +103,7 @@ object(A_Memcached)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(42) {
+array(43) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -175,15 +177,17 @@ array(42) {
   [35]=>
   string(12) "replaceByKey"
   [36]=>
-  string(3) "set"
+  string(15) "resetServerList"
   [37]=>
-  string(8) "setByKey"
+  string(3) "set"
   [38]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [39]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [40]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [41]=>
+  string(9) "setOption"
+  [42]=>
   string(10) "setOptions"
 }

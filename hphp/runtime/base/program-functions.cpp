@@ -15,56 +15,65 @@
 */
 #include "hphp/runtime/base/program-functions.h"
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/php-globals.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/pprof-server.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/admin-request-handler.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/util/process.h"
-#include "hphp/util/capability.h"
-#include "hphp/util/embedded-data.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/light-process.h"
-#include "hphp/util/repo-schema.h"
-#include "hphp/util/current-executable.h"
-#include "hphp/util/service-data.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/pprof-server.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/stat-cache.h"
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/std/ext_std_options.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
-#include "hphp/runtime/base/simple-counter.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/server/admin-request-handler.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/replay-transport.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/constants.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/backtrace.h"
+#include "hphp/util/capability.h"
+#include "hphp/util/current-executable.h"
+#include "hphp/util/embedded-data.h"
+#include "hphp/util/light-process.h"
+#include "hphp/util/process.h"
+#include "hphp/util/repo-schema.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/timer.h"
+
+#include <folly/Portability.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -80,14 +89,6 @@
 #include <memory>
 #include <vector>
 
-#include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/base/unit-cache.h"
-
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/compiler/builtin_symbols.h"
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
 #undef NOUSER
@@ -1070,6 +1071,21 @@ static int compute_hhvm_argc(const options_description& desc,
   return pos;
 }
 
+/*
+ * AsyncFuncImpl defines a minimum C++ stack size but that only applies to
+ * threads we manually create. When the main thread will be executing PHP
+ * rather than just managing a server, make sure its stack is big enough.
+ */
+static void set_stack_size() {
+  struct rlimit rlim;
+  if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
+
+  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+    rlim.rlim_cur = AsyncFuncImpl::kStackSizeMinimum;
+    setrlimit(RLIMIT_STACK, &rlim);
+  }
+}
+
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1408,6 +1424,8 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
+    set_stack_size();
+
     if (po.isTempFile) {
       tempFile = po.file;
     }

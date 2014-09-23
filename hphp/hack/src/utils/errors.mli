@@ -248,6 +248,7 @@ val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
+val generic_at_runtime : Pos.t -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

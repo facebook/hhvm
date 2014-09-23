@@ -334,6 +334,13 @@ module Env = struct
       p, Ident.make x
     | Some v -> p, snd v
 
+  (* Check and see if the user might have been trying to use one of the
+   * generics in scope as a runtime value *)
+  let check_no_runtime_generic genv (p, name) =
+    let tparaml = SMap.keys genv.type_params in
+    if List.mem name tparaml then Errors.generic_at_runtime p;
+    ()
+
   let canonicalize genv env_and_names (p, name) =
     let env, canon_names = !env_and_names in
     if SMap.mem name env then (p, name)
@@ -498,6 +505,8 @@ module Env = struct
       x
 
   let class_name (genv, _) x =
+    (* Generic names are not allowed to shadow class names *)
+    check_no_runtime_generic genv x;
     let x = Namespaces.elaborate_id genv.namespace x in
     let pos, name = canonicalize genv genv.classes x in
     (* Don't let people use strictly internal classes

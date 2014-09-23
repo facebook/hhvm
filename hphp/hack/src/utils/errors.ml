@@ -299,6 +299,7 @@ module Typing                               = struct
   let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
   let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
+  let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1453,6 +1454,10 @@ let unset_in_strict pos =
   add Typing.unset_in_strict pos
     ("unset cannot be used in a completely type safe way and so is banned in "
     ^"strict mode")
+
+let generic_at_runtime p =
+  add Typing.generic_at_runtime p
+    "Generics can only be used in type hints since they are erased at runtime."
 
 let trivial_strict_eq p b left right =
   let msg = "This expression is always "^b in

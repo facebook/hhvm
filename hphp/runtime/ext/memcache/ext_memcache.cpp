@@ -24,8 +24,16 @@
 #include "hphp/runtime/base/zend-string.h"
 #include <vector>
 
-#define MMC_SERIALIZED 1
-#define MMC_COMPRESSED 2
+// MMC values must match pecl-memcache for compatibility
+#define MMC_SERIALIZED  0x0001
+#define MMC_COMPRESSED  0x0002
+
+#define MMC_TYPE_STRING 0x0000
+#define MMC_TYPE_BOOL   0x0100
+#define MMC_TYPE_LONG   0x0300
+#define MMC_TYPE_DOUBLE 0x0700
+
+#define MMC_TYPE_MASK   0x0F00
 
 namespace HPHP {
 
@@ -123,6 +131,34 @@ static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
   return (ret == MEMCACHED_SUCCESS);
 }
 
+static uint32_t memcache_get_flag_for_type(const Variant& var) {
+  switch (var.getType()) {
+  case KindOfBoolean:
+    return MMC_TYPE_BOOL;
+  case KindOfInt64:
+    return MMC_TYPE_LONG;
+  case KindOfDouble:
+    return MMC_TYPE_DOUBLE;
+  case KindOfString:
+  default:
+    return MMC_TYPE_STRING;
+  }
+}
+
+static void memcache_set_type_from_flag(Variant& var, uint32_t flags) {
+  switch (flags & MMC_TYPE_MASK) {
+  case MMC_TYPE_BOOL:
+    var = var.toBoolean();
+    break;
+  case MMC_TYPE_LONG:
+    var = var.toInt64();
+    break;
+  case MMC_TYPE_DOUBLE:
+    var = var.toDouble();
+    break;
+  }
+}
+
 static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
                                                       const Variant& var,
                                                       int &flag) {
@@ -130,6 +166,7 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
   if (var.isString()) {
     v = var.toString();
   } else if (var.isNumeric() || var.isBoolean()) {
+    flag &= ~MMC_COMPRESSED;
     v = var.toString();
   } else {
     flag |= MMC_SERIALIZED;
@@ -138,7 +175,8 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
   std::vector<char> payload;
   size_t value_len = v.length();
 
-  if (data->m_compress_threshold && value_len >= data->m_compress_threshold) {
+  if (!var.isNumeric() && !var.isBoolean() &&
+    data->m_compress_threshold && value_len >= data->m_compress_threshold) {
     flag |= MMC_COMPRESSED;
   }
   if (flag & MMC_COMPRESSED) {
@@ -159,6 +197,8 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
     payload.resize(0);
     payload.insert(payload.end(), v.data(), v.data() + value_len);
    }
+  flag |= memcache_get_flag_for_type(var);
+
   return payload;
 }
 
@@ -195,25 +235,26 @@ static Variant memcache_fetch_from_storage(const char *payload,
     std::vector<char> buffer;
     size_t buffer_len;
     for (int factor = 1; !done && factor <= 16; ++factor) {
-    if (payload_len >=
-        std::numeric_limits<unsigned long>::max() / (1 << factor)) {
-      break;
+      if (payload_len >=
+          std::numeric_limits<unsigned long>::max() / (1 << factor)) {
+        break;
+      }
+      buffer_len = payload_len * (1 << factor) + 1;
+      buffer.resize(buffer_len);
+      if (uncompress((Bytef*)buffer.data(), &buffer_len,
+                     (const Bytef*)payload, (uLong)payload_len) == Z_OK) {
+        done = true;
+      }
     }
-    buffer_len = payload_len * (1 << factor) + 1;
-    buffer.resize(buffer_len);
-    if (uncompress((Bytef*)buffer.data(), &buffer_len,
-                   (const Bytef*)payload, (uLong)payload_len) == Z_OK) {
-      done = true;
-    }
-  }
-  if (!done) {
-    raise_warning("could not uncompress value");
+    if (!done) {
+      raise_warning("could not uncompress value");
       return init_null();
-  }
-  ret = unserialize_if_serialized(buffer.data(), buffer_len, flags);
+    }
+    ret = unserialize_if_serialized(buffer.data(), buffer_len, flags);
   } else {
     ret = unserialize_if_serialized(payload, payload_len, flags);
   }
+  memcache_set_type_from_flag(ret, flags);
 
   return ret;
 }
@@ -391,7 +432,7 @@ static bool HHVM_METHOD(Memcache, delete, const String& key,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static int64_t HHVM_METHOD(Memcache, increment, const String& key,
+static Variant HHVM_METHOD(Memcache, increment, const String& key,
                                                 int offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");
@@ -413,7 +454,7 @@ static int64_t HHVM_METHOD(Memcache, increment, const String& key,
   return false;
 }
 
-static int64_t HHVM_METHOD(Memcache, decrement, const String& key,
+static Variant HHVM_METHOD(Memcache, decrement, const String& key,
                                                 int offset /*= 1*/) {
   if (key.empty()) {
     raise_warning("Key cannot be empty");

@@ -8,11 +8,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function asio_enter_context() { }
-function asio_exit_context() { }
 function asio_get_current_context_idx() { }
 function asio_get_running_in_context($ctx_idx) { }
 function asio_get_running() { }
-function asio_get_current() { }
-function asio_set_on_failed_callback($on_failed_cb) { }
-function asio_set_on_started_callback($on_started_cb) { }

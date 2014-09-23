@@ -552,7 +552,7 @@
   proxymanager:
     url: https://github.com/Ocramius/ProxyManager.git
     branch: master
-    commit: 88be49f61a70700c2e0cd21b01d29bcb53698f7d
+    commit: c5ded659f68e20a198623f48bb2bab2173b659a5
     install_root: proxymanager
     test_root: proxymanager
     # include phpt and phpunit tests, exclude performance tests

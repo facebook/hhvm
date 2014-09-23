@@ -743,11 +743,7 @@ Type thisReturn(const IRInstruction* inst) {
   // Find the instruction that created the current frame and grab the context
   // class from it. $this, if present, is always going to be the context class
   // or a subclass of the context.
-  while (!fpInst->is(DefFP, DefInlineFP)) {
-    assert(fpInst->dst()->isA(Type::FramePtr));
-    assert(fpInst->is(GuardLoc, CheckLoc, AssertLoc, SideExitGuardLoc));
-    fpInst = fpInst->src(0)->inst();
-  }
+  always_assert(fpInst->is(DefFP, DefInlineFP));
   auto const func = fpInst->is(DefFP) ? fpInst->marker().func()
                                       : fpInst->extra<DefInlineFP>()->target;
   func->validate();

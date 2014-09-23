@@ -87,13 +87,6 @@ struct UnknownInputExc : std::runtime_error {
   const int m_line;
 };
 
-struct ControlFlowFailedExc : std::runtime_error {
-  ControlFlowFailedExc(const char* file, int line)
-    : std::runtime_error(folly::format("ControlFlowFailedExc @ {}:{}",
-                                       file, line).str())
-  {}
-};
-
 #define punt() do { \
   throw TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
@@ -235,7 +228,6 @@ struct Translator {
    * the next attempt.
    */
   TranslateResult translateRegion(const RegionDesc& region,
-                                  bool bcControlFlow,
                                   RegionBlacklist& interp,
                                   TransFlags trflags = TransFlags{});
 

@@ -236,6 +236,7 @@ val invalid_shape_field_const : Pos.t -> Pos.t -> unit
 val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
+val generic_at_runtime : Pos.t -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string

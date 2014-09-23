@@ -1,0 +1,2 @@
+File "new_generic_bad.php", line 5, characters 16-16:
+Typing[4124] Generics can only be used in type hints since they are erased at runtime.

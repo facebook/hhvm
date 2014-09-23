@@ -282,6 +282,7 @@ module Typing                               = struct
 
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
+  let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1399,6 +1400,9 @@ let private_override pos class_id id =
   add Typing.private_override pos ((Utils.strip_ns class_id)^"::"^id
           ^": combining private and override is nonsensical")
 
+let generic_at_runtime p =
+  add Typing.generic_at_runtime p
+    "Generics can only be used in type hints since they are erased at runtime."
 
 (*****************************************************************************)
 (* Printing *)

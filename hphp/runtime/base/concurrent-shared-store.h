@@ -78,7 +78,7 @@ struct StoreValue {
    * Note: expiration times are stored in 32-bits as seconds since the Epoch.
    * HHVM might get confused after 2106 :)
    */
-  mutable Either<APCHandle*,char*> data;
+  mutable Either<APCHandle*,char*,either_policy::high_bit> data;
   union { uint32_t expire; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
 };

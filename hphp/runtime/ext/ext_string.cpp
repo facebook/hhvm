@@ -276,18 +276,49 @@ Variant f_hex2bin(const String& str) {
   return ret.detach();
 }
 
-extern const StaticString s_nl;
-
 const StaticString
-  s_br("<br />\n"),
-  s_non_xhtml_br("<br>\n");
+  s_br("<br />"),
+  s_non_xhtml_br("<br>");
 
 String f_nl2br(const String& str, bool is_xhtml /* = true */) {
-  if (is_xhtml) {
-    return string_replace(str, s_nl, s_br);
-  } else {
-    return string_replace(str, s_nl, s_non_xhtml_br);
+  if (str.empty()) {
+    return str;
   }
+
+  String htmlType;
+  if (is_xhtml) {
+    htmlType = s_br;
+  } else {
+    htmlType = s_non_xhtml_br;
+  }
+
+  return stringForEachBuffered(str.size(), str,
+    [&] (StringBuffer& ret, const char*& src, const char* end) {
+      // PHP treats a carriage return beside a newline as the same break
+      // no matter what order they're in.  Don't do it for two of the same in
+      // a row, though...
+      switch (*src) {
+      case '\n':
+        ret.append(htmlType);
+        // skip next if carriage return
+        if (*(src + 1) == '\r') {
+          ret.append(*src);
+          ++src;
+        }
+        ret.append(*src);
+        break;
+      case '\r':
+        ret.append(htmlType);
+        // skip next if newline
+        if (*(src + 1) == '\n') {
+          ret.append(*src);
+          ++src;
+        }
+        /* fall through */
+      default:
+        ret.append(*src);
+      }
+    });
 }
 
 String f_quotemeta(const String& str) {

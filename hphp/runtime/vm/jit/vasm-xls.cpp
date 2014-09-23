@@ -530,6 +530,7 @@ void Vxls::allocate() {
              (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
              (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
              (inst.op == Vinstr::copyargs) || // we lowered it
+             (inst.op == Vinstr::nop) || // we inserted it
              (inst.op == Vinstr::phidef); // we lowered it
     });
     code.erase(end, code.end());
@@ -568,8 +569,15 @@ void Vxls::computePositions() {
   block_ranges.resize(unit.blocks.size());
   unsigned pos = 0;
   for (auto b : blocks) {
+    auto& code = unit.blocks[b].code;
+    bool front_uses{false};
+    visitUses(unit, code.front(), [&](Vreg r) {
+      front_uses = true;
+    });
+    if (front_uses) {
+      code.insert(code.begin(), nop{});
+    }
     auto start = pos;
-    pos += 2; // skip implied label position
     for (auto& inst : unit.blocks[b].code) {
       inst.pos = pos;
       pos += 2;
@@ -825,8 +833,8 @@ void Vxls::buildIntervals() {
   auto loops = false;
   auto preds = computePreds(unit);
   for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
-    auto vlabel = *--blockIt;
-    auto& block = unit.blocks[vlabel];
+    auto b = *--blockIt;
+    auto& block = unit.blocks[b];
     // initial live set is the union of successor live sets.
     LiveSet live(unit.next_vr);
     for (auto s : succs(block)) {
@@ -837,7 +845,7 @@ void Vxls::buildIntervals() {
       }
     }
     // add a range covering the whole block to every live interval
-    auto& block_range = block_ranges[vlabel];
+    auto& block_range = block_ranges[b];
     forEach(live, [&](Vreg r) {
       intervals[r]->add(block_range);
     });
@@ -857,9 +865,9 @@ void Vxls::buildIntervals() {
       uv.across(implicit_across);
     }
     // save live set so it can propagate to predecessors
-    livein[vlabel] = live;
+    livein[b] = live;
     // add a loop-covering range to each interval live into a loop.
-    for (auto p: preds[vlabel]) {
+    for (auto p: preds[b]) {
       auto pred_end = block_ranges[p].end;
       if (pred_end > block_range.start) {
         forEach(live, [&](Vreg r) {
@@ -869,21 +877,33 @@ void Vxls::buildIntervals() {
       }
     }
   }
+  // finish processing live ranges for constants
   for (auto& c : unit.cpool) {
-    auto ivl = intervals[c.second];
-    if (ivl) {
+    if (auto ivl = intervals[c.second]) {
       ivl->ranges.back().start = 0;
       ivl->cns = true;
       ivl->val = c.first;
     }
   }
-  // Each interval's range and use list is backwards; reverse them now.
+  // Ranges and uses were generated in reverse order. Unreverse them now.
   for (auto ivl : intervals) {
     if (!ivl) continue;
     assert(!ivl->ranges.empty()); // no empty intervals
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
-    if (debug) {
+  }
+  if (dumpIREnabled(kRegAllocLevel)) {
+    if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
+    print("after building intervals");
+  }
+  // only constants and physical registers can be live-into the entry block.
+  if (debug) {
+    forEach(livein[unit.entry], [&](Vreg r) {
+      UNUSED auto ivl = intervals[r];
+      assert(ivl->cns || ivl->fixed());
+    });
+    for (auto ivl : intervals) {
+      if (!ivl) continue;
       for (unsigned i = 1; i < ivl->uses.size(); i++) {
         assert(ivl->uses[i].pos >= ivl->uses[i-1].pos); // monotonic
       }
@@ -892,15 +912,6 @@ void Vxls::buildIntervals() {
         assert(ivl->ranges[i].start > ivl->ranges[i-1].end); // no empty gaps
       }
     }
-  }
-  if (dumpIREnabled(kRegAllocLevel)) {
-    if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
-    print("after building intervals");
-  }
-  // todo: t4764262 this should check each root, not just position 0.
-  for (DEBUG_ONLY auto ivl : intervals) {
-    // only constants and physical registers can be live at entry.
-    assert(!ivl || ivl->cns || ivl->fixed() || ivl->start() > 0);
   }
 }
 
@@ -992,10 +1003,7 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
 unsigned Vxls::nearestSplitBefore(unsigned pos) {
   auto b = findBlock(pos);
   auto range = block_ranges[b];
-  if (pos <= range.start + 2 &&
-      unit.blocks[b].code.front().op == Vinstr::phidef) {
-    return range.start;
-  }
+  if (pos == range.start) return pos;
   return (pos - 1) | 1;
 }
 
@@ -1206,6 +1214,7 @@ void Vxls::assignSpill(Interval* ivl) {
     }
     if (m_nextSlot > NumPreAllocatedSpillLocs) {
       // ran out of spill slots
+      if (dumpIREnabled(kRegAllocLevel)) dumpIntervals();
       TRACE(1, "vxls-punt TooManySpills\n");
       PUNT(LinearScan_TooManySpills);
     }
@@ -1258,7 +1267,6 @@ private:
 void Vxls::renameOperands() {
   for (auto b : blocks) {
     auto pos = block_ranges[b].start;
-    pos += 2; // skip implied label
     for (auto& inst : unit.blocks[b].code) {
       Renamer renamer(*this, pos);
       visitOperands(inst, renamer);
@@ -1307,8 +1315,7 @@ void Vxls::insertSpill(Interval* ivl) {
     assert(pos % 2 == 1);
     DEBUG_ONLY auto b = findBlock(pos);
     DEBUG_ONLY auto range = block_ranges[b];
-    assert(pos - 1 > range.start);
-    assert(pos + 1 < range.end);
+    assert(pos - 1 >= range.start && pos + 1 < range.end);
     return true;
   };
   auto pos = ivl->def_pos + 1;
@@ -1320,7 +1327,6 @@ void Vxls::insertSpill(Interval* ivl) {
 void Vxls::lowerCopyargs() {
   for (auto b : blocks) {
     auto pos = block_ranges[b].start;
-    pos += 2;
     for (auto& inst : unit.blocks[b].code) {
       if (inst.op == Vinstr::copyargs) {
         auto& uses = unit.tuples[inst.copyargs_.s];
@@ -1390,9 +1396,7 @@ void Vxls::resolveEdges() {
 void Vxls::insertCopies() {
   // insert copies inside blocks
   for (auto b : blocks) {
-    auto r = block_ranges[b];
-    auto pos = r.start;
-    pos += 2;
+    auto pos = block_ranges[b].start;
     auto& block = unit.blocks[b];
     auto& code = block.code;
     auto offset = spill_offsets[b];
@@ -1535,13 +1539,6 @@ LiveRange Vxls::findBlockRange(unsigned pos) {
   return block_ranges[findBlock(pos)];
 }
 
-template<class F>
-void forEachInterval(jit::vector<Interval*>& intervals, F f) {
-  for (auto ivl : intervals) {
-    if (ivl) f(ivl);
-  }
-}
-
 enum Mode { Light, Heavy };
 template<class Pred>
 const char* draw(Interval* parent, unsigned pos, Mode m, Pred covers) {
@@ -1604,17 +1601,15 @@ std::string Interval::toString() {
 }
 
 void Vxls::dumpIntervals() {
-  unsigned numSplits = 0;
+  Trace::traceRelease("Spills %u\n", m_nextSlot);
   for (auto ivl : intervals) {
     if (!ivl || ivl->fixed()) continue;
     HPHP::Trace::traceRelease("%%%-2lu %s\n", size_t(ivl->vreg),
                               ivl->toString().c_str());
     for (ivl = ivl->next; ivl; ivl = ivl->next) {
-      numSplits++;
       HPHP::Trace::traceRelease("    %s\n", ivl->toString().c_str());
     }
   }
-  Trace::traceRelease("Splits %d\n", numSplits);
 }
 
 auto const ignore_reserved = true;
@@ -1624,7 +1619,8 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
                       Vlabel b) {
   bool fixed_covers[2] = { false, false };
   Interval* fixed = nullptr;
-  forEachInterval(intervals, [&] (Interval* ivl) {
+  for (auto ivl : intervals) {
+    if (!ivl) continue;
     if (ivl->fixed()) {
       if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
         return;
@@ -1633,7 +1629,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
         fixed = ivl; // can be any.
         fixed_covers[0] |= ivl->covers(pos);
         fixed_covers[1] |= ivl->covers(pos + 1);
-        return;
+        continue;
       }
     }
     str << " ";
@@ -1643,7 +1639,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     str << draw(ivl, pos, Heavy, [&](Interval* child, unsigned p) {
       return child->usedAt(p);
     });
-  });
+  }
   str << " " << draw(fixed, pos, Heavy, [&](Interval*, unsigned p) {
     assert(p-pos < 2);
     return fixed_covers[p-pos];
@@ -1653,34 +1649,26 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
   } else {
     str << "     ";
   }
-  if (pos == block_ranges[b].start || pos > 0) {
-    str << folly::format(" {: <3} ", pos);
-  } else {
-    str << "     ";
-  }
-  if (inst) {
-    str << show(unit, *inst);
-  }
-  str << "\n";
+  str << folly::format(" {: <3} ", pos) << show(unit, *inst) << "\n";
 }
 
 void Vxls::print(const char* caption) {
   std::ostringstream str;
   str << "Intervals " << caption << " " << s_counter << "\n";
-  forEachInterval(intervals, [&] (Interval* ivl) {
+  for (auto ivl : intervals) {
+    if (!ivl) continue;
     if (ivl->fixed()) {
       if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
         return;
       }
       if (collapse_fixed) {
-        return;
+        continue;
       }
     }
     str << folly::format(" {: <2}", size_t(ivl->vreg));
-  });
+  }
   str << " FX\n";
   for (auto b : blocks) {
-    printInstr(str, nullptr, block_ranges[b].start, b);
     for (auto& inst : unit.blocks[b].code) {
       printInstr(str, &inst, inst.pos, b);
     }

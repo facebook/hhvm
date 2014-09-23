@@ -560,8 +560,12 @@ void FrameState::merge(Snapshot& state) {
       // try to merge SSATmps for the local if one of them came from
       // a passthrough instruction with the other as the source.
       auto isParent = [](SSATmp* parent, SSATmp* child) -> bool {
-        return child && child->inst()->isPassthrough() &&
-               child->inst()->getPassthroughValue() == parent;
+        if (!child) return false;
+        while (child->inst()->isPassthrough()) {
+          child = child->inst()->getPassthroughValue();
+          if (child == parent) return true;
+        }
+        return false;
       };
       if (isParent(m_locals[i].value, local.value)) {
         local.value = m_locals[i].value;

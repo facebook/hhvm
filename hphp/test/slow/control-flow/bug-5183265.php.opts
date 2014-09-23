@@ -1,0 +1,3 @@
+-vEval.JitPGOThreshold=10
+-vEval.JitPGORegionSelector=wholecfg
+-vEval.HHIRBytecodeControlFlow=true

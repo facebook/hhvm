@@ -1,0 +1,13 @@
+array(1) {
+  [0]=>
+  array(3) {
+    ["host"]=>
+    string(9) "localhost"
+    ["port"]=>
+    int(1234)
+    ["weight"]=>
+    int(1)
+  }
+}
+array(0) {
+}

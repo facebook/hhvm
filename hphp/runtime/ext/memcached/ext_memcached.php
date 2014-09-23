@@ -445,6 +445,14 @@ class Memcached {
   public function getServerList(): array;
 
   /**
+   * Clears all server from the list
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function resetServerList(): bool;
+
+  /**
    * Get server pool statistics
    *
    * @return array - Array of server statistics, one entry per server.

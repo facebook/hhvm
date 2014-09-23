@@ -1,0 +1,17 @@
+string(11) "Some string"
+string(7) "1234567"
+int(1234567)
+string(6) "120.88"
+float(120.88)
+string(4) "true"
+string(5) "false"
+bool(true)
+bool(false)
+object(stdClass)#%d (2) {
+  ["prop1"]=>
+  int(1)
+  ["prop2"]=>
+  string(1) "2"
+}
+string(4) "null"
+NULL

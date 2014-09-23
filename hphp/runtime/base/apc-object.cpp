@@ -52,7 +52,6 @@ APCObject::APCObject(ObjectData* obj, uint32_t propCount)
   , m_propCount{propCount}
 {
   m_handle.setIsObj();
-  m_handle.mustCache();
 }
 
 APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {

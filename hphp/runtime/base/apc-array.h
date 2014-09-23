@@ -60,10 +60,6 @@ struct APCArray {
     return &m_handle;
   }
 
-  bool shouldCache() const {
-    return m_handle.m_shouldCache;
-  }
-
   //
   // Array API
   //
@@ -140,7 +136,6 @@ private:
                                      size_t& size,
                                      bool unserializeObj);
 
-  void mustCache() { m_handle.m_shouldCache = true; }
   void setPacked() { m_handle.setPacked(); }
 
   //

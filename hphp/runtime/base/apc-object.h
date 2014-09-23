@@ -83,9 +83,7 @@ private:
 
 private:
   static APCHandle* MakeShared(String data, size_t& size) {
-    APCHandle* handle = APCString::MakeShared(KindOfObject, data.get(), size);
-    handle->mustCache();
-    return handle;
+    return APCString::MakeShared(KindOfObject, data.get(), size);
   }
 
 private:

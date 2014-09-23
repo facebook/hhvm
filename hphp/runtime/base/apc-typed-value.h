@@ -108,7 +108,6 @@ public:
 
   const Variant& asCVarRef() const {
     // Must be non-refcounted types
-    assert(m_handle.m_shouldCache == false);
     assert(m_handle.m_flags == 0);
     assert(!IS_REFCOUNTED_TYPE(m_handle.m_type));
     return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
@@ -126,10 +125,10 @@ private:
 
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
-   * For non-refcounted types, m_shouldCache and m_flags are guaranteed to be 0,
-   * and other parts of runtime will not touch the count.
+   * For non-refcounted types m_flags is guaranteed to be 0, and other parts of
+   * runtime will not touch the count.
    *
-   * Note that this is assuming a little-endian system: m_shouldCache and
+   * Note that this is assuming a little-endian system: m_unused_space and
    * m_flags have to overlay the higher-order bits of TypedValue::m_type.
    */
 

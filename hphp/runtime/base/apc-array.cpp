@@ -43,7 +43,6 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       String s = apc_serialize(arr);
       APCHandle* handle = APCString::MakeShared(KindOfArray, s.get(), size);
       handle->setSerializedArray();
-      handle->mustCache();
       return handle;
     }
 
@@ -90,9 +89,6 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       auto val = APCHandle::Create(it.secondRef(), s, false, true,
                                    unserializeObj);
       size += s;
-      if (val->shouldCache()) {
-        ret->mustCache();
-      }
       ret->add(key, val);
     }
   } catch (...) {
@@ -119,9 +115,6 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
                                          s, false, true,
                                          unserializeObj);
       size += s;
-      if (val->shouldCache()) {
-        ret->mustCache();
-      }
       ret->vals()[i++] = val;
     }
     assert(i == num_elems);

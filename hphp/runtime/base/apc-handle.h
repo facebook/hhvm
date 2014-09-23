@@ -202,9 +202,6 @@ private:
                                      bool unserializeObj);
   static APCHandle* CreateUncounted(const Variant& source);
 
-  bool shouldCache() const { return m_shouldCache; }
-  void mustCache() { m_shouldCache = true; }
-
   friend struct APCTypedValue;
   friend struct APCString;
   friend struct APCObject;
@@ -230,13 +227,13 @@ private:
   void setUncounted() { m_flags |= Uncounted; }
 
 #if PACKED_TV
-  bool m_shouldCache{false};
+  UNUSED uint8_t m_unused_space;
   DataType m_type;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
 #else
   DataType m_type;
-  bool m_shouldCache{false};
+  UNUSED uint8_t m_unused_space;
   uint8_t m_flags;
   std::atomic<uint32_t> m_count;
 #endif

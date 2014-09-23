@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/shared-store-base.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/vm/treadmill.h"
 

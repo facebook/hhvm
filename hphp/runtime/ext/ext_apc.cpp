@@ -37,6 +37,7 @@
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/shared-store-base.h"
 
 using HPHP::ScopedMem;
 

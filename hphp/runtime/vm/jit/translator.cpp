@@ -1598,7 +1598,6 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
-                            bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
@@ -1618,7 +1617,7 @@ Translator::translateRegion(const RegionDesc& region,
   BlockIdToIRBlockMap     blockIdToIRBlock;
   BlockIdToRegionBlockMap blockIdToRegionBlock;
 
-  if (bcControlFlow) {
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
     ht.setGenMode(IRGenMode::CFG);
     createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
 

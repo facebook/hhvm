@@ -675,8 +675,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
     jit::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
       if (inState.state.frames != firstFrames) {
+        // Task #5216936: add support for merging states with
+        // different FrameStacks, and get rid of the TRACE_PUNT below.
         if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-          throw ControlFlowFailedExc(__FILE__, __LINE__);
+          TRACE_PUNT("refcount-opts needs support for merging states with "
+                     "different FrameStacks");
         }
         always_assert(false &&
           "merging states with different FrameStacks is not supported");

@@ -1030,8 +1030,6 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
 static void shuffleArgs(vixl::MacroAssembler& a,
                         ArgGroup& args,
                         CppCall& call) {
-  assert_not_implemented(args.numStackArgs() == 0);
-
   PhysReg::Map<PhysReg> moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
@@ -1172,6 +1170,11 @@ void CodeGenerator::cgCallHelper(vixl::MacroAssembler& a,
   for (size_t i = 0; i < args.numGpArgs(); i++) {
     args.gpArg(i).setDstReg(PhysReg{argReg(i)});
   }
+  always_assert_flog(
+    args.numStackArgs() == 0,
+    "Stack arguments not yet supported on ARM: `{}'\n\n{}",
+    *m_curInst, m_unit
+  );
   shuffleArgs(a, args, call);
 
   auto syncPoint = emitCall(a, call);

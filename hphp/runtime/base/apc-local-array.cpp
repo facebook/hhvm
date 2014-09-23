@@ -57,7 +57,7 @@ void APCLocalArray::sweep() {
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
   auto const ad = asSharedArray(adIn);
   auto const sv = ad->m_arr->getValue(pos);
-  auto const t = sv->getType();
+  auto const t = sv->type();
   if (!IS_REFCOUNTED_TYPE(t)) {
     return APCTypedValue::fromHandle(sv)->asCVarRef();
   }

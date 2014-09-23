@@ -46,7 +46,8 @@ APCHandle* APCString::MakeShared(
 }
 
 NEVER_INLINE
-StringData* StringData::MakeSVSlowPath(APCString* shared, uint32_t len) {
+StringData* StringData::MakeSharedSlowPath(const APCString* shared,
+                                           uint32_t len) {
   auto const data = shared->getStringData();
   auto const hash = data->m_hash & STRHASH_MASK;
   auto const capAndHash = static_cast<uint64_t>(hash) << 32;
@@ -71,15 +72,15 @@ StringData* StringData::MakeSVSlowPath(APCString* shared, uint32_t len) {
   return sd;
 }
 
-StringData* StringData::Make(APCString* shared) {
+StringData* StringData::Make(const APCString* shared) {
   // No need to check if len > MaxSize, because if it were we'd never
   // have made the StringData in the APCVariant without throwing.
   assert(size_t(shared->getStringData()->size()) <= size_t(MaxSize));
 
-  StringData *data = shared->getStringData();
+  auto const data = shared->getStringData();
   auto const len = data->size();
   if (UNLIKELY(len > SmallStringReserve)) {
-    return MakeSVSlowPath(shared, len);
+    return MakeSharedSlowPath(shared, len);
   }
 
   auto const psrc = data->data();

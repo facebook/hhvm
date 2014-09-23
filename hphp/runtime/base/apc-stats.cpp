@@ -49,32 +49,32 @@ size_t getMemSize(const TypedValue* tv) {
 }
 
 size_t getMemSize(const APCHandle* handle) {
-  auto t = handle->getType();
+  auto t = handle->type();
   if (!IS_REFCOUNTED_TYPE(t)) {
     return sizeof(APCHandle);
   }
   if (t == KindOfString) {
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getStringData());
     }
     return getMemSize(APCString::fromHandle(handle));
   }
   if (t == KindOfArray) {
-    if (handle->getSerializedArray()) {
+    if (handle->isSerializedArray()) {
       return getMemSize(APCString::fromHandle(handle));
     }
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return sizeof(APCTypedValue) +
              getMemSize(APCTypedValue::fromHandle(handle)->getArrayData());
     }
     return getMemSize(APCArray::fromHandle(handle));
   }
   if (t == KindOfObject) {
-    if (handle->getIsObj()) {
-      return getMemSize(APCObject::fromHandle(handle));
+    if (handle->isSerializedObj()) {
+      return getMemSize(APCString::fromHandle(handle));
     }
-    return getMemSize(APCString::fromHandle(handle));
+    return getMemSize(APCObject::fromHandle(handle));
   }
 
   assert(!"Unsupported APCHandle Type in getMemSize");
@@ -394,7 +394,7 @@ void APCDetailedStats::removeAPCValue(APCHandle* handle, bool expired) {
 }
 
 void APCDetailedStats::addType(APCHandle* handle) {
-  DataType type = handle->getType();
+  DataType type = handle->type();
   assert(!IS_REFCOUNTED_TYPE(type) ||
          type == KindOfString ||
          type == KindOfArray ||
@@ -405,26 +405,26 @@ void APCDetailedStats::addType(APCHandle* handle) {
   }
   switch (type) {
   case KindOfString:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncString->increment();
     } else {
       m_apcString->increment();
     }
     return;
   case KindOfArray:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncArray->increment();
-    } else if (handle->getSerializedArray()) {
+    } else if (handle->isSerializedArray()) {
       m_serArray->increment();
     } else {
       m_apcArray->increment();
     }
     return;
   case KindOfObject:
-    if (handle->getIsObj()) {
-      m_apcObject->increment();
-    } else {
+    if (handle->isSerializedObj()) {
       m_serObject->increment();
+    } else {
+      m_apcObject->increment();
     }
     return;
   default:
@@ -433,7 +433,7 @@ void APCDetailedStats::addType(APCHandle* handle) {
 }
 
 void APCDetailedStats::removeType(APCHandle* handle) {
-  DataType type = handle->getType();
+  DataType type = handle->type();
   assert(!IS_REFCOUNTED_TYPE(type) ||
          type == KindOfString ||
          type == KindOfArray ||
@@ -444,26 +444,26 @@ void APCDetailedStats::removeType(APCHandle* handle) {
   }
   switch (type) {
   case KindOfString:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncString->decrement();
     } else {
       m_apcString->decrement();
     }
     return;
   case KindOfArray:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       m_uncArray->decrement();
-    } else if (handle->getSerializedArray()) {
+    } else if (handle->isSerializedArray()) {
       m_serArray->decrement();
     } else {
       m_apcArray->decrement();
     }
     return;
   case KindOfObject:
-    if (handle->getIsObj()) {
-      m_apcObject->decrement();
-    } else {
+    if (handle->isSerializedObj()) {
       m_serObject->decrement();
+    } else {
+      m_apcObject->decrement();
     }
     return;
   default:

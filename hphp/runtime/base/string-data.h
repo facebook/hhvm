@@ -130,7 +130,7 @@ struct StringData {
    * Create a request-local StringData that wraps an APCString
    * that contains a string.
    */
-  static StringData* Make(APCString* shared);
+  static StringData* Make(const APCString* shared);
 
   /*
    * Allocate a string with malloc, using the low-memory allocator if
@@ -427,12 +427,12 @@ struct StringData {
 private:
   struct SharedPayload {
     SweepNode node;
-    APCString* shared;
+    const APCString* shared;
   };
 
 private:
   static StringData* MakeShared(StringSlice sl, bool trueStatic);
-  static StringData* MakeSVSlowPath(APCString*, uint32_t len);
+  static StringData* MakeSharedSlowPath(const APCString*, uint32_t len);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;

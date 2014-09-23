@@ -34,9 +34,9 @@ struct APCString {
   static APCHandle* MakeShared(DataType type, StringData* s, size_t& size);
 
   // Return the PHP string from the APC one
-  static Variant MakeString(APCHandle* handle) {
-    assert(handle->getType() == KindOfString);
-    if (handle->getUncounted()) {
+  static Variant MakeString(const APCHandle* handle) {
+    assert(handle->type() == KindOfString);
+    if (handle->isUncounted()) {
       return APCTypedValue::fromHandle(handle)->getStringData();
     }
     return StringData::Make(APCString::fromHandle(handle));

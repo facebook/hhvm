@@ -13,26 +13,40 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#ifndef incl_HPHP_APC_HANDLE_DEFS_H_
-#define incl_HPHP_APC_HANDLE_DEFS_H_
-
-#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-typed-value.h"
-#include "hphp/runtime/base/execution-context.h"
+
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/ext/ext_apc.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-inline void APCHandle::unreferenceRoot(size_t size) {
-  if (!isUncounted()) {
-    realDecRef();
-  } else {
-    g_context->enqueueAPCHandle(this, size);
+//////////////////////////////////////////////////////////////////////
+
+APCHandle* APCTypedValue::MakeSharedArray(ArrayData* array) {
+  assert(apcExtension::UseUncounted);
+  auto value = new APCTypedValue(
+    array->isPacked() ? MixedArray::MakeUncountedPacked(array)
+                      : MixedArray::MakeUncounted(array));
+  return value->getHandle();
+}
+
+void APCTypedValue::deleteUncounted() {
+  assert(m_handle.isUncounted());
+  DataType type = m_handle.type();
+  assert(type == KindOfString || type == KindOfArray);
+  if (type == KindOfString) {
+    m_data.str->destructUncounted();
+  } else if (type == KindOfArray) {
+    if (m_data.arr->isPacked()) {
+      MixedArray::ReleaseUncountedPacked(m_data.arr);
+    } else {
+      MixedArray::ReleaseUncounted(m_data.arr);
+    }
   }
+  delete this;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif

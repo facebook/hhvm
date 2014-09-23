@@ -2448,9 +2448,9 @@ ExecutionContext::pushLocalsAndIterators(const Func* func,
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assert(handle->getUncounted() && size > 0);
-  assert(handle->getType() == KindOfString ||
-         handle->getType() == KindOfArray);
+  assert(handle->isUncounted() && size > 0);
+  assert(handle->type() == KindOfString ||
+         handle->type() == KindOfArray);
   m_apcHandles.m_handles.push_back(handle);
   m_apcHandles.m_memSize += size;
 }

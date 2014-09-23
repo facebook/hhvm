@@ -81,28 +81,28 @@ public:
   }
 
   bool getBoolean() const {
-    assert(m_handle.is(KindOfBoolean));
+    assert(m_handle.type() == KindOfBoolean);
     return m_data.num != 0;
   }
 
   int64_t getInt64() const {
-    assert(m_handle.is(KindOfInt64));
+    assert(m_handle.type() == KindOfInt64);
     return m_data.num;
   }
 
   double getDouble() const {
-    assert(m_handle.is(KindOfDouble));
+    assert(m_handle.type() == KindOfDouble);
     return m_data.dbl;
   }
 
   StringData* getStringData() const {
-    assert(m_handle.is(KindOfStaticString) ||
-           (m_handle.getUncounted() && m_handle.is(KindOfString)));
+    assert(m_handle.type() == KindOfStaticString ||
+           (m_handle.isUncounted() && m_handle.type() == KindOfString));
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.getUncounted() && m_handle.is(KindOfArray));
+    assert(m_handle.isUncounted() && m_handle.type() == KindOfArray);
     return m_data.arr;
   }
 

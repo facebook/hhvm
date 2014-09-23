@@ -70,28 +70,29 @@ bool StoreValue::expired() const {
 //////////////////////////////////////////////////////////////////////
 
 EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
-  DataType type = handle->getType();
+  DataType type = handle->type();
   if (!IS_REFCOUNTED_TYPE(type)) {
     return EntryInfo::Type::Uncounted;
   }
   switch (type) {
   case KindOfString:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return EntryInfo::Type::UncountedString;
     }
     return EntryInfo::Type::APCString;
   case KindOfArray:
-    if (handle->getUncounted()) {
+    if (handle->isUncounted()) {
       return EntryInfo::Type::UncountedArray;
-    } else if (handle->getSerializedArray()) {
+    }
+    if (handle->isSerializedArray()) {
       return EntryInfo::Type::SerializedArray;
     }
     return EntryInfo::Type::APCArray;
   case KindOfObject:
-    if (handle->getIsObj()) {
-      return EntryInfo::Type::APCObject;
+    if (handle->isSerializedObj()) {
+      return EntryInfo::Type::SerializedObject;
     }
-    return EntryInfo::Type::SerializedObject;
+    return EntryInfo::Type::APCObject;
   default:
     return EntryInfo::Type::Unknown;
   }
@@ -155,7 +156,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
     [&] (APCHandle* var) {
       APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
         storeVal.expire == 0, expired);
-      if (expired && storeVal.expire < oldestLive && var->getUncounted()) {
+      if (expired && storeVal.expire < oldestLive && var->isUncounted()) {
         APCTypedValue::fromHandle(var)->deleteUncounted();
       } else {
         var->unreferenceRoot(storeVal.dataSize);
@@ -244,7 +245,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   // have updated it already, check before updating.
   auto& sval = acc->second;
   auto const handle = sval.data.left();
-  if (handle == svar && !handle->getIsObj()) {
+  if (handle == svar && handle->isSerializedObj()) {
     sval.data = converted;
     APCStats::getAPCStats().updateAPCValue(
       converted, size, handle, sval.dataSize, sval.expire == 0, false);
@@ -323,8 +324,8 @@ bool ConcurrentTableSharedStore::get(const String& key, Variant& value) {
           }
         }
 
-        if (apcExtension::AllowObj && svar->is(KindOfObject) &&
-            !svar->getObjAttempted()) {
+        if (apcExtension::AllowObj && svar->type() == KindOfObject &&
+            !svar->objAttempted()) {
           // Hold ref here for later promoting the object
           svar->reference();
           promoteObj = true;
@@ -366,8 +367,8 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
    */
   auto const oldHandle = sval.data.left();
   if (oldHandle == nullptr) return 0;
-  if (oldHandle->getType() != KindOfInt64 &&
-      oldHandle->getType() != KindOfDouble) {
+  if (oldHandle->type() != KindOfInt64 &&
+      oldHandle->type() != KindOfDouble) {
     return 0;
   }
 

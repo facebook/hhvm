@@ -39,67 +39,51 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * An APCHandle is the externally visible handle for APC entities. APC entities
- * are stored in-memory and accessible to multiple requests/threads.
- * The main role of the APCHandle is to hold the type of the shared data
- * and to manage the lifetime.
- * When an APC entity is stored/added, APCHandle::Create is called.
- * The API is then very simple:
- * - toLocal() fetches an instance of the PHP object stored in the APC entity.
- * That instance will be available to the request/thread that performed the
- * call and that thread only
- * - inc/decRef are the obvious memory management API
- * - few flags accessors are provided too
+ * An APCHandle is the externally visible handle for in-memory APC values.  The
+ * main role of the APCHandle is to hold the type information of the value,
+ * manage the lifetime.  When new values are added to APC, they are created
+ * using APCHandle::Create.
  *
  * Internally the family of APC entities (all APCXXXX classes, e.g. APCString,
  * APCArray, ...) embed the handle and provide an API to return the instance
  * from the handle pointer. Examples:
  *
  *    APCString                         APCTypedValue
- *    --------------                   --------------
- *   | APCHandle    |                  | SharedData   |
- *   | StringData   |                  | APCHandle    |
- *    --------------                   --------------
- * So, for an APCString the caller gets back an APCHandle* pointing to the
- * location of the field in the class. APCString::fromHandle(APCHandle* handle)
- * will simply return the pointer itself as the handle sits at offset 0
- * (reinterpret_cast<APCString*>(handle)).
- * For an APCTypedValue, APCTypedValue::fromHandle(APCHandle* handle) would
- * return the handle pointer minus the offset (in words) of the handle
- * (reinterpret_cast<APCTypedValue*>(handle - 1)).
- * Normally the handle sits at position 0 so the call ends up being a no-op.
- * APCTypedValue is, at the moment, the only entity with the handle at a
- * non-zero offset and that is because the layout of APCTypedValue
- * and TypedValue have to be the same. The same layout allow for an important
- * optimization when an APCTypedValue is contained inside an APCArray. In such
- * cases the APCTypedalue is returned directly instead of creating another
- * TypedValue. That seems to show on perflab at the moment and we continue to
- * optimize that way.
- * APC entities normally contain their data after the handle. That allows us
- * to avoid multiple allocations and multiple dereferences.
- * The family of APC objects provide a pretty simple API to create and manage
- * the overall entity.
- * A set of static functions follow the given pattern (see APCXXX headers):
- * - MakeShared, creates and returns the pointer to APCHandle embedded
- * - fromHandle goes from the handle to the object instance (see above)
- * - MakeXXX (e.g. MakeArray, MakeString, ...) return the instance of the
- * PHP object to use by the request/thread
- * - a Destroy function may be present
- * the one common instance function is
- * - getHandle() which returns the pointer to the embedded APCHandle
- * - a private API can be provided. That private API can be used by other
- * objects that are aware of the APC model and can take advantage of that.
- * APCArray is a good example of that.
+ *   ----------------                  --------------
+ *   | APCHandle    |                  | SharedData |
+ *   | StringData   |                  | APCHandle  |
+ *   ----------------                  --------------
  *
- * It's important to point out that the type itself is not enough to
- * determine the instance behind the APCHandle. That is because both
+ * So, for an APCString the caller gets back an APCHandle* pointing to the
+ * location of the field in the class.  APCString::fromHandle(APCHandle*
+ * handle) will simply return the pointer itself as the handle sits at offset 0
+ * (reinterpret_cast<APCString*>(handle)).  For an APCTypedValue,
+ * APCTypedValue::fromHandle(APCHandle* handle) would return the handle pointer
+ * minus the offset (in words) of the handle.  Normally the handle sits at
+ * position 0 so the call ends up being a no-op.
+ *
+ * APCTypedValue is, at the moment, the only entity with the handle at a
+ * non-zero offset and that is because the layout of APCTypedValue and
+ * TypedValue have to be the same, and we let the DataType field in APCHandle
+ * be used through a TypedValue*.  This layout allows for an important
+ * optimization when an APCTypedValue is contained inside an APCArray---in such
+ * cases the APCTypedValue is returned directly instead of creating another
+ * TypedValue.
+ *
+ * It's important to point out that APCHandle::type() is not enough to
+ * determine the APCXXX class behind the APCHandle.  That is because both
  * APCObject and APCArray can have a serialized form that it is just a string
- * at the moment. Type and flags will tell you what the entity is.
- * This has not been an issue so far because things have been hiding behind
- * API when appropriate. It is however something we may want to revisit.
+ * (see isSerializedArray and isSerializedObj).
+ *
+ * Thread safety:
+ *
+ *    const-qualified member functions on this class are safe for concurrent
+ *    use by multiple threads, as long as no other thread may be calling any
+ *    non-const member functions that are not documented as exceptions to this
+ *    rule.
+ *
  */
 struct APCHandle {
-
   /*
    * Create an instance of an APC object according to the type of source and
    * the various flags. This is the only entry point to create APC entities.
@@ -111,266 +95,145 @@ struct APCHandle {
                            bool unserializeObj = false);
 
   /*
+   * Memory management API.
+   *
+   * APC handles can be managed both by eager reference counting and via the
+   * Treadmill.  Memory management operations on APC handles go through this
+   * API to hide which scheme is being used from users of APCHandle.  The
+   * active scheme can be different for different handles in the same process.
+   *
+   *          function | Uncounted |  Counted
+   *  -----------------+-----------+-----------
+   *         reference |   no-op   |  incref
+   *       unreference |   no-op   |  decref
+   *   unreferenceRoot | treadmill |  decref
+   *
+   * The `size' argument to unreferenceRoot is only use for stats collection,
+   * so zero may be passed in some situations.
+   *
+   * unreferenceRoot may be called while this APCHandle is still being read by
+   * other threads---it is an exception to the thread-safety rule documented
+   * above the class.
+   */
+  void reference() const {
+    if (!isUncounted()) {
+      realIncRef();
+    }
+  }
+  void unreference() const {
+    if (!isUncounted()) {
+      realDecRef();
+    }
+  }
+  void unreferenceRoot(size_t size);
+
+  /*
    * Get an instance of the PHP object represented by this APCHandle. The
    * instance returned will be local to the request/thread that performed
    * the call.
    */
-  Variant toLocal();
+  Variant toLocal() const;
 
-  //
-  // Memory management API.
-  // APC data can be treated in a counted or uncounted way and it is
-  // important to hide ref count operations.
-  // Using the reference/unreference model we are hiding the details of
-  // which data is ref counted vs uncounted.
-  // The idea is that for counted data the API turns into a normal
-  // inc/dec ref while for uncounted it is a no-op.
-  // Final release from the data-store (and generally root releases)
-  // are performed by calling unreferenceRoot. That either performs a
-  // decRef (counted object) or adds the object to the treadmill for
-  // delayed release.
-  //
-  void reference() {
-    if (!getUncounted()) {
-      realIncRef();
-    }
+  /*
+   * Return the PHP DataType represented by this APCHandle.
+   *
+   * Note that this does not entirely determine the type of APC storage being
+   * used---for example, objects and arrays can be represented as serialized
+   * APCStrings, in which case type() will still KindOfObject or KindOfArray.
+   * See isSerializedArray and isSerializedObj below.
+   */
+  DataType type() const { return m_type; }
+
+  /*
+   * When we load KindOfObjects that are !isObj() (i.e. they are back by an
+   * APCString containing a serialized object), we may attempt to convert it to
+   * an APCObject representation.  If the conversion is not possible (for
+   * example, if there are internal references), we set this flag so that we
+   * don't try over and over.
+   *
+   * The non-const setObjAttempted function is safe for concurrent use with
+   * multiple readers and writers on a live APCHandle---it is an exception to
+   * the thread-safety rule documented above the class.
+   */
+  bool objAttempted() const {
+    return m_obj_attempted.load(std::memory_order_relaxed);
   }
-
-  void unreference() {
-    if (!getUncounted()) {
-      realDecRef();
-    }
+  void setObjAttempted() {
+    m_obj_attempted.store(true, std::memory_order_relaxed);
   }
 
   /*
-   * Remove the root reference that holds that handle alive.
-   * The handle may or may not be deleted immediately and it may be
-   * queued with the treadmill to wait for all live requests to be done.
-   * The argument 'size' is a hint and used for reporting purposes.
-   * It can be 0 though one should try hard to pass the correct info.
+   * For KindOfObject and KindOfArray, reprectively, these flags distinguish
+   * between the APCObject and APCArray representations and serialized
+   * APCString representations.
    */
-  void unreferenceRoot(size_t size);
+  bool isSerializedObj() const { return m_flags & SerializedObj; }
+  bool isSerializedArray() const { return m_flags & SerializedArray; }
+  void setSerializedObj() { m_flags |= SerializedObj; }
+  void setSerializedArray() { m_flags |= SerializedArray; }
 
+  /*
+   * If true, this APCHandle is not using reference counting.
+   */
+  bool isUncounted() const { return m_flags & Uncounted; }
+  void setUncounted() { m_flags |= Uncounted; }
 
-  //
-  // Type info API
-  //
-  bool is(DataType d) const { return m_type == d; }
-  DataType getType() const { return m_type; }
-
-  bool getIsObj() const { return m_flags & IsObj; }
-  bool getObjAttempted() const { return m_flags & ObjAttempted; }
-  bool getUncounted() const { return m_flags & Uncounted; }
-  bool getSerializedArray() const { return m_flags & SerializedArray; }
-  bool isPacked() const { return m_flags & IsPacked; }
+  /*
+   * If this APCHandle is using an APCArray representation, this flag
+   * discriminates between two different storage schemes inside APCArray.
+   */
+  bool isPacked() const { return m_flags & Packed; }
+  void setPacked() { m_flags |= Packed; }
 
 private:
-  //
-  // Memory management API
-  //
-  void realIncRef() {
+  constexpr static uint8_t SerializedArray = 1 << 0;
+  constexpr static uint8_t SerializedObj   = 1 << 1;
+  constexpr static uint8_t Packed          = 1 << 2;
+  constexpr static uint8_t Uncounted       = 1 << 3;
+
+private:
+  friend struct APCTypedValue;
+  friend struct APCString;
+  friend struct APCArray;
+  friend struct APCObject;
+  explicit APCHandle(DataType type) : m_type(type) {}
+  APCHandle(const APCHandle&) = delete;
+  APCHandle& operator=(APCHandle const&) = delete;
+
+private:
+  void realIncRef() const {
     assert(IS_REFCOUNTED_TYPE(m_type));
     ++m_count;
   }
 
-  void realDecRef() {
+  void realDecRef() const {
     assert(m_count.load());
     if (m_count > 1) {
       assert(IS_REFCOUNTED_TYPE(m_type));
       --m_count;
     } else {
       assert(m_count.load() == 1);
-      deleteShared();
+      const_cast<APCHandle*>(this)->deleteShared();
     }
   }
 
-  explicit APCHandle(DataType type)
-      : m_type(type)
-      , m_flags(0)
-      , m_count(1) {
-  }
-
-  APCHandle(const APCHandle&) = delete;
-  APCHandle& operator=(APCHandle const&) = delete;
-
   void deleteShared();
 
-  static APCHandle* CreateSharedType(const Variant& source,
-                                     size_t& size,
-                                     bool serialized,
-                                     bool inner,
-                                     bool unserializeObj);
-  static APCHandle* CreateUncounted(const Variant& source);
-
-  friend struct APCTypedValue;
-  friend struct APCString;
-  friend struct APCObject;
-  friend struct APCArray;
-
-  const static uint8_t
-    SerializedArray = (1<<0),
-    IsPacked = (1<<1),
-    IsObj = (1<<2),
-    // APC object are usually in a serialized form. We try to make them
-    // in a more performant format saving the array of properties to initialize
-    // the object.
-    // The following flag is set once that change of format is attempted so
-    // that, if the format change is not possible (internal references), we do
-    // not try to change the format over and over again.
-    ObjAttempted = (1<<3),
-    Uncounted = (1<<4);
-
-  void setSerializedArray() { m_flags |= SerializedArray; }
-  void setPacked() { m_flags |= IsPacked; }
-  void setIsObj() { m_flags |= IsObj; }
-  void setObjAttempted() { m_flags |= ObjAttempted; }
-  void setUncounted() { m_flags |= Uncounted; }
-
+private:
 #if PACKED_TV
-  UNUSED uint8_t m_unused_space;
+  std::atomic<uint8_t> m_obj_attempted{false};
   DataType m_type;
-  uint8_t m_flags;
-  std::atomic<uint32_t> m_count;
+  uint8_t m_flags{0};
+  mutable std::atomic<uint32_t> m_count{1};
 #else
   DataType m_type;
-  UNUSED uint8_t m_unused_space;
-  uint8_t m_flags;
-  std::atomic<uint32_t> m_count;
+  std::atomic<uint8_t> m_obj_attempted{false};
+  uint8_t m_flags{0};
+  mutable std::atomic<uint32_t> m_count{1};
 #endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Walk an object or array and find characteristics of the data graph.
- * Clients set up the walker to look for certain characteristics and call
- * traverseData().
- * Used by APC to make proper decisions about the format of the data to save.
- */
-class DataWalker {
-public:
-  /**
-   * Directive for the DataWalker. Define what to look for.
-   */
-  enum class LookupFeature {
-    Default                  = 0x0,
-    DetectSerializable       = 0x1,
-    RefCountedReference      = 0x2,
-    HasObjectOrResource      = 0x4
-  };
-
-  /**
-   * The set of features found by the DataWalker according to what specified
-   * via LookupFeature.
-   */
-  class DataFeature {
-  public:
-    DataFeature()
-      : m_circular(false)
-      , m_serializable(false)
-      , m_hasCollection(false)
-      , m_hasRefCountReference(false)
-      , m_hasObjectOrResource(false) {
-    }
-
-    bool isCircular() const {
-      return m_circular;
-    }
-
-    bool hasCollection() const {
-      return m_hasCollection;
-    }
-
-    bool hasSerializableReference() {
-      return m_serializable;
-    }
-
-    bool hasRefCountReference() const {
-      return m_hasRefCountReference;
-    }
-
-    bool hasObjectOrResource() const {
-      return m_hasObjectOrResource;
-    }
-
-  private:
-    // whether the data graph contains internal references (it's circular)
-    unsigned m_circular : 1;
-    // whetehr the data graph contains serialiazble objects
-    unsigned m_serializable : 1;
-    // whether the data graph contains collections
-    unsigned m_hasCollection : 1;
-    // whether the data graph contains some ref counted reference
-    // (*not* one of: bool, int, double and static string)
-    unsigned m_hasRefCountReference : 1;
-    // whether the data graph contains any object or resource
-    unsigned m_hasObjectOrResource : 1;
-
-    friend class DataWalker;
-  };
-
-public:
-  /**
-   * Sets up a DataWalker to analyze an object or array.
-   */
-  explicit DataWalker(LookupFeature features) : m_features(features)
-  {
-  }
-
-  DataFeature traverseData(ObjectData* data) const {
-    // keep track of visited nodes in an array or object graph
-    PointerSet visited;
-    DataFeature features;
-    traverseData(data, features, visited);
-    return features;
-  }
-
-  DataFeature traverseData(ArrayData* data) const {
-    // keep track of visited nodes in an array or object graph
-    PointerSet visited;
-    DataFeature features;
-    traverseData(data, features, visited);
-    return features;
-  }
-
-private:
-  void traverseData(ArrayData* data,
-                    DataFeature& features,
-                    PointerSet& visited) const;
-  void traverseData(ObjectData* data,
-                    DataFeature& features,
-                    PointerSet& visited) const;
-
-  bool markVisited(void* pvar,
-                   DataFeature& features,
-                   PointerSet& visited) const;
-  void objectFeature(ObjectData* pobj, DataFeature& features) const;
-
-  bool canStopWalk(DataFeature& features) const;
-
-private:
-  // the set of feature to analyze for this walker
-  LookupFeature m_features;
-};
-
-inline DataWalker::LookupFeature operator|(
-    DataWalker::LookupFeature a,
-    DataWalker::LookupFeature b) {
-  return DataWalker::LookupFeature(
-      static_cast<int>(a) | static_cast<int>(b));
 }
 
-inline bool operator&(
-    DataWalker::LookupFeature a,
-    DataWalker::LookupFeature b) {
-  return static_cast<int>(a) & static_cast<int>(b);
-}
-
-inline DataWalker::LookupFeature operator~(DataWalker::LookupFeature f) {
-  return DataWalker::LookupFeature(~static_cast<int>(f));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-}
-
-#endif /* incl_HPHP_APC_HANDLE_H_ */
+#endif

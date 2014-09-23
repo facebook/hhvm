@@ -116,7 +116,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    * @return     mixed   Returns the old array.
    */
   public function exchangeArray($input) {
-    $old = $this->storage;
+    $old = $this->getArrayCopy();
     $this->check_array_object_or_iterator($input);
     return $old;
   }

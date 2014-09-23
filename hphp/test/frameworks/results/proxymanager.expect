@@ -72,6 +72,44 @@ ProxyManagerTest\FileLocator\FileLocatorTest::testGetProxyFileName
 .
 ProxyManagerTest\FileLocator\FileLocatorTest::testRejectsNonExistingDirectory
 .
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testCanWriteToArrayKeysInPublicProperty
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCalls with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCalls with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCalls with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterCloning with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterCloning with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterCloning with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterUnSerialization with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterUnSerialization with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsAfterUnSerialization with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsWithSuffixListener with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsWithSuffixListener with data set #1
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testMethodCallsWithSuffixListener with data set #2
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testPropertyExistence with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testPropertyReadAccess with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testPropertyUnset with data set #0
+S
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testPropertyWriteAccess with data set #0
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testWillModifyByRefRetrievedPublicProperties
+.
+ProxyManagerTest\Functional\AccessInterceptorScopeLocalizerFunctionalTest::testWillNotModifyRetrievedPublicProperties
+.
 ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testCanWriteToArrayKeysInPublicProperty
 .
 ProxyManagerTest\Functional\AccessInterceptorValueHolderFunctionalTest::testMethodCalls with data set #0
@@ -330,8 +368,12 @@ ProxyManagerTest\Generator\MethodGeneratorTest::testGenerateFromReflection
 .
 ProxyManagerTest\Generator\MethodGeneratorTest::testGenerateSimpleMethod
 .
+ProxyManagerTest\Generator\MethodGeneratorTest::testGeneratedParametersFromReflection
+.
+ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratedParametersAreProperlyEscaped
+.
 ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesDefaultParameterForInternalPhpClasses
-F
+.
 ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesMethodWithCallableType
 .
 ProxyManagerTest\Generator\ParameterGeneratorTest::testGeneratesParameterPassedByReference
@@ -677,35 +719,35 @@ ProxyManagerTest\ProxyGenerator\ValueHolder\MethodGenerator\MagicSleepTest::test
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-isset.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-private-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-isset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-denies-protected-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-isset.phpt
-S
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-read.phpt
-S
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-unset.phpt
-S
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-private-property-write.phpt
-S
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-isset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-scope-localizer-denies-protected-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/access-interceptor-with-cache.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-allows-inexisting-magic-property-read.phpt
@@ -713,43 +755,43 @@ framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-g
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-allows-inexisting-property-write.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-inexisting-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-isset.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-private-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-isset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-denies-protected-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-ghost-with-cache.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-isset.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-private-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-isset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-read.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-unset.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-denies-protected-property-write.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-internal-php-classes.phpt
-F
+.
 framework_downloads/proxymanager/./tests/language-feature-scripts/lazy-loading-value-holder-with-cache.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/null-object-public-function-empty.phpt
@@ -757,4 +799,4 @@ framework_downloads/proxymanager/./tests/language-feature-scripts/null-object-pu
 framework_downloads/proxymanager/./tests/language-feature-scripts/null-object-public-property-empty.phpt
 .
 framework_downloads/proxymanager/./tests/language-feature-scripts/remote-object-json-adapter-denies-unknow-method.phpt
-F
+.

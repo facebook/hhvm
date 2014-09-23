@@ -111,9 +111,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
   case KindOfDouble:  b = (tv->m_data.dbl != 0); break;
   case KindOfStaticString: b = tv->m_data.pstr->toBoolean(); break;
   case KindOfString:  b = tv->m_data.pstr->toBoolean(); tvDecRefStr(tv); break;
-  // Note that this is intentionally incorrect for NameValueTableWrapper, for
-  // which getSize() will always return -1, empty or not.
-  case KindOfArray:   b = !!tv->m_data.parr->getSize();
+  case KindOfArray:   b = !!tv->m_data.parr->size();
                       tvDecRefArr(tv);
                       break;
   case KindOfObject:  b = tv->m_data.pobj->o_toBoolean();

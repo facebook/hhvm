@@ -58,7 +58,7 @@ const StaticString s_IAA("IAA");
 const StaticString s_IB("IB");
 const StaticString s_NonUnique("NonUnique");
 const StaticString s_NonUniqueA("NonUniqueA");
-const StaticString s_WaitHandle("WaitHandle");
+const StaticString s_WaitHandle("HH\\WaitHandle");
 
 // A test program so we can actually test things involving object or
 // class types.
@@ -74,7 +74,7 @@ std::unique_ptr<php::Unit> make_test_unit() {
     # only one we have to make sure the type system can see for unit
     # test purposes, so we can just define it here.  We don't need to
     # give it any of its functions currently.
-    .class [abstract unique builtin] WaitHandle {
+    .class [abstract unique builtin] HH\WaitHandle {
     }
 
     .class [interface unique] IBase {

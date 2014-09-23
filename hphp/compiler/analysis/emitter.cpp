@@ -4764,7 +4764,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           auto const ar = expr->getScope()->getContainingProgram();
           auto const type = expr->getActualType();
           return type && Type::SubType(ar, type,
-                           Type::GetType(Type::KindOfObject, "WaitHandle"));
+                           Type::GetType(Type::KindOfObject, "HH\\WaitHandle"));
         }();
 
         Label resume;
@@ -4780,7 +4780,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
         if (!isKnownWaitHandle) {
           Label likely;
-          StringData* nWaitHandle = makeStaticString("WaitHandle");
+          const static StringData* nWaitHandle =
+            makeStaticString("HH\\WaitHandle");
 
           e.Dup();
           e.InstanceOfD(nWaitHandle);
@@ -8788,7 +8789,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       static const StringData* asyncGenCls =
         makeStaticString("hh\\asyncgenerator");
       static const StringData* generatorCls = makeStaticString("generator");
-      static const StringData* waitHandleCls = makeStaticString("waithandle");
+      static const StringData* waitHandleCls =
+        makeStaticString("hh\\waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");
       StringData* methName = makeStaticString(methodInfo->m_name);
       GeneratorMethod* cmeth;

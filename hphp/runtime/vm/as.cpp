@@ -360,7 +360,7 @@ struct Input {
 private:
   struct is_bareword {
     bool operator()(int i) const {
-      return isalnum(i) || i == '_' || i == '.' || i == '$';
+      return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
     }
   };
 

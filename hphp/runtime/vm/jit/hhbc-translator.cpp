@@ -4765,7 +4765,7 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
   emitVerifyTypeImpl(paramId);
 }
 
-const StaticString s_WaitHandle("WaitHandle");
+const StaticString s_WaitHandle("HH\\WaitHandle");
 
 SSATmp* HhbcTranslator::emitInstanceOfDImpl(SSATmp* src,
                                             const StringData* className) {

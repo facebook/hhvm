@@ -199,7 +199,7 @@ FixupMap::eagerRecord(const Func* func) {
   }
 
   return func->cls() &&
-    !strcmp(func->cls()->name()->data(), "WaitHandle") &&
+    !strcmp(func->cls()->name()->data(), "HH\\WaitHandle") &&
     !strcmp(func->name()->data(), "join");
 }
 

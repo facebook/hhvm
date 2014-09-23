@@ -74,7 +74,7 @@
             ]
         },
         {
-            "name": "WaitHandle",
+            "name": "HH\\WaitHandle",
             "desc": "A wait handle representing asynchronous operation",
             "flags": [
                 "IsAbstract",
@@ -262,7 +262,7 @@
         },
         {
             "name": "HH\\StaticWaitHandle",
-            "parent": "WaitHandle",
+            "parent": "HH\\WaitHandle",
             "desc": "A wait handle that is always finished",
             "flags": [
                 "IsFinal",
@@ -286,7 +286,7 @@
         },
         {
             "name": "HH\\WaitableWaitHandle",
-            "parent": "WaitHandle",
+            "parent": "HH\\WaitHandle",
             "desc": "A wait handle that can be waited upon",
             "flags": [
                 "IsAbstract",

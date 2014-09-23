@@ -114,6 +114,7 @@ struct Folder {
 // as a constant, and there is valid immediate-form of that instruction,
 // then change the instruction and embed the immediate.
 void foldImms(Vunit& unit) {
+  assert(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
   Folder folder{unit};
@@ -123,14 +124,6 @@ void foldImms(Vunit& unit) {
   for (auto& entry : unit.cpool) {
     folder.valid.set(entry.second);
     folder.vals[entry.second] = entry.first;
-  }
-  // vasm is not (yet) ssa. Clear the valid bit if multiply defined.
-  for (auto b : blocks) {
-    for (auto& inst : unit.blocks[b].code) {
-      visitDefs(unit, inst, [&](Vreg r) {
-        folder.valid.reset(r);
-      });
-    }
   }
   // now mutate instructions
   for (auto b : blocks) {

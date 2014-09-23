@@ -30,18 +30,23 @@ let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 (*****************************************************************************)
 
 let (error_list: t ref) = ref []
+let accumulate_errors = ref false
+
+let add_error error =
+  if !accumulate_errors
+  then error_list := error :: !error_list
+  else
+    (* We have an error, but haven't handled it in any way *)
+    assert false
 
 let add code pos msg =
   if !is_hh_fixme pos code then () else
-  error_list := (code, [pos, msg]) :: !error_list
+  add_error (code, [pos, msg])
 
 let add_list code pos_msg_l =
   let pos = fst (List.hd pos_msg_l) in
   if !is_hh_fixme pos code then () else
-  error_list := (code, pos_msg_l) :: !error_list
-
-let add_error error =
-  error_list := error :: !error_list
+  add_error (code, pos_msg_l)
 
 let get_code (error: error) = ((fst error): error_code)
 let to_list (error: error) = ((snd error): message list)
@@ -1507,10 +1512,13 @@ let to_string ((error_code, msgl) : error) : string =
 
 let try_ f1 f2 =
   let error_list_copy = !error_list in
+  let accumulate_errors_copy = !accumulate_errors in
   error_list := [];
+  accumulate_errors := true;
   let result = f1 () in
   let errors = !error_list in
   error_list := error_list_copy;
+  accumulate_errors := accumulate_errors_copy;
   match List.rev errors with
   | [] -> result
   | l :: _ -> f2 l
@@ -1530,11 +1538,17 @@ let try_add_err pos err f1 f2 =
 
 let do_ f =
   let error_list_copy = !error_list in
+  let accumulate_errors_copy = !accumulate_errors in
   error_list := [];
+  accumulate_errors := true;
   let result = f () in
   let out_errors = !error_list in
   error_list := error_list_copy;
+  accumulate_errors := accumulate_errors_copy;
   List.rev out_errors, result
+
+let ignore_ f =
+  snd (do_ f)
 
 let try_when f ~when_ ~do_ =
   try_ f begin fun (error: error) ->

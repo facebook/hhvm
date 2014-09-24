@@ -20,7 +20,6 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"

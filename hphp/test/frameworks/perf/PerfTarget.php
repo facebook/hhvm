@@ -54,4 +54,8 @@ abstract class PerfTarget {
       'If you override needsUnfreeze(), you must override unfreeze() too.'
     );
   }
+
+  final protected function safeCommand(Vector<string> $command): string {
+    return implode(' ', $command->map($x ==> escapeshellarg($x)));
+  }
 }

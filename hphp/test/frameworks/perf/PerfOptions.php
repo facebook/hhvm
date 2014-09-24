@@ -12,6 +12,7 @@ final class PerfOptions {
 
   public bool $wordpress;
   public bool $toys;
+  public bool $sugarcrm;
 
   public bool $skipSanityCheck;
   public bool $skipVersionChecks;
@@ -26,7 +27,7 @@ final class PerfOptions {
         'verbose',
         'php5:', 'hhvm:',
         'siege:', 'nginx:',
-        'toys', 'wordpress',
+        'toys', 'wordpress', 'sugarcrm-login-page',
         'i-am-not-benchmarking',
         'skip-sanity-check',
         'skip-version-checks',
@@ -43,6 +44,7 @@ final class PerfOptions {
 
     $this->wordpress = array_key_exists('wordpress', $o);
     $this->toys = array_key_exists('toys', $o);
+    $this->sugarcrm = array_key_exists('sugarcrm-login-page', $o);
 
     $this->skipSanityCheck = array_key_exists('skip-sanity-check', $o);
     $this->skipVersionChecks = array_key_exists('skip-version-checks', $o);

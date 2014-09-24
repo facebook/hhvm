@@ -6,6 +6,7 @@ require_once('PHP5Daemon.php');
 require_once('NginxDaemon.php');
 require_once('PerfOptions.php');
 require_once('Siege.php');
+require_once('SugarCRMTarget.php');
 require_once('ToysTarget.php');
 require_once('WordpressTarget.php');
 
@@ -125,7 +126,7 @@ function perf_main($argv) {
     fprintf(
       STDERR,
       "Usage: %s --<php5=/path/to/php-cgi|hhvm=/path/to/hhvm> ".
-      "--<toys|wordpress>\n",
+      "--<toys|wordpress|sugarcrm-login-page>\n",
       $argv[0],
     );
     exit(0);
@@ -156,8 +157,18 @@ function perf_main($argv) {
   if ($options->toys) {
     $target = new ToysTarget();
   }
+  if ($options->sugarcrm) {
+    $target = new SugarCRMTarget($temp_dir);
+  }
   if ($target === null) {
-    throw new Exception('Either --wordpress or --toys must be specified');
+    fprintf(
+      STDERR,
+      "You must specify a target with one of the following:\n".
+      "  --toys\n".
+      "  --wordpress\n".
+      "  --sugarcrm-login-page\n"
+    );
+    exit(1);
   }
 
   if ($options->php5) {
@@ -167,10 +178,12 @@ function perf_main($argv) {
     $engine = new HHVMDaemon($temp_dir, $target, $options);
   }
   if ($engine === null) {
-    throw new Exception(
+    fprintf(
+      STDERR,
       'Either --php5=/path/to/php-cgi or --hhvm=/path/to/hhvm '.
       'must be specified'
     );
+    exit(1);
   }
 
   run_benchmark($target, $engine, $temp_dir, $options);

@@ -115,10 +115,6 @@ final class WordpressTarget extends PerfTarget {
     );
   }
 
-  private function safeCommand(Vector<string> $command): string {
-    return implode(' ', $command->map($x ==> escapeshellarg($x)));
-  }
-
   public function getSourceRoot(): string {
     return $this->tempDir.'/wordpress';
   }

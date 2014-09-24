@@ -299,6 +299,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rmap_append p          -> Rmap_append (pos p)
     | Rvar_param p           -> Rvar_param (pos p)
     | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
+    | Rarray_filter (p, r)   -> Rarray_filter (pos p, reason r)
 
   let string_id (p, x) = pos p, x
 

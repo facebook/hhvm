@@ -56,6 +56,7 @@ type t =
   | Rmap_append      of Pos.t
   | Rvar_param       of Pos.t
   | Rinstantiate     of t * string * t
+  | Rarray_filter    of Pos.t * t
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -133,6 +134,11 @@ let rec to_string prefix r =
   | Rinstantiate (r_orig, generic_name, r_inst) ->
       (to_string prefix r_orig) @
         (to_string ("  via this generic " ^ generic_name) r_inst)
+  | Rarray_filter (_, r) ->
+      (to_string prefix r) @
+      [(p, "Single argument array_filter converts KeyedContainer<Tk, ?Tv> to \
+      array<Tk, Tv>, and Container<?Tv> to array<mixed, Tv>")]
+
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -179,6 +185,7 @@ and to_pos = function
   | Rmap_append p -> p
   | Rvar_param p -> p
   | Rinstantiate (_, _, r) -> to_pos r
+  | Rarray_filter (p, _) -> p
 
 type ureason =
   | URnone

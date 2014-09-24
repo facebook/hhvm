@@ -15,15 +15,18 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include <iterator>
+
 #include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/layout.h"
-#include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/reg-alloc.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
 
@@ -191,18 +194,18 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     auto const linfo = layoutBlocks(unit);
 
     for (auto it = linfo.blocks.begin(); it != linfo.acoldIt; ++it) {
-      Block* nextLinear = boost::next(it) != linfo.acoldIt
-        ? *boost::next(it) : nullptr;
+      Block* nextLinear = std::next(it) != linfo.acoldIt
+        ? *std::next(it) : nullptr;
       emitBlock(mainCode, *it, nextLinear);
     }
     for (auto it = linfo.acoldIt; it != linfo.afrozenIt; ++it) {
-      Block* nextLinear = boost::next(it) != linfo.afrozenIt
-        ? *boost::next(it) : nullptr;
+      Block* nextLinear = std::next(it) != linfo.afrozenIt
+        ? *std::next(it) : nullptr;
       emitBlock(coldCode, *it, nextLinear);
     }
     for (auto it = linfo.afrozenIt; it != linfo.blocks.end(); ++it) {
-      Block* nextLinear = boost::next(it) != linfo.blocks.end()
-        ? *boost::next(it) : nullptr;
+      Block* nextLinear = std::next(it) != linfo.blocks.end()
+        ? *std::next(it) : nullptr;
       emitBlock(*frozenCode, *it, nextLinear);
     }
 

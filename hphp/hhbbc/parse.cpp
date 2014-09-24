@@ -21,8 +21,8 @@
 #include <map>
 
 #include <boost/variant.hpp>
-#include <boost/next_prior.hpp>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <set>
 #include <unordered_set>
@@ -312,9 +312,9 @@ void find_fault_funclets(ExnTreeInfo& tinfo,
   auto sectionId = uint32_t{1};
 
   for (auto funcletStartIt = begin(tinfo.faultFuncletStarts);
-      boost::next(funcletStartIt) != end(tinfo.faultFuncletStarts);
+      std::next(funcletStartIt) != end(tinfo.faultFuncletStarts);
       ++funcletStartIt, ++sectionId) {
-    auto const nextFunclet = *boost::next(funcletStartIt);
+    auto const nextFunclet = *std::next(funcletStartIt);
 
     auto offIt = blockStarts.find(*funcletStartIt);
     assert(offIt != end(blockStarts));
@@ -664,11 +664,11 @@ void build_cfg(ParseUnitState& puState,
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
 
   for (auto it = begin(blockStarts);
-      boost::next(it) != end(blockStarts);
+      std::next(it) != end(blockStarts);
       ++it) {
     auto const block   = findBlock(*it);
     auto const bcStart = bc + *it;
-    auto const bcStop  = bc + *boost::next(it);
+    auto const bcStop  = bc + *std::next(it);
 
     if (auto const eh = findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);

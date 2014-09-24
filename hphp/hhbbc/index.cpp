@@ -21,11 +21,11 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <unordered_set>
 #include <vector>
 
-#include <boost/next_prior.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
 
@@ -1195,7 +1195,7 @@ void check_invariants(IndexData& data) {
 
     auto const range = find_range(data.classInfo, name);
     if (begin(range) != end(range)) {
-      always_assert(boost::next(begin(range)) == end(range));
+      always_assert(std::next(begin(range)) == end(range));
     }
   }
 
@@ -1455,8 +1455,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   auto const classes = find_range(m_data->classInfo, clsName);
   for (auto it = begin(classes); it != end(classes); ++it) {
     auto const cinfo = it->second;
-    if ((cinfo->cls->attrs & AttrUnique) || boost::next(it) == end(classes)) {
-      if (debug && boost::next(it) != end(classes)) {
+    if ((cinfo->cls->attrs & AttrUnique) || std::next(it) == end(classes)) {
+      if (debug && std::next(it) != end(classes)) {
         std::fprintf(stderr, "non unique \"unique\" class: %s\n",
           cinfo->cls->name->data());
         for (; it != end(classes); ++it) {
@@ -1677,7 +1677,7 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   };
 
   if (begin(funcs) == end(funcs))              return name_only();
-  if (boost::next(begin(funcs)) != end(funcs)) return name_only();
+  if (std::next(begin(funcs)) != end(funcs))   return name_only();
   auto const func = begin(funcs)->second;
   if (!(func->attrs & AttrUnique))             return name_only();
   if (func->attrs & AttrInterceptable)         return name_only();
@@ -1976,7 +1976,7 @@ bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
   if (m_data->unknownClassSProps.count(name)) return false;
   auto const classes = find_range(m_data->classInfo, cls->name);
   if (begin(classes) == end(classes) ||
-      boost::next(begin(classes)) != end(classes)) {
+      std::next(begin(classes)) != end(classes)) {
     return false;
   }
   auto const cinfo = begin(classes)->second;

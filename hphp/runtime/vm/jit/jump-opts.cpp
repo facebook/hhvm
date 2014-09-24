@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include <iterator>
 #include <utility>
 
-#include <boost/next_prior.hpp>
-
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/opt.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
@@ -151,7 +150,7 @@ void optimizeSideExitCheck(IRUnit& unit, IRInstruction* inst,
   FTRACE(5, "SideExit:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "SideExit:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto const syncABI = &*boost::prior(exitBlock->backIter());
+  auto const syncABI = &*std::prev(exitBlock->backIter());
   assert(syncABI->op() == SyncABIRegs);
 
   FTRACE(5, "converting jump ({}) to side exit\n",

@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/check.h"
 
-#include <boost/next_prior.hpp>
 #include <unordered_set>
 #include <bitset>
 

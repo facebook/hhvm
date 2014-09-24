@@ -975,53 +975,6 @@ and expr_ is_lvalue env (p, e) =
       let env, ty = expr env x in
       Env.debug env ty;
       env, Env.fresh_type()
-  | Call (Cnormal, (_, Id (_, "\\array_filter")), [x])  ->
-      let env, ty = expr env x in
-      let rec get_array_filter_return_type env ty =
-        let env, ety = Env.expand_type env ty in
-        (match ety with
-        | (r, Tarray (_, None, None)) as array_type ->
-            env, array_type
-        | (r, Tunresolved x) ->
-            let env, x = lmap get_array_filter_return_type env x in
-            env, (r, Tunresolved x)
-        | (r, Tany) ->
-            env, (r, Tany)
-        | (r, _) ->
-            let explain_array_filter (r, t) =
-              (Reason.Rarray_filter (p, r), t) in
-            let tk, tv = Env.fresh_type(), Env.fresh_type() in
-            Errors.try_
-              (fun () ->
-                let keyed_container = (
-                  Reason.Rnone,
-                  Tapply (
-                    (Pos.none, "\\KeyedContainer"), [tk; tv]
-                  )
-                ) in
-                let env = SubType.sub_type env keyed_container ety in
-                let env, non_null_type = non_null env tv in
-                env, (r, Tarray (
-                  true,
-                  Some(explain_array_filter tk),
-                  Some(explain_array_filter non_null_type))
-                ))
-              (fun _ -> Errors.try_
-                (fun () ->
-                  let container = (
-                    Reason.Rnone,
-                    Tapply (
-                      (Pos.none, "\\Container"), [tv]
-                    )
-                  ) in
-                  let env = SubType.sub_type env container ety in
-                  let env, non_null_type = non_null env tv in
-                  env, (r, Tarray (
-                    true,
-                    Some(explain_array_filter (r, Tmixed)),
-                    Some(explain_array_filter non_null_type))))
-                (fun _ -> env, (Reason.Rwitness p, Tany))))
-      in get_array_filter_return_type env ty
   | Call (call_type, (_, fun_expr as e), el) ->
       let env, result = dispatch_call p env call_type e el in
       let env = Env.forget_members env p in
@@ -1609,6 +1562,61 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
   | Id (_, x) when SSet.mem x Naming.predef_tests ->
       let env, ty = expr env (List.hd el) in
       env, (Reason.Rwitness p, Tprim Tbool)
+  | Id ((_, "\\array_filter") as id) when el <> []->
+      (* dispatch the call to typecheck the arguments *)
+      let env, fty = fun_type_of_id env id in
+      let env, fty = Env.expand_type env fty in
+      let env, fty = Inst.instantiate_fun env fty el in
+      let env, res = call p env fty el in
+      if List.length el > 1 then env, res else
+      (* but ignore the result and overwrite it with custom return type *)
+      let x = List.hd el in
+      let env, ty = expr env x in
+      let rec get_array_filter_return_type env ty =
+        let env, ety = Env.expand_type env ty in
+        (match ety with
+        | (r, Tarray (_, None, None)) as array_type ->
+            env, array_type
+        | (r, Tunresolved x) ->
+            let env, x = lmap get_array_filter_return_type env x in
+            env, (r, Tunresolved x)
+        | (r, Tany) ->
+            env, (r, Tany)
+        | (r, _) ->
+            let explain_array_filter (r, t) =
+              (Reason.Rarray_filter (p, r), t) in
+            let tk, tv = Env.fresh_type(), Env.fresh_type() in
+            Errors.try_
+              (fun () ->
+                let keyed_container = (
+                  Reason.Rnone,
+                  Tapply (
+                    (Pos.none, "\\KeyedContainer"), [tk; tv]
+                  )
+                ) in
+                let env = SubType.sub_type env keyed_container ety in
+                let env, non_null_type = non_null env tv in
+                env, (r, Tarray (
+                  true,
+                  Some(explain_array_filter tk),
+                  Some(explain_array_filter non_null_type))
+                ))
+              (fun _ -> Errors.try_
+                (fun () ->
+                  let container = (
+                    Reason.Rnone,
+                    Tapply (
+                      (Pos.none, "\\Container"), [tv]
+                    )
+                  ) in
+                  let env = SubType.sub_type env container ety in
+                  let env, non_null_type = non_null env tv in
+                  env, (r, Tarray (
+                    true,
+                    Some(explain_array_filter (r, Tmixed)),
+                    Some(explain_array_filter non_null_type))))
+                (fun _ -> env, (Reason.Rwitness p, Tany))))
+      in get_array_filter_return_type env ty
   | Class_const (CIparent, (_, "__construct")) ->
       call_parent_construct p env el
   | Class_const (CIparent, m) ->

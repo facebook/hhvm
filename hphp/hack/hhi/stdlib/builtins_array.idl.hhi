@@ -42,7 +42,7 @@ function array_fill_keys($keys, $value) { }
  * function(KeyedContainer<Tk, ?Tv>): array<Tk, Tv>
  * function(Container<?Tv>): array<mixed, Tv>
  */
-function array_filter($input, $callback = null) { }
+function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null) { }
 function array_flip($trans) { }
 function key_exists($key, $search) { }
 function array_keys($input, $search_value = null_variant, $strict = false) { }

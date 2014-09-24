@@ -30,8 +30,9 @@
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 using namespace reg;
+using namespace x64;
 
 const char* vinst_names[] = {
 #define O(name, imms, uses, defs) #name,
@@ -866,8 +867,8 @@ void Vasm::finish(const Abi& abi, bool useLLVM, AsmInfo* asmInfo) {
   Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
 }
 
-auto const vauto_gp = RegSet(rAsm).add(reg::r11);
-auto const vauto_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
+auto const vauto_gp = RegSet(rAsm).add(r11);
+auto const vauto_simd = RegSet(xmm5).add(xmm6).add(xmm7);
 UNUSED const Abi vauto_abi {
   .gpUnreserved = vauto_gp,
   .gpReserved = x64::abi.gp() - vauto_gp,
@@ -911,4 +912,4 @@ Vtuple findDefs(const Vunit& unit, Vlabel b) {
   return unit.blocks[b].code.front().phidef_.defs;
 }
 
-}}}
+}}

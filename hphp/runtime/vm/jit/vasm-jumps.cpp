@@ -24,9 +24,6 @@
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
-using namespace x64;
-
-namespace x64 {
 
 PredVector computePreds(const Vunit& unit) {
   PredVector preds(unit.blocks.size());
@@ -37,8 +34,6 @@ PredVector computePreds(const Vunit& unit) {
     }
   });
   return preds;
-}
-
 }
 
 void optimizeJmps(Vunit& unit) {

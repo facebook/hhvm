@@ -37,7 +37,7 @@ struct IRInstruction;
 struct AsmInfo;
 }}
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 
 struct Vptr;
 struct Vscaled;
@@ -47,7 +47,9 @@ struct Vscaled;
 // a gpr, xmm, or virtual register.
 struct Vreg {
   static constexpr auto kind = VregKind::Any;
-  static const unsigned G0{0}, X0{16}, V0{32};
+  static const unsigned G0{0};
+  static const unsigned X0{PhysReg::kSIMDOffset}; // 33
+  static const unsigned V0{64};
   Vreg() : rn(0xffffffff) {}
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r) : rn(int(r)) {}
@@ -149,7 +151,6 @@ typedef Vr<Reg16,VregKind::Gpr>   Vreg16;
 typedef Vr<Reg8,VregKind::Gpr>    Vreg8;
 typedef Vr<RegXMM,VregKind::Simd> VregXMM;
 
-inline Reg64 r64(PhysReg r) { return r; }
 inline Reg64 r64(Vreg64 r) { return r; }
 
 // base + index*scale + disp.
@@ -681,14 +682,14 @@ struct Vinstr {
 #undef O
 
 #define O(name, imms, uses, defs) \
-  /* implicit */ Vinstr(x64::name i) : op(name), name##_(i) {}
+  /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
   X64_OPCODES
 #undef O
 
   Opcode op;
   unsigned pos;
   const IRInstruction* origin{nullptr};
-#define O(name, imms, uses, defs) x64::name name##_;
+#define O(name, imms, uses, defs) jit::name name##_;
   union { X64_OPCODES };
 #undef O
 };
@@ -963,8 +964,6 @@ Vtuple findDefs(const Vunit& unit, Vlabel b);
 
 typedef jit::vector<jit::vector<Vlabel>> PredVector;
 PredVector computePreds(const Vunit& unit);
-
-}
 
 }}
 #endif

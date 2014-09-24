@@ -21,6 +21,8 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 
 namespace HPHP { namespace jit {
+struct Vreg;
+struct Vout;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -184,6 +186,7 @@ struct PhysReg {
 
 private:
   friend struct RegSet;
+  friend struct Vreg;
   explicit constexpr PhysReg(int n) : n(n) {}
 
   int8_t n;
@@ -361,17 +364,13 @@ static_assert(std::is_trivially_destructible<RegSet>::value,
 
 //////////////////////////////////////////////////////////////////////
 
-namespace x64 {
-struct Vout;
-}
-
 struct PhysRegSaverParity {
   PhysRegSaverParity(int parity, X64Assembler& as, RegSet regs);
-  PhysRegSaverParity(int parity, x64::Vout& as, RegSet regs);
+  PhysRegSaverParity(int parity, Vout& as, RegSet regs);
   ~PhysRegSaverParity();
 
   static void emitPops(X64Assembler& as, RegSet regs);
-  static void emitPops(x64::Vout&, RegSet regs);
+  static void emitPops(Vout&, RegSet regs);
 
   PhysRegSaverParity(const PhysRegSaverParity&) = delete;
   PhysRegSaverParity(PhysRegSaverParity&&) noexcept = default;
@@ -384,7 +383,7 @@ struct PhysRegSaverParity {
 
 private:
   X64Assembler* m_as;
-  x64::Vout* m_v;
+  Vout* m_v;
   RegSet m_regs;
   int m_adjust;
 };
@@ -393,7 +392,7 @@ struct PhysRegSaverStub : public PhysRegSaverParity {
   PhysRegSaverStub(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(0, as, regs)
   {}
-  PhysRegSaverStub(x64::Vout& v, RegSet regs)
+  PhysRegSaverStub(Vout& v, RegSet regs)
       : PhysRegSaverParity(0, v, regs)
   {}
 };
@@ -402,7 +401,7 @@ struct PhysRegSaver : public PhysRegSaverParity {
   PhysRegSaver(X64Assembler& as, RegSet regs)
       : PhysRegSaverParity(1, as, regs)
   {}
-  PhysRegSaver(x64::Vout& v, RegSet regs)
+  PhysRegSaver(Vout& v, RegSet regs)
       : PhysRegSaverParity(1, v, regs)
   {}
 };

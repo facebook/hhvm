@@ -25,14 +25,14 @@
 
 namespace HPHP { namespace jit {
 
-std::string show(x64::Vreg r);
-std::string show(x64::Vptr p);
-std::string show(const x64::Vunit& unit);
-std::string show(const x64::Vunit& unit, const x64::Vinstr& inst);
+std::string show(Vreg r);
+std::string show(Vptr p);
+std::string show(const Vunit& unit);
+std::string show(const Vunit& unit, const Vinstr& inst);
 
 // print a dot-compatible digraph of the blocks (without contents)
-void printCfg(const x64::Vunit& unit, const jit::vector<Vlabel>& blocks);
-void printCfg(std::ostream& out, const x64::Vunit& unit,
+void printCfg(const Vunit& unit, const jit::vector<Vlabel>& blocks);
+void printCfg(std::ostream& out, const Vunit& unit,
               const jit::vector<Vlabel>& blocks);
 
 // Tracing level constants.
@@ -47,7 +47,7 @@ constexpr int kVasmDCELevel = 4;
 // above `level'.
 void printUnit(int level,
                const std::string& caption,
-               const x64::Vunit& unit);
+               const Vunit& unit);
 
 // main, cold, frozen
 extern const char* area_names[];

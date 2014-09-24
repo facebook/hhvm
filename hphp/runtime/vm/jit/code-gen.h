@@ -70,7 +70,7 @@ struct CodegenState {
     , catches(unit, CatchInfo())
     , pastGuards(false)
     , labels(unit, Vlabel())
-    , locs(unit, x64::Vloc{})
+    , locs(unit, Vloc{})
   {}
 
   // Each block has a list of addresses to patch, and an address if
@@ -107,7 +107,7 @@ struct CodegenState {
 
   // vasm block labels, one for each hhir block
   StateVector<Block,Vlabel> labels;
-  StateVector<SSATmp,x64::Vloc> locs;
+  StateVector<SSATmp,Vloc> locs;
 };
 
 LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);

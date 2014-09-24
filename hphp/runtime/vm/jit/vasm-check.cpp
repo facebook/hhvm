@@ -21,7 +21,7 @@
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 
 namespace {
 
@@ -127,4 +127,4 @@ bool check(Vunit& unit) {
   return true;
 }
 
-}}}
+}}

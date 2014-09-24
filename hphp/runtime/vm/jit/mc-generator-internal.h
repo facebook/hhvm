@@ -37,7 +37,7 @@ void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 }
 
 template <class Then>
-void ifThen(x64::Vout& v, ConditionCode cc, Then thenBlock) {
+void ifThen(Vout& v, ConditionCode cc, Then thenBlock) {
   using namespace x64;
   auto then = v.makeBlock();
   auto done = v.makeBlock();
@@ -181,12 +181,12 @@ void emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  testb(src, toByte(tvOp));
 }
 
-inline void emitTestTVType(x64::Vout& v, Immed s0, x64::Vreg s1) {
-  v << x64::testbi{s0, s1};
+inline void emitTestTVType(Vout& v, Immed s0, Vreg s1) {
+  v << testbi{s0, s1};
 }
 
-inline void emitTestTVType(x64::Vout& v, Immed s0, x64::Vptr s1) {
-  v << x64::testbim{s0, s1};
+inline void emitTestTVType(Vout& v, Immed s0, Vptr s1) {
+  v << testbim{s0, s1};
 }
 
 template<typename SrcType, typename OpndType>
@@ -196,8 +196,8 @@ emitLoadTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  loadzbl(src, toReg32(tvOp));
 }
 
-inline void emitLoadTVType(x64::Vout& v, x64::Vptr mem, x64::Vreg d) {
-  v << x64::loadzbl{mem, d};
+inline void emitLoadTVType(Vout& v, Vptr mem, Vreg d) {
+  v << loadzbl{mem, d};
 }
 
 template<typename SrcType, typename OpndType>
@@ -205,12 +205,12 @@ void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
-inline void emitCmpTVType(x64::Vout& v, Immed s0, x64::Vptr s1) {
-  v << x64::cmpbim{s0, s1};
+inline void emitCmpTVType(Vout& v, Immed s0, Vptr s1) {
+  v << cmpbim{s0, s1};
 }
 
-inline void emitCmpTVType(x64::Vout& v, Immed s0, x64::Vreg s1) {
-  v << x64::cmpbi{s0, s1};
+inline void emitCmpTVType(Vout& v, Immed s0, Vreg s1) {
+  v << cmpbi{s0, s1};
 }
 
 template<typename DestType, typename OpndType>
@@ -218,13 +218,13 @@ void emitStoreTVType(X64Assembler& a, OpndType tvOp, DestType dest) {
   a.  storeb(toByte(tvOp), dest);
 }
 
-inline void emitStoreTVType(x64::Vout& v, x64::Vreg src, x64::Vptr dest) {
-  v << x64::storeb{src, dest};
+inline void emitStoreTVType(Vout& v, Vreg src, Vptr dest) {
+  v << storeb{src, dest};
 }
 
 inline void
-emitStoreTVType(x64::Vout& v, DataType src, x64::Vptr dest) {
-  v << x64::storebim{src, dest};
+emitStoreTVType(Vout& v, DataType src, Vptr dest) {
+  v << storebim{src, dest};
 }
 
 // emitDeref --

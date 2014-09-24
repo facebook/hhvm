@@ -123,7 +123,7 @@ struct CppCall {
   static CppCall indirect(PhysReg r) {
     return CppCall { Kind::IndirectReg, r };
   }
-  static CppCall indirect(x64::Vreg r) {
+  static CppCall indirect(Vreg r) {
     return CppCall { Kind::IndirectVreg, r };
   }
 
@@ -155,7 +155,7 @@ struct CppCall {
     assert(m_kind == Kind::IndirectReg || m_kind == Kind::Destructor);
     return m_u.reg;
   }
-  x64::Vreg vreg() const {
+  Vreg vreg() const {
     assert(m_kind == Kind::IndirectVreg);
     return m_u.vreg;
   }
@@ -179,12 +179,12 @@ private:
     /* implicit */ U(void* fptr)       : fptr(fptr) {}
     /* implicit */ U(int vtableOffset) : vtableOffset(vtableOffset) {}
     /* implicit */ U(PhysReg reg)      : reg(reg) {}
-    /* implicit */ U(x64::Vreg reg)    : vreg(reg) {}
+    /* implicit */ U(Vreg reg)         : vreg(reg) {}
 
     void* fptr;
     int vtableOffset;
     PhysReg reg;
-    x64::Vreg vreg;
+    Vreg vreg;
   };
 
 private:

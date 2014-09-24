@@ -20,7 +20,6 @@
 #include "hphp/util/slice.h"
 
 namespace HPHP { namespace jit {
-using x64::Vunit;
 
 struct CycleInfo {
   PhysReg node;

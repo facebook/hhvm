@@ -26,18 +26,18 @@ TEST(Vasm, PrintVptr) {
   auto v0 = Vreg{Vreg::V0};
   auto v1 = Vreg{Vreg::V0 + 1};
   Vptr p{Vreg{v0}, Vreg{}, 1, 0};
-  EXPECT_EQ("[%32]", show(p));
+  EXPECT_EQ("[%64]", show(p));
   p.index = v1;
-  EXPECT_EQ("[%32 + %33]", show(p));
+  EXPECT_EQ("[%64 + %65]", show(p));
   p.scale = 4;
-  EXPECT_EQ("[%32 + %33 * 4]", show(p));
+  EXPECT_EQ("[%64 + %65 * 4]", show(p));
   p.disp = 0xbeef;
-  EXPECT_EQ("[%32 + 0xbeef + %33 * 4]", show(p));
+  EXPECT_EQ("[%64 + 0xbeef + %65 * 4]", show(p));
   p.disp = -16;
   p.index = Vreg{};
-  EXPECT_EQ("[%32 - 0x10]", show(p));
+  EXPECT_EQ("[%64 - 0x10]", show(p));
   p.seg = Vptr::FS;
-  EXPECT_EQ("[%fs + %32 - 0x10]", show(p));
+  EXPECT_EQ("[%fs + %64 - 0x10]", show(p));
   p.base = Vreg{};
   EXPECT_EQ("[%fs - 0x10]", show(p));
 }

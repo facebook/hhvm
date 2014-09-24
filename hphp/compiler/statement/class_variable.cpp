@@ -252,33 +252,6 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void ClassVariable::inferTypes(AnalysisResultPtr ar) {
-  assert(getScope().get() == getClassScope().get());
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-
-  // assignments will ignore the passed in type,
-  // but we need to ensure that Null is applied to
-  // the simple variables.
-  m_declaration->inferAndCheck(ar, Type::Null, false);
-
-  if (m_modifiers->isStatic()) {
-    ClassScopePtr scope = getClassScope();
-    for (int i = 0; i < m_declaration->getCount(); i++) {
-      ExpressionPtr exp = (*m_declaration)[i];
-      SimpleVariablePtr var;
-      if (exp->is(Expression::KindOfAssignmentExpression)) {
-        AssignmentExpressionPtr assignment =
-          dynamic_pointer_cast<AssignmentExpression>(exp);
-        ExpressionPtr value = assignment->getValue();
-        if (value->containsDynamicConstant(ar)) {
-          scope->getVariables()->
-            setAttribute(VariableTable::ContainsDynamicStatic);
-        }
-      }
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassVariable::outputCodeModel(CodeGenerator &cg) {

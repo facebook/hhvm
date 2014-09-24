@@ -417,12 +417,6 @@ StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void StatementList::inferTypes(AnalysisResultPtr ar) {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    m_stmts[i]->inferTypes(ar);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void StatementList::outputCodeModel(CodeGenerator &cg) {

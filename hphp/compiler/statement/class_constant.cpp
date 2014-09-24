@@ -126,10 +126,6 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void ClassConstant::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::Some, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstant::outputCodeModel(CodeGenerator &cg) {

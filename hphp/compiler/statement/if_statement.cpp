@@ -212,10 +212,6 @@ StatementPtr IfStatement::postOptimize(AnalysisResultConstPtr ar) {
   }
 }
 
-void IfStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IfStatement::outputCodeModel(CodeGenerator &cg) {

@@ -36,8 +36,6 @@ public:
   virtual void setNthKid(int n, ConstructPtr cp);
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
 
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
   ExpressionPtr getObject() const { return m_object; }
   bool isNullSafe() const { return m_nullsafe; }
 private:
@@ -45,7 +43,6 @@ private:
   bool m_nullsafe;
   int m_objTemp;
 
-  void setInvokeParams(AnalysisResultPtr ar);
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   bool m_bindClass;

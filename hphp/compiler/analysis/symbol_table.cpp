@@ -63,22 +63,7 @@ TypePtr Symbol::CoerceTo(AnalysisResultConstPtr ar,
 TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
                         TypePtr type, bool coerced) {
   if (!type) return type;
-  if (ar->getPhase() == AnalysisResult::FirstInference) {
-    // at this point, you *must* have a lock (if you are user scope)
-    if (scope->is(BlockScope::FunctionScope)) {
-      FunctionScopeRawPtr f =
-        static_pointer_cast<FunctionScope>(scope);
-      if (f->isUserFunction()) {
-        f->getInferTypesMutex().assertOwnedBySelf();
-      }
-    } else if (scope->is(BlockScope::ClassScope)) {
-      ClassScopeRawPtr c =
-        static_pointer_cast<ClassScope>(scope);
-      if (c->isUserClass()) {
-        c->getInferTypesMutex().assertOwnedBySelf();
-      }
-    }
-  }
+
   TypePtr oldType = m_coerced;
   if (!oldType) oldType = Type::Some;
   if (!coerced) return oldType;

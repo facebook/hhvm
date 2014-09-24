@@ -92,10 +92,6 @@ StatementPtr ExpStatement::postOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void ExpStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::Any, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ExpStatement::outputCodeModel(CodeGenerator &cg) {

@@ -35,7 +35,6 @@ public:
   virtual int getRecursiveCount() const {
     return m_stmt ? m_stmt->getRecursiveCount() : 0;
   }
-  void inferAndCheck(AnalysisResultPtr ar, TypePtr type, bool coerce);
 
   /**
    * Whether condition is a literal.

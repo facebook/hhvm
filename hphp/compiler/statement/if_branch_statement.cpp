@@ -78,11 +78,6 @@ void IfBranchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void IfBranchStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_condition) m_condition->inferAndCheck(ar, Type::Boolean, false);
-  if (m_stmt) m_stmt->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IfBranchStatement::outputCodeModel(CodeGenerator &cg) {

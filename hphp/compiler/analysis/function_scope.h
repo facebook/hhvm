@@ -333,13 +333,6 @@ public:
    */
   bool matchParams(FunctionScopePtr func);
 
-  /**
-   * What is the inferred type of this function's parameter at specified
-   * index. Returns number of extra arguments to put into ArgumentArray.
-   */
-  int inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
-                      ExpressionListPtr params, bool &valid);
-
   TypePtr setParamType(AnalysisResultConstPtr ar, int index, TypePtr type);
   TypePtr getParamType(int index);
   TypePtr getParamTypeSpec(int index) { return m_paramTypeSpecs[index]; }

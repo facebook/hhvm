@@ -105,9 +105,6 @@ void UseTraitStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void UseTraitStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {

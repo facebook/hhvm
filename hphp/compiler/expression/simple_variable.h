@@ -38,8 +38,6 @@ public:
   virtual bool isRefable(bool checkError = false) const {
     return checkError || !m_this;
   }
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
 
   virtual bool canonCompare(ExpressionPtr e) const;
   virtual void setContext(Context context);

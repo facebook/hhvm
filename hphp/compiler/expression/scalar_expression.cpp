@@ -230,12 +230,6 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
   return p;
 }
 
-TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                     bool coerce) {
-  assert(false);
-  return TypePtr();
-}
-
 TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
                                         TypePtr type, bool coerce) {
   TypePtr actualType;
@@ -276,21 +270,6 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
   }
 
   return checkTypesImpl(ar, type, actualType, coerce);
-}
-
-TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-  resetTypes();
-
-  if (!Option::AllDynamic &&
-      ar->getPhase() == AnalysisResult::FirstInference &&
-      getScope()->isFirstPass() &&
-      isLiteralString() && m_value.find(' ') == string::npos) {
-    setDynamicByIdentifier(ar, m_value);
-  }
-
-  return inferenceImpl(ar, type, coerce);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

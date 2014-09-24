@@ -251,9 +251,6 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void InterfaceStatement::outputCodeModel(CodeGenerator &cg) {

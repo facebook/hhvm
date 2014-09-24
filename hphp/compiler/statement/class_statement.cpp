@@ -213,9 +213,6 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-void ClassStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassStatement::outputCodeModel(CodeGenerator &cg) {

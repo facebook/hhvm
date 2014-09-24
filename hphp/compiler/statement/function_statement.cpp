@@ -137,9 +137,6 @@ void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
   MethodStatement::analyzeProgram(ar);
 }
 
-void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionStatement::outputCodeModel(CodeGenerator &cg) {

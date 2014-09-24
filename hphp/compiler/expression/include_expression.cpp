@@ -279,11 +279,6 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr IncludeExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                      bool coerce) {
-  return UnaryOpExpression::inferTypes(ar, type, coerce);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IncludeExpression::outputCodeModel(CodeGenerator &cg) {

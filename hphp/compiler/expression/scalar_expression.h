@@ -49,8 +49,6 @@ public:
   bool needsTranslation() const;
   TypePtr inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
                         bool coerce);
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
   virtual bool getScalarValue(Variant &value) {
     value = getVariant(); return true;
   }

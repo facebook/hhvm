@@ -112,10 +112,6 @@ protected:
    */
   void reset();
 
-  TypePtr checkParamsAndReturn(AnalysisResultPtr ar, TypePtr type,
-                               bool coerce, FunctionScopePtr func,
-                               bool arrayParams);
-
   ExpressionPtr inliner(AnalysisResultConstPtr ar,
                         ExpressionPtr obj, std::string localThis);
 };

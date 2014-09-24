@@ -90,9 +90,6 @@ StatementPtr UnsetStatement::postOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void UnsetStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::Variant, true);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

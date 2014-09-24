@@ -295,12 +295,6 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultConstPtr ar) {
   return optimize(ar);
 }
 
-TypePtr AssignmentExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                         bool coerce) {
-
-  return inferAssignmentTypes(ar, type, coerce, m_variable, m_value);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void AssignmentExpression::outputCodeModel(CodeGenerator &cg) {

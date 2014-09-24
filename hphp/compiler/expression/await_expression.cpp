@@ -74,12 +74,6 @@ void AwaitExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr AwaitExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                    bool coerce) {
-  m_exp->inferAndCheck(ar, Type::Some, false);
-  return Type::Variant;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void AwaitExpression::outputCodeModel(CodeGenerator &cg) {

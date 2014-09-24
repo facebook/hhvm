@@ -230,38 +230,6 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
   return ret;
 }
 
-TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  assert(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-  TypePtr ret = getTypeSpec(ar, true);
-
-  VariableTablePtr variables = getScope()->getVariables();
-  // Functions that can be called dynamically have to have
-  // variant parameters, even if they have a type hint
-  if ((Option::AllDynamic || getFunctionScope()->isDynamic()) ||
-      getFunctionScope()->isRedeclaring() ||
-      getFunctionScope()->isVirtual()) {
-    if (!Option::HardTypeHints || !ret->isExactType()) {
-      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
-      ret = Type::Variant;
-    }
-  }
-
-  if (m_defaultValue && !m_ref) {
-    TypePtr r = m_defaultValue->inferAndCheck(ar, Type::Some, false);
-    if (!m_defaultValue->is(KindOfConstantExpression) ||
-        !static_pointer_cast<ConstantExpression>(m_defaultValue)->isNull()) {
-      ret = Type::Coerce(ar, r, ret);
-    }
-  }
-
-  // parameters are like variables, but we need to remember these are
-  // parameters so when variable table is generated, they are not generated
-  // as declared variables.
-  return variables->addParamLike(m_name, ret, ar, shared_from_this(),
-                                 getScope()->isFirstPass());
-}
-
 void ParameterExpression::compatibleDefault() {
   bool compat = true;
   if (!m_defaultValue || !hasTypeHint()) return;

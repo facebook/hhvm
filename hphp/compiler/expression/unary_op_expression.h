@@ -69,8 +69,6 @@ protected:
 private:
   bool preCompute(const Variant& value, Variant &result);
   void setExistContext();
-  static void SetExpTypeForExistsContext(AnalysisResultPtr ar,
-                                         ExpressionPtr e, bool allowPrimitives);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

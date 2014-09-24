@@ -77,10 +77,6 @@ StatementPtr EchoStatement::postOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-void EchoStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::String, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void EchoStatement::outputCodeModel(CodeGenerator &cg) {

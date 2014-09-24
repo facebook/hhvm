@@ -316,20 +316,6 @@ void Expression::resetTypes() {
   m_implementedType.reset();
 }
 
-TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-  assert(type);
-  resetTypes();
-  TypePtr actualType = inferTypes(ar, type, coerce);
-  if (type->is(Type::KindOfSome) || type->is(Type::KindOfAny)) {
-    m_actualType = actualType;
-    m_expectedType.reset();
-    return actualType;
-  }
-  return checkTypesImpl(ar, type, actualType, coerce);
-}
-
 TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
                                    TypePtr expectedType,
                                    TypePtr actualType, bool coerce) {
@@ -449,57 +435,6 @@ bool Expression::CheckVarNR(ExpressionPtr value,
            value->getCPPType()->is(Type::KindOfObject) ||
            value->getCPPType()->isPrimitive() ||
            value->isScalar()));
-}
-
-TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
-                                         bool coerce, ExpressionPtr variable,
-                                         ExpressionPtr
-                                         value /* =ExpressionPtr() */) {
-  assert(type);
-  TypePtr ret = type;
-  if (value) {
-    ret = value->inferAndCheck(ar, Type::Some, false);
-    if (value->isLiteralNull()) {
-      ret = Type::Null;
-    }
-    assert(ret);
-  }
-
-  BlockScopePtr scope = getScope();
-  if (variable->is(Expression::KindOfConstantExpression)) {
-    // ...as in ClassConstant statement
-    ConstantExpressionPtr exp =
-      dynamic_pointer_cast<ConstantExpression>(variable);
-    BlockScope *defScope = nullptr;
-    std::vector<std::string> bases;
-    scope->getConstants()->check(getScope(), exp->getName(), ret,
-                                 true, ar, variable,
-                                 bases, defScope);
-  }
-
-  m_implementedType.reset();
-  TypePtr vt = variable->inferAndCheck(ar, ret, true);
-  if (!coerce && type->is(Type::KindOfAny)) {
-    ret = vt;
-  } else {
-    TypePtr it = variable->getCPPType();
-    if (!Type::SameType(it, ret)) {
-      m_implementedType = it;
-    }
-  }
-
-  if (value) {
-    TypePtr vat(value->getActualType());
-    TypePtr vet(value->getExpectedType());
-    TypePtr vit(value->getImplementedType());
-    if (vat && !vet && vit &&
-        Type::IsMappedToVariant(vit) &&
-        Type::HasFastCastMethod(vat)) {
-      value->setExpectedType(vat);
-    }
-  }
-
-  return ret;
 }
 
 ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,

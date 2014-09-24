@@ -83,9 +83,6 @@ void GotoStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void GotoStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void GotoStatement::outputCodeModel(CodeGenerator &cg) {

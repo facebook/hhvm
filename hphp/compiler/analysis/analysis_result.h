@@ -64,9 +64,6 @@ public:
     // pre-optimize
     FirstPreOptimize,
 
-    // inferTypes
-    FirstInference,
-
     // post-optimize
     PostOptimize,
 
@@ -171,7 +168,6 @@ public:
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   void preOptimize();
-  void inferTypes();
   void postOptimize();
 
   /**
@@ -464,14 +460,6 @@ public:
     AnalysisResult::s_currentScopeThreadLocal.destroy();
   }
 };
-
-#define IMPLEMENT_INFER_AND_CHECK_ASSERT(scope) \
-  do { \
-    assert(AnalysisResult::s_currentScopeThreadLocal->get()); \
-    assert(AnalysisResult::s_currentScopeThreadLocal->get() == \
-           (scope).get()); \
-    (scope)->getInferTypesMutex().assertOwnedBySelf(); \
-  } while (0)
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
 typedef std::pair < const char *, int > LEntry;

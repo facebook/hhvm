@@ -161,6 +161,8 @@ class BackEnd {
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
 
+  virtual void genCodeImpl(IRUnit& unit, AsmInfo*) = 0;
+
   virtual bool supportsRelocation() const { return false; }
 
   /*
@@ -195,8 +197,6 @@ class BackEnd {
                                    AsmInfo* asmInfo, CodeGenFixups& fixups) {
     always_assert(false);
   }
-
-  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
 };
 
 }}

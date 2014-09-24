@@ -697,7 +697,7 @@ struct BackEnd : public jit::BackEnd {
     disasm.disasm(os, begin, end);
   }
 
-  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
+  void genCodeImpl(IRUnit& unit, AsmInfo*) override;
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {

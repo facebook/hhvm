@@ -66,7 +66,8 @@ IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
 {
   m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
+    m_state.setEnableCse(RuntimeOption::EvalHHIRCse &&
+                         !RuntimeOption::EvalHHIRBytecodeControlFlow);
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 

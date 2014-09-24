@@ -583,14 +583,6 @@ void FrameState::merge(Snapshot& state) {
     local.type = Type::unionOf(local.type, m_locals[i].type);
   }
 
-  // TODO(t3729135): If we are merging states from different bytecode
-  // paths, we must conservatively clear the CSE table.  Since the
-  // markers may or may not have been updated, we always clear.  What
-  // we need is a global CSE algorithm.
-  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-    clearCse();
-  }
-
   // For now, we shouldn't be merging states with different inline states.
   assert(m_inlineSavedStates == state.inlineSavedStates);
 }

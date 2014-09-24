@@ -49,12 +49,8 @@ void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   ti->m_reqInjectionData.setDebuggerAttached(false);
 
   // Clear the pc filters
-  if (g_context->m_breakPointFilter != nullptr) {
-    g_context->m_breakPointFilter->clear();
-  }
-  if (g_context->m_flowFilter != nullptr) {
-    g_context->m_flowFilter->clear();
-  }
+  g_context->m_breakPointFilter.clear();
+  g_context->m_flowFilter.clear();
   g_context->m_lineBreakPointFilter.clear();
   g_context->m_callBreakPointFilter.clear();
   g_context->m_retBreakPointFilter.clear();
@@ -105,17 +101,11 @@ static void blacklistFuncInJit(const Func* f) {
 }
 
 static PCFilter* getBreakPointFilter() {
-  if (!g_context->m_breakPointFilter) {
-    g_context->m_breakPointFilter = new PCFilter();
-  }
-  return g_context->m_breakPointFilter;
+  return &g_context->m_breakPointFilter;
 }
 
 static PCFilter* getFlowFilter() {
-  if (g_context->m_flowFilter == nullptr) {
-    g_context->m_flowFilter = new PCFilter();
-  }
-  return g_context->m_flowFilter;
+  return &g_context->m_flowFilter;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -135,14 +125,12 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
   // Short-circuit for cases where we're executing a line of code that we know
   // we don't need an interrupt for, e.g., stepping over a line of code.
-  if (UNLIKELY(g_context->m_flowFilter != nullptr) &&
-      g_context->m_flowFilter->checkPC(pc)) {
+  if (UNLIKELY(g_context->m_flowFilter.checkPC(pc))) {
     TRACE_RB(5, "Location filter hit at pc %p\n", pc);
     return;
   }
   // Are we hitting a breakpoint?
-  if (LIKELY(g_context->m_breakPointFilter == nullptr ||
-      !g_context->m_breakPointFilter->checkPC(pc))) {
+  if (LIKELY(!g_context->m_breakPointFilter.checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
@@ -192,13 +180,12 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     } else {
       // Next command is active and we stepped in. Step out, but save the filter
       // first, as it is cleared when we step out.
-      PCFilter* filter = g_context->m_flowFilter;
-      g_context->m_flowFilter = nullptr;
+      PCFilter filter;
+      g_context->m_flowFilter.swap(filter);
       phpDebuggerStepOut();
 
       // Restore the saved filter and the next flag
-      delete g_context->m_flowFilter;
-      g_context->m_flowFilter = filter;
+      g_context->m_flowFilter.swap(filter);
       req_data.setDebuggerNext(true);
     }
   }
@@ -521,10 +508,8 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
 }
 
 void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
-  if (g_context->m_breakPointFilter) {
-    PC pc = unit->at(offset);
-    g_context->m_breakPointFilter->removePC(pc);
-  }
+  PC pc = unit->at(offset);
+  g_context->m_breakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncEntry(const Func* f) {
@@ -556,9 +541,9 @@ void phpRemoveBreakPointLine(const Unit* unit, int line) {
 }
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset) {
-  if (g_context->m_breakPointFilter) {
+  if (!g_context->m_breakPointFilter.isNull()) {
     PC pc = unit->at(offset);
-    return g_context->m_breakPointFilter->checkPC(pc);
+    return g_context->m_breakPointFilter.checkPC(pc);
   }
   return false;
 }

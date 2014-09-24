@@ -72,8 +72,6 @@ ExecutionContext::ExecutionContext()
   , m_globalVarEnv(nullptr)
   , m_lambdaCounter(0)
   , m_nesting(0)
-  , m_breakPointFilter(nullptr)
-  , m_flowFilter(nullptr)
   , m_dbgNoBreak(false)
   , m_coverPrevLine(-1)
   , m_coverPrevUnit(nullptr)
@@ -119,13 +117,12 @@ void ExecutionContext::cleanup() {
   for (auto& v : m_createdFuncs) delete v;
 
   always_assert(m_activeSims.empty());
-
-  delete m_breakPointFilter;
-  delete m_flowFilter;
 }
 
 void ExecutionContext::sweep() {
   cleanup();
+  m_breakPointFilter.~PCFilter();
+  m_flowFilter.~PCFilter();
   m_lineBreakPointFilter.~PCFilter();
   m_callBreakPointFilter.~PCFilter();
   m_retBreakPointFilter.~PCFilter();

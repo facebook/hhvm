@@ -522,8 +522,8 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  PCFilter* m_breakPointFilter; // Lazily initialized as they are performance
-  PCFilter* m_flowFilter;       // sensitive (nullptr => no breakpoints)
+  PCFilter m_breakPointFilter;
+  PCFilter m_flowFilter;
   PCFilter m_lineBreakPointFilter;
   PCFilter m_callBreakPointFilter;
   PCFilter m_retBreakPointFilter;

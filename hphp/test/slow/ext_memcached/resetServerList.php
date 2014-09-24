@@ -2,6 +2,6 @@
 
 $mem = new Memcached();
 $mem->addServer("localhost", 1234);
-var_dump($mem->getServerList());
+var_dump(count($mem->getServerList()));
 $mem->resetServerList();
 var_dump($mem->getServerList());

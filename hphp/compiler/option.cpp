@@ -63,7 +63,6 @@ map<string, int> Option::DynamicFunctionCalls;
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
 bool Option::GenerateTrimmedPHP = false;
-bool Option::GenerateInferredTypes = false;
 bool Option::ConvertSuperGlobals = false;
 bool Option::ConvertQOpExpressions = false;
 string Option::ProgramPrologue;

@@ -219,7 +219,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "run (default)")
     ("format,f", value<string>(&po.format),
      "lint: (none); \n"
-     "php: trimmed (default) | inlined | pickled | typeinfo |"
+     "php: trimmed (default) | inlined | pickled |"
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
      "run: cluster (default) | file")
@@ -282,9 +282,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("db-stats", value<string>(&po.dbStats),
      "database connection string to save code errors: "
      "<username>:<password>@<host>:<port>/<db>")
-    ("no-type-inference",
-     value<bool>(&po.noTypeInference)->default_value(false),
-     "turn off type inference for C++ code generation")
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "config file name")
     ("config-dir", value<string>(&po.configDir),
@@ -702,9 +699,6 @@ int lintTarget(const CompilerOptions &po) {
 
 static void wholeProgramPasses(const CompilerOptions& po,
                                AnalysisResultPtr ar) {
-  if (!po.noTypeInference) {
-    Option::GenerateInferredTypes = true;
-  }
   if (Option::PreOptimization) {
     Timer timer(Timer::WallTime, "pre-optimizing");
     ar->preOptimize();
@@ -735,18 +729,9 @@ int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
     Option::GenerateTrimmedPHP = true;
     formatCount++;
   }
-  if (po.format.find("typeinfo") != string::npos) {
-    Option::GenerateInferredTypes = true;
-  }
   if (formatCount == 0) {
     Logger::Error("Unknown format for PHP target: %s", po.format.c_str());
     return 1;
-  }
-
-  // analyze
-  if (Option::GenerateInferredTypes || Option::ConvertSuperGlobals) {
-    Logger::Info("inferring types...");
-    ar->inferTypes();
   }
 
   // generate

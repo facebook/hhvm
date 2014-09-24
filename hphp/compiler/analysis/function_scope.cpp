@@ -985,10 +985,6 @@ std::string FunctionScope::getDocFullName() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (Option::GenerateInferredTypes && m_returnType) {
-    cg_printf("// @return %s\n", m_returnType->toString().c_str());
-  }
-
   BlockScope::outputPHP(cg, ar);
 }
 

@@ -224,6 +224,9 @@ flaky_tests = (
 
     # Another process can be created in the meantime
     '/ext/posix/tests/posix_errno_variation2.php',
+
+    # duplicate of a test in test/slow
+    '/ext/gmp/tests/002.php',
 )
 
 # Tests that work but not in repo mode

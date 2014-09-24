@@ -788,11 +788,11 @@ struct Vasm {
   };
   typedef jit::vector<Area> AreaList;
 
-  explicit Vasm(Vmeta* meta)
-    : m_meta(meta) {
+  explicit Vasm(Vmeta* meta) : m_meta(meta) {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
-  void finish(const Abi&, bool useLLVM = false, AsmInfo* asmInfo = nullptr);
+
+  void finishX64(const Abi&, AsmInfo* asmInfo);
 
   // get an existing area
   Vout& main() { return area(AreaIndex::Main).out; }
@@ -807,6 +807,7 @@ struct Vasm {
   Vout& cold(X64Assembler& a) { return cold(a.code()); }
   Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
   Vunit& unit() { return m_unit; }
+  jit::vector<Area>& areas() { return m_areas; }
 
 private:
   Vout& add(CodeBlock &cb, AreaIndex area);
@@ -818,7 +819,6 @@ private:
 private:
   Vmeta* const m_meta;
   Vunit m_unit;
-protected:
   jit::vector<Area> m_areas; // indexed by AreaIndex
 };
 

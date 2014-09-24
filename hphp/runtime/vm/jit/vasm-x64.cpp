@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/vasm-llvm.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 TRACE_SET_MOD(vasm);
@@ -822,33 +821,24 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
 }
 
 // copy of layoutBlocks in layout.cpp
-jit::vector<Vlabel> layoutBlocks(const Vunit& m_unit) {
-  auto blocks = sortBlocks(m_unit);
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
+  auto blocks = sortBlocks(unit);
   // partition into main/cold/frozen areas without changing relative order,
   // and the end{} block will be last.
   auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
     [&](Vlabel b) {
-      return m_unit.blocks[b].area == AreaIndex::Main &&
-             m_unit.blocks[b].code.back().op != Vinstr::end;
+      return unit.blocks[b].area == AreaIndex::Main &&
+             unit.blocks[b].code.back().op != Vinstr::end;
     });
   std::stable_partition(coldIt, blocks.end(),
     [&](Vlabel b) {
-      return m_unit.blocks[b].area == AreaIndex::Cold &&
-             m_unit.blocks[b].code.back().op != Vinstr::end;
+      return unit.blocks[b].area == AreaIndex::Cold &&
+             unit.blocks[b].code.back().op != Vinstr::end;
     });
   return blocks;
 }
 
-void Vasm::finish(const Abi& abi, bool useLLVM, AsmInfo* asmInfo) {
-  if (useLLVM) {
-    try {
-      genCodeLLVM(m_unit, m_areas, layoutBlocks(m_unit));
-      return;
-    } catch (const FailedLLVMCodeGen& e) {
-      FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
-             e.what());
-    }
-  }
+void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   if (!m_unit.cpool.empty()) {
     foldImms(m_unit);
   }
@@ -878,14 +868,15 @@ UNUSED const Abi vauto_abi {
 };
 
 Vauto::~Vauto() {
+  UNUSED auto& areas = this->areas();
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // found at least one nonempty block. finish up.
       if (!main().closed()) main() << end{};
-      assert(m_areas.size() < 2 || cold().empty() || cold().closed());
-      assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
+      assert(areas.size() < 2 || cold().empty() || cold().closed());
+      assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
-      finish(vauto_abi);
+      finishX64(vauto_abi, nullptr);
       return;
     }
   }

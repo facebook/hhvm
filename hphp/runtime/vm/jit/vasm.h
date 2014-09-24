@@ -84,6 +84,7 @@ folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
 }}
 #endif

@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-llvm.h"
 
 namespace HPHP { namespace jit {
 
@@ -1056,7 +1057,17 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
-    vasm.finish(vasm_abi, useLLVM, state.asmInfo);
+    if (useLLVM) {
+      try {
+        genCodeLLVM(vunit, vasm.areas(), layoutBlocks(vunit));
+      } catch (const FailedLLVMCodeGen& e) {
+        FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
+               e.what());
+        vasm.finishX64(vasm_abi, state.asmInfo);
+      }
+    } else {
+      vasm.finishX64(vasm_abi, state.asmInfo);
+    }
   }
 
   auto bcMap = &mcg->cgFixups().m_bcMap;

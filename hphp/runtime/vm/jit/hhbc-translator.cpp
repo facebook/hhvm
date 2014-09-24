@@ -6598,11 +6598,9 @@ void HhbcTranslator::end(Offset nextPc) {
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
-  if (m_irb->hasBlock(next)) {
-    emitJmpImpl(next,
-                nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
-                nullptr);
-  }
+  emitJmpImpl(next,
+              nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
+              nullptr);
 }
 
 void HhbcTranslator::checkStrictlyInteger(

@@ -67,15 +67,17 @@ StatementPtr ClassStatement::clone() {
 // parser functions
 
 void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
-  ClassScope::KindOf kindOf = ClassScope::KindOfObjectClass;
+  ClassScope::KindOf kindOf = ClassScope::KindOf::ObjectClass;
   switch (m_type) {
-  case T_CLASS:     kindOf = ClassScope::KindOfObjectClass;   break;
-  case T_ABSTRACT:  kindOf = ClassScope::KindOfAbstractClass; break;
-  case T_FINAL:     kindOf = ClassScope::KindOfFinalClass;    break;
-  case T_TRAIT:     kindOf = ClassScope::KindOfTrait;         break;
-  case T_ENUM:      kindOf = ClassScope::KindOfEnum;          break;
-  default:
-    assert(false);
+    case T_CLASS:     kindOf = ClassScope::KindOf::ObjectClass;   break;
+    case T_ABSTRACT:  kindOf = ClassScope::KindOf::AbstractClass; break;
+    case T_STATIC: // Slight hack: see comments in hphp.y
+      kindOf = ClassScope::KindOf::UtilClass;     break;
+    case T_FINAL:     kindOf = ClassScope::KindOf::FinalClass;    break;
+    case T_TRAIT:     kindOf = ClassScope::KindOf::Trait;         break;
+    case T_ENUM:      kindOf = ClassScope::KindOf::Enum;          break;
+    default:
+      assert(false);
   }
 
   vector<string> bases;
@@ -218,7 +220,9 @@ void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
 void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   auto numProps = 4;
   if (m_attrList != nullptr) numProps++;
-  if (m_type == T_ABSTRACT || m_type == T_FINAL) numProps++;
+  if (m_type == T_ABSTRACT
+      || m_type == T_FINAL
+      || m_type == T_STATIC) numProps++;
   if (!m_parent.empty()) numProps++;
   if (m_base != nullptr) numProps++;
   if (!m_docComment.empty()) numProps++;
@@ -234,10 +238,15 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   } else if (m_type == T_FINAL) {
     cg.printPropertyHeader("modifiers");
     cg.printModifierVector("final");
+  } else if (m_type == T_STATIC) {
+    cg.printPropertyHeader("modifiers");
+    cg.printModifierVector("abstract final");
   }
   cg.printPropertyHeader("kind");
   if (m_type == T_TRAIT) {
     cg.printValue(PHP_TRAIT);
+  } else if (m_type == T_ENUM) {
+    cg.printValue(PHP_ENUM);
   } else {
     cg.printValue(PHP_CLASS);
   }

@@ -95,7 +95,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   : BlockScope(name, "", StatementPtr(), BlockScope::ClassScope),
     m_parent(parent), m_bases(bases),
     m_attribute(0), m_redeclaring(-1),
-    m_kindOf(KindOfObjectClass), m_derivesFromRedeclaring(Derivation::Normal),
+    m_kindOf(KindOf::ObjectClass),
+    m_derivesFromRedeclaring(Derivation::Normal),
     m_traitStatus(NOT_FLATTENED), m_dynamic(false),
     m_volatile(false), m_persistent(false),
     m_derivedByDynamic(false), m_needsCppCtor(false),
@@ -1285,7 +1286,7 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
 
   // What's a mod again?
   ms.add("attributes", m_attribute)
-    .add("kind", m_kindOf)
+    .add("kind", (int) m_kindOf)
     .add("parent", m_parent)
     .add("bases", m_bases)
     .add("properties", propMap)
@@ -1361,11 +1362,18 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("interfaces", origIfaces);
 
   int mods = 0;
-  // TODO: you should really only get one of these, we should assert this
-  if (m_kindOf == KindOfAbstractClass) mods |= ClassInfo::IsAbstract;
-  if (m_kindOf == KindOfFinalClass)    mods |= ClassInfo::IsFinal;
-  if (m_kindOf == KindOfInterface)     mods |= ClassInfo::IsInterface;
-  if (m_kindOf == KindOfTrait)         mods |= ClassInfo::IsTrait;
+  switch (m_kindOf) {
+    case KindOf::AbstractClass: mods |= ClassInfo::IsAbstract; break;
+    case KindOf::Enum:
+    case KindOf::FinalClass:
+      mods |= ClassInfo::IsFinal; break;
+    case KindOf::UtilClass:
+      mods |= ClassInfo::IsFinal | ClassInfo::IsAbstract; break;
+    case KindOf::Interface:     mods |= ClassInfo::IsInterface; break;
+    case KindOf::Trait:         mods |= ClassInfo::IsTrait; break;
+    case KindOf::ObjectClass:
+      break;
+  }
   ms.add("modifiers", mods);
 
   FunctionScopePtrVec funcs;

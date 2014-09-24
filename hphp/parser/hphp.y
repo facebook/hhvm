@@ -1166,7 +1166,11 @@ trait_decl_name:
 ;
 class_entry_type:
     T_CLASS                            { $$ = T_CLASS;}
-  | T_ABSTRACT T_CLASS                 { $$ = T_ABSTRACT;}
+  | T_ABSTRACT T_CLASS                 { $$ = T_ABSTRACT; }
+  | T_ABSTRACT T_FINAL T_CLASS         { only_in_hh_syntax(_p);
+      /* hacky, but transforming to a single token is quite convenient */
+      $$ = T_STATIC; }
+  | T_FINAL T_ABSTRACT T_CLASS         { only_in_hh_syntax(_p); $$ = T_STATIC; }
   | T_FINAL T_CLASS                    { $$ = T_FINAL;}
 ;
 extends_from:

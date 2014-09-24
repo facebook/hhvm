@@ -1,5 +1,6 @@
 NEXT 9-Oct-2014
-- Hack: System user attributes will be prefixed with __, notably <<Override>> renamed to <<__Override>>
+ - Hack: System user attributes will be prefixed with __, notably <<Override>> renamed to <<__Override>>
+ - Hack: Support for 'abstract final' non-instantiable non-inheritable "utility" classes
 
 "T-Pain" 25-Sep-2014
  - Use vasm virtual registers in x64 backend, transition fully to vasm-xls

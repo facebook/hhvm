@@ -97,7 +97,7 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   }
 
   ClassScopePtr classScope
-    (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
+    (new ClassScope(ClassScope::KindOf::Interface, m_name, "", bases,
                     m_docComment, stmt, attrs));
   setBlockScope(classScope);
   scope->addClass(ar, classScope);

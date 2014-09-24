@@ -1524,6 +1524,7 @@ void Class::setMethods() {
         continue;
       }
     }
+
     MethodMapBuilder::iterator it2 = builder.find(method->name());
     if (it2 != builder.end()) {
       Func* parentMethod = builder[it2->second];
@@ -1610,6 +1611,20 @@ void Class::setMethods() {
                     "must therefore be declared abstract or implement "
                     "the remaining methods", m_preClass->name()->data(),
                     meth->name()->data());
+      }
+    }
+  }
+
+  // If class is abstract final, its static methods should not be abstract
+  if ((attrs() & (AttrAbstract | AttrFinal)) == (AttrAbstract | AttrFinal)) {
+    for (Slot i = 0; i < builder.size(); i++) {
+      const Func* meth = builder[i];
+      if ((meth->attrs() & (AttrAbstract | AttrStatic))
+          == (AttrAbstract | AttrStatic)) {
+        raise_error(
+          "Class %s contains abstract static method (%s) and "
+          "therefore cannot be declared 'abstract final'",
+          m_preClass->name()->data(), meth->name()->data());
       }
     }
   }

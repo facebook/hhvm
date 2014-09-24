@@ -2055,7 +2055,7 @@ and smember_not_found pos ~is_const ~is_method env class_ member_name =
     else if is_method then `static_method
     else `class_variable in
   let error hint =
-    Errors.smember_not_found kind pos member_name hint
+    Errors.smember_not_found kind pos class_.tc_name member_name hint
   in
   match Env.suggest_static_member is_method class_ member_name with
   | None ->

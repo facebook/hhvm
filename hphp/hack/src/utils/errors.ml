@@ -1141,10 +1141,11 @@ let string_of_class_member_kind = function
   | `static_method  -> "static method"
   | `class_variable -> "class variable"
 
-let smember_not_found kind pos member_name hint =
+let smember_not_found kind pos class_name member_name hint =
   let kind = string_of_class_member_kind kind in
+  let class_name = strip_ns class_name in
   add_list Typing.smember_not_found
-    ((pos, "Could not find "^kind^" "^member_name)
+    ((pos, "Could not find "^kind^" "^member_name^" in type "^class_name)
      :: snot_found_hint hint)
 
 let not_found_hint = function

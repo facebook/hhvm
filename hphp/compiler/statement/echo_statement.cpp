@@ -72,11 +72,6 @@ void EchoStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr EchoStatement::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_exp->hasEffect()) m_exp->stripConcat();
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void EchoStatement::outputCodeModel(CodeGenerator &cg) {

@@ -282,13 +282,6 @@ public:
   }
 
   /**
-   * Called after type inference.
-   */
-  virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar) {
-    return ExpressionPtr();
-  }
-
-  /**
    * Find other types that have been inferred for this expression,
    * and combine them with inType to form a new, tighter type.
    */

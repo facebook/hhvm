@@ -64,9 +64,6 @@ public:
     // pre-optimize
     FirstPreOptimize,
 
-    // post-optimize
-    PostOptimize,
-
     CodeGen,
   };
 
@@ -168,7 +165,6 @@ public:
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   void preOptimize();
-  void postOptimize();
 
   /**
    * Force all class variables to be variants, since l-val or reference

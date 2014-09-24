@@ -85,12 +85,6 @@ StatementPtr UnsetStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr UnsetStatement::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_exp->getCount() == 0) return NULL_STATEMENT();
-  return StatementPtr();
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void UnsetStatement::outputCodeModel(CodeGenerator &cg) {

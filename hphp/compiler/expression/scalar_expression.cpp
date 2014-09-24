@@ -204,32 +204,6 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
     m_quoted == s->m_quoted;
 }
 
-ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_expectedType || Type::SameType(m_actualType, m_expectedType)) {
-    return ExpressionPtr();
-  }
-
-  Variant orig = getVariant();
-  Variant cast;
-  bool match = false;
-
-  switch (m_expectedType->getKindOf()) {
-  case Type::KindOfBoolean: match = true; cast = orig.toBoolean(); break;
-  case Type::KindOfInt64:   match = true; cast = orig.toInt64();   break;
-  case Type::KindOfDouble:  match = true; cast = orig.toDouble();  break;
-  case Type::KindOfString:  match = true; cast = orig.toString();  break;
-  }
-
-  if (!match || same(orig, cast)) {
-    // no changes need to be made
-    return ExpressionPtr();
-  }
-
-  ExpressionPtr p = makeScalarExpression(ar, cast);
-  p->setActualType(m_expectedType);
-  return p;
-}
-
 TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
                                         TypePtr type, bool coerce) {
   TypePtr actualType;

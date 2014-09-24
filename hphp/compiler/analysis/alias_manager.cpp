@@ -83,6 +83,7 @@ AliasManager::AliasManager(int opt) :
     m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
     m_hasDeadStore(false), m_hasChainRoot(false),
     m_exprIdx(-1) {
+  always_assert(!m_postOpt && "postOpt support has been partially disabled");
 }
 
 AliasManager::~AliasManager() {
@@ -1148,7 +1149,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
     ExpressionPtr ret;
     if (!m_noAdd) {
       if (m_preOpt) ret = e->preOptimize(m_arp);
-      if (m_postOpt) ret = e->postOptimize(m_arp);
       if (ret) {
         return canonicalizeRecurNonNull(ret);
       }
@@ -1180,7 +1180,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
   ExpressionPtr ret;
   if (!m_noAdd && !doAccessChains) {
     if (m_preOpt) ret = e->preOptimize(m_arp);
-    if (m_postOpt) ret = e->postOptimize(m_arp);
     if (ret) {
       return canonicalizeRecurNonNull(ret);
     }
@@ -2084,7 +2083,6 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   s->setVisited();
   StatementPtr rep;
   if (m_preOpt) rep = s->preOptimize(m_arp);
-  if (m_postOpt) rep = s->postOptimize(m_arp);
   if (rep) {
     s = canonicalizeRecur(rep, ret);
     return s ? s : rep;

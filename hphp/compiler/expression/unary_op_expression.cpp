@@ -405,44 +405,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
-      !m_exp->hasEffect()) {
-    EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>
-      (m_exp);
-    e->stripConcat();
-  }
-
-  if (m_op == T_UNSET_CAST && !hasEffect()) {
-    if (!getScope()->getVariables()->
-        getAttribute(VariableTable::ContainsCompact) ||
-        !m_exp->isScalar()) {
-      return CONSTANT("null");
-    }
-  } else if (m_op == T_UNSET && m_exp->is(KindOfExpressionList) &&
-             !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
-    recomputeEffects();
-    return CONSTANT("null");
-  } else if (m_op == T_BOOL_CAST) {
-    if (m_exp->getActualType() &&
-        m_exp->getActualType()->is(Type::KindOfBoolean)) {
-      return replaceValue(m_exp);
-    }
-  } else if (m_op != T_ARRAY &&
-             m_op != T_VARRAY &&
-             m_op != T_MIARRAY &&
-             m_op != T_MSARRAY &&
-             m_exp &&
-             m_exp->isScalar()) {
-    Variant value;
-    Variant result;
-    if (m_exp->getScalarValue(value) && preCompute(value, result)) {
-      return replaceValue(makeScalarExpression(ar, result));
-    }
-  }
-  return ExpressionPtr();
-}
-
 void UnaryOpExpression::setExistContext() {
   if (m_exp) {
     if (m_exp->is(Expression::KindOfExpressionList)) {

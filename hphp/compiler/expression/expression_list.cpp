@@ -390,7 +390,8 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
     }
   } else {
     bool isUnset = hasContext(UnsetContext) &&
-      ar->getPhase() >= AnalysisResult::PostOptimize;
+      // This used to be gated on ar->getPhase() >= PostOptimize
+      false;
     int isGlobal = -1;
     while (i--) {
       ExpressionPtr &e = m_exps[i];
@@ -426,11 +427,6 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
-  optimize(ar);
-  return ExpressionPtr();
-}
-
-ExpressionPtr ExpressionList::postOptimize(AnalysisResultConstPtr ar) {
   optimize(ar);
   return ExpressionPtr();
 }

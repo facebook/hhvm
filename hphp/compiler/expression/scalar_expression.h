@@ -39,7 +39,6 @@ public:
   void toLower(bool funcCall = false);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool isScalar() const { return true;}
   virtual bool isLiteralString() const;

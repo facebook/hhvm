@@ -258,27 +258,6 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr IncludeExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_include.empty()) {
-    if (!m_depsSet) {
-      analyzeInclude(ar, m_include);
-      m_depsSet = true;
-    }
-    FileScopePtr fs = ar->findFileScope(m_include);
-    if (fs && fs->getPseudoMain()) {
-      if (!Option::KeepStatementsWithNoEffect) {
-        if (ExpressionPtr rep = fs->getEffectiveImpl(ar)) {
-          recomputeEffects();
-          return replaceValue(rep->clone());
-        }
-      }
-    } else {
-      m_include = "";
-    }
-  }
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IncludeExpression::outputCodeModel(CodeGenerator &cg) {

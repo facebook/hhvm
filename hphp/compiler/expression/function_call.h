@@ -43,7 +43,6 @@ public:
   virtual int getKidCount() const;
 
   virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   const std::string &getName() const { return m_name; }
   const std::string &getOriginalName() const { return m_origName; }

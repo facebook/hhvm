@@ -445,13 +445,7 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
                               scope, loc,
                               value, false));
   if (value == "true" || value == "false") {
-    if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-      exp->m_actualType = Type::Boolean;
-    }
   } else if (value == "null") {
-    if (ar->getPhase() >= AnalysisResult::PostOptimize) {
-      exp->m_actualType = Type::Variant;
-    }
   } else {
     assert(false);
   }

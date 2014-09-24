@@ -98,13 +98,6 @@ StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr GlobalStatement::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_exp->getCount()) {
-    return NULL_STATEMENT();
-  }
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void GlobalStatement::outputCodeModel(CodeGenerator &cg) {

@@ -1162,12 +1162,10 @@ public:
   }
 };
 
-// Pre and Post defined in depth_first_visitor.h
+// Pre defined in depth_first_visitor.h
 
 typedef   OptVisitor<Pre>          PreOptVisitor;
 typedef   OptWorker<Pre>           PreOptWorker;
-typedef   OptVisitor<Post>         PostOptVisitor;
-typedef   OptWorker<Post>          PostOptWorker;
 
 template<>
 void OptWorker<Pre>::onThreadEnter() {
@@ -1213,17 +1211,7 @@ void DepthFirstVisitor<Pre, OptVisitor>::setup() {
 }
 
 template<>
-void DepthFirstVisitor<Post, OptVisitor>::setup() {
-  IMPLEMENT_OPT_VISITOR_SETUP(PostOptWorker);
-}
-
-template<>
 void DepthFirstVisitor<Pre, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
-  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
-}
-
-template<>
-void DepthFirstVisitor<Post, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
   IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
 }
 
@@ -1473,66 +1461,7 @@ LProfileMap BaseTryLock::s_LockProfileMap;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 
 ///////////////////////////////////////////////////////////////////////////////
-// post-opt
 
-template<>
-int DepthFirstVisitor<Post, OptVisitor>::visit(BlockScopeRawPtr scope) {
-  scope->clearUpdated();
-  StatementPtr stmt = scope->getStmt();
-  bool done = false;
-  if (MethodStatementPtr m =
-      dynamic_pointer_cast<MethodStatement>(stmt)) {
-
-    AliasManager am(1);
-    if (am.optimize(this->m_data.m_ar, m)) {
-      scope->addUpdates(BlockScope::UseKindCaller);
-    }
-    if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-      done = true;
-    }
-  }
-
-  if (!done) {
-    StatementPtr rep = this->visitStmtRecur(stmt);
-    always_assert(!rep);
-  }
-
-  return scope->getUpdated();
-}
-
-template<>
-ExpressionPtr DepthFirstVisitor<Post, OptVisitor>::visit(ExpressionPtr e) {
-  return e->postOptimize(this->m_data.m_ar);
-}
-
-template<>
-StatementPtr DepthFirstVisitor<Post, OptVisitor>::visit(StatementPtr stmt) {
-  return stmt->postOptimize(this->m_data.m_ar);
-}
-
-class FinalWorker : public JobQueueWorker<MethodStatementPtr, AnalysisResult*> {
-public:
-  virtual void doJob(MethodStatementPtr m) {
-    try {
-      AliasManager am(1);
-      am.finalSetup(m_context->shared_from_this(), m);
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
-    }
-  }
-};
-
-template<>
-void AnalysisResult::preWaitCallback<Post>(
-    bool first, const BlockScopeRawPtrQueue &scopes, void *context) {
-}
-
-void AnalysisResult::postOptimize() {
-  setPhase(AnalysisResult::PostOptimize);
-  processScopesParallel<Post>("PostOptimize");
-}
-
-///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
 ///////////////////////////////////////////////////////////////////////////////

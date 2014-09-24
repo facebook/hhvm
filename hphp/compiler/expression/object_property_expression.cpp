@@ -185,34 +185,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr
-ObjectPropertyExpression::postOptimize(AnalysisResultConstPtr ar) {
-  bool changed = false;
-  if (m_objectClass && hasLocalEffect(AccessorEffect)) {
-    int prop = hasContext(AssignmentLHS) ?
-      ClassScope::MayHaveUnknownPropSetter :
-      hasContext(ExistContext) ?
-        ClassScope::MayHaveUnknownPropTester :
-        hasContext(UnsetContext) && hasContext(LValue) ?
-          ClassScope::MayHavePropUnsetter :
-          ClassScope::MayHaveUnknownPropGetter;
-    if ((m_context & (AssignmentLHS|OprLValue)) ||
-        !m_objectClass->implementsAccessor(prop)) {
-      clearLocalEffect(AccessorEffect);
-      changed = true;
-    }
-  }
-  if (m_valid &&
-      (hasLocalEffect(AccessorEffect) || hasLocalEffect(CreateEffect))) {
-    clearLocalEffect(AccessorEffect);
-    clearLocalEffect(CreateEffect);
-    changed = true;
-  }
-  return changed ?
-    dynamic_pointer_cast<Expression>(shared_from_this()) :
-    ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {

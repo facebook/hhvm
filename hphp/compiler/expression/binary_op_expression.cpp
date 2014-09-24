@@ -397,16 +397,6 @@ void BinaryOpExpression::optimizeTypes(AnalysisResultConstPtr ar) {
   }
 }
 
-ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
-  optimizeTypes(ar);
-  ExpressionPtr optExp = simplifyArithmetic(ar);
-  if (!optExp) {
-    if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
-  }
-  if (optExp) optExp = replaceValue(optExp);
-  return optExp;
-}
-
 static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
                                 LocationPtr loc, ExpressionPtr exp,
                                 bool invert) {

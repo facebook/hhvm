@@ -105,17 +105,6 @@ ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr QOpExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (getActualType() && getActualType()->is(Type::KindOfString) &&
-      m_expYes && m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
-    setActualType(Type::Variant);
-    setExpectedType(Type::String);
-    m_expYes->setExpectedType(Type::Variant);
-    m_expNo->setExpectedType(Type::Variant);
-  }
-  return ExpressionPtr();
-}
-
 ExpressionPtr QOpExpression::unneededHelper() {
   bool yesEffect = false;
   if (m_expYes) {

@@ -1025,36 +1025,6 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_type == FunType::StaticCompact) {
-    for (int i = 0; i < m_params->getCount(); i += 2) {
-      ExpressionPtr e = (*m_params)[i + 1];
-      if (e->is(KindOfUnaryOpExpression) &&
-          static_pointer_cast<UnaryOpExpression>(e)->getOp() == T_UNSET_CAST) {
-        m_params->removeElement(i);
-        m_params->removeElement(i);
-        i -= 2;
-        m_extraArg -= 2;
-        if (m_extraArg < 0) m_extraArg = 0;
-      }
-    }
-    if (!m_params->getCount()) {
-      ExpressionPtr rep(new UnaryOpExpression(getScope(), getLocation(),
-                                              ExpressionPtr(), T_ARRAY, true));
-      return replaceValue(rep);
-    }
-  }
-  /*
-    Dont do this for now. Need to take account of newly created
-    variables etc (which would normally be handled by inferTypes).
-
-    if (ExpressionPtr rep = optimize(ar)) {
-      return rep;
-    }
-  */
-  return FunctionCall::postOptimize(ar);
-}
-
 int SimpleFunctionCall::getLocalEffects() const {
   if (m_class) return UnknownEffect;
 

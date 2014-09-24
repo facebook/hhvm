@@ -130,13 +130,6 @@ public:
     return StatementPtr();
   }
 
-  /**
-   * Called after type inference.
-   */
-  virtual StatementPtr postOptimize(AnalysisResultConstPtr ar) {
-    return StatementPtr();
-  }
-
   bool hasReachableLabel() const;
 
   virtual bool hasDecl() const { return false; }

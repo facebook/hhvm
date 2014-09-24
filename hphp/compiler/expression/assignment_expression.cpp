@@ -291,10 +291,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultConstPtr ar) {
-  return optimize(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void AssignmentExpression::outputCodeModel(CodeGenerator &cg) {

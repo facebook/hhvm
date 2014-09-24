@@ -28,7 +28,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Pre        {};
-struct Post       {};
 
 template <typename When>
 inline int GetPhaseInterestMask() {

@@ -265,16 +265,6 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (!hasLocalEffect(AccessorEffect)) return ExpressionPtr();
-  TypePtr at(m_variable->getActualType());
-  if (at && (at->is(Type::KindOfString) || at->is(Type::KindOfArray))) {
-    clearLocalEffect(AccessorEffect);
-    return dynamic_pointer_cast<Expression>(shared_from_this());
-  }
-  return ExpressionPtr();
-}
-
 /**
  * ArrayElementExpression comes from:
  *

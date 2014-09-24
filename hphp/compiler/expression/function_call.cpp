@@ -557,9 +557,4 @@ ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr FunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_class) updateClassName();
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////

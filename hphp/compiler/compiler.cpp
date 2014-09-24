@@ -943,10 +943,9 @@ void createOutputDirectory(CompilerOptions &po) {
     }
     string temp = t;
     temp += "/hphp_XXXXXX";
-    char path[PATH_MAX + 1];
-    strncpy(path, temp.c_str(), PATH_MAX);
-    path[PATH_MAX] = '\0';
-    po.outputDir = mkdtemp(path);
+    std::vector<char> path(begin(temp), end(temp));
+    path.push_back('\0');
+    po.outputDir = mkdtemp(&path[0]);
     Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }
   mkdir(po.outputDir.c_str(), 0777);

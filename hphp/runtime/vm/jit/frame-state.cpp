@@ -415,7 +415,9 @@ bool FrameState::hasStateFor(Block* block) const {
   return m_snapshots.count(block);
 }
 
-void FrameState::startBlock(Block* block, BCMarker marker) {
+void FrameState::startBlock(Block* block,
+                            BCMarker marker,
+                            LocalStateHook* hook /* = nullptr */) {
   auto const it = m_snapshots.find(block);
   DEBUG_ONLY auto const predsAllowed =
     it != m_snapshots.end() || block->isEntry() || RuntimeOption::EvalJitLoops;
@@ -435,7 +437,7 @@ void FrameState::startBlock(Block* block, BCMarker marker) {
       Indent _;
       ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",
              block->id(), pred->id());
-      unprocessedPredClear(marker);
+      unprocessedPredClear(marker, hook);
       break;
     }
   }
@@ -697,13 +699,17 @@ void FrameState::clearCurrentState() {
   clearLocals(*this);
 }
 
-void FrameState::unprocessedPredClear(BCMarker marker) {
+void FrameState::unprocessedPredClear(BCMarker marker,
+                                      LocalStateHook* hook /* = nullptr */) {
   m_spValue        = nullptr;
   m_marker         = marker;
   m_spOffset       = marker.spOff();
   m_curFunc        = marker.func();
   m_stackDeficit   = 0;
   m_evalStack      = EvalStack();
+
+  // Clear hook first so that it can read local info from the FrameState.
+  if (hook != nullptr) clearLocals(*hook);
   clearLocals(*this);
 }
 

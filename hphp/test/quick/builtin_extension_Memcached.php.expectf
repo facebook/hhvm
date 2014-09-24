@@ -5,7 +5,7 @@ object(Memcached)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(42) {
+array(43) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -63,32 +63,34 @@ array(42) {
   [27]=>
   string(13) "getServerList"
   [28]=>
-  string(8) "getStats"
+  string(15) "resetServerList"
   [29]=>
-  string(10) "getVersion"
+  string(8) "getStats"
   [30]=>
-  string(9) "increment"
+  string(10) "getVersion"
   [31]=>
-  string(14) "incrementByKey"
+  string(9) "increment"
   [32]=>
-  string(7) "prepend"
+  string(14) "incrementByKey"
   [33]=>
-  string(12) "prependByKey"
+  string(7) "prepend"
   [34]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [35]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [36]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [37]=>
-  string(8) "setByKey"
+  string(3) "set"
   [38]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [39]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [40]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [41]=>
+  string(9) "setOption"
+  [42]=>
   string(10) "setOptions"
 }
 ================
@@ -101,7 +103,7 @@ object(A_Memcached)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(42) {
+array(43) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -159,31 +161,33 @@ array(42) {
   [27]=>
   string(13) "getServerList"
   [28]=>
-  string(8) "getStats"
+  string(15) "resetServerList"
   [29]=>
-  string(10) "getVersion"
+  string(8) "getStats"
   [30]=>
-  string(9) "increment"
+  string(10) "getVersion"
   [31]=>
-  string(14) "incrementByKey"
+  string(9) "increment"
   [32]=>
-  string(7) "prepend"
+  string(14) "incrementByKey"
   [33]=>
-  string(12) "prependByKey"
+  string(7) "prepend"
   [34]=>
-  string(7) "replace"
+  string(12) "prependByKey"
   [35]=>
-  string(12) "replaceByKey"
+  string(7) "replace"
   [36]=>
-  string(3) "set"
+  string(12) "replaceByKey"
   [37]=>
-  string(8) "setByKey"
+  string(3) "set"
   [38]=>
-  string(8) "setMulti"
+  string(8) "setByKey"
   [39]=>
-  string(13) "setMultiByKey"
+  string(8) "setMulti"
   [40]=>
-  string(9) "setOption"
+  string(13) "setMultiByKey"
   [41]=>
+  string(9) "setOption"
+  [42]=>
   string(10) "setOptions"
 }

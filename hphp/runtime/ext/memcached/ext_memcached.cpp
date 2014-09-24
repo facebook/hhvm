@@ -807,6 +807,12 @@ Array HHVM_METHOD(Memcached, getserverlist) {
   return returnValue;
 }
 
+bool HHVM_METHOD(Memcached, resetserverlist) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_servers_reset(&data->m_impl->memcached);
+  return true;
+}
+
 Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
@@ -1183,6 +1189,7 @@ class MemcachedExtension : public Extension {
     HHVM_ME(Memcached, decrementbykey);
     HHVM_ME(Memcached, addserver);
     HHVM_ME(Memcached, getserverlist);
+    HHVM_ME(Memcached, resetserverlist);
     HHVM_ME(Memcached, getserverbykey);
     HHVM_ME(Memcached, getstats);
     HHVM_ME(Memcached, getversion);

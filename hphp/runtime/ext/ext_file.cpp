@@ -1196,15 +1196,17 @@ bool f_touch(const String& filename, int64_t mtime /* = 0 */,
     fclose(f);
   }
 
-  if (mtime == 0 || atime == 0) {
-    int now = time(0);
-    if (mtime == 0) mtime = now;
-    if (atime == 0) atime = now;
+  if (mtime == 0 && atime == 0) {
+    // It is important to pass nullptr so that the OS sets mtime and atime
+    // to the current time with maximum precision (more precise then seconds)
+    CHECK_SYSTEM(utime(translated.data(), nullptr));
+  } else {
+    struct utimbuf newtime;
+    newtime.actime = atime ? atime : mtime;
+    newtime.modtime = mtime;
+    CHECK_SYSTEM(utime(translated.data(), &newtime));
   }
-  struct utimbuf newtime;
-  newtime.actime = atime;
-  newtime.modtime = mtime;
-  CHECK_SYSTEM(utime(translated.data(), &newtime));
+
   return true;
 }
 

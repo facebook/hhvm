@@ -149,6 +149,8 @@ const StaticString
   s_readline_name("readline_name"),
   s_attempted_completion_over("attempted_completion_over");
 
+static bool rl_readline_name_malloced = false;
+
 Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
                                      const String& newvalue /* = null */) {
   if (varname.isNull()) {
@@ -175,7 +177,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     if (varname == s_line_buffer) {
       oldval = String(convert_null_to_empty(rl_line_buffer));
       if (!newvalue.isNull()) {
-        rl_line_buffer = (char *) newvalue.data();
+        rl_replace_line(newvalue.data(), 1);
       }
       return oldval;
     } else if (varname == s_point) {
@@ -213,7 +215,9 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     } else if (varname == s_readline_name) {
       oldval = String(convert_null_to_empty(rl_readline_name));
       if (!newvalue.isNull()) {
-        rl_readline_name = (char *) newvalue.data();
+        if (rl_readline_name_malloced) free((void*)rl_readline_name);
+        rl_readline_name = strdup(newvalue.data());
+        rl_readline_name_malloced = true;
       }
       return oldval;
     } else if (varname == s_attempted_completion_over) {

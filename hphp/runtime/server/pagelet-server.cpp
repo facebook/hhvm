@@ -291,7 +291,7 @@ struct PageletWorker
       } else {
         timeout = 0;
       }
-      HttpRequestHandler(timeout).handleRequest(job);
+      HttpRequestHandler(timeout).run(job);
       job->decRefCount();
     } catch (...) {
       Logger::Error("HttpRequestHandler leaked exceptions");

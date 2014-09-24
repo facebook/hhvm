@@ -164,7 +164,7 @@ HttpServer::HttpServer()
     ReplayTransport rt;
     rt.replayInput(hdf);
     HttpRequestHandler handler(0);
-    handler.handleRequest(&rt);
+    handler.run(&rt);
     int code = rt.getResponseCode();
     if (code == 200) {
       Logger::Info("StartupDocument %s returned 200 OK: %s",

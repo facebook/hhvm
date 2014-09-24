@@ -90,14 +90,18 @@ protected:
     bool error = true;
     std::string errorMsg;
 
-    if (abort) {
-      m_handler->abortRequest(transport);
-      return;
-    }
+    SCOPE_EXIT { m_handler->teardownRequest(); };
 
     try {
+      m_handler->setupRequest(transport);
+
+      if (abort) {
+        m_handler->abortRequest(transport);
+        return;
+      }
       std::string cmd = transport->getCommand();
       cmd = std::string("/") + cmd;
+
       if (server->shouldHandle(cmd)) {
         transport->onRequestStart(job->getStartTimer());
         m_handler->handleRequest(transport);

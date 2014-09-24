@@ -853,7 +853,7 @@ static int start_server(const std::string &username) {
       try {
         rt.onRequestStart(start);
         rt.replayInput(Hdf(file));
-        handler.handleRequest(&rt);
+        handler.run(&rt);
 
         timespec stop;
         Timer::GetMonotonicTime(stop);
@@ -1513,7 +1513,7 @@ static int execute_program_impl(int argc, char** argv) {
       for (unsigned int j = 0; j < po.args.size(); j++) {
         ReplayTransport rt;
         rt.replayInput(po.args[j].c_str());
-        handler.handleRequest(&rt);
+        handler.run(&rt);
         printf("%s\n", rt.getResponse().c_str());
       }
     }

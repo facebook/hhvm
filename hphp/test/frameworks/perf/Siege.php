@@ -30,7 +30,7 @@ final class Siege extends Process {
           "You can specify a path to siege 2.7x or >= 3.0.8 with the ".
           "--siege=/path/to/siege option. If you have patched siege to fix ".
           "this issue, pass --skip-version-checks.\n",
-          $version_line
+          $version_line,
         );
         exit(1);
       }
@@ -49,9 +49,11 @@ final class Siege extends Process {
   }
 
   public function start(): void {
-    parent::start($this->options->daemonOutputFileName('siege'),
-                  $this->options->delayProcessLaunch,
-                  $this->options->traceSubProcess);
+    parent::start(
+      $this->options->daemonOutputFileName('siege'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
   }
 
   protected function getArguments(): Vector<string> {

@@ -36,17 +36,17 @@ final class PerfOptions {
   //
   // Maximum wait times, as for example given to file_get_contents
   // or the configuration file for nginx.  These times may be truncated
-  // to the nearest second to accomodate the specific server.
+  // to the nearest integral second to accomodate the specific server.
   //
   public double $maxdelayUnfreeze;
   public double $maxdelayAdminRequest;
   public double $maxdelayNginxKeepAlive;
   public double $maxdelayNginxFastCGI;
 
-  public bool $daemonOutputToFile;    // if sub process output goes to file
-  public ?string $tempDir;
+  public bool $daemonOutputToFile = false;
+  public ?string $tempDir = null;
 
-  public bool $notBenchmarking;
+  public bool $notBenchmarking = false;
 
   public function __construct() {
     $o = getopt(
@@ -93,7 +93,6 @@ final class PerfOptions {
 
     $this->siege = hphp_array_idx($o, 'siege', 'siege');
     $this->nginx = hphp_array_idx($o, 'nginx', 'nginx');
-    $this->hhvmExtraArguments = hphp_array_idx($o, 'hhvm-extra-arguments', '');
 
     $this->wordpress = array_key_exists('wordpress', $o);
     $this->toys = array_key_exists('toys', $o);
@@ -103,22 +102,87 @@ final class PerfOptions {
     $this->skipVersionChecks = array_key_exists('skip-version-checks', $o);
     $this->notBenchmarking = array_key_exists('i-am-not-benchmarking', $o);
 
-    $this->delayNginxStartup = (double)hphp_array_idx($o, 'delay-nginx-startup', 0.0);
-    $this->delayPhpStartup = (double)hphp_array_idx($o, 'delay-php-startup', 0.0);
-    $this->delayServerStabilize = (double)hphp_array_idx($o, 'delay-server-stabilize', 30.0);
-    $this->delayProcessLaunch = (double)hphp_array_idx($o, 'delay-process-launch', 1.0);
-    $this->delayCheckHealth = (double)hphp_array_idx($o, 'delay-check-health', 1.0);
+    //
+    // If any arguments below here are given, then the "standard
+    // semantics" have changed, and any results are potentially not
+    // consistent with the benchmark standards for HHVM. You can only
+    // use these arguments if you also give the -i-am-not-benchmarking
+    // argument too.
+    //
+    $given_args = "";
+    $this->hhvmExtraArguments =
+      $this->get_string_arg($o, 'hhvm-extra-arguments', '', &$given_args,);
+    $this->delayNginxStartup =
+      $this->get_double_arg($o, 'delay-nginx-startup', 0.0, &$given_args,);
+    $this->delayPhpStartup =
+      $this->get_double_arg($o, 'delay-php-startup', 0.0, &$given_args,);
+    $this->delayServerStabilize =
+      $this->get_double_arg($o, 'delay-server-stabilize', 30.0, &$given_args,);
+    $this->delayProcessLaunch =
+      $this->get_double_arg($o, 'delay-process-launch', 1.0, &$given_args,);
+    $this->delayCheckHealth =
+      $this->get_double_arg($o, 'delay-check-health', 1.0, &$given_args,);
 
-    $this->maxdelayUnfreeze = (double)hphp_array_idx($o, 'max-delay-unfreeze', 60.0);
-    $this->maxdelayAdminRequest = (double)hphp_array_idx($o, 'max-delay-admin-request', 3.0);
+    $this->maxdelayUnfreeze =
+      $this->get_double_arg($o, 'max-delay-unfreeze', 60.0, &$given_args,);
+    $this->maxdelayAdminRequest =
+      $this->get_double_arg($o, 'max-delay-admin-request', 3.0, &$given_args,);
 
     $this->maxdelayNginxKeepAlive =
-      (double)hphp_array_idx($o, 'max-delay-nginx-keep-alive', 60);
+      $this->get_double_arg(
+        $o,
+        'max-delay-nginx-keep-alive',
+        60.0,
+        &$given_args,
+      );
     $this->maxdelayNginxFastCGI =
-      (double)hphp_array_idx($o, 'max-delay-nginx-fastcgi', 60);
+      $this->get_double_arg($o, 'max-delay-nginx-fastcgi', 60.0, &$given_args,);
 
-    $this->daemonOutputToFile = array_key_exists('daemon-files', $o);
-    $this->tempDir = hphp_array_idx($o, 'temp-dir', null);
+    $newvalue = array_key_exists('daemon-files', $o);
+    if ($newvalue ^ $this->daemonOutputToFile) {
+      $given_args .= ' --daemon-files';
+    }
+    $this->daemonOutputToFile = $newvalue;
+
+    $this->tempDir =
+      $this->get_string_arg($o, 'temp-dir', null, &$given_args,);
+
+    if ($given_args !== "") {
+      if (!$this->notBenchmarking) {
+        fwrite(
+          STDERR,
+          "Unless you specifically use the argument %s ".
+          "you may not use any of these arguments that you did: %s\n",
+          '--i-am-not-benchmarking',
+          $given_args,
+        );
+        exit(1);
+      }
+    }
+  }
+
+  public static function get_string_arg(
+    Array $options,
+    String $index,
+    ?string $def,
+    string& $used_args,
+  ) : ?string {
+    if (array_key_exists($index, $options)) {
+      $used_args .= ' --'.$index;
+    }
+    return hphp_array_idx($options, $index, $def);
+  }
+
+  public static function get_double_arg(
+    Array $options,
+    String $index,
+    double $def,
+    string& $used_args,
+  ) : double {
+    if (array_key_exists($index, $options)) {
+      $used_args .= ' --'.$index;
+    }
+    return (double)hphp_array_idx($options, $index, $def);
   }
 
   //

@@ -33,7 +33,7 @@ final class WordpressTarget extends PerfTarget {
     shell_exec(
       $this->safeCommand(Vector {
         'zcat',
-        __DIR__.'/wordpress/dbdump.sql.gz'
+        __DIR__.'/wordpress/dbdump.sql.gz',
       }).'|'.
       $this->safeCommand(Vector {
         'mysql',
@@ -59,7 +59,7 @@ final class WordpressTarget extends PerfTarget {
     }
     mysql_query(
       'DELETE FROM wp_options WHERE option_name = "admin_email"',
-      $conn
+      $conn,
     );
 
     copy(
@@ -74,7 +74,7 @@ final class WordpressTarget extends PerfTarget {
       '%s',
       "Can't connect to database ".
       "(mysql -h 127.0.0.1 -pwp_bench -u wp_bench wp_bench). This can be ".
-      "fixed for you.\nMySQL admin user (probably 'root'): "
+      "fixed for you.\nMySQL admin user (probably 'root'): ",
     );
     $username = trim(fgets(STDIN));
     if (!$username) {
@@ -107,12 +107,12 @@ final class WordpressTarget extends PerfTarget {
     mysql_query(
       'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@"%" '.
       'IDENTIFIED BY "wp_bench"',
-      $conn
+      $conn,
     );
     mysql_query(
       'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@127.0.0.1 '.
       'IDENTIFIED BY "wp_bench"',
-      $conn
+      $conn,
     );
   }
 
@@ -160,7 +160,8 @@ final class WordpressTarget extends PerfTarget {
     $data = file_get_contents(
       $url,
       /* include path = */ false,
-      $ctx);
+      $ctx,
+    );
     invariant(
       $data !== false,
       'Failed to unfreeze '.$url.' after '.$options->maxdelayUnfreeze.' secs');

@@ -8,15 +8,17 @@ final class NginxDaemon extends Process {
 
   public function __construct(
     private PerfOptions $options,
-    private PerfTarget $target
+    private PerfTarget $target,
   ) {
     parent::__construct($this->options->nginx);
   }
 
   public function start(): void {
-    parent::start($this->options->daemonOutputFileName('nginx'),
-                  $this->options->delayProcessLaunch,
-                  $this->options->traceSubProcess);
+    parent::start(
+      $this->options->daemonOutputFileName('nginx'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
   }
 
   public function clearAccessLog(): void {
@@ -108,8 +110,10 @@ final class NginxDaemon extends Process {
       '__HTTP_ADMIN_PORT__' => PerfSettings::HttpAdminPort(),
       '__NGINX_CONFIG_ROOT__' => __DIR__.'/nginx',
       '__NGINX_TEMP_DIR__' => $this->options->tempDir,
-      '__NGINX_KEEPALIVE_TIMEOUT__' => (int)$this->options->maxdelayNginxKeepAlive,
-      '__NGINX_FASTCGI_READ_TIMEOUT__' => (int)$this->options->maxdelayNginxFastCGI,
+      '__NGINX_KEEPALIVE_TIMEOUT__' =>
+        (int)$this->options->maxdelayNginxKeepAlive,
+      '__NGINX_FASTCGI_READ_TIMEOUT__' =>
+        (int)$this->options->maxdelayNginxFastCGI,
       '__FRAMEWORK_ROOT__' => $this->target->getSourceRoot(),
     };
 

@@ -16,9 +16,11 @@ final class PHP5Daemon extends PHPEngine {
   }
 
   public function start(): void {
-    parent::start($this->options->daemonOutputFileName('php5'),
-                  $this->options->delayProcessLaunch,
-                  $this->options->traceSubProcess);
+    parent::start(
+      $this->options->daemonOutputFileName('php5'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
   }
 
   protected function getArguments(): Vector<string> {

@@ -76,22 +76,27 @@ final class HHVMDaemon extends PHPEngine {
       // The ice is very thin here regarding this use of explode,
       // as the arguments' values may themselves contain spaces.
       //
-      $arrayExtras = explode(' ', trim($this->options->hhvmExtraArguments), 1000);
+      $arrayExtras = explode(
+        ' ',
+        trim($this->options->hhvmExtraArguments),
+        1000);
       $args->addAll($arrayExtras);
     }
     return $args;
   }
 
   public function start(): void {
-    parent::start($this->options->daemonOutputFileName('hhvm'),
-                  $this->options->delayProcessLaunch,
-                  $this->options->traceSubProcess);
+    parent::start(
+      $this->options->daemonOutputFileName('hhvm'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
     invariant($this->isRunning(), 'Failed to start HHVM');
     for ($i = 0; $i < 10; ++$i) {
       Process::sleepSeconds($this->options->delayCheckHealth);
       $health = $this->adminRequest('/check-health', true);
       if ($health) {
-        if ($health == "failure") {
+        if ($health === "failure") {
           continue;
         }
         $health = json_decode($health, /* assoc array = */ true);
@@ -116,7 +121,10 @@ final class HHVMDaemon extends PHPEngine {
     }
   }
 
-  protected function adminRequest(string $path, $allowFailures = true): string {
+  protected function adminRequest(
+    string $path,
+    bool $allowFailures = true
+  ): string {
     $url = 'http://localhost:'.PerfSettings::HttpAdminPort().$path;
     $ctx = stream_context_create(
       ['http' => ['timeout' => $this->options->maxdelayAdminRequest]]
@@ -130,7 +138,7 @@ final class HHVMDaemon extends PHPEngine {
       $url,
       /* include path = */ false,
       $ctx);
-    if ($result != false) {
+    if ($result !== false) {
       return $result;
     }
     if ($allowFailures) {

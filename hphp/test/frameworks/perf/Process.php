@@ -26,9 +26,11 @@ abstract class Process {
     return $this->executablePath;
   }
 
-  public function start(string $outputFileName = null,
-                        double $delayProcessLaunch = 0.1,
-                        bool $trace = false): void {
+  public function start(
+    string $outputFileName = null,
+    double $delayProcessLaunch = 0.1,
+    bool $trace = false,
+  ): void {
     $executable = $this->getExecutablePath();
 
     $cmd = $executable.' '.implode(

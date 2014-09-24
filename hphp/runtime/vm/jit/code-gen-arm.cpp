@@ -991,7 +991,7 @@ void CodeGenerator::cgShuffle(IRInstruction* inst) {
     if (rd.spilled()) continue;
     if (rs.spilled()) {
       for (auto j = 0; j < rd.numAllocated(); ++j) {
-        m_as.  Ldr  (x2a(rd.reg(i)), vixl::MemOperand(vixl::sp, rs.offset(j)));
+        m_as.  Ldr  (x2a(rd.reg(j)), vixl::MemOperand(vixl::sp, rs.offset(j)));
       }
       continue;
     }

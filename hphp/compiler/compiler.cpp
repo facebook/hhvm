@@ -139,7 +139,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv);
 void createOutputDirectory(CompilerOptions &po);
 int process(const CompilerOptions &po);
 int lintTarget(const CompilerOptions &po);
-int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar);
 void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar);
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr ar,
@@ -214,14 +213,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("target,t", value<string>(&po.target)->default_value("run"),
      "lint | "
-     "analyze | "
      "php | "
      "hhbc | "
      "filecache | "
      "run (default)")
     ("format,f", value<string>(&po.format),
      "lint: (none); \n"
-     "analyze: (none); \n"
      "php: trimmed (default) | inlined | pickled | typeinfo |"
      " <any combination of them by any separator>; \n"
      "hhbc: binary (default) | text; \n"
@@ -462,11 +459,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (!po.docjson.empty()) {
     if (po.target != "run" &&
-        po.target != "hhbc" &&
-        po.target != "analyze") {
+        po.target != "hhbc") {
       Logger::Error(
         "Cannot generate doc JSON file unless target is "
-        "'hhbc', 'run', or 'analyze'");
+        "'hhbc', or 'run'");
     } else {
       Option::DocJson = po.docjson;
     }
@@ -610,7 +606,7 @@ int process(const CompilerOptions &po) {
       if (!package.parse(!po.force)) {
         return 1;
       }
-      if (Option::WholeProgram || po.target == "analyze") {
+      if (Option::WholeProgram) {
         Timer timer(Timer::WallTime, "analyzeProgram");
         ar->analyzeProgram();
       }
@@ -619,7 +615,7 @@ int process(const CompilerOptions &po) {
 
   // saving file cache
   AsyncFileCacheSaver fileCacheThread(&package, po.filecache.c_str());
-  if (po.target != "analyze" && !po.filecache.empty()) {
+  if (!po.filecache.empty()) {
     fileCacheThread.start();
   }
 
@@ -628,9 +624,7 @@ int process(const CompilerOptions &po) {
   }
 
   int ret = 0;
-  if (po.target == "analyze") {
-    ret = analyzeTarget(po, ar);
-  } else if (po.target == "php") {
+  if (po.target == "php") {
     ret = phpTarget(po, ar);
   } else if (po.target == "hhbc") {
     ret = hhbcTarget(po, ar, fileCacheThread);
@@ -653,7 +647,7 @@ int process(const CompilerOptions &po) {
   }
 
   // saving stats
-  if (po.target == "analyze" || po.genStats || !po.dbStats.empty()) {
+  if (po.genStats || !po.dbStats.empty()) {
     int seconds = timer.getMicroSeconds() / 1000000;
 
     Logger::Info("saving code errors and stats...");
@@ -669,12 +663,8 @@ int process(const CompilerOptions &po) {
         Logger::Error("%s", e.what());
       }
     } else {
-      Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
       package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
     }
-  } else if (Compiler::HasError()) {
-    Logger::Info("saving code errors...");
-    Compiler::SaveErrors(ar, (po.outputDir + "/CodeError.js").c_str());
   }
 
   if (!po.filecache.empty()) {
@@ -724,24 +714,6 @@ static void wholeProgramPasses(const CompilerOptions& po,
     Timer timer(Timer::WallTime, "analyze includes");
     ar->analyzeIncludes();
   }
-}
-
-int analyzeTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
-  int ret = 0;
-
-  wholeProgramPasses(po, ar);
-
-  if (Option::GenerateInferredTypes) {
-    Timer timer(Timer::WallTime, "inferring types");
-    ar->inferTypes();
-  }
-  if (Option::PostOptimization) {
-    Timer timer(Timer::WallTime, "post-optimizing");
-    ar->postOptimize();
-  }
-  ar->analyzeProgramFinal();
-
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

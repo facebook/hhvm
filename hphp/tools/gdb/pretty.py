@@ -246,7 +246,7 @@ class LowStringPtrPrinter:
     def to_string(self):
         ptr = self.to_string_data()
         if ptr:
-            return "LowStringPtr '%s'" % str
+            return "LowStringPtr '%s'@%s" % (string_data_val(ptr), ptr)
         else:
             return "LowStringPtr(Null)"
 

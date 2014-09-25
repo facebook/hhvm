@@ -13,13 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_COMPACT_SIZED_PTR_H_
-#define incl_HPHP_UTIL_COMPACT_SIZED_PTR_H_
+#ifndef incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
+#define incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
+
+#include <cstdint>
 
 /*
- * A combined pointer + size intended to save space on x64.  The
- * maximum size should be 2^16 anywhere you use this class (although
- * the non-x64 implementation uses a larger size type).
+ * A combined pointer + tag intended to save space on x64.  The tag must fit in
+ * a 16 bit integer anywhere you use this class (although the non-x64
+ * implementation uses larger space for the tag).
  *
  * For the x64 version, this class relies on the x64 property that a
  * "canonical form" address must have all the upper bits set to the same
@@ -29,8 +31,7 @@
  *
  *     http://en.wikipedia.org/wiki/X86-64#Canonical_form_addresses
  *
- * The portable version just uses a pointer plus a uint32_t for the
- * size.
+ * The portable version just uses a pointer plus an actual TagType for the tag.
  */
 
 namespace HPHP {
@@ -39,20 +40,21 @@ namespace HPHP {
 
 #ifdef __x86_64__
 
-template<class T>
-struct CompactSizedPtr {
-  CompactSizedPtr() { set(0, 0); }
+template<class T, class TagType = uint32_t>
+struct CompactTaggedPtr {
+  CompactTaggedPtr() { set(TagType{}, 0); }
 
-  void set(uint32_t size, T* ptr) {
-    assert(size <= 0xffffu);
+  void set(TagType ttag, T* ptr) {
+    auto const tag = static_cast<uint64_t>(ttag);
+    assert(tag <= 0xffffu);
     assert(!(uintptr_t(ptr) >> 48));
-    m_data = uintptr_t(ptr) | (size_t(size) << 48);
+    m_data = uintptr_t(ptr) | (size_t(tag) << 48);
   }
 
-  uint32_t size() const { return m_data >> 48; }
+  TagType tag() const { return static_cast<TagType>(m_data >> 48); }
 
   const T* ptr() const {
-    return const_cast<CompactSizedPtr*>(this)->ptr();
+    return const_cast<CompactTaggedPtr*>(this)->ptr();
   }
   T* ptr() {
     return reinterpret_cast<T*>(m_data & (-1ull >> 16));
@@ -64,26 +66,45 @@ private:
 
 #else
 
-template<class T>
-struct CompactSizedPtr {
-  CompactSizedPtr() { set(0, 0); }
+template<class T, class TagType = uint32_t>
+struct CompactTaggedPtr {
+  CompactTaggedPtr() { set(TagType{}, 0); }
 
-  void set(uint32_t size, T* ptr) {
-    assert(size <= 0xffffu);
-    m_size = size;
+  void set(TagType ttag, T* ptr) {
+    auto const tag = static_cast<uint32_t>(ttag);
+    assert(tag <= 0xffffu);
+    m_tag = ttag;
     m_ptr = ptr;
   }
 
-  uint32_t size() const { return m_size; }
-  const T* ptr()  const { return m_ptr; }
-        T* ptr()        { return m_ptr; }
+  TagType  tag() const { return m_tag; }
+  const T* ptr() const { return m_ptr; }
+        T* ptr()       { return m_ptr; }
 
 private:
   T* m_ptr;
-  uint32_t m_size;
+  TagType m_tag;
 };
 
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Same thing, named differently for self-documentation when the tag is
+ * representing the size of something.
+ */
+template<class T>
+struct CompactSizedPtr {
+  void set(uint32_t size, T* ptr) { m_data.set(size, ptr); }
+
+  uint32_t size() const { return m_data.tag(); }
+  const T* ptr()  const { return m_data.ptr(); }
+        T* ptr()        { return m_data.ptr(); }
+
+private:
+  CompactTaggedPtr<T> m_data;
+};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -20,7 +20,7 @@
 #include <vector>
 #include <stdexcept>
 #include "hphp/util/assertions.h"
-#include "hphp/util/compact-sized-ptr.h"
+#include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
 

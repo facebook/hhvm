@@ -992,6 +992,7 @@ and expr_ in_cond is_lvalue env (p, e) =
   | Binop ((Ast.AMpamp | Ast.BArbar as c), e1, e2) ->
       let c = c = Ast.AMpamp in
       let lenv = env.Env.lenv in
+      let env, ty1 = expr env e1 in
       let env = condition env c e1 in
       let env, ty2 = raw_expr in_cond env e2 in
       let env = { env with Env.lenv = lenv } in

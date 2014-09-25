@@ -9,8 +9,7 @@
  *
  */
 
-// Checking that a / returns a float
-
-function test(): void {
-  '' === 1/2; // ERROR
+function test(int $a): bool {
+  $b = $a / 2;
+  return '' === $b;
 }

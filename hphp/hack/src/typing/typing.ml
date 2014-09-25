@@ -702,8 +702,11 @@ and bind_as_expr env ty aexpr =
   | _ -> assert false
 
 and expr env e =
+  raw_expr false env e
+
+and raw_expr in_cond env e =
   debug_last_pos := fst e;
-  let env, ty = expr_ false env e in
+  let env, ty = expr_ in_cond false env e in
   if !accumulate_types
   then begin
     type_acc := (fst e, Typing_expand.fully_expand env ty) :: !type_acc;
@@ -712,9 +715,9 @@ and expr env e =
   env, ty
 
 and lvalue env e =
-  expr_ true env e
+  expr_ false true env e
 
-and expr_ is_lvalue env (p, e) =
+and expr_ in_cond is_lvalue env (p, e) =
   match e with
   | Any -> env, (Reason.Rwitness p, Tany)
   | Array [] -> env, (Reason.Rwitness p, Tarray (true, None, None))
@@ -981,28 +984,28 @@ and expr_ is_lvalue env (p, e) =
       env, result
   | Binop (Ast.Eq (Some op), e1, e2) ->
       let e2 = p, Binop (op, e1, e2) in
-      let env, ty = expr env (p, Binop (Ast.Eq None, e1, e2)) in
+      let env, ty = raw_expr in_cond env (p, Binop (Ast.Eq None, e1, e2)) in
       env, ty
   | Binop (Ast.Eq None, e1, e2) ->
-      let env, ty2 = expr env e2 in
+      let env, ty2 = raw_expr in_cond env e2 in
       assign p env e1 ty2
   | Binop ((Ast.AMpamp | Ast.BArbar as c), e1, e2) ->
       let c = c = Ast.AMpamp in
       let lenv = env.Env.lenv in
       let env = condition env c e1 in
-      let env, ty2 = expr env e2 in
+      let env, ty2 = raw_expr in_cond env e2 in
       let env = { env with Env.lenv = lenv } in
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Binop (bop, e1, e2) ->
-      let env, ty1 = expr env e1 in
-      let env, ty2 = expr env e2 in
-      let env, ty = binop p env bop (fst e1) ty1 (fst e2) ty2 in
+      let env, ty1 = raw_expr in_cond env e1 in
+      let env, ty2 = raw_expr in_cond env e2 in
+      let env, ty = binop in_cond p env bop (fst e1) ty1 (fst e2) ty2 in
       env, ty
   | Unop (uop, e) ->
-      let env, ty = expr env e in
+      let env, ty = raw_expr in_cond env e in
       unop p env uop ty
   | Eif (c, e1, e2) ->
-      let env, tyc = expr env c in
+      let env, tyc = raw_expr in_cond env c in
       Typing_async.enforce_not_awaitable env (fst c) tyc;
       let lenv = env.Env.lenv in
       let env  = condition env true c in
@@ -2551,7 +2554,7 @@ and unop p env uop ty =
       let env = Type.sub_type p Reason.URnone env (Reason.Rarith p, Tprim Tnum) ty in
       env, ty
 
-and binop p env bop p1 ty1 p2 ty2 =
+and binop in_cond p env bop p1 ty1 p2 ty2 =
   match bop with
   | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2564,7 +2567,7 @@ and binop p env bop p1 ty1 p2 ty2 =
       | (_, Tarray _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           env, ty
-      | _ -> binop p env Ast.Minus p1 ty1 p2 ty2
+      | _ -> binop in_cond p env Ast.Minus p1 ty1 p2 ty2
       )
   | Ast.Minus | Ast.Star ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2620,7 +2623,11 @@ and binop p env bop p1 ty1 p2 ty2 =
           let env, ty2 = Type.unify p Reason.URnone env ty2 (Reason.Rarith p1, Tprim Tint) in
           env, (Reason.Rarith_ret p, Tprim Tint)
       )
-  | Ast.Eqeq  | Ast.Diff  | Ast.EQeqeq | Ast.Diff2 ->
+  | Ast.Eqeq  | Ast.Diff  ->
+      env, (Reason.Rcomp p, Tprim Tbool)
+  | Ast.EQeqeq | Ast.Diff2 ->
+      if not in_cond
+      then TUtils.assert_nontrivial_strict_eq p bop env ty1 ty2;
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte  | Ast.Gt  | Ast.Gte  ->
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
@@ -2709,7 +2716,8 @@ and condition_isset env = function
  * Build an environment for the true or false branch
  * of conditional statements.
  *)
-and condition env tparamet = function
+and condition env tparamet =
+  let expr = raw_expr true in function
   | _, Expr_list [] -> env
   | _, Expr_list [x] ->
       let env, _ = expr env x in

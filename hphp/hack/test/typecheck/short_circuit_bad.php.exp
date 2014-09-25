@@ -1,0 +1,4 @@
+File "short_circuit_bad.php", line 9, characters 13-19:
+Typing[4063] You are trying to access an element of this container but the container could be null. 
+File "short_circuit_bad.php", line 3, characters 15-20:
+This is what makes me believe it can be null

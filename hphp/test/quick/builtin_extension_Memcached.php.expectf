@@ -2,7 +2,7 @@ Memcached
 object(Memcached)#1 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class Memcached in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
 array(43) {
@@ -100,7 +100,7 @@ object(A_Memcached)#2 (1) {
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
 array(43) {

@@ -1693,6 +1693,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto dstReg = x2a(dloc.reg(0));
   auto dstTypeReg = x2a(dloc.reg(1));
 
+  if (callArgs.numStackArgs() != 0) {
+    CG_PUNT(cgCallBuiltin-StackArgs);
+  }
   cgCallHelper(m_as,
                CppCall::direct(func->nativeFuncPtr()),
                isCppByRef(funcReturnType) ? kVoidDest : callDest(dstReg),

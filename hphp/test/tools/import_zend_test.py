@@ -227,6 +227,9 @@ flaky_tests = (
 
     # duplicate of a test in test/slow
     '/ext/gmp/tests/002.php',
+
+    # Something could be on sending on that UDP port
+    '/ext/standard/tests/network/bug20134.php',
 )
 
 # Tests that work but not in repo mode

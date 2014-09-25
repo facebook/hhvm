@@ -253,9 +253,7 @@ public:
   static int InvokeFewArgsCount;
   static int InlineFunctionThreshold;
   static bool EliminateDeadCode;
-  static bool CopyProp;
   static bool LocalCopyProp;
-  static bool StringLoopOpts;
   static int AutoInline;
   static bool ArrayAccessIdempotent;
 
@@ -263,7 +261,6 @@ public:
    * Output options
    */
   static bool GenerateDocComments;
-  static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;

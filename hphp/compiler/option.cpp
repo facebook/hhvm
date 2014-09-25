@@ -140,11 +140,8 @@ int Option::GetScannerType() {
 int Option::InvokeFewArgsCount = 6;
 int Option::InlineFunctionThreshold = -1;
 bool Option::EliminateDeadCode = true;
-bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
-bool Option::StringLoopOpts = true;
 int Option::AutoInline = 0;
-bool Option::ControlFlow = false;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
 bool Option::DumpAst = false;
@@ -285,11 +282,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   GenerateDocComments      = Config::GetBool(ini, config["GenerateDocComments"], true);
   EliminateDeadCode        = Config::GetBool(ini, config["EliminateDeadCode"], true);
-  CopyProp                 = Config::GetBool(ini, config["CopyProp"], false);
   LocalCopyProp            = Config::GetBool(ini, config["LocalCopyProp"], true);
-  StringLoopOpts           = Config::GetBool(ini, config["StringLoopOpts"], true);
   AutoInline               = Config::GetInt32(ini, config["AutoInline"], 0);
-  ControlFlow              = Config::GetBool(ini, config["ControlFlow"], ControlFlow);
   VariableCoalescing       = Config::GetBool(ini, config["VariableCoalescing"], false);
   ArrayAccessIdempotent    = Config::GetBool(ini, config["ArrayAccessIdempotent"], false);
   DumpAst                  = Config::GetBool(ini, config["DumpAst"], false);

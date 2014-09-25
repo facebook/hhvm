@@ -1694,43 +1694,11 @@ public:
 template<>
 void AnalysisResult::preWaitCallback<Post>(
     bool first, const BlockScopeRawPtrQueue &scopes, void *context) {
-  assert(!Option::ControlFlow || context != nullptr);
-  if (first && Option::ControlFlow) {
-    auto *dispatcher
-      = (JobQueueDispatcher<FinalWorker> *) context;
-    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin(),
-           end = scopes.end(); it != end; ++it) {
-      BlockScopeRawPtr scope = *it;
-      if (MethodStatementPtr m =
-          dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
-        dispatcher->enqueue(m);
-      }
-    }
-  }
 }
 
 void AnalysisResult::postOptimize() {
   setPhase(AnalysisResult::PostOptimize);
-  if (Option::ControlFlow) {
-    BlockScopeRawPtrQueue scopes;
-    getScopesSet(scopes);
-
-    unsigned int threadCount = Option::ParserThreadCount;
-    if (threadCount > scopes.size()) {
-      threadCount = scopes.size();
-    }
-    if (threadCount <= 0) threadCount = 1;
-
-    JobQueueDispatcher<FinalWorker> dispatcher(
-      threadCount, true, 0, false, this);
-
-    processScopesParallel<Post>("PostOptimize", &dispatcher);
-
-    dispatcher.start();
-    dispatcher.stop();
-  } else {
-    processScopesParallel<Post>("PostOptimize");
-  }
+  processScopesParallel<Post>("PostOptimize");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

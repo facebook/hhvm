@@ -464,7 +464,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
+  public function __get(string $name): ?string {
     // $name is a read-only property
     if ($name === 'name') {
       return $this->getName();
@@ -479,7 +479,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
+  public function __set(string $name, $value): void {
     // $name is a read-only property
     if ($name === 'name') {
       throw new ReflectionException(
@@ -678,7 +678,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __get(string $name): ?string {
+  public function __get(string $name): ?string {
     if ($name === 'name') { // $name is a read-only property
       return $this->getName();
     } else if ($name === 'class') { // ... as is $class
@@ -694,7 +694,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __set(string $name, $value): void {
+  public function __set(string $name, $value): void {
     // $name and $class are read-only properties
     if ($name === 'name' || $name === 'class') {
       throw new ReflectionException(
@@ -1293,7 +1293,7 @@ class ReflectionClass implements Reflector, Serializable {
   public function getName(): string;
 
   // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
+  public function __get(string $name): ?string {
     // $name is a read-only property
     if ($name === 'name') {
       return $this->getName();
@@ -1308,7 +1308,7 @@ class ReflectionClass implements Reflector, Serializable {
   }
 
   // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
+  public function __set(string $name, $value): void {
     // $name is a read-only property
     if ($name === 'name') {
       throw new ReflectionException(

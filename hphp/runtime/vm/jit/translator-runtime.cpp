@@ -97,11 +97,12 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // if appropriate
   int64_t intkey;
   ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                      ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
-                      ad->set(key, tvAsCVarRef(&value), copy);
+                  ad->setConverted(intkey, tvAsCVarRef(&value), copy) :
+                  ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
+  decRefStr(key);
   tvRefcountedDecRef(&value);
   return arrayRefShuffle<false>(ad, retval, nullptr);
 }

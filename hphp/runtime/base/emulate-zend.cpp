@@ -43,7 +43,7 @@ bool check_option(const char *option) {
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-     ini_fd = mkstemp(ini_path);
+     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
      if (ini_fd == -1) {
        fprintf(stderr, "Error: unable to open temporary file");
        exit(EXIT_FAILURE);
@@ -61,7 +61,7 @@ int emulate_zend(int argc, char** argv) {
   bool show = false;
   bool need_file = true;
   int ini_fd = -1;
-  char ini_path[] = "/tmp/php-ini-XXXXXX";
+  char ini_path[] = "/tmp/php-ini-XXXXXX.ini";
   std::string ini_section = "";
   const char* program = nullptr;
 

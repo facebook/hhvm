@@ -76,20 +76,66 @@ static std::string normalize(const std::string &name) {
 }
 
 std::string Config::IniName(const Hdf& config) {
-  return "hhvm" + normalize(config.getFullPath());
+  return Config::IniName(config.getFullPath());
 }
 
-void Config::Parse(const std::string &config, IniSetting::Map &ini, Hdf &hdf) {
-  if (boost::ends_with(config, "ini")) {
-    std::ifstream ifs(config);
+std::string Config::IniName(const std::string config) {
+  return "hhvm" + normalize(config);
+}
+
+void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {
+  Config::SetParsedIni(ini, iniStr, "", false);
+}
+
+void Config::ParseHdfString(const std::string hdfStr, Hdf &hdf,
+                            IniSetting::Map &ini) {
+  hdf.fromString(hdfStr.c_str());
+}
+
+void Config::ParseConfigFile(const std::string &filename, IniSetting::Map &ini,
+                             Hdf &hdf) {
+  // We don't allow a filename of just ".ini"
+  if (boost::ends_with(filename, ".ini") && filename.length() > 4) {
+    Config::ParseIniFile(filename, ini);
+  } else {
+    // For now, assume anything else is an hdf file
+    // TODO(#5151773): Have a non-invasive warning if HDF file does not end
+    // .hdf
+    Config::ParseHdfFile(filename, hdf, ini);
+  }
+}
+
+void Config::ParseIniFile(const std::string &filename) {
+  IniSetting::Map ini = IniSetting::Map::object;;
+  Config::ParseIniFile(filename, ini, false);
+}
+
+void Config::ParseIniFile(const std::string &filename, IniSetting::Map &ini,
+                          const bool constants_only /* = false */) {
+    std::ifstream ifs(filename);
     const std::string str((std::istreambuf_iterator<char>(ifs)),
                           std::istreambuf_iterator<char>());
-    auto parsed_ini = IniSetting::FromStringAsMap(str, config);
-    for (auto &pair : parsed_ini.items()) {
-      ini[pair.first] = pair.second;
+    Config::SetParsedIni(ini, str, filename, constants_only);
+}
+
+void Config::ParseHdfFile(const std::string &filename, Hdf &hdf,
+                          IniSetting::Map &ini) {
+  hdf.append(filename);
+}
+
+void Config::SetParsedIni(IniSetting::Map &ini, const std::string confStr,
+                          const std::string filename, bool constants_only) {
+  assert(ini != nullptr);
+  auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
+  for (auto &pair : parsed_ini.items()) {
+    ini[pair.first] = pair.second;
+    if (constants_only) {
+      IniSetting::FillInConstant(pair.first.data(), pair.second,
+                                 IniSetting::FollyDynamic());
+    } else {
+      IniSetting::Set(pair.first.data(), pair.second,
+                      IniSetting::FollyDynamic());
     }
-  } else {
-    hdf.append(config);
   }
 }
 
@@ -102,16 +148,27 @@ const char* Config::Get(const IniSetting::Map &ini, const Hdf& config,
   return config.configGet(defValue);
 }
 
+template<class T> static T variant_init(T v) {
+    return v;
+}
+static int64_t variant_init(uint32_t v) {
+    return v;
+}
+
 #define CONFIG_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
                       const T defValue /* = 0ish */) { \
   auto* value = ini.get_ptr(IniName(config)); \
   if (value && value->isString()) { \
-    T ret; \
-    ini_on_update(value->data(), ret); \
+    T ini_ret, hdf_ret; \
+    ini_on_update(value->data(), ini_ret); \
     /* The HDF still wins because the -v options
-     * are still done via HDF, for now */ \
-    return config.configGet##METHOD(ret); \
+     * are still done via HDF, for now.*/ \
+    hdf_ret = config.configGet##METHOD(ini_ret); \
+    if (ini_ret != hdf_ret) { \
+      IniSetting::Set(IniName(config), variant_init(hdf_ret)); \
+    } \
+    return hdf_ret; \
   } \
   return config.configGet##METHOD(defValue); \
 } \

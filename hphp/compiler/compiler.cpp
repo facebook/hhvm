@@ -380,21 +380,23 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
+  MemoryManager::TlsWrapper::getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (auto& c : po.config) {
-    Config::Parse(c, ini, config);
+  for (auto& file : po.config) {
+    Config::ParseConfigFile(file, ini, config);
+  }
+  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
+    Config::ParseIniString(po.iniStrings[i].c_str(), ini);
   }
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    config.fromString(po.confStrings[i].c_str());
+    Config::ParseHdfString(po.confStrings[i].c_str(), config, ini);
   }
   Option::Load(ini, config);
   IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
-  RuntimeOption::Load(iniR, runtime);
-  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
-    process_ini_settings(po.iniStrings[i].c_str(), "");
-  }
+  RuntimeOption::Load(iniR, runtime, po.iniStrings, po.confStrings);
+
   initialize_repo();
 
   vector<string> badnodes;

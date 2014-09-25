@@ -51,9 +51,9 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  */
 class RuntimeOption {
 public:
-  static void Load(const IniSettingMap &ini,
-                   Hdf& config,
-                   std::vector<std::string>* overwrites = nullptr);
+  static void Load(IniSettingMap &ini, Hdf& config,
+    const std::vector<std::string>& iniClis = std::vector<std::string>(),
+    const std::vector<std::string>& hdfClis = std::vector<std::string>());
 
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;

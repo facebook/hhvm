@@ -1,0 +1,61 @@
+Log.Level = Verbose
+Eval {
+  JitAHotSize = 2323232
+}
+Server {
+  ThreadCount = 100
+  Upload {
+    UploadMaxFileSize = 512MB
+  }
+}
+Machine {
+  name = devserver101
+  tier = development
+  cpu = Intel.x86
+}
+Tiers {
+  X86 {
+    cpu = /Intel.*x86/
+    overwrite {
+      Server.ThreadCount = 50
+    }
+  }
+  X64 {
+    cpu = /Intel.*x64/
+    overwrite {
+      Server.ThreadCount = 250
+    }
+  }
+  devbox {
+    machine = /^dev(server)?[0-9]+/
+    overwrite {
+      Server {
+        ThreadCount=120
+        RequestTimeoutSeconds = 43200
+        Upload {
+          UploadMaxFileSize = 1024MB
+        }
+      }
+    }
+  }
+  prod {
+    machine = /^prod(server)?[0-9]+/
+    overwrite {
+      Server {
+        ThreadCount=300
+        Upload {
+          UploadMaxFileSize = 2048MB
+        }
+      }
+    }
+  }
+  westcoast {
+    tier = /^westcoast$/
+    overwrite {
+      ResourceLimit.RSS=12345789
+      Server.EnableKeepAlive = false
+      Server.RequestTimeoutSeconds = 360
+      Server.Upload.UploadMaxFileSize = 200MB
+    }
+  }
+}

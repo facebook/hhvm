@@ -206,25 +206,6 @@ void process_env_variables(Array& variables) {
   }
 }
 
-void process_ini_file(const std::string& filename) {
-  if (filename.empty()) {
-    return;
-  }
-  std::ifstream ifs(filename);
-  const std::string str((std::istreambuf_iterator<char>(ifs)),
-                        std::istreambuf_iterator<char>());
-  process_ini_settings(str, filename);
-}
-
-void process_ini_settings(const std::string& ini_str,
-                          const std::string& filename /* = "" */) {
-  auto settings = IniSetting::FromStringAsMap(ini_str, filename);
-
-  for (auto& item : settings.items()) {
-    IniSetting::Set(item.first.data(), item.second,
-                    IniSetting::FollyDynamic());
-  }
-}
 // Handle adding a variable to an array, supporting keys that look
 // like array expressions (like 'FOO[][key1][k2]').
 void register_variable(Array& variables, char *name, const Variant& value,
@@ -652,13 +633,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   Extension::RequestInitModules();
-  // If extension constants were used in the in ini files, they would have come
-  // out as 0 in the previous pass. Lets re-import the ini files. We could be
-  // more clever, but that would be harder and this works.
-  for (auto& c : config) {
-    process_ini_file(c);
+  // If extension constants were used in the ini files, they would have come
+  // out as 0 in the previous pass. We will re-import only the constants that
+  // have been later bound. All other non-constant configs should remain as they
+  // are, even if the ini file actually tries to change them.
+  IniSetting::Map ini = IniSetting::Map::object;
+  for (auto& filename: config) {
+    Config::ParseIniFile(filename, ini, true);
   }
-
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
@@ -1291,16 +1273,12 @@ static int execute_program_impl(int argc, char** argv) {
 
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (auto& c : po.config) {
-    Config::Parse(c, ini, config);
+  // Start with .hdf and .ini files
+  for (auto& filename : po.config) {
+    Config::ParseConfigFile(filename, ini, config);
   }
-  RuntimeOption::Load(ini, config, &po.confStrings);
-  for (auto& c : po.config) {
-    process_ini_file(c);
-  }
-  for (auto& istr : po.iniStrings) {
-    process_ini_settings(istr, "");
-  }
+  // Now, take care of CLI options and then officially load and bind things
+  RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings);
 
   vector<string> badnodes;
   config.lint(badnodes);

@@ -127,7 +127,18 @@ bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_stri
   xmlTextReaderPtr reader = NULL;
 
   if (!valid_file.empty()) {
-    reader = xmlReaderForFile(valid_file.data(), encoding.data(), options);
+    // Manually create the IO context to support custom stream wrappers.
+    auto stream = File::Open(valid_file, "rb");
+    if (!stream.isInvalid()) {
+      reader = xmlReaderForIO(libxml_streams_IO_read,
+                              libxml_streams_IO_close,
+                              stream.get(),
+                              valid_file.data(),
+                              encoding.data(),
+                              options);
+      // The xmlTextReaderPtr owns a reference to stream.
+      if (reader) stream.get()->incRefCount();
+    }
   }
 
   if (reader == NULL) {

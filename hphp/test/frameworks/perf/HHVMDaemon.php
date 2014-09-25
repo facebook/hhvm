@@ -1,16 +1,17 @@
 <?hh
 
 require_once('HHVMStats.php');
+require_once('PerfOptions.php');
 require_once('PerfSettings.php');
 require_once('PHPEngine.php');
+require_once('Process.php');
 
 final class HHVMDaemon extends PHPEngine {
   use HHVMStats;
 
   public function __construct(
-    private string $tempDir,
+    private PerfOptions $options,
     private PerfTarget $target,
-    PerfOptions $options
   ) {
     parent::__construct((string) $options->hhvm);
 
@@ -18,17 +19,18 @@ final class HHVMDaemon extends PHPEngine {
       return;
     }
     $output = [];
-    exec(
-      implode(
-        ' ',
-        (Vector {
-            $options->hhvm,
-            '-v', 'Eval.Jit=1',
-            __DIR__.'/hhvm_config_check.php',
-        })->map($x ==> escapeshellarg($x))
-      ),
-      $output
+    $checkCommand = implode(
+      ' ',
+      (Vector {
+          $options->hhvm,
+          '-v', 'Eval.Jit=1',
+          __DIR__.'/hhvm_config_check.php',
+      })->map($x ==> escapeshellarg($x))
     );
+    if ($options->traceSubProcess) {
+      fprintf(STDERR, "%s\n", $checkCommand);
+    }
+    exec($checkCommand, $output);
     $checks = json_decode(implode("\n", $output), /* as array = */ true);
     invariant($checks, 'Got invalid output from hhvm_config_check.php');
     $failed = 0;
@@ -62,7 +64,7 @@ final class HHVMDaemon extends PHPEngine {
   }
 
   protected function getArguments(): Vector<string> {
-    return Vector {
+    $args = Vector {
       '-m', 'server',
       '-p', (string) PerfSettings::FastCGIPort(),
       '-v', 'Server.Type=fastcgi',
@@ -70,15 +72,26 @@ final class HHVMDaemon extends PHPEngine {
       '-v', 'AdminServer.Port='.PerfSettings::FastCGIAdminPort(),
       '-v', 'Server.StatCache=1',
     };
+    if (count($this->options->hhvmExtraArguments) > 0) {
+      $args->addAll($this->options->hhvmExtraArguments);
+    }
+    return $args;
   }
 
   public function start(): void {
-    parent::start();
+    parent::startWorker(
+      $this->options->daemonOutputFileName('hhvm'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
     invariant($this->isRunning(), 'Failed to start HHVM');
     for ($i = 0; $i < 10; ++$i) {
-      sleep(1);
-      $health = $this->adminRequest('/check-health');
+      Process::sleepSeconds($this->options->delayCheckHealth);
+      $health = $this->adminRequest('/check-health', true);
       if ($health) {
+        if ($health === "failure") {
+          continue;
+        }
         $health = json_decode($health, /* assoc array = */ true);
         if (array_key_exists('tc-size', $health) && $health['tc-size'] > 0) {
           return;
@@ -101,11 +114,31 @@ final class HHVMDaemon extends PHPEngine {
     }
   }
 
-  protected function adminRequest(string $path): string {
-    $result = file_get_contents(
-      'http://localhost:'.PerfSettings::HttpAdminPort().$path
+  protected function adminRequest(
+    string $path,
+    bool $allowFailures = true
+  ): string {
+    $url = 'http://localhost:'.PerfSettings::HttpAdminPort().$path;
+    $ctx = stream_context_create(
+      ['http' => ['timeout' => $this->options->maxdelayAdminRequest]]
     );
-    invariant($result !== false, 'Admin request failed');
-    return $result;
+    //
+    // TODO: it would be nice to suppress
+    // Warning messages from file_get_contents
+    // in the event that the connection can't even be made.
+    //
+    $result = file_get_contents(
+      $url,
+      /* include path = */ false,
+      $ctx);
+    if ($result !== false) {
+      return $result;
+    }
+    if ($allowFailures) {
+      return "failure";
+    } else {
+      invariant($result !== false, 'Admin request failed');
+      return $result;
+    }
   }
 }

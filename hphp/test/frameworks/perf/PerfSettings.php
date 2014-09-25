@@ -14,7 +14,7 @@ final class PerfSettings {
     return 10;
   }
 
-  public static function BenchmarkTime(): string{
+  public static function BenchmarkTime(): string {
     // [0-9]+[SMH]
     return '1M'; // 1 minute
   }

@@ -72,22 +72,14 @@ final class HHVMDaemon extends PHPEngine {
       '-v', 'AdminServer.Port='.PerfSettings::FastCGIAdminPort(),
       '-v', 'Server.StatCache=1',
     };
-    if (strlen($this->options->hhvmExtraArguments) > 0) {
-      //
-      // The ice is very thin here regarding this use of explode,
-      // as the arguments' values may themselves contain spaces.
-      //
-      $arrayExtras = explode(
-        ' ',
-        trim($this->options->hhvmExtraArguments),
-        1000);
-      $args->addAll($arrayExtras);
+    if (count($this->options->hhvmExtraArguments) > 0) {
+      $args->addAll($this->options->hhvmExtraArguments);
     }
     return $args;
   }
 
   public function start(): void {
-    parent::start(
+    parent::start_worker(
       $this->options->daemonOutputFileName('hhvm'),
       $this->options->delayProcessLaunch,
       $this->options->traceSubProcess,

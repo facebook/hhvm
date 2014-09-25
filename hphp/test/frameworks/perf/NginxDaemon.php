@@ -14,7 +14,7 @@ final class NginxDaemon extends Process {
   }
 
   public function start(): void {
-    parent::start(
+    parent::start_worker(
       $this->options->daemonOutputFileName('nginx'),
       $this->options->delayProcessLaunch,
       $this->options->traceSubProcess,

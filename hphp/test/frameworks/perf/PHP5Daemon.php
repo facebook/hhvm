@@ -12,11 +12,11 @@ final class PHP5Daemon extends PHPEngine {
     private PerfOptions $options,
     private PerfTarget $target,
   ) {
-    parent::__construct($this->options->php5);
+    parent::__construct((string) $options->php5);
   }
 
   public function start(): void {
-    parent::start(
+    parent::start_worker(
       $this->options->daemonOutputFileName('php5'),
       $this->options->delayProcessLaunch,
       $this->options->traceSubProcess,

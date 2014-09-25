@@ -27,9 +27,11 @@ abstract class Process {
     return $this->executablePath;
   }
 
-  public function start(
-    string $outputFileName = null,
-    double $delayProcessLaunch = 0.1,
+  abstract public function start(): void;
+
+  public function start_worker(
+    ?string $outputFileName = null,
+    float $delayProcessLaunch = 0.1,
     bool $trace = false,
   ): void {
     $executable = $this->getExecutablePath();
@@ -124,7 +126,7 @@ abstract class Process {
     }
   }
 
-  public static function sleepSeconds(double $secs): void {
+  public static function sleepSeconds(float $secs): void {
     usleep($secs * 1e06);
   }
 }

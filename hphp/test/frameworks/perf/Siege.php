@@ -49,7 +49,7 @@ final class Siege extends Process {
   }
 
   public function start(): void {
-    parent::start(
+    parent::start_worker(
       $this->options->daemonOutputFileName('siege'),
       $this->options->delayProcessLaunch,
       $this->options->traceSubProcess,

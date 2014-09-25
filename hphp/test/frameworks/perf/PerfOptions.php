@@ -4,10 +4,15 @@ final class PerfOptions {
   public bool $help;
   public bool $verbose;
 
+  //
+  // Exactly one of php5 or hhvm must be set with the path
+  // to the corresponding executable.  The one that is set
+  // determines what kind of cgi server is run.
+  //
   public ?string $php5;
-
   public ?string $hhvm;
-  public string $hhvmExtraArguments;
+
+  public array $hhvmExtraArguments;
 
   public string $siege;
   public string $nginx;
@@ -21,30 +26,30 @@ final class PerfOptions {
   public bool $traceSubProcess;
 
   //
-  // All times are given in seconds, stored in a double.
+  // All times are given in seconds, stored in a float.
   // For PHP code, the usleep timer is used, so fractional seconds work fine.
   //
   // For times that go into configuration files for 3rd party software,
   // such as nginx, times may be truncated to the nearest integer value,
   // in order to accomodate inflexibility in the 3rd party software.
   //
-  public double $delayNginxStartup;
-  public double $delayPhpStartup;
-  public double $delayProcessLaunch;  // secs to wait after start process
-  public double $delayCheckHealth;    // secs to wait before hit /check-health
+  public float $delayNginxStartup;
+  public float $delayPhpStartup;
+  public float $delayProcessLaunch;  // secs to wait after start process
+  public float $delayCheckHealth;    // secs to wait before hit /check-health
 
   //
   // Maximum wait times, as for example given to file_get_contents
   // or the configuration file for nginx.  These times may be truncated
   // to the nearest integral second to accomodate the specific server.
   //
-  public double $maxdelayUnfreeze;
-  public double $maxdelayAdminRequest;
-  public double $maxdelayNginxKeepAlive;
-  public double $maxdelayNginxFastCGI;
+  public float $maxdelayUnfreeze;
+  public float $maxdelayAdminRequest;
+  public float $maxdelayNginxKeepAlive;
+  public float $maxdelayNginxFastCGI;
 
   public bool $daemonOutputToFile = false;
-  public ?string $tempDir = null;
+  public string $tempDir;
 
   public bool $notBenchmarking = false;
 
@@ -125,50 +130,55 @@ final class PerfOptions {
     // use these arguments if you also give the -i-am-not-benchmarking
     // argument too.
     //
-    $given_args = "";
+    $ga = "";
+
     $this->hhvmExtraArguments =
-      $this->get_string_arg($o, 'hhvm-extra-arguments', '', &$given_args,);
+      PerfOptions::get_array_arg($o, 'hhvm-extra-arguments', &$ga,);
     $this->delayNginxStartup =
-      $this->get_double_arg($o, 'delay-nginx-startup', 0.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'delay-nginx-startup', 0.0, &$ga,);
     $this->delayPhpStartup =
-      $this->get_double_arg($o, 'delay-php-startup', 0.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'delay-php-startup', 0.0, &$ga,);
     $this->delayProcessLaunch =
-      $this->get_double_arg($o, 'delay-process-launch', 1.0, &$given_args,);
+      PerfOptions::get_float_arg( $o, 'delay-process-launch', 1.0, &$ga,);
     $this->delayCheckHealth =
-      $this->get_double_arg($o, 'delay-check-health', 1.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'delay-check-health', 1.0, &$ga,);
 
     $this->maxdelayUnfreeze =
-      $this->get_double_arg($o, 'max-delay-unfreeze', 60.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'max-delay-unfreeze', 60.0, &$ga,);
     $this->maxdelayAdminRequest =
-      $this->get_double_arg($o, 'max-delay-admin-request', 3.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'max-delay-admin-request', 3.0, &$ga,);
 
     $this->maxdelayNginxKeepAlive =
-      $this->get_double_arg(
-        $o,
-        'max-delay-nginx-keep-alive',
-        60.0,
-        &$given_args,
-      );
+      PerfOptions::get_float_arg($o, 'max-delay-nginx-keep-alive', 60.0, &$ga,);
     $this->maxdelayNginxFastCGI =
-      $this->get_double_arg($o, 'max-delay-nginx-fastcgi', 60.0, &$given_args,);
+      PerfOptions::get_float_arg($o, 'max-delay-nginx-fastcgi', 60.0, &$ga,);
 
     $newvalue = array_key_exists('daemon-files', $o);
     if ($newvalue ^ $this->daemonOutputToFile) {
-      $given_args .= ' --daemon-files';
+      $ga .= ' --daemon-files';
     }
     $this->daemonOutputToFile = $newvalue;
 
-    $this->tempDir =
-      $this->get_string_arg($o, 'temp-dir', null, &$given_args,);
+    $argTempDir =
+      PerfOptions::get_string_arg($o, 'temp-dir', '', &$ga,);
 
-    if ($given_args !== "") {
+    if ($argTempDir === '') {
+      $this->tempDir = tempnam('/dev/shm', 'hhvm-nginx');
+      // Currently a file - change to a dir
+      unlink($this->tempDir);
+      mkdir($this->tempDir);
+    } else {
+      $this->tempDir = $argTempDir;
+    }
+
+    if ($ga !== "") {
       if (!$this->notBenchmarking) {
-        fwrite(
+        fprintf(
           STDERR,
           "Unless you specifically use the argument %s ".
           "you may not use any of these arguments that you did: %s\n",
           '--i-am-not-benchmarking',
-          $given_args,
+          $ga,
         );
         exit(1);
       }
@@ -188,26 +198,49 @@ final class PerfOptions {
 
   public static function get_string_arg(
     Array $options,
-    String $index,
-    ?string $def,
+    string $index,
+    string $the_default,
     string& $used_args,
-  ) : ?string {
+  ) : string {
     if (array_key_exists($index, $options)) {
       $used_args .= ' --'.$index;
     }
-    return hphp_array_idx($options, $index, $def);
+    return hphp_array_idx($options, $index, $the_default);
   }
 
-  public static function get_double_arg(
+  //
+  // getopt allows multiple instances of the same argument,
+  // in which case $options[$index] is an array.
+  // If only one instance is given, then getopt just uses a string.
+  //
+  public static function get_array_arg(
     Array $options,
-    String $index,
-    double $def,
+    string $index,
     string& $used_args,
-  ) : double {
+  ) : array {
+    if (array_key_exists($index, $options)) {
+      $used_args .= ' --'.$index;
+    } else {
+      return array();
+    }
+    $option_value = hphp_array_idx($options, $index, array());
+    if (is_array($option_value)) {
+      return $option_value;
+    } else {
+      return array(0 => $option_value);
+    }
+  }
+
+  public static function get_float_arg(
+    Array $options,
+    string $index,
+    float $the_default,
+    string& $used_args,
+  ) : float {
     if (array_key_exists($index, $options)) {
       $used_args .= ' --'.$index;
     }
-    return (double)hphp_array_idx($options, $index, $def);
+    return (float)hphp_array_idx($options, $index, $the_default);
   }
 
   //

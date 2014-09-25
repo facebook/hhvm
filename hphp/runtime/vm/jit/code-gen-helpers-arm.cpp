@@ -53,7 +53,7 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     break;
   case CppCall::Kind::IndirectReg:
   case CppCall::Kind::IndirectVreg:
-    // call indirect currently not implemented. It'll be somthing like
+    // call indirect currently not implemented. It'll be something like
     // a.Br(x2a(call.getReg()))
     not_implemented();
     always_assert(0);
@@ -75,6 +75,37 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   // will still be pointing to the HostCall; it's not advanced past it until the
   // host call returns. In the native case, by contrast, we'll be looking at
   // return addresses, which point after the call.
+  return fixupAddr;
+}
+
+Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
+  PhysReg arg0(argReg(0));
+  PhysReg rHostCall(rHostCallReg);
+  switch (call.kind()) {
+  case CppCall::Kind::Direct:
+    v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
+    break;
+  case CppCall::Kind::Virtual:
+    v << loadq{arg0[0], rHostCall};
+    v << loadq{rHostCall[call.vtableOffset()], rHostCall};
+    break;
+  case CppCall::Kind::IndirectReg:
+  case CppCall::Kind::IndirectVreg:
+    // call indirect currently not implemented. It'll be something like
+    // a.Br(x2a(call.getReg()))
+    not_implemented();
+    always_assert(0);
+    break;
+  case CppCall::Kind::ArrayVirt:
+  case CppCall::Kind::Destructor:
+    not_implemented();
+    always_assert(0);
+    break;
+  }
+  uint8_t argc = args.size();
+  args.add(rHostCall);
+  auto fixupAddr = v.makePoint();
+  v << hostcall{args, argc, fixupAddr};
   return fixupAddr;
 }
 

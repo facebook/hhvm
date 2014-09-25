@@ -39,29 +39,6 @@ const char* vinst_names[] = {
 #undef O
 };
 
-bool isBlockEnd(Vinstr& inst) {
-  switch (inst.op) {
-    case Vinstr::bindaddr:
-    case Vinstr::bindjcc1:
-    case Vinstr::bindjmp:
-    case Vinstr::end:
-    case Vinstr::fallback:
-    case Vinstr::jcc:
-    case Vinstr::jmp:
-    case Vinstr::jmpr:
-    case Vinstr::jmpm:
-    case Vinstr::phijmp:
-    case Vinstr::resume:
-    case Vinstr::ud2:
-    case Vinstr::unwind:
-    case Vinstr::retransopt:
-    case Vinstr::ret:
-      return true;
-    default:
-      return false;
-  }
-}
-
 Vlabel Vunit::makeBlock(AreaIndex area) {
   auto i = blocks.size();
   blocks.emplace_back(area);
@@ -132,6 +109,10 @@ struct Vgen {
   void emit(jit::vector<Vlabel>&);
 
 private:
+  template<class Inst> void emit(Inst& i) {
+    always_assert_flog(false, "unimplemented instruction: {} in B{}\n",
+                       vinst_names[Vinstr(i).op], size_t(current));
+  }
   // intrinsics
   void emit(bindaddr& i);
   void emit(bindcall& i);
@@ -175,6 +156,7 @@ private:
   void emit(andqi& i) { binary(i); a->andq(i.s0, i.d); }
   void emit(addlm& i) { a->addl(i.s0, i.m); }
   void emit(addq& i) { commute(i); a->addq(i.s0, i.d); }
+  void emit(addli& i) { binary(i); a->addl(i.s0, i.d); }
   void emit(addqi& i) { binary(i); a->addq(i.s0, i.d); }
   void emit(addsd& i) { commute(i); a->addsd(i.s0, i.d); }
   void emit(call i);
@@ -299,7 +281,6 @@ private:
     auto area = unit.blocks[b].area;
     return areas[(int)area].start;
   }
-  bool check(Vblock& block);
   CodeBlock& main() { return area(AreaIndex::Main).code; }
   CodeBlock& cold() { return area(AreaIndex::Cold).code; }
   CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
@@ -323,7 +304,7 @@ private:
   Vmeta* meta;
   AsmInfo* m_asmInfo;
   X64Assembler* a;
-  Vlabel next{0}; // in linear order
+  Vlabel current{0}, next{0}; // in linear order
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
@@ -641,7 +622,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
-    assert(check(unit.blocks[labels[i]]));
+    assert(checkBlockEnd(unit, labels[i]));
 
     auto b = labels[i];
     auto& block = unit.blocks[b];
@@ -658,6 +639,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
         j++;
       }
       next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
+      current = b;
     }
 
     const IRInstruction* currentOrigin = nullptr;
@@ -799,16 +781,6 @@ void Vgen::emit(loadq& i) {
   a->loadq(i.s.mr(), i.d);
 }
 
-// check that each block has exactly one terminal instruction at the end.
-bool Vgen::check(Vblock& block) {
-  assert(!block.code.empty());
-  auto n = block.code.size();
-  for (size_t i = 0; i < n - 1; ++i) {
-    assert(!isBlockEnd(block.code[i]));
-  }
-  assert(isBlockEnd(block.code[n - 1]));
-  return true;
-}
 }
 
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
@@ -880,21 +852,6 @@ Vauto::~Vauto() {
       return;
     }
   }
-}
-
-std::string format(Vreg r) {
-  if (r.isPhys()) {
-    if (r.isGP()) {
-      Reg64 r64 = r;
-      return regname(r64);
-    } else {
-      RegXMM rxmm = r;
-      return regname(rxmm);
-    }
-  }
-  std::ostringstream str;
-  str << "%" << size_t(r);
-  return str.str();
 }
 
 Vtuple findDefs(const Vunit& unit, Vlabel b) {

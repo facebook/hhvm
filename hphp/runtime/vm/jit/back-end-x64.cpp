@@ -684,7 +684,7 @@ struct BackEnd : public jit::BackEnd {
     a.   jnz    (fallback);
   }
 
-  void streamPhysReg(std::ostream& os, PhysReg& reg) override {
+  void streamPhysReg(std::ostream& os, PhysReg reg) override {
     auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
       reg::regname(RegXMM(reg));
     os << name;
@@ -1039,8 +1039,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
-    for (auto it = linfo.blocks.begin(); it != linfo.blocks.end(); ++it) {
-      auto block = *it;
+    for (auto block : linfo.blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();

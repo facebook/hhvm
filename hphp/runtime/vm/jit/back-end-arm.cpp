@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit { namespace arm {
 
@@ -478,7 +479,7 @@ struct BackEnd : public jit::BackEnd {
     a.   bind (&after);
   }
 
-  void streamPhysReg(std::ostream& os, PhysReg& reg) override {
+  void streamPhysReg(std::ostream& os, PhysReg reg) override {
     auto prefix = reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
                                 ? 'x' : 'w')
                   : (vixl::FPRegister(reg).size() == vixl::kSRegSize
@@ -514,38 +515,24 @@ RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
   return InvalidRegPair;
 }
 
-static void genBlock(IRUnit& unit, CodeBlock& cb, CodeBlock& coldCode,
-                     CodeBlock& frozenCode,
-                     CodegenState& state, Block* block,
-                     std::vector<TransBCMapping>* bcMap) {
+static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
+                       CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(unit, cb, coldCode, frozenCode, state);
+  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  size_t hhir_count{0};
   for (IRInstruction& instr : *block) {
     IRInstruction* inst = &instr;
+    hhir_count++;
 
     if (instr.is(EndGuards)) state.pastGuards = true;
-    if (bcMap && state.pastGuards &&
-        (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI)) {
-      // Don't insert an entry in bcMap if the marker corresponds to last entry
-      // in there.
-      if (bcMap->empty() ||
-          bcMap->back().md5 != inst->marker().func()->unit()->md5() ||
-          bcMap->back().bcStart != inst->marker().bcOff()) {
-        bcMap->push_back(TransBCMapping{
-            inst->marker().func()->unit()->md5(),
-            inst->marker().bcOff(),
-            mcg->cgFixups().m_tletMain->frontier(),
-            mcg->cgFixups().m_tletCold->frontier(),
-            mcg->cgFixups().m_tletFrozen->frontier()});
-      }
-    }
-    auto* start = cb.frontier();
+
+    vasm.main().setOrigin(inst);
+    vasm.cold().setOrigin(inst);
+    vasm.frozen().setOrigin(inst);
+
     cg.cgInst(inst);
-    if (state.asmInfo && start < cb.frontier()) {
-      state.asmInfo->updateForInstruction(inst, AreaIndex::Main,
-        start, cb.frontier());
-    }
   }
+  return hhir_count;
 }
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
@@ -554,11 +541,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
   LiveRegs live_regs = computeLiveRegs(unit, regs);
   CodegenState state(unit, regs, live_regs, asmInfo);
-
-  // Returns: whether a block has already been emitted.
-  DEBUG_ONLY auto isEmitted = [&](Block* block) {
-    return state.addresses[block];
-  };
 
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
@@ -581,7 +563,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   }
   auto coldStart DEBUG_ONLY = coldCodeIn.frontier();
   auto mainStart DEBUG_ONLY = mainCodeIn.frontier();
-  auto bcMap = &mcg->cgFixups().m_bcMap;
+  size_t hhir_count{0};
+
   {
     mcg->code.lock();
     mcg->cgFixups().setBlocks(&mainCode, &coldCode, frozenCode);
@@ -591,79 +574,41 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       mcg->code.unlock();
     };
 
-    /*
-     * Emit the given block on the supplied assembler.  The `nextLinear'
-     * is the next block that will be emitted on this assembler.  If is
-     * not the next block in control flow order, then emit a patchable jump
-     * to the next flow block.
-     */
-    auto emitBlock = [&](CodeBlock& cb, Block* block, Block* nextLinear) {
-      assert(!isEmitted(block));
-
-      FTRACE(6, "genBlock {} on {}\n", block->id(),
-             cb.base() == coldCode.base() ? "acold" : "a");
-
-      auto const aStart       = cb.frontier();
-      auto const acoldStart   = coldCode.frontier();
-      auto const afrozenStart = frozenCode->frontier();
-      patchJumps(cb, state, block);
-      state.addresses[block] = aStart;
-
-      // If the block ends with a Jmp and the next block is going to be
-      // its target, we don't need to actually emit it.
-      IRInstruction* last = &block->back();
-      state.noTerminalJmp = last->op() == Jmp && nextLinear == last->taken();
-
-      if (state.asmInfo) {
-        state.asmInfo->asmBlockRanges[block] = TcaRange(aStart, cb.frontier());
-      }
-
-      genBlock(unit, cb, coldCode, *frozenCode, state, block, bcMap);
-      auto nextFlow = block->next();
-      if (nextFlow && nextFlow != nextLinear) {
-        emitFwdJmp(cb, nextFlow, state);
-      }
-
-      if (state.asmInfo) {
-        state.asmInfo->asmBlockRanges[block] = TcaRange(aStart, cb.frontier());
-        if (cb.base() != coldCode.base() && frozenCode != &coldCode) {
-          state.asmInfo->coldBlockRanges[block] = TcaRange(acoldStart,
-                                                       coldCode.frontier());
-        }
-        if (cb.base() != frozenCode->base()) {
-          state.asmInfo->frozenBlockRanges[block] = TcaRange(afrozenStart,
-                                                        frozenCode->frontier());
-        }
-      }
-    };
-
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       emitTraceCall(mainCode, unit.bcOff());
     }
 
     auto const linfo = layoutBlocks(unit);
-
-    for (auto it = linfo.blocks.begin(); it != linfo.acoldIt; ++it) {
-      Block* nextLinear = std::next(it) != linfo.acoldIt
-        ? *std::next(it) : nullptr;
-      emitBlock(mainCode, *it, nextLinear);
+    Vasm vasm(&state.meta);
+    auto& vunit = vasm.unit();
+    // create the initial set of vasm numbered the same as hhir blocks.
+    for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
+      state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
-    for (auto it = linfo.acoldIt; it != linfo.afrozenIt; ++it) {
-      Block* nextLinear = std::next(it) != linfo.afrozenIt
-        ? *std::next(it) : nullptr;
-      emitBlock(coldCode, *it, nextLinear);
+    // create vregs for all relevant SSATmps
+    //assignRegs(unit, vunit, state, linfo.blocks);
+    vunit.roots.push_back(state.labels[unit.entry()]);
+    vasm.main(mainCode);
+    vasm.cold(coldCode);
+    vasm.frozen(*frozenCode);
+    for (auto block : linfo.blocks) {
+      auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
+               block->hint() == Block::Hint::Unused ? vasm.frozen() :
+               vasm.main();
+      FTRACE(6, "genBlock {} on {}\n", block->id(),
+             area_names[(unsigned)v.area()]);
+      auto b = state.labels[block];
+      vunit.blocks[b].area = v.area();
+      v.use(b);
+      hhir_count += genBlock(unit, v, vasm, state, block);
+      assert(v.closed());
+      assert(vasm.main().empty() || vasm.main().closed());
+      assert(vasm.cold().empty() || vasm.cold().closed());
+      assert(vasm.frozen().empty() || vasm.frozen().closed());
     }
-    for (auto it = linfo.afrozenIt; it != linfo.blocks.end(); ++it) {
-      Block* nextLinear = std::next(it) != linfo.blocks.end()
-        ? *std::next(it) : nullptr;
-      emitBlock(*frozenCode, *it, nextLinear);
-    }
-
-    if (debug) {
-      for (Block* UNUSED block : linfo.blocks) {
-        assert(isEmitted(block));
-      }
-    }
+    printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
+    assert(check(vunit));
+    vasm.finishARM(arm::abi, state.asmInfo);
   }
 
   assert(coldCodeIn.frontier() == coldStart);

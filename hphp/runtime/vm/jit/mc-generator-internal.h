@@ -38,7 +38,6 @@ void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 
 template <class Then>
 void ifThen(Vout& v, ConditionCode cc, Then thenBlock) {
-  using namespace x64;
   auto then = v.makeBlock();
   auto done = v.makeBlock();
   v << jcc{cc, {done, then}};

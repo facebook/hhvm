@@ -17,8 +17,10 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
@@ -33,6 +35,11 @@ using Trace::ringbufferName;
 const char* area_names[] = { "main", "cold", "frozen" };
 namespace {
 
+const char* vixl_ccs[] = {
+  "eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
+  "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
+};
+
 // Visitor class to format the operands of a Vinstr. There are
 // imm() overloaded methods for each type of operand used by any Vinstr.
 // If we are missing an overload, the templated catch-all prints "?".
@@ -44,6 +51,9 @@ struct FormatVisitor {
     str << sep() << "?";
   }
   void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
+  void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
+  void imm(uint8_t i) { imm(int(i)); }
+  void imm(uint16_t i) { imm(int(i)); }
   void imm(int i) { str << sep() << i; }
   void imm(bool b) { str << sep() << (b ? 'T' : 'F'); }
   void imm(Immed s) { str << sep() << s.l(); }
@@ -55,7 +65,7 @@ struct FormatVisitor {
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
-  void imm(Vpoint p) { str << sep() << (size_t)p; }
+  void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
   void imm(SrcKey k) { str << sep() << showShort(k); }
   void imm(Fixup fix) {
@@ -99,10 +109,6 @@ struct FormatVisitor {
     str << sep() << show(p);
   }
 
-  void print(Reg64 r) {
-    str << sep() << reg::regname(r);
-  }
-
   void print(Vtuple t) {
     for (auto r : unit.tuples[t]) print(r);
   }
@@ -111,26 +117,10 @@ struct FormatVisitor {
     regs.forEach([&](Vreg r) { print(r); });
   }
 
-  template<class R> void print(R r) {
-    str << sep();
-    if (!r.isValid()) str << "%?";
-    else if (r.isVirt()) str << "%" << size_t(r);
-    else str << name(r);
+  void print(Vreg r) {
+    str << sep() << show(r);
   }
-  const char* name(Vreg64 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg32 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg8 r) { return reg::regname(r.asReg()); }
-  const char* name(VregXMM r) {
-    return reg::regname(r.asReg());
-  }
-  const char* name(Vreg r) {
-    if (r.isGP()) {
-      Reg64 tmp = r;
-      return reg::regname(tmp);
-    }
-    RegXMM tmp = r;
-    return reg::regname(tmp);
-  }
+
   const char* sep() { return comma ? ", " : (comma = true, ""); }
   const Vunit& unit;
 
@@ -142,16 +132,12 @@ struct FormatVisitor {
 
 std::string show(Vreg r) {
   if (!r.isValid()) return "%?";
-  if (r.isPhys()) {
-    if (r.isGP()) {
-      Reg64 gpr = r;
-      return reg::regname(gpr);
-    }
-    RegXMM xmm = r;
-    return reg::regname(xmm);
-  }
   std::ostringstream str;
-  str << "%" << size_t(r);
+  if (r.isPhys()) {
+    mcg->backEnd().streamPhysReg(str, r);
+  } else {
+    str << "%" << size_t(r);
+  }
   return str.str();
 }
 

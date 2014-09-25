@@ -157,7 +157,7 @@ class BackEnd {
   virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                            SrcKey sk, size_t dbgOff) = 0;
 
-  virtual void streamPhysReg(std::ostream& os, PhysReg& reg) = 0;
+  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
 

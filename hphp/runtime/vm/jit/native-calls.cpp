@@ -410,7 +410,6 @@ const CallInfo& CallMap::info(Opcode op) {
 
 } // NativeCalls
 
-namespace x64 {
 using namespace NativeCalls;
 ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
                     const IRInstruction* inst) {
@@ -439,36 +438,5 @@ ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
   }
   return argGroup;
 }
-} // X64
-namespace arm {
-using namespace NativeCalls;
-ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
-                    const IRInstruction* inst) {
-  ArgGroup argGroup{inst, regs[inst]};
-  for (auto const& arg : info.args) {
-    switch (arg.type) {
-    case ArgType::SSA:
-      argGroup.ssa(arg.ival);
-      break;
-    case ArgType::TV:
-      argGroup.typedValue(arg.ival);
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.memberKeyS(arg.ival);
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.memberKeyIS(arg.ival);
-      break;
-    case ArgType::ExtraImm:
-      argGroup.imm(arg.extraFunc(inst));
-      break;
-    case ArgType::Imm:
-      argGroup.imm(arg.ival);
-      break;
-    }
-  }
-  return argGroup;
-}
-} // ARM
 
 } }

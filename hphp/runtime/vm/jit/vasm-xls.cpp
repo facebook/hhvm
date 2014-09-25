@@ -16,11 +16,14 @@
 
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
 
@@ -162,10 +165,22 @@ typedef PhysReg::Map<unsigned> PosVec;
 // This encapsulates the intermediate data structures used during the algorithm
 // so we don't have to pass them around everywhere.
 struct Vxls {
-  Vxls(Vunit& unit, const Abi& abi) : unit(unit), abi(abi) {
-    // no matter what we're given, use xmm15 to break shuffle cycles
-    this->abi.simdUnreserved.remove(xmm15);
-    this->abi.simdReserved.add(xmm15);
+  Vxls(Vunit& unit, const Abi& abi)
+    : unit(unit)
+    , m_abi(abi)
+    , m_sp(mcg->backEnd().rSp()) {
+    switch (arch()) {
+      case Arch::X64:
+        m_tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
+        break;
+      case Arch::ARM:
+        m_tmp = vixl::x17; // also used as tmp1 by MacroAssembler
+        break;
+    }
+    m_abi.simdUnreserved.remove(m_tmp);
+    m_abi.simdReserved.add(m_tmp);
+    assert(!m_abi.gpUnreserved.contains(m_sp));
+    assert(!m_abi.gpUnreserved.contains(m_tmp));
   }
   ~Vxls();
   // phases
@@ -203,14 +218,17 @@ struct Vxls {
   void print(const char* caption);
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
   void dumpIntervals();
+  int spEffect(Vinstr& inst) const;
 public:
   struct Compare { bool operator()(const Interval*, const Interval*); };
 public:
   Vunit& unit;
-  Abi abi;
+  Abi m_abi;
+  PhysReg m_sp; // arch-dependent stack pointer
+  PhysReg m_tmp; // only for breaking cycles
   jit::vector<Vlabel> blocks;          // sorted blocks
   jit::vector<LiveRange> block_ranges; // [start,end) position of each block
-  jit::vector<int> spill_offsets;      // per-block rsp[offset] to spill-slots
+  jit::vector<int> spill_offsets;      // per-block sp[offset] to spill-slots
   jit::vector<LiveSet> livein;         // per-block live-in sets
   jit::vector<Interval*> intervals;    // parent intervals, null if unused
   jit::priority_queue<Interval*,Compare> pending; // sorted by Interval start
@@ -508,14 +526,12 @@ void Vxls::computePositions() {
   }
 }
 
-// Return the effect this instruction has on the value of rsp.
-// this will assert if an instruction mutates rsp in an untrackable way.
-int rspEffect(const Vunit& unit, Vinstr& inst) {
+// Return the effect this instruction has on the value of sp.
+// this will assert if an instruction mutates sp in an untrackable way.
+int Vxls::spEffect(Vinstr& inst) const {
   switch (inst.op) {
     default:
-      visitDefs(unit, inst, [&](Vreg r) {
-        assert(r != Vreg64(rsp));
-      });
+      if (debug) visitDefs(unit, inst, [&](Vreg r) { assert(r != m_sp); });
       return 0;
     case Vinstr::push:
     case Vinstr::pushl:
@@ -526,16 +542,16 @@ int rspEffect(const Vunit& unit, Vinstr& inst) {
       return 8;
     case Vinstr::addqi: {
       auto& i = inst.addqi_;
-      if (i.d == Vreg64(rsp)) {
-        assert(i.s1 == Vreg64(rsp));
+      if (i.d == Vreg64(m_sp)) {
+        assert(i.s1 == Vreg64(m_sp));
         return i.s0.l();
       }
       return 0;
     }
     case Vinstr::subqi: {
       auto& i = inst.subqi_;
-      if (i.d == Vreg64(rsp)) {
-        assert(i.s1 == Vreg64(rsp));
+      if (i.d == Vreg64(m_sp)) {
+        assert(i.s1 == Vreg64(m_sp));
         return -i.s0.l();
       }
       return 0;
@@ -556,12 +572,12 @@ void Vxls::analyzeRsp() {
       offset = 0;
     }
     for (auto& inst : unit.blocks[b].code) {
-      offset -= rspEffect(unit, inst);
+      offset -= spEffect(inst);
     }
     for (auto s : succs(unit.blocks[b])) {
       if (visited.test(s)) {
         assert_flog(offset == spill_offsets[s],
-                    "rsp mismatch on edge B{}->B{}, expected {} got {}",
+                    "sp mismatch on edge B{}->B{}, expected {} got {}",
                     size_t(b), size_t(s), spill_offsets[s], offset);
       } else {
         spill_offsets[s] = offset;
@@ -597,7 +613,12 @@ struct DefVisitor {
   template<class D, class H> void defHint(D dst, H hint) {
     def(dst, dst.kind, hint);
   }
-  template<class R> void def(R r) { def(r, r.kind); }
+  template<class R> void def(R r) {
+    def(r, r.kind);
+  }
+  void def(RegSet rs) {
+    rs.forEach([&](Vreg r) { def(r); });
+  }
   void def(Vreg r, VregKind kind, Vreg hint = Vreg{}) {
     auto ivl = m_intervals[r];
     if (m_live.test(r)) {
@@ -718,6 +739,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::bindexit:
       defs = RegSet(rAsm);
       break;
+    // arm instrs
+    case Vinstr::hostcall:
+      defs = (abi.all() - abi.calleeSaved) |
+             RegSet(PhysReg(arm::rHostCallReg));
+      break;
     default:
       break;
   }
@@ -759,7 +785,7 @@ void Vxls::buildIntervals() {
       UseVisitor uv(live, *this, {block_range.start, pos});
       visitOperands(inst, dv);
       RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
+      getEffects(m_abi, inst, implicit_uses, implicit_across, implicit_defs);
       implicit_defs.forEach([&](Vreg r) {
         dv.def(r);
       });
@@ -886,11 +912,11 @@ PhysReg find(const PosVec& posns) {
 // Constrain the allowable registers for ivl by inspecting uses, and
 // return the latest position for which that set is valid.
 unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
-  allow = abi.unreserved();
+  allow = m_abi.unreserved();
   for (auto& u : ivl->uses) {
-    auto need = u.kind == VregKind::Simd ? abi.simdUnreserved :
-                u.kind == VregKind::Gpr ? abi.gpUnreserved :
-                abi.unreserved();
+    auto need = u.kind == VregKind::Simd ? m_abi.simdUnreserved :
+                u.kind == VregKind::Gpr ? m_abi.gpUnreserved :
+                m_abi.unreserved();
     if ((allow & need).empty()) {
       // cannot satisfy constraints; must split before u.pos
       return u.pos - 1;
@@ -1136,6 +1162,7 @@ struct Renamer {
   template<class R> void use(R& r) { rename(r); }
   template<class S, class H> void useHint(S& src, H) { rename(src); }
   template<class R> void across(R& r) { rename(r); }
+  void def(RegSet) {}
   void use(Vptr& m) {
     if (m.base.isValid()) rename(m.base);
     if (m.index.isValid()) rename(m.index);
@@ -1309,8 +1336,8 @@ void Vxls::insertCopies() {
     auto& code = block.code;
     auto offset = spill_offsets[b];
     for (unsigned j = 0; j < code.size(); j++, pos += 2) {
-      MemoryRef slots = rsp[offset];
-      offset -= rspEffect(unit, code[j]);
+      MemoryRef slots = m_sp[offset];
+      offset -= spEffect(code[j]);
       auto s = spills.find(pos - 1);
       if (s != spills.end()) {
         insertSpillsAt(code, j, s->second, slots, pos - 1);
@@ -1335,7 +1362,7 @@ void Vxls::insertCopies() {
       auto c = edge_copies.find({b, 0});
       if (c != edge_copies.end()) {
         unsigned j = code.size() - 1;
-        auto slots = rsp[spill_offsets[succlist[0]]];
+        auto slots = m_sp[spill_offsets[succlist[0]]];
         insertCopiesAt(code, j, c->second, slots, block_ranges[b].end - 1);
       }
     } else {
@@ -1344,7 +1371,7 @@ void Vxls::insertCopies() {
         auto s = succlist[i];
         auto c = edge_copies.find({b, i});
         if (c != edge_copies.end()) {
-          auto slots = rsp[spill_offsets[s]];
+          auto slots = m_sp[spill_offsets[s]];
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           insertCopiesAt(code, j, c->second, slots, block_ranges[s].start);
@@ -1407,7 +1434,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
       }
     }
   }
-  auto hows = doRegMoves(moves, xmm15);
+  auto hows = doRegMoves(moves, m_tmp);
   auto count = hows.size() + loads.size();
   code.insert(code.begin() + j, count, ud2{});
   for (auto& how : hows) {
@@ -1482,7 +1509,7 @@ std::string Interval::toString() {
     out << delim << folly::format("#{:08x}", val);
   }
   if (slot >= 0) {
-    out << delim << "[%rsp+" << PhysLoc::disp(slot) << "]";
+    out << delim << "[%sp+" << PhysLoc::disp(slot) << "]";
   }
   delim = "";
   out << " [";
@@ -1532,7 +1559,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
   Interval* fixed = nullptr;
   forEachInterval(intervals, [&] (Interval* ivl) {
     if (ivl->fixed()) {
-      if (ignore_reserved && !abi.unreserved().contains(ivl->vreg)) {
+      if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
         return;
       }
       if (collapse_fixed) {
@@ -1575,7 +1602,7 @@ void Vxls::print(const char* caption) {
   str << "Intervals " << caption << " " << s_counter << "\n";
   forEachInterval(intervals, [&] (Interval* ivl) {
     if (ivl->fixed()) {
-      if (ignore_reserved && !abi.unreserved().contains(ivl->vreg)) {
+      if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
         return;
       }
       if (collapse_fixed) {
@@ -1623,6 +1650,10 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::jmp: return {&inst.jmp_.target, 1};
     case Vinstr::phijmp: return {&inst.phijmp_.target, 1};
     case Vinstr::unwind: return {inst.unwind_.targets, 2};
+    // arm
+    case Vinstr::cbcc: return {inst.cbcc_.targets, 2};
+    case Vinstr::tbcc: return {inst.tbcc_.targets, 2};
+    case Vinstr::hcunwind: return {inst.hcunwind_.targets, 2};
     default: return {nullptr, nullptr};
   }
 }

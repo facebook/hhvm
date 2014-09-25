@@ -36,6 +36,13 @@ PredVector computePreds(const Vunit& unit) {
   return preds;
 }
 
+// true if inst is a 2-way conditional branch
+bool isBranch(const Vinstr& inst) {
+  return inst.op == Vinstr::jcc ||
+         inst.op == Vinstr::tbcc ||
+         inst.op == Vinstr::cbcc;
+}
+
 void optimizeJmps(Vunit& unit) {
   auto isEmpty = [&](Vlabel b, Vinstr::Opcode op) {
     auto& code = unit.blocks[b].code;

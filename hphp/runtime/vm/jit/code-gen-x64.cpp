@@ -278,7 +278,6 @@ ArgGroup CodeGenerator::argGroup() const {
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
   assert(!inst->is(Shuffle));
-  Opcode opc = inst->op();
   m_curInst = inst;
   SCOPE_EXIT {
     m_curInst = nullptr;
@@ -293,7 +292,7 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
     m_dlocs.push_back(m_state.locs[d]);
     assert(m_dlocs.back().reg(0).isValid());
   }
-  switch (opc) {
+  switch (inst->op()) {
 #define O(name, dsts, srcs, flags)                                \
     case name: FTRACE(7, "cg" #name "\n");                          \
       cg ## name (inst);                                   \
@@ -745,7 +744,7 @@ static bool shuffleArgsPlanningHelper(PhysReg::Map<PhysReg>& moves,
 
 static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
   // Compute the move/shuffle plan.
-  PhysReg::Map<PhysReg> moves;
+  MovePlan moves;
   PhysReg::Map<ArgDesc*> argDescs;
 
   for (size_t i = 0; i < args.numGpArgs(); ++i) {

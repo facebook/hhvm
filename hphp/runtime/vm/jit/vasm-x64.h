@@ -82,8 +82,9 @@ struct Vreg {
   bool operator==(Vreg r) const { return rn == r.rn; }
   bool operator!=(Vreg r) const { return rn != r.rn; }
   PhysReg physReg() const {
-    assert(isPhys());
-    return isGP() ? PhysReg(/* implicit */operator Reg64()) :
+    assert(!isValid() || isPhys());
+    return !isValid() ? InvalidReg :
+           isGP() ? PhysReg(/* implicit */operator Reg64()) :
                     PhysReg(/* implicit */operator RegXMM());
   }
   Vptr operator[](int disp) const;
@@ -379,6 +380,18 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(store, Inone, U(s) U(d), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
+  /* arm instructions */\
+  O(asrv, Inone, U(sl) U(sr), D(d))\
+  O(brk, I(code), Un, Dn)\
+  O(cbcc, I(cc), U(s), Dn)\
+  O(hcsync, I(fix) I(call), Un, Dn)\
+  O(hcnocatch, I(call), Un, Dn)\
+  O(hcunwind, I(call), Un, Dn)\
+  O(hostcall, I(argc) I(syncpoint), U(args), Dn)\
+  O(lslv, Inone, U(sl) U(sr), D(d))\
+  O(pushregs, Inone, U(regs), Dn)\
+  O(popregs, Inone, Un, D(regs))\
+  O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
   O(andb, Inone, U(s0) U(s1), D(d)) \
   O(andbi, I(s0), UH(s1,d), DH(d,s1)) \
@@ -388,6 +401,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(andq, Inone, U(s0) U(s1), D(d)) \
   O(andqi, I(s0), UH(s1,d), DH(d,s1)) \
   O(addlm, Inone, U(s0) U(m), Dn) \
+  O(addli, I(s0), UH(s1,d), DH(d,s1)) \
   O(addq, Inone, U(s0) U(s1), D(d)) \
   O(addqi, I(s0), UH(s1,d), DH(d,s1)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
@@ -537,6 +551,21 @@ struct store { Vreg s; Vptr d; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 
+// arm-specific intrinsics
+struct hcsync { Fixup fix; Vpoint call; };
+struct hcnocatch { Vpoint call; };
+struct hcunwind { Vpoint call; Vlabel targets[2]; };
+struct pushregs { RegSet regs; };
+struct popregs { RegSet regs; };
+
+// arm specific instructions
+struct brk { uint16_t code; };
+struct hostcall { RegSet args; uint8_t argc; Vpoint syncpoint; };
+struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
+struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
+struct lslv { Vreg64 sl, sr, d; };
+struct asrv { Vreg64 sl, sr, d; };
+
 // ATT style operand order. for binary ops:
 // op   s0 s1 d:  d = s1 op s0    =>   d=s1; d op= s0
 // op   imm s1 d: d = s1 op imm   =>   d=s1; d op= imm
@@ -561,6 +590,7 @@ struct andq  { Vreg64 s0, s1, d; };
 struct andqi { Immed s0; Vreg64 s1, d; };
 struct addlm { Vreg32 s0; Vptr m; };
 struct addq  { Vreg64 s0, s1, d; };
+struct addli { Immed s0; Vreg32 s1, d; };
 struct addqi { Immed s0; Vreg64 s1, d; };
 struct addsd  { VregXMM s0, s1, d; };
 struct call { CodeAddress target; RegSet args; };
@@ -710,6 +740,7 @@ struct Vunit {
   Vreg makeConst(uint64_t);
   Vreg makeConst(double);
   Vreg makeConst(const void* p) { return makeConst(uint64_t(p)); }
+  Vreg makeConst(uint32_t v) { return makeConst(uint64_t(v)); }
   Vreg makeConst(int64_t v) { return makeConst(uint64_t(v)); }
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
@@ -793,6 +824,7 @@ struct Vasm {
   }
 
   void finishX64(const Abi&, AsmInfo* asmInfo);
+  void finishARM(const Abi&, AsmInfo* asmInfo);
 
   // get an existing area
   Vout& main() { return area(AreaIndex::Main).out; }
@@ -958,6 +990,7 @@ extern const char* vinst_names[];
 bool isBlockEnd(Vinstr& inst);
 std::string format(Vreg);
 bool check(Vunit&);
+bool checkBlockEnd(Vunit& v, Vlabel b);
 
 // search for the phidef in block b, then return its dest tuple
 Vtuple findDefs(const Vunit& unit, Vlabel b);

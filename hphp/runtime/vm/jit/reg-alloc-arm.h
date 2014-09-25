@@ -52,18 +52,6 @@ bool mayUseConst(const IRInstruction& inst, unsigned i) {
       return vixl::Assembler::IsImmArithmetic(cint);
     }
     break;
-  case AddInt:
-  case SubInt:
-  case EqInt:
-  case NeqInt:
-  case LtInt:
-  case GtInt:
-  case LteInt:
-  case GteInt:
-    if (i == 1) {
-      return vixl::Assembler::IsImmArithmetic(cint);
-    }
-    break;
 
   //TODO: t3944093 add constraints for existing arm codegen
   default:

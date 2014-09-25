@@ -12,10 +12,9 @@ final class Siege extends Process {
   private ?string $logfile;
 
   public function __construct(
-    private string $tempDir,
+    private PerfOptions $options,
     private PerfTarget $target,
     private RequestMode $mode,
-    PerfOptions $options,
   ) {
     parent::__construct($options->siege);
 
@@ -26,20 +25,19 @@ final class Siege extends Process {
       if (preg_match('/^SIEGE 3\.0\.[0-7]$/', $version_line)) {
         fprintf(
           STDERR,
-          "WARNING: Siege 3.0.0-3.0.7 send an incorrect HOST header to ports ".
+          "WARNING: Siege 3.0.0-3.0.7 sends an incorrect HOST header to ports ".
           "other than :80 and :443. You are using '%s'.\n\n".
           "You can specify a path to siege 2.7x or >= 3.0.8 with the ".
           "--siege=/path/to/siege option. If you have patched siege to fix ".
-          "issue, pass --skip-version-checks.\n",
-          $version_line
+          "this issue, pass --skip-version-checks.\n",
+          $version_line,
         );
         exit(1);
       }
     }
 
-
     if ($mode === RequestModes::BENCHMARK) {
-      $this->logfile = tempnam($tempDir, 'siege');
+      $this->logfile = tempnam($options->tempDir, 'siege');
     }
   }
 
@@ -50,8 +48,16 @@ final class Siege extends Process {
     }
   }
 
+  public function start(): void {
+    parent::start(
+      $this->options->daemonOutputFileName('siege'),
+      $this->options->delayProcessLaunch,
+      $this->options->traceSubProcess,
+    );
+  }
+
   protected function getArguments(): Vector<string> {
-    $urls_file = tempnam($this->tempDir, 'urls');
+    $urls_file = tempnam($this->options->tempDir, 'urls');
     $urls = file_get_contents($this->target->getURLsFile());
     $urls = str_replace(
       '__HTTP_PORT__',

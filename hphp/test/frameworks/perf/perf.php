@@ -23,21 +23,22 @@ function print_progress(string $out): void {
 }
 
 function run_benchmark(
-  PerfTarget $target,
-  PHPEngine $php_engine,
-  string $temp_dir,
   PerfOptions $options,
+  PerfTarget $target,
+  PHPEngine $php_engine
 ) {
   print_progress('Installing framework');
   $target->install();
 
   print_progress('Starting Nginx');
-  $nginx = new NginxDaemon($temp_dir, $target, $options);
+  $nginx = new NginxDaemon($options, $target);
   $nginx->start();
+  Process::sleepSeconds($options->delayNginxStartup);
   invariant($nginx->isRunning(), 'Failed to start nginx');
 
   print_progress('Starting PHP Engine');
   $php_engine->start();
+  Process::sleepSeconds($options->delayPhpStartup);
   invariant(
     $php_engine->isRunning(),
     'Failed to start '.get_class($php_engine)
@@ -45,7 +46,7 @@ function run_benchmark(
 
   if ($target->needsUnfreeze()) {
     print_progress('Unfreezing framework');
-    $target->unfreeze();
+    $target->unfreeze($options);
   }
 
   if ($options->skipSanityCheck) {
@@ -56,7 +57,7 @@ function run_benchmark(
   }
 
   print_progress('Starting Siege for warmup');
-  $siege = new Siege($temp_dir, $target, RequestModes::WARMUP, $options);
+  $siege = new Siege($options, $target, RequestModes::WARMUP);
   $siege->start();
   invariant($siege->isRunning(), 'Failed to start siege');
   $siege->wait();
@@ -71,7 +72,7 @@ function run_benchmark(
   $nginx->clearAccessLog();
 
   print_progress('Running Siege for benchmark');
-  $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
+  $siege = new Siege($options, $target, RequestModes::BENCHMARK);
   $siege->start();
   invariant($siege->isRunning(), 'Siege failed to start');
   $siege->wait();
@@ -143,16 +144,18 @@ function perf_main($argv) {
     }
   );
 
-  $temp_dir = tempnam('/dev/shm', 'hhvm-nginx');
-  // Currently a file - change to a dir
-  unlink($temp_dir);
-  mkdir($temp_dir);
+  if ($options->tempDir === null) {
+    $options->tempDir = tempnam('/dev/shm', 'hhvm-nginx');
+    // Currently a file - change to a dir
+    unlink($options->tempDir);
+    mkdir($options->tempDir);
+  }
 
   $target = null;
   $engine = null;
 
   if ($options->wordpress) {
-    $target = new WordpressTarget($options, $temp_dir);
+    $target = new WordpressTarget($options);
   }
   if ($options->toys) {
     $target = new ToysTarget();
@@ -173,10 +176,10 @@ function perf_main($argv) {
   }
 
   if ($options->php5) {
-    $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
+    $engine = new PHP5Daemon($options, $target);
   }
   if ($options->hhvm) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options);
+    $engine = new HHVMDaemon($options, $target);
   }
   if ($engine === null) {
     fprintf(
@@ -188,7 +191,7 @@ function perf_main($argv) {
     invariant_violation("exit() already called");
   }
 
-  run_benchmark($target, $engine, $temp_dir, $options);
+  run_benchmark($options, $target, $engine);
 }
 
 perf_main($argv);

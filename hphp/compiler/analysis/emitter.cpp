@@ -6907,7 +6907,16 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     e.FPushFuncD(numParams, methName);
   } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
-    e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
+
+    auto classScope = meth->getClassScope();
+    if (classScope && classScope->isTrait()) {
+      e.String(methName);
+      e.Self();
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodF(numParams);
+    } else {
+      e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
+    }
   } else {
     e.This();
     fpiStart = m_ue.bcPos();

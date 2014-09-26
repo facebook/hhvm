@@ -33,6 +33,7 @@ include 'huffman.php';
 include 'richards.php';
 include 'deltablue.php';
 include 'splay.php';
+include 'quick-hull.php';
 
 $success = true;
 

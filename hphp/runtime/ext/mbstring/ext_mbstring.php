@@ -54,7 +54,7 @@ function mb_check_encoding(mixed $var = null, mixed $encoding = null): bool;
  *   specified by mode.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_convert_case(string $str, int $mode, mixed $encoding = null): mixed;
 
 /**
@@ -263,7 +263,7 @@ function mb_encode_numericentity(string $str,
  *   pattern, FALSE if not.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg_match(string $pattern,
                        string $str,
                        mixed $option = null): bool;
@@ -284,7 +284,7 @@ function mb_ereg_match(string $pattern,
  * @return mixed - The resultant string on success, or FALSE on error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg_replace(mixed $pattern,
                          string $replacement,
                          string $str,
@@ -344,7 +344,7 @@ function mb_ereg_search_init(string $str,
  *   matched part. It returns FALSE on error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg_search_pos(mixed $pattern = null, mixed $option = null): mixed;
 
 /**
@@ -360,7 +360,7 @@ function mb_ereg_search_pos(mixed $pattern = null, mixed $option = null): mixed;
  *   element, and so on. It returns FALSE on error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg_search_regs(mixed $pattern = null,
                              mixed $option = null): mixed;
 
@@ -386,7 +386,7 @@ function mb_ereg_search_setpos(int $position): bool;
  *   previous one is used.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg_search(mixed $pattern = null, mixed $option = null): mixed;
 
 /**
@@ -402,7 +402,7 @@ function mb_ereg_search(mixed $pattern = null, mixed $option = null): mixed;
  *   an error happens, FALSE will be returned.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_ereg(mixed $pattern, string $str, mixed &$regs = null): mixed;
 
 /**
@@ -416,7 +416,7 @@ function mb_ereg(mixed $pattern, string $str, mixed &$regs = null): mixed;
  * @return mixed - The resultant string or FALSE on error.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_eregi_replace(mixed $pattern,
                           string $replacement,
                           string $str,
@@ -435,7 +435,7 @@ function mb_eregi_replace(mixed $pattern,
  *   an error happens, FALSE will be returned.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_eregi(mixed $pattern, string $str, mixed &$regs = null): mixed;
 
 /**
@@ -463,7 +463,7 @@ function mb_get_info(mixed $type = null): mixed;
  *   mb_http_input() does not process specified HTTP input, it returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_http_input(mixed $type = null): mixed;
 
 /**
@@ -630,7 +630,7 @@ function mb_send_mail(string $to,
  * @return mixed - The result as an array.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_split(string $pattern,
                   string $str,
                   int $count = -1): mixed;
@@ -697,7 +697,7 @@ function mb_strimwidth(string $str,
  *   needle in the haystack string, or FALSE if needle is not found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_stripos(string $haystack,
                     string $needle,
                     int $offset = 0,
@@ -722,7 +722,7 @@ function mb_stripos(string $haystack,
  *   found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_stristr(string $haystack,
                     string $needle,
                     bool $part = false,
@@ -739,7 +739,7 @@ function mb_stristr(string $haystack,
  *   character encoding encoding. A multi-byte character is counted as 1.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strlen(string $str, mixed $encoding = null): mixed;
 
 /**
@@ -758,7 +758,7 @@ function mb_strlen(string $str, mixed $encoding = null): mixed;
  *   needle in the haystack string. If needle is not found, it returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strpos(string $haystack,
                    string $needle,
                    int $offset = 0,
@@ -782,7 +782,7 @@ function mb_strpos(string $haystack,
  *   found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strrchr(string $haystack,
                     string $needle,
                     bool $part = false,
@@ -807,7 +807,7 @@ function mb_strrchr(string $haystack,
  *   found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strrichr(string $haystack,
                      string $needle,
                      bool $part = false,
@@ -830,7 +830,7 @@ function mb_strrichr(string $haystack,
  *   needle in the haystack string, or FALSE if needle is not found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strripos(string $haystack,
                      string $needle,
                      int $offset = 0,
@@ -854,7 +854,7 @@ function mb_strripos(string $haystack,
  *   needle in the haystack string. If needle is not found, it returns FALSE.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strrpos(string $haystack,
                     string $needle,
                     mixed $offset = 0,
@@ -878,7 +878,7 @@ function mb_strrpos(string $haystack,
  *   found.
  *
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function mb_strstr(string $haystack,
                    string $needle,
                    bool $part = false,

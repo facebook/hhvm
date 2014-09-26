@@ -44,7 +44,7 @@ function bzcompress(string $source, int $blocksize = 4,
  * @return mixed - The decompressed string, or an error number if an error
  *                 occurred.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function bzdecompress(string $source, int $small = 0): mixed;
 
 /**
@@ -117,7 +117,7 @@ function bzopen(mixed $filename, string $mode): mixed;
  *
  * @return mixed - Returns the uncompressed data, or FALSE on error.
  */
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function bzread(resource $bz, int $length = 1024): mixed;
 
 /**

@@ -7,6 +7,7 @@
             "name": "checkdate",
             "desc": "Checks the validity of the date formed by the arguments. A date is considered valid if each parameter is properly defined.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Boolean",
@@ -33,6 +34,7 @@
         {
             "name": "date_add",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Object"
@@ -51,6 +53,7 @@
         {
             "name": "date_create_from_format",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -75,6 +78,7 @@
         {
             "name": "date_parse_from_format",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant"
@@ -140,6 +144,7 @@
             "name": "date_default_timezone_get",
             "desc": "In order of preference, this function returns the default timezone by:\n\nReading the timezone set using the date_default_timezone_set() function (if any)\n\nReading the TZ environment variable (if non empty) (Prior to PHP 5.3.0)\n\nReading the value of the date.timezone ini option (if set)\n\nQuerying the host operating system (if supported and allowed by the OS)\n\nIf none of the above succeed, date_default_timezone_get() will return a default timezone of UTC.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String",
@@ -178,6 +183,7 @@
         {
             "name": "date_interval_create_from_date_string",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Object"
@@ -192,6 +198,7 @@
         {
             "name": "date_interval_format",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String"
@@ -210,6 +217,7 @@
         {
             "name": "date_isodate_set",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": null
@@ -237,6 +245,7 @@
         {
             "name": "date_format",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String"
@@ -255,6 +264,7 @@
         {
             "name": "date_modify",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": null
@@ -273,6 +283,7 @@
         {
             "name": "date_parse",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -289,6 +300,7 @@
         {
             "name": "date_sub",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Object"
@@ -307,6 +319,7 @@
         {
             "name": "date_sun_info",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "VariantMap",
@@ -429,6 +442,7 @@
         {
             "name": "date_time_set",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": null
@@ -456,6 +470,7 @@
         {
             "name": "date_timestamp_set",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Object"
@@ -474,6 +489,7 @@
         {
             "name": "date_timezone_set",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": null
@@ -493,6 +509,7 @@
             "name": "date",
             "desc": "Returns a string formatted according to the given format string using the given integer timestamp or the current time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -549,6 +566,7 @@
             "name": "gmdate",
             "desc": "Identical to the date() function except that the time returned is Greenwich Mean Time (GMT).",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -620,6 +638,7 @@
             "name": "gmstrftime",
             "desc": "Behaves the same as strftime() except that the time returned is Greenwich Mean Time (GMT). For example, when run in Eastern Standard Time (GMT -0500), the first line below prints \"Dec 31 1998 20:00:00\", while the second prints \"Jan 01 1999 01:00:00\".",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String",
@@ -643,6 +662,7 @@
             "name": "idate",
             "desc": "Returns a number formatted according to the given format string using the given integer timestamp or the current local time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().\n\nUnlike the function date(), idate() accepts just one char in the format parameter.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -754,6 +774,7 @@
             "name": "strftime",
             "desc": "Format the time and\/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at MSDN.",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -796,6 +817,7 @@
         {
             "name": "strtotime",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -861,6 +883,7 @@
         {
             "name": "timezone_location_get",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "VariantVec"
@@ -875,6 +898,7 @@
         {
             "name": "timezone_name_from_abbr",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Variant",
@@ -903,6 +927,7 @@
         {
             "name": "timezone_name_get",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "String"
@@ -917,6 +942,7 @@
         {
             "name": "timezone_open",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "Object"
@@ -931,6 +957,7 @@
         {
             "name": "timezone_transitions_get",
             "flags": [
+                "ParamCoerceModeFalse"
             ],
             "return": {
                 "type": "VariantVec"

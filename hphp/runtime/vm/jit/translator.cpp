@@ -1663,6 +1663,7 @@ Translator::translateRegion(const RegionDesc& region,
       if (!ht.irBuilder().startBlock(irBlock, marker)) {
         FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
                blockId);
+        processedBlocks.insert(blockId);
         continue;
       }
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);

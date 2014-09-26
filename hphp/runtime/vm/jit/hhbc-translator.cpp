@@ -13,12 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+
 #include <algorithm>
 #include <vector>
 
-#include "folly/CpuId.h"
-#include "folly/Optional.h"
+#include <folly/CpuId.h>
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -36,9 +38,9 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"

@@ -261,11 +261,11 @@ SSATmp* IRInstruction::dst(unsigned i) const {
 }
 
 DstRange IRInstruction::dsts() {
-  return Range<SSATmp*>(m_dst, m_numDsts);
+  return DstRange(m_dst, m_numDsts);
 }
 
-Range<const SSATmp*> IRInstruction::dsts() const {
-  return Range<const SSATmp*>(m_dst, m_numDsts);
+folly::Range<const SSATmp*> IRInstruction::dsts() const {
+  return folly::Range<const SSATmp*>(m_dst, m_numDsts);
 }
 
 void IRInstruction::convertToNop() {

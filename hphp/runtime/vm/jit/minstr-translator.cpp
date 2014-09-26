@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 
 // These files do ugly things with macros so include them last
 #include "hphp/util/assert-throw.h"

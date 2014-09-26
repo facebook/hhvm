@@ -13,10 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/check.h"
 
-#include <unordered_set>
 #include <bitset>
+#include <iostream>
+#include <unordered_set>
 
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"

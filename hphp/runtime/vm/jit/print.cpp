@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/print.h"
 
+#include <iostream>
 #include <vector>
 
 #include "hphp/util/abi-cxx.h"

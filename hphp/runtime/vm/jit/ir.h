@@ -17,39 +17,21 @@
 #ifndef incl_HPHP_VM_IR_H_
 #define incl_HPHP_VM_IR_H_
 
-#include <algorithm>
-#include <cstdarg>
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <list>
-#include <forward_list>
-#include <cassert>
 #include <type_traits>
+#include <vector>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
 #include "folly/Range.h"
 
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
-// forward declaration
-class StringData;
+//////////////////////////////////////////////////////////////////////
+struct StringData;
 
 namespace jit {
-
-using HPHP::jit::TCA;
+//////////////////////////////////////////////////////////////////////
 
 class IRUnit;
 struct IRInstruction;
@@ -961,9 +943,8 @@ Opcode getStackModifyingOpcode(Opcode opc);
 
 bool isRefCounted(SSATmp* opnd);
 
-using folly::Range;
-typedef Range<SSATmp**> SrcRange;
-typedef Range<SSATmp*> DstRange;
+using SrcRange = folly::Range<SSATmp**>;
+using DstRange = folly::Range<SSATmp*>;
 
 /*
  * Given an SSATmp of type Cls, try to find the name of the class.
@@ -1012,7 +993,7 @@ private:
   void init(const Opcode op, const Type base);
 };
 
-typedef folly::Range<TCA> TcaRange;
+using TcaRange = folly::Range<TCA>;
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/vm/jit/back-end-arm.h"
 
+#include <iostream>
+
+#include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/util/text-color.h"
-#include "hphp/vixl/a64/disasm-a64.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/block.h"

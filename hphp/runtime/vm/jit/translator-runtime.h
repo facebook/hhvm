@@ -13,27 +13,37 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace jit {
+#include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/types.h"
 
+namespace HPHP {
+//////////////////////////////////////////////////////////////////////
+
+struct Func;
+
+namespace jit {
+//////////////////////////////////////////////////////////////////////
+
+struct TypeConstraint;
 
 /* MInstrState is stored right above the reserved spill space on the C++
  * stack. */
 #define MISOFF(nm)                                         \
   (offsetof(MInstrState, nm) + kReservedRSPSpillSpace)
 
-const size_t kReservedRSPMInstrStateSpace = RESERVED_STACK_MINSTR_STATE_SPACE;
-const size_t kReservedRSPSpillSpace       = RESERVED_STACK_SPILL_SPACE;
-const size_t kReservedRSPTotalSpace       = RESERVED_STACK_TOTAL_SPACE;
+constexpr size_t kReservedRSPMInstrStateSpace =
+  RESERVED_STACK_MINSTR_STATE_SPACE;
+constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
+constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
 
 //////////////////////////////////////////////////////////////////////
 

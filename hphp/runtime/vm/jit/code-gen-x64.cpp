@@ -17,8 +17,9 @@
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 
 #include <cstring>
-#include <unwind.h>
+#include <iostream>
 #include <limits>
+#include <unwind.h>
 #include <vector>
 
 #include "folly/ScopeGuard.h"

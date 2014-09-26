@@ -23,6 +23,9 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 
 namespace HPHP { namespace jit {
+//////////////////////////////////////////////////////////////////////
+
+class SSATmp;
 
 /*
  * IRInstructions must be arena-allocatable.
@@ -219,7 +222,7 @@ struct IRInstruction {
    */
   SSATmp*    dst(unsigned i) const;
   DstRange   dsts();
-  Range<const SSATmp*> dsts() const;
+  folly::Range<const SSATmp*> dsts() const;
   void       setDsts(unsigned numDsts, SSATmp* newDsts) {
     assert(naryDst());
     m_numDsts = numDsts;

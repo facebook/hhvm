@@ -141,6 +141,7 @@ class ProfTransRec {
   TransID              transId()    const;
   TransKind            kind()       const;
   SrcKey               srcKey()     const;
+  SrcKey               lastSrcKey() const;
   Offset               startBcOff() const;
   Offset               lastBcOff()  const;
   Func*                func()       const;
@@ -180,6 +181,7 @@ public:
 
   bool                    hasTransRec(TransID id)     const;
   SrcKey                  transSrcKey(TransID id)     const;
+  SrcKey                  transLastSrcKey(TransID id) const;
   Offset                  transStartBcOff(TransID id) const;
   Offset                  transLastBcOff(TransID id)  const;
   Op*                     transLastInstr(TransID id)  const;
@@ -189,6 +191,7 @@ public:
   const TransIDVec&       funcProfTransIDs(FuncId funcId) const;
   RegionDescPtr           transRegion(TransID id)     const;
   TransKind               transKind(TransID id)       const;
+  bool                    isKindProfile(TransID id)   const;
   int64_t                 transCounter(TransID id)    const;
   int64_t*                transCounterAddr(TransID id);
   TransID                 prologueTransId(const Func* func,

@@ -18,9 +18,6 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/resumable_wait_handle.h"
-#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -66,14 +63,13 @@ struct XenonRequestLocalData : public RequestEventHandler  {
   XenonRequestLocalData();
   virtual ~XenonRequestLocalData();
   void log(Xenon::SampleType t);
-  Array logAsyncStack();
   Array createResponse();
 
   // virtual from RequestEventHandler
   void requestInit() override;
   void requestShutdown() override;
 
-  // an array of (php, async) stacks
+  // an array of php stacks
   Array m_stackSnapshots;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(XenonRequestLocalData, s_xenonData);
@@ -89,8 +85,7 @@ const StaticString
   s_line("line"),
   s_time("time"),
   s_isWait("ioWaitSample"),
-  s_phpStack("phpStack"),
-  s_asyncStack("asyncStack");
+  s_phpStack("phpStack");
 
 namespace {
 
@@ -123,11 +118,6 @@ Array parsePhpStack(const Array& bt) {
     }
   }
   return stack.toArray();
-}
-
-c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
-  assert(o->instanceof(c_WaitableWaitHandle::classof()));
-  return static_cast<c_WaitableWaitHandle*>(o.get());
 }
 
 } // namespace
@@ -250,37 +240,6 @@ XenonRequestLocalData::~XenonRequestLocalData() {
   TRACE(1, "~XenonRequestLocalData\n");
 }
 
-Array XenonRequestLocalData::logAsyncStack() {
-  VMRegAnchor _;
-
-  auto currentWaitHandle = c_ResumableWaitHandle::getRunning(vmfp());
-  if (currentWaitHandle == nullptr) {
-    // if we have a nullptr, then we have no async stack to store for this log
-    return empty_array();
-  }
-  auto depStack = currentWaitHandle->t_getdependencystack();
-  PackedArrayInit bt(depStack->size());
-
-  for (ArrayIter iter(depStack); iter; ++iter) {
-    if (iter.secondRef().isNull()) {
-      bt.append(make_map_array(s_function, "<prep>"));
-    } else {
-      auto wh = objToWaitableWaitHandle(iter.secondRef().toObject());
-      Array frameData;
-      frameData.set(s_function, wh->t_getname());
-      // Async function wait handles may have a source location to add.
-      if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction) {
-        auto afwh = wh->asAsyncFunction();
-        if (!afwh->isRunning()) {
-          frameData.set(s_file, afwh->getFileName(), true);
-          frameData.set(s_line, afwh->getLineNumber(), true);
-        }
-      }
-      bt.append(frameData);
-    }
-  }
-  return bt.toArray();
-}
 
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
@@ -291,7 +250,6 @@ Array XenonRequestLocalData::createResponse() {
     stacks.append(make_map_array(
       s_time, frame[s_time],
       s_phpStack, parsePhpStack(frame[s_phpStack].toArray()),
-      s_asyncStack, frame[s_asyncStack],
       s_isWait, frame[s_isWait]
     ));
   }
@@ -308,7 +266,6 @@ void XenonRequestLocalData::log(Xenon::SampleType t) {
   m_stackSnapshots.append(make_map_array(
     s_time, now,
     s_phpStack, bt,
-    s_asyncStack, logAsyncStack(),
     s_isWait, (t == Xenon::IOWaitSample)
   ));
 }

@@ -25,7 +25,7 @@
                         Project Xenon
   What is it?
   The name Xenon is from the type of bulb used in strobelights.  The idea is
-  that a timer goes off and the code takes a snapshot of the php and async
+  that a timer goes off and the code takes a snapshot of the combined stack
   stack at that time (ie it flashes the code).
 
   How does it work?
@@ -55,7 +55,7 @@
   all of the data gather for that request/thread.  Period is a double that
   represents seconds (ie 0.1 is a ten of a second).
   Once can alternatively set Xenon ForceAlways=true, which will then
-  gather PHP and async stacks at every function enter/exit.  This will
+  gather combined stacks at every function enter/exit.  This will
   gather potentially large amounts of data - mostly used for small
   script debugging.
 */

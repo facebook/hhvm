@@ -26,10 +26,11 @@
 
 namespace HPHP { namespace jit {
 
+struct AsmInfo;
+struct Block;
+struct GuardConstraints;
 struct IRInstruction;
 class  SSATmp;
-struct Block;
-struct AsmInfo;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,

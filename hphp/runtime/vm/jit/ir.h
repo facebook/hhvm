@@ -38,7 +38,6 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/func.h"
@@ -1078,33 +1077,6 @@ private:
 };
 
 typedef folly::Range<TCA> TcaRange;
-
-/*
- * GuardConstraints holds state that is collected during initial IR generation
- * and needed by the guard relaxation pass.
- */
-struct GuardConstraints {
-  /*
-   * Maps guard instructions (GuardLoc, CheckLoc, GuardStk, etc...)  to
-   * TypeConstraints. The TypeConstraints for a guard start out fully generic
-   * and are tightened appropriately when a value's type is used.
-   */
-  jit::hash_map<const IRInstruction*, TypeConstraint> guards;
-
-  /*
-   * Maps certain instructions dealing with locals to the source of the
-   * local's type coming into the instruction: usually either a guard or the
-   * last known value of the local.
-   */
-  jit::hash_map<const IRInstruction*, TypeSourceSet> typeSrcs;
-
-  /*
-   * Maps AssertLoc/CheckLoc instructions to the type of the local coming into
-   * the instruction. It is needed to compute the type of the local after the
-   * guard.
-   */
-  jit::hash_map<const IRInstruction*, Type> prevTypes;
-};
 
 /*
  * Counts the number of cells a SpillStack will logically push.  (Not

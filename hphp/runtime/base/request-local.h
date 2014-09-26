@@ -71,6 +71,10 @@ struct RequestLocal {
     return m_node.m_p;
   }
 
+  bool getInited() const {
+    return (m_node.m_p != nullptr) && m_node.m_p->getInited();
+  }
+
   void create() NEVER_INLINE;
 
   static void OnThreadExit(void * p) {
@@ -119,6 +123,11 @@ template<typename T>
 class RequestLocal {
 public:
   RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
+
+  bool getInited() const {
+    return !m_tlsObjects.isNull() && m_tlsObjects.get()->getInited();
+  }
+
   T *operator->() const { return get();}
   T &operator*() const { return *get();}
 

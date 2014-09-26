@@ -156,10 +156,26 @@ Array enumWrappers() {
 }
 
 Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
+  /* As include() and require() support streams, we sometimes need to look up
+   * a wrapper outside of a request - eg in HPHP::lookupUnit when using
+   * StatCache. We can't look at the request locals then, as:
+   * 1. requestShutdown has already been called
+   * 2. dereferencing s_request_wrappers will call requestInit, and register
+   *    a request shutdown event handler
+   * 3. the list of request event handlers is a smart::vector, so it gets lost
+   *    at the end of the request.
+   *
+   * The result of this is that s_request_wrappers is no longer request-local -
+   * requestInit() and requestShutdown() will never be called again. As it
+   * holds references to request-allocated data, this leads to intermittent
+   * segfaults.
+   */
+  bool have_request_wrappers = s_request_wrappers.getInited();
+
   String lscheme = f_strtolower(scheme);
 
   // Request local wrapper?
-  {
+  if (have_request_wrappers) {
     auto it = s_request_wrappers->m_wrappers.find(lscheme);
     if (it != s_request_wrappers->m_wrappers.end()) {
       return it->second.get();
@@ -170,8 +186,9 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
   {
     auto it = s_wrappers.find(lscheme.data());
     if ((it != s_wrappers.end()) &&
+        (!have_request_wrappers ||
         (s_request_wrappers->m_disabled.find(lscheme) ==
-         s_request_wrappers->m_disabled.end())) {
+         s_request_wrappers->m_disabled.end()))) {
       return it->second;
     }
   }

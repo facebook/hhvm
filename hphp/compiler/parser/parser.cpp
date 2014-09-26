@@ -491,7 +491,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "asio_get_running_in_context" ||
            stripped == "asio_get_running" ||
            stripped == "xenon_get_data" ||
+           stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
+           stripped == "objprof_start" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;

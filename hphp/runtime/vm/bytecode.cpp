@@ -94,6 +94,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/container-functions.h"
 
@@ -7612,6 +7613,7 @@ void ExecutionContext::requestInit() {
   profileRequestStart();
 
   MemoryProfile::startProfiling();
+  MM().setObjectTracking(false);
 
 #ifdef DEBUG
   Class* cls = NamedEntity::get(s_stdclass.get())->clsList();

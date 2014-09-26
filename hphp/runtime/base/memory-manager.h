@@ -20,6 +20,7 @@
 #include <array>
 #include <vector>
 #include <utility>
+#include <set>
 
 #include "folly/Memory.h"
 
@@ -403,11 +404,12 @@ public:
    */
   void* smartMallocSizeLogged(uint32_t size);
   void smartFreeSizeLogged(void* p, uint32_t size);
+  void* objMallocLogged(size_t size);
+  void objFreeLogged(void* vp, size_t size);
+  void* smartMallocSizeLoggedTracked(uint32_t size);
   template<bool callerSavesActualSize>
   std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
-  void* objMallocLogged(size_t size);
-  void objFreeLogged(void* vp, size_t size);
 
   /*
    * During session shutdown, before resetAllocator(), this phase runs
@@ -508,7 +510,27 @@ public:
     void* callback_data
   );
 
+
+  /*
+   * Object tracking keeps instances of object data's by using track/untrack.
+   * It is then possible to iterate them by iterating the memory manager.
+   * This entire feature is enabled/disabled by using setObjectTracking(bool).
+   */
+  void* trackSlow(void* p);
+  void* untrackSlow(void* p);
+  void* track(void* p);
+  void* untrack(void* p);
+  void setObjectTracking(bool val);
+  bool getObjectTracking();
+
+  /*
+   * Iterating the memory manager tracked objects.
+   */
   void iterate(iterate_callback p_callback, void* user_data);
+  typedef typename std::unordered_set<void*>::iterator iterator;
+  iterator objects_begin() { return m_instances.begin(); }
+  iterator objects_end() { return m_instances.end(); }
+
 private:
   friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
@@ -592,6 +614,8 @@ private:
 
 private:
   bool m_sweeping;
+  bool m_trackingInstances;
+  std::unordered_set<void*> m_instances;
 };
 
 //////////////////////////////////////////////////////////////////////

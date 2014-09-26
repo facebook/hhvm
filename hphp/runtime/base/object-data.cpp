@@ -112,7 +112,8 @@ bool ObjectData::destruct() {
         handle_destructor_exception();
       }
       tvRefcountedDecRef(&retval);
-      return c == this->getCount();
+
+      return (c == this->getCount());
     }
   }
   return true;
@@ -993,13 +994,16 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 }
 
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSizeLogged(size))
+  return new (MM().smartMallocSizeLoggedTracked(size))
     ObjectData(cls, NoInit::noinit);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBigLogged<false>(size).first)
+  auto& mm = MM();
+  auto obj = new (mm.smartMallocSizeBigLogged<false>(size).first)
     ObjectData(cls, NoInit::noinit);
+  mm.track(obj);
+  return obj;
 }
 
 NEVER_INLINE
@@ -1021,6 +1025,8 @@ ObjectData::~ObjectData() {
 
 void ObjectData::DeleteObject(ObjectData* objectData) {
   auto const cls = objectData->getVMClass();
+  auto& mm = MM();
+  mm.untrack(objectData);
 
   if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
     return cls->instanceDtor()(objectData, cls);
@@ -1043,9 +1049,9 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 
   auto const size = sizeForNProps(nProps);
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(objectData, size);
+    return mm.smartFreeSizeLogged(objectData, size);
   }
-  MM().smartFreeSizeBigLogged(objectData, size);
+  mm.smartFreeSizeBigLogged(objectData, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

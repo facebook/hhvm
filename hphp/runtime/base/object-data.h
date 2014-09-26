@@ -143,7 +143,8 @@ class ObjectData {
     }
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
-    auto const obj = new (MM().objMallocLogged(size)) ObjectData(cls);
+    auto& mm = MM();
+    auto const obj = new (mm.objMallocLogged(size)) ObjectData(cls);
     if (UNLIKELY(cls->callsCustomInstanceInit())) {
       /*
         This must happen after the constructor finishes,
@@ -156,6 +157,7 @@ class ObjectData {
       */
       obj->callCustomInstanceInit();
     }
+    mm.track(obj);
     return obj;
   }
 
@@ -169,7 +171,6 @@ class ObjectData {
    */
   static ObjectData* newInstanceRaw(Class* cls, uint32_t size);
   static ObjectData* newInstanceRawBig(Class* cls, size_t size);
-
  private:
   void instanceInit(Class* cls) {
     setAttributes(cls->getODAttrs());

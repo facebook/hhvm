@@ -204,10 +204,10 @@ class Memcached {
    *
    * @return int - Returns item's new value on success.
    */
-  public function decrement(mixed $key,
-                            mixed $offset = 1,
-                            mixed $initial_value = 0,
-                            mixed $expiry = 0): mixed {
+  public function decrement(string $key,
+                            int $offset = 1,
+                            int $initial_value = 0,
+                            int $expiry = 0): mixed {
     return $this->decrementByKey('', $key, $offset, $initial_value, $expiry);
   }
 
@@ -472,12 +472,11 @@ class Memcached {
    *
    * @return int - Returns new item's value on success.
    */
-  public function increment(mixed $key,
-                            mixed $offset = 1,
-                            mixed $initial_value = 0,
-                            mixed $expiry = 0): mixed {
-    return $this->incrementByKey('', $key, $offset, $initial_value, $expiry);
-  }
+  <<__Native>>
+  public function increment(string $key,
+                            int $offset = 1,
+                            int $initial_value = 0,
+                            int $expiry = 0): mixed;
 
   /**
    * Increment numeric item's value, stored on a specific server

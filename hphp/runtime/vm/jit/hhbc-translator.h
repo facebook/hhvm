@@ -678,7 +678,9 @@ private:
       Pair
     };
     SimpleOp simpleCollectionOp();
-    void constrainCollectionOpBase();
+    // Returns true if it successfully constrained the base, false otherwise.
+    bool constrainCollectionOpBase();
+    void specializeBaseIfPossible(Type baseType);
 
     bool generateMVal() const;
     bool needFirstRatchet() const;

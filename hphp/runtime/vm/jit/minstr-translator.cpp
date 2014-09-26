@@ -600,7 +600,7 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
     // Register that we care about the specific type of the base, and might
     // care about its specialized type.
     constrainBase(DataTypeSpecific);
-    constrainCollectionOpBase();
+    specializeBaseIfPossible(baseType);
   } else {
     // Everything else is passed by pointer. We don't have to worry about
     // unboxing here, since all the generic helpers understand boxed bases.
@@ -709,20 +709,28 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
   return SimpleOp::None;
 }
 
-void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
+void HhbcTranslator::MInstrTranslator::specializeBaseIfPossible(Type baseType) {
+  if (constrainCollectionOpBase()) return;
+  if (baseType >= Type::Obj) return;
+  if (!baseType.isSpecialized()) return;
+
+  constrainBase(TypeConstraint(baseType.getClass()));
+}
+
+bool HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
   switch (simpleCollectionOp()) {
     case SimpleOp::None:
-      return;
+      return false;
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledArray:
     case SimpleOp::String:
       m_irb.constrainValue(m_base, DataTypeSpecific);
-      return;
+      return true;
 
     case SimpleOp::PackedArray:
       constrainBase(TypeConstraint(DataTypeSpecialized).setWantArrayKind());
-      return;
+      return true;
 
     case SimpleOp::Vector:
     case SimpleOp::Map:
@@ -731,11 +739,12 @@ void HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
       auto baseType = ldRefReturn(base->type().unbox());
       always_assert(baseType < Type::Obj);
       constrainBase(TypeConstraint(baseType.getClass()));
-      return;
+      return true;
     }
   }
 
   not_reached();
+  return false;
 }
 
 // "Simple" bases are stack cells and locals.

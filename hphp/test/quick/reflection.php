@@ -248,7 +248,7 @@ print "\n";
 
 print "--- getStaticPropertyValue() ---\n";
 var_dump($rb->getStaticPropertyValue('s0'));
-var_dump($rb->getStaticPropertyValue('s4'));
+var_dump($rb->getStaticPropertyValue('s2'));
 print "\n";
 
 print "--- hasConstant() ---\n";

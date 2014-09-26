@@ -791,8 +791,7 @@ void Array::unserialize(VariableUnserializer *uns) {
     auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
 
     // For large arrays, do a naive pre-check for OOM.
-    if (UNLIKELY(allocsz > RuntimeOption::ArrUnserializeCheckSize &&
-                 MM().preAllocOOM(allocsz))) {
+    if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
       check_request_surprise_unlikely();
     }
 

@@ -85,7 +85,6 @@ std::string RuntimeOption::ServerUser;
 
 int RuntimeOption::MaxLoopCount = 0;
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
-size_t RuntimeOption::ArrUnserializeCheckSize = 10000;
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;

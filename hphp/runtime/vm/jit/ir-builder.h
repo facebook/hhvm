@@ -125,9 +125,10 @@ struct IRBuilder {
    */
 
   /*
-   * Start the given block.
+   * Start the given block.  Returns whether or not it succeeded.  A
+   * failure may occur in case the block turned out to be unreachable.
    */
-  void startBlock(Block* block, const BCMarker& marker);
+  bool startBlock(Block* block, const BCMarker& marker);
 
   /*
    * Create a new block corresponding to bytecode control flow.

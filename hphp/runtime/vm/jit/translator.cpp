@@ -1655,12 +1655,15 @@ Translator::translateRegion(const RegionDesc& region,
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
       if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
-        always_assert(RuntimeOption::EvalJitLoops ||
-                      RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
+        always_assert(RuntimeOption::EvalJitLoops);
         irb.clearBlockState(irBlock);
       }
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      ht.irBuilder().startBlock(irBlock, marker);
+      if (!ht.irBuilder().startBlock(irBlock, marker)) {
+        FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
+               blockId);
+        continue;
+      }
       findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
     }

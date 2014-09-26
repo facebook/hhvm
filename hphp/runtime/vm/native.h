@@ -104,7 +104,7 @@ class Object;
  * These macros only differ in the following ways:
  * - They accept a classname in addition to the function name
  * - The registered name of the function is "ClassName->FunctionName"
- * - Prototypes include a prepended const Object& parameter (named this_)
+ * - Prototypes include a prepended ObjectData* const parameter (named this_)
  */
 #define HHVM_MN(cn,fn) c_ ## cn ## _ni_ ## fn
 #define HHVM_METHOD(cn, fn, ...) \

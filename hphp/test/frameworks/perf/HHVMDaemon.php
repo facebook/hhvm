@@ -28,7 +28,7 @@ final class HHVMDaemon extends PHPEngine {
       })->map($x ==> escapeshellarg($x))
     );
     if ($options->traceSubProcess) {
-      printf("%s\n", $checkCommand);
+      echo $checkCommand."\n";
     }
     exec($checkCommand, $output);
     $checks = json_decode(implode("\n", $output), /* as array = */ true);

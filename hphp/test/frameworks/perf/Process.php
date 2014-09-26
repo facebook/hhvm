@@ -52,9 +52,9 @@ abstract class Process {
 
     if ($trace) {
       if ($use_pipe) {
-        printf("%s\n", $this->command);
+        echo $this->command."\n";
       } else {
-        printf("%s >> %s\n", $this->command, $outputFileName);
+        echo $this->command." >> ".$outputFileName."\n";
       }
     }
 

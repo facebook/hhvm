@@ -130,37 +130,65 @@ final class PerfOptions {
     // use these arguments if you also give the -i-am-not-benchmarking
     // argument too.
     //
-    $ga = "";
+    $used_args = "";
 
     $this->hhvmExtraArguments =
-      PerfOptions::get_array_arg($o, 'hhvm-extra-arguments', &$ga,);
+      PerfOptions::get_array_arg($o,
+        'hhvm-extra-arguments',
+        &$used_args,);
     $this->delayNginxStartup =
-      PerfOptions::get_float_arg($o, 'delay-nginx-startup', 0.0, &$ga,);
+      PerfOptions::get_float_arg($o,
+        'delay-nginx-startup',
+        0.0,
+        &$used_args,);
     $this->delayPhpStartup =
-      PerfOptions::get_float_arg($o, 'delay-php-startup', 0.0, &$ga,);
+      PerfOptions::get_float_arg($o,
+        'delay-php-startup',
+        0.0,
+        &$used_args,);
     $this->delayProcessLaunch =
-      PerfOptions::get_float_arg( $o, 'delay-process-launch', 1.0, &$ga,);
+      PerfOptions::get_float_arg($o,
+        'delay-process-launch',
+        1.0,
+        &$used_args,);
     $this->delayCheckHealth =
-      PerfOptions::get_float_arg($o, 'delay-check-health', 1.0, &$ga,);
-
+      PerfOptions::get_float_arg($o,
+        'delay-check-health',
+        1.0,
+        &$used_args,);
     $this->maxdelayUnfreeze =
-      PerfOptions::get_float_arg($o, 'max-delay-unfreeze', 60.0, &$ga,);
+      PerfOptions::get_float_arg($o,
+        'max-delay-unfreeze',
+        60.0,
+        &$used_args,);
     $this->maxdelayAdminRequest =
-      PerfOptions::get_float_arg($o, 'max-delay-admin-request', 3.0, &$ga,);
-
+      PerfOptions::get_float_arg($o,
+        'max-delay-admin-request',
+        3.0,
+        &$used_args,);
     $this->maxdelayNginxKeepAlive =
-      PerfOptions::get_float_arg($o, 'max-delay-nginx-keep-alive', 60.0, &$ga,);
+      PerfOptions::get_float_arg($o,
+        'max-delay-nginx-keep-alive',
+        60.0,
+        &$used_args,);
     $this->maxdelayNginxFastCGI =
-      PerfOptions::get_float_arg($o, 'max-delay-nginx-fastcgi', 60.0, &$ga,);
+      PerfOptions::get_float_arg(
+        $o,
+        'max-delay-nginx-fastcgi',
+        60.0,
+        &$used_args,);
 
     $newvalue = array_key_exists('daemon-files', $o);
     if ($newvalue ^ $this->daemonOutputToFile) {
-      $ga .= ' --daemon-files';
+      $used_args .= ' --daemon-files';
     }
     $this->daemonOutputToFile = $newvalue;
 
     $argTempDir =
-      PerfOptions::get_string_arg($o, 'temp-dir', '', &$ga,);
+      PerfOptions::get_string_arg($o,
+        'temp-dir',
+        '',
+        &$used_args,);
 
     if ($argTempDir === '') {
       $this->tempDir = tempnam('/dev/shm', 'hhvm-nginx');
@@ -171,14 +199,14 @@ final class PerfOptions {
       $this->tempDir = $argTempDir;
     }
 
-    if ($ga !== "") {
+    if ($used_args !== "") {
       if (!$this->notBenchmarking) {
         fprintf(
           STDERR,
           "Unless you specifically use the argument %s ".
           "you may not use any of these arguments that you did: %s\n",
           '--i-am-not-benchmarking',
-          $ga,
+          $used_args,
         );
         exit(1);
       }

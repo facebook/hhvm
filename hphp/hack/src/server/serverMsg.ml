@@ -35,6 +35,7 @@ type build_opts = {
   check: bool; (* some sanity checking *)
   clean_before_build: bool; (* when true, do a clean build *)
   clean: bool; (* when true just clean all generated files *)
+  is_push: bool; (* for push builds *)
   verbose: bool;
 }
 

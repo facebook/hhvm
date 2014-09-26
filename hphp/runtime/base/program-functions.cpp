@@ -1228,7 +1228,8 @@ static int execute_program_impl(int argc, char** argv) {
     cout << desc << "\n";
     return -1;
   }
-  if (vm.count("help")) {
+  // reuse -h for help command if possible
+  if (vm.count("help") || (vm.count("debug-host") && po.mode != "debug")) {
     cout << desc << "\n";
     return 0;
   }

@@ -61,7 +61,7 @@
 */
 
 namespace HPHP {
-class Xenon {
+class Xenon final {
   public:
 
     enum SampleType {
@@ -70,16 +70,16 @@ class Xenon {
       ExitSample,    // sample was during CPU time at the end of a function
     };
 
-    static Xenon& getInstance(void);
+    static Xenon& getInstance(void) noexcept;
 
-    Xenon();
-    ~Xenon();
-    Xenon(Xenon const&) = delete;
-    void operator=(Xenon const&) = delete;
+    Xenon() noexcept;
+    ~Xenon() noexcept {};
+    Xenon(const Xenon&) = delete;
+    void operator=(const Xenon&) = delete;
 
     void start(uint64_t msec);
     void stop();
-    void log(SampleType t);
+    void log(SampleType t) const;
     void surpriseAll();
     void onTimer();
 

@@ -26,8 +26,8 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_xenon.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 namespace HPHP {
 

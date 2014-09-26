@@ -15,7 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
+
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/resumable_wait_handle.h"
@@ -25,8 +26,8 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include <signal.h>
-#include <vector>
 #include <time.h>
 
 #include <iostream>
@@ -60,6 +61,7 @@ void *s_waitThread(void *arg) {
 // allocated when a web request begins (if Xenon is enabled)
 // grab snapshots of the php and async stack when log is called
 // detach itself from its snapshots when the request is ending.
+namespace {
 struct XenonRequestLocalData : public RequestEventHandler  {
   XenonRequestLocalData();
   virtual ~XenonRequestLocalData();
@@ -68,13 +70,14 @@ struct XenonRequestLocalData : public RequestEventHandler  {
   Array createResponse();
 
   // virtual from RequestEventHandler
-  virtual void requestInit();
-  virtual void requestShutdown();
+  void requestInit() override;
+  void requestShutdown() override;
 
   // an array of (php, async) stacks
   Array m_stackSnapshots;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(XenonRequestLocalData, s_xenonData);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics used by the Xenon classes
@@ -83,14 +86,15 @@ const StaticString
   s_class("class"),
   s_function("function"),
   s_file("file"),
-  s_type("type"),
   s_line("line"),
   s_time("time"),
   s_isWait("ioWaitSample"),
   s_phpStack("phpStack"),
   s_asyncStack("asyncStack");
 
-static Array parsePhpStack(const Array& bt) {
+namespace {
+
+Array parsePhpStack(const Array& bt) {
   PackedArrayInit stack(bt->size());
   for (ArrayIter it(bt); it; ++it) {
     const auto& frame = it.second().toArray();
@@ -121,10 +125,12 @@ static Array parsePhpStack(const Array& bt) {
   return stack.toArray();
 }
 
-static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
+c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
   assert(o->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(o.get());
 }
+
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////
 // A singleton object that handles the two Xenon modes (always or timer).
@@ -133,18 +139,15 @@ static c_WaitableWaitHandle *objToWaitableWaitHandle(Object o) {
 // For timer mode, when start is invoked, it adds a new timer to the existing
 // handler for SIGVTALRM.
 
-Xenon& Xenon::getInstance() {
+Xenon& Xenon::getInstance() noexcept {
   static Xenon instance;
   return instance;
 }
 
-Xenon::Xenon() : m_stopping(false) {
+Xenon::Xenon() noexcept : m_stopping(false) {
 #ifndef __APPLE__
   m_timerid = 0;
 #endif
-}
-
-Xenon::~Xenon() {
 }
 
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
@@ -210,7 +213,7 @@ void Xenon::stop() {
 // the Surprise flag.  The data is gathered in thread local storage.
 // If the sample is Enter, then do not record this function name because it
 // hasn't done anything.  The sample belongs to the previous function.
-void Xenon::log(SampleType t) {
+void Xenon::log(SampleType t) const {
   RequestInjectionData *rid = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (rid->checkXenonSignalFlag()) {
     if (!RuntimeOption::XenonForceAlwaysOn) {
@@ -236,6 +239,8 @@ void Xenon::surpriseAll() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // There is one XenonRequestLocalData per thread, stored in thread local area
+
+namespace {
 
 XenonRequestLocalData::XenonRequestLocalData() {
   TRACE(1, "XenonRequestLocalData\n");
@@ -330,7 +335,7 @@ void XenonRequestLocalData::requestShutdown() {
 // Function that allows php code to access request local data that has been
 // gathered via surprise flags.
 
-static Array HHVM_FUNCTION(xenon_get_data, void) {
+Array HHVM_FUNCTION(xenon_get_data, void) {
   if (RuntimeOption::XenonForceAlwaysOn ||
       RuntimeOption::XenonPeriodSeconds > 0) {
     TRACE(1, "xenon_get_data\n");
@@ -338,6 +343,8 @@ static Array HHVM_FUNCTION(xenon_get_data, void) {
   }
   return empty_array();
 }
+
+} // namespace
 
 class xenonExtension : public Extension {
  public:

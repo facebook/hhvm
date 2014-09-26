@@ -146,7 +146,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     mixed   The file name.
    */
   <<__Native>>
-  public function getFileName(): string;
+  public function getFileName(): mixed;
 
   /**
    * ( excerpt from
@@ -158,7 +158,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     mixed   The starting line number.
    */
   <<__Native>>
-  public function getStartLine(): int;
+  public function getStartLine(): mixed;
 
   /**
    * ( excerpt from
@@ -171,7 +171,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *                     or FALSE if unknown.
    */
   <<__Native>>
-  public function getEndLine(): int;
+  public function getEndLine(): mixed;
 
   /**
    * ( excerpt from
@@ -2077,7 +2077,7 @@ class ReflectionClass implements Reflector, Serializable {
    * @return     int   The starting line number, as an integer.
    */
   <<__Native>>
-  public function getStartLine(): int;
+  public function getStartLine(): mixed;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getendline.php )
@@ -2088,7 +2088,7 @@ class ReflectionClass implements Reflector, Serializable {
    *                   FALSE if unknown.
    */
   <<__Native>>
-  public function getEndLine(): int;
+  public function getEndLine(): mixed;
 
   /**
    * ( excerpt from

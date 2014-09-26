@@ -66,10 +66,6 @@ function bar(): Awaitable<A> {
   return (new Foo())->genA();
 }
 
-function duck(): Awaitable<void> {
-  return (new Foo())->prepareA();
-}
-
 function buck(): int {
   return (new Foo())->getA();
 }

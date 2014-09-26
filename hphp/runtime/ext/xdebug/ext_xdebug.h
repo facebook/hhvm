@@ -202,6 +202,7 @@ public:
 
   // Indicates whether the xdebug extension has been enabled via xdebug.enable
   static bool Enable;
+  virtual bool moduleEnabled() const { return Enable; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

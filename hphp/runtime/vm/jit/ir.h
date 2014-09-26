@@ -50,75 +50,11 @@ class StringData;
 namespace jit {
 
 using HPHP::jit::TCA;
-using HPHP::jit::RegSet;
-using HPHP::jit::PhysReg;
-using HPHP::jit::ConditionCode;
 
 class IRUnit;
 struct IRInstruction;
 class SSATmp;
 struct LocalStateHook;
-
-class FailedIRGen : public std::runtime_error {
- public:
-  const char* const file;
-  const int         line;
-  const char* const func;
-
-  FailedIRGen(const char* _file, int _line, const char* _func)
-    : std::runtime_error(folly::format("FailedIRGen @ {}:{} in {}",
-                                       _file, _line, _func).str())
-    , file(_file)
-    , line(_line)
-    , func(_func)
-  {}
-};
-
-class FailedTraceGen : public std::runtime_error {
- public:
-  FailedTraceGen(const char* file, int line, const char* why)
-    : std::runtime_error(folly::format("FailedTraceGen @ {}:{} - {}",
-                                       file, line, why).str())
-  {}
-};
-
-class FailedCodeGen : public std::runtime_error {
- public:
-  const char*   file;
-  const int     line;
-  const char*   func;
-  const Offset  bcOff;
-  const Func*   vmFunc;
-  const bool    resumed;
-  const TransID profTransId;
-
-  FailedCodeGen(const char* _file, int _line, const char* _func,
-                uint32_t _bcOff, const Func* _vmFunc, bool _resumed,
-                TransID _profTransId)
-    : std::runtime_error(
-      folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}. tid = {}",
-                    _file, _line, _func,
-                    _vmFunc->fullName()->data(), _bcOff,
-                    _resumed ? "r" : "", _profTransId)
-      .str())
-    , file(_file)
-    , line(_line)
-    , func(_func)
-    , bcOff(_bcOff)
-    , vmFunc(_vmFunc)
-    , resumed(_resumed)
-    , profTransId(_profTransId)
-  {}
-};
-
-#define SPUNT(instr) do {                           \
-  throw FailedIRGen(__FILE__, __LINE__, instr);     \
-} while(0)
-#define PUNT(instr) SPUNT(#instr)
-#define TRACE_PUNT(why) do { \
-  throw FailedTraceGen(__FILE__, __LINE__, why); \
-} while(0)
-
 
 //////////////////////////////////////////////////////////////////////
 

@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/print.h"
 
 // Include last to localize effects to this file

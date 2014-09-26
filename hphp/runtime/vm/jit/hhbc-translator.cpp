@@ -33,9 +33,11 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 // Include last to localize effects to this file

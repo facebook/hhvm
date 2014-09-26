@@ -14,20 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-
 #include "hphp/runtime/base/mixed-array-defs.h"
+
 #include <algorithm>
 #include <vector>
+
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 // These files do ugly things with macros so include them last

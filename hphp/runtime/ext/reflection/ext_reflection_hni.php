@@ -1904,17 +1904,17 @@ class ReflectionClass implements Reflector, Serializable {
     // we can only check its default value, but that fails 
     // if I want to pass the default value.
     // Use func_get_args() for this.
-
+    $args = func_get_args();
     if ($this->hasProperty($name) &&
         $this->getProperty($name)->isStatic()) {
       return hphp_get_static_property($this->getName(), $name, false);
-    } else if (!array_key_exists(1, func_get_args())) { // !isset($default)
+    } else if (!array_key_exists(1, $args)) {
       throw new ReflectionException(
         sprintf("Class %s does not have a property named %s",
                 $this->getName(), $name)
       );
     }
-    return func_get_args()[1];
+    return $args[1];
   }
 
   /**

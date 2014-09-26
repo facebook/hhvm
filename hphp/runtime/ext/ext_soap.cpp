@@ -31,7 +31,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
@@ -2064,7 +2064,7 @@ Variant c_SoapServer::t_getfunctions() {
   } else if (m_soap_functions.functions_all) {
     return Unit::getSystemFunctions() + Unit::getUserFunctions();
   } else if (!m_soap_functions.ft.empty()) {
-    return f_array_keys(m_soap_functions.ftOriginal);
+    return array_keys_helper(m_soap_functions.ftOriginal);
   }
 
   Class* cls = Unit::lookupClass(class_name.get());

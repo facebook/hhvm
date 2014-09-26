@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/system/constants.h"
 #include "hphp/system/systemlib.h"
 
@@ -279,7 +279,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
   if (UNLIKELY(filters.isNull())) {
     return empty_array();
   }
-  return f_array_keys(filters).toArray();
+  return array_keys_helper(filters).toArray();
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,

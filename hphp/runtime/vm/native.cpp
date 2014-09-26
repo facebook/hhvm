@@ -271,7 +271,7 @@ bool coerceFCallArgs(TypedValue* args,
 
 static inline int32_t minNumArgs(ActRec *ar) {
   auto func = ar->m_func;
-  auto numArgs = func->numParams();
+  auto numArgs = func->numNonVariadicParams();
   int32_t num = numArgs;
   const Func::ParamInfoVec& paramInfo = func->params();
   while (num &&

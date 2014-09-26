@@ -22,7 +22,7 @@
 #include "hphp/runtime/ext/pdo_driver.h"
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/pdo_sqlite.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -1442,7 +1442,7 @@ Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
     // the argument count is > 1
     if (_argc == 1 ||
         pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
-                                f_array_splice(_argv, 1).toArray())) {
+                                HHVM_FN(array_splice)(_argv, 1).toArray())) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

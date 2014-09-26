@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP {
@@ -105,7 +105,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
     arGetContextClassFromBuiltin(vmfp()),
     retVal
   );
-  return f_array_values(retVal).toArray();
+  return HHVM_FN(array_values)(retVal).toArray();
 }
 
 Array HHVM_FUNCTION(get_class_constants, const String& className) {

@@ -79,8 +79,8 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_array.h"
 #include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
@@ -4929,7 +4929,7 @@ OPTBLD_INLINE void ExecutionContext::iopAKExists(IOP_ARGS) {
   NEXT();
   TypedValue* arr = vmStack().topTV();
   TypedValue* key = arr + 1;
-  bool result = f_array_key_exists(tvAsCVarRef(key), tvAsCVarRef(arr));
+  bool result = HHVM_FN(array_key_exists)(tvAsCVarRef(key), tvAsCVarRef(arr));
   vmStack().popTV();
   vmStack().replaceTV<KindOfBoolean>(result);
 }
@@ -4953,9 +4953,9 @@ OPTBLD_INLINE void ExecutionContext::iopArrayIdx(IOP_ARGS) {
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
 
-  Variant result = f_hphp_array_idx(tvAsCVarRef(arr),
-                                    tvAsCVarRef(key),
-                                    tvAsCVarRef(def));
+  Variant result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
+                                  tvAsCVarRef(key),
+                                  tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();
   tvAsVariant(arr) = result;

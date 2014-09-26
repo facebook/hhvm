@@ -35,6 +35,44 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+StackValueInfo::StackValueInfo(SSATmp* value)
+  : value(value)
+  , knownType(value->type())
+  , spansCall(false)
+  , typeSrc(value->inst())
+{
+  ITRACE(5, "{} created\n", show(*this));
+}
+
+StackValueInfo::StackValueInfo(IRInstruction* inst, Type type)
+  : value(nullptr)
+  , knownType(type)
+  , spansCall(false)
+  , typeSrc(inst)
+{
+  ITRACE(5, "{} created\n", show(*this));
+}
+
+std::string show(const StackValueInfo& info) {
+  std::string out = "StackValueInfo {";
+
+  if (info.value) {
+    out += info.value->inst()->toString();
+  } else {
+    folly::toAppend(
+      info.knownType.toString(),
+      " from ",
+      info.typeSrc->toString(),
+      &out
+    );
+  }
+
+  if (info.spansCall) out += ", spans call";
+  out += "}";
+
+  return out;
+}
+
 StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   ITRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
   Trace::Indent _i;

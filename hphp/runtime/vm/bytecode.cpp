@@ -195,6 +195,10 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   return ar->m_func->cls();
 }
 
+void frame_free_locals_no_hook(ActRec* fp) {
+  frame_free_locals_inl_no_hook<false>(fp, fp->func()->numLocals());
+}
+
 const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 const StaticString s_stdclass("stdclass");

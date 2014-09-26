@@ -4,7 +4,8 @@ require_once('PerfTarget.php');
 
 final class WordpressTarget extends PerfTarget {
   public function __construct(
-    private string $tempDir
+    private PerfOptions $options,
+    private string $tempDir,
   ) {
   }
 
@@ -19,6 +20,15 @@ final class WordpressTarget extends PerfTarget {
       '-zxf',
       __DIR__.'/wordpress/wordpress-3.9.1.tar.gz',
     }));
+
+    copy(
+      __DIR__.'/wordpress/wp-config.php',
+      $this->getSourceRoot().'/wp-config.php',
+    );
+
+    if ($this->options->skipDatabaseInstall) {
+      return;
+    }
 
     $root = 'http://'.gethostname().':'.PerfSettings::HttpPort();
     $conn = mysql_connect('127.0.0.1', 'wp_bench', 'wp_bench');
@@ -59,11 +69,6 @@ final class WordpressTarget extends PerfTarget {
     mysql_query(
       'DELETE FROM wp_options WHERE option_name = "admin_email"',
       $conn
-    );
-
-    copy(
-      __DIR__.'/wordpress/wp-config.php',
-      $this->getSourceRoot().'/wp-config.php',
     );
   }
 

@@ -4,7 +4,8 @@ require_once('PerfTarget.php');
 
 final class SugarCRMTarget extends PerfTarget {
   public function __construct(
-    private string $tempDir
+    private PerfOptions $options,
+    private string $tempDir,
   ) {
   }
 
@@ -19,6 +20,15 @@ final class SugarCRMTarget extends PerfTarget {
       '-zxf',
       __DIR__.'/sugarcrm/sugarcrm_dev-6.5.16.tar.gz',
     }));
+
+    copy(
+      __DIR__.'/sugarcrm/config.php',
+      $this->getSourceRoot().'/config.php',
+    );
+
+    if ($this->options->skipDatabaseInstall) {
+      return;
+    }
 
     $root = 'http://'.gethostname().':'.PerfSettings::HttpPort();
     $conn = mysql_connect('127.0.0.1', 'sugarcrm', 'sugarcrm');
@@ -41,11 +51,6 @@ final class SugarCRMTarget extends PerfTarget {
         '-u', 'sugarcrm',
         '-psugarcrm',
       })
-    );
-
-    copy(
-      __DIR__.'/sugarcrm/config.php',
-      $this->getSourceRoot().'/config.php',
     );
   }
 

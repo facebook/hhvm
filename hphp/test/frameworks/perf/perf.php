@@ -152,13 +152,13 @@ function perf_main($argv) {
   $engine = null;
 
   if ($options->wordpress) {
-    $target = new WordpressTarget($temp_dir);
+    $target = new WordpressTarget($options, $temp_dir);
   }
   if ($options->toys) {
     $target = new ToysTarget();
   }
   if ($options->sugarcrm) {
-    $target = new SugarCRMTarget($temp_dir);
+    $target = new SugarCRMTarget($options, $temp_dir);
   }
   if ($target === null) {
     fprintf(

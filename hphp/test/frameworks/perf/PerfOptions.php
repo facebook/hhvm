@@ -14,8 +14,9 @@ final class PerfOptions {
   public bool $toys;
   public bool $sugarcrm;
 
-  public bool $skipSanityCheck;
-  public bool $skipVersionChecks;
+  public bool $skipSanityCheck = false;
+  public bool $skipVersionChecks = false;
+  public bool $skipDatabaseInstall = false;
 
   public bool $notBenchmarking;
 
@@ -31,6 +32,7 @@ final class PerfOptions {
         'i-am-not-benchmarking',
         'skip-sanity-check',
         'skip-version-checks',
+        'skip-database-install',
       ]
     );
     $this->help = array_key_exists('help', $o);
@@ -46,8 +48,32 @@ final class PerfOptions {
     $this->toys = array_key_exists('toys', $o);
     $this->sugarcrm = array_key_exists('sugarcrm-login-page', $o);
 
-    $this->skipSanityCheck = array_key_exists('skip-sanity-check', $o);
-    $this->skipVersionChecks = array_key_exists('skip-version-checks', $o);
     $this->notBenchmarking = array_key_exists('i-am-not-benchmarking', $o);
+    $this->setConvenienceFlag(
+      $this->skipSanityCheck,
+      'skip-sanity-check',
+      $o,
+    );
+    $this->setConvenienceFlag(
+      $this->skipVersionChecks,
+      'skip-version-checks',
+      $o,
+    );
+    $this->setConvenienceFlag(
+      $this->skipDatabaseInstall,
+      'skip-database-install',
+      $o,
+    );
+  }
+
+  private function setConvenienceFlag(bool &$value, string $name, array $opts) {
+    $value = array_key_exists($name, $opts);
+    if ($value) {
+      invariant(
+        $this->notBenchmarking,
+        "You must specify --i-am-not-benchmarking if you specify --%s",
+        $name
+      );
+    }
   }
 }

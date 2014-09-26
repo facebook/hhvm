@@ -130,7 +130,12 @@ void foldImms(Vunit& unit) {
     for (auto& inst : unit.blocks[b].code) {
       switch (inst.op) {
 #define O(name, imms, uses, defs)\
-        case Vinstr::name: folder.fold(inst.name##_, inst); break;
+        case Vinstr::name: {\
+          auto origin = inst.origin;\
+          folder.fold(inst.name##_, inst);\
+          inst.origin = origin;\
+          break;\
+        }
         X64_OPCODES
 #undef O
       }

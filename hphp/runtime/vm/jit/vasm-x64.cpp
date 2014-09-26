@@ -736,12 +736,12 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
 
   for (auto i = 0; i < areas.size(); ++i) {
-    const IRInstruction* currentOrigin = nullptr;
     auto& blockInfos = areaToBlockInfos[i];
     for (auto const blockID : labels) {
       auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
       if (blockInfo.snippets.empty()) continue;
 
+      const IRInstruction* currentOrigin = nullptr;
       for (auto const& snip : blockInfo.snippets) {
         if (currentOrigin != snip.origin && snip.origin) {
           currentOrigin = snip.origin;

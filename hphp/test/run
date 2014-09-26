@@ -30,7 +30,7 @@ one of a few pre-defined suite names that this script knows about.
 
 If you work with hhvm a lot, you might consider a bash alias:
 
-   alias ht="path/to/fbcode/hphp/test/run"
+   alias ht="path/to/hphp/test/run"
 
 Examples:
 
@@ -63,6 +63,9 @@ Examples:
 
   # All tests whose name containing pdo_mysql
   % $argv[0] -i pdo_mysql -m jit -r zend
+  
+  # Print all the standard tests
+  % $argv[0] --list-tests
 
 EOT;
   return usage().$help;
@@ -159,6 +162,7 @@ function get_options($argv) {
     'no-fun' => '',
     'cores' => '',
     'no-clean' => '',
+    'list-tests' => '',
   );
   $options = array();
   $files = array();
@@ -268,6 +272,16 @@ function find_tests($files, array $options = null) {
     });
   }
   return $tests;
+}
+
+function list_tests() {
+  foreach (find_tests(array('all')) as $test) {
+    foreach (array('-m interp', '-m jit') as $mode) {
+      foreach (array('', '-r') as $repo) {
+        print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
+      }
+    }
+  }
 }
 
 function find_test_ext($test, $ext) {
@@ -1566,6 +1580,9 @@ function main($argv) {
   list($options, $files) = get_options($argv);
   if (isset($options['help'])) {
     error(help());
+  }
+  if (isset($options['list-tests'])) {
+    error(list_tests());
   }
   $tests = find_tests($files, $options);
   if (isset($options['shuffle'])) {

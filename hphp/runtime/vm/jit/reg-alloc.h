@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -30,6 +31,9 @@
 namespace HPHP { namespace jit {
 
 class IRUnit;
+struct Vunit;
+struct CodegenState;
+class BackEnd;
 
 inline bool isI32(int64_t c) { return c == int32_t(c); }
 inline bool isU32(int64_t c) { return c == uint32_t(c); }
@@ -194,17 +198,18 @@ private:
   PhysReg m_reg; // if valid, force this register
 };
 
-/*
- * return a constraint for the given src
- */
+// return a constraint for the given src
 Constraint srcConstraint(const IRInstruction& inst, unsigned src);
 
-/*
- * Return a constraint for the given destination.
- */
+// Return a constraint for the given destination.
 Constraint dstConstraint(const IRInstruction& inst, unsigned dst);
 
+// Return InvalidReg, or a specific register to force tmp to use
 PhysReg forceAlloc(const SSATmp& tmp);
+
+// Assign virtual registers to all SSATmps used or defined in reachable blocks.
+void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
+                const BlockList& blocks, BackEnd*);
 
 }}
 

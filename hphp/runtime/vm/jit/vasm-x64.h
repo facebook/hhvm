@@ -389,8 +389,6 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(hcunwind, I(call), Un, Dn)\
   O(hostcall, I(argc) I(syncpoint), U(args), Dn)\
   O(lslv, Inone, U(sl) U(sr), D(d))\
-  O(pushregs, Inone, U(regs), Dn)\
-  O(popregs, Inone, Un, D(regs))\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
   O(andb, Inone, U(s0) U(s1), D(d)) \
@@ -555,8 +553,6 @@ struct unwind { Vlabel targets[2]; };
 struct hcsync { Fixup fix; Vpoint call; };
 struct hcnocatch { Vpoint call; };
 struct hcunwind { Vpoint call; Vlabel targets[2]; };
-struct pushregs { RegSet regs; };
-struct popregs { RegSet regs; };
 
 // arm specific instructions
 struct brk { uint16_t code; };

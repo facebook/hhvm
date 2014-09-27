@@ -79,6 +79,14 @@ struct BackEnd : public jit::BackEnd {
   RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
   RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
 
+  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
+    return false;
+  }
+
+  bool loadsCell(const IRInstruction& inst) override {
+    return false;
+  }
+
 #define CALLEE_SAVED_BARRIER() \
   asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", \
                "x26", "x27", "x28")
@@ -536,11 +544,10 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
 }
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
-  auto regs = allocateRegs(unit);
-  assert(checkRegisters(unit, regs)); // calls checkCfg internally.
   Timer _t(Timer::codeGen);
-  LiveRegs live_regs = computeLiveRegs(unit, regs);
-  CodegenState state(unit, regs, live_regs, asmInfo);
+  RegAllocInfo no_regs(unit);
+  LiveRegs no_live_regs(unit, RegSet());
+  CodegenState state(unit, no_regs, no_live_regs, asmInfo);
 
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
@@ -586,7 +593,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    //assignRegs(unit, vunit, state, linfo.blocks);
+    assignRegs(unit, vunit, state, linfo.blocks, this);
     vunit.roots.push_back(state.labels[unit.entry()]);
     vasm.main(mainCode);
     vasm.cold(coldCode);
@@ -616,7 +623,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
   mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
   if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", &regs, asmInfo);
+    printUnit(kCodeGenLevel, unit, " after code gen ", nullptr, asmInfo);
   }
 }
 

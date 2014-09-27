@@ -49,18 +49,13 @@ struct CodeGenerator : public jit::CodeGenerator {
   void emitCompareInt(IRInstruction* inst);
   void emitCompareIntAndSet(IRInstruction* inst, ConditionCode cond);
 
-  CallDest callDest(PhysReg reg0, PhysReg reg1 = InvalidReg) const;
+  CallDest callDest(Vreg reg0) const;
+  CallDest callDest(Vreg reg0, Vreg reg1) const;
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
 
   void cgCallNative(Vout&, IRInstruction* inst);
-  void cgCallHelper(Vout&,
-                    CppCall call,
-                    const CallDest& dstInfo,
-                    SyncOptions sync,
-                    ArgGroup& args,
-                    RegSet toSave);
   void cgCallHelper(Vout&,
                     CppCall call,
                     const CallDest& dstInfo,

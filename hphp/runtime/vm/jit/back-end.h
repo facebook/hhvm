@@ -97,6 +97,8 @@ class BackEnd {
   virtual Constraint dstConstraint(const IRInstruction& inst, unsigned i) = 0;
   virtual RegPair precolorSrc(const IRInstruction& inst, unsigned i) = 0;
   virtual RegPair precolorDst(const IRInstruction& inst, unsigned i) = 0;
+  virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
+  virtual bool loadsCell(const IRInstruction& inst) = 0;
 
   virtual void enterTCHelper(TCA start, TReqInfo& info) = 0;
   virtual CodeGenerator* newCodeGenerator(const IRUnit& unit,

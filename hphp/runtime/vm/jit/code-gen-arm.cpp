@@ -53,6 +53,7 @@ NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
+NOOP_OPCODE(Shuffle)
 
 // XXX
 NOOP_OPCODE(DbgAssertPtr);
@@ -587,6 +588,24 @@ void ifZero(Vout& v, unsigned bit, Vreg r, Then thenBlock) {
   v = done;
 }
 
+template <class T, class F>
+Vreg condZero(Vout& v, Vreg r, Vreg dst, T t, F f) {
+  using namespace x64;
+  auto fblock = v.makeBlock();
+  auto tblock = v.makeBlock();
+  auto done = v.makeBlock();
+  v << cbcc{vixl::eq, r, {fblock, tblock}};
+  v = tblock;
+  auto treg = t(v);
+  v << phijmp{done, v.makeTuple(VregList{treg})};
+  v = fblock;
+  auto freg = f(v);
+  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v = done;
+  v << phidef{v.makeTuple(VregList{dst})};
+  return dst;
+}
+
 // copy of ifThenElse from code-gen-x64.cpp
 template <class Then, class Else>
 void ifThenElse(Vout& v, ConditionCode cc, Then thenBlock, Else elseBlock) {
@@ -916,63 +935,6 @@ void CodeGenerator::cgNeqInt(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgShuffle(IRInstruction* inst) {
-  PhysReg::Map<PhysReg> moves;
-  PhysReg sp = vixl::sp;
-  auto& v = vmain();
-
-  // Put required reg-reg moves in the map, and do spills at the same time.
-  for (auto i = 0; i < inst->numSrcs(); ++i) {
-    auto rd = inst->extra<Shuffle>()->dests[i];
-    auto rs = m_state.regs[inst].src(i);
-    if (rd.numAllocated() == 0) continue;
-    if (rd.spilled()) {
-      for (auto j = 0; j < rd.numAllocated(); ++j) {
-        v << store{rs.reg(j), sp[rd.offset(j)]};
-      }
-    } else if (!rs.spilled()) {
-      if (rs.reg(0) != InvalidReg) moves[rd.reg(0)] = rs.reg(0);
-      if (rs.reg(1) != InvalidReg) moves[rd.reg(1)] = rs.reg(1);
-    }
-  }
-
-  // Do reg-reg moves.
-  auto howTo = doRegMoves(moves, rAsm);
-  for (auto& how : howTo) {
-    if (how.m_kind == MoveInfo::Kind::Move) {
-      v << copy{how.m_src, how.m_dst};
-    } else {
-      v << copy2{how.m_src, how.m_dst, how.m_dst, how.m_src};
-    }
-  }
-
-  // Now do reloads and reg<-imm.
-  for (auto i = 0; i < inst->numSrcs(); ++i) {
-    auto src = inst->src(i);
-    auto rd = inst->extra<Shuffle>()->dests[i];
-    auto rs = m_state.regs[inst].src(i);
-    if (rd.numAllocated() == 0) continue;
-    if (rd.spilled()) continue;
-    if (rs.spilled()) {
-      for (auto j = 0; j < rd.numAllocated(); ++j) {
-        v << load{sp[rs.offset(j)], rd.reg(j)};
-      }
-      continue;
-    }
-    if (rs.numAllocated() == 0) {
-      assert(src->inst()->op() == DefConst);
-      auto rDst = rd.reg(0);
-      v << ldimm{src->rawVal(), rDst};
-    }
-    if (rd.numAllocated() == 2 && rs.numAllocated() < 2) {
-      // Move src known type to register
-      v << ldimm{src->type().toDataType(), rd.reg(1)};
-    }
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
   MovePlan moves;
   PhysReg::Map<ArgDesc*> argDescs;
@@ -1125,18 +1087,11 @@ void CodeGenerator::cgCallHelper(Vout& v,
                                  CppCall call,
                                  const CallDest& dstInfo,
                                  SyncOptions sync,
-                                 ArgGroup& args,
-                                 RegSet toSave) {
+                                 ArgGroup& args) {
   assert(m_curInst->isNative());
 
   auto dstReg0 = dstInfo.reg0;
   DEBUG_ONLY auto dstReg1 = dstInfo.reg1;
-
-  toSave = toSave & (kGPCallerSaved | kSIMDCallerSaved);
-  assert((toSave & RegSet().add(dstReg0).add(dstReg1)).empty());
-
-  if (!toSave.empty()) v << pushregs{toSave};
-  SCOPE_EXIT { if (!toSave.empty()) v << popregs{toSave}; };
 
   RegSet argRegs;
   for (size_t i = 0; i < args.numGpArgs(); i++) {
@@ -1160,7 +1115,6 @@ void CodeGenerator::cgCallHelper(Vout& v,
   if (taken && taken->isCatch()) {
     auto& info = m_state.catches[taken];
     assert(!info.afterCall);
-    info.savedRegs = toSave;
     assert_not_implemented(args.numStackArgs() == 0);
     info.rspOffset = args.numStackArgs();
     assert(!info.valid);
@@ -1189,23 +1143,18 @@ void CodeGenerator::cgCallHelper(Vout& v,
   }
 }
 
-void CodeGenerator::cgCallHelper(Vout& v,
-                                 CppCall call,
-                                 const CallDest& dstInfo,
-                                 SyncOptions sync,
-                                 ArgGroup& args) {
-  cgCallHelper(v, call, dstInfo, sync, args, m_state.liveRegs[m_curInst]);
+CallDest CodeGenerator::callDest(Vreg reg0) const {
+  return { DestType::SSA, reg0 };
+}
+
+CallDest CodeGenerator::callDest(Vreg reg0, Vreg reg1) const {
+  return { DestType::SSA, reg0, reg1 };
 }
 
 /*
- * XXX copypasta but has to be in the class because of curPhysLoc and
- * changing that would make callsites real messy
+ * XXX copypasta below, but has to be in the class because of srcLoc()
+ * and dstLoc(). Changing that would make callsites real messy.
  */
-
-CallDest CodeGenerator::callDest(PhysReg reg0,
-                                 PhysReg reg1 /* = InvalidReg */) const {
-  return { DestType::SSA, reg0, reg1 };
-}
 
 CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
@@ -1441,17 +1390,14 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
   assert(funcPtrReg.isValid());
 
   auto nParamsReg = nParamsLoc.reg();
-  assert(nParamsReg.isValid() || nParamsTmp->isConst());
 
   auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->intVal());
   auto mask64Reg = mask64Loc.reg();
   uint64_t mask64 = mask64Tmp->intVal();
-  assert(mask64Reg.isValid() || mask64 == uint32_t(mask64));
   assert(mask64);
 
   auto vals64Reg = vals64Loc.reg();
   uint64_t vals64 = vals64Tmp->intVal();
-  assert(vals64Reg.isValid() || vals64 == uint32_t(vals64));
   assert((vals64 & mask64) == vals64);
 
   auto thenBody = [&](Vout& v) {
@@ -1476,31 +1422,21 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
     // immediate in ARM's logical instructions, and if they're not met,
     // the assembler will compensate using ip0 or ip1 as tmps.
     auto masked = v.makeReg();
-    if (mask64Reg.isValid()) {
-      v << andq{mask64Reg, bits, masked};
-    } else {
-      v << andq{v.cns(mask64), bits, masked};
-    }
+    v << andq{mask64Reg, bits, masked};
 
     // Now do the compare. There are also restrictions on immediates in
     // arithmetic instructions (of which Cmp is one; it's just a subtract that
     // sets flags), so same deal as with the mask immediate above.
-    if (vals64Reg.isValid()) {
-      v << cmpq{vals64Reg, masked};
-    } else {
-      v << cmpq{v.cns(vals64), masked};
-    }
+    v << cmpq{vals64Reg, masked};
     doJcc(cond);
   };
 
   auto& v = vmain();
   if (firstBitNum == 0) {
-    assert(!nParamsReg.isValid());
-    // This is the first 64 bits. No need to check
-    // nParams.
+    assert(nParamsTmp->isConst());
+    // This is the first 64 bits. No need to check nParams.
     thenBody(v);
   } else {
-    assert(nParamsReg.isValid());
     // Check number of args...
     v << cmpq{v.cns(firstBitNum), nParamsReg};
 
@@ -1679,36 +1615,27 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
     assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
-    auto isnull = v.makeBlock();
-    auto notnull = v.makeBlock();
-    auto done = v.makeBlock();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    v << cbcc{vixl::ne, dst, {isnull, notnull}};
-    v = isnull;
-    v << ldimm{KindOfNull, dstType};
-    v << jmp{done};
-    v = notnull;
-    v << ldimm{returnType.toDataType(), dstType};
-    v << jmp{done};
-    v = done;
+    condZero(v, dst, dstType, [&](Vout& v) {
+      return v.cns(KindOfNull);
+    }, [&](Vout& v) {
+      return v.cns(returnType.toDataType());
+    });
     return;
   }
 
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // this should use some kind of cmov
+    static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
     assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
-    auto uninit = v.makeBlock();
-    auto not_uninit = v.makeBlock();
-    auto done = v.makeBlock();
-    v << loadzbl{mis[returnOffset + TVOFF(m_type)], dstType};
-    v << cbcc{vixl::ne, dstType, {uninit, not_uninit}};
-    v = uninit;
-    v << ldimm{KindOfNull, dstType};
-    v << jmp{done};
-    v = not_uninit;
+    auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    v << jmp{done};
-    v = done;
+    v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
+    condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
+      return v.cns(KindOfNull);
+    }, [&](Vout& v) {
+      return tmp_dst_type;
+    });
     return;
   }
 
@@ -1731,10 +1658,10 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  auto const& info = m_state.catches[inst->block()];
+  UNUSED auto const& info = m_state.catches[inst->block()];
   assert(info.valid);
   assert(info.rspOffset == 0); // stack args not supported yet
-  if (!info.savedRegs.empty()) vmain() << popregs{info.savedRegs};
+  assert(info.savedRegs.empty());
 }
 
 static void unwindResumeHelper() {
@@ -1754,9 +1681,7 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 void CodeGenerator::emitLoadTypedValue(Vout& v, Vloc dst, Vreg base,
                                        ptrdiff_t offset, Block* label) {
   if (label) not_implemented();
-  if (dst.reg(0).isSIMD()) {
-    not_implemented();
-  }
+  if (dst.isFullSIMD()) not_implemented();
 
   auto valueDst = dst.reg(0);
   auto typeDst  = dst.reg(1);
@@ -1816,8 +1741,9 @@ void CodeGenerator::emitStore(Vout& v, Vreg base, ptrdiff_t offset,
 
   auto data = srcLoc.reg();
   if (src->isA(Type::Bool)) {
-    assert(srcLoc.reg().isGP());
-    v << movzbl{data, data};
+    auto extended = v.makeReg();
+    v << movzbl{data, extended};
+    data = extended;
   }
   v << store{data, base[offset + TVOFF(m_data)]};
 }
@@ -1879,28 +1805,20 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   auto const ch = NamedEntity::get(name)->getFuncHandle();
   PhysReg rds(rVmTl);
   auto& v = vmain();
-  auto nolookup = v.makeBlock();
 
-  if (!dst.isValid()) {
-    auto tmp = v.makeReg();
-    v << load{rds[ch], tmp};
-    dst = tmp;
-  } else {
-    v << load{rds[ch], dst};
-  }
-  auto next = v.makeBlock();
-  v << cbcc{vixl::ne, dst, {next, nolookup}};
-  v = next;
-
-  const Func* (*const func)(const StringData*) = lookupUnknownFunc;
-  cgCallHelper(v,
-    CppCall::direct(func),
-    callDest(inst),
-    SyncOptions::kSyncPoint,
-    argGroup().immPtr(inst->extra<LdFuncCached>()->name)
-  );
-  v << jmp{nolookup};
-  v = nolookup;
+  auto dst1 = v.makeReg();
+  v << load{rds[ch], dst1};
+  condZero(v, dst1, dst, [&](Vout& v) {
+    auto dst2 = v.makeReg();
+    const Func* (*const func)(const StringData*) = lookupUnknownFunc;
+    cgCallHelper(v, CppCall::direct(func),
+      callDest(dst2),
+      SyncOptions::kSyncPoint,
+      argGroup().immPtr(inst->extra<LdFuncCached>()->name));
+    return dst2;
+  }, [&](Vout& v) {
+    return dst1;
+  });
 }
 
 void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
@@ -1985,23 +1903,23 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
-  Opcode opc = inst->op();
+  assert(!inst->is(Shuffle));
   m_curInst = inst;
   SCOPE_EXIT {
     m_curInst = nullptr;
     m_slocs.clear();
     m_dlocs.clear();
   };
-  if (opc != Shuffle) {
-    for (unsigned i = 0, n = inst->numSrcs(); i < n; i++) {
-      m_slocs.push_back(m_state.regs[inst].src(i));
-    }
-    for (unsigned i = 0, n = inst->numDsts(); i < n; i++) {
-      m_dlocs.push_back(m_state.regs[inst].dst(i));
-    }
+  for (auto s : inst->srcs()) {
+    m_slocs.push_back(m_state.locs[s]);
+    assert(m_slocs.back().reg(0).isValid());
+  }
+  for (auto& d : inst->dsts()) {
+    m_dlocs.push_back(m_state.locs[d]);
+    assert(m_dlocs.back().reg(0).isValid());
   }
 
-  switch (opc) {
+  switch (inst->op()) {
 #define O(name, dsts, srcs, flags)                                \
   case name: FTRACE(7, "cg" #name "\n");                          \
              cg ## name (inst);                                   \

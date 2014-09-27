@@ -42,10 +42,8 @@ TRACE_SET_MOD(xls);
 namespace HPHP { namespace jit {
 using Trace::RingBufferType;
 using Trace::ringbufferName;
-using namespace x64;
 
 namespace {
-using namespace reg;
 using namespace Stats;
 
 size_t s_counter;
@@ -172,9 +170,11 @@ struct Vxls {
     switch (arch()) {
       case Arch::X64:
         m_tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
+        m_srkill = RegSet(x64::rAsm);
         break;
       case Arch::ARM:
         m_tmp = vixl::x17; // also used as tmp1 by MacroAssembler
+        m_srkill = RegSet(arm::rAsm);//m_abi.all();
         break;
     }
     m_abi.simdUnreserved.remove(m_tmp);
@@ -219,6 +219,7 @@ struct Vxls {
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
   void dumpIntervals();
   int spEffect(Vinstr& inst) const;
+  void getEffects(const Vinstr& i, RegSet& uses, RegSet& across, RegSet& defs);
 public:
   struct Compare { bool operator()(const Interval*, const Interval*); };
 public:
@@ -226,6 +227,7 @@ public:
   Abi m_abi;
   PhysReg m_sp; // arch-dependent stack pointer
   PhysReg m_tmp; // only for breaking cycles
+  RegSet m_srkill; // killed by service requests
   jit::vector<Vlabel> blocks;          // sorted blocks
   jit::vector<LiveRange> block_ranges; // [start,end) position of each block
   jit::vector<int> spill_offsets;      // per-block sp[offset] to spill-slots
@@ -702,33 +704,33 @@ private:
 // Return the set of physical registers implicitly accessed (used or defined)
 // TODO: t4779515: replace this, and other switches, with logic using
 // attributes, instead of hardcoded opcode names.
-void getEffects(const Abi& abi, const Vinstr& i,
-                RegSet& uses, RegSet& across, RegSet& defs) {
+void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
+                      RegSet& defs) {
   uses = defs = across = RegSet();
   switch (i.op) {
     case Vinstr::mccall:
     case Vinstr::call:
     case Vinstr::callm:
     case Vinstr::callr:
-      defs = abi.all() - abi.calleeSaved;
+      defs = m_abi.all() - m_abi.calleeSaved;
       break;
     case Vinstr::callstub:
       defs = i.callstub_.kills;
       break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
-      defs = abi.all();
+      defs = m_abi.all();
       break;
     case Vinstr::cqo:
-      uses = RegSet(rax);
-      defs = RegSet().add(rax).add(rdx);
+      uses = RegSet(reg::rax);
+      defs = RegSet().add(reg::rax).add(reg::rdx);
       break;
     case Vinstr::idiv:
-      uses = defs = RegSet(rax).add(rdx);
+      uses = defs = RegSet(reg::rax).add(reg::rdx);
       break;
     case Vinstr::shlq:
     case Vinstr::sarq:
-      across = RegSet(rcx);
+      across = RegSet(reg::rcx);
       break;
     case Vinstr::resume:
     case Vinstr::retransopt:
@@ -737,11 +739,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::bindjcc2:
     case Vinstr::bindjmp:
     case Vinstr::bindexit:
-      defs = RegSet(rAsm);
+      defs = m_srkill;
       break;
     // arm instrs
     case Vinstr::hostcall:
-      defs = (abi.all() - abi.calleeSaved) |
+      defs = (m_abi.all() - m_abi.calleeSaved) |
              RegSet(PhysReg(arm::rHostCallReg));
       break;
     default:
@@ -785,7 +787,7 @@ void Vxls::buildIntervals() {
       UseVisitor uv(live, *this, {block_range.start, pos});
       visitOperands(inst, dv);
       RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(m_abi, inst, implicit_uses, implicit_across, implicit_defs);
+      getEffects(inst, implicit_uses, implicit_across, implicit_defs);
       implicit_defs.forEach([&](Vreg r) {
         dv.def(r);
       });
@@ -1395,7 +1397,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     auto slot = ivl->leader()->slot;
     assert(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + PhysLoc::disp(slot)};
-    if (src.isGP()) {
+    if (src.isGP() || arch() == Arch::ARM) {
       stores.emplace_back(store{src, ptr});
     } else {
       // todo: t4764214: not all xmms are wide.
@@ -1425,8 +1427,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     } else {
       assert(ivl->spilled());
       MemoryRef ptr{slots.r + PhysLoc::disp(ivl->slot)};
-      if (dst.isGP()) {
-        //assert(ptr.r.disp == PhysLoc::disp(ivl->slot));
+      if (dst.isGP() || arch() == Arch::ARM) {
         loads.emplace_back(load{ptr, dst});
       } else {
         // todo: t4764214: not all xmms are wide
@@ -1509,7 +1510,7 @@ std::string Interval::toString() {
     out << delim << folly::format("#{:08x}", val);
   }
   if (slot >= 0) {
-    out << delim << "[%sp+" << PhysLoc::disp(slot) << "]";
+    out << delim << folly::format("[%sp+{}]", PhysLoc::disp(slot));
   }
   delim = "";
   out << " [";

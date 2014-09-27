@@ -94,8 +94,6 @@ private:
   void emit(hostcall& i);
   void emit(ldimm& i);
   void emit(load& i);
-  void emit(popregs& i);
-  void emit(pushregs& i);
   void emit(resume& i) { emitServiceReq(*codeBlock, REQ_RESUME); }
   void emit(store& i);
 
@@ -420,79 +418,6 @@ void Vgen::emit(store& i) {
   } else {
     a->Str(D(i.s), M(i.d));
   }
-}
-
-struct RegSaver {
-  explicit RegSaver(RegSet regs)
-      : m_gprs(CPURegister::kRegister, kXRegSize, 0)
-      , m_simds(CPURegister::kFPRegister, kDRegSize, 0)
-      , m_maybeOddGPR(folly::none)
-      , m_maybeOddSIMD(folly::none) {
-    regs.forEach([&] (PhysReg r) {
-      if (r.isGP()) {
-        m_gprs.Combine(r);
-      } else {
-        m_simds.Combine(r);
-      }
-    });
-
-    // The vixl helper requires you to pass it an even number of registers. If
-    // we have an odd number of regs to save, remove one from the list we pass,
-    // and save it ourselves.
-    if (m_gprs.Count() % 2 == 1) {
-      m_maybeOddGPR = m_gprs.PopHighestIndex();
-    }
-    if (m_simds.Count() % 2 == 1) {
-      m_maybeOddSIMD = m_simds.PopHighestIndex();
-    }
-  }
-
-  void emitPushes(MacroAssembler& as) {
-    assert(m_gprs.Count() % 2 == 0);
-    assert(m_simds.Count() % 2 == 0);
-    as.    PushCPURegList(m_gprs);
-    as.    PushCPURegList(m_simds);
-
-    if (m_maybeOddGPR.hasValue()) {
-      // We're only storing a single reg, but the stack pointer must always be
-      // 16-byte aligned. This instruction subtracts 16 from the stack pointer,
-      // then writes the value.
-      as.  Str  (m_maybeOddGPR.value(), MemOperand(sp, -16, PreIndex));
-    }
-    if (m_maybeOddSIMD.hasValue()) {
-      as.  Str  (m_maybeOddSIMD.value(), MemOperand(sp, -16, PreIndex));
-    }
-  }
-
-  void emitPops(MacroAssembler& as) {
-    assert(m_gprs.Count() % 2 == 0);
-    assert(m_simds.Count() % 2 == 0);
-
-    if (m_maybeOddSIMD.hasValue()) {
-      // Read the value, then add 16 to the stack pointer.
-      as.  Ldr  (m_maybeOddSIMD.value(), MemOperand(sp, 16, PostIndex));
-    }
-    if (m_maybeOddGPR.hasValue()) {
-      // Read the value, then add 16 to the stack pointer.
-      as.  Ldr  (m_maybeOddGPR.value(), MemOperand(sp, 16, PostIndex));
-    }
-    as.    PopCPURegList(m_simds);
-    as.    PopCPURegList(m_gprs);
-  }
-
- private:
-  CPURegList m_gprs;
-  CPURegList m_simds;
-  folly::Optional<CPURegister> m_maybeOddGPR;
-  folly::Optional<CPURegister> m_maybeOddSIMD;
-};
-
-void Vgen::emit(pushregs& i) {
-  RegSaver{i.regs}.emitPushes(*a);
-}
-
-void Vgen::emit(popregs& i) {
-  RegSaver{i.regs}.emitPops(*a);
 }
 
 void Vgen::emit(jmp i) {

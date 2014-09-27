@@ -33,32 +33,24 @@ class  SSATmp;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,
-                const RegAllocInfo* regs = nullptr,
                 const GuardConstraints* guards = nullptr);
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
+void printDsts(std::ostream& os, const IRInstruction* inst);
+void printSrcs(std::ostream& os, const IRInstruction* inst);
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards);
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
+void printSrcs(std::ostream& os, const IRInstruction* inst);
+void printDsts(std::ostream& os, const IRInstruction* inst);
 void print(std::ostream& ostream, const IRInstruction*,
-           const RegAllocInfo* regs = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
 
 // SSATmp
-void print(std::ostream& ostream, const SSATmp*,
-           const PhysLoc* loc = nullptr);
+void print(std::ostream& ostream, const SSATmp*);
 void print(const SSATmp*);
 
 // Block
 void print(std::ostream& os, const Block* block,
            AreaIndex area,
-           const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            BCMarker* curMarker = nullptr);
@@ -66,7 +58,6 @@ void print(const Block* block);
 
 // Unit
 void print(std::ostream& ostream, const IRUnit&,
-           const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            bool dotBodies = false);
@@ -90,8 +81,7 @@ constexpr int kExtraLevel = 6;
 constexpr int kExtraExtraLevel = 7;
 
 void printUnit(int level, const IRUnit&, const char* caption,
-               const RegAllocInfo* regs = nullptr, AsmInfo* ai = nullptr,
-               const GuardConstraints* guards = nullptr);
+               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
 
 inline std::ostream& operator<<(std::ostream& os, Type t) {
   return os << t.toString();

@@ -20,7 +20,6 @@
 #include <algorithm>
 
 #include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/phys-loc.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"

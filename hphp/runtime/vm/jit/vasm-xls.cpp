@@ -1141,7 +1141,7 @@ void Vxls::assignSpill(Interval* ivl) {
       leader->slot = m_nextSlot++;
     } else {
       // todo: t4764214 not all XMMs are really wide.
-      if (!PhysLoc::isAligned(m_nextSlot)) m_nextSlot++;
+      if (!isSlotAligned(m_nextSlot)) m_nextSlot++;
       leader->slot = m_nextSlot;
       m_nextSlot += 2;
     }
@@ -1396,7 +1396,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     if (!ivl) continue;
     auto slot = ivl->leader()->slot;
     assert(slot >= 0 && src == ivl->reg);
-    MemoryRef ptr{slots.r + PhysLoc::disp(slot)};
+    MemoryRef ptr{slots.r + slotOffset(slot)};
     if (src.isGP() || arch() == Arch::ARM) {
       stores.emplace_back(store{src, ptr});
     } else {
@@ -1426,7 +1426,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
       loads.emplace_back(ldimm{ivl->val, dst, true});
     } else {
       assert(ivl->spilled());
-      MemoryRef ptr{slots.r + PhysLoc::disp(ivl->slot)};
+      MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
       if (dst.isGP() || arch() == Arch::ARM) {
         loads.emplace_back(load{ptr, dst});
       } else {
@@ -1510,7 +1510,7 @@ std::string Interval::toString() {
     out << delim << folly::format("#{:08x}", val);
   }
   if (slot >= 0) {
-    out << delim << folly::format("[%sp+{}]", PhysLoc::disp(slot));
+    out << delim << folly::format("[%sp+{}]", slotOffset(slot));
   }
   delim = "";
   out << " [";

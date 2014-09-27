@@ -21,7 +21,6 @@
 TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace jit {
-using namespace x64;
 
 namespace {
 struct Folder {

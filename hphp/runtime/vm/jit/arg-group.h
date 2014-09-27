@@ -17,7 +17,6 @@
 #define incl_HPHP_JIT_ARG_GROUP_H
 
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/phys-loc.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 

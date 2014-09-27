@@ -20,8 +20,6 @@
 
 namespace HPHP { namespace jit {
 
-using namespace x64;
-
 TEST(Vasm, PrintVptr) {
   auto v0 = Vreg{Vreg::V0};
   auto v1 = Vreg{Vreg::V0 + 1};

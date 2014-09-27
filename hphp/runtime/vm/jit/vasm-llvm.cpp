@@ -50,9 +50,6 @@ TRACE_SET_MOD(llvm);
 
 namespace HPHP { namespace jit {
 
-// TODO: Remove this (t5048575)
-using namespace ::HPHP::jit::x64;
-
 namespace {
 
 /*

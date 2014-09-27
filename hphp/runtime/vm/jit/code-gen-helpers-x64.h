@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
-#include "hphp/runtime/vm/jit/phys-loc.h"
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////

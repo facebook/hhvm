@@ -566,7 +566,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   coldCodeIn.skip(coldCode.frontier() - coldCodeIn.frontier());
   mainCodeIn.skip(mainCode.frontier() - mainCodeIn.frontier());
   if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", nullptr, asmInfo);
+    printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
   }
 }
 

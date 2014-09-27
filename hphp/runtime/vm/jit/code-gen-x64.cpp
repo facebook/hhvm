@@ -5815,7 +5815,7 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  jit::print(std::cout, m_unit, nullptr, m_state.asmInfo);
+  jit::print(std::cout, m_unit, m_state.asmInfo);
 }
 
 }}}

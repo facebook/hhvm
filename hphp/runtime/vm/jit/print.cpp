@@ -50,21 +50,10 @@ std::string constToString(Type t) {
   return os.str();
 }
 
-const PhysLoc* srcLoc(const RegAllocInfo* regs,
-                      const IRInstruction* inst, unsigned i) {
-  return regs ? &(*regs)[inst].src(i) : nullptr;
-}
-
-const PhysLoc* dstLoc(const RegAllocInfo* regs,
-                      const IRInstruction* inst, unsigned i) {
-  return regs ? &(*regs)[inst].dst(i) : nullptr;
-}
-
-void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i,
-              const RegAllocInfo* regs) {
+void printSrc(std::ostream& ostream, const IRInstruction* inst, uint32_t i) {
   SSATmp* src = inst->src(i);
   if (src != nullptr) {
-    print(ostream, src, srcLoc(regs, inst, i));
+    print(ostream, src);
   } else {
     ostream << color(ANSI_COLOR_RED)
             << "!!!NULL @ " << i
@@ -136,8 +125,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
      << color(ANSI_COLOR_END);
 }
 
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs) {
+void printSrcs(std::ostream& os, const IRInstruction* inst) {
   bool first = true;
   if (inst->op() == IncStat) {
     os << " " << Stats::g_counterNames[inst->src(0)->intVal()]
@@ -151,36 +139,35 @@ void printSrcs(std::ostream& os, const IRInstruction* inst,
       os << " ";
       first = false;
     }
-    printSrc(os, inst, i, regs);
+    printSrc(os, inst, i);
   }
 }
 
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs) {
+void printDsts(std::ostream& os, const IRInstruction* inst) {
   const char* sep = "";
   for (unsigned i = 0, n = inst->numDsts(); i < n; i++) {
     os << punc(sep);
-    print(os, inst->dst(i), dstLoc(regs, inst, i));
+    print(os, inst->dst(i));
     sep = ", ";
   }
 }
 
 void printInstr(std::ostream& ostream, const IRInstruction* inst,
-                const RegAllocInfo* regs, const GuardConstraints* guards) {
-  printDsts(ostream, inst, regs);
+                const GuardConstraints* guards) {
+  printDsts(ostream, inst);
   if (inst->numDsts()) ostream << punc(" = ");
   printOpcode(ostream, inst, guards);
-  printSrcs(ostream, inst, regs);
+  printSrcs(ostream, inst);
 }
 
 void print(std::ostream& ostream, const IRInstruction* inst,
-           const RegAllocInfo* regs, const GuardConstraints* guards) {
+           const GuardConstraints* guards) {
   if (!inst->isTransient()) {
     ostream << color(ANSI_COLOR_YELLOW);
     ostream << folly::format("({:02d}) ", inst->id());
     ostream << color(ANSI_COLOR_END);
   }
-  printInstr(ostream, inst, regs, guards);
+  printInstr(ostream, inst, guards);
   if (Block* taken = inst->taken()) {
     ostream << punc(" -> ");
     printLabel(ostream, taken);
@@ -194,46 +181,14 @@ void print(const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * SSATmp
- */
-std::ostream& operator<<(std::ostream& os, const PhysLoc& loc) {
-  auto sz = loc.numAllocated();
-  if (!sz) return os;
-  os << '(';
-  auto delim = "";
-  for (int i = 0; i < sz; ++i) {
-    os << delim;
-    if (!loc.spilled()) {
-      PhysReg reg = loc.reg(i);
-      mcg->backEnd().streamPhysReg(os, reg);
-    } else {
-      os << "spill[" << loc.slot(i) << "]";
-    }
-    delim = ",";
-  }
-  os << ')';
-  return os;
-}
-
-void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
-  if (loc.numAllocated() > 0) {
-    os << color(ANSI_COLOR_BROWN) << loc << color(ANSI_COLOR_END);
-  }
-}
-
-void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc) {
+void print(std::ostream& os, const SSATmp* tmp) {
   if (tmp->inst()->is(DefConst)) {
     os << constToString(tmp->type());
-    if (loc) printPhysLoc(os, *loc);
     return;
   }
   os << color(ANSI_COLOR_WHITE);
   os << "t" << tmp->id();
   os << color(ANSI_COLOR_END);
-  if (loc) {
-    printPhysLoc(os, *loc);
-  }
   os << punc(":")
      << color(ANSI_COLOR_GREEN)
      << tmp->type().toString()
@@ -258,10 +213,9 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
                              begin, end);
 }
 
-void print(std::ostream& os, const Block* block,
-           AreaIndex area,
-           const RegAllocInfo* regs, const AsmInfo* asmInfo,
-           const GuardConstraints* guards, BCMarker* markerPtr) {
+void print(std::ostream& os, const Block* block, AreaIndex area,
+           const AsmInfo* asmInfo, const GuardConstraints* guards,
+           BCMarker* markerPtr) {
   BCMarker dummy;
   BCMarker& curMarker = markerPtr ? *markerPtr : dummy;
 
@@ -335,14 +289,14 @@ void print(std::ostream& os, const Block* block,
                           folly::format("({}) ", inst.id()).str().size(),
                           ' ');
         auto dst = inst.dst(i);
-        jit::print(os, dst, dstLoc(regs, &inst, i));
+        jit::print(os, dst);
         os << punc(" = ") << color(ANSI_COLOR_CYAN) << "phi "
            << color(ANSI_COLOR_END);
         bool first = true;
         inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
             if (!first) os << punc(", ");
             first = false;
-            printSrc(os, jmp, i, regs);
+            printSrc(os, jmp, i);
             os << punc("@");
             printLabel(os, jmp->block());
           });
@@ -351,7 +305,7 @@ void print(std::ostream& os, const Block* block,
     }
 
     os << std::string(kIndent, ' ');
-    jit::print(os, &inst, regs, guards);
+    jit::print(os, &inst, guards);
     os << '\n';
 
     if (asmInfo) {
@@ -419,8 +373,7 @@ void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
 /*
  * Unit
  */
-void print(std::ostream& os, const IRUnit& unit,
-           const RegAllocInfo* regs, const AsmInfo* asmInfo,
+void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
            const GuardConstraints* guards, bool dotBodies) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
@@ -438,7 +391,7 @@ void print(std::ostream& os, const IRUnit& unit,
         block->hint() != Block::Hint::Unused) {
       // Include the IR in the body of the node
       std::ostringstream out;
-      print(out, block, AreaIndex::Main, regs, asmInfo, guards, &curMarker);
+      print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
       auto bodyRaw = out.str();
       std::string body;
       body.reserve(bodyRaw.size() * 1.25);
@@ -475,7 +428,7 @@ void print(std::ostream& os, const IRUnit& unit,
       os << folly::format("\n{:-^60}", "frozen blocks");
       currentArea = AreaIndex::Frozen;
     }
-    print(os, *it, currentArea, regs, asmInfo, guards, &curMarker);
+    print(os, *it, currentArea, asmInfo, guards, &curMarker);
   }
 }
 
@@ -501,13 +454,12 @@ std::string banner(const char* caption) {
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void printUnit(int level, const IRUnit& unit, const char* caption,
-               const RegAllocInfo* regs, AsmInfo* ai,
+void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
                const GuardConstraints* guards) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     str << banner(caption);
-    print(str, unit, regs, ai, guards);
+    print(str, unit, ai, guards);
     str << banner("");
     HPHP::Trace::traceRelease("%s\n", str.str().c_str());
   }

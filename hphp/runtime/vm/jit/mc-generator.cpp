@@ -1771,7 +1771,7 @@ void MCGenerator::traceCodeGen() {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, unit, msg, nullptr, nullptr, ht.irBuilder().guards());
+    printUnit(level, unit, msg, nullptr, ht.irBuilder().guards());
     assert(checkCfg(unit));
   };
 

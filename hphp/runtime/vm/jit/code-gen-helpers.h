@@ -217,7 +217,6 @@ inline RegSaveFlags operator~(const RegSaveFlags& f) {
 
 template <class T, class F>
 Vreg cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
-  using namespace x64;
   auto fblock = v.makeBlock();
   auto tblock = v.makeBlock();
   auto done = v.makeBlock();

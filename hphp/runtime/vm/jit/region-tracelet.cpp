@@ -232,7 +232,7 @@ RegionDescPtr RegionFormer::go() {
             m_inl.depth() || m_inl.disabled()
               ? " after inlining tracelet formation "
               : " after tracelet formation ",
-            nullptr, nullptr, m_ht.irBuilder().guards());
+            nullptr, m_ht.irBuilder().guards());
 
   if (m_region && !m_region->empty()) {
     m_ht.end(m_sk.offset());
@@ -535,8 +535,8 @@ void RegionFormer::recordDependencies() {
     firstBlock.addPredicted(blockStart, pred);
   });
   if (changed) {
-    printUnit(3, unit, " after guard relaxation ",
-              nullptr, nullptr, m_ht.irBuilder().guards());
+    printUnit(3, unit, " after guard relaxation ", nullptr,
+              m_ht.irBuilder().guards());
   }
 
 }

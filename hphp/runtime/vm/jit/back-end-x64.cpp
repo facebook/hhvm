@@ -843,8 +843,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   if (relocate) {
     if (asmInfo) {
-      printUnit(kRelocationLevel, unit, " before relocation ", nullptr,
-                asmInfo);
+      printUnit(kRelocationLevel, unit, " before relocation ", asmInfo);
     }
 
     auto& be = mcg->backEnd();
@@ -900,7 +899,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   }
 
   if (asmInfo) {
-    printUnit(kCodeGenLevel, unit, " after code gen ", nullptr, asmInfo);
+    printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
   }
 }
 

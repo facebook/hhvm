@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/phys-loc.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/util/asm-x64.h"
@@ -208,28 +207,14 @@ inline Vptr operator+(Vreg64 base, int32_t d) {
   return Vptr(base, d);
 }
 
-// like PhysLoc: "location", either a single or pair of vregs.
-// never a spill slot, since spilling is after code-gen.
-// there is no information about GPR or SIMD here; that's
-// a register allocator choice.
+// A Vloc is either a single or pair of vregs, for keeping track
+// of where we have stored an SSATmp.
 struct Vloc {
   enum Kind { kPair, kWide };
   Vloc() {}
   explicit Vloc(Vreg r) { m_regs[0] = r; }
   Vloc(Vreg r0, Vreg r1) { m_regs[0] = r0; m_regs[1] = r1; }
   Vloc(Kind kind, Vreg r) : m_kind(kind) { m_regs[0] = r; }
-  /* implicit */ Vloc(PhysLoc loc) {
-    assert(!loc.spilled());
-    if (loc.isFullSIMD()) {
-      m_kind = kWide;
-      m_regs[0] = loc.reg(0);
-    } else if (loc.numAllocated() == 1) {
-      m_regs[0] = loc.reg(0);
-    } else if (loc.numAllocated() == 2) {
-      m_regs[0] = loc.reg(0);
-      m_regs[1] = loc.reg(1);
-    }
-  }
   bool hasReg(int i = 0) const {
     return m_regs[i].isValid();
   }

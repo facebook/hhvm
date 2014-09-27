@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace jit {

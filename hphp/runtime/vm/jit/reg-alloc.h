@@ -35,86 +35,43 @@ struct Vunit;
 struct CodegenState;
 class BackEnd;
 
-inline bool isI32(int64_t c) { return c == int32_t(c); }
-inline bool isU32(int64_t c) { return c == uint32_t(c); }
+// Native stack layout:
+// |               |
+// +---------------+
+// |               |
+// | MInstr state  |
+// |               |
+// +---------------+
+// |               |  <-- spill[kReservedRSPSpillSpace - 1]
+// |  spill slots  |  <-- spill[..]
+// |               |  <-- spill[1]
+// |               |  <-- spill[0]
+// +---------------+
+// |  return addr  |
+// +---------------+
+//
+// We need to increase spill indexes by 1 to avoid overwriting the
+// return address.
+
+/*
+ * Return the byte offset to a spill slot
+ */
+inline uint32_t slotOffset(uint32_t slot) {
+  return (slot + 1) * sizeof(uint64_t);
+}
+
+/*
+ * return true if the offset of this spill slot is 16-byte aligned
+ */
+inline bool isSlotAligned(uint32_t slot) {
+  return slot % 2 == 1;
+}
 
 // This value must be consistent with the number of pre-allocated
 // bytes for spill locations in __enterTCHelper in mc-generator.cpp.
 // Be careful when changing this value.
 const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
                                         sizeof(uint64_t);
-
-struct RegAllocInfo {
-  struct RegMap {
-    // new way
-    PhysLoc& src(unsigned i) {
-      assert(i < m_dstOff);
-      return at(i);
-    }
-    PhysLoc& dst(unsigned i) { return at(i + m_dstOff); }
-    const PhysLoc& src(unsigned i) const {
-      assert(i < m_dstOff);
-      return at(i);
-    }
-    const PhysLoc& dst(unsigned i) const { return at(i + m_dstOff); }
-    void resize(unsigned n) const {
-      m_dstOff = n;
-      m_locs.resize(n);
-    }
-  private:
-    PhysLoc& at(unsigned i) {
-      assert(i < m_locs.size());
-      return m_locs[i];
-    }
-    const PhysLoc& at(unsigned i) const {
-      assert(i < m_locs.size());
-      return m_locs[i];
-    }
-    friend struct RegAllocInfo;
-    RegMap& init(const IRInstruction* inst) const {
-      if (m_locs.empty()) {
-        m_dstOff = inst->numSrcs();
-        m_locs.resize(inst->numSrcs() + inst->numDsts());
-      }
-      return *const_cast<RegMap*>(this);
-    }
-  private:
-    mutable unsigned m_dstOff { 0 };
-    mutable jit::vector<PhysLoc> m_locs;
-  };
-  explicit RegAllocInfo(const IRUnit& unit) : m_regs(unit, RegMap()) {}
-  RegAllocInfo(const RegAllocInfo& other) : m_regs(other.m_regs) {}
-  RegAllocInfo(RegAllocInfo&& other) noexcept : m_regs(other.m_regs) {}
-  RegMap& operator[](const IRInstruction* i) { return m_regs[i].init(i); }
-  RegMap& operator[](const IRInstruction& i) { return m_regs[i].init(&i); }
-  const RegMap& operator[](const IRInstruction* i) const {
-    return m_regs[i].init(i);
-  }
-  const RegMap& operator[](const IRInstruction& i) const {
-    return m_regs[i].init(&i);
-  }
-
-  RegSet srcRegs(const IRInstruction& inst) const {
-    auto regs = RegSet();
-    auto& map = m_regs[inst];
-    for (unsigned i = 0, n = inst.numSrcs(); i < n; ++i) {
-      regs |= map.src(i).regs();
-    }
-    return regs;
-  }
-
-  RegSet dstRegs(const IRInstruction& inst) const {
-    auto regs = RegSet();
-    auto& map = m_regs[inst];
-    for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
-      regs |= map.dst(i).regs();
-    }
-    return regs;
-  }
-
-private:
-  StateVector<IRInstruction,RegMap> m_regs;
-};
 
 // Return InvalidReg, or a specific register to force tmp to use
 PhysReg forceAlloc(const SSATmp& tmp);

@@ -23,7 +23,6 @@
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
-using namespace x64;
 
 namespace {
 typedef boost::dynamic_bitset<> LiveSet;

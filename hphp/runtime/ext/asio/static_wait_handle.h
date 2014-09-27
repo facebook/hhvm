@@ -31,7 +31,7 @@ namespace HPHP {
  * immediately.
  */
 FORWARD_DECLARE_CLASS(StaticWaitHandle);
-class c_StaticWaitHandle : public c_WaitHandle {
+class c_StaticWaitHandle final : public c_WaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
 

@@ -32,7 +32,7 @@ namespace HPHP {
  * with null once all given wait handles are finished (succeeded or failed).
  */
 FORWARD_DECLARE_CLASS(AwaitAllWaitHandle);
-class c_AwaitAllWaitHandle : public c_BlockableWaitHandle {
+class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AwaitAllWaitHandle)
 

@@ -34,7 +34,7 @@ namespace HPHP {
  */
 FORWARD_DECLARE_CLASS(AsyncGenerator);
 FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
-class c_AsyncGeneratorWaitHandle : public c_ResumableWaitHandle {
+class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncGeneratorWaitHandle)
 

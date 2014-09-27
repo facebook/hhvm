@@ -35,7 +35,7 @@ FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
 
 typedef uint8_t context_idx_t;
 
-class AsioContext {
+class AsioContext final {
   public:
     void* operator new(size_t size) { return smart_malloc(size); }
     void operator delete(void* ptr) { smart_free(ptr); }

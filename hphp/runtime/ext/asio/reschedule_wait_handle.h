@@ -35,7 +35,7 @@ extern const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
  * RescheduleWaitHandle is guaranteed to never finish immediately.
  */
 FORWARD_DECLARE_CLASS(RescheduleWaitHandle);
-class c_RescheduleWaitHandle : public c_WaitableWaitHandle {
+class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(RescheduleWaitHandle)
 

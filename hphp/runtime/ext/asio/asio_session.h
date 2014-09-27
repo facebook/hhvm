@@ -34,7 +34,7 @@ FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(GenVectorWaitHandle);
 FORWARD_DECLARE_CLASS(ResumableWaitHandle);
 
-class AsioSession {
+class AsioSession final {
   public:
     static void Init();
     static AsioSession* Get() { return s_current.get(); }

@@ -32,7 +32,7 @@ FORWARD_DECLARE_CLASS(AsyncGenerator);
 FORWARD_DECLARE_CLASS(AsyncGeneratorWaitHandle);
 FORWARD_DECLARE_CLASS(StaticWaitHandle);
 FORWARD_DECLARE_CLASS(WaitableWaitHandle);
-class c_AsyncGenerator : public BaseGenerator {
+class c_AsyncGenerator final : public BaseGenerator {
 public:
   DECLARE_CLASS_NO_SWEEP(AsyncGenerator)
 

@@ -33,7 +33,7 @@ namespace HPHP {
  */
 FORWARD_DECLARE_CLASS(GenMapWaitHandle);
 FORWARD_DECLARE_CLASS(Map);
-class c_GenMapWaitHandle : public c_BlockableWaitHandle {
+class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
 

@@ -27,7 +27,7 @@ namespace HPHP {
 
 FORWARD_DECLARE_CLASS(BlockableWaitHandle);
 
-class AsioBlockable {
+class AsioBlockable final {
   public:
     enum class Kind : uint8_t {
       BlockableWaitHandle,
@@ -59,7 +59,7 @@ class AsioBlockable {
     uintptr_t m_bits;
 };
 
-class AsioBlockableChain {
+class AsioBlockableChain final {
   public:
     static constexpr ptrdiff_t firstParentOff() {
       return offsetof(AsioBlockableChain, m_firstParent);

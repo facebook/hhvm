@@ -32,7 +32,7 @@ namespace HPHP {
  * wait handles failed, the exception is propagated by failure.
  */
 FORWARD_DECLARE_CLASS(GenArrayWaitHandle);
-class c_GenArrayWaitHandle : public c_BlockableWaitHandle {
+class c_GenArrayWaitHandle final : public c_BlockableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
 

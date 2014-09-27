@@ -153,7 +153,7 @@ private:
   PageletServerTaskEvent *m_event;
 };
 
-class PageletServerTaskEvent : public AsioExternalThreadEvent {
+class PageletServerTaskEvent final : public AsioExternalThreadEvent {
 public:
 
   ~PageletServerTaskEvent() {
@@ -171,7 +171,7 @@ public:
 
 protected:
 
-  void unserialize(Cell& result) {
+  void unserialize(Cell& result) override final {
     // Main string responses from pagelet thread.
     Array responses = Array::Create();
 

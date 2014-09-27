@@ -32,7 +32,7 @@ namespace HPHP {
  */
 class AsioExternalThreadEvent;
 FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
-class c_ExternalThreadEventWaitHandle
+class c_ExternalThreadEventWaitHandle final
   : public c_WaitableWaitHandle, public Sweepable {
  public:
   DECLARE_CLASS(ExternalThreadEventWaitHandle)

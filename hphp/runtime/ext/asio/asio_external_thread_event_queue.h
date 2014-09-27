@@ -34,7 +34,7 @@ FORWARD_DECLARE_CLASS(ExternalThreadEventWaitHandle);
  */
 #define K_CONSUMER_WAITING (static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L))
 
-class AsioExternalThreadEventQueue {
+class AsioExternalThreadEventQueue final {
   public:
     AsioExternalThreadEventQueue();
 

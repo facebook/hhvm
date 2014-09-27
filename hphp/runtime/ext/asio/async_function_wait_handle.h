@@ -34,7 +34,7 @@ namespace HPHP {
  * wait handle, giving control of the execution back to the asio framework.
  */
 FORWARD_DECLARE_CLASS(AsyncFunctionWaitHandle);
-class c_AsyncFunctionWaitHandle : public c_ResumableWaitHandle {
+class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 

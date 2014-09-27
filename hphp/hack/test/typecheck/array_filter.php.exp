@@ -1,10 +1,17 @@
 array
-array<[150]Tint, Tstring>
-array<[155]Tint, Tstring>
-array<mixed, Tstring>
 array<[164]Tint, Tstring>
+array<[169]Tint, Tstring>
+array<mixed, Tstring>
+array<[178]Tint, Tstring>
 X
 X
+intersect(array<mixed, Tstring>, array<[190]Tint, Tstring>)
+array
+array<[196]Tint, [197]option(Tstring)>
+array<[201]Tint, [202]option(Tstring)>
+array<mixed, [206]option(Tstring)>
+array<[210]Tint, [211]option(Tstring)>
 X
-intersect(array<mixed, Tstring>, array<[183]Tint, Tstring>)
+X
+intersect(array<mixed, [219]option(Tstring)>, array<[222]Tint, [223]option(Tstring)>)
 No errors

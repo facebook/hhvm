@@ -35,12 +35,17 @@ function array_combine($keys, $values) { }
 function array_count_values($input) { }
 function array_fill_keys($keys, $value) { }
 /*
- * Single argument calls to array_filter are rewritten depending on the type
+ * Calls to array_filter are rewritten depending on the type
  * of argument to have one of the following signatures:
  *
- * function(array): array
- * function(KeyedContainer<Tk, ?Tv>): array<Tk, Tv>
+ * function(array, ?(function(Tv):bool)): array
+ * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
+ * function(Container<Tv>, ?(function(Tv):bool)): array<mixed, Tv>
+ *
+ * Single argument calls additionally remove nullability of Tv, i.e.:
+ *
  * function(Container<?Tv>): array<mixed, Tv>
+ *
  */
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null) { }
 function array_flip($trans) { }

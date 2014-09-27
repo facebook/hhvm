@@ -1719,12 +1719,14 @@ void Parser::setIsGenerator() {
   fc.isGenerator = true;
 }
 
-void Parser::onYield(Token &out, Token &expr) {
+void Parser::onYield(Token &out, Token *expr) {
   setIsGenerator();
-  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
+  // yield; == yield null;
+  auto expPtr = expr ? expr->exp : NEW_EXP(ConstantExpression, "null", false);
+  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
 }
 
-void Parser::onYieldPair(Token &out, Token &key, Token &val) {
+void Parser::onYieldPair(Token &out, Token *key, Token *val) {
   setIsGenerator();
   out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }

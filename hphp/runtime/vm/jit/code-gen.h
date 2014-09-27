@@ -38,57 +38,25 @@ enum class SyncOptions {
 typedef StateVector<IRInstruction, RegSet> LiveRegs;
 
 struct CatchInfo {
-  bool valid;
-  /* afterCall is the address after the call instruction that this catch trace
-   * belongs to. It's the key used to look up catch traces by the
-   * unwinder, since it's the value of %rip during unwinding. */
-  TCA afterCall;
-
-  /* savedRegs contains the caller-saved registers that were pushed onto the
-   * C++ stack at the time of the call. The catch trace will pop these
-   * registers (in the same order as PhysRegSaver's destructor) before doing
-   * any real work to restore the register state from before the call. */
-  RegSet savedRegs;
-
-  /* rspOffset is the number of bytes pushed on the C++ stack after the
-   * registers in savedRegs were saved, typically from function calls with >6
-   * arguments. The catch trace will adjust rsp by this amount before popping
-   * anything in savedRegs. */
+  /* rspOffset is the number of bytes pushed on the C++ stack for the call,
+   * for functions with stack arguments. The catch trace will adjust rsp
+   * by this amount before executing the catch block */
   Offset rspOffset;
 };
 
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
-  CodegenState(const IRUnit& unit, const RegAllocInfo& regs,
-               const LiveRegs& liveRegs, AsmInfo* asmInfo)
-    : patches(unit, nullptr)
-    , addresses(unit, nullptr)
-    , regs(regs)
-    , liveRegs(liveRegs)
-    , asmInfo(asmInfo)
+  CodegenState(const IRUnit& unit, AsmInfo* asmInfo)
+    : asmInfo(asmInfo)
     , catches(unit, CatchInfo())
-    , pastGuards(false)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
   {}
 
-  // Each block has a list of addresses to patch, and an address if
-  // it's already been emitted.
-  StateVector<Block,void*> patches;
-  StateVector<Block,TCA> addresses;
-
   // True if this block's terminal Jmp has a desination equal to the
   // next block in the same assmbler.
   bool noTerminalJmp;
-
-  // output from register allocator
-  const RegAllocInfo& regs;
-
-  // for each instruction, holds the RegSet of registers that must be
-  // preserved across that instruction.  This is for push/pop of caller-saved
-  // registers.
-  const LiveRegs& liveRegs;
 
   // Output: start/end ranges of machine code addresses of each instruction.
   AsmInfo* asmInfo;
@@ -100,17 +68,17 @@ struct CodegenState {
   // Have we progressed past the guards? Used to suppress TransBCMappings until
   // we're translating code that can properly be attributed to specific
   // bytecode.
-  bool pastGuards;
+  bool pastGuards{false};
 
   // Postponed code "points" can obtain code addresses after Vasm::finish().
   Vmeta meta;
 
   // vasm block labels, one for each hhir block
   StateVector<Block,Vlabel> labels;
+
+  // vlocs for each SSATmp used or defined in reachable blocks
   StateVector<SSATmp,Vloc> locs;
 };
-
-LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs);
 
 // Allocate registers and generate machine code. Mutates the global
 // singleton MCGenerator (adds code, allocates data, adds fixups).

@@ -68,17 +68,6 @@ struct BackEnd : public jit::BackEnd {
     return PhysReg(arm::rVmFp);
   }
 
-  Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return arm::srcConstraint(inst, i);
-  }
-
-  Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return arm::dstConstraint(inst, i);
-  }
-
-  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
-  RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
-
   bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
     return false;
   }
@@ -173,14 +162,6 @@ struct BackEnd : public jit::BackEnd {
     info.stubAddr = reinterpret_cast<TCA>(sim.xreg(arm::rAsm.code()));
   }
 
-  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
-                                       CodeBlock& mainCode,
-                                       CodeBlock& coldCode,
-                                       CodeBlock& frozenCode,
-                                       CodegenState& state) override {
-    always_assert(false);
-  }
-
   void moveToAlign(CodeBlock& cb,
                    MoveToAlignFlags alignment
                    = MoveToAlignFlags::kJmpTargetAlign) override {
@@ -248,34 +229,6 @@ struct BackEnd : public jit::BackEnd {
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     // TODO(2967396) implement properly
-  }
-
-  void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    // This function always emits a smashable jump but every jump on ARM is
-    // smashable so it's free.
-    emitJumpToBlock(cb, target, CC_None, state);
-  }
-
-  void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
-    auto dest = cb.frontier();
-    auto jump = reinterpret_cast<TCA>(state.patches[block]);
-
-    while (jump && jump != kEndOfTargetChain) {
-      auto nextIfJmp = jmpTarget(jump);
-      auto nextIfJcc = jccTarget(jump);
-
-      // Exactly one of them must be non-nullptr
-      assert(!(nextIfJmp && nextIfJcc));
-      assert(nextIfJmp || nextIfJcc);
-
-      if (nextIfJmp) {
-        smashJmp(jump, dest);
-        jump = nextIfJmp;
-      } else {
-        smashJcc(jump, dest);
-        jump = nextIfJcc;
-      }
-    }
   }
 
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
@@ -515,14 +468,6 @@ std::unique_ptr<jit::BackEnd> newBackEnd() {
   return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
-RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
-  return InvalidRegPair;
-}
-
-RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
-  return InvalidRegPair;
-}
-
 static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
                        CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
@@ -545,9 +490,7 @@ static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
-  RegAllocInfo no_regs(unit);
-  LiveRegs no_live_regs(unit, RegSet());
-  CodegenState state(unit, no_regs, no_live_regs, asmInfo);
+  CodegenState state(unit, asmInfo);
 
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();

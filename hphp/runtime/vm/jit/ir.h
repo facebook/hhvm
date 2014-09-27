@@ -562,7 +562,6 @@ O(InterpOne,                 D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                       E|N|Er) \
 O(InterpOneCF,               D(StkPtr), S(StkPtr) S(FramePtr),                \
                                                                     T|E|N|Er) \
-O(Shuffle,                          ND, SVar(Top),                        NF) \
 O(CreateCont,                   D(Obj), S(FramePtr) C(Int)                    \
                                           S(TCA,Nullptr) C(Int),   E|NNT|PRc) \
 O(ContEnter,                 D(StkPtr), S(StkPtr)                             \

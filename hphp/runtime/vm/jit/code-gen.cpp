@@ -34,33 +34,6 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Compute and save registers that are live *across* each inst, not including
- * registers whose lifetimes end at inst, nor registers defined by inst.
- */
-LiveRegs computeLiveRegs(const IRUnit& unit, const RegAllocInfo& regs) {
-  StateVector<Block, RegSet> live_in(unit, RegSet());
-  LiveRegs live_regs(unit, RegSet());
-  for (bool changed = true; changed;) {
-    changed = false;
-    postorderWalk(unit,
-      [&](Block* block) {
-        RegSet live;
-        if (Block* taken = block->taken()) live = live_in[taken];
-        if (Block* next = block->next()) live |= live_in[next];
-        for (auto it = block->end(); it != block->begin(); ) {
-          IRInstruction& inst = *--it;
-          live -= regs.dstRegs(inst);
-          live_regs[inst] = live;
-          live |= regs.srcRegs(inst);
-        }
-        changed |= (live != live_in[block]);
-        live_in[block] = live;
-      });
-  }
-  return live_regs;
-}
-
 void genCode(IRUnit& unit) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);

@@ -725,26 +725,6 @@ struct RBTraceData : IRExtraData {
   const StringData* msg;
 };
 
-/*
- * ShuffleData holds an array of destination locations for a Shuffle,
- * one per source, as well as a capacity field so we can track the
- * available space to add more srcs and dsts without reallocating.
- */
-struct ShuffleData : IRExtraData {
-  ShuffleData(PhysLoc* dests, uint32_t size, uint32_t cap)
-    : dests(dests), size(size), cap(cap)
-  {}
-
-  std::string show() const;
-
-  PhysLoc* begin() const { return dests; }
-  PhysLoc* end()   const { return dests + size; }
-
-  PhysLoc* dests; // array of up to [cap] PhysLocs
-  uint32_t size; // number of valid dests
-  uint32_t cap; // available slots for more dests & srcs
-};
-
 struct ClassKindData : IRExtraData {
   explicit ClassKindData(ClassKind kind): kind(uint32_t(kind)) {}
 
@@ -932,7 +912,6 @@ X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
-X(Shuffle,                      ShuffleData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(LdRaw,                        RawMemData);

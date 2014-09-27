@@ -259,7 +259,6 @@ ArgGroup CodeGenerator::argGroup() const {
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
-  assert(!inst->is(Shuffle));
   m_curInst = inst;
   SCOPE_EXIT {
     m_curInst = nullptr;
@@ -314,7 +313,6 @@ NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
-NOOP_OPCODE(Shuffle)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -570,7 +568,6 @@ void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
-  assert(info.valid);
   auto& v = vmain();
   v << incstat{Stats::TC_CatchTrace, 1, false};
 
@@ -580,7 +577,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   if (info.rspOffset) {
     v << addqi{info.rspOffset, rsp, rsp};
   }
-  PhysRegSaverParity::emitPops(v, info.savedRegs);
+  PhysRegSaverParity::emitPops(v, RegSet());
 }
 
 static void unwindResumeHelper(_Unwind_Exception* data) {
@@ -1084,10 +1081,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
     );
 
     auto& info = m_state.catches[taken];
-    info.savedRegs = RegSet();
     info.rspOffset = regSaver.rspAdjustment();
-    assert(!info.valid);
-    info.valid = true;
     auto next = v.makeBlock();
     v << unwind{{next, m_state.labels[taken]}};
     v = next;

@@ -111,9 +111,6 @@ struct CodeGenerator : public jit::CodeGenerator {
   jit::vector<Vloc>     m_slocs, m_dlocs;
 };
 
-void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
-                     CodegenState& state);
-
 }}}
 
 #endif

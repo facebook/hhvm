@@ -77,14 +77,6 @@ struct BackEnd : public jit::BackEnd {
     return x64::rVmFp;
   }
 
-  Constraint srcConstraint(const IRInstruction& inst, unsigned i) override {
-    return x64::srcConstraint(inst, i);
-  }
-
-  Constraint dstConstraint(const IRInstruction& inst, unsigned i) override {
-    return x64::dstConstraint(inst, i);
-  }
-
   bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
     return x64::storesCell(inst, srcIdx);
   }
@@ -92,9 +84,6 @@ struct BackEnd : public jit::BackEnd {
   bool loadsCell(const IRInstruction& inst) override {
     return x64::loadsCell(inst.op());
   }
-
-  RegPair precolorSrc(const IRInstruction& inst, unsigned i) override;
-  RegPair precolorDst(const IRInstruction& inst, unsigned i) override;
 
   /*
    * enterTCHelper does not save callee-saved registers except %rbp. This means
@@ -124,14 +113,6 @@ struct BackEnd : public jit::BackEnd {
     jit::enterTCHelper(regs.stack.top(), regs.fp, start,
                        &info, vmFirstAR(), RDS::tl_base);
     CALLEE_SAVED_BARRIER();
-  }
-
-  jit::CodeGenerator* newCodeGenerator(const IRUnit& unit,
-                                       CodeBlock& mainCode,
-                                       CodeBlock& coldCode,
-                                       CodeBlock& frozenCode,
-                                       CodegenState& state) override {
-    always_assert(false);
   }
 
   void moveToAlign(CodeBlock& cb,
@@ -208,14 +189,6 @@ struct BackEnd : public jit::BackEnd {
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     x64::emitTraceCall(cb, pcOff);
-  }
-
-  void emitFwdJmp(CodeBlock& cb, Block* target, CodegenState& state) override {
-    always_assert(false);
-  }
-
-  void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) override {
-    always_assert(false);
   }
 
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
@@ -713,165 +686,12 @@ std::unique_ptr<jit::BackEnd> newBackEnd() {
   return folly::make_unique<BackEnd>();
 }
 
-using NativeCalls::CallMap;
-using NativeCalls::Arg;
-using NativeCalls::ArgType;
-
-// return the number of registers needed to pass this arg
-int argSize(const Arg& arg, const IRInstruction& inst) {
-  switch (arg.type) {
-    case ArgType::SSA:
-    case ArgType::Imm:
-    case ArgType::ExtraImm:
-      return 1;
-    case ArgType::TV:
-      return 2;
-    case ArgType::MemberKeyS:
-      return inst.src(arg.ival)->isA(Type::Str) ? 1 : 2;
-    case ArgType::MemberKeyIS:
-      return inst.src(arg.ival)->isA(Type::Str) ? 1 :
-             inst.src(arg.ival)->isA(Type::Int) ? 1 : 2;
-  }
-  return 1;
-}
-
-// Return the argument-register hint for a native-call opcode.
-RegPair hintNativeCallSrc(const IRInstruction& inst, unsigned i) {
-  auto const& args = CallMap::info(inst.op()).args;
-  auto pos = 0;
-  for (auto& arg : args) {
-    if (argSize(arg, inst) == 1) {
-      if (arg.ival == i && pos < kNumRegisterArgs) {
-        return {argNumToRegName[pos], InvalidReg};
-      }
-      pos++;
-    } else {
-      if (arg.ival == i && pos + 1 < kNumRegisterArgs) {
-        return {argNumToRegName[pos], argNumToRegName[pos + 1]};
-      }
-      pos += 2;
-    }
-  }
-  return InvalidRegPair;
-}
-
-// return the return-value register hint for a NativeCall opcode.
-RegPair hintNativeCallDst(const IRInstruction& inst, unsigned i) {
-  if (i != 0) return InvalidRegPair;
-  auto const& info = CallMap::info(inst.op());
-  switch (info.dest) {
-    case DestType::SSA:
-      return {rax, InvalidReg};
-    case DestType::Dbl:
-    case DestType::SIMD:
-      return {xmm0, InvalidReg};
-    case DestType::TV:
-      return {rax, rdx};
-    case DestType::None:
-      return InvalidRegPair;
-  }
-  return InvalidRegPair;
-}
-
-// Return the arg-register hint for a CallBuiltin instruction.
-RegPair hintCallBuiltinSrc(const IRInstruction& inst, unsigned srcNum) {
-  auto callee = inst.extra<CallBuiltin>()->callee;
-  auto ipos = 0, dpos = 0, spos = 0;
-  if (isCppByRef(callee->returnType())) {
-    if (srcNum == 0) {
-      return {argNumToRegName[0], InvalidReg};
-    }
-    ipos = spos = 1;
-  }
-  // Iterate through the builtin params, keeping track of the HHIR src
-  // pos (spos) and the corresponding int (ipos) and double (dpos)
-  // register argument positions.  When spos == srcNum, return a hint.
-  auto& params = callee->params();
-  int i = 0, n = callee->numParams();
-  for (; i < n && spos < srcNum; ++i, ++spos) {
-    if (params[i].builtinType == KindOfDouble) {
-      dpos++;
-    } else {
-      ipos++;
-    }
-  }
-  if (i < n && spos == srcNum) {
-    if (params[i].builtinType == KindOfDouble) {
-      if (dpos < kNumSIMDRegisterArgs) {
-        return {argNumToSIMDRegName[dpos], InvalidReg};
-      }
-    } else {
-      if (ipos < kNumRegisterArgs) {
-        return {argNumToRegName[ipos], InvalidReg};
-      }
-    }
-  }
-  return InvalidRegPair;
-}
-
-// return the return-register hint for a CallBuiltin instruction
-RegPair hintCallBuiltinDst(const IRInstruction& inst, unsigned i) {
-  // the decision logic here is distilled from CodeGenerator::cgCallBuiltin()
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (i != 0) return InvalidRegPair;
-  auto returnType = inst.typeParam();
-  if (returnType <= Type::Dbl) {
-    return {xmm0, InvalidReg};
-  }
-  if (returnType.isSimpleType()) {
-    return {rax, InvalidReg};
-  }
-  // other return types are passed via stack; generated code reloads
-  // them, so using the ABI assigned registers doesn't matter.
-  return InvalidRegPair;
-}
-
-RegPair BackEnd::precolorSrc(const IRInstruction& inst, unsigned i) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (CallMap::hasInfo(inst.op())) {
-    return hintNativeCallSrc(inst, i);
-  }
-  switch (inst.op()) {
-    case CallBuiltin:
-      return hintCallBuiltinSrc(inst, i);
-    case Shl:
-    case Shr:
-      if (i == 1) return {PhysReg(rcx), InvalidReg};
-      break;
-    case Mod:
-      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
-      if (i == 0) return {PhysReg(rax), InvalidReg};
-    default:
-      break;
-  }
-  return InvalidRegPair;
-}
-
-RegPair BackEnd::precolorDst(const IRInstruction& inst, unsigned i) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring) return InvalidRegPair;
-  if (CallMap::hasInfo(inst.op())) {
-    return hintNativeCallDst(inst, i);
-  }
-  switch (inst.op()) {
-    case CallBuiltin:
-      return hintCallBuiltinDst(inst, i);
-    case Mod:
-      // x86 idiv does: rdx:rax/r => quotent:rax, remainder:rdx
-      if (i == 0) return {PhysReg(rdx), InvalidReg};
-      break;
-    default:
-      break;
-  }
-  return InvalidRegPair;
-}
-
 static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
                        CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
   CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
   size_t hhir_count{0};
   for (IRInstruction& instr : *block) {
-    if (instr.op() == Shuffle) continue;
     IRInstruction* inst = &instr;
     hhir_count++;
 
@@ -898,9 +718,7 @@ UNUSED const Abi vasm_abi {
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
-  RegAllocInfo no_regs(unit);
-  LiveRegs no_live_regs(unit, RegSet());
-  CodegenState state(unit, no_regs, no_live_regs, asmInfo);
+  CodegenState state(unit, asmInfo);
 
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();

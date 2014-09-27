@@ -53,7 +53,6 @@ NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
-NOOP_OPCODE(Shuffle)
 
 // XXX
 NOOP_OPCODE(DbgAssertPtr);
@@ -535,33 +534,6 @@ PUNT_OPCODE(ColIsEmpty)
 PUNT_OPCODE(ColIsNEmpty)
 
 #undef PUNT_OPCODE
-
-//////////////////////////////////////////////////////////////////////
-
-void emitJumpToBlock(CodeBlock& cb, Block* target, ConditionCode cc,
-                     CodegenState& state) {
-  vixl::MacroAssembler as { cb };
-
-  if (state.addresses[target]) {
-    not_implemented();
-  }
-
-  // The block hasn't been emitted yet. Record the location in CodegenState.
-  // CodegenState holds a map from Block* to the head of a linked list, where
-  // the jump instructions themselves are the list nodes.
-  auto next = reinterpret_cast<TCA>(state.patches[target]);
-  auto here = cb.frontier();
-
-  // To avoid encoding 0x0 as the jump target. That would conflict with the use
-  // of nullptr as a sentinel return value from jmpTarget() and jccTarget().
-  // Consider switching those to use folly::Optional or something?
-  if (!next) next = kEndOfTargetChain;
-
-  // This will never actually be executed as a jump to "next". It's just a
-  // pointer to the next jump instruction to retarget.
-  mcg->backEnd().emitSmashableJump(cb, next, cc);
-  state.patches[target] = here;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1114,11 +1086,8 @@ void CodeGenerator::cgCallHelper(Vout& v,
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
     auto& info = m_state.catches[taken];
-    assert(!info.afterCall);
     assert_not_implemented(args.numStackArgs() == 0);
     info.rspOffset = args.numStackArgs();
-    assert(!info.valid);
-    info.valid = true;
     auto next = v.makeBlock();
     v << hcunwind{syncPoint, {next, m_state.labels[taken]}};
     v = next;
@@ -1659,9 +1628,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   UNUSED auto const& info = m_state.catches[inst->block()];
-  assert(info.valid);
   assert(info.rspOffset == 0); // stack args not supported yet
-  assert(info.savedRegs.empty());
 }
 
 static void unwindResumeHelper() {
@@ -1903,7 +1870,6 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
   assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
-  assert(!inst->is(Shuffle));
   m_curInst = inst;
   SCOPE_EXIT {
     m_curInst = nullptr;

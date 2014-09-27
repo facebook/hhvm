@@ -105,15 +105,9 @@ struct RegAllocInfo {
 
   RegSet dstRegs(const IRInstruction& inst) const {
     auto regs = RegSet();
-    if (inst.is(Shuffle)) {
-      for (auto const& dest : *inst.extra<Shuffle>()) {
-        regs |= dest.regs();
-      }
-    } else {
-      auto& map = m_regs[inst];
-      for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
-        regs |= map.dst(i).regs();
-      }
+    auto& map = m_regs[inst];
+    for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+      regs |= map.dst(i).regs();
     }
     return regs;
   }
@@ -121,88 +115,6 @@ struct RegAllocInfo {
 private:
   StateVector<IRInstruction,RegMap> m_regs;
 };
-
-/*
- * New register allocator doing extended linear scan
- */
-RegAllocInfo allocateRegs(IRUnit&);
-
-/*
- * A Constraint represents a set of locations an operand may
- * be assigned to by the register allocator.  GP and SIMD are
- * self explanitory.  VOID means no-location, i.e. InvalidReg.
- * Only some instructions allow a VOID destination, so VOID
- * is explicit.
- */
-struct Constraint {
-  enum Mask: uint8_t {
-    GP = 1,
-    SIMD = 2,
-    VOID = 4,   // used for unused dests that can be InvalidReg
-    IMM = 8
-  };
-
-  /* implicit */ Constraint(Mask m)
-    : m_mask(m)
-    , m_reg(InvalidReg)
-  {}
-  /* implicit */ Constraint(PhysReg r)
-    : m_mask(maskFromReg(r))
-    , m_reg(r)
-  {}
-
-  Constraint& operator=(Constraint c2) {
-    m_mask = c2.m_mask;
-    m_reg = c2.m_reg;
-    return *this;
-  }
-
-  bool operator==(Constraint c2) const {
-    return m_mask == c2.m_mask && m_reg == c2.m_reg;
-  }
-
-  bool operator!=(Constraint c2) const {
-    return !(*this == c2);
-  }
-
-  PhysReg reg() const { return m_reg; }
-
-  Constraint operator|(Constraint c2) const {
-    return (*this == c2) ? *this :
-           Constraint(Mask(m_mask | c2.m_mask));
-  }
-
-  Constraint operator&(Constraint c2) const {
-    return (*this == c2) ? *this :
-           Constraint(Mask(m_mask & c2.m_mask));
-  }
-
-  Constraint operator-(Constraint c2) const {
-    assert(m_reg == InvalidReg && c2.m_reg == InvalidReg);
-    return Mask(m_mask & ~c2.m_mask);
-  }
-
-  Constraint& operator|=(Constraint c2) { return *this = *this | c2; }
-  Constraint& operator&=(Constraint c2) { return *this = *this & c2; }
-  Constraint& operator-=(Constraint c2) { return *this = *this - c2; }
-
-  explicit operator bool() const { return m_mask != 0; }
-
-private:
-  static Mask maskFromReg(PhysReg r) {
-    return r.isGP() ? GP : r.isSIMD() ? SIMD : VOID;
-  }
-
-private:
-  Mask m_mask;
-  PhysReg m_reg; // if valid, force this register
-};
-
-// return a constraint for the given src
-Constraint srcConstraint(const IRInstruction& inst, unsigned src);
-
-// Return a constraint for the given destination.
-Constraint dstConstraint(const IRInstruction& inst, unsigned dst);
 
 // Return InvalidReg, or a specific register to force tmp to use
 PhysReg forceAlloc(const SSATmp& tmp);

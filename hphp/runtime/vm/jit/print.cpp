@@ -222,17 +222,6 @@ void printPhysLoc(std::ostream& os, const PhysLoc& loc) {
   }
 }
 
-std::string ShuffleData::show() const {
-  std::ostringstream os;
-  auto delim = "";
-  for (unsigned i = 0; i < size; ++i) {
-    os << delim;
-    printPhysLoc(os, dests[i]);
-    delim = ",";
-  }
-  return os.str();
-}
-
 void print(std::ostream& os, const SSATmp* tmp, const PhysLoc* loc) {
   if (tmp->inst()->is(DefConst)) {
     os << constToString(tmp->type());

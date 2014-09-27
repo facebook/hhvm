@@ -22,67 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-using NativeCalls::CallMap;
-
 namespace arm {
-
-// Return true if the CodeGenerator method for this instruction can
-// handle an immediate for the ith source operand, usually by selecting
-// a special form of the necessary instruction.  The value of the immediate
-// can affect this decision; we look at the value here, and trust it
-// blindly in CodeGenerator.
-bool mayUseConst(const IRInstruction& inst, unsigned i) {
-  assert(inst.src(i)->isConst());
-  union {
-    int64_t cint;
-    double cdouble;
-  };
-  auto type = inst.src(i)->type();
-  cint = type.rawVal();
-  // (almost?) any instruction that accepts a GPR, can accept XZR in
-  // place of an immediate zero. TODO #3827905
-  switch (inst.op()) {
-  case GuardRefs:
-  case CheckRefs:
-    if (i == 1) return inst.src(2)->intVal() == 0; // nParams
-    if (i == 3) { // mask64
-      return vixl::Assembler::IsImmLogical(cint, vixl::kXRegSize);
-    }
-    if (i == 4) { // vals64
-      return vixl::Assembler::IsImmArithmetic(cint);
-    }
-    break;
-
-  //TODO: t3944093 add constraints for existing arm codegen
-  default:
-    break;
-  }
-  if (CallMap::hasInfo(inst.op())) {
-    // shuffleArgs() knows what to do with immediates.
-    // TODO: #3634984 ... but it needs a scratch register
-    return true;
-  }
-  return false;
-}
-
-Constraint srcConstraint(const IRInstruction& inst, unsigned i) {
-  Constraint c { Constraint::GP };
-  if (inst.src(i)->isConst() && mayUseConst(inst, i)) {
-    c |= Constraint::IMM;
-  }
-  if (inst.src(i)->type() <= Type::Dbl) {
-    c |= Constraint::SIMD;
-  }
-  return c;
-}
-
-Constraint dstConstraint(const IRInstruction& inst, unsigned i) {
-  Constraint c { Constraint::GP };
-  if (inst.dst(i)->type() <= Type::Dbl) {
-    c |= Constraint::SIMD;
-  }
-  return c;
-}
 
 }}}
 

@@ -608,7 +608,7 @@ and type_typedef_naming_and_decl nenv tdef =
     | Ast.Alias x -> false
     | Ast.NewType x -> true
   in
-  let params, tcstr, concrete_type =
+  let (params, tcstr, concrete_type) =
     Naming.typedef nenv tdef in
   let decl = is_abstract, params, concrete_type in
   let filename = Pos.filename pos in

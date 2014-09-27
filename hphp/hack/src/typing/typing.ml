@@ -2362,6 +2362,19 @@ and static_class_id p env = function
         let params = List.map (fun x -> Env.fresh_type()) class_.tc_tparams in
         env, (Reason.Rwitness p, Tapply (c, params))
     )
+  | CIvar e ->
+      let env, ty = expr env e in
+      let _, ty = Env.expand_type env ty in
+      let ty =
+        match ty with
+        | _, Tgeneric (_, Some (_, Tapply _))
+        | _, Tapply _ ->
+            ty
+        | _ ->
+            if env.Env.genv.Env.mode = Ast.Mstrict
+            then Errors.dynamic_class p;
+            Reason.Rnone, Tany
+      in env, ty
 
 and call_construct p env class_ params el =
   let env, cstr = Env.get_construct env class_ in
@@ -2416,6 +2429,20 @@ and is_visible env vis cid =
               "This member is private")
           | _ ->
             Some ("You cannot access this member", "This member is private"))
+      | Some (CIvar e) ->
+          let env, ty = expr env e in
+          let _, ty = Env.expand_type env ty in
+          begin match ty with
+            | _, Tgeneric (_, Some (_, Tapply ((_, c), _)))
+            | _, Tapply ((_, c), _) ->
+                (match Env.get_class env c with
+                | _, Some {tc_final = true; _} -> None
+                | _ -> Some (
+                  ("Private members cannot be accessed dynamically. "
+                     ^"Did you mean to use 'self::'?"),
+                    "This member is private"))
+            | _ -> assert false
+          end
       | None when x <> self_id ->
         Some ("You cannot access this member", "This member is private")
       | Some (CI _)

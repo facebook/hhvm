@@ -1,2 +1,4 @@
-File "method_dispatch_36.php", line 29, characters 5-6:
-Don't use dynamic classes (Naming[2010])
+File "method_dispatch_36.php", line 29, characters 9-10:
+Could not find static method f1 in type A (Typing[4090])
+File "method_dispatch_36.php", line 17, characters 19-20:
+The closest thing is f1 but it's not a static method

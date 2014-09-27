@@ -1798,15 +1798,14 @@ and expr_lambda env f =
     f_fun_kind = f_kind;
   }
 
-and make_class_id env cid =
+and make_class_id env (p, x as cid) =
   no_typedef env cid;
-  match snd cid with
-  | x when x.[0] = '$' && (fst env).in_mode = Ast.Mstrict ->
-      Errors.dynamic_class (fst cid);
-      N.CI cid
+  match x with
   | "parent" -> N.CIparent
   | "self" ->  N.CIself
   | "static" -> N.CIstatic
+  | x when x = "$this" -> N.CIvar (p, N.This)
+  | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
   | _ -> N.CI (Env.class_name env cid)
 
 and casel env l =

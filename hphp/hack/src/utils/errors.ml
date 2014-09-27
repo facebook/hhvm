@@ -96,7 +96,7 @@ module Naming                               = struct
   let different_scope                       = 2007 (* DONT MODIFY!!!! *)
   let disallowed_xhp_type                   = 2008 (* DONT MODIFY!!!! *)
   let double_instead_of_float               = 2009 (* DONT MODIFY!!!! *)
-  let dynamic_class                         = 2010 (* DONT MODIFY!!!! *)
+  (* DEPRECATED: let dynamic_class          = 2010 *)
   let dynamic_method_call                   = 2011 (* DONT MODIFY!!!! *)
   let error_name_already_bound              = 2012 (* DONT MODIFY!!!! *)
   let expected_collection                   = 2013 (* DONT MODIFY!!!! *)
@@ -300,6 +300,7 @@ module Typing                               = struct
   let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
   let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
+  let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -591,7 +592,7 @@ let gen_array_va_rec_arity pos =
     "gen_array_va_rec_DEPRECATED() expects at least 1 argument"
 
 let dynamic_class pos =
-  add Naming.dynamic_class pos
+  add Typing.dynamic_class pos
     "Don't use dynamic classes"
 
 let typedef_constraint pos =

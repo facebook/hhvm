@@ -464,8 +464,11 @@ HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
 
 const StaticString s_ReflectionFuncHandle("ReflectionFuncHandle");
 
-static String HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   auto file = func->unit()->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {
@@ -475,13 +478,19 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   }
 }
 
-static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getStartLine) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getStartLine) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   return func->line1();
 }
 
-static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getEndLine) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getEndLine) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   return func->line2();
 }
 
@@ -918,13 +927,19 @@ static Variant HHVM_METHOD(ReflectionClass, getFileName) {
   }
 }
 
-static int64_t HHVM_METHOD(ReflectionClass, getStartLine) {
+static Variant HHVM_METHOD(ReflectionClass, getStartLine) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->isBuiltin()) {
+    return false;
+  }
   return cls->preClass()->line1();
 }
 
-static int64_t HHVM_METHOD(ReflectionClass, getEndLine) {
+static Variant HHVM_METHOD(ReflectionClass, getEndLine) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->isBuiltin()) {
+    return false;
+  }
   return cls->preClass()->line2();
 }
 

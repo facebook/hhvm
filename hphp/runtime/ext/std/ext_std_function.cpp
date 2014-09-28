@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 
 #include <algorithm>
 #include <vector>
@@ -39,12 +39,12 @@ const StaticString
   s_internal("internal"),
   s_user("user");
 
-Array f_get_defined_functions() {
+Array HHVM_FUNCTION(get_defined_functions) {
   return make_map_array(s_internal, Unit::getSystemFunctions(),
                         s_user, Unit::getUserFunctions());
 }
 
-bool f_function_exists(const String& function_name,
+bool HHVM_FUNCTION(function_exists, const String& function_name,
                        bool autoload /* = true */) {
   return
     function_exists(function_name) ||
@@ -58,20 +58,20 @@ const StaticString
   s_Closure__invoke("Closure::__invoke"),
   s_colon2("::");
 
-bool f_is_callable(const Variant& v, bool syntax /* = false */,
+bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
   bool ret = true;
   if (LIKELY(!syntax)) {
     CallerFrame cf;
-    ObjectData* obj = NULL;
-    HPHP::Class* cls = NULL;
-    StringData* invName = NULL;
+    ObjectData* obj = nullptr;
+    HPHP::Class* cls = nullptr;
+    StringData* invName = nullptr;
     const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
                                                  invName, false);
     if (f == nullptr || f->isAbstract()) {
       ret = false;
     }
-    if (invName != NULL) {
+    if (invName != nullptr) {
       decRefStr(invName);
     }
     if (!name.isReferenced()) return ret;
@@ -125,45 +125,48 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
         name = d->o_getClassName().asString() + "::__invoke";
       }
     }
-    return invoke != NULL;
+    return invoke != nullptr;
   }
 
   return false;
 }
 
-Variant f_call_user_func(int _argc, const Variant& function,
-                         const Array& _argv /* = null_array */) {
-  return vm_call_user_func(function, _argv);
-}
-
-Variant f_call_user_func_array(const Variant& function, const Variant& params) {
+Variant HHVM_FUNCTION(call_user_func, const Variant& function,
+                      const Array& params /* = null_array */) {
   return vm_call_user_func(function, params);
 }
 
-Variant f_check_user_func_async(const Variant& handles, int timeout /* = -1 */) {
+Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
+                      const Array& params) {
+  return vm_call_user_func(function, params);
+}
+
+Variant HHVM_FUNCTION(check_user_func_async, const Variant& handles,
+                     int timeout /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }
 
-Variant f_end_user_func_async(const Object& handle,
-                              int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
-                              const Variant& additional_strategies /* = null */) {
+Variant HHVM_FUNCTION(end_user_func_async, const Object& handle,
+                     int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
+                     const Variant& additional_strategies /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }
 
-Variant f_forward_static_call_array(const Variant& function, const Array& params) {
-  return f_forward_static_call(0, function, params);
+Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
+                      const Array& params) {
+  return HHVM_FN(forward_static_call)(function, params);
 }
 
-Variant f_forward_static_call(int _argc, const Variant& function,
-                              const Array& _argv /* = null_array */) {
+Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
+                              const Array& params /* = null_array */) {
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
-  return vm_call_user_func(function, _argv, true);
+  return vm_call_user_func(function, params, true);
 }
 
-String f_create_function(const String& args, const String& code) {
+String HHVM_FUNCTION(create_function, const String& args, const String& code) {
   return g_context->createFunction(args, code);
 }
 
@@ -174,7 +177,7 @@ static Variant func_get_arg_impl(int arg_num) {
   CallerFrame cf;
   ActRec* ar = cf.actRecForArgs();
 
-  if (ar == NULL) {
+  if (ar == nullptr) {
     return false;
   }
   if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
@@ -218,17 +221,17 @@ static Variant func_get_arg_impl(int arg_num) {
   return false;
 }
 
-Variant f_func_get_arg(int arg_num) {
+Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
   raise_disallowed_dynamic_call(
     "func_get_arg should not be called dynamically");
   return func_get_arg_impl(arg_num);
 }
-Variant f_func_get_arg_sl(int arg_num) {
+Variant HHVM_FUNCTION(SystemLib_func_get_arg_sl, int arg_num) {
   return func_get_arg_impl(arg_num);
 }
 
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
-  if (ar == NULL) {
+  if (ar == nullptr) {
     return Array();
   }
   int numParams = ar->m_func->numNonVariadicParams();
@@ -266,18 +269,18 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   return hhvm_get_frame_args(ar, offset);                                      \
 } while(0)
 
-Variant f_func_get_args() {
+Variant HHVM_FUNCTION(func_get_args) {
   raise_disallowed_dynamic_call(
     "func_get_args should not be called dynamically");
   FUNC_GET_ARGS_IMPL(0);
 }
-// __SystemLib\func_get_args
-Variant f_func_get_args_sl() {
+// __SystemLib\func_get_args_sl
+Variant HHVM_FUNCTION(SystemLib_func_get_args_sl) {
   FUNC_GET_ARGS_IMPL(0);
 }
 
 // __SystemLib\func_slice_args
-Variant f_func_slice_args(int offset) {
+Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset) {
   if (offset < 0) {
     offset = 0;
   }
@@ -288,7 +291,7 @@ ALWAYS_INLINE
 static int64_t func_num_args_impl() {
   EagerCallerFrame cf;
   ActRec* ar = cf.actRecForArgs();
-  if (ar == NULL) {
+  if (ar == nullptr) {
     return -1;
   }
   if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
@@ -300,26 +303,52 @@ static int64_t func_num_args_impl() {
   return ar->numArgs();
 }
 
-int64_t f_func_num_args() {
+int64_t HHVM_FUNCTION(func_num_args) {
   raise_disallowed_dynamic_call(
     "func_num_args should not be called dynamically");
   return func_num_args_impl();
 }
-int64_t f_func_num_arg_() {
+int64_t HHVM_FUNCTION(SystemLib_func_num_arg_) {
   return func_num_args_impl();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void f_register_postsend_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
-  g_context->registerShutdownFunction(function, _argv,
+void HHVM_FUNCTION(register_postsend_function, const Variant& function,
+                   const Array& params /* = null_array */) {
+  g_context->registerShutdownFunction(function, params,
                                       ExecutionContext::PostSend);
 }
 
-void f_register_shutdown_function(int _argc, const Variant& function, const Array& _argv /* = null_array */) {
-  g_context->registerShutdownFunction(function, _argv,
+void HHVM_FUNCTION(register_shutdown_function, const Variant& function,
+                   const Array& params /* = null_array */) {
+  g_context->registerShutdownFunction(function, params,
                                       ExecutionContext::ShutDown);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+void StandardExtension::initFunction() {
+  HHVM_FE(get_defined_functions);
+  HHVM_FE(function_exists);
+  HHVM_FE(is_callable);
+  HHVM_FE(call_user_func);
+  HHVM_FE(call_user_func_array);
+  HHVM_FE(check_user_func_async);
+  HHVM_FE(end_user_func_async);
+  HHVM_FE(forward_static_call_array);
+  HHVM_FE(forward_static_call);
+  HHVM_FE(create_function);
+  HHVM_FE(func_get_arg);
+  HHVM_FALIAS(__SystemLib\\func_get_arg_sl, SystemLib_func_get_arg_sl);
+  HHVM_FE(func_get_args);
+  HHVM_FALIAS(__SystemLib\\func_get_args_sl, SystemLib_func_get_args_sl);
+  HHVM_FALIAS(__SystemLib\\func_slice_args, SystemLib_func_slice_args);
+  HHVM_FE(func_num_args);
+  HHVM_FALIAS(__SystemLib\\func_num_arg_, SystemLib_func_num_arg_);
+  HHVM_FE(register_postsend_function);
+  HHVM_FE(register_shutdown_function);
+
+  loadSystemlib("std_function");
 }
+
+///////////////////////////////////////////////////////////////////////////////
+} // namespace HPHP

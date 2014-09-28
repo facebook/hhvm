@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -383,7 +383,7 @@ bool c_SQLite3::t_createfunction(const String& name, const Variant& callback,
   if (name.empty()) {
     return false;
   }
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("Not a valid callback function %s",
                   callback.toString().data());
     return false;
@@ -407,12 +407,12 @@ bool c_SQLite3::t_createaggregate(const String& name, const Variant& step, const
   if (name.empty()) {
     return false;
   }
-  if (!f_is_callable(step)) {
+  if (!HHVM_FN(is_callable)(step)) {
     raise_warning("Not a valid callback function %s",
                   step.toString().data());
     return false;
   }
-  if (!f_is_callable(final)) {
+  if (!HHVM_FN(is_callable)(final)) {
     raise_warning("Not a valid callback function %s",
                   final.toString().data());
     return false;

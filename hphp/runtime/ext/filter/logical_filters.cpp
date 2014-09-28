@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include <arpa/inet.h>
@@ -771,7 +771,7 @@ Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) {
 }
 
 Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
-  if (!f_is_callable(option_array)) {
+  if (!HHVM_FN(is_callable)(option_array)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }

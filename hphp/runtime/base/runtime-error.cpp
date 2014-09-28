@@ -224,6 +224,20 @@ void raise_param_type_warning(
     func_name += 4;
   } else if (strncmp(func_name, "tg1_", 4) == 0) {
     func_name += 4;
+  } else if (strncmp(func_name, "__SystemLib\\extract", 19) == 0) {
+    func_name = "extract";
+  } else if (strncmp(func_name, "__SystemLib\\parse_str", 21) == 0) {
+    func_name = "parse_str";
+  } else if (strncmp(func_name, "__SystemLib\\compact_sl", 22) == 0) {
+    func_name = "compact";
+  } else if (strncmp(func_name, "__SystemLib\\get_defined_vars", 28) == 0) {
+    func_name = "get_defined_vars";
+  } else if (strncmp(func_name, "__SystemLib\\func_get_args_sl", 28) == 0) {
+    func_name = "func_get_args";
+  } else if (strncmp(func_name, "__SystemLib\\func_get_arg_sl", 27) == 0) {
+    func_name = "func_get_arg";
+  } else if (strncmp(func_name, "__SystemLib\\func_num_arg_", 25) == 0) {
+    func_name = "func_num_args";
   }
   assert(param_num > 0);
   String expected_type_str = getDataTypeString(expected_type);

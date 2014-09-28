@@ -20,8 +20,8 @@
 
 #include <pcre.h>
 
-#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
@@ -75,7 +75,7 @@ Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Varia
                                              const Variant& subject,
                                              int limit /* = -1 */,
                                              VRefParam count /* = null */) {
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("Not a valid callback function %s",
         callback.toString().data());
     return empty_string_variant();

@@ -27,7 +27,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"

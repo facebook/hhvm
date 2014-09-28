@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/FBSerialize.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
@@ -1052,14 +1052,14 @@ Array f_fb_call_user_func_safe(int _argc, const Variant& function,
 Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
                                         const Variant& def,
                                         const Array& _argv /* = null_array */) {
-  if (f_is_callable(function)) {
+  if (HHVM_FN(is_callable)(function)) {
     return vm_call_user_func(function, _argv);
   }
   return def;
 }
 
 Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
-  if (f_is_callable(function)) {
+  if (HHVM_FN(is_callable)(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
   return make_packed_array(false, uninit_null());

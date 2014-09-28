@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 
 namespace HPHP {
 
@@ -345,7 +345,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
         parentToClass(func, &c);
       } else {
         assert(isCallable());
-        return f_is_callable(tvAsCVarRef(tv));
+        return HHVM_FN(is_callable)(tvAsCVarRef(tv));
       }
     } else {
       // We can't save the Class* since it moves around from request
@@ -390,7 +390,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     }
 
     if (isCallable()) {
-      return f_is_callable(tvAsCVarRef(tv));
+      return HHVM_FN(is_callable)(tvAsCVarRef(tv));
     }
     return isPrecise() && checkTypeAliasNonObj(tv);
   }

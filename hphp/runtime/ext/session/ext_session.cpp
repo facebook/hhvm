@@ -43,7 +43,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
@@ -1560,7 +1560,7 @@ static bool HHVM_FUNCTION(session_set_save_handler,
   g_context->removeShutdownFunction(s_session_write_close,
                                     ExecutionContext::ShutDown);
   if (register_shutdown) {
-    f_register_shutdown_function(1, s_session_write_close);
+    HHVM_FN(register_shutdown_function)(s_session_write_close);
   }
 
   if (ini_get_save_handler() != "user") {

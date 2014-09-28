@@ -32,7 +32,7 @@
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -2042,7 +2042,7 @@ void c_SoapServer::t_addfunction(const Variant& func) {
         return;
       }
       String function_name = iter.second().toString();
-      if (!f_function_exists(function_name)) {
+      if (!HHVM_FN(function_exists)(function_name)) {
         raise_warning("Tried to add a non existant function '%s'",
                         function_name.data());
         return;
@@ -2081,7 +2081,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (server->m_type == SOAP_CLASS) {
     cls = soap_obj->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
-    return f_function_exists(fn_name);
+    return HHVM_FN(function_exists)(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
     return server->m_soap_functions.ft.exists(HHVM_FN(strtolower)(fn_name));
   }

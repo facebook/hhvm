@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/pdo_sqlite.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -292,7 +292,7 @@ void php_sqlite3_callback_func(sqlite3_context* context, int argc,
 bool PDOSqliteConnection::createFunction(const String& name,
                                          const Variant& callback,
                                          int argcount) {
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());
     return false;
   }

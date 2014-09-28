@@ -63,7 +63,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/bytecode.h"

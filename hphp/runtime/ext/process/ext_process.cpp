@@ -41,7 +41,7 @@
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -392,7 +392,7 @@ bool HHVM_FUNCTION(pcntl_signal,
     return true;
   }
 
-  if (!f_is_callable(handler)) {
+  if (!HHVM_FN(is_callable)(handler)) {
     raise_warning("%s is not a callable function name error",
                     handler.toString().data());
     return false;

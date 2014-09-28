@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/runtime-option.h"

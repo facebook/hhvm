@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_WARNING);
 
 // Changeable
 readline_info('readline_name', 123); // This gets converted to string

@@ -149,7 +149,9 @@ const StaticString
   s_readline_name("readline_name"),
   s_attempted_completion_over("attempted_completion_over");
 
-static bool rl_readline_name_malloced = false;
+static char* _rl_readline_name = nullptr;
+static char* _rl_line_buffer = nullptr;
+static Mutex info_lock;
 
 Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
                                      const String& newvalue /* = null */) {
@@ -176,8 +178,15 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
     Variant oldval;
     if (varname == s_line_buffer) {
       oldval = String(convert_null_to_empty(rl_line_buffer));
-      if (!newvalue.isNull()) {
-        rl_replace_line(newvalue.data(), 1);
+      if (!newvalue.isNull() && oldval.toString() != newvalue) {
+        Lock lock(info_lock);
+        raise_warning(
+          "This probably isn't doing what you expect it to do, " \
+          "this name is set for EVERY request."
+        );
+        free(_rl_line_buffer);
+        _rl_line_buffer = strdup(newvalue.data());
+        rl_line_buffer = _rl_line_buffer;
       }
       return oldval;
     } else if (varname == s_point) {
@@ -214,10 +223,14 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
       return convert_null_to_empty(rl_library_version);
     } else if (varname == s_readline_name) {
       oldval = String(convert_null_to_empty(rl_readline_name));
-      if (!newvalue.isNull()) {
-        if (rl_readline_name_malloced) free((void*)rl_readline_name);
-        rl_readline_name = strdup(newvalue.data());
-        rl_readline_name_malloced = true;
+      if (!newvalue.isNull() && oldval.toString() != newvalue) {
+        Lock lock(info_lock);
+        raise_warning(
+          "This probably isn't doing what you expect it to do, " \
+          "this name is set for EVERY request."
+        );
+        _rl_readline_name = strdup(newvalue.data());
+        rl_readline_name = _rl_readline_name;
       }
       return oldval;
     } else if (varname == s_attempted_completion_over) {

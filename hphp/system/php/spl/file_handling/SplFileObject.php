@@ -174,11 +174,10 @@ class SplFileObject extends SplFileInfo
    *                     file, or FALSE on error.
    */
   public function fgets() {
-    $line = fgets($this->rsrc, $this->maxLineLen);
-    if ($this->flags & self::DROP_NEW_LINE) {
-      $line = rtrim($line);
+    if(false !== $this->currentLine) {
+      $this->next();
     }
-    return $line;
+    return $this->current();
   }
 
   public function getCurrentLine() {
@@ -554,7 +553,10 @@ class SplFileObject extends SplFileInfo
           $this->escape
         );
       } else {
-        $this->currentLine = $this->fgets();
+        $this->currentLine = fgets($this->rsrc, $this->maxLineLen);
+        if ($this->flags & self::DROP_NEW_LINE) {
+          $this->currentLine = rtrim($this->currentLine);
+        }
       }
     }
     return $this->currentLine;

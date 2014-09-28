@@ -5,7 +5,6 @@ require_once('PerfTarget.php');
 final class SugarCRMTarget extends PerfTarget {
   public function __construct(
     private PerfOptions $options,
-    private string $tempDir,
   ) {
   }
 
@@ -16,7 +15,7 @@ final class SugarCRMTarget extends PerfTarget {
   public function install(): void {
     shell_exec($this->safeCommand(Vector {
       'tar',
-      '-C', $this->tempDir,
+      '-C', $this->options->tempDir,
       '-zxf',
       __DIR__.'/sugarcrm/sugarcrm_dev-6.5.16.tar.gz',
     }));
@@ -90,7 +89,7 @@ final class SugarCRMTarget extends PerfTarget {
   }
 
   public function getSourceRoot(): string {
-    return $this->tempDir.'/sugarcrm_dev-6.5.16';
+    return $this->options->tempDir.'/sugarcrm_dev-6.5.16';
   }
 
   // See PerfTarget::ignorePath() for documentation

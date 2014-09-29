@@ -133,6 +133,9 @@ end : HashSetSig)
 
 let spf = Printf.sprintf
 
+let fst3 = function x, _, _ -> x
+let snd3 = function _, x, _ -> x
+let thd3 = function _, _, x -> x
 
 let internal_error s =
   Printf.fprintf stderr
@@ -151,6 +154,11 @@ let default x y f =
   match y with
   | None -> x
   | Some y -> f y
+
+let opt_fold_left f x y =
+  match y with
+  | None -> x
+  | Some y -> f x y
 
 let rec lmap f env l =
   match l with

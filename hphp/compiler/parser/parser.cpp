@@ -1919,15 +1919,19 @@ Token Parser::onClosure(ClosureType type,
                         Token& ref,
                         Token& params,
                         Token& cparams,
-                        Token& stmts) {
+                        Token& stmts,
+                        Token& ret) {
   Token out;
   Token name;
 
-  Token retIgnore;
+  if (ret.typeAnnotation) {
+    ret.typeAnnotation->setSoft();
+  }
+
   auto stmt = onFunctionHelper(
     FunctionType::Closure,
     modifiers,
-    retIgnore,
+    ret,
     ref,
     nullptr,
     params,

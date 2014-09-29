@@ -122,7 +122,7 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
 $objs = null;
 
 // TEST: async handle
-async function myAsyncFunc(): int { return 42; }
+async function myAsyncFunc(): Awaitable<int> { return 42; }
 $myClass = myAsyncFunc();
 $objs = objprof_get_data();
 echo get_bytes_eq('StaticWaitHandle', $objs) == 16 + $ObjSize // handle size

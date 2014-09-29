@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"

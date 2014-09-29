@@ -19,7 +19,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/disasm.h"
 
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 

@@ -15,8 +15,9 @@
 */
 
 #include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/native-calls.h"
+
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/native-calls.h"
 
 namespace HPHP { namespace jit {
 

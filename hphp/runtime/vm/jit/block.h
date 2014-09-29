@@ -17,8 +17,9 @@
 #ifndef incl_HPHP_VM_BLOCK_H_
 #define incl_HPHP_VM_BLOCK_H_
 
-#include "hphp/runtime/vm/jit/containers.h"
 #include <algorithm>
+
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -71,7 +72,7 @@ struct Block : boost::noncopyable {
     , m_hint(Hint::Neither)
   {}
 
-  uint32_t    id() const           { return m_id; }
+  unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
   void        setHint(Hint hint)   { m_hint = hint; }
 

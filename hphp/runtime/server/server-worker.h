@@ -90,7 +90,7 @@ protected:
     bool error = true;
     std::string errorMsg;
 
-    SCOPE_EXIT { m_handler->teardownRequest(); };
+    SCOPE_EXIT { m_handler->teardownRequest(transport); };
 
     try {
       m_handler->setupRequest(transport);

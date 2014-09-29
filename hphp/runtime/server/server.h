@@ -89,7 +89,7 @@ public:
    * Called before and after request-handling work.
    */
   virtual void setupRequest(Transport* transport) {}
-  virtual void teardownRequest() noexcept {}
+  virtual void teardownRequest(Transport* transport) noexcept {}
 
   /**
    * Sub-class handles a request by implementing this function.
@@ -109,7 +109,7 @@ public:
   void run(Transport* transport) {
     setupRequest(transport);
     handleRequest(transport);
-    teardownRequest();
+    teardownRequest(transport);
   }
 
   int getDefaultTimeout() const { return m_timeout; }

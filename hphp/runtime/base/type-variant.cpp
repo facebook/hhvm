@@ -1068,7 +1068,10 @@ void Variant::unserialize(VariableUnserializer *uns,
         throw Exception("Expected '}' but got '%c'", sep);
       }
 
-      if (uns->getType() != VariableUnserializer::Type::DebuggerSerialize) {
+      if (uns->getType() != VariableUnserializer::Type::DebuggerSerialize ||
+          (cls && cls->isCppSerializable())) {
+        // Don't call wakeup when unserializing for the debugger, except for
+        // natively implemented classes.
         obj->invokeWakeup();
       }
 

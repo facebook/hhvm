@@ -606,7 +606,8 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini, Hdf hdfPattern) {
+static bool matchHdfPattern(const std::string &value,
+                            const IniSetting::Map& ini, Hdf hdfPattern) {
   string pattern = Config::GetString(ini, hdfPattern);
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
@@ -918,8 +919,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     }
     {
       Hdf lang = config["Hack"]["Lang"];
-      IntsOverflowToInts =
-        Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+      Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
+                   EnableHipHopSyntax);
       Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);

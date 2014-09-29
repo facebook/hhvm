@@ -99,8 +99,6 @@ struct UnknownInputExc : std::runtime_error {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator auxiliary types.
 
-using BlockIdToRegionBlockMap = hphp_hash_map<RegionDesc::BlockId,
-                                              RegionDesc::Block*>;
 using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
 
 /*
@@ -382,18 +380,16 @@ public:
   static bool liveFrameIsPseudoMain();
 
 private:
-  void createBlockMaps(const RegionDesc&        region,
-                       BlockIdToIRBlockMap&     blockIdToIRBlock,
-                       BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void createBlockMap(const RegionDesc&    region,
+                      BlockIdToIRBlockMap& blockIdToIRBlock);
 
-  void setSuccIRBlocks(const RegionDesc&              region,
-                       RegionDesc::BlockId            srcBlockId,
-                       const BlockIdToIRBlockMap&     blockIdToIRBlock,
-                       const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void setSuccIRBlocks(const RegionDesc&          region,
+                       RegionDesc::BlockId        srcBlockId,
+                       const BlockIdToIRBlockMap& blockIdToIRBlock);
 
-  void setIRBlock(RegionDesc::BlockId            blockId,
-                  const BlockIdToIRBlockMap&     blockIdToIRBlock,
-                  const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void setIRBlock(RegionDesc::BlockId        blockId,
+                  const RegionDesc&          region,
+                  const BlockIdToIRBlockMap& blockIdToIRBlock);
 
 
   /////////////////////////////////////////////////////////////////////////////

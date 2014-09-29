@@ -1,1 +1,0 @@
-Fatal error: Return type hint for async method C::f() must be Awaitable in %s on line 2

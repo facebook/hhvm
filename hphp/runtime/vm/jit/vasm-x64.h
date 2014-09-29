@@ -116,8 +116,9 @@ private:
 // instantiations of this wrap virtual register numbers in in a strongly
 // typed wrapper that conveys physical constraints, similar to Reg64,
 // Reg32, RegXMM, etc.
-template<class Reg, VregKind k> struct Vr {
-  static constexpr auto kind = k;
+template<class Reg, VregKind Kind, int Bits> struct Vr {
+  static constexpr auto bits = Bits;
+  static constexpr auto kind = Kind;
   explicit Vr(size_t rn) : rn(rn) {}
   /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
     if (kind == VregKind::Gpr) {
@@ -147,8 +148,8 @@ template<class Reg, VregKind k> struct Vr {
   bool isSIMD() const { return rn>=Vreg::X0 && rn<Vreg::X0+Vreg::kNumXMM; }
   bool isSF() const { return rn>=Vreg::S0 && rn<Vreg::S0+Vreg::kNumSF; }
   bool isVirt() const { return rn >= Vreg::V0 && isValid(); }
-  bool operator==(Vr<Reg,k> r) const { return rn == r.rn; }
-  bool operator!=(Vr<Reg,k> r) const { return rn != r.rn; }
+  bool operator==(Vr<Reg,Kind,Bits> r) const { return rn == r.rn; }
+  bool operator!=(Vr<Reg,Kind,Bits> r) const { return rn != r.rn; }
   bool operator==(PhysReg) const = delete;
   bool operator!=(PhysReg) const = delete;
   bool isValid() const { return rn != Vreg::kInvalidReg; }
@@ -163,12 +164,13 @@ template<class Reg, VregKind k> struct Vr {
 private:
   unsigned rn;
 };
-typedef Vr<Reg64,VregKind::Gpr>   Vreg64;
-typedef Vr<Reg32,VregKind::Gpr>   Vreg32;
-typedef Vr<Reg16,VregKind::Gpr>   Vreg16;
-typedef Vr<Reg8,VregKind::Gpr>    Vreg8;
-typedef Vr<RegXMM,VregKind::Simd> VregXMM;
-typedef Vr<RegSF,VregKind::Sf>    VregSF;
+typedef Vr<Reg64,VregKind::Gpr,64>    Vreg64;
+typedef Vr<Reg32,VregKind::Gpr,32>    Vreg32;
+typedef Vr<Reg16,VregKind::Gpr,16>    Vreg16;
+typedef Vr<Reg8,VregKind::Gpr,8>      Vreg8;
+typedef Vr<RegXMM,VregKind::Simd,64>  VregDbl;
+typedef Vr<RegXMM,VregKind::Simd,128> Vreg128;
+typedef Vr<RegSF,VregKind::Sf,4>      VregSF;
 
 inline Reg64 r64(Vreg64 r) { return r; }
 
@@ -290,13 +292,13 @@ inline Vptr Vreg::operator[](Vreg index) const {
   return Vptr(*this, index, 1, 0);
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator*() const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator*() const {
   return Vptr(*this, 0);
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator[](int disp) const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator[](int disp) const {
   return Vptr(*this, disp);
 }
 
@@ -316,28 +318,28 @@ inline Vptr operator+(Vreg64 base, intptr_t d) {
   return Vptr(base, safe_cast<int32_t>(d));
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator[](ScaledIndex si) const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator[](ScaledIndex si) const {
   return Vptr(*this, si.index, si.scale, 0);
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator[](ScaledIndexDisp sid) const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator[](ScaledIndexDisp sid) const {
   return Vptr(*this, sid.si.index, sid.si.scale, sid.disp);
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator[](Vptr p) const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator[](Vptr p) const {
   return Vptr(*this, p.base, 1, p.disp);
 }
 
-template<class Reg, VregKind k>
-Vptr Vr<Reg,k>::operator[](DispReg rd) const {
+template<class Reg, VregKind Kind, int Bits>
+Vptr Vr<Reg,Kind,Bits>::operator[](DispReg rd) const {
   return Vptr(*this, rd.base, 1, rd.disp);
 }
 
-template<class Reg, VregKind k>
-inline Vptr Vr<Reg,k>::operator+(size_t d) const {
+template<class Reg, VregKind Kind, int Bits>
+inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
 }
 
@@ -455,8 +457,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(loadzbl, Inone, U(s), D(d))\
   O(movb, Inone, UH(s,d), DH(d,s))\
   O(movbi, I(s), Un, D(d))\
-  O(movdqa, Inone, UH(s,d), DH(d,s))\
-  O(movl, Inone, UH(s,d), DH(d,d))\
+  O(movl, Inone, UH(s,d), DH(d,s))\
   O(movq, Inone, UH(s,d), DH(d,s))\
   O(movqrx, Inone, U(s), D(d))\
   O(movqxr, Inone, U(s), D(d))\
@@ -586,7 +587,7 @@ struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct addsd  { VregXMM s0, s1, d; };
+struct addsd  { VregDbl s0, s1, d; };
 struct andb  { Vreg8 s0, s1, d; VregSF sf; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct andbim { Immed s; Vptr m; VregSF sf; };
@@ -610,16 +611,16 @@ struct cmpq  { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct cmpqi { Immed  s0; Vreg64 s1; VregSF sf; };
 struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
 struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
-struct cmpsd { ComparisonPred pred; VregXMM s0, s1, d; };
+struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct cqo {};
-struct cvttsd2siq { VregXMM s; Vreg64 d; };
-struct cvtsi2sd { Vreg64 s; VregXMM d; };
-struct cvtsi2sdm { Vptr s; VregXMM d; };
+struct cvttsd2siq { VregDbl s; Vreg64 d; };
+struct cvtsi2sd { Vreg64 s; VregDbl d; };
+struct cvtsi2sdm { Vptr s; VregDbl d; };
 struct decl { Vreg32 s, d; VregSF sf; };
 struct declm { Vptr m; VregSF sf; };
 struct decq { Vreg64 s, d; VregSF sf; };
 struct decqm { Vptr m; VregSF sf; };
-struct divsd { VregXMM s0, s1, d; };
+struct divsd { VregDbl s0, s1, d; };
 struct idiv { Vreg64 s; VregSF sf; };
 struct imul { Vreg64 s0, s1, d; VregSF sf; };
 struct incl { Vreg32 s, d; VregSF sf; };
@@ -634,22 +635,21 @@ struct jmpr { Vreg64 target; };
 struct jmpm { Vptr target; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
-struct loaddqu { Vptr s; VregXMM d; };
+struct loaddqu { Vptr s; Vreg128 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadq { Vptr s; Vreg64 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
-struct loadsd { Vptr s; VregXMM d; };
+struct loadsd { Vptr s; VregDbl d; };
 struct loadzbl { Vptr s; Vreg32 d; };
 struct movb { Vreg8 s, d; };
 struct movbi { Immed s; Vreg8 d; };
-struct movdqa { VregXMM s, d; };
 struct movl { Vreg32 s, d; };
 struct movq { Vreg64 s, d; };
-struct movqrx { Vreg64 s; VregXMM d; };
-struct movqxr { VregXMM s; Vreg64 d; };
+struct movqrx { Vreg64 s; VregDbl d; };
+struct movqxr { VregDbl s; Vreg64 d; };
 struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
-struct mulsd  { VregXMM s0, s1, d; };
+struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
 struct not { Vreg64 s, d; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; };
@@ -657,13 +657,13 @@ struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
 struct popm { Vptr m; };
-struct psllq { Immed s0; VregXMM s1, d; };
-struct psrlq { Immed s0; VregXMM s1, d; };
+struct psllq { Immed s0; VregDbl s1, d; };
+struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
 struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
 struct ret {};
-struct roundsd { RoundDirection dir; VregXMM s, d; };
+struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct sbbl { VregSF sfu; Vreg32 s0, s1, d; VregSF sfd; };
@@ -673,22 +673,22 @@ struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct sqrtsd { VregXMM s, d; };
+struct sqrtsd { VregDbl s, d; };
 struct storeb { Vreg8 s; Vptr m; };
 struct storebim { Immed s; Vptr m; };
-struct storedqu { VregXMM s; Vptr m; };
+struct storedqu { Vreg128 s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };
 struct storelim { Immed s; Vptr m; };
 struct storeq { Vreg64 s; Vptr m; };
 struct storeqim { Immed s; Vptr m; };
-struct storesd { VregXMM s; Vptr m; };
+struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewim { Immed s; Vptr m; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; };
 struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct subsd { VregXMM s0, s1, d; };
+struct subsd { VregDbl s0, s1, d; };
 struct testb { Vreg8 s0, s1; VregSF sf; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; };
 struct testbim { Immed s0; Vptr s1; VregSF sf; };
@@ -698,9 +698,9 @@ struct testlim { Immed s0; Vptr s1; VregSF sf; };
 struct testq { Vreg64 s0, s1; VregSF sf; };
 struct testqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct testqim { Immed s0; Vptr s1; VregSF sf; };
-struct ucomisd { VregXMM s0, s1; VregSF sf; };
+struct ucomisd { VregDbl s0, s1; VregSF sf; };
 struct ud2 {};
-struct unpcklpd { VregXMM s0, s1, d; };
+struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 struct xorb { Vreg8 s0, s1, d; VregSF sf; };
 struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct xorq { Vreg64 s0, s1, d; VregSF sf; };

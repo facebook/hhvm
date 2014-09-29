@@ -114,6 +114,7 @@ struct Interval {
   explicit Interval(Interval* parent)
     : parent(parent)
     , vreg(parent->vreg)
+    , wide(parent->wide)
     , cns(parent->cns)
     , val(parent->val)
   {}
@@ -143,6 +144,7 @@ public:
   jit::vector<Use> uses;
   const Vreg vreg;
   int slot{-1};
+  bool wide{false};
   PhysReg reg;
   bool cns{false};
   uint64_t val;
@@ -609,19 +611,20 @@ struct DefVisitor {
     auto& defs = m_tuples[def_tuple];
     auto& hints = m_tuples[hint_tuple];
     for (int i = 0; i < defs.size(); i++) {
-      defHint(defs[i], hints[i]);
+      def(defs[i], VregKind::Any, hints[i]);
     }
   }
   template<class D, class H> void defHint(D dst, H hint) {
-    def(dst, dst.kind, hint);
+    def(dst, dst.kind, hint, dst.bits == 128);
   }
   template<class R> void def(R r) {
-    def(r, r.kind);
+    def(r, r.kind, Vreg{}, r.bits == 128);
   }
-  void def(RegSet rs) {
-    rs.forEach([&](Vreg r) { def(r); });
-  }
-  void def(Vreg r, VregKind kind, Vreg hint = Vreg{}) {
+  void def(Vreg r) { def(r, VregKind::Any); }
+  void defHint(Vreg d, Vreg hint) { def(d, VregKind::Any, hint); }
+  void def(RegSet rs) { rs.forEach([&](Vreg r) { def(r); }); }
+private:
+  void def(Vreg r, VregKind kind, Vreg hint = Vreg{}, bool wide = false) {
     auto ivl = m_intervals[r];
     if (m_live.test(r)) {
       m_live.reset(r);
@@ -634,6 +637,7 @@ struct DefVisitor {
     }
     if (!ivl->fixed()) {
       ivl->uses.push_back(Use{kind, true, m_pos, hint});
+      ivl->wide |= wide;
     }
     i++;
   }
@@ -673,6 +677,9 @@ struct UseVisitor {
   }
   void use(RegSet regs) {
     regs.forEach([&](Vreg r) { use(r); });
+  }
+  void across(RegSet regs) {
+    regs.forEach([&](Vreg r) { across(r); });
   }
 
   // An operand marked as UA means use-after or use-across. Mark it live
@@ -788,16 +795,10 @@ void Vxls::buildIntervals() {
       visitOperands(inst, dv);
       RegSet implicit_uses, implicit_across, implicit_defs;
       getEffects(inst, implicit_uses, implicit_across, implicit_defs);
-      implicit_defs.forEach([&](Vreg r) {
-        dv.def(r);
-      });
+      dv.def(implicit_defs);
       visitOperands(inst, uv);
-      implicit_uses.forEach([&](Vreg r) {
-        uv.use(r);
-      });
-      implicit_across.forEach([&](Vreg r) {
-        uv.across(r);
-      });
+      uv.use(implicit_uses);
+      uv.across(implicit_across);
     }
     // save live set so it can propagate to predecessors
     livein[vlabel] = live;
@@ -1139,11 +1140,10 @@ void Vxls::assignSpill(Interval* ivl) {
   assert(!ivl->fixed() && ivl->parent && ivl->uses.empty());
   auto leader = ivl->parent;
   if (leader->slot < 0) {
-    if (leader->reg.isGP()) {
+    if (!leader->wide) {
       leader->slot = m_nextSlot++;
     } else {
       assert(leader->reg.isSIMD());
-      // todo: t4764214 not all XMMs are really wide.
       if (!isSlotAligned(m_nextSlot)) m_nextSlot++;
       leader->slot = m_nextSlot;
       m_nextSlot += 2;
@@ -1178,7 +1178,8 @@ private:
   void rename(Vreg16& r) { r = lookup(r, VregKind::Gpr); }
   void rename(Vreg32& r) { r = lookup(r, VregKind::Gpr); }
   void rename(Vreg64& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(VregXMM& r) { r = lookup(r, VregKind::Simd); }
+  void rename(VregDbl& r) { r = lookup(r, VregKind::Simd); }
+  void rename(Vreg128& r) { r = lookup(r, VregKind::Simd); }
   void rename(VregSF& r) { r = lookup(r, VregKind::Sf); }
   void rename(Vreg& r) { r = lookup(r, VregKind::Any); }
   void rename(Vtuple t) { /* phijmp+phidef handled by resolveEdges */ }
@@ -1402,10 +1403,9 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     auto slot = ivl->leader()->slot;
     assert(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + slotOffset(slot)};
-    if (src.isGP() || arch() == Arch::ARM) {
+    if (!ivl->wide) {
       stores.emplace_back(store{src, ptr});
     } else {
-      // todo: t4764214: not all xmms are wide.
       assert(src.isSIMD());
       stores.emplace_back(storedqu{src, ptr});
     }
@@ -1433,10 +1433,9 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     } else {
       assert(ivl->spilled());
       MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
-      if (dst.isGP() || arch() == Arch::ARM) {
+      if (!ivl->wide) {
         loads.emplace_back(load{ptr, dst});
       } else {
-        // todo: t4764214: not all xmms are wide
         assert(dst.isSIMD());
         loads.emplace_back(loaddqu{ptr, dst});
       }

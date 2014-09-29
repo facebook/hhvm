@@ -207,7 +207,6 @@ private:
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
   void emit(movb& i) { a->movb(i.s, i.d); }
   void emit(movbi& i) { a->movb(i.s, i.d); }
-  void emit(movdqa& i) { a->movdqa(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movq& i) { a->movq(i.s, i.d); }
   void emit(movqrx& i) { a->movq_rx(i.s, i.d); }

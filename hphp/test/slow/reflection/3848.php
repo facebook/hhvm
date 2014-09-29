@@ -35,12 +35,12 @@ class MyReflectionClass extends ReflectionClass
 {
   public function __get($name)
   {
-  	return 'undefined';
+    return 'undefined';
   }
 
   public function __set($name, $value)
   {
-  	$this->{$name} = $value . '_bar';
+    $this->{$name} = $value . '_bar';
   }
 }
 

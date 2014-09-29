@@ -64,7 +64,8 @@ SRC = \
   colorFile.ml\
   fileOutline.ml\
   format_hack.ml\
-  hh_ide.ml
+  hh_ide.ml\
+  typeVisitor.ml\
 
 INCLUDEDIRS=$(shell ocamlfind -query js_of_ocaml)
 
@@ -149,6 +150,9 @@ typing_suggest.ml: $(TOP)/typing/typing_suggest.ml
 
 typing_utils.ml: $(TOP)/typing/typing_utils.ml
 	cp $(TOP)/typing/typing_utils.ml .
+
+typeVisitor.ml: $(TOP)/typing/typeVisitor.ml
+	cp $(TOP)/typing/typeVisitor.ml .
 
 typing_dynamic_yield.ml: $(TOP)/typing/typing_dynamic_yield.ml
 	cp $(TOP)/typing/typing_dynamic_yield.ml .

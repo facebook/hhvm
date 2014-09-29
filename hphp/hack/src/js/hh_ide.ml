@@ -391,6 +391,7 @@ let hh_hack_coloring fn =
                         match input with
                         | (ColorFile.Unchecked_code, str) -> ("err", str)
                         | (ColorFile.Checked_code, str) -> ("checked", str)
+                        | (ColorFile.Partially_checked_code, str) -> ("partial", str)
                         | (ColorFile.Keyword, str) -> ("kwd", str)
                         | (ColorFile.Fun, str) -> ("fun", str)
                         | (ColorFile.Default, str) -> ("default", str)

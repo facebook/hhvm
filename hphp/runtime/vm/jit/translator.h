@@ -125,7 +125,6 @@ struct TranslArgs {
   TranslArgs(const SrcKey& sk, bool align)
     : m_sk(sk)
     , m_align(align)
-    , m_interp(false)
     , m_dryRun(false)
     , m_setFuncBody(false)
     , m_transId(kInvalidTransID)
@@ -138,10 +137,6 @@ struct TranslArgs {
   }
   TranslArgs& align(bool align) {
     m_align = align;
-    return *this;
-  }
-  TranslArgs& interp(bool interp) {
-    m_interp = interp;
     return *this;
   }
   TranslArgs& dryRun(bool dry) {
@@ -167,7 +162,6 @@ struct TranslArgs {
 
   SrcKey m_sk;
   bool m_align;
-  bool m_interp;
   bool m_dryRun;
   bool m_setFuncBody;
   TransFlags m_flags;

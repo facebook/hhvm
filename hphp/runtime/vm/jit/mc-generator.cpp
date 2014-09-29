@@ -1591,7 +1591,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   PostConditions pconds;
   RegionDescPtr region;
-  if (!args.m_interp && !reachedTranslationLimit(sk, srcRec)) {
+  if (!reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
     if (m_tx.mode() == TransKind::Optimize) {
       assert(RuntimeOption::EvalJitPGO);

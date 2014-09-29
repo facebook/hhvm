@@ -169,6 +169,7 @@ function perf_main($argv) {
       "  --sugarcrm-login-page\n"
     );
     exit(1);
+    invariant_violation("exit() already called");
   }
 
   if ($options->php5) {
@@ -184,6 +185,7 @@ function perf_main($argv) {
       'must be specified'
     );
     exit(1);
+    invariant_violation("exit() already called");
   }
 
   run_benchmark($target, $engine, $temp_dir, $options);

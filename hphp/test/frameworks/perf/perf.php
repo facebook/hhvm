@@ -167,7 +167,6 @@ function perf_main($argv) {
     exit(1);
     invariant_violation("exit() already called");
   }
-  invariant($target instanceof PerfTarget, "target failure");
 
   if ($options->php5) {
     $engine = new PHP5Daemon($options, $target);
@@ -184,7 +183,6 @@ function perf_main($argv) {
     exit(1);
     invariant_violation("exit() already called");
   }
-  invariant($engine instanceof PHPEngine, "engine failure");
 
   run_benchmark($options, $target, $engine);
 }

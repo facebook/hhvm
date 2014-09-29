@@ -21,9 +21,10 @@ final class PerfOptions {
   public bool $toys;
   public bool $sugarcrm;
 
-  public bool $skipSanityCheck;
-  public bool $skipVersionChecks;
-  public bool $traceSubProcess;
+  public bool $skipSanityCheck = false;
+  public bool $skipVersionChecks = false;
+  public bool $skipDatabaseInstall = false;
+  public bool $traceSubProcess = false;
 
   //
   // All times are given in seconds, stored in a float.

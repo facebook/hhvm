@@ -60,6 +60,7 @@ public:
   bool parseImpl(const char *fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
+  void resetAr() { m_ar.reset(); }
   int getFileCount() const { return m_files.size();}
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}

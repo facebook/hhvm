@@ -8966,7 +8966,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
 /*
  * This is the entry point for offline bytecode generation.
  */
-void emitAllHHBC(AnalysisResultPtr ar) {
+void emitAllHHBC(AnalysisResultPtr&& ar) {
   unsigned int threadCount = Option::ParserThreadCount;
   unsigned int nFiles = ar->getAllFilesVector().size();
   if (threadCount > nFiles) {
@@ -8987,7 +8987,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
 
-  auto setPreloadPriority = [ar](const std::string& f, int p) {
+  auto setPreloadPriority = [&ar](const std::string& f, int p) {
     auto fs = ar->findFileScope(f);
     if (fs) fs->setPreloadPriority(p);
   };
@@ -9062,6 +9062,9 @@ void emitAllHHBC(AnalysisResultPtr ar) {
                                        hhbc_ext_class_count);
   ues.push_back(std::move(nfunc));
   ues.push_back(std::move(ncls));
+
+  ar->finish();
+  ar.reset();
 
   if (!Option::UseHHBBC) {
     batchCommit(std::move(ues));

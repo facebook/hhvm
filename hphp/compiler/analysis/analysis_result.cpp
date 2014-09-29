@@ -89,6 +89,18 @@ AnalysisResult::AnalysisResult()
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
+AnalysisResult::~AnalysisResult() {
+  always_assert(!m_finish);
+}
+
+void AnalysisResult::finish() {
+  if (m_finish) {
+    decltype(m_finish) f;
+    f.swap(m_finish);
+    f(shared_from_this());
+  }
+}
+
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) {
   string &extraCode = m_extraCodes[key];

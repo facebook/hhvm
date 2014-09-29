@@ -902,7 +902,7 @@ public:
                                 StringData* name, bool alloc);
 };
 
-void emitAllHHBC(AnalysisResultPtr ar);
+void emitAllHHBC(AnalysisResultPtr&& ar);
 
 
 extern "C" {

@@ -36,6 +36,7 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <functional>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,6 +121,7 @@ public:
 
 public:
   AnalysisResult();
+  ~AnalysisResult();
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -128,6 +130,10 @@ public:
     assert(m_package && !m_parseOnDemand);
     m_parseOnDemandDirs = dirs;
   }
+  void setFinish(std::function<void(AnalysisResultPtr)>&& fn) {
+    m_finish = std::move(fn);
+  }
+  void finish();
 
   /**
    * create_function() generates extra PHP code that defines the lambda.
@@ -308,6 +314,7 @@ public:
   void addInteger(int64_t n);
 
 private:
+  std::function<void(AnalysisResultPtr)> m_finish;
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;

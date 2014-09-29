@@ -8,14 +8,16 @@
  *
  *)
 
-
 open Lexing
 
+(* Note: While Pos.string prints out positions as closed intervals, pos_start
+ * and pos_end actually form a half-open interval (i.e. pos_end points to the
+ * character *after* the last character of the relevant lexeme.) *)
 type t = {
-    pos_file: string ;
-    pos_start: Lexing.position ;
-    pos_end: Lexing.position ;
-  }
+  pos_file: string ;
+  pos_start: Lexing.position ;
+  pos_end: Lexing.position ;
+}
 
 let file = ref ""
 
@@ -63,7 +65,7 @@ let rhs p =
 let info_pos t =
   let line = t.pos_start.pos_lnum in
   let start = t.pos_start.pos_cnum - t.pos_start.pos_bol + 1 in
-  let end_ = start + t.pos_end.pos_cnum - t.pos_start.pos_cnum - 1 in
+  let end_ = t.pos_end.pos_cnum - t.pos_start.pos_bol in
   line, start, end_
 
 let info_raw t = t.pos_start.pos_cnum, t.pos_end.pos_cnum

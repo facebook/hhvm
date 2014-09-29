@@ -230,7 +230,7 @@ public:
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
   String getErrorPage() const { return m_errorPage;}
-  void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
+  void setErrorPage(const String& page) { m_errorPage = page; }
 
   /**
    * Misc. settings
@@ -294,7 +294,7 @@ private:
   ErrorState m_errorState;
   String m_lastError;
   int m_lastErrorNum;
-  std::string m_errorPage;
+  String m_errorPage;
 
   // misc settings
   Array m_envs;

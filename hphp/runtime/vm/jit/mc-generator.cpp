@@ -248,13 +248,13 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     }
     TCA regionStart = translate(translArgs);
     if (start == nullptr && regionSk == sk) {
-      assert(regionStart);
       start = regionStart;
     }
     // Cloned closures' prologue tables point to the corresponding
     // main/DV entry point.  So update the prologue table when
     // retranslating their entries.
-    if (func->isClonedClosure() && func->isEntry(regionSk.offset())) {
+    if (func->isClonedClosure() && func->isEntry(regionSk.offset()) &&
+        regionStart) {
       int entryNumParams = func->getEntryNumParams(regionSk.offset());
       func->setPrologue(entryNumParams, regionStart);
     }
@@ -262,7 +262,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   m_tx.profData()->freeFuncData(funcId);
 
-  assert(start);
+  assert(start || RuntimeOption::EvalJitGlobalTranslationLimit != (uint64_t)-1);
   return start;
 }
 
@@ -431,13 +431,7 @@ MCGenerator::translate(const TranslArgs& args) {
   assert(m_tx.mode() != TransKind::Invalid);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  if (!args.m_interp) {
-    if (m_numHHIRTrans == RuntimeOption::EvalJitGlobalTranslationLimit) {
-      RuntimeOption::EvalJit = false;
-      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
-      return nullptr;
-    }
-  }
+  if (!shouldTranslate()) return nullptr;
 
   Func* func = const_cast<Func*>(args.m_sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
@@ -650,6 +644,9 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
                        false, true);
   recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
 
+  m_numTrans++;
+  assert(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
+
   return start;
 }
 
@@ -668,8 +665,11 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
   func->resetPrologue(nArgs);
   m_tx.setMode(TransKind::Prologue);
   SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
-  TCA start = getFuncPrologue(func, nArgs, nullptr /* ActRec */,
-                              true /* ignoreTCLimit */);
+  bool ignoreTCLimit =
+    RuntimeOption::EvalJitGlobalTranslationLimit == (uint64_t)-1;
+  TCA start = getFuncPrologue(func, nArgs, nullptr /* ActRec */, ignoreTCLimit);
+  if (!start) return nullptr;
+
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
@@ -1104,10 +1104,9 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
         // Someone else may have changed the func prologue while we
         // waited for the write lease, so read it again.
         dest = getFuncPrologue(func, nArgs);
-        assert(dest);
         if (!isImmutable) dest = backEnd().funcPrologueToGuard(dest, func);
 
-        if (backEnd().callTarget(toSmash) != dest) {
+        if (dest && backEnd().callTarget(toSmash) != dest) {
           assert(backEnd().callTarget(toSmash));
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           backEnd().smashCall(toSmash, dest);
@@ -1794,12 +1793,13 @@ void MCGenerator::traceCodeGen() {
   always_assert(this == mcg);
   genCode(unit);
 
-  m_numHHIRTrans++;
+  m_numTrans++;
+  assert(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
 }
 
 MCGenerator::MCGenerator()
   : m_backEnd(newBackEnd())
-  , m_numHHIRTrans(0)
+  , m_numTrans(0)
   , m_catchTraceMap(128)
 {
   TRACE(1, "MCGenerator@%p startup\n", this);

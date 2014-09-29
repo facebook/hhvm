@@ -319,7 +319,8 @@ private:
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   bool shouldTranslate() const {
-    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
+    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage &&
+            m_numTrans < RuntimeOption::EvalJitGlobalTranslationLimit;
   }
 
   TCA getTopTranslation(SrcKey sk) {
@@ -362,7 +363,7 @@ private:
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
-  uint64_t           m_numHHIRTrans;
+  uint64_t           m_numTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;

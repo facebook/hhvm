@@ -150,11 +150,6 @@ let opt_map f = function
   | None -> None
   | Some x -> Some (f x)
 
-let default x y f =
-  match y with
-  | None -> x
-  | Some y -> f y
-
 let opt_fold_left f x y =
   match y with
   | None -> x

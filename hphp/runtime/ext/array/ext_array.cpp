@@ -254,13 +254,13 @@ Variant HHVM_FUNCTION(array_fill,
   }
 
   if (start_index == 0) {
-    PackedArrayInit pai(num);
+    PackedArrayInit pai(num, CheckAllocation{});
     for (size_t k = 0; k < num; k++) {
       pai.append(value);
     }
     return pai.toVariant();
   } else {
-    ArrayInit ret(num, ArrayInit::Mixed{});
+    ArrayInit ret(num, ArrayInit::Mixed{}, CheckAllocation{});
     ret.set(start_index, value);
     for (int i = num - 1; i > 0; i--) {
       ret.append(value);

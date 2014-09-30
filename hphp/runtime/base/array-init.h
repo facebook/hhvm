@@ -29,6 +29,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Flag indicating whether this allocation should be pre-checked for OOM.
+ */
+enum class CheckAllocation {};
+
 struct ArrayInit {
   enum class Map {};
   // This is the same as map right now, but is here for documentation
@@ -47,8 +52,12 @@ struct ArrayInit {
    * Also, generally it's preferable to use make_map_array or
    * make_packed_array when it's easy, since you don't have to get 'n'
    * right in that case.
+   *
+   * For large array allocations, consider passing CheckAllocation, which will
+   * throw if the allocation would OOM the request.
    */
   ArrayInit(size_t n, Map);
+  ArrayInit(size_t n, Map, CheckAllocation);
 
   ArrayInit(ArrayInit&& other) noexcept
     : m_data(other.m_data)
@@ -284,11 +293,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Flag indicating whether this allocation should be pre-checked for OOM.
- */
-enum class CheckAllocation {};
-
-/*
  * Initializer for a vector-shaped array.
  */
 class PackedArrayInit {
@@ -319,6 +323,7 @@ public:
     m_expectedCount = n;
 #endif
     m_vec->setRefCount(0);
+    check_request_surprise_unlikely();
   }
 
   PackedArrayInit(PackedArrayInit&& other) noexcept

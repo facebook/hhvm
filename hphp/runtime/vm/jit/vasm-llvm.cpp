@@ -456,7 +456,6 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
 
 namespace HPHP { namespace jit {
 
-using namespace x64;
 void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels) {
   throw FailedLLVMCodeGen("This build does not support the LLVM backend");

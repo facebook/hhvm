@@ -78,6 +78,7 @@ if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
   message(FATAL_ERROR "libmemcache is too old, found ${LIBMEMCACHED_VERSION} and we need 0.39")
 endif ()
 include_directories(${LIBMEMCACHED_INCLUDE_DIR})
+link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 # pcre checks
 find_package(PCRE REQUIRED)

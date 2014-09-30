@@ -1275,6 +1275,21 @@ and extend_params genv paraml =
   end paraml genv.type_params in
   { genv with type_params = params }
 
+and uselist_lambda f =
+  (* semantic duplication: This is copied from the implementation of the
+    `Lfun` variant of `expr_` defined earlier in this file. *)
+  let to_capture = ref [] in
+  let handle_unbound (p, x) =
+    to_capture := x :: !to_capture;
+    p, Ident.tmp()
+  in
+  let genv = Env.make_fun_genv empty SMap.empty f in
+  let lenv = Env.empty_local () in
+  let lenv = { lenv with unbound_mode = UBMFunc handle_unbound } in
+  let env = genv, lenv in
+  ignore (expr_lambda env f);
+  uniq !to_capture
+
 and fun_ genv f =
   let tparams = make_constraints f.f_tparams in
   let genv = Env.make_fun_genv genv tparams f in
@@ -1757,6 +1772,9 @@ and expr_ env = function
   | Lfun f ->
       (* We have to build the capture list while we're finding names in
          the closure body---accumulate it in to_capture. *)
+      (* semantic duplication: The logic here is also used in `uselist_lambda`.
+          The differences are enough that it does not make sense to refactor
+          this out for now. *)
       let to_capture = ref [] in
       let handle_unbound (p, x) =
         let cap = Env.lvar env (p, x) in

@@ -51,6 +51,11 @@ val make_env:
 (* Solves the local names within a function *)
 val fun_: env -> Ast.fun_ -> Nast.fun_
 
+(* Uses a default empty environment to extract the use list
+  of a lambda expression. This exists only for the sake of
+  the dehackificator and is not meant for general use. *)
+val uselist_lambda: Ast.fun_ -> string list
+
 (* Solves the local names of a class *)
 val class_: env -> Ast.class_ -> Nast.class_
 

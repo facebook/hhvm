@@ -8285,7 +8285,12 @@ bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
       } else if (u->getOp() == T_FILE || u->getOp() == T_DIR) {
         return false;
       }
-      // fall through
+      return true;
+    }
+    case Expression::KindOfBinaryOpExpression: {
+      BinaryOpExpressionPtr b(
+        static_pointer_cast<BinaryOpExpression>(initExpr));
+      return requiresDeepInit(b->getExp1()) || requiresDeepInit(b->getExp2());
     }
     default:
       return true;

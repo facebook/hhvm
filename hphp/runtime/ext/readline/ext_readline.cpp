@@ -229,6 +229,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
           "This probably isn't doing what you expect it to do, " \
           "this name is set for EVERY request."
         );
+        free(_rl_readline_name);
         _rl_readline_name = strdup(newvalue.data());
         rl_readline_name = _rl_readline_name;
       }

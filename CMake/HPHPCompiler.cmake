@@ -9,9 +9,22 @@ endif()
 
 # using Clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # TODO: Fix Folly ad change to -std=c++11 (ISO C++11), GNU_GCC version enable flags: -ffast-math
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -stdlib=libc++ -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments")
-  # CMAKE_BUILD_TYPE: http://www.cmake.org/Wiki/CMake_Useful_Variables#Compilers_and_Tools
+  set(LLVM_OPT "")
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
+    OUTPUT_VARIABLE _clang_version_info)
+  string(
+    REGEX MATCH "(clang version|based on LLVM) ([0-9]\\.[0-9]\\.?[0-9]?)"
+    CLANG_VERSION "${_clang_version_info}")
+  # Enabled GCC/LLVM stack-smashing protection
+  if(ENABLE_SSP)
+    if(CLANG_VERSION VERSION_GREATER 3.6 OR CLANG_VERSION VERSION_EQUAL 3.6)
+      set(LLVM_OPT "${LLVM_OPT} -fstack-protector-strong")
+    else()
+      set(LLVM_OPT "${LLVM_OPT} -fstack-protector")
+    endif()
+    set(LLVM_OPT "${LLVM_OPT} --param=ssp-buffer-size=4 -pie -fPIC")
+  endif()
   set(CMAKE_C_FLAGS_DEBUG            "-g")
   set(CMAKE_CXX_FLAGS_DEBUG          "-g")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
@@ -20,16 +33,34 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${LLVM_OPT} -w")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -stdlib=libc++ -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments ${LLVM_OPT}")
 # using GCC
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-  set(GNUCC49_OPT "")
+  set(GNUCC_OPT "")
   if (NOT (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
     message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
   elseif(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
     # fix problem with GCC 4.9, Changes in gcc Code Optimization Can Cause a Crash
     # https://kb.isc.org/article/AA-01167
-    set(GNUCC49_OPT "-fno-delete-null-pointer-checks")
+    set(GNUCC_OPT "-fno-delete-null-pointer-checks")
+  endif()
+
+  # Enabled GCC/LLVM stack-smashing protection
+  if(ENABLE_SSP)
+    if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+      if(LINUX)
+        # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
+        set(GNUCC_OPT "${GNUCC_OPT} -Wl,-z,relro,-z,now")
+      endif()
+      if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+        set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector-strong")
+      endif()
+    else()
+      set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector")
+    endif()
+    set(GNUCC_OPT "${GNUCC_OPT} -pie -fPIC --param=ssp-buffer-size=4")
   endif()
 
   # ARM64
@@ -50,8 +81,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${GNUCC49_OPT} -w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations ${GNUCC49_OPT} ${GNUCC_PLAT_OPT}")
+  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${GNUCC_OPT} -w")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -fno-gcse -fno-omit-frame-pointer -ftemplate-depth-180 -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations ${GNUCC_OPT} ${GNUCC_PLAT_OPT}")
   if(STATIC_CXX_LIB)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
   endif()

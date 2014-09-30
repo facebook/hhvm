@@ -13,20 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/apc-file-storage.h"
 
-#include "hphp/runtime/base/shared-store-base.h"
+#include <sys/mman.h>
+
+#include "hphp/util/alloc.h"
+#include "hphp/util/timer.h"
+#include "hphp/util/logger.h"
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/concurrent-shared-store.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/util/alloc.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/logger.h"
-#include <sys/mman.h>
 
 #if !defined(HAVE_POSIX_FALLOCATE) && \
   (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L || defined(__CYGWIN__))
@@ -37,10 +38,10 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-SharedStoreFileStorage s_apc_file_storage;
+APCFileStorage s_apc_file_storage;
 
-void SharedStoreFileStorage::enable(const std::string& prefix,
-                                    int64_t chunkSize, int64_t maxSize) {
+void APCFileStorage::enable(const std::string& prefix,
+                            int64_t chunkSize, int64_t maxSize) {
   Lock lock(m_lock);
   m_prefix = prefix;
   m_chunkSize = chunkSize;
@@ -55,7 +56,7 @@ void SharedStoreFileStorage::enable(const std::string& prefix,
   m_state = StorageState::Open;
 }
 
-char *SharedStoreFileStorage::put(const char *data, int32_t len) {
+char *APCFileStorage::put(const char *data, int32_t len) {
   Lock lock(m_lock);
   if (m_state != StorageState::Open ||
       len + PaddingSize > m_chunkSize - PaddingSize) {
@@ -82,7 +83,7 @@ char *SharedStoreFileStorage::put(const char *data, int32_t len) {
   return addr;
 }
 
-void SharedStoreFileStorage::seal() {
+void APCFileStorage::seal() {
   Lock lock(m_lock);
   if (m_state == StorageState::Sealed) {
     return;
@@ -99,7 +100,7 @@ void SharedStoreFileStorage::seal() {
   }
 }
 
-void SharedStoreFileStorage::adviseOut() {
+void APCFileStorage::adviseOut() {
   Lock lock(m_lock);
   Timer timer(Timer::WallTime, "advising out apc prime");
   for (int i = 0; i < (int)m_chunks.size(); i++) {
@@ -109,7 +110,7 @@ void SharedStoreFileStorage::adviseOut() {
   }
 }
 
-bool SharedStoreFileStorage::hashCheck() {
+bool APCFileStorage::hashCheck() {
   Lock lock(m_lock);
   for (int i = 0; i < (int)m_chunks.size(); i++) {
     char *current = (char*)m_chunks[i];
@@ -146,7 +147,7 @@ bool SharedStoreFileStorage::hashCheck() {
   return true;
 }
 
-void SharedStoreFileStorage::cleanup() {
+void APCFileStorage::cleanup() {
   Lock lock(m_lock);
   for (unsigned int i = 0 ; i < m_fileNames.size(); i++) {
     unlink(m_fileNames[i].c_str());
@@ -154,7 +155,7 @@ void SharedStoreFileStorage::cleanup() {
   m_chunks.clear();
 }
 
-bool SharedStoreFileStorage::addFile() {
+bool APCFileStorage::addFile() {
   if ((int64_t)m_chunks.size() * m_chunkSize >= m_maxSize) {
     m_state = StorageState::Full;
     return false;

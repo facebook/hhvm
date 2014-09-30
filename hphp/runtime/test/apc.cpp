@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/concurrent-shared-store.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 
 namespace HPHP {
 

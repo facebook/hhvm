@@ -48,7 +48,7 @@
 
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/memory-manager.h"

@@ -14,21 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SHARED_STORE_BASE_H_
-#define incl_HPHP_SHARED_STORE_BASE_H_
+#ifndef incl_HPHP_APC_FILE_STORAGE_H_
+#define incl_HPHP_APC_FILE_STORAGE_H_
+
+#include <vector>
+
+#include "hphp/util/lock.h"
 
 #include "hphp/runtime/base/types.h"
-#include <vector>
-#include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/concurrent-shared-store.h"
-#include "hphp/util/lock.h"
-#include "hphp/runtime/base/complex-types.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class SharedStoreFileStorage {
-public:
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * To save memory, hhvm puts portions of primed APC data in a file-backed mmap
+ * that we can madvise away after an initial warmup period.
+ */
+struct APCFileStorage {
   enum class StorageState {
     Invalid,
     Open,
@@ -36,8 +39,15 @@ public:
     Full
   };
 
-  SharedStoreFileStorage()
-  : m_state(StorageState::Invalid), m_current(nullptr), m_chunkRemain(0) {}
+  APCFileStorage()
+    : m_state(StorageState::Invalid)
+    , m_current(nullptr)
+    , m_chunkRemain(0)
+  {}
+
+  APCFileStorage(const APCFileStorage&) = delete;
+  APCFileStorage& operator=(const APCFileStorage&) = delete;
+
   void enable(const std::string& prefix, int64_t chunkSize, int64_t maxSize);
   char *put(const char *data, int32_t len);
   void seal();
@@ -66,9 +76,10 @@ private:
                                  sizeof(char); // '\0'
 };
 
-extern SharedStoreFileStorage s_apc_file_storage;
+extern APCFileStorage s_apc_file_storage;
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_SHARED_STORE_BASE_H_ */
+#endif

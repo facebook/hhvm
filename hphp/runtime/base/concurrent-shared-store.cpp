@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -591,7 +591,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
                                                 KeyValuePair& item,
                                                 bool serialized) {
   if (s_apc_file_storage.getState() !=
-      SharedStoreFileStorage::StorageState::Invalid &&
+      APCFileStorage::StorageState::Invalid &&
       (!v.get()->isStatic() || serialized)) {
     // StaticString for non-object should consume limited amount of space,
     // not worth going through the file storage
@@ -616,7 +616,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
 bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
                                                 KeyValuePair& item) {
   if (s_apc_file_storage.getState() !=
-      SharedStoreFileStorage::StorageState::Invalid &&
+      APCFileStorage::StorageState::Invalid &&
       (IS_REFCOUNTED_TYPE(v.getType()))) {
     // Only do the storage for ref-counted type
     String s = apc_serialize(v);
@@ -635,7 +635,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
 
 void ConcurrentTableSharedStore::primeDone() {
   if (s_apc_file_storage.getState() !=
-      SharedStoreFileStorage::StorageState::Invalid) {
+      APCFileStorage::StorageState::Invalid) {
     s_apc_file_storage.seal();
     s_apc_file_storage.hashCheck();
     // Schedule the adviseOut instead of doing it immediately, so that the

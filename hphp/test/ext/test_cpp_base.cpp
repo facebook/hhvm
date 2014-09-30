@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/system/systemlib.h"

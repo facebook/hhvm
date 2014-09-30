@@ -43,7 +43,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"

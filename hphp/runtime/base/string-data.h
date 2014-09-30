@@ -432,7 +432,7 @@ private:
 
 private:
   static StringData* MakeShared(StringSlice sl, bool trueStatic);
-  static StringData* MakeSharedSlowPath(const APCString*, uint32_t len);
+  static StringData* MakeAPCSlowPath(const APCString*, uint32_t len);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;

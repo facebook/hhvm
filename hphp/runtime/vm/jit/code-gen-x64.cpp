@@ -3365,7 +3365,7 @@ void CodeGenerator::cgConstructInstance(IRInstruction* inst) {
   auto const cls    = inst->extra<ConstructInstance>()->cls;
   auto const dstReg = dstLoc(0).reg();
   cgCallHelper(vmain(),
-               CppCall::direct(cls->instanceCtor()),
+               CppCall::direct(cls->instanceCtor().get()),
                callDest(dstReg),
                SyncOptions::kSyncPoint,
                argGroup().immPtr(cls));

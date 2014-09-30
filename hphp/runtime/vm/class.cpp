@@ -125,7 +125,8 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-static_assert(sizeof(Class) == 416, "Change this only on purpose");
+static_assert(sizeof(Class) == use_lowptr ? 384 : 408,
+              "Change this only on purpose");
 
 namespace {
 

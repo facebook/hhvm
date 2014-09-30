@@ -935,8 +935,6 @@ public:
   Class* m_nextClass{nullptr}; // used by NamedEntity
 
 private:
-  DataType m_enumBaseTy;
-
   // Objects with the <<__NativeData("T")>> UA are allocated with extra space
   // prior to the ObjectData structure itself.
   const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
@@ -948,7 +946,8 @@ private:
   Slot m_traitsEndIdx{0};
   mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
   size_t m_numDeclInterfaces{0};
-  Func* m_toString;
+  LowFuncPtr m_toString;
+  LowFuncPtr m_invoke; // __invoke, iff non-static (or closure)
 
   // In RepoAuthoritative mode, we rely on trait flattening in the compile
   // phase to import the contents of traits.  As a result, m_usedTraits is
@@ -968,12 +967,13 @@ private:
   //    - A static property of this class is accessed.
   std::vector<const Func*> m_sinitVec;
   const ClassInfo* m_clsInfo{nullptr};
-  Func* m_invoke; // __invoke, iff non-static (or closure)
-  Func* m_ctor;
+  LowFuncPtr m_ctor;
+  LowFuncPtr m_dtor;
   PropInitVec m_declPropInit;
   std::vector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
   BuiltinCtorFunction m_instanceCtor{nullptr};
+  BuiltinDtorFunction m_instanceDtor{nullptr};
   mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
   uint32_t m_builtinODTailSize{0};
   PreClassPtr m_preClass;
@@ -983,8 +983,6 @@ private:
   // to a commonly used class name, determined during the profiling warmup
   // requests.
   InstanceBits::BitSet m_instanceBits;
-  BuiltinDtorFunction m_instanceDtor{nullptr};
-  Func* m_dtor;
   MethodMap m_methods;
 
   // Static properties are stored in RDS.  There are three phases of sprop
@@ -1010,6 +1008,8 @@ private:
   // m_declPropInit is indexed by the Slot values from m_declProperties, and
   // contains initialization information.
   PropMap m_declProperties;
+
+  DataType m_enumBaseTy;
 
   int32_t m_ODAttrs;
   unsigned m_needInitialization : 1;      // requires initialization,

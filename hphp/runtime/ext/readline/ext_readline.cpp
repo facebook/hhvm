@@ -121,7 +121,7 @@ static bool HHVM_FUNCTION(
 static bool HHVM_FUNCTION(readline_read_history,
                           const String& filename /* = null */) {
   if (filename.isNull()) {
-    return read_history(NULL) == 0;
+    return read_history(nullptr) == 0;
   } else {
     return read_history(filename.data()) == 0;
   }
@@ -130,7 +130,7 @@ static bool HHVM_FUNCTION(readline_read_history,
 static bool HHVM_FUNCTION(readline_write_history,
                           const String& filename /* = null */) {
   if (filename.isNull()) {
-    return write_history(NULL) == 0;
+    return write_history(nullptr) == 0;
   } else {
     return write_history(filename.data()) == 0;
   }

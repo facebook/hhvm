@@ -253,8 +253,16 @@ function hphp_memory_stop_interval(): bool;
 
 /* Retrieve a path to the loaded php.ini file.
  */
-<<__Native>>
-function php_ini_loaded_file(): mixed;
+function php_ini_loaded_file(): mixed {
+  return false;
+}
+
+/* Retrieve a comma-separated list of paths to any additionally loaded ini
+ * files after php.ini.
+ */
+function php_ini_scanned_files(): mixed {
+  return false;
+}
 
 <<__Native>>
 function php_sapi_name(): string;

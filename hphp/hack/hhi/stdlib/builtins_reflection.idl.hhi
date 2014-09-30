@@ -58,7 +58,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
     const IS_DEPRECATED = 262144;
     public $name;
     public function __construct($name) {}
-    public function __toString() {}
     public static function export($name, $return = null) {}
     public function isDisabled() {}
     public function invoke($args = null) {}
@@ -98,7 +97,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public $class;
     public static function export($class, $name, $return = false) {}
     public function __construct($class, $name) {}
-    public function __toString() {}
     public function isPublic() {}
     public function isPrivate() {}
     public function isProtected() {}
@@ -172,9 +170,6 @@ class ReflectionClass implements Reflector {
     public function getShortName() {}
 }
 class ReflectionObject extends ReflectionClass implements Reflector {
-    public static function export($argument, $return = null) {}
-    public function __construct($argument) {}
-    public function __toString() {}
 }
 class ReflectionProperty implements Reflector {
     const IS_STATIC = 1;

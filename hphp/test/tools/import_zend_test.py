@@ -423,6 +423,8 @@ norepo_tests = (
     '/ext/standard/tests/file/file_get_contents_file_put_contents_variation2.php',
     '/ext/standard/tests/file/file_get_contents_variation1.php',
     '/ext/standard/tests/file/readfile_variation6.php',
+    '/ext/standard/tests/file/unlink_variation8.php',
+    '/ext/standard/tests/file/unlink_variation10.php',
     '/ext/standard/tests/general_functions/is_callable_error.php',
     '/ext/standard/tests/general_functions/is_numeric.php',
     '/ext/standard/tests/math/abs.php',

@@ -88,6 +88,16 @@
 
 #define CHECK_SYSTEM(exp)                                 \
   if ((exp) != 0) {                                       \
+    raise_warning(                                        \
+      "%s(): %s",                                         \
+       __FUNCTION__ + 2,                                  \
+       folly::errnoStr(errno).c_str()                     \
+    );                                                    \
+    return false;                                         \
+  }                                                       \
+
+#define CHECK_SYSTEM_SILENT(exp)                          \
+  if ((exp) != 0) {                                       \
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
                     folly::errnoStr(errno).c_str());      \
     return false;                                         \
@@ -798,7 +808,7 @@ bool f_is_writable(const String& filename) {
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(accessSyscall(filename, W_OK));
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, W_OK));
   return true;
   /*
   int mask = S_IWOTH;
@@ -834,7 +844,7 @@ bool f_is_readable(const String& filename) {
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(accessSyscall(filename, R_OK, true));
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, R_OK, true));
   return true;
   /*
   int mask = S_IROTH;
@@ -865,7 +875,7 @@ bool f_is_executable(const String& filename) {
   if (filename.empty()) {
     return false;
   }
-  CHECK_SYSTEM(accessSyscall(filename, X_OK));
+  CHECK_SYSTEM_SILENT(accessSyscall(filename, X_OK));
   return true;
   /*
   int mask = S_IXOTH;
@@ -894,7 +904,7 @@ bool f_is_executable(const String& filename) {
 bool f_is_file(const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, true));
   return (sb.st_mode & S_IFMT) == S_IFREG;
 }
 
@@ -913,14 +923,14 @@ bool f_is_dir(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb));
+  CHECK_SYSTEM_SILENT(statSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFDIR;
 }
 
 bool f_is_link(const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
   struct stat sb;
-  CHECK_SYSTEM(lstatSyscall(filename, &sb));
+  CHECK_SYSTEM_SILENT(lstatSyscall(filename, &sb));
   return (sb.st_mode & S_IFMT) == S_IFLNK;
 }
 
@@ -948,7 +958,13 @@ Variant f_stat(const String& filename) {
   }
 
   struct stat sb;
-  CHECK_SYSTEM(statSyscall(filename, &sb, true));
+  if (statSyscall(filename, &sb, true) != 0) {
+    raise_warning(
+      "stat(): stat failed for %s",
+       filename.c_str()
+    );
+    return false;
+  }
   return stat_impl(&sb);
 }
 
@@ -1256,9 +1272,10 @@ bool f_touch(const String& filename, int64_t mtime /* = 0 */,
   if (accessSyscall(translated, F_OK)) {
     FILE *f = fopen(translated.data(), "w");
     if (!f) {
-      Logger::Verbose("%s/%d: Unable to create file %s because %s",
-                      __FUNCTION__, __LINE__, translated.data(),
-                      folly::errnoStr(errno).c_str());
+      raise_warning(
+        "touch(): Unable to create file %s because %s",
+        translated.data(), folly::errnoStr(errno).c_str()
+      );
       return false;
     }
     fclose(f);
@@ -1339,7 +1356,15 @@ bool f_unlink(const String& filename, const Variant& context /* = null */) {
   CHECK_PATH_FALSE(filename, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   if (!w) return false;
-  CHECK_SYSTEM(w->unlink(filename));
+  if (w->unlink(filename) != 0) {
+    raise_warning(
+      "%s(%s): %s",
+       __FUNCTION__ + 2,
+       filename.c_str(),
+       folly::errnoStr(errno).c_str()
+    );
+    return false;
+  }
   return true;
 }
 
@@ -1653,6 +1678,11 @@ static bool StringAscending(const String& s1, const String& s2) {
 
 Variant f_scandir(const String& directory, bool descending /* = false */,
                   const Variant& context /* = null */) {
+  if (directory.empty()) {
+    raise_warning("scandir(): Directory name cannot be empty");
+    return false;
+  }
+
   CHECK_PATH(directory, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(directory);
   if (!w) return false;

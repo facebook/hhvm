@@ -1708,8 +1708,9 @@ for_expr:
 ;
 
 yield_expr:
-    T_YIELD expr                       { _p->onYield($$, $2);}
-  | T_YIELD expr T_DOUBLE_ARROW expr   { _p->onYieldPair($$, $2, $4);}
+    T_YIELD                            { _p->onYield($$, NULL);}
+  | T_YIELD expr                       { _p->onYield($$, &$2);}
+  | T_YIELD expr T_DOUBLE_ARROW expr   { _p->onYieldPair($$, &$2, &$4);}
 ;
 
 yield_assign_expr:

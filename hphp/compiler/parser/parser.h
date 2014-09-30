@@ -241,8 +241,8 @@ public:
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
   void onBreakContinue(Token &out, bool isBreak, Token *expr);
   void onReturn(Token &out, Token *expr);
-  void onYield(Token &out, Token &expr);
-  void onYieldPair(Token &out, Token &key, Token &val);
+  void onYield(Token &out, Token *expr);
+  void onYieldPair(Token &out, Token *key, Token *val);
   void onYieldBreak(Token &out);
   void onAwait(Token &out, Token &expr);
   void onGlobal(Token &out, Token &expr);

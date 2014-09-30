@@ -451,7 +451,7 @@ static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
 
-static inline bool nsjrDefault() {
+static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 5 : 0;
 }
 

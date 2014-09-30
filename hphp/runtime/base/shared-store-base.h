@@ -24,35 +24,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/complex-types.h"
 
-#define SHARED_STORE_APPLICATION_CACHE 0
-#define SHARED_STORE_DNS_CACHE 1
-#define MAX_SHARED_STORE 2
-
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-class SharedStores {
-public:
-  static void Create();
-
-public:
-  SharedStores();
-  ~SharedStores();
-  void create();
-  void clear();
-  void reset();
-
-  ConcurrentTableSharedStore& operator[](int id) {
-    assert(id >= 0 && id < MAX_SHARED_STORE);
-    return *m_stores[id];
-  }
-
-private:
-  ConcurrentTableSharedStore* m_stores[MAX_SHARED_STORE];
-};
-
-extern SharedStores s_apc_store;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class SharedStoreFileStorage {

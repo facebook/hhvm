@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 #include <stdexcept>
+#include <type_traits>
 
 #include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -43,6 +44,31 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+std::aligned_storage<
+  sizeof(ConcurrentTableSharedStore),
+  alignof(ConcurrentTableSharedStore)
+>::type s_apc_storage;
+
+ConcurrentTableSharedStore& apc_store() {
+  void* vpStore = &s_apc_storage;
+  return *static_cast<ConcurrentTableSharedStore*>(vpStore);
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void initialize_apc() {
+  APCStats::Create();
+  // Note: we never destruct APC, currently.
+  void* vpStore = &s_apc_storage;
+  new (vpStore) ConcurrentTableSharedStore;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 const StaticString
   s_delete("delete");
@@ -165,7 +191,7 @@ Variant f_apc_store(const Variant& key_or_array,
         return Variant(false);
       }
       Variant v = iter.second();
-      s_apc_store[0].set(key.toString(), v, ttl);
+      apc_store().set(key.toString(), v, ttl);
     }
 
     return Variant(staticEmptyArray());
@@ -176,7 +202,7 @@ Variant f_apc_store(const Variant& key_or_array,
     return Variant(false);
   }
   String strKey = key_or_array.toString();
-  s_apc_store[0].set(strKey, var, ttl);
+  apc_store().set(strKey, var, ttl);
   return Variant(true);
 }
 
@@ -186,7 +212,7 @@ Variant f_apc_store(const Variant& key_or_array,
  */
 bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var) {
   if (!apcExtension::Enable) return false;
-  s_apc_store[0].setWithoutTTL(key, var);
+  apc_store().setWithoutTTL(key, var);
   return true;
 }
 
@@ -208,7 +234,7 @@ Variant f_apc_add(const Variant& key_or_array,
         return false;
       }
       Variant v = iter.second();
-      if (!s_apc_store[0].add(key.toString(), v, ttl)) {
+      if (!apc_store().add(key.toString(), v, ttl)) {
         errors.add(key, -1);
       }
     }
@@ -220,7 +246,7 @@ Variant f_apc_add(const Variant& key_or_array,
     return false;
   }
   String strKey = key_or_array.toString();
-  return s_apc_store[0].add(strKey, var, ttl);
+  return apc_store().add(strKey, var, ttl);
 }
 
 Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
@@ -239,7 +265,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
         return false;
       }
       String strKey = k.toString();
-      if (s_apc_store[0].get(strKey, v)) {
+      if (apc_store().get(strKey, v)) {
         tmp = true;
         init.set(strKey, v);
       }
@@ -248,7 +274,7 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
     return init.create();
   }
 
-  if (s_apc_store[0].get(key.toString(), v)) {
+  if (apc_store().get(key.toString(), v)) {
     success = true;
   } else {
     success = false;
@@ -268,7 +294,7 @@ Variant f_apc_delete(const Variant& key) {
       if (!k.isString()) {
         raise_warning("apc key is not a string");
         init.append(k);
-      } else if (!s_apc_store[0].erase(k.toString())) {
+      } else if (!apc_store().erase(k.toString())) {
         init.append(k);
       }
     }
@@ -290,12 +316,12 @@ Variant f_apc_delete(const Variant& key) {
     return tvAsVariant(&tvResult);
   }
 
-  return s_apc_store[0].erase(key.toString());
+  return apc_store().erase(key.toString());
 }
 
 bool f_apc_clear_cache(const String& cache_type /* = "" */) {
   if (!apcExtension::Enable) return false;
-  return s_apc_store[0].clear();
+  return apc_store().clear();
 }
 
 Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
@@ -303,7 +329,7 @@ Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
   if (!apcExtension::Enable) return false;
 
   bool found = false;
-  int64_t newValue = s_apc_store[0].inc(key, step, found);
+  int64_t newValue = apc_store().inc(key, step, found);
   success = found;
   if (!found) return false;
   return newValue;
@@ -314,7 +340,7 @@ Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
   if (!apcExtension::Enable) return false;
 
   bool found = false;
-  int64_t newValue = s_apc_store[0].inc(key, -step, found);
+  int64_t newValue = apc_store().inc(key, -step, found);
   success = found;
   if (!found) return false;
   return newValue;
@@ -322,7 +348,7 @@ Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
 
 bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas) {
   if (!apcExtension::Enable) return false;
-  return s_apc_store[0].cas(key, old_cas, new_cas);
+  return apc_store().cas(key, old_cas, new_cas);
 }
 
 Variant f_apc_exists(const Variant& key) {
@@ -338,14 +364,14 @@ Variant f_apc_exists(const Variant& key) {
         return false;
       }
       String strKey = k.toString();
-      if (s_apc_store[0].exists(strKey)) {
+      if (apc_store().exists(strKey)) {
         init.append(strKey);
       }
     }
     return init.create();
   }
 
-  return s_apc_store[0].exists(key.toString());
+  return apc_store().exists(key.toString());
 }
 
 
@@ -382,7 +408,7 @@ Variant f_apc_cache_info(const String& cache_type,
     info.add(Variant(it->first, Variant::StaticStrInit{}), it->second);
   }
   if (!limited) {
-    auto const entries = s_apc_store[0].getEntriesInfo();
+    auto const entries = apc_store().getEntriesInfo();
     PackedArrayInit ents(entries.size());
     for (auto& entry : entries) {
       ArrayInit ent(kEntryInfoSize, ArrayInit::Map{});
@@ -503,7 +529,7 @@ void apc_load(int thread) {
     JobDispatcher<ApcLoadJob, ApcLoadWorker>(jobs, thread).run();
   }
 
-  s_apc_store[0].primeDone();
+  apc_store().primeDone();
 
   if (apcExtension::EnableConstLoad) {
 #ifdef USE_JEMALLOC
@@ -661,7 +687,7 @@ void apc_load_impl(struct cache_info *info,
   if (!apcExtension::ForceConstLoadToAPC) {
     if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  auto& s = s_apc_store[0];
+  auto& s = apc_store();
   {
     int count = count_items(int_keys, 2);
     if (count) {
@@ -926,7 +952,7 @@ void apc_load_impl_compressed
   if (!apcExtension::ForceConstLoadToAPC) {
     if (apcExtension::EnableConstLoad && info && info->use_const) return;
   }
-  auto& s = s_apc_store[0];
+  auto& s = apc_store();
   {
     int count = int_lens[0];
     int len = int_lens[1];
@@ -1191,7 +1217,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
           rfc1867ApcData->prev_bytes_processed >
           rfc1867ApcData->update_freq) {
         Variant v;
-        if (s_apc_store[0].get(rfc1867ApcData->tracking_key, v)) {
+        if (apc_store().get(rfc1867ApcData->tracking_key, v)) {
           if (v.is(KindOfArray)) {
             ArrayInit track(6, ArrayInit::Map{});
             track.set(s_total, rfc1867ApcData->content_length);
@@ -1439,7 +1465,6 @@ String apc_reserialize(const String& str) {
 
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
               int waitSeconds) {
-  const int CACHE_ID = 0; /* 0 is used as default for apc */
   DumpMode mode;
   std::ofstream out(filename);
 
@@ -1460,7 +1485,7 @@ bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
     mode = DumpMode::KeyAndValue;
   }
 
-  s_apc_store[CACHE_ID].dump(out, mode);
+  apc_store().dump(out, mode);
   out.close();
   return true;
 }

@@ -37,46 +37,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-SharedStores s_apc_store;
-
-SharedStores::SharedStores() {
-}
-
-void SharedStores::create() {
-  APCStats::Create();
-  for (int i = 0; i < MAX_SHARED_STORE; i++) {
-    switch (apcExtension::TableType) {
-      case apcExtension::TableTypes::ConcurrentTable:
-        m_stores[i] = new ConcurrentTableSharedStore();
-        break;
-      default:
-        assert(false);
-    }
-  }
-}
-
-SharedStores::~SharedStores() {
-  clear();
-}
-
-void SharedStores::clear() {
-  for (int i = 0; i < MAX_SHARED_STORE; i++) {
-    delete m_stores[i];
-    m_stores[i] = nullptr;
-  }
-}
-
-void SharedStores::reset() {
-  clear();
-  create();
-}
-
-void SharedStores::Create() {
-  s_apc_store.create();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 SharedStoreFileStorage s_apc_file_storage;
 
 void SharedStoreFileStorage::enable(const std::string& prefix,

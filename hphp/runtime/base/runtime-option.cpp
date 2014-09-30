@@ -1578,7 +1578,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
 
   Extension::LoadModules(ini, config);
-  SharedStores::Create();
+  extern void initialize_apc();
+  initialize_apc();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

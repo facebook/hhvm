@@ -2254,6 +2254,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"ImmMap", "HH\\ImmMap"},
     (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"InvariantException", "HH\\InvariantException"},
+    (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
 
     (AliasEntry){"bool", "HH\\bool"},
     (AliasEntry){"boolean", "HH\\bool"},

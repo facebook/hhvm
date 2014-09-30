@@ -277,7 +277,7 @@ public:
    * The start of malloc'd memory for `this' (i.e., including the method
    * table).
    */
-  Func** mallocPtrFromThis() const;
+  LowFuncPtr* mallocPtrFromThis() const;
 
   /*
    * Pointer to the array of Class pointers, allocated immediately after

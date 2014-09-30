@@ -4583,9 +4583,9 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto clsReg = srcLoc(0).reg();
   int32_t mSlotVal = inst->src(1)->rawVal();
-  auto methOff = int32_t(mSlotVal * sizeof(Func*));
+  auto methOff = int32_t(mSlotVal * sizeof(LowFuncPtr));
   auto& v = vmain();
-  v << loadq{clsReg[methOff], dstReg};
+  emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowFuncPtr));
 }
 
 void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {

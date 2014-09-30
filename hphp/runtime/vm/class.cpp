@@ -193,9 +193,10 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 
   auto const size = offsetof(Class, m_classVec)
                     + sizeof(m_classVec[0]) * classVecLen
-                    + sizeof(Func*) * funcVecLen;
+                    + sizeof(LowFuncPtr) * funcVecLen;
   auto const mem = low_malloc(size);
-  auto const classPtr = (void *)((uintptr_t)mem + funcVecLen * sizeof(Func*));
+  auto const classPtr = (void *)((uintptr_t)mem +
+                                 funcVecLen * sizeof(LowFuncPtr));
   try {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
@@ -361,9 +362,9 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-Func** Class::mallocPtrFromThis() const {
-  return reinterpret_cast<Func**>(
-      reinterpret_cast<uintptr_t>(this) - m_funcVecLen * sizeof(Func *));
+LowFuncPtr* Class::mallocPtrFromThis() const {
+  return reinterpret_cast<LowFuncPtr*>(
+      reinterpret_cast<uintptr_t>(this) - m_funcVecLen * sizeof(LowFuncPtr));
 }
 
 
@@ -2559,11 +2560,11 @@ void Class::setClassVec() {
 }
 
 void Class::setFuncVec(MethodMapBuilder& builder) {
-  Func** funcVec = (Func**)mallocPtrFromThis();
+  auto funcVec = (LowFuncPtr*)mallocPtrFromThis();
 
-  memset(funcVec, 0, m_funcVecLen * sizeof(Func*));
+  memset(funcVec, 0, m_funcVecLen * sizeof(LowFuncPtr));
 
-  funcVec = (Func**)this;
+  funcVec = (LowFuncPtr*)this;
   assert(builder.size() <= m_funcVecLen);
 
   for (Slot i = 0; i < builder.size(); i++) {

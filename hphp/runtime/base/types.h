@@ -76,6 +76,7 @@ class ResourceData;
 class MArrayIter;
 
 class Class;
+class Func;
 
 class VariableSerializer;
 class VariableUnserializer;
@@ -85,13 +86,15 @@ class VariableUnserializer;
 #ifdef USE_LOWPTR
 constexpr bool use_lowptr = true;
 
-typedef LowPtr<Class, uint32_t> LowClassPtr;
-typedef LowPtr<const StringData, uint32_t> LowStringPtr;
+using LowClassPtr  = LowPtr<Class, uint32_t>;
+using LowFuncPtr   = LowPtr<Func, uint32_t>;
+using LowStringPtr = LowPtr<const StringData, uint32_t>;
 #else
 constexpr bool use_lowptr = false;
 
-typedef LowPtr<Class, uintptr_t> LowClassPtr;
-typedef LowPtr<const StringData, uintptr_t> LowStringPtr;
+using LowClassPtr  = LowPtr<Class, uintptr_t>;
+using LowFuncPtr   = LowPtr<Func, uintptr_t>;
+using LowStringPtr = LowPtr<const StringData, uintptr_t>;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

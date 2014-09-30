@@ -169,12 +169,12 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
-  Func** funcVec = (Func**)this;
+  auto funcVec = (LowFuncPtr*)this;
   funcVec[-((int32_t)idx + 1)] = func;
 }
 

@@ -1,0 +1,4 @@
+object(Widget)#1 (1) {
+  ["count":"Widget":private]=>
+  int(120)
+}

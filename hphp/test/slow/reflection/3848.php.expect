@@ -1,27 +1,27 @@
-class MyReflectionFunction#1 (2) {
-  public $name =>
+object(MyReflectionFunction)#1 (2) {
+  ["name"]=>
   string(1) "f"
-  public $testProperty =>
+  ["testProperty"]=>
   string(7) "foo_bar"
 }
 string(1) "f"
 string(7) "foo_bar"
 string(9) "undefined"
-class MyReflectionClass#2 (2) {
-  public $name =>
+object(MyReflectionClass)#2 (2) {
+  ["name"]=>
   string(9) "TestClass"
-  public $testProperty =>
+  ["testProperty"]=>
   string(7) "foo_bar"
 }
 string(9) "TestClass"
 string(7) "foo_bar"
 string(9) "undefined"
-class MyReflectionMethod#1 (3) {
-  public $name =>
+object(MyReflectionMethod)#3 (3) {
+  ["name"]=>
   string(1) "m"
-  public $class =>
+  ["class"]=>
   string(19) "TestClassWithMethod"
-  public $testProperty =>
+  ["testProperty"]=>
   string(7) "foo_bar"
 }
 string(1) "m"

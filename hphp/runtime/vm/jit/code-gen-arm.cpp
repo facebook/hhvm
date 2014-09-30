@@ -1100,14 +1100,14 @@ void CodeGenerator::cgCallHelper(Vout& v,
     case DestType::SIMD: not_implemented();
     case DestType::SSA:
       assert(dstReg1 == InvalidReg);
-      if (dstReg0.isValid()) v << copy{PhysReg(vixl::x0), dstReg0};
+      v << copy{PhysReg(vixl::x0), dstReg0};
       break;
     case DestType::None:
       assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
     case DestType::Dbl:
       assert(dstReg1 == InvalidReg);
-      if (dstReg0.isValid()) v << copy{PhysReg(vixl::d0), dstReg0};
+      v << copy{PhysReg(vixl::d0), dstReg0};
       break;
   }
 }
@@ -1266,15 +1266,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto doMov = [&] {
     auto const valDst = dstLoc(0).reg(0);
     auto const typeDst = dstLoc(0).reg(1);
-    // TODO: #3626251: XLS: Let Uses say whether a constant is
-    // allowed, and if not, assign a register.
-    if (valDst.isValid()) {
-      if (rVal.isValid()) {
-        v << copy{rVal, valDst};
-      } else {
-        if (src->isConst()) v << ldimm{src->rawVal(), valDst};
-      }
-    }
+    v << copy{rVal, valDst};
     if (typeDst.isValid()) {
       if (rType.isValid()) {
         v << copy{rType, typeDst};
@@ -1307,14 +1299,15 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   } else if (typeParam <= Type::Uncounted &&
              ((srcType == Type::Str && typeParam.maybe(Type::StaticStr)) ||
               (srcType == Type::Arr && typeParam.maybe(Type::StaticArr)))) {
-    // We carry Str and Arr operands around without a type register,
-    // even though they're union types.  The static and non-static
-    // subtypes are distinguised by the refcount field.
+    // We carry Str and Arr operands around without a type register, even
+    // though they're union types. The static and non-static subtypes are
+    // distinguised by the refcount field.
     assert(rVal.isValid());
     auto count = v.makeReg();
+    auto next = v.makeBlock();
     v << loadl{rVal[FAST_REFCOUNT_OFFSET], count};
-    v << cmpli{0, count};
-    doJcc(CC_L);
+    v << tbcc{vixl::eq, UncountedBitPos, count, {next, label(inst->taken())}};
+    v = next;
   } else {
     always_assert_log( false, [&] {
       return folly::format("Bad src: {} and dst: {} types in '{}'",
@@ -1687,7 +1680,6 @@ void CodeGenerator::emitLoad(Vout& v, Type type, Vloc dst, Vreg base,
     not_implemented();
   }
   auto data = dst.reg();
-  if (data == InvalidReg) return; // nothing to load.
   v << load{base[offset + TVOFF(m_data)], data};
 }
 
@@ -1821,7 +1813,7 @@ void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
 
   cgCallHelper(vmain(),
                CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
-               callDest(InvalidReg),
+               kVoidDest,
                SyncOptions::kSyncPoint,
                argGroup().ssa(1/*fp*/).ssa(0/*sp*/).imm(pcOff));
 }

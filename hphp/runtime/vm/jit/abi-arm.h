@@ -126,6 +126,8 @@ const RegSet kGPCalleeSaved = RegSet()
   | RegSet(vixl::x26)
   | RegSet(vixl::x27)
   | RegSet(vixl::x28)
+  // x29 = rVmFp
+  // x30 = rLinkReg
   ;
 
 const RegSet kGPUnreserved = RegSet()

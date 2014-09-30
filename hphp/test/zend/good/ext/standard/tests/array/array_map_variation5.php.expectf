@@ -42,11 +42,11 @@ array(4) {
 -- Iteration 7 --
 array(4) {
   [111]=>
-  string(6) "	Hello"
+  string(6) "%r\x09%rHello"
   ["red"]=>
-  string(6) "col	or"
+  string(6) "col%r\x09%ror"
   [2]=>
-  string(7) "world"
+  string(7) "%r\x0b\x0c%rworld"
   [3]=>
   string(4) "pen
 "

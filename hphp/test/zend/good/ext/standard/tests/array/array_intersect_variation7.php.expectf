@@ -52,11 +52,11 @@ array(1) {
 -- Iterator 7 --
 array(1) {
   ["red"]=>
-  string(6) "col	or"
+  string(6) "col%r\x09%ror"
 }
 array(1) {
   ["red"]=>
-  string(6) "col	or"
+  string(6) "col%r\x09%ror"
 }
 -- Iterator 8 --
 array(1) {

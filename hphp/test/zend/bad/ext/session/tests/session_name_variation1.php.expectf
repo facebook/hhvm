@@ -6,14 +6,14 @@ bool(true)
 string(9) "PHPSESSID"
 string(9) "PHPSESSID"
 bool(true)
-string(1) "	"
+string(1) "%r\x09%r"
 bool(true)
-string(1) "	"
+string(1) "%r\x09%r"
 
 Warning: %s
-string(1) "	"
+string(1) "%r\x09%r"
 bool(true)
-string(1) "	"
+string(1) "%r\x09%r"
 bool(true)
-string(1) "	"
+string(1) "%r\x09%r"
 Done

@@ -2,60 +2,60 @@
 
 -- Before seek operation --
 Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(133)
 
 -- After seeking position to 0 --
 Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(133)
 
 -- After seeking position to 3 --
 lo, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(130)
 
 -- After seeking position to 13 --
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(120)
 
 -- After seeking position to 14 --
- abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+ abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(119)
 
 -- After seeking position to 23 --
 adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^ 
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(110)
 
 -- After seeking position to 34 --
-2394723947	$%$%#$%#$%#^#%^ 
+2394723947%r\x09%r$%$%#$%#$%#^#%^ 
           Hello, world
-, abcdefg	adsdsfdf
-8u2394723947	$%$%#$%#$%#^#%^
+, abcdefg%r\x09%radsdsfdf
+8u2394723947%r\x09%r$%$%#$%#$%#^#%^
 int(99)
 
 -- After seeking position to 1000 --

@@ -141,7 +141,7 @@ array(5) {
 -- With default argument --
 array(4) {
   [0]=>
-  string(3) "a"
+  string(3) "a%r\x0b\x0c%r"
   [1]=>
   string(5) "aaaa
 "
@@ -153,7 +153,7 @@ array(4) {
 -- With more arguments --
 array(8) {
   [0]=>
-  string(3) "a"
+  string(3) "a%r\x0b\x0c%r"
   [1]=>
   string(5) "aaaa
 "
@@ -228,10 +228,10 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 -- With more arguments --
 array(7) {
@@ -245,10 +245,10 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   [0]=>
   string(3) "one"
   [1]=>

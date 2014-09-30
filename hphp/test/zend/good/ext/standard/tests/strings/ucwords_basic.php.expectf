@@ -6,14 +6,14 @@ string(15) "Testing Ucwords"
 -- Iteration 3 --
 string(16) "Testing\tucwords"
 -- Iteration 4 --
-string(15) "Testing	Ucwords"
+string(15) "Testing%r\x09%rUcwords"
 -- Iteration 5 --
 string(15) "Testing
 Ucwords"
 -- Iteration 6 --
 string(16) "Testing\nucwords"
 -- Iteration 7 --
-string(15) "TestingUcwords"
+string(15) "Testing%r\x0b%rUcwords"
 -- Iteration 8 --
 string(16) "Testing\vucwords"
 -- Iteration 9 --
@@ -36,5 +36,5 @@ Ucwords"
 -- Iteration 17 --
 string(16) "Testing\fucwords"
 -- Iteration 18 --
-string(15) "TestingUcwords"
+string(15) "Testing%r\x0c%rUcwords"
 Done

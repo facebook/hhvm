@@ -5,7 +5,7 @@ int(0)
 int(37)
 int(37)
 string(37) "abcdefghij
-mnopqrst	uvwxyz
+mnopqrst%r\x09%ruvwxyz
 0123456789"
 int(37)
 bool(true)

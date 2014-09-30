@@ -72,16 +72,17 @@ breakage or they need to change the expected output.
 
 These can appear in `.expectf` files.
 
-| Char | Description                                | Regex
-|------|--------------------------------------------|-------
-| %e   | Path separator                             | \/
-| %s   | Any characters except newlines             | [^\r\n]+
-| %S   | Optionally any characters except newlines  | [^\r\n]*
-| %a   | Any characters                             | .+
-| %A   | Optionally any characters                  | .*
-| %w   | Optional whitespace                        | \s*
-| %i   | Integer with optional sign                 | [+-]?\d+
-| %d   | Digits                                     | \d+
-| %x   | Hex                                        | [0-9a-fA-F]+
-| %f   | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
-| %c   | Character                                  | .
+| Char    | Description                                | Regex
+|---------|--------------------------------------------|-------
+| %e      | Path separator                             | \/
+| %s      | Any characters except newlines             | [^\r\n]+
+| %S      | Optionally any characters except newlines  | [^\r\n]*
+| %a      | Any characters                             | .+
+| %A      | Optionally any characters                  | .*
+| %w      | Optional whitespace                        | \s*
+| %i      | Integer with optional sign                 | [+-]?\d+
+| %d      | Digits                                     | \d+
+| %x      | Hex                                        | [0-9a-fA-F]+
+| %f      | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
+| %c      | Character                                  | .
+| %r...%r | The ... is a regex                         | The part that is ...

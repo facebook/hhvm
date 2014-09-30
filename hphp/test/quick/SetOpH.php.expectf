@@ -840,8 +840,8 @@ bool(false)
 string(11) "non-numeric"
   | string(11) "non-numeric"
 string(11) "non-numeric"
-  ^ string(11) "           "
-string(11) "           "
+  ^ string(11) "%r\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00%r"
+string(11) "%r\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00%r"
   << int(0)
 int(0)
   >> int(0)
@@ -862,8 +862,8 @@ int(0)
 int(0)
   & string(3) "&(("
 string(3) "&(("
-  | string(11) "-numeric"
-string(11) "-numeric"
+  | string(11) "%r\x7f\x7f\x7f%r-numeric"
+string(11) "%r\x7f\x7f\x7f%r-numeric"
   ^ string(3) "YWW"
 string(3) "YWW"
   << int(0)
@@ -1018,8 +1018,8 @@ bool(false)
 bool(false)
   & string(3) "&(("
 string(3) "&(("
-  | string(11) "-numeric"
-string(11) "-numeric"
+  | string(11) "%r\x7f\x7f\x7f%r-numeric"
+string(11) "%r\x7f\x7f\x7f%r-numeric"
   ^ string(3) "YWW"
 string(3) "YWW"
   << int(789)
@@ -1044,8 +1044,8 @@ int(0)
 string(3) "789"
   | string(3) "789"
 string(3) "789"
-  ^ string(3) "   "
-string(3) "   "
+  ^ string(3) "%r\x00\x00\x00%r"
+string(3) "%r\x00\x00\x00%r"
   << int(1654652928)
 int(1654652928)
   >> int(0)

@@ -177,11 +177,11 @@ int(5)
 array(5) {
   [0]=>
   int(10)
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
   ["pen
 "]=>
@@ -195,11 +195,11 @@ array(7) {
   string(5) "hello"
   [2]=>
   string(5) "world"
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
   ["pen
 "]=>

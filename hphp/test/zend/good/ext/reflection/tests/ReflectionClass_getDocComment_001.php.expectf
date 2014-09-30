@@ -2,9 +2,9 @@
 string(%d) "/**
 
 
-		My
+%r\x09\x09%rMy
 Doc 
-		* Comment 
+%r\x09\x09%r* Comment 
 for A
 
 * */"
@@ -31,7 +31,7 @@ bool(false)
 
 
 ---> Doc comment for class G:
-string(27) "/**	** Doc comment for G */"
+string(27) "/**%r\x09%r** Doc comment for G */"
 
 
 ---> Doc comment for class I:

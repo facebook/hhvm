@@ -1218,9 +1218,9 @@ def walk(filename, dest_subdir):
         test = test.replace('.clean', '')
     if '/ext/phar/tests/' in full_dest_filename:
         test = test.replace('.clean', '')
-    if ('/ext/readline/tests/readline_info_001.php' in full_dest_filename or
-        '/ext/readline/tests/libedit_info_001.php' in full_dest_filename):
-        test = test.replace('readline_info(', '@readline_info(');
+    if ('/ext/readline/tests/readline_info_001.php' in full_dest_filename) or \
+       ('/ext/readline/tests/libedit_info_001.php' in full_dest_filename):
+        test = test.replace('readline_info(', '@readline_info(')
     if '/ext/standard/tests/file/file_get_contents_variation1.php' in full_dest_filename:
         test = test.replace('afile.txt', 'file_get_contents_variation1.txt')
     if '/ext/standard/tests/file/readfile_variation6.php' in full_dest_filename:

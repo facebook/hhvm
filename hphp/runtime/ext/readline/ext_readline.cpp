@@ -118,12 +118,22 @@ static bool HHVM_FUNCTION(
   return true;
 }
 
-static bool HHVM_FUNCTION(readline_read_history, const String& filename) {
-  return read_history(filename.data());
+static bool HHVM_FUNCTION(readline_read_history,
+                          const String& filename /* = null */) {
+  if (filename.isNull()) {
+    return read_history(nullptr) == 0;
+  } else {
+    return read_history(filename.data()) == 0;
+  }
 }
 
-static bool HHVM_FUNCTION(readline_write_history, const String& filename) {
-  return write_history(filename.data());
+static bool HHVM_FUNCTION(readline_write_history,
+                          const String& filename /* = null */) {
+  if (filename.isNull()) {
+    return write_history(nullptr) == 0;
+  } else {
+    return write_history(filename.data()) == 0;
+  }
 }
 
 static class ReadlineExtension : public Extension {

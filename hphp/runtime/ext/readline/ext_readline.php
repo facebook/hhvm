@@ -38,7 +38,7 @@ function readline_completion_function(mixed $function): bool;
  * @return bool -
  */
 <<__Native>>
-function readline_read_history(string $filename): bool;
+function readline_read_history(string $filename = null): bool;
 
 /**
  * Writes the history
@@ -48,7 +48,7 @@ function readline_read_history(string $filename): bool;
  * @return bool -
  */
 <<__Native>>
-function readline_write_history(string $filename): bool;
+function readline_write_history(string $filename = null): bool;
 
 /**
  * Reads a line

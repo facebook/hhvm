@@ -84,7 +84,6 @@ struct BlockSorter {
 // A Use refers to the position where an interval is used or defined
 struct Use {
   VregKind kind;
-  bool def; // true if this is a define
   unsigned pos;
   Vreg hint; // if valid, try to use same vreg as this
 };
@@ -99,6 +98,9 @@ struct LiveRange {
 public:
   unsigned start, end;
 };
+
+typedef jit::vector<LiveRange> RangeList;
+typedef jit::vector<Use> UseList;
 
 // An Interval stores the lifetime of an Vreg as a sorted list of disjoint
 // ranges, and a sorted list of use positions. If this interval was split,
@@ -125,6 +127,8 @@ struct Interval {
   Interval* leader() { return parent ? parent : this; }
   bool spilled() const { return reg == InvalidReg && slot >= 0; }
   // queries
+  unsigned findRange(unsigned pos) const;
+  unsigned findUse(unsigned pos) const;
   bool covers(unsigned pos) const;
   bool usedAt(unsigned pos) const;
   unsigned nextIntersect(Interval*) const;
@@ -140,9 +144,10 @@ struct Interval {
 public:
   Interval* const parent;
   Interval* next{nullptr};
-  jit::vector<LiveRange> ranges;
-  jit::vector<Use> uses;
+  RangeList ranges;
+  UseList uses;
   const Vreg vreg;
+  unsigned def_pos;
   int slot{-1};
   bool wide{false};
   PhysReg reg;
@@ -287,21 +292,53 @@ void Interval::add(LiveRange r) {
   }
 }
 
+// Return range index containing or higher than pos
+unsigned Interval::findRange(unsigned pos) const {
+  unsigned lo = 0;
+  for (unsigned hi = ranges.size(); lo < hi;) {
+    auto mid = (lo + hi) / 2;
+    auto r = ranges[mid];
+    if (pos < r.start) {
+      hi = mid;
+    } else if (r.end <= pos) {
+      lo = mid + 1;
+    } else {
+      return mid;
+    }
+  }
+  assert(lo == ranges.size() || pos < ranges[lo].start);
+  return lo;
+}
+
+unsigned Interval::findUse(unsigned pos) const {
+  unsigned lo = 0, hi = uses.size();
+  while (lo < hi) {
+    auto mid = (lo + hi) / 2;
+    auto u = uses[mid].pos;
+    if (pos < u) {
+      hi = mid;
+    } else if (u < pos) {
+      lo = mid + 1;
+    } else {
+      return mid;
+    }
+  }
+  assert(lo == uses.size() || pos < uses[lo].pos);
+  return lo;
+}
+
 // Return true if one of the ranges in this interval includes pos
 bool Interval::covers(unsigned pos) const {
   if (pos < start() || pos >= end()) return false;
-  for (auto r : ranges) {
-    if (pos < r.start) return false;
-    if (pos < r.end) return true;
-  }
-  return false;
+  auto i = ranges.begin() + findRange(pos);
+  return i != ranges.end() && i->contains(pos);
 }
 
 // Return true if there is a use position at pos
 bool Interval::usedAt(unsigned pos) const {
   if (pos < start() || pos > end()) return false;
-  for (auto& u : uses) if (u.pos == pos) return true;
-  return false;
+  auto i = uses.begin() + findUse(pos);
+  return i != uses.end() && pos == i->pos;
 }
 
 // Return the interval which has a use position at pos
@@ -317,9 +354,11 @@ Interval* Interval::childAt(unsigned pos) {
 // return the next intersection point between this and ivl, or kMaxPos
 // if they never intersect.
 unsigned Interval::nextIntersect(Interval* ivl) const {
-  assert(!ranges.empty() && !ivl->ranges.empty());
+  assert(!fixed());
+  assert(start() < ivl->end()); // otherwise, update() retired it
   auto r1 = ranges.begin(), e1 = ranges.end();
-  auto r2 = ivl->ranges.begin(), e2 = ivl->ranges.end();
+  auto r2 = ivl->ranges.begin() + ivl->findRange(start());
+  auto e2 = ivl->ranges.end();
   for (;;) {
     if (r1->start < r2->start) {
       if (r2->start < r1->end) return r2->start;
@@ -335,10 +374,9 @@ unsigned Interval::nextIntersect(Interval* ivl) const {
 // Return the position of the next use >= pos.
 // If there are no more uses after pos, return kMaxPos.
 unsigned Interval::firstUseAfter(unsigned pos) const {
-  for (auto& u : uses) {
-    if (pos <= u.pos) return u.pos;
-  }
-  return kMaxPos;
+  auto u = uses.begin() + findUse(pos);
+  return u != uses.end() && pos <= u->pos ? u->pos :
+         kMaxPos;
 }
 
 // Return the position of the latest use <= pos.
@@ -368,17 +406,17 @@ Interval* Interval::split(unsigned pos, bool keep_uses) {
   child->next = next;
   next = child;
   // advance r1 to the first range we want in child; maybe split a range.
-  auto r1 = ranges.begin(), r2 = ranges.end();
-  while (r1->end <= pos) r1++;
+  auto r1 = ranges.begin() + findRange(pos);
   if (pos > r1->start) { // split r at pos
     child->ranges.push_back({pos, r1->end});
     r1->end = pos;
     r1++;
   }
-  child->ranges.insert(child->ranges.end(), r1, r2);
-  ranges.erase(r1, r2);
+  child->ranges.insert(child->ranges.end(), r1, ranges.end());
+  ranges.erase(r1, ranges.end());
   // advance u1 to the first use position in child, then copy u1..end to child.
-  auto u1 = uses.begin(), u2 = uses.end();
+  auto u1 = uses.begin() + findUse(end());
+  auto u2 = uses.end();
   if (keep_uses) {
     while (u1 != u2 && u1->pos <= end()) u1++;
   } else {
@@ -636,8 +674,9 @@ private:
       ivl->add({m_pos, m_pos + 1});
     }
     if (!ivl->fixed()) {
-      ivl->uses.push_back(Use{kind, true, m_pos, hint});
+      ivl->uses.push_back(Use{kind, m_pos, hint});
       ivl->wide |= wide;
+      ivl->def_pos = m_pos;
     }
     i++;
   }
@@ -698,7 +737,7 @@ struct UseVisitor {
     if (!ivl) ivl = m_intervals[r] = jit::make<Interval>(r);
     ivl->add({m_range.start, end});
     if (!ivl->fixed()) {
-      ivl->uses.push_back({kind, false, m_range.end, hint});
+      ivl->uses.push_back({kind, m_range.end, hint});
     }
   }
 private:
@@ -949,12 +988,10 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
                        RegSet allow) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
-  // search the copy interval for a register hint at pos
-  auto search = [&](Interval* copy, unsigned pos) -> PhysReg {
-    for (auto ivl = copy; ivl; ivl = ivl->next) {
-      if (pos == ivl->end() && ivl->reg != InvalidReg) {
-        return ivl->reg;
-      }
+  // search ivl for the register assigned to a sub-interval that ends at pos.
+  auto search = [&](Interval* ivl, unsigned pos) -> PhysReg {
+    for (; ivl; ivl = ivl->next) {
+      if (pos == ivl->end() && ivl->reg != InvalidReg) return ivl->reg;
     }
     return InvalidReg;
   };
@@ -962,13 +999,11 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
     if (!u.hint.isValid()) continue;
     auto hint_ivl = intervals[u.hint];
     PhysReg hint;
-    if (u.def) {
+    if (hint_ivl->fixed()) {
+      hint = hint_ivl->reg;
+    } else if (u.pos == current->def_pos) {
       // this is a def, so u.hint is a src
-      hint = hint_ivl->fixed() ? hint_ivl->reg :
-             search(hint_ivl, u.pos);
-    } else {
-      // this is a use, so u.hint is a dest
-      if (hint_ivl->fixed()) hint = hint_ivl->reg;
+      hint = search(hint_ivl, u.pos);
     }
     if (hint == InvalidReg) continue;
     if (!allow.contains(hint)) continue;
@@ -1223,7 +1258,6 @@ void Vxls::resolveSplits() {
     auto slot = i1->slot;
     if (slot >= 0) insertSpill(i1);
     for (auto i2 = i1->next; i2; i1 = i2, i2 = i2->next) {
-      if (slot >= 0) insertSpill(i2);
       auto pos = i2->start();
       if (i1->end() != pos) continue; // spans lifetime hole
       if (i2->reg == InvalidReg) continue; // no load necessary
@@ -1245,7 +1279,7 @@ void Vxls::resolveSplits() {
   }
 }
 
-// Insert a spill after every def-position in ivl.
+// Insert a spill after the def-position in ivl.
 void Vxls::insertSpill(Interval* ivl) {
   auto DEBUG_ONLY checkPos = [&](unsigned pos) {
     assert(pos % 2 == 1);
@@ -1255,12 +1289,9 @@ void Vxls::insertSpill(Interval* ivl) {
     assert(pos + 1 < range.end);
     return true;
   };
-  for (auto& u : ivl->uses) {
-    if (!u.def) continue;
-    auto pos = u.pos + 1;
-    assert(checkPos(pos));
-    spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
-  }
+  auto pos = ivl->def_pos + 1;
+  assert(checkPos(pos));
+  spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
 }
 
 // Lower copyargs into moveplans at the copyargs position.
@@ -1460,11 +1491,15 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
 
 // Return the [start,end) range for the block enclosing pos.
 Vlabel Vxls::findBlock(unsigned pos) {
-  // could binary search in blocks?
-  auto n = block_ranges.size();
-  for (size_t i = 0; i < n; i++) {
-    if (pos >= block_ranges[i].start && pos < block_ranges[i].end) {
-      return Vlabel{i};
+  for (unsigned lo = 0, hi = blocks.size(); lo < hi;) {
+    auto mid = (lo + hi) / 2;
+    auto r = block_ranges[blocks[mid]];
+    if (pos < r.start) {
+      hi = mid;
+    } else if (pos >= r.end) {
+      lo = mid + 1;
+    } else {
+      return blocks[mid];
     }
   }
   always_assert(false);
@@ -1527,7 +1562,7 @@ std::string Interval::toString() {
   out << ") {";
   delim = "";
   for (auto& u : uses) {
-    if (u.def) {
+    if (u.pos == def_pos) {
       out << delim << "@" << u.pos << "=";
       if (u.hint.isValid()) out << show(u.hint);
     } else {

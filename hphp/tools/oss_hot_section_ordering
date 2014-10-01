@@ -1012,4 +1012,3 @@
 .text.timelib_strtotime
 .text._ZN4HPHP6Native17callFuncInt64ImplEPFPNS_10TypedValueEPNS_6ActRecEEPliPdi
 .text.match
-.text.hugifyText

@@ -23,7 +23,7 @@ endif()
 find_package(Gold)
 
 if (GOLD_FOUND)
-  SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,../tools/oss_hot_section_ordering,-T,../tools/oss_linker_script)
+  SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,../tools/oss_hot_section_ordering)
   add_executable(hhvm ${CXX_SOURCES})
   target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${LINKER_SCRIPT})
 else()

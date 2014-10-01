@@ -22,7 +22,6 @@ function f() {
 $reflection = new MyReflectionFunction('f');
 $reflection->testProperty = 'foo';
 
-var_dump($reflection);
 var_dump($reflection->name);
 var_dump($reflection->testProperty);
 var_dump($reflection->undefinedProperty);
@@ -50,7 +49,6 @@ class TestClass{
 $reflection = new MyReflectionClass('TestClass');
 $reflection->testProperty = 'foo';
 
-var_dump($reflection);
 var_dump($reflection->name);
 var_dump($reflection->testProperty);
 var_dump($reflection->undefinedProperty);
@@ -80,7 +78,6 @@ class TestClassWithMethod{
 $reflection = new MyReflectionMethod('TestClassWithMethod::m');
 $reflection->testProperty = 'foo';
 
-var_dump($reflection);
 var_dump($reflection->name);
 var_dump($reflection->class);
 var_dump($reflection->testProperty);

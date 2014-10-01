@@ -1,29 +1,9 @@
-object(MyReflectionFunction)#1 (2) {
-  ["name"]=>
-  string(1) "f"
-  ["testProperty"]=>
-  string(7) "foo_bar"
-}
 string(1) "f"
 string(7) "foo_bar"
 string(9) "undefined"
-object(MyReflectionClass)#2 (2) {
-  ["name"]=>
-  string(9) "TestClass"
-  ["testProperty"]=>
-  string(7) "foo_bar"
-}
 string(9) "TestClass"
 string(7) "foo_bar"
 string(9) "undefined"
-object(MyReflectionMethod)#3 (3) {
-  ["name"]=>
-  string(1) "m"
-  ["class"]=>
-  string(19) "TestClassWithMethod"
-  ["testProperty"]=>
-  string(7) "foo_bar"
-}
 string(1) "m"
 string(19) "TestClassWithMethod"
 string(7) "foo_bar"

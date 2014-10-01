@@ -1,0 +1,11 @@
+= reflection_funcs =
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+array(2) {
+  ["FOO"]=>
+  int(2)
+  ["BAR"]=>
+  int(1)
+}

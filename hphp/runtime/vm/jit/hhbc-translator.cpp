@@ -3499,7 +3499,14 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     auto const& pi = callee->params()[i];
-    switch (pi.builtinType) {
+    auto const& tc = pi.typeConstraint;
+    auto dt = pi.builtinType;
+    Type type;
+    if (tc.isNullable() && !callee->byRef(i)) {
+      dt = tc.underlyingDataType();
+      type = Type::Null;
+    }
+    switch (dt) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
@@ -3508,7 +3515,7 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
     case KindOfResource:
     case KindOfString:
       gen(CoerceStk,
-          Type(pi.builtinType),
+          type | Type(dt),
           StackOffset(numArgs - i - 1),
           makeExitSlow(),
           m_irb->sp());

@@ -3470,19 +3470,40 @@ void CodeGenerator::cgCastStkIntToDbl(IRInstruction* inst) {
 
 void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   Type type       = inst->typeParam();
-  uint32_t offset = inst->extra<CoerceStk>()->offset;
+  auto offset     = cellsToBytes(inst->extra<CoerceStk>()->offset);
   Block* exit     = inst->taken();
   auto spReg      = srcLoc(0).reg();
+  assert(!type.isSpecialized());
 
+  auto& v = vmain();
+
+  // Short-circuit call to tvCoerceParamTo*()
+  // if we're already of the appropriate type (common case)
+  auto const coerceTypeTest = [&](const Type& t) {
+    emitTypeTest(t,
+                 spReg[offset + TVOFF(m_type)],
+                 spReg[offset + TVOFF(m_data)],
+                 [&](ConditionCode cc) {
+                   emitFwdJcc(v, cc, inst->next());
+                 });
+  };
+  if (!type.isKnownDataType()) {
+    assert(Type::Null <= type);
+    coerceTypeTest(Type::Null);
+    type -= Type::Null;
+    assert(type.isKnownDataType());
+  }
+  coerceTypeTest(type);
+
+  // If the type-specific test(s) failed,
+  // fallback on actually calling the tvCoerceParamTo*() helper
   auto args = argGroup();
-  args.addr(spReg, cellsToBytes(offset));
+  args.addr(spReg, offset);
 
   TCA tvCoerceHelper;
   if (type <= Type::Bool) {
     tvCoerceHelper = (TCA)tvCoerceParamToBooleanInPlace;
   } else if (type <= Type::Int) {
-    // if casting to integer, pass 10 as the base for the conversion
-    args.imm(10);
     tvCoerceHelper = (TCA)tvCoerceParamToInt64InPlace;
   } else if (type <= Type::Dbl) {
     tvCoerceHelper = (TCA)tvCoerceParamToDoubleInPlace;
@@ -3498,7 +3519,6 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     not_reached();
   }
 
-  auto& v = vmain();
   auto tmpReg = v.makeReg(); // XXX maybe force to rax?
   cgCallHelper(v,
     CppCall::direct(reinterpret_cast<void (*)()>(tvCoerceHelper)),

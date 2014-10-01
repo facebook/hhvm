@@ -8,4 +8,4 @@ if (strpos($out[0], 'recognized')) {
 	die('skip. junction.exe not found in PATH.');
 }
 
-?>
+?>

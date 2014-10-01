@@ -48,6 +48,9 @@ foreach ($files as $file) {
     }
     // Only do the unix2dos thing done above already
 
+  } else if (ends_with($file, '.skipif')) {
+    // Only do the unix2dos thing done above already
+
   } else if (ends_with($file, '.expect')) {
     // TODO move this to a expectf if we can
     continue;

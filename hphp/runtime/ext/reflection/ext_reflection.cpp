@@ -884,7 +884,7 @@ static bool HHVM_METHOD(ReflectionClass, isInternal) {
 
 static bool HHVM_METHOD(ReflectionClass, isInstantiable) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait))
+  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))
     && (cls->getCtor()->attrs() & AttrPublic);
 }
 

@@ -72,9 +72,7 @@ const AtomicVector<const Func*>& Func::getFuncVec() {
 ///////////////////////////////////////////////////////////////////////////////
 // Creation and destruction.
 
-Func::Func(Unit& unit, PreClass* preClass, int line1, int line2,
-           Offset base, Offset past, const StringData* name, Attr attrs,
-           bool top, const StringData* docComment, int numParams)
+Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
   , m_unit(&unit)
   , m_attrs(attrs)

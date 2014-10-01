@@ -231,8 +231,7 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
   Func* f = new (Func::allocFuncMem(name, numParams,
                                     needsNextClonedClosure,
                                     !preClass))
-    Func(unit, preClass, line1, line2, base, past, name,
-         attrs, top, docComment, numParams);
+    Func(unit, name, attrs);
   m_fMap[fe] = f;
   return f;
 }

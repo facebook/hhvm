@@ -195,9 +195,7 @@ struct Func {
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
 
-  Func(Unit& unit, PreClass* preClass, int line1, int line2,
-       Offset base, Offset past, const StringData* name, Attr attrs,
-       bool top, const StringData* docComment, int numParams);
+  Func(Unit& unit, const StringData* name, Attr attrs);
   ~Func();
 
   /*

@@ -178,7 +178,7 @@ PHP_FUNCTION(ezc_set_global)
 }
 /* }}} */
 
-/* {{{ proto mixed ezc_call(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed ezc_call(mixed function_name [, mixed parameter] [, mixed ...])
  * Call a function, like call_user_func() */
 PHP_FUNCTION(ezc_call)
 {
@@ -204,7 +204,7 @@ PHP_FUNCTION(ezc_call)
 }
 /* }}} */
 
-/* {{{ proto mixed ezc_try_call(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed ezc_try_call(mixed function_name [, mixed parameter] [, mixed ...])
  * Call a function. If it throws an exception, catch it and return the exception
  * object. Otherwise, return the return value. */
 PHP_FUNCTION(ezc_try_call)

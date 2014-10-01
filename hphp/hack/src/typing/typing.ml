@@ -2525,7 +2525,10 @@ and call_ pos env fty el =
       let env, var_param = variadic_param env ft in
       let env, tyl = lfold expr env el in
       let pos_tyl = List.combine (List.map fst el) tyl in
-      let env = wfold_left_default call_param (env, var_param) ft.ft_params pos_tyl in
+      let todos = ref [] in
+      let env = wfold_left_default (call_param todos) (env, var_param)
+                                   ft.ft_params pos_tyl in
+      let env = List.fold_left (|>) env !todos in
       Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret
   | r2, Tanon (arity, id) ->
@@ -2548,12 +2551,26 @@ and call_ pos env fty el =
       env, (Reason.Rnone, Tany)
   )
 
-and call_param env (name, x) (pos, arg) =
+and call_param todos env (name, x) (pos, arg) =
   (match name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env x arg
   );
-  Type.sub_type pos Reason.URparam env x arg
+  (* We solve for Tanon types after all the other params because we want to
+   * typecheck the lambda bodies with as much type information as possible. For
+   * example, in array_map(fn, x), we might be able to use the type of x to
+   * infer the type of fn, but if we call sub_type on fn first, we end up
+   * typechecking its body without the benefit of knowing its full type. If
+   * fn is typehinted but not x, we could use fn to infer the type of x, but
+   * in practice the reverse situation is more likely. This rearrangement is
+   * particularly useful since higher-order functions usually put fn before x.
+   *)
+  match arg with
+  | _, Tanon _ ->
+      todos := (fun env ->
+                Type.sub_type pos Reason.URparam env x arg) :: !todos;
+      env
+  | _ -> Type.sub_type pos Reason.URparam env x arg
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)

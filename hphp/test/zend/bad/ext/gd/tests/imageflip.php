@@ -15,4 +15,4 @@ var_dump(dechex(imagecolorat($im, 0, 0)));
 var_dump(dechex(imagecolorat($im, 0, 98)));
 var_dump(dechex(imagecolorat($im, 98, 0)));
 var_dump(dechex(imagecolorat($im, 98, 98)));
-?> 
+?> 

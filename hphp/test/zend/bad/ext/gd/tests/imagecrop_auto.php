@@ -52,4 +52,4 @@ var_dump(imagesx($im_crop));
 var_dump(imagesy($im_crop));
 
 @unlink(__DIR__ . "/crop_threshold.png");
-?> 
+?> 

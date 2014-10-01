@@ -228,6 +228,18 @@ struct PreClass : AtomicCountable {
       sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
     }
 
+    /*
+     * Pair of (new name, original name) representing the rule.
+     *
+     * This is the format for alias rules expected by reflection.
+     */
+    using NamePair = std::pair<LowStringPtr,LowStringPtr>;
+
+    /*
+     * Get the rule as a NamePair.
+     */
+    NamePair asNamePair() const;
+
   private:
     LowStringPtr m_traitName;
     LowStringPtr m_origMethodName;

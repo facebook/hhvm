@@ -1019,15 +1019,34 @@ static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   return ai.toArray();
 }
 
-static Array HHVM_METHOD(ReflectionClass, getTraitAliases) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  auto const& aliases = const_cast<Class*>(cls)->traitAliases();
-  auto const size = aliases.size();
-  ArrayInit ai(size, ArrayInit::Map{});
-  for (int i = 0; i < size; ++i) {
-    ai.set(StrNR(aliases[i].first), VarNR(aliases[i].second));
+static Array get_trait_alias_info(const Class* cls) {
+  auto const& aliases = cls->traitAliases();
+
+  if (aliases.size()) {
+    ArrayInit ai(aliases.size(), ArrayInit::Map{});
+
+    for (auto const& namePair : aliases) {
+      ai.set(StrNR(namePair.first), VarNR(namePair.second));
+    }
+    return ai.toArray();
+  } else {
+    // Even if we have alias rules, if we're in repo mode, they will be applied
+    // during the trait flattening step, and we won't populate traitAliases()
+    // on the Class.
+    auto const& rules = cls->preClass()->traitAliasRules();
+
+    ArrayInit ai(rules.size(), ArrayInit::Map{});
+
+    for (auto const& rule : rules) {
+      auto namePair = rule.asNamePair();
+      ai.set(StrNR(namePair.first), VarNR(namePair.second));
+    }
+    return ai.toArray();
   }
-  return ai.toArray();
+}
+
+static Array HHVM_METHOD(ReflectionClass, getTraitAliases) {
+  return get_trait_alias_info(ReflectionClassHandle::GetClassFor(this_));
 }
 
 static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
@@ -1556,13 +1575,7 @@ Array get_class_info(const String& name) {
 
   // trait aliases
   {
-    Array arr = Array::Create();
-    const Class::TraitAliasVec& aliases = cls->traitAliases();
-    for (int i = 0, s = aliases.size(); i < s; ++i) {
-      arr.set(StrNR(aliases[i].first), VarNR(aliases[i].second));
-    }
-
-    ret.set(s_trait_aliases, VarNR(arr));
+    ret.set(s_trait_aliases, VarNR(get_trait_alias_info(cls)));
   }
 
   // attributes

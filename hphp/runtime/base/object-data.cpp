@@ -78,7 +78,7 @@ static Array convert_to_array(const ObjectData* obj, HPHP::Class* cls) {
   return tvAsCVarRef(prop).toArray();
 }
 
-static_assert(sizeof(ObjectData) == use_lowptr ? 16 : 32,
+static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 32),
               "Change this only on purpose");
 
 //////////////////////////////////////////////////////////////////////

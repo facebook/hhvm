@@ -146,19 +146,19 @@ inline bool Class::isBuiltin() const {
 }
 
 inline const ClassInfo* Class::clsInfo() const {
-  return m_clsInfo;
+  return m_extra->m_clsInfo;
 }
 
 inline BuiltinCtorFunction Class::instanceCtor() const {
-  return m_instanceCtor;
+  return m_extra->m_instanceCtor;
 }
 
 inline BuiltinDtorFunction Class::instanceDtor() const {
-  return m_instanceDtor;
+  return m_extra->m_instanceDtor;
 }
 
 inline int32_t Class::builtinODTailSize() const {
-  return m_builtinODTailSize;
+  return m_extra->m_builtinODTailSize;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -293,15 +293,19 @@ inline const Class::InterfaceMap& Class::allInterfaces() const {
 }
 
 inline Slot Class::traitsBeginIdx() const {
-  return m_traitsBeginIdx;
+  return m_extra->m_traitsBeginIdx;
 }
 
 inline Slot Class::traitsEndIdx() const   {
-  return m_traitsEndIdx;
+  return m_extra->m_traitsEndIdx;
 }
 
 inline const std::vector<ClassPtr>& Class::usedTraitClasses() const {
-  return m_usedTraits;
+  return m_extra->m_usedTraits;
+}
+
+inline const Class::TraitAliasVec& Class::traitAliases() const {
+  return m_extra->m_traitAliases;
 }
 
 inline const Class::RequirementMap& Class::allRequirements() const {
@@ -336,11 +340,20 @@ inline void Class::setCached() {
 }
 
 inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
-  return m_nativeDataInfo;
+  return m_extra->m_nativeDataInfo;
 }
 
 inline DataType Class::enumBaseTy() const {
   return m_enumBaseTy;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ExtraData.
+
+inline void Class::allocExtraData() {
+  if (!m_extra) {
+    m_extra = new ExtraData();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -125,7 +126,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-static_assert(sizeof(Class) == use_lowptr ? 384 : 408,
+static_assert(sizeof(Class) == (use_lowptr ? 312 : 336),
               "Change this only on purpose");
 
 namespace {
@@ -261,6 +262,11 @@ Class::~Class() {
     Func* meth = getMethod(i);
     if (meth) Func::destroy(meth);
   }
+
+  if (m_extra) {
+    free(m_extra.raw());
+  }
+
   // clean enum cache
   EnumCache::deleteValues(this);
 }
@@ -296,13 +302,19 @@ void Class::releaseRefs() {
   if (okToReleaseParent) {
     m_parent.reset();
   }
+
   m_numDeclInterfaces = 0;
   m_declInterfaces.reset();
-  m_usedTraits.clear();
   m_requirements.clear();
+
+  if (m_extra) {
+    auto xtra = m_extra.raw();
+    xtra->m_usedTraits.clear();
+  }
 }
 
-Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
+Class::Avail Class::avail(Class*& parent,
+                          bool tryAutoload /* = false */) const {
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
       PreClass *ppcls = ourParent->m_preClass.get();
@@ -320,6 +332,7 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       return Avail::False;
     }
   }
+
   for (size_t i = 0; i < m_numDeclInterfaces; i++) {
     auto di = m_declInterfaces.get()[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];
@@ -339,8 +352,9 @@ Class::Avail Class::avail(Class*& parent, bool tryAutoload /*=false*/) const {
       return Avail::False;
     }
   }
-  for (size_t i = 0, num = m_usedTraits.size(); i < num; ++i) {
-    auto usedTrait = m_usedTraits[i].get();
+
+  for (size_t i = 0, n = m_extra->m_usedTraits.size(); i < n; ++i) {
+    auto usedTrait = m_extra->m_usedTraits.at(i).get();
     const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
     PreClass* ptrait = usedTrait->m_preClass.get();
     Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
@@ -843,31 +857,14 @@ DataType Class::clsCnsType(const StringData* cnsName) const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Interfaces and traits.
-
-const Class::TraitAliasVec& Class::traitAliases() {
-  // We keep track of trait aliases in the class only to support
-  // ReflectionClass::getTraitAliases.  So let's load this info from the
-  // preClass only on demand.
-  auto const& preClassRules = m_preClass->traitAliasRules();
-  if (m_traitAliases.size() != preClassRules.size()) {
-    for (auto const& rule : preClassRules) {
-      addTraitAlias(rule.traitName(),
-                    rule.origMethodName(),
-                    rule.newMethodName());
-    }
-  }
-  return m_traitAliases;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // Objects.
 
 size_t Class::declPropOffset(Slot index) const {
   static_assert(std::is_unsigned<Slot>::value,
                 "Slot is supposed to be unsigned");
-  return sizeof(ObjectData) + m_builtinODTailSize + index * sizeof(TypedValue);
+  return sizeof(ObjectData) +
+         m_extra->m_builtinODTailSize +
+         index * sizeof(TypedValue);
 }
 
 
@@ -885,7 +882,7 @@ bool Class::verifyPersistent() const {
       return false;
     }
   }
-  for (auto const& usedTrait : m_usedTraits) {
+  for (auto const& usedTrait : m_extra->m_usedTraits) {
     if (!RDS::isPersistentHandle(usedTrait->classHandle())) {
       return false;
     }
@@ -955,17 +952,19 @@ void Class::setParent() {
 
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {
-    m_instanceCtor = m_preClass->instanceCtor();
-    m_instanceDtor = m_preClass->instanceDtor();
-    m_builtinODTailSize = m_preClass->builtinObjSize() -
-      m_preClass->builtinODOffset();
-    m_clsInfo = ClassInfo::FindSystemClassInterfaceOrTrait(nameStr());
-  } else if (m_parent.get()) {
-    m_instanceCtor = m_parent->m_instanceCtor;
-    m_instanceDtor = m_parent->m_instanceDtor;
-    m_builtinODTailSize = m_parent->m_builtinODTailSize;
-    // XXX: should this be copying over the clsInfo also?  Might be
-    // broken...
+    allocExtraData();
+    m_extra.raw()->m_instanceCtor = m_preClass->instanceCtor();
+    m_extra.raw()->m_instanceDtor = m_preClass->instanceDtor();
+    m_extra.raw()->m_builtinODTailSize = m_preClass->builtinObjSize() -
+                                         m_preClass->builtinODOffset();
+    m_extra.raw()->m_clsInfo =
+      ClassInfo::FindSystemClassInterfaceOrTrait(nameStr());
+  } else if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
+    allocExtraData();
+    m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;
+    m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;
+    m_extra.raw()->m_builtinODTailSize = m_parent->m_extra->m_builtinODTailSize;
+    // XXX: should this be copying over the clsInfo also?  Might be broken...
   }
 }
 
@@ -1101,7 +1100,7 @@ void Class::applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
 Class* Class::findSingleTraitWithMethod(const StringData* methName) {
   // Note: m_methods includes methods from parents / traits recursively
   Class* traitCls = nullptr;
-  for (auto const& t : m_usedTraits) {
+  for (auto const& t : m_extra->m_usedTraits) {
     if (t->m_methods.find(methName)) {
       if (traitCls != nullptr) { // more than one trait contains method
         raise_error("more than one trait contains method '%s'",
@@ -1125,24 +1124,12 @@ void Class::setImportTraitMethodModifiers(TraitMethodList& methList,
   }
 }
 
-// Keep track of trait aliases in the class to support
-// ReflectionClass::getTraitAliases
-void Class::addTraitAlias(const StringData* traitName,
-                          const StringData* origMethName,
-                          const StringData* newMethName) {
-  char buf[traitName->size() + origMethName->size() + 9];
-  sprintf(buf, "%s::%s", (traitName->empty() ? "(null)" : traitName->data()),
-          origMethName->data());
-  const StringData* origName = makeStaticString(buf);
-  m_traitAliases.push_back(std::pair<const StringData*, const StringData*>
-                           (newMethName, origName));
-}
-
 void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
                                 MethodToTraitListMap& importMethToTraitMap) {
   const StringData* traitName    = rule.traitName();
   const StringData* origMethName = rule.origMethodName();
   const StringData* newMethName  = rule.newMethodName();
+  Attr ruleModifiers             = rule.modifiers();
 
   Class* traitCls = nullptr;
   if (traitName->empty()) {
@@ -1155,22 +1142,21 @@ void Class::applyTraitAliasRule(const PreClass::TraitAliasRule& rule,
     raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
   }
 
-  // Save info to support ReflectionClass::getTraitAliases
-  traitName = traitCls->name();
-  addTraitAlias(traitName, origMethName, newMethName);
+  PreClass::TraitAliasRule newRule {
+    traitCls->name(), origMethName, newMethName, ruleModifiers };
+
+  allocExtraData();
+  m_extra.raw()->m_traitAliases.push_back(newRule.asNamePair());
 
   Func* traitMeth = traitCls->lookupMethod(origMethName);
   if (!traitMeth) {
     raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, origMethName->data());
   }
 
-  Attr ruleModifiers;
   if (origMethName == newMethName) {
-    ruleModifiers = rule.modifiers();
     setImportTraitMethodModifiers(importMethToTraitMap[origMethName],
                                   traitCls, ruleModifiers);
   } else {
-    ruleModifiers = rule.modifiers();
     TraitMethod traitMethod(traitCls, traitMeth, ruleModifiers);
     if (!Func::isSpecial(newMethName)) {
       importMethToTraitMap[newMethName].push_back(traitMethod);
@@ -1291,7 +1277,7 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
   MethodToTraitListMap importMethToTraitMap;
 
   // 1. Find all methods to be imported
-  for (auto const& t : m_usedTraits) {
+  for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
     for (Slot i = 0; i < trait->m_methods.size(); ++i) {
       Func* method = trait->getMethod(i);
@@ -1418,14 +1404,17 @@ void checkDeclarationCompat(const PreClass* preClass,
 } // namespace
 
 Class::Class(PreClass* preClass, Class* parent,
-             std::vector<ClassPtr>&& usedTraits, unsigned classVecLen,
-             unsigned funcVecLen)
-  : m_usedTraits(std::move(usedTraits))
-  , m_parent(parent)
+             std::vector<ClassPtr>&& usedTraits,
+             unsigned classVecLen, unsigned funcVecLen)
+  : m_parent(parent)
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(classVecLen)
   , m_funcVecLen(funcVecLen)
 {
+  if (usedTraits.size()) {
+    allocExtraData();
+    m_extra.raw()->m_usedTraits = std::move(usedTraits);
+  }
   setParent();
   setMethods();
   setSpecial();
@@ -1561,11 +1550,11 @@ void Class::setMethods() {
     }
   }
 
-  m_traitsBeginIdx = builder.size();
-  if (m_usedTraits.size()) {
+  auto traitsBeginIdx = builder.size();
+  if (m_extra->m_usedTraits.size()) {
     importTraitMethods(builder);
   }
-  m_traitsEndIdx = builder.size();
+  auto traitsEndIdx = builder.size();
 
   // Make copies of Funcs inherited from the parent class that have
   // static locals
@@ -1601,7 +1590,12 @@ void Class::setMethods() {
   if (Class::MethodCreateHook) {
     Class::MethodCreateHook(this, builder);
     // running MethodCreateHook may add methods to builder
-    m_traitsEndIdx = builder.size();
+    traitsEndIdx = builder.size();
+  }
+
+  if (m_extra) {
+    m_extra.raw()->m_traitsBeginIdx = traitsBeginIdx;
+    m_extra.raw()->m_traitsEndIdx = traitsEndIdx;
   }
 
   // If class is not abstract, check that all abstract methods have been defined
@@ -1688,7 +1682,7 @@ void Class::setConstants() {
       // Constants from interfaces implemented by superclasses can be
       // overridden.
       if (definingClass->attrs() & AttrInterface) {
-        for (auto interface: declInterfaces()) {
+        for (auto interface : declInterfaces()) {
           if (interface->hasConstant(preConst->name())) {
             raise_error("Cannot override previously defined constant "
                         "%s::%s in %s",
@@ -2140,7 +2134,7 @@ void Class::importTraitProps(int idxOffset,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap) {
   if (attrs() & AttrNoExpandTrait) return;
-  for (auto& t : m_usedTraits) {
+  for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
 
     // instance properties
@@ -2165,8 +2159,8 @@ void Class::importTraitProps(int idxOffset,
 
 void Class::addTraitPropInitializers(bool staticProps) {
   if (attrs() & AttrNoExpandTrait) return;
-  for (unsigned t = 0; t < m_usedTraits.size(); t++) {
-    Class* trait = m_usedTraits[t].get();
+  for (auto const& t : m_extra->m_usedTraits) {
+    Class* trait = t.get();
     auto& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
     auto& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
@@ -2275,7 +2269,7 @@ void Class::checkInterfaceMethods() {
  */
 void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
-  for (auto const& trait: m_usedTraits) {
+  for (auto const& trait : m_extra->m_usedTraits) {
     int numIfcs = trait->m_interfaces.size();
 
     for (int i = 0; i < numIfcs; i++) {
@@ -2329,8 +2323,9 @@ void Class::setInterfaces() {
 
   m_numDeclInterfaces = declInterfaces.size();
   m_declInterfaces.reset(new ClassPtr[declInterfaces.size()]);
-  std::copy(begin(declInterfaces), end(declInterfaces),
-    m_declInterfaces.get());
+  std::copy(std::begin(declInterfaces),
+            std::end(declInterfaces),
+            m_declInterfaces.get());
 
   addInterfacesFromUsedTraits(interfacesBuilder);
 
@@ -2354,33 +2349,23 @@ void Class::setRequirements() {
   RequirementMap::Builder reqBuilder;
 
   if (m_parent.get() != nullptr) {
-    auto const& parentReqs = m_parent->allRequirements();
-    for (int i = 0, req_size = parentReqs.size(); i < req_size ; ++i) {
-      auto const& req = parentReqs[i];
+    for (auto const& req : m_parent->allRequirements().range()) {
       reqBuilder.add(req->name(), req);
     }
   }
-
-  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
-    const Class* iface = m_interfaces[i];
-    auto const& ifaceReqs = iface->allRequirements();
-    for (int r = 0, req_size = ifaceReqs.size(); r < req_size ; ++r) {
-      auto const& req = ifaceReqs[r];
+  for (auto const& iface : m_interfaces.range()) {
+    for (auto const& req : iface->allRequirements().range()) {
       reqBuilder.add(req->name(), req);
     }
   }
-
-  for (auto const& ut : m_usedTraits) {
-    auto const usedTrait = ut.get();
-    auto const& traitReqs = usedTrait->allRequirements();
-    for (int i = 0, req_size = traitReqs.size(); i < req_size ; ++i) {
-      auto const& req = traitReqs[i];
+  for (auto const& ut : m_extra->m_usedTraits) {
+    for (auto const& req : ut->allRequirements().range()) {
       reqBuilder.add(req->name(), req);
     }
   }
 
   if (attrs() & AttrTrait) {
-    // Check that requirements are semantically valid
+    // Check that requirements are semantically valid.
     for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
       auto const reqCls = Unit::loadClass(reqName);
@@ -2451,9 +2436,11 @@ void Class::setEnumType() {
 
 void Class::setNativeDataInfo() {
   for (auto cls = this; cls; cls = cls->parent()) {
-    if ((m_nativeDataInfo = cls->preClass()->nativeDataInfo())) {
-      m_instanceCtor = Native::nativeDataInstanceCtor;
-      m_instanceDtor = Native::nativeDataInstanceDtor;
+    if (auto ndi = cls->preClass()->nativeDataInfo()) {
+      allocExtraData();
+      m_extra.raw()->m_nativeDataInfo = ndi;
+      m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
       break;
     }
   }
@@ -2469,9 +2456,9 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
     // "require implements" requirements are expected to be taken care of
     // as part of RepoAuthoritative mode trait flattening.
     assert(!RuntimeOption::RepoAuthoritative);
-    assert(m_usedTraits.size() > 0);
+    assert(m_extra && m_extra->m_usedTraits.size() > 0);
 
-    for (auto const& traitCls : m_usedTraits) {
+    for (auto const& traitCls : m_extra->m_usedTraits) {
       if (traitCls->allRequirements().contains(reqName)) {
         raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
@@ -2486,8 +2473,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
   }
 
   assert(req->is_extends());
-  for (int i = 0, size = m_interfaces.size(); i < size; ++i) {
-    const Class* iface = m_interfaces[i];
+  for (auto const& iface : m_interfaces.range()) {
     if (iface->allRequirements().contains(reqName)) {
       raise_error("Class '%s' required to extend class '%s'"
                   " by interface '%s'",
@@ -2497,7 +2483,7 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
     }
   }
 
-  for (auto const& traitCls : m_usedTraits) {
+  for (auto const& traitCls : m_extra->m_usedTraits) {
     if (traitCls->allRequirements().contains(reqName)) {
       raise_error(Strings::TRAIT_REQ_EXTENDS,
                   m_preClass->name()->data(),
@@ -2513,13 +2499,9 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
 }
 
 void Class::checkRequirementConstraints() const {
+  if (attrs() & (AttrInterface | AttrTrait)) return;
 
-  if (attrs() & (AttrInterface | AttrTrait)) {
-    return; // nothing to do
-  }
-
-  for (int i = 0, req_size = m_requirements.size(); i < req_size ; ++i) {
-    auto const& req = m_requirements[i];
+  for (auto const& req : m_requirements.range()) {
     auto const reqName = req->name();
     if (req->is_implements()) {
       if (UNLIKELY(!ifaceofDirect(reqName))) {

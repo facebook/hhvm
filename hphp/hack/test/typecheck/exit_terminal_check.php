@@ -21,3 +21,11 @@ function main2(): int {
 }
 
 main2();
+
+function main3($a): int {
+  if ($a) {
+    return 1;
+  } else {
+    exit(1);
+  }
+}

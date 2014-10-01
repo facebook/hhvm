@@ -663,6 +663,10 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
   }
 }
 
+const StaticString
+  s_GLOBALS("GLOBALS"),
+  s_this("this");
+
 ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   if (m_class || !m_funcScope ||
       (!m_className.empty() && (!m_classScope || !isPresent()))) {
@@ -752,6 +756,18 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
                 name = prefix + "_" + name;
               }
               if (!is_valid_var_name(name.c_str(), name.size())) continue;
+              if (mode == EXTR_OVERWRITE ||
+                  mode == EXTR_PREFIX_SAME ||
+                  mode == EXTR_PREFIX_INVALID ||
+                  mode == EXTR_IF_EXISTS) {
+                if (name == s_this) {
+                  // this needs extra checks, so skip the optimisation
+                  return ExpressionPtr();
+                }
+                if (name == s_GLOBALS) {
+                  continue;
+                }
+              }
               SimpleVariablePtr var(
                 new SimpleVariable(getScope(), getLocation(), name.data()));
               var->updateSymbol(SimpleVariablePtr());

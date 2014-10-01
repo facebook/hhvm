@@ -154,7 +154,7 @@ class ReflectionClass implements Reflector {
     public function isInstance($object) {}
     public function newInstance($args = null, $_ = null) {}
     public function newInstanceWithoutConstructor() {}
-    public function newInstanceArgs(array $args = null) {}
+    public function newInstanceArgs(array $args = []) {}
     public function getParentClass() {}
     public function isSubclassOf($class) {}
     public function getStaticProperties() {}

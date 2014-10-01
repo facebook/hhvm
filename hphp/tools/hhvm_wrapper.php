@@ -26,7 +26,7 @@ function my_option_map(): OptionInfoMap {
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
-'no-pgo'          => Pair { '',  'Diable PGO' },
+'no-pgo'          => Pair { '',  'Disable PGO' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
                             'Disable global object destructors in CLI mode' },
@@ -36,13 +36,18 @@ function my_option_map(): OptionInfoMap {
 'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
 'no-defaults'     => Pair { '',
                             'Do not use the default wrapper runtime options'},
+'build-root:'     => Pair { '',
+                            'Override the default directory for hhvm and hphp'},
   };
 }
 
-function get_paths(): Map<string,string> {
+function get_paths(OptionMap $opts): Map<string,string> {
   $root = __DIR__.'/../../_bin/hphp';
   if (!is_dir($root)) {
     $root = __DIR__.'/..';
+  }
+  if ($opts->containsKey('build-root')) {
+    $root = realpath($opts['build-root']);
   }
   return Map {
     'hhvm' => "$root/hhvm/hhvm",
@@ -176,11 +181,12 @@ function argv_for_shell(): string {
   return $ret;
 }
 
-function compile_a_repo(bool $unoptimized, bool $echo_command): string {
+function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
+  $echo_command = $opts->containsKey('print-command');
   echo "Compiling with hphp...";
 
   $hphp_out='/tmp/hphp_out'.posix_getpid();
-  $cmd = get_paths()['hphp'].' '.
+  $cmd = get_paths($opts)['hphp'].' '.
     '-v EnableHipHopSyntax=1 '.
     '-v EnableHipHopExperimentalSyntax=1 '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
@@ -218,30 +224,30 @@ function repo_auth_flags(string $flags, string $repo): string {
     '--file ';
 }
 
-function compile_with_hphp(string $flags, bool $print): string {
-  return repo_auth_flags($flags, compile_a_repo(false, $print));
+function compile_with_hphp(string $flags, OptionMap $opts): string {
+  return repo_auth_flags($flags, compile_a_repo(false, $opts));
 }
 
-function create_repo(): void {
-  $repo = compile_a_repo(true, false);
+function create_repo(OptionMap $opts): void {
+  $repo = compile_a_repo(true, $opts);
   system("cp $repo ./hhvm.hhbc");
 }
 
 function run_hhvm(OptionMap $opts): void {
   $flags = determine_flags($opts);
   if ($opts->containsKey('create-repo')) {
-    create_repo();
+    create_repo($opts);
     exit(0);
   }
   if ($opts->containsKey('repo')) {
     $flags = repo_auth_flags($flags, (string) $opts['repo']);
   } else if ($opts->containsKey('compile')) {
-    $flags = compile_with_hphp($flags, $opts->containsKey('print-command'));
+    $flags = compile_with_hphp($flags, $opts);
   }
 
   $pfx = determine_env($opts);
   $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
-  $hhvm = get_paths()['hhvm'];
+  $hhvm = get_paths($opts)['hhvm'];
   $cmd = "$pfx $hhvm $flags ".argv_for_shell();
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";

@@ -1,5 +1,58 @@
 <?hh
 
+$ignore_extensions = array(
+  'bmp',
+  'bz2',
+  'csv',
+  'diff',
+  'exp',
+  'gd2',
+  'gdf',
+  'gif',
+  'gz',
+  'hhbbc',
+  'hhbc',
+  'ico',
+  'iff',
+  'ini',
+  'jp2',
+  'jpc',
+  'jpeg',
+  'jpg',
+  'mo',
+  'mp3',
+  'odt',
+  'otf',
+  'pdf',
+  'phar',
+  'png',
+  'ppt',
+  'psd',
+  'res',
+  'swf',
+  'tar',
+  'tgz',
+  'tif',
+  'tiff',
+  'ttf',
+  'txt',
+  'wbmp',
+  'webp',
+  'wsdl',
+  'xbm',
+  'zip',
+);
+
+$ignore_files = array(
+  '/Zend/tests/multibyte/multibyte_encoding_003.php',
+  '/Zend/tests/multibyte/multibyte_encoding_006.php',
+  '/ext/fileinfo/tests/magic',
+  '/ext/fileinfo/tests/magic',
+  '/ext/fileinfo/tests/test_file_t4156480',
+  '/ext/soap/tests/interop/Round4/GroupI/r4_groupI_xsd_006w.php',
+  '/test/ext/test_zlib_file',
+);
+
 function ends_with($big, $little) {
   return substr($big, -strlen($little)) == $little;
 }
@@ -10,8 +63,18 @@ $files = explode("\n", trim(shell_exec($cmd)));
 
 foreach ($files as $file) {
   $file = realpath($file);
-  $data = file_get_contents($file);
+  foreach ($ignore_files as $ignore_file) {
+    if (strpos($file, $ignore_file) !== false) {
+      continue 2;
+    }
+  }
+  foreach ($ignore_extensions as $ext) {
+    if (ends_with($file, $ext)) {
+      continue 2;
+    }
+  }
 
+  $data = file_get_contents($file);
   if (!$data) {
     print "Can't read $file\n";
     continue;
@@ -20,13 +83,7 @@ foreach ($files as $file) {
   // Carriage returns are the devil
   $data = str_replace("\r", '', $data);
 
-  if (ends_with($file, '.gz') ||
-      ends_with($file, '.zip') ||
-      ends_with($file, '.bz2')
-     ) {
-    continue;
-
-  } else if (ends_with($file, '.expectf')) {
+  if (ends_with($file, '.expectf') || ends_with($file, '.expectf-repo')) {
     // Escape everything with %r
     for ($pos = 0; $pos < strlen($data); $pos++) {
       $char = $data[$pos];
@@ -43,12 +100,13 @@ foreach ($files as $file) {
 
   } else if (ends_with($file, '.php')) {
     if (strpos($data, '__HALT_COMPILER') !== false) {
-      // This file will be binary after this point. Leave in \r.
+      // This file will be binary after this point. Don't touch it.
       continue;
     }
     // Only do the unix2dos thing done above already
 
-  } else if (ends_with($file, '.skipif')) {
+  } else if (ends_with($file, '.skipif') ||
+             ends_with($file, '.ini')) {
     // Only do the unix2dos thing done above already
 
   } else if (ends_with($file, '.expect')) {

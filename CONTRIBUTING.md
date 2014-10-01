@@ -10,11 +10,7 @@ All the open issues tagged [PHP5 incompatibility](https://github.com/facebook/hh
 
 Before changes can be accepted a [Contributor Licensing Agreement](http://code.facebook.com/cla) must be completed. You will be prompted to accept the CLA when you submit your first pull request. If you prefer a hard copy, you can print the [pdf](https://github.com/facebook/hhvm/raw/master/hphp/doc/FB_Individual_CLA.pdf), sign it, scan it, and send it to <cla@fb.com>.
 
-Please add appropriate test cases as you make changes,
-and make sure that they pass locally before submitting your pull request;
-see [here](hphp/test/README.md) for more information.
-All the tests are run via Phabricator,
-however testing locally greatly speeds up the process of accepting your changes.
+Please add appropriate test cases as you make changes, and make sure that they pass locally before submitting your pull request; see [here](hphp/test/README.md) for more information.  All the tests are run via Phabricator, however testing locally greatly speeds up the process of accepting your changes.
 
 ## Quick Links
 

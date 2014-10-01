@@ -99,6 +99,7 @@ static void bt_handler(int sig) {
   // Do it last just in case
 
   Logger::Error("Core dumped: %s", strsignal(sig));
+  Logger::Error("Stack trace in %s", RuntimeOption::StackTraceFilename.c_str());
 
   // Give the debugger a chance to do extra logging if there are any attached
   // debugger clients.

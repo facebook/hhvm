@@ -407,7 +407,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
  */
 class ReflectionFunction extends ReflectionFunctionAbstract {
 
-  /* public readonly string $name; */
+  public string $name; // should be readonly (PHP compatibility)
   private ?Closure $closure = null;
 
   /**
@@ -435,6 +435,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
                 __METHOD__, gettype($name_or_closure))
       );
     }
+
+    $this->name = $this->getName();
   }
 
   <<__Native>>
@@ -461,36 +463,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
         : substr($clsname, 0, $pos + 1).'{closure}';
     }
     return parent::getName();
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
-    // $name is a read-only property
-    if ($name === 'name') {
-      return $this->getName();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
-    // $name is a read-only property
-    if ($name === 'name') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
   }
 
   public function getClosure() {
@@ -623,8 +595,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
 
-  /* public readonly string $name; */
-  /* public readonly string $class; */
+  public string $name; // should be readonly (PHP compatibility)
+  public string $class; // should be readonly (PHP compatibility)
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
@@ -675,37 +647,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       throw new ReflectionException(
         "Method $classname::$name() does not exist");
     }
-  }
-
-  // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __get(string $name): ?string {
-    if ($name === 'name') { // $name is a read-only property
-      return $this->getName();
-    } else if ($name === 'class') { // ... as is $class
-      return $this->getDeclaringClassname();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name, $this->class
-  final public function __set(string $name, $value): void {
-    // $name and $class are read-only properties
-    if ($name === 'name' || $name === 'class') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
+  
+    $this->name = $this->getName();
+    $this->class = $this->getDeclaringClassname();
   }
 
   /**
@@ -1088,7 +1032,7 @@ class ReflectionClass implements Reflector, Serializable {
   const int IS_EXPLICIT_ABSTRACT = 32;
   const int IS_FINAL = 64;
 
-  /* public readonly string $name; */
+  public string $name; // should be readonly (PHP compatibility)
   private $obj = null;
 
   /**
@@ -1110,6 +1054,8 @@ class ReflectionClass implements Reflector, Serializable {
     if (!$this->__init($classname)) {
       throw new ReflectionException("Class $classname does not exist");
     }
+
+    $this->name = $this->getName();
   }
 
   public function serialize() {
@@ -1291,36 +1237,6 @@ class ReflectionClass implements Reflector, Serializable {
 
   <<__Native>>
   public function getName(): string;
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __get(string $name): ?string {
-    // $name is a read-only property
-    if ($name === 'name') {
-      return $this->getName();
-    }
-    $static_cls = get_class($this);
-    if (property_exists($static_cls, $name)) {
-      // __get is called if an existing property is inaccessible
-      trigger_error("Cannot access property $static_cls::$name", E_ERROR);
-    }
-    trigger_error("Undefined property $static_cls::$name", E_NOTICE);
-    return null;
-  }
-
-  // __get and __set are used to maintain read-only $this->name
-  final public function __set(string $name, $value): void {
-    // $name is a read-only property
-    if ($name === 'name') {
-      throw new ReflectionException(
-        'Cannot set read-only property '.__CLASS__.'::'.$name);
-    }
-    if (property_exists(get_class($this), $name)) {
-      // __set is called if the property is inaccessible
-      trigger_error(
-        'Cannot access property '.get_class($this).'::'.$name, E_ERROR);
-    }
-    $this->{$name} = $value;
-  }
 
   <<__Native>>
   private function getParentName(): string;

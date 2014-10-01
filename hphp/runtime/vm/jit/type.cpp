@@ -27,7 +27,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -1004,9 +1004,9 @@ Type buildUnion(Type t, Args... ts) {
 /*
  * Runtime typechecking for IRInstruction operands.
  *
- * This is generated using the table in ir.h.  We instantiate
+ * This is generated using the table in ir-opcode.h.  We instantiate
  * IR_OPCODES after defining all the various source forms to do type
- * assertions according to their form (see ir.h for documentation on
+ * assertions according to their form (see ir-opcode.h for documentation on
  * the notation).  The checkers appear in argument order, so each one
  * increments curSrc, and at the end we can check that the argument
  * count was also correct.

@@ -20,9 +20,9 @@
 #include <algorithm>
 
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 
 namespace HPHP { namespace jit {
 

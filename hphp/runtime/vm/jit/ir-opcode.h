@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_IR_H_
-#define incl_HPHP_VM_IR_H_
+#ifndef incl_HPHP_VM_IR_OPCODE_H_
+#define incl_HPHP_VM_IR_OPCODE_H_
 
 #include <type_traits>
 #include <vector>
@@ -1026,6 +1026,6 @@ template<> struct FormatValue<HPHP::jit::Opcode> {
 };
 }
 
-#include "hphp/runtime/vm/jit/ir-inl.h"
+#include "hphp/runtime/vm/jit/ir-opcode-inl.h"
 
 #endif

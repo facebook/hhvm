@@ -54,7 +54,7 @@ private:
   Vloc dstLoc(unsigned i) const;
   ArgGroup argGroup() const;
 
-  // Autogenerate function declarations for each IR instruction in ir.h
+  // Autogenerate function declarations for each IR instruction in ir-opcode.h
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
   IR_OPCODES
 #undef O

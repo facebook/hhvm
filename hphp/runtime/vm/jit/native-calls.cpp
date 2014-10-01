@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"

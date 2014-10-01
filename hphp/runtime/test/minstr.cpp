@@ -18,7 +18,7 @@
 
 #include "folly/Format.h"
 
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 
 namespace HPHP { namespace jit {
 

@@ -18,7 +18,7 @@
 #define incl_HPHP_VM_IRINSTRUCTION_H_
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 

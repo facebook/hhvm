@@ -1,2 +1,0 @@
-__hot_start = ADDR(.text) ;
-__hot_end = __hot_start + 0x200000 ;

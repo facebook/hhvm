@@ -43,8 +43,13 @@ let canon_key = String.lowercase
 type type_constraint = hint option
 
 type genv = {
+
   (* strict? decl? partial? *)
   in_mode: Ast.mode;
+
+  (* when encountering an unknown name outside of strict, should we
+   * assume that it's implemented by <?php code that we can't see? *)
+  assume_php: bool;
 
   (* are we in the body of a try statement? *)
   in_try: bool;
@@ -87,9 +92,9 @@ type genv = {
 }
 
 (* How to behave when we see an unbound name.  Either we raise an
-   error, or we call a function first and continue if it can resolve
-   the name.  This is used to nest environments when processing
-   closures. *)
+ * error, or we call a function first and continue if it can resolve
+ * the name.  This is used to nest environments when processing
+ * closures. *)
 type unbound_mode =
   | UBMErr
   | UBMFunc of ((Pos.t * string) -> positioned_ident)
@@ -146,6 +151,7 @@ type lenv = {
 
 (* The environment VISIBLE to the outside world. *)
 type env = {
+  iassume_php: bool;
   iclasses: map * canon_names_map;
   ifuns: map;
   itypedefs: map;
@@ -187,6 +193,7 @@ let predef_tests = List.fold_right SSet.add predef_tests_list SSet.empty
 (*****************************************************************************)
 
 let empty = {
+  iassume_php = true;
   iclasses  = SMap.empty, SMap.empty;
   ifuns     = !predef_funs;
   itypedefs = SMap.empty;
@@ -205,32 +212,34 @@ module Env = struct
     has_yield = ref false;
   }
 
-  let empty_global env = {
+  let empty_global nenv = {
     in_mode       = Ast.Mstrict;
+    assume_php    = nenv.iassume_php;
     in_try        = false;
     in_member_fun = false;
     type_params   = SMap.empty;
     type_paraml   = [];
-    classes       = ref env.iclasses;
-    funs          = ref env.ifuns;
-    typedefs      = ref env.itypedefs;
-    gconsts       = ref env.iconsts;
+    classes       = ref nenv.iclasses;
+    funs          = ref nenv.ifuns;
+    typedefs      = ref nenv.itypedefs;
+    gconsts       = ref nenv.iconsts;
     cclass        = None;
     droot         = None;
     namespace     = Namespace_env.empty;
   }
 
-  let make_class_genv genv params c = {
+  let make_class_genv nenv params c = {
     in_mode       =
       (if !Autocomplete.auto_complete then Ast.Mpartial else c.c_mode);
+    assume_php    = nenv.iassume_php;
     in_try        = false;
     in_member_fun = false;
     type_params   = params;
     type_paraml   = List.map (fun (_, x, _) -> x) c.c_tparams;
-    classes       = ref genv.iclasses;
-    funs          = ref genv.ifuns;
-    typedefs      = ref genv.itypedefs;
-    gconsts       = ref genv.iconsts;
+    classes       = ref nenv.iclasses;
+    funs          = ref nenv.ifuns;
+    typedefs      = ref nenv.itypedefs;
+    gconsts       = ref nenv.iconsts;
     cclass        = Some c;
     droot         = Some (Typing_deps.Dep.Class (snd c.c_name));
     namespace     = c.c_namespace;
@@ -242,16 +251,17 @@ module Env = struct
     let env  = genv, lenv in
     env
 
-  let make_typedef_genv genv cstrs tdef = {
+  let make_typedef_genv nenv cstrs tdef = {
     in_mode       = (if !Ide.is_ide_mode then Ast.Mpartial else Ast.Mstrict);
+    assume_php    = nenv.iassume_php;
     in_try        = false;
     in_member_fun = false;
     type_params   = cstrs;
     type_paraml   = List.map (fun (_, x, _) -> x) tdef.t_tparams;
-    classes       = ref genv.iclasses;
-    funs          = ref genv.ifuns;
-    typedefs      = ref genv.itypedefs;
-    gconsts       = ref genv.iconsts;
+    classes       = ref nenv.iclasses;
+    funs          = ref nenv.ifuns;
+    typedefs      = ref nenv.itypedefs;
+    gconsts       = ref nenv.iconsts;
     cclass        = None;
     droot         = None;
     namespace     = tdef.t_namespace;
@@ -263,38 +273,40 @@ module Env = struct
     let env  = genv, lenv in
     env
 
-  let make_fun_genv genv params f = {
+  let make_fun_genv nenv params f = {
     in_mode       = f.f_mode;
+    assume_php    = nenv.iassume_php;
     in_try        = false;
     in_member_fun = false;
     type_params   = params;
     type_paraml   = [];
-    classes       = ref genv.iclasses;
-    funs          = ref genv.ifuns;
-    typedefs      = ref genv.itypedefs;
-    gconsts       = ref genv.iconsts;
+    classes       = ref nenv.iclasses;
+    funs          = ref nenv.ifuns;
+    typedefs      = ref nenv.itypedefs;
+    gconsts       = ref nenv.iconsts;
     cclass        = None;
     droot         = Some (Typing_deps.Dep.Fun (snd f.f_name));
     namespace     = f.f_namespace;
   }
 
-  let make_const_genv genv cst = {
+  let make_const_genv nenv cst = {
     in_mode       = cst.cst_mode;
+    assume_php    = nenv.iassume_php;
     in_try        = false;
     in_member_fun = false;
     type_params   = SMap.empty;
     type_paraml   = [];
-    classes       = ref genv.iclasses;
-    funs          = ref genv.ifuns;
-    typedefs      = ref genv.itypedefs;
-    gconsts       = ref genv.iconsts;
+    classes       = ref nenv.iclasses;
+    funs          = ref nenv.ifuns;
+    typedefs      = ref nenv.itypedefs;
+    gconsts       = ref nenv.iconsts;
     cclass        = None;
     droot         = Some (Typing_deps.Dep.GConst (snd cst.cst_name));
     namespace     = cst.cst_namespace;
   }
 
-  let make_const_env genv cst =
-    let genv = make_const_genv genv cst in
+  let make_const_env nenv cst =
+    let genv = make_const_genv nenv cst in
     let lenv = empty_local () in
     let env  = genv, lenv in
     env
@@ -341,8 +353,11 @@ module Env = struct
           p, canonical
         | None ->
           (match genv.in_mode with
+            | Ast.Mpartial | Ast.Mdecl
+                when genv.assume_php || name = SN.Classes.cUnknown -> ()
             | Ast.Mstrict -> Errors.unbound_name p name
-            | Ast.Mdecl | Ast.Mpartial -> ());
+            | Ast.Mpartial | Ast.Mdecl -> Errors.unbound_name p name
+          );
           p, name
     )
 
@@ -573,11 +588,11 @@ let remove_decls env (funs, classes, typedefs, consts) =
   in
   let itypedefs = SSet.fold SMap.remove typedefs env.itypedefs in
   let iconsts = SSet.fold SMap.remove consts env.iconsts in
-  {
-   ifuns     = ifuns;
-   iclasses  = iclassmap, iclassnames;
-   itypedefs = itypedefs;
-   iconsts   = iconsts;
+  { env with
+    ifuns     = ifuns;
+    iclasses  = iclassmap, iclassnames;
+    itypedefs = itypedefs;
+    iconsts   = iconsts;
   }
 
 (*****************************************************************************)
@@ -641,6 +656,7 @@ let make_env old_env ~funs ~classes ~typedefs ~consts =
   List.iter (Env.new_typedef_id genv) typedefs;
   List.iter (Env.new_global_const_id genv) consts;
   let new_env = {
+    iassume_php = old_env.iassume_php;
     iclasses = !(genv.classes);
     ifuns = !(genv.funs);
     itypedefs = !(genv.typedefs);
@@ -873,7 +889,6 @@ and make_class_id ?(allow_typedef=false) env (p, x as cid) =
     | x when x = "$this" -> N.CIvar (p, N.This)
     | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.lvar env cid))
     | _ -> N.CI (Env.class_name env cid)
-
 
 (*****************************************************************************)
 (* All the methods and static methods of an interface are "implicitely"

@@ -1,3 +1,6 @@
+NEXT
+ - [hack] control whether unseen <?php code is assumed via .hhconfig
+
 Z* 18-Dec-2014
  - Converted objprof extension to use heap parsing
 

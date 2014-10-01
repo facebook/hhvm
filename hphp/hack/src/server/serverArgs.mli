@@ -13,16 +13,17 @@
 (* The main entry point *)
 (*****************************************************************************)
 type options = {
-    check_mode       : bool;
-    json_mode        : bool;
-    root             : Path.path;
-    should_detach    : bool;
-    convert          : Path.path option;
-    load_save_opt    : env_store_action option;
-    version          : bool;
-    start_time       : float;
-    gc_control       : Gc.control; (* configures only the workers *)
-  }
+  check_mode       : bool;
+  json_mode        : bool;
+  root             : Path.path;
+  should_detach    : bool;
+  convert          : Path.path option;
+  load_save_opt    : env_store_action option;
+  version          : bool;
+  start_time       : float;
+  gc_control       : Gc.control; (* configures only the workers *)
+  assume_php       : bool;
+}
 
 and env_store_action =
   | Load of load_info
@@ -51,3 +52,4 @@ val convert       : options -> Path.path option
 val load_save_opt : options -> env_store_action option
 val start_time    : options -> float
 val gc_control    : options -> Gc.control
+val assume_php    : options -> bool

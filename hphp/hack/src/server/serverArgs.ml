@@ -19,17 +19,18 @@ open Utils
 (*****************************************************************************)
 
 type options = {
-    check_mode       : bool;
-    json_mode        : bool;
-    root             : Path.path;
-    should_detach    : bool;
-    convert          : Path.path option;
-    load_save_opt    : env_store_action option;
-    version          : bool;
-    start_time       : float;
-    (* Configures only the workers. Workers can have more relaxed GC configs as
-     * they are short-lived processes *)
-    gc_control       : Gc.control;
+  check_mode       : bool;
+  json_mode        : bool;
+  root             : Path.path;
+  should_detach    : bool;
+  convert          : Path.path option;
+  load_save_opt    : env_store_action option;
+  version          : bool;
+  start_time       : float;
+  (* Configures only the workers. Workers can have more relaxed GC configs as
+   * they are short-lived processes *)
+  gc_control       : Gc.control;
+  assume_php       : bool;
 }
 
 and env_store_action =
@@ -84,6 +85,11 @@ let make_gc_control config =
     | Some s -> int_of_string s
     | None -> ServerConfig.gc_control.Gc.space_overhead in
   { ServerConfig.gc_control with Gc.minor_heap_size; Gc.space_overhead; }
+
+let config_assume_php config =
+  match SMap.get "assume_php" config with
+    | Some s -> bool_of_string s
+    | None -> true
 
 (*****************************************************************************)
 (* The main entry point *)
@@ -155,11 +161,11 @@ let parse_options () =
     version       = !version;
     start_time    = !start_time;
     gc_control    = make_gc_control config;
+    assume_php    = config_assume_php config;
   }
 
 (* useful in testing code *)
-let default_options ~root =
-{
+let default_options ~root = {
   check_mode = false;
   json_mode = false;
   root = Path.mk_path root;
@@ -169,6 +175,7 @@ let default_options ~root =
   version = false;
   start_time = Unix.time ();
   gc_control = ServerConfig.gc_control;
+  assume_php = true;
 }
 
 (* useful for logging *)
@@ -189,3 +196,4 @@ let convert options = options.convert
 let load_save_opt options = options.load_save_opt
 let start_time options = options.start_time
 let gc_control options = options.gc_control
+let assume_php options = options.assume_php

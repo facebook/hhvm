@@ -16,7 +16,7 @@ module Classes = struct
   let cParent = "parent"
   let cStatic = "static"
   let cSelf   = "self"
-  let cUnknown = "*Unknown*"
+  let cUnknown = "\\*Unknown*" (* Used for dynamic classnames, e.g. new $foo(); *)
 
   let cAwaitable = "\\Awaitable"
   let cWaitHandle = "\\WaitHandle"

@@ -1085,6 +1085,8 @@ class ReflectionClass implements Reflector, Serializable {
       $ret .= 'Interface [ ';
     } elseif ($this->isTrait()) {
       $ret .= 'Trait [ ';
+    } elseif ($this->isEnum()) {
+      $ret .= 'Enum [ ';
     } else {
       $ret .= 'Class [ ';
     }
@@ -1104,6 +1106,8 @@ class ReflectionClass implements Reflector, Serializable {
       $ret .= 'interface ';
     } elseif ($this->isTrait()) {
       $ret .= 'trait ';
+    } elseif ($this->isEnum()) {
+      $ret .= 'enum ';
     } else {
       if ($this->isAbstract()) {
         $ret .= 'abstract ';
@@ -1571,13 +1575,20 @@ class ReflectionClass implements Reflector, Serializable {
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
    *
-   * Warning: This function is currently not documented; only its argument
-   * list is available.
+   * Returns whether this is a trait.
    *
-   * @return     bool   Returns TRUE on success or FALSE on failure.
+   * @return     bool   Returns TRUE if this is a trait, FALSE otherwise.
    */
   <<__Native>>
   public function isTrait(): bool;
+
+  /**
+   * Returns whether this ReflectionClass represents an enum.
+   *
+   * @return     bool   Returns TRUE if this is an enum, FALSE otherwise.
+   */
+  <<__Native>>
+  public function isEnum(): bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getmodifiers.php

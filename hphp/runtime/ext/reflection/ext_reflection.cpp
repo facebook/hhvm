@@ -908,6 +908,11 @@ static bool HHVM_METHOD(ReflectionClass, isTrait) {
   return cls->attrs() & AttrTrait;
 }
 
+static bool HHVM_METHOD(ReflectionClass, isEnum) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return cls->attrs() & AttrEnum;
+}
+
 static int HHVM_METHOD(ReflectionClass, getModifiers) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return get_modifiers(cls->attrs(), true);
@@ -1344,6 +1349,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, isInstantiable);
     HHVM_ME(ReflectionClass, isInterface);
     HHVM_ME(ReflectionClass, isTrait);
+    HHVM_ME(ReflectionClass, isEnum);
     HHVM_ME(ReflectionClass, isAbstract);
     HHVM_ME(ReflectionClass, isFinal);
     HHVM_ME(ReflectionClass, getModifiers);

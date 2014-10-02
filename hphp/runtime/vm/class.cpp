@@ -932,16 +932,16 @@ void Class::setParent() {
   // Validate the parent
   if (m_parent.get() != nullptr) {
     Attr attrs = m_parent->attrs();
-    if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait))) {
-      static StringData* sd___MockClass =
-        makeStaticString("__MockClass");
-      if (!(attrs & AttrFinal) ||
+    if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
+      static StringData* sd___MockClass = makeStaticString("__MockClass");
+      if (!(attrs & AttrFinal) || (attrs & AttrEnum) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
           m_preClass->userAttributes().end() ||
           m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
-                    ((attrs & AttrFinal)     ? "final class" :
+                    ((attrs & AttrEnum)      ? "enum" :
+                     (attrs & AttrFinal)     ? "final class" :
                      (attrs & AttrInterface) ? "interface"   : "trait"),
                     m_parent->name()->data());
       }

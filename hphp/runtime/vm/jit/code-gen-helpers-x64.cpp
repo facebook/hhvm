@@ -278,12 +278,6 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     v << loadq{*rdi, rax};
     v << callm{rax[target.vtableOffset()], args};
     return;
-  case CppCall::Kind::IndirectReg:
-    v << callr{target.reg(), args};
-    return;
-  case CppCall::Kind::IndirectVreg:
-    v << callr{target.vreg(), args};
-    return;
   case CppCall::Kind::ArrayVirt: {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
     always_assert_flog(

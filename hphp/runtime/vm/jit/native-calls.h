@@ -22,10 +22,11 @@
 #include <vector>
 #include <algorithm>
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
-#include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 

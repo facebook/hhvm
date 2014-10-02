@@ -51,13 +51,6 @@ TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
     a. Ldr  (rHostCallReg, argReg(0)[0]);
     a. Ldr  (rHostCallReg, rHostCallReg[call.vtableOffset()]);
     break;
-  case CppCall::Kind::IndirectReg:
-  case CppCall::Kind::IndirectVreg:
-    // call indirect currently not implemented. It'll be something like
-    // a.Br(x2a(call.getReg()))
-    not_implemented();
-    always_assert(0);
-    break;
   case CppCall::Kind::ArrayVirt:
   case CppCall::Kind::Destructor:
     not_implemented();
@@ -88,13 +81,6 @@ Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
   case CppCall::Kind::Virtual:
     v << loadq{arg0[0], rHostCall};
     v << loadq{rHostCall[call.vtableOffset()], rHostCall};
-    break;
-  case CppCall::Kind::IndirectReg:
-  case CppCall::Kind::IndirectVreg:
-    // call indirect currently not implemented. It'll be something like
-    // a.Br(x2a(call.getReg()))
-    not_implemented();
-    always_assert(0);
     break;
   case CppCall::Kind::ArrayVirt:
   case CppCall::Kind::Destructor:

@@ -943,24 +943,6 @@ static void shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
       moves[dstReg] = srcReg;
       argDescs[dstReg] = &arg;
     }
-    switch (call.kind()) {
-    case CppCall::Kind::IndirectReg:
-      if (dstReg == call.reg()) {
-        // an indirect call uses an argument register for the func ptr.
-        // Use rAsm2 instead and update the CppCall
-        moves[rAsm2] = call.reg();
-        call.updateCallIndirect(rAsm2);
-      }
-      break;
-    case CppCall::Kind::Direct:
-    case CppCall::Kind::Virtual:
-    case CppCall::Kind::ArrayVirt:
-    case CppCall::Kind::Destructor:
-      break;
-    case CppCall::Kind::IndirectVreg:
-      always_assert(false);
-      break;
-    }
   }
 
   auto const howTo = doVregMoves(v.unit(), moves);

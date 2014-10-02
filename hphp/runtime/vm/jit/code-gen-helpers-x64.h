@@ -21,13 +21,14 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/service-requests-x64.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
 namespace HPHP {

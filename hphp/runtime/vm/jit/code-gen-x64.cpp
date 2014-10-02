@@ -747,29 +747,6 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
     if (shuffleArgsPlanningHelper(moves, argDescs, arg)) {
       continue;
     }
-    switch (call.kind()) {
-    case CppCall::Kind::IndirectReg:
-      if (call.reg() == arg.dstReg()) {
-        // an indirect call uses an argument register for the func ptr.
-        // Use rax instead and update the CppCall
-        moves[reg::rax] = call.reg();
-        call.updateCallIndirect(reg::rax);
-      }
-      break;
-    case CppCall::Kind::IndirectVreg:
-      if (call.vreg() == Vreg{arg.dstReg()}) {
-        // an indirect call uses an argument register for the func ptr.
-        // use Rax instead and update the CppCall
-        moves[reg::rax] = call.vreg();
-        call.updateCallIndirect(reg::rax);
-      }
-      break;
-    case CppCall::Kind::Direct:
-    case CppCall::Kind::Virtual:
-    case CppCall::Kind::ArrayVirt:
-    case CppCall::Kind::Destructor:
-      break;
-    }
   }
   for (size_t i = 0; i < args.numSimdArgs(); ++i) {
     shuffleArgsPlanningHelper(moves, argDescs, args.simdArg(i));

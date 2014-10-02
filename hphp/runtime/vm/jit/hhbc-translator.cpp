@@ -4209,9 +4209,11 @@ void HhbcTranslator::setThisAvailable() {
 template<typename G, typename L>
 void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
                                        int32_t id, G doGuard, L loadAddr) {
-  // We really do want to check for exact equality here: if type is StaticStr
-  // there's nothing for us to do, and we don't support guarding on CountedStr.
-  if (type != Type::Str ||
+  // We really do want to check for exact type equality here: if type
+  // is StaticStr there's nothing for us to do, and we don't support
+  // guarding on CountedStr.
+  if (!RuntimeOption::EvalJitPGOStringSpec ||
+      type != Type::Str ||
       (mcg->tx().mode() != TransKind::Profile &&
        mcg->tx().mode() != TransKind::Optimize)) {
     return doGuard(type);

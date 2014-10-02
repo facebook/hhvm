@@ -478,6 +478,7 @@ public:
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
+  F(bool,     JitPGOStringSpec,        false)                           \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(uint32_t, MaxClonedClosures,       100000)                          \
   F(bool, HHIRValidateRefCount,        debug)                           \

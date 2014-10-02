@@ -131,7 +131,6 @@ struct Interval {
   unsigned findUse(unsigned pos) const;
   bool covers(unsigned pos) const;
   bool usedAt(unsigned pos) const;
-  unsigned nextIntersect(Interval*) const;
   unsigned firstUseAfter(unsigned pos) const;
   unsigned lastUseBefore(unsigned pos) const;
   unsigned firstUse() const;
@@ -351,14 +350,27 @@ Interval* Interval::childAt(unsigned pos) {
   return nullptr;
 }
 
-// return the next intersection point between this and ivl, or kMaxPos
+// Return the next intersection point between current and other, or kMaxPos
 // if they never intersect.
-unsigned Interval::nextIntersect(Interval* ivl) const {
-  assert(!fixed());
-  assert(start() < ivl->end()); // otherwise, update() retired it
-  auto r1 = ranges.begin(), e1 = ranges.end();
-  auto r2 = ivl->ranges.begin() + ivl->findRange(start());
-  auto e2 = ivl->ranges.end();
+unsigned nextIntersect(Interval* current, Interval* other) {
+  assert(!current->fixed());
+  if (!current->parent && !other->parent && !other->fixed()) {
+    // Since other is inactive, it cannot cover current's start, and
+    // current cannot cover other's start, since other started earlier.
+    // Therefore, SSA guarantees no intersection.
+    return kMaxPos;
+  }
+  if (current->end() <= other->start()) {
+    // current ends before other starts.
+    return kMaxPos;
+  }
+  // r1,e1 span all of current
+  auto r1 = current->ranges.begin();
+  auto e1 = current->ranges.end();
+  // r2,e2 span the tail of other that might intersect current
+  auto r2 = other->ranges.begin() + other->findRange(current->start());
+  auto e2 = other->ranges.end();
+  // search for the lowest position covered by current and other
   for (;;) {
     if (r1->start < r2->start) {
       if (r2->start < r1->end) return r2->start;
@@ -1032,8 +1044,10 @@ void Vxls::allocate(Interval* current) {
     free_until[ivl->reg] = 0;
   }
   for (auto ivl : inactive) {
-    auto until = current->nextIntersect(ivl);
-    free_until[ivl->reg] = std::min(until, free_until[ivl->reg]);
+    auto r = ivl->reg;
+    if (free_until[r] == 0) continue;
+    auto until = nextIntersect(current, ivl);
+    free_until[r] = std::min(until, free_until[r]);
   }
   // Try to get a hinted register
   auto hint = findHint(current, free_until, allow);
@@ -1083,14 +1097,16 @@ void Vxls::allocBlocked(Interval* current) {
   }
   // compute next intersection/use of inactive regs to find whats free longest
   for (auto ivl : inactive) {
-    auto intersect_pos = current->nextIntersect(ivl);
+    auto r = ivl->reg;
+    if (blocked[r] == 0) continue;
+    auto intersect_pos = nextIntersect(current, ivl);
     if (intersect_pos == kMaxPos) continue;
     if (ivl->fixed()) {
-      blocked[ivl->reg] = std::min(intersect_pos, blocked[ivl->reg]);
-      used[ivl->reg] = std::min(blocked[ivl->reg], used[ivl->reg]);
+      blocked[r] = std::min(intersect_pos, blocked[r]);
+      used[r] = std::min(blocked[r], used[r]);
     } else {
       auto use_pos = ivl->firstUseAfter(cur_start);
-      used[ivl->reg] = std::min(use_pos, used[ivl->reg]);
+      used[r] = std::min(use_pos, used[r]);
     }
   }
   // choose the best victim register(s) to spill
@@ -1168,7 +1184,7 @@ void Vxls::spillOthers(Interval* current, PhysReg r) {
     if (other->fixed() || r != other->reg) {
       i++; continue;
     }
-    auto intersect = current->nextIntersect(other);
+    auto intersect = nextIntersect(current, other);
     if (intersect >= current->end()) {
       i++; continue;
     }

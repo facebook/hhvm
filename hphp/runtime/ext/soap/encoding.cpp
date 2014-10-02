@@ -1781,7 +1781,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, const Variant& data_, int st
           sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
           sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
         xmlParam = master_to_xml_int(sdlType->encode, data, style, 
-		                             parent, false);
+                                     parent, false);
       } else {
         Variant tmp;
         if (get_zval_property(data, "_", &tmp)) {

@@ -1279,6 +1279,12 @@ method_parameter_list:
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
+    hh_type_opt '&' "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,&$1,$5,$8,true,
+                                                            &$3,&$4); }
+  | non_empty_method_parameter_list ','
+    optional_user_attributes
+    parameter_modifiers
     hh_type_opt "..."
                                       { validate_hh_variadic_variant(
                                           _p, $3, $5, &$4);
@@ -1289,6 +1295,11 @@ method_parameter_list:
     parameter_modifiers
     hh_type_opt "..." T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$3,$5,false,
+                                                            &$1,&$2); }
+  | optional_user_attributes
+    parameter_modifiers
+    hh_type_opt '&' "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,NULL,$3,$6,true,
                                                             &$1,&$2); }
   | optional_user_attributes
     parameter_modifiers
@@ -1350,6 +1361,11 @@ parameter_list:
                                         false,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
+    hh_type_opt '&' "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,&$1,$4,$7,
+                                        true,&$3,NULL); }
+  | non_empty_parameter_list ','
+    optional_user_attributes
     hh_type_opt "..."
                                       { validate_hh_variadic_variant(
                                           _p, $3, $4, NULL);
@@ -1360,6 +1376,10 @@ parameter_list:
     hh_type_opt "..." T_VARIABLE
                                       { _p->onVariadicParam($$,NULL,$2,$4,
                                                             false,&$1,NULL); }
+  | optional_user_attributes
+    hh_type_opt '&' "..." T_VARIABLE
+                                      { _p->onVariadicParam($$,NULL,$2,$5,
+                                                            true,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt "..."
                                       { validate_hh_variadic_variant(

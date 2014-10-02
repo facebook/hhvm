@@ -6,4 +6,4 @@ string(5) "Array"
 string(8) "006b6579"
 string(10) "bar string"
 
-Fatal error: Object of class stdClass could not be converted to string in %s/test/slow/object_property/invalidWith__get.php on line 35
+Catchable fatal error: Object of class stdClass could not be converted to string in %s/test/slow/object_property/invalidWith__get.php on line 35

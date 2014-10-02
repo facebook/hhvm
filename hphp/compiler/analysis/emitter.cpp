@@ -7431,9 +7431,11 @@ void EmitterVisitor::emitClass(Emitter& e,
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
-              cNode->isFinal()     ? AttrFinal     :
-              cNode->isEnum()      ? AttrEnum      :
+              cNode->isEnum()      ? (AttrEnum | AttrFinal) :
                                      AttrNone;
+  if (cNode->isFinal()) {
+    attr = attr | AttrFinal;
+  }
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
         cNode->derivesFromRedeclaring() == Derivation::Normal) {

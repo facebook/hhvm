@@ -590,8 +590,26 @@ class Status {
   }
 
   public static function hasCursorControl() {
-    return !getenv("TRAVIS")
-      && !exec('stty -a | grep -e "\\berase = <undef>"');
+    // for runs on travis-ci.org
+    if (getenv("TRAVIS")) {
+      return false;
+    }
+    $stty = self::getSTTY();
+    if (!$stty) {
+      return false;
+    }
+    return strpos($stty, 'erase = <undef>') === false;
+  }
+
+  public static function getSTTY() {
+    $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
+    $process = proc_open(
+      'stty -a', $descriptorspec, $pipes, null, null,
+      array('suppress_errors' => true)
+    );
+    $stty = stream_get_contents($pipes[1]);
+    proc_close($process);
+    return $stty;
   }
 
   public static function utf8Sanitize($str) {
@@ -1204,7 +1222,7 @@ function msg_loop($num_tests, $queue) {
   $do_progress = Status::getMode() == Status::MODE_NORMAL &&
     Status::hasCursorControl();
   if ($do_progress) {
-    $stty = strtolower(exec('stty -a | grep columns'));
+    $stty = strtolower(Status::getSTTY());
     preg_match_all("/columns ([0-9]+);/", $stty, $output);
     if (!isset($output[1][0])) {
       // because BSD has to be different

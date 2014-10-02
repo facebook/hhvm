@@ -180,15 +180,12 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   auto jmpFlags = instrJmpFlags(i);
 
   if (i.nextOffset == takenOffset) {
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "hottrace");
     // invert the branch
     if (op == OpJmpZ) {
       HHIR_EMIT(JmpNZ, fallthruOffset, jmpFlags);
     } else {
       HHIR_EMIT(JmpZ,  fallthruOffset, jmpFlags);
-    }
-    if (i.nextOffset != takenOffset) {
-      always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
-      HHIR_EMIT(Jmp, takenOffset, jmpFlags);
     }
     return;
   }

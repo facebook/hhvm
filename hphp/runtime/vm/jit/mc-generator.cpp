@@ -262,7 +262,6 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   m_tx.profData()->freeFuncData(funcId);
 
-  assert(start || RuntimeOption::EvalJitGlobalTranslationLimit != (uint64_t)-1);
   return start;
 }
 

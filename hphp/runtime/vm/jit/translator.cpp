@@ -1720,7 +1720,8 @@ Translator::translateRegion(const RegionDesc& region,
       if (i == block->length() - 1) {
         inst.endsRegion = region.isExit(blockId);
         inst.nextIsMerge = nextIsMerge(inst, region);
-        if (instrIsNonCallControlFlow(inst.op()) &&
+        if (ht.genMode() == IRGenMode::Trace &&
+            instrIsNonCallControlFlow(inst.op()) &&
             b < blocks.size() - 1) {
           inst.nextOffset = blocks[b+1]->start().offset();
         }
@@ -1867,9 +1868,7 @@ Translator::translateRegion(const RegionDesc& region,
       // In CFG mode, insert a fallthrough jump at the end of each block.
       if (ht.genMode() == IRGenMode::CFG && i == block->length() - 1) {
         if (instrAllowsFallThru(inst.op())) {
-          auto nextOffset = inst.nextOffset != kInvalidOffset
-            ? inst.nextOffset
-            : inst.offset() + instrLen((Op*)(inst.pc()));
+          auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack
           // after the fallthrough jump, which is just weird.

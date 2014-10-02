@@ -108,6 +108,7 @@ protected:
         error = false;
       } else {
         transport->sendString("Not Found", 404);
+        transport->onSendEnd();
         return;
       }
     } catch (Exception &e) {
@@ -128,6 +129,7 @@ protected:
       } else {
         transport->sendString(RuntimeOption::FatalErrorMessage, 500);
       }
+      transport->onSendEnd();
     }
   }
 

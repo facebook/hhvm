@@ -118,12 +118,22 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   transport->sendRaw((void*)data, len, 200, compressed);
 }
 
-void HttpRequestHandler::handleRequestImpl(Transport *transport) {
+void HttpRequestHandler::setupRequest(Transport* transport) {
   g_context.getCheck();
+  GetAccessLog().onNewRequest();
+}
+
+void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
+  SCOPE_EXIT { always_assert(MM().empty()); };
+  const VirtualHost *vhost = VirtualHost::GetCurrent();
+  GetAccessLog().log(transport, vhost);
+  hphp_session_exit();
+}
+
+void HttpRequestHandler::handleRequest(Transport *transport) {
   ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
-  GetAccessLog().onNewRequest();
   transport->enableCompression();
 
   ServerStatsHelper ssh("all",
@@ -136,11 +146,12 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
   StackTraceNoHeap::AddExtraLogging("URL", transport->getUrl());
 
   // resolve virtual host
-  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
+  const VirtualHost *vhost = VirtualHost::GetCurrent();
   assert(vhost);
   if (vhost->disabled() ||
       vhost->isBlocking(transport->getCommand(), transport->getRemoteHost())) {
     transport->sendString("Not Found", 404);
+    transport->onSendEnd();
     return;
   }
 
@@ -155,6 +166,7 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
 
     if (gettime_diff_us(queueTime, now) > requestTimeoutSeconds * 1000000) {
       transport->sendString("Service Unavailable", 503);
+      transport->onSendEnd();
       m_requestTimedOutOnQueue->addValue(1);
       return;
     }
@@ -190,6 +202,7 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
 
   if (reqURI.forbidden()) {
     transport->sendString("Forbidden", 403);
+    transport->onSendEnd();
     return;
   }
 
@@ -227,7 +240,6 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
       }
       sendStaticContent(transport, data, len, 0, compressed, path, ext);
       ServerStats::LogPage(path, 200);
-      GetAccessLog().log(transport, vhost);
       return;
     }
 
@@ -242,7 +254,6 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
           sendStaticContent(transport, sb.data(), sb.size(), st.st_mtime,
                             false, path, ext);
           ServerStats::LogPage(path, 200);
-          GetAccessLog().log(transport, vhost);
           return;
         }
       }
@@ -256,7 +267,6 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
       if (DynamicContentCache::TheCache.find(key, data, len, compressed)) {
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         ServerStats::LogPage(path, 200);
-        GetAccessLog().log(transport, vhost);
         return;
       }
     }
@@ -320,7 +330,6 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
     transport->onSendEnd();
     hphp_context_exit();
   }
-  GetAccessLog().log(transport, vhost);
   HttpProtocol::ClearRecord(ret, tmpfile);
   /*
    * HPHP logs may need to access data in ServerStats, so we have to
@@ -329,24 +338,10 @@ void HttpRequestHandler::handleRequestImpl(Transport *transport) {
   ServerStats::Reset();
 }
 
-void HttpRequestHandler::handleRequest(Transport *transport) {
-  SCOPE_EXIT { always_assert(MM().empty()); };
-  handleRequestImpl(transport);
-  // Don't flatten handleRequestImpl into handleRequest
-  //
-  // We need hphp_session_exit to run after the destructors for
-  // locals in handleRequestImpl have run, because some of them
-  // free smart-allocated memory.
-  hphp_session_exit();
-}
-
 void HttpRequestHandler::abortRequest(Transport *transport) {
-  SCOPE_EXIT { always_assert(MM().empty()); };
-  GetAccessLog().onNewRequest();
-  const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  assert(vhost);
+  // TODO: t5284137 add some tests for abortRequest
   transport->sendString("Service Unavailable", 503);
-  GetAccessLog().log(transport, vhost);
+  transport->onSendEnd();
 }
 
 bool HttpRequestHandler::executePHPRequest(Transport *transport,

@@ -107,9 +107,9 @@ public:
    * Convenience wrapper around {setup,handle,teardown}Request().
    */
   void run(Transport* transport) {
+    SCOPE_EXIT { teardownRequest(transport); };
     setupRequest(transport);
     handleRequest(transport);
-    teardownRequest(transport);
   }
 
   int getDefaultTimeout() const { return m_timeout; }

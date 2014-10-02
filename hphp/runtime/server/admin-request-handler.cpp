@@ -122,10 +122,17 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 extern unsigned low_arena;
 #endif
 
-void AdminRequestHandler::handleRequest(Transport *transport) {
+void AdminRequestHandler::setupRequest(Transport* transport) {
   g_context.getCheck();
-  SCOPE_EXIT { hphp_memory_cleanup(); };
   GetAccessLog().onNewRequest();
+}
+
+void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {
+  SCOPE_EXIT { hphp_memory_cleanup(); };
+  GetAccessLog().log(transport, nullptr);
+}
+
+void AdminRequestHandler::handleRequest(Transport *transport) {
   transport->addHeader("Content-Type", "text/plain");
   std::string cmd = transport->getCommand();
 
@@ -592,16 +599,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);
   transport->onSendEnd();
-  GetAccessLog().log(transport, nullptr);
 }
 
 void AdminRequestHandler::abortRequest(Transport *transport) {
   g_context.getCheck();
   SCOPE_EXIT { hphp_memory_cleanup(); };
-
-  GetAccessLog().onNewRequest();
   transport->sendString("Service Unavailable", 503);
-  GetAccessLog().log(transport, nullptr);
+  transport->onSendEnd();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

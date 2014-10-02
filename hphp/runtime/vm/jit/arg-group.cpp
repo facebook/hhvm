@@ -21,6 +21,17 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
+const char* destTypeName(DestType dt) {
+  static const char* names[] = {
+    "None",
+    "SSA",
+    "TV",
+    "Dbl",
+    "SIMD",
+  };
+  return names[static_cast<size_t>(dt)];
+}
+
 ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
   if (tmp->isConst()) {
     // tmp is a constant

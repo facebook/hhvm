@@ -482,7 +482,7 @@ void Vgen::emit(tbcc& i) {
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
-  if (m_unit.hasVrs()) {
+  if (m_unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);
     removeDeadCode(m_unit);
     allocateRegisters(m_unit, abi);

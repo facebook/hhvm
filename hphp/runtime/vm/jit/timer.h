@@ -45,6 +45,7 @@
   TIMER_NAME(vasm_xls)                          \
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_gen)                          \
+  TIMER_NAME(vasm_lower)
 
 namespace HPHP { namespace jit {
 

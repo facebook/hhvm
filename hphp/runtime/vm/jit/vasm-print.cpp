@@ -66,6 +66,19 @@ struct FormatVisitor {
     str << sep() << getNativeFunctionName(addr);
   }
   void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
+  void imm(const CppCall& cppcall) {
+    switch (cppcall.kind()) {
+    default:
+      str << sep() << "<unknown>";
+      break;
+    case CppCall::Kind::Direct:
+      return imm((TCA)cppcall.address());
+    case CppCall::Kind::Virtual:
+      str << sep() << folly::format("<virtual at 0x{:08x}>",
+                                    cppcall.vtableOffset());
+      break;
+    }
+  }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
   void imm(SrcKey k) { str << sep() << showShort(k); }
   void imm(Fixup fix) {
@@ -85,6 +98,9 @@ struct FormatVisitor {
   }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
+  }
+  void imm(DestType dt) {
+    str << sep() << destTypeName(dt);
   }
 
   template<class R> void across(R r) { print(r); }
@@ -110,7 +126,22 @@ struct FormatVisitor {
   }
 
   void print(Vtuple t) {
-    for (auto r : unit.tuples[t]) print(r);
+    print(unit.tuples[t]);
+  }
+
+  void print(const VregList& regs) {
+    str << sep() << '{';
+    comma = false;
+    for (auto r : regs) print(r);
+    comma = true;
+    str << '}';
+  }
+
+  void print(VcallArgsId id) {
+    auto& args = unit.vcallArgs[id];
+    print(args.args);
+    print(args.simdArgs);
+    print(args.stkArgs);
   }
 
   void print(RegSet regs) {

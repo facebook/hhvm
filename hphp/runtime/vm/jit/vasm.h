@@ -18,6 +18,8 @@
 #define incl_HPHP_JIT_VASM_H_
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/util/safe-cast.h"
+
 #include <folly/Range.h>
 #include <iosfwd>
 
@@ -31,8 +33,8 @@ struct Abi;
 // Vlabel wraps a block number
 struct Vlabel {
   Vlabel() : n(0xffffffff) {}
-  explicit Vlabel(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
+  explicit Vlabel(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
 private:
   unsigned n; // index in Vunit::blocks
 };
@@ -40,7 +42,7 @@ private:
 // Vpoint is a handle to record or retreive a code address
 struct Vpoint {
   Vpoint(){}
-  explicit Vpoint(size_t n) : n(static_cast<unsigned>(n)) {}
+  explicit Vpoint(size_t n) : n(safe_cast<unsigned>(n)) {}
   /* implicit */ operator size_t() const { return n; }
 private:
   unsigned n; // index in Vmeta::points
@@ -49,10 +51,18 @@ private:
 // Vtuple is an index to a tuple in Vunit::tuples
 struct Vtuple {
   Vtuple() : n(0xffffffff) {}
-  explicit Vtuple(size_t n) : n(static_cast<unsigned>(n)) {}
-  /* implicit */ operator size_t() const { return n; }
+  explicit Vtuple(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
 private:
-  unsigned n; // index in Vunit::reglists
+  unsigned n; // index in Vunit::tuples
+};
+
+// VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs
+struct VcallArgsId {
+  explicit VcallArgsId(size_t n) : n(safe_cast<unsigned>(n)) {}
+  /* implicit */ operator size_t() const { assert(n != 0xffffffff); return n; }
+private:
+  unsigned n; // index in Vunit::vcallArgs
 };
 
 enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };

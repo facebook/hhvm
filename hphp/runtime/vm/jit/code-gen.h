@@ -37,6 +37,11 @@ enum class SyncOptions {
 
 typedef StateVector<IRInstruction, RegSet> LiveRegs;
 
+/*
+ * CatchInfo is used to pass information from call instructions to the catch
+ * block they're linked with. vasm has made most of this unnecessary; afterCall
+ * and savedRegs are only used in the non-vasm ARM backend.
+ */
 struct CatchInfo {
   /* rspOffset is the number of bytes pushed on the C++ stack for the call,
    * for functions with stack arguments. The catch trace will adjust rsp

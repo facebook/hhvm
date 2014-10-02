@@ -17,19 +17,22 @@
 #ifndef incl_HPHP_JIT_VASM_X64_H_
 #define incl_HPHP_JIT_VASM_X64_H_
 
+#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/vasm.h"
-#include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
-#include <folly/Range.h>
+
+#include <bitset>
 #include <boost/dynamic_bitset.hpp>
+#include <folly/Range.h>
 
 namespace HPHP { namespace jit {
 struct IRInstruction;
@@ -37,6 +40,16 @@ struct AsmInfo;
 }}
 
 namespace HPHP { namespace jit {
+
+// XXX: This should go back to arg-group.h as part of work on t5297892
+enum class DestType : uint8_t {
+  None,  // return void (no valid registers)
+  SSA,   // return a single-register value
+  TV,    // return a TypedValue packed in two registers
+  Dbl,   // return scalar double in a single FP register
+  SIMD,  // return a TypedValue in one SIMD register
+};
+const char* destTypeName(DestType);
 
 struct Vptr;
 struct Vscaled;
@@ -377,7 +390,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(nop, Inone, Un, Dn)\
-  O(nocatch, Inone, Un, Dn)\
+  O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
   O(point, I(p), Un, Dn)\
@@ -386,6 +399,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(store, Inone, U(s) U(d), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
+  O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
+  O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -528,6 +543,10 @@ struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
 struct bindjcc1 { ConditionCode cc; VregSF sf; Offset targets[2]; };
 struct bindjcc2 { ConditionCode cc; VregSF sf; Offset target; };
 struct bindjmp { SrcKey target; TransFlags trflags; };
+struct vcall { CppCall call; VcallArgsId args; Vtuple d;
+               Fixup fixup; DestType destType; bool nothrow; };
+struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
+                 Fixup fixup; DestType destType; bool smashable;};
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; };
 struct copy { Vreg s, d; };
@@ -545,7 +564,7 @@ struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
 struct nop {};
-struct nocatch {};
+struct nothrow {};
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct point { Vpoint p; };
@@ -708,17 +727,33 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 
 struct Vinstr {
 #define O(name, imms, uses, defs) name,
-  enum Opcode { X64_OPCODES };
+  enum Opcode : uint8_t { X64_OPCODES };
 #undef O
 
-#define O(name, imms, uses, defs) \
+  Vinstr()
+    : op(ud2)
+  {}
+
+#define O(name, imms, uses, defs)                               \
   /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
   X64_OPCODES
 #undef O
 
   Opcode op;
+
+  /*
+   * Instruction position, currently used only in vasm-xls.
+   */
   unsigned pos;
+
+  /*
+   * If present, the IRInstruction this Vinstr was originally created from.
+   */
   const IRInstruction* origin{nullptr};
+
+  /*
+   * A union of all possible instructions, descriminated by the op field.
+   */
 #define O(name, imms, uses, defs) jit::name name##_;
   union { X64_OPCODES };
 #undef O
@@ -732,11 +767,42 @@ struct Vblock {
 
 typedef jit::vector<Vreg> VregList;
 
-// all the assets that make up a vasm compilation unit
+/*
+ * Source operands for vcall/vinvoke instructions, packed into a struct for
+ * convenience and to keep the instructions compact.
+ */
+struct VcallArgs {
+  VregList args, simdArgs, stkArgs;
+};
+
+/*
+ * A Vunit contains all the assets that make up a vasm compilation unit. It is
+ * responsible for allocating new blocks, Vregs, and tuples.
+ */
 struct Vunit {
+  /*
+   * Create a new block in the given area, returning its id.
+   */
   Vlabel makeBlock(AreaIndex area);
+
+  /*
+   * Create a block intended to be used temporarily, as part of modifying
+   * existing code. Although not necessary for correctness, the block may be
+   * freed with freeScratchBlock when finished.
+   */
+  Vlabel makeScratchBlock();
+
+  /*
+   * Free a scratch block when finished with it. There must be no references to
+   * this block in reachable code.
+   */
+  void freeScratchBlock(Vlabel);
+
   Vreg makeReg() { return Vreg{next_vr++}; }
+  Vtuple makeTuple(VregList&& regs);
   Vtuple makeTuple(const VregList& regs);
+  VcallArgsId makeVcallArgs(VcallArgs&& args);
+
   Vreg makeConst(uint64_t);
   Vreg makeConst(double);
   Vreg makeConst(const void* p) { return makeConst(uint64_t(p)); }
@@ -745,12 +811,20 @@ struct Vunit {
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
-  bool hasVrs() const { return next_vr > Vreg::V0; }
+
+  /*
+   * Returns true iff this Vunit needs register allocation before it can be
+   * emitted, either because it uses virtual registers or contains instructions
+   * that must be lowered by xls.
+   */
+  bool needsRegAlloc() const;
+
   unsigned next_vr{Vreg::V0};
   jit::vector<Vblock> blocks;
   jit::vector<Vlabel> roots; // entry points
   jit::hash_map<uint64_t,Vreg> cpool;
   jit::vector<VregList> tuples;
+  jit::vector<VcallArgs> vcallArgs;
 };
 
 // writer stream to add instructions to a block
@@ -796,9 +870,12 @@ struct Vout {
   Vtuple makeTuple(const VregList& regs) const {
     return m_unit.makeTuple(regs);
   }
-
-private:
-  void add(Vinstr&);
+  Vtuple makeTuple(VregList&& regs) const {
+    return m_unit.makeTuple(std::move(regs));
+  }
+  VcallArgsId makeVcallArgs(VcallArgs&& args) const {
+    return m_unit.makeVcallArgs(std::move(args));
+  }
 
 private:
   Vmeta* const m_meta;
@@ -871,6 +948,12 @@ template<class F> void visit(const Vunit&, Vptr p, F f) {
 }
 template<class F> void visit(const Vunit& unit, Vtuple t, F f) {
   for (auto r : unit.tuples[t]) f(r);
+}
+template<class F> void visit(const Vunit& unit, VcallArgsId a, F f) {
+  auto& args = unit.vcallArgs[a];
+  for (auto r : args.args) f(r);
+  for (auto r : args.simdArgs) f(r);
+  for (auto r : args.stkArgs) f(r);
 }
 template<class F> void visit(const Vunit& unit, RegSet regs, F f) {
   regs.forEach([&](Vreg r) { f(r); });

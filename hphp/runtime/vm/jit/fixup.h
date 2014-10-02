@@ -112,6 +112,8 @@ struct Fixup {
 
   Fixup() {}
 
+  bool isValid() const { return pcOffset >= 0 && spOffset >= 0; }
+
   int32_t pcOffset{-1};
   int32_t spOffset{-1};
 };

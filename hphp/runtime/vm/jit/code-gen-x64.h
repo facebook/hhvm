@@ -184,7 +184,7 @@ private:
   const Class* curClass() const { return curFunc()->cls(); }
   const Unit* curUnit() const { return curFunc()->unit(); }
   bool resumed() const { return m_curInst->marker().resumed(); };
-  Fixup curFixup() const;
+  Fixup makeFixup(SyncOptions sync = SyncOptions::kSyncPoint);
   void recordSyncPoint(Vout& v, SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
   int iterOffset(uint32_t id);

@@ -251,7 +251,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
 // operations are supported.
 #define SUPPORTED_OPS \
 O(addqi) \
-O(call) \
+O(vcall) \
 O(end) \
 O(cmpq) \
 O(cmpqim) \
@@ -266,7 +266,6 @@ O(lea) \
 O(load) \
 O(loadq) \
 O(movq) \
-O(nocatch) \
 O(pushm) \
 O(resume) \
 O(ret) \
@@ -277,7 +276,7 @@ O(testlim) \
 O(ud2) \
 O(unwind)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
-  SUPPORTED_OPS
+        SUPPORTED_OPS
 #undef O
 #undef SUPPORTED_OPS
 
@@ -301,12 +300,15 @@ void LLVMEmitter::emit(const end& inst) {
 }
 
 void LLVMEmitter::emit(const call& inst) {
-  // Only calls with no arguments and no return value are currently supported.
+  always_assert(false);
+}
+
+void LLVMEmitter::emit(const vcall& inst) {
   auto fnType = llvm::PointerType::get(
     llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
     0
   );
-  auto fn = m_irb.CreateIntToPtr(cns(uintptr_t(inst.target)), fnType);
+  auto fn = m_irb.CreateIntToPtr(cns(uintptr_t(inst.call.address())), fnType);
   m_irb.CreateCall(fn);
 }
 
@@ -371,9 +373,6 @@ void LLVMEmitter::emit(const loadq& inst) {
 }
 
 void LLVMEmitter::emit(const movq& inst) {
-}
-
-void LLVMEmitter::emit(const nocatch& inst) {
 }
 
 void LLVMEmitter::emit(const pushm& inst) {

@@ -31,14 +31,6 @@ struct CallInfo;
 
 //////////////////////////////////////////////////////////////////////
 
-enum class DestType : unsigned {
-  None,  // return void (no valid registers)
-  SSA,   // return a single-register value
-  TV,    // return a TypedValue packed in two registers
-  Dbl,   // return scalar double in a single FP register
-  SIMD,  // return a TypedValue in one SIMD register
-};
-
 /*
  * CallDest is the destination specification for a cgCallHelper
  * invocation.
@@ -65,7 +57,6 @@ public:
              // mangling before call depending on TypedValue's layout.
     Imm,     // 64-bit Immediate
     Addr,    // Address (register plus 32-bit displacement)
-    None,    // Nothing: register will contain garbage
   };
 
   PhysReg dstReg() const { return m_dstReg; }
@@ -229,11 +220,6 @@ private:
    */
   ArgGroup& type(int i) {
     push_arg(ArgDesc(m_inst->src(i), m_locs[i], false));
-    return *this;
-  }
-
-  ArgGroup& none() {
-    push_arg(ArgDesc(ArgDesc::Kind::None));
     return *this;
   }
 

@@ -707,6 +707,9 @@ struct UseVisitor {
   void use(Vtuple uses) {
     for (auto r : m_tuples[uses]) use(r);
   }
+  void use(VcallArgsId id) {
+    always_assert(false && "vcall unsupported in vxls");
+  }
   void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
     auto& uses = m_tuples[src_tuple];
     auto& hints = m_tuples[hint_tuple];
@@ -721,12 +724,6 @@ struct UseVisitor {
     regs.forEach([&](Vreg r) { across(r); });
   }
 
-  // An operand marked as UA means use-after or use-across. Mark it live
-  // across the instruction so its lifetime conflicts with the destination,
-  // which ensures it will be assigned a different register than the
-  // destination. This isn't necessary if *both* operands of a binary
-  // instruction are the same virtual register, but is still correct.
-  template<class R> void across(R r) { use(r, r.kind, m_range.end + 1); }
   template<class R> void use(R r) { use(r, r.kind, m_range.end); }
   template<class S, class H> void useHint(S src, H hint) {
     use(src, src.kind, m_range.end, hint);
@@ -740,6 +737,13 @@ struct UseVisitor {
       ivl->uses.push_back({kind, m_range.end, hint});
     }
   }
+
+  // An operand marked as UA means use-after or use-across. Mark it live
+  // across the instruction so its lifetime conflicts with the destination,
+  // which ensures it will be assigned a different register than the
+  // destination. This isn't necessary if *both* operands of a binary
+  // instruction are the same virtual register, but is still correct.
+  template<class R> void across(R r) { use(r, r.kind, m_range.end + 1); }
 private:
   jit::vector<Interval*>& m_intervals;
   jit::vector<VregList>& m_tuples;
@@ -792,6 +796,9 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
       defs = (m_abi.all() - m_abi.calleeSaved) |
              RegSet(PhysReg(arm::rHostCallReg));
       break;
+    case Vinstr::vcall:
+    case Vinstr::vinvoke:
+      always_assert(false && "Unsupported instruction in vxls");
     default:
       break;
   }
@@ -1199,6 +1206,7 @@ struct Renamer {
   template<class T> void imm(const T& r) {}
   template<class R> void def(R& r) { rename(r); }
   template<class D, class H> void defHint(D& dst, H) { rename(dst); }
+  void use(VcallArgsId) { always_assert(false && "vcall unsupported in vxls"); }
   template<class R> void use(R& r) { rename(r); }
   template<class S, class H> void useHint(S& src, H) { rename(src); }
   template<class R> void across(R& r) { rename(r); }
@@ -1692,7 +1700,7 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::jmp: return {&inst.jmp_.target, 1};
     case Vinstr::phijmp: return {&inst.phijmp_.target, 1};
     case Vinstr::unwind: return {inst.unwind_.targets, 2};
-    // arm
+    case Vinstr::vinvoke: return {inst.vinvoke_.targets, 2};
     case Vinstr::cbcc: return {inst.cbcc_.targets, 2};
     case Vinstr::tbcc: return {inst.tbcc_.targets, 2};
     case Vinstr::hcunwind: return {inst.hcunwind_.targets, 2};

@@ -295,9 +295,6 @@ let try_with_channel oc f1 f2 =
     close_out oc;
     f2 e
 
-let pipe (x : 'a)  (f : 'a -> 'b) : 'b = f x
-let (|>) = pipe
-
 let rec filter_some = function
   | [] -> []
   | None :: l -> filter_some l

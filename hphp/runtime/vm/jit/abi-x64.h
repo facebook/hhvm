@@ -152,6 +152,9 @@ const RegSet kCalleeSaved = RegSet()
   | kXMMCalleeSaved
   ;
 
+const RegSet kSF = RegSet(RegSF{0})
+  ;
+
 const RegSet kXMMRegs = RegSet()
   | kXMMUnreserved
   | kXMMReserved
@@ -251,7 +254,8 @@ UNUSED const Abi abi {
   kGPReserved,    // gpReserved
   kXMMUnreserved, // simdUnreserved
   kXMMReserved,   // simdReserved
-  kCalleeSaved    // calleeSaved
+  kCalleeSaved,   // calleeSaved
+  kSF             // sf
 };
 
 //////////////////////////////////////////////////////////////////////

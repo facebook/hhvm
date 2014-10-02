@@ -147,16 +147,16 @@ private:
   void emit(unwind& i);
 
   // instructions
-  void emit(andb& i) { commute(i); a->andb(i.s0, i.d); }
+  void emit(andb& i) { commuteSF(i); a->andb(i.s0, i.d); }
   void emit(andbi& i) { binary(i); a->andb(i.s0, i.d); }
   void emit(andbim& i) { a->andb(i.s, i.m); }
-  void emit(andl& i) { commute(i); a->andl(i.s0, i.d); }
+  void emit(andl& i) { commuteSF(i); a->andl(i.s0, i.d); }
   void emit(andli& i) { binary(i); a->andl(i.s0, i.d); }
-  void emit(andq& i) { commute(i); a->andq(i.s0, i.d); }
+  void emit(andq& i) { commuteSF(i); a->andq(i.s0, i.d); }
   void emit(andqi& i) { binary(i); a->andq(i.s0, i.d); }
-  void emit(addlm& i) { a->addl(i.s0, i.m); }
-  void emit(addq& i) { commute(i); a->addq(i.s0, i.d); }
   void emit(addli& i) { binary(i); a->addl(i.s0, i.d); }
+  void emit(addlm& i) { a->addl(i.s0, i.m); }
+  void emit(addq& i) { commuteSF(i); a->addq(i.s0, i.d); }
   void emit(addqi& i) { binary(i); a->addq(i.s0, i.d); }
   void emit(addsd& i) { commute(i); a->addsd(i.s0, i.d); }
   void emit(call i);
@@ -185,14 +185,14 @@ private:
   void emit(decq& i) { unary(i); a->decq(i.d); }
   void emit(decqm& i) { a->decq(i.m); }
   void emit(divsd& i) { noncommute(i); a->divsd(i.s0, i.d); }
-  void emit(imul& i) { commute(i); a->imul(i.s0, i.d); }
-  void emit(incwm& i) { a->incw(i.m); }
+  void emit(imul& i) { commuteSF(i); a->imul(i.s0, i.d); }
   void emit(idiv& i) { a->idiv(i.s); }
   void emit(incl& i) { unary(i); a->incl(i.d); }
   void emit(inclm& i) { a->incl(i.m); }
   void emit(incq& i) { unary(i); a->incq(i.d); }
   void emit(incqm& i) { a->incq(i.m); }
   void emit(incqmlock& i) { a->lock(); a->incq(i.m); }
+  void emit(incwm& i) { a->incw(i.m); }
   void emit(jcc& i);
   void emit(jmp i);
   void emit(jmpr& i) { a->jmp(i.target); }
@@ -217,7 +217,7 @@ private:
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(not& i) { unary(i); a->not(i.d); }
-  void emit(orq& i) { commute(i); a->orq(i.s0, i.d); }
+  void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }
   void emit(pop& i) { a->pop(i.d); }
@@ -229,7 +229,6 @@ private:
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
-  void emit(rorqi& i) { binary(i); a->rorq(i.s0, i.d); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
   void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
@@ -267,9 +266,9 @@ private:
   void emit(ucomisd& i) { a->ucomisd(i.s0, i.s1); }
   void emit(ud2& i) { a->ud2(); }
   void emit(unpcklpd& i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
-  void emit(xorb& i) { commute(i); a->xorb(i.s0, i.d); }
+  void emit(xorb& i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi& i) { binary(i); a->xorb(i.s0, i.d); }
-  void emit(xorq& i) { commute(i); a->xorq(i.s0, i.d); }
+  void emit(xorq& i) { commuteSF(i); a->xorq(i.s0, i.d); }
   void emit(xorqi& i) { binary(i); a->xorq(i.s0, i.d); }
 
   // helpers
@@ -286,6 +285,7 @@ private:
   CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
+  template<class Inst> void commuteSF(Inst&);
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
 
@@ -316,6 +316,15 @@ private:
 template<class Inst> void Vgen::noncommute(Inst& i) {
   assert(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
+}
+
+// prepare a binary op that is commutative. Swap operands if the dest is s0.
+template<class Inst> void Vgen::commuteSF(Inst& i) {
+  if (i.s1 != i.d && i.s0 == i.d) {
+    i = Inst{i.s1, i.s0, i.d, i.sf};
+  } else {
+    binary(i);
+  }
 }
 
 // prepare a binary op that is commutative. Swap operands if the dest is s0.
@@ -357,7 +366,7 @@ void Vgen::emit(cloadq& i) {
 void Vgen::emit(cmovq i) {
   if (i.f != i.d && i.t == i.d) {
     // negate the condition and swap t/f operands so we dont clobber i.t
-    i = {ccNegate(i.cc), i.t, i.f, i.d};
+    i = {ccNegate(i.cc), i.sf, i.t, i.f, i.d};
   } else {
     prep(i.f, i.d);
   }
@@ -384,6 +393,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // GP => GP
       a->movq(i.s, i.d);
     } else {                             // GP => XMM
+      assert(i.d.isSIMD());
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
       a->movq_rx(i.s, i.d);
@@ -392,6 +402,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // XMM => GP
       a->movq_xr(i.s, i.d);
     } else {                             // XMM => XMM
+      assert(i.d.isSIMD());
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
       a->movdqa(i.s, i.d);
@@ -479,7 +490,7 @@ void Vgen::emit(callstub& i) {
 }
 
 void Vgen::emit(fallback& i) {
-  emit(fallbackcc{CC_None, i.dest, i.trflags});
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
 }
 
 void Vgen::emit(fallbackcc i) {
@@ -531,6 +542,7 @@ void Vgen::emit(load& i) {
   if (i.d.isGP()) {
     a->loadq(mref, i.d);
   } else {
+    assert(i.d.isSIMD());
     a->movsd(mref, i.d);
   }
 }
@@ -569,6 +581,7 @@ void Vgen::emit(store& i) {
   if (i.s.isGP()) {
     a->storeq(i.s, i.d);
   } else {
+    assert(i.s.isSIMD());
     a->movsd(i.s, i.d);
   }
 }
@@ -752,7 +765,7 @@ void Vgen::emit(cvtsi2sdm& i) {
 void Vgen::emit(jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
-      i = jcc{ccNegate(i.cc), {i.targets[1], i.targets[0]}};
+      i = jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}};
     }
     auto taken = i.targets[1];
     jccs.push_back({a->frontier(), taken});
@@ -836,7 +849,8 @@ UNUSED const Abi vauto_abi {
   .gpReserved = x64::abi.gp() - vauto_gp,
   .simdUnreserved = vauto_simd,
   .simdReserved = x64::abi.simd() - vauto_simd,
-  .calleeSaved = x64::abi.calleeSaved
+  .calleeSaved = x64::abi.calleeSaved,
+  .sf = x64::abi.sf
 };
 
 Vauto::~Vauto() {

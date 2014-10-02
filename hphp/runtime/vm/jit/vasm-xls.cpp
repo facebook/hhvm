@@ -357,7 +357,7 @@ unsigned Interval::firstUse() const {
 }
 
 // Split this interval at pos and return the rest. Pos must be a location
-// that ensures both shorter intervals are nonempty. If keep_uses is set,Uses
+// that ensures both shorter intervals are nonempty. If keep_uses is set, Uses
 // exactly at the end of the first interval will stay with the first part.
 Interval* Interval::split(unsigned pos, bool keep_uses) {
   assert(pos > start() && pos < end()); // both parts will be non-empty
@@ -914,11 +914,13 @@ PhysReg find(const PosVec& posns) {
 // Constrain the allowable registers for ivl by inspecting uses, and
 // return the latest position for which that set is valid.
 unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
+  auto const any = m_abi.unreserved() - m_abi.sf; // Any but not flags.
   allow = m_abi.unreserved();
   for (auto& u : ivl->uses) {
     auto need = u.kind == VregKind::Simd ? m_abi.simdUnreserved :
                 u.kind == VregKind::Gpr ? m_abi.gpUnreserved :
-                m_abi.unreserved();
+                u.kind == VregKind::Sf ? m_abi.sf :
+                /* VregKind::Any */ any;
     if ((allow & need).empty()) {
       // cannot satisfy constraints; must split before u.pos
       return u.pos - 1;
@@ -1140,6 +1142,7 @@ void Vxls::assignSpill(Interval* ivl) {
     if (leader->reg.isGP()) {
       leader->slot = m_nextSlot++;
     } else {
+      assert(leader->reg.isSIMD());
       // todo: t4764214 not all XMMs are really wide.
       if (!isSlotAligned(m_nextSlot)) m_nextSlot++;
       leader->slot = m_nextSlot;
@@ -1176,6 +1179,7 @@ private:
   void rename(Vreg32& r) { r = lookup(r, VregKind::Gpr); }
   void rename(Vreg64& r) { r = lookup(r, VregKind::Gpr); }
   void rename(VregXMM& r) { r = lookup(r, VregKind::Simd); }
+  void rename(VregSF& r) { r = lookup(r, VregKind::Sf); }
   void rename(Vreg& r) { r = lookup(r, VregKind::Any); }
   void rename(Vtuple t) { /* phijmp+phidef handled by resolveEdges */ }
   PhysReg lookup(Vreg vreg, VregKind kind) {
@@ -1184,6 +1188,7 @@ private:
     PhysReg reg = ivl->childAt(pos)->reg;
     assert((kind == VregKind::Gpr && reg.isGP()) ||
            (kind == VregKind::Simd && reg.isSIMD()) ||
+           (kind == VregKind::Sf && reg.isSF()) ||
            (kind == VregKind::Any && reg != InvalidReg));
     return reg;
   }
@@ -1401,6 +1406,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
       stores.emplace_back(store{src, ptr});
     } else {
       // todo: t4764214: not all xmms are wide.
+      assert(src.isSIMD());
       stores.emplace_back(storedqu{src, ptr});
     }
   }
@@ -1431,6 +1437,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
         loads.emplace_back(load{ptr, dst});
       } else {
         // todo: t4764214: not all xmms are wide
+        assert(dst.isSIMD());
         loads.emplace_back(loaddqu{ptr, dst});
       }
     }

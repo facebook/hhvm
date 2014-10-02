@@ -180,7 +180,7 @@ const RegSet kSIMDCallerSaved = RegSet()
   | RegSet(vixl::d27)
   | RegSet(vixl::d28)
   | RegSet(vixl::d29)
-  | RegSet(vixl::d30)
+  // d30 exists, but PhysReg can't represent it, so we don't use it.
   // d31 exists, but PhysReg can't represent it, so we don't use it.
   ;
 
@@ -208,12 +208,16 @@ const RegSet kCalleeSaved = RegSet()
   | kSIMDCalleeSaved
   ;
 
+const RegSet kSF = RegSet(RegSF{0})
+  ;
+
 UNUSED const Abi abi {
   kGPUnreserved,   // gpUnreserved
   kGPReserved,     // gpReserved
   kSIMDUnreserved, // simdUnreserved
   kSIMDReserved,   // simdReserved
-  kCalleeSaved     // calleeSaved
+  kCalleeSaved,    // calleeSaved
+  kSF              // sf
 };
 
 }}}

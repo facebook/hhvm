@@ -36,22 +36,21 @@ struct Vout;
 struct PhysReg {
  private:
   static constexpr auto kMaxRegs = 64;
-  static constexpr auto kSIMDOffset = 33;
-
-  // These are populated in Map's constructor, because they depend on a
-  // RuntimeOption.
-  static int kNumGP;
-  static int kNumSIMD;
+  static constexpr auto kGPOffset = 0;
+  static constexpr auto kSIMDOffset = 33; // ARM has 33 GP registers.
+  static constexpr auto kSFOffset = 63;
+  static constexpr auto kNumSF = 1;
 
  public:
   enum Type {
     GP,
     SIMD,
-    kNumTypes,  // keep last
+    SF,
   };
   explicit constexpr PhysReg() : n(-1) {}
   constexpr /* implicit */ PhysReg(Reg64 r) : n(int(r)) {}
   constexpr /* implicit */ PhysReg(RegXMM r) : n(int(r) + kSIMDOffset) {}
+  constexpr /* implicit */ PhysReg(RegSF r) : n(int(r) + kSFOffset) {}
   explicit constexpr PhysReg(Reg32 r) : n(int(r)) {}
   explicit constexpr PhysReg(Reg8 r) : n(int(r)) {}
 
@@ -67,6 +66,10 @@ struct PhysReg {
     assert(isSIMD() || n == -1);
     return RegXMM(n - kSIMDOffset);
   }
+  /* implicit */ operator RegSF() const {
+    assert(isSF() || n == -1);
+    return RegSF(n - kSFOffset);
+  }
 
   /* implicit */ operator vixl::CPURegister() const {
     if (n == -1) {
@@ -75,19 +78,25 @@ struct PhysReg {
       if (isGP()) {
         return vixl::CPURegister(n, vixl::kXRegSize,
                                  vixl::CPURegister::kRegister);
-      } else {
+      } else if (isSIMD()) {
         return vixl::CPURegister(n - kSIMDOffset, vixl::kDRegSize,
                                  vixl::CPURegister::kFPRegister);
+      } else {
+        assert(isSF());
+        return vixl::NoCPUReg;
       }
     }
   }
 
   Type type() const {
     assert(n >= 0 && n < kMaxRegs);
-    return n < kSIMDOffset ? GP : SIMD;
+    return isGP() ? GP :
+           isSIMD() ? SIMD :
+           /* isSF() ? */ SF;
   }
-  bool isGP () const { return n >= 0 && n < kSIMDOffset; }
-  bool isSIMD() const { return n >= kSIMDOffset && n < kMaxRegs; }
+  bool isGP() const { return n >= kGPOffset && n < kGPOffset+numGP(); }
+  bool isSIMD() const { return n >= kSIMDOffset && n < kSIMDOffset+numSIMD(); }
+  bool isSF() const { return n >= kSFOffset && n < kSFOffset+kNumSF; }
   constexpr bool operator==(PhysReg r) const { return n == r.n; }
   constexpr bool operator!=(PhysReg r) const { return n != r.n; }
   constexpr bool operator==(Reg64 r) const { return Reg64(n) == r; }
@@ -118,6 +127,14 @@ struct PhysReg {
 
   static int getNumGP();
   static int getNumSIMD();
+  static int numGP() {
+    static int kNumGP = getNumGP();
+    return kNumGP;
+  }
+  static int numSIMD() {
+    static int kNumSIMD = getNumSIMD();
+    return kNumSIMD;
+  }
 
   /*
    * This struct can be used to efficiently represent a map from PhysReg to T.
@@ -131,13 +148,6 @@ struct PhysReg {
   template<typename T>
   struct Map {
     Map() : m_elms() {
-      // These are used in operator++ to determine how to iterate. They're
-      // initialized here because they depend on a RuntimeOption so they can't
-      // be inited at static init time.
-      if (kNumGP == 0 || kNumSIMD == 0) {
-        kNumGP = getNumGP();
-        kNumSIMD = getNumSIMD();
-      }
     }
 
     T& operator[](const PhysReg& r) {
@@ -161,9 +171,11 @@ struct PhysReg {
 
       iterator& operator++() {
         idx++;
-        if (idx == kNumGP) {
+        if (idx == kGPOffset + numGP() && idx < kSIMDOffset) {
           idx = kSIMDOffset;
-        } else if (idx == kSIMDOffset + kNumSIMD) {
+        } else if (idx == kSIMDOffset + numSIMD() && idx < kSFOffset) {
+          idx = kSFOffset;
+        } else if (idx == kSFOffset + kNumSF && idx < kMaxRegs) {
           idx = kMaxRegs;
         }
         return *this;

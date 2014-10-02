@@ -216,11 +216,11 @@ inline RegSaveFlags operator~(const RegSaveFlags& f) {
 }
 
 template <class T, class F>
-Vreg cond(Vout& v, ConditionCode cc, Vreg dst, T t, F f) {
+Vreg cond(Vout& v, ConditionCode cc, Vreg sf, Vreg dst, T t, F f) {
   auto fblock = v.makeBlock();
   auto tblock = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {fblock, tblock}};
+  v << jcc{cc, sf, {fblock, tblock}};
   v = tblock;
   auto treg = t(v);
   v << phijmp{done, v.makeTuple(VregList{treg})};

@@ -73,7 +73,6 @@ bool effectful(Vinstr& inst) {
     //case Vinstr::orqi:
     case Vinstr::psllq:
     case Vinstr::psrlq:
-    //case Vinstr::rorqi:
     case Vinstr::roundsd:
     //case Vinstr::sarq:
     //case Vinstr::sarqi:

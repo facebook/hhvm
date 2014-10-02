@@ -110,11 +110,11 @@ const char* getContextName(const Class* ctx) {
 //////////////////////////////////////////////////////////////////////
 
 template <class Then>
-void CodeGenerator::unlikelyIfBlock(Vout& v, Vout& vcold,
-                                    ConditionCode cc, Then then) {
+void CodeGenerator::unlikelyIfBlock(Vout& v, Vout& vcold, ConditionCode cc,
+                                    Vreg sf, Then then) {
   auto unlikely = vcold.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {done, unlikely}};
+  v << jcc{cc, sf, {done, unlikely}};
   vcold = unlikely;
   then(vcold);
   if (!vcold.closed()) vcold << jmp{done};
@@ -122,12 +122,12 @@ void CodeGenerator::unlikelyIfBlock(Vout& v, Vout& vcold,
 }
 
 template <class Block>
-void CodeGenerator::ifBlock(Vout& v, Vout& vcold, ConditionCode cc,
+void CodeGenerator::ifBlock(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
                             Block taken, bool unlikely) {
-  if (unlikely) return unlikelyIfBlock(v, vcold, cc, taken);
+  if (unlikely) return unlikelyIfBlock(v, vcold, cc, sf, taken);
   auto takenLabel = v.makeBlock();
   auto doneLabel = v.makeBlock();
-  v << jcc{cc, {doneLabel, takenLabel}};
+  v << jcc{cc, sf, {doneLabel, takenLabel}};
   v = takenLabel;
   taken(v);
   if (!v.closed()) v << jmp{doneLabel};
@@ -136,12 +136,12 @@ void CodeGenerator::ifBlock(Vout& v, Vout& vcold, ConditionCode cc,
 
 // Generate an if-then-else block
 template <class Then, class Else>
-void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc,
+void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc, Vreg sf,
                                Then thenBlock, Else elseBlock) {
   auto thenLabel = v.makeBlock();
   auto elseLabel = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {elseLabel, thenLabel}};
+  v << jcc{cc, sf, {elseLabel, thenLabel}};
   v = thenLabel;
   thenBlock(v);
   if (!v.closed()) v << jmp{done};
@@ -152,19 +152,22 @@ void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc,
 }
 
 template <class Then, class Else>
-void CodeGenerator::ifThenElse(Vout& v, Vout& vcold, ConditionCode cc,
+void CodeGenerator::ifThenElse(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
                                Then thenBlock, Else elseBlock, bool unlikely) {
-  if (unlikely) return unlikelyIfThenElse(v, vcold, cc, thenBlock, elseBlock);
-  ifThenElse(v, cc, thenBlock, elseBlock);
+  if (unlikely) {
+    return unlikelyIfThenElse(v, vcold, cc, sf, thenBlock, elseBlock);
+  }
+  ifThenElse(v, cc, sf, thenBlock, elseBlock);
 }
 
 template <class Then, class Else>
 void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
-                                       Then unlikelyBlock, Else elseBlock) {
+                                       Vreg sf, Then unlikelyBlock,
+                                       Else elseBlock) {
   auto elseLabel = v.makeBlock();
   auto unlikelyLabel = vcold.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {elseLabel, unlikelyLabel}};
+  v << jcc{cc, sf, {elseLabel, unlikelyLabel}};
   v = elseLabel;
   elseBlock(v);
   if (!v.closed()) v << jmp{done};
@@ -176,11 +179,12 @@ void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
 
 // emit an if-then-else condition where the true case is unlikely.
 template <class T, class F>
-Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
+Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
+                  F f) {
   auto fblock = v.makeBlock();
   auto tblock = vc.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {fblock, tblock}};
+  v << jcc{cc, sf, {fblock, tblock}};
   vc = tblock;
   auto treg = t(vc);
   vc << phijmp{done, vc.makeTuple(VregList{treg})};
@@ -200,10 +204,11 @@ Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg d, T t, F f) {
  * Passes the proper assembler to use to the unlikely function.
  */
 template <class Then>
-void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Then then) {
+void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
+                    Then then) {
   auto unlikely = vstub.makeBlock();
   auto done = vmain.makeBlock();
-  vmain << jcc{cc, {done, unlikely}};
+  vmain << jcc{cc, sf, {done, unlikely}};
   vstub = unlikely;
   then(vstub);
   if (!vstub.closed()) vstub << jmp{done};
@@ -212,11 +217,12 @@ void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Then then) {
 
 // Generate an if-then-else block
 template <class Then, class Else>
-void ifThenElse(Vout& v, ConditionCode cc, Then thenBlock, Else elseBlock) {
+void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
+                Else elseBlock) {
   auto thenLabel = v.makeBlock();
   auto elseLabel = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {elseLabel, thenLabel}};
+  v << jcc{cc, sf, {elseLabel, thenLabel}};
   v = thenLabel;
   thenBlock();
   if (!v.closed()) v << jmp{done};
@@ -230,12 +236,12 @@ void ifThenElse(Vout& v, ConditionCode cc, Then thenBlock, Else elseBlock) {
  * Same as ifThenElse except the first block is off in astubs
  */
 template <class Then, class Else>
-void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc,
+void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
                         Then unlikelyBlock, Else elseBlock) {
   auto elseLabel = vmain.makeBlock();
   auto unlikelyLabel = vstub.makeBlock();
   auto done = vmain.makeBlock();
-  vmain << jcc{cc, {elseLabel, unlikelyLabel}};
+  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
   vmain = elseLabel;
   elseBlock(vmain);
   if (!vmain.closed()) vmain << jmp{done};
@@ -474,13 +480,14 @@ Vlabel CodeGenerator::label(Block* b) {
   return m_state.labels[b];
 }
 
-void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Block* target) {
+void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf,
+                               Block* target) {
   auto next = v.makeBlock();
-  v << jcc{cc, {next, m_state.labels[target]}};
+  v << jcc{cc, sf, {next, m_state.labels[target]}};
   v = next;
 }
 
-void CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
+Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   auto const type0 = inst->src(0)->type();
   auto const type1 = inst->src(1)->type();
 
@@ -494,34 +501,39 @@ void CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   }
   auto reg0 = srcLoc(0).reg();
   auto reg1 = srcLoc(1).reg();
+  auto const sf = v.makeReg();
   if (type0 <= Type::Bool) {
-    v << cmpb{reg1, reg0};
+    v << cmpb{reg1, reg0, sf};
   } else {
-    v << cmpq{reg1, reg0};
+    v << cmpq{reg1, reg0, sf};
   }
+  return sf;
 }
 
-void CodeGenerator::emitCompareInt(Vout& v, IRInstruction* inst) {
+Vreg CodeGenerator::emitCompareInt(Vout& v, IRInstruction* inst) {
   auto srcReg0 = srcLoc(0).reg();
   auto srcReg1 = srcLoc(1).reg();
+  auto const sf = v.makeReg();
   // Note the reverse syntax in the assembler.
   // This cmp will compute srcReg0 - srcReg1
-  v << cmpq{srcReg1, srcReg0};
+  v << cmpq{srcReg1, srcReg0, sf};
+  return sf;
 }
 
-void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc,
+void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
                                    const ReqBindJccData* extra) {
-  v << bindjcc1{cc, {extra->notTaken, extra->taken}};
+  v << bindjcc1{cc, sf, {extra->notTaken, extra->taken}};
 }
 
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
     auto& v = vmain();
     auto sp = v.makeReg();
+    auto const sf = v.makeReg();
     // Verify that rVmSp == rbp - spOff
     v << lea{rbp[-cellsToBytes(inst->extra<StackOffset>()->offset)], sp};
-    v << cmpq{sp, rVmSp};
-    ifBlock(v, vcold(), CC_NE, [](Vout& v) { v << ud2(); });
+    v << cmpq{sp, rVmSp, sf};
+    ifBlock(v, vcold(), CC_NE, sf, [](Vout& v) { v << ud2(); });
   }
 }
 
@@ -529,8 +541,9 @@ void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
   if (!inst->taken()) return;
   auto reg = srcLoc(0).reg(0);
   auto& v = vmain();
-  v << testq{reg, reg};
-  v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << testq{reg, reg, sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
@@ -540,8 +553,9 @@ void CodeGenerator::cgCheckNonNull(IRInstruction* inst) {
   assert(taken);
 
   auto& v = vmain();
-  v << testq{srcReg, srcReg};
-  emitFwdJcc(v, CC_Z, taken);
+  auto const sf = v.makeReg();
+  v << testq{srcReg, srcReg, sf};
+  emitFwdJcc(v, CC_Z, sf, taken);
   v << copy{srcReg, dstReg};
 }
 
@@ -550,8 +564,9 @@ void CodeGenerator::cgAssertNonNull(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto dstReg = dstLoc(0).reg();
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << testq{srcReg, srcReg};
-    ifThen(v, CC_Z, [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << testq{srcReg, srcReg, sf};
+    ifThen(v, CC_Z, sf, [&](Vout& v) {
       v << ud2{};
     });
   }
@@ -575,7 +590,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   // successfully, so skip over any stack arguments and pop any
   // saved registers.
   if (info.rspOffset) {
-    v << addqi{info.rspOffset, rsp, rsp};
+    v << addqi{info.rspOffset, rsp, rsp, v.makeReg()};
   }
   PhysRegSaverParity::emitPops(v, RegSet());
 }
@@ -597,8 +612,9 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
 
 void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   auto& v = vmain();
-  v << cmpbim{0, rVmTl[unwinderSideExitOff()]};
-  unlikelyIfBlock(v, vcold(), CC_E, callUnwindResumeHelper);
+  auto const sf = v.makeReg();
+  v << cmpbim{0, rVmTl[unwinderSideExitOff()], sf};
+  unlikelyIfBlock(v, vcold(), CC_E, sf, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
   v << incstat{Stats::TC_CatchSideExit, 1, false};
@@ -613,30 +629,30 @@ void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
 void CodeGenerator::cgJcc(IRInstruction* inst) {
   auto& v = vmain();
   auto cc = opToConditionCode(inst->op());
-  emitCompare(v, inst);
-  v << jcc{cc, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitCompare(v, inst);
+  v << jcc{cc, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgJccInt(IRInstruction* inst) {
   auto& v = vmain();
   auto cc = opToConditionCode(inst->op());
-  emitCompareInt(v, inst);
-  v << jcc{cc, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitCompareInt(v, inst);
+  v << jcc{cc, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgReqBindJcc(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
-  emitCompare(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()),
+  auto const sf = emitCompare(v, inst);
+  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
                  inst->extra<ReqBindJccData>());
 }
 
 void CodeGenerator::cgReqBindJccInt(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
-  emitCompareInt(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()),
+  auto const sf = emitCompareInt(v, inst);
+  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
                  inst->extra<ReqBindJccData>());
 }
 
@@ -798,7 +814,7 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
           auto tmp1 = v.makeReg();
           v << movb{srcReg, tmp1};
           auto tmp2 = v.makeReg();
-          v << shlli{CHAR_BIT, tmp1, tmp2};
+          v << shlli{CHAR_BIT, tmp1, tmp2, v.makeReg()};
           v << pushl{tmp2};
         }
         break;
@@ -895,9 +911,9 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
     } else if (kind == ArgDesc::Kind::TypeReg) {
       if (kTypeShiftBits > 0) {
         if (src.isVirt()) {
-          v << shlqi{kTypeShiftBits, src, dst};
+          v << shlqi{kTypeShiftBits, src, dst, v.makeReg()};
         } else {
-          v << shlqi{kTypeShiftBits, dst, dst};
+          v << shlqi{kTypeShiftBits, dst, dst, v.makeReg()};
         }
       } else {
         if (src.isVirt()) {
@@ -906,9 +922,9 @@ static int64_t shuffleArgs(Vout& v, ArgGroup& args, CppCall& call) {
       }
     } else if (kind == ArgDesc::Kind::Addr) {
       if (src.isVirt()) {
-        v << addqi{arg.disp(), src, dst};
+        v << addqi{arg.disp(), src, dst, v.makeReg()};
       } else {
-        v << addqi{arg.disp(), dst, dst};
+        v << addqi{arg.disp(), dst, dst, v.makeReg()};
       }
     } else if (arg.isZeroExtend()) {
       if (src.isVirt()) {
@@ -1100,7 +1116,9 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
       // type in the lower bits, so shift the type result register.
       auto rval = packed_tv ? reg::rdx : reg::rax;
       auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) v << shrqi{kTypeShiftBits, rtyp, rtyp};
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
       v << copy2{rval, rtyp, dstInfo.reg0, dstInfo.reg1};
     }
     break;
@@ -1109,7 +1127,9 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
       // type in the lower bits, so shift the type result register.
       auto rval = packed_tv ? reg::rdx : reg::rax;
       auto rtyp = packed_tv ? reg::rax : reg::rdx;
-      if (kTypeShiftBits > 0) v << shrqi{kTypeShiftBits, rtyp, rtyp};
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
       pack2(v, rval, rtyp, dstInfo.reg0);
     }
     break;
@@ -1148,19 +1168,71 @@ void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   v << psrlq{1, tmp, dst};
 }
 
+Vreg CodeGenerator::emitAddInt(Vout& v, IRInstruction* inst) {
+  SSATmp* src0 = inst->src(0);
+  SSATmp* src1 = inst->src(1);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto const sf = v.makeReg();
+
+  // Special cases: x = y + 1, x = 1 + y
+  if (src1->isConst(1)) {
+    v << incq{s0, d, sf};
+  } else if (src0->isConst(1)) {
+    v << incq{s1, d, sf};
+  } else {
+    v << addq{s1, s0, d, sf};
+  }
+  return sf;
+}
+
+Vreg CodeGenerator::emitSubInt(Vout& v, IRInstruction* inst) {
+  auto src0 = inst->src(0);
+  auto src1 = inst->src(1);
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto const sf = v.makeReg();
+
+  if (src0->isConst(0)) {
+    // There is no unary negate HHIR instruction, so handle that here.
+    v << neg{s1, d, sf};
+  } else if (src1->isConst(1)) {
+    v << decq{s0, d, sf};
+  } else {
+    v << subq{s1, s0, d, sf};
+  }
+  return sf;
+}
+
+Vreg CodeGenerator::emitMulInt(Vout& v, IRInstruction* inst) {
+  auto s0 = srcLoc(0).reg();
+  auto s1 = srcLoc(1).reg();
+  auto d = dstLoc(0).reg();
+  auto const sf = v.makeReg();
+
+  v << imul{s1, s0, d, sf};
+  return sf;
+}
+
 void CodeGenerator::cgAddIntO(IRInstruction* inst) {
-  cgAddInt(inst);
-  vmain() << jcc{CC_O, {label(inst->next()), label(inst->taken())}};
+  auto& v = vmain();
+  auto const sf = emitAddInt(v, inst);
+  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgSubIntO(IRInstruction* inst) {
-  cgSubInt(inst);
-  vmain() << jcc{CC_O, {label(inst->next()), label(inst->taken())}};
+  auto& v = vmain();
+  auto const sf = emitSubInt(v, inst);
+  assert(sf != InvalidReg);
+  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgMulIntO(IRInstruction* inst) {
-  cgMulInt(inst);
-  vmain() << jcc{CC_O, {label(inst->next()), label(inst->taken())}};
+  auto& v = vmain();
+  auto const sf = emitMulInt(v, inst);
+  v << jcc{CC_O, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgFloor(IRInstruction* inst) {
@@ -1176,46 +1248,15 @@ void CodeGenerator::cgCeil(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAddInt(IRInstruction* inst) {
-  SSATmp* src0 = inst->src(0);
-  SSATmp* src1 = inst->src(1);
-  auto s0 = srcLoc(0).reg();
-  auto s1 = srcLoc(1).reg();
-  auto d = dstLoc(0).reg();
-  auto& v = vmain();
-
-  // Special cases: x = y + 1, x = 1 + y
-  if (src1->isConst(1)) {
-    v << incq{s0, d};
-  } else if (src0->isConst(1)) {
-    v << incq{s1, d};
-  } else {
-    v << addq{s1, s0, d};
-  }
+  emitAddInt(vmain(), inst);
 }
 
 void CodeGenerator::cgSubInt(IRInstruction* inst) {
-  auto src0 = inst->src(0);
-  auto src1 = inst->src(1);
-  auto s0 = srcLoc(0).reg();
-  auto s1 = srcLoc(1).reg();
-  auto d = dstLoc(0).reg();
-  auto& v = vmain();
-
-  if (src0->isConst(0)) {
-    // There is no unary negate HHIR instruction, so handle that here.
-    v << neg{s1, d};
-  } else if (src1->isConst(1)) {
-    v << decq{s0, d};
-  } else {
-    v << subq{s1, s0, d};
-  }
+  emitSubInt(vmain(), inst);
 }
 
 void CodeGenerator::cgMulInt(IRInstruction* inst) {
-  auto s0 = srcLoc(0).reg();
-  auto s1 = srcLoc(1).reg();
-  auto d = dstLoc(0).reg();
-  vmain() << imul{s1, s0, d};
+  emitMulInt(vmain(), inst);
 }
 
 void CodeGenerator::cgAddDbl(IRInstruction* inst) {
@@ -1236,7 +1277,8 @@ void CodeGenerator::cgMulDbl(IRInstruction* inst) {
   auto s0 = srcLoc(0).reg();
   auto s1 = srcLoc(1).reg();
   auto d = dstLoc(0).reg();
-  vmain() << mulsd{s1, s0, d};
+  auto& v = vmain();
+  v << mulsd{s1, s0, d};
 }
 
 void CodeGenerator::cgDivDbl(IRInstruction* inst) {
@@ -1247,9 +1289,10 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   auto& v = vmain();
 
   // divide by zero check
-  v << ucomisd{v.cns(0), srcReg1};
-  unlikelyIfBlock(v, vcold(), CC_NP, [&] (Vout& v) {
-    emitFwdJcc(v, CC_E, exit);
+  auto const sf = v.makeReg();
+  v << ucomisd{v.cns(0), srcReg1, sf};
+  unlikelyIfBlock(v, vcold(), CC_NP, sf, [&] (Vout& v) {
+    emitFwdJcc(v, CC_E, sf, exit);
   });
   v << divsd{srcReg1, srcReg0, dstReg};
 }
@@ -1258,14 +1301,16 @@ void CodeGenerator::cgAndInt(IRInstruction* inst) {
   auto s0 = srcLoc(0).reg();
   auto s1 = srcLoc(1).reg();
   auto d = dstLoc(0).reg();
-  vmain() << andq{s1, s0, d};
+  auto& v = vmain();
+  v << andq{s1, s0, d, v.makeReg()};
 }
 
 void CodeGenerator::cgOrInt(IRInstruction* inst) {
   auto s0 = srcLoc(0).reg();
   auto s1 = srcLoc(1).reg();
   auto d = dstLoc(0).reg();
-  vmain() << orq{s1, s0, d};
+  auto& v = vmain();
+  v << orq{s1, s0, d, v.makeReg()};
 }
 
 void CodeGenerator::cgXorInt(IRInstruction* inst) {
@@ -1276,7 +1321,7 @@ void CodeGenerator::cgXorInt(IRInstruction* inst) {
   if (inst->src(1)->isConst(-1)) {
     v << not{s0, d};
   } else {
-    v << xorq{s1, s0, d};
+    v << xorq{s1, s0, d, v.makeReg()};
   }
 }
 
@@ -1284,7 +1329,8 @@ void CodeGenerator::cgXorBool(IRInstruction* inst) {
   auto s0 = srcLoc(0).reg();
   auto s1 = srcLoc(1).reg();
   auto d = dstLoc(0).reg();
-  vmain() << xorb{s1, s0, d};
+  auto& v = vmain();
+  v << xorb{s1, s0, d, v.makeReg()};
 }
 
 void CodeGenerator::cgMod(IRInstruction* inst) {
@@ -1294,8 +1340,8 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   auto& v = vmain();
 
   v << copy{dividend, rax};
-  v << cqo{};            // sign-extend rax => rdx:rax
-  v << idiv{divisor};    // rdx:rax/divisor => quot:rax, rem:rdx
+  v << cqo{};                      // sign-extend rax => rdx:rax
+  v << idiv{divisor, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
   v << copy{rdx, dst};
 }
 
@@ -1315,11 +1361,11 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
 
   if (src1->isConst()) {
     int n = src1->intVal() & 0x3f; // only use low 6 bits.
-    v << Opi{n, srcReg0, dstReg};
+    v << Opi{n, srcReg0, dstReg, v.makeReg()};
   } else {
     // assume srcs and dsts are vregs and rcx isn't live
     v << copy{srcReg1, rcx};
-    v << Op{srcReg0, dstReg};
+    v << Op{srcReg0, dstReg, v.makeReg()};
   }
 }
 
@@ -1426,12 +1472,13 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
   // case 2: bool/null cmp anything
   // simplifyCmp has converted all args to bool
   else if (type1 <= Type::Bool && type2 <= Type::Bool) {
+    auto const sf = v.makeReg();
     if (src2->isConst()) {
-      v << cmpbi{src2->boolVal(), src1Reg};
+      v << cmpbi{src2->boolVal(), src1Reg, sf};
     } else {
-      v << cmpb{src2Reg, src1Reg};
+      v << cmpb{src2Reg, src1Reg, sf};
     }
-    v << setcc{cc, dstReg};
+    v << setcc{cc, sf, dstReg};
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1551,8 +1598,8 @@ void CodeGenerator::cgGteX(IRInstruction* inst) {
 void CodeGenerator::emitCmpInt(IRInstruction* inst, ConditionCode cc) {
   auto dstReg = dstLoc(0).reg();
   auto& v = vmain();
-  emitCompareInt(v, inst);
-  v << setcc{cc, dstReg};
+  auto const sf = emitCompareInt(v, inst);
+  v << setcc{cc, sf, dstReg};
 }
 
 void CodeGenerator::cgEqInt(IRInstruction* inst)  { emitCmpInt(inst, CC_E); }
@@ -1569,7 +1616,7 @@ void CodeGenerator::emitCmpEqDbl(IRInstruction* inst, ComparisonPred pred) {
   auto& v = vmain();
   auto tmp = v.makeReg();
   v << cmpsd{pred, srcReg0, srcReg1, tmp};
-  v << andbi{1, tmp, dstReg};
+  v << andbi{1, tmp, dstReg, v.makeReg()};
 }
 
 void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
@@ -1581,8 +1628,9 @@ void CodeGenerator::emitCmpRelDbl(IRInstruction* inst, ConditionCode cc,
   if (flipOperands) {
     std::swap(srcReg0, srcReg1);
   }
-  v << ucomisd{srcReg0, srcReg1};
-  v << setcc{cc, dstReg};
+  auto const sf = v.makeReg();
+  v << ucomisd{srcReg0, srcReg1, sf};
+  v << setcc{cc, sf, dstReg};
 }
 
 void CodeGenerator::cgEqDbl(IRInstruction* inst)  {
@@ -1644,30 +1692,30 @@ Vreg getDataPtrEnregistered(Vout& v, Vptr dataSrc) {
 
 template<class Loc1, class Loc2, class JmpFn>
 void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
-                                 JmpFn doJcc) {
+                                 Vreg sf, JmpFn doJcc) {
   assert(!(type <= Type::Cls));
   auto& v = vmain();
   ConditionCode cc;
   if (type <= Type::StaticStr) {
-    emitCmpTVType(v, KindOfStaticString, typeSrc);
+    emitCmpTVType(v, sf, KindOfStaticString, typeSrc);
     cc = CC_E;
   } else if (type <= Type::Str) {
     assert(type != Type::CountedStr &&
            "We don't support guarding on CountedStr");
-    emitTestTVType(v, KindOfStringBit, typeSrc);
+    emitTestTVType(v, sf, KindOfStringBit, typeSrc);
     cc = CC_NZ;
   } else if (type == Type::Null) {
-    emitCmpTVType(v, KindOfNull, typeSrc);
+    emitCmpTVType(v, sf, KindOfNull, typeSrc);
     cc = CC_LE;
   } else if (type == Type::UncountedInit) {
-    emitTestTVType(v, KindOfUncountedInitBit, typeSrc);
+    emitTestTVType(v, sf, KindOfUncountedInitBit, typeSrc);
     cc = CC_NZ;
   } else if (type == Type::Uncounted) {
-    emitCmpTVType(v, KindOfRefCountThreshold, typeSrc);
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, typeSrc);
     cc = CC_LE;
   } else if (type == Type::Cell) {
     assert(!m_curInst->is(LdRef));
-    emitCmpTVType(v, KindOfRef, typeSrc);
+    emitCmpTVType(v, sf, KindOfRef, typeSrc);
     cc = CC_L;
   } else if (type == Type::Gen) {
     // nothing to check
@@ -1681,18 +1729,19 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
     DataType dataType = type.toDataType();
     assert(dataType == KindOfRef ||
            (dataType >= KindOfUninit && dataType <= KindOfResource));
-    emitCmpTVType(v, dataType, typeSrc);
+    emitCmpTVType(v, sf, dataType, typeSrc);
     cc = CC_E;
   }
-  doJcc(cc);
+  doJcc(cc, sf);
 
   if (type.isSpecialized()) {
-    emitSpecializedTypeTest(type, dataSrc, doJcc);
+    auto const sf2 = v.makeReg();
+    emitSpecializedTypeTest(type, dataSrc, sf2, doJcc);
   }
 }
 
 template<class DataLoc, class JmpFn>
-void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
+void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
                                             JmpFn doJcc) {
   assert(type.isSpecialized());
   if (type < Type::Res) {
@@ -1705,18 +1754,18 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc,
     // emit the specific class test
     assert(type.getClass()->attrs() & AttrNoOverride);
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    emitCmpClass(v, type.getClass(), reg[ObjectData::getVMClassOffset()]);
-    doJcc(CC_E);
+    emitCmpClass(v, sf, type.getClass(), reg[ObjectData::getVMClassOffset()]);
+    doJcc(CC_E, sf);
   } else {
     assert(type < Type::Arr);
     auto reg = getDataPtrEnregistered(v, dataSrc);
-    v << cmpbim{type.getArrayKind(), reg[ArrayData::offsetofKind()]};
-    doJcc(CC_E);
+    v << cmpbim{type.getArrayKind(), reg[ArrayData::offsetofKind()], sf};
+    doJcc(CC_E, sf);
   }
 }
 
 template<class JmpFn>
-void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
+void CodeGenerator::emitIsTypeTest(IRInstruction* inst, Vreg sf, JmpFn doJcc) {
   auto const src = inst->src(0);
   auto const loc = srcLoc(0);
 
@@ -1727,8 +1776,8 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
 
   if (src->isA(Type::PtrToGen)) {
     auto base = loc.reg();
-    emitTypeTest(inst->typeParam(), base[TVOFF(m_type)],
-                 base[TVOFF(m_data)], doJcc);
+    emitTypeTest(inst->typeParam(), base[TVOFF(m_type)], base[TVOFF(m_data)],
+                 sf, doJcc);
     return;
   }
   assert(src->isA(Type::Gen));
@@ -1740,7 +1789,7 @@ void CodeGenerator::emitIsTypeTest(IRInstruction* inst, JmpFn doJcc) {
     CG_PUNT(IsType-KnownType);
   }
   auto dataSrcReg = loc.reg(0); // data register
-  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, doJcc);
+  emitTypeTest(inst->typeParam(), typeSrcReg, dataSrcReg, sf, doJcc);
 }
 
 template<class Loc>
@@ -1748,42 +1797,50 @@ void CodeGenerator::emitTypeCheck(Type type,
                                   Loc typeSrc,
                                   Loc dataSrc,
                                   Block* taken) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
   emitTypeTest(
-    type, typeSrc, dataSrc,
-    [&](ConditionCode cc) {
-      emitFwdJcc(vmain(), ccNegate(cc), taken);
+    type, typeSrc, dataSrc, sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
+      emitFwdJcc(v, ccNegate(cc), sfTaken, taken);
     });
 }
 
 template<class Loc>
 void CodeGenerator::emitTypeGuard(Type type, Loc typeSrc, Loc dataSrc) {
-  emitTypeTest(type, typeSrc, dataSrc,
-    [&](ConditionCode cc) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitTypeTest(type, typeSrc, dataSrc, sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
       auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
-      vmain() << fallbackcc{ccNegate(cc), destSK};
+      vmain() << fallbackcc{ccNegate(cc), sfTaken, destSK};
     });
 }
 
-void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc) {
-  vmain() << setcc{cc, dstLoc(0).reg()};
+void CodeGenerator::emitSetCc(IRInstruction* inst, ConditionCode cc, Vreg sf) {
+  vmain() << setcc{cc, sf, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgIsTypeMemCommon(IRInstruction* inst, bool negate) {
   bool called = false; // check emitSetCc is called only once
-  emitIsTypeTest(inst,
-    [&](ConditionCode cc) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitIsTypeTest(inst, sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
       assert(!called);
-      emitSetCc(inst, negate ? ccNegate(cc) : cc);
+      emitSetCc(inst, negate ? ccNegate(cc) : cc, sfTaken);
       called = true;
     });
 }
 
 void CodeGenerator::cgIsTypeCommon(IRInstruction* inst, bool negate) {
   bool called = false; // check emitSetCc is called only once
-  emitIsTypeTest(inst,
-    [&](ConditionCode cc) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitIsTypeTest(inst, sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
       assert(!called);
-      emitSetCc(inst, negate ? ccNegate(cc) : cc);
+      emitSetCc(inst, negate ? ccNegate(cc) : cc, sfTaken);
       called = true;
     });
 }
@@ -1824,10 +1881,11 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
   auto t3 = v.makeReg();
   auto t4 = v.makeReg();
   v << movzbl{typeReg, t1};
-  v << subli{KindOfBoolean, t1, t2};
-  v << subli{KindOfString - KindOfBoolean + 1, t2, t3};
-  v << sbbl{t3, t3, t4};
-  v << neg{t4, dstReg};
+  v << subli{KindOfBoolean, t1, t2, v.makeReg()};
+  auto const sf = v.makeReg();
+  v << subli{KindOfString - KindOfBoolean + 1, t2, t3, sf};
+  v << sbbl{sf, t3, t3, t4, v.makeReg()};
+  v << neg{t4, dstReg, v.makeReg()};
 }
 
 void CodeGenerator::cgIsNType(IRInstruction* inst) {
@@ -1851,7 +1909,7 @@ void CodeGenerator::cgIsNTypeMem(IRInstruction* inst) {
  * if it doesn't exist than the candidate can't be an instance of it
  * and will fail this check.
  */
-void CodeGenerator::emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst) {
+Vreg CodeGenerator::emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst) {
   auto const rObjClass     = srcLoc(0).reg(0);
   auto const testClassName = inst->src(1)->strVal();
   int offset;
@@ -1859,44 +1917,46 @@ void CodeGenerator::emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst) {
   if (!InstanceBits::getMask(testClassName, offset, mask)) {
     always_assert(!"cgInstanceOfBitmask had no bitmask");
   }
-  v << testbim{int8_t(mask), rObjClass[offset]};
+  auto const sf = v.makeReg();
+  v << testbim{int8_t(mask), rObjClass[offset], sf};
+  return sf;
 }
 
 void CodeGenerator::cgInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << setcc{CC_NZ, dstLoc(0).reg()};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << setcc{CC_NZ, sf, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgNInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << setcc{CC_Z, dstLoc(0).reg()};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << setcc{CC_Z, sf, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgJmpInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << jcc{CC_Z, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgReqBindJmpInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()),
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
                  inst->extra<ReqBindJccData>());
 }
 
 void CodeGenerator::cgReqBindJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  emitReqBindJcc(v, opToConditionCode(inst->op()),
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  emitReqBindJcc(v, opToConditionCode(inst->op()), sf,
                  inst->extra<ReqBindJccData>());
 }
 
@@ -1904,16 +1964,16 @@ void CodeGenerator::cgSideExitJmpInstanceOfBitmask(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgSideExitJmpNInstanceOfBitmask(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitInstanceBitmaskCheck(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitInstanceBitmaskCheck(v, inst);
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
@@ -1935,8 +1995,9 @@ void CodeGenerator::cgInstanceOf(IRInstruction* inst) {
     return;
   }
 
-  v << testq{testReg, testReg};
-  cond(v, CC_NZ, destReg, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  v << testq{testReg, testReg, sf};
+  cond(v, CC_NZ, sf, destReg, [&](Vout& v) {
     return call_classof(v.makeReg());
   }, [&](Vout& v) {
     // testReg == 0, set dest to false (0)
@@ -1961,15 +2022,17 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
     // Check the length of the class vectors. If the candidate's is at
     // least as long as the potential base (testClass) it might be a
     // subclass.
+    auto const sf = v.makeReg();
     v << cmplim{safe_cast<int32_t>(testClass->classVecLen()),
-                rObjClass[Class::classVecLenOff()]};
-    return cond(v, CC_NB, dst, [&](Vout& v) {
+                rObjClass[Class::classVecLenOff()], sf};
+    return cond(v, CC_NB, sf, dst, [&](Vout& v) {
       // If it's a subclass, rTestClass must be at the appropriate index.
       auto const vecOffset = Class::classVecOff() +
         sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
       auto const b = v.makeReg();
-      emitCmpClass(v, rTestClass, rObjClass[vecOffset]);
-      v << setcc{CC_E, b};
+      auto const sf = v.makeReg();
+      emitCmpClass(v, sf, rTestClass, rObjClass[vecOffset]);
+      v << setcc{CC_E, sf, b};
       return b;
     }, [&](Vout& v) {
       return v.cns(0);
@@ -1984,15 +2047,16 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
 
   // Test if it is the exact same class.  TODO(#2044801): we should be
   // doing this control flow at the IR level.
-  emitCmpClass(v, rTestClass, rObjClass);
+  auto const sf = v.makeReg();
+  emitCmpClass(v, sf, rTestClass, rObjClass);
   if (testClass->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the
     // same-class check, never the strict-subclass check.
-    v << setcc{CC_E, rdst};
+    v << setcc{CC_E, sf, rdst};
     return;
   }
 
-  cond(v, CC_E, rdst, [&](Vout& v) {
+  cond(v, CC_E, sf, rdst, [&](Vout& v) {
     return v.cns(1);
   }, [&](Vout& v) {
     return check_strict_subclass(v.makeReg());
@@ -2010,20 +2074,23 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto rIndef = v.cns(0x8000000000000000L);
   auto dst1 = v.makeReg();
   v << cvttsd2siq{srcReg, dst1};
-  v << cmpq{rIndef, dst1};
-  unlikelyCond(v, vcold(), CC_E, dstReg, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  v << cmpq{rIndef, dst1, sf};
+  unlikelyCond(v, vcold(), CC_E, sf, dstReg, [&](Vout& v) {
     // result > max signed int or unordered
-    v << ucomisd{v.cns(0), srcReg};
-    return cond(v, CC_NB, v.makeReg(), [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << ucomisd{v.cns(0), srcReg, sf};
+    return cond(v, CC_NB, sf, v.makeReg(), [&](Vout& v) {
       return dst1;
     }, [&](Vout& v) {
       // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      return cond(v, CC_P, v.makeReg(), [&](Vout& v) {
+      return cond(v, CC_P, sf, v.makeReg(), [&](Vout& v) {
         return dst1;
       }, [&](Vout& v) {
-        v << ucomisd{v.cns(maxULongAsDouble), srcReg};
-        return cond(v, CC_B, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
-          return v.cns(0);
+        auto const sf = v.makeReg();
+        v << ucomisd{v.cns(maxULongAsDouble), srcReg, sf};
+        return cond(v, CC_B, sf, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
+            return v.cns(0);
         }, [&](Vout& v) {
           // 0 < src0 <= ULONG_MAX
           // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
@@ -2039,7 +2106,7 @@ void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
           // because it's possible that src0 == LONG_MAX in which case
           // cvttsd2siq will yield an indefiniteInteger, which we would
           // like to make zero)
-          v << xorq{rIndef, tmp_int, dst5};
+          v << xorq{rIndef, tmp_int, dst5, v.makeReg()};
           return dst5;
         });
       });
@@ -2055,8 +2122,9 @@ void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
   auto& v = vmain();
   auto t1 = v.makeReg();
   auto t2 = v.makeReg();
-  v << shlqi{1, src, t1}; // 0.0 stays zero and -0.0 is now 0.0
-  v << setcc{CC_NE, t2}; // lower byte becomes 1 if dstReg != 0
+  auto const sf = v.makeReg();
+  v << shlqi{1, src, t1, sf}; // 0.0 stays zero and -0.0 is now 0.0
+  v << setcc{CC_NE, sf, t2}; // lower byte becomes 1 if dstReg != 0
   v << movzbl{t2, dst};
 }
 
@@ -2065,8 +2133,9 @@ void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
   auto srcReg = srcLoc(0).reg();
   auto& v = vmain();
   auto b = v.makeReg();
-  v << testq{srcReg, srcReg};
-  v << setcc{CC_NE, b};
+  auto const sf = v.makeReg();
+  v << testq{srcReg, srcReg, sf};
+  v << setcc{CC_NE, sf, b};
   v << movzbl{b, dstReg};
 }
 
@@ -2077,22 +2146,24 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
 
   auto size = v.makeReg();
   v << loadl{srcReg[ArrayData::offsetofSize()], size};
-  v << testl{size, size};
+  auto const sf = v.makeReg();
+  v << testl{size, size, sf};
 
-  unlikelyCond(v, vcold(), CC_S, dstReg,
+  unlikelyCond(v, vcold(), CC_S, sf, dstReg,
     [&](Vout& v) {
       auto vsize = v.makeReg();
       auto dst1 = v.makeReg();
       cgCallHelper(v, CppCall::method(&ArrayData::vsize),
                    callDest(vsize), SyncOptions::kNoSyncPoint,
                    argGroup().ssa(0));
-      v << testl{vsize, vsize};
-      v << setcc{CC_NZ, dst1};
+      auto const sf = v.makeReg();
+      v << testl{vsize, vsize, sf};
+      v << setcc{CC_NZ, sf, dst1};
       return dst1;
     },
     [&](Vout& v) {
       auto dst2 = v.makeReg();
-      v << setcc{CC_NZ, dst2};
+      v << setcc{CC_NZ, sf, dst2};
       return dst2;
     }
   );
@@ -2103,18 +2174,20 @@ void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
  * but with a shorter encoding (eg testb(val, mr))
  * if possible.
  */
-void testimm(Vout& v, uint32_t val, Vptr mr) {
+static Vreg testimm(Vout& v, uint32_t val, Vptr mr) {
   int off = 0;
   auto val2 = val;
   while (val2 > 0xff && !(val2 & 0xff)) {
     off++;
     val2 >>= 8;
   }
+  auto const sf = v.makeReg();
   if (val2 > 0xff) {
-    v << testlim{(int32_t)val, mr};
+    v << testlim{(int32_t)val, mr, sf};
   } else {
-    v << testbim{(int8_t)val2, mr + off};
+    v << testbim{(int8_t)val2, mr + off, sf};
   }
+  return sf;
 }
 
 void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
@@ -2123,8 +2196,9 @@ void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
          ty.getClass() &&
          ty.getClass()->isCollectionClass());
   auto& v = vmain();
-  v << cmplim{0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET]};
-  v << setcc{CC_E, dstLoc(0).reg()};
+  auto const sf = v.makeReg();
+  v << cmplim{0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
+  v << setcc{CC_E, sf, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
@@ -2133,8 +2207,9 @@ void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
          ty.getClass() &&
          ty.getClass()->isCollectionClass());
   auto& v = vmain();
-  v << cmplim{0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET]};
-  v << setcc{CC_NE, dstLoc(0).reg()};
+  auto const sf = v.makeReg();
+  v << cmplim{0, srcLoc(0).reg()[FAST_COLLECTION_SIZE_OFFSET], sf};
+  v << setcc{CC_NE, sf, dstLoc(0).reg()};
 }
 
 void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
@@ -2142,17 +2217,18 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
   auto const rsrc = srcLoc(0).reg();
   auto& v = vmain();
 
-  testimm(v, ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()]);
-  unlikelyCond(v, vcold(), CC_NZ, rdst,
+  auto const sf = testimm(v, ObjectData::CallToImpl,
+                          rsrc[ObjectData::attributeOff()]);
+  unlikelyCond(v, vcold(), CC_NZ, sf, rdst,
     [&] (Vout& v) {
-      testimm(v,
-              ObjectData::IsCollection,
-              rsrc[ObjectData::attributeOff()]);
-      return cond(v, CC_NZ, v.makeReg(),
+      auto const sf = testimm(v, ObjectData::IsCollection,
+                              rsrc[ObjectData::attributeOff()]);
+      return cond(v, CC_NZ, sf, v.makeReg(),
         [&] (Vout& v) { // rsrc points to native collection
           auto dst2 = v.makeReg();
-          v << cmplim{0, rsrc[FAST_COLLECTION_SIZE_OFFSET]};
-          v << setcc{CC_NE, dst2}; // true iff size not zero
+          auto const sf = v.makeReg();
+          v << cmplim{0, rsrc[FAST_COLLECTION_SIZE_OFFSET], sf};
+          v << setcc{CC_NE, sf, dst2}; // true iff size not zero
           return dst2;
         }, [&] (Vout& v) { // rsrc is not a native collection
           auto dst3 = v.makeReg();
@@ -2202,49 +2278,54 @@ void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
   auto& v = vmain();
   auto f = v.cns(makeStaticString(""));
   auto t = v.cns(makeStaticString("1"));
-  v << testb{srcReg, srcReg};
-  v << cmovq{CC_NZ, f, t, dstReg};
+  auto const sf = v.makeReg();
+  v << testb{srcReg, srcReg, sf};
+  v << cmovq{CC_NZ, sf, f, t, dstReg};
 }
 
 void CodeGenerator::cgConvClsToCctx(IRInstruction* inst) {
   auto const sreg = srcLoc(0).reg();
   auto const dreg = dstLoc(0).reg();
-  vmain() << orqi{1, sreg, dreg};
+  auto& v = vmain();
+  v << orqi{1, sreg, dreg, v.makeReg()};
 }
 
 void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   auto src = srcLoc(0).reg();
   auto dst = dstLoc(0).reg();
   auto& v = vmain();
-  emitCmpTVType(v, KindOfRef, src[TVOFF(m_type)]);
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRef, src[TVOFF(m_type)]);
   if (RefData::tvOffset() == 0) {
-    v << cloadq{CC_E, src, src[TVOFF(m_data)], dst};
+    v << cloadq{CC_E, sf, src, src[TVOFF(m_data)], dst};
     return;
   }
-  cond(v, CC_E, dst, [&](Vout& v) {
+  cond(v, CC_E, sf, dst, [&](Vout& v) {
     auto ref_ptr = v.makeReg();
     auto cell_ptr = v.makeReg();
     v << loadq{src[TVOFF(m_data)], ref_ptr};
-    v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr};
+    v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr, v.makeReg()};
     return cell_ptr;
   }, [&](Vout& v) {
     return src;
   });
 }
 
-void CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
+Vreg CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
   v << loadq{rVmTl[ch], dst};
-  v << testq{dst, dst};
+  auto const sf = v.makeReg();
+  v << testq{dst, dst, sf};
+  return sf;
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
   auto& v = vmain();
   auto dst1 = v.makeReg();
-  cgLdFuncCachedCommon(inst, dst1);
-  unlikelyCond(v, vcold(), CC_Z, dstLoc(0).reg(), [&] (Vout& v) {
+  auto const sf = cgLdFuncCachedCommon(inst, dst1);
+  unlikelyCond(v, vcold(), CC_Z, sf, dstLoc(0).reg(), [&] (Vout& v) {
     auto dst2 = v.makeReg();
     const Func* (*const func)(const StringData*) = lookupUnknownFunc;
     cgCallHelper(v,
@@ -2261,9 +2342,9 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  cgLdFuncCachedCommon(inst, dstLoc(0).reg());
+  auto const sf = cgLdFuncCachedCommon(inst, dstLoc(0).reg());
   if (auto const taken = inst->taken()) {
-    vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
+    vmain() << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
   }
 }
 
@@ -2276,9 +2357,10 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
   // Check the first function handle, otherwise try to autoload.
   auto dst1 = v.makeReg();
   v << loadq{rVmTl[hFunc], dst1};
-  v << testq{dst1, dst1};
+  auto const sf = v.makeReg();
+  v << testq{dst1, dst1, sf};
 
-  unlikelyCond(v, vcold(), CC_Z, dstReg, [&] (Vout& v) {
+  unlikelyCond(v, vcold(), CC_Z, sf, dstReg, [&] (Vout& v) {
     // If we get here, things are going to be slow anyway, so do all the
     // autoloading logic in lookupFallbackFunc instead of ASM
     const Func* (*const func)(const StringData*, const StringData*) =
@@ -2353,12 +2435,13 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   auto classptr = v.makeReg();
   v << mcprep{func_class};
   v << movl{func_class, classptr};  // zeros the top 32 bits
-  v << cmpq{classptr, clsReg};
-  v << jcc{CC_NE, {fast_path, slow_path}};
+  auto const sf = v.makeReg();
+  v << cmpq{classptr, clsReg, sf};
+  v << jcc{CC_NE, sf, {fast_path, slow_path}};
 
   v = fast_path;
   auto funcptr = v.makeReg();
-  v << shrqi{32, func_class, funcptr};
+  v << shrqi{32, func_class, funcptr, v.makeReg()};
   v << storeq{funcptr, actRecReg[AROFF(m_func)]};
   v << jmp{done};
 
@@ -2386,8 +2469,9 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   auto const rdst = dstLoc(0).reg();
   auto& v = vmain();
   v << loadq{rsrc[Class::invokeOff()], rdst};
-  v << testq{rdst, rdst};
-  v << jcc{CC_Z, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << testq{rdst, rdst, sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgStRetVal(IRInstruction* inst) {
@@ -2474,10 +2558,11 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
     if (data->bounded) {
       if (data->base) {
         idx = v.makeReg();
-        v << subq{v.cns(data->base), indexReg, idx};
+        v << subq{v.cns(data->base), indexReg, idx, v.makeReg()};
       }
-      v << cmpqi{data->cases - 2, idx};
-      v << bindjcc2{CC_AE, data->defaultOff};
+      auto const sf = v.makeReg();
+      v << cmpqi{data->cases - 2, idx, sf};
+      v << bindjcc2{CC_AE, sf, data->defaultOff};
     }
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
@@ -2705,9 +2790,10 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
     if (!type.needsStaticBitCheck()) {
       emitIncRef(v, base);
     } else {
-      v << cmplim{0, base[FAST_REFCOUNT_OFFSET]};
+      auto const sf = v.makeReg();
+      v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_NS, [&](Vout& v) { emitIncRef(v, base); });
+      ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, base); });
     }
   };
 
@@ -2715,8 +2801,9 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
     assert(IS_REFCOUNTED_TYPE(type.toDataType()));
     increfMaybeStatic(v);
   } else {
-    emitCmpTVType(v, KindOfRefCountThreshold, srcLoc.reg(1));
-    ifThen(v, CC_NLE, [&](Vout& v) { increfMaybeStatic(v); });
+    auto const sf = v.makeReg();
+    emitCmpTVType(v, sf, KindOfRefCountThreshold, srcLoc.reg(1));
+    ifThen(v, CC_NLE, sf, [&](Vout& v) { increfMaybeStatic(v); });
   }
 }
 
@@ -2734,11 +2821,10 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
 
   auto const src = srcLoc(0).reg();
   auto& v = vmain();
+  auto const sf = v.makeReg();
 
-  v << testbi{0x1, src};
-  ifThen(v, CC_Z, [&](Vout& v) {
-    emitIncRef(v, src);
-  });
+  v << testbi{0x1, src, sf};
+  ifThen(v, CC_Z, sf, [&](Vout& v) { emitIncRef(v, src); });
 }
 
 void CodeGenerator::cgDecRefStack(IRInstruction* inst) {
@@ -2755,16 +2841,18 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
 
   auto decrefIfAvailable = [&](Vout& v) {
     // Check if this is available and we're not in a static context instead
-    v << testbi{1, rthis};
-    ifThen(v, CC_Z, [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << testbi{1, rthis, sf};
+    ifThen(v, CC_Z, sf, [&](Vout& v) {
       cgDecRefStaticType(v, Type::Obj, rthis, true /* genZeroCheck */);
     });
   };
 
   if (curFunc()->isPseudoMain()) {
     // In pseudo-mains, emit check for presence of m_this
-    v << testq{rthis, rthis};
-    ifThen(v, CC_NZ, [&](Vout& v) { decrefIfAvailable(v); });
+    auto const sf = v.makeReg();
+    v << testq{rthis, rthis, sf};
+    ifThen(v, CC_NZ, sf, [&](Vout& v) { decrefIfAvailable(v); });
   } else {
     decrefIfAvailable(v);
   }
@@ -2836,7 +2924,8 @@ bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
 
   auto& v = vmain();
   if (profile->profiling()) {
-    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)]};
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)],
+               v.makeReg()};
   } else if (profile->optimizing()) {
     auto const data = profile->data(DecRefProfile::reduce);
     if (data.hitRate() != 0 && data.hitRate() != 100) {
@@ -2899,24 +2988,27 @@ void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
     v << incstat{Stats::TC_DecRef_NZ};
   }
 
+  Vreg sf;
   auto destroy = [&](Vout& v) {
     v << incstat{unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
                  Stats::TC_DecRef_Likely_Destroy};
     if (profile && profile->profiling()) {
-      v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)]};
+      v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)],
+                 v.makeReg()};
     }
     destroyImpl(v);
   };
 
   if (!type.needsStaticBitCheck()) {
-    v << declm{dataReg[FAST_REFCOUNT_OFFSET]};
+    sf = v.makeReg();
+    v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v);
+      emitAssertFlagsNonNegative(v, sf);
     }
 
     if (hasDestroy) {
-      ifBlock(v, vcold(), CC_E, destroy, unlikelyDestroy);
+      ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     }
     return;
   }
@@ -2927,35 +3019,39 @@ void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
 
     if (type.needsStaticBitCheck()) {
       auto next = v.makeBlock();
-      v << jcc{CC_L, {next, done}};
+      assert(sf!= InvalidReg);
+      v << jcc{CC_L, sf, {next, done}};
       v = next;
     }
 
     // Decrement _count
-    v << declm{dataReg[FAST_REFCOUNT_OFFSET]};
+    sf = v.makeReg();
+    v << declm{dataReg[FAST_REFCOUNT_OFFSET], sf};
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       // Assert that the ref count is not less than zero
-      emitAssertFlagsNonNegative(v);
+      emitAssertFlagsNonNegative(v, sf);
     }
   };
 
   if (hasDestroy) {
-    v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET]};
-    ifThenElse(v, vcold(), CC_E, destroy, static_check_and_decl,
+    sf = v.makeReg();
+    v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
+    ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
                unlikelyDestroy);
     return;
   }
   if (type.needsStaticBitCheck()) {
-    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET]};
+    sf = v.makeReg();
+    v << cmplim{0, dataReg[FAST_REFCOUNT_OFFSET], sf};
   }
 
   static_check_and_decl(v);
 }
 
-void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done,
-                                              Type type, Vreg dataReg) {
-  return cgCheckStaticBitAndDecRef(v, done, type, dataReg,
-                                   (void (*)(Vout&))nullptr);
+void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
+                                              Vreg dataReg) {
+  cgCheckStaticBitAndDecRef(v, done, type, dataReg,
+                            (void (*)(Vout&))nullptr);
 }
 
 //
@@ -2965,8 +3061,9 @@ void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done,
 void CodeGenerator::cgCheckRefCountedType(Vreg typeReg, Vlabel done) {
   auto& v = vmain();
   auto next = v.makeBlock();
-  emitCmpTVType(v, KindOfRefCountThreshold, typeReg);
-  v << jcc{CC_LE, {next, done}};
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold, typeReg);
+  v << jcc{CC_LE, sf, {next, done}};
   v = next;
 }
 
@@ -2974,8 +3071,10 @@ void CodeGenerator::cgCheckRefCountedType(Vreg baseReg, int64_t offset,
                                           Vlabel done) {
   auto& v = vmain();
   auto next = v.makeBlock();
-  emitCmpTVType(v, KindOfRefCountThreshold, baseReg[offset + TVOFF(m_type)]);
-  v << jcc{CC_LE, {next, done}};
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfRefCountThreshold,
+                baseReg[offset + TVOFF(m_type)]);
+  v << jcc{CC_LE, sf, {next, done}};
   v = next;
 }
 
@@ -3023,15 +3122,15 @@ void CodeGenerator::cgDecRefDynamicType(Vreg typeReg, Vreg dataReg,
 
   // Emit check for UncountedValue or StaticValue and the actual DecRef
   if (genZeroCheck) {
-      cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg, [&] (Vout& v) {
-          // Emit call to release in m_acold
-          cgCallHelper(v, CppCall::destruct(argNumToRegName[1]),
-                       kVoidDest,
-                       SyncOptions::kSyncPoint,
-                       argGroup()
-                       .reg(dataReg)
-                       .reg(typeReg));
-        });
+    cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg, [&] (Vout& v) {
+        // Emit call to release in m_acold
+        cgCallHelper(v, CppCall::destruct(argNumToRegName[1]),
+                     kVoidDest,
+                     SyncOptions::kSyncPoint,
+                     argGroup()
+                     .reg(dataReg)
+                     .reg(typeReg));
+      });
   } else {
     cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg);
   }
@@ -3137,21 +3236,26 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   v << storeq{ctx, spReg[spOffset + int(AROFF(m_this))]};
 
   auto ctx2 = v.makeReg();
-  v << shrqi{1, ctx, ctx2};
-  ifThen(v, CC_NBE, [&](Vout& v) {
-    auto ctx3 = v.makeReg();
-    v << shlqi{1, ctx2, ctx3};
-    emitIncRef(v, ctx3);
-  });
+  {
+    auto const sf = v.makeReg();
+    v << shrqi{1, ctx, ctx2, sf};
+    ifThen(v, CC_NBE, sf, [&](Vout& v) {
+      auto ctx3 = v.makeReg();
+      v << shlqi{1, ctx2, ctx3, v.makeReg()};
+      emitIncRef(v, ctx3);
+    });
+  }
   auto name = v.makeReg();
   v << loadq{fpReg[itOff + CufIter::nameOff()], name};
-  v << testq{name, name};
-  ifThenElse(v, CC_NZ, [&](Vout& v) {
-    v << cmplim{0, name[FAST_REFCOUNT_OFFSET]};
+  auto const sf = v.makeReg();
+  v << testq{name, name, sf};
+  ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
     static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_NS, [&](Vout& v) { emitIncRef(v, name); });
+    ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
     auto name2 = v.makeReg();
-    v << orqi{ActRec::kInvNameBit, name, name2};
+    v << orqi{ActRec::kInvNameBit, name, name2, v.makeReg()};
     v << storeq{name2, spReg[spOffset + int(AROFF(m_invName))]};
   }, [&](Vout& v) {
     v << storeq{name, spReg[spOffset + int(AROFF(m_invName))]};
@@ -3180,7 +3284,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     } else {
       auto clsPtrReg = srcLoc(2/*objOrCls*/).reg();
       auto thisptr = v.makeReg();
-      v << orqi{1, clsPtrReg, thisptr};
+      v << orqi{1, clsPtrReg, thisptr, v.makeReg()};
       v << storeq{thisptr, spReg[spOffset + int(AROFF(m_this))]};
     }
   } else if (objOrCls->isA(Type::Obj)) {
@@ -3294,16 +3398,18 @@ void CodeGenerator::cgCheckInitProps(IRInstruction* inst) {
   auto const cls = inst->extra<CheckInitProps>()->cls;
   auto const branch = inst->taken();
   auto& v = vmain();
-  v << cmpqim{0, rVmTl[cls->propHandle()]};
-  v << jcc{CC_Z, {label(inst->next()), label(branch)}};
+  auto const sf = v.makeReg();
+  v << cmpqim{0, rVmTl[cls->propHandle()], sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(branch)}};
 }
 
 void CodeGenerator::cgCheckInitSProps(IRInstruction* inst) {
   auto const cls = inst->extra<CheckInitSProps>()->cls;
   auto const branch = inst->taken();
   auto& v = vmain();
-  v << cmpbim{0, rVmTl[cls->sPropInitHandle()]};
-  v << jcc{CC_Z, {label(inst->next()), label(branch)}};
+  auto const sf = v.makeReg();
+  v << cmpbim{0, rVmTl[cls->sPropInitHandle()], sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(branch)}};
 }
 
 void CodeGenerator::cgNewInstanceRaw(IRInstruction* inst) {
@@ -3329,7 +3435,7 @@ void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
   if (odAttrs) {
     // o_attribute is 16 bits but the fact that we're or-ing a mask makes it ok
     assert(!(odAttrs & 0xffff0000));
-    v << orqim{odAttrs, srcReg[ObjectData::attributeOff()]};
+    v << orqim{odAttrs, srcReg[ObjectData::attributeOff()], v.makeReg()};
   }
 
   // Initialize the properties
@@ -3480,11 +3586,12 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   // Short-circuit call to tvCoerceParamTo*()
   // if we're already of the appropriate type (common case)
   auto const coerceTypeTest = [&](const Type& t) {
+    auto const sf = v.makeReg();
     emitTypeTest(t,
                  spReg[offset + TVOFF(m_type)],
-                 spReg[offset + TVOFF(m_data)],
-                 [&](ConditionCode cc) {
-                   emitFwdJcc(v, cc, inst->next());
+                 spReg[offset + TVOFF(m_data)], sf,
+                 [&](ConditionCode cc, Vreg sfTaken) {
+                   emitFwdJcc(v, cc, sf, inst->next());
                  });
   };
   if (!type.isKnownDataType()) {
@@ -3526,8 +3633,9 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     SyncOptions::kSyncPoint,
     args
   );
-  v << testbi{1, tmpReg};
-  v << jcc{CC_E, {label(inst->next()), label(exit)}};
+  auto const sf = v.makeReg();
+  v << testbi{1, tmpReg, sf};
+  v << jcc{CC_E, sf, {label(inst->next()), label(exit)}};
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
@@ -3614,8 +3722,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
     v << loadq{misReg[returnOffset], dstReg};
-    v << testq{dstReg, dstReg};
-    v << cmovq{CC_Z, rtype, nulltype, dstType};
+    auto const sf = v.makeReg();
+    v << testq{dstReg, dstReg, sf};
+    v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
     return;
   }
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
@@ -3627,8 +3736,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     emitLoadTVType(v, misReg[returnOffset + TVOFF(m_type)], tmp_type);
     v << loadq{misReg[returnOffset + TVOFF(m_data)], dstReg};
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    v << testb{tmp_type, tmp_type};
-    v << cmovq{CC_Z, tmp_type, nulltype, dstType};
+    auto const sf = v.makeReg();
+    v << testb{tmp_type, tmp_type, sf};
+    v << cmovq{CC_Z, sf, tmp_type, nulltype, dstType};
     return;
   }
   not_reached();
@@ -3659,7 +3769,8 @@ void CodeGenerator::emitAdjustSp(Vreg spReg, Vreg dstReg,
     if (dstReg != spReg) {
       v << lea{spReg[adjustment], dstReg};
     } else {
-      v << addqi{adjustment, dstReg, dstReg};
+      auto const sf = v.makeReg();
+      v << addqi{adjustment, dstReg, dstReg, sf};
     }
   } else {
     v << copy{spReg, dstReg};
@@ -3689,12 +3800,14 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
 
   if (curFunc()->isPseudoMain() || !curFunc()->mayHaveThis()) {
     // Check for a null $this pointer first.
-    v << testq{dstReg, dstReg};
-    emitFwdJcc(v, CC_Z, taken);
+    auto const sf = v.makeReg();
+    v << testq{dstReg, dstReg, sf};
+    emitFwdJcc(v, CC_Z, sf, taken);
   }
 
-  v << testbi{1, dstReg};
-  v << jcc{CC_NZ, {label(inst->next()), label(taken)}};
+  auto const sf = v.makeReg();
+  v << testbi{1, dstReg, sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(taken)}};
 }
 
 void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
@@ -3702,8 +3815,9 @@ void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   // Context could be either a this object or a class ptr
   auto& v = vmain();
-  v << testbi{1, srcReg};
-  cond(v, CC_NZ, dstReg,
+  auto const sf = v.makeReg();
+  v << testbi{1, srcReg, sf};
+  cond(v, CC_NZ, sf, dstReg,
     [&](Vout& v) { // ctx is a class
       return emitLdClsCctx(v, srcReg, v.makeReg());
     }, [&](Vout& v) { // ctx is this ptr
@@ -3755,8 +3869,9 @@ void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
 void CodeGenerator::cgCheckStaticLocInit(IRInstruction* inst) {
   auto const src = srcLoc(0).reg();
   auto& v = vmain();
-  emitCmpTVType(v, KindOfUninit, src[RefData::tvOffset() + TVOFF(m_type)]);
-  v << jcc{CC_E, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, src[RefData::tvOffset() + TVOFF(m_type)]);
+  v << jcc{CC_E, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
@@ -3772,7 +3887,7 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
   cgStore(rdSrc[RefData::tvOffset()], inst->src(1), srcLoc(1), Width::Full);
-  v << inclm{rdSrc[FAST_REFCOUNT_OFFSET]};
+  v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
   if (debug) {
     static_assert(sizeof(RefData::Magic::kMagic) == sizeof(uint64_t), "");
     emitImmStoreq(v, static_cast<int64_t>(RefData::Magic::kMagic),
@@ -3886,8 +4001,9 @@ void CodeGenerator::cgStringIsset(IRInstruction* inst) {
   auto idxReg = srcLoc(1).reg();
   auto dstReg = dstLoc(0).reg();
   auto& v = vmain();
-  v << cmplm{idxReg, strReg[StringData::sizeOff()]};
-  v << setcc{CC_NBE, dstReg};
+  auto const sf = v.makeReg();
+  v << cmplm{idxReg, strReg[StringData::sizeOff()], sf};
+  v << setcc{CC_NBE, sf, dstReg};
 }
 
 void CodeGenerator::cgProfileArray(IRInstruction* inst) {
@@ -3899,8 +4015,10 @@ void CodeGenerator::cgProfileArray(IRInstruction* inst) {
   // this to a conditional add.
   static_assert(ArrayData::ArrayKind::kPackedKind == 0, "kPackedKind changed");
   auto tmp_kind = v.makeReg();
+  auto const sf = v.makeReg();
   v << loadzbl{baseReg[ArrayData::offsetofKind()], tmp_kind};
-  v << addlm{tmp_kind, rVmTl[handle + offsetof(NonPackedArrayProfile, count)]};
+  v << addlm{tmp_kind, rVmTl[handle + offsetof(NonPackedArrayProfile, count)],
+             sf};
 }
 
 void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
@@ -3915,8 +4033,9 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   // since idx is KindOfInt64.
   auto tmp_size = v.makeReg();
   v << loadl{arrReg[ArrayData::offsetofSize()], tmp_size};
-  v << cmpq{idxReg, tmp_size};
-  v << jcc{CC_BE, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << cmpq{idxReg, tmp_size, sf};
+  v << jcc{CC_BE, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
@@ -3946,7 +4065,7 @@ void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
    */
   static_assert(sizeof(TypedValue) == 16, "");
   auto scaled_idx = v.makeReg();
-  v << shlqi{0x4, rIdx, scaled_idx}; // multiply by 16
+  v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()}; // multiply by 16
   cgLoad(inst->dst(), dstLoc(0), rArr[scaled_idx + sizeof(ArrayData)]);
 }
 
@@ -3956,12 +4075,13 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
   auto const rIdx = srcLoc(1).reg();
   auto const dst = dstLoc(0).reg();
   auto& v = vmain();
+  auto const sf = v.makeReg();
 
   if (idx->isConst()) {
     auto elem_offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
     auto type_offset = elem_offset + TVOFF(m_type);
     if (deltaFits(type_offset, sz::dword)) {
-      emitCmpTVType(v, KindOfNull, rArr[type_offset]);
+      emitCmpTVType(v, sf, KindOfNull, rArr[type_offset]);
       goto do_check;
     }
   }
@@ -3970,13 +4090,13 @@ void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
     static_assert(sizeof(TypedValue) == 16, "");
     auto scaled_idx = v.makeReg();
     auto type_offset = sizeof(ArrayData) + TVOFF(m_type);
-    v << shlqi{0x4, rIdx, scaled_idx};
-    emitCmpTVType(v, KindOfNull, rArr[scaled_idx + type_offset]);
+    v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()};
+    emitCmpTVType(v, sf, KindOfNull, rArr[scaled_idx + type_offset]);
   }
 
 do_check:
   auto b = v.makeReg();
-  v << setcc{CC_NE, b};
+  v << setcc{CC_NE, sf, b};
   v << movzbl{b, dst};
 }
 
@@ -3990,18 +4110,19 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
       args.ssa(0/*idx*/);
       cgCallHelper(v, CppCall::direct(throwOOB),
                    kVoidDest, SyncOptions::kSyncPoint, args);
-
-    };
+  };
 
   auto& v = vmain();
   if (idx->isConst()) {
-    v << cmpq{idxReg, sizeReg};
-    unlikelyIfBlock(v, vcold(), CC_BE, throwHelper);
+    auto const sf = v.makeReg();
+    v << cmpq{idxReg, sizeReg, sf};
+    unlikelyIfBlock(v, vcold(), CC_BE, sf, throwHelper);
     return;
   }
 
-  v << cmpq{sizeReg, idxReg};
-  unlikelyIfBlock(v, vcold(), CC_AE, throwHelper);
+  auto const sf = v.makeReg();
+  v << cmpq{sizeReg, idxReg, sf};
+  unlikelyIfBlock(v, vcold(), CC_AE, sf, throwHelper);
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
@@ -4042,8 +4163,9 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
 
   auto ptr = v.makeReg();
   v << loadq{vecReg[rawPtrOffset], ptr};
-  v << cmplim{1, ptr[countOffset]};
-  v << jcc{CC_NE, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << cmplim{1, ptr[countOffset], sf};
+  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 /**
@@ -4203,11 +4325,13 @@ void CodeGenerator::emitSideExitGuard(Type type,
                                       Loc typeSrc,
                                       Loc dataSrc,
                                       Offset taken) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
   emitTypeTest(
-    type, typeSrc, dataSrc,
-    [&](ConditionCode cc) {
+    type, typeSrc, dataSrc, sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
       auto const sk = SrcKey(curFunc(), taken, resumed());
-      vmain() << bindexit{ccNegate(cc), sk};
+      v << bindexit{ccNegate(cc), sfTaken, sk};
     });
 }
 
@@ -4234,16 +4358,16 @@ void CodeGenerator::cgExitJcc(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitCompare(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitCompare(v, inst);
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitCompareInt(v, inst);
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitCompareInt(v, inst);
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
@@ -4255,8 +4379,9 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   auto const rData = srcLoc(0).reg(0);
   auto const rType = srcLoc(0).reg(1);
   auto& v = vmain();
-  auto doJcc = [&](ConditionCode cc) {
-    emitFwdJcc(v, ccNegate(cc), inst->taken());
+  auto const sf = v.makeReg();
+  auto doJcc = [&](ConditionCode cc, Vreg sfTaken) {
+    emitFwdJcc(v, ccNegate(cc), sfTaken, inst->taken());
   };
   auto doMov = [&]() {
     auto const valDst = dstLoc(0).reg(0);
@@ -4282,7 +4407,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   }
 
   if (rType != InvalidReg) {
-    emitTypeTest(typeParam, rType, rData, doJcc);
+    emitTypeTest(typeParam, rType, rData, sf, doJcc);
   } else {
     Type srcType = src->type();
     if (srcType.isBoxed() && typeParam.isBoxed()) {
@@ -4290,15 +4415,15 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
     } else if (typeParam.isSpecialized()) {
       // We're just checking the array kind or object class of a value with a
       // mostly-known type.
-      emitSpecializedTypeTest(typeParam, rData, doJcc);
+      emitSpecializedTypeTest(typeParam, rData, sf, doJcc);
     } else if (typeParam <= Type::Uncounted &&
                ((srcType <= Type::Str && typeParam.maybe(Type::StaticStr)) ||
                 (srcType <= Type::Arr && typeParam.maybe(Type::StaticArr)))) {
       // We carry Str and Arr operands around without a type register,
       // even though they're union types.  The static and non-static
       // subtypes are distinguised by the refcount field.
-      v << cmplim{0, rData[FAST_REFCOUNT_OFFSET]};
-      doJcc(CC_L);
+      v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
+      doJcc(CC_L, sf);
     } else {
       // We should only get here if this CheckType should've been simplified
       // away but wasn't for some reason, so do a simple version of what it
@@ -4337,12 +4462,14 @@ void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
   auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
   auto const ch      = NamedEntity::get(clsName)->getClassHandle();
   auto& v = vmain();
-  v << cmpqm{v.cns(cls), rVmTl[ch]};
-  v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << cmpqm{v.cns(cls), rVmTl[ch], sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 template <class JmpFn>
-void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
+void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
+                                      JmpFn doJcc) {
   assert(inst->numSrcs() == 5);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
@@ -4384,11 +4511,11 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
       // bit, we can get away with a single test,
       // rather than mask-and-compare
       if (mask64 <= 0xff) {
-        v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff]};
+        v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff], sf};
       } else if (mask64 <= 0xffffffff) {
-        v << testlim{(int32_t)mask64, bitsPtrReg[bitsOff]};
+        v << testlim{(int32_t)mask64, bitsPtrReg[bitsOff], sf};
       } else {
-        v << testqm{mask64Reg, bitsPtrReg[bitsOff]};
+        v << testqm{mask64Reg, bitsPtrReg[bitsOff], sf};
       }
       if (vals64) cond = CC_E;
     } else {
@@ -4398,23 +4525,23 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
       //     bitsVal2 <- bitsValReg & mask64
       auto bitsVal2 = v.makeReg();
       if (mask64 <= 0xff) {
-        v << andbi{(int8_t)mask64, bitsValReg, bitsVal2};
+        v << andbi{(int8_t)mask64, bitsValReg, bitsVal2, v.makeReg()};
       } else if (mask64 <= 0xffffffff) {
-        v << andli{(int32_t)mask64, bitsValReg, bitsVal2};
+        v << andli{(int32_t)mask64, bitsValReg, bitsVal2, v.makeReg()};
       } else {
-        v << andq{mask64Reg, bitsValReg, bitsVal2};
+        v << andq{mask64Reg, bitsValReg, bitsVal2, v.makeReg()};
       }
 
       //   If bitsVal2 != vals64, then goto Exit
       if (vals64 <= 0xff) {
-        v << cmpbi{(int8_t)vals64, bitsVal2};
+        v << cmpbi{(int8_t)vals64, bitsVal2, sf};
       } else if (vals64 <= 0xffffffff) {
-        v << cmpli{(int32_t)vals64, bitsVal2};
+        v << cmpli{(int32_t)vals64, bitsVal2, sf};
       } else {
-        v << cmpq{vals64Reg, bitsVal2};
+        v << cmpq{vals64Reg, bitsVal2, sf};
       }
     }
-    doJcc(v, cond);
+    doJcc(v, cond, sf);
   };
 
   if (firstBitNum == 0) {
@@ -4424,37 +4551,44 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, JmpFn doJcc) {
     thenBody(v);
   } else {
     // Check number of args...
-    v << cmpqi{firstBitNum, nParamsReg};
+    auto const sf2 = v.makeReg();
+    v << cmpqi{firstBitNum, nParamsReg, sf2};
 
     if (vals64 != 0 && vals64 != mask64) {
       // If we're beyond nParams, then either all params
       // are refs, or all params are non-refs, so if vals64
       // isn't 0 and isnt mask64, there's no possibility of
       // a match
-      doJcc(v, CC_LE);
+      doJcc(v, CC_LE, sf2);
       thenBody(v);
     } else {
-      ifThenElse(v, CC_NLE, thenBody, /* else */ [&](Vout& v) {
+      ifThenElse(v, CC_NLE, sf2, thenBody,
+                 /* else */ [&](Vout& v) {
           //   If not special builtin...
-          v << testlim{AttrVariadicByRef, funcPtrReg[Func::attrsOff()]};
-          doJcc(v, vals64 ? CC_Z : CC_NZ);
+          auto const sf = v.makeReg();
+          v << testlim{AttrVariadicByRef, funcPtrReg[Func::attrsOff()], sf};
+          doJcc(v, vals64 ? CC_Z : CC_NZ, sf);
         });
     }
   }
 }
 
 void CodeGenerator::cgGuardRefs(IRInstruction* inst) {
-  emitReffinessTest(inst,
-    [&](Vout& v, ConditionCode cc) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitReffinessTest(inst, sf,
+    [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
       auto const destSK = SrcKey(curFunc(), inst->marker().bcOff(), resumed());
-      v << fallbackcc{cc, destSK};
+      v << fallbackcc{cc, sfTaken, destSK};
     });
 }
 
 void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
-  emitReffinessTest(inst,
-    [&](Vout& v, ConditionCode cc) {
-      emitFwdJcc(v, cc, inst->taken());
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  emitReffinessTest(inst, sf,
+    [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
+      emitFwdJcc(v, cc, sfTaken, inst->taken());
     });
 }
 
@@ -4542,7 +4676,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
     auto vmclass = v.makeReg();
     emitLdLowPtr(v, srcCtx[ObjectData::getVMClassOffset()],
                  vmclass, sizeof(LowClassPtr));
-    v << orqi{1, vmclass, dstCtx};
+    v << orqi{1, vmclass, dstCtx, v.makeReg()};
   } else {
     // Just incref $this.
     emitIncRef(v, srcCtx);
@@ -4566,8 +4700,9 @@ void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
 
   // If we don't know whether we have a This, we need to check dynamically
   if (!withThis) {
-    v << testbi{1, srcCtxReg};
-    cond(v, CC_Z, destCtxReg, [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << testbi{1, srcCtxReg, sf};
+    cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
       // If we have a This pointer in destCtxReg, then select either This
       // or its Class based on whether callee is static or not
       auto dst1 = v.makeReg();
@@ -4624,15 +4759,16 @@ Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
                                                  RDS::Handle ch) {
   auto& v = vmain();
   // thisReg is holding $this. Should we pass it to the callee?
-  v << cmplim{1, rVmTl[ch + offsetof(StaticMethodFCache, m_static)]};
-  return cond(v, CC_E, destCtxReg, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  v << cmplim{1, rVmTl[ch + offsetof(StaticMethodFCache, m_static)], sf};
+  return cond(v, CC_E, sf, destCtxReg, [&](Vout& v) {
     // If calling a static method...
     // Load (this->m_cls | 0x1) into destCtxReg
     auto vmclass = v.makeReg();
     auto dst1 = v.makeReg();
     emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
                  vmclass, sizeof(LowClassPtr));
-    v << orqi{1, vmclass, dst1};
+    v << orqi{1, vmclass, dst1, v.makeReg()};
     return dst1;
   }, [&](Vout& v) {
     // Else: calling non-static method
@@ -4669,8 +4805,9 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   assert(t <= Type::Ctx);
   // dynamically check if we have a This pointer and call
   // emitGetCtxFwdCallWithThisDyn below
-  v << testbi{1, srcCtxReg};
-  cond(v, CC_Z, destCtxReg, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  v << testbi{1, srcCtxReg, sf};
+  cond(v, CC_Z, sf, destCtxReg, [&](Vout& v) {
     // If we have a 'this' pointer ...
     return emitGetCtxFwdCallWithThisDyn(v.makeReg(), srcCtxReg, make_cache());
   }, [&](Vout& v) {
@@ -4688,20 +4825,21 @@ void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
   vmain() << lea{rVmTl[ch], dstReg};
 }
 
-RDS::Handle CodeGenerator::cgLdClsCachedCommon(IRInstruction* inst, Vreg dst) {
+RDS::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
+                                               Vreg dst, Vreg sf) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  auto& v = vmain();
   v << loadq{rVmTl[ch], dst};
-  v << testq{dst, dst};
+  v << testq{dst, dst, sf};
   return ch;
 }
 
 void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
   auto& v = vmain();
   auto dst1 = v.makeReg();
-  auto ch = cgLdClsCachedCommon(inst, dst1);
-  unlikelyCond(v, vcold(), CC_E, dstLoc(0).reg(), [&] (Vout& v) {
+  auto const sf = v.makeReg();
+  auto ch = cgLdClsCachedCommon(v, inst, dst1, sf);
+  unlikelyCond(v, vcold(), CC_E, sf, dstLoc(0).reg(), [&] (Vout& v) {
     auto dst2 = v.makeReg();
     Class* (*const func)(Class**, const StringData*) = jit::lookupKnownClass;
     cgCallHelper(v, CppCall::direct(func), callDest(dst2),
@@ -4715,9 +4853,11 @@ void CodeGenerator::cgLdClsCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
-  cgLdClsCachedCommon(inst, dstLoc(0).reg());
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  cgLdClsCachedCommon(v, inst, dstLoc(0).reg(), sf);
   if (Block* taken = inst->taken()) {
-    vmain() << jcc{CC_Z, {label(inst->next()), label(taken)}};
+    v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
   }
 }
 
@@ -4862,59 +5002,62 @@ void CodeGenerator::cgLdGblAddr(IRInstruction* inst) {
                callDest(dstReg),
                SyncOptions::kNoSyncPoint,
                argGroup().ssa(0));
-  v << testq{dstReg, dstReg};
-  v << jcc{CC_Z, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << testq{dstReg, dstReg, sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
-void CodeGenerator::emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc) {
+Vreg CodeGenerator::emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc) {
   auto reg = srcLoc.reg();
+  auto const sf = v.makeReg();
   if (src->isA(Type::Bool)) {
-    v << testb{reg, reg};
+    v << testb{reg, reg, sf};
   } else {
-    v << testq{reg, reg};
+    v << testq{reg, reg, sf};
   }
+  return sf;
 }
 
 void CodeGenerator::cgJmpZero(IRInstruction* inst) {
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  v << jcc{CC_Z, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgJmpNZero(IRInstruction* inst) {
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgReqBindJmpZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  emitReqBindJcc(v, CC_Z, inst->extra<ReqBindJmpZero>());
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  emitReqBindJcc(v, CC_Z, sf, inst->extra<ReqBindJmpZero>());
 }
 
 void CodeGenerator::cgReqBindJmpNZero(IRInstruction* inst) {
   // TODO(#2404427): prepareForTestAndSmash?
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  emitReqBindJcc(v, CC_NZ, inst->extra<ReqBindJmpNZero>());
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  emitReqBindJcc(v, CC_NZ, sf, inst->extra<ReqBindJmpNZero>());
 }
 
 void CodeGenerator::cgSideExitJmpZero(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgSideExitJmpNZero(IRInstruction* inst) {
   auto const extra = inst->extra<SideExitJccData>();
   auto const sk = SrcKey(curFunc(), extra->taken, resumed());
   auto& v = vmain();
-  emitTestZero(v, inst->src(0), srcLoc(0));
-  v << bindexit{opToConditionCode(inst->op()), sk, extra->trflags};
+  auto const sf = emitTestZero(v, inst->src(0), srcLoc(0));
+  v << bindexit{opToConditionCode(inst->op()), sf, sk, extra->trflags};
 }
 
 void CodeGenerator::cgJmp(IRInstruction* inst) {
@@ -4978,8 +5121,9 @@ void CodeGenerator::cgCheckInit(IRInstruction* inst) {
 
   static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
   auto& v = vmain();
-  v << testb{typeReg, typeReg};
-  v << jcc{CC_Z, {label(inst->next()), label(taken)}};
+  auto const sf = v.makeReg();
+  v << testb{typeReg, typeReg, sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
 }
 
 void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
@@ -4991,14 +5135,15 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
   if (t.not(Type::Uninit)) return;
   auto basereg = srcLoc(0).reg();
   auto& v = vmain();
-  emitCmpTVType(v, KindOfUninit, basereg[offset + TVOFF(m_type)]);
-  v << jcc{CC_Z, {label(inst->next()), label(taken)}};
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, basereg[offset + TVOFF(m_type)]);
+  v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
 }
 
 void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
   auto&v = vmain();
-  emitTestSurpriseFlags(v);
-  v << jcc{CC_NZ, {label(inst->next()), label(inst->taken())}};
+  auto const sf = emitTestSurpriseFlags(v);
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
@@ -5006,8 +5151,9 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
   TransID  transId = inst->extra<CheckCold>()->transId;
   auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
-  v << decqm{v.cns(counterAddr)[0]};
-  v << jcc{CC_LE, {label(inst->next()), label(taken)}};
+  auto const sf = v.makeReg();
+  v << decqm{v.cns(counterAddr)[0], sf};
+  v << jcc{CC_LE, sf, {label(inst->next()), label(taken)}};
 }
 
 static const StringData* s_ReleaseVV = makeStaticString("ReleaseVV");
@@ -5020,10 +5166,12 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   TargetProfile<ReleaseVVProfile> profile(m_unit.context(), m_curInst->marker(),
                                           s_ReleaseVV);
   if (profile.profiling()) {
-    v << incwm{rVmTl[profile.handle() + offsetof(ReleaseVVProfile, executed)]};
+    v << incwm{rVmTl[profile.handle() + offsetof(ReleaseVVProfile, executed)],
+               v.makeReg()};
   }
 
-  v << cmpqim{0, rFp[AROFF(m_varEnv)]};
+  auto const sf = v.makeReg();
+  v << cmpqim{0, rFp[AROFF(m_varEnv)], sf};
 
   bool releaseUnlikely = true;
   if (profile.optimizing()) {
@@ -5035,13 +5183,14 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
       releaseUnlikely = false;
     }
   }
-  ifBlock(v, vcold(), CC_NZ, [&] (Vout& v) {
+  ifBlock(v, vcold(), CC_NZ, sf, [&] (Vout& v) {
     if (profile.profiling()) {
       auto offsetof_release = offsetof(ReleaseVVProfile, released);
-      v << incwm{rVmTl[profile.handle() + offsetof_release]};
+      v << incwm{rVmTl[profile.handle() + offsetof_release], v.makeReg()};
     }
-    v << testlim{ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)]};
-    emitFwdJcc(v, CC_Z, label);
+    auto const sf = v.makeReg();
+    v << testlim{ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)], sf};
+    emitFwdJcc(v, CC_Z, sf, label);
     cgCallHelper(
       v,
       CppCall::direct(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
@@ -5057,9 +5206,10 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
   auto base    = srcLoc(0).reg();
   auto dstReg  = dstLoc(0).reg();
   auto& v = vmain();
-  emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)],
-    [&](ConditionCode cc) {
-      cond(v, cc, dstReg, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  emitTypeTest(Type::BoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)], sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
+      cond(v, cc, sfTaken, dstReg, [&](Vout& v) {
         return base;
       }, [&](Vout& v) {
         auto dst2 = v.makeReg();
@@ -5101,7 +5251,9 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 
   auto spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
   if (spAdjustBytes != 0) {
-    vmain() << addqi{spAdjustBytes, newSpReg, newSpReg};
+    auto& v = vmain();
+    auto const sf = v.makeReg();
+    v << addqi{spAdjustBytes, newSpReg, newSpReg, sf};
   }
 }
 
@@ -5138,13 +5290,14 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto checkStarted = inst->src(1)->boolVal();
   auto stateOff     = BaseGenerator::stateOff();
   auto& v = vmain();
+  auto const sf = v.makeReg();
 
   static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
   static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
-  v << cmpbim{1, contReg[stateOff]};
-  emitFwdJcc(v, checkStarted ? CC_NE : CC_A, inst->taken());
+  v << cmpbim{1, contReg[stateOff], sf};
+  emitFwdJcc(v, checkStarted ? CC_NE : CC_A, sf, inst->taken());
 
   // Set generator state as Running.
   v << storebim{int8_t(BaseGenerator::State::Running), contReg[stateOff]};
@@ -5158,8 +5311,9 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
 
   // Take exit if state == 0.
-  v << testbim{int8_t(0xff), contReg[stateOff]};
-  v << jcc{CC_Z, {label(inst->next()), label(inst->taken())}};
+  auto const sf = v.makeReg();
+  v << testbim{int8_t(0xff), contReg[stateOff], sf};
+  v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgContValid(IRInstruction* inst) {
@@ -5170,15 +5324,17 @@ void CodeGenerator::cgContValid(IRInstruction* inst) {
 
   // Return 1 if generator state is not Done.
   auto b = v.makeReg();
-  v << cmpbim{int8_t(BaseGenerator::State::Done), contReg[stateOff]};
-  v << setcc{CC_NE, b};
+  auto const sf = v.makeReg();
+  v << cmpbim{int8_t(BaseGenerator::State::Done), contReg[stateOff], sf};
+  v << setcc{CC_NE, sf, b};
   v << movzbl{b, dstReg};
 }
 
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
   auto contArReg = srcLoc(0).reg();
-  vmain() << incqm{contArReg[CONTOFF(m_key) + TVOFF(m_data) -
-                             c_Generator::arOff()]};
+  auto& v = vmain();
+  v << incqm{contArReg[CONTOFF(m_key) + TVOFF(m_data) - c_Generator::arOff()],
+             v.makeReg()};
 }
 
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
@@ -5190,8 +5346,9 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto mem_index = v.makeReg();
   auto res = v.makeReg();
   v << loadq{contArReg[off], mem_index};
-  v << cmpq{mem_index, newIdxReg};
-  v << cmovq{CC_G, mem_index, newIdxReg, res};
+  auto const sf = v.makeReg();
+  v << cmpq{mem_index, newIdxReg, sf};
+  v << cmovq{CC_G, sf, mem_index, newIdxReg, res};
   v << storeq{res, contArReg[off]};
 }
 
@@ -5214,7 +5371,7 @@ void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
         // See Func::finishedEmittingParams and Func::numParams for rationale
         auto tmp = v.makeReg();
         v << loadl{src, tmp};
-        v << shrli{1, tmp, destReg};
+        v << shrli{1, tmp, destReg, v.makeReg()};
       } else {
         v << loadl{src, destReg};
       }
@@ -5368,8 +5525,9 @@ void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
     "we use byte instructions for IsWaitHandle"
   );
   auto& v = vmain();
-  v << testbim{ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()]};
-  v << setcc{CC_NZ, rdst};
+  auto const sf = v.makeReg();
+  v << testbim{ObjectData::IsWaitHandle, robj[ObjectData::attributeOff()], sf};
+  v << setcc{CC_NZ, sf, rdst};
 }
 
 void CodeGenerator::cgLdWHState(IRInstruction* inst) {
@@ -5378,7 +5536,7 @@ void CodeGenerator::cgLdWHState(IRInstruction* inst) {
   auto& v = vmain();
   auto state = v.makeReg();
   v << loadzbl{robj[ObjectData::whStateOffset()], state};
-  v << andbi{0x0F, state, rdst};
+  v << andbi{0x0F, state, rdst, v.makeReg()};
 }
 
 void CodeGenerator::cgLdWHResult(IRInstruction* inst) {
@@ -5649,7 +5807,7 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   TransID  transId = inst->extra<TransIDData>()->transId;
   auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
-  v << decqm{v.cns(counterAddr)[0]};
+  v << decqm{v.cns(counterAddr)[0], v.makeReg()};
 }
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
@@ -5658,12 +5816,13 @@ void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
 
 void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
   auto& v = vmain();
-  emitTypeTest(inst->typeParam(),
-               srcLoc(0).reg(1),
-               srcLoc(0).reg(0),
-               [&](ConditionCode cc) {
-                 ifThen(v, ccNegate(cc), [&](Vout& v) { v << ud2{}; });
-               });
+  auto const sf = v.makeReg();
+  emitTypeTest(inst->typeParam(), srcLoc(0).reg(1), srcLoc(0).reg(0), sf,
+    [&](ConditionCode cc, Vreg sfTaken) {
+      ifThen(v, ccNegate(cc), sfTaken, [&](Vout& v) {
+        v << ud2{};
+      });
+    });
 }
 
 /*
@@ -5679,8 +5838,9 @@ void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
   // RetCtrl.
   always_assert(!inst->is(FreeActRec, RetCtrl));
   auto v = vmain();
-  v << cmpqm{v.cns(enterTCServiceReq), *rsp};
-  ifThen(v, CC_NE, [&](Vout& v) {
+  auto const sf = v.makeReg();
+  v << cmpqm{v.cns(enterTCServiceReq), *rsp, sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) {
      v << ud2{};
   });
 }
@@ -5697,17 +5857,18 @@ void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
     }
     return;
   }
+  auto const sf = v.makeReg();
   if (!constraint->isConst() && objClass->isConst()) {
     // Reverse the args because cmpq can only have a constant in the LHS.
-    v << cmpq{objClassReg, constraintReg};
+    v << cmpq{objClassReg, constraintReg, sf};
   } else {
-    v << cmpq{constraintReg, objClassReg};
+    v << cmpq{constraintReg, objClassReg, sf};
   }
 
   // The native call for this instruction is the slow path that does
   // proper subtype checking. The comparison above is just to
   // short-circuit the overhead when the Classes are an exact match.
-  ifThen(v, CC_NE, [&](Vout& v){ cgCallNative(v, inst); });
+  ifThen(v, CC_NE, sf, [&](Vout& v) { cgCallNative(v, inst); });
 }
 
 void CodeGenerator::cgVerifyParamCls(IRInstruction* inst) {
@@ -5773,24 +5934,26 @@ void CodeGenerator::cgProfileStr(IRInstruction* inst) {
   auto const ch = profile.handle();
 
   auto ptrReg = srcLoc(0).reg();
-  emitCmpTVType(v, KindOfStaticString, ptrReg[TVOFF(m_type)]);
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfStaticString, ptrReg[TVOFF(m_type)]);
   ifThenElse(
-    v, CC_E,
+    v, CC_E, sf,
     [&](Vout& v) { // m_type == KindOfStaticString
-      v << inclm{rVmTl[ch + offsetof(StrProfile, staticStr)]};
+      v << inclm{rVmTl[ch + offsetof(StrProfile, staticStr)], v.makeReg()};
     },
     [&](Vout& v) { // m_type == KindOfString
       auto ptr = v.makeReg();
+      auto const sf = v.makeReg();
       v << loadq{ptrReg[TVOFF(m_data)], ptr};
-      v << cmplim{StaticValue, ptr[FAST_REFCOUNT_OFFSET]};
+      v << cmplim{StaticValue, ptr[FAST_REFCOUNT_OFFSET], sf};
 
       ifThenElse(
-        v, CC_E,
+        v, CC_E, sf,
         [&](Vout& v) { // _count == StaticValue
-          v << inclm{rVmTl[ch + offsetof(StrProfile, strStatic)]};
+          v << inclm{rVmTl[ch + offsetof(StrProfile, strStatic)], v.makeReg()};
         },
         [&](Vout& v) {
-          v << inclm{rVmTl[ch + offsetof(StrProfile, str)]};
+          v << inclm{rVmTl[ch + offsetof(StrProfile, str)], v.makeReg()};
         }
       );
     }
@@ -5804,9 +5967,10 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto dst1 = v.makeReg();
 
   v << loadl{baseReg[ArrayData::offsetofSize()], dst1};
-  v << testl{dst1, dst1};
+  auto const sf = v.makeReg();
+  v << testl{dst1, dst1, sf};
 
-  unlikelyCond(v, vcold(), CC_S, dstReg,
+  unlikelyCond(v, vcold(), CC_S, sf, dstReg,
     [&](Vout& v) {
       auto dst2 = v.makeReg();
       cgCallHelper(v, CppCall::method(&ArrayData::vsize),

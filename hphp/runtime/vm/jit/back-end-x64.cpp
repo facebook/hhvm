@@ -666,8 +666,9 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {
-    auto name = reg.type() == PhysReg::GP ? reg::regname(Reg64(reg)) :
-      reg::regname(RegXMM(reg));
+    auto name = (reg.type() == PhysReg::GP) ? reg::regname(Reg64(reg)) :
+      (reg.type() == PhysReg::SIMD) ? reg::regname(RegXMM(reg)) :
+      /* (reg.type() == PhysReg::SF) ? */ reg::regname(RegSF(reg));
     os << name;
   }
 
@@ -713,7 +714,8 @@ UNUSED const Abi vasm_abi {
   .gpReserved = x64::abi.gp() - vasm_gp,
   .simdUnreserved = vasm_simd,
   .simdReserved = x64::abi.simd() - vasm_simd,
-  .calleeSaved = x64::kCalleeSaved
+  .calleeSaved = x64::kCalleeSaved,
+  .sf = x64::abi.sf
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {

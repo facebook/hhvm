@@ -46,7 +46,7 @@ struct CodeGenerator : public jit::CodeGenerator {
   const Func* curFunc() const { return m_curInst->marker().func(); }
   bool resumed() const { return m_curInst->marker().resumed(); }
 
-  void emitCompareInt(IRInstruction* inst);
+  Vreg emitCompareInt(IRInstruction* inst);
   void emitCompareIntAndSet(IRInstruction* inst, ConditionCode cond);
 
   CallDest callDest(Vreg reg0) const;
@@ -70,10 +70,11 @@ struct CodeGenerator : public jit::CodeGenerator {
   void emitDecRefMem(Vout&, Type type, Vreg base, int offset);
 
   template <class JmpFn>
-  void emitReffinessTest(IRInstruction* inst, JmpFn doJcc);
+  void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, JmpFn doJcc);
+  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, Vreg sf,
+                    JmpFn doJcc);
 
   void emitLoadTypedValue(Vout&, Vloc dst, Vreg base, ptrdiff_t offset,
                           Block* label);

@@ -39,7 +39,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
 jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
   constexpr auto N = 64;
-  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) == N);
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
   jit::vector<VMoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
@@ -133,7 +133,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
-  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) == N);
+  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
   jit::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);

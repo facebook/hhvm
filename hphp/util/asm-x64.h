@@ -98,6 +98,7 @@ SIMPLE_REGTYPE(Reg32);
 SIMPLE_REGTYPE(Reg16);
 SIMPLE_REGTYPE(Reg8);
 SIMPLE_REGTYPE(RegXMM);
+SIMPLE_REGTYPE(RegSF);
 
 #undef SIMPLE_REGTYPE
 
@@ -471,6 +472,9 @@ namespace reg {
     X(xmm7); X(xmm8); X(xmm9); X(xmm10); X(xmm11); X(xmm12); X(xmm13);
     X(xmm14); X(xmm15);
     return nullptr;
+  }
+  inline const char* regname(RegSF r) {
+    return "%flags";
   }
 #undef X
 

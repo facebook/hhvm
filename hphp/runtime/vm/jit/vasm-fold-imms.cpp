@@ -47,34 +47,34 @@ struct Folder {
   template<class Inst> void fold(Inst&, Vinstr& out) {}
   void fold(addq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = addqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = addqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(andq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(cmpb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1}; }
+    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
   }
   void fold(cmpq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpqi{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
   }
   void fold(cmpqm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpqim{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmpqim{val, in.s1, in.sf}; }
   }
   void fold(cmplm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmplim{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
   }
   void fold(orq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = orqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = orqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = orqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(storeb& in, Vinstr& out) {
     int val;
@@ -94,17 +94,17 @@ struct Folder {
   }
   void fold(subq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = subqi{val, in.s1, in.d}; }
+    if (match_int(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
   }
   void fold(xorb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = xorbi{val, in.s1, in.d}; }
-    else if (match_byte(in.s1, val)) { out = xorbi{val, in.s0, in.d}; }
+    if (match_byte(in.s0, val)) { out = xorbi{val, in.s1, in.d, in.sf}; }
+    else if (match_byte(in.s1, val)) { out = xorbi{val, in.s0, in.d, in.sf}; }
   }
   void fold(xorq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
   }
 };
 }

@@ -111,12 +111,12 @@ inline void emitLdLowPtr(Vout& v, Vreg dest, Vptr mem, size_t size) {
   }
 }
 
-inline void emitCmpClass(Vout& v, Vreg reg, const Class* c) {
+inline void emitCmpClass(Vout& v, Vreg sf, Vreg reg, const Class* c) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    v << cmpq{v.cns(c), reg};
+    v << cmpq{v.cns(c), reg, sf};
   } else if (size == 4) {
-    v << cmpl{v.cns(c), reg};
+    v << cmpl{v.cns(c), reg, sf};
   } else {
     not_implemented();
   }

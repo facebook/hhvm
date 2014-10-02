@@ -51,7 +51,7 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Asm& as, const Op* pc);
-void emitEagerSyncPoint(Vout&, const Op* pc);
+void emitEagerSyncPoint(Vout& v, const Op* pc);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
@@ -60,22 +60,22 @@ void emitTransCounterInc(Asm& a);
 void emitTransCounterInc(Vout&);
 
 void emitIncRef(Asm& as, PhysReg base);
-void emitIncRef(Vout&, Vreg base);
+void emitIncRef(Vout& v, Vreg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg);
 
-void emitAssertFlagsNonNegative(Vout&);
-void emitAssertRefCount(Vout&, Vreg base);
+void emitAssertFlagsNonNegative(Vout& v, Vreg sf);
+void emitAssertRefCount(Vout& v, Vreg base);
 
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg);
 void emitLea(Asm& as, MemoryRef mr, PhysReg dst);
 
-Vreg emitLdObjClass(Vout&, Vreg objReg, Vreg dstReg);
-Vreg emitLdClsCctx(Vout&, Vreg srcReg, Vreg dstReg);
+Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg);
+Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg);
 
 void emitCall(Asm& as, TCA dest, RegSet args);
 void emitCall(Asm& as, CppCall call, RegSet args);
-void emitCall(Vout&, CppCall call, RegSet args);
+void emitCall(Vout& v, CppCall call, RegSet args);
 
 // store imm to the 8-byte memory location at ref. Warning: don't use this
 // if you wanted an atomic store; large imms cause two stores.
@@ -93,7 +93,7 @@ void emitTraceCall(CodeBlock& cb, Offset pcOff);
  * before a jnz to surprise handling code.
  */
 void emitTestSurpriseFlags(Asm& as);
-void emitTestSurpriseFlags(Vout&);
+Vreg emitTestSurpriseFlags(Vout&);
 
 void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Fixup fixup);
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -174,16 +174,16 @@ emitTLSLoad(X64Assembler& a, const ThreadLocalNoCheck<T>& datum, Reg64 dest) {
 #endif // USE_GCC_FAST_TLS
 
 // Emit a load of a low pointer.
-void emitLdLowPtr(Vout&, Vptr mem, Vreg reg, size_t size);
+void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size);
 
-void emitCmpClass(Vout&, const Class* c, Vptr mem);
-void emitCmpClass(Vout&, Vreg reg, Vptr mem);
-void emitCmpClass(Vout&, Vreg reg1, Vreg reg2);
+void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem);
+void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem);
+void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
 
-void copyTV(Vout&, Vloc src, Vloc dst);
-void pack2(Vout&, Vreg s0, Vreg s1, Vreg d0);
+void copyTV(Vout& v, Vloc src, Vloc dst);
+void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
 
-Vreg zeroExtendIfBool(Vout&, const SSATmp* src, Vreg reg);
+Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
 
 ConditionCode opToConditionCode(Opcode opc);
 
@@ -239,7 +239,7 @@ inline MemoryRef lookupDestructor(Vout& v, PhysReg typeReg) {
                 (KindOfResource      >> kShiftDataTypeToDestrIndex == 4) &&
                 (KindOfRef           >> kShiftDataTypeToDestrIndex == 5),
                 "lookup of destructors depends on KindOf* values");
-  v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg};
+  v << shrli{kShiftDataTypeToDestrIndex, typeReg, typeReg, v.makeReg()};
   return baseless(typeReg*8 + table);
 }
 

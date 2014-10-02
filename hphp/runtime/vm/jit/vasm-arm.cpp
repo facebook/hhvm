@@ -432,7 +432,7 @@ void Vgen::emit(jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
       // the taken branch is the fall-through block, invert the branch.
-      i = jcc{ccNegate(i.cc), {i.targets[1], i.targets[0]}};
+      i = jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}};
     }
     jccs.push_back({a->frontier(), i.targets[1]});
     // B.cond range is +/- 1MB but this uses BR

@@ -46,45 +46,58 @@ struct Vscaled;
 // a gpr, xmm, or virtual register.
 struct Vreg {
   static constexpr auto kind = VregKind::Any;
+  static const unsigned kNumGP{PhysReg::kSIMDOffset}; // 33
+  static const unsigned kNumXMM{30};
+  static const unsigned kNumSF{1};
   static const unsigned G0{0};
-  static const unsigned X0{PhysReg::kSIMDOffset}; // 33
-  static const unsigned V0{64};
-  Vreg() : rn(0xffffffff) {}
+  static const unsigned X0{kNumGP};
+  static const unsigned S0{X0+kNumXMM};
+  static const unsigned V0{S0+kNumSF};
+  static const unsigned kInvalidReg{0xffffffffU};
+  Vreg() : rn(kInvalidReg) {}
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r) : rn(int(r)) {}
   /* implicit */ Vreg(Reg32 r) : rn(int(r)) {}
   /* implicit */ Vreg(Reg8 r) : rn(int(r)) {}
   /* implicit */ Vreg(RegXMM r) : rn(X0+int(r)) {}
+  /* implicit */ Vreg(RegSF r) : rn(S0+int(r)) {}
   /* implicit */ Vreg(PhysReg r) {
-    rn = r == InvalidReg ? 0xffffffff :
+    rn = (r == InvalidReg) ? kInvalidReg :
          r.isGP() ? G0+int(Reg64(r)) :
-         X0+int(RegXMM(r));
+          r.isSIMD() ? X0+int(RegXMM(r)) :
+          /* r.isSF() ? */ S0+int(RegSF(r));
   }
   /* implicit */ operator size_t() const { return rn; }
   /* implicit */ operator Reg64() const {
     assert(isGP());
-    return Reg64(rn);
+    return Reg64(rn - G0);
   }
   /* implicit */ operator RegXMM() const {
     assert(isSIMD());
     return RegXMM(rn - X0);
   }
+  /* implicit */ operator RegSF() const {
+    assert(isSF());
+    return RegSF(rn - S0);
+  }
   /* implicit */ operator PhysReg() const { return physReg(); }
   bool isPhys() const {
-    static_assert(G0 == 0, "");
+    static_assert(G0 < V0 && X0 < V0 && S0 < V0 && V0 < kInvalidReg, "");
     return rn < V0;
   }
-  bool isGP() const { assert(!isVirt()); return rn < X0; }
-  bool isSIMD() const { assert(!isVirt()); return rn >= X0 && rn < V0; }
-  bool isVirt() const { return isValid() && rn >= V0; }
-  bool isValid() const { return rn < 0xffffffff; }
+  bool isGP() const { return /* rn >= G0 && */ rn < G0+kNumGP; }
+  bool isSIMD() const { return rn >= X0 && rn < X0+kNumXMM; }
+  bool isSF() const { return rn >= S0 && rn < S0+kNumSF; }
+  bool isVirt() const { return rn >= V0 && isValid(); }
+  bool isValid() const { return rn != kInvalidReg; }
   bool operator==(Vreg r) const { return rn == r.rn; }
   bool operator!=(Vreg r) const { return rn != r.rn; }
   PhysReg physReg() const {
     assert(!isValid() || isPhys());
     return !isValid() ? InvalidReg :
            isGP() ? PhysReg(/* implicit */operator Reg64()) :
-                    PhysReg(/* implicit */operator RegXMM());
+           isSIMD() ? PhysReg(/* implicit */operator RegXMM()) :
+           /* isSF() ? */ PhysReg(/* implicit */operator RegSF());
   }
   Vptr operator[](int disp) const;
   Vptr operator[](ScaledIndex) const;
@@ -97,7 +110,7 @@ struct Vreg {
   Vptr operator[](Vreg) const;
   Vptr operator+(size_t d) const;
 private:
-  unsigned rn{0xffffffff};
+  unsigned rn{kInvalidReg};
 };
 
 // instantiations of this wrap virtual register numbers in in a strongly
@@ -107,17 +120,21 @@ template<class Reg, VregKind k> struct Vr {
   static constexpr auto kind = k;
   explicit Vr(size_t rn) : rn(rn) {}
   /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
-    if (kind == VregKind::Simd) {
-      assert(!r.isValid() || r.isVirt() || r.isSIMD());
-    } else if (kind == VregKind::Gpr) {
+    if (kind == VregKind::Gpr) {
       assert(!r.isValid() || r.isVirt() || r.isGP());
+    } else if (kind == VregKind::Simd) {
+      assert(!r.isValid() || r.isVirt() || r.isSIMD());
+    } else if (kind == VregKind::Sf) {
+      assert(!r.isValid() || r.isVirt() || r.isSF());
     }
   }
   /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
   /* implicit */ Vr(PhysReg pr) : Vr{Vreg(pr)} {}
   Reg asReg() const {
     assert(isPhys());
-    return isGP() ? Reg(rn) : Reg(rn-Vreg::X0);
+    return isGP() ? Reg(rn) :
+           isSIMD() ? Reg(rn-Vreg::X0) :
+           /* isSF() ? */ Reg(rn-Vreg::S0);
   }
   /* implicit */ operator Reg() const { return asReg(); }
   /* implicit */ operator Vreg() const { return Vreg(rn); }
@@ -126,14 +143,15 @@ template<class Reg, VregKind k> struct Vr {
     static_assert(Vreg::G0 == 0, "");
     return rn < Vreg::V0;
   }
-  bool isGP() const { assert(!isVirt()); return rn < Vreg::X0; }
-  bool isSIMD() const { assert(!isVirt());return rn>=Vreg::X0 && rn<Vreg::V0; }
-  bool isVirt() const { return isValid() && rn >= Vreg::V0; }
+  bool isGP() const { return rn>=Vreg::G0 && rn<Vreg::G0+Vreg::kNumGP; }
+  bool isSIMD() const { return rn>=Vreg::X0 && rn<Vreg::X0+Vreg::kNumXMM; }
+  bool isSF() const { return rn>=Vreg::S0 && rn<Vreg::S0+Vreg::kNumSF; }
+  bool isVirt() const { return rn >= Vreg::V0 && isValid(); }
   bool operator==(Vr<Reg,k> r) const { return rn == r.rn; }
   bool operator!=(Vr<Reg,k> r) const { return rn != r.rn; }
   bool operator==(PhysReg) const = delete;
   bool operator!=(PhysReg) const = delete;
-  bool isValid() const { return rn < 0xffffffff; }
+  bool isValid() const { return rn != Vreg::kInvalidReg; }
   Vptr operator[](int disp) const;
   Vptr operator[](ScaledIndex si) const;
   Vptr operator[](ScaledIndexDisp sid) const;
@@ -150,6 +168,7 @@ typedef Vr<Reg32,VregKind::Gpr>   Vreg32;
 typedef Vr<Reg16,VregKind::Gpr>   Vreg16;
 typedef Vr<Reg8,VregKind::Gpr>    Vreg8;
 typedef Vr<RegXMM,VregKind::Simd> VregXMM;
+typedef Vr<RegSF,VregKind::Sf>    VregSF;
 
 inline Reg64 r64(Vreg64 r) { return r; }
 
@@ -336,9 +355,9 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
-  O(bindexit, I(cc) I(target), Un, Dn)\
-  O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), Un, Dn)\
-  O(bindjcc2, I(cc) I(target), Un, Dn)\
+  O(bindexit, I(cc) I(target), U(sf), Dn)\
+  O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
+  O(bindjcc2, I(cc) I(target), U(sf), Dn)\
   O(bindjmp, I(target) I(trflags), Un, Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target), Dn)\
@@ -348,7 +367,7 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(end, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
-  O(fallbackcc, I(cc) I(dest), Un, Dn)\
+  O(fallbackcc, I(cc) I(dest), U(sf), Dn)\
   O(incstat, I(stat) I(n) I(force), Un, Dn)\
   O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
   O(ldpoint, I(s), Un, D(d))\
@@ -376,53 +395,53 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(lslv, Inone, U(sl) U(sr), D(d))\
   O(tbcc, I(cc) I(bit), U(s), Dn)\
   /* x64 instructions */\
-  O(andb, Inone, U(s0) U(s1), D(d)) \
-  O(andbi, I(s0), UH(s1,d), DH(d,s1)) \
-  O(andbim, I(s), U(m), Dn) \
-  O(andl, Inone, U(s0) U(s1), D(d)) \
-  O(andli, I(s0), UH(s1,d), DH(d,s1)) \
-  O(andq, Inone, U(s0) U(s1), D(d)) \
-  O(andqi, I(s0), UH(s1,d), DH(d,s1)) \
-  O(addlm, Inone, U(s0) U(m), Dn) \
-  O(addli, I(s0), UH(s1,d), DH(d,s1)) \
-  O(addq, Inone, U(s0) U(s1), D(d)) \
-  O(addqi, I(s0), UH(s1,d), DH(d,s1)) \
+  O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(addlm, Inone, U(s0) U(m), D(sf)) \
+  O(addq, Inone, U(s0) U(s1), D(d) D(sf)) \
+  O(addqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
+  O(andb, Inone, U(s0) U(s1), D(d) D(sf)) \
+  O(andbi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andbim, I(s), U(m), D(sf)) \
+  O(andl, Inone, U(s0) U(s1), D(d) D(sf)) \
+  O(andli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andq, Inone, U(s0) U(s1), D(d) D(sf)) \
+  O(andqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(call, I(target), U(args), Dn)\
   O(callm, Inone, U(target) U(args), Dn)\
   O(callr, Inone, U(target) U(args), Dn)\
-  O(cloadq, I(cc), U(f) U(t), D(d))\
-  O(cmovq, I(cc), U(f) U(t), D(d))\
-  O(cmpb, Inone, U(s0) U(s1), Dn)\
-  O(cmpbi, I(s0), U(s1), Dn)\
-  O(cmpbim, I(s0), U(s1), Dn)\
-  O(cmpl, Inone, U(s0) U(s1), Dn)\
-  O(cmpli, I(s0), U(s1), Dn)\
-  O(cmplim, I(s0), U(s1), Dn)\
-  O(cmplm, Inone, U(s0) U(s1), Dn)\
-  O(cmpq, Inone, U(s0) U(s1), Dn)\
-  O(cmpqi, I(s0), U(s1), Dn)\
-  O(cmpqim, I(s0), U(s1), Dn)\
-  O(cmpqm, Inone, U(s0) U(s1), Dn)\
+  O(cloadq, I(cc), U(sf) U(f) U(t), D(d))\
+  O(cmovq, I(cc), U(sf) U(f) U(t), D(d))\
+  O(cmpb, Inone, U(s0) U(s1), D(sf))\
+  O(cmpbi, I(s0), U(s1), D(sf))\
+  O(cmpbim, I(s0), U(s1), D(sf))\
+  O(cmpl, Inone, U(s0) U(s1), D(sf))\
+  O(cmpli, I(s0), U(s1), D(sf))\
+  O(cmplim, I(s0), U(s1), D(sf))\
+  O(cmplm, Inone, U(s0) U(s1), D(sf))\
+  O(cmpq, Inone, U(s0) U(s1), D(sf))\
+  O(cmpqi, I(s0), U(s1), D(sf))\
+  O(cmpqim, I(s0), U(s1), D(sf))\
+  O(cmpqm, Inone, U(s0) U(s1), D(sf))\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(cqo, Inone, Un, Dn)\
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
   O(cvtsi2sdm, Inone, U(s), D(d))\
-  O(decl, Inone, UH(s,d), DH(d,s))\
-  O(declm, Inone, U(m), Dn)\
-  O(decq, Inone, UH(s,d), DH(d,s))\
-  O(decqm, Inone, U(m), Dn)\
+  O(decl, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(declm, Inone, U(m), D(sf))\
+  O(decq, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(decqm, Inone, U(m), D(sf))\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
-  O(incwm, Inone, U(m), Dn)\
-  O(idiv, Inone, U(s), Dn)\
-  O(imul, Inone, U(s0) U(s1), D(d))\
-  O(incl, Inone, UH(s,d), DH(d,s))\
-  O(inclm, Inone, U(m), Dn)\
-  O(incq, Inone, UH(s,d), DH(d,s))\
-  O(incqm, Inone, U(m), Dn)\
-  O(incqmlock, Inone, U(m), Dn)\
-  O(jcc, I(cc), Un, Dn)\
+  O(incwm, Inone, U(m), D(sf))\
+  O(idiv, Inone, U(s), D(sf))\
+  O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(inclm, Inone, U(m), D(sf))\
+  O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(incqm, Inone, U(m), D(sf))\
+  O(incqmlock, Inone, U(m), D(sf))\
+  O(jcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target), Dn)\
   O(jmpm, Inone, U(target), Dn)\
@@ -444,11 +463,11 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
-  O(neg, Inone, UH(s,d), DH(d,s))\
+  O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(not, Inone, UH(s,d), DH(d,s))\
-  O(orq, Inone, U(s0) U(s1), D(d))\
-  O(orqi, I(s0), UH(s1,d), DH(d,s1)) \
-  O(orqim, I(s0), U(m), Dn)\
+  O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(orqim, I(s0), U(m), D(sf))\
   O(pop, Inone, Un, D(d))\
   O(popm, Inone, U(m), Dn)\
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
@@ -457,17 +476,16 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, Un, Dn)\
-  O(rorqi, I(s0), UH(s1,d), DH(d,s1))\
   O(roundsd, I(dir), U(s), D(d))\
-  O(sarq, Inone, U(s), D(d))\
-  O(sarqi, I(s0), UH(s1,d), DH(d,s1))\
-  O(sbbl, Inone, UA(s0) U(s1), D(d))\
-  O(setcc, I(cc), Un, D(d))\
-  O(shlli, I(s0), UH(s1,d), DH(d,s1))\
-  O(shlq, Inone, U(s), D(d))\
-  O(shlqi, I(s0), UH(s1,d), DH(d,s1))\
-  O(shrli, I(s0), UH(s1,d), DH(d,s1))\
-  O(shrqi, I(s0), UH(s1,d), DH(d,s1))\
+  O(sarq, Inone, U(s), D(d) D(sf))\
+  O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(sbbl, Inone, U(sfu) UA(s0) U(s1), D(d) D(sfd))\
+  O(setcc, I(cc), U(sf), D(d))\
+  O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(shlq, Inone, U(s), D(d) D(sf))\
+  O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(shrli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(sqrtsd, Inone, U(s), D(d))\
   O(storeb, Inone, U(s) U(m), Dn)\
   O(storebim, I(s), U(m), Dn)\
@@ -479,34 +497,35 @@ inline Vptr Vr<Reg,k>::operator+(size_t d) const {
   O(storew, Inone, U(s) U(m), Dn)\
   O(storesd, Inone, U(s) U(m), Dn)\
   O(storewim, I(s), U(m), Dn)\
-  O(subl, Inone, UA(s0) U(s1), D(d))\
-  O(subli, I(s0), UH(s1,d), DH(d,s1))\
-  O(subq, Inone, UA(s0) U(s1), D(d))\
-  O(subqi, I(s0), UH(s1,d), DH(d,s1))\
+  O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
+  O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(subq, Inone, UA(s0) U(s1), D(d) D(sf))\
+  O(subqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subsd, Inone, UA(s0) U(s1), D(d))\
-  O(testb, Inone, U(s0) U(s1), Dn)\
-  O(testbi, I(s0), U(s1), Dn)\
-  O(testbim, I(s0), U(s1), Dn)\
-  O(testl, Inone, U(s0) U(s1), Dn)\
-  O(testli, I(s0), U(s1), Dn)\
-  O(testlim, I(s0), U(s1), Dn)\
-  O(testq, Inone, U(s0) U(s1), Dn)\
-  O(testqm, Inone, U(s0) U(s1), Dn)\
-  O(testqim, I(s0), U(s1), Dn)\
-  O(ucomisd, Inone, U(s0) U(s1), Dn)\
+  O(testb, Inone, U(s0) U(s1), D(sf))\
+  O(testbi, I(s0), U(s1), D(sf))\
+  O(testbim, I(s0), U(s1), D(sf))\
+  O(testl, Inone, U(s0) U(s1), D(sf))\
+  O(testli, I(s0), U(s1), D(sf))\
+  O(testlim, I(s0), U(s1), D(sf))\
+  O(testq, Inone, U(s0) U(s1), D(sf))\
+  O(testqm, Inone, U(s0) U(s1), D(sf))\
+  O(testqim, I(s0), U(s1), D(sf))\
+  O(ucomisd, Inone, U(s0) U(s1), D(sf))\
   O(ud2, Inone, Un, Dn)\
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
-  O(xorb, Inone, U(s0) U(s1), D(d))\
-  O(xorbi, I(s0), UH(s1,d), DH(d,s1))\
-  O(xorq, Inone, U(s0) U(s1), D(d))\
-  O(xorqi, I(s0), UH(s1,d), DH(d,s1))\
+  O(xorb, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(xorbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
 
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
 struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
-struct bindexit { ConditionCode cc; SrcKey target; TransFlags trflags; };
-struct bindjcc1 { ConditionCode cc; Offset targets[2]; };
-struct bindjcc2 { ConditionCode cc; Offset target; };
+struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
+                  TransFlags trflags; };
+struct bindjcc1 { ConditionCode cc; VregSF sf; Offset targets[2]; };
+struct bindjcc2 { ConditionCode cc; VregSF sf; Offset target; };
 struct bindjmp { SrcKey target; TransFlags trflags; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; };
@@ -516,7 +535,8 @@ struct copyargs { Vtuple s, d; };
 struct end {};
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; };
-struct fallbackcc { ConditionCode cc; SrcKey dest; TransFlags trflags; };
+struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
+                    TransFlags trflags; };
 struct incstat { Stats::StatCounter stat; int n; bool force; };
 struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex; };
 struct ldpoint { Vpoint s; Vreg64 d; };
@@ -562,53 +582,53 @@ struct asrv { Vreg64 sl, sr, d; };
 //  p   RIPRelativeRef
 
 // x64 instructions
-struct andb  { Vreg8 s0, s1, d; };
-struct andbi { Immed s0; Vreg8 s1, d; };
-struct andbim { Immed s; Vptr m; };
-struct andl  { Vreg32 s0, s1, d; };
-struct andli { Immed s0; Vreg32 s1, d; };
-struct andq  { Vreg64 s0, s1, d; };
-struct andqi { Immed s0; Vreg64 s1, d; };
-struct addlm { Vreg32 s0; Vptr m; };
-struct addq  { Vreg64 s0, s1, d; };
-struct addli { Immed s0; Vreg32 s1, d; };
-struct addqi { Immed s0; Vreg64 s1, d; };
+struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
+struct addq  { Vreg64 s0, s1, d; VregSF sf; };
+struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct addsd  { VregXMM s0, s1, d; };
+struct andb  { Vreg8 s0, s1, d; VregSF sf; };
+struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; };
+struct andbim { Immed s; Vptr m; VregSF sf; };
+struct andl  { Vreg32 s0, s1, d; VregSF sf; };
+struct andli { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct andq  { Vreg64 s0, s1, d; VregSF sf; };
+struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct call { CodeAddress target; RegSet args; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
-struct cloadq { ConditionCode cc; Vreg64 f; Vptr t; Vreg64 d; };
-struct cmovq { ConditionCode cc; Vreg64 f, t, d; };
-struct cmpb  { Vreg8  s0; Vreg8  s1; };
-struct cmpbi { Immed  s0; Vreg8  s1; };
-struct cmpbim { Immed s0; Vptr s1; };
-struct cmpl  { Vreg32 s0; Vreg32 s1; };
-struct cmpli { Immed  s0; Vreg32 s1; };
-struct cmplim { Immed s0; Vptr s1; };
-struct cmplm { Vreg32 s0; Vptr s1; };
-struct cmpq  { Vreg64 s0; Vreg64 s1; };
-struct cmpqi { Immed  s0; Vreg64 s1; };
-struct cmpqim { Immed s0; Vptr s1; };
-struct cmpqm { Vreg64 s0; Vptr s1; };
+struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
+struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };
+struct cmpbi { Immed  s0; Vreg8  s1; VregSF sf; };
+struct cmpbim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpl  { Vreg32 s0; Vreg32 s1; VregSF sf; };
+struct cmpli { Immed  s0; Vreg32 s1; VregSF sf; };
+struct cmplim { Immed s0; Vptr s1; VregSF sf; };
+struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; };
+struct cmpq  { Vreg64 s0; Vreg64 s1; VregSF sf; };
+struct cmpqi { Immed  s0; Vreg64 s1; VregSF sf; };
+struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct cmpsd { ComparisonPred pred; VregXMM s0, s1, d; };
 struct cqo {};
 struct cvttsd2siq { VregXMM s; Vreg64 d; };
 struct cvtsi2sd { Vreg64 s; VregXMM d; };
 struct cvtsi2sdm { Vptr s; VregXMM d; };
-struct decl { Vreg32 s, d; };
-struct declm { Vptr m; };
-struct decq { Vreg64 s, d; };
-struct incwm { Vptr m; };
-struct decqm { Vptr m; };
+struct decl { Vreg32 s, d; VregSF sf; };
+struct declm { Vptr m; VregSF sf; };
+struct decq { Vreg64 s, d; VregSF sf; };
+struct decqm { Vptr m; VregSF sf; };
 struct divsd { VregXMM s0, s1, d; };
-struct idiv { Vreg64 s; };
-struct imul { Vreg64 s0, s1, d; };
-struct incl { Vreg32 s, d; };
-struct inclm { Vptr m; };
-struct incq { Vreg64 s, d; };
-struct incqm { Vptr m; };
-struct incqmlock { Vptr m; };
-struct jcc { ConditionCode cc; Vlabel targets[2]; };
+struct idiv { Vreg64 s; VregSF sf; };
+struct imul { Vreg64 s0, s1, d; VregSF sf; };
+struct incl { Vreg32 s, d; VregSF sf; };
+struct inclm { Vptr m; VregSF sf; };
+struct incq { Vreg64 s, d; VregSF sf; };
+struct incqm { Vptr m; VregSF sf; };
+struct incqmlock { Vptr m; VregSF sf; };
+struct incwm { Vptr m; VregSF sf; };
+struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; };
 struct jmpm { Vptr target; };
@@ -630,11 +650,11 @@ struct movqxr { VregXMM s; Vreg64 d; };
 struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregXMM s0, s1, d; };
-struct neg { Vreg64 s, d; };
+struct neg { Vreg64 s, d; VregSF sf; };
 struct not { Vreg64 s, d; };
-struct orq { Vreg64 s0, s1, d; };
-struct orqi { Immed s0; Vreg64 s1, d; };
-struct orqim { Immed s0; Vptr m; };
+struct orq { Vreg64 s0, s1, d; VregSF sf; };
+struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
 struct popm { Vptr m; };
 struct psllq { Immed s0; VregXMM s1, d; };
@@ -643,17 +663,16 @@ struct push { Vreg64 s; };
 struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
 struct ret {};
-struct rorqi { Immed s0; Vreg64 s1, d; };
 struct roundsd { RoundDirection dir; VregXMM s, d; };
-struct sarq { Vreg64 s, d; }; // uses rcx
-struct sarqi { Immed s0; Vreg64 s1, d; };
-struct sbbl { Vreg32 s0, s1, d; };
-struct setcc { ConditionCode cc; Vreg8 d; };
-struct shlli { Immed s0; Vreg32 s1, d; };
-struct shlq { Vreg64 s, d; }; // uses rcx
-struct shlqi { Immed s0; Vreg64 s1, d; };
-struct shrli { Immed s0; Vreg32 s1, d; };
-struct shrqi { Immed s0; Vreg64 s1, d; };
+struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
+struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct sbbl { VregSF sfu; Vreg32 s0, s1, d; VregSF sfd; };
+struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
+struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
+struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct sqrtsd { VregXMM s, d; };
 struct storeb { Vreg8 s; Vptr m; };
 struct storebim { Immed s; Vptr m; };
@@ -665,27 +684,27 @@ struct storeqim { Immed s; Vptr m; };
 struct storesd { VregXMM s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewim { Immed s; Vptr m; };
-struct subl { Vreg32 s0, s1, d; };
-struct subli { Immed s0; Vreg32 s1, d; };
-struct subq { Vreg64 s0, s1, d; };
-struct subqi { Immed s0; Vreg64 s1, d; };
+struct subl { Vreg32 s0, s1, d; VregSF sf; };
+struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
+struct subq { Vreg64 s0, s1, d; VregSF sf; };
+struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct subsd { VregXMM s0, s1, d; };
-struct testb { Vreg8 s0, s1; };
-struct testbi { Immed s0; Vreg8 s1; };
-struct testbim { Immed s0; Vptr s1; };
-struct testl { Vreg32 s0, s1; };
-struct testli { Immed s0; Vreg32 s1; };
-struct testlim { Immed s0; Vptr s1; };
-struct testq { Vreg64 s0, s1; };
-struct testqm { Vreg64 s0; Vptr s1; };
-struct testqim { Immed s0; Vptr s1; };
-struct ucomisd { VregXMM s0, s1; };
+struct testb { Vreg8 s0, s1; VregSF sf; };
+struct testbi { Immed s0; Vreg8 s1; VregSF sf; };
+struct testbim { Immed s0; Vptr s1; VregSF sf; };
+struct testl { Vreg32 s0, s1; VregSF sf; };
+struct testli { Immed s0; Vreg32 s1; VregSF sf; };
+struct testlim { Immed s0; Vptr s1; VregSF sf; };
+struct testq { Vreg64 s0, s1; VregSF sf; };
+struct testqm { Vreg64 s0; Vptr s1; VregSF sf; };
+struct testqim { Immed s0; Vptr s1; VregSF sf; };
+struct ucomisd { VregXMM s0, s1; VregSF sf; };
 struct ud2 {};
 struct unpcklpd { VregXMM s0, s1, d; };
-struct xorb { Vreg8 s0, s1, d; };
-struct xorbi { Immed s0; Vreg8 s1, d; };
-struct xorq { Vreg64 s0, s1, d; };
-struct xorqi { Immed s0; Vreg64 s1, d; };
+struct xorb { Vreg8 s0, s1, d; VregSF sf; };
+struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; };
+struct xorq { Vreg64 s0, s1, d; VregSF sf; };
+struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 
 struct Vinstr {
 #define O(name, imms, uses, defs) name,

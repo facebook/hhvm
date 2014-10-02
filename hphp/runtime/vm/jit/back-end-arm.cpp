@@ -441,6 +441,10 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void streamPhysReg(std::ostream& os, PhysReg reg) override {
+    if (reg.isSF()) {
+      os << "statusFlags";
+      return;
+    }
     auto prefix = reg.isGP() ? (vixl::Register(reg).size() == vixl::kXRegSize
                                 ? 'x' : 'w')
                   : (vixl::FPRegister(reg).size() == vixl::kSRegSize

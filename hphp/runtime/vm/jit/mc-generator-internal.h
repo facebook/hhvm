@@ -37,10 +37,10 @@ void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
 }
 
 template <class Then>
-void ifThen(Vout& v, ConditionCode cc, Then thenBlock) {
+void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
   auto then = v.makeBlock();
   auto done = v.makeBlock();
-  v << jcc{cc, {done, then}};
+  v << jcc{cc, sf, {done, then}};
   v = then;
   thenBlock(v);
   if (!v.closed()) v << jmp{done};
@@ -180,12 +180,12 @@ void emitTestTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  testb(src, toByte(tvOp));
 }
 
-inline void emitTestTVType(Vout& v, Immed s0, Vreg s1) {
-  v << testbi{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << testbi{s0, s1, sf};
 }
 
-inline void emitTestTVType(Vout& v, Immed s0, Vptr s1) {
-  v << testbim{s0, s1};
+inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << testbim{s0, s1, sf};
 }
 
 template<typename SrcType, typename OpndType>
@@ -204,12 +204,12 @@ void emitCmpTVType(X64Assembler& a, SrcType src, OpndType tvOp) {
   a.  cmpb(src, toByte(tvOp));
 }
 
-inline void emitCmpTVType(Vout& v, Immed s0, Vptr s1) {
-  v << cmpbim{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
+  v << cmpbim{s0, s1, sf};
 }
 
-inline void emitCmpTVType(Vout& v, Immed s0, Vreg s1) {
-  v << cmpbi{s0, s1};
+inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << cmpbi{s0, s1, sf};
 }
 
 template<typename DestType, typename OpndType>

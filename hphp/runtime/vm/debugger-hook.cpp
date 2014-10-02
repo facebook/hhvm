@@ -39,24 +39,27 @@ typedef RequestInjectionData::StepOutState StepOutState;
 void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   // legacy hphpd code expects no failure if no hook handler is attached
   ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
-  if (ti->m_debugHookHandler == nullptr) {
+  if (!isDebuggerAttached(ti)) {
     return;
   }
 
-  // Delete the handler
-  delete ti->m_debugHookHandler;
-  ti->m_debugHookHandler = nullptr;
   ti->m_reqInjectionData.setDebuggerAttached(false);
 
-  // Clear the pc filters
-  g_context->m_breakPointFilter.clear();
-  g_context->m_flowFilter.clear();
-  g_context->m_lineBreakPointFilter.clear();
-  g_context->m_callBreakPointFilter.clear();
-  g_context->m_retBreakPointFilter.clear();
+  // do not remove/delete m_hookHandler, its a singleton, and
+  // code in another thread could be using it.
+
+  if (ti == ThreadInfo::s_threadInfo.getNoCheck()) {
+    // Clear the pc filters
+    // We can only do this for the current thread
+    ti->m_reqInjectionData.m_breakPointFilter.clear();
+    ti->m_reqInjectionData.m_flowFilter.clear();
+    ti->m_reqInjectionData.m_lineBreakPointFilter.clear();
+    ti->m_reqInjectionData.m_callBreakPointFilter.clear();
+    ti->m_reqInjectionData.m_retBreakPointFilter.clear();
+  }
 
   // Disble function entry/exit events
-  EventHook::DisableDebug();
+  ti->m_reqInjectionData.clearDebuggerHookFlag();
 
   // If there are no more handlers attached, clear the blacklist
   Lock lock(s_lock);
@@ -101,11 +104,11 @@ static void blacklistFuncInJit(const Func* f) {
 }
 
 static PCFilter* getBreakPointFilter() {
-  return &g_context->m_breakPointFilter;
+  return &ThreadInfo::s_threadInfo->m_reqInjectionData.m_breakPointFilter;
 }
 
 static PCFilter* getFlowFilter() {
-  return &g_context->m_flowFilter;
+  return &ThreadInfo::s_threadInfo->m_reqInjectionData.m_flowFilter;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -123,14 +126,15 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
+  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
   // Short-circuit for cases where we're executing a line of code that we know
   // we don't need an interrupt for, e.g., stepping over a line of code.
-  if (UNLIKELY(g_context->m_flowFilter.checkPC(pc))) {
+  if (UNLIKELY(req_data.m_flowFilter.checkPC(pc))) {
     TRACE_RB(5, "Location filter hit at pc %p\n", pc);
     return;
   }
   // Are we hitting a breakpoint?
-  if (LIKELY(!g_context->m_breakPointFilter.checkPC(pc))) {
+  if (LIKELY(!req_data.m_breakPointFilter.checkPC(pc))) {
     TRACE(5, "not in the PC range for any breakpoints\n");
     if (LIKELY(!DEBUGGER_FORCE_INTR)) {
       return;
@@ -158,7 +162,6 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   // If we are no longer on the active line breakpoint, clear it
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
   int active_line = req_data.getActiveLineBreak();
   int line = unit->getLineNumber(unit->offsetOf(pc));
   if (UNLIKELY(active_line != -1 && active_line != line)) {
@@ -181,11 +184,11 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
       // Next command is active and we stepped in. Step out, but save the filter
       // first, as it is cleared when we step out.
       PCFilter filter;
-      g_context->m_flowFilter.swap(filter);
+      req_data.m_flowFilter.swap(filter);
       phpDebuggerStepOut();
 
       // Restore the saved filter and the next flag
-      g_context->m_flowFilter.swap(filter);
+      req_data.m_flowFilter.swap(filter);
       req_data.setDebuggerNext(true);
     }
   }
@@ -208,18 +211,18 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   // Check if we are hitting a call breakpoint
-  if (UNLIKELY(g_context->m_callBreakPointFilter.checkPC(pc))) {
+  if (UNLIKELY(req_data.m_callBreakPointFilter.checkPC(pc))) {
     handler->onFuncEntryBreak(func);
   }
 
   // Check if we are hitting a return breakpoint
-  if (UNLIKELY(g_context->m_retBreakPointFilter.checkPC(pc))) {
+  if (UNLIKELY(req_data.m_retBreakPointFilter.checkPC(pc))) {
     handler->onFuncExitBreak(func);
   }
 
   // Check if we are hitting a line breakpoint. Also ensure the current line
   // hasn't already been set as the active line breakpoint.
-  if (UNLIKELY(g_context->m_lineBreakPointFilter.checkPC(pc) &&
+  if (UNLIKELY(req_data.m_lineBreakPointFilter.checkPC(pc) &&
                active_line != line)) {
     req_data.setActiveLineBreak(line);
     handler->onLineBreak(unit, line);
@@ -459,7 +462,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Add to the breakpoint filter and the func entry filter
   getBreakPointFilter()->addPC(pc);
-  g_context->m_callBreakPointFilter.addPC(pc);
+  ThreadInfo::s_threadInfo->m_reqInjectionData.m_callBreakPointFilter.addPC(pc);
 
   // Blacklist the location
   if (RuntimeOption::EvalJit) {
@@ -483,7 +486,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
 
     // Add pc to the breakpoint filter and the func exit filter
     getBreakPointFilter()->addPC(pc);
-    g_context->m_retBreakPointFilter.addPC(pc);
+    ThreadInfo::s_threadInfo->
+      m_reqInjectionData.m_retBreakPointFilter.addPC(pc);
 
     // Blacklist the location
     if (RuntimeOption::EvalJit && mcg->tx().addDbgBLPC(pc)) {
@@ -503,13 +507,14 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
 
   // Add to the breakpoint filter and the line filter
   phpAddBreakPointRange(unit, offsets);
-  g_context->m_lineBreakPointFilter.addRanges(unit, offsets);
+  ThreadInfo::s_threadInfo->
+    m_reqInjectionData.m_lineBreakPointFilter.addRanges(unit, offsets);
   return true;
 }
 
 void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
-  g_context->m_breakPointFilter.removePC(pc);
+  ThreadInfo::s_threadInfo->m_reqInjectionData.m_breakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncEntry(const Func* f) {
@@ -517,7 +522,8 @@ void phpRemoveBreakPointFuncEntry(const Func* f) {
   // filter
   auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
   auto pc = f->unit()->at(base);
-  g_context->m_callBreakPointFilter.removePC(pc);
+  ThreadInfo::s_threadInfo->
+    m_reqInjectionData.m_callBreakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncExit(const Func* f) {
@@ -527,7 +533,8 @@ void phpRemoveBreakPointFuncExit(const Func* f) {
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen((Op*) pc)) {
     if (*reinterpret_cast<const Op*>(pc) == OpRetC) {
-      g_context->m_retBreakPointFilter.removePC(pc);
+      ThreadInfo::s_threadInfo->
+        m_reqInjectionData.m_retBreakPointFilter.removePC(pc);
     }
   }
 }
@@ -536,14 +543,17 @@ void phpRemoveBreakPointLine(const Unit* unit, int line) {
   // See note in debugger-hook.h. This can only remove from the line filter
   OffsetRangeVec offsets;
   if (unit->getOffsetRanges(line, offsets)) {
-    g_context->m_lineBreakPointFilter.removeRanges(unit, offsets);
+    ThreadInfo::s_threadInfo->
+      m_reqInjectionData.m_lineBreakPointFilter.removeRanges(unit, offsets);
   }
 }
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset) {
-  if (!g_context->m_breakPointFilter.isNull()) {
+  if (!ThreadInfo::s_threadInfo->
+      m_reqInjectionData.m_breakPointFilter.isNull()) {
     PC pc = unit->at(offset);
-    return g_context->m_breakPointFilter.checkPC(pc);
+    return ThreadInfo::s_threadInfo->
+      m_reqInjectionData.m_breakPointFilter.checkPC(pc);
   }
   return false;
 }

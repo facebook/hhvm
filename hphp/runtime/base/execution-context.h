@@ -522,11 +522,6 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  PCFilter m_breakPointFilter;
-  PCFilter m_flowFilter;
-  PCFilter m_lineBreakPointFilter;
-  PCFilter m_callBreakPointFilter;
-  PCFilter m_retBreakPointFilter;
   bool m_dbgNoBreak;
   bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArrayTC(PC pc);

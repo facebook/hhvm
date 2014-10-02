@@ -86,7 +86,8 @@ bool CmdFlowControl::onServer(DebuggerProxy &proxy) {
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   // We may be stopped at a place with no source info.
   if (!site || !site->valid()) return;
-  g_context->m_flowFilter.clear();
+  RequestInjectionData &rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  rid.m_flowFilter.clear();
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
   OffsetRangeVec ranges;
@@ -113,15 +114,15 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
              (op != OpAwait) &&
              (op != OpRetC);
     };
-    g_context->m_flowFilter.addRanges(unit, ranges,
+    rid.m_flowFilter.addRanges(unit, ranges,
                                       excludeResumableReturns);
   } else {
-    g_context->m_flowFilter.addRanges(unit, ranges);
+    rid.m_flowFilter.addRanges(unit, ranges);
   }
 }
 
 void CmdFlowControl::removeLocationFilter() {
-  g_context->m_flowFilter.clear();
+  ThreadInfo::s_threadInfo->m_reqInjectionData.m_flowFilter.clear();
 }
 
 bool CmdFlowControl::hasStepOuts() {

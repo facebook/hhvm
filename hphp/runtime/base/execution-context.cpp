@@ -121,11 +121,6 @@ void ExecutionContext::cleanup() {
 
 void ExecutionContext::sweep() {
   cleanup();
-  m_breakPointFilter.~PCFilter();
-  m_flowFilter.~PCFilter();
-  m_lineBreakPointFilter.~PCFilter();
-  m_callBreakPointFilter.~PCFilter();
-  m_retBreakPointFilter.~PCFilter();
 }
 
 ExecutionContext::~ExecutionContext() {

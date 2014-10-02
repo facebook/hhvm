@@ -351,6 +351,11 @@ void RequestInjectionData::reset() {
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::NONE;
   m_debuggerNext = false;
+  m_breakPointFilter.clear();
+  m_flowFilter.clear();
+  m_lineBreakPointFilter.clear();
+  m_callBreakPointFilter.clear();
+  m_retBreakPointFilter.clear();
   while (!m_activeLineBreaks.empty()) {
     m_activeLineBreaks.pop();
   }

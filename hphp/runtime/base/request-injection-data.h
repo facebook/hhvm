@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_REQUEST_INJECTION_DATA_H_
 #define incl_HPHP_REQUEST_INJECTION_DATA_H_
 
+#include "hphp/runtime/vm/pc-filter.h"
+
 #include <cinttypes>
 #include <cstdlib>
 #include <vector>
@@ -95,9 +97,14 @@ struct RequestInjectionData {
   // Indicating we should force interrupts for debuggers. This is intended to be
   // used by debuggers for forcing onOpcode events. It shouldn't be modified
   // internally
-  bool m_debuggerIntr;
-
+  bool     m_debuggerIntr;
 public:
+  PCFilter m_breakPointFilter;
+  PCFilter m_flowFilter;
+  PCFilter m_lineBreakPointFilter;
+  PCFilter m_callBreakPointFilter;
+  PCFilter m_retBreakPointFilter;
+
   // The state of the step out command
   enum class StepOutState {
     NONE,     // Command is inactive

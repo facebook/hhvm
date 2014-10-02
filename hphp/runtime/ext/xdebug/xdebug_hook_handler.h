@@ -147,8 +147,8 @@ extern DECLARE_THREAD_LOCAL(XDebugThreadBreakpoints, s_xdebug_breakpoints);
 ////////////////////////////////////////////////////////////////////////////////
 // XDebugHookHandler
 
-class XDebugHookHandler : public DebugHookHandler {
-public:
+struct XDebugHookHandler : DebugHookHandler {
+  static DebugHookHandler* GetInstance();
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
@@ -245,6 +245,9 @@ public:
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
+ private:
+  XDebugHookHandler() {}
+  ~XDebugHookHandler() override {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -346,7 +346,8 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
   PCFilter locSave;
-  locSave.swap(g_context->m_flowFilter);
+  RequestInjectionData &rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {
     EvalBreakControl eval(m_noBreak);
@@ -359,7 +360,7 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
                         DebuggerProxy::ExecutePHPFlagsNone));
   }
   g_context->debuggerSettings.bypassCheck = false;
-  locSave.swap(g_context->m_flowFilter);
+  locSave.swap(rid.m_flowFilter);
   return proxy.sendToClient(this);
 }
 

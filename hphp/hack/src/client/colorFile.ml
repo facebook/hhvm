@@ -79,10 +79,10 @@ let rec flatten_ acc stack = function
   | [] | [_] as l ->
       let elem = Stack.pop stack in
       flatten_ acc stack (elem :: l)
-  | (pos1, ty1 as elt1) :: ((pos2, _) :: _ as rl) ->
+  | (pos1, x as elt1) :: ((pos2, _) :: _ as rl) ->
       let _, char_end1 = Pos.info_raw pos1 in
       let char_start2, _ = Pos.info_raw pos2 in
-      if char_end1 < char_start2
+      if char_end1 <= char_start2
       then (* Intervals are disjoint *)
         if Stack.is_empty stack
         then
@@ -90,11 +90,15 @@ let rec flatten_ acc stack = function
         else
           let elem = Stack.pop stack in
           flatten_ (elt1 :: acc) stack (elem :: rl)
-      else
+      else begin (* interval 2 is nested within interval 1 *)
+        (* avoid creating zero-length intervals *)
+        if pos1.Pos.pos_end <> pos2.Pos.pos_end
+        then
+          (let pos1_rest = { pos1 with Pos.pos_start = pos2.Pos.pos_end } in
+          Stack.push (pos1_rest, x) stack);
         let pos1_head = { pos1 with Pos.pos_end = pos2.Pos.pos_start } in
-        let pos1_rest = { pos1 with Pos.pos_start = pos2.Pos.pos_end } in
-        Stack.push (pos1_rest, ty1) stack;
-        flatten_ ((pos1_head, ty1) :: acc) stack rl
+        flatten_ ((pos1_head, x) :: acc) stack rl
+      end
 
 let flatten xs =
   flatten_ [] (Stack.create ()) xs |> List.rev

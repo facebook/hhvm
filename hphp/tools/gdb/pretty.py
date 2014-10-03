@@ -98,7 +98,7 @@ class ArrayDataPrinter:
             elif data['m_aux']['u_hash'] == 0:
                 key = '%d' % elt['ikey']
             else:
-                key = '"%s"' % string_data_val(elt['key'].dereference())
+                key = '"%s"' % string_data_val(elt['skey'].dereference())
             self.cur = self.cur + 1
             self.count = self.count + 1
             return (key, data)

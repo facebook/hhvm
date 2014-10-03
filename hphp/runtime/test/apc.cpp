@@ -97,6 +97,11 @@ std::unique_ptr<Store> new_primed_store() {
   return ret;
 }
 
+const StaticString s_key("key");
+const StaticString s_key2("key2");
+const StaticString s_value1("value1");
+const StaticString s_value2("value2");
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -104,11 +109,90 @@ std::unique_ptr<Store> new_primed_store() {
 TEST(APC, Basic) {
   auto store = new_store();
 
-  const StaticString s_key("key");
-  const StaticString s_value1("value1");
-
   EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500), true);
   EXPECT_EQ(store->exists(s_key), true);
+  Variant got;
+  EXPECT_EQ(store->get(s_key, got), true);
+  EXPECT_TRUE(cellSame(*got.asCell(),
+    make_tv<KindOfStaticString>(s_value1.get())));
+  EXPECT_EQ(store->erase(s_key), true);
+  EXPECT_EQ(store->get(s_key, got), false);
+}
+
+TEST(APC, SetOverwrite) {
+  auto store = new_store();
+
+  store->set(s_key, Variant(s_value1), 1500);
+  Variant got;
+  EXPECT_EQ(store->get(s_key, got), true);
+  EXPECT_TRUE(cellSame(*got.asCell(),
+              make_tv<KindOfStaticString>(s_value1.get())));
+  store->set(s_key, Variant(s_value2), 1500);
+  EXPECT_EQ(store->get(s_key, got), true);
+  EXPECT_TRUE(cellSame(*got.asCell(),
+              make_tv<KindOfStaticString>(s_value2.get())));
+}
+
+TEST(APC, Clear) {
+  auto store = new_store();
+
+  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500), true);
+  EXPECT_EQ(store->add(s_key2, Variant(s_value2), 1500), true);
+  EXPECT_EQ(store->exists(s_key), true);
+  EXPECT_EQ(store->exists(s_key2), true);
+  store->clear();
+  EXPECT_EQ(store->exists(s_key), false);
+  EXPECT_EQ(store->exists(s_key2), false);
+}
+
+TEST(APC, IncCas) {
+  auto store = new_store();
+  bool found = false;
+
+  store->set(s_key, Variant(1), 1500);
+  EXPECT_EQ(store->inc(s_key, 1, found), 2);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 3);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 4);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 5);
+  EXPECT_TRUE(found);
+
+  store->set(s_key, Variant(1.0), 1500);
+  EXPECT_EQ(store->inc(s_key, 1, found), 2);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 3);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 4);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(store->inc(s_key, 1, found), 5);
+  EXPECT_TRUE(found);
+
+  store->set(s_key, Variant(1), 1500);
+  EXPECT_TRUE(store->cas(s_key, 1, 2));
+  EXPECT_TRUE(store->cas(s_key, 2, 3));
+  EXPECT_TRUE(store->cas(s_key, 3, 4));
+  EXPECT_TRUE(store->cas(s_key, 4, 5));
+  EXPECT_FALSE(store->cas(s_key, 4, 5));
+
+  store->set(s_key, Variant(1.0), 1500);
+  EXPECT_TRUE(store->cas(s_key, 1, 2));
+  EXPECT_TRUE(store->cas(s_key, 2, 3));
+  EXPECT_TRUE(store->cas(s_key, 3, 4));
+  EXPECT_TRUE(store->cas(s_key, 4, 5));
+  EXPECT_FALSE(store->cas(s_key, 4, 5));
+
+  // make sure it doesn't work on some non-doubles/ints
+
+  store->set(s_key, Variant(s_value2), 1500);
+  EXPECT_EQ(store->inc(s_key, 1, found), 0);
+  EXPECT_FALSE(found);
+  EXPECT_FALSE(store->cas(s_key, 1, 2));
+  store->erase(s_key);
+  EXPECT_EQ(store->inc(s_key, 1, found), 0);
+  EXPECT_FALSE(found);
+  EXPECT_FALSE(store->cas(s_key, 1, 2));
 }
 
 TEST(APC, BasicPrimeStuff) {

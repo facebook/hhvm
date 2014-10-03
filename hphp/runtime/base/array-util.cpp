@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/thread-info.h"
 
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "folly/Optional.h"
 
@@ -351,9 +351,9 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(f_strtolower(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtolower)(key.toString()), iter.secondRef());
       } else {
-        ret.set(f_strtoupper(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtoupper)(key.toString()), iter.secondRef());
       }
     } else {
       ret.set(key, iter.secondRef());

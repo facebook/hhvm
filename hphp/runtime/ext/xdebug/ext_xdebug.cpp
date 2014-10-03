@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
@@ -118,7 +118,7 @@ static String format_filename(String* dir,
     switch (c) {
       // crc32 of current working directory
       case 'c': {
-        int64_t crc32 = f_crc32(g_context->getCwd());
+        int64_t crc32 = HHVM_FN(crc32)(g_context->getCwd());
         buf.append(crc32);
         break;
       }

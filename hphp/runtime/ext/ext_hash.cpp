@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <memory>
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
 #include "hphp/runtime/ext/hash/hash_sha.h"
 #include "hphp/runtime/ext/hash/hash_ripemd.h"
@@ -196,7 +196,7 @@ Array HHVM_FUNCTION(hash_algos) {
 
 static HashEnginePtr php_hash_fetch_ops(const String& algo) {
   HashEngineMap::const_iterator iter =
-    HashEngines.find(f_strtolower(algo).data());
+    HashEngines.find(HHVM_FN(strtolower)(algo).data());
   if (iter == HashEngines.end()) {
     return HashEnginePtr();
   }
@@ -242,7 +242,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   if (raw_output) {
     return raw;
   }
-  return f_bin2hex(raw);
+  return HHVM_FN(bin2hex)(raw);
 }
 
 Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
@@ -357,7 +357,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   if (raw_output) {
     return raw;
   }
-  return f_bin2hex(raw);
+  return HHVM_FN(bin2hex)(raw);
 }
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {

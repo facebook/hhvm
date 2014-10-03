@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 
 namespace HPHP {
@@ -102,7 +102,7 @@ void RequestInjectionData::threadInit() {
                    "include_path", getDefaultIncludePath().c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       auto paths = f_explode(":", value);
+                       auto paths = HHVM_FN(explode)(":", value);
                        m_include_paths.clear();
                        for (ArrayIter iter(paths); iter; ++iter) {
                          m_include_paths.push_back(
@@ -132,7 +132,7 @@ void RequestInjectionData::threadInit() {
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       auto boom = f_explode(";", value).toCArrRef();
+                       auto boom = HHVM_FN(explode)(";", value).toCArrRef();
 
                        std::vector<std::string> directories;
                        directories.reserve(boom.size());
@@ -240,7 +240,7 @@ std::string RequestInjectionData::getDefaultIncludePath() {
   for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {
     include_paths.append(String(RuntimeOption::IncludeSearchPaths[i]));
   }
-  return f_implode(":", include_paths).toCppString();
+  return HHVM_FN(implode)(":", include_paths).toCppString();
 }
 
 void RequestInjectionData::onSessionInit() {

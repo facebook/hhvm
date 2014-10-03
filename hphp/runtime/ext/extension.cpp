@@ -21,7 +21,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
@@ -403,7 +403,7 @@ void Extension::loadSystemlib(const std::string& name) {
   std::string n = name.empty() ?
     std::string(m_name.data(), m_name.size()) : name;
   std::string section("ext.");
-  section += f_md5(n, false).substr(0, 12).data();
+  section += HHVM_FN(md5)(n, false).substr(0, 12).data();
   std::string hhas;
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {

@@ -1,8 +1,8 @@
 Function [ <internal> function trim ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $str ]
-    Parameter #1 [ <optional> $charlist = '
+    Parameter #0 [ <required> HH\string $str ]
+    Parameter #1 [ <optional> HH\string $charlist = '
   	' . "\0" . ' ' ]
   }
 }

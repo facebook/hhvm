@@ -43,7 +43,7 @@
 #define PCRE_CACHE_SIZE 4096
 
 #ifdef HHVM
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/system/constants.h"
 #endif
 
@@ -965,7 +965,8 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					if (match_len) {
 #ifdef HHVM
-                        auto slashed = HPHP::f_addslashes(HPHP::String(match, match_len, HPHP::CopyString));
+                        auto slashed = HPHP::HHVM_FN(addslashes)(HPHP::String(
+                                       match, match_len, HPHP::CopyString));
                         esc_match_len = slashed.length();
                         memcpy(esc_match, slashed.data(), esc_match_len);
 #else

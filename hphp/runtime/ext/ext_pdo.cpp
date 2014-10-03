@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -662,10 +662,10 @@ static bool pdo_stmt_describe_columns(sp_PDOStatement stmt) {
         stmt->dbh->desired_case != PDO_CASE_NATURAL) {
       switch (stmt->dbh->desired_case) {
       case PDO_CASE_UPPER:
-        name = f_strtoupper(name);
+        name = HHVM_FN(strtoupper)(name);
         break;
       case PDO_CASE_LOWER:
-        name = f_strtolower(name);
+        name = HHVM_FN(strtolower)(name);
         break;
       default:;
       }

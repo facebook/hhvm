@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -1040,7 +1040,7 @@ static void addInterfaceMethods(const Class* iface, c_Set* st) {
     const Func* m = methods[i];
     if (m->isGenerated()) continue;
 
-    st->add(f_strtolower(m->nameStr()).get());
+    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
   }
 
   for (auto const& parentIface: iface->declInterfaces()) {
@@ -1074,7 +1074,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
       const Func* m = methods[i];
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
 
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
 
     for (Slot i = currentCls->traitsBeginIdx();
@@ -1082,7 +1082,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
          ++i) {
       const Func* m = currentCls->getMethod(i);
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
   } while ((currentCls = currentCls->parent()));
 
@@ -1600,7 +1600,7 @@ Array get_class_info(const String& name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       if (RuntimeOption::EvalRuntimeTypeProfile) {
         set_debugger_type_profiling_info(info, cls, m);
@@ -1613,7 +1613,7 @@ Array get_class_info(const String& name) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info));

@@ -464,7 +464,6 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \

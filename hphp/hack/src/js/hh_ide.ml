@@ -20,6 +20,7 @@ let () = Ide.is_ide_mode := true
 let (files: (string, string) Hashtbl.t) = Hashtbl.create 23
 
 let globals = Hashtbl.create 23
+let parse_errors = Hashtbl.create 23
 
 (*****************************************************************************)
 (* helpers *)
@@ -130,10 +131,19 @@ let declare_file fn content =
     Hashtbl.replace globals fn (true, [], []);
     ()
 
+let rec last_error errors =
+  match errors with
+    | [] -> None
+    | [e] -> Some e
+    | _ :: tail -> last_error tail
+
 let hh_add_file fn content =
   Hashtbl.replace files fn content;
   try
-    declare_file fn content
+    let errors, _ = Errors.do_ begin fun () ->
+      declare_file fn content
+    end in
+    Hashtbl.replace parse_errors fn (last_error errors)
   with e ->
     ()
 
@@ -145,30 +155,29 @@ let hh_add_dep fn content =
     ()
 
 let hh_check ?(check_mode=true) fn =
-  Pos.file := fn;
-  Autocomplete.auto_complete := false;
-  let content = Hashtbl.find files fn in
-  Errors.try_
-    begin fun () ->
-(*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    let ast = (*builtins @ *) ast in
-    Parser_heap.ParserHeap.add fn ast;
-    let funs, classes, typedefs, consts = make_funs_classes ast in
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton fn) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes fn;
-    List.iter (fun (_, fname) -> type_fun fname fn) funs;
-    List.iter (fun (_, cname) -> type_class cname fn) classes;
-    error []
-    end
-    begin fun l ->
-      error [l]
-    end
+  match Hashtbl.find parse_errors fn with
+    | Some e -> error [e]
+    | None ->
+      Pos.file := fn;
+      Autocomplete.auto_complete := false;
+      Errors.try_
+        begin fun () ->
+        let ast = Parser_heap.ParserHeap.find_unsafe fn in
+        let funs, classes, typedefs, consts = make_funs_classes ast in
+        let nenv =
+          Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts
+        in
+        let all_classes = List.fold_right begin fun (_, cname) acc ->
+          SMap.add cname (SSet.singleton fn) acc
+        end classes SMap.empty in
+        Typing_decl.make_env nenv all_classes fn;
+        List.iter (fun (_, fname) -> type_fun fname fn) funs;
+        List.iter (fun (_, cname) -> type_class cname fn) classes;
+        error []
+        end
+        begin fun l ->
+          error [l]
+        end
 
 let hh_auto_complete fn =
   AutocompleteService.attach_hooks();

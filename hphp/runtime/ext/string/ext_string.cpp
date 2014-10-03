@@ -885,10 +885,7 @@ Variant f_sscanf(int _argc,
 
 String HHVM_FUNCTION(chr,
                      Variant ascii) {
-  char buf[2];
-  buf[0] = ascii.toInt64();
-  buf[1] = 0;
-  return String(buf, 1, CopyString);
+  return String(makeStaticString((char)ascii.toInt64()));
 }
 
 int64_t HHVM_FUNCTION(ord,

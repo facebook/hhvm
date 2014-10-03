@@ -52,7 +52,7 @@ Filename and line number information is only included for C++ functions.
         sp_type = T('uintptr_t').pointer()
         sp = gdb.parse_and_eval('$rbp').cast(sp_type)
         if len(argv) >= 1:
-            sp = argv[0].cast(ptr_type)
+            sp = argv[0].cast(sp_type)
 
         # Set rip = $rip.
         rip_type = T('uintptr_t')

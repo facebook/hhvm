@@ -63,6 +63,7 @@ class AsyncMysqlConnection {
   public function close() { }
   public function releaseConnection() { }
   public function serverInfo() { }
+  public function warningCount() { }
   public function host() { }
   public function port() { }
   public function setReusable(bool $reusable) { }

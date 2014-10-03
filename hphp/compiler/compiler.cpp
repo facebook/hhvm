@@ -389,7 +389,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::Load(ini, config);
   IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
-  RuntimeOption::Load(iniR, runtime, po.iniStrings, po.confStrings);
+  // The configuration command line strings were already processed above
+  // Don't process them again.
+  RuntimeOption::Load(iniR, runtime);
 
   initialize_repo();
 

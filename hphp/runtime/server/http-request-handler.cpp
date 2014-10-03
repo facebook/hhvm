@@ -121,6 +121,8 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
 void HttpRequestHandler::setupRequest(Transport* transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
+  // set current virtual host
+  (void)HttpProtocol::GetVirtualHost(transport);
 }
 
 void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {

@@ -3591,7 +3591,9 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
                  spReg[offset + TVOFF(m_type)],
                  spReg[offset + TVOFF(m_data)], sf,
                  [&](ConditionCode cc, Vreg sfTaken) {
-                   emitFwdJcc(v, cc, sf, inst->next());
+                   auto next = v.makeBlock();
+                   v << jcc{ccNegate(cc), sf, {label(inst->next()), next}};
+                   v = next;
                  });
   };
   if (!type.isKnownDataType()) {
@@ -3626,7 +3628,7 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     not_reached();
   }
 
-  auto tmpReg = v.makeReg(); // XXX maybe force to rax?
+  auto tmpReg = v.makeReg();
   cgCallHelper(v,
     CppCall::direct(reinterpret_cast<void (*)()>(tvCoerceHelper)),
     callDest(tmpReg),

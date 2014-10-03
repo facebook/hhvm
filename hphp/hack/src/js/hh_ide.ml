@@ -330,7 +330,20 @@ let hh_find_lvar_refs file line char =
   try
     clean();
     Find_refs.find_refs_target := Some (line, char);
-    ignore (hh_check ~check_mode:false file);
+    let ast = Parser_heap.ParserHeap.find_unsafe file in
+    (* We only need to name to find references to locals *)
+    List.iter begin fun def ->
+      match def with
+      | Ast.Fun f ->
+          let nenv = Naming.empty in
+          let _ = Naming.fun_ nenv f in
+          ()
+      | Ast.Class c ->
+          let nenv = Naming.empty in
+          let _ = Naming.class_ nenv c in
+          ()
+      | _ -> ()
+    end ast;
     let res_list = List.map Pos.json !Find_refs.find_refs_result in
     clean();
     output_json (JAssoc [ "positions",      JList res_list;

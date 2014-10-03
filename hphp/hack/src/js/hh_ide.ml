@@ -434,8 +434,20 @@ let hh_get_method_calls fn =
                       ])
 
 let hh_arg_info fn line char =
+  (* all the hooks for arg info happen in typing,
+   * so we only need to run typing*)
   ArgumentInfoService.attach_hooks (line, char);
-  ignore (hh_check ~check_mode:false fn);
+  let _, funs, classes = Hashtbl.find globals fn in
+  List.iter begin fun (_, f_name) ->
+    let tenv = Typing_env.empty fn in
+    let f = Naming_heap.FunHeap.find_unsafe f_name in
+    Typing.fun_def tenv f_name f
+  end funs;
+  List.iter begin fun (_, c_name) ->
+    let tenv = Typing_env.empty fn in
+    let c = Naming_heap.ClassHeap.find_unsafe c_name in
+    Typing.class_def tenv c_name c
+  end classes;
   let result = ArgumentInfoService.get_result() in
   let result = match result with
     | Some result -> result

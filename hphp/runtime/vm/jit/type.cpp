@@ -934,8 +934,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DofS(n)         return inst->src(n)->type();
 #define DUnbox(n)       return inst->src(n)->type().unbox();
 #define DBox(n)         return boxType(inst->src(n)->type());
-#define DRefineS(n)     return refineType(inst->src(n)->type(), \
-                                          inst->typeParam());
+#define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
+                                                 inst->typeParam());
 #define DParam          return inst->typeParam();
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);

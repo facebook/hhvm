@@ -117,7 +117,15 @@ void retypeDst(IRInstruction* inst, int num) {
     return;
   }
 
-  ssa->setType(outputType(inst, num));
+  // Update the type of the SSATmp.  However, avoid generating type Bottom,
+  // which can happen when refining type of CheckType and AssertType.  In
+  // such cases, the code will be unreachable anyway.
+  auto newType = outputType(inst, num);
+  if (newType != Type::Bottom) {
+    ssa->setType(newType);
+  } else {
+    always_assert(inst->op() == CheckType || inst->op() == AssertType);
+  }
 }
 }
 

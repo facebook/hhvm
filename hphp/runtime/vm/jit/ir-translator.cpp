@@ -916,6 +916,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
 
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
+  ht.emitIncStat(Stats::Instr_TC, 1, false);
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {

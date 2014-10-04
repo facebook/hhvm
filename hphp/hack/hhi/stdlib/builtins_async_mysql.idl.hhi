@@ -97,7 +97,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   **/
   public function rowBlocks() { }
 }
-class AsyncMysqlRowBlock extends Countable, KeyedTraversable<int, AsyncMysqlRow> {
+class AsyncMysqlRowBlock implements Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }
   public function at(int $row, mixed $field): mixed { }
   public function getFieldAsInt(int $row, mixed $field): int { }

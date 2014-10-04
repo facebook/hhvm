@@ -179,6 +179,8 @@ struct Class {
    */
   bool couldHaveMagicGet() const;
 
+  bool isEnum() const;
+  const TypeConstraint& enumBaseTy() const;
   /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned

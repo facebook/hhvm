@@ -433,6 +433,17 @@ bool Class::couldHaveMagicGet() const {
   );
 }
 
+bool Class::isEnum() const {
+  if (val.left()) return false;
+  auto const c = val.right();
+  return c->cls->attrs & AttrEnum;
+}
+
+const TypeConstraint& Class::enumBaseTy() const {
+  assert(isEnum());
+  return val.right()->cls->enumBaseTy;
+}
+
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();
@@ -1679,6 +1690,9 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
            * type for unique classes.
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
+            if (rcls->isEnum()) {
+              return lookup_constraint(ctx, rcls->enumBaseTy());
+            }
             return interface_supports_non_objects(rcls->name())
               ? TInitCell // none of these interfaces support Uninits
               : subObj(*rcls);

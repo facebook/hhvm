@@ -554,8 +554,11 @@ void ExecutionContext::executeFunctions(const Array& funcs) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    Array callback = iter.second().toArray();
+  for (int pos = 0; pos < funcs.size(); ++pos) {
+    // We may append to the end of the array from these functions but they have
+    // no way to write to any other location additionally we know that the array
+    // is zero indexed so this style of iteration should be safe
+    Array callback = funcs[pos].toArray();
     vm_call_user_func(callback[s_name], callback[s_args].toArray());
   }
 }
@@ -570,7 +573,7 @@ void ExecutionContext::onShutdownPreSend() {
     SCOPE_EXIT {
       try { m_shutdowns.remove(ShutDown); } catch (...) {}
     };
-    executeFunctions(m_shutdowns[ShutDown].toArray());
+    executeFunctions(forceToArray(m_shutdowns.lvalAt(ShutDown)));
   }
 }
 
@@ -587,7 +590,7 @@ void ExecutionContext::onShutdownPostSend() {
           SCOPE_EXIT {
             try { m_shutdowns.remove(PostSend); } catch (...) {}
           };
-          executeFunctions(m_shutdowns[PostSend].toArray());
+          executeFunctions(forceToArray(m_shutdowns.lvalAt(PostSend)));
         }
       }
     } catch (...) {

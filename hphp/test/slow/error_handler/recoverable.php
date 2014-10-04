@@ -7,3 +7,5 @@ set_error_handler(function($errno, $errmsg) {
 $closure = function() {};
 
 var_dump($closure->prop);
+
+var_dump('it should continue');

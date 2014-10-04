@@ -554,8 +554,8 @@ void ExecutionContext::executeFunctions(const Array& funcs) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    Array callback = iter.second().toArray();
+  for (int i = 0; i < funcs.size(); ++i) {
+    Array callback = funcs[i].toArray();
     vm_call_user_func(callback[s_name], callback[s_args].toArray());
   }
 }
@@ -570,7 +570,7 @@ void ExecutionContext::onShutdownPreSend() {
     SCOPE_EXIT {
       try { m_shutdowns.remove(ShutDown); } catch (...) {}
     };
-    executeFunctions(m_shutdowns[ShutDown].toArray());
+    executeFunctions(m_shutdowns.lvalAt(ShutDown).toArrRef());
   }
 }
 
@@ -587,7 +587,7 @@ void ExecutionContext::onShutdownPostSend() {
           SCOPE_EXIT {
             try { m_shutdowns.remove(PostSend); } catch (...) {}
           };
-          executeFunctions(m_shutdowns[PostSend].toArray());
+          executeFunctions(m_shutdowns.lvalAt(PostSend).toArrRef());
         }
       }
     } catch (...) {

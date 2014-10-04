@@ -194,7 +194,7 @@ module Typing                               = struct
   let cyclic_class_def                      = 4013 (* DONT MODIFY!!!! *)
   let cyclic_typedef                        = 4014 (* DONT MODIFY!!!! *)
   let discarded_awaitable                   = 4015 (* DONT MODIFY!!!! *)
-  let dont_use_isset                        = 4016 (* DONT MODIFY!!!! *)
+  let isset_empty_unset_in_strict           = 4016 (* DONT MODIFY!!!! *)
   let dynamic_yield_private                 = 4017 (* DONT MODIFY!!!! *)
   let enum_constant_type_bad                = 4018 (* DONT MODIFY!!!! *)
   let enum_switch_nonexhaustive             = 4019 (* DONT MODIFY!!!! *)
@@ -297,7 +297,7 @@ module Typing                               = struct
   let void_usage                            = 4119 (* DONT MODIFY!!!! *)
   let declared_covariant                    = 4120 (* DONT MODIFY!!!! *)
   let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
-  let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
+  (* let unset_in_strict                    = 4122 Deprecated! *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
   let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
   let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
@@ -1070,9 +1070,11 @@ let parent_abstract_call meth_name call_pos parent_pos =
     parent_pos, "Declaration is here"
   ]
 
-let dont_use_isset pos =
-  add Typing.dont_use_isset pos
-    "Don't use isset!"
+let isset_empty_unset_in_strict pos name =
+  let name = Utils.strip_ns name in
+  add Typing.isset_empty_unset_in_strict pos
+    (name^" cannot be used in a completely type safe way and so is banned in "
+     ^"strict mode")
 
 let array_get_arity pos1 name pos2 =
   add_list Typing.array_get_arity [
@@ -1451,11 +1453,6 @@ let nullsafe_not_needed p nonnull_witness =
    p,
    "You are using the ?-> operator but this object cannot be null. "
  ] @ nonnull_witness)
-
-let unset_in_strict pos =
-  add Typing.unset_in_strict pos
-    ("unset cannot be used in a completely type safe way and so is banned in "
-    ^"strict mode")
 
 let generic_at_runtime p =
   add Typing.generic_at_runtime p

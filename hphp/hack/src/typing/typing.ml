@@ -1555,13 +1555,15 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
   | Id (_, "echo") ->
       let env, _ = lfold expr env el in
       env, (Reason.Rwitness p, Tprim Tvoid)
-  | Id (_, "\\isset") ->
+  | Id (_, ("\\isset" as pseudo_func))
+  | Id (_, ("\\empty" as pseudo_func)) ->
       let env, _ = lfold expr env el in
-      if Env.is_strict env
-      then Errors.dont_use_isset p;
+      if Env.is_strict env then
+        Errors.isset_empty_unset_in_strict p pseudo_func;
       env, (Reason.Rwitness p, Tprim Tbool)
-  | Id (_, "\\unset") ->
-      if Env.is_strict env then Errors.unset_in_strict p;
+  | Id (_, ("\\unset" as pseudo_func)) ->
+      if Env.is_strict env then
+        Errors.isset_empty_unset_in_strict p pseudo_func;
       env, (Reason.Rwitness p, Tprim Tvoid)
   | Id (_, x) when SSet.mem x Naming.predef_tests ->
       let env, ty = expr env (List.hd el) in

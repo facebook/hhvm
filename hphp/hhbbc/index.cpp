@@ -1492,7 +1492,7 @@ res::Func Index::resolve_method(Context ctx,
     return res::Func { this, res::Func::MethodName { name } };
   };
 
-  if (!clsType.strictSubtypeOf(TCls)) {
+  if (!is_specialized_cls(clsType)) {
     return name_only();
   }
   auto const dcls  = dcls_of(clsType);
@@ -1915,7 +1915,7 @@ Type Index::lookup_public_static(Type cls, Type name) const {
   }
 
   auto const cinfo = [&] () -> borrowed_ptr<const ClassInfo> {
-    if (!cls.strictSubtypeOf(TCls)) {
+    if (!is_specialized_cls(cls)) {
       return nullptr;
     }
     auto const dcls = dcls_of(cls);
@@ -2217,7 +2217,7 @@ void PublicSPropIndexer::merge(Type tcls, Type name, Type val) {
   // it could affect any class (we could chase the inheritance hierarchy
   // downward to try to limit it, but don't currently).
   auto const cinfo = [&]() -> borrowed_ptr<ClassInfo> {
-    if (!tcls.strictSubtypeOf(TCls)) {
+    if (!is_specialized_cls(tcls)) {
       return nullptr;
     }
     auto const dcls = dcls_of(tcls);

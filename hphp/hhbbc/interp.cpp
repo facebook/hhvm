@@ -317,7 +317,7 @@ void in(ISS& env, const bc::CnsU&) { push(env, TInitCell); }
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const t1 = topA(env);
-  if (t1.strictSubtypeOf(TCls)) {
+  if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
@@ -556,10 +556,10 @@ void jmpImpl(ISS& env, const Op& op) {
   if (v1) {
     auto const taken = !cellToBool(*v1) != Negate;
     if (taken) {
-      nofallthrough(env);
+      jmp_nofallthrough(env);
       env.propagate(*op.target, env.state);
     } else {
-      never_taken(env);
+      jmp_nevertaken(env);
     }
     return;
   }
@@ -999,7 +999,7 @@ void in(ISS& env, const bc::InstanceOf& op) {
                        bc::InstanceOfD { v1->m_data.pstr });
   }
 
-  if (t1.strictSubtypeOf(TObj)) {
+  if (t1.subtypeOf(TObj) && is_specialized_obj(t1)) {
     auto const dobj = dobj_of(t1);
     switch (dobj.type) {
     case DObj::Sub:
@@ -1311,9 +1311,9 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   if (is_opt(t1) && op.subop == ObjMethodOp::NullThrows) {
     t1 = unopt(t1);
   }
-  auto const clsTy = t1.strictSubtypeOf(TObj) ? objcls(t1) : TCls;
+  auto const clsTy = objcls(t1);
   auto const rcls = [&]() -> folly::Optional<res::Class> {
-    if (clsTy.strictSubtypeOf(TCls)) return dcls_of(clsTy).cls;
+    if (is_specialized_cls(clsTy)) return dcls_of(clsTy).cls;
     return folly::none;
   }();
 
@@ -1359,7 +1359,7 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
     rfunc = env.index.resolve_method(env.ctx, t1, v2->m_data.pstr);
   }
   folly::Optional<res::Class> rcls;
-  if (t1.strictSubtypeOf(TCls)) rcls = dcls_of(t1).cls;
+  if (is_specialized_cls(t1)) rcls = dcls_of(t1).cls;
   fpiPush(env, ActRec { FPIKind::ClsMeth, rcls, rfunc });
 }
 
@@ -1379,7 +1379,7 @@ void in(ISS& env, const bc::FPushCtorD& op) {
 
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const t1 = topA(env);
-  if (t1.strictSubtypeOf(TCls)) {
+  if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
@@ -1568,14 +1568,8 @@ void in(ISS& env, const bc::FPassM& op) {
 
 void pushCallReturnType(ISS& env, const Type& ty) {
   if (ty == TBottom) {
-    // The callee function never returns.  It might throw, or loop
-    // forever.
-    calledNoReturn(env);
-    // Right now we need to continue in some semi-sane state in
-    // case we are in the middle of an FPI region or something
-    // that must finish.  But we can't push a TBottom (there are
-    // no values in that set), so we push something meaningless.
-    return push(env, TInitGen);
+    // The callee function never returns.  It might throw, or loop forever.
+    unreachable(env);
   }
   return push(env, ty);
 }
@@ -1698,7 +1692,7 @@ void in(ISS& env, const bc::IterInit& op) {
   env.propagate(*op.target, env.state);
   if (t1.subtypeOf(TArrE)) {
     nothrow(env);
-    nofallthrough(env);
+    jmp_nofallthrough(env);
     return;
   }
   auto ity = iter_types(t1);
@@ -1718,7 +1712,7 @@ void in(ISS& env, const bc::IterInitK& op) {
   env.propagate(*op.target, env.state);
   if (t1.subtypeOf(TArrE)) {
     nothrow(env);
-    nofallthrough(env);
+    jmp_nofallthrough(env);
     return;
   }
   auto ity = iter_types(t1);
@@ -2011,15 +2005,23 @@ void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::Await&) {
   auto const t = popC(env);
 
-  // The next opcode is reachable via suspend-resume.
-  if (!is_specialized_wait_handle(t) || is_opt(t) ||
-      wait_handle_inner(t).subtypeOf(TBottom)) {
-    // Uninferred garbage?
-    // TODO(#4205450): Mark next opcode as unreachable if inner is TBottom.
-    push(env, TInitCell);
-  } else {
-    push(env, wait_handle_inner(t));
+  // If the thing we're awaiting isn't a wait handle, there's nothing we can
+  // infer here.  (This can happen if a user declares a class with a
+  // getWaitHandle method that returns non-WaitHandle garbage.)
+  if (!t.subtypeOf(TObj) || !is_specialized_wait_handle(t)) {
+    return push(env, TInitCell);
   }
+
+  auto const inner = wait_handle_inner(t);
+  if (inner.subtypeOf(TBottom)) {
+    // If it's a WaitH<Bottom>, we know it's going to throw an exception, and
+    // the fallthrough code is not reachable.
+    push(env, TBottom);
+    unreachable(env);
+    return;
+  }
+
+  push(env, inner);
 }
 
 void in(ISS& env, const bc::Strlen&) {
@@ -2240,10 +2242,16 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
     auto const flags = interpOps(interp, iter, stop, propagate);
-    if (flags.calledNoReturn) {
-      FTRACE(2, "  <called function that never returns>\n");
+    if (interp.state.unreachable) {
+      FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
+      if (interp.state.fpiStack.empty()) {
+        // We have no reason to continue running the interpreter if there's no
+        // FPI region active.
+        return RunFlags {};
+      }
       continue;
     }
+
     switch (flags.jmpFlag) {
     case StepFlags::JmpFlags::Taken:
       FTRACE(2, "  <took branch; no fallthrough>\n");

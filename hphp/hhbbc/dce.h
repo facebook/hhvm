@@ -18,6 +18,8 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/type-string.h"
+
 #include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {
@@ -34,7 +36,8 @@ namespace php { struct Block; }
 /*
  * Perform DCE on a single basic block.
  */
-void local_dce(const Index&, Context, borrowed_ptr<php::Block>, const State&);
+void local_dce(const Index&, const FuncAnalysis&, borrowed_ptr<php::Block>,
+  const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on
@@ -51,6 +54,11 @@ void global_dce(const Index&, const FuncAnalysis&);
  * blocks we believe are unreachable with fatal opcodes.
  */
 void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString s_unreachable("static analysis error: supposedly "
+                                 "unreachable code was reached");
 
 //////////////////////////////////////////////////////////////////////
 

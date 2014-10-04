@@ -90,11 +90,6 @@ struct StepFlags {
   JmpFlags jmpFlag = JmpFlags::Either;
 
   /*
-   * If true, we made a call to a function that never returns.
-   */
-  bool calledNoReturn = false;
-
-  /*
    * If an instruction sets this flag, it means that if it pushed a
    * type with a constant value, it had no side effects other than
    * computing the value which was pushed.  This means the instruction

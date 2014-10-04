@@ -4190,7 +4190,7 @@ ContCurrent    []  ->  [C]
 15. Async functions
 -------------------
 
-Await  <number of iterators>   [C:Obj]  ->  [C]
+Await  <number of iterators>   [C]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Awaits
   a WaitHandle provided by $1, suspending the execution if the WaitHandle

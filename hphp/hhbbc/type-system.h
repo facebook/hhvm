@@ -354,6 +354,8 @@ private:
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array(const Type&);
+  friend bool is_specialized_obj(const Type&);
+  friend bool is_specialized_cls(const Type&);
   friend bool is_ref_with_inner(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
@@ -641,10 +643,16 @@ Type unopt(Type t);
 bool is_opt(Type t);
 
 /*
- * Returns true if type 't' represents a "specialized" object, that is
- * an object of a known class, or an optional object of a known class.
+ * Returns true if type 't' represents a "specialized" object, that is an
+ * object of a known class, or an optional object of a known class.
  */
-bool is_specialized_obj(Type t);
+bool is_specialized_obj(const Type&);
+
+/*
+ * Returns true if type 't' represents a "specialized" class---i.e. a class
+ * with a DCls structure.
+ */
+bool is_specialized_cls(const Type&);
 
 /*
  * Returns whether `t' is a WaitH<T> or ?WaitH<T> for some T.
@@ -666,7 +674,7 @@ bool is_specialized_array(const Type& t);
  *
  * Pre: t.subtypeOf(TObj)
  */
-Type objcls(Type t);
+Type objcls(const Type& t);
 
 /*
  * If the type t has a known constant value, return it as a Cell.
@@ -694,7 +702,7 @@ DObj dobj_of(const Type& t);
 /*
  * Return the DCls structure for a strict subtype of TCls.
  *
- * Pre: t.strictSubtypeOf(TCls)
+ * Pre: is_specialized_cls(t)
  */
 DCls dcls_of(Type t);
 
@@ -846,6 +854,7 @@ std::pair<Type,Type> iter_types(const Type&);
  * sure these things are merged into the appropriate unit or repo.
  *
  * Pre: !t.couldBe(TCls)
+ *      !t.subtypeOf(TBottom)
  */
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
 

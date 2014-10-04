@@ -193,6 +193,19 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(dst.stack.size() == src.stack.size());
   assert(dst.fpiStack.size() == src.fpiStack.size());
 
+  if (src.unreachable) {
+    // If we're coming from unreachable code and the dst is already
+    // initialized, it doesn't change the dst (whether it is reachable or not).
+    return false;
+  }
+  if (dst.unreachable) {
+    // If we're going to code currently believed to be unreachable, take the
+    // src state, and consider the dest state changed only if the source state
+    // was reachable.
+    dst = src;
+    return !src.unreachable;
+  }
+
   auto changed = false;
 
   auto const available = dst.thisAvailable && src.thisAvailable;
@@ -275,7 +288,7 @@ std::string state_string(const php::Func& f, const State& st) {
     return ret;
   }
 
-  ret = "state:\n";
+  folly::format(&ret, "state{}:\n", st.unreachable ? " (unreachable)" : "");
   if (f.cls) {
     folly::format(&ret, "thisAvailable({})\n", st.thisAvailable);
   }

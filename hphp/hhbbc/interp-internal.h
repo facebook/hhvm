@@ -18,7 +18,9 @@
 
 #include <algorithm>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
+
+#include "hphp/runtime/base/type-string.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
@@ -85,14 +87,16 @@ void nothrow(ISS& env) {
   env.flags.wasPEI = false;
 }
 
-void calledNoReturn(ISS& env)    { env.flags.calledNoReturn = true; }
-void constprop(ISS& env)         { env.flags.canConstProp = true; }
-void nofallthrough(ISS& env)     {
+void unreachable(ISS& env)    { env.state.unreachable = true; }
+void constprop(ISS& env)      { env.flags.canConstProp = true; }
+
+void jmp_nofallthrough(ISS& env) {
   env.flags.jmpFlag = StepFlags::JmpFlags::Taken;
 }
-void never_taken(ISS& env)       {
+void jmp_nevertaken(ISS& env) {
   env.flags.jmpFlag = StepFlags::JmpFlags::Fallthrough;
 }
+
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 

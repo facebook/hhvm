@@ -162,12 +162,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
-
-
-//////////////////////////////////////////////////////////////////////
-
 // Returns whether decrefing a type could run a destructor.
 bool couldRunDestructor(const Type& t) {
   // We could check for specialized objects to see if they don't
@@ -757,17 +751,17 @@ void remove_unused_locals(Context const ctx,
 }
 
 void local_dce(const Index& index,
-               Context const ctx,
+               const FuncAnalysis& ainfo,
                borrowed_ptr<php::Block> const blk,
                const State& stateIn) {
   Trace::Bump bumper{Trace::hhbbc_dce, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
+    is_systemlib_part(*ainfo.ctx.unit)};
 
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
   auto allLive = std::bitset<kMaxTrackedLocals>();
   allLive.set();
-  optimize_dce(index, ctx, blk, stateIn, allLive, allLive);
+  optimize_dce(index, ainfo.ctx, blk, stateIn, allLive, allLive);
 }
 
 //////////////////////////////////////////////////////////////////////

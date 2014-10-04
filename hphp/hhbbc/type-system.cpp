@@ -1506,14 +1506,16 @@ bool is_opt(Type t) {
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
-bool is_specialized_obj(Type t) {
-  return t.strictSubtypeOf(TObj) ||
-    (is_opt(t) && unopt(t).strictSubtypeOf(TObj));
+bool is_specialized_obj(const Type& t) {
+  return t.m_dataTag == DataTag::Obj;
 }
 
-Type objcls(Type t) {
-  assert(t.subtypeOf(TObj));
-  if (t.strictSubtypeOf(TObj)) {
+bool is_specialized_cls(const Type& t) {
+  return t.m_dataTag == DataTag::Cls;
+}
+
+Type objcls(const Type& t) {
+  if (t.subtypeOf(TObj) && is_specialized_obj(t)) {
     auto const d = dobj_of(t);
     return d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls);
   }
@@ -1586,8 +1588,7 @@ DObj dobj_of(const Type& t) {
 
 DCls dcls_of(Type t) {
   assert(t.checkInvariants());
-  assert(t.strictSubtypeOf(TCls));
-  assert(t.m_dataTag == DataTag::Cls);
+  assert(is_specialized_cls(t));
   return t.m_data.dcls;
 }
 
@@ -2416,6 +2417,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
 
 RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   assert(!t.couldBe(TCls));
+  assert(!t.subtypeOf(TBottom));
   using T = RepoAuthType::Tag;
 
   if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {

@@ -464,17 +464,6 @@ bool Class::couldHaveMagicGet() const {
   );
 }
 
-bool Class::isEnum() const {
-  if (val.left()) return false;
-  auto const c = val.right();
-  return c->cls->attrs & AttrEnum;
-}
-
-const TypeConstraint& Class::enumBaseTy() const {
-  assert(isEnum());
-  return val.right()->cls->enumBaseTy;
-}
-
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();
@@ -577,6 +566,7 @@ struct IndexData {
   ISStringToMany<const php::Func>      methods;
   ISStringToMany<const php::Func>      funcs;
   ISStringToMany<const php::TypeAlias> typeAliases;
+  ISStringToMany<const php::Class>     enums;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -841,6 +831,10 @@ void add_unit_to_index(IndexData& index,
                        const InterceptableMethodMap& imethodMap,
                        const php::Unit& unit) {
   for (auto& c : unit.classes) {
+    if (c->attrs & AttrEnum) {
+      index.enums.insert({c->name, borrow(c)});
+    }
+
     index.classes.insert({c->name, borrow(c)});
 
     auto const imethIt = imethodMap.find(c->name->data());
@@ -1444,15 +1438,17 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   clsName = normalizeNS(clsName);
 
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We know it has to name a class only if there's no type alias
-    // with this name.
+    // We know it has to name a class only if there's no type alias with this
+    // name.  We also refuse to have name-only resolutions of enums, so that
+    // all name only resolutions can be treated as objects.
     //
     // TODO(#3519401): when we start unfolding type aliases, we could
     // look at whether it is an alias for a specific class here.
     // (Note this might need to split into a different API: type
     // aliases aren't allowed everywhere we're doing resolve_class
     // calls.)
-    if (!m_data->typeAliases.count(clsName)) {
+    if (!m_data->typeAliases.count(clsName) &&
+        !m_data->enums.count(clsName)) {
       return res::Class { this, clsName };
     }
     return folly::none;
@@ -1752,12 +1748,17 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         case KindOfResource:     return TRes;
         case KindOfObject:
           /*
-           * Type constraints only imply an object of a particular
-           * type for unique classes.
+           * If we can resolve the class, we'll give an object of a type
+           * according to that resolution.  Some classes in hhvm can be
+           * "enums", which we need to handle as non-object types.  A name-only
+           * resolution is guaranteed to be some kind of non-enum,
+           * non-type-alias object (see resolve_class).
            */
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            if (rcls->isEnum()) {
-              return lookup_constraint(ctx, rcls->enumBaseTy());
+            if (auto const cinfo = rcls->val.right()) {
+              if (cinfo->cls->attrs & AttrEnum) {
+                return lookup_constraint(ctx, cinfo->cls->enumBaseTy);
+              }
             }
             return interface_supports_non_objects(rcls->name())
               ? TInitCell // none of these interfaces support Uninits

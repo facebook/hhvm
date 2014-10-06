@@ -312,7 +312,7 @@ and fun_def env _ f =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
       let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_fun_kind in
-      let env = solve_todos env in
+      let env = fold_fun_list env env.Env.todo in
       if Env.is_strict env then begin
         List.iter2 (check_param env) f_params params;
         match f.f_ret with
@@ -321,10 +321,6 @@ and fun_def env _ f =
       end;
    )
   end
-
-and solve_todos env =
-  List.fold_left (fun env f -> f env) env (Env.get_todo env)
-
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -2505,7 +2501,7 @@ and call pos env fty el =
    * When this is the case, a call could violate one of the constraints
    * in a branch.
    *)
-  let env = solve_todos env in
+  let env = fold_fun_list env env.Env.todo in
   env, ty
 
 and call_ pos env fty el =
@@ -2530,7 +2526,7 @@ and call_ pos env fty el =
       let todos = ref [] in
       let env = wfold_left_default (call_param todos) (env, var_param)
                                    ft.ft_params pos_tyl in
-      let env = List.fold_left (|>) env !todos in
+      let env = fold_fun_list env !todos in
       Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret
   | r2, Tanon (arity, id) ->

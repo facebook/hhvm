@@ -306,6 +306,11 @@ struct MemoryManager {
   struct MaskAlloc;
 
   /*
+   * An RAII wrapper to suppress OOM checking in a region.
+   */
+  struct SuppressOOM;
+
+  /*
    * Returns true iff a sweep is in progress.  I.e., is the current
    * thread running inside a call to MemoryManager::sweep().
    *

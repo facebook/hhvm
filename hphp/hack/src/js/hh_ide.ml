@@ -148,11 +148,14 @@ let hh_add_file fn content =
     ()
 
 let hh_add_dep fn content =
-  try
+  Typing_deps.is_dep := true;
+  (try
     declare_file fn content;
     Parser_heap.ParserHeap.remove fn
   with e ->
     ()
+  );
+  Typing_deps.is_dep := false
 
 let hh_check ?(check_mode=true) fn =
   match Hashtbl.find parse_errors fn with

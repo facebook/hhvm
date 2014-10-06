@@ -21,7 +21,7 @@ open Typing_defs
 (* Figures out if a class needs to be treated like an enum and if so returns
  * Some(base, type, constraint), where base is the underlying type of the
  * enum, type is the actual type of enum elements, and constraint is
- * an optional subtyipong constraint. For subclasses of Enum<T>, both
+ * an optional subtyping constraint. For subclasses of Enum<T>, both
  * base and type these are T.
  * For first-class enums, we distinguish between these. *)
 let is_enum name enum ancestors =

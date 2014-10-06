@@ -184,18 +184,9 @@ and sub_type env ty_super ty_sub =
       let env, _ = Unify.unify env tk_super tk_sub in
       let env, _ = Unify.unify env ts_super ts_sub in
       env
-  (* Handle enums with subtyping constraints. *)
-  | _, (p_sub, (Tapply ((_, x), [])))
-    when Typing_env.get_enum_constraint env x <> None ->
-    (match Typing_env.get_enum_constraint env x with
-      | Some base ->
-        (* Handling is the same as abstracts with as *)
-        Errors.try_
-          (fun () -> fst (Unify.unify env ty_super ty_sub))
-          (fun _ -> sub_type env ty_super base)
-      | None -> assert false)
-
-  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)), (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_)) ->
+  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)),
+      (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_))
+      when Typing_env.get_enum_constraint env (snd x_sub) = None  ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub then fst (Unify.unify env ety_super ety_sub)
     else begin
@@ -307,6 +298,16 @@ and sub_type env ty_super ty_sub =
       Errors.try_
          (fun () -> fst (Unify.unify env ty_super ty_sub))
          (fun _ -> sub_type env ty_super x)
+  (* Handle enums with subtyping constraints. *)
+  | _, (p_sub, (Tapply ((_, x), [])))
+    when Typing_env.get_enum_constraint env x <> None ->
+    (match Typing_env.get_enum_constraint env x with
+      | Some base ->
+        (* Handling is the same as abstracts with as *)
+        Errors.try_
+          (fun () -> fst (Unify.unify env ty_super ty_sub))
+          (fun _ -> sub_type env ty_super base)
+      | None -> assert false)
   | _ -> fst (Unify.unify env ty_super ty_sub)
 
 and is_sub_type env ty_super ty_sub =

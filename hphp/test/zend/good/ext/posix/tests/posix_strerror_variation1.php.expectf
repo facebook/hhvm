@@ -98,4 +98,4 @@ string
 Arg value  
 string
 
-Fatal error: %s
+Catchable fatal error: %s

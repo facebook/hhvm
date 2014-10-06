@@ -4,4 +4,4 @@ object(Foo)#1 (0) {
 }
 bool(false)
 
-Fatal error: Argument 1 passed to f() must be an instance of resource, Foo given in %s on line 6
+Catchable fatal error: Argument 1 passed to f() must be an instance of resource, Foo given in %s on line 6

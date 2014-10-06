@@ -85,8 +85,9 @@ FatalErrorException::FatalErrorException(int, const char *msg, ...) {
 }
 
 FatalErrorException::FatalErrorException(const std::string& msg,
-                                         const Array& backtrace)
-  : ExtendedException(msg, backtrace.get())
+                                         const Array& backtrace,
+                                         bool isRecoverable /* = false */)
+  : ExtendedException(msg, backtrace.get()), m_recoverable(isRecoverable)
 {}
 
 //////////////////////////////////////////////////////////////////////

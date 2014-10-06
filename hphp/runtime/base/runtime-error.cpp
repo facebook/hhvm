@@ -268,7 +268,7 @@ void raise_message(ErrorConstants::ErrorModes mode,
   if (mode == ErrorConstants::ErrorModes::ERROR) {
     HANDLE_ERROR(false, Always, "\nFatal error: ", skipTop);
   } else if (mode == ErrorConstants::ErrorModes::RECOVERABLE_ERROR) {
-    HANDLE_ERROR(true, IfUnhandled, "\nCatchable Fatal error: ", skipTop);
+    HANDLE_ERROR(true, IfUnhandled, "\nCatchable fatal error: ", skipTop);
   } else if (!g_context->errorNeedsHandling(errnum, true,
                               ExecutionContext::ErrorThrowMode::Never)) {
     return;

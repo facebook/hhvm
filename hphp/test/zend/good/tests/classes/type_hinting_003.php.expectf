@@ -16,4 +16,4 @@ array(1) {
   int(25)
 }
 
-Fatal error: %s
+Catchable fatal error: %s

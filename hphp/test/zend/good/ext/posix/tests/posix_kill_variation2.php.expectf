@@ -98,4 +98,4 @@ bool(false)
 Arg value  
 bool(false)
 
-Fatal error: %s
+Catchable fatal error: %s

@@ -1,4 +1,4 @@
 NULL
 int(2)
 
-Fatal error: Argument 1 passed to wat() must be an instance of bar, string given in %s on line 8
+Catchable fatal error: Argument 1 passed to wat() must be an instance of bar, string given in %s on line 8

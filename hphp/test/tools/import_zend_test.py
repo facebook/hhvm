@@ -1032,8 +1032,6 @@ def walk(filename, dest_subdir):
 
             exp = re.sub(r'(?:Parse|Fatal)\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)
-            exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
-                    '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Warning\\?:.*',
                     '\nWarning: '+match_rest_of_line, exp)
             exp = re.sub(r'Notice\\?:.*',

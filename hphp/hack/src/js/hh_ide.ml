@@ -27,9 +27,6 @@ let parse_errors = Hashtbl.create 23
 (* helpers *)
 (*****************************************************************************)
 
-let output_json json =
-  Js.string (json_to_string json)
-
 let error el =
   let res =
     if el = [] then
@@ -44,7 +41,7 @@ let error el =
                "internal_error", JBool false;
              ]
   in
-  output_json res
+  to_js_object res
 
 (*****************************************************************************)
 
@@ -220,13 +217,13 @@ let hh_auto_complete fn =
       List.map AutocompleteService.autocomplete_result_to_json result
     in
     AutocompleteService.detach_hooks();
-    output_json (JAssoc [ "completions",     JList result;
+    to_js_object (JAssoc [ "completions",     JList result;
                           "completion_type", JString completion_type_str;
                           "internal_error",  JBool false;
                         ])
   with _ ->
     AutocompleteService.detach_hooks();
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_method_at_position fn line char =
@@ -286,10 +283,10 @@ let hh_get_method_at_position fn line char =
       | _ -> JAssoc [ "internal_error", JBool false;
                     ] in
     Find_refs.find_method_at_cursor_target := None;
-    output_json result
+    to_js_object result
   with _ ->
     Find_refs.find_method_at_cursor_target := None;
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_get_deps =
@@ -319,7 +316,7 @@ let hh_get_deps =
           )
       end
     end deps;
-    output_json (JAssoc [ "deps",           JList !result;
+    to_js_object (JAssoc [ "deps",           JList !result;
                           "internal_error", JBool false;
                         ])
 
@@ -367,12 +364,12 @@ let hh_find_lvar_refs file line char =
     end;
     let res_list = List.map Pos.json !Find_refs.find_refs_result in
     clean();
-    output_json (JAssoc [ "positions",      JList res_list;
+    to_js_object (JAssoc [ "positions",      JList res_list;
                           "internal_error", JBool false;
                         ])
   with _ ->
     clean();
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_infer_type file line char =
@@ -384,7 +381,7 @@ let hh_infer_type file line char =
   | None -> JAssoc [ "internal_error", JBool false;
                    ]
   in
-  output_json output
+  to_js_object output
 
 let hh_infer_pos file line char =
   let pos, _ = infer_at_pos file line char in
@@ -395,7 +392,7 @@ let hh_infer_pos file line char =
   | None -> JAssoc [ "internal_error", JBool false;
                    ]
   in
-  output_json output
+  to_js_object output
 
 let hh_file_summary fn =
   try
@@ -407,11 +404,11 @@ let hh_file_summary fn =
                "pos",  Pos.json pos;
              ]
       end outline in
-    output_json (JAssoc [ "summary",          JList res_list;
+    to_js_object (JAssoc [ "summary",          JList res_list;
                           "internal_error",   JBool false;
                         ])
   with _ ->
-    output_json (JAssoc [ "internal_error", JBool true;
+    to_js_object (JAssoc [ "internal_error", JBool true;
                         ])
 
 let hh_hack_coloring fn =
@@ -430,7 +427,7 @@ let hh_hack_coloring fn =
                         JAssoc [ "checked", JString checked;
                                  "text",    JString text;
                                ]) result in
-  output_json (JAssoc [ "coloring",       JList result;
+  to_js_object (JAssoc [ "coloring",       JList result;
                         "internal_error", JBool false;
                       ])
 
@@ -446,7 +443,7 @@ let hh_get_method_calls fn =
     end results in
   Typing_defs.accumulate_method_calls := false;
   Typing_defs.accumulate_method_calls_result := [];
-  output_json (JAssoc [ "method_calls",   JList results;
+  to_js_object (JAssoc [ "method_calls",   JList results;
                         "internal_error", JBool false;
                       ])
 
@@ -476,7 +473,7 @@ let hh_arg_info fn line char =
   let json_res =
     ("internal_error", JBool false) :: ArgumentInfoService.to_json result
   in
-  output_json (JAssoc json_res)
+  to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
   let result = Format_hack.region start end_ contents in
@@ -486,7 +483,7 @@ let hh_format contents start end_ =
     | Format_hack.Internal_error -> "", "", true
     | Format_hack.Success s -> "", s, false
   in
-  output_json (JAssoc [ "error_message", JString error;
+  to_js_object (JAssoc [ "error_message", JString error;
                         "result", JString result;
                         "internal_error",   JBool internal_error;
                       ])

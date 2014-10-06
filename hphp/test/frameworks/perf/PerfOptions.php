@@ -127,7 +127,7 @@ final class PerfOptions {
 
     $this->hhvmExtraArguments = $this->getArray('hhvm-extra-arguments');
     $this->delayNginxStartup = $this->getFloat('delay-nginx-startup', 0.0);
-    $this->delayPhpStartup = $this->getFloat('delay-php-startup', 0.0);
+    $this->delayPhpStartup = $this->getFloat('delay-php-startup', 1.0);
     $this->delayProcessLaunch = $this->getFloat('delay-process-launch', 0.0);
     $this->delayCheckHealth = $this->getFloat('delay-check-health', 1.0);
     $this->maxdelayUnfreeze = $this->getFloat('max-delay-unfreeze', 60.0);

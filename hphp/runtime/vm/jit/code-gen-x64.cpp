@@ -2445,7 +2445,7 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   auto const rsrc = srcLoc(0).reg();
   auto const rdst = dstLoc(0).reg();
   auto& v = vmain();
-  v << loadq{rsrc[Class::invokeOff()], rdst};
+  emitLdLowPtr(v, rsrc[Class::invokeOff()], rdst, sizeof(LowFuncPtr));
   auto const sf = v.makeReg();
   v << testq{rdst, rdst, sf};
   v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};

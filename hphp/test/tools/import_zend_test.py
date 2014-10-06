@@ -1148,7 +1148,7 @@ def walk(filename, dest_subdir):
             test += '\n'
         if not sections['CLEAN'].startswith('<?'):
             sections['CLEAN'] = '<?php\n' + sections['CLEAN']
-        disable_errors = "<?php error_reporting(0); ?>\n";
+        disable_errors = "<?php error_reporting(0); ?>\n"
         test += disable_errors + sections['CLEAN']
 
     # If you put an exception in here, please send a pull request upstream to

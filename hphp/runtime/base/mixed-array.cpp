@@ -1045,7 +1045,7 @@ ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
  */
 ALWAYS_INLINE
 MixedArray* MixedArray::moveVal(TypedValue& tv, TypedValue v) {
-  tv.m_type = typeInitNull(v.m_type);
+  tv.m_type = v.m_type == KindOfUninit ? KindOfNull : v.m_type;
   tv.m_data.num = v.m_data.num;
   return this;
 }

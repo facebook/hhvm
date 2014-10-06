@@ -273,17 +273,6 @@ constexpr bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;
 }
 
-// typeReentersOnRelease --
-//   Returns whether the release helper for a given type can
-//   reenter.
-inline bool typeReentersOnRelease(DataType type) {
-  return IS_REFCOUNTED_TYPE(type) && type != KindOfString;
-}
-
-constexpr DataType typeInitNull(DataType t) {
-  return t == KindOfUninit ? KindOfNull : t;
-}
-
 /*
  * Returns whether two DataTypes for primitive types are "equivalent"
  * as far as user-visible php types are concerned.  (I.e. ignoring

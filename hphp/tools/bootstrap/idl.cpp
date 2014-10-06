@@ -747,7 +747,8 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
   }
 }
 
-fbstring PhpFunc::getCppSig() const {
+fbstring
+PhpFunc::getPrefixedCppName(bool fullyQualified /* = true */) const {
   std::ostringstream out;
 
   fbstring nm = getCppName();
@@ -755,15 +756,26 @@ fbstring PhpFunc::getCppSig() const {
   std::transform(nm.begin(), nm.end(), lowername.begin(),
                  std::ptr_fun<int, int>(std::tolower));
 
+  if (fullyQualified) {
+    out << "HPHP::";
+  }
   if (!isMethod()) {
-    out << "HPHP::f_" << lowername << "(";
+    out << "f_" << lowername;
   } else {
     if (isStatic()) {
-      out << "HPHP::c_" << className() << "::ti_" << lowername << "(";
+      out << "c_" << className() << "::ti_" << lowername;
     } else {
-      out << "HPHP::c_" << className() << "::t_" << lowername << "(";
+      out << "c_" << className() << "::t_" << lowername;
     }
   }
+
+  return out.str();
+}
+
+fbstring PhpFunc::getCppSig(bool fullyQualified /* = true */) const {
+  std::ostringstream out;
+
+  out << getPrefixedCppName(fullyQualified) << "(";
 
   bool firstParam = true;
   if (isVarArgs()) {

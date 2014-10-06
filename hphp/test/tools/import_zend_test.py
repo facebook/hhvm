@@ -256,6 +256,8 @@ norepo_tests = (
     '/Zend/tests/class_alias_013.php',
     '/Zend/tests/class_constants_003.php',
     '/Zend/tests/class_exists_001.php',
+    '/Zend/tests/closure_040.php',
+    '/Zend/tests/closure_042.php',
     '/Zend/tests/constants_005.php',
     '/Zend/tests/errmsg_007.php',
     '/Zend/tests/errmsg_026.php',
@@ -1144,7 +1146,10 @@ def walk(filename, dest_subdir):
             test += '?>\n'
         if not test.endswith('\n'):
             test += '\n'
-        test += sections['CLEAN']
+        if not sections['CLEAN'].startswith('<?'):
+            sections['CLEAN'] = '<?php\n' + sections['CLEAN']
+        disable_errors = "<?php error_reporting(0); ?>\n";
+        test += disable_errors + sections['CLEAN']
 
     # If you put an exception in here, please send a pull request upstream to
     # php-src. Then when it gets merged kill your hack.

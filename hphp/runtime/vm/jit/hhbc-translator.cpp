@@ -3346,6 +3346,7 @@ const StaticString
   s_is_a("is_a"),
   s_count("count"),
   s_ini_get("ini_get"),
+  s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class");
 
@@ -3418,6 +3419,56 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
   return nullptr;
 }
 
+/*
+ * Transforms in_array with a static haystack argument into an AKExists with the
+ * haystack flipped.
+ */
+SSATmp* HhbcTranslator::optimizedCallInArray() {
+  // We will restrict this optimization to needles that are strings, and
+  // haystacks that have only non-numeric string keys. This avoids a bunch of
+  // complication around numeric-string array-index semantics.
+  if (!(topType(2) <= Type::Str)) {
+    return nullptr;
+  }
+
+  auto const haystackType = topType(1);
+  if (!(haystackType <= Type::StaticArr) || !haystackType.isConst()) {
+    // Haystack isn't statically known
+    return nullptr;
+  }
+
+  auto const haystack = haystackType.arrVal();
+  if (haystack->size() == 0) {
+    return cns(false);
+  }
+
+  ArrayInit flipped{haystack->size(), ArrayInit::Map{}};
+
+  for (auto iter = ArrayIter{haystack}; iter; ++iter) {
+    auto const& key = iter.secondRef();
+    int64_t ignoredInt;
+    double ignoredDbl;
+
+    if (!key.isString() ||
+        key.asCStrRef().get()
+          ->isNumericWithVal(ignoredInt, ignoredDbl, false) != KindOfNull) {
+      // Numeric strings will complicate matters because the loose comparisons
+      // done with array keys are not quite the same as loose comparisons done
+      // by in_array. For example: in_array('0', array('0000')) is true, but
+      // doing array('0000' => true)['0'] will say "undefined index". This seems
+      // unlikely to affect real-world usage.
+      return nullptr;
+    }
+
+    flipped.set(key.asCStrRef(), init_null_variant);
+  }
+
+  auto needle = topC(2);
+  auto array = flipped.toArray();
+  array.get()->setStatic();
+  return gen(AKExists, cns(array.get()), needle);
+}
+
 SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
   auto const curCls = curClass();
   auto const curName = [&] {
@@ -3464,6 +3515,9 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
       break;
     case 3:
       if (func->name()->isame(s_is_a.get())) res = optimizedCallIsA();
+      else if (func->name()->isame(s_in_array.get())) {
+        res = optimizedCallInArray();
+      }
       break;
     default: break;
   }

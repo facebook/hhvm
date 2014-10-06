@@ -806,6 +806,7 @@ private:
                              uint32_t numNonDefault);
   SSATmp* optimizedCallIsA();
   SSATmp* optimizedCallIniGet();
+  SSATmp* optimizedCallInArray();
   SSATmp* optimizedCallCount();
   SSATmp* optimizedCallGetClass(uint32_t);
   SSATmp* optimizedCallGetCalledClass();

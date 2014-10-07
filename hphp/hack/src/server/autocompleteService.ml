@@ -157,6 +157,9 @@ let autocomplete_lvar_naming id locals =
 let autocomplete_lvar_typing id env =
   if Some (fst id)= !(Autocomplete.auto_complete_pos)
   then begin
+    (* The typechecker might call this hook more than once (loops) so we
+     * need to clear the list of results first or we could have repeat locals *)
+    autocomplete_results := [];
     ac_env := Some env;
     Autocomplete.auto_complete_pos := Some (fst id);
     (* Get the types of all the variables in scope at this point *)
@@ -313,11 +316,14 @@ let get_results funs classes =
      completion_type = Some Autocomplete.Actype
   then compute_complete_global funs classes;
   let results = !autocomplete_results in
-  let fake_env = Typing_env.empty "" in
+  let env = match !ac_env with
+    | Some e -> e
+    | None -> Typing_env.empty ""
+  in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with
       | Some s -> s
-      | None -> Typing_print.full_strip_ns fake_env (x.ty)
+      | None -> Typing_print.full_strip_ns env (x.ty)
     in
     let func_details = match x.ty with
       | (_, Tfun ft) ->
@@ -326,12 +332,12 @@ let get_results funs classes =
             param_name     = (match name with
                                | Some n -> n
                                | None -> "");
-            param_ty       = Typing_print.full_strip_ns fake_env pty;
+            param_ty       = Typing_print.full_strip_ns env pty;
             param_variadic = is_variadic;
           }
         in
         Some {
-          return_ty = Typing_print.full_strip_ns fake_env ft.ft_ret;
+          return_ty = Typing_print.full_strip_ns env ft.ft_ret;
           min_arity = arity_min ft.ft_arity;
           params    = List.map param_to_record ft.ft_params @
             (match ft.ft_arity with

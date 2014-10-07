@@ -18,12 +18,6 @@ type t =
   | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
                  concrete type parameters *)
 
-let make (pos, ty) =
-  pos, match ty with
-  | _, Typing_defs.Tany -> Unchecked
-  | _ when TUtils.HasTany.check ty -> Partial
-  | _ -> Checked
-
 let string = function
   | Checked   -> "checked"
   | Partial   -> "partial"
@@ -47,3 +41,27 @@ type result = {
 type 'a trie =
   | Leaf of 'a
   | Node of 'a * 'a trie SMap.t
+
+let mk_level_list fn_opt pos_ty_l =
+  let pos_lvl_l = rev_rev_map (fun (pos, ty) ->
+    pos, match ty with
+    | _, Typing_defs.Tany -> Unchecked
+    | _ when TUtils.HasTany.check ty -> Partial
+    | _ -> Checked) pos_ty_l
+  in
+  (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
+  (* NOTE(jez): can we monadize this? *)
+  match fn_opt with
+  | None -> pos_lvl_l
+  | Some fn ->
+    match Parser_heap.HH_FIXMES.get fn with
+    | None -> pos_lvl_l
+    | Some fixme_map ->
+        rev_rev_map (fun (p, lvl as pos_lvl) ->
+          let line = p.Pos.pos_start.Lexing.pos_lnum in
+          match lvl with
+          | Checked when IMap.mem line fixme_map ->
+              (p, Partial)
+          | Unchecked | Partial | Checked ->
+              pos_lvl
+        ) pos_lvl_l

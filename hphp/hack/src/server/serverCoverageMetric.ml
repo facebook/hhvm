@@ -22,8 +22,8 @@ let update_assoc f k xs =
     else (k', v)) xs
 
 (* Count the number of expressions of each kind of Coverage_level. *)
-let count_exprs pos_ty_l =
-  let pos_level_l = rev_rev_map CL.make pos_ty_l in
+let count_exprs fn pos_ty_l =
+  let pos_level_l = CL.mk_level_list (Some fn) pos_ty_l in
   List.fold_left (fun c (_, lvl) -> update_assoc ((+) 1) lvl c)
                  CL.empty_counter pos_level_l
 
@@ -51,7 +51,7 @@ let get_coverage neutral fnl =
     | Some defs ->
         assert (!(Typing_defs.type_acc) = []);
         List.iter ServerIdeUtils.check_def defs;
-        let counts = count_exprs !Typing_defs.type_acc in
+        let counts = count_exprs fn !Typing_defs.type_acc in
         Typing_defs.type_acc := [];
         Some (fn, counts)
   end fnl |> cat_opts in

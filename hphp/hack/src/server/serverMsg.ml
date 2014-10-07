@@ -66,7 +66,6 @@ type patch =
 
 type command =
 | ERROR_OUT_OF_DATE
-| PRINT_TYPES of file_input
 | STATUS of Path.path
 | LIST_FILES
 | AUTOCOMPLETE of string
@@ -86,6 +85,7 @@ type command =
 | SUGGEST of string list
 | ARGUMENT_INFO of string * int * int
 | CALC_COVERAGE of string
+| PRINT_COVERAGE_LEVELS of file_input
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

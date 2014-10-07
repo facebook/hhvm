@@ -10,6 +10,8 @@
 
 open Utils
 
+module CL = Coverage_level
+
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
@@ -192,7 +194,6 @@ let collect_defs ast =
 
 (* Make readable test output *)
 let replace_color input =
-  let module CL = Coverage_level in
   match input with
   | (Some CL.Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
   | (Some CL.Checked, str) -> "<checked>"^str^"</checked>"
@@ -201,7 +202,8 @@ let replace_color input =
 
 let print_colored fn =
   let content = cat fn in
-  let results = ColorFile.go content !Typing_defs.type_acc in
+  let pos_level_l = CL.mk_level_list (Some fn) !Typing_defs.type_acc in
+  let results = ColorFile.go content pos_level_l in
   if Unix.isatty Unix.stdout
   then Tty.print (ClientColorFile.replace_colors results)
   else print_string (List.map replace_color results |> String.concat "")

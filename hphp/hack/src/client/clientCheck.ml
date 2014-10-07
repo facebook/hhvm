@@ -72,7 +72,7 @@ let rec main args retries =
             let file = expand_path file in
             ServerMsg.FileName file
         in
-        let command = ServerMsg.PRINT_TYPES file_input in
+        let command = ServerMsg.PRINT_COVERAGE_LEVELS file_input in
         ServerMsg.cmd_to_channel oc command;
         let pos_type_l = Marshal.from_channel ic in
         ClientColorFile.go file_input args.output_json pos_type_l;

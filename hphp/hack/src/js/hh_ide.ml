@@ -417,7 +417,7 @@ let hh_file_summary fn =
 let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check ~check_mode:false fn);
-  let result = !(Typing_defs.type_acc) in
+  let result = CL.mk_level_list (Some fn) !(Typing_defs.type_acc) in
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := [];
   let result = ColorFile.go (Hashtbl.find files fn) result in

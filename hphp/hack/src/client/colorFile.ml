@@ -94,9 +94,8 @@ let walk content pos_level_list =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str (pos_ty_l: (Pos.t * Typing_defs.ty) list) =
+let go str (pos_level_l: (Pos.t * Coverage_level.t) list) =
   let cmp x y = Compare.pos (fst x) (fst y) in
-  let pos_ty_l = List.sort cmp pos_ty_l in
-  let pos_ty_l = flatten pos_ty_l in
-  let pos_level_l = List.map CL.make pos_ty_l in
+  let pos_level_l = List.sort cmp pos_level_l in
+  let pos_level_l = flatten pos_level_l in
   walk str pos_level_l

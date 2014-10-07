@@ -69,10 +69,10 @@ module Program : Server.SERVER_PROGRAM = struct
     die ()
 
   let respond genv env ~client ~msg =
-    let ic, oc = client in
+    let _, oc = client in
     match msg with
     | ServerMsg.ERROR_OUT_OF_DATE -> incorrect_hash oc
-    | ServerMsg.PRINT_TYPES fn -> ServerPrintTypes.go fn genv env ic oc
+    | ServerMsg.PRINT_COVERAGE_LEVELS fn -> ServerColorFile.go fn oc
     | ServerMsg.INFER_TYPE (fn, line, char) ->
         infer (fn, line, char) oc
     | ServerMsg.SUGGEST (files) -> suggest files oc

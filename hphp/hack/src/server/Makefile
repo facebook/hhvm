@@ -10,7 +10,7 @@ SRC= serverArgs.ml serverEnv.ml \
  serverMsg.ml find.ml serverDfind.ml \
  serverIdeUtils.ml \
  findRefsService.ml methodJumps.ml serverMethodJumps.ml \
- serverPeriodical.ml serverPrintTypes.ml \
+ serverPeriodical.ml \
  serverError.ml serverTypeCheck.ml serverIdentifyFunction.ml \
  autocompleteService.ml serverAutoComplete.ml serverEnvBuild.ml \
  serverHealth.ml serverSign.ml \
@@ -18,7 +18,7 @@ SRC= serverArgs.ml serverEnv.ml \
  serverRefactor.ml serverInferType.ml \
  fileOutline.ml serverFileOutline.ml methodJumps.ml serverMethodJumps.ml \
  argumentInfoService.ml \
- serverCoverageMetric.ml argumentInfoService.ml \
+ serverCoverageMetric.ml serverColorFile.ml argumentInfoService.ml \
  serverArgumentInfo.ml serverSearch.ml serverFunctors.ml hackProgram.ml \
 
 

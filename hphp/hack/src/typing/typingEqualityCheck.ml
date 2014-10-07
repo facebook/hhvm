@@ -18,7 +18,7 @@ module N = Nast
 (* Check if a comparison is trivially true or false *)
 (*****************************************************************************)
 
-let assert_nontrivial p bop env ty1 ty2 =
+let rec assert_nontrivial p bop env ty1 ty2 =
   let _, ty1 = Env.expand_type env ty1 in
   let _, ty1, trail1 = TDef.force_expand_typedef env ty1 in
   let _, ty2 = Env.expand_type env ty2 in
@@ -43,4 +43,7 @@ let assert_nontrivial p bop env ty1 ty2 =
         (Reason.to_string ("This is " ^ tys1) r1)
         (Reason.to_string ("This is " ^ tys2) r2)
         trail1 trail2
+  | (_, Toption ty1), (_, Tprim _ as ty2)
+  | (_, Tprim _ as ty1), (_, Toption ty2) ->
+      assert_nontrivial p bop env ty1 ty2
   | _ -> ()

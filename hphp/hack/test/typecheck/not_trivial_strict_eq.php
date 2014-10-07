@@ -31,3 +31,8 @@ function g(): void {
     $b[] = $a[$idx];
   }
 }
+
+function h(?int $a, ?string $b): bool {
+  // Not a trivial comparison since both $a and $b can be null
+  return $a === $b;
+}

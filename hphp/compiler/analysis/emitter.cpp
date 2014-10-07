@@ -799,8 +799,8 @@ void SymbolicStack::push(char sym) {
   if (sym != StackSym::W && sym != StackSym::K && sym != StackSym::L &&
       sym != StackSym::T && sym != StackSym::I && sym != StackSym::H) {
     m_actualStack.push_back(m_symStack.size());
-    *m_actualStackHighWaterPtr = MAX(*m_actualStackHighWaterPtr,
-                                     (int)m_actualStack.size());
+    *m_actualStackHighWaterPtr = std::max(*m_actualStackHighWaterPtr,
+                                          (int)m_actualStack.size());
   }
   m_symStack.push_back(SymEntry(sym));
 }
@@ -1010,7 +1010,7 @@ int SymbolicStack::sizeActual() const {
 
 void SymbolicStack::pushFDesc() {
   m_fdescCount += kNumActRecCells;
-  *m_fdescHighWaterPtr = MAX(*m_fdescHighWaterPtr, m_fdescCount);
+  *m_fdescHighWaterPtr = std::max(*m_fdescHighWaterPtr, m_fdescCount);
 }
 
 void SymbolicStack::popFDesc() {

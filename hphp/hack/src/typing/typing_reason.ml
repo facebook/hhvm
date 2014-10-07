@@ -136,8 +136,9 @@ let rec to_string prefix r =
         (to_string ("  via this generic " ^ generic_name) r_inst)
   | Rarray_filter (_, r) ->
       (to_string prefix r) @
-      [(p, "Single argument array_filter converts KeyedContainer<Tk, ?Tv> to \
-      array<Tk, Tv>, and Container<?Tv> to array<mixed, Tv>")]
+      [(p, "array_filter converts KeyedContainer<Tk, Tv> to \
+      array<Tk, Tv>, and Container<Tv> to array<arraykey, Tv>. \
+      Single argument calls additionally remove nullability from Tv.")]
 
 
 and to_pos = function

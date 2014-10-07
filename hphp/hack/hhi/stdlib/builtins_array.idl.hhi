@@ -40,11 +40,11 @@ function array_fill_keys($keys, $value) { }
  *
  * function(array, ?(function(Tv):bool)): array
  * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
- * function(Container<Tv>, ?(function(Tv):bool)): array<mixed, Tv>
+ * function(Container<Tv>, ?(function(Tv):bool)): array<arraykey, Tv>
  *
  * Single argument calls additionally remove nullability of Tv, i.e.:
  *
- * function(Container<?Tv>): array<mixed, Tv>
+ * function(Container<?Tv>): array<arraykey, Tv>
  *
  */
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null) { }

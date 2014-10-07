@@ -1570,23 +1570,28 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in
       let env, res = call p env fty el in
-      let multi_arg = List.length el > 1 in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd el in
       let env, ty = expr env x in
+      let explain_array_filter (r, t) =
+        (Reason.Rarray_filter (p, r), t) in
+      let get_value_type env tv =
+        let env, tv = if List.length el > 1 then env, tv else non_null env tv in
+        env, explain_array_filter tv in
       let rec get_array_filter_return_type env ty =
         let env, ety = Env.expand_type env ty in
         (match ety with
         | (r, Tarray (_, None, None)) as array_type ->
             env, array_type
+        | (r, Tarray (_, Some tv, None)) ->
+            let env, tv = get_value_type env tv in
+            env, (r, Tarray (true, Some tv, None))
         | (r, Tunresolved x) ->
             let env, x = lmap get_array_filter_return_type env x in
             env, (r, Tunresolved x)
         | (r, Tany) ->
             env, (r, Tany)
         | (r, _) ->
-            let explain_array_filter (r, t) =
-              (Reason.Rarray_filter (p, r), t) in
             let tk, tv = Env.fresh_type(), Env.fresh_type() in
             Errors.try_
               (fun () ->
@@ -1597,12 +1602,11 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
                   )
                 ) in
                 let env = SubType.sub_type env keyed_container ety in
-                let env, tv =
-                  if multi_arg then env, tv else non_null env tv in
+                let env, tv = get_value_type env tv in
                 env, (r, Tarray (
                   true,
-                  Some(explain_array_filter tk),
-                  Some(explain_array_filter tv))
+                  Some (explain_array_filter tk),
+                  Some tv)
                 ))
               (fun _ -> Errors.try_
                 (fun () ->
@@ -1613,12 +1617,11 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
                     )
                   ) in
                   let env = SubType.sub_type env container ety in
-                  let env, tv =
-                    if multi_arg then env, tv else non_null env tv in
+                  let env, tv = get_value_type env tv in
                   env, (r, Tarray (
                     true,
-                    Some(explain_array_filter (r, Tmixed)),
-                    Some(explain_array_filter tv))))
+                    Some (explain_array_filter (r, Tprim Tarraykey)),
+                    Some tv)))
                 (fun _ -> env, res)))
       in get_array_filter_return_type env ty
   | Class_const (CIparent, (_, "__construct")) ->

@@ -6781,6 +6781,12 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       "<<__Memoize>> cannot be used on functions with variable arguments");
   }
 
+  auto classScope = meth->getClassScope();
+  if (classScope && classScope->isInterface()) {
+    throw IncludeTimeFatalException(meth,
+      "<<__Memoize>> cannot be used in interfaces");
+  }
+
   bool isFunc = meth->is(Statement::KindOfFunctionStatement);
   int numParams = m_curFunc->params.size();
   int staticLocalID = 0;
@@ -6923,7 +6929,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
 
-    auto classScope = meth->getClassScope();
     if (classScope && classScope->isTrait()) {
       e.String(methName);
       e.Self();

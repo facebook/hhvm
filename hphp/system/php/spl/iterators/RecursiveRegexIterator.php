@@ -57,7 +57,10 @@ class RecursiveRegexIterator extends RegexIterator
   public function getChildren() {
     return new RecursiveRegexIterator(
       $this->hasChildren() ? $this->getInnerIterator()->getChildren() : null,
-      $this->getRegex()
+      $this->getRegex(),
+      $this->getMode(),
+      $this->getFlags(),
+      $this->getPregFlags()
     );
   }
 

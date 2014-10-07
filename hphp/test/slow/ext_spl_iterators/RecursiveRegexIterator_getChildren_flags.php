@@ -1,4 +1,7 @@
 <?php
+// This doesn't match PHP6.0, but a PR is here:
+// https://github.com/php/php-src/pull/865
+
 
 $arr = new RecursiveArrayIterator([['test2', 'test3']]);
 $regex = new RecursiveRegexIterator($arr, '/^test/',

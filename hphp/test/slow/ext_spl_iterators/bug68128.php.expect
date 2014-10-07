@@ -1,2 +1,55 @@
-No children
-Children: test4 test5 
+No children Array
+(
+    [0] => Array
+        (
+            [0] => test1
+        )
+
+    [1] => Array
+        (
+            [0] => t
+        )
+
+    [2] => Array
+        (
+            [0] => 1
+        )
+
+)
+
+Children: Array
+(
+    [0] => Array
+        (
+            [0] => test4
+        )
+
+    [1] => Array
+        (
+            [0] => t
+        )
+
+    [2] => Array
+        (
+            [0] => 4
+        )
+
+)
+Array
+(
+    [0] => Array
+        (
+            [0] => test5
+        )
+
+    [1] => Array
+        (
+            [0] => t
+        )
+
+    [2] => Array
+        (
+            [0] => 5
+        )
+
+)

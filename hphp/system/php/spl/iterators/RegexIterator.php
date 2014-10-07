@@ -126,10 +126,10 @@ class RegexIterator extends FilterIterator
       case self::ALL_MATCHES:
         $this->current = array();
 
-        preg_match_all($this->regex, $subject, $this->current,
+        $count = preg_match_all($this->regex, $subject, $this->current,
                        $this->pregFlags);
 
-        $ret = count($this->current) > 0;
+        $ret = $count > 0;
         break;
       case self::SPLIT:
         $this->current = preg_split($this->regex, $subject, null,

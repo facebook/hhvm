@@ -99,6 +99,10 @@ class RegexIterator extends FilterIterator
    * @return boolean TRUE if a match, FALSE otherwise.
    */
   public function accept() {
+    if (is_array(parent::current())) {
+      return false;
+    }
+
     $this->key     = parent::key();
     $this->current = parent::current();
 

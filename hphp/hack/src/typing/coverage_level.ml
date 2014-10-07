@@ -8,6 +8,8 @@
  *
  *)
 
+open Utils
+
 module TUtils = Typing_utils
 
 type t =
@@ -28,12 +30,20 @@ let string = function
   | Unchecked -> "unchecked"
 
 let empty_counter = [
-  (Unchecked, 0);
-  (Checked, 0);
-  (Partial, 0);
+  Unchecked, 0;
+  Checked, 0;
+  Partial, 0;
 ]
 
 type result = {
-  counter    : (t * int) list;
+  (* An assoc list that counts the number of expressions at each coverage level *)
+  counts     : (t * int) list;
+  (* A number between 0 to 1 that summarizes the extent of coverage *)
   percentage : float;
 }
+
+(* There is a trie in utils/, but it is not quite what we need ... *)
+
+type 'a trie =
+  | Leaf of 'a
+  | Node of 'a * 'a trie SMap.t

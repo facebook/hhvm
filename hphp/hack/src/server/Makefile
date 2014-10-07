@@ -18,7 +18,7 @@ SRC= serverArgs.ml serverEnv.ml \
  serverRefactor.ml serverInferType.ml \
  fileOutline.ml serverFileOutline.ml methodJumps.ml serverMethodJumps.ml \
  argumentInfoService.ml \
- serverCoverageMetric.ml \
+ serverCoverageMetric.ml argumentInfoService.ml \
  serverArgumentInfo.ml serverSearch.ml serverFunctors.ml hackProgram.ml \
 
 

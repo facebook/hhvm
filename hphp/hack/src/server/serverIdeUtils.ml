@@ -118,30 +118,30 @@ let fix_file_and_def content = try
 with e ->
   report_error e;
   ()
-    
+
+let check_def = function
+  | Ast.Fun f ->
+      (try Typing_check_service.type_fun (snd f.Ast.f_name)
+      with _ -> ())
+  | Ast.Class c ->
+      (try Typing_check_service.type_class (snd c.Ast.c_name)
+      with _ -> ())
+  | Ast.Stmt _ -> ()
+  | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
+      (try Typing_check_service.check_typedef tname
+      with _ -> ()
+      )
+  | Ast.Constant _ -> ()
+  | Ast.Namespace _
+  | Ast.NamespaceUse _ -> assert false
+
 let recheck file_names =
   SharedMem.invalidate_caches();
   Errors.ignore_ begin fun () ->
     List.iter begin fun fn ->
       match Parser_heap.ParserHeap.get fn with
       | None -> ()
-      | Some defs ->
-          List.iter begin function
-          | Ast.Fun f ->
-              (try Typing_check_service.type_fun (snd f.Ast.f_name)
-              with _ -> ())
-          | Ast.Class c ->
-              (try Typing_check_service.type_class (snd c.Ast.c_name)
-              with _ -> ())
-          | Ast.Stmt _ -> ()
-          | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
-              (try Typing_check_service.check_typedef tname
-              with _ -> ()
-              )
-          | Ast.Constant _ -> ()
-          | Ast.Namespace _
-          | Ast.NamespaceUse _ -> assert false
-          end defs
+      | Some defs -> List.iter check_def defs
     end file_names
   end
 

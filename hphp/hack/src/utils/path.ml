@@ -88,7 +88,10 @@ let remove (path : path) : unit =
   Sys.remove file
 
 let parent (path : path) : path = 
-  mk_path (string_of_path path ^ "/../")
+  let s = string_of_path path in
+  if is_directory path
+  then mk_path (s ^ "/../")
+  else mk_path (Filename.dirname s)
 
 let slash_escaped_string_of_path (path: path) : string =
   let path_str = string_of_path path in

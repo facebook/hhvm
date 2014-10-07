@@ -155,6 +155,11 @@ let opt_fold_left f x y =
   | None -> x
   | Some y -> f x y
 
+let rec cat_opts = function
+  | [] -> []
+  | Some x :: xs -> x :: cat_opts xs
+  | None :: xs -> cat_opts xs
+
 let rec lmap f env l =
   match l with
   | [] -> env, []
@@ -228,6 +233,12 @@ let rec wfold_left2 f env l1 l2 =
       let env = f env x1 x2 in
       wfold_left2 f env rl1 rl2
 
+let rec zip_with f l1 l2 =
+  match l1, l2 with
+  | [], _ | _, [] -> []
+  | x1 :: rl1, x2 :: rl2 ->
+      f x1 x2 :: zip_with f rl1 rl2
+
 let apply_for_env_fold f env acc x =
   let env, x = f env x in
   env, x :: acc
@@ -258,7 +269,7 @@ let maybe f env = function
   | Some x -> f env x
 
 let unsafe_opt = function
-  | None -> assert false
+  | None -> raise (Invalid_argument "unsafe_opt got None")
   | Some x -> x
 
 let liter f env l = List.iter (f env) l

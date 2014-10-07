@@ -113,62 +113,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public function getPrototype() {}
     public function setAccessible($accessible) {}
 }
-class ReflectionClass implements Reflector {
-    const IS_IMPLICIT_ABSTRACT = 16;
-    const IS_EXPLICIT_ABSTRACT = 32;
-    const IS_FINAL = 64;
-    public $name = '';
-    final private function __clone() {}
-    public static function export($argument, $return = false) {}
-    public function __construct($argument) {}
-    public function __toString() {}
-    public function getName() {}
-    public function isInternal() {}
-    public function isUserDefined() {}
-    public function isInstantiable() {}
-    public function isCloneable() {}
-    public function getFileName() {}
-    public function getStartLine() {}
-    public function getEndLine() {}
-    public function getDocComment() {}
-    public function getConstructor() {}
-    public function hasMethod($name) {}
-    public function getMethod($name) {}
-    public function getMethods($filter = null) {}
-    public function hasProperty($name) {}
-    public function getProperty($name) {}
-    public function getProperties($filter = null) {}
-    public function hasConstant($name) {}
-    public function getConstants() {}
-    public function getConstant($name) {}
-    public function getInterfaces() {}
-    public function getInterfaceNames() {}
-    public function isInterface() {}
-    public function getTraits() {}
-    public function getTraitNames() {}
-    public function getTraitAliases() {}
-    public function isTrait() {}
-    public function isAbstract() {}
-    public function isFinal() {}
-    public function getModifiers() {}
-    public function isInstance($object) {}
-    public function newInstance($args = null, $_ = null) {}
-    public function newInstanceWithoutConstructor() {}
-    public function newInstanceArgs(array $args = []) {}
-    public function getParentClass() {}
-    public function isSubclassOf($class) {}
-    public function getStaticProperties() {}
-    public function getStaticPropertyValue($name, $default = null) {}
-    public function setStaticPropertyValue($name, $value) {}
-    public function getDefaultProperties() {}
-    public function isIterateable() {}
-    public function implementsInterface($interface) {}
-    public function getExtension() {}
-    public function getExtensionName() {}
-    public function inNamespace() {}
-    public function getNamespaceName() {}
-    public function getShortName() {}
-}
 class ReflectionObject extends ReflectionClass implements Reflector {
 }
 class ReflectionProperty implements Reflector {

@@ -1989,9 +1989,9 @@ std::vector<UsageInfo> MCGenerator::getUsageInfo() {
       RuntimeOption::EvalJitTargetCacheSize / 4,
       false});
   tcUsageInfo.emplace_back(UsageInfo{
-      "cloned-closuers",
+      "cloned-closures",
       Func::s_totalClonedClosures,
-      RuntimeOption::EvalMaxClonedClosures});
+      100000 /* dummy value -- there isn't really a capacity for this */});
   return tcUsageInfo;
 }
 

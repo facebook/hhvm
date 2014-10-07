@@ -479,7 +479,6 @@ public:
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(bool,     JitPGOStringSpec,        false)                           \
   F(uint32_t, HotFuncCount,            4100)                            \
-  F(uint32_t, MaxClonedClosures,       100000)                          \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \

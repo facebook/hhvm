@@ -114,11 +114,7 @@ void* Func::allocFuncMem(
     numExtraPrologues * sizeof(unsigned char*) +
     numExtraFuncPtrs * sizeof(Func*);
 
-  if (needsNextClonedClosure) {
-    s_totalClonedClosures++;
-    always_assert(
-      s_totalClonedClosures <= RuntimeOption::EvalMaxClonedClosures);
-  }
+  if (needsNextClonedClosure) s_totalClonedClosures++;
 
   void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
 

@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"

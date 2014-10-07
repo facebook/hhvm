@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include <set>
 #include <map>
 #include <algorithm>
@@ -65,7 +65,7 @@ const StaticString
   s_data("data");
 
 bool disableWrapper(const String& scheme) {
-  String lscheme = HHVM_FN(strtolower)(scheme);
+  String lscheme = f_strtolower(scheme);
   bool ret = false;
 
   // Unregister request-specific wrappers entirely
@@ -93,7 +93,7 @@ bool disableWrapper(const String& scheme) {
 }
 
 bool restoreWrapper(const String& scheme) {
-  String lscheme = HHVM_FN(strtolower)(scheme);
+  String lscheme = f_strtolower(scheme);
   bool ret = false;
 
   // Unregister request-specific wrapper
@@ -117,7 +117,7 @@ bool restoreWrapper(const String& scheme) {
 
 bool registerRequestWrapper(const String& scheme,
                             std::unique_ptr<Wrapper> wrapper) {
-  String lscheme = HHVM_FN(strtolower)(scheme);
+  String lscheme = f_strtolower(scheme);
 
   // Global, non-disabled wrapper
   if ((s_wrappers.find(lscheme.data()) != s_wrappers.end()) &&
@@ -172,7 +172,7 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
    */
   bool have_request_wrappers = s_request_wrappers.getInited();
 
-  String lscheme = HHVM_FN(strtolower)(scheme);
+  String lscheme = f_strtolower(scheme);
 
   // Request local wrapper?
   if (have_request_wrappers) {

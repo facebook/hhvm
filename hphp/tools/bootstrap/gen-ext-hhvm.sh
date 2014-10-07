@@ -2,12 +2,24 @@
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-if [ ! -d `dirname $3` ] ; then
-   mkdir -p `dirname $3`
+# $1 Operating System (currently: "linux" or "darwin")
+# $2 Machine architecture (currently: "x64" or "arm")
+# $3 Object file to read symbols from
+# $4 ext_hhvm.cpp source to generate
+# $5 ext_hhvm.h header to generate
+if [ "$1" = "darwin" ]; then
+  gobjdump --section=".text" -t $3 | \
+      awk '{ if ($2=="g") print $8 }' | \
+      $GEN_EXT_HHVM \
+      $2 $5 $4 $DIR/../../system/idl/*.idl.json
+elif [ "$1" = "cygwin" ]; then
+  objdump --section=".text" -t $3 | \
+      awk '{ if(NF > 1) print $NF }' | \
+      $GEN_EXT_HHVM \
+      $2 $5 $4 $DIR/../../system/idl/*.idl.json
+else
+  readelf -s -W $3 | grep 'FUNC.*GLOBAL' | \
+      sed -e 's/^.*DEFAULT[0-9 ]*//' | \
+      $GEN_EXT_HHVM \
+      $2 $5 $4 $DIR/../../system/idl/*.idl.json
 fi
- 
-# $1 Machine architecture (currently: "x64" or "arm")
-# $2 Idl file to read definitions from
-# $3 ext_hhvm.cpp source to generate
-# $4 ext_hhvm.h header to generate
-$GEN_EXT_HHVM $1 $4 $3 $2

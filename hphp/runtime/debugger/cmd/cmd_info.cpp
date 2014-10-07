@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 
@@ -395,7 +395,7 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
       space1 = matches1.toCArrRef()[1].toString().size();
       space2 = matches2.toCArrRef()[1].toString().size();
     }
-    String spaces = HHVM_FN(str_repeat)(" ", space2 - space1 - 1);
+    String spaces = f_str_repeat(" ", space2 - space1 - 1);
     sb.printf("%s%s\n", spaces.data(), doc.data());
   }
 }

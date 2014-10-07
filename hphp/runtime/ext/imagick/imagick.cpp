@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 using std::pair;
 using std::string;
@@ -1796,10 +1796,10 @@ static vector<pair<String, String>> parseIdentify(const String& identify) {
   };
 
   vector<pair<String, String>> ret;
-  Array lines = HHVM_FN(explode)("\r\n", identify).toArray();
+  Array lines = f_explode("\r\n", identify).toArray();
   ret.reserve(keys.size());
   for (ArrayIter it(lines); it; ++it) {
-    String line = HHVM_FN(trim)(it.secondRefPlus().toString());
+    String line = f_trim(it.secondRefPlus().toString());
     auto key = std::find_if(keys.begin(), keys.end(),
         [=](Keys::const_reference i) {
           const string& prefix = i.first;

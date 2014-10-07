@@ -58,7 +58,6 @@ int main(int argc, const char* argv[]) {
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
       << "#include \"hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h\"\n"
-      << "#include \"hphp/util/abi-cxx.h\"\n"
       << "namespace HPHP {\n"
       << "  struct TypedValue;\n"
       << "  struct ActRec;\n"
@@ -106,10 +105,10 @@ int main(int argc, const char* argv[]) {
     }
     first = false;
 
+    auto prefix = "fh_";
     fbstring name = func.lowerCppName();
-    cpp << "{ \"" << escapeCpp(func.getPhpName()) << "\", "
-        << "fg_" << name << ", (void*)(&"
-        << func.getPrefixedCppName() << ") }";
+    cpp << "{ \"" << escapeCpp(func.getPhpName()) << "\", " << "fg_" << name
+        << ", (void *)&" << prefix << name << " }";
   }
   cpp << "\n};\n\n";
 
@@ -128,8 +127,8 @@ int main(int argc, const char* argv[]) {
 
       auto name = method.getUniqueName();
       cpp << "{ \"" << method.getCppName() << "\", "
-          << "tg_" << name << ", getMethodPtr(&"
-          << method.getPrefixedCppName() << ") }";
+          << "tg_" << name << ", "
+          << "(void*)&th_" << name << " }";
     }
     cpp << "\n};\n\n";
   }

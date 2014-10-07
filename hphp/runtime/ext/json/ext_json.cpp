@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
@@ -123,7 +123,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
     return z;
   }
 
-  String trimmed = HHVM_FN(trim)(json, "\t\n\r ");
+  String trimmed = f_trim(json, "\t\n\r ");
 
   if (trimmed.size() == 4) {
     if (!strcasecmp(trimmed.data(), "null")) {

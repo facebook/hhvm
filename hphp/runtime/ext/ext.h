@@ -30,6 +30,7 @@
 #include "hphp/facebook/extensions/string_buffer/ext_string_buffer.h"
 #endif
 
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array_idl.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -53,7 +54,7 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_xml.h"

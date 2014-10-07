@@ -16,7 +16,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/ext_apc.h"
 
 namespace HPHP {
 

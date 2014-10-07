@@ -25,8 +25,8 @@
 
 #include "folly/ScopeGuard.h"
 
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
@@ -911,7 +911,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     raise_warning("Cannot modify header information - headers already sent");
   }
 
-  String header = HHVM_FN(rtrim)(str);
+  String header = f_rtrim(str);
 
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad

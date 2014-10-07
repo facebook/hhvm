@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/ext_apc.h"
 
 #if !defined(HAVE_POSIX_FALLOCATE) && \
   (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L || defined(__CYGWIN__))

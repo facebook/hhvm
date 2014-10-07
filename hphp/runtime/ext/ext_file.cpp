@@ -16,8 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/base/runtime-option.h"

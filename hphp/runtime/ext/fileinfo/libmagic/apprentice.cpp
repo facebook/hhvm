@@ -1821,7 +1821,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
           m->str_flags |= STRING_TEXTTEST;
           break;
         case CHAR_TRIM:
-          m->str_flags |= HHVM_FN(trim);
+          m->str_flags |= STRING_TRIM;
           break;
         case CHAR_PSTRING_1_LE:
           if (m->type != FILE_PSTRING)

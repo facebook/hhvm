@@ -30,7 +30,7 @@
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/repo.h"

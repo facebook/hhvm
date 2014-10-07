@@ -68,46 +68,26 @@ class apcExtension : public Extension {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-Variant HHVM_FUNCTION(apc_add,
-                      const Variant& key_or_array,
-                      const Variant& var = null_variant,
-                      int64_t ttl = 0);
-Variant HHVM_FUNCTION(apc_store,
-                      const Variant& key_or_array,
-                      const Variant& var = null_variant,
-                      int64_t ttl = 0);
-bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
-                   const String& key,
-                   const Variant& var);
-Variant HHVM_FUNCTION(apc_fetch,
-                      const Variant& key,
-                      VRefParam success = uninit_null());
-Variant HHVM_FUNCTION(apc_delete,
-                      const Variant& key);
-bool HHVM_FUNCTION(apc_clear_cache,
-                   const String& cache_type = "");
-Variant HHVM_FUNCTION(apc_inc,
-                      const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
-Variant HHVM_FUNCTION(apc_dec,
-                      const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
-bool HHVM_FUNCTION(apc_cas,
-                   const String& key,
-                   int64_t old_cas,
-                   int64_t new_cas);
-Variant HHVM_FUNCTION(apc_exists,
-                      const Variant& key);
+Variant f_apc_add(const Variant& key_or_array, const Variant& var = null_variant,
+                  int64_t ttl = 0);
+Variant f_apc_store(const Variant& key_or_array, const Variant& var = null_variant,
+                    int64_t ttl = 0);
+bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var);
+
+Variant f_apc_fetch(const Variant& key, VRefParam success = uninit_null());
+Variant f_apc_delete(const Variant& key);
+bool f_apc_clear_cache(const String& cache_type = "");
+Variant f_apc_inc(const String& key, int64_t step = 1,
+                  VRefParam success = uninit_null());
+Variant f_apc_dec(const String& key, int64_t step = 1,
+                  VRefParam success = uninit_null());
+bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas);
+Variant f_apc_exists(const String& cache_type);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(apc_cache_info,
-                      const String& cache_type /* = "" */,
-                      bool limited /* = false */);
-Array HHVM_FUNCTION(apc_sma_info,
-                    bool limited /* = false */);
+Variant f_apc_cache_info(const String& cache_type = "", bool limited = false);
+Array f_apc_sma_info(bool limited = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files

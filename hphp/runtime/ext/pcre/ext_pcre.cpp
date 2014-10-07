@@ -20,9 +20,9 @@
 
 #include <pcre.h>
 
-#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 

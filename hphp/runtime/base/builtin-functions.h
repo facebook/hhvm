@@ -90,6 +90,9 @@ inline bool is_empty_string(const Variant& v) {
 
 bool array_is_valid_callback(const Array& arr);
 
+Variant f_call_user_func_array(const Variant& function, const Array& params,
+                               bool bound = false);
+
 const HPHP::Func*
 vm_decode_function(const Variant& function,
                    ActRec* ar,

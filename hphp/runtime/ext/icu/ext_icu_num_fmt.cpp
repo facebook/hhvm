@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_num_fmt.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 
 namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////

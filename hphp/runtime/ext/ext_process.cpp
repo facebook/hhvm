@@ -42,7 +42,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
@@ -483,7 +483,7 @@ String f_exec(const String& command, VRefParam output /* = null */,
     return String();
   }
 
-  return HHVM_FN(rtrim)(lines[count - 1].toString());
+  return f_rtrim(lines[count - 1].toString());
 }
 
 void f_passthru(const String& command, VRefParam return_var /* = null */) {
@@ -531,7 +531,7 @@ String f_system(const String& command, VRefParam return_var /* = null */) {
     return String();
   }
 
-  return HHVM_FN(rtrim)(lines[count - 1].toString());
+  return f_rtrim(lines[count - 1].toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,12 +21,12 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/system/constants.h"
 
 namespace HPHP {
@@ -76,14 +76,14 @@ Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {
     response = response.substr(0, pos);
   }
 
-  Array ret = HHVM_FN(explode)("\r\n", response).toArray();
+  Array ret = f_explode("\r\n", response).toArray();
   if (!format) {
     return ret;
   }
 
   Array assoc;
   for (ArrayIter iter(ret); iter; ++iter) {
-    Array tokens = HHVM_FN(explode)(": ", iter.second(), 2).toArray();
+    Array tokens = f_explode(": ", iter.second(), 2).toArray();
     if (tokens.size() == 2) {
       assoc.set(tokens[0], tokens[1]);
     } else {

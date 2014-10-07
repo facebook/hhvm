@@ -34,7 +34,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": null
+                        "type": "Object"
                     },
                     "args": [
                     ]
@@ -45,7 +45,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": null
+                        "type": "Object"
                     },
                     "args": [
                         {
@@ -61,7 +61,7 @@
                     "flags": [
                     ],
                     "return": {
-                        "type": null
+                        "type": "Object"
                     },
                     "args": [
                         {

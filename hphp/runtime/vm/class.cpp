@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/enum-cache.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"

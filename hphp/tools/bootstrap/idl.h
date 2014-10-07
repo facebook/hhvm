@@ -253,8 +253,7 @@ class PhpFunc {
               (m_idlName == "__call")));
   }
 
-  fbstring getCppSig(bool fullyQualified = true) const;
-  fbstring getPrefixedCppName(bool fullyQualified = true) const;
+  fbstring getCppSig() const;
 
   fbstring getPrettyName() const {
     if (isMethod()) {

@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/text-util.h"

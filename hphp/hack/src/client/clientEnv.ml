@@ -20,6 +20,7 @@ type client_mode =
 | MODE_SAVE_STATE of string
 | MODE_SHOW of string
 | MODE_COLORING of string
+| MODE_COVERAGE of string
 | MODE_FIND_REFS of string
 | MODE_IDENTIFY_FUNCTION of string
 | MODE_OUTLINE

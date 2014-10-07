@@ -85,6 +85,7 @@ type command =
 | SEARCH of string * string
 | SUGGEST of string list
 | ARGUMENT_INFO of string * int * int
+| CALC_COVERAGE of string
 
 let cmd_to_channel (oc:out_channel) (cmd:command): unit =
   Printf.fprintf oc "%s\n" Build_id.build_id_ohai;

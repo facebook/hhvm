@@ -77,6 +77,13 @@ let rec main args retries =
         let pos_type_l = Marshal.from_channel ic in
         ClientColorFile.go file_input args.output_json pos_type_l;
         exit 0
+    | MODE_COVERAGE file ->
+        let ic, oc = connect args in
+        let command = ServerMsg.CALC_COVERAGE (expand_path file) in
+        ServerMsg.cmd_to_channel oc command;
+        let counts_opt = Marshal.from_channel ic in
+        print_string (ClientCoverageMetric.to_json counts_opt);
+        exit 0
     | MODE_FIND_CLASS_REFS name ->
         let ic, oc = connect args in
         let command = ServerMsg.FIND_REFS (ServerMsg.Class name) in

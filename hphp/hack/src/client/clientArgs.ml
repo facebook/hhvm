@@ -124,6 +124,8 @@ let parse_check_args cmd =
       " (mode) auto-completes the text on stdin";
     "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
       " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
+    "--coverage", Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
+      " (mode) calculates the extent of typing of a given file or directory";
     "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
     "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),

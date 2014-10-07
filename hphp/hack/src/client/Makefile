@@ -11,6 +11,7 @@ SRC= clientEnv.ml clientExceptions.ml  clientUtils.ml colorFile.ml \
   clientBuild.ml clientProlog.ml clientStatus.ml clientCheckStatus.ml \
   clientMethodJumps.ml clientTypeAtPos.ml clientArgumentInfo.ml \
   clientRestart.ml clientFindRefs.ml clientOutline.ml clientRefactor.ml \
+  clientCoverageMetric.ml \
   clientAutocomplete.ml clientMethodJumps.ml clientSearch.ml clientCheck.ml \
   clientLogCommand.ml clientLogCommandUtils.ml
 

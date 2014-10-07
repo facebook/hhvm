@@ -521,18 +521,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         std::ostringstream stats;
         stats << "<jemalloc-stats>" << endl;
-        if (error != 0){
-          stats << "  <allocated>" << allocated << "</allocated>" << endl;
-          stats << "  <active>" << active << "</active>" << endl;
-          stats << "  <mapped>" << mapped << "</mapped>" << endl;
-          stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
-          stats << "  <low_allocated>"
-            << (low_small_allocated + low_large_allocated)
-            << "<low_allocated>" << endl;
-          stats << "  <low_active>"
-            << low_active
-            << "</low_active>" << endl;
-        }
+        stats << "  <allocated>" << allocated << "</allocated>" << endl;
+        stats << "  <active>" << active << "</active>" << endl;
+        stats << "  <mapped>" << mapped << "</mapped>" << endl;
+        stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
+        stats << "  <low_allocated>"
+              << (low_small_allocated + low_large_allocated)
+              << "<low_allocated>" << endl;
+        stats << "  <low_active>"
+              << low_active
+              << "</low_active>" << endl;
         stats << "  <error>" << error << "</error>" << endl;
         stats << "</jemalloc-stats>" << endl;
         transport->sendString(stats.str());

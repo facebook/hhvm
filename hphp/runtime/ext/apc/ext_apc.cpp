@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include <fstream>
 
@@ -71,6 +71,33 @@ void initialize_apc() {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+#define DEFINE_CONSTANT(name, value)                                           \
+  static const int64_t k_##name = value;                                       \
+  static const StaticString s_##name(#name)                                    \
+
+#define REGISTER_CONSTANT(name)                                                \
+  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
+
+DEFINE_CONSTANT(APC_ITER_TYPE, 0x1);
+DEFINE_CONSTANT(APC_ITER_KEY, 0x2);
+DEFINE_CONSTANT(APC_ITER_FILENAME, 0x4);
+DEFINE_CONSTANT(APC_ITER_DEVICE, 0x8);
+DEFINE_CONSTANT(APC_ITER_INODE, 0x10);
+DEFINE_CONSTANT(APC_ITER_VALUE, 0x20);
+DEFINE_CONSTANT(APC_ITER_MD5, 0x40);
+DEFINE_CONSTANT(APC_ITER_NUM_HITS, 0x80);
+DEFINE_CONSTANT(APC_ITER_MTIME, 0x100);
+DEFINE_CONSTANT(APC_ITER_CTIME, 0x200);
+DEFINE_CONSTANT(APC_ITER_DTIME, 0x400);
+DEFINE_CONSTANT(APC_ITER_ATIME, 0x800);
+DEFINE_CONSTANT(APC_ITER_REFCOUNT, 0x1000);
+DEFINE_CONSTANT(APC_ITER_MEM_SIZE, 0x2000);
+DEFINE_CONSTANT(APC_ITER_TTL, 0x4000);
+DEFINE_CONSTANT(APC_ITER_NONE, 0x0);
+DEFINE_CONSTANT(APC_ITER_ALL, 0xFFFFFFFFFF);
+DEFINE_CONSTANT(APC_LIST_ACTIVE, 1);
+DEFINE_CONSTANT(APC_LIST_DELETED, 2);
 
 const StaticString
   s_delete("delete");
@@ -136,6 +163,40 @@ void apcExtension::moduleInit() {
                               FileStorageChunkSize,
                               FileStorageMaxSize);
   }
+
+  REGISTER_CONSTANT(APC_ITER_TYPE);
+  REGISTER_CONSTANT(APC_ITER_KEY);
+  REGISTER_CONSTANT(APC_ITER_FILENAME);
+  REGISTER_CONSTANT(APC_ITER_DEVICE);
+  REGISTER_CONSTANT(APC_ITER_INODE);
+  REGISTER_CONSTANT(APC_ITER_VALUE);
+  REGISTER_CONSTANT(APC_ITER_MD5);
+  REGISTER_CONSTANT(APC_ITER_NUM_HITS);
+  REGISTER_CONSTANT(APC_ITER_MTIME);
+  REGISTER_CONSTANT(APC_ITER_CTIME);
+  REGISTER_CONSTANT(APC_ITER_DTIME);
+  REGISTER_CONSTANT(APC_ITER_ATIME);
+  REGISTER_CONSTANT(APC_ITER_REFCOUNT);
+  REGISTER_CONSTANT(APC_ITER_MEM_SIZE);
+  REGISTER_CONSTANT(APC_ITER_TTL);
+  REGISTER_CONSTANT(APC_ITER_NONE);
+  REGISTER_CONSTANT(APC_ITER_ALL);
+  REGISTER_CONSTANT(APC_LIST_ACTIVE);
+  REGISTER_CONSTANT(APC_LIST_DELETED);
+
+  HHVM_FE(apc_add);
+  HHVM_FE(apc_store);
+  HHVM_FE(apc_store_as_primed_do_not_use);
+  HHVM_FE(apc_fetch);
+  HHVM_FE(apc_delete);
+  HHVM_FE(apc_clear_cache);
+  HHVM_FE(apc_inc);
+  HHVM_FE(apc_dec);
+  HHVM_FE(apc_cas);
+  HHVM_FE(apc_exists);
+  HHVM_FE(apc_cache_info);
+  HHVM_FE(apc_sma_info);
+  loadSystemlib();
 }
 
 void apcExtension::moduleShutdown() {
@@ -177,10 +238,10 @@ bool apcExtension::EnableCLI = true;
 
 static apcExtension s_apc_extension;
 
-///////////////////////////////////////////////////////////////////////////////
-Variant f_apc_store(const Variant& key_or_array,
-                    const Variant& var /* = null_variant */,
-                    int64_t ttl /* = 0 */) {
+Variant HHVM_FUNCTION(apc_store,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return Variant(false);
 
   if (key_or_array.is(KindOfArray)) {
@@ -212,15 +273,18 @@ Variant f_apc_store(const Variant& key_or_array,
  * Stores the key in a similar fashion as "priming" would do (no TTL limit).
  * Using this function is equivalent to adding your key to apc_prime.so.
  */
-bool f_apc_store_as_primed_do_not_use(const String& key, const Variant& var) {
+bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
+                   const String& key,
+                   const Variant& var) {
   if (!apcExtension::Enable) return false;
   apc_store().setWithoutTTL(key, var);
   return true;
 }
 
-Variant f_apc_add(const Variant& key_or_array,
-                  const Variant& var /* = null_variant */,
-                  int64_t ttl /* = 0 */) {
+Variant HHVM_FUNCTION(apc_add,
+                      const Variant& key_or_array,
+                      const Variant& var /* = null */,
+                      int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return false;
 
   if (key_or_array.is(KindOfArray)) {
@@ -251,7 +315,9 @@ Variant f_apc_add(const Variant& key_or_array,
   return apc_store().add(strKey, var, ttl);
 }
 
-Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
+Variant HHVM_FUNCTION(apc_fetch,
+                      const Variant& key,
+                      VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
 
   Variant v;
@@ -285,7 +351,8 @@ Variant f_apc_fetch(const Variant& key, VRefParam success /* = null */) {
   return v;
 }
 
-Variant f_apc_delete(const Variant& key) {
+Variant HHVM_FUNCTION(apc_delete,
+                      const Variant& key) {
   if (!apcExtension::Enable) return false;
 
   if (key.is(KindOfArray)) {
@@ -321,13 +388,16 @@ Variant f_apc_delete(const Variant& key) {
   return apc_store().erase(key.toString());
 }
 
-bool f_apc_clear_cache(const String& cache_type /* = "" */) {
+bool HHVM_FUNCTION(apc_clear_cache,
+                   const String& cache_type /* = "" */) {
   if (!apcExtension::Enable) return false;
   return apc_store().clear();
 }
 
-Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
-                  VRefParam success /* = null */) {
+Variant HHVM_FUNCTION(apc_inc,
+                      const String& key,
+                      int64_t step /* = 1 */,
+                      VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
 
   bool found = false;
@@ -337,8 +407,10 @@ Variant f_apc_inc(const String& key, int64_t step /* = 1 */,
   return newValue;
 }
 
-Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
-                  VRefParam success /* = null */) {
+Variant HHVM_FUNCTION(apc_dec,
+                      const String& key,
+                      int64_t step /* = 1 */,
+                      VRefParam success /* = null */) {
   if (!apcExtension::Enable) return false;
 
   bool found = false;
@@ -348,12 +420,16 @@ Variant f_apc_dec(const String& key, int64_t step /* = 1 */,
   return newValue;
 }
 
-bool f_apc_cas(const String& key, int64_t old_cas, int64_t new_cas) {
+bool HHVM_FUNCTION(apc_cas,
+                   const String& key,
+                   int64_t old_cas,
+                   int64_t new_cas) {
   if (!apcExtension::Enable) return false;
   return apc_store().cas(key, old_cas, new_cas);
 }
 
-Variant f_apc_exists(const Variant& key) {
+Variant HHVM_FUNCTION(apc_exists,
+                      const Variant& key) {
   if (!apcExtension::Enable) return false;
 
   if (key.is(KindOfArray)) {
@@ -394,8 +470,9 @@ const uint32_t kCacheInfoSize = 40;
 // Number of elements in the entry array
 const int32_t kEntryInfoSize = 5;
 
-Variant f_apc_cache_info(const String& cache_type,
-                         bool limited /* = false */) {
+Variant HHVM_FUNCTION(apc_cache_info,
+                      const String& cache_type,
+                      bool limited /* = false */) {
   ArrayInit info(kCacheInfoSize, ArrayInit::Map{});
   info.add(s_start_time, start_time());
   if (cache_type.size() != 0 && !cache_type.same(s_user)) {
@@ -426,7 +503,8 @@ Variant f_apc_cache_info(const String& cache_type,
   return info.toArray();
 }
 
-Array f_apc_sma_info(bool limited /* = false */) {
+Array HHVM_FUNCTION(apc_sma_info,
+                    bool limited /* = false */) {
   return empty_array();
 }
 
@@ -1207,7 +1285,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       track.set(s_name, rfc1867ApcData->name);
       track.set(s_done, 0);
       track.set(s_start_time, rfc1867ApcData->start_time);
-      f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
+      HHVM_FN(apc_store)(rfc1867ApcData->tracking_key, track.create(), 3600);
     }
     break;
 
@@ -1229,7 +1307,8 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
             track.set(s_name, rfc1867ApcData->name);
             track.set(s_done, 0);
             track.set(s_start_time, rfc1867ApcData->start_time);
-            f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
+            HHVM_FN(apc_store)(rfc1867ApcData->tracking_key, track.create(),
+                               3600);
           }
           rfc1867ApcData->prev_bytes_processed =
             rfc1867ApcData->bytes_processed;
@@ -1254,7 +1333,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
       track.set(s_cancel_upload, rfc1867ApcData->cancel_upload);
       track.set(s_done, 0);
       track.set(s_start_time, rfc1867ApcData->start_time);
-      f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
+      HHVM_FN(apc_store)(rfc1867ApcData->tracking_key, track.create(), 3600);
     }
     break;
 
@@ -1278,7 +1357,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
         track.set(s_cancel_upload, rfc1867ApcData->cancel_upload);
         track.set(s_done, 1);
         track.set(s_start_time, rfc1867ApcData->start_time);
-        f_apc_store(rfc1867ApcData->tracking_key, track.create(), 3600);
+        HHVM_FN(apc_store)(rfc1867ApcData->tracking_key, track.create(), 3600);
       }
     }
     break;

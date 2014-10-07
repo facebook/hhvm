@@ -30,7 +30,6 @@
 #include "hphp/facebook/extensions/string_buffer/ext_string_buffer.h"
 #endif
 
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array_idl.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"

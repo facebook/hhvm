@@ -29,7 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 

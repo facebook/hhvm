@@ -21,6 +21,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"

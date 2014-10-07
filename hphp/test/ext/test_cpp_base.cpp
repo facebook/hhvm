@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"

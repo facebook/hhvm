@@ -1,4 +1,13 @@
-NEXT 9-Oct-2014
+NEXT 23-Oct-2014
+ -
+
+"Ultramagnetic" 9-Oct-2014
+ - Optimize strtr
+ - Closure::bind support
+ - Cleanup/shrink various runtime data structures
+ - Various jit performance optimizations
+ - Fix various debugger crashes
+ - Better handling of memory limits
  - Hack: System user attributes will be prefixed with __, notably <<Override>> renamed to <<__Override>>
  - Hack: Support for 'abstract final' non-instantiable non-inheritable "utility" classes
 

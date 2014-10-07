@@ -17,6 +17,7 @@ open Utils
 type options = {
   filename : string;
   suggest : bool;
+  color : bool;
   rest : string list
 }
 
@@ -101,6 +102,7 @@ let error l = die (Errors.to_string l)
 let parse_options () =
   let fn_ref = ref None in
   let suggest = ref false in
+  let color = ref false in
   let rest_options = ref [] in
   let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -108,6 +110,9 @@ let parse_options () =
     "--suggest",
       Arg.Set suggest,
       "Suggest missing typehints";
+    "--color",
+      Arg.Set color,
+      "Produce color output";
     "--",
       Arg.Rest rest,
       "";
@@ -116,7 +121,7 @@ let parse_options () =
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn; suggest = !suggest; rest = !rest_options }
+  { filename = fn; suggest = !suggest; color = !color; rest = !rest_options }
 
 let suggest_and_print fn funs classes typedefs consts =
   let make_set =
@@ -185,6 +190,22 @@ let collect_defs ast =
     | _ -> funs, classes, typedefs, consts
   end ast ([], [], [], [])
 
+(* Make readable test output *)
+let replace_color input =
+  let module CL = Coverage_level in
+  match input with
+  | (Some CL.Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
+  | (Some CL.Checked, str) -> "<checked>"^str^"</checked>"
+  | (Some CL.Partial, str) -> "<partial>"^str^"</partial>"
+  | (None, str) -> str
+
+let print_colored fn =
+  let content = cat fn in
+  let results = ColorFile.go content !Typing_defs.type_acc in
+  if Unix.isatty Unix.stdout
+  then Tty.print (ClientColorFile.replace_colors results)
+  else print_string (List.map replace_color results |> String.concat "")
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
@@ -195,7 +216,7 @@ let collect_defs ast =
  * a given file. You can then inspect this typing environment, e.g.
  * with 'Typing_env.Classes.get "Foo";;'
  *)
-let main_hack { filename; suggest; _ } =
+let main_hack { filename; suggest; color; _ } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
@@ -215,9 +236,12 @@ let main_hack { filename; suggest; _ } =
         SMap.add cname (SSet.singleton filename) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
+      Typing_defs.accumulate_types := color;
       List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
       List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
       List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
+      if color
+      then print_colored filename;
       if suggest
       then suggest_and_print filename funs classes typedefs consts
     end

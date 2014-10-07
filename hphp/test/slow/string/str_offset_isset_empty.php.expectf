@@ -104,7 +104,7 @@ string(1) "C"
 bool(true)
 bool(true)
 
-string(3) " 	2"
+string(3) " %r\x09%r2"
 string(1) "C"
 bool(true)
 bool(true)

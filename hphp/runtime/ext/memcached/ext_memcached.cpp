@@ -161,6 +161,10 @@ const int64_t q_Memcached$$RES_NOT_SUPPORTED
           = MEMCACHED_NOT_SUPPORTED;
 const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
           = MEMCACHED_INVALID_HOST_PROTOCOL;
+const int64_t q_Memcached$$OPT_VERIFY_KEY
+          = MEMCACHED_BEHAVIOR_VERIFY_KEY;
+const int64_t q_Memcached$$OPT_SORT_HOSTS
+          = MEMCACHED_BEHAVIOR_SORT_HOSTS;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -461,15 +465,12 @@ class MemcachedData {
                           myServerKey.length(), key.c_str(), key.length(),
                           payload.data(), payload.size(), expiration, flags));
   }
-  typedef memcached_return_t (*IncDecOperation)(memcached_st *, const char *,
-      size_t, const char *, size_t, uint64_t, uint64_t, time_t, uint64_t *);
-  Variant incDecOperationImpl(IncDecOperation op, const String& server_key,
-                                                  const String& key,
-                                                  int64_t offset,
-                                                  int64_t inital_value,
-                                                  int64_t expiry) {
+
+  Variant incDecOp(bool isInc,
+                   const StringData* server_key, const StringData* key,
+                   int64_t offset, int64_t initial_value, int64_t expiry) {
     m_impl->rescode = q_Memcached$$RES_SUCCESS;
-    if (key.empty()) {
+    if (key->empty() || strchr(key->data(), ' ')) {
       m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
       return false;
     }
@@ -478,15 +479,75 @@ class MemcachedData {
       return false;
     }
 
+    // Dispatch to the correct memcached_* function depending on initial_value,
+    // server_key, and isInc.
     uint64_t value;
-    const String& myServerKey = server_key.empty() ? key : server_key;
-    if (!handleError(op(&m_impl->memcached, myServerKey.c_str(),
-                        myServerKey.length(), key.c_str(), key.length(),
-                        (uint32_t)offset, (uint32_t)inital_value,
-                        (uint32_t)expiry, &value))) {
-      return false;
+    memcached_return_t status;
+
+    // XXX(#3862): use_initial should really depend on the number of arguments
+    // passed to the function but this isn't currently supported by HNI.
+    bool use_initial = isBinaryProtocol();
+    auto mc = &m_impl->memcached;
+    if (use_initial) {
+      if (!isBinaryProtocol()) {
+        raise_warning("Initial value is only supported with binary protocol");
+        return false;
+      }
+
+      if (server_key) {
+        if (isInc) {
+          status = memcached_increment_with_initial_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        } else {
+          status = memcached_decrement_with_initial_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        }
+      } else {
+        if (isInc) {
+          status = memcached_increment_with_initial(
+            mc, key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        } else {
+          status = memcached_decrement_with_initial(
+            mc, key->data(), key->size(),
+            offset, initial_value, expiry, &value);
+        }
+      }
+    } else {
+      if (server_key) {
+        if (isInc) {
+          status = memcached_increment_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, &value);
+        } else {
+          status = memcached_decrement_by_key(
+            mc,
+            server_key->data(), server_key->size(), key->data(), key->size(),
+            offset, &value);
+        }
+      } else {
+        if (isInc) {
+          status = memcached_increment(
+            mc, key->data(), key->size(), offset, &value);
+        } else {
+          status = memcached_decrement(
+            mc, key->data(), key->size(), offset, &value);
+        }
+      }
     }
+
+    if (!handleError(status)) return false;
     return (int64_t)value;
+  }
+
+  bool isBinaryProtocol() {
+    return memcached_behavior_get(&m_impl->memcached,
+                                  MEMCACHED_BEHAVIOR_BINARY_PROTOCOL);
   }
 
   typedef std::map<std::string, ImplPtr> ImplMap;
@@ -741,24 +802,42 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
                      key.c_str(), key.length(), time));
 }
 
-Variant HHVM_METHOD(Memcached, incrementbykey, const String& server_key,
-                                               const String& key,
-                                               int64_t offset /*= 1*/,
-                                               int64_t inital_value /*= 0*/,
-                                               int64_t expiry /*= 0*/) {
-  auto data = Native::data<MemcachedData>(this_);
-  return data->incDecOperationImpl(memcached_increment_with_initial_by_key,
-                                server_key, key, offset, inital_value, expiry);
+Variant HHVM_METHOD(Memcached, increment,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    true, nullptr, key.get(), offset, initial_value, expiry);
 }
 
-Variant HHVM_METHOD(Memcached, decrementbykey, const String& server_key,
-                                               const String& key,
-                                               int64_t offset /*= 1*/,
-                                               int64_t inital_value /*= 0*/,
-                                               int64_t expiry /*= 0*/) {
-  auto data = Native::data<MemcachedData>(this_);
-  return data->incDecOperationImpl(memcached_decrement_with_initial_by_key,
-                                server_key, key, offset, inital_value, expiry);
+Variant HHVM_METHOD(Memcached, incrementbykey,
+                    const String& server_key,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    true, server_key.get(), key.get(), offset, initial_value, expiry);
+}
+
+Variant HHVM_METHOD(Memcached, decrement,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    false, nullptr, key.get(), offset, initial_value, expiry);
+}
+
+Variant HHVM_METHOD(Memcached, decrementbykey,
+                    const String& server_key,
+                    const String& key,
+                    int64_t offset /* = 1 */,
+                    int64_t initial_value /* = 0 */,
+                    int64_t expiry /* = 0 */) {
+  return Native::data<MemcachedData>(this_)->incDecOp(
+    false, server_key.get(), key.get(), offset, initial_value, expiry);
 }
 
 bool HHVM_METHOD(Memcached, addserver, const String& host, int port,
@@ -805,6 +884,12 @@ Array HHVM_METHOD(Memcached, getserverlist) {
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;
+}
+
+bool HHVM_METHOD(Memcached, resetserverlist) {
+  auto data = Native::data<MemcachedData>(this_);
+  memcached_servers_reset(&data->m_impl->memcached);
+  return true;
 }
 
 Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
@@ -1131,7 +1216,9 @@ const StaticString s_OPT_SERIALIZER("OPT_SERIALIZER");
 const StaticString s_OPT_SERVER_FAILURE_LIMIT("OPT_SERVER_FAILURE_LIMIT");
 const StaticString s_OPT_SOCKET_RECV_SIZE("OPT_SOCKET_RECV_SIZE");
 const StaticString s_OPT_SOCKET_SEND_SIZE("OPT_SOCKET_SEND_SIZE");
+const StaticString s_OPT_SORT_HOSTS("OPT_SORT_HOSTS");
 const StaticString s_OPT_TCP_NODELAY("OPT_TCP_NODELAY");
+const StaticString s_OPT_VERIFY_KEY("OPT_VERIFY_KEY");
 const StaticString s_RES_BAD_KEY_PROVIDED("RES_BAD_KEY_PROVIDED");
 const StaticString s_RES_BUFFERED("RES_BUFFERED");
 const StaticString s_RES_CLIENT_ERROR("RES_CLIENT_ERROR");
@@ -1179,10 +1266,13 @@ class MemcachedExtension : public Extension {
     HHVM_ME(Memcached, replacebykey);
     HHVM_ME(Memcached, casbykey);
     HHVM_ME(Memcached, deletebykey);
+    HHVM_ME(Memcached, increment);
     HHVM_ME(Memcached, incrementbykey);
+    HHVM_ME(Memcached, decrement);
     HHVM_ME(Memcached, decrementbykey);
     HHVM_ME(Memcached, addserver);
     HHVM_ME(Memcached, getserverlist);
+    HHVM_ME(Memcached, resetserverlist);
     HHVM_ME(Memcached, getserverbykey);
     HHVM_ME(Memcached, getstats);
     HHVM_ME(Memcached, getversion);
@@ -1394,6 +1484,13 @@ class MemcachedExtension : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_SERIALIZER_PHP.get(), q_Memcached$$SERIALIZER_PHP
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_VERIFY_KEY.get(), q_Memcached$$OPT_VERIFY_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SORT_HOSTS.get(), q_Memcached$$OPT_SORT_HOSTS
+    );
+
 
     loadSystemlib();
   }

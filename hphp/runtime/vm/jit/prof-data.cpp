@@ -148,6 +148,11 @@ SrcKey ProfTransRec::srcKey() const {
   return m_sk;
 }
 
+SrcKey ProfTransRec::lastSrcKey() const {
+  assert(m_kind == TransKind::Profile);
+  return SrcKey(m_sk.func(), m_lastBcOff, m_sk.resumed());
+}
+
 Offset ProfTransRec::startBcOff() const {
   return m_region->start().offset();;
 }
@@ -205,6 +210,11 @@ SrcKey ProfData::transSrcKey(TransID id) const {
   return m_transRecs[id]->srcKey();
 }
 
+SrcKey ProfData::transLastSrcKey(TransID id) const {
+  assert(id < m_transRecs.size());
+  return m_transRecs[id]->lastSrcKey();
+}
+
 Offset ProfData::transStartBcOff(TransID id) const {
   assert(id < m_transRecs.size());
   return m_transRecs[id]->startBcOff();
@@ -246,6 +256,13 @@ const TransIDVec& ProfData::funcProfTransIDs(FuncId funcId) const {
 TransKind ProfData::transKind(TransID id) const {
   assert(id < m_numTrans);
   return m_transRecs[id]->kind();
+}
+
+bool ProfData::isKindProfile(TransID id) const {
+  assert(id < m_numTrans);
+  // we don't keep ProfTransRecs for non-profile translations
+  if (m_transRecs[id] == nullptr) return false;
+  return m_transRecs[id]->kind() == TransKind::Profile;
 }
 
 int64_t ProfData::transCounter(TransID id) const {

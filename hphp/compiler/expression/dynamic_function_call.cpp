@@ -94,29 +94,6 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                        bool coerce) {
-  reset();
-  ConstructPtr self = shared_from_this();
-  if (m_class) {
-    m_class->inferAndCheck(ar, Type::Any, false);
-  } else if (!m_className.empty()) {
-    ClassScopePtr cls = resolveClassWithChecks();
-    if (cls) {
-      m_classScope = cls;
-    }
-  }
-
-  m_nameExp->inferAndCheck(ar, Type::Some, false);
-
-  if (m_params) {
-    for (int i = 0; i < m_params->getCount(); i++) {
-      (*m_params)[i]->inferAndCheck(ar, Type::Variant, true);
-    }
-  }
-  return Type::Variant;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {

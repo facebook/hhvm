@@ -20,6 +20,8 @@
 #include <boost/intrusive/list.hpp>
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/vm/jit/containers.h"
+
 namespace HPHP { namespace jit {
 
 struct Block;

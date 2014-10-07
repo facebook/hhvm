@@ -1,0 +1,17 @@
+array
+array<[168]Tint, Tstring>
+array<[173]Tint, Tstring>
+array<mixed, Tstring>
+array<[182]Tint, Tstring>
+X
+X
+intersect(array<mixed, Tstring>, array<[194]Tint, Tstring>)
+array
+array<[200]Tint, [201]option(Tstring)>
+array<[205]Tint, [206]option(Tstring)>
+array<mixed, [210]option(Tstring)>
+array<[214]Tint, [215]option(Tstring)>
+X
+X
+intersect(array<mixed, [223]option(Tstring)>, array<[226]Tint, [227]option(Tstring)>)
+No errors

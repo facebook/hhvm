@@ -77,7 +77,10 @@ namespace HPHP {
   INVOKE_FEW_ARGS(PASS_ARR,INVOKE_FEW_ARGS_COUNT)
 #define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
 
-#define NEWOBJ(T) new (HPHP::MM().smartMallocSizeLogged(sizeof(T))) T
+#define NEWOBJ(T) new (std::is_convertible<T*,ObjectData*>::value       \
+    ? HPHP::MM().smartMallocSizeLoggedTracked(sizeof(T))                \
+    : HPHP::MM().smartMallocSizeLogged(sizeof(T)))                      \
+  T
 
 #define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
   public:                                                               \

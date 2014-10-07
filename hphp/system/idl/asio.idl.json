@@ -3,47 +3,6 @@
     "consts": [
     ],
     "funcs": [
-        {
-            "name": "asio_get_current_context_idx",
-            "desc": "Get index of the current scheduler context, or 0 if there is none",
-            "flags": [
-            ],
-            "return": {
-                "type": "Int32",
-                "desc": "An index of the current scheduler context"
-            },
-            "args": [
-            ]
-        },
-        {
-            "name": "asio_get_running_in_context",
-            "desc": "Get currently running wait handle in a context specified by its index",
-            "flags": [
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ResumableWaitHandle that is running in a specified context"
-            },
-            "args": [
-                {
-                    "name": "ctx_idx",
-                    "type": "Int32",
-                    "desc": "An index of a specified context"
-                }
-            ]
-        },
-        {
-            "name": "asio_get_running",
-            "desc": "Get currently running wait handle, or null if there is none",
-            "flags": [
-            ],
-            "return": {
-                "type": "Object",
-                "desc": "A ResumableWaitHandle that is running in the current context"
-            },
-            "args": [
-            ]
-        }
     ],
     "classes": [
         {

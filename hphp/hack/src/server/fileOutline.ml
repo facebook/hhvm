@@ -28,18 +28,20 @@ let get_class_summary class_ =
   res_list
 
 let outline_ast ast =
-  let funs, classes = List.fold_left begin fun (funs, classes) def ->
-    match def with
-    | Ast.Fun f ->
-        let nenv = Naming.empty in
-        let f = Naming.fun_ nenv f in
-        (f.Nast.f_name :: funs, classes)
-    | Ast.Class c ->
-        let nenv = Naming.empty in
-        let c = Naming.class_ nenv c in
-        (funs, c :: classes)
-    | _ -> (funs, classes)
-  end ([], []) ast in
+  let funs, classes = Errors.ignore_ begin fun () ->
+    List.fold_left begin fun (funs, classes) def ->
+      match def with
+      | Ast.Fun f ->
+          let nenv = Naming.empty in
+          let f = Naming.fun_ nenv f in
+          (f.Nast.f_name :: funs, classes)
+      | Ast.Class c ->
+          let nenv = Naming.empty in
+          let c = Naming.class_ nenv c in
+          (funs, c :: classes)
+      | _ -> (funs, classes)
+    end ([], []) ast
+  end in
   let res_list = List.fold_left begin fun acc class_ ->
       List.rev_append (get_class_summary class_) acc
     end [] classes in
@@ -48,5 +50,7 @@ let outline_ast ast =
     end res_list funs
 
 let outline content =
-  let {Parser_hack.ast; _} = Parser_hack.program content in
+  let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
+    Parser_hack.program content
+  end in
   outline_ast ast

@@ -133,7 +133,6 @@ public:
   static bool GeneratePickledPHP;
   static bool GenerateInlinedPHP;
   static bool GenerateTrimmedPHP;
-  static bool GenerateInferredTypes;  // comments on constant/variable tables
   static bool ConvertSuperGlobals;    // $GLOBALS['var'] => global $var
   static bool ConvertQOpExpressions;  // $var = $exp ? $yes : $no => if-else
   static std::string ProgramPrologue;
@@ -253,9 +252,7 @@ public:
   static int InvokeFewArgsCount;
   static int InlineFunctionThreshold;
   static bool EliminateDeadCode;
-  static bool CopyProp;
   static bool LocalCopyProp;
-  static bool StringLoopOpts;
   static int AutoInline;
   static bool ArrayAccessIdempotent;
 
@@ -263,7 +260,6 @@ public:
    * Output options
    */
   static bool GenerateDocComments;
-  static bool ControlFlow;
   static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;

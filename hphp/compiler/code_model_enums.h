@@ -104,6 +104,7 @@ namespace HPHP {
     PHP_CLASS = 1,
     PHP_INTERFACE = 2,
     PHP_TRAIT = 3,
+    PHP_ENUM = 4,
   };
 
   /** The sort order to use when grouping query results */

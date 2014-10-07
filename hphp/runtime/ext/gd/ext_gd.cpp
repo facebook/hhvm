@@ -1642,22 +1642,17 @@ const StaticString
   s_mime("mime"),
   s_linespacing("linespacing");
 
-Variant HHVM_FUNCTION(getimagesize, const String& filename,
-                                    VRefParam imageinfo /*=null */) {
+Variant getImageSize(Resource stream, VRefParam imageinfo) {
   int itype = 0;
   struct gfxinfo *result = NULL;
   if (imageinfo.isReferenced()) {
     imageinfo = Array::Create();
   }
 
-  Variant stream = f_fopen(filename, "rb");
-  if (same(stream, false)) {
-    return false;
-  }
-  itype = php_getimagetype(stream.toResource());
+  itype = php_getimagetype(stream);
   switch( itype) {
   case IMAGE_FILETYPE_GIF:
-    result = php_handle_gif(stream.toResource());
+    result = php_handle_gif(stream);
     break;
   case IMAGE_FILETYPE_JPEG:
     {
@@ -1665,62 +1660,60 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
       if (imageinfo.isReferenced()) {
         infoArr = Array::Create();
       }
-      result = php_handle_jpeg(stream.toResource(), infoArr);
+      result = php_handle_jpeg(stream, infoArr);
       if (!infoArr.empty()) {
         imageinfo = infoArr;
       }
     }
     break;
   case IMAGE_FILETYPE_PNG:
-    result = php_handle_png(stream.toResource());
+    result = php_handle_png(stream);
     break;
   case IMAGE_FILETYPE_SWF:
-    result = php_handle_swf(stream.toResource());
+    result = php_handle_swf(stream);
     break;
   case IMAGE_FILETYPE_SWC:
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-    result = php_handle_swc(stream.toResource());
+    result = php_handle_swc(stream);
 #else
     raise_notice("The image is a compressed SWF file, but you do not "
                  "have a static version of the zlib extension enabled");
 #endif
     break;
   case IMAGE_FILETYPE_PSD:
-    result = php_handle_psd(stream.toResource());
+    result = php_handle_psd(stream);
     break;
   case IMAGE_FILETYPE_BMP:
-    result = php_handle_bmp(stream.toResource());
+    result = php_handle_bmp(stream);
     break;
   case IMAGE_FILETYPE_TIFF_II:
-    result = php_handle_tiff(stream.toResource(), 0);
+    result = php_handle_tiff(stream, 0);
     break;
   case IMAGE_FILETYPE_TIFF_MM:
-    result = php_handle_tiff(stream.toResource(), 1);
+    result = php_handle_tiff(stream, 1);
     break;
   case IMAGE_FILETYPE_JPC:
-    result = php_handle_jpc(stream.toResource());
+    result = php_handle_jpc(stream);
     break;
   case IMAGE_FILETYPE_JP2:
-    result = php_handle_jp2(stream.toResource());
+    result = php_handle_jp2(stream);
     break;
   case IMAGE_FILETYPE_IFF:
-    result = php_handle_iff(stream.toResource());
+    result = php_handle_iff(stream);
     break;
   case IMAGE_FILETYPE_WBMP:
-    result = php_handle_wbmp(stream.toResource());
+    result = php_handle_wbmp(stream);
     break;
   case IMAGE_FILETYPE_XBM:
-    result = php_handle_xbm(stream.toResource());
+    result = php_handle_xbm(stream);
     break;
   case IMAGE_FILETYPE_ICO:
-    result = php_handle_ico(stream.toResource());
+    result = php_handle_ico(stream);
     break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     break;
   }
-
-  f_fclose(stream.toResource());
 
   if (result) {
     ArrayInit ret(7, ArrayInit::Mixed{});
@@ -1744,6 +1737,30 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
   } else {
     return false;
   }
+}
+
+Variant HHVM_FUNCTION(getimagesize, const String& filename,
+                                    VRefParam imageinfo /*=null */) {
+  Variant stream = f_fopen(filename, "rb");
+  if (same(stream, false)) {
+    return false;
+  }
+  Variant ret = getImageSize(stream.toResource(), imageinfo);
+  f_fclose(stream.toResource());
+  return ret;
+}
+
+Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
+                                              VRefParam imageinfo /*=null */) {
+  String data = "data://text/plain;base64,";
+  data += StringUtil::Base64Encode(imagedata);
+  Variant stream = f_fopen(data, "r");
+  if (same(stream, false)) {
+    return false;
+  }
+  Variant ret = getImageSize(stream.toResource(), imageinfo);
+  f_fclose(stream.toResource());
+  return ret;
 }
 
 // PHP extension gd.c
@@ -8033,6 +8050,7 @@ class GdExtension : public Extension {
   void moduleInit() override {
     HHVM_FE(gd_info);
     HHVM_FE(getimagesize);
+    HHVM_FE(getimagesizefromstring);
     HHVM_FE(image_type_to_extension);
     HHVM_FE(image_type_to_mime_type);
 #ifdef HAVE_GD_WBMP

@@ -117,6 +117,11 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
   }
 }
 
+DebugHookHandler* DebuggerHookHandler::GetInstance() {
+  static DebugHookHandler* instance = new DebuggerHookHandler;
+  return instance;
+}
+
 void DebuggerHookHandler::onFileLoad(Unit* unit) {
   DebuggerProxy* proxy = Debugger::GetProxy().get();
   if (proxy == nullptr) return;

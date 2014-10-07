@@ -24,11 +24,12 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
-
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/preclass.h"
+
+#include "hphp/util/default-ptr.h"
 
 #include <boost/range/iterator_range.hpp>
 
@@ -42,7 +43,6 @@ namespace HPHP {
 
 struct Class;
 struct ClassInfo;
-struct ClassInfoVM;
 struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
@@ -51,7 +51,7 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef AtomicSmartPtr<Class> ClassPtr;
+using ClassPtr = AtomicSmartPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -155,7 +155,7 @@ struct Class : AtomicCountable {
 
     const PropInitVec& operator=(const PropInitVec&);
 
-    typedef TypedValueAux* iterator;
+    using iterator = TypedValueAux*;
 
     iterator begin();
     iterator end();
@@ -184,15 +184,15 @@ struct Class : AtomicCountable {
   };
 
   /*
-   * Container typedefs.
+   * Container types.
    */
-  typedef std::vector<std::pair<LowStringPtr,LowStringPtr>> TraitAliasVec;
+  using MethodMap         = FixedStringMap<Slot, false, Slot>;
+  using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, false, Slot>;
+  using InterfaceMap      = IndexedStringMap<LowClassPtr, true, int>;
+  using RequirementMap    = IndexedStringMap<
+                              const PreClass::ClassRequirement*, true, int>;
 
-  typedef FixedStringMap<Slot, false, Slot> MethodMap;
-  typedef FixedStringMapBuilder<Func*, Slot, false, Slot> MethodMapBuilder;
-  typedef IndexedStringMap<LowClassPtr, true, int> InterfaceMap;
-  typedef IndexedStringMap<
-    const PreClass::ClassRequirement*, true, int> RequirementMap;
+  using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ public:
    * The start of malloc'd memory for `this' (i.e., including the method
    * table).
    */
-  Func** mallocPtrFromThis() const;
+  LowFuncPtr* mallocPtrFromThis() const;
 
   /*
    * Pointer to the array of Class pointers, allocated immediately after
@@ -442,6 +442,7 @@ public:
    */
   Func* lookupMethod(const StringData* methName) const;
 
+  static void getMethodNames(const Class* cls, const Class* ctx, Array& result);
 
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]
@@ -713,11 +714,11 @@ public:
   const std::vector<ClassPtr>& usedTraitClasses() const;
 
   /*
-   * Vector of (new name, original name) pairs representing trait aliases.
+   * Trait alias rules.
    *
-   * Not const due to memoization; this is only used for reflection.
+   * This is only used by reflection.
    */
-  const TraitAliasVec& traitAliases();
+  const TraitAliasVec& traitAliases() const;
 
   /*
    * All trait and interface requirements imposed on this class, including
@@ -752,11 +753,6 @@ public:
    * and all parents, interfaces, and traits for this class are persistent.
    */
   bool verifyPersistent() const;
-
-  /*
-   * Populate the ClassInfoVM for this class in `ci'.
-   */
-  void getClassInfo(ClassInfoVM* ci);
 
   /*
    * Get and set the RDS handle for the class with this class's name.
@@ -812,12 +808,59 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
+  // ExtraData.
+
+private:
+  struct ExtraData {
+    ExtraData() {}
+
+    /*
+     * Vector of (new name, original name) pairs, representing trait aliases.
+     */
+    TraitAliasVec m_traitAliases;
+
+    /*
+     * In RepoAuthoritative mode, we rely on trait flattening in the compile
+     * phase to import the contents of traits.  As a result, m_usedTraits is
+     * always empty.
+     */
+    std::vector<ClassPtr> m_usedTraits;
+
+    /*
+     * Only used by reflection for method ordering.  Whenever we have no traits
+     * (e.g., in repo mode, where traits are flattened), these will both be 0.
+     */
+    Slot m_traitsBeginIdx{0};
+    Slot m_traitsEndIdx{0};
+
+    /*
+     * Builtin-specific data.
+     */
+    BuiltinCtorFunction m_instanceCtor{nullptr};
+    BuiltinDtorFunction m_instanceDtor{nullptr};
+    const ClassInfo* m_clsInfo{nullptr};
+    uint32_t m_builtinODTailSize{0};
+
+    /*
+     * Objects with the <<__NativeData("T")>> UA are allocated with extra space
+     * prior to the ObjectData structure itself.
+     */
+    const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+  };
+
+  /*
+   * Allocate the ExtraData; done only when necessary.
+   */
+  void allocExtraData();
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // Internal types.
 
 private:
-  typedef IndexedStringMap<Const,true,Slot> ConstMap;
-  typedef IndexedStringMap<Prop,true,Slot> PropMap;
-  typedef IndexedStringMap<SProp,true,Slot> SPropMap;
+  using ConstMap = IndexedStringMap<Const,true,Slot>;
+  using PropMap  = IndexedStringMap<Prop,true,Slot>;
+  using SPropMap = IndexedStringMap<SProp,true,Slot>;
 
   struct TraitMethod {
     TraitMethod(Class* trait, Func* method, Attr modifiers)
@@ -831,11 +874,11 @@ private:
     Attr m_modifiers;
   };
 
-  typedef std::list<TraitMethod> TraitMethodList;
-  typedef hphp_hash_map<LowStringPtr,
-                        TraitMethodList,
-                        string_data_hash,
-                        string_data_isame> MethodToTraitListMap;
+  using TraitMethodList      = std::list<TraitMethod>;
+  using MethodToTraitListMap = hphp_hash_map<LowStringPtr,
+                                             TraitMethodList,
+                                             string_data_hash,
+                                             string_data_isame>;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -940,25 +983,16 @@ public:
   Class* m_nextClass{nullptr}; // used by NamedEntity
 
 private:
-  DataType m_enumBaseTy;
+  default_ptr<ExtraData> m_extra;
 
-  // Objects with the <<__NativeData("T")>> UA are allocated with extra space
-  // prior to the ObjectData structure itself.
-  const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+  RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
-
-  TraitAliasVec m_traitAliases;
-
-  Slot m_traitsBeginIdx{0};
-  Slot m_traitsEndIdx{0};
-  mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
   size_t m_numDeclInterfaces{0};
-  Func* m_toString;
+  mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
 
-  // In RepoAuthoritative mode, we rely on trait flattening in the compile
-  // phase to import the contents of traits.  As a result, m_usedTraits is
-  // always empty.
-  std::vector<ClassPtr> m_usedTraits;
+  LowFuncPtr m_toString;
+  LowFuncPtr m_invoke; // __invoke, iff non-static (or closure)
+
   ConstMap m_constants;
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
@@ -972,24 +1006,18 @@ private:
   //    - An instance of this class is created.
   //    - A static property of this class is accessed.
   std::vector<const Func*> m_sinitVec;
-  const ClassInfo* m_clsInfo{nullptr};
-  Func* m_invoke; // __invoke, iff non-static (or closure)
-  Func* m_ctor;
+  LowFuncPtr m_ctor;
+  LowFuncPtr m_dtor;
   PropInitVec m_declPropInit;
   std::vector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
-  BuiltinCtorFunction m_instanceCtor{nullptr};
   mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
-  uint32_t m_builtinODTailSize{0};
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
-  RequirementMap m_requirements;
   // Bitmap of parent classes and implemented interfaces.  Each bit corresponds
   // to a commonly used class name, determined during the profiling warmup
   // requests.
   InstanceBits::BitSet m_instanceBits;
-  BuiltinDtorFunction m_instanceDtor{nullptr};
-  Func* m_dtor;
   MethodMap m_methods;
 
   // Static properties are stored in RDS.  There are three phases of sprop
@@ -1016,7 +1044,9 @@ private:
   // contains initialization information.
   PropMap m_declProperties;
 
+  DataType m_enumBaseTy;
   int32_t m_ODAttrs;
+
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply
                                           // having static members
@@ -1026,8 +1056,10 @@ private:
   unsigned m_hasDeepInitProps : 1;
   unsigned m_attrCopy : 28;               // cache of m_preClass->attrs().
 
-  // Vector of Class pointers that encodes the inheritance hierarchy,
-  // including this Class as the last element.
+  /*
+   * Vector of Class pointers that encodes the inheritance hierarchy, including
+   * this Class as the last element.
+   */
   LowClassPtr m_classVec[1]; // Dynamically sized; must come last.
 };
 

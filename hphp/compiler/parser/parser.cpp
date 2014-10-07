@@ -487,8 +487,13 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant_callback_register" ||
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
+           stripped == "asio_get_current_context_idx" ||
+           stripped == "asio_get_running_in_context" ||
+           stripped == "asio_get_running" ||
            stripped == "xenon_get_data" ||
+           stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
+           stripped == "objprof_start" ||
            stripped == "server_warmup_status"
           )) {
         funcName = "HH\\" + stripped;
@@ -1714,12 +1719,14 @@ void Parser::setIsGenerator() {
   fc.isGenerator = true;
 }
 
-void Parser::onYield(Token &out, Token &expr) {
+void Parser::onYield(Token &out, Token *expr) {
   setIsGenerator();
-  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expr->exp);
+  // yield; == yield null;
+  auto expPtr = expr ? expr->exp : NEW_EXP(ConstantExpression, "null", false);
+  out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
 }
 
-void Parser::onYieldPair(Token &out, Token &key, Token &val) {
+void Parser::onYieldPair(Token &out, Token *key, Token *val) {
   setIsGenerator();
   out->exp = NEW_EXP(YieldExpression, key->exp, val->exp);
 }
@@ -2247,6 +2254,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"ImmMap", "HH\\ImmMap"},
     (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"InvariantException", "HH\\InvariantException"},
+    (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
 
     (AliasEntry){"bool", "HH\\bool"},
     (AliasEntry){"boolean", "HH\\bool"},

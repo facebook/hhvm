@@ -18,11 +18,14 @@
 #define incl_HPHP_VM_IRINSTRUCTION_H_
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
 namespace HPHP { namespace jit {
+//////////////////////////////////////////////////////////////////////
+
+class SSATmp;
 
 /*
  * IRInstructions must be arena-allocatable.
@@ -175,11 +178,6 @@ struct IRInstruction {
    */
   void become(IRUnit&, IRInstruction* other);
 
-  /*
-   * Add an additional src SSATmp and dst Operand to this Shuffle.
-   */
-  void addCopy(IRUnit&, SSATmp* src, const PhysLoc& dest);
-
   bool       is() const { return false; }
   template<typename... Args>
   bool       is(Opcode op, Args&&... args) const {
@@ -219,7 +217,7 @@ struct IRInstruction {
    */
   SSATmp*    dst(unsigned i) const;
   DstRange   dsts();
-  Range<const SSATmp*> dsts() const;
+  folly::Range<const SSATmp*> dsts() const;
   void       setDsts(unsigned numDsts, SSATmp* newDsts) {
     assert(naryDst());
     m_numDsts = numDsts;

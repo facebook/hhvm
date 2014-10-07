@@ -1,0 +1,4 @@
+File "static_polymorphism_private_bad.php", line 7, characters 19-20:
+Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
+File "static_polymorphism_private_bad.php", line 4, characters 18-20:
+This member is private

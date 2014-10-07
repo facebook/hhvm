@@ -42,11 +42,11 @@ array(3) {
 }
 -- Iteration 6 --
 array(3) {
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
-  ["re	d"]=>
+  ["re%r\x09%rd"]=>
   string(5) "color"
-  ["world"]=>
+  ["%r\x0b\x0c%rworld"]=>
   float(2.2)
 }
 -- Iteration 7 --

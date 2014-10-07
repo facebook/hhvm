@@ -19,44 +19,38 @@
 
 #include <iosfwd>
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 namespace HPHP { namespace jit {
 
+struct AsmInfo;
+struct Block;
+struct GuardConstraints;
 struct IRInstruction;
 class  SSATmp;
-struct Block;
-struct AsmInfo;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,
-                const RegAllocInfo* regs = nullptr,
                 const GuardConstraints* guards = nullptr);
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
+void printDsts(std::ostream& os, const IRInstruction* inst);
+void printSrcs(std::ostream& os, const IRInstruction* inst);
 void printOpcode(std::ostream& os, const IRInstruction* inst,
                  const GuardConstraints* guards);
-void printSrcs(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
-void printDsts(std::ostream& os, const IRInstruction* inst,
-               const RegAllocInfo* regs);
+void printSrcs(std::ostream& os, const IRInstruction* inst);
+void printDsts(std::ostream& os, const IRInstruction* inst);
 void print(std::ostream& ostream, const IRInstruction*,
-           const RegAllocInfo* regs = nullptr,
            const GuardConstraints* guards = nullptr);
 void print(const IRInstruction*);
 
 // SSATmp
-void print(std::ostream& ostream, const SSATmp*,
-           const PhysLoc* loc = nullptr);
+void print(std::ostream& ostream, const SSATmp*);
 void print(const SSATmp*);
 
 // Block
 void print(std::ostream& os, const Block* block,
-           const RegAllocInfo* regs = nullptr,
+           AreaIndex area,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            BCMarker* curMarker = nullptr);
@@ -64,7 +58,6 @@ void print(const Block* block);
 
 // Unit
 void print(std::ostream& ostream, const IRUnit&,
-           const RegAllocInfo* regs = nullptr,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            bool dotBodies = false);
@@ -80,16 +73,15 @@ static inline bool dumpIREnabled(int level = 1) {
 
 constexpr int kIRLevel = 1;
 constexpr int kCodeGenLevel = 2;
-constexpr int kTraceletLevel = 3;
 constexpr int kOptLevel = 3;
+constexpr int kTraceletLevel = 4;
 constexpr int kRegAllocLevel = 4;
 constexpr int kRelocationLevel = 4;
 constexpr int kExtraLevel = 6;
 constexpr int kExtraExtraLevel = 7;
 
 void printUnit(int level, const IRUnit&, const char* caption,
-               const RegAllocInfo* regs = nullptr, AsmInfo* ai = nullptr,
-               const GuardConstraints* guards = nullptr);
+               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
 
 inline std::ostream& operator<<(std::ostream& os, Type t) {
   return os << t.toString();
@@ -97,6 +89,8 @@ inline std::ostream& operator<<(std::ostream& os, Type t) {
 inline std::ostream& operator<<(std::ostream& os, TypeConstraint tc) {
   return os << tc.toString();
 }
+
+std::string banner(const char* caption);
 
 void disasmRange(std::ostream& os, TCA begin, TCA end);
 inline void disasmRange(std::ostream& os, TcaRange r) {

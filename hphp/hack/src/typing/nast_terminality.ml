@@ -32,7 +32,7 @@ end = struct
             AE_assert (_, False) |
             AE_invariant ((_, False), _, _) |
             AE_invariant_violation _))
-    | Expr (_, Call (Cnormal, (_, Id (_, "exit")), _)) -> raise Exit
+    | Expr (_, Call (Cnormal, (_, Id (_, "\\exit")), _)) -> raise Exit
     | If (_, b1, b2) ->
       (try terminal inside_case b1; () with Exit ->
         terminal inside_case b2)

@@ -201,6 +201,7 @@ and class_id =
   | CIparent
   | CIself
   | CIstatic
+  | CIvar of expr
   | CI of sid
 
 and expr = Pos.t * expr_

@@ -252,9 +252,9 @@ string(7) "'false'"
 
 
 Iteration 11
-''
-''
-string(3) "''"
+'%r\x0b%r'
+'%r\x0b%r'
+string(3) "'%r\x0b%r'"
 
 
 Iteration 12

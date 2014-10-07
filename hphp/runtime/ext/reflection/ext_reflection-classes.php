@@ -263,14 +263,15 @@ class ReflectionParameter implements Reflector {
     }
     $ltype = strtolower($this->info['type']);
     $nonClassTypehints = array(
-      'hh\bool' => 1,
-      'hh\int' => 1,
-      'hh\float' => 1,
-      'hh\num' => 1,
-      'hh\string' => 1,
-      'hh\resource' => 1,
-      'hh\mixed' => 1,
-      'hh\void' => 1,
+      'hh\\bool' => 1,
+      'hh\\int' => 1,
+      'hh\\float' => 1,
+      'hh\\num' => 1,
+      'hh\\string' => 1,
+      'hh\\resource' => 1,
+      'hh\\mixed' => 1,
+      'hh\\void' => 1,
+      'hh\\arraykey' => 1,
       /* TODO Task #4813871: Add 'hh\this' to this list */
       'array' => 1,
       'callable' => 1,

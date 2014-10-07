@@ -312,7 +312,7 @@ and fun_def env _ f =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
       let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_fun_kind in
-      let env = solve_todos env in
+      let env = fold_fun_list env env.Env.todo in
       if Env.is_strict env then begin
         List.iter2 (check_param env) f_params params;
         match f.f_ret with
@@ -321,10 +321,6 @@ and fun_def env _ f =
       end;
    )
   end
-
-and solve_todos env =
-  List.fold_left (fun env f -> f env) env (Env.get_todo env)
-
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -702,8 +698,11 @@ and bind_as_expr env ty aexpr =
   | _ -> assert false
 
 and expr env e =
+  raw_expr false env e
+
+and raw_expr in_cond env e =
   debug_last_pos := fst e;
-  let env, ty = expr_ false env e in
+  let env, ty = expr_ in_cond false env e in
   if !accumulate_types
   then begin
     type_acc := (fst e, Typing_expand.fully_expand env ty) :: !type_acc;
@@ -712,9 +711,9 @@ and expr env e =
   env, ty
 
 and lvalue env e =
-  expr_ true env e
+  expr_ false true env e
 
-and expr_ is_lvalue env (p, e) =
+and expr_ in_cond is_lvalue env (p, e) =
   match e with
   | Any -> env, (Reason.Rwitness p, Tany)
   | Array [] -> env, (Reason.Rwitness p, Tarray (true, None, None))
@@ -981,28 +980,29 @@ and expr_ is_lvalue env (p, e) =
       env, result
   | Binop (Ast.Eq (Some op), e1, e2) ->
       let e2 = p, Binop (op, e1, e2) in
-      let env, ty = expr env (p, Binop (Ast.Eq None, e1, e2)) in
+      let env, ty = raw_expr in_cond env (p, Binop (Ast.Eq None, e1, e2)) in
       env, ty
   | Binop (Ast.Eq None, e1, e2) ->
-      let env, ty2 = expr env e2 in
+      let env, ty2 = raw_expr in_cond env e2 in
       assign p env e1 ty2
   | Binop ((Ast.AMpamp | Ast.BArbar as c), e1, e2) ->
       let c = c = Ast.AMpamp in
       let lenv = env.Env.lenv in
+      let env, ty1 = expr env e1 in
       let env = condition env c e1 in
-      let env, ty2 = expr env e2 in
+      let env, ty2 = raw_expr in_cond env e2 in
       let env = { env with Env.lenv = lenv } in
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Binop (bop, e1, e2) ->
-      let env, ty1 = expr env e1 in
-      let env, ty2 = expr env e2 in
-      let env, ty = binop p env bop (fst e1) ty1 (fst e2) ty2 in
+      let env, ty1 = raw_expr in_cond env e1 in
+      let env, ty2 = raw_expr in_cond env e2 in
+      let env, ty = binop in_cond p env bop (fst e1) ty1 (fst e2) ty2 in
       env, ty
   | Unop (uop, e) ->
-      let env, ty = expr env e in
+      let env, ty = raw_expr in_cond env e in
       unop p env uop ty
   | Eif (c, e1, e2) ->
-      let env, tyc = expr env c in
+      let env, tyc = raw_expr in_cond env c in
       Typing_async.enforce_not_awaitable env (fst c) tyc;
       let lenv = env.Env.lenv in
       let env  = condition env true c in
@@ -1551,17 +1551,76 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
   | Id (_, "echo") ->
       let env, _ = lfold expr env el in
       env, (Reason.Rwitness p, Tprim Tvoid)
-  | Id (_, "\\isset") ->
+  | Id (_, ("\\isset" as pseudo_func))
+  | Id (_, ("\\empty" as pseudo_func)) ->
       let env, _ = lfold expr env el in
-      if Env.is_strict env
-      then Errors.dont_use_isset p;
+      if Env.is_strict env then
+        Errors.isset_empty_unset_in_strict p pseudo_func;
       env, (Reason.Rwitness p, Tprim Tbool)
-  | Id (_, "\\unset") ->
-      if Env.is_strict env then Errors.unset_in_strict p;
+  | Id (_, ("\\unset" as pseudo_func)) ->
+      if Env.is_strict env then
+        Errors.isset_empty_unset_in_strict p pseudo_func;
       env, (Reason.Rwitness p, Tprim Tvoid)
   | Id (_, x) when SSet.mem x Naming.predef_tests ->
       let env, ty = expr env (List.hd el) in
       env, (Reason.Rwitness p, Tprim Tbool)
+  | Id ((_, "\\array_filter") as id) when el <> []->
+      (* dispatch the call to typecheck the arguments *)
+      let env, fty = fun_type_of_id env id in
+      let env, fty = Env.expand_type env fty in
+      let env, fty = Inst.instantiate_fun env fty el in
+      let env, res = call p env fty el in
+      let multi_arg = List.length el > 1 in
+      (* but ignore the result and overwrite it with custom return type *)
+      let x = List.hd el in
+      let env, ty = expr env x in
+      let rec get_array_filter_return_type env ty =
+        let env, ety = Env.expand_type env ty in
+        (match ety with
+        | (r, Tarray (_, None, None)) as array_type ->
+            env, array_type
+        | (r, Tunresolved x) ->
+            let env, x = lmap get_array_filter_return_type env x in
+            env, (r, Tunresolved x)
+        | (r, Tany) ->
+            env, (r, Tany)
+        | (r, _) ->
+            let explain_array_filter (r, t) =
+              (Reason.Rarray_filter (p, r), t) in
+            let tk, tv = Env.fresh_type(), Env.fresh_type() in
+            Errors.try_
+              (fun () ->
+                let keyed_container = (
+                  Reason.Rnone,
+                  Tapply (
+                    (Pos.none, "\\KeyedContainer"), [tk; tv]
+                  )
+                ) in
+                let env = SubType.sub_type env keyed_container ety in
+                let env, tv =
+                  if multi_arg then env, tv else non_null env tv in
+                env, (r, Tarray (
+                  true,
+                  Some(explain_array_filter tk),
+                  Some(explain_array_filter tv))
+                ))
+              (fun _ -> Errors.try_
+                (fun () ->
+                  let container = (
+                    Reason.Rnone,
+                    Tapply (
+                      (Pos.none, "\\Container"), [tv]
+                    )
+                  ) in
+                  let env = SubType.sub_type env container ety in
+                  let env, tv =
+                    if multi_arg then env, tv else non_null env tv in
+                  env, (r, Tarray (
+                    true,
+                    Some(explain_array_filter (r, Tmixed)),
+                    Some(explain_array_filter tv))))
+                (fun _ -> env, res)))
+      in get_array_filter_return_type env ty
   | Class_const (CIparent, (_, "__construct")) ->
       call_parent_construct p env el
   | Class_const (CIparent, m) ->
@@ -2000,7 +2059,7 @@ and smember_not_found pos ~is_const ~is_method env class_ member_name =
     else if is_method then `static_method
     else `class_variable in
   let error hint =
-    Errors.smember_not_found kind pos member_name hint
+    Errors.smember_not_found kind pos class_.tc_name member_name hint
   in
   match Env.suggest_static_member is_method class_ member_name with
   | None ->
@@ -2301,6 +2360,19 @@ and static_class_id p env = function
         let params = List.map (fun x -> Env.fresh_type()) class_.tc_tparams in
         env, (Reason.Rwitness p, Tapply (c, params))
     )
+  | CIvar e ->
+      let env, ty = expr env e in
+      let _, ty = Env.expand_type env ty in
+      let ty =
+        match ty with
+        | _, Tgeneric (_, Some (_, Tapply _))
+        | _, Tapply _ ->
+            ty
+        | _ ->
+            if env.Env.genv.Env.mode = Ast.Mstrict
+            then Errors.dynamic_class p;
+            Reason.Rnone, Tany
+      in env, ty
 
 and call_construct p env class_ params el =
   let env, cstr = Env.get_construct env class_ in
@@ -2355,6 +2427,20 @@ and is_visible env vis cid =
               "This member is private")
           | _ ->
             Some ("You cannot access this member", "This member is private"))
+      | Some (CIvar e) ->
+          let env, ty = expr env e in
+          let _, ty = Env.expand_type env ty in
+          begin match ty with
+            | _, Tgeneric (_, Some (_, Tapply ((_, c), _)))
+            | _, Tapply ((_, c), _) ->
+                (match Env.get_class env c with
+                | _, Some {tc_final = true; _} -> None
+                | _ -> Some (
+                  ("Private members cannot be accessed dynamically. "
+                     ^"Did you mean to use 'self::'?"),
+                    "This member is private"))
+            | _ -> assert false
+          end
       | None when x <> self_id ->
         Some ("You cannot access this member", "This member is private")
       | Some (CI _)
@@ -2415,7 +2501,7 @@ and call pos env fty el =
    * When this is the case, a call could violate one of the constraints
    * in a branch.
    *)
-  let env = solve_todos env in
+  let env = fold_fun_list env env.Env.todo in
   env, ty
 
 and call_ pos env fty el =
@@ -2437,7 +2523,10 @@ and call_ pos env fty el =
       let env, var_param = variadic_param env ft in
       let env, tyl = lfold expr env el in
       let pos_tyl = List.combine (List.map fst el) tyl in
-      let env = wfold_left_default call_param (env, var_param) ft.ft_params pos_tyl in
+      let todos = ref [] in
+      let env = wfold_left_default (call_param todos) (env, var_param)
+                                   ft.ft_params pos_tyl in
+      let env = fold_fun_list env !todos in
       Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
       env, ft.ft_ret
   | r2, Tanon (arity, id) ->
@@ -2460,12 +2549,26 @@ and call_ pos env fty el =
       env, (Reason.Rnone, Tany)
   )
 
-and call_param env (name, x) (pos, arg) =
+and call_param todos env (name, x) (pos, arg) =
   (match name with
   | None -> ()
   | Some name -> Typing_suggest.save_param name env x arg
   );
-  Type.sub_type pos Reason.URparam env x arg
+  (* We solve for Tanon types after all the other params because we want to
+   * typecheck the lambda bodies with as much type information as possible. For
+   * example, in array_map(fn, x), we might be able to use the type of x to
+   * infer the type of fn, but if we call sub_type on fn first, we end up
+   * typechecking its body without the benefit of knowing its full type. If
+   * fn is typehinted but not x, we could use fn to infer the type of x, but
+   * in practice the reverse situation is more likely. This rearrangement is
+   * particularly useful since higher-order functions usually put fn before x.
+   *)
+  match arg with
+  | _, Tanon _ ->
+      todos := (fun env ->
+                Type.sub_type pos Reason.URparam env x arg) :: !todos;
+      env
+  | _ -> Type.sub_type pos Reason.URparam env x arg
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
@@ -2496,7 +2599,7 @@ and unop p env uop ty =
       let env = Type.sub_type p Reason.URnone env (Reason.Rarith p, Tprim Tnum) ty in
       env, ty
 
-and binop p env bop p1 ty1 p2 ty2 =
+and binop in_cond p env bop p1 ty1 p2 ty2 =
   match bop with
   | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2509,7 +2612,7 @@ and binop p env bop p1 ty1 p2 ty2 =
       | (_, Tarray _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
           env, ty
-      | _ -> binop p env Ast.Minus p1 ty1 p2 ty2
+      | _ -> binop in_cond p env Ast.Minus p1 ty1 p2 ty2
       )
   | Ast.Minus | Ast.Star ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2565,7 +2668,11 @@ and binop p env bop p1 ty1 p2 ty2 =
           let env, ty2 = Type.unify p Reason.URnone env ty2 (Reason.Rarith p1, Tprim Tint) in
           env, (Reason.Rarith_ret p, Tprim Tint)
       )
-  | Ast.Eqeq  | Ast.Diff  | Ast.EQeqeq | Ast.Diff2 ->
+  | Ast.Eqeq  | Ast.Diff  ->
+      env, (Reason.Rcomp p, Tprim Tbool)
+  | Ast.EQeqeq | Ast.Diff2 ->
+      if not in_cond
+      then TUtils.assert_nontrivial_strict_eq p bop env ty1 ty2;
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte  | Ast.Gt  | Ast.Gte  ->
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
@@ -2654,7 +2761,8 @@ and condition_isset env = function
  * Build an environment for the true or false branch
  * of conditional statements.
  *)
-and condition env tparamet = function
+and condition env tparamet =
+  let expr = raw_expr true in function
   | _, Expr_list [] -> env
   | _, Expr_list [x] ->
       let env, _ = expr env x in

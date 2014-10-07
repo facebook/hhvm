@@ -33,7 +33,6 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);

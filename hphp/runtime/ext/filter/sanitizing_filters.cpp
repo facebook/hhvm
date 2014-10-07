@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/ext/filter/ext_filter.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/constants.h"
@@ -229,7 +229,7 @@ Variant php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL) {
   } else {
     quotes = k_ENT_NOQUOTES;
   }
-  return f_htmlentities(value, quotes);
+  return HHVM_FN(htmlentities)(value, quotes);
 }
 
 Variant php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL) {
@@ -323,7 +323,7 @@ Variant php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL) {
 
 Variant php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL) {
   /* just call addslashes quotes */
-  return f_addslashes(value);
+  return HHVM_FN(addslashes)(value);
 }
 
 }

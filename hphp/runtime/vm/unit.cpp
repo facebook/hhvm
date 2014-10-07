@@ -226,10 +226,10 @@ static SourceLocTable loadSourceLocTable(const Unit* unit) {
 }
 
 /*
- * Return a copy of the Unit's SourceLocTable, extracting it from the repo if
+ * Return the Unit's SourceLocTable, extracting it from the repo if
  * necessary.
  */
-SourceLocTable getSourceLocTable(const Unit* unit) {
+const SourceLocTable& getSourceLocTable(const Unit* unit) {
   {
     ExtendedLineInfoCache::const_accessor acc;
     if (s_extendedLineInfo.find(acc, unit)) {
@@ -259,7 +259,7 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
     }
   }
 
-  auto const srcLoc = getSourceLocTable(unit);
+  auto const& srcLoc = getSourceLocTable(unit);
 
   LineToOffsetRangeVecMap map;
   Offset baseOff = 0;
@@ -318,7 +318,7 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
 }
 
 bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
-  auto sourceLocTable = getSourceLocTable(this);
+  auto const& sourceLocTable = getSourceLocTable(this);
   return HPHP::getSourceLoc(sourceLocTable, pc, sLoc);
 }
 

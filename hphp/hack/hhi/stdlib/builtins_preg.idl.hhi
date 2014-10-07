@@ -9,6 +9,15 @@
  *
  */
 function preg_grep($pattern, $input, $flags = 0) { }
+/*
+ * `preg_match` can actually return false if the regex fails to compile.
+ * However, most code has no need to consider this possibility because their
+ * regexes are known at compile time. If you are using a regex only known at
+ * runtime, please handle the possibility of a false return value, and override
+ * any spurious type errors with a HH_FIXME comment.
+ *
+ * This will eventually be fixed with more type inference magic.
+ */
 function preg_match($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0): int { }
 function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0, $offset = 0) { }
 function preg_replace($pattern, $replacement, $subject, $limit = -1, &$count = null) { }

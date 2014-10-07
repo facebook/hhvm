@@ -655,24 +655,6 @@ bool VariableTable::hasNonStaticPrivate() const {
 }
 
 void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (Option::GenerateInferredTypes) {
-    for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      Symbol *sym = m_symbolVec[i];
-      if (isInherited(sym->getName())) continue;
-
-      if (sym->isParameter()) {
-        cg_printf("// @param  ");
-      } else if (sym->isGlobal()) {
-        cg_printf("// @global ");
-      } else if (sym->isStatic()) {
-        cg_printf("// @static ");
-      } else {
-        cg_printf("// @local  ");
-      }
-      cg_printf("%s\t$%s\n", sym->getFinalType()->toString().c_str(),
-                sym->getName().c_str());
-    }
-  }
   if (Option::ConvertSuperGlobals && !getAttribute(ContainsDynamicVariable)) {
     std::set<string> convertibles;
     typedef std::pair<const string,Symbol> symPair;

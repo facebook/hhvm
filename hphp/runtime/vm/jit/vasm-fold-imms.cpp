@@ -21,7 +21,6 @@
 TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace jit {
-using namespace x64;
 
 namespace {
 struct Folder {
@@ -48,34 +47,34 @@ struct Folder {
   template<class Inst> void fold(Inst&, Vinstr& out) {}
   void fold(addq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = addqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = addqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(andq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(cmpb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1}; }
+    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
   }
   void fold(cmpq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpqi{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
   }
   void fold(cmpqm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpqim{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmpqim{val, in.s1, in.sf}; }
   }
   void fold(cmplm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmplim{val, in.s1}; }
+    if (match_int(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
   }
   void fold(orq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = orqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = orqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = orqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(storeb& in, Vinstr& out) {
     int val;
@@ -95,17 +94,17 @@ struct Folder {
   }
   void fold(subq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = subqi{val, in.s1, in.d}; }
+    if (match_int(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
   }
   void fold(xorb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = xorbi{val, in.s1, in.d}; }
-    else if (match_byte(in.s1, val)) { out = xorbi{val, in.s0, in.d}; }
+    if (match_byte(in.s0, val)) { out = xorbi{val, in.s1, in.d, in.sf}; }
+    else if (match_byte(in.s1, val)) { out = xorbi{val, in.s0, in.d, in.sf}; }
   }
   void fold(xorq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d}; }
-    else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d}; }
+    if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
+    else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
   }
 };
 }
@@ -114,6 +113,7 @@ struct Folder {
 // as a constant, and there is valid immediate-form of that instruction,
 // then change the instruction and embed the immediate.
 void foldImms(Vunit& unit) {
+  assert(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
   Folder folder{unit};
@@ -124,20 +124,17 @@ void foldImms(Vunit& unit) {
     folder.valid.set(entry.second);
     folder.vals[entry.second] = entry.first;
   }
-  // vasm is not (yet) ssa. Clear the valid bit if multiply defined.
-  for (auto b : blocks) {
-    for (auto& inst : unit.blocks[b].code) {
-      visitDefs(unit, inst, [&](Vreg r) {
-        folder.valid.reset(r);
-      });
-    }
-  }
   // now mutate instructions
   for (auto b : blocks) {
     for (auto& inst : unit.blocks[b].code) {
       switch (inst.op) {
 #define O(name, imms, uses, defs)\
-        case Vinstr::name: folder.fold(inst.name##_, inst); break;
+        case Vinstr::name: {\
+          auto origin = inst.origin;\
+          folder.fold(inst.name##_, inst);\
+          inst.origin = origin;\
+          break;\
+        }
         X64_OPCODES
 #undef O
       }

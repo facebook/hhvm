@@ -141,4 +141,10 @@ echo passthrough($o) === $o ? '12 ' : '-12 ';
 $o = Set {2};
 echo passthrough($o) === $o ? '13 ' : '-13 ';
 $o = Map {1 => 2};
-echo passthrough($o) === $o ? '14 ' : '-14 ';
+echo passthrough($o) === $o ? "14\n" : "-14\n";
+
+echo "Test that objects and strings don't collide\n";
+echo oneArgTopLevel(new O('test1')).' ';
+echo oneArgTopLevel('test1').' ';
+echo oneArgTopLevel(new O('test2')).' ';
+echo oneArgTopLevel('test2')."\n";

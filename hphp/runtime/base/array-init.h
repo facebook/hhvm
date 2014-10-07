@@ -22,10 +22,17 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Flag indicating whether this allocation should be pre-checked for OOM.
+ */
+enum class CheckAllocation {};
 
 struct ArrayInit {
   enum class Map {};
@@ -45,8 +52,12 @@ struct ArrayInit {
    * Also, generally it's preferable to use make_map_array or
    * make_packed_array when it's easy, since you don't have to get 'n'
    * right in that case.
+   *
+   * For large array allocations, consider passing CheckAllocation, which will
+   * throw if the allocation would OOM the request.
    */
   ArrayInit(size_t n, Map);
+  ArrayInit(size_t n, Map, CheckAllocation);
 
   ArrayInit(ArrayInit&& other) noexcept
     : m_data(other.m_data)
@@ -294,6 +305,25 @@ public:
 #endif
   {
     m_vec->setRefCount(0);
+  }
+
+  /*
+   * Before allocating, check if the allocation would cause the request to OOM.
+   *
+   * @throws RequestMemoryExceededException if allocating would OOM.
+   */
+  PackedArrayInit(size_t n, CheckAllocation) {
+    auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
+    if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+      check_request_surprise_unlikely();
+    }
+    m_vec = MixedArray::MakeReserve(n);
+#ifndef NDEBUG
+    m_addCount = 0;
+    m_expectedCount = n;
+#endif
+    m_vec->setRefCount(0);
+    check_request_surprise_unlikely();
   }
 
   PackedArrayInit(PackedArrayInit&& other) noexcept

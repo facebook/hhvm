@@ -29,52 +29,51 @@ struct PCFilter::PtrMapNode {
 };
 
 void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
+  static_assert(sizeof(PCFilter::PtrMapNode) == sizeof(PCFilter::PtrMap) &&
+                sizeof(PCFilter::PtrMapNode) == sizeof(void*),
+                "PtrMapNode and PtrMap must hold a single pointer");
+
   // clear all the sub levels and mark all slots NULL
   if (bits <= PTRMAP_LEVEL_BITS) {
     assert(bits == PTRMAP_LEVEL_BITS);
-    // On bottom level, pointers are not PtrMapNode*
-    memset(m_entries, 0, sizeof(void*) * PTRMAP_LEVEL_ENTRIES);
     return;
   }
   for (int i = 0; i < PTRMAP_LEVEL_ENTRIES; i++) {
     if (m_entries[i]) {
-      ((PCFilter::PtrMapNode*)m_entries[i])->clearImpl(bits -
-                                                       PTRMAP_LEVEL_BITS);
-      free(((PCFilter::PtrMapNode*)m_entries[i])->m_entries);
+      ((PCFilter::PtrMapNode*)&m_entries[i])->clearImpl(bits -
+                                                        PTRMAP_LEVEL_BITS);
       free(m_entries[i]);
       m_entries[i] = nullptr;
     }
   }
 }
 
-PCFilter::PtrMapNode* PCFilter::PtrMap::MakeNode() {
-  PtrMapNode* node = (PtrMapNode*)malloc(sizeof(PtrMapNode));
-  node->m_entries =
-    (void**)calloc(1, PTRMAP_LEVEL_ENTRIES * sizeof(void*));
-  return node;
+static void* MakeNode() {
+  return calloc(PTRMAP_LEVEL_ENTRIES, sizeof(void*));
 }
 
-PCFilter::PtrMap::~PtrMap() {
-  clear();
-  free(m_root->m_entries);
-  free(m_root);
-}
-
-void* PCFilter::PtrMap::getPointer(void* ptr) {
-  PtrMapNode* current = m_root;
+void* PCFilter::PtrMap::getPointerImpl(void* ptr) const {
+  auto current = (PtrMapNode*)&m_root;
+  assert(current->m_entries);
   unsigned short cursor = PTRMAP_PTR_SIZE;
-  while (current && cursor) {
+  do {
     cursor -= PTRMAP_LEVEL_BITS;
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
     assert(index < PTRMAP_LEVEL_ENTRIES);
-    current = (PtrMapNode*)(current->m_entries[index]);
-  }
-  return (void*)current;
+    current = (PtrMapNode*)&current->m_entries[index];
+  } while (current->m_entries && cursor);
+  return current->m_entries;
 }
 
 void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
-  PtrMapNode* current = m_root;
+  PtrMapNode* current = (PtrMapNode*)&m_root;
+  if (!current->m_entries) {
+    if (!val) return;
+    m_root = MakeNode();
+  }
+  assert(current->m_entries == m_root);
+
   unsigned short cursor = PTRMAP_PTR_SIZE;
   while (true) {
     cursor -= PTRMAP_LEVEL_BITS;
@@ -86,14 +85,19 @@ void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
       break;
     }
     if (!current->m_entries[index])  {
-      current->m_entries[index] = (void*) MakeNode();
+      current->m_entries[index] = MakeNode();
     }
-    current = (PtrMapNode*)(current->m_entries[index]);
+    current = (PtrMapNode*)&current->m_entries[index];
   }
 }
 
 void PCFilter::PtrMap::clear() {
-  m_root->clearImpl(PTRMAP_PTR_SIZE);
+  if (m_root) {
+    auto current = (PtrMapNode*)&m_root;
+    current->clearImpl(PTRMAP_PTR_SIZE);
+    free(m_root);
+    m_root = nullptr;
+  }
 }
 
 // Adds a range of PCs to the filter given a collection of offset ranges.

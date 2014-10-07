@@ -86,7 +86,7 @@ void init_stack_limits(pthread_attr_t* attr) {
   // On OSX 10.9, we are lied to about the main thread's stack size.
   // Set it to the minimum stack size, which is set earlier by
   // execute_program_impl.
-  const size_t stackSizeMinimum = 8 * 1024 * 1024;
+  const size_t stackSizeMinimum = AsyncFuncImpl::kStackSizeMinimum;
   if (pthread_main_np() == 1) {
     if (s_stackSize < stackSizeMinimum) {
       char osRelease[256];

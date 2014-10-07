@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -50,6 +51,7 @@ void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
  * Returns the address at which to record a fixup, if you need to.
  */
 jit::TCA emitCall(vixl::MacroAssembler& a, CppCall call);
+Vpoint emitCall(Vout&, CppCall call, RegSet args);
 
 /*
  * Swaps two registers. Uses XOR swap, so will not touch memory, flags, or any
@@ -100,30 +102,22 @@ void emitIncRefGeneric(vixl::MacroAssembler& a,
 /**
  * Emit a load of a low pointer.
  */
-template<class Mem>
-void emitLdLowPtr(vixl::MacroAssembler& a,
-                  const vixl::Register& dest,
-                  Mem mem, size_t size) {
+inline void emitLdLowPtr(Vout& v, Vreg dest, Vptr mem, size_t size) {
   if (size == 8) {
-    a.   Ldr   (dest, mem);
+    v << load{mem, dest};
   } else if (size == 4) {
-    a.   Ldr   (dest.W(), mem); // XXX will this zero-extend?
+    v << loadl{mem, dest};
   } else {
     not_implemented();
   }
 }
 
-inline
-void emitCmpClass(vixl::MacroAssembler& a,
-                  const vixl::Register& reg,
-                  const Class* c) {
+inline void emitCmpClass(Vout& v, Vreg sf, Vreg reg, const Class* c) {
   auto size = sizeof(LowClassPtr);
-  auto imm = reinterpret_cast<int64_t>(c);
-
   if (size == 8) {
-    a.   Cmp   (reg, imm);
+    v << cmpq{v.cns(c), reg, sf};
   } else if (size == 4) {
-    a.   Cmp   (reg.W(), uint32_t(imm));
+    v << cmpl{v.cns(c), reg, sf};
   } else {
     not_implemented();
   }

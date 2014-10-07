@@ -139,53 +139,6 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
-  // we optimize the most two common cases of switch statements
-  bool allInteger = true;
-  bool allString = true;
-  if (m_cases && m_cases->getCount()) {
-    for (int i = 0; i < m_cases->getCount(); i++) {
-      CaseStatementPtr stmt =
-        dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-      if (!stmt->getCondition()) {
-        if (m_cases->getCount() == 1) allInteger = allString = false;
-      } else {
-        if (!stmt->isLiteralInteger()) allInteger = false;
-        if (!stmt->isLiteralString()) allString = false;
-      }
-    }
-  }
-  if (allInteger && allString) {
-    allInteger = allString = false;
-  }
-
-  TypePtr ret = m_exp->inferAndCheck(ar, Type::Some, false);
-  // these are the cases where toInt64(x) is OK for the switch statement
-  if (allInteger && (ret->is(Type::KindOfInt32) || ret->is(Type::KindOfInt64))) {
-    m_exp->setExpectedType(Type::Int64);
-  }
-  if (ret->is(Type::KindOfObject) && ret->isSpecificObject()) {
-    m_exp->setExpectedType(Type::Object);
-  }
-  ConstructPtr self = shared_from_this();
-  if (m_cases && m_cases->getCount()) {
-    int defaultCount = 0;
-    for (int i = 0; i < m_cases->getCount(); i++) {
-      CaseStatementPtr stmt =
-        dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-      stmt->inferAndCheck(ar, Type::Some, false);
-      ExpressionPtr cond = stmt->getCondition();
-      if (!cond) {
-        defaultCount++;
-      }
-    }
-    // TODO: this really belongs in analyzeProgram()
-    if (defaultCount > 1 && getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::MoreThanOneDefault, m_cases);
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void SwitchStatement::outputCodeModel(CodeGenerator &cg) {

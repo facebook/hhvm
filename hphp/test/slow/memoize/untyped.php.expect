@@ -18,3 +18,5 @@ Test Hack collections
 65 65 66 66
 Test that the args are correctly passed to the real function
 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+Test that objects and strings don't collide
+67 68 69 70

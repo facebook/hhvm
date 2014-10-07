@@ -25,9 +25,8 @@
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
@@ -159,35 +158,15 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
 
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
-  if (RuntimeOption::EnableDnsCache) {
-    Variant success;
-    Variant resolved = f_apc_fetch(hostname, ref(success),
-                                   SHARED_STORE_DNS_CACHE);
-    if (same(success, true)) {
-      if (same(resolved, false)) {
-        return hostname;
-      }
-      return resolved.toString();
-    }
-  }
 
   HostEnt result;
   if (!safe_gethostbyname(hostname.data(), result)) {
-    if (RuntimeOption::EnableDnsCache) {
-      f_apc_store(hostname, false, RuntimeOption::DnsCacheTTL,
-                  SHARED_STORE_DNS_CACHE);
-    }
     return hostname;
   }
 
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  String ret(safe_inet_ntoa(in));
-  if (RuntimeOption::EnableDnsCache) {
-    f_apc_store(hostname, ret, RuntimeOption::DnsCacheTTL,
-                SHARED_STORE_DNS_CACHE);
-  }
-  return ret;
+  return String(safe_inet_ntoa(in));
 }
 
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
@@ -932,7 +911,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     raise_warning("Cannot modify header information - headers already sent");
   }
 
-  String header = f_rtrim(str);
+  String header = HHVM_FN(rtrim)(str);
 
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad

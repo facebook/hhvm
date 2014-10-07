@@ -42,7 +42,7 @@ struct APCArray {
                                bool unserializeObj);
   static APCHandle* MakeShared();
 
-  static Variant MakeArray(APCHandle* handle);
+  static Variant MakeArray(const APCHandle* handle);
 
   static void Delete(APCHandle* handle);
 
@@ -59,9 +59,8 @@ struct APCArray {
   APCHandle* getHandle() {
     return &m_handle;
   }
-
-  bool shouldCache() const {
-    return m_handle.m_shouldCache;
+  const APCHandle* getHandle() const {
+    return &m_handle;
   }
 
   //
@@ -140,18 +139,17 @@ private:
                                      size_t& size,
                                      bool unserializeObj);
 
-  void mustCache() { m_handle.m_shouldCache = true; }
   void setPacked() { m_handle.setPacked(); }
 
   //
   // Array internal API
   //
-  void add(APCHandle *key, APCHandle *val);
+  void add(APCHandle* key, APCHandle* val);
   ssize_t indexOf(const StringData* key) const;
   ssize_t indexOf(int64_t key) const;
 
   /* index of the beginning of each hash chain */
-  int *hash() const { return (int*)(this + 1); }
+  int* hash() const { return (int*)(this + 1); }
   /* buckets, stored in index order */
   Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
   /* start of the data for packed array */

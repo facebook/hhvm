@@ -338,7 +338,6 @@ void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   if (func && !func->isRedeclaring()) {
     if (m_funcScope != func) {
       m_funcScope = func;
-      assert(ar->getPhase() != AnalysisResult::FirstInference);
       Construct::recomputeEffects();
       m_funcScope->addCaller(getScope());
     }
@@ -662,6 +661,10 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
   }
 }
 
+const StaticString
+  s_GLOBALS("GLOBALS"),
+  s_this("this");
+
 ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   if (m_class || !m_funcScope ||
       (!m_className.empty() && (!m_classScope || !isPresent()))) {
@@ -751,6 +754,18 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
                 name = prefix + "_" + name;
               }
               if (!is_valid_var_name(name.c_str(), name.size())) continue;
+              if (mode == EXTR_OVERWRITE ||
+                  mode == EXTR_PREFIX_SAME ||
+                  mode == EXTR_PREFIX_INVALID ||
+                  mode == EXTR_IF_EXISTS) {
+                if (name == s_this) {
+                  // this needs extra checks, so skip the optimisation
+                  return ExpressionPtr();
+                }
+                if (name == s_GLOBALS) {
+                  continue;
+                }
+              }
               SimpleVariablePtr var(
                 new SimpleVariable(getScope(), getLocation(), name.data()));
               var->updateSymbol(SimpleVariablePtr());
@@ -1026,36 +1041,6 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
-  if (m_type == FunType::StaticCompact) {
-    for (int i = 0; i < m_params->getCount(); i += 2) {
-      ExpressionPtr e = (*m_params)[i + 1];
-      if (e->is(KindOfUnaryOpExpression) &&
-          static_pointer_cast<UnaryOpExpression>(e)->getOp() == T_UNSET_CAST) {
-        m_params->removeElement(i);
-        m_params->removeElement(i);
-        i -= 2;
-        m_extraArg -= 2;
-        if (m_extraArg < 0) m_extraArg = 0;
-      }
-    }
-    if (!m_params->getCount()) {
-      ExpressionPtr rep(new UnaryOpExpression(getScope(), getLocation(),
-                                              ExpressionPtr(), T_ARRAY, true));
-      return replaceValue(rep);
-    }
-  }
-  /*
-    Dont do this for now. Need to take account of newly created
-    variables etc (which would normally be handled by inferTypes).
-
-    if (ExpressionPtr rep = optimize(ar)) {
-      return rep;
-    }
-  */
-  return FunctionCall::postOptimize(ar);
-}
-
 int SimpleFunctionCall::getLocalEffects() const {
   if (m_class) return UnknownEffect;
 
@@ -1064,215 +1049,6 @@ int SimpleFunctionCall::getLocalEffects() const {
   }
 
   return UnknownEffect;
-}
-
-TypePtr SimpleFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                       bool coerce) {
-  assert(false);
-  return TypePtr();
-}
-
-TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                          bool coerce) {
-  assert(type);
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-
-  resetTypes();
-  reset();
-
-  if (m_class) {
-    m_class->inferAndCheck(ar, Type::Any, false);
-  }
-
-  if (m_safeDef) {
-    m_safeDef->inferAndCheck(ar, Type::Any, false);
-  }
-
-  if (m_safe) {
-    getScope()->getVariables()->
-      setAttribute(VariableTable::NeedGlobalPointer);
-  }
-
-  ConstructPtr self = shared_from_this();
-
-  // handling define("CONSTANT", ...);
-  if (!m_class && m_className.empty()) {
-    if (m_type == FunType::Define && m_params &&
-        unsigned(m_params->getCount() - 2) <= 1u) {
-      ScalarExpressionPtr name =
-        dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-      if (name) {
-        string varName = name->getIdentifier();
-        if (!varName.empty()) {
-          ExpressionPtr value = (*m_params)[1];
-          TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
-
-          BlockScopePtr block;
-          bool newlyDeclared = false;
-          {
-            Lock lock(ar->getMutex());
-            block = ar->findConstantDeclarer(varName);
-            if (!block) {
-              FileScopeRawPtr fs(getFileScope());
-              GET_LOCK(fs); // file scope cannot depend on a function scope
-              fs->declareConstant(ar, varName);
-              block = ar->findConstantDeclarer(varName);
-              newlyDeclared = true;
-            }
-          }
-
-          assert(block);
-          ConstantTablePtr constants = block->getConstants();
-          if (constants != ar->getConstants()) {
-            TRY_LOCK(block);
-            if (value && !value->isScalar()) {
-              constants->setDynamic(ar, varName, true);
-              varType = Type::Variant;
-            }
-            if (constants->isDynamic(varName)) {
-              m_dynamicConstant = true;
-              getScope()->getVariables()->
-                setAttribute(VariableTable::NeedGlobalPointer);
-            } else {
-              if (newlyDeclared) {
-                const Symbol *sym = constants->getSymbol(varName);
-                assert(!sym || !sym->declarationSet());
-                constants->add(varName, varType, value, ar, self);
-                sym = constants->getSymbol(varName);
-                always_assert(sym);
-              } else {
-                constants->setType(ar, varName, varType, true);
-              }
-            }
-            // in case the old 'value' has been optimized
-            constants->setValue(ar, varName, value);
-          } else {
-            always_assert(!newlyDeclared);
-          }
-          m_valid = true;
-          return checkTypesImpl(ar, type, Type::Boolean, coerce);
-        }
-      }
-      if (getScope()->isFirstPass()) {
-        Compiler::Error(Compiler::BadDefine, self);
-      }
-    } else if (m_type == FunType::Extract || m_type == FunType::GetDefinedVars) {
-      getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
-    }
-  }
-
-  FunctionScopePtr func;
-
-  if (!m_class && m_className.empty()) {
-    if (!m_dynamicInvoke) {
-      func = ar->findFunction(m_name);
-    }
-  } else {
-    ClassScopePtr cls = resolveClassWithChecks();
-    if (!cls) {
-      if (m_params) {
-        m_params->inferAndCheck(ar, Type::Some, false);
-        markRefParams(FunctionScopePtr(), m_name, canInvokeFewArgs());
-      }
-      return checkTypesImpl(ar, type, Type::Variant, coerce);
-    }
-    m_classScope = cls;
-
-    if (m_name == "__construct") {
-      // if the class is known, php will try to identify class-name ctor
-      func = cls->findConstructor(ar, true);
-    } else {
-      func = cls->findFunction(ar, m_name, true, true);
-    }
-
-    if (func && !func->isStatic()) {
-      ClassScopePtr clsThis = getOriginalClass();
-      FunctionScopePtr funcThis = getOriginalFunction();
-      if (!Option::AllDynamic &&
-          (!clsThis ||
-          (clsThis != m_classScope &&
-           !clsThis->derivesFrom(ar, m_className, true, false)) ||
-          funcThis->isStatic())) {
-        func->setDynamic();
-      }
-    }
-  }
-  if (!func || func->isRedeclaring() || func->isAbstract()) {
-    if (m_funcScope) {
-      m_funcScope.reset();
-      Construct::recomputeEffects();
-    }
-    if (func && func->isRedeclaring()) {
-      m_redeclared = true;
-      getScope()->getVariables()->
-        setAttribute(VariableTable::NeedGlobalPointer);
-    }
-    if (m_params) {
-      if (Option::WholeProgram && func && func->isRedeclaring()) {
-        FunctionScope::FunctionInfoPtr info =
-          FunctionScope::GetFunctionInfo(m_name);
-        always_assert(info);
-        for (int i = m_params->getCount(); i--; ) {
-          if (!Option::WholeProgram || info->isRefParam(i)) {
-            m_params->markParam(i, canInvokeFewArgs());
-          }
-        }
-      }
-      if (m_arrayParams) {
-        (*m_params)[0]->inferAndCheck(ar, Type::Array, false);
-      } else {
-        m_params->inferAndCheck(ar, Type::Some, false);
-      }
-    }
-    return checkTypesImpl(ar, type, Type::Variant, coerce);
-  } else if (func != m_funcScope) {
-    assert(!m_funcScope ||
-           !func->hasUser(getScope(), BlockScope::UseKindCaller));
-    m_funcScope = func;
-    m_funcScope->addCaller(getScope(), !type->is(Type::KindOfAny));
-    Construct::recomputeEffects();
-  }
-
-  m_builtinFunction = !func->isUserFunction();
-
-  beforeCheck(ar);
-
-  m_valid = true;
-  TypePtr rtype = checkParamsAndReturn(ar, type, coerce,
-                                       func, m_arrayParams);
-
-  // this is ok un-guarded b/c this value never gets un-set (once its
-  // true its always true) and the value itself doesn't get read
-  // until later phases
-  if (m_arrayParams && func && !m_builtinFunction) func->setDirectInvoke();
-
-  if (m_safe) {
-    TypePtr atype = getActualType();
-    if (m_safe > 0 && !m_safeDef) {
-      atype = Type::Array;
-    } else if (!m_safeDef) {
-      atype = Type::Variant;
-    } else {
-      TypePtr t = m_safeDef->getActualType();
-      if (!t || !atype || !Type::SameType(t, atype)) {
-        atype = Type::Variant;
-      }
-    }
-    rtype = checkTypesImpl(ar, type, atype, coerce);
-    m_voidReturn = m_voidUsed = false;
-  }
-
-  if (m_valid && !m_className.empty() &&
-      (!m_funcScope || !m_funcScope->isStatic())) {
-    int objCall = checkObjCall(ar);
-
-    if (objCall <= 0 || !m_localThis.empty()) {
-      m_implementedType = Type::Variant;
-    }
-  }
-
-  assert(rtype);
-  return rtype;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

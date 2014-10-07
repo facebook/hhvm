@@ -5,12 +5,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import argparse
-import difflib
 import os.path
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
+from itertools import compress
+from operator import not_
 
 verbose = False
 
@@ -43,27 +44,27 @@ def check_results(fnames):
     if success:
         print("All %d tests passed!" % total)
     else:
-        failures = total - sum(results)
-        print("Failed %d out of %d tests." % (failures, total))
+        failures = list(compress(fnames, map(not_, results)))
+        print("Failures:\n" + " ".join(failures))
+        for f in failures:
+            print_file(f + '.out')
+        print("Failed %d out of %d tests." % (len(failures), total))
     return success
 
 def check_result(fname):
     try:
         with open(fname + '.exp') as fexp:
-            exp = fexp.readlines()
+            exp = fexp.read()
     except FileNotFoundError:
         exp = ''
     with open(fname + '.out') as fout:
-        out = fout.readlines()
-    success = exp == out
-    if not success:
-        with open(fname + '.diff', 'w') as fdiff:
-            fdiff.writelines(difflib.unified_diff(
-                exp, out,
-                fromfile=fname + '.exp',
-                tofile=fname + '.out'))
-        print("%s failed!" % fname)
-    return success
+        out = fout.read()
+    return exp == out
+
+def print_file(fname):
+    print('%s:' % fname)
+    with open(fname) as f:
+        print(f.read())
 
 def get_hh_flags():
     if not os.path.isfile('HH_FLAGS'):

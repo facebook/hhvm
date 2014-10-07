@@ -67,6 +67,12 @@ $r = mb_ereg_search_regs();    // get next result
 var_dump($r == array("p\xC3\x9C"));
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
+mb_regex_encoding("UTF-8");
+mb_ereg_search_init($str);
+$r = mb_ereg_search_regs("abc", "ms");
+var_dump($r);
+
+$str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
 $reg = "\\w+";
 mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
@@ -87,5 +93,16 @@ $body = ">whateversuffix";
 $body = mb_eregi_replace($pattern, $replacement, $body);
 var_dump($body);
 
+$pattern = "(>[^<]*)(suffix)";
+$replacement = "\\1<span class=\"search\">\\2</span>";
+$body = ">whateversuffix";
+$body = mb_eregi_replace($pattern, $replacement, $body, "ip");
+var_dump($body);
+
 $str = "XYZ";
 var_dump(mb_eregi("z", $str));
+
+$str = "XYZ";
+$matches = array();
+var_dump(mb_eregi("z", $str, $matches));
+var_dump($matches);

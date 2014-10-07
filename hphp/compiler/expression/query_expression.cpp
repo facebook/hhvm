@@ -235,16 +235,6 @@ void QueryOrderby::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr QueryOrderby::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  for (unsigned int i = 0; i < m_expressions->getCount(); i++) {
-    if (ExpressionPtr e = (*m_expressions)[i]) {
-      e->inferAndCheck(ar, Type::Some, false);
-    }
-  }
-  return Type::Object;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void QueryOrderby::outputCodeModel(CodeGenerator &cg) {

@@ -19,10 +19,11 @@
 
 #include <algorithm>
 
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/phys-loc.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/util/arena.h"
 #include "hphp/util/ringbuffer.h"
 
 namespace HPHP { namespace jit {
@@ -723,26 +724,6 @@ struct RBTraceData : IRExtraData {
   const StringData* msg;
 };
 
-/*
- * ShuffleData holds an array of destination locations for a Shuffle,
- * one per source, as well as a capacity field so we can track the
- * available space to add more srcs and dsts without reallocating.
- */
-struct ShuffleData : IRExtraData {
-  ShuffleData(PhysLoc* dests, uint32_t size, uint32_t cap)
-    : dests(dests), size(size), cap(cap)
-  {}
-
-  std::string show() const;
-
-  PhysLoc* begin() const { return dests; }
-  PhysLoc* end()   const { return dests + size; }
-
-  PhysLoc* dests; // array of up to [cap] PhysLocs
-  uint32_t size; // number of valid dests
-  uint32_t cap; // available slots for more dests & srcs
-};
-
 struct ClassKindData : IRExtraData {
   explicit ClassKindData(ClassKind kind): kind(uint32_t(kind)) {}
 
@@ -930,7 +911,6 @@ X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
-X(Shuffle,                      ShuffleData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(LdRaw,                        RawMemData);

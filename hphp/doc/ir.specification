@@ -1674,21 +1674,7 @@ D:Int = SetErrorLevel S0:Int
   Equivalent to calling error_reporting(S0) in PHP.
 
 
-15. Register allocation
-
-
-Shuffle<d...> S...
-
-  Shuffle takes N source variables and N destination operands, and performs a
-  parallel copy from the source's currently assigned location to the
-  destination locations. Destinations may be registers or spill slots. Sources
-  may be registers, spill slots, or constants. Mem-Mem copies are not
-  supported. Each destination must be unique. Shuffle is not an SSA operation;
-  destination registers are assigned at multiple positions in the code, and may
-  hold different variables at different positions.
-
-
-16. Generators & Closures
+15. Generators & Closures
 
 
 D:Obj = CreateCl S0:ConstCls S1:ConstInt S2:FramePtr S3:StkPtr
@@ -1851,7 +1837,7 @@ D:Obj = LdResumableArObj S0:FramePtr
   Loads the Resumable object, given a Resumable's frame pointer in S0.
 
 
-17. Debugging, instrumentation, and profiling
+16. Debugging, instrumentation, and profiling
 
 
 IncStat S0:ConstInt S1:ConstInt S2:ConstBool
@@ -1892,7 +1878,7 @@ DbgAssertRetAddr
   Assert that the current hardware return address is the expected value. If the
   assertion fails, execution is aborted via a hardware exception.
 
-18. Iterators
+17. Iterators
 
 
 D:Bool = IterInit <IterData> S0:{Arr|Obj} S1:FramePtr
@@ -1974,7 +1960,7 @@ CIterFree<IterId> S0:FramePtr
   pointed to by S0.
 
 
-19. Member instruction support
+18. Member instruction support
 
 
 D:PtrToCell = DefMIStateBase
@@ -2290,7 +2276,7 @@ D:Bool = ColIsNEmpty S0:Obj
   Returns whether a collection instance is empty or not.  S0 must be known to
   be an instance of a collection class at compile time.
 
-20. Exception/unwinding support
+19. Exception/unwinding support
 
 BeginCatch
 

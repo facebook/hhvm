@@ -1,0 +1,101 @@
+*** Testing posix_kill() : usage variations ***
+
+Notice: %s
+
+Notice: %s
+
+Arg value 10.5 
+bool(false)
+
+Arg value -10.5 
+bool(false)
+
+Arg value 101234567000 
+bool(false)
+
+Arg value 1.07654321E-9 
+bool(false)
+
+Arg value 0.5 
+bool(false)
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+bool(false)
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+bool(false)
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+bool(false)
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+bool(false)
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value 1 
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+
+Warning: %s
+bool(false)
+
+Arg value  
+
+Warning: %s
+bool(false)
+
+Arg value string 
+
+Warning: %s
+bool(false)
+
+Arg value string 
+
+Warning: %s
+bool(false)
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+
+Catchable fatal error: %s

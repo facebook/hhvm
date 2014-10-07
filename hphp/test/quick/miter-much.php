@@ -40,7 +40,7 @@ function repeat($fn, $accum, $k) {
 }
 
 function main() {
-  $x = repeat($x ==> array_blowup($x), array(1,2,3,4,5), 3);
+  $x = repeat($x ==> array_blowup($x), array(1,2,3,4), 3);
   miter_foo($x);
 }
 

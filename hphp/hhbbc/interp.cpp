@@ -483,8 +483,8 @@ void castBoolImpl(ISS& env, bool negate) {
     }));
   }
 
-  if (t.subtypeOf(TArrE)) return push(env, TFalse);
-  if (t.subtypeOf(TArrN)) return push(env, TTrue);
+  if (t.subtypeOf(TArrE)) return push(env, negate ? TTrue : TFalse);
+  if (t.subtypeOf(TArrN)) return push(env, negate ? TFalse : TTrue);
 
   push(env, TBool);
 }

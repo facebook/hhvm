@@ -264,25 +264,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                   bool coerce) {
-  if (m_variables) {
-    for (int i = m_variables->getCount(); i--; ) {
-      ExpressionPtr exp = (*m_variables)[i];
-      if (exp) {
-        if (exp->is(Expression::KindOfListAssignment)) {
-          exp->inferAndCheck(ar, Type::Any, false);
-        } else {
-          inferAssignmentTypes(ar, Type::Variant, true, exp);
-        }
-      }
-    }
-  }
-
-  if (!m_array) return TypePtr();
-  return m_array->inferAndCheck(ar, Type::Variant, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ListAssignment::outputCodeModel(CodeGenerator &cg) {

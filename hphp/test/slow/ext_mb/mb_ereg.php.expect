@@ -24,10 +24,20 @@ array(1) {
 bool(true)
 bool(true)
 bool(true)
+array(1) {
+  [0]=>
+  string(3) "abc"
+}
 bool(true)
 string(2) "30"
 string(2) "04"
 string(4) "1973"
 string(10) "1973-04-30"
 string(43) ">whatever<span class="search">suffix</span>"
+string(43) ">whatever<span class="search">suffix</span>"
 int(1)
+int(1)
+array(1) {
+  [0]=>
+  string(1) "Z"
+}

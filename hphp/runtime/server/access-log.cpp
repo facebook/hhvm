@@ -337,20 +337,8 @@ bool AccessLog::genField(std::ostringstream &out, const char* &format,
     break;
   case 'r':
     {
-      const char *method = nullptr;
-      switch (transport->getMethod()) {
-      case Transport::Method::GET: method = "GET"; break;
-      case Transport::Method::POST:
-        if (transport->getExtendedMethod() == nullptr) {
-          method = "POST";
-        } else {
-          method = transport->getExtendedMethod();
-        }
-        break;
-      case Transport::Method::HEAD: method = "HEAD"; break;
-      default: break;
-      }
-      if (!method) return false;
+      const char *method = transport->getMethodName();
+      if (!method || !method[0]) return false;
       out << method << " ";
 
       const char *url = transport->getUrl();

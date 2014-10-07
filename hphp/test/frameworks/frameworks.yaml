@@ -518,6 +518,8 @@
       - phpbb3/tests/template/template_test_case_with_tree.php
       # race condition - https://github.com/phpbb/phpbb/pull/2890
       - phpbb3/tests/lock/flock_test.php
+      # race condition - https://github.com/phpbb/phpbb/pull/3006
+      - phpbb3/tests/wrapper/gmgetdate_test.php
   phpmyadmin:
     url: https://github.com/phpmyadmin/phpmyadmin.git
     # Stable is RELEASE_4_1_9 but we have many pull requests in master
@@ -552,7 +554,7 @@
   proxymanager:
     url: https://github.com/Ocramius/ProxyManager.git
     branch: master
-    commit: 88be49f61a70700c2e0cd21b01d29bcb53698f7d
+    commit: c5ded659f68e20a198623f48bb2bab2173b659a5
     install_root: proxymanager
     test_root: proxymanager
     # include phpt and phpunit tests, exclude performance tests

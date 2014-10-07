@@ -16,6 +16,7 @@ module C = Tty
 module Json = Hh_json
 let err_clr       = C.Bold C.Red       (* Unchecked code *)
 let checked_clr   = C.Normal C.Green   (* Checked code *)
+let partial_clr   = C.Normal C.Yellow  (* Partially checked code *)
 let kwd_clr       = C.Normal C.Magenta (* Keyword *)
 let fun_clr       = C.Normal C.Blue    (* Function name *)
 let default_color = C.Normal C.Default (* All the rest *)
@@ -24,6 +25,7 @@ let replace_color input =
   match input with
   | (ColorFile.Unchecked_code, str) -> (err_clr, str)
   | (ColorFile.Checked_code, str) -> (checked_clr, str)
+  | (ColorFile.Partially_checked_code, str) -> (partial_clr, str)
   | (ColorFile.Keyword, str) -> (kwd_clr, str)
   | (ColorFile.Fun, str) -> (fun_clr, str)
   | (ColorFile.Default, str) -> (default_color, str)
@@ -36,6 +38,7 @@ let to_json input =
                           let color_string = match clr with
                           | ColorFile.Unchecked_code -> "err"
                           | ColorFile.Checked_code -> "checked"
+                          | ColorFile.Partially_checked_code -> "partial"
                           | ColorFile.Keyword -> "kwd"
                           | ColorFile.Fun -> "fun"
                           | ColorFile.Default -> "default" in

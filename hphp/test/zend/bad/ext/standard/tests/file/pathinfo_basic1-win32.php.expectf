@@ -492,13 +492,13 @@ array(3) {
   string(3) " c:"
 }
 -- Iteration 37 --
-string(14) "		c:\test\adir"
+string(14) "%r\x09\x09%rc:\test\adir"
 string(9) "afile.txt"
 string(3) "txt"
 string(5) "afile"
 array(4) {
   ["dirname"]=>
-  string(14) "		c:\test\adir"
+  string(14) "%r\x09\x09%rc:\test\adir"
   ["basename"]=>
   string(9) "afile.txt"
   ["extension"]=>

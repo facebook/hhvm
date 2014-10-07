@@ -17,48 +17,27 @@
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
 #include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/vasm-llvm.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 using namespace reg;
+using namespace x64;
 
 const char* vinst_names[] = {
 #define O(name, imms, uses, defs) #name,
   X64_OPCODES
 #undef O
 };
-
-bool isBlockEnd(Vinstr& inst) {
-  switch (inst.op) {
-    case Vinstr::bindaddr:
-    case Vinstr::bindjcc1:
-    case Vinstr::bindjmp:
-    case Vinstr::end:
-    case Vinstr::fallback:
-    case Vinstr::jcc:
-    case Vinstr::jmp:
-    case Vinstr::jmpr:
-    case Vinstr::jmpm:
-    case Vinstr::phijmp:
-    case Vinstr::resume:
-    case Vinstr::ud2:
-    case Vinstr::unwind:
-    case Vinstr::retransopt:
-    case Vinstr::ret:
-      return true;
-    default:
-      return false;
-  }
-}
 
 Vlabel Vunit::makeBlock(AreaIndex area) {
   auto i = blocks.size();
@@ -88,19 +67,19 @@ Vtuple Vunit::makeTuple(const VregList& regs) {
 
 Vout& Vout::operator<<(Vinstr inst) {
   assert(!closed());
-  inst.sk = m_sk;
+  inst.origin = m_origin;
   m_unit.blocks[m_block].code.push_back(inst);
   return *this;
 }
 
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_sk};
+  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_origin};
 }
 
 Vout Vout::makeEntry() {
   auto label = m_unit.makeBlock(m_area);
   m_unit.roots.push_back(label); // save entry label
-  return {m_meta, m_unit, label, m_area, m_sk};
+  return {m_meta, m_unit, label, m_area, m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -119,16 +98,21 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta)
+  Vgen(Vunit& u, Vasm::AreaList& areas, Vmeta* meta, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
     , meta(meta)
+    , m_asmInfo(asmInfo)
     , addrs(u.blocks.size(), nullptr)
   {}
   void emit(jit::vector<Vlabel>&);
 
 private:
+  template<class Inst> void emit(Inst& i) {
+    always_assert_flog(false, "unimplemented instruction: {} in B{}\n",
+                       vinst_names[Vinstr(i).op], size_t(current));
+  }
   // intrinsics
   void emit(bindaddr& i);
   void emit(bindcall& i);
@@ -163,15 +147,16 @@ private:
   void emit(unwind& i);
 
   // instructions
-  void emit(andb& i) { commute(i); a->andb(i.s0, i.d); }
+  void emit(andb& i) { commuteSF(i); a->andb(i.s0, i.d); }
   void emit(andbi& i) { binary(i); a->andb(i.s0, i.d); }
   void emit(andbim& i) { a->andb(i.s, i.m); }
-  void emit(andl& i) { commute(i); a->andl(i.s0, i.d); }
+  void emit(andl& i) { commuteSF(i); a->andl(i.s0, i.d); }
   void emit(andli& i) { binary(i); a->andl(i.s0, i.d); }
-  void emit(andq& i) { commute(i); a->andq(i.s0, i.d); }
+  void emit(andq& i) { commuteSF(i); a->andq(i.s0, i.d); }
   void emit(andqi& i) { binary(i); a->andq(i.s0, i.d); }
+  void emit(addli& i) { binary(i); a->addl(i.s0, i.d); }
   void emit(addlm& i) { a->addl(i.s0, i.m); }
-  void emit(addq& i) { commute(i); a->addq(i.s0, i.d); }
+  void emit(addq& i) { commuteSF(i); a->addq(i.s0, i.d); }
   void emit(addqi& i) { binary(i); a->addq(i.s0, i.d); }
   void emit(addsd& i) { commute(i); a->addsd(i.s0, i.d); }
   void emit(call i);
@@ -200,14 +185,14 @@ private:
   void emit(decq& i) { unary(i); a->decq(i.d); }
   void emit(decqm& i) { a->decq(i.m); }
   void emit(divsd& i) { noncommute(i); a->divsd(i.s0, i.d); }
-  void emit(imul& i) { commute(i); a->imul(i.s0, i.d); }
-  void emit(incwm& i) { a->incw(i.m); }
+  void emit(imul& i) { commuteSF(i); a->imul(i.s0, i.d); }
   void emit(idiv& i) { a->idiv(i.s); }
   void emit(incl& i) { unary(i); a->incl(i.d); }
   void emit(inclm& i) { a->incl(i.m); }
   void emit(incq& i) { unary(i); a->incq(i.d); }
   void emit(incqm& i) { a->incq(i.m); }
   void emit(incqmlock& i) { a->lock(); a->incq(i.m); }
+  void emit(incwm& i) { a->incw(i.m); }
   void emit(jcc& i);
   void emit(jmp i);
   void emit(jmpr& i) { a->jmp(i.target); }
@@ -222,7 +207,6 @@ private:
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
   void emit(movb& i) { a->movb(i.s, i.d); }
   void emit(movbi& i) { a->movb(i.s, i.d); }
-  void emit(movdqa& i) { a->movdqa(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movq& i) { a->movq(i.s, i.d); }
   void emit(movqrx& i) { a->movq_rx(i.s, i.d); }
@@ -232,7 +216,7 @@ private:
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(not& i) { unary(i); a->not(i.d); }
-  void emit(orq& i) { commute(i); a->orq(i.s0, i.d); }
+  void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }
   void emit(pop& i) { a->pop(i.d); }
@@ -244,7 +228,6 @@ private:
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
-  void emit(rorqi& i) { binary(i); a->rorq(i.s0, i.d); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
   void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
@@ -282,9 +265,9 @@ private:
   void emit(ucomisd& i) { a->ucomisd(i.s0, i.s1); }
   void emit(ud2& i) { a->ud2(); }
   void emit(unpcklpd& i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
-  void emit(xorb& i) { commute(i); a->xorb(i.s0, i.d); }
+  void emit(xorb& i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi& i) { binary(i); a->xorb(i.s0, i.d); }
-  void emit(xorq& i) { commute(i); a->xorq(i.s0, i.d); }
+  void emit(xorq& i) { commuteSF(i); a->xorq(i.s0, i.d); }
   void emit(xorqi& i) { binary(i); a->xorq(i.s0, i.d); }
 
   // helpers
@@ -296,12 +279,12 @@ private:
     auto area = unit.blocks[b].area;
     return areas[(int)area].start;
   }
-  bool check(Vblock& block);
   CodeBlock& main() { return area(AreaIndex::Main).code; }
   CodeBlock& cold() { return area(AreaIndex::Cold).code; }
   CodeBlock& frozen() { return area(AreaIndex::Frozen).code; }
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
+  template<class Inst> void commuteSF(Inst&);
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
 
@@ -316,10 +299,11 @@ private:
   struct PointPatch { CodeAddress instr; Vpoint pos; };
   Vunit& unit;
   BackEnd& backend;
-  jit::vector<Vasm::Area>& areas;
+  Vasm::AreaList& areas;
   Vmeta* meta;
+  AsmInfo* m_asmInfo;
   X64Assembler* a;
-  Vlabel next{0}; // in linear order
+  Vlabel current{0}, next{0}; // in linear order
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
@@ -331,6 +315,15 @@ private:
 template<class Inst> void Vgen::noncommute(Inst& i) {
   assert(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
+}
+
+// prepare a binary op that is commutative. Swap operands if the dest is s0.
+template<class Inst> void Vgen::commuteSF(Inst& i) {
+  if (i.s1 != i.d && i.s0 == i.d) {
+    i = Inst{i.s1, i.s0, i.d, i.sf};
+  } else {
+    binary(i);
+  }
 }
 
 // prepare a binary op that is commutative. Swap operands if the dest is s0.
@@ -372,7 +365,7 @@ void Vgen::emit(cloadq& i) {
 void Vgen::emit(cmovq i) {
   if (i.f != i.d && i.t == i.d) {
     // negate the condition and swap t/f operands so we dont clobber i.t
-    i = {ccNegate(i.cc), i.t, i.f, i.d};
+    i = {ccNegate(i.cc), i.sf, i.t, i.f, i.d};
   } else {
     prep(i.f, i.d);
   }
@@ -399,6 +392,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // GP => GP
       a->movq(i.s, i.d);
     } else {                             // GP => XMM
+      assert(i.d.isSIMD());
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
       a->movq_rx(i.s, i.d);
@@ -407,6 +401,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // XMM => GP
       a->movq_xr(i.s, i.d);
     } else {                             // XMM => XMM
+      assert(i.d.isSIMD());
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
       a->movdqa(i.s, i.d);
@@ -494,7 +489,7 @@ void Vgen::emit(callstub& i) {
 }
 
 void Vgen::emit(fallback& i) {
-  emit(fallbackcc{CC_None, i.dest, i.trflags});
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
 }
 
 void Vgen::emit(fallbackcc i) {
@@ -546,6 +541,7 @@ void Vgen::emit(load& i) {
   if (i.d.isGP()) {
     a->loadq(mref, i.d);
   } else {
+    assert(i.d.isSIMD());
     a->movsd(mref, i.d);
   }
 }
@@ -584,6 +580,7 @@ void Vgen::emit(store& i) {
   if (i.s.isGP()) {
     a->storeq(i.s, i.d);
   } else {
+    assert(i.s.isSIMD());
     a->movsd(i.s, i.d);
   }
 }
@@ -609,22 +606,43 @@ void Vgen::emit(unwind& i) {
 
 // overall emitter
 void Vgen::emit(jit::vector<Vlabel>& labels) {
+  // Some structures here track where we put things just for debug printing.
+  struct Snippet {
+    const IRInstruction* origin;
+    TcaRange range;
+  };
+  struct BlockInfo {
+    jit::vector<Snippet> snippets;
+  };
+
+  // This is under the printir tracemod because it mostly shows you IR and
+  // machine code, not vasm and machine code (not implemented).
+  bool shouldUpdateAsmInfo = !!m_asmInfo
+    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
     bcmap = &mcg->cgFixups().m_bcMap;
   }
-  jit::vector<jit::vector<TcaRange>> block_ranges(areas.size());
-  for (auto& r : block_ranges) r.resize(unit.blocks.size());
+
+  jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
+  if (shouldUpdateAsmInfo) {
+    areaToBlockInfos.resize(areas.size());
+    for (auto& r : areaToBlockInfos) {
+      r.resize(unit.blocks.size());
+    }
+  }
+
   for (int i = 0, n = labels.size(); i < n; ++i) {
-    assert(check(unit.blocks[labels[i]]));
+    assert(checkBlockEnd(unit, labels[i]));
+
     auto b = labels[i];
     auto& block = unit.blocks[b];
     X64Assembler as { area(block.area).code };
     a = &as;
-    addrs[b] = a->frontier();
-    for (int j = 0; j < areas.size(); j++) {
-      block_ranges[j][b] = TcaRange{areas[j].code.frontier(), nullptr};
-    }
+    auto blockStart = a->frontier();
+    addrs[b] = blockStart;
+
     {
       // Compute the next block we will emit into the current area.
       auto cur_start = start(labels[i]);
@@ -633,31 +651,58 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
         j++;
       }
       next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
+      current = b;
     }
-    for (auto& inst : block.code) {
-      if (bcmap && inst.sk.valid() && (bcmap->empty() ||
-          bcmap->back().md5 != inst.sk.unit()->md5() ||
-          bcmap->back().bcStart != inst.sk.offset())) {
-        bcmap->push_back(TransBCMapping{
-          inst.sk.unit()->md5(),
-          inst.sk.offset(),
-          main().frontier(),
-          cold().frontier(),
-          frozen().frontier()
-        });
+
+    const IRInstruction* currentOrigin = nullptr;
+    auto blockInfo = shouldUpdateAsmInfo
+      ? &areaToBlockInfos[unsigned(block.area)][b]
+      : nullptr;
+    auto start_snippet = [&](Vinstr& inst) {
+      if (!shouldUpdateAsmInfo) return;
+
+      blockInfo->snippets.push_back(
+        Snippet { inst.origin, TcaRange { a->code().frontier(), nullptr } }
+      );
+    };
+    auto finish_snippet = [&] {
+      if (!shouldUpdateAsmInfo) return;
+
+      if (!blockInfo->snippets.empty()) {
+        auto& snip = blockInfo->snippets.back();
+        snip.range = TcaRange { snip.range.start(), a->code().frontier() };
       }
+    };
+
+    for (auto& inst : block.code) {
+      if (currentOrigin != inst.origin) {
+        finish_snippet();
+        start_snippet(inst);
+        currentOrigin = inst.origin;
+      }
+
+      if (bcmap && inst.origin) {
+        auto sk = inst.origin->marker().sk();
+        if (bcmap->empty() ||
+            bcmap->back().md5 != sk.unit()->md5() ||
+            bcmap->back().bcStart != sk.offset()) {
+          bcmap->push_back(TransBCMapping{sk.unit()->md5(), sk.offset(),
+                                          main().frontier(), cold().frontier(),
+                                          frozen().frontier()});
+        }
+      }
+
       switch (inst.op) {
-#define O(name, imms, uses, defs)\
+#define O(name, imms, uses, defs) \
         case Vinstr::name: emit(inst.name##_); break;
         X64_OPCODES
 #undef O
       }
     }
-    for (int j = 0; j < areas.size(); j++) {
-      auto start = block_ranges[j][b].start();
-      block_ranges[j][b] = TcaRange{start, areas[j].code.frontier()};
-    }
+
+    finish_snippet();
   }
+
   for (auto& p : jccs) {
     assert(addrs[p.target]);
     X64Assembler::patchJcc(p.instr, addrs[p.target]);
@@ -680,18 +725,29 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     ((int32_t*)after_lea)[-1] = d;
   }
 
-  if (dumpIREnabled(kCodeGenLevel+1)) {
-    std::ostringstream str;
-    for (auto b : labels) {
-      str << "B" << size_t(b) << "\n";
-      for (int j = 0; j < areas.size(); j++) {
-        if (!block_ranges[j][b].empty()) {
-          disasmRange(str, block_ranges[j][b]);
-          str << "\n";
+  if (!shouldUpdateAsmInfo) {
+    return;
+  }
+
+  for (auto i = 0; i < areas.size(); ++i) {
+    auto& blockInfos = areaToBlockInfos[i];
+    for (auto const blockID : labels) {
+      auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
+      if (blockInfo.snippets.empty()) continue;
+
+      const IRInstruction* currentOrigin = nullptr;
+      for (auto const& snip : blockInfo.snippets) {
+        if (currentOrigin != snip.origin && snip.origin) {
+          currentOrigin = snip.origin;
         }
+
+        m_asmInfo->updateForInstruction(
+          currentOrigin,
+          static_cast<AreaIndex>(i),
+          snip.range.start(),
+          snip.range.end());
       }
     }
-    HPHP::Trace::traceRelease("%s\n", str.str().c_str());
   }
 }
 
@@ -708,7 +764,7 @@ void Vgen::emit(cvtsi2sdm& i) {
 void Vgen::emit(jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
-      i = jcc{ccNegate(i.cc), {i.targets[1], i.targets[0]}};
+      i = jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}};
     }
     auto taken = i.targets[1];
     jccs.push_back({a->frontier(), taken});
@@ -737,16 +793,6 @@ void Vgen::emit(loadq& i) {
   a->loadq(i.s.mr(), i.d);
 }
 
-// check that each block has exactly one terminal instruction at the end.
-bool Vgen::check(Vblock& block) {
-  assert(!block.code.empty());
-  auto n = block.code.size();
-  for (size_t i = 0; i < n - 1; ++i) {
-    assert(!isBlockEnd(block.code[i]));
-  }
-  assert(isBlockEnd(block.code[n - 1]));
-  return true;
-}
 }
 
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
@@ -759,33 +805,24 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
 }
 
 // copy of layoutBlocks in layout.cpp
-jit::vector<Vlabel> layoutBlocks(const Vunit& m_unit) {
-  auto blocks = sortBlocks(m_unit);
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
+  auto blocks = sortBlocks(unit);
   // partition into main/cold/frozen areas without changing relative order,
   // and the end{} block will be last.
   auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
     [&](Vlabel b) {
-      return m_unit.blocks[b].area == AreaIndex::Main &&
-             m_unit.blocks[b].code.back().op != Vinstr::end;
+      return unit.blocks[b].area == AreaIndex::Main &&
+             unit.blocks[b].code.back().op != Vinstr::end;
     });
   std::stable_partition(coldIt, blocks.end(),
     [&](Vlabel b) {
-      return m_unit.blocks[b].area == AreaIndex::Cold &&
-             m_unit.blocks[b].code.back().op != Vinstr::end;
+      return unit.blocks[b].area == AreaIndex::Cold &&
+             unit.blocks[b].code.back().op != Vinstr::end;
     });
   return blocks;
 }
 
-void Vasm::finish(const Abi& abi, bool useLLVM) {
-  if (useLLVM) {
-    try {
-      genCodeLLVM(m_unit, m_areas, layoutBlocks(m_unit));
-      return;
-    } catch (const FailedLLVMCodeGen& e) {
-      FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
-             e.what());
-    }
-  }
+void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   if (!m_unit.cpool.empty()) {
     foldImms(m_unit);
   }
@@ -801,45 +838,33 @@ void Vasm::finish(const Abi& abi, bool useLLVM) {
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, m_meta).emit(blocks);
+  Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
 }
 
-auto const vauto_gp = RegSet(rAsm).add(reg::r11);
-auto const vauto_simd = RegSet(reg::xmm5).add(reg::xmm6).add(reg::xmm7);
+auto const vauto_gp = RegSet(rAsm).add(r11);
+auto const vauto_simd = RegSet(xmm5).add(xmm6).add(xmm7);
 UNUSED const Abi vauto_abi {
   .gpUnreserved = vauto_gp,
   .gpReserved = x64::abi.gp() - vauto_gp,
   .simdUnreserved = vauto_simd,
   .simdReserved = x64::abi.simd() - vauto_simd,
-  .calleeSaved = x64::abi.calleeSaved
+  .calleeSaved = x64::abi.calleeSaved,
+  .sf = x64::abi.sf
 };
 
 Vauto::~Vauto() {
+  UNUSED auto& areas = this->areas();
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // found at least one nonempty block. finish up.
       if (!main().closed()) main() << end{};
-      assert(m_areas.size() < 2 || cold().empty() || cold().closed());
-      assert(m_areas.size() < 3 || frozen().empty() || frozen().closed());
-      finish(vauto_abi);
+      assert(areas.size() < 2 || cold().empty() || cold().closed());
+      assert(areas.size() < 3 || frozen().empty() || frozen().closed());
+      Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
+      finishX64(vauto_abi, nullptr);
       return;
     }
   }
-}
-
-std::string format(Vreg r) {
-  if (r.isPhys()) {
-    if (r.isGP()) {
-      Reg64 r64 = r;
-      return regname(r64);
-    } else {
-      RegXMM rxmm = r;
-      return regname(rxmm);
-    }
-  }
-  std::ostringstream str;
-  str << "%" << size_t(r);
-  return str.str();
 }
 
 Vtuple findDefs(const Vunit& unit, Vlabel b) {
@@ -848,4 +873,4 @@ Vtuple findDefs(const Vunit& unit, Vlabel b) {
   return unit.blocks[b].code.front().phidef_.defs;
 }
 
-}}}
+}}

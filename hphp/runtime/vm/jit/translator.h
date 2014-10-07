@@ -87,13 +87,6 @@ struct UnknownInputExc : std::runtime_error {
   const int m_line;
 };
 
-struct ControlFlowFailedExc : std::runtime_error {
-  ControlFlowFailedExc(const char* file, int line)
-    : std::runtime_error(folly::format("ControlFlowFailedExc @ {}:{}",
-                                       file, line).str())
-  {}
-};
-
 #define punt() do { \
   throw TranslationFailedExc(__FILE__, __LINE__); \
 } while(0)
@@ -106,8 +99,6 @@ struct ControlFlowFailedExc : std::runtime_error {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator auxiliary types.
 
-using BlockIdToRegionBlockMap = hphp_hash_map<RegionDesc::BlockId,
-                                              RegionDesc::Block*>;
 using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
 
 /*
@@ -134,7 +125,6 @@ struct TranslArgs {
   TranslArgs(const SrcKey& sk, bool align)
     : m_sk(sk)
     , m_align(align)
-    , m_interp(false)
     , m_dryRun(false)
     , m_setFuncBody(false)
     , m_transId(kInvalidTransID)
@@ -147,10 +137,6 @@ struct TranslArgs {
   }
   TranslArgs& align(bool align) {
     m_align = align;
-    return *this;
-  }
-  TranslArgs& interp(bool interp) {
-    m_interp = interp;
     return *this;
   }
   TranslArgs& dryRun(bool dry) {
@@ -176,7 +162,6 @@ struct TranslArgs {
 
   SrcKey m_sk;
   bool m_align;
-  bool m_interp;
   bool m_dryRun;
   bool m_setFuncBody;
   TransFlags m_flags;
@@ -235,7 +220,6 @@ struct Translator {
    * the next attempt.
    */
   TranslateResult translateRegion(const RegionDesc& region,
-                                  bool bcControlFlow,
                                   RegionBlacklist& interp,
                                   TransFlags trflags = TransFlags{});
 
@@ -390,18 +374,16 @@ public:
   static bool liveFrameIsPseudoMain();
 
 private:
-  void createBlockMaps(const RegionDesc&        region,
-                       BlockIdToIRBlockMap&     blockIdToIRBlock,
-                       BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void createBlockMap(const RegionDesc&    region,
+                      BlockIdToIRBlockMap& blockIdToIRBlock);
 
-  void setSuccIRBlocks(const RegionDesc&              region,
-                       RegionDesc::BlockId            srcBlockId,
-                       const BlockIdToIRBlockMap&     blockIdToIRBlock,
-                       const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void setSuccIRBlocks(const RegionDesc&          region,
+                       RegionDesc::BlockId        srcBlockId,
+                       const BlockIdToIRBlockMap& blockIdToIRBlock);
 
-  void setIRBlock(RegionDesc::BlockId            blockId,
-                  const BlockIdToIRBlockMap&     blockIdToIRBlock,
-                  const BlockIdToRegionBlockMap& blockIdToRegionBlock);
+  void setIRBlock(RegionDesc::BlockId        blockId,
+                  const RegionDesc&          region,
+                  const BlockIdToIRBlockMap& blockIdToIRBlock);
 
 
   /////////////////////////////////////////////////////////////////////////////

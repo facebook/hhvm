@@ -251,6 +251,29 @@ Array HHVM_FUNCTION(SystemLib_get_defined_vars) {
   return get_defined_vars();
 }
 
+const StaticString
+  s_GLOBALS("GLOBALS"),
+  s_this("this");
+
+static const Func* arGetContextFunc(const ActRec* ar) {
+  if (ar == nullptr) {
+    return nullptr;
+  }
+  if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
+    // Pseudomains inherit the context of their caller
+    auto const context = g_context.getNoCheck();
+    ar = context->getPrevVMState(ar);
+    while (ar != nullptr &&
+             (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
+      ar = context->getPrevVMState(ar);
+    }
+    if (ar == nullptr) {
+      return nullptr;
+    }
+  }
+  return ar->m_func;
+}
+
 static bool modify_extract_name(VarEnv* v,
                                 String& name,
                                 int64_t extract_type,
@@ -264,11 +287,15 @@ static bool modify_extract_name(VarEnv* v,
   case EXTR_IF_EXISTS:
     if (v->lookup(name.get()) == nullptr) {
       return false;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_SAME:
     if (v->lookup(name.get()) != nullptr) {
       name = prefix + "_" + name;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_ALL:
@@ -277,6 +304,8 @@ static bool modify_extract_name(VarEnv* v,
   case EXTR_PREFIX_INVALID:
     if (!is_valid_var_name(name.get()->data(), name.size())) {
       name = prefix + "_" + name;
+    } else {
+      goto namechecks;
     }
     break;
   case EXTR_PREFIX_IF_EXISTS:
@@ -285,6 +314,21 @@ static bool modify_extract_name(VarEnv* v,
     }
     name = prefix + "_" + name;
     break;
+  case EXTR_OVERWRITE:
+    namechecks:
+    if (name == s_GLOBALS) {
+      return false;
+    }
+    if (name == s_this) {
+      // Only disallow $this when inside a non-static method, or a static method
+      // that has defined $this (matches Zend)
+      CallerFrame cf;
+      const Func* func = arGetContextFunc(cf());
+
+      if (func && func->isMethod() && v->lookup(s_this.get()) != nullptr) {
+        return false;
+      }
+    }
   default:
     break;
   }

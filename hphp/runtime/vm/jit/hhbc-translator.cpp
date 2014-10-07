@@ -13,12 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+
 #include <algorithm>
 #include <vector>
 
-#include "folly/CpuId.h"
-#include "folly/Optional.h"
+#include <folly/CpuId.h>
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_closure.h"
@@ -33,10 +35,12 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 
 // Include last to localize effects to this file
 #include "hphp/util/assert-throw.h"
@@ -3339,10 +3343,41 @@ void HhbcTranslator::emitNameA() {
 }
 
 const StaticString
+  s_is_a("is_a"),
   s_count("count"),
   s_ini_get("ini_get"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class");
+
+SSATmp* HhbcTranslator::optimizedCallIsA() {
+  // The last param of is_a has a default argument of false, which makes it
+  // behave the same as instanceof (which doesn't allow a string as the tested
+  // object). Don't do the conversion if we're not sure this arg is false.
+  auto const allowStringType = topType(0);
+  if (!(allowStringType <= Type::Bool)
+      || !allowStringType.isConst()
+      || allowStringType.boolVal()) {
+    return nullptr;
+  }
+
+  // Unlike InstanceOfD, is_a doesn't support interfaces like Stringish, so e.g.
+  // "is_a('x', 'Stringish')" is false even though "'x' instanceof Stringish" is
+  // true. So if the first arg is not an object, the return is always false.
+  auto const objType = topType(2);
+  if (!objType.maybe(Type::Obj)) {
+    return cns(false);
+  }
+
+  if (objType <= Type::Obj) {
+    auto const classnameType = topType(1);
+    if (classnameType <= Type::StaticStr && classnameType.isConst()) {
+      return emitInstanceOfDImpl(topC(2), top(Type::Str, 1)->strVal());
+    }
+  }
+
+  // The LHS is a strict superset of Obj; bail.
+  return nullptr;
+}
 
 SSATmp* HhbcTranslator::optimizedCallCount() {
   auto const mode = top(Type::Int, 0);
@@ -3427,6 +3462,9 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
     case 2:
       if (func->name()->isame(s_count.get())) res = optimizedCallCount();
       break;
+    case 3:
+      if (func->name()->isame(s_is_a.get())) res = optimizedCallIsA();
+      break;
     default: break;
   }
 
@@ -3461,7 +3499,14 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
   // Convert types if needed.
   for (int i = 0; i < numNonDefault; i++) {
     auto const& pi = callee->params()[i];
-    switch (pi.builtinType) {
+    auto const& tc = pi.typeConstraint;
+    auto dt = pi.builtinType;
+    Type type;
+    if (tc.isNullable() && !callee->byRef(i)) {
+      dt = tc.underlyingDataType();
+      type = Type::Null;
+    }
+    switch (dt) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
@@ -3470,7 +3515,7 @@ void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
     case KindOfResource:
     case KindOfString:
       gen(CoerceStk,
-          Type(pi.builtinType),
+          type | Type(dt),
           StackOffset(numArgs - i - 1),
           makeExitSlow(),
           m_irb->sp());
@@ -4164,9 +4209,11 @@ void HhbcTranslator::setThisAvailable() {
 template<typename G, typename L>
 void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
                                        int32_t id, G doGuard, L loadAddr) {
-  // We really do want to check for exact equality here: if type is StaticStr
-  // there's nothing for us to do, and we don't support guarding on CountedStr.
-  if (type != Type::Str ||
+  // We really do want to check for exact type equality here: if type
+  // is StaticStr there's nothing for us to do, and we don't support
+  // guarding on CountedStr.
+  if (!RuntimeOption::EvalJitPGOStringSpec ||
+      type != Type::Str ||
       (mcg->tx().mode() != TransKind::Profile &&
        mcg->tx().mode() != TransKind::Optimize)) {
     return doGuard(type);
@@ -4608,10 +4655,8 @@ void HhbcTranslator::emitVerifyParamType(int32_t paramId) {
 
 const StaticString s_WaitHandle("WaitHandle");
 
-void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
-  const StringData* className = lookupStringId(classNameStrId);
-  SSATmp* src = popC();
-
+SSATmp* HhbcTranslator::emitInstanceOfDImpl(SSATmp* src,
+                                            const StringData* className) {
   /*
    * InstanceOfD is always false if it's not an object.
    *
@@ -4627,15 +4672,11 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       (src->isA(Type::Str) && interface_supports_string(className)) ||
       (src->isA(Type::Int) && interface_supports_int(className)) ||
       (src->isA(Type::Dbl) && interface_supports_double(className));
-    push(cns(res));
-    gen(DecRef, src);
-    return;
+    return cns(res);
   }
 
   if (s_WaitHandle.get()->isame(className)) {
-    push(gen(IsWaitHandle, src));
-    gen(DecRef, src);
-    return;
+    return gen(IsWaitHandle, src);
   }
 
   SSATmp* objClass     = gen(LdObjClass, src);
@@ -4653,9 +4694,7 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
    * interfaces map and call it a day.
    */
   if (!haveBit && classIsUniqueInterface(maybeCls)) {
-    push(gen(InstanceOfIface, objClass, ssaClassName));
-    gen(DecRef, src);
-    return;
+    return gen(InstanceOfIface, objClass, ssaClassName);
   }
 
   /*
@@ -4671,11 +4710,17 @@ void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
       ? cns(maybeCls)
       : gen(LdClsCachedSafe, ssaClassName);
 
-  push(
+  return
       haveBit ? gen(InstanceOfBitmask, objClass, ssaClassName)
     : isUnique && isNormalClass ? gen(ExtendsClass, objClass, checkClass)
-    : gen(InstanceOf, objClass, checkClass)
-  );
+    : gen(InstanceOf, objClass, checkClass);
+}
+
+void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
+  const StringData* className = lookupStringId(classNameStrId);
+  SSATmp* src = popC();
+
+  push(emitInstanceOfDImpl(src, className));
   gen(DecRef, src);
 }
 
@@ -5660,7 +5705,9 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
   using namespace jit::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
-    assert(locId >= 0 && locId < curFunc()->numLocals());
+    static_assert(std::is_unsigned<typeof(locId)>::value,
+                  "locId should be unsigned");
+    assert(locId < curFunc()->numLocals());
     return m_irb->localType(locId, DataTypeSpecific);
   };
   auto boxed = [](Type t) {
@@ -6564,11 +6611,9 @@ void HhbcTranslator::end(Offset nextPc) {
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
-  if (m_irb->hasBlock(next)) {
-    emitJmpImpl(next,
-                nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
-                nullptr);
-  }
+  emitJmpImpl(next,
+              nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
+              nullptr);
 }
 
 void HhbcTranslator::checkStrictlyInteger(

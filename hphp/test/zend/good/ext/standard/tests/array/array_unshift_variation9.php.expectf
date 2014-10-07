@@ -105,10 +105,10 @@ int(5)
 array(5) {
   [0]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   ["f"]=>
   string(5) "first"
   ["s"]=>
@@ -122,10 +122,10 @@ int(7)
 array(7) {
   [0]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   [1]=>
   string(5) "hello"
   [2]=>
@@ -144,7 +144,7 @@ int(5)
 array(5) {
   [0]=>
   string(44) "11 < 12. 123 >22
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "
   ["f"]=>
   string(5) "first"
@@ -159,7 +159,7 @@ int(7)
 array(7) {
   [0]=>
   string(44) "11 < 12. 123 >22
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "
   [1]=>
   string(5) "hello"

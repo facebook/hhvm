@@ -118,7 +118,7 @@ public:
   static const APCLocalArray* asSharedArray(const ArrayData*);
 
 private:
-  explicit APCLocalArray(APCArray* source)
+  explicit APCLocalArray(const APCArray* source)
     : ArrayData(kSharedKind)
     , m_arr(source)
     , m_localCache(nullptr)
@@ -142,7 +142,7 @@ private:
   Variant getKey(ssize_t pos) const;
 
 private:
-  APCArray* m_arr;
+  const APCArray* m_arr;
   mutable TypedValue* m_localCache;
 };
 

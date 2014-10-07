@@ -30,18 +30,23 @@ let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 (*****************************************************************************)
 
 let (error_list: t ref) = ref []
+let accumulate_errors = ref false
+
+let add_error error =
+  if !accumulate_errors
+  then error_list := error :: !error_list
+  else
+    (* We have an error, but haven't handled it in any way *)
+    assert false
 
 let add code pos msg =
   if !is_hh_fixme pos code then () else
-  error_list := (code, [pos, msg]) :: !error_list
+  add_error (code, [pos, msg])
 
 let add_list code pos_msg_l =
   let pos = fst (List.hd pos_msg_l) in
   if !is_hh_fixme pos code then () else
-  error_list := (code, pos_msg_l) :: !error_list
-
-let add_error error =
-  error_list := error :: !error_list
+  add_error (code, pos_msg_l)
 
 let get_code (error: error) = ((fst error): error_code)
 let to_list (error: error) = ((snd error): message list)
@@ -96,7 +101,7 @@ module Naming                               = struct
   let different_scope                       = 2007 (* DONT MODIFY!!!! *)
   let disallowed_xhp_type                   = 2008 (* DONT MODIFY!!!! *)
   let double_instead_of_float               = 2009 (* DONT MODIFY!!!! *)
-  let dynamic_class                         = 2010 (* DONT MODIFY!!!! *)
+  (* DEPRECATED: let dynamic_class          = 2010 *)
   let dynamic_method_call                   = 2011 (* DONT MODIFY!!!! *)
   let error_name_already_bound              = 2012 (* DONT MODIFY!!!! *)
   let expected_collection                   = 2013 (* DONT MODIFY!!!! *)
@@ -194,7 +199,7 @@ module Typing                               = struct
   let cyclic_class_def                      = 4013 (* DONT MODIFY!!!! *)
   let cyclic_typedef                        = 4014 (* DONT MODIFY!!!! *)
   let discarded_awaitable                   = 4015 (* DONT MODIFY!!!! *)
-  let dont_use_isset                        = 4016 (* DONT MODIFY!!!! *)
+  let isset_empty_unset_in_strict           = 4016 (* DONT MODIFY!!!! *)
   let dynamic_yield_private                 = 4017 (* DONT MODIFY!!!! *)
   let enum_constant_type_bad                = 4018 (* DONT MODIFY!!!! *)
   let enum_switch_nonexhaustive             = 4019 (* DONT MODIFY!!!! *)
@@ -297,8 +302,10 @@ module Typing                               = struct
   let void_usage                            = 4119 (* DONT MODIFY!!!! *)
   let declared_covariant                    = 4120 (* DONT MODIFY!!!! *)
   let declared_contravariant                = 4121 (* DONT MODIFY!!!! *)
-  let unset_in_strict                       = 4122 (* DONT MODIFY!!!! *)
+  (* let unset_in_strict                    = 4122 Deprecated! *)
   let strict_members_not_known              = 4123 (* DONT MODIFY!!!! *)
+  let generic_at_runtime                    = 4124 (* DONT MODIFY!!!! *)
+  let dynamic_class                         = 4125 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -590,7 +597,7 @@ let gen_array_va_rec_arity pos =
     "gen_array_va_rec_DEPRECATED() expects at least 1 argument"
 
 let dynamic_class pos =
-  add Naming.dynamic_class pos
+  add Typing.dynamic_class pos
     "Don't use dynamic classes"
 
 let typedef_constraint pos =
@@ -1068,9 +1075,11 @@ let parent_abstract_call meth_name call_pos parent_pos =
     parent_pos, "Declaration is here"
   ]
 
-let dont_use_isset pos =
-  add Typing.dont_use_isset pos
-    "Don't use isset!"
+let isset_empty_unset_in_strict pos name =
+  let name = Utils.strip_ns name in
+  add Typing.isset_empty_unset_in_strict pos
+    (name^" cannot be used in a completely type safe way and so is banned in "
+     ^"strict mode")
 
 let array_get_arity pos1 name pos2 =
   add_list Typing.array_get_arity [
@@ -1140,10 +1149,11 @@ let string_of_class_member_kind = function
   | `static_method  -> "static method"
   | `class_variable -> "class variable"
 
-let smember_not_found kind pos member_name hint =
+let smember_not_found kind pos class_name member_name hint =
   let kind = string_of_class_member_kind kind in
+  let class_name = strip_ns class_name in
   add_list Typing.smember_not_found
-    ((pos, "Could not find "^kind^" "^member_name)
+    ((pos, "Could not find "^kind^" "^member_name^" in type "^class_name)
      :: snot_found_hint hint)
 
 let not_found_hint = function
@@ -1449,10 +1459,9 @@ let nullsafe_not_needed p nonnull_witness =
    "You are using the ?-> operator but this object cannot be null. "
  ] @ nonnull_witness)
 
-let unset_in_strict pos =
-  add Typing.unset_in_strict pos
-    ("unset cannot be used in a completely type safe way and so is banned in "
-    ^"strict mode")
+let generic_at_runtime p =
+  add Typing.generic_at_runtime p
+    "Generics can only be used in type hints since they are erased at runtime."
 
 let trivial_strict_eq p b left right =
   let msg = "This expression is always "^b in
@@ -1503,10 +1512,13 @@ let to_string ((error_code, msgl) : error) : string =
 
 let try_ f1 f2 =
   let error_list_copy = !error_list in
+  let accumulate_errors_copy = !accumulate_errors in
   error_list := [];
+  accumulate_errors := true;
   let result = f1 () in
   let errors = !error_list in
   error_list := error_list_copy;
+  accumulate_errors := accumulate_errors_copy;
   match List.rev errors with
   | [] -> result
   | l :: _ -> f2 l
@@ -1526,11 +1538,17 @@ let try_add_err pos err f1 f2 =
 
 let do_ f =
   let error_list_copy = !error_list in
+  let accumulate_errors_copy = !accumulate_errors in
   error_list := [];
+  accumulate_errors := true;
   let result = f () in
   let out_errors = !error_list in
   error_list := error_list_copy;
+  accumulate_errors := accumulate_errors_copy;
   List.rev out_errors, result
+
+let ignore_ f =
+  snd (do_ f)
 
 let try_when f ~when_ ~do_ =
   try_ f begin fun (error: error) ->

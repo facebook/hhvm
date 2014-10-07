@@ -147,12 +147,12 @@ array(6) {
 -- Iteration 6 --
 array(6) {
   [0]=>
-  string(3) "a"
+  string(3) "a%r\x0b\x0c%r"
   [1]=>
   string(5) "aaaa
 "
   [2]=>
-  string(5) "b	bbb"
+  string(5) "b%r\x09%rbbb"
   [3]=>
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
   [4]=>
@@ -166,12 +166,12 @@ array(6) {
   [1]=>
   string(5) "HELLO"
   [2]=>
-  string(3) "a"
+  string(3) "a%r\x0b\x0c%r"
   [3]=>
   string(5) "aaaa
 "
   [4]=>
-  string(5) "b	bbb"
+  string(5) "b%r\x09%rbbb"
   [5]=>
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
@@ -216,15 +216,15 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   [0]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "
   [1]=>
   string(5) "HELLO"
@@ -246,15 +246,15 @@ the lazy dog
 This is a double quoted string"
   ["h3"]=>
   string(88) "hello
- world	
-1111		 != 2222
+ world%r\x09%r
+1111%r\x09\x09%r != 2222%r\x0b\x0b%r
 heredoc
-double quoted string. withdifferentwhitespaces"
+double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   [2]=>
   string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
-2222 != 1111.	 0000 = 0000
+2222 != 1111.%r\x09%r 0000 = 0000
 "
 }
 -- Iteration 9 --

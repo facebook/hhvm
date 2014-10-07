@@ -126,21 +126,22 @@ struct IncomingBranch {
     return IncomingBranch(Tag::ADDR, TCA(from));
   }
 
-  Tag type()        const { return static_cast<Tag>(m_ptr.size()); }
+  Tag type()        const { return m_ptr.tag(); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
   void adjust(TCA addr) {
-    m_ptr.set(m_ptr.size(), addr);
+    m_ptr.set(m_ptr.tag(), addr);
   }
+
 private:
   explicit IncomingBranch(Tag type, TCA toSmash) {
-    m_ptr.set((uint32_t)type, toSmash);
+    m_ptr.set(type, toSmash);
   }
 
   /* needed to allow IncomingBranch to be put in a GrowableVector */
   friend class GrowableVector<IncomingBranch>;
   IncomingBranch() {}
 
-  CompactSizedPtr<void> m_ptr;
+  CompactTaggedPtr<void,Tag> m_ptr;
 };
 
 /*

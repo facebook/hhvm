@@ -27,12 +27,13 @@
 #include "hphp/util/ringbuffer.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -173,7 +174,7 @@ struct MCGenerator : private boost::noncopyable {
     return !mcg || Translator::WriteLease().amOwner();
   }
 
-  static jit::CppCall getDtorCall(DataType type);
+  static CppCall getDtorCall(DataType type);
   static bool isPseudoEvent(const char* event);
 
 public:
@@ -319,7 +320,8 @@ private:
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
   bool shouldTranslate() const {
-    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage;
+    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage &&
+            m_numTrans < RuntimeOption::EvalJitGlobalTranslationLimit;
   }
 
   TCA getTopTranslation(SrcKey sk) {
@@ -362,7 +364,7 @@ private:
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
-  uint64_t           m_numHHIRTrans;
+  uint64_t           m_numTrans;
   FixupMap           m_fixupMap;
   UnwindInfoHandle   m_unwindRegistrar;
   CatchTraceMap      m_catchTraceMap;

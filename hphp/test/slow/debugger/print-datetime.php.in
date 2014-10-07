@@ -1,0 +1,3 @@
+=new DateTime('9/18/2014 11:00:00 America/Los_Angeles');
+=function () { return 4; };
+c

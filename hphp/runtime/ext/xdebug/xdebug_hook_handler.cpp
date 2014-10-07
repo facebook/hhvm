@@ -389,6 +389,11 @@ static const Variant get_breakpoint_message(const BreakInfo& bi) {
     Variant(bi.message->data()) : init_null();
 }
 
+DebugHookHandler* XDebugHookHandler::GetInstance() {
+  static DebugHookHandler* instance = new XDebugHookHandler;
+  return instance;
+}
+
 template<BreakType type>
 void XDebugHookHandler::onBreak(const BreakInfo& bi) {
   // Have to have a server to break.

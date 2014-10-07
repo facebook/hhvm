@@ -89,6 +89,18 @@ AnalysisResult::AnalysisResult()
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
+AnalysisResult::~AnalysisResult() {
+  always_assert(!m_finish);
+}
+
+void AnalysisResult::finish() {
+  if (m_finish) {
+    decltype(m_finish) f;
+    f.swap(m_finish);
+    f(shared_from_this());
+  }
+}
+
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) {
   string &extraCode = m_extraCodes[key];
@@ -1162,14 +1174,10 @@ public:
   }
 };
 
-// Pre, InferTypes, and Post defined in depth_first_visitor.h
+// Pre defined in depth_first_visitor.h
 
 typedef   OptVisitor<Pre>          PreOptVisitor;
 typedef   OptWorker<Pre>           PreOptWorker;
-typedef   OptVisitor<InferTypes>   InferTypesVisitor;
-typedef   OptWorker<InferTypes>    InferTypesWorker;
-typedef   OptVisitor<Post>         PostOptVisitor;
-typedef   OptWorker<Post>          PostOptWorker;
 
 template<>
 void OptWorker<Pre>::onThreadEnter() {
@@ -1215,28 +1223,7 @@ void DepthFirstVisitor<Pre, OptVisitor>::setup() {
 }
 
 template<>
-void DepthFirstVisitor<InferTypes, OptVisitor>::setup() {
-  IMPLEMENT_OPT_VISITOR_SETUP(InferTypesWorker);
-}
-
-template<>
-void DepthFirstVisitor<Post, OptVisitor>::setup() {
-  IMPLEMENT_OPT_VISITOR_SETUP(PostOptWorker);
-}
-
-template<>
 void DepthFirstVisitor<Pre, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
-  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
-}
-
-template<>
-void DepthFirstVisitor<InferTypes, OptVisitor>::enqueue(
-  BlockScopeRawPtr scope) {
-  IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
-}
-
-template<>
-void DepthFirstVisitor<Post, OptVisitor>::enqueue(BlockScopeRawPtr scope) {
   IMPLEMENT_OPT_VISITOR_ENQUEUE(scope);
 }
 
@@ -1477,135 +1464,6 @@ void AnalysisResult::preOptimize() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// infer types
-
-template<>
-int
-DepthFirstVisitor<InferTypes, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
-  // acquire a lock on the scope
-  SimpleLock lock(scope->getInferTypesMutex());
-
-  // set the thread local to this scope-
-  // use an object to do this so if an exception is thrown we can take
-  // advantage of stack-unwinding
-  //
-  // NOTE: this *must* happen *after* the lock has been acquired, since there
-  // is code which depends on this ordering
-  SetCurrentScope sc(scope);
-
-  StatementPtr stmt = scope->getStmt();
-  MethodStatementPtr m =
-    dynamic_pointer_cast<MethodStatement>(stmt);
-  bool pushPrev = m && !scope->isFirstPass() &&
-    !scope->getContainingFunction()->inPseudoMain();
-  if (m) {
-    if (pushPrev) scope->getVariables()->beginLocal();
-    scope->getContainingFunction()->pushReturnType();
-  }
-
-  int ret = 0;
-  try {
-    bool done;
-    do {
-      scope->clearUpdated();
-      if (m) {
-        scope->getContainingFunction()->clearRetExprs();
-        m->inferFunctionTypes(this->m_data.m_ar);
-      } else {
-        for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
-          StatementPtr kid(
-            dynamic_pointer_cast<Statement>(stmt->getNthKid(i)));
-          if (kid) {
-            kid->inferTypes(this->m_data.m_ar);
-          }
-        }
-      }
-
-      done = !scope->getUpdated();
-      ret |= scope->getUpdated();
-      scope->incPass();
-    } while (!done);
-
-    if (m) {
-      bool changed = scope->getContainingFunction()->popReturnType();
-      if (changed && scope->selfUser() & BlockScope::UseKindCallerReturn) {
-        // for a recursive caller, we must let the scope run again, because
-        // there are potentially AST nodes which are interested in the updated
-        // return type
-#ifdef HPHP_INSTRUMENT_TYPE_INF
-        ++RescheduleException::s_NumForceRerunSelfCaller;
-#endif /* HPHP_INSTRUMENT_TYPE_INF */
-        scope->setForceRerun(true);
-      }
-      if (pushPrev) {
-        scope->getVariables()->endLocal();
-        ret = 0; // since we really care about the updated flags *after*
-                 // endLocal()
-      }
-      scope->getContainingFunction()->fixRetExprs();
-      ret |= scope->getUpdated();
-      scope->clearUpdated();
-    }
-  } catch (RescheduleException &e) {
-    // potential deadlock detected- reschedule
-    // this scope to run at a later time
-#ifdef HPHP_INSTRUMENT_TYPE_INF
-    ++RescheduleException::s_NumReschedules;
-#endif /* HPHP_INSTRUMENT_TYPE_INF */
-    ret |= scope->getUpdated();
-    if (m) {
-      scope->getContainingFunction()->resetReturnType();
-      if (pushPrev) {
-        scope->getVariables()->resetLocal();
-        ret = 0; // since we really care about the updated flags *after*
-                 // resetLocal()
-      }
-      scope->getContainingFunction()->fixRetExprs();
-      ret |= scope->getUpdated();
-      scope->clearUpdated();
-    }
-    scope->setNeedsReschedule(true);
-  }
-
-  // inc regardless of reschedule exception or not, since these are the
-  // semantics of run id
-  scope->incRunId();
-
-  return ret;
-}
-
-template<>
-bool AnalysisResult::postWaitCallback<InferTypes>(
-    bool first, bool again,
-    const BlockScopeRawPtrQueue &scopes, void *context) {
-
-#ifdef HPHP_INSTRUMENT_TYPE_INF
-  std::cout << "Number of rescheduled: " <<
-    RescheduleException::s_NumReschedules << std::endl;
-  RescheduleException::s_NumReschedules = 0;
-
-  std::cout << "Number of force rerun self callers: " <<
-    RescheduleException::s_NumForceRerunSelfCaller << std::endl;
-  RescheduleException::s_NumForceRerunSelfCaller = 0;
-
-  std::cout << "Number of return types changed: " <<
-    RescheduleException::s_NumRetTypesChanged << std::endl;
-  RescheduleException::s_NumRetTypesChanged = 0;
-
-  std::cout << "Lock contention: " << std::endl;
-  for (LProfileMap::const_iterator it = BaseTryLock::s_LockProfileMap.begin();
-       it != BaseTryLock::s_LockProfileMap.end(); ++it) {
-    const LEntry &entry = it->first;
-    int count = it->second;
-    std::cout << "(" << entry.first << "@" << entry.second << "): " <<
-      count << std::endl;
-  }
-
-  BaseTryLock::s_LockProfileMap.clear();
-#endif /* HPHP_INSTRUMENT_TYPE_INF */
-
-  return again;
-}
 
 #ifdef HPHP_INSTRUMENT_TYPE_INF
 std::atomic<int> RescheduleException::s_NumReschedules(0);
@@ -1614,126 +1472,8 @@ std::atomic<int> RescheduleException::s_NumRetTypesChanged(0);
 LProfileMap BaseTryLock::s_LockProfileMap;
 #endif /* HPHP_INSTRUMENT_TYPE_INF */
 
-void AnalysisResult::inferTypes() {
-  setPhase(FirstInference);
-  BlockScopeRawPtrQueue scopes;
-  getScopesSet(scopes);
-
-  for (auto scope : scopes) {
-    scope->setInTypeInference(true);
-    scope->clearUpdated();
-    assert(scope->getNumDepsToWaitFor() == 0);
-  }
-
-#ifdef HPHP_INSTRUMENT_TYPE_INF
-  assert(RescheduleException::s_NumReschedules          == 0);
-  assert(RescheduleException::s_NumForceRerunSelfCaller == 0);
-  assert(BaseTryLock::s_LockProfileMap.empty());
-#endif /* HPHP_INSTRUMENT_TYPE_INF */
-
-  processScopesParallel<InferTypes>("InferTypes");
-
-  for (auto scope : scopes) {
-    scope->setInTypeInference(false);
-    scope->clearUpdated();
-    assert(scope->getMark() == BlockScope::MarkProcessed);
-    assert(scope->getNumDepsToWaitFor() == 0);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// post-opt
 
-template<>
-int DepthFirstVisitor<Post, OptVisitor>::visit(BlockScopeRawPtr scope) {
-  scope->clearUpdated();
-  StatementPtr stmt = scope->getStmt();
-  bool done = false;
-  if (MethodStatementPtr m =
-      dynamic_pointer_cast<MethodStatement>(stmt)) {
-
-    AliasManager am(1);
-    if (am.optimize(this->m_data.m_ar, m)) {
-      scope->addUpdates(BlockScope::UseKindCaller);
-    }
-    if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-      done = true;
-    }
-  }
-
-  if (!done) {
-    StatementPtr rep = this->visitStmtRecur(stmt);
-    always_assert(!rep);
-  }
-
-  return scope->getUpdated();
-}
-
-template<>
-ExpressionPtr DepthFirstVisitor<Post, OptVisitor>::visit(ExpressionPtr e) {
-  return e->postOptimize(this->m_data.m_ar);
-}
-
-template<>
-StatementPtr DepthFirstVisitor<Post, OptVisitor>::visit(StatementPtr stmt) {
-  return stmt->postOptimize(this->m_data.m_ar);
-}
-
-class FinalWorker : public JobQueueWorker<MethodStatementPtr, AnalysisResult*> {
-public:
-  virtual void doJob(MethodStatementPtr m) {
-    try {
-      AliasManager am(1);
-      am.finalSetup(m_context->shared_from_this(), m);
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
-    }
-  }
-};
-
-template<>
-void AnalysisResult::preWaitCallback<Post>(
-    bool first, const BlockScopeRawPtrQueue &scopes, void *context) {
-  assert(!Option::ControlFlow || context != nullptr);
-  if (first && Option::ControlFlow) {
-    auto *dispatcher
-      = (JobQueueDispatcher<FinalWorker> *) context;
-    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin(),
-           end = scopes.end(); it != end; ++it) {
-      BlockScopeRawPtr scope = *it;
-      if (MethodStatementPtr m =
-          dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
-        dispatcher->enqueue(m);
-      }
-    }
-  }
-}
-
-void AnalysisResult::postOptimize() {
-  setPhase(AnalysisResult::PostOptimize);
-  if (Option::ControlFlow) {
-    BlockScopeRawPtrQueue scopes;
-    getScopesSet(scopes);
-
-    unsigned int threadCount = Option::ParserThreadCount;
-    if (threadCount > scopes.size()) {
-      threadCount = scopes.size();
-    }
-    if (threadCount <= 0) threadCount = 1;
-
-    JobQueueDispatcher<FinalWorker> dispatcher(
-      threadCount, true, 0, false, this);
-
-    processScopesParallel<Post>("PostOptimize", &dispatcher);
-
-    dispatcher.start();
-    dispatcher.stop();
-  } else {
-    processScopesParallel<Post>("PostOptimize");
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
 ///////////////////////////////////////////////////////////////////////////////

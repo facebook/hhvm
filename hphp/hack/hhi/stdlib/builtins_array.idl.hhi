@@ -34,7 +34,20 @@ function array_chunk($input, $size, $preserve_keys = false) { }
 function array_combine($keys, $values) { }
 function array_count_values($input) { }
 function array_fill_keys($keys, $value) { }
-function array_filter($input, $callback = null_variant) { }
+/*
+ * Calls to array_filter are rewritten depending on the type
+ * of argument to have one of the following signatures:
+ *
+ * function(array, ?(function(Tv):bool)): array
+ * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
+ * function(Container<Tv>, ?(function(Tv):bool)): array<mixed, Tv>
+ *
+ * Single argument calls additionally remove nullability of Tv, i.e.:
+ *
+ * function(Container<?Tv>): array<mixed, Tv>
+ *
+ */
+function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null) { }
 function array_flip($trans) { }
 function key_exists($key, $search) { }
 function array_keys($input, $search_value = null_variant, $strict = false) { }

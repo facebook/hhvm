@@ -13,16 +13,16 @@ array(11) {
   [3]=>
   string(2) "\a"
   [4]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [7]=>
   string(1) "
 "
   [8]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [9]=>
   NULL
   [10]=>
@@ -40,16 +40,16 @@ array(11) {
   [3]=>
   string(2) "\a"
   [4]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [7]=>
   string(1) "
 "
   [8]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [9]=>
   NULL
   [10]=>
@@ -67,16 +67,16 @@ array(11) {
   [3]=>
   string(2) "\a"
   [4]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [6]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [7]=>
   string(1) "
 "
   [8]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [9]=>
   NULL
   [10]=>

@@ -30,9 +30,7 @@
 #include "hphp/facebook/extensions/string_buffer/ext_string_buffer.h"
 #endif
 
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_asio.h"
+#include "hphp/runtime/ext/array/ext_array_idl.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
@@ -45,7 +43,6 @@
 #include "hphp/runtime/ext/ext_ipc.h"
 #include "hphp/runtime/ext/ext_ldap.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_mb.h"
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/ext_posix.h"
 #include "hphp/runtime/ext/ext_process.h"
@@ -56,11 +53,14 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
 #include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
+
+// half-IDL, half-HNI
+#include "hphp/runtime/ext/asio/ext_asio.h"
 
 #endif // incl_EXT_LIST_EXT_H_

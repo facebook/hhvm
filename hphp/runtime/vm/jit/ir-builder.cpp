@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/util/assertions.h"
 
@@ -66,7 +67,8 @@ IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
 {
   m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
+    m_state.setEnableCse(RuntimeOption::EvalHHIRCse &&
+                         !RuntimeOption::EvalHHIRBytecodeControlFlow);
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 
@@ -1219,11 +1221,15 @@ repeat:
   }
 }
 
-void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
+bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
-  if (block == m_curBlock) return;
+  if (block == m_curBlock) return true;
+
+  // Return false if we don't have a state for block. This can happen
+  // when trying to start a region block that turned out to be unreachable.
+  if (!m_state.hasStateFor(block)) return false;
 
   // There's no reason for us to be starting on the entry block when it's not
   // our current block.
@@ -1237,7 +1243,6 @@ void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   m_state.pauseBlock(m_curBlock);
   m_curBlock = block;
 
-  always_assert(m_state.hasStateFor(block));
   m_state.startBlock(m_curBlock, marker);
   insertLocalPhis();
 
@@ -1245,6 +1250,7 @@ void IRBuilder::startBlock(Block* block, const BCMarker& marker) {
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));
+  return true;
 }
 
 void IRBuilder::clearBlockState(Block* block) {

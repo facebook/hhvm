@@ -303,6 +303,16 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
         );
       }
     }
+    if (!m_modifiers->isStatic() && classScope->isStaticUtil()) {
+      m_modifiers->parseTimeFatal(
+        Compiler::InvalidAttribute,
+        "Class %s contains non-static method %s and "
+        "therefore cannot be declared 'abstract final'",
+        classScope->getOriginalName().c_str(),
+        getOriginalName().c_str()
+      );
+    }
+
     if (isNative) {
       if (getStmts()) {
         parseTimeFatal(Compiler::InvalidAttribute,
@@ -574,49 +584,6 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
     default:
       assert(false);
       break;
-  }
-}
-
-void MethodStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
-void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getFunctionScope());
-
-  FunctionScopeRawPtr funcScope = getFunctionScope();
-  bool pseudoMain = funcScope->inPseudoMain();
-
-  if (m_stmt && funcScope->isFirstPass()) {
-    if (pseudoMain ||
-        funcScope->getReturnType() ||
-        m_stmt->hasRetExp()) {
-      bool lastIsReturn = false;
-      if (m_stmt->getCount()) {
-        StatementPtr lastStmt = (*m_stmt)[m_stmt->getCount()-1];
-        if (lastStmt->is(Statement::KindOfReturnStatement)) {
-          lastIsReturn = true;
-        }
-      }
-      if (!lastIsReturn) {
-        ExpressionPtr constant =
-          makeScalarExpression(ar, funcScope->inPseudoMain() ?
-                               Variant(1) :
-                               Variant(Variant::NullInit()));
-        ReturnStatementPtr returnStmt =
-          ReturnStatementPtr(
-            new ReturnStatement(getScope(), getLabelScope(),
-                                getLocation(), constant));
-        m_stmt->addElement(returnStmt);
-      }
-    }
-  }
-
-  if (m_params) {
-    m_params->inferAndCheck(ar, Type::Any, false);
-  }
-
-  if (m_stmt) {
-    m_stmt->inferTypes(ar);
   }
 }
 

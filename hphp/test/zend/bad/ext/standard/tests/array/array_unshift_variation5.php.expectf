@@ -139,11 +139,11 @@ array(5) {
   [0]=>
   int(10)
   [1]=>
-  string(6) "	Hello"
+  string(6) "%r\x09%rHello"
   ["red"]=>
-  string(6) "col	or"
+  string(6) "col%r\x09%ror"
   [2]=>
-  string(7) "world"
+  string(7) "%r\x0b\x0c%rworld"
   [3]=>
   string(4) "pen
 "
@@ -157,11 +157,11 @@ array(7) {
   [2]=>
   string(5) "world"
   [3]=>
-  string(6) "	Hello"
+  string(6) "%r\x09%rHello"
   ["red"]=>
-  string(6) "col	or"
+  string(6) "col%r\x09%ror"
   [4]=>
-  string(7) "world"
+  string(7) "%r\x0b\x0c%rworld"
   [5]=>
   string(4) "pen
 "

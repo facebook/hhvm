@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
@@ -152,7 +152,7 @@ struct IfCountNotStatic {
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
   auto t = v.cns(mcg->tx().getTransCounterAddr());
-  v << incqmlock{*t};
+  v << incqmlock{*t, v.makeReg()};
 }
 
 void emitTransCounterInc(Asm& a) {
@@ -164,10 +164,11 @@ void emitIncRef(Vout& v, Vreg base) {
     emitAssertRefCount(v, base);
   }
   // emit incref
-  v << inclm{base[FAST_REFCOUNT_OFFSET]};
+  auto const sf = v.makeReg();
+  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(v);
+    emitAssertFlagsNonNegative(v, sf);
   }
 }
 
@@ -193,15 +194,17 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
   } // endif
 }
 
-void emitAssertFlagsNonNegative(Vout& v) {
-  ifThen(v, CC_NGE, [&](Vout& v) { v << ud2{}; });
+void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
+  ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
 }
 
 void emitAssertRefCount(Vout& v, Vreg base) {
-  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET]};
-  ifThen(v, CC_NLE, [&](Vout& v) {
-    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET]};
-    ifThen(v, CC_NBE, [&](Vout& v) { v << ud2{}; });
+  auto const sf = v.makeReg();
+  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
+  ifThen(v, CC_NLE, sf, [&](Vout& v) {
+    auto const sf = v.makeReg();
+    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
+    ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
 }
 
@@ -251,7 +254,7 @@ Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
 Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
   auto t = v.makeReg();
   v << copy{srcReg, t};
-  v << decq{t, dstReg};
+  v << decq{t, dstReg, v.makeReg()};
   return dstReg;
 }
 
@@ -274,12 +277,6 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     // using rax as scratch.
     v << loadq{*rdi, rax};
     v << callm{rax[target.vtableOffset()], args};
-    return;
-  case CppCall::Kind::IndirectReg:
-    v << callr{target.reg(), args};
-    return;
-  case CppCall::Kind::IndirectVreg:
-    v << callr{target.vreg(), args};
     return;
   case CppCall::Kind::ArrayVirt: {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
@@ -361,10 +358,12 @@ void emitTestSurpriseFlags(Asm& a) {
   a.testl(-1, rVmTl[RDS::kConditionFlagsOff]);
 }
 
-void emitTestSurpriseFlags(Vout& v) {
+Vreg emitTestSurpriseFlags(Vout& v) {
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  v << testlim{-1, rVmTl[RDS::kConditionFlagsOff]};
+  auto const sf = v.makeReg();
+  v << testlim{-1, rVmTl[RDS::kConditionFlagsOff], sf};
+  return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -378,8 +377,8 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
-  emitTestSurpriseFlags(v);
-  v << jcc{CC_NZ, {done, cold}};
+  auto const sf = emitTestSurpriseFlags(v);
+  v << jcc{CC_NZ, sf, {done, cold}};
 
   vcold = cold;
   vcold << movq{rVmFp, argNumToRegName[0]};
@@ -399,34 +398,34 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
   }
 }
 
-void emitCmpClass(Vout& v, const Class* c, Vptr mem) {
+void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    v << cmpqm{v.cns(c), mem};
+    v << cmpqm{v.cns(c), mem, sf};
   } else if (size == 4) {
-    v << cmplm{v.cns(c), mem};
+    v << cmplm{v.cns(c), mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg reg, Vptr mem) {
+void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    v << cmpqm{reg, mem};
+    v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    v << cmplm{reg, mem};
+    v << cmplm{reg, mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg reg1, Vreg reg2) {
+void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
   auto size = sizeof(LowClassPtr);
   if (size == 8) {
-    v << cmpq{reg1, reg2};
+    v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {
-    v << cmpl{reg1, reg2};
+    v << cmpl{reg1, reg2, sf};
   } else {
     not_implemented();
   }

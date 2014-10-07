@@ -42,102 +42,108 @@ let declare content =
   let declared_funs = ref SSet.empty in
   let declared_classes = ref SSet.empty in
   try
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    let funs, classes = List.fold_left begin fun (funs, classes) def ->
-      match def with
-        | Ast.Fun f -> SSet.add (snd f.Ast.f_name) funs, classes
-        | Ast.Class c -> funs, SSet.add (snd c.Ast.c_name) classes
-        | _ -> funs, classes
-    end (SSet.empty, SSet.empty) ast in
-    oldify_funs funs;
-    oldify_classes classes;
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let f = Naming.fun_ nenv f in
-          if !Find_refs.find_method_at_cursor_target <> None then
-            Find_refs.process_find_refs None
-              (snd f.Nast.f_name) (fst f.Nast.f_name);
-          let fname = (snd f.Nast.f_name) in
-          Typing.fun_decl f;
-          declared_funs := SSet.add fname !declared_funs;
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let c = Naming.class_ nenv c in
-          if !Find_refs.find_method_at_cursor_target <> None then
-            Find_refs.process_class_ref (fst c.Nast.c_name)
-              (snd c.Nast.c_name) None;
-          let cname = snd c.Nast.c_name in
-          let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-          if !Find_refs.find_method_at_cursor_target <> None then
-          List.iter begin fun method_ ->
-            Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-              (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-          end all_methods;
-          (match c.Nast.c_constructor with
-          | Some method_ ->
+    Errors.ignore_ begin fun () ->
+      let {Parser_hack.is_hh_file; comments; ast} =
+        Parser_hack.program content
+      in
+      let funs, classes = List.fold_left begin fun (funs, classes) def ->
+        match def with
+          | Ast.Fun f -> SSet.add (snd f.Ast.f_name) funs, classes
+          | Ast.Class c -> funs, SSet.add (snd c.Ast.c_name) classes
+          | _ -> funs, classes
+      end (SSet.empty, SSet.empty) ast in
+      oldify_funs funs;
+      oldify_classes classes;
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let f = Naming.fun_ nenv f in
+            if !Find_refs.find_method_at_cursor_target <> None then
+              Find_refs.process_find_refs None
+                (snd f.Nast.f_name) (fst f.Nast.f_name);
+            let fname = (snd f.Nast.f_name) in
+            Typing.fun_decl f;
+            declared_funs := SSet.add fname !declared_funs;
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let c = Naming.class_ nenv c in
+            if !Find_refs.find_method_at_cursor_target <> None then
+              Find_refs.process_class_ref (fst c.Nast.c_name)
+                (snd c.Nast.c_name) None;
+            let cname = snd c.Nast.c_name in
+            let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
+            if !Find_refs.find_method_at_cursor_target <> None then
+            List.iter begin fun method_ ->
               Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                "__construct" (fst method_.Nast.m_name)
-          | None -> ());
-          declared_classes := SSet.add cname !declared_classes;
-          Typing_decl.class_decl c;
-          ()
-      | _ -> ()
-    end ast;
-    !declared_funs, !declared_classes
+                (snd method_.Nast.m_name) (fst method_.Nast.m_name)
+            end all_methods;
+            (match c.Nast.c_constructor with
+            | Some method_ ->
+                Find_refs.process_find_refs (Some (snd c.Nast.c_name))
+                  "__construct" (fst method_.Nast.m_name)
+            | None -> ());
+            declared_classes := SSet.add cname !declared_classes;
+            Typing_decl.class_decl c;
+            ()
+        | _ -> ()
+      end ast;
+      !declared_funs, !declared_classes
+    end
   with e ->
     report_error e;
     SSet.empty, SSet.empty
 
 let fix_file_and_def content = try
-  let {Parser_hack.is_hh_file; comments; ast} = Parser_hack.program content in
-  List.iter begin fun def ->
-    match def with
-    | Ast.Fun f ->
-        let nenv = Naming.empty in
-        let f = Naming.fun_ nenv f in
-        let filename = Pos.filename (fst f.Nast.f_name) in
-        let tenv = Typing_env.empty filename in
-        Typing.fun_def tenv (snd f.Nast.f_name) f
-    | Ast.Class c ->
-        let nenv = Naming.empty in
-        let c = Naming.class_ nenv c in
-        let filename = Pos.filename (fst c.Nast.c_name) in
-        let tenv = Typing_env.empty filename in
-        let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-        res
-    | _ -> ()
-  end ast;
+  Errors.ignore_ begin fun () ->
+    let {Parser_hack.is_hh_file; comments; ast} = Parser_hack.program content in
+    List.iter begin fun def ->
+      match def with
+      | Ast.Fun f ->
+          let nenv = Naming.empty in
+          let f = Naming.fun_ nenv f in
+          let filename = Pos.filename (fst f.Nast.f_name) in
+          let tenv = Typing_env.empty filename in
+          Typing.fun_def tenv (snd f.Nast.f_name) f
+      | Ast.Class c ->
+          let nenv = Naming.empty in
+          let c = Naming.class_ nenv c in
+          let filename = Pos.filename (fst c.Nast.c_name) in
+          let tenv = Typing_env.empty filename in
+          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+          res
+      | _ -> ()
+    end ast;
+  end
 with e ->
   report_error e;
   ()
     
 let recheck file_names =
   SharedMem.invalidate_caches();
-  List.iter begin fun fn ->
-    match Parser_heap.ParserHeap.get fn with
-    | None -> ()
-    | Some defs ->
-        List.iter begin function
-        | Ast.Fun f ->
-            (try Typing_check_service.type_fun (snd f.Ast.f_name)
-            with _ -> ())
-        | Ast.Class c ->
-            (try Typing_check_service.type_class (snd c.Ast.c_name)
-            with _ -> ())
-        | Ast.Stmt _ -> ()
-        | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
-            (try Typing_check_service.check_typedef tname
-            with _ -> ()
-            )
-        | Ast.Constant _ -> ()
-        | Ast.Namespace _
-        | Ast.NamespaceUse _ -> assert false
-        end defs
-  end file_names
+  Errors.ignore_ begin fun () ->
+    List.iter begin fun fn ->
+      match Parser_heap.ParserHeap.get fn with
+      | None -> ()
+      | Some defs ->
+          List.iter begin function
+          | Ast.Fun f ->
+              (try Typing_check_service.type_fun (snd f.Ast.f_name)
+              with _ -> ())
+          | Ast.Class c ->
+              (try Typing_check_service.type_class (snd c.Ast.c_name)
+              with _ -> ())
+          | Ast.Stmt _ -> ()
+          | Ast.Typedef { Ast.t_id = (_, tname); _ } ->
+              (try Typing_check_service.check_typedef tname
+              with _ -> ()
+              )
+          | Ast.Constant _ -> ()
+          | Ast.Namespace _
+          | Ast.NamespaceUse _ -> assert false
+          end defs
+    end file_names
+  end
 
 let check_file_input fi =
   match fi with

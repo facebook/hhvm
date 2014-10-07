@@ -17,8 +17,10 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
@@ -33,6 +35,11 @@ using Trace::ringbufferName;
 const char* area_names[] = { "main", "cold", "frozen" };
 namespace {
 
+const char* vixl_ccs[] = {
+  "eq", "ne", "hs", "lo", "mi", "pl", "vs", "vc",
+  "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
+};
+
 // Visitor class to format the operands of a Vinstr. There are
 // imm() overloaded methods for each type of operand used by any Vinstr.
 // If we are missing an overload, the templated catch-all prints "?".
@@ -44,6 +51,9 @@ struct FormatVisitor {
     str << sep() << "?";
   }
   void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
+  void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
+  void imm(uint8_t i) { imm(int(i)); }
+  void imm(uint16_t i) { imm(int(i)); }
   void imm(int i) { str << sep() << i; }
   void imm(bool b) { str << sep() << (b ? 'T' : 'F'); }
   void imm(Immed s) { str << sep() << s.l(); }
@@ -55,7 +65,7 @@ struct FormatVisitor {
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
-  void imm(Vpoint p) { str << sep() << (size_t)p; }
+  void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
   void imm(SrcKey k) { str << sep() << showShort(k); }
   void imm(Fixup fix) {
@@ -79,6 +89,7 @@ struct FormatVisitor {
 
   template<class R> void across(R r) { print(r); }
   template<class R> void use(R r) { print(r); }
+  template<class R, class H> void useHint(R r, H) { print(r); }
   void use(Vptr m) { print(m); }
   void use(Vtuple uses) { print(uses); }
 
@@ -92,13 +103,10 @@ struct FormatVisitor {
   }
   void def(Vtuple defs) { defSep(); print(defs); }
   template<class R> void def(R r) { defSep(); print(r); }
+  template<class R, class H> void defHint(R r, H) { defSep(); print(r); }
 
   void print(Vptr p) {
     str << sep() << show(p);
-  }
-
-  void print(Reg64 r) {
-    str << sep() << reg::regname(r);
   }
 
   void print(Vtuple t) {
@@ -109,26 +117,10 @@ struct FormatVisitor {
     regs.forEach([&](Vreg r) { print(r); });
   }
 
-  template<class R> void print(R r) {
-    str << sep();
-    if (!r.isValid()) str << "%?";
-    else if (r.isVirt()) str << "%" << size_t(r);
-    else str << name(r);
+  void print(Vreg r) {
+    str << sep() << show(r);
   }
-  const char* name(Vreg64 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg32 r) { return reg::regname(r.asReg()); }
-  const char* name(Vreg8 r) { return reg::regname(r.asReg()); }
-  const char* name(VregXMM r) {
-    return reg::regname(r.asReg());
-  }
-  const char* name(Vreg r) {
-    if (r.isGP()) {
-      Reg64 tmp = r;
-      return reg::regname(tmp);
-    }
-    RegXMM tmp = r;
-    return reg::regname(tmp);
-  }
+
   const char* sep() { return comma ? ", " : (comma = true, ""); }
   const Vunit& unit;
 
@@ -140,16 +132,12 @@ struct FormatVisitor {
 
 std::string show(Vreg r) {
   if (!r.isValid()) return "%?";
-  if (r.isPhys()) {
-    if (r.isGP()) {
-      Reg64 gpr = r;
-      return reg::regname(gpr);
-    }
-    RegXMM xmm = r;
-    return reg::regname(xmm);
-  }
   std::ostringstream str;
-  str << "%" << size_t(r);
+  if (r.isPhys()) {
+    mcg->backEnd().streamPhysReg(str, r);
+  } else {
+    str << "%" << size_t(r);
+  }
   return str.str();
 }
 
@@ -201,11 +189,21 @@ std::string show(const Vunit& unit, const Vinstr& inst) {
 void printBlock(std::ostream& out, const Vunit& unit,
                 const PredVector& preds, Vlabel b) {
   auto& block = unit.blocks[b];
-  out << folly::format("B{: <11} {}", size_t(b), area_names[int(block.area)]);
+  out << '\n' << color(ANSI_COLOR_MAGENTA);
+  out << folly::format(" B{: <11} {}", size_t(b),
+           area_names[int(block.area)]);
   for (auto p : preds[b]) out << ", B" << size_t(p);
-  out << "\n";
+  out << color(ANSI_COLOR_END);
+
+  if (!block.code.empty() && !block.code.front().origin) out << '\n';
+
+  const IRInstruction* currentOrigin = nullptr;
   for (auto& inst : block.code) {
-    out << "  " << show(unit, inst) << "\n";
+    if (currentOrigin != inst.origin && inst.origin) {
+      currentOrigin = inst.origin;
+      out << "\n    " << currentOrigin->toString() << '\n';
+    }
+    out << "        " << show(unit, inst) << '\n';
   }
 }
 
@@ -238,7 +236,6 @@ std::string show(const Vunit& unit) {
   auto blocks = sortBlocks(unit);
 
   std::ostringstream out;
-  printCfg(out, unit, blocks);
   for (auto b : blocks) {
     printBlock(out, unit, preds, b);
   }
@@ -247,7 +244,12 @@ std::string show(const Vunit& unit) {
 
 void printUnit(int level, const std::string& caption, const Vunit& unit) {
   if (!Trace::moduleEnabledRelease(HPHP::Trace::vasm, level)) return;
-  Trace::ftraceRelease("\n{}\n{}\n", caption, show(unit));
+  Trace::ftraceRelease(
+    "\n{}{}\n{}",
+    banner(caption.c_str()),
+    show(unit),
+    banner("")
+  );
 }
 
 }}

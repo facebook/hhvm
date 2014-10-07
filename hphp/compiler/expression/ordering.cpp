@@ -82,12 +82,6 @@ void Ordering::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr Ordering::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  m_key->inferAndCheck(ar, Type::Some, false);
-  return Type::Object;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void Ordering::outputCodeModel(CodeGenerator &cg) {

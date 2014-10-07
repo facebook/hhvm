@@ -7,4 +7,4 @@ function fact($x) {
   return gmp_mul($x, fact($x-1));
 }
 
-print gmp_strval(fact(1000)) . "\n";
+print gmp_strval(fact(218)) . "\n";

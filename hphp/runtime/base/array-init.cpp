@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
@@ -29,6 +29,26 @@ ArrayInit::ArrayInit(size_t n, Map)
 {
   m_data = MixedArray::MakeReserveMixed(n);
   m_data->setRefCount(0);
+}
+
+ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  if (n > std::numeric_limits<int>::max()) {
+    MM().forceOOM();
+    check_request_surprise_unlikely();
+  }
+  auto const cmret = computeCapAndMask(n);
+  auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+  if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+  m_data = MixedArray::MakeReserveMixed(n);
+  m_data->setRefCount(0);
+  check_request_surprise_unlikely();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -165,7 +165,13 @@ public:
   static bool SetUser(const std::string& name, const folly::dynamic& value,
                       FollyDynamic);
   static bool SetUser(const String& name, const Variant& value);
-
+  /**
+   * Fill in constant that may not have been bound when an
+   * ini file was initially parsed
+   */
+   static bool FillInConstant(const std::string& name,
+                              const folly::dynamic& value,
+                              FollyDynamic);
   /**
    * Get the mode for a setting
    */
@@ -267,6 +273,12 @@ public:
   // have been initialized. This should only be used in rare cases that can't
   // be refactored into registration before extensions are done.
   static bool s_pretendExtensionsHaveNotBeenLoaded;
+
+  // Used to help us late bind extension constants (e.g. E_ALL) that
+  // were incorrectly bound initially, and needed to be bound again after
+  // all was loaded.
+  static bool s_config_is_a_constant;
+  static std::set<std::string> config_names_that_use_constants;
 
 private:
   static void Bind(const Extension* extension, const Mode mode,

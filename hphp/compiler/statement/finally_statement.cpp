@@ -88,10 +88,6 @@ void FinallyStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void FinallyStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmt) m_stmt->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FinallyStatement::outputCodeModel(CodeGenerator &cg) {

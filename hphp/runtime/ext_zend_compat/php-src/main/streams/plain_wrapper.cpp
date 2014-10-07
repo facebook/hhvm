@@ -20,10 +20,12 @@
 
 #include "php.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/object-data.h"
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC) {
   FILE *f = tmpfile();
   if (f) {
+    using HPHP::ObjectData;
     auto* file = NEWOBJ(HPHP::PlainFile)(f);
     auto* stream = HPHP::smart_new<php_stream>(file);
     stream->hphp_file->incRefCount();

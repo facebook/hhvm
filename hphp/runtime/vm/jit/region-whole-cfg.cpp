@@ -77,6 +77,9 @@ struct DFS {
         auto dstSK = m_profData->transSrcKey(dst);
         if (folly::get_default(m_srcKeyToTransID, dstSK, dst) != dst) continue;
 
+        // Skip dst if we already generated a region starting at that SrcKey.
+        if (m_profData->optimized(dstSK)) continue;
+
         auto dstBlockId = m_profData->transRegion(dst)->entry()->id();
         m_arcs.push_back({srcBlockId, dstBlockId});
 

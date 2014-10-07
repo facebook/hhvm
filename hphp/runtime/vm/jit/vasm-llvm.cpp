@@ -19,7 +19,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/disasm.h"
 
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
@@ -51,9 +50,6 @@ TRACE_SET_MOD(llvm);
 
 namespace HPHP { namespace jit {
 
-// TODO: Remove this (t5048575)
-using namespace ::HPHP::jit::x64;
-
 namespace {
 
 /*
@@ -61,7 +57,7 @@ namespace {
  * TC. Currently all code goes into the Main code block.
  */
 struct TCMemoryManager : public llvm::RTDyldMemoryManager {
-  explicit TCMemoryManager(jit::vector<Vasm::Area>& areas)
+  explicit TCMemoryManager(Vasm::AreaList& areas)
     : m_areas(areas)
   {
   }
@@ -117,7 +113,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
   }
 
 private:
-  jit::vector<Vasm::Area>& m_areas;
+  Vasm::AreaList& m_areas;
 };
 
 /*
@@ -125,7 +121,7 @@ private:
  * optimizing that and emitting machine code from the result.
  */
 struct LLVMEmitter {
-  explicit LLVMEmitter(const Vunit& unit, jit::vector<Vasm::Area>& areas)
+  explicit LLVMEmitter(const Vunit& unit, Vasm::AreaList& areas)
     : m_context(llvm::getGlobalContext())
     , m_module(new llvm::Module("", m_context))
     , m_function(llvm::Function::Create(
@@ -243,7 +239,7 @@ X64_OPCODES
   jit::vector<llvm::Value*> m_valueInfo;
 
   const Vunit& m_unit;
-  jit::vector<Vasm::Area>& m_areas;
+  Vasm::AreaList& m_areas;
 };
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
@@ -407,8 +403,8 @@ void LLVMEmitter::emit(const ud2& inst) {
 void LLVMEmitter::emit(const unwind& inst) {
 }
 
-std::string showNewCode(const jit::vector<Vasm::Area>& areas) DEBUG_ONLY;
-std::string showNewCode(const jit::vector<Vasm::Area>& areas) {
+std::string showNewCode(const Vasm::AreaList& areas) DEBUG_ONLY;
+std::string showNewCode(const Vasm::AreaList& areas) {
   std::ostringstream str;
   Disasm disasm(Disasm::Options().indent(2));
 
@@ -430,7 +426,7 @@ std::string showNewCode(const jit::vector<Vasm::Area>& areas) {
 
 }
 
-void genCodeLLVM(const Vunit& unit, jit::vector<Vasm::Area>& areas,
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels) {
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
@@ -460,8 +456,7 @@ void genCodeLLVM(const Vunit& unit, jit::vector<Vasm::Area>& areas,
 
 namespace HPHP { namespace jit {
 
-using namespace x64;
-void genCodeLLVM(const Vunit& unit, jit::vector<Vasm::Area>& areas,
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels) {
   throw FailedLLVMCodeGen("This build does not support the LLVM backend");
 }

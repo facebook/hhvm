@@ -865,10 +865,6 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
   return MM().stopStatsInterval();
 }
 
-static Variant HHVM_FUNCTION(php_ini_loaded_file) {
-  return false;
-}
-
 String HHVM_FUNCTION(php_sapi_name) {
   return RuntimeOption::ExecutionMode;
 }
@@ -1224,7 +1220,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(hphp_memory_get_interval_peak_usage);
   HHVM_FE(hphp_memory_start_interval);
   HHVM_FE(hphp_memory_stop_interval);
-  HHVM_FE(php_ini_loaded_file);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);
   HHVM_FE(phpinfo);

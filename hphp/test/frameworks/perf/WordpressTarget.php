@@ -3,8 +3,9 @@
 require_once('PerfTarget.php');
 
 final class WordpressTarget extends PerfTarget {
+
   public function __construct(
-    private string $tempDir
+    private PerfOptions $options,
   ) {
   }
 
@@ -15,10 +16,19 @@ final class WordpressTarget extends PerfTarget {
   public function install(): void {
     shell_exec($this->safeCommand(Vector {
       'tar',
-      '-C', $this->tempDir,
+      '-C', $this->options->tempDir,
       '-zxf',
       __DIR__.'/wordpress/wordpress-3.9.1.tar.gz',
     }));
+
+    copy(
+      __DIR__.'/wordpress/wp-config.php',
+      $this->getSourceRoot().'/wp-config.php',
+    );
+
+    if ($this->options->skipDatabaseInstall) {
+      return;
+    }
 
     $root = 'http://'.gethostname().':'.PerfSettings::HttpPort();
     $conn = mysql_connect('127.0.0.1', 'wp_bench', 'wp_bench');
@@ -32,7 +42,7 @@ final class WordpressTarget extends PerfTarget {
     shell_exec(
       $this->safeCommand(Vector {
         'zcat',
-        __DIR__.'/wordpress/dbdump.sql.gz'
+        __DIR__.'/wordpress/dbdump.sql.gz',
       }).'|'.
       $this->safeCommand(Vector {
         'mysql',
@@ -58,12 +68,7 @@ final class WordpressTarget extends PerfTarget {
     }
     mysql_query(
       'DELETE FROM wp_options WHERE option_name = "admin_email"',
-      $conn
-    );
-
-    copy(
-      __DIR__.'/wordpress/wp-config.php',
-      $this->getSourceRoot().'/wp-config.php',
+      $conn,
     );
   }
 
@@ -73,7 +78,7 @@ final class WordpressTarget extends PerfTarget {
       '%s',
       "Can't connect to database ".
       "(mysql -h 127.0.0.1 -pwp_bench -u wp_bench wp_bench). This can be ".
-      "fixed for you.\nMySQL admin user (probably 'root'): "
+      "fixed for you.\nMySQL admin user (probably 'root'): ",
     );
     $username = trim(fgets(STDIN));
     if (!$username) {
@@ -106,21 +111,17 @@ final class WordpressTarget extends PerfTarget {
     mysql_query(
       'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@"%" '.
       'IDENTIFIED BY "wp_bench"',
-      $conn
+      $conn,
     );
     mysql_query(
       'GRANT ALL PRIVILEGES ON wp_bench.* TO wp_bench@127.0.0.1 '.
       'IDENTIFIED BY "wp_bench"',
-      $conn
+      $conn,
     );
   }
 
-  private function safeCommand(Vector<string> $command): string {
-    return implode(' ', $command->map($x ==> escapeshellarg($x)));
-  }
-
   public function getSourceRoot(): string {
-    return $this->tempDir.'/wordpress';
+    return $this->options->tempDir.'/wordpress';
   }
 
   // See PerfTarget::ignorePath() for documentation
@@ -138,28 +139,32 @@ final class WordpressTarget extends PerfTarget {
 
   // Contact rpc.pingomatic.com, upgrade to latest .z release, other periodic
   // tasks
-  public function unfreeze(): void {
+  public function unfreeze(PerfOptions $options): void {
     // Need internet access or wordpress will keep on retrying this stuff
     if (!file_get_contents('http://www.example.com')) {
-      throw new Exception('Wordpress requires internet access');
+      throw new Exception(
+        'Wordpress requires internet access to http://www.example.com');
     }
-    // Does basic bookeeping...
-    $this->unfreezeRequest();
+    // Does basic bookkeeping...
+    $this->unfreezeRequest($options);
     // Does more involved stuff like upgrading wordpress...
-    $this->unfreezeRequest();
+    $this->unfreezeRequest($options);
     // Let's just be paranoid and do it again.
-    $this->unfreezeRequest();
+    $this->unfreezeRequest($options);
   }
 
-  private function unfreezeRequest(): void {
+  private function unfreezeRequest(PerfOptions $options): void {
+    $url = 'http://'.gethostname().':'.PerfSettings::HttpPort().'/';
     $ctx = stream_context_create(
-      ['http' => ['timeout' => 120]]
+      ['http' => ['timeout' => $options->maxdelayUnfreeze]]
     );
     $data = file_get_contents(
-      'http://'.gethostname().':'.PerfSettings::HttpPort().'/',
+      $url,
       /* include path = */ false,
-      $ctx
+      $ctx,
     );
-    invariant($data !== false, 'Failed to unfreeze');
+    invariant(
+      $data !== false,
+      'Failed to unfreeze '.$url.' after '.$options->maxdelayUnfreeze.' secs');
   }
 }

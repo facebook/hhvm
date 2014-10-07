@@ -615,6 +615,12 @@ struct DFSChecker {
  *      enabled.
  *
  *   7) All blocks are reachable from the entry block.
+ *
+ *   8) For each block, there must be a path from the entry to it that
+ *      includes only earlier blocks in the region.
+ *
+ *   9) The region is topologically sorted unless loops are enabled.
+ *
  */
 bool check(const RegionDesc& region, std::string& error) {
 
@@ -689,6 +695,28 @@ bool check(const RegionDesc& region, std::string& error) {
   // 7) All blocks are reachable from the entry (first) block.
   if (dfsCheck.numVisited() != blockSet.size()) {
     return bad("region has unreachable blocks");
+  }
+
+  // 8) and 9) are checked below.
+  RegionDesc::BlockIdSet visited;
+  auto& blocks = region.blocks();
+  for (unsigned i = 0; i < blocks.size(); i++) {
+    auto bid = blocks[i]->id();
+    unsigned nVisited = 0;
+    for (auto pred : region.preds(bid)) {
+      nVisited += visited.count(pred);
+    }
+    // 8) For each block, there must be a path from the entry to it that
+    //    includes only earlier blocks in the region.
+    if (nVisited == 0 && i != 0) {
+      return bad(folly::format("block {} appears before all its predecessors",
+                               bid).str());
+    }
+    // 9) The region is topologically sorted unless loops are enabled.
+    if (!RuntimeOption::EvalJitLoops && nVisited != region.preds(bid).size()) {
+      return bad(folly::format("non-topological order (bid: {})", bid).str());
+    }
+    visited.insert(bid);
   }
 
   return true;

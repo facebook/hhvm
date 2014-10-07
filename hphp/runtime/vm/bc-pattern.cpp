@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/bc-pattern.h"
 
+#include <iterator>
+
 #include "hphp/runtime/vm/func.h"
 
 namespace HPHP {

@@ -39,7 +39,7 @@ struct FailedLLVMCodeGen : public std::runtime_error {
  *
  * Throws FailedLLVMCodeGen on failure.
  */
-void genCodeLLVM(const x64::Vunit& unit, jit::vector<x64::Vasm::Area>& areas,
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels);
 
 } }

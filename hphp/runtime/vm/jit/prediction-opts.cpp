@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include <boost/next_prior.hpp>
+#include <iterator>
 
-#include "folly/Optional.h"
 #include "folly/Lazy.h"
+#include "folly/Optional.h"
 
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
@@ -153,7 +153,7 @@ void optimizePredictions(IRUnit& unit) {
     );
 
     // Move the fallthrough case to specialized.
-    moveToBlock(sinkFirst, boost::next(sinkLast), specialized);
+    moveToBlock(sinkFirst, std::next(sinkLast), specialized);
 
     return true;
   };

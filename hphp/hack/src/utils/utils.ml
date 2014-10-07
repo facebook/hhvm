@@ -133,6 +133,9 @@ end : HashSetSig)
 
 let spf = Printf.sprintf
 
+let fst3 = function x, _, _ -> x
+let snd3 = function _, x, _ -> x
+let thd3 = function _, _, x -> x
 
 let internal_error s =
   Printf.fprintf stderr
@@ -147,10 +150,10 @@ let opt_map f = function
   | None -> None
   | Some x -> Some (f x)
 
-let default x y f =
+let opt_fold_left f x y =
   match y with
   | None -> x
-  | Some y -> f y
+  | Some y -> f x y
 
 let rec lmap f env l =
   match l with
@@ -350,3 +353,6 @@ let rec iter2_shortest f l1 l2 =
 (* We may want to replace this with a tail-recursive map at some point,
  * factoring here so we have a clean way to grep. *)
 let rev_rev_map f l = List.rev (List.rev_map f l)
+
+let fold_fun_list acc fl =
+  List.fold_left (|>) acc fl

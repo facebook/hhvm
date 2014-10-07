@@ -162,8 +162,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   }
 
-  // Task #4075847: enable optimizations with loops
-  if (RuntimeOption::EvalHHIRRefcountOpts && !cfgHasLoop(unit)) {
+  if (RuntimeOption::EvalHHIRRefcountOpts) {
     optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
     finishPass("refcount opts");
   }

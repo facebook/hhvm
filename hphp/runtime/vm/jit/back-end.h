@@ -93,17 +93,10 @@ class BackEnd {
   virtual PhysReg rSp() = 0;
   virtual PhysReg rVmSp() = 0;
   virtual PhysReg rVmFp() = 0;
-  virtual Constraint srcConstraint(const IRInstruction& inst, unsigned i) = 0;
-  virtual Constraint dstConstraint(const IRInstruction& inst, unsigned i) = 0;
-  virtual RegPair precolorSrc(const IRInstruction& inst, unsigned i) = 0;
-  virtual RegPair precolorDst(const IRInstruction& inst, unsigned i) = 0;
+  virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
+  virtual bool loadsCell(const IRInstruction& inst) = 0;
 
   virtual void enterTCHelper(TCA start, TReqInfo& info) = 0;
-  virtual CodeGenerator* newCodeGenerator(const IRUnit& unit,
-                                          CodeBlock& mainCode,
-                                          CodeBlock& coldCode,
-                                          CodeBlock& frozenCode,
-                                          CodegenState& state) = 0;
   virtual void moveToAlign(CodeBlock& cb,
                            MoveToAlignFlags alignment
                            = MoveToAlignFlags::kJmpTargetAlign) = 0;
@@ -122,9 +115,6 @@ class BackEnd {
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
   virtual void emitTraceCall(CodeBlock& cb, Offset pcOff) = 0;
-  virtual void emitFwdJmp(CodeBlock& cb, Block* target,
-                          CodegenState& state) = 0;
-  virtual void patchJumps(CodeBlock& cb, CodegenState& state, Block* block) = 0;
   /*
    * Returns true if the given current frontier can have an nBytes-long
    * instruction written that will be smashable later.
@@ -157,9 +147,11 @@ class BackEnd {
   virtual void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
                            SrcKey sk, size_t dbgOff) = 0;
 
-  virtual void streamPhysReg(std::ostream& os, PhysReg& reg) = 0;
+  virtual void streamPhysReg(std::ostream& os, PhysReg reg) = 0;
   virtual void disasmRange(std::ostream& os, int indent, bool dumpIR,
                            TCA begin, TCA end) = 0;
+
+  virtual void genCodeImpl(IRUnit& unit, AsmInfo*) = 0;
 
   virtual bool supportsRelocation() const { return false; }
 
@@ -195,8 +187,6 @@ class BackEnd {
                                    AsmInfo* asmInfo, CodeGenFixups& fixups) {
     always_assert(false);
   }
-
-  virtual void genCodeImpl(IRUnit& unit, AsmInfo*);
 };
 
 }}

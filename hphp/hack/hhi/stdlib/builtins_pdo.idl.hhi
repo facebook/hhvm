@@ -137,3 +137,6 @@ class PDOStatement {
   public function __wakeup() { }
   public function __sleep() { }
 }
+class PDOException extends RuntimeException {
+  public ?array $errorInfo = null;
+}

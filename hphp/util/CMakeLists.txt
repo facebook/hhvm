@@ -9,7 +9,7 @@ foreach (file ${files})
 
   # Disable Channeled JSON until we're sure it's going to stick
   # sgolemon(2014-02-19)
-        if (${file} MATCHES "channeled-json-")
+  if (${file} MATCHES "channeled-json-")
     list(REMOVE_ITEM CXX_SOURCES ${file})
   endif()
 endforeach()
@@ -17,7 +17,7 @@ endforeach()
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
          "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp"
-         COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/generate-buildinfo.sh"
+  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/generate-buildinfo.sh"
   DEPENDS ${CXX_SOURCES}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../
   COMMENT "Generating Repo Schema ID and Compiler ID"

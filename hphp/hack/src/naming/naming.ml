@@ -334,6 +334,13 @@ module Env = struct
       p, Ident.make x
     | Some v -> p, snd v
 
+  (* Check and see if the user might have been trying to use one of the
+   * generics in scope as a runtime value *)
+  let check_no_runtime_generic genv (p, name) =
+    let tparaml = SMap.keys genv.type_params in
+    if List.mem name tparaml then Errors.generic_at_runtime p;
+    ()
+
   let canonicalize genv env_and_names (p, name) =
     let env, canon_names = !env_and_names in
     if SMap.mem name env then (p, name)
@@ -498,6 +505,8 @@ module Env = struct
       x
 
   let class_name (genv, _) x =
+    (* Generic names are not allowed to shadow class names *)
+    check_no_runtime_generic genv x;
     let x = Namespaces.elaborate_id genv.namespace x in
     let pos, name = canonicalize genv genv.classes x in
     (* Don't let people use strictly internal classes
@@ -1266,6 +1275,21 @@ and extend_params genv paraml =
   end paraml genv.type_params in
   { genv with type_params = params }
 
+and uselist_lambda f =
+  (* semantic duplication: This is copied from the implementation of the
+    `Lfun` variant of `expr_` defined earlier in this file. *)
+  let to_capture = ref [] in
+  let handle_unbound (p, x) =
+    to_capture := x :: !to_capture;
+    p, Ident.tmp()
+  in
+  let genv = Env.make_fun_genv empty SMap.empty f in
+  let lenv = Env.empty_local () in
+  let lenv = { lenv with unbound_mode = UBMFunc handle_unbound } in
+  let env = genv, lenv in
+  ignore (expr_lambda env f);
+  uniq !to_capture
+
 and fun_ genv f =
   let tparams = make_constraints f.f_tparams in
   let genv = Env.make_fun_genv genv tparams f in
@@ -1748,6 +1772,9 @@ and expr_ env = function
   | Lfun f ->
       (* We have to build the capture list while we're finding names in
          the closure body---accumulate it in to_capture. *)
+      (* semantic duplication: The logic here is also used in `uselist_lambda`.
+          The differences are enough that it does not make sense to refactor
+          this out for now. *)
       let to_capture = ref [] in
       let handle_unbound (p, x) =
         let cap = Env.lvar env (p, x) in
@@ -1789,15 +1816,14 @@ and expr_lambda env f =
     f_fun_kind = f_kind;
   }
 
-and make_class_id env cid =
+and make_class_id env (p, x as cid) =
   no_typedef env cid;
-  match snd cid with
-  | x when x.[0] = '$' && (fst env).in_mode = Ast.Mstrict ->
-      Errors.dynamic_class (fst cid);
-      N.CI cid
+  match x with
   | "parent" -> N.CIparent
   | "self" ->  N.CIself
   | "static" -> N.CIstatic
+  | x when x = "$this" -> N.CIvar (p, N.This)
+  | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
   | _ -> N.CI (Env.class_name env cid)
 
 and casel env l =

@@ -152,10 +152,11 @@ struct FrameState final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
-   * Starts tracking state for a block and reloads any previously
-   * saved state.
+   * Starts tracking state for a block and reloads any previously saved
+   * state. Can set local values to null if hitting a block with an
+   * unprocessed predecessor, so we pass in an optional LocalStateHook.
    */
-  void startBlock(Block*, BCMarker);
+  void startBlock(Block*, BCMarker, LocalStateHook* hook = nullptr);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -311,9 +312,10 @@ struct FrameState final : private LocalStateHook {
   void clearCurrentState();
 
   /*
-   * Clears state upon hitting an unprocessed predecessor.
+   * Clears state upon hitting an unprocessed predecessor. Takes an optional
+   * hook whose locals will get nulled out.
    */
-  void unprocessedPredClear(BCMarker);
+  void unprocessedPredClear(BCMarker, LocalStateHook* hook = nullptr);
 
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();

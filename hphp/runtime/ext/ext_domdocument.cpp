@@ -19,7 +19,7 @@
 #include <map>
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
@@ -3423,7 +3423,7 @@ bool c_DOMDocument::t_registernodeclass(const String& baseclass,
                 baseclass.data());
     return false;
   }
-  m_classmap.set(f_strtolower(baseclass), extendedclass);
+  m_classmap.set(HHVM_FN(strtolower)(baseclass), extendedclass);
   return true;
 }
 

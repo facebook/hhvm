@@ -701,7 +701,8 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
     }
     return -1;
   }
-  always_assert(buf == "success");
+  always_assert_flog(buf == "success",
+                     "Unexpected message from light process: `{}'", buf);
   int64_t pid = -1;
   lwp_read_int64(fin, pid);
   always_assert(pid);

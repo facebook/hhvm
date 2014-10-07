@@ -17,7 +17,9 @@
 
 class Exception {
   protected string $message;
-  protected int $code;
+  // $code should be untyped, or mixed because subclasses use it as a
+  // string, the main example being PDOException
+  protected $code;
   protected ?Exception $previous = null;
   protected string $file;
   protected int $line;

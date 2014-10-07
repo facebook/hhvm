@@ -475,7 +475,10 @@ inline ActRec* arFromSpOffset(const ActRec *sp, int32_t offset) {
   return arAtOffset(sp, offset);
 }
 
+void frame_free_locals_no_hook(ActRec* fp);
+
 inline TypedValue* arReturn(ActRec* ar, Variant&& value) {
+  frame_free_locals_no_hook(ar);
   ar->m_r = *value.asTypedValue();
   tvWriteNull(value.asTypedValue());
   return &ar->m_r;

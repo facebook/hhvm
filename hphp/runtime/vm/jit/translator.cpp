@@ -58,6 +58,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -1453,21 +1454,17 @@ void Translator::traceFree() {
 }
 
 /*
- * Create two maps for all blocks in the region:
- *   - a map from RegionDesc::BlockId -> IR Block* for all region blocks
- *   - a map from RegionDesc::BlockId -> RegionDesc::Block
+ * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-void Translator::createBlockMaps(const RegionDesc&        region,
-                                 BlockIdToIRBlockMap&     blockIdToIRBlock,
-                                 BlockIdToRegionBlockMap& blockIdToRegionBlock)
+void Translator::createBlockMap(const RegionDesc&    region,
+                                BlockIdToIRBlockMap& blockIdToIRBlock)
 {
   HhbcTranslator& ht = m_irTrans->hhbcTrans();
   IRBuilder& irb = ht.irBuilder();
   blockIdToIRBlock.clear();
-  blockIdToRegionBlock.clear();
   auto const& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
-    RegionDesc::Block* rBlock = blocks[i].get();
+    auto rBlock = blocks[i];
     auto id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
     assert(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
@@ -1477,8 +1474,7 @@ void Translator::createBlockMaps(const RegionDesc&        region,
     // block jump to this block.
     Block* iBlock = irb.unit().defBlock();
 
-    blockIdToIRBlock[id]     = iBlock;
-    blockIdToRegionBlock[id] = rBlock;
+    blockIdToIRBlock[id] = iBlock;
     FTRACE(1,
            "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
            id, iBlock->id(), bcOff);
@@ -1489,15 +1485,12 @@ void Translator::createBlockMaps(const RegionDesc&        region,
  * Set IRBuilder's Block associated to blockId's block according to
  * the mapping in blockIdToIRBlock.
  */
-void Translator::setIRBlock(RegionDesc::BlockId            blockId,
-                            const BlockIdToIRBlockMap&     blockIdToIRBlock,
-                            const BlockIdToRegionBlockMap& blockIdToRegionBlock)
+void Translator::setIRBlock(RegionDesc::BlockId        blockId,
+                            const RegionDesc&          region,
+                            const BlockIdToIRBlockMap& blockIdToIRBlock)
 {
   IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
-  auto rit = blockIdToRegionBlock.find(blockId);
-  assert(rit != blockIdToRegionBlock.end());
-  RegionDesc::Block* rBlock = rit->second;
-
+  auto rBlock = region.block(blockId);
   Offset bcOffset = rBlock->start().offset();
 
   auto iit = blockIdToIRBlock.find(blockId);
@@ -1513,17 +1506,15 @@ void Translator::setIRBlock(RegionDesc::BlockId            blockId,
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
  * the region.
  */
-void Translator::setSuccIRBlocks(
-  const RegionDesc&              region,
-  RegionDesc::BlockId            srcBlockId,
-  const BlockIdToIRBlockMap&     blockIdToIRBlock,
-  const BlockIdToRegionBlockMap& blockIdToRegionBlock)
+void Translator::setSuccIRBlocks(const RegionDesc&          region,
+                                 RegionDesc::BlockId        srcBlockId,
+                                 const BlockIdToIRBlockMap& blockIdToIRBlock)
 {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
   IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
   irb.resetOffsetMapping();
   for (auto dstBlockId : region.succs(srcBlockId)) {
-    setIRBlock(dstBlockId, blockIdToIRBlock, blockIdToRegionBlock);
+    setIRBlock(dstBlockId, region, blockIdToIRBlock);
   }
 }
 
@@ -1531,15 +1522,12 @@ void Translator::setSuccIRBlocks(
  * Compute the set of bytecode offsets that may follow the execution
  * of srcBlockId in the region.
  */
-static void findSuccOffsets(const RegionDesc&              region,
-                            RegionDesc::BlockId            srcBlockId,
-                            const BlockIdToRegionBlockMap& blockIdToRegionBlock,
-                            OffsetSet&                     set) {
+static void findSuccOffsets(const RegionDesc&   region,
+                            RegionDesc::BlockId srcBlockId,
+                            OffsetSet&          set) {
   set.clear();
   for (auto dstBlockId : region.succs(srcBlockId)) {
-    auto rit = blockIdToRegionBlock.find(dstBlockId);
-    assert(rit != blockIdToRegionBlock.end());
-    RegionDesc::Block* rDstBlock = rit->second;
+    auto rDstBlock = region.block(dstBlockId);
     Offset bcOffset = rDstBlock->start().offset();
     set.insert(bcOffset);
   }
@@ -1598,7 +1586,6 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
-                            bool bcControlFlow,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
@@ -1615,12 +1602,10 @@ Translator::translateRegion(const RegionDesc& region,
   IRBuilder& irb = ht.irBuilder();
   auto const startSk = region.start();
 
-  BlockIdToIRBlockMap     blockIdToIRBlock;
-  BlockIdToRegionBlockMap blockIdToRegionBlock;
-
-  if (bcControlFlow) {
+  BlockIdToIRBlockMap blockIdToIRBlock;
+  if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
     ht.setGenMode(IRGenMode::CFG);
-    createBlockMaps(region, blockIdToIRBlock, blockIdToRegionBlock);
+    createBlockMap(region, blockIdToIRBlock);
 
     // Make the IR entry block jump to the IR block we mapped the region entry
     // block to (they are not the same!).
@@ -1656,14 +1641,18 @@ Translator::translateRegion(const RegionDesc& region,
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
       if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
-        always_assert(RuntimeOption::EvalJitLoops ||
-                      RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
+        always_assert(RuntimeOption::EvalJitLoops);
         irb.clearBlockState(irBlock);
       }
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      ht.irBuilder().startBlock(irBlock, marker);
-      findSuccOffsets(region, blockId, blockIdToRegionBlock, succOffsets);
-      setSuccIRBlocks(region, blockId, blockIdToIRBlock, blockIdToRegionBlock);
+      if (!ht.irBuilder().startBlock(irBlock, marker)) {
+        FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
+               blockId);
+        processedBlocks.insert(blockId);
+        continue;
+      }
+      findSuccOffsets(region, blockId, succOffsets);
+      setSuccIRBlocks(region, blockId, blockIdToIRBlock);
     }
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
@@ -1731,7 +1720,8 @@ Translator::translateRegion(const RegionDesc& region,
       if (i == block->length() - 1) {
         inst.endsRegion = region.isExit(blockId);
         inst.nextIsMerge = nextIsMerge(inst, region);
-        if (instrIsNonCallControlFlow(inst.op()) &&
+        if (ht.genMode() == IRGenMode::Trace &&
+            instrIsNonCallControlFlow(inst.op()) &&
             b < blocks.size() - 1) {
           inst.nextOffset = blocks[b+1]->start().offset();
         }
@@ -1878,9 +1868,7 @@ Translator::translateRegion(const RegionDesc& region,
       // In CFG mode, insert a fallthrough jump at the end of each block.
       if (ht.genMode() == IRGenMode::CFG && i == block->length() - 1) {
         if (instrAllowsFallThru(inst.op())) {
-          auto nextOffset = inst.nextOffset != kInvalidOffset
-            ? inst.nextOffset
-            : inst.offset() + instrLen((Op*)(inst.pc()));
+          auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack
           // after the fallthrough jump, which is just weird.

@@ -49,22 +49,12 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(const String& name) {
   assert(s_loaded);
 
   const MethodInfo *ret = s_systemFuncs->getMethodInfo(name);
-  if (ret == nullptr) {
-    ret = g_context->findFunctionInfo(name);
-  }
   return ret;
 }
 
 const ClassInfo *ClassInfo::FindClassInterfaceOrTrait(const String& name) {
   assert(!name.isNull());
   assert(s_loaded);
-
-  const ClassInfo *r;
-  if ((r = g_context->findClassInfo(name)) != nullptr ||
-      (r = g_context->findInterfaceInfo(name)) != nullptr ||
-      (r = g_context->findTraitInfo(name)) != nullptr) {
-    return r;
-  }
 
   ClassMap::const_iterator iter = s_class_like.find(name);
   if (iter != s_class_like.end()) {
@@ -298,112 +288,6 @@ bool ClassInfo::GetClassMethods(MethodVec &ret, const ClassInfo *classInfo) {
   }
 
   return true;
-}
-
-void ClassInfo::GetClassSymbolNames(const Array& names, bool interface, bool trait,
-                                    std::vector<String> &classes,
-                                    std::vector<String> *clsMethods,
-                                    std::vector<String> *clsProperties,
-                                    std::vector<String> *clsConstants) {
-  if (clsMethods || clsProperties || clsConstants) {
-    for (ArrayIter iter(names); iter; ++iter) {
-      String clsname = iter.second().toString();
-      classes.push_back(clsname);
-
-      const ClassInfo *cls;
-      if (interface) {
-        cls = FindInterface(clsname.data());
-      } else if (trait) {
-        cls = FindTrait(clsname.data());
-      } else {
-        try {
-          cls = FindClass(clsname.data());
-        } catch (Exception &e) {
-          Logger::Error("Caught exception %s", e.getMessage().c_str());
-          continue;
-        } catch(...) {
-          Logger::Error("Caught unknown exception");
-          continue;
-        }
-      }
-      assert(cls);
-      if (clsMethods) {
-        const ClassInfo::MethodVec &methods = cls->getMethodsVec();
-        for (unsigned int i = 0; i < methods.size(); i++) {
-          clsMethods->push_back(clsname + "::" + methods[i]->name);
-        }
-      }
-      if (clsProperties) {
-        const ClassInfo::PropertyVec &properties = cls->getPropertiesVec();
-        for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
-             iter != properties.end(); ++iter) {
-          clsProperties->push_back(clsname + "::$" + (*iter)->name);
-        }
-      }
-      if (clsConstants) {
-        const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
-        for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
-             iter != constants.end(); ++iter) {
-          clsConstants->push_back(clsname + "::" + (*iter)->name);
-        }
-      }
-    }
-  } else {
-    for (ArrayIter iter(names); iter; ++iter) {
-      classes.push_back(iter.second().toString());
-    }
-  }
-}
-
-void ClassInfo::GetSymbolNames(std::vector<String> &classes,
-                               std::vector<String> &functions,
-                               std::vector<String> &constants,
-                               std::vector<String> *clsMethods,
-                               std::vector<String> *clsProperties,
-                               std::vector<String> *clsConstants) {
-  static unsigned int methodSize = 128;
-  static unsigned int propSize   = 128;
-  static unsigned int constSize  = 128;
-
-  if (clsMethods) {
-    clsMethods->reserve(methodSize);
-  }
-  if (clsProperties) {
-    clsProperties->reserve(propSize);
-  }
-  if (clsConstants) {
-    clsConstants->reserve(constSize);
-  }
-
-  GetClassSymbolNames(GetClasses(), false, false, classes,
-                      clsMethods, clsProperties, clsConstants);
-  GetClassSymbolNames(GetInterfaces(), true, false, classes,
-                      clsMethods, clsProperties, clsConstants);
-
-  if (clsMethods && methodSize < clsMethods->size()) {
-    methodSize = clsMethods->size();
-  }
-  if (clsProperties && propSize < clsProperties->size()) {
-    propSize = clsProperties->size();
-  }
-  if (constSize && constSize < clsConstants->size()) {
-    constSize = clsConstants->size();
-  }
-
-  Array funcs1 = Unit::getSystemFunctions();
-  Array funcs2 = Unit::getUserFunctions();
-  functions.reserve(funcs1.size() + funcs2.size());
-  for (ArrayIter iter(funcs1); iter; ++iter) {
-    functions.push_back(iter.second().toString());
-  }
-  for (ArrayIter iter(funcs2); iter; ++iter) {
-    functions.push_back(iter.second().toString());
-  }
-  Array consts = lookupDefinedConstants();
-  constants.reserve(consts.size());
-  for (ArrayIter iter(consts); iter; ++iter) {
-    constants.push_back(iter.first().toString());
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

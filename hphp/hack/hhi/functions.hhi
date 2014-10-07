@@ -15,6 +15,13 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+// isset, empty, and unset only look like functions to static analysis, but
+// in fact act as special expression subtypes within the runtime
+function isset($x): bool;
+function empty($x): bool;
+function unset($x): void;
+
+//
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed
 function chr(int $ascii): string;
@@ -31,8 +38,6 @@ function func_get_args(): array;
 function implode(string $glue, $pieces): string; // could be Container<Stringish>
 function explode(string $delimiter, ?Stringish $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 function is_array(mixed $arg): bool;
-function isset($x): bool;
-function unset($x): void;
 function ord(string $string): int;
 function strip_tags(string $str, string $allowable_tags = ''): string;
 

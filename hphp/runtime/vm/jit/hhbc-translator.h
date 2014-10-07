@@ -678,7 +678,9 @@ private:
       Pair
     };
     SimpleOp simpleCollectionOp();
-    void constrainCollectionOpBase();
+    // Returns true if it successfully constrained the base, false otherwise.
+    bool constrainCollectionOpBase();
+    void specializeBaseIfPossible(Type baseType);
 
     bool generateMVal() const;
     bool needFirstRatchet() const;
@@ -788,6 +790,7 @@ private:
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
+  SSATmp* emitInstanceOfDImpl(SSATmp*, const StringData*);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
                                          folly::Optional<Type>&) const;
@@ -801,6 +804,7 @@ private:
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
+  SSATmp* optimizedCallIsA();
   SSATmp* optimizedCallIniGet();
   SSATmp* optimizedCallCount();
   SSATmp* optimizedCallGetClass(uint32_t);

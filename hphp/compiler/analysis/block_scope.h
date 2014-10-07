@@ -217,11 +217,6 @@ public:
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
   /**
-   * Triggers type inference of all statements inside this block.
-   */
-  void inferTypes(AnalysisResultPtr ar);
-
-  /**
    * Code gen
    */
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);

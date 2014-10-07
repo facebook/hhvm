@@ -261,11 +261,11 @@ SSATmp* IRInstruction::dst(unsigned i) const {
 }
 
 DstRange IRInstruction::dsts() {
-  return Range<SSATmp*>(m_dst, m_numDsts);
+  return DstRange(m_dst, m_numDsts);
 }
 
-Range<const SSATmp*> IRInstruction::dsts() const {
-  return Range<const SSATmp*>(m_dst, m_numDsts);
+folly::Range<const SSATmp*> IRInstruction::dsts() const {
+  return folly::Range<const SSATmp*>(m_dst, m_numDsts);
 }
 
 void IRInstruction::convertToNop() {
@@ -338,29 +338,6 @@ void IRInstruction::setOpcode(Opcode newOpc) {
     clearEdges();
   }
   m_op = newOpc;
-}
-
-void IRInstruction::addCopy(IRUnit& unit, SSATmp* src, const PhysLoc& dest) {
-  assert(op() == Shuffle);
-  auto data = extra<Shuffle>();
-  auto n = numSrcs();
-  assert(n == data->size && n <= data->cap);
-  if (n == data->cap) {
-    auto cap = data->cap * 2;
-    auto srcs = new (unit.arena()) SSATmp*[cap];
-    auto dests = new (unit.arena()) PhysLoc[cap];
-    for (unsigned i = 0; i < n; i++) {
-      srcs[i] = m_srcs[i];
-      dests[i] = data->dests[i];
-    }
-    m_srcs = srcs;
-    data->dests = dests;
-    data->cap = cap;
-  }
-  m_numSrcs = n + 1;
-  m_srcs[n] = src;
-  data->size = n + 1;
-  data->dests[n] = dest;
 }
 
 SSATmp* IRInstruction::src(uint32_t i) const {

@@ -13,13 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/check.h"
 
-#include <boost/next_prior.hpp>
-#include <unordered_set>
 #include <bitset>
+#include <iostream>
+#include <unordered_set>
 
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -35,37 +36,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhir);
-
-struct RegState {
-  RegState();
-  SSATmp*& tmp(const PhysLoc&, int i);
-  void merge(const RegState& other);
-  PhysReg::Map<SSATmp*> regs;  // which tmp is in each register
-  SSATmp* slots[NumPreAllocatedSpillLocs]; // which tmp is in each spill slot
-};
-
-RegState::RegState() {
-  memset(slots, 0, sizeof(slots));
-}
-
-SSATmp*& RegState::tmp(const PhysLoc& loc, int i) {
-  if (loc.spilled()) {
-    assert(loc.slot(i) < NumPreAllocatedSpillLocs);
-    return slots[loc.slot(i)];
-  }
-  auto r = loc.reg(i);
-  assert(r != jit::InvalidReg);
-  return regs[r];
-}
-
-void RegState::merge(const RegState& other) {
-  for (auto r : regs) {
-    if (regs[r] != other.regs[r]) regs[r] = nullptr;
-  }
-  for (unsigned i = 0; i < NumPreAllocatedSpillLocs; i++) {
-    if (slots[i] != other.slots[i]) slots[i] = nullptr;
-  }
-}
 
 // Return the number of parameters required for this block
 DEBUG_ONLY static int numBlockParams(Block* b) {
@@ -264,117 +234,6 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
   });
 
   return isValid;
-}
-
-bool checkNoShuffles(const IRUnit& unit) {
-  postorderWalk(unit, [] (Block* b) {
-    for (DEBUG_ONLY auto& inst : *b) assert(inst.op() != Shuffle);
-  });
-  return true;
-}
-
-/*
- * Check that each destination register or spill slot is unique,
- * and that sources have the same number or less operands than
- * destinations.
- */
-bool checkShuffle(const IRInstruction& inst, const RegAllocInfo& regs) {
-  auto n = inst.numSrcs();
-  assert(n == inst.extra<Shuffle>()->size);
-  RegSet destRegs;
-  std::bitset<NumPreAllocatedSpillLocs> destSlots;
-  auto& inst_regs = regs[inst];
-  for (uint32_t i = 0; i < n; ++i) {
-    DEBUG_ONLY auto& rs = inst_regs.src(i);
-    DEBUG_ONLY auto& rd = inst.extra<Shuffle>()->dests[i];
-    if (rd.numAllocated() == 0) continue; // dest was unused; ignore.
-    if (rd.spilled()) {
-      assert(!rs.spilled()); // no mem-mem copies
-    } else {
-      // rs could have less assigned registers/slots than rd, in these cases:
-      // - when rs is empty, because the source is a constant.
-      // - when rs has 1 register because it's untagged but rd needs 2 because
-      //   it's a more general (tagged) type, because of a phi.
-      assert(rs.numWords() <= rd.numWords());
-      assert(rs.spilled() || rs.isFullSIMD() == rd.isFullSIMD());
-    }
-    for (int j = 0; j < rd.numAllocated(); ++j) {
-      if (rd.spilled()) {
-        assert(!destSlots.test(rd.slot(j)));
-        destSlots.set(rd.slot(j));
-      } else {
-        assert(!destRegs.contains(rd.reg(j))); // no duplicate dests
-        destRegs.add(rd.reg(j));
-      }
-    }
-  }
-  return true;
-}
-
-bool checkRegisters(const IRUnit& unit, const RegAllocInfo& regs) {
-  assert(checkCfg(unit));
-  auto blocks = rpoSortCfg(unit);
-  StateVector<Block, RegState> states(unit, RegState());
-  StateVector<Block, bool> reached(unit, false);
-  for (auto* block : blocks) {
-    RegState state = states[block];
-    for (IRInstruction& inst : *block) {
-      if (inst.op() == Jmp) continue; // handled by Shuffle
-      auto& inst_regs = regs[inst];
-      for (int i = 0, n = inst.numSrcs(); i < n; ++i) {
-        auto const &rs = inst_regs.src(i);
-        if (!rs.spilled()) {
-          // hack - ignore rbx and rbp
-          if (rs.reg(0) == mcg->backEnd().rVmSp() ||
-              rs.reg(0) == mcg->backEnd().rVmFp()) {
-            continue;
-          }
-        }
-        DEBUG_ONLY auto src = inst.src(i);
-        assert(rs.numWords() == src->numWords() ||
-               (src->isConst() && rs.numWords() == 0));
-        DEBUG_ONLY auto allocated = rs.numAllocated();
-        if (allocated == 2) {
-          if (rs.spilled()) {
-            assert(rs.slot(0) != rs.slot(1));
-          } else {
-            assert(rs.reg(0) != rs.reg(1));
-          }
-        }
-        for (unsigned i = 0, n = rs.numAllocated(); i < n; ++i) {
-          assert(state.tmp(rs, i) == src);
-        }
-      }
-      auto update = [&](SSATmp* tmp, const PhysLoc& loc) {
-        for (unsigned i = 0, n = loc.numAllocated(); i < n; ++i) {
-          state.tmp(loc, i) = tmp;
-        }
-      };
-      if (inst.op() == Shuffle) {
-        checkShuffle(inst, regs);
-        for (unsigned i = 0; i < inst.numSrcs(); ++i) {
-          update(inst.src(i), inst.extra<Shuffle>()->dests[i]);
-        }
-      } else {
-        for (unsigned i = 0; i < inst.numDsts(); ++i) {
-          update(inst.dst(i), inst_regs.dst(i));
-        }
-      }
-    }
-    // State contains the PhysLoc->SSATmp reverse mappings at block end;
-    // propagate the state to succ
-    auto updateEdge = [&](Block* succ) {
-      if (!reached[succ]) {
-        states[succ] = state;
-      } else {
-        states[succ].merge(state);
-      }
-    };
-    if (auto* next = block->next()) updateEdge(next);
-    if (auto* taken = block->taken()) updateEdge(taken);
-  }
-
-  return true;
 }
 
 }}

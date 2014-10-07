@@ -105,47 +105,6 @@ ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr QOpExpression::postOptimize(AnalysisResultConstPtr ar) {
-  if (getActualType() && getActualType()->is(Type::KindOfString) &&
-      m_expYes && m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
-    setActualType(Type::Variant);
-    setExpectedType(Type::String);
-    m_expYes->setExpectedType(Type::Variant);
-    m_expNo->setExpectedType(Type::Variant);
-  }
-  return ExpressionPtr();
-}
-
-TypePtr QOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  if (m_expYes) {
-    m_condition->inferAndCheck(ar, Type::Boolean, false);
-    TypePtr typeYes = m_expYes->inferAndCheck(ar, Type::Some, coerce);
-    TypePtr typeNo = m_expNo->inferAndCheck(ar, Type::Some, coerce);
-    if (Type::SameType(typeYes, typeNo) &&
-        m_expYes->isLiteralString() == m_expNo->isLiteralString()) {
-      // already the same type, no coercion needed
-      // special case on literal string since String is slower than Variant
-      m_expYes->inferAndCheck(ar, typeYes, false);
-      m_expNo->inferAndCheck(ar, typeYes, false);
-      return typeYes;
-    }
-  } else {
-    TypePtr typeYes = m_condition->inferAndCheck(ar, Type::Some, coerce);
-    TypePtr typeNo = m_expNo->inferAndCheck(ar, Type::Some, coerce);
-    if (Type::SameType(typeYes, typeNo) &&
-        m_condition->isLiteralString() == m_expNo->isLiteralString()) {
-      // already the same type, no coercion needed
-      // special case on literal string since String is slower than Variant
-      m_condition->inferAndCheck(ar, typeYes, false);
-      m_expNo->inferAndCheck(ar, typeYes, false);
-      return typeYes;
-    }
-  }
-
-  return Type::Variant;
-}
-
 ExpressionPtr QOpExpression::unneededHelper() {
   bool yesEffect = false;
   if (m_expYes) {

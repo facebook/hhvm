@@ -433,6 +433,7 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
+  m_instances.clear();
 
   resetCouldOOM();
 }
@@ -804,6 +805,20 @@ void MemoryManager::resetCouldOOM() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.clearMemExceededFlag();
   m_couldOOM = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NEVER_INLINE
+void* MemoryManager::trackSlow(void* p) {
+  m_instances.insert(p);
+  return p;
+}
+
+NEVER_INLINE
+void* MemoryManager::untrackSlow(void* p) {
+  m_instances.erase(p);
+  return p;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

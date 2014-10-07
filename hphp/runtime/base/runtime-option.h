@@ -51,9 +51,9 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  */
 class RuntimeOption {
 public:
-  static void Load(const IniSettingMap &ini,
-                   Hdf& config,
-                   std::vector<std::string>* overwrites = nullptr);
+  static void Load(IniSettingMap &ini, Hdf& config,
+    const std::vector<std::string>& iniClis = std::vector<std::string>(),
+    const std::vector<std::string>& hdfClis = std::vector<std::string>());
 
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;
@@ -85,7 +85,6 @@ public:
 
   static int  MaxLoopCount;
   static int  MaxSerializedStringSize;
-  static size_t ArrUnserializeCheckSize;
   static bool NoInfiniteRecursionDetection;
   static bool WarnTooManyArguments;
   static bool EnableHipHopErrors;
@@ -152,6 +151,7 @@ public:
   static int ServerShutdownListenNoWork;
   static std::vector<std::string> ServerNextProtocols;
   static int GzipCompressionLevel;
+  static int GzipMaxCompressionLevel;
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;
   static std::string ForceCompressionParam;
@@ -319,9 +319,6 @@ public:
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
 
-  static bool EnableDnsCache;
-  static int DnsCacheTTL;
-
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;
@@ -391,7 +388,7 @@ public:
   F(uint64_t, JitAColdSize,            24 << 20)                        \
   F(uint64_t, JitAFrozenSize,          40 << 20)                        \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
-  F(uint64_t, JitRelocationSize,       1 << 20)                         \
+  F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
@@ -467,7 +464,6 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
-  F(bool, HHIREnableCalleeSavedOpt,    true)                            \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
@@ -481,6 +477,7 @@ public:
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
+  F(bool,     JitPGOStringSpec,        false)                           \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(uint32_t, MaxClonedClosures,       100000)                          \
   F(bool, HHIRValidateRefCount,        debug)                           \

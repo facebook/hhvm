@@ -3,6 +3,7 @@ string(0) ""
 string(1) "1"
 string(0) ""
 string(3) "256"
+string(3) "100"
 string(4) "4100"
 string(7) "4194304"
 string(0) ""
@@ -13,6 +14,8 @@ string(1) "1"
 string(0) ""
 string(0) ""
 string(4) "1000"
+string(1) "2"
+string(14) "/tmp/apc_store"
 bool(false)
 bool(false)
 bool(false)

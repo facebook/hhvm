@@ -48,7 +48,7 @@
 
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/shared-store-base.h"
+#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -85,7 +85,6 @@ std::string RuntimeOption::ServerUser;
 
 int RuntimeOption::MaxLoopCount = 0;
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
-size_t RuntimeOption::ArrUnserializeCheckSize = 10000;
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::EnableHipHopErrors = true;
@@ -116,7 +115,7 @@ int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
-int RuntimeOption::ServerThreadCount = 0; // Config::Bind has default of 2*CPUs
+int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::ProdServerPort = 80;
 int RuntimeOption::QueuedJobsReleaseRate = 3;
 bool RuntimeOption::ServerThreadRoundRobin = false;
@@ -154,6 +153,7 @@ int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownListenNoWork = -1;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 int RuntimeOption::GzipCompressionLevel = 3;
+int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
@@ -315,9 +315,6 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
-bool RuntimeOption::EnableDnsCache = false;
-int RuntimeOption::DnsCacheTTL = 10 * 60; // 10 minutes
-
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
@@ -454,7 +451,7 @@ static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
 
-static inline bool nsjrDefault() {
+static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 5 : 0;
 }
 
@@ -470,6 +467,7 @@ static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
 static const int kDefaultJitPGOThreshold = debug ? 2 : 10;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
+static const uint64_t kJitRelocationSizeDefault = debug ? 1 << 20 : 0;
 
 static const bool kJitTimerDefault =
 #ifdef ENABLE_JIT_TIMER_DEFAULT
@@ -608,7 +606,8 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini, Hdf hdfPattern) {
+static bool matchHdfPattern(const std::string &value,
+                            const IniSetting::Map& ini, Hdf hdfPattern) {
   string pattern = Config::GetString(ini, hdfPattern);
   if (!pattern.empty()) {
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
@@ -622,19 +621,11 @@ static bool matchHdfPattern(const std::string &value, const IniSetting::Map& ini
   return true;
 }
 
-void RuntimeOption::Load(const IniSetting::Map& ini,
-                         Hdf& config,
-                         std::vector<std::string> *overwrites /* = nullptr */) {
-  if (overwrites) {
-    // Do these first, mainly so we can override Tier.*.machine,
-    // Tier.*.tier and Tier.*.cpu on the command line. But it can
-    // also make sense to override fields within a Tier (
-    // eg if you are using the same command line across a lot
-    // of different machines)
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
-    }
-  }
+// A machine can belong to a tier, which can overwrite
+// various settings, even if they are set in the same
+// hdf file. However, CLI overrides still win the day over
+// everything.
+static void getTierOverwrites(IniSetting::Map& ini, Hdf& config) {
 
   // Machine metrics
   string hostname, tier, cpu;
@@ -661,20 +652,43 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       if (matchHdfPattern(hostname, ini, hdf["machine"]) &&
           matchHdfPattern(tier, ini, hdf["tier"]) &&
           matchHdfPattern(cpu, ini, hdf["cpu"])) {
-        Tier = hdf.getName();
+        RuntimeOption::Tier = hdf.getName();
         config.copy(hdf["overwrite"]);
         // no break here, so we can continue to match more overwrites
       }
       hdf["overwrite"].setVisited(); // avoid lint complaining
     }
   }
+}
 
-  if (overwrites) {
-    // Do the command line overrides again, so we override
-    // any tier overwrites
-    for (unsigned int i = 0; i < overwrites->size(); i++) {
-      config.fromString(overwrites->at(i).c_str());
-    }
+
+void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
+  const std::vector<std::string>& iniClis /* = std::vector<std::string>() */,
+  const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */) {
+
+  // Get the ini (-d) and hdf (-v) strings, which may override some
+  // of options that were set from config files. We also do these
+  // now so we can override Tier.*.[machine | tier | cpu] on the
+  // command line, along with any fields within a Tier (e.g.,
+  // CoreFileSize)
+  for (auto& istr : iniClis) {
+    Config::ParseIniString(istr, ini);
+  }
+  for (auto& hstr : hdfClis) {
+    Config::ParseHdfString(hstr, config, ini);
+  }
+  // See if there are any Tier-based overrides
+  getTierOverwrites(ini, config);
+  // Then get the ini and hdf cli strings again, in case the tier overwrites
+  // overrode any non-tier based command line option we set. The tier-based
+  // command line overwrites will already have been set in the call above.
+  // This extra call is for the other command line options that may have been
+  // overridden by a tier, but shouldn't have been.
+  for (auto& istr : iniClis) {
+    Config::ParseIniString(istr, ini);
+  }
+  for (auto& hstr : hdfClis) {
+    Config::ParseHdfString(hstr, config, ini);
   }
 
   Config::Bind(PidFile, ini, config["PidFile"], "www.pid");
@@ -905,8 +919,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     }
     {
       Hdf lang = config["Hack"]["Lang"];
-      IntsOverflowToInts =
-        Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+      Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
+                   EnableHipHopSyntax);
       Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);
@@ -1046,6 +1060,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
       ServerGracefulShutdownWait = ServerDanglingWait;
     }
     Config::Bind(GzipCompressionLevel, ini, server["GzipCompressionLevel"], 3);
+    Config::Bind(GzipMaxCompressionLevel, ini,
+                 server["GzipMaxCompressionLevel"], 9);
 
     Config::Bind(ForceCompressionURL, ini, server["ForceCompression"]["URL"]);
     Config::Bind(ForceCompressionCookie, ini,
@@ -1156,10 +1172,6 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     Config::Bind(UseDirectCopy, ini, server["UseDirectCopy"], false);
     Config::Bind(AlwaysUseRelativePath, ini, server["AlwaysUseRelativePath"],
                  false);
-
-    Hdf dns = server["DnsCache"];
-    Config::Bind(EnableDnsCache, ini, dns["Enable"]);
-    Config::Bind(DnsCacheTTL, ini, dns["TTL"], 600); // 10 minutes
 
     Hdf upload = server["Upload"];
     Config::Bind(UploadMaxFileSize, ini, upload["UploadMaxFileSize"], 100);
@@ -1566,7 +1578,8 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
 
 
   Extension::LoadModules(ini, config);
-  SharedStores::Create();
+  extern void initialize_apc();
+  initialize_apc();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

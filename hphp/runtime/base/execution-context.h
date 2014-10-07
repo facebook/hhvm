@@ -58,52 +58,6 @@ struct VMState {
   TypedValue *sp;
 };
 
-class MethodInfoVM : public ClassInfo::MethodInfo,
-                     public AtomicCountable {
- public:
-  ~MethodInfoVM();
-  void atomicRelease() { delete this; }
-};
-
-class ClassInfoVM : public ClassInfo,
-                    public AtomicCountable {
- public:
-  ~ClassInfoVM();
-  void atomicRelease() { delete this; }
-  virtual const String& getParentClass() const { return m_parentClass; }
-
-  const InterfaceSet  &getInterfaces()      const { return m_interfaces;}
-  const InterfaceVec  &getInterfacesVec()   const { return m_interfacesVec;}
-  const MethodMap     &getMethods()         const { return m_methods;}
-  const MethodVec     &getMethodsVec()      const { return m_methodsVec;}
-  const PropertyMap   &getProperties()      const { return m_properties;}
-  const PropertyVec   &getPropertiesVec()   const { return m_propertiesVec;}
-  const ConstantMap   &getConstants()       const { return m_constants;}
-  const ConstantVec   &getConstantsVec()    const { return m_constantsVec;}
-  const UserAttributeVec &getUserAttributeVec() const { return m_userAttrVec;}
-  const TraitSet      &getTraits()          const { return m_traits;}
-  const TraitVec      &getTraitsVec()       const { return m_traitsVec;}
-  const TraitAliasVec &getTraitAliasesVec() const { return m_traitAliasesVec;}
-
- private:
-  String        m_parentClass;
-  InterfaceSet  m_interfaces;      // all interfaces
-  InterfaceVec  m_interfacesVec;   // all interfaces
-  TraitSet      m_traits;          // all used traits
-  TraitVec      m_traitsVec;       // all used traits
-  TraitAliasVec m_traitAliasesVec; // all trait aliases
-  MethodMap     m_methods;         // all methods
-  MethodVec     m_methodsVec;      // in source order
-  PropertyMap   m_properties;      // all properties
-  PropertyVec   m_propertiesVec;   // in source order
-  ConstantMap   m_constants;       // all constants
-  ConstantVec   m_constantsVec;    // in source order
-  UserAttributeVec m_userAttrVec;
-
- public:
-  friend class Class;
-};
-
 enum class CallType {
   ClsMethod,
   ObjMethod,
@@ -170,6 +124,11 @@ public:
   ExecutionContext(const ExecutionContext&) = delete;
   ExecutionContext& operator=(const ExecutionContext&) = delete;
   ~ExecutionContext();
+  void sweep();
+
+  void* operator new(size_t s)  { return smart_malloc(s); }
+  void* operator new(size_t s, void* p) { return p; }
+  void operator delete(void* p) { smart_free(p); }
 
   // For RPCRequestHandler
   void backupSession();
@@ -271,7 +230,7 @@ public:
   String getLastError() const { return m_lastError;}
   int getLastErrorNumber() const { return m_lastErrorNum;}
   String getErrorPage() const { return m_errorPage;}
-  void setErrorPage(const String& page) { m_errorPage = (std::string) page; }
+  void setErrorPage(const String& page) { m_errorPage = page; }
 
   /**
    * Misc. settings
@@ -299,14 +258,11 @@ public:
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
-  // This has to appear before m_userErrorHandlers since C++ destructs objects
-  // from last declared to first declared. If it was after, we would destroy
-  // the property table before the error handlers ran.
-  std::unordered_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 private:
   class OutputBuffer {
   public:
-    OutputBuffer() : oss(8192) {}
+    explicit OutputBuffer(Variant&& h) :
+        oss(8192), handler(std::move(h)) {}
     StringBuffer oss;
     Variant handler;
   };
@@ -318,7 +274,7 @@ private:
 
   // output buffering
   StringBuffer *m_out;                // current output buffer
-  std::list<OutputBuffer*> m_buffers; // a stack of output buffers
+  smart::list<OutputBuffer> m_buffers; // a stack of output buffers
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
@@ -328,17 +284,17 @@ private:
   String m_rawPostData;
 
   // request handlers
-  std::set<RequestEventHandler*> m_requestEventHandlerSet;
-  std::vector<RequestEventHandler*> m_requestEventHandlers;
+  smart::set<RequestEventHandler*> m_requestEventHandlerSet;
+  smart::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
 
   // error handling
-  std::vector<std::pair<Variant,int> > m_userErrorHandlers;
-  std::vector<Variant> m_userExceptionHandlers;
+  smart::vector<std::pair<Variant,int> > m_userErrorHandlers;
+  smart::vector<Variant> m_userExceptionHandlers;
   ErrorState m_errorState;
   String m_lastError;
   int m_lastErrorNum;
-  std::string m_errorPage;
+  String m_errorPage;
 
   // misc settings
   Array m_envs;
@@ -349,8 +305,8 @@ private:
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;
-  std::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
-  std::vector<Variant> m_userExceptionHandlersBackup;
+  smart::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
+  smart::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
 
@@ -369,7 +325,7 @@ public:
   // (due to a transitional period where we had two subclasses of a
   // ExecutionContext, for hphpc and hhvm).
 public:
-  typedef std::set<ObjectData*> LiveObjSet;
+  typedef smart::set<ObjectData*> LiveObjSet;
   LiveObjSet m_liveBCObjs;
 
 public:
@@ -382,6 +338,7 @@ public:
 private:
   struct APCHandles {
     size_t m_memSize = 0;
+    // gets moved to treadmill, can't be smart::
     std::vector<APCHandle*> m_handles;
   } m_apcHandles;
   void manageAPCHandle();
@@ -390,6 +347,8 @@ private:
     ConsumeAll,
     LeaveLast
   };
+  void cleanup();
+
   template <bool setMember, bool warn, bool define, bool unset, bool reffy,
             unsigned mdepth, VectorLeaveCode mleave, bool saveResult>
   bool memberHelperPre(PC& pc, unsigned& ndiscard, TypedValue*& base,
@@ -454,9 +413,10 @@ OPCODES
   ActRec* fPushFuncImpl(const Func* func, int numArgs);
 
 public:
-  typedef hphp_hash_map<const StringData*, ClassInfo::ConstantInfo*,
-                        string_data_hash, string_data_same> ConstInfoMap;
-  ConstInfoMap m_constInfo;
+  // Although the error handlers may want to access dynamic properties,
+  // we cannot *call* the error handlers (or their destructors) while
+  // destroying the context, so C++ order of destruction is not an issue.
+  smart::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
 
   const Func* lookupMethodCtx(const Class* cls,
                                         const StringData* methodName,
@@ -508,16 +468,16 @@ public:
 
   VarEnv* m_globalVarEnv;
 
-  hphp_hash_map<
+  smart::hash_map<
     StringData*,
     Unit*,
     string_data_hash,
     string_data_same
   > m_evaledFiles;
-  std::vector<const StringData*> m_evaledFilesOrder;
-  std::vector<Unit*> m_createdFuncs;
+  smart::vector<const StringData*> m_evaledFilesOrder;
+  smart::vector<Unit*> m_createdFuncs;
 
-  std::vector<Fault> m_faults;
+  smart::vector<Fault> m_faults;
 
   ActRec* getStackFrame();
   ObjectData* getThis();
@@ -562,11 +522,6 @@ public:
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
-  PCFilter* m_breakPointFilter; // Lazily initialized as they are performance
-  PCFilter* m_flowFilter;       // sensitive (nullptr => no breakpoints)
-  PCFilter m_lineBreakPointFilter;
-  PCFilter m_callBreakPointFilter;
-  PCFilter m_retBreakPointFilter;
   bool m_dbgNoBreak;
   bool doFCall(ActRec* ar, PC& pc);
   bool doFCallArrayTC(PC pc);
@@ -660,17 +615,8 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
-  // VM ClassInfo support
-  StringIMap<AtomicSmartPtr<MethodInfoVM> > m_functionInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_classInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_interfaceInfos;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >  m_traitInfos;
-  Array getConstantsInfo();
-  const ClassInfo::MethodInfo* findFunctionInfo(const String& name);
-  const ClassInfo* findClassInfo(const String& name);
-  const ClassInfo* findInterfaceInfo(const String& name);
-  const ClassInfo* findTraitInfo(const String& name);
-  const ClassInfo::ConstantInfo* findConstantInfo(const String& name);
+  template<typename T> using SmartStringIMap =
+    smart::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
 
   // The op*() methods implement individual opcode handlers.
 #define O(name, imm, pusph, pop, flags)                                       \
@@ -687,10 +633,12 @@ public:
   Variant m_setprofileCallback;
   bool m_executingSetprofileCallback;
 
-  std::vector<vixl::Simulator*> m_activeSims;
+  smart::vector<vixl::Simulator*> m_activeSims;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<> void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
 extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 

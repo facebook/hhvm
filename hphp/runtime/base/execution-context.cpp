@@ -43,8 +43,8 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -72,8 +72,6 @@ ExecutionContext::ExecutionContext()
   , m_globalVarEnv(nullptr)
   , m_lambdaCounter(0)
   , m_nesting(0)
-  , m_breakPointFilter(nullptr)
-  , m_flowFilter(nullptr)
   , m_dbgNoBreak(false)
   , m_coverPrevLine(-1)
   , m_coverPrevUnit(nullptr)
@@ -104,6 +102,27 @@ ExecutionContext::ExecutionContext()
   }
 }
 
+template<> void ThreadLocalNoCheck<ExecutionContext>::destroy() {
+  if (!isNull()) {
+    getNoCheck()->sweep();
+    setNull();
+  }
+}
+
+
+void ExecutionContext::cleanup() {
+  manageAPCHandle();
+
+  // Discard all units that were created via create_function().
+  for (auto& v : m_createdFuncs) delete v;
+
+  always_assert(m_activeSims.empty());
+}
+
+void ExecutionContext::sweep() {
+  cleanup();
+}
+
 ExecutionContext::~ExecutionContext() {
   // When we destroy the execution context will call destructors on any objects
   // in the userErrorHandlers and userExceptionHandlers vectors. If these
@@ -115,20 +134,7 @@ ExecutionContext::~ExecutionContext() {
     while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
     while (!m_userExceptionHandlers.empty()) m_userExceptionHandlers.pop_back();
   }
-
-  // Discard any ConstInfo objects that were created to support reflection.
-  for (ConstInfoMap::const_iterator it = m_constInfo.begin();
-       it != m_constInfo.end(); ++it) {
-    delete it->second;
-  }
-
-  // Discard all units that were created via create_function().
-  for (auto& v : m_createdFuncs) delete v;
-
-  delete m_breakPointFilter;
-  delete m_flowFilter;
-  obFlushAll();
-  for (auto& b : m_buffers) delete b;
+  cleanup();
 }
 
 void ExecutionContext::backupSession() {
@@ -241,15 +247,13 @@ void ExecutionContext::obStart(const Variant& handler /* = null */) {
     raise_error("ob_start(): Cannot use output buffering "
                 "in output buffering display handlers");
   }
-  OutputBuffer *ob = new OutputBuffer();
-  ob->handler = handler;
-  m_buffers.push_back(ob);
+  m_buffers.emplace_back(Variant(handler));
   resetCurrentBuffer();
 }
 
 String ExecutionContext::obCopyContents() {
   if (!m_buffers.empty()) {
-    StringBuffer &oss = m_buffers.back()->oss;
+    StringBuffer &oss = m_buffers.back().oss;
     if (!oss.empty()) {
       return oss.copy();
     }
@@ -259,7 +263,7 @@ String ExecutionContext::obCopyContents() {
 
 String ExecutionContext::obDetachContents() {
   if (!m_buffers.empty()) {
-    StringBuffer &oss = m_buffers.back()->oss;
+    StringBuffer &oss = m_buffers.back().oss;
     if (!oss.empty()) {
       return oss.detach();
     }
@@ -271,12 +275,12 @@ int ExecutionContext::obGetContentLength() {
   if (m_buffers.empty()) {
     return 0;
   }
-  return m_buffers.back()->oss.size();
+  return m_buffers.back().oss.size();
 }
 
 void ExecutionContext::obClean(int handler_flag) {
   if (!m_buffers.empty()) {
-    OutputBuffer *last = m_buffers.back();
+    OutputBuffer *last = &m_buffers.back();
     if (!last->handler.isNull()) {
       m_insideOBHandler = true;
       SCOPE_EXIT { m_insideOBHandler = false; };
@@ -295,44 +299,44 @@ bool ExecutionContext::obFlush() {
   }
 
   auto iter = m_buffers.end();
-  OutputBuffer* last = *(--iter);
+  OutputBuffer& last = *(--iter);
 
   const int flag = k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_END;
 
   if (iter != m_buffers.begin()) {
-    OutputBuffer *prev = *(--iter);
-    if (last->handler.isNull()) {
-      prev->oss.absorb(last->oss);
+    OutputBuffer& prev = *(--iter);
+    if (last.handler.isNull()) {
+      prev.oss.absorb(last.oss);
     } else {
-      auto str = last->oss.detach();
+      auto str = last.oss.detach();
       try {
         Variant tout;
         {
           m_insideOBHandler = true;
           SCOPE_EXIT { m_insideOBHandler = false; };
           tout = vm_call_user_func(
-            last->handler, make_packed_array(str, flag)
+            last.handler, make_packed_array(str, flag)
           );
         }
-        prev->oss.append(tout.toString());
+        prev.oss.append(tout.toString());
       } catch (...) {
-        prev->oss.append(str);
+        prev.oss.append(str);
         throw;
       }
     }
     return true;
   }
 
-  auto str = last->oss.detach();
+  auto str = last.oss.detach();
 
-  if (!last->handler.isNull()) {
+  if (!last.handler.isNull()) {
     try {
       Variant tout;
       {
         m_insideOBHandler = true;
         SCOPE_EXIT { m_insideOBHandler = false; };
         tout = vm_call_user_func(
-          last->handler, make_packed_array(str, flag)
+          last.handler, make_packed_array(str, flag)
         );
       }
       str = tout.toString();
@@ -353,7 +357,6 @@ void ExecutionContext::obFlushAll() {
 bool ExecutionContext::obEnd() {
   assert(m_protectedLevel >= 0);
   if ((int)m_buffers.size() > m_protectedLevel) {
-    delete m_buffers.back();
     m_buffers.pop_back();
     resetCurrentBuffer();
     if (m_implicitFlush) flush();
@@ -381,9 +384,8 @@ const StaticString
 
 Array ExecutionContext::obGetStatus(bool full) {
   Array ret = Array::Create();
-  std::list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
   int level = 0;
-  for (; iter != m_buffers.end(); ++iter, ++level) {
+  for (auto& buffer : m_buffers) {
     Array status;
     status.set(s_level, level);
     if (level < m_protectedLevel) {
@@ -391,7 +393,7 @@ Array ExecutionContext::obGetStatus(bool full) {
       status.set(s_name, s_default_output_handler);
     } else {
       status.set(s_type, 0);
-      status.set(s_name, (*iter)->handler);
+      status.set(s_name, buffer.handler);
     }
 
     if (full) {
@@ -399,6 +401,7 @@ Array ExecutionContext::obGetStatus(bool full) {
     } else {
       ret = std::move(status);
     }
+    level++;
   }
   return ret;
 }
@@ -410,7 +413,7 @@ void ExecutionContext::obSetImplicitFlush(bool on) {
 Array ExecutionContext::obGetHandlers() {
   Array ret;
   for (auto& ob : m_buffers) {
-    auto& handler = ob->handler;
+    auto& handler = ob.handler;
     ret.append(handler.isNull() ? s_default_output_handler : handler);
   }
   return ret;
@@ -423,7 +426,7 @@ void ExecutionContext::flush() {
              (m_transport == nullptr ||
               (m_transport->getHTTPVersion() == "1.1" &&
                m_transport->getMethod() != Transport::Method::HEAD))) {
-    StringBuffer &oss = m_buffers.front()->oss;
+    StringBuffer &oss = m_buffers.front().oss;
     if (!oss.empty()) {
       if (m_transport) {
         m_transport->sendRaw((void*)oss.data(), oss.size(), 200, false, true);
@@ -440,7 +443,7 @@ void ExecutionContext::resetCurrentBuffer() {
   if (m_buffers.empty()) {
     m_out = nullptr;
   } else {
-    m_out = &m_buffers.back()->oss;
+    m_out = &m_buffers.back().oss;
   }
 }
 
@@ -478,7 +481,7 @@ bool ExecutionContext::hasShutdownFunctions(ShutdownType type) {
 }
 
 Variant ExecutionContext::pushUserErrorHandler(const Variant& function,
-                                                   int error_types) {
+                                               int error_types) {
   Variant ret;
   if (!m_userErrorHandlers.empty()) {
     ret = m_userErrorHandlers.back().first;
@@ -508,8 +511,8 @@ void ExecutionContext::popUserExceptionHandler() {
   }
 }
 
-void ExecutionContext::registerRequestEventHandler
-(RequestEventHandler *handler) {
+void ExecutionContext::registerRequestEventHandler(
+  RequestEventHandler *handler) {
   assert(handler);
   if (m_requestEventHandlerSet.find(handler) ==
       m_requestEventHandlerSet.end()) {
@@ -546,8 +549,11 @@ void ExecutionContext::executeFunctions(const Array& funcs) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 
-  for (ArrayIter iter(funcs); iter; ++iter) {
-    Array callback = iter.second().toArray();
+  for (int pos = 0; pos < funcs.size(); ++pos) {
+    // We may append to the end of the array from these functions but they have
+    // no way to write to any other location additionally we know that the array
+    // is zero indexed so this style of iteration should be safe
+    Array callback = funcs[pos].toArray();
     vm_call_user_func(callback[s_name], callback[s_args].toArray());
   }
 }
@@ -562,7 +568,7 @@ void ExecutionContext::onShutdownPreSend() {
     SCOPE_EXIT {
       try { m_shutdowns.remove(ShutDown); } catch (...) {}
     };
-    executeFunctions(m_shutdowns[ShutDown].toArray());
+    executeFunctions(forceToArray(m_shutdowns.lvalAt(ShutDown)));
   }
 }
 
@@ -579,7 +585,7 @@ void ExecutionContext::onShutdownPostSend() {
           SCOPE_EXIT {
             try { m_shutdowns.remove(PostSend); } catch (...) {}
           };
-          executeFunctions(m_shutdowns[PostSend].toArray());
+          executeFunctions(forceToArray(m_shutdowns.lvalAt(PostSend)));
         }
       }
     } catch (...) {
@@ -696,7 +702,9 @@ void ExecutionContext::handleError(const std::string& msg,
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));
-    auto exn = FatalErrorException(msg, ee.getBacktrace());
+    bool isRecoverable =
+      errnum == static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+    auto exn = FatalErrorException(msg, ee.getBacktrace(), isRecoverable);
     exn.setSilent(!errorNeedsLogging(errnum));
     throw exn;
   }
@@ -771,7 +779,14 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 bool ExecutionContext::onFatalError(const Exception &e) {
   MM().resetCouldOOM();
 
+  auto prefix = "\nFatal error: ";
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);
+  auto const fatal = dynamic_cast<const FatalErrorException*>(&e);
+  if (fatal && fatal->isRecoverable()) {
+     prefix = "\nCatchable fatal error: ";
+     errnum = static_cast<int>(ErrorConstants::ErrorModes::RECOVERABLE_ERROR);
+  }
+
   recordLastError(e, errnum);
 
   bool silenced = false;
@@ -782,16 +797,16 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
   if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                fileAndLine.first.c_str(), fileAndLine.second);
+    Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
+                fileAndLine.second);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(Logger::LogError, "\nFatal error: ", e,
-                fileAndLine.first.c_str(), fileAndLine.second);
+    Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
+                fileAndLine.second);
   }
   return handled;
 }

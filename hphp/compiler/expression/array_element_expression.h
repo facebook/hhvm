@@ -34,7 +34,6 @@ public:
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   virtual bool isRefable(bool checkError = false) const { return true;}
   bool isTemporary() const;

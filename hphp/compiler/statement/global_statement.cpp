@@ -98,44 +98,6 @@ StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr GlobalStatement::postOptimize(AnalysisResultConstPtr ar) {
-  if (!m_exp->getCount()) {
-    return NULL_STATEMENT();
-  }
-  return StatementPtr();
-}
-
-void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
-  IMPLEMENT_INFER_AND_CHECK_ASSERT(getScope());
-
-  BlockScopePtr scope = getScope();
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    VariableTablePtr variables = scope->getVariables();
-    variables->setAttribute(VariableTable::NeedGlobalPointer);
-    if (exp->is(Expression::KindOfSimpleVariable)) {
-      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
-      const std::string &name = var->getName();
-      /* If we have already seen this variable in the current scope and
-         it is not a global variable, record this variable as "redeclared"
-         which will force Variant type.
-       */
-      variables->setAttribute(VariableTable::InsideGlobalStatement);
-      variables->checkRedeclared(name, KindOfGlobalStatement);
-      variables->addLocalGlobal(name);
-      var->setContext(Expression::Declaration);
-      var->inferAndCheck(ar, Type::Any, true);
-      variables->forceVariant(ar, name, VariableTable::AnyVars);
-      variables->clearAttribute(VariableTable::InsideGlobalStatement);
-    } else {
-      variables->forceVariants(ar, VariableTable::AnyVars);
-      variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-      assert(exp->is(Expression::KindOfDynamicVariable));
-      exp->inferAndCheck(ar, Type::Any, true);
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void GlobalStatement::outputCodeModel(CodeGenerator &cg) {

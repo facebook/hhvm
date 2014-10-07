@@ -15,56 +15,65 @@
 */
 #include "hphp/runtime/base/program-functions.h"
 
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/php-globals.h"
+#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/pprof-server.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/admin-request-handler.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/util/process.h"
-#include "hphp/util/capability.h"
-#include "hphp/util/embedded-data.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/light-process.h"
-#include "hphp/util/repo-schema.h"
-#include "hphp/util/current-executable.h"
-#include "hphp/util/service-data.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/pprof-server.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/stat-cache.h"
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/std/ext_std_options.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_xenon.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
-#include "hphp/runtime/base/simple-counter.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
+#include "hphp/runtime/server/admin-request-handler.h"
+#include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/replay-transport.h"
+#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/runtime-type-profiler.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/constants.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/backtrace.h"
+#include "hphp/util/capability.h"
+#include "hphp/util/current-executable.h"
+#include "hphp/util/embedded-data.h"
+#include "hphp/util/light-process.h"
+#include "hphp/util/process.h"
+#include "hphp/util/repo-schema.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/timer.h"
+
+#include <folly/Portability.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -80,14 +89,6 @@
 #include <memory>
 #include <vector>
 
-#include "hphp/runtime/base/arch.h"
-#include "hphp/runtime/base/unit-cache.h"
-
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/compiler/builtin_symbols.h"
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
 #undef NOUSER
@@ -205,25 +206,6 @@ void process_env_variables(Array& variables) {
   }
 }
 
-void process_ini_file(const std::string& filename) {
-  if (filename.empty()) {
-    return;
-  }
-  std::ifstream ifs(filename);
-  const std::string str((std::istreambuf_iterator<char>(ifs)),
-                        std::istreambuf_iterator<char>());
-  process_ini_settings(str, filename);
-}
-
-void process_ini_settings(const std::string& ini_str,
-                          const std::string& filename /* = "" */) {
-  auto settings = IniSetting::FromStringAsMap(ini_str, filename);
-
-  for (auto& item : settings.items()) {
-    IniSetting::Set(item.first.data(), item.second,
-                    IniSetting::FollyDynamic());
-  }
-}
 // Handle adding a variable to an array, supporting keys that look
 // like array expressions (like 'FOO[][key1][k2]').
 void register_variable(Array& variables, char *name, const Variant& value,
@@ -651,13 +633,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   Extension::RequestInitModules();
-  // If extension constants were used in the in ini files, they would have come
-  // out as 0 in the previous pass. Lets re-import the ini files. We could be
-  // more clever, but that would be harder and this works.
-  for (auto& c : config) {
-    process_ini_file(c);
+  // If extension constants were used in the ini files, they would have come
+  // out as 0 in the previous pass. We will re-import only the constants that
+  // have been later bound. All other non-constant configs should remain as they
+  // are, even if the ini file actually tries to change them.
+  IniSetting::Map ini = IniSetting::Map::object;
+  for (auto& filename: config) {
+    Config::ParseIniFile(filename, ini, true);
   }
-
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
@@ -870,7 +853,7 @@ static int start_server(const std::string &username) {
       try {
         rt.onRequestStart(start);
         rt.replayInput(Hdf(file));
-        handler.handleRequest(&rt);
+        handler.run(&rt);
 
         timespec stop;
         Timer::GetMonotonicTime(stop);
@@ -1070,6 +1053,21 @@ static int compute_hhvm_argc(const options_description& desc,
   return pos;
 }
 
+/*
+ * AsyncFuncImpl defines a minimum C++ stack size but that only applies to
+ * threads we manually create. When the main thread will be executing PHP
+ * rather than just managing a server, make sure its stack is big enough.
+ */
+static void set_stack_size() {
+  struct rlimit rlim;
+  if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
+
+  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+    rlim.rlim_cur = AsyncFuncImpl::kStackSizeMinimum;
+    setrlimit(RLIMIT_STACK, &rlim);
+  }
+}
+
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1228,7 +1226,8 @@ static int execute_program_impl(int argc, char** argv) {
     cout << desc << "\n";
     return -1;
   }
-  if (vm.count("help")) {
+  // reuse -h for help command if possible
+  if (vm.count("help") || (vm.count("debug-host") && po.mode != "debug")) {
     cout << desc << "\n";
     return 0;
   }
@@ -1275,16 +1274,12 @@ static int execute_program_impl(int argc, char** argv) {
 
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (auto& c : po.config) {
-    Config::Parse(c, ini, config);
+  // Start with .hdf and .ini files
+  for (auto& filename : po.config) {
+    Config::ParseConfigFile(filename, ini, config);
   }
-  RuntimeOption::Load(ini, config, &po.confStrings);
-  for (auto& c : po.config) {
-    process_ini_file(c);
-  }
-  for (auto& istr : po.iniStrings) {
-    process_ini_settings(istr, "");
-  }
+  // Now, take care of CLI options and then officially load and bind things
+  RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings);
 
   vector<string> badnodes;
   config.lint(badnodes);
@@ -1408,6 +1403,8 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
+    set_stack_size();
+
     if (po.isTempFile) {
       tempFile = po.file;
     }
@@ -1460,6 +1457,11 @@ static int execute_program_impl(int argc, char** argv) {
           // go unused until we finally stop it when the user quits the
           // debugger.
           g_context->setSandboxId(localProxy->getDummyInfo().id());
+          if (restart) {
+            // Systemlib.php is not loaded again, so we need this if we
+            // are to hit any breakpoints in systemlib.
+            proxySetBreakPoints(localProxy.get());
+          }
           Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
           execute_command_line_end(po.xhprofFlags, true, file.c_str());
@@ -1472,9 +1474,6 @@ static int execute_program_impl(int argc, char** argv) {
             free(new_argv);
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
-          // Systemlib.php is not loaded again, so we need this if we
-          // are to hit any breakpoints in systemlib.
-          proxySetBreakPoints(localProxy.get());
           restart = true;
         } catch (const Eval::DebuggerClientExitException &e) {
           execute_command_line_end(0, false, nullptr);
@@ -1515,7 +1514,7 @@ static int execute_program_impl(int argc, char** argv) {
       for (unsigned int j = 0; j < po.args.size(); j++) {
         ReplayTransport rt;
         rt.replayInput(po.args[j].c_str());
-        handler.handleRequest(&rt);
+        handler.run(&rt);
         printf("%s\n", rt.getResponse().c_str());
       }
     }
@@ -1840,49 +1839,49 @@ void hphp_thread_exit() {
   finish_thread_locals();
 }
 
+void hphp_memory_cleanup() {
+  auto& mm = MM();
+  // sweep functions are allowed to access g_context,
+  // so we can't destroy it yet
+  mm.sweep();
+
+  // But its smart allocated, and has some members that need
+  // cleanup, so destroy it before its too late
+  g_context.destroy();
+
+  mm.resetAllocator();
+}
+
 void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
-  g_context.destroy();
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  auto& mm = MM();
-
   {
     ServerStatsHelper ssh("rollback");
-    // sweep functions are allowed to call g_context->, so we need to
-    // reinitialize g_context here.
-    g_context.getCheck();
 
     // Clean up pcre state at the end of the request.
     pcre_session_exit();
 
-    mm.sweep();
-
-    // Destroy g_context again because ExecutionContext has
-    // SmartAllocated data members. These members cannot survive over
-    // resetAllocator(), so we need to destroy g_context before
-    // calling resetAllocator().
-    g_context.destroy();
-
-    mm.resetAllocator();
-
+    hphp_memory_cleanup();
     // Do any post-sweep cleanup necessary for global variables
     free_global_variables_after_sweep();
-    g_context.getCheck();
   }
 
   ThreadInfo::s_threadInfo->onSessionExit();
-  assert(mm.empty());
+  assert(MM().empty());
 }
 
 void hphp_process_exit() {
   Xenon::getInstance().stop();
   PageletServer::Stop();
   XboxServer::Stop();
+  // Debugger::Stop() needs an execution context
+  g_context.getCheck();
   Eval::Debugger::Stop();
+  g_context.destroy();
   Extension::ShutdownModules();
   LightProcess::Close();
   for (InitFiniNode *in = extra_process_exit; in; in = in->next) {

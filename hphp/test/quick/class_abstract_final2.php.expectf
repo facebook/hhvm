@@ -1,0 +1,1 @@
+Fatal error: Class Utils contains non-static method noGood and therefore cannot be declared 'abstract final' in %s/class_abstract_final2.php on line %d

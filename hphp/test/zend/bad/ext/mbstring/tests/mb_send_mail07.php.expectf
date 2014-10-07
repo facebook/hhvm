@@ -11,4 +11,4 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-KR
 Content-Transfer-Encoding: 7bit
 
-테스트
+%r\x1b%r$)C%r\x0e%rEW=:F.%r\x0f%r

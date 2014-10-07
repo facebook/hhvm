@@ -28,7 +28,7 @@ void WarmupRequestHandler::handleRequest(Transport *transport) {
   // count across all threads.  Therefore we let WarmupRequestHandlerFactory
   // track the global request count.
   m_factory->bumpReqCount();
-  m_reqHandler.handleRequest(transport);
+  m_reqHandler.run(transport);
 }
 
 void WarmupRequestHandler::abortRequest(Transport *transport) {

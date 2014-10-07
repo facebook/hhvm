@@ -49,9 +49,13 @@ abstract class PerfTarget {
     return false;
   }
 
-  public function unfreeze(): void {
+  public function unfreeze(PerfOptions $options): void {
     invariant_violation(
       'If you override needsUnfreeze(), you must override unfreeze() too.'
     );
+  }
+
+  final protected function safeCommand(Vector<string> $command): string {
+    return implode(' ', $command->map($x ==> escapeshellarg($x)));
   }
 }

@@ -79,15 +79,6 @@ void WhileStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void WhileStatement::inferTypes(AnalysisResultPtr ar) {
-  m_condition->inferAndCheck(ar, Type::Boolean, false);
-  if (m_stmt) {
-    getScope()->incLoopNestedLevel();
-    m_stmt->inferTypes(ar);
-    getScope()->decLoopNestedLevel();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void WhileStatement::outputCodeModel(CodeGenerator &cg) {

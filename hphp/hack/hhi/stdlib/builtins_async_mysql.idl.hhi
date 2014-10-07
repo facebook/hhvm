@@ -63,6 +63,7 @@ class AsyncMysqlConnection {
   public function close() { }
   public function releaseConnection() { }
   public function serverInfo() { }
+  public function warningCount() { }
   public function host() { }
   public function port() { }
   public function setReusable(bool $reusable) { }
@@ -84,6 +85,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function __construct() { parent::__construct();}
   public function numRowsAffected(): int { }
   public function lastInsertId(): int { }
+  public function numRows(): int { }
   public function mapRows() { }
   public function vectorRows() { }
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }
@@ -95,8 +97,9 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   **/
   public function rowBlocks() { }
 }
-class AsyncMysqlRowBlock extends Countable, KeyedTraversable<int, AsyncMysqlRow> {
+class AsyncMysqlRowBlock implements Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }
+  public function at(int $row, mixed $field): mixed { }
   public function getFieldAsInt(int $row, mixed $field): int { }
   public function getFieldAsDouble(int $row, mixed $field): float { }
   public function getFieldAsString(int $row, mixed $field): string { }
@@ -122,6 +125,7 @@ class AsyncMysqlRowBlockIterator implements Iterator, Traversable {
 */
 class AsyncMysqlRow implements MysqlRow {
   public function __construct() { }
+  public function at(mixed $field): mixed { }
   public function getFieldAsInt(mixed $field): int { }
   public function getFieldAsDouble(mixed $field): float { }
   public function getFieldAsString(mixed $field): string { }

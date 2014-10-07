@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -464,8 +464,11 @@ HPHP::Class* Reflection::s_ReflectionExceptionClass = nullptr;
 
 const StaticString s_ReflectionFuncHandle("ReflectionFuncHandle");
 
-static String HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   auto file = func->unit()->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {
@@ -475,13 +478,19 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   }
 }
 
-static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getStartLine) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getStartLine) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   return func->line1();
 }
 
-static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getEndLine) {
+static Variant HHVM_METHOD(ReflectionFunctionAbstract, getEndLine) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  if (func->isBuiltin()) {
+    return false;
+  }
   return func->line2();
 }
 
@@ -875,7 +884,7 @@ static bool HHVM_METHOD(ReflectionClass, isInternal) {
 
 static bool HHVM_METHOD(ReflectionClass, isInstantiable) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait))
+  return !(cls->attrs() & (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))
     && (cls->getCtor()->attrs() & AttrPublic);
 }
 
@@ -899,6 +908,11 @@ static bool HHVM_METHOD(ReflectionClass, isTrait) {
   return cls->attrs() & AttrTrait;
 }
 
+static bool HHVM_METHOD(ReflectionClass, isEnum) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return cls->attrs() & AttrEnum;
+}
+
 static int HHVM_METHOD(ReflectionClass, getModifiers) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return get_modifiers(cls->attrs(), true);
@@ -918,13 +932,19 @@ static Variant HHVM_METHOD(ReflectionClass, getFileName) {
   }
 }
 
-static int64_t HHVM_METHOD(ReflectionClass, getStartLine) {
+static Variant HHVM_METHOD(ReflectionClass, getStartLine) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->isBuiltin()) {
+    return false;
+  }
   return cls->preClass()->line1();
 }
 
-static int64_t HHVM_METHOD(ReflectionClass, getEndLine) {
+static Variant HHVM_METHOD(ReflectionClass, getEndLine) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  if (cls->isBuiltin()) {
+    return false;
+  }
   return cls->preClass()->line2();
 }
 
@@ -999,15 +1019,34 @@ static Array HHVM_METHOD(ReflectionClass, getTraitNames) {
   return ai.toArray();
 }
 
-static Array HHVM_METHOD(ReflectionClass, getTraitAliases) {
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  auto const& aliases = const_cast<Class*>(cls)->traitAliases();
-  auto const size = aliases.size();
-  ArrayInit ai(size, ArrayInit::Map{});
-  for (int i = 0; i < size; ++i) {
-    ai.set(StrNR(aliases[i].first), VarNR(aliases[i].second));
+static Array get_trait_alias_info(const Class* cls) {
+  auto const& aliases = cls->traitAliases();
+
+  if (aliases.size()) {
+    ArrayInit ai(aliases.size(), ArrayInit::Map{});
+
+    for (auto const& namePair : aliases) {
+      ai.set(StrNR(namePair.first), VarNR(namePair.second));
+    }
+    return ai.toArray();
+  } else {
+    // Even if we have alias rules, if we're in repo mode, they will be applied
+    // during the trait flattening step, and we won't populate traitAliases()
+    // on the Class.
+    auto const& rules = cls->preClass()->traitAliasRules();
+
+    ArrayInit ai(rules.size(), ArrayInit::Map{});
+
+    for (auto const& rule : rules) {
+      auto namePair = rule.asNamePair();
+      ai.set(StrNR(namePair.first), VarNR(namePair.second));
+    }
+    return ai.toArray();
   }
-  return ai.toArray();
+}
+
+static Array HHVM_METHOD(ReflectionClass, getTraitAliases) {
+  return get_trait_alias_info(ReflectionClassHandle::GetClassFor(this_));
 }
 
 static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
@@ -1025,7 +1064,7 @@ static void addInterfaceMethods(const Class* iface, c_Set* st) {
     const Func* m = methods[i];
     if (m->isGenerated()) continue;
 
-    st->add(f_strtolower(m->nameStr()).get());
+    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
   }
 
   for (auto const& parentIface: iface->declInterfaces()) {
@@ -1059,7 +1098,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
       const Func* m = methods[i];
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
 
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
 
     for (Slot i = currentCls->traitsBeginIdx();
@@ -1067,7 +1106,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
          ++i) {
       const Func* m = currentCls->getMethod(i);
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
   } while ((currentCls = currentCls->parent()));
 
@@ -1329,6 +1368,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, isInstantiable);
     HHVM_ME(ReflectionClass, isInterface);
     HHVM_ME(ReflectionClass, isTrait);
+    HHVM_ME(ReflectionClass, isEnum);
     HHVM_ME(ReflectionClass, isAbstract);
     HHVM_ME(ReflectionClass, isFinal);
     HHVM_ME(ReflectionClass, getModifiers);
@@ -1535,13 +1575,7 @@ Array get_class_info(const String& name) {
 
   // trait aliases
   {
-    Array arr = Array::Create();
-    const Class::TraitAliasVec& aliases = cls->traitAliases();
-    for (int i = 0, s = aliases.size(); i < s; ++i) {
-      arr.set(StrNR(aliases[i].first), VarNR(aliases[i].second));
-    }
-
-    ret.set(s_trait_aliases, VarNR(arr));
+    ret.set(s_trait_aliases, VarNR(get_trait_alias_info(cls)));
   }
 
   // attributes
@@ -1585,7 +1619,7 @@ Array get_class_info(const String& name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       if (RuntimeOption::EvalRuntimeTypeProfile) {
         set_debugger_type_profiling_info(info, cls, m);
@@ -1598,7 +1632,7 @@ Array get_class_info(const String& name) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info));

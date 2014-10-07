@@ -207,13 +207,11 @@ and unify_ env r1 ty1 r2 ty2 =
   | Tanon _, Tanon _ -> env, Tunresolved [r1, ty1; r2, ty2]
   | Tfun ft, Tanon (anon_arity, id)
   | Tanon (anon_arity, id), Tfun ft ->
-      if not (IMap.mem id env.Env.genv.Env.anons)
-      then begin
+      (match Env.get_anonymous env id with
+      | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
         env, Tany
-      end
-      else
-        let anon = IMap.find_unsafe id env.Env.genv.Env.anons in
+      | Some anon ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
         if not (unify_arities ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
@@ -221,7 +219,7 @@ and unify_ env r1 ty1 r2 ty2 =
         let env, ft = Inst.instantiate_ft env ft in
         let env, ret = anon env ft.ft_params in
         let env, _ = unify env ft.ft_ret ret in
-        env, Tfun ft
+        env, Tfun ft)
   | Tobject, Tobject
   | Tobject, Tapply _
   | Tapply _, Tobject -> env, Tobject

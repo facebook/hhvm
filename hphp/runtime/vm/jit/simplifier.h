@@ -17,11 +17,15 @@
 #ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 #define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 
+#include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/cse.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 
 namespace HPHP { namespace jit {
+
+struct IRInstruction;
+struct IRUnit;
+struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -210,48 +214,16 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 struct StackValueInfo {
-  explicit StackValueInfo(SSATmp* value)
-    : value(value)
-    , knownType(value->type())
-    , spansCall(false)
-    , typeSrc(value->inst())
-  {
-    ITRACE(5, "{} created\n", show());
-  }
-
-  explicit StackValueInfo(IRInstruction* inst, Type type)
-    : value(nullptr)
-    , knownType(type)
-    , spansCall(false)
-    , typeSrc(inst)
-  {
-    ITRACE(5, "{} created\n", show());
-  }
-
-  std::string show() const {
-    std::string out = "StackValueInfo {";
-
-    if (value) {
-      out += value->inst()->toString();
-    } else {
-      folly::toAppend(knownType.toString(), " from ", typeSrc->toString(),
-                      &out);
-    }
-
-    if (spansCall) out += ", spans call";
-    out += "}";
-
-    return out;
-  }
+  explicit StackValueInfo(SSATmp*);
+  explicit StackValueInfo(IRInstruction*, Type);
 
   SSATmp* value;   // may be nullptr
   Type knownType;  // the type of the value, for when value is nullptr
   bool spansCall;  // whether the tmp's definition was above a call
   IRInstruction* typeSrc; // the instruction that gave us knownType
-
- private:
-  TRACE_SET_MOD(hhir);
 };
+
+std::string show(const StackValueInfo&);
 
 /*
  * Track down a value or type using the StkPtr chain.
@@ -285,8 +257,8 @@ void copyProp(IRInstruction*);
  * Returns the canonical version of the given value by tracing through any
  * passthrough instructions (Mov, CheckType, etc...).
  */
-const SSATmp* canonical(const SSATmp* tmp);
-SSATmp* canonical(SSATmp* tmp);
+const SSATmp* canonical(const SSATmp*);
+SSATmp* canonical(SSATmp*);
 
 /*
  * Assuming sp is the VM stack pointer either from inside an FPI region or an

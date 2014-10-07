@@ -29,6 +29,7 @@
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "proxygen/lib/workers/WorkerThread.h"
 #include "proxygen/lib/services/Acceptor.h"
+#include "proxygen/lib/services/AcceptorConfiguration.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/util/job-queue.h"
 
@@ -219,4 +220,3 @@ private:
 }
 
 #endif // incl_HPHP_HTTP_SERVER_FASTCGI_FASTCGI_SERVER_H_
-

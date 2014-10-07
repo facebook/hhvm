@@ -1,6 +1,6 @@
 Delimiter:  ZZZ
-	<?php // 1
-	234567890A
+%r\x09%r<?php // 1
+%r\x09%r234567890A
 Delimiter:  Z
-	<?php // 1
-	234567890A
+%r\x09%r<?php // 1
+%r\x09%r234567890A

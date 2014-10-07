@@ -125,7 +125,7 @@ struct XboxWorker
       *s_xbox_prev_req_init_doc = reqInitDoc;
 
       job->onRequestStart(job->getStartTimer());
-      createRequestHandler()->handleRequest(job);
+      createRequestHandler()->run(job);
       destroyRequestHandler();
       job->decRefCount();
     } catch (...) {

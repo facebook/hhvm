@@ -36,7 +36,6 @@ public:
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   void deepCopy(SimpleFunctionCallPtr exp);
 
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
@@ -53,8 +52,6 @@ public:
 
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
-  virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
-                                bool coerce);
 
   virtual int getLocalEffects() const;
 

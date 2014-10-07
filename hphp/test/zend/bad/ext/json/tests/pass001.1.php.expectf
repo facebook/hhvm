@@ -28,7 +28,7 @@ Testing:
         "special": "`1~!@#$%^&*()_+-={':[,]}|;.</>?",
         "hex": "\u0123\u4567\u89AB\uCDEF\uabcd\uef4A",
         "unicode": "\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8",
-        "プレスキット": "プレスキット",
+        "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r": "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r",
         "empty_string": "",
         "true": true,
         "false": false,
@@ -112,9 +112,9 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "%r\x08\x0c%r
 
-	"
+%r\x09%r"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -126,11 +126,11 @@ array(14) {
     ["special"]=>
     string(31) "`1~!@#$%^&*()_+-={':[,]}|;.</>?"
     ["hex"]=>
-    string(17) "ģ䕧覫췯ꯍ"
+    string(17) "%r\xc4\xa3\xe4\x95\xa7\xe8\xa6\xab\xec\xb7\xaf\xea\xaf\x8d\xee\xbd\x8a%r"
     ["unicode"]=>
-    string(18) "プレスキット"
-    ["プレスキット"]=>
-    string(18) "プレスキット"
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
+    ["%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"]=>
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
     ["empty_string"]=>
     string(0) ""
     ["true"]=>
@@ -226,9 +226,9 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"%r\xec\xab\xbe\xeb\xaa\xbe\xea\xae\x98\xef\xb3\x9e\xeb\xb3\x9a\xee\xbd\x8a\x08\x0c%r
 
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+%r\x09%r`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -293,9 +293,9 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "%r\x08\x0c%r
 
-	"
+%r\x09%r"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -307,11 +307,11 @@ array(14) {
     ["special"]=>
     string(31) "`1~!@#$%^&*()_+-={':[,]}|;.</>?"
     ["hex"]=>
-    string(17) "ģ䕧覫췯ꯍ"
+    string(17) "%r\xc4\xa3\xe4\x95\xa7\xe8\xa6\xab\xec\xb7\xaf\xea\xaf\x8d\xee\xbd\x8a%r"
     ["unicode"]=>
-    string(18) "プレスキット"
-    ["プレスキット"]=>
-    string(18) "プレスキット"
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
+    ["%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"]=>
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
     ["empty_string"]=>
     string(0) ""
     ["true"]=>
@@ -407,9 +407,9 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"%r\xec\xab\xbe\xeb\xaa\xbe\xea\xae\x98\xef\xb3\x9e\xeb\xb3\x9a\xee\xbd\x8a\x08\x0c%r
 
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+%r\x09%r`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -478,9 +478,9 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "%r\x08\x0c%r
 
-	"
+%r\x09%r"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -492,11 +492,11 @@ array(14) {
     ["special"]=>
     string(31) "`1~!@#$%^&*()_+-={':[,]}|;.</>?"
     ["hex"]=>
-    string(17) "ģ䕧覫췯ꯍ"
+    string(17) "%r\xc4\xa3\xe4\x95\xa7\xe8\xa6\xab\xec\xb7\xaf\xea\xaf\x8d\xee\xbd\x8a%r"
     ["unicode"]=>
-    string(18) "プレスキット"
-    ["プレスキット"]=>
-    string(18) "プレスキット"
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
+    ["%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"]=>
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
     ["empty_string"]=>
     string(0) ""
     ["true"]=>
@@ -592,9 +592,9 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"%r\xec\xab\xbe\xeb\xaa\xbe\xea\xae\x98\xef\xb3\x9e\xeb\xb3\x9a\xee\xbd\x8a\x08\x0c%r
 
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+%r\x09%r`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -659,9 +659,9 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "%r\x08\x0c%r
 
-	"
+%r\x09%r"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -673,11 +673,11 @@ array(14) {
     ["special"]=>
     string(31) "`1~!@#$%^&*()_+-={':[,]}|;.</>?"
     ["hex"]=>
-    string(17) "ģ䕧覫췯ꯍ"
+    string(17) "%r\xc4\xa3\xe4\x95\xa7\xe8\xa6\xab\xec\xb7\xaf\xea\xaf\x8d\xee\xbd\x8a%r"
     ["unicode"]=>
-    string(18) "プレスキット"
-    ["プレスキット"]=>
-    string(18) "プレスキット"
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
+    ["%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"]=>
+    string(18) "%r\xe3\x83\x97\xe3\x83\xac\xe3\x82\xb9\xe3\x82\xad\xe3\x83\x83\xe3\x83\x88%r"
     ["empty_string"]=>
     string(0) ""
     ["true"]=>
@@ -773,9 +773,9 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"%r\xec\xab\xbe\xeb\xaa\xbe\xea\xae\x98\xef\xb3\x9e\xeb\xb3\x9a\xee\xbd\x8a\x08\x0c%r
 
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+%r\x09%r`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>

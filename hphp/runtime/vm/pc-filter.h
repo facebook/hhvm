@@ -40,16 +40,25 @@ private:
     PtrMap() {
       static_assert(PTRMAP_PTR_SIZE % PTRMAP_LEVEL_BITS == 0,
                     "PTRMAP_PTR_SIZE must be a multiple of PTRMAP_LEVEL_BITS");
-      m_root = MakeNode();
+      m_root = nullptr;
     }
-    ~PtrMap();
-    void setPointer(void* ptr, void* val);
-    void* getPointer(void* ptr);
-    void clear();
+    ~PtrMap() { clear(); }
+    PtrMap(const PtrMap&) = delete;
+    PtrMap& operator=(const PtrMap&) = delete;
 
+    void setPointer(void* ptr, void* val);
+    void* getPointer(void* ptr) const {
+      if (!m_root) return nullptr;
+      return getPointerImpl(ptr);
+    }
+    void clear();
+    void swap(PtrMap& other) {
+      std::swap(m_root, other.m_root);
+    }
+    bool isNull() { return m_root == nullptr; }
   private:
-    PtrMapNode* m_root;
-    static PtrMapNode* MakeNode();
+    void* getPointerImpl(void* ptr) const;
+    void* m_root;
   };
 
   PtrMap m_map;
@@ -77,6 +86,12 @@ public:
   }
   bool checkPC(const unsigned char* pc) {
     return m_map.getPointer((void*)pc) == (void*)pc;
+  }
+
+  bool isNull() { return m_map.isNull(); }
+
+  void swap(PCFilter& other) {
+    m_map.swap(other.m_map);
   }
 
   void clear() {

@@ -224,6 +224,12 @@ flaky_tests = (
 
     # Another process can be created in the meantime
     '/ext/posix/tests/posix_errno_variation2.php',
+
+    # duplicate of a test in test/slow
+    '/ext/gmp/tests/002.php',
+
+    # Something could be on sending on that UDP port
+    '/ext/standard/tests/network/bug20134.php',
 )
 
 # Tests that work but not in repo mode
@@ -282,6 +288,13 @@ norepo_tests = (
     '/ext/pdo_sqlite/tests/bug46139.php',
     '/ext/pdo_sqlite/tests/bug52487.php',
     '/ext/phar/tests/012.php',
+    # missing undefined variable notice
+    '/ext/posix/tests/posix_kill_variation1.php',
+    '/ext/posix/tests/posix_kill_variation2.php',
+    '/ext/posix/tests/posix_strerror_variation1.php',
+    '/ext/posix/tests/posix_getgrgid_variation.php',
+    '/ext/posix/tests/posix_getpwuid_variation.php',
+    ####################################
     '/ext/reflection/tests/bug64936.php',
     '/ext/reflection/tests/bug29268.php',
     '/ext/sqlite3/tests/bug47159.php',
@@ -1018,8 +1031,6 @@ def walk(filename, dest_subdir):
                 match_rest_of_line = '.+'
 
             exp = re.sub(r'(?:Parse|Fatal)\\? error\\?:.*',
-                    '\nFatal error: '+match_rest_of_line, exp)
-            exp = re.sub(r'Catchable\\? fatal\\? error\\?:.*',
                     '\nFatal error: '+match_rest_of_line, exp)
             exp = re.sub(r'Warning\\?:.*',
                     '\nWarning: '+match_rest_of_line, exp)

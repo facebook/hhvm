@@ -20,6 +20,7 @@ let () = Ide.is_ide_mode := true
 let (files: (string, string) Hashtbl.t) = Hashtbl.create 23
 
 let globals = Hashtbl.create 23
+let parse_errors = Hashtbl.create 23
 
 (*****************************************************************************)
 (* helpers *)
@@ -130,59 +131,81 @@ let declare_file fn content =
     Hashtbl.replace globals fn (true, [], []);
     ()
 
+let rec last_error errors =
+  match errors with
+    | [] -> None
+    | [e] -> Some e
+    | _ :: tail -> last_error tail
+
 let hh_add_file fn content =
   Hashtbl.replace files fn content;
   try
-    declare_file fn content
+    let errors, _ = Errors.do_ begin fun () ->
+      declare_file fn content
+    end in
+    Hashtbl.replace parse_errors fn (last_error errors)
   with e ->
     ()
 
+let hh_add_dep fn content =
+  Typing_deps.is_dep := true;
+  (try
+    Errors.ignore_ begin fun () ->
+      declare_file fn content;
+      Parser_heap.ParserHeap.remove fn
+    end
+  with e ->
+    ()
+  );
+  Typing_deps.is_dep := false
+
 let hh_check ?(check_mode=true) fn =
-  Pos.file := fn;
-  Autocomplete.auto_complete := false;
-  let content = Hashtbl.find files fn in
-  Errors.try_
-    begin fun () ->
-(*    let builtins = Parser.program lexer (Lexing.from_string Ast.builtins) in *)
-    let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
-    in
-    let ast = (*builtins @ *) ast in
-    Parser_heap.ParserHeap.add fn ast;
-    let funs, classes, typedefs, consts = make_funs_classes ast in
-    let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
-    let all_classes = List.fold_right begin fun (_, cname) acc ->
-      SMap.add cname (SSet.singleton fn) acc
-    end classes SMap.empty in
-    Typing_decl.make_env nenv all_classes fn;
-    List.iter (fun (_, fname) -> type_fun fname fn) funs;
-    List.iter (fun (_, cname) -> type_class cname fn) classes;
-    error []
-    end
-    begin fun l ->
-      error [l]
-    end
+  match Hashtbl.find parse_errors fn with
+    | Some e -> error [e]
+    | None ->
+      Pos.file := fn;
+      Autocomplete.auto_complete := false;
+      Errors.try_
+        begin fun () ->
+        let ast = Parser_heap.ParserHeap.find_unsafe fn in
+        let funs, classes, typedefs, consts = make_funs_classes ast in
+        let nenv =
+          Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts
+        in
+        let all_classes = List.fold_right begin fun (_, cname) acc ->
+          SMap.add cname (SSet.singleton fn) acc
+        end classes SMap.empty in
+        Typing_decl.make_env nenv all_classes fn;
+        List.iter (fun (_, fname) -> type_fun fname fn) funs;
+        List.iter (fun (_, cname) -> type_class cname fn) classes;
+        error []
+        end
+        begin fun l ->
+          error [l]
+        end
 
 let hh_auto_complete fn =
   AutocompleteService.attach_hooks();
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let f = Naming.fun_ nenv f in
-          Typing.fun_def tenv (snd f.Nast.f_name) f
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let c = Naming.class_ nenv c in
-          Typing_decl.class_decl c;
-          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-          res
-      | _ -> ()
-    end ast;
+    Errors.ignore_ begin fun () ->
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let f = Naming.fun_ nenv f in
+            Typing.fun_def tenv (snd f.Nast.f_name) f
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let c = Naming.class_ nenv c in
+            Typing_decl.class_decl c;
+            let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+            res
+        | _ -> ()
+      end ast;
+    end;
     let completion_type_str =
       match !Autocomplete.argument_global_type with
       | Some Autocomplete.Acid -> "id"
@@ -211,38 +234,40 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_target := Some (line, char);
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
-    List.iter begin fun def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let f = Naming.fun_ nenv f in
-          Find_refs.process_find_refs None
-              (snd f.Nast.f_name) (fst f.Nast.f_name);
-          Typing.fun_def tenv (snd f.Nast.f_name) f
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let tenv = Typing_env.empty fn in
-          let c = Naming.class_ nenv c in
-          if !Find_refs.find_method_at_cursor_target <> None
-          then begin
-            Find_refs.process_class_ref (fst c.Nast.c_name)
-              (snd c.Nast.c_name) None
-          end;
-          let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
-          List.iter begin fun method_ ->
-            Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-              (snd method_.Nast.m_name) (fst method_.Nast.m_name)
-          end all_methods;
-          (match c.Nast.c_constructor with
-          | None -> ()
-          | Some method_ ->
+    Errors.ignore_ begin fun () ->
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let f = Naming.fun_ nenv f in
+            Find_refs.process_find_refs None
+                (snd f.Nast.f_name) (fst f.Nast.f_name);
+            Typing.fun_def tenv (snd f.Nast.f_name) f
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let tenv = Typing_env.empty fn in
+            let c = Naming.class_ nenv c in
+            if !Find_refs.find_method_at_cursor_target <> None
+            then begin
+              Find_refs.process_class_ref (fst c.Nast.c_name)
+                (snd c.Nast.c_name) None
+            end;
+            let all_methods = c.Nast.c_methods @ c.Nast.c_static_methods in
+            List.iter begin fun method_ ->
               Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                  "__construct" (fst method_.Nast.m_name));
-          let res = Typing.class_def tenv (snd c.Nast.c_name) c in
-          res
-      | _ -> ()
-    end ast;
+                (snd method_.Nast.m_name) (fst method_.Nast.m_name)
+            end all_methods;
+            (match c.Nast.c_constructor with
+            | None -> ()
+            | Some method_ ->
+                Find_refs.process_find_refs (Some (snd c.Nast.c_name))
+                    "__construct" (fst method_.Nast.m_name));
+            let res = Typing.class_def tenv (snd c.Nast.c_name) c in
+            res
+        | _ -> ()
+      end ast;
+    end;
     let result =
       match !Find_refs.find_method_at_cursor_result with
       | Some res ->
@@ -323,7 +348,22 @@ let hh_find_lvar_refs file line char =
   try
     clean();
     Find_refs.find_refs_target := Some (line, char);
-    ignore (hh_check ~check_mode:false file);
+    let ast = Parser_heap.ParserHeap.find_unsafe file in
+    Errors.ignore_ begin fun () ->
+      (* We only need to name to find references to locals *)
+      List.iter begin fun def ->
+        match def with
+        | Ast.Fun f ->
+            let nenv = Naming.empty in
+            let _ = Naming.fun_ nenv f in
+            ()
+        | Ast.Class c ->
+            let nenv = Naming.empty in
+            let _ = Naming.class_ nenv c in
+            ()
+        | _ -> ()
+      end ast;
+    end;
     let res_list = List.map Pos.json !Find_refs.find_refs_result in
     clean();
     output_json (JAssoc [ "positions",      JList res_list;
@@ -384,6 +424,7 @@ let hh_hack_coloring fn =
                         match input with
                         | (ColorFile.Unchecked_code, str) -> ("err", str)
                         | (ColorFile.Checked_code, str) -> ("checked", str)
+                        | (ColorFile.Partially_checked_code, str) -> ("partial", str)
                         | (ColorFile.Keyword, str) -> ("kwd", str)
                         | (ColorFile.Fun, str) -> ("fun", str)
                         | (ColorFile.Default, str) -> ("default", str)
@@ -413,8 +454,22 @@ let hh_get_method_calls fn =
                       ])
 
 let hh_arg_info fn line char =
+  (* all the hooks for arg info happen in typing,
+   * so we only need to run typing*)
   ArgumentInfoService.attach_hooks (line, char);
-  ignore (hh_check ~check_mode:false fn);
+  let _, funs, classes = Hashtbl.find globals fn in
+  Errors.ignore_ begin fun () ->
+    List.iter begin fun (_, f_name) ->
+      let tenv = Typing_env.empty fn in
+      let f = Naming_heap.FunHeap.find_unsafe f_name in
+      Typing.fun_def tenv f_name f
+    end funs;
+    List.iter begin fun (_, c_name) ->
+      let tenv = Typing_env.empty fn in
+      let c = Naming_heap.ClassHeap.find_unsafe c_name in
+      Typing.class_def tenv c_name c
+    end classes;
+  end;
   let result = ArgumentInfoService.get_result() in
   let result = match result with
     | Some result -> result
@@ -458,6 +513,7 @@ let js_wrap_string_2 func =
 let () =
   Js.Unsafe.set Js.Unsafe.global "hh_check_file" (js_wrap_string_1 hh_check);
   Js.Unsafe.set Js.Unsafe.global "hh_add_file" (js_wrap_string_2 hh_add_file);
+  Js.Unsafe.set Js.Unsafe.global "hh_add_dep" (js_wrap_string_2 hh_add_dep);
   Js.Unsafe.set Js.Unsafe.global "hh_auto_complete" (js_wrap_string_1 hh_auto_complete);
   Js.Unsafe.set Js.Unsafe.global "hh_get_deps" (Js.wrap_callback hh_get_deps);
   Js.Unsafe.set Js.Unsafe.global "hh_infer_type" (js_wrap_string_1 hh_infer_type);

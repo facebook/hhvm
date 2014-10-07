@@ -27,8 +27,9 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cse.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -125,9 +126,10 @@ struct IRBuilder {
    */
 
   /*
-   * Start the given block.
+   * Start the given block.  Returns whether or not it succeeded.  A
+   * failure may occur in case the block turned out to be unreachable.
    */
-  void startBlock(Block* block, const BCMarker& marker);
+  bool startBlock(Block* block, const BCMarker& marker);
 
   /*
    * Create a new block corresponding to bytecode control flow.

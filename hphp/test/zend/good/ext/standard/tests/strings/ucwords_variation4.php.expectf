@@ -22,16 +22,16 @@ string(10) "Jack's Pen"
 -- Iteration 11 --
 string(14) "P't'y 't It's "
 -- Iteration 12 --
-string(24) "	Testing	Testing	Ucwords"
+string(24) "%r\x09%rTesting%r\x09%rTesting%r\x09%rUcwords"
 -- Iteration 13 --
-string(26) "\ttesting\ttesting	Ucwords"
+string(26) "\ttesting\ttesting%r\x09%rUcwords"
 -- Iteration 14 --
 string(31) "Testing
 Ucwords Testing Ucwords"
 -- Iteration 15 --
 string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --
-string(34) "TestingUcwords  Testing 
+string(34) "Testing%r\x0c%rUcwords %r\x0c%r Testing 
 Ucwords"
 -- Iteration 17 --
 string(36) "Testing\fucwords \f Testing 
@@ -45,7 +45,7 @@ Ucwords
 -- Iteration 19 --
 string(39) "\ntesting\nucwords\n Testing \n Ucwords"
 -- Iteration 20 --
-string(18) "UsingVerticalTab"
+string(18) "Using%r\x0b%rVertical%r\x0b%rTab"
 -- Iteration 21 --
 string(20) "Using\vvertical\vtab"
 -- Iteration 22 --
@@ -53,7 +53,7 @@ string(42) "T@@#$% %test ^test &test *test +test -test"
 -- Iteration 23 --
 string(40) "!test ~test `test` =test= @test@test.com"
 -- Iteration 24 --
-string(37) "/test/r	Est\ucwords	\y\y\u \yy\ /uu/"
+string(37) "/test/r%r\x09%rEst\ucwords%r\x09%r\y\y\u%r\x03%r \yy\ /uu/"
 -- Iteration 25 --
 string(16) "!@#$%^&*()_+=-`~"
 Done

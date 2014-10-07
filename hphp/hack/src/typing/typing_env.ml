@@ -565,6 +565,9 @@ module FakeMembers = struct
       | CIparent -> "parent"
       | CIself -> "self"
       | CIstatic -> "static"
+      | CIvar (_, This) -> "$this"
+      | CIvar (_, Lvar (_, x)) -> "$"^string_of_int(x)
+      | CIvar _ -> assert false
       | CI (_, x) -> x
     in
     class_name^"::"^member_name

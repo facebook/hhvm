@@ -105,6 +105,9 @@ struct TransFlags {
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
 
+// Enumeration representing the various areas that we emit code.
+enum class AreaIndex : unsigned { Main, Cold, Frozen, Max };
+
 }}
 
 #endif

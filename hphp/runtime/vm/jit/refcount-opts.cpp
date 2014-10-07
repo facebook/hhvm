@@ -22,15 +22,16 @@
 #include "folly/Optional.h"
 #include "folly/MapUtil.h"
 
-#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -503,6 +504,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
                     IRUnit& unit, FrameState&& frameState)
     : m_unit(unit)
     , m_blocks(*blocks)
+    , m_loopHeaders(findLoopHeaders(unit))
     , m_block(nullptr)
     , m_inst(nullptr)
     , m_ids(*ids)
@@ -520,14 +522,37 @@ struct SinkPointAnalyzer : private LocalStateHook {
       ITRACE(3, "entering B{}\n", block->id());
       Indent _i;
 
+      auto const oldBlock = m_block;
+
+      // mergeStates depends on us having set m_block as the new block.
       m_block = block;
-      m_frameState.startBlock(block, block->front().marker());
 
       if (block != m_blocks.front()) {
         assert(m_savedStates.count(block) == 1);
         m_state = mergeStates(std::move(m_savedStates[block]));
         m_savedStates.erase(block);
       }
+
+      // Hack so that FrameState::startBlock can place sink points correctly
+      // if it ends up consuming locals.
+      if (m_loopHeaders.count(block) != 0) {
+        // oldBlock must be the loop pre-header as we're processing the unit
+        // in reverse postorder.
+        //
+        // TODO(#4887242): Get pre-header from Loop data structure.
+        assert(oldBlock->numSuccs() == 1);
+        assert(oldBlock->taken() == block);
+
+        // Need to set m_inst as startBlock will consume values upon entering
+        // a loop header, and it will need to know where to place the sink
+        // points.
+        m_inst = &oldBlock->back();
+      }
+
+      // startBlock will set local values to nullptr if we're entering a loop,
+      // so this has to happen after we merge in our incoming states.
+      m_frameState.startBlock(block, block->front().marker(), this);
+      m_inst = nullptr;
 
       for (auto& inst : *block) {
         m_inst = &inst;
@@ -675,8 +700,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
     jit::hash_map<SSATmp*, IncomingValue> mergedValues;
     for (auto const& inState : states) {
       if (inState.state.frames != firstFrames) {
+        // Task #5216936: add support for merging states with
+        // different FrameStacks, and get rid of the TRACE_PUNT below.
         if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-          throw ControlFlowFailedExc(__FILE__, __LINE__);
+          TRACE_PUNT("refcount-opts needs support for merging states with "
+                     "different FrameStacks");
         }
         always_assert(false &&
           "merging states with different FrameStacks is not supported");
@@ -1359,7 +1387,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // the main $this for the frame and indicate that we're tracking a
         // reference to it.
         frame.mainThis = m_inst->dst();
-        m_state.values[frame.mainThis].realCount = 1;
+
+        auto& valState = m_state.values[frame.mainThis];
+        valState.realCount = 1;
       }
       return;
     }
@@ -1489,6 +1519,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
   /* The IRUnit being processed and its blocks */
   const IRUnit& m_unit;
   const BlockList& m_blocks;
+
+  /* The set of loop headers in the unit. */
+  BlockSet m_loopHeaders;
 
   /* Current block and current instruction */
   const Block* m_block;
@@ -1830,9 +1863,13 @@ void eliminateTakes(const BlockList& blocks) {
 void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
-  auto const changed = splitCriticalEdges(unit);
-  if (changed) {
+
+  if (splitCriticalEdges(unit)) {
     printUnit(6, unit, "after splitting critical edges for refcount opts");
+  }
+
+  if (insertLoopPreHeaders(unit)) {
+    printUnit(6, unit, "after inserting loop pre-headers for refcount opts");
   }
 
   auto const blocks = rpoSortCfg(unit);

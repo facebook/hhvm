@@ -240,7 +240,25 @@ bool coerceFCallArgs(TypedValue* args,
     COERCE_OR_CAST(kind, kind)                          \
     break; /* end of case */
 
-    switch (pi.builtinType) {
+    auto tc = pi.typeConstraint;
+    auto targetType = pi.builtinType;
+    if (tc.isNullable() && !func->byRef(i)) {
+      if (IS_NULL_TYPE(args[-i].m_type)) {
+        // No need to coerce when passed a null for a nullable type
+        continue;
+      }
+      // Arg isn't null, so treat it like the underlying type for coersion
+      // purposes.  The ABI-passed type will still be mixed/Variant.
+      targetType = tc.underlyingDataType();
+    }
+
+    // Skip tvCoerceParamTo*() call if we're already the right type
+    if ((args[-i].m_type == targetType) ||
+        (IS_STRING_TYPE(args[-i].m_type) && IS_STRING_TYPE(targetType))) {
+      continue;
+    }
+
+    switch (targetType) {
       CASE(Boolean)
       CASE(Int64)
       CASE(Double)
@@ -271,7 +289,7 @@ bool coerceFCallArgs(TypedValue* args,
 
 static inline int32_t minNumArgs(ActRec *ar) {
   auto func = ar->m_func;
-  auto numArgs = func->numParams();
+  auto numArgs = func->numNonVariadicParams();
   int32_t num = numArgs;
   const Func::ParamInfoVec& paramInfo = func->params();
   while (num &&

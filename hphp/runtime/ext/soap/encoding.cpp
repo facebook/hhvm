@@ -22,9 +22,9 @@
 
 #include "folly/Conv.h"
 
-#include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
@@ -906,7 +906,7 @@ static Variant to_zval_hexbin(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
     String str =
-      f_hex2bin(String((const char*)data->children->content));
+      HHVM_FN(hex2bin)(String((const char*)data->children->content));
     if (str.isNull()) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
@@ -1010,7 +1010,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, const Variant& data, int sty
   xmlAddChild(parent, ret);
   FIND_ZVAL_NULL(data, ret, style);
 
-  String str = f_bin2hex(data.toString());
+  String str = HHVM_FN(bin2hex)(data.toString());
   xmlAddChild(ret, xmlNewTextLen(BAD_CAST(str.data()), str.size()));
 
   if (style == SOAP_ENCODED) {
@@ -1780,7 +1780,8 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, const Variant& data_, int st
           sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
           sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
           sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
-        xmlParam = master_to_xml(sdlType->encode, data, style, parent);
+        xmlParam = master_to_xml_int(sdlType->encode, data, style,
+                                     parent, false);
       } else {
         Variant tmp;
         if (get_zval_property(data, "_", &tmp)) {

@@ -18,7 +18,6 @@
 #define incl_HPHP_RUNTIME_VM_JIT_GUARD_RELAXATION_H_
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/vm/jit/ir.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -26,8 +25,9 @@
 
 namespace HPHP { namespace jit {
 
-struct SSATmp;
+struct GuardConstraints;
 struct IRUnit;
+struct SSATmp;
 
 enum RelaxGuardsFlags {
   RelaxNormal =      0,

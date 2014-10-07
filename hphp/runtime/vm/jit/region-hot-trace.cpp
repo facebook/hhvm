@@ -113,26 +113,6 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       }
     }
 
-    // Break trace if translation tid cannot follow the execution of
-    // the entire translation prevId.  This can only happen if the
-    // execution of prevId takes a side exit that leads to the
-    // execution of tid.
-    if (prevId != kInvalidTransID) {
-      Op* lastInstr = profData->transLastInstr(prevId);
-      const Unit* unit = profData->transFunc(prevId)->unit();
-      OffsetSet succOffs = instrSuccOffsets(lastInstr, unit);
-      if (!succOffs.count(profData->transSrcKey(tid).offset())) {
-        if (HPHP::Trace::moduleEnabled(HPHP::Trace::pgo, 2)) {
-          FTRACE(2, "selectHotTrace: WARNING: Breaking region @: {}\n",
-                 show(*region));
-          FTRACE(2, "selectHotTrace: next translation selected: tid = {}\n{}\n",
-                 tid, show(*blockRegion));
-          FTRACE(2, "\nsuccOffs = {}\n", folly::join(", ", succOffs));
-        }
-        break;
-      }
-    }
-
     bool hasPredBlock = !region->empty();
     RegionDesc::BlockId predBlockId = (hasPredBlock ?
                                        region->blocks().back().get()->id() : 0);

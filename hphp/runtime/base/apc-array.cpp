@@ -18,6 +18,7 @@
 #include "folly/Bits.h"
 
 #include "hphp/runtime/base/apc-handle.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/apc-string.h"
@@ -25,7 +26,7 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 
@@ -43,7 +44,6 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       String s = apc_serialize(arr);
       APCHandle* handle = APCString::MakeShared(KindOfArray, s.get(), size);
       handle->setSerializedArray();
-      handle->mustCache();
       return handle;
     }
 
@@ -90,9 +90,6 @@ APCHandle* APCArray::MakeShared(ArrayData* arr,
       auto val = APCHandle::Create(it.secondRef(), s, false, true,
                                    unserializeObj);
       size += s;
-      if (val->shouldCache()) {
-        ret->mustCache();
-      }
       ret->add(key, val);
     }
   } catch (...) {
@@ -119,9 +116,6 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
                                          s, false, true,
                                          unserializeObj);
       size += s;
-      if (val->shouldCache()) {
-        ret->mustCache();
-      }
       ret->vals()[i++] = val;
     }
     assert(i == num_elems);
@@ -133,19 +127,19 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
   return ret->getHandle();
 }
 
-Variant APCArray::MakeArray(APCHandle* handle) {
-  if (handle->getUncounted()) {
+Variant APCArray::MakeArray(const APCHandle* handle) {
+  if (handle->isUncounted()) {
     return APCTypedValue::fromHandle(handle)->getArrayData();
-  } else if (handle->getSerializedArray()) {
-    StringData* serArr = APCString::fromHandle(handle)->getStringData();
+  } else if (handle->isSerializedArray()) {
+    auto const serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());
   }
   return APCLocalArray::Make(APCArray::fromHandle(handle))->asArrayData();
 }
 
 void APCArray::Delete(APCHandle* handle) {
-  handle->getSerializedArray() ? delete APCString::fromHandle(handle)
-                               : delete APCArray::fromHandle(handle);
+  handle->isSerializedArray() ? delete APCString::fromHandle(handle)
+                              : delete APCArray::fromHandle(handle);
 }
 
 APCArray::~APCArray() {
@@ -172,13 +166,13 @@ void APCArray::add(APCHandle *key, APCHandle *val) {
   bucket->val = val;
   m.m_num++;
   int hash_pos;
-  if (!IS_REFCOUNTED_TYPE(key->getType())) {
-    APCTypedValue *k = APCTypedValue::fromHandle(key);
-    hash_pos = (key->is(KindOfInt64) ?
+  if (!IS_REFCOUNTED_TYPE(key->type())) {
+    auto const k = APCTypedValue::fromHandle(key);
+    hash_pos = (key->type() == KindOfInt64 ?
         k->getInt64() : k->getStringData()->hash()) & m.m_capacity_mask;
   } else {
-    assert(key->is(KindOfString));
-    APCString *k = APCString::fromHandle(key);
+    assert(key->type() == KindOfString);
+    auto const k = APCString::fromHandle(key);
     hash_pos = k->getStringData()->hash() & m.m_capacity_mask;
   }
 
@@ -192,15 +186,15 @@ ssize_t APCArray::indexOf(const StringData* key) const {
   ssize_t bucket = hash()[h & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    if (!IS_REFCOUNTED_TYPE(b[bucket].key->getType())) {
-      APCTypedValue *k = APCTypedValue::fromHandle(b[bucket].key);
-      if (!b[bucket].key->is(KindOfInt64) &&
+    if (!IS_REFCOUNTED_TYPE(b[bucket].key->type())) {
+      auto const k = APCTypedValue::fromHandle(b[bucket].key);
+      if (b[bucket].key->type() != KindOfInt64 &&
           key->same(k->getStringData())) {
         return bucket;
       }
     } else {
-      assert(b[bucket].key->is(KindOfString));
-      APCString *k = APCString::fromHandle(b[bucket].key);
+      assert(b[bucket].key->type() == KindOfString);
+      auto const k = APCString::fromHandle(b[bucket].key);
       if (key->same(k->getStringData())) {
         return bucket;
       }
@@ -214,7 +208,7 @@ ssize_t APCArray::indexOf(int64_t key) const {
   ssize_t bucket = hash()[key & m.m_capacity_mask];
   Bucket* b = buckets();
   while (bucket != -1) {
-    if (b[bucket].key->is(KindOfInt64) &&
+    if (b[bucket].key->type() == KindOfInt64 &&
         key == APCTypedValue::fromHandle(b[bucket].key)->getInt64()) {
       return bucket;
     }

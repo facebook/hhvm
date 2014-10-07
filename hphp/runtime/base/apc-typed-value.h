@@ -81,34 +81,33 @@ public:
   }
 
   bool getBoolean() const {
-    assert(m_handle.is(KindOfBoolean));
+    assert(m_handle.type() == KindOfBoolean);
     return m_data.num != 0;
   }
 
   int64_t getInt64() const {
-    assert(m_handle.is(KindOfInt64));
+    assert(m_handle.type() == KindOfInt64);
     return m_data.num;
   }
 
   double getDouble() const {
-    assert(m_handle.is(KindOfDouble));
+    assert(m_handle.type() == KindOfDouble);
     return m_data.dbl;
   }
 
   StringData* getStringData() const {
-    assert(m_handle.is(KindOfStaticString) ||
-           (m_handle.getUncounted() && m_handle.is(KindOfString)));
+    assert(m_handle.type() == KindOfStaticString ||
+           (m_handle.isUncounted() && m_handle.type() == KindOfString));
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(m_handle.getUncounted() && m_handle.is(KindOfArray));
+    assert(m_handle.isUncounted() && m_handle.type() == KindOfArray);
     return m_data.arr;
   }
 
   const Variant& asCVarRef() const {
     // Must be non-refcounted types
-    assert(m_handle.m_shouldCache == false);
     assert(m_handle.m_flags == 0);
     assert(!IS_REFCOUNTED_TYPE(m_handle.m_type));
     return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
@@ -126,10 +125,10 @@ private:
 
   /*
    * Keep the object layout binary compatible with Variant for primitive types.
-   * For non-refcounted types, m_shouldCache and m_flags are guaranteed to be 0,
-   * and other parts of runtime will not touch the count.
+   * For non-refcounted types m_flags is guaranteed to be 0, and other parts of
+   * runtime will not touch the count.
    *
-   * Note that this is assuming a little-endian system: m_shouldCache and
+   * Note that this is assuming a little-endian system: m_unused_space and
    * m_flags have to overlay the higher-order bits of TypedValue::m_type.
    */
 

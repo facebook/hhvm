@@ -8,6 +8,21 @@ shift;
 
 SYSTEMLIB=$INSTALL_DIR/systemlib.php
 
+lib=""
+if [ "$1" = "--lib" ] ; then
+  lib=1
+  shift;
+  SYSTEMLIB_ROOT=$INSTALL_DIR/$1
+  SYSTEMLIB=$SYSTEMLIB_ROOT.php
+  shift;
+fi
+
+prefix=""
+if [ "$1" = "--rel" ] ; then
+  prefix=$INSTALL_DIR/
+  shift
+fi
+
 # If we put the line we're generating into this file,
 # then the linter will think the generator itself
 # is generated.  Encode it into a variable for safe keeping.
@@ -16,7 +31,8 @@ AT="@"
 echo "<?hh" > ${SYSTEMLIB}
 echo "// {$AT}generated" >> ${SYSTEMLIB}
 
-for i in $@; do
+for ii in $@; do
+  i=$prefix$ii
   if [ ! -f "$i" ]; then
     echo "File $i is in the index, but does not exist" >&2
     exit 1
@@ -28,8 +44,7 @@ for i in $@; do
   BNHHAS=`basename $BN .hhas`
   if [ "$BNPHP.php" = "$BN" ]; then
     # First, .php files are included with their open tags stripped
-    HEADER=`head -1 $i | cut -c 1-5`
-    if [ ! "${HEADER}" = "<?php" ]; then
+    if head -1 $i | grep -qv '^<?\(php\|hh\)'; then
       echo "Unexpected header in file $i" >&2
       exit 1
     fi
@@ -37,20 +52,25 @@ for i in $@; do
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
       echo "namespace {" >> ${SYSTEMLIB}
     fi
-    cat $i | grep -v '<?php' >> ${SYSTEMLIB}
+    tail -n +2 $i >> ${SYSTEMLIB}
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
       echo "}" >> ${SYSTEMLIB}
     fi
   else
     if [ ! "$BNHHAS.hhas" = "$BN" ]; then
-      echo "File $i is neither PHP not HHAS source" >&2
+      echo "File $i is neither PHP nor HHAS source" >&2
       exit 1
     fi
   fi
 done
 
 echo "" >> ${SYSTEMLIB}
-echo "<?hhas" >> ${SYSTEMLIB}
+if [ -n "$lib" ] ; then
+  SYSTEMLIB=$SYSTEMLIB_ROOT.hhas
+  echo > ${SYSTEMLIB}
+else
+  echo "<?hhas" >> ${SYSTEMLIB}
+fi
 
 # Then .hhas files are included en-masse
 for i in $@; do
@@ -58,6 +78,6 @@ for i in $@; do
   BNHHAS=`basename $BN .hhas`
   if [ "$BNHHAS.hhas" = "$BN" ]; then
     echo "" >> ${SYSTEMLIB}
-    cat $i >> ${SYSTEMLIB}
+    cat $prefix$i >> ${SYSTEMLIB}
   fi
 done

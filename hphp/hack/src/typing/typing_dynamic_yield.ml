@@ -54,14 +54,6 @@ let rec decl env methods =
         } in
         let acc = add gen_name {ce with ce_type = gen_ty} acc in
 
-        (* Define prepareFoo(), which is always Awaitable<void> *)
-        let prepare_name = "prepare"^base in
-        let prepare_r = Reason.Rdynamic_yield (p, ft.ft_pos, prepare_name, name) in
-        let prepare_ty = ce_r, Tfun {ft with
-          ft_ret =  prepare_r, Tapply ((p, "\\Awaitable"), [r, Tprim Nast.Tvoid])
-        } in
-        let acc = add prepare_name {ce with ce_type = prepare_ty} acc in
-
         (* Define getFoo(), which is T if yieldFoo() is Awaitable<T>. As an
          * annoying special-case, unfinalize this, since the runtime allows you
          * to "override" a yieldFoo() with a getFoo(), and people unfortunately

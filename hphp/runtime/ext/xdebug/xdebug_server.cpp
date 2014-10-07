@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
@@ -827,7 +827,7 @@ void XDebugServer::parseInput(String& cmd, Array& args) {
         if (args[opt].isNull()) {
           size_t size = ptr - value;
           StringData* val_data = StringData::Make(value, size, CopyString);
-          args.set(opt, f_stripcslashes(String(val_data)));
+          args.set(opt, HHVM_FN(stripcslashes)(String(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
           throw ERROR_DUP_ARG;

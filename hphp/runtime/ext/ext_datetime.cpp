@@ -177,7 +177,7 @@ Variant c_DateTime::ti_createfromformat(const String& format,
                                         const Object& timezone /*= null_object */) {
   c_DateTime *datetime = NEWOBJ(c_DateTime);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
-  datetime->m_dt = NEWOBJ(DateTime(curr, false));
+  datetime->m_dt = NEWOBJ(DateTime)(curr, false);
   if (!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
                                  format.data(), false)) {
     return false;

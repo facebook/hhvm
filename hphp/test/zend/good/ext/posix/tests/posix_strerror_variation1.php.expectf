@@ -1,0 +1,101 @@
+*** Testing posix_strerror() : usage variations ***
+
+Notice: %s
+
+Notice: %s
+
+Arg value 10.5 
+string
+
+Arg value -10.5 
+string
+
+Arg value 101234567000 
+string
+
+Arg value 1.07654321E-9 
+string
+
+Arg value 0.5 
+string
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+boolean
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+boolean
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+boolean
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+boolean
+
+Notice: %s
+
+Arg value Array 
+
+Warning: %s
+boolean
+
+Arg value  
+string
+
+Arg value  
+string
+
+Arg value 1 
+string
+
+Arg value  
+string
+
+Arg value 1 
+string
+
+Arg value  
+string
+
+Arg value  
+
+Warning: %s
+boolean
+
+Arg value  
+
+Warning: %s
+boolean
+
+Arg value string 
+
+Warning: %s
+boolean
+
+Arg value string 
+
+Warning: %s
+boolean
+
+Arg value  
+string
+
+Arg value  
+string
+
+Catchable fatal error: %s

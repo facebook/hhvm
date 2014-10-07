@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -165,7 +164,7 @@ HttpServer::HttpServer()
     ReplayTransport rt;
     rt.replayInput(hdf);
     HttpRequestHandler handler(0);
-    handler.handleRequest(&rt);
+    handler.run(&rt);
     int code = rt.getResponseCode();
     if (code == 200) {
       Logger::Info("StartupDocument %s returned 200 OK: %s",

@@ -165,6 +165,12 @@ type env = {
      *)
     keep_source_pos : bool             ;
     source_pos_l : source_pos list ref ;
+
+    (* When no_trailing_commas is false (default), multiline comma separated items
+      include a trailing comma, when it is false, we omit trailing commas. The
+      standard php parser does not support trailing commas, but hhvm does.
+    *)
+    no_trailing_commas : bool             ;
   }
 
 (*****************************************************************************)
@@ -189,34 +195,35 @@ type saved_env = {
     sv_source_pos_l  : source_pos list     ;
   }
 
-let empty lexbuf from to_ keep_source_pos = {
-  margin     = ref 0             ;
-  last       = ref Newline       ;
-  last_token = ref Terror        ;
-  last_str   = ref ""            ;
-  last_out   = ref ""            ;
-  buffer     = Buffer.create 256 ;
-  lexbuf     = lexbuf            ;
-  lb_line    = ref 1             ;
-  priority   = 0                 ;
-  char_pos   = ref 0             ;
-  abs_pos    = ref 0             ;
-  char_size  = 80                ;
-  char_break = 80                ;
-  break_on   = max_int           ;
-  line       = ref 0             ;
-  report_fit = false             ;
-  failed     = ref 0             ;
-  try_depth  = 0                 ;
-  one_line   = false             ;
-  in_attr    = false             ;
-  spaces     = ref 0             ;
-  stop       = max_int           ;
-  silent     = ref false         ;
-  from                           ;
-  to_                            ;
-  keep_source_pos                ;
-  source_pos_l  = ref []         ;
+let empty lexbuf from to_ keep_source_pos no_trailing_commas = {
+  margin     = ref 0                          ;
+  last       = ref Newline                    ;
+  last_token = ref Terror                     ;
+  last_str   = ref ""                         ;
+  last_out   = ref ""                         ;
+  buffer     = Buffer.create 256              ;
+  lexbuf     = lexbuf                         ;
+  lb_line    = ref 1                          ;
+  priority   = 0                              ;
+  char_pos   = ref 0                          ;
+  abs_pos    = ref 0                          ;
+  char_size  = 80                             ;
+  char_break = 80                             ;
+  break_on   = max_int                        ;
+  line       = ref 0                          ;
+  report_fit = false                          ;
+  failed     = ref 0                          ;
+  try_depth  = 0                              ;
+  one_line   = false                          ;
+  in_attr    = false                          ;
+  spaces     = ref 0                          ;
+  stop       = max_int                        ;
+  silent     = ref false                      ;
+  from                                        ;
+  to_                                         ;
+  keep_source_pos                             ;
+  source_pos_l  = ref []                      ;
+  no_trailing_commas = no_trailing_commas     ;
 }
 
 (* Saves all the references of the environment *)
@@ -226,7 +233,7 @@ let save_env env =
         char_size; silent; one_line;
         last_str; last_out; keep_source_pos; source_pos_l;
         break_on; line; failed; try_depth; spaces;
-        report_fit; in_attr; stop; from; to_} = env in
+        report_fit; in_attr; stop; from; to_; no_trailing_commas} = env in
   { sv_margin = !margin;
     sv_last = !last;
     sv_buffer = env.buffer;
@@ -1086,11 +1093,13 @@ let list_comma_multi_nl ~trailing element env =
   newline env
 
 let list_comma ?(trailing=true) element env =
+  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi ~trailing element)
 
 let list_comma_nl ?(trailing=true) element env =
+  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi_nl ~trailing element)
@@ -1114,7 +1123,7 @@ type 'a return =
   | Internal_error
   | Success of 'a
 
-let rec entry ~keep_source_metadata from to_ content k =
+let rec entry ~keep_source_metadata ~no_trailing_commas from to_ content k =
   let errorl, () = Errors.do_ begin fun () ->
     let _ = Parser_hack.program content in
     ()
@@ -1123,7 +1132,7 @@ let rec entry ~keep_source_metadata from to_ content k =
   then Parsing_error errorl
   else try
     let lb = Lexing.from_string content in
-    let env = empty lb from to_ keep_source_metadata in
+    let env = empty lb from to_ keep_source_metadata no_trailing_commas in
     header env;
     Success (k env)
   with
@@ -1183,7 +1192,7 @@ and typedef env = wrap env begin function
   | Tword when !(env.last_str) = "shape" ->
       last_token env;
       expect "(" env;
-      right env (list_comma_multi_nl ~trailing:true shape_type_elt);
+      right env (list_comma_multi_nl ~trailing:(not env.no_trailing_commas) shape_type_elt);
       expect ")" env
   | _ ->
       back env;
@@ -1298,7 +1307,7 @@ and fun_signature_multi env =
   seq env [opt_tok Tamp; name; hint_parameter; expect "("; newline];
   if next_token env = Trp
   then right env (fun env -> wrap env (fun _ -> back env))
-  else right env (list_comma_multi ~trailing:true fun_param);
+  else right env (list_comma_multi ~trailing:(not env.no_trailing_commas) fun_param);
   seq env [newline; expect ")"; return_type; use]
 
 and fun_param env =
@@ -2520,7 +2529,7 @@ and array_one_line env =
   list_comma_single array_element_single env
 
 and array_multi_line env =
-  list_comma_multi_nl ~trailing:true array_element_multi env
+  list_comma_multi_nl ~trailing:(not env.no_trailing_commas) array_element_multi env
 
 and array_element_single env =
   expr env;
@@ -2549,15 +2558,15 @@ and arrow_opt env =
 (*****************************************************************************)
 
 let region ~start ~end_ content =
-  entry ~keep_source_metadata:false start end_ content
+  entry ~keep_source_metadata:false start end_ content ~no_trailing_commas:false
     (fun env -> Buffer.contents env.buffer)
 
-let program content =
-  entry ~keep_source_metadata:false 0 max_int content
+let program ?no_trailing_commas:(no_trailing_commas = false) content =
+  entry ~keep_source_metadata:false 0 max_int content ~no_trailing_commas:no_trailing_commas
     (fun env -> Buffer.contents env.buffer)
 
 let program_with_source_metadata content =
-  entry ~keep_source_metadata:true 0 max_int content begin
+  entry ~keep_source_metadata:true 0 max_int content ~no_trailing_commas:false begin
     fun env ->
       Buffer.contents env.buffer, List.rev !(env.source_pos_l)
   end

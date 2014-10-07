@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend.h"
 #include "hphp/runtime/ext_zend_compat/php-src/TSRM/TSRM.h"
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_exceptions.h"
+#include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_globals.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -40,6 +41,14 @@ void zBoxAndProxy(TypedValue* arg) {
     }
     inner->m_data.parr = ProxyArray::Make(inner_arr);
   }
+}
+
+static void zend_wrap_func_cleanup() {
+    ZendExecutionStack::popHHVMStack();
+    if (EG(exception)) {
+      zval_ptr_dtor(&EG(exception));
+      EG(exception) = NULL;
+    }
 }
 
 TypedValue* zend_wrap_func(ActRec* ar) {
@@ -86,10 +95,10 @@ TypedValue* zend_wrap_func(ActRec* ar) {
       TSRMLS_CC
     );
   } catch (...) {
-    ZendExecutionStack::popHHVMStack();
+    zend_wrap_func_cleanup();
     throw;
   }
-  ZendExecutionStack::popHHVMStack();
+  zend_wrap_func_cleanup();
 
   // If an exception was caught, rethrow it
   ZendExceptionStore& exceptionStore = ZendExceptionStore::getInstance();

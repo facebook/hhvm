@@ -22,12 +22,10 @@
 #include <iosfwd>
 
 namespace HPHP { namespace jit {
-namespace x64 {
 struct Vunit;
 struct Vinstr;
 struct Vblock;
 struct Vreg;
-}
 struct Abi;
 
 // Vlabel wraps a block number
@@ -57,8 +55,7 @@ private:
   unsigned n; // index in Vunit::reglists
 };
 
-enum class VregKind : uint8_t { Any, Gpr, Simd };
-enum class AreaIndex: unsigned { Main, Cold, Frozen, Max };
+enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
 // holds information generated while assembling final code;
 // designed to outlive instances of Vunit and Vasm.
@@ -72,21 +69,22 @@ struct Vmeta {
 };
 
 // passes
-void allocateRegisters(x64::Vunit&, const Abi&);
-void optimizeJmps(x64::Vunit&);
-void removeDeadCode(x64::Vunit&);
-void foldImms(x64::Vunit&);
+void allocateRegisters(Vunit&, const Abi&);
+void optimizeJmps(Vunit&);
+void removeDeadCode(Vunit&);
+void foldImms(Vunit&);
 
 /*
  * Get the successors of a block or instruction. If given a non-const
  * reference, the resulting Range will allow mutation of the Vlabels.
  */
-folly::Range<Vlabel*> succs(x64::Vinstr& inst);
-folly::Range<Vlabel*> succs(x64::Vblock& block);
-folly::Range<const Vlabel*> succs(const x64::Vinstr& inst);
-folly::Range<const Vlabel*> succs(const x64::Vblock& block);
+folly::Range<Vlabel*> succs(Vinstr& inst);
+folly::Range<Vlabel*> succs(Vblock& block);
+folly::Range<const Vlabel*> succs(const Vinstr& inst);
+folly::Range<const Vlabel*> succs(const Vblock& block);
 
-jit::vector<Vlabel> sortBlocks(const x64::Vunit& unit);
+jit::vector<Vlabel> sortBlocks(const Vunit& unit);
+jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
 }}
 #endif

@@ -6,4 +6,4 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
 	die("No php executable defined\n");
 }
-?>
+?>

@@ -30,8 +30,10 @@ public:
 public:
   explicit AdminRequestHandler(int timeout);
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport);
-  virtual void abortRequest(Transport *transport);
+  void setupRequest(Transport* transport) override;
+  void teardownRequest(Transport* transport) noexcept override;
+  void handleRequest(Transport *transport) override;
+  void abortRequest(Transport *transport) override;
 
 private:
   bool handleCheckRequest  (const std::string &cmd, Transport *transport);

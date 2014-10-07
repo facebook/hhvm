@@ -52,14 +52,14 @@ array(0) {
 }
 -- Iteration 8 --
 array(2) {
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
   ["pen
 "]=>
   int(33)
 }
 array(2) {
-  ["	Hello"]=>
+  ["%r\x09%rHello"]=>
   int(111)
   ["pen
 "]=>

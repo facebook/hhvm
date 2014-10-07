@@ -39,9 +39,10 @@
 
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/print.h"
 
 // Include last to localize effects to this file
@@ -179,15 +180,12 @@ IRTranslator::translateBranchOp(const NormalizedInstruction& i) {
   auto jmpFlags = instrJmpFlags(i);
 
   if (i.nextOffset == takenOffset) {
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "hottrace");
     // invert the branch
     if (op == OpJmpZ) {
       HHIR_EMIT(JmpNZ, fallthruOffset, jmpFlags);
     } else {
       HHIR_EMIT(JmpZ,  fallthruOffset, jmpFlags);
-    }
-    if (i.nextOffset != takenOffset) {
-      always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg");
-      HHIR_EMIT(Jmp, takenOffset, jmpFlags);
     }
     return;
   }
@@ -918,6 +916,7 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
   assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
 
   ht.emitRB(RBTypeBytecodeStart, ni.source, 2);
+  ht.emitIncStat(Stats::Instr_TC, 1, false);
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {

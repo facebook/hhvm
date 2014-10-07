@@ -120,12 +120,6 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void TryStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_tryStmt) m_tryStmt->inferTypes(ar);
-  if (m_catches) m_catches->inferTypes(ar);
-  if (m_finallyStmt) m_finallyStmt->inferTypes(ar);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void TryStatement::outputCodeModel(CodeGenerator &cg) {

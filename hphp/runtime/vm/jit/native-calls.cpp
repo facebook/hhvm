@@ -23,12 +23,12 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/vm/jit/ir.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
-#include "hphp/runtime/ext/ext_array.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 
 namespace HPHP { namespace jit { namespace NativeCalls {
 
@@ -410,7 +410,6 @@ const CallInfo& CallMap::info(Opcode op) {
 
 } // NativeCalls
 
-namespace x64 {
 using namespace NativeCalls;
 ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
                     const IRInstruction* inst) {
@@ -439,36 +438,5 @@ ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
   }
   return argGroup;
 }
-} // X64
-namespace arm {
-using namespace NativeCalls;
-ArgGroup toArgGroup(const CallInfo& info, const RegAllocInfo& regs,
-                    const IRInstruction* inst) {
-  ArgGroup argGroup{inst, regs[inst]};
-  for (auto const& arg : info.args) {
-    switch (arg.type) {
-    case ArgType::SSA:
-      argGroup.ssa(arg.ival);
-      break;
-    case ArgType::TV:
-      argGroup.typedValue(arg.ival);
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.memberKeyS(arg.ival);
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.memberKeyIS(arg.ival);
-      break;
-    case ArgType::ExtraImm:
-      argGroup.imm(arg.extraFunc(inst));
-      break;
-    case ArgType::Imm:
-      argGroup.imm(arg.ival);
-      break;
-    }
-  }
-  return argGroup;
-}
-} // ARM
 
 } }

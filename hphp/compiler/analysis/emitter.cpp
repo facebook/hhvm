@@ -6907,7 +6907,16 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     e.FPushFuncD(numParams, methName);
   } else if (meth->getFunctionScope()->isStatic()) {
     emitClsIfSPropBase(e);
-    e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
+
+    auto classScope = meth->getClassScope();
+    if (classScope && classScope->isTrait()) {
+      e.String(methName);
+      e.Self();
+      fpiStart = m_ue.bcPos();
+      e.FPushClsMethodF(numParams);
+    } else {
+      e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
+    }
   } else {
     e.This();
     fpiStart = m_ue.bcPos();
@@ -7562,9 +7571,11 @@ void EmitterVisitor::emitClass(Emitter& e,
   Attr attr = cNode->isInterface() ? AttrInterface :
               cNode->isTrait()     ? AttrTrait     :
               cNode->isAbstract()  ? AttrAbstract  :
-              cNode->isFinal()     ? AttrFinal     :
-              cNode->isEnum()      ? AttrEnum      :
+              cNode->isEnum()      ? (AttrEnum | AttrFinal) :
                                      AttrNone;
+  if (cNode->isFinal()) {
+    attr = attr | AttrFinal;
+  }
   if (Option::WholeProgram) {
     if (!cNode->isRedeclaring() &&
         cNode->derivesFromRedeclaring() == Derivation::Normal) {
@@ -8957,7 +8968,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
 /*
  * This is the entry point for offline bytecode generation.
  */
-void emitAllHHBC(AnalysisResultPtr ar) {
+void emitAllHHBC(AnalysisResultPtr&& ar) {
   unsigned int threadCount = Option::ParserThreadCount;
   unsigned int nFiles = ar->getAllFilesVector().size();
   if (threadCount > nFiles) {
@@ -8978,7 +8989,7 @@ void emitAllHHBC(AnalysisResultPtr ar) {
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
 
-  auto setPreloadPriority = [ar](const std::string& f, int p) {
+  auto setPreloadPriority = [&ar](const std::string& f, int p) {
     auto fs = ar->findFileScope(f);
     if (fs) fs->setPreloadPriority(p);
   };
@@ -9053,6 +9064,9 @@ void emitAllHHBC(AnalysisResultPtr ar) {
                                        hhbc_ext_class_count);
   ues.push_back(std::move(nfunc));
   ues.push_back(std::move(ncls));
+
+  ar->finish();
+  ar.reset();
 
   if (!Option::UseHHBBC) {
     batchCommit(std::move(ues));

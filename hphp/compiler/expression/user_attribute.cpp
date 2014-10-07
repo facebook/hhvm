@@ -52,12 +52,6 @@ void UserAttribute::analyzeProgram(AnalysisResultPtr ar) {
   // do nothing
 }
 
-TypePtr UserAttribute::inferTypes(AnalysisResultPtr ar, TypePtr type,
-                                  bool coerce) {
-  assert(false);
-  return TypePtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void UserAttribute::outputCodeModel(CodeGenerator &cg) {

@@ -17,10 +17,12 @@
 #ifndef incl_HPHP_JIT_MUTATION_H_
 #define incl_HPHP_JIT_MUTATION_H_
 
-#include "hphp/runtime/vm/jit/ir.h"
-#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/block.h"
 
 namespace HPHP { namespace jit {
+
+struct IRInstruction;
+struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +52,6 @@ void cloneToBlock(const BlockList& blocks,
                   Block::iterator first,
                   Block::iterator last,
                   Block* target);
-
 
 /*
  * Move a range of IRInstructions to the front of a target block

@@ -64,9 +64,6 @@ void LabelStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void LabelStatement::inferTypes(AnalysisResultPtr ar) {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void LabelStatement::outputCodeModel(CodeGenerator &cg) {

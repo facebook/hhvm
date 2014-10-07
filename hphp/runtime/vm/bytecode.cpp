@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/repo.h"
@@ -52,6 +53,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/util/text-util.h"
@@ -72,13 +74,11 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_array.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
@@ -86,12 +86,15 @@
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/memory-profile.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/container-functions.h"
 
@@ -190,6 +193,10 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
     }
   }
   return ar->m_func->cls();
+}
+
+void frame_free_locals_no_hook(ActRec* fp) {
+  frame_free_locals_inl_no_hook<false>(fp, fp->func()->numLocals());
 }
 
 const StaticString s_call_user_func("call_user_func");
@@ -574,10 +581,22 @@ void flush_evaluation_stack() {
     RPCRequestHandler::cleanupState();
   }
 
+  if (!g_context.isNull()) {
+    /*
+     * It is possible to create a new thread, but then not use it
+     * because another thread became available and stole the job.
+     * If that thread becomes idle, it will have a g_context, and
+     * some smart allocated memory
+     */
+    hphp_memory_cleanup();
+  }
+
   if (!t_se.isNull()) {
     t_se->flush();
   }
   RDS::flush();
+
+  always_assert(MM().empty());
 }
 
 static std::string toStringElm(const TypedValue* tv) {
@@ -2323,120 +2342,6 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
-MethodInfoVM::~MethodInfoVM() {
-  for (std::vector<const ClassInfo::ParameterInfo*>::iterator it =
-       parameters.begin(); it != parameters.end(); ++it) {
-    if ((*it)->value != nullptr) {
-      free((void*)(*it)->value);
-    }
-  }
-}
-
-ClassInfoVM::~ClassInfoVM() {
-  for (auto& m : m_methodsVec) delete m;
-  for (auto& p : m_properties) delete p.second;
-  for (auto& c : m_constants)  delete c.second;
-}
-
-const ClassInfo::MethodInfo* ExecutionContext::findFunctionInfo(
-  const String& name) {
-  StringIMap<AtomicSmartPtr<MethodInfoVM> >::iterator it =
-    m_functionInfos.find(name);
-  if (it == m_functionInfos.end()) {
-    Func* func = Unit::loadFunc(name.get());
-    if (func == nullptr || func->builtinFuncPtr()) {
-      return nullptr;
-    }
-    AtomicSmartPtr<MethodInfoVM> &m = m_functionInfos[name];
-    m = new MethodInfoVM();
-    func->getFuncInfo(m.get());
-    return m.get();
-  } else {
-    return it->second.get();
-  }
-}
-
-const ClassInfo* ExecutionContext::findClassInfo(const String& name) {
-  if (name.empty()) return nullptr;
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
-    m_classInfos.find(name);
-  if (it == m_classInfos.end()) {
-    Class* cls = Unit::lookupClass(name.get());
-    if (cls == nullptr) return nullptr;
-    if (cls->clsInfo()) return cls->clsInfo();
-    if (cls->attrs() & (AttrInterface | AttrTrait)) {
-      // If the specified name matches with something that is not formally
-      // a class, return NULL
-      return nullptr;
-    }
-    AtomicSmartPtr<ClassInfoVM> &c = m_classInfos[name];
-    c = new ClassInfoVM();
-    cls->getClassInfo(c.get());
-    return c.get();
-  } else {
-    return it->second.get();
-  }
-}
-
-const ClassInfo* ExecutionContext::findInterfaceInfo(const String& name) {
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
-    m_interfaceInfos.find(name);
-  if (it == m_interfaceInfos.end()) {
-    Class* cls = Unit::lookupClass(name.get());
-    if (cls == nullptr)  return nullptr;
-    if (cls->clsInfo()) return cls->clsInfo();
-    if (!(cls->attrs() & AttrInterface)) {
-      // If the specified name matches with something that is not formally
-      // an interface, return NULL
-      return nullptr;
-    }
-    AtomicSmartPtr<ClassInfoVM> &c = m_interfaceInfos[name];
-    c = new ClassInfoVM();
-    cls->getClassInfo(c.get());
-    return c.get();
-  } else {
-    return it->second.get();
-  }
-}
-
-const ClassInfo* ExecutionContext::findTraitInfo(const String& name) {
-  StringIMap<AtomicSmartPtr<ClassInfoVM> >::iterator it =
-    m_traitInfos.find(name);
-  if (it != m_traitInfos.end()) {
-    return it->second.get();
-  }
-  Class* cls = Unit::lookupClass(name.get());
-  if (cls == nullptr) return nullptr;
-  if (cls->clsInfo()) return cls->clsInfo();
-  if (!(cls->attrs() & AttrTrait)) {
-    return nullptr;
-  }
-  AtomicSmartPtr<ClassInfoVM> &classInfo = m_traitInfos[name];
-  classInfo = new ClassInfoVM();
-  cls->getClassInfo(classInfo.get());
-  return classInfo.get();
-}
-
-const ClassInfo::ConstantInfo* ExecutionContext::findConstantInfo(
-    const String& name) {
-  auto const tv = Unit::lookupCns(name.get());
-  if (tv == nullptr) {
-    return nullptr;
-  }
-  ConstInfoMap::const_iterator it = m_constInfo.find(name.get());
-  if (it != m_constInfo.end()) {
-    return it->second;
-  }
-  StringData* key = makeStaticString(name.get());
-  ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo();
-  ci->name = StrNR(key);
-  ci->valueLen = 0;
-  ci->valueText = "";
-  ci->setValue(tvAsCVarRef(tv));
-  m_constInfo[key] = ci;
-  return ci;
-}
-
 /*
   Instantiate hoistable classes and functions.
   If there is any more work left to do, setup a
@@ -2548,9 +2453,9 @@ ExecutionContext::pushLocalsAndIterators(const Func* func,
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assert(handle->getUncounted() && size > 0);
-  assert(handle->getType() == KindOfString ||
-         handle->getType() == KindOfArray);
+  assert(handle->isUncounted() && size > 0);
+  assert(handle->type() == KindOfString ||
+         handle->type() == KindOfArray);
   m_apcHandles.m_handles.push_back(handle);
   m_apcHandles.m_memSize += size;
 }
@@ -2576,11 +2481,12 @@ public:
 void ExecutionContext::manageAPCHandle() {
   assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
   if (m_apcHandles.m_handles.size() > 0) {
+    std::vector<APCHandle*> handles;
+    handles.swap(m_apcHandles.m_handles);
     Treadmill::enqueue(
-        FreedAPCHandle(std::move(m_apcHandles.m_handles),
+        FreedAPCHandle(std::move(handles),
                        m_apcHandles.m_memSize));
     APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
-    m_apcHandles.m_handles.clear();
   }
 }
 
@@ -5028,7 +4934,7 @@ OPTBLD_INLINE void ExecutionContext::iopAKExists(IOP_ARGS) {
   NEXT();
   TypedValue* arr = vmStack().topTV();
   TypedValue* key = arr + 1;
-  bool result = f_array_key_exists(tvAsCVarRef(key), tvAsCVarRef(arr));
+  bool result = HHVM_FN(array_key_exists)(tvAsCVarRef(key), tvAsCVarRef(arr));
   vmStack().popTV();
   vmStack().replaceTV<KindOfBoolean>(result);
 }
@@ -5052,9 +4958,9 @@ OPTBLD_INLINE void ExecutionContext::iopArrayIdx(IOP_ARGS) {
   TypedValue* key = vmStack().indTV(1);
   TypedValue* arr = vmStack().indTV(2);
 
-  Variant result = f_hphp_array_idx(tvAsCVarRef(arr),
-                                    tvAsCVarRef(key),
-                                    tvAsCVarRef(def));
+  Variant result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
+                                  tvAsCVarRef(key),
+                                  tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();
   tvAsVariant(arr) = result;
@@ -7307,7 +7213,7 @@ OPTBLD_INLINE void ExecutionContext::iopStrlen(IOP_ARGS) {
     subj->m_type = KindOfInt64;
     subj->m_data.num = ans;
   } else {
-    Variant ans = f_strlen(tvAsVariant(subj));
+    Variant ans = HHVM_FN(strlen)(tvAsVariant(subj));
     tvAsVariant(subj) = ans;
   }
 }
@@ -7711,6 +7617,7 @@ void ExecutionContext::requestInit() {
   profileRequestStart();
 
   MemoryProfile::startProfiling();
+  MM().setObjectTracking(false);
 
 #ifdef DEBUG
   Class* cls = NamedEntity::get(s_stdclass.get())->clsList();

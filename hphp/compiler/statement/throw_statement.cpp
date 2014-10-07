@@ -69,10 +69,6 @@ void ThrowStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void ThrowStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, Type::Object, false);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ThrowStatement::outputCodeModel(CodeGenerator &cg) {

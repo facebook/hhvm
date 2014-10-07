@@ -30,7 +30,7 @@ one of a few pre-defined suite names that this script knows about.
 
 If you work with hhvm a lot, you might consider a bash alias:
 
-   alias ht="path/to/fbcode/hphp/test/run"
+   alias ht="path/to/hphp/test/run"
 
 Examples:
 
@@ -63,6 +63,9 @@ Examples:
 
   # All tests whose name containing pdo_mysql
   % $argv[0] -i pdo_mysql -m jit -r zend
+  
+  # Print all the standard tests
+  % $argv[0] --list-tests
 
 EOT;
   return usage().$help;
@@ -159,6 +162,7 @@ function get_options($argv) {
     'no-fun' => '',
     'cores' => '',
     'no-clean' => '',
+    'list-tests' => '',
   );
   $options = array();
   $files = array();
@@ -270,6 +274,16 @@ function find_tests($files, array $options = null) {
   return $tests;
 }
 
+function list_tests() {
+  foreach (find_tests(array('all')) as $test) {
+    foreach (array('-m interp', '-m jit') as $mode) {
+      foreach (array('', '-r') as $repo) {
+        print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
+      }
+    }
+  }
+}
+
 function find_test_ext($test, $ext) {
   if (is_file("{$test}.{$ext}")) {
     return "{$test}.{$ext}";
@@ -321,8 +335,10 @@ function mode_cmd($options) {
     case 'llvm':
       return "$jit_args -vEval.JitLLVM=2";
     case 'pgo':
-      return "$jit_args -vEval.JitPGO=1 -vEval.JitRegionSelector=hottrace ".
-             "-vEval.JitPGOHotOnly=0";
+      return $jit_args.
+        ' -vEval.JitPGO=1'.
+        ' -vEval.JitPGORegionSelector=hottrace'.
+        ' -vEval.JitPGOHotOnly=0';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
@@ -574,8 +590,26 @@ class Status {
   }
 
   public static function hasCursorControl() {
-    return !getenv("TRAVIS")
-      && !exec('stty -a | grep -e "\\berase = <undef>"');
+    // for runs on travis-ci.org
+    if (getenv("TRAVIS")) {
+      return false;
+    }
+    $stty = self::getSTTY();
+    if (!$stty) {
+      return false;
+    }
+    return strpos($stty, 'erase = <undef>') === false;
+  }
+
+  public static function getSTTY() {
+    $descriptorspec = array(1 => array("pipe", "w"), 2 => array("pipe", "w"));
+    $process = proc_open(
+      'stty -a', $descriptorspec, $pipes, null, null,
+      array('suppress_errors' => true)
+    );
+    $stty = stream_get_contents($pipes[1]);
+    proc_close($process);
+    return $stty;
   }
 
   public static function utf8Sanitize($str) {
@@ -1115,18 +1149,10 @@ function run_test($options, $test) {
 
     $hphp_repo = "$test.repo/hhvm.hhbc";
     $hhbbc_repo = "$test.repo/hhvm.hhbbc";
-    shell_exec("rm -f \"$hphp_repo\" \"$hhbbc_repo\" ".
-               "\"$test.repo/CodeError.js\"");
+    shell_exec("rm -f \"$hphp_repo\" \"$hhbbc_repo\" ");
     $hphp = hphp_cmd($options, $test);
     $hhbbc = hhbbc_cmd($options, $test);
     shell_exec("$hphp 2>&1");
-    if (file_exists("$test.code_error") &&
-        file_exists("$test.repo/CodeError.js")) {
-      file_put_contents("$test.diff",
-                        "Test failed because CodeError.js was not empty: ".
-                        file_get_contents("$test.repo/CodeError.js"));
-      return false;
-    }
     shell_exec("$hhbbc 2>&1");
 
     return run_one_config($options, $test, $hhvm, $hhvm_env);
@@ -1196,7 +1222,7 @@ function msg_loop($num_tests, $queue) {
   $do_progress = Status::getMode() == Status::MODE_NORMAL &&
     Status::hasCursorControl();
   if ($do_progress) {
-    $stty = strtolower(exec('stty -a | grep columns'));
+    $stty = strtolower(Status::getSTTY());
     preg_match_all("/columns ([0-9]+);/", $stty, $output);
     if (!isset($output[1][0])) {
       // because BSD has to be different
@@ -1566,6 +1592,9 @@ function main($argv) {
   list($options, $files) = get_options($argv);
   if (isset($options['help'])) {
     error(help());
+  }
+  if (isset($options['list-tests'])) {
+    error(list_tests());
   }
   $tests = find_tests($files, $options);
   if (isset($options['shuffle'])) {

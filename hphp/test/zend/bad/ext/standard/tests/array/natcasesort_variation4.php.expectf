@@ -9,13 +9,13 @@ array(11) {
   string(1) "
 "
   [10]=>
-  string(1) ""
+  string(1) "%r\x0b%r"
   [7]=>
-  string(1) "	"
+  string(1) "%r\x09%r"
   [5]=>
-  string(1) ""
+  string(1) "%r\x0c%r"
   [4]=>
-  string(1) ""
+  string(1) "%r\x1b%r"
   [2]=>
   string(2) "\a"
   [3]=>

@@ -17,8 +17,20 @@
 #ifndef incl_HPHP_VM_CONTAINERS_H_
 #define incl_HPHP_VM_CONTAINERS_H_
 
-#include "hphp/runtime/base/smart-containers.h"
+#include <deque>
+#include <functional>
+#include <list>
+#include <map>
 #include <memory>
+#include <queue>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+#include <boost/container/flat_set.hpp>
+#include <boost/container/flat_map.hpp>
 
 namespace HPHP {
 namespace jit {

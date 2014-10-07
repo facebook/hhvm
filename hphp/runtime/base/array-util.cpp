@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/thread-info.h"
 
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "folly/Optional.h"
 
@@ -351,9 +351,9 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(f_strtolower(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtolower)(key.toString()), iter.secondRef());
       } else {
-        ret.set(f_strtoupper(key.toString()), iter.secondRef());
+        ret.set(HHVM_FN(strtoupper)(key.toString()), iter.secondRef());
       }
     } else {
       ret.set(key, iter.secondRef());
@@ -501,6 +501,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
   std::vector<int> indices;
   Array::SortImpl(indices, input, opaque, Array::SortRegularAscending, false);
 
+  int duplicates_count = 0;
   std::vector<bool> duplicates(indices.size(), false);
   int lastIdx = indices[0];
   Variant last = input->getValue(opaque.positions[lastIdx]);
@@ -508,6 +509,7 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
     int currentIdx = indices[i];
     Variant current = input->getValue(opaque.positions[currentIdx]);
     if (equal(current, last)) {
+      ++duplicates_count;
       if (currentIdx > lastIdx) {
         duplicates[currentIdx] = true;
         continue;
@@ -518,12 +520,12 @@ Variant ArrayUtil::RegularSortUnique(const Array& input) {
     last = current;
   }
 
-  Array ret = Array::Create();
+  ArrayInit ret(indices.size() - duplicates_count, ArrayInit::Map{});
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
     if (!duplicates[i]) ret.set(iter.first(), iter.secondRef());
   }
-  return ret;
+  return ret.toVariant();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

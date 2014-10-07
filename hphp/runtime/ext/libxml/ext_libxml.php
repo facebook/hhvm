@@ -9,7 +9,7 @@ class LibXMLError {
  * buffer, or an empty array otherwise.
  */
 <<__Native>>
-function libxml_get_errors(): mixed;
+function libxml_get_errors(): array;
 
 /* Returns a LibXMLError object if there is any error in the buffer, FALSE
  * otherwise.
@@ -26,6 +26,13 @@ function libxml_clear_errors(): void;
  */
 <<__Native>>
 function libxml_use_internal_errors(bool $use_errors = false): bool;
+
+/* Suppress recording of internal error recording to save memory.
+ * Has no effect unless libxml_use_internal_errors() is enabled.
+ * Reset when libxml_use_internal_errors() is called.
+ */
+<<__Native>>
+function libxml_suppress_errors(bool $suppress_errors): void;
 
 /* Disable/enable the ability to load external entities. */
 <<__Native>>

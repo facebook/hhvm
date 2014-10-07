@@ -109,6 +109,27 @@ private:
   MemoryManager& m_mm;
 };
 
+struct MemoryManager::SuppressOOM {
+  explicit SuppressOOM(MemoryManager& mm)
+      : m_mm(mm)
+      , m_savedCouldOOM(mm.m_couldOOM) {
+    FTRACE(1, "SuppressOOM() [couldOOM was {}]\n", m_savedCouldOOM);
+    m_mm.m_couldOOM = false;
+  }
+
+  ~SuppressOOM() {
+    FTRACE(1, "~SuppressOOM() [couldOOM is {}]\n", m_savedCouldOOM);
+    m_mm.m_couldOOM = m_savedCouldOOM;
+  }
+
+  SuppressOOM(const SuppressOOM&) = delete;
+  SuppressOOM& operator=(const SuppressOOM&) = delete;
+
+private:
+  MemoryManager& m_mm;
+  bool m_savedCouldOOM;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct MemoryManager::SmallNode {
@@ -311,6 +332,13 @@ void* MemoryManager::smartMallocSizeLogged(uint32_t size) {
 }
 
 ALWAYS_INLINE
+void* MemoryManager::smartMallocSizeLoggedTracked(uint32_t size) {
+  auto const retptr = smartMallocSize(size);
+  if (memory_profiling) { logAllocation(retptr, size); }
+  return track(retptr);
+}
+
+ALWAYS_INLINE
 void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   if (memory_profiling) { logDeallocation(p); }
   smartFreeSize(p, size);
@@ -341,6 +369,22 @@ ALWAYS_INLINE
 void MemoryManager::objFreeLogged(void* vp, size_t size) {
   if (memory_profiling) { logDeallocation(vp); }
   objFree(vp, size);
+}
+
+ALWAYS_INLINE
+void* MemoryManager::track(void* p) {
+  if (UNLIKELY(m_trackingInstances)) {
+    return trackSlow(p);
+  }
+  return p;
+}
+
+ALWAYS_INLINE
+void* MemoryManager::untrack(void* p) {
+  if (UNLIKELY(m_trackingInstances)) {
+    return untrackSlow(p);
+  }
+  return p;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -415,6 +459,20 @@ inline void MemoryManager::forceOOM() {
 inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+void MemoryManager::setObjectTracking(bool val) {
+  if (val) {
+    m_instances.clear();
+  }
+  m_trackingInstances = val;
+}
+
+ALWAYS_INLINE
+bool MemoryManager::getObjectTracking() {
+  return m_trackingInstances;
+}
+
 
 }
 

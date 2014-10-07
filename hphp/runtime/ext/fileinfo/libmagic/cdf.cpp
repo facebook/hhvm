@@ -78,7 +78,7 @@ static union {
   uint32_t u;
 } cdf_bo;
 
-#define NEED_SWAP  (cdf_bo.u == (uint32_t)0x01020304)
+#define NEED_SWAP  bool(cdf_bo.u == (uint32_t)0x01020304)
 
 #define CDF_TOLE8(x)  ((uint64_t)(NEED_SWAP ? _cdf_tole8(x) : (uint64_t)(x)))
 #define CDF_TOLE4(x)  ((uint32_t)(NEED_SWAP ? _cdf_tole4(x) : (uint32_t)(x)))

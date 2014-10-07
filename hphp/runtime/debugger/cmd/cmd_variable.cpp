@@ -18,9 +18,9 @@
 #include "hphp/runtime/base/hphp-system.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
-#include "hphp/runtime/ext/ext_asio.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP { namespace Eval {
@@ -264,7 +264,7 @@ static c_AsyncFunctionWaitHandle *objToContinuationWaitHandle(Object o) {
 
 static
 c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
-  auto top = f_asio_get_running();
+  auto top = HHVM_FN(asio_get_running)();
 
   if (top.isNull()) {
     return nullptr;

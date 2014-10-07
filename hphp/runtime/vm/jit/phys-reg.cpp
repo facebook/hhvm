@@ -22,9 +22,6 @@
 namespace HPHP { namespace jit {
 using namespace x64;
 
-int PhysReg::kNumGP = 0;
-int PhysReg::kNumSIMD = 0;
-
 int PhysReg::getNumGP() {
   return mcg->backEnd().abi().gp().size();
 }
@@ -43,7 +40,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
   auto gpr = regs - xmm;
   m_adjust = (parity & 0x1) == (gpr.size() & 0x1) ? 8 : 0;
   if (!xmm.empty()) {
-    v << subqi{16 * xmm.size(), reg::rsp, reg::rsp};
+    v << subqi{16 * xmm.size(), reg::rsp, reg::rsp, v.makeReg()};
     int offset = 0;
     xmm.forEach([&](PhysReg pr) {
       v << storedqu{pr, reg::rsp[offset]};
@@ -55,7 +52,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
   });
   if (m_adjust) {
     // Maintain stack evenness for SIMD compatibility.
-    v << subqi{m_adjust, reg::rsp, reg::rsp};
+    v << subqi{m_adjust, reg::rsp, reg::rsp, v.makeReg()};
   }
 }
 
@@ -70,7 +67,8 @@ PhysRegSaverParity::~PhysRegSaverParity() {
   auto finish = [&](Vout& v) {
     if (m_adjust) {
       // See above; stack parity.
-      v << addqi{m_adjust, reg::rsp, reg::rsp};
+      auto const sf = v.makeReg();
+      v << addqi{m_adjust, reg::rsp, reg::rsp, sf};
     }
     emitPops(v, m_regs);
   };
@@ -93,7 +91,8 @@ void PhysRegSaverParity::emitPops(Vout& v, RegSet regs) {
       v << loaddqu{reg::rsp[offset], pr};
       offset += 16;
     });
-    v << addqi{offset, reg::rsp, reg::rsp};
+    auto const sf = v.makeReg();
+    v << addqi{offset, reg::rsp, reg::rsp, sf};
   }
 }
 

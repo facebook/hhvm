@@ -246,8 +246,14 @@ enum FbCompactSerializeCode {
   FB_CS_STOP       = 12,
   FB_CS_SKIP       = 13,
   FB_CS_VECTOR     = 14,
-  FB_CS_MAX_CODE   = 15,
+  FB_CS_OBJ        = 15,
+  FB_CS_MAX_CODE   = 16,
 };
+
+static_assert(FB_CS_MAX_CODE <= '0',
+  "FB_CS_MAX_CODE must be less than ASCII '0' or fb_compact_serialize() could "
+  "produce strings that when used as array keys could collide with integer "
+  "array keys. Assumption relevant to fb_compact_serialize_code() below");
 
 // 1 byte: 0<7 bits>
 const uint64_t kInt7Mask            = 0x7f;
@@ -470,6 +476,10 @@ static int fb_compact_serialize_variant(
           Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
           throw e;
         }
+
+        // Marker that shows that this was an obj so it doesn't collide with
+        // strings
+        fb_compact_serialize_code(sb, FB_CS_OBJ);
 
         Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
         fb_compact_serialize_string(sb, ser.toString());

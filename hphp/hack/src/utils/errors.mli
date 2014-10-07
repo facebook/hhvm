@@ -51,7 +51,6 @@ val real_instead_of_float : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit
-val unset_in_strict: Pos.t -> unit
 val this_no_argument : Pos.t -> unit
 val this_outside_of_class : Pos.t -> unit
 val this_must_be_return : Pos.t -> unit
@@ -122,7 +121,7 @@ val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
 val undefined_parent : Pos.t -> unit
 val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
-val dont_use_isset : Pos.t -> unit
+val isset_empty_unset_in_strict : Pos.t -> string -> unit
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 val static_overflow : Pos.t -> unit
 val typing_error : Pos.t -> string -> unit
@@ -138,6 +137,7 @@ val expected_class : Pos.t -> unit
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method ] ->
   Pos.t ->
+  string ->
   string ->
   [< `closest of Pos.t * string | `did_you_mean of Pos.t * string | `no_hint ] ->
   unit
@@ -248,6 +248,7 @@ val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
+val generic_at_runtime : Pos.t -> unit
 
 val to_json : error -> Hh_json.json
 val to_string : error -> string
@@ -255,5 +256,6 @@ val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 val try_add_err : Pos.t -> string -> (unit -> 'a) -> (unit -> 'a) -> 'a
 val do_ : (unit -> 'a) -> error list * 'a
+val ignore_ : (unit -> 'a) -> 'a
 val try_when :
   (unit -> unit) -> when_:(unit -> bool) -> do_:(error -> unit) -> unit

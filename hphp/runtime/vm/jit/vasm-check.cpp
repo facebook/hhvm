@@ -15,12 +15,13 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/util/assertions.h"
 #include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
 
 namespace {
 
@@ -47,19 +48,24 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
     }
     for (auto& inst : unit.blocks[b].code) {
       visitUses(unit, inst, [&](Vreg v) {
-        assert_flog(v.isValid(), "invalid vreg used in B{}", size_t(b));
+        assert_flog(v.isValid(), "invalid vreg used in B{}\n{}",
+                                 size_t(b), show(unit));
         assert_flog(!v.isVirt() || local_defs[v],
-                    "%{} used before def in B{}", size_t(v), size_t(b));
+                    "%{} used before def in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
       });
       visitDefs(unit, inst, [&](Vreg v) {
-        assert_flog(v.isValid(), "invalid vreg defined in B{}", size_t(b));
-        // TODO: t4779057: require SSA
+        assert_flog(v.isValid(), "invalid vreg defined in B{}\n{}",
+                    size_t(b), show(unit));
         assert_flog(!v.isVirt() || !consts.test(v),
-                    "%{} const defined in B{}", size_t(v), size_t(b));
-        //assert_flog(!v.isVirt() || !local_defs[v],
-        //            "%{} locally redefined in B{}", size_t(v), size_t(b));
-        //assert_flog(!v.isVirt() || !global_defs[v],
-        //            "%{} redefined in B{}", size_t(v), size_t(b));
+                    "%{} const defined in B{}\n",
+                    size_t(v), size_t(b), show(unit));
+        assert_flog(!v.isVirt() || !local_defs[v],
+                    "%{} locally redefined in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
+        assert_flog(!v.isVirt() || !global_defs[v],
+                    "%{} redefined in B{}\n{}",
+                    size_t(v), size_t(b), show(unit));
         local_defs.set(v);
         global_defs.set(v);
       });
@@ -83,6 +89,9 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
     bool unwind_valid = false;
     bool nocatch_valid = false;
     bool sync_valid = false;
+    bool hcunwind_valid = false;
+    bool hcsync_valid = false;
+    bool hcnocatch_valid = false;
     for (auto& inst : unit.blocks[b].code) {
       switch (inst.op) {
         case Vinstr::call:
@@ -103,8 +112,24 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
           assert(nocatch_valid);
           unwind_valid = nocatch_valid = false;
           break;
+        case Vinstr::hostcall:
+          hcsync_valid = hcunwind_valid = hcnocatch_valid = true;
+          break;
+        case Vinstr::hcsync:
+          assert(hcsync_valid);
+          hcsync_valid = false;
+          break;
+        case Vinstr::hcunwind:
+          assert(hcunwind_valid);
+          hcunwind_valid = hcnocatch_valid = false;
+          break;
+        case Vinstr::hcnocatch:
+          assert(hcnocatch_valid);
+          hcunwind_valid = hcnocatch_valid = false;
+          break;
         default:
           unwind_valid = nocatch_valid = sync_valid = false;
+          hcunwind_valid = hcnocatch_valid = hcsync_valid = false;
           break;
       }
     }
@@ -114,6 +139,49 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
 
 }
 
+bool isBlockEnd(Vinstr& inst) {
+  switch (inst.op) {
+    // service request-y things
+    case Vinstr::bindaddr:
+    case Vinstr::bindjcc1:
+    case Vinstr::bindjmp:
+    case Vinstr::fallback:
+    case Vinstr::retransopt:
+    // control flow
+    case Vinstr::jcc:
+    case Vinstr::jmp:
+    case Vinstr::jmpr:
+    case Vinstr::jmpm:
+    case Vinstr::phijmp:
+    // terminal
+    case Vinstr::resume:
+    case Vinstr::ud2:
+    case Vinstr::unwind:
+    case Vinstr::ret:
+    case Vinstr::end:
+    // arm specific
+    case Vinstr::hcunwind:
+    case Vinstr::cbcc:
+    case Vinstr::tbcc:
+    case Vinstr::brk:
+      return true;
+    default:
+      return false;
+  }
+}
+
+// check that each block has exactly one terminal instruction at the end.
+bool checkBlockEnd(Vunit& unit, Vlabel b) {
+  assert(!unit.blocks[b].code.empty());
+  auto& block = unit.blocks[b];
+  auto n = block.code.size();
+  for (size_t i = 0; i < n - 1; ++i) {
+    assert(!isBlockEnd(block.code[i]));
+  }
+  assert(isBlockEnd(block.code[n - 1]));
+  return true;
+}
+
 bool check(Vunit& unit) {
   auto blocks = sortBlocks(unit);
   assert(checkSSA(unit, blocks));
@@ -121,4 +189,4 @@ bool check(Vunit& unit) {
   return true;
 }
 
-}}}
+}}

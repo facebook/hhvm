@@ -6,6 +6,7 @@ require_once('PHP5Daemon.php');
 require_once('NginxDaemon.php');
 require_once('PerfOptions.php');
 require_once('Siege.php');
+require_once('SugarCRMTarget.php');
 require_once('ToysTarget.php');
 require_once('WordpressTarget.php');
 
@@ -22,21 +23,22 @@ function print_progress(string $out): void {
 }
 
 function run_benchmark(
-  PerfTarget $target,
-  PHPEngine $php_engine,
-  string $temp_dir,
   PerfOptions $options,
+  PerfTarget $target,
+  PHPEngine $php_engine
 ) {
   print_progress('Installing framework');
   $target->install();
 
   print_progress('Starting Nginx');
-  $nginx = new NginxDaemon($temp_dir, $target, $options);
+  $nginx = new NginxDaemon($options, $target);
   $nginx->start();
+  Process::sleepSeconds($options->delayNginxStartup);
   invariant($nginx->isRunning(), 'Failed to start nginx');
 
   print_progress('Starting PHP Engine');
   $php_engine->start();
+  Process::sleepSeconds($options->delayPhpStartup);
   invariant(
     $php_engine->isRunning(),
     'Failed to start '.get_class($php_engine)
@@ -44,7 +46,7 @@ function run_benchmark(
 
   if ($target->needsUnfreeze()) {
     print_progress('Unfreezing framework');
-    $target->unfreeze();
+    $target->unfreeze($options);
   }
 
   if ($options->skipSanityCheck) {
@@ -55,7 +57,7 @@ function run_benchmark(
   }
 
   print_progress('Starting Siege for warmup');
-  $siege = new Siege($temp_dir, $target, RequestModes::WARMUP, $options);
+  $siege = new Siege($options, $target, RequestModes::WARMUP);
   $siege->start();
   invariant($siege->isRunning(), 'Failed to start siege');
   $siege->wait();
@@ -70,7 +72,7 @@ function run_benchmark(
   $nginx->clearAccessLog();
 
   print_progress('Running Siege for benchmark');
-  $siege = new Siege($temp_dir, $target, RequestModes::BENCHMARK, $options);
+  $siege = new Siege($options, $target, RequestModes::BENCHMARK);
   $siege->start();
   invariant($siege->isRunning(), 'Siege failed to start');
   $siege->wait();
@@ -125,7 +127,7 @@ function perf_main($argv) {
     fprintf(
       STDERR,
       "Usage: %s --<php5=/path/to/php-cgi|hhvm=/path/to/hhvm> ".
-      "--<toys|wordpress>\n",
+      "--<toys|wordpress|sugarcrm-login-page>\n",
       $argv[0],
     );
     exit(0);
@@ -142,38 +144,45 @@ function perf_main($argv) {
     }
   );
 
-  $temp_dir = tempnam('/dev/shm', 'hhvm-nginx');
-  // Currently a file - change to a dir
-  unlink($temp_dir);
-  mkdir($temp_dir);
-
   $target = null;
   $engine = null;
 
   if ($options->wordpress) {
-    $target = new WordpressTarget($temp_dir);
+    $target = new WordpressTarget($options);
   }
   if ($options->toys) {
     $target = new ToysTarget();
   }
+  if ($options->sugarcrm) {
+    $target = new SugarCRMTarget($options);
+  }
   if ($target === null) {
-    throw new Exception('Either --wordpress or --toys must be specified');
+    fprintf(
+      STDERR,
+      "You must specify a target with one of the following:\n".
+      "  --toys\n".
+      "  --wordpress\n".
+      "  --sugarcrm-login-page\n"
+    );
+    exit(1);
   }
 
   if ($options->php5) {
-    $engine = new PHP5Daemon($temp_dir, $target, $options->php5);
+    $engine = new PHP5Daemon($options, $target);
   }
   if ($options->hhvm) {
-    $engine = new HHVMDaemon($temp_dir, $target, $options);
+    $engine = new HHVMDaemon($options, $target);
   }
   if ($engine === null) {
-    throw new Exception(
+    fprintf(
+      STDERR,
       'Either --php5=/path/to/php-cgi or --hhvm=/path/to/hhvm '.
       'must be specified'
     );
+    exit(1);
   }
 
-  run_benchmark($target, $engine, $temp_dir, $options);
+  run_benchmark($options, $target, $engine);
 }
 
 perf_main($argv);

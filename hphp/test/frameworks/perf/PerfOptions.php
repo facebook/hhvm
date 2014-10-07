@@ -57,47 +57,59 @@ final class PerfOptions {
   private array $args;
   private Vector<string> $notBenchmarkingArgs = Vector { };
 
-  public function __construct() {
-    $o = getopt(
-      '',
-      [
-        'help',
+  public function __construct($argv) {
+    $def = Vector {
+      'help',
 
-        'verbose',
+      'verbose',
 
-        'php5:',
-        'hhvm:',
-        'siege:',
-        'nginx:',
+      'php5:',
+      'hhvm:',
+      'siege:',
+      'nginx:',
 
-        'toys',
-        'wordpress',
-        'sugarcrm-login-page',
+      'toys',
+      'wordpress',
+      'sugarcrm-login-page',
 
-        'i-am-not-benchmarking',
+      'i-am-not-benchmarking',
 
-        'hhvm-extra-arguments:',
+      'hhvm-extra-arguments:',
 
-        'skip-sanity-check',
-        'skip-version-checks',
-        'skip-database-install',
-        'trace',
+      'skip-sanity-check',
+      'skip-version-checks',
+      'skip-database-install',
+      'trace',
 
-        'delay-nginx-startup:',
-        'delay-php-startup:',
-        'delay-process-launch:',
-        'delay-check-health:',
+      'delay-nginx-startup:',
+      'delay-php-startup:',
+      'delay-process-launch:',
+      'delay-check-health:',
 
-        'max-delay-unfreeze:',
-        'max-delay-admin-request:',
-        'max-delay-nginx-keepalive:',
-        'max-delay-nginx-fastcgi:',
+      'max-delay-unfreeze:',
+      'max-delay-admin-request:',
+      'max-delay-nginx-keepalive:',
+      'max-delay-nginx-fastcgi:',
 
-        'daemon-files',  // daemon output goes to files in the temp directory
-        'temp-dir:',  // temp directory to use; if absent one in /tmp is made
-      ]
-    );
+      'daemon-files',  // daemon output goes to files in the temp directory
+      'temp-dir:',  // temp directory to use; if absent one in /tmp is made
+    };
+    $o = getopt('', $def);
+
     $this->help = array_key_exists('help', $o);
+    if ($this->help) {
+      fprintf(
+        STDERR,
+        "Usage: %s \\\n".
+        "  --<php5=/path/to/php-cgi|hhvm=/path/to/hhvm>\\\n".
+        "  --<toys|wordpress|sugarcrm-login-page>\n".
+        "\n".
+        "Options:\n%s",
+        $argv[0],
+        implode('', $def->map($x ==> '  --'.$x."\n")),
+      );
+      exit(1);
+    };
     $this->verbose = array_key_exists('verbose', $o);
 
     $this->php5 = hphp_array_idx($o, 'php5', null);

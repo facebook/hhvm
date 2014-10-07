@@ -121,17 +121,7 @@ function perf_main($argv) {
     exit(1);
   }
 
-  $options = new PerfOptions();
-
-  if ($options->help) {
-    fprintf(
-      STDERR,
-      "Usage: %s --<php5=/path/to/php-cgi|hhvm=/path/to/hhvm> ".
-      "--<toys|wordpress|sugarcrm-login-page>\n",
-      $argv[0],
-    );
-    exit(0);
-  }
+  $options = new PerfOptions($argv);
 
   // If we exit cleanly, Process::__destruct() gets called, but it doesn't
   // if we're killed by Ctrl-C. This tends to leak php-cgi or hhvm processes -

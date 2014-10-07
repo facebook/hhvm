@@ -71,6 +71,9 @@ function generics<T>(T $a, T $b): T {
   return $i++ % 2 ? $a : $b;
 }
 
+<<__Memoize>>
+function boolNoRet(bool $a) {static $i = 140; return ($a ? 42 : -42) + $i++;}
+
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';
@@ -154,4 +157,10 @@ echo "Test generics\n";
 echo generics(1,2).' ';
 echo generics(1,2).' ';
 echo generics('a','b').' ';
-echo generics('a','b');
+echo generics('a','b')."\n";
+
+echo "Test bool without return type (test for issue in #5307125)\n";
+echo boolNoRet(true).' ';
+echo boolNoRet(true).' ';
+echo boolNoRet(false).' ';
+echo boolNoRet(false);

@@ -6756,6 +6756,19 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
   }
 }
 
+bool EmitterVisitor::isMemoizeBlessedType(const TypeConstraint &tc) {
+  if (!tc.hasConstraint() || !tc.isPrecise() || tc.isSoft()) {
+    return false;
+  }
+  if (tc.isNullable() && !DataType::KindOfInt64) {
+    return false;
+  }
+  return
+    tc.underlyingDataType() == DataType::KindOfBoolean ||
+    tc.underlyingDataType() == DataType::KindOfInt64 ||
+    tc.underlyingDataType() == DataType::KindOfString;
+}
+
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
                                        const StringData* methName,
                                        const StringData* propName) {
@@ -6815,14 +6828,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
           "reference");
       }
 
-      const TypeConstraint &tc = m_curFunc->params[i].typeConstraint;
-      bool blessedType =
-        tc.underlyingDataType() == DataType::KindOfBoolean ||
-        tc.underlyingDataType() == DataType::KindOfInt64 ||
-        (tc.underlyingDataType() == DataType::KindOfString && !tc.isNullable());
-      blessedType &= tc.hasConstraint() && tc.isPrecise() && !tc.isSoft();
-
-      if (blessedType) {
+      if (isMemoizeBlessedType(m_curFunc->params[i].typeConstraint)) {
         paramNumToLocalID[i] = i;
         continue;
       }
@@ -6881,9 +6887,18 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     }
 
     if (!noRetNull) {
+      auto lastArgTC = m_curFunc->params[numParams - 1].typeConstraint;
+      bool lastArgBool =
+        isMemoizeBlessedType(lastArgTC) &&
+        lastArgTC.underlyingDataType() == DataType::KindOfBoolean &&
+        !lastArgTC.isNullable();
+
       // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1]))
       emitVirtualLocal(paramNumToLocalID[numParams - 1]);
       emitCGet(e);
+      if (lastArgBool) {
+        e.CastInt();
+      }
       emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
                       numParams - 1);
       emitCGet(e);

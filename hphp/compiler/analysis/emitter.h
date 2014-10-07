@@ -750,6 +750,7 @@ public:
   void emitMemoizeProp(Emitter& e, MethodStatementPtr meth,
                        const StringData* propName, Id localID,
                        const std::vector<Id>& paramIDs, uint numParams);
+  bool isMemoizeBlessedType(const TypeConstraint &tc);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName,
                          const StringData* propName);
   void emitConstMethodCallNoParams(Emitter& e, string name);

@@ -4,8 +4,8 @@ open Utils
 module CL = Coverage_level
 
 let result_to_json r = JAssoc [
-  "counts", JAssoc (List.map
-    (fun (k, v) -> CL.string k, JInt v) r.CL.counts);
+  "counts", JAssoc (CL.CLMap.elements r.CL.counts |>
+    List.map (fun (k, v) -> CL.string k, JInt v));
   "percentage", JFloat r.CL.percentage;
 ]
 

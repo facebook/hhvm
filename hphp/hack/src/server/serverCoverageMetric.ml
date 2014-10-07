@@ -13,32 +13,24 @@ open Utils
 module CL = Coverage_level
 module SE = ServerEnv
 
-(* Looks inside an assoc list for a key k that's mapped to value v and replaces
- * v with the value of `f v` *)
-let update_assoc f k xs =
-  List.map (fun (k', v) ->
-    if k = k'
-    then (k, f v)
-    else (k', v)) xs
-
 (* Count the number of expressions of each kind of Coverage_level. *)
 let count_exprs fn pos_ty_l =
   let pos_level_l = CL.mk_level_list (Some fn) pos_ty_l in
-  List.fold_left (fun c (_, lvl) -> update_assoc ((+) 1) lvl c)
+  List.fold_left (fun c (_, lvl) -> CL.incr_counter lvl c)
                  CL.empty_counter pos_level_l
 
 (* Calculate the percentage of code we have covered as a ratio of typed
  * expressions : total expressions. Partially-typed expressions count as half
  * a typed expression. *)
 let calc_percentage ctr =
-  let total = List.fold_left (fun acc x -> acc + snd x) 0 ctr in
+  let total = CL.CLMap.fold (fun k v acc -> v + acc) ctr 0 in
   let mult = function
     | CL.Unchecked -> 0.0
     | CL.Partial -> 0.5
     | CL.Checked -> 1.0
   in
-  let score = List.fold_left
-    (fun acc x -> mult (fst x) *. float_of_int (snd x) +. acc) 0.0 ctr in
+  let score = CL.CLMap.fold
+    (fun k v acc -> mult k *. float_of_int v +. acc) ctr 0.0 in
   score /. float_of_int total
 
 (* Returns a list of (file_name, assoc list of counts) *)
@@ -79,22 +71,23 @@ let rec insert combine path_l v trie_opt =
           Node (combine v v',
                 SMap.add p (insert combine rl v child_opt) m))
 
-(* Convert a list of (file_name, assoc list of counts) into a trie. Each
+(* Convert a list of (file_name, map of counts) into a trie. Each
  * internal node of the trie has the sum of counts of all its child nodes.
  * NOTE(jez): we could parallelize this trie construction if we had a
  * merge_trie function, but the actual typecheck / type accumulation step
  * dominates the runtime, so there's not much improvement to be had here. *)
 let mk_trie acc fn_counts_l =
-  let combine v1 v2 = match v1, v2 with
-    | (CL.Checked, c1), (CL.Checked, c2) -> CL.Checked, c1 + c2
-    | (CL.Unchecked, c1), (CL.Unchecked, c2) -> CL.Unchecked, c1 + c2
-    | (CL.Partial, c1), (CL.Partial, c2) -> CL.Partial, c1 + c2
+  let combine v1 v2 = CL.CLMap.merge (fun k a b ->
+    let c = match a, b with
+    | Some c1, Some c2 -> c1 + c2
     | _ -> assert false
+    in Some c
+    ) v1 v2
   in
   List.fold_left
     (fun acc (fn, counts) ->
       let path_l = Str.split (Str.regexp "/") fn in
-      Some (insert (zip_with combine) path_l counts acc))
+      Some (insert combine path_l counts acc))
     acc fn_counts_l
 
 let rec trie_map f = function

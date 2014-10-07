@@ -233,12 +233,6 @@ let rec wfold_left2 f env l1 l2 =
       let env = f env x1 x2 in
       wfold_left2 f env rl1 rl2
 
-let rec zip_with f l1 l2 =
-  match l1, l2 with
-  | [], _ | _, [] -> []
-  | x1 :: rl1, x2 :: rl2 ->
-      f x1 x2 :: zip_with f rl1 rl2
-
 let apply_for_env_fold f env acc x =
   let env, x = f env x in
   env, x :: acc

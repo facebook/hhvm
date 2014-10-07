@@ -1463,9 +1463,12 @@ let generic_at_runtime p =
   add Typing.generic_at_runtime p
     "Generics can only be used in type hints since they are erased at runtime."
 
-let trivial_strict_eq p b left right =
+let trivial_strict_eq p b left right left_trail right_trail =
   let msg = "This expression is always "^b in
-  add_list Typing.trivial_strict_eq ((p, msg) :: left @ right)
+  let left_trail = List.map typedef_trail_entry left_trail in
+  let right_trail = List.map typedef_trail_entry right_trail in
+  add_list Typing.trivial_strict_eq
+    ((p, msg) :: left @ left_trail @ right @ right_trail)
 
 let void_usage p reason =
   let msg = "You are attempting to use the return value of a void function" in

@@ -2675,7 +2675,7 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.EQeqeq | Ast.Diff2 ->
       if not in_cond
-      then TUtils.assert_nontrivial_strict_eq p bop env ty1 ty2;
+      then TypingEqualityCheck.assert_nontrivial p bop env ty1 ty2;
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte  | Ast.Gt  | Ast.Gte  ->
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in

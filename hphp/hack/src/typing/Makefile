@@ -13,6 +13,7 @@ SRC= typeVisitor.ml typing_reason.ml typing_defs.ml \
  typing_expand.ml typing_compare.ml typing_exts.ml \
  typing_generic.ml typing_instantiate.ml \
  typing_tdef.ml typing_unify.ml typing_subtype.ml \
+ typingEqualityCheck.ml \
  typing_ops.ml typing_suggest.ml typing_dynamic_yield.ml \
  nast_terminality.ml nastCheck.ml nastInitCheck.ml typing_alias.ml \
  typing_extends.ml typing_async.ml typing_lenv.ml typing_hooks.ml \

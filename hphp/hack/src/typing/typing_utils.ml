@@ -239,34 +239,6 @@ let min_vis_opt vis_opt1 vis_opt2 =
       Some (pos, min_vis x y)
 
 (*****************************************************************************)
-(* Check if a comparison is trivially true or false *)
-(*****************************************************************************)
-
-let assert_nontrivial_strict_eq p bop env ty1 ty2 =
-  let _, ty1 = Env.expand_type env ty1 in
-  let _, ty2 = Env.expand_type env ty2 in
-  let trivial_result = match bop with
-    | Ast.EQeqeq -> "false"
-    | Ast.Diff2 -> "true"
-    | _ -> assert false in
-  match ty1, ty2 with
-  | (_, Tprim N.Tnum),               (_, Tprim (N.Tint | N.Tfloat))
-  | (_, Tprim (N.Tint | N.Tfloat)),  (_, Tprim N.Tnum)
-  | (_, Tprim N.Tarraykey),          (_, Tprim (N.Tint | N.Tstring))
-  | (_, Tprim (N.Tint | N.Tstring)), (_, Tprim N.Tarraykey) -> ()
-  | (r, Tprim N.Tvoid), _
-  | _, (r, Tprim N.Tvoid) ->
-      (* Ideally we shouldn't hit this case, but well... *)
-      Errors.void_usage p (Reason.to_string ("This is void") r)
-  | (r1, (Tprim a as ty1)), (r2, (Tprim b as ty2)) when a <> b ->
-      let tys1 = Typing_print.error ty1 in
-      let tys2 = Typing_print.error ty2 in
-      Errors.trivial_strict_eq p trivial_result
-        (Reason.to_string ("This is " ^ tys1) r1)
-        (Reason.to_string ("This is " ^ tys2) r2)
-  | _ -> ()
-
-(*****************************************************************************)
 (* Check if a type is not fully constrained *)
 (*****************************************************************************)
 

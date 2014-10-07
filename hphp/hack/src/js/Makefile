@@ -67,6 +67,7 @@ SRC = \
   hh_ide.ml\
   typeVisitor.ml\
   coverage_level.ml\
+  typingEqualityCheck.ml\
 
 INCLUDEDIRS=$(shell ocamlfind -query js_of_ocaml)
 

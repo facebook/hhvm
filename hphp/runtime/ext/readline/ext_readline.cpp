@@ -182,7 +182,7 @@ Variant HHVM_FUNCTION(readline_info, const String& varname /* = null */,
         Lock lock(info_lock);
         raise_warning(
           "This probably isn't doing what you expect it to do, " \
-          "this name is set for EVERY request."
+          "this buffer is set for EVERY request."
         );
         free(_rl_line_buffer);
         _rl_line_buffer = strdup(newvalue.data());

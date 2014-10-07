@@ -265,3 +265,24 @@ let assert_nontrivial_strict_eq p bop env ty1 ty2 =
         (Reason.to_string ("This is " ^ tys1) r1)
         (Reason.to_string ("This is " ^ tys2) r2)
   | _ -> ()
+
+(*****************************************************************************)
+(* Check if a type is not fully constrained *)
+(*****************************************************************************)
+
+module HasTany : sig
+  val check: ty -> bool
+end = struct
+  let visitor =
+    object(this)
+      inherit [bool] TypeVisitor.type_visitor
+      method! on_tany _ = true
+      method! on_tarray acc _ ty1_opt ty2_opt =
+        (* Check for array without its value type parameter specified *)
+        (match ty2_opt with
+        | None -> true
+        | Some ty -> this#on_type acc ty) ||
+        (opt_fold_left this#on_type acc ty1_opt)
+    end
+  let check ty = visitor#on_type false ty
+end

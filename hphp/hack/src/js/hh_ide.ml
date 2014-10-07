@@ -10,6 +10,7 @@
 
 open Utils
 open Hh_json
+module CL = Coverage_level
 
 (*****************************************************************************)
 (* Globals *)
@@ -422,12 +423,8 @@ let hh_hack_coloring fn =
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
-                        | (ColorFile.Unchecked_code, str) -> ("err", str)
-                        | (ColorFile.Checked_code, str) -> ("checked", str)
-                        | (ColorFile.Partially_checked_code, str) -> ("partial", str)
-                        | (ColorFile.Keyword, str) -> ("kwd", str)
-                        | (ColorFile.Fun, str) -> ("fun", str)
-                        | (ColorFile.Default, str) -> ("default", str)
+                        | (Some lvl, str) -> (CL.string lvl, str)
+                        | (None, str) -> ("default", str)
                         ) result in
   let result = List.map (fun (checked, text) ->
                         JAssoc [ "checked", JString checked;

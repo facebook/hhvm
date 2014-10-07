@@ -8,43 +8,9 @@
  *
  *)
 
-open Typing_defs
 open Utils
 
-(*****************************************************************************)
-(* Section defining the colors we are going to use *)
-(*****************************************************************************)
-
-type mycolor =
-  | Unchecked_code (* Unchecked code *)
-  | Checked_code   (* Checked code *)
-  | Partially_checked_code (* Partially checked code *)
-  | Keyword        (* Keyword *)
-  | Fun            (* Function name *)
-  | Default        (* All the rest *)
-
-module HasTany : sig
-  val check: ty -> bool
-end = struct
-  let visitor =
-    object(this)
-      inherit [bool] TypeVisitor.type_visitor
-      method! on_tany _ = true
-      method! on_tarray acc _ ty1_opt ty2_opt =
-        (* Check for array without its value type parameter specified *)
-        (match ty2_opt with
-        | None -> true
-        | Some ty -> this#on_type acc ty) ||
-        (opt_fold_left this#on_type acc ty1_opt)
-    end
-  let check ty = visitor#on_type false ty
-end
-
-let make_color (pos, ty) =
-  pos, match ty with
-  | _, Typing_defs.Tany -> Unchecked_code
-  | _ when HasTany.check ty -> Partially_checked_code
-  | _ -> Checked_code
+module CL = Coverage_level
 
 (*****************************************************************************)
 (* Module comparing positions (to sort them later)
@@ -107,30 +73,30 @@ let flatten xs =
 (* Walks the content of a string and adds colors at the given positions. *)
 (*****************************************************************************)
 
-let walk content pos_color_list =
+let walk content pos_level_list =
   let result = ref [] in
   let i = ref 0 in
-  let add color j =
+  let add level_opt j =
     if j <= !i then () else
     let size = j - !i in
-    result := (color, String.sub content !i size) :: !result;
+    result := (level_opt, String.sub content !i size) :: !result;
     i := !i + size
   in
-  List.iter begin fun (pos, color) ->
+  List.iter begin fun (pos, level) ->
     let char_start, char_end = Pos.info_raw pos in
-    add Default char_start;
-    add color char_end;
-  end pos_color_list;
-  add Default (String.length content);
+    add None char_start;
+    add (Some level) char_end;
+  end pos_level_list;
+  add None (String.length content);
   List.rev !result
 
 (*****************************************************************************)
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str (pos_type_l: (Pos.t * Typing_defs.ty) list) =
+let go str (pos_ty_l: (Pos.t * Typing_defs.ty) list) =
   let cmp x y = Compare.pos (fst x) (fst y) in
-  let pos_type_l = List.sort cmp pos_type_l in
-  let pos_type_l = flatten pos_type_l in
-  let pos_color_l = List.map make_color pos_type_l in
-  walk str pos_color_l
+  let pos_ty_l = List.sort cmp pos_ty_l in
+  let pos_ty_l = flatten pos_ty_l in
+  let pos_level_l = List.map CL.make pos_ty_l in
+  walk str pos_level_l

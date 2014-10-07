@@ -66,6 +66,7 @@ SRC = \
   format_hack.ml\
   hh_ide.ml\
   typeVisitor.ml\
+  coverage_level.ml\
 
 INCLUDEDIRS=$(shell ocamlfind -query js_of_ocaml)
 
@@ -153,6 +154,9 @@ typing_utils.ml: $(TOP)/typing/typing_utils.ml
 
 typeVisitor.ml: $(TOP)/typing/typeVisitor.ml
 	cp $(TOP)/typing/typeVisitor.ml .
+
+coverage_level.ml: $(TOP)/typing/coverage_level.ml
+	cp $(TOP)/typing/coverage_level.ml .
 
 typing_dynamic_yield.ml: $(TOP)/typing/typing_dynamic_yield.ml
 	cp $(TOP)/typing/typing_dynamic_yield.ml .

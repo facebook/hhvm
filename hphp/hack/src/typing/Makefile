@@ -19,7 +19,8 @@ SRC= typeVisitor.ml typing_reason.ml typing_defs.ml \
  typing_enum.ml typing_variance.ml \
  typing.ml typing_inherit.ml typing_decl.ml \
  typing_suggest_service.ml typing_decl_service.ml \
- typing_check_service.ml typing_redecl_service.ml
+ typing_check_service.ml typing_redecl_service.ml \
+ coverage_level.ml
 
 
 INCLUDEDIRS=$(TOP)/utils \

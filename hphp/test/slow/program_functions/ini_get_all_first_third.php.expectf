@@ -1079,9 +1079,9 @@ array(177) {
   ["hhvm.hhbc_arena_chunk_size"]=>
   array(3) {
     ["global_value"]=>
-    string(8) "67108864"
+    string(8) "10485760"
     ["local_value"]=>
-    string(8) "67108864"
+    string(8) "10485760"
     ["access"]=>
     int(4)
   }

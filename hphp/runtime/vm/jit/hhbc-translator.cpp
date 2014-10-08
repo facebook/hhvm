@@ -3465,8 +3465,7 @@ SSATmp* HhbcTranslator::optimizedCallInArray() {
 
   auto needle = topC(2);
   auto array = flipped.toArray();
-  array.get()->setStatic();
-  return gen(AKExists, cns(array.get()), needle);
+  return gen(AKExists, cns(ArrayData::GetScalarArray(array.get())), needle);
 }
 
 SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {

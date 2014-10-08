@@ -397,6 +397,22 @@ static inline bool pgoDefault() {
   return !RuntimeOption::EvalSimulateARM;
 }
 
+static inline uint64_t pgoThresholdDefault() {
+#ifdef HHVM_WHOLE_CFG
+  return 10;
+#else
+  return debug ? 2 : 10;
+#endif
+}
+
+static inline std::string pgoRegionSelectorDefault() {
+#ifdef HHVM_WHOLE_CFG
+  return "wholecfg";
+#else
+  return "hottrace";
+#endif
+}
+
 static inline bool loopsDefault() {
 #ifdef HHVM_JIT_LOOPS_BY_DEFAULT
   return true;
@@ -406,7 +422,9 @@ static inline bool loopsDefault() {
 }
 
 static inline bool controlFlowDefault() {
-#if defined(HHVM_JIT_LOOPS_BY_DEFAULT) || defined(HHVM_CONTROL_FLOW)
+#if defined(HHVM_JIT_LOOPS_BY_DEFAULT) || \
+    defined(HHVM_CONTROL_FLOW) ||         \
+    defined(HHVM_WHOLE_CFG)
   return true;
 #else
   return false;
@@ -464,7 +482,6 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 const uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
 static const int kDefaultProfileInterpRequests = debug ? 1 : 11;
-static const int kDefaultJitPGOThreshold = debug ? 2 : 10;
 static const uint32_t kDefaultProfileRequests = debug ? 1 << 31 : 500;
 static const size_t kJitGlobalDataDef = RuntimeOption::EvalJitASize >> 2;
 static const uint64_t kJitRelocationSizeDefault = debug ? 1 << 20 : 0;

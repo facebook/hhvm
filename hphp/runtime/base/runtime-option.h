@@ -471,8 +471,8 @@ public:
   F(bool,     JitLoops,                loopsDefault())                  \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \
-  F(string,   JitPGORegionSelector,    "hottrace")                      \
-  F(uint64_t, JitPGOThreshold,         kDefaultJitPGOThreshold)         \
+  F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
+  F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
   F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \

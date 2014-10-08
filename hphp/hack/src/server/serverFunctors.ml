@@ -143,7 +143,6 @@ end = struct
       | Die -> die ()
       | Exit code -> exit code
       | Continue env' -> env := env');
-  (*    report := ServerCheckError.check_first_error !env.errorl; *)
       if has_client then Program.handle_connection genv !env socket;
     done
 

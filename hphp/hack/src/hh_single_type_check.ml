@@ -87,7 +87,8 @@ let builtins = "<?hh // decl\n"^
   "  final public static function isValid(mixed $value): bool;\n"^
   "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
   "}\n"^
-  "}\n"
+  "}\n"^
+  "function array_map($x, $y, ...);\n"
 
 (*****************************************************************************)
 (* Helpers *)

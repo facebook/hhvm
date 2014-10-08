@@ -1624,6 +1624,39 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
                     Some tv)))
                 (fun _ -> env, res)))
       in get_array_filter_return_type env ty
+  | Id ((_, "\\array_map") as x) ->
+      let env, fty = fun_type_of_id env x in
+      let env, fty = Env.expand_type env fty in
+      let fty = match fty, el with
+        | ((r, Tfun fty), _::args) when args <> [] ->
+          let arity = List.length args in
+          let vars = List.map (fun _ -> Env.fresh_type()) args in
+          let tr = Env.fresh_type() in
+          let f = (None, (
+            r,
+            Tfun {
+              ft_pos = fty.ft_pos;
+              ft_unsafe = false; ft_abstract = false;
+              ft_arity = Fstandard (arity, arity); ft_tparams = [];
+              ft_params = List.map (fun x -> (None, x)) vars;
+              ft_ret = tr;
+            }
+          )) in
+          let containers = List.map (fun var ->
+            (None,
+              (r,
+                Tapply ((fty.ft_pos, "\\Container"), [var])
+              )
+            )
+          ) vars in
+          (r, Tfun {fty with
+            ft_arity = Fstandard (arity+1, arity+1);
+            ft_params = f::containers;
+            ft_ret = (r, Tarray(true, None, None));
+          })
+        | _ -> fty in
+      let env, fty = Inst.instantiate_fun env fty el in
+      call p env fty el
   | Class_const (CIparent, (_, "__construct")) ->
       call_parent_construct p env el
   | Class_const (CIparent, m) ->

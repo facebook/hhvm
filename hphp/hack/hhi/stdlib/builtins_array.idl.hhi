@@ -51,6 +51,18 @@ function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback =
 function array_flip($trans) { }
 function key_exists($key, $search) { }
 function array_keys($input, $search_value = null_variant, $strict = false) { }
+/**
+ * array_map signature is rewritten based on the arity of the call:
+ *
+ * array_map(F, A1, A2, ..., An); becomes
+ *
+ * array_map<T1, ... Tn, Tr>(
+ *   (function(T1, ..., Tn): Tr),
+ *   Container<T1>,
+ *   ...,
+ *   Container<Tn>
+ *): array;
+ */
 function array_map($callback, $arr1, ...) { }
 function array_merge_recursive($array1, ...) { }
 function array_merge($array1, ...) { }

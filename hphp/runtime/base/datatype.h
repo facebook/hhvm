@@ -32,63 +32,73 @@ namespace HPHP {
 
 /*
  * DataType is the type tag for a TypedValue (see typed-value.h).
+ *
+ * Beware if you change the order, as we may have a few type checks in the code
+ * that depend on the order.  Also beware of adding to the number of bits
+ * needed to represent this.  (Known dependency in unwind-x64.h.)
  */
 enum DataType : int8_t {
-  KindOfClass            = -13,
-  MinDataType            = -13,
+  KindOfClass         = -13,
 
   // Values below zero are not PHP values, but runtime-internal.
-  KindOfAny              = -8,
-  KindOfUncounted        = -7,
-  KindOfUncountedInit    = -6,
+  KindOfAny           = -8,
+  KindOfInvalid       = -1,
+  KindOfUnknown       = KindOfInvalid,
+  KindOfNone          = KindOfInvalid,
 
-  KindOfInvalid          = -1,
-  KindOfUnknown          = KindOfInvalid,
-  KindOfNone             = KindOfInvalid,
+  // Any code that static_asserts about the value of KindOfNull may also depend
+  // on there not being any values between KindOfUninit and KindOfNull.
+  KindOfUninit        = 0x00,  //   0000000
+  KindOfNull          = 0x08,  //   0001000
+  KindOfBoolean       = 0x09,  //   0001001
+  KindOfInt64         = 0x0a,  //   0001010
+  KindOfDouble        = 0x0b,  //   0001011
 
-  /**
-   * Beware if you change the order, as we may have a few type checks
-   * in the code that depend on the order.  Also beware of adding to
-   * the number of bits needed to represent this.  (Known dependency
-   * in unwind-x64.h.)
-   */
-  KindOfUninit           = 0x00,
-  // Any code that static_asserts about the value of KindOfNull may
-  // also depend on there not being any values between KindOfUninit
-  // and KindOfNull.
-  KindOfNull             = 0x08,  //   0001000
-  KindOfBoolean          = 0x09,  //   0001001
-  KindOfInt64            = 0x0a,  //   0001010
-  KindOfDouble           = 0x0b,  //   0001011
-
-  KindOfStaticString     = 0x0c,  //   0001100
-  KindOfString           = 0x14,  //   0010100
-  KindOfArray            = 0x20,  //   0100000
-  KindOfObject           = 0x30,  //   0110000
-  KindOfResource         = 0x40,  //   1000000
-  KindOfRef              = 0x50,  //   1010000
-  KindOfNamedLocal       = 0x51,  //   1010001
-
-  MaxNumDataTypes        = KindOfNamedLocal + 1, // marker, not a valid type
-  MaxNumDataTypesIndex   = 12 + 1,  // 1 + the number of valid DataTypes above
-
-  // Note: KindOfStringBit must be set in KindOfStaticString and KindOfString,
-  //       and it must be 0 in any other real DataType.
-  KindOfStringBit        = 0x04,
-
-  // Note: KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double,
-  //       and StaticString, and it must be 0 for any other real DataType.
-  KindOfUncountedInitBit = 0x08,
+  KindOfStaticString  = 0x0c,  //   0001100
+  KindOfString        = 0x14,  //   0010100
+  KindOfArray         = 0x20,  //   0100000
+  KindOfObject        = 0x30,  //   0110000
+  KindOfResource      = 0x40,  //   1000000
+  KindOfRef           = 0x50,  //   1010000
+  KindOfNamedLocal    = 0x51,  //   1010001
 };
 
-const unsigned int kDataTypeMask = 0x7f;
+/*
+ * DataType limits.
+ */
+constexpr int    kNumDataTypes = 12;
+constexpr int8_t kMinDataType  = KindOfClass;
+constexpr int8_t kMaxDataType  = KindOfNamedLocal;
 
-// For a given DataType dt >= 0, this mask can be used to test if dt is
-// KindOfArray, KindOfObject, KindOfResource, or KindOfRef
-const unsigned int kNotConstantValueTypeMask = 0x60;
+/*
+ * All DataTypes are expressible in seven bits.
+ */
+constexpr unsigned kDataTypeMask = 0x7f;
 
-// All DataTypes greater than this value are refcounted.
-const DataType KindOfRefCountThreshold = KindOfStaticString;
+/*
+ * KindOfStringBit must be set in KindOfStaticString and KindOfString, and it
+ * must be 0 in any other DataType.
+ */
+constexpr int KindOfStringBit = 0x04;
+
+/*
+ * KindOfUncountedInitBit must be set for Null, Boolean, Int64, Double, and
+ * StaticString, and it must be 0 for any other DataType.
+ */
+constexpr int KindOfUncountedInitBit = 0x08;
+
+/*
+ * For a given DataType dt >= 0, this mask can be used to test if dt is
+ * KindOfArray, KindOfObject, KindOfResource, or KindOfRef.
+ */
+constexpr unsigned kNotConstantValueTypeMask = 0x60;
+
+/*
+ * All DataTypes greater than this value are refcounted.
+ */
+constexpr DataType KindOfRefCountThreshold = KindOfStaticString;
+
+//////////////////////////////////////////////////////////////////////
 
 // These must be kept in order from least to most specific.
 #define DT_CATEGORIES(func)                     \
@@ -141,7 +151,7 @@ static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 static_assert(KindOfUninit == 0,
               "Several things assume this tag is 0, especially RDS");
 
-static_assert(MaxNumDataTypes - 1 <= kDataTypeMask, "");
+static_assert(kMaxDataType <= kDataTypeMask, "");
 
 static_assert((kNotConstantValueTypeMask & KindOfArray) != 0  &&
               (kNotConstantValueTypeMask & KindOfObject) != 0 &&
@@ -175,8 +185,6 @@ inline std::string tname(DataType t) {
     CS(Ref)
     CS(Class)
     CS(Any)
-    CS(Uncounted)
-    CS(UncountedInit)
 
 #undef CS
     case KindOfInvalid: return std::string("Invalid");
@@ -218,19 +226,19 @@ inline int getDataTypeIndex(DataType type) {
 
 inline DataType getDataTypeValue(unsigned index) {
   switch (index) {
-    case 0  : return KindOfUninit;
-    case 1  : return KindOfNull;
-    case 2  : return KindOfBoolean;
-    case 3  : return KindOfInt64;
-    case 4  : return KindOfDouble;
-    case 5  : return KindOfStaticString;
-    case 6  : return KindOfString;
-    case 7  : return KindOfArray;
-    case 8  : return KindOfObject;
-    case 9  : return KindOfResource;
-    case 10 : return KindOfRef;
-    case 11 : return KindOfNamedLocal;
-    default : not_reached();
+    case 0:  return KindOfUninit;
+    case 1:  return KindOfNull;
+    case 2:  return KindOfBoolean;
+    case 3:  return KindOfInt64;
+    case 4:  return KindOfDouble;
+    case 5:  return KindOfStaticString;
+    case 6:  return KindOfString;
+    case 7:  return KindOfArray;
+    case 8:  return KindOfObject;
+    case 9:  return KindOfResource;
+    case 10: return KindOfRef;
+    case 11: return KindOfNamedLocal;
+    default: not_reached();
   }
 }
 
@@ -246,8 +254,8 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   return TYPE_TO_DESTR_IDX(t);
 }
 
-#define IS_REAL_TYPE(t)                                                 \
-  (((t) >= ::HPHP::KindOfUninit && (t) < ::HPHP::MaxNumDataTypes) ||    \
+#define IS_REAL_TYPE(t)                                             \
+  (((t) >= ::HPHP::KindOfUninit && (t) <= ::HPHP::kMaxDataType) ||  \
    (t) == ::HPHP::KindOfClass)
 
 // Helper macro for checking if a given type is refcounted

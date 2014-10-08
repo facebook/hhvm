@@ -602,7 +602,7 @@ void flush_evaluation_stack() {
 static std::string toStringElm(const TypedValue* tv) {
   std::ostringstream os;
 
-  if (tv->m_type < MinDataType || tv->m_type > MaxNumDataTypes) {
+  if (tv->m_type < kMinDataType || tv->m_type > kMaxDataType) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }

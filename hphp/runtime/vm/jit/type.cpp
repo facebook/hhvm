@@ -235,8 +235,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
     case KindOfClass         : return kCls;
-    case KindOfUncountedInit : return kUncountedInit;
-    case KindOfUncounted     : return kUncounted;
     case KindOfAny           : return kGen;
     case KindOfRef: {
       if (inner == KindOfAny) {

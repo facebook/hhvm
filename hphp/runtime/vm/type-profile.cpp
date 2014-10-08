@@ -62,9 +62,9 @@ struct ValueProfile {
   uint32_t m_tag;
   // All of these saturate at 255.
   Counter m_totalSamples;
-  Counter m_samples[MaxNumDataTypesIndex];
+  Counter m_samples[kNumDataTypes];
   void dump() {
-    for (int i = 0; i < MaxNumDataTypesIndex; i++) {
+    for (int i = 0; i < kNumDataTypes; i++) {
       TRACE(0, "t%3d: %4d\n", i, m_samples[getDataTypeValue(i)]);
     }
   }
@@ -421,7 +421,7 @@ PredVal predictType(TypeProfileKey key) {
   DataType pred = KindOfUninit;
   // If we have fewer than kMinInstances predictions, consider it too
   // little data to be actionable.
-  for (int i = 0; i < MaxNumDataTypesIndex; ++i) {
+  for (int i = 0; i < kNumDataTypes; ++i) {
     double prob = (1.0 * prof->m_samples[i]) / total;
     if (prob > maxProb) {
       maxProb = prob;

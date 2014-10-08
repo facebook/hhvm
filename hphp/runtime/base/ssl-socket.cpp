@@ -309,7 +309,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
+SSLSocket *SSLSocket::Create(int fd, int domain, const HostURL &hosturl,
+                             double timeout) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -325,10 +326,7 @@ SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
     return nullptr;
   }
 
-  int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
-  int type = SOCK_STREAM;
-  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain,
-                                  hosturl.getHost().c_str(),
+  SSLSocket *sock = new SSLSocket(fd, domain, hosturl.getHost().c_str(),
                                   hosturl.getPort());
   sock->m_method = method;
   sock->m_connect_timeout = timeout;

@@ -541,7 +541,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     // create vregs for all relevant SSATmps
     assignRegs(unit, vunit, state, linfo.blocks, this);
-    vunit.roots.push_back(state.labels[unit.entry()]);
+    vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);

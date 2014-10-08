@@ -1694,9 +1694,7 @@ void Vxls::print(const char* caption) {
 
 jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   BlockSorter s(unit);
-  for (auto it = unit.roots.end(); it != unit.roots.begin();) {
-    s.dfs(*--it);
-  }
+  s.dfs(unit.entry);
   std::reverse(s.blocks.begin(), s.blocks.end());
   // put the blocks containing "end" last; expect at most one per area.
   std::stable_partition(s.blocks.begin(), s.blocks.end(), [&] (Vlabel b) {

@@ -820,8 +820,8 @@ struct Vunit {
   bool needsRegAlloc() const;
 
   unsigned next_vr{Vreg::V0};
+  Vlabel entry;
   jit::vector<Vblock> blocks;
-  jit::vector<Vlabel> roots; // entry points
   jit::hash_map<uint64_t,Vreg> cpool;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
@@ -846,10 +846,9 @@ struct Vout {
   bool closed() const;
 
   Vout makeBlock(); // create a stream connected to a new empty block
-  Vout makeEntry(); // makeBlock() and add it to unit.roots
 
   // instruction emitter
-  Vout& operator<<(Vinstr inst);
+  Vout& operator<<(const Vinstr& inst);
 
   Vpoint makePoint() { return m_meta->makePoint(); }
   Vmeta& meta() { return *m_meta; }
@@ -922,12 +921,19 @@ private:
   jit::vector<Area> m_areas; // indexed by AreaIndex
 };
 
+/*
+ * Vauto is a convenience helper for emitting small amounts of machine code
+ * using vasm. It always has a main code block; cold and frozen blocks may be
+ * added using the normal Vasm API after creation. When the Vauto goes out of
+ * scope, it will finalize and emit any code it contains.
+ */
 struct Vauto : Vasm {
-  explicit Vauto(Vmeta* meta = nullptr)
-    : Vasm(meta)
-  {}
+  explicit Vauto(CodeBlock& code)
+    : Vasm(nullptr)
+  {
+    unit().entry = Vlabel(main(code));
+  }
   ~Vauto();
-  RegSet params;
 };
 
 template<class F> void visit(const Vunit&, Vreg v, F f) {
@@ -1050,7 +1056,7 @@ struct PostorderWalker {
     fn(b);
   }
   template<class Fn> void dfs(Fn fn) {
-    for (auto b : unit.roots) dfs(b, fn);
+    dfs(unit.entry, fn);
   }
   explicit PostorderWalker(const Vunit& u)
     : unit(u)

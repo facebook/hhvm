@@ -58,7 +58,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
 
 PhysRegSaverParity::PhysRegSaverParity(int parity, X64Assembler& as,
                                        RegSet regs)
-  : PhysRegSaverParity{parity, Vauto().main(as), regs} {
+  : PhysRegSaverParity{parity, Vauto(as.code()).main(), regs} {
   m_v = nullptr;
   m_as = &as;
 }
@@ -73,7 +73,7 @@ PhysRegSaverParity::~PhysRegSaverParity() {
     emitPops(v, m_regs);
   };
   if (m_as) {
-    finish(Vauto().main(*m_as));
+    finish(Vauto(m_as->code()).main());
   } else {
     finish(*m_v);
   }
@@ -97,7 +97,7 @@ void PhysRegSaverParity::emitPops(Vout& v, RegSet regs) {
 }
 
 void PhysRegSaverParity::emitPops(X64Assembler& as, RegSet regs) {
-  emitPops(Vauto().main(as), regs);
+  emitPops(Vauto(as.code()).main(), regs);
 }
 
 int PhysRegSaverParity::rspAdjustment() const {

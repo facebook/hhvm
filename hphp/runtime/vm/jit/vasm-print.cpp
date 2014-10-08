@@ -65,6 +65,9 @@ struct FormatVisitor {
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
+  void imm(TCA* addr) {
+    str << sep() << folly::format("{}", addr);
+  }
   void imm(Vpoint p) { str << sep() << '@' << (size_t)p; }
   void imm(const CppCall& cppcall) {
     switch (cppcall.kind()) {
@@ -101,6 +104,9 @@ struct FormatVisitor {
   }
   void imm(DestType dt) {
     str << sep() << destTypeName(dt);
+  }
+  void imm(RIPRelativeRef r) {
+    str << sep() << folly::format("ip[{:#x}]", r.r.disp);
   }
 
   template<class R> void across(R r) { print(r); }

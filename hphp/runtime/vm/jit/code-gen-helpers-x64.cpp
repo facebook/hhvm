@@ -76,7 +76,7 @@ void emitEagerSyncPoint(Vout& v, const Op* pc) {
 }
 
 void emitEagerSyncPoint(Asm& as, const Op* pc) {
-  emitEagerSyncPoint(Vauto().main(as), pc);
+  emitEagerSyncPoint(Vauto(as.code()).main(), pc);
 }
 
 // emitEagerVMRegSave --
@@ -115,7 +115,7 @@ void emitGetGContext(Vout& v, Vreg dest) {
 }
 
 void emitGetGContext(Asm& as, PhysReg dest) {
-  emitGetGContext(Vauto().main(as), dest);
+  emitGetGContext(Vauto(as.code()).main(), dest);
 }
 
 // IfCountNotStatic --
@@ -156,7 +156,7 @@ void emitTransCounterInc(Vout& v) {
 }
 
 void emitTransCounterInc(Asm& a) {
-  emitTransCounterInc(Vauto().main(a));
+  emitTransCounterInc(Vauto(a.code()).main());
 }
 
 void emitIncRef(Vout& v, Vreg base) {
@@ -173,7 +173,7 @@ void emitIncRef(Vout& v, Vreg base) {
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
-  emitIncRef(Vauto().main(as), base);
+  emitIncRef(Vauto(as.code()).main(), base);
 }
 
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
@@ -259,11 +259,11 @@ Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
-  Vauto().main(a) << call{dest, args};
+  Vauto(a.code()).main() << call{dest, args};
 }
 
 void emitCall(Asm& a, CppCall call, RegSet args) {
-  emitCall(Vauto().main(a), call, args);
+  emitCall(Vauto(a.code()).main(), call, args);
 }
 
 void emitCall(Vout& v, CppCall target, RegSet args) {
@@ -368,8 +368,8 @@ Vreg emitTestSurpriseFlags(Vout& v) {
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup) {
-  Vauto vasm;
-  auto& v = vasm.main(mainCode);
+  Vauto vasm(mainCode);
+  auto& v = vasm.main();
   auto& vc = vasm.cold(coldCode);
   emitCheckSurpriseFlagsEnter(v, vc, fixup);
 }

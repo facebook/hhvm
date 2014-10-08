@@ -107,21 +107,16 @@ bool Vunit::needsRegAlloc() const {
   return false;
 }
 
-Vout& Vout::operator<<(Vinstr inst) {
+Vout& Vout::operator<<(const Vinstr& inst) {
   assert(!closed());
-  inst.origin = m_origin;
-  m_unit.blocks[m_block].code.push_back(inst);
+  auto& code = m_unit.blocks[m_block].code;
+  code.emplace_back(inst);
+  code.back().origin = m_origin;
   return *this;
 }
 
 Vout Vout::makeBlock() {
   return {m_meta, m_unit, m_unit.makeBlock(area()), m_origin};
-}
-
-Vout Vout::makeEntry() {
-  auto label = m_unit.makeBlock(area());
-  m_unit.roots.push_back(label); // save entry label
-  return {m_meta, m_unit, label, m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -472,12 +467,14 @@ void Vgen::emit(copy2& i) {
 
 void Vgen::emit(bindaddr& i) {
   mcg->setJmpTransID((TCA)i.dest);
-  *i.dest = emitEphemeralServiceReq(a->code(),
-                           mcg->getFreeStub(a->code(), &mcg->cgFixups()),
-                           REQ_BIND_ADDR,
-                           i.dest,
-                           i.sk.toAtomicInt(),
-                           TransFlags{}.packed);
+  *i.dest = emitEphemeralServiceReq(
+    frozen(),
+    mcg->getFreeStub(frozen(), &mcg->cgFixups()),
+    REQ_BIND_ADDR,
+    i.dest,
+    i.sk.toAtomicInt(),
+    TransFlags{}.packed
+  );
   mcg->cgFixups().m_codePointers.insert(i.dest);
 }
 
@@ -841,7 +838,6 @@ void Vgen::emit(loadq& i) {
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   assert(size_t(area) == m_areas.size());
   auto b = m_unit.makeBlock(area);
-  if (size_t(b) == 0) m_unit.roots.push_back(b);
   Vout v{m_meta, m_unit, b};
   m_areas.push_back(Area{v, cb, cb.frontier()});
   return m_areas.back().out;

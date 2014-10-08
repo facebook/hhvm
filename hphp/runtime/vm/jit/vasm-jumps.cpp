@@ -61,10 +61,8 @@ void optimizeJmps(Vunit& unit) {
         npreds[s]++;
       }
     });
-    // give roots an extra predecessor to prevent cloning them.
-    for (auto b : unit.roots) {
-      npreds[b]++;
-    }
+    // give entry an extra predecessor to prevent cloning it
+    npreds[unit.entry]++;
     PostorderWalker{unit}.dfs([&](Vlabel b) {
       auto& block = unit.blocks[b];
       auto& code = block.code;

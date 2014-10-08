@@ -2284,12 +2284,10 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   auto data   = inst->extra<LdBindAddr>();
   auto dstReg = dstLoc(0).reg();
   auto& v = vmain();
-  auto& vf = vfrozen();
 
   // Emit service request to smash address of SrcKey into 'addr'.
   TCA* addrPtr = mcg->allocData<TCA>(sizeof(TCA), 1);
-  vf = vf.makeEntry();
-  vf << bindaddr{addrPtr, data->sk};
+  v << bindaddr{addrPtr, data->sk};
 
   // Load the maybe bound address.
   auto addr = intptr_t(addrPtr);
@@ -2305,7 +2303,6 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   SSATmp* index       = inst->src(0);
   auto indexReg       = srcLoc(0).reg();
   auto& v = vmain();
-  auto& vf = vfrozen();
 
   if (!index->isConst()) {
     auto idx = indexReg;
@@ -2321,13 +2318,12 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
     auto t = v.makeReg();
-    v << leap{rip[(intptr_t)table], t};
-    v << jmpm{t[idx*8]};
     for (int i = 0; i < data->cases; i++) {
       auto sk = SrcKey(curFunc(), data->targets[i], resumed());
-      vf = vf.makeEntry();
-      vf << bindaddr{&table[i], sk};
+      v << bindaddr{&table[i], sk};
     }
+    v << leap{rip[(intptr_t)table], t};
+    v << jmpm{t[idx*8]};
   } else {
     int64_t indexVal = index->intVal();
     if (data->bounded) {
@@ -2349,18 +2345,16 @@ void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
   auto table = mcg->allocData<SSwitchMap>(64);
   new (table) SSwitchMap(data->numCases);
   auto& v = vmain();
-  auto& vf = vfrozen();
+
   for (int64_t i = 0; i < data->numCases; ++i) {
     table->add(data->cases[i].str, nullptr);
     TCA* addr = table->find(data->cases[i].str);
     auto sk = SrcKey(curFunc(), data->cases[i].dest, resumed());
-    vf = vf.makeEntry();
-    vf << bindaddr{addr, sk};
+    v << bindaddr{addr, sk};
   }
   TCA* def = mcg->allocData<TCA>(sizeof(TCA), 1);
   auto sk = SrcKey(curFunc(), data->defaultOff, resumed());
-  vf = vf.makeEntry();
-  vf << bindaddr{def, sk};
+  v << bindaddr{def, sk};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperFast),
                callDest(inst),
@@ -2389,16 +2383,14 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
     sizeof(const StringData*), data->numCases);
   auto jmptab = mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
   auto& v = vmain();
-  auto& vf = vfrozen();
+
   for (int i = 0; i < data->numCases; ++i) {
     strtab[i] = data->cases[i].str;
     auto sk = SrcKey(curFunc(), data->cases[i].dest, resumed());
-    vf = vf.makeEntry();
-    vf << bindaddr{&jmptab[i], sk};
+    v << bindaddr{&jmptab[i], sk};
   }
   auto sk = SrcKey(curFunc(), data->defaultOff, resumed());
-  vf = vf.makeEntry();
-  vf << bindaddr{&jmptab[data->numCases], sk};
+  v << bindaddr{&jmptab[data->numCases], sk};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperSlow),
                callDest(inst),

@@ -1,0 +1,6 @@
+File "postfix_parse.php", line 15, characters 3-9:
+Typing[4110] Typing error
+File "postfix_parse.php", line 15, characters 3-9:
+This is a num (int/float) because this is used in an arithmetic operation
+File "postfix_parse.php", line 5, characters 12-17:
+It is incompatible with a string

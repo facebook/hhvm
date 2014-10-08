@@ -1908,7 +1908,8 @@ Translator::translateRegion(const RegionDesc& region,
     assert(!knownFuncs.hasNext());
   }
 
-  traceEnd();
+  if (ht.genMode() == IRGenMode::Trace) traceEnd();
+
   irGenTimer.end();
 
   try {

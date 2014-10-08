@@ -738,12 +738,8 @@ void FrameState::setLocalValue(uint32_t id, SSATmp* value) {
 void FrameState::refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {
   always_assert(id < m_locals.size());
   auto& local = m_locals[id];
-  Type newType = refineType(local.type, type);
-  ITRACE(2, "updating local {}'s type: {} -> {}\n",
-         id, local.type, newType);
-  always_assert_flog(newType != Type::Bottom,
-                     "Bad new type for local {}: {} & {} = {}",
-                     id, local.type, type, newType);
+  Type newType = refineTypeNoCheck(local.type, type);
+  ITRACE(2, "updating local {}'s type: {} -> {}\n", id, local.type, newType);
   local.type = newType;
   local.typeSrcs.clear();
   local.typeSrcs.insert(typeSrc);

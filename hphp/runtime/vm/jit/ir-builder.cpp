@@ -466,6 +466,12 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
 
   auto const type = localType(locId, DataTypeGeneric);
+
+  // The types may not be compatible in the presence of unreachable code.
+  // Don't try to optimize the code in this case, and just let
+  // unreachable code elimination take care of it later.
+  if (type.not(inst->typeParam())) return nullptr;
+
   // If FrameState's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);

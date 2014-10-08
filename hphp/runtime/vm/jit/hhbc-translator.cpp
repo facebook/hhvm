@@ -512,6 +512,7 @@ void HhbcTranslator::emitSingletonSLoc(const Func* func, const Op* op) {
 void HhbcTranslator::emitPrint() {
   Type type = topC()->type();
   if (type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
+    auto catchBlock = makeCatch();
     auto const cell = popC();
 
     Opcode op;
@@ -527,7 +528,7 @@ void HhbcTranslator::emitPrint() {
     }
     // the print helpers decref their arg, so don't decref pop'ed value
     if (op != Nop) {
-      gen(op, cell);
+      gen(op, catchBlock, cell);
     }
     push(cns(1));
   } else {

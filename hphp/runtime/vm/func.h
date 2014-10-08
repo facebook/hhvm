@@ -65,17 +65,17 @@ using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
  * Exception handler table entry.
  */
 struct EHEnt {
-  enum class Type {
+  enum class Type : uint8_t {
     Catch,
     Fault
   };
   typedef std::vector<std::pair<Id, Offset>> CatchVec;
 
   Type m_type;
+  bool m_itRef;
   Offset m_base;
   Offset m_past;
   int m_iterId;
-  bool m_itRef;
   int m_parentIndex;
   Offset m_fault;
   CatchVec m_catches;

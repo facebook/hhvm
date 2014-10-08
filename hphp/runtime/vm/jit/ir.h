@@ -602,9 +602,9 @@ O(RaiseUninitLoc,                   ND, S(Str),                       E|N|Er) \
 O(WarnNonObjProp,                   ND, NA,                           E|N|Er) \
 O(ThrowNonObjProp,                  ND, NA,                         T|E|N|Er) \
 O(RaiseUndefProp,                   ND, S(Obj) CStr,                  E|N|Er) \
-O(PrintStr,                         ND, S(Str),                    E|NNT|CRc) \
-O(PrintInt,                         ND, S(Int),                    E|NNT|CRc) \
-O(PrintBool,                        ND, S(Bool),                   E|NNT|CRc) \
+O(PrintStr,                         ND, S(Str),                   E|N|Er|CRc) \
+O(PrintInt,                         ND, S(Int),                   E|N|Er|CRc) \
+O(PrintBool,                        ND, S(Bool),                  E|N|Er|CRc) \
 O(VerifyRetCls,                     ND, S(Cls)                                \
                                           S(Cls)                              \
                                           C(Int)                              \

@@ -71,16 +71,17 @@ bool Repo::prefork() {
   if (!t_dh.isNull()) {
     t_dh.destroy();
   }
-  folly::SingletonVault::singleton()->destroyInstances();
   s_lock.lock();
   if (s_nRepos > 0) {
     s_lock.unlock();
     return true;
   }
+  folly::SingletonVault::singleton()->destroyInstances();
   return false;
 }
 
 void Repo::postfork(pid_t pid) {
+  folly::SingletonVault::singleton()->reenableInstances();
   if (pid == 0) {
     new (&s_lock) SimpleMutex();
   } else {

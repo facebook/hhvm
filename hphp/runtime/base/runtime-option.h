@@ -413,7 +413,7 @@ public:
   F(bool, RuntimeTypeProfile,          false)                           \
   F(int32_t, RuntimeTypeProfileLoggingFreq,  0)                         \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
-  F(uint32_t, HHBCArenaChunkSize,      64 << 20)                        \
+  F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \

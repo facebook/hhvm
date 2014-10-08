@@ -16,26 +16,30 @@
 
 #include "hphp/runtime/base/preg.h"
 
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
+#include <atomic>
+#include <fstream>
+#include <mutex>
 #include <pcre.h>
 #include <onigposix.h>
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/zend-functions.h"
+#include <utility>
+
+#include <folly/AtomicHashArray.h>
+
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/base/container-functions.h"
-#include <tbb/concurrent_hash_map.h>
-#include <fstream>
-#include <utility>
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/logger.h"
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -88,32 +92,38 @@ typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
                          string_data_hash, ahm_string_data_same> PCREStringMap;
 typedef std::pair<const StringData*, const pcre_cache_entry*> PCREEntry;
 
-static PCREStringMap* s_pcreCacheMap;
+static std::atomic<PCREStringMap*> s_pcreCacheMap;
+static std::atomic<time_t> s_pcreCacheExpire;
+static std::mutex s_clearMutex;
+
+static PCREStringMap* pcre_cache_create() {
+  PCREStringMap::Config config;
+  config.maxLoadFactor = 0.5;
+  return PCREStringMap::create(
+    RuntimeOption::EvalPCRETableSize, config).release();
+}
+
+static void pcre_cache_destroy(PCREStringMap* cache) {
+  for (auto& it : *cache) {
+    delete it.second;
+  }
+  PCREStringMap::destroy(cache);
+}
 
 void pcre_init() {
-  if (!s_pcreCacheMap) {
-    PCREStringMap::Config config;
-    config.maxLoadFactor = 0.5;
-    s_pcreCacheMap = PCREStringMap::create(
-                       RuntimeOption::EvalPCRETableSize, config).release();
-  }
+  assert(!s_pcreCacheMap);
+  s_pcreCacheMap = pcre_cache_create();
+  s_pcreCacheExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
 }
 
 void pcre_reinit() {
-  PCREStringMap::Config config;
-  config.maxLoadFactor = 0.5;
-  PCREStringMap* newMap = PCREStringMap::create(
-                     RuntimeOption::EvalPCRETableSize, config).release();
   if (s_pcreCacheMap) {
-    PCREStringMap::iterator it;
-    for (it = s_pcreCacheMap->begin(); it != s_pcreCacheMap->end(); it++) {
-      // there should not be a lot of entries created before runtime
-      // options were parsed.
-      delete(it->second);
-    }
-    PCREStringMap::destroy(s_pcreCacheMap);
+    // there should not be a lot of entries created before runtime
+    // options were parsed.
+    pcre_cache_destroy(s_pcreCacheMap);
   }
-  s_pcreCacheMap = newMap;
+  s_pcreCacheMap = pcre_cache_create();
+  s_pcreCacheExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
 }
 
 void pcre_dump_cache(const std::string& filename) {
@@ -127,19 +137,40 @@ void pcre_dump_cache(const std::string& filename) {
 static const pcre_cache_entry* lookup_cached_pcre(const String& regex) {
   assert(s_pcreCacheMap);
   PCREStringMap::iterator it;
-  if ((it = s_pcreCacheMap->find(regex.get())) != s_pcreCacheMap->end()) {
+  auto cache = s_pcreCacheMap.load(std::memory_order_acquire);
+  if ((it = cache->find(regex.get())) != cache->end()) {
     return it->second;
   }
   return 0;
 }
 
+static void pcre_clear_cache() {
+  std::unique_lock<std::mutex> lock(s_clearMutex, std::try_to_lock);
+  if (!lock) return;
+
+  auto newExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+  s_pcreCacheExpire.store(newExpire, std::memory_order_relaxed);
+
+  auto tmpMap = pcre_cache_create();
+  tmpMap = s_pcreCacheMap.exchange(tmpMap, std::memory_order_acq_rel);
+
+  Treadmill::enqueue([tmpMap]() {
+      pcre_cache_destroy(tmpMap);
+   });
+}
+
 static const pcre_cache_entry*
 insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
   assert(s_pcreCacheMap);
-  auto pair = s_pcreCacheMap->insert(
+  // Clear the cache if we haven't refreshed it in a while
+  if (time(nullptr) > s_pcreCacheExpire) {
+    pcre_clear_cache();
+  }
+  auto cache = s_pcreCacheMap.load(std::memory_order_acquire);
+  auto pair = cache->insert(
     PCREEntry(makeStaticString(regex.get()), ent));
   if (!pair.second) {
-    if (pair.first == s_pcreCacheMap->end()) {
+    if (pair.first == cache->end()) {
       // Global Cache is full
       // still return the entry and free it at the end of the request
       s_pcre_globals->cleanupOnRequestEnd(ent);
@@ -1503,7 +1534,7 @@ int preg_last_error() {
 }
 
 size_t preg_pcre_cache_size() {
-  return (size_t)s_pcreCacheMap->size();
+  return (size_t)s_pcreCacheMap.load(std::memory_order_acquire)->size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

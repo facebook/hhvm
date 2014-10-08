@@ -2832,21 +2832,14 @@ and expr_prefix_unary env start op =
 
 and expr_postfix_unary env uop e1 =
   let end_ = Pos.make env.lb in
-  let e =
-    reduce env e1 (unary_priority uop) begin fun e1 env ->
-      let op =
-        match uop with
-        | Tincr -> Upincr
-        | Tdecr -> Updecr
-        | _ -> assert false
-      in
-      Pos.btw (fst e1) end_, Unop (op, e1)
-    end
+  let op =
+    match uop with
+    | Tincr -> Upincr
+    | Tdecr -> Updecr
+    | _ -> assert false
   in
-  let x = L.token env.lb in
-  if x = uop
-  then expr_remain env e
-  else (L.back env.lb; expr_remain env e)
+  let e = Pos.btw (fst e1) end_, Unop (op, e1) in
+  expr_remain env e
 
 (*****************************************************************************)
 (* If expression: _?_:_ *)

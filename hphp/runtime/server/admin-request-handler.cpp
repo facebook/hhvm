@@ -527,7 +527,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
         stats << "  <low_allocated>"
               << (low_small_allocated + low_large_allocated)
-              << "<low_allocated>" << endl;
+              << "</low_allocated>" << endl;
         stats << "  <low_active>"
               << low_active
               << "</low_active>" << endl;

@@ -21,4 +21,7 @@ class ReflectionParameter implements Reflector {
     public function getDefaultValue() {}
     public function isDefaultValueConstant() {}
     public function getDefaultValueConstantName() {}
+    public function getTypehintText() {}
+    public function getDefaultValueText() {}
+    public function isVariadic() {}
 }

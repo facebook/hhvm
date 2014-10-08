@@ -10,7 +10,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public $name = '';
     public $class = '';
     public static function export($class, $name, $return = false) {}
-    public function __construct($class, $name) {}
+    public function __construct($class, $name = null) {}
     public function isPublic() {}
     public function isPrivate() {}
     public function isProtected() {}
@@ -21,7 +21,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     public function isDestructor() {}
     public function getClosure($object) {}
     public function getModifiers() {}
-    public function invoke($object, $parameter = null, $_ = null) {}
+    public function invoke($object, ...) {}
     public function invokeArgs($object, array $args) {}
     public function getDeclaringClass() {}
     public function getPrototype() {}

@@ -6,7 +6,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
     public function __construct($name) {}
     public static function export($name, $return = null) {}
     public function isDisabled() {}
-    public function invoke($args = null) {}
+    public function invoke(...) {}
     public function invokeArgs(array $args) {}
     public function getClosure() {}
 }

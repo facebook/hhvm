@@ -25,4 +25,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     public function getStartLine() {}
     public function getStaticVariables() {}
     public function returnsReference() {}
+    public function isAsync() {}
+    public function isGenerator() {}
+    public function getReturnTypeText() {}
+    public function getAttribute($attr) {}
 }

@@ -12,8 +12,8 @@ class ReflectionProperty implements Reflector {
     public function __construct($class, $name) {}
     public function __toString() {}
     public function getName() {}
-    public function getValue($object) {}
-    public function setValue($object, $value) {}
+    public function getValue($object = null) {}
+    public function setValue($object, $value = null) {}
     public function isPublic() {}
     public function isPrivate() {}
     public function isProtected() {}
@@ -23,4 +23,5 @@ class ReflectionProperty implements Reflector {
     public function getDeclaringClass() {}
     public function getDocComment() {}
     public function setAccessible($accessible) {}
+    public function getTypeText() {}
 }

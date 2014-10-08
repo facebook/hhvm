@@ -829,20 +829,12 @@ struct Vunit {
 
 // writer stream to add instructions to a block
 struct Vout {
-  Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area)
-    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_origin(nullptr)
-  {}
-  Vout(Vmeta* m, Vunit& u, Vlabel b, AreaIndex area,
-       const IRInstruction* origin)
-    : m_meta(m), m_unit(u), m_block(b), m_area(area), m_origin(origin)
-  {}
-  Vout(const Vout& v)
-    : m_meta(v.m_meta), m_unit(v.m_unit), m_block(v.m_block), m_area(v.m_area)
-    , m_origin(v.m_origin)
+  Vout(Vmeta* m, Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
+    : m_meta(m), m_unit(u), m_block(b), m_origin(origin)
   {}
 
   Vout& operator=(const Vout& v) {
-    assert(&v.m_unit == &m_unit && v.m_area == m_area);
+    assert(&v.m_unit == &m_unit && v.m_meta == m_meta);
     m_block = v.m_block;
     m_origin = v.m_origin;
     return *this;
@@ -866,7 +858,7 @@ struct Vout {
   void use(Vlabel b) { m_block = b; }
   void setOrigin(const IRInstruction* i) { m_origin = i; }
   Vreg makeReg() { return m_unit.makeReg(); }
-  AreaIndex area() const { return m_area; }
+  AreaIndex area() const { return m_unit.blocks[m_block].area; }
   Vtuple makeTuple(const VregList& regs) const {
     return m_unit.makeTuple(regs);
   }
@@ -881,7 +873,6 @@ private:
   Vmeta* const m_meta;
   Vunit& m_unit;
   Vlabel m_block;
-  AreaIndex m_area;
   const IRInstruction* m_origin;
 };
 

@@ -115,13 +115,13 @@ Vout& Vout::operator<<(Vinstr inst) {
 }
 
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(m_area), m_area, m_origin};
+  return {m_meta, m_unit, m_unit.makeBlock(area()), m_origin};
 }
 
 Vout Vout::makeEntry() {
-  auto label = m_unit.makeBlock(m_area);
+  auto label = m_unit.makeBlock(area());
   m_unit.roots.push_back(label); // save entry label
-  return {m_meta, m_unit, label, m_area, m_origin};
+  return {m_meta, m_unit, label, m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -842,7 +842,7 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   assert(size_t(area) == m_areas.size());
   auto b = m_unit.makeBlock(area);
   if (size_t(b) == 0) m_unit.roots.push_back(b);
-  Vout v{m_meta, m_unit, b, area};
+  Vout v{m_meta, m_unit, b};
   m_areas.push_back(Area{v, cb, cb.frontier()});
   return m_areas.back().out;
 }
@@ -916,7 +916,7 @@ static void lowerCalls(Vunit& unit, const Abi& abi) {
 
       auto scratch = unit.makeScratchBlock();
       SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-      Vout v(nullptr, unit, scratch, AreaIndex::Main, inst.origin);
+      Vout v(nullptr, unit, scratch, inst.origin);
 
       int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
       if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};

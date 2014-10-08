@@ -1000,7 +1000,7 @@ $deltaBlue = function() {
   projectionTest(100);
 };
 
-$DeltaBlue = new BenchmarkSuite('DeltaBlue', [66118], array(
+$DeltaBlue = new BenchmarkSuite('DeltaBlue', [250000], array(
   new Benchmark('DeltaBlue', true, false, 4400, $deltaBlue)
 ));
 

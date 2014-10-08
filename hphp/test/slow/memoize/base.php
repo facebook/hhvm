@@ -65,16 +65,6 @@ class B extends A {
   }
 }
 
-function inc() { static $i = 250; return $i++; }
-
-trait T {
-  <<__Memoize>>
-  public static function testTraitStatic() { return inc(); }
-}
-
-class T1 { use T; }
-class T2 { use T; }
-
 (new A())->testA();
 // Test to make sure that a new object isn't reusing the results from the old
 // object,
@@ -100,10 +90,4 @@ echo $b->testMemoizedOverride()."\n";
 // Test passing a function that passes $this as an argument. This caused the
 // segfault in #5150421.
 echo $a->testPassesThis().' ';
-echo $a->testPassesThis()."\n";
-
-// Test static memoized functions in traits
-echo T1::testTraitStatic().' ';
-echo T1::testTraitStatic().' ';
-echo T2::testTraitStatic().' ';
-echo T2::testTraitStatic();
+echo $a->testPassesThis();

@@ -1,0 +1,12 @@
+basic trait use
+0 0 1 1
+override method
+10 10 11 11
+override meth with different sig
+20 20 21 21
+27 27 28 28
+override meth with different sig with namespaces
+30 30 31 31
+35 35 36 36
+static trait method
+50 50 51 51

@@ -6299,13 +6299,29 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->isGenerator = funcScope->isGenerator();
 
     if (funcScope->userAttributes().count("__Memoize")) {
+      auto classScope = meth->getClassScope();
+
+      // Due to an edge case with traits, we need to include the name for
+      // disambiguation when a trait function with no args is overridden by a
+      // trait function with args
+      std::string traitNamePart;
+      if (classScope && classScope->isTrait()) {
+        traitNamePart = classScope->getName();
+        // the backslash comes from namespaces. @jan thought that would cause
+        // issues, so use $ instead
+        for (char &c: traitNamePart) {
+          c = (c == '\\' ? '$' : c);
+        }
+        traitNamePart += "$";
+      }
+
       auto const originalName = fe->name;
       auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));
-      FuncEmitter* memoizeFe = nullptr;
       auto const propName = makeStaticString(
-        folly::sformat("{}$memoize_cache", fe->name->data()));
+        folly::sformat("{}${}memoize_cache", fe->name->data(), traitNamePart));
 
+      FuncEmitter* memoizeFe = nullptr;
       if (meth->is(Statement::KindOfFunctionStatement)) {
         if (!p.m_top) {
           throw IncludeTimeFatalException(meth,

@@ -46,6 +46,9 @@
  */
 /*****************************************************************************/
 
+/* define CAML_NAME_SPACE to ensure all the caml imports are prefixed with
+ * 'caml_' */
+#define CAML_NAME_SPACE
 #include <caml/memory.h>
 #include <caml/alloc.h>
 #include <string.h>

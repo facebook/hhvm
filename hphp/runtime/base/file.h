@@ -241,7 +241,7 @@ protected:
 
   void invokeFiltersOnClose();
   void closeImpl();
-  virtual void sweep() FOLLY_OVERRIDE;
+  virtual void sweep() override;
 
   /**
    * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.

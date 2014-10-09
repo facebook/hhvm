@@ -92,13 +92,13 @@ namespace HPHP {
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
-  void sweep() FOLLY_OVERRIDE;
+  void sweep() override;
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   static void typeCheck() {                                             \
     static_assert(std::is_base_of<ObjectData,T>::value, "");            \
   }                                                                     \
-  virtual void sweep() FOLLY_OVERRIDE;
+  virtual void sweep() override;
 
 #define IMPLEMENT_OBJECT_ALLOCATION(T)          \
   void HPHP::T::sweep() { this->~T(); }

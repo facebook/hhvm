@@ -52,7 +52,7 @@ public:
   SSLSocket();
   SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
-  void sweep() FOLLY_OVERRIDE;
+  void sweep() override;
 
   // will setup and enable crypto
   bool onConnect();
@@ -106,7 +106,7 @@ public:
   ~Certificate() {
     if (m_cert) X509_free(m_cert);
   }
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // calls delete this
     SweepableResourceData::sweep();
   }

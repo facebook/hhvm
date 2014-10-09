@@ -38,7 +38,7 @@ public:
   virtual bool isEof() const {
     return false; // Most implementations can't tell if they've reached EOF
   }
-  void sweep() FOLLY_OVERRIDE { close(); }
+  void sweep() override { close(); }
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
@@ -76,7 +76,7 @@ public:
   virtual void rewind();
   virtual bool isEof() const;
 
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // Leave m_it alone
     Directory::sweep();
   }

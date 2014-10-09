@@ -28,7 +28,7 @@ public:
 
   explicit UserDirectory(Class* cls);
   ~UserDirectory() {}
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // Don't close like the parent, 'cause that's what zend does
   }
 

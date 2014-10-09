@@ -101,7 +101,7 @@ public:
         const char *password, const char *database,
         MYSQL* raw_connection = nullptr);
   ~MySQL();
-  void sweep() FOLLY_OVERRIDE;
+  void sweep() override;
   void setLastError(const char *func);
   void close();
 

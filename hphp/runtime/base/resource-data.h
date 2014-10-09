@@ -172,7 +172,7 @@ class ResourceData {
  */
 class SweepableResourceData : public ResourceData, public Sweepable {
 protected:
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // ResourceData objects are non-smart allocated by default (see
     // operator delete in ResourceData), so sweeping will destroy the
     // object and deallocate its seat as well.

@@ -61,7 +61,7 @@ public:
   virtual bool eof();
   virtual Array getMetaData();
   virtual int64_t tell();
-  virtual void sweep() FOLLY_OVERRIDE;
+  virtual void sweep() override;
 
   // check if the socket is still open
   virtual bool checkLiveness();

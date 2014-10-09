@@ -38,7 +38,7 @@ public:
   Image() : m_gdImage(nullptr) {}
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
   ~Image();
-  void sweep() FOLLY_OVERRIDE;
+  void sweep() override;
   gdImagePtr get() { return m_gdImage;}
   void reset() { m_gdImage = nullptr;}
 

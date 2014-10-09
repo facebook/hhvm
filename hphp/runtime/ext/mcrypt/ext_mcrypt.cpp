@@ -40,7 +40,7 @@ public:
     MCrypt::close();
   }
 
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     close();
   }
 

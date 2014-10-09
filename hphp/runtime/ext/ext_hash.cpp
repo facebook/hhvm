@@ -164,7 +164,7 @@ public:
     HashContext::sweep();
   }
 
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     /* Just in case the algo has internally allocated resources */
     if (context) {
       assert(ops->digest_size >= 0);

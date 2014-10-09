@@ -163,7 +163,7 @@ public:
   ~Key() {
     if (m_key) EVP_PKEY_free(m_key);
   }
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // Base class calls delete this, which should work.
     SweepableResourceData::sweep();
   }
@@ -320,7 +320,7 @@ public:
     X509_REQ_free(m_csr);
   }
 
-  void sweep() FOLLY_OVERRIDE {
+  void sweep() override {
     // Base class calls delete this, which should work.
     SweepableResourceData::sweep();
   }

@@ -81,7 +81,7 @@ public:
   explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
   virtual ~BuiltinFile();
   virtual bool close();
-  virtual void sweep() FOLLY_OVERRIDE;
+  virtual void sweep() override;
 };
 
 /**

@@ -592,6 +592,7 @@ void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   auto& v = vmain();
+  v << landingpad{};
   v << incstat{Stats::TC_CatchTrace, 1, false};
 
   // We want to restore state as though the call had completed

@@ -118,6 +118,16 @@ inline const std::type_info& typeInfoFromUnwindException(
 typedef std::shared_ptr<void> UnwindInfoHandle;
 UnwindInfoHandle register_unwind_region(unsigned char* address, size_t size);
 
+/*
+ * The personality routine for code emitted by the jit.
+ */
+_Unwind_Reason_Code
+tc_unwind_personality(int version,
+                      _Unwind_Action actions,
+                      uint64_t exceptionClass,
+                      _Unwind_Exception* exceptionObj,
+                      _Unwind_Context* context);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

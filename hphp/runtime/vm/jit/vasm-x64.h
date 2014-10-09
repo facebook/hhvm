@@ -401,6 +401,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
+  O(landingpad, Inone, Un, Dn)\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -573,6 +574,7 @@ struct retransopt { SrcKey sk; TransID id; };
 struct store { Vreg s; Vptr d; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
+struct landingpad {};
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -979,7 +981,7 @@ void visitUses(const Vunit& unit, Vinstr& inst, Use use) {
 }
 
 template<class Def>
-void visitDefs(const Vunit& unit, Vinstr& inst, Def def) {
+void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
   switch (inst.op) {
 #define O(name, imms, uses, defs) \
     case Vinstr::name: { \

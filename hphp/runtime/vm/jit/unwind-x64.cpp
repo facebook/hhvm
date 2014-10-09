@@ -141,6 +141,13 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   return true;
 }
 
+void deregister_unwind_region(std::vector<char>* p) {
+  std::auto_ptr<std::vector<char> > del(p);
+  __deregister_frame(&(*p)[0]);
+}
+
+}
+
 _Unwind_Reason_Code
 tc_unwind_personality(int version,
                       _Unwind_Action actions,
@@ -217,13 +224,6 @@ tc_unwind_personality(int version,
 
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;
-}
-
-void deregister_unwind_region(std::vector<char>* p) {
-  std::auto_ptr<std::vector<char> > del(p);
-  __deregister_frame(&(*p)[0]);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

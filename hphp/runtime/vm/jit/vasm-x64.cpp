@@ -182,6 +182,7 @@ private:
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
+  void emit(landingpad& i) {}
 
   // instructions
   void emit(andb& i) { commuteSF(i); a->andb(i.s0, i.d); }

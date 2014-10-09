@@ -5,19 +5,19 @@
 
 function get_dups(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "dups", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "dups", 0);
 }
 function get_refs(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "refs", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "refs", 0);
 }
 function get_srefs(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "srefs", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "srefs", 0);
 }
 function get_path(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "path", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "path", 0);
 }
 
 function getStr(int $len): string {

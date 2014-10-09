@@ -5,7 +5,7 @@
 
 function get_instances(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "instances", 0);
 }
 function get_bytes_eq(string $cls, ?array $objs) {
   if (!$objs) return 0;
@@ -18,11 +18,12 @@ function get_bytes_eq(string $cls, ?array $objs) {
 }
 function get_bytes(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "bytes", 0);
 }
 function get_bytesd(string $cls, ?array $objs) {
   if (!$objs) return 0;
-  return idx(idx($objs, $cls, array()), "bytes_normalized", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, array()),
+    "bytes_normalized", 0);
 }
 function getStr(int $len): string {
   $ret = "";

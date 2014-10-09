@@ -1,4 +1,4 @@
-array(168) {
+array(169) {
   ["hhvm.jit_profile_requests"]=>
   array(3) {
     ["global_value"]=>
@@ -547,6 +547,15 @@ array(168) {
     string(1) "1"
     ["access"]=>
     int(4)
+  }
+  ["hhvm.pcre_expire_interval"]=>
+  array(3) {
+    ["global_value"]=>
+    string(%d) "%s"
+    ["local_value"]=>
+    string(%d) "%s"
+    ["access"]=>
+    int(%d)
   }
   ["hhvm.pcre_table_size"]=>
   array(3) {

@@ -628,7 +628,7 @@ static bool send_report(Transport *transport, Writer::Format format,
   std::string out;
   ServerStats::Report(out, format, from, to, agg, keys, url, code, prefix);
 
-  transport->addHeader("Content-Type", mime);
+  transport->replaceHeader("Content-Type", mime);
   transport->sendString(out);
   return true;
 }
@@ -638,7 +638,7 @@ static bool send_status(Transport *transport, Writer::Format format,
   string out;
   ServerStats::ReportStatus(out, format);
 
-  transport->addHeader("Content-Type", mime);
+  transport->replaceHeader("Content-Type", mime);
   transport->sendString(out);
   return true;
 }
@@ -749,19 +749,19 @@ bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
   std::string out;
   if (cmd == "memory.xml") {
       MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::XML);
-      transport->addHeader("Content-Type","application/xml");
+      transport->replaceHeader("Content-Type","application/xml");
       transport->sendString(out);
       return true;
   }
   if (cmd == "memory.json") {
       MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::JSON);
-      transport->addHeader("Content-Type","application/json");
+      transport->replaceHeader("Content-Type","application/json");
       transport->sendString(out);
       return true;
   }
   if (cmd == "memory.html" || cmd == "memory.htm") {
       MemoryStats::GetInstance()->ReportMemory(out, Writer::Format::XML);
-      transport->addHeader("Content-Type","application/html");
+      transport->replaceHeader("Content-Type","application/html");
       transport->sendString(out);
       return true;
   }
@@ -837,7 +837,7 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
           200) {
         xsl = response.data();
         if (!xsl.empty()) {
-          transport->addHeader("Content-Type", "application/xml");
+          transport->replaceHeader("Content-Type", "application/xml");
           transport->sendString(xsl);
           return true;
         }

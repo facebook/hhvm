@@ -49,7 +49,7 @@ class NumberFormatter {
 
   public static function create($locale,
                                 $style,
-                                $pattern) {
+                                $pattern = "") {
     try {
       return new NumberFormatter($locale, $style, $pattern);
     } catch (Exception $e) {

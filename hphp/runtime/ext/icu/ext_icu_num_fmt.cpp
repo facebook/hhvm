@@ -291,9 +291,9 @@ static Variant HHVM_METHOD(NumberFormatter, format, const Variant& value,
   }
 
   if (type == UNUM(TYPE_DEFAULT)) {
-    if (value.isInteger()) {
+    if (num.isInteger()) {
       type = UNUM(TYPE_INT64);
-    } else if (value.isDouble()) {
+    } else if (num.isDouble()) {
       type = UNUM(TYPE_DOUBLE);
     }
   }

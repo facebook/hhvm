@@ -319,10 +319,7 @@ private:
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  bool shouldTranslate() const {
-    return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage &&
-            m_numTrans < RuntimeOption::EvalJitGlobalTranslationLimit;
-  }
+  bool shouldTranslate() const;
 
   TCA getTopTranslation(SrcKey sk) {
     return m_tx.getSrcRec(sk)->getTopTranslation();

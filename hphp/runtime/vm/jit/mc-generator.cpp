@@ -304,6 +304,19 @@ MCGenerator::numTranslations(SrcKey sk) const {
   return 0;
 }
 
+bool MCGenerator::shouldTranslate() const {
+  // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
+  if (m_numTrans >= RuntimeOption::EvalJitGlobalTranslationLimit) {
+    return false;
+  }
+
+  // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do
+  // allow Optimize translations past that limit.
+  return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage ||
+         m_tx.mode() == TransKind::Optimize;
+}
+
+
 static void populateLiveContext(RegionContext& ctx) {
   typedef RegionDesc::Location L;
 

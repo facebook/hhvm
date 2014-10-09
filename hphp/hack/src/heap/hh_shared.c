@@ -59,7 +59,6 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/mman.h>
 #include <sys/errno.h>
 #include <stdint.h>
 #include <sys/resource.h>
@@ -114,9 +113,6 @@ typedef struct {
 /* Globals */
 /*****************************************************************************/
 
-/* The location of the shared memory */
-static char* shared_mem;
-
 /* ENCODING: The first element is the size stored in bytes, the rest is
  * the data. The size is set to zero when the storage is empty.
  */
@@ -149,9 +145,6 @@ static char* heap_init;
 
 /* The size of the heap after initialization of the server */
 static size_t heap_init_size = 0;
-
-/* The size of a page (memory page) */
-static int page_size;
 
 /*****************************************************************************/
 /* Given a pointer to the shared memory address space, initializes all
@@ -257,9 +250,9 @@ void hh_shared_init() {
   int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE;
   int prot  = PROT_READ  | PROT_WRITE;
 
-  page_size = getpagesize();
+  int page_size = getpagesize();
 
-  shared_mem =
+  char* shared_mem =
     (char*)mmap(NULL, page_size + SHARED_MEM_SIZE, prot, flags, 0, 0);
 
   if(shared_mem == MAP_FAILED) {

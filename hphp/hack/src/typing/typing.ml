@@ -1627,34 +1627,133 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
   | Id ((_, "\\array_map") as x) ->
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
-      let fty = match fty, el with
-        | ((r, Tfun fty), _::args) when args <> [] ->
+      let env, fty = match fty, el with
+        | ((r_fty, Tfun fty), _::args) when args <> [] ->
           let arity = List.length args in
-          let vars = List.map (fun _ -> Env.fresh_type()) args in
-          let tr = Env.fresh_type() in
-          let f = (None, (
-            r,
-            Tfun {
-              ft_pos = fty.ft_pos;
-              ft_unsafe = false; ft_abstract = false;
-              ft_arity = Fstandard (arity, arity); ft_tparams = [];
-              ft_params = List.map (fun x -> (None, x)) vars;
-              ft_ret = tr;
-            }
-          )) in
-          let containers = List.map (fun var ->
-            (None,
-              (r,
-                Tapply ((fty.ft_pos, "\\Container"), [var])
+          (*
+            Builds a function with signature:
+
+            function<T1, ..., Tn, Tr>(
+              (function(T1, ..., Tn):Tr),
+              Container<T1>,
+              ...,
+              Container<Tn>,
+            ): R
+
+            where R is constructed by build_output_container applied to Tr
+          *)
+          let build_function (build_output_container:(ty -> ty)) : ty  =
+            let vars = List.map (fun _ -> Env.fresh_type()) args in
+            let tr = Env.fresh_type() in
+            let f = (None, (
+              r_fty,
+              Tfun {
+                ft_pos = fty.ft_pos;
+                ft_unsafe = false; ft_abstract = false;
+                ft_arity = Fstandard (arity, arity); ft_tparams = [];
+                ft_params = List.map (fun x -> (None, x)) vars;
+                ft_ret = tr;
+              }
+            )) in
+            let containers = List.map (fun var ->
+              (None,
+                (r_fty,
+                  Tapply ((fty.ft_pos, "\\Container"), [var])
+                )
               )
-            )
-          ) vars in
-          (r, Tfun {fty with
-            ft_arity = Fstandard (arity+1, arity+1);
-            ft_params = f::containers;
-            ft_ret = (r, Tarray(true, None, None));
-          })
-        | _ -> fty in
+            ) vars in
+            (r_fty, Tfun {fty with
+              ft_arity = Fstandard (arity+1, arity+1);
+              ft_params = f::containers;
+              ft_ret =  build_output_container tr;
+            }) in
+
+          (*
+            Takes a Container type and returns a function that can "pack" a type
+            into an array of appropriate shape, preserving the key type, i.e.:
+            array                 -> f, where f R = array
+            array<X>              -> f, where f R = array<R>
+            array<X, Y>           -> f, where f R = array<X, R>
+            Vector<X>             -> f  where f R = array<R>
+            KeyedContainer<X, Y>  -> f, where f R = array<X, R>
+            Container<X>          -> f, where f R = array<arraykey, R>
+            X                     -> f, where f R = Y
+          *)
+          let rec build_output_container
+            (env:Env.env) (x:ty) : (Env.env * (ty -> ty)) =
+            let env, x = Env.expand_type env x in (match x with
+              | (_, Tarray (_, None, None)) as array_type ->
+                env, (fun _ -> array_type)
+              | (r, Tarray (_, _, None)) ->
+                env, (fun tr -> (r, Tarray (true, Some(tr), None)) )
+              | ((_, Tany) as any) ->
+                env, (fun _ -> any)
+              | (r, Tunresolved x) ->
+                let env, x = lmap build_output_container env x in
+                env, (fun tr -> (r, Tunresolved (List.map (fun f -> f tr) x)))
+              | (r, _) ->
+                let tk, tv = Env.fresh_type(), Env.fresh_type() in
+                let try_vector env =
+                  let vector = (
+                    r_fty,
+                    Tapply (
+                      (fty.ft_pos, "\\ConstVector"), [tv]
+                    )
+                  ) in
+                  let env = SubType.sub_type env vector x in
+                  env, (fun tr -> (r, Tarray (
+                    true,
+                    Some(tr),
+                    None)
+                  )) in
+                let try_keyed_container env =
+                  let keyed_container = (
+                    r_fty,
+                    Tapply (
+                      (fty.ft_pos, "\\KeyedContainer"), [tk; tv]
+                    )
+                  ) in
+                  let env = SubType.sub_type env keyed_container x in
+                  env, (fun tr -> (r, Tarray (
+                    true,
+                    Some(tk),
+                    Some(tr))
+                  )) in
+                let try_container env =
+                  let container = (
+                    r_fty,
+                    Tapply (
+                      (fty.ft_pos, "\\Container"), [tv]
+                    )
+                  ) in
+                  let env = SubType.sub_type env container x in
+                  env, (fun tr -> (r, Tarray (
+                    true,
+                    Some((r, Tprim Tarraykey)),
+                    Some(tr)))) in
+                Errors.try_
+                  (fun () ->
+                    try_vector  env)
+                  (fun _ -> Errors.try_
+                    (fun () ->
+                      try_keyed_container env)
+                    (fun _ -> Errors.try_
+                      (fun () ->
+                        try_container env)
+                      (fun _ -> env, (fun _ -> (Reason.Rwitness p, Tany)))))) in
+          (*
+            Single argument calls preserve the key type, multi argument
+            calls always return an array<Tr>
+          *)
+          (match args with
+            | [x] ->
+              let env, x = expr env x in
+              let env, output_container = build_output_container env x in
+              env, build_function output_container
+            | _ ->
+              env, build_function (fun tr ->
+                (r_fty, Tarray(true, Some(tr), None))))
+        | _ -> env, fty in
       let env, fty = Inst.instantiate_fun env fty el in
       call p env fty el
   | Class_const (CIparent, (_, "__construct")) ->

@@ -61,7 +61,18 @@ function array_keys($input, $search_value = null_variant, $strict = false) { }
  *   Container<T1>,
  *   ...,
  *   Container<Tn>
- *): array;
+ *): R;
+ *
+ * where for n > 1, R = array<Tr>
+ * for n = 1, R depends on actual type of container passed at the call site:
+ *
+ * array                 -> R = array
+ * array<X>              -> R = array<Tr>
+ * array<X, Y>           -> R = array<X, Tr>
+ * Vector<X>             -> R = array<Tr>
+ * KeyedContainer<X, Y>  -> R = array<X, Tr>
+ * Container<X>          -> R = array<arraykey, Tr>
+ * X (unknown type)      -> R = Y (other unknown type)
  */
 function array_map($callback, $arr1, ...) { }
 function array_merge_recursive($array1, ...) { }

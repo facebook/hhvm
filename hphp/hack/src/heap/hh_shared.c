@@ -24,6 +24,7 @@
  *    of data to the workers. This is used to share an environment in
  *    read-only mode with all the workers.
  *    The master stores, the workers read.
+ *    Only concurrent reads allowed. No concurrent write/read and write/write.
  *
  * II) The dependency table. It's a hashtable that contains all the
  *    dependencies between Hack objects. It is filled concurrently by
@@ -32,17 +33,33 @@
  *    to retrieve the list of dependencies associated with an object.
  *
  * III) The Hashtable.
- *     The operations implemented, and their limitations:
+ *    Key observation of the table is that data with the same key are
+ *    considered equivalent, and so you can arbitrarily get any copy of it;
+ *    furthermore if data is missing it can be recomputed, so incorrectly
+ *    saying data is missing when it is being written is only a potential perf
+ *    loss. Note that "equivalent" doesn't necessarily mean "identical", e.g.,
+ *    two alpha-converted types are "equivalent" though not litterally byte-
+ *    identical. (That said, I'm pretty sure the Hack typechecker actually does
+ *    always write identical data, but the hashtable doesn't need quite that
+ *    strong of an invariant.)
+ *
+ *    The operations implemented, and their limitations:
  *
  *    -) Concurrent writes: SUPPORTED
- *       As long as its not interleaved with any other operation
- *       (other than mem)!
+ *       One will win and the other will get dropped on the floor. There is no
+ *       way to tell which happened. Only promise is that after a write, the
+ *       one thread which did the write will see data in the table (though it
+ *       may be slightly different data than what was written, see above about
+ *       equivalent data).
  *
  *    -) Concurrent reads: SUPPORTED
- *       As long as they are no concurrent writers.
+ *       If interleaved with a concurrent write, the read will arbitrarily
+ *       say that there is no data at that slot or return the entire new data
+ *       written by the concurrent writer.
  *
  *    -) Concurrent removes: NOT SUPPORTED
- *       Only the master can remove.
+ *       Only the master can remove, and can only do so if there are no other
+ *       concurrent operations (reads or writes).
  */
 /*****************************************************************************/
 

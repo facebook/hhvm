@@ -444,7 +444,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   auto const ctx = Context { func.unit, &func, func.cls };
   auto const fa  = analyze_func(index, ctx);
   {
-    Trace::Bump bumper{Trace::hhbbc, kTraceBump};
+    Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto& blk : func.blocks) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;

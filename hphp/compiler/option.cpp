@@ -397,7 +397,8 @@ void Option::FilterFiles(std::vector<std::string> &files,
 void initialize_hhbbc_options() {
   if (!Option::UseHHBBC) return;
   HHBBC::options.AllFuncsInterceptable  = Option::JitEnableRenameFunction;
-  HHBBC::options.InterceptableFunctions = Option::DynamicInvokeFunctions;
+  HHBBC::options.InterceptableFunctions = HHBBC::make_method_map(
+                                            Option::DynamicInvokeFunctions);
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
   HHBBC::options.DisallowDynamicVarEnvFuncs =

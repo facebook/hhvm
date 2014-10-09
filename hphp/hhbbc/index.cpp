@@ -29,12 +29,12 @@
 #include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/String.h"
-#include "folly/Format.h"
-#include "folly/Hash.h"
-#include "folly/Memory.h"
-#include "folly/Optional.h"
-#include "folly/Lazy.h"
+#include <folly/String.h>
+#include <folly/Format.h>
+#include <folly/Hash.h>
+#include <folly/Memory.h>
+#include <folly/Optional.h>
+#include <folly/Lazy.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
@@ -48,6 +48,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/analyze.h"
 
 namespace HPHP { namespace HHBBC {
@@ -810,26 +811,7 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-using InterceptableMethodMap = std::map<
-  std::string,
-  std::set<std::string,stdltistr>,
-  stdltistr
->;
-
-InterceptableMethodMap make_interceptable_method_map() {
-  auto ret = InterceptableMethodMap{};
-  for (auto& str : options.InterceptableFunctions) {
-    std::vector<std::string> parts;
-    folly::split("::", str, parts);
-    if (parts.size() != 2) continue;
-    ret[parts[0]].insert(parts[1]);
-  }
-  return ret;
-}
-
-void add_unit_to_index(IndexData& index,
-                       const InterceptableMethodMap& imethodMap,
-                       const php::Unit& unit) {
+void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& c : unit.classes) {
     if (c->attrs & AttrEnum) {
       index.enums.insert({c->name, borrow(c)});
@@ -837,14 +819,10 @@ void add_unit_to_index(IndexData& index,
 
     index.classes.insert({c->name, borrow(c)});
 
-    auto const imethIt = imethodMap.find(c->name->data());
-
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
 
-      if (options.AllFuncsInterceptable ||
-          (imethIt != end(imethodMap) &&
-           imethIt->second.count(m->name->data()))) {
+      if (is_interceptable_function(borrow(c), borrow(m))) {
         m->attrs = m->attrs | AttrInterceptable;
       }
     }
@@ -855,8 +833,7 @@ void add_unit_to_index(IndexData& index,
   }
 
   for (auto& f : unit.funcs) {
-    if (options.AllFuncsInterceptable ||
-        options.InterceptableFunctions.count(f->name->data())) {
+    if (is_interceptable_function(nullptr, borrow(f))) {
       f->attrs = f->attrs | AttrInterceptable;
     }
     index.funcs.insert({f->name, borrow(f)});
@@ -1388,9 +1365,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
-  auto const imethodMap = make_interceptable_method_map();
   for (auto& u : program->units) {
-    add_unit_to_index(*m_data, imethodMap, *u);
+    add_unit_to_index(*m_data, *u);
   }
 
   NamingEnv env;

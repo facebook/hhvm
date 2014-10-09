@@ -22,16 +22,16 @@
 #include <memory>
 #include <cstdint>
 #include <algorithm>
-
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-
 #include <unistd.h>
 #include <exception>
 #include <utility>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
@@ -53,6 +53,7 @@ std::string output_repo;
 std::string input_repo;
 bool logging = true;
 
+
 //////////////////////////////////////////////////////////////////////
 
 void parse_options(int argc, char** argv) {
@@ -61,7 +62,8 @@ void parse_options(int argc, char** argv) {
   auto const defaultThreadCount =
     std::max<long>(sysconf(_SC_NPROCESSORS_ONLN) - 1, 1);
 
-  std::vector<std::string> interceptable;
+  std::vector<std::string> interceptable_fns;
+  std::vector<std::string> trace_fns;
   bool no_logging = false;
 
   po::options_description basic("Options");
@@ -89,8 +91,11 @@ void parse_options(int argc, char** argv) {
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
     ("interceptable",
-      po::value(&interceptable)->composing(),
+      po::value(&interceptable_fns)->composing(),
       "Add an interceptable function")
+    ("trace",
+      po::value(&trace_fns)->composing(),
+      "Add a function to increase tracing level on (for debugging)")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -161,8 +166,8 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
-  options.InterceptableFunctions.insert(begin(interceptable),
-                                        end(interceptable));
+  options.InterceptableFunctions = make_method_map(interceptable_fns);
+  options.TraceFunctions         = make_method_map(trace_fns);
   logging = !no_logging;
 }
 

@@ -34,6 +34,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/options-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -239,6 +240,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
                                 const std::vector<Type>* knownArgs) {
   auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai(ctx);
+
+  Trace::Bump bumper{Trace::hhbbc, kTraceFuncBump,
+    is_trace_function(ctx.cls, ctx.func)};
   FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
 
   /*

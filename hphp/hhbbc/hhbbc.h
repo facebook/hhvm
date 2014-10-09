@@ -19,8 +19,9 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <set>
 #include <utility>
+#include <map>
+#include <set>
 
 #include "hphp/util/functional.h"
 
@@ -37,20 +38,39 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+using MethodMap = std::map<
+  std::string,
+  std::set<std::string,stdltistr>,
+  stdltistr
+>;
+
+// Create a method map for the options structure from a SinglePassReadableRange
+// containing a list of Class::methodName strings.
+template<class SinglePassReadableRange>
+MethodMap make_method_map(SinglePassReadableRange&);
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Publically-settable options that control compilation.
  */
 struct Options {
   /*
-   * Functions that we should assume may be used with fb_intercept.
-   * Functions that aren't named in this list may be optimized with
-   * the assumption they aren't intercepted, in whole_program mode.
+   * Functions that we should assume may be used with fb_intercept.  Functions
+   * that aren't named in this list may be optimized with the assumption they
+   * aren't intercepted, in whole_program mode.
    *
    * If AllFuncsInterceptable, it's as if this list contains every function in
    * the program.
    */
-  std::set<std::string,stdltistr> InterceptableFunctions;
+  MethodMap InterceptableFunctions;
   bool AllFuncsInterceptable = false;
+
+  /*
+   * When debugging, it can be useful to ask for certain functions to be traced
+   * at a higher level than the rest of the program.
+   */
+  MethodMap TraceFunctions;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -261,5 +281,7 @@ int main(int argc, char** argv);
 //////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/hhbbc/hhbbc-inl.h"
 
 #endif

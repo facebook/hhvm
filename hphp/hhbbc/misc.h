@@ -75,11 +75,17 @@ enum class PrepKind { Ref, Val, Unknown };
 constexpr int kSystemLibBump = 10;
 
 /*
+ * Functions listed in the --trace functions list get trace level bumped by
+ * this amount.
+ */
+constexpr int kTraceFuncBump = -2;
+
+/*
  * We may run the interpreter collecting stats and when trace is on
  * the amount of noise is unbearable. This is to keep tracing out
  * of stats collection.
  */
-constexpr int kTraceBump = 50;
+constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 

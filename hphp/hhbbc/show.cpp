@@ -300,7 +300,7 @@ std::string show(const Bytecode& bc) {
         folly::toAppend(":", m.immInt, &ret);
         break;
       case MCodeImm::Local:
-        folly::toAppend(":$", m.immLoc->name->data(), &ret);
+        folly::toAppend(":$", local_string(m.immLoc), &ret);
         break;
       }
     }

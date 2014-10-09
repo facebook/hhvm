@@ -92,8 +92,10 @@ using namespace jit::reg;
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc, bool resumed, TransID profTransId) {
   if (dumpIREnabled()) {
-    HPHP::Trace::trace("--------- CG_PUNT %s %d %s  bcOff: %d \n",
-                       file, line, func, bcOff);
+    auto const phpFile = vmFunc->filename()->data();
+    auto const phpLine = vmFunc->unit()->getLineNumber(bcOff);
+    HPHP::Trace::trace("--------- CG_PUNT %s at %s:%d from %s:%d (bcOff %d)\n",
+                       func, file, line, phpFile, phpLine, bcOff);
   }
   throw FailedCodeGen(file, line, func, bcOff, vmFunc, resumed, profTransId);
 }
@@ -1424,18 +1426,6 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
   auto src2Reg = loc2.reg();
   auto dstReg  = dstLoc(0).reg();
   auto& v = vmain();
-
-  // It is possible that some pass has been done after simplification; if such
-  // a pass invalidates our invariants, then just punt.
-
-  // simplifyCmp has done const-const optimization
-  //
-  // If the types are the same and there is only one constant,
-  // simplifyCmp has moved it to the right.
-  if (src1->isConst()) {
-    // TODO: #3626251 will let us eliminate this punt.
-    CG_PUNT(cgOpCmpHelper_const);
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   // case 1: null/string cmp string

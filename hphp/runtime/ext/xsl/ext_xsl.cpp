@@ -694,12 +694,9 @@ class XSLExtension : public Extension {
   public:
     XSLExtension() : Extension("xsl", "0.1") {};
 
-    virtual void threadInit() override {
+    virtual void moduleInit() {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
-    }
-
-    virtual void moduleInit() {
       Native::registerConstant<KindOfInt64>(
         s_XSL_SECPREF_NONE.get(), k_XSL_SECPREF_NONE
       );

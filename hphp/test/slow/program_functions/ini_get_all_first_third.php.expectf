@@ -1529,9 +1529,9 @@ array(177) {
   ["hhvm.jit_pgo_region_selector"]=>
   array(3) {
     ["global_value"]=>
-    string(8) "hottrace"
+    string(%d) "%r(wholecfg|hottrace)%r"
     ["local_value"]=>
-    string(8) "hottrace"
+    string(%d) "%r(wholecfg|hottrace)%r"
     ["access"]=>
     int(4)
   }

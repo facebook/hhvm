@@ -8,6 +8,15 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+const HTML_SPECIALCHARS = 0;
+const HTML_ENTITIES = 1;
+const ENT_COMPAT = 2;
+const ENT_QUOTES = 3;
+const ENT_NOQUOTES = 0;
+const ENT_IGNORE = 4;
+const STR_PAD_LEFT = 0;
+const STR_PAD_RIGHT = 1;
+const STR_PAD_BOTH = 2;
 function addcslashes($str, $charlist) { }
 function stripcslashes($str) { }
 function addslashes($str) { }

@@ -177,7 +177,8 @@ class SplFileObject extends SplFileInfo
     if(false !== $this->currentLine) {
       $this->next();
     }
-    return $this->current();
+
+    return $this->currentLine = fgets($this->rsrc, $this->maxLineLen);
   }
 
   public function getCurrentLine() {

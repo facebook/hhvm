@@ -17,11 +17,16 @@ function test(
   $intersection = true ? $vector_array : $keyed_container;
 
   hh_show(array_map($f, $array));
-  hh_show(array_map($f, $vector_array));
-  hh_show(array_map($f, $hashtable_array));
+  take_bool_array(array_map($f, $vector_array));
+  take_X_bool_array(array_map($f, $hashtable_array));
   hh_show(array_map($f, $untyped));
-  hh_show(array_map($f, $container));
-  hh_show(array_map($f, $intersection));
-  hh_show(array_map($f, $vector));
-  hh_show(array_map($g, $intersection, $vector_array));
+  take_arraykey_bool_array(array_map($f, $container));
+  take_mixed_bool_array(array_map($f, $intersection));
+  take_bool_array(array_map($f, $vector));
+  take_bool_array(array_map($g, $intersection, $vector_array));
 }
+
+function take_bool_array(array<bool> $_): void {}
+function take_X_bool_array(array<X, bool> $_): void {}
+function take_arraykey_bool_array(array<arraykey, bool> $_): void {}
+function take_mixed_bool_array(array<mixed, bool> $_): void {}

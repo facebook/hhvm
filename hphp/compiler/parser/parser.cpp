@@ -101,13 +101,6 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 
-#ifdef FACEBOOK
-#include "hphp/facebook/src/compiler/fb_compiler_hooks.h"
-#define RealSimpleFunctionCall FBSimpleFunctionCall
-#else
-#define RealSimpleFunctionCall SimpleFunctionCall
-#endif
-
 #define NEW_EXP0(cls)                                           \
   cls##Ptr(new cls(BlockScopePtr(),                             \
                    getLocation()))
@@ -132,7 +125,7 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
-    new RealSimpleFunctionCall(
+    new SimpleFunctionCall(
       EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
       name, hadBackslash, params, cls));
 }
@@ -506,7 +499,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     }
 
     SimpleFunctionCallPtr call
-      (new RealSimpleFunctionCall
+      (new SimpleFunctionCall
        (BlockScopePtr(), getLocation(),
         funcName, hadBackslash,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));

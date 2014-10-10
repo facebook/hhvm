@@ -76,9 +76,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
     return;
   }
 
-  if (Option::PersistenceHook) {
-    fs->setPersistent(Option::PersistenceHook(fs, scope));
-  }
+  fs->setPersistent(false);
 
   if (m_name == "__autoload") {
     if (m_params && m_params->getCount() != 1) {

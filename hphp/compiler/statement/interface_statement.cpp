@@ -102,9 +102,7 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
-  if (Option::PersistenceHook) {
-    classScope->setPersistent(Option::PersistenceHook(classScope, scope));
-  }
+  classScope->setPersistent(false);
 
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {

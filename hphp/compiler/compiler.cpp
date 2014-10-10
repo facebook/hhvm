@@ -149,14 +149,9 @@ int runTarget(const CompilerOptions &po);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" void compiler_hook_initialize();
-
 int compiler_main(int argc, char **argv) {
   try {
     CompilerOptions po;
-#ifdef FACEBOOK
-    compiler_hook_initialize();
-#endif
 
     int ret = prepareOptions(po, argc, argv);
     if (ret == 1) return 0; // --help

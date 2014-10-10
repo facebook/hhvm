@@ -4018,6 +4018,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             e.AKExists();
             return true;
           }
+        } else if (call->isCallToFunction("hh\\invariant")) {
+          if (emitHHInvariant(e, call)) return true;
         } else if (call->isCallToFunction("idx") &&
                    call->isOptimizable() &&
                    systemlibDefinesIdx &&
@@ -4855,6 +4857,46 @@ void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e, string name) {
   }
   e.FCall(0);
   emitConvertToCell(e);
+}
+
+const StaticString s_hh_invariant_violation("hh\\invariant_violation");
+const StaticString s_invariant_violation("invariant_violation");
+
+bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
+  if (!m_ue.m_isHHFile && !RuntimeOption::EnableHipHopSyntax) return false;
+
+  auto const params = call->getParams();
+  if (!params || params->getCount() < 1) return false;
+
+  Label ok;
+
+  // TODO(#5328945): invariant is supposed to return void, but this Dup-based
+  // translation is necessary in the short term since some things currently
+  // expect it to have a return value.
+  visit((*params)[0]);
+  emitCGet(e);
+  e.Dup();
+  e.JmpNZ(ok);
+
+  emitPop(e);
+
+  auto const fpiStart = m_ue.bcPos();
+  e.FPushFuncD(params->getCount() - 1, s_hh_invariant_violation.get());
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
+      emitFuncCallArg(e, (*params)[i], i - 1);
+    }
+  }
+  e.FCall(params->getCount() - 1);
+  emitPop(e);
+  // The invariant_violation can't return; but bytecode invariants mandate an
+  // opcode that can't fall through:
+  e.String(s_invariant_violation.get());
+  e.Fatal(FatalOp::Runtime);
+
+  ok.set(e);
+  return true;
 }
 
 int EmitterVisitor::scanStackForLocation(int iLast) {

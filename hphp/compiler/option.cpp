@@ -156,8 +156,6 @@ StringBag Option::OptionStrings;
 
 bool Option::GenerateDocComments = true;
 
-bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
-
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 

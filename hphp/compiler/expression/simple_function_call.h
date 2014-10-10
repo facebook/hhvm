@@ -25,8 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
-class SimpleFunctionCall : public FunctionCall {
-public:
+struct SimpleFunctionCall final : FunctionCall {
   static void InitFunctionTypeMap();
 
 public:

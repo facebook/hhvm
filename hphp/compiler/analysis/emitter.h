@@ -754,8 +754,7 @@ public:
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName,
                          const StringData* propName);
   void emitConstMethodCallNoParams(Emitter& e, string name);
-  void emitCreateStaticWaitHandle(Emitter& e, std::string cls,
-                                  std::function<void()> emitParam);
+  bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,
                                 MethodStatementPtr& meth,
                                 Label& topOfBody);

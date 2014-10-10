@@ -17,10 +17,8 @@
 
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-
-#include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-
+#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"

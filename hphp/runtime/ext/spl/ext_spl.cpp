@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -52,6 +52,7 @@ const StaticString spl_classes[] = {
   StaticString("BadFunctionCallException"),
   StaticString("BadMethodCallException"),
   StaticString("CachingIterator"),
+  StaticString("CallbackFilterIterator"),
   StaticString("Countable"),
   s_directory_iterator,
   StaticString("DomainException"),
@@ -75,6 +76,7 @@ const StaticString spl_classes[] = {
   StaticString("RangeException"),
   StaticString("RecursiveArrayIterator"),
   StaticString("RecursiveCachingIterator"),
+  StaticString("RecursiveCallbackFilterIterator"),
   StaticString("RecursiveDirectoryIterator"),
   StaticString("RecursiveFilterIterator"),
   StaticString("RecursiveIterator"),
@@ -102,7 +104,7 @@ const StaticString spl_classes[] = {
   StaticString("UnexpectedValueException"),
 };
 
-Array f_spl_classes() {
+Array HHVM_FUNCTION(spl_classes) {
   const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
   ArrayInit ret(num_classes, ArrayInit::Map{});
   for (size_t i = 0; i < num_classes; ++i) {
@@ -126,7 +128,7 @@ static bool s_inited = false;
 static int64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
-String f_spl_object_hash(const Object& obj) {
+String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
@@ -145,13 +147,16 @@ String f_spl_object_hash(const Object& obj) {
   return String(buf, CopyString);
 }
 
-int64_t f_hphp_object_pointer(const Object& obj) { return (int64_t)obj.get();}
+int64_t HHVM_FUNCTION(hphp_object_pointer, const Object& obj) {
+  return (int64_t)obj.get();
+}
 
-Variant f_hphp_get_this() {
+Variant HHVM_FUNCTION(hphp_get_this) {
   return g_context->getThis();
 }
 
-Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_implements, const Variant& obj,
+                                        bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -177,7 +182,8 @@ Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_parents, const Variant& obj,
+                                     bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -202,7 +208,8 @@ Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_uses, const Variant& obj,
+                                  bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -256,56 +263,10 @@ Object get_traversable_object_iterator(const Variant& obj) {
   return itObj;
 }
 
-Variant f_iterator_apply(const Variant& obj, const Variant& func,
-                         const Array& params /* = null_array */) {
-  CHECK_TRAVERSABLE_IMPL(obj, 0);
-  Object pobj = get_traversable_object_iterator(obj);
-  pobj->o_invoke_few_args(s_rewind, 0);
-  int64_t count = 0;
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    if (!same(vm_call_user_func(func, params), true)) {
-      break;
-    }
-    ++count;
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return count;
-}
-
-Variant f_iterator_count(const Variant& obj) {
-  CHECK_TRAVERSABLE_IMPL(obj, 0);
-  Object pobj = get_traversable_object_iterator(obj);
-  pobj->o_invoke_few_args(s_rewind, 0);
-  int64_t count = 0;
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    ++count;
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return count;
-}
-
-Variant f_iterator_to_array(const Variant& obj, bool use_keys /* = true */) {
-  Array ret(Array::Create());
-  CHECK_TRAVERSABLE_IMPL(obj, ret);
-  Object pobj = get_traversable_object_iterator(obj);
-
-  pobj->o_invoke_few_args(s_rewind, 0);
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    Variant val = pobj->o_invoke_few_args(s_current, 0);
-    if (use_keys) {
-      Variant key = pobj->o_invoke_few_args(s_key, 0);
-      ret.set(key, val);
-    } else {
-      ret.append(val);
-    }
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return ret;
-}
-
-bool f_spl_autoload_register(const Variant& autoload_function /* = null_variant */,
-                             bool throws /* = true */,
-                             bool prepend /* = false */) {
+bool HHVM_FUNCTION(spl_autoload_register, 
+                   const Variant& autoload_function /* = null_variant */,
+                   bool throws /* = true */,
+                   bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {
     if (throws) {
       throw_spl_exception("Function spl_autoload_call()"
@@ -322,7 +283,7 @@ bool f_spl_autoload_register(const Variant& autoload_function /* = null_variant 
   return res;
 }
 
-bool f_spl_autoload_unregister(const Variant& autoload_function) {
+bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function) {
   if (same(autoload_function, s_spl_autoload_call)) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
@@ -331,7 +292,7 @@ bool f_spl_autoload_unregister(const Variant& autoload_function) {
   return true;
 }
 
-Variant f_spl_autoload_functions() {
+Variant HHVM_FUNCTION(spl_autoload_functions) {
   const Array& handlers = AutoloadHandler::s_instance->getHandlers();
   if (handlers.isNull()) {
     return false;
@@ -340,7 +301,7 @@ Variant f_spl_autoload_functions() {
   }
 }
 
-void f_spl_autoload_call(const String& class_name) {
+void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
   AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
@@ -359,7 +320,8 @@ struct ExtensionList final : RequestEventHandler {
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
 }
 
-String f_spl_autoload_extensions(const String& file_extensions /* = null_string */) {
+String HHVM_FUNCTION(spl_autoload_extensions,
+                     const String& file_extensions /* = null_string */) {
   if (!file_extensions.isNull()) {
     s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
                                    .toArray();
@@ -395,12 +357,28 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SPLExtension : public Extension {
- public:
-  SPLExtension() : Extension("SPL", "0.2") { }
+class SPLExtension : public Extension {
+public:
+  SPLExtension() : Extension("spl", "0.2") { }
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
     HHVM_ME(DirectoryIterator, hh_readdir);
     HHVM_ME(GlobIterator, count);
+  }
+  virtual void moduleInit() {
+    HHVM_FE(spl_classes);
+    HHVM_FE(spl_object_hash);
+    HHVM_FE(hphp_object_pointer);
+    HHVM_FE(hphp_get_this);
+    HHVM_FE(class_implements);
+    HHVM_FE(class_parents);
+    HHVM_FE(class_uses);
+    HHVM_FE(spl_autoload_call);
+    HHVM_FE(spl_autoload_extensions);
+    HHVM_FE(spl_autoload_functions);
+    HHVM_FE(spl_autoload_register);
+    HHVM_FE(spl_autoload_unregister);
+
+    loadSystemlib();
   }
 } s_SPL_extension;
 

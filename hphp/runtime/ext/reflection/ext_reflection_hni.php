@@ -576,6 +576,22 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     }
     return null;
   }
+
+  <<__Native>>
+  private function getClosureThisObject(object $closure): object;
+
+  /**
+   * Returns this pointer bound to closure.
+   *
+   * @return object|NULL Returns $this pointer. Returns NULL in case of
+   * an error.
+   */
+  public function getClosureThis(): ?mixed {
+    if ($this->closure) {
+      return $this->getClosureThisObject($this->closure);
+    }
+    return null;
+  }
 }
 
 /**

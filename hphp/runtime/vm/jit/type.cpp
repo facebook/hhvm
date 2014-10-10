@@ -284,12 +284,12 @@ struct Type::ArrayOps {
     auto const sameKind = [&]() -> folly::Optional<ArrayData::ArrayKind> {
       if (arrayKindValid(a)) {
         if (arrayKindValid(b)) {
-          if (a == b) return kind(a);
+          if (a == b) return arrayKind(a);
           return folly::none;
         }
-        return kind(a);
+        return arrayKind(a);
       }
-      if (arrayKindValid(b)) return kind(b);
+      if (arrayKindValid(b)) return arrayKind(b);
       return folly::none;
     }();
     auto const ty = [&]() -> const RepoAuthType::Array* {
@@ -336,7 +336,7 @@ struct Type::ArrayOps {
 
 private:
   static folly::Optional<ArrayData::ArrayKind> okind(ArrayInfo in) {
-    if (arrayKindValid(in)) return kind(in);
+    if (arrayKindValid(in)) return arrayKind(in);
     return folly::none;
   }
 };

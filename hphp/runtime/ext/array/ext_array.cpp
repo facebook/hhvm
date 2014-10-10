@@ -374,8 +374,8 @@ TypedValue* HHVM_FN(array_keys)(ActRec* ar) {
     return arReturn(ar, init_null());
   }
 
-  Variant key = getArg<KindOfAny>(ar, 0);
-  Variant search_value = argc > 1 ? getArg<KindOfAny>(ar, 1) : uninit_null();
+  Variant key = getArgVariant(ar, 0);
+  Variant search_value = argc > 1 ? getArgVariant(ar, 1) : uninit_null();
   bool strict = argc > 2 ? getArg<KindOfBoolean>(ar, 2) : false;
   return arReturn(ar, array_keys_helper(key, search_value, strict));
 }

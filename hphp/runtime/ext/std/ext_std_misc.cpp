@@ -280,7 +280,7 @@ TypedValue* HHVM_FUNCTION(pack, ActRec* ar) {
   String format(getArg<KindOfString>(ar,0));
   Array extra = Array::Create();
   for (int i = 1; i<num; i++) {
-    extra.append(getArg<KindOfAny>(ar,i));
+    extra.append(getArgVariant(ar,i));
   }
   Variant result = ZendPack().pack(format, extra);
   // pack() returns false if there was an error

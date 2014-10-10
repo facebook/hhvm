@@ -601,11 +601,11 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
           return false;
         }
         /* fallthrough */
-      case 'v': // KindOfAny (Variant)
+      case 'v': // Variant
         *va_arg(va, Variant*) = tv ? tvAsVariant(tv) : uninit_null();
         break;
 
-      case 'V': // KindOfAny (TypedValue*)
+      case 'V': // TypedValue*
         *va_arg(va, TypedValue**) = tv;
 
       default:

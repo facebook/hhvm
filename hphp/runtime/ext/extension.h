@@ -161,9 +161,8 @@ TypedValue* getArg(ActRec *ar, unsigned arg) {
 /**
  * Get numbered arg (zero based) as a Variant
  */
-template <DataType DType>
-typename std::enable_if<DType == KindOfAny, Variant>::type
-getArg(ActRec *ar, unsigned arg, Variant def = uninit_null()) {
+inline Variant getArgVariant(ActRec *ar, unsigned arg,
+                             Variant def = uninit_null()) {
   auto tv = getArg(ar, arg);
   return tv ? tvAsVariant(tv) : def;
 }
@@ -193,7 +192,7 @@ getArg(ActRec *ar, unsigned arg) {
  * Throws warning and returns 0/nullptr if arg not passed
  */
 template <DataType DType>
-typename std::enable_if<(DType != KindOfAny) && (DType != KindOfRef),
+typename std::enable_if<DType != KindOfRef,
   typename DataTypeCPPType<DType>::type>::type
 getArg(ActRec *ar, unsigned arg) {
   auto tv = getArg(ar, arg);

@@ -46,9 +46,9 @@ void XDebugProfiler::ensureBufferSpace() {
   } catch (const OutOfMemoryException& e) {
     raise_error("Cannot allocate more memory for the xdebug profiler. Consider "
                 "turning off profiling or tracing. Note that certain ini "
-                "settings such as hhvm.xdebug.collect_memory and "
-                "hhvm.xdebug.collect_time implicitly "
-                "turn on tracing, so turn those off if this is unexpected.\n"
+                "settings such as xdebug.collect_memory and "
+                "xdebug.collect_time implicitly turn on tracing, so turn those "
+                " off if this is unexpected.\n"
                 "Current frame buffer length: %zu\n"
                 "Failed to expand to length: %zu\n",
                 m_frameBufferSize,

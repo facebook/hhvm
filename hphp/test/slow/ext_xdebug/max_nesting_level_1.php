@@ -5,12 +5,12 @@ function foo($i) {
   if ($i === 10) {
     return;
   } else if ($i === 3) {
-    ini_set("hhvm.xdebug-not-done.max_nesting_level", 0);
+    ini_set("xdebug.max_nesting_level", 0);
   }
   foo($i + 1);
 }
 
 $i = xdebug_get_stack_depth();
 echo "$i\n";
-ini_set("hhvm.xdebug-not-done.max_nesting_level", $i + 4);
+ini_set("xdebug.max_nesting_level", $i + 4);
 foo($i + 1);

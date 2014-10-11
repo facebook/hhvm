@@ -221,6 +221,54 @@
   CASE(CheckTypeLOp) \
   CASE(CheckTypeCOp)
 
+#define INTERP_ONE_INSTRS \
+  CASE(LowInvalid) \
+  CASE(Nop) \
+  CASE(Box) \
+  CASE(BoxR) \
+  CASE(BoxRNop) \
+  CASE(UnboxRNop) \
+  CASE(AddElemV) \
+  CASE(AddNewElemV) \
+  CASE(ClsCns) \
+  CASE(Exit) \
+  CASE(Fatal) \
+  CASE(Unwind) \
+  CASE(Throw) \
+  CASE(CGetL3) \
+  CASE(CGetN) \
+  CASE(VGetN) \
+  CASE(IssetN) \
+  CASE(EmptyN) \
+  CASE(SetN) \
+  CASE(SetOpN) \
+  CASE(SetOpG) \
+  CASE(SetOpS) \
+  CASE(IncDecN) \
+  CASE(IncDecG) \
+  CASE(IncDecS) \
+  CASE(BindN) \
+  CASE(UnsetN) \
+  CASE(UnsetG) \
+  CASE(FPushObjMethod) \
+  CASE(FPassC) \
+  CASE(FPassVNop) \
+  CASE(FPassN) \
+  CASE(FCallUnpack) \
+  CASE(CufSafeArray) \
+  CASE(CufSafeReturn) \
+  CASE(Incl) \
+  CASE(InclOnce) \
+  CASE(Req) \
+  CASE(ReqOnce) \
+  CASE(ReqDoc) \
+  CASE(Eval) \
+  CASE(DefClsNop) \
+  CASE(DefTypeAlias) \
+  CASE(Catch) \
+  CASE(HighInvalid) \
+  /*  */
+
 // PSEUDOINSTR_DISPATCH is a switch() fragment that routes opcodes to their
 // shared handlers, as per the PSEUDOINSTRS macro.
 #define PSEUDOINSTR_DISPATCH(func)                \

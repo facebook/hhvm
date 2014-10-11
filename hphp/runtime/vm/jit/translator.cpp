@@ -1219,12 +1219,16 @@ bool dontGuardAnyInputs(Op op) {
   INSTRS
   PSEUDOINSTR_DISPATCH(NOOP)
     return false;
-
-  default:
-    return true;
-  }
 #undef NOOP
 #undef CASE
+
+#define CASE(op) case Op::op:
+  INTERP_ONE_INSTRS
+#undef CASE
+    return true;
+  }
+
+  always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(op));
 }
 
 const StaticString s_http_response_header("http_response_header");
@@ -1363,18 +1367,20 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
   if (RuntimeOption::EvalJitAlwaysInterpOne) return true;
 
   switch (inst.op()) {
-    // Generate a case for each instruction we support at least partially.
-# define CASE(name) case Op::name:
+#define CASE(name) case Op::name:
   INSTRS
-# undef CASE
-# define NOTHING(...) // PSEUDOINSTR_DISPATCH has the cases in it
+#undef CASE
+#define NOTHING(...) // PSEUDOINSTR_DISPATCH has the cases in it
   PSEUDOINSTR_DISPATCH(NOTHING)
-# undef NOTHING
-      return false;
+#undef NOTHING
+    return false;
 
-    default:
-      return true;
+#define CASE(name) case Op::name:
+  INTERP_ONE_INSTRS
+#undef CASE
+    return true;
   }
+  always_assert_flog(0, "invalid opcode {}", static_cast<uint32_t>(inst.op()));
 }
 
 void Translator::traceStart(TransContext context) {

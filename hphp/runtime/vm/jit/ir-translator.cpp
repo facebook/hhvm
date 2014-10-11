@@ -864,26 +864,25 @@ MINSTRS
 MII(FPass)
 #undef MII
 
-void
-IRTranslator::translateInstrWork(const NormalizedInstruction& i) {
+void IRTranslator::translateInstrWork(const NormalizedInstruction& i) {
   auto const op = i.op();
 
   switch (op) {
-#define CASE(iNm) \
-    case Op::iNm: return unpack ## iNm(nullptr, i);
-
-    REGULAR_INSTRS
+#define CASE(iNm) case Op::iNm: return unpack ## iNm(nullptr, i);
+  REGULAR_INSTRS
 #undef CASE
 
-#define CASE(nm) \
-    case Op::nm: return translate ## nm(i); break;
-#define TRANSLATE(name, inst) translate ## name(i); break;
-    IRREGULAR_INSTRS
-    PSEUDOINSTR_DISPATCH(TRANSLATE)
+#define CASE(nm) case Op::nm: return translate ## nm(i);
+#define TRANSLATE(name, inst) return translate ## name(i);
+  IRREGULAR_INSTRS
+  PSEUDOINSTR_DISPATCH(TRANSLATE)
 #undef TRANSLATE
 #undef CASE
-    default:
-      always_assert(false);
+
+#define CASE(op) case Op::op:
+  INTERP_ONE_INSTRS
+#undef CASE
+    always_assert(false);
   }
 }
 

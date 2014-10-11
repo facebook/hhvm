@@ -1,6 +1,30 @@
 {
     "preamble": "",
     "consts": [
+        {
+            "name": "STREAM_META_TOUCH",
+            "value": 1
+        },
+        {
+            "name": "STREAM_META_OWNER_NAME",
+            "value": 2
+        },
+        {
+            "name": "STREAM_META_OWNER",
+            "value": 3
+        },
+        {
+            "name": "STREAM_META_GROUP_NAME",
+            "value": 4
+        },
+        {
+            "name": "STREAM_META_GROUP",
+            "value": 5
+        },
+        {
+            "name": "STREAM_META_ACCESS",
+            "value": 6
+        }
     ],
     "funcs": [
         {

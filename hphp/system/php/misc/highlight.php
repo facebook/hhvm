@@ -36,7 +36,10 @@ function highlight_string($data, $return = false) {
       $next_color = __HPHP_highlight_get_color($colors, $type);
     } else {
       $string = $token;
-      $next_color = $colors['keyword'];
+			if($string === "\"")
+				$next_color = $colors['string'];
+			else
+				$next_color = $colors['keyword'];
     }
 
     if ($last_color != $next_color) {

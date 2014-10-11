@@ -313,6 +313,12 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       break;
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
+    case Flavor::CVU:
+      // Note that we only support C's for CVU so far (this only comes up with
+      // FCallBuiltin)---we'll fail the verifier if something changes to send
+      // V's or U's through here.
+      gen(bc::PopC {});
+      break;
     }
   }
 
@@ -354,6 +360,15 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       // We should only ever const prop for FPassL right now.
       always_assert(numPush == 1 && op.op == Op::FPassL);
       gen(bc::FPassC { op.FPassL.arg1 });
+      continue;
+    }
+
+    // Similar special case for FCallBuiltin.  We need to turn things into R
+    // flavors since opcode that followed the call are going to expect that
+    // flavor.
+    if (op.op == Op::FCallBuiltin) {
+      gen(bc::RGetCNop {});
+      continue;
     }
   }
 

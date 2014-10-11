@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/unit.h"
-
 #include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {

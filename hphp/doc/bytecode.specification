@@ -1004,6 +1004,11 @@ UnboxRNop   [R:<T>]  ->  [C:<T>]
   UnboxR, no op. $1 must be statically known to be unboxed. This instruction
   pushes $1 on the stack as a cell.
 
+RGetCNop    [C:<T>]  ->  [R:<T>]
+
+  Convert a cell to an R, no op.  This is a flavor-safety only opcode.
+
+
 2. Literal and constant instructions
 ------------------------------------
 

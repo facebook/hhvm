@@ -941,6 +941,7 @@ bool isAlwaysNop(Op op) {
   case Op::FPassVNop:
   case Op::Nop:
   case Op::UnboxRNop:
+  case Op::RGetCNop:
     return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:

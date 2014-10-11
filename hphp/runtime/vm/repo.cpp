@@ -126,6 +126,11 @@ void Repo::setCliFile(const std::string& cliFile) {
   s_cliFile = cliFile;
 }
 
+size_t Repo::stringLengthLimit() const {
+  static const size_t limit = sqlite3_limit(m_dbc, SQLITE_LIMIT_LENGTH, -1);
+  return limit;
+}
+
 void Repo::loadGlobalData(bool allowFailure /* = false */) {
   m_lsrp.load();
 

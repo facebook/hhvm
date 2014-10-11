@@ -3399,6 +3399,10 @@ OPTBLD_INLINE void ExecutionContext::iopUnboxRNop(IOP_ARGS) {
   assert(cellIsPlausible(*vmStack().topTV()));
 }
 
+OPTBLD_INLINE void ExecutionContext::iopRGetCNop(IOP_ARGS) {
+  NEXT();
+}
+
 OPTBLD_INLINE void ExecutionContext::iopNull(IOP_ARGS) {
   NEXT();
   vmStack().pushNull();

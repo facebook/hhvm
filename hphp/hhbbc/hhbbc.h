@@ -121,61 +121,64 @@ struct Options {
    *
    * Note, this is disabled by default because of the need to have an
    * intersection operation in the type system to maintain index
-   * invariants---it doesn't quite work yet.  See comments in
-   * index.cpp.
+   * invariants---it doesn't quite work yet.  See comments in index.cpp.
    */
   bool ContextSensitiveInterp = false;
 
   /*
-   * If true, completely remove jumps to blocks that are inferred to
-   * be dead.  When false, dead blocks are replaced with Fatal
-   * bytecodes.
+   * If true, completely remove jumps to blocks that are inferred to be dead.
+   * When false, dead blocks are replaced with Fatal bytecodes.
    */
   bool RemoveDeadBlocks = true;
 
   /*
-   * Whether to propagate constant values by replacing instructions
-   * which are known to always produce a constant with instructions
-   * that produce that constant.
+   * Whether to propagate constant values by replacing instructions which are
+   * known to always produce a constant with instructions that produce that
+   * constant.
    */
   bool ConstantProp = true;
 
   /*
-   * Whether to perform local or global dead code elimination.  This
-   * removes unnecessary instructions within a single block, or across
-   * blocks, respectively.
+   * Whether we should evaluate side-effect free builtins at compile time when
+   * they have compile-time constant arguments.
+   */
+  bool ConstantFoldBuiltins = true;
+
+  /*
+   * Whether to perform local or global dead code elimination.  This removes
+   * unnecessary instructions within a single block, or across blocks,
+   * respectively.
    *
-   * Note: GlobalDCE is off for now because it is a bit of a work in
-   * progress (needs more testing).
+   * Note: GlobalDCE is off for now because it is a bit of a work in progress
+   * (needs more testing).
    */
   bool LocalDCE = true;
   bool GlobalDCE = false;
 
   /*
-   * Whether to remove completely unused local variables.  This
-   * requires GlobalDCE.
+   * Whether to remove completely unused local variables.  This requires
+   * GlobalDCE.
    */
   bool RemoveUnusedLocals = false;
 
   /*
-   * If true, insert opcodes that assert inferred types, so we can
-   * assume them at runtime.
+   * If true, insert opcodes that assert inferred types, so we can assume them
+   * at runtime.
    */
   bool InsertAssertions = true;
   bool InsertStackAssertions = true;
 
   /*
-   * If true, try to filter asserts out that are "obvious" (this is a
-   * code size optimization).  It can be useful to turn this option
-   * off for debugging.
+   * If true, try to filter asserts out that are "obvious" (this is a code size
+   * optimization).  It can be useful to turn this option off for debugging.
    *
    * Has no effect if !InsertStackAssertions.
    */
   bool FilterAssertions = true;
 
   /*
-   * Whether to replace bytecode with less expensive bytecodes when we
-   * can.  E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
+   * Whether to replace bytecode with less expensive bytecodes when we can.
+   * E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
    */
   bool StrengthReduce = true;
 

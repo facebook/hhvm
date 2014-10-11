@@ -485,6 +485,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(BoxRNop,         NA,               ONE(RV),         ONE(VV),    NF) \
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
   O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
+  O(RGetCNop,        NA,               ONE(CV),         ONE(RV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \

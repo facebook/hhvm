@@ -228,6 +228,7 @@
   CASE(BoxR) \
   CASE(BoxRNop) \
   CASE(UnboxRNop) \
+  CASE(RGetCNop) \
   CASE(AddElemV) \
   CASE(AddNewElemV) \
   CASE(ClsCns) \

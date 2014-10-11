@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_VM_LITSTR_REPO_PROXY_H_
 #define incl_HPHP_VM_LITSTR_REPO_PROXY_H_
 
+#include <cstdlib>
+
 #include "hphp/runtime/vm/repo-helpers.h"
 
 namespace HPHP {

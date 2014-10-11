@@ -21,6 +21,7 @@
 #include <utility>
 #include <string>
 #include <memory>
+#include <cstdlib>
 
 #include <sqlite3.h>
 
@@ -97,6 +98,12 @@ public:
   bool findFile(const char* path, const std::string& root, MD5& md5);
   bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
+
+  /*
+   * Return the largest size for a static string that can be inserted into the
+   * repo.
+   */
+  size_t stringLengthLimit() const;
 
   /*
    * Return a vector of (filepath, MD5) for every unit in central

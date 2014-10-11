@@ -113,6 +113,8 @@ void parse_options(int argc, char** argv) {
                                 po::value(&options.ContextSensitiveInterp))
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
+    ("constant-fold-builtins",  po::value(&options.ConstantFoldBuiltins))
+    ("peephole",                po::value(&options.Peephole))
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
@@ -265,11 +267,12 @@ int main(int argc, char** argv) try {
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
-  RuntimeOption::RepoLocalPath     = "/tmp/hhbbc.repo";
-  RuntimeOption::RepoCentralPath   = input_repo;
-  RuntimeOption::RepoLocalMode     = "--";
-  RuntimeOption::RepoJournal       = "memory";
-  RuntimeOption::RepoCommit        = false;
+  RuntimeOption::RepoLocalPath       = "/tmp/hhbbc.repo";
+  RuntimeOption::RepoCentralPath     = input_repo;
+  RuntimeOption::RepoLocalMode       = "--";
+  RuntimeOption::RepoJournal         = "memory";
+  RuntimeOption::RepoCommit          = false;
+  RuntimeOption::EvalJit             = false;
 
   register_process_init();
   initialize_repo();

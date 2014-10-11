@@ -9186,6 +9186,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     return;
   }
 
+  RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
   auto pair = HHBBC::whole_program(std::move(ues));
   batchCommit(std::move(pair.first));
   commitGlobalData(std::move(pair.second));

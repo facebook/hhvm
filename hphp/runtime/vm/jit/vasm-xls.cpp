@@ -1480,6 +1480,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
       }
     }
   }
+  auto origin = code[j].origin;
   auto hows = doRegMoves(moves, m_tmp);
   auto count = hows.size() + loads.size();
   code.insert(code.begin() + j, count, ud2{});
@@ -1489,10 +1490,12 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     } else {
       code[j] = copy{how.m_src, how.m_dst};
     }
+    code[j].origin = origin;
     code[j++].pos = pos;
   }
   for (auto& inst : loads) {
     code[j] = inst;
+    code[j].origin = origin;
     code[j++].pos = pos;
   }
 }

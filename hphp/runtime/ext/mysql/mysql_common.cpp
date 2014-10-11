@@ -515,6 +515,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
   // ipv6 hostname:port is of the form [1:2:3:4:5]:port
   String host, socket;
   int port;
+  int savePersistent = false;
 
   auto slash_pos = server.find('/');
   if (slash_pos != std::string::npos) {
@@ -536,14 +537,21 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
   }
 
   if (mySQL == nullptr && persistent) {
-    mySQL = MySQL::GetPersistent(host, port, socket, username, password,
-                                 client_flags);
+    auto p_mySQL = MySQL::GetPersistent(host, port, socket, username, password,
+                                   client_flags);
+
+    if (p_mySQL != nullptr) {
+      mySQL = p_mySQL;
+    } else {
+      savePersistent = true;
+    }
   }
 
   if (mySQL == nullptr) {
     mySQL = new MySQL(host.c_str(), port, username.c_str(), password.c_str(),
                       database.c_str());
   }
+
 
   if (mySQL->getState() == MySQLState::INITED) {
     if (async) {
@@ -574,11 +582,12 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     }
   }
 
-  if (persistent) {
+  MySQL::SetDefaultConn(mySQL);
+
+  if (savePersistent) {
     MySQL::SetPersistent(host, port, socket, username, password,
                          client_flags, mySQL);
   }
-  MySQL::SetDefaultConn(mySQL);
   return Resource(mySQL);
 }
 

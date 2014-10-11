@@ -32,4 +32,25 @@ var_dump(is_callable(array($obj,'foo')));
 var_dump(is_callable(array($obj,'bar')));
 // nonexistent instance method
 var_dump(is_callable(array($obj,'asdfjkl')));
+echo "\n";
+
+interface I {
+  public function foo();
+}
+// user interface method
+var_dump(is_callable(array('I','foo')));
+// nonexistent interface method
+var_dump(is_callable(array('I','asdfjkl')));
+echo "\n";
+
+abstract class A {
+  public function foo() {}
+  abstract public function bar();
+}
+// user abstract class non-abstract function
+var_dump(is_callable(array('A', 'foo')));
+// user abstract class abstract function
+var_dump(is_callable(array('A', 'bar')));
+// nonexistent abstract class method
+var_dump(is_callable(array('A', 'asdfghjk')));
 

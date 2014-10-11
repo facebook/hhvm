@@ -56,7 +56,6 @@ struct NormalizedInstruction {
                      // this is the offset of the next instruction in the trace*
   bool endsRegion:1;
   bool nextIsMerge:1;
-  bool changesPC:1;
   bool preppedByRef:1;
   bool outputPredicted:1;
   bool ignoreInnerType:1;

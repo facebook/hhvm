@@ -648,11 +648,6 @@ struct InstrInfo {
 const InstrInfo& getInstrInfo(Op op);
 
 /*
- * Is the output of `instr' dependent on its input?
- */
-bool outputDependsOnInput(const Op op);
-
-/*
  * Is the output of `inst' predicted?
  *
  * Flags on `inst' may be updated.

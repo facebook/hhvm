@@ -1227,56 +1227,6 @@ bool dontGuardAnyInputs(Op op) {
 #undef CASE
 }
 
-bool outputDependsOnInput(const Op op) {
-  switch (instrInfo[op].type) {
-    case OutNull:
-    case OutNullUninit:
-    case OutString:
-    case OutStringImm:
-    case OutDouble:
-    case OutBoolean:
-    case OutBooleanImm:
-    case OutPredBool:
-    case OutInt64:
-    case OutArray:
-    case OutArrayImm:
-    case OutObject:
-    case OutResource:
-    case OutThisObject:
-    case OutUnknown:
-    case OutVUnknown:
-    case OutClassRef:
-    case OutPred:
-    case OutCns:
-    case OutStrlen:
-    case OutNone:
-      return false;
-
-    // NB: this sounds like it should have the output depend on the
-    // input, but it behaves the same as OutBoolean unless we are
-    // inlining, and in that case we don't relaxDeps.
-    case OutIsTypeL:
-      return false;
-
-    case OutFDesc:
-    case OutSameAsInput:
-    case OutCInput:
-    case OutVInput:
-    case OutCInputL:
-    case OutVInputL:
-    case OutFInputL:
-    case OutFInputR:
-    case OutArith:
-    case OutArithO:
-    case OutBitOp:
-    case OutSetOp:
-    case OutIncDec:
-    case OutFPushCufSafe:
-      return true;
-  }
-  not_reached();
-}
-
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
 const StaticString s_extract("extract");

@@ -124,10 +124,10 @@ struct Class : AtomicCountable {
     LowStringPtr m_docComment;
     // Most derived class that declared this property.
     LowClassPtr m_class;
+    int m_idx;
     // Used if (m_class == this).
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
-    int m_idx;
   };
 
   /*
@@ -980,14 +980,14 @@ public:
   // hot, and must be the last member.
 
 public:
-  Class* m_nextClass{nullptr}; // used by NamedEntity
+  LowClassPtr m_nextClass{nullptr}; // used by NamedEntity
 
 private:
   default_ptr<ExtraData> m_extra;
 
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
-  size_t m_numDeclInterfaces{0};
+  uint32_t m_numDeclInterfaces{0};
   mutable RDS::Link<Array> m_nonScalarConstantCache{RDS::kInvalidHandle};
 
   LowFuncPtr m_toString;
@@ -1011,7 +1011,6 @@ private:
   PropInitVec m_declPropInit;
   FixedVector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
-  mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
   // Bitmap of parent classes and implemented interfaces.  Each bit corresponds
@@ -1045,7 +1044,8 @@ private:
   PropMap m_declProperties;
 
   DataType m_enumBaseTy;
-  int32_t m_ODAttrs;
+  uint16_t m_ODAttrs;
+  mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
 
   unsigned m_needInitialization : 1;      // requires initialization,
                                           // due to [ps]init or simply

@@ -45,7 +45,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 
 class ObjectData {
  public:
-  enum Attribute {
+  enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
     UseSet        = 0x0004, // __set()

@@ -238,7 +238,7 @@ inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
 
-inline const std::vector<const Func*>& Class::pinitVec() const {
+inline const FixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
 }
 

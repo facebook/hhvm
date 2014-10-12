@@ -38,6 +38,8 @@ struct FixedVector {
   typedef T value_type;
   typedef T* iterator;
   typedef const T* const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
   /*
    * Default constructor leaves a FixedVector with size() == 0.
@@ -103,6 +105,14 @@ struct FixedVector {
   const_iterator end()   const { return m_sp.ptr() + size(); }
   iterator begin()             { return m_sp.ptr(); }
   iterator end()               { return m_sp.ptr() + size(); }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  reverse_iterator rend()   { return reverse_iterator(begin()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
 
   void swap(FixedVector& fv) {
     std::swap(m_sp, fv.m_sp);

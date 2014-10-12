@@ -534,7 +534,7 @@ public:
    *
    * These are invoked during initProps() to populate the copied PropInitVec.
    */
-  const std::vector<const Func*>& pinitVec() const;
+  const FixedVector<const Func*>& pinitVec() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -902,7 +902,7 @@ private:
                                      Class*           traitCls,
                                      Attr             modifiers);
   void importTraitMethods(MethodMapBuilder& curMethodMap);
-  void addTraitPropInitializers(bool staticProps);
+  void addTraitPropInitializers(std::vector<const Func*>&, bool staticProps);
   void applyTraitRules(MethodToTraitListMap& importMethToTraitMap);
   void applyTraitPrecRule(const PreClass::TraitPrecRule& rule,
                           MethodToTraitListMap& importMethToTraitMap);
@@ -1005,11 +1005,11 @@ private:
   // happens:
   //    - An instance of this class is created.
   //    - A static property of this class is accessed.
-  std::vector<const Func*> m_sinitVec;
+  FixedVector<const Func*> m_sinitVec;
   LowFuncPtr m_ctor;
   LowFuncPtr m_dtor;
   PropInitVec m_declPropInit;
-  std::vector<const Func*> m_pinitVec;
+  FixedVector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
   mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
   PreClassPtr m_preClass;

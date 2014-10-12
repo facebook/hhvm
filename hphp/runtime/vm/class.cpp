@@ -126,7 +126,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-static_assert(sizeof(Class) == (use_lowptr ? 312 : 336),
+static_assert(sizeof(Class) == (use_lowptr ? 280 : 304),
               "Change this only on purpose");
 
 namespace {
@@ -2157,12 +2157,12 @@ void Class::importTraitProps(int idxOffset,
   }
 }
 
-void Class::addTraitPropInitializers(bool staticProps) {
+void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
+                                     bool staticProps) {
   if (attrs() & AttrNoExpandTrait) return;
   for (auto const& t : m_extra->m_usedTraits) {
     Class* trait = t.get();
     auto& traitInitVec = staticProps ? trait->m_sinitVec : trait->m_pinitVec;
-    auto& thisInitVec  = staticProps ? m_sinitVec : m_pinitVec;
     // Insert trait's 86[ps]init into the current class, avoiding repetitions.
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
       // Clone 86[ps]init methods, and set the class to the current class.
@@ -2178,11 +2178,14 @@ void Class::addTraitPropInitializers(bool staticProps) {
 }
 
 void Class::setInitializers() {
+  std::vector<const Func*> pinits;
+  std::vector<const Func*> sinits;
+
   if (m_parent.get() != nullptr) {
     // Copy parent's 86pinit() vector, so that the 86pinit() methods can be
     // called in reverse order without any search/recursion during
     // initialization.
-    m_pinitVec = m_parent->m_pinitVec;
+    pinits.assign(m_parent->m_pinitVec.begin(), m_parent->m_pinitVec.end());
   }
 
   // This class only has a __[ps]init() method if it's needed.  Append to the
@@ -2191,14 +2194,17 @@ void Class::setInitializers() {
   // hierarchy initialize the same property.
   const Func* meth86pinit = findSpecialMethod(this, s_86pinit.get());
   if (meth86pinit != nullptr) {
-    m_pinitVec.push_back(meth86pinit);
+    pinits.push_back(meth86pinit);
   }
-  addTraitPropInitializers(false);
+  addTraitPropInitializers(pinits, false);
   const Func* sinit = findSpecialMethod(this, s_86sinit.get());
   if (sinit) {
-    m_sinitVec.push_back(sinit);
+    sinits.push_back(sinit);
   }
-  addTraitPropInitializers(true);
+  addTraitPropInitializers(sinits, true);
+
+  m_pinitVec = pinits;
+  m_sinitVec = sinits;
 
   m_needInitialization = (m_pinitVec.size() > 0 ||
     m_staticProperties.size() > 0);

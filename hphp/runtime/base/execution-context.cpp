@@ -545,16 +545,28 @@ void ExecutionContext::onRequestShutdown() {
   m_requestEventHandlerSet.clear();
 }
 
-void ExecutionContext::executeFunctions(const Array& funcs) {
+void ExecutionContext::executeFunctions(ShutdownType type) {
   ThreadInfo::s_threadInfo->m_reqInjectionData.resetTimer(
     RuntimeOption::PspTimeoutSeconds);
 
-  for (int pos = 0; pos < funcs.size(); ++pos) {
-    // We may append to the end of the array from these functions but they have
-    // no way to write to any other location additionally we know that the array
-    // is zero indexed so this style of iteration should be safe
-    Array callback = funcs[pos].toArray();
-    vm_call_user_func(callback[s_name], callback[s_args].toArray());
+  if (!m_shutdowns.isNull() && m_shutdowns.exists(type)) {
+    SCOPE_EXIT {
+      try { m_shutdowns.remove(type); } catch (...) {}
+    };
+    // We mustn't destroy any callbacks until we're done with all
+    // of them. So hold them in tmp.
+    Array tmp;
+    while (true) {
+      auto& var = m_shutdowns.lvalAt(type);
+      if (!var.isArray()) break;
+      auto funcs = var.toArray();
+      var.unset();
+      for (int pos = 0; pos < funcs.size(); ++pos) {
+        Array callback = funcs[pos].toArray();
+        vm_call_user_func(callback[s_name], callback[s_args].toArray());
+      }
+      tmp.append(funcs);
+    }
   }
 }
 
@@ -564,12 +576,7 @@ void ExecutionContext::onShutdownPreSend() {
     try { obFlushAll(); } catch (...) {}
   };
 
-  if (!m_shutdowns.isNull() && m_shutdowns.exists(ShutDown)) {
-    SCOPE_EXIT {
-      try { m_shutdowns.remove(ShutDown); } catch (...) {}
-    };
-    executeFunctions(forceToArray(m_shutdowns.lvalAt(ShutDown)));
-  }
+  executeFunctions(ShutDown);
 }
 
 extern void ext_session_request_shutdown();
@@ -580,14 +587,7 @@ void ExecutionContext::onShutdownPostSend() {
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
-      if (!m_shutdowns.isNull()) {
-        if (m_shutdowns.exists(PostSend)) {
-          SCOPE_EXIT {
-            try { m_shutdowns.remove(PostSend); } catch (...) {}
-          };
-          executeFunctions(forceToArray(m_shutdowns.lvalAt(PostSend)));
-        }
-      }
+      executeFunctions(PostSend);
     } catch (...) {
       try {
         bump_counter_and_rethrow(true /* isPsp */);

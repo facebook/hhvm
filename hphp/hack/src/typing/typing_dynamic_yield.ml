@@ -12,8 +12,8 @@
 (* Module used to type DynamicYield
  * Each class that uses the DynamicYield trait or which extends a class that
  * uses the DynamicYield trait implicitly defines a few methods. If it
- * explicitly defines a yieldFoo method, then it implicitly also defines genFoo,
- * prepareFoo, and getFoo (unless any of those methods are explicitly defined).
+ * explicitly defines a yieldFoo method, then it implicitly also defines genFoo
+ * (unless this method is explicitly defined).
  * It does this with __call().
  *)
 (*****************************************************************************)
@@ -27,7 +27,7 @@ module Env    = Typing_env
 module SN     = Naming_special_names
 
 (* Classes that use the DynamicYield trait and implement yieldFoo also provide
- * prepareFoo, genFoo(), and getFoo()
+ * genFoo()
  *)
 let rec decl env methods =
   SMap.fold begin fun name ce (env, acc) ->
@@ -53,16 +53,6 @@ let rec decl env methods =
           ft_ret =  gen_r, Tapply ((p, SN.Classes.cAwaitable), [base_ty])
         } in
         let acc = add gen_name {ce with ce_type = gen_ty} acc in
-
-        (* Define getFoo(), which is T if yieldFoo() is Awaitable<T>. As an
-         * annoying special-case, unfinalize this, since the runtime allows you
-         * to "override" a yieldFoo() with a getFoo(), and people unfortunately
-         * do this quite a bit. *)
-        let get_name = "get"^base in
-        let base_p = Reason.to_pos (fst base_ty) in
-        let get_r = Reason.Rdynamic_yield (base_p, ft.ft_pos, get_name, name) in
-        let get_ty = ce_r, Tfun {ft with ft_ret = get_r, snd base_ty} in
-        let acc = add get_name {ce with ce_type = get_ty ; ce_final = false} acc in
         env, acc
       | None ->
         (match parse_get_name name with

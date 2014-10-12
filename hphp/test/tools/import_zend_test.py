@@ -1258,7 +1258,8 @@ def walk(filename, dest_subdir):
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
        '/ext/xmlreader/tests/012.php' in full_dest_filename or
        '/ext/dom/tests/bug37456.php' in full_dest_filename or
-       '/ext/dom/tests/bug67081.php' in full_dest_filename):
+       '/ext/dom/tests/bug67081.php' in full_dest_filename or
+       '/ext/xsl/tests/bug53965.php' in full_dest_filename):
         open(full_dest_filename + '.ini', 'w').write(
                 'hhvm.libxml.ext_entity_whitelist = "file"')
     if '/ext/xsl/tests/xslt008.php' in full_dest_filename:

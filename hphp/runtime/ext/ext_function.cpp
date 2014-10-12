@@ -68,7 +68,7 @@ bool f_is_callable(const Variant& v, bool syntax /* = false */,
     StringData* invName = NULL;
     const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
                                                  invName, false);
-    if (f == NULL || f->isAbstract()) {
+    if (f == nullptr || f->isAbstract()) {
       ret = false;
     }
     if (invName != NULL) {

@@ -2333,6 +2333,59 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
   push(cns);
 }
 
+SSATmp* HhbcTranslator::optimizedAKExists(SSATmp* arr, SSATmp* needle) {
+  // We only want to do this optimization when querying string keys in an array
+  // of only string keys. When you start mixing int and string keys, you have to
+  // deal with conversion of strictly-integer strings, which is a can of worms.
+  if (!needle->isA(Type::Str)) {
+    return nullptr;
+  }
+
+  if (!arr->isA(Type::StaticArr) || !arr->isConst()) {
+    return nullptr;
+  }
+
+  constexpr auto kMaxAKExistsUnrollSize = 4;
+  auto const arrayData = arr->arrVal();
+  if (arrayData->size() > kMaxAKExistsUnrollSize) {
+    return nullptr;
+  }
+  if (arrayData->size() == 0) {
+    return cns(false);
+  }
+
+  // Do a first pass through to make sure every key is a string; from here on
+  // we'll be gen'ing new instructions (branches) that can't yet be DCE'd if it
+  // turns out we can't do the optimization.
+  for (auto iter = ArrayIter{arrayData}; iter; ++iter) {
+    if (!iter.first().isString()) return nullptr;
+  }
+
+  auto iterPos = arrayData->iter_begin();
+  auto const firstKey = arrayData->getKey(iterPos);
+  auto currVal = gen(Same, needle, cns(firstKey.asCStrRef().get()));
+
+  for (iterPos = arrayData->iter_advance(iterPos);
+       iterPos != arrayData->iter_end();
+       iterPos = arrayData->iter_advance(iterPos)) {
+    auto const key = arrayData->getKey(iterPos);
+    currVal = m_irb->cond(
+      0,
+      [&] (Block* taken) {
+        gen(JmpZero, taken, currVal);
+      },
+      [&] {
+        return cns(true);
+      },
+      [&] {
+        return gen(Same, needle, cns(key.asCStrRef().get()));
+      }
+    );
+  }
+
+  return currVal;
+}
+
 void HhbcTranslator::emitAKExists() {
   SSATmp* arr = popC();
   SSATmp* key = popC();
@@ -2344,7 +2397,12 @@ void HhbcTranslator::emitAKExists() {
     PUNT(AKExists_badKey);
   }
 
-  push(gen(AKExists, arr, key));
+  if (SSATmp* opt = optimizedAKExists(arr, key)) {
+    push(opt);
+  } else {
+    push(gen(AKExists, arr, key));
+  }
+
   gen(DecRef, arr);
   gen(DecRef, key);
 }
@@ -3466,7 +3524,12 @@ SSATmp* HhbcTranslator::optimizedCallInArray() {
 
   auto needle = topC(2);
   auto array = flipped.toArray();
-  return gen(AKExists, cns(ArrayData::GetScalarArray(array.get())), needle);
+  auto const arrayCns = cns(ArrayData::GetScalarArray(array.get()));
+  if (SSATmp* akExists = optimizedAKExists(arrayCns, needle)) {
+    return akExists;
+  }
+
+  return gen(AKExists, arrayCns, needle);
 }
 
 SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {

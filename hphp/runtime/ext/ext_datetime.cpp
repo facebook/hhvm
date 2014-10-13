@@ -64,10 +64,10 @@ struct DateGlobals {
 };
 IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
 
-static class DateExtension : public Extension {
+static class DateExtension final : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
-  void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
@@ -203,7 +203,7 @@ int64_t c_DateTime::GetTimestamp(const Object& obj) {
     return obj.getTyped<c_DateTime>(true)->t_gettimestamp();
   }
   assert(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
-  Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
+  Variant result = obj->o_invoke(s_getTimestamp, empty_array());
   return result.toInt64();
 }
 
@@ -214,8 +214,9 @@ int64_t c_DateTime::GetTimestamp(const ObjectData* od) {
 SmartResource<DateTime> c_DateTime::unwrap(const Object& datetime) {
   if (LIKELY(datetime.is<c_DateTime>())) {
     SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
-    if (cdt.get() == nullptr)
+    if (cdt.get() == nullptr) {
       return SmartResource<DateTime>();
+    }
     return cdt->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
@@ -241,14 +242,12 @@ const StaticString
 Array c_DateTime::ti_getlasterrors() {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
-  Array ret = Array::Create();
-
-  ret.add(s_warning_count, warnings.size());
-  ret.add(s_warnings, warnings);
-  ret.add(s_error_count, errors.size());
-  ret.add(s_errors, errors);
-
-  return ret;
+  return make_map_array(
+    s_warning_count, warnings.size(),
+    s_warnings, warnings,
+    s_error_count, errors.size(),
+    s_errors, errors
+  );
 }
 
 int64_t c_DateTime::t_getoffset() {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include <memory>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/smart-object.h"
 #include "hphp/runtime/base/timezone.h"
@@ -33,7 +34,7 @@ namespace HPHP {
  * Encapsulating all date/time manipulations, conversions, input and output
  * into this one single class.
  */
-class DateTime : public SweepableResourceData {
+class DateTime final : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(DateTime);
 
@@ -310,23 +311,23 @@ private:
       requestShutdown();
       m_errors = ec;
     }
-    Array getLastWarnings() {
-      Array ret = Array::Create();
-      if (!m_errors) return ret;
+    Array getLastWarnings() const {
+      if (!m_errors) return empty_array();
+      ArrayInit ret(m_errors->warning_count, ArrayInit::Map{});
       for(int i = 0; i < m_errors->warning_count; i++) {
         timelib_error_message *em = m_errors->warning_messages + i;
         ret.set(em->position, String(em->message, CopyString));
       }
-      return ret;
+      return ret.toArray();
     }
-    Array getLastErrors() {
-      Array ret = Array::Create();
-      if (!m_errors) return ret;
+    Array getLastErrors() const {
+      if (!m_errors) return empty_array();
+      ArrayInit ret(m_errors->error_count, ArrayInit::Map{});
       for(int i = 0; i < m_errors->error_count; i++) {
         timelib_error_message *em = m_errors->error_messages + i;
         ret.set(em->position, String(em->message, CopyString));
       }
-      return ret;
+      return ret.toArray();
     }
 
   private:

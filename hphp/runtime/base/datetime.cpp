@@ -729,54 +729,56 @@ String DateTime::stdcFormat(const String& format) const {
 }
 
 Array DateTime::toArray(ArrayFormat format) const {
-  Array ret;
   bool error;
   switch (format) {
   case ArrayFormat::TimeMap:
-    ret.set(s_seconds, second());
-    ret.set(s_minutes, minute());
-    ret.set(s_hours,   hour());
-    ret.set(s_mday,    day());
-    ret.set(s_wday,    dow());
-    ret.set(s_mon,     month());
-    ret.set(s_year,    year());
-    ret.set(s_yday,    doy());
-    ret.set(s_weekday, weekdayName());
-    ret.set(s_month,   monthName());
-    ret.set(0,         toTimeStamp(error));
-    break;
+    return make_map_array(
+      s_seconds, second(),
+      s_minutes, minute(),
+      s_hours,   hour(),
+      s_mday,    day(),
+      s_wday,    dow(),
+      s_mon,     month(),
+      s_year,    year(),
+      s_yday,    doy(),
+      s_weekday, weekdayName(),
+      s_month,   monthName(),
+      0,         toTimeStamp(error)
+    );
   case ArrayFormat::TmMap:
     {
       struct tm tm;
       toTm(tm);
-      ret.set(s_tm_sec,   tm.tm_sec);
-      ret.set(s_tm_min,   tm.tm_min);
-      ret.set(s_tm_hour,  tm.tm_hour);
-      ret.set(s_tm_mday,  tm.tm_mday);
-      ret.set(s_tm_mon,   tm.tm_mon);
-      ret.set(s_tm_year,  tm.tm_year);
-      ret.set(s_tm_wday,  tm.tm_wday);
-      ret.set(s_tm_yday,  tm.tm_yday);
-      ret.set(s_tm_isdst, tm.tm_isdst);
+      return make_map_array(
+        s_tm_sec,   tm.tm_sec,
+        s_tm_min,   tm.tm_min,
+        s_tm_hour,  tm.tm_hour,
+        s_tm_mday,  tm.tm_mday,
+        s_tm_mon,   tm.tm_mon,
+        s_tm_year,  tm.tm_year,
+        s_tm_wday,  tm.tm_wday,
+        s_tm_yday,  tm.tm_yday,
+        s_tm_isdst, tm.tm_isdst
+      );
     }
-    break;
   case ArrayFormat::TmVector:
     {
       struct tm tm;
       toTm(tm);
-      ret.append(tm.tm_sec);
-      ret.append(tm.tm_min);
-      ret.append(tm.tm_hour);
-      ret.append(tm.tm_mday);
-      ret.append(tm.tm_mon);
-      ret.append(tm.tm_year);
-      ret.append(tm.tm_wday);
-      ret.append(tm.tm_yday);
-      ret.append(tm.tm_isdst);
+      return make_packed_array(
+        tm.tm_sec,
+        tm.tm_min,
+        tm.tm_hour,
+        tm.tm_mday,
+        tm.tm_mon,
+        tm.tm_year,
+        tm.tm_wday,
+        tm.tm_yday,
+        tm.tm_isdst
+      );
     }
-    break;
   }
-  return ret;
+  return empty_array();
 }
 
 bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,

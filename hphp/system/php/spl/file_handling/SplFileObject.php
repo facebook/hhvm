@@ -178,7 +178,7 @@ class SplFileObject extends SplFileInfo
       $this->next();
     }
 
-    return $this->currentLine = $this->getCurrentLineProcessed();
+    return $this->currentLine = $this->getCurrentLineImpl();
   }
 
   public function getCurrentLine() {
@@ -554,7 +554,7 @@ class SplFileObject extends SplFileInfo
           $this->escape
         );
       } else {
-        $this->currentLine = $this->getCurrentLineProcessed();
+        $this->currentLine = $this->getCurrentLineImpl();
       }
     }
     return $this->currentLine;
@@ -666,7 +666,7 @@ class SplFileObject extends SplFileInfo
     return true;
   }
 
-  private function getCurrentLineProcessed()
+  private function getCurrentLineImpl()
   {
     $line = fgets($this->rsrc, $this->maxLineLen);
     if ($this->flags & self::DROP_NEW_LINE) {

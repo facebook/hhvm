@@ -104,6 +104,9 @@ extern char **environ;
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+// Forward declarations.
+
 extern InitFiniNode *extra_process_init, *extra_process_exit;
 
 void initialize_repo();
@@ -114,6 +117,8 @@ void initialize_repo();
  * actually initialize the VM.
  */
 void (*g_vmProcessInit)();
+
+void timezone_init();
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -1636,6 +1641,9 @@ void hphp_process_init() {
 
   // reinitialize pcre table
   pcre_reinit();
+
+  // initialize the tzinfo cache.
+  timezone_init();
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not

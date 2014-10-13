@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/timezone.h"
 
+#include <folly/AtomicHashArray.h>
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/datetime.h"
@@ -23,6 +25,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 
+#include "hphp/util/functional.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
@@ -74,9 +77,26 @@ public:
   TimeZoneData() : Database(nullptr) {}
 
   const timelib_tzdb *Database;
-  MapStringToTimeZoneInfo Cache;
 };
 static IMPLEMENT_THREAD_LOCAL(TimeZoneData, s_timezone_data);
+
+struct ahm_eqstr {
+  bool operator()(const char* a, const char* b) {
+    return intptr_t(a) > 0 && (strcmp(a, b) == 0);
+  }
+};
+
+using TimeZoneCache =
+  folly::AtomicHashArray<const char*, TimeZoneInfo, cstr_hash, ahm_eqstr>;
+using TimeZoneCacheEntry = std::pair<const char*, TimeZoneInfo>;
+
+TimeZoneCache* s_tzCache;
+
+void timezone_init() {
+  // Allocate enough space to cache all possible timezones, if needed.
+  constexpr size_t kMaxTimeZoneCache = 1000;
+  s_tzCache = TimeZoneCache::create(kMaxTimeZoneCache).release();
+}
 
 const timelib_tzdb *TimeZone::GetDatabase() {
   const timelib_tzdb *&Database = s_timezone_data->Database;
@@ -87,11 +107,9 @@ const timelib_tzdb *TimeZone::GetDatabase() {
 }
 
 TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
-  MapStringToTimeZoneInfo &Cache = s_timezone_data->Cache;
-
-  MapStringToTimeZoneInfo::const_iterator iter = Cache.find(name);
-  if (iter != Cache.end()) {
-    return iter->second;
+  auto const it = s_tzCache->find(name);
+  if (it != s_tzCache->end()) {
+    return it->second;
   }
 
   TimeZoneInfo tzi(timelib_parse_tzfile(name, db), tzinfo_deleter());
@@ -103,8 +121,16 @@ TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
   }
 
   if (tzi) {
-    Cache[name] = tzi;
+    auto key = strdup(name);
+    auto result = s_tzCache->insert(TimeZoneCacheEntry(key, tzi));
+    if (!result.second) {
+      // The cache should never fill up since tzinfos are finite.
+      always_assert(result.first != s_tzCache->end());
+      // A collision occurred, so we don't need our strdup'ed key.
+      free(key);
+    }
   }
+
   return tzi;
 }
 

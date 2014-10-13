@@ -364,7 +364,7 @@ public:
   static std::string DynamicExtensionPath;
   static std::vector<std::string> DynamicExtensions;
 
-  static bool RecursiveRegexIterator_UseParentFlags;
+  static bool RecursiveRegexIteratorUseParentFlags;
 
 
 #define EVALFLAGS()                                                     \

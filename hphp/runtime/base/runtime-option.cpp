@@ -349,7 +349,7 @@ std::vector<std::string> RuntimeOption::Extensions;
 std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 
-bool RuntimeOption::RecursiveRegexIterator_UseParentFlags = true;
+bool RuntimeOption::RecursiveRegexIteratorUseParentFlags = true;
 
 std::vector<void(*)(const IniSettingMap&, const Hdf&)>*
   RuntimeOption::OptionHooks = nullptr;
@@ -1586,7 +1586,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,
                    "hhvm.spl.recursive_regex_iterator.use_parent_flags",
-                   &RuntimeOption::RecursiveRegexIterator_UseParentFlags);
+                   &RuntimeOption::RecursiveRegexIteratorUseParentFlags);
 
   // Extensions
   Config::Bind(RuntimeOption::ExtensionDir, ini, "extension_dir",

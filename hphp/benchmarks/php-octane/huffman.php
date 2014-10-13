@@ -391,7 +391,7 @@ $RunHuffman = function() {
   }
 };
 
-$HuffmanSuite = new BenchmarkSuite('Huffman', [100000], [
+$Huffman = new BenchmarkSuite('Huffman', [100000], [
   new Benchmark('Huffman', true, false, 100000, $RunHuffman)
 ]);
 ?>

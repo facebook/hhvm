@@ -38,6 +38,7 @@ function my_option_map(): OptionInfoMap {
                             'Do not use the default wrapper runtime options'},
 'build-root:'     => Pair { '',
                             'Override the default directory for hhvm and hphp'},
+'perf:'           => Pair { '', 'Run perf record'},
   };
 }
 
@@ -247,6 +248,9 @@ function run_hhvm(OptionMap $opts): void {
 
   $pfx = determine_env($opts);
   $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
+  if ($opts->containsKey('perf')) {
+    $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
+  }
   $hhvm = get_paths($opts)['hhvm'];
   $cmd = "$pfx $hhvm $flags ".argv_for_shell();
   if ($opts->containsKey('print-command')) {

@@ -69,7 +69,6 @@ struct EHEnt {
     Catch,
     Fault
   };
-  typedef std::vector<std::pair<Id, Offset>> CatchVec;
 
   Type m_type;
   bool m_itRef;
@@ -78,9 +77,7 @@ struct EHEnt {
   int m_iterId;
   int m_parentIndex;
   Offset m_fault;
-  CatchVec m_catches;
-
-  template<class SerDe> void serde(SerDe& sd);
+  FixedVector<std::pair<Id,Offset>> m_catches;
 };
 
 /*
@@ -1216,12 +1213,12 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class EHEntVec>
-const EHEnt* findEH(const EHEntVec& ehtab, Offset o) {
+template<class Container>
+const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
   uint32_t i;
   uint32_t sz = ehtab.size();
 
-  const EHEnt* eh = nullptr;
+  const typename Container::value_type* eh = nullptr;
   for (i = 0; i < sz; i++) {
     if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
       eh = &ehtab[i];
@@ -1229,6 +1226,7 @@ const EHEnt* findEH(const EHEntVec& ehtab, Offset o) {
   }
   return eh;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

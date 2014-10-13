@@ -1438,7 +1438,7 @@ void parse_fault(AsmState& as, int nestLevel) {
   as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Fault;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
@@ -1481,7 +1481,7 @@ void parse_catch(AsmState& as, int nestLevel) {
   as.in.expect('{');
   parse_function_body(as, nestLevel + 1);
 
-  EHEnt& eh = as.fe->addEHEnt();
+  auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();

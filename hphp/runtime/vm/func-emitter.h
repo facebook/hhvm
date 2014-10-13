@@ -44,6 +44,21 @@ struct UnitEmitter;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct EHEntEmitter {
+  EHEnt::Type m_type;
+  bool m_itRef;
+  Offset m_base;
+  Offset m_past;
+  int m_iterId;
+  int m_parentIndex;
+  Offset m_fault;
+  std::vector<std::pair<Id,Offset>> m_catches;
+
+  template<class SerDe> void serde(SerDe& sd);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Bag of Func's fields used to emit Funcs.
  */
@@ -71,7 +86,7 @@ struct FuncEmitter {
 
   typedef std::vector<ParamInfo> ParamInfoVec;
   typedef std::vector<Func::SVInfo> SVInfoVec;
-  typedef std::vector<EHEnt> EHEntVec;
+  typedef std::vector<EHEntEmitter> EHEntVec;
   typedef std::vector<FPIEnt> FPIEntVec;
 
 
@@ -176,7 +191,7 @@ struct FuncEmitter {
   /*
    * Add entries to the EH and FPI tables, and return them by reference.
    */
-  EHEnt& addEHEnt();
+  EHEntEmitter& addEHEnt();
   FPIEnt& addFPIEnt();
 
 private:

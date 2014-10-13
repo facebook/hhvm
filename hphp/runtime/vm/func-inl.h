@@ -23,21 +23,6 @@ namespace HPHP {
 // EH and FPI tables.
 
 template<class SerDe>
-void EHEnt::serde(SerDe& sd) {
-  sd(m_type)
-    (m_base)
-    (m_past)
-    (m_iterId)
-    (m_fault)
-    (m_itRef)
-    (m_parentIndex)
-    ;
-  if (m_type == Type::Catch) {
-    sd(m_catches);
-  }
-}
-
-template<class SerDe>
 void FPIEnt::serde(SerDe& sd) {
   sd(m_fpushOff)
     (m_fcallOff)

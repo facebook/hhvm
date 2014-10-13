@@ -8283,7 +8283,7 @@ void EmitterVisitor::newFPIRegion(Offset start, Offset end, Offset fpOff) {
 
 void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
   for (auto& eh : m_catchRegions) {
-    EHEnt& e = fe->addEHEnt();
+    auto& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Catch;
     e.m_base = eh->m_start;
     e.m_past = eh->m_end;
@@ -8299,7 +8299,7 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
   }
   m_catchRegions.clear();
   for (auto& fr : m_faultRegions) {
-    EHEnt& e = fe->addEHEnt();
+    auto& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Fault;
     e.m_base = fr->m_start;
     e.m_past = fr->m_end;

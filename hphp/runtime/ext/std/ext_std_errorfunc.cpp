@@ -18,6 +18,9 @@
 
 #include <iostream>
 
+#include <folly/Likely.h>
+#include <folly/Format.h>
+
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -234,7 +237,9 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
                                   int error_type /* = k_E_USER_NOTICE */) {
   std::string msg = error_msg.data();
-  if (g_context->getThrowAllErrors()) throw error_type;
+  if (UNLIKELY(g_context->getThrowAllErrors())) {
+    throw Exception(folly::sformat("throwAllErrors: {}", error_type));
+  }
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::ErrorThrowMode::IfUnhandled,

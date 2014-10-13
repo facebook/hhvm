@@ -22,7 +22,9 @@
 #include <list>
 #include <utility>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
+#include <folly/Format.h>
+#include <folly/Likely.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -619,8 +621,8 @@ void ExecutionContext::onShutdownPostSend() {
 bool ExecutionContext::errorNeedsHandling(int errnum,
                                               bool callUserHandler,
                                               ErrorThrowMode mode) {
-  if (m_throwAllErrors) {
-    throw errnum;
+  if (UNLIKELY(m_throwAllErrors)) {
+    throw Exception(folly::sformat("throwAllErrors: {}", errnum));
   }
   if (mode != ErrorThrowMode::Never || errorNeedsLogging(errnum) ||
       ThreadInfo::s_threadInfo->m_reqInjectionData.hasTrackErrors()) {

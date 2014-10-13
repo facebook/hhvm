@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/vm/func.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -532,6 +533,49 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
   return tv->m_type == KindOfResource;
+}
+
+#define XX(kind, expkind)                                         \
+void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
+                                    const Func* callee,           \
+                                    unsigned int arg_num) {       \
+  if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
+    return;                                                       \
+  }                                                               \
+  raise_param_type_warning(callee->name()->data(),                \
+                           arg_num, KindOf##expkind, tv->m_type); \
+  throw TVCoercionException(callee, arg_num, tv->m_type,          \
+                            KindOf##expkind);                     \
+}
+#define X(kind) XX(kind, kind)
+X(Boolean)
+X(Int64)
+X(Double)
+X(String)
+X(Array)
+X(Object)
+XX(NullableObject, Object)
+X(Resource)
+#undef X
+#undef XX
+
+TVCoercionException::TVCoercionException(const Func* func,
+                                         int arg_num,
+                                         DataType actual,
+                                         DataType expected)
+    : std::runtime_error(
+        folly::format("Unable to coerce param {} to {}() "
+                      "from {} to {}",
+                      arg_num,
+                      func->name()->data(),
+                      actual,
+                      expected).str())
+{
+  if (func->attrs() & AttrParamCoerceModeFalse) {
+    m_tv = make_tv<KindOfBoolean>(false);
+  } else {
+    m_tv = make_tv<KindOfNull>();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

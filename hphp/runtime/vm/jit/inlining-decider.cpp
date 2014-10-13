@@ -275,21 +275,8 @@ bool isInlinableCPPBuiltin(const Func* f) {
     return false;
   }
 
-  // Right now, the IR isn't prepared to do parameter coercing during an
-  // inlining of NativeImpl for any of our param modes.  We'll want to expand
-  // this in the short term, but for now we're targeting collection member
-  // functions, which are (a) IDL-based (so no HNI support here yet), and (b)
-  // take `const Variant&` for every param.
-  //
-  // So for now, we only inline when the params are Variants.
-  for (auto i = uint32_t{0}; i < f->numParams(); ++i) {
-    if (f->params()[i].builtinType != KindOfUnknown) {
-      if (f->isParamCoerceMode()) return false;
-    }
-  }
-
-  // Static methods need to be passed their class, which we don't
-  // support yet.
+  // TODO: Static methods need to be passed their class, which we don't
+  // support yet. (t5360661)
   if (f->isMethod() && (f->attrs() & AttrStatic)) {
     return false;
   }
@@ -364,9 +351,19 @@ bool InliningDecider::shouldInline(const Func* callee,
     return refuse("inlining stack depth limit exceeded");
   }
 
+  // Even if the func contains NativeImpl we may have broken the trace before
+  // we hit it.
+  auto containsNativeImpl = [&] {
+    for (auto block : region.blocks()) {
+      if (!block->empty() && block->last().op() == OpNativeImpl) return true;
+    }
+    return false;
+  };
+
   // Try to inline CPP builtin functions.
-  if (callee->isCPPBuiltin() &&
-      static_cast<Op>(*callee->getEntry()) == Op::NativeImpl) {
+  // The NativeImpl opcode may appear later in the function because of Asserts
+  // generated in hhbbc
+  if (callee->isCPPBuiltin() && containsNativeImpl()) {
     if (isInlinableCPPBuiltin(callee)) {
       return accept("inlinable CPP builtin");
     }

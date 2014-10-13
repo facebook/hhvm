@@ -330,6 +330,12 @@ CALL_OPCODE(Box)
 CALL_OPCODE(ColAddElemC)
 CALL_OPCODE(ColAddNewElemC)
 
+CALL_OPCODE(CoerceCellToBool);
+CALL_OPCODE(CoerceCellToInt);
+CALL_OPCODE(CoerceCellToDbl);
+CALL_OPCODE(CoerceStrToDbl);
+CALL_OPCODE(CoerceStrToInt);
+
 CALL_OPCODE(ConvBoolToArr);
 CALL_OPCODE(ConvDblToArr);
 CALL_OPCODE(ConvIntToArr);
@@ -617,6 +623,19 @@ void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpbim{0, rVmTl[unwinderSideExitOff()], sf};
   unlikelyIfBlock(v, vcold(), CC_E, sf, callUnwindResumeHelper);
+
+  // doSideExit == true, so fall through to the side exit code
+  v << incstat{Stats::TC_CatchSideExit, 1, false};
+}
+
+void CodeGenerator::cgCheckSideExit(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  v << cmpbim{0, rVmTl[unwinderSideExitOff()], sf};
+
+  auto done = v.makeBlock();
+  v << jcc{CC_E, sf, {done, label(inst->taken())}};
+  v = done;
 
   // doSideExit == true, so fall through to the side exit code
   v << incstat{Stats::TC_CatchSideExit, 1, false};
@@ -3322,10 +3341,9 @@ void CodeGenerator::cgCastStkIntToDbl(IRInstruction* inst) {
 
 void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   Type type       = inst->typeParam();
-  auto offset     = cellsToBytes(inst->extra<CoerceStk>()->offset);
-  Block* exit     = inst->taken();
-  auto spReg      = srcLoc(0).reg();
-  assert(!type.isSpecialized());
+  auto extra      = inst->extra<CoerceStk>();
+  PhysReg spReg   = srcLoc(0).reg();
+  auto offset     = cellsToBytes(extra->offset);
 
   auto& v = vmain();
 
@@ -3354,36 +3372,34 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
   // fallback on actually calling the tvCoerceParamTo*() helper
   auto args = argGroup();
   args.addr(spReg, offset);
+  args.imm(extra->callee);
+  args.imm(extra->argNum);
 
   TCA tvCoerceHelper;
   if (type <= Type::Bool) {
-    tvCoerceHelper = (TCA)tvCoerceParamToBooleanInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToBooleanOrThrow;
   } else if (type <= Type::Int) {
-    tvCoerceHelper = (TCA)tvCoerceParamToInt64InPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToInt64OrThrow;
   } else if (type <= Type::Dbl) {
-    tvCoerceHelper = (TCA)tvCoerceParamToDoubleInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToDoubleOrThrow;
   } else if (type <= Type::Arr) {
-    tvCoerceHelper = (TCA)tvCoerceParamToArrayInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToArrayOrThrow;
   } else if (type <= Type::Str) {
-    tvCoerceHelper = (TCA)tvCoerceParamToStringInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToStringOrThrow;
   } else if (type <= Type::Obj) {
-    tvCoerceHelper = (TCA)tvCoerceParamToObjectInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToObjectOrThrow;
   } else if (type <= Type::Res) {
-    tvCoerceHelper = (TCA)tvCoerceParamToResourceInPlace;
+    tvCoerceHelper = (TCA)tvCoerceParamToResourceOrThrow;
   } else {
     not_reached();
   }
 
-  auto tmpReg = v.makeReg();
   cgCallHelper(v,
     CppCall::direct(reinterpret_cast<void (*)()>(tvCoerceHelper)),
-    callDest(tmpReg),
+    kVoidDest,
     SyncOptions::kSyncPoint,
     args
   );
-  auto const sf = v.makeReg();
-  v << testbi{1, tmpReg, sf};
-  v << jcc{CC_E, sf, {label(inst->next()), label(exit)}};
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
@@ -3426,12 +3442,22 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Pointers to smartptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{0};
-  if (callee->isMethod() && !callee->isStatic()) {
-    // Note, we don't support objects with vtables here (if they may
-    // need a this pointer adjustment).  This should be filtered out
-    // earlier right now.
-    callArgs.ssa(srcNum);
-    ++srcNum;
+  if (callee->isMethod()) {
+    if (callee->isStatic()) {
+      // This isn't entirely accurate.  HNI functions expect the Class*
+      // of the class used for the call which may be callee->cls() or
+      // one of its children. Currently we don't support FCallBuiltin on
+      // these functions (disabled in inlining-decider.cpp); (t5360661)
+      if (callee->isNative()) {
+        callArgs.imm(callee->cls());
+      }
+    } else {
+      // Note, we don't support objects with vtables here (if they may
+      // need a this pointer adjustment).  This should be filtered out
+      // earlier right now.
+      callArgs.ssa(srcNum);
+      ++srcNum;
+    }
   }
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];

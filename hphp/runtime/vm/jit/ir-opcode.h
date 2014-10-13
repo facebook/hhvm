@@ -133,7 +133,7 @@ O(CheckStk,                  D(StkPtr), S(StkPtr),                       B|E) \
 O(EndGuards,                        ND, NA,                                E) \
 O(CastStk,                   D(StkPtr), S(StkPtr),                      N|Er) \
 O(CastStkIntToDbl,           D(StkPtr), S(StkPtr),                         E) \
-O(CoerceStk,                 D(StkPtr), S(StkPtr),                    B|N|Er) \
+O(CoerceStk,                 D(StkPtr), S(StkPtr),                      N|Er) \
 O(AssertStk,                 D(StkPtr), S(StkPtr),                         E) \
 O(ProfileStr,                       ND, S(PtrToStr),                       E) \
 O(CheckDefinedClsEq,                ND, NA,                              B|E) \
@@ -152,6 +152,7 @@ O(TrackLoc,                         ND, S(Gen),                            E) \
 O(BeginCatch,                       ND, NA,                                E) \
 O(EndCatch,                         ND, S(FramePtr) S(StkPtr),           E|T) \
 O(TryEndCatch,                      ND, S(FramePtr) S(StkPtr),             E) \
+O(CheckSideExit,                    ND, S(FramePtr) S(StkPtr),           B|E) \
 O(LdUnwinderValue,              DParam, NA,                              PRc) \
 O(DeleteUnwinderException,          ND, NA,                              NNT) \
 O(AddInt,                       D(Int), S(Int) S(Int),                     C) \
@@ -174,6 +175,12 @@ O(Shr,                          D(Int), S(Int) S(Int),                     C) \
 O(AddIntO,                      D(Int), S(Int) S(Int),                   B|C) \
 O(SubIntO,                      D(Int), S(Int) S(Int),                   B|C) \
 O(MulIntO,                      D(Int), S(Int) S(Int),                   B|C) \
+                                                                              \
+O(CoerceCellToBool,            D(Bool), S(Cell),                           N) \
+O(CoerceCellToInt,              D(Int), S(Cell),                           N) \
+O(CoerceStrToInt,               D(Int), S(Str),                            N) \
+O(CoerceCellToDbl,              D(Dbl), S(Cell),                           N) \
+O(CoerceStrToDbl,               D(Dbl), S(Str),                            N) \
                                                                               \
 O(ConvBoolToArr,                D(Arr), S(Bool),                   C|NNT|PRc) \
 O(ConvDblToArr,                 D(Arr), S(Dbl),                    C|NNT|PRc) \

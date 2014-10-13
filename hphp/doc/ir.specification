@@ -307,11 +307,28 @@ D:StkPtr = CastStkIntToDbl<offset> S0:StkPtr
   Returns a new StkPtr where the slot at offset has been converted from an
   integer to double.
 
-D:StkPtr = CoerceStk<T,offset> S0:StkPtr -> B
+The following instructions deal with paramater coercion (the standard type
+conversion for arguments to HNI functions). If parameter coercion fails these
+functions will throw a TVCoercion exception. They may throw other types of
+exceptions depending on how coercion is implemented.
+
+D:StkPtr = CoerceStk<T,offset,fn,argNum> S0:StkPtr
 
   Returns a new StkPtr that represents the same stack as S0, but with the slot
-  at offset (in cells) converted to type T. If the type conversion can't be
-  done then branches to block B.
+  at offset (in cells) converted to type T. May throw an exception in the case
+  of failed paramater coercion. The callee is f, and the position of the
+  argument being coerced is argNum.
+
+D:Bool = CoerceCellToBool<fn,argNum> S0:Cell
+D:Int  = CoerceCellToInt<fn,argNum> S0:Cell
+D:Int  = CoerceStrToInt<fn,argNum> S0:Str
+D:Dbl  = CoerceCellToDbl<fn,argNum> S0:Cell
+D:Dbl  = CoerceStrToDbl<fn,argNum> S0:Str
+
+  These instructions convert either a Cell or a Str to a primitive type (Bool,
+  Int, Dbl) and return the resulting value. They may throw an exception upon
+  failed type coercion. They are encoded along with callee Func, fn, and the
+  integer position of the argument, argNum, being coerced.
 
 CheckInit S0:Gen -> B
 
@@ -2292,6 +2309,11 @@ TryEndCatch S0:FramePtr S1:StkPtr
 
   Marks a potential end of a catch region and might return control to the
   unwinder. Exact behavior is implementation and architecture specific.
+
+CheckSideExit S0:FramePtr S1:StkPtr -> B
+
+  Branches to B if the currently executing catch region should return control to
+  the unwinder rather than side exiting.
 
 D:Cell = LdUnwinderValue
 

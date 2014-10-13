@@ -254,6 +254,87 @@ StringData* convResToStrHelper(ResourceData* o) {
   return r;
 }
 
+inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
+                           const Func* func) {
+  raise_param_type_warning(func->name()->data(), argNum, expected, actual);
+
+  throw TVCoercionException(func, argNum, actual, expected);
+}
+
+bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  DataType type = tv.m_type;
+  if (type == KindOfArray || type == KindOfObject || type == KindOfResource) {
+    coerceCellFail(KindOfBoolean, type, argNum, func);
+    not_reached();
+  }
+
+  return cellToBool(tv);
+}
+
+int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
+  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
+
+  if (type != KindOfDouble && type != KindOfInt64) {
+    coerceCellFail(KindOfDouble, KindOfString, argNum, func);
+    not_reached();
+  }
+
+  return reinterpretDblAsInt(sd->toDouble());
+}
+
+int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  switch (tv.m_type) {
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfNull:
+    case KindOfBoolean:
+      return convCellToDblHelper(tv);
+    case KindOfString:
+    case KindOfStaticString:
+      return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
+    default:
+      break;
+  }
+
+  coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
+  not_reached();
+}
+
+int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
+  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
+
+  if (type != KindOfDouble && type != KindOfInt64) {
+    coerceCellFail(KindOfInt64, KindOfString, argNum, func);
+    not_reached();
+  }
+
+  return sd->toInt64();
+}
+
+int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
+  assert(cellIsPlausible(tv));
+
+  switch (tv.m_type) {
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfNull:
+    case KindOfBoolean:
+      return cellToInt(tv);
+    case KindOfString:
+    case KindOfStaticString:
+      return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
+    default:
+      break;
+  }
+
+  coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
+  not_reached();
+}
+
 const StaticString
   s_empty(""),
   s_1("1");

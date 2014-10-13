@@ -550,28 +550,34 @@ inline void tvUnboxIfNeeded(TypedValue* tv) {
 /*
  * TypedValue conversions that update the tv in place (decrefing and
  * old value, if necessary).
+ *
+ * CastInPlace will forcibly change the value to the new type
+ *   and will not fail. (Though the results may be silly)
+ * CoerceInPlace will attempt to convert the type and
+ *   return false on failure
+ * CoerceOrThrow will attempt to convert the type and
+ *   both raise a warning and throw a TVCoercionException on failure
  */
-void tvCastToBooleanInPlace(TypedValue* tv);
-void tvCastToInt64InPlace(TypedValue* tv);
 void cellCastToInt64InPlace(Cell*);
-void tvCastToDoubleInPlace(TypedValue* tv);
 double tvCastToDouble(TypedValue* tv);
-void tvCastToStringInPlace(TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
-void tvCastToArrayInPlace(TypedValue* tv);
-void tvCastToObjectInPlace(TypedValue* tv);
-void tvCastToNullableObjectInPlace(TypedValue* tv);
-void tvCastToResourceInPlace(TypedValue* tv);
-
 bool tvCanBeCoercedToNumber(TypedValue* tv);
-bool tvCoerceParamToBooleanInPlace(TypedValue* tv);
-bool tvCoerceParamToInt64InPlace(TypedValue* tv);
-bool tvCoerceParamToDoubleInPlace(TypedValue* tv);
-bool tvCoerceParamToStringInPlace(TypedValue* tv);
-bool tvCoerceParamToArrayInPlace(TypedValue* tv);
-bool tvCoerceParamToObjectInPlace(TypedValue* tv);
-bool tvCoerceParamToNullableObjectInPlace(TypedValue* tv);
-bool tvCoerceParamToResourceInPlace(TypedValue* tv);
+
+#define X(kind) \
+void tvCastTo##kind##InPlace(TypedValue* tv); \
+bool tvCoerceParamTo##kind##InPlace(TypedValue* tv); \
+void tvCoerceParamTo##kind##OrThrow(TypedValue* tv, \
+                                    const Func* callee, \
+                                    unsigned int arg_num);
+X(Boolean)
+X(Int64)
+X(Double)
+X(String)
+X(Array)
+X(Object)
+X(NullableObject)
+X(Resource)
+#undef X
 
 typedef void(*RawDestructor)(void*);
 extern const RawDestructor g_destructors[kDestrTableSize];
@@ -603,6 +609,19 @@ inline bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
 #undef X
   not_reached();
 }
+
+/*
+ * TVCoercionException is thrown to indicate that a parameter could not be
+ * coerced when calling an HNI builtin function.
+ */
+struct TVCoercionException : public std::runtime_error {
+  TVCoercionException(const Func* func, int arg_num,
+                      DataType actual, DataType expected);
+
+  TypedValue tv() const { return m_tv; }
+private:
+  TypedValue m_tv;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

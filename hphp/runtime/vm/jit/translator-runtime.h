@@ -139,6 +139,13 @@ StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceData* o);
 StringData* convCellToStrHelper(TypedValue tv);
 
+
+bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func);
+int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
+int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
+int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
+int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
+
 void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);

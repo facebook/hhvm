@@ -109,12 +109,16 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
   case CastStk:
   case CastStkIntToDbl:
     // fallthrough
-  case CoerceStk:
-    // fallthrough
   case GuardStk:
     // We don't have a value, but we may know the type due to guarding
     // on it.
     if (inst->extra<StackOffset>()->offset == index) {
+      return StackValueInfo { inst, inst->typeParam() };
+    }
+    return getStackValue(inst->src(0), index);
+
+  case CoerceStk:
+    if (inst->extra<CoerceStk>()->offset == index) {
       return StackValueInfo { inst, inst->typeParam() };
     }
     return getStackValue(inst->src(0), index);
@@ -462,6 +466,10 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case IsNType:       return simplifyIsType(inst);
     case IsScalarType:  return simplifyIsScalarType(inst);
     case CheckInit:     return simplifyCheckInit(inst);
+
+    case CoerceCellToBool: return simplifyCoerceCellToBool(inst);
+    case CoerceCellToInt:  return simplifyCoerceCellToInt(inst);
+    case CoerceCellToDbl:  return simplifyCoerceCellToDbl(inst);
 
     case JmpZero:
     case JmpNZero:
@@ -1760,6 +1768,57 @@ SSATmp* Simplifier::simplifyConvObjToBool(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyConvCellToObj(const IRInstruction* inst) {
   if (inst->src(0)->isA(Type::Obj)) return inst->src(0);
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCoerceCellToBool(const IRInstruction* inst) {
+  auto const src     = inst->src(0);
+  auto const srcType = src->type();
+
+  if (srcType.subtypeOfAny(Type::Bool, Type::Null, Type::Dbl,
+                           Type::Int, Type::Str)) {
+    return gen(ConvCellToBool, src);
+  }
+
+  // We actually know that any other type will fail causing us to side exit
+  // but there's no easy way to optimize for that
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCoerceCellToInt(const IRInstruction* inst) {
+  auto const src      = inst->src(0);
+  auto const srcType  = src->type();
+
+  if (srcType.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Dbl,
+                           Type::Bool)) {
+    return gen(ConvCellToInt, inst->taken(), src);
+  }
+
+  if (srcType <= Type::Str) return gen(CoerceStrToInt, inst->taken(),
+                                       *inst->extra<CoerceCellToInt>(), src);
+
+  // We actually know that any other type will fail causing us to side exit
+  // but there's no easy way to optimize for that
+
+  return nullptr;
+}
+
+SSATmp* Simplifier::simplifyCoerceCellToDbl(const IRInstruction* inst) {
+  auto const src      = inst->src(0);
+  auto const srcType  = src->type();
+
+  if (srcType.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Dbl,
+                           Type::Bool)) {
+    return gen(ConvCellToDbl, inst->taken(), src);
+  }
+
+  if (srcType <= Type::Str) return gen(CoerceStrToDbl, inst->taken(),
+                                       *inst->extra<CoerceCellToDbl>(), src);
+
+  // We actually know that any other type will fail causing us to side exit
+  // but there's no easy way to optimize for that
 
   return nullptr;
 }

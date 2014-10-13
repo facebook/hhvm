@@ -84,8 +84,8 @@ bool checkBlock(Block* b) {
     // Invariant #8
     assert(inst.marker().valid());
     assert(inst.block() == b);
-    // Invariant #6. CoerceStk is special: t3213636
-    assert_log((inst.mayRaiseError() && !inst.is(CoerceStk)) ==
+    // Invariant #6
+    assert_log(inst.mayRaiseError() ==
                (inst.taken() && inst.taken()->isCatch()),
                [&]{ return inst.toString(); });
   }

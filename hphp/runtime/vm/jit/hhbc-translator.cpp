@@ -3599,93 +3599,6 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
   return true;
 }
 
-void HhbcTranslator::emitFCallBuiltinCoerce(const Func* callee,
-                                            uint32_t numArgs,
-                                            uint32_t numNonDefault,
-                                            bool destroyLocals) {
-  /*
-   * Spill args to stack.  Some of the arguments may be passed by
-   * reference, for which case we will pass a stack address.
-   *
-   * The CallBuiltin instruction itself doesn't depend on the stack
-   * pointer, but if any of its args were passed via pointers to the
-   * stack it will indirectly depend on it.
-   */
-  spillStack();
-
-  // Convert types if needed.
-  for (int i = 0; i < numNonDefault; i++) {
-    auto const& pi = callee->params()[i];
-    auto const& tc = pi.typeConstraint;
-    auto dt = pi.builtinType;
-    Type type;
-    if (tc.isNullable() && !callee->byRef(i)) {
-      dt = tc.underlyingDataType();
-      type = Type::Null;
-    }
-    switch (dt) {
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfString:
-      gen(CoerceStk,
-          type | Type(dt),
-          StackOffset(numArgs - i - 1),
-          makeExitSlow(),
-          m_irb->sp());
-      break;
-    case KindOfUnknown:
-      break;
-    default:
-      not_reached();
-    }
-  }
-
-  // Pass arguments for CallBuiltin.
-  SSATmp* args[numArgs];
-  for (int i = numArgs - 1; i >= 0; i--) {
-    auto const& pi = callee->params()[i];
-    switch (pi.builtinType) {
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-      args[i] = top(Type(pi.builtinType),
-                        numArgs - i - 1);
-      break;
-    default:
-      args[i] = ldStackAddr(numArgs - i - 1, DataTypeSpecific);
-      break;
-    }
-  }
-
-  // Generate call and set return type
-  auto const retDt = callee->returnType();
-  auto retType = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
-  if (callee->attrs() & ClassInfo::IsReference) retType = retType.box();
-
-  SSATmp** const decayedPtr = &args[0];
-  auto const ret = gen(
-    CallBuiltin,
-    retType,
-    CallBuiltinData { callee, destroyLocals },
-    makeCatch(),
-    std::make_pair(numArgs, decayedPtr)
-  );
-
-  // Decref and free args
-  for (int i = 0; i < numArgs; i++) {
-    auto const arg = popR();
-    if (i >= numArgs - numNonDefault) {
-      gen(DecRef, arg);
-    }
-  }
-
-  push(ret);
-}
-
 void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                                       uint32_t numNonDefault,
                                       int32_t funcId,
@@ -3696,11 +3609,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
   callee->validate();
 
   if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
-
-  if (callee->isParamCoerceMode()) {
-    return emitFCallBuiltinCoerce(callee, numArgs, numNonDefault,
-                                  destroyLocals);
-  }
 
   emitBuiltinCall(callee,
                   numArgs,
@@ -3734,20 +3642,31 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     paramSSAs[offset] = getArg(offset);
 
     auto const& pi = callee->params()[offset];
-    switch (pi.builtinType) {
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-        paramThroughStack[offset] = false;
-        break;
-      default:
-        ++numParamsThroughStack;
-        paramThroughStack[offset] = true;
-        break;
+    auto dt = pi.builtinType;
+    auto const& tc = pi.typeConstraint;
+    if (tc.isNullable() && !callee->byRef(offset)) {
+      dt = tc.underlyingDataType();
+      ++numParamsThroughStack;
+      paramThroughStack[offset] = true;
+    } else if (!callee->byRef(offset)) {
+      switch (dt) {
+        case KindOfBoolean:
+        case KindOfInt64:
+        case KindOfDouble:
+          paramThroughStack[offset] = false;
+          break;
+        default:
+          ++numParamsThroughStack;
+          paramThroughStack[offset] = true;
+          break;
+      }
+    } else {
+      ++numParamsThroughStack;
+      paramThroughStack[offset] = true;
     }
 
     paramNeedsConversion[offset] = offset < numNonDefault
-                                   && pi.builtinType != KindOfUnknown;
+                                   && dt != KindOfUnknown;
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -3758,10 +3677,6 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
   /*
    * Everything that needs to be on the stack gets spilled now.
-   *
-   * Note: right here we should eventually be handling the possibility
-   * that we need to coerce parameters.  But right now any situation
-   * requiring that is disabled in shouldIRInline.
    */
   if (numParamsThroughStack != 0 || !inlining) {
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
@@ -3779,6 +3694,19 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     updateMarker();
   }
 
+  auto const decRefForCatch =  [&] {
+    // TODO(#4323657): this is generating generic DecRefs at the time
+    // of this writing---probably we're not handling the stack chain
+    // correctly in a catch block.
+    for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      if (paramThroughStack[i]) {
+        popDecRef(Type::Gen);
+      } else {
+        gen(DecRef, paramSSAs[i]);
+      }
+    }
+  };
+
   /*
    * We have an unusual situation if we raise an exception:
    *
@@ -3793,17 +3721,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
    * need to pop anything we pushed, put down a fake ActRec, and then
    * eagerly sync VM regs to represent that stack depth.
    */
-  auto const makeUnusualCatch = [&] { return makeCatchImpl([&] {
-    // TODO(#4323657): this is generating generic DecRefs at the time
-    // of this writing---probably we're not handling the stack chain
-    // correctly in a catch block.
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      if (paramThroughStack[i]) {
-        popDecRef(Type::Gen);
-      } else {
-        gen(DecRef, paramSSAs[i]);
-      }
-    }
+  auto const prepareForCatch = [&] {
     if (inlining) {
       emitFPushActRec(cns(callee),
                       paramThis ? paramThis : cns(Type::Nullptr),
@@ -3822,7 +3740,22 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     gen(SyncABIRegs, m_irb->fp(), stack);
     gen(EagerSyncVMRegs, m_irb->fp(), stack);
     return stack;
-  }); };
+  };
+
+
+  auto const prepareForSideExit = [&] { if (paramThis) gen(DecRef, paramThis);};
+  auto const makeUnusualCatch = [&] {
+    return makeCatchImpl([&] {
+      decRefForCatch();
+      return prepareForCatch();
+    });
+  };
+
+  auto const makeParamCoerceCatch = [&] {
+    return makeParamCoerceExit(decRefForCatch,
+                               prepareForSideExit,
+                               prepareForCatch);
+  };
 
   /*
    * Prepare the actual arguments to the CallBuiltin instruction.  If
@@ -3837,20 +3770,73 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
     if (paramThis) args[argIdx++] = paramThis;
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
+      auto pi = callee->params()[i];
+      auto dt = pi.builtinType;
+      auto const& tc = pi.typeConstraint;
+
+      Type t;
+      if (tc.isNullable() && !callee->byRef(i)) {
+        dt = tc.underlyingDataType();
+        t = Type::Null | Type(dt);
+      } else if (dt != KindOfInvalid) {
+        t = Type(dt);
+      }
+
       if (!paramThroughStack[i]) {
         if (paramNeedsConversion[i]) {
-          auto const ty = Type(callee->params()[i].builtinType);
           auto const oldVal = paramSSAs[i];
-          paramSSAs[i] = [&] {
-            if (ty <= Type::Int) {
-              return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
-            }
-            if (ty <= Type::Dbl) {
-              return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
-            }
-            always_assert(ty <= Type::Bool);  // or will be passed by stack
-            return gen(ConvCellToBool, oldVal);
-          }();
+
+          if (callee->isParamCoerceMode()) {
+            auto conv = [&](Type t, SSATmp* src) {
+              if (t <= Type::Int) {
+                return gen(CoerceCellToInt,
+                           CoerceData(callee, i + 1),
+                           makeParamCoerceCatch(),
+                           src);
+              }
+              if (t <= Type::Dbl) {
+                return gen(CoerceCellToDbl,
+                           CoerceData(callee, i + 1),
+                           makeParamCoerceCatch(),
+                           src);
+              }
+              always_assert(t <= Type::Bool);
+              return gen(CoerceCellToBool,
+                         CoerceData(callee, i + 1),
+                         makeParamCoerceCatch(),
+                         src);
+            };
+
+            paramSSAs[i] = [&] {
+              if (Type::Null < t) {
+                return m_irb->cond(
+                  0,
+                  [&] (Block* taken) {
+                    auto isnull = gen(IsType, Type::Null, oldVal);
+                    gen(JmpNZero, taken, isnull);
+                  },
+                  [&] { // Next: oldVal is non-null
+                    t -= Type::Null;
+                    return conv(t, oldVal);
+                  },
+                  [&] { // Taken: oldVal is null
+                    return gen(AssertType, Type::Null, oldVal);
+                  });
+              }
+              return conv(t, oldVal);
+            }();
+          } else {
+            paramSSAs[i] = [&] {
+              if (t <= Type::Int) {
+                return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
+              }
+              if (t <= Type::Dbl) {
+                return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
+              }
+              always_assert(t <= Type::Bool);
+              return gen(ConvCellToBool, oldVal);
+            }();
+          }
           gen(DecRef, oldVal);
         }
         args[argIdx++] = paramSSAs[i];
@@ -3859,16 +3845,25 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
       auto const offset = numParamsThroughStack - stackIdx - 1;
       if (paramNeedsConversion[i]) {
-        Type t(callee->params()[i].builtinType);
-        if (callee->params()[i].builtinType == KindOfObject &&
-            callee->methInfo()->parameters[i]->valueLen > 0) {
+        auto mi = callee->methInfo();
+        if (callee->params()[i].builtinType == KindOfObject && mi &&
+            mi->parameters[i]->valueLen > 0) {
           t = Type::NullableObj;
         }
-        gen(CastStk,
-            makeUnusualCatch(),
-            t,
-            StackOffset { static_cast<int32_t>(offset) },
-            m_irb->sp());
+
+        if (callee->isParamCoerceMode()) {
+          gen(CoerceStk,
+              t,
+              CoerceStkData(offset, callee, i + 1),
+              makeParamCoerceCatch(),
+              m_irb->sp());
+        } else {
+          gen(CastStk,
+              t,
+              StackOffset(offset),
+              makeUnusualCatch(),
+              m_irb->sp());
+        }
       }
 
       args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
@@ -3991,7 +3986,7 @@ void HhbcTranslator::emitNativeImplInlined() {
                   paramThis,
                   true,     /* inlining */
                   wasInliningConstructor,
-                  false,    /* destroyLocals */
+                  builtinFuncDestroysLocals(callee), /* destroyLocals */
                   [&](uint32_t i) {
                     auto ret = ldLoc(i, nullptr, DataTypeSpecific);
                     gen(IncRef, ret);
@@ -6266,6 +6261,45 @@ Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,
       return nullptr;
     }
   );
+}
+
+template<typename CommonBody, typename SideExitBody, typename TakenBody>
+Block* HhbcTranslator::makeParamCoerceExit(CommonBody commonBody,
+                                           SideExitBody sideExitBody,
+                                           TakenBody takenBody) {
+  auto exit = m_irb->makeExit(Block::Hint::Unused);
+  auto taken = m_irb->makeExit(Block::Hint::Unused);
+
+  BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
+  gen(BeginCatch);
+  commonBody();
+  gen(CheckSideExit, taken, m_irb->fp(), m_irb->sp());
+
+  // prepare for regular exception
+  {
+    BlockPusher bpTaken(*m_irb, makeMarker(bcOff()), taken);
+
+    auto sp = takenBody();
+    gen(EndCatch, m_irb->fp(), sp);
+  }
+
+  // prepare for side exit
+  sideExitBody();
+
+  // Push the side exit return value onto the stack and cleanup the exception
+  auto val = gen(LdUnwinderValue, Type::Cell);
+  gen(DeleteUnwinderException);
+
+  // Spill the stack
+  auto spills = peekSpillValues();
+  spills.insert(spills.begin(), val);
+  auto stack = emitSpillStack(m_irb->sp(), spills, 0);
+
+  gen(SyncABIRegs, m_irb->fp(), stack);
+  gen(EagerSyncVMRegs, m_irb->fp(), stack);
+  gen(ReqBindJmp, ReqBindJmpData(nextBcOff()));
+
+  return exit;
 }
 
 Block* HhbcTranslator::makeExitError(SSATmp* msg, Block* catchBlock) {

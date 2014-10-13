@@ -714,6 +714,13 @@ bool instrMustInterp(const NormalizedInstruction& inst);
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller);
 
+/*
+ * Could the CPP builtin function `callee` destroy the locals
+ * in the environment of its caller?
+ *
+ * This occurs, e.g., if `func' is extract().
+ */
+bool builtinFuncDestroysLocals(const Func* callee);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Completely unrelated functionality.

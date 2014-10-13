@@ -132,6 +132,9 @@ private:
   SSATmp* simplifyConvCellToInt(const IRInstruction*);
   SSATmp* simplifyConvCellToDbl(const IRInstruction*);
   SSATmp* simplifyConvCellToObj(const IRInstruction*);
+  SSATmp* simplifyCoerceCellToBool(const IRInstruction*);
+  SSATmp* simplifyCoerceCellToDbl(const IRInstruction*);
+  SSATmp* simplifyCoerceCellToInt(const IRInstruction*);
   SSATmp* simplifyFloor(const IRInstruction*);
   SSATmp* simplifyCeil(const IRInstruction*);
   SSATmp* simplifyUnboxPtr(const IRInstruction*);

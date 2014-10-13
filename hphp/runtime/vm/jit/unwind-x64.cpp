@@ -89,7 +89,7 @@ void sync_regstate(_Unwind_Context* context) {
 }
 
 bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         InvalidSetMException* ism) {
+                         bool do_side_exit, TypedValue unwinder_tv) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTraceOpt = mcg->getCatchTrace(rip);
   if (!catchTraceOpt) return false;
@@ -119,9 +119,9 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
     return false;
   }
 
-  FTRACE(1, "installing catch trace {} for call {} with ism {}, "
+  FTRACE(1, "installing catch trace {} for call {} with tv {}, "
          "returning _URC_INSTALL_CONTEXT\n",
-         catchTrace, rip, ism);
+         catchTrace, rip, unwinder_tv.pretty());
 
   // In theory the unwind api will let us set registers in the frame
   // before executing our landing pad. In practice, trying to use
@@ -131,9 +131,9 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // have to worry about saving its arguments somewhere while
   // executing the exit trace.
   unwindRdsInfo->unwinderScratch = (int64_t)exn;
-  unwindRdsInfo->doSideExit = ism;
-  if (ism) {
-    unwindRdsInfo->unwinderTv = ism->tv();
+  unwindRdsInfo->doSideExit = do_side_exit;
+  if (do_side_exit) {
+    unwindRdsInfo->unwinderTv = unwinder_tv;
   }
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -158,8 +158,12 @@ tc_unwind_personality(int version,
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
   InvalidSetMException* ism = nullptr;
+  TVCoercionException* tce = nullptr;
   if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(
+      exceptionFromUnwindException(exceptionObj));
+  } else if (ti == typeid(TVCoercionException)) {
+    tce = static_cast<TVCoercionException*>(
       exceptionFromUnwindException(exceptionObj));
   }
 
@@ -189,6 +193,10 @@ tc_unwind_personality(int version,
              ism->tv().pretty());
       return _URC_HANDLER_FOUND;
     }
+    if (tce) {
+      FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND");
+      return _URC_HANDLER_FOUND;
+    }
   }
 
   /*
@@ -198,10 +206,11 @@ tc_unwind_personality(int version,
    * which is an exit trace from hhir with a few special instructions.
    */
   else if (actions & _UA_CLEANUP_PHASE) {
+    TypedValue tv = ism ? ism->tv() : tce ? tce->tv() : TypedValue();
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(context);
     }
-    if (install_catch_trace(context, exceptionObj, ism)) {
+    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
       return _URC_INSTALL_CONTEXT;
     }
   }

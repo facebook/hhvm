@@ -673,6 +673,40 @@ struct InterpOneData : IRExtraData {
   }
 };
 
+struct CoerceStkData : IRExtraData {
+  explicit CoerceStkData(int64_t off, const Func* f, int64_t arg_num)
+    : offset(off), callee(f), argNum(arg_num) {}
+
+  std::string show() const {
+    return folly::format(
+      "{},{},{}",
+      offset,
+      callee->name()->data(),
+      argNum
+    ).str();
+  }
+
+  int32_t offset;
+  const Func* callee;
+  int32_t argNum;
+};
+
+struct CoerceData : IRExtraData {
+  explicit CoerceData(const Func* f, int64_t arg_num)
+    : callee(f), argNum(arg_num) {}
+
+  std::string show() const {
+    return folly::format(
+      "{},{}",
+      callee->name()->data(),
+      argNum
+    ).str();
+  }
+
+  const Func* callee;
+  int64_t argNum;
+};
+
 /*
  * StackOffset to adjust stack pointer by and boolean indicating whether or not
  * the stack pointer in src1 used for analysis spans a function call.
@@ -834,7 +868,12 @@ X(GuardStk,                     StackOffset);
 X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
 X(CastStkIntToDbl,              StackOffset);
-X(CoerceStk,                    StackOffset);
+X(CoerceStk,                    CoerceStkData);
+X(CoerceCellToInt,              CoerceData);
+X(CoerceCellToDbl,              CoerceData);
+X(CoerceCellToBool,             CoerceData);
+X(CoerceStrToInt,               CoerceData);
+X(CoerceStrToDbl,               CoerceData);
 X(AssertStk,                    StackOffset);
 X(ReDefSP,                      ReDefSPData);
 X(DefSP,                        StackOffset);

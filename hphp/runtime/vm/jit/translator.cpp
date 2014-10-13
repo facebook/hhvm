@@ -1238,6 +1238,23 @@ const StaticString s_extractNative("__SystemLib\\extract");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
 
+bool funcByNameDestroysLocals(const StringData* fname) {
+  if (fname) {
+    return fname->isame(s_extract.get()) ||
+           fname->isame(s_extractNative.get()) ||
+           fname->isame(s_parse_str.get()) ||
+           fname->isame(s_parse_strNative.get());
+  }
+
+  return false;
+}
+
+bool builtinFuncDestroysLocals(const Func* callee) {
+  assert(callee && callee->isCPPBuiltin());
+  auto const fname = callee->name();
+  return funcByNameDestroysLocals(fname);
+}
+
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   auto locals = caller->localNames();
@@ -1251,10 +1268,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
     auto const str = unit->lookupLitstrId(id);
-    return str->isame(s_extract.get()) ||
-           str->isame(s_extractNative.get()) ||
-           str->isame(s_parse_str.get()) ||
-           str->isame(s_parse_strNative.get());
+    return funcByNameDestroysLocals(str);
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
@@ -1291,8 +1305,10 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
       inst->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;
   }
-  // In profiling mode, don't trace through a control flow merge point
-  if (mcg->tx().profData()->anyBlockEndsAt(inst->func(), inst->offset())) {
+  // In profiling mode, don't trace through a control flow merge point,
+  // however, allow inlining of default parameter funclets
+  if (mcg->tx().profData()->anyBlockEndsAt(inst->func(), inst->offset()) &&
+      !inst->func()->isEntry(inst->nextSk().offset())) {
     return true;
   }
   return false;

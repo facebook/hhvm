@@ -208,6 +208,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/advise-out-apc:  forcibly madvise out APC prime data\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
+        "/random-apc:      dump the key and size of a random APC entry\n"
+        "                  optionally set count for number of entries returned"
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
@@ -363,7 +365,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleConstSizeRequest(cmd, transport)) {
       break;
     }
-    if (strcmp(cmd.c_str(), "static-strings") == 0 &&
+    if (strncmp(cmd.c_str(), "static-strings", 14) == 0 &&
         handleStaticStringsRequest(cmd, transport)) {
       break;
     }
@@ -404,6 +406,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
       s_apc_file_storage.adviseOut();
       transport->sendString("Done\n");
+      break;
+    }
+
+    if (strncmp(cmd.c_str(), "random-apc", 10) == 0 &&
+        handleRandomApcRequest(cmd, transport)) {
       break;
     }
 
@@ -1013,4 +1020,23 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+bool AdminRequestHandler::handleRandomApcRequest(const std::string &cmd,
+                                                 Transport *transport){
+  std::ostringstream out;
+  uint32_t keyCount = 1;
+  std::string count = transport->getParam("count");
+  if (count != "") {
+    try {
+      keyCount = folly::to<int64_t>(count);
+    } catch (const std::invalid_argument& ia) {
+      // set keyCount to 1 if an invalid string is passed
+      keyCount = 1;
+    }
+  }
+  apc_get_random_entries(out, keyCount);
+  transport->sendString(out.str());
+
+  return true;
+}
 }

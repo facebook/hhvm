@@ -1493,5 +1493,10 @@ bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
   return true;
 }
 
+bool apc_get_random_entries(std::ostream &out, uint32_t count) {
+  apc_store().dumpRandomKeys(out, count);
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

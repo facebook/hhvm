@@ -158,6 +158,7 @@ String apc_reserialize(const String& str);
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump,
               int waitSeconds);
 size_t get_const_map_size();
+bool apc_get_random_entries(std::ostream &out, uint32_t count);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

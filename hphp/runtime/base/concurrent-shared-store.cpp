@@ -770,6 +770,46 @@ void ConcurrentTableSharedStore::dump(std::ostream& out, DumpMode dumpMode) {
   Logger::Info("dumping apc done");
 }
 
-//////////////////////////////////////////////////////////////////////
+void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream &out,
+                                                uint32_t count) {
+  for (; count > 0; count--) {
+    m_vars.getRandomAPCEntry(out);
+  }
+}
 
+template<typename Key, typename T, typename HashCompare>
+void ConcurrentTableSharedStore
+      ::APCMap<Key,T,HashCompare>
+      ::getRandomAPCEntry(std::ostream &out) {
+#if TBB_VERSION_MAJOR == 4 && TBB_VERSION_MINOR == 0
+  while (this->my_size > 0) {
+    auto randIndex = rand() % this->my_size;
+    auto mahBucket = this->segment_index_of(randIndex);
+    auto segmentIndex = randIndex - this->segment_base(mahBucket);
+    auto bucketPtr = this->my_table[mahBucket];
+    {
+      bucketPtr->mutex.lock();
+      SCOPE_EXIT{ bucketPtr->mutex.unlock(); };
+      auto nodePtr = (bucketPtr + segmentIndex)->node_list;
+      if (nodePtr != nullptr &&
+          nodePtr != tbb::interface5::internal::rehash_req &&
+          nodePtr != tbb::interface5::internal::empty_rehashed) {
+        uintptr_t apcPairPtr =
+         (reinterpret_cast<uintptr_t>(nodePtr) +
+          sizeof(tbb::interface5::internal::hash_map_node_base));
+        auto apcPair =
+          (reinterpret_cast<std::pair<const char *, StoreValue>*>
+                    (apcPairPtr));
+        out << apcPair->first << "," << apcPair->second.dataSize << "\n";
+        return;
+      }
+    }
+  }
+#else
+  out << "Incompatible TBB library\n";
+#endif
+  return;
+}
+
+//////////////////////////////////////////////////////////////////////
 }

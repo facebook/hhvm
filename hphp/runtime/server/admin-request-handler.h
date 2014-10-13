@@ -45,7 +45,8 @@ private:
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
-  bool handleVMRequest      (const std::string &cnd, Transport *transport);
+  bool handleVMRequest      (const std::string &cmd, Transport *transport);
+  bool handleRandomApcRequest (const std::string &cmd, Transport *transport);
 
 #ifdef GOOGLE_CPU_PROFILER
   bool handleCPUProfilerRequest (const std::string &cmd, Transport *transport);

@@ -413,6 +413,9 @@ and xhpattr = parse
   | eof                { Teof        }
   | ws+                { xhpattr lexbuf }
   | '\n'               { Lexing.new_line lexbuf; xhpattr lexbuf }
+  | fixme_start        { fixme_state0 lexbuf;
+                         xhpattr lexbuf
+                       }
   | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
                          xhpattr lexbuf
                        }

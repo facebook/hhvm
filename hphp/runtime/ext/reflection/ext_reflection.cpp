@@ -821,6 +821,15 @@ static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
   return String();
 }
 
+static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
+                           const Object& closure) {
+  auto clos = closure.getTyped<c_Closure>();
+  if (clos->hasThis()) {
+    return clos->getThis();
+  }
+  return nullptr;
+}
+
 // helper for getStaticVariables
 static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
                          const Object& closure) {
@@ -1360,6 +1369,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionFunction, __initClosure);
     HHVM_ME(ReflectionFunction, getClosureUseVariables);
     HHVM_ME(ReflectionFunction, getClosureScopeClassname);
+    HHVM_ME(ReflectionFunction, getClosureThisObject);
 
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);

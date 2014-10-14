@@ -412,22 +412,21 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  BytecodeAccumulator accumulator(newBCs);
-
   CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
 
+  auto peephole = make_peephole(newBCs);
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
-    auto const stateIn = state; // The accumulator expects input eval state.
+    auto const stateIn = state; // Peephole expects input eval state.
     auto gen = [&,srcStack] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(newBC));
       if (options.Peephole) {
-        accumulator.append(newBC, stateIn, srcStack);
+        peephole.append(newBC, stateIn, srcStack);
       } else {
         newBCs.push_back(newBC);
       }
@@ -503,7 +502,7 @@ void first_pass(const Index& index,
   }
 
   if (options.Peephole) {
-    accumulator.finalize();
+    peephole.finalize();
   }
   blk->hhbcs = std::move(newBCs);
 }

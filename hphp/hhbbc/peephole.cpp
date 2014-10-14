@@ -27,14 +27,16 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
-void BytecodeAccumulator::finalize() {
+void ConcatPeephole::finalize() {
   while (!m_working.empty()) {
     squash();
   }
+  m_next.finalize();
 }
 
-void BytecodeAccumulator::append(const Bytecode& op, const State& state,
-                                 const std::vector<Op> srcStack) {
+void ConcatPeephole::append(const Bytecode& op,
+                            const State& state,
+                            const std::vector<Op>& srcStack) {
   assert(state.stack.size() == srcStack.size());
   int nstack = state.stack.size();
 
@@ -82,9 +84,12 @@ void BytecodeAccumulator::append(const Bytecode& op, const State& state,
   push_back(op);
 }
 
-void BytecodeAccumulator::push_back(const Bytecode& op, bool is_concat) {
+/*
+ * Push to the innermost stream.
+ */
+void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
   if (m_working.empty()) {
-    m_stream.push_back(op);
+    m_next.push_back(op);
   } else {
     auto& inner = m_working.back();
 
@@ -97,7 +102,7 @@ void BytecodeAccumulator::push_back(const Bytecode& op, bool is_concat) {
  * Reorder and rewrite the most nested concat subsequence, and append it to
  * the previous subsequence in the stack.
  */
-void BytecodeAccumulator::squash() {
+void ConcatPeephole::squash() {
   assert(!m_working.empty());
 
   auto workstream = m_working.back();

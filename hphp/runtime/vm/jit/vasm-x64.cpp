@@ -369,6 +369,7 @@ template<class Inst> void Vgen::commute(Inst& i) {
 }
 
 void Vgen::emit(call i) {
+  // warning: this is a copy of emitCall(TCA) in code-gen-helpers-x64.cpp
   if (a->jmpDeltaFits(i.target) && !Stats::enabled()) {
     a->call(i.target);
   } else {
@@ -1009,6 +1010,10 @@ static void lowerCalls(Vunit& unit, const Abi& abi) {
 }
 
 void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
+  static thread_local bool busy;
+  always_assert(!busy);
+  busy = true;
+  SCOPE_EXIT { busy = false; };
   lowerCalls(m_unit, abi);
 
   if (!m_unit.cpool.empty()) {

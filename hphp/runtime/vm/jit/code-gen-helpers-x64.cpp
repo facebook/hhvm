@@ -76,7 +76,10 @@ void emitEagerSyncPoint(Vout& v, const Op* pc) {
 }
 
 void emitEagerSyncPoint(Asm& as, const Op* pc) {
-  emitEagerSyncPoint(Vauto(as.code()).main(), pc);
+  // keep this in sync with vasm code above.
+  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
+  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
+  emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
 // emitEagerVMRegSave --
@@ -259,7 +262,19 @@ Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
 }
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
-  Vauto(a.code()).main() << call{dest, args};
+  // warning: keep this in sync with vasm-x64 call{}
+  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+    a.call(dest);
+  } else {
+    // can't do a near call; store address in data section.
+    // call by loading the address using rip-relative addressing.  This
+    // assumes the data section is near the current code section.  Since
+    // this sequence is directly in-line, rip-relative like this is
+    // more compact than loading a 64-bit immediate.
+    auto addr = mcg->allocLiteral((uint64_t)dest);
+    a.call(rip[(intptr_t)addr]);
+    assert(((int32_t*)a.frontier())[-1] + a.frontier() == dest);
+  }
 }
 
 void emitCall(Asm& a, CppCall call, RegSet args) {
@@ -368,13 +383,20 @@ Vreg emitTestSurpriseFlags(Vout& v) {
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  Fixup fixup) {
-  Vauto vasm(mainCode);
-  auto& v = vasm.main();
-  auto& vc = vasm.cold(coldCode);
-  emitCheckSurpriseFlagsEnter(v, vc, fixup);
+  // warning: keep this in sync with the vasm version below.
+  Asm a{mainCode}, acold{coldCode};
+
+  emitTestSurpriseFlags(a);
+  a.  jnz(coldCode.frontier());
+
+  acold.  movq  (rVmFp, argNumToRegName[0]);
+  emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper, argSet(1));
+  mcg->recordSyncPoint(acold.frontier(), fixup.pcOffset, fixup.spOffset);
+  acold.  jmp   (a.frontier());
 }
 
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Fixup fixup) {
+  // warning: keep this in sync with the x64 version above.
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
   auto const sf = emitTestSurpriseFlags(v);

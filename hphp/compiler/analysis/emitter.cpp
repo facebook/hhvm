@@ -6952,6 +6952,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodF(numParams);
     } else {
+      fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
     }
   } else {

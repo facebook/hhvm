@@ -29,9 +29,10 @@ void emitBindJcc(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                  SrcKey dest);
 void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
                       jit::ConditionCode cc);
-int32_t emitBindCall(CodeBlock& cb, CodeBlock& cold,
-                     CodeBlock& frozen, SrcKey srcKey,
-                     const Func* funcd, int numArgs);
+void emitBindCall(CodeBlock& cb, CodeBlock& frozen, SrcKey srcKey,
+                  const Func* funcd, int numArgs);
+void emitCallNativeImpl(CodeBlock& cb, CodeBlock& cold, SrcKey srcKey,
+                        const Func* funcd, int numArgs);
 
 }}}
 

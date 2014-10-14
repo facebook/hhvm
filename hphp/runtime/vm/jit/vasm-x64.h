@@ -389,6 +389,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
+  O(nativeimpl, I(sk) I(callee) I(argc), Un, Dn)\
   O(nop, Inone, Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
@@ -559,6 +560,7 @@ struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
+struct nativeimpl { SrcKey sk; const Func* callee; unsigned argc; };
 struct nop {};
 struct nothrow {};
 struct phidef { Vtuple defs; };

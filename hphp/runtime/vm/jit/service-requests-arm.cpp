@@ -141,11 +141,24 @@ void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 
 //////////////////////////////////////////////////////////////////////
 
-int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
+void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold, SrcKey srcKey,
+                        const Func* func, int numArgs) {
+  assert(isNativeImplCall(func, numArgs));
+  MacroAssembler a { main };
+
+  // We need to store the return address into the AR, but we don't know it
+  // yet. Write out a mov instruction (two instructions, under the hood) with
+  // a placeholder address, and we'll overwrite it later.
+  auto toOverwrite = main.frontier();
+  a.    Mov  (rAsm, toOverwrite);
+  a.    Str  (rAsm, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
+
+  emitRegGetsRegPlusImm(a, rVmFp, rVmSp, cellsToBytes(numArgs));
+  emitCheckSurpriseFlagsEnter(main, cold, Fixup(0, numArgs));
+  // rVmSp is already correctly adjusted, because there's no locals other than
+  // the arguments passed.
 
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
-
-  MacroAssembler a { cb };
   a.  Mov  (argReg(0), rVmFp);
   if (mcg->fixupMap().eagerRecord(func)) {
     a.Mov  (rAsm, func->getEntry());
@@ -162,60 +175,41 @@ int32_t emitNativeImpl(CodeBlock& cb, const Func* func) {
   int nLocalCells = func->numSlotsInFrame();
   a.  Ldr  (rVmFp, rVmFp[AROFF(m_sfp)]);
 
-  return sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
-}
-
-int32_t emitBindCall(CodeBlock& mainCode, CodeBlock& coldCode,
-                     CodeBlock& frozenCode, SrcKey srcKey,
-                     const Func* funcd, int numArgs) {
-  if (isNativeImplCall(funcd, numArgs)) {
-    MacroAssembler a { mainCode };
-
-    // We need to store the return address into the AR, but we don't know it
-    // yet. Write out a mov instruction (two instructions, under the hood) with
-    // a placeholder address, and we'll overwrite it later.
-    auto toOverwrite = mainCode.frontier();
-    a.    Mov  (rAsm, toOverwrite);
-    a.    Str  (rAsm, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
-
-    emitRegGetsRegPlusImm(a, rVmFp, rVmSp, cellsToBytes(numArgs));
-    emitCheckSurpriseFlagsEnter(mainCode, coldCode, Fixup(0, numArgs));
-    // rVmSp is already correctly adjusted, because there's no locals other than
-    // the arguments passed.
-
-    auto retval = emitNativeImpl(mainCode, funcd);
-    {
-      auto realRetAddr = mainCode.frontier();
-      // Go back and overwrite with the proper return address.
-      CodeCursor cc(mainCode, toOverwrite);
-      a.  Mov  (rAsm, realRetAddr);
-    }
-
-    return retval;
+  {
+    auto realRetAddr = main.frontier();
+    // Go back and overwrite with the proper return address.
+    CodeCursor cc(main, toOverwrite);
+    a.  Mov  (rAsm, realRetAddr);
   }
 
-  MacroAssembler a { mainCode };
+  auto adjust = sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
+  if (adjust != 0) {
+    a.  Add(rVmSp, rVmSp, adjust);
+  }
+}
+
+void emitBindCall(CodeBlock& main, CodeBlock& frozen, SrcKey srcKey,
+                  const Func* func, int numArgs) {
+  assert(!isNativeImplCall(func, numArgs));
+  MacroAssembler a { main };
   emitRegGetsRegPlusImm(a, rStashedAR, rVmSp, cellsToBytes(numArgs));
 
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
 
-  auto toSmash = mainCode.frontier();
-  mcg->backEnd().emitSmashableCall(mainCode, frozenCode.frontier());
+  auto toSmash = main.frontier();
+  mcg->backEnd().emitSmashableCall(main, frozen.frontier());
 
-  MacroAssembler afrozen { frozenCode };
+  MacroAssembler afrozen { frozen };
   afrozen.  Mov  (serviceReqArgReg(1), rStashedAR);
   // Put return address into pre-live ActRec, and restore the saved one.
   emitStoreRetIntoActRec(afrozen);
 
-  emitServiceReq(frozenCode, REQ_BIND_CALL, req);
+  emitServiceReq(frozen, REQ_BIND_CALL, req);
 
   req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
-  req->m_isImmutable = (bool)funcd;
-
-  return 0;
+  req->m_isImmutable = (bool)func;
 }
-
 
 }}}

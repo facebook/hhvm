@@ -172,6 +172,7 @@ private:
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
+  void emit(nativeimpl& i);
   void emit(nothrow& i);
   void emit(nop& i) { a->nop(); }
   void emit(phidef& i) { always_assert(false); }
@@ -476,7 +477,11 @@ void Vgen::emit(bindaddr& i) {
 }
 
 void Vgen::emit(bindcall& i) {
-  emitBindCall(a->code(), cold(), frozen(), i.sk, i.callee, i.argc);
+  emitBindCall(a->code(), frozen(), i.sk, i.callee, i.argc);
+}
+
+void Vgen::emit(nativeimpl& i) {
+  emitCallNativeImpl(a->code(), cold(), i.sk, i.callee, i.argc);
 }
 
 void Vgen::emit(bindexit& i) {

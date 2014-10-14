@@ -787,6 +787,7 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
       break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
+    case Vinstr::nativeimpl:
       defs = m_abi.all();
       break;
     case Vinstr::cqo:

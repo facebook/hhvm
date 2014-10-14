@@ -94,6 +94,7 @@ private:
   void emit(hostcall& i);
   void emit(ldimm& i);
   void emit(load& i);
+  void emit(nativeimpl& i);
   void emit(resume& i) { emitServiceReq(*codeBlock, REQ_RESUME); }
   void emit(store& i);
 
@@ -306,11 +307,11 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 }
 
 void Vgen::emit(bindcall& i) {
-  auto adjust = emitBindCall(*codeBlock, cold(), frozen(), i.sk, i.callee,
-                             i.argc);
-  if (adjust) {
-    a->Add(rVmSp, rVmSp, adjust);
-  }
+  emitBindCall(*codeBlock, frozen(), i.sk, i.callee, i.argc);
+}
+
+void Vgen::emit(nativeimpl& i) {
+  emitCallNativeImpl(*codeBlock, cold(), i.sk, i.callee, i.argc);
 }
 
 void Vgen::emit(bindexit& i) {

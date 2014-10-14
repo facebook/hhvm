@@ -33,7 +33,7 @@ type subst = ty SMap.t
 
 let rec make_subst tparams tyl =
   (* We tolerate missing types in silent_mode. When that happens, we bind
-   * all the paremeters we can, and bind the remaining ones to "Tany".
+   * all the parameters we can, and bind the remaining ones to "Tany".
    *)
   let subst = ref SMap.empty in
   let tyl = ref tyl in

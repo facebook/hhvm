@@ -18,15 +18,23 @@ module N = Nast
 (* Check if a comparison is trivially true or false *)
 (*****************************************************************************)
 
+let trivial_comparison_error p bop (r1, ty1) (r2, ty2) trail1 trail2 =
+  let trivial_result = match bop with
+    | Ast.EQeqeq -> "false"
+    | Ast.Diff2 -> "true"
+    | _ -> assert false in
+  let tys1 = Typing_print.error ty1 in
+  let tys2 = Typing_print.error ty2 in
+  Errors.trivial_strict_eq p trivial_result
+    (Reason.to_string ("This is " ^ tys1) r1)
+    (Reason.to_string ("This is " ^ tys2) r2)
+    trail1 trail2
+
 let rec assert_nontrivial p bop env ty1 ty2 =
   let _, ty1 = Env.expand_type env ty1 in
   let _, ty1, trail1 = TDef.force_expand_typedef env ty1 in
   let _, ty2 = Env.expand_type env ty2 in
   let _, ty2, trail2 = TDef.force_expand_typedef env ty2 in
-  let trivial_result = match bop with
-    | Ast.EQeqeq -> "false"
-    | Ast.Diff2 -> "true"
-    | _ -> assert false in
   match ty1, ty2 with
   | (_, Tprim N.Tnum),               (_, Tprim (N.Tint | N.Tfloat))
   | (_, Tprim (N.Tint | N.Tfloat)),  (_, Tprim N.Tnum)
@@ -36,13 +44,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | _, (r, Tprim N.Tvoid) ->
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string ("This is void") r)
-  | (r1, (Tprim a as ty1)), (r2, (Tprim b as ty2)) when a <> b ->
-      let tys1 = Typing_print.error ty1 in
-      let tys2 = Typing_print.error ty2 in
-      Errors.trivial_strict_eq p trivial_result
-        (Reason.to_string ("This is " ^ tys1) r1)
-        (Reason.to_string ("This is " ^ tys2) r2)
-        trail1 trail2
+  | (_, Tprim a), (_, Tprim b) when a <> b ->
+      trivial_comparison_error p bop ty1 ty2 trail1 trail2
   | (_, Toption ty1), (_, Tprim _ as ty2)
   | (_, Tprim _ as ty1), (_, Toption ty2) ->
       assert_nontrivial p bop env ty1 ty2

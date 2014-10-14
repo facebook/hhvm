@@ -83,9 +83,7 @@ void emitCall(Vout& v, CppCall call, RegSet args);
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
-void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
-
-void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm);
+void emitRB(Vout& v, Trace::RingBufferType t, const char* msgm);
 
 void emitTraceCall(CodeBlock& cb, Offset pcOff);
 

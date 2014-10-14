@@ -242,25 +242,17 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
   return toSmash;
 }
 
-void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold,
-                        SrcKey srcKey, const Func* func, int numArgs) {
+void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
+                        int numArgs) {
   assert(isNativeImplCall(func, numArgs));
-  Asm a { main };
   auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
-  if (deltaFits(retAddr, sz::dword)) {
-    a.storeq(int32_t(retAddr),
-             rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
-  } else {
-    a.lea(rip[retAddr], reg::rax);
-    a.storeq(reg::rax, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
-  }
-  assert(func->numLocals() == func->numParams());
+  v << store{v.cns(retAddr), rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
+  assert(numArgs == func->numLocals());
   assert(func->numIterators() == 0);
-  emitLea(a, rVmSp[cellsToBytes(numArgs)], rVmFp);
-  emitCheckSurpriseFlagsEnter(main, cold, Fixup(0, numArgs));
+  v << lea{rVmSp[cellsToBytes(numArgs)], rVmFp};
+  emitCheckSurpriseFlagsEnter(v, vc, Fixup{0, numArgs});
   // rVmSp is already correctly adjusted, because there's no locals
   // other than the arguments passed.
-  //
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
   if (false) { // typecheck
     ActRec* ar = nullptr;
@@ -274,11 +266,11 @@ void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold,
    * normal case. In the case where an exception is thrown, the VM unwinder
    * will handle it for us.
    */
-  a.   movq  (rVmFp, argNumToRegName[0]);
   if (mcg->fixupMap().eagerRecord(func)) {
-    emitEagerSyncPoint(a, reinterpret_cast<const Op*>(func->getEntry()));
+    emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()));
   }
-  emitCall(a, (TCA)builtinFuncPtr, argSet(1));
+  v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
+             v.makeTuple({}), Fixup{0, numArgs}};
 
   /*
    * We're sometimes calling this while curFunc() isn't really the
@@ -293,10 +285,6 @@ void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold,
   assert(func->numLocals() == func->numParams());
   assert(*reinterpret_cast<const Op*>(func->getEntry()) == Op::NativeImpl);
   assert(instrLen((Op*)func->getEntry()) == func->past() - func->base());
-  Offset pcOffset = 0;  // NativeImpl is the only instruction in the func
-  Offset stackOff = func->numLocals(); // Builtin stubs have no
-                                       // non-arg locals
-  mcg->recordSyncPoint(main.frontier(), pcOffset, stackOff);
 
   /*
    * The native implementation already put the return value on the
@@ -310,12 +298,12 @@ void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold,
    * reg-to-reg move.
    */
   int nLocalCells = func->numSlotsInFrame();
-  a.   loadq  (rVmFp[AROFF(m_sfp)], rVmFp);
+  v << load{rVmFp[AROFF(m_sfp)], rVmFp};
 
-  emitRB(a, Trace::RBTypeFuncExit, func->fullName()->data());
+  emitRB(v, Trace::RBTypeFuncExit, func->fullName()->data());
   auto adjust = safe_cast<int>(sizeof(ActRec) + cellsToBytes(nLocalCells-1));
   if (adjust) {
-    a.  addq(adjust, rVmSp);
+    v << addqi{adjust, rVmSp, rVmSp, v.makeReg()};
   }
 }
 

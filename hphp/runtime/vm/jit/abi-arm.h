@@ -45,6 +45,14 @@ inline vixl::Register argReg(unsigned index) {
   return vixl::Register::XRegFromCode(index);
 }
 
+inline RegSet argSet(int n) {
+  RegSet regs;
+  for (int i = 0; i < n; i++) {
+    regs.add(PhysReg(argReg(i)));
+  }
+  return regs;
+}
+
 inline vixl::Register serviceReqArgReg(unsigned index) {
   // First arg holds the request number
   return argReg(index + 1);

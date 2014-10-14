@@ -332,26 +332,13 @@ void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
   }
 }
 
-void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
-  if (cc == CC_None) {
-    a.   jmp(dest);
-  } else {
-    a.   jcc((ConditionCode)cc, dest);
-  }
-}
-
-void emitRB(X64Assembler& a,
-            Trace::RingBufferType t,
-            const char* msg) {
+void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
-  PhysRegSaver save(a, kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
-  a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    call((TCA)Trace::ringbufferMsg);
+  v << vcall{CppCall::direct(Trace::ringbufferMsg),
+             v.makeVcallArgs({{v.cns(msg), v.cns(strlen(msg)), v.cns(t)}}),
+             v.makeTuple({})};
 }
 
 void emitTraceCall(CodeBlock& cb, Offset pcOff) {

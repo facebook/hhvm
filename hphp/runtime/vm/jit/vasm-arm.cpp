@@ -96,10 +96,12 @@ private:
   void emit(hcunwind& i);
   void emit(hostcall& i);
   void emit(ldimm& i);
+  void emit(ldpoint& i);
   void emit(load& i);
-  void emit(nativeimpl& i);
+  void emit(point& i) { meta->points[i.p] = a->frontier(); }
   void emit(resume& i) { emitServiceReq(*codeBlock, REQ_RESUME); }
   void emit(store& i);
+  void emit(syncpoint& i);
 
   // instructions
   void emit(addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), vixl::SetFlags); }
@@ -110,6 +112,7 @@ private:
   void emit(asrv& i) { a->asrv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(brk& i) { a->Brk(i.code); }
   void emit(cbcc& i);
+  void emit(callr& i) { a->Blr(X(i.target)); }
   void emit(cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -131,6 +134,7 @@ private:
   void emit(subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }
   void emit(subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(tbcc& i);
+  void emit(testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
   void emit(xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
@@ -151,7 +155,7 @@ private:
 
 private:
   struct LabelPatch { CodeAddress instr; Vlabel target; };
-  struct PointPatch { CodeAddress instr; Vpoint pos; };
+  struct PointPatch { CodeAddress instr; Vpoint pos; Vreg d; };
   Vunit& unit;
   BackEnd& backend;
   jit::vector<Vasm::Area>& areas;
@@ -282,10 +286,9 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     mcg->registerCatchBlock(p.instr, addrs[p.target]);
   }
   for (auto& p : ldpoints) {
-    auto after_lea = p.instr + 7;
-    auto d = meta->points[p.pos] - after_lea;
-    assert(deltaFits(d, sz::dword));
-    ((int32_t*)after_lea)[-1] = d;
+    CodeCursor cc(main(), p.instr);
+    MacroAssembler a{main()};
+    a.Mov(X(p.d), meta->points[p.pos]);
   }
 
   if (!shouldUpdateAsmInfo) {
@@ -316,10 +319,6 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
 void Vgen::emit(bindcall& i) {
   emitBindCall(*codeBlock, frozen(), i.sk, i.callee, i.argc);
-}
-
-void Vgen::emit(nativeimpl& i) {
-  emitCallNativeImpl(*codeBlock, cold(), i.sk, i.callee, i.argc);
 }
 
 void Vgen::emit(bindexit& i) {
@@ -411,6 +410,11 @@ void Vgen::emit(ldimm& i) {
   }
 }
 
+void Vgen::emit(ldpoint& i) {
+  ldpoints.push_back({a->frontier(), i.s, i.d});
+  a->Mov(X(i.d), a->frontier()); // write a placeholder address
+}
+
 void Vgen::emit(load& i) {
   if (i.d.isGP()) {
     a->Ldr(X(i.d), M(i.s));
@@ -425,6 +429,13 @@ void Vgen::emit(store& i) {
   } else {
     a->Str(D(i.s), M(i.d));
   }
+}
+
+void Vgen::emit(syncpoint& i) {
+  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
+         i.fix.pcOffset, i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
+                       i.fix.spOffset);
 }
 
 void Vgen::emit(jmp i) {

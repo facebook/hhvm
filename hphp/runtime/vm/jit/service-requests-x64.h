@@ -20,7 +20,9 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
+struct Vout;
+namespace x64 {
 
 /*
  * emitServiceReqWork --
@@ -61,8 +63,8 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
  */
 void emitBindCall(CodeBlock& main, CodeBlock& frozen, SrcKey srcKey,
                   const Func* funcd, int numArgs);
-void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold, SrcKey srcKey,
-                        const Func* funcd, int numArgs);
+void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* funcd,
+                        int numArgs);
 
 }}}
 

@@ -803,13 +803,16 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
     case Vinstr::callm:
     case Vinstr::callr:
       defs = m_abi.all() - m_abi.calleeSaved;
+      switch (arch()) {
+        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
+        case Arch::X64: break;
+      }
       break;
     case Vinstr::callstub:
       defs = i.callstub_.kills;
       break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
-    case Vinstr::nativeimpl:
       defs = m_abi.all();
       break;
     case Vinstr::cqo:

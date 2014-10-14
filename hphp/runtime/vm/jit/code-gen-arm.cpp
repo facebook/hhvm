@@ -1634,8 +1634,9 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storel{v.cns(extra->after), rSP[ar + AROFF(m_soff)]};
   if (isNativeImplCall(extra->callee, extra->numParams)) {
-    v << nativeimpl{srcKey, extra->callee, extra->numParams};
-    assert(dstLoc(0).reg() == PhysReg(rVmSp)); // bindcall will adjust vmsp
+    // emitCallNativeImpl will adjust rVmSp
+    assert(dstLoc(0).reg() == PhysReg(rVmSp));
+    emitCallNativeImpl(v, vcold(), srcKey, extra->callee, extra->numParams);
   } else {
     v << bindcall{srcKey, extra->callee, extra->numParams};
   }

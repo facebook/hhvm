@@ -141,50 +141,43 @@ void emitBindSideExit(CodeBlock& cb, CodeBlock& frozen, SrcKey dest,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCallNativeImpl(CodeBlock& main, CodeBlock& cold, SrcKey srcKey,
+void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey,
                         const Func* func, int numArgs) {
   assert(isNativeImplCall(func, numArgs));
-  MacroAssembler a { main };
 
   // We need to store the return address into the AR, but we don't know it
-  // yet. Write out a mov instruction (two instructions, under the hood) with
-  // a placeholder address, and we'll overwrite it later.
-  auto toOverwrite = main.frontier();
-  a.    Mov  (rAsm, toOverwrite);
-  a.    Str  (rAsm, rVmSp[cellsToBytes(numArgs) + AROFF(m_savedRip)]);
+  // yet. Use ldpoint, and point{} below, to get the address.
+  PhysReg sp{rVmSp}, fp{rVmFp}, rds{rVmTl};
+  auto ret_point = v.makePoint();
+  auto ret_addr = v.makeReg();
+  v << ldpoint{ret_point, ret_addr};
+  v << store{ret_addr, sp[cellsToBytes(numArgs) + AROFF(m_savedRip)]};
 
-  emitRegGetsRegPlusImm(a, rVmFp, rVmSp, cellsToBytes(numArgs));
-  emitCheckSurpriseFlagsEnter(main, cold, Fixup(0, numArgs));
+  v << lea{sp[cellsToBytes(numArgs)], fp};
+  emitCheckSurpriseFlagsEnter(v, vc, Fixup(0, numArgs));
   // rVmSp is already correctly adjusted, because there's no locals other than
   // the arguments passed.
 
   BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
-  a.  Mov  (argReg(0), rVmFp);
+  v << copy{fp, PhysReg{argReg(0)}};
   if (mcg->fixupMap().eagerRecord(func)) {
-    a.Mov  (rAsm, func->getEntry());
-    a.Str  (rAsm, rVmTl[RDS::kVmpcOff]);
-    a.Str  (rVmFp, rVmTl[RDS::kVmfpOff]);
-    a.Str  (rVmSp, rVmTl[RDS::kVmspOff]);
+    v << store{v.cns(func->getEntry()), rds[RDS::kVmpcOff]};
+    v << store{fp, rds[RDS::kVmfpOff]};
+    v << store{sp, rds[RDS::kVmspOff]};
   }
-  auto syncPoint = emitCall(a, CppCall::direct(builtinFuncPtr));
+  auto syncPoint = emitCall(v, CppCall::direct(builtinFuncPtr), argSet(1));
 
   Offset pcOffset = 0;
   Offset stackOff = func->numLocals();
-  mcg->recordSyncPoint(syncPoint, pcOffset, stackOff);
+  v << hcsync{Fixup{pcOffset, stackOff}, syncPoint};
 
   int nLocalCells = func->numSlotsInFrame();
-  a.  Ldr  (rVmFp, rVmFp[AROFF(m_sfp)]);
+  v << load{fp[AROFF(m_sfp)], fp};
+  v << point{ret_point};
 
-  {
-    auto realRetAddr = main.frontier();
-    // Go back and overwrite with the proper return address.
-    CodeCursor cc(main, toOverwrite);
-    a.  Mov  (rAsm, realRetAddr);
-  }
-
-  auto adjust = sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
+  int adjust = sizeof(ActRec) + cellsToBytes(nLocalCells - 1);
   if (adjust != 0) {
-    a.  Add(rVmSp, rVmSp, adjust);
+    v << addqi{adjust, sp, sp, v.makeReg()};
   }
 }
 

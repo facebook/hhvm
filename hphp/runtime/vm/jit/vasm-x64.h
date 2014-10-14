@@ -389,7 +389,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
-  O(nativeimpl, I(sk) I(callee) I(argc), Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
@@ -545,7 +544,7 @@ struct bindjmp { SrcKey target; TransFlags trflags; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; bool smashable;};
+                 Fixup fixup; DestType destType; bool smashable; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; };
 struct copy { Vreg s, d; };
@@ -562,7 +561,6 @@ struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
-struct nativeimpl { SrcKey sk; const Func* callee; unsigned argc; };
 struct nop {};
 struct nothrow {};
 struct phidef { Vtuple defs; };

@@ -3309,7 +3309,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   assert(dstLoc(0).reg() == rVmSp);
   auto const srcKey = m_curInst->marker().sk();
   if (isNativeImplCall(extra->callee, extra->numParams)) {
-    v << nativeimpl{srcKey, extra->callee, extra->numParams};
+    emitCallNativeImpl(v, vcold(), srcKey, extra->callee, extra->numParams);
   } else {
     v << bindcall{srcKey, extra->callee, extra->numParams};
   }

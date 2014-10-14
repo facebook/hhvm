@@ -131,14 +131,28 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 //////////////////////////////////////////////////////////////////////
 
 void emitTestSurpriseFlags(vixl::MacroAssembler& a) {
+  // Keep this in sync with vasm version below
   static_assert(RequestInjectionData::LastFlag < (1LL << 32),
                 "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.  Ldrh  (rAsm, rVmTl[RDS::kConditionFlagsOff]);
-  a.  Tst   (rAsm, 0xffffffff);
+  a.  Ldr   (rAsm.W(), rVmTl[RDS::kConditionFlagsOff]);
+  a.  Tst   (rAsm.W(), rAsm.W());
+}
+
+Vreg emitTestSurpriseFlags(Vout& v) {
+  // Keep this in sync with arm version above
+  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
+                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  PhysReg rds{rVmTl};
+  auto flags = v.makeReg();
+  auto sf = v.makeReg();
+  v << loadl{rds[RDS::kConditionFlagsOff], flags};
+  v << testl{flags, flags, sf};
+  return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  jit::Fixup fixup) {
+  // keep this in sync with vasm version below
   vixl::MacroAssembler a { mainCode };
   vixl::MacroAssembler acold { coldCode };
 
@@ -151,6 +165,22 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
       emitCallWithinTC(acold, mcg->tx().uniqueStubs.functionEnterHelper);
   mcg->recordSyncPoint(fixupAddr, fixup.pcOffset, fixup.spOffset);
   mcg->backEnd().emitSmashableJump(coldCode, mainCode.frontier(), CC_None);
+}
+
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, jit::Fixup fixup) {
+  // keep this in sync with arm version above
+  PhysReg fp{rVmFp}, arg0{argReg(0)};
+  auto surprise = vc.makeBlock();
+  auto done = v.makeBlock();
+  auto sf = emitTestSurpriseFlags(v);
+  v << jcc{CC_NZ, sf, {done, surprise}};
+
+  vc = surprise;
+  vc << copy{fp, arg0};
+  vc << callr{vc.cns(mcg->tx().uniqueStubs.functionEnterHelper), argSet(1)};
+  vc << syncpoint{fixup};
+  vc << jmp{done};
+  v = done;
 }
 
 //////////////////////////////////////////////////////////////////////

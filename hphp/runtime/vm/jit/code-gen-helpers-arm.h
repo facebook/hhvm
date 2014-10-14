@@ -72,6 +72,7 @@ void emitRegRegMove(vixl::MacroAssembler& a,
  */
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  jit::Fixup fixup);
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, jit::Fixup fixup);
 
 /*
  * Increments the current (at translation time) translation counter.

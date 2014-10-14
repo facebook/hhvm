@@ -1,5 +1,4 @@
 <?php
-// This doesn't match PHP5.6.0, but a PR is here:
 // https://github.com/php/php-src/pull/865
 
 

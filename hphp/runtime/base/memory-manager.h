@@ -573,7 +573,6 @@ private:
   void  smartFree(void* ptr);
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);
-  void refreshStatsHelper();
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();

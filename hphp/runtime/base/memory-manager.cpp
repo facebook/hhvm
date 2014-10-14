@@ -248,11 +248,6 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #endif
 }
 
-NEVER_INLINE
-void MemoryManager::refreshStatsHelper() {
-  refreshStats();
-}
-
 void MemoryManager::refreshStatsHelperExceeded() {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.setMemExceededFlag();
@@ -538,7 +533,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
     safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
   );
 
-  refreshStatsHelper();
+  refreshStats();
   if (newNode != n) {
     oldNext->prev = oldPrev->next = newNode;
   }
@@ -551,7 +546,7 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
  */
 NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
-    refreshStatsHelper();
+    refreshStats();
   }
   void* slab = safe_malloc(kSlabSize);
   assert((uintptr_t(slab) & kSmartSizeAlignMask) == 0);
@@ -613,7 +608,7 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
   // was too large for one of the existing slabs. When we're not using jemalloc
   // this check won't do anything so avoid the extra overhead.
   if (use_jemalloc || UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
-    refreshStatsHelper();
+    refreshStats();
   }
   // link after m_sweep
   SweepNode* next = m_sweep.next;

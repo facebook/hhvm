@@ -124,8 +124,8 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     }
     tvDup(*tvFrom, *tvTo);
   } else if (fp->hasVarEnv()) {
-    g_context->setVar(s_http_response_header.get(),
-                      Variant(m_responseHeaders).asTypedValue());
+    fp->getVarEnv()->set(s_http_response_header.get(),
+                         Variant(m_responseHeaders).asTypedValue());
   }
 
   /*

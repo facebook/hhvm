@@ -301,8 +301,12 @@ rule token = parse
                          lexbuf.Lexing.lex_start_p <- start;
                          Tunsafeexpr
                        }
-  | fixme_start        { fixme_state0 lexbuf;
-                         token lexbuf
+  | fixme_start        { let fixme = fixme_state0 lexbuf in
+                         let tok = token lexbuf in
+                         (match fixme with
+                           | Some err_nbr -> add_fixme err_nbr (Pos.make lexbuf)
+                           | None -> ());
+                         tok
                        }
   | "/*"               { let buf = Buffer.create 256 in
                          comment_list := comment buf lexbuf :: !comment_list;
@@ -413,8 +417,12 @@ and xhpattr = parse
   | eof                { Teof        }
   | ws+                { xhpattr lexbuf }
   | '\n'               { Lexing.new_line lexbuf; xhpattr lexbuf }
-  | fixme_start        { fixme_state0 lexbuf;
-                         xhpattr lexbuf
+  | fixme_start        { let fixme = fixme_state0 lexbuf in
+                         let tok = xhpattr lexbuf in
+                         (match fixme with
+                           | Some err_nbr -> add_fixme err_nbr (Pos.make lexbuf)
+                           | None -> ());
+                         tok
                        }
   | "/*"               { ignore (comment (Buffer.create 256) lexbuf);
                          xhpattr lexbuf
@@ -455,6 +463,7 @@ and comment buf = parse
 and fixme_state0 = parse
   | eof                { let pos = Pos.make lexbuf in
                          Errors.unterminated_comment pos;
+                         None
                        }
   | ws+                { fixme_state0 lexbuf
                        }
@@ -463,13 +472,15 @@ and fixme_state0 = parse
                        }
   | '['                { fixme_state1 lexbuf }
   | _                  { Errors.fixme_format (Pos.make lexbuf);
-                         ignore (comment (Buffer.create 256) lexbuf)
+                         ignore (comment (Buffer.create 256) lexbuf);
+                         None
                        }
 
 (* HH_FIXME[... *)
 and fixme_state1 = parse
   | eof                { let pos = Pos.make lexbuf in
-                         Errors.unterminated_comment pos
+                         Errors.unterminated_comment pos;
+                         None
                        }
   | ws+                { fixme_state1 lexbuf }
   | '\n'               { Lexing.new_line lexbuf;
@@ -479,24 +490,20 @@ and fixme_state1 = parse
                          let err_nbr = int_of_string err_nbr in
                          fixme_state2 err_nbr lexbuf }
   | _                  { Errors.fixme_format (Pos.make lexbuf);
-                         ignore (comment (Buffer.create 256) lexbuf)
+                         ignore (comment (Buffer.create 256) lexbuf);
+                         None
                        }
 
 (* HH_FIXME[NUMBER... *)
 and fixme_state2 err_nbr = parse
   | eof                { let pos = Pos.make lexbuf in
-                         Errors.unterminated_comment pos
+                         Errors.unterminated_comment pos;
+                         None
                        }
   | "*/" ws* '\n'      { Lexing.new_line lexbuf;
-                         let pos = Pos.make lexbuf in
-                         let line, _, _ = Pos.info_pos pos in
-                         let pos = Pos.set_line pos (line+1) in
-                         (* Nothing after */, the HH_FIXME applies to the
-                          * next line.
-                          *)
-                         add_fixme err_nbr pos
+                         Some err_nbr
                        }
-  | "*/"               { add_fixme err_nbr (Pos.make lexbuf) }
+  | "*/"               { Some err_nbr }
   | '\n'               { Lexing.new_line lexbuf;
                          fixme_state2 err_nbr lexbuf
                        }

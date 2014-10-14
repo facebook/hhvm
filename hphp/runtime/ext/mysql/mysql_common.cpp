@@ -552,7 +552,6 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
                       database.c_str());
   }
 
-
   if (mySQL->getState() == MySQLState::INITED) {
     if (async) {
 #ifdef FACEBOOK

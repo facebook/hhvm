@@ -52,5 +52,4 @@ let init genv env next_files =
   let env, errorl, failed = init_hack genv env next_files in
   let env = { env with errorl = errorl;
               failed_parsing = failed } in
-  ServerError.print_errorl (ServerArgs.json_mode genv.options) env.errorl stdout;
   env

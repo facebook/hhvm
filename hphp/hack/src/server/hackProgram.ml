@@ -218,15 +218,17 @@ module Program : Server.SERVER_PROGRAM = struct
       match next_files_hhi () with
       | [] -> next_files_root ()
       | x -> x in
-    let env = ServerInit.init genv env next_files in
+    ServerInit.init genv env next_files
+
+  let run_once_and_exit genv env root =
+    ServerError.print_errorl (ServerArgs.json_mode genv.options)
+                             env.errorl stdout;
     match ServerArgs.convert genv.options with
     | None ->
-        if ServerArgs.check_mode genv.options
-        then Server.Exit (if env.errorl = [] then 0 else 1)
-        else Server.Continue env
+        exit (if env.errorl = [] then 0 else 1)
     | Some dirname ->
         ServerConvert.go genv env root dirname;
-        Server.Exit 0
+        exit 0
 
   let recheck genv env updates report =
     let diff_php, diff_js = updates in

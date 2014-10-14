@@ -18,7 +18,6 @@ type options = {
     root             : Path.path;
     should_detach    : bool;
     convert          : Path.path option;
-    rest             : string list;
   }
 
 val parse_options: unit -> options

@@ -22,7 +22,6 @@ type options = {
     root             : Path.path;
     should_detach    : bool;
     convert          : Path.path option;
-    rest             : string list;
   }
 
 (*****************************************************************************)
@@ -43,27 +42,23 @@ module Messages = struct
   let suggest_types = " generates the file hh_pad_patches"
   let check         = " check and exit"
   let json          = " output errors in json format (arc lint mode)"
-  let all           = " sandcastle mode"
   let daemon        = " detach process"
   let from_vim      = " passed from hh_client"
   let from_emacs    = " passed from hh_client"
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
-  let rest          = ""
 end
 
 
 (*****************************************************************************)
 (* CAREFUL!!!!!!! *)
 (*****************************************************************************)
-(* --json and --all are used for the linters. External tools are relying on the
+(* --json is used for the linters. External tools are relying on the
    format -- don't change it in an incompatible way!
 *)
 (*****************************************************************************)
 
 let arg x = Arg.Unit (fun () -> x := true)
-
-let rest r = Arg.Rest (fun x -> r := x :: !r)
 
 let populate_options () =
   let root          = ref "" in
@@ -76,22 +71,18 @@ let populate_options () =
   let should_detach = ref false in
   let save_types    = ref false in
   let convert_dir   = ref None  in
-  let all           = ref false in
   let cdir          = fun s -> convert_dir := Some s in
-  let rest_options  = ref [] in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
      "--suggest-types" , arg save_types    , Messages.suggest_types;
      "--check"         , arg check_mode    , Messages.check;
      "--json"          , arg json_mode     , Messages.json; (* CAREFUL!!! *)
-     "--all"           , arg all           , Messages.all;  (* CAREFUL!!! *)
      "--daemon"        , arg should_detach , Messages.daemon;
      "-d"              , arg should_detach , Messages.daemon;
      "--from-vim"      , arg from_vim      , Messages.from_vim;
      "--from-emacs"    , arg from_emacs    , Messages.from_emacs;
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
-     "--"              , rest rest_options , Messages.rest;
    ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -110,7 +101,6 @@ let populate_options () =
     root          = Path.mk_path !root;
     should_detach = !should_detach;
     convert       = convert;
-    rest          = !rest_options;
   }
 
 (* useful in testing code *)
@@ -121,7 +111,6 @@ let default_options ~root =
   root = Path.mk_path root;
   should_detach = false;
   convert = None;
-  rest = [];
 }
 
 (*****************************************************************************)

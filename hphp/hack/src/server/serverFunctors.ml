@@ -63,7 +63,7 @@ end = struct
     ignore(Lock.release root "init")
 
   (* This code is only executed when the options --check is NOT present *)
-  let main_hh_server_init root=
+  let main_hh_server_init root =
     grab_lock root;
     init_message();
     ()
@@ -75,10 +75,13 @@ end = struct
 
   let go genv env root =
     let is_check_mode = ServerArgs.check_mode genv.options in
-    if not is_check_mode then main_hh_server_init root;
-    if not is_check_mode then grab_init_lock root;
-    ServerPeriodical.init root;
-    if not is_check_mode then ServerDfind.dfind_init root;
+    if not is_check_mode
+    then (
+      main_hh_server_init root;
+      grab_init_lock root;
+      ServerPeriodical.init root;
+      ServerDfind.dfind_init root
+    );
     match Program.init genv env root with
     | Exit code -> exit code
     | Die -> die()

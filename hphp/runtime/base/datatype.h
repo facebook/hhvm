@@ -38,9 +38,8 @@ namespace HPHP {
  * needed to represent this.  (Known dependency in unwind-x64.h.)
  */
 enum DataType : int8_t {
-  KindOfClass         = -13,
-
   // Values below zero are not PHP values, but runtime-internal.
+  KindOfClass         = -13,
   KindOfAny           = -8,
   KindOfInvalid       = -1,
   KindOfUnknown       = KindOfInvalid,
@@ -48,19 +47,22 @@ enum DataType : int8_t {
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
-  KindOfUninit        = 0x00,  //   0000000
-  KindOfNull          = 0x08,  //   0001000
-  KindOfBoolean       = 0x09,  //   0001001
-  KindOfInt64         = 0x0a,  //   0001010
-  KindOfDouble        = 0x0b,  //   0001011
 
-  KindOfStaticString  = 0x0c,  //   0001100
-  KindOfString        = 0x14,  //   0010100
-  KindOfArray         = 0x20,  //   0100000
-  KindOfObject        = 0x30,  //   0110000
-  KindOfResource      = 0x40,  //   1000000
-  KindOfRef           = 0x50,  //   1010000
-  KindOfNamedLocal    = 0x51,  //   1010001
+                               //      uncounted init bit
+                               //      |string bit
+                               //      ||
+  KindOfUninit        = 0x00,  //  00000000
+  KindOfNull          = 0x08,  //  00001000
+  KindOfBoolean       = 0x09,  //  00001001
+  KindOfInt64         = 0x0a,  //  00001010
+  KindOfDouble        = 0x0b,  //  00001011
+  KindOfStaticString  = 0x0c,  //  00001100
+  KindOfString        = 0x14,  //  00010100
+  KindOfArray         = 0x20,  //  00100000
+  KindOfObject        = 0x30,  //  00110000
+  KindOfResource      = 0x40,  //  01000000
+  KindOfRef           = 0x50,  //  01010000
+  KindOfNamedLocal    = 0x51,  //  01010001
 };
 
 /*

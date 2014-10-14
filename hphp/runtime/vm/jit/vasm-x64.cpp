@@ -246,9 +246,6 @@ private:
   void emit(movb& i) { a->movb(i.s, i.d); }
   void emit(movbi& i) { a->movb(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
-  void emit(movq& i) { a->movq(i.s, i.d); }
-  void emit(movqrx& i) { a->movq_rx(i.s, i.d); }
-  void emit(movqxr& i) { a->movq_xr(i.s, i.d); }
   void emit(movzbl& i) { a->movzbl(i.s, i.d); }
   void emit(movsbl& i) { a->movsbl(i.s, i.d); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }

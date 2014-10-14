@@ -62,7 +62,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::movb:
     case Vinstr::movbi:
     case Vinstr::movl:
-    case Vinstr::movq:
     case Vinstr::movsbl:
     case Vinstr::movzbl:
     case Vinstr::mulsd:

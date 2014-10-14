@@ -474,9 +474,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(movb, Inone, UH(s,d), DH(d,s))\
   O(movbi, I(s), Un, D(d))\
   O(movl, Inone, UH(s,d), DH(d,s))\
-  O(movq, Inone, UH(s,d), DH(d,s))\
-  O(movqrx, Inone, U(s), D(d))\
-  O(movqxr, Inone, U(s), D(d))\
   O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
@@ -665,9 +662,6 @@ struct loadzbl { Vptr s; Vreg32 d; };
 struct movb { Vreg8 s, d; };
 struct movbi { Immed s; Vreg8 d; };
 struct movl { Vreg32 s, d; };
-struct movq { Vreg64 s, d; };
-struct movqrx { Vreg64 s; VregDbl d; };
-struct movqxr { VregDbl s; Vreg64 d; };
 struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregDbl s0, s1, d; };

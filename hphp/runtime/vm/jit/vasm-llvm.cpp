@@ -397,7 +397,6 @@ O(ldimm) \
 O(lea) \
 O(load) \
 O(loadq) \
-O(movq) \
 O(pushm) \
 O(resume) \
 O(ret) \
@@ -567,10 +566,6 @@ void LLVMEmitter::emit(const load& inst) {
 
 void LLVMEmitter::emit(const loadq& inst) {
   defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s)));
-}
-
-void LLVMEmitter::emit(const movq& inst) {
-  defineValue(inst.d, value(inst.s));
 }
 
 void LLVMEmitter::emit(const pushm& inst) {

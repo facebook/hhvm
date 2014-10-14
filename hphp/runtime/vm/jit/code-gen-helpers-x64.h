@@ -151,7 +151,7 @@ emitTLSLoad(Vout& v, const ThreadLocalNoCheck<T>& datum, Vreg dest) {
     v << callr{reg::rax, argSet(1)};
   }
   if (dest != Vreg(reg::rax)) {
-    v << movq{reg::rax, dest};
+    v << copy{reg::rax, dest};
   }
 }
 

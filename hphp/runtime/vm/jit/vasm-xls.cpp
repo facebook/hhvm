@@ -451,7 +451,6 @@ Vxls::~Vxls() {
 }
 
 bool is_nop(copy& i) { return i.s == i.d; }
-bool is_nop(movq& i) { return i.s == i.d; }
 bool is_nop(copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
 
 bool is_nop(lea& i) {
@@ -529,7 +528,6 @@ void Vxls::allocate() {
     auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
       return (inst.op == Vinstr::copy && is_nop(inst.copy_)) ||
              (inst.op == Vinstr::copy2 && is_nop(inst.copy2_)) ||
-             (inst.op == Vinstr::movq && is_nop(inst.movq_)) ||
              (inst.op == Vinstr::lea && is_nop(inst.lea_)) ||
              (inst.op == Vinstr::copyargs) || // we lowered it
              (inst.op == Vinstr::phidef); // we lowered it

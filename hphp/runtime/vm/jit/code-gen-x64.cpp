@@ -5053,7 +5053,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 
   v << storeq{curFpReg, genFpReg[AROFF(m_sfp)]};
   v << storelim{returnOff, genFpReg[AROFF(m_soff)]};
-  v << movq{genFpReg, curFpReg};
+  v << copy{genFpReg, curFpReg};
   v << contenter{curFpReg, addrReg};
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must
   // also start here.

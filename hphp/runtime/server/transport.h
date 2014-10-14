@@ -365,11 +365,7 @@ public:
   /**
    * Sending back a response.
    */
-  void setResponse(int code, const char *info) {
-    assert(code != 500 || (info && *info)); // must have a reason for a 500
-    m_responseCode = code;
-    m_responseCodeInfo = info ? info : "";
-  }
+  void setResponse(int code, const char *info = nullptr);
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
   bool setHeaderCallback(const Variant& callback);
@@ -392,7 +388,7 @@ public:
     sendRaw((void*)data.c_str(), data.length(), code, compressed, chunked,
             codeInfo);
   }
-  void redirect(const char *location, int code, const char *info );
+  void redirect(const char *location, int code, const char *info = nullptr);
 
   // TODO: support rfc1867
   virtual bool isUploadedFile(const String& filename);

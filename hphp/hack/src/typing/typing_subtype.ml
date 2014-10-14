@@ -17,6 +17,7 @@ module Unify = Typing_unify
 module Env = Typing_env
 module TDef = Typing_tdef
 module TUtils = Typing_utils
+module TUEnv = Typing_unification_env
 module ShapeMap = Nast.ShapeMap
 
 (* This function checks that the method ft_sub can be used to replace
@@ -88,6 +89,11 @@ and subtype_tparam env variance super child =
   | Ast.Contravariant -> sub_type env child super
   | Ast.Invariant -> fst (Unify.unify env super child)
 
+(* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
+ * unify_with_uenv, see comment there. *)
+and sub_type env ty_super ty_sub =
+  sub_type_with_uenv env (TUEnv.empty, ty_super) (TUEnv.empty, ty_sub)
+
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
  *
@@ -96,21 +102,24 @@ and subtype_tparam env variance super child =
  *      sub_type env ?int alpha => env where alpha==?int
  *      sub_type env int string => error
  *)
-and sub_type env ty_super ty_sub =
+and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_super, ety_sub with
   | (r, Tapply ((_, x), argl)), _ when Typing_env.is_typedef env x ->
       let env, ty_super = TDef.expand_typedef env r x argl in
-      sub_type env ty_super ty_sub
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | _, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
       let env, ty_sub = TDef.expand_typedef env r x argl in
-      sub_type env ty_super ty_sub
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Tunresolved _), (_, Tunresolved _) ->
-      let env, _ = Unify.unify env ty_super ty_sub in
+      let env, _ =
+        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
       env
   | (_, Tunresolved tyl), (r_sub, _) ->
-      let env, _ = Unify.unify env ty_super (r_sub, Tunresolved [ty_sub]) in
+      let ty_sub = (r_sub, Tunresolved [ty_sub]) in
+      let env, _ =
+        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
       env
   | (_, Tany), (_, Tunresolved _) ->
       (* This branch is necessary in the following case:
@@ -122,13 +131,15 @@ and sub_type env ty_super ty_sub =
        * Thanks to this branch, the type variable unifies with the intersection
        * type.
        *)
-      fst (Unify.unify env ty_super ty_sub)
+      fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
   | _, (_, Tunresolved tyl) ->
-      List.fold_left (fun env x -> sub_type env ty_super x) env tyl
+      List.fold_left begin fun env x ->
+        sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
+      end env tyl
   | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub))
   | (_, Tprim _), (r_sub, Tgeneric (x, Some ty_sub)) ->
       (Errors.try_
-         (fun () -> sub_type env ty_super ty_sub)
+         (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
          (fun l -> Reason.explain_generic_constraint r_sub x l; env)
       )
   | (r_super, Tgeneric ("this", Some ty_super)), (r_sub, Tgeneric ("this", Some ty_sub)) ->
@@ -136,7 +147,7 @@ and sub_type env ty_super ty_sub =
   | (_, Tgeneric (x_super, _)), (r_sub, Tgeneric (x_sub, Some ty_sub)) ->
       if x_super = x_sub then env else
       (Errors.try_
-         (fun () -> sub_type env ty_super ty_sub)
+         (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
          (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
       )
   (* Dirty covariance hacks *)
@@ -305,10 +316,17 @@ and sub_type env ty_super ty_sub =
       sub_type env ty_super (reason, Tarray (is_local, Some int_type, Some elt_ty))
   | _, (_, Tany) -> env
   | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
+  | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
+  | _, (_, Toption ty_sub) when uenv_sub.TUEnv.non_null ->
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Toption ty_super), (_, Toption ty_sub) ->
-      sub_type env ty_super ty_sub
+      let uenv_super = { uenv_super with TUEnv.non_null = true } in
+      let uenv_sub = { uenv_sub with TUEnv.non_null = true } in
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Toption ty_super), _ ->
-      sub_type env ty_super ty_sub
+      let uenv_super = { uenv_super with TUEnv.non_null = true } in
+      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | (_, Ttuple tyl_super), (_, Ttuple tyl_sub)
     when List.length tyl_super = List.length tyl_sub ->
     wfold_left2 sub_type env tyl_super tyl_sub
@@ -337,8 +355,8 @@ and sub_type env ty_super ty_sub =
       )
   | _, (_, Tabstract (_, _, Some x)) ->
       Errors.try_
-         (fun () -> fst (Unify.unify env ty_super ty_sub))
-         (fun _ -> sub_type env ty_super x)
+         (fun () -> fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)))
+         (fun _ -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x))
   (* Handle enums with subtyping constraints. *)
   | _, (p_sub, (Tapply ((_, x), [])))
     when Typing_env.get_enum_constraint env x <> None ->

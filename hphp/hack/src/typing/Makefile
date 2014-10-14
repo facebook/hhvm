@@ -8,6 +8,7 @@ TARGET=lib
 # typing_graph.ml typing_deps.ml \
 
 SRC= typeVisitor.ml typing_reason.ml typing_defs.ml \
+ typing_unification_env.ml \
  typing_env.ml typing_print.ml typing_utils.ml \
  typing_hint.ml \
  typing_expand.ml typing_compare.ml typing_exts.ml \

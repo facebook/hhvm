@@ -14,22 +14,30 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TDef = Typing_tdef
 module Inst = Typing_instantiate
+module TUEnv = Typing_unification_env
 
+(* Most code -- notably the cases in unify_ -- do *not* need to thread through
+ * the uenv, since for example just because we know an array<foo, bar> can't
+ * itself be null, that doesn't mean that foo and bar can't be null. *)
 let rec unify env ty1 ty2 =
+  unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, ty2)
+
+and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
   if ty1 == ty2 then env, ty1 else
   match ty1, ty2 with
   | (_, Tany), ty | ty, (_, Tany) -> env, ty
-  | (r1, Tvar n1), (r2, Tvar n2) -> unify_var env r1 n1 r2 n2
+  | (r1, Tvar n1), (r2, Tvar n2) -> unify_var env (r1, uenv1, n1) (r2, uenv2, n2)
   | (r, Tvar n), ty2
   | ty2, (r, Tvar n) ->
       let env, ty1 = Env.get_type env n in
       let n' = Env.fresh() in
       let env = Env.rename env n n' in
-      let env, ty = unify env ty1 ty2 in
+      let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
       let env = Env.add env n ty in
       env, (r, Tvar n')
   | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
       let r = unify_reason r1 r2 in
+      (* TODO this should probably pass through the uenv *)
       let env, tyl = TUtils.normalize_inter env tyl1 tyl2 in
       env, (r, Tunresolved tyl)
   | (r, Tunresolved tyl), (_, ty_ as ty)
@@ -39,21 +47,27 @@ let rec unify env ty1 ty2 =
       let r = Reason.Rcoerced (p1, env.Env.pos, str_ty) in
       let env = List.fold_left (fun env x -> TUtils.sub_type env ty x) env tyl in
       env, (r, ty_)
+  | (_, Toption ty1), _ when uenv1.TUEnv.non_null ->
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
+  | _, (_, Toption ty2) when uenv2.TUEnv.non_null ->
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, Toption ty1), (r2, Toption ty2) ->
       let r = unify_reason r1 r2 in
-      let env, ty = unify env ty1 ty2 in
+      let uenv1 = { uenv1 with TUEnv.non_null = true } in
+      let uenv2 = { uenv2 with TUEnv.non_null = true } in
+      let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
       env, (r, Toption ty)
   (* Mixed is nullable and we want it to unify with both ?T and T at
    * the same time. If we try to unify mixed with an option,
    * we peel of the ? and unify mixed with the underlying type. *)
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
-    unify env ty1 (r2, Tmixed)
+    unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, (r2, Tmixed))
   | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
      (* When we are in async functions, we allow people to write Awaitable<void>
       * and then do yield result(null) *)
       if Env.allow_null_as_void env
-      then unify env ty1 ty
+      then unify_with_uenv env (uenv1, ty1) (uenv2, ty)
       else (TUtils.uerror r1 ty1' r2 ty2'; env, (r1, ty1'))
   (* It might look like you can combine the next two cases, but you can't --
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
@@ -61,16 +75,16 @@ let rec unify env ty1 ty2 =
    *)
   | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef env x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
-      unify env ty1 ty2
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
       let env, ty1 = TDef.expand_typedef env r x argl in
-      unify env ty1 ty2
+      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
       let env, ty = unify_ env r1 ty1 r2 ty2 in
       env, (r, ty)
 
-and unify_var env r1 n1 r2 n2 =
+and unify_var env (r1, uenv1, n1) (r2, uenv2, n2) =
   let r = unify_reason r1 r2 in
   let env, n1 = Env.get_var env n1 in
   let env, n2 = Env.get_var env n2 in
@@ -80,7 +94,7 @@ and unify_var env r1 n1 r2 n2 =
   let n' = Env.fresh() in
   let env = Env.rename env n1 n' in
   let env = Env.rename env n2 n' in
-  let env, ty = unify env ty1 ty2 in
+  let env, ty = unify_with_uenv env (uenv1, ty1) (uenv2, ty2) in
   (* I ALWAYS FORGET THIS! ALWAYS!!! *)
   (* The type of n' could have changed because of recursive types *)
   (* We need one more round *)

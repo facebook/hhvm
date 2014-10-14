@@ -261,6 +261,12 @@ bool MySQL::connect(const String& host, int port, const String& socket,
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
   m_xaction_count = 0;
+  if (m_host.empty()) m_host = static_cast<std::string>(host);
+  if (m_username.empty()) m_username = static_cast<std::string>(username);
+  if (m_password.empty()) m_password = static_cast<std::string>(password);
+  if (m_socket.empty()) m_socket = static_cast<std::string>(socket);
+  if (m_database.empty()) m_database = static_cast<std::string>(database);
+  if (!m_port) m_port = port;
   bool ret = mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(),
                             (database.empty() ? nullptr : database.data()),
@@ -536,7 +542,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     socket = MySQL::GetDefaultSocket();
   }
 
-  if (mySQL == nullptr && persistent) {
+  if (persistent) {
     auto p_mySQL = MySQL::GetPersistent(host, port, socket, username, password,
                                    client_flags);
 
@@ -581,12 +587,11 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     }
   }
 
-  MySQL::SetDefaultConn(mySQL);
-
   if (savePersistent) {
     MySQL::SetPersistent(host, port, socket, username, password,
                          client_flags, mySQL);
   }
+  MySQL::SetDefaultConn(mySQL);
   return Resource(mySQL);
 }
 

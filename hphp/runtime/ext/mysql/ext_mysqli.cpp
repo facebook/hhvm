@@ -231,6 +231,8 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 }
 
 static void HHVM_METHOD(mysqli, hh_init) {
+  Resource data = new MySQL(nullptr, 0, nullptr, nullptr, nullptr);
+  this_->o_set(s_connection, data, s_mysqli.get());
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
@@ -242,14 +244,15 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
     persistent = true;
     s = s.substr(2);
   }
-  // lets let leave the connection/reconnection managemenent to mysql_common
-  // so we can have persistent connections
-  auto data = php_mysql_do_connect_on_link(
-                  nullptr, s, username.toString(), password.toString(),
+  auto conn = get_connection(this_);
+  assert(conn);
+  Variant ret = php_mysql_do_connect_on_link(
+                  conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
                   -1, -1);
-  if (data.toBoolean()) {
-    this_->o_set(s_connection, data, s_mysqli.get());
+  if (ret.toBoolean()) {
+    // replace the connection incase we get a different one back (persistent)
+    this_->o_set(s_connection, ret, s_mysqli.get());
     return true;
   } else {
     return false;

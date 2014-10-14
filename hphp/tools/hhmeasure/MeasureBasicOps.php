@@ -1,4 +1,4 @@
-<?hh
+<?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 /*
@@ -105,7 +105,7 @@ class Runner {
   // Add microbenchmarks to BasicOps.php and add calls to them here
   public static function runtestsBasic() {
     /* 0: Do nothing */
-    $loop_do_nothing = function (int $count) {
+    $loop_do_nothing = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
       }
@@ -114,7 +114,7 @@ class Runner {
     TimeHHOperations::timeop('nothing', $loop_do_nothing);
 
     /* 1: Function call */
-    $loop_function_call = function (int $count) {
+    $loop_function_call = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += function_call(0);
@@ -124,7 +124,7 @@ class Runner {
     TimeHHOperations::timeop('function_call', $loop_function_call);
 
     /* 2: Method call */
-    $loop_static_method_call = function (int $count) {
+    $loop_static_method_call = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += MethodCall::callStaticMethod(0);
@@ -134,7 +134,7 @@ class Runner {
     TimeHHOperations::
       timeop('static_method_call', $loop_static_method_call);
 
-    $loop_instance_method_call = function (int $count) {
+    $loop_instance_method_call = function ($count) {
       $result = 0;
       $instance = new MethodCall();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -145,7 +145,7 @@ class Runner {
     TimeHHOperations::
       timeop('instance_method_call', $loop_instance_method_call);
 
-    $loop_interface_method_call = function (int $count) {
+    $loop_interface_method_call = function ($count) {
       $result = 0;
       $instance = new Class0();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -157,7 +157,7 @@ class Runner {
       timeop('interface_method_call', $loop_interface_method_call);
 
     /* 3: IndexArrayMap */
-    $loop_idxemptyarray = function (int $count) {
+    $loop_idxemptyarray = function ($count) {
       $result = 0;
       $instance = new EmptyArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -167,7 +167,7 @@ class Runner {
     };
     TimeHHOperations::timeop('idxemptyarray', $loop_idxemptyarray);
 
-    $loop_idxnohit_smallarray = function (int $count) {
+    $loop_idxnohit_smallarray = function ($count) {
       $result = 0;
       $instance = new NoHitSmallArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -178,7 +178,7 @@ class Runner {
     TimeHHOperations::
       timeop('idxnohit_smallarray', $loop_idxnohit_smallarray);
 
-    $loop_idxhit_smallarray = function (int $count) {
+    $loop_idxhit_smallarray = function ($count) {
       $result = 0;
       $instance = new HitSmallArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -189,7 +189,7 @@ class Runner {
     TimeHHOperations::
       timeop('idxhit_smallarray', $loop_idxhit_smallarray);
 
-    $loop_idxnohit_largearray = function (int $count) {
+    $loop_idxnohit_largearray = function ($count) {
       $result = 0;
       $instance = new NoHitLargeArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -200,7 +200,7 @@ class Runner {
     TimeHHOperations::
       timeop('idxnohit_largearray', $loop_idxnohit_largearray);
 
-    $loop_idxhit_largearray = function (int $count) {
+    $loop_idxhit_largearray = function ($count) {
       $result = 0;
       $instance = new HitLargeArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -212,7 +212,7 @@ class Runner {
       timeop('idxhit_largearray', $loop_idxhit_largearray);
 
     /* 4: MethodExists */
-    $loop_methodexists_string = function (int $count) {
+    $loop_methodexists_string = function ($count) {
       $result = 0;
       $instance = new MethodExistsString();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -223,7 +223,7 @@ class Runner {
     TimeHHOperations::
       timeop('methodexists_string', $loop_methodexists_string);
 
-    $loop_methodexists = function (int $count) {
+    $loop_methodexists = function ($count) {
       $result = 0;
       $instance = new MethodExistsClass();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -234,7 +234,7 @@ class Runner {
     TimeHHOperations::
       timeop('methodexists', $loop_methodexists);
 
-    $loop_methodnotexists = function (int $count) {
+    $loop_methodnotexists = function ($count) {
       $result = 0;
       $instance = new MethodNotExistsClass();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -245,7 +245,7 @@ class Runner {
     TimeHHOperations::
       timeop('methodnotexists', $loop_methodnotexists);
 
-    $loop_methodexists_base = function (int $count) {
+    $loop_methodexists_base = function ($count) {
       $result = 0;
       $instance = new MethodExistsDerivedClass();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -256,7 +256,7 @@ class Runner {
     TimeHHOperations::
       timeop('methodexists_base', $loop_methodexists_base);
 
-    $loop_methodnotexists_base = function (int $count) {
+    $loop_methodnotexists_base = function ($count) {
       $result = 0;
       $instance = new MethodNotExistsDerivedClass();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -268,7 +268,7 @@ class Runner {
       timeop('methodnotexists_base', $loop_methodnotexists_base);
 
     /* 5: Field Access */
-    $loop_fieldaccess_staticint = function (int $count) {
+    $loop_fieldaccess_staticint = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += FieldAccess::accessStaticCounter();
@@ -278,7 +278,7 @@ class Runner {
     TimeHHOperations::
       timeop('fieldaccess_staticint', $loop_fieldaccess_staticint);
 
-    $loop_fieldaccess_instanceint = function (int $count) {
+    $loop_fieldaccess_instanceint = function ($count) {
       $result = 0;
       $instance = new FieldAccess();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -289,7 +289,7 @@ class Runner {
     TimeHHOperations::
       timeop('fieldaccess_instanceint', $loop_fieldaccess_instanceint);
 
-    $loop_fieldaccess_staticstring = function (int $count) {
+    $loop_fieldaccess_staticstring = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += FieldAccess::accessStaticString();
@@ -299,7 +299,7 @@ class Runner {
     TimeHHOperations::
       timeop('fieldaccess_staticstring', $loop_fieldaccess_staticstring);
 
-    $loop_fieldaccess_instancestring = function (int $count) {
+    $loop_fieldaccess_instancestring = function ($count) {
       $result = 0;
       $instance = new FieldAccess();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -311,7 +311,7 @@ class Runner {
       timeop('fieldaccess_instancestring', $loop_fieldaccess_instancestring);
 
     /* 6: Array Access */
-    $loop_arrayassign_int = function (int $count) {
+    $loop_arrayassign_int = function ($count) {
       $result = 0;
       $instance = new IntArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -322,7 +322,7 @@ class Runner {
     TimeHHOperations::
       timeop('arrayassign_int', $loop_arrayassign_int);
 
-    $loop_arrayassign_string = function (int $count) {
+    $loop_arrayassign_string = function ($count) {
       $result = 0;
       $instance = new StringArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -334,7 +334,7 @@ class Runner {
       timeop('arrayassign_string', $loop_arrayassign_string);
 
     /* 7: Closures et al */
-    $loop_anonymousfunc_instance = function (int $count) {
+    $loop_anonymousfunc_instance = function ($count) {
       $result = 0;
       $instance = new AnonymousFunctions();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -345,7 +345,7 @@ class Runner {
     TimeHHOperations::
       timeop('anonymousfunc_instance', $loop_anonymousfunc_instance);
 
-    $loop_anonymousfunc_static = function (int $count) {
+    $loop_anonymousfunc_static = function ($count) {
       $result = 0;
       $instance = new AnonymousFunctions();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -356,7 +356,7 @@ class Runner {
     TimeHHOperations::
       timeop('anonymousfunc_static', $loop_anonymousfunc_static);
 
-    $loop_variablefunc_instance = function (int $count) {
+    $loop_variablefunc_instance = function ($count) {
       $result = 0;
       $instance = new AnonymousFunctions();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -367,7 +367,7 @@ class Runner {
     TimeHHOperations::
       timeop('variablefunc_instance', $loop_variablefunc_instance);
 
-    $loop_variablefunc_static = function (int $count) {
+    $loop_variablefunc_static = function ($count) {
       $result = 0;
       $instance = new AnonymousFunctions();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -381,7 +381,7 @@ class Runner {
   }
 
   public static function runtestsInstanceof() {
-    $loop_instanceof_miss0 = function (int $count) {
+    $loop_instanceof_miss0 = function ($count) {
       $result = 0;
       $instance = new Miss0();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -391,7 +391,7 @@ class Runner {
     };
     TimeHHOperations::timeop('instanceof_miss0', $loop_instanceof_miss0);
 
-    $loop_instanceof_miss1 = function (int $count) {
+    $loop_instanceof_miss1 = function ($count) {
       $result = 0;
       $instance = new Miss1();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -401,7 +401,7 @@ class Runner {
     };
     TimeHHOperations::timeop('instanceof_miss1', $loop_instanceof_miss1);
 
-    $loop_instanceof_hit1 = function (int $count) {
+    $loop_instanceof_hit1 = function ($count) {
       $result = 0;
       $instance = new Hit1();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -411,7 +411,7 @@ class Runner {
     };
     TimeHHOperations::timeop('instanceof_hit1', $loop_instanceof_hit1);
 
-    $loop_instanceof_miss4 = function (int $count) {
+    $loop_instanceof_miss4 = function ($count) {
       $result = 0;
       $instance = new Miss4();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -421,7 +421,7 @@ class Runner {
     };
     TimeHHOperations::timeop('instanceof_miss4', $loop_instanceof_miss4);
 
-    $loop_instanceof_hit5 = function (int $count) {
+    $loop_instanceof_hit5 = function ($count) {
       $result = 0;
       $instance = new Hit5();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -433,7 +433,7 @@ class Runner {
   }
 
   public static function runtestsIsset() {
-    $loop_issetcheck = function (int $count) {
+    $loop_issetcheck = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += X::isX();
@@ -442,7 +442,7 @@ class Runner {
     };
     TimeHHOperations::timeop('issetcheck', $loop_issetcheck);
 
-    $loop_noissetcheck = function (int $count) {
+    $loop_noissetcheck = function ($count) {
       $result = 0;
       for ($iter = 0; $iter < $count; $iter++) {
         $result += Y::isY();
@@ -453,7 +453,7 @@ class Runner {
   }
 
   public static function runtestsIteration() {
-    $loop_iterate_sum20 = function (int $count) {
+    $loop_iterate_sum20 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -464,7 +464,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_sum20', $loop_iterate_sum20);
 
-    $loop_iterate_sum100 = function (int $count) {
+    $loop_iterate_sum100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -475,7 +475,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_sum100', $loop_iterate_sum100);
 
-    $loop_iterate_intarray10 = function (int $count) {
+    $loop_iterate_intarray10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -486,7 +486,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intarray_foreach10', $loop_iterate_intarray10);
 
-    $loop_iterate_intarrayfor10 = function (int $count) {
+    $loop_iterate_intarrayfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -497,7 +497,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intarray_for10', $loop_iterate_intarrayfor10);
 
-    $loop_iterate_stringarray10 = function (int $count) {
+    $loop_iterate_stringarray10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -508,7 +508,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringarray_foreach10', $loop_iterate_stringarray10);
 
-    $loop_iterate_stringarrayfor10 = function (int $count) {
+    $loop_iterate_stringarrayfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -519,7 +519,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringarray_for10', $loop_iterate_stringarrayfor10);
 
-    $loop_iterate_objectarray10 = function (int $count) {
+    $loop_iterate_objectarray10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -530,7 +530,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectarray_foreach10', $loop_iterate_objectarray10);
 
-    $loop_iterate_objectarrayfor10 = function (int $count) {
+    $loop_iterate_objectarrayfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -541,7 +541,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectarray_for10', $loop_iterate_objectarrayfor10);
 
-    $loop_iterate_intarray100 = function (int $count) {
+    $loop_iterate_intarray100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -552,7 +552,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intarray_foreach100', $loop_iterate_intarray100);
 
-    $loop_iterate_intarrayfor100 = function (int $count) {
+    $loop_iterate_intarrayfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -563,7 +563,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intarray_for100', $loop_iterate_intarrayfor100);
 
-    $loop_iterate_stringarray100 = function (int $count) {
+    $loop_iterate_stringarray100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -574,7 +574,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringarray_foreach100', $loop_iterate_stringarray100);
 
-    $loop_iterate_stringarrayfor100 = function (int $count) {
+    $loop_iterate_stringarrayfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -585,7 +585,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringarray_for100', $loop_iterate_stringarrayfor100);
 
-    $loop_iterate_objectarray100 = function (int $count) {
+    $loop_iterate_objectarray100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -596,7 +596,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectarray_foreach100', $loop_iterate_objectarray100);
 
-    $loop_iterate_objectarrayfor100 = function (int $count) {
+    $loop_iterate_objectarrayfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestArray();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -607,7 +607,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectarray_for100', $loop_iterate_objectarrayfor100);
 
-    $loop_iterate_intvector10 = function (int $count) {
+    $loop_iterate_intvector10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -618,7 +618,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intvector_foreach10', $loop_iterate_intvector10);
 
-    $loop_iterate_intvectorfor10 = function (int $count) {
+    $loop_iterate_intvectorfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -629,7 +629,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intvector_for10', $loop_iterate_intvectorfor10);
 
-    $loop_iterate_stringvector10 = function (int $count) {
+    $loop_iterate_stringvector10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -640,7 +640,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringvector_foreach10', $loop_iterate_stringvector10);
 
-    $loop_iterate_stringvectorfor10 = function (int $count) {
+    $loop_iterate_stringvectorfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -651,7 +651,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringvector_for10', $loop_iterate_stringvectorfor10);
 
-    $loop_iterate_objectvector10 = function (int $count) {
+    $loop_iterate_objectvector10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -662,7 +662,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectvector_foreach10', $loop_iterate_objectvector10);
 
-    $loop_iterate_objectvectorfor10 = function (int $count) {
+    $loop_iterate_objectvectorfor10 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -673,7 +673,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectvector_for10', $loop_iterate_objectvectorfor10);
 
-    $loop_iterate_intvector100 = function (int $count) {
+    $loop_iterate_intvector100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -684,7 +684,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intvector_foreach100', $loop_iterate_intvector100);
 
-    $loop_iterate_intvectorfor100 = function (int $count) {
+    $loop_iterate_intvectorfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -695,7 +695,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_intvector_for100', $loop_iterate_intvectorfor100);
 
-    $loop_iterate_stringvector100 = function (int $count) {
+    $loop_iterate_stringvector100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -706,7 +706,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringvector_foreach100', $loop_iterate_stringvector100);
 
-    $loop_iterate_stringvectorfor100 = function (int $count) {
+    $loop_iterate_stringvectorfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -717,7 +717,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_stringvector_for100', $loop_iterate_stringvectorfor100);
 
-    $loop_iterate_objectvector100 = function (int $count) {
+    $loop_iterate_objectvector100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -728,7 +728,7 @@ class Runner {
     TimeHHOperations::
       timeop('iterate_objectvector_foreach100', $loop_iterate_objectvector100);
 
-    $loop_iterate_objectvectorfor100 = function (int $count) {
+    $loop_iterate_objectvectorfor100 = function ($count) {
       $result = 0;
       $instance = new IteratorTestVector();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -741,7 +741,7 @@ class Runner {
   }
 
   public static function runtestsRegex() {
-    $loop_regex_pcre_len18 = function (int $count) {
+    $loop_regex_pcre_len18 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -752,7 +752,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_pcre_len18', $loop_regex_pcre_len18);
 
-    $loop_regex_posix_len18 = function (int $count) {
+    $loop_regex_posix_len18 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -763,7 +763,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_posix_len18', $loop_regex_posix_len18);
 
-    $loop_regex_byhand_len18 = function (int $count) {
+    $loop_regex_byhand_len18 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -774,7 +774,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_byhand_len18', $loop_regex_byhand_len18);
 
-    $loop_regex_pcre_len85 = function (int $count) {
+    $loop_regex_pcre_len85 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -785,7 +785,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_pcre_len85', $loop_regex_pcre_len85);
 
-    $loop_regex_posix_len85 = function (int $count) {
+    $loop_regex_posix_len85 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -796,7 +796,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_posix_len85', $loop_regex_posix_len85);
 
-    $loop_regex_byhand_len85 = function (int $count) {
+    $loop_regex_byhand_len85 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -807,7 +807,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_byhand_len85', $loop_regex_byhand_len85);
 
-    $loop_regex_pcre_len152 = function (int $count) {
+    $loop_regex_pcre_len152 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -818,7 +818,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_pcre_len152', $loop_regex_pcre_len152);
 
-    $loop_regex_posix_len152 = function (int $count) {
+    $loop_regex_posix_len152 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -829,7 +829,7 @@ class Runner {
     TimeHHOperations::
       timeop('regex_posix_len152', $loop_regex_posix_len152);
 
-    $loop_regex_byhand_len152 = function (int $count) {
+    $loop_regex_byhand_len152 = function ($count) {
       $result = 0;
       $instance = new RegEx();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -842,7 +842,7 @@ class Runner {
   }
 
   public static function runtestsReflection() {
-    $loop_reflection_getobjclassname = function (int $count) {
+    $loop_reflection_getobjclassname = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -853,7 +853,7 @@ class Runner {
     TimeHHOperations::
       timeop('reflection_getobjclassname', $loop_reflection_getobjclassname);
 
-    $loop_regular_gettype = function (int $count) {
+    $loop_regular_gettype = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -864,7 +864,7 @@ class Runner {
     TimeHHOperations::
       timeop('regular_gettype', $loop_regular_gettype);
 
-    $loop_refinvoke_emptystatic = function (int $count) {
+    $loop_refinvoke_emptystatic = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -875,7 +875,7 @@ class Runner {
     TimeHHOperations::
       timeop('refinvoke_emptystatic', $loop_refinvoke_emptystatic);
 
-    $loop_refinvoke_emptystatic5Arg = function (int $count) {
+    $loop_refinvoke_emptystatic5Arg = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -886,7 +886,7 @@ class Runner {
     TimeHHOperations::
       timeop('refinvoke_emptystatic5Arg', $loop_refinvoke_emptystatic5Arg);
 
-    $loop_refinvokeargs_emptystatic5Arg = function (int $count) {
+    $loop_refinvokeargs_emptystatic5Arg = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -898,7 +898,7 @@ class Runner {
       timeop('refinvokeargs_emptystatic5Arg',
        $loop_refinvokeargs_emptystatic5Arg);
 
-    $loop_regular_emptystaticmethodcall = function (int $count) {
+    $loop_regular_emptystaticmethodcall = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -910,7 +910,7 @@ class Runner {
       timeop('regular_emptystaticmethodcall',
         $loop_regular_emptystaticmethodcall);
 
-    $loop_regular_emptystaticmethod5argcall = function (int $count) {
+    $loop_regular_emptystaticmethod5argcall = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -922,7 +922,7 @@ class Runner {
       timeop('regular_emptystaticmethod_5args_call',
         $loop_regular_emptystaticmethod5argcall);
 
-    $loop_reflection_getinstanceintprop = function (int $count) {
+    $loop_reflection_getinstanceintprop = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -934,7 +934,7 @@ class Runner {
       timeop('reflection_getinstanceintprop',
         $loop_reflection_getinstanceintprop);
 
-    $loop_reflection_setinstanceintprop = function (int $count) {
+    $loop_reflection_setinstanceintprop = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {
@@ -946,7 +946,7 @@ class Runner {
       timeop('reflection_setinstanceintprop',
         $loop_reflection_setinstanceintprop);
 
-     $loop_regular_setinstanceintprop = function (int $count) {
+     $loop_regular_setinstanceintprop = function ($count) {
       $result = 0;
       $instance = new ReflectionTest();
       for ($iter = 0; $iter < $count; $iter++) {

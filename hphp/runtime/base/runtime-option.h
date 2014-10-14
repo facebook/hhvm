@@ -403,7 +403,6 @@ public:
      [1-UINT32_MAX] - raise warning every X times
   */                                                                    \
   F(uint32_t, HackArrayWarnFrequency,  0)                               \
-  F(bool, CheckMoreReturnTypeHints,    false)                           \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \

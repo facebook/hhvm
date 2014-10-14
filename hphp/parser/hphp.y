@@ -1865,7 +1865,7 @@ closure_expression:
     '{' inner_statement_list '}'       { _p->finishStatement($10, $10); $10 = 1;
                                          $$ = _p->onClosure(ClosureType::Long,
                                                             nullptr,
-                                                            $2,$5,$8,$10,$7);
+                                                            $2,$5,$8,$10);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
   | non_empty_member_modifiers
@@ -1879,7 +1879,7 @@ closure_expression:
     '{' inner_statement_list '}'       { _p->finishStatement($11, $11); $11 = 1;
                                          $$ = _p->onClosure(ClosureType::Long,
                                                             &$1,
-                                                            $3,$6,$9,$11,$8);
+                                                            $3,$6,$9,$11);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
 ;
@@ -1893,11 +1893,11 @@ lambda_expression:
                                          Token u;
                                          _p->onParam($1,NULL,u,$1,0,
                                                      NULL,NULL,NULL);}
-    lambda_body                        { Token v; Token w; Token x;
+    lambda_body                        { Token v; Token w;
                                          _p->finishStatement($3, $3); $3 = 1;
                                          $$ = _p->onClosure(ClosureType::Short,
                                                             nullptr,
-                                                            v,$1,w,$3,x);
+                                                            v,$1,w,$3);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
   | T_ASYNC
@@ -1909,13 +1909,13 @@ lambda_expression:
                                          Token u;
                                          _p->onParam($2,NULL,u,$2,0,
                                                      NULL,NULL,NULL);}
-    lambda_body                        { Token v; Token w; Token x;
+    lambda_body                        { Token v; Token w;
                                          $1 = T_ASYNC;
                                          _p->onMemberModifier($1, nullptr, $1);
                                          _p->finishStatement($4, $4); $4 = 1;
                                          $$ = _p->onClosure(ClosureType::Short,
                                                             &$1,
-                                                            v,$2,w,$4,x);
+                                                            v,$2,w,$4);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
   | T_LAMBDA_OP                        { _p->pushFuncLocation();
@@ -1930,7 +1930,7 @@ lambda_expression:
                                          _p->finishStatement($6, $6); $6 = 1;
                                          $$ = _p->onClosure(ClosureType::Short,
                                                             nullptr,
-                                                            u,$3,v,$6,$5);
+                                                            u,$3,v,$6);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
   | T_ASYNC
@@ -1948,7 +1948,7 @@ lambda_expression:
                                          _p->finishStatement($7, $7); $7 = 1;
                                          $$ = _p->onClosure(ClosureType::Short,
                                                             &$1,
-                                                            u,$4,v,$7,$6);
+                                                            u,$4,v,$7);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
 ;

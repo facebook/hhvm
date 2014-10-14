@@ -10062,7 +10062,7 @@ yyreduce:
     { _p->finishStatement((yyvsp[(10) - (11)]), (yyvsp[(10) - (11)])); (yyvsp[(10) - (11)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Long,
                                                             nullptr,
-                                                            (yyvsp[(2) - (11)]),(yyvsp[(5) - (11)]),(yyvsp[(8) - (11)]),(yyvsp[(10) - (11)]),(yyvsp[(7) - (11)]));
+                                                            (yyvsp[(2) - (11)]),(yyvsp[(5) - (11)]),(yyvsp[(8) - (11)]),(yyvsp[(10) - (11)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;
@@ -10084,7 +10084,7 @@ yyreduce:
     { _p->finishStatement((yyvsp[(11) - (12)]), (yyvsp[(11) - (12)])); (yyvsp[(11) - (12)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Long,
                                                             &(yyvsp[(1) - (12)]),
-                                                            (yyvsp[(3) - (12)]),(yyvsp[(6) - (12)]),(yyvsp[(9) - (12)]),(yyvsp[(11) - (12)]),(yyvsp[(8) - (12)]));
+                                                            (yyvsp[(3) - (12)]),(yyvsp[(6) - (12)]),(yyvsp[(9) - (12)]),(yyvsp[(11) - (12)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;
@@ -10107,11 +10107,11 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1896 "hphp.y"
-    { Token v; Token w; Token x;
+    { Token v; Token w;
                                          _p->finishStatement((yyvsp[(3) - (3)]), (yyvsp[(3) - (3)])); (yyvsp[(3) - (3)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Short,
                                                             nullptr,
-                                                            v,(yyvsp[(1) - (3)]),w,(yyvsp[(3) - (3)]),x);
+                                                            v,(yyvsp[(1) - (3)]),w,(yyvsp[(3) - (3)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;
@@ -10134,13 +10134,13 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1912 "hphp.y"
-    { Token v; Token w; Token x;
+    { Token v; Token w;
                                          (yyvsp[(1) - (4)]) = T_ASYNC;
                                          _p->onMemberModifier((yyvsp[(1) - (4)]), nullptr, (yyvsp[(1) - (4)]));
                                          _p->finishStatement((yyvsp[(4) - (4)]), (yyvsp[(4) - (4)])); (yyvsp[(4) - (4)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Short,
                                                             &(yyvsp[(1) - (4)]),
-                                                            v,(yyvsp[(2) - (4)]),w,(yyvsp[(4) - (4)]),x);
+                                                            v,(yyvsp[(2) - (4)]),w,(yyvsp[(4) - (4)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;
@@ -10164,7 +10164,7 @@ yyreduce:
                                          _p->finishStatement((yyvsp[(6) - (6)]), (yyvsp[(6) - (6)])); (yyvsp[(6) - (6)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Short,
                                                             nullptr,
-                                                            u,(yyvsp[(3) - (6)]),v,(yyvsp[(6) - (6)]),(yyvsp[(5) - (6)]));
+                                                            u,(yyvsp[(3) - (6)]),v,(yyvsp[(6) - (6)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;
@@ -10190,7 +10190,7 @@ yyreduce:
                                          _p->finishStatement((yyvsp[(7) - (7)]), (yyvsp[(7) - (7)])); (yyvsp[(7) - (7)]) = 1;
                                          (yyval) = _p->onClosure(ClosureType::Short,
                                                             &(yyvsp[(1) - (7)]),
-                                                            u,(yyvsp[(4) - (7)]),v,(yyvsp[(7) - (7)]),(yyvsp[(6) - (7)]));
+                                                            u,(yyvsp[(4) - (7)]),v,(yyvsp[(7) - (7)]));
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);;}
     break;

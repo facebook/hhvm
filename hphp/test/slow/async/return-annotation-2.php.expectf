@@ -1,1 +1,0 @@
-Fatal error: Return type hint for async function f() must be Awaitable in %s on line 2

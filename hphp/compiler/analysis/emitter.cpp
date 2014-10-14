@@ -6299,34 +6299,6 @@ void EmitterVisitor::emitPostponedMeths() {
     fe->isAsync = funcScope->isAsync();
     fe->isGenerator = funcScope->isGenerator();
 
-    if (RuntimeOption::EvalCheckMoreReturnTypeHints) {
-      if (fe->isAsync && !fe->isGenerator && meth->retTypeAnnotation()) {
-        auto rta = meth->retTypeAnnotation();
-        auto nTypeArgs = rta->numTypeArgs();
-        if (!rta->isAwaitable()) {
-          if (fe->isClosureBody) {
-            throw IncludeTimeFatalException(
-              meth,
-              "Return type hint for async closure must be Awaitable"
-            );
-          } else {
-            throw IncludeTimeFatalException(
-              meth,
-              "Return type hint for async %s %s() must be Awaitable",
-              meth->getClassScope() ? "method" : "function",
-              meth->getOriginalFullName().c_str()
-            );
-          }
-        }
-        if (nTypeArgs >= 2) {
-          throw IncludeTimeFatalException(
-            meth,
-            "Awaitable interface expects 1 type argument, %d given",
-            nTypeArgs);
-        }
-      }
-    }
-
     if (funcScope->userAttributes().count("__Memoize")) {
       auto classScope = meth->getClassScope();
 

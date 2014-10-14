@@ -1921,21 +1921,15 @@ Token Parser::onClosure(ClosureType type,
                         Token& ref,
                         Token& params,
                         Token& cparams,
-                        Token& stmts,
-                        Token& ret) {
+                        Token& stmts) {
   Token out;
   Token name;
 
-  if (!RuntimeOption::EvalCheckMoreReturnTypeHints) {
-    if (ret.typeAnnotation) {
-      ret.typeAnnotation->setSoft();
-    }
-  }
-
+  Token retIgnore;
   auto stmt = onFunctionHelper(
     FunctionType::Closure,
     modifiers,
-    ret,
+    retIgnore,
     ref,
     nullptr,
     params,

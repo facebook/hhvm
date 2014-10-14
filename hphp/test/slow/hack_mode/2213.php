@@ -30,7 +30,7 @@ function right_shift_hack(Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo>,Foo>>,Foo
 }
 
 $a = blarg('a','aa','aaa');
-$d = (function():string{
+$d = (function():UNICORNS{
 return 'd';
 }
 );

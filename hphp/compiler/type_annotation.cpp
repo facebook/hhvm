@@ -180,7 +180,13 @@ void TypeAnnotation::appendToTypeList(TypeAnnotationPtr typeList) {
 
 void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
   TypeAnnotationPtr typeArgsElem = m_typeArgs;
-  auto numTypeArgs = this->numTypeArgs();
+  auto numTypeArgs = 0;
+  while (typeArgsElem != nullptr) {
+    numTypeArgs++;
+    typeArgsElem = typeArgsElem->m_typeList;
+  }
+  typeArgsElem = m_typeArgs;
+
   auto numProps = 1;
   if (m_nullable) numProps++;
   if (m_soft) numProps++;
@@ -223,16 +229,6 @@ void TypeAnnotation::outputCodeModel(CodeGenerator& cg) {
     cg.printf("}");
   }
   cg.printObjectFooter();
-}
-
-int TypeAnnotation::numTypeArgs() const {
-  int n = 0;
-  TypeAnnotationPtr typeEl = m_typeArgs;
-  while (typeEl) {
-    ++n;
-    typeEl = typeEl->m_typeList;
-  }
-  return n;
 }
 
 }

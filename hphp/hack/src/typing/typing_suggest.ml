@@ -221,12 +221,3 @@ let normalize ty =
   try
     Some (normalize ty)
   with Exit -> None
-
-(* Function called when we found a missing ? *)
-let save_qm p =
-  (*
-  if !save_types
-  then save_qms := PSet.add p !save_qms
-  else ()
-*)
-  ()

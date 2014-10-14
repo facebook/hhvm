@@ -238,7 +238,6 @@ and make_param_type_ ~for_body default env param =
         match (param.param_expr) with
           | Some (null_pos, Null) when not (Env.is_decl env) ->
             Errors.nullable_parameter (fst x);
-            Typing_suggest.save_qm (fst x);
             let env, ty = Typing_hint.hint env x in
             env, (Reason.Rwitness null_pos, Toption ty)
           | Some _ | None -> Typing_hint.hint env x

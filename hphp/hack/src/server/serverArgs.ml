@@ -39,7 +39,6 @@ let print_usage_and_exit () =
 
 module Messages = struct
   let debug         = " debugging mode"
-  let suggest_types = " generates the file hh_pad_patches"
   let check         = " check and exit"
   let json          = " output errors in json format (arc lint mode)"
   let daemon        = " detach process"
@@ -69,12 +68,10 @@ let populate_options () =
   let check_mode    = ref false in
   let json_mode     = ref false in
   let should_detach = ref false in
-  let save_types    = ref false in
   let convert_dir   = ref None  in
   let cdir          = fun s -> convert_dir := Some s in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
-     "--suggest-types" , arg save_types    , Messages.suggest_types;
      "--check"         , arg check_mode    , Messages.check;
      "--json"          , arg json_mode     , Messages.json; (* CAREFUL!!! *)
      "--daemon"        , arg should_detach , Messages.daemon;

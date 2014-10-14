@@ -322,9 +322,9 @@ let apply_patches tried_patches genv env continue patches =
   ()
 
 (* Main entry point *)
-let go genv env root modified dirname_path =
+let go genv env root dirname_path =
   let dirname = Path.string_of_path dirname_path in
-  let env = ref (ServerInit.init genv env modified) in
+  let env = ref env in
   let continue = ref false in
   check_no_error genv !env;
   let tried_patches = Hashtbl.create 23 in

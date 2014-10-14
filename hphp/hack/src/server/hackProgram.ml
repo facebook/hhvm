@@ -218,14 +218,14 @@ module Program : Server.SERVER_PROGRAM = struct
       match next_files_hhi () with
       | [] -> next_files_root ()
       | x -> x in
+    let env = ServerInit.init genv env next_files in
     match ServerArgs.convert genv.options with
     | None ->
-        let env = ServerInit.init genv env next_files in
         if ServerArgs.check_mode genv.options
         then Server.Exit (if env.errorl = [] then 0 else 1)
         else Server.Continue env
     | Some dirname ->
-        ServerConvert.go genv env root next_files dirname;
+        ServerConvert.go genv env root dirname;
         Server.Exit 0
 
   let recheck genv env updates report =

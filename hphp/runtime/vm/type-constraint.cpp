@@ -431,7 +431,9 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   auto const givenType = describe_actual_type(tv, isHHType());
   // Handle return type constraint failures
   if (id == ReturnId) {
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft() &&
+        (!func->isClosureBody() ||
+         !RuntimeOption::EvalSoftClosureReturnTypeHints)) {
       raise_typehint_error(
         folly::format(
           "Value returned from {}() must be of type {}, {} given",

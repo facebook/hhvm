@@ -1,0 +1,1 @@
+Fatal error: Return type hint for async closure must be awaitable in %s on line 3

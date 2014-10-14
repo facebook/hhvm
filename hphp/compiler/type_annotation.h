@@ -109,6 +109,15 @@ public:
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "HH\\this"); }
 
+  bool isAwaitable() const {
+    return !strcasecmp(m_name.c_str(), "HH\\Awaitable");
+  }
+
+  bool isWaitHandle() const {
+    return !strcasecmp(m_name.c_str(), "WaitHandle") ||
+           !strcasecmp(m_name.c_str(), "HH\\WaitHandle");
+  }
+
   /*
    * Returns whether this TypeAnnotation is "simple"---as described
    * above, this implies it has only one level of depth.  Both the
@@ -161,6 +170,8 @@ public:
    *  Serializes the type annotation using the given CodeGenerator.
    */
   void outputCodeModel(CodeGenerator& cg);
+
+  int numTypeArgs() const;
 
 private:
   void functionTypeName(std::string &name) const;

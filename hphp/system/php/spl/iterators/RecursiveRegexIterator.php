@@ -55,7 +55,7 @@ class RecursiveRegexIterator extends RegexIterator
    *                     iterated over by the inner iterator.
    */
   public function getChildren() {
-    if (ini_get("hhvm.spl.recursive_regex_iterator.use_parent_flags") {
+    if (ini_get("hhvm.spl.recursive_regex_iterator.use_parent_flags")) {
       return new RecursiveRegexIterator(
         $this->hasChildren() ? $this->getInnerIterator()->getChildren() : null,
         $this->getRegex(),

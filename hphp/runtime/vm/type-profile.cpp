@@ -24,7 +24,8 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/String.h"
+#include <folly/Optional.h>
+#include <folly/String.h>
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/lock.h"
@@ -399,7 +400,7 @@ void recordType(TypeProfileKey key, DataType dt) {
   ONTRACE(2, prof->dump());
 }
 
-typedef std::pair<DataType, double> PredVal;
+typedef std::pair<folly::Optional<DataType>, double> PredVal;
 
 PredVal predictType(TypeProfileKey key) {
   PredVal kNullPred = std::make_pair(KindOfUninit, 0.0);
@@ -437,6 +438,7 @@ PredVal predictType(TypeProfileKey key) {
   if (maxProb > 1.0) maxProb = 1.0;
   return std::make_pair(pred, maxProb);
 }
+
 //////////////////////////////////////////////////////////////////////
 
 }

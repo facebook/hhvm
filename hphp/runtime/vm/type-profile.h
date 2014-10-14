@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/hhbc.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -52,7 +54,7 @@ void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
 void recordType(TypeProfileKey sk, DataType dt);
-std::pair<DataType, double> predictType(TypeProfileKey key);
+std::pair<folly::Optional<DataType>, double> predictType(TypeProfileKey key);
 int64_t requestCount();
 
 /*

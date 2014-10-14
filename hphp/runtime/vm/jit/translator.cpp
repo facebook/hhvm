@@ -162,7 +162,15 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
   return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
-static folly::Optional<DataType>
+
+///////////////////////////////////////////////////////////////////////////////
+// Type predictions.
+
+namespace {
+
+using TypePred = std::pair<folly::Optional<DataType>, double>;
+
+folly::Optional<DataType>
 predictionForRepoAuthType(RepoAuthType repoTy) {
   using T = RepoAuthType::Tag;
   switch (repoTy.tag()) {
@@ -210,8 +218,7 @@ predictionForRepoAuthType(RepoAuthType repoTy) {
   not_reached();
 }
 
-static std::pair<DataType,double>
-predictMVec(const NormalizedInstruction* ni) {
+TypePred predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
                                      ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
@@ -219,14 +226,14 @@ predictMVec(const NormalizedInstruction* ni) {
     auto const predTy = predictionForRepoAuthType(info.repoAuthType);
     if (predTy) {
       FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
-        static_cast<int>(*predTy));
-      return std::make_pair(*predTy, 1.0);
+                static_cast<int>(*predTy));
+      return std::make_pair(predTy, 1.0);
     }
     // If the RepoAuthType converts to an exact data type, there's no
     // point in having a prediction because we know its type with 100%
     // accuracy.  Disable it in that case here.
     if (convertToDataType(info.repoAuthType)) {
-      return std::make_pair(KindOfAny, 0.0);
+      return std::make_pair(folly::none, 0.0);
     }
   }
 
@@ -238,22 +245,20 @@ predictMVec(const NormalizedInstruction* ni) {
     TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
           mc == MET ? "elt" : "prop",
           name->data(),
-          pred.first,
+          pred.first ? *pred.first : -1,
           pred.second);
     return pred;
   }
 
-  return std::make_pair(KindOfAny, 0.0);
+  return std::make_pair(folly::none, 0.0);
 }
 
 /*
- * predictOutputs --
- *
- *   Provide a best guess for the output type of this instruction.
+ * Provide a best guess for the output type of this instruction.
  */
-static DataType
+folly::Optional<DataType>
 predictOutputs(const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
+  if (!RuntimeOption::EvalJitTypePrediction) return folly::none;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
@@ -270,8 +275,7 @@ predictOutputs(const NormalizedInstruction* ni) {
         case KindOfObject:
         case KindOfResource:
           break;
-        // KindOfRef and KindOfUninit can't happen for lots of predicted
-        // types.
+        // KindOfRef and KindOfUninit can't happen for lots of predicted types.
         case KindOfRef:
         case KindOfUninit:
         default:
@@ -369,8 +373,9 @@ predictOutputs(const NormalizedInstruction* ni) {
      */
 
     auto inType = ni->inputs[0]->rtt;
-    auto const inDt = inType.isKnownDataType() ? inType.toDataType()
-                                               : KindOfAny;
+    auto const inDt = inType.isKnownDataType()
+      ? folly::make_optional(inType.toDataType())
+      : folly::none;
     // If the base is a string, the output is probably a string. Unless the
     // member code is MW, then we're either going to fatal or promote the
     // string to an array.
@@ -395,7 +400,11 @@ predictOutputs(const NormalizedInstruction* ni) {
 
   auto const op = ni->op();
   static const double kAccept = 1.0;
-  std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
+
+  std::pair<folly::Optional<DataType>, double> pred {
+    std::make_pair(folly::none, 0.0)
+  };
+
   if (op == OpCGetS) {
     auto nameType = ni->inputs[1]->rtt;
     if (nameType.isConst(Type::Str)) {
@@ -404,7 +413,7 @@ predictOutputs(const NormalizedInstruction* ni) {
                                         propName));
       TRACE(1, "prediction for static fields named %s: %d, %f\n",
             propName->data(),
-            pred.first,
+            pred.first ? *pred.first : -1,
             pred.second);
     }
   } else if (op == OpCGetM) {
@@ -419,17 +428,22 @@ predictOutputs(const NormalizedInstruction* ni) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
              invName->data(),
-             pred.first,
+             pred.first ? *pred.first : -1,
              pred.second);
     }
   }
   if (pred.second >= kAccept) {
-    FTRACE(1, "accepting prediction of type {}\n", pred.first);
-    assert(pred.first != KindOfUninit);
+    FTRACE(1, "accepting prediction of type {}\n",
+              pred.first ? *pred.first : -1);
+    assert(!pred.first || *pred.first != KindOfUninit);
     return pred.first;
   }
-  return KindOfAny;
+  return folly::none;
 }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * NB: this opcode structure is sparse; it cannot just be indexed by
@@ -922,8 +936,8 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(&inst);
-    if (dt != KindOfAny) {
-      inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
+    if (dt) {
+      inst.outPred = Type(*dt, *dt == KindOfRef ? KindOfAny : KindOfNone);
       inst.outputPredicted = true;
     } else {
       doPrediction = false;

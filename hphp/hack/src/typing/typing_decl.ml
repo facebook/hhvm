@@ -24,6 +24,8 @@ module DynamicYield = Typing_dynamic_yield
 module Reason = Typing_reason
 module Inst = Typing_instantiate
 
+module SN = Naming_special_names
+
 (*****************************************************************************)
 (* Module used to track what classes are declared and which ones still need
  * to be processed. The declaration phase happens in parallel. Because of that
@@ -404,7 +406,7 @@ and class_decl c =
   let consts = inherited.Typing_inherit.ih_consts in
   let env, consts =
     List.fold_left (class_const_decl c) (env, consts) c.c_consts in
-  let consts = SMap.add "class" (class_class_decl c.c_name) consts in
+  let consts = SMap.add SN.Members.mClass (class_class_decl c.c_name) consts in
   let sclass_var = static_class_var_decl c in
   let scvars = inherited.Typing_inherit.ih_scvars in
   let env, scvars = List.fold_left sclass_var (env, scvars) c.c_static_vars in
@@ -419,11 +421,11 @@ and class_decl c =
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
   let impl = match SMap.get "__toString" m with
-    | Some {ce_type = (_, Tfun ft); _} when cls_name <> "\\Stringish" ->
+    | Some {ce_type = (_, Tfun ft); _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = ft.ft_pos in
-      let h = (pos, Nast.Happly ((pos, "\\Stringish"), [])) in
+      let h = (pos, Nast.Happly ((pos, SN.Classes.cStringish), [])) in
       h :: impl
     | _ -> impl
   in
@@ -688,7 +690,7 @@ and method_decl c env m =
       | None, FAsync ->
         let pos = fst m.m_name in
         env, (Reason.Rasync_ret pos,
-              Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))
+              Tapply ((pos, SN.Classes.cAwaitable), [(Reason.Rwitness pos, Tany)]))
       | Some ret, _ -> Typing_hint.hint env ret in
   let env, arity = match m.m_variadic with
     | FVvariadicArg param ->

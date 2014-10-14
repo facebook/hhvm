@@ -17,6 +17,7 @@
 open Utils
 
 module Env = Typing_env
+module SN = Naming_special_names
 
 exception Timeout
 let timeout secs f =
@@ -98,7 +99,7 @@ let resolve_types acc collated_values =
         let xhp = reason, Typing_defs.Tapply ((Pos.none, "\\:xhp"), []) in
         let xhp_option = reason, Typing_defs.Toption xhp in
         let awaitable ty =
-          reason, Typing_defs.Tapply ((Pos.none, "\\Awaitable"), [ty]) in
+          reason, Typing_defs.Tapply ((Pos.none, SN.Classes.cAwaitable), [ty]) in
         let awaitable_xhp = awaitable xhp in
         let awaitable_xhp_option = awaitable xhp_option in
 

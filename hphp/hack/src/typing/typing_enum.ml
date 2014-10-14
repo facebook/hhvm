@@ -18,6 +18,8 @@ open Nast
 open Utils
 open Typing_defs
 
+module SN = Naming_special_names
+
 (* Figures out if a class needs to be treated like an enum and if so returns
  * Some(base, type, constraint), where base is the underlying type of the
  * enum, type is the actual type of enum elements, and constraint is
@@ -27,10 +29,10 @@ open Typing_defs
 let is_enum name enum ancestors =
   match enum with
     | None ->
-      (match SMap.get "\\Enum" ancestors with
-        | Some (_, (Tapply ((_, "\\Enum"), [ty_exp]))) ->
+      (match SMap.get SN.FB.cEnum ancestors with
+        | Some (_, (Tapply ((_, enum), [ty_exp]))) when enum = SN.FB.cEnum ->
           (* If the class is a subclass of UncheckedEnum, ignore it. *)
-          if SMap.mem "\\UncheckedEnum" ancestors then None
+          if SMap.mem SN.FB.cUncheckedEnum ancestors then None
           else Some (ty_exp, ty_exp, None)
         | _ -> None)
     | Some enum ->
@@ -110,7 +112,7 @@ let enum_class_decl_rewrite env name enum ancestors consts =
       (* A special constant called "class" gets added, and we don't
        * want to rewrite its type. *)
       SMap.mapi (function k -> function c ->
-                 if k = "class" then c else {c with ce_type = ty})
+                 if k = SN.Members.mClass then c else {c with ce_type = ty})
         consts
 
 let get_constant tc (seen, has_default) = function
@@ -132,7 +134,7 @@ let get_constant tc (seen, has_default) = function
 let check_enum_exhaustiveness env pos tc caselist =
   let (seen, has_default) =
     List.fold_left (get_constant tc) (SMap.empty, false) caselist in
-  let consts = SMap.remove "class" tc.tc_consts in
+  let consts = SMap.remove SN.Members.mClass tc.tc_consts in
   let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
   match (all_cases_handled, has_default) with
     | false, false ->

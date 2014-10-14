@@ -259,8 +259,11 @@ let hh_get_method_at_position fn line char =
             (match c.Nast.c_constructor with
             | None -> ()
             | Some method_ ->
-                Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                    "__construct" (fst method_.Nast.m_name));
+              Find_refs.process_find_refs
+                (Some (snd c.Nast.c_name))
+                Naming_special_names.Members.__construct
+                (fst method_.Nast.m_name)
+            );
             let res = Typing.class_def tenv (snd c.Nast.c_name) c in
             res
         | _ -> ()

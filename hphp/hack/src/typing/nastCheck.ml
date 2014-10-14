@@ -233,12 +233,12 @@ type env = {
 let is_magic =
   let h = Hashtbl.create 23 in
   let a x = Hashtbl.add h x true in
-  a "__set";
-  a "__isset";
-  a "__get";
-  a "__unset";
-  a "__call";
-  a "__callStatic";
+  a Naming_special_names.Members.__set;
+  a Naming_special_names.Members.__isset;
+  a Naming_special_names.Members.__get;
+  a Naming_special_names.Members.__unset;
+  a Naming_special_names.Members.__call;
+  a Naming_special_names.Members.__callStatic;
   fun (_, s) ->
     Hashtbl.mem h s
 
@@ -433,7 +433,7 @@ and class_var env cv =
   ()
 
 and check__toString m is_static =
-  if snd m.m_name = "__toString"
+  if snd m.m_name = Naming_special_names.Members.__toString
   then begin
     if m.m_visibility <> Public || is_static
     then Errors.toString_visibility (fst m.m_name);

@@ -4,10 +4,9 @@ TOP=..
 ##############################################################################
 TARGET=lib
 
-SRC= nast.ml nastVisitor.ml \
+SRC= naming_special_names.ml nast.ml nastVisitor.ml \
  naming_heap.ml \
  naming_ast_helpers.ml naming_hooks.ml naming.ml
-
 
 INCLUDEDIRS=$(TOP)/utils \
   $(TOP)/globals \
@@ -32,4 +31,3 @@ $(TARGET).cma: $(OBJS)
 
 $(TARGET).cmxa: $(OBJS:.cmo=.cmx) $(LIBS:.cma=.cmxa)
 	$(OCAMLOPT) -a -o $@ $^
-

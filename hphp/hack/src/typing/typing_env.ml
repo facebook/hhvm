@@ -13,6 +13,7 @@ open Utils
 open Typing_defs
 open Nast
 
+module SN = Naming_special_names
 module Dep = Typing_deps.Dep
 
 (* The following classes are used to make sure we make no typing
@@ -562,9 +563,9 @@ module FakeMembers = struct
   let make_static_id cid member_name =
     let class_name =
       match cid with
-      | CIparent -> "parent"
-      | CIself -> "self"
-      | CIstatic -> "static"
+      | CIparent -> SN.Classes.cParent
+      | CIself -> SN.Classes.cSelf
+      | CIstatic -> SN.Classes.cStatic
       | CIvar (_, This) -> "$this"
       | CIvar (_, Lvar (_, x)) -> "$"^string_of_int(x)
       | CIvar _ -> assert false

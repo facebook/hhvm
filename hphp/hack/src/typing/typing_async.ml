@@ -13,6 +13,7 @@ module Reason = Typing_reason
 module Type   = Typing_ops
 module Env    = Typing_env
 module TUtils = Typing_utils
+module SN     = Naming_special_names
 
 let enforce_not_awaitable env p ty =
   let _, ety = Env.expand_type env ty in
@@ -20,8 +21,9 @@ let enforce_not_awaitable env p ty =
   (* Match only a single unresolved -- this isn't typically how you
    * look into an unresolved, but the single list case is all we care
    * about since that's all you can get in this case (I think). *)
-  | _, Tunresolved [r, Tapply ((_, "\\Awaitable"), _)]
-  | r, Tapply ((_, "\\Awaitable"), _) ->
+  | _, Tunresolved [r, Tapply ((_, awaitable), _)]
+  | r, Tapply ((_, awaitable), _) when
+      awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
   | _ -> ()
 
@@ -54,8 +56,8 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     end tyl (env, []) in
     env, (r, Tunresolved rtyl)
   | _ ->
-    let expected_opt_type = r, Toption (r, Tapply ((p, "\\Awaitable"), [type_var])) in
-    let expected_non_opt_type = r, Tapply ((p, "\\Awaitable"), [type_var]) in
+    let expected_opt_type = r, Toption (r, Tapply ((p, SN.Classes.cAwaitable), [type_var])) in
+    let expected_non_opt_type = r, Tapply ((p, SN.Classes.cAwaitable), [type_var]) in
     let expected_type, return_type = (match e_opt_ty with
       | _, Toption _ ->
         expected_opt_type, (r, Toption type_var)
@@ -104,7 +106,7 @@ let gena env p ty =
 let genva env p tyl =
   let env, rtyl =
     overload_extract_from_awaitable_list env p tyl in
-  let inner_type = (Reason.Rwitness p, Ttuple rtyl) in 
+  let inner_type = (Reason.Rwitness p, Ttuple rtyl) in
   env, inner_type
 
 let rec gen_array_rec env p ty =

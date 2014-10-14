@@ -14,6 +14,8 @@ open Utils
 open Nast
 open Typing_defs
 
+module SN = Naming_special_names
+
 (* Exception raised when we hit a return statement and the initialization
  * is not over.
  * When that is the case, we bubble up back to the toplevel environment.
@@ -137,7 +139,7 @@ open Env
 (*****************************************************************************)
 
 let is_whitelisted = function
-  | "\\get_class" -> true
+  | x when x = SN.StdlibFunctions.get_class -> true
   | _ -> false
 
 let rec class_decl tenv c =

@@ -271,8 +271,9 @@ let from_parent env c =
       | Ast.Cenum ->
         let pos = fst c.c_name in
         let enum_type = pos, Happly (c.c_name, []) in
-        let parent = pos, Happly ((pos, "\\HH\\BuiltinEnum"),
-                                  [enum_type]) in
+        let parent =
+          pos, Happly ((pos, Naming_special_names.Classes.cHH_BuiltinEnum),
+                       [enum_type]) in
         [parent]
       | _ -> c.c_extends
   in

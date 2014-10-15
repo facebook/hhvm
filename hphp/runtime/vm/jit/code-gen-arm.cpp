@@ -1629,15 +1629,17 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const rFP   = srcLoc(1).reg();
   auto const ar = extra->numParams * sizeof(TypedValue);
   auto const srcKey = m_curInst->marker().sk();
+  auto const argc = extra->numParams;
+  auto const func = extra->callee;
   auto& v = vmain();
   v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storel{v.cns(extra->after), rSP[ar + AROFF(m_soff)]};
-  if (isNativeImplCall(extra->callee, extra->numParams)) {
+  if (isNativeImplCall(func, argc)) {
     // emitCallNativeImpl will adjust rVmSp
     assert(dstLoc(0).reg() == PhysReg(rVmSp));
-    emitCallNativeImpl(v, vcold(), srcKey, extra->callee, extra->numParams);
+    emitCallNativeImpl(v, vcold(), srcKey, func, argc);
   } else {
-    v << bindcall{srcKey, extra->callee, extra->numParams};
+    emitBindCall(v, m_frozen, srcKey, func, argc);
   }
 }
 
@@ -1857,7 +1859,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
   v << load{rds[RDS::kVmfpOff], fp};
   v << load{rds[RDS::kVmspOff], sp};
-  emitServiceReq(v, SRFlags::Persist, REQ_RESUME, {});
+  emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgLdClsName(IRInstruction* inst) {

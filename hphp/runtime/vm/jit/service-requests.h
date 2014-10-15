@@ -153,6 +153,10 @@ struct ReqBindCall {
   bool m_isImmutable; // call was to known func.
 };
 
+struct BindCallInfo {
+  ReqBindCall* req;
+  TCA stub; // address of stub to call
+};
 
 struct ServiceReqArgInfo {
   enum {

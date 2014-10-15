@@ -318,7 +318,8 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 }
 
 void Vgen::emit(bindcall& i) {
-  emitBindCall(*codeBlock, frozen(), i.sk, i.callee, i.argc);
+  i.req->m_toSmash = a->frontier();
+  mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
 }
 
 void Vgen::emit(bindexit& i) {
@@ -519,8 +520,11 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rds{rVmTl};
   v << store{vmfp, rds[RDS::kVmfpOff]};
   v << store{vmsp, rds[RDS::kVmspOff]};
-  v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
-  //  lea(rip[(int64_t)stubStart], jit::x64::rAsm); if !persist
+  if (svcreq.stub_block) {
+    always_assert(false && "use rip-rel addr to get ephemeral stub addr");
+  } else {
+    v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
+  }
   v << ldimm{svcreq.req, PhysReg{argReg(0)}};
   arg_regs.add(arm::rAsm).add(argReg(0));
 

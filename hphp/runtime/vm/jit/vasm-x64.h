@@ -369,7 +369,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 #define VASM_OPCODES\
   /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
-  O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
+  O(bindcall, I(stub) I(req), U(args), Dn)\
   O(bindexit, I(cc) I(target), U(sf), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
   O(bindjcc2nd, I(cc) I(target), U(sf), Dn)\
@@ -395,7 +395,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(point, I(p), Un, Dn)\
   O(store, Inone, U(s) U(d), Dn)\
-  O(svcreq, I(req), U(args), Dn)\
+  O(svcreq, I(req) I(stub_block), U(args), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -534,7 +534,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
-struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
+struct bindcall { TCA stub; ReqBindCall* req; RegSet args; };
 struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
                   TransFlags trflags; };
 struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2]; };
@@ -560,14 +560,13 @@ struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
-struct nop {};
 struct nothrow {};
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct point { Vpoint p; };
 struct store { Vreg s; Vptr d; };
-struct svcreq { ServiceRequest req; Vtuple args; };
+struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 struct landingpad {};
@@ -665,6 +664,7 @@ struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
+struct nop {};
 struct not { Vreg64 s, d; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };

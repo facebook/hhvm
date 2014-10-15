@@ -2285,13 +2285,9 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
 
 // generic vasm service-request generator. target specific details
 // are hidden by the svcreq{} instruction.
-void emitServiceReq(Vout& v, SRFlags flags, ServiceRequest req,
-                        const ServiceReqArgVec& argv) {
-  assert(!(flags & SRFlags::Align));
-  assert(flags & SRFlags::Persist);
-  assert(!(flags & SRFlags::JmpInsteadOfRet)); // jmp vs ret
+void emitServiceReq(Vout& v, TCA stub_block,
+                    ServiceRequest req, const ServiceReqArgVec& argv) {
   TRACE(3, "Emit Service Req %s(", serviceReqName(req));
-
   VregList args;
   for (auto& argInfo : argv) {
     switch (argInfo.m_kind) {
@@ -2306,7 +2302,7 @@ void emitServiceReq(Vout& v, SRFlags flags, ServiceRequest req,
       }
     }
   }
-  v << svcreq{req, v.makeTuple(args)};
+  v << svcreq{req, v.makeTuple(args), stub_block};
 }
 
 } // HPHP::jit

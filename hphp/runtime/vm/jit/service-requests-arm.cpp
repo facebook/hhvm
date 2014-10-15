@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit { namespace arm {
 
@@ -181,28 +182,32 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey,
   }
 }
 
-void emitBindCall(CodeBlock& main, CodeBlock& frozen, SrcKey srcKey,
+void emitBindCall(Vout& v, CodeBlock& frozen, SrcKey srcKey,
                   const Func* func, int numArgs) {
   assert(!isNativeImplCall(func, numArgs));
-  MacroAssembler a { main };
-  emitRegGetsRegPlusImm(a, rStashedAR, rVmSp, cellsToBytes(numArgs));
 
   ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
-
-  auto toSmash = main.frontier();
-  mcg->backEnd().emitSmashableCall(main, frozen.frontier());
-
-  MacroAssembler afrozen { frozen };
-  afrozen.  Mov  (serviceReqArgReg(1), rStashedAR);
-  // Put return address into pre-live ActRec, and restore the saved one.
-  emitStoreRetIntoActRec(afrozen);
-
-  emitServiceReq(frozen, REQ_BIND_CALL, req);
-
-  req->m_toSmash = toSmash;
   req->m_nArgs = numArgs;
   req->m_sourceInstr = srcKey;
   req->m_isImmutable = (bool)func;
+
+  // emit the mainline code
+  PhysReg new_fp{rStashedAR}, vmsp{arm::rVmSp};
+  v << lea{vmsp[cellsToBytes(numArgs)], new_fp};
+  v << bindcall{frozen.frontier(), req, RegSet(new_fp)};
+
+  // emit the stub into frozen as a persistent stub
+  {
+    Vauto vasm(frozen);
+    auto& vf = vasm.main();
+    vf << copy{new_fp, PhysReg(serviceReqArgReg(1))};
+    // Put return address into pre-live ActRec, and restore the saved one.
+    vf << store{PhysReg{rLinkReg}, new_fp[AROFF(m_savedRip)]};
+    ServiceReqArgVec argv;
+    packServiceReqArgs(argv, req);
+    emitServiceReq(vf, nullptr, REQ_BIND_CALL, argv);
+    printUnit(kVasmCodeGenLevel, "emitBindCall", vasm.unit());
+  }
 }
 
 }}}

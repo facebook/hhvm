@@ -102,6 +102,11 @@ struct FormatVisitor {
   void imm(ServiceRequest req) {
     str << sep() << serviceReqName(req);
   }
+  void imm(ReqBindCall* req) {
+    imm(req->m_sourceInstr);
+    imm(req->m_nArgs);
+    imm(req->m_isImmutable);
+  }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }

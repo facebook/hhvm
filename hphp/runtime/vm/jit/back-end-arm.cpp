@@ -472,22 +472,17 @@ std::unique_ptr<jit::BackEnd> newBackEnd() {
   return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
-static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
+static size_t genBlock(IRUnit& unit, Vout& v, Vout& vc, CodeBlock& frozen,
                        CodegenState& state, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  CodeGenerator cg(unit, v, vc, frozen, state);
   size_t hhir_count{0};
-  for (IRInstruction& instr : *block) {
-    IRInstruction* inst = &instr;
+  for (IRInstruction& inst : *block) {
     hhir_count++;
-
-    if (instr.is(EndGuards)) state.pastGuards = true;
-
-    vasm.main().setOrigin(inst);
-    vasm.cold().setOrigin(inst);
-    vasm.frozen().setOrigin(inst);
-
-    cg.cgInst(inst);
+    if (inst.is(EndGuards)) state.pastGuards = true;
+    v.setOrigin(&inst);
+    vc.setOrigin(&inst);
+    cg.cgInst(&inst);
   }
   return hhir_count;
 }
@@ -554,7 +549,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       auto b = state.labels[block];
       vunit.blocks[b].area = v.area();
       v.use(b);
-      hhir_count += genBlock(unit, v, vasm, state, block);
+      hhir_count += genBlock(unit, v, vasm.cold(), *frozenCode, state, block);
       assert(v.closed());
       assert(vasm.main().empty() || vasm.main().closed());
       assert(vasm.cold().empty() || vasm.cold().closed());

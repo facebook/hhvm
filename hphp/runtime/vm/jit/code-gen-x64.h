@@ -33,12 +33,12 @@ constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 struct CodeGenerator : public jit::CodeGenerator {
   typedef jit::X64Assembler Asm;
 
-  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, Vout& frozen,
-                CodegenState& state)
+  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold,
+                CodeBlock& frozen, CodegenState& state)
     : m_unit(unit)
     , m_vmain(main)
     , m_vcold(cold)
-    , m_vfrozen(frozen)
+    , m_frozen(frozen)
     , m_state(state)
     , m_curInst(nullptr)
   {
@@ -239,13 +239,12 @@ private:
 
   Vout& vmain() { return m_vmain; }
   Vout& vcold() { return m_vcold; }
-  Vout& vfrozen() { return m_vfrozen; }
 
 private:
   const IRUnit&       m_unit;
   Vout&               m_vmain;
   Vout&               m_vcold;
-  Vout&               m_vfrozen;
+  CodeBlock&          m_frozen;
   CodegenState&       m_state;
   IRInstruction*      m_curInst;  // current instruction being generated
   jit::vector<Vloc>   m_slocs, m_dlocs;

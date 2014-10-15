@@ -2556,7 +2556,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
   auto sk = SrcKey(curFunc(), extra->offset, resumed());
-  emitServiceReq(vmain(), SRFlags::Persist, REQ_RETRANSLATE_OPT, {
+  emitServiceReq(vmain(), nullptr, REQ_RETRANSLATE_OPT, {
     {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
     {ServiceReqArgInfo::Immediate, {extra->transId}}
   });
@@ -3314,10 +3314,12 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   assert(dstLoc(0).reg() == rVmSp);
   auto const srcKey = m_curInst->marker().sk();
-  if (isNativeImplCall(extra->callee, extra->numParams)) {
-    emitCallNativeImpl(v, vcold(), srcKey, extra->callee, extra->numParams);
+  auto const callee = extra->callee;
+  auto const argc = extra->numParams;
+  if (isNativeImplCall(callee, argc)) {
+    emitCallNativeImpl(v, vcold(), srcKey, callee, argc);
   } else {
-    v << bindcall{srcKey, extra->callee, extra->numParams};
+    emitBindCall(v, m_frozen, srcKey, callee, argc);
   }
 }
 
@@ -5061,7 +5063,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto& v = vmain();
   v << load{rVmTl[RDS::kVmfpOff], rVmFp};
   v << load{rVmTl[RDS::kVmspOff], rVmSp};
-  emitServiceReq(v, SRFlags::Persist, REQ_RESUME, {});
+  emitServiceReq(v, nullptr, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

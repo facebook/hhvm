@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/base/arch.h"
 
 #include <algorithm>
 
@@ -477,7 +478,10 @@ void Vgen::emit(bindaddr& i) {
 }
 
 void Vgen::emit(bindcall& i) {
-  emitBindCall(a->code(), frozen(), i.sk, i.callee, i.argc);
+  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
+  mcg->cgFixups().m_codePointers.insert(&i.req->m_toSmash);
+  i.req->m_toSmash = a->frontier();
+  a->call(i.stub);
 }
 
 void Vgen::emit(bindexit& i) {
@@ -892,10 +896,13 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
   emitEagerVMRegSave(v, RegSaveFlags::SaveFP);
-  v << ldimm{0, x64::rAsm}; // because persist flag
-  //  lea(rip[(int64_t)stubStart], jit::x64::rAsm); if !persist
-  v << ldimm{svcreq.req, reg::rdi};
-  arg_regs.add(rAsm).add(reg::rdi);
+  if (svcreq.stub_block) {
+    v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
+  } else {
+    v << ldimm{0, rAsm}; // because persist flag
+  }
+  v << ldimm{svcreq.req, rdi};
+  arg_regs.add(rAsm).add(rdi);
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
   // In the case of some special stubs (m_callToExit, m_retHelper), we
@@ -1087,7 +1094,10 @@ Vauto::~Vauto() {
       assert(areas.size() < 2 || cold().empty() || cold().closed());
       assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
-      finishX64(vauto_abi, nullptr);
+      switch (arch()) {
+        case Arch::X64: finishX64(vauto_abi, nullptr); break;
+        case Arch::ARM: finishARM(vauto_abi, nullptr); break;
+      }
       return;
     }
   }

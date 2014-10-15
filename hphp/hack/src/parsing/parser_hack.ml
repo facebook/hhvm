@@ -118,8 +118,6 @@ let drop (env : env) : unit = match L.token env.lb with _ -> ()
 
 let btw (p1, _) (p2, _) = Pos.btw p1 p2
 
-let is_hh_file = ref false
-
 (*****************************************************************************)
 (* Errors *)
 (*****************************************************************************)
@@ -392,12 +390,11 @@ let ref_param env =
 (*****************************************************************************)
 
 let rec program content =
-  is_hh_file := false;
   L.comment_list := [];
   L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
   let env = init_env lb in
-  let ast = header env in
+  let ast, is_hh_file = header env in
   let comments = !L.comment_list in
   let fixmes = !L.fixmes in
   L.comment_list := [];
@@ -405,7 +402,6 @@ let rec program content =
   Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
-  let is_hh_file = !is_hh_file in
   let ast = Namespaces.elaborate_defs ast in
   {is_hh_file; comments; ast}
 
@@ -422,15 +418,14 @@ and header env =
       let attr = SMap.empty in
       let result = ignore_toplevel ~attr [] env (fun x -> x = Teof) in
       expect env Teof;
-      if head = Some Ast.Mdecl then is_hh_file := true;
-      result
+      let is_hh_file = head = Some Ast.Mdecl in
+      result, is_hh_file
   | _, Some mode ->
       let result = toplevel [] { env with mode = mode } (fun x -> x = Teof) in
       expect env Teof;
-      is_hh_file := true;
-      result
+      result, true
   | _ ->
-      []
+      [], false
 
 and get_header env =
   match L.header env.lb with

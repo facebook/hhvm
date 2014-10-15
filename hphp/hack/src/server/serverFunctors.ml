@@ -169,21 +169,22 @@ end = struct
       Unix.dup2 fd Unix.stdout;
       Unix.dup2 fd Unix.stderr;
       Unix.close fd;
-
       (* child process is ready *)
-      main options
     end else begin
       (* let original parent exit *)
 
       Printf.printf "Spawned %s (child pid=%d)\n" (Program.name) pid;
       Printf.printf "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
       flush stdout;
-      ()
+      raise Pervasives.Exit
     end
 
   let start () =
     let options = Program.parse_options() in
-    if ServerArgs.should_detach options
-    then daemonize options
-    else main options
+    try
+      if ServerArgs.should_detach options
+      then daemonize options;
+      main options
+    with Pervasives.Exit ->
+      ()
 end

@@ -1797,6 +1797,8 @@ and expr_ env = function
       end
   | Unsafeexpr _ ->
       N.Any
+  | Import _ ->
+      N.Any
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true env) f.f_ret in

@@ -279,6 +279,13 @@ and expr_ =
   | Lfun of fun_
   | Xml of id * (id * expr) list * expr list
   | Unsafeexpr of expr
+  | Import of import_flavor * expr
+
+and import_flavor =
+  | Include
+  | Require
+  | IncludeOnce
+  | RequireOnce
 
 and afield =
   | AFvalue of expr

@@ -126,11 +126,8 @@ type token =
 (* Fake tokens *)
   | Tyield
   | Tawait
-  | Tinclude
-  | Tinclude_once
+  | Timport
   | Teval
-  | Trequire
-  | Trequire_once
   | Tprint
   | Tinstanceof
   | Tnew
@@ -235,11 +232,8 @@ let token_to_string = function
   | Teof          -> "eof"
   | Tyield        -> "yield"
   | Tawait        -> "await"
-  | Tinclude      -> "include"
-  | Tinclude_once -> "include_once"
+  | Timport       -> "import"
   | Teval         -> "eval"
-  | Trequire      -> "require"
-  | Trequire_once -> "require_once"
   | Tprint        -> "print"
   | Tinstanceof   -> "instanceof"
   | Tnew          -> "new"

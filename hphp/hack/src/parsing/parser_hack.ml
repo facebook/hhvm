@@ -224,8 +224,9 @@ let rec check_lvalue env = function
   | Null | True | False | Id _ | Clone _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
-  | Await _ | Expr_list _ | Cast _ | Unop _ |
-    Binop _ | Eif _ | InstanceOf _ | New _ | Efun _ | Lfun _ | Xml _) ->
+  | Await _ | Expr_list _ | Cast _ | Unop _
+  | Binop _ | Eif _ | InstanceOf _ | New _ | Efun _ | Lfun _ | Xml _
+  | Import _) ->
       error_at env pos "Invalid lvalue"
 
 (*****************************************************************************)
@@ -251,7 +252,7 @@ let priorities = [
   (* Lowest priority *)
   (NonAssoc, [Tyield]);
   (NonAssoc, [Tawait]);
-  (Left, [Tinclude; Tinclude_once; Teval; Trequire; Trequire_once]);
+  (Left, [Timport; Teval;]);
   (Left, [Tcomma]);
   (Right, [Tprint]);
   (Left, [Tqm; Tcolon]);
@@ -624,10 +625,11 @@ and toplevel_word ~attr env = function
             cst_namespace = Namespace_env.empty;
           }) cstl
       | _ -> assert false)
-  | "require" | "require_once" ->
-      let _ = expr env in
+  | r when is_import r ->
+      let pos = Pos.make env.lb in
+      let e = expr_import r env pos in
       expect env Tsc;
-      [Stmt Noop]
+      [Stmt (Expr e)]
   | _ ->
       let pos = Pos.make env.lb in
       L.back env.lb;
@@ -2475,14 +2477,13 @@ and expr_atomic_word ~allow_class env pos = function
       expr_clone env pos
   | "list" ->
       expr_php_list env pos
-  | "require" | "require_once" ->
+  | r when is_import r ->
       if env.mode = Ast.Mstrict
       then
         error env
-          ("Parse error: require_once is supported only as a toplevel "^
+          ("Parse error: "^r^" is supported only as a toplevel "^
           "declaration");
-      let _ = expr env in
-      pos, Null
+      expr_import r env pos
   | x ->
       pos, Id (pos, x)
 
@@ -2617,6 +2618,27 @@ and collection_field_list_remain env =
           else fd :: collection_field_list_remain env
       | _ ->
           error_expect env "}"; []
+
+(*****************************************************************************)
+(* Imports - require/include/require_once/include_once *)
+(*****************************************************************************)
+
+and is_import r =
+  List.exists ((=) r) ["require"; "require_once"; "include"; "include_once"]
+
+and expr_import r env start =
+  let flavor = match r with
+  | "require" -> Require
+  | "include" -> Include
+  | "require_once" -> RequireOnce
+  | "include_once" -> IncludeOnce
+    (* We just checked for this very condition *)
+  | _ -> assert false in
+  (* all the import statements have the same priority *)
+  with_priority env Timport begin fun env ->
+    let e = expr env in
+    Pos.btw start (fst e), Import (flavor, e)
+  end
 
 (*****************************************************************************)
 (* InstanceOf *)

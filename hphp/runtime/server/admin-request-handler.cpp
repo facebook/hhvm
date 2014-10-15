@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/thread-hooks.h"
+#include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -213,6 +214,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
+        "/dump-array-info: dump array tracer info to /tmp/array_tracer_dump\n"
+
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
 
 #ifdef GOOGLE_CPU_PROFILER
@@ -389,6 +392,18 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto filename = transport->getParam("file");
       if (filename == "") filename = "/tmp/pcre_cache";
       pcre_dump_cache(filename);
+      transport->sendString("OK\n");
+      break;
+    }
+
+    if (cmd == "dump-array-info") {
+      if (!RuntimeOption::EvalTraceArrays) {
+        transport->sendString("Eval.TraceArrays not enabled.\n");
+        break;
+      }
+      auto filename = transport->getParam("file");
+      if (filename == "") filename = "/tmp/array_tracer_dump";
+      array_tracer_dump(filename);
       transport->sendString("OK\n");
       break;
     }

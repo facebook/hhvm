@@ -1,4 +1,4 @@
-array(193) {
+array(194) {
   ["hhvm.server.graceful_shutdown_wait"]=>
   array(3) {
     ["global_value"]=>
@@ -816,6 +816,15 @@ array(193) {
     string(1) "1"
     ["local_value"]=>
     string(1) "1"
+    ["access"]=>
+    int(4)
+  }
+  ["hhvm.trace_arrays"]=>
+  array(3) {
+    ["global_value"]=>
+    string(0) ""
+    ["local_value"]=>
+    string(0) ""
     ["access"]=>
     int(4)
   }

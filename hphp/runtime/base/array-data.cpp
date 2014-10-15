@@ -172,7 +172,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
  *   we want to change this to make callsites cheaper.
  */
 
-extern const ArrayFunctions g_array_funcs = {
+extern const ArrayFunctions g_array_funcs_unmodified = {
   /*
    * void Release(ArrayData*)
    *
@@ -738,6 +738,10 @@ extern const ArrayFunctions g_array_funcs = {
     &ProxyArray::ZAppend,
   },
 };
+
+// We create a copy so that we can dynamically instrument g_array_funcs at
+// runtime in ArrayTracer to capture array usage.
+ArrayFunctions g_array_funcs = g_array_funcs_unmodified;
 
 #undef DISPATCH
 #undef DISPATCH_INTMAP_SPECIALIZED

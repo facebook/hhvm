@@ -1196,7 +1196,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
     Config::Bind(UploadTmpDir, ini, upload["UploadTmpDir"], "/tmp");
     Config::Bind(EnableFileUploads, ini, upload["EnableFileUploads"], true);
-    Config::Bind(MaxFileUploads, ini, "max_file_uploads", 20);
+    Config::Bind(MaxFileUploads, ini, upload["MaxFileUploads"], 20);
     Config::Bind(EnableUploadProgress, ini, upload["EnableUploadProgress"]);
     Config::Bind(Rfc1867Freq, ini, upload["Rfc1867Freq"], 256 * 1024);
     if (Rfc1867Freq < 0) Rfc1867Freq = 256 * 1024;

@@ -33,7 +33,7 @@ namespace HPHP {
  * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
  */
 static std::string normalize(const std::string &name) {
-  std::string out = ".";
+  std::string out = "hhvm.";
   size_t idx = 0;
   for (auto &c : name) {
     // This is the first or last character
@@ -61,6 +61,9 @@ static std::string normalize(const std::string &name) {
     idx++;
   }
 
+  boost::replace_first(out,
+                       "hhvm.server.upload.max_file_uploads",
+                       "max_file_uploads");
   // Make sure IPv6 or IPv4 are handled correctly
   boost::replace_first(out, "_i_pv", "_ipv");
   boost::replace_first(out, ".i_pv", ".ipv");
@@ -80,7 +83,7 @@ std::string Config::IniName(const Hdf& config) {
 }
 
 std::string Config::IniName(const std::string config) {
-  return "hhvm" + normalize(config);
+  return normalize(config);
 }
 
 void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {

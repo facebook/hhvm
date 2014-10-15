@@ -18,13 +18,14 @@
 #define incl_HPHP_DATATYPE_H_
 
 #include <cstdint>
-#include <string>
 #include <cstdio>
+#include <string>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
+#include <folly/Optional.h>
 
-#include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 
@@ -40,10 +41,8 @@ namespace HPHP {
 enum DataType : int8_t {
   // Values below zero are not PHP values, but runtime-internal.
   KindOfClass         = -13,
-  KindOfAny           = -8,
   KindOfInvalid       = -1,
   KindOfUnknown       = KindOfInvalid,
-  KindOfNone          = KindOfInvalid,
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
@@ -64,6 +63,30 @@ enum DataType : int8_t {
   KindOfRef           = 0x50,  //  01010000
   KindOfNamedLocal    = 0x51,  //  01010001
 };
+
+/*
+ * Function parameter types for users of DataType that want a representation
+ * for top and bottom types.
+ *
+ * These are intended to be used for, e.g., discriminating constructors; they
+ * should never be munged into a DataType data member.
+ */
+enum class KindOfNone {};
+enum class KindOfAny  {};
+
+/*
+ * Optional DataType.
+ *
+ * Used for (DataType|KindOfNoneType) or (DataType|KindOfAnyType), depending on
+ * context.  Users who wish to use (DataType|KindOfNoneType|KindOfAnyType)
+ * should consider dying in a fire.
+ */
+using MaybeDataType = folly::Optional<DataType>;
+
+/*
+ * None type for MaybeDataType.
+ */
+const MaybeDataType kNoneDataType = folly::none;
 
 /*
  * DataType limits.
@@ -186,7 +209,6 @@ inline std::string tname(DataType t) {
     CS(Resource)
     CS(Ref)
     CS(Class)
-    CS(Any)
 
 #undef CS
     case KindOfInvalid: return std::string("Invalid");

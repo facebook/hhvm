@@ -2010,7 +2010,7 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t id) {
       auto const td = tc.namedEntity()->getCachedTypeAlias();
       if (tc.namedEntity()->isPersistentTypeAlias() && td) {
         if ((td->nullable && valType <= Type::Null)
-            || td->kind == KindOfAny
+            || td->any
             || equivDataTypes(td->kind, valType.toDataType())) {
           m_irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
           return;

@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/hhbc.h"
-
-#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -54,7 +54,7 @@ void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
 void recordType(TypeProfileKey sk, DataType dt);
-std::pair<folly::Optional<DataType>, double> predictType(TypeProfileKey key);
+std::pair<MaybeDataType, double> predictType(TypeProfileKey key);
 int64_t requestCount();
 
 /*

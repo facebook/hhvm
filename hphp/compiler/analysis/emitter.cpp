@@ -7626,9 +7626,9 @@ void EmitterVisitor::emitClassUseTrait(PreClassEmitter* pce,
 void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   auto const nullable = td->annot->isNullable();
   auto const valueStr = td->annot->stripNullable().vanillaName();
-  auto const kind =
-    td->annot->stripNullable().isFunction()  ? KindOfAny :
-    td->annot->stripNullable().isMixed()     ? KindOfAny :
+  auto const any = td->annot->stripNullable().isFunction() ||
+                   td->annot->stripNullable().isMixed();
+  auto const kind = any ? KindOfUninit :
     !strcasecmp(valueStr.c_str(), "array")   ? KindOfArray :
     !strcasecmp(valueStr.c_str(), "HH\\int") ? KindOfInt64 :
     !strcasecmp(valueStr.c_str(), "HH\\bool") ? KindOfBoolean :
@@ -7647,6 +7647,7 @@ void EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   record.name     = name;
   record.value    = value;
   record.kind     = kind;
+  record.any      = any;
   record.nullable = nullable;
   record.attrs    = AttrNone;
   Id id = m_ue.addTypeAlias(record);

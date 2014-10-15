@@ -399,11 +399,11 @@ static bool VerifyTypeSlowImpl(const Class* cls,
       // we already know we're checking a non-null object with the
       // class `cls'.  We do however need to check for typedefs to
       // mixed.
-      if (def->kind == KindOfObject) {
+      if (def->any) {
+        return true;
+      } else if (def->kind == KindOfObject) {
         constraint = def->klass;
         if (constraint && cls->classof(constraint)) return true;
-      } else if (def->kind == KindOfAny) {
-        return true;
       }
     }
   }

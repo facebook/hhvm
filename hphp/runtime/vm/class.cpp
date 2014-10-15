@@ -2431,9 +2431,11 @@ void Class::setRequirements() {
 void Class::setEnumType() {
   if (attrs() & AttrEnum) {
     m_enumBaseTy = m_preClass->enumBaseTy().underlyingDataTypeResolved();
-    // Make sure we've loaded a valid underlying type
-    if (!IS_INT_TYPE(m_enumBaseTy) && !IS_STRING_TYPE(m_enumBaseTy) &&
-        m_enumBaseTy != KindOfAny) {
+
+    // Make sure we've loaded a valid underlying type.
+    if (m_enumBaseTy &&
+        !IS_INT_TYPE(*m_enumBaseTy) &&
+        !IS_STRING_TYPE(*m_enumBaseTy)) {
       raise_error("Invalid base type for enum %s",
                   m_preClass->name()->data());
     }

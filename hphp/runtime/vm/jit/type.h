@@ -246,12 +246,24 @@ private:
 
 public:
   /*
-   * Constructors.
+   * Default bottom constructor.
    */
   Type();
-  explicit Type(DataType outerType, DataType innerType = KindOfInvalid);
+
+  /*
+   * Regular constructors.
+   */
+  explicit Type(DataType outer, DataType inner = KindOfUninit);
+  explicit Type(DataType outer, KindOfAny);
+
+  /*
+   * Copy from `dl->rtt'.
+   */
   explicit Type(const DynLocation* dl);
 
+  /*
+   * Assignment.
+   */
   Type& operator=(Type b);
 
   /*

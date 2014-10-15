@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_TYPE_CONSTRAINT_H_
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
@@ -148,7 +149,7 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint,
    * chasing down type aliases.
    */
-  DataType underlyingDataTypeResolved() const;
+  MaybeDataType underlyingDataTypeResolved() const;
 
   /*
    * Predicates for various properties of the type constraint.

@@ -327,7 +327,7 @@ fbstring PhpParam::getDefault() const {
   }
   auto value = m_param["value"].asString();
   if (value == "null") {
-    switch (kindOf()) {
+    switch (static_cast<int>(kindOf())) {
       case KindOfString: return "null_string";
       case KindOfArray: return "null_array";
       case KindOfObject: return "null_object";

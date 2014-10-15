@@ -29,7 +29,6 @@
 
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
-#include "folly/Optional.h"
 
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
@@ -168,10 +167,14 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 
 namespace {
 
-using TypePred = std::pair<folly::Optional<DataType>, double>;
+/*
+ * Pair of (predicted type, confidence).
+ *
+ * A kNoneDataType prediction means mixed/unknown.
+ */
+using TypePred = std::pair<MaybeDataType, double>;
 
-folly::Optional<DataType>
-predictionForRepoAuthType(RepoAuthType repoTy) {
+MaybeDataType predictionForRepoAuthType(RepoAuthType repoTy) {
   using T = RepoAuthType::Tag;
   switch (repoTy.tag()) {
   case T::OptBool:  return KindOfBoolean;
@@ -213,7 +216,7 @@ predictionForRepoAuthType(RepoAuthType repoTy) {
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
-    return folly::none;
+    return kNoneDataType;
   }
   not_reached();
 }
@@ -233,7 +236,7 @@ TypePred predictMVec(const NormalizedInstruction* ni) {
     // point in having a prediction because we know its type with 100%
     // accuracy.  Disable it in that case here.
     if (convertToDataType(info.repoAuthType)) {
-      return std::make_pair(folly::none, 0.0);
+      return std::make_pair(kNoneDataType, 0.0);
     }
   }
 
@@ -250,15 +253,14 @@ TypePred predictMVec(const NormalizedInstruction* ni) {
     return pred;
   }
 
-  return std::make_pair(folly::none, 0.0);
+  return std::make_pair(kNoneDataType, 0.0);
 }
 
 /*
  * Provide a best guess for the output type of this instruction.
  */
-folly::Optional<DataType>
-predictOutputs(const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return folly::none;
+MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
+  if (!RuntimeOption::EvalJitTypePrediction) return kNoneDataType;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
@@ -374,8 +376,8 @@ predictOutputs(const NormalizedInstruction* ni) {
 
     auto inType = ni->inputs[0]->rtt;
     auto const inDt = inType.isKnownDataType()
-      ? folly::make_optional(inType.toDataType())
-      : folly::none;
+      ? MaybeDataType(inType.toDataType())
+      : kNoneDataType;
     // If the base is a string, the output is probably a string. Unless the
     // member code is MW, then we're either going to fatal or promote the
     // string to an array.
@@ -401,9 +403,7 @@ predictOutputs(const NormalizedInstruction* ni) {
   auto const op = ni->op();
   static const double kAccept = 1.0;
 
-  std::pair<folly::Optional<DataType>, double> pred {
-    std::make_pair(folly::none, 0.0)
-  };
+  std::pair<MaybeDataType, double> pred = std::make_pair(kNoneDataType, 0.0);
 
   if (op == OpCGetS) {
     auto nameType = ni->inputs[1]->rtt;
@@ -438,7 +438,7 @@ predictOutputs(const NormalizedInstruction* ni) {
     assert(!pred.first || *pred.first != KindOfUninit);
     return pred.first;
   }
-  return folly::none;
+  return kNoneDataType;
 }
 
 }
@@ -937,7 +937,7 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(&inst);
     if (dt) {
-      inst.outPred = Type(*dt, *dt == KindOfRef ? KindOfAny : KindOfNone);
+      inst.outPred = *dt == KindOfRef ? Type(*dt, KindOfAny{}) : Type(*dt);
       inst.outputPredicted = true;
     } else {
       doPrediction = false;

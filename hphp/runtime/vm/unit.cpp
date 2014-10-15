@@ -801,18 +801,25 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 namespace {
 
 TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
-  // If the class is an enum, pull out the actual base type.
+  TypeAliasReq req;
+
   if (isEnum(klass)) {
-    return TypeAliasReq { klass->enumBaseTy(),
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    // If the class is an enum, pull out the actual base type.
+    if (auto const enumType = klass->enumBaseTy()) {
+      req.kind     = *enumType;
+      req.nullable = thisType->nullable;
+      req.name     = thisType->name;
+    } else {
+      req.any  = true;
+      req.name = thisType->name;
+    }
   } else {
-    return TypeAliasReq { KindOfObject,
-                          thisType->nullable,
-                          klass,
-                          thisType->name };
+    req.kind     = KindOfObject;
+    req.nullable = thisType->nullable;
+    req.klass    = klass;
+    req.name     = thisType->name;
   }
+  return req;
 }
 
 TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
@@ -829,10 +836,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    */
 
   if (thisType->kind != KindOfObject) {
-    return TypeAliasReq { thisType->kind,
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    return TypeAliasReq::From(*thisType);
   }
 
   /*
@@ -857,10 +861,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq { targetTd->kind,
-                          thisType->nullable || targetTd->nullable,
-                          targetTd->klass,
-                          thisType->name };
+    return TypeAliasReq::From(*targetTd, *thisType);
   }
 
   if (AutoloadHandler::s_instance->autoloadClassOrType(
@@ -870,14 +871,11 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq { targetTd->kind,
-                            thisType->nullable || targetTd->nullable,
-                            targetTd->klass,
-                            thisType->name };
+      return TypeAliasReq::From(*targetTd, *thisType);
     }
   }
 
-  return TypeAliasReq { KindOfInvalid, false, nullptr, nullptr };
+  return TypeAliasReq::Invalid();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -900,17 +898,12 @@ void Unit::defTypeAlias(Id id) {
     };
     if (thisType->attrs & AttrPersistent) {
       // We may have cached the fully resolved type in a previous request.
-      auto resolved = resolveTypeAlias(thisType);
-      if (resolved.kind != current->kind ||
-          resolved.nullable != current->nullable ||
-          resolved.klass != current->klass) {
+      if (resolveTypeAlias(thisType) != *current) {
         raiseIncompatible();
       }
       return;
     }
-    if (thisType->kind != current->kind ||
-        thisType->nullable != current->nullable ||
-        Unit::lookupClass(typeName) != current->klass) {
+    if (!current->compat(*thisType)) {
       raiseIncompatible();
     }
     return;
@@ -933,7 +926,7 @@ void Unit::defTypeAlias(Id id) {
   }
 
   auto resolved = resolveTypeAlias(thisType);
-  if (resolved.kind == KindOfInvalid) {
+  if (resolved.invalid) {
     raise_error("Unknown type or class %s", typeName->data());
     return;
   }

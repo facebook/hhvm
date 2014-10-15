@@ -219,9 +219,8 @@ Type::Type(const DynLocation* dl)
 {}
 
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
-  assert(outer != KindOfInvalid);
   assert(inner != KindOfRef);
-  assert(IMPLIES(inner == KindOfNone, outer != KindOfRef));
+  assert(inner == KindOfUninit || outer == KindOfRef);
 
   switch (outer) {
     case KindOfUninit        : return kUninit;
@@ -235,15 +234,9 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
     case KindOfClass         : return kCls;
-    case KindOfAny           : return kGen;
-    case KindOfRef: {
-      if (inner == KindOfAny) {
-        return kBoxedCell;
-      } else {
-        assert(inner != KindOfUninit);
-        return bitsFromDataType(inner, KindOfNone) << kBoxShift;
-      }
-    }
+    case KindOfRef:
+      assert(inner != KindOfUninit);
+      return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
     default                  : always_assert(false && "Unsupported DataType");
   }
 }
@@ -659,7 +652,7 @@ Type liveTVType(const TypedValue* tv) {
   }
 
   auto outer = tv->m_type;
-  auto inner = KindOfInvalid;
+  auto inner = KindOfUninit;
 
   if (outer == KindOfStaticString) outer = KindOfString;
   if (outer == KindOfRef) {

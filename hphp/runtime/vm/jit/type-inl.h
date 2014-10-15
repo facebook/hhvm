@@ -58,8 +58,15 @@ inline Type::Type()
   , m_extra(0)
 {}
 
-inline Type::Type(DataType outerType, DataType innerType)
-  : m_bits(bitsFromDataType(outerType, innerType))
+inline Type::Type(DataType outer, DataType inner)
+  : m_bits(bitsFromDataType(outer, inner))
+  , m_hasConstVal(false)
+  , m_extra(0)
+{}
+
+inline Type::Type(DataType outer, KindOfAny)
+  : m_bits(outer == KindOfRef ? kBoxedCell
+                              : bitsFromDataType(outer, KindOfUninit))
   , m_hasConstVal(false)
   , m_extra(0)
 {}

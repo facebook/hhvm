@@ -257,7 +257,8 @@ SSATmp* HhbcTranslator::MInstrTranslator::genStk(Opcode opc,
   if (base->inst()->op() == LdStackAddr) {
     MInstrEffects effects(opc, srcVec);
     if (effects.baseTypeChanged || effects.baseValChanged) {
-      opc = getStackModifyingOpcode(opc);
+      return genStkImpl<ExtraData>::go(
+        *this, getStackModifyingOpcode(opc), taken, extra, srcs..., m_irb.sp());
     }
   }
 

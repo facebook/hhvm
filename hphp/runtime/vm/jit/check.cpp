@@ -58,6 +58,8 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
+ * 9. If a DefLabel defines a value of type StkPtr, it must appear as the first
+ *    dest. This is necessary for the state tracking in FrameState::update.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -65,7 +67,13 @@ bool checkBlock(Block* b) {
   assert(!b->empty());
 
   // Invariant #1
-  if (it->op() == DefLabel) ++it;
+  if (it->op() == DefLabel) {
+    // Invariant #9
+    for (unsigned i = 0, n = it->numDsts(); i < n; ++i) {
+      assert(IMPLIES(it->dst(i)->isA(Type::StkPtr), i == 0));
+    }
+    ++it;
+  }
 
   // Invariant #1
   if (it != end && it->op() == BeginCatch) {

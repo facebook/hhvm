@@ -77,12 +77,12 @@ const RegSet kGPCallerSaved =
   reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi | reg::r8 | reg::r9;
 
 const RegSet kGPCalleeSaved =
-  reg::r13 | reg::r14 | reg::r15;
+  reg::rbx | reg::r13 | reg::r14 | reg::r15;
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
-  rVmSp | reg::rsp | rVmFp | rVmTl | reg::r11 | rAsm;
+  reg::rsp | rVmFp | rVmTl | reg::r11 | rAsm;
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
@@ -124,11 +124,17 @@ const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 constexpr PhysReg rStashedAR = reg::r15;
 
 /*
- * A set of all special cross-tracelet registers. rVmFp, rVmSp, and
- * rVmTl go through various states between tracelets, but should all
- * be considered special.
+ * Registers that are live between all tracelets.
  */
-const RegSet kSpecialCrossTraceRegs = rStashedAR | rVmFp | rVmSp | rVmTl;
+const RegSet kCrossTraceRegs =
+  rVmFp | rVmSp | rVmTl;
+
+/*
+ * Registers that are live during a PHP function call, between the caller and
+ * the callee.
+ */
+const RegSet kCrossCallRegs =
+  kCrossTraceRegs | rStashedAR;
 
 /*
  * Registers that can safely be used for scratch purposes in-between
@@ -139,7 +145,7 @@ const RegSet kSpecialCrossTraceRegs = rStashedAR | rVmFp | rVmSp | rVmTl;
  * modifying them.
  */
 const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
-  (kGPUnreserved - kSpecialCrossTraceRegs);
+  (kGPUnreserved - kCrossCallRegs);
 
 //////////////////////////////////////////////////////////////////////
 /*

@@ -391,7 +391,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   Asm a { mcg->code.main() };
   Label not_magic_call;
   auto const rInvName = r13;
-  assert(!kSpecialCrossTraceRegs.contains(r13));
+  assert(!kCrossCallRegs.contains(r13));
 
   auto skFuncBody = SrcKey {};
   auto callFixup  = TCA { nullptr };

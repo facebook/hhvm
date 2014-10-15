@@ -1385,7 +1385,7 @@ void Vxls::resolveEdges() {
     auto& defs = unit.tuples[findDefs(unit, target)];
     for (unsigned i = 0, n = uses.size(); i < n; ++i) {
       auto i1 = intervals[uses[i]];
-      if (i1) i1 = i1->childAt(p1);
+      if (i1 && !i1->fixed()) i1 = i1->childAt(p1);
       auto i2 = intervals[defs[i]];
       if (i2->reg != i1->reg) {
         assert((edge_copies[{block,targetIndex}][i2->reg] == nullptr));

@@ -2307,6 +2307,12 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     }
     return getStackValue(inst->src(0), index - kNumActRecCells);
 
+  case DefLabel:
+    // We could keep tracing back through all the preds of inst's block but
+    // there aren't currently any situations where that will add information we
+    // wouldn't otherwise have.
+    return StackValueInfo { inst, Type::StackElem };
+
   default:
     {
       // Assume it's a vector instruction.  This will assert in

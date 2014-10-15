@@ -253,7 +253,8 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
    * will handle it for us.
    */
   if (mcg->fixupMap().eagerRecord(func)) {
-    emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()));
+    emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
+                       rVmFp, rVmSp);
   }
   v << vcall{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
              v.makeTuple({}), Fixup{0, numArgs}};

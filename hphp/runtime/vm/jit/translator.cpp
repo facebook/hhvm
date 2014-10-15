@@ -1593,7 +1593,7 @@ Translator::translateRegion(const RegionDesc& region,
     // block to (they are not the same!).
 
     auto const entry = irb.unit().entry();
-    irb.startBlock(entry, entry->front().marker());
+    irb.startBlock(entry, entry->front().marker(), false /* unprocessedPred */);
 
     auto const irBlock = blockIdToIRBlock[region.entry()->id()];
     always_assert(irBlock != entry);
@@ -1622,12 +1622,12 @@ Translator::translateRegion(const RegionDesc& region,
     OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
-      if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
-        always_assert(RuntimeOption::EvalJitLoops);
-        irb.clearBlockState(irBlock);
-      }
+      auto unprocessedPred =
+        blockHasUnprocessedPred(region, blockId, processedBlocks);
+      always_assert(IMPLIES(unprocessedPred, RuntimeOption::EvalJitLoops));
+
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      if (!ht.irBuilder().startBlock(irBlock, marker)) {
+      if (!ht.irBuilder().startBlock(irBlock, marker, unprocessedPred)) {
         FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
                blockId);
         processedBlocks.insert(blockId);

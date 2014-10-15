@@ -1700,7 +1700,8 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
   emitProfiledGuard(
     type, "Loc", locId,
-    [&](Type type) { gen(GuardLoc, type, LocalId(locId), m_irb->fp()); },
+    [&](Type type) { gen(GuardLoc, type, LocalId(locId),
+                         m_irb->fp(), m_irb->sp()); },
     [&] { return gen(LdLocAddr, Type::PtrToStr, LocalId(locId),
                      m_irb->fp()); }
   );
@@ -1770,7 +1771,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
 
   emitProfiledGuard(
     type, "Stk", stackIndex,
-    [&](Type type) { gen(GuardStk, type, stackOff, m_irb->sp()); },
+    [&](Type type) { gen(GuardStk, type, stackOff, m_irb->sp(), m_irb->fp()); },
     [&] { return gen(LdStackAddr, Type::PtrToStr, stackOff, m_irb->sp()); }
   );
 
@@ -1904,7 +1905,8 @@ void HhbcTranslator::refCheckHelper(int64_t entryArDelta,
 
     uint64_t vals64 = packBitVec(vals, i);
     if (dest == -1) {
-      gen(GuardRefs, funcPtr, nParams, cns(i), cns(mask64), cns(vals64));
+      gen(GuardRefs, funcPtr, nParams, cns(i), cns(mask64), cns(vals64),
+          m_irb->fp(), m_irb->sp());
     } else {
       gen(CheckRefs, makeExit(dest), funcPtr, nParams, cns(i),
           cns(mask64), cns(vals64));
@@ -3369,8 +3371,6 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     m_bcStateStack.back().bcOff = targetBcOff;
   }
 
-  gen(SyncABIRegs, m_irb->fp(), stack);
-
   if (flag == ExitFlag::Interp) {
     auto interpSk = SrcKey {curFunc(), targetBcOff, resumed()};
     auto pc = curUnit()->at(targetBcOff);
@@ -3383,16 +3383,17 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
     idata.cellsPushed = getStackPushed(pc);
     idata.opcode = *reinterpret_cast<const Op*>(pc);
 
-    // This is deliberately ignoring anything the opcode might output on the
-    // stack -- this Unit is about to end.
-    gen(interpOp, idata, makeCatchNoSpill(), stack, m_irb->fp());
+    stack = gen(interpOp, idata, makeCatchNoSpill(), stack, m_irb->fp());
 
     if (!changesPC) {
       // If the op changes PC, InterpOneCF handles getting to the right place
+      gen(SyncABIRegs, m_irb->fp(), stack);
       gen(ReqBindJmp, ReqBindJmpData(interpSk.advanced().offset()));
     }
     return exit;
   }
+
+  gen(SyncABIRegs, m_irb->fp(), stack);
 
   if (!isInlining() &&
       curBcOff == m_context.initBcOffset &&
@@ -3433,17 +3434,33 @@ Block* HhbcTranslator::makeCatchNoSpill() {
 }
 
 /*
- * Returns an IR block corresponding to the given offset.
+ * Returns an IR block corresponding to the given bytecode offset. If the block
+ * starts with a DefLabel expecting a StkPtr, this function will return an
+ * intermediate block that passes the current sp.
  */
 Block* HhbcTranslator::getBlock(Offset offset) {
-  // If hasBlock returns true, then IRUnit already has a block for
-  // that offset and makeBlock will just return it.  This will be the
-  // proper successor block set by Translator::setSuccIRBlocks.
-  // Otherwise, the given offset doesn't belong to the region, so we
-  // just create an exit block.
+  // If hasBlock returns true, then IRUnit already has a block for that offset
+  // and makeBlock will just return it.  This will be the proper successor
+  // block set by Translator::setSuccIRBlocks.  Otherwise, the given offset
+  // doesn't belong to the region, so we just create an exit block.
 
-  return m_irb->hasBlock(offset) ? m_irb->makeBlock(offset)
-                                 : makeExit(offset);
+  if (!m_irb->hasBlock(offset)) return makeExit(offset);
+
+  auto block = m_irb->makeBlock(offset);
+  if (!block->empty()) {
+    auto& label = block->front();
+    if (label.is(DefLabel) && label.numDsts() > 0 &&
+        label.dst(0)->isA(Type::StkPtr)) {
+      auto middle = m_unit.defBlock();
+      ITRACE(2, "getBlock returning B{} to pass sp to B{}\n",
+             middle->id(), block->id());
+      BlockPusher bp(*m_irb, label.marker(), middle);
+      gen(Jmp, block, m_irb->sp());
+      return middle;
+    }
+  }
+
+  return block;
 }
 
 SSATmp* HhbcTranslator::emitSpillStack(SSATmp* sp,

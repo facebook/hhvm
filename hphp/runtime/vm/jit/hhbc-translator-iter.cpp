@@ -26,8 +26,8 @@ TRACE_SET_MOD(hhir);
 
 template<class Lambda>
 void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
-                                           Lambda genFunc,
-                                           bool invertCond) {
+                                        Lambda genFunc,
+                                        bool invertCond) {
   auto const src = popC();
   auto const type = src->type();
   if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);

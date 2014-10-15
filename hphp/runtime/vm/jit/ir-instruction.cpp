@@ -245,10 +245,7 @@ SSATmp* IRInstruction::modifiedStkPtr() const {
 
 SSATmp* IRInstruction::previousStkPtr() const {
   assert(modifiesStack());
-  assert(MInstrEffects::supported(this));
-  auto base = src(minstrBaseIdx(this));
-  assert(base->inst()->is(LdStackAddr));
-  return base->inst()->src(0);
+  return src(numSrcs() - 1);
 }
 
 bool IRInstruction::hasMainDst() const {

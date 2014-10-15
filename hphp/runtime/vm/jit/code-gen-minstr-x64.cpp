@@ -27,6 +27,16 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::cgDefineModifiedStkPtr(IRInstruction* inst) {
+  // Some m-instr support instructions produce a new StkPtr. Make sure we
+  // define the new Vreg here.
+  if (inst->modifiesStack()) {
+    auto srcSp = m_state.locs[inst->previousStkPtr()].reg();
+    auto dstSp = m_state.locs[inst->modifiedStkPtr()].reg();
+    vmain() << copy{srcSp, dstSp};
+  }
+}
+
 void CodeGenerator::cgBaseG(IRInstruction* inst) {
   using namespace MInstrHelpers;
   using F = TypedValue* (*)(TypedValue);
@@ -59,9 +69,12 @@ void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgPropX(IRInstruction* i)     { return cgPropImpl(i); }
-void CodeGenerator::cgPropDX(IRInstruction* i)    { return cgPropImpl(i); }
-void CodeGenerator::cgPropDXStk(IRInstruction* i) { return cgPropImpl(i); }
+void CodeGenerator::cgPropX(IRInstruction* i)     { cgPropImpl(i); }
+void CodeGenerator::cgPropDX(IRInstruction* i)    { cgPropImpl(i); }
+void CodeGenerator::cgPropDXStk(IRInstruction* i) {
+  cgPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   using namespace MInstrHelpers;
@@ -102,7 +115,10 @@ void CodeGenerator::cgVGetPropImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgVGetProp(IRInstruction* i)    { cgVGetPropImpl(i); }
-void CodeGenerator::cgVGetPropStk(IRInstruction* i) { cgVGetPropImpl(i); }
+void CodeGenerator::cgVGetPropStk(IRInstruction* i) {
+  cgVGetPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgBindPropImpl(IRInstruction* inst) {
   auto const base = inst->src(0);
@@ -122,7 +138,10 @@ void CodeGenerator::cgBindPropImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgBindProp(IRInstruction* i)    { cgBindPropImpl(i); }
-void CodeGenerator::cgBindPropStk(IRInstruction* i) { cgBindPropImpl(i); }
+void CodeGenerator::cgBindPropStk(IRInstruction* i) {
+  cgBindPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgSetPropImpl(IRInstruction* inst) {
   auto const base = inst->src(0);
@@ -140,8 +159,11 @@ void CodeGenerator::cgSetPropImpl(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgSetProp(IRInstruction* i)    { cgSetPropStk(i); }
-void CodeGenerator::cgSetPropStk(IRInstruction* i) { cgSetPropImpl(i); }
+void CodeGenerator::cgSetProp(IRInstruction* i)    { cgSetPropImpl(i); }
+void CodeGenerator::cgSetPropStk(IRInstruction* i) {
+  cgSetPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgUnsetProp(IRInstruction* inst) {
   auto const base = inst->src(0);
@@ -178,7 +200,10 @@ void CodeGenerator::cgSetOpPropImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSetOpProp(IRInstruction* i)    { cgSetOpPropImpl(i); }
-void CodeGenerator::cgSetOpPropStk(IRInstruction* i) { cgSetOpPropImpl(i); }
+void CodeGenerator::cgSetOpPropStk(IRInstruction* i) {
+  cgSetOpPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
   auto const base = inst->src(0);
@@ -199,7 +224,10 @@ void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncDecProp(IRInstruction* i)    { cgIncDecPropImpl(i); }
-void CodeGenerator::cgIncDecPropStk(IRInstruction* i) { cgIncDecPropImpl(i); }
+void CodeGenerator::cgIncDecPropStk(IRInstruction* i) {
+  cgIncDecPropImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
   bool const isEmpty = inst->op() == EmptyProp;
@@ -238,9 +266,16 @@ void CodeGenerator::cgElemImpl(IRInstruction* inst) {
 
 void CodeGenerator::cgElemX(IRInstruction* i)     { cgElemImpl(i); }
 void CodeGenerator::cgElemDX(IRInstruction* i)    { cgElemImpl(i); }
-void CodeGenerator::cgElemDXStk(IRInstruction* i) { cgElemImpl(i); }
+void CodeGenerator::cgElemDXStk(IRInstruction* i) {
+  cgElemImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
+
 void CodeGenerator::cgElemUX(IRInstruction* i)    { cgElemImpl(i); }
-void CodeGenerator::cgElemUXStk(IRInstruction* i) { cgElemImpl(i); }
+void CodeGenerator::cgElemUXStk(IRInstruction* i) {
+  cgElemImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
   auto const key     = inst->src(1);
@@ -375,7 +410,10 @@ void CodeGenerator::cgVGetElemImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgVGetElem(IRInstruction* i)    { cgVGetElemImpl(i); }
-void CodeGenerator::cgVGetElemStk(IRInstruction* i) { cgVGetElemImpl(i); }
+void CodeGenerator::cgVGetElemStk(IRInstruction* i) {
+  cgVGetElemImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
   bool const setRef  = inst->op() == ArraySetRef;
@@ -426,7 +464,10 @@ void CodeGenerator::cgSetElemImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgSetElem(IRInstruction* i)    { cgSetElemImpl(i); }
-void CodeGenerator::cgSetElemStk(IRInstruction* i) { cgSetElemImpl(i); }
+void CodeGenerator::cgSetElemStk(IRInstruction* i) {
+  cgSetElemImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
   auto const key     = inst->src(1);
@@ -467,7 +508,10 @@ void CodeGenerator::cgUnsetElemImpl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgUnsetElem(IRInstruction* i)    { cgUnsetElemImpl(i); }
-void CodeGenerator::cgUnsetElemStk(IRInstruction* i) { cgUnsetElemImpl(i); }
+void CodeGenerator::cgUnsetElemStk(IRInstruction* i) {
+  cgUnsetElemImpl(i);
+  cgDefineModifiedStkPtr(i);
+}
 
 void CodeGenerator::cgIssetEmptyElemImpl(IRInstruction* inst) {
   auto const isEmpty = inst->op() == EmptyElem;

@@ -69,16 +69,16 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
-void emitEagerSyncPoint(Vout& v, const Op* pc) {
-  v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
-  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp) {
+  v << store{vmfp, rVmTl[RDS::kVmfpOff]};
+  v << store{vmsp, rVmTl[RDS::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
-void emitEagerSyncPoint(Asm& as, const Op* pc) {
+void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp) {
   // keep this in sync with vasm code above.
-  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
-  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
+  as.  storeq(vmfp, rVmTl[RDS::kVmfpOff]);
+  as.  storeq(vmsp, rVmTl[RDS::kVmspOff]);
   emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
@@ -93,7 +93,7 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
          RegSaveFlags::None);
 
   Reg64 pcReg = rdi;
-  assert(!kSpecialCrossTraceRegs.contains(rdi));
+  assert(!kCrossCallRegs.contains(rdi));
 
   as.   storeq (rVmSp, rVmTl[RDS::kVmspOff]);
   if (savePC) {
@@ -121,7 +121,7 @@ void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
   assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
          RegSaveFlags::None);
 
-  assert(!kSpecialCrossTraceRegs.contains(rdi));
+  assert(!kCrossCallRegs.contains(rdi));
 
   v << store{rVmSp, rVmTl[RDS::kVmspOff]};
   if (savePC) {

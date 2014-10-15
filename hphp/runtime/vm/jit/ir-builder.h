@@ -126,10 +126,10 @@ struct IRBuilder {
    */
 
   /*
-   * Start the given block.  Returns whether or not it succeeded.  A
-   * failure may occur in case the block turned out to be unreachable.
+   * Start the given block.  Returns whether or not it succeeded.  A failure
+   * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker);
+  bool startBlock(Block* block, const BCMarker& marker, bool unprocessedPred);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -151,11 +151,6 @@ struct IRBuilder {
    * Set the block associated with the given offset in the offset->block map.
    */
   void setBlock(Offset offset, Block* block);
-
-  /*
-   * Clear the state associated with the given block.
-   */
-  void clearBlockState(Block* block);
 
  public:
   /*
@@ -457,7 +452,7 @@ private:
 private:
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
-  void      insertLocalPhis();
+  void      insertPhis(bool forceSpPhi);
 
 private:
   IRUnit& m_unit;

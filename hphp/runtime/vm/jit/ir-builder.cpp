@@ -1110,12 +1110,34 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void IRBuilder::insertLocalPhis() {
-  if (m_curBlock->numPreds() < 2) return;
+void IRBuilder::insertPhis(bool forceSpPhi) {
+  ITRACE(2, "insertPhis starting for B{} with {} preds, forceSpPhi = {}\n",
+         m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
+  Trace::Indent _i;
+
+  if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
 
   jit::hash_map<Block*, jit::vector<SSATmp*>> blockToPhiTmpsMap;
   jit::hash_map<Block*, jit::vector<SSATmp*>> blockToLdLocs;
   jit::vector<uint32_t> localIds;
+
+  // First, determine if we need a phi for vmsp.
+  auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
+  auto needSpPhi = forceSpPhi;
+  for (auto& e : m_curBlock->preds()) {
+    auto predSp = m_state.spLeavingBlock(e.from());
+    ITRACE(4, "sp for pred B{}: {}\n", e.from()->id(), *predSp->inst());
+    if (predSp != sp) needSpPhi = true;
+  }
+
+  ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
+  if (needSpPhi) {
+    for (auto& e : m_curBlock->preds()) {
+      auto inBlock = e.from();
+      auto inSp = m_state.spLeavingBlock(inBlock);
+      blockToPhiTmpsMap[inBlock].push_back(inSp);
+    }
+  }
 
   // Determine which SSATmps must receive a phi. To make some optimizations
   // simpler, we require that an SSATmp for a local is either provided in no
@@ -1132,6 +1154,7 @@ void IRBuilder::insertLocalPhis() {
       incomingValues.insert(local);
     }
 
+    ITRACE(3, "local {} needs phi: {}\n", i, incomingValues.size() == 1);
     // If there's only one unique incoming value, we don't need a phi. This
     // includes situations where no incoming blocks provide the value, since
     // they're really providing nullptr.
@@ -1168,8 +1191,8 @@ void IRBuilder::insertLocalPhis() {
     }
   }
 
-  if (localIds.empty()) return;
-  auto const numPhis = localIds.size();
+  auto const numPhis = localIds.size() + needSpPhi;
+  if (numPhis == 0) return;
 
   // Split incoming critical edges so we can modify Jmp srcs of preds.
 repeat:
@@ -1223,16 +1246,18 @@ repeat:
   // reference to its value.
   IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
                                          jit::vector<unsigned>(numPhis, 1));
-  m_curBlock->prepend(label);
+  assert(m_curBlock->empty());
+  appendInstruction(label);
   retypeDests(label, &m_unit);
 
   // Add TrackLoc's to update local state.
-  for (unsigned i = 0; i < numPhis; ++i) {
-    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i));
+  for (unsigned i = 0, n = localIds.size(); i < n; ++i) {
+    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i + needSpPhi));
   }
 }
 
-bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
+bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
+                           bool unprocessedPred) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
@@ -1254,18 +1279,13 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker);
-  insertLocalPhis();
-
-  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
+  m_state.startBlock(m_curBlock, marker, nullptr, unprocessedPred);
+  insertPhis(unprocessedPred);
+  always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));
   return true;
-}
-
-void IRBuilder::clearBlockState(Block* block) {
-  m_state.clearBlock(block);
 }
 
 Block* IRBuilder::makeBlock(Offset offset) {

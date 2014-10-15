@@ -485,14 +485,16 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   };
 
   /*
-   * Prepare the actual arguments to the CallBuiltin instruction.  If
-   * any of the parameters need type conversions, we need to handle
-   * that too.
+   * Prepare the actual arguments to the CallBuiltin instruction.  If any of
+   * the parameters need type conversions, we need to handle that too.
    */
-  auto const cbNumArgs = numArgs + (paramThis ? 1 : 0);
+  auto const cbNumArgs = 2 + numArgs + (paramThis ? 1 : 0);
   SSATmp* args[cbNumArgs];
+  auto argIdx = uint32_t{0};
+  args[argIdx++] = m_irb->fp();
+  args[argIdx++] = m_irb->sp();
   {
-    auto argIdx   = uint32_t{0};
+
     auto stackIdx = uint32_t{0};
 
     if (paramThis) args[argIdx++] = paramThis;
@@ -875,7 +877,7 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
 void HhbcTranslator::emitNativeImpl() {
   if (isInlining()) return emitNativeImplInlined();
 
-  gen(NativeImpl, m_irb->fp());
+  gen(NativeImpl, m_irb->fp(), m_irb->sp());
   SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
   SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
   SSATmp* fp = gen(FreeActRec, m_irb->fp());

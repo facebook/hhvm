@@ -151,7 +151,6 @@ private:
   void cgIsTypeCommon(IRInstruction* inst, bool negate);
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   Vreg emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst);
-  void emitTraceRet(Vout& v);
   void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                         const Class* cls, size_t nProps);
 
@@ -183,6 +182,7 @@ private:
   void cgLookupCnsCommon(IRInstruction* inst);
   RDS::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
+  void cgDefineModifiedStkPtr(IRInstruction*);
   void cgPropImpl(IRInstruction*);
   void cgVGetPropImpl(IRInstruction*);
   void cgBindPropImpl(IRInstruction*);

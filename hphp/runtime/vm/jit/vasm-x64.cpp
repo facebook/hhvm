@@ -884,7 +884,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
   Vout v(unit, b, origin);
 
-  RegSet arg_regs;
+  RegSet arg_regs = kCrossTraceRegs;
   VregList arg_dests;
   for (int i = 0, n = argv.size(); i < n; ++i) {
     PhysReg d{serviceReqArgRegs[i]};
@@ -1051,11 +1051,25 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           lowerVcall(unit, Vlabel{ib}, ii);
           break;
 
+        case Vinstr::defvmsp:
+          inst = copy{rVmSp, inst.defvmsp_.d};
+          break;
+
+        case Vinstr::syncvmsp:
+          inst = copy{inst.syncvmsp_.s, rVmSp};
+          break;
+
+        case Vinstr::syncvmfp:
+          inst = copy{inst.syncvmfp_.s, rVmFp};
+          break;
+
         default:
           break;
       }
     }
   }
+
+  printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
 
 void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {

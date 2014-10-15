@@ -867,7 +867,8 @@ void HhbcTranslator::emitFCallArray(const Offset pcOffset,
                                     const Offset after,
                                     bool destroyLocals) {
   auto const stack = spillStack();
-  gen(CallArray, CallArrayData { pcOffset, after, destroyLocals }, stack);
+  gen(CallArray, CallArrayData { pcOffset, after, destroyLocals }, stack,
+      m_irb->fp());
 }
 
 void HhbcTranslator::emitFCall(uint32_t numParams,

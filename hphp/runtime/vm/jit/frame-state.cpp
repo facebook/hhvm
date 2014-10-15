@@ -145,6 +145,13 @@ void FrameState::update(const IRInstruction* inst) {
     m_thisAvailable = true;
     break;
 
+  case DefLabel:
+    if (inst->numDsts() > 0) {
+      auto dst0 = inst->dst(0);
+      if (dst0->isA(Type::StkPtr)) m_spValue = dst0;
+    }
+    break;
+
   default:
     break;
   }
@@ -415,15 +422,30 @@ bool FrameState::hasStateFor(Block* block) const {
   return m_states.count(block);
 }
 
+Block* FrameState::findUnprocessedPred(Block* block) const {
+  for (auto const& edge : block->preds()) {
+    auto const pred = edge.from();
+    if (!isVisited(pred)) return pred;
+  }
+  return nullptr;
+}
+
 const FrameState::LocalVec& FrameState::localsLeavingBlock(Block* block) const {
   auto const it = m_states.find(block);
   assert(it != m_states.end());
   return it->second.out.locals;
 }
 
+SSATmp* FrameState::spLeavingBlock(Block* b) const {
+  auto it = m_states.find(b);
+  assert(it != m_states.end());
+  return it->second.out.spValue;
+}
+
 void FrameState::startBlock(Block* block,
                             BCMarker marker,
-                            LocalStateHook* hook /* = nullptr */) {
+                            LocalStateHook* hook /* = nullptr */,
+                            bool unprocessedPred /* = false */) {
   auto const it = m_states.find(block);
   auto const end = m_states.end();
 
@@ -438,15 +460,11 @@ void FrameState::startBlock(Block* block,
   }
 
   // Reset state if the block has an unprocessed predecessor.
-  for (auto const& edge : block->preds()) {
-    auto const pred = edge.from();
-    if (!isVisited(pred)) {
-      Indent _;
-      ITRACE(4, "B{} has unprocessed predecessor B{}, resetting state\n",
-             block->id(), pred->id());
-      unprocessedPredClear(marker, hook);
-      break;
-    }
+  if (unprocessedPred || findUnprocessedPred(block)) {
+    Indent _;
+    ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
+           block->id());
+    unprocessedPredClear(marker, hook);
   }
 
   markVisited(block);
@@ -469,22 +487,6 @@ void FrameState::unpauseBlock(Block* block) {
 
   load(snap);
   m_inlineSavedStates = snap.inlineSavedStates;
-}
-
-void FrameState::clearBlock(Block* block) {
-  auto const it = m_states.find(block);
-  if (it == m_states.end()) return;
-
-  ITRACE(4, "Clearing state for B{}\n", block->id());
-
-  auto& snap = it->second.in;
-
-  // Empty the fields that could change further down in the control flow graph.
-
-  snap.spValue = nullptr;
-  snap.stackDeficit = 0;
-  snap.evalStack = EvalStack();
-  snap.locals = LocalVec(m_locals.size());
 }
 
 FrameState::Snapshot FrameState::createSnapshot() const {
@@ -831,9 +833,13 @@ bool FrameState::isVisited(const Block* b) const {
 }
 
 std::string show(const FrameState& state) {
+  auto bcOff = state.marker().valid() ? state.marker().bcOff() : -1;
+  auto func = state.func();
+  auto funcName = func ? func->fullName() : makeStaticString("null");
+
   return folly::format("func: {}, bcOff: {}, spOff: {}{}{}",
-                       state.func()->fullName()->data(),
-                       state.marker().bcOff(),
+                       funcName->data(),
+                       bcOff,
                        state.spOffset(),
                        state.thisAvailable() ? ", thisAvailable" : "",
                        state.frameSpansCall() ? ", frameSpansCall" : ""

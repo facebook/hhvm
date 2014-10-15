@@ -365,24 +365,27 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 // Un,Dn    no uses, defs
 
 #define VASM_OPCODES\
-  /* intrinsics */\
+  /* service requests, PHP-level function calls */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
-  O(bindcall, I(stub), U(args), Dn)  \
-  O(bindexit, I(cc) I(target), U(sf), Dn)\
-  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
-  O(bindjcc2nd, I(cc) I(target), U(sf), Dn)\
-  O(bindjmp, I(target) I(trflags), Un, Dn)\
+  O(bindcall, I(stub), U(args), Dn)\
+  O(bindexit, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
+  O(bindjcc2nd, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
-  O(contenter, Inone, U(fp) U(target), Dn)\
+  O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(resume, Inone, U(args), Dn)\
+  O(retransopt, I(sk) I(id), U(args), Dn)\
+  /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
   O(end, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
-  O(fallback, I(dest), Un, Dn)\
-  O(fallbackcc, I(cc) I(dest), U(sf), Dn)\
-  O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
+  O(fallback, I(dest), U(args), Dn)\
+  O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
+  O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
   O(ldpoint, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
@@ -399,6 +402,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
   O(landingpad, Inone, Un, Dn)\
+  O(defvmsp, Inone, Un, D(d))\
+  O(syncvmsp, Inone, U(s), Dn)\
+  O(syncvmfp, Inone, U(s), Dn)\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -460,7 +466,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(jcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target), Dn)\
-  O(jmpm, Inone, U(target), Dn)\
+  O(jmpm, Inone, U(target) U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
   O(loaddqu, Inone, U(s), D(d))\
@@ -534,26 +540,30 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 struct bindaddr { TCA* dest; SrcKey sk; };
 struct bindcall { TCA stub; RegSet args; };
 struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
-                  TransFlags trflags; };
-struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2]; };
-struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; };
-struct bindjmp { SrcKey target; TransFlags trflags; };
+                  TransFlags trflags; RegSet args; };
+struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2];
+                    RegSet args; };
+struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
+struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
+struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
+struct contenter { Vreg64 fp, target; RegSet args; };
+struct resume { RegSet args; };
+struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
                  Fixup fixup; DestType destType; bool smashable; };
-struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
-struct contenter { Vreg64 fp, target; };
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct debugtrap {};
 struct end {};
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
-struct fallback { SrcKey dest; TransFlags trflags; };
+struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
-                    TransFlags trflags; };
-struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex; };
+                    TransFlags trflags; RegSet args; };
+struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
+                RegSet args; };
 struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
@@ -568,6 +578,9 @@ struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 struct landingpad {};
+struct defvmsp { Vreg d; };
+struct syncvmsp { Vreg s; };
+struct syncvmfp { Vreg s; };
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -647,7 +660,7 @@ struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; };
-struct jmpm { Vptr target; };
+struct jmpm { Vptr target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loaddqu { Vptr s; Vreg128 d; };
@@ -728,6 +741,18 @@ struct Vinstr {
 
 #define O(name, imms, uses, defs)                               \
   /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
+  VASM_OPCODES
+#undef O
+
+  /*
+   * Define an operator= for all instructions to preserve origin and pos.
+   */
+#define O(name, ...)                            \
+  Vinstr& operator=(const jit::name& i) {       \
+    op = Vinstr::name;                          \
+    name##_ = i;                                \
+    return *this;                               \
+  }
   VASM_OPCODES
 #undef O
 

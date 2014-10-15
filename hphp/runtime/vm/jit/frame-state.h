@@ -152,11 +152,23 @@ struct FrameState final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
-   * Starts tracking state for a block and reloads any previously saved
-   * state. Can set local values to null if hitting a block with an
-   * unprocessed predecessor, so we pass in an optional LocalStateHook.
+   * Return an unprocessed predecessor of the given block, or nullptr if none
+   * exists.
    */
-  void startBlock(Block*, BCMarker, LocalStateHook* hook = nullptr);
+  Block* findUnprocessedPred(Block*) const;
+
+  /*
+   * Starts tracking state for a block and reloads any previously saved
+   * state. Can set local values to null if hitting a block with an unprocessed
+   * predecessor, so we pass in an optional LocalStateHook. The unprocessedPred
+   * parameter is used during initial IR generation to indicate that the given
+   * block has an unprocessed predecessor in the region that might not yet be
+   * linked into the IR cfg.
+   */
+  void startBlock(Block* b,
+                  BCMarker marker,
+                  LocalStateHook* hook = nullptr,
+                  bool unprocessedPred = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -272,16 +284,23 @@ struct FrameState final : private LocalStateHook {
   using LocalVec = jit::vector<LocalState>;
 
   /*
-   * Info about locals leaving a block. The block must have already been
+   * Info about state leaving a block. The block must have already been
    * processed.
    */
   const LocalVec& localsLeavingBlock(Block*) const;
+  SSATmp* spLeavingBlock(Block*) const;
 
   /*
    * Marks a block as visited in the current iteration. FrameState::startBlock
    * does this automatically.
    */
   void markVisited(const Block*);
+
+  /*
+   * Clears state upon hitting an unprocessed predecessor. Takes an optional
+   * hook whose locals will get nulled out.
+   */
+  void unprocessedPredClear(BCMarker, LocalStateHook* hook = nullptr);
 
  private:
   /*
@@ -324,12 +343,6 @@ struct FrameState final : private LocalStateHook {
    * other blocks intact.
    */
   void clearCurrentState();
-
-  /*
-   * Clears state upon hitting an unprocessed predecessor. Takes an optional
-   * hook whose locals will get nulled out.
-   */
-  void unprocessedPredClear(BCMarker, LocalStateHook* hook = nullptr);
 
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();

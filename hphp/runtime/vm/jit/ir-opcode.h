@@ -117,7 +117,7 @@ struct LocalStateHook;
 
 #define O_STK(name, dst, src, flags)            \
   O(name, dst, src, StkFlags(flags))            \
-  O(name ## Stk, DStk(dst), src, flags)
+  O(name ## Stk, DStk(dst), src S(StkPtr), flags)
 
 // The IR opcode table is generated from lines that start with | in
 // hphp/doc/ir.specification.

@@ -166,7 +166,7 @@ let parsing genv env =
   HackSearchService.MasterApi.clear_shared_memory env.failed_parsing;
   SharedMem.collect();
   let get_next = Bucket.make (SSet.elements env.failed_parsing) in
-  Parsing_service.go genv.workers false env.files_info ~get_next
+  Parsing_service.go genv.workers ~get_next
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.
@@ -175,8 +175,8 @@ let parsing genv env =
  *)
 (*****************************************************************************)
 
-let update_file_info genv env fast_parsed =
-  Typing_deps.update_files genv.workers fast_parsed;
+let update_file_info env fast_parsed =
+  Typing_deps.update_files fast_parsed;
   let files_info = SMap.fold SMap.add fast_parsed env.files_info in
   files_info
 
@@ -218,7 +218,7 @@ let type_check genv env =
   let t = t2 in
 
   (* UPDATE FILE INFO *)
-  let files_info = update_file_info genv env fast_parsed in
+  let files_info = update_file_info env fast_parsed in
 
   (* BUILDING AUTOLOADMAP *)
   !hook_after_parsing genv { env with files_info };

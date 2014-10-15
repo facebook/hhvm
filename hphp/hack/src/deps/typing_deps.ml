@@ -120,7 +120,7 @@ let get_files deps =
     with Not_found -> acc
   end deps SSet.empty
 
-let update_files workers fast =
+let update_files fast =
   SMap.iter begin fun filename info ->
     let {FileInfo.funs; classes; types; 
          consts = _ (* TODO probably a bug #3844332 *);

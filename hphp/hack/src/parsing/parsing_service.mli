@@ -13,8 +13,6 @@ val empty_file_info: FileInfo.t
 
 val go:
   Worker.t list option ->
-  bool ->
-  FileInfo.t SMap.t ->
   get_next:(unit -> string list) ->
   FileInfo.t SMap.t * Errors.t * SSet.t
 

@@ -91,7 +91,7 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is SSet.t of files that we failed to parse
  *)
-let parse check_mode (acc, errorl, error_files, php_files) fn =
+let parse (acc, errorl, error_files, php_files) fn =
   let errorl', {Parser_hack.is_hh_file; comments; ast} =
     Errors.do_ begin fun () ->
       Parser_hack.from_file fn
@@ -133,13 +133,13 @@ let merge_parse
   SSet.union files1 files2,
   SSet.union pfiles1 pfiles2
 
-let parse_files check_mode acc fnl =
-  List.fold_left (parse check_mode) acc fnl
+let parse_files acc fnl =
+  List.fold_left parse acc fnl
 
-let parse_parallel workers check_mode get_next =
+let parse_parallel workers get_next =
   MultiWorker.call
       workers
-      ~job:(parse_files check_mode)
+      ~job:parse_files
       ~neutral:neutral
       ~merge:merge_parse
       ~next:get_next
@@ -148,8 +148,8 @@ let parse_parallel workers check_mode get_next =
 (* Main entry points *)
 (*****************************************************************************)
 
-let go workers check_mode files ~get_next =
+let go workers ~get_next =
   let fast, errorl, failed_parsing, php_files =
-    parse_parallel workers check_mode get_next in
+    parse_parallel workers get_next in
   Parsing_hooks.dispatch_parse_task_completed_hook (SMap.keys fast) php_files;
   fast, errorl, failed_parsing

@@ -840,7 +840,6 @@ Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   return m_areas.back().out;
 }
 
-// copy of layoutBlocks in layout.cpp
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
   auto blocks = sortBlocks(unit);
   // partition into main/cold/frozen areas without changing relative order,

@@ -50,7 +50,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/native-calls.h"

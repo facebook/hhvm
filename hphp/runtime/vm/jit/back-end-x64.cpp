@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-alloc-x64.h"
@@ -788,7 +788,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       emitTraceCall(mainCode, unit.bcOff());
     }
 
-    auto const linfo = layoutBlocks(unit);
+    auto const blocks = rpoSortCfg(unit);
     Vasm vasm(&state.meta);
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
@@ -796,12 +796,12 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, linfo.blocks, this);
+    assignRegs(unit, vunit, state, blocks, this);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
-    for (auto block : linfo.blocks) {
+    for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();

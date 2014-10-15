@@ -93,7 +93,11 @@ folly::Range<Vlabel*> succs(Vblock& block);
 folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
+// Sort blocks in reverse-postorder starting from unit.entry
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
+
+// Group blocks into main, cold, and frozen while preserving relative
+// order with each section.
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
 }}

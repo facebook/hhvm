@@ -609,7 +609,7 @@ static void unwindResumeHelper(_Unwind_Exception* data) {
 
 static void callUnwindResumeHelper(Vout& v) {
   auto exnReg = v.makeReg();
-  v << loadq{rVmTl[unwinderScratchOff()], exnReg};
+  v << load{rVmTl[unwinderScratchOff()], exnReg};
   v << vcall{CppCall::direct(unwindResumeHelper), v.makeVcallArgs({{exnReg}}),
              v.makeTuple({})};
   v << ud2{};
@@ -645,7 +645,7 @@ void CodeGenerator::cgCheckSideExit(IRInstruction* inst) {
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
   auto& v = vmain();
   auto exnReg = v.makeReg();
-  v << loadq{rVmTl[unwinderScratchOff()], exnReg};
+  v << load{rVmTl[unwinderScratchOff()], exnReg};
   v << vcall{CppCall::direct(_Unwind_DeleteException),
              v.makeVcallArgs({{exnReg}}), v.makeTuple({})};
 }
@@ -1461,7 +1461,7 @@ Vreg getDataPtrEnregistered(Vout&, Vreg dataSrc) {
 // cmp instruction
 Vreg getDataPtrEnregistered(Vout& v, Vptr dataSrc) {
   auto t = v.makeReg();
-  v << loadq{dataSrc, t};
+  v << load{dataSrc, t};
   return t;
 }
 
@@ -2078,7 +2078,7 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
   cond(v, CC_E, sf, dst, [&](Vout& v) {
     auto ref_ptr = v.makeReg();
     auto cell_ptr = v.makeReg();
-    v << loadq{src[TVOFF(m_data)], ref_ptr};
+    v << load{src[TVOFF(m_data)], ref_ptr};
     v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr, v.makeReg()};
     return cell_ptr;
   }, [&](Vout& v) {
@@ -2090,7 +2090,7 @@ Vreg CodeGenerator::cgLdFuncCachedCommon(IRInstruction* inst, Vreg dst) {
   auto const name = inst->extra<LdFuncCachedData>()->name;
   auto const ch   = NamedEntity::get(name)->getFuncHandle();
   auto& v = vmain();
-  v << loadq{rVmTl[ch], dst};
+  v << load{rVmTl[ch], dst};
   auto const sf = v.makeReg();
   v << testq{dst, dst, sf};
   return sf;
@@ -2131,7 +2131,7 @@ void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
 
   // Check the first function handle, otherwise try to autoload.
   auto dst1 = v.makeReg();
-  v << loadq{rVmTl[hFunc], dst1};
+  v << load{rVmTl[hFunc], dst1};
   auto const sf = v.makeReg();
   v << testq{dst1, dst1, sf};
 
@@ -2217,7 +2217,7 @@ void CodeGenerator::cgLdObjMethod(IRInstruction* inst) {
   v = fast_path;
   auto funcptr = v.makeReg();
   v << shrqi{32, func_class, funcptr, v.makeReg()};
-  v << storeq{funcptr, actRecReg[AROFF(m_func)]};
+  v << store{funcptr, actRecReg[AROFF(m_func)]};
   v << jmp{done};
 
   v = slow_path;
@@ -2279,7 +2279,7 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
 void CodeGenerator::emitTraceRet(Vout& v) {
   // call to a trace function
   auto ripReg = v.makeReg();
-  v << loadq{*rsp, ripReg}; // return ip from native stack
+  v << load{*rsp, ripReg}; // return ip from native stack
   v << vcall{CppCall::direct(traceRet),
              v.makeVcallArgs({{rVmFp, rVmSp, ripReg}}), v.makeTuple({})};
 }
@@ -2438,7 +2438,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fakeRet  = mcg->tx().uniqueStubs.retInlHelper;
   auto const retBCOff = inst->extra<DefInlineFP>()->retBCOff;
   auto& v = vmain();
-  v << storeq{callerFP, calleeFP[AROFF(m_sfp)]};
+  v << store{callerFP, calleeFP[AROFF(m_sfp)]};
   emitImmStoreq(v, intptr_t(fakeRet), calleeFP[AROFF(m_savedRip)]);
   v << storeli{retBCOff, calleeFP[AROFF(m_soff)]};
   cgMov(inst);
@@ -2447,7 +2447,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
 void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg();
   assert(fpReg == rVmFp);
-  vmain() << loadq{fpReg[AROFF(m_sfp)], rVmFp};
+  vmain() << load{fpReg[AROFF(m_sfp)], rVmFp};
 }
 
 void CodeGenerator::cgReDefSP(IRInstruction* inst) {
@@ -2465,7 +2465,7 @@ void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   auto ptr = srcLoc(0).reg();
   auto off = AROFF(m_sfp);
   auto dst = dstLoc(0).reg();
-  vmain() << loadq{ptr[off], dst};
+  vmain() << load{ptr[off], dst};
 }
 
 void CodeGenerator::cgStProp(IRInstruction* inst) {
@@ -2603,7 +2603,7 @@ void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
   auto fpReg = srcLoc(0).reg();
   auto& v = vmain();
   auto rthis = v.makeReg(); // Load AR->m_this into rthis
-  v << loadq{fpReg[AROFF(m_this)], rthis};
+  v << load{fpReg[AROFF(m_this)], rthis};
 
   auto decrefIfAvailable = [&](Vout& v) {
     // Check if this is available and we're not in a static context instead
@@ -2918,7 +2918,7 @@ void CodeGenerator::cgDecRefDynamicTypeMem(Vreg baseReg, int64_t offset) {
   // Emit check for ref-counted type
   cgCheckRefCountedType(baseReg, offset, done);
 
-  v << loadq{baseReg[offset + TVOFF(m_data)], dataReg};
+  v << load{baseReg[offset + TVOFF(m_data)], dataReg};
 
   // Emit check for UncountedValue or StaticValue and the actual DecRef
   cgCheckStaticBitAndDecRef(v, done, Type::Cell, dataReg, [&](Vout& v) {
@@ -2948,7 +2948,7 @@ void CodeGenerator::cgDecRefMem(Type type, Vreg baseReg, int64_t offset) {
     cgDecRefDynamicTypeMem(baseReg, offset);
   } else if (type.maybeCounted()) {
     auto dataReg = v.makeReg();
-    v << loadq{baseReg[offset + TVOFF(m_data)], dataReg};
+    v << load{baseReg[offset + TVOFF(m_data)], dataReg};
     cgDecRefStaticType(v, type, dataReg, true);
   }
 }
@@ -2994,12 +2994,12 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   auto& v = vmain();
 
   auto func = v.makeReg();
-  v << loadq{fpReg[itOff + CufIter::funcOff()], func};
-  v << storeq{func, spReg[spOffset + int(AROFF(m_func))]};
+  v << load{fpReg[itOff + CufIter::funcOff()], func};
+  v << store{func, spReg[spOffset + int(AROFF(m_func))]};
 
   auto ctx = v.makeReg();
-  v << loadq{fpReg[itOff + CufIter::ctxOff()], ctx};
-  v << storeq{ctx, spReg[spOffset + int(AROFF(m_this))]};
+  v << load{fpReg[itOff + CufIter::ctxOff()], ctx};
+  v << store{ctx, spReg[spOffset + int(AROFF(m_this))]};
 
   auto ctx2 = v.makeReg();
   {
@@ -3012,7 +3012,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     });
   }
   auto name = v.makeReg();
-  v << loadq{fpReg[itOff + CufIter::nameOff()], name};
+  v << load{fpReg[itOff + CufIter::nameOff()], name};
   auto const sf = v.makeReg();
   v << testq{name, name, sf};
   ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
@@ -3022,9 +3022,9 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
     auto name2 = v.makeReg();
     v << orqi{ActRec::kInvNameBit, name, name2, v.makeReg()};
-    v << storeq{name2, spReg[spOffset + int(AROFF(m_invName))]};
+    v << store{name2, spReg[spOffset + int(AROFF(m_invName))]};
   }, [&](Vout& v) {
-    v << storeq{name, spReg[spOffset + int(AROFF(m_invName))]};
+    v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
   });
   v << storeli{safe_cast<int32_t>(nArgs),
                spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
@@ -3051,16 +3051,16 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
       auto clsPtrReg = srcLoc(2/*objOrCls*/).reg();
       auto thisptr = v.makeReg();
       v << orqi{1, clsPtrReg, thisptr, v.makeReg()};
-      v << storeq{thisptr, spReg[spOffset + int(AROFF(m_this))]};
+      v << store{thisptr, spReg[spOffset + int(AROFF(m_this))]};
     }
   } else if (objOrCls->isA(Type::Obj)) {
     // store this pointer
-    v << storeq{srcLoc(2/*objOrCls*/).reg(),
-                spReg[spOffset + int(AROFF(m_this))]};
+    v << store{srcLoc(2/*objOrCls*/).reg(),
+               spReg[spOffset + int(AROFF(m_this))]};
   } else if (objOrCls->isA(Type::Ctx)) {
     // Stores either a this pointer or a Cctx -- statically unknown.
     auto objOrClsPtrReg = srcLoc(2/*objOrCls*/).reg();
-    v << storeq{objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]};
+    v << store{objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]};
   } else {
     assert(objOrCls->isA(Type::Nullptr));
     // no obj or class; this happens in FPushFunc
@@ -3085,7 +3085,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   } else {
     int offset_m_func = spOffset + int(AROFF(m_func));
     auto funcLoc = srcLoc(1);
-    v << storeq{funcLoc.reg(0), spReg[offset_m_func]};
+    v << store{funcLoc.reg(0), spReg[offset_m_func]};
   }
 
   v << storeli{nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
@@ -3113,7 +3113,7 @@ void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
     v << storeqi{0, obj[c_Closure::ctxOffset()]};
   } else {
     auto const ctx = srcLoc(1).reg();
-    v << storeq{ctx, obj[c_Closure::ctxOffset()]};
+    v << store{ctx, obj[c_Closure::ctxOffset()]};
   }
 }
 
@@ -3214,10 +3214,10 @@ void CodeGenerator::cgInitObjProps(IRInstruction* inst) {
       // Slower case: we have to load the src address from the targetcache
       auto propInitVec = v.makeReg();
       // Load the Class's propInitVec from the targetcache
-      v << loadq{rVmTl[cls->propHandle()], propInitVec};
+      v << load{rVmTl[cls->propHandle()], propInitVec};
       // We want &(*propData)[0]
       auto rPropData = v.makeReg();
-      v << loadq{propInitVec[Class::PropInitVec::dataOff()], rPropData};
+      v << load{propInitVec[Class::PropInitVec::dataOff()], rPropData};
       if (!cls->hasDeepInitProps()) {
         auto args = argGroup()
           .addr(srcReg,
@@ -3261,7 +3261,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   auto& v = vmain();
 
   auto const ar = extra->numParams * sizeof(TypedValue);
-  v << storeq{rFP, rSP[ar + AROFF(m_sfp)]};
+  v << store{rFP, rSP[ar + AROFF(m_sfp)]};
   v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
 
   if (extra->knownPrologue) {
@@ -3496,7 +3496,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // return type is String, Array, or Object; fold nullptr to KindOfNull
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
-    v << loadq{misReg[returnOffset], dstReg};
+    v << load{misReg[returnOffset], dstReg};
     auto const sf = v.makeReg();
     v << testq{dstReg, dstReg, sf};
     v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
@@ -3509,7 +3509,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();
     emitLoadTVType(v, misReg[returnOffset + TVOFF(m_type)], tmp_type);
-    v << loadq{misReg[returnOffset + TVOFF(m_data)], dstReg};
+    v << load{misReg[returnOffset + TVOFF(m_data)], dstReg};
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
     auto const sf = v.makeReg();
     v << testb{tmp_type, tmp_type, sf};
@@ -3570,7 +3570,7 @@ void CodeGenerator::cgLdThis(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto& v = vmain();
 
-  v << loadq{srcLoc(0).reg()[AROFF(m_this)], dstReg};
+  v << load{srcLoc(0).reg()[AROFF(m_this)], dstReg};
   if (!taken) return;  // no need to perform its checks
 
   if (curFunc()->isPseudoMain() || !curFunc()->mayHaveThis()) {
@@ -3609,7 +3609,7 @@ void CodeGenerator::cgLdClsCctx(IRInstruction* inst) {
 void CodeGenerator::cgLdCtx(IRInstruction* inst) {
   auto const dstReg = dstLoc(0).reg();
   auto const srcReg = srcLoc(0).reg();
-  vmain() << loadq{srcReg[AROFF(m_this)], dstReg};
+  vmain() << load{srcReg[AROFF(m_this)], dstReg};
 }
 
 void CodeGenerator::cgLdCctx(IRInstruction* inst) {
@@ -3621,7 +3621,7 @@ void CodeGenerator::cgLdClsName(IRInstruction* inst) {
   auto const srcReg = srcLoc(0).reg();
   auto& v = vmain();
   auto preclass = v.makeReg();
-  v << loadq{srcReg[Class::preClassOff()], preclass};
+  v << load{srcReg[Class::preClassOff()], preclass};
   emitLdLowPtr(v, preclass[PreClass::nameOffset()],
                dstReg, sizeof(LowStringPtr));
 }
@@ -3631,7 +3631,7 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto const offset = inst->src(1);
   auto dstReg       = dstLoc(0).reg();
   auto baseReg      = srcLoc(0).reg();
-  vmain() << loadq{baseReg[offset->intVal() + AROFF(m_func)], dstReg};
+  vmain() << load{baseReg[offset->intVal() + AROFF(m_func)], dstReg};
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
@@ -3684,7 +3684,7 @@ void CodeGenerator::cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc loc) {
   }
 
   if (src->type().needsValueReg()) {
-    v << storeq{srcReg0, refTVData(dst)};
+    v << store{srcReg0, refTVData(dst)};
   }
   emitStoreTVType(v, srcReg1, refTVType(dst));
 }
@@ -3750,7 +3750,7 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
     emitTypeCheck(type, typeDstReg, valueDstReg, label);
   }
   // Load value
-  v << loadq{refTVData(ref), valueDstReg};
+  v << load{refTVData(ref), valueDstReg};
 }
 
 void CodeGenerator::cgLdProp(IRInstruction* inst) {
@@ -3915,7 +3915,7 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   assert(vec->type().strictSubtypeOf(Type::Obj) &&
          vec->type().getClass() == c_Vector::classof());
-  vmain() << loadq{vecReg[c_Vector::dataOffset()], dstReg};
+  vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
 
 /**
@@ -3937,7 +3937,7 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   auto countOffset = (int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData);
 
   auto ptr = v.makeReg();
-  v << loadq{vecReg[rawPtrOffset], ptr};
+  v << load{vecReg[rawPtrOffset], ptr};
   auto const sf = v.makeReg();
   v << cmplim{1, ptr[countOffset], sf};
   v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
@@ -4276,7 +4276,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
       bitsOff = Func::refBitValOff();
       bitsPtrReg = funcPtrReg;
     } else {
-      v << loadq{funcPtrReg[Func::sharedOff()], bitsPtrReg};
+      v << load{funcPtrReg[Func::sharedOff()], bitsPtrReg};
       bitsOff -= sizeof(uint64_t);
     }
 
@@ -4294,7 +4294,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
       if (vals64) cond = CC_E;
     } else {
       auto bitsValReg = v.makeReg();
-      v << loadq{bitsPtrReg[bitsOff], bitsValReg};
+      v << load{bitsPtrReg[bitsOff], bitsValReg};
 
       //     bitsVal2 <- bitsValReg & mask64
       auto bitsVal2 = v.makeReg();
@@ -4425,7 +4425,7 @@ void CodeGenerator::cgLdClsMethodCacheCommon(IRInstruction* inst, Offset off) {
   auto const methodName = extra.methodName;
   auto const ch = StaticMethodCache::alloc(clsName, methodName,
                                            getContextName(curClass()));
-  vmain() << loadq{rVmTl[ch + off], dstReg};
+  vmain() << load{rVmTl[ch + off], dstReg};
 }
 
 void CodeGenerator::cgLdClsMethodCacheFunc(IRInstruction* inst) {
@@ -4500,7 +4500,7 @@ void CodeGenerator::cgLdClsMethodFCacheFunc(IRInstruction* inst) {
   auto const ch = StaticMethodFCache::alloc(
     clsName, methodName, getContextName(curClass())
   );
-  vmain() << loadq{rVmTl[ch], dstReg};
+  vmain() << load{rVmTl[ch], dstReg};
 }
 
 void CodeGenerator::cgLookupClsMethodFCache(IRInstruction* inst) {
@@ -4603,7 +4603,7 @@ RDS::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
                                                Vreg dst, Vreg sf) {
   const StringData* className = inst->src(0)->strVal();
   auto ch = NamedEntity::get(className)->getClassHandle();
-  v << loadq{rVmTl[ch], dst};
+  v << load{rVmTl[ch], dst};
   v << testq{dst, dst, sf};
   return ch;
 }
@@ -4641,9 +4641,9 @@ void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {
   const Vreg rds = rVmTl;
   auto& v = vmain();
   if (ch->isConst()) {
-    v << loadq{rds[ch->rdsHandleVal()], dreg};
+    v << load{rds[ch->rdsHandleVal()], dreg};
   } else {
-    v << loadq{rds[srcLoc(0).reg()], dreg};
+    v << load{rds[srcLoc(0).reg()], dreg};
   }
 }
 
@@ -5034,8 +5034,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   cgInterpOneCommon(inst);
   auto& v = vmain();
-  v << loadq{rVmTl[RDS::kVmfpOff], rVmFp};
-  v << loadq{rVmTl[RDS::kVmspOff], rVmSp};
+  v << load{rVmTl[RDS::kVmfpOff], rVmFp};
+  v << load{rVmTl[RDS::kVmspOff], rVmSp};
   v << resume{};
 }
 
@@ -5051,7 +5051,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   assert(srcLoc(0).reg() == rVmSp);
   assert(curFpReg == rVmFp);
 
-  v << storeq{curFpReg, genFpReg[AROFF(m_sfp)]};
+  v << store{curFpReg, genFpReg[AROFF(m_sfp)]};
   v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
   v << copy{genFpReg, curFpReg};
   v << contenter{curFpReg, addrReg};
@@ -5119,11 +5119,11 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto& v = vmain();
   auto mem_index = v.makeReg();
   auto res = v.makeReg();
-  v << loadq{contArReg[off], mem_index};
+  v << load{contArReg[off], mem_index};
   auto const sf = v.makeReg();
   v << cmpq{mem_index, newIdxReg, sf};
   v << cmovq{CC_G, sf, mem_index, newIdxReg, res};
-  v << storeq{res, contArReg[off]};
+  v << store{res, contArReg[off]};
 }
 
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
@@ -5150,7 +5150,7 @@ void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
         v << loadl{src, destReg};
       }
       break;
-    case sz::qword: v << loadq{src, destReg}; break;
+    case sz::qword: v << load{src, destReg}; break;
     default:        not_implemented();
   }
 }
@@ -5181,7 +5181,7 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
     switch (size) {
       case sz::byte:  v << storeb{srcReg, dst}; break;
       case sz::dword: v << storel{srcReg, dst}; break;
-      case sz::qword: v << storeq{srcReg, dst}; break;
+      case sz::qword: v << store{srcReg, dst}; break;
       default:        not_implemented();
     }
   }
@@ -5251,7 +5251,7 @@ void CodeGenerator::cgLdAsyncArParentChain(IRInstruction* inst) {
   const int64_t off = c_AsyncFunctionWaitHandle::parentChainOff()
                     - c_AsyncFunctionWaitHandle::arOff();
   auto& v = vmain();
-  v << loadq{asyncArReg[off], dstReg};
+  v << load{asyncArReg[off], dstReg};
 }
 
 void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
@@ -5278,16 +5278,16 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
   // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::BWH;
   auto firstParent = v.makeReg();
   assert(uint8_t(AsioBlockable::Kind::BlockableWaitHandle) == 0);
-  v << loadq{childReg[firstParentOff], firstParent};
-  v << storeq{firstParent, parentArReg[nextParentToArOff]};
+  v << load{childReg[firstParentOff], firstParent};
+  v << store{firstParent, parentArReg[nextParentToArOff]};
 
   // child->m_parentChain.m_firstParent = &parent->m_blockable;
   auto objToAr = v.makeReg();
   v << lea{parentArReg[blockableToArOff], objToAr};
-  v << storeq{objToAr, childReg[firstParentOff]};
+  v << store{objToAr, childReg[firstParentOff]};
 
   // parent->m_child = child;
-  v << storeq{childReg, parentArReg[childToArOff]};
+  v << store{childReg, parentArReg[childToArOff]};
 }
 
 void CodeGenerator::cgIsWaitHandle(IRInstruction* inst) {
@@ -5692,8 +5692,8 @@ void CodeGenerator::cgLdClsInitData(IRInstruction* inst) {
   auto handle = v.makeReg();
   auto vec = v.makeReg();
   v << loadl{clsReg[offset], handle};
-  v << loadq{rds[handle], vec};
-  v << loadq{vec[Class::PropInitVec::dataOff()], dstReg};
+  v << load{rds[handle], vec};
+  v << load{vec[Class::PropInitVec::dataOff()], dstReg};
 }
 
 void CodeGenerator::cgConjure(IRInstruction* inst) {
@@ -5718,7 +5718,7 @@ void CodeGenerator::cgProfileStr(IRInstruction* inst) {
     [&](Vout& v) { // m_type == KindOfString
       auto ptr = v.makeReg();
       auto const sf = v.makeReg();
-      v << loadq{ptrReg[TVOFF(m_data)], ptr};
+      v << load{ptrReg[TVOFF(m_data)], ptr};
       v << cmplim{StaticValue, ptr[FAST_REFCOUNT_OFFSET], sf};
 
       ifThenElse(

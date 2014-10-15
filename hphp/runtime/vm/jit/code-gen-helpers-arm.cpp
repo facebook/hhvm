@@ -79,8 +79,8 @@ Vpoint emitCall(Vout& v, CppCall call, RegSet args) {
     v << ldimm{reinterpret_cast<intptr_t>(call.address()), rHostCall};
     break;
   case CppCall::Kind::Virtual:
-    v << loadq{arg0[0], rHostCall};
-    v << loadq{rHostCall[call.vtableOffset()], rHostCall};
+    v << load{arg0[0], rHostCall};
+    v << load{rHostCall[call.vtableOffset()], rHostCall};
     break;
   case CppCall::Kind::ArrayVirt:
   case CppCall::Kind::Destructor:

@@ -239,7 +239,6 @@ private:
   void emit(leap& i) { a->lea(i.s, i.d); }
   void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
   void emit(loadl& i) { a->loadl(i.s, i.d); }
-  void emit(loadq& i);
   void emit(loadqp& i) { a->loadq(i.s, i.d); }
   void emit(loadsd& i) { a->movsd(i.s, i.d); }
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
@@ -278,7 +277,6 @@ private:
   void emit(storebi& i) { a->storeb(i.s, i.m); }
   void emit(storel& i) { a->storel(i.s, i.m); }
   void emit(storeli& i) { a->storel(i.s, i.m); }
-  void emit(storeq& i) { a->storeq(i.s, i.m); }
   void emit(storeqi& i) { a->storeq(i.s, i.m); }
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
@@ -824,11 +822,6 @@ void Vgen::emit(lea& i) {
   } else {
     a->lea(i.s, i.d);
   }
-}
-
-void Vgen::emit(loadq& i) {
-  if (i.s.seg == Vptr::FS) a->fs();
-  a->loadq(i.s.mr(), i.d);
 }
 
 }

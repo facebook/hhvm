@@ -467,7 +467,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(leap, I(s), Un, D(d))\
   O(loaddqu, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
-  O(loadq, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
@@ -506,7 +505,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(storedqu, Inone, U(s) U(m), Dn)\
   O(storel, Inone, U(s) U(m), Dn)\
   O(storeli, I(s), U(m), Dn)\
-  O(storeq, Inone, U(s) U(m), Dn)\
   O(storeqi, I(s), U(m), Dn)\
   O(storesd, Inone, U(s) U(m), Dn)\
   O(storew, Inone, U(s) U(m), Dn)\
@@ -655,7 +653,6 @@ struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loaddqu { Vptr s; Vreg128 d; };
 struct loadl { Vptr s; Vreg32 d; };
-struct loadq { Vptr s; Vreg64 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadsd { Vptr s; VregDbl d; };
 struct loadzbl { Vptr s; Vreg32 d; };
@@ -694,7 +691,6 @@ struct storebi { Immed s; Vptr m; };
 struct storedqu { Vreg128 s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };
 struct storeli { Immed s; Vptr m; };
-struct storeq { Vreg64 s; Vptr m; };
 struct storeqi { Immed s; Vptr m; };
 struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };

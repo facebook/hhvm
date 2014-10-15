@@ -396,7 +396,6 @@ O(jmp) \
 O(ldimm) \
 O(lea) \
 O(load) \
-O(loadq) \
 O(pushm) \
 O(resume) \
 O(ret) \
@@ -561,10 +560,6 @@ void LLVMEmitter::emit(const lea& inst) {
 }
 
 void LLVMEmitter::emit(const load& inst) {
-  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s)));
-}
-
-void LLVMEmitter::emit(const loadq& inst) {
   defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s)));
 }
 

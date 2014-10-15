@@ -70,8 +70,8 @@ void moveToAlign(CodeBlock& cb,
 }
 
 void emitEagerSyncPoint(Vout& v, const Op* pc) {
-  v << storeq{rVmFp, rVmTl[RDS::kVmfpOff]};
-  v << storeq{rVmSp, rVmTl[RDS::kVmspOff]};
+  v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
+  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
@@ -275,7 +275,7 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     // Virtual call.
     // Load method's address from proper offset off of object in rdi,
     // using rax as scratch.
-    v << loadq{*rdi, rax};
+    v << load{*rdi, rax};
     v << callm{rax[target.vtableOffset()], args};
     return;
   case CppCall::Kind::ArrayVirt: {

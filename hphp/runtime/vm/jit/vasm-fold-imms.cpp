@@ -84,10 +84,6 @@ struct Folder {
     int val;
     if (match_int(in.s, val)) { out = storeli{val, in.m}; }
   }
-  void fold(storeq& in, Vinstr& out) {
-    int val;
-    if (match_int(in.s, val)) { out = storeqi{val, in.m}; }
-  }
   void fold(store& in, Vinstr& out) {
     int val;
     if (match_int(in.s, val)) { out = storeqi{val, in.d}; }

@@ -113,14 +113,12 @@ private:
   void emit(jmp i);
   void emit(lea& i) { a->Add(X(i.d), X(i.s.base), i.s.disp); }
   void emit(loadl& i) { a->Ldr(W(i.d), M(i.s)); /* assume 0-extends */ }
-  void emit(loadq& i) { a->Ldr(X(i.d), M(i.s)); }
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }
   void emit(storeb& i) { a->Strb(W(i.s), M(i.m)); }
   void emit(storel& i) { a->Str(W(i.s), M(i.m)); }
-  void emit(storeq& i) { a->Str(X(i.s), M(i.m)); }
   void emit(setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
   void emit(subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }

@@ -29,13 +29,13 @@ let dummy_path: path = { is_normalized = true; path = ""; }
 let expanduser (path : string) : string =
   Str.substitute_first
     (Str.regexp "^~\\([^/]*\\)")
-    begin fun s -> 
+    begin fun s ->
       match Str.matched_group 1 s with
-        | "" -> 
+        | "" ->
           begin try Unix.getenv "HOME"
           with Not_found -> (Unix.getpwuid (Unix.getuid())).Unix.pw_dir end
-        | unixname -> 
-          try (Unix.getpwnam unixname).Unix.pw_dir 
+        | unixname ->
+          try (Unix.getpwnam unixname).Unix.pw_dir
           with Not_found -> Str.matched_string s end
     path
 
@@ -87,7 +87,7 @@ let remove (path : path) : unit =
   let file = string_of_path path in
   Sys.remove file
 
-let parent (path : path) : path = 
+let parent (path : path) : path =
   let s = string_of_path path in
   if is_directory path
   then mk_path (s ^ "/../")
@@ -95,9 +95,9 @@ let parent (path : path) : path =
 
 let slash_escaped_string_of_path (path: path) : string =
   let path_str = string_of_path path in
-  let buf = Buffer.create (String.length path_str) in 
-  String.iter (fun ch -> 
-    match ch with 
+  let buf = Buffer.create (String.length path_str) in
+  String.iter (fun ch ->
+    match ch with
     | '/' -> Buffer.add_string buf "zS"
     | '\x00' -> Buffer.add_string buf "z0"
     | 'z' -> Buffer.add_string buf "zZ"
@@ -108,12 +108,12 @@ let slash_escaped_string_of_path (path: path) : string =
 let path_of_slash_escaped_string (str: string) : path =
   let length = String.length str in
   let buf = Buffer.create length in
-  let rec consume i = 
+  let rec consume i =
     if i >= length then ()
-    else 
-      let replacement = 
+    else
+      let replacement =
         if i < length - 1 && str.[i] = 'z'
-        then match str.[i+1] with 
+        then match str.[i+1] with
           | 'S' -> Some '/'
           | '0' -> Some '\x00'
           | 'Z' -> Some 'z'

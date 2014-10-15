@@ -16,7 +16,7 @@ open Utils
 
 
 (*****************************************************************************)
-(* dfind doesn't always pick up the token 
+(* dfind doesn't always pick up the token
  * however, it seems that in some cases, despite the fact that the token was
  * not picked up, dfind is still healthy.
  * So here is our strategy:
@@ -40,7 +40,7 @@ let dfind_init root =
 let dfind genv (root:Path.path) retries =
   (match !dfind_proc with
   | None -> assert false
-  | Some x -> 
+  | Some x ->
       DfindEnv.SSet.fold SSet.add (DfindLib.get_changes x) SSet.empty)
 
 let dfind genv root = dfind genv root 20

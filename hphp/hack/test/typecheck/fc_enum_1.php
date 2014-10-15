@@ -24,6 +24,11 @@ function test3(): void {
   test2(Foo::BAR);
 }
 
+function test4(): string {
+  echo 'foo'.Foo::BAR;
+  return Bar::FOO.Bar::BAZ;
+}
+
 function do_case(Bar $x): int {
   switch ($x) {
     case Bar::FOO:

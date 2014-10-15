@@ -20,7 +20,7 @@ let init_hack genv env get_next =
     ServerArgs.check_mode genv.options &&
     ServerArgs.convert genv.options = None
   in
-  
+
   if not is_check_mode then begin
     Typing_deps.update_files files_info;
   end;

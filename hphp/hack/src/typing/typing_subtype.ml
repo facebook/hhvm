@@ -395,15 +395,21 @@ and sub_string p env ty2 =
       let env, class_ = Env.get_class env (snd x) in
       (match class_ with
       | None -> env
-      | Some tc when
-          tc.tc_name = SN.Classes.cStringish
-          || SMap.mem SN.Classes.cStringish tc.tc_ancestors -> env
+      | Some tc
+          (* A Stringish is a string or an object with a __toString method
+           * that will be converted to a string *)
+          when tc.tc_name = SN.Classes.cStringish
+          || SMap.mem SN.Classes.cStringish tc.tc_ancestors
+          (* Apply enum means that we're dealing with enum values,
+           * which are primitives (int/string) *)
+          || tc.tc_kind = Ast.Cenum ->
+        env
       | Some _ ->
-          Errors.object_string p (Reason.to_pos r2);
-          env
+        Errors.object_string p (Reason.to_pos r2);
+        env
       )
   | _, Tany ->
-      env (* Unifies with anything *)
+    env (* Unifies with anything *)
   | _, Tobject -> env
   | _ -> fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 

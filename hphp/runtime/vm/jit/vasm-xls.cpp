@@ -1623,7 +1623,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     if (!ivl) continue;
     if (ivl->fixed()) {
       if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
-        return;
+        continue;
       }
       if (collapse_fixed) {
         fixed = ivl; // can be any.
@@ -1659,7 +1659,7 @@ void Vxls::print(const char* caption) {
     if (!ivl) continue;
     if (ivl->fixed()) {
       if (ignore_reserved && !m_abi.unreserved().contains(ivl->vreg)) {
-        return;
+        continue;
       }
       if (collapse_fixed) {
         continue;

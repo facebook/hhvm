@@ -502,15 +502,15 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(sqrtsd, Inone, U(s), D(d))\
   O(storeb, Inone, U(s) U(m), Dn)\
-  O(storebim, I(s), U(m), Dn)\
+  O(storebi, I(s), U(m), Dn)\
   O(storedqu, Inone, U(s) U(m), Dn)\
   O(storel, Inone, U(s) U(m), Dn)\
-  O(storelim, I(s), U(m), Dn)\
+  O(storeli, I(s), U(m), Dn)\
   O(storeq, Inone, U(s) U(m), Dn)\
-  O(storeqim, I(s), U(m), Dn)\
-  O(storew, Inone, U(s) U(m), Dn)\
+  O(storeqi, I(s), U(m), Dn)\
   O(storesd, Inone, U(s) U(m), Dn)\
-  O(storewim, I(s), U(m), Dn)\
+  O(storew, Inone, U(s) U(m), Dn)\
+  O(storewi, I(s), U(m), Dn)\
   O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, Inone, UA(s0) U(s1), D(d) D(sf))\
@@ -690,15 +690,15 @@ struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct sqrtsd { VregDbl s, d; };
 struct storeb { Vreg8 s; Vptr m; };
-struct storebim { Immed s; Vptr m; };
+struct storebi { Immed s; Vptr m; };
 struct storedqu { Vreg128 s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };
-struct storelim { Immed s; Vptr m; };
+struct storeli { Immed s; Vptr m; };
 struct storeq { Vreg64 s; Vptr m; };
-struct storeqim { Immed s; Vptr m; };
+struct storeqi { Immed s; Vptr m; };
 struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
-struct storewim { Immed s; Vptr m; };
+struct storewi { Immed s; Vptr m; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; };

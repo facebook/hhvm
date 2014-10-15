@@ -849,9 +849,9 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 
     case ArgDesc::Kind::Addr: {
       auto tmp = v.makeReg();
-        v << lea{arg.srcReg()[arg.disp().l()], tmp};
-        vargs.push_back(tmp);
-        break;
+      v << lea{arg.srcReg()[arg.disp().l()], tmp};
+      vargs.push_back(tmp);
+      break;
     }
   }
 }
@@ -2440,7 +2440,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto& v = vmain();
   v << storeq{callerFP, calleeFP[AROFF(m_sfp)]};
   emitImmStoreq(v, intptr_t(fakeRet), calleeFP[AROFF(m_savedRip)]);
-  v << storelim{retBCOff, calleeFP[AROFF(m_soff)]};
+  v << storeli{retBCOff, calleeFP[AROFF(m_soff)]};
   cgMov(inst);
 }
 
@@ -3026,8 +3026,8 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   }, [&](Vout& v) {
     v << storeq{name, spReg[spOffset + int(AROFF(m_invName))]};
   });
-  v << storelim{safe_cast<int32_t>(nArgs),
-                spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
+  v << storeli{safe_cast<int32_t>(nArgs),
+               spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
 }
 
@@ -3065,7 +3065,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     assert(objOrCls->isA(Type::Nullptr));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
-    v << storeqim{0, spReg[offset_m_this]};
+    v << storeqi{0, spReg[offset_m_this]};
   }
   // actRec->m_invName
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
@@ -3088,7 +3088,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     v << storeq{funcLoc.reg(0), spReg[offset_m_func]};
   }
 
-  v << storelim{nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
+  v << storeli{nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   emitAdjustSp(spReg, dstLoc(0).reg(), spOffset);
 }
 
@@ -3110,7 +3110,7 @@ void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
   auto const obj = srcLoc(0).reg();
   auto& v = vmain();
   if (inst->src(1)->isA(Type::Nullptr)) {
-    v << storeqim{0, obj[c_Closure::ctxOffset()]};
+    v << storeqi{0, obj[c_Closure::ctxOffset()]};
   } else {
     auto const ctx = srcLoc(1).reg();
     v << storeq{ctx, obj[c_Closure::ctxOffset()]};
@@ -3132,7 +3132,7 @@ void CodeGenerator::emitInitObjProps(Vreg dstReg, const Class* cls,
         emitImmStoreq(v, cls->declPropInit()[i].m_data.num,
                       dstReg[propDataOffset]);
       }
-      v << storebim{cls->declPropInit()[i].m_type, dstReg[propTypeOffset]};
+      v << storebi{cls->declPropInit()[i].m_type, dstReg[propTypeOffset]};
     }
     return;
   }
@@ -3262,7 +3262,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
 
   auto const ar = extra->numParams * sizeof(TypedValue);
   v << storeq{rFP, rSP[ar + AROFF(m_sfp)]};
-  v << storelim{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
+  v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
 
   if (extra->knownPrologue) {
     assert(extra->callee);
@@ -5052,7 +5052,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   assert(curFpReg == rVmFp);
 
   v << storeq{curFpReg, genFpReg[AROFF(m_sfp)]};
-  v << storelim{returnOff, genFpReg[AROFF(m_soff)]};
+  v << storeli{returnOff, genFpReg[AROFF(m_soff)]};
   v << copy{genFpReg, curFpReg};
   v << contenter{curFpReg, addrReg};
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must
@@ -5074,7 +5074,7 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   emitFwdJcc(v, checkStarted ? CC_NE : CC_A, sf, inst->taken());
 
   // Set generator state as Running.
-  v << storebim{int8_t(BaseGenerator::State::Running), contReg[stateOff]};
+  v << storebi{int8_t(BaseGenerator::State::Running), contReg[stateOff]};
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
@@ -5172,8 +5172,8 @@ void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
   if (src->isConst()) {
     auto val = Immed64(src->rawVal());
     switch (size) {
-      case sz::byte:  v << storebim{val.b(), dst}; break;
-      case sz::dword: v << storelim{val.l(), dst}; break;
+      case sz::byte:  v << storebi{val.b(), dst}; break;
+      case sz::dword: v << storeli{val.l(), dst}; break;
       case sz::qword: emitImmStoreq(v, val.q(), dst); break;
       default:        not_implemented();
     }
@@ -5273,7 +5273,7 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
                                  - c_AsyncFunctionWaitHandle::arOff();
 
   // parent->setState(STATE_BLOCKED);
-  v << storebim{blocked, parentArReg[stateToArOff]};
+  v << storebi{blocked, parentArReg[stateToArOff]};
 
   // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::BWH;
   auto firstParent = v.makeReg();

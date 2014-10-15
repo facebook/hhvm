@@ -78,19 +78,19 @@ struct Folder {
   }
   void fold(storeb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s, val)) { out = storebim{val, in.m}; }
+    if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
   }
   void fold(storel& in, Vinstr& out) {
     int val;
-    if (match_int(in.s, val)) { out = storelim{val, in.m}; }
+    if (match_int(in.s, val)) { out = storeli{val, in.m}; }
   }
   void fold(storeq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s, val)) { out = storeqim{val, in.m}; }
+    if (match_int(in.s, val)) { out = storeqi{val, in.m}; }
   }
   void fold(store& in, Vinstr& out) {
     int val;
-    if (match_int(in.s, val)) { out = storeqim{val, in.d}; }
+    if (match_int(in.s, val)) { out = storeqi{val, in.d}; }
   }
   void fold(subq& in, Vinstr& out) {
     int val;

@@ -302,10 +302,10 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
 
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
-    v << storeqim{imm.l(), ref};
+    v << storeqi{imm.l(), ref};
   } else {
-    v << storelim{int32_t(imm.q()), ref};
-    v << storelim{int32_t(imm.q() >> 32), ref + 4};
+    v << storeli{int32_t(imm.q()), ref};
+    v << storeli{int32_t(imm.q() >> 32), ref + 4};
   }
 }
 

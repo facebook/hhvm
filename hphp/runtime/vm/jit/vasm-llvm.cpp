@@ -401,8 +401,8 @@ O(pushm) \
 O(resume) \
 O(ret) \
 O(retransopt) \
-O(storebim) \
-O(storeqim) \
+O(storebi) \
+O(storeqi) \
 O(syncpoint) \
 O(testlim) \
 O(ud2) \
@@ -583,10 +583,10 @@ void LLVMEmitter::emit(const retransopt& inst) {
   emitTrap();
 }
 
-void LLVMEmitter::emit(const storebim& inst) {
+void LLVMEmitter::emit(const storebi& inst) {
 }
 
-void LLVMEmitter::emit(const storeqim& inst) {
+void LLVMEmitter::emit(const storeqi& inst) {
 }
 
 void LLVMEmitter::emit(const syncpoint& inst) {

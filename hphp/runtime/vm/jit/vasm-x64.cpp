@@ -275,14 +275,14 @@ private:
   void emit(sqrtsd& i) { a->sqrtsd(i.s, i.d); }
   void emit(storedqu& i) { a->movdqu(i.s, i.m); }
   void emit(storeb& i) { a->storeb(i.s, i.m); }
-  void emit(storebim& i) { a->storeb(i.s, i.m); }
+  void emit(storebi& i) { a->storeb(i.s, i.m); }
   void emit(storel& i) { a->storel(i.s, i.m); }
-  void emit(storelim& i) { a->storel(i.s, i.m); }
+  void emit(storeli& i) { a->storel(i.s, i.m); }
   void emit(storeq& i) { a->storeq(i.s, i.m); }
-  void emit(storeqim& i) { a->storeq(i.s, i.m); }
+  void emit(storeqi& i) { a->storeq(i.s, i.m); }
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
-  void emit(storewim& i) { a->storew(i.s, i.m); }
+  void emit(storewi& i) { a->storew(i.s, i.m); }
   void emit(subl& i) { noncommute(i); a->subl(i.s0, i.d); }
   void emit(subli& i) { binary(i); a->subl(i.s0, i.d); }
   void emit(subq& i) { noncommute(i); a->subq(i.s0, i.d); }

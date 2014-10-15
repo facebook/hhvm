@@ -223,7 +223,7 @@ inline void emitStoreTVType(Vout& v, Vreg src, Vptr dest) {
 
 inline void
 emitStoreTVType(Vout& v, DataType src, Vptr dest) {
-  v << storebim{src, dest};
+  v << storebi{src, dest};
 }
 
 // emitDeref --

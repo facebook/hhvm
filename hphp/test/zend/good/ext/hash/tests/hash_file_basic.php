@@ -20,6 +20,7 @@ var_dump( base64_encode( hash_file( 'md5', $filename, true ) ) );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $filename = 'hash_file_basic_example.txt';

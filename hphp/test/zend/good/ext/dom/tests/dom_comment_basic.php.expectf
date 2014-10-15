@@ -2,7 +2,7 @@ bool(true)
 --- child 0 ---
 DOMText
 string(2) "
-%r\x09%r"
+	"
 --- child 1 ---
 DOMComment
 string(14) " Hello World! "

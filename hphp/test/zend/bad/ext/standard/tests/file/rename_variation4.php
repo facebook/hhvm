@@ -26,6 +26,7 @@ var_dump( file_exists($file_path."/12345" ) );  // expecting true
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/12345");

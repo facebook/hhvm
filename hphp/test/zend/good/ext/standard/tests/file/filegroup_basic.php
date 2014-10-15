@@ -33,6 +33,7 @@ var_dump( filegroup("/") );
 echo "\n*** Done ***\n";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 
 $file_path = dirname(__FILE__);

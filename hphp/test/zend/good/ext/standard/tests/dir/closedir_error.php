@@ -26,6 +26,7 @@ var_dump( closedir($dir_handle, $extra_arg) );
 closedir($dir_handle);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $base_dir = dirname(__FILE__);
 $dir_path = $base_dir . '\closedir_error';

@@ -24,6 +24,7 @@ var_dump( rewinddir($dir_handle, $extra_arg) );
 closedir($dir_handle);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir_path = dirname(__FILE__) . "/rewinddir_error";
 rmdir($dir_path);

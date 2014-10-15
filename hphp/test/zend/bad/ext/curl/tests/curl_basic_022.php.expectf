@@ -1,6 +1,6 @@
 array(2) {
   [0]=>
-  string(38) ".php.net%r\x09%rTRUE%r\x09%r/%r\x09%rFALSE%r\x09%r2145916799%r\x09%rC1%r\x09%rv1"
+  string(38) ".php.net	TRUE	/	FALSE	2145916799	C1	v1"
   [1]=>
-  string(38) ".php.net%r\x09%rTRUE%r\x09%r/%r\x09%rFALSE%r\x09%r2145916799%r\x09%rC2%r\x09%rv2"
+  string(38) ".php.net	TRUE	/	FALSE	2145916799	C2	v2"
 }

@@ -13,7 +13,7 @@ $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 mysqli_error($link));
 	}
 
-	if (!mysqli_query($link, 'CREATE TABLE test_mysqli_real_escape_string_gbk_table_1(id INT, label CHAR(1), PRIMARY
+	if (!mysqli_query($link, 'CREATE TABLE test_mysqli_real_escape_string_gbk_table_1(id INT, label CHAR(3), PRIMARY
 KEY(id)) ENGINE=' . $engine . " DEFAULT CHARSET=gbk")) {
 		printf("Failed to create test_mysqli_real_escape_string_gbk_table_1 table: [%d] %s\n", mysqli_errno($link),
 mysqli_error($link));
@@ -44,6 +44,7 @@ mysqli_error($link));
 	mysqli_close($link);
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_real_escape_string_gbk_table_1'; require_once("clean_table.inc");
 ?>

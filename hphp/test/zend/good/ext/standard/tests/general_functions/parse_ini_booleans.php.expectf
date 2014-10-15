@@ -46,7 +46,7 @@ array(3) {
     ["string_off"]=>
     string(4) "Off "
     ["string_no"]=>
-    string(4) "No%r\x09%r "
+    string(4) "No	 "
     ["string_none"]=>
     string(5) " NoNe"
     ["string_null"]=>

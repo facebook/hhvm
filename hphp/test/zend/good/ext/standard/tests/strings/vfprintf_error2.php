@@ -20,6 +20,7 @@ fclose($fp);
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $file = 'vfprintf_error2.phpt.txt';

@@ -36,7 +36,7 @@ array(3) {
 
 -- After shift: --
 ---- Pop array from array:
-Returned value:%r\x09%rarray(3) {
+Returned value:	array(3) {
   [0]=>
   int(1)
   [1]=>
@@ -52,7 +52,7 @@ array(2) {
   string(3) "two"
 }
 ---- Pop element from array within array:
-Returned value:%r\x09%rint(1)
+Returned value:	int(1)
 New array:
 array(3) {
   [0]=>

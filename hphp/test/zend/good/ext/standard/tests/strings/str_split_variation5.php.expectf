@@ -56,7 +56,7 @@ array(4) {
   [0]=>
   string(10) "This check"
   [1]=>
-  string(10) "s%r\x09%r str_spl"
+  string(10) "s	 str_spl"
   [2]=>
   string(10) "it()
 Escap"

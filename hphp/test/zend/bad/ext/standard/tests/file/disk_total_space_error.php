@@ -22,6 +22,7 @@ fclose($fh);
 
 echo"\n--- Done ---";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/disk_total_space.tmp");

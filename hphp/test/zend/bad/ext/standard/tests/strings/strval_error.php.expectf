@@ -1,0 +1,14 @@
+*** Testing strval() : error conditions ***
+
+-- Testing strval() function with more than expected no. of arguments --
+
+Warning: %s
+NULL
+
+-- Testing strval() function with less than expected no. of arguments --
+
+Warning: %s
+NULL
+
+-- Testing strval() function with object which has not toString() method  --
+Catchable fatal error: Object of class MyClass could not be converted to string in %s on line %d

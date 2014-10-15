@@ -28,6 +28,7 @@ var_dump( chmod("$file_path/mkdir_variation2/", 0777) );  // chmod to enable rem
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 rmdir(dirname(__FILE__)."/mkdir_variation2/test/");
 rmdir(dirname(__FILE__)."/mkdir_variation2/");

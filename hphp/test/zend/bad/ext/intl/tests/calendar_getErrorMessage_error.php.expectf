@@ -3,5 +3,4 @@ Warning: %s
 
 Warning: %s
 bool(false)
-
-Fatal error: %s
+Catchable fatal error: Argument 1 passed to intlcal_get_error_message() must be an instance of IntlCalendar, null given in %s on line %d

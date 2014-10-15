@@ -41,6 +41,7 @@ var_dump( fileperms("nofile", 0777) );
 
 echo "\n*** Done ***\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink( dirname(__FILE__)."/006_error.tmp");
 ?>

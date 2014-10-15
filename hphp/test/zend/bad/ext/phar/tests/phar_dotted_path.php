@@ -21,6 +21,7 @@ foreach ($phar as $entry) {
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__) . '/broken.dirname/dotted_path.phar');
 rmdir(dirname(__FILE__) . '/broken.dirname');

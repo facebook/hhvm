@@ -57,6 +57,7 @@ delete_files($file_path, 10, $name_prefix);
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 rmdir(dirname(__FILE__)."/is_readable_variation2/");
 ?>

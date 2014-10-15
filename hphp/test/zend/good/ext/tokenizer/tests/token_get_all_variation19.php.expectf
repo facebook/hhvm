@@ -8,16 +8,16 @@ comment */
 
 // a class
 class TestClass {
-%r\x09%rpublic function foo() {
-%r\x09\x09%recho "Called foo()\n";
-%r\x09%r}
+	public function foo() {
+		echo "Called foo()\n";
+	}
 }
 
 $a = new TestClass();
 $a->foo();
 
 for ($i = 0; $i < 10; $i++) {
-%r\x09%recho "Loop iteration $i\n";
+	echo "Loop iteration $i\n";
 }
 
 "

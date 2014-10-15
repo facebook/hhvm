@@ -47,6 +47,7 @@ var_dump( is_link($deleted_link) );
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation5";

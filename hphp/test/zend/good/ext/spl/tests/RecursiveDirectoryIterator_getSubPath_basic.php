@@ -18,6 +18,7 @@ foreach ($list as $item) {
 	echo $item . "\n";
 }
 ?>
+<?php error_reporting(0); ?>
 <?php
 function rrmdir($dir) {
     foreach(glob($dir . '/*') as $file) {

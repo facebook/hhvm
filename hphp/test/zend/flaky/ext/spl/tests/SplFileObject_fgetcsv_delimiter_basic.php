@@ -11,6 +11,7 @@ fclose($fp);
 $fo = new SplFileObject('SplFileObject__fgetcsv2.csv');
 var_dump($fo->fgetcsv('|'));
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink('SplFileObject__fgetcsv2.csv');
 ?>

@@ -1,23 +1,23 @@
 zip->status (0):
-%r\x09%rempty(): 1
-%r\x09%risset(): 1
+	empty(): 1
+	isset(): 1
 zip->numFiles (4):
-%r\x09%rempty(): 0
-%r\x09%risset(): 1
+	empty(): 0
+	isset(): 1
 
 Notice: %s
 zip->bogus (0):
-%r\x09%rempty(): 1
-%r\x09%risset(): 0
+	empty(): 1
+	isset(): 0
 zip->status (0):
-%r\x09%rempty(): 1
-%r\x09%risset(): 1
+	empty(): 1
+	isset(): 1
 zip->numFiles (5):
-%r\x09%rempty(): 0
-%r\x09%risset(): 1
+	empty(): 0
+	isset(): 1
 zip->filename (%d):
-%r\x09%rempty(): 0
-%r\x09%risset(): 1
+	empty(): 0
+	isset(): 1
 zip->comment (19):
-%r\x09%rempty(): 0
-%r\x09%risset(): 1
+	empty(): 0
+	isset(): 1

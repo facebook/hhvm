@@ -493,18 +493,18 @@ array(3) {
 }
 -- Iteration 37 --
 %unicode|string%(1) "."
-%unicode|string%(24) "%r\x09\x09%rc:\test\adir\afile.txt"
+%unicode|string%(24) "		c:\test\adir\afile.txt"
 %unicode|string%(3) "txt"
-%unicode|string%(20) "%r\x09\x09%rc:\test\adir\afile"
+%unicode|string%(20) "		c:\test\adir\afile"
 array(4) {
   [%u|b%"dirname"]=>
   %unicode|string%(1) "."
   [%u|b%"basename"]=>
-  %unicode|string%(24) "%r\x09\x09%rc:\test\adir\afile.txt"
+  %unicode|string%(24) "		c:\test\adir\afile.txt"
   [%u|b%"extension"]=>
   %unicode|string%(3) "txt"
   [%u|b%"filename"]=>
-  %unicode|string%(20) "%r\x09\x09%rc:\test\adir\afile"
+  %unicode|string%(20) "		c:\test\adir\afile"
 }
 -- Iteration 38 --
 %unicode|string%(1) "/"

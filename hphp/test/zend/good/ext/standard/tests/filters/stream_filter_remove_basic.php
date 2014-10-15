@@ -24,6 +24,7 @@ fclose( $fp );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';

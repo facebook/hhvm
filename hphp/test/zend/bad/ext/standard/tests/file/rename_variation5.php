@@ -42,6 +42,7 @@ var_dump( rename($dirname, $linkname) );
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/rename_variation5_link.tmp");

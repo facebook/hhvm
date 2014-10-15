@@ -72,6 +72,7 @@ echo $e->getMessage(), "\n";
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');
 @unlink(dirname(__FILE__) . '/testit/extfile.php');

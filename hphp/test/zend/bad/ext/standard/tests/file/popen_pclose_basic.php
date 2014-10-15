@@ -54,6 +54,7 @@ var_dump( is_int($return_value_pclose) );
 
 echo "\n--- Done ---";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dirpath = $file_path."/popen_basic";

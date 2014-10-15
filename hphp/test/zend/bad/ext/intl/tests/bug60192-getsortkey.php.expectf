@@ -1,0 +1,1 @@
+Catchable fatal error: Collator::getSortKey(): Object not initialized in %s on line %d

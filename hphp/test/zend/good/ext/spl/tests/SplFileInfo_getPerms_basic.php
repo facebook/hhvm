@@ -7,6 +7,7 @@ $fileInfo = new SplFileInfo('SplFileInfo_getPerms_basic.txt');
 var_dump($fileInfo->getPerms() == 0100557);
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink('SplFileInfo_getPerms_basic.txt');
 ?>

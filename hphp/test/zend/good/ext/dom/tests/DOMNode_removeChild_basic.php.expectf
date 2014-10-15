@@ -6,41 +6,41 @@ Course: no title:DOMText
 node 3
 Course: two:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc2n1
-%r\x09\x09\x09%rc2n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c2n1
+			c2n2
+		
+	"
 node 2
 Course: no title:DOMText
 ~string(2) "
-%r\x09%r"
+	"
 node 1
 Course: one:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc1n1
-%r\x09\x09\x09%rc1n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c1n1
+			c1n2
+		
+	"
 node 0
 Course: no title:DOMText
 ~string(2) "
-%r\x09%r"
+	"
 after text removed it now has 2 nodes
 node 0
 Course: one:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc1n1
-%r\x09\x09\x09%rc1n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c1n1
+			c1n2
+		
+	"
 node 1
 Course: two:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc2n1
-%r\x09\x09\x09%rc2n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c2n1
+			c2n2
+		
+	"

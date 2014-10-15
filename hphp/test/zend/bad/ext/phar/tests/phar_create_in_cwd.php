@@ -19,6 +19,7 @@ __HALT_COMPILER();
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>

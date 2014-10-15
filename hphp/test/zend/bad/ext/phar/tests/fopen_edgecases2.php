@@ -23,6 +23,7 @@ fopen("../oops", "r");
 include $pname . '/foo/hi';
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>

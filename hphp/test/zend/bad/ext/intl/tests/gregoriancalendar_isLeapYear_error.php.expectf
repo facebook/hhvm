@@ -23,5 +23,4 @@ Warning: %s
 
 Warning: %s
 bool(false)
-
-Fatal error: %s
+Catchable fatal error: Argument 1 passed to intlgregcal_is_leap_year() must be an instance of IntlGregorianCalendar, integer given in %s on line %d

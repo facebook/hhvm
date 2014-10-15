@@ -21,6 +21,7 @@ var_dump(file_exists($pname . '/another/dir/'));
 var_dump(file_exists($pname2 . '/test/'));
 var_dump(file_exists($pname3 . '/another/dir/'));
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php'); ?>

@@ -40,6 +40,7 @@ closedir($tar);
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tar_003.phar.tar');
 ?>

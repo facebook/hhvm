@@ -33,13 +33,13 @@ This is line 2
 of "heredoc" string"
 
 -- Iteration 10 --
-string(1) "%r\x09%r"
+string(1) "	"
 
 -- Iteration 11 --
 string(1) "t"
 
 -- Iteration 12 --
-string(12) "Hello %r\x09%rworld"
+string(12) "Hello 	world"
 
 -- Iteration 13 --
 string(12) "Hello tworld"
@@ -57,6 +57,6 @@ string(12) "Hello tworld"
 string(12) "Hello tworld"
 
 -- Iteration 18 --
-string(71) "This is line 1 %r\x09%rof 'heredoc' string
-This is line 2 %r\x09%rof "heredoc" string"
+string(71) "This is line 1 	of 'heredoc' string
+This is line 2 	of "heredoc" string"
 Done

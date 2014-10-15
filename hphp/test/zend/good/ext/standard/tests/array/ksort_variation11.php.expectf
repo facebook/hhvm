@@ -7,9 +7,9 @@ array(3) {
   string(7) "HEREDOC"
   ["Heredoc"]=>
   string(7) "Heredoc"
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
 }
 
@@ -20,9 +20,9 @@ array(3) {
   string(7) "HEREDOC"
   ["Heredoc"]=>
   string(7) "Heredoc"
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
 }
 
@@ -33,9 +33,9 @@ array(3) {
   string(7) "HEREDOC"
   ["Heredoc"]=>
   string(7) "Heredoc"
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
 }
 Done

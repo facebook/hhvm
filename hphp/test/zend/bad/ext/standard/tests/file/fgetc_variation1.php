@@ -39,6 +39,7 @@ for(; $loop_counter < count($file_modes); $loop_counter++) {
 }
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink( dirname(__FILE__)."/fgetc_variation1.tmp");
 ?>

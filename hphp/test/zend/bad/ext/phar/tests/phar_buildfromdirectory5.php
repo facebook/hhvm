@@ -19,6 +19,7 @@ var_dump(file_exists(dirname(__FILE__) . '/buildfromdirectory5.phar'));
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/buildfromdirectory5.phar');
 foreach(range(1, 4) as $i) {

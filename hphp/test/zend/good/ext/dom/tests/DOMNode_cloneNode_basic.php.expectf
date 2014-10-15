@@ -2,30 +2,30 @@ Start cloneNode test
 node 0
 Course: new title3:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc1n1
-%r\x09\x09\x09%rc1n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c1n1
+			c1n2
+		
+	"
 node 1
 Course: two:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc2n1
-%r\x09\x09\x09%rc2n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c2n1
+			c2n2
+		
+	"
 node 2
 Course: new title default:DOMElement
 ~string(0) ""
 node 3
 Course: new title true:DOMElement
 ~string(24) "
-%r\x09\x09%r
-%r\x09\x09\x09%rc1n1
-%r\x09\x09\x09%rc1n2
-%r\x09\x09%r
-%r\x09%r"
+		
+			c1n1
+			c1n2
+		
+	"
 node 4
 Course: new title false:DOMElement
 ~string(0) ""

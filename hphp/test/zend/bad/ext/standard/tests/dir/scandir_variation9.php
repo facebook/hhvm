@@ -29,6 +29,7 @@ foreach($ints as $sorting_order) {
 delete_files($dir, 2);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir = dirname(__FILE__) . '/scandir_variation9';
 rmdir($dir);

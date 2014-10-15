@@ -31,6 +31,7 @@ var_dump($zip->getExternalAttributesIndex($id, $a, $b, ZipArchive::FL_UNCHANGED)
 $zip->close();
 ?>
 == Done
+<?php error_reporting(0); ?>
 <?php
 $name = __DIR__ . '/withattr.zip';
 @unlink($name);

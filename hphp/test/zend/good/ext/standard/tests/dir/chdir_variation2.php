@@ -57,6 +57,7 @@ var_dump(getcwd());
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level2_one/level2_two");

@@ -1,6 +1,6 @@
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-string(32) "hello %r\x09\x09%rworld... strip_tags_test"
+string(32) "hello 		world... strip_tags_test"
 -- Iteration 2 --
 string(34) "hello \t\tworld... strip_tags_test"
 -- Iteration 3 --

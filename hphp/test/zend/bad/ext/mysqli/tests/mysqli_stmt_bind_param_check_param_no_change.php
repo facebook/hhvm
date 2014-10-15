@@ -53,6 +53,7 @@
 	echo("$one - $two\n\n");
 	echo "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_stmt_bind_param_check_param_no_change_table_1'; require_once("clean_table.inc");
 ?>

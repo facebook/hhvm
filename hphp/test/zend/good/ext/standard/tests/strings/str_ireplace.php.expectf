@@ -45,8 +45,8 @@ array(2) {
   string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
 string(143) "Change tracking and management software designed to watch
-%r\x09%rfor abnormal system behavior.
+	for abnormal system behavior.
 Suggest features, report bugs, or ask
-%r\x09%rquestions here."
-string(152) "Change tracking and management software designed to watch<br>%r\x09%rfor abnormal system behavior.<br>Suggest features, report bugs, or ask<br>%r\x09%rquestions here."
+	questions here."
+string(152) "Change tracking and management software designed to watch<br>	for abnormal system behavior.<br>Suggest features, report bugs, or ask<br>	questions here."
 Done

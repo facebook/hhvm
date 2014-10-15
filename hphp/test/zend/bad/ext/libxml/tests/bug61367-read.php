@@ -33,6 +33,7 @@ stream_wrapper_register( 'exploit', 'StreamExploiter' );
 $s = fopen( 'exploit://', 'r' );
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink('test_bug_61367-read/bad');
 rmdir('test_bug_61367-read/base');

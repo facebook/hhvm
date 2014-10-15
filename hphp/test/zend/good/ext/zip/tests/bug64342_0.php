@@ -24,6 +24,7 @@ if ($res === TRUE) {
 
 ?>
 DONE
+<?php error_reporting(0); ?>
 <?php
 
 @unlink(dirname(__FILE__) . '/bug64342.zip');

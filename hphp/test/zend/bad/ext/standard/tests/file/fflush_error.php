@@ -41,6 +41,7 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
 echo "\n*** Done ***";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/fflush_error.tmp");

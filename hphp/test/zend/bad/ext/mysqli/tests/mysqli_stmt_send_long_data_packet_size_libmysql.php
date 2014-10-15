@@ -78,6 +78,7 @@
 
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_stmt_send_long_data_packet_size_libmysql_table_1'; require_once("clean_table.inc");
 ?>

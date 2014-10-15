@@ -19,7 +19,7 @@ Size of destination file => int(1500)
 -- Iteration 3 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name => copy%r\x09%rvariation3.tmp
+Destination file name => copy	variation3.tmp
 Size of source file => int(1500)
 Size of destination file => int(1500)
 

@@ -9,6 +9,7 @@ try {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/buildfromdirectory3.phar');
 __HALT_COMPILER();

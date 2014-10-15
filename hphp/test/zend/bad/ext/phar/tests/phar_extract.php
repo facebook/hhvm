@@ -91,6 +91,7 @@ try {
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @rmdir(dirname(__FILE__) . '/whatever');
 @unlink(dirname(__FILE__) . '/oops');

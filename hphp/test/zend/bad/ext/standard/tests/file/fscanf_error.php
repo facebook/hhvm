@@ -51,6 +51,7 @@ foreach($invalid_formats as $format)  {
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_error.tmp";

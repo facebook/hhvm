@@ -46,6 +46,7 @@ echo "\n-- After restricting parent directory --\n";
 var_dump(scandir($child_dir_path));
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $parent_dir_path = dirname(__FILE__) . "/scandir_variation5";
 $sub_dir_path = $parent_dir_path."/sub_dir";

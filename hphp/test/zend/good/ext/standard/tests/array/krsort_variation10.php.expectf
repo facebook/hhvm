@@ -3,9 +3,9 @@
 -- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --
 bool(true)
 array(3) {
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
   ["Heredoc"]=>
   string(7) "Heredoc"
@@ -16,9 +16,9 @@ Test this!!!"
 -- Testing krsort() by supplying heredoc string array, 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
   ["Heredoc"]=>
   string(7) "Heredoc"
@@ -29,9 +29,9 @@ Test this!!!"
 -- Testing krsort() by supplying heredoc string array, 'flag' = SORT_STRING --
 bool(true)
 array(3) {
-  ["heredoc string%r\x09%rwith!@# and 123
+  ["heredoc string	with!@# and 123
 Test this!!!"]=>
-  string(43) "heredoc string%r\x09%rwith!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
   ["Heredoc"]=>
   string(7) "Heredoc"

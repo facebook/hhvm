@@ -29,7 +29,7 @@ array(10) {
   [5]=>
   string(0) ""
   [6]=>
-  string(1) "%r\x09%r"
+  string(1) "	"
   [0]=>
   string(1) " "
   [9]=>
@@ -57,7 +57,7 @@ array(4) {
   [1]=>
   string(7) "Heredoc"
   [3]=>
-  string(4%d) "heredoc string%r\x09%rwith!@# and 123
+  string(4%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
 Done

@@ -53,6 +53,7 @@ foreach($dirs_arr as $dir1) {
 echo"\n--- Done ---";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/disk_free_space");

@@ -10,6 +10,7 @@ $phar->decompressFiles();
 
 echo 'ok';
 ?>
+<?php error_reporting(0); ?>
 <?php
 if (is_file(dirname(__FILE__) . '/testdir/1.php'))
   unlink(dirname(__FILE__) . '/testdir/1.php');

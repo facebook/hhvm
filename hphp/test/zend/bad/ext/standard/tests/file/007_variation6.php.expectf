@@ -5,7 +5,7 @@ int(37)
 string(57) "line
 line of text
 liabcdefghij
-mnopqrst%r\x09%ruvwxyz
+mnopqrst	uvwxyz
 0123456789"
 int(57)
 bool(true)

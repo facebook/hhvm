@@ -3,5 +3,4 @@ Warning: %s
 
 Warning: %s
 bool(false)
-
-Fatal error: %s
+Catchable fatal error: Argument 1 passed to intltz_get_raw_offset() must be an instance of IntlTimeZone, null given in %s on line %d

@@ -20,6 +20,7 @@ print( fileinode("./..") )."\n";
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink (dirname(__FILE__)."/inode.tmp");
 ?>

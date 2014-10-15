@@ -18,6 +18,7 @@ if (NULL !== ($tmp = @mysql_get_proto_info('too many', 'arguments')))
 
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

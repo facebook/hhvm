@@ -17,4 +17,5 @@ while (false !== ($a = readdir($dir))) {
 	var_dump(is_dir('phar://hio/' . $a));
 }
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>

@@ -61,6 +61,7 @@ foreach($perms_array as $permission) {
 }
 echo "*** Done ***\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 chmod(dirname(__FILE__)."/006_variation2.tmp", 0777);
 chmod(dirname(__FILE__)."/006_variation2", 0777);

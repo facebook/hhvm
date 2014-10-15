@@ -7,5 +7,4 @@ bool(false)
 
 Warning: %s
 bool(false)
-
-Fatal error: %s
+Catchable fatal error: Argument 1 passed to intlcal_clear() must be an instance of IntlCalendar, integer given in %s on line %d

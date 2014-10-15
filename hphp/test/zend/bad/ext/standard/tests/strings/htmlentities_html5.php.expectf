@@ -1,1511 +1,1511 @@
-&Tab;%r\x09%rU+00009
-&NewLine;%r\x09%rU+0000A
-&excl;%r\x09%rU+00021
-&quot;%r\x09%rU+00022
-&num;%r\x09%rU+00023
-&dollar;%r\x09%rU+00024
-&percnt;%r\x09%rU+00025
-&amp;%r\x09%rU+00026
-&apos;%r\x09%rU+00027
-&lpar;%r\x09%rU+00028
-&rpar;%r\x09%rU+00029
-&ast;%r\x09%rU+0002A
-&plus;%r\x09%rU+0002B
-&comma;%r\x09%rU+0002C
-&period;%r\x09%rU+0002E
-&sol;%r\x09%rU+0002F
-&colon;%r\x09%rU+0003A
-&semi;%r\x09%rU+0003B
-&lt;%r\x09%rU+0003C
-&equals;%r\x09%rU+0003D
-&gt;%r\x09%rU+0003E
-&quest;%r\x09%rU+0003F
-&commat;%r\x09%rU+00040
-&lbrack;%r\x09%rU+0005B
-&bsol;%r\x09%rU+0005C
-&rsqb;%r\x09%rU+0005D
-&Hat;%r\x09%rU+0005E
-&lowbar;%r\x09%rU+0005F
-&grave;%r\x09%rU+00060
-&lbrace;%r\x09%rU+0007B
-&vert;%r\x09%rU+0007C
-&rcub;%r\x09%rU+0007D
-&nbsp;%r\x09%rU+000A0
-&iexcl;%r\x09%rU+000A1
-&cent;%r\x09%rU+000A2
-&pound;%r\x09%rU+000A3
-&curren;%r\x09%rU+000A4
-&yen;%r\x09%rU+000A5
-&brvbar;%r\x09%rU+000A6
-&sect;%r\x09%rU+000A7
-&DoubleDot;%r\x09%rU+000A8
-&copy;%r\x09%rU+000A9
-&ordf;%r\x09%rU+000AA
-&laquo;%r\x09%rU+000AB
-&not;%r\x09%rU+000AC
-&shy;%r\x09%rU+000AD
-&reg;%r\x09%rU+000AE
-&macr;%r\x09%rU+000AF
-&deg;%r\x09%rU+000B0
-&plusmn;%r\x09%rU+000B1
-&sup2;%r\x09%rU+000B2
-&sup3;%r\x09%rU+000B3
-&DiacriticalAcute;%r\x09%rU+000B4
-&micro;%r\x09%rU+000B5
-&para;%r\x09%rU+000B6
-&CenterDot;%r\x09%rU+000B7
-&Cedilla;%r\x09%rU+000B8
-&sup1;%r\x09%rU+000B9
-&ordm;%r\x09%rU+000BA
-&raquo;%r\x09%rU+000BB
-&frac14;%r\x09%rU+000BC
-&half;%r\x09%rU+000BD
-&frac34;%r\x09%rU+000BE
-&iquest;%r\x09%rU+000BF
-&Agrave;%r\x09%rU+000C0
-&Aacute;%r\x09%rU+000C1
-&Acirc;%r\x09%rU+000C2
-&Atilde;%r\x09%rU+000C3
-&Auml;%r\x09%rU+000C4
-&Aring;%r\x09%rU+000C5
-&AElig;%r\x09%rU+000C6
-&Ccedil;%r\x09%rU+000C7
-&Egrave;%r\x09%rU+000C8
-&Eacute;%r\x09%rU+000C9
-&Ecirc;%r\x09%rU+000CA
-&Euml;%r\x09%rU+000CB
-&Igrave;%r\x09%rU+000CC
-&Iacute;%r\x09%rU+000CD
-&Icirc;%r\x09%rU+000CE
-&Iuml;%r\x09%rU+000CF
-&ETH;%r\x09%rU+000D0
-&Ntilde;%r\x09%rU+000D1
-&Ograve;%r\x09%rU+000D2
-&Oacute;%r\x09%rU+000D3
-&Ocirc;%r\x09%rU+000D4
-&Otilde;%r\x09%rU+000D5
-&Ouml;%r\x09%rU+000D6
-&times;%r\x09%rU+000D7
-&Oslash;%r\x09%rU+000D8
-&Ugrave;%r\x09%rU+000D9
-&Uacute;%r\x09%rU+000DA
-&Ucirc;%r\x09%rU+000DB
-&Uuml;%r\x09%rU+000DC
-&Yacute;%r\x09%rU+000DD
-&THORN;%r\x09%rU+000DE
-&szlig;%r\x09%rU+000DF
-&agrave;%r\x09%rU+000E0
-&aacute;%r\x09%rU+000E1
-&acirc;%r\x09%rU+000E2
-&atilde;%r\x09%rU+000E3
-&auml;%r\x09%rU+000E4
-&aring;%r\x09%rU+000E5
-&aelig;%r\x09%rU+000E6
-&ccedil;%r\x09%rU+000E7
-&egrave;%r\x09%rU+000E8
-&eacute;%r\x09%rU+000E9
-&ecirc;%r\x09%rU+000EA
-&euml;%r\x09%rU+000EB
-&igrave;%r\x09%rU+000EC
-&iacute;%r\x09%rU+000ED
-&icirc;%r\x09%rU+000EE
-&iuml;%r\x09%rU+000EF
-&eth;%r\x09%rU+000F0
-&ntilde;%r\x09%rU+000F1
-&ograve;%r\x09%rU+000F2
-&oacute;%r\x09%rU+000F3
-&ocirc;%r\x09%rU+000F4
-&otilde;%r\x09%rU+000F5
-&ouml;%r\x09%rU+000F6
-&divide;%r\x09%rU+000F7
-&oslash;%r\x09%rU+000F8
-&ugrave;%r\x09%rU+000F9
-&uacute;%r\x09%rU+000FA
-&ucirc;%r\x09%rU+000FB
-&uuml;%r\x09%rU+000FC
-&yacute;%r\x09%rU+000FD
-&thorn;%r\x09%rU+000FE
-&yuml;%r\x09%rU+000FF
-&Amacr;%r\x09%rU+00100
-&amacr;%r\x09%rU+00101
-&Abreve;%r\x09%rU+00102
-&abreve;%r\x09%rU+00103
-&Aogon;%r\x09%rU+00104
-&aogon;%r\x09%rU+00105
-&Cacute;%r\x09%rU+00106
-&cacute;%r\x09%rU+00107
-&Ccirc;%r\x09%rU+00108
-&ccirc;%r\x09%rU+00109
-&Cdot;%r\x09%rU+0010A
-&cdot;%r\x09%rU+0010B
-&Ccaron;%r\x09%rU+0010C
-&ccaron;%r\x09%rU+0010D
-&Dcaron;%r\x09%rU+0010E
-&dcaron;%r\x09%rU+0010F
-&Dstrok;%r\x09%rU+00110
-&dstrok;%r\x09%rU+00111
-&Emacr;%r\x09%rU+00112
-&emacr;%r\x09%rU+00113
-&Edot;%r\x09%rU+00116
-&edot;%r\x09%rU+00117
-&Eogon;%r\x09%rU+00118
-&eogon;%r\x09%rU+00119
-&Ecaron;%r\x09%rU+0011A
-&ecaron;%r\x09%rU+0011B
-&Gcirc;%r\x09%rU+0011C
-&gcirc;%r\x09%rU+0011D
-&Gbreve;%r\x09%rU+0011E
-&gbreve;%r\x09%rU+0011F
-&Gdot;%r\x09%rU+00120
-&gdot;%r\x09%rU+00121
-&Gcedil;%r\x09%rU+00122
-&Hcirc;%r\x09%rU+00124
-&hcirc;%r\x09%rU+00125
-&Hstrok;%r\x09%rU+00126
-&hstrok;%r\x09%rU+00127
-&Itilde;%r\x09%rU+00128
-&itilde;%r\x09%rU+00129
-&Imacr;%r\x09%rU+0012A
-&imacr;%r\x09%rU+0012B
-&Iogon;%r\x09%rU+0012E
-&iogon;%r\x09%rU+0012F
-&Idot;%r\x09%rU+00130
-&inodot;%r\x09%rU+00131
-&IJlig;%r\x09%rU+00132
-&ijlig;%r\x09%rU+00133
-&Jcirc;%r\x09%rU+00134
-&jcirc;%r\x09%rU+00135
-&Kcedil;%r\x09%rU+00136
-&kcedil;%r\x09%rU+00137
-&kgreen;%r\x09%rU+00138
-&Lacute;%r\x09%rU+00139
-&lacute;%r\x09%rU+0013A
-&Lcedil;%r\x09%rU+0013B
-&lcedil;%r\x09%rU+0013C
-&Lcaron;%r\x09%rU+0013D
-&lcaron;%r\x09%rU+0013E
-&Lmidot;%r\x09%rU+0013F
-&lmidot;%r\x09%rU+00140
-&Lstrok;%r\x09%rU+00141
-&lstrok;%r\x09%rU+00142
-&Nacute;%r\x09%rU+00143
-&nacute;%r\x09%rU+00144
-&Ncedil;%r\x09%rU+00145
-&ncedil;%r\x09%rU+00146
-&Ncaron;%r\x09%rU+00147
-&ncaron;%r\x09%rU+00148
-&napos;%r\x09%rU+00149
-&ENG;%r\x09%rU+0014A
-&eng;%r\x09%rU+0014B
-&Omacr;%r\x09%rU+0014C
-&omacr;%r\x09%rU+0014D
-&Odblac;%r\x09%rU+00150
-&odblac;%r\x09%rU+00151
-&OElig;%r\x09%rU+00152
-&oelig;%r\x09%rU+00153
-&Racute;%r\x09%rU+00154
-&racute;%r\x09%rU+00155
-&Rcedil;%r\x09%rU+00156
-&rcedil;%r\x09%rU+00157
-&Rcaron;%r\x09%rU+00158
-&rcaron;%r\x09%rU+00159
-&Sacute;%r\x09%rU+0015A
-&sacute;%r\x09%rU+0015B
-&Scirc;%r\x09%rU+0015C
-&scirc;%r\x09%rU+0015D
-&Scedil;%r\x09%rU+0015E
-&scedil;%r\x09%rU+0015F
-&Scaron;%r\x09%rU+00160
-&scaron;%r\x09%rU+00161
-&Tcedil;%r\x09%rU+00162
-&tcedil;%r\x09%rU+00163
-&Tcaron;%r\x09%rU+00164
-&tcaron;%r\x09%rU+00165
-&Tstrok;%r\x09%rU+00166
-&tstrok;%r\x09%rU+00167
-&Utilde;%r\x09%rU+00168
-&utilde;%r\x09%rU+00169
-&Umacr;%r\x09%rU+0016A
-&umacr;%r\x09%rU+0016B
-&Ubreve;%r\x09%rU+0016C
-&ubreve;%r\x09%rU+0016D
-&Uring;%r\x09%rU+0016E
-&uring;%r\x09%rU+0016F
-&Udblac;%r\x09%rU+00170
-&udblac;%r\x09%rU+00171
-&Uogon;%r\x09%rU+00172
-&uogon;%r\x09%rU+00173
-&Wcirc;%r\x09%rU+00174
-&wcirc;%r\x09%rU+00175
-&Ycirc;%r\x09%rU+00176
-&ycirc;%r\x09%rU+00177
-&Yuml;%r\x09%rU+00178
-&Zacute;%r\x09%rU+00179
-&zacute;%r\x09%rU+0017A
-&Zdot;%r\x09%rU+0017B
-&zdot;%r\x09%rU+0017C
-&Zcaron;%r\x09%rU+0017D
-&zcaron;%r\x09%rU+0017E
-&fnof;%r\x09%rU+00192
-&imped;%r\x09%rU+001B5
-&gacute;%r\x09%rU+001F5
-&jmath;%r\x09%rU+00237
-&circ;%r\x09%rU+002C6
-&Hacek;%r\x09%rU+002C7
-&Breve;%r\x09%rU+002D8
-&dot;%r\x09%rU+002D9
-&ring;%r\x09%rU+002DA
-&ogon;%r\x09%rU+002DB
-&DiacriticalTilde;%r\x09%rU+002DC
-&DiacriticalDoubleAcute;%r\x09%rU+002DD
-&DownBreve;%r\x09%rU+00311
-&Alpha;%r\x09%rU+00391
-&Beta;%r\x09%rU+00392
-&Gamma;%r\x09%rU+00393
-&Delta;%r\x09%rU+00394
-&Epsilon;%r\x09%rU+00395
-&Zeta;%r\x09%rU+00396
-&Eta;%r\x09%rU+00397
-&Theta;%r\x09%rU+00398
-&Iota;%r\x09%rU+00399
-&Kappa;%r\x09%rU+0039A
-&Lambda;%r\x09%rU+0039B
-&Mu;%r\x09%rU+0039C
-&Nu;%r\x09%rU+0039D
-&Xi;%r\x09%rU+0039E
-&Omicron;%r\x09%rU+0039F
-&Pi;%r\x09%rU+003A0
-&Rho;%r\x09%rU+003A1
-&Sigma;%r\x09%rU+003A3
-&Tau;%r\x09%rU+003A4
-&Upsilon;%r\x09%rU+003A5
-&Phi;%r\x09%rU+003A6
-&Chi;%r\x09%rU+003A7
-&Psi;%r\x09%rU+003A8
-&Omega;%r\x09%rU+003A9
-&alpha;%r\x09%rU+003B1
-&beta;%r\x09%rU+003B2
-&gamma;%r\x09%rU+003B3
-&delta;%r\x09%rU+003B4
-&epsi;%r\x09%rU+003B5
-&zeta;%r\x09%rU+003B6
-&eta;%r\x09%rU+003B7
-&theta;%r\x09%rU+003B8
-&iota;%r\x09%rU+003B9
-&kappa;%r\x09%rU+003BA
-&lambda;%r\x09%rU+003BB
-&mu;%r\x09%rU+003BC
-&nu;%r\x09%rU+003BD
-&xi;%r\x09%rU+003BE
-&omicron;%r\x09%rU+003BF
-&pi;%r\x09%rU+003C0
-&rho;%r\x09%rU+003C1
-&sigmav;%r\x09%rU+003C2
-&sigma;%r\x09%rU+003C3
-&tau;%r\x09%rU+003C4
-&upsi;%r\x09%rU+003C5
-&phi;%r\x09%rU+003C6
-&chi;%r\x09%rU+003C7
-&psi;%r\x09%rU+003C8
-&omega;%r\x09%rU+003C9
-&thetasym;%r\x09%rU+003D1
-&upsih;%r\x09%rU+003D2
-&straightphi;%r\x09%rU+003D5
-&piv;%r\x09%rU+003D6
-&Gammad;%r\x09%rU+003DC
-&gammad;%r\x09%rU+003DD
-&varkappa;%r\x09%rU+003F0
-&rhov;%r\x09%rU+003F1
-&straightepsilon;%r\x09%rU+003F5
-&backepsilon;%r\x09%rU+003F6
-&IOcy;%r\x09%rU+00401
-&DJcy;%r\x09%rU+00402
-&GJcy;%r\x09%rU+00403
-&Jukcy;%r\x09%rU+00404
-&DScy;%r\x09%rU+00405
-&Iukcy;%r\x09%rU+00406
-&YIcy;%r\x09%rU+00407
-&Jsercy;%r\x09%rU+00408
-&LJcy;%r\x09%rU+00409
-&NJcy;%r\x09%rU+0040A
-&TSHcy;%r\x09%rU+0040B
-&KJcy;%r\x09%rU+0040C
-&Ubrcy;%r\x09%rU+0040E
-&DZcy;%r\x09%rU+0040F
-&Acy;%r\x09%rU+00410
-&Bcy;%r\x09%rU+00411
-&Vcy;%r\x09%rU+00412
-&Gcy;%r\x09%rU+00413
-&Dcy;%r\x09%rU+00414
-&IEcy;%r\x09%rU+00415
-&ZHcy;%r\x09%rU+00416
-&Zcy;%r\x09%rU+00417
-&Icy;%r\x09%rU+00418
-&Jcy;%r\x09%rU+00419
-&Kcy;%r\x09%rU+0041A
-&Lcy;%r\x09%rU+0041B
-&Mcy;%r\x09%rU+0041C
-&Ncy;%r\x09%rU+0041D
-&Ocy;%r\x09%rU+0041E
-&Pcy;%r\x09%rU+0041F
-&Rcy;%r\x09%rU+00420
-&Scy;%r\x09%rU+00421
-&Tcy;%r\x09%rU+00422
-&Ucy;%r\x09%rU+00423
-&Fcy;%r\x09%rU+00424
-&KHcy;%r\x09%rU+00425
-&TScy;%r\x09%rU+00426
-&CHcy;%r\x09%rU+00427
-&SHcy;%r\x09%rU+00428
-&SHCHcy;%r\x09%rU+00429
-&HARDcy;%r\x09%rU+0042A
-&Ycy;%r\x09%rU+0042B
-&SOFTcy;%r\x09%rU+0042C
-&Ecy;%r\x09%rU+0042D
-&YUcy;%r\x09%rU+0042E
-&YAcy;%r\x09%rU+0042F
-&acy;%r\x09%rU+00430
-&bcy;%r\x09%rU+00431
-&vcy;%r\x09%rU+00432
-&gcy;%r\x09%rU+00433
-&dcy;%r\x09%rU+00434
-&iecy;%r\x09%rU+00435
-&zhcy;%r\x09%rU+00436
-&zcy;%r\x09%rU+00437
-&icy;%r\x09%rU+00438
-&jcy;%r\x09%rU+00439
-&kcy;%r\x09%rU+0043A
-&lcy;%r\x09%rU+0043B
-&mcy;%r\x09%rU+0043C
-&ncy;%r\x09%rU+0043D
-&ocy;%r\x09%rU+0043E
-&pcy;%r\x09%rU+0043F
-&rcy;%r\x09%rU+00440
-&scy;%r\x09%rU+00441
-&tcy;%r\x09%rU+00442
-&ucy;%r\x09%rU+00443
-&fcy;%r\x09%rU+00444
-&khcy;%r\x09%rU+00445
-&tscy;%r\x09%rU+00446
-&chcy;%r\x09%rU+00447
-&shcy;%r\x09%rU+00448
-&shchcy;%r\x09%rU+00449
-&hardcy;%r\x09%rU+0044A
-&ycy;%r\x09%rU+0044B
-&softcy;%r\x09%rU+0044C
-&ecy;%r\x09%rU+0044D
-&yucy;%r\x09%rU+0044E
-&yacy;%r\x09%rU+0044F
-&iocy;%r\x09%rU+00451
-&djcy;%r\x09%rU+00452
-&gjcy;%r\x09%rU+00453
-&jukcy;%r\x09%rU+00454
-&dscy;%r\x09%rU+00455
-&iukcy;%r\x09%rU+00456
-&yicy;%r\x09%rU+00457
-&jsercy;%r\x09%rU+00458
-&ljcy;%r\x09%rU+00459
-&njcy;%r\x09%rU+0045A
-&tshcy;%r\x09%rU+0045B
-&kjcy;%r\x09%rU+0045C
-&ubrcy;%r\x09%rU+0045E
-&dzcy;%r\x09%rU+0045F
-&ensp;%r\x09%rU+02002
-&emsp;%r\x09%rU+02003
-&emsp13;%r\x09%rU+02004
-&emsp14;%r\x09%rU+02005
-&numsp;%r\x09%rU+02007
-&puncsp;%r\x09%rU+02008
-&ThinSpace;%r\x09%rU+02009
-&hairsp;%r\x09%rU+0200A
-&ZeroWidthSpace;%r\x09%rU+0200B
-&zwnj;%r\x09%rU+0200C
-&zwj;%r\x09%rU+0200D
-&lrm;%r\x09%rU+0200E
-&rlm;%r\x09%rU+0200F
-&hyphen;%r\x09%rU+02010
-&ndash;%r\x09%rU+02013
-&mdash;%r\x09%rU+02014
-&horbar;%r\x09%rU+02015
-&Verbar;%r\x09%rU+02016
-&OpenCurlyQuote;%r\x09%rU+02018
-&rsquo;%r\x09%rU+02019
-&sbquo;%r\x09%rU+0201A
-&OpenCurlyDoubleQuote;%r\x09%rU+0201C
-&rdquo;%r\x09%rU+0201D
-&bdquo;%r\x09%rU+0201E
-&dagger;%r\x09%rU+02020
-&Dagger;%r\x09%rU+02021
-&bull;%r\x09%rU+02022
-&nldr;%r\x09%rU+02025
-&hellip;%r\x09%rU+02026
-&permil;%r\x09%rU+02030
-&pertenk;%r\x09%rU+02031
-&prime;%r\x09%rU+02032
-&Prime;%r\x09%rU+02033
-&tprime;%r\x09%rU+02034
-&backprime;%r\x09%rU+02035
-&lsaquo;%r\x09%rU+02039
-&rsaquo;%r\x09%rU+0203A
-&oline;%r\x09%rU+0203E
-&caret;%r\x09%rU+02041
-&hybull;%r\x09%rU+02043
-&frasl;%r\x09%rU+02044
-&bsemi;%r\x09%rU+0204F
-&qprime;%r\x09%rU+02057
-&MediumSpace;%r\x09%rU+0205F
-&NoBreak;%r\x09%rU+02060
-&af;%r\x09%rU+02061
-&InvisibleTimes;%r\x09%rU+02062
-&ic;%r\x09%rU+02063
-&euro;%r\x09%rU+020AC
-&TripleDot;%r\x09%rU+020DB
-&DotDot;%r\x09%rU+020DC
-&complexes;%r\x09%rU+02102
-&incare;%r\x09%rU+02105
-&gscr;%r\x09%rU+0210A
-&HilbertSpace;%r\x09%rU+0210B
-&Hfr;%r\x09%rU+0210C
-&Hopf;%r\x09%rU+0210D
-&planckh;%r\x09%rU+0210E
-&planck;%r\x09%rU+0210F
-&imagline;%r\x09%rU+02110
-&Ifr;%r\x09%rU+02111
-&lagran;%r\x09%rU+02112
-&ell;%r\x09%rU+02113
-&naturals;%r\x09%rU+02115
-&numero;%r\x09%rU+02116
-&copysr;%r\x09%rU+02117
-&wp;%r\x09%rU+02118
-&primes;%r\x09%rU+02119
-&rationals;%r\x09%rU+0211A
-&realine;%r\x09%rU+0211B
-&Rfr;%r\x09%rU+0211C
-&Ropf;%r\x09%rU+0211D
-&rx;%r\x09%rU+0211E
-&trade;%r\x09%rU+02122
-&Zopf;%r\x09%rU+02124
-&mho;%r\x09%rU+02127
-&Zfr;%r\x09%rU+02128
-&iiota;%r\x09%rU+02129
-&Bscr;%r\x09%rU+0212C
-&Cfr;%r\x09%rU+0212D
-&escr;%r\x09%rU+0212F
-&expectation;%r\x09%rU+02130
-&Fouriertrf;%r\x09%rU+02131
-&Mellintrf;%r\x09%rU+02133
-&orderof;%r\x09%rU+02134
-&aleph;%r\x09%rU+02135
-&beth;%r\x09%rU+02136
-&gimel;%r\x09%rU+02137
-&daleth;%r\x09%rU+02138
-&CapitalDifferentialD;%r\x09%rU+02145
-&DifferentialD;%r\x09%rU+02146
-&exponentiale;%r\x09%rU+02147
-&ImaginaryI;%r\x09%rU+02148
-&frac13;%r\x09%rU+02153
-&frac23;%r\x09%rU+02154
-&frac15;%r\x09%rU+02155
-&frac25;%r\x09%rU+02156
-&frac35;%r\x09%rU+02157
-&frac45;%r\x09%rU+02158
-&frac16;%r\x09%rU+02159
-&frac56;%r\x09%rU+0215A
-&frac18;%r\x09%rU+0215B
-&frac38;%r\x09%rU+0215C
-&frac58;%r\x09%rU+0215D
-&frac78;%r\x09%rU+0215E
-&larr;%r\x09%rU+02190
-&uarr;%r\x09%rU+02191
-&srarr;%r\x09%rU+02192
-&darr;%r\x09%rU+02193
-&harr;%r\x09%rU+02194
-&UpDownArrow;%r\x09%rU+02195
-&nwarrow;%r\x09%rU+02196
-&UpperRightArrow;%r\x09%rU+02197
-&LowerRightArrow;%r\x09%rU+02198
-&swarr;%r\x09%rU+02199
-&nleftarrow;%r\x09%rU+0219A
-&nrarr;%r\x09%rU+0219B
-&rarrw;%r\x09%rU+0219D
-&Larr;%r\x09%rU+0219E
-&Uarr;%r\x09%rU+0219F
-&twoheadrightarrow;%r\x09%rU+021A0
-&Darr;%r\x09%rU+021A1
-&larrtl;%r\x09%rU+021A2
-&rarrtl;%r\x09%rU+021A3
-&LeftTeeArrow;%r\x09%rU+021A4
-&UpTeeArrow;%r\x09%rU+021A5
-&map;%r\x09%rU+021A6
-&DownTeeArrow;%r\x09%rU+021A7
-&larrhk;%r\x09%rU+021A9
-&rarrhk;%r\x09%rU+021AA
-&larrlp;%r\x09%rU+021AB
-&looparrowright;%r\x09%rU+021AC
-&harrw;%r\x09%rU+021AD
-&nleftrightarrow;%r\x09%rU+021AE
-&Lsh;%r\x09%rU+021B0
-&rsh;%r\x09%rU+021B1
-&ldsh;%r\x09%rU+021B2
-&rdsh;%r\x09%rU+021B3
-&crarr;%r\x09%rU+021B5
-&curvearrowleft;%r\x09%rU+021B6
-&curarr;%r\x09%rU+021B7
-&olarr;%r\x09%rU+021BA
-&orarr;%r\x09%rU+021BB
-&leftharpoonup;%r\x09%rU+021BC
-&leftharpoondown;%r\x09%rU+021BD
-&RightUpVector;%r\x09%rU+021BE
-&uharl;%r\x09%rU+021BF
-&rharu;%r\x09%rU+021C0
-&rhard;%r\x09%rU+021C1
-&RightDownVector;%r\x09%rU+021C2
-&dharl;%r\x09%rU+021C3
-&rightleftarrows;%r\x09%rU+021C4
-&udarr;%r\x09%rU+021C5
-&lrarr;%r\x09%rU+021C6
-&llarr;%r\x09%rU+021C7
-&upuparrows;%r\x09%rU+021C8
-&rrarr;%r\x09%rU+021C9
-&downdownarrows;%r\x09%rU+021CA
-&leftrightharpoons;%r\x09%rU+021CB
-&rightleftharpoons;%r\x09%rU+021CC
-&nLeftarrow;%r\x09%rU+021CD
-&nhArr;%r\x09%rU+021CE
-&nrArr;%r\x09%rU+021CF
-&DoubleLeftArrow;%r\x09%rU+021D0
-&DoubleUpArrow;%r\x09%rU+021D1
-&Implies;%r\x09%rU+021D2
-&Downarrow;%r\x09%rU+021D3
-&hArr;%r\x09%rU+021D4
-&Updownarrow;%r\x09%rU+021D5
-&nwArr;%r\x09%rU+021D6
-&neArr;%r\x09%rU+021D7
-&seArr;%r\x09%rU+021D8
-&swArr;%r\x09%rU+021D9
-&lAarr;%r\x09%rU+021DA
-&rAarr;%r\x09%rU+021DB
-&zigrarr;%r\x09%rU+021DD
-&LeftArrowBar;%r\x09%rU+021E4
-&RightArrowBar;%r\x09%rU+021E5
-&DownArrowUpArrow;%r\x09%rU+021F5
-&loarr;%r\x09%rU+021FD
-&roarr;%r\x09%rU+021FE
-&hoarr;%r\x09%rU+021FF
-&forall;%r\x09%rU+02200
-&comp;%r\x09%rU+02201
-&part;%r\x09%rU+02202
-&Exists;%r\x09%rU+02203
-&nexist;%r\x09%rU+02204
-&empty;%r\x09%rU+02205
-&nabla;%r\x09%rU+02207
-&isinv;%r\x09%rU+02208
-&notin;%r\x09%rU+02209
-&ReverseElement;%r\x09%rU+0220B
-&notniva;%r\x09%rU+0220C
-&prod;%r\x09%rU+0220F
-&Coproduct;%r\x09%rU+02210
-&sum;%r\x09%rU+02211
-&minus;%r\x09%rU+02212
-&MinusPlus;%r\x09%rU+02213
-&plusdo;%r\x09%rU+02214
-&ssetmn;%r\x09%rU+02216
-&lowast;%r\x09%rU+02217
-&compfn;%r\x09%rU+02218
-&Sqrt;%r\x09%rU+0221A
-&prop;%r\x09%rU+0221D
-&infin;%r\x09%rU+0221E
-&angrt;%r\x09%rU+0221F
-&angle;%r\x09%rU+02220
-&angmsd;%r\x09%rU+02221
-&angsph;%r\x09%rU+02222
-&mid;%r\x09%rU+02223
-&nshortmid;%r\x09%rU+02224
-&shortparallel;%r\x09%rU+02225
-&nparallel;%r\x09%rU+02226
-&and;%r\x09%rU+02227
-&or;%r\x09%rU+02228
-&cap;%r\x09%rU+02229
-&cup;%r\x09%rU+0222A
-&Integral;%r\x09%rU+0222B
-&Int;%r\x09%rU+0222C
-&tint;%r\x09%rU+0222D
-&ContourIntegral;%r\x09%rU+0222E
-&DoubleContourIntegral;%r\x09%rU+0222F
-&Cconint;%r\x09%rU+02230
-&cwint;%r\x09%rU+02231
-&cwconint;%r\x09%rU+02232
-&awconint;%r\x09%rU+02233
-&there4;%r\x09%rU+02234
-&Because;%r\x09%rU+02235
-&ratio;%r\x09%rU+02236
-&Colon;%r\x09%rU+02237
-&minusd;%r\x09%rU+02238
-&mDDot;%r\x09%rU+0223A
-&homtht;%r\x09%rU+0223B
-&sim;%r\x09%rU+0223C
-&bsim;%r\x09%rU+0223D
-&ac;%r\x09%rU+0223E
-&acd;%r\x09%rU+0223F
-&wr;%r\x09%rU+02240
-&NotTilde;%r\x09%rU+02241
-&esim;%r\x09%rU+02242
-&simeq;%r\x09%rU+02243
-&nsime;%r\x09%rU+02244
-&TildeFullEqual;%r\x09%rU+02245
-&simne;%r\x09%rU+02246
-&ncong;%r\x09%rU+02247
-&approx;%r\x09%rU+02248
-&napprox;%r\x09%rU+02249
-&ape;%r\x09%rU+0224A
-&apid;%r\x09%rU+0224B
-&bcong;%r\x09%rU+0224C
-&CupCap;%r\x09%rU+0224D
-&bump;%r\x09%rU+0224E
-&HumpEqual;%r\x09%rU+0224F
-&esdot;%r\x09%rU+02250
-&doteqdot;%r\x09%rU+02251
-&fallingdotseq;%r\x09%rU+02252
-&risingdotseq;%r\x09%rU+02253
-&coloneq;%r\x09%rU+02254
-&eqcolon;%r\x09%rU+02255
-&ecir;%r\x09%rU+02256
-&circeq;%r\x09%rU+02257
-&wedgeq;%r\x09%rU+02259
-&veeeq;%r\x09%rU+0225A
-&triangleq;%r\x09%rU+0225C
-&equest;%r\x09%rU+0225F
-&NotEqual;%r\x09%rU+02260
-&Congruent;%r\x09%rU+02261
-&NotCongruent;%r\x09%rU+02262
-&leq;%r\x09%rU+02264
-&ge;%r\x09%rU+02265
-&lE;%r\x09%rU+02266
-&geqq;%r\x09%rU+02267
-&lneqq;%r\x09%rU+02268
-&gneqq;%r\x09%rU+02269
-&ll;%r\x09%rU+0226A
-&gg;%r\x09%rU+0226B
-&between;%r\x09%rU+0226C
-&NotCupCap;%r\x09%rU+0226D
-&NotLess;%r\x09%rU+0226E
-&ngtr;%r\x09%rU+0226F
-&NotLessEqual;%r\x09%rU+02270
-&ngeq;%r\x09%rU+02271
-&LessTilde;%r\x09%rU+02272
-&GreaterTilde;%r\x09%rU+02273
-&nlsim;%r\x09%rU+02274
-&ngsim;%r\x09%rU+02275
-&lessgtr;%r\x09%rU+02276
-&gl;%r\x09%rU+02277
-&ntlg;%r\x09%rU+02278
-&NotGreaterLess;%r\x09%rU+02279
-&prec;%r\x09%rU+0227A
-&succ;%r\x09%rU+0227B
-&PrecedesSlantEqual;%r\x09%rU+0227C
-&succcurlyeq;%r\x09%rU+0227D
-&precsim;%r\x09%rU+0227E
-&SucceedsTilde;%r\x09%rU+0227F
-&npr;%r\x09%rU+02280
-&NotSucceeds;%r\x09%rU+02281
-&sub;%r\x09%rU+02282
-&sup;%r\x09%rU+02283
-&nsub;%r\x09%rU+02284
-&nsup;%r\x09%rU+02285
-&SubsetEqual;%r\x09%rU+02286
-&supe;%r\x09%rU+02287
-&NotSubsetEqual;%r\x09%rU+02288
-&NotSupersetEqual;%r\x09%rU+02289
-&subsetneq;%r\x09%rU+0228A
-&supsetneq;%r\x09%rU+0228B
-&cupdot;%r\x09%rU+0228D
-&UnionPlus;%r\x09%rU+0228E
-&sqsub;%r\x09%rU+0228F
-&sqsupset;%r\x09%rU+02290
-&SquareSubsetEqual;%r\x09%rU+02291
-&SquareSupersetEqual;%r\x09%rU+02292
-&sqcap;%r\x09%rU+02293
-&sqcup;%r\x09%rU+02294
-&CirclePlus;%r\x09%rU+02295
-&ominus;%r\x09%rU+02296
-&CircleTimes;%r\x09%rU+02297
-&osol;%r\x09%rU+02298
-&CircleDot;%r\x09%rU+02299
-&ocir;%r\x09%rU+0229A
-&oast;%r\x09%rU+0229B
-&odash;%r\x09%rU+0229D
-&boxplus;%r\x09%rU+0229E
-&boxminus;%r\x09%rU+0229F
-&timesb;%r\x09%rU+022A0
-&sdotb;%r\x09%rU+022A1
-&vdash;%r\x09%rU+022A2
-&dashv;%r\x09%rU+022A3
-&DownTee;%r\x09%rU+022A4
-&perp;%r\x09%rU+022A5
-&models;%r\x09%rU+022A7
-&DoubleRightTee;%r\x09%rU+022A8
-&Vdash;%r\x09%rU+022A9
-&Vvdash;%r\x09%rU+022AA
-&VDash;%r\x09%rU+022AB
-&nvdash;%r\x09%rU+022AC
-&nvDash;%r\x09%rU+022AD
-&nVdash;%r\x09%rU+022AE
-&nVDash;%r\x09%rU+022AF
-&prurel;%r\x09%rU+022B0
-&vartriangleleft;%r\x09%rU+022B2
-&vrtri;%r\x09%rU+022B3
-&LeftTriangleEqual;%r\x09%rU+022B4
-&RightTriangleEqual;%r\x09%rU+022B5
-&origof;%r\x09%rU+022B6
-&imof;%r\x09%rU+022B7
-&mumap;%r\x09%rU+022B8
-&hercon;%r\x09%rU+022B9
-&intcal;%r\x09%rU+022BA
-&veebar;%r\x09%rU+022BB
-&barvee;%r\x09%rU+022BD
-&angrtvb;%r\x09%rU+022BE
-&lrtri;%r\x09%rU+022BF
-&xwedge;%r\x09%rU+022C0
-&xvee;%r\x09%rU+022C1
-&bigcap;%r\x09%rU+022C2
-&bigcup;%r\x09%rU+022C3
-&diamond;%r\x09%rU+022C4
-&sdot;%r\x09%rU+022C5
-&Star;%r\x09%rU+022C6
-&divonx;%r\x09%rU+022C7
-&bowtie;%r\x09%rU+022C8
-&ltimes;%r\x09%rU+022C9
-&rtimes;%r\x09%rU+022CA
-&lthree;%r\x09%rU+022CB
-&rthree;%r\x09%rU+022CC
-&backsimeq;%r\x09%rU+022CD
-&curlyvee;%r\x09%rU+022CE
-&curlywedge;%r\x09%rU+022CF
-&Sub;%r\x09%rU+022D0
-&Supset;%r\x09%rU+022D1
-&Cap;%r\x09%rU+022D2
-&Cup;%r\x09%rU+022D3
-&pitchfork;%r\x09%rU+022D4
-&epar;%r\x09%rU+022D5
-&lessdot;%r\x09%rU+022D6
-&gtrdot;%r\x09%rU+022D7
-&Ll;%r\x09%rU+022D8
-&Gg;%r\x09%rU+022D9
-&lesseqgtr;%r\x09%rU+022DA
-&gtreqless;%r\x09%rU+022DB
-&curlyeqprec;%r\x09%rU+022DE
-&cuesc;%r\x09%rU+022DF
-&NotPrecedesSlantEqual;%r\x09%rU+022E0
-&NotSucceedsSlantEqual;%r\x09%rU+022E1
-&NotSquareSubsetEqual;%r\x09%rU+022E2
-&NotSquareSupersetEqual;%r\x09%rU+022E3
-&lnsim;%r\x09%rU+022E6
-&gnsim;%r\x09%rU+022E7
-&precnsim;%r\x09%rU+022E8
-&scnsim;%r\x09%rU+022E9
-&nltri;%r\x09%rU+022EA
-&ntriangleright;%r\x09%rU+022EB
-&nltrie;%r\x09%rU+022EC
-&NotRightTriangleEqual;%r\x09%rU+022ED
-&vellip;%r\x09%rU+022EE
-&ctdot;%r\x09%rU+022EF
-&utdot;%r\x09%rU+022F0
-&dtdot;%r\x09%rU+022F1
-&disin;%r\x09%rU+022F2
-&isinsv;%r\x09%rU+022F3
-&isins;%r\x09%rU+022F4
-&isindot;%r\x09%rU+022F5
-&notinvc;%r\x09%rU+022F6
-&notinvb;%r\x09%rU+022F7
-&isinE;%r\x09%rU+022F9
-&nisd;%r\x09%rU+022FA
-&xnis;%r\x09%rU+022FB
-&nis;%r\x09%rU+022FC
-&notnivc;%r\x09%rU+022FD
-&notnivb;%r\x09%rU+022FE
-&barwed;%r\x09%rU+02305
-&doublebarwedge;%r\x09%rU+02306
-&lceil;%r\x09%rU+02308
-&RightCeiling;%r\x09%rU+02309
-&LeftFloor;%r\x09%rU+0230A
-&RightFloor;%r\x09%rU+0230B
-&drcrop;%r\x09%rU+0230C
-&dlcrop;%r\x09%rU+0230D
-&urcrop;%r\x09%rU+0230E
-&ulcrop;%r\x09%rU+0230F
-&bnot;%r\x09%rU+02310
-&profline;%r\x09%rU+02312
-&profsurf;%r\x09%rU+02313
-&telrec;%r\x09%rU+02315
-&target;%r\x09%rU+02316
-&ulcorner;%r\x09%rU+0231C
-&urcorner;%r\x09%rU+0231D
-&llcorner;%r\x09%rU+0231E
-&drcorn;%r\x09%rU+0231F
-&frown;%r\x09%rU+02322
-&smile;%r\x09%rU+02323
-&cylcty;%r\x09%rU+0232D
-&profalar;%r\x09%rU+0232E
-&topbot;%r\x09%rU+02336
-&ovbar;%r\x09%rU+0233D
-&solbar;%r\x09%rU+0233F
-&angzarr;%r\x09%rU+0237C
-&lmoust;%r\x09%rU+023B0
-&rmoust;%r\x09%rU+023B1
-&OverBracket;%r\x09%rU+023B4
-&bbrk;%r\x09%rU+023B5
-&bbrktbrk;%r\x09%rU+023B6
-&OverParenthesis;%r\x09%rU+023DC
-&UnderParenthesis;%r\x09%rU+023DD
-&OverBrace;%r\x09%rU+023DE
-&UnderBrace;%r\x09%rU+023DF
-&trpezium;%r\x09%rU+023E2
-&elinters;%r\x09%rU+023E7
-&blank;%r\x09%rU+02423
-&oS;%r\x09%rU+024C8
-&HorizontalLine;%r\x09%rU+02500
-&boxv;%r\x09%rU+02502
-&boxdr;%r\x09%rU+0250C
-&boxdl;%r\x09%rU+02510
-&boxur;%r\x09%rU+02514
-&boxul;%r\x09%rU+02518
-&boxvr;%r\x09%rU+0251C
-&boxvl;%r\x09%rU+02524
-&boxhd;%r\x09%rU+0252C
-&boxhu;%r\x09%rU+02534
-&boxvh;%r\x09%rU+0253C
-&boxH;%r\x09%rU+02550
-&boxV;%r\x09%rU+02551
-&boxdR;%r\x09%rU+02552
-&boxDr;%r\x09%rU+02553
-&boxDR;%r\x09%rU+02554
-&boxdL;%r\x09%rU+02555
-&boxDl;%r\x09%rU+02556
-&boxDL;%r\x09%rU+02557
-&boxuR;%r\x09%rU+02558
-&boxUr;%r\x09%rU+02559
-&boxUR;%r\x09%rU+0255A
-&boxuL;%r\x09%rU+0255B
-&boxUl;%r\x09%rU+0255C
-&boxUL;%r\x09%rU+0255D
-&boxvR;%r\x09%rU+0255E
-&boxVr;%r\x09%rU+0255F
-&boxVR;%r\x09%rU+02560
-&boxvL;%r\x09%rU+02561
-&boxVl;%r\x09%rU+02562
-&boxVL;%r\x09%rU+02563
-&boxHd;%r\x09%rU+02564
-&boxhD;%r\x09%rU+02565
-&boxHD;%r\x09%rU+02566
-&boxHu;%r\x09%rU+02567
-&boxhU;%r\x09%rU+02568
-&boxHU;%r\x09%rU+02569
-&boxvH;%r\x09%rU+0256A
-&boxVh;%r\x09%rU+0256B
-&boxVH;%r\x09%rU+0256C
-&uhblk;%r\x09%rU+02580
-&lhblk;%r\x09%rU+02584
-&block;%r\x09%rU+02588
-&blk14;%r\x09%rU+02591
-&blk12;%r\x09%rU+02592
-&blk34;%r\x09%rU+02593
-&Square;%r\x09%rU+025A1
-&squarf;%r\x09%rU+025AA
-&EmptyVerySmallSquare;%r\x09%rU+025AB
-&rect;%r\x09%rU+025AD
-&marker;%r\x09%rU+025AE
-&fltns;%r\x09%rU+025B1
-&bigtriangleup;%r\x09%rU+025B3
-&blacktriangle;%r\x09%rU+025B4
-&triangle;%r\x09%rU+025B5
-&blacktriangleright;%r\x09%rU+025B8
-&rtri;%r\x09%rU+025B9
-&bigtriangledown;%r\x09%rU+025BD
-&blacktriangledown;%r\x09%rU+025BE
-&triangledown;%r\x09%rU+025BF
-&blacktriangleleft;%r\x09%rU+025C2
-&ltri;%r\x09%rU+025C3
-&lozenge;%r\x09%rU+025CA
-&cir;%r\x09%rU+025CB
-&tridot;%r\x09%rU+025EC
-&bigcirc;%r\x09%rU+025EF
-&ultri;%r\x09%rU+025F8
-&urtri;%r\x09%rU+025F9
-&lltri;%r\x09%rU+025FA
-&EmptySmallSquare;%r\x09%rU+025FB
-&FilledSmallSquare;%r\x09%rU+025FC
-&starf;%r\x09%rU+02605
-&star;%r\x09%rU+02606
-&phone;%r\x09%rU+0260E
-&female;%r\x09%rU+02640
-&male;%r\x09%rU+02642
-&spadesuit;%r\x09%rU+02660
-&clubs;%r\x09%rU+02663
-&hearts;%r\x09%rU+02665
-&diamondsuit;%r\x09%rU+02666
-&sung;%r\x09%rU+0266A
-&flat;%r\x09%rU+0266D
-&natur;%r\x09%rU+0266E
-&sharp;%r\x09%rU+0266F
-&check;%r\x09%rU+02713
-&cross;%r\x09%rU+02717
-&maltese;%r\x09%rU+02720
-&sext;%r\x09%rU+02736
-&VerticalSeparator;%r\x09%rU+02758
-&lbbrk;%r\x09%rU+02772
-&rbbrk;%r\x09%rU+02773
-&bsolhsub;%r\x09%rU+027C8
-&suphsol;%r\x09%rU+027C9
-&LeftDoubleBracket;%r\x09%rU+027E6
-&RightDoubleBracket;%r\x09%rU+027E7
-&langle;%r\x09%rU+027E8
-&RightAngleBracket;%r\x09%rU+027E9
-&Lang;%r\x09%rU+027EA
-&Rang;%r\x09%rU+027EB
-&loang;%r\x09%rU+027EC
-&roang;%r\x09%rU+027ED
-&longleftarrow;%r\x09%rU+027F5
-&LongRightArrow;%r\x09%rU+027F6
-&LongLeftRightArrow;%r\x09%rU+027F7
-&xlArr;%r\x09%rU+027F8
-&DoubleLongRightArrow;%r\x09%rU+027F9
-&xhArr;%r\x09%rU+027FA
-&xmap;%r\x09%rU+027FC
-&dzigrarr;%r\x09%rU+027FF
-&nvlArr;%r\x09%rU+02902
-&nvrArr;%r\x09%rU+02903
-&nvHarr;%r\x09%rU+02904
-&Map;%r\x09%rU+02905
-&lbarr;%r\x09%rU+0290C
-&bkarow;%r\x09%rU+0290D
-&lBarr;%r\x09%rU+0290E
-&dbkarow;%r\x09%rU+0290F
-&drbkarow;%r\x09%rU+02910
-&DDotrahd;%r\x09%rU+02911
-&UpArrowBar;%r\x09%rU+02912
-&DownArrowBar;%r\x09%rU+02913
-&Rarrtl;%r\x09%rU+02916
-&latail;%r\x09%rU+02919
-&ratail;%r\x09%rU+0291A
-&lAtail;%r\x09%rU+0291B
-&rAtail;%r\x09%rU+0291C
-&larrfs;%r\x09%rU+0291D
-&rarrfs;%r\x09%rU+0291E
-&larrbfs;%r\x09%rU+0291F
-&rarrbfs;%r\x09%rU+02920
-&nwarhk;%r\x09%rU+02923
-&nearhk;%r\x09%rU+02924
-&searhk;%r\x09%rU+02925
-&swarhk;%r\x09%rU+02926
-&nwnear;%r\x09%rU+02927
-&toea;%r\x09%rU+02928
-&seswar;%r\x09%rU+02929
-&swnwar;%r\x09%rU+0292A
-&rarrc;%r\x09%rU+02933
-&cudarrr;%r\x09%rU+02935
-&ldca;%r\x09%rU+02936
-&rdca;%r\x09%rU+02937
-&cudarrl;%r\x09%rU+02938
-&larrpl;%r\x09%rU+02939
-&curarrm;%r\x09%rU+0293C
-&cularrp;%r\x09%rU+0293D
-&rarrpl;%r\x09%rU+02945
-&harrcir;%r\x09%rU+02948
-&Uarrocir;%r\x09%rU+02949
-&lurdshar;%r\x09%rU+0294A
-&ldrushar;%r\x09%rU+0294B
-&LeftRightVector;%r\x09%rU+0294E
-&RightUpDownVector;%r\x09%rU+0294F
-&DownLeftRightVector;%r\x09%rU+02950
-&LeftUpDownVector;%r\x09%rU+02951
-&LeftVectorBar;%r\x09%rU+02952
-&RightVectorBar;%r\x09%rU+02953
-&RightUpVectorBar;%r\x09%rU+02954
-&RightDownVectorBar;%r\x09%rU+02955
-&DownLeftVectorBar;%r\x09%rU+02956
-&DownRightVectorBar;%r\x09%rU+02957
-&LeftUpVectorBar;%r\x09%rU+02958
-&LeftDownVectorBar;%r\x09%rU+02959
-&LeftTeeVector;%r\x09%rU+0295A
-&RightTeeVector;%r\x09%rU+0295B
-&RightUpTeeVector;%r\x09%rU+0295C
-&RightDownTeeVector;%r\x09%rU+0295D
-&DownLeftTeeVector;%r\x09%rU+0295E
-&DownRightTeeVector;%r\x09%rU+0295F
-&LeftUpTeeVector;%r\x09%rU+02960
-&LeftDownTeeVector;%r\x09%rU+02961
-&lHar;%r\x09%rU+02962
-&uHar;%r\x09%rU+02963
-&rHar;%r\x09%rU+02964
-&dHar;%r\x09%rU+02965
-&luruhar;%r\x09%rU+02966
-&ldrdhar;%r\x09%rU+02967
-&ruluhar;%r\x09%rU+02968
-&rdldhar;%r\x09%rU+02969
-&lharul;%r\x09%rU+0296A
-&llhard;%r\x09%rU+0296B
-&rharul;%r\x09%rU+0296C
-&lrhard;%r\x09%rU+0296D
-&udhar;%r\x09%rU+0296E
-&ReverseUpEquilibrium;%r\x09%rU+0296F
-&RoundImplies;%r\x09%rU+02970
-&erarr;%r\x09%rU+02971
-&simrarr;%r\x09%rU+02972
-&larrsim;%r\x09%rU+02973
-&rarrsim;%r\x09%rU+02974
-&rarrap;%r\x09%rU+02975
-&ltlarr;%r\x09%rU+02976
-&gtrarr;%r\x09%rU+02978
-&subrarr;%r\x09%rU+02979
-&suplarr;%r\x09%rU+0297B
-&lfisht;%r\x09%rU+0297C
-&rfisht;%r\x09%rU+0297D
-&ufisht;%r\x09%rU+0297E
-&dfisht;%r\x09%rU+0297F
-&lopar;%r\x09%rU+02985
-&ropar;%r\x09%rU+02986
-&lbrke;%r\x09%rU+0298B
-&rbrke;%r\x09%rU+0298C
-&lbrkslu;%r\x09%rU+0298D
-&rbrksld;%r\x09%rU+0298E
-&lbrksld;%r\x09%rU+0298F
-&rbrkslu;%r\x09%rU+02990
-&langd;%r\x09%rU+02991
-&rangd;%r\x09%rU+02992
-&lparlt;%r\x09%rU+02993
-&rpargt;%r\x09%rU+02994
-&gtlPar;%r\x09%rU+02995
-&ltrPar;%r\x09%rU+02996
-&vzigzag;%r\x09%rU+0299A
-&vangrt;%r\x09%rU+0299C
-&angrtvbd;%r\x09%rU+0299D
-&ange;%r\x09%rU+029A4
-&range;%r\x09%rU+029A5
-&dwangle;%r\x09%rU+029A6
-&uwangle;%r\x09%rU+029A7
-&angmsdaa;%r\x09%rU+029A8
-&angmsdab;%r\x09%rU+029A9
-&angmsdac;%r\x09%rU+029AA
-&angmsdad;%r\x09%rU+029AB
-&angmsdae;%r\x09%rU+029AC
-&angmsdaf;%r\x09%rU+029AD
-&angmsdag;%r\x09%rU+029AE
-&angmsdah;%r\x09%rU+029AF
-&bemptyv;%r\x09%rU+029B0
-&demptyv;%r\x09%rU+029B1
-&cemptyv;%r\x09%rU+029B2
-&raemptyv;%r\x09%rU+029B3
-&laemptyv;%r\x09%rU+029B4
-&ohbar;%r\x09%rU+029B5
-&omid;%r\x09%rU+029B6
-&opar;%r\x09%rU+029B7
-&operp;%r\x09%rU+029B9
-&olcross;%r\x09%rU+029BB
-&odsold;%r\x09%rU+029BC
-&olcir;%r\x09%rU+029BE
-&ofcir;%r\x09%rU+029BF
-&olt;%r\x09%rU+029C0
-&ogt;%r\x09%rU+029C1
-&cirscir;%r\x09%rU+029C2
-&cirE;%r\x09%rU+029C3
-&solb;%r\x09%rU+029C4
-&bsolb;%r\x09%rU+029C5
-&boxbox;%r\x09%rU+029C9
-&trisb;%r\x09%rU+029CD
-&rtriltri;%r\x09%rU+029CE
-&LeftTriangleBar;%r\x09%rU+029CF
-&RightTriangleBar;%r\x09%rU+029D0
-&iinfin;%r\x09%rU+029DC
-&infintie;%r\x09%rU+029DD
-&nvinfin;%r\x09%rU+029DE
-&eparsl;%r\x09%rU+029E3
-&smeparsl;%r\x09%rU+029E4
-&eqvparsl;%r\x09%rU+029E5
-&lozf;%r\x09%rU+029EB
-&RuleDelayed;%r\x09%rU+029F4
-&dsol;%r\x09%rU+029F6
-&xodot;%r\x09%rU+02A00
-&bigoplus;%r\x09%rU+02A01
-&bigotimes;%r\x09%rU+02A02
-&biguplus;%r\x09%rU+02A04
-&bigsqcup;%r\x09%rU+02A06
-&iiiint;%r\x09%rU+02A0C
-&fpartint;%r\x09%rU+02A0D
-&cirfnint;%r\x09%rU+02A10
-&awint;%r\x09%rU+02A11
-&rppolint;%r\x09%rU+02A12
-&scpolint;%r\x09%rU+02A13
-&npolint;%r\x09%rU+02A14
-&pointint;%r\x09%rU+02A15
-&quatint;%r\x09%rU+02A16
-&intlarhk;%r\x09%rU+02A17
-&pluscir;%r\x09%rU+02A22
-&plusacir;%r\x09%rU+02A23
-&simplus;%r\x09%rU+02A24
-&plusdu;%r\x09%rU+02A25
-&plussim;%r\x09%rU+02A26
-&plustwo;%r\x09%rU+02A27
-&mcomma;%r\x09%rU+02A29
-&minusdu;%r\x09%rU+02A2A
-&loplus;%r\x09%rU+02A2D
-&roplus;%r\x09%rU+02A2E
-&Cross;%r\x09%rU+02A2F
-&timesd;%r\x09%rU+02A30
-&timesbar;%r\x09%rU+02A31
-&smashp;%r\x09%rU+02A33
-&lotimes;%r\x09%rU+02A34
-&rotimes;%r\x09%rU+02A35
-&otimesas;%r\x09%rU+02A36
-&Otimes;%r\x09%rU+02A37
-&odiv;%r\x09%rU+02A38
-&triplus;%r\x09%rU+02A39
-&triminus;%r\x09%rU+02A3A
-&tritime;%r\x09%rU+02A3B
-&iprod;%r\x09%rU+02A3C
-&amalg;%r\x09%rU+02A3F
-&capdot;%r\x09%rU+02A40
-&ncup;%r\x09%rU+02A42
-&ncap;%r\x09%rU+02A43
-&capand;%r\x09%rU+02A44
-&cupor;%r\x09%rU+02A45
-&cupcap;%r\x09%rU+02A46
-&capcup;%r\x09%rU+02A47
-&cupbrcap;%r\x09%rU+02A48
-&capbrcup;%r\x09%rU+02A49
-&cupcup;%r\x09%rU+02A4A
-&capcap;%r\x09%rU+02A4B
-&ccups;%r\x09%rU+02A4C
-&ccaps;%r\x09%rU+02A4D
-&ccupssm;%r\x09%rU+02A50
-&And;%r\x09%rU+02A53
-&Or;%r\x09%rU+02A54
-&andand;%r\x09%rU+02A55
-&oror;%r\x09%rU+02A56
-&orslope;%r\x09%rU+02A57
-&andslope;%r\x09%rU+02A58
-&andv;%r\x09%rU+02A5A
-&orv;%r\x09%rU+02A5B
-&andd;%r\x09%rU+02A5C
-&ord;%r\x09%rU+02A5D
-&wedbar;%r\x09%rU+02A5F
-&sdote;%r\x09%rU+02A66
-&simdot;%r\x09%rU+02A6A
-&congdot;%r\x09%rU+02A6D
-&easter;%r\x09%rU+02A6E
-&apacir;%r\x09%rU+02A6F
-&apE;%r\x09%rU+02A70
-&eplus;%r\x09%rU+02A71
-&pluse;%r\x09%rU+02A72
-&Esim;%r\x09%rU+02A73
-&Colone;%r\x09%rU+02A74
-&Equal;%r\x09%rU+02A75
-&ddotseq;%r\x09%rU+02A77
-&equivDD;%r\x09%rU+02A78
-&ltcir;%r\x09%rU+02A79
-&gtcir;%r\x09%rU+02A7A
-&ltquest;%r\x09%rU+02A7B
-&gtquest;%r\x09%rU+02A7C
-&les;%r\x09%rU+02A7D
-&ges;%r\x09%rU+02A7E
-&lesdot;%r\x09%rU+02A7F
-&gesdot;%r\x09%rU+02A80
-&lesdoto;%r\x09%rU+02A81
-&gesdoto;%r\x09%rU+02A82
-&lesdotor;%r\x09%rU+02A83
-&gesdotol;%r\x09%rU+02A84
-&lap;%r\x09%rU+02A85
-&gap;%r\x09%rU+02A86
-&lne;%r\x09%rU+02A87
-&gne;%r\x09%rU+02A88
-&lnap;%r\x09%rU+02A89
-&gnap;%r\x09%rU+02A8A
-&lesseqqgtr;%r\x09%rU+02A8B
-&gEl;%r\x09%rU+02A8C
-&lsime;%r\x09%rU+02A8D
-&gsime;%r\x09%rU+02A8E
-&lsimg;%r\x09%rU+02A8F
-&gsiml;%r\x09%rU+02A90
-&lgE;%r\x09%rU+02A91
-&glE;%r\x09%rU+02A92
-&lesges;%r\x09%rU+02A93
-&gesles;%r\x09%rU+02A94
-&els;%r\x09%rU+02A95
-&egs;%r\x09%rU+02A96
-&elsdot;%r\x09%rU+02A97
-&egsdot;%r\x09%rU+02A98
-&el;%r\x09%rU+02A99
-&eg;%r\x09%rU+02A9A
-&siml;%r\x09%rU+02A9D
-&simg;%r\x09%rU+02A9E
-&simlE;%r\x09%rU+02A9F
-&simgE;%r\x09%rU+02AA0
-&LessLess;%r\x09%rU+02AA1
-&GreaterGreater;%r\x09%rU+02AA2
-&glj;%r\x09%rU+02AA4
-&gla;%r\x09%rU+02AA5
-&ltcc;%r\x09%rU+02AA6
-&gtcc;%r\x09%rU+02AA7
-&lescc;%r\x09%rU+02AA8
-&gescc;%r\x09%rU+02AA9
-&smt;%r\x09%rU+02AAA
-&lat;%r\x09%rU+02AAB
-&smte;%r\x09%rU+02AAC
-&late;%r\x09%rU+02AAD
-&bumpE;%r\x09%rU+02AAE
-&preceq;%r\x09%rU+02AAF
-&SucceedsEqual;%r\x09%rU+02AB0
-&prE;%r\x09%rU+02AB3
-&scE;%r\x09%rU+02AB4
-&precneqq;%r\x09%rU+02AB5
-&scnE;%r\x09%rU+02AB6
-&precapprox;%r\x09%rU+02AB7
-&succapprox;%r\x09%rU+02AB8
-&precnapprox;%r\x09%rU+02AB9
-&succnapprox;%r\x09%rU+02ABA
-&Pr;%r\x09%rU+02ABB
-&Sc;%r\x09%rU+02ABC
-&subdot;%r\x09%rU+02ABD
-&supdot;%r\x09%rU+02ABE
-&subplus;%r\x09%rU+02ABF
-&supplus;%r\x09%rU+02AC0
-&submult;%r\x09%rU+02AC1
-&supmult;%r\x09%rU+02AC2
-&subedot;%r\x09%rU+02AC3
-&supedot;%r\x09%rU+02AC4
-&subE;%r\x09%rU+02AC5
-&supseteqq;%r\x09%rU+02AC6
-&subsim;%r\x09%rU+02AC7
-&supsim;%r\x09%rU+02AC8
-&subsetneqq;%r\x09%rU+02ACB
-&supnE;%r\x09%rU+02ACC
-&csub;%r\x09%rU+02ACF
-&csup;%r\x09%rU+02AD0
-&csube;%r\x09%rU+02AD1
-&csupe;%r\x09%rU+02AD2
-&subsup;%r\x09%rU+02AD3
-&supsub;%r\x09%rU+02AD4
-&subsub;%r\x09%rU+02AD5
-&supsup;%r\x09%rU+02AD6
-&suphsub;%r\x09%rU+02AD7
-&supdsub;%r\x09%rU+02AD8
-&forkv;%r\x09%rU+02AD9
-&topfork;%r\x09%rU+02ADA
-&mlcp;%r\x09%rU+02ADB
-&Dashv;%r\x09%rU+02AE4
-&Vdashl;%r\x09%rU+02AE6
-&Barv;%r\x09%rU+02AE7
-&vBar;%r\x09%rU+02AE8
-&vBarv;%r\x09%rU+02AE9
-&Vbar;%r\x09%rU+02AEB
-&Not;%r\x09%rU+02AEC
-&bNot;%r\x09%rU+02AED
-&rnmid;%r\x09%rU+02AEE
-&cirmid;%r\x09%rU+02AEF
-&midcir;%r\x09%rU+02AF0
-&topcir;%r\x09%rU+02AF1
-&nhpar;%r\x09%rU+02AF2
-&parsim;%r\x09%rU+02AF3
-&parsl;%r\x09%rU+02AFD
-&fflig;%r\x09%rU+0FB00
-&filig;%r\x09%rU+0FB01
-&fllig;%r\x09%rU+0FB02
-&ffilig;%r\x09%rU+0FB03
-&ffllig;%r\x09%rU+0FB04
-&Ascr;%r\x09%rU+1D49C
-&Cscr;%r\x09%rU+1D49E
-&Dscr;%r\x09%rU+1D49F
-&Gscr;%r\x09%rU+1D4A2
-&Jscr;%r\x09%rU+1D4A5
-&Kscr;%r\x09%rU+1D4A6
-&Nscr;%r\x09%rU+1D4A9
-&Oscr;%r\x09%rU+1D4AA
-&Pscr;%r\x09%rU+1D4AB
-&Qscr;%r\x09%rU+1D4AC
-&Sscr;%r\x09%rU+1D4AE
-&Tscr;%r\x09%rU+1D4AF
-&Uscr;%r\x09%rU+1D4B0
-&Vscr;%r\x09%rU+1D4B1
-&Wscr;%r\x09%rU+1D4B2
-&Xscr;%r\x09%rU+1D4B3
-&Yscr;%r\x09%rU+1D4B4
-&Zscr;%r\x09%rU+1D4B5
-&ascr;%r\x09%rU+1D4B6
-&bscr;%r\x09%rU+1D4B7
-&cscr;%r\x09%rU+1D4B8
-&dscr;%r\x09%rU+1D4B9
-&fscr;%r\x09%rU+1D4BB
-&hscr;%r\x09%rU+1D4BD
-&iscr;%r\x09%rU+1D4BE
-&jscr;%r\x09%rU+1D4BF
-&kscr;%r\x09%rU+1D4C0
-&lscr;%r\x09%rU+1D4C1
-&mscr;%r\x09%rU+1D4C2
-&nscr;%r\x09%rU+1D4C3
-&pscr;%r\x09%rU+1D4C5
-&qscr;%r\x09%rU+1D4C6
-&rscr;%r\x09%rU+1D4C7
-&sscr;%r\x09%rU+1D4C8
-&tscr;%r\x09%rU+1D4C9
-&uscr;%r\x09%rU+1D4CA
-&vscr;%r\x09%rU+1D4CB
-&wscr;%r\x09%rU+1D4CC
-&xscr;%r\x09%rU+1D4CD
-&yscr;%r\x09%rU+1D4CE
-&zscr;%r\x09%rU+1D4CF
-&Afr;%r\x09%rU+1D504
-&Bfr;%r\x09%rU+1D505
-&Dfr;%r\x09%rU+1D507
-&Efr;%r\x09%rU+1D508
-&Ffr;%r\x09%rU+1D509
-&Gfr;%r\x09%rU+1D50A
-&Jfr;%r\x09%rU+1D50D
-&Kfr;%r\x09%rU+1D50E
-&Lfr;%r\x09%rU+1D50F
-&Mfr;%r\x09%rU+1D510
-&Nfr;%r\x09%rU+1D511
-&Ofr;%r\x09%rU+1D512
-&Pfr;%r\x09%rU+1D513
-&Qfr;%r\x09%rU+1D514
-&Sfr;%r\x09%rU+1D516
-&Tfr;%r\x09%rU+1D517
-&Ufr;%r\x09%rU+1D518
-&Vfr;%r\x09%rU+1D519
-&Wfr;%r\x09%rU+1D51A
-&Xfr;%r\x09%rU+1D51B
-&Yfr;%r\x09%rU+1D51C
-&afr;%r\x09%rU+1D51E
-&bfr;%r\x09%rU+1D51F
-&cfr;%r\x09%rU+1D520
-&dfr;%r\x09%rU+1D521
-&efr;%r\x09%rU+1D522
-&ffr;%r\x09%rU+1D523
-&gfr;%r\x09%rU+1D524
-&hfr;%r\x09%rU+1D525
-&ifr;%r\x09%rU+1D526
-&jfr;%r\x09%rU+1D527
-&kfr;%r\x09%rU+1D528
-&lfr;%r\x09%rU+1D529
-&mfr;%r\x09%rU+1D52A
-&nfr;%r\x09%rU+1D52B
-&ofr;%r\x09%rU+1D52C
-&pfr;%r\x09%rU+1D52D
-&qfr;%r\x09%rU+1D52E
-&rfr;%r\x09%rU+1D52F
-&sfr;%r\x09%rU+1D530
-&tfr;%r\x09%rU+1D531
-&ufr;%r\x09%rU+1D532
-&vfr;%r\x09%rU+1D533
-&wfr;%r\x09%rU+1D534
-&xfr;%r\x09%rU+1D535
-&yfr;%r\x09%rU+1D536
-&zfr;%r\x09%rU+1D537
-&Aopf;%r\x09%rU+1D538
-&Bopf;%r\x09%rU+1D539
-&Dopf;%r\x09%rU+1D53B
-&Eopf;%r\x09%rU+1D53C
-&Fopf;%r\x09%rU+1D53D
-&Gopf;%r\x09%rU+1D53E
-&Iopf;%r\x09%rU+1D540
-&Jopf;%r\x09%rU+1D541
-&Kopf;%r\x09%rU+1D542
-&Lopf;%r\x09%rU+1D543
-&Mopf;%r\x09%rU+1D544
-&Oopf;%r\x09%rU+1D546
-&Sopf;%r\x09%rU+1D54A
-&Topf;%r\x09%rU+1D54B
-&Uopf;%r\x09%rU+1D54C
-&Vopf;%r\x09%rU+1D54D
-&Wopf;%r\x09%rU+1D54E
-&Xopf;%r\x09%rU+1D54F
-&Yopf;%r\x09%rU+1D550
-&aopf;%r\x09%rU+1D552
-&bopf;%r\x09%rU+1D553
-&copf;%r\x09%rU+1D554
-&dopf;%r\x09%rU+1D555
-&eopf;%r\x09%rU+1D556
-&fopf;%r\x09%rU+1D557
-&gopf;%r\x09%rU+1D558
-&hopf;%r\x09%rU+1D559
-&iopf;%r\x09%rU+1D55A
-&jopf;%r\x09%rU+1D55B
-&kopf;%r\x09%rU+1D55C
-&lopf;%r\x09%rU+1D55D
-&mopf;%r\x09%rU+1D55E
-&nopf;%r\x09%rU+1D55F
-&oopf;%r\x09%rU+1D560
-&popf;%r\x09%rU+1D561
-&qopf;%r\x09%rU+1D562
-&ropf;%r\x09%rU+1D563
-&sopf;%r\x09%rU+1D564
-&topf;%r\x09%rU+1D565
-&uopf;%r\x09%rU+1D566
-&vopf;%r\x09%rU+1D567
-&wopf;%r\x09%rU+1D568
-&xopf;%r\x09%rU+1D569
-&yopf;%r\x09%rU+1D56A
-&zopf;%r\x09%rU+1D56B
-&nvlt;%r\x09%rU+0003C U+020D2
-&bne;%r\x09%rU+0003D U+020E5
-&nvgt;%r\x09%rU+0003E U+020D2
-&fjlig;%r\x09%rU+00066 U+0006A
-&ThickSpace;%r\x09%rU+0205F U+0200A
-&nrarrw;%r\x09%rU+0219D U+00338
-&npart;%r\x09%rU+02202 U+00338
-&nang;%r\x09%rU+02220 U+020D2
-&caps;%r\x09%rU+02229 U+0FE00
-&cups;%r\x09%rU+0222A U+0FE00
-&nvsim;%r\x09%rU+0223C U+020D2
-&race;%r\x09%rU+0223D U+00331
-&acE;%r\x09%rU+0223E U+00333
-&nesim;%r\x09%rU+02242 U+00338
-&napid;%r\x09%rU+0224B U+00338
-&nvap;%r\x09%rU+0224D U+020D2
-&nbump;%r\x09%rU+0224E U+00338
-&nbumpe;%r\x09%rU+0224F U+00338
-&nedot;%r\x09%rU+02250 U+00338
-&bnequiv;%r\x09%rU+02261 U+020E5
-&nvle;%r\x09%rU+02264 U+020D2
-&nvge;%r\x09%rU+02265 U+020D2
-&nlE;%r\x09%rU+02266 U+00338
-&NotGreaterFullEqual;%r\x09%rU+02267 U+00338
-&lvertneqq;%r\x09%rU+02268 U+0FE00
-&gvertneqq;%r\x09%rU+02269 U+0FE00
-&nLtv;%r\x09%rU+0226A U+00338
-&nLt;%r\x09%rU+0226A U+020D2
-&NotGreaterGreater;%r\x09%rU+0226B U+00338
-&nGt;%r\x09%rU+0226B U+020D2
-&NotSucceedsTilde;%r\x09%rU+0227F U+00338
-&vnsub;%r\x09%rU+02282 U+020D2
-&nsupset;%r\x09%rU+02283 U+020D2
-&vsubne;%r\x09%rU+0228A U+0FE00
-&vsupne;%r\x09%rU+0228B U+0FE00
-&NotSquareSubset;%r\x09%rU+0228F U+00338
-&NotSquareSuperset;%r\x09%rU+02290 U+00338
-&sqcaps;%r\x09%rU+02293 U+0FE00
-&sqcups;%r\x09%rU+02294 U+0FE00
-&nvltrie;%r\x09%rU+022B4 U+020D2
-&nvrtrie;%r\x09%rU+022B5 U+020D2
-&nLl;%r\x09%rU+022D8 U+00338
-&nGg;%r\x09%rU+022D9 U+00338
-&lesg;%r\x09%rU+022DA U+0FE00
-&gesl;%r\x09%rU+022DB U+0FE00
-&notindot;%r\x09%rU+022F5 U+00338
-&notinE;%r\x09%rU+022F9 U+00338
-&nrarrc;%r\x09%rU+02933 U+00338
-&NotLeftTriangleBar;%r\x09%rU+029CF U+00338
-&NotRightTriangleBar;%r\x09%rU+029D0 U+00338
-&ncongdot;%r\x09%rU+02A6D U+00338
-&napE;%r\x09%rU+02A70 U+00338
-&nles;%r\x09%rU+02A7D U+00338
-&nges;%r\x09%rU+02A7E U+00338
-&NotNestedLessLess;%r\x09%rU+02AA1 U+00338
-&NotNestedGreaterGreater;%r\x09%rU+02AA2 U+00338
-&smtes;%r\x09%rU+02AAC U+0FE00
-&lates;%r\x09%rU+02AAD U+0FE00
-&NotPrecedesEqual;%r\x09%rU+02AAF U+00338
-&NotSucceedsEqual;%r\x09%rU+02AB0 U+00338
-&nsubE;%r\x09%rU+02AC5 U+00338
-&nsupseteqq;%r\x09%rU+02AC6 U+00338
-&vsubnE;%r\x09%rU+02ACB U+0FE00
-&varsupsetneqq;%r\x09%rU+02ACC U+0FE00
-&parsl;%r\xef\xb8\x80\x09%rU+02AFD U+0FE00
+&Tab;	U+00009
+&NewLine;	U+0000A
+&excl;	U+00021
+&quot;	U+00022
+&num;	U+00023
+&dollar;	U+00024
+&percnt;	U+00025
+&amp;	U+00026
+&apos;	U+00027
+&lpar;	U+00028
+&rpar;	U+00029
+&ast;	U+0002A
+&plus;	U+0002B
+&comma;	U+0002C
+&period;	U+0002E
+&sol;	U+0002F
+&colon;	U+0003A
+&semi;	U+0003B
+&lt;	U+0003C
+&equals;	U+0003D
+&gt;	U+0003E
+&quest;	U+0003F
+&commat;	U+00040
+&lbrack;	U+0005B
+&bsol;	U+0005C
+&rsqb;	U+0005D
+&Hat;	U+0005E
+&lowbar;	U+0005F
+&grave;	U+00060
+&lbrace;	U+0007B
+&vert;	U+0007C
+&rcub;	U+0007D
+&nbsp;	U+000A0
+&iexcl;	U+000A1
+&cent;	U+000A2
+&pound;	U+000A3
+&curren;	U+000A4
+&yen;	U+000A5
+&brvbar;	U+000A6
+&sect;	U+000A7
+&DoubleDot;	U+000A8
+&copy;	U+000A9
+&ordf;	U+000AA
+&laquo;	U+000AB
+&not;	U+000AC
+&shy;	U+000AD
+&reg;	U+000AE
+&macr;	U+000AF
+&deg;	U+000B0
+&plusmn;	U+000B1
+&sup2;	U+000B2
+&sup3;	U+000B3
+&DiacriticalAcute;	U+000B4
+&micro;	U+000B5
+&para;	U+000B6
+&CenterDot;	U+000B7
+&Cedilla;	U+000B8
+&sup1;	U+000B9
+&ordm;	U+000BA
+&raquo;	U+000BB
+&frac14;	U+000BC
+&half;	U+000BD
+&frac34;	U+000BE
+&iquest;	U+000BF
+&Agrave;	U+000C0
+&Aacute;	U+000C1
+&Acirc;	U+000C2
+&Atilde;	U+000C3
+&Auml;	U+000C4
+&Aring;	U+000C5
+&AElig;	U+000C6
+&Ccedil;	U+000C7
+&Egrave;	U+000C8
+&Eacute;	U+000C9
+&Ecirc;	U+000CA
+&Euml;	U+000CB
+&Igrave;	U+000CC
+&Iacute;	U+000CD
+&Icirc;	U+000CE
+&Iuml;	U+000CF
+&ETH;	U+000D0
+&Ntilde;	U+000D1
+&Ograve;	U+000D2
+&Oacute;	U+000D3
+&Ocirc;	U+000D4
+&Otilde;	U+000D5
+&Ouml;	U+000D6
+&times;	U+000D7
+&Oslash;	U+000D8
+&Ugrave;	U+000D9
+&Uacute;	U+000DA
+&Ucirc;	U+000DB
+&Uuml;	U+000DC
+&Yacute;	U+000DD
+&THORN;	U+000DE
+&szlig;	U+000DF
+&agrave;	U+000E0
+&aacute;	U+000E1
+&acirc;	U+000E2
+&atilde;	U+000E3
+&auml;	U+000E4
+&aring;	U+000E5
+&aelig;	U+000E6
+&ccedil;	U+000E7
+&egrave;	U+000E8
+&eacute;	U+000E9
+&ecirc;	U+000EA
+&euml;	U+000EB
+&igrave;	U+000EC
+&iacute;	U+000ED
+&icirc;	U+000EE
+&iuml;	U+000EF
+&eth;	U+000F0
+&ntilde;	U+000F1
+&ograve;	U+000F2
+&oacute;	U+000F3
+&ocirc;	U+000F4
+&otilde;	U+000F5
+&ouml;	U+000F6
+&divide;	U+000F7
+&oslash;	U+000F8
+&ugrave;	U+000F9
+&uacute;	U+000FA
+&ucirc;	U+000FB
+&uuml;	U+000FC
+&yacute;	U+000FD
+&thorn;	U+000FE
+&yuml;	U+000FF
+&Amacr;	U+00100
+&amacr;	U+00101
+&Abreve;	U+00102
+&abreve;	U+00103
+&Aogon;	U+00104
+&aogon;	U+00105
+&Cacute;	U+00106
+&cacute;	U+00107
+&Ccirc;	U+00108
+&ccirc;	U+00109
+&Cdot;	U+0010A
+&cdot;	U+0010B
+&Ccaron;	U+0010C
+&ccaron;	U+0010D
+&Dcaron;	U+0010E
+&dcaron;	U+0010F
+&Dstrok;	U+00110
+&dstrok;	U+00111
+&Emacr;	U+00112
+&emacr;	U+00113
+&Edot;	U+00116
+&edot;	U+00117
+&Eogon;	U+00118
+&eogon;	U+00119
+&Ecaron;	U+0011A
+&ecaron;	U+0011B
+&Gcirc;	U+0011C
+&gcirc;	U+0011D
+&Gbreve;	U+0011E
+&gbreve;	U+0011F
+&Gdot;	U+00120
+&gdot;	U+00121
+&Gcedil;	U+00122
+&Hcirc;	U+00124
+&hcirc;	U+00125
+&Hstrok;	U+00126
+&hstrok;	U+00127
+&Itilde;	U+00128
+&itilde;	U+00129
+&Imacr;	U+0012A
+&imacr;	U+0012B
+&Iogon;	U+0012E
+&iogon;	U+0012F
+&Idot;	U+00130
+&inodot;	U+00131
+&IJlig;	U+00132
+&ijlig;	U+00133
+&Jcirc;	U+00134
+&jcirc;	U+00135
+&Kcedil;	U+00136
+&kcedil;	U+00137
+&kgreen;	U+00138
+&Lacute;	U+00139
+&lacute;	U+0013A
+&Lcedil;	U+0013B
+&lcedil;	U+0013C
+&Lcaron;	U+0013D
+&lcaron;	U+0013E
+&Lmidot;	U+0013F
+&lmidot;	U+00140
+&Lstrok;	U+00141
+&lstrok;	U+00142
+&Nacute;	U+00143
+&nacute;	U+00144
+&Ncedil;	U+00145
+&ncedil;	U+00146
+&Ncaron;	U+00147
+&ncaron;	U+00148
+&napos;	U+00149
+&ENG;	U+0014A
+&eng;	U+0014B
+&Omacr;	U+0014C
+&omacr;	U+0014D
+&Odblac;	U+00150
+&odblac;	U+00151
+&OElig;	U+00152
+&oelig;	U+00153
+&Racute;	U+00154
+&racute;	U+00155
+&Rcedil;	U+00156
+&rcedil;	U+00157
+&Rcaron;	U+00158
+&rcaron;	U+00159
+&Sacute;	U+0015A
+&sacute;	U+0015B
+&Scirc;	U+0015C
+&scirc;	U+0015D
+&Scedil;	U+0015E
+&scedil;	U+0015F
+&Scaron;	U+00160
+&scaron;	U+00161
+&Tcedil;	U+00162
+&tcedil;	U+00163
+&Tcaron;	U+00164
+&tcaron;	U+00165
+&Tstrok;	U+00166
+&tstrok;	U+00167
+&Utilde;	U+00168
+&utilde;	U+00169
+&Umacr;	U+0016A
+&umacr;	U+0016B
+&Ubreve;	U+0016C
+&ubreve;	U+0016D
+&Uring;	U+0016E
+&uring;	U+0016F
+&Udblac;	U+00170
+&udblac;	U+00171
+&Uogon;	U+00172
+&uogon;	U+00173
+&Wcirc;	U+00174
+&wcirc;	U+00175
+&Ycirc;	U+00176
+&ycirc;	U+00177
+&Yuml;	U+00178
+&Zacute;	U+00179
+&zacute;	U+0017A
+&Zdot;	U+0017B
+&zdot;	U+0017C
+&Zcaron;	U+0017D
+&zcaron;	U+0017E
+&fnof;	U+00192
+&imped;	U+001B5
+&gacute;	U+001F5
+&jmath;	U+00237
+&circ;	U+002C6
+&Hacek;	U+002C7
+&Breve;	U+002D8
+&dot;	U+002D9
+&ring;	U+002DA
+&ogon;	U+002DB
+&DiacriticalTilde;	U+002DC
+&DiacriticalDoubleAcute;	U+002DD
+&DownBreve;	U+00311
+&Alpha;	U+00391
+&Beta;	U+00392
+&Gamma;	U+00393
+&Delta;	U+00394
+&Epsilon;	U+00395
+&Zeta;	U+00396
+&Eta;	U+00397
+&Theta;	U+00398
+&Iota;	U+00399
+&Kappa;	U+0039A
+&Lambda;	U+0039B
+&Mu;	U+0039C
+&Nu;	U+0039D
+&Xi;	U+0039E
+&Omicron;	U+0039F
+&Pi;	U+003A0
+&Rho;	U+003A1
+&Sigma;	U+003A3
+&Tau;	U+003A4
+&Upsilon;	U+003A5
+&Phi;	U+003A6
+&Chi;	U+003A7
+&Psi;	U+003A8
+&Omega;	U+003A9
+&alpha;	U+003B1
+&beta;	U+003B2
+&gamma;	U+003B3
+&delta;	U+003B4
+&epsi;	U+003B5
+&zeta;	U+003B6
+&eta;	U+003B7
+&theta;	U+003B8
+&iota;	U+003B9
+&kappa;	U+003BA
+&lambda;	U+003BB
+&mu;	U+003BC
+&nu;	U+003BD
+&xi;	U+003BE
+&omicron;	U+003BF
+&pi;	U+003C0
+&rho;	U+003C1
+&sigmav;	U+003C2
+&sigma;	U+003C3
+&tau;	U+003C4
+&upsi;	U+003C5
+&phi;	U+003C6
+&chi;	U+003C7
+&psi;	U+003C8
+&omega;	U+003C9
+&thetasym;	U+003D1
+&upsih;	U+003D2
+&straightphi;	U+003D5
+&piv;	U+003D6
+&Gammad;	U+003DC
+&gammad;	U+003DD
+&varkappa;	U+003F0
+&rhov;	U+003F1
+&straightepsilon;	U+003F5
+&backepsilon;	U+003F6
+&IOcy;	U+00401
+&DJcy;	U+00402
+&GJcy;	U+00403
+&Jukcy;	U+00404
+&DScy;	U+00405
+&Iukcy;	U+00406
+&YIcy;	U+00407
+&Jsercy;	U+00408
+&LJcy;	U+00409
+&NJcy;	U+0040A
+&TSHcy;	U+0040B
+&KJcy;	U+0040C
+&Ubrcy;	U+0040E
+&DZcy;	U+0040F
+&Acy;	U+00410
+&Bcy;	U+00411
+&Vcy;	U+00412
+&Gcy;	U+00413
+&Dcy;	U+00414
+&IEcy;	U+00415
+&ZHcy;	U+00416
+&Zcy;	U+00417
+&Icy;	U+00418
+&Jcy;	U+00419
+&Kcy;	U+0041A
+&Lcy;	U+0041B
+&Mcy;	U+0041C
+&Ncy;	U+0041D
+&Ocy;	U+0041E
+&Pcy;	U+0041F
+&Rcy;	U+00420
+&Scy;	U+00421
+&Tcy;	U+00422
+&Ucy;	U+00423
+&Fcy;	U+00424
+&KHcy;	U+00425
+&TScy;	U+00426
+&CHcy;	U+00427
+&SHcy;	U+00428
+&SHCHcy;	U+00429
+&HARDcy;	U+0042A
+&Ycy;	U+0042B
+&SOFTcy;	U+0042C
+&Ecy;	U+0042D
+&YUcy;	U+0042E
+&YAcy;	U+0042F
+&acy;	U+00430
+&bcy;	U+00431
+&vcy;	U+00432
+&gcy;	U+00433
+&dcy;	U+00434
+&iecy;	U+00435
+&zhcy;	U+00436
+&zcy;	U+00437
+&icy;	U+00438
+&jcy;	U+00439
+&kcy;	U+0043A
+&lcy;	U+0043B
+&mcy;	U+0043C
+&ncy;	U+0043D
+&ocy;	U+0043E
+&pcy;	U+0043F
+&rcy;	U+00440
+&scy;	U+00441
+&tcy;	U+00442
+&ucy;	U+00443
+&fcy;	U+00444
+&khcy;	U+00445
+&tscy;	U+00446
+&chcy;	U+00447
+&shcy;	U+00448
+&shchcy;	U+00449
+&hardcy;	U+0044A
+&ycy;	U+0044B
+&softcy;	U+0044C
+&ecy;	U+0044D
+&yucy;	U+0044E
+&yacy;	U+0044F
+&iocy;	U+00451
+&djcy;	U+00452
+&gjcy;	U+00453
+&jukcy;	U+00454
+&dscy;	U+00455
+&iukcy;	U+00456
+&yicy;	U+00457
+&jsercy;	U+00458
+&ljcy;	U+00459
+&njcy;	U+0045A
+&tshcy;	U+0045B
+&kjcy;	U+0045C
+&ubrcy;	U+0045E
+&dzcy;	U+0045F
+&ensp;	U+02002
+&emsp;	U+02003
+&emsp13;	U+02004
+&emsp14;	U+02005
+&numsp;	U+02007
+&puncsp;	U+02008
+&ThinSpace;	U+02009
+&hairsp;	U+0200A
+&ZeroWidthSpace;	U+0200B
+&zwnj;	U+0200C
+&zwj;	U+0200D
+&lrm;	U+0200E
+&rlm;	U+0200F
+&hyphen;	U+02010
+&ndash;	U+02013
+&mdash;	U+02014
+&horbar;	U+02015
+&Verbar;	U+02016
+&OpenCurlyQuote;	U+02018
+&rsquo;	U+02019
+&sbquo;	U+0201A
+&OpenCurlyDoubleQuote;	U+0201C
+&rdquo;	U+0201D
+&bdquo;	U+0201E
+&dagger;	U+02020
+&Dagger;	U+02021
+&bull;	U+02022
+&nldr;	U+02025
+&hellip;	U+02026
+&permil;	U+02030
+&pertenk;	U+02031
+&prime;	U+02032
+&Prime;	U+02033
+&tprime;	U+02034
+&backprime;	U+02035
+&lsaquo;	U+02039
+&rsaquo;	U+0203A
+&oline;	U+0203E
+&caret;	U+02041
+&hybull;	U+02043
+&frasl;	U+02044
+&bsemi;	U+0204F
+&qprime;	U+02057
+&MediumSpace;	U+0205F
+&NoBreak;	U+02060
+&af;	U+02061
+&InvisibleTimes;	U+02062
+&ic;	U+02063
+&euro;	U+020AC
+&TripleDot;	U+020DB
+&DotDot;	U+020DC
+&complexes;	U+02102
+&incare;	U+02105
+&gscr;	U+0210A
+&HilbertSpace;	U+0210B
+&Hfr;	U+0210C
+&Hopf;	U+0210D
+&planckh;	U+0210E
+&planck;	U+0210F
+&imagline;	U+02110
+&Ifr;	U+02111
+&lagran;	U+02112
+&ell;	U+02113
+&naturals;	U+02115
+&numero;	U+02116
+&copysr;	U+02117
+&wp;	U+02118
+&primes;	U+02119
+&rationals;	U+0211A
+&realine;	U+0211B
+&Rfr;	U+0211C
+&Ropf;	U+0211D
+&rx;	U+0211E
+&trade;	U+02122
+&Zopf;	U+02124
+&mho;	U+02127
+&Zfr;	U+02128
+&iiota;	U+02129
+&Bscr;	U+0212C
+&Cfr;	U+0212D
+&escr;	U+0212F
+&expectation;	U+02130
+&Fouriertrf;	U+02131
+&Mellintrf;	U+02133
+&orderof;	U+02134
+&aleph;	U+02135
+&beth;	U+02136
+&gimel;	U+02137
+&daleth;	U+02138
+&CapitalDifferentialD;	U+02145
+&DifferentialD;	U+02146
+&exponentiale;	U+02147
+&ImaginaryI;	U+02148
+&frac13;	U+02153
+&frac23;	U+02154
+&frac15;	U+02155
+&frac25;	U+02156
+&frac35;	U+02157
+&frac45;	U+02158
+&frac16;	U+02159
+&frac56;	U+0215A
+&frac18;	U+0215B
+&frac38;	U+0215C
+&frac58;	U+0215D
+&frac78;	U+0215E
+&larr;	U+02190
+&uarr;	U+02191
+&srarr;	U+02192
+&darr;	U+02193
+&harr;	U+02194
+&UpDownArrow;	U+02195
+&nwarrow;	U+02196
+&UpperRightArrow;	U+02197
+&LowerRightArrow;	U+02198
+&swarr;	U+02199
+&nleftarrow;	U+0219A
+&nrarr;	U+0219B
+&rarrw;	U+0219D
+&Larr;	U+0219E
+&Uarr;	U+0219F
+&twoheadrightarrow;	U+021A0
+&Darr;	U+021A1
+&larrtl;	U+021A2
+&rarrtl;	U+021A3
+&LeftTeeArrow;	U+021A4
+&UpTeeArrow;	U+021A5
+&map;	U+021A6
+&DownTeeArrow;	U+021A7
+&larrhk;	U+021A9
+&rarrhk;	U+021AA
+&larrlp;	U+021AB
+&looparrowright;	U+021AC
+&harrw;	U+021AD
+&nleftrightarrow;	U+021AE
+&Lsh;	U+021B0
+&rsh;	U+021B1
+&ldsh;	U+021B2
+&rdsh;	U+021B3
+&crarr;	U+021B5
+&curvearrowleft;	U+021B6
+&curarr;	U+021B7
+&olarr;	U+021BA
+&orarr;	U+021BB
+&leftharpoonup;	U+021BC
+&leftharpoondown;	U+021BD
+&RightUpVector;	U+021BE
+&uharl;	U+021BF
+&rharu;	U+021C0
+&rhard;	U+021C1
+&RightDownVector;	U+021C2
+&dharl;	U+021C3
+&rightleftarrows;	U+021C4
+&udarr;	U+021C5
+&lrarr;	U+021C6
+&llarr;	U+021C7
+&upuparrows;	U+021C8
+&rrarr;	U+021C9
+&downdownarrows;	U+021CA
+&leftrightharpoons;	U+021CB
+&rightleftharpoons;	U+021CC
+&nLeftarrow;	U+021CD
+&nhArr;	U+021CE
+&nrArr;	U+021CF
+&DoubleLeftArrow;	U+021D0
+&DoubleUpArrow;	U+021D1
+&Implies;	U+021D2
+&Downarrow;	U+021D3
+&hArr;	U+021D4
+&Updownarrow;	U+021D5
+&nwArr;	U+021D6
+&neArr;	U+021D7
+&seArr;	U+021D8
+&swArr;	U+021D9
+&lAarr;	U+021DA
+&rAarr;	U+021DB
+&zigrarr;	U+021DD
+&LeftArrowBar;	U+021E4
+&RightArrowBar;	U+021E5
+&DownArrowUpArrow;	U+021F5
+&loarr;	U+021FD
+&roarr;	U+021FE
+&hoarr;	U+021FF
+&forall;	U+02200
+&comp;	U+02201
+&part;	U+02202
+&Exists;	U+02203
+&nexist;	U+02204
+&empty;	U+02205
+&nabla;	U+02207
+&isinv;	U+02208
+&notin;	U+02209
+&ReverseElement;	U+0220B
+&notniva;	U+0220C
+&prod;	U+0220F
+&Coproduct;	U+02210
+&sum;	U+02211
+&minus;	U+02212
+&MinusPlus;	U+02213
+&plusdo;	U+02214
+&ssetmn;	U+02216
+&lowast;	U+02217
+&compfn;	U+02218
+&Sqrt;	U+0221A
+&prop;	U+0221D
+&infin;	U+0221E
+&angrt;	U+0221F
+&angle;	U+02220
+&angmsd;	U+02221
+&angsph;	U+02222
+&mid;	U+02223
+&nshortmid;	U+02224
+&shortparallel;	U+02225
+&nparallel;	U+02226
+&and;	U+02227
+&or;	U+02228
+&cap;	U+02229
+&cup;	U+0222A
+&Integral;	U+0222B
+&Int;	U+0222C
+&tint;	U+0222D
+&ContourIntegral;	U+0222E
+&DoubleContourIntegral;	U+0222F
+&Cconint;	U+02230
+&cwint;	U+02231
+&cwconint;	U+02232
+&awconint;	U+02233
+&there4;	U+02234
+&Because;	U+02235
+&ratio;	U+02236
+&Colon;	U+02237
+&minusd;	U+02238
+&mDDot;	U+0223A
+&homtht;	U+0223B
+&sim;	U+0223C
+&bsim;	U+0223D
+&ac;	U+0223E
+&acd;	U+0223F
+&wr;	U+02240
+&NotTilde;	U+02241
+&esim;	U+02242
+&simeq;	U+02243
+&nsime;	U+02244
+&TildeFullEqual;	U+02245
+&simne;	U+02246
+&ncong;	U+02247
+&approx;	U+02248
+&napprox;	U+02249
+&ape;	U+0224A
+&apid;	U+0224B
+&bcong;	U+0224C
+&CupCap;	U+0224D
+&bump;	U+0224E
+&HumpEqual;	U+0224F
+&esdot;	U+02250
+&doteqdot;	U+02251
+&fallingdotseq;	U+02252
+&risingdotseq;	U+02253
+&coloneq;	U+02254
+&eqcolon;	U+02255
+&ecir;	U+02256
+&circeq;	U+02257
+&wedgeq;	U+02259
+&veeeq;	U+0225A
+&triangleq;	U+0225C
+&equest;	U+0225F
+&NotEqual;	U+02260
+&Congruent;	U+02261
+&NotCongruent;	U+02262
+&leq;	U+02264
+&ge;	U+02265
+&lE;	U+02266
+&geqq;	U+02267
+&lneqq;	U+02268
+&gneqq;	U+02269
+&ll;	U+0226A
+&gg;	U+0226B
+&between;	U+0226C
+&NotCupCap;	U+0226D
+&NotLess;	U+0226E
+&ngtr;	U+0226F
+&NotLessEqual;	U+02270
+&ngeq;	U+02271
+&LessTilde;	U+02272
+&GreaterTilde;	U+02273
+&nlsim;	U+02274
+&ngsim;	U+02275
+&lessgtr;	U+02276
+&gl;	U+02277
+&ntlg;	U+02278
+&NotGreaterLess;	U+02279
+&prec;	U+0227A
+&succ;	U+0227B
+&PrecedesSlantEqual;	U+0227C
+&succcurlyeq;	U+0227D
+&precsim;	U+0227E
+&SucceedsTilde;	U+0227F
+&npr;	U+02280
+&NotSucceeds;	U+02281
+&sub;	U+02282
+&sup;	U+02283
+&nsub;	U+02284
+&nsup;	U+02285
+&SubsetEqual;	U+02286
+&supe;	U+02287
+&NotSubsetEqual;	U+02288
+&NotSupersetEqual;	U+02289
+&subsetneq;	U+0228A
+&supsetneq;	U+0228B
+&cupdot;	U+0228D
+&UnionPlus;	U+0228E
+&sqsub;	U+0228F
+&sqsupset;	U+02290
+&SquareSubsetEqual;	U+02291
+&SquareSupersetEqual;	U+02292
+&sqcap;	U+02293
+&sqcup;	U+02294
+&CirclePlus;	U+02295
+&ominus;	U+02296
+&CircleTimes;	U+02297
+&osol;	U+02298
+&CircleDot;	U+02299
+&ocir;	U+0229A
+&oast;	U+0229B
+&odash;	U+0229D
+&boxplus;	U+0229E
+&boxminus;	U+0229F
+&timesb;	U+022A0
+&sdotb;	U+022A1
+&vdash;	U+022A2
+&dashv;	U+022A3
+&DownTee;	U+022A4
+&perp;	U+022A5
+&models;	U+022A7
+&DoubleRightTee;	U+022A8
+&Vdash;	U+022A9
+&Vvdash;	U+022AA
+&VDash;	U+022AB
+&nvdash;	U+022AC
+&nvDash;	U+022AD
+&nVdash;	U+022AE
+&nVDash;	U+022AF
+&prurel;	U+022B0
+&vartriangleleft;	U+022B2
+&vrtri;	U+022B3
+&LeftTriangleEqual;	U+022B4
+&RightTriangleEqual;	U+022B5
+&origof;	U+022B6
+&imof;	U+022B7
+&mumap;	U+022B8
+&hercon;	U+022B9
+&intcal;	U+022BA
+&veebar;	U+022BB
+&barvee;	U+022BD
+&angrtvb;	U+022BE
+&lrtri;	U+022BF
+&xwedge;	U+022C0
+&xvee;	U+022C1
+&bigcap;	U+022C2
+&bigcup;	U+022C3
+&diamond;	U+022C4
+&sdot;	U+022C5
+&Star;	U+022C6
+&divonx;	U+022C7
+&bowtie;	U+022C8
+&ltimes;	U+022C9
+&rtimes;	U+022CA
+&lthree;	U+022CB
+&rthree;	U+022CC
+&backsimeq;	U+022CD
+&curlyvee;	U+022CE
+&curlywedge;	U+022CF
+&Sub;	U+022D0
+&Supset;	U+022D1
+&Cap;	U+022D2
+&Cup;	U+022D3
+&pitchfork;	U+022D4
+&epar;	U+022D5
+&lessdot;	U+022D6
+&gtrdot;	U+022D7
+&Ll;	U+022D8
+&Gg;	U+022D9
+&lesseqgtr;	U+022DA
+&gtreqless;	U+022DB
+&curlyeqprec;	U+022DE
+&cuesc;	U+022DF
+&NotPrecedesSlantEqual;	U+022E0
+&NotSucceedsSlantEqual;	U+022E1
+&NotSquareSubsetEqual;	U+022E2
+&NotSquareSupersetEqual;	U+022E3
+&lnsim;	U+022E6
+&gnsim;	U+022E7
+&precnsim;	U+022E8
+&scnsim;	U+022E9
+&nltri;	U+022EA
+&ntriangleright;	U+022EB
+&nltrie;	U+022EC
+&NotRightTriangleEqual;	U+022ED
+&vellip;	U+022EE
+&ctdot;	U+022EF
+&utdot;	U+022F0
+&dtdot;	U+022F1
+&disin;	U+022F2
+&isinsv;	U+022F3
+&isins;	U+022F4
+&isindot;	U+022F5
+&notinvc;	U+022F6
+&notinvb;	U+022F7
+&isinE;	U+022F9
+&nisd;	U+022FA
+&xnis;	U+022FB
+&nis;	U+022FC
+&notnivc;	U+022FD
+&notnivb;	U+022FE
+&barwed;	U+02305
+&doublebarwedge;	U+02306
+&lceil;	U+02308
+&RightCeiling;	U+02309
+&LeftFloor;	U+0230A
+&RightFloor;	U+0230B
+&drcrop;	U+0230C
+&dlcrop;	U+0230D
+&urcrop;	U+0230E
+&ulcrop;	U+0230F
+&bnot;	U+02310
+&profline;	U+02312
+&profsurf;	U+02313
+&telrec;	U+02315
+&target;	U+02316
+&ulcorner;	U+0231C
+&urcorner;	U+0231D
+&llcorner;	U+0231E
+&drcorn;	U+0231F
+&frown;	U+02322
+&smile;	U+02323
+&cylcty;	U+0232D
+&profalar;	U+0232E
+&topbot;	U+02336
+&ovbar;	U+0233D
+&solbar;	U+0233F
+&angzarr;	U+0237C
+&lmoust;	U+023B0
+&rmoust;	U+023B1
+&OverBracket;	U+023B4
+&bbrk;	U+023B5
+&bbrktbrk;	U+023B6
+&OverParenthesis;	U+023DC
+&UnderParenthesis;	U+023DD
+&OverBrace;	U+023DE
+&UnderBrace;	U+023DF
+&trpezium;	U+023E2
+&elinters;	U+023E7
+&blank;	U+02423
+&oS;	U+024C8
+&HorizontalLine;	U+02500
+&boxv;	U+02502
+&boxdr;	U+0250C
+&boxdl;	U+02510
+&boxur;	U+02514
+&boxul;	U+02518
+&boxvr;	U+0251C
+&boxvl;	U+02524
+&boxhd;	U+0252C
+&boxhu;	U+02534
+&boxvh;	U+0253C
+&boxH;	U+02550
+&boxV;	U+02551
+&boxdR;	U+02552
+&boxDr;	U+02553
+&boxDR;	U+02554
+&boxdL;	U+02555
+&boxDl;	U+02556
+&boxDL;	U+02557
+&boxuR;	U+02558
+&boxUr;	U+02559
+&boxUR;	U+0255A
+&boxuL;	U+0255B
+&boxUl;	U+0255C
+&boxUL;	U+0255D
+&boxvR;	U+0255E
+&boxVr;	U+0255F
+&boxVR;	U+02560
+&boxvL;	U+02561
+&boxVl;	U+02562
+&boxVL;	U+02563
+&boxHd;	U+02564
+&boxhD;	U+02565
+&boxHD;	U+02566
+&boxHu;	U+02567
+&boxhU;	U+02568
+&boxHU;	U+02569
+&boxvH;	U+0256A
+&boxVh;	U+0256B
+&boxVH;	U+0256C
+&uhblk;	U+02580
+&lhblk;	U+02584
+&block;	U+02588
+&blk14;	U+02591
+&blk12;	U+02592
+&blk34;	U+02593
+&Square;	U+025A1
+&squarf;	U+025AA
+&EmptyVerySmallSquare;	U+025AB
+&rect;	U+025AD
+&marker;	U+025AE
+&fltns;	U+025B1
+&bigtriangleup;	U+025B3
+&blacktriangle;	U+025B4
+&triangle;	U+025B5
+&blacktriangleright;	U+025B8
+&rtri;	U+025B9
+&bigtriangledown;	U+025BD
+&blacktriangledown;	U+025BE
+&triangledown;	U+025BF
+&blacktriangleleft;	U+025C2
+&ltri;	U+025C3
+&lozenge;	U+025CA
+&cir;	U+025CB
+&tridot;	U+025EC
+&bigcirc;	U+025EF
+&ultri;	U+025F8
+&urtri;	U+025F9
+&lltri;	U+025FA
+&EmptySmallSquare;	U+025FB
+&FilledSmallSquare;	U+025FC
+&starf;	U+02605
+&star;	U+02606
+&phone;	U+0260E
+&female;	U+02640
+&male;	U+02642
+&spadesuit;	U+02660
+&clubs;	U+02663
+&hearts;	U+02665
+&diamondsuit;	U+02666
+&sung;	U+0266A
+&flat;	U+0266D
+&natur;	U+0266E
+&sharp;	U+0266F
+&check;	U+02713
+&cross;	U+02717
+&maltese;	U+02720
+&sext;	U+02736
+&VerticalSeparator;	U+02758
+&lbbrk;	U+02772
+&rbbrk;	U+02773
+&bsolhsub;	U+027C8
+&suphsol;	U+027C9
+&LeftDoubleBracket;	U+027E6
+&RightDoubleBracket;	U+027E7
+&langle;	U+027E8
+&RightAngleBracket;	U+027E9
+&Lang;	U+027EA
+&Rang;	U+027EB
+&loang;	U+027EC
+&roang;	U+027ED
+&longleftarrow;	U+027F5
+&LongRightArrow;	U+027F6
+&LongLeftRightArrow;	U+027F7
+&xlArr;	U+027F8
+&DoubleLongRightArrow;	U+027F9
+&xhArr;	U+027FA
+&xmap;	U+027FC
+&dzigrarr;	U+027FF
+&nvlArr;	U+02902
+&nvrArr;	U+02903
+&nvHarr;	U+02904
+&Map;	U+02905
+&lbarr;	U+0290C
+&bkarow;	U+0290D
+&lBarr;	U+0290E
+&dbkarow;	U+0290F
+&drbkarow;	U+02910
+&DDotrahd;	U+02911
+&UpArrowBar;	U+02912
+&DownArrowBar;	U+02913
+&Rarrtl;	U+02916
+&latail;	U+02919
+&ratail;	U+0291A
+&lAtail;	U+0291B
+&rAtail;	U+0291C
+&larrfs;	U+0291D
+&rarrfs;	U+0291E
+&larrbfs;	U+0291F
+&rarrbfs;	U+02920
+&nwarhk;	U+02923
+&nearhk;	U+02924
+&searhk;	U+02925
+&swarhk;	U+02926
+&nwnear;	U+02927
+&toea;	U+02928
+&seswar;	U+02929
+&swnwar;	U+0292A
+&rarrc;	U+02933
+&cudarrr;	U+02935
+&ldca;	U+02936
+&rdca;	U+02937
+&cudarrl;	U+02938
+&larrpl;	U+02939
+&curarrm;	U+0293C
+&cularrp;	U+0293D
+&rarrpl;	U+02945
+&harrcir;	U+02948
+&Uarrocir;	U+02949
+&lurdshar;	U+0294A
+&ldrushar;	U+0294B
+&LeftRightVector;	U+0294E
+&RightUpDownVector;	U+0294F
+&DownLeftRightVector;	U+02950
+&LeftUpDownVector;	U+02951
+&LeftVectorBar;	U+02952
+&RightVectorBar;	U+02953
+&RightUpVectorBar;	U+02954
+&RightDownVectorBar;	U+02955
+&DownLeftVectorBar;	U+02956
+&DownRightVectorBar;	U+02957
+&LeftUpVectorBar;	U+02958
+&LeftDownVectorBar;	U+02959
+&LeftTeeVector;	U+0295A
+&RightTeeVector;	U+0295B
+&RightUpTeeVector;	U+0295C
+&RightDownTeeVector;	U+0295D
+&DownLeftTeeVector;	U+0295E
+&DownRightTeeVector;	U+0295F
+&LeftUpTeeVector;	U+02960
+&LeftDownTeeVector;	U+02961
+&lHar;	U+02962
+&uHar;	U+02963
+&rHar;	U+02964
+&dHar;	U+02965
+&luruhar;	U+02966
+&ldrdhar;	U+02967
+&ruluhar;	U+02968
+&rdldhar;	U+02969
+&lharul;	U+0296A
+&llhard;	U+0296B
+&rharul;	U+0296C
+&lrhard;	U+0296D
+&udhar;	U+0296E
+&ReverseUpEquilibrium;	U+0296F
+&RoundImplies;	U+02970
+&erarr;	U+02971
+&simrarr;	U+02972
+&larrsim;	U+02973
+&rarrsim;	U+02974
+&rarrap;	U+02975
+&ltlarr;	U+02976
+&gtrarr;	U+02978
+&subrarr;	U+02979
+&suplarr;	U+0297B
+&lfisht;	U+0297C
+&rfisht;	U+0297D
+&ufisht;	U+0297E
+&dfisht;	U+0297F
+&lopar;	U+02985
+&ropar;	U+02986
+&lbrke;	U+0298B
+&rbrke;	U+0298C
+&lbrkslu;	U+0298D
+&rbrksld;	U+0298E
+&lbrksld;	U+0298F
+&rbrkslu;	U+02990
+&langd;	U+02991
+&rangd;	U+02992
+&lparlt;	U+02993
+&rpargt;	U+02994
+&gtlPar;	U+02995
+&ltrPar;	U+02996
+&vzigzag;	U+0299A
+&vangrt;	U+0299C
+&angrtvbd;	U+0299D
+&ange;	U+029A4
+&range;	U+029A5
+&dwangle;	U+029A6
+&uwangle;	U+029A7
+&angmsdaa;	U+029A8
+&angmsdab;	U+029A9
+&angmsdac;	U+029AA
+&angmsdad;	U+029AB
+&angmsdae;	U+029AC
+&angmsdaf;	U+029AD
+&angmsdag;	U+029AE
+&angmsdah;	U+029AF
+&bemptyv;	U+029B0
+&demptyv;	U+029B1
+&cemptyv;	U+029B2
+&raemptyv;	U+029B3
+&laemptyv;	U+029B4
+&ohbar;	U+029B5
+&omid;	U+029B6
+&opar;	U+029B7
+&operp;	U+029B9
+&olcross;	U+029BB
+&odsold;	U+029BC
+&olcir;	U+029BE
+&ofcir;	U+029BF
+&olt;	U+029C0
+&ogt;	U+029C1
+&cirscir;	U+029C2
+&cirE;	U+029C3
+&solb;	U+029C4
+&bsolb;	U+029C5
+&boxbox;	U+029C9
+&trisb;	U+029CD
+&rtriltri;	U+029CE
+&LeftTriangleBar;	U+029CF
+&RightTriangleBar;	U+029D0
+&iinfin;	U+029DC
+&infintie;	U+029DD
+&nvinfin;	U+029DE
+&eparsl;	U+029E3
+&smeparsl;	U+029E4
+&eqvparsl;	U+029E5
+&lozf;	U+029EB
+&RuleDelayed;	U+029F4
+&dsol;	U+029F6
+&xodot;	U+02A00
+&bigoplus;	U+02A01
+&bigotimes;	U+02A02
+&biguplus;	U+02A04
+&bigsqcup;	U+02A06
+&iiiint;	U+02A0C
+&fpartint;	U+02A0D
+&cirfnint;	U+02A10
+&awint;	U+02A11
+&rppolint;	U+02A12
+&scpolint;	U+02A13
+&npolint;	U+02A14
+&pointint;	U+02A15
+&quatint;	U+02A16
+&intlarhk;	U+02A17
+&pluscir;	U+02A22
+&plusacir;	U+02A23
+&simplus;	U+02A24
+&plusdu;	U+02A25
+&plussim;	U+02A26
+&plustwo;	U+02A27
+&mcomma;	U+02A29
+&minusdu;	U+02A2A
+&loplus;	U+02A2D
+&roplus;	U+02A2E
+&Cross;	U+02A2F
+&timesd;	U+02A30
+&timesbar;	U+02A31
+&smashp;	U+02A33
+&lotimes;	U+02A34
+&rotimes;	U+02A35
+&otimesas;	U+02A36
+&Otimes;	U+02A37
+&odiv;	U+02A38
+&triplus;	U+02A39
+&triminus;	U+02A3A
+&tritime;	U+02A3B
+&iprod;	U+02A3C
+&amalg;	U+02A3F
+&capdot;	U+02A40
+&ncup;	U+02A42
+&ncap;	U+02A43
+&capand;	U+02A44
+&cupor;	U+02A45
+&cupcap;	U+02A46
+&capcup;	U+02A47
+&cupbrcap;	U+02A48
+&capbrcup;	U+02A49
+&cupcup;	U+02A4A
+&capcap;	U+02A4B
+&ccups;	U+02A4C
+&ccaps;	U+02A4D
+&ccupssm;	U+02A50
+&And;	U+02A53
+&Or;	U+02A54
+&andand;	U+02A55
+&oror;	U+02A56
+&orslope;	U+02A57
+&andslope;	U+02A58
+&andv;	U+02A5A
+&orv;	U+02A5B
+&andd;	U+02A5C
+&ord;	U+02A5D
+&wedbar;	U+02A5F
+&sdote;	U+02A66
+&simdot;	U+02A6A
+&congdot;	U+02A6D
+&easter;	U+02A6E
+&apacir;	U+02A6F
+&apE;	U+02A70
+&eplus;	U+02A71
+&pluse;	U+02A72
+&Esim;	U+02A73
+&Colone;	U+02A74
+&Equal;	U+02A75
+&ddotseq;	U+02A77
+&equivDD;	U+02A78
+&ltcir;	U+02A79
+&gtcir;	U+02A7A
+&ltquest;	U+02A7B
+&gtquest;	U+02A7C
+&les;	U+02A7D
+&ges;	U+02A7E
+&lesdot;	U+02A7F
+&gesdot;	U+02A80
+&lesdoto;	U+02A81
+&gesdoto;	U+02A82
+&lesdotor;	U+02A83
+&gesdotol;	U+02A84
+&lap;	U+02A85
+&gap;	U+02A86
+&lne;	U+02A87
+&gne;	U+02A88
+&lnap;	U+02A89
+&gnap;	U+02A8A
+&lesseqqgtr;	U+02A8B
+&gEl;	U+02A8C
+&lsime;	U+02A8D
+&gsime;	U+02A8E
+&lsimg;	U+02A8F
+&gsiml;	U+02A90
+&lgE;	U+02A91
+&glE;	U+02A92
+&lesges;	U+02A93
+&gesles;	U+02A94
+&els;	U+02A95
+&egs;	U+02A96
+&elsdot;	U+02A97
+&egsdot;	U+02A98
+&el;	U+02A99
+&eg;	U+02A9A
+&siml;	U+02A9D
+&simg;	U+02A9E
+&simlE;	U+02A9F
+&simgE;	U+02AA0
+&LessLess;	U+02AA1
+&GreaterGreater;	U+02AA2
+&glj;	U+02AA4
+&gla;	U+02AA5
+&ltcc;	U+02AA6
+&gtcc;	U+02AA7
+&lescc;	U+02AA8
+&gescc;	U+02AA9
+&smt;	U+02AAA
+&lat;	U+02AAB
+&smte;	U+02AAC
+&late;	U+02AAD
+&bumpE;	U+02AAE
+&preceq;	U+02AAF
+&SucceedsEqual;	U+02AB0
+&prE;	U+02AB3
+&scE;	U+02AB4
+&precneqq;	U+02AB5
+&scnE;	U+02AB6
+&precapprox;	U+02AB7
+&succapprox;	U+02AB8
+&precnapprox;	U+02AB9
+&succnapprox;	U+02ABA
+&Pr;	U+02ABB
+&Sc;	U+02ABC
+&subdot;	U+02ABD
+&supdot;	U+02ABE
+&subplus;	U+02ABF
+&supplus;	U+02AC0
+&submult;	U+02AC1
+&supmult;	U+02AC2
+&subedot;	U+02AC3
+&supedot;	U+02AC4
+&subE;	U+02AC5
+&supseteqq;	U+02AC6
+&subsim;	U+02AC7
+&supsim;	U+02AC8
+&subsetneqq;	U+02ACB
+&supnE;	U+02ACC
+&csub;	U+02ACF
+&csup;	U+02AD0
+&csube;	U+02AD1
+&csupe;	U+02AD2
+&subsup;	U+02AD3
+&supsub;	U+02AD4
+&subsub;	U+02AD5
+&supsup;	U+02AD6
+&suphsub;	U+02AD7
+&supdsub;	U+02AD8
+&forkv;	U+02AD9
+&topfork;	U+02ADA
+&mlcp;	U+02ADB
+&Dashv;	U+02AE4
+&Vdashl;	U+02AE6
+&Barv;	U+02AE7
+&vBar;	U+02AE8
+&vBarv;	U+02AE9
+&Vbar;	U+02AEB
+&Not;	U+02AEC
+&bNot;	U+02AED
+&rnmid;	U+02AEE
+&cirmid;	U+02AEF
+&midcir;	U+02AF0
+&topcir;	U+02AF1
+&nhpar;	U+02AF2
+&parsim;	U+02AF3
+&parsl;	U+02AFD
+&fflig;	U+0FB00
+&filig;	U+0FB01
+&fllig;	U+0FB02
+&ffilig;	U+0FB03
+&ffllig;	U+0FB04
+&Ascr;	U+1D49C
+&Cscr;	U+1D49E
+&Dscr;	U+1D49F
+&Gscr;	U+1D4A2
+&Jscr;	U+1D4A5
+&Kscr;	U+1D4A6
+&Nscr;	U+1D4A9
+&Oscr;	U+1D4AA
+&Pscr;	U+1D4AB
+&Qscr;	U+1D4AC
+&Sscr;	U+1D4AE
+&Tscr;	U+1D4AF
+&Uscr;	U+1D4B0
+&Vscr;	U+1D4B1
+&Wscr;	U+1D4B2
+&Xscr;	U+1D4B3
+&Yscr;	U+1D4B4
+&Zscr;	U+1D4B5
+&ascr;	U+1D4B6
+&bscr;	U+1D4B7
+&cscr;	U+1D4B8
+&dscr;	U+1D4B9
+&fscr;	U+1D4BB
+&hscr;	U+1D4BD
+&iscr;	U+1D4BE
+&jscr;	U+1D4BF
+&kscr;	U+1D4C0
+&lscr;	U+1D4C1
+&mscr;	U+1D4C2
+&nscr;	U+1D4C3
+&pscr;	U+1D4C5
+&qscr;	U+1D4C6
+&rscr;	U+1D4C7
+&sscr;	U+1D4C8
+&tscr;	U+1D4C9
+&uscr;	U+1D4CA
+&vscr;	U+1D4CB
+&wscr;	U+1D4CC
+&xscr;	U+1D4CD
+&yscr;	U+1D4CE
+&zscr;	U+1D4CF
+&Afr;	U+1D504
+&Bfr;	U+1D505
+&Dfr;	U+1D507
+&Efr;	U+1D508
+&Ffr;	U+1D509
+&Gfr;	U+1D50A
+&Jfr;	U+1D50D
+&Kfr;	U+1D50E
+&Lfr;	U+1D50F
+&Mfr;	U+1D510
+&Nfr;	U+1D511
+&Ofr;	U+1D512
+&Pfr;	U+1D513
+&Qfr;	U+1D514
+&Sfr;	U+1D516
+&Tfr;	U+1D517
+&Ufr;	U+1D518
+&Vfr;	U+1D519
+&Wfr;	U+1D51A
+&Xfr;	U+1D51B
+&Yfr;	U+1D51C
+&afr;	U+1D51E
+&bfr;	U+1D51F
+&cfr;	U+1D520
+&dfr;	U+1D521
+&efr;	U+1D522
+&ffr;	U+1D523
+&gfr;	U+1D524
+&hfr;	U+1D525
+&ifr;	U+1D526
+&jfr;	U+1D527
+&kfr;	U+1D528
+&lfr;	U+1D529
+&mfr;	U+1D52A
+&nfr;	U+1D52B
+&ofr;	U+1D52C
+&pfr;	U+1D52D
+&qfr;	U+1D52E
+&rfr;	U+1D52F
+&sfr;	U+1D530
+&tfr;	U+1D531
+&ufr;	U+1D532
+&vfr;	U+1D533
+&wfr;	U+1D534
+&xfr;	U+1D535
+&yfr;	U+1D536
+&zfr;	U+1D537
+&Aopf;	U+1D538
+&Bopf;	U+1D539
+&Dopf;	U+1D53B
+&Eopf;	U+1D53C
+&Fopf;	U+1D53D
+&Gopf;	U+1D53E
+&Iopf;	U+1D540
+&Jopf;	U+1D541
+&Kopf;	U+1D542
+&Lopf;	U+1D543
+&Mopf;	U+1D544
+&Oopf;	U+1D546
+&Sopf;	U+1D54A
+&Topf;	U+1D54B
+&Uopf;	U+1D54C
+&Vopf;	U+1D54D
+&Wopf;	U+1D54E
+&Xopf;	U+1D54F
+&Yopf;	U+1D550
+&aopf;	U+1D552
+&bopf;	U+1D553
+&copf;	U+1D554
+&dopf;	U+1D555
+&eopf;	U+1D556
+&fopf;	U+1D557
+&gopf;	U+1D558
+&hopf;	U+1D559
+&iopf;	U+1D55A
+&jopf;	U+1D55B
+&kopf;	U+1D55C
+&lopf;	U+1D55D
+&mopf;	U+1D55E
+&nopf;	U+1D55F
+&oopf;	U+1D560
+&popf;	U+1D561
+&qopf;	U+1D562
+&ropf;	U+1D563
+&sopf;	U+1D564
+&topf;	U+1D565
+&uopf;	U+1D566
+&vopf;	U+1D567
+&wopf;	U+1D568
+&xopf;	U+1D569
+&yopf;	U+1D56A
+&zopf;	U+1D56B
+&nvlt;	U+0003C U+020D2
+&bne;	U+0003D U+020E5
+&nvgt;	U+0003E U+020D2
+&fjlig;	U+00066 U+0006A
+&ThickSpace;	U+0205F U+0200A
+&nrarrw;	U+0219D U+00338
+&npart;	U+02202 U+00338
+&nang;	U+02220 U+020D2
+&caps;	U+02229 U+0FE00
+&cups;	U+0222A U+0FE00
+&nvsim;	U+0223C U+020D2
+&race;	U+0223D U+00331
+&acE;	U+0223E U+00333
+&nesim;	U+02242 U+00338
+&napid;	U+0224B U+00338
+&nvap;	U+0224D U+020D2
+&nbump;	U+0224E U+00338
+&nbumpe;	U+0224F U+00338
+&nedot;	U+02250 U+00338
+&bnequiv;	U+02261 U+020E5
+&nvle;	U+02264 U+020D2
+&nvge;	U+02265 U+020D2
+&nlE;	U+02266 U+00338
+&NotGreaterFullEqual;	U+02267 U+00338
+&lvertneqq;	U+02268 U+0FE00
+&gvertneqq;	U+02269 U+0FE00
+&nLtv;	U+0226A U+00338
+&nLt;	U+0226A U+020D2
+&NotGreaterGreater;	U+0226B U+00338
+&nGt;	U+0226B U+020D2
+&NotSucceedsTilde;	U+0227F U+00338
+&vnsub;	U+02282 U+020D2
+&nsupset;	U+02283 U+020D2
+&vsubne;	U+0228A U+0FE00
+&vsupne;	U+0228B U+0FE00
+&NotSquareSubset;	U+0228F U+00338
+&NotSquareSuperset;	U+02290 U+00338
+&sqcaps;	U+02293 U+0FE00
+&sqcups;	U+02294 U+0FE00
+&nvltrie;	U+022B4 U+020D2
+&nvrtrie;	U+022B5 U+020D2
+&nLl;	U+022D8 U+00338
+&nGg;	U+022D9 U+00338
+&lesg;	U+022DA U+0FE00
+&gesl;	U+022DB U+0FE00
+&notindot;	U+022F5 U+00338
+&notinE;	U+022F9 U+00338
+&nrarrc;	U+02933 U+00338
+&NotLeftTriangleBar;	U+029CF U+00338
+&NotRightTriangleBar;	U+029D0 U+00338
+&ncongdot;	U+02A6D U+00338
+&napE;	U+02A70 U+00338
+&nles;	U+02A7D U+00338
+&nges;	U+02A7E U+00338
+&NotNestedLessLess;	U+02AA1 U+00338
+&NotNestedGreaterGreater;	U+02AA2 U+00338
+&smtes;	U+02AAC U+0FE00
+&lates;	U+02AAD U+0FE00
+&NotPrecedesEqual;	U+02AAF U+00338
+&NotSucceedsEqual;	U+02AB0 U+00338
+&nsubE;	U+02AC5 U+00338
+&nsupseteqq;	U+02AC6 U+00338
+&vsubnE;	U+02ACB U+0FE00
+&varsupsetneqq;	U+02ACC U+0FE00
+&parsl;︀	U+02AFD U+0FE00

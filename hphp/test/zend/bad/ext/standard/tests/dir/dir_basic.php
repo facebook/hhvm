@@ -42,6 +42,7 @@ var_dump( $d->read() );
 delete_files($dir_path, 3, "dir_basic", 1, ".tmp");
 echo "Done";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dir_path = $file_path."/dir_basic";

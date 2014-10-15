@@ -1,5 +1,5 @@
 string(80) "
 
-%r\x09%rfirst cell before < first cell after
-%r\x09%rsecond cell before < second cell after
+	first cell before < first cell after
+	second cell before < second cell after
 "

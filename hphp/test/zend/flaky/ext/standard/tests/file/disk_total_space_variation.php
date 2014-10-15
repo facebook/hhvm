@@ -56,6 +56,7 @@ var_dump( disk_total_space(b"$file_path") );
 echo"\n--- Done ---";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/disk_total_space");

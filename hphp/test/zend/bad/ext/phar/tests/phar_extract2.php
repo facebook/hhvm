@@ -28,6 +28,7 @@ foreach ($extracted as $out) {
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/tempmanifest2.phar.php');
 $dir = dirname(__FILE__) . '/extract2/';

@@ -1,6 +1,6 @@
 *** Testing mb_ereg() : usage variations ***
 
-ASCII String without $regs arg:%r\x09\x09%rint(1)
+ASCII String without $regs arg:		int(1)
 ASCII String with $regs arg:
 int(38)
 array(1) {
@@ -8,7 +8,7 @@ array(1) {
   string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
 }
 
-Multibyte String without $regs arg:%r\x09%rint(1)
+Multibyte String without $regs arg:	int(1)
 Multubyte String with $regs arg:
 int(53)
 array(1) {

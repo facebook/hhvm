@@ -27,6 +27,8 @@ var_dump(rmdir($sessions));
 echo "Done";
 ob_end_flush();
 ?>
+<?php error_reporting(0); ?>
+<?php
 $directory = dirname(__FILE__);
 $sessions = ($directory."/sessions");
 var_dump(rmdir($sessions));

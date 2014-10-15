@@ -40,6 +40,7 @@ foreach($src_dirs as $src_dir) {
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 rmdir($file_path."/rename_variation1_dir");

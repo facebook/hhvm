@@ -13,7 +13,7 @@ array(4) {
 }
 
 -- After shift: --
-Returned value:%r\x09%rstring(4) "zero"
+Returned value:	string(4) "zero"
 New array:
 array(3) {
   [0]=>

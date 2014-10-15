@@ -50,6 +50,7 @@ echo '$list = ';var_export($res);echo ";\n";
 ?>
 ===DONE===
 <?php exit(0); ?>
+<?php error_reporting(0); ?>
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
 unlink($file);

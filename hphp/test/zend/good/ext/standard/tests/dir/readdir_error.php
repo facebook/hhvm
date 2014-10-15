@@ -25,6 +25,7 @@ var_dump( readdir($dir_handle, $extra_arg) );
 closedir($dir_handle);
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__) . "/readdir_error";
 rmdir($path);

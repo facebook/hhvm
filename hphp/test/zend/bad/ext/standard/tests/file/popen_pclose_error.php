@@ -18,6 +18,7 @@ fclose($file_handle);
 var_dump( pclose(1) );
 echo "\n--- Done ---";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink($file_path."/popen.tmp");

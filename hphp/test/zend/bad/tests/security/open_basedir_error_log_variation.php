@@ -12,6 +12,7 @@ var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $initdir."/test/ok/ok.tx
 
 test_open_basedir_after("error_log");
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once "open_basedir.inc";
 delete_directories();

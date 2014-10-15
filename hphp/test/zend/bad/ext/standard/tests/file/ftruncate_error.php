@@ -62,6 +62,7 @@ var_dump( filesize($filename) );
 
 echo "Done\n";
 ?> 
+<?php error_reporting(0); ?>
 <?php
 $filename = dirname(__FILE__)."/ftruncate_error.tmp";
 unlink( $filename );

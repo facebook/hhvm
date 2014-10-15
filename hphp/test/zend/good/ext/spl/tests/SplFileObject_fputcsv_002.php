@@ -7,6 +7,7 @@ $fo->fputcsv($data);
 
 var_dump($data);
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv1.csv';
 unlink($file);

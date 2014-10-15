@@ -34,6 +34,7 @@ var_dump( file_get_contents($filename, 1, NULL, 5, 20) );
 
 echo "--- Done ---";
 ?>
+<?php error_reporting(0); ?>
 <?php
 //Deleting the temporary files and directory used in the testcase
 

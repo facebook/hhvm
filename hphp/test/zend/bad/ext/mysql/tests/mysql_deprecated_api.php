@@ -59,6 +59,7 @@ if (version_compare(PHP_VERSION, '5.3.99') >= 0) {
 
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

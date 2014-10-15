@@ -45,6 +45,7 @@ clearstatcache();
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 if(file_exists($file_path."/is_dir_variation2_symlink")) {

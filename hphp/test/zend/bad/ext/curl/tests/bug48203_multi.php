@@ -52,4 +52,5 @@ foreach($options_to_check as $option) {
 }
 
 ?>
+<?php error_reporting(0); ?>
 <?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>

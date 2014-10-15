@@ -18,6 +18,7 @@ var_dump( fileowner( $symlink ) === $uid );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';

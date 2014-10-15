@@ -49,6 +49,7 @@ var_dump($f->eof());
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/files/phar_oo_007.phar.php');
 __halt_compiler();

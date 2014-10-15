@@ -1,51 +1,51 @@
 Constant: IMAGETYPE_GIF
-%r\x09%rWith dot: .gif
-%r\x09%rWithout dot: gif
+	With dot: .gif
+	Without dot: gif
 Constant: IMAGETYPE_JPEG
-%r\x09%rWith dot: .jpeg
-%r\x09%rWithout dot: jpeg
+	With dot: .jpeg
+	Without dot: jpeg
 Constant: IMAGETYPE_PNG
-%r\x09%rWith dot: .png
-%r\x09%rWithout dot: png
+	With dot: .png
+	Without dot: png
 Constant: IMAGETYPE_SWF
-%r\x09%rWith dot: .swf
-%r\x09%rWithout dot: swf
+	With dot: .swf
+	Without dot: swf
 Constant: IMAGETYPE_PSD
-%r\x09%rWith dot: .psd
-%r\x09%rWithout dot: psd
+	With dot: .psd
+	Without dot: psd
 Constant: IMAGETYPE_BMP
-%r\x09%rWith dot: .bmp
-%r\x09%rWithout dot: bmp
+	With dot: .bmp
+	Without dot: bmp
 Constant: IMAGETYPE_TIFF_II
-%r\x09%rWith dot: .tiff
-%r\x09%rWithout dot: tiff
+	With dot: .tiff
+	Without dot: tiff
 Constant: IMAGETYPE_TIFF_MM
-%r\x09%rWith dot: .tiff
-%r\x09%rWithout dot: tiff
+	With dot: .tiff
+	Without dot: tiff
 Constant: IMAGETYPE_JPC
-%r\x09%rWith dot: .jpc
-%r\x09%rWithout dot: jpc
+	With dot: .jpc
+	Without dot: jpc
 Constant: IMAGETYPE_JP2
-%r\x09%rWith dot: .jp2
-%r\x09%rWithout dot: jp2
+	With dot: .jp2
+	Without dot: jp2
 Constant: IMAGETYPE_JPX
-%r\x09%rWith dot: .jpx
-%r\x09%rWithout dot: jpx
+	With dot: .jpx
+	Without dot: jpx
 Constant: IMAGETYPE_JB2
-%r\x09%rWith dot: .jb2
-%r\x09%rWithout dot: jb2
+	With dot: .jb2
+	Without dot: jb2
 Constant: IMAGETYPE_IFF
-%r\x09%rWith dot: .iff
-%r\x09%rWithout dot: iff
+	With dot: .iff
+	Without dot: iff
 Constant: IMAGETYPE_WBMP
-%r\x09%rWith dot: .bmp
-%r\x09%rWithout dot: bmp
+	With dot: .bmp
+	Without dot: bmp
 Constant: IMAGETYPE_JPEG2000
-%r\x09%rWith dot: .jpc
-%r\x09%rWithout dot: jpc
+	With dot: .jpc
+	Without dot: jpc
 Constant: IMAGETYPE_XBM
-%r\x09%rWith dot: .xbm
-%r\x09%rWithout dot: xbm
+	With dot: .xbm
+	Without dot: xbm
 
 Warning: %s
 bool(false)

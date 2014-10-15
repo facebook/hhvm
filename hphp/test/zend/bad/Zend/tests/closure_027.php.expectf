@@ -1,0 +1,9 @@
+object(stdClass)#%d (0) {
+}
+NULL
+
+Notice: %s
+
+Warning: %s
+NULL
+Catchable fatal error: Argument 1 passed to test() must be an instance of Closure%s, instance of stdClass given, called in %s on line %d and defined in %s on line %d

@@ -28,6 +28,7 @@ var_dump( hash_file( 'md5', $filename, false, $extra_arg ) );
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 
 $filename = 'hash_file_error_example.txt';

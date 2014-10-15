@@ -15,6 +15,7 @@ var_dump( $fo->fputcsv($fields, $delim, $enclosure, $fo) );
 
 echo "Done\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv2.csv';
 unlink($file);

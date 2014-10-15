@@ -37,6 +37,7 @@ echo $e->getMessage(),"\n";
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 @unlink(dirname(__FILE__) . '/phar_bz2.phar');
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');

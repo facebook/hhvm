@@ -24,6 +24,18 @@ object(GMP)#%d (1) {
 }
 object(GMP)#%d (1) {
   ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "714"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
   string(1) "2"
 }
 object(GMP)#%d (1) {
@@ -52,6 +64,18 @@ object(GMP)#%d (1) {
 
 Warning: %s
 bool(false)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(28) "3937657486715347520027492352"
+}
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "59"
@@ -108,6 +132,12 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-11"
 }
+
+Warning: %s
+bool(false)
+
+Warning: %s
+bool(false)
 object(GMP)#%d (1) {
   ["num"]=>
   string(3) "-43"
@@ -169,7 +199,7 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(2) "42"
 }
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "9"
-}
+string(4) "4217"
+string(4) "4217"
+string(4) "4217"
+string(4) "4217"

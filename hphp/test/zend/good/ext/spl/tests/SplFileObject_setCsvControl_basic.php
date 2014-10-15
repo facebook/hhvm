@@ -14,6 +14,7 @@ foreach ($s as $row) {
     echo "$fruit : $quantity\n";
 }
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink('csv_control_data.csv');
 ?>

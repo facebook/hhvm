@@ -44,6 +44,7 @@ var_dump( stat($names_with_key["dir"]) ); // value stored with string key
 echo "\n--- Done ---";
 ?>
 
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation19.tmp");

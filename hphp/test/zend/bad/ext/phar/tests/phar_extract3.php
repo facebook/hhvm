@@ -25,6 +25,7 @@ try {
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $dir = dirname(__FILE__) . '/test-extract3/';
 @unlink($dir . 'stuff.txt');

@@ -34,4 +34,5 @@ include $alias . '/b/new.php';
 ?>
 
 ===DONE===
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip'); ?>

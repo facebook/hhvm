@@ -149,6 +149,7 @@
 	test_fetch($host, $user, $passwd, $db, $port, $socket, $engine, MYSQLI_CLIENT_COMPRESS);
 	print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 	$test_table_name = 'test_mysqli_fetch_array_large_table_1'; require_once("clean_table.inc");
 ?>

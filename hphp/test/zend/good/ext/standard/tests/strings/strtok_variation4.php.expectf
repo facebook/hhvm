@@ -41,7 +41,7 @@ bool(false)
 bool(false)
 
 --- Iteration 6 ---
-string(11) "hello%r\x09%rworld"
+string(11) "hello	world"
 bool(false)
 bool(false)
 bool(false)

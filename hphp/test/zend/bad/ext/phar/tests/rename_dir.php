@@ -16,4 +16,5 @@ rename($pname . '/a', $pname . '/b');
 echo file_get_contents($pname . '/b/x') . "\n";
 echo file_get_contents($pname . '/a/x') . "\n";
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>

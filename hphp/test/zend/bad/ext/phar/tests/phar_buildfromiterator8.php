@@ -11,6 +11,7 @@ try {
 }
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/buildfromiterator8.phar');
 __HALT_COMPILER();

@@ -42,6 +42,7 @@ foreach($files_arr as $file) {
 
 echo "\n*** Done ***";
 ?>
+<?php error_reporting(0); ?>
 <?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/fileowner_variation3";

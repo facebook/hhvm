@@ -10,6 +10,7 @@ var_dump($arch->getStatusString());
 $arch->close();
 
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink($dirname.'foo.zip');
 ?>

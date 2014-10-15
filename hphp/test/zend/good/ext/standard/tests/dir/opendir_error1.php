@@ -24,6 +24,7 @@ $extra_arg = 10;
 var_dump( opendir($path, $context, $extra_arg) );
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php
 $path = dirname(__FILE__) . "/opendir_error";
 rmdir($path);

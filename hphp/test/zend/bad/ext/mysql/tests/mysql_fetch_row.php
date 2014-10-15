@@ -28,6 +28,7 @@ var_dump(mysql_fetch_row($res));
 mysql_close($link);
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

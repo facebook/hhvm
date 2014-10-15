@@ -14,6 +14,7 @@ for ($i = 0; $i < 4*1024; $i++){
 echo("\n Written Files($i)\n");
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 $dirName = dirname(__FILE__);
 $fileDir="$dirName/test_data";

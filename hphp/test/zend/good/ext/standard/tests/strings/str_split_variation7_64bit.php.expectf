@@ -62,7 +62,7 @@ array(30) {
   [27]=>
   string(1) " "
   [28]=>
-  string(1) "%r\x09%r"
+  string(1) "	"
   [29]=>
   string(1) "."
 }
@@ -73,24 +73,24 @@ bool(false)
 -- Iteration 4 --
 array(1) {
   [0]=>
-  string(30) "string with 123,escape char %r\x09%r."
+  string(30) "string with 123,escape char 	."
 }
 -- Iteration 5 --
 array(2) {
   [0]=>
   string(26) "string with 123,escape cha"
   [1]=>
-  string(4) "r %r\x09%r."
+  string(4) "r 	."
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  string(30) "string with 123,escape char %r\x09%r."
+  string(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
 array(1) {
   [0]=>
-  string(30) "string with 123,escape char %r\x09%r."
+  string(30) "string with 123,escape char 	."
 }
 -- Iteration 8 --
 

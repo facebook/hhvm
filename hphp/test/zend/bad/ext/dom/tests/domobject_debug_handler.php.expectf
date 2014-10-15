@@ -38,6 +38,6 @@ DOMDocument Object
     [localName] => 
     [baseURI] => %s
     [textContent] => 
-%r\x09%rfoobar
+	foobar
 
 )

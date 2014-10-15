@@ -8,5 +8,4 @@ Warning: %s
 
 Warning: %s
 
-
-Fatal error: %s
+Catchable fatal error: Argument 1 passed to transliterator_get_error_code() must be an instance of Transliterator, array given in %s on line %d

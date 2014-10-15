@@ -12,6 +12,7 @@ $phar = new PharData($fname2);
 var_dump($phar['blah']->isDir(), $phar['test']->isDir());
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.tar');

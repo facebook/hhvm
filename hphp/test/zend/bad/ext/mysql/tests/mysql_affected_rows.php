@@ -109,6 +109,7 @@ if (false !== ($tmp = @mysql_affected_rows($link)))
 
 print "done!";
 ?>
+<?php error_reporting(0); ?>
 <?php
 require_once("clean_table.inc");
 ?>

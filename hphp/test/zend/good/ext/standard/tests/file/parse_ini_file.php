@@ -210,6 +210,7 @@ print_r($ini_array);
 
 echo "*** Done **\n";
 ?>
+<?php error_reporting(0); ?>
 <?php
 unlink(dirname(__FILE__)."/parse_ini_file.ini");
 ?>

@@ -19,4 +19,5 @@ $fp = fopen('phar://hio/a', 'r');
 var_dump(fstat($fp));
 fclose($fp);
 ?>
+<?php error_reporting(0); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php'); ?>

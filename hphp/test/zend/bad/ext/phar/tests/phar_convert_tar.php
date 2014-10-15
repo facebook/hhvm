@@ -30,6 +30,7 @@ var_dump($phar->getStub());
 
 ?>
 ===DONE===
+<?php error_reporting(0); ?>
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar');

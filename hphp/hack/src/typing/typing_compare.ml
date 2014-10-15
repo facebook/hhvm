@@ -512,7 +512,7 @@ let class_big_diff class1 class2 =
  * what we have already added.
  *)
 (*****************************************************************************)
-let rec get_extend_deps trace cid_hash to_redecl =
+let rec get_extend_deps_ trace cid_hash to_redecl =
   if ISet.mem cid_hash !trace
   then to_redecl
   else begin
@@ -523,7 +523,7 @@ let rec get_extend_deps trace cid_hash to_redecl =
       if Typing_deps.Dep.is_class obj
       then
         let to_redecl = ISet.add obj acc in
-        get_extend_deps trace obj to_redecl
+        get_extend_deps_ trace obj to_redecl
     else to_redecl
   end ideps to_redecl
   end
@@ -540,8 +540,11 @@ and get_all_dependencies trace cid (to_redecl, to_recheck) =
   let to_redecl = ISet.union bazooka to_redecl in
   let to_recheck = ISet.union bazooka to_recheck in
   let cid_hash = Typing_deps.Dep.make (Dep.Class cid) in
-  let to_redecl = get_extend_deps trace cid_hash to_redecl in
+  let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
   to_redecl, to_recheck
+
+let get_extend_deps cid_hash to_redecl =
+  get_extend_deps_ (ref ISet.empty) cid_hash to_redecl
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -652,16 +655,16 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
            * positions differ. We therefore must redeclare the sub-classes
            * but not recheck them.
            *)
-          let to_redecl = get_extend_deps trace cid_hash to_redecl in
+          let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
           to_redecl, to_recheck
       else
-        let to_redecl = get_extend_deps trace cid_hash to_redecl in
+        let to_redecl = get_extend_deps_ trace cid_hash to_redecl in
         let to_recheck = ISet.union to_redecl to_recheck in
         ISet.union deps to_redecl, ISet.union deps to_recheck
 
-let get_classes_deps old_classes new_classes trace classes =
+let get_classes_deps old_classes new_classes classes =
   SSet.fold
-    (get_class_deps old_classes new_classes trace)
+    (get_class_deps old_classes new_classes (ref ISet.empty))
     classes
     (ISet.empty, ISet.empty)
 

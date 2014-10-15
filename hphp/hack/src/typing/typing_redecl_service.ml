@@ -87,9 +87,8 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
 
 let compute_classes_deps old_classes new_classes acc classes =
   let to_redecl, to_recheck = acc in
-  let trace = ref ISet.empty in
   let rdd, rdc = 
-    Typing_compare.get_classes_deps old_classes new_classes trace classes
+    Typing_compare.get_classes_deps old_classes new_classes classes
   in
   let to_redecl = ISet.union rdd to_redecl in
   let to_recheck = ISet.union rdc to_recheck in

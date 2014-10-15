@@ -1090,7 +1090,7 @@ static void addInterfaceMethods(const Class* iface, c_Set* st) {
 // helper for getMethods: returns a Set
 static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  Attr mask = attrs_from_modifiers(filter, true);
+  Attr mask = attrs_from_modifiers(filter, false);
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters

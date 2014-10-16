@@ -19,16 +19,11 @@ type failed_parsing = SSet.t
 type files = SSet.t
 type client = in_channel * out_channel
 
-type program_ret =
-  | Die
-  | Continue of env
-  | Exit of int
-
 module type SERVER_PROGRAM = sig
   val preinit : ServerArgs.options -> unit
   val init : genv -> env -> Path.path -> env
   val run_once_and_exit : genv -> env -> Path.path -> unit
-  val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
+  val recheck: genv -> env -> (SSet.t * SSet.t) -> env
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
@@ -94,7 +89,6 @@ end = struct
 
   let serve genv env socket root =
     let env = ref env in
-    let report = ref [] in
     while true do
       if not (Lock.check root "lock") then begin
         Printf.printf "Lost %s lock; reacquiring.\n" Program.name;
@@ -109,10 +103,7 @@ end = struct
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
       let updates = ServerDfind.get_updates genv root in
-      (match Program.recheck genv !env updates report with
-      | Die -> die ()
-      | Exit code -> exit code
-      | Continue env' -> env := env');
+      env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
 
@@ -196,7 +187,7 @@ end = struct
       Printf.printf "Spawned %s (child pid=%d)\n" (Program.name) pid;
       Printf.printf "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
       flush stdout;
-      raise Pervasives.Exit
+      raise Exit
     end
 
   let start () =
@@ -205,6 +196,6 @@ end = struct
       if ServerArgs.should_detach options
       then daemonize options;
       main options
-    with Pervasives.Exit ->
+    with Exit ->
       ()
 end

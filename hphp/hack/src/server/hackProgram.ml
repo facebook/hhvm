@@ -230,29 +230,15 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerConvert.go genv env root dirname;
         exit 0
 
-  let recheck genv env updates report =
+  let recheck genv env updates =
     let diff_php, diff_js = updates in
     let diff = SSet.union diff_php diff_js in
-    if not (SSet.is_empty diff)
-    then
+    if SSet.is_empty diff
+    then env
+    else
       let failed_parsing = SSet.union diff env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
-      Server.Continue (ServerTypeCheck.check genv check_env);
-    else
-      if !report <> []
-        then begin
-          (* We have a report that the state is inconsistent, at the same
-          * time, dfind is telling us that nothing changed between the moment
-          * where we produced the report and now. Basically: we have a bug!
-          *)
-          Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
-          Printf.printf "*************************************************\n";
-          Printf.printf "CRASH REPORT:\n";
-          Printf.printf "*************************************************\n";
-          List.iter (Printf.printf "%s\n") !report;
-          Printf.printf "*************************************************\n";
-          Server.Die
-        end else Server.Continue env
+      ServerTypeCheck.check genv check_env
 
   let parse_options = ServerArgs.parse_options
 end

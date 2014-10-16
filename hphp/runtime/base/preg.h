@@ -56,13 +56,15 @@ class pcre_cache_entry {
   pcre_cache_entry& operator=(const pcre_cache_entry&);
 
 public:
-  pcre_cache_entry() {}
+  pcre_cache_entry() : subpat_names(nullptr) {}
   ~pcre_cache_entry();
 
   pcre *re;
   pcre_extra *extra; // Holds results of studying
-  int preg_options;
-  int compile_options;
+  int preg_options:1;
+  int compile_options:31;
+  int num_subpats;
+  char **subpat_names;
 };
 
 class PCREglobals {

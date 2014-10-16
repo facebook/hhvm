@@ -60,6 +60,7 @@ pcre_cache_entry::~pcre_cache_entry() {
     pcre_free_study(extra);
 #endif
   }
+  free(subpat_names);
   pcre_free(re);
 }
 
@@ -209,6 +210,80 @@ private:
 };
 
 typedef FreeHelperImpl<true> SmartFreeHelper;
+}
+
+static void set_extra_limits(pcre_extra*& extra) {
+  if (extra == nullptr) {
+    pcre_extra& extra_data = t_extra_data;
+    extra_data.flags = PCRE_EXTRA_MATCH_LIMIT |
+      PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+    extra = &extra_data;
+  }
+  extra->match_limit = s_pcre_globals->m_preg_backtrace_limit;
+  extra->match_limit_recursion = s_pcre_globals->m_preg_recursion_limit;
+}
+
+static char** get_subpat_names(pcre_cache_entry* pce) {
+  if (pce->subpat_names) return pce->subpat_names;
+
+  /*
+  * Build a mapping from subpattern numbers to their names. We will always
+  * allocate the table, even though there may be no named subpatterns. This
+  * avoids somewhat more complicated logic in the inner loops.
+  */
+  pcre_extra *extra = pce->extra;
+  set_extra_limits(extra);
+
+  int name_count;
+
+  pce->subpat_names = (char **)calloc(pce->num_subpats, sizeof(char *));
+  int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_count);
+  if (rc < 0) {
+    raise_warning("Internal pcre_fullinfo() error %d", rc);
+    return nullptr;
+  }
+  if (name_count > 0) {
+    int name_size, ni = 0;
+    unsigned short name_idx;
+    char* name_table;
+    int rc1, rc2;
+
+    rc1 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMETABLE, &name_table);
+    rc2 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
+    rc = rc2 ? rc2 : rc1;
+    if (rc < 0) {
+      raise_warning("Internal pcre_fullinfo() error %d", rc);
+      return nullptr;
+    }
+    while (ni++ < name_count) {
+      name_idx = 0xff * (unsigned char)name_table[0] +
+                 (unsigned char)name_table[1];
+      pce->subpat_names[name_idx] = name_table + 2;
+      if (is_numeric_string(pce->subpat_names[name_idx],
+                            strlen(pce->subpat_names[name_idx]),
+                            nullptr, nullptr, 0) != KindOfNull) {
+        raise_warning("Numeric named subpatterns are not allowed");
+        return nullptr;
+      }
+      name_table += name_size;
+    }
+  }
+  return pce->subpat_names;
+}
+
+static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
+  pcre_extra *extra = pce->extra;
+  set_extra_limits(extra);
+
+  /* Calculate the size of the offsets array*/
+  int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_CAPTURECOUNT,
+                         &pce->num_subpats);
+  if (rc < 0) {
+    raise_warning("Internal pcre_fullinfo() error %d", rc);
+    return false;
+  }
+  pce->num_subpats++;
+  return true;
 }
 
 static const pcre_cache_entry*
@@ -370,83 +445,28 @@ pcre_get_compiled_regex_cache(const String& regex) {
   pcre_cache_entry *new_entry = new pcre_cache_entry();
   new_entry->re = re;
   new_entry->extra = extra;
-  new_entry->preg_options = poptions;
-  new_entry->compile_options = coptions;
-  return insert_cached_pcre(regex, new_entry);
-}
 
-static void set_extra_limits(pcre_extra*& extra) {
-  if (extra == nullptr) {
-    pcre_extra& extra_data = t_extra_data;
-    extra_data.flags = PCRE_EXTRA_MATCH_LIMIT |
-      PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-    extra = &extra_data;
+  assert((poptions & ~0x1) == 0);
+  new_entry->preg_options = poptions;
+
+  assert((coptions & 0x80000000) == 0);
+  new_entry->compile_options = coptions;
+
+  /* Get pcre full info */
+  if (!get_pcre_fullinfo(new_entry)) {
+    delete new_entry;
+    return nullptr;
   }
-  extra->match_limit = s_pcre_globals->m_preg_backtrace_limit;
-  extra->match_limit_recursion = s_pcre_globals->m_preg_recursion_limit;
+
+  return insert_cached_pcre(regex, new_entry);
 }
 
 static int *create_offset_array(const pcre_cache_entry *pce,
                                 int &size_offsets) {
-  pcre_extra *extra = pce->extra;
-  set_extra_limits(extra);
-
-  /* Calculate the size of the offsets array, and allocate memory for it. */
-  int num_subpats; // Number of captured subpatterns
-  int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
-  if (rc < 0) {
-    raise_warning("Internal pcre_fullinfo() error %d", rc);
-    return nullptr;
-  }
-  num_subpats++;
-  size_offsets = num_subpats * 3;
+  /* Allocate memory for the offsets array */
+  size_offsets = pce->num_subpats * 3;
   return (int *)smart_malloc(size_offsets * sizeof(int));
 }
-
-/*
- * Build a mapping from subpattern numbers to their names. We will always
- * allocate the table, even though there may be no named subpatterns. This
- * avoids somewhat more complicated logic in the inner loops.
- */
-static char** make_subpats_table(int num_subpats, const pcre_cache_entry* pce) {
-  pcre_extra* extra = pce->extra;
-  set_extra_limits(extra);
-  char **subpat_names = (char **)smart_calloc(num_subpats, sizeof(char *));
-  int name_cnt = 0, name_size, ni = 0;
-  char *name_table;
-  unsigned short name_idx;
-
-  int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
-  if (rc < 0) {
-    raise_warning("Internal pcre_fullinfo() error %d", rc);
-    return nullptr;
-  }
-  if (name_cnt > 0) {
-    int rc1, rc2;
-    rc1 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMETABLE, &name_table);
-    rc2 = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
-    rc = rc2 ? rc2 : rc1;
-    if (rc < 0) {
-      raise_warning("Internal pcre_fullinfo() error %d", rc);
-      return nullptr;
-    }
-
-    while (ni++ < name_cnt) {
-      name_idx = 0xff * (unsigned char)name_table[0] +
-                 (unsigned char)name_table[1];
-      subpat_names[name_idx] = name_table + 2;
-      if (is_numeric_string(subpat_names[name_idx],
-                            strlen(subpat_names[name_idx]),
-                            nullptr, nullptr, 0) != KindOfNull) {
-        raise_warning("Numeric named subpatterns are not allowed");
-        return nullptr;
-      }
-      name_table += name_size;
-    }
-  }
-  return subpat_names;
-}
-
 
 static inline void add_offset_pair(Array& result,
                                    const String& str,
@@ -632,13 +652,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
     return false;
   }
 
-  /*
-   * Build a mapping from subpattern numbers to their names. We will always
-   * allocate the table, even though there may be no named subpatterns. This
-   * avoids somewhat more complicated logic in the inner loops.
-   */
-  char** subpat_names = make_subpats_table(num_subpats, pce);
-  SmartFreeHelper subpatFreer(subpat_names);
+  char** subpat_names = get_subpat_names(const_cast<pcre_cache_entry *>(pce));
   if (subpat_names == nullptr) {
     return false;
   }
@@ -918,9 +932,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
 
-  int num_subpats = size_offsets / 3;
-  char** subpat_names = make_subpats_table(num_subpats, pce);
-  SmartFreeHelper subpatNamesFreer(subpat_names);
+  char** subpat_names = get_subpat_names(const_cast<pcre_cache_entry *>(pce));
   if (subpat_names == nullptr) {
     return false;
   }

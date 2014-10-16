@@ -1228,7 +1228,7 @@ and hint_list_paren env =
   expect ")" env
 
 and hint env = wrap env begin function
-  | Tplus | Tminus | Tqm | Tat ->
+  | Tplus | Tminus | Tqm | Tat | Tbslash ->
       last_token env;
       hint env
   | Tpercent | Tcolon ->

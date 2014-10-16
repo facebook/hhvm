@@ -371,8 +371,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
   O(bindexit, I(cc) I(target), U(sf), Dn)\
-  O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
-  O(bindjcc2, I(cc) I(target), U(sf), Dn)\
+  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
+  O(bindjcc2nd, I(cc) I(target), U(sf), Dn)\
   O(bindjmp, I(target) I(trflags), Un, Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target), Dn)\
@@ -538,8 +538,8 @@ struct bindaddr { TCA* dest; SrcKey sk; };
 struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
 struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
                   TransFlags trflags; };
-struct bindjcc1 { ConditionCode cc; VregSF sf; Offset targets[2]; };
-struct bindjcc2 { ConditionCode cc; VregSF sf; Offset target; };
+struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2]; };
+struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; };
 struct bindjmp { SrcKey target; TransFlags trflags; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };

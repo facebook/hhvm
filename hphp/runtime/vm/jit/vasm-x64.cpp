@@ -155,8 +155,8 @@ private:
   void emit(bindaddr& i);
   void emit(bindcall& i);
   void emit(bindexit& i);
-  void emit(bindjcc1& i);
-  void emit(bindjcc2& i);
+  void emit(bindjcc1st& i);
+  void emit(bindjcc2nd& i);
   void emit(bindjmp& i);
   void emit(callstub& i);
   void emit(contenter& i);
@@ -490,7 +490,7 @@ void Vgen::emit(bindexit& i) {
   emitBindSideExit(a->code(), frozen(), i.cc, i.target, i.trflags);
 }
 
-void Vgen::emit(bindjcc1& i) {
+void Vgen::emit(bindjcc1st& i) {
   backend.prepareForTestAndSmash(a->code(), 0,
                                  TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a->frontier();
@@ -510,7 +510,7 @@ void Vgen::emit(bindjcc1& i) {
   a->jmp(jccStub);
 }
 
-void Vgen::emit(bindjcc2& i) {
+void Vgen::emit(bindjcc2nd& i) {
   backend.prepareForSmash(a->code(), kJmpccLen);
   auto def = emitEphemeralServiceReq(frozen(),
                                      mcg->getFreeStub(frozen(),

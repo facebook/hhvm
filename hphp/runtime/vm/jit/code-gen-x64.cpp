@@ -544,7 +544,7 @@ Vreg CodeGenerator::emitCompareInt(Vout& v, IRInstruction* inst) {
 
 void CodeGenerator::emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
                                    const ReqBindJccData* extra) {
-  v << bindjcc1{cc, sf, {extra->notTaken, extra->taken}};
+  v << bindjcc1st{cc, sf, {extra->notTaken, extra->taken}};
 }
 
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
@@ -2347,7 +2347,7 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       auto const sf = v.makeReg();
       v << cmpqi{data->cases - 2, idx, sf};
-      v << bindjcc2{CC_AE, sf, data->defaultOff};
+      v << bindjcc2nd{CC_AE, sf, data->defaultOff};
     }
 
     TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);

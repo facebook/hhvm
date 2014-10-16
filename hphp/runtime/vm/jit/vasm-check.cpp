@@ -153,7 +153,7 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
 bool isBlockEnd(Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
-    case Vinstr::bindjcc1:
+    case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:
     case Vinstr::retransopt:

@@ -3324,7 +3324,7 @@ and method_def env m =
       ret (fst m.m_name) m.m_body m.m_fun_kind in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in
   match m.m_ret with
-    | None when Env.is_strict env && snd m.m_name <> "__destruct" ->
+    | None when Env.is_strict env && snd m.m_name <> SN.Members.__destruct ->
       (* if we are in strict mode, the only case where we don't want to enforce
        * a return type is when the method is a destructor
        *)

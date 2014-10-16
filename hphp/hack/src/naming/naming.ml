@@ -735,20 +735,22 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   | Some h -> h
   | None -> begin
     match x with
-    | "\\void"
-    | "\\int"
-    | "\\bool"
-    | "\\float"
-    | "\\num"
-    | "\\string"
-    | "\\resource"
-    | "\\mixed"
-    | "\\array"
-    | "\\arraykey"
-    | "\\integer"
-    | "\\boolean"
-    | "\\double"
-    | "\\real" ->
+      | x when x.[0] = '\\' &&
+        ( x = ("\\"^SN.Typehints.void)
+        || x = ("\\"^SN.Typehints.int)
+        || x = ("\\"^SN.Typehints.bool)
+        || x = ("\\"^SN.Typehints.float)
+        || x = ("\\"^SN.Typehints.num)
+        || x = ("\\"^SN.Typehints.string)
+        || x = ("\\"^SN.Typehints.resource)
+        || x = ("\\"^SN.Typehints.mixed)
+        || x = ("\\"^SN.Typehints.array)
+        || x = ("\\"^SN.Typehints.arraykey)
+        || x = ("\\"^SN.Typehints.integer)
+        || x = ("\\"^SN.Typehints.boolean)
+        || x = ("\\"^SN.Typehints.double)
+        || x = ("\\"^SN.Typehints.real)
+        ) ->
         Errors.primitive_toplevel p;
         N.Hany
     | x when x = SN.Typehints.void -> N.Hprim N.Tvoid

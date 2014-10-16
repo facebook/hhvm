@@ -82,6 +82,14 @@ module Members = struct
 
 end
 
+module UserAttributes = struct
+
+  let uaOverride            = "__Override"
+  let uaConsistentConstruct = "__ConsistentConstruct"
+  let uaUnsafeConstruct    = "__UNSAFE_Construct"
+
+end
+
 (* Tested before \\-prepending name-canonicalization *)
 module SpecialFunctions = struct
 

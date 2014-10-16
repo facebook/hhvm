@@ -335,7 +335,7 @@ and class_decl_if_missing class_env c =
   then ()
   else begin
     if Naming_heap.ClassHeap.mem cid then () else
-    class_naming_and_decl class_env cid c
+      class_naming_and_decl class_env cid c
   end
 
 and class_naming_and_decl class_env cid c =
@@ -376,12 +376,12 @@ and class_hint_decl class_env hint =
   match hint with
     | _, Happly ((p, cid), _)
       when SMap.mem cid class_env.all_classes && not (is_class_ready cid) ->
-      (* We are supposed to redeclare the class *)
-        let files = SMap.find_unsafe cid class_env.all_classes in
-        SSet.iter begin fun fn ->
-          let class_opt = Parser_heap.find_class_in_file fn cid in
-          class_decl_if_missing_opt class_env class_opt
-        end files
+        (* We are supposed to redeclare the class *)
+      let files = SMap.find_unsafe cid class_env.all_classes in
+      SSet.iter begin fun fn ->
+        let class_opt = Parser_heap.find_class_in_file fn cid in
+        class_decl_if_missing_opt class_env class_opt
+      end files
     | _ ->
       (* This class lives in PHP land *)
       ()
@@ -420,7 +420,7 @@ and class_decl c =
     | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
-  let impl = match SMap.get "__toString" m with
+  let impl = match SMap.get SN.Members.__toString m with
     | Some {ce_type = (_, Tfun ft); _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
@@ -545,7 +545,7 @@ and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
   let cconsist =
     class_.c_final ||
-    SMap.mem "__ConsistentConstruct" class_.c_user_attributes in
+      SMap.mem SN.UserAttributes.uaConsistentConstruct class_.c_user_attributes in
   match class_.c_constructor, pcstr with
     | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
@@ -567,11 +567,12 @@ and build_constructor env class_ method_ =
   let mconsist = match ty with
     | (_, Tfun ({ft_abstract = true; _})) -> true
     | _ -> mconsist in
-  (* the alternative to overriding <<__ConsistentConstruct>> is marking
-   * the corresponding 'new static()' UNSAFE, potentially impacting the safety
-   * of a large type hierarchy. *)
+  (* the alternative to overriding
+   * UserAttributes.uaConsistentConstruct is marking the corresponding
+   * 'new static()' UNSAFE, potentially impacting the safety of a large
+   * type hierarchy. *)
   let consist_override =
-    SMap.mem "__UNSAFE_Construct" method_.m_user_attributes in
+    SMap.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
     ce_override = consist_override;
@@ -614,9 +615,9 @@ and class_const_decl c (env, acc) (h, id, e) =
             if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
             then Errors.missing_typehint (fst id);
             Reason.Rwitness (fst id), Tany
-          in
-          (env, infer_const e)
-        end
+        in
+        (env, infer_const e)
+      end
       | Some h -> Typing_hint.hint env h
   in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -718,7 +719,7 @@ and method_decl c env m =
 and method_check_override c m acc =
   let pos, id = m.m_name in
   let class_pos, class_id = c.c_name in
-  let override = SMap.mem "__Override" m.m_user_attributes in
+  let override = SMap.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with

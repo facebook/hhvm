@@ -254,7 +254,7 @@ and expr_ =
   | Array_get of expr * expr option
   | Class_get of id * pstring
   | Class_const of id * pstring
-  | Call of expr * expr list
+  | Call of expr * expr list * expr list
   | Int of pstring
   | Float of pstring
   | String of pstring

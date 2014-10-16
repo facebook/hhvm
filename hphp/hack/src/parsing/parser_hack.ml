@@ -214,7 +214,7 @@ let check_toplevel env pos =
 
 let rec check_lvalue env = function
   | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
-  | pos, Call ((_, Id (_, "tuple")), _) ->
+  | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter (check_lvalue env) el
@@ -632,7 +632,7 @@ and toplevel_word ~attr env = function
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
-  | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value])) ->
+  | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value], [])) ->
       Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
@@ -2024,7 +2024,7 @@ and statement_echo env =
   let pos = Pos.make env.lb in
   let args = echo_args env in
   let f = pos, Id (pos, "echo") in
-  Expr (pos, Call (f, args))
+  Expr (pos, Call (f, args, []))
 
 and echo_args env =
   let e = expr env in
@@ -2564,16 +2564,48 @@ and expr_colcol_remain ~allow_class env e1 cname =
       e1
 
 (*****************************************************************************)
-(* Function call (foo(params)) *)
+(* Function call (f(params)) *)
 (*****************************************************************************)
 
 and expr_call env e1 =
   reduce env e1 Tlp begin fun e1 env ->
     L.back env.lb;
-    let args = expr_list env in
+    let args1, args2 = expr_call_list env in
     let end_ = Pos.make env.lb in
-    Pos.btw (fst e1) end_, Call (e1, args)
+    Pos.btw (fst e1) end_, Call (e1, args1, args2)
   end
+
+(* An expr_call_list is the same as an expr_list except for the possibility
+ * of ParamUnpack (aka splat) calls of the form:
+ *   f(...$unpacked);
+ *)
+and expr_call_list env =
+  expect env Tlp;
+  expr_call_list_remain env
+
+and expr_call_list_remain env =
+  match L.token env.lb with
+    | Trp -> [], []
+    | Tellipsis -> (* f($x, $y, << ...$args >> ) *)
+      let unpack_e = expr { env with priority = 0 } in
+      (* no regular params after an unpack *)
+      (match L.token env.lb with
+        | Trp -> [], [unpack_e]
+        | _ -> error_expect env ")"; [], [unpack_e])
+    | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let e = expr { env with priority = 0 } in
+      match L.token env.lb with
+        | Trp -> [e], []
+        | Tcomma ->
+          if !(env.errors) != error_state
+          then [e], []
+          else begin
+            let reg, unpack = expr_call_list_remain env
+            in e :: reg, unpack
+          end
+        | _ -> error_expect env ")"; [e], []
 
 (*****************************************************************************)
 (* Collections *)

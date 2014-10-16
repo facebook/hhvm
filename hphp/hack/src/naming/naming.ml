@@ -674,6 +674,10 @@ let convert_shape_name env = function
     let class_name = Env.class_name env x in
     (pos, N.SFclass_const (class_name, (pos, y)))
 
+let splat_unexpected = function
+  | [] -> ()
+  | (pos, _) :: _ -> Errors.naming_too_few_arguments pos; ()
+
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
@@ -1586,16 +1590,19 @@ and expr_ env = function
       N.Class_get (make_class_id env x1, x2)
   | Class_const (x1, x2) ->
       N.Class_const (make_class_id env x1, x2)
-  | Call ((_, Id (p, pseudo_func)), el)
+  | Call ((_, Id (p, pseudo_func)), el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
-      N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), List.map (expr env) el)
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.call_user_func ->
+      splat_unexpected uel ;
+      N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), exprl env el)
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.call_user_func ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | f :: el ->
-          N.Call (N.Cuser_func, expr env f, List.map (expr env) el)
+          N.Call (N.Cuser_func, expr env f, exprl env el)
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.fun_ ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.fun_ ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_, String (p2, s)] when String.contains s ':' ->
@@ -1606,7 +1613,8 @@ and expr_ env = function
           N.Any
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.inst_meth ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.inst_meth ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
@@ -1617,7 +1625,8 @@ and expr_ env = function
         N.Any
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.meth_caller ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.meth_caller ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
@@ -1634,7 +1643,8 @@ and expr_ env = function
           )
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.class_meth ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.class_meth ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
@@ -1654,71 +1664,79 @@ and expr_ env = function
           )
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.assert_ ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.assert_ ->
+      splat_unexpected uel ;
       if List.length el <> 1
       then Errors.assert_arity p;
       N.Assert (N.AE_assert (expr env (List.hd el)))
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.invariant ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.invariant ->
+      splat_unexpected uel ;
       (match el with
       | st :: format :: el ->
-          let el = List.map (expr env) el in
+          let el = exprl env el in
           N.Assert (N.AE_invariant (expr env st, expr env format, el))
         | _ ->
           Errors.naming_too_few_arguments p;
           N.Any
       )
-  | Call ((p, Id (_, cn)), el)
+  | Call ((p, Id (_, cn)), el, uel)
       when cn = SN.SpecialFunctions.invariant_violation ->
+      splat_unexpected uel ;
       (match el with
       | format :: el ->
-        let el = List.map (expr env) el in
+        let el = exprl env el in
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
         Errors.naming_too_few_arguments p;
         N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.SpecialFunctions.tuple ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.tuple ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
-      | el -> N.List (List.map (expr env) el)
+      | el -> N.List (exprl env el)
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.FB.fgena ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgena ->
+      splat_unexpected uel ;
       (match el with
       | [e] -> N.Special_func (N.Gena (expr env e))
       | _ -> Errors.gena_arity p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.FB.fgenva ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgenva ->
+      splat_unexpected uel ;
       if List.length el < 1
       then (Errors.genva_arity p; N.Any)
-      else N.Special_func (N.Genva (List.map (expr env) el))
-  | Call ((p, Id (_, cn)), el) when cn = SN.FB.fgen_array_rec ->
+      else N.Special_func (N.Genva (exprl env el))
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgen_array_rec ->
+      splat_unexpected uel ;
       (match el with
       | [e] -> N.Special_func (N.Gen_array_rec (expr env e))
       | _ -> Errors.gen_array_rec_arity p; N.Any
       )
-  | Call ((p, Id (_, cn)), el) when cn = SN.FB.fgen_array_va_rec_DEPRECATED ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgen_array_va_rec_DEPRECATED ->
+      splat_unexpected uel ;
       if List.length el < 1
       then begin
         Errors.gen_array_va_rec_arity p;
         N.Any
       end
-      else N.Special_func (N.Gen_array_va_rec (List.map (expr env) el))
-  | Call ((p, Id f), el) ->
+      else N.Special_func (N.Gen_array_va_rec (exprl env el))
+  | Call ((p, Id f), el, uel) ->
       N.Call (N.Cnormal, (p, N.Id (Env.fun_id env f)),
-        List.map (expr env) el)
+              (exprl env el) @ (exprl env uel))
   (* Handle nullsafe instance method calls here. Because Obj_get is used
      for both instance property access and instance method calls, we need
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
      only match instance method calls *)
-  | Call ((p, Obj_get (e1, e2, OG_nullsafe)), el) ->
+  | Call ((p, Obj_get (e1, e2, OG_nullsafe)), el, uel) ->
       N.Call
         (N.Cnormal,
          (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
-         List.map (expr env) el)
+         (exprl env el) @ (exprl env uel))
   (* Handle all kinds of calls that weren't handled by any of
      the cases above *)
-  | Call (e, el) ->
-      N.Call (N.Cnormal, expr env e, List.map (expr env) el)
+  | Call (e, el, uel) ->
+      N.Call (N.Cnormal, expr env e, (exprl env el) @ (exprl env uel))
   | Yield_break -> (snd env).has_yield := true; N.Yield_break
   | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
@@ -1799,7 +1817,7 @@ and expr_ env = function
       let env = (fst env, lenv) in
       let f = expr_lambda env f in
       N.Efun (f, !to_capture)
-  | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, List.map (expr env) el)
+  | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, exprl env el)
   | Shape fdl ->
       N.Shape begin List.fold_left begin fun fdm (pname, value) ->
         let pos, name = convert_shape_name env pname in

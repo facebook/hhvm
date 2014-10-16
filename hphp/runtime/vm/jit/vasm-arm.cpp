@@ -33,6 +33,8 @@ namespace HPHP { namespace jit {
 using namespace arm;
 using namespace vixl;
 
+namespace arm { struct ImmFolder; }
+
 namespace {
 
 vixl::Register W(Vreg32 r) {
@@ -103,12 +105,14 @@ private:
   void emit(addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }
   void emit(addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(andq& i) { a->And(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
+  void emit(andqi& i) { a->And(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
   void emit(asrv& i) { a->asrv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(brk& i) { a->Brk(i.code); }
   void emit(cbcc& i);
   void emit(cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
+  void emit(cmpqi& i) { a->Cmp(X(i.s1), i.s0.l()); }
   void emit(imul& i) { a->Mul(X(i.d), X(i.s1), X(i.s0)); }
   void emit(jcc& i);
   void emit(jmp i);
@@ -118,14 +122,17 @@ private:
   void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }
+  void emit(orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* xxx flags? */); }
   void emit(storeb& i) { a->Strb(W(i.s), M(i.m)); }
   void emit(storel& i) { a->Str(W(i.s), M(i.m)); }
   void emit(setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
   void emit(subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), vixl::SetFlags); }
+  void emit(subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.l(), vixl::SetFlags); }
   void emit(tbcc& i);
   void emit(testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
+  void emit(xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
 
   CodeAddress start(Vlabel b) {
     auto area = unit.blocks[b].area;
@@ -481,6 +488,9 @@ void Vgen::emit(tbcc& i) {
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
+  if (!m_unit.cpool.empty()) {
+    foldImms<arm::ImmFolder>(m_unit);
+  }
   if (m_unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);
     removeDeadCode(m_unit);

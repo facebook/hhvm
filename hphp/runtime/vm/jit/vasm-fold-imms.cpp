@@ -16,15 +16,15 @@
 
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/vixl/a64/assembler-a64.h"
 #include <boost/dynamic_bitset.hpp>
 
 TRACE_SET_MOD(hhir);
 
 namespace HPHP { namespace jit {
 
-namespace {
-struct Folder {
-  Vunit& unit;
+namespace x64 {
+struct ImmFolder {
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
@@ -103,16 +103,76 @@ struct Folder {
     else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
   }
 };
+} // namespace x64
+
+namespace arm {
+struct ImmFolder {
+  jit::vector<uint64_t> vals;
+  boost::dynamic_bitset<> valid;
+
+  bool arith_imm(Vreg r, int32_t& out) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!vixl::Assembler::IsImmArithmetic(imm64)) return false;
+    out = safe_cast<int32_t>(imm64);
+    return true;
+  }
+  bool logical_imm(Vreg r, int32_t& out) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!vixl::Assembler::IsImmLogical(imm64, vixl::kXRegSize)) return false;
+    if (!deltaFits(imm64, sz::word)) return false;
+    out = safe_cast<int32_t>(imm64);
+    return true;
+  }
+
+  template<typename Inst>
+  void fold(Inst& i, Vinstr& out) {}
+
+  void fold(addq& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
+    else if (arith_imm(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
+  }
+  void fold(andq& in, Vinstr& out) {
+    int val;
+    if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
+  }
+  void fold(cmpl& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
+  }
+  void fold(cmpq& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
+  }
+  void fold(orq& in, Vinstr& out) {
+    int val;
+    if (logical_imm(in.s0, val)) { out = orqi{val, in.s1, in.d, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
+  }
+  void fold(subq& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
+  }
+  void fold(xorq& in, Vinstr& out) {
+    int val;
+    if (logical_imm(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
+  }
+};
 }
 
 // Immediate-folding. If an instruction takes a register operand defined
 // as a constant, and there is valid immediate-form of that instruction,
 // then change the instruction and embed the immediate.
+template<typename Folder>
 void foldImms(Vunit& unit) {
   assert(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
-  Folder folder{unit};
+  Folder folder;
   folder.vals.resize(unit.next_vr);
   folder.valid.resize(unit.next_vr);
   // figure out which Vregs are constants and stash their values.
@@ -138,5 +198,8 @@ void foldImms(Vunit& unit) {
   }
   printUnit(kVasmImmsLevel, "after foldImms", unit);
 }
+
+template void foldImms<x64::ImmFolder>(Vunit& unit);
+template void foldImms<arm::ImmFolder>(Vunit& unit);
 
 }}

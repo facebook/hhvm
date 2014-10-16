@@ -35,6 +35,8 @@ namespace HPHP { namespace jit {
 using namespace reg;
 using namespace x64;
 
+namespace x64 { struct ImmFolder; }
+
 #define O(name, ...)                                                    \
   static_assert(sizeof(name) <= 48, "vasm struct " #name " is too big");
 VASM_OPCODES
@@ -1021,7 +1023,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   lowerCalls(m_unit, abi);
 
   if (!m_unit.cpool.empty()) {
-    foldImms(m_unit);
+    foldImms<x64::ImmFolder>(m_unit);
   }
   if (m_unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);

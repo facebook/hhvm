@@ -82,7 +82,7 @@ struct Vmeta {
 void allocateRegisters(Vunit&, const Abi&);
 void optimizeJmps(Vunit&);
 void removeDeadCode(Vunit&);
-void foldImms(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
 
 /*
  * Get the successors of a block or instruction. If given a non-const

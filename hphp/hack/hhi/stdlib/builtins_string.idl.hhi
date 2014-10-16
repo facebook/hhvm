@@ -51,7 +51,6 @@ function html_entity_decode($str, $quote_style = ENT_COMPAT, $charset = "ISO-885
 function htmlentities($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
 function htmlspecialchars_decode($str, $quote_style = ENT_COMPAT) { }
 function htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
-function fb_htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $extra = array()) { }
 function quoted_printable_encode($str) { }
 function quoted_printable_decode($str) { }
 function convert_uudecode($data) { }

@@ -123,7 +123,6 @@ Vout Vout::makeBlock() {
 
 // implicit cast to label for initializing branch instructions
 Vout::operator Vlabel() const {
-  assert(empty());
   return m_block;
 }
 
@@ -179,6 +178,7 @@ private:
   void emit(nop& i) { a->nop(); }
   void emit(phidef& i) { always_assert(false); }
   void emit(phijmp& i) { always_assert(false); }
+  void emit(phijcc& i) { always_assert(false); }
   void emit(point& i) { meta->points[i.p] = a->frontier(); }
   void emit(resume& i) { emitServiceReq(a->code(), REQ_RESUME); }
   void emit(retransopt& i);

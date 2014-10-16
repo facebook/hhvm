@@ -453,7 +453,10 @@ O(NewMixedArray,                D(Arr), C(Int),                      NNT|PRc) \
 O(NewVArray,                    D(Arr), C(Int),                      NNT|PRc) \
 O(NewMIArray,                   D(Arr), C(Int),                      NNT|PRc) \
 O(NewMSArray,                   D(Arr), C(Int),                      NNT|PRc) \
-O(NewPackedArray,           DArrPacked, C(Int) S(StkPtr),      E|NNT|PRc|CRc) \
+O(NewPackedArray,           DArrPacked, S(StkPtr),             E|NNT|PRc|CRc) \
+O(AllocPackedArray,         DArrPacked, NA,                        E|NNT|PRc) \
+O(InitPackedArray,                  ND, S(Arr) S(Gen),                 E|CRc) \
+O(InitPackedArrayLoop,              ND, S(Arr) S(StkPtr),              E|CRc) \
 O(NewStructArray,               D(Arr), S(StkPtr),             E|NNT|PRc|CRc) \
 O(NewCol,                       D(Obj), C(Int) C(Int),               NNT|PRc) \
 O(Clone,                        D(Obj), S(Obj),                   N|E|PRc|Er) \

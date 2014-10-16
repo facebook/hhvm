@@ -382,6 +382,7 @@ CALL_OPCODE(NewMIArray)
 CALL_OPCODE(NewMSArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(NewPackedArray)
+CALL_OPCODE(AllocPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
@@ -485,6 +486,20 @@ CALL_OPCODE(OODeclExists)
 
 Vlabel CodeGenerator::label(Block* b) {
   return m_state.labels[b];
+}
+
+void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
+  Vloc src, Type srcType) {
+  if (srcType.needsValueReg()) {
+    v << store{src.reg(0), base[offset + TVOFF(m_data)]};
+  }
+
+  if (src.hasReg(1)) {
+    v << storeb{src.reg(1), base[offset + TVOFF(m_type)]};
+  } else {
+    assert(srcType.isKnownDataType());
+    v << storeb{v.cns(srcType.toDataType()), base[offset + TVOFF(m_type)]};
+  }
 }
 
 void CodeGenerator::emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf,
@@ -5773,6 +5788,69 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   auto const dstReg  = dstLoc(0).reg();
   auto& v = vmain();
   v << loadl{baseReg[FAST_COLLECTION_SIZE_OFFSET], dstReg};
+}
+
+void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {
+  auto const arrReg = srcLoc(0).reg();
+  auto const index = inst->extra<InitPackedArray>()->index;
+  auto const value = srcLoc(1);
+  auto& v = vmain();
+
+  auto slotOffset = PackedArray::entriesOffset() + index * sizeof(TypedValue);
+  emitStoreTypedValue(v, arrReg, slotOffset, value, inst->src(1)->type());
+}
+
+void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
+  auto const arrReg = srcLoc(0).reg();
+  int count = inst->extra<PackedArrayData>()->size;
+  auto const sp = srcLoc(1).reg();
+
+  auto& v = vmain();
+  auto loopBody = v.makeBlock();
+  auto done = v.makeBlock();
+
+  auto firstEntry = PackedArray::entriesOffset();
+
+  // Initialize loop variables and jump to the first condition check.
+  Vreg i0 = v.makeReg(), i1 = v.makeReg(), i2 = v.makeReg(), i3 = v.makeReg();
+  Vreg j0 = v.makeReg(), j1 = v.makeReg(), j2 = v.makeReg(), j3 = v.makeReg();
+  auto dataReg = v.makeReg();
+  auto typeReg = v.makeReg();
+  // FIXME Task #5276053: Initializing i first made the register allocator
+  // generate an extra xchg for some reason. Initializing j first made that
+  // issue go away. It might have to do with the implicit ordering of
+  // registers that the allocator assigns to intervals. It'd be nice to make
+  // the register allocator less sensitive to the ordering of instructions
+  // when the order doesn't matter. It doesn't seem like this would be an
+  // easy task, however.
+  j0 = v.cns((count - 1) * 2);
+  i0 = v.cns(0);
+  v << phijmp{loopBody, v.makeTuple(VregList{i0, j0})};
+
+  // We know that we have at least one element in the array so we don't have
+  // to do an initial bounds check.
+  assert(count);
+
+  v = loopBody;
+  v << phidef{v.makeTuple(VregList{i1, j1})};
+
+  // Load the value from the stack and store into the array.
+  v << loadzbl{sp[j1 * 8] + TVOFF(m_type), typeReg};
+  v << storeb{typeReg, arrReg[i1 * 8] + (firstEntry + TVOFF(m_type))};
+  v << load{sp[j1 * 8] + TVOFF(m_data), dataReg};
+  v << store{dataReg, arrReg[i1 * 8] + (firstEntry + TVOFF(m_data))};
+  // Increment the loop variable by 2 because we can only scale by at most 8.
+  v << addqi{2, i1, i2, v.makeReg()};
+  v << subqi{2, j1, j2, v.makeReg()};
+
+  // Jump back to the body if we're still in bounds, fall through otherwise.
+  auto cmpResult = v.makeReg();
+  v << cmpq{v.cns(0), j2, cmpResult};
+  v << phijcc{CC_GE, cmpResult, {done, loopBody},
+    v.makeTuple(VregList{i2, j2})};
+
+  v = done;
+  v << phidef{v.makeTuple(VregList{i3, j3})};
 }
 
 void CodeGenerator::print() const {

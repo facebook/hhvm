@@ -195,6 +195,9 @@ private:
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
 
+  void emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
+    Vloc src, Type srcType);
+
   /*
    * Execute the code emitted by 'taken' only if the given condition code is
    * true.

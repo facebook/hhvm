@@ -224,7 +224,7 @@ public:
   void emitNewMIArray(int capacity);
   void emitNewMSArray(int capacity);
   void emitNewLikeArrayL(int id, int capacity);
-  void emitNewPackedArray(int n);
+  void emitNewPackedArray(uint32_t n);
   void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
   void emitClone();
@@ -546,6 +546,8 @@ public:
   REGULAR_INSTRS
 #undef CASE
 
+  static constexpr auto kMaxUnrolledInitArray = 8;
+
 private:
   /*
    * MInstrTranslator is responsible for translating one of the m-instr
@@ -830,6 +832,8 @@ private: // Exit trace creation routines.
 
   void emitBinaryBitOp(Op op);
   void emitBinaryArith(Op op);
+
+  SSATmp* touchArgsSpillStackAndPopArgs(int numArgs);
 
   /*
    * Create a custom side exit---that is, an exit that does some

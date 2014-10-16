@@ -145,6 +145,12 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case CreateAFWH:
       return srcNo == 4;
 
+    case InitPackedArray:
+      return srcNo == 1;
+
+    case InitPackedArrayLoop:
+      return srcNo > 0;
+
     default:
       return true;
   }

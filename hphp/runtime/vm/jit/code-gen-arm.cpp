@@ -539,6 +539,9 @@ PUNT_OPCODE(MulIntO)
 PUNT_OPCODE(EagerSyncVMRegs)
 PUNT_OPCODE(ColIsEmpty)
 PUNT_OPCODE(ColIsNEmpty)
+PUNT_OPCODE(AllocPackedArray)
+PUNT_OPCODE(InitPackedArray)
+PUNT_OPCODE(InitPackedArrayLoop)
 
 #undef PUNT_OPCODE
 

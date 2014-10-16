@@ -113,6 +113,12 @@ bool sizeLessThanPackedCapCode(uint32_t size, uint32_t packedCapCode) {
   return size < cap;
 }
 
+ALWAYS_INLINE
+ptrdiff_t PackedArray::entriesOffset() {
+  return reinterpret_cast<ptrdiff_t>(
+    packedData(reinterpret_cast<ArrayData*>(0x0)));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

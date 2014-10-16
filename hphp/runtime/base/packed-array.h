@@ -123,6 +123,8 @@ struct PackedArray {
   static ArrayData* NonSmartConvert(const ArrayData*);
   static ArrayData* NonSmartConvertHelper(const ArrayData*);
 
+  static ptrdiff_t entriesOffset();
+
 private:
   static ArrayData* Grow(ArrayData*);
   static ArrayData* GrowHelper(ArrayData*);

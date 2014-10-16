@@ -659,20 +659,44 @@ void HhbcTranslator::emitNewLikeArrayL(int id, int capacity) {
   push(arr);
 }
 
-void HhbcTranslator::emitNewPackedArray(int numArgs) {
-  // The NewPackedArray opcode's helper needs array values passed to it
-  // via the stack.  We use spillStack() to flush the eval stack and
-  // obtain a pointer to the topmost item; if over-flushing becomes
-  // a problem then we should refactor the NewPackedArray opcode to
-  // take its values directly as SSA operands.
-  //
+SSATmp* HhbcTranslator::touchArgsSpillStackAndPopArgs(int numArgs) {
   // Before the spillStack() we touch all of the incoming stack
   // arguments so that they are available to later optimizations via
   // getStackValue().
   for (int i = 0; i < numArgs; i++) topC(i, DataTypeGeneric);
   SSATmp* sp = spillStack();
   for (int i = 0; i < numArgs; i++) popC(DataTypeGeneric);
-  push(gen(NewPackedArray, cns(numArgs), sp));
+  return sp;
+}
+
+void HhbcTranslator::emitNewPackedArray(uint32_t numArgs) {
+  auto const extra = PackedArrayData { numArgs };
+  if (numArgs > kPackedCapCodeThreshold) {
+    // The NewPackedArray opcode's helper needs array values passed to it
+    // via the stack.  We use spillStack() to flush the eval stack and
+    // obtain a pointer to the topmost item; if over-flushing becomes
+    // a problem then we should refactor the NewPackedArray opcode to
+    // take its values directly as SSA operands.
+    //
+    // We only emit NewPackedArray when the array literal is too large for the
+    // normal inline AllocNewPackedArray/InitPackedArray IR nodes to handle.
+    SSATmp* sp = touchArgsSpillStackAndPopArgs(numArgs);
+    push(gen(NewPackedArray, extra, sp));
+    return;
+  }
+
+  SSATmp* array = gen(AllocPackedArray, extra);
+  if (numArgs > kMaxUnrolledInitArray) {
+    SSATmp* sp = touchArgsSpillStackAndPopArgs(numArgs);
+    gen(InitPackedArrayLoop, extra, array, sp);
+    push(array);
+    return;
+  }
+
+  for (int i = 0; i < numArgs; ++i) {
+    gen(InitPackedArray, IndexData{ numArgs - i - 1 }, array, popC());
+  }
+  push(array);
 }
 
 void HhbcTranslator::emitNewStructArray(uint32_t numArgs, StringData** keys) {

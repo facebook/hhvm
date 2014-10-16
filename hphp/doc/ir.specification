@@ -1087,11 +1087,30 @@ D:Arr = NewLikeArrayL S0:Arr S1:ConstInt
   Allocate a new array in the same mode as S0 and with expected capacity S1,
   unless S1 == 0, in which case the capacity is set to S0's size.
 
-D:Arr = NewPackedArray S0:ConstInt S1:StkPtr
+D:Arr = NewPackedArray<size> S0:StkPtr
 
-  Allocate a new array by taking the top S0 elements off the stack given by S1.
-  Note that this instruction assumes it can take the values from the stack
+  Allocate a new array by taking the top size elements off the stack given by 
+  S0. Note that this instruction assumes it can take the values from the stack
   without increfing them.
+
+D:Arr = AllocPackedArray<size>
+
+  Allocate a new uninitialized packed array with space for size elements in it. 
+  The array will be initialized with values using either InitPackedArray or 
+  InitPackedArrayLoop.
+
+InitPackedArray<index> S0:Arr S1:Gen
+
+  Store the S1 into the slot at index in array S0. This instruction assumes 
+  that it doesn't have to incref the value being stored. Used to initialize an 
+  array allocated with AllocPackedArray.
+
+InitPackedArrayLoop<size> S0:Arr S1:StkPtr
+
+  Store the top size elements on the stack given by S1 into the array S0. 
+  Assumes that the first element on the stack is the last element in the array.
+  Used to initialize an array allocated with AllocPackedArray that was too big
+  to use a series of InitPackedArray instructions.
 
 D:Arr = NewStructArray<keys...> S0:StkPtr
 

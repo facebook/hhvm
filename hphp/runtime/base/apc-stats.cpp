@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/apc-handle.h"

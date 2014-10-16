@@ -780,6 +780,18 @@ struct NewStructData : IRExtraData {
   std::string show() const;
 };
 
+struct PackedArrayData : IRExtraData {
+  explicit PackedArrayData(uint32_t size) : size(size) {}
+  uint32_t size;
+  std::string show() const { return folly::format("{}", size).str(); }
+};
+
+struct IndexData : IRExtraData {
+  explicit IndexData(uint32_t index) : index(index) {}
+  uint32_t index;
+  std::string show() const { return folly::format("{}", index).str(); }
+};
+
 struct RawMemData : IRExtraData {
 # define RAW_MEM_DATA_TYPES                     \
   RAW_TYPE(AsyncState)                          \
@@ -952,6 +964,10 @@ X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
+X(NewPackedArray,               PackedArrayData);
+X(AllocPackedArray,             PackedArrayData);
+X(InitPackedArrayLoop,          PackedArrayData);
+X(InitPackedArray,              IndexData);
 X(LdRaw,                        RawMemData);
 X(StRaw,                        RawMemData);
 X(StAsyncArRaw,                 RawMemData);

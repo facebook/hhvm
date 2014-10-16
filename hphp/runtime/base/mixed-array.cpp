@@ -193,6 +193,28 @@ MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
   return ad;
 }
 
+ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
+  assert(size > 0);
+  ArrayData* ad;
+  assert(size <= kPackedCapCodeThreshold);
+  auto const cap = size;
+  ad = static_cast<ArrayData*>(
+    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+  );
+  assert(cap == packedCodeToCap(cap));
+  ad->m_kindAndSize = uint64_t{size} << 32 | cap;  // sets kPackedKind
+  assert(ad->m_kind == kPackedKind);
+  assert(ad->m_size == size);
+  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+
+  ad->m_posAndCount = uint64_t{1} << 32; // zero's pos
+
+  assert(ad->m_pos == 0);
+  assert(ad->m_count == 1);
+  assert(PackedArray::checkInvariants(ad));
+  return ad;
+}
+
 MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
                                  const TypedValue* values) {
   assert(size > 0);

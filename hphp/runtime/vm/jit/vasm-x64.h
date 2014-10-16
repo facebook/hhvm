@@ -394,6 +394,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
+  O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(point, I(p), Un, Dn)\
   O(resume, Inone, Un, Dn)\
   O(retransopt, I(sk) I(id), Un, Dn)\
@@ -565,6 +566,7 @@ struct nop {};
 struct nothrow {};
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
+struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct point { Vpoint p; };
 struct resume {};
 struct retransopt { SrcKey sk; TransID id; };

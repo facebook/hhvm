@@ -149,6 +149,7 @@ public:
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakePackedHelper(uint32_t size, const TypedValue* values);
+  static ArrayData* MakePackedUninitialized(uint32_t size);
 
   /*
    * Allocate a new, empty, request-local array in int map/string map mode, with

@@ -350,7 +350,7 @@ struct LLVMEmitter {
   };
 
 #define O(name, ...) void emit(const name&);
-X64_OPCODES
+VASM_OPCODES
 #undef O
 
   void emitTrap();

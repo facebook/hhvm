@@ -37,13 +37,13 @@ using namespace x64;
 
 #define O(name, ...)                                                    \
   static_assert(sizeof(name) <= 48, "vasm struct " #name " is too big");
-X64_OPCODES
+VASM_OPCODES
 #undef O
 static_assert(sizeof(Vinstr) <= 64, "Vinstr should be <= 64 bytes");
 
 const char* vinst_names[] = {
 #define O(name, imms, uses, defs) #name,
-  X64_OPCODES
+  VASM_OPCODES
 #undef O
 };
 
@@ -737,7 +737,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
       switch (inst.op) {
 #define O(name, imms, uses, defs) \
         case Vinstr::name: emit(inst.name##_); break;
-        X64_OPCODES
+        VASM_OPCODES
 #undef O
       }
     }

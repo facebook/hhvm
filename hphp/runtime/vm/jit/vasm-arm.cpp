@@ -249,7 +249,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
       switch (inst.op) {
 #define O(name, imms, uses, defs) \
         case Vinstr::name: emit(inst.name##_); break;
-        X64_OPCODES
+        VASM_OPCODES
 #undef O
       }
     }

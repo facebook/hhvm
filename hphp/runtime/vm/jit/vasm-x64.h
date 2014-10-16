@@ -366,7 +366,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 // DH(d,h)  define d, try assigning same register as h
 // Un,Dn    no uses, defs
 
-#define X64_OPCODES\
+#define VASM_OPCODES\
   /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
@@ -721,7 +721,7 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 
 struct Vinstr {
 #define O(name, imms, uses, defs) name,
-  enum Opcode : uint8_t { X64_OPCODES };
+  enum Opcode : uint8_t { VASM_OPCODES };
 #undef O
 
   Vinstr()
@@ -730,7 +730,7 @@ struct Vinstr {
 
 #define O(name, imms, uses, defs)                               \
   /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
-  X64_OPCODES
+  VASM_OPCODES
 #undef O
 
   Opcode op;
@@ -749,7 +749,7 @@ struct Vinstr {
    * A union of all possible instructions, descriminated by the op field.
    */
 #define O(name, imms, uses, defs) jit::name name##_;
-  union { X64_OPCODES };
+  union { VASM_OPCODES };
 #undef O
 };
 
@@ -963,7 +963,7 @@ void visitUses(const Vunit& unit, Vinstr& inst, Use use) {
 #define UA(s) visit(unit, i.s, use);
 #define UH(s,h) visit(unit, i.s, use);
 #define Un
-    X64_OPCODES
+    VASM_OPCODES
 #undef Un
 #undef UH
 #undef UA
@@ -984,7 +984,7 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
 #define D(d) visit(unit, i.d, def);
 #define DH(d,h) visit(unit, i.d, def);
 #define Dn
-    X64_OPCODES
+    VASM_OPCODES
 #undef Dn
 #undef DH
 #undef D
@@ -995,7 +995,7 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
 /*
  * visitOperands visits all operands of the given instruction, calling
  * visitor.imm(), visitor.use(), visitor.across(), and visitor.def() as defined
- * in the X64_OPCODES macro.
+ * in the VASM_OPCODES macro.
  *
  * The template spew is necessary to support callers that only have a const
  * Vinstr& as well as callers with a Vinstr& that wish to mutate the
@@ -1025,7 +1025,7 @@ visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
 #define Inone
 #define Un
 #define Dn
-    X64_OPCODES
+    VASM_OPCODES
 #undef Dn
 #undef Un
 #undef Inone

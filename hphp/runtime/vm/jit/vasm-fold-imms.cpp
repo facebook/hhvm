@@ -131,7 +131,7 @@ void foldImms(Vunit& unit) {
           inst.origin = origin;\
           break;\
         }
-        X64_OPCODES
+        VASM_OPCODES
 #undef O
       }
     }

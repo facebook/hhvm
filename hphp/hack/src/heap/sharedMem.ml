@@ -31,6 +31,16 @@ external collect: unit -> unit = "hh_collect"
 external init_done: unit -> unit = "hh_call_after_init"
 
 (*****************************************************************************)
+(* Serializes the shared memory and writes it to a file *)
+(*****************************************************************************)
+external save: string -> unit = "hh_save"
+
+(*****************************************************************************)
+(* Loads the shared memory by reading from a file *)
+(*****************************************************************************)
+external load: string -> unit = "hh_load"
+
+(*****************************************************************************)
 (* Module returning the MD5 of the key. It's because the code in C land
  * expects this format. I prefer to make it an abstract type to make sure
  * we don't forget to give the MD5 instead of the key itself.

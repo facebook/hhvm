@@ -116,6 +116,16 @@
 #define CACHE_MASK      (~(CACHE_LINE_SIZE - 1))
 #define ALIGNED(x)      ((x + CACHE_LINE_SIZE - 1) & CACHE_MASK)
 
+/* Fix the location of our shared memory so we can save and restore the
+ * hashtable easily */
+#define SHARED_MEM_INIT 0x500000000000
+
+/* As a sanity check when loading from a file */
+static uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000;
+
+/* The VCS identifier (typically a git hash) of the build */
+extern const char* const BuildInfo_kRevision;
+
 /*****************************************************************************/
 /* Types */
 /*****************************************************************************/
@@ -148,6 +158,7 @@ static int* hcounter;   // the number of slots taken in the table
 
 /* A counter increasing globally across all forks. */
 static uintptr_t* counter;
+/* This should only be used before forking */
 static uintptr_t early_counter = 1;
 
 /* The top of the heap */
@@ -161,6 +172,7 @@ static pid_t my_pid;
 static char* heap_init;
 
 /* The size of the heap after initialization of the server */
+/* This should only be used by the master */
 static size_t heap_init_size = 0;
 
 /*****************************************************************************/
@@ -264,13 +276,14 @@ void hh_shared_init() {
   /* MAP_NORESERVE is because we want a lot more virtual memory than what
    * we are actually going to use.
    */
-  int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE;
+  int flags = MAP_SHARED | MAP_ANON | MAP_NORESERVE | MAP_FIXED;
   int prot  = PROT_READ  | PROT_WRITE;
 
   int page_size = getpagesize();
 
   char* shared_mem =
-    (char*)mmap(NULL, page_size + SHARED_MEM_SIZE, prot, flags, 0, 0);
+    (char*)mmap((void*)SHARED_MEM_INIT, page_size + SHARED_MEM_SIZE, prot,
+                flags, 0, 0);
 
   if(shared_mem == MAP_FAILED) {
     printf("Error initializing: %s\n", strerror(errno));
@@ -294,6 +307,70 @@ void hh_shared_init() {
   sigaction(SIGSEGV, &sigact, NULL);
 
   set_priorities();
+}
+
+static void fwrite_no_fail(const void* ptr, size_t size, size_t nmemb, FILE* fp) {
+  size_t nmemb_written = fwrite(ptr, size, nmemb, fp);
+  assert(nmemb_written == nmemb);
+}
+
+void hh_save(value out_filename) {
+  CAMLparam1(out_filename);
+  FILE* fp = fopen(String_val(out_filename), "wb");
+
+  fwrite_no_fail(&MAGIC_CONSTANT, sizeof MAGIC_CONSTANT, 1, fp);
+
+  size_t revlen = strlen(BuildInfo_kRevision);
+  fwrite_no_fail(&revlen, sizeof revlen, 1, fp);
+  fwrite_no_fail(BuildInfo_kRevision, sizeof(char), revlen, fp);
+
+  fwrite_no_fail(&heap_init_size, sizeof heap_init_size, 1, fp);
+
+  uintptr_t heap_size = (uintptr_t)*heap - (uintptr_t)SHARED_MEM_INIT;
+  fwrite_no_fail(&heap_size, sizeof heap_size, 1, fp);
+  fwrite_no_fail((void*)SHARED_MEM_INIT, 1, heap_size, fp);
+
+  fclose(fp);
+  CAMLreturn0;
+}
+
+/* We want to use read() instead of fread() for the large shared memory block
+ * because buffering slows things down. This means we cannot use fread() for
+ * the other (smaller) values in our file either, because the buffering can
+ * move the file position indicator ahead of the values read. */
+static void read_all(int fd, void* start, size_t size) {
+  size_t total_read = 0;
+  do {
+    void* ptr = (void*)((uintptr_t)start + total_read);
+    ssize_t bytes_read = read(fd, (void*)ptr, size);
+    assert(bytes_read != -1 && bytes_read != 0);
+    total_read += bytes_read;
+  } while (total_read < size);
+}
+
+void hh_load(value in_filename) {
+  CAMLparam1(in_filename);
+  FILE* fp = fopen(String_val(in_filename), "rb");
+
+  uint64_t magic = 0;
+  read_all(fileno(fp), (void*)&magic, sizeof magic);
+  assert(magic == MAGIC_CONSTANT);
+
+  size_t revlen = 0;
+  read_all(fileno(fp), (void*)&revlen, sizeof revlen);
+  char revision[revlen];
+  read_all(fileno(fp), (void*)revision, revlen * sizeof(char));
+  assert(strncmp(revision, BuildInfo_kRevision, revlen) == 0);
+
+  read_all(fileno(fp), (void*)&heap_init_size, sizeof heap_init_size);
+
+  uintptr_t heap_size = 0;
+  read_all(fileno(fp), (void*)&heap_size, sizeof heap_size);
+  read_all(fileno(fp), (void*)SHARED_MEM_INIT, heap_size * sizeof(char));
+  assert(*heap == (char*)(SHARED_MEM_INIT + heap_size));
+
+  fclose(fp);
+  CAMLreturn0;
 }
 
 /* Must be called by every worker before any operation is performed */
@@ -481,7 +558,7 @@ void hh_collect() {
   char* tmp_heap;
 
   if(*heap < heap_init + 2 * heap_init_size) {
-    // We have not grown passed twice the size of the initial size
+    // We have not grown past twice the size of the initial size
     return;
   }
 

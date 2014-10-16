@@ -2277,6 +2277,12 @@ emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   mcg->backEnd().emitIncStat(cb, disp, n);
 }
 
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
+  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+}
+
 } // HPHP::jit
 
 } // HPHP

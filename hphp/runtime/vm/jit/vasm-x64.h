@@ -384,14 +384,12 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), Un, Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf), Dn)\
-  O(incstat, I(stat) I(n) I(force), Un, Dn)\
   O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
   O(ldpoint, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(nativeimpl, I(sk) I(callee) I(argc), Un, Dn)\
-  O(nop, Inone, Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
@@ -420,6 +418,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(addlm, Inone, U(s0) U(m), D(sf)) \
   O(addq, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(addqim, I(s0), U(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(andb, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(andbi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -480,6 +479,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
   O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -557,7 +557,6 @@ struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; };
-struct incstat { Stats::StatCounter stat; int n; bool force; };
 struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex; };
 struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
@@ -609,6 +608,7 @@ struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct addqim { Immed s0; Vptr m; VregSF sf; };
 struct addsd  { VregDbl s0, s1, d; };
 struct andb  { Vreg8 s0, s1, d; VregSF sf; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; };

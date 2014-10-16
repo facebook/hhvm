@@ -263,7 +263,7 @@ Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
   // warning: keep this in sync with vasm-x64 call{}
-  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+  if (a.jmpDeltaFits(dest)) {
     a.call(dest);
   } else {
     // can't do a near call; store address in data section.
@@ -273,7 +273,6 @@ void emitCall(Asm& a, TCA dest, RegSet args) {
     // more compact than loading a 64-bit immediate.
     auto addr = mcg->allocLiteral((uint64_t)dest);
     a.call(rip[(intptr_t)addr]);
-    assert(((int32_t*)a.frontier())[-1] + a.frontier() == dest);
   }
 }
 

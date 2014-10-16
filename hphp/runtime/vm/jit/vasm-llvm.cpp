@@ -389,7 +389,6 @@ O(cmpq) \
 O(cmpqim) \
 O(copy) \
 O(decqm) \
-O(incstat) \
 O(incwm) \
 O(jcc) \
 O(jmp) \
@@ -482,9 +481,6 @@ void LLVMEmitter::emit(const decqm& inst) {
   auto newVal = m_irb.CreateSub(oldVal, cns(int64_t{1}));
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(ptr, newVal);
-}
-
-void LLVMEmitter::emit(const incstat& inst) {
 }
 
 void LLVMEmitter::emit(const incwm& inst) {

@@ -162,13 +162,11 @@ private:
   void emit(contenter& i);
   void emit(copy i);
   void emit(copy2& i);
-  void emit(copyargs& i) { always_assert(false); }
   void emit(debugtrap& i) { a->int3(); }
   void emit(end& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
-  void emit(incstat& i) { emitIncStat(a->code(), i.stat, i.n, i.force); }
   void emit(kpcall& i);
   void emit(ldpoint& i);
   void emit(load& i);
@@ -176,12 +174,8 @@ private:
   void emit(mcprep& i);
   void emit(nativeimpl& i);
   void emit(nothrow& i);
-  void emit(nop& i) { a->nop(); }
-  void emit(phidef& i) { always_assert(false); }
-  void emit(phijmp& i) { always_assert(false); }
-  void emit(phijcc& i) { always_assert(false); }
   void emit(point& i) { meta->points[i.p] = a->frontier(); }
-  void emit(resume& i) { emitServiceReq(a->code(), REQ_RESUME); }
+  void emit(resume& i);
   void emit(retransopt& i);
   void emit(store& i);
   void emit(syncpoint i);
@@ -200,6 +194,7 @@ private:
   void emit(addlm& i) { a->addl(i.s0, i.m); }
   void emit(addq& i) { commuteSF(i); a->addq(i.s0, i.d); }
   void emit(addqi& i) { binary(i); a->addq(i.s0, i.d); }
+  void emit(addqim& i);
   void emit(addsd& i) { commute(i); a->addsd(i.s0, i.d); }
   void emit(call i);
   void emit(callm& i) { a->call(i.target); }
@@ -253,6 +248,7 @@ private:
   void emit(movsbl& i) { a->movsbl(i.s, i.d); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
+  void emit(nop& i) { a->nop(); }
   void emit(not& i) { unary(i); a->not(i.d); }
   void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
@@ -372,9 +368,14 @@ template<class Inst> void Vgen::commute(Inst& i) {
   }
 }
 
+void Vgen::emit(addqim& i) {
+  if (i.m.seg == Vptr::FS) a->fs();
+  a->addq(i.s0, i.m.mr());
+}
+
 void Vgen::emit(call i) {
   // warning: this is a copy of emitCall(TCA) in code-gen-helpers-x64.cpp
-  if (a->jmpDeltaFits(i.target) && !Stats::enabled()) {
+  if (a->jmpDeltaFits(i.target)) {
     a->call(i.target);
   } else {
     // can't do a near call; store address in data section.
@@ -384,7 +385,6 @@ void Vgen::emit(call i) {
     // more compact than loading a 64-bit immediate.
     auto addr = mcg->allocLiteral((uint64_t)i.target);
     a->call(rip[(intptr_t)addr]);
-    assert(((int32_t*)a->frontier())[-1] + a->frontier() == (TCA)addr);
   }
 }
 
@@ -613,6 +613,10 @@ void Vgen::emit(mcprep& i) {
   after[-1] = (movAddrUInt << 1) | 1;
   mcg->cgFixups().m_addressImmediates.insert(
     reinterpret_cast<TCA>(~movAddrUInt));
+}
+
+void Vgen::emit(resume& i) {
+  emitServiceReq(a->code(), REQ_RESUME);
 }
 
 void Vgen::emit(retransopt& i) {

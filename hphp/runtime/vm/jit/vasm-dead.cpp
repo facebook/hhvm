@@ -93,8 +93,6 @@ bool effectful(Vinstr& inst) {
       return false;
     case Vinstr::ldimm:
       return !inst.ldimm_.saveflags;
-    case Vinstr::incstat:
-      return inst.incstat_.force || Stats::enabled();
     default:
       return true;
   }

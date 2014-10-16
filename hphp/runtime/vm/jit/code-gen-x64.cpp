@@ -607,7 +607,8 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto const& info = m_state.catches[inst->block()];
   auto& v = vmain();
   v << landingpad{};
-  v << incstat{Stats::TC_CatchTrace, 1, false};
+
+  emitIncStat(v, Stats::TC_CatchTrace);
 
   // We want to restore state as though the call had completed
   // successfully, so skip over any stack arguments.
@@ -640,7 +641,7 @@ void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   unlikelyIfBlock(v, vcold(), CC_E, sf, callUnwindResumeHelper);
 
   // doSideExit == true, so fall through to the side exit code
-  v << incstat{Stats::TC_CatchSideExit, 1, false};
+  emitIncStat(v, Stats::TC_CatchSideExit);
 }
 
 void CodeGenerator::cgCheckSideExit(IRInstruction* inst) {
@@ -653,7 +654,7 @@ void CodeGenerator::cgCheckSideExit(IRInstruction* inst) {
   v = done;
 
   // doSideExit == true, so fall through to the side exit code
-  v << incstat{Stats::TC_CatchSideExit, 1, false};
+  emitIncStat(v, Stats::TC_CatchSideExit);
 }
 
 void CodeGenerator::cgDeleteUnwinderException(IRInstruction* inst) {
@@ -2714,9 +2715,9 @@ bool CodeGenerator::decRefDestroyIsUnlikely(OptDecRefProfile& profile,
              data, m_curInst->marker().show(), profileKey->data());
     }
     if (data.hitRate() == 0) {
-      v << incstat{Stats::TC_DecRef_Profiled_0};
+      emitIncStat(v, Stats::TC_DecRef_Profiled_0);
     } else if (data.hitRate() == 100) {
-      v << incstat{Stats::TC_DecRef_Profiled_100};
+      emitIncStat(v, Stats::TC_DecRef_Profiled_100);
     }
     return data.hitRate() < RuntimeOption::EvalJitUnlikelyDecRefPercent;
   }
@@ -2762,16 +2763,16 @@ void CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
     hasDestroy ? decRefDestroyIsUnlikely(profile, type) : false;
 
   if (hasDestroy) {
-    v << incstat{unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl :
-                 Stats::TC_DecRef_Likely_Decl};
+    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl :
+                   Stats::TC_DecRef_Likely_Decl);
   } else {
-    v << incstat{Stats::TC_DecRef_NZ};
+    emitIncStat(v, Stats::TC_DecRef_NZ);
   }
 
   Vreg sf;
   auto destroy = [&](Vout& v) {
-    v << incstat{unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
-                 Stats::TC_DecRef_Likely_Destroy};
+    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
+                   Stats::TC_DecRef_Likely_Destroy);
     if (profile && profile->profiling()) {
       v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
@@ -5588,7 +5589,7 @@ void CodeGenerator::cgIncStat(IRInstruction *inst) {
   auto stat = Stats::StatCounter(inst->src(0)->intVal());
   int n = inst->src(1)->intVal();
   bool force = inst->src(2)->boolVal();
-  vmain() << incstat{stat, n, force};
+  emitIncStat(vmain(), stat, n, force);
 }
 
 void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {

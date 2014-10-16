@@ -39,6 +39,7 @@ void Sweepable::Node::delist() {
   p->next = n;
 }
 
+// Called once per thread initialization from ThreadInfo::init
 void Sweepable::InitSweepableList() {
   t_sweep.init();
 }

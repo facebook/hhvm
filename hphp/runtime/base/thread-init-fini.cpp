@@ -51,7 +51,6 @@ InitFiniNode::InitFiniNode(void(*f)(), When init) {
 
 // Beware: this is actually called once per request, not as the name suggests
 void init_thread_locals(void *arg /* = NULL */) {
-  Sweepable::InitSweepableList();
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_get_rand_data();

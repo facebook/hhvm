@@ -210,7 +210,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match st with
-    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el)) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el, [])) ->
       let acc = List.fold_left expr acc el in
       assign env acc parent_init_cvar
     | Expr e -> expr acc e
@@ -324,7 +324,7 @@ and expr_ env acc p e =
       | Some e -> expr acc e)
   | Class_const _
   | Class_get _ -> acc
-  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _) ->
+  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _) ->
       let method_ = Env.get_method env f in
       (match method_ with
       | None ->
@@ -338,19 +338,31 @@ and expr_ env acc p e =
               toplevel env acc b
           )
       )
-  | Assert (AE_invariant_violation (e, el))
-  | Call (_, e, el) ->
-      let el =
-        match e with
+  | Assert (AE_invariant_violation (e, el)) ->
+    let el =
+      match e with
         | _, Id (_, fun_name) when is_whitelisted fun_name ->
-            List.filter begin function
-              | _, This -> false
-              | _ -> true
-            end el
+          List.filter begin function
+            | _, This -> false
+            | _ -> true
+          end el
         | _ -> el
-      in
-      let acc = List.fold_left expr acc el in
-      expr acc e
+    in
+    let acc = List.fold_left expr acc el in
+    expr acc e
+  | Call (_, e, el, uel) ->
+    let el = el @ uel in
+    let el =
+      match e with
+        | _, Id (_, fun_name) when is_whitelisted fun_name ->
+          List.filter begin function
+            | _, This -> false
+            | _ -> true
+          end el
+        | _ -> el
+    in
+    let acc = List.fold_left expr acc el in
+    expr acc e
   | True
   | False
   | Int _

@@ -134,9 +134,10 @@ module CheckFunctionType = struct
         expr f_type e;
         maybe expr f_type eopt;
         ()
-    | _, Call (_, e, el) ->
+    | _, Call (_, e, el, uel) ->
         expr f_type e;
         liter expr f_type el;
+        liter expr f_type uel;
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
@@ -585,9 +586,10 @@ and expr_ env = function
       expr env e;
       maybe expr env eopt;
       ()
-  | Call (_, e, el) ->
+  | Call (_, e, el, uel) ->
       expr env e;
       liter expr env el;
+      liter expr env uel;
       ()
   | True | False | Int _
   | Float _ | Null | String _ -> ()

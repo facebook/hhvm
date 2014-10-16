@@ -60,7 +60,7 @@ class type ['a] nast_visitor_type = object
   method on_array_get : 'a -> expr -> expr option -> 'a
   method on_class_get : 'a -> class_id -> pstring -> 'a
   method on_class_const : 'a -> class_id -> pstring -> 'a
-  method on_call : 'a -> call_type -> expr -> expr list -> 'a
+  method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
   method on_false : 'a -> 'a
   method on_int : 'a -> pstring -> 'a
@@ -227,7 +227,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Array_get   (e1, e2)    -> this#on_array_get acc e1 e2
    | Class_get   (cid, id)   -> this#on_class_get acc cid id
    | Class_const (cid, id)   -> this#on_class_const acc cid id
-   | Call        (ct, e, el) -> this#on_call acc ct e el
+   | Call        (ct, e, el, uel) -> this#on_call acc ct e el uel
    | String2     (el, s)     -> this#on_string2 acc el s
    | Pair        (e1, e2)    -> this#on_pair acc e1 e2
    | Cast        (hint, e)   -> this#on_cast acc hint e
@@ -283,9 +283,10 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
   method on_class_get acc _ _ = acc
   method on_class_const acc _ _ = acc
 
-  method on_call acc _ e el =
+  method on_call acc _ e el uel =
     let acc = this#on_expr acc e in
     let acc = List.fold_left this#on_expr acc el in
+    let acc = List.fold_left this#on_expr acc uel in
     acc
 
   method on_true acc = acc

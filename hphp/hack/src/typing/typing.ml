@@ -960,7 +960,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env, ety1 = Env.expand_type env ty1 in
       let env, ty2 = expr env e2 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
-  | Call (Cnormal, (_, Id (_, "copy")), [x]) ->
+  | Call (Cnormal, (_, Id (_, "copy")), [x], _) -> (* XXX: is this ever used??? *)
       let env, ty = expr env x in
       let env, ety = Env.expand_type env ty in
       (match ety with
@@ -970,13 +970,13 @@ and expr_ in_cond is_lvalue env (p, e) =
       | r, ety ->
           TUtils.in_var env (r, ety)
       )
-  | Call (Cnormal, (_, Id (_, hh_show)), [x])
+  | Call (Cnormal, (_, Id (_, hh_show)), [x], [])
       when hh_show = SN.PseudoFunctions.hh_show ->
       let env, ty = expr env x in
       Env.debug env ty;
       env, Env.fresh_type()
-  | Call (call_type, (_, fun_expr as e), el) ->
-      let env, result = dispatch_call p env call_type e el in
+  | Call (call_type, (_, fun_expr as e), el, uel) ->
+      let env, result = dispatch_call p env call_type e (el @ uel) in
       let env = Env.forget_members env p in
       env, result
   | Binop (Ast.Eq (Some op), e1, e2) ->
@@ -1554,7 +1554,7 @@ and check_abstract_parent_meth mname pos fty =
  *)
 and dispatch_call p env call_type (fpos, fun_expr as e) el =
   match fun_expr with
-  | Id (_, "echo") ->
+  | Id (_, pseudo_func) when pseudo_func = SN.SpecialFunctions.echo ->
       let env, _ = lfold expr env el in
       env, (Reason.Rwitness p, Tprim Tvoid)
   | Id (_, pseudo_func)
@@ -2931,10 +2931,10 @@ and condition env tparamet =
   | r, Expr_list (x::xs) ->
       let env, _ = expr env x in
       condition env tparamet (r, Expr_list xs)
-  | _, Call (Cnormal, (_, Id (_, func)), [param])
+  | _, Call (Cnormal, (_, Id (_, func)), [param], [])
     when SN.PseudoFunctions.isset = func && tparamet && not (Env.is_strict env) ->
       condition_isset env param
-  | _, Call (Cnormal, (_, Id (_, func)), [e])
+  | _, Call (Cnormal, (_, Id (_, func)), [e], [])
     when not tparamet && SN.StdlibFunctions.is_null = func ->
       condition_var_non_null env e
   | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
@@ -2973,22 +2973,22 @@ and condition env tparamet =
       let env = condition env false e1 in
       let env = condition env false e2 in
       env
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_array ->
       is_array env lv
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_int ->
       is_type env lv Tint
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_bool ->
       is_type env lv Tbool
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_float ->
       is_type env lv Tfloat
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_string ->
       is_type env lv Tstring
-  | _, Call (Cnormal, (_, Id (_, f)), [lv])
+  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = Naming.is_resource ->
       is_type env lv Tresource
   | _, Unop (Ast.Unot, e) ->

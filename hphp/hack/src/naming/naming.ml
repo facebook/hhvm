@@ -1593,13 +1593,12 @@ and expr_ env = function
   | Call ((_, Id (p, pseudo_func)), el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
       splat_unexpected uel ;
-      N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), exprl env el)
+      N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), exprl env el, [])
   | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.call_user_func ->
       splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
-      | f :: el ->
-          N.Call (N.Cuser_func, expr env f, exprl env el)
+      | f :: el -> N.Call (N.Cuser_func, expr env f, exprl env el, [])
       )
   | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.fun_ ->
       splat_unexpected uel ;
@@ -1723,7 +1722,7 @@ and expr_ env = function
       else N.Special_func (N.Gen_array_va_rec (exprl env el))
   | Call ((p, Id f), el, uel) ->
       N.Call (N.Cnormal, (p, N.Id (Env.fun_id env f)),
-              (exprl env el) @ (exprl env uel))
+              exprl env el, exprl env uel)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
      for both instance property access and instance method calls, we need
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
@@ -1732,11 +1731,11 @@ and expr_ env = function
       N.Call
         (N.Cnormal,
          (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
-         (exprl env el) @ (exprl env uel))
+         exprl env el, exprl env uel)
   (* Handle all kinds of calls that weren't handled by any of
      the cases above *)
   | Call (e, el, uel) ->
-      N.Call (N.Cnormal, expr env e, (exprl env el) @ (exprl env uel))
+      N.Call (N.Cnormal, expr env e, exprl env el, exprl env uel)
   | Yield_break -> (snd env).has_yield := true; N.Yield_break
   | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
   | Await e -> N.Await (expr env e)

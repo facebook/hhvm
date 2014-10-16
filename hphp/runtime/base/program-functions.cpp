@@ -45,7 +45,6 @@
 #include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
@@ -1835,6 +1834,10 @@ void hphp_context_shutdown() {
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();
+
+  // Extension shutdown could have re-initialized some
+  // request locals
+  context->onRequestShutdown();
 }
 
 void hphp_context_exit(bool shutdown /* = true */) {
@@ -1861,7 +1864,16 @@ void hphp_memory_cleanup() {
   // so we can't destroy it yet
   mm.sweep();
 
-  // But its smart allocated, and has some members that need
+  // We should never have any registered RequestEventHandlers. If we do
+  // something after onRequestShutdown registered a RequestEventHandler.
+  // Its now too late to run the requestShutdown functions, but if we carry
+  // on, requestInit and requestShutdown will never be called again.
+  // I considered just clearing the inited flags; which works for some
+  // RequestEventHandlers - but its a disaster for others. So just fail hard
+  // here.
+  always_assert(!g_context->hasRequestEventHandlers());
+
+  // g_context is smart allocated, and has some members that need
   // cleanup, so destroy it before its too late
   g_context.destroy();
 

@@ -258,6 +258,9 @@ public:
   const String& getSandboxId() const { return m_sandboxId; }
   void setSandboxId(const String& sandboxId) { m_sandboxId = sandboxId; }
 
+  bool hasRequestEventHandlers() const {
+    return !m_requestEventHandlers.empty();
+  }
 private:
   class OutputBuffer {
   public:
@@ -284,7 +287,6 @@ private:
   String m_rawPostData;
 
   // request handlers
-  smart::set<RequestEventHandler*> m_requestEventHandlerSet;
   smart::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
 

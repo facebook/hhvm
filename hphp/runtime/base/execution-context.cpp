@@ -515,14 +515,8 @@ void ExecutionContext::popUserExceptionHandler() {
 
 void ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
-  assert(handler);
-  if (m_requestEventHandlerSet.find(handler) ==
-      m_requestEventHandlerSet.end()) {
-    m_requestEventHandlerSet.insert(handler);
-    m_requestEventHandlers.push_back(handler);
-  } else {
-    assert(false);
-  }
+  assert(handler && handler->getInited());
+  m_requestEventHandlers.push_back(handler);
 }
 
 static bool requestEventHandlerPriorityComp(RequestEventHandler *a,
@@ -531,20 +525,22 @@ static bool requestEventHandlerPriorityComp(RequestEventHandler *a,
 }
 
 void ExecutionContext::onRequestShutdown() {
-  // Sort handlers by priority so that lower priority values get shutdown
-  // first
-  sort(m_requestEventHandlers.begin(), m_requestEventHandlers.end(),
-       requestEventHandlerPriorityComp);
-  for (unsigned int i = 0; i < m_requestEventHandlers.size(); i++) {
-    RequestEventHandler *handler = m_requestEventHandlers[i];
-    assert(handler->getInited());
-    if (handler->getInited()) {
+  while (!m_requestEventHandlers.empty()) {
+    // handlers could cause other handlers to be registered,
+    // so need to repeat until done
+    decltype(m_requestEventHandlers) tmp;
+    tmp.swap(m_requestEventHandlers);
+
+    // Sort handlers by priority so that lower priority values get shutdown
+    // first
+    sort(tmp.begin(), tmp.end(),
+         requestEventHandlerPriorityComp);
+    for (auto* handler : tmp) {
+      assert(handler->getInited());
       handler->requestShutdown();
       handler->setInited(false);
     }
   }
-  m_requestEventHandlers.clear();
-  m_requestEventHandlerSet.clear();
 }
 
 void ExecutionContext::executeFunctions(ShutdownType type) {

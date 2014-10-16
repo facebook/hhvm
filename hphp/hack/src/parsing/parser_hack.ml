@@ -2618,7 +2618,7 @@ and collection_field_list_remain env =
 (*****************************************************************************)
 
 and is_import r =
-  List.exists ((=) r) ["require"; "require_once"; "include"; "include_once"]
+  List.mem r ["require"; "require_once"; "include"; "include_once"]
 
 and expr_import r env start =
   let flavor = match r with

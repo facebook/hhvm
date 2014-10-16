@@ -37,7 +37,8 @@ Variant f_min(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      raise_warning("min(): When only one parameter is given, it must be an array");
+      raise_warning("min(): When only one parameter is given,"
+                    " it must be an array");
       return init_null();
     }
 
@@ -75,7 +76,8 @@ Variant f_max(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      raise_warning("max(): When only one parameter is given, it must be an array");
+      raise_warning("max(): When only one parameter is given,"
+                    " it must be an array");
       return init_null();
     }
 

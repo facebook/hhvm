@@ -298,6 +298,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
     | Rmap_append p          -> Rmap_append (pos p)
     | Rvar_param p           -> Rvar_param (pos p)
+    | Runpack_param p        -> Runpack_param (pos p)
     | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
     | Rarray_filter (p, r)   -> Rarray_filter (pos p, reason r)
 

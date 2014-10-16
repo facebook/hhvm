@@ -976,7 +976,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       Env.debug env ty;
       env, Env.fresh_type()
   | Call (call_type, (_, fun_expr as e), el, uel) ->
-      let env, result = dispatch_call p env call_type e (el @ uel) in
+      let env, result = dispatch_call p env call_type e el uel in
       let env = Env.forget_members env p in
       env, result
   | Binop (Ast.Eq (Some op), e1, e2) ->
@@ -1552,7 +1552,7 @@ and check_abstract_parent_meth mname pos fty =
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
  *)
-and dispatch_call p env call_type (fpos, fun_expr as e) el =
+and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
   match fun_expr with
   | Id (_, pseudo_func) when pseudo_func = SN.SpecialFunctions.echo ->
       let env, _ = lfold expr env el in
@@ -1562,6 +1562,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
         pseudo_func = SN.PseudoFunctions.isset
         || pseudo_func = SN.PseudoFunctions.empty ->
     let env, _ = lfold expr env el in
+    let env, _ = lfold expr env uel in
     if Env.is_strict env then
       Errors.isset_empty_unset_in_strict p pseudo_func;
     env, (Reason.Rwitness p, Tprim Tbool)
@@ -1573,12 +1574,12 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       let env, ty = expr env (List.hd el) in
       env, (Reason.Rwitness p, Tprim Tbool)
   | Id ((_, array_filter) as id)
-      when array_filter = SN.StdlibFunctions.array_filter && el <> []->
+      when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
       (* dispatch the call to typecheck the arguments *)
       let env, fty = fun_type_of_id env id in
       let env, fty = Env.expand_type env fty in
-      let env, fty = Inst.instantiate_fun env fty el in
-      let env, res = call p env fty el in
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      let env, res = call p env fty el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd el in
       let env, ty = expr env x in
@@ -1634,7 +1635,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
                 (fun _ -> env, res)))
       in get_array_filter_return_type env ty
   | Id ((_, array_map) as x)
-      when array_map = SN.StdlibFunctions.array_map && el <> []->
+      when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
       let env, fty = match fty, el with
@@ -1764,10 +1765,10 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
               env, build_function (fun tr ->
                 (r_fty, Tarray(true, Some(tr), None))))
         | _ -> env, fty in
-      let env, fty = Inst.instantiate_fun env fty el in
-      call p env fty el
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      call p env fty el []
   | Class_const (CIparent, (_, construct))
-    when construct = SN.Members.__construct ->
+    when construct = SN.Members.__construct && uel = [] ->
       call_parent_construct p env el
   | Class_const (CIparent, m) ->
       let env, ty1 = static_class_id p env CIparent in
@@ -1777,9 +1778,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
          * methods *)
         let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
         let env, fty = Env.expand_type env fty in
-        let env, fty = Inst.instantiate_fun env fty el in
+        let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
         let fty = check_abstract_parent_meth (snd m) p fty in
-        call p env fty el
+        call p env fty el uel
       end
       else begin
         (* in instance context, you can call parent:foo() on static
@@ -1797,9 +1798,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
               obj_get_ ~is_method:true ~nullsafe:None env ty1 m
               begin fun (env, fty, _) ->
                 let env, fty = Env.expand_type env fty in
-                let env, fty = Inst.instantiate_fun env fty el in
+                let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
                 let fty = check_abstract_parent_meth (snd m) p fty in
-                let env, method_ = call p env fty el in
+                let env, method_ = call p env fty el uel in
                 env, method_, None
               end
               k_lhs
@@ -1808,9 +1809,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
           | Some _ ->
             let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
             let env, fty = Env.expand_type env fty in
-            let env, fty = Inst.instantiate_fun env fty el in
+            let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
             let fty = check_abstract_parent_meth (snd m) p fty in
-            call p env fty el
+            call p env fty el uel
         )
       end
   | Class_const(e1, m) ->
@@ -1818,8 +1819,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       let env, ty1 = static_class_id p env e1 in
       let env, fty = class_get ~is_method:true ~is_const:false env ty1 m e1 in
       let env, fty = Env.expand_type env fty in
-      let env, fty = Inst.instantiate_fun env fty el in
-      call p env fty el
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      call p env fty el uel
   | Obj_get(e1, (_, Id m), nullflavor) ->
       let is_method = call_type = Cnormal in
       let env, ty1 = expr env e1 in
@@ -1830,8 +1831,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
         ) in
       let fn = (fun (env, fty, _) ->
         let env, fty = Env.expand_type env fty in
-        let env, fty = Inst.instantiate_fun env fty el in
-        let env, method_ = call p env fty el in
+        let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+        let env, method_ = call p env fty el uel in
         env, method_, None) in
       (if nullflavor == OG_nullsafe && not (type_could_be_null env ty1) then
         let env, (r, _) = Env.expand_type env ty1 in
@@ -1845,13 +1846,13 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el =
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x in
       let env, fty = Env.expand_type env fty in
-      let env, fty = Inst.instantiate_fun env fty el in
-      call p env fty el
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      call p env fty el uel
   | _ ->
       let env, fty = expr env e in
       let env, fty = Env.expand_type env fty in
-      let env, fty = Inst.instantiate_fun env fty el in
-      call p env fty el
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      call p env fty el uel
 
 and fun_type_of_id env x =
   Find_refs.process_find_refs None (snd x) (fst x);
@@ -2550,7 +2551,7 @@ and call_construct p env class_ params el =
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in
-      fst (call p env m el)
+      fst (call p env m el [])
 
 and check_visibility p env (p_vis, vis) cid =
   match is_visible env vis cid with
@@ -2636,9 +2637,9 @@ and is_visible env vis cid =
             | _, _ -> None
         )
 
-and check_arity env pos pos_def (arity:int) (exp_arity:fun_arity) =
+and check_arity ?(check_min=true) env pos pos_def (arity:int) (exp_arity:fun_arity) =
   let exp_min = (Typing_defs.arity_min exp_arity) in
-  if arity < exp_min then
+  if check_min && arity < exp_min then
     Errors.typing_too_few_args pos pos_def;
   match exp_arity with
     | Fstandard (_, exp_max) ->
@@ -2654,60 +2655,71 @@ and variadic_param env ft =
     | Fvariadic (_, p_ty) -> env, Some p_ty
     | Fellipsis _ | Fstandard _ -> env, None
 
-and call pos env fty el =
-  let env, ty = call_ pos env fty el in
+and call pos env fty el uel =
+  let env, ty = call_ pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
    * When this is the case, a call could violate one of the constraints
-   * in a branch.
-   *)
+   * in a branch. *)
   let env = fold_fun_list env env.Env.todo in
   env, ty
 
-and call_ pos env fty el =
+and call_ pos env fty el uel =
   let env, efty = Env.expand_type env fty in
   (match efty with
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
       let env, fty = Typing_tdef.expand_typedef env r x argl in
-      call_ pos env fty el
+      call_ pos env fty el uel
   | _, (Tany | Tunresolved []) ->
-      let env, _ = lmap expr env el in
-      Typing_hooks.dispatch_fun_call_hooks [] (List.map fst el) env;
-      env, (Reason.Rnone, Tany)
+    let el = el @ uel in
+    let env, _ = lmap expr env el in
+    Typing_hooks.dispatch_fun_call_hooks [] (List.map fst (el @ uel)) env;
+    env, (Reason.Rnone, Tany)
   | r, Tunresolved tyl ->
-      let env, retl = lmap (fun env ty -> call pos env ty el) env tyl in
-      TUtils.in_var env (r, Tunresolved retl)
+    let env, retl = lmap (fun env ty -> call pos env ty el uel) env tyl in
+    TUtils.in_var env (r, Tunresolved retl)
   | r2, Tfun ft ->
-      let pos_def = Reason.to_pos r2 in
-      let () = check_arity env pos pos_def (List.length el) ft.ft_arity in
-      let env, var_param = variadic_param env ft in
-      let env, tyl = lfold expr env el in
-      let pos_tyl = List.combine (List.map fst el) tyl in
-      let todos = ref [] in
-      let env = wfold_left_default (call_param todos) (env, var_param)
-                                   ft.ft_params pos_tyl in
-      let env = fold_fun_list env !todos in
-      Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst el) env;
-      env, ft.ft_ret
-  | r2, Tanon (arity, id) ->
-      let env, tyl = lmap expr env el in
-      let anon = Env.get_anonymous env id in
-      let fpos = Reason.to_pos r2 in
-      (match anon with
-        | None ->
-          Errors.anonymous_recursive_call pos;
-          env, (Reason.Rnone, Tany)
-        | Some anon ->
-          let () = check_arity env pos fpos (List.length tyl) arity in
-          let tyl = List.map (fun x -> None, x) tyl in
-          anon env tyl)
+    let pos_def = Reason.to_pos r2 in
+    let () = check_arity ~check_min:(uel = [])
+      env pos pos_def (List.length el + List.length uel) ft.ft_arity in
+    let env, var_param = variadic_param env ft in
+    let env, tyl = lmap expr env el in
+    let pos_tyl = List.combine (List.map fst el) tyl in
+    let todos = ref [] in
+    let env = wfold_left_default (call_param todos) (env, var_param)
+      ft.ft_params pos_tyl in
+    let unpack_expr = (fun env e ->
+      let pos = fst e in
+      let unpack_r = Reason.Runpack_param pos in
+      let env, ty_elt = expr env e in
+      let container_ty = (unpack_r, Tapply ((pos, SN.Collections.cContainer),
+                                            [unpack_r, Tany])) in
+      let env = Type.sub_type pos Reason.URparam env container_ty ty_elt in
+      env, ty_elt
+    ) in
+    let env, _ = lmap unpack_expr env uel in
+    let env = fold_fun_list env !todos in
+    Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst (el @ uel)) env;
+    env, ft.ft_ret
+  | r2, Tanon (arity, id) when uel = [] ->
+    let env, tyl = lmap expr env el in
+    let anon = Env.get_anonymous env id in
+    let fpos = Reason.to_pos r2 in
+    (match anon with
+      | None ->
+        Errors.anonymous_recursive_call pos;
+        env, (Reason.Rnone, Tany)
+      | Some anon ->
+        let () = check_arity env pos fpos (List.length tyl) arity in
+        let tyl = List.map (fun x -> None, x) tyl in
+        anon env tyl)
   | _, Tarray _ when not (Env.is_strict env) ->
-      (* Relaxing call_user_func to work with an array is partial mode *)
-      env, (Reason.Rnone, Tany)
+    (* Relaxing call_user_func to work with an array in partial mode *)
+    env, (Reason.Rnone, Tany)
   | _, ty ->
-      bad_call pos ty;
-      env, (Reason.Rnone, Tany)
+    bad_call pos ty;
+    env, (Reason.Rnone, Tany)
   )
 
 and call_param todos env (name, x) (pos, arg) =

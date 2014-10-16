@@ -1383,7 +1383,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf stats = config["Stats"];
-    Config::Bind(EnableStats, ini, stats); // main switch
+    Config::Bind(EnableStats, ini, stats["Enable"], false); // main switch
 
     Config::Bind(EnableAPCStats, ini, stats["APC"], false);
     Config::Bind(EnableWebStats, ini, stats["Web"]);

@@ -1101,6 +1101,14 @@ Variant f_disk_total_space(const String& directory) {
 bool f_chmod(const String& filename, int64_t mode) {
   CHECK_PATH_FALSE(filename, 1);
   String translated = File::TranslatePath(filename);
+
+  // If filename points to a user file, invoke UserStreamWrapper::touch(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    return usw->chmod(filename, mode);
+  }
+
   CHECK_SYSTEM(chmod(translated.c_str(), mode));
   return true;
 }
@@ -1113,7 +1121,7 @@ static int get_uid(const Variant& user) {
     if (!pw) {
       Logger::Verbose("%s/%d: Unable to find uid for %s",
                       __FUNCTION__, __LINE__, suser.data());
-      return 0;
+      return -1;
     }
     uid = pw->pw_uid;
   } else {
@@ -1124,8 +1132,23 @@ static int get_uid(const Variant& user) {
 
 bool f_chown(const String& filename, const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
+
+  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    if (user.isInteger()) {
+      return usw->chown(filename, user.toInt64());
+    } else if (user.isString()) {
+      return usw->chown(filename, user.toString());
+    }
+    raise_warning("parameter 2 should be string or integer, %s given",
+                  tname(user.getType()).data());
+    return false;
+  }
+
   int uid = get_uid(user);
-  if (uid == 0) return false;
+  if (uid == -1) return false;
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
   return true;
 }
@@ -1146,7 +1169,7 @@ static int get_gid(const Variant& group) {
     if (!gr) {
       Logger::Verbose("%s/%d: Unable to find gid for %s",
                       __FUNCTION__, __LINE__, sgroup.data());
-      return 0;
+      return -1;
     }
     gid = gr->gr_gid;
   } else {
@@ -1157,8 +1180,23 @@ static int get_gid(const Variant& group) {
 
 bool f_chgrp(const String& filename, const Variant& group) {
   CHECK_PATH_FALSE(filename, 1);
+
+  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    if (group.isInteger()) {
+      return usw->chgrp(filename, group.toInt64());
+    } else if (group.isString()) {
+      return usw->chgrp(filename, group.toString());
+    }
+    raise_warning("parameter 2 should be string or integer, %s given",
+                  tname(group.getType()).data());
+    return false;
+  }
+
   int gid = get_gid(group);
-  if (gid == 0) return false;
+  if (gid == -1) return false;
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }

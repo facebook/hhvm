@@ -22,7 +22,12 @@ type options = {
     root             : Path.path;
     should_detach    : bool;
     convert          : Path.path option;
+    load_save_opt    : env_store_action option;
   }
+
+and env_store_action =
+  | Load of string
+  | Save of string
 
 (*****************************************************************************)
 (* Usage code *)
@@ -46,6 +51,8 @@ module Messages = struct
   let from_emacs    = " passed from hh_client"
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
+  let load          = " load server state from file"
+  let save          = " save server state to file"
 end
 
 
@@ -69,7 +76,10 @@ let populate_options () =
   let json_mode     = ref false in
   let should_detach = ref false in
   let convert_dir   = ref None  in
+  let load_save_opt = ref None  in
   let cdir          = fun s -> convert_dir := Some s in
+  let load          = fun s -> load_save_opt := Some (Load s) in
+  let save          = fun s -> load_save_opt := Some (Save s) in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
      "--check"         , arg check_mode    , Messages.check;
@@ -80,6 +90,8 @@ let populate_options () =
      "--from-emacs"    , arg from_emacs    , Messages.from_emacs;
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
+     "--load"          , Arg.String load   , Messages.load;
+     "--save"          , Arg.String save   , Messages.save;
    ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -98,6 +110,7 @@ let populate_options () =
     root          = Path.mk_path !root;
     should_detach = !should_detach;
     convert       = convert;
+    load_save_opt = !load_save_opt;
   }
 
 (* useful in testing code *)
@@ -108,6 +121,7 @@ let default_options ~root =
   root = Path.mk_path root;
   should_detach = false;
   convert = None;
+  load_save_opt = None;
 }
 
 (*****************************************************************************)
@@ -139,3 +153,4 @@ let json_mode options = options.json_mode
 let root options = options.root
 let should_detach options = options.should_detach
 let convert options = options.convert
+let load_save_opt options = options.load_save_opt

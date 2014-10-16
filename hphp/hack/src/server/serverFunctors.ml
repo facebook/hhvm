@@ -116,6 +116,26 @@ end = struct
       if has_client then Program.handle_connection genv !env socket;
     done
 
+  let create_program_init genv env root = fun () ->
+    match ServerArgs.load_save_opt genv.options with
+    | None -> Program.init genv env root
+    | Some (ServerArgs.Save fn) ->
+        let chan = open_out_no_fail fn in
+        let env = Program.init genv env root in
+        Marshal.to_channel chan env [];
+        close_out_no_fail fn chan;
+        (* We cannot save the shared memory to `chan` because the OCaml runtime
+         * does not expose the underlying file descriptor to C code; so we use
+         * a separate ".sharedmem" file.  *)
+        SharedMem.save (fn^".sharedmem");
+        env
+    | Some (ServerArgs.Load fn) ->
+        let chan = open_in_no_fail fn in
+        let env = Marshal.from_channel chan in
+        close_in_no_fail fn chan;
+        SharedMem.load (fn^".sharedmem");
+        env
+
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set
   * of files that changed, it is only set back to SSet.empty when the
@@ -135,14 +155,14 @@ end = struct
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
     let env = ServerEnvBuild.make_env options in
+    let program_init = create_program_init genv env root in
     let is_check_mode = ServerArgs.check_mode genv.options in
     if is_check_mode
     then
-      let env = Program.init genv env root in
+      let env = program_init () in
       Program.run_once_and_exit genv env root
     else
-      let env = MainInit.go root
-                  (fun () -> Program.init genv env root) in
+      let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
       EventLogger.init_done ();
       serve genv env socket root

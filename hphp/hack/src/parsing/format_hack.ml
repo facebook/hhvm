@@ -1928,7 +1928,7 @@ and namespace env =
   wrap env begin function
     | Tsc -> back env; semi_colon env;
     | Tlcb ->
-        space env; last_token env;
+        space env; last_token env; newline env;
         right env (stmt_list ~is_toplevel:true);
         expect "}" env
     | _ ->

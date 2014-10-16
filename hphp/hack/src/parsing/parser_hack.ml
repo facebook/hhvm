@@ -389,7 +389,7 @@ let ref_param env =
 (* Entry point *)
 (*****************************************************************************)
 
-let rec program content =
+let rec program ?(elaborate_namespaces = true) content =
   L.comment_list := [];
   L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
@@ -402,7 +402,9 @@ let rec program content =
   Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
-  let ast = Namespaces.elaborate_defs ast in
+  let ast = if elaborate_namespaces
+    then Namespaces.elaborate_defs ast
+    else ast in
   {is_hh_file; comments; ast}
 
 (*****************************************************************************)
@@ -600,10 +602,7 @@ and toplevel_word ~attr env = function
       }]
   | "namespace" ->
       let id, body = namespace env in
-      (* Check for an empty name and omit the Namespace wrapper *)
-      (match id with
-      | (_, "") -> body
-      | _ -> [Namespace (id, body)])
+      [Namespace (id, body)]
   | "use" ->
       let usel = namespace_use_list env [] in
       [NamespaceUse usel]

@@ -119,8 +119,16 @@ module ElaborateDefs = struct
     | other -> other
 
   let rec def nsenv = function
+    (*
+      The default namespace in php is the global namespace specified by
+      the empty string. In the case of an empty string, we model it as
+      the global namespace.
+    *)
     | Namespace ((_, nsname), prog) -> begin
-        let new_nsenv = {nsenv with ns_name = Some nsname} in
+        let nsname = match nsname with
+          | "" -> None
+          | _ -> Some nsname in
+        let new_nsenv = {nsenv with ns_name = nsname} in
         nsenv, program new_nsenv prog
       end
     | NamespaceUse l -> begin

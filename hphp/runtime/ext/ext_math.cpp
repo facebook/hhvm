@@ -249,7 +249,7 @@ static DataType convert_for_pow(const Variant& val,
     default:
       // Unknown data type
       raise_error("Unsupported operand types");
-      return KindOfUnknown; // Not Reached
+      return KindOfInvalid; // Not Reached
   }
 }
 

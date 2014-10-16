@@ -50,7 +50,7 @@ inline bool isRefType(DataType dt) {
 }
 
 inline void* retPtrArg(DataType retType, TypedValue &ret) {
-  if (retType == KindOfUnknown) {
+  if (retType == KindOfInvalid) {
     return &ret;
   }
   if (isRefType(retType)) {
@@ -102,7 +102,7 @@ static void populateArgs(const Func* func,
       }
     } else {
       assert((GP_count + 1) < kMaxBuiltinArgs);
-      if (type == KindOfUnknown) {
+      if (type == KindOfInvalid) {
         GP_args[GP_count++] = (int64_t)(args - i);
       } else if (isRefType(type)) {
         GP_args[GP_count++] = (int64_t)&args[-i].m_data;
@@ -141,7 +141,7 @@ static void populateArgsNoDoubles(const Func* func,
   for (int i = 0; i < numArgs; ++i) {
     auto dt = func->params()[i].builtinType;
     assert(dt != KindOfDouble);
-    if (dt == KindOfUnknown) {
+    if (dt == KindOfInvalid) {
       GP_args[GP_count++] = (int64_t)(args - i);
     } else if (isRefType(dt)) {
       GP_args[GP_count++] = (int64_t)&(args[-i].m_data);
@@ -178,7 +178,7 @@ void callFunc(const Func* func, void *ctx,
 
   BuiltinFunction f = func->nativeFuncPtr();
   switch (ret.m_type) {
-    case KindOfUnknown:
+    case KindOfInvalid:
        callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
        if (ret.m_type == KindOfUninit) {
          ret.m_type = KindOfNull;
@@ -274,7 +274,7 @@ bool coerceFCallArgs(TypedValue* args,
         }
         break;
       }
-      case KindOfUnknown:
+      case KindOfInvalid:
         break;
       default:
         not_reached();

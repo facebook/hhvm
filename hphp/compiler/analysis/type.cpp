@@ -641,7 +641,7 @@ DataType Type::getDataType() const {
     case KindOfPrimitive:
     case KindOfPlusOperand:
     case KindOfSequence:
-    default:                return HPHP::KindOfUnknown;
+    default:                return HPHP::KindOfInvalid;
   }
 }
 

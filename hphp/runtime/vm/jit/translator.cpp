@@ -64,7 +64,6 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#define KindOfUnknown DontUseKindOfUnknownInThisFile
 #define KindOfInvalid DontUseKindOfInvalidInThisFile
 
 TRACE_SET_MOD(trans);

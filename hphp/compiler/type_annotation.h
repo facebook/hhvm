@@ -158,7 +158,7 @@ public:
   /*
    * Root datatype, ignores inner types for generics
    *
-   * For nullable or soft types, KindOfUnknown will be returned
+   * For nullable or soft types, KindOfInvalid will be returned
    * since the annotation could represent more than one type.
    *
    * To get the expected type even with nullable/soft annotations

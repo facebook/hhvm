@@ -77,7 +77,7 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
     return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
   }
   if (!expectedType && (m_nullable || m_soft)) {
-    return KindOfUnknown;
+    return KindOfInvalid;
   }
   if (!strcasecmp(m_name.c_str(), "null") ||
       !strcasecmp(m_name.c_str(), "HH\\void")) {
@@ -86,12 +86,12 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
   if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
   if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfUnknown;
-  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfInvalid;
+  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return KindOfInvalid;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return KindOfUnknown;
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return KindOfInvalid;
 
   return KindOfObject;
 }

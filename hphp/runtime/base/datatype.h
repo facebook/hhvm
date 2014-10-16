@@ -42,7 +42,6 @@ enum DataType : int8_t {
   // Values below zero are not PHP values, but runtime-internal.
   KindOfClass         = -13,
   KindOfInvalid       = -1,
-  KindOfUnknown       = KindOfInvalid,
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.

@@ -394,7 +394,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     }
 
     paramNeedsConversion[offset] = offset < numNonDefault
-                                   && dt != KindOfUnknown;
+                                   && dt != KindOfInvalid;
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -605,7 +605,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   // Make the actual call.
   auto const retType = [&] {
     auto const retDt = callee->returnType();
-    auto const ret = retDt == KindOfUnknown ? Type::Cell : Type(retDt);
+    auto const ret = retDt == KindOfInvalid ? Type::Cell : Type(retDt);
     return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
   }();
   SSATmp** decayedPtr = &args[0];

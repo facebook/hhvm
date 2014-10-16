@@ -237,7 +237,7 @@ getArg(ActRec *ar, unsigned arg,
 inline
 DataType getArgType(ActRec *ar, unsigned arg) {
   TypedValue *tv = getArg(ar, arg);
-  return tv ? tv->m_type : KindOfUnknown;
+  return tv ? tv->m_type : KindOfInvalid;
 }
 
 /**

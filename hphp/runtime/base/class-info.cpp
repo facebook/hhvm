@@ -525,7 +525,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       constant->valueLen = 0;
       constant->valueText = nullptr;
       Variant v;
-      if (dt == KindOfUnknown) {
+      if (dt == KindOfInvalid) {
         constant->valueLen = intptr_t(len_or_cw);
       } else {
         v = ClassInfo::GetVariant(dt, len_or_cw);

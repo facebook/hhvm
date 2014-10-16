@@ -747,7 +747,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
  * Check whether return types of builtins are not simple types.
  *
  * This is different from IS_REFCOUNTED_TYPE because builtins can return
- * Variants, and we use KindOfUnknown to denote these return types.
+ * Variants, and we use KindOfInvalid to denote these return types.
  */
 inline bool isCppByRef(DataType t) {
   return t != KindOfBoolean && t != KindOfInt64 &&

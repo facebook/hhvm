@@ -5338,7 +5338,7 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
         case KindOfArray:
           e.Int(0);
           break;
-        case KindOfUnknown:
+        case KindOfInvalid:
           e.NullUninit();
           break;
         default:

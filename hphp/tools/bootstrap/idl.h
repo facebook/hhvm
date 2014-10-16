@@ -83,7 +83,7 @@ bool isKindOfIndirect(DataType kindof);
 static inline fbstring kindOfString(DataType t) {
   switch ((int)t) {
     case KindOfAny:          return "Any";
-    case KindOfUnknown:      return "Unknown";
+    case KindOfInvalid:      return "Unknown";
     case KindOfNull:         return "Null";
     case KindOfBoolean:      return "Boolean";
     case KindOfInt64:        return "Int64";

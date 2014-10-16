@@ -363,7 +363,7 @@ static DataType get_option_value_type(int64_t option) {
 #endif
       return KindOfNull;
     default:
-      return KindOfUnknown;
+      return KindOfInvalid;
   }
 
   not_reached();
@@ -375,7 +375,7 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
   VALIDATE_CONN(conn, MySQLState::INITED)
 
   DataType dt = get_option_value_type(option);
-  if (dt == KindOfUnknown) {
+  if (dt == KindOfInvalid) {
     return false;
   }
 

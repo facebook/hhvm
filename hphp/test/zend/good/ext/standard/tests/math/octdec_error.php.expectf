@@ -1,0 +1,11 @@
+*** Testing octdec() :  error conditions ***
+
+-- Incorrect number of arguments --
+
+Warning: %s
+
+Warning: %s
+
+-- Incorrect input --
+
+Catchable fatal error: %s

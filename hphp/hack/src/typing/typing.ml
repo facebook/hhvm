@@ -960,16 +960,6 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env, ety1 = Env.expand_type env ty1 in
       let env, ty2 = expr env e2 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
-  | Call (Cnormal, (_, Id (_, "copy")), [x], _) -> (* XXX: is this ever used??? *)
-      let env, ty = expr env x in
-      let env, ety = Env.expand_type env ty in
-      (match ety with
-      | r, Tarray (_, x1, x2) ->
-          (* We consider the array as local now *)
-          TUtils.in_var env (r, Tarray (true, x1, x2))
-      | r, ety ->
-          TUtils.in_var env (r, ety)
-      )
   | Call (Cnormal, (_, Id (_, hh_show)), [x], [])
       when hh_show = SN.PseudoFunctions.hh_show ->
       let env, ty = expr env x in
@@ -1866,14 +1856,6 @@ and fun_type_of_id env x =
   in
   env, fty
 
-(* Checking that the user explicitely made a copy *)
-and array_cow p =
-  (* Let's disable this for now. We have too many arrays in our codebase.
-   * When the time is right and we want to switch to containers, we will
-   * revive this.
-   *)
-  ()
-
 (*****************************************************************************)
 (* Function type-checking expressions accessing an array (example: $x[...]).
  * The parameter is_lvalue is true when the expression is on the left hand
@@ -1901,8 +1883,6 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       in
       env, (fst ety1, Tunresolved tyl)
   | Tarray (is_local, Some ty, None) ->
-      if is_lvalue && not is_local
-      then array_cow p;
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URarray_get env ty2 ty1 in
       env, ty
@@ -1980,8 +1960,6 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env p ety1
   | Tarray (is_local, Some k, Some v) ->
-      if is_lvalue && not is_local
-      then array_cow p;
       let env, ty2 = TUtils.unresolved env ty2 in
       let env, _ = Type.unify p Reason.URarray_get env k ty2 in
       (* The values in the array are not consistent
@@ -2080,8 +2058,6 @@ and array_append is_lvalue p env ty1 =
       (* You can append a pair to a map *)
       env, (Reason.Rmap_append p, Tapply ((p, SN.Collections.cPair), [tkey; tvalue]))
   | Tarray (is_local, Some ty, None) ->
-      if is_lvalue && not is_local
-      then array_cow p;
       env, ty
   | Tobject ->
       if Env.is_strict env

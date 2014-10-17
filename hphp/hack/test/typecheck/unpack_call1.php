@@ -2,6 +2,23 @@
 
 function f(int $foo, ...$args): void {}
 
+class C1 {
+  public function __construct(
+    private int $foo,
+    private ...$args
+  ) {}
+  public function f(int $foo, ...$args): void {}
+}
+
+class C2 extends C1 {
+  public function __construct(
+    private int $foo,
+    private ...$args
+  ) {
+    parent::__construct($foo, ...$args);
+  }
+}
+
 function make_int_args(): Container<int> {
   // UNSAFE
 }
@@ -17,6 +34,10 @@ function make_str_args(): Vector<string> {
 function test_basic(): void {
   $args = array(1, 2, 3);
   f(...$args);
+  $inst = new C1(...$args);
+  $inst->f(...$args);
+  $inst = new C2(...$args);
+  $inst->f(...$args);
 
   switch ( mt_rand() % 5 ) {
     case 0: $args[] = 20; break;

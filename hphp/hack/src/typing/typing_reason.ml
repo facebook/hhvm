@@ -101,7 +101,7 @@ let rec to_string prefix r =
   | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" in an async function")]
   | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
-  | Runpack_param    _ -> [(p, prefix ^ " (it is unpacked with ...)")]
+  | Runpack_param    _ -> [(p, prefix ^ " (it is unpacked with '...')")]
   | Rcoerced     (p1, p2, s)  ->
       [
         (p, prefix);

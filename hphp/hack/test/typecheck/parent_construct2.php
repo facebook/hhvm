@@ -26,11 +26,10 @@ class B extends A {
   public int $z;
 
   public function __construct() {
-    if(true) {
+    if (true) {
     }
     $this->z = 0;
     $this->make_my_day();
     parent::__construct();
   }
 }
-

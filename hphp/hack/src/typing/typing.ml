@@ -1069,7 +1069,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       Typing_hooks.dispatch_new_id_hook c env;
       Typing_utils.process_static_find_ref c (p, SN.Members.__construct);
       let check_not_abstract = true in
-      let env, ty = new_object ~check_not_abstract p env c el in
+      let env, ty = new_object ~check_not_abstract p env c el uel in
       let env = Env.forget_members env p in
       env, ty
   | Cast ((_, Harray (None, None)), _) when Env.is_strict env ->
@@ -1228,7 +1228,7 @@ and special_func env p func =
   ) in
   env, (Reason.Rwitness p, Tapply ((p, SN.Classes.cAwaitable), [ty]))
 
-and new_object ~check_not_abstract p env c el =
+and new_object ~check_not_abstract p env c el uel =
   let env, class_ = class_id p env c in
   (match class_ with
   | None ->
@@ -1237,6 +1237,7 @@ and new_object ~check_not_abstract p env c el =
       | CIself -> Errors.new_self_outside_class p
       | _ -> ());
       let _ = lmap expr env el in
+      let _ = lmap expr env uel in
       env, (Reason.Runknown_class p, Tobject)
   | Some (cname, class_) ->
       if check_not_abstract && class_.tc_abstract && c <> CIstatic
@@ -1246,7 +1247,7 @@ and new_object ~check_not_abstract p env c el =
       end env class_.tc_tparams in
       let env =
         if SSet.mem "XHP" class_.tc_extends then env else
-        let env = call_construct p env class_ params el in
+        let env = call_construct p env class_ params el uel in
         env
       in
       let obj_type = Reason.Rwitness p, Tapply (cname, params) in
@@ -1497,16 +1498,17 @@ and yield_field_key env = function
   | Nast.AFkvalue (x, _) ->
       expr env x
 
-and check_parent_construct pos env el env_parent =
+and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
-  let env, parent = new_object ~check_not_abstract pos env CIparent el in
+  let env, parent = new_object ~check_not_abstract pos env CIparent el uel in
   let env, _ = Type.unify pos (Reason.URnone) env env_parent parent in
   env, (Reason.Rwitness pos, Tprim Tvoid)
 
-and call_parent_construct pos env el =
+and call_parent_construct pos env el uel =
   let parent = Env.get_parent env in
   match parent with
-    | _, Tapply (_, params) -> check_parent_construct pos env el parent
+    | _, Tapply (_, params) ->
+      check_parent_construct pos env el uel parent
     | _ ->
       let default = env, (Reason.Rnone, Tany) in
       match Env.get_self env with
@@ -1518,7 +1520,7 @@ and call_parent_construct pos env el =
                 | None -> Errors.parent_in_trait pos; default
                 | Some (tc_parent, parent_ty) ->
                   (* let r = Reason.Rwitness pos in *)
-                  check_parent_construct pos env el parent_ty
+                  check_parent_construct pos env el uel parent_ty
               )
             | Some self_tc ->
               if not self_tc.tc_members_fully_known
@@ -1551,7 +1553,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         pseudo_func = SN.PseudoFunctions.isset
         || pseudo_func = SN.PseudoFunctions.empty ->
     let env, _ = lfold expr env el in
-    let env, _ = lfold expr env uel in
+    let env, _ = lfold unpack_expr env uel in
     if Env.is_strict env then
       Errors.isset_empty_unset_in_strict p pseudo_func;
     env, (Reason.Rwitness p, Tprim Tbool)
@@ -1757,8 +1759,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
       call p env fty el []
   | Class_const (CIparent, (_, construct))
-    when construct = SN.Members.__construct && uel = [] ->
-      call_parent_construct p env el
+    when construct = SN.Members.__construct ->
+      call_parent_construct p env el uel
   | Class_const (CIparent, m) ->
       let env, ty1 = static_class_id p env CIparent in
       if Env.is_static env
@@ -2511,7 +2513,7 @@ and static_class_id p env = function
             Reason.Rnone, Tany
       in env, ty
 
-and call_construct p env class_ params el =
+and call_construct p env class_ params el uel =
   let env, cstr = Env.get_construct env class_ in
   let mode = env.Env.genv.Env.mode in
   Find_refs.process_find_refs (Some class_.tc_name) SN.Members.__construct p;
@@ -2526,7 +2528,7 @@ and call_construct p env class_ params el =
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst class_.tc_tparams params in
       let env, m = Inst.instantiate subst env m in
-      fst (call p env m el [])
+      fst (call p env m el uel)
 
 and check_visibility p env (p_vis, vis) cid =
   match is_visible env vis cid with
@@ -2640,6 +2642,15 @@ and call pos env fty el uel =
   let env = fold_fun_list env env.Env.todo in
   env, ty
 
+and unpack_expr env e =
+  let pos = fst e in
+  let unpack_r = Reason.Runpack_param pos in
+  let env, ty_elt = expr env e in
+  let container_ty = (unpack_r, Tapply ((pos, SN.Collections.cContainer),
+                                        [unpack_r, Tany])) in
+  let env = Type.sub_type pos Reason.URparam env container_ty ty_elt in
+  env, ty_elt
+
 and call_ pos env fty el uel =
   let env, efty = Env.expand_type env fty in
   (match efty with
@@ -2664,15 +2675,6 @@ and call_ pos env fty el uel =
     let todos = ref [] in
     let env = wfold_left_default (call_param todos) (env, var_param)
       ft.ft_params pos_tyl in
-    let unpack_expr = (fun env e ->
-      let pos = fst e in
-      let unpack_r = Reason.Runpack_param pos in
-      let env, ty_elt = expr env e in
-      let container_ty = (unpack_r, Tapply ((pos, SN.Collections.cContainer),
-                                            [unpack_r, Tany])) in
-      let env = Type.sub_type pos Reason.URparam env container_ty ty_elt in
-      env, ty_elt
-    ) in
     let env, _ = lmap unpack_expr env uel in
     let env = fold_fun_list env !todos in
     Typing_hooks.dispatch_fun_call_hooks ft.ft_params (List.map fst (el @ uel)) env;

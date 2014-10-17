@@ -41,5 +41,4 @@ final class C extends B {
     $this->do_this_too();
     print $this->x;
   }
-
 }

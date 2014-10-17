@@ -1,6 +1,6 @@
 <?hh
 
-function f(int $foo): void {}
+function f(string $foo): void {}
 
 function test(): void {
   $args = array();

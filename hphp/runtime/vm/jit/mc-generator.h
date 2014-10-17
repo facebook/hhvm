@@ -390,6 +390,9 @@ inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
 extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
                         bool force = false);
 
+void emitServiceReq(Vout& v, SRFlags flags, ServiceRequest req,
+                    const ServiceReqArgVec& argv);
+
 }}
 
 #endif

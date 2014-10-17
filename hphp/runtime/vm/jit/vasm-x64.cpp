@@ -174,8 +174,6 @@ private:
   void emit(mcprep& i);
   void emit(nothrow& i);
   void emit(point& i) { meta->points[i.p] = a->frontier(); }
-  void emit(resume& i);
-  void emit(retransopt& i);
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -610,15 +608,6 @@ void Vgen::emit(mcprep& i) {
     reinterpret_cast<TCA>(~movAddrUInt));
 }
 
-void Vgen::emit(resume& i) {
-  emitServiceReq(a->code(), REQ_RESUME);
-}
-
-void Vgen::emit(retransopt& i) {
-  emitServiceReq(a->code(), REQ_RETRANSLATE_OPT,
-                 i.sk.toAtomicInt(), i.id);
-}
-
 void Vgen::emit(store& i) {
   if (i.s.isGP()) {
     a->storeq(i.s, i.d);
@@ -882,6 +871,40 @@ static void vector_splice(V& out, size_t idx, size_t count, V& in) {
   in.clear();
 }
 
+// Lower svcreq{} by making copies to abi registers explicit, saving
+// vm regs, and returning to the VM. svcreq{} is guaranteed to be
+// at the end of a block, so we can just keep appending to the same
+// block.
+static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
+  assert(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
+  auto svcreq = inst.svcreq_; // copy it
+  auto origin = inst.origin;
+  auto& argv = unit.tuples[svcreq.args];
+  unit.blocks[b].code.pop_back(); // delete the svcreq instruction
+  Vout v(nullptr, unit, b, origin);
+
+  RegSet arg_regs;
+  VregList arg_dests;
+  for (int i = 0, n = argv.size(); i < n; ++i) {
+    PhysReg d{serviceReqArgRegs[i]};
+    arg_dests.push_back(d);
+    arg_regs.add(d);
+  }
+  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  emitEagerVMRegSave(v, RegSaveFlags::SaveFP);
+  v << ldimm{0, x64::rAsm}; // because persist flag
+  //  lea(rip[(int64_t)stubStart], jit::x64::rAsm); if !persist
+  v << ldimm{svcreq.req, reg::rdi};
+  arg_regs.add(rAsm).add(reg::rdi);
+
+  // Weird hand-shaking with enterTC: reverse-call a service routine.
+  // In the case of some special stubs (m_callToExit, m_retHelper), we
+  // have already unbalanced the return stack by doing a ret to
+  // something other than enterTCHelper.  In that case
+  // SRJmpInsteadOfRet indicates to fake the return.
+  v << ret{arg_regs};
+}
+
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
@@ -892,6 +915,10 @@ static void lowerCalls(Vunit& unit, const Abi& abi) {
   // iterators.
   auto& blocks = unit.blocks;
   for (size_t ib = 0; ib < blocks.size(); ++ib) {
+    if (blocks[ib].code.empty()) continue;
+    if (blocks[ib].code.back().op == Vinstr::svcreq) {
+      lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
+    }
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
       if (inst.op != Vinstr::vcall && inst.op != Vinstr::vinvoke) continue;

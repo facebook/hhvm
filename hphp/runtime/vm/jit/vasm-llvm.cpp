@@ -396,9 +396,7 @@ O(ldimm) \
 O(lea) \
 O(load) \
 O(pushm) \
-O(resume) \
 O(ret) \
-O(retransopt) \
 O(storebi) \
 O(storeqi) \
 O(syncpoint) \
@@ -562,15 +560,7 @@ void LLVMEmitter::emit(const load& inst) {
 void LLVMEmitter::emit(const pushm& inst) {
 }
 
-void LLVMEmitter::emit(const resume& inst) {
-  emitTrap();
-}
-
 void LLVMEmitter::emit(const ret& inst) {
-  emitTrap();
-}
-
-void LLVMEmitter::emit(const retransopt& inst) {
   emitTrap();
 }
 

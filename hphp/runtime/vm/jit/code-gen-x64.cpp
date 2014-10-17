@@ -2311,8 +2311,8 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitTraceRet(v);
   }
-
-  v << ret{};
+  auto args = RegSet().add(rVmSp).add(rVmFp);
+  v << ret{args};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2547,13 +2547,11 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto extra = inst->extra<ReqRetranslateOpt>();
-  auto& v = vmain();
-  auto& vc = vcold();
-  auto sr = vc.makeBlock();
-  v << jmp{sr};
-  vc = sr;
   auto sk = SrcKey(curFunc(), extra->offset, resumed());
-  vc << retransopt{sk, extra->transId};
+  emitServiceReq(vmain(), SRFlags::Persist, REQ_RETRANSLATE_OPT, {
+    {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
+    {ServiceReqArgInfo::Immediate, {extra->transId}}
+  });
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
@@ -5055,7 +5053,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto& v = vmain();
   v << load{rVmTl[RDS::kVmfpOff], rVmFp};
   v << load{rVmTl[RDS::kVmspOff], rVmSp};
-  v << resume{};
+  emitServiceReq(v, SRFlags::Persist, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {

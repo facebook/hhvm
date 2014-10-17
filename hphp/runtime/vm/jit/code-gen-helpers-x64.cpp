@@ -113,6 +113,34 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
   }
 }
 
+// Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
+// the bytecode offset is expected to be in rdi and is clobbered
+void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
+  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
+  bool savePC = bool(flags & RegSaveFlags::SavePC);
+  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
+         RegSaveFlags::None);
+
+  assert(!kSpecialCrossTraceRegs.contains(rdi));
+
+  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
+  if (savePC) {
+    PhysReg pc{rdi};
+    auto func = v.makeReg();
+    auto unit = v.makeReg();
+    auto bc = v.makeReg();
+    // m_fp -> m_func -> m_unit -> m_bc + pcReg
+    v << load{rVmFp[AROFF(m_func)], func};
+    v << load{func[Func::unitOff()], unit};
+    v << load{unit[Unit::bcOff()], bc};
+    v << addq{bc, pc, pc, v.makeReg()};
+    v << store{pc, rVmTl[RDS::kVmpcOff]};
+  }
+  if (saveFP) {
+    v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
+  }
+}
+
 void emitGetGContext(Vout& v, Vreg dest) {
   emitTLSLoad<ExecutionContext>(v, g_context, dest);
 }

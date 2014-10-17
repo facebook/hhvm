@@ -99,7 +99,6 @@ private:
   void emit(ldpoint& i);
   void emit(load& i);
   void emit(point& i) { meta->points[i.p] = a->frontier(); }
-  void emit(resume& i) { emitServiceReq(*codeBlock, REQ_RESUME); }
   void emit(store& i);
   void emit(syncpoint& i);
 
@@ -127,6 +126,7 @@ private:
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }
   void emit(orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* xxx flags? */); }
+  void emit(ret& i) { a->Ret(); }
   void emit(storeb& i) { a->Strb(W(i.s), M(i.m)); }
   void emit(storel& i) { a->Str(W(i.s), M(i.m)); }
   void emit(setcc& i) { PhysReg r(i.d.asReg()); a->Cset(X(r), C(i.cc)); }
@@ -497,9 +497,60 @@ void Vgen::emit(tbcc& i) {
   emit(jmp{i.targets[0]});
 }
 
+// Lower svcreq{} by making copies to abi registers explicit, saving
+// vm regs, and returning to the VM. svcreq{} is guaranteed to be
+// at the end of a block, so we can just keep appending to the same block.
+static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
+  auto svcreq = inst.svcreq_; // copy it
+  auto origin = inst.origin;
+  auto& argv = unit.tuples[svcreq.args];
+  unit.blocks[b].code.pop_back(); // delete the svcreq instruction
+  Vout v(nullptr, unit, b, origin);
+
+  RegSet arg_regs;
+  VregList arg_dests;
+  for (int i = 0, n = argv.size(); i < n; ++i) {
+    PhysReg d{serviceReqArgReg(i)};
+    arg_dests.push_back(d);
+    arg_regs.add(d);
+  }
+  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  // Save VM regs
+  PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rds{rVmTl};
+  v << store{vmfp, rds[RDS::kVmfpOff]};
+  v << store{vmsp, rds[RDS::kVmspOff]};
+  v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
+  //  lea(rip[(int64_t)stubStart], jit::x64::rAsm); if !persist
+  v << ldimm{svcreq.req, PhysReg{argReg(0)}};
+  arg_regs.add(arm::rAsm).add(argReg(0));
+
+  // Weird hand-shaking with enterTC: reverse-call a service routine.
+  // In the case of some special stubs (m_callToExit, m_retHelper), we
+  // have already unbalanced the return stack by doing a ret to
+  // something other than enterTCHelper.  In that case
+  // SRJmpInsteadOfRet indicates to fake the return.
+  v << load{sp[0], PhysReg{rLinkReg}};
+  v << lea{sp[16], sp}; // fake postindexing
+  arg_regs.add(rLinkReg); // arm ret{} implicitly uses LR
+  v << ret{arg_regs};
+}
+
+// Lower svcreq
+void lower(Vunit& unit) {
+  Timer _t(Timer::vasm_lower);
+  for (size_t b = 0; b < unit.blocks.size(); ++b) {
+    auto& code = unit.blocks[b].code;
+    if (code.empty()) continue;
+    if (code.back().op == Vinstr::svcreq) {
+      lower_svcreq(unit, Vlabel{b}, code.back());
+    }
+  }
+}
+
 }
 
 void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
+  lower(m_unit);
   if (!m_unit.cpool.empty()) {
     foldImms<arm::ImmFolder>(m_unit);
   }

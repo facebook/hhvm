@@ -1858,7 +1858,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   PhysReg rds(rVmTl), fp(rVmFp), sp(rVmSp);
   v << load{rds[RDS::kVmfpOff], fp};
   v << load{rds[RDS::kVmspOff], sp};
-  v << resume{};
+  emitServiceReq(v, SRFlags::Persist, REQ_RESUME, {});
 }
 
 void CodeGenerator::cgLdClsName(IRInstruction* inst) {

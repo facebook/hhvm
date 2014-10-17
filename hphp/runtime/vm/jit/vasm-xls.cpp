@@ -638,6 +638,14 @@ int Vxls::spEffect(Vinstr& inst) const {
       }
       return 0;
     }
+    case Vinstr::lea: {
+      auto& i = inst.lea_;
+      if (i.d == Vreg64(m_sp)) {
+        assert(i.s.base == i.d && !i.s.index.isValid());
+        return i.s.disp;
+      }
+      return 0;
+    }
   }
 }
 
@@ -826,8 +834,6 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
     case Vinstr::sarq:
       across = RegSet(reg::rcx);
       break;
-    case Vinstr::resume:
-    case Vinstr::retransopt:
     case Vinstr::bindaddr:
     case Vinstr::bindjcc1st:
     case Vinstr::bindjcc2nd:

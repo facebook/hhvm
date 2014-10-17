@@ -156,7 +156,7 @@ bool isBlockEnd(Vinstr& inst) {
     case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:
-    case Vinstr::retransopt:
+    case Vinstr::svcreq:
     // control flow
     case Vinstr::jcc:
     case Vinstr::jmp:
@@ -165,7 +165,6 @@ bool isBlockEnd(Vinstr& inst) {
     case Vinstr::phijmp:
     case Vinstr::phijcc:
     // terminal
-    case Vinstr::resume:
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vinvoke:

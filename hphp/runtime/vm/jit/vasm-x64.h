@@ -394,9 +394,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(phijmp, Inone, U(uses), Dn)\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(point, I(p), Un, Dn)\
-  O(resume, Inone, Un, Dn)\
-  O(retransopt, I(sk) I(id), Un, Dn)\
   O(store, Inone, U(s) U(d), Dn)\
+  O(svcreq, I(req), U(args), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -490,7 +489,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(push, Inone, U(s), Dn)\
   O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
-  O(ret, Inone, Un, Dn)\
+  O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, U(s), D(d) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -567,9 +566,8 @@ struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct point { Vpoint p; };
-struct resume {};
-struct retransopt { SrcKey sk; TransID id; };
 struct store { Vreg s; Vptr d; };
+struct svcreq { ServiceRequest req; Vtuple args; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 struct landingpad {};
@@ -678,7 +676,7 @@ struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
 struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
-struct ret {};
+struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };

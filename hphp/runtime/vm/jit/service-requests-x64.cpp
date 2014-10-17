@@ -118,7 +118,6 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
   const bool align   = flags & SRFlags::Align;
   const bool persist = flags & SRFlags::Persist;
 
-
   CodeBlock cb;
   cb.init(start, maxStubSpace, "stubTemp");
   Asm as { cb };
@@ -136,7 +135,7 @@ emitServiceReqImpl(TCA stubStart, TCA start, TCA& end, int maxStubSpace,
     assert(i < kNumServiceReqArgRegs);
     auto reg = serviceReqArgRegs[i];
     const auto& argInfo = argv[i];
-    switch(argv[i].m_kind) {
+    switch (argInfo.m_kind) {
       case ServiceReqArgInfo::Immediate: {
         TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
         as.    emitImmReg(argInfo.m_imm, reg);

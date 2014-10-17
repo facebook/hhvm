@@ -1065,7 +1065,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env, rty = expr env e in
       Async.overload_extract_from_awaitable env p rty
   | Special_func func -> special_func env p func
-  | New (c, el) ->
+  | New (c, el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env;
       Typing_utils.process_static_find_ref c (p, SN.Members.__construct);
       let check_not_abstract = true in
@@ -1090,7 +1090,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       ignore (anon env ft.ft_params);
       env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
-      let env, obj = expr env (fst sid, New (CI sid, [])) in
+      let env, obj = expr env (fst sid, New (CI sid, [], [])) in
       let env, attr_tyl = lfold expr env (List.map snd attrl) in
       let env, body = lfold expr env el in
       (* We don't perform any check on XHP body right now, because
@@ -1210,7 +1210,6 @@ and anon_make anon_lenv p f =
 (*****************************************************************************)
 (* End of anonymous functions. *)
 (*****************************************************************************)
-
 
 and special_func env p func =
   let env, ty = (match func with

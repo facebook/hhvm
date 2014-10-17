@@ -1792,8 +1792,8 @@ and expr_ env = function
       N.InstanceOf (expr env e, (p, N.Id (Env.class_name env x)))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
-  | New (x, el) ->
-      N.New (make_class_id env x, exprl env el)
+  | New (x, el, uel) ->
+      N.New (make_class_id env x, exprl env el, exprl env uel)
   | Efun (f, idl) ->
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
       let idl' = List.map (Env.lvar env) idl in

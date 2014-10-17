@@ -210,7 +210,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match st with
-    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el, [])) ->
+    | Expr (_, Call (Cnormal, (_, Class_const (CIparent, (_, m))), el, uel)) ->
       let acc = List.fold_left expr acc el in
       assign env acc parent_init_cvar
     | Expr e -> expr acc e
@@ -385,7 +385,8 @@ and expr_ env acc p e =
   | Special_func (Genva el)
   | Special_func (Gen_array_va_rec el) ->
       exprl acc el
-  | New (_, el) -> exprl acc el
+  | New (_, el, uel) ->
+      exprl acc (el @ uel)
   | Pair (e1, e2) ->
     let acc = expr acc e1 in
     expr acc e2

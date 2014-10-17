@@ -2809,9 +2809,9 @@ and expr_new env pos_start =
           error_expect env "class name";
           p, "*Unknown*"
     in
-    let args = expr_list env in
+    let args1, args2 = expr_call_list env in
     let pos_end = Pos.make env.lb in
-    Pos.btw pos_start pos_end, New (cname, args)
+    Pos.btw pos_start pos_end, New (cname, args1, args2)
   end
 
 (*****************************************************************************)

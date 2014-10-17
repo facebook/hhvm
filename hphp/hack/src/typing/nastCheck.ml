@@ -163,9 +163,10 @@ module CheckFunctionType = struct
     | _, Eif (e1, Some e2, e3) ->
         liter expr f_type [e1; e2; e3];
       ()
-    | _, New (_, el) ->
+    | _, New (_, el, uel) ->
       liter expr f_type el;
-        ()
+      liter expr f_type uel;
+      ()
     | _, InstanceOf (e, _) ->
         expr f_type e;
         ()
@@ -651,8 +652,10 @@ and expr_ env = function
   | InstanceOf (e, _) ->
       expr env e;
       ()
-  | New (_, el) ->
-      liter expr env el
+  | New (_, el, uel) ->
+      liter expr env el;
+      liter expr env uel;
+      ()
   | Efun (f, _) ->
       func env f;
       ()

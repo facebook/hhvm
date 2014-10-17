@@ -243,7 +243,7 @@ and expr_ =
   | Binop of Ast.bop * expr * expr
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
-  | New of class_id * expr list
+  | New of class_id * expr list * expr list
   | Efun of fun_ * id list
   | Xml of sid * (pstring * expr) list * expr list
   | Assert of assert_expr

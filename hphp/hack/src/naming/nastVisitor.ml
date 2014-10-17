@@ -80,7 +80,7 @@ class type ['a] nast_visitor_type = object
   method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_instanceOf : 'a -> expr -> expr -> 'a
-  method on_new : 'a -> class_id -> expr list -> 'a
+  method on_new : 'a -> class_id -> expr list -> expr list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> (pstring * expr) list -> expr list -> 'a
   method on_assert : 'a -> assert_expr -> 'a
@@ -235,7 +235,7 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
-   | New         (cid, el)        -> this#on_new acc cid el
+   | New         (cid, el, uel)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | ValCollection    (s, el)     ->
@@ -343,8 +343,10 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     let acc = this#on_expr acc e2 in
     acc
 
-  method on_new acc _ el =
-    List.fold_left this#on_expr acc el
+  method on_new acc _ el uel =
+    let acc = List.fold_left this#on_expr acc el in
+    let acc = List.fold_left this#on_expr acc uel in
+    acc
 
   method on_efun acc f _ = this#on_block acc f.f_body
   method on_xml acc _ attrl el =

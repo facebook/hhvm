@@ -269,7 +269,7 @@ and expr_ =
   | Binop of bop * expr * expr
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
-  | New of id * expr list
+  | New of id * expr list * expr list
   (* Traditional PHP-style closure with a use list. *)
   | Efun of fun_ * id list
   (*

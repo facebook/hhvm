@@ -840,6 +840,15 @@ struct ClsNeqData : IRExtraData {
   Class* testClass; // class we're checking equality with
 };
 
+struct MInstrAttrData : IRExtraData {
+  explicit MInstrAttrData(MInstrAttr mia) : mia(mia) {}
+  std::string show() const {
+    using U = std::underlying_type<MInstrAttr>::type;
+    return folly::to<std::string>(static_cast<U>(mia));
+  }
+  MInstrAttr mia;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -989,6 +998,15 @@ X(StContArRaw,                  RawMemData);
 X(ProfileArray,                 RDSHandleData);
 X(ProfileStr,                   ProfileStrData);
 X(ClsNeq,                       ClsNeqData);
+X(BaseG,                        MInstrAttrData);
+X(PropX,                        MInstrAttrData);
+X(PropDX,                       MInstrAttrData);
+X(PropDXStk,                    MInstrAttrData);
+X(ElemX,                        MInstrAttrData);
+X(ElemDX,                       MInstrAttrData);
+X(ElemDXStk,                    MInstrAttrData);
+X(ElemUX,                       MInstrAttrData);
+X(ElemUXStk,                    MInstrAttrData);
 
 #undef X
 

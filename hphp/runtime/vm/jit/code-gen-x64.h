@@ -23,7 +23,9 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP { namespace jit {
+namespace NativeCalls { struct CallInfo; }
+namespace x64 {
 
 // Cache alignment is required for mutable instructions to make sure
 // mutations don't "tear" on remote cpus.
@@ -181,6 +183,21 @@ private:
   void cgLookupCnsCommon(IRInstruction* inst);
   RDS::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
+  void cgPropImpl(IRInstruction*);
+  void cgVGetPropImpl(IRInstruction*);
+  void cgBindPropImpl(IRInstruction*);
+  void cgSetPropImpl(IRInstruction*);
+  void cgSetOpPropImpl(IRInstruction*);
+  void cgIncDecPropImpl(IRInstruction*);
+  void cgIssetEmptyPropImpl(IRInstruction*);
+  void cgElemImpl(IRInstruction*);
+  void cgElemArrayImpl(IRInstruction*);
+  void cgVGetElemImpl(IRInstruction*);
+  void cgArraySetImpl(IRInstruction*);
+  void cgSetElemImpl(IRInstruction*);
+  void cgUnsetElemImpl(IRInstruction*);
+  void cgIssetEmptyElemImpl(IRInstruction*);
+
   Vlabel label(Block*);
   void emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf, Block* target);
 

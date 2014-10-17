@@ -29,6 +29,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Func;
+struct c_Vector;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
@@ -251,6 +252,17 @@ void registerLiveObj(ObjectData* obj);
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();
+
+namespace MInstrHelpers {
+StringData* stringGetI(StringData*, uint64_t);
+uint64_t pairIsset(c_Pair*, int64_t);
+uint64_t vectorIsset(c_Vector*, int64_t);
+void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
+void setWithRefElemC(TypedValue*, TypedValue, TypedValue*, MInstrState*);
+void setWithRefNewElem(TypedValue*, TypedValue*, MInstrState*);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

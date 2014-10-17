@@ -2060,8 +2060,8 @@ void HhbcTranslator::emitArrayIdx() {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
-  Type keyType = topC(1, DataTypeGeneric)->type();
-  Type arrType = topC(2, DataTypeGeneric)->type();
+  auto const keyType = topC(1, DataTypeGeneric)->type();
+  auto const arrType = topC(2, DataTypeGeneric)->type();
 
   if (!(arrType <= Type::Arr)) {
     // raise fatal
@@ -2070,9 +2070,10 @@ void HhbcTranslator::emitArrayIdx() {
   }
 
   if (keyType <= Type::Null) {
-    SSATmp* def = popC(DataTypeGeneric); // def is just pushed back on the stack
-    SSATmp* key = popC();
-    SSATmp* arr = popC();
+    auto const def = popC(DataTypeGeneric); // def is just pushed back on the
+                                            // stack
+    auto const key = popC();
+    auto const arr = popC();
 
     // if the key is null it will not be found so just return the default
     push(def);
@@ -2085,32 +2086,13 @@ void HhbcTranslator::emitArrayIdx() {
     return;
   }
 
-  SSATmp* def = popC(DataTypeGeneric); // a helper will decref it but the
-                                       // translated code doesn't care about
-                                       // the type
-  SSATmp* key = popC();
-  SSATmp* arr = popC();
+  auto const def = popC(DataTypeGeneric); // a helper will decref it but the
+                                          // translated code doesn't care about
+                                          // the type
+  auto const key = popC();
+  auto const arr = popC();
 
-  KeyType arrayKeyType;
-  bool checkForInt;
-  bool converted;
-  checkStrictlyInteger(key, arrayKeyType, checkForInt, converted);
-
-  TCA opFunc;
-  if (checkForInt) {
-    opFunc = (TCA)&arrayIdxSi;
-  } else if (KeyType::Int == arrayKeyType) {
-    if (converted) {
-      opFunc = (TCA)&arrayIdxIc;
-    } else {
-      opFunc = (TCA)&arrayIdxI;
-    }
-  } else {
-    assert(KeyType::Str == arrayKeyType);
-    opFunc = (TCA)&arrayIdxS;
-  }
-
-  push(gen(ArrayIdx, cns(opFunc), arr, key, def));
+  push(gen(ArrayIdx, arr, key, def));
   gen(DecRef, arr);
   gen(DecRef, key);
   gen(DecRef, def);
@@ -6780,28 +6762,6 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
   emitJmpImpl(next,
               nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
               nullptr);
-}
-
-void HhbcTranslator::checkStrictlyInteger(
-    SSATmp*& key, KeyType& keyType, bool& checkForInt, bool& converted) {
-  checkForInt = false;
-  converted = false;
-  if (key->isA(Type::Int)) {
-    keyType = KeyType::Int;
-  } else {
-    assert(key->isA(Type::Str));
-    keyType = KeyType::Str;
-    if (key->isConst()) {
-      int64_t i;
-      if (key->strVal()->isStrictlyInteger(i)) {
-        converted = true;
-        keyType = KeyType::Int;
-        key = cns(i);
-      }
-    } else {
-      checkForInt = true;
-    }
-  }
 }
 
 bool HhbcTranslator::inPseudoMain() const {

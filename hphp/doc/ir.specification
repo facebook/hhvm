@@ -1652,16 +1652,16 @@ D:Bool = AKExists S0:Cell S1:Cell
   Has the effects of array_key_exists(S0, S1). Note that S0 does not need to be
   an array---if it is an Obj the ArrayAccess API will be used, etc.
 
-D:Cell = ArrayIdx S0:ConstTCA S1:Arr S2:{Int,Str} S3:Cell
+D:Cell = ArrayIdx S0:Arr S1:{Int,Str} S2:Cell
 
-  Checks if the array S1 contains the key S2, and returns the result if found.
-  Otherwise S3 is returned.
+  Checks if S0 contains the key S1, and returns the result if found. Otherwise
+  S2 is returned.
 
-D:Cell = GenericIdx S0:ConstTCA S1:Cell S2:Cell S3:Cell
+D:Cell = GenericIdx S0:Cell S1:Cell S2:Cell
 
-  Checks if S1 contains the key S2, and returns the result if found. Otherwise
-  S3 is returned. S1 must support array or indexed access. If S1 does not
-  support array or indexed access S3 is returned.
+  Checks if S0 contains the key S1, and returns the result if found. Otherwise
+  S2 is returned. If S0 does not support array or indexed access S2 is
+  returned.
 
 D:TCA LdBindAddr<SrcKey>
 
@@ -2040,165 +2040,161 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-D:PtrToGen = PropX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
+D:PtrToGen = BaseG S0:Str
 
-  Lookup intermediate property in S2, with key S3. S4 should point to an
+  Get a base from global named S0.
+
+D:PtrToGen = PropX S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
+
+  Lookup intermediate property in S1, with key S2. S4 should point to an
   MInstrState struct.
 
-D:PtrToGen = PropDX S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
-                    S4:PtrToCell
-D:PtrToGen, D:StkPtr = PropDXStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
-                                 S3:Gen S4:PtrToCell
+D:PtrToGen = PropDX S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
+D:PtrToGen, D:StkPtr = PropDXStk S0:ConstCls S1:{Obj|PtrToGen}
+                                 S2:Cell S3:PtrToCell
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-D:Cell = CGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:PtrToCell
+D:Cell = CGetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
 
-  Get property with key S3 from S2. S4 should point to an MInstrState struct.
+  Get property with key S2 from S1. S3 should point to an MInstrState struct.
 
-D:BoxedCell = VGetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrtoGen} S3:Gen
-                       S4:PtrToCell
-D:BoxedCell, D:StkPtr = VGetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
-                                    S3:Gen S4:PtrToCell
+D:BoxedCell = VGetProp S0:ConstCls S1:{Obj|PtrtoGen} S2:Cell S3:PtrToCell
+D:BoxedCell, D:StkPtr = VGetPropStk S0:ConstCls S1:{Obj|PtrToGen}
+                                    S2:Cell S3:PtrToCell
 
-  Get property with key S3 from base S2 as a reference. S4 should point to an
+  Get property with key S2 from base S1 as a reference. S3 should point to an
   MInstrState struct.
 
-BindProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:BoxedCell
-         S5:PtrToCell
-D:StkPtr = BindPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrtoGen} S3:Gen
-                       S4:BoxedCell S5:PtrToCell
+BindProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:BoxedCell S4:PtrToCell
+D:StkPtr = BindPropStk S0:ConstCls S1:{Obj|PtrtoGen} S2:Cell
+                       S3:BoxedCell S4:PtrToCell
 
-  Bind property with key S3 in base S2 to the reference in S4. S5 should point
+  Bind property with key S2 in base S1 to the reference in S3. S4 should point
   to an MInstrState struct.
 
-SetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
-D:StkPtr = SetPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen S4:Cell
+SetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
+D:StkPtr = SetPropStk S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
 
-  Set property with key S3 in S2 to S4.
+  Set property with key S2 in S1 to S3.
 
-D:Cell = SetOpProp S0:ConstTCA S1:{Obj|PtrToGen} S2:Gen S3:Cell S4:PtrToCell
-D:Cell, D:StkPtr = SetOpPropStk S0:ConstTCA S1:{Obj|PtrtoGen} S2:Gen S3:Cell
-                                S4:PtrtoCell
+UnsetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
 
-  Set op propery with key S2 in base S1, using S3 as the right hand side. S4
+D:Cell = SetOpProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell S4:PtrToCell S5:ConstInt
+D:Cell, D:StkPtr = SetOpPropStk S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
+                                S4:PtrtoCell S5:ConstInt
+
+  Set op propery with key S1 in base S0, using S2 as the right hand side. S3
   should point to an MInstrState struct.
 
-D:Cell = IncDecProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
-                    S4:PtrToCell
-D:Cell, D:StkPtr = IncDecPropStk S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen}
-                                 S3:Gen S4:PtrToCell
+D:Cell = IncDecProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
+                    S3:PtrToCell S4:ConstInt
+D:Cell, D:StkPtr = IncDecPropStk S0:ConstCls S1:{Obj|PtrToGen}
+                                 S2:Cell S3:PtrToCell S4:ConstInt
 
-  Increment/decrement property with key S3 in base S2. S4 should point to an
+  Increment/decrement property with key S2 in base S1. S3 should point to an
   MInstrState struct.
 
-D:Bool = EmptyProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+D:Bool = EmptyProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
 
-  Returns true iff the property with key S3 in base S2 is empty.
+  Returns true iff the property with key S2 in base S1 is empty.
 
-D:Bool = IssetProp S0:ConstTCA S1:ConstCls S2:{Obj|PtrToGen} S3:Gen
+D:Bool = IssetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
 
-  Returns true iff the property with key S3 in base S2 is set.
+  Returns true iff the property with key S2 in base S1 is set.
 
-D:PtrToGen = ElemX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:PtrToGen = ElemX S0:PtrToGen S1:Cell S2:PtrToCell
 
-  Get intermediate element with key S2 from base S1. The base will not be
-  modified. S3 should point to an MInstrState struct.
+  Get intermediate element with key S1 from base S0. The base will not be
+  modified. S2 should point to an MInstrState struct.
 
-D:PtrToGen = ElemArray S0:ConstTCA S1:PtrToArr S2:{Int|Str}
+D:PtrToGen = ElemArray S0:PtrToArr S1:{Int|Str}
 
-  Similar to ElemX, but assumes the base S1 is an array and the key S2 is an
+  Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
   int/str.
 
-D:PtrToGen = ElemDX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
-D:PtrToGen, D:StkPtr = ElemDXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:PtrToGen = ElemDX S0:PtrToGen S1:Cell S2:PtrToCell
+D:PtrToGen, D:StkPtr = ElemDXStk S0:PtrToGen S1:Cell S2:PtrToCell
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-D:PtrToGen = ElemUX S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
-D:PtrToGen, D:StkPtr = ElemUXStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:PtrToGen = ElemUX S0:PtrToGen S1:Cell S2:PtrToCell
+D:PtrToGen, D:StkPtr = ElemUXStk S0:PtrToGen S1:Cell S2:PtrToCell
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-D:Cell = ArrayGet S0:ConstTCA S1:Arr S2:{Int|Str}
+D:Cell = ArrayGet S0:Arr S1:{Int|Str}
 
-  Get element with key S2 from base S1.
+  Get element with key S1 from base S0.
 
-D:StaticStr = StringGet S0:ConstTCA S1:Str S2:Int
+D:StaticStr = StringGet S0:Str S1:Int
 
-  Get string representing character at position S2 from base string S1.
+  Get string representing character at position S1 from base string S0.
 
-D:Cell = PairGet S0:ConstTCA S1:Obj<Pair> S2:{Int}
+D:Cell = PairGet S0:Obj<Pair> S1:{Int}
 
-  Get element with key S2 from base S1. S1 is a Pair instance.
+  Get element with key S1 from base S0.
 
-D:Cell = MapGet S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
+D:Cell = MapGet S0:Obj<Map> S1:{Int|Str}
 
-  Get element with key S2 from base S1. S1 is a Map instance.
+  Get element with key S1 from base S0.
 
-D:Cell = CGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:Cell = CGetElem S0:PtrToGen S1:Cell S2:PtrToCell
 
-  Get element with key S2 from S1. S3 should point to an MInstrState struct.
+  Get element with key S1 from S0. S2 should point to an MInstrState struct.
 
-D:BoxedCell = VGetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
-D:BoxedCell, D:StkPtr = VGetElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:BoxedCell = VGetElem S0:PtrToGen S1:Gen S2:PtrToCell
+D:BoxedCell, D:StkPtr = VGetElemStk S0:PtrToGen S1:Gen S2:PtrToCell
 
-  Get element with key S2 from base S1 as a reference. S3 should point to an
+  Get element with key S1 from base S0 as a reference. S2 should point to an
   MInstrState struct.
 
-BindElem S0:ConstTCA S1:PtrToGen S2:Gen S3:BoxedCell S4:PtrToCell
-D:StkPtr = BindElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:BoxedCell S4:PtrToCell
+BindElem S0:PtrToGen S1:Cell S2:BoxedCell S3:PtrToCell
+D:StkPtr = BindElemStk S0:PtrToGen S1:Cell S2:BoxedCell S3:PtrToCell
 
-  Bind element with key S2 in base S1 to the reference S3. S4 should point to
+  Bind element with key S1 in base S0 to the reference S2. S3 should point to
   an MInstrState struct.
 
-D:Arr = ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell
+D:Arr = ArraySet S0:Arr S1:{Int|Str} S2:Cell
 
-  Set element with key S2 in S1 to S3. The dest will be a new Array that should
-  replace S1.
+  Set element with key S1 in S0 to S2. The dest will be a new Array that should
+  replace S0.
 
-ArraySet S0:ConstTCA S1:Arr S2:{Int|Str} S3:Cell S4:BoxedArr
+MapSet S0:Obj<Map> S1:{Int|Str} S2:Cell
 
-  Set element with key S2 in S1 to S3. If S4 points to S1 after the set
-  operation, it will be replaced with the new Array resulting from the set
-  operation.
+  Set element with key S1 in S0 to S2.
 
-MapSet S0:ConstTCA S1:Obj<Map> S2:{Int|Str} S3:Cell
+D:{CountedStr|Nullptr} = SetElem S0:PtrToGen S1:Cell S2:Cell
+D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:PtrToGen S1:Gen S2:Cell
 
-  Set element with key S2 in S1 to S3. S1 is a Map instance.
+  Set element with key S1 in S0 to S2.
 
-D:{CountedStr|Nullptr} = SetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
-D:{CountedStr|Nullptr} D:StkPtr = SetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
-                                             S3:Cell
+SetWithRefElem S0:PtrToGen S1:Cell S2:PtrToGen S3:PtrToCell
+D:StkPtr = SetWithRefElemStk S0:PtrToGen S1:Cell S2:PtrToGen
+                             S3:PtrToCell
 
-  Set element with key S2 in S1 to S3.
-
-SetWithRefElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen S4:PtrToCell
-D:StkPtr = SetWithRefElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToGen
-                             S4:PtrToCell
-
-  Set element with key S2 in S1 to S3. S4 should point to an MInstrState
+  Set element with key S1 in S0 to S2. S3 should point to an MInstrState
   struct.
 
-UnsetElem S0:ConstTCA S1:PtrToGen S2:Gen
-D:StkPtr = UnsetElemStk S0:ConstTCA S1:PtrToGen S2:Gen
+UnsetElem S0:PtrToGen S1:Cell
+D:StkPtr = UnsetElemStk S0:PtrToGen S1:Cell
 
-  Unsets the element at key S2 in the base S1.
+  Unsets the element at key S1 in the base S0.
 
-D:Cell = SetOpElem S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell S4:PtrToCell
-D:Cell, D:StkPtr = SetOpElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:Cell
-                                S4:PtrToCell
+D:Cell = SetOpElem S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell S4:ConstInt
+D:Cell, D:StkPtr = SetOpElemStk S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell
+                                S4:ConstInt
 
-  Set op elem with key S2 in base S1, using S3 as the right hand side. S4
+  Set op elem with key S1 in base S0, using S2 as the right hand side. S3
   should point to an MInstrState struct.
 
-D:Cell = IncDecElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
-D:Cell, D:StkPtr = IncDecElemStk S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:Cell = IncDecElem S0:PtrToGen S1:Cell S2:PtrToCell S3:ConstInt
+D:Cell, D:StkPtr = IncDecElemStk S0:PtrToGen S1:Cell S2:PtrToCell S3:ConstInt
 
-  Increment/decrement element with key S2 in base S1. S3 should point to an
+  Increment/decrement element with key S1 in base S0. S2 should point to an
   MInstrState struct.
 
 SetNewElem S0:PtrToGen S1:Cell
@@ -2211,48 +2207,44 @@ D:StkPtr = SetNewElemStk S0:PtrToArr S1:Cell
 
   Append the value in S1 to S0, where S0 must be a pointer to an array.
 
-SetWithRefNewElem S0:ConstTCA S1:PtrToGen S2:PtrToGen S3:PtrToCell
-D:StkPtr = SetWithRefNewElemStk S0:ConstTCA S1:PtrToGen S2:PtrToGen
-                                          S3:PtrToCell
+SetWithRefNewElem S0:PtrToGen S1:PtrToGen S2:PtrToCell
+D:StkPtr = SetWithRefNewElemStk S0:PtrToGen S1:PtrToGen S2:PtrToCell
 
-  AppendWithRef the value in S2 to S1. S3 should point to an MInstrState
+  AppendWithRef the value in S1 to S0. S2 should point to an MInstrState
   struct.
 
-BindNewElem S0:ConstTCA S0:PtrToGen S1:BoxedCell S2:PtrToCell
+BindNewElem S0:PtrToGen S1:BoxedCell S2:PtrToCell
 D:StkPtr = BindNewElemStk S0:PtrToGen S1:BoxedCell S2:PtrToCell
 
   Append the reference in S1 to S0. S2 should point to an MInstrState struct.
 
-D:Bool = ArrayIsset S0:ConstTCA S1:Arr S2:{Int|Str}
+D:Bool = ArrayIsset S0:Arr S1:{Int|Str}
 
-  Returns true iff the element at key S2 in the base S1 is set.
+  Returns true iff the element at key S1 in the base S0 is set.
 
 D:Bool = StringIsset S0:Str S1:Int
 
   Returns true iff the string S0 has a character at position S1.
 
-D:Bool = VectorIsset S0:ConstTCA S1:Obj<Vector> S2:{Int}
+D:Bool = VectorIsset S0:Obj<Vector> S1:{Int}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a Vector
-  instance.
+  Returns true iff the element at key S1 in the base S0 is set.
 
-D:Bool = PairIsset S0:ConstTCA S1:Obj<Pair> S2:{Int}
+D:Bool = PairIsset S0:Obj<Pair> S1:{Int}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a Pair
-  instance.
+  Returns true iff the element at key S1 in the base S0 is set.
 
-D:Bool = MapIsset S0:ConstTCA S1:Obj<Map> S2:{Int|Str}
+D:Bool = MapIsset S0:Obj<Map> S1:{Int|Str}
 
-  Returns true iff the element at key S2 in the base S1 is set. S1 is a Map
-  instance.
+  Returns true iff the element at key S1 in the base S0 is set.
 
-D:Bool = IssetElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:Bool = IssetElem S0:PtrToGen S1:Cell S2:PtrToCell
 
-  Returns true iff the element at key S2 in S1 is set.
+  Returns true iff the element at key S1 in S0 is set.
 
-D:Bool = EmptyElem S0:ConstTCA S1:PtrToGen S2:Gen S3:PtrToCell
+D:Bool = EmptyElem S0:PtrToGen S1:Cell S2:PtrToCell
 
-  Returns true iff the element at key S2 in S1 is set and not equal (as defined
+  Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
 
 CheckBounds S0:Int S1:Int

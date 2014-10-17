@@ -33,9 +33,9 @@ struct StringData;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-class IRUnit;
+struct IRUnit;
 struct IRInstruction;
-class SSATmp;
+struct SSATmp;
 struct LocalStateHook;
 
 //////////////////////////////////////////////////////////////////////
@@ -631,128 +631,98 @@ O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
                                           S(FramePtr),                  Er|E) \
 O(CIterFree,                        ND, S(FramePtr),                       E) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
-O(BaseG,                   D(PtrToGen), C(TCA)                                \
-                                          S(Str),                       E|Er) \
-O(PropX,                   D(PtrToGen), C(TCA)                                \
-                                          C(Cls)                              \
+O(BaseG,                   D(PtrToGen), S(Str),                         E|Er) \
+O(PropX,                   D(PtrToGen), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell),                 E|Er) \
-O_STK(PropDX,              D(PtrToGen), C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(PropDX,              D(PtrToGen), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell),           MProp|E|Er) \
-O(CGetProp,                    D(Cell), C(TCA)                                \
-                                          C(Cls)                              \
+O(CGetProp,                    D(Cell), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell),             E|PRc|Er) \
-O_STK(VGetProp,           D(BoxedCell), C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(VGetProp,           D(BoxedCell), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell),                       \
                                                               MProp|E|PRc|Er) \
-O_STK(BindProp,                     ND, C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(BindProp,                     ND, C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),           MProp|E|Er) \
-O_STK(SetProp,                      ND, C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(SetProp,                      ND, C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(Cell),                MProp|E|Er) \
-O(UnsetProp,                        ND, C(TCA)                                \
-                                          C(Cls)                              \
+O(UnsetProp,                        ND, C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell),                      E|Er) \
-O_STK(SetOpProp,               D(Cell), C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(SetOpProp,               D(Cell), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
                                           C(Int),             MProp|E|PRc|Er) \
-O_STK(IncDecProp,              D(Cell), C(TCA)                                \
-                                          C(Cls)                              \
+O_STK(IncDecProp,              D(Cell), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
                                           C(Int),             MProp|E|PRc|Er) \
-O(EmptyProp,                   D(Bool), C(TCA)                                \
-                                          C(Cls)                              \
+O(EmptyProp,                   D(Bool), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell),                      E|Er) \
-O(IssetProp,                   D(Bool), C(TCA)                                \
-                                          C(Cls)                              \
+O(IssetProp,                   D(Bool), C(Cls)                                \
                                           S(Obj,PtrToGen)                     \
                                           S(Cell),                      E|Er) \
-O(ElemX,                   D(PtrToGen), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O(ElemX,                   D(PtrToGen), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),                 E|Er) \
-O(ElemArray,               D(PtrToGen), C(TCA)                                \
-                                          S(PtrToArr)                         \
-                                          S(Int,Str),                   E|Er) \
-O_STK(ElemDX,              D(PtrToGen), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O(ElemArray,               D(PtrToGen), S(PtrToArr) S(Int,Str),         E|Er) \
+O(ElemArrayW,              D(PtrToGen), S(PtrToArr) S(Int,Str),         E|Er) \
+O_STK(ElemDX,              D(PtrToGen), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),           MElem|E|Er) \
-O_STK(ElemUX,              D(PtrToGen), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(ElemUX,              D(PtrToGen), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),           MElem|E|Er) \
-O(ArrayGet,                    D(Cell), C(TCA)                                \
-                                          S(Arr)                              \
+O(ArrayGet,                    D(Cell), S(Arr)                                \
                                           S(Int,Str),                 PRc|Er) \
-O(StringGet,              D(StaticStr), C(TCA)                                \
-                                          S(Str)                              \
-                                          S(Int),                     PRc|Er) \
-O(MapGet,                      D(Cell), C(TCA)                                \
-                                          S(Obj)                              \
+O(StringGet,              D(StaticStr), S(Str) S(Int),                PRc|Er) \
+O(MapGet,                      D(Cell), S(Obj)                                \
                                           S(Int,Str),               E|PRc|Er) \
-O(CGetElem,                    D(Cell), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O(CGetElem,                    D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),             E|PRc|Er) \
-O_STK(VGetElem,           D(BoxedCell), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(VGetElem,           D(BoxedCell), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),                       \
                                                               MElem|E|PRc|Er) \
-O_STK(BindElem,                     ND, C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(BindElem,                     ND, S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),           MElem|E|Er) \
-O(ArraySet,                     D(Arr), C(TCA)                                \
-                                          S(Arr)                              \
+O(ArraySet,                     D(Arr), S(Arr)                                \
                                           S(Int,Str)                          \
                                           S(Cell),            E|PRc|CRc|K|Er) \
-O(MapSet,                           ND, C(TCA)                                \
-                                          S(Obj)                              \
+O(MapSet,                           ND, S(Obj)                                \
                                           S(Int,Str)                          \
                                           S(Cell),                      E|Er) \
-O(ArraySetRef,                      ND, C(TCA)                                \
-                                          S(Arr)                              \
+O(ArraySetRef,                      ND, S(Arr)                                \
                                           S(Int,Str)                          \
                                           S(Cell)                             \
                                           S(BoxedArr),            E|CRc|K|Er) \
-O_STK(SetElem,                DSetElem, C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(SetElem,                DSetElem, S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(Cell),            MElem|E|PRc|Er) \
-O_STK(SetWithRefElem,               ND, C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(SetWithRefElem,               ND, S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToGen)                         \
                                           S(PtrToCell),           MElem|E|Er) \
-O_STK(UnsetElem,                    ND, C(TCA)                                \
-                                          S(PtrToGen)                         \
-                                          S(Cell),                MElem|E|Er) \
+O_STK(UnsetElem,                    ND, S(PtrToGen) S(Cell),      MElem|E|Er) \
 O_STK(SetOpElem,               D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(Cell)                             \
@@ -766,32 +736,21 @@ O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),                MElem|E|Er) \
 O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \
                                           S(Cell),                MElem|E|Er) \
-O_STK(SetWithRefNewElem,            ND, C(TCA)                                \
-                                          S(PtrToGen)                         \
+O_STK(SetWithRefNewElem,            ND, S(PtrToGen)                           \
                                           S(PtrToGen)                         \
                                           S(PtrToCell),           MElem|E|Er) \
 O_STK(BindNewElem,                  ND, S(PtrToGen)                           \
                                           S(BoxedCell)                        \
                                           S(PtrToCell),           MElem|E|Er) \
-O(ArrayIsset,                  D(Bool), C(TCA)                                \
-                                          S(Arr)                              \
-                                          S(Int,Str),                   E|Er) \
+O(ArrayIsset,                  D(Bool), S(Arr) S(Int,Str),              E|Er) \
 O(StringIsset,                 D(Bool), S(Str) S(Int),                    NF) \
-O(VectorIsset,                 D(Bool), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int),                          E) \
-O(PairIsset,                   D(Bool), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int),                          E) \
-O(MapIsset,                    D(Bool), C(TCA)                                \
-                                          S(Obj)                              \
-                                          S(Int,Str),                      E) \
-O(IssetElem,                   D(Bool), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O(VectorIsset,                 D(Bool), S(Obj) S(Int),                     E) \
+O(PairIsset,                   D(Bool), S(Obj) S(Int),                     E) \
+O(MapIsset,                    D(Bool), S(Obj) S(Int,Str),                 E) \
+O(IssetElem,                   D(Bool), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),                 E|Er) \
-O(EmptyElem,                   D(Bool), C(TCA)                                \
-                                          S(PtrToGen)                         \
+O(EmptyElem,                   D(Bool), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),                 E|Er) \
 O(IncStat,                          ND, C(Int) C(Int) C(Bool),             E) \
@@ -805,8 +764,7 @@ O(Count,                        D(Int), S(Cell),                          Er) \
 O(CountArray,                   D(Int), S(Arr),                           NF) \
 O(CountArrayFast,               D(Int), S(Arr),                           NF) \
 O(CountCollection,              D(Int), S(Obj),                           NF) \
-O(ArrayIdx,                    D(Cell), C(TCA)                                \
-                                          S(Arr)                              \
+O(ArrayIdx,                    D(Cell), S(Arr)                                \
                                           S(Int,Str)                          \
                                           S(Cell),                     E|PRc) \
 O(GenericIdx,                  D(Cell), S(Cell)                               \

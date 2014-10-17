@@ -52,12 +52,12 @@ Arg extra(MemberType EDType::*ptr) {
 
 Arg immed(intptr_t imm) { return Arg(ArgType::Imm, imm); }
 
-FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
+UNUSED FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
 
 auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
-auto constexpr MemberKeyS  = ArgType::MemberKeyS;
-auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
+UNUSED auto constexpr MemberKeyS  = ArgType::MemberKeyS;
+UNUSED auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 
 using IFaceSupportFn = bool (*)(const StringData*);
 
@@ -251,8 +251,6 @@ static CallMap s_callMap {
     {ClosureStaticLocInit,
                          closureStaticLocInit, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {ArrayIdx,           fssa(0), DTV, SSync,
-                           {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {GenericIdx,         genericIdx, DTV, SSync,
                           {{TV, 0}, {TV, 1}, {TV, 2}}},
 
@@ -291,79 +289,25 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
-    {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}}},
-    {PropX,    fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {PropDX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {CGetProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
-    {VGetProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
-    {BindProp, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
-    {SetProp,  fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {TV, 4}}},
-    {UnsetProp, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {SetOpProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {TV, 4}, {SSA, 5}, {SSA, 6}}},
-    {IncDecProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
-    {EmptyProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {IssetProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {ElemX,    fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ElemArray, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {ElemDX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ElemUX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ArrayGet, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {StringGet, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {MapGet,   fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {CGetElem, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {VGetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {BindElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
-    {SetWithRefElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
-    {ArraySet, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {MapSet,   fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {ArraySetRef, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {SetElem,  fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {TV, 3}}},
-    {UnsetElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}}},
     {SetOpElem, setOpElem, DTV, SSync,
                  {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
     {IncDecElem, incDecElem, DTV, SSync,
                  {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
-    {SetWithRefNewElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {BindNewElem, bindNewElemIR, DNone, SSync,
                  {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {ArrayIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {VectorIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {PairIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {MapIsset,  fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {IssetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {EmptyElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
+    {StringGet, MInstrHelpers::stringGetI, DSSA, SSync,
+                 {{SSA, 0}, {SSA, 1}}},
+    {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SSync,
+                  {{SSA, 0}, {SSA, 1}}},
+    {BindElem, MInstrHelpers::bindElemC, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+    {SetWithRefElem, MInstrHelpers::setWithRefElemC, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+    {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
+                 {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

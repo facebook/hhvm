@@ -406,53 +406,23 @@ CALL_OPCODE(RaiseNotice)
 CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
-CALL_OPCODE(ArrayIdx)
 CALL_OPCODE(GenericIdx)
 CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
 CALL_OPCODE(LdGblAddrDef)
 
 // Vector instruction helpers
-CALL_OPCODE(BaseG)
-CALL_OPCODE(PropX)
-CALL_STK_OPCODE(PropDX)
-CALL_OPCODE(CGetProp)
-CALL_STK_OPCODE(VGetProp)
-CALL_STK_OPCODE(BindProp)
-CALL_STK_OPCODE(SetProp)
-CALL_OPCODE(UnsetProp)
-CALL_STK_OPCODE(SetOpProp)
-CALL_STK_OPCODE(IncDecProp)
-CALL_OPCODE(EmptyProp)
-CALL_OPCODE(IssetProp)
-CALL_OPCODE(ElemX)
-CALL_OPCODE(ElemArray)
-CALL_STK_OPCODE(ElemDX)
-CALL_STK_OPCODE(ElemUX)
-CALL_OPCODE(ArrayGet)
 CALL_OPCODE(StringGet)
-CALL_OPCODE(MapGet)
-CALL_OPCODE(CGetElem)
-CALL_STK_OPCODE(VGetElem)
 CALL_STK_OPCODE(BindElem)
 CALL_STK_OPCODE(SetWithRefElem)
 CALL_STK_OPCODE(SetWithRefNewElem)
-CALL_OPCODE(ArraySet)
-CALL_OPCODE(MapSet)
-CALL_OPCODE(ArraySetRef)
-CALL_STK_OPCODE(SetElem)
-CALL_STK_OPCODE(UnsetElem)
 CALL_STK_OPCODE(SetOpElem)
 CALL_STK_OPCODE(IncDecElem)
 CALL_STK_OPCODE(SetNewElem)
 CALL_STK_OPCODE(SetNewElemArray)
 CALL_STK_OPCODE(BindNewElem)
-CALL_OPCODE(ArrayIsset)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
-CALL_OPCODE(MapIsset)
-CALL_OPCODE(IssetElem)
-CALL_OPCODE(EmptyElem)
 
 CALL_OPCODE(InstanceOfIface)
 CALL_OPCODE(InterfaceSupportsArr)
@@ -742,11 +712,9 @@ void CodeGenerator::cgHalt(IRInstruction* inst) {
 
 void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   using namespace NativeCalls;
+  always_assert(CallMap::hasInfo(inst->op()));
+  auto const& info = CallMap::info(inst->op());
 
-  Opcode opc = inst->op();
-  always_assert(CallMap::hasInfo(opc));
-
-  auto const& info = CallMap::info(opc);
   ArgGroup argGroup = toArgGroup(info, m_state.locs, inst);
 
   auto call = [&]() -> CppCall {
@@ -762,11 +730,11 @@ void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
 
   auto const dest = [&]() -> CallDest {
     switch (info.dest) {
-      case DestType::None:  return kVoidDest;
-      case DestType::TV:
-      case DestType::SIMD:  return callDestTV(inst);
-      case DestType::SSA:   return callDest(inst);
-      case DestType::Dbl:   return callDestDbl(inst);
+    case DestType::None:  return kVoidDest;
+    case DestType::TV:
+    case DestType::SIMD:  return callDestTV(inst);
+    case DestType::SSA:   return callDest(inst);
+    case DestType::Dbl:   return callDestDbl(inst);
     }
     not_reached();
   }();

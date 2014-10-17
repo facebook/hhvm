@@ -117,7 +117,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case ArraySet:
     case ArraySetRef:
       // Only consumes the reference to its input array
-      return srcNo == 1;
+      return srcNo == 0;
 
     case SpillStack:
       // Inputs 2+ are values to store

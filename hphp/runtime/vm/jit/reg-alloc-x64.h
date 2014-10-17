@@ -87,9 +87,13 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     case StElem:
       return srcIdx == 2;
 
+    /*
+     * TODO: XXX: why is this legit?  Isn't this exactly the case in the above
+     * comment?
+     */
     case ArraySet:
     case MapSet:
-      return srcIdx == 3;
+      return srcIdx == 2;
 
     case SpillStack:
       return srcIdx >= 2 && srcIdx < inst.numSrcs();

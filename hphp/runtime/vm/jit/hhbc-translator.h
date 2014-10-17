@@ -36,6 +36,8 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
 struct PropInfo;
 
 enum class IRGenMode {
@@ -580,7 +582,6 @@ private:
     void emitPropGeneric();
     void emitPropSpecialized(const MInstrAttr mia, PropInfo propInfo);
     void emitElem();
-    void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
     void emitRatchetRefs();
 
@@ -590,8 +591,6 @@ private:
     void emit##instr##Prop();
     MINSTRS
 #   undef MII
-    void emitIssetEmptyElem(bool isEmpty);
-    void emitIssetEmptyProp(bool isEmpty);
     void emitNotSuppNewElem();
     void emitVGetNewElem();
     void emitSetNewElem();
@@ -602,19 +601,12 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     SSATmp* emitArrayGet(SSATmp* key);
     void emitProfiledArrayGet(SSATmp* key);
-    void emitArrayIsset();
     SSATmp* emitPackedArrayGet(SSATmp* base, SSATmp* key);
     void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
-    void emitStringIsset();
     void emitVectorSet(SSATmp* key, SSATmp* value);
     void emitVectorGet(SSATmp* key);
-    void emitVectorIsset();
     void emitPairGet(SSATmp* key);
-    void emitPairIsset();
-    void emitMapSet(SSATmp* key, SSATmp* value);
-    void emitMapGet(SSATmp* key);
-    void emitMapIsset();
 
     // Generate a catch block that does not perform any final DecRef operations
     // on scratch space, and return its first block.
@@ -654,8 +646,9 @@ private:
      * inputs, replacing the opcode with the version that returns a new StkPtr
      * if appropriate.
      */
-    template<typename... Srcs>
-    SSATmp* genStk(Opcode op, Block* taken, Srcs... srcs);
+    template<class MaybeExtra, class... Srcs>
+    SSATmp* genStk(Opcode op, Block* taken, const MaybeExtra&, Srcs... srcs);
+    template<class MaybeExtra> struct genStkImpl;
 
     /* Various predicates about the current instruction */
     bool isSimpleBase();
@@ -762,8 +755,6 @@ private:
   void emitBindMem(SSATmp* ptr, SSATmp* src);
   void emitEmptyMem(SSATmp* ptr);
   void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
-  void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                            bool& checkForInt, bool& converted);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,

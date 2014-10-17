@@ -130,8 +130,7 @@ struct CallInfo {
 typedef std::initializer_list<CallInfo> CallInfoList;
 typedef hphp_hash_map<Opcode, CallInfo, std::hash<Opcode>> CallInfoMap;
 
-class CallMap {
-public:
+struct CallMap {
   explicit CallMap(CallInfoList infos);
 
   static bool hasInfo(Opcode op);

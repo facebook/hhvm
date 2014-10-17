@@ -1226,6 +1226,58 @@ void registerLiveObj(ObjectData* obj) {
   g_context->m_liveBCObjs.insert(obj);
 }
 
+namespace MInstrHelpers {
+
+StringData* stringGetI(StringData* str, uint64_t x) {
+  if (LIKELY(x < str->size())) {
+    return str->getChar(x);
+  }
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("Out of bounds");
+  }
+  return s_empty.get();
+}
+
+uint64_t pairIsset(c_Pair* pair, int64_t index) {
+  auto result = pair->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+uint64_t vectorIsset(c_Vector* vec, int64_t index) {
+  auto result = vec->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+void bindElemC(TypedValue* base, TypedValue key, RefData* val,
+               MInstrState* mis) {
+  base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
+}
+
+void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue* val,
+                     MInstrState* mis) {
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
+void setWithRefNewElem(TypedValue* base, TypedValue* val,
+                       MInstrState* mis) {
+  base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
+}
+
 //////////////////////////////////////////////////////////////////////
 
 uintptr_t tlsBaseNoInline() {

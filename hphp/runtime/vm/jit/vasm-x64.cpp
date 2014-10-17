@@ -912,10 +912,131 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   v << ret{arg_regs};
 }
 
+static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
+  auto& blocks = unit.blocks;
+  auto& inst = blocks[b].code[iInst];
+  auto const is_vcall = inst.op == Vinstr::vcall;
+  auto const vcall = inst.vcall_;
+  auto const vinvoke = inst.vinvoke_;
+
+  // Extract all the relevant information from the appropriate instruction.
+  auto const is_smashable = !is_vcall && vinvoke.smashable;
+  auto const call = is_vcall ? vcall.call : vinvoke.call;
+  auto const& vargs = unit.vcallArgs[is_vcall ? vcall.args : vinvoke.args];
+  auto const& stkArgs = vargs.stkArgs;
+  auto const dests = unit.tuples[is_vcall ? vcall.d : vinvoke.d];
+  auto const fixup = is_vcall ? vcall.fixup : vinvoke.fixup;
+  auto const destType = is_vcall ? vcall.destType : vinvoke.destType;
+
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(nullptr, unit, scratch, inst.origin);
+
+  int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
+  if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
+
+  // Push stack arguments, in reverse order.
+  for (int i = stkArgs.size() - 1; i >= 0; --i) v << push{stkArgs[i]};
+
+  // Get the arguments in the proper registers.
+  RegSet argRegs;
+  auto doArgs = [&](const VregList& srcs, const PhysReg argNames[]) {
+    VregList argDests;
+    for (size_t i = 0; i < srcs.size(); ++i) {
+      auto reg = argNames[i];
+      argDests.push_back(reg);
+      argRegs.add(reg);
+    }
+    if (argDests.size()) {
+      v << copyargs{v.makeTuple(srcs),
+                    v.makeTuple(std::move(argDests))};
+    }
+  };
+  doArgs(vargs.args, argNumToRegName);
+  doArgs(vargs.simdArgs, argNumToSIMDRegName);
+
+  // Emit the call.
+  if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
+  else              emitCall(v, call, argRegs);
+
+  // Handle fixup and unwind information.
+  if (fixup.isValid()) v << syncpoint{fixup};
+
+  if (!is_vcall) {
+    auto& targets = vinvoke.targets;
+    v << unwind{{targets[0], targets[1]}};
+
+    // Write out the code so far to the end of b. Remaining code will be
+    // emitted to the next block.
+    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
+  } else if (vcall.nothrow) {
+    v << nothrow{};
+  }
+
+  // Copy the call result to the destination register(s)
+  switch (destType) {
+    case DestType::TV: {
+      // rax contains m_type and m_aux but we're expecting just the type in
+      // the lower bits, so shift the type result register.
+      auto rval = packed_tv ? reg::rdx : reg::rax;
+      auto rtyp = packed_tv ? reg::rax : reg::rdx;
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
+      assert(dests.size() == 2);
+      v << copy2{rval, rtyp, dests[0], dests[1]};
+      break;
+    }
+    case DestType::SIMD: {
+      // rax contains m_type and m_aux but we're expecting just the type in
+      // the lower bits, so shift the type result register.
+      auto rval = packed_tv ? reg::rdx : reg::rax;
+      auto rtyp = packed_tv ? reg::rax : reg::rdx;
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
+      assert(dests.size() == 1);
+      pack2(v, rval, rtyp, dests[0]);
+      break;
+    }
+    case DestType::SSA:
+      // copy the single-register result to dests[0]
+      assert(dests.size() == 1);
+      assert(dests[0].isValid());
+      v << copy{reg::rax, dests[0]};
+      break;
+    case DestType::None:
+      assert(dests.empty());
+      break;
+    case DestType::Dbl:
+      // copy the single-register result to dests[0]
+      assert(dests.size() == 1);
+      assert(dests[0].isValid());
+      v << copy{reg::xmm0, dests[0]};
+      break;
+  }
+
+  if (stkArgs.size() > 0) {
+    v << addqi{safe_cast<int32_t>(stkArgs.size() * sizeof(uintptr_t)
+                                  + adjust),
+               reg::rsp,
+               reg::rsp,
+               v.makeReg()};
+  }
+
+  // Insert new instructions to the appropriate block
+  if (is_vcall) {
+    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
+  } else {
+    vector_splice(blocks[vinvoke.targets[0]].code, 0, 0,
+                  blocks[scratch].code);
+  }
+}
+
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
-static void lowerCalls(Vunit& unit, const Abi& abi) {
+static void lowerForX64(Vunit& unit, const Abi& abi) {
   Timer _t(Timer::vasm_lower);
 
   // Scratch block can change blocks allocation, hence cannot use regular
@@ -928,122 +1049,14 @@ static void lowerCalls(Vunit& unit, const Abi& abi) {
     }
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
-      if (inst.op != Vinstr::vcall && inst.op != Vinstr::vinvoke) continue;
-      auto const is_vcall = inst.op == Vinstr::vcall;
-      auto const vcall = inst.vcall_;
-      auto const vinvoke = inst.vinvoke_;
+      switch (inst.op) {
+        case Vinstr::vcall:
+        case Vinstr::vinvoke:
+          lowerVcall(unit, Vlabel{ib}, ii);
+          break;
 
-      // Extract all the relevant information from the appropriate instruction.
-      auto const is_smashable = !is_vcall && vinvoke.smashable;
-      auto const call = is_vcall ? vcall.call : vinvoke.call;
-      auto const& vargs = unit.vcallArgs[is_vcall ? vcall.args : vinvoke.args];
-      auto const& stkArgs = vargs.stkArgs;
-      auto const dests = unit.tuples[is_vcall ? vcall.d : vinvoke.d];
-      auto const fixup = is_vcall ? vcall.fixup : vinvoke.fixup;
-      auto const destType = is_vcall ? vcall.destType : vinvoke.destType;
-
-      auto scratch = unit.makeScratchBlock();
-      SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-      Vout v(nullptr, unit, scratch, inst.origin);
-
-      int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-      if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
-
-      // Push stack arguments, in reverse order.
-      for (int i = stkArgs.size() - 1; i >= 0; --i) v << push{stkArgs[i]};
-
-      // Get the arguments in the proper registers.
-      RegSet argRegs;
-      auto doArgs = [&](const VregList& srcs, const PhysReg argNames[]) {
-        VregList argDests;
-        for (size_t i = 0; i < srcs.size(); ++i) {
-          auto reg = argNames[i];
-          argDests.push_back(reg);
-          argRegs.add(reg);
-        }
-        if (argDests.size()) {
-          v << copyargs{v.makeTuple(srcs),
-                        v.makeTuple(std::move(argDests))};
-        }
-      };
-      doArgs(vargs.args, argNumToRegName);
-      doArgs(vargs.simdArgs, argNumToSIMDRegName);
-
-      // Emit the call.
-      if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
-      else              emitCall(v, call, argRegs);
-
-      // Handle fixup and unwind information.
-      if (fixup.isValid()) v << syncpoint{fixup};
-
-      if (!is_vcall) {
-        auto& targets = vinvoke.targets;
-        v << unwind{{targets[0], targets[1]}};
-
-        // Write out the code so far to the end of ib. Remaining code will be
-        // emitted to the next block.
-        vector_splice(blocks[ib].code, ii, 1, unit.blocks[scratch].code);
-      } else if (vcall.nothrow) {
-        v << nothrow{};
-      }
-
-      // Copy the call result to the destination register(s)
-      switch (destType) {
-      case DestType::TV: {
-          // rax contains m_type and m_aux but we're expecting just the type in
-          // the lower bits, so shift the type result register.
-          auto rval = packed_tv ? reg::rdx : reg::rax;
-          auto rtyp = packed_tv ? reg::rax : reg::rdx;
-          if (kTypeShiftBits > 0) {
-            v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-          }
-          assert(dests.size() == 2);
-          v << copy2{rval, rtyp, dests[0], dests[1]};
-        }
-        break;
-      case DestType::SIMD: {
-          // rax contains m_type and m_aux but we're expecting just the type in
-          // the lower bits, so shift the type result register.
-          auto rval = packed_tv ? reg::rdx : reg::rax;
-          auto rtyp = packed_tv ? reg::rax : reg::rdx;
-          if (kTypeShiftBits > 0) {
-            v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-          }
-          assert(dests.size() == 1);
-          pack2(v, rval, rtyp, dests[0]);
-        }
-        break;
-      case DestType::SSA:
-        // copy the single-register result to dests[0]
-        assert(dests.size() == 1);
-        assert(dests[0].isValid());
-        v << copy{reg::rax, dests[0]};
-        break;
-      case DestType::None:
-        assert(dests.empty());
-        break;
-      case DestType::Dbl:
-        // copy the single-register result to dests[0]
-        assert(dests.size() == 1);
-        assert(dests[0].isValid());
-        v << copy{reg::xmm0, dests[0]};
-        break;
-      }
-
-      if (stkArgs.size() > 0) {
-        v << addqi{safe_cast<int32_t>(stkArgs.size() * sizeof(uintptr_t)
-                                      + adjust),
-                   reg::rsp,
-                   reg::rsp,
-                   v.makeReg()};
-      }
-
-      // Insert new instructions to the appropriate block
-      if (is_vcall) {
-        vector_splice(blocks[ib].code, ii, 1, unit.blocks[scratch].code);
-      } else {
-        vector_splice(unit.blocks[vinvoke.targets[0]].code, 0, 0,
-                      unit.blocks[scratch].code);
+        default:
+          break;
       }
     }
   }
@@ -1054,7 +1067,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   always_assert(!busy);
   busy = true;
   SCOPE_EXIT { busy = false; };
-  lowerCalls(m_unit, abi);
+  lowerForX64(m_unit, abi);
 
   if (!m_unit.cpool.empty()) {
     foldImms<x64::ImmFolder>(m_unit);

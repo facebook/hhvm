@@ -51,7 +51,7 @@ namespace HPHP {
 
 StaticString File::s_resource_name("stream");
 
-IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
+int __thread s_pcloseRet;
 
 const int File::CHUNK_SIZE = 8192;
 const int File::USE_INCLUDE_PATH = 1;

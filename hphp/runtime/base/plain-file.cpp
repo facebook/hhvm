@@ -116,19 +116,19 @@ bool PlainFile::close() {
 
 bool PlainFile::closeImpl() {
   bool ret = true;
-  s_file_data->m_pcloseRet = 0;
+  s_pcloseRet = 0;
   if (!m_closed) {
     if (m_stream) {
-      s_file_data->m_pcloseRet = fclose(m_stream);
+      s_pcloseRet = fclose(m_stream);
       m_stream = nullptr;
     } else if (m_fd >= 0) {
-      s_file_data->m_pcloseRet = ::close(m_fd);
+      s_pcloseRet = ::close(m_fd);
     }
     if (m_buffer) {
       free(m_buffer);
       m_buffer = nullptr;
     }
-    ret = (s_file_data->m_pcloseRet == 0);
+    ret = (s_pcloseRet == 0);
     m_closed = true;
     m_fd = -1;
   }

@@ -54,7 +54,7 @@ bool OutputFile::close() {
 }
 
 bool OutputFile::closeImpl() {
-  s_file_data->m_pcloseRet = 0;
+  s_pcloseRet = 0;
   if (!m_closed) {
     m_closed = true;
     return true;

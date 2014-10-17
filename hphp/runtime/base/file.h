@@ -32,16 +32,7 @@ namespace HPHP {
 
 class StreamContext;
 
-class FileData final : public RequestEventHandler {
-public:
-  FileData() : m_pcloseRet(0) {}
-  void clear() { m_pcloseRet = 0; }
-  void requestInit() override { clear(); }
-  void requestShutdown() override { clear(); }
-  int m_pcloseRet;
-};
-
-DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
+extern int __thread s_pcloseRet;
 
 /**
  * This is PHP's "stream", base class of plain file, gzipped file, directory

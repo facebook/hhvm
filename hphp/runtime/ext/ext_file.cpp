@@ -285,7 +285,7 @@ bool f_fclose(const Resource& handle) {
 Variant f_pclose(const Resource& handle) {
   CHECK_HANDLE(handle, f);
   CHECK_ERROR(f->close());
-  return s_file_data->m_pcloseRet;
+  return s_pcloseRet;
 }
 
 Variant f_fseek(const Resource& handle, int64_t offset,

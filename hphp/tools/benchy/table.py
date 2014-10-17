@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Encapsulated table class for pretty printing tabular data.
 
 """
@@ -25,7 +26,7 @@ def _print_entry_centered(entry, width):
 
     """
     total_padding = width - _len_sans_ansi(entry)
-    front_padding = ' ' * (total_padding / 2)
+    front_padding = ' ' * (total_padding // 2)
     back_padding = ' ' * (total_padding - len(front_padding))
     sys.stdout.write("%s%s%s" % (front_padding, entry, back_padding))
 

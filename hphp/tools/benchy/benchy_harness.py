@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Harness for running benchmarks.
 
 This module handles all aspects of running a series of benchmarks with

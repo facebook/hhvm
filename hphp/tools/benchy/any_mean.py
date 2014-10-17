@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Computes averages and confidence intervals of labeled data."""
 from __future__ import absolute_import
 from __future__ import division

@@ -11,6 +11,11 @@ benchy_harness.py: The main benchmark harness. It is responsible for actually
 
 benchy_config.py: The central config file for all of the other benchy scripts.
 
+platform.py: Dynamically loads a Platform object based on the .benchy config 
+  file which knows how to perform any platform-specific duties that benchy 
+  needs. Any file of the form *_platform.py contains an implementation of one 
+  of these Platform objects.
+
 any_mean.py: Responsible for consuming the raw benchmark measurments and 
   aggregating them into means and confidence intervals.
 

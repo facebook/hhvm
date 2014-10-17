@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Pretty print statistics comparisons.
 
 Parses files containing labeled lines of means and confidence intervals,

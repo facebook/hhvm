@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Various utilities to compute confidence intervals.
 
 """

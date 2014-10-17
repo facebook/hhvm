@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Configuration loader for benchy benchmark harness.
 
 """
@@ -46,6 +47,7 @@ def _load():
         _load.config['RUNLOG_PATH'] = os.path.join(work_dir, 'runlog')
         _load.config['PERF_PATH'] = os.path.join(work_dir, 'perf')
         _load.config['TMP_PATH'] = os.path.join(work_dir, 'tmp')
+        _load.config['PLATFORM'] = "%s_platform" % tmp['platform']
     return _load.config
 _load.config = None
 
@@ -68,6 +70,7 @@ BUILD_INTERNAL_PATH = _get('BUILD_INTERNAL_PATH')
 HARNESS_PATH = _get('HARNESS_PATH')
 INCLUDE_PATH = _get('INCLUDE_PATH')
 PERF_PATH = _get('PERF_PATH')
+PLATFORM = _get('PLATFORM')
 RUNLOG_PATH = _get('RUNLOG_PATH')
 RUNSCRIPT_PATH = _get('RUNSCRIPT_PATH')
 SIGNIFICANCE_PATH = _get('SIGNIFICANCE_PATH')

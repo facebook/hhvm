@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Convenience wrapper for benchmarking.
 
 Ties together all of the parts of building branches, running benchmarks, and
@@ -19,6 +20,7 @@ import shlex
 import subprocess
 
 import benchy_config as config
+from platform import platform
 
 def _unique_id():
     """Returns the next unique integer ID.
@@ -92,19 +94,15 @@ def build_branches(branches):
     """Builds each of the branches into their own directories.
 
     """
-    env = os.environ.copy()
     for branch in branches:
-        run_command('arc feature %s' % branch.name)
-        run_command('fbmake clean')
-
         build_dir = branch.build_dir()
         if os.path.isfile(build_dir):
             os.remove(build_dir)
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
 
-        env['FBMAKE_BUILD_ROOT'] = build_dir
-        run_command('fbmake --build-root "%s" opt -j70' % build_dir, env)
+        platform().switch_to_branch(branch)
+        platform().build_branch(branch)
 
 
 def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):

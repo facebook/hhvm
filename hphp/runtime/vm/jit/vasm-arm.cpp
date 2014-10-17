@@ -89,6 +89,7 @@ private:
   void emit(bindjmp& i);
   void emit(copy& i);
   void emit(copy2& i);
+  void emit(debugtrap& i) { a->Brk(0); }
   void emit(fallbackcc i);
   void emit(hcsync& i);
   void emit(hcnocatch& i);

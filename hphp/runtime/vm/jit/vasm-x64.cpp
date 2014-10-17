@@ -163,6 +163,7 @@ private:
   void emit(copy i);
   void emit(copy2& i);
   void emit(copyargs& i) { always_assert(false); }
+  void emit(debugtrap& i) { a->int3(); }
   void emit(end& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);

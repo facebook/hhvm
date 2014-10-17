@@ -249,9 +249,6 @@ public:
   ClassScopePtr getClass(AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) const;
 
-  DataType getDataType() const;
-  DataType getHhvmDataType() const;
-
   /**
    * Type hint names in PHP.
    */

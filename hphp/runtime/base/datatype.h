@@ -29,7 +29,7 @@
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * DataType is the type tag for a TypedValue (see typed-value.h).
@@ -64,6 +64,18 @@ enum DataType : int8_t {
 };
 
 /*
+ * Sentinel invalid DataType.
+ *
+ * This value must differ from that of any real DataType.  A live TypedValue
+ * should never have this as its type tag, so we keep it out of the enum to
+ * keep switches cleaner.
+ *
+ * This should only be used where MaybeDataType cannot be (e.g., in
+ * TypedValues, such as for MixedArray tombstones).
+ */
+constexpr DataType kInvalidDataType = static_cast<DataType>(-1);
+
+/*
  * Function parameter types for users of DataType that want a representation
  * for top and bottom types.
  *
@@ -87,17 +99,20 @@ using MaybeDataType = folly::Optional<DataType>;
  */
 const MaybeDataType kNoneDataType = folly::none;
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * All DataTypes are expressible in seven bits.
+ */
+constexpr unsigned kDataTypeMask = 0x7f;
+
 /*
  * DataType limits.
  */
 constexpr int    kNumDataTypes = 12;
 constexpr int8_t kMinDataType  = KindOfClass;
 constexpr int8_t kMaxDataType  = KindOfNamedLocal;
-
-/*
- * All DataTypes are expressible in seven bits.
- */
-constexpr unsigned kDataTypeMask = 0x7f;
 
 /*
  * KindOfStringBit must be set in KindOfStaticString and KindOfString, and it
@@ -122,7 +137,9 @@ constexpr unsigned kNotConstantValueTypeMask = 0x60;
  */
 constexpr DataType KindOfRefCountThreshold = KindOfStaticString;
 
-//////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// DataTypeCategory
 
 // These must be kept in order from least to most specific.
 #define DT_CATEGORIES(func)                     \
@@ -137,11 +154,14 @@ enum class DataTypeCategory : uint8_t {
   DT_CATEGORIES(DT)
 #undef DT
 };
+
 #define DT(name) auto constexpr DataType##name = DataTypeCategory::name;
 DT_CATEGORIES(DT)
 #undef DT
 
-//////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Static asserts.
 
 static_assert(KindOfString       & KindOfStringBit, "");
 static_assert(KindOfStaticString & KindOfStringBit, "");
@@ -171,7 +191,6 @@ static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
 static_assert(!(KindOfNamedLocal & KindOfUncountedInitBit), "");
 static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
-// assume KindOfUninit == 0 in ClsCns
 static_assert(KindOfUninit == 0,
               "Several things assume this tag is 0, especially RDS");
 
@@ -190,7 +209,8 @@ static_assert(!(kNotConstantValueTypeMask &
               "null, bool, int, double and string types");
 
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Names.
 
 inline std::string tname(DataType t) {
   switch (t) {
@@ -208,11 +228,12 @@ inline std::string tname(DataType t) {
     CS(Resource)
     CS(Ref)
     CS(Class)
-
 #undef CS
-    case KindOfInvalid: return std::string("Invalid");
 
     default: {
+       if (t == kInvalidDataType) {
+         return std::string("Invalid");
+       }
       char buf[128];
       sprintf(buf, "Unknown:%d", t);
       return std::string(buf);
@@ -228,6 +249,10 @@ inline std::string typeCategoryName(DataTypeCategory c) {
   }
   not_reached();
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Indices.
 
 inline int getDataTypeIndex(DataType type) {
   switch (type) {
@@ -265,7 +290,9 @@ inline DataType getDataTypeValue(unsigned index) {
   }
 }
 
-// These are used in type_variant.cpp and mc-generator.cpp
+/*
+ * These are used in type_variant.cpp and mc-generator.cpp.
+ */
 const int kShiftDataTypeToDestrIndex = 4;
 const int kDestrTableSize = 6;
 
@@ -277,40 +304,57 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
   return TYPE_TO_DESTR_IDX(t);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Is-a macros.
+
 #define IS_REAL_TYPE(t)                                             \
   (((t) >= ::HPHP::KindOfUninit && (t) <= ::HPHP::kMaxDataType) ||  \
    (t) == ::HPHP::KindOfClass)
 
-// Helper macro for checking if a given type is refcounted
+/*
+ * Helper macro for checking if a given type is refcounted.
+ */
 #define IS_REFCOUNTED_TYPE(t)                                   \
   (assert(IS_REAL_TYPE(t)), (t) > HPHP::KindOfRefCountThreshold)
 
-// Helper function for checking if a type is KindOfString or KindOfStaticString.
-static_assert(KindOfStaticString == 0x0C, "");
-static_assert(KindOfString       == 0x14, "");
+/*
+ * Helper function for checking if a type is either KindOfString or
+ * KindOfStaticString.
+ */
 constexpr bool IS_STRING_TYPE(DataType t) {
   return (t & ~0x18) == KindOfStringBit;
 }
+static_assert(KindOfStaticString == 0x0c, "");
+static_assert(KindOfString       == 0x14, "");
 
-// Check if a type is KindOfUninit or KindOfNull
+/*
+ * Check if a type is KindOfUninit or KindOfNull.
+ */
 #define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)
-// Other type check macros
+
+/*
+ * Other type-check macros.
+ */
 #define IS_INT_TYPE(t) ((t) == KindOfInt64)
-constexpr bool IS_ARRAY_TYPE(DataType t) { return t == KindOfArray; }
 #define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
 #define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
+
+constexpr bool IS_ARRAY_TYPE(DataType t) {
+  return t == KindOfArray;
+}
 
 constexpr bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;
 }
 
 /*
- * Returns whether two DataTypes for primitive types are "equivalent"
- * as far as user-visible php types are concerned.  (I.e. ignoring
- * different types of strings or different types of nulls.)
+ * Return whether two DataTypes for primitive types are "equivalent" as far as
+ * user-visible PHP types are concerned (i.e. ignoring different types of
+ * strings or different types of nulls).
  *
- * Pre: t1 and t2 must both be DataTypes that represent php-types.
- * (Non-internal KindOfs.)
+ * Pre: t1 and t2 must both be DataTypes that represent PHP-types.
+ * (non-internal KindOfs.)
  */
 constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return
@@ -319,11 +363,11 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
     (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 namespace folly {
 template<> struct FormatValue<HPHP::DataTypeCategory> {
@@ -351,6 +395,6 @@ template<> struct FormatValue<HPHP::DataType> {
 };
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 #endif

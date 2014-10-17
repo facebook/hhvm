@@ -709,7 +709,7 @@ public:
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
   Id emitSetUnnamedL(Emitter& e);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
-  DataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
+  MaybeDataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
   void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
                          std::vector<Label>& caseLabels, Label& done,
                          const SwitchState& state);

@@ -218,8 +218,8 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
   return string_numeric_to_base(v, tobase);
 }
 
-static DataType convert_for_pow(const Variant& val,
-                                int64_t& ival, double& dval) {
+static MaybeDataType convert_for_pow(const Variant& val,
+                                     int64_t& ival, double& dval) {
   switch (val.getType()) {
     case KindOfNull:
     case KindOfUninit:
@@ -249,7 +249,7 @@ static DataType convert_for_pow(const Variant& val,
     default:
       // Unknown data type
       raise_error("Unsupported operand types");
-      return KindOfInvalid; // Not Reached
+      return kNoneDataType; // Not Reached
   }
 }
 
@@ -257,9 +257,9 @@ Variant f_pow(const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
   if (base.isArray()) return 0LL;
-  DataType bt = convert_for_pow(base, bint, bdbl);
+  MaybeDataType bt = convert_for_pow(base, bint, bdbl);
   if (exp.isArray()) return 1LL;
-  DataType et = convert_for_pow(exp,  eint, edbl);
+  MaybeDataType et = convert_for_pow(exp,  eint, edbl);
   if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
     if (eint == 0) return 1LL;
     if (bint == 0) return 0LL;

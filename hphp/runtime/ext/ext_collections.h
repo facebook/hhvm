@@ -972,9 +972,9 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   static bool isTombstoneType(DataType t) {
-    assert(IS_REAL_TYPE(t) || t == KindOfInvalid);
+    assert(IS_REAL_TYPE(t) || t == kInvalidDataType);
     return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && KindOfInvalid < 0, "");
+    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
   }
 
   static bool isTombstone(const Elm* e) {

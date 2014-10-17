@@ -2427,7 +2427,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
     }
     FuncFinisher ff(this, e, m_curFunc);
     TypedValue mainReturn;
-    mainReturn.m_type = KindOfInvalid;
+    mainReturn.m_type = kInvalidDataType;
     bool notMergeOnly = false;
 
     if (Option::UseHHBBC && SystemLib::s_inited) notMergeOnly = true;
@@ -2458,7 +2458,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           notMergeOnly = true; // TODO(#2103206): typedefs should be mergable
           break;
         case Statement::KindOfReturnStatement:
-          if (mainReturn.m_type != KindOfInvalid) break;
+          if (mainReturn.m_type != kInvalidDataType) break;
 
           visit(s);
           if (notMergeOnly) {
@@ -2489,7 +2489,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
           }
           break;
         case Statement::KindOfExpStatement:
-          if (mainReturn.m_type == KindOfInvalid) {
+          if (mainReturn.m_type == kInvalidDataType) {
             ExpressionPtr e =
               static_pointer_cast<ExpStatement>(s)->getExpression();
             switch (e->getKindOf()) {
@@ -2547,7 +2547,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
             }
           } // fall through
         default:
-          if (mainReturn.m_type != KindOfInvalid) break;
+          if (mainReturn.m_type != kInvalidDataType) break;
           notMergeOnly = true;
           visit(s);
       }
@@ -2555,7 +2555,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
     if (!notMergeOnly) {
       m_ue.m_mergeOnly = true;
-      if (mainReturn.m_type == KindOfInvalid) {
+      if (mainReturn.m_type == kInvalidDataType) {
         tvWriteUninit(&mainReturn);
         if (boost::algorithm::ends_with(filename, EVAL_FILENAME_SUFFIX)) {
           tvAsVariant(&mainReturn) = init_null();
@@ -3076,8 +3076,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         SwitchState state;
         bool didSwitch = false;
         if (enabled) {
-          DataType stype = analyzeSwitch(sw, state);
-          if (stype != KindOfInvalid) {
+          MaybeDataType stype = analyzeSwitch(sw, state);
+          if (stype) {
             e.incStat(stype == KindOfInt64 ? Stats::Switch_Integer
                                            : Stats::Switch_String,
                       1);
@@ -3090,7 +3090,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
             } else if (stype == KindOfInt64) {
               emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
             } else {
-              assert(IS_STRING_TYPE(stype));
+              assert(IS_STRING_TYPE(*stype));
               emitStringSwitch(e, sw, caseLabels, brkTarget, state);
             }
             didSwitch = true;
@@ -5846,8 +5846,8 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
                   m_evalStack.get(m_evalStack.size() - 1) | StackSym::M);
 }
 
-DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
-                                       SwitchState& state) {
+MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
+                                            SwitchState& state) {
   auto& caseMap = state.cases;
   DataType t = KindOfUninit;
   StatementListPtr cases(sw->getCases());
@@ -5865,11 +5865,11 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         if (caseType == KindOfStaticString) caseType = KindOfString;
         if ((caseType != KindOfInt64 && caseType != KindOfString) ||
             !IMPLIES(t != KindOfUninit, caseType == t)) {
-          return KindOfInvalid;
+          return kNoneDataType;
         }
         t = caseType;
       } else {
-        return KindOfInvalid;
+        return kNoneDataType;
       }
       int64_t n;
       bool isNonZero;
@@ -5912,11 +5912,11 @@ DataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
     int64_t nTargets = caseMap.rbegin()->first - base + 1;
     // Fail if the cases are too sparse
     if ((float)caseMap.size() / nTargets < 0.5) {
-      return KindOfInvalid;
+      return kNoneDataType;
     }
   } else if (t == KindOfString) {
     if (caseMap.size() < kMinStringSwitchCases) {
-      return KindOfInvalid;
+      return kNoneDataType;
     }
   }
 

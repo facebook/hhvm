@@ -311,7 +311,7 @@ static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
   return !mysql_kill(conn->get(), processid);
 }
 
-static DataType get_option_value_type(int64_t option) {
+static MaybeDataType get_option_value_type(int64_t option) {
   switch (option) {
     case MYSQL_INIT_COMMAND:
     case MYSQL_READ_DEFAULT_FILE:
@@ -363,7 +363,7 @@ static DataType get_option_value_type(int64_t option) {
 #endif
       return KindOfNull;
     default:
-      return KindOfInvalid;
+      return kNoneDataType;
   }
 
   not_reached();
@@ -374,10 +374,8 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 
-  DataType dt = get_option_value_type(option);
-  if (dt == KindOfInvalid) {
-    return false;
-  }
+  MaybeDataType dt = get_option_value_type(option);
+  if (!dt) return false;
 
   // Just holders for the value
   my_bool bool_value;
@@ -385,7 +383,7 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
 
   const void *value_ptr = nullptr;
   if (!value.isNull()) {
-    switch (dt) {
+    switch (*dt) {
       case KindOfString:
         other_value = value.toString();
         value_ptr = other_value.getStringData()->data();

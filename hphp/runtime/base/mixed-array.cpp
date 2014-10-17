@@ -297,7 +297,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
       copyKeyValue(e, te, &other);
     } else {
       // Tombstone.
-      te.data.m_type = KindOfInvalid;
+      te.data.m_type = kInvalidDataType;
     }
   }
 
@@ -626,7 +626,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *
  * kMixedKind:
  *   m_nextKI >= highest actual int key
- *   Elm.data.m_type maybe KindOfInvalid (tombstone)
+ *   Elm.data.m_type maybe kInvalidDataType (tombstone)
  *   hash[] maybe Tombstone
  *
  * kPackedKind:
@@ -634,7 +634,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *   m_nextKI = uninitialized
  *   Elm.skey uninitialized
  *   Elm.hash uninitialized
- *   no KindOfInvalid tombstones
+ *   no kInvalidDataType tombstones
  */
 bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");
@@ -1748,7 +1748,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   TypedValue* tv = &e.data;
   DataType oldType = tv->m_type;
   uint64_t oldDatum = tv->m_data.num;
-  tv->m_type = KindOfInvalid;
+  tv->m_type = kInvalidDataType;
   --m_size;
   // Mark the hash entry as "deleted".
   assert(m_used <= m_cap);

@@ -48,7 +48,7 @@ NameValueTable::NameValueTable(ActRec* fp)
     assert(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = insert(func->localVarName(i));
-    assert(elm && elm->m_tv.m_type == KindOfInvalid);
+    assert(elm && elm->m_tv.m_type == kInvalidDataType);
     elm->m_tv.m_type = KindOfNamedLocal;
     elm->m_tv.m_data.num = i;
   }
@@ -114,7 +114,7 @@ void NameValueTable::attach(ActRec* fp) {
 
     auto elm = insert(func->localVarName(i));
     assert(elm);
-    if (elm->m_tv.m_type != KindOfInvalid) {
+    if (elm->m_tv.m_type != kInvalidDataType) {
       assert(elm->m_tv.m_type != KindOfNamedLocal);
       tvCopy(elm->m_tv, *loc);
     }
@@ -225,7 +225,7 @@ TypedValue* NameValueTable::derefNamedLocal(TypedValue* tv) const {
 
 TypedValue* NameValueTable::findTypedValue(const StringData* name) {
   Elm* elm = insert(name);
-  if (elm->m_tv.m_type == KindOfInvalid) {
+  if (elm->m_tv.m_type == kInvalidDataType) {
     tvWriteNull(&elm->m_tv);
     return &elm->m_tv;
   }
@@ -239,7 +239,7 @@ NameValueTable::Elm* NameValueTable::insertImpl(const StringData* name) {
     assert(numProbes++ < m_tabMask + 1);
     if (nullptr == elm->m_name) {
       elm->m_name = name;
-      elm->m_tv.m_type = KindOfInvalid;
+      elm->m_tv.m_type = kInvalidDataType;
       return elm;
     }
     if (name->same(elm->m_name)) {
@@ -254,7 +254,7 @@ NameValueTable::Elm* NameValueTable::insertImpl(const StringData* name) {
 NameValueTable::Elm* NameValueTable::insert(const StringData* name) {
   reserve(m_elms + 1);
   Elm* elm = insertImpl(name);
-  if (elm->m_tv.m_type == KindOfInvalid) {
+  if (elm->m_tv.m_type == kInvalidDataType) {
     ++m_elms;
     name->incRefCount();
   }

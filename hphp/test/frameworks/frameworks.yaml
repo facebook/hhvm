@@ -91,6 +91,14 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Cache/FileLockRegionTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
+  dbal:
+    url: https://github.com/doctrine/dbal.git
+    branch: master
+    commit: 50557fc0c7479067063532171a602338cf8f413a
+    install_root: dbal
+    test_root: dbal
+    config_file: dbal/tests/travis/sqlite.travis.xml
+    # config_file: dbal/tests/travis/mysql.travis.xml - not yet allowed, as framework tests can currently only use sqlite
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.0-alpha13

@@ -52,12 +52,8 @@ Arg extra(MemberType EDType::*ptr) {
 
 Arg immed(intptr_t imm) { return Arg(ArgType::Imm, imm); }
 
-UNUSED FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
-
 auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
-UNUSED auto constexpr MemberKeyS  = ArgType::MemberKeyS;
-UNUSED auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 
 using IFaceSupportFn = bool (*)(const StringData*);
 
@@ -77,7 +73,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  *     <function pointer>          - Raw function pointer
  *     <pointer to member>         - Dispatch to a C++ member function---the
  *                                   function must be non-virtual.
- *     fssa(idx)                   - Use a const TCA from inst->src(idx)
  *
  * Dest
  *   DSSA  - The helper returns a single-register value
@@ -94,9 +89,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  *     {SSA, idx}               - Pass the value in inst->src(idx)
  *     {TV, idx}                - Pass the value in inst->src(idx) as a
  *                                TypedValue, in two registers
- *     {MemberKeyS, idx}           - Like TV, but Str values are passed as a raw
- *                                StringData*, in a single register
- *     {MemberKeyIS, idx}          - Like MemberKeyS, including Int
  *     extra(&EDStruct::member) - extract an immediate from extra data
  *     immed(int64_t)           - constant immediate
  */
@@ -385,12 +377,6 @@ ArgGroup toArgGroup(const CallInfo& info,
       break;
     case ArgType::TV:
       argGroup.typedValue(arg.ival);
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.memberKeyS(arg.ival);
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.memberKeyIS(arg.ival);
       break;
     case ArgType::ExtraImm:
       argGroup.imm(arg.extraFunc(inst));

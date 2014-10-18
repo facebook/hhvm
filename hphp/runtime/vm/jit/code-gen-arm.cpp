@@ -1042,17 +1042,6 @@ void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   auto const& info = CallMap::info(opc);
   ArgGroup argGroup = toArgGroup(info, m_state.locs, inst);
 
-  auto call = [&]() -> CppCall {
-    switch (info.func.type) {
-    case FuncType::Call:
-      return CppCall(info.func.call);
-    case FuncType::SSA:
-      return CppCall::direct(
-        reinterpret_cast<void(*)()>(inst->src(info.func.srcIdx)->tcaVal()));
-    }
-    not_reached();
-  }();
-
   auto const dest = [&]() -> CallDest {
     switch (info.dest) {
       case DestType::None:  return kVoidDest;
@@ -1064,7 +1053,7 @@ void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
     not_reached();
   }();
 
-  cgCallHelper(v, call, dest, info.sync, argGroup);
+  cgCallHelper(v, info.func.call, dest, info.sync, argGroup);
 }
 
 void CodeGenerator::cgCallHelper(Vout& v,

@@ -2078,16 +2078,15 @@ D:StkPtr = SetPropStk S0:{Obj|PtrToGen} S1:Cell S2:Cell
 
 UnsetProp S1:{Obj|PtrToGen} S2:Cell
 
-D:Cell = SetOpProp S0:{Obj|PtrToGen} S1:Cell S2:Cell S3:PtrToCell S4:ConstInt
-D:Cell, D:StkPtr = SetOpPropStk S0:{Obj|PtrToGen} S1:Cell S2:Cell S3:PtrtoCell
-                                S4:ConstInt
+D:Cell = SetOpProp<op> S0:{Obj|PtrToGen} S1:Cell S2:Cell S3:PtrToCell
+D:Cell, D:StkPtr = SetOpPropStk<op> S0:{Obj|PtrToGen} S1:Cell S2:Cell
+                                    S3:PtrtoCell
 
   Set op propery with key S1 in base S0, using S2 as the right hand side. S3
   should point to an MInstrState struct.
 
-D:Cell = IncDecProp S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell S3:ConstInt
-D:Cell, D:StkPtr = IncDecPropStk S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
-                                 S3:ConstInt
+D:Cell = IncDecProp<op> S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
+D:Cell, D:StkPtr = IncDecPropStk<op> S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
 
   Increment/decrement property with key S1 in base S0. S2 should point to an
   MInstrState struct.
@@ -2180,15 +2179,14 @@ D:StkPtr = UnsetElemStk S0:PtrToGen S1:Cell
 
   Unsets the element at key S1 in the base S0.
 
-D:Cell = SetOpElem S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell S4:ConstInt
-D:Cell, D:StkPtr = SetOpElemStk S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell
-                                S4:ConstInt
+D:Cell = SetOpElem<op> S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell
+D:Cell, D:StkPtr = SetOpElemStk<op> S0:PtrToGen S1:Cell S2:Cell S3:PtrToCell
 
   Set op elem with key S1 in base S0, using S2 as the right hand side. S3
   should point to an MInstrState struct.
 
-D:Cell = IncDecElem S0:PtrToGen S1:Cell S2:PtrToCell S3:ConstInt
-D:Cell, D:StkPtr = IncDecElemStk S0:PtrToGen S1:Cell S2:PtrToCell S3:ConstInt
+D:Cell = IncDecElem<op> S0:PtrToGen S1:Cell S2:PtrToCell
+D:Cell, D:StkPtr = IncDecElemStk<op> S0:PtrToGen S1:Cell S2:PtrToCell
 
   Increment/decrement element with key S1 in base S0. S2 should point to an
   MInstrState struct.

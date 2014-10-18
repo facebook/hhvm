@@ -657,12 +657,10 @@ O(UnsetProp,                        ND, S(Obj,PtrToGen)                       \
 O_STK(SetOpProp,               D(Cell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell)                        \
-                                          C(Int),           MProp|E|PRc|Er) \
+                                          S(PtrToCell),     MProp|E|PRc|Er) \
 O_STK(IncDecProp,              D(Cell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
-                                          S(PtrToCell)                        \
-                                          C(Int),           MProp|E|PRc|Er) \
+                                          S(PtrToCell),     MProp|E|PRc|Er) \
 O(EmptyProp,                   D(Bool), S(Obj,PtrToGen)                       \
                                           S(Cell),                    E|Er) \
 O(IssetProp,                   D(Bool), S(Obj,PtrToGen)                       \
@@ -715,12 +713,10 @@ O_STK(UnsetElem,                    ND, S(PtrToGen) S(Cell),      MElem|E|Er) \
 O_STK(SetOpElem,               D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(Cell)                             \
-                                          S(PtrToCell)                        \
-                                          C(Int),             MElem|E|PRc|Er) \
+                                          S(PtrToCell),     MElem|E|PRc|Er) \
 O_STK(IncDecElem,              D(Cell), S(PtrToGen)                           \
                                           S(Cell)                             \
-                                          S(PtrToCell)                        \
-                                          C(Int),             MElem|E|PRc|Er) \
+                                          S(PtrToCell),     MElem|E|PRc|Er) \
 O_STK(SetNewElem,                   ND, S(PtrToGen)                           \
                                           S(Cell),                MElem|E|Er) \
 O_STK(SetNewElemArray,              ND, S(PtrToArr)                           \

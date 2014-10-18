@@ -849,6 +849,18 @@ struct MInstrAttrData : IRExtraData {
   MInstrAttr mia;
 };
 
+struct SetOpData : IRExtraData {
+  explicit SetOpData(SetOpOp op) : op(op) {}
+  std::string show() const { return subopToName(op); }
+  SetOpOp op;
+};
+
+struct IncDecData : IRExtraData {
+  explicit IncDecData(IncDecOp op) : op(op) {}
+  std::string show() const { return subopToName(op); }
+  IncDecOp op;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1007,6 +1019,10 @@ X(ElemDX,                       MInstrAttrData);
 X(ElemDXStk,                    MInstrAttrData);
 X(ElemUX,                       MInstrAttrData);
 X(ElemUXStk,                    MInstrAttrData);
+X(SetOpProp,                    SetOpData);
+X(IncDecProp,                   IncDecData);
+X(SetOpElem,                    SetOpData);
+X(IncDecElem,                   IncDecData);
 
 #undef X
 

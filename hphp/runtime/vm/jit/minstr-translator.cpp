@@ -1236,15 +1236,15 @@ void HhbcTranslator::MInstrTranslator::emitSetOpProp() {
   SetOpOp op = SetOpOp(m_ni.imm[0].u_OA);
   auto const key = getKey();
   auto const value = getValue();
-  m_result = genStk(SetOpProp, makeCatch(), NoExtraData{},
-                    m_base, key, value, genMisPtr(), cns(op));
+  m_result = genStk(SetOpProp, makeCatch(), SetOpData { op },
+                    m_base, key, value, genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
   IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   auto const key = getKey();
-  m_result = genStk(IncDecProp, makeCatch(), NoExtraData{},
-                    m_base, key, genMisPtr(), cns(op));
+  m_result = genStk(IncDecProp, makeCatch(), IncDecData { op },
+                    m_base, key, genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitBindProp() {
@@ -1627,14 +1627,14 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
 
 void HhbcTranslator::MInstrTranslator::emitSetOpElem() {
   SetOpOp op = static_cast<SetOpOp>(m_ni.imm[0].u_OA);
-  m_result = genStk(SetOpElem, makeCatch(), NoExtraData{},
-                    m_base, getKey(), getValue(), genMisPtr(), cns(op));
+  m_result = genStk(SetOpElem, makeCatch(), SetOpData{op},
+                    m_base, getKey(), getValue(), genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitIncDecElem() {
   IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
-  m_result = genStk(IncDecElem, makeCatch(), NoExtraData{},
-                    m_base, getKey(), genMisPtr(), cns(op));
+  m_result = genStk(IncDecElem, makeCatch(), IncDecData { op },
+                    m_base, getKey(), genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitBindElem() {

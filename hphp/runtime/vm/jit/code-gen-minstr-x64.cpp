@@ -160,6 +160,7 @@ void CodeGenerator::cgUnsetProp(IRInstruction* inst) {
 
 void CodeGenerator::cgSetOpPropImpl(IRInstruction* inst) {
   auto const base = inst->src(0);
+  auto const extra = inst->extra<SetOpProp>();
   BUILD_OPTAB(SETOPPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -172,7 +173,7 @@ void CodeGenerator::cgSetOpPropImpl(IRInstruction* inst) {
       .typedValue(1)
       .typedValue(2)
       .ssa(3)
-      .ssa(4)
+      .imm(static_cast<int32_t>(extra->op))
   );
 }
 
@@ -181,6 +182,7 @@ void CodeGenerator::cgSetOpPropStk(IRInstruction* i) { cgSetOpPropImpl(i); }
 
 void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
   auto const base = inst->src(0);
+  auto const extra = inst->extra<IncDecProp>();
   BUILD_OPTAB(INCDECPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -192,7 +194,7 @@ void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
       .ssa(0)
       .typedValue(1)
       .ssa(2)
-      .ssa(3)
+      .imm(static_cast<int32_t>(extra->op))
   );
 }
 

@@ -282,9 +282,11 @@ static CallMap s_callMap {
 
     /* MInstrTranslator helpers */
     {SetOpElem, setOpElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
+                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3},
+                  extra(&SetOpData::op)}},
     {IncDecElem, incDecElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+                 {{SSA, 0}, {TV, 1}, {SSA, 2},
+                  extra(&IncDecData::op)}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {BindNewElem, bindNewElemIR, DNone, SSync,

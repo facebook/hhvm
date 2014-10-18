@@ -932,10 +932,11 @@ let tuple_syntax p =
   add Typing.tuple_syntax p
     ("Did you want a tuple? Try (X,Y), not tuple<X,Y>")
 
-let class_arity pos class_name arity =
-  add Typing.class_arity pos
-    ("The class "^(Utils.strip_ns class_name)^" expects "^
-     soi arity^" arguments")
+let class_arity usage_pos class_pos class_name arity =
+  add_list Typing.class_arity
+    [usage_pos, ("The class "^(Utils.strip_ns class_name)^" expects "^
+                    soi arity^" arguments");
+     class_pos, "Definition is here"]
 
 let dynamic_yield_private pos =
   add_list Typing.dynamic_yield_private

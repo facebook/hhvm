@@ -3095,8 +3095,7 @@ and get_implements ~with_checks ~this (env: Typing_env.env) ht =
       | Some class_ ->
           let size1 = List.length class_.tc_tparams in
           let size2 = List.length paraml in
-          if size1 <> size2
-          then Errors.class_arity p c size1;
+          if size1 <> size2 then Errors.class_arity p class_.tc_pos c size1;
           let this_ty = fst this, Tgeneric (SN.Typehints.this, Some this) in
           let subst =
             Inst.make_subst_with_this ~this:this_ty class_.tc_tparams paraml in

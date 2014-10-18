@@ -433,6 +433,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_XHP_REQUIRED:
       case T_ENUM:
       case T_ARRAY:
+      case T_CALLABLE:
         nextLookahead(pos);
         break;
       case T_SHAPE:

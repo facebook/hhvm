@@ -235,4 +235,17 @@ int TypeAnnotation::numTypeArgs() const {
   return n;
 }
 
+TypeAnnotationPtr TypeAnnotation::getTypeArg(int n) const {
+  int i = 0;
+  TypeAnnotationPtr typeEl = m_typeArgs;
+  while (typeEl) {
+    if (i == n) {
+      return typeEl;
+    }
+    ++i;
+    typeEl = typeEl->m_typeList;
+  }
+  return TypeAnnotationPtr();
+}
+
 }

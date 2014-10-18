@@ -169,6 +169,7 @@ public:
   void outputCodeModel(CodeGenerator& cg);
 
   int numTypeArgs() const;
+  TypeAnnotationPtr getTypeArg(int n) const;
 
 private:
   void functionTypeName(std::string &name) const;

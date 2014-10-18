@@ -433,26 +433,32 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   auto const givenType = describe_actual_type(tv, isHHType());
   // Handle return type constraint failures
   if (id == ReturnId) {
+    std::string msg;
+    if (func->isClosureBody()) {
+      msg =
+        folly::format(
+          "Value returned from {}closure must be of type {}, {} given",
+          func->isAsync() ? "async " : "",
+          name,
+          givenType
+        ).str();
+    } else {
+      msg =
+        folly::format(
+          "Value returned from {}{} {}() must be of type {}, {} given",
+          func->isAsync() ? "async " : "",
+          func->preClass() ? "method" : "function",
+          func->fullName()->data(),
+          name,
+          givenType
+        ).str();
+    }
     if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft() &&
         (!func->isClosureBody() ||
          !RuntimeOption::EvalSoftClosureReturnTypeHints)) {
-      raise_typehint_error(
-        folly::format(
-          "Value returned from {}() must be of type {}, {} given",
-          func->fullName()->data(),
-          name,
-          givenType
-        ).str()
-      );
+      raise_typehint_error(msg);
     } else {
-      raise_debugging(
-        folly::format(
-          "Value returned from {}() must be of type {}, {} given",
-          func->fullName()->data(),
-          name,
-          givenType
-        ).str()
-      );
+      raise_debugging(msg);
     }
     return;
   }

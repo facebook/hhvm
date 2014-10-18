@@ -2976,13 +2976,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         } else {
           e.Null();
         }
-
         assert(m_evalStack.size() == 1);
-        bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
+        assert(IMPLIES(m_curFunc->isAsync || m_curFunc->isGenerator,
+                       retSym == StackSym::C));
 
-        // resumables
-        if (m_curFunc->isAsync || m_curFunc->isGenerator) {
-          assert(retSym == StackSym::C);
+        bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
+        if (m_curFunc->isGenerator) {
+          // Suppress return type checking for generators
           hasConstraint = false;
         }
 
@@ -6613,6 +6613,20 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   auto annot = meth->retTypeAnnotation();
+  // For a non-generator async function with a return annotation of the form
+  // "Awaitable<T>", we set m_retTypeConstraint to T. For all other async
+  // functions, we leave m_retTypeConstraint empty.
+  if (annot && fe->isAsync && !fe->isGenerator) {
+    // Semantic checks ensure that the return annotation is either "Awaitable"
+    // or of the form "Awaitable<T>"
+    assert(annot->isAwaitable() && annot->numTypeArgs() <= 1);
+    bool isSoft = annot->isSoft();
+    // If annot was "Awaitable" with no type args, getTypeArg() will return an
+    // empty annotation
+    annot = annot->getTypeArg(0);
+    // If the original annotation was soft, make sure we preserve the softness
+    if (annot && isSoft) annot->setSoft();
+  }
   // Ideally we should handle the void case in TypeConstraint::check. This
   // should however get done in a different diff, since it could impact
   // perf in a negative way (#3145038)

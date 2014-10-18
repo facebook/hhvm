@@ -1099,7 +1099,8 @@ static NEVER_INLINE
 int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assert(arr->hasExactlyOneRef());
   assert(arr->isPacked());
-  PackedArray::Release(arr);
+  // Use non-specialized release call so ArrayTracer can track its destruction
+  arr->release();
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
   }
@@ -1110,7 +1111,8 @@ static NEVER_INLINE
 int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   assert(arr->isMixed());
   assert(arr->hasExactlyOneRef());
-  MixedArray::Release(arr);
+  // Use non-specialized release call so ArrayTracer can track its destruction
+  arr->release();
   if (debug) {
     iter->arr().setIterType(ArrayIter::TypeUndefined);
   }

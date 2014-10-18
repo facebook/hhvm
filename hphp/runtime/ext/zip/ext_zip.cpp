@@ -23,6 +23,19 @@
 
 namespace HPHP {
 
+static String to_full_path(const String& filename) {
+  if (filename.charAt(0) == '/') {
+    return filename;
+  }
+  return f_getcwd().toString() + String::FromChar('/') + filename;
+}
+
+// A wrapper for `zip_open` that prepares a full path
+// file name to consider current working directory.
+static zip* _zip_open(const String& filename, int _flags, int* zep) {
+  return zip_open(to_full_path(filename).c_str(), _flags, zep);
+}
+
 class ZipStream : public File {
  public:
   DECLARE_RESOURCE_ALLOCATION(ZipStream);
@@ -100,7 +113,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
     }
 
     int err;
-    auto z = zip_open(path.c_str(), 0, &err);
+    auto z = _zip_open(path, 0, &err);
     if (z == nullptr) {
       return nullptr;
     }
@@ -1037,7 +1050,7 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(open, filename);
 
   int  err;
-  auto z = zip_open(filename.c_str(), flags, &err);
+  auto z = _zip_open(filename, flags, &err);
   if (z == nullptr) {
     return err;
   }
@@ -1332,7 +1345,7 @@ static Variant HHVM_FUNCTION(zip_open, const String& filename) {
   FAIL_IF_EMPTY_STRING(zip_open, filename);
 
   int  err;
-  auto z = zip_open(filename.c_str(), 0, &err);
+  auto z = _zip_open(filename, 0, &err);
   if (z == nullptr) {
     return err;
   }

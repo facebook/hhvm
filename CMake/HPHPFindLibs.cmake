@@ -17,8 +17,6 @@
 
 include(CheckFunctionExists)
 
-add_definitions("-DHAVE_QUICKLZ")
-
 # libdl
 find_package(LibDL)
 if (LIBDL_INCLUDE_DIRS)

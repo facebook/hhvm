@@ -261,6 +261,12 @@ bool MySQL::connect(const String& host, int port, const String& socket,
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
   m_xaction_count = 0;
+  if (m_host.empty()) m_host = static_cast<std::string>(host);
+  if (m_username.empty()) m_username = static_cast<std::string>(username);
+  if (m_password.empty()) m_password = static_cast<std::string>(password);
+  if (m_socket.empty()) m_socket = static_cast<std::string>(socket);
+  if (m_database.empty()) m_database = static_cast<std::string>(database);
+  if (!m_port) m_port = port;
   bool ret = mysql_real_connect(m_conn, host.data(), username.data(),
                             password.data(),
                             (database.empty() ? nullptr : database.data()),
@@ -515,6 +521,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
   // ipv6 hostname:port is of the form [1:2:3:4:5]:port
   String host, socket;
   int port;
+  int savePersistent = false;
 
   auto slash_pos = server.find('/');
   if (slash_pos != std::string::npos) {
@@ -535,9 +542,15 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     socket = MySQL::GetDefaultSocket();
   }
 
-  if (mySQL == nullptr && persistent) {
-    mySQL = MySQL::GetPersistent(host, port, socket, username, password,
-                                 client_flags);
+  if (persistent) {
+    auto p_mySQL = MySQL::GetPersistent(host, port, socket, username, password,
+                                   client_flags);
+
+    if (p_mySQL != nullptr) {
+      mySQL = p_mySQL;
+    } else {
+      savePersistent = true;
+    }
   }
 
   if (mySQL == nullptr) {
@@ -574,7 +587,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
     }
   }
 
-  if (persistent) {
+  if (savePersistent) {
     MySQL::SetPersistent(host, port, socket, username, password,
                          client_flags, mySQL);
   }

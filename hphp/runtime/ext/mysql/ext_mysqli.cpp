@@ -250,7 +250,13 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
                   conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
                   -1, -1);
-  return ret.toBoolean();
+  if (ret.toBoolean()) {
+    // replace the connection incase we get a different one back (persistent)
+    this_->o_set(s_connection, ret, s_mysqli.get());
+    return true;
+  } else {
+    return false;
+  }
 }
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {

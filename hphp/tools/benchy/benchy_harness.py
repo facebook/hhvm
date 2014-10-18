@@ -108,16 +108,25 @@ class VirtualMachine(object):
     """A single named executable with which to run benchmarks and measure.
 
     """
-    def __init__(self, name, path):
+    def __init__(self, name, path, env):
         self.name = name
         self.path = path
         self.uid = _unique_id()
+        self.env = env
 
     def __str__(self):
         return "{0.name}".format(self)
 
     def __repr__(self):
         return self.__str__()
+VirtualMachine.pattern = r'(?P<name>[^:]+)(?P<env_path>(?::[^:]+)+)'
+
+
+def parse_env(env_list):
+    """Parses a series of environment variable assignment clauses.
+
+    """
+    return dict([x.split('=') for x in env_list])
 
 
 def load_benchmark_suites():
@@ -203,6 +212,27 @@ def warmup_lines_to_chop(benchmark, warmup):
     return lines_to_chop
 
 
+def set_env(env):
+    """Returns a series of lines to set all the environment variables to their
+    corresponding values in env.
+
+    """
+    lines = []
+    for key, value in env.iteritems():
+        lines.append("export {0}={1}".format(key, value))
+    return '\n'.join(lines)
+
+
+def unset_env(env):
+    """Returns a series of lines to unset all the environment variables in env.
+
+    """
+    lines = []
+    for key, _ in env.iteritems():
+        lines.append("unset {0}".format(key))
+    return '\n'.join(lines)
+
+
 def single_run(**kwargs):
     """Generates the necessary shell-fu for a single benchmark invocation.
 
@@ -214,7 +244,9 @@ def single_run(**kwargs):
     printf "include 'util.php';\\n" >> {include}
     printf "include '{bench.path}';\\n" >> {include}
     printf "QueueRuns({extra_iters}, \\${bench.name});\\n" >> {include}
+    {setenv}
     {wrapper} --compile --build-root={vm.path} {perf} -- {harness} > {tmp}
+    {unsetenv}
     cat {tmp} | tail -n +{lines_to_chop} >> {runlog}
     """
     lines = template.format(**kwargs).split('\n')[1:-1]
@@ -235,7 +267,7 @@ def generate_runscript(vms, benchmarks_to_run, run_perf, warmup, inner, outer):
                 final_runlist.append((virtual_machine, benchmark))
     random.shuffle(final_runlist)
 
-    lines = []
+    lines = ['set -e']
     for i in range(len(final_runlist)):
         virtual_machine, benchmark = final_runlist[i]
         runlog_path = config.RUNLOG_PATH + ('.{0.uid}'.format(virtual_machine))
@@ -255,7 +287,9 @@ def generate_runscript(vms, benchmarks_to_run, run_perf, warmup, inner, outer):
             include=config.INCLUDE_PATH,
             wrapper=config.WRAPPER_PATH,
             harness=config.BENCH_ENTRY_PATH,
-            tmp=config.TMP_PATH))
+            tmp=config.TMP_PATH,
+            setenv=set_env(virtual_machine.env),
+            unsetenv=unset_env(virtual_machine.env)))
     lines.append("printf '\\a\\n'")
 
     with open(config.RUNSCRIPT_PATH, 'w') as runscript:
@@ -279,19 +313,15 @@ def parse_virtual_machines(raw_vms):
 
     """
     vms = []
-    vm_pattern = r'(?:(.*):)?(.*)'
-    counter = 0
     for raw_vm in raw_vms:
-        counter += 1
-        result = re.match(vm_pattern, raw_vm)
+        result = re.match(VirtualMachine.pattern, raw_vm)
         if result is None:
             raise RuntimeError("Invalid format for VM: %s" % raw_vm)
-        name = result.group(1)
-        path = str(result.group(2))
+        name = result.group('name')
+        env_path = result.group('env_path').split(':')[1:]
+        env, path = parse_env(env_path[:-1]), str(env_path[-1])
 
-        if name is None:
-            name = "VM #%d" % counter
-        vms.append(VirtualMachine(name, path))
+        vms.append(VirtualMachine(name, path, env))
     return vms
 
 
@@ -319,7 +349,10 @@ def main():
     parser.add_argument('--warmup', action='store', type=int, default=1,
                         help='Number of inner iterations to warmup the VM.')
     parser.add_argument('vm', nargs='+', type=str, metavar='VM',
-                        help='VM to benchmark')
+                        help='VM to benchmark. Consists of NAME:PATH. Can also '
+                             'add a colon-separated list of environment '
+                             'variables to set when benchmarking this VM. '
+                             'E.g. NAME:VAR1=VAL1:VAR2=VAL2:PATH')
     args = parser.parse_args()
 
     setup_workdir()

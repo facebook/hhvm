@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import argparse
 import os
+import re
 import shlex
 import subprocess
 
@@ -52,9 +53,10 @@ def set_verbose_level(level):
 
 class Branch(object):
     """A branch within a repository, i.e. the basic unit of comparison."""
-    def __init__(self, name):
+    def __init__(self, name, env):
         self.name = name
         self.uid = _unique_id()
+        self.env = env
 
     def build_dir(self):
         """Returns the build directory for this branch.
@@ -69,6 +71,16 @@ class Branch(object):
         """
         return os.path.join(self.build_dir(), config.BUILD_INTERNAL_PATH)
 
+    def result_file(self):
+        return "{0.name}.{0.uid}".format(self)
+
+    def format(self):
+        if len(self.env) > 0:
+            return "{0.name}:{0.env}:{1}".format(self, self.root_dir())
+        else:
+            return "{0.name}:{1}".format(self, self.root_dir())
+Branch.pattern = r'([^:]+)((?::[^:]+)+)?'
+
 
 def parse_branches(raw_branches):
     """Maps branch names and to Branch objects.
@@ -76,8 +88,24 @@ def parse_branches(raw_branches):
     """
     branches = []
     for raw_branch in raw_branches:
-        branches.append(Branch(raw_branch))
+        result = re.match(Branch.pattern, raw_branch)
+        if result is None:
+            raise RuntimeError("Invalid branch format: %s" % raw_branch)
+        name = result.group(1)
+        env = '' if result.group(2) is None else result.group(2)[1:]
+        branches.append(Branch(name, env))
     return branches
+
+
+def unique_branches(branches):
+    result = []
+    seen = set()
+    for branch in branches:
+        if branch.name in seen:
+            continue
+        seen.add(branch.name)
+        result.append(branch)
+    return result
 
 
 def run_command(cmd, env=None, stdout=None):
@@ -94,7 +122,7 @@ def build_branches(branches):
     """Builds each of the branches into their own directories.
 
     """
-    for branch in branches:
+    for branch in unique_branches(branches):
         build_dir = branch.build_dir()
         if os.path.isfile(build_dir):
             os.remove(build_dir)
@@ -116,7 +144,7 @@ def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
     perf_str = '--perf' if run_perf else ''
     inner_str = '' if inner is None else '--inner {0}'.format(inner)
     outer_str = '' if outer is None else '--outer {0}'.format(outer)
-    branch_str = ' '.join(["%s:%s" % (b.name, b.root_dir()) for b in branches])
+    branch_str = ' '.join([b.format() for b in branches])
 
     command = "{harness} {suites} {benchmarks} {perf} {inner} {outer} {branch}"
     run_command(command.format(harness=benchy_path,
@@ -140,7 +168,7 @@ def process_results(branches, output_mode):
     for branch in branches:
         counter += 1
         runlog = os.path.join(config.WORK_DIR, "runlog.%d" % counter)
-        result_path = os.path.join(config.WORK_DIR, branch.name)
+        result_path = os.path.join(config.WORK_DIR, branch.result_file())
         with open(result_path, 'w') as result_file:
             cmd = "{anymean} --geomean {runlog}"
             run_command(cmd.format(anymean=anymean, runlog=runlog),
@@ -172,8 +200,12 @@ def main():
     parser.add_argument('--outer', action='store', type=int,
                         help='Number of instances of the VM to run for each '
                              'benchmark')
-    parser.add_argument('branch', nargs='+', type=str, metavar='BRANCH',
-                        help='Branch to benchmark')
+    parser.add_argument('branch', nargs='+', type=str,
+                        metavar=r'BRANCH',
+                        help='Branch to benchmark. Can also add a colon-'
+                             'separated list of environment variables to set '
+                             'when benchmarking this branch. E.g. '
+                             'BRANCH:VAR1=VAL1:VAR2=VAL2')
     parser.add_argument('--remarkup', action='store_const', const=True,
                         default=False, help='Spit out the results as Remarkup')
     parser.add_argument('--perf', action='store_const', const=True,

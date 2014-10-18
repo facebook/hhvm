@@ -726,3 +726,168 @@ function memcache_add_server(Memcache $memcache,
                               $retry_interval, $status, $failure_callback,
                               $timeoutms);
 }
+
+// Signifies we have built-in session support
+define('MEMCACHE_HAVE_SESSION', true);
+
+class MemcacheSessionModule implements \SessionHandlerInterface {
+
+  const UNIX_PREFIX = 'unix://';
+  const FILE_PREFIX = 'file://';
+
+  const SCHEME_FILE = 'file';
+  const SCHEME_TCP = 'tcp';
+
+  const ZERO_PORT = ':0';
+
+  private $memcache;
+  private $serverList;
+
+  public function close() {
+    if ($this->memcache instanceof Memcache) {
+      $this->memcache->close();
+    }
+    $this->memcache = null;
+    $this->serverList = array();
+    return true;
+  }
+
+  public function destroy($sessionId) {
+    return $this->getMemcache()->delete($sessionId);
+  }
+
+  public function gc($maxLifetime) {
+    return true;
+  }
+
+  public function open($savePath, $name) {
+    $serverList = self::parseSavePath($savePath);
+    if (!$serverList) {
+      return false;
+    }
+
+    $this->serverList = $serverList;
+    return true;
+  }
+
+  public function read($sessionId) {
+    return (string)$this->getMemcache()->get($sessionId);
+  }
+
+  public function write($sessionId, $data) {
+    return $this->getMemcache()->set($sessionId,
+                                     $data,
+                                     MEMCACHE_COMPRESSED,
+                                     ini_get('session.gc_maxlifetime'));
+  }
+
+  private static function parseSavePath($savePath) {
+    if (empty($savePath)) {
+      trigger_error("Failed to parse session.save_path (empty save_path)",
+                    E_WARNING);
+      return false;
+    }
+
+    $serverList = explode(',', $savePath);
+
+    $return = array();
+    foreach ($serverList as $url) {
+      $url = strtolower(trim($url));
+
+      // white-space only / empty keys are skipped
+      if (empty($url)) {
+        continue;
+      }
+      // Swap unix:// to file:// for parse_url usage like pecl does
+      if (substr($url, 0, strlen(self::UNIX_PREFIX)) === self::UNIX_PREFIX) {
+        $url = self::FILE_PREFIX . substr($url, strlen(self::UNIX_PREFIX));
+      }
+
+      $parsedUrlData = parse_url($url);
+      if (!$parsedUrlData) {
+        trigger_error("Failed to parse session.save_path " .
+                      "(unable to parse url, url was '" . $url . "')",
+                      E_WARNING);
+        return false;
+      }
+
+      // Init optional values to default values
+      $serverInfo = array(
+        'persistent' => true,
+        'weight' => 1,
+        'timeout' => 1,
+        'retry_interval' => 15
+      );
+
+      switch ($parsedUrlData['scheme']) {
+        case self::SCHEME_FILE:
+          // Remove a zero port, if found
+          if (substr($parsedUrlData['path'], -2) === self::ZERO_PORT) {
+            $parsedUrlData['path'] = substr($parsedUrlData['path'], 0, -2);
+          }
+          // Return url back to a unix:// prefix instead of file://
+          $serverInfo['host'] = self::UNIX_PREFIX . $parsedUrlData['path'];
+          $serverInfo['port'] = 0;
+          break;
+        case self::SCHEME_TCP:
+          // We don't give TCP connections a tcp:// prefix
+          $serverInfo['host'] = $parsedUrlData['host'];
+          if (array_key_exists('port', $parsedUrlData)) {
+            $serverInfo['port'] = $parsedUrlData['port'];
+          } else {
+            $serverInfo['port'] = (int)ini_get('memcache.default_port');
+          }
+          break;
+        default:
+          trigger_error("Failed to parse session.save_path " .
+                        "(unknown protocol, url was '" . $url . "')",
+                        E_WARNING);
+          return false;
+      }
+
+      if (array_key_exists('query', $parsedUrlData)) {
+        $optionList = array();
+        parse_str($parsedUrlData['query'], $optionList);
+        if (count($optionList) > 0) {
+          foreach ($optionList as $key => $value) {
+            switch ($key) {
+              case 'persistent':
+                $serverInfo[$key] = (bool)$value;
+                break;
+              case 'weight':
+              case 'timeout':
+              case 'retry_interval':
+                $serverInfo[$key] = (int)$value;
+                break;
+            }
+          }
+        }
+      }
+
+      $return[] = $serverInfo;
+    }
+
+    return $return;
+  }
+
+  private function getMemcache() {
+    if ($this->memcache instanceof Memcache) {
+      return $this->memcache;
+    }
+
+    $memcache = new Memcache;
+    if (!empty($this->serverList)) {
+      foreach ($this->serverList as $serverInfo) {
+        $memcache->addServer($serverInfo['host'],
+                             $serverInfo['port'],
+                             $serverInfo['persistent'],
+                             $serverInfo['weight'],
+                             $serverInfo['timeout'],
+                             $serverInfo['retry_interval']);
+      }
+    }
+
+    $this->memcache = $memcache;
+    return $memcache;
+  }
+}

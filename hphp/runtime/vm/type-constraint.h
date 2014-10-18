@@ -143,7 +143,7 @@ struct TypeConstraint {
    * KindOfObject: it may either be a type alias or a class, depending
    * on what typeName() means in a given request.
    */
-  DataType underlyingDataType() const { return m_type.dt; }
+  MaybeDataType underlyingDataType() const { return m_type.dt; }
 
   /*
    * Returns the underlying DataType for this TypeConstraint,
@@ -241,7 +241,7 @@ struct TypeConstraint {
 
 private:
   struct Type {
-    DataType dt;
+    MaybeDataType dt;
     MetaType metatype;
   };
   typedef hphp_hash_map<const StringData*, Type,

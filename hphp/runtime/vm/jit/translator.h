@@ -744,20 +744,9 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   Class* ctx);
 
 /*
- * Check whether return types of builtins are not simple types.
- *
- * This is different from IS_REFCOUNTED_TYPE because builtins can return
- * Variants, and we use KindOfInvalid to denote these return types.
- */
-inline bool isCppByRef(DataType t) {
-  return t != KindOfBoolean && t != KindOfInt64 &&
-         t != KindOfNull && t != KindOfDouble;
-}
-
-/*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
  */
-inline bool isSmartPtrRef(DataType t) {
+inline bool isSmartPtrRef(MaybeDataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject ||
          t == KindOfResource;

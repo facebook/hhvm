@@ -69,15 +69,15 @@ std::string TypeAnnotation::fullName() const {
   return name;
 }
 
-DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
+MaybeDataType TypeAnnotation::dataType() const {
   if (m_function || m_xhp || m_tuple) {
     return KindOfObject;
   }
   if (m_typeArgs) {
     return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
   }
-  if (!expectedType && (m_nullable || m_soft)) {
-    return KindOfInvalid;
+  if (m_nullable || m_soft) {
+    return folly::none;
   }
   if (!strcasecmp(m_name.c_str(), "null") ||
       !strcasecmp(m_name.c_str(), "HH\\void")) {
@@ -86,12 +86,12 @@ DataType TypeAnnotation::dataType(bool expectedType /*= false */) const {
   if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
   if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
   if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return KindOfInvalid;
-  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return KindOfInvalid;
+  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return folly::none;
+  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return KindOfInvalid;
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 
   return KindOfObject;
 }

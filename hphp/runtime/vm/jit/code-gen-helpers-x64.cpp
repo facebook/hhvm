@@ -163,9 +163,8 @@ struct IfCountNotStatic {
                     int32_t> NonStaticCondBlock;
   static_assert(UncountedValue < 0 && StaticValue < 0, "");
   NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(Asm& as,
-                   PhysReg reg,
-                   DataType t = KindOfInvalid) {
+  IfCountNotStatic(Asm& as, PhysReg reg,
+                   MaybeDataType t = folly::none) {
 
     // Objects and variants cannot be static
     if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {

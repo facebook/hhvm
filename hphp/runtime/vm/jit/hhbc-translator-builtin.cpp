@@ -376,8 +376,8 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
       dt = tc.underlyingDataType();
       ++numParamsThroughStack;
       paramThroughStack[offset] = true;
-    } else if (!callee->byRef(offset)) {
-      switch (dt) {
+    } else if (dt && !callee->byRef(offset)) {
+      switch (*dt) {
         case KindOfBoolean:
         case KindOfInt64:
         case KindOfDouble:
@@ -393,8 +393,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
       paramThroughStack[offset] = true;
     }
 
-    paramNeedsConversion[offset] = offset < numNonDefault
-                                   && dt != KindOfInvalid;
+    paramNeedsConversion[offset] = offset < numNonDefault && dt;
   }
 
   // For the same reason that we have to IncRef the locals above, we
@@ -505,9 +504,10 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
       Type t;
       if (tc.isNullable() && !callee->byRef(i)) {
         dt = tc.underlyingDataType();
-        t = Type::Null | Type(dt);
-      } else if (dt != KindOfInvalid) {
-        t = Type(dt);
+        t = Type::Null;
+      }
+      if (dt) {
+        t |= Type(*dt);
       }
 
       if (!paramThroughStack[i]) {
@@ -604,8 +604,8 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
   // Make the actual call.
   auto const retType = [&] {
-    auto const retDt = callee->returnType();
-    auto const ret = retDt == KindOfInvalid ? Type::Cell : Type(retDt);
+    auto const retDT = callee->returnType();
+    auto const ret = retDT ? Type(*retDT) : Type::Cell;
     return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
   }();
   SSATmp** decayedPtr = &args[0];

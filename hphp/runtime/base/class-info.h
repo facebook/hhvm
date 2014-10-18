@@ -124,7 +124,7 @@ public:
   struct ParameterInfo {
     ~ParameterInfo();
     Attribute attribute;
-    DataType argType;      // hinted arg type
+    MaybeDataType argType; // hinted arg type
     const char *name;
     const char *type;      // hinted type string
     const char *value;     // serialized default value
@@ -151,7 +151,7 @@ public:
     const char *file;
     int line1;
     int line2;
-    DataType returnType;
+    MaybeDataType returnType;
   };
 
   class PropertyInfo {
@@ -159,7 +159,7 @@ public:
     PropertyInfo() : docComment(nullptr) {}
     Attribute attribute;
     String name;
-    DataType type;
+    MaybeDataType type;
     const char *docComment;
     const ClassInfo *owner;
   };

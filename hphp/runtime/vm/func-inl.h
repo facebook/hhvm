@@ -34,6 +34,38 @@ void FPIEnt::serde(SerDe& sd) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// ParamInfo.
+
+inline Func::ParamInfo::ParamInfo()
+  : defaultValue(make_tv<KindOfUninit>())
+{}
+
+template<class SerDe>
+inline void Func::ParamInfo::serde(SerDe& sd) {
+  sd(builtinType)
+    (funcletOff)
+    (defaultValue)
+    (phpCode)
+    (typeConstraint)
+    (variadic)
+    (userAttributes)
+    (userType)
+    ;
+}
+
+inline bool Func::ParamInfo::hasDefaultValue() const {
+  return funcletOff != InvalidAbsoluteOffset;
+}
+
+inline bool Func::ParamInfo::hasScalarDefaultValue() const {
+  return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
+}
+
+inline bool Func::ParamInfo::isVariadic() const {
+  return variadic;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Func.
 
 inline void Func::validate() const {
@@ -174,7 +206,7 @@ inline bool Func::contains(Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline DataType Func::returnType() const {
+inline MaybeDataType Func::returnType() const {
   return shared()->m_returnType;
 }
 

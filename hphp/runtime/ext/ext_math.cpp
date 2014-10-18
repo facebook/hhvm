@@ -249,7 +249,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
     default:
       // Unknown data type
       raise_error("Unsupported operand types");
-      return kNoneDataType; // Not Reached
+      return folly::none; // Not Reached
   }
 }
 

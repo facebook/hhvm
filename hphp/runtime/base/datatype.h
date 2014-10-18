@@ -41,7 +41,6 @@ namespace HPHP {
 enum DataType : int8_t {
   // Values below zero are not PHP values, but runtime-internal.
   KindOfClass         = -13,
-  KindOfInvalid       = -1,
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
@@ -93,11 +92,6 @@ enum class KindOfAny  {};
  * should consider dying in a fire.
  */
 using MaybeDataType = folly::Optional<DataType>;
-
-/*
- * None type for MaybeDataType.
- */
-const MaybeDataType kNoneDataType = folly::none;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -308,41 +302,63 @@ ALWAYS_INLINE unsigned typeToDestrIndex(DataType t) {
 ///////////////////////////////////////////////////////////////////////////////
 // Is-a macros.
 
+/*
+ * Whether a type is valid.
+ */
 #define IS_REAL_TYPE(t)                                             \
   (((t) >= ::HPHP::KindOfUninit && (t) <= ::HPHP::kMaxDataType) ||  \
    (t) == ::HPHP::KindOfClass)
 
 /*
- * Helper macro for checking if a given type is refcounted.
+ * Whether a type is refcounted.
  */
 #define IS_REFCOUNTED_TYPE(t)                                   \
   (assert(IS_REAL_TYPE(t)), (t) > HPHP::KindOfRefCountThreshold)
 
 /*
- * Helper function for checking if a type is either KindOfString or
- * KindOfStaticString.
+ * Whether a builtin return or param type is not a simple type.
+ *
+ * This is different from IS_REFCOUNTED_TYPE because builtins can accept and
+ * return Variants, and we use folly::none to denote these cases.
+ */
+inline bool isBuiltinByRef(MaybeDataType t) {
+  return t != KindOfNull &&
+         t != KindOfBoolean &&
+         t != KindOfInt64 &&
+         t != KindOfDouble;
+}
+
+/*
+ * Whether a type is KindOfUninit or KindOfNull.
+ */
+constexpr bool IS_NULL_TYPE(DataType t) {
+  return unsigned(t) <= KindOfNull;
+}
+
+/*
+ * Whether a type is any kind of string.
  */
 constexpr bool IS_STRING_TYPE(DataType t) {
   return (t & ~0x18) == KindOfStringBit;
+}
+inline bool IS_STRING_TYPE(MaybeDataType t) {
+  return t && IS_STRING_TYPE(*t);
 }
 static_assert(KindOfStaticString == 0x0c, "");
 static_assert(KindOfString       == 0x14, "");
 
 /*
- * Check if a type is KindOfUninit or KindOfNull.
- */
-#define IS_NULL_TYPE(t) (unsigned(t) <= KindOfNull)
-
-/*
  * Other type-check macros.
  */
-#define IS_INT_TYPE(t) ((t) == KindOfInt64)
-#define IS_BOOL_TYPE(t) ((t) == KindOfBoolean)
-#define IS_DOUBLE_TYPE(t) ((t) == KindOfDouble)
-
-constexpr bool IS_ARRAY_TYPE(DataType t) {
-  return t == KindOfArray;
-}
+#define IS_TYPE(NAME, Kind)                       \
+  constexpr bool IS_##NAME##_TYPE(DataType t) {   \
+    return t == KindOf##Kind;                     \
+  }
+IS_TYPE(INT,    Int64)
+IS_TYPE(BOOL,   Boolean)
+IS_TYPE(DOUBLE, Double)
+IS_TYPE(ARRAY,  Array)
+#undef IS_TYPE
 
 constexpr bool IS_INT_KEY_TYPE(DataType t) {
   return t <= KindOfInt64;

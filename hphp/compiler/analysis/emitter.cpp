@@ -5308,7 +5308,7 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
 }
 
 void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
-                                           DataType t, int paramId) {
+                                           MaybeDataType t, int paramId) {
   switch (v.getType()) {
     case KindOfString:
     case KindOfStaticString: {
@@ -5330,19 +5330,20 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
       }
       break;
     case KindOfNull:
-      switch (t) {
-        case KindOfString:
-        case KindOfStaticString:
-        case KindOfObject:
-        case KindOfResource:
-        case KindOfArray:
-          e.Int(0);
-          break;
-        case KindOfInvalid:
-          e.NullUninit();
-          break;
-        default:
-          not_reached();
+      if (t) {
+        switch (*t) {
+          case KindOfString:
+          case KindOfStaticString:
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfArray:
+            e.Int(0);
+            break;
+          default:
+            not_reached();
+        }
+      } else {
+        e.NullUninit();
       }
       break;
     case KindOfArray:
@@ -5865,11 +5866,11 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
         if (caseType == KindOfStaticString) caseType = KindOfString;
         if ((caseType != KindOfInt64 && caseType != KindOfString) ||
             !IMPLIES(t != KindOfUninit, caseType == t)) {
-          return kNoneDataType;
+          return folly::none;
         }
         t = caseType;
       } else {
-        return kNoneDataType;
+        return folly::none;
       }
       int64_t n;
       bool isNonZero;
@@ -5912,11 +5913,11 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
     int64_t nTargets = caseMap.rbegin()->first - base + 1;
     // Fail if the cases are too sparse
     if ((float)caseMap.size() / nTargets < 0.5) {
-      return kNoneDataType;
+      return folly::none;
     }
   } else if (t == KindOfString) {
     if (caseMap.size() < kMinStringSwitchCases) {
-      return kNoneDataType;
+      return folly::none;
     }
   }
 

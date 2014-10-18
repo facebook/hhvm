@@ -69,13 +69,13 @@ void TypeConstraint::init() {
   if (isTypeVar()) {
     // We kept the type variable type constraint to correctly check child
     // classes implementing abstract methods or interfaces.
-    m_type.dt = KindOfInvalid;
+    m_type.dt = folly::none;
     m_type.metatype = MetaType::Precise;
     return;
   }
 
   if (m_typeName == nullptr) {
-    m_type.dt = KindOfInvalid;
+    m_type.dt = folly::none;
     m_type.metatype = MetaType::Precise;
     return;
   }
@@ -241,9 +241,9 @@ std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   assert(!isSelf() && !isParent());
-  if (!hasConstraint()) return kNoneDataType;
+  if (!hasConstraint()) return folly::none;
 
-  MaybeDataType t{underlyingDataType()};
+  auto t = underlyingDataType();
 
   // If we aren't a class or type alias, nothing special to do.
   if (!isObjectOrTypeAlias()) return t;
@@ -311,8 +311,7 @@ bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
   return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
 
-bool
-TypeConstraint::check(TypedValue* tv, const Func* func) const {
+bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
   assert(hasConstraint());
 
   // This is part of the interpreter runtime; perf matters.
@@ -396,17 +395,16 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
     return isPrecise() && checkTypeAliasNonObj(tv);
   }
 
-  return equivDataTypes(m_type.dt, tv->m_type);
+  return m_type.dt && equivDataTypes(*m_type.dt, tv->m_type);
 }
 
-bool
-TypeConstraint::checkPrimitive(DataType dt) const {
+bool TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
   if (isNullable() && dt == KindOfNull) return true;
   if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   if (isArrayKey()) { return IS_INT_TYPE(dt) || IS_STRING_TYPE(dt); }
-  return equivDataTypes(m_type.dt, dt);
+  return m_type.dt && equivDataTypes(*m_type.dt, dt);
 }
 
 static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {

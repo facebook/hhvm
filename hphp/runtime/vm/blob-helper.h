@@ -19,11 +19,12 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <limits>
 #include <type_traits>
 #include <vector>
-#include <limits>
 
-#include "folly/Varint.h"
+#include <folly/Optional.h>
+#include <folly/Varint.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-helpers.h"
@@ -157,6 +158,13 @@ struct BlobEncoder {
     encode(s.get());
   }
 
+  template<class T>
+  void encode(const folly::Optional<T>& opt) {
+    const bool some = opt.hasValue();
+    encode(some);
+    if (some) encode(*opt);
+  }
+
   template<class K, class V>
   void encode(const std::pair<K,V>& kv) {
     encode(kv.first);
@@ -270,6 +278,20 @@ struct BlobDecoder {
 
     tvAsVariant(&tv) = unserialize_from_string(s);
     tvAsVariant(&tv).setEvalScalar();
+  }
+
+  template<class T>
+  void decode(folly::Optional<T>& opt) {
+    bool some;
+    decode(some);
+
+    if (!some) {
+      opt = folly::none;
+    } else {
+      T value;
+      decode(value);
+      opt = value;
+    }
   }
 
   template<class K, class V>

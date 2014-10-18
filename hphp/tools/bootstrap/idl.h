@@ -27,8 +27,8 @@
 using folly::fbstring;
 using folly::fbvector;
 
-#define KindOfNone  static_cast<DataType>(-1)
-#define KindOfAny   static_cast<DataType>(-8)
+#define KindOfInvalid kInvalidDataType
+#define KindOfAny     static_cast<DataType>(-8)
 
 namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
@@ -82,8 +82,8 @@ bool isKindOfIndirect(DataType kindof);
 
 static inline fbstring kindOfString(DataType t) {
   switch ((int)t) {
-    case KindOfAny:          return "Any";
     case KindOfInvalid:      return "Unknown";
+    case KindOfAny:          return "Any";
     case KindOfNull:         return "Null";
     case KindOfBoolean:      return "Boolean";
     case KindOfInt64:        return "Int64";

@@ -789,7 +789,7 @@ public:
   /*
    * Get the underlying enum base type if this is an enum.
    *
-   * A return of kNoneDataType represents the `mixed' type.
+   * A return of folly::none represents the `mixed' type.
    */
   MaybeDataType enumBaseTy() const;
 

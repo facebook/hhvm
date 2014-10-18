@@ -1542,7 +1542,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   v << copy{sp, mis};//XXX why do this copy?
 
   auto callArgs = argGroup();
-  if (isCppByRef(funcReturnType)) {
+  if (isBuiltinByRef(funcReturnType)) {
     if (isSmartPtrRef(funcReturnType)) {
       // first arg is pointer to storage for the return value
       returnOffset += TVOFF(m_data);
@@ -1572,7 +1572,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   cgCallHelper(v,
                CppCall::direct(func->nativeFuncPtr()),
-               isCppByRef(funcReturnType) ? kVoidDest : callDest(dst),
+               isBuiltinByRef(funcReturnType) ? kVoidDest : callDest(dst),
                SyncOptions::kSyncPoint,
                callArgs);
 
@@ -1584,7 +1584,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   mis = sp;
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
-    assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     condZero(v, dst, dstType, [&](Vout& v) {
       return v.cns(KindOfNull);
@@ -1597,7 +1597,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // this should use some kind of cmov
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};

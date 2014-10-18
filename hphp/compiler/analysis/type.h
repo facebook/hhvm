@@ -124,8 +124,9 @@ public:
   /**
    * Map Runtime DataType to analysis Type
    */
-  static TypePtr FromDataType(DataType dt, TypePtr unknown) {
-    switch (dt) {
+  static TypePtr FromDataType(MaybeDataType dt, TypePtr unknown) {
+    if (!dt) return unknown;
+    switch (*dt) {
       case DataType::KindOfNull:     return Type::Null;
       case DataType::KindOfBoolean:  return Type::Boolean;
       case DataType::KindOfInt64:    return Type::Int64;
@@ -135,9 +136,14 @@ public:
       case DataType::KindOfArray:    return Type::Array;
       case DataType::KindOfObject:   return Type::Object;
       case DataType::KindOfResource: return Type::Resource;
-      default:
+
+      case DataType::KindOfUninit:
+      case DataType::KindOfRef:
+      case DataType::KindOfNamedLocal:
+      case DataType::KindOfClass:
         return unknown;
     }
+    not_reached();
   }
 
   /**

@@ -3415,7 +3415,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   v << copy{reg::rsp, misReg};
 
   auto callArgs = argGroup(inst);
-  if (isCppByRef(funcReturnType)) {
+  if (isBuiltinByRef(funcReturnType)) {
     // First arg is pointer to storage for that return value
     if (isSmartPtrRef(funcReturnType)) {
       returnOffset += TVOFF(m_data);
@@ -3461,7 +3461,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   // If the return value is returned by reference, we don't need the
   // return value from this call since we know where the value is.
-  auto dest = isCppByRef(funcReturnType) ? kVoidDest :
+  auto dest = isBuiltinByRef(funcReturnType) ? kVoidDest :
               funcReturnType == KindOfDouble ? callDestDbl(inst) :
               callDest(inst);
   cgCallHelper(v, CppCall::direct(callee->nativeFuncPtr()),
@@ -3481,7 +3481,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // the builtin writes the return value into MInstrState::tvBuiltinReturn
   // TV, from where it has to be tested and copied.
   if (returnType.isReferenceType()) {
-    assert(isCppByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
@@ -3493,7 +3493,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // return type is Variant; fold KindOfUninit to KindOfNull
-    assert(isCppByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     assert(misReg != Vreg{dstType});
     auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();

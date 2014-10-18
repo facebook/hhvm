@@ -1738,7 +1738,10 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
-        switch (tc.underlyingDataType()) {
+        auto const dt = tc.underlyingDataType();
+        if (!dt) return TInitCell;
+
+        switch (*dt) {
         case KindOfString:       return TStr;
         case KindOfStaticString: return TStr;
         case KindOfArray:        return TArr;
@@ -1770,6 +1773,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         }
         return TInitCell;
       }();
+
       return mainType == TInitCell || !tc.isNullable() ? mainType
         : opt(mainType);
     }

@@ -403,7 +403,7 @@ void recordType(TypeProfileKey key, DataType dt) {
 /*
  * Pair of (predicted type, confidence).
  *
- * A kNoneDataType prediction means mixed/unknown.
+ * A folly::none prediction means mixed/unknown.
  */
 typedef std::pair<MaybeDataType, double> PredVal;
 

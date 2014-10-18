@@ -785,7 +785,8 @@ public:
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
-  void emitBuiltinDefaultArg(Emitter& e, Variant& v, DataType t, int paramId);
+  void emitBuiltinDefaultArg(Emitter& e, Variant& v,
+                             MaybeDataType t, int paramId);
   void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   void emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,

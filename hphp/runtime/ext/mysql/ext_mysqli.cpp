@@ -363,7 +363,7 @@ static MaybeDataType get_option_value_type(int64_t option) {
 #endif
       return KindOfNull;
     default:
-      return kNoneDataType;
+      return folly::none;
   }
 
   not_reached();

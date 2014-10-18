@@ -64,8 +64,6 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#define KindOfInvalid DontUseKindOfInvalidInThisFile
-
 TRACE_SET_MOD(trans);
 
 namespace HPHP { namespace jit {
@@ -169,7 +167,7 @@ namespace {
 /*
  * Pair of (predicted type, confidence).
  *
- * A kNoneDataType prediction means mixed/unknown.
+ * A folly::none prediction means mixed/unknown.
  */
 using TypePred = std::pair<MaybeDataType, double>;
 
@@ -215,7 +213,7 @@ MaybeDataType predictionForRepoAuthType(RepoAuthType repoTy) {
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
-    return kNoneDataType;
+    return folly::none;
   }
   not_reached();
 }
@@ -235,7 +233,7 @@ TypePred predictMVec(const NormalizedInstruction* ni) {
     // point in having a prediction because we know its type with 100%
     // accuracy.  Disable it in that case here.
     if (convertToDataType(info.repoAuthType)) {
-      return std::make_pair(kNoneDataType, 0.0);
+      return std::make_pair(folly::none, 0.0);
     }
   }
 
@@ -252,14 +250,14 @@ TypePred predictMVec(const NormalizedInstruction* ni) {
     return pred;
   }
 
-  return std::make_pair(kNoneDataType, 0.0);
+  return std::make_pair(folly::none, 0.0);
 }
 
 /*
  * Provide a best guess for the output type of this instruction.
  */
 MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return kNoneDataType;
+  if (!RuntimeOption::EvalJitTypePrediction) return folly::none;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
@@ -376,7 +374,7 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
     auto inType = ni->inputs[0]->rtt;
     auto const inDt = inType.isKnownDataType()
       ? MaybeDataType(inType.toDataType())
-      : kNoneDataType;
+      : folly::none;
     // If the base is a string, the output is probably a string. Unless the
     // member code is MW, then we're either going to fatal or promote the
     // string to an array.
@@ -402,7 +400,7 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
   auto const op = ni->op();
   static const double kAccept = 1.0;
 
-  std::pair<MaybeDataType, double> pred = std::make_pair(kNoneDataType, 0.0);
+  std::pair<MaybeDataType, double> pred = std::make_pair(folly::none, 0.0);
 
   if (op == OpCGetS) {
     auto nameType = ni->inputs[1]->rtt;
@@ -437,7 +435,7 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
     assert(!pred.first || *pred.first != KindOfUninit);
     return pred.first;
   }
-  return kNoneDataType;
+  return folly::none;
 }
 
 }

@@ -204,10 +204,10 @@ struct Param {
 
   /*
    * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  KindOfInvalid for
+   * functions with a native implementation.  folly::none for
    * non-builtins.
    */
-  DataType builtinType;
+  folly::Optional<DataType> builtinType;
 
   /*
    * Whether this parameter is passed by reference.
@@ -250,9 +250,10 @@ struct StaticLocalInfo {
  */
 struct NativeInfo {
   /*
-   * Return type from the C++ implementation function, as a DataType.
+   * Return type from the C++ implementation function, as an optional DataType;
+   * folly::none stands for a Variant return.
    */
-  DataType returnType;
+  folly::Optional<DataType> returnType;
 };
 
 /*

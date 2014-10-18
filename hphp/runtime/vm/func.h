@@ -131,44 +131,27 @@ struct Func {
    * Parameter default value info.
    */
   struct ParamInfo {
-    ParamInfo()
-      : builtinType(KindOfInvalid)
-      , variadic(false)
-      , funcletOff(InvalidAbsoluteOffset)
-      , defaultValue(make_tv<KindOfUninit>())
-      , phpCode(nullptr)
-      , userType(nullptr)
-    {}
+    ParamInfo();
 
-    template<class SerDe>
-    void serde(SerDe& sd) {
-      sd(builtinType)
-        (funcletOff)
-        (defaultValue)
-        (phpCode)
-        (typeConstraint)
-        (variadic)
-        (userAttributes)
-        (userType)
-        ;
-    }
+    bool hasDefaultValue() const;
+    bool hasScalarDefaultValue() const;
+    bool isVariadic() const;
 
-    bool hasDefaultValue() const {
-      return funcletOff != InvalidAbsoluteOffset;
-    }
-    bool hasScalarDefaultValue() const {
-      return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
-    }
-    bool isVariadic() const { return variadic; }
+    template<class SerDe> void serde(SerDe& sd);
 
-  public:
-    DataType builtinType;     // Typehint for builtins.
-    bool variadic;
-    Offset funcletOff;
-    TypedValue defaultValue;  // Set to Uninit if there is no DV,
-                              // or if there's a nonscalar DV.
-    LowStringPtr phpCode;     // Eval'able PHP code.
-    LowStringPtr userType;    // User-annotated type.
+    // Typehint for builtins.
+    MaybeDataType builtinType{folly::none};
+    // True if this is a `...' parameter.
+    bool variadic{false};
+    // DV initializer funclet offset.
+    Offset funcletOff{InvalidAbsoluteOffset};
+    // Set to Uninit if there is no DV, or if there's a nonscalar DV.
+    TypedValue defaultValue;
+    // Eval-able PHP code.
+    LowStringPtr phpCode{nullptr};
+    // User-annotated type.
+    LowStringPtr userType{nullptr};
+
     TypeConstraint typeConstraint;
     UserAttributeMap userAttributes;
   };
@@ -405,6 +388,8 @@ struct Func {
    *
    * There are a number of caveats regarding this value:
    *
+   *    - If the returnType() is folly::none, the return is a Variant.
+   *
    *    - If the returnType() is KindOfString, KindOfArray, or KindOfObject,
    *      null may also be returned.
    *
@@ -416,7 +401,7 @@ struct Func {
    *
    *    - This list of caveats may be incorrect and/or incomplete.
    */
-  DataType returnType() const;
+  MaybeDataType returnType() const;
 
   /*
    * Whether this function returns by reference.
@@ -1078,7 +1063,7 @@ private:
     bool m_isGenerated : 1;
     bool m_hasExtendedSharedData : 1;
 
-    DataType m_returnType;
+    MaybeDataType m_returnType;
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
     TypeConstraint m_retTypeConstraint;

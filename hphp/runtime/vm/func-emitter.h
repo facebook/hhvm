@@ -287,7 +287,7 @@ public:
   SVInfoVec staticVars;
   int maxStackCells;
 
-  DataType returnType;
+  MaybeDataType returnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
 

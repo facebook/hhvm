@@ -406,7 +406,9 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
     docComment = *p++;
 
     if (attribute & IsSystem) {
-      returnType = (DataType)(int64_t)(*p++);
+      auto dt = static_cast<DataType>((int64_t)(*p++));
+      returnType = dt == kInvalidDataType ? folly::none
+                                          : MaybeDataType(dt);
     }
     while (*p) {
       ParameterInfo *parameter = new ParameterInfo();
@@ -414,7 +416,9 @@ ClassInfo::MethodInfo::MethodInfo(const char **&p) {
       parameter->name = *p++;
       parameter->type = *p++;
       if (attribute & IsSystem) {
-        parameter->argType = (DataType)(int64_t)(*p++);
+        auto dt = static_cast<DataType>((int64_t)(*p++));
+        parameter->argType = dt == kInvalidDataType ? folly::none
+                                                    : MaybeDataType(dt);
       }
       parameter->value = *p++;
       parameter->valueLen = (int64_t)*p++;
@@ -494,7 +498,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     PropertyInfo *property = new PropertyInfo();
     property->attribute = (Attribute)(int64_t)(*p++);
     property->name = staticString(*p++);
-    property->type = DataType((int)uintptr_t(*p++));
+    auto dt = static_cast<DataType>((int)uintptr_t(*p++));
+    property->type = dt == kInvalidDataType ? folly::none
+                                            : MaybeDataType(dt);
     property->owner = this;
     assert(m_properties.find(property->name) == m_properties.end());
     m_properties[property->name] = property;

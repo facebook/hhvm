@@ -76,13 +76,13 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
 }
 
 Type native_function_return_type(borrowed_ptr<const php::Func> f) {
-  if (f->nativeInfo->returnType == KindOfInvalid) {
+  if (!f->nativeInfo->returnType) {
     if (f->attrs & AttrReference) {
       return TRef;
     }
     return TInitCell;
   }
-  auto t = from_DataType(f->nativeInfo->returnType);
+  auto t = from_DataType(*f->nativeInfo->returnType);
   // Regardless of ParamCoerceMode, native functions can return null if
   // too many arguments are passed.
   t = union_of(t, TInitNull);

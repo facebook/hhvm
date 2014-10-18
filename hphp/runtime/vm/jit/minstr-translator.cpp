@@ -191,7 +191,7 @@ void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
 
 // minstrBaseIdx returns the src index for inst's base operand.
 int minstrBaseIdx(Opcode opc) {
-  return opcodeHasFlags(opc, MInstrProp) ? 1 :
+  return opcodeHasFlags(opc, MInstrProp) ? 0 :
          opcodeHasFlags(opc, MInstrElem) ? 0 :
          bad_value<int>();
 }
@@ -893,11 +893,11 @@ void HhbcTranslator::MInstrTranslator::emitPropGeneric() {
 
   auto const key = getKey();
   if (mia & Define) {
-    m_base = genStk(PropDX, makeCatch(), MInstrAttrData { mia }, CTX(),
+    m_base = genStk(PropDX, makeCatch(), MInstrAttrData { mia },
                     m_base, key, genMisPtr());
   } else {
-    m_base = gen(PropX, makeCatch(), MInstrAttrData { mia }, CTX(),
-      m_base, key, genMisPtr());
+    m_base = gen(PropX, makeCatch(), MInstrAttrData { mia },
+                 m_base, key, genMisPtr());
   }
 }
 
@@ -1184,23 +1184,23 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
   }
 
   auto const key = getKey();
-  m_result = gen(CGetProp, makeCatch(), CTX(), m_base, key, genMisPtr());
+  m_result = gen(CGetProp, makeCatch(), m_base, key, genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitVGetProp() {
   auto const key = getKey();
   m_result = genStk(VGetProp, makeCatch(), NoExtraData{},
-                    CTX(), m_base, key, genMisPtr());
+                    m_base, key, genMisPtr());
 }
 
 void HhbcTranslator::MInstrTranslator::emitIssetProp() {
   auto const key = getKey();
-  m_result = gen(IssetProp, makeCatch(), CTX(), m_base, key);
+  m_result = gen(IssetProp, makeCatch(), m_base, key);
 }
 
 void HhbcTranslator::MInstrTranslator::emitEmptyProp() {
   auto const key = getKey();
-  m_result = gen(EmptyProp, makeCatch(), CTX(), m_base, key);
+  m_result = gen(EmptyProp, makeCatch(), m_base, key);
 }
 
 void HhbcTranslator::MInstrTranslator::emitSetProp() {
@@ -1228,8 +1228,7 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
 
   // Emit the appropriate helper call.
   auto const key = getKey();
-  genStk(SetProp, makeCatchSet(), NoExtraData{}, CTX(),
-         m_base, key, value);
+  genStk(SetProp, makeCatchSet(), NoExtraData{}, m_base, key, value);
   m_result = value;
 }
 
@@ -1238,21 +1237,20 @@ void HhbcTranslator::MInstrTranslator::emitSetOpProp() {
   auto const key = getKey();
   auto const value = getValue();
   m_result = genStk(SetOpProp, makeCatch(), NoExtraData{},
-                    CTX(), m_base, key, value, genMisPtr(), cns(op));
+                    m_base, key, value, genMisPtr(), cns(op));
 }
 
 void HhbcTranslator::MInstrTranslator::emitIncDecProp() {
   IncDecOp op = static_cast<IncDecOp>(m_ni.imm[0].u_OA);
   auto const key = getKey();
   m_result = genStk(IncDecProp, makeCatch(), NoExtraData{},
-                    CTX(), m_base, key, genMisPtr(), cns(op));
+                    m_base, key, genMisPtr(), cns(op));
 }
 
 void HhbcTranslator::MInstrTranslator::emitBindProp() {
   auto const key = getKey();
   auto const box = getValue();
-  genStk(BindProp, makeCatch(), NoExtraData{}, CTX(),
-         m_base, key, box, genMisPtr());
+  genStk(BindProp, makeCatch(), NoExtraData{}, m_base, key, box, genMisPtr());
   m_result = box;
 }
 
@@ -1265,7 +1263,7 @@ void HhbcTranslator::MInstrTranslator::emitUnsetProp() {
     return;
   }
 
-  gen(UnsetProp, makeCatch(), CTX(), m_base, key);
+  gen(UnsetProp, makeCatch(), m_base, key);
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,

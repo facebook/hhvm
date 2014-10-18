@@ -45,17 +45,17 @@ void CodeGenerator::cgBaseG(IRInstruction* inst) {
 void CodeGenerator::cgPropImpl(IRInstruction* inst) {
   using namespace MInstrHelpers;
   auto const mia = inst->extra<MInstrAttrData>()->mia;
-  BUILD_OPTAB(PROP_HELPER_TABLE, mia, inst->src(1)->isA(Type::Obj));
+  BUILD_OPTAB(PROP_HELPER_TABLE, mia, inst->src(0)->isA(Type::Obj));
   cgCallHelper(
     vmain(),
     CppCall::direct(opFunc),
     callDest(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .typedValue(2)
-      .ssa(3)
+      .typedValue(1)
+      .ssa(2)
   );
 }
 
@@ -65,8 +65,8 @@ void CodeGenerator::cgPropDXStk(IRInstruction* i) { return cgPropImpl(i); }
 
 void CodeGenerator::cgCGetProp(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  auto const base    = inst->src(1);
-  auto const key     = inst->src(2);
+  auto const base    = inst->src(0);
+  auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
   BUILD_OPTAB(CGETPROP_HELPER_TABLE, keyType, base->isA(Type::Obj));
   cgCallHelper(
@@ -75,17 +75,17 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
     callDestTV(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .memberKeyS(2)
-      .ssa(3)
+      .memberKeyS(1)
+      .ssa(2)
   );
 }
 
 void CodeGenerator::cgVGetPropImpl(IRInstruction* inst) {
   using namespace MInstrHelpers;
-  auto const base    = inst->src(1);
-  auto const key     = inst->src(2);
+  auto const base    = inst->src(0);
+  auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
   BUILD_OPTAB(VGETPROP_HELPER_TABLE, keyType, base->isA(Type::Obj));
   cgCallHelper(
@@ -94,10 +94,10 @@ void CodeGenerator::cgVGetPropImpl(IRInstruction* inst) {
     callDest(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .memberKeyS(2)
-      .ssa(3)
+      .memberKeyS(1)
+      .ssa(2)
   );
 }
 
@@ -105,7 +105,7 @@ void CodeGenerator::cgVGetProp(IRInstruction* i)    { cgVGetPropImpl(i); }
 void CodeGenerator::cgVGetPropStk(IRInstruction* i) { cgVGetPropImpl(i); }
 
 void CodeGenerator::cgBindPropImpl(IRInstruction* inst) {
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(BINDPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -113,11 +113,11 @@ void CodeGenerator::cgBindPropImpl(IRInstruction* inst) {
     callDest(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .typedValue(2)
+      .typedValue(1)
+      .ssa(2)
       .ssa(3)
-      .ssa(4)
   );
 }
 
@@ -125,7 +125,7 @@ void CodeGenerator::cgBindProp(IRInstruction* i)    { cgBindPropImpl(i); }
 void CodeGenerator::cgBindPropStk(IRInstruction* i) { cgBindPropImpl(i); }
 
 void CodeGenerator::cgSetPropImpl(IRInstruction* inst) {
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(SETPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -133,10 +133,10 @@ void CodeGenerator::cgSetPropImpl(IRInstruction* inst) {
     kVoidDest,
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
+      .typedValue(1)
       .typedValue(2)
-      .typedValue(3)
   );
 }
 
@@ -144,7 +144,7 @@ void CodeGenerator::cgSetProp(IRInstruction* i)    { cgSetPropStk(i); }
 void CodeGenerator::cgSetPropStk(IRInstruction* i) { cgSetPropImpl(i); }
 
 void CodeGenerator::cgUnsetProp(IRInstruction* inst) {
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(UNSETPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -152,14 +152,14 @@ void CodeGenerator::cgUnsetProp(IRInstruction* inst) {
     kVoidDest,
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .typedValue(2)
+      .typedValue(1)
   );
 }
 
 void CodeGenerator::cgSetOpPropImpl(IRInstruction* inst) {
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(SETOPPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -167,12 +167,12 @@ void CodeGenerator::cgSetOpPropImpl(IRInstruction* inst) {
     callDestTV(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
+      .typedValue(1)
       .typedValue(2)
-      .typedValue(3)
+      .ssa(3)
       .ssa(4)
-      .ssa(5)
   );
 }
 
@@ -180,7 +180,7 @@ void CodeGenerator::cgSetOpProp(IRInstruction* i)    { cgSetOpPropImpl(i); }
 void CodeGenerator::cgSetOpPropStk(IRInstruction* i) { cgSetOpPropImpl(i); }
 
 void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(INCDECPROP_HELPER_TABLE, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -188,11 +188,11 @@ void CodeGenerator::cgIncDecPropImpl(IRInstruction* inst) {
     callDestTV(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .typedValue(2)
+      .typedValue(1)
+      .ssa(2)
       .ssa(3)
-      .ssa(4)
   );
 }
 
@@ -201,7 +201,7 @@ void CodeGenerator::cgIncDecPropStk(IRInstruction* i) { cgIncDecPropImpl(i); }
 
 void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
   bool const isEmpty = inst->op() == EmptyProp;
-  auto const base = inst->src(1);
+  auto const base = inst->src(0);
   BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, isEmpty, base->isA(Type::Obj));
   cgCallHelper(
     vmain(),
@@ -209,9 +209,9 @@ void CodeGenerator::cgIssetEmptyPropImpl(IRInstruction* inst) {
     callDest(inst),
     SyncOptions::kSyncPoint,
     argGroup(inst)
+      .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .typedValue(2)
+      .typedValue(1)
   );
 }
 

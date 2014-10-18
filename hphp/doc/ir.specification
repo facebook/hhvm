@@ -2044,65 +2044,61 @@ D:PtrToGen = BaseG S0:Str
 
   Get a base from global named S0.
 
-D:PtrToGen = PropX S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
+D:PtrToGen = PropX S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
 
-  Lookup intermediate property in S1, with key S2. S4 should point to an
+  Lookup intermediate property in S0, with key S1. S3 should point to an
   MInstrState struct.
 
-D:PtrToGen = PropDX S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
-D:PtrToGen, D:StkPtr = PropDXStk S0:ConstCls S1:{Obj|PtrToGen}
-                                 S2:Cell S3:PtrToCell
+D:PtrToGen = PropDX S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
+D:PtrToGen, D:StkPtr = PropDXStk S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-D:Cell = CGetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:PtrToCell
+D:Cell = CGetProp S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
 
-  Get property with key S2 from S1. S3 should point to an MInstrState struct.
+  Get property with key S1 from S0. S2 should point to an MInstrState struct.
 
-D:BoxedCell = VGetProp S0:ConstCls S1:{Obj|PtrtoGen} S2:Cell S3:PtrToCell
-D:BoxedCell, D:StkPtr = VGetPropStk S0:ConstCls S1:{Obj|PtrToGen}
-                                    S2:Cell S3:PtrToCell
+D:BoxedCell = VGetProp S0:{Obj|PtrtoGen} S1:Cell S2:PtrToCell
+D:BoxedCell, D:StkPtr = VGetPropStk S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
 
-  Get property with key S2 from base S1 as a reference. S3 should point to an
+  Get property with key S1 from base S0 as a reference. S2 should point to an
   MInstrState struct.
 
-BindProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:BoxedCell S4:PtrToCell
-D:StkPtr = BindPropStk S0:ConstCls S1:{Obj|PtrtoGen} S2:Cell
-                       S3:BoxedCell S4:PtrToCell
+BindProp S0:{Obj|PtrToGen} S1:Cell S2:BoxedCell S3:PtrToCell
+D:StkPtr = BindPropStk S0:{Obj|PtrtoGen} S1:Cell S2:BoxedCell S3:PtrToCell
 
-  Bind property with key S2 in base S1 to the reference in S3. S4 should point
+  Bind property with key S1 in base S0 to the reference in S2. S3 should point
   to an MInstrState struct.
 
-SetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
-D:StkPtr = SetPropStk S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
+SetProp S0:{Obj|PtrToGen} S1:Cell S2:Cell
+D:StkPtr = SetPropStk S0:{Obj|PtrToGen} S1:Cell S2:Cell
 
-  Set property with key S2 in S1 to S3.
+  Set property with key S1 in S0 to S2.
 
-UnsetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
+UnsetProp S1:{Obj|PtrToGen} S2:Cell
 
-D:Cell = SetOpProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell S4:PtrToCell S5:ConstInt
-D:Cell, D:StkPtr = SetOpPropStk S0:ConstCls S1:{Obj|PtrToGen} S2:Cell S3:Cell
-                                S4:PtrtoCell S5:ConstInt
+D:Cell = SetOpProp S0:{Obj|PtrToGen} S1:Cell S2:Cell S3:PtrToCell S4:ConstInt
+D:Cell, D:StkPtr = SetOpPropStk S0:{Obj|PtrToGen} S1:Cell S2:Cell S3:PtrtoCell
+                                S4:ConstInt
 
   Set op propery with key S1 in base S0, using S2 as the right hand side. S3
   should point to an MInstrState struct.
 
-D:Cell = IncDecProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
-                    S3:PtrToCell S4:ConstInt
-D:Cell, D:StkPtr = IncDecPropStk S0:ConstCls S1:{Obj|PtrToGen}
-                                 S2:Cell S3:PtrToCell S4:ConstInt
+D:Cell = IncDecProp S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell S3:ConstInt
+D:Cell, D:StkPtr = IncDecPropStk S0:{Obj|PtrToGen} S1:Cell S2:PtrToCell
+                                 S3:ConstInt
 
-  Increment/decrement property with key S2 in base S1. S3 should point to an
+  Increment/decrement property with key S1 in base S0. S2 should point to an
   MInstrState struct.
 
-D:Bool = EmptyProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
+D:Bool = EmptyProp S0:{Obj|PtrToGen} S1:Cell
 
-  Returns true iff the property with key S2 in base S1 is empty.
+  Returns true iff the property with key S1 in base S0 is empty.
 
-D:Bool = IssetProp S0:ConstCls S1:{Obj|PtrToGen} S2:Cell
+D:Bool = IssetProp S0:{Obj|PtrToGen} S1:Cell
 
-  Returns true iff the property with key S2 in base S1 is set.
+  Returns true iff the property with key S1 in base S0 is set.
 
 D:PtrToGen = ElemX S0:PtrToGen S1:Cell S2:PtrToCell
 

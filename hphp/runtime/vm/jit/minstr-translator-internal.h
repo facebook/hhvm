@@ -25,8 +25,6 @@
 
 namespace HPHP { namespace jit { namespace {
 
-#define CTX() cns(contextClass())
-
 static const MInstrAttr Warn = MIA_warn;
 static const MInstrAttr Unset = MIA_unset;
 static const MInstrAttr Reffy = MIA_reffy;

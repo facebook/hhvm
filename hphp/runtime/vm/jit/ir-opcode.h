@@ -631,53 +631,42 @@ O(DecodeCufIter,               D(Bool), S(Arr,Obj,Str)                        \
                                           S(FramePtr),                  Er|E) \
 O(CIterFree,                        ND, S(FramePtr),                       E) \
 O(DefMIStateBase,         D(PtrToCell), NA,                               NF) \
-O(BaseG,                   D(PtrToGen), S(Str),                         E|Er) \
-O(PropX,                   D(PtrToGen), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+O(BaseG,                   D(PtrToGen), S(Str),                        E|Er) \
+O(PropX,                   D(PtrToGen), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
-                                          S(PtrToCell),                 E|Er) \
-O_STK(PropDX,              D(PtrToGen), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          S(PtrToCell),               E|Er) \
+O_STK(PropDX,              D(PtrToGen), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
-                                          S(PtrToCell),           MProp|E|Er) \
-O(CGetProp,                    D(Cell), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          S(PtrToCell),         MProp|E|Er) \
+O(CGetProp,                    D(Cell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
-                                          S(PtrToCell),             E|PRc|Er) \
-O_STK(VGetProp,           D(BoxedCell), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          S(PtrToCell),           E|PRc|Er) \
+O_STK(VGetProp,           D(BoxedCell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
                                           S(PtrToCell),                       \
-                                                              MProp|E|PRc|Er) \
-O_STK(BindProp,                     ND, C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                                            MProp|E|PRc|Er) \
+O_STK(BindProp,                     ND, S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
                                           S(BoxedCell)                        \
-                                          S(PtrToCell),           MProp|E|Er) \
-O_STK(SetProp,                      ND, C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          S(PtrToCell),         MProp|E|Er) \
+O_STK(SetProp,                      ND, S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
-                                          S(Cell),                MProp|E|Er) \
-O(UnsetProp,                        ND, C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
-                                          S(Cell),                      E|Er) \
-O_STK(SetOpProp,               D(Cell), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          S(Cell),              MProp|E|Er) \
+O(UnsetProp,                        ND, S(Obj,PtrToGen)                       \
+                                          S(Cell),                    E|Er) \
+O_STK(SetOpProp,               D(Cell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),             MProp|E|PRc|Er) \
-O_STK(IncDecProp,              D(Cell), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
+                                          C(Int),           MProp|E|PRc|Er) \
+O_STK(IncDecProp,              D(Cell), S(Obj,PtrToGen)                       \
                                           S(Cell)                             \
                                           S(PtrToCell)                        \
-                                          C(Int),             MProp|E|PRc|Er) \
-O(EmptyProp,                   D(Bool), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
-                                          S(Cell),                      E|Er) \
-O(IssetProp,                   D(Bool), C(Cls)                                \
-                                          S(Obj,PtrToGen)                     \
-                                          S(Cell),                      E|Er) \
+                                          C(Int),           MProp|E|PRc|Er) \
+O(EmptyProp,                   D(Bool), S(Obj,PtrToGen)                       \
+                                          S(Cell),                    E|Er) \
+O(IssetProp,                   D(Bool), S(Obj,PtrToGen)                       \
+                                          S(Cell),                    E|Er) \
 O(ElemX,                   D(PtrToGen), S(PtrToGen)                           \
                                           S(Cell)                             \
                                           S(PtrToCell),                 E|Er) \

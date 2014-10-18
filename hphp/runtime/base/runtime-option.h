@@ -497,7 +497,6 @@ public:
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
-  F(bool, CheckRepoAuthDeserialize,    true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \
                         kDefaultInitialStaticStringTableSize)           \

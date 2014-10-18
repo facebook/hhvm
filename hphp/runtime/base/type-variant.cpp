@@ -723,7 +723,6 @@ static void unserializeProp(VariableUnserializer *uns,
 
   t->unserialize(uns);
 
-  if (!RuntimeOption::EvalCheckRepoAuthDeserialize) return;
   if (!RuntimeOption::RepoAuthoritative) return;
   if (!Repo::get().global().HardPrivatePropInference) return;
 

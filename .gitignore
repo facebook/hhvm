@@ -25,6 +25,7 @@ hphp.log
 /hphp/compiler/analysis/code_error.inc
 /hphp/runtime/ext/*/CMakeLists.txt
 /hphp/runtime/ext/*/*.so
+/hphp/runtime/ir-opcode-generated.h
 
 /hphp/runtime/tmp/Test*
 /hphp/runtime/tmp/run

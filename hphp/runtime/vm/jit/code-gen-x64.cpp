@@ -3909,10 +3909,6 @@ void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
 }
 
-/**
- * Given a vector, check if it has a immutable copy and jump to the taken
- * branch if so.
- */
 void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();

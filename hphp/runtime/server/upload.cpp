@@ -800,7 +800,7 @@ void rfc1867PostHandler(Transport* transport,
         new_val_len = value_len;
         if (php_rfc1867_callback != nullptr) {
           multipart_event_formdata event_formdata;
-          size_t newlength = 0;
+          size_t newlength = new_val_len;
 
           event_formdata.post_bytes_processed = mbuff->read_post_bytes;
           event_formdata.name = param;

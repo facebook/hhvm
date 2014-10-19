@@ -127,7 +127,7 @@ class IntlExtension : public Extension {
   void threadInit() override {
     bindIniSettings();
   }
-
+  void threadShutdown() override;
  private:
   void bindIniSettings();
   void bindConstants();

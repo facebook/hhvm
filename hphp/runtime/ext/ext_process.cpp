@@ -280,6 +280,7 @@ struct SignalHandlers final : RequestEventHandler {
     handlers.reset();
     // restore the old signal mask, thus unblock those that should be
     pthread_sigmask(SIG_SETMASK, &oldSet, NULL);
+    inited.store(true);
   }
   void requestShutdown() override {
     // block all signals
@@ -288,26 +289,21 @@ struct SignalHandlers final : RequestEventHandler {
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     handlers.reset();
+    inited.store(false);
   }
-
   Array handlers;
   int signaled[_NSIG];
   sigset_t oldSet;
+  std::atomic<bool> inited;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 
-// We must register the s_signal_handlers RequestEventHandler
-// immediately: otherwise, pcntl_signal_handler might try to register
-// it while processing a signal, which means calling malloc to insert
-// it into various vectors and sets, which is not ok from a signal
-// handler.
-static InitFiniNode initSignalHandler(
-  [] { s_signal_handlers.get(); },
-  InitFiniNode::When::ThreadInit
-);
+static bool signalHandlersInited() {
+  return s_signal_handlers.getInited() && s_signal_handlers->inited.load();
+}
 
 static void pcntl_signal_handler(int signo) {
-  if (signo > 0 && signo < _NSIG && !g_context.isNull()) {
+  if (signo > 0 && signo < _NSIG && signalHandlersInited()) {
     s_signal_handlers->signaled[signo] = 1;
     RequestInjectionData &data = ThreadInfo::s_threadInfo.getNoCheck()->
                                    m_reqInjectionData;
@@ -326,6 +322,7 @@ public:
 static SignalHandlersStaticInitializer s_signal_handlers_initializer;
 
 bool f_pcntl_signal_dispatch() {
+  if (!signalHandlersInited()) return true;
   int *signaled = s_signal_handlers->signaled;
   for (int i = 0; i < _NSIG; i++) {
     if (signaled[i]) {

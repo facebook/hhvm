@@ -40,4 +40,5 @@ class Platform(object):
         _run_command('fbmake clean')
         env = os.environ.copy()
         env['FBMAKE_BUILD_ROOT'] = build_dir
-        _run_command('fbmake --build-root "%s" opt -j70' % build_dir, env)
+        _run_command('/usr/local/bin/fbmake --build-root "%s" '
+                     '--ccache=off --distcc=on opt -j9000' % build_dir, env)

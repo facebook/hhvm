@@ -1057,10 +1057,10 @@ ranges due to eagerly loaded values at the start of the tracelet.
   pointer to the current frame (used to get the context). May throw or fatal if
   method is not accessible.
 
-| LdPropAddr<T>, D(PtrToGen), S(Obj) C(Int), C
+| LdPropAddr<T>, DParam, S(Obj) C(Int), C
 
   Load the address of the object property for S0 at offset S1 (in bytes) into
-  D.
+  D.  T must be a subtype of PtrToGen.
 
 | LdGblAddr, D(PtrToGen), S(Str), B
 

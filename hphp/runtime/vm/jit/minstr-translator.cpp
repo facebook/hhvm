@@ -843,16 +843,15 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
 PropInfo HhbcTranslator::MInstrTranslator::getCurrentPropertyOffset(
   const Class*& knownCls
 ) {
-  auto info = getPropertyOffset(m_ni, contextClass(), knownCls,
-                                m_mii, m_mInd, m_iInd);
+  auto const baseType = m_base->type().derefIfPtr();
+  if (!knownCls) {
+    if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
+      knownCls = baseType.getClass();
+    }
+  }
+  auto const info = getPropertyOffset(m_ni, contextClass(), knownCls,
+                                      m_mii, m_mInd, m_iInd);
   if (info.offset == -1) return info;
-
-  auto baseType = m_base->type().derefIfPtr();
-  always_assert_flog(
-    baseType < Type::Obj,
-    "Got property offset for base {} which isn't an object",
-    *m_base->inst()
-  );
 
   auto baseCls = baseType.getClass();
 
@@ -919,13 +918,13 @@ SSATmp* HhbcTranslator::MInstrTranslator::checkInitProp(
     PropInfo propInfo,
     bool doWarn,
     bool doDefine) {
-  SSATmp* key = getKey();
+  auto const key = getKey();
   assert(key->isA(Type::StaticStr));
   assert(baseAsObj->isA(Type::Obj));
   assert(propAddr->type().isPtr());
 
   auto const needsCheck =
-    Type::Uninit <= convertToType(propInfo.repoAuthType) &&
+    Type::Uninit <= propAddr->type().deref() &&
     // The m_mInd check is to avoid initializing a property to
     // InitNull right before it's going to be set to something else.
     (doWarn || (doDefine && m_mInd < m_ni.immVecM.size() - 1));
@@ -970,74 +969,96 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
-  SSATmp* initNull = m_irb.genPtrToInitNull();
+  auto const initNull = m_irb.genPtrToInitNull();
+
+  SCOPE_EXIT {
+    // After this function, m_base is either a pointer to init_null_variant or
+    // a property in the object that we've verified isn't uninit.
+    assert(m_base->type().isPtr());
+  };
 
   /*
-   * Type-inference from hphpc only tells us that this is either an object of a
-   * given class type or null.  If it's not an object, it has to be a null type
-   * based on type inference.  (It could be KindOfRef with an object inside,
-   * except that this isn't inferred for object properties so we're fine not
-   * checking KindOfRef in that case.)
-   *
-   * On the other hand, if m_base->isA(Type::Obj), we're operating on the base
-   * which was already guarded by tracelet guards (and may have been KindOfRef,
-   * but the Base* op already handled this). So we only need to do a type
-   * check against null here in the intermediate cases.
+   * Normal case, where the base is an object---just do a lea with the type
+   * information we got from static analysis.  The caller of this function will
+   * use it to know whether it can avoid a generic incref, unbox, etc.
    */
   if (m_base->isA(Type::Obj)) {
-    SSATmp* propAddr = gen(LdPropAddr, m_base, cns(propInfo.offset));
+    auto const propAddr = gen(
+      LdPropAddr,
+      convertToType(propInfo.repoAuthType).ptr(),
+      m_base,
+      cns(propInfo.offset)
+    );
     m_base = checkInitProp(m_base, propAddr, propInfo, doWarn, doDefine);
-  } else {
-    m_base = m_irb.cond(
-      0,
-      [&] (Block* taken) {
-        return gen(LdMem, Type::Obj, taken, m_base, cns(0));
-      },
-      [&] (SSATmp* baseAsObj) {
-        // Next: Base is an object. Load property address and check for uninit
-        return checkInitProp(baseAsObj,
-                             gen(LdPropAddr, baseAsObj,
-                                 cns(propInfo.offset)),
-                             propInfo,
-                             doWarn,
-                             doDefine);
-      },
-      [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
-        m_irb.hint(Block::Hint::Unlikely);
-        if (doWarn) {
-          gen(WarnNonObjProp, makeCatch());
-        }
-        if (doDefine) {
-          /*
-           * NOTE:
-           *
-           * This case logically is supposed to do a stdClass promotion.  It
-           * should ideally not be possible (since we have a known class type),
-           * except that the static compiler doesn't correctly infer object
-           * class types in some edge cases involving stdClass promotion.
-           *
-           * This is impossible to handle "correctly" if we're in the middle of
-           * a multi-dim property expression, because things further along may
-           * also have type inference telling them that object properties are
-           * at a given slot, but the object could actually be a stdClass
-           * instead of the knownCls type if we were to promote here.
-           *
-           * So, we throw a fatal error, which is what hphpc's generated C++
-           * would do in this case too.
-           *
-           * Relevant TODOs:
-           *   #1789661 (this can cause bugs if bytecode.cpp promotes)
-           *   #1124706 (we want to get rid of stdClass promotion in general)
-           */
-          gen(ThrowNonObjProp, makeCatch());
-        }
-        return initNull;
-      });
+    return;
   }
 
-  // At this point m_base is either a pointer to init_null_variant or
-  // a property in the object that we've verified isn't uninit.
-  assert(m_base->type().isPtr());
+  /*
+   * We also support nullable objects for the base.  This is a frequent result
+   * of static analysis on multi-dim property accesses ($foo->bar->baz), since
+   * hhbbc doesn't try to prove __construct must be run or that sort of thing
+   * (so every object-holding object property can also be null).
+   *
+   * After a null check, if it's actually an object we can just do LdPropAddr,
+   * otherwise we just give out a pointer to the init_null_variant (after
+   * raising the appropriate warnings).
+   */
+  m_base = m_irb.cond(
+    0,
+    [&] (Block* taken) {
+      gen(CheckTypeMem, Type::Obj, taken, m_base);
+    },
+    [&] {
+      // Next: Base is an object. Load property and check for uninit.
+      auto const obj = gen(
+        LdMem,
+        m_base->type().deref() & Type::Obj,
+        m_base,
+        cns(0)
+      );
+      auto const propAddr = gen(
+        LdPropAddr,
+        convertToType(propInfo.repoAuthType).ptr(),
+        obj,
+        cns(propInfo.offset)
+      );
+      return checkInitProp(obj, propAddr, propInfo, doWarn, doDefine);
+    },
+    [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
+      m_irb.hint(Block::Hint::Unlikely);
+      if (doWarn) {
+        gen(WarnNonObjProp, makeCatch());
+      }
+      if (doDefine) {
+        /*
+         * This case is where we're logically supposed to do stdClass
+         * promotion.  However, it's impossible that we're going to be asked to
+         * do this with the way type inference works ahead of time right now:
+         *
+         *   o In defining minstrs, the only way hhbbc will know that an object
+         *     type is nullable and also specialized is if the only type it can
+         *     be is ?Obj=stdClass.  (This is because it does object property
+         *     inference in a control flow insensitive way, so if null is
+         *     possible stdClass must be added to the type, and there are no
+         *     unions of multiple specialized object types.)
+         *
+         *   o On the other hand, if the type was really ?Obj=stdClass, we
+         *     wouldn't have gotten a known property offset for any properties,
+         *     because stdClass has no declared properties, so we can't be
+         *     here.
+         *
+         * We could punt, but it's better to assert for now because if we
+         * change this in hhbbc it will be on-purpose...
+         */
+        always_assert_flog(
+          false,
+          "Static analysis error: we would've needed to generate "
+          "stdClass-promotion code in the JIT, which is unexpected."
+        );
+      }
+      return initNull;
+    }
+  );
 }
 
 void HhbcTranslator::MInstrTranslator::emitElem() {
@@ -1180,7 +1201,7 @@ void HhbcTranslator::MInstrTranslator::emitCGetProp() {
       return;
     }
 
-    auto const ty = convertToType(propInfo.repoAuthType);
+    auto const ty      = m_base->type().deref();
     auto const cellPtr = ty.maybeBoxed() ? gen(UnboxPtr, m_base) : m_base;
     m_result = gen(LdMem, ty.unbox(), cellPtr, cns(0));
     gen(IncRef, m_result);
@@ -1218,10 +1239,10 @@ void HhbcTranslator::MInstrTranslator::emitSetProp() {
       !mightCallMagicPropMethod(Define, knownCls, propInfo)) {
     emitPropSpecialized(MIA_define, propInfo);
 
-    auto const propTy = convertToType(propInfo.repoAuthType);
-    auto const cellTy = propTy.maybeBoxed() ? propTy.unbox() : propTy;
+    auto const propTy  = m_base->type().deref();
+    auto const cellTy  = propTy.maybeBoxed() ? propTy.unbox() : propTy;
     auto const cellPtr = propTy.maybeBoxed() ? gen(UnboxPtr, m_base) : m_base;
-    auto const oldVal = gen(LdMem, cellTy, cellPtr, cns(0));
+    auto const oldVal  = gen(LdMem, cellTy, cellPtr, cns(0));
 
     gen(IncRef, value);
     gen(StMem, cellPtr, cns(0), value);
@@ -1862,12 +1883,25 @@ void HhbcTranslator::MInstrTranslator::prependToTraces(IRInstruction* inst) {
 }
 
 bool HhbcTranslator::MInstrTranslator::needFirstRatchet() const {
-  if (m_ni.inputs[m_mii.valCount()]->rtt.unbox() <= Type::Arr) {
-    switch (m_ni.immVecM[0]) {
-      case MEC: case MEL: case MET: case MEI: return false;
-      case MPC: case MPL: case MPT: case MW:  return true;
-      default: not_reached();
+  auto const firstTy = m_ni.inputs[m_mii.valCount()]->rtt.unbox();
+  if (firstTy <= Type::Arr) {
+    if (mcodeIsElem(m_ni.immVecM[0])) return false;
+    return true;
+  }
+  if (firstTy < Type::Obj && firstTy.isSpecialized()) {
+    auto const klass = firstTy.getClass();
+    auto const no_overrides = AttrNoOverrideMagicGet|
+                              AttrNoOverrideMagicSet|
+                              AttrNoOverrideMagicIsset|
+                              AttrNoOverrideMagicUnset;
+    if ((klass->attrs() & no_overrides) != no_overrides) {
+      // Note: we could also add a check here on whether the first property RAT
+      // contains Uninit---if not we can still return false.  See
+      // mightCallMagicPropMethod.
+      return true;
     }
+    if (mcodeIsProp(m_ni.immVecM[0])) return false;
+    return true;
   }
   return true;
 }
@@ -1891,7 +1925,7 @@ bool HhbcTranslator::MInstrTranslator::needFinalRatchet() const {
 //
 // Following are a few more examples to make the algorithm clear:
 //
-//   (base is array)      (base is object)   (base is object)
+//   (base is array)      (base is object*)  (base is object*)
 //   BaseL                BaseL              BaseL
 //   ElemL                ElemL              CGetPropL
 //     no ratchet           ratchet            logical ratchet
@@ -1902,9 +1936,9 @@ bool HhbcTranslator::MInstrTranslator::needFinalRatchet() const {
 //   IssetElemL
 //     logical ratchet
 //
-//   (base is array)
-//   BaseL
-//   ElemL
+//   (base is array)        * If the base is a known (specialized) object type,
+//   BaseL                    we can also avoid the first rachet if we can
+//   ElemL                    prove it can't possibly invoke magic methods.
 //     no ratchet
 //   ElemL
 //     ratchet

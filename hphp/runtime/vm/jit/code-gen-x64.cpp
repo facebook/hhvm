@@ -3736,7 +3736,7 @@ void CodeGenerator::cgLdProp(IRInstruction* inst) {
          inst->taken());
 }
 
-void CodeGenerator::cgLdMem(IRInstruction * inst) {
+void CodeGenerator::cgLdMem(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
          srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
          inst->taken());

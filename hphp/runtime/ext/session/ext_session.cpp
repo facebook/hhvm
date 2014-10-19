@@ -137,23 +137,19 @@ const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
-struct SessionRequestData final : RequestEventHandler, Session {
+struct SessionRequestData final : Session {
   SessionRequestData() {}
+
+  void init() {
+    m_id.detach();
+    m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
+  }
 
   void destroy() {
     m_id.reset();
     m_session_status = Session::None;
     m_ps_session_handler = nullptr;
-  }
-
-  void requestInit() override {
-    destroy();
-  }
-
-  void requestShutdown() override {
-    // We don't actually want to do our requestShutdownImpl here---it
-    // is run explicitly from the execution context, because it could
-    // run user code.
   }
 
   void requestShutdownImpl();
@@ -162,7 +158,7 @@ public:
   String m_id;
 
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
+static __thread SessionRequestData* s_session;
 #define PS(name) s_session->m_ ## name
 
 void SessionRequestData::requestShutdownImpl() {
@@ -1880,6 +1876,10 @@ static class SessionExtension : public Extension {
   }
 
   virtual void threadInit() {
+    // TODO: t5226715 We shouldn't need to check s_session here, but right now
+    // this is called for every request.
+    if (s_session) return;
+    s_session = new SessionRequestData;
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -1963,10 +1963,19 @@ static class SessionExtension : public Extension {
                      &PS(hash_bits_per_character));
   }
 
-  virtual void requestInit() {
-    // warm up the session data
-    s_session->requestInit();
+  virtual void threadShutdown() override {
+    delete s_session;
+    s_session = nullptr;
   }
+
+  virtual void requestInit() override {
+    s_session->init();
+  }
+
+  /*
+    No need for requestShutdown; its handled explicitly by a call to
+    ext_session_request_shutdown()
+  */
 } s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

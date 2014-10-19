@@ -6160,15 +6160,11 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
  * compile time with constant input to get deterministic output.
  */
 const StaticString
-  s_HipHopSpecific("__HipHopSpecific"),
   s_IsFoldable("__IsFoldable"),
   s_ParamCoerceModeNull("__ParamCoerceModeNull"),
   s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
 
 static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
-  if (fe->userAttributes.count(s_HipHopSpecific.get())) {
-    attrs = attrs | AttrHPHPSpecific;
-  }
   if (fe->userAttributes.count(s_IsFoldable.get())) {
     attrs = attrs | AttrIsFoldable;
   }

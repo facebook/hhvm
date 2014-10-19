@@ -972,12 +972,8 @@ public:
   char& maybeIntercepted() const;
 
   /*
-   * Populate the MethodInfo for this function in `mi'.
-   *
-   * If methInfo() is non-null, this just performs a deep copy.
+   * Access to the global vector of funcs.  This maps FuncID's back to Func*'s.
    */
-  void getFuncInfo(ClassInfo::MethodInfo* mi) const;
-
   static const AtomicVector<const Func*>& getFuncVec();
 
   /*

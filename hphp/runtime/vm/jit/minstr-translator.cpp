@@ -291,15 +291,19 @@ SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
 namespace {
 bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
                               PropInfo propInfo) {
-  auto const objAttr = (mia & Define) ? ObjectData::UseSet : ObjectData::UseGet;
-  auto const clsHasMagicMethod = !cls || (cls->getODAttrs() & objAttr);
-
-  return clsHasMagicMethod &&
-    convertToType(propInfo.repoAuthType).maybe(Type::Uninit);
+  if (convertToType(propInfo.repoAuthType).not(Type::Uninit)) {
+    return false;
+  }
+  if (!cls) return true;
+  bool const no_override_magic =
+    // NB: this function can't yet be used for unset or isset contexts.  Just
+    // get and set.
+    (mia & Define) ? cls->attrs() & AttrNoOverrideMagicSet
+                   : cls->attrs() & AttrNoOverrideMagicGet;
+  return !no_override_magic;
 }
 
-bool
-mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
+bool mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
   const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
   unsigned mi = 0;
   unsigned ii = mii.valCount() + 1;

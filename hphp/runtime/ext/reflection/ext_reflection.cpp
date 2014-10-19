@@ -165,9 +165,11 @@ int get_modifiers(Attr attrs, bool cls) {
   if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
   if (attrs & AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
   if (attrs & AttrStatic)    php_modifier |= 0x01;
-  if (attrs & AttrPublic)    php_modifier |= 0x100;
-  if (attrs & AttrProtected) php_modifier |= 0x200;
-  if (attrs & AttrPrivate)   php_modifier |= 0x400;
+  if (!cls) {  // AttrPublic bits are not valid on class (have other meaning)
+    if (attrs & AttrPublic)    php_modifier |= 0x100;
+    if (attrs & AttrProtected) php_modifier |= 0x200;
+    if (attrs & AttrPrivate)   php_modifier |= 0x400;
+  }
   return php_modifier;
 }
 
@@ -181,9 +183,11 @@ static Attr attrs_from_modifiers(int php_modifier, bool cls) {
     attrs = (Attr)(attrs | AttrFinal);
   }
   if (php_modifier & 0x01) { attrs = (Attr)(attrs | AttrStatic); }
-  if (php_modifier & 0x100) { attrs = (Attr)(attrs | AttrPublic); }
-  if (php_modifier & 0x200) { attrs = (Attr)(attrs | AttrProtected); }
-  if (php_modifier & 0x400) { attrs = (Attr)(attrs | AttrPrivate); }
+  if (!cls) {  // AttrPublic bits are not valid on class (have other meaning)
+    if (php_modifier & 0x100) { attrs = (Attr)(attrs | AttrPublic); }
+    if (php_modifier & 0x200) { attrs = (Attr)(attrs | AttrProtected); }
+    if (php_modifier & 0x400) { attrs = (Attr)(attrs | AttrPrivate); }
+  }
   return attrs;
 }
 

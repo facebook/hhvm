@@ -38,10 +38,18 @@ enum Attr {
   AttrReference            = (1 <<  0), //       |          |    X    //
                                         //       |          |         //
   // Method visibility.  The relative ordering of these is important. //
+  // N.B. the values are overlayed with some of the no-override bits for magic
+  // class methods (next), since they don't apply to classes.
   AttrPublic               = (1 <<  1), //       |    X     |    X    //
   AttrProtected            = (1 <<  2), //       |    X     |    X    //
   AttrPrivate              = (1 <<  3), //       |    X     |    X    //
                                         //       |          |         //
+  // No-override bits for magic class methods.  If set, the class does not
+  // define that magic function, and neither does any derived class.  Note that
+  // the bit for __unset is further down due to Attr-sharing across types.
+  AttrNoOverrideMagicGet   = (1 <<  1), //   X   |          |         //
+  AttrNoOverrideMagicSet   = (1 <<  2), //   X   |          |         //
+  AttrNoOverrideMagicIsset = (1 <<  3), //   X   |          |         //
   // N.B.: AttrEnum and AttrStatic overlap! But they can't be set on the
   // same things.
   // Is this class an enum?
@@ -66,6 +74,8 @@ enum Attr {
                                         //       |          |         //
   // Indicates that this function should be ignored in backtraces.    //
   AttrNoInjection          = (1 <<  9), //       |          |    X    //
+  // Indicates a class has no derived classes that have a magic __unset method.
+  AttrNoOverrideMagicUnset = (1 <<  9), //   X   |          |         //
                                         //       |          |         //
   // Indicates that the function or class is uniquely named among functions or
   // classes across the codebase.  Note that function and class names are in

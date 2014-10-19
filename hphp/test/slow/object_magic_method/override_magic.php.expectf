@@ -1,0 +1,5 @@
+get: x
+string(3) "heh"
+
+Notice: Undefined property: X1::$x in %s/test/slow/object_magic_method/override_magic.php on line 15
+NULL

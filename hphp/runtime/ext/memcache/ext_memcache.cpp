@@ -42,21 +42,12 @@ const int64_t k_MEMCACHE_COMPRESSED = MMC_COMPRESSED;
 static bool ini_on_update_hash_strategy(const std::string& value);
 static bool ini_on_update_hash_function(const std::string& value);
 
-struct MEMCACHEGlobals final : RequestEventHandler {
+struct MEMCACHEGlobals final {
   std::string hash_strategy;
   std::string hash_function;
-
-  MEMCACHEGlobals() {}
-
-  void requestInit() override {
-    hash_strategy = "standard";
-    hash_function = "crc32";
-  }
-
-  void requestShutdown() override {}
 };
 
-IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEGlobals, s_memcache_globals);
+static __thread MEMCACHEGlobals* s_memcache_globals;
 #define MEMCACHEG(name) s_memcache_globals->name
 
 const StaticString s_MemcacheData("MemcacheData");
@@ -104,9 +95,9 @@ static bool ini_on_update_hash_strategy(const std::string& value) {
 
 static bool ini_on_update_hash_function(const std::string& value) {
   if (!strncasecmp(value.data(), "crc32", sizeof("crc32"))) {
-    MEMCACHEG(hash_strategy) = "crc32";
+    MEMCACHEG(hash_function) = "crc32";
   } else if (!strncasecmp(value.data(), "fnv", sizeof("fnv"))) {
-    MEMCACHEG(hash_strategy) = "fnv";
+    MEMCACHEG(hash_function) = "fnv";
   }
   return false;
 }
@@ -677,6 +668,10 @@ class MemcacheExtension : public Extension {
   public:
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
+      // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
+      // but right now this is called for every request.
+      if (s_memcache_globals) return;
+      s_memcache_globals = new MEMCACHEGlobals;
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
@@ -691,6 +686,10 @@ class MemcacheExtension : public Extension {
                          nullptr
                        ),
                        &MEMCACHEG(hash_function));
+    }
+    void threadShutdown() override {
+      delete s_memcache_globals;
+      s_memcache_globals = nullptr;
     }
 
     virtual void moduleInit() {

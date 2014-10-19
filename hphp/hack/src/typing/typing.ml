@@ -2379,12 +2379,11 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
 and type_could_be_null env ty1 =
   let env, ety1 = Env.expand_type env ty1 in
   match (snd ety1) with
-  | Tunresolved tyl -> List.exists (type_could_be_null env) tyl
   | Tgeneric (x, Some ty) -> type_could_be_null env ty
   | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
       let env, ty = Typing_tdef.expand_typedef env (fst ety1) x argl in
       type_could_be_null env ty
-  | Toption _ | Tgeneric _ | Tmixed | Tany -> true
+  | Toption _ | Tgeneric _ | Tunresolved _ | Tmixed | Tany -> true
   | _ -> false
 
 and alpha_this ~new_name env paraml =

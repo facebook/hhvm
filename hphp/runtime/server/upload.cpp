@@ -435,7 +435,7 @@ static int multipart_buffer_headers(multipart_buffer *self,
 
   /* get lines of text, or CRLF_CRLF */
 
-  while( (line = get_line(self)) && strlen(line) > 0 )
+  while( (line = get_line(self)) && line[0] != '\0' )
   {
     /* add header to table */
 
@@ -926,7 +926,7 @@ void rfc1867PostHandler(Transport* transport,
         continue;
       }
 
-      if (strlen(filename) == 0) {
+      if (filename[0] == '\0') {
         Logger::Verbose("No file uploaded");
         cancel_upload = UPLOAD_ERROR_D;
       }
@@ -986,10 +986,10 @@ void rfc1867PostHandler(Transport* transport,
       }
       if (!cancel_upload && !end) {
         Logger::Verbose("Missing mime boundary at the end of the data for "
-                        "file %s", strlen(filename) > 0 ? filename : "");
+                        "file %s", filename[0] != '\0' ? filename : "");
         cancel_upload = UPLOAD_ERROR_C;
       }
-      if (strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
+      if (filename[0] != '\0' && total_bytes == 0 && !cancel_upload) {
         Logger::Verbose("Uploaded file size 0 - file [%s=%s] not saved",
                         param, filename);
         cancel_upload = 5;

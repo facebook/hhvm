@@ -1013,9 +1013,9 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
     return;
   }
   auto const ldrefExit = makeExit();
+  auto const oldLoc = ldLoc(id, ldrefExit, DataTypeCountness);
   auto const tmpThis = gen(LdThis, makeExitSlow(), m_irb->fp());
   gen(IncRef, tmpThis);
-  auto const oldLoc = ldLoc(id, ldrefExit, DataTypeCountness);
   genStLocal(id, m_irb->fp(), tmpThis);
   gen(DecRef, oldLoc);
 }
@@ -6773,7 +6773,7 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
 }
 
 bool HhbcTranslator::inPseudoMain() const {
-  return Translator::liveFrameIsPseudoMain();
+  return curFunc()->isPseudoMain();
 }
 
 }}

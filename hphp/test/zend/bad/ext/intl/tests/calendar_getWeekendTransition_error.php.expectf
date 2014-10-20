@@ -16,4 +16,5 @@ Warning: %s
 
 Warning: %s
 bool(false)
-Catchable fatal error: Argument 1 passed to intlcal_get_weekend_transition() must be an instance of IntlCalendar, integer given in %s on line %d
+
+Catchable fatal error: %s

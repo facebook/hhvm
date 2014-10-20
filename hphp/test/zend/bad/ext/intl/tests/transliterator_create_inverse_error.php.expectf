@@ -2,4 +2,5 @@
 Warning: %s
 
 Warning: %s
-Catchable fatal error: Argument 1 passed to transliterator_create_inverse() must be an instance of Transliterator, string given in %s on line %d
+
+Catchable fatal error: %s

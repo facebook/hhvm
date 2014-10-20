@@ -30,24 +30,18 @@ namespace HPHP { namespace jit { namespace x64 {
 constexpr size_t kCacheLineSize = 64;
 constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
-struct CodeGenerator : public jit::CodeGenerator {
-  typedef jit::X64Assembler Asm;
-
-  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold,
-                CodeBlock& frozen, CodegenState& state)
+struct CodeGenerator {
+  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, CodeBlock& frozen,
+                CodegenState& state)
     : m_unit(unit)
     , m_vmain(main)
     , m_vcold(cold)
     , m_frozen(frozen)
     , m_state(state)
     , m_curInst(nullptr)
-  {
-  }
+  {}
 
-  virtual ~CodeGenerator() {
-  }
-
-  void cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst);
 
 private:
   Vloc srcLoc(unsigned i) const;

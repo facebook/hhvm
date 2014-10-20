@@ -89,11 +89,6 @@ struct CodegenState {
 // singleton MCGenerator (adds code, allocates data, adds fixups).
 void genCode(IRUnit&);
 
-struct CodeGenerator {
-  virtual ~CodeGenerator() {}
-  virtual void cgInst(IRInstruction* inst) = 0;
-};
-
 }}
 
 #endif

@@ -28,8 +28,7 @@
 
 namespace HPHP { namespace jit { namespace arm {
 
-struct CodeGenerator : public jit::CodeGenerator {
-
+struct CodeGenerator {
   CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, CodeBlock& frozen,
                 CodegenState& state)
     : m_unit(unit)
@@ -39,8 +38,7 @@ struct CodeGenerator : public jit::CodeGenerator {
     , m_state(state)
   {}
 
-  virtual ~CodeGenerator() {}
-  void cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst);
 
  private:
   const Func* curFunc() const { return m_curInst->marker().func(); }

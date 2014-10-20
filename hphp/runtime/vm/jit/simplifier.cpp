@@ -387,146 +387,9 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     m_insts.pop();
   };
 
-  SSATmp* src1 = inst->numSrcs() < 1 ? nullptr : inst->src(0);
-  SSATmp* src2 = inst->numSrcs() < 2 ? nullptr : inst->src(1);
-
-  Opcode opc = inst->op();
-  switch (opc) {
-    case AbsDbl:    return simplifyAbsDbl(inst);
-
-    case AddInt:    return simplifyAddInt(src1, src2);
-    case SubInt:    return simplifySubInt(src1, src2);
-    case MulInt:    return simplifyMulInt(src1, src2);
-    case AddDbl:    return simplifyAddDbl(src1, src2);
-    case SubDbl:    return simplifySubDbl(src1, src2);
-    case MulDbl:    return simplifyMulDbl(src1, src2);
-
-    case AddIntO:   return simplifyAddIntO(src1, src2);
-    case SubIntO:   return simplifySubIntO(src1, src2);
-    case MulIntO:   return simplifyMulIntO(src1, src2);
-
-    case DivDbl:    return simplifyDivDbl(inst);
-    case Mod:       return simplifyMod(src1, src2);
-    case AndInt:    return simplifyAndInt(src1, src2);
-    case OrInt:     return simplifyOrInt(src1, src2);
-    case XorInt:    return simplifyXorInt(src1, src2);
-    case XorBool:   return simplifyXorBool(src1, src2);
-    case Shl:       return simplifyShl(inst);
-    case Shr:       return simplifyShr(inst);
-
-    case Gt:
-    case Gte:
-    case Lt:
-    case Lte:
-    case Eq:
-    case Neq:
-    case GtInt:
-    case GteInt:
-    case LtInt:
-    case LteInt:
-    case EqInt:
-    case NeqInt:
-    case Same:
-    case NSame:
-      return simplifyCmp(opc, inst, src1, src2);
-
-    case ConcatCellCell: return simplifyConcatCellCell(inst);
-    case ConcatStrStr:  return simplifyConcatStrStr(src1, src2);
-    case Mov:           return simplifyMov(src1);
-    case ConvBoolToArr: return simplifyConvToArr(inst);
-    case ConvDblToArr:  return simplifyConvToArr(inst);
-    case ConvIntToArr:  return simplifyConvToArr(inst);
-    case ConvStrToArr:  return simplifyConvToArr(inst);
-    case ConvArrToBool: return simplifyConvArrToBool(inst);
-    case ConvDblToBool: return simplifyConvDblToBool(inst);
-    case ConvIntToBool: return simplifyConvIntToBool(inst);
-    case ConvStrToBool: return simplifyConvStrToBool(inst);
-    case ConvArrToDbl:  return simplifyConvArrToDbl(inst);
-    case ConvBoolToDbl: return simplifyConvBoolToDbl(inst);
-    case ConvIntToDbl:  return simplifyConvIntToDbl(inst);
-    case ConvStrToDbl:  return simplifyConvStrToDbl(inst);
-    case ConvArrToInt:  return simplifyConvArrToInt(inst);
-    case ConvBoolToInt: return simplifyConvBoolToInt(inst);
-    case ConvDblToInt:  return simplifyConvDblToInt(inst);
-    case ConvStrToInt:  return simplifyConvStrToInt(inst);
-    case ConvBoolToStr: return simplifyConvBoolToStr(inst);
-    case ConvDblToStr:  return simplifyConvDblToStr(inst);
-    case ConvIntToStr:  return simplifyConvIntToStr(inst);
-    case ConvCellToBool:return simplifyConvCellToBool(inst);
-    case ConvCellToStr: return simplifyConvCellToStr(inst);
-    case ConvCellToInt: return simplifyConvCellToInt(inst);
-    case ConvCellToDbl: return simplifyConvCellToDbl(inst);
-    case ConvObjToBool: return simplifyConvObjToBool(inst);
-    case ConvCellToObj: return simplifyConvCellToObj(inst);
-    case Floor:         return simplifyFloor(inst);
-    case Ceil:          return simplifyCeil(inst);
-    case UnboxPtr:      return simplifyUnboxPtr(inst);
-    case BoxPtr:        return simplifyBoxPtr(inst);
-    case IsType:
-    case IsNType:       return simplifyIsType(inst);
-    case IsScalarType:  return simplifyIsScalarType(inst);
-    case CheckInit:     return simplifyCheckInit(inst);
-
-    case CoerceCellToBool: return simplifyCoerceCellToBool(inst);
-    case CoerceCellToInt:  return simplifyCoerceCellToInt(inst);
-    case CoerceCellToDbl:  return simplifyCoerceCellToDbl(inst);
-
-    case JmpZero:
-    case JmpNZero:
-      return simplifyCondJmp(inst);
-
-    case JmpGt:
-    case JmpGte:
-    case JmpLt:
-    case JmpLte:
-    case JmpEq:
-    case JmpNeq:
-    case JmpGtInt:
-    case JmpGteInt:
-    case JmpLtInt:
-    case JmpLteInt:
-    case JmpEqInt:
-    case JmpNeqInt:
-    case JmpSame:
-    case JmpNSame:
-      return simplifyQueryJmp(inst);
-
-    case DecRef:
-    case DecRefNZ:     return simplifyDecRef(inst);
-    case IncRef:       return simplifyIncRef(inst);
-    case IncRefCtx:    return simplifyIncRefCtx(inst);
-    case AssertNonNull:return simplifyAssertNonNull(inst);
-
-    case LdCtx:        return simplifyLdCtx(inst);
-    case LdClsCtx:     return simplifyLdClsCtx(inst);
-    case LdObjClass:   return simplifyLdObjClass(inst);
-    case LdObjInvoke:  return simplifyLdObjInvoke(inst);
-    case GetCtxFwdCall:return simplifyGetCtxFwdCall(inst);
-    case ConvClsToCctx: return simplifyConvClsToCctx(inst);
-
-    case SpillStack:   return simplifySpillStack(inst);
-    case CastStk:      return simplifyCastStk(inst);
-    case CoerceStk:    return simplifyCoerceStk(inst);
-    case LdStack:      return simplifyLdStack(inst);
-    case TakeStack:    return simplifyTakeStack(inst);
-    case LdStackAddr:  return simplifyLdStackAddr(inst);
-    case DecRefStack:  return simplifyDecRefStack(inst);
-    case LdLoc:        return simplifyLdLoc(inst);
-
-    case CheckPackedArrayBounds: return simplifyCheckPackedArrayBounds(inst);
-    case LdPackedArrayElem:      return simplifyLdPackedArrayElem(inst);
-    case IsWaitHandle:           return simplifyIsWaitHandle(inst);
-
-    case Count:       return simplifyCount(inst);
-    case CountArray:  return simplifyCountArray(inst);
-
-    case LdClsName:   return simplifyLdClsName(inst);
-
-    case CallBuiltin: return simplifyCallBuiltin(inst);
-
-    default:
-      return nullptr;
-  }
+#define X(x) case x: return simplify##x(inst);
+  switch (inst->op()) { SIMPLIFY_INSTRS default: return nullptr; }
+#undef X
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -617,20 +480,40 @@ SSATmp* Simplifier::simplifyConvClsToCctx(const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyQueryJmp(const IRInstruction* inst) {
+SSATmp* Simplifier::queryJmpImpl(const IRInstruction* inst) {
   SSATmp* src1 = inst->src(0);
   SSATmp* src2 = inst->src(1);
   Opcode opc = inst->op();
-  // reuse the logic in simplifyCmp.
-  SSATmp* newCmp = simplifyCmp(queryJmpToQueryOp(opc), nullptr, src1, src2);
+  // reuse the logic in cmpImpl
+  SSATmp* newCmp = cmpImpl(queryJmpToQueryOp(opc), nullptr, src1, src2);
   if (!newCmp) return nullptr;
 
   // Become an equivalent conditional jump and reuse that logic.
   return gen(JmpNZero, inst->taken(), newCmp);
 }
 
-SSATmp* Simplifier::simplifyMov(SSATmp* src) {
-  return src;
+#define QUERY_JMP(x)                                      \
+SSATmp* Simplifier::simplify##x(const IRInstruction* i) { \
+  return queryJmpImpl(i);                                 \
+}
+QUERY_JMP(JmpGt)
+QUERY_JMP(JmpGte)
+QUERY_JMP(JmpLt)
+QUERY_JMP(JmpLte)
+QUERY_JMP(JmpEq)
+QUERY_JMP(JmpNeq)
+QUERY_JMP(JmpGtInt)
+QUERY_JMP(JmpGteInt)
+QUERY_JMP(JmpLtInt)
+QUERY_JMP(JmpLteInt)
+QUERY_JMP(JmpEqInt)
+QUERY_JMP(JmpNeqInt)
+QUERY_JMP(JmpSame)
+QUERY_JMP(JmpNSame)
+#undef QUERY_JMP
+
+SSATmp* Simplifier::simplifyMov(const IRInstruction* inst) {
+  return inst->src(0);
 }
 
 SSATmp* Simplifier::simplifyAbsDbl(const IRInstruction* inst) {
@@ -645,7 +528,7 @@ SSATmp* Simplifier::simplifyAbsDbl(const IRInstruction* inst) {
 }
 
 template <class Oper>
-SSATmp* Simplifier::simplifyConst(SSATmp* src1, SSATmp* src2, Oper op) {
+SSATmp* Simplifier::constImpl(SSATmp* src1, SSATmp* src2, Oper op) {
   // don't canonicalize to the right, OP might not be commutative
   if (!src1->isConst() || !src2->isConst()) return nullptr;
 
@@ -657,12 +540,12 @@ SSATmp* Simplifier::simplifyConst(SSATmp* src1, SSATmp* src2, Oper op) {
   return nullptr;
 }
 
-template <class Oper>
-SSATmp* Simplifier::simplifyCommutative(SSATmp* src1,
-                                        SSATmp* src2,
-                                        Opcode opcode,
-                                        Oper op) {
-  if (auto simp = simplifyConst(src1, src2, op)) return simp;
+template<class Oper>
+SSATmp* Simplifier::commutativeImpl(SSATmp* src1,
+                                    SSATmp* src2,
+                                    Opcode opcode,
+                                    Oper op) {
+  if (auto simp = constImpl(src1, src2, op)) return simp;
 
   // Canonicalize constants to the right.
   if (src1->isConst() && !src2->isConst()) {
@@ -693,14 +576,14 @@ SSATmp* Simplifier::simplifyCommutative(SSATmp* src1,
 }
 
 template <class OutOper, class InOper>
-SSATmp* Simplifier::simplifyDistributive(SSATmp* src1,
-                                         SSATmp* src2,
-                                         Opcode outcode,
-                                         Opcode incode,
-                                         OutOper outop,
-                                         InOper inop) {
+SSATmp* Simplifier::distributiveImpl(SSATmp* src1,
+                                     SSATmp* src2,
+                                     Opcode outcode,
+                                     Opcode incode,
+                                     OutOper outop,
+                                     InOper inop) {
   // assumes that outop is commutative, don't use with subtract!
-  if (auto simp = simplifyCommutative(src1, src2, outcode, outop)) return simp;
+  if (auto simp = commutativeImpl(src1, src2, outcode, outop)) return simp;
 
   auto inst1 = src1->inst();
   auto inst2 = src2->inst();
@@ -728,10 +611,13 @@ SSATmp* Simplifier::simplifyDistributive(SSATmp* src1,
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyAddInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   auto add = std::plus<int64_t>();
   auto mul = std::multiplies<int64_t>();
-  if (auto simp = simplifyDistributive(src1, src2, AddInt, MulInt, add, mul)) {
+  if (auto simp = distributiveImpl(src1, src2, AddInt, MulInt, add, mul)) {
     return simp;
   }
   if (src2->isConst()) {
@@ -795,7 +681,9 @@ SSATmp* Simplifier::simplifyAddInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAddIntO(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyAddIntO(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   if (src1->isConst() && src2->isConst()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
@@ -804,9 +692,12 @@ SSATmp* Simplifier::simplifyAddIntO(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifySubInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   auto sub = std::minus<int64_t>();
-  if (auto simp = simplifyConst(src1, src2, sub)) return simp;
+  if (auto simp = constImpl(src1, src2, sub)) return simp;
 
   // X - X --> 0
   if (src1 == src2) return cns(0);
@@ -831,7 +722,9 @@ SSATmp* Simplifier::simplifySubInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifySubIntO(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifySubIntO(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   if (src1->isConst() && src2->isConst()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
@@ -840,9 +733,12 @@ SSATmp* Simplifier::simplifySubIntO(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyMulInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyMulInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   auto mul = std::multiplies<int64_t>();
-  if (auto simp = simplifyCommutative(src1, src2, MulInt, mul)) return simp;
+  if (auto simp = commutativeImpl(src1, src2, MulInt, mul)) return simp;
 
   if (!src2->isConst()) return nullptr;
 
@@ -882,27 +778,21 @@ SSATmp* Simplifier::simplifyMulInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyAddDbl(SSATmp* src1, SSATmp* src2) {
-  if (auto simp = simplifyConst(src1, src2, std::plus<double>())) {
-    return simp;
-  }
-  return nullptr;
+SSATmp* Simplifier::simplifyAddDbl(const IRInstruction* inst) {
+  return constImpl(inst->src(0), inst->src(1), std::plus<double>());
 }
 
-SSATmp* Simplifier::simplifySubDbl(SSATmp* src1, SSATmp* src2) {
-  if (auto c = simplifyConst(src1, src2, std::minus<double>())) {
-    return c;
-  }
-  return nullptr;
+SSATmp* Simplifier::simplifySubDbl(const IRInstruction* inst) {
+  return constImpl(inst->src(0), inst->src(1), std::minus<double>());
 }
 
-SSATmp* Simplifier::simplifyMulDbl(SSATmp* src1, SSATmp* src2) {
-  auto mul = std::multiplies<double>();
-  if (auto simp = simplifyConst(src1, src2, mul)) return simp;
-  return nullptr;
+SSATmp* Simplifier::simplifyMulDbl(const IRInstruction* inst) {
+  return constImpl(inst->src(0), inst->src(1), std::multiplies<double>());
 }
 
-SSATmp* Simplifier::simplifyMulIntO(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyMulIntO(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   if (src1->isConst() && src2->isConst()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
@@ -911,7 +801,10 @@ SSATmp* Simplifier::simplifyMulIntO(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyMod(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyMod(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   if (!src2->isConst()) return nullptr;
 
   int64_t src2Val = src2->intVal();
@@ -953,10 +846,12 @@ SSATmp* Simplifier::simplifyDivDbl(const IRInstruction* inst) {
   return src1->isConst() ? cns(src1->dblVal() / src2Val) : nullptr;
 }
 
-SSATmp* Simplifier::simplifyAndInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyAndInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   auto bit_and = [](int64_t a, int64_t b) { return a & b; };
   auto bit_or = [](int64_t a, int64_t b) { return a | b; };
-  auto simp = simplifyDistributive(src1, src2, AndInt, OrInt, bit_and, bit_or);
+  auto simp = distributiveImpl(src1, src2, AndInt, OrInt, bit_and, bit_or);
   if (simp != nullptr) {
     return simp;
   }
@@ -977,10 +872,13 @@ SSATmp* Simplifier::simplifyAndInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyOrInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyOrInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   auto bit_and = [](int64_t a, int64_t b) { return a & b; };
   auto bit_or = [](int64_t a, int64_t b) { return a | b; };
-  auto simp = simplifyDistributive(src1, src2, OrInt, AndInt, bit_or, bit_and);
+  auto simp = distributiveImpl(src1, src2, OrInt, AndInt, bit_or, bit_and);
   if (simp != nullptr) {
     return simp;
   }
@@ -1001,9 +899,11 @@ SSATmp* Simplifier::simplifyOrInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXorInt(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyXorInt(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   auto bitxor = [](int64_t a, int64_t b) { return a ^ b; };
-  if (auto simp = simplifyCommutative(src1, src2, XorInt, bitxor)) {
+  if (auto simp = commutativeImpl(src1, src2, XorInt, bitxor)) {
     return simp;
   }
   // X ^ X --> 0
@@ -1013,7 +913,7 @@ SSATmp* Simplifier::simplifyXorInt(SSATmp* src1, SSATmp* src2) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXorTrue(SSATmp* src) {
+SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
   IRInstruction* inst = src->inst();
   Opcode op = inst->op();
 
@@ -1060,7 +960,10 @@ SSATmp* Simplifier::simplifyXorTrue(SSATmp* src) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyXorBool(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyXorBool(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   // Both constants.
   if (src1->isConst() && src2->isConst()) {
     return cns(bool(src1->boolVal() ^ src2->boolVal()));
@@ -1075,12 +978,15 @@ SSATmp* Simplifier::simplifyXorBool(SSATmp* src1, SSATmp* src2) {
   if (src2->isConst(false)) return src1;
 
   // X^1 => simplify "not" logic
-  if (src2->isConst(true)) return simplifyXorTrue(src1);
+  if (src2->isConst(true)) return xorTrueImpl(src1);
   return nullptr;
 }
 
 template<class Oper>
-SSATmp* Simplifier::simplifyShift(SSATmp* src1, SSATmp* src2, Oper op) {
+SSATmp* Simplifier::shiftImpl(const IRInstruction* inst, Oper op) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+
   if (src1->isConst()) {
     if (src1->intVal() == 0) {
       return cns(0);
@@ -1099,19 +1005,11 @@ SSATmp* Simplifier::simplifyShift(SSATmp* src1, SSATmp* src2, Oper op) {
 }
 
 SSATmp* Simplifier::simplifyShl(const IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
-
-  return simplifyShift(src1, src2, [] (int64_t a, int64_t b) {
-                       return a << b; });
+  return shiftImpl(inst, [] (int64_t a, int64_t b) { return a << b; });
 }
 
 SSATmp* Simplifier::simplifyShr(const IRInstruction* inst) {
-  auto src1 = inst->src(0);
-  auto src2 = inst->src(1);
-
-  return simplifyShift(src1, src2, [] (int64_t a, int64_t b) {
-                       return a >> b; });
+  return shiftImpl(inst, [] (int64_t a, int64_t b) { return a >> b; });
 }
 
 template<class T, class U>
@@ -1136,8 +1034,10 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   }
 }
 
-SSATmp* Simplifier::simplifyCmp(Opcode opName, const IRInstruction* inst,
-                                SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::cmpImpl(Opcode opName,
+                            const IRInstruction* inst,
+                            SSATmp* src1,
+                            SSATmp* src2) {
   auto newInst = [inst, this](Opcode op, SSATmp* src1, SSATmp* src2) {
     return gen(op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
   };
@@ -1397,7 +1297,29 @@ SSATmp* Simplifier::simplifyCmp(Opcode opName, const IRInstruction* inst,
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
+#define X(x)                                                \
+  SSATmp* Simplifier::simplify##x(const IRInstruction* i) { \
+    return cmpImpl(i->op(), i, i->src(0), i->src(1));       \
+  }
+
+X(Gt)
+X(Gte)
+X(Lt)
+X(Lte)
+X(Eq)
+X(Neq)
+X(GtInt)
+X(GteInt)
+X(LtInt)
+X(LteInt)
+X(EqInt)
+X(NeqInt)
+X(Same)
+X(NSame)
+
+#undef X
+
+SSATmp* Simplifier::isTypeImpl(const IRInstruction* inst) {
   bool trueSense = inst->op() == IsType;
   auto type      = inst->typeParam();
   auto src       = inst->src(0);
@@ -1429,6 +1351,14 @@ SSATmp* Simplifier::simplifyIsType(const IRInstruction* inst) {
   // are non-disjoint but neither is a subtype of the other. We can't simplify
   // this away.
   return nullptr;
+}
+
+SSATmp* Simplifier::simplifyIsType(const IRInstruction* i) {
+  return isTypeImpl(i);
+}
+
+SSATmp* Simplifier::simplifyIsNType(const IRInstruction* i) {
+  return isTypeImpl(i);
 }
 
 SSATmp* Simplifier::simplifyIsScalarType(const IRInstruction* inst) {
@@ -1494,25 +1424,43 @@ SSATmp* Simplifier::simplifyConcatCellCell(const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConcatStrStr(SSATmp* src1, SSATmp* src2) {
+SSATmp* Simplifier::simplifyConcatStrStr(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
   if (src1->isConst() && src1->isA(Type::StaticStr) &&
       src2->isConst() && src2->isA(Type::StaticStr)) {
-    StringData* str1 = const_cast<StringData *>(src1->strVal());
-    StringData* str2 = const_cast<StringData *>(src2->strVal());
-    StringData* merge = makeStaticString(concat_ss(str1, str2));
-    return cns(merge);
+    auto const str1 = const_cast<StringData*>(src1->strVal());
+    auto const str2 = const_cast<StringData*>(src2->strVal());
+    auto const sval = String::attach(concat_ss(str1, str2));
+    return cns(makeStaticString(sval.get()));
   }
 
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyConvToArr(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+SSATmp* Simplifier::convToArrImpl(const IRInstruction* inst) {
+  auto const src = inst->src(0);
   if (src->isConst()) {
     Array arr = Array::Create(src->variantVal());
     return cns(ArrayData::GetScalarArray(arr.get()));
   }
   return nullptr;
+}
+
+SSATmp* Simplifier::simplifyConvBoolToArr(const IRInstruction* inst) {
+  return convToArrImpl(inst);
+}
+
+SSATmp* Simplifier::simplifyConvIntToArr(const IRInstruction* inst) {
+  return convToArrImpl(inst);
+}
+
+SSATmp* Simplifier::simplifyConvDblToArr(const IRInstruction* inst) {
+  return convToArrImpl(inst);
+}
+
+SSATmp* Simplifier::simplifyConvStrToArr(const IRInstruction* inst) {
+  return convToArrImpl(inst);
 }
 
 SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
@@ -1801,7 +1749,7 @@ SSATmp* Simplifier::simplifyCoerceCellToDbl(const IRInstruction* inst) {
 }
 
 template<class Oper>
-SSATmp* Simplifier::simplifyRoundCommon(const IRInstruction* inst, Oper op) {
+SSATmp* Simplifier::roundImpl(const IRInstruction* inst, Oper op) {
   auto const src  = inst->src(0);
 
   if (src->isConst()) {
@@ -1817,11 +1765,11 @@ SSATmp* Simplifier::simplifyRoundCommon(const IRInstruction* inst, Oper op) {
 }
 
 SSATmp* Simplifier::simplifyFloor(const IRInstruction* inst) {
-  return simplifyRoundCommon(inst, floor);
+  return roundImpl(inst, floor);
 }
 
 SSATmp* Simplifier::simplifyCeil(const IRInstruction* inst) {
-  return simplifyRoundCommon(inst, ceil);
+  return roundImpl(inst, ceil);
 }
 
 SSATmp* Simplifier::simplifyUnboxPtr(const IRInstruction* inst) {
@@ -1846,12 +1794,20 @@ SSATmp* Simplifier::simplifyCheckInit(const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyDecRef(const IRInstruction* inst) {
+SSATmp* Simplifier::decRefImpl(const IRInstruction* inst) {
   auto src = inst->src(0);
   if (!typeMightRelax(src) && !isRefCounted(src)) {
     return gen(Nop);
   }
   return nullptr;
+}
+
+SSATmp* Simplifier::simplifyDecRef(const IRInstruction* inst) {
+  return decRefImpl(inst);
+}
+
+SSATmp* Simplifier::simplifyDecRefNZ(const IRInstruction* inst) {
+  return decRefImpl(inst);
 }
 
 SSATmp* Simplifier::simplifyIncRef(const IRInstruction* inst) {
@@ -1873,7 +1829,7 @@ SSATmp* Simplifier::simplifyIncRefCtx(const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
+SSATmp* Simplifier::condJmpImpl(const IRInstruction* inst) {
   SSATmp* const src            = inst->src(0);
   IRInstruction* const srcInst = src->inst();
   const Opcode srcOpcode       = srcInst->op();
@@ -1956,6 +1912,13 @@ SSATmp* Simplifier::simplifyCondJmp(const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* Simplifier::simplifyJmpZero(const IRInstruction* i) {
+  return condJmpImpl(i);
+}
+SSATmp* Simplifier::simplifyJmpNZero(const IRInstruction* i) {
+  return condJmpImpl(i);
+}
+
 SSATmp* Simplifier::simplifyCastStk(const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
@@ -2019,13 +1982,6 @@ SSATmp* Simplifier::simplifyTakeStack(const IRInstruction* inst) {
     return gen(Nop);
   }
 
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyLdLoc(const IRInstruction* inst) {
-  // Ideally we'd replace LdLoc<Null,...> with a constant value of that type,
-  // but that prevents the guard relaxation code from tracing the source of
-  // values.
   return nullptr;
 }
 

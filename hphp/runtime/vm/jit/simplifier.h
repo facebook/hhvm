@@ -37,9 +37,6 @@ struct SSATmp;
  * can be modified in place or replaced with new instructions as
  * needed.
  *
- * The Simplifier recursively invokes itself, so that all instructions
- * returned from simplify() have been fully simplified themselves.
- *
  * The line of separation between these two modules is essentially
  * about who needs to know about tracked state.  If an optimization is
  * completely stateless (e.g. strength reduction, constant folding,
@@ -69,6 +66,121 @@ struct Simplifier {
 private:
   SSATmp* simplifyWork(const IRInstruction*);
 
+#define SIMPLIFY_INSTRS                         \
+  X(Shl)                                        \
+  X(Shr)                                        \
+  X(AbsDbl)                                     \
+  X(AssertNonNull)                              \
+  X(BoxPtr)                                     \
+  X(CallBuiltin)                                \
+  X(CastStk)                                    \
+  X(Ceil)                                       \
+  X(CheckInit)                                  \
+  X(CheckPackedArrayBounds)                     \
+  X(CoerceCellToBool)                           \
+  X(CoerceCellToDbl)                            \
+  X(CoerceCellToInt)                            \
+  X(CoerceStk)                                  \
+  X(ConcatCellCell)                             \
+  X(ConcatStrStr)                               \
+  X(ConvArrToBool)                              \
+  X(ConvArrToDbl)                               \
+  X(ConvArrToInt)                               \
+  X(ConvBoolToArr)                              \
+  X(ConvBoolToDbl)                              \
+  X(ConvBoolToInt)                              \
+  X(ConvBoolToStr)                              \
+  X(ConvCellToBool)                             \
+  X(ConvCellToDbl)                              \
+  X(ConvCellToInt)                              \
+  X(ConvCellToObj)                              \
+  X(ConvCellToStr)                              \
+  X(ConvClsToCctx)                              \
+  X(ConvDblToArr)                               \
+  X(ConvDblToBool)                              \
+  X(ConvDblToInt)                               \
+  X(ConvDblToStr)                               \
+  X(ConvIntToArr)                               \
+  X(ConvIntToBool)                              \
+  X(ConvIntToDbl)                               \
+  X(ConvIntToStr)                               \
+  X(ConvObjToBool)                              \
+  X(ConvStrToArr)                               \
+  X(ConvStrToBool)                              \
+  X(ConvStrToDbl)                               \
+  X(ConvStrToInt)                               \
+  X(Count)                                      \
+  X(CountArray)                                 \
+  X(DecRef)                                     \
+  X(DecRefNZ)                                   \
+  X(DecRefStack)                                \
+  X(DivDbl)                                     \
+  X(Floor)                                      \
+  X(GetCtxFwdCall)                              \
+  X(IncRef)                                     \
+  X(IncRefCtx)                                  \
+  X(IsNType)                                    \
+  X(IsScalarType)                               \
+  X(IsType)                                     \
+  X(IsWaitHandle)                               \
+  X(LdClsCtx)                                   \
+  X(LdClsName)                                  \
+  X(LdCtx)                                      \
+  X(LdObjClass)                                 \
+  X(LdObjInvoke)                                \
+  X(LdPackedArrayElem)                          \
+  X(LdStack)                                    \
+  X(LdStackAddr)                                \
+  X(Mov)                                        \
+  X(SpillStack)                                 \
+  X(TakeStack)                                  \
+  X(UnboxPtr)                                   \
+  X(JmpGt)                                      \
+  X(JmpGte)                                     \
+  X(JmpLt)                                      \
+  X(JmpLte)                                     \
+  X(JmpEq)                                      \
+  X(JmpNeq)                                     \
+  X(JmpGtInt)                                   \
+  X(JmpGteInt)                                  \
+  X(JmpLtInt)                                   \
+  X(JmpLteInt)                                  \
+  X(JmpEqInt)                                   \
+  X(JmpNeqInt)                                  \
+  X(JmpSame)                                    \
+  X(JmpNSame)                                   \
+  X(JmpZero)                                    \
+  X(JmpNZero)                                   \
+  X(OrInt)                                      \
+  X(AddInt)                                     \
+  X(SubInt)                                     \
+  X(MulInt)                                     \
+  X(AddDbl)                                     \
+  X(SubDbl)                                     \
+  X(MulDbl)                                     \
+  X(Mod)                                        \
+  X(AndInt)                                     \
+  X(XorInt)                                     \
+  X(XorBool)                                    \
+  X(AddIntO)                                    \
+  X(SubIntO)                                    \
+  X(MulIntO)                                    \
+  X(Gt)                                         \
+  X(Gte)                                        \
+  X(Lt)                                         \
+  X(Lte)                                        \
+  X(Eq)                                         \
+  X(Neq)                                        \
+  X(GtInt)                                      \
+  X(GteInt)                                     \
+  X(LtInt)                                      \
+  X(LteInt)                                     \
+  X(EqInt)                                      \
+  X(NeqInt)                                     \
+  X(Same)                                       \
+  X(NSame)                                      \
+  /* */
+
   /*
    * Individual simplification routines return nullptr if they don't
    * want to change anything, or they can call gen any number of times
@@ -76,124 +188,38 @@ private:
    * that should be used as the value of the simplified instruction
    * sequence.
    */
-  SSATmp* simplifyMov(SSATmp* src);
-  SSATmp* simplifyNot(SSATmp* src);
-  SSATmp* simplifyAbsDbl(const IRInstruction* inst);
-  SSATmp* simplifyAddInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySubInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMulInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyAddDbl(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySubDbl(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMulDbl(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyAddIntO(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySubIntO(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMulIntO(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyMod(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyDivDbl(const IRInstruction* inst);
-  SSATmp* simplifyAndInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyOrInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyXorInt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyShl(const IRInstruction* inst);
-  SSATmp* simplifyShr(const IRInstruction* inst);
-  SSATmp* simplifyXorBool(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyXorTrue(SSATmp* src);
-  SSATmp* simplifyGt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyGte(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyLt(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyLte(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyEq(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyNeq(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifySame(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyNSame(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyIsType(const IRInstruction*);
-  SSATmp* simplifyIsScalarType(const IRInstruction*);
-  SSATmp* simplifyConcatCellCell(const IRInstruction*);
-  SSATmp* simplifyConcatStrStr(SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyConvToArr(const IRInstruction*);
-  SSATmp* simplifyConvArrToBool(const IRInstruction*);
-  SSATmp* simplifyConvDblToBool(const IRInstruction*);
-  SSATmp* simplifyConvIntToBool(const IRInstruction*);
-  SSATmp* simplifyConvStrToBool(const IRInstruction*);
-  SSATmp* simplifyConvToDbl(const IRInstruction*);
-  SSATmp* simplifyConvArrToDbl(const IRInstruction*);
-  SSATmp* simplifyConvBoolToDbl(const IRInstruction*);
-  SSATmp* simplifyConvIntToDbl(const IRInstruction*);
-  SSATmp* simplifyConvStrToDbl(const IRInstruction*);
-  SSATmp* simplifyConvArrToInt(const IRInstruction*);
-  SSATmp* simplifyConvBoolToInt(const IRInstruction*);
-  SSATmp* simplifyConvDblToInt(const IRInstruction*);
-  SSATmp* simplifyConvObjToInt(const IRInstruction*);
-  SSATmp* simplifyConvStrToInt(const IRInstruction*);
-  SSATmp* simplifyConvBoolToStr(const IRInstruction*);
-  SSATmp* simplifyConvDblToStr(const IRInstruction*);
-  SSATmp* simplifyConvIntToStr(const IRInstruction*);
-  SSATmp* simplifyConvCellToBool(const IRInstruction*);
-  SSATmp* simplifyConvCellToStr(const IRInstruction*);
-  SSATmp* simplifyConvCellToInt(const IRInstruction*);
-  SSATmp* simplifyConvCellToDbl(const IRInstruction*);
-  SSATmp* simplifyConvCellToObj(const IRInstruction*);
-  SSATmp* simplifyCoerceCellToBool(const IRInstruction*);
-  SSATmp* simplifyCoerceCellToDbl(const IRInstruction*);
-  SSATmp* simplifyCoerceCellToInt(const IRInstruction*);
-  SSATmp* simplifyFloor(const IRInstruction*);
-  SSATmp* simplifyCeil(const IRInstruction*);
-  SSATmp* simplifyUnboxPtr(const IRInstruction*);
-  SSATmp* simplifyBoxPtr(const IRInstruction*);
-  SSATmp* simplifyCheckInit(const IRInstruction* inst);
-  SSATmp* simplifyDecRef(const IRInstruction* inst);
-  SSATmp* simplifyIncRef(const IRInstruction* inst);
-  SSATmp* simplifyIncRefCtx(const IRInstruction* inst);
-  SSATmp* simplifyLdCtx(const IRInstruction*);
-  SSATmp* simplifyLdClsCtx(const IRInstruction*);
-  SSATmp* simplifyLdObjClass(const IRInstruction*);
-  SSATmp* simplifyLdObjInvoke(const IRInstruction*);
-  SSATmp* simplifyGetCtxFwdCall(const IRInstruction* inst);
-  SSATmp* simplifyConvClsToCctx(const IRInstruction* inst);
-  SSATmp* simplifySpillStack(const IRInstruction* inst);
-  SSATmp* simplifyCmp(Opcode opName, const IRInstruction* inst,
-                      SSATmp* src1, SSATmp* src2);
-  SSATmp* simplifyCondJmp(const IRInstruction*);
-  SSATmp* simplifyQueryJmp(const IRInstruction*);
-  SSATmp* simplifyCastStk(const IRInstruction*);
-  SSATmp* simplifyCoerceStk(const IRInstruction*);
-  SSATmp* simplifyLdStack(const IRInstruction*);
-  SSATmp* simplifyTakeStack(const IRInstruction*);
-  SSATmp* simplifyLdStackAddr(const IRInstruction*);
-  SSATmp* simplifyDecRefStack(const IRInstruction*);
-  SSATmp* simplifyLdLoc(const IRInstruction*);
-  SSATmp* simplifyAssertNonNull(const IRInstruction*);
-  SSATmp* simplifyCallBuiltin(const IRInstruction*);
-  SSATmp* simplifyConvObjToBool(const IRInstruction*);
-  SSATmp* simplifyIsWaitHandle(const IRInstruction*);
-  SSATmp* simplifyCount(const IRInstruction*);
-  SSATmp* simplifyCountArray(const IRInstruction*);
-  SSATmp* simplifyCountCollection(const IRInstruction*);
-  SSATmp* simplifyLdClsName(const IRInstruction*);
+#define X(x) SSATmp* simplify##x(const IRInstruction*);
+  SIMPLIFY_INSTRS
+#undef X
 
+private:
+  SSATmp* cmpImpl(Opcode opName, const IRInstruction*, SSATmp*, SSATmp*);
+  SSATmp* condJmpImpl(const IRInstruction*);
+  SSATmp* queryJmpImpl(const IRInstruction*);
+  SSATmp* isTypeImpl(const IRInstruction*);
+  SSATmp* convToArrImpl(const IRInstruction*);
+  SSATmp* decRefImpl(const IRInstruction*);
   template <class Oper>
-  SSATmp* simplifyConst(SSATmp* src1, SSATmp* src2, Oper op);
-
-  template <class Oper>
-  SSATmp* simplifyCommutative(SSATmp* src1,
-                              SSATmp* src2,
-                              Opcode opcode,
-                              Oper op);
-
-  template <class OutOper, class InOper>
-  SSATmp* simplifyDistributive(SSATmp* src1,
-                               SSATmp* src2,
-                               Opcode outcode,
-                               Opcode incode,
-                               OutOper outop,
-                               InOper inop);
-
+  SSATmp* constImpl(SSATmp*, SSATmp*, Oper op);
+  SSATmp* xorTrueImpl(SSATmp*);
   template<class Oper>
-  SSATmp* simplifyShift(SSATmp* src1, SSATmp* src2, Oper op);
-  template<class Oper> SSATmp* simplifyRoundCommon(const IRInstruction*, Oper);
+  SSATmp* commutativeImpl(SSATmp* src1,
+                          SSATmp* src2,
+                          Opcode opcode,
+                          Oper op);
+  template<class OutOper, class InOper>
+  SSATmp* distributiveImpl(SSATmp* src1,
+                           SSATmp* src2,
+                           Opcode outcode,
+                           Opcode incode,
+                           OutOper outop,
+                           InOper inop);
+  template<class Oper>
+  SSATmp* shiftImpl(const IRInstruction*, Oper op);
+  template<class Oper>
+  SSATmp* roundImpl(const IRInstruction*, Oper);
 
-  SSATmp* simplifyCheckPackedArrayBounds(const IRInstruction*);
-  SSATmp* simplifyLdPackedArrayElem(const IRInstruction*);
-
+private:
   bool typeMightRelax(SSATmp* src) const;
 
 private: // makeInstruction forwarders

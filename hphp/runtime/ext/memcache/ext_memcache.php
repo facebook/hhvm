@@ -744,11 +744,11 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
   private $serverList;
 
   public function close() {
-    if ($this->memcache instanceof Memcache) {
+    if ($this->memcache instanceof \Memcache) {
       $this->memcache->close();
     }
     $this->memcache = null;
-    $this->serverList = array();
+    $this->serverList = null;
     return true;
   }
 
@@ -771,6 +771,7 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
   }
 
   public function read($sessionId) {
+    // Cast to string as false means "failure", not empty data
     return (string)$this->getMemcache()->get($sessionId);
   }
 
@@ -782,6 +783,7 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
   }
 
   private static function parseSavePath($savePath) {
+    $savePath = trim($savePath);
     if (empty($savePath)) {
       trigger_error("Failed to parse session.save_path (empty save_path)",
                     E_WARNING);
@@ -792,14 +794,17 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
 
     $return = array();
     foreach ($serverList as $url) {
-      $url = strtolower(trim($url));
+      $url = trim($url);
 
       // white-space only / empty keys are skipped
       if (empty($url)) {
         continue;
       }
-      // Swap unix:// to file:// for parse_url usage like pecl does
-      if (substr($url, 0, strlen(self::UNIX_PREFIX)) === self::UNIX_PREFIX) {
+
+      // Swap unix:// to file:// for parse_url usage like pecl does, if found
+      if (strncasecmp($url,
+                      self::UNIX_PREFIX,
+                      strlen(self::UNIX_PREFIX)) === 0) {
         $url = self::FILE_PREFIX . substr($url, strlen(self::UNIX_PREFIX));
       }
 
@@ -871,11 +876,11 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
   }
 
   private function getMemcache() {
-    if ($this->memcache instanceof Memcache) {
+    if ($this->memcache instanceof \Memcache) {
       return $this->memcache;
     }
 
-    $memcache = new Memcache;
+    $memcache = new \Memcache;
     if (!empty($this->serverList)) {
       foreach ($this->serverList as $serverInfo) {
         $memcache->addServer($serverInfo['host'],

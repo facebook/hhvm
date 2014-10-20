@@ -6,3 +6,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
+bool(true)
+string(%d) "%s"
+bool(false)
+string(%d) "%s"

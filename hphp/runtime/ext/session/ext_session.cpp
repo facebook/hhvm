@@ -505,6 +505,12 @@ static class MemcacheSessionModule : public SystemlibSessionModule {
     SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
 } s_memcache_session_module;
 
+static class MemcachedSessionModule : public SystemlibSessionModule {
+ public:
+  MemcachedSessionModule() :
+    SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
+} s_memcached_session_module;
+
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 

@@ -1,0 +1,13 @@
+<?php
+if (!extension_loaded("memcached")) {
+  echo "SKIP";
+} elseif (!Memcached::HAVE_SESSION) {
+  echo "SKIP";
+} else {
+  $memc = new Memcached();
+  $memc->addServer('localhost', '11211');
+  $version = $memc->getVersion();
+  if (!$version) {
+    echo "SKIP No Memcached running";
+  }
+}

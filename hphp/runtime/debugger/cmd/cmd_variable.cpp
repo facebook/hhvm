@@ -243,6 +243,7 @@ void CmdVariable::onClient(DebuggerClient &client) {
 }
 
 const StaticString s_GLOBALS("GLOBALS");
+const StaticString s_this("this");
 
 Array CmdVariable::GetGlobalVariables() {
   Array ret = g_context->m_globalVarEnv->getDefinedVariables();
@@ -317,6 +318,16 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   } else {
     m_variables = g_context->getLocalDefinedVariables(m_frame);
     m_global = g_context->getVarEnv(m_frame) == g_context->m_globalVarEnv;
+    auto oThis = g_context->getThis();
+    if (nullptr != oThis) {
+      TypedValue tvThis;
+
+      tvThis.m_type = KindOfObject;
+      tvThis.m_data.pobj = oThis;
+
+      Variant thisName(s_this);
+      m_variables.add(thisName, tvAsVariant(&tvThis));
+    }
   }
 
   if (m_global) {

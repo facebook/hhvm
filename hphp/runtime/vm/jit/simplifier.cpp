@@ -497,7 +497,6 @@ SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
     case IncRefCtx:    return simplifyIncRefCtx(inst);
     case AssertNonNull:return simplifyAssertNonNull(inst);
 
-    case LdCls:        return simplifyLdCls(inst);
     case LdCtx:        return simplifyLdCtx(inst);
     case LdClsCtx:     return simplifyLdClsCtx(inst);
     case LdObjClass:   return simplifyLdObjClass(inst);
@@ -615,28 +614,6 @@ SSATmp* Simplifier::simplifyConvClsToCctx(const IRInstruction* inst) {
   auto* srcInst = inst->src(0)->inst();
   if (srcInst->is(LdClsCctx)) return srcInst->src(0);
 
-  return nullptr;
-}
-
-SSATmp* Simplifier::simplifyLdCls(const IRInstruction* inst) {
-  SSATmp* clsName = inst->src(0);
-  if (clsName->isConst()) {
-    const Class* cls = Unit::lookupClass(clsName->strVal());
-    if (cls) {
-      if (RDS::isPersistentHandle(cls->classHandle())) {
-        // the class is always defined
-        return cns(cls);
-      }
-      const Class* ctx = inst->src(1)->clsVal();
-      if (ctx && ctx->classof(cls)) {
-        // the class of the current function being compiled is the
-        // same as or derived from cls, so cls must be defined and
-        // cannot change the next time we execute this same code
-        return cns(cls);
-      }
-    }
-    return gen(LdClsCached, inst->taken(), clsName);
-  }
   return nullptr;
 }
 

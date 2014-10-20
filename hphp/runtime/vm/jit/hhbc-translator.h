@@ -784,6 +784,7 @@ private:
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
   SSATmp* emitInstanceOfDImpl(SSATmp*, const StringData*);
+  SSATmp* ldCls(Block* catchBlock, SSATmp* clsName);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
                                          folly::Optional<Type>&) const;

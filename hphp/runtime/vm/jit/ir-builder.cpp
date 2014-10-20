@@ -624,7 +624,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
   // return an SSATmp*.
-  if (SSATmp* preOpt = preOptimize(inst)) {
+  if (auto const preOpt = preOptimize(inst)) {
     FTRACE(1, "  {}preOptimize returned: {}\n",
            indent(), preOpt->inst()->toString());
     return preOpt;

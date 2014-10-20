@@ -3106,9 +3106,7 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
   }
 
   if (mustBeStatic) {
-    // static function: ctx is just the Class*. LdCls will simplify to a
-    // DefConst or LdClsCached.
-    return gen(LdCls, makeCatch(), cns(cls->name()), cns(curClass()));
+    return ldCls(makeCatch(), cns(cls->name()));
   }
   if (m_irb->thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
@@ -4942,14 +4940,24 @@ static bool isSupportedAGet(SSATmp* classSrc) {
   return (classSrc->isA(Type::Obj) || classSrc->isA(Type::Str));
 }
 
+SSATmp* HhbcTranslator::ldCls(Block* catchBlock, SSATmp* className) {
+  assert(className->isA(Type::Str));
+  if (className->isConst()) {
+    if (auto const cls = Unit::lookupClass(className->strVal())) {
+      if (classIsPersistentOrCtxParent(cls)) return cns(cls);
+    }
+    return gen(LdClsCached, catchBlock, className);
+  }
+  return gen(LdCls, catchBlock, className, cns(curClass()));
+}
+
 void HhbcTranslator::emitAGet(SSATmp* classSrc, Block* catchBlock) {
   if (classSrc->isA(Type::Str)) {
-    push(gen(LdCls, catchBlock, classSrc, cns(curClass())));
-  } else if (classSrc->isA(Type::Obj)) {
-    push(gen(LdObjClass, classSrc));
-  } else {
-    not_reached();
+    push(ldCls(catchBlock, classSrc));
+    return;
   }
+  always_assert(classSrc->isA(Type::Obj));
+  push(gen(LdObjClass, classSrc));
 }
 
 void HhbcTranslator::emitAGetC() {

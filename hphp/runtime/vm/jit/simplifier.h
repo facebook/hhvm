@@ -143,8 +143,6 @@ private:
   SSATmp* simplifyDecRef(const IRInstruction* inst);
   SSATmp* simplifyIncRef(const IRInstruction* inst);
   SSATmp* simplifyIncRefCtx(const IRInstruction* inst);
-  SSATmp* simplifyLdCls(const IRInstruction* inst);
-  SSATmp* simplifyLdClsPropAddr(const IRInstruction*);
   SSATmp* simplifyLdCtx(const IRInstruction*);
   SSATmp* simplifyLdClsCtx(const IRInstruction*);
   SSATmp* simplifyLdObjClass(const IRInstruction*);

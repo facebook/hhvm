@@ -124,17 +124,25 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
     if (prev.isBlockEnd()) {
       assert(where == m_curBlock->end());
-      // start a new block
-      m_state.pauseBlock(m_curBlock);
+
+      auto oldBlock = m_curBlock;
+
+      // First make the inst's next block, so we can save state to it in
+      // finishBlock.
       m_curBlock = m_unit.defBlock();
-      m_state.startBlock(m_curBlock, inst->marker());
-      where = m_curBlock->begin();
-      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
       if (!prev.isTerminal()) {
-        // new block is reachable from old block so link it.
+        // New block is reachable from old block so link it.
         prev.setNext(m_curBlock);
         m_curBlock->setHint(prev.block()->hint());
       }
+
+      m_state.finishBlock(oldBlock);
+
+      m_state.startBlock(m_curBlock, inst->marker());
+      where = m_curBlock->begin();
+
+      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
+
     }
   }
 
@@ -1122,7 +1130,7 @@ void IRBuilder::insertLocalPhis() {
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.from();
-      auto local = m_state.localsForBlock(pred)[i].value;
+      auto local = m_state.localsLeavingBlock(pred)[i].value;
       if (local == nullptr) missingPreds.insert(&e);
       incomingValues.insert(local);
     }
@@ -1135,7 +1143,7 @@ void IRBuilder::insertLocalPhis() {
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.from();
-      auto& local = m_state.localsForBlock(pred)[i];
+      auto& local = m_state.localsLeavingBlock(pred)[i];
       if (missingPreds.count(&e)) {
         // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
         // the fpValue from m_curBlock since we currently require that all our
@@ -1246,7 +1254,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   always_assert(lastInst.isBlockEnd());
   always_assert(lastInst.isTerminal() || m_curBlock->next() != nullptr);
 
-  m_state.pauseBlock(m_curBlock);
+  m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker);
@@ -1286,7 +1294,8 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
   m_offsetToBlockMap[offset] = block;
 }
 
-void IRBuilder::pushBlock(BCMarker marker, Block* b,
+void IRBuilder::pushBlock(BCMarker marker,
+                          Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_state.marker().show(), b, marker.show());
@@ -1314,8 +1323,8 @@ void IRBuilder::popBlock() {
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
-  m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(top.block, top.marker);
+  m_state.finishBlock(m_curBlock);
+  m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;

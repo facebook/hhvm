@@ -412,22 +412,29 @@ void FrameState::dropLocalRefsInnerTypes(LocalStateHook& hook) const {
 ///// Methods for managing and merge block state /////
 
 bool FrameState::hasStateFor(Block* block) const {
-  return m_snapshots.count(block);
+  return m_states.count(block);
+}
+
+const FrameState::LocalVec& FrameState::localsLeavingBlock(Block* block) const {
+  auto const it = m_states.find(block);
+  assert(it != m_states.end());
+  return it->second.out.locals;
 }
 
 void FrameState::startBlock(Block* block,
                             BCMarker marker,
                             LocalStateHook* hook /* = nullptr */) {
-  auto const it = m_snapshots.find(block);
+  auto const it = m_states.find(block);
+  auto const end = m_states.end();
+
   DEBUG_ONLY auto const predsAllowed =
-    it != m_snapshots.end() || block->isEntry() || RuntimeOption::EvalJitLoops;
+    it != end || block->isEntry() || RuntimeOption::EvalJitLoops;
   assert(IMPLIES(block->numPreds() > 0, predsAllowed));
 
-  if (it != m_snapshots.end()) {
-    load(it->second);
+  if (it != end) {
+    load(it->second.in);
     ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
-    m_inlineSavedStates = it->second.inlineSavedStates;
-    m_snapshots.erase(it);
+    m_inlineSavedStates = it->second.in.inlineSavedStates;
   }
 
   // Reset state if the block has an unprocessed predecessor.
@@ -446,29 +453,34 @@ void FrameState::startBlock(Block* block,
 }
 
 void FrameState::finishBlock(Block* block) {
-  assert(block->back().isTerminal() == !block->next());
+  assert(block->back().isTerminal() == !block->next() || m_building);
 
-  if (!block->back().isTerminal()) {
-    save(block->next());
-  }
-  if (m_building) {
-    save(block);
-  }
+  m_states[block].out = createSnapshotWithInline();
+
+  if (!block->back().isTerminal()) save(block->next());
 }
 
 void FrameState::pauseBlock(Block* block) {
-  save(block);
+  m_states[block].out = createSnapshotWithInline();
+}
+
+void FrameState::unpauseBlock(Block* block) {
+  auto& snap = m_states[block].out;
+
+  load(snap);
+  m_inlineSavedStates = snap.inlineSavedStates;
 }
 
 void FrameState::clearBlock(Block* block) {
-  auto it = m_snapshots.find(block);
-  if (it == m_snapshots.end()) return;
+  auto const it = m_states.find(block);
+  if (it == m_states.end()) return;
 
   ITRACE(4, "Clearing state for B{}\n", block->id());
 
-  auto& snap = it->second;
+  auto& snap = it->second.in;
 
   // Empty the fields that could change further down in the control flow graph.
+
   snap.spValue = nullptr;
   snap.stackDeficit = 0;
   snap.evalStack = EvalStack();
@@ -491,6 +503,12 @@ FrameState::Snapshot FrameState::createSnapshot() const {
   return state;
 }
 
+FrameState::Snapshot FrameState::createSnapshotWithInline() const {
+  auto snap = createSnapshot();
+  snap.inlineSavedStates = m_inlineSavedStates;
+  return snap;
+}
+
 /*
  * Save current state for block.  If this is the first time saving state for
  * block, create a new snapshot.  Otherwise merge the current state into the
@@ -498,20 +516,13 @@ FrameState::Snapshot FrameState::createSnapshot() const {
  */
 void FrameState::save(Block* block) {
   ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show(*this));
-  auto it = m_snapshots.find(block);
-  if (it != m_snapshots.end()) {
-    merge(it->second);
+  auto const it = m_states.find(block);
+  if (it != m_states.end()) {
+    merge(it->second.in);
     ITRACE(4, "Merged state: {}\n", show(*this));
   } else {
-    auto& snapshot = m_snapshots[block] = createSnapshot();
-    snapshot.inlineSavedStates = m_inlineSavedStates;
+    m_states[block].in = createSnapshotWithInline();
   }
-}
-
-const FrameState::LocalVec& FrameState::localsForBlock(Block* b) const {
-  auto bit = m_snapshots.find(b);
-  assert(bit != m_snapshots.end());
-  return bit->second.locals;
 }
 
 void FrameState::load(Snapshot& state) {
@@ -521,8 +532,8 @@ void FrameState::load(Snapshot& state) {
   m_curFunc = state.curFunc;
   m_thisAvailable = state.thisAvailable;
   m_stackDeficit = state.stackDeficit;
-  m_evalStack = std::move(state.evalStack);
-  m_locals = std::move(state.locals);
+  m_evalStack = state.evalStack;
+  m_locals = state.locals;
   m_marker = state.curMarker;
   m_frameSpansCall = m_frameSpansCall || state.frameSpansCall;
 }
@@ -674,7 +685,7 @@ void FrameState::clear() {
   }
   clearCurrentState();
   clearCse();
-  m_snapshots.clear();
+  m_states.clear();
   m_visited.clear();
   assert(m_inlineSavedStates.empty());
 }

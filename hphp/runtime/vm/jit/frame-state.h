@@ -171,6 +171,11 @@ struct FrameState final : private LocalStateHook {
   void pauseBlock(Block*);
 
   /*
+   * Resumes processing a block that was stopped by pauseBlock.
+   */
+  void unpauseBlock(Block*);
+
+  /*
    * Clear state associated with the given block.
    */
   void clearBlock(Block*);
@@ -266,7 +271,11 @@ struct FrameState final : private LocalStateHook {
 
   using LocalVec = jit::vector<LocalState>;
 
-  const LocalVec& localsForBlock(Block*) const;
+  /*
+   * Info about locals leaving a block. The block must have already been
+   * processed.
+   */
+  const LocalVec& localsLeavingBlock(Block*) const;
 
   /*
    * Marks a block as visited in the current iteration. FrameState::startBlock
@@ -303,6 +312,11 @@ struct FrameState final : private LocalStateHook {
         curMarker == b.curMarker &&
         inlineSavedStates == b.inlineSavedStates;
     }
+  };
+
+  struct BlockState {
+    Snapshot in;
+    Snapshot out;
   };
 
   /*
@@ -352,6 +366,8 @@ struct FrameState final : private LocalStateHook {
   CSEHash* cseHashTable(const IRInstruction* inst);
 
   Snapshot createSnapshot() const;
+  Snapshot createSnapshotWithInline() const;
+
   void save(Block*);
   void load(Snapshot& state);
   void merge(Snapshot& s1);
@@ -427,9 +443,9 @@ struct FrameState final : private LocalStateHook {
   bool m_enableCse{false};
 
   /*
-   * Saved snapshots of the incoming state for Blocks.
+   * Saved snapshots of the incoming and outgoing state of blocks.
    */
-  jit::hash_map<Block*, Snapshot> m_snapshots;
+  jit::hash_map<Block*, BlockState> m_states;
 
   /*
    * Set of visited blocks during the traversal of the unit.

@@ -2756,6 +2756,10 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
         cns(nStack), // cells popped since the last SpillStack
     };
 
+    // Need to save FP, we're switching to our side exit block, but it hasn't
+    // had a predecessor propagate state to it via FrameState::finishBlock yet.
+    auto const fp = m_irb.fp();
+
     BlockPusher bp(m_irb, m_marker, m_failedSetBlock);
     if (!isSetWithRef) {
       gen(DecRefStack, StackOffset(0), Type::Cell, catchSp);
@@ -2764,7 +2768,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
     SSATmp* sp = gen(SpillStack, std::make_pair(args.size(), &args[0]));
     gen(DeleteUnwinderException);
-    gen(SyncABIRegs, m_irb.fp(), sp);
+    gen(SyncABIRegs, fp, sp);
     gen(ReqBindJmp, ReqBindJmpData(nextOff));
   }
 

@@ -607,15 +607,15 @@ void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
 }
 
 Vloc CodeGenerator::srcLoc(unsigned i) const {
-  return m_slocs[i];
+  return m_state.locs[m_curInst->src(i)];
 }
 
 Vloc CodeGenerator::dstLoc(unsigned i) const {
-  return m_dlocs[i];
+  return m_state.locs[m_curInst->src(i)];
 }
 
 ArgGroup CodeGenerator::argGroup() const {
-  return ArgGroup(m_curInst, m_slocs);
+  return ArgGroup(m_curInst, m_state.locs);
 }
 
 Vlabel CodeGenerator::label(Block* b) {
@@ -1039,7 +1039,7 @@ void CodeGenerator::cgCallNative(Vout& v, IRInstruction* inst) {
   always_assert(CallMap::hasInfo(opc));
 
   auto const& info = CallMap::info(opc);
-  ArgGroup argGroup = toArgGroup(info, m_slocs, inst);
+  ArgGroup argGroup = toArgGroup(info, m_state.locs, inst);
 
   auto call = [&]() -> CppCall {
     switch (info.func.type) {
@@ -1888,21 +1888,8 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
-  assert(!m_curInst && m_slocs.empty() && m_dlocs.empty());
   m_curInst = inst;
-  SCOPE_EXIT {
-    m_curInst = nullptr;
-    m_slocs.clear();
-    m_dlocs.clear();
-  };
-  for (auto s : inst->srcs()) {
-    m_slocs.push_back(m_state.locs[s]);
-    assert(m_slocs.back().reg(0).isValid());
-  }
-  for (auto& d : inst->dsts()) {
-    m_dlocs.push_back(m_state.locs[d]);
-    assert(m_dlocs.back().reg(0).isValid());
-  }
+  SCOPE_EXIT { m_curInst = nullptr; };
 
   switch (inst->op()) {
 #define O(name, dsts, srcs, flags)                                \

@@ -430,7 +430,8 @@ const CallInfo& CallMap::info(Opcode op) {
 } // NativeCalls
 
 using namespace NativeCalls;
-ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
+ArgGroup toArgGroup(const CallInfo& info,
+                    const StateVector<SSATmp,Vloc>& locs,
                     const IRInstruction* inst) {
   ArgGroup argGroup{inst, locs};
   for (auto const& arg : info.args) {

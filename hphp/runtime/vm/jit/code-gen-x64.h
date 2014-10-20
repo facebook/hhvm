@@ -43,8 +43,8 @@ struct CodeGenerator {
   void cgInst(IRInstruction* inst);
 
 private:
-  Vloc srcLoc(unsigned i) const;
-  Vloc dstLoc(unsigned i) const;
+  Vloc srcLoc(const IRInstruction* inst, unsigned i) const;
+  Vloc dstLoc(const IRInstruction* inst, unsigned i) const;
   ArgGroup argGroup(const IRInstruction* inst) const;
 
   // Autogenerate function declarations for each IR instruction in ir-opcode.h
@@ -258,7 +258,6 @@ private:
   Vout&               m_vcold;
   CodeBlock&          m_frozen;
   CodegenState&       m_state;
-  jit::vector<Vloc>   m_slocs, m_dlocs;
 };
 
 // Helpers to compute a reference to a TypedValue type and data

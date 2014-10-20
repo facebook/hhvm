@@ -37,25 +37,6 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-template<typename T>
-struct OptionSetter {
-  OptionSetter(T& o, T newVal) : opt(o), oldVal(o) {
-    opt = newVal;
-  }
-  ~OptionSetter() {
-    opt = oldVal;
-  }
-
-  T& opt;
-  T oldVal;
-};
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 TEST(Simplifier, JumpConstFold) {
   BCMarker dummy = BCMarker::Dummy();
   IRUnit unit(test_context);

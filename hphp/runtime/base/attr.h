@@ -115,8 +115,9 @@ enum Attr {
   // Set on functions to mark them as hot during PGO profiling.       //
   AttrHot                  = (1 << 19), //       |          |    X    //
                                         //       |          |         //
-  // Set on all builtin functions, whether PHP or C++.      |         //
-  AttrBuiltin              = (1 << 20), //    X  |          |    X    //
+  // Set on all builtin functions, whether PHP or C++. For properties, it
+  // is set on internal properties (e.g. <<__memoize>> caching)
+  AttrBuiltin              = (1 << 20), //    X  |    X     |    X    //
                                         //       |          |         //
   // Set on builtin functions that can be replaced by user implementations.
   AttrAllowOverride        = (1 << 21), //       |          |    X    //

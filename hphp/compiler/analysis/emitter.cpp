@@ -6410,7 +6410,7 @@ void EmitterVisitor::emitPostponedMeths() {
         } else {
           tvProp = make_tv<KindOfArray>(staticEmptyArray());
         }
-        Attr attrs = AttrPrivate;
+        Attr attrs = AttrPrivate | AttrBuiltin;
         attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
         pce->addProperty(propName, attrs, nullptr, nullptr,
                          &tvProp, RepoAuthType{});

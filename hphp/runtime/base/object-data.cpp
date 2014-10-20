@@ -677,15 +677,15 @@ inline Array getSerializeProps(const ObjectData* obj,
   auto cls = obj->getVMClass();
   auto debuginfo = cls->lookupMethod(s_debugInfo.get());
   if (!debuginfo) {
-    // When ArrayIterator is casted to an array, it return it's array object,
-    // however when it's being var_dump'd or print_r'd, it shows it's properties
+    // When ArrayIterator is cast to an array, it returns its array object,
+    // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
       Array ret(ArrayData::Create());
       obj->o_getArray(ret);
       return ret;
     }
 
-    // Same with Closure, since it's a dynamic object but still has it's own
+    // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       Array ret(ArrayData::Create());
@@ -1716,7 +1716,10 @@ void ObjectData::getProp(const Class* klass, bool pubOnly,
                          const PreClass::Prop* prop,
                          Array& props,
                          std::vector<bool>& inserted) const {
-  if (prop->attrs() & AttrStatic) {
+  if (prop->attrs()
+      & (AttrStatic | // statics aren't part of individual instances
+        | AttrBuiltin // runtime-internal attrs, such as the <<Memoize>> cache
+        )) {
     return;
   }
 

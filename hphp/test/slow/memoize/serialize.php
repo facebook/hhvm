@@ -64,13 +64,13 @@ function test_unserialize($class, $s) {
   invariant(strlen($class) === strlen(C1::class),
             'string lengths must match');
 
+  echo '== unserialize', ' (', $class::PURPOSE, ')',
+    ' ==', "\n";
+
   // changing the class in the string to simulate deserialization into a
   // PHP with a different implementation of C1
   $s = strtr($s, array( C1::class => $class));
   var_dump($s);
-
-  echo '== unserialize', ' (into ', $class, ' for ', $class::PURPOSE, ')',
-    ' ==', "\n";
 
   $un = unserialize($s);
   var_dump($un->f(10));

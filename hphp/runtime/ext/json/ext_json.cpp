@@ -37,7 +37,7 @@ const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
 const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
 
 // json_decode() options
-const int64_t k_JSON_BIGINT_AS_STRING  = 1<<0;
+const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
 
 // FB json_decode() options
 // intentionally higher so when PHP adds more options we're fine

@@ -67,10 +67,6 @@ bool IRInstruction::naryDst() const {
   return opcodeHasFlags(op(), NaryDest | ModifiesStack);
 }
 
-bool IRInstruction::isNative() const {
-  return opcodeHasFlags(op(), CallsNative);
-}
-
 bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
 }

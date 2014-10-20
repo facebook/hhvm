@@ -1071,8 +1071,6 @@ void CodeGenerator::cgCallHelper(Vout& v,
                                  const CallDest& dstInfo,
                                  SyncOptions sync,
                                  ArgGroup& args) {
-  assert(m_curInst->isNative());
-
   auto dstReg0 = dstInfo.reg0;
   DEBUG_ONLY auto dstReg1 = dstInfo.reg1;
 

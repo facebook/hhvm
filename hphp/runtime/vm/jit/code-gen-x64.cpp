@@ -874,8 +874,6 @@ static void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 void
 CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
                             SyncOptions sync, ArgGroup& args) {
-  assert(m_curInst->isNative());
-
   jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
     prepareArg(args.gpArg(i), v, vargs);

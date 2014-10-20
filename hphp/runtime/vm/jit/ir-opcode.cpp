@@ -47,8 +47,6 @@ TRACE_SET_MOD(hhir);
 #define C      CanCSE
 #define E      Essential
 #define Er     MayRaiseError
-#define N      CallsNative|MayRaiseError
-#define NNT    CallsNative
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
 #define T      Terminal

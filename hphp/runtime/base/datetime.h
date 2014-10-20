@@ -270,7 +270,6 @@ public:
   void modify(const String& diff); // PHP's date_modify() function, muy powerful
   void add(const SmartResource<DateInterval> &interval);
   void sub(const SmartResource<DateInterval> &interval);
-  void internalModify(timelib_rel_time *rel, bool have_relative, char bias);
 
   // conversions
   void toTm(struct tm &ta) const;
@@ -298,6 +297,9 @@ public:
 
   // Error access
 private:
+  void internalModify(timelib_time *t);
+  void internalModifyRelative(timelib_rel_time *rel, bool have_relative,
+                              char bias);
   struct LastErrors final : RequestEventHandler {
     void requestInit() override {
       m_errors = nullptr;

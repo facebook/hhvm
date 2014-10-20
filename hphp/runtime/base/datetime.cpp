@@ -438,11 +438,37 @@ void DateTime::modify(const String& diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              nullptr, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
-  internalModify(&(tmp_time->relative), tmp_time->have_relative, 1);
+  internalModify(tmp_time);
   timelib_time_dtor(tmp_time);
 }
 
-void DateTime::internalModify(timelib_rel_time *rel,
+void DateTime::internalModify(timelib_time *t) {
+  // TIMELIB_UNSET (and other constants) defined in timelib.h
+  // (see hhvm-third-party)
+  if (t->y != TIMELIB_UNSET) {
+    m_time->y = t->y;
+  }
+  if (t->m != TIMELIB_UNSET) {
+    m_time->m = t->m;
+  }
+  if (t->d != TIMELIB_UNSET) {
+    m_time->d = t->d;
+  }
+  if (t->h != TIMELIB_UNSET) {
+    m_time->h = t->h;
+    m_time->i = 0;
+    m_time->s = 0;
+    if (t->i != TIMELIB_UNSET) {
+      m_time->i = t->i;
+      if (t->s != TIMELIB_UNSET) {
+        m_time->s = t->s;
+      }
+    }
+  }
+  internalModifyRelative(&(t->relative), t->have_relative, 1);
+}
+
+void DateTime::internalModifyRelative(timelib_rel_time *rel,
                               bool have_relative, char bias) {
   m_time->relative.y = rel->y * bias;
   m_time->relative.m = rel->m * bias;
@@ -463,12 +489,12 @@ void DateTime::internalModify(timelib_rel_time *rel,
 
 void DateTime::add(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
+  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ? -1 :  1);
 }
 
 void DateTime::sub(const SmartResource<DateInterval> &interval) {
   timelib_rel_time *rel = interval->get();
-  internalModify(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
+  internalModifyRelative(rel, true, TIMELIB_REL_INVERT(rel) ?  1 : -1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

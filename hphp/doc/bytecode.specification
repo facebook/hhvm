@@ -1697,8 +1697,12 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Obj      |  Obj
       Scalar   | Int or Dbl or Str or Bool
 
-  If $1 is of type t, this instruction pushes true onto the stack, otherwise it
-  pushes false.
+  If t is Obj, this instruction checks if the operand in an object.
+    Instances of a special class __PHP_Incomplete_Class are not considered
+    objects.
+    Instances of descendants of __PHP_Incomplete_Class are considered objects.
+  Otherwise, the result is true if $1 is of type t and false otherwise.
+  The result is pushed on the stack.
 
 IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 
@@ -1716,10 +1720,10 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       Obj      |  Obj                       | false
       Scalar   |  Int or Dbl or Str or Bool | false
 
-  If the local variable given by %1 is defined, this pushes true onto the stack
-  if the local variable is of type t, otherwise it pushes false. If the local
-  is of kind reference, then the inner value is used to determine the type.
-
+  If the local variable given by %1 is defined, the logic is the same as for
+    IsTypeC (see above).
+  If the local is of kind reference, then the inner value is used to determine
+    the type.
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes x onto the stack.
 

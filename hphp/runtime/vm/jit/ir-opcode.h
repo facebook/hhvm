@@ -220,6 +220,7 @@ O(ConvResToStr,                 D(Str), S(Res),                     N|PRc|Er) \
 O(ConvCellToStr,                D(Str), S(Cell),                    N|PRc|Er) \
                                                                               \
 O(ExtendsClass,                D(Bool), S(Cls) C(Cls),                     C) \
+O(ClsNeq,                      D(Bool), S(Cls),                            C) \
 O(IsWaitHandle,                D(Bool), S(Obj),                            C) \
 O(OODeclExists,                D(Bool), S(Str) S(Bool),               N|E|Er) \
 O(InstanceOf,                  D(Bool), S(Cls) S(Cls),                 C|NNT) \

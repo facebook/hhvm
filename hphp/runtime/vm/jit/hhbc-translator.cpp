@@ -2148,7 +2148,11 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
 
 void HhbcTranslator::emitIsTypeC(DataType t) {
   SSATmp* src = popC(DataTypeSpecific);
-  push(gen(IsType, Type(t), src));
+  if (t == KindOfObject) {
+    push(optimizedCallIsObject(src));
+  } else {
+    push(gen(IsType, Type(t), src));
+  }
   gen(DecRef, src);
 }
 
@@ -2157,7 +2161,11 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   auto const ldgblExit = makePseudoMainExit();
   auto const val =
     ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeSpecific);
-  push(gen(IsType, Type(t), val));
+  if (t == KindOfObject) {
+    push(optimizedCallIsObject(val));
+  } else {
+    push(gen(IsType, Type(t), val));
+  }
 }
 
 void HhbcTranslator::emitIsScalarL(int id) {
@@ -3373,7 +3381,8 @@ const StaticString
   s_ini_get("ini_get"),
   s_in_array("in_array"),
   s_get_class("get_class"),
-  s_get_called_class("get_called_class");
+  s_get_called_class("get_called_class"),
+  s_is_object("is_object");
 
 SSATmp* HhbcTranslator::optimizedCallIsA() {
   // The last param of is_a has a default argument of false, which makes it
@@ -3518,6 +3527,42 @@ SSATmp* HhbcTranslator::optimizedCallGetCalledClass() {
   return gen(LdClsName, cls);
 }
 
+SSATmp* HhbcTranslator::optimizedCallIsObject(SSATmp* src) {
+  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
+    auto const cls = src->type().getClass();
+    if (!m_irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
+      // If we know the class without having to specialize a guard
+      // any further, use it.
+      return cns(cls != SystemLib::s___PHP_Incomplete_ClassClass);
+    }
+  }
+
+  if (src->type().not(Type::Obj)) {
+    return cns(false);
+  }
+
+  auto checkClass = [this] (SSATmp* obj) {
+    auto cls = gen(LdObjClass, obj);
+    auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
+    return gen(ClsNeq, ClsNeqData { testCls }, cls);
+  };
+
+  return m_irb->cond(
+    0, // references produced
+    [&] (Block* taken) {
+      auto isObj = gen(IsType, Type::Obj, src);
+      gen(JmpZero, taken, isObj);
+    },
+    [&] { // Next: src is an object
+      auto obj = gen(AssertType, Type::Obj, src);
+      return checkClass(obj);
+    },
+    [&] {// Taken: src is not an object
+      return cns(false);
+    }
+  );
+}
+
 bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
                                            uint32_t numArgs,
                                            uint32_t numNonDefault) {
@@ -3529,8 +3574,9 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
       }
       break;
     case 1:
-      if (func->name()->isame(s_ini_get.get())) res = optimizedCallIniGet();
-      else if (func->name()->isame(s_get_class.get())) {
+      if (func->name()->isame(s_ini_get.get())) {
+        res = optimizedCallIniGet();
+      } else if (func->name()->isame(s_get_class.get())) {
         res = optimizedCallGetClass(numNonDefault);
       }
       break;

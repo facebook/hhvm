@@ -67,6 +67,7 @@ const StaticString s_Exception("Exception");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
+const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -962,24 +963,37 @@ void isTypeImpl(ISS& env, Type locOrCell, Type test) {
   push(env, TBool);
 }
 
+void isTypeObj(ISS& env, const Type& ty) {
+  if (!ty.couldBe(TObj)) return push(env, TFalse);
+  if (ty.subtypeOf(TObj)) {
+    auto const incompl = objExact(
+      env.index.builtin_class(s_PHP_Incomplete_Class.get()));
+    if (!ty.couldBe(incompl))  return push(env, TTrue);
+    if (ty.subtypeOf(incompl)) return push(env, TFalse);
+  }
+  push(env, TBool);
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   auto const loc = locAsCell(env, op.loc1);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, loc);
+  default: return isTypeImpl(env, loc, type_of_istype(op.subop));
   }
-  isTypeImpl(env, loc, type_of_istype(op.subop));
 }
 
 template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
   nothrow(env);
   auto const t1 = popC(env);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, t1);
+  default: return isTypeImpl(env, t1, type_of_istype(op.subop));
   }
-  isTypeImpl(env, t1, type_of_istype(op.subop));
 }
 
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }

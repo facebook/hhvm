@@ -80,7 +80,16 @@ inline bool is_int(const Variant& v)    { return v.isInteger();}
 inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
 inline bool is_string(const Variant& v) { return v.isString();}
 inline bool is_array(const Variant& v)  { return v.is(KindOfArray);}
-inline bool is_object(const Variant& var) { return var.is(KindOfObject); }
+
+inline bool is_object(const Variant& var) {
+  if (!var.is(KindOfObject)) {
+    return false;
+  }
+  auto cls = var.toObject().get()->getVMClass();
+  auto incompleteClass = SystemLib::s___PHP_Incomplete_ClassClass;
+  return cls != incompleteClass;
+}
+
 inline bool is_empty_string(const Variant& v) {
   return v.isString() && v.getStringData()->empty();
 }

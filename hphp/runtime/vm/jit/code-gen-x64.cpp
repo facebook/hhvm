@@ -1853,6 +1853,16 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
   });
 }
 
+void CodeGenerator::cgClsNeq(IRInstruction* inst) {
+  auto const rdst          = dstLoc(0).reg();
+  const Vreg rObjClass     = srcLoc(0).reg();
+  auto& v = vmain();
+  auto testClass           = v.cns(inst->extra<ClsNeqData>()->testClass);
+  auto const sf = v.makeReg();
+  emitCmpClass(v, sf, testClass, rObjClass);
+  v << setcc{CC_NE, sf, rdst};
+}
+
 void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
   auto dstReg = dstLoc(0).reg();
   auto srcReg = srcLoc(0).reg();

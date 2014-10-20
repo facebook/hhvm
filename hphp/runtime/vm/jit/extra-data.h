@@ -827,6 +827,19 @@ struct RawMemData : IRExtraData {
   std::string show() const;
 };
 
+struct ClsNeqData : IRExtraData {
+  explicit ClsNeqData(Class* testClass) : testClass(testClass) {}
+
+  std::string show() const {
+    return testClass->name()->data();
+  }
+
+  bool cseEquals(ClsNeqData o) const { return testClass == o.testClass; }
+  size_t cseHash() const { return std::hash<Class*>()(testClass); }
+
+  Class* testClass; // class we're checking equality with
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -975,6 +988,7 @@ X(LdContArRaw,                  RawMemData);
 X(StContArRaw,                  RawMemData);
 X(ProfileArray,                 RDSHandleData);
 X(ProfileStr,                   ProfileStrData);
+X(ClsNeq,                       ClsNeqData);
 
 #undef X
 

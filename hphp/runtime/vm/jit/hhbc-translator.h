@@ -812,6 +812,7 @@ private:
   SSATmp* optimizedCallCount();
   SSATmp* optimizedCallGetClass(uint32_t);
   SSATmp* optimizedCallGetCalledClass();
+  SSATmp* optimizedCallIsObject(SSATmp* src);
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);

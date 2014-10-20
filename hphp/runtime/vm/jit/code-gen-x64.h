@@ -38,7 +38,6 @@ struct CodeGenerator {
     , m_vcold(cold)
     , m_frozen(frozen)
     , m_state(state)
-    , m_curInst(nullptr)
   {}
 
   void cgInst(IRInstruction* inst);
@@ -46,7 +45,7 @@ struct CodeGenerator {
 private:
   Vloc srcLoc(unsigned i) const;
   Vloc dstLoc(unsigned i) const;
-  ArgGroup argGroup() const;
+  ArgGroup argGroup(const IRInstruction* inst) const;
 
   // Autogenerate function declarations for each IR instruction in ir-opcode.h
 #define O(name, dsts, srcs, flags) void cg##name(IRInstruction* inst);
@@ -60,7 +59,8 @@ private:
   CallDest callDest(const IRInstruction*) const;
   CallDest callDestTV(const IRInstruction*) const;
   CallDest callDestDbl(const IRInstruction*) const;
-  template<class Arg> CppCall arrayCallIfLowMem(Arg vtable) const;
+  template<class Arg>
+  CppCall arrayCallIfLowMem(const IRInstruction* inst, Arg vtable) const;
 
   // Main call helper:
   void cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
@@ -73,8 +73,7 @@ private:
 
   // helpers to load a value in dst. When label is not null a type check
   // is performed against value to ensure it is of the type expected by dst
-  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base,
-              Block* label = nullptr);
+  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label = nullptr);
   void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
                         Block* label = nullptr);
 
@@ -89,9 +88,11 @@ private:
   void emitSpecializedTypeTest(Type type, DataLoc data, Vreg sf, JmpFn doJcc);
 
   template<class Loc>
-  void emitTypeCheck(Type type, Loc typeSrc, Loc dataSrc, Block* taken);
+  void emitTypeCheck(Type type, Loc typeSrc,
+                     Loc dataSrc, Block* taken);
   template<class Loc>
-  void emitTypeGuard(Type type, Loc typeLoc, Loc dataLoc);
+  void emitTypeGuard(const BCMarker& marker, Type type, Loc typeLoc,
+                     Loc dataLoc);
 
   void cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc);
   void cgDecRefWork(IRInstruction* inst, bool genZeroCheck);
@@ -124,7 +125,7 @@ private:
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
   template<class Loc>
-  void emitSideExitGuard(Type type, Loc typeLoc,
+  void emitSideExitGuard(const IRInstruction* inst, Type type, Loc typeLoc,
                          Loc dataLoc, Offset taken);
   void emitReqBindJcc(Vout& v, ConditionCode cc, Vreg sf,
                       const ReqBindJccData*);
@@ -149,20 +150,28 @@ private:
   void cgIsTypeMemCommon(IRInstruction*, bool negate);
   Vreg emitInstanceBitmaskCheck(Vout& v, IRInstruction* inst);
   void emitTraceRet(Vout& v);
-  void emitInitObjProps(Vreg dstReg, const Class* cls, size_t nProps);
+  void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
+                        const Class* cls, size_t nProps);
 
-  bool decRefDestroyIsUnlikely(OptDecRefProfile& profile, Type type);
+  bool decRefDestroyIsUnlikely(const IRInstruction* inst,
+                               OptDecRefProfile& profile, Type type);
   template <typename F>
-  void cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
+  void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
+                                 Vlabel done, Type type,
                                  Vreg dataReg, F destroyImpl);
-  void cgCheckStaticBitAndDecRef(Vout& v, Vlabel done, Type type,
+  void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
+                                 Vlabel done, Type type,
                                  Vreg dataReg);
   void cgCheckRefCountedType(Vreg typeReg, Vlabel done);
   void cgCheckRefCountedType(Vreg baseReg, int64_t offset, Vlabel done);
-  void cgDecRefStaticType(Vout& v, Type type, Vreg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicType(Vreg typeReg, Vreg dataReg, bool genZeroCheck);
-  void cgDecRefDynamicTypeMem(Vreg baseReg, int64_t offset);
-  void cgDecRefMem(Type type, Vreg baseReg, int64_t offset);
+  void cgDecRefStaticType(Vout&, const IRInstruction* inst, Type type,
+                          Vreg dataReg, bool genZeroCheck);
+  void cgDecRefDynamicType(const IRInstruction* inst, Vreg typeReg,
+                           Vreg dataReg, bool genZeroCheck);
+  void cgDecRefDynamicTypeMem(const IRInstruction* inst, Vreg baseReg,
+                              int64_t offset);
+  void cgDecRefMem(const IRInstruction* inst, Type type, Vreg baseReg,
+                   int64_t offset);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);
@@ -174,14 +183,23 @@ private:
                                   Vreg sf);
   Vlabel label(Block*);
   void emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf, Block* target);
-  const Func* curFunc() const { return m_curInst->marker().func(); };
-  const Class* curClass() const { return curFunc()->cls(); }
-  const Unit* curUnit() const { return curFunc()->unit(); }
-  bool resumed() const { return m_curInst->marker().resumed(); };
-  Fixup makeFixup(SyncOptions sync = SyncOptions::kSyncPoint);
-  void recordSyncPoint(Vout& v, SyncOptions sync = SyncOptions::kSyncPoint);
-  int iterOffset(SSATmp* tmp) { return iterOffset(tmp->intVal()); }
-  int iterOffset(uint32_t id);
+
+  static const Func* getFunc(const BCMarker& marker) {
+    return marker.func();
+  };
+  static const Class* getClass(const BCMarker& marker) {
+    return getFunc(marker)->cls();
+  }
+  static const Unit* getUnit(const BCMarker& marker) {
+    return getFunc(marker)->unit();
+  }
+  static bool resumed(const BCMarker& marker) {
+    return marker.resumed();
+  };
+
+  Fixup makeFixup(const BCMarker& marker,
+                  SyncOptions sync = SyncOptions::kSyncPoint);
+  int iterOffset(const BCMarker& marker, uint32_t id);
 
   void emitAdjustSp(Vreg spReg, Vreg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
@@ -240,7 +258,6 @@ private:
   Vout&               m_vcold;
   CodeBlock&          m_frozen;
   CodegenState&       m_state;
-  IRInstruction*      m_curInst;  // current instruction being generated
   jit::vector<Vloc>   m_slocs, m_dlocs;
 };
 

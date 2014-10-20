@@ -194,6 +194,10 @@ struct ArgGroup {
     return memberKeyImpl(i, false);
   }
 
+  const IRInstruction* inst() const {
+    return m_inst;
+  }
+
 private:
   void push_arg(const ArgDesc& arg) {
     // If m_override is set, use it unconditionally. Otherwise, select

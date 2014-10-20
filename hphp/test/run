@@ -2,6 +2,7 @@
 <?php
 /**
 * Run the test suites in various configurations.
+* Test 1
 */
 
 function get_expect_file($test, $type, $options) {

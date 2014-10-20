@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -86,7 +86,9 @@ String stringForEachFast(const String& str, Op action) {
   return stringForEach<false>(str.size(), str.get(), action);
 }
 
-String f_addcslashes(const String& str, const String& charlist) {
+String HHVM_FUNCTION(addcslashes,
+                     const String& str,
+                     const String& charlist) {
   if (str.empty() || (!charlist.isNull() && charlist.empty())) {
     return str;
   }
@@ -124,7 +126,8 @@ String f_addcslashes(const String& str, const String& charlist) {
     });
 }
 
-String f_stripcslashes(const String& str) {
+String HHVM_FUNCTION(stripcslashes,
+                     const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -185,7 +188,8 @@ String f_stripcslashes(const String& str) {
     });
 }
 
-String f_addslashes(const String& str) {
+String HHVM_FUNCTION(addslashes,
+                     const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -206,7 +210,8 @@ String f_addslashes(const String& str) {
     });
 }
 
-String f_stripslashes(const String& str) {
+String HHVM_FUNCTION(stripslashes,
+                     const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -223,7 +228,8 @@ String f_stripslashes(const String& str) {
     });
 }
 
-String f_bin2hex(const String& str) {
+String HHVM_FUNCTION(bin2hex,
+                     const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -236,7 +242,8 @@ String f_bin2hex(const String& str) {
     });
 }
 
-Variant f_hex2bin(const String& str) {
+Variant HHVM_FUNCTION(hex2bin,
+                      const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -280,12 +287,14 @@ const StaticString
   s_br("<br />"),
   s_non_xhtml_br("<br>");
 
-String f_nl2br(const String& str, bool is_xhtml /* = true */) {
+String HHVM_FUNCTION(nl2br,
+                     const String& str,
+                     bool is_xhtml /* = true */) {
   if (str.empty()) {
     return str;
   }
-
   String htmlType;
+
   if (is_xhtml) {
     htmlType = s_br;
   } else {
@@ -321,7 +330,8 @@ String f_nl2br(const String& str, bool is_xhtml /* = true */) {
     });
 }
 
-String f_quotemeta(const String& str) {
+String HHVM_FUNCTION(quotemeta,
+                     const String& str) {
   if (str.empty()) {
     return str;
   }
@@ -339,7 +349,8 @@ String f_quotemeta(const String& str) {
     });
 }
 
-String f_str_shuffle(const String& str) {
+String HHVM_FUNCTION(str_shuffle,
+                     const String& str) {
   if (str.size() <= 1) {
     return str;
   }
@@ -359,7 +370,8 @@ String f_str_shuffle(const String& str) {
   return ret;
 }
 
-String f_strrev(const String& str) {
+String HHVM_FUNCTION(strrev,
+                     const String& str) {
   auto len = str.size();
 
   if (str.get()->hasExactlyOneRef()) {
@@ -385,11 +397,13 @@ String f_strrev(const String& str) {
   return ret;
 }
 
-String f_strtolower(String str) {
+String HHVM_FUNCTION(strtolower,
+                     String str) {
   return stringForEachFast(str, tolower);
 }
 
-String f_strtoupper(String str) {
+String HHVM_FUNCTION(strtoupper,
+                     String str) {
   return stringForEachFast(str, toupper);
 }
 
@@ -412,15 +426,18 @@ String stringToCaseFirst(const String& str, OpTo tocase, OpIs iscase) {
   return ret;
 }
 
-String f_ucfirst(String str) {
+String HHVM_FUNCTION(ucfirst,
+                     String str) {
   return stringToCaseFirst(str, toupper, isupper);
 }
 
-String f_lcfirst(String str) {
+String HHVM_FUNCTION(lcfirst,
+                     String str) {
   return stringToCaseFirst(str, tolower, islower);
 }
 
-String f_ucwords(String str) {
+String HHVM_FUNCTION(ucwords,
+                     String str) {
   char last = ' ';
   return stringForEachFast(str, [&] (char c) {
     char ret = isspace(last) ? toupper(c) : c;
@@ -429,8 +446,10 @@ String f_ucwords(String str) {
   });
 }
 
-String f_strip_tags(const String& str, const String& allowable_tags /* = "" */) {
-  return StringUtil::StripHTMLTags(str, allowable_tags);
+String HHVM_FUNCTION(strip_tags,
+                     const String& str,
+                     const Variant& allowable_tags /* = "" */) {
+  return StringUtil::StripHTMLTags(str, allowable_tags.toString());
 }
 
 template <bool left, bool right> ALWAYS_INLINE
@@ -462,27 +481,40 @@ String stringTrim(String& str, const String& charlist) {
   return str.substr(start, end - start + 1);
 }
 
-String f_trim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String HHVM_FUNCTION(trim,
+                     String str,
+                     const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,true>(str, charlist);
 }
 
-String f_ltrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String HHVM_FUNCTION(ltrim,
+                     String str,
+                     const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<true,false>(str, charlist);
 }
 
-String f_rtrim(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String HHVM_FUNCTION(rtrim,
+                     String str,
+                     const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
-String f_chop(String str, const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
+String HHVM_FUNCTION(chop,
+                      String str,
+                      const String& charlist /* = k_HPHP_TRIM_CHARLIST */) {
   return stringTrim<false,true>(str, charlist);
 }
 
-Variant f_explode(const String& delimiter, const String& str, int limit /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(explode,
+                      const String& delimiter,
+                      const String& str,
+                      int limit /* = 0x7FFFFFFF */) {
   return StringUtil::Explode(str, delimiter, limit);
 }
 
-String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) {
+String HHVM_FUNCTION(implode,
+                     const Variant& arg1,
+                     const Variant& arg2 /* = null_variant */) {
   Array items;
   String delim;
   if (isContainer(arg1)) {
@@ -499,15 +531,21 @@ String f_implode(const Variant& arg1, const Variant& arg2 /* = null_variant */) 
   return StringUtil::Implode(items, delim);
 }
 
-String f_join(const Variant& glue, const Variant& pieces /* = null_variant */) {
-  return f_implode(glue, pieces);
+String HHVM_FUNCTION(join,
+                     const Variant& arg1,
+                     const Variant& arg2 /* = null_variant */) {
+  return HHVM_FN(implode)(arg1, arg2);
 }
 
-Variant f_str_split(const String& str, int64_t split_length /* = 1 */) {
+Variant HHVM_FUNCTION(str_split,
+                      const String& str,
+                      int64_t split_length /* = 1 */) {
   return StringUtil::Split(str, split_length);
 }
 
-Variant f_chunk_split(const String& body, int chunklen /* = 76 */,
+Variant HHVM_FUNCTION(chunk_split,
+                      const String& body,
+                      int chunklen /* = 76 */,
                       const String& end /* = "\r\n" */) {
   return StringUtil::ChunkSplit(body, chunklen, end);
 }
@@ -528,7 +566,9 @@ struct TokenizerData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(TokenizerData, s_tokenizer_data);
 
-Variant f_strtok(const String& str, const Variant& token /* = null_variant */) {
+Variant HHVM_FUNCTION(strtok,
+                      const String& str,
+                      const Variant& token /* = null_variant */) {
   String stoken;
   if (!token.isNull()) {
     s_tokenizer_data->str = str;
@@ -647,7 +687,10 @@ static Variant str_replace(const Variant& search, const Variant& replace, const 
                      caseSensitive);
 }
 
-Variant f_str_replace(const Variant& search, const Variant& replace, const Variant& subject,
+Variant HHVM_FUNCTION(str_replace,
+                      const Variant& search,
+                      const Variant& replace,
+                      const Variant& subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, true);
@@ -655,17 +698,22 @@ Variant f_str_replace(const Variant& search, const Variant& replace, const Varia
   return ret;
 }
 
-Variant f_str_ireplace(const Variant& search, const Variant& replace, const Variant& subject,
-                       VRefParam count /* = null */) {
+Variant HHVM_FUNCTION(str_ireplace,
+                      const Variant& search,
+                      const Variant& replace,
+                      const Variant& subject,
+                      VRefParam count /* = null */) {
   int nCount = 0;
   Variant ret = str_replace(search, replace, subject, nCount, false);
   count = nCount;
   return ret;
 }
 
-Variant f_substr_replace(const Variant& str, const Variant& replacement,
-                         const Variant& start,
-                         const Variant& length /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(substr_replace,
+                      const Variant& str,
+                      const Variant& replacement,
+                      const Variant& start,
+                      const Variant& length /* = 0x7FFFFFFF */) {
   if (!str.is(KindOfArray)) {
     String repl;
     if (replacement.is(KindOfArray)) {
@@ -761,19 +809,27 @@ Variant f_substr_replace(const Variant& str, const Variant& replacement,
   return ret;
 }
 
-Variant f_substr(const String& str, int start, int length /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(substr,
+                      const String& str,
+                      int start,
+                      int length /* = 0x7FFFFFFF */) {
   String ret = str.substr(start, length, true);
   if (ret.isNull()) return false;
   return ret;
 }
 
-String f_str_pad(const String& input, int pad_length, const String& pad_string /* = " " */,
-                        int pad_type /* = k_STR_PAD_RIGHT */) {
+String HHVM_FUNCTION(str_pad,
+                     const String& input,
+                     int pad_length,
+                     const String& pad_string /* = " " */,
+                     int pad_type /* = k_STR_PAD_RIGHT */) {
   return StringUtil::Pad(input, pad_length, pad_string,
                          (StringUtil::PadType)pad_type);
 }
 
-String f_str_repeat(const String& input, int multiplier) {
+String HHVM_FUNCTION(str_repeat,
+                     const String& input,
+                     int multiplier) {
   if (input.empty()) {
     return input;
   }
@@ -827,23 +883,29 @@ Variant f_sscanf(int _argc,
   return ret;
 }
 
-String f_chr(int64_t ascii) {
-  return String(makeStaticString((char)ascii));
+String HHVM_FUNCTION(chr,
+                     Variant ascii) {
+  return String(makeStaticString((char)ascii.toInt64()));
 }
 
-int64_t f_ord(const String& str) {
+int64_t HHVM_FUNCTION(ord,
+                      const String& str) {
   return (int64_t)(unsigned char)str[0];
 }
 
-Variant f_money_format(const String& format, double number) {
+Variant HHVM_FUNCTION(money_format,
+                      const String& format,
+                      double number) {
   String s = StringUtil::MoneyFormat(format.c_str(), number);
   if (s.isNull()) return false;
   return s;
 }
 
-String f_number_format(double number, int decimals /* = 0 */,
-                       const Variant& dec_point_in /* = "." */,
-                       const Variant& thousands_sep_in /* = "," */) {
+String HHVM_FUNCTION(number_format,
+                     double number,
+                     int decimals /* = 0 */,
+                     const Variant& dec_point_in /* = "." */,
+                     const Variant& thousands_sep_in /* = "," */) {
 
   String dec_point(".");
   if (!dec_point_in.isNull()) {
@@ -857,11 +919,16 @@ String f_number_format(double number, int decimals /* = 0 */,
   return string_number_format(number, decimals, dec_point, thousands_sep);
 }
 
-int64_t f_strcmp(const String& str1, const String& str2) {
+int64_t HHVM_FUNCTION(strcmp,
+                      const String& str1,
+                      const String& str2) {
   return string_strcmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
 
-Variant f_strncmp(const String& str1, const String& str2, int len) {
+Variant HHVM_FUNCTION(strncmp,
+                      const String& str1,
+                      const String& str2,
+                      int len) {
   if (len < 0) {
     raise_warning("Length must be greater than or equal to 0");
     return false;
@@ -870,16 +937,23 @@ Variant f_strncmp(const String& str1, const String& str2, int len) {
                         len);
 }
 
-int64_t f_strnatcmp(const String& str1, const String& str2) {
+int64_t HHVM_FUNCTION(strnatcmp,
+                      const String& str1,
+                      const String& str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             false);
 }
 
-int64_t f_strcasecmp(const String& str1, const String& str2) {
+int64_t HHVM_FUNCTION(strcasecmp,
+                      const String& str1,
+                      const String& str2) {
   return bstrcasecmp(str1.data(), str1.size(), str2.data(), str2.size());
 }
 
-Variant f_strncasecmp(const String& str1, const String& str2, int len) {
+Variant HHVM_FUNCTION(strncasecmp,
+                      const String& str1,
+                      const String& str2,
+                      int len) {
   if (len < 0) {
     raise_warning("Length must be greater than or equal to 0");
     return false;
@@ -888,18 +962,25 @@ Variant f_strncasecmp(const String& str1, const String& str2, int len) {
                             len);
 }
 
-int64_t f_strnatcasecmp(const String& str1, const String& str2) {
+int64_t HHVM_FUNCTION(strnatcasecmp,
+                      const String& str1,
+                      const String& str2) {
   return string_natural_cmp(str1.data(), str1.size(), str2.data(), str2.size(),
                             true);
 }
 
-int64_t f_strcoll(const String& str1, const String& str2) {
+int64_t HHVM_FUNCTION(strcoll,
+                      const String& str1,
+                      const String& str2) {
   return strcoll(str1.c_str(), str2.c_str());
 }
 
-Variant f_substr_compare(const String& main_str, const String& str, int offset,
-                         int length /* = INT_MAX */,
-                         bool case_insensitivity /* = false */) {
+Variant HHVM_FUNCTION(substr_compare,
+                      const String& main_str,
+                      const String& str,
+                      int offset,
+                      int length /* = INT_MAX */,
+                      bool case_insensitivity /* = false */) {
   int s1_len = main_str.size();
   int s2_len = str.size();
 
@@ -929,9 +1010,11 @@ Variant f_substr_compare(const String& main_str, const String& str, int offset,
   return string_ncmp(s1 + offset, str.data(), cmp_len);
 }
 
-Variant f_strstr(const String& haystack, const Variant& needle,
-                 bool before_needle /* = false */) {
-  Variant ret = f_strpos(haystack, needle);
+Variant HHVM_FUNCTION(strstr,
+                      const String& haystack,
+                      const Variant& needle,
+                      bool before_needle /* = false */) {
+  Variant ret = HHVM_FN(strpos)(haystack, needle);
   if (same(ret, false)) {
     return false;
   }
@@ -942,9 +1025,11 @@ Variant f_strstr(const String& haystack, const Variant& needle,
   }
 }
 
-Variant f_stristr(const String& haystack, const Variant& needle,
-                  bool before_needle /* = false */) {
-  Variant ret = f_stripos(haystack, needle);
+Variant HHVM_FUNCTION(stristr,
+                      const String& haystack,
+                      const Variant& needle,
+                      bool before_needle /* = false */) {
+  Variant ret = HHVM_FN(stripos)(haystack, needle);
   if (same(ret, false)) {
     return false;
   }
@@ -1054,15 +1139,16 @@ bool str_contains_any_of(const String& haystack, const String& char_list) {
   return strpbrk_impl<true>(haystack, char_list).toBooleanVal();
 }
 
-Variant f_strpbrk(const String& haystack, const String& char_list) {
+Variant HHVM_FUNCTION(strpbrk,
+                      const String& haystack,
+                      const String& char_list) {
   return strpbrk_impl<false>(haystack, char_list);
 }
 
-Variant f_strchr(const String& haystack, const Variant& needle) {
-  return f_strstr(haystack, needle);
-}
-
-Variant f_strpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
+Variant HHVM_FUNCTION(strpos,
+                      const String& haystack,
+                      const Variant& needle,
+                      int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -1082,7 +1168,10 @@ Variant f_strpos(const String& haystack, const Variant& needle, int offset /* = 
   return false;
 }
 
-Variant f_stripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
+Variant HHVM_FUNCTION(stripos,
+                      const String& haystack,
+                      const Variant& needle,
+                      int offset /* = 0 */) {
   if (offset < 0 || offset > haystack.size()) {
     raise_warning("Offset not contained in string");
     return false;
@@ -1114,7 +1203,15 @@ static bool is_valid_strrpos_args(
   return true;
 }
 
-Variant f_strrchr(const String& haystack, const Variant& needle) {
+Variant HHVM_FUNCTION(strchr,
+                      const String& haystack,
+                      const Variant& needle) {
+  return HHVM_FN(strstr)(haystack, needle);
+}
+
+Variant HHVM_FUNCTION(strrchr,
+                      const String& haystack,
+                      const Variant& needle) {
   if (haystack.size() == 0) {
     return false;
   }
@@ -1129,7 +1226,10 @@ Variant f_strrchr(const String& haystack, const Variant& needle) {
   return haystack.substr(pos);
 }
 
-Variant f_strrpos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
+Variant HHVM_FUNCTION(strrpos,
+                      const String& haystack,
+                      const Variant& needle,
+                      int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1143,7 +1243,10 @@ Variant f_strrpos(const String& haystack, const Variant& needle, int offset /* =
   return false;
 }
 
-Variant f_strripos(const String& haystack, const Variant& needle, int offset /* = 0 */) {
+Variant HHVM_FUNCTION(strripos,
+                      const String& haystack,
+                      const Variant& needle,
+                      int offset /* = 0 */) {
   if (!is_valid_strrpos_args(haystack, needle, offset)) {
     return false;
   }
@@ -1157,8 +1260,11 @@ Variant f_strripos(const String& haystack, const Variant& needle, int offset /* 
   return false;
 }
 
-Variant f_substr_count(const String& haystack, const String& needle, int offset /* = 0 */,
-                       int length /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(substr_count,
+                      const String& haystack,
+                      const String& needle,
+                      int offset /* = 0 */,
+                      int length /* = 0x7FFFFFFF */) {
   int lenNeedle = needle.size();
   if (lenNeedle == 0) {
     throw_invalid_argument("needle: (empty)");
@@ -1210,8 +1316,11 @@ namespace {
   }
 }
 
-Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
-                 int length /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(strspn,
+                      const String& str1,
+                      const String& str2,
+                      int start /* = 0 */,
+                      int length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
   const char *s2 = str2.data();
   int s1_len = str1.size();
@@ -1229,8 +1338,11 @@ Variant f_strspn(const String& str1, const String& str2, int start /* = 0 */,
   return length;
 }
 
-Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
-                  int length /* = 0x7FFFFFFF */) {
+Variant HHVM_FUNCTION(strcspn,
+                      const String& str1,
+                      const String& str2,
+                      int start /* = 0 */,
+                      int length /* = 0x7FFFFFFF */) {
   const char *s1 = str1.data();
   const char *s2 = str2.data();
   int s1_len = str1.size();
@@ -1248,7 +1360,8 @@ Variant f_strcspn(const String& str1, const String& str2, int start /* = 0 */,
   return length;
 }
 
-Variant f_strlen(const Variant& vstr) {
+Variant HHVM_FUNCTION(strlen,
+                      const Variant& vstr) {
   auto const cell = vstr.asCell();
   switch (cell->m_type) {
   case KindOfString:
@@ -1271,10 +1384,11 @@ Variant f_strlen(const Variant& vstr) {
   }
 }
 
-Array f_str_getcsv(const String& str,
-                   const String& delimiter /* = "," */,
-                   const String& enclosure /* = "\"" */,
-                   const String& escape /* = "\\" */) {
+Array HHVM_FUNCTION(str_getcsv,
+                    const String& str,
+                    const String& delimiter /* = "," */,
+                    const String& enclosure /* = "\"" */,
+                    const String& escape /* = "\\" */) {
   if (str.empty()) {
     return Array::Create(null_variant);
   }
@@ -1292,7 +1406,9 @@ Array f_str_getcsv(const String& str,
   return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }
 
-Variant f_count_chars(const String& str, int64_t mode /* = 0 */) {
+Variant HHVM_FUNCTION(count_chars,
+                      const String& str,
+                      int64_t mode /* = 0 */) {
   int chars[256];
   memset((void*)chars, 0, sizeof(chars));
   const unsigned char *buf = (const unsigned char *)str.data();
@@ -1354,8 +1470,10 @@ Variant f_count_chars(const String& str, int64_t mode /* = 0 */) {
  * string containing alphabetic characters, which also may contain, but not
  * start with "'" and "-" characters.
  */
-Variant f_str_word_count(const String& str, int64_t format /* = 0 */,
-                         const String& charlist /* = "" */) {
+Variant HHVM_FUNCTION(str_word_count,
+                      const String& str,
+                      int64_t format /* = 0 */,
+                      const String& charlist /* = "" */) {
   int str_len = str.size();
   switch (format) {
   case 1:
@@ -1428,14 +1546,20 @@ Variant f_str_word_count(const String& str, int64_t format /* = 0 */,
   return ret.isNull() ? Array::Create() : ret;
 }
 
-int64_t f_levenshtein(const String& str1, const String& str2, int cost_ins /* = 1 */,
-                         int cost_rep /* = 1 */, int cost_del /* = 1 */) {
+int64_t HHVM_FUNCTION(levenshtein,
+                      const String& str1,
+                      const String& str2,
+                      int cost_ins /* = 1 */,
+                      int cost_rep /* = 1 */,
+                      int cost_del /* = 1 */) {
   return string_levenshtein(str1.data(), str1.size(), str2.data(), str2.size(),
                             cost_ins, cost_rep, cost_del);
 }
 
-int64_t f_similar_text(const String& first, const String& second,
-                       VRefParam percent /* = uninit_null() */) {
+int64_t HHVM_FUNCTION(similar_text,
+                      const String& first,
+                      const String& second,
+                      VRefParam percent /* = uninit_null() */) {
   float p;
   int ret = string_similar_text(first.data(), first.size(),
                                 second.data(), second.size(), &p);
@@ -1443,26 +1567,33 @@ int64_t f_similar_text(const String& first, const String& second,
   return ret;
 }
 
-Variant f_soundex(const String& str) {
+Variant HHVM_FUNCTION(soundex,
+                      const String& str) {
   if (str.empty()) return false;
   return string_soundex(str);
 }
 
-Variant f_metaphone(const String& str, int phones /* = 0 */) {
+Variant HHVM_FUNCTION(metaphone,
+                      const String& str,
+                      int phones /* = 0 */) {
   return string_metaphone(str.data(), str.size(), 0, 1);
 }
 
-String f_html_entity_decode(const String& str, int flags /* = k_ENT_COMPAT */,
-                            const String& charset /* = "UTF-8" */) {
+String HHVM_FUNCTION(html_entity_decode,
+                     const String& str,
+                     int flags /* = k_ENT_COMPAT */,
+                     const String& charset /* = "UTF-8" */) {
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 scharset, true);
 }
 
-String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
-                      const String& charset /* = "UTF-8" */,
-                      bool double_encode /* = true */) {
+String HHVM_FUNCTION(htmlentities,
+                     const String& str,
+                     int flags /* = k_ENT_COMPAT */,
+                     const String& charset /* = "UTF-8" */,
+                     bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1470,15 +1601,18 @@ String f_htmlentities(const String& str, int flags /* = k_ENT_COMPAT */,
                                 scharset, double_encode, true);
 }
 
-String f_htmlspecialchars_decode(const String& str,
-                                 int flags /* = k_ENT_COMPAT */) {
+String HHVM_FUNCTION(htmlspecialchars_decode,
+                     const String& str,
+                     int flags /* = k_ENT_COMPAT */) {
   return StringUtil::HtmlDecode(str, StringUtil::toQuoteStyle(flags),
                                 "UTF-8", false);
 }
 
-String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
-                          const String& charset /* = "UTF-8" */,
-                          bool double_encode /* = true */) {
+String HHVM_FUNCTION(htmlspecialchars,
+                     const String& str,
+                     int flags /* = k_ENT_COMPAT */,
+                     const String& charset /* = "UTF-8" */,
+                     bool double_encode /* = true */) {
   // dropping double_encode parameters and see runtime/base/zend-html.h
   const char *scharset = charset.data();
   if (!*scharset) scharset = "ISO-8859-1";
@@ -1486,22 +1620,31 @@ String f_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
                                 scharset, double_encode, false);
 }
 
-String f_fb_htmlspecialchars(const String& str, int flags /* = k_ENT_COMPAT */,
-                             const String& charset /* = "ISO-8859-1" */,
-                             const Array& extra /* = null_array */) {
+String HHVM_FUNCTION(fb_htmlspecialchars,
+                     const String& str,
+                     int flags /* = k_ENT_COMPAT */,
+                     const String& charset /* = "ISO-8859-1" */,
+                     const Variant& extra /* = empty_array_ref */) {
+  if (!extra.isNull() && !extra.isArray()) {
+    throw_expected_array_exception();
+  }
+  const Array& arr_extra = extra.isNull() ? empty_array_ref : extra.toArray();
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
-                                     charset.data(), false, extra);
+                                     charset.data(), false, arr_extra);
 }
 
-String f_quoted_printable_encode(const String& str) {
+String HHVM_FUNCTION(quoted_printable_encode,
+                     const String& str) {
   return StringUtil::QuotedPrintableEncode(str);
 }
 
-String f_quoted_printable_decode(const String& str) {
+String HHVM_FUNCTION(quoted_printable_decode,
+                     const String& str) {
   return StringUtil::QuotedPrintableDecode(str);
 }
 
-Variant f_convert_uudecode(const String& data) {
+Variant HHVM_FUNCTION(convert_uudecode,
+                      const String& data) {
   String ret = StringUtil::UUDecode(data);
   if (ret.isNull()) {
     raise_warning(
@@ -1512,28 +1655,37 @@ Variant f_convert_uudecode(const String& data) {
   return ret;
 }
 
-Variant f_convert_uuencode(const String& data) {
+Variant HHVM_FUNCTION(convert_uuencode,
+                      const String& data) {
   if (data.empty()) return false;
   return StringUtil::UUEncode(data);
 }
 
-String f_str_rot13(const String& str) {
+String HHVM_FUNCTION(str_rot13,
+                     const String& str) {
   return StringUtil::ROT13(str);
 }
 
-int64_t f_crc32(const String& str) {
+int64_t HHVM_FUNCTION(crc32,
+                      const String& str) {
   return (uint32_t)StringUtil::CRC32(str);
 }
 
-String f_crypt(const String& str, const String& salt /* = "" */) {
+String HHVM_FUNCTION(crypt,
+                     const String& str,
+                     const String& salt /* = "" */) {
   return StringUtil::Crypt(str, salt.c_str());
 }
 
-String f_md5(const String& str, bool raw_output /* = false */) {
+String HHVM_FUNCTION(md5,
+                     const String& str,
+                     bool raw_output /* = false */) {
   return StringUtil::MD5(str, raw_output);
 }
 
-String f_sha1(const String& str, bool raw_output /* = false */) {
+String HHVM_FUNCTION(sha1,
+                     const String& str,
+                     bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 
@@ -1604,7 +1756,10 @@ Variant strtr_fast(const String& str, const Array& arr,
 
 static constexpr int kBitsPerQword = CHAR_BIT * sizeof(uint64_t);
 
-Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = null_variant */) {
+Variant HHVM_FUNCTION(strtr,
+                      const String& str,
+                      const Variant& from,
+                      const Variant& to /* = null_variant */) {
   if (str.empty()) {
     return str;
   }
@@ -1657,7 +1812,10 @@ Variant f_strtr(const String& str, const Variant& from, const Variant& to /* = n
   return result.detach();
 }
 
-Variant f_setlocale(int _argc, int category, const Variant& locale, const Array& _argv /* = null_array */) {
+Variant HHVM_FUNCTION(setlocale,
+                      int category,
+                      const Variant& locale,
+                      const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.is(KindOfArray)) {
     if (!argv.empty()) throw_invalid_argument("locale: not string)");
@@ -1712,7 +1870,7 @@ const StaticString
   s_grouping("grouping"),
   s_mon_grouping("mon_grouping");
 
-Array f_localeconv() {
+Array HHVM_FUNCTION(localeconv) {
   struct lconv currlocdata;
   {
     Lock lock(s_mutex);
@@ -1759,11 +1917,15 @@ Array f_localeconv() {
   return ret;
 }
 
-String f_nl_langinfo(int item) {
+String HHVM_FUNCTION(nl_langinfo,
+                     int item) {
   return nl_langinfo(item);
 }
 
-String f_convert_cyr_string(const String& str, const String& from, const String& to) {
+String HHVM_FUNCTION(convert_cyr_string,
+                     const String& str,
+                     const String& from,
+                     const String& to) {
   return string_convert_cyrillic_string(str, from[0], to[0]);
 }
 
@@ -1827,9 +1989,10 @@ String encode_as_utf8(int code_point) {
   return String::FromCStr(res.data());
 }
 
-Array f_get_html_translation_table(int table /* = 0 */,
-                                   int flags /* = k_ENT_COMPAT */,
-                                   const String& encoding /* = "UTF-8" */) {
+Array HHVM_FUNCTION(get_html_translation_table,
+                    int table /* = 0 */,
+                    int flags /* = k_ENT_COMPAT */,
+                    const String& encoding /* = "UTF-8" */) {
   using namespace entity_charset_enum;
   auto charset = determine_charset(encoding.data());
   if (charset == cs_unknown) {
@@ -1900,15 +2063,115 @@ Array f_get_html_translation_table(int table /* = 0 */,
   return ret;
 }
 
-String f_hebrev(const String& hebrew_text, int max_chars_per_line /* = 0 */) {
+String HHVM_FUNCTION(hebrev,
+                     const String& hebrew_text,
+                     int max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, false);
 }
 
-String f_hebrevc(const String& hebrew_text, int max_chars_per_line /* = 0 */) {
+String HHVM_FUNCTION(hebrevc,
+                     const String& hebrew_text,
+                     int max_chars_per_line /* = 0 */) {
   if (hebrew_text.empty()) return hebrew_text;
   return string_convert_hebrew_string(hebrew_text, max_chars_per_line, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+class StringExtension : public Extension {
+public:
+  StringExtension() : Extension("string") {}
+  virtual void moduleInit() {
+    HHVM_FE(addcslashes);
+    HHVM_FE(stripcslashes);
+    HHVM_FE(addslashes);
+    HHVM_FE(stripslashes);
+    HHVM_FE(bin2hex);
+    HHVM_FE(hex2bin);
+    HHVM_FE(nl2br);
+    HHVM_FE(quotemeta);
+    HHVM_FE(str_shuffle);
+    HHVM_FE(strrev);
+    HHVM_FE(strtolower);
+    HHVM_FE(strtoupper);
+    HHVM_FE(ucfirst);
+    HHVM_FE(lcfirst);
+    HHVM_FE(ucwords);
+    HHVM_FE(strip_tags);
+    HHVM_FE(trim);
+    HHVM_FE(ltrim);
+    HHVM_FE(rtrim);
+    HHVM_FE(chop);
+    HHVM_FE(explode);
+    HHVM_FE(implode);
+    HHVM_FE(join);
+    HHVM_FE(str_split);
+    HHVM_FE(chunk_split);
+    HHVM_FE(strtok);
+    HHVM_FE(str_replace);
+    HHVM_FE(str_ireplace);
+    HHVM_FE(substr_replace);
+    HHVM_FE(substr);
+    HHVM_FE(str_pad);
+    HHVM_FE(str_repeat);
+    HHVM_FE(html_entity_decode);
+    HHVM_FE(htmlentities);
+    HHVM_FE(htmlspecialchars_decode);
+    HHVM_FE(htmlspecialchars);
+    HHVM_FE(fb_htmlspecialchars);
+    HHVM_FE(quoted_printable_encode);
+    HHVM_FE(quoted_printable_decode);
+    HHVM_FE(convert_uudecode);
+    HHVM_FE(convert_uuencode);
+    HHVM_FE(str_rot13);
+    HHVM_FE(crc32);
+    HHVM_FE(crypt);
+    HHVM_FE(md5);
+    HHVM_FE(sha1);
+    HHVM_FE(strtr);
+    HHVM_FE(convert_cyr_string);
+    HHVM_FE(get_html_translation_table);
+    HHVM_FE(hebrev);
+    HHVM_FE(hebrevc);
+    HHVM_FE(setlocale);
+    HHVM_FE(localeconv);
+    HHVM_FE(nl_langinfo);
+    HHVM_FE(chr);
+    HHVM_FE(ord);
+    HHVM_FE(money_format);
+    HHVM_FE(number_format);
+    HHVM_FE(strcmp);
+    HHVM_FE(strncmp);
+    HHVM_FE(strnatcmp);
+    HHVM_FE(strcasecmp);
+    HHVM_FE(strncasecmp);
+    HHVM_FE(strnatcasecmp);
+    HHVM_FE(strcoll);
+    HHVM_FE(substr_compare);
+    HHVM_FE(strchr);
+    HHVM_FE(strrchr);
+    HHVM_FE(strstr);
+    HHVM_FE(stristr);
+    HHVM_FE(strpbrk);
+    HHVM_FE(strpos);
+    HHVM_FE(stripos);
+    HHVM_FE(strrpos);
+    HHVM_FE(strripos);
+    HHVM_FE(substr_count);
+    HHVM_FE(strspn);
+    HHVM_FE(strcspn);
+    HHVM_FE(strlen);
+    HHVM_FE(str_getcsv);
+    HHVM_FE(count_chars);
+    HHVM_FE(str_word_count);
+    HHVM_FE(levenshtein);
+    HHVM_FE(similar_text);
+    HHVM_FE(soundex);
+    HHVM_FE(metaphone);
+
+    loadSystemlib();
+  }
+} s_string_extension;
+
 }

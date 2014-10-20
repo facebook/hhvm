@@ -36,7 +36,7 @@
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
@@ -1010,7 +1010,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
                   if (eval) {
-                    String esc_match = f_addslashes(
+                    String esc_match = HHVM_FN(addslashes)(
                       String(
                         subject.data() + offsets[backref<<1],
                         match_len,
@@ -1063,7 +1063,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
                   if (eval) {
-                    String esc_match = f_addslashes(
+                    String esc_match = HHVM_FN(addslashes)(
                       String(
                         subject.data() + offsets[backref<<1],
                         match_len,

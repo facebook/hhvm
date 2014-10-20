@@ -19,13 +19,12 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_apc.h"
-#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/ext/ext_string.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -125,7 +124,7 @@ bool TestCppBase::TestString() {
 
   // manipulations
   {
-    String s = f_strtolower("Test");
+    String s = HHVM_FN(strtolower)("Test");
     VS(s.c_str(), "test");
   }
 

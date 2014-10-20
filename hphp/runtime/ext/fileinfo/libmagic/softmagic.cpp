@@ -448,7 +448,7 @@ mprint(struct magic_set *ms, struct magic *m)
       if (*m->value.s == '\0')
         str[strcspn(str, "\n")] = '\0';
 
-      if (m->str_flags & STRING_TRIM) {
+      if (m->str_flags & HHVM_FN(trim)) {
         char *last;
         while (isspace((unsigned char)*str))
           str++;

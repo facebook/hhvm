@@ -253,8 +253,9 @@ String f_timezone_version_get();
 bool f_checkdate(int month, int day, int year);
 Object f_date_add(const Object& datetime, const Object& interval);
 Variant f_date_create_from_format(const String& format,
-                                 const String& time,
-                                 const Object& timezone = null_object);
+                                  const String& time,
+                                  const Object& timezone = null_object);
+Variant f_date_parse_from_format(const String& format, const String& date);
 Variant f_date_create(const String& time = null_string,
                       const Object& timezone = null_object);
 void f_date_date_set(const Object& object, int year, int month, int day);

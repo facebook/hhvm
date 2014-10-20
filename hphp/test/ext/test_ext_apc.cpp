@@ -15,7 +15,7 @@
 */
 
 #include "hphp/test/ext/test_ext_apc.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

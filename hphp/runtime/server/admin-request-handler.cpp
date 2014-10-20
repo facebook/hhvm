@@ -54,8 +54,8 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/repo-schema.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/ext_apc.h"
 #include "hphp/util/stacktrace-profiler.h"
 
 namespace HPHP {

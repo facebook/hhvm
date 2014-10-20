@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -422,7 +422,7 @@ static void CopyHeaderVariables(Array& server,
     auto const& key = header.first;
     auto const& values = header.second;
     auto normalizedKey = s_HTTP_ +
-                         string_replace(f_strtoupper(key), s_dash,
+                         string_replace(HHVM_FN(strtoupper)(key), s_dash,
                                         s_underscore);
 
     // Detect suspicious headers.  We are about to modify header names for

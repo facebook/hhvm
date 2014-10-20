@@ -74,12 +74,10 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
@@ -88,6 +86,8 @@
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -7217,7 +7217,7 @@ OPTBLD_INLINE void ExecutionContext::iopStrlen(IOP_ARGS) {
     subj->m_type = KindOfInt64;
     subj->m_data.num = ans;
   } else {
-    Variant ans = f_strlen(tvAsVariant(subj));
+    Variant ans = HHVM_FN(strlen)(tvAsVariant(subj));
     tvAsVariant(subj) = ans;
   }
 }

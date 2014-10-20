@@ -60,10 +60,14 @@ Variant f_stream_context_create(const Array& options = null_array,
 
 Variant f_stream_context_get_options(const Resource& stream_or_context);
 
-bool f_stream_context_set_option(const Resource& stream_or_context,
-                                 const Variant& wrapper,
-                                 const String& option = null_string,
+bool f_stream_context_set_option(const Variant& stream_or_context,
+                                 const Variant& wrapper_or_options,
+                                 const Variant& option = null_variant,
                                  const Variant& value = null_variant);
+
+Variant f_stream_context_get_default(const Array& options = null_array);
+
+Variant f_stream_context_set_default(const Array& options);
 
 Variant f_stream_context_get_params(const Resource& stream_or_context);
 

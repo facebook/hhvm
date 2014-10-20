@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/smart-containers.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -237,7 +237,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   const Variant& type_map = m_map.get()->get(kind);
   auto const typeMapCell = type_map.asCell();
   if (typeMapCell->m_type != KindOfArray) return Failure;
-  String canonicalName = toLower ? f_strtolower(name) : name;
+  String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
   const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
   bool ok = false;
   if (file.isString()) {

@@ -113,18 +113,16 @@ and unify_ env r1 ty1 r2 ty2 =
           TUtils.uerror r1 ty1 r2 ty2;
           env, Tany
       )
-  | Tarray (_, None, None), (Tarray _ as ty)
-  | (Tarray _ as ty), Tarray (_, None, None) ->
+  | Tarray (None, None), (Tarray _ as ty)
+  | (Tarray _ as ty), Tarray (None, None) ->
       env, ty
-  | Tarray (b1, Some ty1, None), Tarray (b2, Some ty2, None) ->
-      let is_local = b1 && b2 in
+  | Tarray (Some ty1, None), Tarray (Some ty2, None) ->
       let env, ty = unify env ty1 ty2 in
-      env, Tarray (is_local, Some ty, None)
-  | Tarray (b1, Some ty1, Some ty2), Tarray (b2, Some ty3, Some ty4) ->
-      let is_local = b1 && b2 in
+      env, Tarray (Some ty, None)
+  | Tarray (Some ty1, Some ty2), Tarray (Some ty3, Some ty4) ->
       let env, ty1 = unify env ty1 ty3 in
       let env, ty2 = unify env ty2 ty4 in
-      env, Tarray (is_local, Some ty1, Some ty2)
+      env, Tarray (Some ty1, Some ty2)
   | Tfun ft1, Tfun ft2 ->
       let env, ft1 = Inst.instantiate_ft env ft1 in
       let env, ft2 = Inst.instantiate_ft env ft2 in
@@ -199,8 +197,8 @@ and unify_ env r1 ty1 r2 ty2 =
         )
   | _, Tgeneric ("this", Some (_, Tapply ((_, x), _))) ->
       unify_ env r2 ty2 r1 ty1
-  | (Ttuple _ as ty), Tarray (_, None, None)
-  | Tarray (_, None, None), (Ttuple _ as ty) ->
+  | (Ttuple _ as ty), Tarray (None, None)
+  | Tarray (None, None), (Ttuple _ as ty) ->
       env, ty
   | Ttuple tyl1, Ttuple tyl2 ->
       let size1 = List.length tyl1 in

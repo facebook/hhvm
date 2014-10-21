@@ -35,10 +35,10 @@ let rec fully_expand seen env (r, ty) =
 and fully_expand_ seen env = function
   | Tvar _ -> assert false
   | Tmixed | Tgeneric _ | Tany | Tanon _ | Tprim _ as x -> x
-  | Tarray (b, ty1, ty2) ->
+  | Tarray (ty1, ty2) ->
       let ty1 = fully_expand_opt seen env ty1 in
       let ty2 = fully_expand_opt seen env ty2 in
-      Tarray (b, ty1, ty2)
+      Tarray (ty1, ty2)
   | Ttuple tyl ->
       Ttuple (List.map (fully_expand seen env) tyl)
   | Tunresolved tyl ->

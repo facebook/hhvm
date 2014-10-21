@@ -18,16 +18,14 @@ type visibility =
   | Vprivate of string
   | Vprotected of string
 
-type is_local_array = bool
-
 (* All the possible types, reason is a trace of why a type
-   was infered in a certain way.
+   was inferred in a certain way.
 *)
 type ty = Reason.t * ty_
 and ty_ =
   | Tany                          (* Unifies with anything *)
   | Tmixed                        (* ' with Nothing (mixed type) *)
-  | Tarray        of is_local_array * ty option * ty option
+  | Tarray        of ty option * ty option
   | Tgeneric      of string * ty option (* A generic type *)
   | Toption       of ty
   | Tprim         of Nast.tprim   (* All the primitive types: int, string, void, etc. *)

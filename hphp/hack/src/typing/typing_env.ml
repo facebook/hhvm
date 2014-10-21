@@ -180,9 +180,9 @@ let rec debug stack env (r, ty) =
   match ty with
   | Tunresolved tyl -> o "intersect("; debugl stack env tyl; o ")"
   | Ttuple _ -> o "tuple"
-  | Tarray (_, None, None) -> o "array"
-  | Tarray (_, Some x, None) -> o "array<"; debug stack env x; o ">"
-  | Tarray (_, Some x, Some y) -> o "array<"; debug stack env x; o ", ";
+  | Tarray (None, None) -> o "array"
+  | Tarray (Some x, None) -> o "array<"; debug stack env x; o ">"
+  | Tarray (Some x, Some y) -> o "array<"; debug stack env x; o ", ";
       debug stack env y; o ">"
   | Tarray _ -> assert false
   | Tmixed -> o "mixed"

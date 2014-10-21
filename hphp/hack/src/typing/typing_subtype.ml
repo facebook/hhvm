@@ -274,7 +274,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tapply ((_, coll), [tv_super])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, coll), [tv_super])), (r, Tarray (ty3, ty4))
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
       (match ty3, ty4 with
@@ -284,7 +284,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | Some ty3, Some ty4 ->
           sub_type env tv_super ty4
       )
-  | (_, Tapply ((_, coll), [tk_super; tv_super])), (r, Tarray (_, ty3, ty4))
+  | (_, Tapply ((_, coll), [tk_super; tv_super])), (r, Tarray (ty3, ty4))
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
          || coll = SN.Collections.cIndexish) ->
@@ -308,15 +308,15 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tstring)
   | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tnum)
     when xhp_child = SN.Classes.cXHPChild -> env
-  | (_, (Tarray (_, Some ty_super, None))), (_, (Tarray (_, Some ty_sub, None))) ->
+  | (_, (Tarray (Some ty_super, None))), (_, (Tarray (Some ty_sub, None))) ->
       sub_type env ty_super ty_sub
-  | (_, (Tarray (_, Some tk_super, Some tv_super))), (_, Tarray (_, Some tk_sub, Some tv_sub)) ->
+  | (_, (Tarray (Some tk_super, Some tv_super))), (_, Tarray (Some tk_sub, Some tv_sub)) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
-  | (_, Tarray (_, Some _, Some _)), (reason, Tarray (is_local, Some elt_ty, None)) ->
+  | (_, Tarray (Some _, Some _)), (reason, Tarray (Some elt_ty, None)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env ty_super (reason, Tarray (is_local, Some int_type, Some elt_ty))
+      sub_type env ty_super (reason, Tarray (Some int_type, Some elt_ty))
   | _, (_, Tany) -> env
   | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
   | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->

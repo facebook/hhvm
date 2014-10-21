@@ -124,7 +124,7 @@ let rec my_unify depth env ty1 ty2 =
       r, Toption (my_unify env ty1 ty2)
   | (r, Tarray _), (_, Tarray _) ->
       (try snd (Typing_ops.unify Pos.none Typing_reason.URnone env ty1 ty2)
-      with _ -> (r, Tarray (false, None, None)))
+      with _ -> (r, Tarray (None, None)))
   | (_, Tunresolved tyl), ty2
   | ty2, (_, Tunresolved tyl) ->
       List.fold_left (my_unify env) ty2 tyl
@@ -181,9 +181,9 @@ and normalize_ = function
       normalize_ (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
-  | Tarray (is_local, k, v) -> begin
-    try Tarray (is_local, opt_map normalize k, opt_map normalize v)
-    with Exit -> Tarray (false, None, None)
+  | Tarray (k, v) -> begin
+    try Tarray (opt_map normalize k, opt_map normalize v)
+    with Exit -> Tarray (None, None)
   end
   | Tgeneric _ as x -> x
   | Toption (_, (Toption (_, _) as ty)) -> normalize_ ty

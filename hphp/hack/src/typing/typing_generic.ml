@@ -32,7 +32,7 @@ end = struct
     | Tgeneric (x, _) -> raise (Found x)
     | Tanon _
     | Tany | Tmixed | Tprim _ -> ()
-    | Tarray (_, ty1, ty2) ->
+    | Tarray (ty1, ty2) ->
         ty_opt ty1; ty_opt ty2
     | Tvar _ -> () (* Expansion got rid of Tvars ... *)
     | Toption x -> ty x
@@ -65,10 +65,10 @@ let rename env old_name new_name ty_to_rename =
         env, (r, Tgeneric (name, ty))
     | Tanon _
     | Tany | Tmixed | Tprim _-> env, (r, t)
-    | Tarray (local, ty1, ty2) ->
+    | Tarray (ty1, ty2) ->
         let env, ty1 = ty_opt env ty1 in
         let env, ty2 = ty_opt env ty2 in
-        env, (r, Tarray (local, ty1, ty2))
+        env, (r, Tarray (ty1, ty2))
     | Tvar n ->
         let env, t = Env.get_type env n in
         let n' = Env.fresh() in

@@ -70,7 +70,7 @@ and check_typedef seen env (r, t) =
   match t with
   | Tany -> ()
   | Tmixed -> ()
-  | Tarray (_, ty1, ty2) ->
+  | Tarray (ty1, ty2) ->
       check_typedef_opt seen env ty1;
       check_typedef_opt seen env ty2;
       ()

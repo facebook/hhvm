@@ -77,21 +77,21 @@ let overload_extract_from_awaitable_list env p tyl =
 
 let gena env p ty =
   match snd (TUtils.fold_unresolved env ty) with
-  | _, Tarray (_, None, None) ->
+  | _, Tarray (None, None) ->
     env, ty
-  | r, Tarray (is_local, Some ty1, None) ->
+  | r, Tarray (Some ty1, None) ->
     let env, ty1 = overload_extract_from_awaitable env p ty1 in
-    env, (r, Tarray (is_local, Some ty1, None))
-  | r, Tarray (is_local, Some ty1, Some ty2) ->
+    env, (r, Tarray (Some ty1, None))
+  | r, Tarray (Some ty1, Some ty2) ->
     let env, ty2 = overload_extract_from_awaitable env p ty2 in
-    env, (r, Tarray (is_local, Some ty1, Some ty2))
+    env, (r, Tarray (Some ty1, Some ty2))
   | r, Ttuple tyl ->
     let env, tyl =
       overload_extract_from_awaitable_list env p tyl in
     env, (r, Ttuple tyl)
   | r, ty ->
     (* Oh well...let's at least make sure it is array-ish *)
-    let expected_ty = r, Tarray (true, None, None) in
+    let expected_ty = r, Tarray (None, None) in
     let env =
       Errors.try_
         (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
@@ -135,12 +135,12 @@ let rec gen_array_rec env p ty =
       | _ -> overload_extract_from_awaitable env p ety
   end in
   match snd (TUtils.fold_unresolved env ty) with
-  | r, Tarray (is_local, Some vty, None) ->
+  | r, Tarray (Some vty, None) ->
     let env, vty = is_array env vty in
-    env, (r, Tarray (is_local, Some vty, None))
-  | r, Tarray (is_local, kty, Some vty) ->
+    env, (r, Tarray (Some vty, None))
+  | r, Tarray (kty, Some vty) ->
     let env, vty = is_array env vty in
-    env, (r, Tarray (is_local, kty, Some vty))
+    env, (r, Tarray (kty, Some vty))
   | r, Ttuple tyl -> gen_array_va_rec env p tyl
   | _ -> gena env p ty
 

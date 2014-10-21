@@ -32,7 +32,7 @@ and hint_ p env = function
       then Errors.generic_array_strict p;
       let env, h1 = opt hint env h1 in
       let env, h2 = opt hint env h2 in
-      env, Tarray (true, h1, h2)
+      env, Tarray (h1, h2)
   | Hprim p -> env, Tprim p
   | Habstr (x, hopt) ->
       let env, ty_opt = opt hint env hopt in

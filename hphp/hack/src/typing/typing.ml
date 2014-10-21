@@ -248,22 +248,13 @@ and make_param_type_ ~for_body default env param =
       (* when checking the body of a function with a variadic
        * argument, "f(C ...$args)", $args is an array<C> ... *)
       let r = Reason.Rvar_param param_pos in
-      let is_local = true in
       let arr_values = r, t in
-      r, Tarray (is_local, Some arr_values, None)
+      r, Tarray (Some arr_values, None)
     | r, t when param.param_is_variadic ->
       (* ... but when checking a call to such a function: "f($a, $b)",
        * both $a and $b must be of type C *)
       Reason.Rvar_param param_pos, t
     | x -> x
-  in
-  let ty =
-    match ty with
-      | r, Tarray (_, x1, x2) ->
-        (* if an array is passed by reference, we don't want to trigger
-         * the copy on write *)
-        r, Tarray (param.param_is_reference, x1, x2)
-      | x -> x
   in
   TUtils.save_infer env param_pos ty;
   env, (Some param.param_name, ty)
@@ -716,7 +707,7 @@ and lvalue env e =
 and expr_ in_cond is_lvalue env (p, e) =
   match e with
   | Any -> env, (Reason.Rwitness p, Tany)
-  | Array [] -> env, (Reason.Rwitness p, Tarray (true, None, None))
+  | Array [] -> env, (Reason.Rwitness p, Tarray (None, None))
   | Array (x :: rl as l) ->
       check_consistent_fields x rl;
       let env, value = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
@@ -736,7 +727,7 @@ and expr_ in_cond is_lvalue env (p, e) =
       in
       (match x with
       | Nast.AFvalue _ ->
-          env, (Reason.Rwitness p, Tarray (true, Some value, None))
+          env, (Reason.Rwitness p, Tarray (Some value, None))
       | Nast.AFkvalue _ ->
           let env, key = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
           let env, keys =
@@ -745,7 +736,7 @@ and expr_ in_cond is_lvalue env (p, e) =
             fold_left_env (apply_for_env_fold TUtils.unresolved) env [] keys in
           let unify_key = Type.unify p Reason.URarray_key in
           let env, key = fold_left_env unify_key env key keys in
-          env, (Reason.Rwitness p, Tarray (true, Some key, Some value))
+          env, (Reason.Rwitness p, Tarray (Some key, Some value))
       )
   | ValCollection (name, el) ->
       let env, x = TUtils.in_var env (Reason.Rnone, Tunresolved []) in
@@ -1361,12 +1352,12 @@ and assign p env e1 ty2 =
             assign (fst e) env e elt_type
           end env el in
           env, ty2
-      | r, Tarray (_, Some elt_type, None) ->
+      | r, Tarray (Some elt_type, None) ->
           let env, _ = lfold begin fun env e ->
             assign (fst e) env e elt_type
           end env el in
           env, ty2
-      | r, Tarray (_, None, None)
+      | r, Tarray (None, None)
       | r, Tany ->
           let env, _ = lfold begin fun env e ->
             assign (fst e) env e (r, Tany)
@@ -1582,11 +1573,11 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       let rec get_array_filter_return_type env ty =
         let env, ety = Env.expand_type env ty in
         (match ety with
-        | (r, Tarray (_, None, None)) as array_type ->
+        | (r, Tarray (None, None)) as array_type ->
             env, array_type
-        | (r, Tarray (_, Some tv, None)) ->
+        | (r, Tarray (Some tv, None)) ->
             let env, tv = get_value_type env tv in
-            env, (r, Tarray (true, Some tv, None))
+            env, (r, Tarray (Some tv, None))
         | (r, Tunresolved x) ->
             let env, x = lmap get_array_filter_return_type env x in
             env, (r, Tunresolved x)
@@ -1605,7 +1596,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                 let env = SubType.sub_type env keyed_container ety in
                 let env, tv = get_value_type env tv in
                 env, (r, Tarray (
-                  true,
                   Some (explain_array_filter tk),
                   Some tv)
                 ))
@@ -1620,7 +1610,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                   let env = SubType.sub_type env container ety in
                   let env, tv = get_value_type env tv in
                   env, (r, Tarray (
-                    true,
                     Some (explain_array_filter (r, Tprim Tarraykey)),
                     Some tv)))
                 (fun _ -> env, res)))
@@ -1684,10 +1673,10 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
           let rec build_output_container
             (env:Env.env) (x:ty) : (Env.env * (ty -> ty)) =
             let env, x = Env.expand_type env x in (match x with
-              | (_, Tarray (_, None, None)) as array_type ->
+              | (_, Tarray (None, None)) as array_type ->
                 env, (fun _ -> array_type)
-              | (r, Tarray (_, _, None)) ->
-                env, (fun tr -> (r, Tarray (true, Some(tr), None)) )
+              | (r, Tarray (_, None)) ->
+                env, (fun tr -> (r, Tarray (Some(tr), None)) )
               | ((_, Tany) as any) ->
                 env, (fun _ -> any)
               | (r, Tunresolved x) ->
@@ -1704,7 +1693,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                   ) in
                   let env = SubType.sub_type env vector x in
                   env, (fun tr -> (r, Tarray (
-                    true,
                     Some(tr),
                     None)
                   )) in
@@ -1717,7 +1705,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                   ) in
                   let env = SubType.sub_type env keyed_container x in
                   env, (fun tr -> (r, Tarray (
-                    true,
                     Some(tk),
                     Some(tr))
                   )) in
@@ -1730,7 +1717,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                   ) in
                   let env = SubType.sub_type env container x in
                   env, (fun tr -> (r, Tarray (
-                    true,
                     Some((r, Tprim Tarraykey)),
                     Some(tr)))) in
                 Errors.try_
@@ -1754,7 +1740,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
               env, build_function output_container
             | _ ->
               env, build_function (fun tr ->
-                (r_fty, Tarray(true, Some(tr), None))))
+                (r_fty, Tarray(Some(tr), None))))
         | _ -> env, fty in
       let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
       call p env fty el []
@@ -1883,7 +1869,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       end env tyl
       in
       env, (fst ety1, Tunresolved tyl)
-  | Tarray (is_local, Some ty, None) ->
+  | Tarray (Some ty, None) ->
       let ty1 = Reason.Ridx (fst e2), Tprim Tint in
       let env, _ = Type.unify p Reason.URarray_get env ty2 ty1 in
       env, ty
@@ -1960,7 +1946,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       when is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env p ety1
-  | Tarray (is_local, Some k, Some v) ->
+  | Tarray (Some k, Some v) ->
       let env, ty2 = TUtils.unresolved env ty2 in
       let env, _ = Type.unify p Reason.URarray_get env k ty2 in
       (* The values in the array are not consistent
@@ -1972,7 +1958,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       | _, Tunresolved _ -> env, (Reason.Rwitness p, Tany)
       | _ -> env, v
       )
-  | Tany | Tarray (_, None, None) -> env, (Reason.Rnone, Tany)
+  | Tany | Tarray (None, None) -> env, (Reason.Rnone, Tany)
   | Tprim Tstring ->
       let ty = Reason.Rwitness p, Tprim Tstring in
       let env, ty = Type.unify p Reason.URnone env ty1 ty in
@@ -2050,7 +2036,7 @@ and array_append is_lvalue p env ty1 =
   let env, ty1 = TUtils.fold_unresolved env ty1 in
   let env, ety1 = Env.expand_type env ty1 in
   match snd ety1 with
-  | Tany | Tarray (_, None, None) -> env, (Reason.Rnone, Tany)
+  | Tany | Tarray (None, None) -> env, (Reason.Rnone, Tany)
   | Tgeneric (_, Some (_, Tapply ((_, n), [ty])))
   | Tapply ((_, n), [ty])
       when n = SN.Collections.cVector || n = SN.Collections.cSet ->
@@ -2058,7 +2044,7 @@ and array_append is_lvalue p env ty1 =
   | Tapply ((_, n), [tkey; tvalue]) when n = SN.Collections.cMap ->
       (* You can append a pair to a map *)
       env, (Reason.Rmap_append p, Tapply ((p, SN.Collections.cPair), [tkey; tvalue]))
-  | Tarray (is_local, Some ty, None) ->
+  | Tarray (Some ty, None) ->
       env, ty
   | Tobject ->
       if Env.is_strict env
@@ -2938,7 +2924,7 @@ and condition env tparamet =
       let env, ty = expr env e in
       let env, ety = Env.expand_type env ty in
       (match ety with
-      | _, Tarray (_, None, None)
+      | _, Tarray (None, None)
       | _, Tprim Tbool -> env
       | _ ->
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
@@ -3066,12 +3052,12 @@ and is_type env e tprim =
 and is_array env = function
   | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local (Reason.Rwitness p, Tarray (true, None, None))
+      Env.set_local env local (Reason.Rwitness p, Tarray (None, None))
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local (Reason.Rwitness p, Tarray (true, None, None))
+      Env.set_local env local (Reason.Rwitness p, Tarray (None, None))
   | _, Lvar (p, x) ->
-      Env.set_local env x (Reason.Rwitness p, Tarray (true, None, None))
+      Env.set_local env x (Reason.Rwitness p, Tarray (None, None))
   | _ -> env
 
 and string2 env idl =

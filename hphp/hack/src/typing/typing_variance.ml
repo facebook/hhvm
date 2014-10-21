@@ -405,7 +405,7 @@ and type_ root variance env (reason, ty) =
   match ty with
   | Tany -> env
   | Tmixed -> env
-  | Tarray (_, ty1, ty2) ->
+  | Tarray (ty1, ty2) ->
     let env = type_option root variance env ty1 in
     let env = type_option root variance env ty2 in
     env

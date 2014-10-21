@@ -80,7 +80,31 @@ private:
   smart::vector<const pcre_cache_entry*> m_overflow;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Cache management
+
+/*
+ * Initialize PCRE cache.
+ */
+void pcre_init();
+
+/*
+ * Clear PCRE cache.  Not thread safe - call only after parsing options.
+ */
+void pcre_reinit();
+
+/*
+ * Clean up thread-local PCREs.
+ */
+void pcre_session_exit();
+
+/*
+ * Dump the contents of the PCRE cache to filename.
+ */
 void pcre_dump_cache(const std::string& filename);
+
+///////////////////////////////////////////////////////////////////////////////
+// PHP API
 
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 

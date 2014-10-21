@@ -122,6 +122,10 @@ void (*g_vmProcessInit)();
 
 void timezone_init();
 
+void pcre_init();
+void pcre_reinit();
+void pcre_session_exit();
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

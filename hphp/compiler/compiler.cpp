@@ -144,6 +144,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
 int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
                    AsyncFileCacheSaver &fcThread);
 int runTarget(const CompilerOptions &po);
+void pcre_init();
 
 ///////////////////////////////////////////////////////////////////////////////
 

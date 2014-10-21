@@ -146,7 +146,11 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
   if (LIKELY(size <= kPackedCapCodeThreshold)) {
-    auto const cap = size;
+    auto cap = size;
+    if (auto const newCap = PackedArray::getMaxCapInPlaceFast(cap)) {
+      cap = newCap;
+    }
+    assert(cap > 0);
     ad = static_cast<ArrayData*>(
       MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
@@ -181,15 +185,12 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
 NEVER_INLINE
 ArrayData*
 MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
-  auto const cap = roundUpPackedCap(size);
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
-  auto const capCode = packedCapToCode(cap);
-  ad->m_kindAndSize = uint64_t{size} << 32 | capCode;  // sets kPackedKind
+  auto const ad = MakeReserveSlow(size);
+  // cap code is already set
+  ad->m_size = size;
   assert(ad->m_kind == kPackedKind);
   assert(ad->m_size == size);
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(packedCodeToCap(ad->m_packedCapCode) >= size);
   return ad;
 }
 

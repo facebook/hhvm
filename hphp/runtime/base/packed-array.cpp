@@ -201,11 +201,15 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
   DEBUG_ONLY auto const oldPos = old->m_pos;
 
   ArrayData* ad;
-  if (LIKELY((old->m_packedCapCode & 0xFFFFFFul) <=
-             kPackedCapCodeThreshold / 2)) {
-    assert((old->m_packedCapCode & 0xFFFFFFul) ==
-           packedCodeToCap(old->m_packedCapCode));
-    auto const cap = (old->m_packedCapCode & 0xFFFFFFul) * 2;
+  uint32_t oldCapCode = old->m_packedCapCode & 0xFFFFFFul;
+  auto cap = oldCapCode * 2;
+  if (LIKELY(cap <= kPackedCapCodeThreshold)) {
+    assert(oldCapCode == packedCodeToCap(old->m_packedCapCode));
+    // We add 1 to the cap, to make it use up all the memory to be allocated, if
+    // the original cap has been maximized.
+    if (auto capUpdated = getMaxCapInPlaceFast(++cap)) {
+      cap = capUpdated;
+    }
     ad = static_cast<ArrayData*>(
       MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
@@ -254,20 +258,41 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   auto const oldCap = packedCodeToCap(old->m_packedCapCode);
   static_assert(kMaxPackedCap >= MixedArray::MaxSize, "");
   if (UNLIKELY(oldCap > MixedArray::MaxSize / 2)) return nullptr;
-  auto const cap = roundUpPackedCap(oldCap * 2);
-  // The capacity should not change if it round trips into
-  // encoded form and back
-  ArrayData* ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-  auto const capCode = packedCapToCode(cap);
+  auto cap = roundUpPackedCap(oldCap * 2);
+  assert(cap > kPackedCapCodeThreshold);
+  ArrayData* ad = MixedArray::MakeReserveSlow(cap);
+  if (UNLIKELY(ad == nullptr)) return nullptr;
+  // ad->m_packedCapCode is already set correctly in MakeReserveSlow
+  // Assuming VPackedArray and PackedArray are the same in implementation
+  auto const capCode = ad->m_packedCapCode;
   auto const oldSize = old->m_size;
   ad->m_kindAndSize = uint64_t{oldSize} << 32 | capCode |
                       uint64_t{old->m_kind} << 24;
   assert(ad->isPacked());
   assert(ad->m_size == oldSize);
   assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+
   return ad;
+}
+
+/*
+ * Get the maximum possible capacity without reallocation. Return 0 if we don't
+ * have a quick way to get a better cap. Currently this only works for caps
+ * within kPackedCapCodeThreshold. It should be pretty fast.
+ */
+uint32_t PackedArray::getMaxCapInPlaceFast(uint32_t cap) {
+  if (UNLIKELY(cap > kPackedCapCodeThreshold)) {
+    return 0;
+  }
+  static_assert(sizeof(TypedValue) == 16, "sizeof TypedValue changed?");
+  static_assert(sizeof(ArrayData) == 16, "sizeof ArrayData changed?");
+  assert((cap + 1) * 16U <= kMaxSmartSize);
+  uint32_t newCap = (MemoryManager::smartSizeClass((cap + 1) << 4) >> 4) - 1;
+  if (UNLIKELY(newCap > kPackedCapCodeThreshold)) {
+    newCap &= ~0xFFU;
+  }
+  assert(newCap >= cap);
+  return newCap > cap ? newCap : 0;
 }
 
 NEVER_INLINE
@@ -534,9 +559,8 @@ ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
 NEVER_INLINE
 ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
   auto const cap = roundUpPackedCap(capacity);
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
+  auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
+  auto const ad = static_cast<ArrayData*>(MM().objMallocLogged(requestSize));
   auto const capCode = packedCapToCode(cap);
   ad->m_kindAndSize = capCode;    // zeros m_size and m_kind
   assert(ad->isPacked());
@@ -573,16 +597,9 @@ ArrayData* MixedArray::MakeReserveVArray(uint32_t capacity) {
 
 NEVER_INLINE
 ArrayData* MixedArray::MakeReserveVArraySlow(uint32_t capacity) {
-  auto const cap = roundUpPackedCap(capacity);
-  auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
-  auto const capCode = packedCapToCode(cap);
-  ad->m_kindAndSize = uint64_t{capCode} |
-                      uint64_t{kVPackedKind} << 24; // zeros m_size
-  assert(ad->isPacked());
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
-  assert(ad->m_size == 0);
+  // Avoid code duplication.
+  auto ad = MakeReserveSlow(capacity);
+  ad->m_kind = kVPackedKind;
   return ad;
 }
 

@@ -124,6 +124,7 @@ struct PackedArray {
   static ArrayData* NonSmartConvertHelper(const ArrayData*);
 
   static ptrdiff_t entriesOffset();
+  static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
 private:
   static ArrayData* Grow(ArrayData*);

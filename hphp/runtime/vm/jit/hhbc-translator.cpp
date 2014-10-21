@@ -616,6 +616,10 @@ void HhbcTranslator::emitNewArray(int capacity) {
   if (capacity == 0) {
     push(cns(staticEmptyArray()));
   } else {
+    if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
+      assert(newCap > static_cast<uint32_t>(capacity));
+      capacity = newCap;
+    }
     push(gen(NewArray, cns(capacity)));
   }
 }
@@ -630,6 +634,10 @@ void HhbcTranslator::emitNewMixedArray(int capacity) {
 
 void HhbcTranslator::emitNewVArray(int capacity) {
   // TODO(t4757263) staticEmptyArray() for VArray
+  if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
+    assert(newCap > static_cast<uint32_t>(capacity));
+    capacity = newCap;
+  }
   push(gen(NewVArray, cns(capacity)));
 }
 

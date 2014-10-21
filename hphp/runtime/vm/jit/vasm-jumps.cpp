@@ -73,6 +73,25 @@ void optimizeJmps(Vunit& unit) {
           // both edges have same target, change to jmp
           code.back() = jmp{ss[0]};
           changed = true;
+        } else {
+          auto& jcc_i = code.back().jcc_;
+          if (isEmpty(jcc_i.targets[0], Vinstr::fallback)) {
+            jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
+                        {jcc_i.targets[1], jcc_i.targets[0]}};
+          }
+          if (isEmpty(jcc_i.targets[1], Vinstr::fallback)) {
+            // replace jcc with fallbackcc and jmp
+            const auto& fb_i = unit.blocks[jcc_i.targets[1]].code[0].fallback_;
+            const auto t0 = jcc_i.targets[0];
+            const auto jcc_origin = code.back().origin;
+            code.pop_back();
+            code.emplace_back(
+              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest, fb_i.trflags});
+            code.back().origin = jcc_origin;
+            code.emplace_back(jmp{t0});
+            code.back().origin = jcc_origin;
+            changed = true;
+          }
         }
       }
       if (code.back().op == Vinstr::jmp) {

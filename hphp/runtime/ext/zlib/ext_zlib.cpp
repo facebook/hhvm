@@ -551,7 +551,7 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
     return false;
   }
 #else
-  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+  int ret = LZ4_decompress_fast(compressed_ptr, uncompressed, dsize);
 
   if (ret <= 0 || ret > inSize) {
     return false;

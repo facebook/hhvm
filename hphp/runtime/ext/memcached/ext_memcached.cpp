@@ -200,19 +200,10 @@ const StaticString
   s_cas("cas");
 
 // INI settings
-struct MEMCACHEDGlobals final : RequestEventHandler {
+struct MEMCACHEDGlobals final {
   std::string sess_prefix;
-
-  MEMCACHEDGlobals() {}
-
-  void requestInit() override {
-    sess_prefix = "memc.sess.key.";
-  }
-
-  void requestShutdown() override {}
 };
-
-IMPLEMENT_STATIC_REQUEST_LOCAL(MEMCACHEDGlobals, s_memcached_globals);
+static __thread MEMCACHEDGlobals* s_memcached_globals;
 #define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {
@@ -1292,8 +1283,17 @@ class MemcachedExtension : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
   void threadInit() override {
+    if (s_memcached_globals) {
+      return;
+    }
+    s_memcached_globals = new MEMCACHEDGlobals;
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
+  }
+
+  void threadShutdown() override {
+    delete s_memcached_globals;
+    s_memcached_globals = nullptr;
   }
 
   virtual void moduleInit() {

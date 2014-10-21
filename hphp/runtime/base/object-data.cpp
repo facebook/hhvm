@@ -1718,7 +1718,7 @@ void ObjectData::getProp(const Class* klass, bool pubOnly,
                          std::vector<bool>& inserted) const {
   if (prop->attrs()
       & (AttrStatic | // statics aren't part of individual instances
-        | AttrBuiltin // runtime-internal attrs, such as the <<Memoize>> cache
+         AttrBuiltin  // runtime-internal attrs, such as the <<Memoize>> cache
         )) {
     return;
   }

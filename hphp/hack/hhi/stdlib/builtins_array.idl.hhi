@@ -82,7 +82,6 @@ function array_replace($array1, ...) { }
 function array_multisort(&$arr1, ...) { }
 function array_pad($input, $pad_size, $pad_value) { }
 function array_pop(&$array) { }
-function array_product($array) { }
 function array_push(&$array, $var, ...) { }
 function array_rand($input, $num_req = 1) { }
 function array_reduce($input, $callback, $initial = null) { }
@@ -91,7 +90,6 @@ function array_search($needle, $haystack, $strict = false) { }
 function array_shift(&$array) { }
 function array_slice($array, $offset, $length = null, $preserve_keys = false) { }
 function array_splice(&$input, $offset, $length = null, $replacement = null) { }
-function array_sum($array) { }
 function array_unique($array, $sort_flags = 2) { }
 function array_unshift(&$array, $var, ...) { }
 function array_values($input) { }

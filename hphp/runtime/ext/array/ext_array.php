@@ -291,13 +291,13 @@ function array_pop(mixed &$array): mixed;
 /**
  * array_product() returns the product of values in an array.
  *
- * @param mixed $array - The array.
+ * @param Container<T> $input - The input array or Collection.
  *
- * @return mixed - Returns the product as an integer or float.
+ * @return num - Returns the product as an integer or float.
  *
  */
 <<__Native, __IsFoldable>>
-function array_product(mixed $array): mixed;
+function array_product(mixed $input): mixed;
 
 /**
  * array_push() treats array as a stack, and pushes the passed variables onto
@@ -475,13 +475,13 @@ function array_splice(mixed &$input,
 /**
  * array_sum() returns the sum of values in an array.
  *
- * @param mixed $array - The input array.
+ * @param Container<T> $input - The input array or Collection.
  *
- * @return mixed - Returns the sum of values as an integer or float.
+ * @return num - Returns the sum of values as an integer or float.
  *
  */
 <<__Native, __IsFoldable>>
-function array_sum(mixed $array): mixed;
+function array_sum(mixed $input): mixed;
 
 /**
  * Takes an input array and returns a new array without duplicate values.

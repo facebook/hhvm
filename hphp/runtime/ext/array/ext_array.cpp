@@ -600,15 +600,57 @@ Variant HHVM_FUNCTION(array_pop,
 }
 
 Variant HHVM_FUNCTION(array_product,
-                      const Variant& array) {
-  getCheckedArray(array);
-  int64_t i;
-  double d;
-  if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {
-    return i;
-  } else {
-    return d;
+                      const Variant& input) {
+  if (UNLIKELY(!isContainer(input))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
+    return init_null();
   }
+
+  int64_t i = 1;
+  ArrayIter iter(input);
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+    switch (entry.getType()) {
+    case KindOfDouble: {
+      goto DOUBLE;
+    }
+    case KindOfStaticString:
+    case KindOfString: {
+      int64_t ti;
+      double td;
+      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+          KindOfInt64) {
+        i *= ti;
+        break;
+      } else {
+        goto DOUBLE;
+      }
+    }
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource: {
+      break;
+    }
+    default: {
+      i *= entry.toInt64();
+      break;
+    }
+    }
+  }
+  return i;
+
+DOUBLE:
+  double d = i;
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
+        !entry.is(KindOfResource)) {
+      d *= entry.toDouble();
+    }
+  }
+  return d;
 }
 
 Variant HHVM_FUNCTION(array_push,
@@ -823,15 +865,57 @@ Variant HHVM_FUNCTION(array_splice,
 }
 
 Variant HHVM_FUNCTION(array_sum,
-                      const Variant& array) {
-  getCheckedArray(array);
-  int64_t i;
-  double d;
-  if (ArrayUtil::Sum(arr_array, &i, &d) == KindOfInt64) {
-    return i;
-  } else {
-    return d;
+                      const Variant& input) {
+  if (UNLIKELY(!isContainer(input))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
+    return init_null();
   }
+
+  int64_t i = 0;
+  ArrayIter iter(input);
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+    switch (entry.getType()) {
+    case KindOfDouble: {
+      goto DOUBLE;
+    }
+    case KindOfStaticString:
+    case KindOfString: {
+      int64_t ti;
+      double td;
+      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+          KindOfInt64) {
+        i += ti;
+        break;
+      } else {
+        goto DOUBLE;
+      }
+    }
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource: {
+      break;
+    }
+    default: {
+      i += entry.toInt64();
+      break;
+    }
+    }
+  }
+  return i;
+
+DOUBLE:
+  double d = i;
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRef());
+    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
+        !entry.is(KindOfResource)) {
+      d += entry.toDouble();
+    }
+  }
+  return d;
 }
 
 Variant HHVM_FUNCTION(array_unshift,

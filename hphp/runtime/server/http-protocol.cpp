@@ -872,6 +872,7 @@ void HttpProtocol::DecodeRfc1867(Transport *transport,
 }
 
 const char *HttpProtocol::GetReasonString(int code) {
+  // https://tools.ietf.org/html/rfc7231#section-6.1
   switch (code) {
   case 100: return "Continue";
   case 101: return "Switching Protocols";
@@ -882,7 +883,6 @@ const char *HttpProtocol::GetReasonString(int code) {
   case 204: return "No Content";
   case 205: return "Reset Content";
   case 206: return "Partial Content";
-  case 207: return "Multi-Status";
   case 300: return "Multiple Choices";
   case 301: return "Moved Permanently";
   case 302: return "Found";
@@ -898,24 +898,24 @@ const char *HttpProtocol::GetReasonString(int code) {
   case 405: return "Method Not Allowed";
   case 406: return "Not Acceptable";
   case 407: return "Proxy Authentication Required";
-  case 408: return "Request Time-out";
+  case 408: return "Request Timeout";
   case 409: return "Conflict";
   case 410: return "Gone";
   case 411: return "Length Required";
   case 412: return "Precondition Failed";
-  case 413: return "Request Entity Too Large";
-  case 414: return "Request-URI Too Large";
+  case 413: return "Payload Too Large";
+  case 414: return "URI Too Long";
   case 415: return "Unsupported Media Type";
-  case 416: return "Requested range not satisfiable";
+  case 416: return "Range Not Satisfiable";
   case 417: return "Expectation Failed";
   case 500: return "Internal Server Error";
   case 501: return "Not Implemented";
   case 502: return "Bad Gateway";
   case 503: return "Service Unavailable";
-  case 504: return "Gateway Time-out";
-  case 505: return "HTTP Version not supported";
+  case 504: return "Gateway Timeout";
+  case 505: return "HTTP Version Not Supported";
   }
-  return "Bad Response";
+  return "";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

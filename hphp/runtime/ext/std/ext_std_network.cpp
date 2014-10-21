@@ -968,8 +968,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
       transport->addHeader(newHeader.empty() ? header : newHeader);
     }
     if (http_response_code) {
-      transport->setResponse(http_response_code,
-                             "explicit_header_response_code");
+      transport->setResponse(http_response_code);
     }
   }
 }
@@ -981,7 +980,7 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   if (transport) {
     *s_response_code = transport->getResponseCode();
     if (response_code) {
-      transport->setResponse(response_code, "explicit_header_response_code");
+      transport->setResponse(response_code);
     }
   }
 

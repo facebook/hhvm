@@ -518,5 +518,39 @@ bool UserFile::touch(const String& path, int64_t mtime, int64_t atime) {
   return false;
 }
 
+bool UserFile::chown(const String& path, const Variant& user) {
+  bool invoked = false;
+  Variant ret;
+  PackedArrayInit init(3);
+  init.append(path);
+  if (user.isString()) {
+    init
+      .append(2) // STREAM_META_OWNER_NAME
+      .append(user.toString());
+    ret = invoke(
+      m_StreamMetadata,
+      s_stream_metadata,
+      init.toArray(),
+      invoked
+    );
+  } else {
+    init
+      .append(3) // STREAM_META_OWNER
+      .append(user.toInt32());
+    ret = invoke(
+      m_StreamMetadata,
+      s_stream_metadata,
+      init.toArray(),
+      invoked
+    );
+  }
+  if (invoked && ret.toBoolean() == true) {
+    return true;
+  }
+
+  raise_warning("\"%s::chown\" call failed", m_cls->name()->data());
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

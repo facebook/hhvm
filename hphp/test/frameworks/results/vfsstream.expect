@@ -629,7 +629,7 @@ org\bovigo\vfs\vfsStreamWrapperTestCase::chmod
 org\bovigo\vfs\vfsStreamWrapperTestCase::chmodModifiesPermissions
 F
 org\bovigo\vfs\vfsStreamWrapperTestCase::chownChangesUser
-F
+.
 org\bovigo\vfs\vfsStreamWrapperTestCase::chownDoesNotWorkOnVfsStreamUrls
 .
 org\bovigo\vfs\vfsStreamWrapperTestCase::directoriesAndNonExistingFilesAreNeverExecutable

@@ -89,6 +89,10 @@ using namespace jit::reg;
  */
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
+            const Func* vmFunc, bool resumed,
+            TransID profTransId) ATTRIBUTE_NORETURN;
+
+void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc, bool resumed, TransID profTransId) {
   if (dumpIREnabled()) {
     auto const phpFile = vmFunc->filename()->data();

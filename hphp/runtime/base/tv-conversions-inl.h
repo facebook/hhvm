@@ -31,10 +31,7 @@ inline bool cellToBool(Cell cell) {
   case KindOfDouble:        return cell.m_data.dbl != 0;
   case KindOfStaticString:
   case KindOfString:        return cell.m_data.pstr->toBoolean();
-
-  // Note that this is intentionally incorrect for NameValueTableWrapper, for
-  // which getSize() will always return -1, empty or not.
-  case KindOfArray:         return !!cell.m_data.parr->getSize();
+  case KindOfArray:         return !!cell.m_data.parr->size();
 
   case KindOfObject:        return cell.m_data.pobj->o_toBoolean();
   case KindOfResource:      return cell.m_data.pres->o_toBoolean();

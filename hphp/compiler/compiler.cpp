@@ -27,7 +27,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/json.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db-conn.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-util.h"
@@ -95,7 +94,6 @@ struct CompilerOptions {
   int revision;
   bool genStats;
   bool keepTempDir;
-  string dbStats;
   bool noTypeInference;
   int logLevel;
   bool force;
@@ -274,9 +272,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
-    ("db-stats", value<string>(&po.dbStats),
-     "database connection string to save code errors: "
-     "<username>:<password>@<host>:<port>/<db>")
     ("config,c", value<vector<string> >(&po.config)->composing(),
      "config file name")
     ("config-dir", value<string>(&po.configDir),
@@ -626,24 +621,12 @@ int process(const CompilerOptions &po) {
       }
 
       // saving stats
-      if (po.genStats || !po.dbStats.empty()) {
+      if (po.genStats) {
         int seconds = timer.getMicroSeconds() / 1000000;
 
         Logger::Info("saving code errors and stats...");
         Timer timer(Timer::WallTime, "saving stats");
-
-        if (!po.dbStats.empty()) {
-          try {
-            ServerDataPtr server = ServerData::Create(po.dbStats);
-            int runId = package.saveStatsToDB(server, seconds, po.branch,
-                                              po.revision);
-            package.commitStats(server, runId);
-          } catch (const DatabaseException& e) {
-            Logger::Error("%s", e.what());
-          }
-        } else {
-          package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
-        }
+        package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
       }
       package.resetAr();
     });

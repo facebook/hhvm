@@ -29,7 +29,6 @@
 
 #include "folly/String.h"
 
-#include "hphp/util/db-conn.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/externals.h"

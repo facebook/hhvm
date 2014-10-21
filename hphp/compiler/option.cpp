@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db-query.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/process.h"
 #include "hphp/hhbbc/hhbbc.h"

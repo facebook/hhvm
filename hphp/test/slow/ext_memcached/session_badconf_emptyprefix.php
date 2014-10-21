@@ -6,7 +6,7 @@ ini_set('session.save_path', 'localhost:11211');
 
 error_reporting(0);
 function handler($errno, $errstr) {
-	echo "$errstr\n";
+  echo "$errstr\n";
 }
 
 set_error_handler('handler', E_ALL);

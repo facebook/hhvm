@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
-#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/process/ext_process.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -4419,7 +4419,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   char *all_headers = (char *)device.buffer;
 
-  String cmd = f_escapeshellcmd(extra_cmd);
+  String cmd = HHVM_FN(escapeshellcmd)(extra_cmd);
   bool ret = (!err && php_mail(to_r, encoded_subject.data(),
                                encoded_message.data(),
                                all_headers, cmd.data()));

@@ -44,7 +44,6 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_pdo.h"
 #include "hphp/runtime/ext/ext_posix.h"
-#include "hphp/runtime/ext/ext_process.h"
 #include "hphp/runtime/ext/ext_server.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_soap.h"

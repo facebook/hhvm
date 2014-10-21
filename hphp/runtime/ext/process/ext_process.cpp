@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/process/ext_process.h"
 
 #include <cstdlib>
 #include <vector>
@@ -120,14 +120,50 @@ static bool check_cmd(const char *cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(pcntl, NO_EXTENSION_VERSION_YET);
+static class ProcessExtension : public Extension {
+public:
+  ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(pcntl_alarm);
+    HHVM_FE(pcntl_exec);
+    HHVM_FE(pcntl_fork);
+    HHVM_FE(pcntl_getpriority);
+    HHVM_FE(pcntl_setpriority);
+    HHVM_FE(pcntl_signal);
+    HHVM_FE(pcntl_wait);
+    HHVM_FE(pcntl_waitpid);
+    HHVM_FE(pcntl_wexitstatus);
+    HHVM_FE(pcntl_signal_dispatch);
+    HHVM_FE(pcntl_wifexited);
+    HHVM_FE(pcntl_wifsignaled);
+    HHVM_FE(pcntl_wifstopped);
+    HHVM_FE(pcntl_wstopsig);
+    HHVM_FE(pcntl_wtermsig);
+    HHVM_FE(shell_exec);
+    HHVM_FE(exec);
+    HHVM_FE(passthru);
+    HHVM_FE(system);
+    HHVM_FE(proc_open);
+    HHVM_FE(proc_terminate);
+    HHVM_FE(proc_close);
+    HHVM_FE(proc_get_status);
+    HHVM_FE(proc_nice);
+    HHVM_FE(escapeshellarg);
+    HHVM_FE(escapeshellcmd);
 
-int64_t f_pcntl_alarm(int seconds) {
+    loadSystemlib("process");
+  }
+} s_process_extension;
+
+int64_t HHVM_FUNCTION(pcntl_alarm,
+                      int seconds) {
   return alarm(seconds);
 }
 
-void f_pcntl_exec(const String& path, const Array& args /* = null_array */,
-                  const Array& envs /* = null_array */) {
+void HHVM_FUNCTION(pcntl_exec,
+                   const String& path,
+                   const Array& args /* = null_array */,
+                   const Array& envs /* = null_array */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
     return;
   }
@@ -164,7 +200,7 @@ void f_pcntl_exec(const String& path, const Array& args /* = null_array */,
   free(argv);
 }
 
-int64_t f_pcntl_fork() {
+int64_t HHVM_FUNCTION(pcntl_fork) {
   if (RuntimeOption::ServerExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
@@ -181,8 +217,9 @@ int64_t f_pcntl_fork() {
   return pid;
 }
 
-Variant f_pcntl_getpriority(int pid /* = 0 */,
-                            int process_identifier /* = 0 */) {
+Variant HHVM_FUNCTION(pcntl_getpriority,
+                      int pid /* = 0 */,
+                      int process_identifier /* = 0 */) {
   if (pid == 0) {
     pid = getpid();
   }
@@ -211,8 +248,10 @@ Variant f_pcntl_getpriority(int pid /* = 0 */,
   return pri;
 }
 
-bool f_pcntl_setpriority(int priority, int pid /* = 0 */,
-                         int process_identifier /* = 0 */) {
+bool HHVM_FUNCTION(pcntl_setpriority,
+                   int priority,
+                   int pid /* = 0 */,
+                   int process_identifier /* = 0 */) {
   if (pid == 0) {
     pid = getpid();
   }
@@ -321,7 +360,7 @@ public:
 };
 static SignalHandlersStaticInitializer s_signal_handlers_initializer;
 
-bool f_pcntl_signal_dispatch() {
+bool HHVM_FUNCTION(pcntl_signal_dispatch) {
   if (!signalHandlersInited()) return true;
   int *signaled = s_signal_handlers->signaled;
   for (int i = 0; i < _NSIG; i++) {
@@ -336,8 +375,10 @@ bool f_pcntl_signal_dispatch() {
   return true;
 }
 
-bool f_pcntl_signal(int signo, const Variant& handler,
-                    bool restart_syscalls /* = true */) {
+bool HHVM_FUNCTION(pcntl_signal,
+                   int signo,
+                   const Variant& handler,
+                   bool restart_syscalls /* = true */) {
   /* Special long value case for SIG_DFL and SIG_IGN */
   if (handler.isInteger()) {
     int64_t handle = handler.toInt64();
@@ -366,7 +407,9 @@ bool f_pcntl_signal(int signo, const Variant& handler,
   return true;
 }
 
-int64_t f_pcntl_wait(VRefParam status, int options /* = 0 */) {
+int64_t HHVM_FUNCTION(pcntl_wait,
+                      VRefParam status,
+                      int options /* = 0 */) {
   int child_id;
   int nstatus = 0;
   child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
@@ -379,22 +422,45 @@ int64_t f_pcntl_wait(VRefParam status, int options /* = 0 */) {
   return child_id;
 }
 
-int64_t f_pcntl_waitpid(int pid, VRefParam status, int options /* = 0 */) {
+int64_t HHVM_FUNCTION(pcntl_waitpid,
+                      int pid,
+                      VRefParam status,
+                      int options /* = 0 */) {
   int nstatus = status;
   pid_t child_id = LightProcess::pcntl_waitpid((pid_t)pid, &nstatus, options);
   status = nstatus;
   return child_id;
 }
 
-int64_t f_pcntl_wexitstatus(int status) {
+int64_t HHVM_FUNCTION(pcntl_wexitstatus,
+                      int status) {
   return WEXITSTATUS(status);
 }
 
-bool f_pcntl_wifexited(int status) { return WIFEXITED(status);}
-bool f_pcntl_wifsignaled(int status) { return WIFSIGNALED(status);}
-bool f_pcntl_wifstopped(int status) { return WIFSTOPPED(status);}
-int64_t f_pcntl_wstopsig(int status) { return WSTOPSIG(status);}
-int64_t f_pcntl_wtermsig(int status) { return WTERMSIG(status);}
+bool HHVM_FUNCTION(pcntl_wifexited,
+                   int status) {
+  return WIFEXITED(status);
+}
+
+bool HHVM_FUNCTION(pcntl_wifsignaled,
+                   int status) {
+  return WIFSIGNALED(status);
+}
+
+bool HHVM_FUNCTION(pcntl_wifstopped,
+                   int status) {
+  return WIFSTOPPED(status);
+}
+
+int64_t HHVM_FUNCTION(pcntl_wstopsig,
+                      int status) {
+  return WSTOPSIG(status);
+}
+
+int64_t HHVM_FUNCTION(pcntl_wtermsig,
+                      int status) {
+  return WTERMSIG(status);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // popen
@@ -439,7 +505,8 @@ private:
   FILE *m_proc;
 };
 
-Variant f_shell_exec(const String& cmd) {
+Variant HHVM_FUNCTION(shell_exec,
+                      const String& cmd) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd.c_str());
   if (!fp) return init_null();
@@ -453,8 +520,10 @@ Variant f_shell_exec(const String& cmd) {
   return ret;
 }
 
-String f_exec(const String& command, VRefParam output /* = null */,
-              VRefParam return_var /* = null */) {
+String HHVM_FUNCTION(exec,
+                     const String& command,
+                     VRefParam output /* = null */,
+                     VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
   if (!fp) return empty_string();
@@ -483,7 +552,9 @@ String f_exec(const String& command, VRefParam output /* = null */,
   return HHVM_FN(rtrim)(lines[count - 1].toString());
 }
 
-void f_passthru(const String& command, VRefParam return_var /* = null */) {
+void HHVM_FUNCTION(passthru,
+                   const String& command,
+                   VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
   if (!fp) return;
@@ -501,7 +572,9 @@ void f_passthru(const String& command, VRefParam return_var /* = null */) {
   return_var = ret;
 }
 
-String f_system(const String& command, VRefParam return_var /* = null */) {
+String HHVM_FUNCTION(system,
+                     const String& command,
+                     VRefParam return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command.c_str());
   if (!fp) return empty_string();
@@ -790,10 +863,13 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
   return Resource(proc);
 }
 
-Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pipes,
-                    const String& cwd /* = null_string */,
-                    const Variant& env /* = null_variant */,
-                    const Variant& other_options /* = null_variant */) {
+Variant HHVM_FUNCTION(proc_open,
+                      const String& cmd,
+                      const Array& descriptorspec,
+                      VRefParam pipes,
+                      const String& cwd /* = null_string */,
+                      const Variant& env /* = null_variant */,
+                      const Variant& other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }
@@ -898,13 +974,15 @@ Variant f_proc_open(const String& cmd, const Array& descriptorspec, VRefParam pi
   _exit(127);
 }
 
-bool f_proc_terminate(const Resource& process,
-                      int signal /* = SIGTERM */) {
+bool HHVM_FUNCTION(proc_terminate,
+                   const Resource& process,
+                   int signal /* = SIGTERM */) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
   return kill(proc->child, signal) == 0;
 }
 
-int64_t f_proc_close(const Resource& process) {
+int64_t HHVM_FUNCTION(proc_close,
+                      const Resource& process) {
   return process.getTyped<ChildProcess>()->close();
 }
 
@@ -918,7 +996,8 @@ const StaticString
   s_termsig("termsig"),
   s_stopsig("stopsig");
 
-Array f_proc_get_status(const Resource& process) {
+Array HHVM_FUNCTION(proc_get_status,
+                    const Resource& process) {
   ChildProcess *proc = process.getTyped<ChildProcess>();
 
   errno = 0;
@@ -958,7 +1037,8 @@ Array f_proc_get_status(const Resource& process) {
   );
 }
 
-bool f_proc_nice(int increment) {
+bool HHVM_FUNCTION(proc_nice,
+                   int increment) {
   if (nice(increment) < 0 && errno) {
     raise_warning("Only a super user may attempt to increase the "
                     "priority of a process");
@@ -972,7 +1052,8 @@ bool f_proc_nice(int increment) {
 
 const StaticString s_twosinglequotes("''");
 
-String f_escapeshellarg(const String& arg) {
+String HHVM_FUNCTION(escapeshellarg,
+                     const String& arg) {
   if (!arg.empty()) {
     return string_escape_shell_arg(arg.c_str());
   } else if (!RuntimeOption::EnableHipHopSyntax) {
@@ -981,7 +1062,8 @@ String f_escapeshellarg(const String& arg) {
   return arg;
 }
 
-String f_escapeshellcmd(const String& command) {
+String HHVM_FUNCTION(escapeshellcmd,
+                     const String& command) {
   if (!command.empty()) {
     return string_escape_shell_cmd(command.c_str());
   }

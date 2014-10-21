@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/ext_process.h"
+#include "hphp/runtime/ext/process/ext_process.h"
 
 namespace HPHP {
 
@@ -112,9 +112,9 @@ bool HHVM_FUNCTION(mail,
   subject2 = php_trim(subject2);
 
   if (!RuntimeOption::MailForceExtraParameters.empty()) {
-    params2 = f_escapeshellcmd(RuntimeOption::MailForceExtraParameters);
+    params2 = HHVM_FN(escapeshellcmd)(RuntimeOption::MailForceExtraParameters);
   } else {
-    params2 = f_escapeshellcmd(params2);
+    params2 = HHVM_FN(escapeshellcmd)(params2);
   }
 
   return php_mail(to2, subject2, message2, headers2, params2);

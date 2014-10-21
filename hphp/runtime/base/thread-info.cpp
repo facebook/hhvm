@@ -180,8 +180,8 @@ ssize_t check_request_surprise(ThreadInfo* info) {
     }
   }
   if (do_signaled) {
-    extern bool f_pcntl_signal_dispatch();
-    f_pcntl_signal_dispatch();
+    extern bool HHVM_FN(pcntl_signal_dispatch)();
+    HHVM_FN(pcntl_signal_dispatch)();
   }
 
   if (pendingException) {

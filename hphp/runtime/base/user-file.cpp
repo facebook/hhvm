@@ -289,12 +289,12 @@ bool UserFile::truncate(int64_t size) {
 bool UserFile::lock(int operation, bool &wouldBlock) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
-    op |= LOCK_NB;
+    op |= 4; // PHP LOCK_NB = 4
   }
   switch (operation & ~LOCK_NB) {
-    case LOCK_SH: op |= LOCK_SH; break;
-    case LOCK_EX: op |= LOCK_EX; break;
-    case LOCK_UN: op |= LOCK_UN; break;
+    case LOCK_SH: op |= 1; break; // PHP LOCK_SH = 1
+    case LOCK_EX: op |= 2; break; // PHP LOCK_EX = 2
+    case LOCK_UN: op |= 3; break; // PHP LOCK_UN = 3
   }
 
   // bool stream_lock(int $operation)

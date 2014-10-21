@@ -21,8 +21,8 @@ type client = in_channel * out_channel
 
 module type SERVER_PROGRAM = sig
   val preinit : ServerArgs.options -> unit
-  val init : genv -> env -> Path.path -> env
-  val run_once_and_exit : genv -> env -> Path.path -> unit
+  val init : genv -> env -> env
+  val run_once_and_exit : genv -> env -> unit
   val recheck: genv -> env -> (SSet.t * SSet.t) -> env
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
@@ -91,7 +91,8 @@ end = struct
     let ready_socket_l, _, _ = Unix.select [socket] [] [] (1.0) in
     ready_socket_l <> []
 
-  let serve genv env socket root =
+  let serve genv env socket =
+    let root = ServerArgs.root genv.options in
     let env = ref env in
     while true do
       if not (Lock.check root "lock") then begin
@@ -111,12 +112,12 @@ end = struct
       if has_client then Program.handle_connection genv !env socket;
     done
 
-  let create_program_init genv env root = fun () ->
+  let create_program_init genv env = fun () ->
     match ServerArgs.load_save_opt genv.options with
-    | None -> Program.init genv env root
+    | None -> Program.init genv env
     | Some (ServerArgs.Save fn) ->
         let chan = open_out_no_fail fn in
-        let env = Program.init genv env root in
+        let env = Program.init genv env in
         Marshal.to_channel chan env [];
         Program.marshal chan;
         close_out_no_fail fn chan;
@@ -160,17 +161,17 @@ end = struct
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
     let env = ServerEnvBuild.make_env options in
-    let program_init = create_program_init genv env root in
+    let program_init = create_program_init genv env in
     let is_check_mode = ServerArgs.check_mode genv.options in
     if is_check_mode
     then
       let env = program_init () in
-      Program.run_once_and_exit genv env root
+      Program.run_once_and_exit genv env
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
       EventLogger.init_done ();
-      serve genv env socket root
+      serve genv env socket
 
   let get_log_file root =
     let user = Sys.getenv "USER" in

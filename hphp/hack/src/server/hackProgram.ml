@@ -208,7 +208,8 @@ module Program : Server.SERVER_PROGRAM = struct
     let js_next_files = Find.make_next_files_js ~filter:(fun _ -> true) dir in
     fun () -> php_next_files () @ js_next_files ()
 
-  let init genv env root =
+  let init genv env =
+    let root = ServerArgs.root genv.options in
     let next_files_hhi =
       match Hhi.get_hhi_root () with
       | Some hhi_root -> make_next_files hhi_root
@@ -220,14 +221,14 @@ module Program : Server.SERVER_PROGRAM = struct
       | x -> x in
     ServerInit.init genv env next_files
 
-  let run_once_and_exit genv env root =
+  let run_once_and_exit genv env =
     ServerError.print_errorl (ServerArgs.json_mode genv.options)
                              env.errorl stdout;
     match ServerArgs.convert genv.options with
     | None ->
         exit (if env.errorl = [] then 0 else 1)
     | Some dirname ->
-        ServerConvert.go genv env root dirname;
+        ServerConvert.go genv env dirname;
         exit 0
 
   let recheck genv env updates =

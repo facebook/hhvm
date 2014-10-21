@@ -35,6 +35,13 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_Array("Array");
+const StaticString s_isEmpty("isEmpty");
+const StaticString s_1("1");
+const StaticString s_empty("");
+
+//////////////////////////////////////////////////////////////////////
+
 StackValueInfo::StackValueInfo(SSATmp* value)
   : value(value)
   , knownType(value->type())
@@ -476,54 +483,16 @@ SSATmp* Simplifier::simplifyGetCtxFwdCall(const IRInstruction* inst) {
 SSATmp* Simplifier::simplifyConvClsToCctx(const IRInstruction* inst) {
   auto* srcInst = inst->src(0)->inst();
   if (srcInst->is(LdClsCctx)) return srcInst->src(0);
-
   return nullptr;
 }
-
-SSATmp* Simplifier::queryJmpImpl(const IRInstruction* inst) {
-  SSATmp* src1 = inst->src(0);
-  SSATmp* src2 = inst->src(1);
-  Opcode opc = inst->op();
-  // reuse the logic in cmpImpl
-  SSATmp* newCmp = cmpImpl(queryJmpToQueryOp(opc), nullptr, src1, src2);
-  if (!newCmp) return nullptr;
-
-  // Become an equivalent conditional jump and reuse that logic.
-  return gen(JmpNZero, inst->taken(), newCmp);
-}
-
-#define QUERY_JMP(x)                                      \
-SSATmp* Simplifier::simplify##x(const IRInstruction* i) { \
-  return queryJmpImpl(i);                                 \
-}
-QUERY_JMP(JmpGt)
-QUERY_JMP(JmpGte)
-QUERY_JMP(JmpLt)
-QUERY_JMP(JmpLte)
-QUERY_JMP(JmpEq)
-QUERY_JMP(JmpNeq)
-QUERY_JMP(JmpGtInt)
-QUERY_JMP(JmpGteInt)
-QUERY_JMP(JmpLtInt)
-QUERY_JMP(JmpLteInt)
-QUERY_JMP(JmpEqInt)
-QUERY_JMP(JmpNeqInt)
-QUERY_JMP(JmpSame)
-QUERY_JMP(JmpNSame)
-#undef QUERY_JMP
 
 SSATmp* Simplifier::simplifyMov(const IRInstruction* inst) {
   return inst->src(0);
 }
 
 SSATmp* Simplifier::simplifyAbsDbl(const IRInstruction* inst) {
-  auto src = inst->src(0);
-
-  if (src->isConst()) {
-    double val = src->dblVal();
-    return cns(fabs(val));
-  }
-
+  auto const src = inst->src(0);
+  if (src->isConst()) return cns(fabs(src->dblVal()));
   return nullptr;
 }
 
@@ -535,8 +504,8 @@ SSATmp* Simplifier::constImpl(SSATmp* src1, SSATmp* src2, Oper op) {
   auto both = [&](Type ty) { return src1->type() <= ty && src2->type() <= ty; };
 
   if (both(Type::Bool)) return cns(op(src1->boolVal(), src2->boolVal()));
-  if (both(Type::Int)) return cns(op(src1->intVal(), src2->intVal()));
-  if (both(Type::Dbl)) return cns(op(src1->dblVal(), src2->dblVal()));
+  if (both(Type::Int))  return cns(op(src1->intVal(), src2->intVal()));
+  if (both(Type::Dbl))  return cns(op(src1->dblVal(), src2->dblVal()));
   return nullptr;
 }
 
@@ -555,8 +524,8 @@ SSATmp* Simplifier::commutativeImpl(SSATmp* src1,
   // Only handle integer operations for now.
   if (!src1->isA(Type::Int) || !src2->isA(Type::Int)) return nullptr;
 
-  auto inst1 = src1->inst();
-  auto inst2 = src2->inst();
+  auto const inst1 = src1->inst();
+  auto const inst2 = src2->inst();
   if (inst1->op() == opcode && inst1->src(1)->isConst()) {
     // (X + C1) + C2 --> X + C3
     if (src2->isConst()) {
@@ -575,6 +544,12 @@ SSATmp* Simplifier::commutativeImpl(SSATmp* src1,
   return nullptr;
 }
 
+/*
+ * Assumes that outop is commutative, don't use with subtract!
+ *
+ * Assumes that the values we're going to add new uses to are not reference
+ * counted.  (I.e. this is a distributive FooInt opcode.)
+ */
 template <class OutOper, class InOper>
 SSATmp* Simplifier::distributiveImpl(SSATmp* src1,
                                      SSATmp* src2,
@@ -582,13 +557,12 @@ SSATmp* Simplifier::distributiveImpl(SSATmp* src1,
                                      Opcode incode,
                                      OutOper outop,
                                      InOper inop) {
-  // assumes that outop is commutative, don't use with subtract!
   if (auto simp = commutativeImpl(src1, src2, outcode, outop)) return simp;
 
-  auto inst1 = src1->inst();
-  auto inst2 = src2->inst();
-  Opcode op1 = inst1->op();
-  Opcode op2 = inst2->op();
+  auto const inst1 = src1->inst();
+  auto const inst2 = src2->inst();
+  auto const op1 = inst1->op();
+  auto const op2 = inst2->op();
   // all combinations of X * Y + X * Z --> X * (Y + Z)
   if (op1 == incode && op2 == incode) {
     if (inst1->src(0) == inst2->src(0)) {
@@ -914,20 +888,22 @@ SSATmp* Simplifier::simplifyXorInt(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
-  IRInstruction* inst = src->inst();
-  Opcode op = inst->op();
+  auto const inst = src->inst();
+  auto const op = inst->op();
 
   switch (op) {
   // !!X --> X
   case XorBool:
-    if (inst->src(1)->isConst(true)) return inst->src(0);
+    if (inst->src(1)->isConst(true)) {
+      // This is safe to add a new use to because inst->src(0) is a bool.
+      assert(inst->src(0)->isA(Type::Bool));
+      return inst->src(0);
+    }
     return nullptr;
 
-  case ColIsNEmpty:
-    return gen(ColIsEmpty, inst->src(0));
-  case ColIsEmpty:
-    return gen(ColIsNEmpty, inst->src(0));
-
+  /*
+   * TODO(#5394328): the following is currently unsound.
+   */
   // !(X cmp Y) --> X opposite_cmp Y
   case Lt:
   case Lte:
@@ -945,17 +921,19 @@ SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
     }
     break;
   }
+
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
-    // TODO: combine this with the above check and use isQueryOp or
-    // add an isNegatable.
+    // This is safe because instanceofs don't take reference counted arguments.
+    assert(!isRefCounted(inst->src(0)) && !isRefCounted(inst->src(1)));
     return gen(
       negateQueryOp(op),
-      std::make_pair(inst->numSrcs(), inst->srcs().begin())
+      inst->src(0),
+      inst->src(1)
     );
     return nullptr;
-  // TODO !(X | non_zero) --> 0
-  default: (void)op;
+  default:
+    break;
   }
   return nullptr;
 }
@@ -1034,6 +1012,10 @@ static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   }
 }
 
+/*
+ * TODO(#5394328): this is unsound; it can add uses to decref'd reference
+ * counted values.
+ */
 SSATmp* Simplifier::cmpImpl(Opcode opName,
                             const IRInstruction* inst,
                             SSATmp* src1,
@@ -1319,11 +1301,45 @@ X(NSame)
 
 #undef X
 
+SSATmp* Simplifier::queryJmpImpl(const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+  auto const opc = inst->op();
+  // reuse the logic in cmpImpl
+  auto const newCmp = cmpImpl(queryJmpToQueryOp(opc), nullptr, src1, src2);
+  if (!newCmp) return nullptr;
+
+  // Become an equivalent conditional jump and reuse that logic.
+  return gen(JmpNZero, inst->taken(), newCmp);
+}
+
+#define X(x)                                                \
+  SSATmp* Simplifier::simplify##x(const IRInstruction* i) { \
+    return queryJmpImpl(i);                                 \
+  }
+
+X(JmpGt)
+X(JmpGte)
+X(JmpLt)
+X(JmpLte)
+X(JmpEq)
+X(JmpNeq)
+X(JmpGtInt)
+X(JmpGteInt)
+X(JmpLtInt)
+X(JmpLteInt)
+X(JmpEqInt)
+X(JmpNeqInt)
+X(JmpSame)
+X(JmpNSame)
+
+#undef X
+
 SSATmp* Simplifier::isTypeImpl(const IRInstruction* inst) {
-  bool trueSense = inst->op() == IsType;
-  auto type      = inst->typeParam();
-  auto src       = inst->src(0);
-  auto srcType   = src->type();
+  bool const trueSense = inst->op() == IsType;
+  auto const type      = inst->typeParam();
+  auto const src       = inst->src(0);
+  auto const srcType   = src->type();
 
   // If typeMightRelax(src) returns true, we can't generally depend on the
   // src's type. However, we always constrain the input to this opcode with at
@@ -1362,21 +1378,17 @@ SSATmp* Simplifier::simplifyIsNType(const IRInstruction* i) {
 }
 
 SSATmp* Simplifier::simplifyIsScalarType(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
+  auto const src = inst->src(0);
   if (src->type().isKnownDataType()) {
-    if (src->isA(Type::Int | Type::Dbl | Type::Str | Type::Bool)) {
-      return cns(true);
-    } else {
-      return cns(false);
-    }
+    return cns(src->isA(Type::Int | Type::Dbl | Type::Str | Type::Bool));
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConcatCellCell(const IRInstruction* inst) {
-  SSATmp* src1 = inst->src(0);
-  SSATmp* src2 = inst->src(1);
-  auto catchBlock = inst->taken();
+  auto const src1       = inst->src(0);
+  auto const src2       = inst->src(1);
+  auto const catchBlock = inst->taken();
 
   if (src1->isA(Type::Str) && src2->isA(Type::Str)) { // StrStr
     return gen(ConcatStrStr, catchBlock, src1, src2);
@@ -1464,7 +1476,7 @@ SSATmp* Simplifier::simplifyConvStrToArr(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
     // const_cast is safe. We're only making use of a cell helper.
     auto arr = const_cast<ArrayData*>(src->arrVal());
@@ -1474,35 +1486,36 @@ SSATmp* Simplifier::simplifyConvArrToBool(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvDblToBool(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    return cns(bool(src->dblVal()));
+    bool const bval = src->dblVal();
+    return cns(bval);
   }
-
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvIntToBool(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    return cns(bool(src->intVal()));
+    bool const bval = src->intVal();
+    return cns(bval);
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvStrToBool(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
     // only the strings "", and "0" convert to false, all other strings
     // are converted to true
-    const StringData* str = src->strVal();
+    auto const str = src->strVal();
     return cns(!str->empty() && !str->isZero());
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvArrToDbl(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
     if (src->arrVal()->empty()) {
       return cns(0.0);
@@ -1512,19 +1525,22 @@ SSATmp* Simplifier::simplifyConvArrToDbl(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvBoolToDbl(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    return cns(double(src->boolVal()));
+    double const dval = src->boolVal();
+    return cns(dval);
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvIntToDbl(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    return cns(double(src->intVal()));
+    double const dval = src->intVal();
+    return cns(dval);
   }
   if (src->inst()->is(ConvBoolToInt)) {
+    // This is safe, because the bool src is not reference counted.
     return gen(ConvBoolToDbl, src->inst()->src(0));
   }
   return nullptr;
@@ -1536,29 +1552,23 @@ SSATmp* Simplifier::simplifyConvStrToDbl(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvArrToInt(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    if (src->arrVal()->empty()) {
-      return cns(0);
-    }
+    if (src->arrVal()->empty()) return cns(0);
     return cns(1);
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvBoolToInt(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
-  if (src->isConst()) {
-    return cns(int(src->boolVal()));
-  }
+  auto const src = inst->src(0);
+  if (src->isConst()) return cns(static_cast<int>(src->boolVal()));
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvDblToInt(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
-  if (src->isConst()) {
-    return cns(toInt64(src->dblVal()));
-  }
+  auto const src = inst->src(0);
+  if (src->isConst()) return cns(toInt64(src->dblVal()));
   return nullptr;
 }
 
@@ -1568,18 +1578,16 @@ SSATmp* Simplifier::simplifyConvStrToInt(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvBoolToStr(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
-    if (src->boolVal()) {
-      return cns(makeStaticString("1"));
-    }
-    return cns(makeStaticString(""));
+    if (src->boolVal()) return cns(s_1.get());
+    return cns(s_empty.get());
   }
   return nullptr;
 }
 
 SSATmp* Simplifier::simplifyConvDblToStr(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
     String dblStr(buildStringData(src->dblVal()));
     return cns(makeStaticString(dblStr));
@@ -1588,7 +1596,7 @@ SSATmp* Simplifier::simplifyConvDblToStr(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyConvIntToStr(const IRInstruction* inst) {
-  SSATmp* src  = inst->src(0);
+  auto const src = inst->src(0);
   if (src->isConst()) {
     return cns(
       makeStaticString(folly::to<std::string>(src->intVal()))
@@ -1633,11 +1641,11 @@ SSATmp* Simplifier::simplifyConvCellToStr(const IRInstruction* inst) {
   auto const catchTrace = inst->taken();
 
   if (srcType <= Type::Bool)   return gen(ConvBoolToStr, src);
-  if (srcType <= Type::Null)   return cns(makeStaticString(""));
+  if (srcType <= Type::Null)   return cns(s_empty.get());
   if (srcType <= Type::Arr)  {
     gen(RaiseNotice, catchTrace,
         cns(makeStaticString("Array to string conversion")));
-    return cns(makeStaticString("Array"));
+    return cns(s_Array.get());
   }
   if (srcType <= Type::Dbl)    return gen(ConvDblToStr, src);
   if (srcType <= Type::Int)    return gen(ConvIntToStr, src);
@@ -1693,7 +1701,6 @@ SSATmp* Simplifier::simplifyConvObjToBool(const IRInstruction* inst) {
 
 SSATmp* Simplifier::simplifyConvCellToObj(const IRInstruction* inst) {
   if (inst->src(0)->isA(Type::Obj)) return inst->src(0);
-
   return nullptr;
 }
 
@@ -1795,7 +1802,7 @@ SSATmp* Simplifier::simplifyCheckInit(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::decRefImpl(const IRInstruction* inst) {
-  auto src = inst->src(0);
+  auto const src = inst->src(0);
   if (!typeMightRelax(src) && !isRefCounted(src)) {
     return gen(Nop);
   }
@@ -1811,7 +1818,7 @@ SSATmp* Simplifier::simplifyDecRefNZ(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyIncRef(const IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
+  auto const src = inst->src(0);
   if (!typeMightRelax(src) && !isRefCounted(src)) {
     return gen(Nop);
   }
@@ -1819,7 +1826,7 @@ SSATmp* Simplifier::simplifyIncRef(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyIncRefCtx(const IRInstruction* inst) {
-  auto* ctx = inst->src(0);
+  auto const ctx = inst->src(0);
   if (ctx->isA(Type::Obj)) {
     return gen(IncRef, ctx);
   } else if (!typeMightRelax(ctx) && ctx->type().notCounted()) {
@@ -1830,9 +1837,9 @@ SSATmp* Simplifier::simplifyIncRefCtx(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::condJmpImpl(const IRInstruction* inst) {
-  SSATmp* const src            = inst->src(0);
-  IRInstruction* const srcInst = src->inst();
-  const Opcode srcOpcode       = srcInst->op();
+  auto const src       = inst->src(0);
+  auto const srcInst   = src->inst();
+  auto const srcOpcode = srcInst->op();
 
   // After other simplifications below (isConvIntOrPtrToBool), we can
   // end up with a non-Bool input.  Nothing more to do in this case.
@@ -1848,26 +1855,25 @@ SSATmp* Simplifier::condJmpImpl(const IRInstruction* inst) {
     }
     if (val) {
       return gen(Jmp, inst->taken());
-    } else {
-      return gen(Nop);
     }
-    return nullptr;
+    return gen(Nop);
   }
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
-    return gen(
-      inst->op() == JmpZero ? JmpNZero : JmpZero,
-      inst->taken(),
-      srcInst->src(0)
-    );
+    if (!isRefCounted(srcInst->src(0))) {
+      return gen(
+        inst->op() == JmpZero ? JmpNZero : JmpZero,
+        inst->taken(),
+        srcInst->src(0)
+      );
+    }
   }
 
   /*
-   * Try to combine the src inst with the Jmp.  We can't do any
-   * combinations of the src instruction with the jump if the src's
-   * are refcounted, since we may have dec refs between the src
-   * instruction and the jump.
+   * Try to combine the src inst with the Jmp.  We can't do any combinations of
+   * the src instruction with the jump if the src's are refcounted, since we
+   * may have dec refs between the src instruction and the jump.
    */
   for (auto& src : srcInst->srcs()) {
     if (isRefCounted(src)) return nullptr;
@@ -2051,9 +2057,8 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
   if (array->isConst()) {
     if (idxVal >= array->arrVal()->size()) {
       return gen(Jmp, inst->taken());
-    } else {
-      return gen(Nop);
     }
+    return gen(Nop);
   }
 
   if (auto const at = array->type().getArrayType()) {
@@ -2076,23 +2081,23 @@ SSATmp* Simplifier::simplifyCheckPackedArrayBounds(const IRInstruction* inst) {
 }
 
 SSATmp* Simplifier::simplifyLdPackedArrayElem(const IRInstruction* inst) {
-  auto* arrayTmp = inst->src(0);
-  auto* idxTmp   = inst->src(1);
+  auto const arrayTmp = inst->src(0);
+  auto const idxTmp   = inst->src(1);
   if (arrayTmp->isConst() && idxTmp->isConst()) {
-    auto* value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
+    auto const value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
     if (!value) {
       // The index doesn't exist. This code should be unreachable at runtime.
       return nullptr;
     }
 
-    if (value->m_type == KindOfRef) value = value->m_data.pref->tv();
+    if (value->m_type == KindOfRef) {
+      return cns(*value->m_data.pref->tv());
+    }
     return cns(*value);
   }
 
   return nullptr;
 }
-
-const StaticString s_isEmpty("isEmpty");
 
 SSATmp* Simplifier::simplifyCount(const IRInstruction* inst) {
   auto const val = inst->src(0);

@@ -18,7 +18,8 @@ let init_hack genv env get_next =
 
   let is_check_mode =
     ServerArgs.check_mode genv.options &&
-    ServerArgs.convert genv.options = None
+    ServerArgs.convert genv.options = None &&
+    ServerArgs.load_save_opt genv.options = None
   in
 
   if not is_check_mode then begin

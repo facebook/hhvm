@@ -26,8 +26,13 @@ type options = {
   }
 
 and env_store_action =
-  | Load of string
+  | Load of load_info
   | Save of string
+
+and load_info = {
+  filename : string;
+  to_recheck : string list;
+}
 
 (*****************************************************************************)
 (* Usage code *)
@@ -51,8 +56,10 @@ module Messages = struct
   let from_emacs    = " passed from hh_client"
   let from_hhclient = " passed from hh_client"
   let convert       = " adds type annotations automatically"
-  let load          = " load server state from file"
   let save          = " save server state to file"
+  let load          = " a space-separated list of files; the first file is"^
+                      " the file containing the saved state, and the rest are"^
+                      " the list of files to recheck"
 end
 
 
@@ -78,8 +85,14 @@ let populate_options () =
   let convert_dir   = ref None  in
   let load_save_opt = ref None  in
   let cdir          = fun s -> convert_dir := Some s in
-  let load          = fun s -> load_save_opt := Some (Load s) in
   let save          = fun s -> load_save_opt := Some (Save s) in
+  let load          = fun s ->
+    let arg_l       = Str.split (Str.regexp " ") s in
+    match arg_l with
+    | [] -> raise (Invalid_argument "--load needs at least one argument")
+    | filename :: to_recheck ->
+        load_save_opt := Some (Load { filename; to_recheck; })
+  in
   let options =
     ["--debug"         , arg debug         , Messages.debug;
      "--check"         , arg check_mode    , Messages.check;
@@ -90,9 +103,9 @@ let populate_options () =
      "--from-emacs"    , arg from_emacs    , Messages.from_emacs;
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
-     "--load"          , Arg.String load   , Messages.load;
      "--save"          , Arg.String save   , Messages.save;
-   ] in
+     "--load"          , Arg.Rest load     , Messages.load;
+    ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
   (* json implies check *)

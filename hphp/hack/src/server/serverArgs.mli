@@ -22,8 +22,13 @@ type options = {
   }
 
 and env_store_action =
-  | Load of string
+  | Load of load_info
   | Save of string
+
+and load_info = {
+  filename : string;
+  to_recheck : string list;
+}
 
 val parse_options: unit -> options
 val default_options: root:string -> options

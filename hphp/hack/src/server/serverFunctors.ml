@@ -125,13 +125,21 @@ end = struct
          * a separate ".sharedmem" file.  *)
         SharedMem.save (fn^".sharedmem");
         env
-    | Some (ServerArgs.Load fn) ->
-        let chan = open_in_no_fail fn in
+    | Some (ServerArgs.Load { ServerArgs.filename; ServerArgs.to_recheck }) ->
+        let chan = open_in_no_fail filename in
         let env = Marshal.from_channel chan in
         Program.unmarshal chan;
-        close_in_no_fail fn chan;
-        SharedMem.load (fn^".sharedmem");
-        env
+        close_in_no_fail filename chan;
+        SharedMem.load (filename^".sharedmem");
+        let updates = List.fold_left
+          (fun (diff_php, diff_js) fn ->
+            if Find.is_php_path fn
+            then (SSet.add fn diff_php, diff_js)
+            else if Find.is_js_path fn
+            then (diff_php, SSet.add fn diff_js)
+            else (diff_php, diff_js))
+          (SSet.empty, SSet.empty) to_recheck in
+        Program.recheck genv env updates
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set

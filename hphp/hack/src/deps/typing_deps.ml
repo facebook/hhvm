@@ -110,12 +110,12 @@ let get_bazooka x =
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles: (int, SSet.t) Hashtbl.t) = Hashtbl.create 23
+let (ifiles: (int, SSet.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
 let get_files deps =
   ISet.fold begin fun dep acc ->
     try 
-      let files = Hashtbl.find ifiles dep in
+      let files = Hashtbl.find !ifiles dep in
       SSet.union files acc
     with Not_found -> acc
   end deps SSet.empty
@@ -139,9 +139,9 @@ let update_files fast =
     let defs = ISet.union funs classes in
     ISet.iter begin fun def ->
       let previous =
-        try Hashtbl.find ifiles def with Not_found -> SSet.empty
+        try Hashtbl.find !ifiles def with Not_found -> SSet.empty
       in
-      Hashtbl.replace ifiles def (SSet.add filename previous)
+      Hashtbl.replace !ifiles def (SSet.add filename previous)
     end defs
   end fast 
 

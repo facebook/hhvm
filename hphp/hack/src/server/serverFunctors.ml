@@ -30,6 +30,10 @@ module type SERVER_PROGRAM = sig
   val name: string
   val get_errors: ServerEnv.env -> Errors.t
   val handle_connection : genv -> env -> Unix.file_descr -> unit
+  (* This is a hack for us to save / restore the global state that is not
+   * already captured by ServerEnv *)
+  val marshal : out_channel -> unit
+  val unmarshal : in_channel -> unit
 end
 
 (*****************************************************************************)
@@ -114,6 +118,7 @@ end = struct
         let chan = open_out_no_fail fn in
         let env = Program.init genv env root in
         Marshal.to_channel chan env [];
+        Program.marshal chan;
         close_out_no_fail fn chan;
         (* We cannot save the shared memory to `chan` because the OCaml runtime
          * does not expose the underlying file descriptor to C code; so we use
@@ -123,6 +128,7 @@ end = struct
     | Some (ServerArgs.Load fn) ->
         let chan = open_in_no_fail fn in
         let env = Marshal.from_channel chan in
+        Program.unmarshal chan;
         close_in_no_fail fn chan;
         SharedMem.load (fn^".sharedmem");
         env

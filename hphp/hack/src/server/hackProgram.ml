@@ -241,4 +241,10 @@ module Program : Server.SERVER_PROGRAM = struct
       ServerTypeCheck.check genv check_env
 
   let parse_options = ServerArgs.parse_options
+
+  let marshal chan =
+    Marshal.to_channel chan !Typing_deps.ifiles []
+
+  let unmarshal chan =
+    Typing_deps.ifiles := Marshal.from_channel chan
 end

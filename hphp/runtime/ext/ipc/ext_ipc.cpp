@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_ipc.h"
+#include "hphp/runtime/ext/ipc/ext_ipc.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/system/constants.h"
@@ -58,13 +58,57 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvmsg, NO_EXTENSION_VERSION_YET);
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvsem, NO_EXTENSION_VERSION_YET);
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(sysvshm, NO_EXTENSION_VERSION_YET);
+static class SysvmsgExtension : public Extension {
+public:
+  SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(ftok);
+    HHVM_FE(msg_get_queue);
+    HHVM_FE(msg_queue_exists);
+    HHVM_FE(msg_send);
+    HHVM_FE(msg_receive);
+    HHVM_FE(msg_remove_queue);
+    HHVM_FE(msg_set_queue);
+    HHVM_FE(msg_stat_queue);
+
+    loadSystemlib();
+  }
+} s_sysvmsg_extension;
+
+static class SysvsemExtension : public Extension {
+public:
+  SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(sem_acquire);
+    HHVM_FE(sem_get);
+    HHVM_FE(sem_release);
+    HHVM_FE(sem_remove);
+
+    loadSystemlib();
+  }
+} s_sysvsem_extension;
+
+static class SysvshmExtension : public Extension {
+public:
+  SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(shm_attach);
+    HHVM_FE(shm_detach);
+    HHVM_FE(shm_remove);
+    HHVM_FE(shm_get_var);
+    HHVM_FE(shm_has_var);
+    HHVM_FE(shm_put_var);
+    HHVM_FE(shm_remove_var);
+
+    loadSystemlib();
+  }
+} s_sysvshm_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_ftok(const String& pathname, const String& proj) {
+int64_t HHVM_FUNCTION(ftok,
+                      const String& pathname,
+                      const String& proj) {
   if (pathname.empty()) {
     raise_warning("Pathname is empty");
     return -1;
@@ -92,7 +136,9 @@ public:
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 };
 
-Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
+Variant HHVM_FUNCTION(msg_get_queue,
+                      int64_t key,
+                      int64_t perms /* = 0666 */) {
   int id = msgget(key, 0);
   if (id < 0) {
     id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
@@ -108,11 +154,13 @@ Variant f_msg_get_queue(int64_t key, int64_t perms /* = 0666 */) {
   return Resource(q);
 }
 
-bool f_msg_queue_exists(int64_t key) {
+bool HHVM_FUNCTION(msg_queue_exists,
+                   int64_t key) {
   return msgget(key, 0) >= 0;
 }
 
-bool f_msg_remove_queue(const Resource& queue) {
+bool HHVM_FUNCTION(msg_remove_queue,
+                   const Resource& queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -134,7 +182,9 @@ const StaticString
   s_msg_lspid("msg_lspid"),
   s_msg_lrpid("msg_lrpid");
 
-bool f_msg_set_queue(const Resource& queue, const Array& data) {
+bool HHVM_FUNCTION(msg_set_queue,
+                   const Resource& queue,
+                   const Array& data) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -159,7 +209,8 @@ bool f_msg_set_queue(const Resource& queue, const Array& data) {
   return false;
 }
 
-Array f_msg_stat_queue(const Resource& queue) {
+Array HHVM_FUNCTION(msg_stat_queue,
+                    const Resource& queue) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -185,9 +236,13 @@ Array f_msg_stat_queue(const Resource& queue) {
   return Array();
 }
 
-bool f_msg_send(const Resource& queue, int64_t msgtype, const Variant& message,
-                bool serialize /* = true */, bool blocking /* = true */,
-                VRefParam errorcode /* = null */) {
+bool HHVM_FUNCTION(msg_send,
+                   const Resource& queue,
+                   int64_t msgtype,
+                   const Variant& message,
+                   bool serialize /* = true */,
+                   bool blocking /* = true */,
+                   VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -220,10 +275,14 @@ bool f_msg_send(const Resource& queue, int64_t msgtype, const Variant& message,
   return true;
 }
 
-bool f_msg_receive(const Resource& queue, int64_t desiredmsgtype, VRefParam msgtype,
+bool HHVM_FUNCTION(msg_receive,
+                   const Resource& queue,
+                   int64_t desiredmsgtype,
+                   VRefParam msgtype,
                    int64_t maxsize, VRefParam message,
                    bool unserialize /* = true */,
-                   int64_t flags /* = 0 */, VRefParam errorcode /* = null */) {
+                   int64_t flags /* = 0 */,
+                   VRefParam errorcode /* = null */) {
   MessageQueue *q = queue.getTyped<MessageQueue>();
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -379,11 +438,13 @@ public:
   }
 };
 
-bool f_sem_acquire(const Resource& sem_identifier) {
+bool HHVM_FUNCTION(sem_acquire,
+                   const Resource& sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(true);
 }
 
-bool f_sem_release(const Resource& sem_identifier) {
+bool HHVM_FUNCTION(sem_release,
+                   const Resource& sem_identifier) {
   return sem_identifier.getTyped<Semaphore>()->op(false);
 }
 
@@ -391,8 +452,11 @@ bool f_sem_release(const Resource& sem_identifier) {
  * Return an id for the semaphore with the given key, and allow max_acquire
  * (default 1) processes to acquire it simultaneously.
  */
-Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
-                  int64_t perm /* = 0666 */, bool auto_release /* = true */) {
+Variant HHVM_FUNCTION(sem_get,
+                      int64_t key,
+                      int64_t max_acquire /* = 1 */,
+                      int64_t perm /* = 0666 */,
+                      bool auto_release /* = true */) {
   /* Get/create the semaphore.  Note that we rely on the semaphores
    * being zeroed when they are created.  Despite the fact that
    * the(?)  Linux semget() man page says they are not initialized,
@@ -479,7 +543,8 @@ Variant f_sem_get(int64_t key, int64_t max_acquire /* = 1 */,
  * contributed by Gavin Sherry gavin@linuxworld.com.au
  * Fri Mar 16 00:50:13 EST 2001
  */
-bool f_sem_remove(const Resource& sem_identifier) {
+bool HHVM_FUNCTION(sem_remove,
+                   const Resource& sem_identifier) {
   Semaphore *sem_ptr = sem_identifier.getTyped<Semaphore>();
 
   union semun un;
@@ -614,8 +679,10 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   return 0;
 }
 
-Variant f_shm_attach(int64_t shm_key, int64_t shm_size /* = 10000 */,
-                     int64_t shm_flag /* = 0666 */) {
+Variant HHVM_FUNCTION(shm_attach,
+                      int64_t shm_key,
+                      int64_t shm_size /* = 10000 */,
+                      int64_t shm_flag /* = 0666 */) {
   char *shm_ptr;
   long shm_id;
 
@@ -665,7 +732,8 @@ Variant f_shm_attach(int64_t shm_key, int64_t shm_size /* = 10000 */,
   return ret;
 }
 
-bool f_shm_detach(int64_t shm_identifier) {
+bool HHVM_FUNCTION(shm_detach,
+                   int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -679,7 +747,8 @@ bool f_shm_detach(int64_t shm_identifier) {
   return true;
 }
 
-bool f_shm_remove(int64_t shm_identifier) {
+bool HHVM_FUNCTION(shm_remove,
+                   int64_t shm_identifier) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -704,7 +773,9 @@ bool f_shm_remove(int64_t shm_identifier) {
   return true;
 }
 
-Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key) {
+Variant HHVM_FUNCTION(shm_get_var,
+                      int64_t shm_identifier,
+                      int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -725,7 +796,9 @@ Variant f_shm_get_var(int64_t shm_identifier, int64_t variable_key) {
   return unserialize_from_buffer(&shm_var->mem, shm_var->length);
 }
 
-bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {
+bool HHVM_FUNCTION(shm_has_var,
+                   int64_t shm_identifier,
+                   int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);
@@ -740,7 +813,9 @@ bool f_shm_has_var(int64_t shm_identifier, int64_t variable_key) {
   return shm_varpos >= 0;
 }
 
-bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
+bool HHVM_FUNCTION(shm_put_var,
+                   int64_t shm_identifier,
+                   int64_t variable_key,
                    const Variant& variable) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
@@ -765,7 +840,9 @@ bool f_shm_put_var(int64_t shm_identifier, int64_t variable_key,
   return true;
 }
 
-bool f_shm_remove_var(int64_t shm_identifier, int64_t variable_key) {
+bool HHVM_FUNCTION(shm_remove_var,
+                   int64_t shm_identifier,
+                   int64_t variable_key) {
   Lock lock(g_shm_mutex);
   std::set<sysvshm_shm*>::iterator iter =
     g_shms.find((sysvshm_shm*)shm_identifier);

@@ -111,6 +111,10 @@ type response =
 | SERVER_DYING
 | PONG
 
+type build_progress =
+| BUILD_PROGRESS of string
+| BUILD_ERROR of string
+
 let response_to_string = function
   | SERVER_OUT_OF_DATE -> "Server Out of Date"
   | DIRECTORY_MISMATCH _ -> "Directory Mismatch"

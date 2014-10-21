@@ -1,3 +1,6 @@
+hackificator and remove_soft_types
+==================================
+
 These refactoring and conversion tools are based on pfff instead of the core
 hh_server code due to pfff's superior support for parsing, modifying, and then
 unparsing PHP code. However, this makes them more annoying to build.

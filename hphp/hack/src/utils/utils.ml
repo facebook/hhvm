@@ -96,6 +96,7 @@ module MyMap: functor (Ord: Map.OrderedType)
 
 module SMap = MyMap(String)
 module IMap = MyMap(Ident)
+module PMap = MyMap(Pos)
 module ISet = Set.Make(Ident)
 module SSet = Set.Make(String)
 module CSet = Set.Make(Char)

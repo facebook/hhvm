@@ -24,13 +24,15 @@ module Compare = struct
   let pos pos1 pos2 =
     let char_start1, char_end1 = Pos.info_raw pos1 in
     let char_start2, char_end2 = Pos.info_raw pos2 in
-    if char_end1 < char_start2
+    if char_end1 <= char_start2
     then -1
-    else if char_end2 < char_start1
+    else if char_end2 <= char_start1
     then 1
     (* If one position is nested inside another, put the outer position first *)
     else if char_start1 < char_start2
     then -1
+    else if char_start2 < char_start1
+    then 1
     else compare char_end2 char_end1
 
 end
@@ -94,7 +96,8 @@ let walk content pos_level_list =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str (pos_level_l: (Pos.t * Coverage_level.t) list) =
+let go str (pos_level_m : Coverage_level.t PMap.t) =
+  let pos_level_l = PMap.elements pos_level_m in
   let cmp x y = Compare.pos (fst x) (fst y) in
   let pos_level_l = List.sort cmp pos_level_l in
   let pos_level_l = flatten pos_level_l in

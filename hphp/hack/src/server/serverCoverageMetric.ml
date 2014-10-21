@@ -14,10 +14,10 @@ module CL = Coverage_level
 module SE = ServerEnv
 
 (* Count the number of expressions of each kind of Coverage_level. *)
-let count_exprs fn pos_ty_l =
-  let pos_level_l = CL.mk_level_list (Some fn) pos_ty_l in
-  List.fold_left (fun c (_, lvl) -> CL.incr_counter lvl c)
-                 CL.empty_counter pos_level_l
+let count_exprs fn pos_ty_m =
+  let pos_level_m = CL.mk_level_map (Some fn) pos_ty_m in
+  PMap.fold (fun _ lvl c -> CL.incr_counter lvl c)
+            pos_level_m CL.empty_counter
 
 (* Calculate the percentage of code we have covered as a ratio of typed
  * expressions : total expressions. Partially-typed expressions count as half
@@ -31,7 +31,9 @@ let calc_percentage ctr =
   in
   let score = CL.CLMap.fold
     (fun k v acc -> mult k *. float_of_int v +. acc) ctr 0.0 in
-  score /. float_of_int total
+  if total = 0
+  then 1.0
+  else score /. float_of_int total
 
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage neutral fnl =
@@ -41,10 +43,10 @@ let get_coverage neutral fnl =
     match Parser_heap.ParserHeap.get fn with
     | None -> None
     | Some defs ->
-        assert (!(Typing_defs.type_acc) = []);
+        assert (!(Typing_defs.type_acc) = PMap.empty);
         List.iter ServerIdeUtils.check_def defs;
         let counts = count_exprs fn !Typing_defs.type_acc in
-        Typing_defs.type_acc := [];
+        Typing_defs.type_acc := PMap.empty;
         Some (fn, counts)
   end fnl |> cat_opts in
   Typing_defs.accumulate_types := false;

@@ -47,12 +47,12 @@ let to_json input =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go file_input output_json pos_level_l =
+let go file_input output_json pos_level_m =
   let str = match file_input with
     | ServerMsg.FileName filename -> Utils.cat filename
     | ServerMsg.FileContent content -> content
   in
-  let results = ColorFile.go str pos_level_l in
+  let results = ColorFile.go str pos_level_m in
   if output_json then
     print_endline (Json.json_to_string (to_json results))
   else if Unix.isatty Unix.stdout

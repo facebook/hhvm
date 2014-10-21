@@ -53,26 +53,24 @@ type 'a trie =
   | Leaf of 'a
   | Node of 'a * 'a trie SMap.t
 
-let mk_level_list fn_opt pos_ty_l =
-  let pos_lvl_l = rev_rev_map (fun (pos, ty) ->
-    pos, match ty with
+let mk_level_map fn_opt pos_ty_m =
+  let pos_lvl_m = PMap.map (function
     | _, Typing_defs.Tany -> Unchecked
-    | _ when TUtils.HasTany.check ty -> Partial
-    | _ -> Checked) pos_ty_l
+    | ty when TUtils.HasTany.check ty -> Partial
+    | _ -> Checked) pos_ty_m
   in
   (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
   (* NOTE(jez): can we monadize this? *)
   match fn_opt with
-  | None -> pos_lvl_l
+  | None -> pos_lvl_m
   | Some fn ->
     match Parser_heap.HH_FIXMES.get fn with
-    | None -> pos_lvl_l
+    | None -> pos_lvl_m
     | Some fixme_map ->
-        rev_rev_map (fun (p, lvl as pos_lvl) ->
+        PMap.mapi (fun p lvl ->
           let line = p.Pos.pos_start.Lexing.pos_lnum in
           match lvl with
           | Checked when IMap.mem line fixme_map ->
-              (p, Partial)
-          | Unchecked | Partial | Checked ->
-              pos_lvl
-        ) pos_lvl_l
+              Partial
+          | Unchecked | Partial | Checked -> lvl
+        ) pos_lvl_m

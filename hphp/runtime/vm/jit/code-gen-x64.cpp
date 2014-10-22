@@ -571,7 +571,7 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   // We want to restore state as though the call had completed
   // successfully, so skip over any stack arguments.
   if (auto offset = m_state.catch_offsets[inst->block()]) {
-    v << addqi{offset, rsp, rsp, v.makeReg()};
+    v << lea{rsp[offset], rsp};
   }
 }
 
@@ -2047,7 +2047,7 @@ void CodeGenerator::cgUnboxPtr(IRInstruction* inst) {
     auto ref_ptr = v.makeReg();
     auto cell_ptr = v.makeReg();
     v << load{src[TVOFF(m_data)], ref_ptr};
-    v << addqi{RefData::tvOffset(), ref_ptr, cell_ptr, v.makeReg()};
+    v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
     return cell_ptr;
   }, [&](Vout& v) {
     return src;
@@ -3011,7 +3011,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   });
   v << storeli{safe_cast<int32_t>(nArgs),
                spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
-  emitAdjustSp(spReg, dstLoc(inst, 0).reg(), spOffset);
+  v << lea{spReg[spOffset], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
@@ -3072,7 +3072,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   v << storeli{nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
-  emitAdjustSp(spReg, dstLoc(inst, 0).reg(), spOffset);
+  v << lea{spReg[spOffset], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
@@ -3524,22 +3524,7 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     int offset = safe_cast<int32_t>(i * ssize_t(sizeof(Cell)) + adjustment);
     cgStore(spReg[offset], spillVals[i], srcLoc(inst, i + 2), Width::Full);
   }
-  emitAdjustSp(spReg, dstReg, adjustment);
-}
-
-void CodeGenerator::emitAdjustSp(Vreg spReg, Vreg dstReg,
-                                 int adjustment /* bytes */) {
-  auto& v = vmain();
-  if (adjustment != 0) {
-    if (dstReg != spReg) {
-      v << lea{spReg[adjustment], dstReg};
-    } else {
-      auto const sf = v.makeReg();
-      v << addqi{adjustment, dstReg, dstReg, sf};
-    }
-  } else {
-    v << copy{spReg, dstReg};
-  }
+  vmain() << lea{spReg[adjustment], dstReg};
 }
 
 void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
@@ -5003,15 +4988,8 @@ void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   cgInterpOneCommon(inst);
 
   auto const& extra = *inst->extra<InterpOne>();
-  auto newSpReg = dstLoc(inst, 0).reg();
-  assert(newSpReg == srcLoc(inst, 0).reg());
-
-  auto spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
-  if (spAdjustBytes != 0) {
-    auto& v = vmain();
-    auto const sf = v.makeReg();
-    v << addqi{spAdjustBytes, newSpReg, newSpReg, sf};
-  }
+  auto const spAdjust = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
+  vmain() << lea{srcLoc(inst, 0).reg()[spAdjust], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {

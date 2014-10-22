@@ -229,6 +229,10 @@ struct LLVMEmitter {
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
+    m_mInstrStateArea =
+      m_irb.CreateAlloca(m_int8, cns(RESERVED_STACK_MINSTR_STATE_SPACE),
+                         "MIState");
+
     auto m_personalityFTy = llvm::FunctionType::get(m_int32, false);
     m_personalityFunc =
       llvm::Function::Create(m_personalityFTy,
@@ -1070,16 +1074,11 @@ void LLVMEmitter::emitTrap() {
 }
 
 llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
-
   bool inFS = s.seg == Vptr::FS;
   llvm::Value* ptr = nullptr;
   if (s.base == reg::rsp) {
     // Translate %rsp-relative offsets into MInstrState offsets.
     always_assert(!s.index.isValid());
-    if (!m_mInstrStateArea) {
-      m_mInstrStateArea =
-        m_irb.CreateAlloca(m_int8, cns(RESERVED_STACK_MINSTR_STATE_SPACE));
-    }
     ptr =  m_irb.CreateGEP(m_mInstrStateArea,
                            cns(int64_t{s.disp} - RESERVED_STACK_SPILL_SPACE),
                            "getelem");

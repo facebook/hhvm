@@ -215,7 +215,6 @@ private:
                   SyncOptions sync = SyncOptions::kSyncPoint);
   int iterOffset(const BCMarker& marker, uint32_t id);
 
-  void emitAdjustSp(Vreg spReg, Vreg dstReg, int adjustment);
   void emitConvBoolOrIntToDbl(IRInstruction* inst);
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);

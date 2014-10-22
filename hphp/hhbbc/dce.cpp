@@ -454,6 +454,22 @@ void readDtorLocs(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Note that the instructions with popConds are relying on the consumer of the
+ * values they push to check whether lifetime changes can have side-effects.
+ *
+ * For example, in bytecode like this, assuming $x is an object with a
+ * destructor:
+ *
+ *   CGetL $x
+ *   UnsetL $x
+ *   // ...
+ *   PopC $x // dtor should be here.
+ *
+ * The PopC will decide it can't be eliminated, which prevents us from
+ * eliminating the CGetL.
+ */
+
 void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
 // For PopV and PopR currently we never know if can't run a
 // destructor.
@@ -472,23 +488,6 @@ void dce(Env& env, const bc::NameA&)      { popCond(env, push(env)); }
 void dce(Env& env, const bc::NewArray&)   { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)     { pushRemovable(env); }
 void dce(Env& env, const bc::AGetC&)      { popCond(env, push(env)); }
-
-/*
- * Note that these instructions with popConds are relying on the
- * consumer of the values they push to check whether lifetime
- * changes can have side-effects.
- *
- * For example, in bytecode like this, assuming $x is an object with
- * a destructor:
- *
- *   CGetL $x
- *   UnsetL $x
- *   // ...
- *   PopC $x // dtor should be here.
- *
- * The PopC will decide it can't be eliminated, which prevents us
- * from eliminating the CGetL.
- */
 
 void dce(Env& env, const bc::Dup&) {
   auto const u1 = push(env);
@@ -740,7 +739,7 @@ void remove_unused_locals(Context const ctx,
 
   func->locals.erase(
     std::remove_if(
-      begin(func->locals),
+      begin(func->locals) + func->params.size(),
       end(func->locals),
       [&] (const std::unique_ptr<php::Local>& l) {
         if (!usedLocals.test(l->id)) {

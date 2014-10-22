@@ -183,6 +183,11 @@ void validate_options() {
     std::cerr << "-fanalyze-public-statics requires -fanalyze-pseudomains\n";
     std::exit(1);
   }
+
+  if (options.RemoveUnusedLocals && !options.GlobalDCE) {
+    std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

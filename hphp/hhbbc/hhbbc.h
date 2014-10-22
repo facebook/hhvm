@@ -148,18 +148,15 @@ struct Options {
    * Whether to perform local or global dead code elimination.  This removes
    * unnecessary instructions within a single block, or across blocks,
    * respectively.
-   *
-   * Note: GlobalDCE is off for now because it is a bit of a work in progress
-   * (needs more testing).
    */
   bool LocalDCE = true;
-  bool GlobalDCE = false;
+  bool GlobalDCE = true;
 
   /*
    * Whether to remove completely unused local variables.  This requires
    * GlobalDCE.
    */
-  bool RemoveUnusedLocals = false;
+  bool RemoveUnusedLocals = true;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can assume them

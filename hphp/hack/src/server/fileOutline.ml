@@ -8,46 +8,30 @@
  *
  *)
 
-let get_class_summary class_ =
-  let class_name = Utils.strip_ns (snd class_.Nast.c_name) in
-  let res_list =
-    (fst class_.Nast.c_name,
-      class_name, "class") :: [] in
-  let res_list = List.fold_left begin fun acc method_ ->
-    (fst method_.Nast.m_name,
-      class_name ^ "::" ^ snd method_.Nast.m_name, "method"):: acc
-    end res_list class_.Nast.c_methods in
-  let res_list = List.fold_left begin fun acc method_ ->
-    (fst method_.Nast.m_name,
-      class_name ^ "::" ^ snd method_.Nast.m_name, "static method"):: acc
-    end res_list class_.Nast.c_static_methods in
-  let res_list = match class_.Nast.c_constructor with
-  | None -> res_list
-  | Some method_ -> (fst method_.Nast.m_name,
-      class_name ^ "::" ^ snd method_.Nast.m_name, "method"):: res_list in
-  res_list
+let summarize_class class_ acc =
+  let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
+  let res_list = (fst class_.Ast.c_name, class_name, "class") :: acc in
+  List.fold_left begin fun acc method_ ->
+    match method_ with
+      | Ast.Method m ->
+          let desc =
+            if List.mem (Ast.Static) m.Ast.m_kind then "static method"
+            else "method"
+          in
+          (fst m.Ast.m_name, class_name ^ "::" ^ snd m.Ast.m_name, desc) :: acc
+      | _ -> acc
+  end res_list class_.Ast.c_body
+
+let summarize_fun f acc =
+  (fst f.Ast.f_name, Utils.strip_ns (snd f.Ast.f_name), "function") :: acc
 
 let outline_ast ast =
-  let funs, classes = Errors.ignore_ begin fun () ->
-    List.fold_left begin fun (funs, classes) def ->
-      match def with
-      | Ast.Fun f ->
-          let nenv = Naming.empty in
-          let f = Naming.fun_ nenv f in
-          (f.Nast.f_name :: funs, classes)
-      | Ast.Class c ->
-          let nenv = Naming.empty in
-          let c = Naming.class_ nenv c in
-          (funs, c :: classes)
-      | _ -> (funs, classes)
-    end ([], []) ast
-  end in
-  let res_list = List.fold_left begin fun acc class_ ->
-      List.rev_append (get_class_summary class_) acc
-    end [] classes in
-  List.fold_left begin fun acc f_name ->
-      (fst f_name, Utils.strip_ns (snd f_name), "function") :: acc
-    end res_list funs
+  List.fold_left begin fun acc def ->
+    match def with
+    | Ast.Fun f -> summarize_fun f acc
+    | Ast.Class c -> summarize_class c acc
+    | _ -> acc
+  end [] ast
 
 let outline content =
   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->

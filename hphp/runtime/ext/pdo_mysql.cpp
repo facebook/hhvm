@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/network.h"
 #include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -264,6 +265,22 @@ bool PDOMySqlConnection::create(const Array& options) {
 
   php_pdo_parse_data_source(data_source.data(), data_source.size(), vars, 5);
 
+  dbname = vars[1].optval;
+  host = vars[2].optval;
+
+  // Extract port number from a host in case it's inlined.
+  HostURL hosturl(std::string(host), port);
+  if (hosturl.isValid()) {
+    std::strcpy(host, hosturl.getHost().c_str());
+    port = hosturl.getPort();
+  }
+
+  // Explicit port param overrides the
+  // implicit one from host.
+  if (vars[3].optval) {
+    port = atoi(vars[3].optval);
+  }
+
   /* handle for the server */
   if (!(m_server = mysql_init(NULL))) {
     handleError(__FILE__, __LINE__);
@@ -360,11 +377,6 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   }
 
-  dbname = vars[1].optval;
-  host = vars[2].optval;
-  if (vars[3].optval) {
-    port = atoi(vars[3].optval);
-  }
   if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
     unix_socket = vars[4].optval;
   }

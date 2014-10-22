@@ -615,32 +615,41 @@ Variant HHVM_FUNCTION(array_product,
   ArrayIter iter(input);
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
+
     switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i *= ti;
-        break;
-      } else {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i *= entry.toInt64();
+        continue;
+
+      case KindOfDouble:
         goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i *= ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
       }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i *= entry.toInt64();
-      break;
-    }
-    }
+    not_reached();
   }
   return i;
 
@@ -648,10 +657,21 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d *= entry.toDouble();
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d *= entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   return d;
 }
@@ -880,32 +900,41 @@ Variant HHVM_FUNCTION(array_sum,
   ArrayIter iter(input);
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
+
     switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i += ti;
-        break;
-      } else {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i += entry.toInt64();
+        continue;
+
+      case KindOfDouble:
         goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i += ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
       }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i += entry.toInt64();
-      break;
-    }
-    }
+    not_reached();
   }
   return i;
 
@@ -913,10 +942,21 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d += entry.toDouble();
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d += entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   return d;
 }

@@ -376,15 +376,16 @@ namespace {
 Variant CreateVarForUncountedArray(const Variant& source) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return init_null();
+
     case KindOfBoolean:
       return source.getBoolean();
     case KindOfInt64:
       return source.getInt64();
     case KindOfDouble:
       return source.getDouble();
-    case KindOfUninit:
-    case KindOfNull:
-      return init_null();
     case KindOfStaticString:
       return source.getStringData();
 
@@ -401,10 +402,13 @@ Variant CreateVarForUncountedArray(const Variant& source) {
              MixedArray::MakeUncounted(ad);
     }
 
-    default:
-      assert(false); // type not allowed
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return init_null();
+  not_reached();
 }
 
 }

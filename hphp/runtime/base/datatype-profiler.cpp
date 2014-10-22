@@ -35,18 +35,18 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
 
 DataType DataTypeProfiler::operator()(DataType type) {
   switch (type) {
-  case KindOfUninit:        m_uninit.count(); break;
-  case KindOfNull:          m_null.count(); break;
-  case KindOfBoolean:       m_boolean.count(); break;
-  case KindOfInt64:         m_int.count(); break;
-  case KindOfDouble:        m_double.count(); break;
-  case KindOfStaticString:  m_static_string.count(); break;
-  case KindOfString:        m_string.count(); break;
-  case KindOfArray:         m_array.count(); break;
-  case KindOfObject:        m_object.count(); break;
-  case KindOfResource:      m_resource.count(); break;
-  case KindOfRef:           m_ref.count(); break;
-  default: assert(false); break;
+    case KindOfUninit:        m_uninit.count(); break;
+    case KindOfNull:          m_null.count(); break;
+    case KindOfBoolean:       m_boolean.count(); break;
+    case KindOfInt64:         m_int.count(); break;
+    case KindOfDouble:        m_double.count(); break;
+    case KindOfStaticString:  m_static_string.count(); break;
+    case KindOfString:        m_string.count(); break;
+    case KindOfArray:         m_array.count(); break;
+    case KindOfObject:        m_object.count(); break;
+    case KindOfResource:      m_resource.count(); break;
+    case KindOfRef:           m_ref.count(); break;
+    case KindOfClass:         not_reached();
   }
   return type;
 }

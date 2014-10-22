@@ -229,7 +229,6 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
 ///////////////////////////////////////////////////////////////////////////////
 // information and calculations
 
-
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {

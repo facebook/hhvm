@@ -112,7 +112,6 @@ static folly::dynamic variant_to_dynamic(const Variant& v) {
   switch (v.getType()) {
     case KindOfUninit:
     case KindOfNull:
-    default:
       return nullptr;
     case KindOfBoolean:
       return v.toBoolean();
@@ -125,13 +124,17 @@ static folly::dynamic variant_to_dynamic(const Variant& v) {
       return v.toString().data();
     case KindOfArray:
     case KindOfObject:
-    case KindOfResource:
+    case KindOfResource: {
       folly::dynamic ret = folly::dynamic::object;
       for (ArrayIter iter(v.toArray()); iter; ++iter) {
         ret.insert(variant_to_dynamic(iter.first()),
                    variant_to_dynamic(iter.second()));
       }
       return ret;
+    }
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }

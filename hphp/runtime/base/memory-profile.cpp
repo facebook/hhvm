@@ -126,17 +126,20 @@ size_t MemoryProfile::getSizeOfTV(const TypedValue* tv) {
   if (!RuntimeOption::HHProfServerEnabled) return 0;
 
   switch (tv->m_type) {
-  case KindOfString:
-    return getSizeOfPtr(tv->m_data.pstr);
-  case KindOfArray:
-    return getSizeOfArray(tv->m_data.parr);
-  case KindOfObject:
-    return getSizeOfObject(tv->m_data.pobj);
-  case KindOfRef:
-    return getSizeOfPtr(tv->m_data.pref);
-  default:
-    return 0;
+    DT_UNCOUNTED_CASE:
+    case KindOfResource:
+    case KindOfClass:
+      return 0;
+    case KindOfString:
+      return getSizeOfPtr(tv->m_data.pstr);
+    case KindOfArray:
+      return getSizeOfArray(tv->m_data.parr);
+    case KindOfObject:
+      return getSizeOfObject(tv->m_data.pobj);
+    case KindOfRef:
+      return getSizeOfPtr(tv->m_data.pref);
   }
+  not_reached();
 }
 
 // static

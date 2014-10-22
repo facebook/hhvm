@@ -259,8 +259,9 @@ inline int getDataTypeIndex(DataType type) {
     case KindOfObject       : return 8;
     case KindOfResource     : return 9;
     case KindOfRef          : return 10;
-    default                 : not_reached();
+    case KindOfClass        : break;  // Not a "real" DT.
   }
+  not_reached();
 }
 
 inline DataType getDataTypeValue(unsigned index) {
@@ -374,6 +375,21 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
     (IS_STRING_TYPE(t1) && IS_STRING_TYPE(t2)) ||
     (IS_NULL_TYPE(t1) && IS_NULL_TYPE(t2));
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Switch case macros.
+
+/*
+ * Covers all DataTypes `dt' such that !IS_REFCOUNTED_TYPE(dt) holds.
+ */
+#define DT_UNCOUNTED_CASE   \
+  case KindOfUninit:        \
+  case KindOfNull:          \
+  case KindOfBoolean:       \
+  case KindOfInt64:         \
+  case KindOfDouble:        \
+  case KindOfStaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 

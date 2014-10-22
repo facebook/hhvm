@@ -801,14 +801,23 @@ bool StringData::isNumeric() const {
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
-  case KindOfNull:   return false;
-  case KindOfInt64:
-  case KindOfDouble: return true;
-  default:
-    assert(false);
-    break;
+    case KindOfNull:
+      return false;
+    case KindOfInt64:
+    case KindOfDouble:
+      return true;
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return false;
+  not_reached();
 }
 
 bool StringData::isInteger() const {
@@ -816,14 +825,23 @@ bool StringData::isInteger() const {
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
-  case KindOfNull:   return false;
-  case KindOfInt64:  return true;
-  case KindOfDouble: return false;
-  default:
-    assert(false);
-    break;
+    case KindOfNull:
+    case KindOfDouble:
+      return false;
+    case KindOfInt64:
+      return true;
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return false;
+  not_reached();
 }
 
 bool StringData::toBoolean() const {

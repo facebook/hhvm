@@ -469,18 +469,15 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   case Type::JSON: {
     if ((m_option & k_JSON_NUMERIC_CHECK) && !isArrayKey) {
       int64_t lval; double dval;
-      switch (is_numeric_string(v, len, &lval, &dval, 0)) {
-        case KindOfInt64:
-          write(lval);
-          return;
-        case KindOfDouble:
-          write(dval);
-          return;
-        default:
-          break;
+      auto dt = is_numeric_string(v, len, &lval, &dval, 0);
+      if (IS_INT_TYPE(dt)) {
+        write(lval);
+        return;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        write(dval);
+        return;
       }
     }
-
     appendJsonEscape(*m_buf, v, len, m_option);
     break;
   }

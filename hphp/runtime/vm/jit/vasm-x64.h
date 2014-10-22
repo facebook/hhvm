@@ -163,8 +163,6 @@ template<class Reg, VregKind Kind, int Bits> struct Vr {
   bool isVirt() const { return rn >= Vreg::V0 && isValid(); }
   bool operator==(Vr<Reg,Kind,Bits> r) const { return rn == r.rn; }
   bool operator!=(Vr<Reg,Kind,Bits> r) const { return rn != r.rn; }
-  bool operator==(PhysReg) const = delete;
-  bool operator!=(PhysReg) const = delete;
   bool isValid() const { return rn != Vreg::kInvalidReg; }
   Vptr operator[](int disp) const;
   Vptr operator[](ScaledIndex si) const;

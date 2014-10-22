@@ -81,6 +81,8 @@ constexpr ptrdiff_t kVmfpOff           = kVmRegsOff + offsetof(VMRegs, fp);
 constexpr ptrdiff_t kVmpcOff           = kVmRegsOff + offsetof(VMRegs, pc);
 constexpr ptrdiff_t kVmFirstAROff      = kVmRegsOff + offsetof(VMRegs, firstAR);
 
+static_assert(kVmspOff == 16 && kVmfpOff == 32,
+              "Eager vm-reg save in translator-asm-helpers.S");
 } }
 
 #endif

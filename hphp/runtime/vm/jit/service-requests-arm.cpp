@@ -76,11 +76,11 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
     maybeCc.emplace(cb, start);
   }
 
-  // There are 6 instructions after the argument-shuffling, and they're all
+  // There are 4 instructions after the argument-shuffling, and they're all
   // single instructions (i.e. not macros). There are up to 4 instructions per
   // argument (it may take up to 4 instructions to move a 64-bit immediate into
   // a register).
-  constexpr auto kMaxStubSpace = 6 * vixl::kInstructionSize +
+  constexpr auto kMaxStubSpace = 4 * vixl::kInstructionSize +
     (4 * maxArgReg()) * vixl::kInstructionSize;
 
   for (auto i = 0; i < argv.size(); ++i) {
@@ -96,10 +96,6 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
       default: not_reached();
     }
   }
-
-  // Save VM regs
-  a.     Str   (rVmFp, rVmTl[RDS::kVmfpOff]);
-  a.     Str   (rVmSp, rVmTl[RDS::kVmspOff]);
 
   if (persist) {
     a.   Mov   (rAsm, 0);

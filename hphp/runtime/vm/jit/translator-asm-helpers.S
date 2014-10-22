@@ -100,6 +100,11 @@ ETCH_LABEL(enterTCHelper$serviceReqLabel:)
    */
   .globl ETCH_NAME(enterTCServiceReq)
   ETCH_NAME(enterTCServiceReq:)
+  /*
+   * Eager vm-reg save. Must match values in rds-header.h
+   */
+  mov %rbx, 16(%r12)
+  mov %rbp, 32(%r12)
   add $RESERVED_STACK_TOTAL_SPACE, %rsp
   CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
   // Restore infoPtr into %rbx

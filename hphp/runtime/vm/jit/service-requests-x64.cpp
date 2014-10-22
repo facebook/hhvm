@@ -94,11 +94,12 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
   emitBindJPost(cb, frozen, cc, toSmash, sr);
 }
 
+const int kExtraRegs = 2; // we also set rdi and r10
 static constexpr int maxStubSpace() {
-  /* max space for moving to align, saving VM regs plus emitting args */
+  /* max space for moving to align plus emitting args */
   return
-    kJmpTargetAlign - 1 + (0x14 /*kVMRegSpace*/) +
-    kNumServiceReqArgRegs * kMovSize;
+    kJmpTargetAlign - 1 +
+    (kNumServiceReqArgRegs + kExtraRegs) * kMovSize;
 }
 
 // fill remaining space in stub with ud2 or int3
@@ -150,7 +151,6 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
       default: not_reached();
     }
   }
-  emitEagerVMRegSave(as, RegSaveFlags::SaveFP);
   if (persist) {
     as.  emitImmReg(0, jit::x64::rAsm);
   } else {

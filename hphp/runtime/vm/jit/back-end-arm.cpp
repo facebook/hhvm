@@ -151,6 +151,9 @@ struct BackEnd : public jit::BackEnd {
 
     assert(sim.sp() == spOnEntry);
 
+    vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
+    vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
+
     info.requestNum = sim.xreg(0);
     info.args[0] = sim.xreg(1);
     info.args[1] = sim.xreg(2);

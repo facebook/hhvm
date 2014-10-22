@@ -700,7 +700,7 @@ void ExecutionContext::handleError(const std::string& msg,
         }
         tvDup(*tvFrom, *tvTo);
       } else if (fp->hasVarEnv()) {
-        g_context->setVar(s_php_errormsg.get(), tvFrom);
+        fp->getVarEnv()->set(s_php_errormsg.get(), tvFrom);
       }
     }
 

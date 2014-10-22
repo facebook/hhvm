@@ -193,6 +193,7 @@ private:
 #undef X
 
 private:
+  bool validate(SSATmp*, const IRInstruction*) const;
   SSATmp* cmpImpl(Opcode opName, const IRInstruction*, SSATmp*, SSATmp*);
   SSATmp* condJmpImpl(const IRInstruction*);
   SSATmp* queryJmpImpl(const IRInstruction*);

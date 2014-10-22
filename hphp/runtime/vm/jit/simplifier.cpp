@@ -379,12 +379,71 @@ template<class... Args> SSATmp* Simplifier::gen(Opcode op, BCMarker marker,
 
 //////////////////////////////////////////////////////////////////////
 
-Simplifier::Result Simplifier::simplify(const IRInstruction* inst,
+
+/*
+ * Simplifier rules are not allowed to add new uses to SSATmps that aren't
+ * known to be available.  All the sources to the original instruction must
+ * be available, and non-reference counted values reachable through the
+ * source chain are also always available.  Anything else requires more
+ * complicated analysis than belongs in the simplifier right now.
+ */
+bool Simplifier::validate(SSATmp* newDst,
+                          const IRInstruction* origInst) const {
+  // Certain opcodes that read stack locations have valid simplification
+  // rules (we know values are available because they are on the eval
+  // stack) that are not easy to double check here.
+  if (origInst->op() == LdStack || origInst->op() == DecRefStack) {
+    return true;
+  }
+
+  auto known_available = [&] (SSATmp* src) -> bool {
+    if (!isRefCounted(src)) return true;
+    for (auto& oldSrc : origInst->srcs()) {
+      if (oldSrc == src) return true;
+    }
+    return false;
+  };
+
+  if (!m_newInsts.empty()) {
+    for (auto& newInst : m_newInsts) {
+      for (auto& src : newInst->srcs()) {
+        always_assert_flog(
+          known_available(src),
+          "A simplification rule produced an instruction that used a value "
+          "that wasn't known to be available:\n"
+          "  original inst: {}\n"
+          "  new inst     : {}\n"
+          "  src          : {}\n",
+          origInst->toString(),
+          newInst->toString(),
+          src->toString()
+        );
+      }
+    }
+    return true;
+  }
+
+  if (newDst) {
+    always_assert_flog(
+      known_available(newDst),
+      "simplifier produced a new destination that wasn't known to be "
+      "available:\n"
+      "  original inst: {}\n"
+      "  new dst:       {}\n",
+      origInst->toString(),
+      newDst->toString()
+    );
+  }
+
+  return true;
+}
+
+Simplifier::Result Simplifier::simplify(const IRInstruction* origInst,
                                         bool typesMightRelax) {
   m_typesMightRelax = typesMightRelax;
-
-  SSATmp* newDst = simplifyWork(inst);
-  return Result{std::move(m_newInsts), newDst};
+  auto const newDst = simplifyWork(origInst);
+  assert(validate(newDst, origInst));
+  return Result { std::move(m_newInsts), newDst };
 }
 
 SSATmp* Simplifier::simplifyWork(const IRInstruction* inst) {
@@ -901,9 +960,6 @@ SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
     }
     return nullptr;
 
-  /*
-   * TODO(#5394328): the following is currently unsound.
-   */
   // !(X cmp Y) --> X opposite_cmp Y
   case Lt:
   case Lte:
@@ -913,10 +969,15 @@ SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
   case Neq:
   case Same:
   case NSame: {
-    auto s0 = inst->src(0);
-    auto s1 = inst->src(1);
-    // Not for Dbl:  (x < NaN) != !(x >= NaN)
-    if (!s0->isA(Type::Dbl) && !s1->isA(Type::Dbl)) {
+    auto const s0 = inst->src(0);
+    auto const s1 = inst->src(1);
+    auto const safeToFold =
+      // Not for Dbl:  (x < NaN) != !(x >= NaN)
+      !s0->isA(Type::Dbl) && !s1->isA(Type::Dbl) &&
+      // We can't add new uses to reference counted types without a more
+      // advanced availability analysis.
+      !isRefCounted(s0) && !isRefCounted(s1);
+    if (safeToFold) {
       return gen(negateQueryOp(op), s0, s1);
     }
     break;
@@ -935,6 +996,7 @@ SSATmp* Simplifier::xorTrueImpl(SSATmp* src) {
   default:
     break;
   }
+
   return nullptr;
 }
 
@@ -1023,9 +1085,6 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
   auto newInst = [inst, this](Opcode op, SSATmp* src1, SSATmp* src2) {
     return gen(op, inst ? inst->taken() : (Block*)nullptr, src1, src2);
   };
-  // ---------------------------------------------------------------------
-  // Perform some execution optimizations immediately
-  // ---------------------------------------------------------------------
 
   auto const type1 = src1->type();
   auto const type2 = src2->type();
@@ -1036,44 +1095,39 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
     return cns(bool(cmpOp(opName, 0, 0)));
   }
 
-  // need both types to be unboxed to simplify, and the code below assumes the
+  // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
   if (!type1.isKnownUnboxedDataType() || !type2.isKnownUnboxedDataType()) {
     return nullptr;
   }
 
-  // ---------------------------------------------------------------------
   // OpSame and OpNSame have some special rules
-  // ---------------------------------------------------------------------
-
   if (opName == Same || opName == NSame) {
     // OpSame and OpNSame do not perform type juggling
     if (type1.toDataType() != type2.toDataType() &&
         !(type1 <= Type::Str && type2 <= Type::Str)) {
       return cns(opName == NSame);
     }
+    // Here src1 and src2 are same type, treating Str and StaticStr as the
+    // same.
 
-    // src1 and src2 are same type, treating Str and StaticStr as the same
-
-    // OpSame and OpNSame have special rules for string, array, object, and
-    // resource.  Other types may simplify to OpEq and OpNeq, respectively
+    // Constant fold if they are both constant strings.
     if (type1 <= Type::Str && type2 <= Type::Str) {
       if (src1->isConst() && src2->isConst()) {
-        auto str1 = src1->strVal();
-        auto str2 = src2->strVal();
+        auto const str1 = src1->strVal();
+        auto const str2 = src2->strVal();
         bool same = str1->same(str2);
         return cns(bool(cmpOp(opName, same, 1)));
-      } else {
-        return nullptr;
       }
+      return nullptr;
     }
 
+    // If type is a primitive type - simplify to Eq/Neq.  Str was already
+    // removed above.
     auto const badTypes = Type::Obj | Type::Res | Type::Arr;
     if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
       return nullptr;
     }
-
-    // Type is a primitive type - simplify to Eq/Neq
     return newInst(opName == Same ? Eq : Neq, src1, src2);
   }
 
@@ -1085,9 +1139,8 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
   if (type1 <= Type::Null && type2 <= Type::Null) {
     return cns(bool(cmpOp(opName, 0, 0)));
   }
+
   // const cmp const
-  // TODO this list is incomplete - feel free to add more
-  // TODO: can simplify const arrays when sizes are different or both 0
   if (src1->isConst() && src2->isConst()) {
     // StaticStr cmp StaticStr
     if (src1->isA(Type::StaticStr) &&
@@ -1133,11 +1186,8 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
     // Hence we may check for equality with that boolean.
     // E.g. `some-int > false` is equivalent to `some-int == true`
     if (opName != Eq) {
-      if (cmpOp(opName, false, b)) {
-        return newInst(Eq, src1, cns(false));
-      } else {
-        return newInst(Eq, src1, cns(true));
-      }
+      bool const res = cmpOp(opName, false, b);
+      return newInst(Eq, src1, cns(!res));
     }
   }
 
@@ -1181,7 +1231,7 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
 
   // case 1a: null cmp string. Convert null to ""
   if (type1 <= Type::Str && type2 <= Type::Null) {
-    return newInst(opName, src1, cns(makeStaticString("")));
+    return newInst(opName, src1, cns(s_empty.get()));
   }
 
   // case 1b: null cmp object. Convert null to false and the object to true
@@ -1212,25 +1262,17 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
 
     // Optimize comparison between int and const bool
     if (src1->isA(Type::Int) && src2->isConst()) {
-      // Based on the const bool optimization (above) opName should be OpEq
+      // Based on the const bool optimization (above) opName should be Eq
       always_assert(opName == Eq);
-
-      if (src2->boolVal()) {
-        return newInst(Neq, src1, cns(0));
-      } else {
-        return newInst(Eq, src1, cns(0));
-      }
+      return newInst(src2->boolVal() ? Neq : Eq, src1, cns(0));
     }
 
     // Nothing fancy to do - perform juggling as normal.
     return newInst(opName, gen(ConvCellToBool, src1), src2);
   }
 
-  // From here on, we must be careful of how Type::Obj gets dealt with,
-  // since Type::Obj can refer to an object or to a resource.
-
-  // case 3: object cmp object. No juggling to do
-  // same-type simplification is performed above
+  // case 3: object cmp object. No juggling to do same-type simplification is
+  // performed above.
 
   // strings get canonicalized to the left
   if (type2 <= Type::Str) {
@@ -1260,8 +1302,8 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
     return newInst(opName, cns(si), src2);
   }
 
-  // case 5: array cmp array. No juggling to do
-  // same-type simplification is performed above
+  // case 5: array cmp array. No juggling to do same-type simplification is
+  // performed above
 
   // case 6: array cmp anything. Array is greater
   if (src1->isA(Type::Arr)) {
@@ -1271,11 +1313,6 @@ SSATmp* Simplifier::cmpImpl(Opcode opName,
     return cns(bool(cmpOp(opName, 0, 1)));
   }
 
-  // case 7: object cmp anything. Object is greater
-  // ---------------------------------------------------------------------
-  // Unfortunately, we are unsure of whether Type::Obj is an object or a
-  // resource, so this code cannot be applied.
-  // ---------------------------------------------------------------------
   return nullptr;
 }
 

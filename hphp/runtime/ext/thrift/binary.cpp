@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
@@ -47,8 +47,6 @@ StaticString PHPTransport::s_vtype("vtype");
 StaticString PHPTransport::s_etype("etype");
 StaticString PHPTransport::s_format("format");
 StaticString PHPTransport::s_collection("collection");
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(thrift_protocol, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -536,11 +534,16 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
   transport.writeI8(T_STOP); // struct end
 }
 
-void f_thrift_protocol_write_binary(const Object& transportobj, const String& method_name,
-                                    int64_t msgtype, const Object& request_struct,
-                                    int seqid, bool strict_write, bool oneway) {
+void HHVM_FUNCTION(thrift_protocol_write_binary,
+                   const Variant& transportobj,
+                   const String& method_name,
+                   int64_t msgtype,
+                   const Variant& request_struct,
+                   int seqid,
+                   bool strict_write,
+                   bool oneway) {
 
-  PHPOutputTransport transport(transportobj);
+  PHPOutputTransport transport(transportobj.toObject());
 
   if (strict_write) {
     int32_t version = VERSION_1 | msgtype;
@@ -553,11 +556,12 @@ void f_thrift_protocol_write_binary(const Object& transportobj, const String& me
     transport.writeI32(seqid);
   }
 
+  const Object& obj_request_struct = request_struct.toObject();
   Variant spec = HHVM_FN(hphp_get_static_property)(
-                                            request_struct->o_getClassName(),
-                                            s_TSPEC,
-                                            false);
-  binary_serialize_spec(request_struct, transport, spec.toArray());
+    obj_request_struct->o_getClassName(),
+    s_TSPEC,
+    false);
+  binary_serialize_spec(obj_request_struct, transport, spec.toArray());
 
   if (oneway) {
     transport.onewayFlush();
@@ -566,10 +570,11 @@ void f_thrift_protocol_write_binary(const Object& transportobj, const String& me
   }
 }
 
-Variant f_thrift_protocol_read_binary(const Object& transportobj,
-                                      const String& obj_typename,
-                                      bool strict_read) {
-  PHPInputTransport transport(transportobj);
+Variant HHVM_FUNCTION(thrift_protocol_read_binary,
+                      const Variant& transportobj,
+                      const String& obj_typename,
+                      bool strict_read) {
+  PHPInputTransport transport(transportobj.toObject());
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
 

@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 #include <stack>
@@ -1016,24 +1016,26 @@ class CompactReader {
 
 };
 
-int f_thrift_protocol_set_compact_version(int version) {
+int HHVM_FUNCTION(thrift_protocol_set_compact_version,
+                  int version) {
   int result = s_compact_request_data->version;
   s_compact_request_data->version = (uint8_t)version;
   return result;
 }
 
-void f_thrift_protocol_write_compact(const Object& transportobj,
-                                     const String& method_name,
-                                     int64_t msgtype,
-                                     const Object& request_struct,
-                                     int seqid,
-                                     bool oneway) {
-  PHPOutputTransport transport(transportobj);
+void HHVM_FUNCTION(thrift_protocol_write_compact,
+                   const Variant& transportobj,
+                   const String& method_name,
+                   int64_t msgtype,
+                   const Variant& request_struct,
+                   int seqid,
+                   bool oneway) {
+  PHPOutputTransport transport(transportobj.toObject());
 
   CompactWriter writer(&transport);
   writer.setWriteVersion(s_compact_request_data->version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
-  writer.write(request_struct);
+  writer.write(request_struct.toObject());
 
   if (oneway) {
     transport.onewayFlush();
@@ -1042,9 +1044,10 @@ void f_thrift_protocol_write_compact(const Object& transportobj,
   }
 }
 
-Variant f_thrift_protocol_read_compact(const Object& transportobj,
-                                       const String& obj_typename) {
-  CompactReader reader(transportobj);
+Variant HHVM_FUNCTION(thrift_protocol_read_compact,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  CompactReader reader(transportobj.toObject());
   return reader.read(obj_typename);
 }
 

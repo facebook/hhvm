@@ -53,7 +53,6 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/ext_thread.h"
-#include "hphp/runtime/ext/ext_thrift.h"
 #include "hphp/runtime/ext/ext_xml.h"
 #include "hphp/runtime/ext/ext_xmlreader.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"

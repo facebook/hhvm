@@ -30,18 +30,17 @@ namespace HPHP {
 struct ActRec;
 
 /*
- * This class implements a name to TypedValue map.  Basically a
- * hashtable from StringData* to TypedValue.
+ * This class implements a name to TypedValue map.  Basically a hashtable from
+ * StringData* to TypedValue.
  *
- * This is for use in variable environments in bytecode.cpp, and is
- * also used for the global variable environment ($GLOBALS via
- * NameValueTableWrapper).
+ * This is for use in variable environments in bytecode.cpp, and is also used
+ * for the global variable environment ($GLOBALS via NameValueTableWrapper).
  *
- * The table may be optionally attached to an ActRec, in which case
- * it will contain a KindOfNamedLocal TypedValue per every named local
- * defined in ActRec's function. This is to keep storage for locals in
- * functions with a VarEnv in their normal location, but still make them
- * accessible by name through this table.
+ * The table may be optionally attached to an ActRec, in which case it will
+ * contain a kNamedLocalDataType TypedValue per every named local defined in
+ * ActRec's function.  This is to keep storage for locals in functions with a
+ * VarEnv in their normal location, but still make them accessible by name
+ * through this table.
  */
 struct NameValueTable : private boost::noncopyable {
   struct Iterator {

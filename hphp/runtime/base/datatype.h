@@ -59,20 +59,20 @@ enum DataType : int8_t {
   KindOfObject        = 0x30,  //  00110000
   KindOfResource      = 0x40,  //  01000000
   KindOfRef           = 0x50,  //  01010000
-  KindOfNamedLocal    = 0x51,  //  01010001
 };
 
 /*
- * Sentinel invalid DataType.
+ * Sentinel invalid DataTypes.
  *
- * This value must differ from that of any real DataType.  A live TypedValue
- * should never have this as its type tag, so we keep it out of the enum to
+ * These values must differ from that of any real DataType.  A live TypedValue
+ * should never have these as its type tag, so we keep them out of the enum to
  * keep switches cleaner.
  *
- * This should only be used where MaybeDataType cannot be (e.g., in
+ * These should only be used where MaybeDataType cannot be (e.g., in
  * TypedValues, such as for MixedArray tombstones).
  */
-constexpr DataType kInvalidDataType = static_cast<DataType>(-1);
+constexpr DataType kInvalidDataType      = static_cast<DataType>(-1);
+constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-2);
 
 /*
  * Function parameter types for users of DataType that want a representation
@@ -106,7 +106,7 @@ constexpr unsigned kDataTypeMask = 0x7f;
  */
 constexpr int    kNumDataTypes = 12;
 constexpr int8_t kMinDataType  = KindOfClass;
-constexpr int8_t kMaxDataType  = KindOfNamedLocal;
+constexpr int8_t kMaxDataType  = KindOfRef;
 
 /*
  * KindOfStringBit must be set in KindOfStaticString and KindOfString, and it
@@ -168,7 +168,6 @@ static_assert(!(KindOfArray      & KindOfStringBit), "");
 static_assert(!(KindOfObject     & KindOfStringBit), "");
 static_assert(!(KindOfResource   & KindOfStringBit), "");
 static_assert(!(KindOfRef        & KindOfStringBit), "");
-static_assert(!(KindOfNamedLocal & KindOfStringBit), "");
 static_assert(!(KindOfClass      & KindOfStringBit), "");
 
 static_assert(KindOfNull         & KindOfUncountedInitBit, "");
@@ -182,7 +181,6 @@ static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
 static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
 static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
-static_assert(!(KindOfNamedLocal & KindOfUncountedInitBit), "");
 static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 static_assert(KindOfUninit == 0,
@@ -261,7 +259,6 @@ inline int getDataTypeIndex(DataType type) {
     case KindOfObject       : return 8;
     case KindOfResource     : return 9;
     case KindOfRef          : return 10;
-    case KindOfNamedLocal   : return 11;
     default                 : not_reached();
   }
 }
@@ -279,7 +276,6 @@ inline DataType getDataTypeValue(unsigned index) {
     case 8:  return KindOfObject;
     case 9:  return KindOfResource;
     case 10: return KindOfRef;
-    case 11: return KindOfNamedLocal;
     default: not_reached();
   }
 }

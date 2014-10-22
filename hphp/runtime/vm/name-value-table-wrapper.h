@@ -25,33 +25,32 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Wrapper to provide a KindOfArray interface to a NameValueTable.
- * This is used to expose a NameValueTable to php code, particularly
- * for $GLOBALS, but also for some internal generated-bytecode
- * initialization routines (86pinit, 86sinit).
+ * Wrapper to provide a KindOfArray interface to a NameValueTable.  This is
+ * used to expose a NameValueTable to php code, particularly for $GLOBALS, but
+ * also for some internal generated-bytecode initialization routines (86pinit,
+ * 86sinit).
  *
  * Some differences compared to normal php arrays:
  *
- *   - Does not behave as if it has value semantics.  (I.e., no COW.)
+ *   - Does not behave as if it has value semantics (i.e., no COW).
  *
  *   - Iteration order is not specified.
  *
- *   - Non-string keys are not really supported.  (Integers are
- *     converted to strings.)
+ *   - Non-string keys are not really supported.  (Integers are converted to
+ *     strings.)
  *
- *   - size() is an O(N) operation.  (This is because of KindOfNamedLocal
+ *   - size() is an O(N) operation.  (This is because of kNamedLocalDataType
  *     support in the underlying NameValueTable.)
  *
  *   - Append/prepend operations are not supported.
  *
- *   - Strong iterators "past the end" are not updated when new
- *     elements are added.  (Since iteration order is unspecified,
- *     this semantic would seem weird anyway.)
+ *   - Strong iterators "past the end" are not updated when new elements are
+ *     added.  (Since iteration order is unspecified, this semantic would seem
+ *     weird anyway.)
  *
- * This holds a pointer to a NameValueTable whose lifetime must be
- * guaranteed to outlast the lifetime of the NameValueTableWrapper.
- * (The wrapper is refcounted, as required by ArrayData, but the table
- * pointed to is not.)
+ * This holds a pointer to a NameValueTable whose lifetime must be guaranteed
+ * to outlast the lifetime of the NameValueTableWrapper.  (The wrapper is
+ * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
 struct NameValueTableWrapper : private ArrayData {
   explicit NameValueTableWrapper(NameValueTable* tab)

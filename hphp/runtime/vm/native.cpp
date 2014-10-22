@@ -283,7 +283,6 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfNull:
       case KindOfStaticString:
       case KindOfRef:
-      case KindOfNamedLocal:
       case KindOfClass:
         not_reached();
     }

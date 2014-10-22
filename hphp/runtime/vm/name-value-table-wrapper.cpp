@@ -38,9 +38,8 @@ NameValueTableWrapper::asNVTW(const ArrayData* ad) {
 }
 
 size_t NameValueTableWrapper::Vsize(const ArrayData* ad) {
-  // We need to iterate to find out the actual size, since
-  // KindOfNamedLocal elements in the array may have been set to
-  // KindOfUninit.
+  // We need to iterate to find out the actual size, since kNamedLocalDataType
+  // elements in the array may have been set to KindOfUninit.
   auto a = asNVTW(ad);
   size_t count = 0;
   auto iter_limit = IterEnd(a);

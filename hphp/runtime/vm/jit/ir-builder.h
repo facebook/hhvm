@@ -461,7 +461,6 @@ private:
 
 private:
   IRUnit& m_unit;
-  Simplifier m_simplifier;
   FrameState m_state;
 
   /*

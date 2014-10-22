@@ -63,7 +63,7 @@ Examples:
 
   # All tests whose name containing pdo_mysql
   % $argv[0] -i pdo_mysql -m jit -r zend
-  
+
   # Print all the standard tests
   % $argv[0] --list-tests
 
@@ -1506,7 +1506,6 @@ function start_server_impl($options, $config, $port) {
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
     '-vEval.JitASize=100000000',
-    '-vEval.JitAStubsSize=100000000',
     '-vEval.JitGlobalDataSize=32000000'
   );
   if (getenv('HHVM_TEST_SERVER_LOG')) {

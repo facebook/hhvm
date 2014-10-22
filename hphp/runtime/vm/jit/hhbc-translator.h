@@ -27,7 +27,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -857,53 +856,6 @@ private: // Exit trace creation routines.
                    std::vector<SSATmp*>(),
                    int64_t numPop = 0);
   Block* makeCatchNoSpill();
-
-  /*
-   * CoerceStk can generate two types of exceptions:
-   *
-   * TVCoercionException: Indicates parameter coersion failed and designates
-   *                      a return value to push onto the stack. These types
-   *                      of exceptions will trigger a side exit which will
-   *                      push a return value and continue execution at the
-   *                      next BC.
-   *
-   * PHP exceptions: Potentially generated when user code is reentered as part
-   *                 of coercion. These exceptions should be treated normally
-   *                 and allowed to continue unwinding the stack.
-   *
-   *
-   * The commonBody parameter is a function to be run before checking if we are
-   * handling a TVCoercionException or not. It should contain any common cleanup
-   * shared between this and regular exceptions.
-   *
-   * The sideExitBody parameter is a function to be run before pushing the
-   * return value. It should pop any parameters off the stack and perform the
-   * associated DecRefs if necessary.
-   *
-   * The takenBody parameter is a function to be run should a non-
-   * TVCoercionException be raised from user code. In this case any cleanup
-   * necessary should be performed before the undwinder resumes.
-   *
-   * Three blocks are emitted when this function is called, and they follow this
-   * template, B0 is returned:
-   *
-   * B0:
-   *  BeginCatch
-   *  <<commonBody>>
-   *  CheckSideExit FP, SP -> B2
-   *  -> B1
-   * B1:
-   *  <<sideExitBody>>
-   *  val = LdUnwinderValue<Cell>
-   *  DeleteUnwinderException
-   *  SP = SpillStack<...>
-   *  SyncABIRegs FP, SP
-   *  EagerSyncABIRegs FP, SP
-   *  ReqBindJmp<nextBcOff>
-   * B2:
-   *  <<takenBody>>
-   *  EndCatch FP, SP
-   */
   template<typename CommonBody, typename SideExitBody, typename TakenBody>
   Block* makeParamCoerceExit(CommonBody commonBody, SideExitBody sideExitBody,
                              TakenBody takenBody);
@@ -1058,6 +1010,20 @@ private:
 
   IRGenMode m_mode;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool classIsUnique(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative && cls && (cls->attrs() & AttrUnique);
+}
+
+inline bool classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) && isNormalClass(cls);
+}
+
+inline bool classIsUniqueInterface(const Class* cls) {
+  return classIsUnique(cls) && isInterface(cls);
+}
 
 //////////////////////////////////////////////////////////////////////
 

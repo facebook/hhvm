@@ -192,12 +192,12 @@ Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
   v << jcc{cc, sf, {fblock, tblock}};
   vc = tblock;
   auto treg = t(vc);
-  vc << phijmp{done, vc.makeTuple(VregList{treg})};
+  vc << phijmp{done, vc.makeTuple({treg})};
   v = fblock;
   auto freg = f(v);
-  v << phijmp{done, v.makeTuple(VregList{freg})};
+  v << phijmp{done, v.makeTuple({freg})};
   v = done;
-  v << phidef{v.makeTuple(VregList{d})};
+  v << phidef{v.makeTuple({d})};
   return d;
 }
 
@@ -5763,43 +5763,33 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
   // Initialize loop variables and jump to the first condition check.
   Vreg i0 = v.makeReg(), i1 = v.makeReg(), i2 = v.makeReg(), i3 = v.makeReg();
   Vreg j0 = v.makeReg(), j1 = v.makeReg(), j2 = v.makeReg(), j3 = v.makeReg();
-  auto dataReg = v.makeReg();
-  auto typeReg = v.makeReg();
-  // FIXME Task #5276053: Initializing i first made the register allocator
-  // generate an extra xchg for some reason. Initializing j first made that
-  // issue go away. It might have to do with the implicit ordering of
-  // registers that the allocator assigns to intervals. It'd be nice to make
-  // the register allocator less sensitive to the ordering of instructions
-  // when the order doesn't matter. It doesn't seem like this would be an
-  // easy task, however.
-  j0 = v.cns((count - 1) * 2);
+  Vreg value = v.makeReg();
   i0 = v.cns(0);
-  v << phijmp{loopBody, v.makeTuple(VregList{i0, j0})};
+  j0 = v.cns((count - 1) * 2);
+  v << phijmp{loopBody, v.makeTuple({i0, j0})};
 
   // We know that we have at least one element in the array so we don't have
   // to do an initial bounds check.
   assert(count);
 
   v = loopBody;
-  v << phidef{v.makeTuple(VregList{i1, j1})};
+  v << phidef{v.makeTuple({i1, j1})};
 
-  // Load the value from the stack and store into the array.
-  v << loadzbl{sp[j1 * 8] + TVOFF(m_type), typeReg};
-  v << storeb{typeReg, arrReg[i1 * 8] + (firstEntry + TVOFF(m_type))};
-  v << load{sp[j1 * 8] + TVOFF(m_data), dataReg};
-  v << store{dataReg, arrReg[i1 * 8] + (firstEntry + TVOFF(m_data))};
+  // Load the value from the stack and store into the array. It's safe
+  // to copy all 16 bytes of the value because packed arrays don't use
+  // The TypedValueAux::m_aux field.
+  v << loaddqu{sp[j1 * 8], value};
+  v << storedqu{value, arrReg[i1 * 8] + firstEntry};
   // Increment the loop variable by 2 because we can only scale by at most 8.
-  v << addqi{2, i1, i2, v.makeReg()};
-  v << subqi{2, j1, j2, v.makeReg()};
+  v << lea{i1[2], i2};
+  auto subFlags = v.makeReg();
+  v << subqi{2, j1, j2, subFlags};
 
   // Jump back to the body if we're still in bounds, fall through otherwise.
-  auto cmpResult = v.makeReg();
-  v << cmpq{v.cns(0), j2, cmpResult};
-  v << phijcc{CC_GE, cmpResult, {done, loopBody},
-    v.makeTuple(VregList{i2, j2})};
+  v << phijcc{CC_GE, subFlags, {done, loopBody}, v.makeTuple({i2, j2})};
 
   v = done;
-  v << phidef{v.makeTuple(VregList{i3, j3})};
+  v << phidef{v.makeTuple({i3, j3})};
 }
 
 void CodeGenerator::print() const {

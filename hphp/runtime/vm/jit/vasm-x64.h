@@ -812,6 +812,7 @@ struct Vunit {
   bool needsRegAlloc() const;
 
   unsigned next_vr{Vreg::V0};
+  unsigned next_point{0};
   Vlabel entry;
   jit::vector<Vblock> blocks;
   jit::hash_map<uint64_t,Vreg> cpool;
@@ -821,12 +822,12 @@ struct Vunit {
 
 // writer stream to add instructions to a block
 struct Vout {
-  Vout(Vmeta* m, Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
-    : m_meta(m), m_unit(u), m_block(b), m_origin(origin)
+  Vout(Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
+    : m_unit(u), m_block(b), m_origin(origin)
   {}
 
   Vout& operator=(const Vout& v) {
-    assert(&v.m_unit == &m_unit && v.m_meta == m_meta);
+    assert(&v.m_unit == &m_unit);
     m_block = v.m_block;
     m_origin = v.m_origin;
     return *this;
@@ -842,8 +843,7 @@ struct Vout {
   // instruction emitter
   Vout& operator<<(const Vinstr& inst);
 
-  Vpoint makePoint() { return m_meta->makePoint(); }
-  Vmeta& meta() { return *m_meta; }
+  Vpoint makePoint() { return Vpoint{m_unit.next_point++}; }
   Vunit& unit() { return m_unit; }
   template<class T> Vreg cns(T v) { return m_unit.makeConst(v); }
   void use(Vlabel b) { m_block = b; }
@@ -861,7 +861,6 @@ struct Vout {
   }
 
 private:
-  Vmeta* const m_meta;
   Vunit& m_unit;
   Vlabel m_block;
   const IRInstruction* m_origin;
@@ -878,7 +877,7 @@ struct Vasm {
   };
   typedef jit::vector<Area> AreaList;
 
-  explicit Vasm(Vmeta* meta) : m_meta(meta) {
+  explicit Vasm() {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
 
@@ -908,7 +907,6 @@ private:
   }
 
 private:
-  Vmeta* const m_meta;
   Vunit m_unit;
   jit::vector<Area> m_areas; // indexed by AreaIndex
 };
@@ -920,9 +918,7 @@ private:
  * scope, it will finalize and emit any code it contains.
  */
 struct Vauto : Vasm {
-  explicit Vauto(CodeBlock& code)
-    : Vasm(nullptr)
-  {
+  explicit Vauto(CodeBlock& code) {
     unit().entry = Vlabel(main(code));
   }
   ~Vauto();

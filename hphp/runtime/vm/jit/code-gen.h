@@ -75,9 +75,6 @@ struct CodegenState {
   // bytecode.
   bool pastGuards{false};
 
-  // Postponed code "points" can obtain code addresses after Vasm::finish().
-  Vmeta meta;
-
   // vasm block labels, one for each hhir block
   StateVector<Block,Vlabel> labels;
 

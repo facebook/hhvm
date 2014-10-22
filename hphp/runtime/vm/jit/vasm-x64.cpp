@@ -119,7 +119,7 @@ Vout& Vout::operator<<(const Vinstr& inst) {
 }
 
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(area()), m_origin};
+  return {m_unit, m_unit.makeBlock(area()), m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
@@ -137,14 +137,14 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, Vasm::AreaList& areas, Vmeta* meta, AsmInfo* asmInfo)
+  Vgen(Vunit& u, Vasm::AreaList& areas, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
-    , meta(meta)
-    , m_asmInfo(asmInfo)
-    , addrs(u.blocks.size(), nullptr)
-  {}
+    , m_asmInfo(asmInfo) {
+    addrs.resize(u.blocks.size());
+    points.resize(u.next_point);
+  }
   void emit(jit::vector<Vlabel>&);
 
 private:
@@ -174,7 +174,7 @@ private:
   void emit(mccall& i);
   void emit(mcprep& i);
   void emit(nothrow& i);
-  void emit(point& i) { meta->points[i.p] = a->frontier(); }
+  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -331,11 +331,10 @@ private:
   Vunit& unit;
   BackEnd& backend;
   Vasm::AreaList& areas;
-  Vmeta* meta;
   AsmInfo* m_asmInfo;
   X64Assembler* a;
   Vlabel current{0}, next{0}; // in linear order
-  jit::vector<CodeAddress> addrs;
+  jit::vector<CodeAddress> addrs, points;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
   jit::hash_map<uint64_t,uint64_t*> cpool;
@@ -757,7 +756,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
   for (auto& p : ldpoints) {
     auto after_lea = p.instr + 7;
-    auto d = meta->points[p.pos] - after_lea;
+    auto d = points[p.pos] - after_lea;
     assert(deltaFits(d, sz::dword));
     ((int32_t*)after_lea)[-1] = d;
   }
@@ -830,7 +829,7 @@ void Vgen::emit(lea& i) {
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   assert(size_t(area) == m_areas.size());
   auto b = m_unit.makeBlock(area);
-  Vout v{m_meta, m_unit, b};
+  Vout v{m_unit, b};
   m_areas.push_back(Area{v, cb, cb.frontier()});
   return m_areas.back().out;
 }
@@ -885,7 +884,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   auto origin = inst.origin;
   auto& argv = unit.tuples[svcreq.args];
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
-  Vout v(nullptr, unit, b, origin);
+  Vout v(unit, b, origin);
 
   RegSet arg_regs;
   VregList arg_dests;
@@ -930,7 +929,7 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
 
   auto scratch = unit.makeScratchBlock();
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(nullptr, unit, scratch, inst.origin);
+  Vout v(unit, scratch, inst.origin);
 
   int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
   if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
@@ -1084,7 +1083,7 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
+  Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
 auto const vauto_gp = RegSet(rAsm).add(r11);

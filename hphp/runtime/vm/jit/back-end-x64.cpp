@@ -784,7 +784,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
 
     auto const blocks = rpoSortCfg(unit);
-    Vasm vasm(&state.meta);
+    Vasm vasm;
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {

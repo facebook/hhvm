@@ -67,14 +67,14 @@ vixl::Condition C(ConditionCode cc) {
 }
 
 struct Vgen {
-  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, Vmeta* meta, AsmInfo* asmInfo)
+  Vgen(Vunit& u, jit::vector<Vasm::Area>& areas, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
-    , meta(meta)
-    , m_asmInfo(asmInfo)
-    , addrs(u.blocks.size(), nullptr)
-  {}
+    , m_asmInfo(asmInfo) {
+    addrs.resize(u.blocks.size());
+    points.resize(u.next_point);
+  }
   void emit(jit::vector<Vlabel>&);
 
 private:
@@ -98,7 +98,7 @@ private:
   void emit(ldimm& i);
   void emit(ldpoint& i);
   void emit(load& i);
-  void emit(point& i) { meta->points[i.p] = a->frontier(); }
+  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint& i);
 
@@ -159,12 +159,11 @@ private:
   Vunit& unit;
   BackEnd& backend;
   jit::vector<Vasm::Area>& areas;
-  Vmeta* meta;
   AsmInfo* m_asmInfo;
   vixl::MacroAssembler* a;
   CodeBlock* codeBlock;
   Vlabel current{0}, next{0}; // in linear order
-  jit::vector<CodeAddress> addrs;
+  jit::vector<CodeAddress> addrs, points;
   jit::vector<LabelPatch> jccs, jmps, bccs, catches;
   jit::vector<PointPatch> ldpoints;
 };
@@ -287,7 +286,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   for (auto& p : ldpoints) {
     CodeCursor cc(main(), p.instr);
     MacroAssembler a{main()};
-    a.Mov(X(p.d), meta->points[p.pos]);
+    a.Mov(X(p.d), points[p.pos]);
   }
 
   if (!shouldUpdateAsmInfo) {
@@ -368,22 +367,22 @@ void Vgen::emit(fallbackcc i) {
 }
 
 void Vgen::emit(hcsync& i) {
-  assert(meta->points[i.call]);
-  mcg->recordSyncPoint(meta->points[i.call], i.fix.pcOffset, i.fix.spOffset);
+  assert(points[i.call]);
+  mcg->recordSyncPoint(points[i.call], i.fix.pcOffset, i.fix.spOffset);
 }
 
 void Vgen::emit(hcnocatch& i) {
   // register a null catch trace at the position of the call
-  mcg->registerCatchBlock(meta->points[i.call], nullptr);
+  mcg->registerCatchBlock(points[i.call], nullptr);
 }
 
 void Vgen::emit(hcunwind& i) {
-  catches.push_back({meta->points[i.call], i.targets[1]});
+  catches.push_back({points[i.call], i.targets[1]});
   emit(jmp{i.targets[0]});
 }
 
 void Vgen::emit(hostcall& i) {
-  meta->points[i.syncpoint] = a->frontier();
+  points[i.syncpoint] = a->frontier();
   a->HostCall(i.argc);
 }
 
@@ -505,7 +504,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   auto origin = inst.origin;
   auto& argv = unit.tuples[svcreq.args];
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
-  Vout v(nullptr, unit, b, origin);
+  Vout v(unit, b, origin);
 
   RegSet arg_regs;
   VregList arg_dests;
@@ -569,7 +568,7 @@ void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
+  Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
 }}

@@ -19,7 +19,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 TRACE_SET_MOD(hhir);

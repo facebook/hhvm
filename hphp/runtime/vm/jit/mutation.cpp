@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {

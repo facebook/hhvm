@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 
 #include <sstream>
 #include <type_traits>

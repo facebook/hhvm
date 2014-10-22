@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 
 #include "hphp/runtime/test/match.h"
 #include "hphp/runtime/test/test-context.h"

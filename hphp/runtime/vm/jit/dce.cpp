@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 

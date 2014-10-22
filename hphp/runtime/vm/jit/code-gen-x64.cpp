@@ -59,7 +59,6 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"

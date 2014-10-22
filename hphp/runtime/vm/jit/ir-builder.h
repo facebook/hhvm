@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {
@@ -65,7 +65,7 @@ namespace HPHP { namespace jit {
  *
  *      After the preOptimize pass, IRBuilder calls out to
  *      Simplifier to perform state-independent optimizations, like
- *      copy propagation and strength reduction.  (See simplifier.h.)
+ *      copy propagation and strength reduction.  (See simplify.h.)
  *
  *
  * After all the instructions are linked into the trace, this module can also

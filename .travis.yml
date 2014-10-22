@@ -20,7 +20,7 @@ before_script:
   - time TRAVIS=1 ./configure_generic.sh -DENABLE_COTIRE=ON
 # for some tests
   - time sudo locale-gen de_DE && sudo locale-gen zh_CN.utf8 && sudo locale-gen fr_FR
-  - time make -j 6
+  - time make -j 4
 # mysql configuration for unit-tests
   - mysql -e 'CREATE DATABASE IF NOT EXISTS hhvm;'
   - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=hhvm"

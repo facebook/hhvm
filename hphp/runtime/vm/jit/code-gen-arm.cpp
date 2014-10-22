@@ -1073,7 +1073,7 @@ void CodeGenerator::cgCallHelper(Vout& v,
   always_assert_flog(
     args.numStackArgs() == 0,
     "Stack arguments not yet supported on ARM: `{}'\n\n{}",
-    *m_curInst, m_unit
+    *m_curInst, m_state.unit
   );
   shuffleArgs(v, args, call);
 
@@ -1084,9 +1084,7 @@ void CodeGenerator::cgCallHelper(Vout& v,
 
   auto* taken = m_curInst->taken();
   if (taken && taken->isCatch()) {
-    auto& info = m_state.catches[taken];
     assert_not_implemented(args.numStackArgs() == 0);
-    info.rspOffset = args.numStackArgs();
     auto next = v.makeBlock();
     v << hcunwind{syncPoint, {next, m_state.labels[taken]}};
     v = next;
@@ -1223,7 +1221,7 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto const sf = v.makeReg();
   emitTypeTest(v, inst->typeParam(), type, rFP[baseOff + TVOFF(m_data)], sf,
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
+      auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
       v << fallbackcc{ccNegate(cc), sf, destSK};
     });
 }
@@ -1237,7 +1235,7 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto const sf = v.makeReg();
   emitTypeTest(v, inst->typeParam(), type, rSP[baseOff + TVOFF(m_data)], sf,
     [&] (ConditionCode cc) {
-      auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
+      auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
       v << fallbackcc{ccNegate(cc), sf, destSK};
     });
 }
@@ -1463,8 +1461,8 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_unit.bcOff() == inst->marker().bcOff());
-  auto const destSK = SrcKey(curFunc(), m_unit.bcOff(), resumed());
+  assert(m_state.unit.bcOff() == inst->marker().bcOff());
+  auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
   auto& v = vmain();
   v << fallback{destSK};
 }
@@ -1628,15 +1626,15 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     assert(dstLoc(0).reg() == PhysReg(rVmSp));
     emitCallNativeImpl(v, vcold(), srcKey, func, argc);
   } else {
-    emitBindCall(v, m_frozen, srcKey, func, argc);
+    emitBindCall(v, m_state.frozen, srcKey, func, argc);
   }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  UNUSED auto const& info = m_state.catches[inst->block()];
-  assert(info.rspOffset == 0); // stack args not supported yet
+  // stack args are not supported yet
+  assert(m_state.catch_offsets[inst->block()] == 0);
 }
 
 static void unwindResumeHelper() {

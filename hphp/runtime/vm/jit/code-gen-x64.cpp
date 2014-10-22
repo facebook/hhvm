@@ -563,7 +563,6 @@ void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
-  auto const& info = m_state.catches[inst->block()];
   auto& v = vmain();
   v << landingpad{};
 
@@ -571,8 +570,8 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
 
   // We want to restore state as though the call had completed
   // successfully, so skip over any stack arguments.
-  if (info.rspOffset) {
-    v << addqi{info.rspOffset, rsp, rsp, v.makeReg()};
+  if (auto offset = m_state.catch_offsets[inst->block()]) {
+    v << addqi{offset, rsp, rsp, v.makeReg()};
   }
 }
 
@@ -861,8 +860,8 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
       inst->marker().show()
     );
 
-    auto& info = m_state.catches[taken];
-    info.rspOffset = ((args.numStackArgs() + 1) & ~1) * sizeof(uintptr_t);
+    m_state.catch_offsets[taken] = ((args.numStackArgs() + 1) & ~1) *
+                                   sizeof(uintptr_t);
     next = v.makeBlock();
     targets[0] = next;
     targets[1] = m_state.labels[taken];
@@ -1543,7 +1542,8 @@ void CodeGenerator::emitTypeGuard(const BCMarker& marker, Type type,
   auto const sf = v.makeReg();
   emitTypeTest(type, typeSrc, dataSrc, sf,
     [&](ConditionCode cc, Vreg sfTaken) {
-      auto dest = SrcKey(getFunc(marker), m_unit.bcOff(), resumed(marker));
+      auto dest = SrcKey(getFunc(marker), m_state.unit.bcOff(),
+                         resumed(marker));
       vmain() << fallbackcc{ccNegate(cc), sfTaken, dest};
     });
 }
@@ -2514,9 +2514,10 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_unit.bcOff() == inst->marker().bcOff());
+  assert(m_state.unit.bcOff() == inst->marker().bcOff());
   auto const& marker = inst->marker();
-  auto const destSK = SrcKey(getFunc(marker), m_unit.bcOff(), resumed(marker));
+  auto const destSK = SrcKey(getFunc(marker), m_state.unit.bcOff(),
+                             resumed(marker));
   auto trflags = inst->extra<ReqRetranslate>()->trflags;
   vmain() << fallback{destSK, trflags};
 }
@@ -2660,7 +2661,7 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
                                             profileId,
                                             '-',
                                             type.toString()));
-  profile.emplace(m_unit.context(), inst->marker(), profileKey);
+  profile.emplace(m_state.unit.context(), inst->marker(), profileKey);
 
   auto& v = vmain();
   if (profile->profiling()) {
@@ -3280,7 +3281,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   if (isNativeImplCall(callee, argc)) {
     emitCallNativeImpl(v, vcold(), srcKey, callee, argc);
   } else {
-    emitBindCall(v, m_frozen, srcKey, callee, argc);
+    emitBindCall(v, m_state.frozen, srcKey, callee, argc);
   }
 }
 
@@ -4919,8 +4920,8 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   auto const rFp = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  TargetProfile<ReleaseVVProfile> profile(m_unit.context(), inst->marker(),
-                                          s_ReleaseVV);
+  TargetProfile<ReleaseVVProfile> profile(m_state.unit.context(),
+                                          inst->marker(), s_ReleaseVV);
   if (profile.profiling()) {
     v << incwm{rVmTl[profile.handle() + offsetof(ReleaseVVProfile, executed)],
                v.makeReg()};
@@ -5690,7 +5691,7 @@ void CodeGenerator::cgConjure(IRInstruction* inst) {
 
 void CodeGenerator::cgProfileStr(IRInstruction* inst) {
   auto& v = vmain();
-  TargetProfile<StrProfile> profile(m_unit.context(), inst->marker(),
+  TargetProfile<StrProfile> profile(m_state.unit.context(), inst->marker(),
                                     inst->extra<ProfileStrData>()->key);
   assert(profile.profiling());
   auto const ch = profile.handle();
@@ -5824,7 +5825,7 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
 }
 
 void CodeGenerator::print() const {
-  jit::print(std::cout, m_unit, m_state.asmInfo);
+  jit::print(std::cout, m_state.unit, m_state.asmInfo);
 }
 
 }}}

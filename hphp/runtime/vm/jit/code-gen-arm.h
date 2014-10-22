@@ -29,13 +29,10 @@
 namespace HPHP { namespace jit { namespace arm {
 
 struct CodeGenerator {
-  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, CodeBlock& frozen,
-                CodegenState& state)
-    : m_unit(unit)
+  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
+    : m_state(state)
     , m_vmain(main)
     , m_vcold(cold)
-    , m_frozen(frozen)
-    , m_state(state)
   {}
 
   void cgInst(IRInstruction* inst);
@@ -100,11 +97,9 @@ struct CodeGenerator {
   Vout& vcold() { return m_vcold; }
 
  private:
-  const IRUnit&         m_unit;
+  CodegenState&         m_state;
   Vout&                 m_vmain;
   Vout&                 m_vcold;
-  CodeBlock&            m_frozen;
-  CodegenState&         m_state;
   IRInstruction*        m_curInst{nullptr};
   jit::vector<Vloc>     m_slocs, m_dlocs;
 };

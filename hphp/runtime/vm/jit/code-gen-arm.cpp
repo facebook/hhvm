@@ -1494,12 +1494,9 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   v << storel{v.cns(nArgs), spReg[spOff + AROFF(m_numArgsAndFlags)]};
 
   // Magic-call name.
-  if (invName) {
-    auto bits = reinterpret_cast<uintptr_t>(invName) | ActRec::kInvNameBit;
-    v << store{v.cns(bits), spReg[spOff + AROFF(m_invName)]};
-  } else {
-    v << store{PhysReg(vixl::xzr), spReg[spOff + AROFF(m_invName)]};
-  }
+  auto bits =
+    (invName ? reinterpret_cast<uintptr_t>(invName) | ActRec::kInvNameBit : 0);
+  v << store{v.cns(bits), spReg[spOff + AROFF(m_invName)]};
 
   // Func and this/class are slightly tricky. The func may be a tuple of a Func*
   // and context.
@@ -1516,7 +1513,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     v << store{objClsReg, spReg[spOff + AROFF(m_this)]};
   } else {
     assert(objOrCls->isA(Type::Nullptr));
-    v << store{PhysReg(vixl::xzr), spReg[spOff + AROFF(m_this)]};
+    v << store{v.cns(0), spReg[spOff + AROFF(m_this)]};
   }
 
   // Now set func, and possibly this/cls
@@ -1526,7 +1523,9 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // Adjust stack pointer
-  v << addqi{safe_cast<int32_t>(spOff), spReg, dstLoc(0).reg(), v.makeReg()};
+  if (spOff) {
+    v << addqi{safe_cast<int32_t>(spOff), spReg, dstLoc(0).reg(), v.makeReg()};
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1828,7 +1827,10 @@ void CodeGenerator::cgSpillStack(IRInstruction* inst) {
     const ptrdiff_t offset = i * sizeof(Cell) + adjustment;
     emitStore(v, sp, offset, spillVals[i], srcLoc(i + 2));
   }
-  v << addqi{safe_cast<int32_t>(adjustment), sp, dst, v.makeReg()};
+
+  if (adjustment) {
+    v << addqi{safe_cast<int32_t>(adjustment), sp, dst, v.makeReg()};
+  }
 }
 
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {

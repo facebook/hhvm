@@ -125,6 +125,10 @@ struct ImmFolder {
     out = safe_cast<int32_t>(imm64);
     return true;
   }
+  bool zero_imm(Vreg r) {
+    if (!valid.test(r)) return false;
+    return vals[r] == 0;
+  }
 
   template<typename Inst>
   void fold(Inst& i, Vinstr& out) {}
@@ -151,6 +155,18 @@ struct ImmFolder {
     int val;
     if (logical_imm(in.s0, val)) { out = orqi{val, in.s1, in.d, in.sf}; }
     else if (logical_imm(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
+  }
+  void fold(store& in, Vinstr& out) {
+    if (zero_imm(in.s)) out = store{PhysReg(vixl::xzr), in.d};
+  }
+  void fold(storeqi& in, Vinstr& out) {
+    if (in.s.q() == 0) out = store{PhysReg(vixl::xzr), in.m};
+  }
+  void fold(storel& in, Vinstr& out) {
+    if (zero_imm(in.s)) out = storel{PhysReg(vixl::wzr), in.m};
+  }
+  void fold(storeli& in, Vinstr& out) {
+    if (in.s.l() == 0) out = storel{PhysReg(vixl::wzr), in.m};
   }
   void fold(subq& in, Vinstr& out) {
     int val;

@@ -167,7 +167,6 @@ private:
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jccs, jmps, bccs, catches;
   jit::vector<PointPatch> ldpoints;
-  jit::hash_map<uint64_t,uint64_t*> cpool;
 };
 
 // overall emitter

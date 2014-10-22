@@ -341,6 +341,10 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    return retAddr - 8;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     vixl::MacroAssembler a { cb };
     vixl::Label afterData;

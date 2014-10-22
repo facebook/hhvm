@@ -628,6 +628,12 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    auto addr = retAddr - x64::kCallLen;
+    assert(isSmashable(addr, x64::kCallLen));
+    return addr;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
     assert(isSmashable(cb.frontier(), x64::kCallLen));

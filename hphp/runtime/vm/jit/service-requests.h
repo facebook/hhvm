@@ -145,19 +145,6 @@ inline SRFlags operator|(SRFlags a, SRFlags b) {
  * to it at callout-time.
  */
 
-// REQ_BIND_CALL
-struct ReqBindCall {
-  SrcKey m_sourceInstr;
-  jit::TCA m_toSmash;
-  int m_nArgs;
-  bool m_isImmutable; // call was to known func.
-};
-
-struct BindCallInfo {
-  ReqBindCall* req;
-  TCA stub; // address of stub to call
-};
-
 struct ServiceReqArgInfo {
   enum {
     Immediate,

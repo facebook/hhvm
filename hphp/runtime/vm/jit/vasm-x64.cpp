@@ -478,8 +478,6 @@ void Vgen::emit(bindaddr& i) {
 
 void Vgen::emit(bindcall& i) {
   mcg->backEnd().prepareForSmash(a->code(), kCallLen);
-  mcg->cgFixups().m_codePointers.insert(&i.req->m_toSmash);
-  i.req->m_toSmash = a->frontier();
   a->call(i.stub);
 }
 
@@ -894,14 +892,13 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
     arg_regs |= d;
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
-  emitEagerVMRegSave(v, RegSaveFlags::SaveFP);
   if (svcreq.stub_block) {
     v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
   } else {
     v << ldimm{0, rAsm}; // because persist flag
   }
   v << ldimm{svcreq.req, rdi};
-  arg_regs |= rAsm | rdi;
+  arg_regs |= rAsm | rdi | rVmFp | rVmSp;
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
   // In the case of some special stubs (m_callToExit, m_retHelper), we

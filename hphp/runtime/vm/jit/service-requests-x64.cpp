@@ -298,23 +298,12 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* func,
  * service request stub. the stub, and the eventual targets, take
  * rStashedAR as an argument.
  */
-void emitBindCall(Vout& v, CodeBlock& frozen, SrcKey srcKey,
+void emitBindCall(Vout& v, CodeBlock& frozen,
                   const Func* func, int numArgs) {
   assert(!isNativeImplCall(func, numArgs));
 
-  // Use some space from the beginning of the service
-  // request stub to emit BIND_CALL specific code.
-  CodeBlock stub;
-  stub.init(mcg->getFreeStub(frozen, &mcg->cgFixups()),
-            maxStubSpace(), "stubTemp");
-
-  // Whatever prologue we're branching to will check at runtime that we
-  // went to the right Func*, correcting if necessary. We treat the first
-  // Func we encounter as a decent prediction. Make space to burn in a TCA.
-  ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
-  req->m_nArgs = numArgs;
-  req->m_sourceInstr = srcKey;
-  req->m_isImmutable = (bool)func;
+  auto& us = mcg->tx().uniqueStubs;
+  auto addr = func ? us.immutableBindCallStub : us.bindCallStub;
 
   // emit the mainline code
   if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
@@ -322,27 +311,7 @@ void emitBindCall(Vout& v, CodeBlock& frozen, SrcKey srcKey,
     emitImmStoreq(v, kUninitializedRIP, rVmSp[off]);
   }
   v << lea{rVmSp[cellsToBytes(numArgs)], rStashedAR};
-  v << bindcall{stub.frontier(), req, RegSet(rStashedAR)};
-
-  // emit the ephemeral stub
-  {
-    Vauto vasm(stub);
-    auto& vf = vasm.main();
-    vf << copy{rStashedAR, serviceReqArgRegs[1]};
-    // Pop the return address from bindcall{} into the actrec in rStashedAR.
-    vf << popm{rStashedAR[AROFF(m_savedRip)]};
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, req);
-    emitServiceReq(vf, stub.base(), jit::REQ_BIND_CALL, argv);
-    printUnit(kVasmCodeGenLevel, "emitBindCall", vasm.unit());
-  }
-  padStub(stub); // fill remainder with ud2
-  if (stub.base() == frozen.frontier()) {
-    frozen.skip(stub.used());
-  }
-
-  TRACE(1, "will bind static call: tca %p, func %p, afrozen %p\n",
-        req->m_toSmash, func, frozen.frontier());
+  v << bindcall{addr, RegSet(rStashedAR)};
 }
 
 }}}

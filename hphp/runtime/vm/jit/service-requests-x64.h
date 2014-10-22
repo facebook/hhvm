@@ -61,7 +61,7 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 /*
  * Emits a REQ_BIND_CALL service request, and adjusts rVmSp after the call.
  */
-void emitBindCall(Vout& v, CodeBlock& frozen, SrcKey srcKey,
+void emitBindCall(Vout& v, CodeBlock& frozen,
                   const Func* funcd, int numArgs);
 void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey, const Func* funcd,
                         int numArgs);

@@ -3281,7 +3281,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   if (isNativeImplCall(callee, argc)) {
     emitCallNativeImpl(v, vcold(), srcKey, callee, argc);
   } else {
-    emitBindCall(v, m_state.frozen, srcKey, callee, argc);
+    emitBindCall(v, m_state.frozen, callee, argc);
   }
 }
 

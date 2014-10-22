@@ -367,7 +367,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 #define VASM_OPCODES\
   /* intrinsics */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
-  O(bindcall, I(stub) I(req), U(args), Dn)\
+  O(bindcall, I(stub), U(args), Dn)  \
   O(bindexit, I(cc) I(target), U(sf), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
   O(bindjcc2nd, I(cc) I(target), U(sf), Dn)\
@@ -532,7 +532,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
-struct bindcall { TCA stub; ReqBindCall* req; RegSet args; };
+struct bindcall { TCA stub; RegSet args; };
 struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
                   TransFlags trflags; };
 struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2]; };

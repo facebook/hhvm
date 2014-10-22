@@ -1626,7 +1626,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     assert(dstLoc(0).reg() == PhysReg(rVmSp));
     emitCallNativeImpl(v, vcold(), srcKey, func, argc);
   } else {
-    emitBindCall(v, m_state.frozen, srcKey, func, argc);
+    emitBindCall(v, m_state.frozen, func, argc);
   }
 }
 

@@ -1092,12 +1092,12 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   bool smashed = false;
   switch (requestNum) {
   case REQ_BIND_CALL: {
-    ReqBindCall* req = reinterpret_cast<ReqBindCall*>(args[0]);
-    ActRec* calleeFrame = reinterpret_cast<ActRec*>(args[1]);
-    TCA toSmash = req->m_toSmash;
+    ActRec* calleeFrame = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+    TCA toSmash =
+      backEnd().smashableCallFromReturn((TCA)calleeFrame->m_savedRip);
     Func *func = const_cast<Func*>(calleeFrame->m_func);
-    int nArgs = req->m_nArgs;
-    bool isImmutable = req->m_isImmutable;
+    int nArgs = calleeFrame->numArgs();
+    bool isImmutable = args[0];
     TRACE(2, "enterTC: bindCall %s, ActRec %p\n",
           func->fullName()->data(), calleeFrame);
     TCA dest = getFuncPrologue(func, nArgs);
@@ -1122,7 +1122,6 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
           assert(backEnd().callTarget(toSmash));
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           backEnd().smashCall(toSmash, dest);
-          smashed = true;
           // For functions to be PGO'ed, if their current prologues
           // are still profiling ones (living in code.prof()), then
           // save toSmash as a caller to the prologue, so that it can
@@ -1148,7 +1147,11 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       // should be safe to redo.
       TRACE(2, "enterTC: bindCall rollback smash %p -> %p\n",
             toSmash, dest);
-      sk = req->m_sourceInstr;
+
+      const FPIEnt* fe = liveFunc()->findPrecedingFPI(
+        liveFunc()->base() + calleeFrame->m_soff);
+
+      sk = SrcKey{liveFunc(), fe->m_fcallOff, vmfp()->resumed()};
 
       // EnterTCHelper pushes the return ip onto the stack when the
       // requestNum is REQ_BIND_CALL, but if start is NULL, it will

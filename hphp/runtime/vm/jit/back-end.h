@@ -136,6 +136,12 @@ class BackEnd {
   virtual void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) = 0;
   virtual void emitSmashableCall(CodeBlock& cb, TCA dest) = 0;
   /*
+   * Find the start of a smashable call from the return address
+   * observed in the callee
+   */
+  virtual TCA smashableCallFromReturn(TCA returnAddr) = 0;
+
+  /*
    * Decodes jump instructions and returns their target. This includes handling
    * for ARM's multi-instruction "smashable jump" sequences. If the code does
    * not encode the right kind of jump, these functions return nullptr.

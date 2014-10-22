@@ -178,32 +178,16 @@ void emitCallNativeImpl(Vout& v, Vout& vc, SrcKey srcKey,
   }
 }
 
-void emitBindCall(Vout& v, CodeBlock& frozen, SrcKey srcKey,
-                  const Func* func, int numArgs) {
+void emitBindCall(Vout& v, CodeBlock& frozen, const Func* func, int numArgs) {
   assert(!isNativeImplCall(func, numArgs));
 
-  ReqBindCall* req = mcg->globalData().alloc<ReqBindCall>();
-  req->m_nArgs = numArgs;
-  req->m_sourceInstr = srcKey;
-  req->m_isImmutable = (bool)func;
+  auto& us = mcg->tx().uniqueStubs;
+  auto addr = func ? us.immutableBindCallStub : us.bindCallStub;
 
   // emit the mainline code
   PhysReg new_fp{rStashedAR}, vmsp{arm::rVmSp};
   v << lea{vmsp[cellsToBytes(numArgs)], new_fp};
-  v << bindcall{frozen.frontier(), req, RegSet(new_fp)};
-
-  // emit the stub into frozen as a persistent stub
-  {
-    Vauto vasm(frozen);
-    auto& vf = vasm.main();
-    vf << copy{new_fp, PhysReg(serviceReqArgReg(1))};
-    // Put return address into pre-live ActRec, and restore the saved one.
-    vf << store{PhysReg{rLinkReg}, new_fp[AROFF(m_savedRip)]};
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, req);
-    emitServiceReq(vf, nullptr, REQ_BIND_CALL, argv);
-    printUnit(kVasmCodeGenLevel, "emitBindCall", vasm.unit());
-  }
+  v << bindcall{addr, RegSet(new_fp)};
 }
 
 }}}

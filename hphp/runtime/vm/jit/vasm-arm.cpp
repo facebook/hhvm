@@ -316,7 +316,6 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 }
 
 void Vgen::emit(bindcall& i) {
-  i.req->m_toSmash = a->frontier();
   mcg->backEnd().emitSmashableCall(*codeBlock, i.stub);
 }
 

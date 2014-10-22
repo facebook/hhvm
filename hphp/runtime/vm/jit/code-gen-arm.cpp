@@ -612,7 +612,7 @@ Vloc CodeGenerator::srcLoc(unsigned i) const {
 }
 
 Vloc CodeGenerator::dstLoc(unsigned i) const {
-  return m_state.locs[m_curInst->src(i)];
+  return m_state.locs[m_curInst->dst(i)];
 }
 
 ArgGroup CodeGenerator::argGroup() const {

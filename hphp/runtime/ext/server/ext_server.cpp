@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 
 #include "folly/Conv.h"
 
@@ -31,12 +31,45 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(server, NO_EXTENSION_VERSION_YET);
+static const StaticString s_PAGELET_NOT_READY("PAGELET_NOT_READY");
+static const StaticString s_PAGELET_READY("PAGELET_READY");
+static const StaticString s_PAGELET_DONE("PAGELET_DONE");
+
+static class ServerExtension : public Extension {
+public:
+  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    Native::registerConstant<KindOfInt64>(s_PAGELET_NOT_READY.get(),
+                                          k_PAGELET_NOT_READY);
+    Native::registerConstant<KindOfInt64>(s_PAGELET_READY.get(),
+                                          k_PAGELET_READY);
+    Native::registerConstant<KindOfInt64>(s_PAGELET_DONE.get(), k_PAGELET_DONE);
+
+    HHVM_FE(dangling_server_proxy_old_request);
+    HHVM_FE(pagelet_server_is_enabled);
+    HHVM_FE(pagelet_server_task_start);
+    HHVM_FE(pagelet_server_task_status);
+    HHVM_FE(pagelet_server_task_result);
+    HHVM_FE(pagelet_server_flush);
+    HHVM_FE(xbox_send_message);
+    HHVM_FE(xbox_post_message);
+    HHVM_FE(xbox_task_start);
+    HHVM_FE(xbox_task_status);
+    HHVM_FE(xbox_task_result);
+    HHVM_FE(xbox_process_call_message);
+    HHVM_FE(xbox_get_thread_timeout);
+    HHVM_FE(xbox_set_thread_timeout);
+    HHVM_FE(xbox_schedule_thread_reset);
+    HHVM_FE(xbox_get_thread_time);
+
+    loadSystemlib();
+  }
+} s_server_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 // dangling server
 
-bool f_dangling_server_proxy_old_request() {
+bool HHVM_FUNCTION(dangling_server_proxy_old_request) {
   static bool s_detected_dangling_server = true;
 
   if (!s_detected_dangling_server ||
@@ -79,16 +112,17 @@ const int64_t k_PAGELET_NOT_READY = PAGELET_NOT_READY;
 const int64_t k_PAGELET_READY     = PAGELET_READY;
 const int64_t k_PAGELET_DONE      = PAGELET_DONE;
 
-bool f_pagelet_server_is_enabled() {
+bool HHVM_FUNCTION(pagelet_server_is_enabled) {
   return PageletServer::Enabled();
 }
 
 const StaticString s_Host("Host");
 
-Resource f_pagelet_server_task_start(const String& url,
-                                     const Array& headers /* = null_array */,
-                                     const String& post_data /* = null_string */,
-                                     const Array& files /* = null_array */) {
+Resource HHVM_FUNCTION(pagelet_server_task_start,
+                       const String& url,
+                       const Array& headers /* = null_array */,
+                       const String& post_data /* = null_string */,
+                       const Array& files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
   int timeout = ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
@@ -105,13 +139,16 @@ Resource f_pagelet_server_task_start(const String& url,
                                   post_data, files, timeout);
 }
 
-int64_t f_pagelet_server_task_status(const Resource& task) {
+int64_t HHVM_FUNCTION(pagelet_server_task_status,
+                      const Resource& task) {
   return PageletServer::TaskStatus(task);
 }
 
-String f_pagelet_server_task_result(const Resource& task, VRefParam headers,
-                                    VRefParam code,
-                                    int64_t timeout_ms /* = 0 */) {
+String HHVM_FUNCTION(pagelet_server_task_result,
+                     const Resource& task,
+                     VRefParam headers,
+                     VRefParam code,
+                     int64_t timeout_ms /* = 0 */) {
   Array rheaders;
   int rcode;
   String response = PageletServer::TaskResult(task, rheaders, rcode,
@@ -121,7 +158,7 @@ String f_pagelet_server_task_result(const Resource& task, VRefParam headers,
   return response;
 }
 
-void f_pagelet_server_flush() {
+void HHVM_FUNCTION(pagelet_server_flush) {
   ExecutionContext *context = g_context.getNoCheck();
   Transport *transport = context->getTransport();
   if (transport &&
@@ -139,33 +176,42 @@ void f_pagelet_server_flush() {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool f_xbox_send_message(const String& msg,
-                         VRefParam retRef,
-                         int64_t timeout_ms,
-                         const String& host /* = "localhost" */) {
+bool HHVM_FUNCTION(xbox_send_message,
+                   const String& msg,
+                   VRefParam retRef,
+                   int64_t timeout_ms,
+                   const String& host /* = "localhost" */) {
   Array ret;
   auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
   retRef = ret;
   return b;
 }
 
-bool f_xbox_post_message(const String& msg, const String& host /* = "localhost" */) {
+bool HHVM_FUNCTION(xbox_post_message,
+                   const String& msg,
+                   const String& host /* = "localhost" */) {
   return XboxServer::PostMessage(msg, host);
 }
 
-Resource f_xbox_task_start(const String& message) {
+Resource HHVM_FUNCTION(xbox_task_start,
+                       const String& message) {
   return XboxServer::TaskStart(message);
 }
 
-bool f_xbox_task_status(const Resource& task) {
+bool HHVM_FUNCTION(xbox_task_status,
+                   const Resource& task) {
   return XboxServer::TaskStatus(task);
 }
 
-int64_t f_xbox_task_result(const Resource& task, int64_t timeout_ms, VRefParam ret) {
+int64_t HHVM_FUNCTION(xbox_task_result,
+                      const Resource& task,
+                      int64_t timeout_ms,
+                      VRefParam ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
 }
 
-Variant f_xbox_process_call_message(const String& msg) {
+Variant HHVM_FUNCTION(xbox_process_call_message,
+                      const String& msg) {
   Variant v = unserialize_from_string(msg);
   if (!v.isArray()) {
     raise_error("Error decoding xbox call message");
@@ -190,7 +236,7 @@ Variant f_xbox_process_call_message(const String& msg) {
   return vm_call_user_func(fn, args.toArray());
 }
 
-int64_t f_xbox_get_thread_timeout() {
+int64_t HHVM_FUNCTION(xbox_get_thread_timeout) {
   auto server_info = XboxServer::GetServerInfo();
   if (server_info) {
     return server_info->getMaxDuration();
@@ -198,7 +244,8 @@ int64_t f_xbox_get_thread_timeout() {
   throw Exception("Not an xbox worker!");
 }
 
-void f_xbox_set_thread_timeout(int timeout) {
+void HHVM_FUNCTION(xbox_set_thread_timeout,
+                   int timeout) {
   if (timeout < 0) {
     raise_warning("Cannot set timeout/duration to a negative number.");
     return;
@@ -211,7 +258,7 @@ void f_xbox_set_thread_timeout(int timeout) {
   }
 }
 
-void f_xbox_schedule_thread_reset() {
+void HHVM_FUNCTION(xbox_schedule_thread_reset) {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
     handler->setReset();
@@ -220,7 +267,7 @@ void f_xbox_schedule_thread_reset() {
   }
 }
 
-int64_t f_xbox_get_thread_time() {
+int64_t HHVM_FUNCTION(xbox_get_thread_time) {
   RPCRequestHandler *handler = XboxServer::GetRequestHandler();
   if (handler) {
     return time(nullptr) - handler->getLastResetTime();

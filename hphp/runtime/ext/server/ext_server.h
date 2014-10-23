@@ -37,22 +37,44 @@ enum PageletStatusType {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_dangling_server_proxy_old_request();
-bool f_pagelet_server_is_enabled();
-Resource f_pagelet_server_task_start(const String& url, const Array& headers = null_array, const String& post_data = null_string, const Array& files = null_array);
-int64_t f_pagelet_server_task_status(const Resource& task);
-String f_pagelet_server_task_result(const Resource& task, VRefParam headers, VRefParam code, int64_t timeout_ms);
-void f_pagelet_server_flush();
-bool f_xbox_send_message(const String& msg, VRefParam ret, int64_t timeout_ms, const String& host = "localhost");
-bool f_xbox_post_message(const String& msg, const String& host = "localhost");
-Resource f_xbox_task_start(const String& message);
-bool f_xbox_task_status(const Resource& task);
-int64_t f_xbox_task_result(const Resource& task, int64_t timeout_ms, VRefParam ret);
-Variant f_xbox_process_call_message(const String& msg);
-int64_t f_xbox_get_thread_timeout();
-void f_xbox_set_thread_timeout(int timeout);
-void f_xbox_schedule_thread_reset();
-int64_t f_xbox_get_thread_time();
+bool HHVM_FUNCTION(dangling_server_proxy_old_request);
+bool HHVM_FUNCTION(pagelet_server_is_enabled);
+Resource HHVM_FUNCTION(pagelet_server_task_start,
+                       const String& url,
+                       const Array& headers = null_array,
+                       const String& post_data = null_string,
+                       const Array& files = null_array);
+int64_t HHVM_FUNCTION(pagelet_server_task_status,
+                      const Resource& task);
+String HHVM_FUNCTION(pagelet_server_task_result,
+                     const Resource& task,
+                     VRefParam headers,
+                     VRefParam code,
+                     int64_t timeout_ms);
+void HHVM_FUNCTION(pagelet_server_flush);
+bool HHVM_FUNCTION(xbox_send_message,
+                   const String& msg,
+                   VRefParam ret,
+                   int64_t timeout_ms,
+                   const String& host = "localhost");
+bool HHVM_FUNCTION(xbox_post_message,
+                   const String& msg,
+                   const String& host = "localhost");
+Resource HHVM_FUNCTION(xbox_task_start,
+                       const String& message);
+bool HHVM_FUNCTION(xbox_task_status,
+                   const Resource& task);
+int64_t HHVM_FUNCTION(xbox_task_result,
+                      const Resource& task,
+                      int64_t timeout_ms,
+                      VRefParam ret);
+Variant HHVM_FUNCTION(xbox_process_call_message,
+                      const String& msg);
+int64_t HHVM_FUNCTION(xbox_get_thread_timeout);
+void HHVM_FUNCTION(xbox_set_thread_timeout,
+                   int timeout);
+void HHVM_FUNCTION(xbox_schedule_thread_reset);
+int64_t HHVM_FUNCTION(xbox_get_thread_time);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

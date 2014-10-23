@@ -142,6 +142,8 @@ struct Block : boost::noncopyable {
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
   InstructionList& instrs()      { return m_instrs; }
+  const InstructionList&
+                   instrs() const{ return m_instrs; }
   bool             empty() const { return m_instrs.empty(); }
   iterator         begin()       { return m_instrs.begin(); }
   iterator         end()         { return m_instrs.end(); }

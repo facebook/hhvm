@@ -501,8 +501,6 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto const curType = localType(locId, DataTypeGeneric);
   auto const newType = inst->src(1)->type();
 
-  assert(!inst->hasTypeParam());
-
   /*
    * There's no need to store the type if it's going to be the same
    * KindOfFoo.  We'll still have to store string types because we

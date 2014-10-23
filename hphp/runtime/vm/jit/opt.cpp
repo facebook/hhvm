@@ -176,10 +176,21 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (doReoptimize) {
     irBuilder.reoptimize();
     finishPass("reoptimize");
-    // Cleanup any dead code left around by CSE/Simplification
-    // Ideally, this would be controlled by a flag returned
-    // by optimizeTrace indicating whether DCE is necessary
     dce("reoptimize");
+  }
+
+  /*
+   * Note: doing this pass this late might not be ideal, in particular because
+   * we've already turned some StLoc instructions into StLocNT.
+   *
+   * But right now there are assumptions preventing us from doing it before
+   * refcount opts.  (Refcount opts needs to see all the StLocs explicitly
+   * because it makes assumptions about whether references are consumed based
+   * on that.)
+   */
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeMemory, "memelim");
+    dce("memelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

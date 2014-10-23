@@ -1647,7 +1647,7 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   gen(DecRef, testVal);
   auto const stack = spillStack();
   gen(SyncABIRegs, m_irb->fp(), stack);
-  gen(JmpIndirect, dest);
+  gen(JmpSSwitchDest, dest);
 }
 
 void HhbcTranslator::setThisAvailable() {
@@ -2341,8 +2341,7 @@ void HhbcTranslator::emitAGetL(int id) {
 }
 
 void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
-  SSATmp* prevValue = gen(LdMem, ptr->type().deref(), ptr, cns(0));
-
+  auto const prevValue = gen(LdMem, ptr->type().deref(), ptr, cns(0));
   pushIncRef(src);
   gen(StMem, ptr, cns(0), src);
   gen(DecRef, prevValue);

@@ -131,6 +131,7 @@ bool checkBlock(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  * 6. The entry block must not have any predecessors.
+ * 7. The entry block starts with a DefFP instruction.
  */
 bool checkCfg(const IRUnit& unit) {
   auto const blocksIds = rpoSortCfgWithIds(unit);
@@ -139,6 +140,9 @@ bool checkCfg(const IRUnit& unit) {
 
   // Entry block can't have predecessors.
   assert(unit.entry()->numPreds() == 0);
+
+  // Entry block starts with DefFP
+  assert(!unit.entry()->empty() && unit.entry()->begin()->op() == DefFP);
 
   // Check valid successor/predecessor edges.
   for (Block* b : blocks) {

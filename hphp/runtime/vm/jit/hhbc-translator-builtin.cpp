@@ -295,7 +295,7 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
  * B0:
  *  BeginCatch
  *  <<commonBody>>
- *  CheckSideExit FP, SP -> B2
+ *  UnwindCheckSideExit FP, SP -> B2
  *  -> B1
  * B1:
  *  <<sideExitBody>>
@@ -319,7 +319,7 @@ Block* HhbcTranslator::makeParamCoerceExit(CommonBody commonBody,
   BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
   gen(BeginCatch);
   commonBody();
-  gen(CheckSideExit, taken, m_irb->fp(), m_irb->sp());
+  gen(UnwindCheckSideExit, taken, m_irb->fp(), m_irb->sp());
 
   // prepare for regular exception
   {

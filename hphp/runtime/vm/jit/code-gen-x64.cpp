@@ -612,7 +612,7 @@ void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
   emitIncStat(v, Stats::TC_CatchSideExit);
 }
 
-void CodeGenerator::cgCheckSideExit(IRInstruction* inst) {
+void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = v.makeReg();
   v << cmpbim{0, rVmTl[unwinderSideExitOff()], sf};
@@ -3878,10 +3878,10 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
   auto sizeReg = srcLoc(inst, 1).reg();
 
   auto throwHelper = [&](Vout& v) {
-      auto args = argGroup(inst);
-      args.ssa(0/*idx*/);
-      cgCallHelper(v, CppCall::direct(throwOOB),
-                   kVoidDest, SyncOptions::kSyncPoint, args);
+    auto args = argGroup(inst);
+    args.ssa(0/*idx*/);
+    cgCallHelper(v, CppCall::direct(throwOOB),
+                 kVoidDest, SyncOptions::kSyncPoint, args);
   };
 
   auto& v = vmain();
@@ -4879,7 +4879,7 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
   v << phidef{v.makeTuple(std::move(args))};
 }
 
-void CodeGenerator::cgJmpIndirect(IRInstruction* inst) {
+void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
   v << jmpr{srcLoc(inst, 0).reg()};
 }
@@ -5112,7 +5112,6 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   auto newIdxReg = srcLoc(inst, 1).reg();
   int64_t off = CONTOFF(m_index) - c_Generator::arOff();
-  // this is hacky and awful oh god
   auto& v = vmain();
   auto mem_index = v.makeReg();
   auto res = v.makeReg();

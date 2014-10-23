@@ -34,6 +34,7 @@
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -1019,6 +1020,10 @@ void Variant::unserialize(VariableUnserializer *uns,
             raise_warning("%s does not support the 'O' serialization "
                           "format", clsName.data());
           }
+
+          Variant serializedNativeData = init_null();
+          bool hasSerializedNativeData = false;
+
           /*
             Count backwards so that i is the number of properties
             remaining (to be used as an estimate for the total number
@@ -1030,7 +1035,10 @@ void Variant::unserialize(VariableUnserializer *uns,
             int ksize = key.size();
             const char *kdata = key.data();
             int subLen = 0;
-            if (kdata[0] == '\0') {
+            if (key == ObjectData::s_serializedNativeDataKey) {
+              serializedNativeData.unserialize(uns);
+              hasSerializedNativeData = true;
+            } else if (kdata[0] == '\0') {
               if (UNLIKELY(!ksize)) {
                 raise_error("Cannot access empty property");
               }
@@ -1053,6 +1061,18 @@ void Variant::unserialize(VariableUnserializer *uns,
             } else {
               unserializeProp(uns, obj.get(), key, nullptr, key, i + 1);
             }
+          }
+
+          // nativeDataWakeup is called last to ensure that all properties are
+          // already unserialized. We also ensure that nativeDataWakeup is
+          // invoked regardless of whether or not serialized native data exists
+          // within the serialized content.
+          if (obj->getAttribute(ObjectData::HasNativeData) &&
+              obj->getVMClass()->getNativeDataInfo()->isSerializable()) {
+            Native::nativeDataWakeup(obj.get(), serializedNativeData);
+          } else if (hasSerializedNativeData) {
+            raise_warning("%s does not expect any serialized native data.",
+                          clsName.data());
           }
         } else {
           assert(type == 'V' || type == 'K');

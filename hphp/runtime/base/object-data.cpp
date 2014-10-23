@@ -65,6 +65,9 @@ const StaticString
   s_serialize("serialize"),
   s_clone("__clone");
 
+const StaticString
+  ObjectData::s_serializedNativeDataKey(std::string("\0native", 7));
+
 static Array convert_to_array(const ObjectData* obj, HPHP::Class* cls) {
   bool visible, accessible, unset;
   auto prop = obj->getProp(
@@ -714,6 +717,7 @@ inline Array getSerializeProps(const ObjectData* obj,
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
+  Variant serializableNativeData = init_null();
   Variant ret;
 
   if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
@@ -746,6 +750,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (getAttribute(HasSleep)) {
       handleSleep = true;
       ret = const_cast<ObjectData*>(this)->invokeSleep();
+    }
+    if (getAttribute(HasNativeData)) {
+      auto* ndi = cls->getNativeDataInfo();
+      if (ndi->isSerializable()) {
+        serializableNativeData = Native::nativeDataSleep(this);
+      }
     }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
@@ -820,6 +830,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         wanted.set(propName, init_null());
       }
       serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
+      if (!serializableNativeData.isNull()) {
+        wanted.set(s_serializedNativeDataKey, serializableNativeData);
+      }
       wanted.serialize(serializer, true);
     } else {
       raise_notice("serialize(): __sleep should return an array only "
@@ -865,6 +878,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         }
       }
       serializer->setObjectInfo(className, o_getId(), 'O');
+      if (!serializableNativeData.isNull()) {
+        properties.set(s_serializedNativeDataKey, serializableNativeData);
+      }
       properties.serialize(serializer, true);
     }
   }

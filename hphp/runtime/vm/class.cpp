@@ -416,6 +416,10 @@ const Func* Class::getDeclaredCtor() const {
 
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes
+  auto* ndi = m_extra ? m_extra.raw()->m_nativeDataInfo : nullptr;
+  if (ndi != nullptr && ndi->isSerializable()) {
+    return true;
+  }
   auto info = clsInfo();
   auto p = this;
   while ((!info) && (p = p->parent())) {

@@ -71,6 +71,8 @@ class ObjectData {
     RealPropExist = 16,    // For property_exists
   };
 
+  static const StaticString s_serializedNativeDataKey;
+
  private:
   static __thread int os_max_id;
 

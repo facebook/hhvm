@@ -1,0 +1,21 @@
+string(15) "__sleep invoked"
+string(3) "Foo"
+string(3) "Foo"
+string(104) ""O:3:\"Bar\":3:{s:4:\"prop\";i:1337;s:8:\"\u0000Bar\u0000meh\";i:456;s:7:\"\u0000native\";s:3:\"Foo\";}""
+string(16) "__wakeup invoked"
+int(1337)
+string(14) "not serialized"
+string(3) "Foo"
+string(3) "Foo"
+object(Bar)#2 (5) {
+  ["prop"]=>
+  int(1337)
+  ["dontSerializeMe"]=>
+  string(14) "not serialized"
+  ["meh":"Bar":private]=>
+  int(456)
+  ["name"]=>
+  string(3) "Foo"
+  ["obj":"ReflectionClass":private]=>
+  NULL
+}

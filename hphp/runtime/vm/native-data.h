@@ -27,6 +27,8 @@ struct NativeDataInfo {
   typedef void (*CopyFunc)(ObjectData *dest, ObjectData *src);
   typedef void (*DestroyFunc)(ObjectData *obj);
   typedef void (*SweepFunc)(ObjectData *sweep);
+  typedef Variant (*SleepFunc)(const ObjectData *sleep);
+  typedef void (*WakeupFunc)(ObjectData *wakeup, const Variant& data);
 
   size_t sz;
   uint16_t odattrs;
@@ -34,9 +36,15 @@ struct NativeDataInfo {
   CopyFunc copy; // clone $obj
   DestroyFunc destroy; // unset($obj)
   SweepFunc sweep; // sweep $obj
+  SleepFunc sleep; // serialize($obj)
+  WakeupFunc wakeup; // unserialize($obj)
 
   void setObjectDataAttribute(uint16_t attr) {
     odattrs |= attr;
+  }
+
+  bool isSerializable() const {
+    return sleep != nullptr && wakeup != nullptr;
   }
 };
 
@@ -49,12 +57,20 @@ T* data(ObjectData *obj) {
   return reinterpret_cast<T*>(node) - 1;
 }
 
+template<class T>
+const T* data(const ObjectData *obj) {
+  const auto node = reinterpret_cast<const SweepNode*>(obj) - 1;
+  return reinterpret_cast<const T*>(node) - 1;
+}
+
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
                             NativeDataInfo::CopyFunc copy,
                             NativeDataInfo::DestroyFunc destroy,
-                            NativeDataInfo::SweepFunc sweep);
+                            NativeDataInfo::SweepFunc sweep,
+                            NativeDataInfo::SleepFunc sleep,
+                            NativeDataInfo::WakeupFunc wakeup);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -93,6 +109,34 @@ void>::type nativeDataInfoSweep(ObjectData* obj) {
   data<T>(obj)->~T();
 }
 
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSleep, sleep);
+
+template<class T>
+typename std::enable_if<hasSleep<T, Variant() const>::value,
+Variant>::type nativeDataInfoSleep(const ObjectData* obj) {
+  return data<T>(obj)->sleep();
+}
+
+template<class T>
+typename std::enable_if<!hasSleep<T, Variant() const>::value,
+Variant>::type nativeDataInfoSleep(const ObjectData* obj) {
+  always_assert(0);
+}
+
+FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasWakeup, wakeup);
+
+template<class T>
+typename std::enable_if<hasWakeup<T, void(const Variant&, ObjectData*)>::value,
+void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
+  data<T>(obj)->wakeup(content, obj);
+}
+
+template<class T>
+typename std::enable_if<!hasWakeup<T, void(const Variant&, ObjectData*)>::value,
+void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
+  always_assert(0);
+}
+
 enum NDIFlags {
   NONE           = 0,
   // Skipping the ctor/dtor is generally a bad idea
@@ -110,7 +154,11 @@ void registerNativeDataInfo(const StringData* name,
                            ? nullptr : &nativeDataInfoCopy<T>,
                          &nativeDataInfoDestroy<T>,
                          (flags & NDIFlags::NO_SWEEP)
-                           ? nullptr : &nativeDataInfoSweep<T>);
+                           ? nullptr : &nativeDataInfoSweep<T>,
+                         hasSleep<T, Variant() const>::value
+                           ? &nativeDataInfoSleep<T> : nullptr,
+                         hasWakeup<T, void(const Variant&, ObjectData*)>::value
+                           ? &nativeDataInfoWakeup<T> : nullptr);
 }
 
 ObjectData* nativeDataInstanceCtor(Class* cls);
@@ -118,6 +166,8 @@ void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src);
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
 void sweepNativeData();
+Variant nativeDataSleep(const ObjectData* obj);
+void nativeDataWakeup(ObjectData* obj, const Variant& data);
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

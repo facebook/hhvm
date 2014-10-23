@@ -29,8 +29,12 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::InitFunc init,
                             NativeDataInfo::CopyFunc copy,
                             NativeDataInfo::DestroyFunc destroy,
-                            NativeDataInfo::SweepFunc sweep) {
+                            NativeDataInfo::SweepFunc sweep,
+                            NativeDataInfo::SleepFunc sleep,
+                            NativeDataInfo::WakeupFunc wakeup) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
+  assert((sleep == nullptr && wakeup == nullptr) ||
+         (sleep != nullptr && wakeup != nullptr));
   NativeDataInfo info;
   info.sz = sz;
   info.odattrs = ObjectData::Attribute::HasNativeData;
@@ -38,6 +42,8 @@ void registerNativeDataInfo(const StringData* name,
   info.copy = copy;
   info.destroy = destroy;
   info.sweep = sweep;
+  info.sleep = sleep;
+  info.wakeup = wakeup;
   s_nativedatainfo[name] = info;
 }
 
@@ -186,6 +192,20 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
     return MM().smartFreeSizeLogged(ptr, size);
   }
   MM().smartFreeSizeBigLogged(ptr, size);
+}
+
+Variant nativeDataSleep(const ObjectData* obj) {
+  auto* ndi = obj->getVMClass()->getNativeDataInfo();
+  assert(ndi);
+  assert(ndi->sleep);
+  return ndi->sleep(obj);
+}
+
+void nativeDataWakeup(ObjectData* obj, const Variant& data) {
+  auto* ndi = obj->getVMClass()->getNativeDataInfo();
+  assert(ndi);
+  assert(ndi->wakeup);
+  ndi->wakeup(obj, data);
 }
 
 //////////////////////////////////////////////////////////////////////////////

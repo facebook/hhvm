@@ -874,10 +874,7 @@ const StaticString s_ReflectionClassHandle("ReflectionClassHandle");
 
 // helper for __construct
 static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
-  auto const cls = Unit::loadClass(name.get());
-  if (!cls) return empty_string();
-  ReflectionClassHandle::Get(this_)->setClass(cls);
-  return cls->nameStr();
+  return ReflectionClassHandle::Get(this_)->init(name);
 }
 
 static String HHVM_METHOD(ReflectionClass, getName) {
@@ -1322,6 +1319,24 @@ static String HHVM_METHOD(ReflectionClass, getConstructorName) {
   if (!ctor) { return String(); }
   auto ret = const_cast<StringData*>(ctor->name());
   return String(ret);
+}
+
+void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
+    if (!content.isString()) {
+      throw Exception("Native data of ReflectionClass should be a class name");
+    }
+
+    String clsName = content.toString();
+    String result = init(clsName);
+    if (result.empty()) {
+      auto msg = folly::format("Class {} does not exist", clsName.data()).str();
+      throw Object(Reflection::AllocReflectionExceptionObject(String(msg)));
+    }
+
+    // It is possible that $name does not get serialized. If a class derives
+    // from ReflectionClass and the return value of its __sleep() function does
+    // not contain 'name', $name gets ignored. So, we restore $name here.
+    obj->o_set(s_name, result);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

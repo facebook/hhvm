@@ -27,8 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-sdlCtx::~sdlCtx()
-{
+sdlCtx::~sdlCtx() {
   for (auto const& doc : docs) {
     xmlFreeDoc(doc.second);
   }

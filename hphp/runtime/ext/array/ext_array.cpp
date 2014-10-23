@@ -941,8 +941,9 @@ static void walk_func(VRefParam value,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
+  int nargs = userdata.isInitialized() ? 3 : 2;
   TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
-  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
+  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, nargs, args);
 }
 
 bool HHVM_FUNCTION(array_walk_recursive,

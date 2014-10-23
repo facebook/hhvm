@@ -604,12 +604,11 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
   assert(o >= base() && o < past());
   const FPIEntVec& fpitab = shared()->m_fpitab;
   assert(fpitab.size());
-  const FPIEnt* fe = &fpitab[0];
-  unsigned int i;
-  for (i = 1; i < fpitab.size(); i++) {
+  const FPIEnt* fe = 0;
+  for (unsigned i = 0; i < fpitab.size(); i++) {
     const FPIEnt* cur = &fpitab[i];
     if (o > cur->m_fcallOff &&
-        fe->m_fcallOff < cur->m_fcallOff) {
+        (!fe || fe->m_fcallOff < cur->m_fcallOff)) {
       fe = cur;
     }
   }

@@ -988,7 +988,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Load an unqualified constant via the RDS, first by trying constName, then by
   trying fallbackName. Raises a notice if neither can be found.
 
-| LookupClsCns<T,className,constName>, D(Uncounted), NA, E|Er
+| LookupClsCns<T,className,constName>, DCns, NA, E|Er|PRc
 
   Load a class constant for a class via the RDS, invoking autoload if it is not
   defined. This instruction may raise an undefined constant error if autoload

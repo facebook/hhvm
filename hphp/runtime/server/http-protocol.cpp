@@ -846,7 +846,7 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
     }
   } else {
     /* search for the end of the boundary */
-    e = strchr(s, ',');
+    e = strpbrk(s, ",;");
   }
   if (e) {
     e[0] = '\0';

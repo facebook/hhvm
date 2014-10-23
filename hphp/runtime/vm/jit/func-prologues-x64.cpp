@@ -68,24 +68,19 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   assert(kScratchCrossTraceRegs.contains(rdx));
 
   auto funcImm = Immed64(func);
-  const int kAlignMask = kCacheLineMask;
-  int loBits = uintptr_t(a.frontier()) & kAlignMask;
-  int delta, size;
+  int nBytes, offset;
 
   // Ensure the immediate is safely smashable
   // the immediate must not cross a qword boundary,
   if (!funcImm.fits(sz::dword)) {
-    size = 8;
-    delta = loBits + kFuncMovImm;
+    nBytes = kFuncGuardLen;
+    offset = kFuncMovImm;
   } else {
-    size = 4;
-    delta = loBits + kFuncCmpImm;
+    nBytes = kFuncGuardShortLen;
+    offset = kFuncCmpImm;
   }
 
-  delta = (delta + size - 1) & kAlignMask;
-  if (delta < size - 1) {
-    a.emitNop(size - 1 - delta);
-  }
+  mcg->backEnd().prepareForSmash(a.code(), nBytes, offset);
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!funcImm.fits(sz::dword)) {

@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_ldap.h"
+#include "hphp/runtime/ext/ldap/ext_ldap.h"
 #include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/thread-local.h"
@@ -32,7 +32,56 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(ldap, NO_EXTENSION_VERSION_YET);
+static class LdapExtension : public Extension {
+public:
+  LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(ldap_connect);
+    HHVM_FE(ldap_explode_dn);
+    HHVM_FE(ldap_dn2ufn);
+    HHVM_FE(ldap_err2str);
+    HHVM_FE(ldap_add);
+    HHVM_FE(ldap_mod_add);
+    HHVM_FE(ldap_mod_del);
+    HHVM_FE(ldap_mod_replace);
+    HHVM_FE(ldap_modify);
+    HHVM_FE(ldap_bind);
+    HHVM_FE(ldap_set_rebind_proc);
+    HHVM_FE(ldap_sort);
+    HHVM_FE(ldap_start_tls);
+    HHVM_FE(ldap_unbind);
+    HHVM_FE(ldap_get_option);
+    HHVM_FE(ldap_set_option);
+    HHVM_FE(ldap_close);
+    HHVM_FE(ldap_list);
+    HHVM_FE(ldap_read);
+    HHVM_FE(ldap_search);
+    HHVM_FE(ldap_rename);
+    HHVM_FE(ldap_delete);
+    HHVM_FE(ldap_compare);
+    HHVM_FE(ldap_errno);
+    HHVM_FE(ldap_error);
+    HHVM_FE(ldap_get_dn);
+    HHVM_FE(ldap_count_entries);
+    HHVM_FE(ldap_get_entries);
+    HHVM_FE(ldap_first_entry);
+    HHVM_FE(ldap_next_entry);
+    HHVM_FE(ldap_get_attributes);
+    HHVM_FE(ldap_first_attribute);
+    HHVM_FE(ldap_next_attribute);
+    HHVM_FE(ldap_first_reference);
+    HHVM_FE(ldap_next_reference);
+    HHVM_FE(ldap_parse_reference);
+    HHVM_FE(ldap_parse_result);
+    HHVM_FE(ldap_free_result);
+    HHVM_FE(ldap_get_values_len);
+    HHVM_FE(ldap_get_values);
+    HHVM_FE(ldap_control_paged_result);
+    HHVM_FE(ldap_control_paged_result_response);
+
+    loadSystemlib();
+  }
+} s_ldap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -284,10 +333,14 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref,
 }
 
 static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
-                                  const Variant& filter, const Array& attributes,
+                                  const Variant& filter,
+                                  const Variant& attributes,
                                   int attrsonly, int sizelimit, int timelimit,
                                   int deref, int scope) {
-  int num_attribs = attributes.size();
+  const Array& arr_attributes = attributes.isNull()
+                              ? null_array
+                              : attributes.toArray();
+  int num_attribs = arr_attributes.size();
   int old_sizelimit = -1, old_timelimit = -1, old_deref = -1;
   int ldap_err = 1, parallel_search = 1;
   char **ldap_attrs = (char**)malloc((num_attribs+1) * sizeof(char *));
@@ -300,12 +353,12 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
 
 
   for (int i = 0; i < num_attribs; i++) {
-    if (!attributes.exists(i)) {
+    if (!arr_attributes.exists(i)) {
       raise_warning("Array initialization wrong");
       ldap_err = 0;
       goto cleanup;
     }
-    String attr = attributes[i].toString();
+    String attr = arr_attributes[i].toString();
     stringHolder.append(attr);
     ldap_attrs[i] = (char*)attr.data();
   }
@@ -538,8 +591,12 @@ static void get_attributes(Array &ret, LDAP *ldap,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_ldap_connect(const String& hostname /* = null_string */,
-                       int port /* = 389 */) {
+Variant HHVM_FUNCTION(ldap_connect,
+                      const Variant& hostname /* = null_variant */,
+                      int port /* = 389 */) {
+  const String& str_hostname = hostname.isNull()
+                             ? null_string
+                             : hostname.toString();
   if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
     raise_warning("Too many open links (%ld)", LDAPG(num_links));
     return false;
@@ -549,15 +606,15 @@ Variant f_ldap_connect(const String& hostname /* = null_string */,
   Resource ret(ld);
 
   LDAP *ldap = NULL;
-  if (!hostname.empty() && hostname.find('/') >= 0) {
-    int rc = ldap_initialize(&ldap, hostname.data());
+  if (!str_hostname.empty() && str_hostname.find('/') >= 0) {
+    int rc = ldap_initialize(&ldap, str_hostname.data());
     if (rc != LDAP_SUCCESS) {
       raise_warning("Could not create session handle: %s",
                     ldap_err2string(rc));
       return false;
     }
   } else {
-    ldap = ldap_init((char*)hostname.data(), port);
+    ldap = ldap_init((char*)str_hostname.data(), port);
   }
 
   if (ldap) {
@@ -570,7 +627,9 @@ Variant f_ldap_connect(const String& hostname /* = null_string */,
   return false;
 }
 
-Variant f_ldap_explode_dn(const String& dn, int with_attrib) {
+Variant HHVM_FUNCTION(ldap_explode_dn,
+                      const String& dn,
+                      int with_attrib) {
   char **ldap_value;
   if (!(ldap_value = ldap_explode_dn((char*)dn.data(), with_attrib))) {
     /* Invalid parameters were passed to ldap_explode_dn */
@@ -591,7 +650,8 @@ Variant f_ldap_explode_dn(const String& dn, int with_attrib) {
   return ret;
 }
 
-Variant f_ldap_dn2ufn(const String& db) {
+Variant HHVM_FUNCTION(ldap_dn2ufn,
+                      const String& db) {
   char *ufn = ldap_dn2ufn((char*)db.data());
   if (ufn) {
     String ret(ufn, CopyString);
@@ -601,46 +661,72 @@ Variant f_ldap_dn2ufn(const String& db) {
   return false;
 }
 
-String f_ldap_err2str(int errnum) {
+String HHVM_FUNCTION(ldap_err2str,
+                     int errnum) {
   return String(ldap_err2string(errnum), CopyString);
 }
 
-bool f_ldap_add(const Resource& link, const String& dn, const Array& entry) {
+bool HHVM_FUNCTION(ldap_add,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, PHP_LD_FULL_ADD);
 }
 
-bool f_ldap_mod_add(const Resource& link, const String& dn, const Array& entry) {
+bool HHVM_FUNCTION(ldap_mod_add,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_ADD);
 }
 
-bool f_ldap_mod_del(const Resource& link, const String& dn, const Array& entry) {
+bool HHVM_FUNCTION(ldap_mod_del,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_DELETE);
 }
 
-bool f_ldap_mod_replace(const Resource& link, const String& dn, const Array& entry) {
+bool HHVM_FUNCTION(ldap_mod_replace,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
-bool f_ldap_modify(const Resource& link, const String& dn, const Array& entry) {
+bool HHVM_FUNCTION(ldap_modify,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
-bool f_ldap_bind(const Resource& link, const String& bind_rdn /* = null_string */,
-                 const String& bind_password /* = null_string */) {
+bool HHVM_FUNCTION(ldap_bind,
+                   const Resource& link,
+                   const Variant& bind_rdn /* = null_variant */,
+                   const Variant& bind_password /* = null_variant */) {
 
-  if (memchr(bind_rdn.data(), '\0', bind_rdn.size()) != nullptr) {
+  const String& str_bind_rdn = bind_rdn.isNull()
+                             ? null_string
+                             : bind_rdn.toString();
+  const String& str_bind_password = bind_password.isNull()
+                                  ? null_string
+                                  : bind_password.toString();
+
+  if (memchr(str_bind_rdn.data(), '\0', str_bind_rdn.size()) != nullptr) {
     raise_warning("DN contains a null byte");
     return false;
   }
-  if (memchr(bind_password.data(), '\0', bind_password.size()) != nullptr) {
+  if (memchr(str_bind_password.data(), '\0',
+      str_bind_password.size()) != nullptr) {
     raise_warning("Password contains a null byte");
     return false;
   }
 
   int rc;
   LdapLink *ld = link.getTyped<LdapLink>();
-  if ((rc = ldap_bind_s(ld->link, (char*)bind_rdn.data(),
-                        (char*)bind_password.data(),
+  if ((rc = ldap_bind_s(ld->link, (char*)str_bind_rdn.data(),
+                        (char*)str_bind_password.data(),
                         LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
     raise_warning("Unable to bind to server: %s", ldap_err2string(rc));
     return false;
@@ -648,7 +734,9 @@ bool f_ldap_bind(const Resource& link, const String& bind_rdn /* = null_string *
   return true;
 }
 
-bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback) {
+bool HHVM_FUNCTION(ldap_set_rebind_proc,
+                   const Resource& link,
+                   const Variant& callback) {
   LdapLink *ld = link.getTyped<LdapLink>();
 
   if (callback.isString() && callback.toString().empty()) {
@@ -677,7 +765,10 @@ bool f_ldap_set_rebind_proc(const Resource& link, const Variant& callback) {
   return true;
 }
 
-bool f_ldap_sort(const Resource& link, const Resource& result, const String& sortfilter) {
+bool HHVM_FUNCTION(ldap_sort,
+                   const Resource& link,
+                   const Resource& result,
+                   const String& sortfilter) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -690,7 +781,8 @@ bool f_ldap_sort(const Resource& link, const Resource& result, const String& sor
   return true;
 }
 
-bool f_ldap_start_tls(const Resource& link) {
+bool HHVM_FUNCTION(ldap_start_tls,
+                   const Resource& link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc, protocol = LDAP_VERSION3;
   if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol))
@@ -702,13 +794,17 @@ bool f_ldap_start_tls(const Resource& link) {
   return true;
 }
 
-bool f_ldap_unbind(const Resource& link) {
+bool HHVM_FUNCTION(ldap_unbind,
+                   const Resource& link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   ld->close();
   return true;
 }
 
-bool f_ldap_get_option(const Resource& link, int option, VRefParam retval) {
+bool HHVM_FUNCTION(ldap_get_option,
+                   const Resource& link,
+                   int option,
+                   VRefParam retval) {
   LdapLink *ld = link.getTyped<LdapLink>();
 
   switch (option) {
@@ -796,7 +892,10 @@ const StaticString
   s_value("value"),
   s_iscritical("iscritical");
 
-bool f_ldap_set_option(const Variant& link, int option, const Variant& newval) {
+bool HHVM_FUNCTION(ldap_set_option,
+                   const Variant& link,
+                   int option,
+                   const Variant& newval) {
   LDAP *ldap = NULL;
   if (!link.isNull()) {
     LdapLink *ld = link.toResource().getTyped<LdapLink>();
@@ -941,35 +1040,54 @@ bool f_ldap_set_option(const Variant& link, int option, const Variant& newval) {
   return true;
 }
 
-bool f_ldap_close(const Resource& link) {
+bool HHVM_FUNCTION(ldap_close,
+                   const Resource& link) {
   return f_ldap_unbind(link);
 }
 
-Variant f_ldap_list(const Variant& link, const Variant& base_dn, const Variant& filter,
-                    const Array& attributes /* = null_array */,
-                    int attrsonly /* = 0 */, int sizelimit /* = -1 */,
-                    int timelimit /* = -1 */, int deref /* = -1 */) {
+Variant HHVM_FUNCTION(ldap_list,
+                      const Variant& link,
+                      const Variant& base_dn,
+                      const Variant& filter,
+                      const Variant& attributes /* = null_variant */,
+                      int attrsonly /* = 0 */,
+                      int sizelimit /* = -1 */,
+                      int timelimit /* = -1 */,
+                      int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_ONELEVEL);
 }
 
-Variant f_ldap_read(const Variant& link, const Variant& base_dn, const Variant& filter,
-                    const Array& attributes /* = null_array */,
-                    int attrsonly /* = 0 */, int sizelimit /* = -1 */,
-                    int timelimit /* = -1 */, int deref /* = -1 */) {
+Variant HHVM_FUNCTION(ldap_read,
+                      const Variant& link,
+                      const Variant& base_dn,
+                      const Variant& filter,
+                      const Variant& attributes /* = null_variant */,
+                      int attrsonly /* = 0 */,
+                      int sizelimit /* = -1 */,
+                      int timelimit /* = -1 */,
+                      int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_BASE);
 }
 
-Variant f_ldap_search(const Variant& link, const Variant& base_dn, const Variant& filter,
-                      const Array& attributes /* = null_array */,
-                      int attrsonly /* = 0 */, int sizelimit /* = -1 */,
-                      int timelimit /* = -1 */, int deref /* = -1 */) {
+Variant HHVM_FUNCTION(ldap_search,
+                      const Variant& link,
+                      const Variant& base_dn,
+                      const Variant& filter,
+                      const Variant& attributes /* = null_variant */,
+                      int attrsonly /* = 0 */,
+                      int sizelimit /* = -1 */,
+                      int timelimit /* = -1 */,
+                      int deref /* = -1 */) {
   return php_ldap_do_search(link, base_dn, filter, attributes, attrsonly,
                             sizelimit, timelimit, deref, LDAP_SCOPE_SUBTREE);
 }
 
-bool f_ldap_rename(const Resource& link, const String& dn, const String& newrdn,
+bool HHVM_FUNCTION(ldap_rename,
+                   const Resource& link,
+                   const String& dn,
+                   const String& newrdn,
                    const String& newparent,
                    bool deleteoldrdn) {
   LdapLink *ld = link.getTyped<LdapLink>();
@@ -979,7 +1097,9 @@ bool f_ldap_rename(const Resource& link, const String& dn, const String& newrdn,
   return rc == LDAP_SUCCESS;
 }
 
-bool f_ldap_delete(const Resource& link, const String& dn) {
+bool HHVM_FUNCTION(ldap_delete,
+                   const Resource& link,
+                   const String& dn) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc;
   if ((rc = ldap_delete_s(ld->link, (char*)dn.data())) != LDAP_SUCCESS) {
@@ -989,8 +1109,11 @@ bool f_ldap_delete(const Resource& link, const String& dn) {
   return true;
 }
 
-Variant f_ldap_compare(const Resource& link, const String& dn, const String& attribute,
-                       const String& value) {
+Variant HHVM_FUNCTION(ldap_compare,
+                      const Resource& link,
+                      const String& dn,
+                      const String& attribute,
+                      const String& value) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int rc = ldap_compare_s(ld->link, (char*)dn.data(), (char*)attribute.data(),
                           (char*)value.data());
@@ -1002,18 +1125,22 @@ Variant f_ldap_compare(const Resource& link, const String& dn, const String& att
   return -1LL;
 }
 
-int64_t f_ldap_errno(const Resource& link) {
+int64_t HHVM_FUNCTION(ldap_errno,
+                      const Resource& link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   return _get_lderrno(ld->link);
 }
 
-String f_ldap_error(const Resource& link) {
+String HHVM_FUNCTION(ldap_error,
+                     const Resource& link) {
   LdapLink *ld = link.getTyped<LdapLink>();
   int ld_errno = _get_lderrno(ld->link);
   return String(ldap_err2string(ld_errno), CopyString);
 }
 
-Variant f_ldap_get_dn(const Resource& link, const Resource& result_entry) {
+Variant HHVM_FUNCTION(ldap_get_dn,
+                      const Resource& link,
+                      const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1026,13 +1153,17 @@ Variant f_ldap_get_dn(const Resource& link, const Resource& result_entry) {
   return false;
 }
 
-int64_t f_ldap_count_entries(const Resource& link, const Resource& result) {
+int64_t HHVM_FUNCTION(ldap_count_entries,
+                      const Resource& link,
+                      const Resource& result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
   return ldap_count_entries(ld->link, res->data);
 }
 
-Variant f_ldap_get_entries(const Resource& link, const Resource& result) {
+Variant HHVM_FUNCTION(ldap_get_entries,
+                      const Resource& link,
+                      const Resource& result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -1069,7 +1200,9 @@ Variant f_ldap_get_entries(const Resource& link, const Resource& result) {
   return ret;
 }
 
-Variant f_ldap_first_entry(const Resource& link, const Resource& result) {
+Variant HHVM_FUNCTION(ldap_first_entry,
+                      const Resource& link,
+                      const Resource& result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -1081,7 +1214,9 @@ Variant f_ldap_first_entry(const Resource& link, const Resource& result) {
   return NEWOBJ(LdapResultEntry)(entry, res);
 }
 
-Variant f_ldap_next_entry(const Resource& link, const Resource& result_entry) {
+Variant HHVM_FUNCTION(ldap_next_entry,
+                      const Resource& link,
+                      const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1093,7 +1228,9 @@ Variant f_ldap_next_entry(const Resource& link, const Resource& result_entry) {
   return NEWOBJ(LdapResultEntry)(msg, entry->result.get());
 }
 
-Array f_ldap_get_attributes(const Resource& link, const Resource& result_entry) {
+Array HHVM_FUNCTION(ldap_get_attributes,
+                    const Resource& link,
+                    const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
   Array ret = Array::Create();
@@ -1101,7 +1238,9 @@ Array f_ldap_get_attributes(const Resource& link, const Resource& result_entry) 
   return ret;
 }
 
-Variant f_ldap_first_attribute(const Resource& link, const Resource& result_entry) {
+Variant HHVM_FUNCTION(ldap_first_attribute,
+                      const Resource& link,
+                      const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1115,7 +1254,9 @@ Variant f_ldap_first_attribute(const Resource& link, const Resource& result_entr
   return ret;
 }
 
-Variant f_ldap_next_attribute(const Resource& link, const Resource& result_entry) {
+Variant HHVM_FUNCTION(ldap_next_attribute,
+                      const Resource& link,
+                      const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1139,7 +1280,9 @@ Variant f_ldap_next_attribute(const Resource& link, const Resource& result_entry
   return ret;
 }
 
-Variant f_ldap_first_reference(const Resource& link, const Resource& result) {
+Variant HHVM_FUNCTION(ldap_first_reference,
+                      const Resource& link,
+                      const Resource& result) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -1151,7 +1294,9 @@ Variant f_ldap_first_reference(const Resource& link, const Resource& result) {
   return NEWOBJ(LdapResultEntry)(entry, res);
 }
 
-Variant f_ldap_next_reference(const Resource& link, const Resource& result_entry) {
+Variant HHVM_FUNCTION(ldap_next_reference,
+                      const Resource& link,
+                      const Resource& result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1163,8 +1308,10 @@ Variant f_ldap_next_reference(const Resource& link, const Resource& result_entry
   return NEWOBJ(LdapResultEntry)(entry_next, entry->result.get());
 }
 
-bool f_ldap_parse_reference(const Resource& link, const Resource& result_entry,
-                            VRefParam referrals) {
+bool HHVM_FUNCTION(ldap_parse_reference,
+                   const Resource& link,
+                   const Resource& result_entry,
+                   VRefParam referrals) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1187,10 +1334,13 @@ bool f_ldap_parse_reference(const Resource& link, const Resource& result_entry,
   return true;
 }
 
-bool f_ldap_parse_result(const Resource& link, const Resource& result, VRefParam errcode,
-                         VRefParam matcheddn /* = null */,
-                         VRefParam errmsg /* = null */,
-                         VRefParam referrals /* = null */) {
+bool HHVM_FUNCTION(ldap_parse_result,
+                   const Resource& link,
+                   const Resource& result,
+                   VRefParam errcode,
+                   VRefParam matcheddn /* = null */,
+                   VRefParam errmsg /* = null */,
+                   VRefParam referrals /* = null */) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
 
@@ -1235,14 +1385,17 @@ bool f_ldap_parse_result(const Resource& link, const Resource& result, VRefParam
   return true;
 }
 
-bool f_ldap_free_result(const Resource& result) {
+bool HHVM_FUNCTION(ldap_free_result,
+                   const Resource& result) {
   LdapResult *res = result.getTyped<LdapResult>();
   res->close();
   return true;
 }
 
-Variant f_ldap_get_values_len(const Resource& link, const Resource& result_entry,
-                              const String& attribute) {
+Variant HHVM_FUNCTION(ldap_get_values_len,
+                      const Resource& link,
+                      const Resource& result_entry,
+                      const String& attribute) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
 
@@ -1266,13 +1419,18 @@ Variant f_ldap_get_values_len(const Resource& link, const Resource& result_entry
   return ret;
 }
 
-Variant f_ldap_get_values(const Resource& link, const Resource& result_entry,
-                          const String& attribute) {
+Variant HHVM_FUNCTION(ldap_get_values,
+                      const Resource& link,
+                      const Resource& result_entry,
+                      const String& attribute) {
   return f_ldap_get_values_len(link, result_entry, attribute);
 }
 
-bool f_ldap_control_paged_result(const Resource& link, int pagesize,
-                                 bool iscritical, const String& cookie) {
+bool HHVM_FUNCTION(ldap_control_paged_result,
+                   const Resource& link,
+                   int pagesize,
+                   bool iscritical,
+                   const String& cookie) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LDAPControl ctrl, *ctrlsp[2];
   int rc;
@@ -1312,9 +1470,11 @@ bool f_ldap_control_paged_result(const Resource& link, int pagesize,
   return rc == LDAP_SUCCESS;
 }
 
-bool f_ldap_control_paged_result_response(const Resource& link, const Resource& result,
-                                          VRefParam cookie,
-                                          VRefParam estimated) {
+bool HHVM_FUNCTION(ldap_control_paged_result_response,
+                   const Resource& link,
+                   const Resource& result,
+                   VRefParam cookie,
+                   VRefParam estimated) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResult *res = result.getTyped<LdapResult>();
   int rc, lerrcode;

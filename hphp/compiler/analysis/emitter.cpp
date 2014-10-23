@@ -4870,15 +4870,9 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
 
   Label ok;
 
-  // TODO(#5328945): invariant is supposed to return void, but this Dup-based
-  // translation is necessary in the short term since some things currently
-  // expect it to have a return value.
   visit((*params)[0]);
   emitCGet(e);
-  e.Dup();
   e.JmpNZ(ok);
-
-  emitPop(e);
 
   auto const fpiStart = m_ue.bcPos();
   e.FPushFuncD(params->getCount() - 1, s_hh_invariant_violation.get());
@@ -4896,6 +4890,8 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
   e.Fatal(FatalOp::Runtime);
 
   ok.set(e);
+  e.Null(); // invariant returns null if used in an expression, void according
+            // to the typechecker.
   return true;
 }
 

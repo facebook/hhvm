@@ -249,8 +249,6 @@ bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 Opcode getStackModifyingOpcode(Opcode opc);
 
-bool isRefCounted(SSATmp* opnd);
-
 using SrcRange = folly::Range<SSATmp**>;
 using DstRange = folly::Range<SSATmp*>;
 

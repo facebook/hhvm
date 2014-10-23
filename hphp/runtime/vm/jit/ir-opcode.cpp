@@ -466,10 +466,6 @@ Opcode queryToDblQueryOp(Opcode opc) {
   }
 }
 
-bool isRefCounted(SSATmp* tmp) {
-  return tmp->type().maybeCounted() && !tmp->isConst();
-}
-
 int32_t spillValueCells(const IRInstruction* spillStack) {
   assert(spillStack->op() == SpillStack);
   int32_t numSrcs = spillStack->numSrcs();

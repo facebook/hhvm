@@ -2942,7 +2942,7 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
 
 void CodeGenerator::cgDecRefWork(IRInstruction* inst, bool genZeroCheck) {
   auto src = inst->src(0);
-  if (!isRefCounted(src)) return;
+  if (!src->type().maybeCounted()) return;
   Type type = src->type();
   auto ptr_reg = srcLoc(inst, 0).reg(0);
   if (type.isKnownDataType()) {

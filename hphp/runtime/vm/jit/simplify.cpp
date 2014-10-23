@@ -123,7 +123,7 @@ bool validate(const State& env,
   }
 
   auto known_available = [&] (SSATmp* src) -> bool {
-    if (!isRefCounted(src)) return true;
+    if (!src->type().maybeCounted()) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
     }
@@ -697,12 +697,18 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case NSame: {
     auto const s0 = inst->src(0);
     auto const s1 = inst->src(1);
+    // Not for Dbl:  (x < NaN) != !(x >= NaN)
+    //
+    // Also don't do it for arrays; we haven't thought through whether this
+    // transformation always holds on that type (and we could only plausibly do
+    // it for static ones anyway, because of the !maybeCounted restriction we
+    // have below).
+    auto const unsafeTypes = Type::Dbl|Type::Arr;
     auto const safeToFold =
-      // Not for Dbl:  (x < NaN) != !(x >= NaN)
-      !s0->isA(Type::Dbl) && !s1->isA(Type::Dbl) &&
+      s0->type().not(unsafeTypes) && s1->type().not(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
-      !isRefCounted(s0) && !isRefCounted(s1);
+      !s0->type().maybeCounted() && !s1->type().maybeCounted();
     if (safeToFold) {
       return gen(env, negateQueryOp(op), s0, s1);
     }
@@ -712,7 +718,8 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assert(!isRefCounted(inst->src(0)) && !isRefCounted(inst->src(1)));
+    assert(!inst->src(0)->type().maybeCounted() &&
+           !inst->src(1)->type().maybeCounted());
     return gen(
       env,
       negateQueryOp(op),
@@ -1570,7 +1577,7 @@ SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !isRefCounted(src)) {
+  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1586,7 +1593,7 @@ SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !isRefCounted(src)) {
+  if (!mightRelax(env, src) && !src->type().maybeCounted()) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1628,7 +1635,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->isConst(true)) {
-    if (!isRefCounted(srcInst->src(0))) {
+    if (!srcInst->src(0)->type().maybeCounted()) {
       return gen(
         env,
         inst->op() == JmpZero ? JmpNZero : JmpZero,
@@ -1644,7 +1651,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
    * may have dec refs between the src instruction and the jump.
    */
   for (auto& src : srcInst->srcs()) {
-    if (isRefCounted(src)) return nullptr;
+    if (src->type().maybeCounted()) return nullptr;
   }
 
   // If the source is conversion of an int or pointer to boolean, we

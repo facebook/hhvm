@@ -1496,7 +1496,11 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
-  if (ty < Type::Obj && ty.getClass() && ty.getClass()->isCollectionClass()) {
+
+  if (!typeMightRelax(inst->src(0)) &&
+      ty < Type::Obj &&
+      ty.getClass() &&
+      ty.getClass()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;

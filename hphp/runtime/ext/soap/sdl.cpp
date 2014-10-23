@@ -27,6 +27,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+sdlCtx::~sdlCtx()
+{
+  for (auto const& doc : docs) {
+    xmlFreeDoc(doc.second);
+  }
+}
+
 encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
                                   const xmlChar *type) {
   std::string ns, cptype;

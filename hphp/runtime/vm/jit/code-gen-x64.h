@@ -25,6 +25,7 @@
 
 namespace HPHP { namespace jit {
 namespace NativeCalls { struct CallInfo; }
+namespace arm { struct CodeGenerator; }
 namespace x64 {
 
 // Cache alignment is required for mutable instructions to make sure
@@ -33,6 +34,8 @@ constexpr size_t kCacheLineSize = 64;
 constexpr size_t kCacheLineMask = kCacheLineSize - 1;
 
 struct CodeGenerator {
+  friend struct arm::CodeGenerator;
+
   CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
     : m_state(state)
     , m_vmain(main)

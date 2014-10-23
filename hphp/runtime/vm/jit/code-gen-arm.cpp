@@ -151,6 +151,15 @@ CALL_OPCODE(RestoreErrorLevel)
 CALL_OPCODE(Count)
 CALL_OPCODE(CountArray)
 
+//////////////////////////////////////////////////////////////////////
+
+#define DELEGATE_OPCODE(name) \
+  void CodeGenerator::cg##name(IRInstruction* inst) { \
+    m_xcg.cg##name(inst); \
+  }
+
+DELEGATE_OPCODE(ConvBoolToInt)
+
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc, bool resumed, TransID profTransId) {
@@ -190,7 +199,6 @@ PUNT_OPCODE(ConvObjToBool)
 PUNT_OPCODE(ConvBoolToDbl)
 PUNT_OPCODE(ConvIntToDbl)
 
-PUNT_OPCODE(ConvBoolToInt)
 PUNT_OPCODE(ConvDblToInt)
 
 PUNT_OPCODE(ConvBoolToStr)

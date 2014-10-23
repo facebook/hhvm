@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -30,7 +31,8 @@ namespace HPHP { namespace jit { namespace arm {
 
 struct CodeGenerator {
   CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
-    : m_state(state)
+    : m_xcg{state, main, cold}
+    , m_state(state)
     , m_vmain(main)
     , m_vcold(cold)
   {}
@@ -97,6 +99,13 @@ struct CodeGenerator {
   Vout& vcold() { return m_vcold; }
 
  private:
+  /*
+   * TODO(4894527): this is a temporary measure while we merge the two
+   * CodeGenerator implementations. We call through to the x64 CodeGenerator for
+   * opcodes where the two platforms can use identical vasm implementations.
+   */
+  x64::CodeGenerator    m_xcg;
+
   CodegenState&         m_state;
   Vout&                 m_vmain;
   Vout&                 m_vcold;

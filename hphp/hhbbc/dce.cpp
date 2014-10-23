@@ -176,6 +176,11 @@ bool setCouldHaveSideEffects(const Type& t) {
   return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
 }
 
+// Some reads could raise warnings and run arbitrary code.
+bool readCouldHaveSideEffects(const Type& t) {
+  return t.couldBe(TUninit);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -304,13 +309,13 @@ struct Env {
 
 void markSetDead(Env& env, const InstrIdSet& set) {
   env.dceState.markedDead[env.id] = 1;
-  FTRACE(2, "    marking {} {}\n", env.id, show(set));
+  FTRACE(2, "     marking {} {}\n", env.id, show(set));
   for (auto& i : set) env.dceState.markedDead[i] = 1;
 }
 
 void markDead(Env& env) {
   env.dceState.markedDead[env.id] = 1;
-  FTRACE(2, "    marking {}\n", env.id);
+  FTRACE(2, "     marking {}\n", env.id);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -363,17 +368,16 @@ void popCond(Env& env, Args&&... args) {
 }
 
 /*
- * It may be ok to remove pops on objects with destructors in some
- * scenarios (where it won't change the observable point at which a
- * destructor runs).  We could also look at the object type and see
- * if it is known that it can't have a user-defined destructor.
+ * It may be ok to remove pops on objects with destructors in some scenarios
+ * (where it won't change the observable point at which a destructor runs).  We
+ * could also look at the object type and see if it is known that it can't have
+ * a user-defined destructor.
  *
  * For now, we mark the cell popped with a Use::UsedIfLastRef. This indicates
- * to the producer of the cell that the it is considered used if
- * it could be the last reference alive (in which case the destructor
- * would be run on Pop). If the producer knows that the cell is
- * not the last reference (e.g. if it is a Dup), then Use:UsedIfLastRef
- * is equivalent to Use::Not.
+ * to the producer of the cell that the it is considered used if it could be
+ * the last reference alive (in which case the destructor would be run on
+ * Pop). If the producer knows that the cell is not the last reference (e.g. if
+ * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
  */
 void discardNonDtors(Env& env) {
   auto const t = topC(env);
@@ -500,9 +504,9 @@ void dce(Env& env, const bc::Dup&) {
   switch (u1.first) {
   case Use::Not:
   case Use::UsedIfLastRef:
-    //  It is ok to eliminate the Dup even if its second output u2
-    //  is used, because eliminating the Dup still leaves the second
-    //  output u2 on stack.
+    // It is ok to eliminate the Dup even if its second output u2
+    // is used, because eliminating the Dup still leaves the second
+    // output u2 on stack.
     markSetDead(env, u1.second);
     switch (u2.first) {
     case Use::Not:
@@ -554,6 +558,43 @@ void dce(Env& env, const bc::SetL& op) {
   pop(env);
   if (!effects) addKill(env, op.loc1->id);
   if (effects)  addGen(env, op.loc1->id);
+}
+
+/*
+ * IncDecL is a read-modify-write: can be removed if the local isn't live, the
+ * set can't have side effects, and no one reads the value it pushes.  If the
+ * instruction is not dead, always add the local to the set of upward exposed
+ * uses.
+ */
+void dce(Env& env, const bc::IncDecL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy) ||
+                         readCouldHaveSideEffects(oldTy);
+  auto const u1      = push(env);
+  if (!isLive(env, op.loc1->id) && !effects && allUnused(u1)) {
+    return markSetDead(env, u1.second);
+  }
+  addGen(env, op.loc1->id);
+}
+
+/*
+ * SetOpL is like IncDecL, but with the complication that we don't know if we
+ * can mark it dead when visiting it, because it is going to pop an input but
+ * unlike SetL doesn't push the value it popped.  For the current scheme we
+ * just add the local to gen even if we're doing a removable push, which is
+ * correct but could definitely fail to eliminate some earlier stores.
+ */
+void dce(Env& env, const bc::SetOpL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy) ||
+                         readCouldHaveSideEffects(oldTy);
+  if (!isLive(env, op.loc1->id) && !effects) {
+    popCond(env, push(env));
+  } else {
+    push(env);
+    pop(env);
+  }
+  addGen(env, op.loc1->id);
 }
 
 /*

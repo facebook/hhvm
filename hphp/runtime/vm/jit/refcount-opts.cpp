@@ -1236,6 +1236,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     assertCanConsume(value);
 
+    // Drop one IncRef right before a DecRef, so that we don't end up
+    // missing opportunities because we sunk IncRefs too late.
+    if (m_inst->is(DecRef, DecRefNZ) && valState.optDelta() > 0) {
+      placeSinkPoint(value, valState, sinkPoint);
+    }
+
     // Note that we're treating consumers and observers the same here, which is
     // necessary until we have better alias analysis.
     observeValue(value, valState, sinkPoint);

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace jit {
 namespace {

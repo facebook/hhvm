@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/opt.h"
+#include "hphp/runtime/vm/jit/frame-state.h"
 
 #include "hphp/runtime/test/test-context.h"
 

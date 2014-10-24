@@ -511,7 +511,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   for (int i = 0, n = argv.size(); i < n; ++i) {
     PhysReg d{serviceReqArgReg(i)};
     arg_dests.push_back(d);
-    arg_regs.add(d);
+    arg_regs |= d;
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
   // Save VM regs
@@ -524,7 +524,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
     v << ldimm{0, PhysReg{arm::rAsm}}; // because persist flag
   }
   v << ldimm{svcreq.req, PhysReg{argReg(0)}};
-  arg_regs.add(arm::rAsm).add(argReg(0));
+  arg_regs |= arm::rAsm | argReg(0);
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
   // In the case of some special stubs (m_callToExit, m_retHelper), we
@@ -533,7 +533,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   // SRJmpInsteadOfRet indicates to fake the return.
   v << load{sp[0], PhysReg{rLinkReg}};
   v << lea{sp[16], sp}; // fake postindexing
-  arg_regs.add(rLinkReg); // arm ret{} implicitly uses LR
+  arg_regs |= rLinkReg; // arm ret{} implicitly uses LR
   v << ret{arg_regs};
 }
 

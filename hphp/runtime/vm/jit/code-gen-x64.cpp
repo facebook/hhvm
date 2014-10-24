@@ -2264,7 +2264,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitTraceRet(v);
   }
-  auto args = RegSet().add(rVmSp).add(rVmFp);
+  auto args = rVmSp | rVmFp;
   v << ret{args};
 }
 

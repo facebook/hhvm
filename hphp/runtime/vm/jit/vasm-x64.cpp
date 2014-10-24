@@ -891,7 +891,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   for (int i = 0, n = argv.size(); i < n; ++i) {
     PhysReg d{serviceReqArgRegs[i]};
     arg_dests.push_back(d);
-    arg_regs.add(d);
+    arg_regs |= d;
   }
   v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
   emitEagerVMRegSave(v, RegSaveFlags::SaveFP);
@@ -901,7 +901,7 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
     v << ldimm{0, rAsm}; // because persist flag
   }
   v << ldimm{svcreq.req, rdi};
-  arg_regs.add(rAsm).add(rdi);
+  arg_regs |= rAsm | rdi;
 
   // Weird hand-shaking with enterTC: reverse-call a service routine.
   // In the case of some special stubs (m_callToExit, m_retHelper), we
@@ -944,7 +944,7 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     for (size_t i = 0; i < srcs.size(); ++i) {
       auto reg = argNames[i];
       argDests.push_back(reg);
-      argRegs.add(reg);
+      argRegs |= reg;
     }
     if (argDests.size()) {
       v << copyargs{v.makeTuple(srcs),
@@ -1086,8 +1086,8 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
-auto const vauto_gp = RegSet(rAsm).add(r11);
-auto const vauto_simd = RegSet(xmm5).add(xmm6).add(xmm7);
+auto const vauto_gp = rAsm | r11;
+auto const vauto_simd = xmm5 | xmm6 | xmm7;
 UNUSED const Abi vauto_abi {
   .gpUnreserved = vauto_gp,
   .gpReserved = x64::abi.gp() - vauto_gp,

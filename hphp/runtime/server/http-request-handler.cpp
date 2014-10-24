@@ -129,6 +129,11 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   SCOPE_EXIT { always_assert(MM().empty()); };
   const VirtualHost *vhost = VirtualHost::GetCurrent();
   GetAccessLog().log(transport, vhost);
+  /*
+   * HPHP logs may need to access data in ServerStats, so we have to
+   * clear the hashtable after writing the log entry.
+   */
+  ServerStats::Reset();
   hphp_session_exit();
 }
 
@@ -333,11 +338,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     hphp_context_exit();
   }
   HttpProtocol::ClearRecord(ret, tmpfile);
-  /*
-   * HPHP logs may need to access data in ServerStats, so we have to
-   * clear the hashtable after writing the log entry.
-   */
-  ServerStats::Reset();
 }
 
 void HttpRequestHandler::abortRequest(Transport *transport) {

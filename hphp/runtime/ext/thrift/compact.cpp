@@ -538,15 +538,6 @@ class CompactReader {
       }
     }
 
-  private:
-    PHPInputTransport transport;
-    uint8_t version;
-    CState state;
-    uint16_t lastFieldNum;
-    bool boolValue;
-    std::stack<std::pair<CState, uint16_t> > structHistory;
-    std::stack<CState> containerHistory;
-
     void readStruct(const Object& dest, const Array& spec) {
       readStructBegin();
 
@@ -585,6 +576,15 @@ class CompactReader {
 
       readStructEnd();
     }
+
+  private:
+    PHPInputTransport transport;
+    uint8_t version;
+    CState state;
+    uint16_t lastFieldNum;
+    bool boolValue;
+    std::stack<std::pair<CState, uint16_t> > structHistory;
+    std::stack<CState> containerHistory;
 
     void readStructBegin(void) {
       structHistory.push(std::make_pair(state, lastFieldNum));
@@ -1049,6 +1049,17 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const String& obj_typename) {
   CompactReader reader(transportobj.toObject());
   return reader.read(obj_typename);
+}
+
+Variant HHVM_FUNCTION(thrift_protocol_read_compact_struct,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  CompactReader reader(transportobj.toObject());
+  Object ret = create_object(obj_typename, Array());
+  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,
+                                                   "_TSPEC", false);
+  reader.readStruct(ret, spec.toArray());
+  return ret;
 }
 
 }

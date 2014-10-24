@@ -39,6 +39,10 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary,
                       const String& obj_typename,
                       bool strict_read);
 
+Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
+                      const Variant& transportobj,
+                      const String& obj_typename);
+
 int HHVM_FUNCTION(thrift_protocol_set_compact_version,
                   int version);
 
@@ -51,6 +55,10 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
                    bool oneway = false);
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
+                      const Variant& transportobj,
+                      const String& obj_typename);
+
+Variant HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                       const Variant& transportobj,
                       const String& obj_typename);
 

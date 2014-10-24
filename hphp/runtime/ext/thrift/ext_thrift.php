@@ -15,6 +15,10 @@ function thrift_protocol_read_binary(mixed $transportobj,
                                      bool $strict_read): mixed;
 
 <<__Native>>
+function thrift_protocol_read_binary_struct(mixed $transportobj,
+                                            string $obj_typename): mixed;
+
+<<__Native>>
 function thrift_protocol_set_compact_version(int $version): int;
 
 <<__Native>>
@@ -28,3 +32,7 @@ function thrift_protocol_write_compact(mixed $transportobj,
 <<__Native>>
 function thrift_protocol_read_compact(mixed $transportobj,
                                       string $obj_typename): mixed;
+
+<<__Native>>
+function thrift_protocol_read_compact_struct(mixed $transportobj,
+                                             string $obj_typename): mixed;

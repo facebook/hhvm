@@ -25,9 +25,11 @@ public:
   virtual void moduleInit() {
     HHVM_FE(thrift_protocol_write_binary);
     HHVM_FE(thrift_protocol_read_binary);
+    HHVM_FE(thrift_protocol_read_binary_struct);
     HHVM_FE(thrift_protocol_set_compact_version);
     HHVM_FE(thrift_protocol_write_compact);
     HHVM_FE(thrift_protocol_read_compact);
+    HHVM_FE(thrift_protocol_read_compact_struct);
 
     loadSystemlib("thrift");
   }

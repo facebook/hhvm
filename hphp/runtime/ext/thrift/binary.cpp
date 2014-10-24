@@ -618,5 +618,17 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary,
   return ret_val;
 }
 
+Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
+                      const Variant& transportobj,
+                      const String& obj_typename) {
+  PHPInputTransport transport(transportobj.toObject());
+
+  Object ret_val = createObject(obj_typename);
+  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,
+                                                   false);
+  binary_deserialize_spec(ret_val, transport, spec.toArray());
+  return ret_val;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

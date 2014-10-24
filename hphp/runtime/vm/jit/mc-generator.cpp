@@ -1977,13 +1977,6 @@ std::vector<UsageInfo> MCGenerator::getUsageInfo() {
                              a.capacity(),
                              true});
   });
-  // Report code.stubs usage = code.cold + code.frozen usage, so
-  // ODS doesn't break.
-  tcUsageInfo.emplace_back(UsageInfo{
-      std::string("code.stubs"),
-      code.realCold().used() + code.realFrozen().used(),
-      code.realCold().capacity() + code.realFrozen().capacity(),
-      false});
   tcUsageInfo.emplace_back(UsageInfo{
       "data",
       code.data().used(),

@@ -33,6 +33,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define PHP_LOCK_SH 1
+#define PHP_LOCK_EX 2
+#define PHP_LOCK_UN 3
+#define PHP_LOCK_NB 4
+
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
 StaticString s_stream_read("stream_read");
@@ -289,12 +294,12 @@ bool UserFile::truncate(int64_t size) {
 bool UserFile::lock(int operation, bool &wouldBlock) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
-    op |= LOCK_NB;
+    op |= PHP_LOCK_NB;
   }
   switch (operation & ~LOCK_NB) {
-    case LOCK_SH: op |= LOCK_SH; break;
-    case LOCK_EX: op |= LOCK_EX; break;
-    case LOCK_UN: op |= LOCK_UN; break;
+    case LOCK_SH: op |= PHP_LOCK_SH; break;
+    case LOCK_EX: op |= PHP_LOCK_EX; break;
+    case LOCK_UN: op |= PHP_LOCK_UN; break;
   }
 
   // bool stream_lock(int $operation)

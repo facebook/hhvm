@@ -448,6 +448,11 @@ static Array HHVM_FUNCTION(xdebug_get_collected_errors,
 static const StaticString s_closure_varname("0Closure");
 
 static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
+  if (RuntimeOption::RepoAuthoritative) {
+    raise_error("xdebug_get_declared_vars unsupported in RepoAuthoritative "
+      "mode");
+  }
+
   // Grab the callee function
   VMRegAnchor _; // Ensure consistent state for vmfp
   ActRec* fp = g_context->getPrevVMState(vmfp());

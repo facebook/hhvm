@@ -636,71 +636,71 @@ static std::string toStringElm(const TypedValue* tv) {
     break;
   }
 
-  switch (tv->m_type) {
-  case KindOfUninit:
-    os << "Uninit";
-    break;
-  case KindOfNull:
-    os << "Null";
-    break;
-  case KindOfBoolean:
-    os << (tv->m_data.num ? "True" : "False");
-    break;
-  case KindOfInt64:
-    os << "0x" << std::hex << tv->m_data.num << std::dec;
-    break;
-  case KindOfDouble:
-    os << tv->m_data.dbl;
-    break;
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int len = tv->m_data.pstr->size();
-      bool truncated = false;
-      if (len > 128) {
-        len = 128;
-        truncated = true;
+  do {
+    switch (tv->m_type) {
+    case KindOfUninit:
+      os << "Uninit";
+      continue;
+    case KindOfNull:
+      os << "Null";
+      continue;
+    case KindOfBoolean:
+      os << (tv->m_data.num ? "True" : "False");
+      continue;
+    case KindOfInt64:
+      os << "0x" << std::hex << tv->m_data.num << std::dec;
+      continue;
+    case KindOfDouble:
+      os << tv->m_data.dbl;
+      continue;
+    case KindOfStaticString:
+    case KindOfString:
+      {
+        int len = tv->m_data.pstr->size();
+        bool truncated = false;
+        if (len > 128) {
+          len = 128;
+          truncated = true;
+        }
+        os << tv->m_data.pstr;
+        print_count();
+        os << ":\""
+           << escapeStringForCPP(tv->m_data.pstr->data(), len)
+           << "\"" << (truncated ? "..." : "");
       }
-      os << tv->m_data.pstr;
+      continue;
+    case KindOfArray:
+      assert_refcount_realistic_nz(tv->m_data.parr->getCount());
+      os << tv->m_data.parr;
       print_count();
-      os << ":\""
-         << escapeStringForCPP(tv->m_data.pstr->data(), len)
-         << "\"" << (truncated ? "..." : "");
+      os << ":Array";
+      continue;
+    case KindOfObject:
+      assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
+      os << tv->m_data.pobj;
+      print_count();
+      os << ":Object("
+         << tv->m_data.pobj->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfResource:
+      assert_refcount_realistic_nz(tv->m_data.pres->getCount());
+      os << tv->m_data.pres;
+      print_count();
+      os << ":Resource("
+         << const_cast<ResourceData*>(tv->m_data.pres)
+              ->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfRef:
+      break;
+    case KindOfClass:
+      os << tv->m_data.pcls
+         << ":" << tv->m_data.pcls->name()->data();
+      continue;
     }
-    break;
-  case KindOfArray:
-    assert_refcount_realistic_nz(tv->m_data.parr->getCount());
-    os << tv->m_data.parr;
-    print_count();
-    os << ":Array";
-    break;
-  case KindOfObject:
-    assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
-    os << tv->m_data.pobj;
-    print_count();
-    os << ":Object("
-       << tv->m_data.pobj->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfResource:
-    assert_refcount_realistic_nz(tv->m_data.pres->getCount());
-    os << tv->m_data.pres;
-    print_count();
-    os << ":Resource("
-       << const_cast<ResourceData*>(tv->m_data.pres)
-            ->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfRef:
     not_reached();
-  case KindOfClass:
-    os << tv->m_data.pcls
-       << ":" << tv->m_data.pcls->name()->data();
-    break;
-  default:
-    os << "?";
-    break;
-  }
+  } while (0);
 
   return os.str();
 }
@@ -3976,39 +3976,38 @@ OPTBLD_INLINE bool ExecutionContext::cellInstanceOf(
   assert(tv->m_type != KindOfRef);
   Class* cls = nullptr;
   switch (tv->m_type) {
-    case KindOfObject:
-      cls = Unit::lookupClass(ne);
-      if (cls) return tv->m_data.pobj->instanceof(cls);
-      break;
-    case KindOfArray:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_array(cls->name())) {
-        return true;
-      }
-      break;
-    case KindOfString:
-    case KindOfStaticString:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_string(cls->name())) {
-        return true;
-      }
-      break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfResource:
+      return false;
+
     case KindOfInt64:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_int(cls->name())) {
-        return true;
-      }
-      break;
+      return cls && interface_supports_int(cls->name());
+
     case KindOfDouble:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_double(cls->name())) {
-        return true;
-      }
+      return cls && interface_supports_double(cls->name());
+
+    case KindOfStaticString:
+    case KindOfString:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_string(cls->name());
+
+    case KindOfArray:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_array(cls->name());
+
+    case KindOfObject:
+      cls = Unit::lookupClass(ne);
+      return cls && tv->m_data.pobj->instanceof(cls);
+
+    case KindOfRef:
+    case KindOfClass:
       break;
-    default:
-      return false;
   }
-  return false;
+  not_reached();
 }
 
 ALWAYS_INLINE
@@ -4236,71 +4235,80 @@ OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
     int64_t intval;
     SwitchMatch match = SwitchMatch::NORMAL;
 
-    switch (val->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        intval = 0;
-        break;
-
-      case KindOfBoolean:
-        // bool(true) is equal to any non-zero int, bool(false) == 0
-        if (val->m_data.num) {
-          match = SwitchMatch::NONZERO;
-        } else {
+    [&] {
+      switch (val->m_type) {
+        case KindOfUninit:
+        case KindOfNull:
           intval = 0;
-        }
-        break;
+          return;
 
-      case KindOfInt64:
-        intval = val->m_data.num;
-        break;
-
-      case KindOfDouble:
-        match = doubleCheck(val->m_data.dbl, intval);
-        break;
-
-      case KindOfStaticString:
-      case KindOfString: {
-        double dval = 0.0;
-        DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
-        switch (t) {
-          case KindOfNull:
+        case KindOfBoolean:
+          // bool(true) is equal to any non-zero int, bool(false) == 0
+          if (val->m_data.num) {
+            match = SwitchMatch::NONZERO;
+          } else {
             intval = 0;
-            break;
+          }
+          return;
 
-          case KindOfDouble:
-            match = doubleCheck(dval, intval);
-            break;
+        case KindOfInt64:
+          intval = val->m_data.num;
+          return;
 
-          case KindOfInt64:
-            // do nothing
-            break;
+        case KindOfDouble:
+          match = doubleCheck(val->m_data.dbl, intval);
+          return;
 
-          default:
-            not_reached();
+        case KindOfStaticString:
+        case KindOfString: {
+          double dval = 0.0;
+          DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
+          switch (t) {
+            case KindOfNull:
+              intval = 0;
+              break;
+            case KindOfInt64:
+              // do nothing
+              break;
+            case KindOfDouble:
+              match = doubleCheck(dval, intval);
+              break;
+            case KindOfUninit:
+            case KindOfBoolean:
+            case KindOfStaticString:
+            case KindOfString:
+            case KindOfArray:
+            case KindOfObject:
+            case KindOfResource:
+            case KindOfRef:
+            case KindOfClass:
+              not_reached();
+          }
+          tvRefcountedDecRef(val);
+          return;
         }
-        tvRefcountedDecRef(val);
-        break;
+
+        case KindOfArray:
+          match = SwitchMatch::DEFAULT;
+          tvDecRef(val);
+          return;
+
+        case KindOfObject:
+          intval = val->m_data.pobj->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfResource:
+          intval = val->m_data.pres->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfRef:
+        case KindOfClass:
+          break;
       }
-
-      case KindOfArray:
-        match = SwitchMatch::DEFAULT;
-        tvDecRef(val);
-        break;
-
-      case KindOfObject:
-        intval = val->m_data.pobj->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      case KindOfResource:
-        intval = val->m_data.pres->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      default:
-        not_reached();
-    }
+      not_reached();
+    }();
     vmStack().discard();
 
     if (match != SwitchMatch::NORMAL ||

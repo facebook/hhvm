@@ -346,6 +346,10 @@ inline Type Type::cns(const TypedValue& tv) {
 
   auto ret = [&] {
     switch (tv.m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        not_reached();
+
       case KindOfClass:
       case KindOfBoolean:
       case KindOfInt64:
@@ -359,9 +363,12 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfArray:
         return forConst(tv.m_data.parr);
 
-      default:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
         always_assert(false && "Invalid KindOf for constant TypedValue");
     }
+    not_reached();
   }();
   ret.m_hasConstVal = true;
   ret.m_extra = tv.m_data.num;

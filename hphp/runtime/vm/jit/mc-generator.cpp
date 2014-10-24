@@ -136,20 +136,21 @@ MCGenerator* mcg;
 
 CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
-  case BitwiseKindOfString:
-    return CppCall::method(&StringData::release);
-  case KindOfArray:
-    return CppCall::method(&ArrayData::release);
-  case KindOfObject:
-    return CppCall::method(&ObjectData::release);
-  case KindOfResource:
-    return CppCall::method(&ResourceData::release);
-  case KindOfRef:
-    return CppCall::method(&RefData::release);
-  default:
-    assert(false);
-    not_reached();
+    case KindOfString:
+      return CppCall::method(&StringData::release);
+    case KindOfArray:
+      return CppCall::method(&ArrayData::release);
+    case KindOfObject:
+      return CppCall::method(&ObjectData::release);
+    case KindOfResource:
+      return CppCall::method(&ResourceData::release);
+    case KindOfRef:
+      return CppCall::method(&RefData::release);
+    DT_UNCOUNTED_CASE:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 bool MCGenerator::profileSrcKey(SrcKey sk) const {

@@ -237,8 +237,8 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfRef:
       assert(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
-    default                  : always_assert(false && "Unsupported DataType");
   }
+  not_reached();
 }
 
 // ClassOps and ArrayOps are used below to write code that can perform set

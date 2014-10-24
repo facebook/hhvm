@@ -2049,16 +2049,29 @@ void Class::setProperties() {
 
 bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   if (tv1.m_type != tv2.m_type) return false;
+
   switch (tv1.m_type) {
-    case KindOfNull: return true;
+    case KindOfNull:
+      return true;
+
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
-    default: return false;
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      return false;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void Class::importTraitInstanceProp(Class*      trait,

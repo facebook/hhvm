@@ -284,23 +284,31 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   return reinterpretDblAsInt(sd->toDouble());
 }
 
-int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func) {
+int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assert(cellIsPlausible(tv));
 
   switch (tv.m_type) {
-    case KindOfInt64:
-    case KindOfDouble:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
       return convCellToDblHelper(tv);
-    case KindOfString:
+
     case KindOfStaticString:
+    case KindOfString:
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
-    default:
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
       break;
   }
-
-  coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
   not_reached();
 }
 
@@ -319,19 +327,27 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assert(cellIsPlausible(tv));
 
   switch (tv.m_type) {
-    case KindOfInt64:
-    case KindOfDouble:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
       return cellToInt(tv);
-    case KindOfString:
+
     case KindOfStaticString:
+    case KindOfString:
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
-    default:
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
       break;
   }
-
-  coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
   not_reached();
 }
 
@@ -341,21 +357,23 @@ const StaticString
 
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
-  case KindOfUninit:
-  case KindOfNull:     return s_empty.get();
-  case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
-  case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
-  case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
-  case KindOfString:   tv.m_data.pstr->incRefCount();
-                       /* fallthrough */
-  case KindOfStaticString:
-                       return tv.m_data.pstr;
-  case KindOfArray:    raise_notice("Array to string conversion");
-                       return array_string.get();
-  case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
-  case KindOfResource: return convResToStrHelper(tv.m_data.pres);
-  default:             not_reached();
+    case KindOfUninit:
+    case KindOfNull:          return s_empty.get();
+    case KindOfBoolean:       return tv.m_data.num ? s_1.get() : s_empty.get();
+    case KindOfInt64:         return convIntToStrHelper(tv.m_data.num);
+    case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
+    case KindOfString:        tv.m_data.pstr->incRefCount();
+                              /* fallthrough */
+    case KindOfStaticString:
+                              return tv.m_data.pstr;
+    case KindOfArray:         raise_notice("Array to string conversion");
+                              return array_string.get();
+    case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
+    case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
+    case KindOfRef:
+    case KindOfClass:         break;
   }
+  not_reached();
 }
 
 void raisePropertyOnNonObject() {
@@ -626,22 +644,33 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets) {
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
   int64_t ival;
   double dval;
-  switch (s->isNumericWithVal(ival, dval, 1)) {
-    case KindOfNull:
-      ival = switchBoundsCheck(0, base, nTargets);
-      break;
 
-    case KindOfDouble:
-      ival = switchBoundsCheck(dval, base, nTargets);
-      break;
+  [&] {
+    switch (s->isNumericWithVal(ival, dval, 1)) {
+      case KindOfNull:
+        ival = switchBoundsCheck(0, base, nTargets);
+        return;
+      case KindOfInt64:
+        ival = switchBoundsCheck(ival, base, nTargets);
+        return;
+      case KindOfDouble:
+        ival = switchBoundsCheck(dval, base, nTargets);
+        return;
 
-    case KindOfInt64:
-      ival = switchBoundsCheck(ival, base, nTargets);
-      break;
+      case KindOfUninit:
+      case KindOfBoolean:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }();
 
-    default:
-      not_reached();
-  }
   decRefStr(s);
   return ival;
 }

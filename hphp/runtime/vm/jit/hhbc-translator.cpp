@@ -1276,15 +1276,22 @@ void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
 // static value.
 SSATmp* HhbcTranslator::staticTVCns(const TypedValue* tv) {
   switch (tv->m_type) {
-  case KindOfNull:         return cns(Type::InitNull);
-  case KindOfBoolean:      return cns(!!tv->m_data.num);
-  case KindOfInt64:        return cns(tv->m_data.num);
-  case KindOfString:
-  case KindOfStaticString: return cns(tv->m_data.pstr);
-  case KindOfDouble:       return cns(tv->m_data.dbl);
-  case KindOfArray:        return cns(tv->m_data.parr);
-  default:                 always_assert(0);
+    case KindOfNull:          return cns(Type::InitNull);
+    case KindOfBoolean:       return cns(!!tv->m_data.num);
+    case KindOfInt64:         return cns(tv->m_data.num);
+    case KindOfDouble:        return cns(tv->m_data.dbl);
+    case KindOfStaticString:
+    case KindOfString:        return cns(tv->m_data.pstr);
+    case KindOfArray:         return cns(tv->m_data.parr);
+
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  always_assert(false);
 }
 
 void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,

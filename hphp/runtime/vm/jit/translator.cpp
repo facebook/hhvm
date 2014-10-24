@@ -261,7 +261,7 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
     while (true) {
-      dt = get_random() % (KindOfRef + 1);
+      dt = getDataTypeValue(get_random() % (kMaxDataType + 1));
       switch (dt) {
         case KindOfNull:
         case KindOfBoolean:
@@ -272,11 +272,15 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
         case KindOfObject:
         case KindOfResource:
           break;
+
         // KindOfRef and KindOfUninit can't happen for lots of predicted types.
-        case KindOfRef:
         case KindOfUninit:
-        default:
+        case KindOfStaticString:
+        case KindOfRef:
           continue;
+
+        case KindOfClass:
+          not_reached();
       }
       break;
     }

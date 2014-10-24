@@ -752,8 +752,6 @@ private:
    * Emit helpers.
    */
   void emitBindMem(SSATmp* ptr, SSATmp* src);
-  void emitEmptyMem(SSATmp* ptr);
-  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,

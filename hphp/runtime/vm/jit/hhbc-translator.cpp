@@ -2343,11 +2343,6 @@ void HhbcTranslator::emitBindMem(SSATmp* ptr, SSATmp* src) {
   gen(DecRef, prevValue);
 }
 
-void HhbcTranslator::emitEmptyMem(SSATmp* ptr) {
-  SSATmp* ld = gen(LdMem, Type::Cell, gen(UnboxPtr, ptr), cns(0));
-  push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
-}
-
 void HhbcTranslator::destroyName(SSATmp* name) {
   assert(name == topC());
   popDecRef(name->type());

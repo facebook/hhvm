@@ -285,6 +285,8 @@ void ArrayTracer::dumpToFile(const std::string& filename) {
       << m_numPackedToMixed.load() << "\n";
   out << s_numUnknownReleases.data() << " ==> "
       << m_numUnknownReleases.load() << "\n";
+  out << "===No Info Size Histogram===\n"
+      << m_noInfoSizes.toString();
 
   out.close();
 }
@@ -370,6 +372,9 @@ void ArrayTracer::handleAccounting(const ArrayData* ad) {
   if (itr != liveArrays()->end()) {
     auto arrayClass = classifyUsage(kind, itr->second);
     m_classCntrs[arrayClass]++;
+    if (arrayClass == ArrayClass::NoInfo) {
+      m_noInfoSizes.addValue(ad->getSize());
+    }
   } else {
     // Keep internal bookkeeping about arrays we don't know about
     m_numUnknownReleases++;

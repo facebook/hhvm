@@ -112,6 +112,32 @@ void mergeArrayUsage(const ArrayUsage left, ArrayUsage& write) {
   write.usageBitVec |= left.usageBitVec;
 }
 
+struct LogarithmicHistogram {
+ public:
+  void addValue(uint32_t val) {
+    auto idx = folly::findLastSet(val);
+    m_buckets[idx]++;
+  }
+
+  std::string toString() {
+    std::ostringstream os;
+    os << "0: " << m_buckets[0].load() << "\n";
+    for (uint8_t i = 1; i < m_buckets.size(); i++) {
+      os << (uint32_t{1} << (i-1)) << ": "
+         << m_buckets[i].load() << "\n";
+    }
+    return os.str();
+  }
+
+ private:
+  // m_buckets[0] == [0, 1)
+  // m_buckets[1] == [1, 2)
+  // m_buckets[2] == [2, 4)
+  // ...
+  // m_buckets[32] == [2^31, 2^32)
+  std::array<std::atomic<uint64_t>, 8 * sizeof(uint32_t) + 1> m_buckets;
+};
+
 struct ArrayTracer {
 
   // Detail: Internally AtomicHashMap is going to use a full 8 bytes to store
@@ -264,6 +290,8 @@ public:
   std::vector<uint64_t> m_classCntrs;
   std::vector<uint64_t> m_staticKindCntrs;
   std::vector<uint64_t> m_staticClassCntrs;
+
+  LogarithmicHistogram m_noInfoSizes;
 };
 
 ArrayTracer* getArrayTracer();

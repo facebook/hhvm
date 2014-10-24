@@ -4477,22 +4477,32 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         Variant v;
         ex->getScalarValue(v);
         switch (v.getType()) {
-          case KindOfString:
-          case KindOfStaticString:
-          {
-            StringData* nValue = makeStaticString(v.getStringData());
-            e.String(nValue);
-            break;
-          }
           case KindOfInt64:
             e.Int(v.getInt64());
-            break;
+            return true;
+
           case KindOfDouble:
-            e.Double(v.getDouble()); break;
-          default:
-            assert(false);
+            e.Double(v.getDouble());
+            return true;
+
+          case KindOfStaticString:
+          case KindOfString: {
+            StringData* nValue = makeStaticString(v.getStringData());
+            e.String(nValue);
+            return true;
+          }
+
+          case KindOfUninit:
+          case KindOfNull:
+          case KindOfBoolean:
+          case KindOfArray:
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfRef:
+          case KindOfClass:
+            break;
         }
-        return true;
+        not_reached();
       }
 
       case Expression::KindOfSimpleVariable: {
@@ -5306,48 +5316,67 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
 void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
                                            MaybeDataType t, int paramId) {
   switch (v.getType()) {
-    case KindOfString:
-    case KindOfStaticString: {
-      StringData *nValue = makeStaticString(v.getStringData());
-      e.String(nValue);
-      break;
-    }
-    case KindOfInt64:
-      e.Int(v.getInt64());
-      break;
-    case KindOfDouble:
-      e.Double(v.toDouble());
-      break;
+    case KindOfNull:
+      if (t) {
+        [&] {
+          switch (*t) {
+            case KindOfStaticString:
+            case KindOfString:
+            case KindOfArray:
+            case KindOfObject:
+            case KindOfResource:
+              e.Int(0);
+              return;
+            case KindOfUninit:
+            case KindOfNull:
+            case KindOfBoolean:
+            case KindOfInt64:
+            case KindOfDouble:
+            case KindOfRef:
+            case KindOfClass:
+              break;
+          }
+          not_reached();
+        }();
+      } else {
+        e.NullUninit();
+      }
+      return;
+
     case KindOfBoolean:
       if (v.getBoolean()) {
         e.True();
       } else {
         e.False();
       }
-      break;
-    case KindOfNull:
-      if (t) {
-        switch (*t) {
-          case KindOfString:
-          case KindOfStaticString:
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfArray:
-            e.Int(0);
-            break;
-          default:
-            not_reached();
-        }
-      } else {
-        e.NullUninit();
-      }
-      break;
+      return;
+
+    case KindOfInt64:
+      e.Int(v.getInt64());
+      return;
+
+    case KindOfDouble:
+      e.Double(v.toDouble());
+      return;
+
+    case KindOfStaticString:
+    case KindOfString: {
+      StringData *nValue = makeStaticString(v.getStringData());
+      e.String(nValue);
+      return;
+    }
     case KindOfArray:
       e.Array(v.getArrayData());
+      return;
+
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
       break;
-    default:
-      not_reached();
   }
+  not_reached();
 }
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,

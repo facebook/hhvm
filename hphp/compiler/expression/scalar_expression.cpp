@@ -72,20 +72,33 @@ ScalarExpression::ScalarExpression
       m_dval = value.toDouble();
     }
   }
-  switch (value.getType()) {
-  case KindOfStaticString:
-  case KindOfString:
-    m_type = T_STRING;
-    break;
-  case KindOfInt64:
-    m_type = T_LNUMBER;
-    break;
-  case KindOfDouble:
-    m_type = T_DNUMBER;
-    break;
-  default:
-    assert(false);
-  }
+  [&] {
+    switch (value.getType()) {
+      case KindOfInt64:
+        m_type = T_LNUMBER;
+        return;
+
+      case KindOfDouble:
+        m_type = T_DNUMBER;
+        return;
+
+      case KindOfStaticString:
+      case KindOfString:
+        m_type = T_STRING;
+        return;
+
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }();
   const String& s = value.toString();
   m_value = s.toCppString();
   if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {

@@ -253,62 +253,85 @@ void ParameterExpression::compatibleDefault() {
     // Since the default value's type is inferred from the value itself it is
     // ok to compare against the lower case version of the type hint in hint
     const char* hint = getTypeHint().c_str();
-    switch(defaultType) {
-    case KindOfBoolean:
-      compat = !strcasecmp(hint, "HH\\bool");
-      break;
-    case KindOfInt64:
-      compat = (!strcasecmp(hint, "HH\\int") ||
-                !strcasecmp(hint, "HH\\num") ||
-                !strcasecmp(hint, "HH\\arraykey") ||
-                interface_supports_int(hint));
-      break;
-    case KindOfDouble:
-      compat = (!strcasecmp(hint, "HH\\float") ||
-                !strcasecmp(hint, "HH\\num") ||
-                interface_supports_double(hint));
-      break;
-    case KindOfString:  /* fall through */
-    case KindOfStaticString:
-      compat = (!strcasecmp(hint, "HH\\string") ||
-                !strcasecmp(hint, "HH\\arraykey") ||
-                interface_supports_string(hint));
-      break;
-    case KindOfArray:
-      compat = (!strcasecmp(hint, "array") ||
-                interface_supports_array(hint));
-      break;
-    case KindOfUninit:  /* fall through */
-    case KindOfNull:
-      compat = true;
-      break;
-    /* KindOfClass is an hhvm internal type, cannot occur here */
-    case KindOfObject:  /* fall through */
-    case KindOfResource: /* fall through */
-    case KindOfRef:
-      assert(false /* likely parser bug */);
-    default:
-      compat = false;
-      break;
-    }
+    [&] {
+      switch (defaultType) {
+        case KindOfUninit:  /* fall through */
+        case KindOfNull:
+          compat = true;
+          return;
+
+        case KindOfBoolean:
+          compat = !strcasecmp(hint, "HH\\bool");
+          return;
+
+        case KindOfInt64:
+          compat = (!strcasecmp(hint, "HH\\int") ||
+                    !strcasecmp(hint, "HH\\num") ||
+                    !strcasecmp(hint, "HH\\arraykey") ||
+                    interface_supports_int(hint));
+          return;
+
+        case KindOfDouble:
+          compat = (!strcasecmp(hint, "HH\\float") ||
+                    !strcasecmp(hint, "HH\\num") ||
+                    interface_supports_double(hint));
+          return;
+
+        case KindOfStaticString:
+        case KindOfString:
+          compat = (!strcasecmp(hint, "HH\\string") ||
+                    !strcasecmp(hint, "HH\\arraykey") ||
+                    interface_supports_string(hint));
+          return;
+
+        case KindOfArray:
+          compat = (!strcasecmp(hint, "array") ||
+                    interface_supports_array(hint));
+          return;
+
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRef:
+        case KindOfClass:
+          break;
+      }
+      always_assert(false /* likely parser bug */);
+    }();
   } else {
     msg = "Default value for parameter %s with a class type hint "
           "can only be NULL";
-    switch(defaultType) {
-    case KindOfNull:
-      compat = true;
-      break;
-    case KindOfArray:
-      compat = !strcasecmp(getTypeHint().c_str(), "array");
-      break;
-    default:
-      compat = false;
-      if (!strcasecmp(getTypeHint().c_str(), "array")) {
-        msg = "Default value for parameter %s with array type hint "
-              "can only be an array or NULL";
+
+    [&] {
+      switch (defaultType) {
+        case KindOfNull:
+          compat = true;
+          return;
+
+        case KindOfArray:
+          compat = !strcasecmp(getTypeHint().c_str(), "array");
+          return;
+
+        case KindOfUninit:
+        case KindOfBoolean:
+        case KindOfInt64:
+        case KindOfDouble:
+        case KindOfStaticString:
+        case KindOfString:
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRef:
+          compat = false;
+          if (!strcasecmp(getTypeHint().c_str(), "array")) {
+            msg = "Default value for parameter %s with array type hint "
+                  "can only be an array or NULL";
+          }
+          return;
+
+        case KindOfClass:
+          break;
       }
-      break;
-    }
+      not_reached();
+    }();
   }
 
   if (!compat) {

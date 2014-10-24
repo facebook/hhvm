@@ -13,8 +13,6 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_ext
    )
 
-add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
-
 if (ENABLE_ZEND_COMPAT)
   add_definitions("-DENABLE_ZEND_COMPAT=1")
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)

@@ -75,10 +75,10 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset,
   case PHP_ICONV_ERR_SUCCESS:
     break;
   case PHP_ICONV_ERR_CONVERTER:
-    raise_warning("iconv: Cannot open converter");
+    raise_notice("iconv: Cannot open converter");
     break;
   case PHP_ICONV_ERR_WRONG_CHARSET:
-    raise_warning("iconv: Wrong charset, "
+    raise_notice("iconv: Wrong charset, "
                   "conversion from `%s' to `%s' is not allowed",
                   in_charset, out_charset);
     break;
@@ -94,7 +94,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset,
     raise_warning("iconv: Buffer length exceeded");
     break;
   case PHP_ICONV_ERR_MALFORMED:
-    raise_notice("iconv: Malformed string");
+    raise_warning("iconv: Malformed string");
     break;
   default:
     // other error

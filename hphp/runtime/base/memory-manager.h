@@ -502,7 +502,7 @@ public:
    * until this flag has been reset, to try to avoid getting OOMs during the
    * initial OOM processing.
    */
-  void resetCouldOOM();
+  void resetCouldOOM(bool state = true);
 
   /*
    * Iterator to the allocated slabs. Used to traverse the memory

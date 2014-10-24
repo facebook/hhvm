@@ -581,7 +581,7 @@ extern void ext_session_request_shutdown();
 
 void ExecutionContext::onShutdownPostSend() {
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
-  MM().resetCouldOOM();
+  MM().resetCouldOOM(isStandardRequest());
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
@@ -775,7 +775,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 }
 
 bool ExecutionContext::onFatalError(const Exception &e) {
-  MM().resetCouldOOM();
+  MM().resetCouldOOM(isStandardRequest());
 
   auto prefix = "\nFatal error: ";
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);

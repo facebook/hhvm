@@ -780,10 +780,10 @@ void MemoryManager::logDeallocation(void* p) {
   MemoryProfile::logDeallocation(p);
 }
 
-void MemoryManager::resetCouldOOM() {
+void MemoryManager::resetCouldOOM(bool state) {
   ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_reqInjectionData.clearMemExceededFlag();
-  m_couldOOM = true;
+  m_couldOOM = state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

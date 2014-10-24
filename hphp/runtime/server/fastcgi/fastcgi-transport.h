@@ -56,6 +56,7 @@ public:
   virtual uint16_t getRemotePort() override;
   virtual const std::string getScriptFilename() override;
   virtual const std::string getPathTranslated() override;
+  virtual const std::string getPathInfo() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
   virtual const char *getServerAddr() override;
@@ -139,6 +140,7 @@ private:
   ResponseHeaders m_responseHeaders;
   bool m_headersSent;
   bool m_readMore;
+  std::string m_pathInfo;
 
   apache::thrift::concurrency::Monitor m_monitor;
   int m_waiting;

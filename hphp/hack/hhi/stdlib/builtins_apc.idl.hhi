@@ -24,7 +24,7 @@ function apc_inc($key, $step = 1, &$success = null, $cache_id = 0) { }
 function apc_dec($key, $step = 1, &$success = null, $cache_id = 0) { }
 function apc_cas($key, $old_cas, $new_cas, $cache_id = 0) { }
 function apc_exists($key, $cache_id = 0) { }
-function apc_bin_dump($cache_id = 0, $filter = null_variant) { }
+function apc_bin_dump($cache_id = 0, $filter = null) { }
 function apc_bin_load($data, $flags = 0, $cache_id = 0) { }
 function apc_bin_dumpfile($cache_id, $filter, $filename, $flags = 0, $context = null) { }
 function apc_bin_loadfile($filename, $context = null, $flags = 0, $cache_id = 0) { }

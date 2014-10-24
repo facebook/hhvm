@@ -25,7 +25,7 @@ class SoapServer {
 class SoapClient {
   public function __construct($wsdl, $options = null) { }
   public function __call($name, $args) { }
-  public function __soapcall($name, $args, $options = null, $input_headers = null_variant, &$output_headers = null) { }
+  public function __soapcall($name, $args, $options = null, $input_headers = null, &$output_headers = null) { }
   public function __getlastrequest() { }
   public function __getlastresponse() { }
   public function __getlastrequestheaders() { }
@@ -35,7 +35,7 @@ class SoapClient {
   public function __dorequest($buf, $location, $action, $version, $oneway = false) { }
   public function __setcookie($name, $value = null) { }
   public function __setlocation($new_location = null) { }
-  public function __setsoapheaders($headers = null_variant) { }
+  public function __setsoapheaders($headers = null) { }
 }
 class SoapVar {
   public function __construct($data, $type, $type_name = null, $type_namespace = null, $node_name = null, $node_namespace = null) { }

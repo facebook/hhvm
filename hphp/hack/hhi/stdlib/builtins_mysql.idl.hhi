@@ -58,7 +58,7 @@ function mysql_list_dbs($link_identifier = null) { }
 function mysql_list_tables($database, $link_identifier = null) { }
 function mysql_list_fields($database_name, $table_name, $link_identifier = null) { }
 function mysql_list_processes($link_identifier = null) { }
-function mysql_db_name($result, $row, $field = null_variant) { }
+function mysql_db_name($result, $row, $field = null) { }
 function mysql_tablename($result, $i) { }
 function mysql_num_fields($result) { }
 function mysql_num_rows($result) { }
@@ -69,7 +69,7 @@ function mysql_fetch_assoc($result) { }
 function mysql_fetch_array($result, $result_type = 3) { }
 function mysql_fetch_lengths($result) { }
 function mysql_fetch_object($result, $class_name = "stdClass", $params = null) { }
-function mysql_result($result, $row, $field = null_variant) { }
+function mysql_result($result, $row, $field = null) { }
 function mysql_fetch_field($result, $field = -1) { }
 function mysql_field_seek($result, $field = 0) { }
 function mysql_field_name($result, $field = 0) { }

@@ -53,9 +53,9 @@ function hypot($x, $y) { }
 function fmod($x, $y) { }
 function sqrt($arg) { }
 function getrandmax() { }
-function srand($seed = null_variant) { }
+function srand($seed = null) { }
 function rand($min = 0, $max = RAND_MAX) { }
 function mt_getrandmax() { }
-function mt_srand($seed = null_variant) { }
+function mt_srand($seed = null) { }
 function mt_rand($min = 0, $max = RAND_MAX) { }
 function lcg_value() { }

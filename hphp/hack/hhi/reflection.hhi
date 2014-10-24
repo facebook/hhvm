@@ -71,6 +71,7 @@ class ReflectionClass {
   public function isInstance(mixed $object): bool;
   public function isInstantiable(): bool;
   public function isInterface(): bool;
+  public function isEnum(): bool;
   public function isInternal(): bool;
   public function isIterateable(): bool;
   /**

@@ -50,7 +50,7 @@ function array_fill_keys($keys, $value) { }
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null) { }
 function array_flip($trans) { }
 function key_exists($key, $search) { }
-function array_keys($input, $search_value = null_variant, $strict = false) { }
+function array_keys($input, $search_value = null, $strict = false) { }
 /**
  * array_map signature is rewritten based on the arity of the call:
  *
@@ -85,18 +85,18 @@ function array_pop(&$array) { }
 function array_product($array) { }
 function array_push(&$array, $var, ...) { }
 function array_rand($input, $num_req = 1) { }
-function array_reduce($input, $callback, $initial = null_variant) { }
+function array_reduce($input, $callback, $initial = null) { }
 function array_reverse($array, $preserve_keys = false) { }
 function array_search($needle, $haystack, $strict = false) { }
 function array_shift(&$array) { }
-function array_slice($array, $offset, $length = null_variant, $preserve_keys = false) { }
-function array_splice(&$input, $offset, $length = null_variant, $replacement = null_variant) { }
+function array_slice($array, $offset, $length = null, $preserve_keys = false) { }
+function array_splice(&$input, $offset, $length = null, $replacement = null) { }
 function array_sum($array) { }
 function array_unique($array, $sort_flags = 2) { }
 function array_unshift(&$array, $var, ...) { }
 function array_values($input) { }
-function array_walk_recursive(&$input, $funcname, $userdata = null_variant) { }
-function array_walk(&$input, $funcname, $userdata = null_variant) { }
+function array_walk_recursive(&$input, $funcname, $userdata = null) { }
+function array_walk(&$input, $funcname, $userdata = null) { }
 function compact($varname, ...) { }
 function shuffle(&$array) { }
 function sizeof($var, $recursive = false) { }

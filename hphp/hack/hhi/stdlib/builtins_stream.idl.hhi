@@ -11,7 +11,7 @@
 function stream_context_create($options = null, $params = null) { }
 function stream_context_get_default($options = null) { }
 function stream_context_get_options($stream_or_context) { }
-function stream_context_set_option($stream_or_context, $wrapper, $option = null, $value = null_variant) { }
+function stream_context_set_option($stream_or_context, $wrapper, $option = null, $value = null) { }
 function stream_context_set_param($stream_or_context, $params) { }
 function stream_copy_to_stream($source, $dest, $maxlength = -1, $offset = 0) { }
 function stream_encoding($stream, $encoding = null) { }
@@ -21,8 +21,8 @@ function stream_bucket_make_writeable($brigade) { }
 function stream_bucket_new($stream, $buffer) { }
 function stream_filter_register($filtername, $classname) { }
 function stream_filter_remove($stream_filter) { }
-function stream_filter_append($stream, $filtername, $read_write = 0, $params = null_variant) { }
-function stream_filter_prepend($stream, $filtername, $read_write = 0, $params = null_variant) { }
+function stream_filter_append($stream, $filtername, $read_write = 0, $params = null) { }
+function stream_filter_prepend($stream, $filtername, $read_write = 0, $params = null) { }
 function stream_get_contents($handle, $maxlen = 0, $offset = 0) { }
 function stream_get_filters() { }
 function stream_get_line($handle, $length = 0, $ending = null) { }

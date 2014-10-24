@@ -68,14 +68,14 @@ struct LibXmlRequestData final : RequestEventHandler {
   void requestInit() override {
     m_use_error = false;
     m_suppress_error = false;
-    m_errors.reset();
+    m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
     m_streams_context = uninit_null();
   }
 
   void requestShutdown() override {
     m_use_error = false;
-    m_errors.reset();
+    m_errors = xmlErrorVec();
     m_streams_context = uninit_null();
   }
 

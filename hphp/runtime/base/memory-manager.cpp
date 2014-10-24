@@ -412,7 +412,9 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  m_instances.clear();
+  if (m_trackingInstances) {
+    m_instances = std::unordered_set<void*>();
+  }
 
   resetCouldOOM();
 }

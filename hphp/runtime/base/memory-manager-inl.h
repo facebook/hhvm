@@ -463,7 +463,7 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 ALWAYS_INLINE
 void MemoryManager::setObjectTracking(bool val) {
   if (val) {
-    m_instances.clear();
+    m_instances = std::unordered_set<void*>();
   }
   m_trackingInstances = val;
 }

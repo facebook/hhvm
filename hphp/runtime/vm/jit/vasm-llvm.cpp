@@ -1040,7 +1040,9 @@ void LLVMEmitter::emit(const syncpoint& inst) {
 }
 
 void LLVMEmitter::emit(const testbi& inst) {
-  auto result = m_irb.CreateAnd(value(inst.s1), inst.s0.b());
+  auto result = m_irb.CreateAnd(m_irb.CreateTruncOrBitCast(value(inst.s1),
+                                                           m_int8),
+                                inst.s0.b());
   defineFlagTmp(inst.sf, result);
 }
 

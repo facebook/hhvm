@@ -116,8 +116,6 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
 }
 
 function waitForServerToGetGoing($serverPort) {
-  global $test_run_id, $LOG_ROOT;
-
   $host = php_uname('n');
   $r = "";
   for ($i = 1; $i <= 20; $i++) {

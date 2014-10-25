@@ -1142,8 +1142,8 @@ bool f_chown(const String& filename, const Variant& user) {
     } else if (user.isString()) {
       return usw->chown(filename, user.toString());
     }
-    raise_warning("parameter 2 should be string or integer, %s given",
-                  tname(user.getType()).data());
+    raise_warning("chown(): parameter 2 should be string or integer, %s given",
+                  getDataTypeString(user.getType()).c_str());
     return false;
   }
 
@@ -1190,8 +1190,8 @@ bool f_chgrp(const String& filename, const Variant& group) {
     } else if (group.isString()) {
       return usw->chgrp(filename, group.toString());
     }
-    raise_warning("parameter 2 should be string or integer, %s given",
-                  tname(group.getType()).data());
+    raise_warning("chgrp(): parameter 2 should be string or integer, %s given",
+                  getDataTypeString(group.getType()).c_str());
     return false;
   }
 

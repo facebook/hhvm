@@ -115,3 +115,7 @@ chgrp('abc://i', 0);
 chgrp('abc://j', 10);
 chgrp('abc://k', 'root');
 
+// explicit errors
+
+chown('abc://l', []);
+chgrp('abc://m', []);

@@ -108,3 +108,7 @@ array(3) {
   [2]=>
   string(4) "root"
 }
+
+Warning: chown(): parameter 2 should be string or integer, array given in %s on line 120
+
+Warning: chgrp(): parameter 2 should be string or integer, array given in %s on line 121

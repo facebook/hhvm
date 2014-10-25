@@ -54,9 +54,6 @@ NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 
-// XXX
-NOOP_OPCODE(DbgAssertPtr);
-
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.
 NOOP_OPCODE(DbgAssertRetAddr)
@@ -70,56 +67,65 @@ NOOP_OPCODE(DbgAssertRetAddr)
     cgCallNative(vmain(), i); \
   }
 
+#define CALL_STK_OPCODE(name) \
+  CALL_OPCODE(name) \
+  CALL_OPCODE(name ## Stk)
+
+
+CALL_OPCODE(AddElemStrKey)
+CALL_OPCODE(AddElemIntKey)
+CALL_OPCODE(AddNewElem)
+CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(Box)
-CALL_OPCODE(ConvIntToStr)
+CALL_OPCODE(ColAddElemC)
+CALL_OPCODE(ColAddNewElemC)
 
-CALL_OPCODE(AllocObj)
+CALL_OPCODE(CoerceCellToBool);
+CALL_OPCODE(CoerceCellToInt);
+CALL_OPCODE(CoerceCellToDbl);
+CALL_OPCODE(CoerceStrToDbl);
+CALL_OPCODE(CoerceStrToInt);
 
-CALL_OPCODE(ConcatStrStr)
-CALL_OPCODE(ConcatIntStr)
-CALL_OPCODE(ConcatStrInt)
+CALL_OPCODE(ConvBoolToArr);
+CALL_OPCODE(ConvDblToArr);
+CALL_OPCODE(ConvIntToArr);
+CALL_OPCODE(ConvObjToArr);
+CALL_OPCODE(ConvStrToArr);
+CALL_OPCODE(ConvCellToArr);
+
+CALL_OPCODE(ConvStrToBool);
+CALL_OPCODE(ConvCellToBool);
+
+CALL_OPCODE(ConvArrToDbl);
+CALL_OPCODE(ConvObjToDbl);
+CALL_OPCODE(ConvStrToDbl);
+CALL_OPCODE(ConvCellToDbl);
+
+CALL_OPCODE(ConvArrToInt);
+CALL_OPCODE(ConvObjToInt);
+CALL_OPCODE(ConvStrToInt);
+CALL_OPCODE(ConvCellToInt);
+
+CALL_OPCODE(ConvCellToObj);
+
+CALL_OPCODE(ConvDblToStr);
+CALL_OPCODE(ConvIntToStr);
+CALL_OPCODE(ConvObjToStr);
+CALL_OPCODE(ConvResToStr);
+CALL_OPCODE(ConvCellToStr);
+
+CALL_OPCODE(ConcatStrStr);
+CALL_OPCODE(ConcatStrInt);
+CALL_OPCODE(ConcatIntStr);
 CALL_OPCODE(ConcatStr3);
 CALL_OPCODE(ConcatStr4);
 
-CALL_OPCODE(PrintStr)
-CALL_OPCODE(PrintInt)
-CALL_OPCODE(PrintBool)
-
-CALL_OPCODE(AddElemStrKey)
-
-CALL_OPCODE(ConvBoolToArr)
-CALL_OPCODE(ConvDblToArr)
-CALL_OPCODE(ConvIntToArr)
-CALL_OPCODE(ConvObjToArr)
-CALL_OPCODE(ConvStrToArr)
-CALL_OPCODE(ConvCellToArr)
-
-CALL_OPCODE(ConvStrToBool)
-CALL_OPCODE(ConvCellToBool)
-CALL_OPCODE(ConvArrToDbl)
-CALL_OPCODE(ConvObjToDbl)
-CALL_OPCODE(ConvStrToDbl)
-CALL_OPCODE(ConvCellToDbl)
-
-CALL_OPCODE(ConvObjToInt)
-CALL_OPCODE(ConvArrToInt)
-CALL_OPCODE(ConvStrToInt)
-
-CALL_OPCODE(RaiseWarning)
-CALL_OPCODE(RaiseError)
-CALL_OPCODE(ConvCellToObj)
-CALL_OPCODE(LookupClsMethod)
-CALL_OPCODE(RaiseNotice)
-CALL_OPCODE(LookupClsRDSHandle)
-CALL_OPCODE(LdSwitchStrIndex)
-CALL_OPCODE(LdSwitchDblIndex)
-CALL_OPCODE(LdSwitchObjIndex)
-CALL_OPCODE(CustomInstanceInit)
-CALL_OPCODE(LdClsCtor)
-
-CALL_OPCODE(LdArrFuncCtx)
-CALL_OPCODE(LdArrFPushCuf)
-CALL_OPCODE(LdStrFPushCuf)
+CALL_OPCODE(TypeProfileFunc)
+CALL_OPCODE(CreateCont)
+CALL_OPCODE(CreateAFWH)
+CALL_OPCODE(CreateSSWH)
+CALL_OPCODE(AFWHPrepareChild)
+CALL_OPCODE(ABCUnblock)
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewVArray)
@@ -127,29 +133,76 @@ CALL_OPCODE(NewMIArray)
 CALL_OPCODE(NewMSArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(NewPackedArray)
+CALL_OPCODE(AllocPackedArray)
 CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
-CALL_OPCODE(ClosureStaticLocInit)
+CALL_OPCODE(AllocObj)
+CALL_OPCODE(CustomInstanceInit)
+CALL_OPCODE(InitProps)
+CALL_OPCODE(InitSProps)
+CALL_OPCODE(RegisterLiveObj)
+CALL_OPCODE(LdClsCtor)
+CALL_OPCODE(LookupClsMethod)
+CALL_OPCODE(LookupClsRDSHandle)
+CALL_OPCODE(LdArrFuncCtx)
+CALL_OPCODE(LdArrFPushCuf)
+CALL_OPCODE(LdStrFPushCuf)
+CALL_OPCODE(PrintStr)
+CALL_OPCODE(PrintInt)
+CALL_OPCODE(PrintBool)
+CALL_OPCODE(DbgAssertPtr)
+CALL_OPCODE(LdSwitchDblIndex)
+CALL_OPCODE(LdSwitchStrIndex)
+CALL_OPCODE(LdSwitchObjIndex)
 CALL_OPCODE(VerifyParamCallable)
 CALL_OPCODE(VerifyParamFail)
+CALL_OPCODE(VerifyRetCallable)
+CALL_OPCODE(VerifyRetFail)
+CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
-CALL_OPCODE(AddNewElem)
-CALL_OPCODE(ColAddElemC)
-CALL_OPCODE(ColAddNewElemC)
-CALL_OPCODE(ArrayAdd)
-CALL_OPCODE(CreateCont)
-CALL_OPCODE(CreateAFWH)
-CALL_OPCODE(CreateSSWH)
-CALL_OPCODE(AFWHPrepareChild)
-CALL_OPCODE(ABCUnblock)
-CALL_OPCODE(TypeProfileFunc)
+CALL_OPCODE(RaiseError)
+CALL_OPCODE(RaiseWarning)
+CALL_OPCODE(RaiseNotice)
+CALL_OPCODE(RaiseArrayIndexNotice)
 CALL_OPCODE(IncStatGrouped)
+CALL_OPCODE(ClosureStaticLocInit)
+CALL_OPCODE(GenericIdx)
+CALL_OPCODE(LdClsPropAddrOrNull)
+CALL_OPCODE(LdClsPropAddrOrRaise)
+CALL_OPCODE(LdGblAddrDef)
+
+// Vector instruction helpers
+CALL_OPCODE(StringGet)
+CALL_STK_OPCODE(BindElem)
+CALL_STK_OPCODE(SetWithRefElem)
+CALL_STK_OPCODE(SetWithRefNewElem)
+CALL_STK_OPCODE(SetOpElem)
+CALL_STK_OPCODE(IncDecElem)
+CALL_STK_OPCODE(SetNewElem)
+CALL_STK_OPCODE(SetNewElemArray)
+CALL_STK_OPCODE(BindNewElem)
+CALL_OPCODE(VectorIsset)
+CALL_OPCODE(PairIsset)
+
+CALL_OPCODE(InstanceOfIface)
+CALL_OPCODE(InterfaceSupportsArr)
+CALL_OPCODE(InterfaceSupportsStr)
+CALL_OPCODE(InterfaceSupportsInt)
+CALL_OPCODE(InterfaceSupportsDbl)
+
 CALL_OPCODE(ZeroErrorLevel)
 CALL_OPCODE(RestoreErrorLevel)
+
 CALL_OPCODE(Count)
-CALL_OPCODE(CountArray)
+
+CALL_OPCODE(SurpriseHook)
+CALL_OPCODE(FunctionSuspendHook)
+CALL_OPCODE(FunctionReturnHook)
+
+CALL_OPCODE(OODeclExists)
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -177,19 +230,9 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
            curFunc(), resumed(), m_curInst->marker().profTransId())
 
-/////////////////////////////////////////////////////////////////////
-//TODO t3702757: Convert to CALL_OPCODE, the following set works on
-//   x86 but needs a closer look on arm
-PUNT_OPCODE(AddElemIntKey)
-PUNT_OPCODE(ConvCellToInt)
+//////////////////////////////////////////////////////////////////////
 PUNT_OPCODE(ArrayIdx)
-PUNT_OPCODE(RaiseArrayIndexNotice)
-PUNT_OPCODE(RaiseUninitLoc)
-PUNT_OPCODE(VerifyRetCallable)
-PUNT_OPCODE(VerifyRetFail)
-PUNT_OPCODE(GenericIdx)
-// End of failing set
-/////////////////////////////////////////////////////////////////////
+PUNT_OPCODE(CountArray)
 
 PUNT_OPCODE(ProfileStr)
 PUNT_OPCODE(ConvArrToBool)
@@ -202,16 +245,6 @@ PUNT_OPCODE(ConvIntToDbl)
 PUNT_OPCODE(ConvDblToInt)
 
 PUNT_OPCODE(ConvBoolToStr)
-PUNT_OPCODE(ConvDblToStr)
-PUNT_OPCODE(ConvObjToStr)
-PUNT_OPCODE(ConvResToStr)
-PUNT_OPCODE(ConvCellToStr)
-
-PUNT_OPCODE(CoerceCellToBool)
-PUNT_OPCODE(CoerceCellToInt)
-PUNT_OPCODE(CoerceCellToDbl)
-PUNT_OPCODE(CoerceStrToDbl)
-PUNT_OPCODE(CoerceStrToInt)
 
 PUNT_OPCODE(ProfileArray)
 PUNT_OPCODE(CheckTypeMem)
@@ -236,11 +269,6 @@ PUNT_OPCODE(ExtendsClass)
 PUNT_OPCODE(ClsNeq)
 PUNT_OPCODE(IsWaitHandle)
 PUNT_OPCODE(InstanceOf)
-PUNT_OPCODE(InstanceOfIface)
-PUNT_OPCODE(InterfaceSupportsArr)
-PUNT_OPCODE(InterfaceSupportsStr)
-PUNT_OPCODE(InterfaceSupportsInt)
-PUNT_OPCODE(InterfaceSupportsDbl)
 PUNT_OPCODE(IsTypeMem)
 PUNT_OPCODE(IsNTypeMem)
 PUNT_OPCODE(Gt)
@@ -327,9 +355,6 @@ PUNT_OPCODE(SideExitJmpNZero)
 PUNT_OPCODE(SideExitGuardLoc)
 PUNT_OPCODE(JmpIndirect)
 PUNT_OPCODE(CheckSurpriseFlags)
-PUNT_OPCODE(SurpriseHook)
-PUNT_OPCODE(FunctionSuspendHook)
-PUNT_OPCODE(FunctionReturnHook)
 PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(CheckInit)
 PUNT_OPCODE(CheckInitMem)
@@ -382,11 +407,8 @@ PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
 PUNT_OPCODE(LdPropAddr)
 PUNT_OPCODE(LdClsPropAddrKnown)
-PUNT_OPCODE(LdClsPropAddrOrNull)
-PUNT_OPCODE(LdClsPropAddrOrRaise)
 PUNT_OPCODE(LdObjMethod)
 PUNT_OPCODE(LdObjInvoke)
-PUNT_OPCODE(LdGblAddrDef)
 PUNT_OPCODE(LdGblAddr)
 PUNT_OPCODE(LdObjClass)
 PUNT_OPCODE(LdFunc)
@@ -398,10 +420,7 @@ PUNT_OPCODE(LdSSwitchDestSlow)
 PUNT_OPCODE(JmpSwitchDest)
 PUNT_OPCODE(ConstructInstance)
 PUNT_OPCODE(CheckInitProps)
-PUNT_OPCODE(InitProps)
 PUNT_OPCODE(CheckInitSProps)
-PUNT_OPCODE(InitSProps)
-PUNT_OPCODE(RegisterLiveObj)
 PUNT_OPCODE(NewInstanceRaw)
 PUNT_OPCODE(InitObjProps)
 PUNT_OPCODE(StClosureFunc)
@@ -435,7 +454,6 @@ PUNT_OPCODE(DecRefNZ)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
 PUNT_OPCODE(ReDefSP)
-PUNT_OPCODE(OODeclExists);
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyRetCls)
 PUNT_OPCODE(ConcatCellCell)
@@ -503,38 +521,19 @@ PUNT_OPCODE(ElemDXStk)
 PUNT_OPCODE(ElemUX)
 PUNT_OPCODE(ElemUXStk)
 PUNT_OPCODE(ArrayGet)
-PUNT_OPCODE(StringGet)
 PUNT_OPCODE(MapGet)
 PUNT_OPCODE(CGetElem)
 PUNT_OPCODE(VGetElem)
 PUNT_OPCODE(VGetElemStk)
-PUNT_OPCODE(BindElem)
-PUNT_OPCODE(BindElemStk)
 PUNT_OPCODE(ArraySet)
 PUNT_OPCODE(MapSet)
 PUNT_OPCODE(ArraySetRef)
 PUNT_OPCODE(SetElem)
 PUNT_OPCODE(SetElemStk)
-PUNT_OPCODE(SetWithRefElem)
-PUNT_OPCODE(SetWithRefElemStk)
 PUNT_OPCODE(UnsetElem)
 PUNT_OPCODE(UnsetElemStk)
-PUNT_OPCODE(SetOpElem)
-PUNT_OPCODE(SetOpElemStk)
-PUNT_OPCODE(IncDecElem)
-PUNT_OPCODE(IncDecElemStk)
-PUNT_OPCODE(SetNewElem)
-PUNT_OPCODE(SetNewElemStk)
-PUNT_OPCODE(SetNewElemArray)
-PUNT_OPCODE(SetNewElemArrayStk)
-PUNT_OPCODE(SetWithRefNewElem)
-PUNT_OPCODE(SetWithRefNewElemStk)
-PUNT_OPCODE(BindNewElem)
-PUNT_OPCODE(BindNewElemStk)
 PUNT_OPCODE(ArrayIsset)
 PUNT_OPCODE(StringIsset)
-PUNT_OPCODE(VectorIsset)
-PUNT_OPCODE(PairIsset)
 PUNT_OPCODE(MapIsset)
 PUNT_OPCODE(IssetElem)
 PUNT_OPCODE(EmptyElem)
@@ -549,7 +548,6 @@ PUNT_OPCODE(MulIntO)
 PUNT_OPCODE(EagerSyncVMRegs)
 PUNT_OPCODE(ColIsEmpty)
 PUNT_OPCODE(ColIsNEmpty)
-PUNT_OPCODE(AllocPackedArray)
 PUNT_OPCODE(InitPackedArray)
 PUNT_OPCODE(InitPackedArrayLoop)
 
@@ -1101,8 +1099,8 @@ void CodeGenerator::cgCallHelper(Vout& v,
   }
 
   switch (dstInfo.type) {
-    case DestType::TV: not_implemented();
-    case DestType::SIMD: not_implemented();
+    case DestType::TV: CG_PUNT(cgCall-ReturnTV);
+    case DestType::SIMD: CG_PUNT(cgCall-ReturnSIMD);
     case DestType::SSA:
       assert(dstReg1 == InvalidReg);
       v << copy{PhysReg(vixl::x0), dstReg0};

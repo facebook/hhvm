@@ -1102,7 +1102,7 @@ bool f_chmod(const String& filename, int64_t mode) {
   CHECK_PATH_FALSE(filename, 1);
   String translated = File::TranslatePath(filename);
 
-  // If filename points to a user file, invoke UserStreamWrapper::touch(..)
+  // If filename points to a user file, invoke UserStreamWrapper::chmod(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {

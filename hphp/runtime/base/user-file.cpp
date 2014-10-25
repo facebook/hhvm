@@ -500,7 +500,7 @@ bool UserFile::invokeMetadata(const Array& args, const char* funcName) {
   Variant ret = invoke(m_StreamMetadata, s_stream_metadata, args, invoked);
   if (!invoked) {
     raise_warning("%s(): %s::stream_metadata is not implemented!",
-        funcName, m_cls->name()->data());
+                  funcName, m_cls->name()->data());
     return false;
   } else if (ret.toBoolean() == true) {
     return true;

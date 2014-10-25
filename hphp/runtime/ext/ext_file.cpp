@@ -1155,6 +1155,21 @@ bool f_chown(const String& filename, const Variant& user) {
 
 bool f_lchown(const String& filename, const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
+
+  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    if (user.isInteger()) {
+      return usw->chown(filename, user.toInt64());
+    } else if (user.isString()) {
+      return usw->chown(filename, user.toString());
+    }
+    raise_warning("lchown(): parameter 2 should be string or integer, %s given",
+                  getDataTypeString(user.getType()).c_str());
+    return false;
+  }
+
   int uid = get_uid(user);
   if (uid == 0) return false;
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
@@ -1203,6 +1218,21 @@ bool f_chgrp(const String& filename, const Variant& group) {
 
 bool f_lchgrp(const String& filename, const Variant& group) {
   CHECK_PATH_FALSE(filename, 1);
+
+  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    if (group.isInteger()) {
+      return usw->chgrp(filename, group.toInt64());
+    } else if (group.isString()) {
+      return usw->chgrp(filename, group.toString());
+    }
+    raise_warning("lchgrp(): parameter 2 should be string or integer, %s given",
+                  getDataTypeString(group.getType()).c_str());
+    return false;
+  }
+
   int gid = get_gid(group);
   if (gid == 0) return false;
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));

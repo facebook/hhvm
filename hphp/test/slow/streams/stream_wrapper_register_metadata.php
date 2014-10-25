@@ -111,11 +111,21 @@ chown('abc://f', 0);
 chown('abc://g', 10);
 chown('abc://h', 'root');
 
-chgrp('abc://i', 0);
-chgrp('abc://j', 10);
-chgrp('abc://k', 'root');
+lchown('abc://i', 0);
+lchown('abc://j', 10);
+lchown('abc://k', 'root');
+
+chgrp('abc://l', 0);
+chgrp('abc://m', 10);
+chgrp('abc://n', 'root');
+
+lchgrp('abc://o', 0);
+lchgrp('abc://p', 10);
+lchgrp('abc://q', 'root');
 
 // explicit errors
 
-chown('abc://l', []);
-chgrp('abc://m', []);
+chown('abc://r', []);
+lchown('abc://s', []);
+chgrp('abc://t', []);
+lchgrp('abc://u', []);

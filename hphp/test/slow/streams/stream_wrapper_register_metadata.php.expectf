@@ -86,7 +86,7 @@ array(3) {
   [0]=>
   string(7) "abc://i"
   [1]=>
-  int(5)
+  int(3)
   [2]=>
   int(0)
 }
@@ -95,7 +95,7 @@ array(3) {
   [0]=>
   string(7) "abc://j"
   [1]=>
-  int(5)
+  int(3)
   [2]=>
   int(10)
 }
@@ -104,11 +104,69 @@ array(3) {
   [0]=>
   string(7) "abc://k"
   [1]=>
+  int(2)
+  [2]=>
+  string(4) "root"
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://l"
+  [1]=>
+  int(5)
+  [2]=>
+  int(0)
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://m"
+  [1]=>
+  int(5)
+  [2]=>
+  int(10)
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://n"
+  [1]=>
+  int(4)
+  [2]=>
+  string(4) "root"
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://o"
+  [1]=>
+  int(5)
+  [2]=>
+  int(0)
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://p"
+  [1]=>
+  int(5)
+  [2]=>
+  int(10)
+}
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://q"
+  [1]=>
   int(4)
   [2]=>
   string(4) "root"
 }
 
-Warning: chown(): parameter 2 should be string or integer, array given in %s on line 120
+Warning: chown(): parameter 2 should be string or integer, array given in %s on line 128
 
-Warning: chgrp(): parameter 2 should be string or integer, array given in %s on line 121
+Warning: lchown(): parameter 2 should be string or integer, array given in %s on line 129
+
+Warning: chgrp(): parameter 2 should be string or integer, array given in %s on line 130
+
+Warning: lchgrp(): parameter 2 should be string or integer, array given in %s on line 131

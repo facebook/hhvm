@@ -107,6 +107,17 @@ function determine_flags(OptionMap $opts): string {
     $flags .=
       '-v Eval.JitRegionSelector='.((string)$opts['region-mode']).' '.
       '';
+    if ($opts['region-mode'] == 'method') {
+      $flags .=
+        '-v Eval.JitLoops=1 '.
+        '-v Eval.HHIRBytecodeControlFlow=1 '.
+        '-v Eval.JitPGO=0 '.
+        '';
+      if (!$opts->containsKey('compile')) {
+        echo 'Reminder: running region-mode=method without --compile is '.
+             "almost never going to work...\n";
+      }
+    }
   }
 
   $simple_args = Map {

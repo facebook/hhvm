@@ -62,6 +62,7 @@ public:
   bool mkdir(const String& path, int mode, int options);
   bool rmdir(const String& path, int options);
   bool touch(const String& path, int64_t mtime, int64_t atime);
+  bool chown(const String& path, const Variant& user);
 
 private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);

@@ -1124,6 +1124,13 @@ static int get_uid(const Variant& user) {
 
 bool f_chown(const String& filename, const Variant& user) {
   CHECK_PATH_FALSE(filename, 1);
+
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
+  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  if (usw != nullptr) {
+    return usw->chown(filename, user);
+  }
+
   int uid = get_uid(user);
   if (uid == 0) return false;
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));

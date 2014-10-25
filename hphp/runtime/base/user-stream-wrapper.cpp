@@ -92,11 +92,20 @@ Directory* UserStreamWrapper::opendir(const String& path) {
   return dir;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// non-generic functions
+
 bool UserStreamWrapper::touch(const String& path,
                               int64_t mtime, int64_t atime) {
   auto file = NEWOBJ(UserFile)(m_cls);
   Resource wrapper(file);
   return file->touch(path, mtime, atime);
+}
+
+bool UserStreamWrapper::chown(const String& path, const Variant& user) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chown(path, user);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

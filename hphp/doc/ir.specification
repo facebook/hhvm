@@ -902,12 +902,12 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Also, note that you should not add new uses of LdMem.  We intend to split it
   up into several 'categorized' load instructions.
 
-| LdProp, DParam, S(Obj) C(Int), B
+| LdContField, DParam, S(Obj) C(Int), B
 
   Loads a property from the object referenced by S0 at the offset given by S1
   and puts the value in D. If the optional target B is specified and the loaded
   value's type does not match T, this instruction does not load into D and
-  branches to block B.
+  branches to block B. S0 must be a Generator.
 
 | LdElem, D(Cell), S(PtrToCell) S(Int), E
 
@@ -1827,10 +1827,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 | WarnNonObjProp, ND, NA, E|Er
 
   Raise a warning for property access on a non-object base.
-
-| ThrowNonObjProp, ND, NA, T|E|Er
-
-  Throws a fatal error for trying to set a property on a non-object base.
 
 | RaiseUndefProp, ND, S(Obj) CStr, E|Er
 

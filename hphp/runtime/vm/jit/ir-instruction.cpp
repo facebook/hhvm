@@ -181,7 +181,7 @@ bool IRInstruction::isRawLoad() const {
     case LdRef:
     case LdStack:
     case LdElem:
-    case LdProp:
+    case LdContField:
     case LdPackedArrayElem:
     case LdGbl:
       return true;

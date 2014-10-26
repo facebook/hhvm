@@ -397,7 +397,6 @@ CALL_OPCODE(VerifyRetCallable)
 CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(WarnNonObjProp)
-CALL_OPCODE(ThrowNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
@@ -3750,7 +3749,7 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
   v << load{refTVData(ref), valueDstReg};
 }
 
-void CodeGenerator::cgLdProp(IRInstruction* inst) {
+void CodeGenerator::cgLdContField(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
          srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
          inst->taken());

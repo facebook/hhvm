@@ -297,7 +297,7 @@ void HhbcTranslator::emitContKey() {
   SSATmp* cont = gen(LdThis, m_irb->fp());
   gen(ContStartedCheck, makeExitSlow(), cont);
   SSATmp* offset = cns(offsetof(c_Generator, m_key));
-  SSATmp* value = gen(LdProp, Type::Cell, cont, offset);
+  SSATmp* value = gen(LdContField, Type::Cell, cont, offset);
   pushIncRef(value);
 }
 
@@ -306,7 +306,7 @@ void HhbcTranslator::emitContCurrent() {
   SSATmp* cont = gen(LdThis, m_irb->fp());
   gen(ContStartedCheck, makeExitSlow(), cont);
   SSATmp* offset = cns(offsetof(c_Generator, m_value));
-  SSATmp* value = gen(LdProp, Type::Cell, cont, offset);
+  SSATmp* value = gen(LdContField, Type::Cell, cont, offset);
   pushIncRef(value);
 }
 

@@ -65,7 +65,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
 ///////////////////////////////////////////////////////////////////////////////
 
 void NEVER_INLINE throw_invalid_property_name(const String& name);
-void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 void throw_exception(const Object& e);

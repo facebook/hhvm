@@ -41,7 +41,7 @@ bool loadsCell(Opcode op) {
     case LdStack:
     case LdLoc:
     case LdMem:
-    case LdProp:
+    case LdContField:
     case LdElem:
     case LdPackedArrayElem:
     case LdRef:

@@ -460,7 +460,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdObjMethod:
   case LdPackedArrayElem:
   case LdPairBase:
-  case LdProp:
+  case LdContField:
   case LdPropAddr:
   case LdRaw:
   case LdRef:
@@ -573,7 +573,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SyncABIRegs:
   case TakeRef:
   case TakeStack:
-  case ThrowNonObjProp:
   case TrackLoc:
   case TypeProfileFunc:
   case UnwindCheckSideExit:

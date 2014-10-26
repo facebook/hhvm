@@ -234,7 +234,6 @@ static CallMap s_callMap {
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
-    {ThrowNonObjProp,    throw_null_object_prop, DNone, SSync, {}},
     {RaiseUndefProp,     raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},

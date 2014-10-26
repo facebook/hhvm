@@ -1769,7 +1769,7 @@ static Variant HHVM_FUNCTION(iconv, const String& in_charset,
     php_iconv_string(str.data(), str.size(), &out_buffer, &out_len,
                      out_charset.data(), in_charset.data());
   _php_iconv_show_error(__FUNCTION__+2, err, out_charset.data(), in_charset.data());
-  if (out_buffer != NULL) {
+  if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != NULL) {
     return String(out_buffer, out_len, AttachString);
   }
   return false;

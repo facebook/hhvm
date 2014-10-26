@@ -1744,6 +1744,33 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | _ -> env, fty in
       let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
       call p env fty el []
+  | Id ((_, "\\idx") as id) ->
+      (* Directly call get_fun so that we can muck with the type before
+       * instantiation -- much easier to work in terms of Tgeneric Tk/Tv than
+       * trying to figure out which Tvar is which. *)
+      let env, fty = Env.get_fun env (snd id) in
+      let fty = match fty with
+        | Some fty -> fty
+        | None -> assert false in
+      let param1, (name2, (r2, _)), (name3, (r3, _)) = match fty.ft_params with
+        | [param1; param2; param3] -> param1, param2, param3
+        | _ -> assert false in
+      let params, ret = match List.length el with
+        | 2 ->
+          let param2 = (name2, (r2, Toption (r2, Tgeneric ("Tk", None)))) in
+          let rret = fst fty.ft_ret in
+          let ret = (rret, Toption (rret, Tgeneric ("Tv", None))) in
+          [param1; param2], ret
+        | 3 ->
+          let param2 = (name2, (r2, Tgeneric ("Tk", None))) in
+          let param3 = (name3, (r3, Tgeneric ("Tv", None))) in
+          let ret = (fst fty.ft_ret, Tgeneric ("Tv", None)) in
+          [param1; param2; param3], ret
+        | _ -> fty.ft_params, fty.ft_ret in
+      let fty = { fty with ft_params = params; ft_ret = ret } in
+      let env, fty = Inst.instantiate_ft env fty in
+      let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
+      call p env tfun el []
   | Class_const (CIparent, (_, construct))
     when construct = SN.Members.__construct ->
       call_parent_construct p env el uel

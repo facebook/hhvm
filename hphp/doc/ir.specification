@@ -1196,17 +1196,13 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the m_func member of an ActRec. S0 is the base address, and S1 is an
   offset, such that S0 + S1 points to the base of the ActRec.
 
-| LdRaw<T>, DLdRaw, S(Str,Obj,Func), NF
+| LdFuncNumParams, D(Int), S(Func), NF
 
-  "Raw" load from memory---i.e. outside of our type-system.
+  Returns the value of func->numParams().
 
-  S0 is the base address, and is an untyped pointer. S1 is a constant from the
-  RawMemSlot::Kind enum, which describes the offset from the base, and the
-  size. The value in D is assumed to be of type T.
+| LdStrLen, D(Int), S(Str), NF
 
-  This opcode must not modify locals or eval stack slots.
-
-  Try not to add new uses of this instruction.
+  Load the length of the string in S0.
 
 | LdStaticLocCached<func,staticLocalName>, D(BoxedCell), NA, NF
 
@@ -1505,16 +1501,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Store the value in S1 into the RefData pointed to by S0. Stores the
   RefData::m_type also. Returns a new value for S0, which will now have the
   type of S1 after boxing.
-
-| StRaw, ND, S(Obj) S(Int), E
-
-  "Raw" store to memory---i.e. outside of our type-system.
-
-  S0 is the base address, and is an untyped pointer. S1 is a constant from the
-  RawMemSlot::Kind enum, which describes the offset from the base, and the
-  size. The value in S2 depends on the value of S1.
-
-  Try not to add new uses of this instruction.
 
 | SpillStack, D(StkPtr), S(StkPtr) C(Int) SVar(StackElem), CRc
 
@@ -2056,6 +2042,11 @@ ranges due to eagerly loaded values at the start of the tracelet.
   increments the key of a generator if that generator's key is an Int.
   This will cause undefined behavior if the generator's key is not an Int.
 
+| ContArIncIdx, D(Int), S(FramePtr), E
+
+  Increment the internal index in the Generator in S0, and return the new index
+  value.
+
 | ContArUpdateIdx, ND, S(FramePtr) S(Int), E
 
   Updates the internal index of generator with S1 if necessary, i.e. if S1
@@ -2066,21 +2057,18 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
 
-| LdContArRaw, DLdRaw, S(FramePtr), NF
+| LdContResumeAddr, D(TCA), S(Obj), E
 
-  Loads raw data from the Generator object ActRec of which is S0. S1 is a
-  constant from the RawMemSlot::Kind enum, which describes the offset from the
-  generator base, and the size.
+  Load the resume addr from the Generator in S0.
 
-  This opcode must not modify locals in the Generator object.
+| StContArState<state>, ND, S(FramePtr), E
 
-  Please do not add new uses of this opcode.
+  Change the state of the Generator object which has frame pointer S0.
 
-| StContArRaw, ND, S(FramePtr) S(Int,TCA,Nullptr), E
+| StContArResume<offset>, ND, S(FramePtr) S(TCA), E
 
-  Stores raw data into the Generator object ActRec of which is S0. S1 is a
-  constant from the RawMemSlow::Kind enum, which describes the offset from the
-  Generator base, and the size. S2 is the value.
+  Store the resume address S1 into the Generator whose ActRec is given by S0,
+  marking the offset to resume at as `offset'.
 
 | LdContArValue, DParam, S(FramePtr), PRc
 
@@ -2100,16 +2088,15 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| StAsyncArRaw<OffsetData>, ND, S(FramePtr) S(Int,TCA,Nullptr), E
+| StAsyncArSucceeded, ND, S(FramePtr), E
 
-  Stores raw data into the AsyncFunctionWaitHandle object, whose ActRec is
-  given by S0. OffsetData is a constant from the RawMemSlow::Kind enum, which
-  describes the offset from the AsyncFunctionWaitHandle base, and the size.
-  S1 is the value.
+  Mark the AsyncFunctionWaitHandle object whose ActRec is given by S0 as
+  STATE_SUCCEEDED.
 
-  This opcode must not modify locals in the current frame.
+| StAsyncArResume<offset>, ND, S(FramePtr) S(TCA), E
 
-  Try not to add new "raw" store opcodes like this.
+  Store the resume address S1 into the AsyncFunctionWaitHandle whose ActRec is
+  given by S0, marking the offset to resume at as `offset'.
 
 | StAsyncArResult, ND, S(FramePtr) S(Cell), E|CRc
 

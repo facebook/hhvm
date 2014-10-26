@@ -1035,10 +1035,7 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     auto parentChain = gen(LdAsyncArParentChain, m_irb->fp());
 
     // Mark the async function as succeeded.
-    auto succeeded = c_WaitHandle::toKindState(
-        c_WaitHandle::Kind::AsyncFunction, c_WaitHandle::STATE_SUCCEEDED);
-    gen(StAsyncArRaw, RawMemData{RawMemData::AsyncState}, m_irb->fp(),
-        cns(succeeded));
+    gen(StAsyncArSucceeded, m_irb->fp());
 
     // Store the return value.
     gen(StAsyncArResult, m_irb->fp(), retVal);
@@ -1062,8 +1059,9 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
     gen(DecRef, oldValue);
 
     // Mark generator as finished.
-    gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-        cns(BaseGenerator::State::Done));
+    gen(StContArState,
+        GeneratorState { BaseGenerator::State::Done },
+        m_irb->fp());
 
     // Push return value of next()/send()/raise().
     push(cns(Type::InitNull));

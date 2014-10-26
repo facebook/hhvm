@@ -812,19 +812,27 @@ void HhbcTranslator::emitStrlen() {
     if (input->isConst()) {
       // static string; fold its strlen operation
       push(cns(input->strVal()->size()));
-    } else {
-      push(gen(LdRaw, RawMemData{RawMemData::StrLen}, input));
-      gen(DecRef, input);
+      return;
     }
-  } else if (inType <= Type::Null) {
+
+    push(gen(LdStrLen, input));
+    gen(DecRef, input);
+    return;
+  }
+
+  if (inType <= Type::Null) {
     popC();
     push(cns(0));
-  } else if (inType <= Type::Bool) {
+    return;
+  }
+
+  if (inType <= Type::Bool) {
     // strlen(true) == 1, strlen(false) == 0.
     push(gen(ConvBoolToInt, popC()));
-  } else {
-    emitInterpOne(Type::Int | Type::InitNull, 1);
+    return;
   }
+
+  emitInterpOne(Type::Int | Type::InitNull, 1);
 }
 
 void HhbcTranslator::emitFloor() {

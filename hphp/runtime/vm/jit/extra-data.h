@@ -1,4 +1,4 @@
-/*
+  /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -18,6 +18,8 @@
 #define incl_HPHP_VM_EXTRADATA_H_
 
 #include <algorithm>
+
+#include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -792,41 +794,6 @@ struct IndexData : IRExtraData {
   std::string show() const { return folly::format("{}", index).str(); }
 };
 
-struct RawMemData : IRExtraData {
-# define RAW_MEM_DATA_TYPES                     \
-  RAW_TYPE(AsyncState)                          \
-  RAW_TYPE(AsyncResumeAddr)                     \
-  RAW_TYPE(AsyncResumeOffset)                   \
-  RAW_TYPE(ContResumeAddr)                      \
-  RAW_TYPE(ContResumeOffset)                    \
-  RAW_TYPE(ContState)                           \
-  RAW_TYPE(ContIndex)                           \
-  RAW_TYPE(StrLen)                              \
-  RAW_TYPE(FuncNumParams)                       \
-
-  enum Type : uint8_t {
-#   define RAW_TYPE(name) name,
-    RAW_MEM_DATA_TYPES
-#   undef RAW_TYPE
-  };
-# define RAW_TYPE(name) +1
-  static constexpr size_t kNumTypes = RAW_MEM_DATA_TYPES;
-# undef RAW_TYPE
-
-  struct Info {
-    const int offset;
-    const int size;
-    const jit::Type type;
-  };
-
-  explicit RawMemData(Type t) : type(t) {}
-
-  Type type;
-
-  const Info& info() const;
-  std::string show() const;
-};
-
 struct ClsNeqData : IRExtraData {
   explicit ClsNeqData(Class* testClass) : testClass(testClass) {}
 
@@ -859,6 +826,21 @@ struct IncDecData : IRExtraData {
   explicit IncDecData(IncDecOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
   IncDecOp op;
+};
+
+struct ResumeOffset : IRExtraData {
+  explicit ResumeOffset(Offset off) : off(off) {}
+  std::string show() const { return folly::to<std::string>(off); }
+  Offset off;
+};
+
+struct GeneratorState : IRExtraData {
+  explicit GeneratorState(BaseGenerator::State state) : state(state) {}
+  std::string show() const {
+    using U = std::underlying_type<BaseGenerator::State>::type;
+    return folly::to<std::string>(static_cast<U>(state));
+  }
+  BaseGenerator::State state;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1002,11 +984,6 @@ X(NewPackedArray,               PackedArrayData);
 X(AllocPackedArray,             PackedArrayData);
 X(InitPackedArrayLoop,          PackedArrayData);
 X(InitPackedArray,              IndexData);
-X(LdRaw,                        RawMemData);
-X(StRaw,                        RawMemData);
-X(StAsyncArRaw,                 RawMemData);
-X(LdContArRaw,                  RawMemData);
-X(StContArRaw,                  RawMemData);
 X(ProfileArray,                 RDSHandleData);
 X(ProfileStr,                   ProfileStrData);
 X(ClsNeq,                       ClsNeqData);
@@ -1023,6 +1000,9 @@ X(SetOpProp,                    SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
 X(IncDecElem,                   IncDecData);
+X(StAsyncArResume,              ResumeOffset);
+X(StContArResume,               ResumeOffset);
+X(StContArState,                GeneratorState);
 
 #undef X
 

@@ -1901,7 +1901,7 @@ void HhbcTranslator::refCheckHelper(int64_t entryArDelta,
     if (i == 0) {
       nParams = cns(64);
     } else if (!nParams || nParams->isConst()) {
-      nParams = gen(LdRaw, RawMemData{RawMemData::FuncNumParams}, funcPtr);
+      nParams = gen(LdFuncNumParams, funcPtr);
     }
 
     uint64_t vals64 = packBitVec(vals, i);

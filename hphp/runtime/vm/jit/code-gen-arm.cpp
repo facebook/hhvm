@@ -436,7 +436,6 @@ PUNT_OPCODE(StMem)
 PUNT_OPCODE(StProp)
 PUNT_OPCODE(StLocNT)
 PUNT_OPCODE(StRef)
-PUNT_OPCODE(StRaw)
 PUNT_OPCODE(StElem)
 PUNT_OPCODE(LdStaticLocCached)
 PUNT_OPCODE(CheckStaticLocInit)
@@ -464,12 +463,10 @@ PUNT_OPCODE(ContValid)
 PUNT_OPCODE(ContArIncKey)
 PUNT_OPCODE(ContArUpdateIdx)
 PUNT_OPCODE(LdContActRec)
-PUNT_OPCODE(StContArRaw)
 PUNT_OPCODE(LdContArValue)
 PUNT_OPCODE(StContArValue)
 PUNT_OPCODE(LdContArKey)
 PUNT_OPCODE(StContArKey)
-PUNT_OPCODE(StAsyncArRaw)
 PUNT_OPCODE(StAsyncArResult)
 PUNT_OPCODE(LdAsyncArParentChain)
 PUNT_OPCODE(AFWHBlockOn)
@@ -549,6 +546,13 @@ PUNT_OPCODE(ColIsEmpty)
 PUNT_OPCODE(ColIsNEmpty)
 PUNT_OPCODE(InitPackedArray)
 PUNT_OPCODE(InitPackedArrayLoop)
+PUNT_OPCODE(LdStrLen)
+PUNT_OPCODE(StAsyncArSucceeded)
+PUNT_OPCODE(StAsyncArResume)
+PUNT_OPCODE(StContArResume)
+PUNT_OPCODE(LdContResumeAddr)
+PUNT_OPCODE(ContArIncIdx)
+PUNT_OPCODE(StContArState)
 
 #undef PUNT_OPCODE
 
@@ -1748,25 +1752,18 @@ void CodeGenerator::cgLdStack(IRInstruction* inst) {
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);
 }
 
-void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
-  auto dest    = dstLoc(0).reg();
-  auto offset  = inst->extra<RawMemData>()->info().offset;
-  auto ptr     = srcLoc(0).reg()[offset + extraOff];
+void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
   auto& v = vmain();
-  switch (inst->extra<RawMemData>()->info().size) {
-    case sz::byte:  v << loadzbl{ptr, dest}; break;
-    case sz::dword: v << loadl{ptr, dest}; break;
-    case sz::qword: v << load{ptr, dest}; break;
-    default:        not_implemented();
-  }
-}
-
-void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  emitLdRaw(inst, 0);
-}
-
-void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -c_Generator::arOff());
+  auto dst = dstLoc(0).reg();
+  auto src = srcLoc(0).reg()[Func::paramCountsOff()];
+  // See Func::finishedEmittingParams and Func::numParams.
+  v << loadl{src, dst};
+  // TODO(#4894527): this should be doing the following, but we don't support
+  // it yet in vasm-arm.
+  //
+  // auto tmp = v.makeReg();
+  // v << loadl{src, tmp};
+  // v << shrli{1, tmp, dst, v.makeReg()};
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {

@@ -288,6 +288,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStrStr:
   case Conjure:
   case ConstructInstance:
+  case ContArIncIdx:
   case ContArIncKey:
   case ContArUpdateIdx:
   case ContPreNext:
@@ -443,14 +444,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCns:
   case LdContActRec:
   case LdContArKey:
-  case LdContArRaw:
   case LdContArValue:
+  case LdContField:
+  case LdContResumeAddr:
   case LdCtx:
   case LdElem:
   case LdFunc:
   case LdFuncCached:
   case LdFuncCachedSafe:
   case LdFuncCachedU:
+  case LdFuncNumParams:
   case LdGblAddr:
   case LdGblAddrDef:
   case LdLocAddr:
@@ -460,9 +463,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdObjMethod:
   case LdPackedArrayElem:
   case LdPairBase:
-  case LdContField:
   case LdPropAddr:
-  case LdRaw:
   case LdRef:
   case LdResumableArObj:
   case LdRetAddr:
@@ -472,6 +473,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdStackAddr:
   case LdStaticLocCached:
   case LdStrFPushCuf:
+  case LdStrLen:
   case LdSwitchDblIndex:
   case LdSwitchObjIndex:
   case LdSwitchStrIndex:
@@ -548,20 +550,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SpillFrame:
   case SpillStack:
   case Sqrt:
-  case StAsyncArRaw:
   case StAsyncArResult:
+  case StAsyncArResume:
+  case StAsyncArSucceeded:
   case StaticLocInitCached:
   case StClosureArg:
   case StClosureCtx:
   case StClosureFunc:
   case StContArKey:
-  case StContArRaw:
+  case StContArResume:
+  case StContArState:
   case StContArValue:
   case StElem:
   case StGbl:
   case StMem:
   case StProp:
-  case StRaw:
   case StRef:
   case StRetVal:
   case StringGet:

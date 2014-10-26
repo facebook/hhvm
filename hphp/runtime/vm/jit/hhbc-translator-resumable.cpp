@@ -74,10 +74,7 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
-  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeAddr}, m_irb->fp(),
-      resumeAddr);
-  gen(StAsyncArRaw, RawMemData{RawMemData::AsyncResumeOffset}, m_irb->fp(),
-      cns(resumeOffset));
+  gen(StAsyncArResume, ResumeOffset { resumeOffset }, m_irb->fp(), resumeAddr);
 
   // Set up the dependency.
   gen(AFWHBlockOn, m_irb->fp(), child);
@@ -175,8 +172,7 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
   // Load generator's FP and resume address.
   auto genObj = gen(LdThis, m_irb->fp());
   auto genFp = gen(LdContActRec, Type::FramePtr, genObj);
-  auto resumeAddr =
-    gen(LdContArRaw, RawMemData{RawMemData::ContResumeAddr}, genFp);
+  auto resumeAddr = gen(LdContResumeAddr, genObj);
 
   // Make sure function enter hook is called if needed.
   auto exitSlow = makeExitSlow();
@@ -210,10 +206,7 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(), resumeOffset, true);
   auto const resumeAddr = gen(LdBindAddr, LdBindAddrData(resumeSk));
-  gen(StContArRaw, RawMemData{RawMemData::ContResumeAddr}, m_irb->fp(),
-      resumeAddr);
-  gen(StContArRaw, RawMemData{RawMemData::ContResumeOffset}, m_irb->fp(),
-      cns(resumeOffset));
+  gen(StContArResume, ResumeOffset { resumeOffset }, m_irb->fp(), resumeAddr);
 
   // Set yielded value.
   auto const oldValue = gen(LdContArValue, Type::Cell, m_irb->fp());
@@ -221,10 +214,10 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
   gen(DecRef, oldValue);
 
   // Set state from Running to Started.
-  gen(StContArRaw, RawMemData{RawMemData::ContState}, m_irb->fp(),
-      cns(BaseGenerator::State::Started));
+  gen(StContArState,
+      GeneratorState { BaseGenerator::State::Started },
+      m_irb->fp());
 }
-
 
 void HhbcTranslator::emitYield(Offset resumeOffset) {
   assert(resumed());
@@ -237,12 +230,7 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
 
   // take a fast path if this generator has no yield k => v;
   if (curFunc()->isPairGenerator()) {
-    // this needs optimization
-    auto const idx =
-      gen(LdContArRaw, RawMemData{RawMemData::ContIndex}, m_irb->fp());
-    auto const newIdx = gen(AddInt, idx, cns(1));
-    gen(StContArRaw, RawMemData{RawMemData::ContIndex}, m_irb->fp(), newIdx);
-
+    auto const newIdx = gen(ContArIncIdx, m_irb->fp());
     auto const oldKey = gen(LdContArKey, Type::Cell, m_irb->fp());
     gen(StContArKey, m_irb->fp(), newIdx);
     gen(DecRef, oldKey);

@@ -5128,70 +5128,6 @@ void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   vmain() << lea{base[offset], dest};
 }
 
-void CodeGenerator::emitLdRaw(IRInstruction* inst, size_t extraOff) {
-  auto destReg = dstLoc(inst, 0).reg();
-  auto offset  = inst->extra<RawMemData>()->info().offset;
-  auto src     = srcLoc(inst, 0).reg()[offset + extraOff];
-  auto& v = vmain();
-  switch (inst->extra<RawMemData>()->info().size) {
-    case sz::byte:  v << loadzbl{src, destReg}; break;
-    case sz::dword:
-      if (inst->extra<RawMemData>()->type == RawMemData::FuncNumParams) {
-        // See Func::finishedEmittingParams and Func::numParams for rationale
-        auto tmp = v.makeReg();
-        v << loadl{src, tmp};
-        v << shrli{1, tmp, destReg, v.makeReg()};
-      } else {
-        v << loadl{src, destReg};
-      }
-      break;
-    case sz::qword: v << load{src, destReg}; break;
-    default:        not_implemented();
-  }
-}
-
-void CodeGenerator::cgLdRaw(IRInstruction* inst) {
-  emitLdRaw(inst, 0);
-}
-
-void CodeGenerator::cgLdContArRaw(IRInstruction* inst) {
-  emitLdRaw(inst, -BaseGenerator::arOff());
-}
-
-void CodeGenerator::emitStRaw(IRInstruction* inst, size_t offset, int size) {
-  auto dst    = srcLoc(inst, 0).reg()[offset];
-  auto src    = inst->src(1);
-  auto srcReg = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  if (src->isConst()) {
-    auto val = Immed64(src->rawVal());
-    switch (size) {
-      case sz::byte:  v << storebi{val.b(), dst}; break;
-      case sz::dword: v << storeli{val.l(), dst}; break;
-      case sz::qword: emitImmStoreq(v, val.q(), dst); break;
-      default:        not_implemented();
-    }
-  } else {
-    switch (size) {
-      case sz::byte:  v << storeb{srcReg, dst}; break;
-      case sz::dword: v << storel{srcReg, dst}; break;
-      case sz::qword: v << store{srcReg, dst}; break;
-      default:        not_implemented();
-    }
-  }
-}
-
-void CodeGenerator::cgStRaw(IRInstruction* inst) {
-  auto const info = inst->extra<RawMemData>()->info();
-  emitStRaw(inst, info.offset, info.size);
-}
-
-void CodeGenerator::cgStContArRaw(IRInstruction* inst) {
-  auto const info = inst->extra<RawMemData>()->info();
-  emitStRaw(inst, -BaseGenerator::arOff() + info.offset, info.size);
-}
-
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   const int64_t valueOff = CONTOFF(m_value);
@@ -5225,10 +5161,73 @@ void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   cgStore(contArReg[off], value, valueLoc, Width::Full);
 }
 
-void CodeGenerator::cgStAsyncArRaw(IRInstruction* inst) {
-  auto const info = inst->extra<RawMemData>()->info();
-  emitStRaw(inst, -c_AsyncFunctionWaitHandle::arOff() + info.offset,
-            info.size);
+void CodeGenerator::cgStAsyncArSucceeded(IRInstruction* inst) {
+  auto const off = c_WaitHandle::stateOff()
+                 - c_AsyncFunctionWaitHandle::arOff();
+  vmain() << storebi{
+    c_WaitHandle::toKindState(
+      c_WaitHandle::Kind::AsyncFunction,
+      c_WaitHandle::STATE_SUCCEEDED
+    ),
+    srcLoc(inst, 0).reg()[off]
+  };
+}
+
+void CodeGenerator::resumableStResumeImpl(IRInstruction* inst,
+                                          ptrdiff_t offAddr,
+                                          ptrdiff_t offOffset) {
+  vmain() << store{
+    srcLoc(inst, 1).reg(),
+    srcLoc(inst, 0).reg()[offAddr]
+  };
+  vmain() << storeli{
+    inst->extra<ResumeOffset>()->off,
+    srcLoc(inst, 0).reg()[offOffset]
+  };
+}
+
+void CodeGenerator::cgStAsyncArResume(IRInstruction* inst) {
+  resumableStResumeImpl(
+    inst,
+    c_AsyncFunctionWaitHandle::resumeAddrOff() -
+      c_AsyncFunctionWaitHandle::arOff(),
+    c_AsyncFunctionWaitHandle::resumeOffsetOff() -
+      c_AsyncFunctionWaitHandle::arOff()
+  );
+}
+
+void CodeGenerator::cgStContArResume(IRInstruction* inst) {
+  resumableStResumeImpl(
+    inst,
+    c_Generator::resumeAddrOff() - BaseGenerator::arOff(),
+    c_Generator::resumeOffsetOff() - BaseGenerator::arOff()
+  );
+}
+
+void CodeGenerator::cgLdContResumeAddr(IRInstruction* inst) {
+  vmain() << load{
+    srcLoc(inst, 0).reg()[c_Generator::resumeAddrOff()],
+    dstLoc(inst, 0).reg()
+  };
+}
+
+void CodeGenerator::cgContArIncIdx(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const idxOff = CONTOFF(m_index) - BaseGenerator::arOff();
+  auto const dst    = dstLoc(inst, 0).reg();
+  auto const src    = srcLoc(inst, 0).reg()[idxOff];
+  auto const tmp    = v.makeReg();
+  v << load{src, tmp};
+  v << incq{tmp, dst, v.makeReg()};
+  v << store{dst, src};
+}
+
+void CodeGenerator::cgStContArState(IRInstruction* inst) {
+  auto const off = c_Generator::stateOff() - BaseGenerator::arOff();
+  vmain() << storebi{
+    static_cast<int8_t>(inst->extra<StContArState>()->state),
+    srcLoc(inst, 0).reg()[off]
+  };
 }
 
 void CodeGenerator::cgStAsyncArResult(IRInstruction* inst) {
@@ -5771,6 +5770,23 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   auto const dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
   v << loadl{baseReg[FAST_COLLECTION_SIZE_OFFSET], dstReg};
+}
+
+void CodeGenerator::cgLdStrLen(IRInstruction* inst) {
+  vmain() << loadl{
+    srcLoc(inst, 0).reg()[StringData::sizeOff()],
+    dstLoc(inst, 0).reg()
+  };
+}
+
+void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dst = dstLoc(inst, 0).reg();
+  auto src = srcLoc(inst, 0).reg()[Func::paramCountsOff()];
+  auto tmp = v.makeReg();
+  // See Func::finishedEmittingParams and Func::numParams.
+  v << loadl{src, tmp};
+  v << shrli{1, tmp, dst, v.makeReg()};
 }
 
 void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {

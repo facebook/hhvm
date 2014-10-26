@@ -56,7 +56,6 @@ bool shouldHHIRRelaxGuards() {
 #define DStk(x)        x;
 #define DBuiltin       return false; // from immutable typeParam
 #define DSubtract(n,t) DofS(n)
-#define DLdRaw         return false; // fixed type from ExtraData
 #define DCns           return false; // fixed type
 
 bool typeMightRelax(const SSATmp* tmp) {
@@ -93,7 +92,6 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DStk
 #undef DBuiltin
 #undef DSubtract
-#undef DLdRaw
 #undef DCns
 
 namespace {

@@ -516,11 +516,9 @@ void eliminateDeadCode(IRUnit& unit) {
       if (srcInst->op() == DefConst) continue;
 
       if (RuntimeOption::EvalHHIRInlineFrameOpts) {
-        if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
-          if (srcInst->is(DefInlineFP)) {
-            FTRACE(3, "adding use to {} from {}\n", *src, *inst);
-            ++uses[src];
-          }
+        if (srcInst->is(DefInlineFP)) {
+          FTRACE(3, "adding use to {} from {}\n", *src, *inst);
+          ++uses[src];
         }
       }
 

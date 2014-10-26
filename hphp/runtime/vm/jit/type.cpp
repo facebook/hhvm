@@ -940,7 +940,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND              assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin        return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DLdRaw          return inst->extra<RawMemData>()->info().type;
 #define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
                                Type::Int | Type::Dbl | Type::Str | Type::Res;
 
@@ -970,7 +969,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
-#undef DLdRaw
 #undef DCns
 
 }
@@ -1153,7 +1151,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DArrElem
 #define DArrPacked
 #define DThis
-#define DLdRaw
 #define DCns
 
 #define O(opcode, dstinfo, srcinfo, flags)      \
@@ -1190,7 +1187,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DArrPacked
 #undef DLdRef
 #undef DThis
-#undef DLdRaw
 #undef DCns
 
   return true;

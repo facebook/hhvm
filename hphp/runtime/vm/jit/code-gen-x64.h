@@ -222,6 +222,7 @@ private:
   void cgLdClsMethodCacheCommon(IRInstruction* inst, Offset offset);
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
+  void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
 
   void emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
     Vloc src, Type srcType);

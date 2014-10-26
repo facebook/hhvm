@@ -182,9 +182,9 @@ array(169) {
   ["hhvm.log.always_log_unhandled_exceptions"]=>
   array(3) {
     ["global_value"]=>
-    string(1) "1"
+    string(1) "0"
     ["local_value"]=>
-    string(1) "1"
+    string(1) "0"
     ["access"]=>
     int(4)
   }

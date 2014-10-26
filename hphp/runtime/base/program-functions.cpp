@@ -1405,7 +1405,7 @@ static int execute_program_impl(int argc, char** argv) {
       return 1;
     } catch (const FatalErrorException& e) {
       RuntimeOption::CallUserHandlerOnFatals = false;
-      RuntimeOption::AlwaysLogUnhandledExceptions = true;
+      RuntimeOption::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
       return 1;
     }

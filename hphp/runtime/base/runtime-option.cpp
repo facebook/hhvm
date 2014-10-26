@@ -71,10 +71,10 @@ std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
-bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
+bool RuntimeOption::AlwaysLogUnhandledExceptions = false;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
-bool RuntimeOption::CallUserHandlerOnFatals = true;
+bool RuntimeOption::CallUserHandlerOnFatals = false;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
@@ -785,7 +785,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  0);
 
     Config::Bind(AlwaysLogUnhandledExceptions, ini,
-                 logger["AlwaysLogUnhandledExceptions"], true);
+                 logger["AlwaysLogUnhandledExceptions"], false);
     Config::Bind(NoSilencer, ini, logger["NoSilencer"]);
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
@@ -823,7 +823,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,
-                 error["CallUserHandlerOnFatals"], true);
+                 error["CallUserHandlerOnFatals"], false);
     Config::Bind(ThrowExceptionOnBadMethodCall, ini,
                  error["ThrowExceptionOnBadMethodCall"], true);
     Config::Bind(LogNativeStackOnOOM, ini,

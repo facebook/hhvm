@@ -177,8 +177,8 @@ ALWAYS_INLINE void StringData::delist() {
 }
 
 void StringData::sweepAll() {
-  auto& head = MM().m_strings;
-  for (SweepNode *next, *n = head.next; n != &head; n = next) {
+  auto& head = MM().getStringList();
+  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
@@ -330,7 +330,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
 
 ALWAYS_INLINE void StringData::enlist() {
  assert(isShared());
- auto& head = MM().m_strings;
+ auto& head = MM().getStringList();
  // insert after head
  auto const next = head.next;
  auto& payload = *sharedPayload();

@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -426,7 +425,7 @@ struct StringData {
 
 private:
   struct SharedPayload {
-    SweepNode node;
+    StringDataNode node;
     const APCString* shared;
   };
 

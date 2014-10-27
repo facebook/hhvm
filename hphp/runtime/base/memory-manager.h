@@ -29,7 +29,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -270,10 +269,7 @@ constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This is the header MemoryManager uses for large allocations, and
- * it's also used for StringData's that wrap APCHandle.
- *
- * TODO(#2946560): refactor this not to be shared with StringData.
+ * This is the header MemoryManager uses for large allocations
  */
 struct SweepNode {
   SweepNode* next;
@@ -282,6 +278,15 @@ struct SweepNode {
     size_t padbytes;
   };
 };
+
+/*
+ * Header MemoryManager uses StringDatas that wrape APCHandle
+ */
+struct StringDataNode {
+  StringDataNode* next;
+  StringDataNode* prev;
+};
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -425,6 +430,12 @@ public:
   void sweep();
 
   /*
+   * Returns ptr to head node of m_strings linked list. This used by
+   * StringData during a reset, enlist, and delist
+   */
+  StringDataNode& getStringList() { return m_strings; }
+
+  /*
    * Returns true if there are no allocated slabs
    */
   bool empty() const { return m_slabs.empty(); }
@@ -537,7 +548,6 @@ public:
   iterator objects_end() { return m_instances.end(); }
 
 private:
-  friend class StringData; // for enlist/delist access to m_strings
   friend void* smart_malloc(size_t nbytes);
   friend void* smart_calloc(size_t count, size_t bytes);
   friend void* smart_realloc(void* ptr, size_t nbytes);
@@ -598,7 +608,7 @@ private:
   void* m_limit;
   std::array<FreeList,kNumSmartSizes> m_freelists;
   SweepNode m_sweep;   // oversize smart_malloc'd blocks
-  SweepNode m_strings; // in-place node is head of circular list
+  StringDataNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_statsIntervalActive;
   bool m_couldOOM{true};

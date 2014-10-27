@@ -136,10 +136,6 @@ function find_all_files_containing_text(
   return $files;
 }
 
-function idx(array $array, mixed $key, mixed $default = null): mixed {
-  return isset($array[$key]) ? $array[$key] : $default;
-}
-
 function command_exists(string $cmd): bool {
     $ret = shell_exec("which $cmd");
     return !empty($ret);

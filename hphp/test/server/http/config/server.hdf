@@ -1,0 +1,17 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  AllowedFiles {
+    * = hello.php
+    * = hphpd.php
+  }
+}
+
+Repo {
+  Local.Mode = r-
+  Eval.Mode = readonly
+  Commit = true
+}

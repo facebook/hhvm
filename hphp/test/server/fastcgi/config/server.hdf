@@ -1,0 +1,14 @@
+
+Log {
+  AlwaysLogUnhandledExceptions = false
+}
+
+Server {
+  Type = fastcgi
+}
+
+Repo {
+  Local.Mode = r-
+  Eval.Mode = readonly
+  Commit = true
+}

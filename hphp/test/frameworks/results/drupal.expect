@@ -2328,6 +2328,18 @@ Drupal\Tests\Core\Extension\ModuleHandlerTest::testSetModuleList
 .
 Drupal\Tests\Core\Extension\ModuleHandlerTest::testWriteCache
 .
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #0
+.
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #1
+.
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #2
+.
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testGetBaseThemes with data set #3
+.
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testRebuildThemeData
+.
+Drupal\Tests\Core\Extension\ThemeHandlerTest::testRebuildThemeDataWithThemeParents
+.
 Drupal\Tests\Core\ExternalUrlTest::testCreateFromPath
 .
 Drupal\Tests\Core\ExternalUrlTest::testCreateFromRequest

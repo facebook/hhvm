@@ -78,6 +78,9 @@
     commit: 4ecdbf89c4a3d1e5dfe73c57e3202a5e2a18c87e
     install_root: composer
     test_root: composer
+    flakey:
+      # Depends on internet connection to example.com
+      - composer/tests/Composer/Test/Util/RemoteFilesystemTest.php
   doctrine2:
     url: https://github.com/doctrine/doctrine2.git
     # Stable is 2.4.4, but need master since we have pull requests.

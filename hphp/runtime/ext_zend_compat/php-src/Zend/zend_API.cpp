@@ -22,7 +22,7 @@
 
 // has to be before zend_API since that defines getThis()
 #include "zend_API.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "zend_constants.h"
 
 #include "hphp/runtime/base/zend-printf.h"
@@ -1107,7 +1107,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
   fcc->calling_scope = NULL;
   fcc->object_ptr = NULL;
 
-  bool b = f_is_callable(
+  bool b = HHVM_FN(is_callable)(
       tvAsVariant(callable->tv()),
       check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY,
       HPHP::ref(name));

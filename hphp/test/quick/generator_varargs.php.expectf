@@ -60,11 +60,21 @@ array(2) {
   [1]=>
   string(11) "replacement"
 }
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
 int(2)
 array(2) {
   [0]=>
@@ -157,12 +167,24 @@ array(3) {
   [2]=>
   string(5) "hello"
 }
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
 int(3)
 array(3) {
   [0]=>
@@ -272,13 +294,27 @@ array(4) {
   [3]=>
   int(47)
 }
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
-string(3) "idx"
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
+
+Warning: func_get_arg() expects parameter 1 to be integer, string given in %s on line %d
+NULL
 int(4)
 array(4) {
   [0]=>

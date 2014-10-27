@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
@@ -5137,7 +5137,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
   String handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
-  if (!f_is_callable(handler)) {
+  if (!HHVM_FN(is_callable)(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
   } else if (intern->m_registerPhpFunctions == 2 &&
              !intern->m_registered_phpfunctions.exists(handler)) {

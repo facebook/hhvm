@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -360,7 +360,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   String handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
-  if (!f_is_callable(handler)) {
+  if (!HHVM_FN(is_callable)(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
     // Push an empty string to get an xslt result.
     valuePush(ctxt, xmlXPathNewString((xmlChar*)""));

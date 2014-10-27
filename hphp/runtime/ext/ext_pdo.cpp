@@ -24,7 +24,7 @@
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/class-info.h"
@@ -1750,7 +1750,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
 }
 
 static bool do_fetch_func_prepare(sp_PDOStatement stmt) {
-  if (!f_is_callable(stmt->fetch.func)) {
+  if (!HHVM_FN(is_callable)(stmt->fetch.func)) {
     pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                          "user-supplied function must be a valid callback");
     return false;
@@ -2833,7 +2833,7 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
     break;
 
   case PDO_FETCH_FUNC:
-    if (!f_function_exists(class_name.toString())) {
+    if (!HHVM_FN(function_exists)(class_name.toString())) {
       pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
                            "no fetch function specified");
       error = 1;

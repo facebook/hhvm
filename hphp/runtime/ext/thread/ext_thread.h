@@ -15,24 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_thread.h"
-#include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/util/process.h"
+#ifndef incl_HPHP_EXT_THREAD_H_
+#define incl_HPHP_EXT_THREAD_H_
+
+#include "hphp/runtime/base/base-includes.h"
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(thread, NO_EXTENSION_VERSION_YET);
-
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t f_hphp_get_thread_id() {
-  return  (unsigned long)Process::GetThreadId();
-}
-
-int64_t f_hphp_gettid() {
-  return (unsigned int)Process::GetThreadPid();
-}
+int64_t HHVM_FUNCTION(hphp_get_thread_id);
+int64_t HHVM_FUNCTION(hphp_gettid);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // incl_HPHP_EXT_THREAD_H_

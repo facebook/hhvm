@@ -59,55 +59,21 @@ extern const int64_t q_XMLReader$$SUBST_ENTITIES;
 ///////////////////////////////////////////////////////////////////////////////
 // class XMLReader
 
-FORWARD_DECLARE_CLASS(XMLReader);
-class c_XMLReader : public ExtObjectDataFlags<ObjectData::UseGet>, public Sweepable {
- public:
-  DECLARE_CLASS(XMLReader)
+class XMLReader {
+public:
+  XMLReader();
+  ~XMLReader();
+  void close();
+  String read_string_func(xmlreader_read_char_t internal_function);
+  bool bool_func_no_arg(xmlreader_read_int_t internal_function);
+  Variant string_func_string_arg(String value,
+                                 xmlreader_read_one_char_t internal_function);
+  bool set_relaxng_schema(String source, int type);
 
-  // need to implement
-  public: c_XMLReader(Class* cls = c_XMLReader::classof());
-  public: ~c_XMLReader();
-  public: void t___construct();
-  public: bool t_open(const String& uri, const String& encoding = null_string, int64_t options = 0);
-  public: bool t_xml(const String& source, const String& encoding = null_string, int64_t options = 0);
-  public: bool t_close();
-  public: bool t_read();
-  public: bool t_next(const String& localname = null_string);
-  public: String t_readstring();
-  public: String t_readinnerxml();
-  public: String t_readouterxml();
-  public: bool t_movetonextattribute();
-  public: Variant t_getattribute(const String& name);
-  public: Variant t_getattributeno(int64_t index);
-  public: Variant t_getattributens(const String& name, const String& namespaceURI);
-  public: bool t_movetoattribute(const String& name);
-  public: bool t_movetoattributeno(int64_t index);
-  public: bool t_movetoattributens(const String& name, const String& namespaceURI);
-  public: bool t_movetoelement();
-  public: bool t_movetofirstattribute();
-  public: bool t_isvalid();
-  public: Variant t___get(Variant name);
-  public: bool t_getparserproperty(int64_t property);
-  public: Variant t_lookupnamespace(const String& prefix);
-  public: bool t_setschema(const String& source);
-  public: bool t_setparserproperty(int64_t property, bool value);
-  public: bool t_setrelaxngschema(const String& filename);
-  public: bool t_setrelaxngschemasource(const String& source);
-  public: Variant t_expand(const Object& basenode);
-  public: Variant t___destruct();
-
-  private: String read_string_func(xmlreader_read_char_t internal_function);
-  private: bool bool_func_no_arg(xmlreader_read_int_t internal_function);
-  private: Variant string_func_string_arg(String value, xmlreader_read_one_char_t internal_function);
-  private: bool set_relaxng_schema(String source, int type);
-
- public:
-  SmartResource<File>  m_uri;
- private:
-  xmlTextReaderPtr        m_ptr;
+  SmartResource<File> m_uri;
+  xmlTextReaderPtr m_ptr;
   xmlParserInputBufferPtr m_input;
-  void*                   m_schema;
-  void close_impl();
+  void* m_schema;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

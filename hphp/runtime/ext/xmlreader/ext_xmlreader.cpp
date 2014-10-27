@@ -15,21 +15,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_xmlreader.h"
+#include "hphp/runtime/ext/xmlreader/ext_xmlreader.h"
 #include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(xmlreader, 0.1);
-
 ///////////////////////////////////////////////////////////////////////////////
 // constants
+
+const StaticString s_XMLReader("XMLReader");
+
 const int64_t q_XMLReader$$NONE = XML_READER_TYPE_NONE;
 const int64_t q_XMLReader$$ELEMENT = XML_READER_TYPE_ELEMENT;
 const int64_t q_XMLReader$$ATTRIBUTE = XML_READER_TYPE_ATTRIBUTE;
@@ -44,7 +46,8 @@ const int64_t q_XMLReader$$DOC_TYPE = XML_READER_TYPE_DOCUMENT_TYPE;
 const int64_t q_XMLReader$$DOC_FRAGMENT = XML_READER_TYPE_DOCUMENT_FRAGMENT;
 const int64_t q_XMLReader$$NOTATION = XML_READER_TYPE_NOTATION;
 const int64_t q_XMLReader$$WHITESPACE = XML_READER_TYPE_WHITESPACE;
-const int64_t q_XMLReader$$SIGNIFICANT_WHITESPACE = XML_READER_TYPE_SIGNIFICANT_WHITESPACE;
+const int64_t q_XMLReader$$SIGNIFICANT_WHITESPACE =
+  XML_READER_TYPE_SIGNIFICANT_WHITESPACE;
 const int64_t q_XMLReader$$END_ELEMENT = XML_READER_TYPE_END_ELEMENT;
 const int64_t q_XMLReader$$END_ENTITY = XML_READER_TYPE_END_ENTITY;
 const int64_t q_XMLReader$$XML_DECLARATION = XML_READER_TYPE_XML_DECLARATION;
@@ -60,10 +63,9 @@ const int64_t q_XMLReader$$SUBST_ENTITIES = XML_PARSER_SUBST_ENTITIES;
 // helpers
 
 static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
-                                            xmlRelaxNGValidityErrorFunc error_func,
-                                            xmlRelaxNGValidityWarningFunc warn_func )
-{
-  xmlRelaxNGParserCtxtPtr parser = NULL;
+    xmlRelaxNGValidityErrorFunc error_func,
+    xmlRelaxNGValidityWarningFunc warn_func) {
+  xmlRelaxNGParserCtxtPtr parser = nullptr;
   xmlRelaxNGPtr           sptr;
   String valid_file;
 
@@ -71,21 +73,21 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
     case XMLREADER_LOAD_FILE:
       valid_file = libxml_get_valid_file_path(source.c_str());
       if (valid_file.empty()) {
-        return NULL;
+        return nullptr;
       }
       parser = xmlRelaxNGNewParserCtxt(valid_file.c_str());
       break;
     case XMLREADER_LOAD_STRING:
       parser = xmlRelaxNGNewMemParserCtxt(source.data(), source.size());
-      /* If loading from memory, we need to set the base directory for the document
-        but it is not apparent how to do that for schema's */
+      // If loading from memory, we need to set the base directory for the
+      // document but it is not apparent how to do that for schema's
       break;
     default:
-      return NULL;
+      return nullptr;
   }
 
-  if (parser == NULL) {
-    return NULL;
+  if (parser == nullptr) {
+    return nullptr;
   }
 
   if (error_func || warn_func) {
@@ -101,21 +103,40 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(String source, int type,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-c_XMLReader::c_XMLReader(Class* cb) :
-    ExtObjectDataFlags<ObjectData::UseGet>(cb), m_ptr(NULL), m_input(NULL), m_schema(NULL) {
+XMLReader::XMLReader() : m_ptr(nullptr), m_input(nullptr), m_schema(nullptr) {
 }
 
-c_XMLReader::~c_XMLReader() {
-  close_impl();
+XMLReader::~XMLReader() {
+  close();
 }
 
-void c_XMLReader::t___construct() {
-}
-
-bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_string*/, int64_t options /*= 0*/) {
+void XMLReader::close() {
   SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
-    t_close();
+    xmlFreeTextReader(m_ptr);
+    m_ptr = nullptr;
+  }
+  if (m_input) {
+    xmlFreeParserInputBuffer(m_input);
+    m_input = nullptr;
+  }
+  if (m_schema) {
+    xmlRelaxNGFree((xmlRelaxNGPtr) m_schema);
+    m_schema = nullptr;
+  }
+}
+
+bool HHVM_METHOD(XMLReader, open,
+                 const String& uri,
+                 const Variant& encoding /*= null_variant*/,
+                 int64_t options /*= 0*/) {
+  auto* data = Native::data<XMLReader>(this_);
+  const String& str_encoding = encoding.isNull()
+                            ? null_string
+                            : encoding.toString();
+  SYNC_VM_REGS_SCOPED();
+  if (data->m_ptr) {
+    data->close();
   }
 
   if (uri.empty()) {
@@ -124,7 +145,7 @@ bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_stri
   }
 
   String valid_file = libxml_get_valid_file_path(uri.c_str());
-  xmlTextReaderPtr reader = NULL;
+  xmlTextReaderPtr reader = nullptr;
 
   if (!valid_file.empty()) {
     // Manually create the IO context to support custom stream wrappers.
@@ -134,28 +155,36 @@ bool c_XMLReader::t_open(const String& uri, const String& encoding /*= null_stri
                               libxml_streams_IO_close,
                               stream.get(),
                               valid_file.data(),
-                              encoding.data(),
+                              str_encoding.data(),
                               options);
       // The xmlTextReaderPtr owns a reference to stream.
       if (reader) stream.get()->incRefCount();
     }
   }
 
-  if (reader == NULL) {
+  if (reader == nullptr) {
     raise_warning("Unable to open source data");
     return false;
   }
 
-  m_ptr = reader;
+  data->m_ptr = reader;
 
   return true;
 }
 
-bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_string*/, int64_t options /*= 0*/) {
-  xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
+bool HHVM_METHOD(XMLReader, XML,
+                 const String& source,
+                 const Variant& encoding /*= null_variant*/,
+                 int64_t options /*= 0*/) {
+  auto* data = Native::data<XMLReader>(this_);
+  const String& str_encoding = encoding.isNull()
+                            ? null_string
+                            : encoding.toString();
+  xmlParserInputBufferPtr inputbfr = xmlParserInputBufferCreateMem(
+    source.c_str(), source.size(), XML_CHAR_ENCODING_NONE);
 
-  if (inputbfr != NULL) {
-    char *uri = NULL;
+  if (inputbfr != nullptr) {
+    char *uri = nullptr;
     String directory = g_context->getCwd();
     if (!directory.empty()) {
       if (directory[directory.size() - 1] != '/') {
@@ -166,14 +195,15 @@ bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_st
 
     xmlTextReaderPtr reader = xmlNewTextReader(inputbfr, uri);
 
-    if (reader != NULL) {
+    if (reader != nullptr) {
       int ret = 0;
 #if LIBXML_VERSION >= 20628
-      ret = xmlTextReaderSetup(reader, NULL, uri, encoding.data(), options);
+      ret = xmlTextReaderSetup(reader, nullptr, uri, str_encoding.data(),
+                               options);
 #endif
       if (ret == 0) {
-        m_ptr = reader;
-        m_input = inputbfr;
+        data->m_ptr = reader;
+        data->m_input = inputbfr;
 
         if (uri) {
           xmlFree(uri);
@@ -196,31 +226,17 @@ bool c_XMLReader::t_xml(const String& source, const String& encoding /*= null_st
   return false;
 }
 
-void c_XMLReader::close_impl() {
-  SYNC_VM_REGS_SCOPED();
-  if (m_ptr) {
-    xmlFreeTextReader(m_ptr);
-    m_ptr = NULL;
-  }
-  if (m_input) {
-    xmlFreeParserInputBuffer(m_input);
-    m_input = NULL;
-  }
-  if (m_schema) {
-    xmlRelaxNGFree((xmlRelaxNGPtr) m_schema);
-    m_schema = NULL;
-  }
-}
-
-bool c_XMLReader::t_close() {
-  close_impl();
+bool HHVM_METHOD(XMLReader, close) {
+  auto* data = Native::data<XMLReader>(this_);
+  data->close();
   return true;
 }
 
-bool c_XMLReader::t_read() {
+bool HHVM_METHOD(XMLReader, read) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
-  if (m_ptr) {
-    int ret = xmlTextReaderRead(m_ptr);
+  if (data->m_ptr) {
+    int ret = xmlTextReaderRead(data->m_ptr);
     if (ret == -1) {
       raise_warning("An Error Occured while reading");
       return false;
@@ -232,15 +248,21 @@ bool c_XMLReader::t_read() {
   return false;
 }
 
-bool c_XMLReader::t_next(const String& localname /*= null_string*/) {
+bool HHVM_METHOD(XMLReader, next,
+                 const Variant& localname /*= null_variant*/) {
+  auto* data = Native::data<XMLReader>(this_);
+  const String& str_localname = localname.isNull()
+                              ? null_string
+                              : localname.toString();
   SYNC_VM_REGS_SCOPED();
-  if (m_ptr) {
-    int ret = xmlTextReaderNext(m_ptr);
-    while (!localname.empty() && ret == 1) {
-      if (xmlStrEqual(xmlTextReaderConstLocalName(m_ptr), (xmlChar *)localname.data())) {
+  if (data->m_ptr) {
+    int ret = xmlTextReaderNext(data->m_ptr);
+    while (!str_localname.empty() && ret == 1) {
+      if (xmlStrEqual(xmlTextReaderConstLocalName(data->m_ptr),
+          (xmlChar *)str_localname.data())) {
         return true;
       }
-      ret = xmlTextReaderNext(m_ptr);
+      ret = xmlTextReaderNext(data->m_ptr);
     }
     if (ret == -1) {
       raise_warning("An Error Occured while reading");
@@ -253,9 +275,9 @@ bool c_XMLReader::t_next(const String& localname /*= null_string*/) {
   return false;
 }
 
-String c_XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
+String XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
   SYNC_VM_REGS_SCOPED();
-  char *retchar = NULL;
+  char *retchar = nullptr;
   if (m_ptr) {
     retchar = (char *)internal_function(m_ptr);
   }
@@ -268,19 +290,22 @@ String c_XMLReader::read_string_func(xmlreader_read_char_t internal_function) {
   }
 }
 
-String c_XMLReader::t_readstring() {
-  return read_string_func(xmlTextReaderReadString);
+String HHVM_METHOD(XMLReader, readString) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->read_string_func(xmlTextReaderReadString);
 }
 
-String c_XMLReader::t_readinnerxml() {
-  return read_string_func(xmlTextReaderReadInnerXml);
+String HHVM_METHOD(XMLReader, readInnerXML) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->read_string_func(xmlTextReaderReadInnerXml);
 }
 
-String c_XMLReader::t_readouterxml() {
-  return read_string_func(xmlTextReaderReadOuterXml);
+String HHVM_METHOD(XMLReader, readOuterXML) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->read_string_func(xmlTextReaderReadOuterXml);
 }
 
-bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
+bool XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
   SYNC_VM_REGS_SCOPED();
   if (m_ptr) {
     int ret = internal_function(m_ptr);
@@ -291,7 +316,8 @@ bool c_XMLReader::bool_func_no_arg(xmlreader_read_int_t internal_function) {
   return false;
 }
 
-Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_char_t internal_function) {
+Variant XMLReader::string_func_string_arg(String value,
+    xmlreader_read_one_char_t internal_function) {
   SYNC_VM_REGS_SCOPED();
 
   if (value.empty()) {
@@ -299,7 +325,7 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
     return false;
   }
 
-  char *retchar = NULL;
+  char *retchar = nullptr;
   if (m_ptr) {
     retchar = (char *)internal_function(m_ptr, (const unsigned char *)value.data());
   }
@@ -313,15 +339,19 @@ Variant c_XMLReader::string_func_string_arg(String value, xmlreader_read_one_cha
   }
 }
 
-Variant c_XMLReader::t_getattribute(const String& name) {
-  return string_func_string_arg(name, xmlTextReaderGetAttribute);
+Variant HHVM_METHOD(XMLReader, getAttribute,
+                    const String& name) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->string_func_string_arg(name, xmlTextReaderGetAttribute);
 }
 
-Variant c_XMLReader::t_getattributeno(int64_t index) {
+Variant HHVM_METHOD(XMLReader, getAttributeNo,
+                    int64_t index) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
-  char *retchar = NULL;
-  if (m_ptr) {
-    retchar = (char *)xmlTextReaderGetAttributeNo(m_ptr, index);
+  char *retchar = nullptr;
+  if (data->m_ptr) {
+    retchar = (char *)xmlTextReaderGetAttributeNo(data->m_ptr, index);
   }
   if (retchar) {
     String ret((const char*)retchar, CopyString);
@@ -332,16 +362,19 @@ Variant c_XMLReader::t_getattributeno(int64_t index) {
   }
 }
 
-Variant c_XMLReader::t_getattributens(const String& name, const String& namespaceURI) {
+Variant HHVM_METHOD(XMLReader, getAttributeNs,
+                    const String& name,
+                    const String& namespaceURI) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
   }
 
-  char *retchar = NULL;
-  if (m_ptr) {
-    retchar = (char *)xmlTextReaderGetAttributeNs(m_ptr,
+  char *retchar = nullptr;
+  if (data->m_ptr) {
+    retchar = (char *)xmlTextReaderGetAttributeNs(data->m_ptr,
                                                   (xmlChar *)name.data(),
                                                   (xmlChar *)namespaceURI.data());
   }
@@ -355,15 +388,17 @@ Variant c_XMLReader::t_getattributens(const String& name, const String& namespac
   }
 }
 
-bool c_XMLReader::t_movetoattribute(const String& name) {
+bool HHVM_METHOD(XMLReader, moveToAttribute,
+                 const String& name) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty()) {
     raise_warning("Attribute Name is required");
     return false;
   }
 
-  if (m_ptr) {
-    int ret = xmlTextReaderMoveToAttribute(m_ptr, (xmlChar *)name.data());
+  if (data->m_ptr) {
+    int ret = xmlTextReaderMoveToAttribute(data->m_ptr, (xmlChar *)name.data());
     if (ret == 1) {
       return true;
     }
@@ -371,10 +406,12 @@ bool c_XMLReader::t_movetoattribute(const String& name) {
   return false;
 }
 
-bool c_XMLReader::t_movetoattributeno(int64_t index) {
+bool HHVM_METHOD(XMLReader, moveToAttributeNo,
+                 int64_t index) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
-  if (m_ptr) {
-    int ret = xmlTextReaderMoveToAttributeNo(m_ptr, index);
+  if (data->m_ptr) {
+    int ret = xmlTextReaderMoveToAttributeNo(data->m_ptr, index);
     if (ret == 1) {
       return true;
     }
@@ -382,14 +419,17 @@ bool c_XMLReader::t_movetoattributeno(int64_t index) {
   return false;
 }
 
-bool c_XMLReader::t_movetoattributens(const String& name, const String& namespaceURI) {
+bool HHVM_METHOD(XMLReader, moveToAttributeNs,
+                 const String& name,
+                 const String& namespaceURI) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (name.empty() || namespaceURI.empty()) {
     raise_warning("Attribute Name and Namespace URI cannot be empty");
     return false;
   }
-  if (m_ptr) {
-    int ret = xmlTextReaderMoveToAttributeNs(m_ptr,
+  if (data->m_ptr) {
+    int ret = xmlTextReaderMoveToAttributeNs(data->m_ptr,
                                              (xmlChar *)name.data(),
                                              (xmlChar *)namespaceURI.data());
     if (ret == 1) {
@@ -399,26 +439,32 @@ bool c_XMLReader::t_movetoattributens(const String& name, const String& namespac
   return false;
 }
 
-bool c_XMLReader::t_movetoelement() {
-  return bool_func_no_arg(xmlTextReaderMoveToElement);
+bool HHVM_METHOD(XMLReader, moveToElement) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->bool_func_no_arg(xmlTextReaderMoveToElement);
 }
 
-bool c_XMLReader::t_movetofirstattribute() {
-  return bool_func_no_arg(xmlTextReaderMoveToFirstAttribute);
+bool HHVM_METHOD(XMLReader, moveToFirstAttribute) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->bool_func_no_arg(xmlTextReaderMoveToFirstAttribute);
 }
 
-bool c_XMLReader::t_movetonextattribute() {
-  return bool_func_no_arg(xmlTextReaderMoveToNextAttribute);
+bool HHVM_METHOD(XMLReader, moveToNextAttribute) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->bool_func_no_arg(xmlTextReaderMoveToNextAttribute);
 }
 
-bool c_XMLReader::t_isvalid() {
-  return bool_func_no_arg(xmlTextReaderIsValid);
+bool HHVM_METHOD(XMLReader, isValid) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->bool_func_no_arg(xmlTextReaderIsValid);
 }
 
-bool c_XMLReader::t_getparserproperty(int64_t property) {
+bool HHVM_METHOD(XMLReader, getParserProperty,
+                 int64_t property) {
+  auto* data = Native::data<XMLReader>(this_);
   int ret = 0;
-  if (m_ptr) {
-    ret = xmlTextReaderGetParserProp(m_ptr, property);
+  if (data->m_ptr) {
+    ret = xmlTextReaderGetParserProp(data->m_ptr, property);
   }
   if (ret == -1) {
     raise_warning("Invalid parser property");
@@ -427,19 +473,23 @@ bool c_XMLReader::t_getparserproperty(int64_t property) {
   return ret;
 }
 
-Variant c_XMLReader::t_lookupnamespace(const String& prefix) {
-  return string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
+Variant HHVM_METHOD(XMLReader, lookupNamespace,
+                    const String& prefix) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->string_func_string_arg(prefix, xmlTextReaderLookupNamespace);
 }
 
-bool c_XMLReader::t_setschema(const String& source) {
+bool HHVM_METHOD(XMLReader, setSchema,
+                 const String& source) {
+  auto* data = Native::data<XMLReader>(this_);
   SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
     raise_warning("Schema data source is required");
     return false;
   }
 
-  if (m_ptr) {
-    int ret = xmlTextReaderSchemaValidate(m_ptr, source.c_str());
+  if (data->m_ptr) {
+    int ret = xmlTextReaderSchemaValidate(data->m_ptr, source.c_str());
     if (ret == 0) {
       return true;
     }
@@ -448,9 +498,12 @@ bool c_XMLReader::t_setschema(const String& source) {
   return false;
 }
 
-bool c_XMLReader::t_setparserproperty(int64_t property, bool value) {
-  if (m_ptr) {
-    int ret = xmlTextReaderSetParserProp(m_ptr, property, value);
+bool HHVM_METHOD(XMLReader, setParserProperty,
+                 int64_t property,
+                 bool value) {
+  auto* data = Native::data<XMLReader>(this_);
+  if (data->m_ptr) {
+    int ret = xmlTextReaderSetParserProp(data->m_ptr, property, value);
     if (ret == -1) {
       raise_warning("Invalid parser property");
       return false;
@@ -460,7 +513,7 @@ bool c_XMLReader::t_setparserproperty(int64_t property, bool value) {
   return false;
 }
 
-bool c_XMLReader::set_relaxng_schema(String source, int type) {
+bool XMLReader::set_relaxng_schema(String source, int type) {
   SYNC_VM_REGS_SCOPED();
   if (source.empty()) {
     raise_warning("Schema data source is required");
@@ -469,14 +522,14 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
 
   if (m_ptr) {
     int ret = -1;
-    xmlRelaxNGPtr schema = NULL;
+    xmlRelaxNGPtr schema = nullptr;
     if (!source.empty()) {
-      schema =  _xmlreader_get_relaxNG(source, type, NULL, NULL);
+      schema =  _xmlreader_get_relaxNG(source, type, nullptr, nullptr);
       if (schema) {
         ret = xmlTextReaderRelaxNGSetSchema(m_ptr, schema);
       }
     } else {
-      ret = xmlTextReaderRelaxNGSetSchema(m_ptr, NULL);
+      ret = xmlTextReaderRelaxNGSetSchema(m_ptr, nullptr);
     }
 
     if (ret == 0) {
@@ -492,12 +545,16 @@ bool c_XMLReader::set_relaxng_schema(String source, int type) {
   return false;
 }
 
-bool c_XMLReader::t_setrelaxngschema(const String& filename) {
-  return set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
+bool HHVM_METHOD(XMLReader, setRelaxNGSchema,
+                 const String& filename) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
 }
 
-bool c_XMLReader::t_setrelaxngschemasource(const String& source) {
-  return set_relaxng_schema(source, XMLREADER_LOAD_STRING);
+bool HHVM_METHOD(XMLReader, setRelaxNGSchemaSource,
+                 const String& source) {
+  auto* data = Native::data<XMLReader>(this_);
+  return data->set_relaxng_schema(source, XMLREADER_LOAD_STRING);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -536,7 +593,7 @@ public:
         return iiter->second;
       }
     }
-    return NULL;
+    return nullptr;
   }
 private:
   // Previously, this class was backed by an imap. This led to a lot of
@@ -548,41 +605,43 @@ private:
 };
 
 static XMLPropertyAccessor xmlreader_properties[] = {
-  { "attributeCount", xmlTextReaderAttributeCount, NULL, KindOfInt64 },
-  { "baseURI", NULL, xmlTextReaderConstBaseUri, KindOfString },
-  { "depth", xmlTextReaderDepth, NULL, KindOfInt64 },
-  { "hasAttributes", xmlTextReaderHasAttributes, NULL, KindOfBoolean },
-  { "hasValue", xmlTextReaderHasValue, NULL, KindOfBoolean },
-  { "isDefault", xmlTextReaderIsDefault, NULL, KindOfBoolean },
-  { "isEmptyElement", xmlTextReaderIsEmptyElement, NULL, KindOfBoolean },
-  { "localName", NULL, xmlTextReaderConstLocalName, KindOfString },
-  { "name", NULL, xmlTextReaderConstName, KindOfString },
-  { "namespaceURI", NULL, xmlTextReaderConstNamespaceUri, KindOfString },
-  { "nodeType", xmlTextReaderNodeType, NULL, KindOfInt64 },
-  { "prefix", NULL, xmlTextReaderConstPrefix, KindOfString },
-  { "value", NULL, xmlTextReaderConstValue, KindOfString },
-  { "xmlLang", NULL, xmlTextReaderConstXmlLang, KindOfString },
-  { NULL, NULL, NULL }
+  { "attributeCount", xmlTextReaderAttributeCount, nullptr, KindOfInt64 },
+  { "baseURI", nullptr, xmlTextReaderConstBaseUri, KindOfString },
+  { "depth", xmlTextReaderDepth, nullptr, KindOfInt64 },
+  { "hasAttributes", xmlTextReaderHasAttributes, nullptr, KindOfBoolean },
+  { "hasValue", xmlTextReaderHasValue, nullptr, KindOfBoolean },
+  { "isDefault", xmlTextReaderIsDefault, nullptr, KindOfBoolean },
+  { "isEmptyElement", xmlTextReaderIsEmptyElement, nullptr, KindOfBoolean },
+  { "localName", nullptr, xmlTextReaderConstLocalName, KindOfString },
+  { "name", nullptr, xmlTextReaderConstName, KindOfString },
+  { "namespaceURI", nullptr, xmlTextReaderConstNamespaceUri, KindOfString },
+  { "nodeType", xmlTextReaderNodeType, nullptr, KindOfInt64 },
+  { "prefix", nullptr, xmlTextReaderConstPrefix, KindOfString },
+  { "value", nullptr, xmlTextReaderConstValue, KindOfString },
+  { "xmlLang", nullptr, xmlTextReaderConstXmlLang, KindOfString },
+  { nullptr, nullptr, nullptr }
 };
 
 static XMLPropertyAccessorMap xmlreader_properties_map
 ((XMLPropertyAccessor*)xmlreader_properties);
 
-Variant c_XMLReader::t___get(Variant name) {
-  const xmlChar *retchar = NULL;
+Variant HHVM_METHOD(XMLReader, __get,
+                    Variant name) {
+  auto* data = Native::data<XMLReader>(this_);
+  const xmlChar *retchar = nullptr;
   int retint = 0;
 
   XMLPropertyAccessor *propertyMap = xmlreader_properties_map.get(name);
   if (!propertyMap) {
-    raiseUndefProp(name.getStringData());
+    this_->raiseUndefProp(name.getStringData());
     return init_null();
   }
 
-  if (m_ptr) {
+  if (data->m_ptr) {
     if (propertyMap->getter_char) {
-      retchar = propertyMap->getter_char(m_ptr);
+      retchar = propertyMap->getter_char(data->m_ptr);
     } else if (propertyMap->getter_int) {
-      retint = propertyMap->getter_int(m_ptr);
+      retint = propertyMap->getter_int(data->m_ptr);
     }
   }
 
@@ -605,13 +664,15 @@ Variant c_XMLReader::t___get(Variant name) {
   return init_null();
 }
 
-Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
+Variant HHVM_METHOD(XMLReader, expand,
+                    const Variant& basenode /* = null */) {
+  auto* data = Native::data<XMLReader>(this_);
   p_DOMDocument doc;
   xmlDocPtr docp = nullptr;
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    c_DOMNode *dombasenode = basenode.getTyped<c_DOMNode>();
+    c_DOMNode *dombasenode = basenode.toObject().getTyped<c_DOMNode>();
     doc = dombasenode->doc();
     docp = (xmlDocPtr) doc->m_node;
     if (docp == nullptr) {
@@ -622,8 +683,8 @@ Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
     doc = (p_DOMDocument) SystemLib::AllocDOMDocumentObject();
   }
 
-  if (m_ptr) {
-    xmlNodePtr node = xmlTextReaderExpand(m_ptr);
+  if (data->m_ptr) {
+    xmlNodePtr node = xmlTextReaderExpand(data->m_ptr);
     if (node == nullptr) {
       raise_warning("An Error Occurred while expanding");
       return false;
@@ -642,9 +703,72 @@ Variant c_XMLReader::t_expand(const Object& basenode /* = null */) {
   return false;
 }
 
-Variant c_XMLReader::t___destruct() {
-  return init_null();
-}
+///////////////////////////////////////////////////////////////////////////////
+
+#define REGISTER_XML_READER_CONSTANT(name)                                     \
+  Native::registerClassConstant<KindOfInt64>(s_XMLReader.get(),                \
+                                             makeStaticString(#name),          \
+                                             q_XMLReader$$##name)              \
+
+static class XMLReaderExtension : public Extension {
+public:
+  XMLReaderExtension() : Extension("xmlreader", "0.1") {}
+  virtual void moduleInit() {
+    REGISTER_XML_READER_CONSTANT(NONE);
+    REGISTER_XML_READER_CONSTANT(ELEMENT);
+    REGISTER_XML_READER_CONSTANT(ATTRIBUTE);
+    REGISTER_XML_READER_CONSTANT(TEXT);
+    REGISTER_XML_READER_CONSTANT(CDATA);
+    REGISTER_XML_READER_CONSTANT(ENTITY_REF);
+    REGISTER_XML_READER_CONSTANT(ENTITY);
+    REGISTER_XML_READER_CONSTANT(PI);
+    REGISTER_XML_READER_CONSTANT(COMMENT);
+    REGISTER_XML_READER_CONSTANT(DOC);
+    REGISTER_XML_READER_CONSTANT(DOC_TYPE);
+    REGISTER_XML_READER_CONSTANT(DOC_FRAGMENT);
+    REGISTER_XML_READER_CONSTANT(NOTATION);
+    REGISTER_XML_READER_CONSTANT(WHITESPACE);
+    REGISTER_XML_READER_CONSTANT(SIGNIFICANT_WHITESPACE);
+    REGISTER_XML_READER_CONSTANT(END_ELEMENT);
+    REGISTER_XML_READER_CONSTANT(END_ENTITY);
+    REGISTER_XML_READER_CONSTANT(XML_DECLARATION);
+    REGISTER_XML_READER_CONSTANT(LOADDTD);
+    REGISTER_XML_READER_CONSTANT(DEFAULTATTRS);
+    REGISTER_XML_READER_CONSTANT(VALIDATE);
+    REGISTER_XML_READER_CONSTANT(SUBST_ENTITIES);
+
+    HHVM_ME(XMLReader, open);
+    HHVM_ME(XMLReader, XML);
+    HHVM_ME(XMLReader, close);
+    HHVM_ME(XMLReader, read);
+    HHVM_ME(XMLReader, next);
+    HHVM_ME(XMLReader, readString);
+    HHVM_ME(XMLReader, readInnerXML);
+    HHVM_ME(XMLReader, readOuterXML);
+    HHVM_ME(XMLReader, moveToNextAttribute);
+    HHVM_ME(XMLReader, getAttribute);
+    HHVM_ME(XMLReader, getAttributeNo);
+    HHVM_ME(XMLReader, getAttributeNs);
+    HHVM_ME(XMLReader, moveToAttribute);
+    HHVM_ME(XMLReader, moveToAttributeNo);
+    HHVM_ME(XMLReader, moveToAttributeNs);
+    HHVM_ME(XMLReader, moveToElement);
+    HHVM_ME(XMLReader, moveToFirstAttribute);
+    HHVM_ME(XMLReader, isValid);
+    HHVM_ME(XMLReader, __get);
+    HHVM_ME(XMLReader, getParserProperty);
+    HHVM_ME(XMLReader, lookupNamespace);
+    HHVM_ME(XMLReader, setSchema);
+    HHVM_ME(XMLReader, setParserProperty);
+    HHVM_ME(XMLReader, setRelaxNGSchema);
+    HHVM_ME(XMLReader, setRelaxNGSchemaSource);
+    HHVM_ME(XMLReader, expand);
+
+    Native::registerNativeDataInfo<XMLReader>(s_XMLReader.get());
+
+    loadSystemlib();
+  }
+} s_xml_reader_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

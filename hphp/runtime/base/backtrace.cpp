@@ -239,7 +239,12 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto func = fp->func();
         for (int i = 0; i < nformals; i++) {
           const StringData* argname = func->localVarName(i);
-          Variant val = withValues ? tvAsVariant(varEnv->lookup(argname)) : "";
+          TypedValue* tv = varEnv->lookup(argname);
+
+          Variant val;
+          if (tv != nullptr) { // the variable hasn't been unset
+            val = withValues ? tvAsVariant(tv) : "";
+          }
 
           if (withNames) {
             args.set(String(argname->data(), CopyString), val);

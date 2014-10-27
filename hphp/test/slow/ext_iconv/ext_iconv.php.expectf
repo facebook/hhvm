@@ -1,7 +1,7 @@
 bool(true)
 bool(true)
 
-Notice: iconv: Detected an illegal character in input string in %s/test/slow/ext_iconv/ext_iconv.php on line 27
+Notice: iconv_mime_decode(): Detected an illegal character in input string in %s/test/slow/ext_iconv/ext_iconv.php on line 27
 bool(true)
 bool(true)
 bool(true)

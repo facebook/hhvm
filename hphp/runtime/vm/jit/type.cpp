@@ -788,6 +788,7 @@ Type ldRefReturn(Type typeParam) {
   // manually confirmed the benefit.
 
   if (typeParam.strictSubtypeOf(Type::Obj) &&
+      typeParam.isSpecialized() &&
       typeParam.getClass()->attrs() & AttrFinal &&
       typeParam.getClass()->isCollectionClass()) {
     /*

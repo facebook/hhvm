@@ -668,9 +668,11 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
   // DataTypeGeneric is used in here to avoid constraining the base in case we
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
+  auto const base = getInput(m_mii.valCount(), DataTypeGeneric);
 
-  SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
-  auto baseType = ldRefReturn(base->type().unbox());
+  auto const baseType = base->type().maybeBoxed()
+                          ? ldRefReturn(base->type().unbox())
+                          : base->type();
   HPHP::Op op = m_ni.mInstrOp();
   bool readInst = (op == OpCGetM || op == OpIssetM);
   if ((op == OpSetM || readInst) &&
@@ -678,8 +680,11 @@ HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
       isSingleMember()) {
 
     if (baseType <= Type::Arr) {
-      auto const isPacked = (baseType.hasArrayKind() &&
-                            baseType.getArrayKind() == ArrayData::kPackedKind);
+      // Use the raw base type to figure out if it is known to be packed.
+      auto const isPacked =
+        baseType.isSpecialized() &&
+        baseType.hasArrayKind() &&
+        baseType.getArrayKind() == ArrayData::kPackedKind;
       if (mcodeIsElem(m_ni.immVecM[0])) {
         SSATmp* key = getInput(m_mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {

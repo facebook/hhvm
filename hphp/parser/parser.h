@@ -67,6 +67,11 @@ enum class ClosureType {
   Long,
 };
 
+enum ObjPropType {
+  ObjPropNormal,
+  ObjPropXhpAttr
+};
+
 //////////////////////////////////////////////////////////////////////
 
 typedef void* TStatementPtr;

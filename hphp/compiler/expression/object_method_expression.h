@@ -38,9 +38,13 @@ public:
 
   ExpressionPtr getObject() const { return m_object; }
   bool isNullSafe() const { return m_nullsafe; }
+  bool isXhpGetAttr() const { return m_xhpGetAttr; }
+  void setIsXhpGetAttr() { m_xhpGetAttr = true; }
+
 private:
   ExpressionPtr m_object;
   bool m_nullsafe;
+  bool m_xhpGetAttr;
   int m_objTemp;
 
   // for avoiding code generate toObject(Variant)

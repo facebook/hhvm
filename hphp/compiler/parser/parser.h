@@ -168,6 +168,8 @@ public:
   void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
                           Token &params);
 
+  void checkAllowedInWriteContext(ExpressionPtr e);
+
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);
   void onAListVar(Token &out, Token *list, Token *var);

@@ -525,6 +525,21 @@ void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
   if (nullsafe) {
     PARSE_ERROR("?-> is not supported for property access");
   }
+  if (prop.num() == ObjPropXhpAttr) {
+    // Handle "$obj->:xhp-attr" transform
+    ExpressionListPtr paramsExp = NEW_EXP0(ExpressionList);
+    ScalarExpressionPtr name =
+      NEW_EXP(ScalarExpression, T_CONSTANT_ENCAPSED_STRING,
+              prop->text(), true);
+    paramsExp->addElement(name);
+    ScalarExpressionPtr getAttributeMethodName =
+      NEW_EXP(ScalarExpression, T_STRING, std::string("getAttribute"));
+    auto om = NEW_EXP(ObjectMethodExpression, base->exp,
+                      getAttributeMethodName, paramsExp, nullsafe);
+    om->setIsXhpGetAttr();
+    out->exp = om;
+    return;
+  }
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
@@ -689,13 +704,24 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   out->exp = expList;
 }
 
+void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
+  if (dynamic_pointer_cast<FunctionCall>(e)) {
+    if (e->is(Expression::KindOfObjectMethodExpression)) {
+      ObjectMethodExpressionPtr om =
+        dynamic_pointer_cast<ObjectMethodExpression>(e);
+      if (om->isXhpGetAttr()) {
+        PARSE_ERROR("Using ->: syntax in write context is not supported");
+      }
+    }
+    PARSE_ERROR("Can't use return value in write context");
+  }
+}
+
 void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
                               bool rhsFirst /* = false */) {
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
-    if (dynamic_pointer_cast<FunctionCall>((*el)[i])) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext((*el)[i]);
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
@@ -742,14 +768,13 @@ void Parser::checkAssignThis(ExpressionListPtr params) {
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
                       bool rhsFirst /* = false */) {
-  if (dynamic_pointer_cast<FunctionCall>(var->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref, rhsFirst);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
@@ -781,9 +806,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
   case T_DEC:
   case T_ISSET:
   case T_UNSET:
-    if (dynamic_pointer_cast<FunctionCall>(operand->exp)) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext(operand->exp);
   default:
     {
       UnaryOpExpressionPtr exp = NEW_EXP(UnaryOpExpression, operand->exp, op,
@@ -800,9 +823,8 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   BinaryOpExpressionPtr bop =
     NEW_EXP(BinaryOpExpression, operand1->exp, operand2->exp, op);
 
-  if (bop->isAssignmentOp() &&
-      dynamic_pointer_cast<FunctionCall>(operand1->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
+  if (bop->isAssignmentOp()) {
+    checkAllowedInWriteContext(operand1->exp);
   }
 
   out->exp = bop;
@@ -1854,10 +1876,8 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt, bool awaitAs) {
-  if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
-      dynamic_pointer_cast<FunctionCall>(value->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(name->exp);
+  checkAllowedInWriteContext(value->exp);
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
   }

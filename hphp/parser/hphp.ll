@@ -345,6 +345,19 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_STRING;
 }
 
+<ST_LOOKING_FOR_PROPERTY>":"{XHPLABEL}  {
+  if (_scanner->isHHSyntaxEnabled()) {
+    /* After -> or ?->, HH mode supports ":xhp-label"-style identifiers.
+       We strip off the first colon, but aside from that we do not mangle
+       the XHP name. */
+    yytext++; yyleng--;
+    yy_pop_state(yyscanner);
+    RETTOKEN(T_XHP_LABEL);
+  }
+  yyless(1);
+  RETSTEP(':');
+}
+
 <ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_FUNC_NAME>{WHITESPACE} {
         RETSTEP(T_WHITESPACE);
 }

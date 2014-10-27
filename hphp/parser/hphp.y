@@ -2590,13 +2590,24 @@ object_operator:
   | T_NULLSAFE_OBJECT_OPERATOR         { $$ = $1; $$ = 1;}
 ;
 
-object_member_name_no_variables:
+object_property_name_no_variables:
+    ident                              { $$ = $1; $$ = HPHP::ObjPropNormal;}
+  | T_XHP_LABEL                        { $$ = $1; $$ = HPHP::ObjPropXhpAttr;}
+  | '{' expr '}'                       { $$ = $2; $$ = HPHP::ObjPropNormal;}
+;
+
+object_property_name:
+    object_property_name_no_variables  { $$ = $1;}
+  | variable_no_objects                { $$ = $1; $$ = HPHP::ObjPropNormal;}
+;
+
+object_method_name_no_variables:
     ident                              { $$ = $1;}
   | '{' expr '}'                       { $$ = $2;}
 ;
 
-object_member_name:
-    object_member_name_no_variables    { $$ = $1;}
+object_method_name:
+    object_method_name_no_variables    { $$ = $1;}
   | variable_no_objects                { $$ = $1;}
 ;
 
@@ -2625,10 +2636,10 @@ variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable object_operator
-    object_member_name              { _p->onObjectProperty($$,$1,$2.num(),$3);}
+    object_property_name            { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_member_name              { _p->onObjectProperty($$,$2,$4.num(),$5);}
+    object_property_name            { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | static_class_name
     T_DOUBLE_COLON
     variable_no_objects                { _p->onStaticMember($$,$1,$3);}
@@ -2645,10 +2656,12 @@ dimmable_variable:
   | class_method_call                  { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | variable object_operator
-    object_member_name_no_variables  { _p->onObjectProperty($$,$1,$2.num(),$3);}
+    object_property_name_no_variables
+                                    { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_member_name_no_variables  { _p->onObjectProperty($$,$2,$4.num(),$5);}
+    object_property_name_no_variables
+                                    { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
@@ -2671,11 +2684,11 @@ lambda_or_closure:
 
 object_method_call:
     variable object_operator
-    object_member_name hh_typeargs_opt '('
+    object_method_name hh_typeargs_opt '('
     function_call_parameter_list ')' { _p->onObjectMethodCall($$,$1,$2.num(),$3,$6);}
   | '(' expr_with_parens ')'
     object_operator
-    object_member_name hh_typeargs_opt '('
+    object_method_name hh_typeargs_opt '('
     function_call_parameter_list ')' { _p->onObjectMethodCall($$,$2,$4.num(),$5,$8);}
 ;
 
@@ -2725,10 +2738,10 @@ variable_no_calls:
   | dimmable_variable_no_calls_access  { $$ = $1;}
   | variable_no_calls
     object_operator
-    object_member_name              { _p->onObjectProperty($$,$1,$2.num(),$3);}
+    object_property_name            { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_member_name              { _p->onObjectProperty($$,$2,$4.num(),$5);}
+    object_property_name            { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | static_class_name
     T_DOUBLE_COLON
     variable_no_objects                { _p->onStaticMember($$,$1,$3);}
@@ -2738,10 +2751,12 @@ variable_no_calls:
 dimmable_variable_no_calls:
   | dimmable_variable_no_calls_access  { $$ = $1;}
   | variable_no_calls object_operator
-    object_member_name_no_variables    { _p->onObjectProperty($$,$1,$2.num(),$3);}
+    object_property_name_no_variables
+                                    { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_member_name_no_variables    { _p->onObjectProperty($$,$2,$4.num(),$5);}
+    object_property_name_no_variables 
+                                    { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 

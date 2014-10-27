@@ -248,10 +248,10 @@ bool canBeOptional(trep bits) {
 }
 
 /*
- * Combine array bits.  Our type system currently avoids arbitrary
- * unions (see rationale above), so we don't have predefined types
- * like CArr|SArrN, or SArrN|CArrE.  This function checks a few cases
- * to ensure combining array type bits leaves it predefined.
+ * Combine array bits.  Our type system currently avoids arbitrary unions (see
+ * rationale above), so we don't have predefined types like CArr|SArrN, or
+ * SArrN|CArrE.  This function checks a few cases to ensure combining array
+ * type bits leaves it predefined.
  */
 trep combine_arr_bits(trep a, trep b) {
   assert((a & BArr) == a || (a & BOptArr) == a);
@@ -403,9 +403,9 @@ Type packed_values(const DArrPacked& a) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Helper for dealing with disjointDataFn's---most of them are
- * commutative.  This shuffles values to the right in a canonical
- * order to need less overloads.
+ * Helper for dealing with disjointDataFn's---most of them are commutative.
+ * This shuffles values to the right in a canonical order to need less
+ * overloads.
  */
 template<class InnerFn>
 struct Commute : InnerFn {
@@ -565,12 +565,11 @@ struct ArrUnionImpl {
     };
 
     /*
-     * With the current meaning of structs, if the keys are different,
-     * we can't do anything better than going to a map type.  The
-     * reason for this is that our struct types currently are implying
-     * the presense of all the keys in the struct (it might be worth
-     * adding some more types for struct subtyping to handle this
-     * better.)
+     * With the current meaning of structs, if the keys are different, we can't
+     * do anything better than going to a map type.  The reason for this is
+     * that our struct types currently are implying the presense of all the
+     * keys in the struct (it might be worth adding some more types for struct
+     * subtyping to handle this better.)
      */
     if (a.map.size() != b.map.size()) return to_map();
 
@@ -1659,8 +1658,8 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 
-  // It might be an object, or we might want to support type aliases
-  // in HNI at some point.  For now just be conservative.
+  // It might be an object, or we might want to support type aliases in HNI at
+  // some point.  For now just be conservative.
   return TGen;
 }
 
@@ -1730,10 +1729,9 @@ Type union_of(Type a, Type b) {
   if (b.subtypeOf(a)) return a;
 
   /*
-   * We need to check this before specialized objects, including the
-   * case where one of them was TInitNull, because otherwise we'll go
-   * down the is_specialized_obj paths and lose the wait handle
-   * information.
+   * We need to check this before specialized objects, including the case where
+   * one of them was TInitNull, because otherwise we'll go down the
+   * is_specialized_obj paths and lose the wait handle information.
    */
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
@@ -1814,9 +1812,9 @@ Type union_of(Type a, Type b) {
   X(TArr)
 
   /*
-   * Merging option types tries to preserve subtype information where
-   * it's possible.  E.g. if you union InitNull and Obj<=Foo, we want
-   * OptObj<=Foo to be the result.
+   * Merging option types tries to preserve subtype information where it's
+   * possible.  E.g. if you union InitNull and Obj<=Foo, we want OptObj<=Foo to
+   * be the result.
    */
   if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
   if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
@@ -2093,17 +2091,16 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
 }
 
 /*
- * Note: for now we're merging counted arrays into whatever type it
- * used to have in the following set functions, and returning arr_*'s
- * in some cases where we could know it was a carr_*.
+ * Note: for now we're merging counted arrays into whatever type it used to
+ * have in the following set functions, and returning arr_*'s in some cases
+ * where we could know it was a carr_*.
  *
- * To be able to assume it is actually counted it if used to be
- * static, we need to add code checking for keys that are one of the
- * "illegal offset type" of keys.
+ * To be able to assume it is actually counted it if used to be static, we need
+ * to add code checking for keys that are one of the "illegal offset type" of
+ * keys.
  *
- * A similar issue applies if you want to take out emptiness when a
- * set occurs.  If the key could be an illegal key type, the array may
- * remain empty.
+ * A similar issue applies if you want to take out emptiness when a set occurs.
+ * If the key could be an illegal key type, the array may remain empty.
  */
 
 // Do the effects of array_set but without handling possibly emptiness

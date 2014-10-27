@@ -90,27 +90,26 @@ struct Type;
  *
  *   {Init,}Prim
  *
- *       "Primitive" types---these can be represented in a TypedValue
- *       without a pointer to the heap.
+ *       "Primitive" types---these can be represented in a TypedValue without a
+ *       pointer to the heap.
  *
  *   {Init,}Unc
  *
- *       "Uncounted" types---values of these types don't require
- *       reference counting.
+ *       "Uncounted" types---values of these types don't require reference
+ *       counting.
  *
  *   WaitH<T>
  *
- *       A WaitHandle that is known will either return a value of type
- *       T from its join() method (or Await), or else throw an
- *       exception.
+ *       A WaitHandle that is known will either return a value of type T from
+ *       its join() method (or Await), or else throw an exception.
  *
  * Array types:
  *
- *   Arrays are divided along two dimensions: counted or uncounted,
- *   and empty or non-empty.  Unions of either are allowed.  The
- *   naming convention is {S,C,}Arr{N,E,}, where leaving out either
- *   bit means it's unknown along that dimension.  All arrays are
- *   subtypes of the Arr type.  The lattice here looks like this:
+ *   Arrays are divided along two dimensions: counted or uncounted, and empty
+ *   or non-empty.  Unions of either are allowed.  The naming convention is
+ *   {S,C,}Arr{N,E,}, where leaving out either bit means it's unknown along
+ *   that dimension.  All arrays are subtypes of the Arr type.  The lattice
+ *   here looks like this:
  *
  *                         Arr
  *                          |
@@ -124,16 +123,15 @@ struct Type;
  *              | /   \  |     | /   \  |
  *             SArrN  CArrN   CArrE  SArrE
  *
- *   "Specialized" array types may be found as subtypes of any of the
- *   above types except SArrE and CArrE, or of optional versions of
- *   the above types (e.g. as a subtype of ?ArrN).  The information
- *   about additional structure is dispayed in parenthesis, and
- *   probably best explained by some examples:
+ *   "Specialized" array types may be found as subtypes of any of the above
+ *   types except SArrE and CArrE, or of optional versions of the above types
+ *   (e.g. as a subtype of ?ArrN).  The information about additional structure
+ *   is dispayed in parenthesis, and probably best explained by some examples:
  *
  *     SArrN(Bool,Int)
  *
- *         Tuple-like static two-element array, with integer keys 0
- *         and 1, containing a Bool and an Int with unknown values.
+ *         Tuple-like static two-element array, with integer keys 0 and 1,
+ *         containing a Bool and an Int with unknown values.
  *
  *     Arr(Int,Dbl)
  *
@@ -142,39 +140,38 @@ struct Type;
  *
  *     CArrN([Bool])
  *
- *         Non-empty reference counted array with contiguous
- *         zero-based integer keys, unknown size, values all are
- *         subtypes of Bool.
+ *         Non-empty reference counted array with contiguous zero-based integer
+ *         keys, unknown size, values all are subtypes of Bool.
  *
  *     ArrN(x:Int,y:Int)
  *
- *         Struct-like array with known fields "x" and "y" that have
- *         Int values, and no other fields.  Struct-like arrays always
- *         have known string keys, and the type contains only those
- *         array values with exactly the given key set.  The order of
- *         the array elements is not tracked in this type system.
+ *         Struct-like array with known fields "x" and "y" that have Int
+ *         values, and no other fields.  Struct-like arrays always have known
+ *         string keys, and the type contains only those array values with
+ *         exactly the given key set.  The order of the array elements is not
+ *         tracked in this type system.
  *
  *     Arr([SStr:InitCell])
  *
  *         Possibly empty map-like array with unknown keys, but all
- *         non-reference counted strings, all values InitCell.  In
- *         this case the array itself may or may not be static.
+ *         non-reference counted strings, all values InitCell.  In this case
+ *         the array itself may or may not be static.
  *
- *         Note that struct-like arrays will be subtypes of map-like
- *         arrays with string keys.
+ *         Note that struct-like arrays will be subtypes of map-like arrays
+ *         with string keys.
  *
  *     ArrN([Int:InitPrim])
  *
- *         Map-like array with only integer keys (not-necessarily
- *         contiguous) and values that are all subtypes of InitPrim.
- *         Note that the keys *may* be contiguous integers, so for
- *         example Arr([InitPrim]) <: Arr([Int => InitPrim]).
+ *         Map-like array with only integer keys (not-necessarily contiguous)
+ *         and values that are all subtypes of InitPrim.  Note that the keys
+ *         *may* be contiguous integers, so for example Arr([InitPrim]) <:
+ *         Arr([Int => InitPrim]).
  *
  *     Arr([InitCell:InitCell])
  *
- *         Map-like array with either integer or string keys, and
- *         InitCell values, or empty.  Essentially this is the most
- *         generic array that can't contain php references.
+ *         Map-like array with either integer or string keys, and InitCell
+ *         values, or empty.  Essentially this is the most generic array that
+ *         can't contain php references.
  *
  *  TODO(#3774082): we should have a Str|Int type.
  */

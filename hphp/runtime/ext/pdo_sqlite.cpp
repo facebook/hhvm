@@ -17,8 +17,8 @@
 
 #include "hphp/runtime/ext/pdo_sqlite.h"
 #include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/sqlite3/ext_sqlite3.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sqlite3.h>
 
@@ -297,7 +297,7 @@ bool PDOSqliteConnection::createFunction(const String& name,
     return false;
   }
 
-  auto udf = std::make_shared<c_SQLite3::UserDefinedFunc>();
+  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
   auto stat = sqlite3_create_function(m_db, name.data(), argcount, SQLITE_UTF8,
                                       udf.get(), php_sqlite3_callback_func,
                                       nullptr, nullptr);

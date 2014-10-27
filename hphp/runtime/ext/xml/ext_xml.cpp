@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_xml.h"
+#include "hphp/runtime/ext/xml/ext_xml.h"
 
 #include "folly/ScopeGuard.h"
 
@@ -29,7 +29,38 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(xml, NO_EXTENSION_VERSION_YET);
+static class XMLExtension : public Extension {
+public:
+  XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    HHVM_FE(xml_parser_create);
+    HHVM_FE(xml_parser_free);
+    HHVM_FE(xml_parse);
+    HHVM_FE(xml_parse_into_struct);
+    HHVM_FE(xml_parser_create_ns);
+    HHVM_FE(xml_parser_get_option);
+    HHVM_FE(xml_parser_set_option);
+    HHVM_FE(xml_set_character_data_handler);
+    HHVM_FE(xml_set_default_handler);
+    HHVM_FE(xml_set_element_handler);
+    HHVM_FE(xml_set_processing_instruction_handler);
+    HHVM_FE(xml_set_start_namespace_decl_handler);
+    HHVM_FE(xml_set_end_namespace_decl_handler);
+    HHVM_FE(xml_set_unparsed_entity_decl_handler);
+    HHVM_FE(xml_set_external_entity_ref_handler);
+    HHVM_FE(xml_set_notation_decl_handler);
+    HHVM_FE(xml_set_object);
+    HHVM_FE(xml_get_current_byte_index);
+    HHVM_FE(xml_get_current_column_number);
+    HHVM_FE(xml_get_current_line_number);
+    HHVM_FE(xml_get_error_code);
+    HHVM_FE(xml_error_string);
+    HHVM_FE(utf8_decode);
+    HHVM_FE(utf8_encode);
+
+    loadSystemlib();
+  }
+} s_xml_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -682,16 +713,28 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource f_xml_parser_create(const String& encoding /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, null_string, 0).toResource();
+Resource HHVM_FUNCTION(xml_parser_create,
+                       const Variant& encoding /* = null_variant */) {
+  const String& strEncoding = encoding.isNull()
+                            ? null_string
+                            : encoding.toString();
+  return php_xml_parser_create_impl(strEncoding, null_string, 0).toResource();
 }
 
-Resource f_xml_parser_create_ns(const String& encoding /* = null_string */,
-                              const String& separator /* = null_string */) {
-  return php_xml_parser_create_impl(encoding, separator, 1).toResource();
+Resource HHVM_FUNCTION(xml_parser_create_ns,
+                       const Variant& encoding /* = null_variant */,
+                       const Variant& separator /* = null_variant */) {
+  const String& strEncoding = encoding.isNull()
+                            ? null_string
+                            : encoding.toString();
+  const String& strSeparator = separator.isNull()
+                             ? null_string
+                             : separator.toString();
+  return php_xml_parser_create_impl(strEncoding, strSeparator, 1).toResource();
 }
 
-bool f_xml_parser_free(const Resource& parser) {
+bool HHVM_FUNCTION(xml_parser_free,
+                   const Resource& parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   if (p->isparsing == 1) {
     raise_warning("Parser cannot be freed while it is parsing.");
@@ -700,7 +743,10 @@ bool f_xml_parser_free(const Resource& parser) {
   return true;
 }
 
-int64_t f_xml_parse(const Resource& parser, const String& data, bool is_final /* = true */) {
+int64_t HHVM_FUNCTION(xml_parse,
+                      const Resource& parser,
+                      const String& data,
+                      bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
   // the frame pointer by calling through the system's copy of XML_Parse
   // in libexpat.so.
@@ -715,8 +761,11 @@ int64_t f_xml_parse(const Resource& parser, const String& data, bool is_final /*
   return ret;
 }
 
-int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRefParam values,
-                            VRefParam index /* = null */) {
+int64_t HHVM_FUNCTION(xml_parse_into_struct,
+                      const Resource& parser,
+                      const String& data,
+                      VRefParam values,
+                      VRefParam index /* = null */) {
   SYNC_VM_REGS_SCOPED();
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
@@ -739,7 +788,9 @@ int64_t f_xml_parse_into_struct(const Resource& parser, const String& data, VRef
   return ret;
 }
 
-Variant f_xml_parser_get_option(const Resource& parser, int option) {
+Variant HHVM_FUNCTION(xml_parser_get_option,
+                      const Resource& parser,
+                      int option) {
   XmlParser * p = parser.getTyped<XmlParser>();
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -753,7 +804,10 @@ Variant f_xml_parser_get_option(const Resource& parser, int option) {
   return false;
 }
 
-bool f_xml_parser_set_option(const Resource& parser, int option, const Variant& value) {
+bool HHVM_FUNCTION(xml_parser_set_option,
+                   const Resource& parser,
+                   int option,
+                   const Variant& value) {
   XmlParser * p = parser.getTyped<XmlParser>();
   switch (option) {
   case PHP_XML_OPTION_CASE_FOLDING:
@@ -783,22 +837,28 @@ bool f_xml_parser_set_option(const Resource& parser, int option, const Variant& 
   return true;
 }
 
-bool f_xml_set_character_data_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_character_data_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->characterDataHandler, handler);
   XML_SetCharacterDataHandler(p->parser, _xml_characterDataHandler);
   return true;
 }
 
-bool f_xml_set_default_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_default_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->defaultHandler, handler);
   XML_SetDefaultHandler(p->parser, _xml_defaultHandler);
   return true;
 }
 
-bool f_xml_set_element_handler(const Resource& parser, const Variant& start_element_handler,
-                               const Variant& end_element_handler) {
+bool HHVM_FUNCTION(xml_set_element_handler,
+                   const Resource& parser,
+                   const Variant& start_element_handler,
+                   const Variant& end_element_handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startElementHandler, start_element_handler);
   xml_set_handler(&p->endElementHandler, end_element_handler);
@@ -807,7 +867,9 @@ bool f_xml_set_element_handler(const Resource& parser, const Variant& start_elem
   return true;
 }
 
-bool f_xml_set_processing_instruction_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_processing_instruction_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->processingInstructionHandler, handler);
   XML_SetProcessingInstructionHandler(p->parser,
@@ -815,75 +877,93 @@ bool f_xml_set_processing_instruction_handler(const Resource& parser, const Vari
   return true;
 }
 
-bool f_xml_set_start_namespace_decl_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_start_namespace_decl_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->startNamespaceDeclHandler, handler);
   XML_SetStartNamespaceDeclHandler(p->parser, _xml_startNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_end_namespace_decl_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_end_namespace_decl_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->endNamespaceDeclHandler, handler);
   XML_SetEndNamespaceDeclHandler(p->parser, _xml_endNamespaceDeclHandler);
   return true;
 }
 
-bool f_xml_set_unparsed_entity_decl_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_unparsed_entity_decl_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->unparsedEntityDeclHandler, handler);
   XML_SetUnparsedEntityDeclHandler(p->parser, _xml_unparsedEntityDeclHandler);
   return true;
 }
 
-bool f_xml_set_external_entity_ref_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_external_entity_ref_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->externalEntityRefHandler, handler);
   XML_SetExternalEntityRefHandler(p->parser, _xml_externalEntityRefHandler);
   return true;
 }
 
-bool f_xml_set_notation_decl_handler(const Resource& parser, const Variant& handler) {
+bool HHVM_FUNCTION(xml_set_notation_decl_handler,
+                   const Resource& parser,
+                   const Variant& handler) {
   XmlParser * p = parser.getTyped<XmlParser>();
   xml_set_handler(&p->notationDeclHandler, handler);
   XML_SetNotationDeclHandler(p->parser, _xml_notationDeclHandler);
   return true;
 }
 
-bool f_xml_set_object(const Resource& parser, VRefParam object) {
+bool HHVM_FUNCTION(xml_set_object,
+                   const Resource& parser,
+                   VRefParam object) {
   XmlParser * p = parser.getTyped<XmlParser>();
   p->object.assignRef(object);
   return true;
 }
 
-int64_t f_xml_get_current_byte_index(const Resource& parser) {
+int64_t HHVM_FUNCTION(xml_get_current_byte_index,
+                      const Resource& parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentByteIndex(p->parser);
 }
 
-int64_t f_xml_get_current_column_number(const Resource& parser) {
+int64_t HHVM_FUNCTION(xml_get_current_column_number,
+                      const Resource& parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
-int64_t f_xml_get_current_line_number(const Resource& parser) {
+int64_t HHVM_FUNCTION(xml_get_current_line_number,
+                      const Resource& parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetCurrentLineNumber(p->parser);
 }
 
-int64_t f_xml_get_error_code(const Resource& parser) {
+int64_t HHVM_FUNCTION(xml_get_error_code,
+                      const Resource& parser) {
   XmlParser * p = parser.getTyped<XmlParser>();
   return XML_GetErrorCode(p->parser);
 }
 
-String f_xml_error_string(int code) {
+String HHVM_FUNCTION(xml_error_string,
+                     int code) {
   char * str = (char *)XML_ErrorString((XML_Error)/*(int)*/code);
   return String(str, CopyString);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-String f_utf8_decode(const String& data) {
+String HHVM_FUNCTION(utf8_decode,
+                     const String& data) {
   String str = String(data.size(), ReserveString);
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
@@ -927,7 +1007,8 @@ String f_utf8_decode(const String& data) {
   return str;
 }
 
-String f_utf8_encode(const String& data) {
+String HHVM_FUNCTION(utf8_encode,
+                     const String& data) {
   auto const maxSize = safe_cast<size_t>(data.size()) * 4;
   String str = String(maxSize, ReserveString);
   char *newbuf = str.bufferSlice().ptr;

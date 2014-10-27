@@ -222,7 +222,7 @@ class ObjectData {
   }
 
   Collection::Type getCollectionType() const {
-    return isCollection() ? static_cast<Collection::Type>(o_subclassData.u16)
+    return isCollection() ? static_cast<Collection::Type>(o_subclassData.u8[0])
                           : Collection::Type::InvalidType;
   }
 
@@ -457,8 +457,7 @@ private:
 
   // 16 bits of memory that can be reused by subclasses
 protected:
-  union {
-    uint16_t u16;
+  struct {
     uint8_t u8[2];
   } o_subclassData;
 

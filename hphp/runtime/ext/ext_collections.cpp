@@ -744,7 +744,7 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
-  o_subclassData.u16 = Collection::VectorType;
+  o_subclassData.u8[0] = Collection::VectorType;
 }
 
 void c_Vector::t___construct(const Variant& iterable /* = null_variant */) {
@@ -1558,7 +1558,7 @@ Object c_ImmVector::t_values() {
 // Non PHP methods.
 
 c_ImmVector::c_ImmVector(Class* cls) : BaseVector(cls) {
-  o_subclassData.u16 = Collection::ImmVectorType;
+  o_subclassData.u8[0] = Collection::ImmVectorType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2066,7 +2066,7 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Map::c_Map(Class* cls) : BaseMap(cls) {
-  o_subclassData.u16 = Collection::MapType;
+  o_subclassData.u8[0] = Collection::MapType;
 }
 
 // Protected (Internal)
@@ -3802,7 +3802,7 @@ void c_MapIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
-  o_subclassData.u16 = Collection::ImmMapType;
+  o_subclassData.u8[0] = Collection::ImmMapType;
 }
 
 void c_ImmMap::t___construct(const Variant& iterable /* = null_variant */) {
@@ -4792,7 +4792,7 @@ Variant BaseSet::php_get(const Variant& key) const {
 // Set
 
 c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
-  o_subclassData.u16 = Collection::SetType;
+  o_subclassData.u8[0] = Collection::SetType;
 }
 
 void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
@@ -5174,7 +5174,7 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
 }
 
 c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls) {
-  o_subclassData.u16 = Collection::ImmSetType;
+  o_subclassData.u8[0] = Collection::ImmSetType;
 }
 
 void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -5267,7 +5267,7 @@ c_Pair::c_Pair(Class* cb)
   : ExtObjectDataFlags(cb)
   , m_size(2)
 {
-  o_subclassData.u16 = Collection::PairType;
+  o_subclassData.u8[0] = Collection::PairType;
   tvWriteNull(&elm0);
   tvWriteNull(&elm1);
 }
@@ -5276,7 +5276,7 @@ c_Pair::c_Pair(NoInit, Class* cb)
   : ExtObjectDataFlags(cb)
   , m_size(0)
 {
-  o_subclassData.u16 = Collection::PairType;
+  o_subclassData.u8[0] = Collection::PairType;
 }
 
 c_Pair::~c_Pair() {

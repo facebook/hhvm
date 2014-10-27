@@ -64,7 +64,7 @@ public:
   int preg_options:1;
   int compile_options:31;
   int num_subpats;
-  char **subpat_names;
+  mutable std::atomic<char**> subpat_names;
 };
 
 class PCREglobals {

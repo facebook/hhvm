@@ -399,9 +399,9 @@ static inline bool pgoDefault() {
 
 static inline uint64_t pgoThresholdDefault() {
 #ifdef HHVM_WHOLE_CFG
-  return 10;
+  return 100;
 #else
-  return debug ? 2 : 10;
+  return debug ? 2 : 100;
 #endif
 }
 

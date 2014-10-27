@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/smart-containers.h"
 #include "hphp/runtime/base/type-string.h"
+#include <folly/EvictingCacheMap.h>
 
 #include <cstdint>
 #include <cstddef>
@@ -48,6 +49,10 @@ enum {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+  constexpr int kLocalCacheSize = 1024;
+}
+
 class Array;
 struct Variant;
 
@@ -56,8 +61,32 @@ class pcre_cache_entry {
   pcre_cache_entry& operator=(const pcre_cache_entry&);
 
 public:
-  pcre_cache_entry() : subpat_names(nullptr) {}
+  pcre_cache_entry()
+    : re(nullptr), extra(nullptr), preg_options(0), compile_options(0),
+      num_subpats(0), subpat_names(nullptr), ref_count(0)
+  {}
+
   ~pcre_cache_entry();
+
+  void setStatic() {
+    ref_count = StaticValue;
+  }
+
+  void incRefCount() {
+    if (ref_count != StaticValue) {
+      ++ref_count;
+    }
+  }
+
+  bool decRefAndRelease() {
+    if (ref_count != StaticValue) {
+      if (--ref_count == 0) {
+        delete this;
+        return true;
+      }
+    }
+    return false;
+  }
 
   pcre *re;
   pcre_extra *extra; // Holds results of studying
@@ -65,19 +94,18 @@ public:
   int compile_options:31;
   int num_subpats;
   char **subpat_names;
+  int ref_count;
 };
+
+typedef SmartPtr<pcre_cache_entry> pcre_cache_entry_ptr;
 
 class PCREglobals {
 public:
-  PCREglobals() { }
-  ~PCREglobals();
-  void cleanupOnRequestEnd(const pcre_cache_entry* ent);
-  void onSessionExit();
+  PCREglobals() : m_local_cache(kLocalCacheSize) { }
   // pcre ini_settings
   int64_t m_preg_backtrace_limit;
   int64_t m_preg_recursion_limit;
-private:
-  smart::vector<const pcre_cache_entry*> m_overflow;
+  folly::EvictingCacheMap<std::string, pcre_cache_entry_ptr> m_local_cache;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,11 +120,6 @@ void pcre_init();
  * Clear PCRE cache.  Not thread safe - call only after parsing options.
  */
 void pcre_reinit();
-
-/*
- * Clean up thread-local PCREs.
- */
-void pcre_session_exit();
 
 /*
  * Dump the contents of the PCRE cache to filename.

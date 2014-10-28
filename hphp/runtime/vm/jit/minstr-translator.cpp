@@ -1302,16 +1302,25 @@ SSATmp* HhbcTranslator::MInstrTranslator::emitPackedArrayGet(SSATmp* base,
   assert(base->isA(Type::Arr) &&
          base->type().getArrayKind() == ArrayData::kPackedKind);
 
+  auto doLdElem = [&] {
+    auto res = gen(LdPackedArrayElem, base, key);
+    auto unboxed = m_ht.unbox(res, nullptr);
+    gen(IncRef, unboxed);
+    return unboxed;
+  };
+
+  if (key->isConst() &&
+      packedArrayBoundsCheckUnnecessary(base->type(), key->intVal())) {
+    return doLdElem();
+  }
+
   return m_irb.cond(
     1,
     [&] (Block* taken) {
       gen(CheckPackedArrayBounds, taken, base, key);
     },
     [&] { // Next:
-      auto res = gen(LdPackedArrayElem, base, key);
-      auto unboxed = m_ht.unbox(res, nullptr);
-      gen(IncRef, unboxed);
-      return unboxed;
+      return doLdElem();
     },
     [&] { // Taken:
       m_irb.hint(Block::Hint::Unlikely);
@@ -1458,7 +1467,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
       gen(CheckPackedArrayBounds, taken, m_base, key);
     },
     [&] { // Next:
-      return gen(CheckPackedArrayElemNull, m_base, key);
+      return gen(IsPackedArrayElemNull, m_base, key);
     },
     [&] { // Taken:
       return cns(false);

@@ -362,7 +362,7 @@ PUNT_OPCODE(CheckNullptr)
 PUNT_OPCODE(CheckBounds)
 PUNT_OPCODE(LdVectorSize)
 PUNT_OPCODE(CheckPackedArrayBounds)
-PUNT_OPCODE(CheckPackedArrayElemNull)
+PUNT_OPCODE(IsPackedArrayElemNull)
 PUNT_OPCODE(VectorHasImmCopy)
 PUNT_OPCODE(VectorDoCow)
 PUNT_OPCODE(CheckNonNull)
@@ -553,6 +553,7 @@ PUNT_OPCODE(StContArResume)
 PUNT_OPCODE(LdContResumeAddr)
 PUNT_OPCODE(ContArIncIdx)
 PUNT_OPCODE(StContArState)
+PUNT_OPCODE(CheckTypePackedArrayElem)
 
 #undef PUNT_OPCODE
 

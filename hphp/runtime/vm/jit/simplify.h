@@ -124,6 +124,13 @@ SSATmp* canonical(SSATmp*);
  */
 IRInstruction* findSpillFrame(SSATmp* sp);
 
+/*
+ * Checks whether a packed array bounds check is unnecessary.  We share this
+ * logic with gen time so that cases that are visible immediately don't require
+ * generating IR with control flow that we have to clean up later.
+ */
+bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t key);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

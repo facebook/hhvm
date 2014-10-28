@@ -3846,7 +3846,37 @@ void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0), rArr[scaled_idx + sizeof(ArrayData)]);
 }
 
-void CodeGenerator::cgCheckPackedArrayElemNull(IRInstruction* inst) {
+void CodeGenerator::cgCheckTypePackedArrayElem(IRInstruction* inst) {
+  auto const idx  = inst->src(1);
+  auto const rArr = srcLoc(inst, 0).reg();
+  auto const rIdx = srcLoc(inst, 1).reg();
+  auto& v = vmain();
+
+  if (idx->isConst()) {
+    auto const offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
+    if (deltaFits(offset, sz::dword)) {
+      emitTypeCheck(
+        inst->typeParam(),
+        rArr[offset + TVOFF(m_type)],
+        rArr[offset + TVOFF(m_data)],
+        inst->taken()
+      );
+      return;
+    }
+  }
+
+  static_assert(sizeof(TypedValue) == 16, "");
+  auto scaled_idx = v.makeReg();
+  v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()}; // multiply by 16
+  emitTypeCheck(
+    inst->typeParam(),
+    rArr[scaled_idx + TVOFF(m_type)],
+    rArr[scaled_idx + TVOFF(m_data)],
+    inst->taken()
+  );
+}
+
+void CodeGenerator::cgIsPackedArrayElemNull(IRInstruction* inst) {
   auto const idx = inst->src(1);
   auto const rArr = srcLoc(inst, 0).reg();
   auto const rIdx = srcLoc(inst, 1).reg();

@@ -2641,14 +2641,20 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
-| CheckPackedArrayElemNull, D(Bool), AK(Packed) S(Int), E
+| CheckTypePackedArrayElem<T>, ND, AK(Packed) S(Int), B|E
+
+  If the array element at S0[S1] is not type T, take the branch.
+
+| IsPackedArrayElemNull, D(Bool), AK(Packed) S(Int), E
 
   Returns true if the element at index S1 of the packed array in S0 is not
   null.
 
-| LdPackedArrayElem, DArrElem, AK(Packed) S(Int), E
+| LdPackedArrayElem<T>, DArrElem, AK(Packed) S(Int), E
 
-  Loads the element of the packed array in S0 at index S1.
+  Loads the element of the packed array in S0 at index S1. If the type param T
+  is specified, the destination type intersects it with whatever we'd know from
+  the type of S0.
 
 | LdVectorSize, D(Int), S(Obj), E
 

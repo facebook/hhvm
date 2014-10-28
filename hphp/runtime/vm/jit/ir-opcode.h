@@ -62,7 +62,8 @@ struct LocalStateHook;
  *     DAllocObj   single dst has a type of a newly allocated object; may be a
  *                   specialized object type if the class is known
  *     DArrPacked  single dst has a packed array type
- *     DArrElem    single dst has type based on reading an array element
+ *     DArrElem    single dst has type based on reading an array element,
+ *                   intersected with an optional type parameter
  *     DThis       single dst has type Obj<ctx>, where ctx is the
  *                   current context class
  *     DMulti      multiple dests. type and number depend on instruction

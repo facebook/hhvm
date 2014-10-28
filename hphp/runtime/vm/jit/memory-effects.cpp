@@ -260,7 +260,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckNonNull:
   case CheckNullptr:
   case CheckPackedArrayBounds:
-  case CheckPackedArrayElemNull:
+  case CheckTypePackedArrayElem:
+  case IsPackedArrayElemNull:
   case CheckRefs:
   case CheckStaticLocInit:
   case CheckStk:

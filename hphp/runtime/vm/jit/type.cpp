@@ -757,9 +757,12 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  if (inst->op() != LdPackedArrayElem) return Type::Gen;
+  assert(inst->op() == LdPackedArrayElem);
+  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
+
   auto const arrTy = inst->src(0)->type().getArrayType();
-  if (!arrTy) return Type::Gen;
+  if (!arrTy) return tyParam;
 
   using T = RepoAuthType::Array::Tag;
   switch (arrTy->tag()) {
@@ -768,15 +771,15 @@ Type arrElemReturn(const IRInstruction* inst) {
       auto const idx = inst->src(1);
       if (!idx->isConst()) return Type::Gen;
       if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-        return convertToType(arrTy->packedElem(idx->intVal()));
+        return convertToType(arrTy->packedElem(idx->intVal())) & tyParam;
       }
     }
     return Type::Gen;
   case T::PackedN:
-    return convertToType(arrTy->elemType());
+    return convertToType(arrTy->elemType()) & tyParam;
   }
 
-  return Type::Gen;
+  return tyParam;
 }
 
 }

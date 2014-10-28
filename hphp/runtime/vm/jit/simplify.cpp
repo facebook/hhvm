@@ -1839,20 +1839,8 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
     return gen(env, Nop);
   }
 
-  if (auto const at = array->type().getArrayType()) {
-    using A = RepoAuthType::Array;
-    switch (at->tag()) {
-    case A::Tag::Packed:
-      if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
-        return gen(env, Nop);
-      }
-      break;
-    case A::Tag::PackedN:
-      if (idxVal == 0 && at->emptiness() == A::Empty::No) {
-        return gen(env, Nop);
-      }
-      break;
-    }
+  if (packedArrayBoundsCheckUnnecessary(array->type(), idxVal)) {
+    return gen(env, Nop);
   }
 
   return nullptr;
@@ -2401,6 +2389,19 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   }
 
   return inst;
+}
+
+bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {
+  auto const at = arrayType.getArrayType();
+  if (!at) return false;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    return idxVal < at->size() && at->emptiness() == A::Empty::No;
+  case A::Tag::PackedN:
+    return idxVal == 0 && at->emptiness() == A::Empty::No;
+  }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

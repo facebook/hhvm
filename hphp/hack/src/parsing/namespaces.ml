@@ -24,6 +24,9 @@ module SSet = Utils.SSet
  *
  * See hhvm/compiler/parser/parser.cpp Parser::getAutoAliasedClasses for the
  * canonical list. *)
+(* Task #5481311: We want to add "IMemoizeParam" to the list below, but it
+   seems to cause problems for the typechecker. We should figure out what's
+   broken and fix it *)
 let autoimport_classes = [
   "Traversable";
   "KeyedTraversable";
@@ -35,13 +38,32 @@ let autoimport_classes = [
   "KeyedIterable";
   "Collection";
   "Vector";
-  "Set";
   "ImmVector";
+  "Map";
+  "ImmMap";
+  "StableMap";
+  "Set";
   "ImmSet";
   "Pair";
-  "Map";
-  "StableMap";
-  "ImmMap"
+  "Awaitable";
+  "AsyncIterator";
+  "AsyncKeyedIterator";
+  "InvariantException";
+  "AsyncGenerator";
+  "WaitHandle";
+  "StaticWaitHandle";
+  "WaitableWaitHandle";
+  "BlockableWaitHandle";
+  "ResumableWaitHandle";
+  "AsyncFunctionWaitHandle";
+  "AsyncGeneratorWaitHandle";
+  "AwaitAllWaitHandle";
+  "GenArrayWaitHandle";
+  "GenMapWaitHandle";
+  "GenVectorWaitHandle";
+  "RescheduleWaitHandle";
+  "SleepWaitHandle";
+  "ExternalThreadEventWaitHandle"
 ]
 let autoimport_set =
   List.fold_left (fun s e -> SSet.add e s) SSet.empty autoimport_classes

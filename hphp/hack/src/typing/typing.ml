@@ -1020,10 +1020,15 @@ and expr_ in_cond is_lvalue env (p, e) =
         let env, local = Env.FakeMembers.make p env e y in
         let local = p, Lvar (p, local) in
         expr env local
-  | Obj_get (e1, (_, Id m), _) ->
+  | Obj_get (e1, (_, Id m), nullflavor) ->
+      let nullsafe =
+        (match nullflavor with
+          | OG_nullthrows -> None
+          | OG_nullsafe -> Some p
+        ) in
       let env, ty1 = expr env e1 in
       let env, result =
-        obj_get ~is_method:false ~nullsafe:None env ty1 m (fun x -> x) in
+        obj_get ~is_method:false ~nullsafe:nullsafe env ty1 m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
       if has_lost_info
       then

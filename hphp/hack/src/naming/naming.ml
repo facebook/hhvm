@@ -1576,14 +1576,15 @@ and expr_ env = function
   | Lvar x ->
       Naming_hooks.dispatch_lvar_hook x !((snd env).locals);
       N.Lvar (Env.lvar env x)
-  | Obj_get (e1, (p, _ as e2), OG_nullthrows) ->
-      N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullthrows)
-  (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
-     is being used for instance property access; see the case below for
-     handling nullsafe instance method calls to see how this works *)
-  | Obj_get (_, (p, _), OG_nullsafe) ->
-      Errors.nullsafe_property_access p;
-      N.Any
+  | Obj_get (e1, (p, _ as e2), nullsafe) ->
+      (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
+         is being used for instance property access; see the case below for
+         handling nullsafe instance method calls to see how this works *)
+      let nullsafe = match nullsafe with
+        | OG_nullsafe -> Errors.nullsafe_property_access p; N.OG_nullsafe
+        | OG_nullthrows -> N.OG_nullthrows
+      in
+      N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe)
   | Array_get ((p, Lvar x), None) ->
       let id = p, N.Lvar (Env.lvar env x) in
       N.Array_get (id, None)

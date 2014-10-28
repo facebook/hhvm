@@ -73,7 +73,7 @@ namespace HPHP { namespace jit {
  * reoptimize() entry point.
  */
 struct IRBuilder {
-  IRBuilder(Offset initialSpOffsetFromFp, IRUnit&, const Func*);
+  IRBuilder(IRUnit&, BCMarker);
   ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }

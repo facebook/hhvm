@@ -47,19 +47,21 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-HhbcTranslator::HhbcTranslator(TransContext context)
-  : m_context(context)
-  , m_unit(context)
-  , m_irb(new IRBuilder(context.initSpOffset, m_unit, context.func))
-  , m_bcStateStack { BcState { context.initBcOffset,
-                               context.resumed,
-                               context.func } }
+HhbcTranslator::HhbcTranslator(TransContext ctx)
+  : m_context(ctx)
+  , m_unit(ctx)
+  , m_irb(new IRBuilder(m_unit, BCMarker { SrcKey { ctx.func,
+                                                    ctx.initBcOffset,
+                                                    ctx.resumed },
+                                           ctx.initSpOffset,
+                                           ctx.transID }))
+  , m_bcStateStack { BcState { ctx.initBcOffset, ctx.resumed, ctx.func } }
   , m_lastBcOff{false}
   , m_mode{IRGenMode::Trace}
 {
   updateMarker();
   auto const fp = gen(DefFP);
-  gen(DefSP, StackOffset{context.initSpOffset}, fp);
+  gen(DefSP, StackOffset{ctx.initSpOffset}, fp);
 }
 
 void HhbcTranslator::setGenMode(IRGenMode mode) {

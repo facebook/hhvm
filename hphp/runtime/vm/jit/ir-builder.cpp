@@ -55,11 +55,9 @@ using Trace::Indent;
 
 TRACE_SET_MOD(hhir);
 
-IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
-                     IRUnit& unit,
-                     const Func* func)
+IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
-  , m_state(unit, initialSpOffsetFromFp, func)
+  , m_state(unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())

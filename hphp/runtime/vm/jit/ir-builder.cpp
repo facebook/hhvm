@@ -101,7 +101,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdGbl)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdLocPseudoMain)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
@@ -458,8 +458,8 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdGbl(IRInstruction* inst) {
-  auto const locId = inst->extra<LdGbl>()->locId;
+SSATmp* IRBuilder::preOptimizeLdLocPseudoMain(IRInstruction* inst) {
+  auto const locId = inst->extra<LdLocPseudoMain>()->locId;
   auto const locType = localType(locId, DataTypeGeneric);
   auto const minType = std::min(locType, inst->typeParam()).relaxToGuardable();
   inst->setTypeParam(minType);
@@ -545,7 +545,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
-    X(LdGbl);
+    X(LdLocPseudoMain);
     X(LdLocAddr);
     X(StLoc);
   default:
@@ -820,11 +820,11 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocAddr, LdGbl)) {
-    // We've hit a LdLoc, LdLocAddr, or LdGbl. If the value's type source is
-    // non-null and not a FramePtr, it's a real value that was killed by a
-    // Call. The value won't be live but it's ok to use it to track down the
-    // guard.
+  if (inst->is(LdLoc, LdLocAddr, LdLocPseudoMain)) {
+    // We've hit a LdLoc, LdLocAddr, or LdLocPseudoMain. If the value's type
+    // source is non-null and not a FramePtr, it's a real value that was killed
+    // by a Call. The value won't be live but it's ok to use it to track down
+    // the guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
                        "No typeSrcs found for {}\n\n{}", *inst, m_unit);

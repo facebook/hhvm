@@ -61,7 +61,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckLoc:
   case DecRefLoc:
   case GuardLoc:
-  case LdGbl:
+  case LdLocPseudoMain:
   case LdLoc:
     return ReadLocal { inst.src(0), inst.extra<LocalId>()->locId };
 
@@ -562,7 +562,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StContArState:
   case StContArValue:
   case StElem:
-  case StGbl:
+  case StLocPseudoMain:
   case StMem:
   case StProp:
   case StRef:

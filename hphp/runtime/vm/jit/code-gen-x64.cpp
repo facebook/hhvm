@@ -4026,18 +4026,18 @@ void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
   }
 }
 
-void CodeGenerator::cgLdGbl(IRInstruction* inst) {
+void CodeGenerator::cgLdLocPseudoMain(IRInstruction* inst) {
   cgLoad(
     inst->dst(),
     dstLoc(inst, 0),
-    srcLoc(inst, 0).reg()[localOffset(inst->extra<LdGbl>()->locId)],
+    srcLoc(inst, 0).reg()[localOffset(inst->extra<LdLocPseudoMain>()->locId)],
     inst->taken()
   );
 }
 
-void CodeGenerator::cgStGbl(IRInstruction* inst) {
+void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
-  auto off = localOffset(inst->extra<StGbl>()->locId);
+  auto off = localOffset(inst->extra<StLocPseudoMain>()->locId);
   cgStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Full);
 }
 

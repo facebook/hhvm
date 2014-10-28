@@ -558,8 +558,8 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
       return m_ht.top(Type::StackElem, m_stackInputs[i], tc);
 
     case Location::Local:
-      // N.B. Exit block for LdGbl is nullptr because we always InterpOne
-      // member instructions in pseudomains
+      // N.B. Exit block for LdLocPseudoMain is nullptr because we always
+      // InterpOne member instructions in pseudomains
       return m_ht.ldLoc(l.offset, nullptr, tc);
 
     case Location::Litstr:

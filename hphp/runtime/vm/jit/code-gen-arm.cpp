@@ -377,7 +377,7 @@ PUNT_OPCODE(LdContField)
 PUNT_OPCODE(LdElem)
 PUNT_OPCODE(LdPackedArrayElem)
 PUNT_OPCODE(LdRef)
-PUNT_OPCODE(LdGbl)
+PUNT_OPCODE(LdLocPseudoMain)
 PUNT_OPCODE(LdThis)
 PUNT_OPCODE(LdRetAddr)
 PUNT_OPCODE(ConvClsToCctx)
@@ -1743,7 +1743,9 @@ void CodeGenerator::cgStLocWork(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStLoc(IRInstruction* inst) { cgStLocWork(inst); }
-void CodeGenerator::cgStGbl(IRInstruction* inst) { cgStLocWork(inst); }
+void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
+  cgStLocWork(inst);
+}
 
 void CodeGenerator::cgLdStack(IRInstruction* inst) {
   assert(inst->taken() == nullptr);

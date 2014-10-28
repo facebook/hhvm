@@ -868,11 +868,13 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
-| LdGbl<T,localId>, DParam, S(FramePtr), B
+| LdLocPseudoMain<T,localId>, DParam, S(FramePtr), B
 
   Loads local number localId from frame S0 and puts the value in D if the
   local's type is a subtype of T. If the local's type is not a subtype of T,
-  then the load does not happen, and this instruction branches to B.
+  then the load does not happen, and this instruction branches to B. This
+  instruction is used for loading locals in pseudo-mains, where they can alias
+  globals.
 
 | LdStackAddr<offset>, DParam, S(StkPtr), C
 
@@ -1490,10 +1492,10 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Store S1 to local number localId on the frame pointed to by S0, without
   storing the type.
 
-| StGbl<localId>, ND, S(FramePtr) S(Gen), E|CRc
+| StLocPseudoMain<localId>, ND, S(FramePtr) S(Gen), E|CRc
 
   Behaves just like StLoc, except the hard requirement that it is only emitted
-  for globals. We don't optimize StGbl the same way as StLoc, as we need
+  for pseudo-mains. We don't optimize StGbl the same way as StLoc, as we need
   intraprocedural analysis to know whether the store is truly dead.
 
 | StRef, DBox(1), S(BoxedCell) S(Cell), E|CRc|P

@@ -125,7 +125,7 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
     case LdLoc:
     case LdLocAddr:
-    case LdGbl: {
+    case LdLocPseudoMain: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
 

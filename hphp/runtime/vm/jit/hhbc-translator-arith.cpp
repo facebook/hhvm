@@ -71,11 +71,11 @@ void HhbcTranslator::emitConcatN(int n) {
 
 void HhbcTranslator::emitIncDecL(bool pre, bool inc, bool over, uint32_t id) {
   auto const ldrefExit = makeExit();
-  auto const ldgblExit = makePseudoMainExit();
+  auto const ldPMExit = makePseudoMainExit();
   auto const src = ldLocInnerWarn(
     id,
     ldrefExit,
-    ldgblExit,
+    ldPMExit,
     DataTypeSpecific
   );
 
@@ -92,7 +92,7 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, bool over, uint32_t id) {
   if (src->isA(Type::Null)) {
     push(inc && pre ? cns(1) : src);
     if (inc) {
-      stLoc(id, ldrefExit, ldgblExit, cns(1));
+      stLoc(id, ldrefExit, ldPMExit, cns(1));
     }
     return;
   }
@@ -102,7 +102,7 @@ void HhbcTranslator::emitIncDecL(bool pre, bool inc, bool over, uint32_t id) {
   }
 
   auto const res = emitIncDec(pre, inc, over, src);
-  stLoc(id, ldrefExit, ldgblExit, res);
+  stLoc(id, ldrefExit, ldPMExit, res);
 }
 
 // only handles integer or double inc/dec
@@ -241,7 +241,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   if (inPseudoMain()) PUNT(SetOpL-PseudoMain);
 
   // Null guard block for globals because we always punt on pseudomains
-  auto const ldgblExit = nullptr;
+  auto const ldPMExit = nullptr;
 
   /*
    * Handle array addition first because we don't want to bother with
@@ -256,7 +256,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
      * the stack.
      */
     auto const catchBlock = makeCatch();
-    auto const loc    = ldLoc(id, ldgblExit, DataTypeSpecific);
+    auto const loc    = ldLoc(id, ldPMExit, DataTypeSpecific);
     auto const val    = popC();
     auto const result = gen(ArrayAdd, catchBlock, loc, val);
     genStLocal(id, m_irb->fp(), result);
@@ -265,7 +265,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   }
 
   auto const ldrefExit = makeExit();
-  auto loc = ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeGeneric);
+  auto loc = ldLocInnerWarn(id, ldrefExit, ldPMExit, DataTypeGeneric);
 
   if (subOp == Op::Concat) {
     /*
@@ -280,7 +280,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
     // Null exit block for 'ldrefExit' because this is a local that we've
     // already guarded against in the upper ldLocInnerWarn, and we can't run
     // any guards since ConcatCellCell can have effects.
-    pushIncRef(stLocNRC(id, nullptr, ldgblExit, result));
+    pushIncRef(stLocNRC(id, nullptr, ldPMExit, result));
 
     // ConcatCellCell does not DecRef its second argument,
     // so we need to do it here
@@ -314,7 +314,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
     } else {
       result = gen(opc, loc, val);
     }
-    pushStLoc(id, ldrefExit, ldgblExit, result);
+    pushStLoc(id, ldrefExit, ldPMExit, result);
     return;
   }
 

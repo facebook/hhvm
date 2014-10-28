@@ -829,8 +829,8 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
 
 void HhbcTranslator::emitFPassL(int32_t id) {
   auto ldrefExit = makeExit();
-  auto ldgblExit = makePseudoMainExit();
-  pushIncRef(ldLocInnerWarn(id, ldrefExit, ldgblExit, DataTypeSpecific));
+  auto ldPMExit = makePseudoMainExit();
+  pushIncRef(ldLocInnerWarn(id, ldrefExit, ldPMExit, DataTypeSpecific));
 }
 
 void HhbcTranslator::emitFPassR() {

@@ -926,39 +926,39 @@ private:
   SSATmp* unbox(SSATmp* val, Block* exit);
 
   /*
-   * Local instruction helpers. The ldgblExit is so helpers can emit the guard
-   * for LdGbl insts if we're in the pseudomain. The ldrefExit is for helpers
-   * that might need to emit a LdRef to unbox a local.
+   * Local instruction helpers. The ldPMExit is so helpers can emit the guard
+   * for LdLocPseudoMain insts if we're in the pseudomain. The ldrefExit is for
+   * helpers that might need to emit a LdRef to unbox a local.
    */
   SSATmp* ldLoc(uint32_t id,
-                Block* ldgblExit,
+                Block* ldPMExit,
                 TypeConstraint constraint);
   SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
   SSATmp* ldLocInner(uint32_t id,
                      Block* ldrefExit,
-                     Block* ldgblExit,
+                     Block* ldPMExit,
                      TypeConstraint constraint);
   SSATmp* ldLocInnerWarn(uint32_t id,
                          Block* ldrefExit,
-                         Block* ldgblExit,
+                         Block* ldPMExit,
                          TypeConstraint constraint,
                          Block* catchBlock = nullptr);
 
   SSATmp* pushStLoc(uint32_t id,
                     Block* ldrefExit,
-                    Block* ldgblExit,
+                    Block* ldPMExit,
                     SSATmp* newVal);
   SSATmp* stLoc(uint32_t id,
                 Block* ldrefExit,
-                Block* ldgblExit,
+                Block* ldPMExit,
                 SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id,
                    Block* ldrefExit,
-                   Block* ldgblExit,
+                   Block* ldPMExit,
                    SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id,
                     Block* ldrefExit,
-                    Block* ldgblExit,
+                    Block* ldPMExit,
                     SSATmp* newVal,
                     bool decRefOld,
                     bool incRefOld);

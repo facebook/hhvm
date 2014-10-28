@@ -444,6 +444,10 @@ struct UnitRepoProxy : public RepoProxy {
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
                                            const MD5& md5);
 
+  void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
+                           LineTable& lineTable);
+  void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
+
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
 #define URP_GOP(o) URP_OP(Get##o, get##o)
 #define URP_OPS \

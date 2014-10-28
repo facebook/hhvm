@@ -712,6 +712,7 @@ void Repo::pragmas(int repoId) {
   // Valid synchronous values: 0 (OFF), 1 (NORMAL), 2 (FULL).
   static const int synchronous = 0;
   setIntPragma(repoId, "synchronous", synchronous);
+  setIntPragma(repoId, "cache_size", 20);
   // Valid journal_mode values: delete, truncate, persist, memory, wal, off.
   setTextPragma(repoId, "journal_mode", RuntimeOption::RepoJournal.c_str());
 }

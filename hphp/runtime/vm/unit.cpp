@@ -26,6 +26,8 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/container/flat_map.hpp>
+
 #include <folly/Format.h>
 
 #include <tbb/concurrent_hash_map.h>
@@ -136,6 +138,21 @@ using ExtendedLineInfoCache = tbb::concurrent_hash_map<
 >;
 ExtendedLineInfoCache s_extendedLineInfo;
 
+/*
+ * Since line numbers are only used for generating warnings and backtraces, the
+ * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
+ * these mappings lazily from the repo and cache only the ones we actually use.
+*/
+
+using LineMap = boost::container::flat_map<Offset,int>;
+
+using LineInfoCache = tbb::concurrent_hash_map<
+  const Unit*,
+  LineMap,
+  pointer_hash<Unit>
+>;
+LineInfoCache s_lineInfo;
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -166,6 +183,7 @@ Unit::Unit()
 
 Unit::~Unit() {
   s_extendedLineInfo.erase(this);
+  s_lineInfo.erase(this);
 
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
@@ -292,6 +310,17 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
   return acc->second.lineToOffsetRange;
 }
 
+static LineTable loadLineTable(const Unit* unit) {
+  auto ret = LineTable{};
+  if (unit->repoID() == RepoIdInvalid) return ret;
+
+  Lock lock(g_classesMutex);
+  auto& urp = Repo::get().urp();
+  urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
+
+  return ret;
+}
+
 int getLineNumber(const LineTable& table, Offset pc) {
   auto const key = LineEntry(pc, -1);
   auto it = std::upper_bound(begin(table), end(table), key);
@@ -303,7 +332,39 @@ int getLineNumber(const LineTable& table, Offset pc) {
 }
 
 int Unit::getLineNumber(Offset pc) const {
-  return HPHP::getLineNumber(m_lineTable, pc);
+  if (m_lineTable.size() != 0) {
+    return HPHP::getLineNumber(m_lineTable, pc);
+  }
+
+  {
+    LineInfoCache::const_accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      auto const it = lineMap.find(pc);
+      if (it != lineMap.end()) {
+        return it->second;
+      }
+    }
+  }
+
+  auto line = HPHP::getLineNumber(loadLineTable(this), pc);
+
+  {
+    LineInfoCache::accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      lineMap.insert(std::pair<Offset,int>(pc, line));
+      return line;
+    }
+  }
+
+  LineMap newLineMap{};
+  newLineMap.insert(std::pair<Offset,int>(pc, line));
+  LineInfoCache::accessor acc;
+  if (s_lineInfo.insert(acc, this)) {
+    acc->second = std::move(newLineMap);
+  }
+  return line;
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
@@ -324,10 +385,11 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
   LineEntry key = LineEntry(pc, -1);
-  auto it = std::upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
-  if (it != m_lineTable.end()) {
+  auto lineTable = loadLineTable(this);
+  auto it = std::upper_bound(lineTable.begin(), lineTable.end(), key);
+  if (it != lineTable.end()) {
     assert(pc < it->pastOffset());
-    Offset base = it == m_lineTable.begin() ? 0 : (it-1)->pastOffset();
+    Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
     range.m_base = base;
     range.m_past = it->pastOffset();
     return true;

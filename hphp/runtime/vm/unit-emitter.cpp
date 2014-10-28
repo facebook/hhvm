@@ -421,6 +421,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnit(repoId).insert(*this, txn, m_sn, m_md5, m_bc, m_bclen);
     }
     int64_t usn = m_sn;
+    urp.insertUnitLineTable(repoId, txn, usn, m_lineTable);
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr(repoId).insert(txn, usn, i, m_litstrs[i]);
     }
@@ -616,18 +617,16 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   /*
    * What's going on is we're going to have a m_lineTable if this UnitEmitter
    * was loaded from the repo, and no m_sourceLocTab (it's demand-loaded by
-   * unit.cpp because it's only used for the debugger).
+   * unit.cpp because it's only used for the debugger).  Don't bother creating
+   * the line table here, because we can retrieve it from the repo later.
    *
    * On the other hand, if this unit was just created by parsing a php file (or
-   * whatnot), we'll have a m_sourceLocTab.  We'll normally have a m_lineTable
-   * also, because of side-effects of UnitEmitter::insert, but this code still
-   * needs to check in case commit() was not called, because you're required to
-   * always have a m_lineTable.
+   * whatnot), we'll have a m_sourceLocTab.  In this case we should populate
+   * m_lineTable (otherwise we might lose line info altogether, since it may
+   * not be backed by a repo).
    */
-  if (m_lineTable.size() == 0) {
+  if (m_sourceLocTab.size() != 0) {
     u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
-  } else {
-    u->m_lineTable = m_lineTable;
   }
 
   for (size_t i = 0; i < m_feTab.size(); ++i) {
@@ -678,7 +677,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   sd(m_mainReturn)
     (m_mergeOnly)
     (m_isHHFile)
-    (m_lineTable)
     (m_typeAliases)
     (m_preloadPriority)
     ;
@@ -744,6 +742,12 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
                 " PRIMARY KEY (unitSn, pastOffset));";
     txn.exec(ssCreate.str());
   }
+  {
+    std::stringstream ssCreate;
+    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitLineTable")
+             << "(unitSn INTEGER PRIMARY KEY, data BLOB);";
+    txn.exec(ssCreate.str());
+  }
 }
 
 bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
@@ -767,6 +771,7 @@ bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
     getUnitArrays(repoId).get(ue);
     m_repo.pcrp().getPreClasses(repoId).get(ue);
     getUnitMergeables(repoId).get(ue);
+    getUnitLineTable(repoId, ue.m_sn, ue.m_lineTable);
     m_repo.frp().getFuncs(repoId).get(ue);
   } catch (RepoExc& re) {
     TRACE(0,
@@ -1010,6 +1015,46 @@ void UnitRepoProxy::GetUnitMergeablesStmt
       }
     }
   } while (!query.done());
+  txn.commit();
+}
+
+void UnitRepoProxy::insertUnitLineTable(int repoId,
+                                        RepoTxn& txn,
+                                        int64_t unitSn,
+                                        LineTable& lineTable) {
+  RepoStmt stmt(m_repo);
+  stmt.prepare(
+    folly::format(
+      "INSERT INTO {} VALUES(@unitSn, @data);",
+      m_repo.table(repoId, "UnitLineTable")
+    ).str());
+
+  RepoTxnQuery query(txn, stmt);
+  BlobEncoder dataBlob;
+  dataBlob.encode(lineTable);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindBlob("@data", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void UnitRepoProxy::getUnitLineTable(int repoId,
+                                     int64_t unitSn,
+                                     LineTable& lineTable) {
+  RepoStmt stmt(m_repo);
+  stmt.prepare(
+    folly::format(
+      "SELECT data FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(repoId, "UnitLineTable")
+    ).str());
+
+  RepoTxn txn(m_repo);
+  RepoTxnQuery query(txn, stmt);
+  query.bindInt64("@unitSn", unitSn);
+  query.step();
+  if (query.row()) {
+    BlobDecoder dataBlob = query.getBlob(0);
+    dataBlob.decode(lineTable);
+  }
   txn.commit();
 }
 

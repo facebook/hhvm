@@ -69,7 +69,7 @@ class Branch(object):
         branch.
 
         """
-        return os.path.join(self.build_dir(), config.BUILD_INTERNAL_PATH)
+        return os.path.join(self.build_dir(), platform().build_internal_path)
 
     def result_file(self):
         return "{0.name}.{0.uid}".format(self)

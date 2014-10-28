@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import benchy_config as config
+import multiprocessing
 import os
 import shlex
 import subprocess
@@ -17,13 +18,12 @@ def _run_command(cmd, env=None, stdout=None):
 
 
 class Platform(object):
-    """Facebook-specific Platform object.
+    """Open source Platform object that uses git and cmake.
 
     """
     def __init__(self):
-        self.name = "fb"
-        self.build_internal_path = os.path.join(
-            config.SRCROOT_PATH[1:], '_build', 'opt', 'hphp')
+        self.name = "oss"
+        self.build_internal_path = 'hphp'
 
     def switch_to_branch(self, branch):
         """Switches the current repository to the specified branch.
@@ -31,7 +31,7 @@ class Platform(object):
         This function will always be invoked prior to building a branch.
 
         """
-        _run_command('arc feature %s' % branch.name)
+        _run_command('git checkout %s' % branch.name)
 
     def build_branch(self, branch):
         """Builds the specified branch.
@@ -39,9 +39,12 @@ class Platform(object):
         This function will always be invoked after switching to a branch.
 
         """
+        before_dir = os.getcwd()
         build_dir = branch.build_dir()
-        _run_command('fbmake clean')
-        env = os.environ.copy()
-        env['FBMAKE_BUILD_ROOT'] = build_dir
-        _run_command('/usr/local/bin/fbmake --build-root "%s" '
-                     '--ccache=off --distcc=on opt -j9000' % build_dir, env)
+        try:
+            print(build_dir)
+            os.chdir(build_dir)
+            _run_command('cmake %s' % config.SRCROOT_PATH)
+            _run_command('make -j%d' % multiprocessing.cpu_count())
+        finally:
+            os.chdir(before_dir)

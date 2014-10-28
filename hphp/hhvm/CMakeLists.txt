@@ -23,7 +23,7 @@ endif()
 find_package(Gold)
 
 if (GOLD_FOUND)
-  SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,../tools/oss_hot_section_ordering)
+  SET(LINKER_SCRIPT -fuse-ld=gold -Wl,--section-ordering-file,${CMAKE_CURRENT_SOURCE_DIR}/../tools/oss_hot_section_ordering)
   add_executable(hhvm ${CXX_SOURCES})
   target_link_libraries(hhvm ${HHVM_LINK_LIBRARIES} ${LINKER_SCRIPT})
 else()
@@ -44,6 +44,12 @@ if(CYGWIN OR MSVC OR MINGW)
   add_dependencies(hhvm generate_rc)
 else()
   add_dependencies(hhvm systemlib)
+endif()
+
+if (CMAKE_HOST_UNIX)
+  add_custom_command(TARGET hhvm POST_BUILD
+    COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} sh "${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh"
+    COMMENT "Creating symlinks for hhvm")
 endif()
 
 if (ENABLE_COTIRE)

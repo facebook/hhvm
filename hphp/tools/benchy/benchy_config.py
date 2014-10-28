@@ -27,11 +27,10 @@ def _load():
         'ANYMEAN_PATH': os.path.join(benchy_dir, 'any_mean.py'),
         'BENCHMARK_DIR': benchmark_dir,
         'BENCH_ENTRY_PATH': os.path.join(benchmark_dir, 'harness-run.php'),
-        'BUILD_INTERNAL_PATH': os.path.join(fbcode_dir[1:], '_build',
-                                            'opt', 'hphp'),
         'HARNESS_PATH': os.path.join(benchy_dir, 'benchy_harness.py'),
         'INCLUDE_PATH': os.path.join(benchmark_dir, 'include.php'),
         'SIGNIFICANCE_PATH': os.path.join(benchy_dir, 'significance.py'),
+        'SRCROOT_PATH': fbcode_dir,
         'SUITES_PATH': os.path.join(benchmark_dir, 'suites.json'),
         'VERSION': 1,
         'WRAPPER_PATH': os.path.join(tools_dir, 'hhvm_wrapper.php'),
@@ -66,7 +65,6 @@ ANYMEAN_PATH = _get('ANYMEAN_PATH')
 BENCHMARK_DIR = _get('BENCHMARK_DIR')
 BENCH_ENTRY_PATH = _get('BENCH_ENTRY_PATH')
 BUILD_ROOT = _get('BUILD_ROOT')
-BUILD_INTERNAL_PATH = _get('BUILD_INTERNAL_PATH')
 HARNESS_PATH = _get('HARNESS_PATH')
 INCLUDE_PATH = _get('INCLUDE_PATH')
 PERF_PATH = _get('PERF_PATH')
@@ -74,6 +72,7 @@ PLATFORM = _get('PLATFORM')
 RUNLOG_PATH = _get('RUNLOG_PATH')
 RUNSCRIPT_PATH = _get('RUNSCRIPT_PATH')
 SIGNIFICANCE_PATH = _get('SIGNIFICANCE_PATH')
+SRCROOT_PATH = _get('SRCROOT_PATH')
 SUITES_PATH = _get('SUITES_PATH')
 TMP_PATH = _get('TMP_PATH')
 VERSION = _get('VERSION')

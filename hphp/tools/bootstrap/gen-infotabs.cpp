@@ -30,8 +30,11 @@ using folly::fbvector;
 using namespace HPHP::IDL;
 
 int main(int argc, const char* argv[]) {
-  if (argc < 3) {
-    std::cout << "Usage: " << argv[0] << " <output file> <*.idl.json>...\n";
+  if (argc < 4) {
+    std::cout << "Usage: " << argv[0]
+              << " <output file>"
+              << " <header file>"
+              << " <*.idl.json>...\n";
     return 0;
   }
 
@@ -41,7 +44,7 @@ int main(int argc, const char* argv[]) {
   fbstring invocation_trace;
   makeInvocationTrace(invocation_trace, argc, argv);
 
-  for (auto i = 2; i < argc; ++i) {
+  for (auto i = 3; i < argc; ++i) {
     try {
       parseIDL(argv[i], funcs, classes);
     } catch (const std::exception& exc) {
@@ -57,7 +60,7 @@ int main(int argc, const char* argv[]) {
   cpp << "#include \"hphp/runtime/ext_hhvm/ext_hhvm.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "#include \"hphp/runtime/vm/runtime.h\"\n"
-      << "#include \"hphp/runtime/ext_hhvm/ext_hhvm_infotabs.h\"\n"
+      << "#include \"" << argv[2] << "\"\n"
       << "#include \"hphp/util/abi-cxx.h\"\n"
       << "namespace HPHP {\n"
       << "  struct TypedValue;\n"

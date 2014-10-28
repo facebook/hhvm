@@ -500,27 +500,81 @@ bool UserFile::rmdir(const String& filename, int options) {
   return false;
 }
 
+bool UserFile::invokeMetadata(const Array& args, const char* funcName) {
+  bool invoked = false;
+  Variant ret = invoke(m_StreamMetadata, s_stream_metadata, args, invoked);
+  if (!invoked) {
+    raise_warning("%s(): %s::stream_metadata is not implemented!",
+                  funcName, m_cls->name()->data());
+    return false;
+  } else if (ret.toBoolean() == true) {
+    return true;
+  }
+  return false;
+}
+
 bool UserFile::touch(const String& path, int64_t mtime, int64_t atime) {
   if (atime == 0) {
     atime = mtime;
   }
-  bool invoked = false;
-  Variant ret = invoke(
-    m_StreamMetadata,
-    s_stream_metadata,
+
+  return invokeMetadata(
     PackedArrayInit(3)
       .append(path)
       .append(1) // STREAM_META_TOUCH
       .append(atime ? make_packed_array(mtime, atime) : Array::Create())
       .toArray(),
-    invoked
-  );
-  if (invoked && (ret.toBoolean() == true)) {
-    return true;
-  }
+    "touch");
+}
 
-  raise_warning("\"%s::touch\" call failed", m_cls->name()->data());
-  return false;
+bool UserFile::chmod(const String& path, int64_t mode) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(6) // STREAM_META_ACCESS
+      .append(mode)
+      .toArray(),
+    "chmod");
+}
+
+bool UserFile::chown(const String& path, int64_t uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(3) // STREAM_META_OWNER
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chown(const String& path, const String& uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(2) // STREAM_META_OWNER_NAME
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chgrp(const String& path, int64_t gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(5) // STREAM_META_GROUP
+      .append(gid)
+      .toArray(),
+      "chgrp");
+}
+
+bool UserFile::chgrp(const String& path, const String& gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(4) // STREAM_META_GROUP_NAME
+      .append(gid)
+      .toArray(),
+    "chgrp");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

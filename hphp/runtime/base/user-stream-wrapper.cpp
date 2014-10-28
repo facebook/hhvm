@@ -99,5 +99,35 @@ bool UserStreamWrapper::touch(const String& path,
   return file->touch(path, mtime, atime);
 }
 
+bool UserStreamWrapper::chmod(const String& path, int64_t mode) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chmod(path, mode);
+}
+
+bool UserStreamWrapper::chown(const String& path, int64_t uid) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chown(path, uid);
+}
+
+bool UserStreamWrapper::chown(const String& path, const String& uid) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chown(path, uid);
+}
+
+bool UserStreamWrapper::chgrp(const String& path, int64_t gid) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chgrp(path, gid);
+}
+
+bool UserStreamWrapper::chgrp(const String& path, const String& gid) {
+  auto file = NEWOBJ(UserFile)(m_cls);
+  Resource wrapper(file);
+  return file->chgrp(path, gid);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

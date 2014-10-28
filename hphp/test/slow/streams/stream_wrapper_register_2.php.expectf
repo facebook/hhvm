@@ -1,2 +1,18 @@
 
-Warning: "B::touch" call failed in %s on line %d
+Warning: touch(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)
+
+Warning: chmod(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)
+
+Warning: chown(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)
+
+Warning: chown(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)
+
+Warning: chgrp(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)
+
+Warning: chgrp(): B::stream_metadata is not implemented! in %s on line %d
+bool(false)

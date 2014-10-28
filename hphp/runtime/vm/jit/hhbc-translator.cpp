@@ -1898,7 +1898,7 @@ void HhbcTranslator::refCheckHelper(int64_t entryArDelta,
 
     if (i == 0) {
       nParams = cns(64);
-    } else if (i == 64) {
+    } else if (!nParams || nParams->isConst()) {
       nParams = gen(LdRaw, RawMemData{RawMemData::FuncNumParams}, funcPtr);
     }
 

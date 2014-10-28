@@ -534,6 +534,7 @@ norepo_tests = (
     '/Zend/tests/bug33116.php',
     '/Zend/tests/bug36513.php',
     '/Zend/tests/bug43128.php',
+    '/Zend/tests/bug47714.php',
     '/Zend/tests/bug54624.php',
     '/Zend/tests/bug60444.php',
     '/Zend/tests/bug62907.php',

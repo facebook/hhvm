@@ -184,8 +184,8 @@ module NastCheck                            = struct
 end
 
 module Typing                               = struct
-  let abstract_class_final                  = 4001 (* DONT MODIFY!!!! *)
-  let abstract_instantiate                  = 4002 (* DONT MODIFY!!!! *)
+  (* let abstract_class_final                  = 4001 (\* DONT MODIFY!!!! *\) *)
+  let uninstantiable_class                  = 4002 (* DONT MODIFY!!!! *)
   let anonymous_recursive                   = 4003 (* DONT MODIFY!!!! *)
   let anonymous_recursive_call              = 4004 (* DONT MODIFY!!!! *)
   let array_access                          = 4005 (* DONT MODIFY!!!! *)
@@ -600,6 +600,13 @@ let dynamic_class pos =
   add Typing.dynamic_class pos
     "Don't use dynamic classes"
 
+let uninstantiable_class usage_pos decl_pos name =
+  let name = (strip_ns name) in
+  add_list Typing.uninstantiable_class [
+    usage_pos, (name^" is uninstantiable");
+    decl_pos, "Declaration is here"
+  ]
+
 let typedef_constraint pos =
   add Naming.typedef_constraint pos
     "Constraints on typedefs are not supported"
@@ -636,7 +643,7 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
 
 let using_internal_class pos name =
   add Naming.using_internal_class pos (
-  name^" is an implementation internal class that can not be used directly"
+  name^" is an implementation internal class that cannot be used directly"
  )
 
 (*****************************************************************************)
@@ -1050,10 +1057,6 @@ let new_static_inconsistent new_pos (cpos, cname) =
     cpos, ("This declaration neither defines an abstract/final __construct"
            ^" nor uses <<__ConsistentConstruct>> attribute")]
 
-let abstract_instantiate pos cname =
-  add Typing.abstract_instantiate pos
-    ("Can't instantiate " ^ Utils.strip_ns cname)
-
 let pair_arity pos =
   add Typing.pair_arity pos "A pair has exactly 2 elements"
 
@@ -1235,10 +1238,6 @@ let read_before_write (pos, v) =
 let interface_final pos =
   add Typing.interface_final pos
     "Interfaces cannot be final"
-
-let abstract_class_final pos =
-  add Typing.abstract_class_final pos
-    "Abstract classes cannot be final"
 
 let trait_final pos =
   add Typing.trait_final pos

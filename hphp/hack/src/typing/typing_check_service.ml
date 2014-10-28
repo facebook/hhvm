@@ -30,8 +30,7 @@ let type_fun x =
     let fun_ = Naming_heap.FunHeap.find_unsafe x in
     let tenv = Typing_env.empty (Pos.filename (fst fun_.Nast.f_name)) in
     Typing.fun_def tenv x fun_;
-  with Not_found ->
-    ()
+  with Not_found -> ()
 
 let type_class x =
   try
@@ -39,8 +38,7 @@ let type_class x =
     let filename = Pos.filename (fst class_.Nast.c_name) in
     let tenv = Typing_env.empty filename in
     Typing.class_def tenv x class_
-  with Not_found ->
-    ()
+  with Not_found -> ()
 
 let check_typedef x =
   try

@@ -294,11 +294,15 @@ and fun_def env _ f =
       let env, hret =
         match f.f_ret with
         | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
-        | Some ret -> Typing_hint.hint env ret in
+        | Some ret ->
+          let env = Typing_hint.check_instantiable env ret in
+          Typing_hint.hint env ret in
       let f_params = match f.f_variadic with
         | FVvariadicArg param -> param :: f.f_params
         | _ -> f.f_params
       in
+      let env = Typing_hint.check_params_instantiable env f_params in
+      let env = Typing_hint.check_tparams_instantiable env f.f_tparams in
       let env, params =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
@@ -1074,8 +1078,19 @@ and expr_ in_cond is_lvalue env (p, e) =
   | Cast (ty, e) ->
       let env, _ = expr env e in
       Typing_hint.hint env ty
-  | InstanceOf (e1, _) ->
+  | InstanceOf (e1, e2) ->
       let env, _ = expr env e1 in
+      let () = match e2 with
+        | (_, Id (pos_c, name_c)) ->
+          let env, class_ = Env.get_class env name_c in
+          (match class_ with
+            | Some class_ when class_.tc_kind = Ast.Ctrait ->
+              Errors.uninstantiable_class pos_c class_.tc_pos class_.tc_name
+            | Some class_ when class_.tc_kind = Ast.Cabstract && class_.tc_final ->
+              Errors.uninstantiable_class pos_c class_.tc_pos class_.tc_name
+            | None | Some _-> ()
+          )
+        | _ -> () in
       env, (Reason.Rwitness p, Tprim Tbool)
   | Efun (f, idl) ->
       NastCheck.fun_ env f;
@@ -1237,7 +1252,7 @@ and new_object ~check_not_abstract p env c el uel =
       env, (Reason.Runknown_class p, Tobject)
   | Some (cname, class_) ->
       if check_not_abstract && class_.tc_abstract && c <> CIstatic
-      then Errors.abstract_instantiate p (snd cname);
+      then Errors.uninstantiable_class p class_.tc_pos class_.tc_name;
       let env, params = lfold begin fun env x ->
         TUtils.in_var env (Reason.Rnone, Tunresolved [])
       end env class_.tc_tparams in
@@ -2925,8 +2940,8 @@ and condition_isset env = function
   | v -> condition_var_non_null env v
 
 (**
- * Build an environment for the true or false branch
- * of conditional statements.
+ * Build an environment for the true or false branch of
+ * conditional statements.
  *)
 and condition env tparamet =
   let expr = raw_expr true in function
@@ -3153,8 +3168,7 @@ and class_def_parent env class_def class_type =
   | (_, Happly ((_, x), _) as parent_ty) :: _ ->
       let env, parent_type = Env.get_class_dep env x in
       (match parent_type with
-      | Some parent_type ->
-          check_parent env class_def class_type parent_type
+      | Some parent_type -> check_parent env class_def class_type parent_type
       | None -> ());
       let env, parent_ty = Typing_hint.hint env parent_ty in
       env, parent_ty
@@ -3232,16 +3246,13 @@ and class_def_ env_up c tc =
   end;
   let env = Env.set_self env self in
   let env = Env.set_parent env parent in
-  if tc.tc_final && c.c_kind <> Ast.Cnormal
-  then begin
-    let pos = fst c.c_name in
+  if tc.tc_final then begin
     match c.c_kind with
-    | Ast.Cinterface -> Errors.interface_final pos
-    | Ast.Cabstract -> Errors.abstract_class_final pos
-    | Ast.Ctrait -> Errors.trait_final pos
-    (* the parser won't let enums be final *)
-    | Ast.Cenum -> assert false
-    | Ast.Cnormal -> assert false
+    | Ast.Cinterface -> Errors.interface_final (fst c.c_name)
+    | Ast.Cabstract -> ()
+    | Ast.Ctrait -> Errors.trait_final (fst c.c_name)
+    | Ast.Cenum -> (* the parser won't let enums be final *) assert false
+    | Ast.Cnormal -> ()
   end;
   List.iter (class_implements env c) impl;
   SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;
@@ -3322,15 +3333,18 @@ and class_var_def env is_static c cv =
 and method_def env m =
   let env = { env with Env.lenv = Env.empty_local } in
   let env = Env.set_local env this (Env.get_self env) in
-  let env, ret =
-    match m.m_ret with
+  let env, ret = (match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
-    | Some ret -> Typing_hint.hint env ret in
+    | Some ret ->
+      let env = Typing_hint.check_instantiable env ret in
+      Typing_hint.hint env ret) in
   let env = DynamicYield.method_def env m.m_name ret in
   let m_params = match m.m_variadic with
     | FVvariadicArg param -> param :: m.m_params
     | _ -> m.m_params
   in
+  let env = Typing_hint.check_params_instantiable env m_params in
+  let env = Typing_hint.check_tparams_instantiable env m.m_tparams in
   let env, params =
     lfold (make_param_type_ ~for_body:true Env.fresh_type) env m_params in
   if Env.is_strict env then begin

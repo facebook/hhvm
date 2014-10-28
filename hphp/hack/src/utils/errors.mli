@@ -77,6 +77,7 @@ val genva_arity : Pos.t -> unit
 val gen_array_rec_arity : Pos.t -> unit
 val gen_array_va_rec_arity : Pos.t -> unit
 val dynamic_class : Pos.t -> unit
+val uninstantiable_class : Pos.t -> Pos.t -> string -> unit
 val typedef_constraint : Pos.t -> unit
 val add_a_typehint : Pos.t -> unit
 val local_const : Pos.t -> unit
@@ -115,7 +116,6 @@ val anonymous_recursive : Pos.t -> unit
 val new_static_outside_class : Pos.t -> unit
 val new_self_outside_class : Pos.t -> unit
 val new_static_inconsistent : Pos.t -> (Pos.t * string) -> unit
-val abstract_instantiate : Pos.t -> string -> unit
 val pair_arity : Pos.t -> unit
 val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
 val undefined_parent : Pos.t -> unit
@@ -164,7 +164,6 @@ val sketchy_null_check_primitive : Pos.t -> unit
 val extend_final : Pos.t -> unit
 val read_before_write : Pos.t * string -> unit
 val interface_final : Pos.t -> unit
-val abstract_class_final : Pos.t -> unit
 val trait_final : Pos.t -> unit
 val implement_abstract : Pos.t -> Pos.t -> string -> unit
 val generic_static : Pos.t -> string -> unit

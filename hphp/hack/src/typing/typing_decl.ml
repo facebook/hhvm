@@ -376,7 +376,7 @@ and class_hint_decl class_env hint =
   match hint with
     | _, Happly ((p, cid), _)
       when SMap.mem cid class_env.all_classes && not (is_class_ready cid) ->
-        (* We are supposed to redeclare the class *)
+      (* We are supposed to redeclare the class *)
       let files = SMap.find_unsafe cid class_env.all_classes in
       SSet.iter begin fun fn ->
         let class_opt = Parser_heap.find_class_in_file fn cid in
@@ -472,6 +472,7 @@ and class_decl c =
     then SMap.fold SMap.add self_dimpl dimpl
     else dimpl
   in
+  let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
   let env, enum = match c.c_enum with
     | None -> env, None
@@ -773,23 +774,24 @@ and type_typedef_naming_and_decl nenv tdef =
     | Ast.Alias x -> false
     | Ast.NewType x -> true
   in
-  let (params, tcstr, concrete_type) =
-    Naming.typedef nenv tdef in
+  let (params, tcstr, concrete_type) = Naming.typedef nenv tdef in
   let decl = is_abstract, params, concrete_type in
   let filename = Pos.filename pos in
   let env = Typing_env.empty filename in
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
+  let env = Typing_hint.check_instantiable env concrete_type in
   let env, concrete_type = Typing_hint.hint env concrete_type in
   let env, tcstr =
     match tcstr with
     | None -> env, None
     | Some constraint_type ->
-        let env, constraint_type = Typing_hint.hint env constraint_type in
-        let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
-        let env = sub_type env constraint_type concrete_type in
-        env, Some constraint_type
+      let env = Typing_hint.check_instantiable env constraint_type in
+      let env, constraint_type = Typing_hint.hint env constraint_type in
+      let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
+      let env = sub_type env constraint_type concrete_type in
+      env, Some constraint_type
   in
   let visibility =
     if is_abstract then Env.Typedef.Private else Env.Typedef.Public

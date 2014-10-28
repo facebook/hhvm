@@ -554,9 +554,13 @@ and toplevel acc env terminate =
 
 and toplevel_word ~attr env = function
   | "abstract" ->
-      expect_word env "class";
-      let class_ = class_ ~attr ~final:false ~kind:Cabstract env in
-      [Class class_]
+    let final = (match L.token env.lb with
+      | Tword when Lexing.lexeme env.lb = "final" -> true
+      | _ -> begin L.back env.lb; false end
+    ) in
+    expect_word env "class";
+    let class_ = class_ ~attr ~final ~kind:Cabstract env in
+    [Class class_]
   | "final" ->
       expect_word env "class";
       let class_ = class_ ~attr ~final:true ~kind:Cnormal env in
@@ -813,7 +817,7 @@ and class_extends env =
       (match Lexing.lexeme env.lb with
       | "extends" -> class_extends_list env
       | "implements" -> L.back env.lb; []
-      | _ -> error env "Expected: extends"; []
+      | s -> error env ("Expected: extends; Got: "^s); []
       )
   | Tlcb ->
       L.back env.lb;
@@ -828,7 +832,7 @@ and class_implements env =
       (match Lexing.lexeme env.lb with
       | "implements" -> class_extends_list env
       | "extends" -> L.back env.lb; []
-      | _ -> error env "Expected: implements"; []
+      | s -> error env ("Expected: implements; Got: "^s); []
       )
   | Tlcb ->
       L.back env.lb;

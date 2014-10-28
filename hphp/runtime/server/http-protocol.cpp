@@ -642,8 +642,7 @@ static void CopyPathInfo(Array& server,
                  server[s_DOCUMENT_ROOT].toCStrRef() +
                  r.pathInfo().data()
                  );
-    }
-    else {
+    } else {
       // otherwise reset path_translated back to the transport if it has it.
       server.set(s_PATH_TRANSLATED, 
                  transport->getPathTranslated()

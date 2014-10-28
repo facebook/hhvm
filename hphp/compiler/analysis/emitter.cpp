@@ -6617,9 +6617,10 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   // "Awaitable<T>", we set m_retTypeConstraint to T. For all other async
   // functions, we leave m_retTypeConstraint empty.
   if (annot && fe->isAsync && !fe->isGenerator) {
-    // Semantic checks ensure that the return annotation is either "Awaitable"
-    // or of the form "Awaitable<T>"
-    assert(annot->isAwaitable() && annot->numTypeArgs() <= 1);
+    // Semantic checks ensure that the return annotation is "Awaitable" or
+    // "WaitHandle" and that it has at most one type parameter
+    assert(annot->isAwaitable() || annot->isWaitHandle());
+    assert(annot->numTypeArgs() <= 1);
     bool isSoft = annot->isSoft();
     // If annot was "Awaitable" with no type args, getTypeArg() will return an
     // empty annotation

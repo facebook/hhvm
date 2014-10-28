@@ -68,6 +68,10 @@ const std::string FastCGITransport::getPathInfo() {
   return m_pathInfo;
 }
 
+bool FastCGITransport::isPathInfoSet() {
+  return m_pathInfoSet;
+}
+
 const std::string FastCGITransport::getDocumentRoot() {
   return m_documentRoot;
 }
@@ -411,6 +415,9 @@ void FastCGITransport::onHeadersComplete() {
   m_serverObject = getRawHeader(s_scriptName);
   m_scriptFilename = getRawHeader(s_scriptFilename);
   m_pathTranslated = getRawHeader(s_pathTranslated);
+  if (getRawHeaderPtr(s_pathInfo) != nullptr) {
+    m_pathInfoSet = true;
+  }
   m_pathInfo = getRawHeader(s_pathInfo);
   m_documentRoot = getRawHeader(s_documentRoot);
   if (!m_documentRoot.empty() &&

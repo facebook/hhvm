@@ -635,18 +635,22 @@ static void CopyPathInfo(Array& server,
   } else {
     assert(server.exists(s_DOCUMENT_ROOT));
     assert(server[s_DOCUMENT_ROOT].isString());
-    
-    if (!r.pathInfo().empty()) {
-      //if PATH_INFO is set use it to set PATH_TRANSLATED
-      server.set(s_PATH_TRANSLATED, 
-                 server[s_DOCUMENT_ROOT].toCStrRef() +
-                 r.pathInfo().data()
-                 );
+    // reset path_translated back to the transport if it has it.
+    auto const& pathTranslated = transport->getPathTranslated();
+    if (!pathTranslated.empty()) {
+      if (documentRoot == s_forwardslash) {
+        // path outside document root or / is document root
+        server.set(s_PATH_TRANSLATED, String(pathTranslated));
+      } else {
+        server.set(s_PATH_TRANSLATED,
+                   String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                          s_forwardslash + pathTranslated));
+      }
     } else {
-      // otherwise reset path_translated back to the transport if it has it.
-      server.set(s_PATH_TRANSLATED, 
-                 transport->getPathTranslated()
-                 );
+      server.set(s_PATH_TRANSLATED,
+                 String(server[s_DOCUMENT_ROOT].toCStrRef() +
+                        server[s_SCRIPT_NAME].toCStrRef() +
+                        r.pathInfo().data()));
     }
     server.set(s_PATH_INFO, r.pathInfo());
   }

@@ -53,7 +53,7 @@ public:
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(BaseGenerator, o_subclassData.u8[0]);
+    return offsetof(BaseGenerator, o_subclass_u8);
   }
 
   explicit BaseGenerator(Class* cls) : ExtObjectDataFlags(cls) {}
@@ -68,11 +68,11 @@ public:
   }
 
   State getState() const {
-    return static_cast<State>(o_subclassData.u8[0]);
+    return static_cast<State>(o_subclass_u8);
   }
 
   void setState(State state) {
-    o_subclassData.u8[0] = static_cast<uint8_t>(state);
+    o_subclass_u8 = static_cast<uint8_t>(state);
   }
 
   void startedCheck() {

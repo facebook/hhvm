@@ -61,7 +61,7 @@ class ObjectData {
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
-                            // stored in o_subclassData.u16)
+                            // stored in o_subclass_u8)
     InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
   };
 
@@ -222,7 +222,7 @@ class ObjectData {
   }
 
   Collection::Type getCollectionType() const {
-    return isCollection() ? static_cast<Collection::Type>(o_subclassData.u8[0])
+    return isCollection() ? static_cast<Collection::Type>(o_subclass_u8)
                           : Collection::Type::InvalidType;
   }
 
@@ -441,7 +441,7 @@ class ObjectData {
     return offsetof(ObjectData, o_attribute);
   }
   static constexpr ptrdiff_t whStateOffset() {
-    return offsetof(ObjectData, o_subclassData.u8[0]);
+    return offsetof(ObjectData, o_subclass_u8);
   }
 
 private:
@@ -451,21 +451,24 @@ private:
 
   static void compileTimeAssertions();
 
+#ifdef USE_LOWPTR
+private:
+  LowClassPtr m_cls;
+  int o_id; // Numeric identifier of this object (used for var_dump())
+  mutable uint16_t o_attribute;
+protected:
+  uint8_t o_subclass_u8; // for subclasses
+private:
+  uint8_t m_kind; // TODO: #5478458 overlap with array/collection kind
+  mutable RefCount m_count;
+#else
 private:
   LowClassPtr m_cls;
   mutable uint16_t o_attribute;
-
-  // 16 bits of memory that can be reused by subclasses
 protected:
-  struct {
-    uint8_t u8[2];
-  } o_subclassData;
-
+  uint8_t o_subclass_u8; // for subclasses
 private:
-#ifdef USE_LOWPTR
-  int o_id; // Numeric identifier of this object (used for var_dump())
-  mutable RefCount m_count;
-#else
+  uint8_t m_kind; // TODO: #5478458 overlap with array/collection kind
   mutable RefCount m_count;
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif

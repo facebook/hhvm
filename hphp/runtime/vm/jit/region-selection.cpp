@@ -112,6 +112,14 @@ SrcKey RegionDesc::start() const {
   return m_blocks[0]->start();
 }
 
+uint32_t RegionDesc::instrSize() const {
+  uint32_t size = 0;
+  for (auto& b : m_blocks) {
+    size += b->length();
+  }
+  return size;
+}
+
 RegionDesc::Block* RegionDesc::addBlock(SrcKey sk,
                                         int    length,
                                         Offset spOffset) {
@@ -461,6 +469,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
   if (region) {
     FTRACE(3, "{}", show(*region));
+    always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
   } else {
     FTRACE(1, "no region selectable; using tracelet compiler\n");
   }
@@ -504,6 +513,8 @@ RegionDescPtr selectHotRegion(TransID transId,
            mcg->tx().profData()->curTransID(), dotFileName,
            region ? show(*region) : std::string("empty region"));
   }
+
+  always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
 
   return region;
 }

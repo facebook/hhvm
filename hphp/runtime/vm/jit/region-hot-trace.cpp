@@ -77,10 +77,21 @@ RegionDescPtr selectHotTrace(TransID triggerId,
   // pre-conditions of the successor block.
   hphp_hash_map<RegionDesc::BlockId, PostConditions> blockPostConds;
 
+  uint32_t numBCInstrs = 0;
+
   while (!selectedSet.count(tid)) {
 
     RegionDescPtr blockRegion = profData->transRegion(tid);
     if (blockRegion == nullptr) break;
+
+    // Break if region would be larger than the specified limit.
+    auto newInstrSize = numBCInstrs + blockRegion->instrSize();
+    if (newInstrSize > RuntimeOption::EvalJitMaxRegionInstrs) {
+      FTRACE(2, "selectHotTrace: breaking region at Translation {} because "
+             "size ({}) would exceed of maximum translation limit\n",
+             tid, newInstrSize);
+      break;
+    }
 
     // If the debugger is attached, only allow single-block regions.
     if (prevId != kInvalidTransID && isDebuggerAttachedProcess()) {
@@ -132,6 +143,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
 
     // Add blockRegion's blocks and arcs to region.
     region->append(*blockRegion);
+    numBCInstrs += blockRegion->instrSize();
 
     if (hasPredBlock) {
       if (RuntimeOption::EvalHHIRBytecodeControlFlow) {

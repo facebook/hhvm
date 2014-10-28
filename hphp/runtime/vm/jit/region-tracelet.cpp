@@ -64,6 +64,8 @@ private:
   jit::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   uint32_t m_numJmps;
+  uint32_t m_numBCInstrs{0};
+  uint32_t m_pendingInlinedInstrs{0};
 
   InliningDecider& m_inl;
   const bool m_profiling;
@@ -77,7 +79,7 @@ private:
   void addInstruction();
   bool consumeInput(int i, const InputInfo& ii);
   bool traceThroughJmp();
-  bool tryInline();
+  bool tryInline(uint32_t& instrSize);
   void recordDependencies();
   void truncateLiterals();
 };
@@ -133,6 +135,13 @@ RegionDescPtr RegionFormer::go() {
   }
 
   while (true) {
+    assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+    if (m_numBCInstrs == RuntimeOption::EvalJitMaxRegionInstrs) {
+      FTRACE(1, "selectTracelet: breaking region due to size limit ({})\n",
+             m_numBCInstrs);
+      break;
+    }
+
     if (!prepareInstruction()) break;
 
     if (traceThroughJmp()) continue;
@@ -143,7 +152,8 @@ RegionDescPtr RegionFormer::go() {
     auto const doPrediction =
       m_profiling ? false : outputIsPredicted(m_inst);
 
-    if (tryInline()) {
+    uint32_t calleeInstrSize;
+    if (tryInline(calleeInstrSize)) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
       // translate the callee and potentially use its return type to extend the
       // tracelet.
@@ -163,6 +173,7 @@ RegionDescPtr RegionFormer::go() {
 
       m_sk = m_ht.curSrcKey();
       m_blockFinished = true;
+      m_pendingInlinedInstrs += calleeInstrSize;
       continue;
     }
 
@@ -324,6 +335,8 @@ void RegionFormer::addInstruction() {
 
   FTRACE(2, "selectTracelet adding instruction {}\n", m_inst.toString());
   m_curBlock->addInstruction();
+  m_numBCInstrs++;
+  if (m_ht.isInlining()) m_pendingInlinedInstrs--;
 }
 
 bool RegionFormer::traceThroughJmp() {
@@ -375,15 +388,17 @@ bool RegionFormer::traceThroughJmp() {
                          : m_sk.advanced().offset());
   }
 
-  ++m_numJmps;
+  m_numJmps++;
   m_blockFinished = true;
   return true;
 }
 
-bool RegionFormer::tryInline() {
+bool RegionFormer::tryInline(uint32_t& instrSize) {
   assert(m_inst.source == m_sk);
   assert(m_inst.func() == curFunc());
   assert(m_sk.resumed() == resumed());
+
+  instrSize = 0;
 
   if (!m_inl.canInlineAt(m_inst.source, m_inst.funcd, *m_region)) {
     return false;
@@ -434,6 +449,11 @@ bool RegionFormer::tryInline() {
     return refuse("failed to select region in callee");
   }
 
+  instrSize = region->instrSize();
+  auto newInstrSize = instrSize + m_numBCInstrs + m_pendingInlinedInstrs;
+  if (newInstrSize > RuntimeOption::EvalJitMaxRegionInstrs) {
+    return refuse("new region would be too large");
+  }
   if (!m_inl.shouldInline(callee, *region)) {
     return refuse("shouldIRInline failed");
   }

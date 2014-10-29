@@ -82,16 +82,20 @@ class ResourceData {
  private:
   static void compileTimeAssertions();
 
+ private:
   //============================================================================
   // ResourceData fields
+  UNUSED char m_pad[3];
+  UNUSED uint8_t m_kind; // TODO: 5478458 Overlap kind fields
+
+  // Counter to keep track of the number of references to this resource
+  // (i.e. the resource's "refcount")
+  mutable RefCount m_count;
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
   // output functions)
   int32_t o_id;
-  // Counter to keep track of the number of references to this resource
-  // (i.e. the resource's "refcount")
-  mutable RefCount m_count;
 } __attribute__((__aligned__(16)));
 
 /**

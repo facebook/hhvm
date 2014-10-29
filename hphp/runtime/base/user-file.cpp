@@ -405,7 +405,6 @@ int UserFile::access(const String& path, int mode) {
       return simulateAccessResult(
                !(buf.st_mode & S_IFDIR) &&  // Directories are not executable
                ((buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
-               (buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
                (buf.st_gid == gid && (buf.st_mode & S_IXGRP)) ||
                (buf.st_mode & S_IXOTH)));
     default: // Unknown mode.

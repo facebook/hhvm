@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #define ICONV_SUPPORTS_ERRNO 1
 #include <iconv.h>
 
@@ -69,7 +71,7 @@ typedef enum _php_iconv_err_t {
   PHP_ICONV_ERR_ALLOC             = 8
 } php_iconv_err_t;
 
-static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset,
+static void _php_iconv_show_error(php_iconv_err_t &err, const char *out_charset,
                                   const char *in_charset) {
   switch (err) {
   case PHP_ICONV_ERR_SUCCESS:
@@ -87,6 +89,12 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset,
                     "in input string");
     break;
   case PHP_ICONV_ERR_ILLEGAL_SEQ:
+    if (RuntimeOption::IconvIgnoreCorrect == HackStrictOption::ERROR) {
+      if (boost::ends_with(out_charset, "//IGNORE")) {
+        err = PHP_ICONV_ERR_SUCCESS;
+        break;
+      }
+    }
     raise_notice("iconv: Detected an illegal character in input string");
     break;
   case PHP_ICONV_ERR_TOO_BIG:

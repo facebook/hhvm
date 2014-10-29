@@ -54,8 +54,11 @@ EXT_HHVM_DIR(CXX_SOURCES CXX_HEADERS "../../system/idl" "hphp_runtime_ext")
 ## ext_hhvm_infotabs
 #
 
-set(INFOTABS_HEADER "${CMAKE_CURRENT_BINARY_DIR}/ext_hhvm_infotabs.h")
-set(INFOTABS_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/ext_hhvm_infotabs.cpp")
+set(ROOT_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/generated")
+set(GENERATED_DIR "${ROOT_GEN_DIR}/hphp/runtime/ext_hhvm/")
+include_directories(BEFORE "${ROOT_GEN_DIR}")
+set(INFOTABS_HEADER "${GENERATED_DIR}/ext_hhvm_infotabs.h")
+set(INFOTABS_SOURCE "${GENERATED_DIR}/ext_hhvm_infotabs.cpp")
 
 auto_sources(HPHP_IDLS "*.idl.json" "RECURSE"
              "${CMAKE_CURRENT_SOURCE_DIR}/../../system/idl")
@@ -73,7 +76,6 @@ add_custom_command(
   COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-infotabs"
   ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
-
 
 #
 ## Actual library

@@ -527,6 +527,16 @@ void VariableSerializer::write(const Object& v) {
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
         collectionSerialize(v.get(), this);
+      } else if (v->instanceof(SystemLib::s_ClosureClass)) {
+        // We serialize closures as "{}" in JSON mode to be compatible
+        // with PHP. And issue a warning in HipHop syntax.
+        if (RuntimeOption::EnableHipHopSyntax) {
+          m_buf->append("null");
+          json_set_last_error_code(
+            json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
+          return;
+        }
+        m_buf->append("{}");
       } else {
         Array props = v->o_toArray(true);
         setObjectInfo(v->o_getClassName(), v->o_getId(), 'O');

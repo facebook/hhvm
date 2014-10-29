@@ -403,9 +403,11 @@ int UserFile::access(const String& path, int mode) {
                (buf.st_mode & S_IWOTH));
     case X_OK: // Test for execute permission.
       return simulateAccessResult(
+               !(buf.st_mode & S_IFDIR) &&  // Directories are not executable
+               ((buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
                (buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
                (buf.st_gid == gid && (buf.st_mode & S_IXGRP)) ||
-               (buf.st_mode & S_IXOTH));
+               (buf.st_mode & S_IXOTH)));
     default: // Unknown mode.
       return -1;
   }

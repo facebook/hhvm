@@ -1649,10 +1649,14 @@ Variant openssl_pkcs7_verify_core(
     goto clean_exit;
   }
   if (ignore_cert_expiration) {
+#if (OPENSSL_VERSION_NUMBER >= 0x10000000)
     // make sure no other callback is specified
     assert(!store->verify_cb);
     // ignore expired certs
     X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
+#else
+    always_assert(false);
+#endif
   }
   in = BIO_new_file(filename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
   if (in == NULL) {

@@ -1710,7 +1710,7 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
     type, "Loc", locId,
     [&](Type type) { gen(GuardLoc, type, LocalId(locId),
                          m_irb->fp(), m_irb->sp()); },
-    [&] { return gen(LdLocAddr, Type::PtrToStr, LocalId(locId),
+    [&] { return gen(LdLocAddr, Type::PtrToFrameStr, LocalId(locId),
                      m_irb->fp()); }
   );
 
@@ -1739,8 +1739,10 @@ void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type,
     [&](Type type) {
       gen(CheckLoc, type, LocalId(locId), makeExit(dest), m_irb->fp());
     },
-    [&] { return gen(LdLocAddr, Type::PtrToStr, LocalId(locId),
-                     m_irb->fp()); }
+    [&] {
+      return gen(LdLocAddr, Type::PtrToFrameStr, LocalId(locId),
+                 m_irb->fp());
+    }
   );
 }
 
@@ -1780,7 +1782,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
   emitProfiledGuard(
     type, "Stk", stackIndex,
     [&](Type type) { gen(GuardStk, type, stackOff, m_irb->sp(), m_irb->fp()); },
-    [&] { return gen(LdStackAddr, Type::PtrToStr, stackOff, m_irb->sp()); }
+    [&] { return gen(LdStackAddr, Type::PtrToStkStr, stackOff, m_irb->sp()); }
   );
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
@@ -1814,7 +1816,9 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
         gen(CheckStk, type, exit, adjustedOffset, m_irb->sp());
       },
       [&] {
-        return gen(LdStackAddr, Type::PtrToStr, adjustedOffset, m_irb->sp());
+        return gen(
+          LdStackAddr, Type::PtrToStkStr, adjustedOffset, m_irb->sp()
+        );
       }
     );
   }
@@ -2370,7 +2374,7 @@ SSATmp* HhbcTranslator::ldClsPropAddrKnown(Block* catchBlock,
     return cls->staticPropRepoAuthType(slot);
   }();
 
-  auto const ptrTy = convertToType(repoTy).ptr();
+  auto const ptrTy = convertToType(repoTy).ptr(Ptr::SProp);
 
   emitInitSProps(cls, catchBlock);
   return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
@@ -2632,7 +2636,8 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
     case InitPropOp::Static:
       // For sinit, the context class is always the same as the late-bound
       // class, so we can just use curClass().
-      base = gen(LdClsPropAddrKnown, Type::PtrToCell, cns(ctx), cns(propName));
+      base = gen(LdClsPropAddrKnown, Type::PtrToSPropCell, cns(ctx),
+        cns(propName));
       break;
 
     case InitPropOp::NonStatic: {
@@ -3026,8 +3031,9 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           // supply an IR opcode representing the operation. SetWithRefElem is
           // used instead of SetElem because SetElem makes a few assumptions
           // about side exits that interpOne won't do.
-          auto const baseType = m_irb->localType(base.offset,
-                                                 DataTypeSpecific).ptr();
+          auto const baseType = m_irb->localType(
+            base.offset, DataTypeSpecific
+          ).ptr(Ptr::Frame);
           auto const isUnset = inst.op() == OpUnsetM;
           auto const isProp = mcodeIsProp(inst.immVecM[0]);
 
@@ -3505,7 +3511,7 @@ SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
   assert(offset >= (int32_t)m_irb->evalStack().numCells());
   return gen(
     LdStackAddr,
-    Type::PtrToGen,
+    Type::PtrToStkGen,
     StackOffset(offset + m_irb->stackDeficit() - m_irb->evalStack().numCells()),
     m_irb->sp()
   );
@@ -3557,7 +3563,7 @@ SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {
 
 SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, "LdLocAddr");
-  return gen(LdLocAddr, Type::PtrToGen, LocalId(locId), m_irb->fp());
+  return gen(LdLocAddr, Type::PtrToFrameGen, LocalId(locId), m_irb->fp());
 }
 
 /*

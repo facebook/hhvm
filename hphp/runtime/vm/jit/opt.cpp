@@ -63,11 +63,11 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
     if (t <= Type::Gen) {
-      IRInstruction* addr = unit.gen(LdStackAddr,
-                                     inst.marker(),
-                                     Type::PtrToGen,
-                                     StackOffset(i),
-                                     sp);
+      auto const addr = unit.gen(LdStackAddr,
+                                 inst.marker(),
+                                 Type::PtrToStkGen,
+                                 StackOffset(i),
+                                 sp);
       block->insert(pos, addr);
       IRInstruction* check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
       block->insert(pos, check);
@@ -90,11 +90,11 @@ static void insertAsserts(IRUnit& unit) {
         }
         if (inst.op() == Call) {
           SSATmp* sp = inst.dst();
-          IRInstruction* addr = unit.gen(LdStackAddr,
-                                         inst.marker(),
-                                         Type::PtrToGen,
-                                         StackOffset(0),
-                                         sp);
+          auto const addr = unit.gen(LdStackAddr,
+                                     inst.marker(),
+                                     Type::PtrToStkGen,
+                                     StackOffset(0),
+                                     sp);
           insertAfter(&inst, addr);
           insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
           continue;

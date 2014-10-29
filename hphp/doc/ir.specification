@@ -194,12 +194,6 @@ Passthrough
   variable, or some other property that doesn't affect the value of the
   variable itself.
 
-  A "canonical" value is a value with a non-passthrough source. The canonical
-  version of a value is the first value with a non-passthrough source obtained
-  by chasing any passthrough instructions.  Some ir instructions have rules
-  about behavior depending on whether some sources canonically come from
-  certain other instructions.
-
 ModifiesStack
 
   The instruction modifies the in-memory evaluation stack in the process of
@@ -252,9 +246,6 @@ be rechecked before each use.
 | CheckTypeMem<T>, ND, S(PtrToGen), B|E
 
   If the value pointed to by S0 is not type T, branch to the block B.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
 
 | GuardLoc<T,localId>, ND, S(FramePtr) S(StkPtr), E
 
@@ -352,9 +343,6 @@ exceptions depending on how coercion is implemented.
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to block B.
 
-  The PtrToGen in S0 must not be a pointer into the evaluation stack or frame
-  locals.
-
 | CheckDefinedClsEq<className,classPtr>, ND, NA, B|E
 
   Compare the currently defined class of name `className' with `classPtr'; if
@@ -401,9 +389,6 @@ exceptions depending on how coercion is implemented.
 | CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA), B
 
   If the value in S0 is Nullptr, branch to block B.
-
-  The value in S0 must not be a pointer into the evaluation stack or frame
-  locals.
 
 | AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func), P
 
@@ -702,9 +687,6 @@ To string conversions:
 
   Sets D to true iff the value referenced by S0 is not of type T.
 
-  The value in S0 must not be a pointer into the evaluation stack or frame
-  locals.
-
 | IsScalarType, D(Bool), S(Cell), C
 
   Returns true if S0 is of type Int, Bool, Dbl or Str. Returns false otherwise.
@@ -820,21 +802,18 @@ generating efficient compare-and-branch instruction sequences.
 
   Box S0 if it is unboxed, and put the resulting BoxedCell in D.
 
-| UnboxPtr, D(PtrToCell), S(PtrToGen), NF
+| UnboxPtr, DUnboxPtr, S(PtrToGen), NF
 
   If S0 points to a cell that is KindOfRef, dereference the pointer in the
   TypedValue and return a pointer to the inner-cell in D.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-| BoxPtr, D(PtrToBoxedCell), S(PtrToGen), NF
+| BoxPtr, DBoxPtr, S(PtrToGen), NF
 
   Boxes the TypeValue that S0 points to if it is not boxed. The result D points
   to the same TypedValue as S0 but has a more refined type.
 
-  The PtrToGen in S0 must not be a pointer into the evaluation stack or frame
-  locals.
+  S0 may not already point into a RefData (due to VM invariants), although the
+  IR type system does not enforce it.
 
 
 7. Loads
@@ -876,18 +855,19 @@ ranges due to eagerly loaded values at the start of the tracelet.
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStackAddr<offset>, DParam, S(StkPtr), C
+| LdStackAddr<T,offset>, DParamPtr(Stk), S(StkPtr), C
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
-  (in cells).
+  (in cells). T must be a subtype of PtrToStkGen.
 
-| LdLocAddr<T,localId>, DParam, S(FramePtr), C
+| LdLocAddr<T,localId>, DParamPtr(Frame), S(FramePtr), C
 
-  Loads the address of the local slot localId from the frame S0 into D.
+  Loads the address of the local slot localId from the frame S0 into D. T must
+  be a subtype of PtrToFrameGen.
 
-| LdVectorBase, D(PtrToCell), S(Obj), E
+| LdVectorBase, D(PtrToMemCell), S(Obj), E
 
-| LdPairBase, D(PtrToCell), S(Obj), E
+| LdPairBase, D(PtrToMemCell), S(Obj), E
 
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
@@ -897,12 +877,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads from S0 + S1 (in bytes) and puts the value in D. If the optional target
   block B is specified and the loaded value's type does not match T, this
   instruction does not load into D and branches to block B.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-  Also, note that you should not add new uses of LdMem.  We intend to split it
-  up into several 'categorized' load instructions.
 
 | LdContField, DParam, S(Obj) C(Int), B
 
@@ -915,8 +889,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
-
-  The cell at S0 + S1 must not be in the evaluation stack or frame locals.
 
 | LdRef<T>, DLdRef, S(BoxedCell), B
 
@@ -999,7 +971,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   decref of the result is necessary because class constants will always be
   static.
 
-| LdClsInitData, D(PtrToCell), S(Cls), C
+| LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 
   Loads the pointer to the property initializer array for class S0.
 
@@ -1097,29 +1069,30 @@ ranges due to eagerly loaded values at the start of the tracelet.
   pointer to the current frame (used to get the context). May throw or fatal if
   method is not accessible.
 
-| LdPropAddr<T>, DParam, S(Obj) C(Int), C
+| LdPropAddr<T>, DParamPtr(Prop), S(Obj) C(Int), C
 
   Load the address of the object property for S0 at offset S1 (in bytes) into
-  D.  T must be a subtype of PtrToGen.
+  D.  T must be a subtype of PtrToPropGen.
 
-| LdGblAddr, D(PtrToGen), S(Str), B
+| LdGblAddr, D(PtrToGblGen), S(Str), B
 
   Loads a pointer to a global. S0 is the global's name. Branches to B if the
   global is not defined.
 
-| LdGblAddrDef, D(PtrToGen), S(Str), E
+| LdGblAddrDef, D(PtrToGblGen), S(Str), E
 
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.
 
-| LdClsPropAddrKnown<T>, DParam, C(Cls) CStr, C
+| LdClsPropAddrKnown<T>, DParamPtr(SProp), C(Cls) CStr, C
 
   Loads a pointer to a static class property. S0 points to the class, and S1 is
   the property name. Should only be called when S0 is known statically, and
   when it is known to have a visible and accessible static property named S1.
-  The type of D will be a Ptr of whatever type the static property has.
+  The type of D will be a Ptr of whatever type the static property has. The
+  type parameter T must be a subtype of PtrToSPropGen.
 
-| LdClsPropAddrOrNull, D(PtrToGen|Nullptr),
+| LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
 |                      S(Cls) S(Str) C(Cls),
 |                      C|E|Er
 
@@ -1128,7 +1101,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned.
 
-| LdClsPropAddrOrRaise, D(PtrToGen), S(Cls) S(Str) C(Cls), C|E|Er
+| LdClsPropAddrOrRaise, D(PtrToSPropGen), S(Cls) S(Str) C(Cls), C|E|Er
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
   property name, and S2 is the class representing the context of the code
@@ -1469,9 +1442,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Store S2 into the location S0 + S1 (in bytes).
 
-  The PtrToGen in S0 must not be a pointer into the evaluation stack or frame
-  locals.
-
 | StProp, ND, S(Obj) C(Int) S(Gen), E|CRc
 
   Store S2 into the location S0 + S1 (in bytes).
@@ -1480,8 +1450,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Store S2 into the location given by the index S1 from base pointer S0. The
   index in S1 is the number of bytes from the base in S0.
-
-  The cell at S0 + S1 must not be in the evaluation stack or frame locals.
 
 | StLoc<localId>, ND, S(FramePtr) S(Gen), E|CRc
 
@@ -1661,11 +1629,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
   is used by the translator to track values that are stored in locals. It can
   be thought of as a store (which does not physically store anything).
 
-| LdMIStateAddr, DofS(0), S(PtrToGen) C(Int), C
-
-  Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
-  type as S0. S0 must be the output of a DefMIStateBase.
-
 | IncRef, ND, S(Gen), E
 
   If S0 is a refcounted type, increment its refcount.
@@ -1702,9 +1665,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Decref the value pointed to by S0 at offset S1 (in bytes), calling any
   appropriate destructor if the refcount goes to zero.
-
-  The PtrToGen in S0 must not be a pointer into the evaluation stack or frame
-  locals.
 
 | DecRefNZ, ND, S(Gen), E|CRc
 
@@ -2293,9 +2253,14 @@ ranges due to eagerly loaded values at the start of the tracelet.
 18. Member instruction support
 
 
-| DefMIStateBase, D(PtrToCell), NA, NF
+| DefMIStateBase, D(PtrToMISGen), NA, NF
 
   Declares a base register for MInstrState. Currently this is always %rsp.
+
+| LdMIStateAddr, DofS(0), S(PtrToMISGen) C(Int), C
+
+  Load an MInstrState address. Returns a pointer to (S0 + S1) with the same
+  type as S0. S0 must be the output of a DefMIStateBase.
 
 All of the remaining opcodes in this section are simple wrappers around helper
 functions (specified in S0) to perform the corresponding vector operation. If
@@ -2334,134 +2299,88 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(PtrToGen), S(Str), E|Er
+| BaseG, D(PtrToRGblCell), S(Str), E|Er
 
   Get a base from global named S0.
 
-| PropX, D(PtrToGen), S(Obj,PtrToGen) S(Cell) S(PtrToCell), E|Er
+  NB: BaseG returns either a PtrToGblGen, OR a pointer to a ref that is rooted
+  in a GblGen.  (I.e. the unbox happens in the C++ helper that this instruction
+  calls.)
 
-  Lookup intermediate property in S0, with key S1. S2 should point to an
-  MInstrState struct.
+| PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Lookup intermediate property in S0, with key S1.
 
-|STK PropDX, D(PtrToGen), S(Obj,PtrToGen) S(Cell) S(PtrToCell), MProp|E|Er
+|STK PropDX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|E|Er
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|PRc|Er
 
-| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToCell), E|PRc|Er
-
-  Get property with key S1 from S0. S2 should point to an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Get property with key S1 from S0.
 
 |STK VGetProp, D(BoxedCell),
-|              S(Obj,PtrToGen) S(Cell) S(PtrToCell),
+|              S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
 |              MProp|E|PRc|Er
 
-  Get property with key S1 from base S0 as a reference. S2 should point to an
-  MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Get property with key S1 from base S0 as a reference.
 
 |STK BindProp, ND,
-|              S(Obj,PtrToGen) S(Cell) S(BoxedCell) S(PtrToCell),
+|              S(Obj,PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen),
 |              MProp|E|Er
 
-  Bind property with key S1 in base S0 to the reference in S2. S3 should point
-  to an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Bind property with key S1 in base S0 to the reference in S2.
 
 |STK SetProp, ND, S(Obj,PtrToGen) S(Cell) S(Cell), MProp|E|Er
 
   Set property with key S1 in S0 to S2.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
-
 | UnsetProp, ND, S(Obj,PtrToGen) S(Cell), E|Er
 
   Unset an object property.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
-
 |STK SetOpProp<op>, D(Cell),
-|                   S(Obj,PtrToGen) S(Cell) S(Cell) S(PtrToCell),
+|                   S(Obj,PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
 |                   MProp|E|PRc|Er
 
-  Set op propery with key S1 in base S0, using S2 as the right hand side. S3
-  should point to an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
+  Set op propery with key S1 in base S0, using S2 as the right hand side.
 
 |STK IncDecProp<op>, D(Cell),
-|                    S(Obj,PtrToGen) S(Cell) S(PtrToCell),
+|                    S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
 |                    MProp|E|PRc|Er
 
-  Increment/decrement property with key S1 in base S0. S2 should point to an
-  MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
+  Increment/decrement property with key S1 in base S0.
 
 | EmptyProp, D(Bool), S(Obj,PtrToGen) S(Cell), E|Er
 
   Returns true iff the property with key S1 in base S0 is empty.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
-
 | IssetProp, D(Bool), S(Obj,PtrToGen) S(Cell), E|Er
 
   Returns true iff the property with key S1 in base S0 is set.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
-
-| ElemX, D(PtrToGen), S(PtrToGen) S(Cell) S(PtrToCell), E|Er
+| ElemX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 
   Get intermediate element with key S1 from base S0. The base will not be
-  modified. S2 should point to an MInstrState struct.
+  modified.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  cannonically from a LdLocAddr instruction.
+| ElemArray, D(PtrToMemGen), S(PtrToArr) S(Int,Str), E|Er
 
-| ElemArray, D(PtrToGen), S(PtrToArr) S(Int,Str), E|Er
-
-| ElemArrayW, D(PtrToGen), S(PtrToArr) S(Int,Str), E|Er
+| ElemArrayW, D(PtrToMemGen), S(PtrToArr) S(Int,Str), E|Er
 
   Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
   int/str.  The ElemArrayW version is for Warn member instrs.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-|STK ElemDX, D(PtrToGen), S(PtrToGen) S(Cell) S(PtrToCell), MElem|E|Er
+|STK ElemDX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-|STK ElemUX, D(PtrToGen), S(PtrToGen) S(Cell) S(PtrToCell), MElem|E|Er
+|STK ElemUX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
 
 | ArrayGet, D(Cell), S(Arr) S(Int,Str), PRc|Er
 
@@ -2475,28 +2394,17 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToCell), E|PRc|Er
+| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToMISGen), E|PRc|Er
 
-  Get element with key S1 from S0. S2 should point to an MInstrState struct.
+  Get element with key S1 from S0.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+|STK VGetElem, D(BoxedCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|E|PRc|Er
 
-|STK VGetElem, D(BoxedCell), S(PtrToGen) S(Cell) S(PtrToCell), MElem|E|PRc|Er
+  Get element with key S1 from base S0 as a reference.
 
-  Get element with key S1 from base S0 as a reference. S2 should point to an
-  MInstrState struct.
+|STK BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(PtrToMISGen), MElem|E|Er
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-|STK BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell) S(PtrToCell), MElem|E|Er
-
-  Bind element with key S1 in base S0 to the reference S2. S3 should point to
-  an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Bind element with key S1 in base S0 to the reference S2.
 
 | ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), E|PRc|CRc|K|Er
 
@@ -2515,78 +2423,47 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
 |STK SetWithRefElem, ND,
-|                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToCell),
+|                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),
 |                    MElem|E|Er
 
-  Set element with key S1 in S0 to S2. S3 should point to an MInstrState
-  struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Set element with key S1 in S0 to S2.
 
 |STK UnsetElem, ND, S(PtrToGen) S(Cell), MElem|E|Er
 
   Unsets the element at key S1 in the base S0.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
 |STK SetOpElem<op>, D(Cell),
-|                   S(PtrToGen) S(Cell) S(Cell) S(PtrToCell),
+|                   S(PtrToGen) S(Cell) S(Cell) S(PtrToMISGen),
 |                   MElem|E|PRc|Er
 
-  Set op elem with key S1 in base S0, using S2 as the right hand side. S3
-  should point to an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Set op elem with key S1 in base S0, using S2 as the right hand side.
 
 |STK IncDecElem, D(Cell),
-|                S(PtrToGen) S(Cell) S(PtrToCell),
+|                S(PtrToGen) S(Cell) S(PtrToMISGen),
 |                MElem|E|PRc|Er
 
-  Increment/decrement element with key S1 in base S0. S2 should point to an
-  MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Increment/decrement element with key S1 in base S0.
 
 |STK SetNewElem, ND, S(PtrToGen) S(Cell), MElem|E|Er
 
   Append the value in S1 to S0.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
 |STK SetNewElemArray, ND, S(PtrToArr) S(Cell), MElem|E|Er
 
   Append the value in S1 to S0, where S0 must be a pointer to an array.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
 |STK SetWithRefNewElem, ND,
-|                       S(PtrToGen) S(PtrToGen) S(PtrToCell),
+|                       S(PtrToGen) S(PtrToGen) S(PtrToMISGen),
 |                       MElem|E|Er
 
-  AppendWithRef the value in S1 to S0. S2 should point to an MInstrState
-  struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  AppendWithRef the value in S1 to S0.
 
 |STK BindNewElem, ND,
-|                 S(PtrToGen) S(BoxedCell) S(PtrToCell),
+|                 S(PtrToGen) S(BoxedCell) S(PtrToMISGen),
 |                 MElem|E|Er
 
-  Append the reference in S1 to S0. S2 should point to an MInstrState struct.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
+  Append the reference in S1 to S0.
 
 | ArrayIsset, D(Bool), S(Arr) S(Int,Str), E|Er
 
@@ -2608,20 +2485,14 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| IssetElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToCell), E|Er
+| IssetElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 
   Returns true iff the element at key S1 in S0 is set.
 
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
-
-| EmptyElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToCell), E|Er
+| EmptyElem, D(Bool), S(PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
-
-  The PtrToGen in S0 must not be a pointer to a frame local, unless it comes
-  canonically from a LdLocAddr instruction.
 
 | CheckBounds, ND, S(Int) S(Int), E|Er
 

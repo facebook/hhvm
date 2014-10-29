@@ -62,6 +62,9 @@ TRACE_SET_MOD(hhir);
 #define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
 #define DParam         HasDest
+#define DParamPtr(k)   HasDest
+#define DUnboxPtr      HasDest
+#define DBoxPtr        HasDest
 #define DAllocObj      HasDest
 #define DArrElem       HasDest
 #define DArrPacked     HasDest
@@ -106,6 +109,9 @@ OpInfo g_opInfo[] = {
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
 #undef DArrElem
 #undef DArrPacked
 #undef DAllocObj

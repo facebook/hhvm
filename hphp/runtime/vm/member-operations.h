@@ -326,8 +326,9 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvScratch,
   unknownBaseType(base);
 }
 
-/**
- * Fast path for Elem assuming base is an Array
+/*
+ * Fast path for Elem assuming base is an Array.  Does not unbox the returned
+ * pointer.
  */
 template <bool warn, KeyType keyType = KeyType::Any>
 inline const TypedValue* Elem(TypedValue& tvScratch, TypedValue& tvRef,
@@ -465,11 +466,10 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(scratchKey));
 }
 
-/**
- * $base[$key] = ...
- * \____ ____/
- *      v
- *   $result
+/*
+ * Intermediate elem operation for defining member instructions.
+ *
+ * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template <bool warn, bool reffy, KeyType keyType = KeyType::Any>
 inline TypedValue* ElemD(TypedValue& tvScratch, TypedValue& tvRef,
@@ -542,11 +542,10 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(scratchKey));
 }
 
-/**
- * $base[$key] = ...
- * \____ ____/
- *      v
- *   $result
+/*
+ * Intermediate Elem operation for an unsetting member instruction.
+ *
+ * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template <KeyType keyType = KeyType::Any>
 inline TypedValue* ElemU(TypedValue& tvScratch, TypedValue& tvRef,
@@ -1834,14 +1833,12 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
   unknownBaseType(base);
 }
 
-// define == false:
-//   $result = $base->$key;
-//
-// define == true:
-//   $base->$key = ...
-//   \____ ____/
-//        v
-//     $result
+/*
+ * Generic property access (PropX and PropDX end up here).
+ *
+ * Returns a pointer to a number of possible places, but does not unbox it.
+ * (The returned pointer is never pointing into a RefData.)
+ */
 template <bool warn, bool define, bool unset, bool baseIsObj = false,
           KeyType keyType = KeyType::Any>
 inline TypedValue* Prop(TypedValue& tvScratch, TypedValue& tvRef,

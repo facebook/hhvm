@@ -161,6 +161,7 @@ void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
   baseType = origBase;
   always_assert(baseType.isPtr() ^ baseType.notPtr());
   auto const basePtr = baseType.isPtr();
+  auto const basePtrKind = basePtr ? baseType.ptrKind() : Ptr::Unk;
   baseType = baseType.derefIfPtr();
 
   // Only certain types of bases are supported now but this list may expand in
@@ -180,7 +181,7 @@ void MInstrEffects::init(const Opcode rawOp, const Type origBase) {
   getBaseType(rawOp, true, inner, baseValChanged);
 
   baseType = inner.box() | outer;
-  baseType = basePtr ? baseType.ptr() : baseType;
+  baseType = basePtr ? baseType.ptr(basePtrKind) : baseType;
 
   baseTypeChanged = baseType != origBase;
 
@@ -283,9 +284,8 @@ SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
 
   if (m_needMIS) {
     return gen(LdMIStateAddr, m_misBase, cns(kReservedRSPSpillSpace));
-  } else {
-    return cns(Type::cns(nullptr, Type::PtrToUninit));
   }
+  return cns(Type::cns(nullptr, Type::PtrToMISUninit));
 }
 
 
@@ -991,7 +991,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
   if (m_base->isA(Type::Obj)) {
     auto const propAddr = gen(
       LdPropAddr,
-      convertToType(propInfo.repoAuthType).ptr(),
+      convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
       m_base,
       cns(propInfo.offset)
     );
@@ -1024,7 +1024,7 @@ void HhbcTranslator::MInstrTranslator::emitPropSpecialized(const MInstrAttr mia,
       );
       auto const propAddr = gen(
         LdPropAddr,
-        convertToType(propInfo.repoAuthType).ptr(),
+        convertToType(propInfo.repoAuthType).ptr(Ptr::Prop),
         obj,
         cns(propInfo.offset)
       );

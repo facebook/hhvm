@@ -1771,12 +1771,12 @@ SSATmp* simplifyLdStackAddr(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
   // NB: strict subtype relation. Non-strict results in infinite recursion.
-  if (info.knownType.ptr() < inst->typeParam()) {
+  if (info.knownType.ptr(Ptr::Stk) < inst->typeParam()) {
     return gen(
       env,
       LdStackAddr,
       *inst->extra<StackOffset>(),
-      info.knownType.ptr(),
+      info.knownType.ptr(Ptr::Stk),
       inst->src(0)
     );
   }

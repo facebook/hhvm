@@ -88,11 +88,11 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
-  return cns(Type::cns(&init_null_variant, Type::PtrToInitNull));
+  return cns(Type::cns(&init_null_variant, Type::PtrToMemInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
-  return cns(Type::cns(&null_variant, Type::PtrToUninit));
+  return cns(Type::cns(&null_variant, Type::PtrToMemUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -488,7 +488,7 @@ SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
   auto const locId = inst->extra<LdLocAddr>()->locId;
   auto const type = localType(locId, DataTypeGeneric);
   assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(std::min(type.ptr(), inst->typeParam()));
+  inst->setTypeParam(std::min(type.ptr(Ptr::Frame), inst->typeParam()));
   return nullptr;
 }
 

@@ -50,33 +50,36 @@ struct LocalStateHook;
  *   Contains a description of how to compute the type of the
  *   destination(s) of an instruction from its sources.
  *
- *     ND          instruction has no destination
- *     D(type)     single dst has a specific type
- *     DofS(N)     single dst has the type of src N
- *     DBox(N)     single dst has boxed type of src N
- *     DRefineS(N) single dst's type is the intersection of src N and paramType
- *     DParam      single dst has type of the instruction's type parameter
- *     DLdRef      single dst has type of the instruction's type parameter,
- *                 loosened to allow efficient type checks
- *     DAllocObj   single dst has a type of a newly allocated object; may be a
- *                   specialized object type if the class is known
- *     DArrPacked  single dst has a packed array type
- *     DArrElem    single dst has type based on reading an array element,
- *                   intersected with an optional type parameter
- *     DThis       single dst has type Obj<ctx>, where ctx is the
- *                   current context class
- *     DMulti      multiple dests. type and number depend on instruction
- *     DSetElem    single dst is a subset of CountedStr|Nullptr depending on
- *                   sources
- *     DStk(x)     up to two dests. x should be another D* macro and indicates
- *                   the type of the first dest, if any. the second (or first,
- *                   depending on the presence of a primary destination), will
- *                   be of type Type::StkPtr. implies ModifiesStack.
- *     DBuiltin    single dst for CallBuiltin. This can return complex data
- *                   types such as (Type::Str | Type::Null)
+ *     ND           instruction has no destination
+ *     D(type)      single dst has a specific type
+ *     DofS(N)      single dst has the type of src N
+ *     DBox(N)      single dst has boxed type of src N
+ *     DRefineS(N)  single dst's type is intersection of src N and paramType
+ *     DParam       single dst has type of the instruction's type parameter
+ *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
+ *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
+ *     DBoxPtr      Boxed PtrTo*T
+ *     DLdRef       single dst has type of the instruction's type parameter,
+ *                  loosened to allow efficient type checks
+ *     DAllocObj    single dst has a type of a newly allocated object; may be a
+ *                    specialized object type if the class is known
+ *     DArrPacked   single dst has a packed array type
+ *     DArrElem     single dst has type based on reading an array element,
+ *                    intersected with an optional type parameter
+ *     DThis        single dst has type Obj<ctx>, where ctx is the
+ *                    current context class
+ *     DMulti       multiple dests. type and number depend on instruction
+ *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
+ *                    sources
+ *     DStk(x)      up to two dests. x should be another D* macro and indicates
+ *                    the type of the first dest, if any. the second (or first,
+ *                    depending on the presence of a primary destination), will
+ *                    be of type Type::StkPtr. implies ModifiesStack.
+ *     DBuiltin     single dst for CallBuiltin. This can return complex data
+ *                    types such as (Type::Str | Type::Null)
  *     DSubtract(N,t) single dest has type of src N with t removed
- *     DCns        single dst's type is the union of legal types for PHP
- *                   constants
+ *     DCns         single dst's type is the union of legal types for PHP
+ *                    constants
  *
  * srcinfo:
  *

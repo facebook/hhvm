@@ -44,6 +44,9 @@ bool shouldHHIRRelaxGuards() {
 #define DBox(n)        DofS(n)
 #define DRefineS(n)    return true;  // typeParam may relax
 #define DParam         return true;  // typeParam may relax
+#define DParamPtr(k)   return true;  // typeParam may relax
+#define DUnboxPtr      return typeMightRelax(inst->src(0));
+#define DBoxPtr        return typeMightRelax(inst->src(0));
 #define DLdRef         return true;  // typeParam may relax
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
@@ -80,6 +83,9 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
 #undef DLdRef
 #undef DAllocObj
 #undef DArrPacked
@@ -98,7 +104,8 @@ namespace {
  * of the load to match the relaxed type of the guard.
  */
 void retypeLoad(IRInstruction* load, Type newType) {
-  newType = load->is(LdLocAddr, LdStackAddr) ? newType.ptr() : newType;
+  newType = load->is(LdLocAddr) ? newType.ptr(Ptr::Frame) : newType;
+  newType = load->is(LdStackAddr) ? newType.ptr(Ptr::Stk) : newType;
 
   // Set new typeParam of 'load' if different from previous one,
   // but avoid doing it if newType is Bottom.  Note that we may end up

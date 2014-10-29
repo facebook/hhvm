@@ -467,17 +467,17 @@ private:
   // fields.  (gcc does not combine the stores itself.)
   union {
     struct {
-      uint32_t m_len;
+      uint32_t m_cap;
       mutable RefCount m_count;
     };
-    uint64_t m_lenAndCount;
+    uint64_t m_capAndCount;
   };
   union {
     struct {
-      int32_t m_cap;
+      uint32_t m_len;
       mutable strhash_t m_hash;   // precompute hash codes for static strings
     };
-    uint64_t m_capAndHash;
+    uint64_t m_lenAndHash;
   };
 
   friend class APCString;

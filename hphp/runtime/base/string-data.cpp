@@ -100,8 +100,8 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = sl.len;
-  sd->m_capAndHash  = sl.len + 1;
+  sd->m_capAndCount = sl.len + 1; // cap=len+1, count=0
+  sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
@@ -138,8 +138,8 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = 0;
-  sd->m_capAndHash  = 1;
+  sd->m_capAndCount = 1; // cap=1 count=0
+  sd->m_lenAndHash  = 0; // len=0 hash=0
   data[0] = 0;
 
   assert(sd->m_hash == 0);
@@ -201,8 +201,8 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_lenAndCount  = sl.len;
-  sd->m_capAndHash   = cap - sizeof(StringData);
+  sd->m_capAndCount  = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
@@ -235,8 +235,8 @@ StringData* StringData::Make(size_t reserveLen) {
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_lenAndCount = 0;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->isFlat());
   assert(sd->checkSane());
@@ -263,8 +263,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
   memcpy(data + r1.len, r2.ptr, r2.len);
@@ -288,8 +288,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   void* p;
   p = memcpy(data,              r1.ptr, r1.len);
@@ -311,8 +311,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   void* p;
   p = memcpy(data,              r1.ptr, r1.len);
@@ -343,17 +343,15 @@ ALWAYS_INLINE void StringData::enlist() {
 NEVER_INLINE
 StringData* StringData::MakeAPCSlowPath(const APCString* shared,
                                         uint32_t len) {
-  auto const data = shared->getStringData();
-  auto const hash = data->m_hash & STRHASH_MASK;
-  auto const capAndHash = static_cast<uint64_t>(hash) << 32;
-
   auto const sd = static_cast<StringData*>(
       MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
   );
+  auto const data = shared->getStringData();
+  auto const hash = data->m_hash & STRHASH_MASK;
 
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash = capAndHash;
+  sd->m_capAndCount = 0; // cap=count=0
+  sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -387,12 +385,9 @@ StringData* StringData::Make(const APCString* shared) {
   auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
 
-  auto const capAndHash = static_cast<uint64_t>(hash) << 32 |
-                                            (cap - sizeof(StringData));
-
   sd->m_data = pdst;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash = capAndHash;
+  sd->m_capAndCount = (cap - sizeof(StringData)); // count=0
+  sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
   auto const mcret = memcpy(pdst, psrc, len);
@@ -942,10 +937,6 @@ bool StringData::checkSane() const {
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(offsetof(StringData, m_count) == FAST_REFCOUNT_OFFSET,
                 "m_count at wrong offset");
-  static_assert(offsetof(StringSlice, ptr) == offsetof(StringData, m_data) &&
-                offsetof(StringSlice, len) == offsetof(StringData, m_len),
-                "StringSlice and StringData must have same pointer and size "
-                "layout for the StaticString map");
 
   assert(uint32_t(size()) <= MaxSize);
   assert(uint32_t(capacity()) <= MaxCap);

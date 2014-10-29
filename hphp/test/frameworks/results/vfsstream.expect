@@ -633,7 +633,7 @@ org\bovigo\vfs\vfsStreamWrapperTestCase::chownChangesUser
 org\bovigo\vfs\vfsStreamWrapperTestCase::chownDoesNotWorkOnVfsStreamUrls
 .
 org\bovigo\vfs\vfsStreamWrapperTestCase::directoriesAndNonExistingFilesAreNeverExecutable
-F
+.
 org\bovigo\vfs\vfsStreamWrapperTestCase::dirname
 .
 org\bovigo\vfs\vfsStreamWrapperTestCase::file_exists

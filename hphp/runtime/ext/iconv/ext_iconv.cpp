@@ -71,22 +71,23 @@ typedef enum _php_iconv_err_t {
   PHP_ICONV_ERR_ALLOC             = 8
 } php_iconv_err_t;
 
-static void _php_iconv_show_error(php_iconv_err_t &err, const char *out_charset,
+static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
+                                  const char *out_charset, 
                                   const char *in_charset) {
   switch (err) {
   case PHP_ICONV_ERR_SUCCESS:
     break;
   case PHP_ICONV_ERR_CONVERTER:
-    raise_warning("iconv: Cannot open converter");
+    raise_notice("%s(): Cannot open converter", func);
     break;
   case PHP_ICONV_ERR_WRONG_CHARSET:
-    raise_warning("iconv: Wrong charset, "
+    raise_notice("%s(): Wrong charset, "
                   "conversion from `%s' to `%s' is not allowed",
-                  in_charset, out_charset);
+                  func, in_charset, out_charset);
     break;
   case PHP_ICONV_ERR_ILLEGAL_CHAR:
-    raise_notice("iconv: Detected an incomplete multibyte character "
-                    "in input string");
+    raise_notice("%s(): Detected an incomplete multibyte character "
+                  "in input string", func);
     break;
   case PHP_ICONV_ERR_ILLEGAL_SEQ:
     if (RuntimeOption::IconvIgnoreCorrect == HackStrictOption::ERROR) {
@@ -95,18 +96,19 @@ static void _php_iconv_show_error(php_iconv_err_t &err, const char *out_charset,
         break;
       }
     }
-    raise_notice("iconv: Detected an illegal character in input string");
+    raise_notice("%s(): Detected an illegal character in input string",
+                  func);
     break;
   case PHP_ICONV_ERR_TOO_BIG:
     // should not happen
-    raise_warning("iconv: Buffer length exceeded");
+    raise_warning("%s(): Buffer length exceeded", func);
     break;
   case PHP_ICONV_ERR_MALFORMED:
-    raise_notice("iconv: Malformed string");
+    raise_warning("%s(): Malformed string", func);
     break;
   default:
     // other error
-    raise_notice("iconv: Unknown error (%d)", errno);
+    raise_notice("%s(): Unknown error (%d)", func, errno);
     break;
   }
 }
@@ -1648,7 +1650,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode,
   php_iconv_err_t err =
     _php_iconv_mime_decode(retval, encoded_string.data(),
                            encoded_string.size(), enc.data(), NULL, mode);
-  _php_iconv_show_error(err, enc.data(), "???");
+  _php_iconv_show_error(__FUNCTION__+2, err, enc.data(), "???");
 
   if (err == PHP_ICONV_ERR_SUCCESS) {
     return retval.detach();
@@ -1722,7 +1724,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
   }
 
   if (err != PHP_ICONV_ERR_SUCCESS) {
-    _php_iconv_show_error(err, enc.data(), "???");
+    _php_iconv_show_error(__FUNCTION__+2, err, enc.data(), "???");
     return false;
   }
   return ret;
@@ -1775,8 +1777,9 @@ static Variant HHVM_FUNCTION(iconv, const String& in_charset,
   php_iconv_err_t err =
     php_iconv_string(str.data(), str.size(), &out_buffer, &out_len,
                      out_charset.data(), in_charset.data());
-  _php_iconv_show_error(err, out_charset.data(), in_charset.data());
-  if (out_buffer != NULL) {
+  _php_iconv_show_error(__FUNCTION__+2, err, 
+                        out_charset.data(), in_charset.data());
+  if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != nullptr) {
     return String(out_buffer, out_len, AttachString);
   }
   return false;
@@ -1790,7 +1793,7 @@ static Variant HHVM_FUNCTION(iconv_strlen,
   unsigned int retval;
   php_iconv_err_t err = _php_iconv_strlen(&retval, str.data(), str.size(),
                                           enc.data());
-  _php_iconv_show_error(err, GENERIC_SUPERSET_NAME, enc.data());
+  _php_iconv_show_error(__FUNCTION__+2, err, GENERIC_SUPERSET_NAME, enc.data());
   if (err == PHP_ICONV_ERR_SUCCESS) {
     return (int64_t)retval;
   }
@@ -1815,7 +1818,7 @@ static Variant HHVM_FUNCTION(iconv_strpos,
   php_iconv_err_t err =
     _php_iconv_strpos(&retval, haystack.data(), haystack.size(),
                       needle.data(), needle.size(), offset, enc.data());
-  _php_iconv_show_error(err, GENERIC_SUPERSET_NAME, enc.data());
+  _php_iconv_show_error(__FUNCTION__+2, err, GENERIC_SUPERSET_NAME, enc.data());
   if (err == PHP_ICONV_ERR_SUCCESS && retval != (unsigned int)-1) {
     return (long)retval;
   }
@@ -1836,7 +1839,7 @@ static Variant HHVM_FUNCTION(iconv_strrpos,
   php_iconv_err_t err =
     _php_iconv_strpos(&retval, haystack.data(), haystack.size(),
                       needle.data(), needle.size(), -1, enc.data());
-  _php_iconv_show_error(err, GENERIC_SUPERSET_NAME, enc.data());
+  _php_iconv_show_error(__FUNCTION__+2, err, GENERIC_SUPERSET_NAME, enc.data());
   if (err == PHP_ICONV_ERR_SUCCESS && retval != (unsigned int)-1) {
     return (long)retval;
   }
@@ -1853,7 +1856,7 @@ static Variant HHVM_FUNCTION(iconv_substr,
   StringBuffer retval;
   php_iconv_err_t err = _php_iconv_substr(retval, str.data(), str.size(),
                                           offset, length, enc.data());
-  _php_iconv_show_error(err, GENERIC_SUPERSET_NAME, enc.data());
+  _php_iconv_show_error(__FUNCTION__+2, err, GENERIC_SUPERSET_NAME, enc.data());
   if (err == PHP_ICONV_ERR_SUCCESS && !str.empty() && retval.data()) {
     return retval.detach();
   }
@@ -1870,7 +1873,7 @@ static String HHVM_FUNCTION(ob_iconv_handler,
       php_iconv_string(contents.data(), contents.size(), &out_buffer, &out_len,
                        ICONVG(output_encoding).c_str(),
                        ICONVG(internal_encoding).c_str());
-    _php_iconv_show_error(err, ICONVG(output_encoding).c_str(),
+    _php_iconv_show_error(__FUNCTION__+2, err, ICONVG(output_encoding).c_str(),
                           ICONVG(internal_encoding).c_str());
     if (out_buffer != NULL) {
       g_context->setContentType(mimetype, ICONVG(output_encoding));

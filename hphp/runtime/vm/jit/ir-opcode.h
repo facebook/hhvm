@@ -53,7 +53,6 @@ struct LocalStateHook;
  *     ND          instruction has no destination
  *     D(type)     single dst has a specific type
  *     DofS(N)     single dst has the type of src N
- *     DUnbox(N)   single dst has unboxed type of src N
  *     DBox(N)     single dst has boxed type of src N
  *     DRefineS(N) single dst's type is the intersection of src N and paramType
  *     DParam      single dst has type of the instruction's type parameter

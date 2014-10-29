@@ -41,7 +41,6 @@ bool shouldHHIRRelaxGuards() {
 #define ND             always_assert(false);
 #define D(t)           return false; // fixed type
 #define DofS(n)        return typeMightRelax(inst->src(n));
-#define DUnbox(n)      DofS(n)
 #define DBox(n)        DofS(n)
 #define DRefineS(n)    return true;  // typeParam may relax
 #define DParam         return true;  // typeParam may relax
@@ -78,7 +77,6 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef ND
 #undef D
 #undef DofS
-#undef DUnbox
 #undef DBox
 #undef DRefineS
 #undef DParam

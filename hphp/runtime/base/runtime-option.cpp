@@ -67,11 +67,30 @@ std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::PidFile = "www.pid";
 
+bool RuntimeOption::EnableHipHopSyntax = false;
+bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
+bool RuntimeOption::EnableShortTags = true;
+bool RuntimeOption::EnableAspTags = false;
+bool RuntimeOption::EnableXHP = false;
+bool RuntimeOption::EnableObjDestructCall = true;
+bool RuntimeOption::EnableEmitSwitch = true;
+bool RuntimeOption::EnableEmitterStats = true;
+bool RuntimeOption::CheckSymLink = true;
+int RuntimeOption::MaxUserFunctionId = (2 * 65536);
+bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableZendCompat = false;
+bool RuntimeOption::EnableZendSorting = false;
+bool RuntimeOption::TimeoutsUseWallTime = true;
+bool RuntimeOption::CheckFlushOnUserClose = true;
+bool RuntimeOption::EvalAuthoritativeMode = false;
+bool RuntimeOption::IntsOverflowToInts = false;
+
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
-bool RuntimeOption::AlwaysLogUnhandledExceptions = false;
+bool RuntimeOption::AlwaysLogUnhandledExceptions =
+  RuntimeOption::EnableHipHopSyntax;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
 bool RuntimeOption::CallUserHandlerOnFatals = false;
@@ -320,24 +339,6 @@ std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
 std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
 int RuntimeOption::LightProcessCount = 0;
-
-bool RuntimeOption::EnableHipHopSyntax = false;
-bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
-bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnableAspTags = false;
-bool RuntimeOption::EnableXHP = false;
-bool RuntimeOption::EnableObjDestructCall = true;
-bool RuntimeOption::EnableEmitSwitch = true;
-bool RuntimeOption::EnableEmitterStats = true;
-bool RuntimeOption::CheckSymLink = true;
-int RuntimeOption::MaxUserFunctionId = (2 * 65536);
-bool RuntimeOption::EnableArgsInBacktraces = true;
-bool RuntimeOption::EnableZendCompat = false;
-bool RuntimeOption::EnableZendSorting = false;
-bool RuntimeOption::TimeoutsUseWallTime = true;
-bool RuntimeOption::CheckFlushOnUserClose = true;
-bool RuntimeOption::EvalAuthoritativeMode = false;
-bool RuntimeOption::IntsOverflowToInts = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -785,7 +786,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  0);
 
     Config::Bind(AlwaysLogUnhandledExceptions, ini,
-                 logger["AlwaysLogUnhandledExceptions"], false);
+                 logger["AlwaysLogUnhandledExceptions"],
+                 RuntimeOption::EnableHipHopSyntax);
     Config::Bind(NoSilencer, ini, logger["NoSilencer"]);
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],

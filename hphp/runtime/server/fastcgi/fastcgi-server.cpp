@@ -33,18 +33,20 @@ using folly::IOBufQueue;
 using folly::io::Cursor;
 using apache::thrift::async::TEventBase;
 using apache::thrift::async::TAsyncTransport;
-using apache::thrift::async::TAsyncServerSocket;
 using apache::thrift::async::TAsyncTimeout;
-using apache::thrift::transport::TSocketAddress;
 using apache::thrift::transport::TTransportException;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 const int FastCGIAcceptor::k_maxConns = 50;
 const int FastCGIAcceptor::k_maxRequests = 1000;
-const TSocketAddress FastCGIAcceptor::s_unknownSocketAddress("127.0.0.1", 0);
 
-bool FastCGIAcceptor::canAccept(const TSocketAddress& address) {
+const apache::thrift::transport::TSocketAddress
+FastCGIAcceptor::s_unknownSocketAddress("127.0.0.1", 0);
+
+bool FastCGIAcceptor::canAccept(
+  const apache::thrift::transport::TSocketAddress& address) {
+
   // TODO: Support server IP whitelist.
   return m_server->canAccept();
 }
@@ -55,7 +57,7 @@ void FastCGIAcceptor::onNewConnection(
     const std::string& nextProtocolName,
     const ::proxygen::TransportInfo& tinfo)
 {
-  TSocketAddress localAddress;
+  apache::thrift::transport::TSocketAddress localAddress;
   try {
     sock->getLocalAddress(&localAddress);
   } catch (...) {
@@ -82,8 +84,8 @@ void FastCGIAcceptor::onConnectionsDrained() {
 FastCGIConnection::FastCGIConnection(
   FastCGIServer* server,
   TAsyncTransport::UniquePtr sock,
-  const TSocketAddress& localAddr,
-  const TSocketAddress& peerAddr)
+  const apache::thrift::transport::TSocketAddress& localAddr,
+  const apache::thrift::transport::TSocketAddress& peerAddr)
   : SocketConnection(std::move(sock), localAddr, peerAddr),
     m_server(server) {
   m_eventBase = m_server->getEventBaseManager()->getExistingEventBase();
@@ -198,7 +200,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                  RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
                  RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
-  TSocketAddress sock_addr;
+  apache::thrift::transport::TSocketAddress sock_addr;
   if (useFileSocket) {
     sock_addr.setFromPath(address);
   } else if (address.empty()) {
@@ -227,7 +229,7 @@ void FastCGIServer::removeTakeoverListener(TakeoverListener* lisener) {
 }
 
 void FastCGIServer::start() {
-  m_socket.reset(new TAsyncServerSocket(m_worker.getEventBase()));
+  m_socket.reset(new apache::thrift::async::TAsyncServerSocket(m_worker.getEventBase()));
   try {
     m_socket->bind(m_socketConfig.bindAddress);
   } catch (const apache::thrift::transport::TTransportException& ex) {

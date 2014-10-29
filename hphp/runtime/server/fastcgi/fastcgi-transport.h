@@ -23,7 +23,7 @@
 #include "folly/io/IOBufQueue.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include "thrift/lib/cpp/transport/TSocketAddress.h" // @nolint
+#include "folly/SocketAddress.h" // @nolint
 #include "thrift/lib/cpp/concurrency/Monitor.h" // @nolint
 
 #include <map>

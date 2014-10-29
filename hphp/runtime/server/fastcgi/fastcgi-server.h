@@ -23,8 +23,10 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-worker.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
+#include <folly/io/async/AsyncServerSocket.h>
+#include "thrift/lib/cpp/async/TAsyncServerSocket.h"
 #include "thrift/lib/cpp/async/TEventBaseManager.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
 #include "proxygen/lib/workers/WorkerThread.h"

@@ -88,7 +88,6 @@ extern const int64_t q_PDO$$CASE_UPPER;
 extern const int64_t q_PDO$$NULL_NATURAL;
 extern const int64_t q_PDO$$NULL_EMPTY_STRING;
 extern const int64_t q_PDO$$NULL_TO_STRING;
-extern const StaticString q_PDO$$ERR_NONE;
 extern const int64_t q_PDO$$FETCH_ORI_NEXT;
 extern const int64_t q_PDO$$FETCH_ORI_PRIOR;
 extern const int64_t q_PDO$$FETCH_ORI_FIRST;
@@ -107,100 +106,109 @@ extern const int64_t q_PDO$$MYSQL_ATTR_COMPRESS;
 extern const int64_t q_PDO$$MYSQL_ATTR_DIRECT_QUERY;
 extern const int64_t q_PDO$$MYSQL_ATTR_FOUND_ROWS;
 extern const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE;
+extern const StaticString q_PDO$$ERR_NONE;
+
+const StaticString s_PARAM_BOOL("PARAM_BOOL");
+const StaticString s_PARAM_NULL("PARAM_NULL");
+const StaticString s_PARAM_INT("PARAM_INT");
+const StaticString s_PARAM_STR("PARAM_STR");
+const StaticString s_PARAM_LOB("PARAM_LOB");
+const StaticString s_PARAM_STMT("PARAM_STMT");
+const StaticString s_PARAM_INPUT_OUTPUT("PARAM_INPUT_OUTPUT");
+const StaticString s_PARAM_EVT_ALLOC("PARAM_EVT_ALLOC");
+const StaticString s_PARAM_EVT_FREE("PARAM_EVT_FREE");
+const StaticString s_PARAM_EVT_EXEC_PRE("PARAM_EVT_EXEC_PRE");
+const StaticString s_PARAM_EVT_EXEC_POST("PARAM_EVT_EXEC_POST");
+const StaticString s_PARAM_EVT_FETCH_PRE("PARAM_EVT_FETCH_PRE");
+const StaticString s_PARAM_EVT_FETCH_POST("PARAM_EVT_FETCH_POST");
+const StaticString s_PARAM_EVT_NORMALIZE("PARAM_EVT_NORMALIZE");
+const StaticString s_FETCH_USE_DEFAULT("FETCH_USE_DEFAULT");
+const StaticString s_FETCH_LAZY("FETCH_LAZY");
+const StaticString s_FETCH_ASSOC("FETCH_ASSOC");
+const StaticString s_FETCH_NUM("FETCH_NUM");
+const StaticString s_FETCH_BOTH("FETCH_BOTH");
+const StaticString s_FETCH_OBJ("FETCH_OBJ");
+const StaticString s_FETCH_BOUND("FETCH_BOUND");
+const StaticString s_FETCH_COLUMN("FETCH_COLUMN");
+const StaticString s_FETCH_CLASS("FETCH_CLASS");
+const StaticString s_FETCH_INTO("FETCH_INTO");
+const StaticString s_FETCH_FUNC("FETCH_FUNC");
+const StaticString s_FETCH_GROUP("FETCH_GROUP");
+const StaticString s_FETCH_UNIQUE("FETCH_UNIQUE");
+const StaticString s_FETCH_KEY_PAIR("FETCH_KEY_PAIR");
+const StaticString s_FETCH_CLASSTYPE("FETCH_CLASSTYPE");
+const StaticString s_FETCH_SERIALIZE("FETCH_SERIALIZE");
+const StaticString s_FETCH_PROPS_LATE("FETCH_PROPS_LATE");
+const StaticString s_FETCH_NAMED("FETCH_NAMED");
+const StaticString s_ATTR_AUTOCOMMIT("ATTR_AUTOCOMMIT");
+const StaticString s_ATTR_PREFETCH("ATTR_PREFETCH");
+const StaticString s_ATTR_TIMEOUT("ATTR_TIMEOUT");
+const StaticString s_ATTR_ERRMODE("ATTR_ERRMODE");
+const StaticString s_ATTR_SERVER_VERSION("ATTR_SERVER_VERSION");
+const StaticString s_ATTR_CLIENT_VERSION("ATTR_CLIENT_VERSION");
+const StaticString s_ATTR_SERVER_INFO("ATTR_SERVER_INFO");
+const StaticString s_ATTR_CONNECTION_STATUS("ATTR_CONNECTION_STATUS");
+const StaticString s_ATTR_CASE("ATTR_CASE");
+const StaticString s_ATTR_CURSOR_NAME("ATTR_CURSOR_NAME");
+const StaticString s_ATTR_CURSOR("ATTR_CURSOR");
+const StaticString s_ATTR_ORACLE_NULLS("ATTR_ORACLE_NULLS");
+const StaticString s_ATTR_PERSISTENT("ATTR_PERSISTENT");
+const StaticString s_ATTR_STATEMENT_CLASS("ATTR_STATEMENT_CLASS");
+const StaticString s_ATTR_FETCH_TABLE_NAMES("ATTR_FETCH_TABLE_NAMES");
+const StaticString s_ATTR_FETCH_CATALOG_NAMES("ATTR_FETCH_CATALOG_NAMES");
+const StaticString s_ATTR_DRIVER_NAME("ATTR_DRIVER_NAME");
+const StaticString s_ATTR_STRINGIFY_FETCHES("ATTR_STRINGIFY_FETCHES");
+const StaticString s_ATTR_MAX_COLUMN_LEN("ATTR_MAX_COLUMN_LEN");
+const StaticString s_ATTR_EMULATE_PREPARES("ATTR_EMULATE_PREPARES");
+const StaticString s_ATTR_DEFAULT_FETCH_MODE("ATTR_DEFAULT_FETCH_MODE");
+const StaticString s_ERRMODE_SILENT("ERRMODE_SILENT");
+const StaticString s_ERRMODE_WARNING("ERRMODE_WARNING");
+const StaticString s_ERRMODE_EXCEPTION("ERRMODE_EXCEPTION");
+const StaticString s_CASE_NATURAL("CASE_NATURAL");
+const StaticString s_CASE_LOWER("CASE_LOWER");
+const StaticString s_CASE_UPPER("CASE_UPPER");
+const StaticString s_NULL_NATURAL("NULL_NATURAL");
+const StaticString s_NULL_EMPTY_STRING("NULL_EMPTY_STRING");
+const StaticString s_NULL_TO_STRING("NULL_TO_STRING");
+const StaticString s_FETCH_ORI_NEXT("FETCH_ORI_NEXT");
+const StaticString s_FETCH_ORI_PRIOR("FETCH_ORI_PRIOR");
+const StaticString s_FETCH_ORI_FIRST("FETCH_ORI_FIRST");
+const StaticString s_FETCH_ORI_LAST("FETCH_ORI_LAST");
+const StaticString s_FETCH_ORI_ABS("FETCH_ORI_ABS");
+const StaticString s_FETCH_ORI_REL("FETCH_ORI_REL");
+const StaticString s_CURSOR_FWDONLY("CURSOR_FWDONLY");
+const StaticString s_CURSOR_SCROLL("CURSOR_SCROLL");
+const StaticString s_MYSQL_ATTR_USE_BUFFERED_QUERY(
+  "MYSQL_ATTR_USE_BUFFERED_QUERY");
+const StaticString s_MYSQL_ATTR_LOCAL_INFILE("MYSQL_ATTR_LOCAL_INFILE");
+const StaticString s_MYSQL_ATTR_MAX_BUFFER_SIZE("MYSQL_ATTR_MAX_BUFFER_SIZE");
+const StaticString s_MYSQL_ATTR_INIT_COMMAND("MYSQL_ATTR_INIT_COMMAND");
+const StaticString s_MYSQL_ATTR_READ_DEFAULT_FILE(
+  "MYSQL_ATTR_READ_DEFAULT_FILE");
+const StaticString s_MYSQL_ATTR_READ_DEFAULT_GROUP(
+  "MYSQL_ATTR_READ_DEFAULT_GROUP");
+const StaticString s_MYSQL_ATTR_COMPRESS("MYSQL_ATTR_COMPRESS");
+const StaticString s_MYSQL_ATTR_DIRECT_QUERY("MYSQL_ATTR_DIRECT_QUERY");
+const StaticString s_MYSQL_ATTR_FOUND_ROWS("MYSQL_ATTR_FOUND_ROWS");
+const StaticString s_MYSQL_ATTR_IGNORE_SPACE("MYSQL_ATTR_IGNORE_SPACE");
+const StaticString s_ERR_NONE("ERR_NONE");
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // class PDO
 
-FORWARD_DECLARE_CLASS(PDO);
-class c_PDO : public ExtObjectData {
+class PDOData {
  public:
-  DECLARE_CLASS_NO_SWEEP(PDO)
-
-  // need to implement
-  public: c_PDO(Class* cls = c_PDO::classof());
-  public: ~c_PDO();
-  public: void t___construct(const String& dsn,
-                             const String& username = null_string,
-                             const String& password = null_string,
-                             const Array& options = null_array);
-  public: Variant t_prepare(const String& statement,
-                            const Array& options = null_array);
-  public: bool t_begintransaction();
-  public: bool t_commit();
-  public: bool t_intransaction();
-  public: bool t_rollback();
-  public: bool t_setattribute(int64_t attribute, const Variant& value);
-  public: Variant t_getattribute(int64_t attribute);
-  public: Variant t_exec(const String& query);
-  public: Variant t_lastinsertid(const String& seqname = null_string);
-  public: Variant t_errorcode();
-  public: Array t_errorinfo();
-  public: Variant t_query(int _argc, const String& sql, const Array& _argv);
-  public: Variant t_quote(const String& str,
-                          int64_t paramtype = q_PDO$$PARAM_STR);
-  public: bool t_sqlitecreatefunction(const String& name, const Variant& callback,
-                                      int64_t argcount = -1);
-  public: bool t_sqlitecreateaggregate(const String& name, const Variant& step,
-                                       const Variant& final, int64_t argcount = -1);
-  public: Variant t___wakeup();
-  public: Variant t___sleep();
-  public: static Array ti_getavailabledrivers();
-
   public: sp_PDOConnection m_dbh;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOStatement
 
-FORWARD_DECLARE_CLASS(PDOStatement);
-class c_PDOStatement : public ExtObjectData {
+class PDOStatementData {
  public:
-  DECLARE_CLASS_NO_SWEEP(PDOStatement)
-
-  // need to implement
-  public: c_PDOStatement(Class* cls = c_PDOStatement::classof());
-  public: ~c_PDOStatement();
-  public: Variant t_execute(const Array& params = null_array);
-  public: Variant t_fetch(int64_t how = 0,
-                          int64_t orientation = q_PDO$$FETCH_ORI_NEXT,
-                          int64_t offset = 0);
-  public: Variant t_fetchobject(const String& class_name = null_string,
-                                const Variant& ctor_args = uninit_null());
-  public: Variant t_fetchcolumn(int64_t column_numner = 0);
-  public: Variant t_fetchall(int64_t how = 0,
-                             const Variant& class_name = uninit_null(),
-                             const Variant& ctor_args = uninit_null());
-  public: bool t_bindvalue(const Variant& paramno, const Variant& param,
-                           int64_t type = q_PDO$$PARAM_STR);
-  public: bool t_bindparam(const Variant& paramno, VRefParam param,
-                           int64_t type = q_PDO$$PARAM_STR,
-                           int64_t max_value_len = 0,
-                           const Variant& driver_params = uninit_null());
-  public: bool t_bindcolumn(const Variant& paramno, VRefParam param,
-                            int64_t type = q_PDO$$PARAM_STR,
-                            int64_t max_value_len = 0,
-                            const Variant& driver_params = uninit_null());
-  public: int64_t t_rowcount();
-  public: Variant t_errorcode();
-  public: Array t_errorinfo();
-  public: Variant t_setattribute(int64_t attribute, const Variant& value);
-  public: Variant t_getattribute(int64_t attribute);
-  public: int64_t t_columncount();
-  public: Variant t_getcolumnmeta(int64_t column);
-  public: bool t_setfetchmode(int _argc, int64_t mode,
-                              const Array& _argv = null_array);
-  public: bool t_nextrowset();
-  public: bool t_closecursor();
-  public: Variant t_debugdumpparams();
-  public: Variant t_current();
-  public: Variant t_key();
-  public: Variant t_next();
-  public: Variant t_rewind();
-  public: Variant t_valid();
-  public: Variant t___wakeup();
-  public: Variant t___sleep();
-
-
+  public: PDOStatementData();
+  public: ~PDOStatementData();
 
   public: sp_PDOStatement m_stmt;
   public: Variant m_row;

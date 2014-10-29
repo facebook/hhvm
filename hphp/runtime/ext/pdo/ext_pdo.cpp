@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_pdo.h"
+#include "hphp/runtime/ext/pdo/ext_pdo.h"
 
 #include <string>
 #include <set>
@@ -49,8 +49,6 @@
   }                                                     \
 
 namespace HPHP {
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(PDO, 1.0.4dev);
 
 using std::string;
 ///////////////////////////////////////////////////////////////////////////////
@@ -471,7 +469,8 @@ const StaticString
   s_errorInfo("errorInfo"),
   s_PDOException("PDOException");
 
-void throw_pdo_exception(const Variant& code, const Variant& info, const char *fmt, ...) {
+void throw_pdo_exception(const Variant& code, const Variant& info,
+                         const char *fmt, ...) {
   ObjectData *obj = SystemLib::AllocPDOExceptionObject();
   obj->o_set(s_code, code, s_PDOException);
 
@@ -583,7 +582,8 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, const String& clsname,
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
-                               const String& clsname, const Variant& ctor_args) {
+                               const String& clsname,
+                               const Variant& ctor_args) {
   object->o_set("queryString", stmt->query_string);
   if (clsname.empty()) {
     return;
@@ -762,8 +762,8 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
   return true; /* no ctor no args is also ok */
 }
 
-static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mode,
-                                    const Array& _argv) {
+static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc,
+                                    int64_t mode, const Array& _argv) {
   _argc = _argv.size() + 1;
 
   if (stmt->default_fetch_type == PDO_FETCH_INTO) {
@@ -893,6 +893,12 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc, int64_t mod
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// forward declarations
+
+static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+                        const Variant& value);
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct PDORequestData final : RequestEventHandler {
   void requestInit() override {}
@@ -923,15 +929,15 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
-c_PDO::c_PDO(Class* cb) : ExtObjectData(cb) {
-}
+const StaticString s_PDO("PDO");
 
-c_PDO::~c_PDO() {
-}
+static void HHVM_METHOD(PDO, __construct, const String& dsn,
+                        const String& username /* = null_string */,
+                        const String& password /* = null_string */,
+                        const Variant& optionsV /* = null_array */) {
+  auto data = Native::data<PDOData>(this_);
+  auto options = optionsV.isNull() ? null_array : optionsV.toArray();
 
-void c_PDO::t___construct(const String& dsn, const String& username /* = null_string */,
-                          const String& password /* = null_string */,
-                          const Array& options /* = null_array */) {
   String data_source = dsn;
 
   /* parse the data source name */
@@ -941,12 +947,14 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
     String name = "pdo.dsn."; name += data_source;
     String ini_dsn;
     if (!IniSetting::Get(name, ini_dsn)) {
-      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name");
+      throw_pdo_exception(uninit_null(), uninit_null(),
+                          "invalid data source name");
     }
     data_source = ini_dsn;
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via INI: %s)",
+      throw_pdo_exception(uninit_null(), uninit_null(),
+                          "invalid data source name (via INI: %s)",
                           ini_dsn.data());
     }
   }
@@ -955,12 +963,14 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
     /* the specified URI holds connection details */
     Resource resource = File::Open(data_source.substr(4), "rb");
     if (resource.isNull()) {
-      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source URI");
+      throw_pdo_exception(uninit_null(), uninit_null(),
+                          "invalid data source URI");
     }
     data_source = resource.getTyped<File>()->readLine(1024);
     colon = strchr(data_source.data(), ':');
     if (!colon) {
-      throw_pdo_exception(uninit_null(), uninit_null(), "invalid data source name (via URI)");
+      throw_pdo_exception(uninit_null(), uninit_null(),
+                          "invalid data source name (via URI)");
     }
   }
 
@@ -1000,169 +1010,191 @@ void c_PDO::t___construct(const String& dsn, const String& username /* = null_st
     if (is_persistent) {
       shashkey = hashkey.detach();
       /* let's see if we have one cached.... */
-      m_dbh = dynamic_cast<PDOConnection*>
+      data->m_dbh = dynamic_cast<PDOConnection*>
         (g_persistentResources->get(PDOConnection::PersistentKey,
                                   shashkey.data()));
 
-      if (m_dbh.get()) {
-        m_dbh->persistentRestore();
+      if (data->m_dbh.get()) {
+        data->m_dbh->persistentRestore();
 
         /* is the connection still alive ? */
-        if (m_dbh->support(PDOConnection::MethodCheckLiveness) &&
-            !m_dbh->checkLiveness()) {
+        if (data->m_dbh->support(PDOConnection::MethodCheckLiveness) &&
+            !data->m_dbh->checkLiveness()) {
           /* nope... need to kill it */
-          s_pdo_request_data->m_persistent_connections.erase(m_dbh.get());
-          m_dbh = nullptr;
+          s_pdo_request_data->m_persistent_connections.erase(data->m_dbh.get());
+          data->m_dbh = nullptr;
         } else {
           /* Yep, use it and mark it for saving at rshutdown */
-          s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
+          s_pdo_request_data->m_persistent_connections.insert(
+            data->m_dbh.get());
         }
       }
 
-      if (m_dbh.get()) {
+      if (data->m_dbh.get()) {
         call_factory = false;
       } else {
         /* need a brand new pdbh */
-        m_dbh = driver->createConnection(colon+1, username, password, options);
-        if (m_dbh.get() == nullptr) {
-          throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
+        data->m_dbh = driver->createConnection(colon + 1, username,
+                                               password, options);
+        if (data->m_dbh.get() == nullptr) {
+          throw_pdo_exception(uninit_null(), uninit_null(),
+                              "unable to create a connection");
         }
-        m_dbh->persistent_id = string(shashkey.data(), shashkey.size());
+        data->m_dbh->persistent_id = string(shashkey.data(), shashkey.size());
       }
     }
   }
-  if (!m_dbh.get()) {
-    m_dbh = driver->createConnection(colon+1, username, password, options);
-    if (m_dbh.get() == nullptr) {
-      throw_pdo_exception(uninit_null(), uninit_null(), "unable to create a connection");
+  if (!data->m_dbh.get()) {
+    data->m_dbh = driver->createConnection(colon + 1, username,
+                                           password, options);
+    if (data->m_dbh.get() == nullptr) {
+      throw_pdo_exception(uninit_null(), uninit_null(),
+                          "unable to create a connection");
     }
   }
 
   if (call_factory) {
-    m_dbh->default_fetch_type = PDO_FETCH_BOTH;
+    data->m_dbh->default_fetch_type = PDO_FETCH_BOTH;
   }
 
-  m_dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1);
+  data->m_dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1);
 
   if (!call_factory) {
     /* we got a persistent guy from our cache */
     for (ArrayIter iter(options); iter; ++iter) {
-      t_setattribute(iter.first().toInt64(), iter.second());
+      HHVM_MN(PDO, setattribute)(this_, iter.first().toInt64(),
+                                      iter.second());
     }
-  } else if (m_dbh.get()) {
+  } else if (data->m_dbh.get()) {
     if (is_persistent) {
       assert(!shashkey.empty());
       g_persistentResources->set(PDOConnection::PersistentKey, shashkey.data(),
-                               m_dbh.get());
-      s_pdo_request_data->m_persistent_connections.insert(m_dbh.get());
+                                 data->m_dbh.get());
+      s_pdo_request_data->m_persistent_connections.insert(data->m_dbh.get());
     }
 
-    m_dbh->driver = driver;
+    data->m_dbh->driver = driver;
     for (ArrayIter iter(options); iter; ++iter) {
-      t_setattribute(iter.first().toInt64(), iter.second());
+      HHVM_MN(PDO, setattribute)(this_, iter.first().toInt64(),
+                                      iter.second());
     }
   }
 }
 
+static Variant HHVM_METHOD(PDO, prepare, const String& statement,
+                           const Array& options = null_array) {
+  auto data = Native::data<PDOData>(this_);
 
-Variant c_PDO::t_prepare(const String& statement,
-                         const Array& options /* = null_array */) {
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
 
   String clsname;
   Variant ctor_args;
   if (options.exists(PDO_ATTR_STATEMENT_CLASS)) {
     Variant opt = options[PDO_ATTR_STATEMENT_CLASS];
-    if (!valid_statement_class(m_dbh, opt, clsname, ctor_args)) {
+    if (!valid_statement_class(data->m_dbh, opt, clsname, ctor_args)) {
       return false;
     }
   } else {
-    clsname = m_dbh->def_stmt_clsname;
-    ctor_args = m_dbh->def_stmt_ctor_args;
+    clsname = data->m_dbh->def_stmt_clsname;
+    ctor_args = data->m_dbh->def_stmt_ctor_args;
   }
 
-  Object ret = pdo_stmt_instantiate(m_dbh, clsname, ctor_args);
+  Object ret = pdo_stmt_instantiate(data->m_dbh, clsname, ctor_args);
   if (ret.isNull()) {
     pdo_raise_impl_error
-      (m_dbh, nullptr, "HY000",
+      (data->m_dbh, nullptr, "HY000",
        "failed to instantiate user-supplied statement class");
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
   }
-  c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
+  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
 
-  if (m_dbh->preparer(statement, &pdostmt->m_stmt, options)) {
+  if (data->m_dbh->preparer(statement, &pdostmt->m_stmt, options)) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
     assert(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = statement;
-    stmt->default_fetch_type = m_dbh->default_fetch_type;
-    stmt->dbh = m_dbh;
+    stmt->default_fetch_type = data->m_dbh->default_fetch_type;
+    stmt->dbh = data->m_dbh;
 
     pdo_stmt_construct(stmt, ret, clsname, ctor_args);
     return ret;
   }
 
-  PDO_HANDLE_DBH_ERR(m_dbh);
+  PDO_HANDLE_DBH_ERR(data->m_dbh);
   return false;
 }
 
-bool c_PDO::t_begintransaction() {
-  if (m_dbh->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(), "There is already an active transaction");
+ static bool HHVM_METHOD(PDO, begintransaction) {
+  auto data = Native::data<PDOData>(this_);
+
+  if (data->m_dbh->in_txn) {
+    throw_pdo_exception(uninit_null(), uninit_null(),
+                        "There is already an active transaction");
   }
-  if (m_dbh->begin()) {
-    m_dbh->in_txn = 1;
+  if (data->m_dbh->begin()) {
+    data->m_dbh->in_txn = 1;
     return true;
   }
-  if (strcmp(m_dbh->error_code, PDO_ERR_NONE)) {
-    pdo_handle_error(m_dbh, nullptr);
+  if (strcmp(data->m_dbh->error_code, PDO_ERR_NONE)) {
+    pdo_handle_error(data->m_dbh, nullptr);
   }
   return false;
 }
 
-bool c_PDO::t_commit() {
-  assert(m_dbh->driver);
-  if (!m_dbh->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(), "There is no active transaction");
+static bool HHVM_METHOD(PDO, commit) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
+  if (!data->m_dbh->in_txn) {
+    throw_pdo_exception(uninit_null(), uninit_null(),
+                        "There is no active transaction");
   }
-  if (m_dbh->commit()) {
-    m_dbh->in_txn = 0;
+  if (data->m_dbh->commit()) {
+    data->m_dbh->in_txn = 0;
     return true;
   }
-  PDO_HANDLE_DBH_ERR(m_dbh);
+  PDO_HANDLE_DBH_ERR(data->m_dbh);
   return false;
 }
 
-bool c_PDO::t_intransaction() {
-  assert(m_dbh->driver);
-  return m_dbh->in_txn;
+static bool HHVM_METHOD(PDO, intransaction) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
+  return data->m_dbh->in_txn;
 }
 
-bool c_PDO::t_rollback() {
-  assert(m_dbh->driver);
-  if (!m_dbh->in_txn) {
-    throw_pdo_exception(uninit_null(), uninit_null(), "There is no active transaction");
+static bool HHVM_METHOD(PDO, rollback) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
+  if (!data->m_dbh->in_txn) {
+    throw_pdo_exception(uninit_null(), uninit_null(),
+                        "There is no active transaction");
   }
-  if (m_dbh->rollback()) {
-    m_dbh->in_txn = 0;
+  if (data->m_dbh->rollback()) {
+    data->m_dbh->in_txn = 0;
     return true;
   }
-  PDO_HANDLE_DBH_ERR(m_dbh);
+  PDO_HANDLE_DBH_ERR(data->m_dbh);
   return false;
 }
 
-bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
-  assert(m_dbh->driver);
+static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+                        const Variant& value) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
 
 #define PDO_LONG_PARAM_CHECK                                           \
   if (!value.isInteger() && !value.isString() && !value.isBoolean()) { \
-    pdo_raise_impl_error(m_dbh, nullptr, "HY000",                      \
+    pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",                \
                          "attribute value must be an integer");        \
-    PDO_HANDLE_DBH_ERR(m_dbh);                                         \
+    PDO_HANDLE_DBH_ERR(data->m_dbh);                                   \
     return false;                                                      \
   }                                                                    \
 
@@ -1173,11 +1205,11 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
     case PDO_ERRMODE_SILENT:
     case PDO_ERRMODE_WARNING:
     case PDO_ERRMODE_EXCEPTION:
-      m_dbh->error_mode = (PDOErrorMode)value.toInt64();
+      data->m_dbh->error_mode = (PDOErrorMode)value.toInt64();
       return true;
     default:
-      pdo_raise_impl_error(m_dbh, nullptr, "HY000", "invalid error mode");
-      PDO_HANDLE_DBH_ERR(m_dbh);
+      pdo_raise_impl_error(data->m_dbh, nullptr, "HY000", "invalid error mode");
+      PDO_HANDLE_DBH_ERR(data->m_dbh);
       return false;
     }
     return false;
@@ -1188,19 +1220,19 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
     case PDO_CASE_NATURAL:
     case PDO_CASE_UPPER:
     case PDO_CASE_LOWER:
-      m_dbh->desired_case = (PDOCaseConversion)value.toInt64();
+      data->m_dbh->desired_case = (PDOCaseConversion)value.toInt64();
       return true;
     default:
-      pdo_raise_impl_error(m_dbh, nullptr, "HY000",
+      pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",
                            "invalid case folding mode");
-      PDO_HANDLE_DBH_ERR(m_dbh);
+      PDO_HANDLE_DBH_ERR(data->m_dbh);
       return false;
     }
     return false;
 
   case PDO_ATTR_ORACLE_NULLS:
     PDO_LONG_PARAM_CHECK;
-    m_dbh->oracle_nulls = value.toInt64();
+    data->m_dbh->oracle_nulls = value.toInt64();
     return true;
 
   case PDO_ATTR_DEFAULT_FETCH_MODE:
@@ -1209,7 +1241,7 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
         Variant tmp = value.toCArrRef()[0];
         if (tmp.isInteger() && ((tmp.toInt64() == PDO_FETCH_INTO ||
                                  tmp.toInt64() == PDO_FETCH_CLASS))) {
-          pdo_raise_impl_error(m_dbh, nullptr, "HY000",
+          pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",
                                "FETCH_INTO and FETCH_CLASS are not yet "
                                "supported as default fetch modes");
           return false;
@@ -1219,40 +1251,41 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
       PDO_LONG_PARAM_CHECK;
     }
     if (value.toInt64() == PDO_FETCH_USE_DEFAULT) {
-      pdo_raise_impl_error(m_dbh, nullptr, "HY000", "invalid fetch mode type");
+      pdo_raise_impl_error(data->m_dbh, nullptr,
+                           "HY000", "invalid fetch mode type");
       return false;
     }
-    m_dbh->default_fetch_type = (PDOFetchType)value.toInt64();
+    data->m_dbh->default_fetch_type = (PDOFetchType)value.toInt64();
     return true;
 
   case PDO_ATTR_STRINGIFY_FETCHES:
     PDO_LONG_PARAM_CHECK;
-    m_dbh->stringify = value.toInt64() ? 1 : 0;
+    data->m_dbh->stringify = value.toInt64() ? 1 : 0;
     return true;
 
   case PDO_ATTR_STATEMENT_CLASS:
     {
-      if (m_dbh->is_persistent) {
-        pdo_raise_impl_error(m_dbh, nullptr, "HY000",
+      if (data->m_dbh->is_persistent) {
+        pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",
                              "PDO::ATTR_STATEMENT_CLASS cannot be used "
                              "with persistent PDO instances");
-        PDO_HANDLE_DBH_ERR(m_dbh);
+        PDO_HANDLE_DBH_ERR(data->m_dbh);
         return false;
       }
       String clsname;
-      if (!valid_statement_class(m_dbh, value, clsname,
-                                 m_dbh->def_stmt_ctor_args)) {
+      if (!valid_statement_class(data->m_dbh, value, clsname,
+                                 data->m_dbh->def_stmt_ctor_args)) {
         return false;
       }
-      m_dbh->def_stmt_clsname = clsname.c_str();
+      data->m_dbh->def_stmt_clsname = clsname.c_str();
       return true;
     }
   }
 
-  if (m_dbh->support(PDOConnection::MethodSetAttribute)) {
-    strcpy(m_dbh->error_code, PDO_ERR_NONE);
-    m_dbh->query_stmt = NULL;
-    if (m_dbh->setAttribute(attribute, value)) {
+  if (data->m_dbh->support(PDOConnection::MethodSetAttribute)) {
+    strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+    data->m_dbh->query_stmt = nullptr;
+    if (data->m_dbh->setAttribute(attribute, value)) {
       return true;
     }
   }
@@ -1261,114 +1294,123 @@ bool c_PDO::t_setattribute(int64_t attribute, const Variant& value) {
     throw_pdo_exception(uninit_null(), uninit_null(),
                         "The auto-commit mode cannot be changed for this "
                         "driver");
-  } else if (!m_dbh->support(PDOConnection::MethodSetAttribute)) {
-    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
+  } else if (!data->m_dbh->support(PDOConnection::MethodSetAttribute)) {
+    pdo_raise_impl_error(data->m_dbh, nullptr, "IM001",
                          "driver does not support setting attributes");
   } else {
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
   }
   return false;
 }
 
-Variant c_PDO::t_getattribute(int64_t attribute) {
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
 
   /* handle generic PDO-level atributes */
   switch (attribute) {
   case PDO_ATTR_PERSISTENT:
-    return (bool)m_dbh->is_persistent;
+    return (bool)data->m_dbh->is_persistent;
 
   case PDO_ATTR_CASE:
-    return (int64_t)m_dbh->desired_case;
+    return (int64_t)data->m_dbh->desired_case;
 
   case PDO_ATTR_ORACLE_NULLS:
-    return (int64_t)m_dbh->oracle_nulls;
+    return (int64_t)data->m_dbh->oracle_nulls;
 
   case PDO_ATTR_ERRMODE:
-    return (int64_t)m_dbh->error_mode;
+    return (int64_t)data->m_dbh->error_mode;
 
   case PDO_ATTR_DRIVER_NAME:
-    return String(m_dbh->driver->getName());
+    return String(data->m_dbh->driver->getName());
 
   case PDO_ATTR_STATEMENT_CLASS: {
     Array ret;
-    ret.append(String(m_dbh->def_stmt_clsname));
-    if (!m_dbh->def_stmt_ctor_args.isNull()) {
-      ret.append(m_dbh->def_stmt_ctor_args);
+    ret.append(String(data->m_dbh->def_stmt_clsname));
+    if (!data->m_dbh->def_stmt_ctor_args.isNull()) {
+      ret.append(data->m_dbh->def_stmt_ctor_args);
     }
     return ret;
   }
   case PDO_ATTR_DEFAULT_FETCH_MODE:
-    return (int64_t)m_dbh->default_fetch_type;
+    return (int64_t)data->m_dbh->default_fetch_type;
   }
 
-  if (!m_dbh->support(PDOConnection::MethodGetAttribute)) {
-    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
+  if (!data->m_dbh->support(PDOConnection::MethodGetAttribute)) {
+    pdo_raise_impl_error(data->m_dbh, nullptr, "IM001",
                          "driver does not support getting attributes");
     return false;
   }
 
   Variant ret;
-  switch (m_dbh->getAttribute(attribute, ret)) {
+  switch (data->m_dbh->getAttribute(attribute, ret)) {
   case -1:
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
   case 0:
-    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
+    pdo_raise_impl_error(data->m_dbh, nullptr, "IM001",
                          "driver does not support that attribute");
     return false;
   }
   return ret;
 }
 
-Variant c_PDO::t_exec(const String& query) {
+static Variant HHVM_METHOD(PDO, exec, const String& query) {
+  auto data = Native::data<PDOData>(this_);
+
   SYNC_VM_REGS_SCOPED();
   if (query.empty()) {
-    pdo_raise_impl_error(m_dbh, nullptr, "HY000",
+    pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",
                          "trying to execute an empty query");
     return false;
   }
 
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
 
-  int64_t ret = m_dbh->doer(query);
+  int64_t ret = data->m_dbh->doer(query);
   if (ret == -1) {
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
   }
   return ret;
 }
 
-Variant c_PDO::t_lastinsertid(const String& seqname /* = null_string */) {
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+static Variant HHVM_METHOD(PDO, lastinsertid,
+                           const String& seqname /* = null_string */) {
+  auto data = Native::data<PDOData>(this_);
 
-  if (!m_dbh->support(PDOConnection::MethodLastId)) {
-    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
+
+  if (!data->m_dbh->support(PDOConnection::MethodLastId)) {
+    pdo_raise_impl_error(data->m_dbh, nullptr, "IM001",
                          "driver does not support lastInsertId()");
     return false;
   }
 
-  String ret = m_dbh->lastId(seqname.data());
+  String ret = data->m_dbh->lastId(seqname.data());
   if (ret.empty()) {
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
   }
   return ret;
 }
 
-Variant c_PDO::t_errorcode() {
-  assert(m_dbh->driver);
-  if (m_dbh->query_stmt) {
-    return String(m_dbh->query_stmt->error_code, CopyString);
+static Variant HHVM_METHOD(PDO, errorcode) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
+  if (data->m_dbh->query_stmt) {
+    return String(data->m_dbh->query_stmt->error_code, CopyString);
   }
 
-  if (m_dbh->error_code[0] == '\0') {
+  if (data->m_dbh->error_code[0] == '\0') {
     return init_null();
   }
 
@@ -1376,21 +1418,23 @@ Variant c_PDO::t_errorcode() {
    * Making sure that we fallback to the default implementation
    * if the dbh->error_code is not null.
    */
-  return String(m_dbh->error_code, CopyString);
+  return String(data->m_dbh->error_code, CopyString);
 }
 
-Array c_PDO::t_errorinfo() {
-  assert(m_dbh->driver);
+static Array HHVM_METHOD(PDO, errorinfo) {
+  auto data = Native::data<PDOData>(this_);
+
+  assert(data->m_dbh->driver);
 
   Array ret;
-  if (m_dbh->query_stmt) {
-    ret.append(String(m_dbh->query_stmt->error_code, CopyString));
+  if (data->m_dbh->query_stmt) {
+    ret.append(String(data->m_dbh->query_stmt->error_code, CopyString));
   } else {
-    ret.append(String(m_dbh->error_code, CopyString));
+    ret.append(String(data->m_dbh->error_code, CopyString));
   }
 
-  if (m_dbh->support(PDOConnection::MethodFetchErr)) {
-    m_dbh->fetchErr(m_dbh->query_stmt, ret);
+  if (data->m_dbh->support(PDOConnection::MethodFetchErr)) {
+    data->m_dbh->fetchErr(data->m_dbh->query_stmt, ret);
   }
 
   /**
@@ -1409,38 +1453,43 @@ Array c_PDO::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
-  SYNC_VM_REGS_SCOPED();
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+static Variant HHVM_METHOD(PDO, query, const String& sql,
+                           const Array& _argv) {
 
-  Object ret = pdo_stmt_instantiate(m_dbh, m_dbh->def_stmt_clsname,
-                                    m_dbh->def_stmt_ctor_args);
+  auto data = Native::data<PDOData>(this_);
+  SYNC_VM_REGS_SCOPED();
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
+
+  Object ret = pdo_stmt_instantiate(data->m_dbh, data->m_dbh->def_stmt_clsname,
+                                    data->m_dbh->def_stmt_ctor_args);
   if (ret.isNull()) {
     pdo_raise_impl_error
-      (m_dbh, nullptr, "HY000",
+      (data->m_dbh, nullptr, "HY000",
        "failed to instantiate user supplied statement class");
     return init_null();
   }
-  c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
+  // PDOStatementData *pdostmt = ret.getTyped<PDOStatementData>();
+  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
 
-  if (m_dbh->preparer(sql, &pdostmt->m_stmt, Array())) {
+  if (data->m_dbh->preparer(sql, &pdostmt->m_stmt, Array())) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
     assert(stmt);
 
     /* unconditionally keep this for later reference */
     stmt->query_string = sql;
-    stmt->default_fetch_type = m_dbh->default_fetch_type;
+    stmt->default_fetch_type = data->m_dbh->default_fetch_type;
     stmt->active_query_string = stmt->query_string;
-    stmt->dbh = m_dbh;
+    stmt->dbh = data->m_dbh;
     stmt->lazy_object_ref.unset();
 
     strcpy(stmt->error_code, PDO_ERR_NONE);
 
     // when we add support for varargs here, we only need to set the stmt if
     // the argument count is > 1
-    if (_argc == 1 ||
+    int argc = _argv.size() + 1;
+    if (argc == 1 ||
         pdo_stmt_set_fetch_mode(stmt, 0, _argv.rvalAt(0).toInt64Val(),
                                 HHVM_FN(array_splice)(_argv, 1).toArray())) {
       /* now execute the statement */
@@ -1454,71 +1503,75 @@ Variant c_PDO::t_query(int _argc, const String& sql, const Array& _argv) {
           stmt->executed = 1;
         }
         if (ok) {
-          pdo_stmt_construct(stmt, ret, m_dbh->def_stmt_clsname,
-                             m_dbh->def_stmt_ctor_args);
+          pdo_stmt_construct(stmt, ret, data->m_dbh->def_stmt_clsname,
+                             data->m_dbh->def_stmt_ctor_args);
           return ret;
         }
       }
     }
     /* something broke */
-    m_dbh->query_stmt = stmt;
+    data->m_dbh->query_stmt = stmt;
     PDO_HANDLE_STMT_ERR(stmt);
   } else {
-    PDO_HANDLE_DBH_ERR(m_dbh);
+    PDO_HANDLE_DBH_ERR(data->m_dbh);
   }
 
   return false;
 }
 
-Variant c_PDO::t_quote(const String& str, int64_t paramtype /* = q_PDO$$PARAM_STR */) {
-  assert(m_dbh->driver);
-  strcpy(m_dbh->error_code, PDO_ERR_NONE);
-  m_dbh->query_stmt = NULL;
+static Variant HHVM_METHOD(PDO, quote, const String& str,
+                           int64_t paramtype /* = q_PDO$$PARAM_STR */) {
+  auto data = Native::data<PDOData>(this_);
 
-  if (!m_dbh->support(PDOConnection::MethodQuoter)) {
-    pdo_raise_impl_error(m_dbh, nullptr, "IM001",
+  assert(data->m_dbh->driver);
+  strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
+  data->m_dbh->query_stmt = nullptr;
+
+  if (!data->m_dbh->support(PDOConnection::MethodQuoter)) {
+    pdo_raise_impl_error(data->m_dbh, nullptr, "IM001",
                          "driver does not support quoting");
     return false;
   }
 
   String quoted;
-  if (m_dbh->quoter(str, quoted, (PDOParamType)paramtype)) {
+  if (data->m_dbh->quoter(str, quoted, (PDOParamType)paramtype)) {
     return quoted;
   }
-  PDO_HANDLE_DBH_ERR(m_dbh);
+  PDO_HANDLE_DBH_ERR(data->m_dbh);
   return false;
 }
 
-bool c_PDO::t_sqlitecreatefunction(const String& name,
-                                   const Variant& callback,
-                                   int64_t argcount /* = -1 */) {
-  auto conn = dynamic_cast<PDOSqliteConnection*>(m_dbh.get());
+static bool HHVM_METHOD(PDO, sqlitecreatefunction, const String& name,
+                        const Variant& callback, int64_t argcount /* = -1 */) {
+  auto data = Native::data<PDOData>(this_);
+
+  auto conn = dynamic_cast<PDOSqliteConnection*>(data->m_dbh.get());
   if (conn == nullptr) {
     return false;
   }
   return conn->createFunction(name, callback, argcount);
 }
 
-bool c_PDO::t_sqlitecreateaggregate(const String& name,
-                                    const Variant& step, const Variant& final,
-                                    int64_t argcount /* = -1 */) {
+static bool HHVM_METHOD(PDO, sqlitecreateaggregate, const String& name,
+                        const Variant& step, const Variant& final,
+                        int64_t argcount /* = -1 */) {
   raise_recoverable_error("PDO::sqliteCreateAggregate not implemented");
   return false;
 }
 
-Variant c_PDO::t___wakeup() {
+static Variant HHVM_METHOD(PDO, __wakeup) {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
   return init_null();
 }
 
-Variant c_PDO::t___sleep() {
+static Variant HHVM_METHOD(PDO, __sleep) {
   throw_pdo_exception(uninit_null(), uninit_null(),
                       "You cannot serialize or unserialize PDO instances");
   return init_null();
 }
 
-Array c_PDO::ti_getavailabledrivers() {
+static Array HHVM_STATIC_METHOD(PDO, getAvailableDrivers) {
   return f_pdo_drivers();
 }
 
@@ -2041,12 +2094,13 @@ static bool do_fetch(sp_PDOStatement stmt,
   return true;
 }
 
-static int register_bound_param(const Variant& paramno, VRefParam param, int64_t type,
-                                int64_t max_value_len, const Variant& driver_params,
+static int register_bound_param(const Variant& paramno, VRefParam param,
+                                int64_t type, int64_t max_value_len,
+                                const Variant& driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
   SmartResource<PDOBoundParam> p(NEWOBJ(PDOBoundParam));
-  // need to make sure this is NULL, in case a fatal errors occurs before its set
-  // inside really_register_bound_param
+  // need to make sure this is NULL, in case a fatal errors occurs before it's
+  // set inside really_register_bound_param
   p->stmt = NULL;
 
   if (paramno.isNumeric()) {
@@ -2643,20 +2697,25 @@ clean_up:
 ///////////////////////////////////////////////////////////////////////////////
 // PDOStatement
 
-c_PDOStatement::c_PDOStatement(Class* cb) :
-    ExtObjectData(cb), m_rowIndex(-1) {
+const StaticString s_PDOStatement("PDOStatement");
+
+PDOStatementData::PDOStatementData() : m_rowIndex(-1) {
 }
 
-c_PDOStatement::~c_PDOStatement() {
+PDOStatementData::~PDOStatementData() {
   m_stmt.reset();
 }
 
-Variant c_PDOStatement::t_execute(const Array& params /* = null_array */) {
+static Variant HHVM_METHOD(PDOStatement, execute,
+                           const Variant& paramsV /* = null_array */) {
+  auto data = Native::data<PDOStatementData>(this_);
+  auto params = paramsV.isNull() ? null_array : paramsV.toArray();
+
   SYNC_VM_REGS_SCOPED();
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
-    m_stmt->bound_params.reset();
+    data->m_stmt->bound_params.reset();
     for (ArrayIter iter(params); iter; ++iter) {
       SmartResource<PDOBoundParam> param(NEWOBJ(PDOBoundParam));
       param->param_type = PDO_PARAM_STR;
@@ -2670,187 +2729,199 @@ Variant c_PDOStatement::t_execute(const Array& params /* = null_array */) {
         int64_t num_index = iter.first().toInt64();
         /* we're okay to be zero based here */
         if (num_index < 0) {
-          pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY093", NULL);
+          pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt,
+                               "HY093", nullptr);
           return false;
         }
         param->paramno = num_index;
       }
 
-      if (!really_register_bound_param(param.get(), m_stmt, true)) {
+      if (!really_register_bound_param(param.get(), data->m_stmt, true)) {
         return false;
       }
     }
   }
 
   int ret = 1;
-  if (PDO_PLACEHOLDER_NONE == m_stmt->supports_placeholders) {
+  if (PDO_PLACEHOLDER_NONE == data->m_stmt->supports_placeholders) {
     /* handle the emulated parameter binding, m_stmt->active_query_string
        holds the query with binds expanded and quoted. */
-    ret = pdo_parse_params(m_stmt.get(), m_stmt->query_string,
-                           m_stmt->active_query_string);
+    ret = pdo_parse_params(data->m_stmt.get(), data->m_stmt->query_string,
+                           data->m_stmt->active_query_string);
     if (ret == 0) { /* no changes were made */
-      m_stmt->active_query_string = m_stmt->query_string;
+      data->m_stmt->active_query_string = data->m_stmt->query_string;
     } else if (ret == -1) {
       /* something broke */
-      PDO_HANDLE_STMT_ERR(m_stmt);
+      PDO_HANDLE_STMT_ERR(data->m_stmt);
       return false;
     }
-  } else if (!dispatch_param_event(m_stmt, PDO_PARAM_EVT_EXEC_PRE)) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+  } else if (!dispatch_param_event(data->m_stmt, PDO_PARAM_EVT_EXEC_PRE)) {
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
-  if (m_stmt->executer()) {
-    m_stmt->active_query_string.reset();
-    if (!m_stmt->executed) {
+  if (data->m_stmt->executer()) {
+    data->m_stmt->active_query_string.reset();
+    if (!data->m_stmt->executed) {
       /* this is the first execute */
 
-      if (m_stmt->dbh->alloc_own_columns && m_stmt->columns.empty()) {
+      if (data->m_stmt->dbh->alloc_own_columns
+          && data->m_stmt->columns.empty()) {
         /* for "big boy" drivers, we need to allocate memory to fetch
          * the results into, so lets do that now */
-        ret = pdo_stmt_describe_columns(m_stmt);
+        ret = pdo_stmt_describe_columns(data->m_stmt);
       }
 
-      m_stmt->executed = 1;
+      data->m_stmt->executed = 1;
     }
 
-    if (ret && !dispatch_param_event(m_stmt, PDO_PARAM_EVT_EXEC_POST)) {
+    if (ret && !dispatch_param_event(data->m_stmt, PDO_PARAM_EVT_EXEC_POST)) {
       return false;
     }
 
     return (bool)ret;
   }
-  m_stmt->active_query_string.reset();
-  PDO_HANDLE_STMT_ERR(m_stmt);
+  data->m_stmt->active_query_string.reset();
+  PDO_HANDLE_STMT_ERR(data->m_stmt);
   return false;
 }
 
-Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
-                                int64_t orientation /* = q_PDO$$FETCH_ORI_NEXT */,
-                                int64_t offset /* = 0 */) {
+static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
+                           int64_t orientation = q_PDO$$FETCH_ORI_NEXT,
+                           int64_t offset = 0) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   SYNC_VM_REGS_SCOPED();
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  if (!pdo_stmt_verify_mode(data->m_stmt, how, false)) {
     return false;
   }
 
   Variant ret;
-  if (!do_fetch(m_stmt, true, ret, (PDOFetchType)how,
+  if (!do_fetch(data->m_stmt, true, ret, (PDOFetchType)how,
                 (PDOFetchOrientation)orientation, offset, NULL)) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchobject(const String& class_name /* = null_string */,
-                                      const Variant& ctor_args /* = null */) {
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  if (!pdo_stmt_verify_mode(m_stmt, PDO_FETCH_CLASS, false)) {
+static Variant HHVM_METHOD(PDOStatement, fetchobject,
+                           const String& class_name /* = null_string */,
+                           const Variant& ctor_args /* = null */) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  if (!pdo_stmt_verify_mode(data->m_stmt, PDO_FETCH_CLASS, false)) {
     return false;
   }
 
-  String old_clsname = m_stmt->fetch.clsname;
-  Variant old_ctor_args = m_stmt->fetch.ctor_args;
+  String old_clsname = data->m_stmt->fetch.clsname;
+  Variant old_ctor_args = data->m_stmt->fetch.ctor_args;
   bool error = false;
 
-  m_stmt->fetch.clsname = class_name;
+  data->m_stmt->fetch.clsname = class_name;
   if (class_name.isNull()) {
-    m_stmt->fetch.clsname = "stdclass";
+    data->m_stmt->fetch.clsname = "stdclass";
   }
-  if (!HHVM_FN(class_exists)(m_stmt->fetch.clsname)) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+  if (!HHVM_FN(class_exists)(data->m_stmt->fetch.clsname)) {
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "HY000",
                          "Could not find user-supplied class");
     error = true;
   }
   if (!ctor_args.isNull() && !ctor_args.isArray()) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "HY000",
                          "ctor_args must be either NULL or an array");
     error = true;
   }
-  m_stmt->fetch.ctor_args = ctor_args;
+  data->m_stmt->fetch.ctor_args = ctor_args;
 
   Variant ret;
-  if (!error && !do_fetch(m_stmt, true, ret, PDO_FETCH_CLASS,
+  if (!error && !do_fetch(data->m_stmt, true, ret, PDO_FETCH_CLASS,
                           PDO_FETCH_ORI_NEXT, 0, NULL)) {
     error = true;
   }
   if (error) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
   }
 
-  m_stmt->fetch.clsname = old_clsname;
-  m_stmt->fetch.ctor_args = old_ctor_args;
+  data->m_stmt->fetch.clsname = old_clsname;
+  data->m_stmt->fetch.ctor_args = old_ctor_args;
   if (error) {
     return false;
   }
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchcolumn(int64_t column_numner /* = 0 */) {
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  if (!do_fetch_common(m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
+                           int64_t column_numner /* = 0 */) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  if (!do_fetch_common(data->m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
   Variant ret;
-  fetch_value(m_stmt, ret, column_numner, NULL);
+  fetch_value(data->m_stmt, ret, column_numner, nullptr);
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
-                                   const Variant& class_name /* = null */,
-                                   const Variant& ctor_args /* = null */) {
-  if (!pdo_stmt_verify_mode(m_stmt, how, true)) {
+static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
+                           const Variant& class_name /* = null */,
+                           const Variant& ctor_args /* = null */) {
+  auto self = Native::data<PDOStatementData>(this_);
+
+  if (!pdo_stmt_verify_mode(self->m_stmt, how, true)) {
     return false;
   }
 
-  String old_clsname = m_stmt->fetch.clsname;
-  Variant old_ctor_args = m_stmt->fetch.ctor_args;
+  String old_clsname = self->m_stmt->fetch.clsname;
+  Variant old_ctor_args = self->m_stmt->fetch.ctor_args;
   int error = 0;
 
   switch (how & ~PDO_FETCH_FLAGS) {
   case PDO_FETCH_CLASS:
-    m_stmt->fetch.clsname = class_name;
+    self->m_stmt->fetch.clsname = class_name;
     if (class_name.isNull()) {
-      m_stmt->fetch.clsname = "stdclass";
+      self->m_stmt->fetch.clsname = "stdclass";
     }
-    if (!HHVM_FN(class_exists)(m_stmt->fetch.clsname)) {
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+    if (!HHVM_FN(class_exists)(self->m_stmt->fetch.clsname)) {
+      pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",
                            "Could not find user-supplied class");
       error = 1;
     }
     if (!ctor_args.isNull() && !ctor_args.isArray()) {
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+      pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",
                            "ctor_args must be either NULL or an array");
       error = 1;
       break;
     }
-    m_stmt->fetch.ctor_args = ctor_args;
+    self->m_stmt->fetch.ctor_args = ctor_args;
 
     if (!error) {
-      do_fetch_class_prepare(m_stmt);
+      do_fetch_class_prepare(self->m_stmt);
     }
     break;
 
   case PDO_FETCH_FUNC:
     if (!f_function_exists(class_name.toString())) {
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+      pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",
                            "no fetch function specified");
       error = 1;
     } else {
-      m_stmt->fetch.func = class_name;
-      do_fetch_func_prepare(m_stmt);
+      self->m_stmt->fetch.func = class_name;
+      do_fetch_func_prepare(self->m_stmt);
     }
     break;
 
   case PDO_FETCH_COLUMN:
     if (class_name.isNull()) {
-      m_stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+      self->m_stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
     } else {
-      m_stmt->fetch.column = class_name.toInt64();
+      self->m_stmt->fetch.column = class_name.toInt64();
     }
     if (!ctor_args.isNull()) {
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "HY000",
+      pdo_raise_impl_error(self->m_stmt->dbh, self->m_stmt, "HY000",
                            "Third parameter not allowed for "
                            "PDO::FETCH_COLUMN");
       error = 1;
@@ -2861,23 +2932,23 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
   int flags = how & PDO_FETCH_FLAGS;
 
   if ((how & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT) {
-    flags |= m_stmt->default_fetch_type & PDO_FETCH_FLAGS;
-    how |= m_stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
+    flags |= self->m_stmt->default_fetch_type & PDO_FETCH_FLAGS;
+    how |= self->m_stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
   }
 
   Variant *return_all = NULL;
   Variant return_value;
   Variant data;
   if (!error)  {
-    strcpy(m_stmt->error_code, PDO_ERR_NONE);
+    strcpy(self->m_stmt->error_code, PDO_ERR_NONE);
 
     if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
         (how == PDO_FETCH_USE_DEFAULT &&
-         m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
+         self->m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
       return_value = Array::Create();
       return_all = &return_value;
     }
-    if (!do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
+    if (!do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
                   PDO_FETCH_ORI_NEXT, 0, return_all)) {
       error = 2;
     }
@@ -2886,12 +2957,12 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
     if ((how & PDO_FETCH_GROUP)) {
       do {
         data.unset();
-      } while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
+      } while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, return_all));
     } else if (how == PDO_FETCH_KEY_PAIR ||
                (how == PDO_FETCH_USE_DEFAULT &&
-                m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-      while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
+                self->m_stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
+      while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
                       PDO_FETCH_ORI_NEXT, 0, return_all)) {
         continue;
       }
@@ -2900,16 +2971,16 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
       do {
         return_value.toArrRef().append(data);
         data.unset();
-      } while (do_fetch(m_stmt, true, data, (PDOFetchType)(how | flags),
+      } while (do_fetch(self->m_stmt, true, data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, NULL));
     }
   }
 
-  m_stmt->fetch.clsname = old_clsname;
-  m_stmt->fetch.ctor_args = old_ctor_args;
+  self->m_stmt->fetch.clsname = old_clsname;
+  self->m_stmt->fetch.ctor_args = old_ctor_args;
 
   if (error) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+    PDO_HANDLE_STMT_ERR(self->m_stmt);
     if (error != 2) {
       return false;
     }
@@ -2922,44 +2993,59 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
   return return_value;
 }
 
-bool c_PDOStatement::t_bindvalue(const Variant& paramno, const Variant& param,
-                                 int64_t type /* = q_PDO$$PARAM_STR */) {
-  return register_bound_param(paramno, param, type, 0, uninit_null(), m_stmt, true);
+
+static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
+                        const Variant& param,
+                        int64_t type /* = q_PDO$$PARAM_STR */) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return register_bound_param(paramno, param, type, 0,
+                              uninit_null(), data->m_stmt, true);
 }
 
-bool c_PDOStatement::t_bindparam(const Variant& paramno, VRefParam param,
-                                 int64_t type /* = q_PDO$$PARAM_STR */,
-                                 int64_t max_value_len /* = 0 */,
-                                 const Variant& driver_params /*= null */) {
+static bool HHVM_METHOD(PDOStatement, bindparam, const Variant& paramno,
+                        VRefParam param, int64_t type /* = q_PDO$$PARAM_STR */,
+                        int64_t max_value_len /* = 0 */,
+                        const Variant& driver_params /*= null */) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   return register_bound_param(paramno, ref(param), type, max_value_len,
-                              driver_params, m_stmt, true);
+                              driver_params, data->m_stmt, true);
 }
 
-bool c_PDOStatement::t_bindcolumn(const Variant& paramno, VRefParam param,
-                                  int64_t type /* = q_PDO$$PARAM_STR */,
-                                  int64_t max_value_len /* = 0 */,
-                                  const Variant& driver_params /* = null */) {
+static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
+                        VRefParam param, int64_t type /* = q_PDO$$PARAM_STR */,
+                        int64_t max_value_len /* = 0 */,
+                        const Variant& driver_params /* = null */) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   return register_bound_param(paramno, ref(param), type, max_value_len,
-                              driver_params, m_stmt, false);
+                              driver_params, data->m_stmt, false);
 }
 
-int64_t c_PDOStatement::t_rowcount() {
-  return m_stmt->row_count;
+static int64_t HHVM_METHOD(PDOStatement, rowcount) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return data->m_stmt->row_count;
 }
 
-Variant c_PDOStatement::t_errorcode() {
-  if (m_stmt->error_code[0] == '\0') {
+static Variant HHVM_METHOD(PDOStatement, errorcode) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  if (data->m_stmt->error_code[0] == '\0') {
     return init_null();
   }
-  return String(m_stmt->error_code, CopyString);
+  return String(data->m_stmt->error_code, CopyString);
 }
 
-Array c_PDOStatement::t_errorinfo() {
-  Array ret;
-  ret.append(String(m_stmt->error_code, CopyString));
+static Array HHVM_METHOD(PDOStatement, errorinfo) {
+  auto data = Native::data<PDOStatementData>(this_);
 
-  if (m_stmt->dbh->support(PDOConnection::MethodFetchErr)) {
-    m_stmt->dbh->fetchErr(m_stmt.get(), ret);
+  Array ret;
+  ret.append(String(data->m_stmt->error_code, CopyString));
+
+  if (data->m_stmt->dbh->support(PDOConnection::MethodFetchErr)) {
+    data->m_stmt->dbh->fetchErr(data->m_stmt.get(), ret);
   }
 
   int error_count = ret.size();
@@ -2973,41 +3059,46 @@ Array c_PDOStatement::t_errorinfo() {
   return ret;
 }
 
-Variant c_PDOStatement::t_setattribute(int64_t attribute, const Variant& value) {
-  if (!m_stmt->support(PDOStatement::MethodSetAttribute)) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
+static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
+                           const Variant& value) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  if (!data->m_stmt->support(PDOStatement::MethodSetAttribute)) {
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
                          "This driver doesn't support setting attributes");
     return false;
   }
 
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  if (m_stmt->setAttribute(attribute, value)) {
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  if (data->m_stmt->setAttribute(attribute, value)) {
     return true;
   }
-  PDO_HANDLE_STMT_ERR(m_stmt);
+  PDO_HANDLE_STMT_ERR(data->m_stmt);
   return false;
 }
 
-Variant c_PDOStatement::t_getattribute(int64_t attribute) {
+static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   Variant ret;
-  if (!m_stmt->support(PDOStatement::MethodGetAttribute)) {
-    if (!generic_stmt_attr_get(m_stmt, ret, attribute)) {
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
+  if (!data->m_stmt->support(PDOStatement::MethodGetAttribute)) {
+    if (!generic_stmt_attr_get(data->m_stmt, ret, attribute)) {
+      pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
                            "This driver doesn't support getting attributes");
       return false;
     }
     return ret;
   }
 
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  switch (m_stmt->getAttribute(attribute, ret)) {
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  switch (data->m_stmt->getAttribute(attribute, ret)) {
   case -1:
-    PDO_HANDLE_STMT_ERR(m_stmt);
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   case 0:
-    if (!generic_stmt_attr_get(m_stmt, ret, attribute)) {
+    if (!generic_stmt_attr_get(data->m_stmt, ret, attribute)) {
       /* XXX: should do something better here */
-      pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
+      pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
                            "driver doesn't support getting that attribute");
       return false;
     }
@@ -3018,8 +3109,10 @@ Variant c_PDOStatement::t_getattribute(int64_t attribute) {
   return ret;
 }
 
-int64_t c_PDOStatement::t_columncount() {
-  return m_stmt->column_count;
+static int64_t HHVM_METHOD(PDOStatement, columncount) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return data->m_stmt->column_count;
 }
 
 const StaticString
@@ -3028,28 +3121,31 @@ const StaticString
   s_precision("precision"),
   s_pdo_type("pdo_type");
 
-Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
+static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   if (column < 0) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "42P10",
                          "column number must be non-negative");
     return false;
   }
 
-  if (!m_stmt->support(PDOStatement::MethodGetColumnMeta)) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
+  if (!data->m_stmt->support(PDOStatement::MethodGetColumnMeta)) {
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
                          "driver doesn't support meta data");
     return false;
   }
 
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
   Array ret;
-  if (!m_stmt->getColumnMeta(column, ret)) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+  if (!data->m_stmt->getColumnMeta(column, ret)) {
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
 
   /* add stock items */
-  PDOColumn *col = m_stmt->columns[column].toResource().getTyped<PDOColumn>();
+  PDOColumn *col =
+    data->m_stmt->columns[column].toResource().getTyped<PDOColumn>();
   ret.set(s_name, col->name);
   ret.set(s_len, (int64_t)col->maxlen); /* FIXME: unsigned ? */
   ret.set(s_precision, (int64_t)col->precision);
@@ -3060,58 +3156,68 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
   return ret;
 }
 
-bool c_PDOStatement::t_setfetchmode(int _argc, int64_t mode,
-                                    const Array& _argv /* = null_array */) {
-  return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
+static bool HHVM_METHOD(PDOStatement, setfetchmode,
+                        int64_t mode, const Array& _argv /* = null_array */) {
+  auto data = Native::data<PDOStatementData>(this_);
+  int argc = _argv.size() + 1;
+
+  return pdo_stmt_set_fetch_mode(data->m_stmt, argc, mode, _argv);
 }
 
-bool c_PDOStatement::t_nextrowset() {
-  if (!m_stmt->support(PDOStatement::MethodNextRowset)) {
-    pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
+static bool HHVM_METHOD(PDOStatement, nextrowset) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  if (!data->m_stmt->support(PDOStatement::MethodNextRowset)) {
+    pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
                          "driver does not support multiple rowsets");
     return false;
   }
 
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
 
   /* un-describe */
-  if (!m_stmt->columns.empty()) {
-    m_stmt->columns.clear();
-    m_stmt->column_count = 0;
+  if (!data->m_stmt->columns.empty()) {
+    data->m_stmt->columns.clear();
+    data->m_stmt->column_count = 0;
   }
 
-  if (!m_stmt->nextRowset()) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+  if (!data->m_stmt->nextRowset()) {
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
 
-  pdo_stmt_describe_columns(m_stmt);
+  pdo_stmt_describe_columns(data->m_stmt);
   return true;
 }
 
-bool c_PDOStatement::t_closecursor() {
-  if (!m_stmt->support(PDOStatement::MethodCursorCloser)) {
+static bool HHVM_METHOD(PDOStatement, closecursor) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  if (!data->m_stmt->support(PDOStatement::MethodCursorCloser)) {
     /* emulate it by fetching and discarding rows */
     do {
-      while (m_stmt->fetcher(PDO_FETCH_ORI_NEXT, 0));
-      if (!t_nextrowset()) {
+      while (data->m_stmt->fetcher(PDO_FETCH_ORI_NEXT, 0));
+      // if (!data->t_nextrowset()) {
+      if (HHVM_MN(PDOStatement, nextrowset)(this_)) {
         break;
       }
     } while (true);
-    m_stmt->executed = 0;
+    data->m_stmt->executed = 0;
     return true;
   }
 
-  strcpy(m_stmt->error_code, PDO_ERR_NONE);
-  if (!m_stmt->cursorCloser()) {
-    PDO_HANDLE_STMT_ERR(m_stmt);
+  strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
+  if (!data->m_stmt->cursorCloser()) {
+    PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
   }
-  m_stmt->executed = 0;
+  data->m_stmt->executed = 0;
   return true;
 }
 
-Variant c_PDOStatement::t_debugdumpparams() {
+static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
+  auto data = Native::data<PDOStatementData>(this_);
+
   Resource resource = File::Open("php://output", "w");
   File *f = resource.getTyped<File>(true);
   if (!f) {
@@ -3119,13 +3225,14 @@ Variant c_PDOStatement::t_debugdumpparams() {
   }
 
   Array params;
-  params.append(m_stmt->query_string.size());
-  params.append(m_stmt->query_string.size());
-  params.append(m_stmt->query_string.data());
+  params.append(data->m_stmt->query_string.size());
+  params.append(data->m_stmt->query_string.size());
+  params.append(data->m_stmt->query_string.data());
   f->printf("SQL: [%d] %.*s\n", params);
 
-  f->printf("Params:  %d\n", make_packed_array(m_stmt->bound_params.size()));
-  for (ArrayIter iter(m_stmt->bound_params); iter; ++iter) {
+  f->printf("Params:  %d\n",
+            make_packed_array(data->m_stmt->bound_params.size()));
+  for (ArrayIter iter(data->m_stmt->bound_params); iter; ++iter) {
     if (iter.first().isString()) {
       String key = iter.first().toString();
       params = make_packed_array(key.size(), key.size(), key.data());
@@ -3149,45 +3256,527 @@ Variant c_PDOStatement::t_debugdumpparams() {
   return true;
 }
 
-Variant c_PDOStatement::t_current() {
-  return m_row;
+static Variant HHVM_METHOD(PDOStatement, current) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return data->m_row;
 }
 
-Variant c_PDOStatement::t_key() {
-  return m_rowIndex;
+static Variant HHVM_METHOD(PDOStatement, key) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return data->m_rowIndex;
 }
 
-Variant c_PDOStatement::t_next() {
-  m_row = t_fetch(PDO_FETCH_USE_DEFAULT);
-  if (same(m_row, false)) {
-    m_rowIndex = -1;
+static Variant HHVM_METHOD(PDOStatement, next) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  data->m_row = HHVM_MN(PDOStatement, fetch)(this_, PDO_FETCH_USE_DEFAULT);
+  if (same(data->m_row, false)) {
+    data->m_rowIndex = -1;
   } else {
-    ++m_rowIndex;
+    ++data->m_rowIndex;
   }
   return init_null();
 }
 
-Variant c_PDOStatement::t_rewind() {
-  m_rowIndex = -1;
-  t_next();
+static Variant HHVM_METHOD(PDOStatement, rewind) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  data->m_rowIndex = -1;
+  HHVM_MN(PDOStatement, next)(this_);
   return init_null();
 }
 
-Variant c_PDOStatement::t_valid() {
-  return m_rowIndex >= 0;
+static Variant HHVM_METHOD(PDOStatement, valid) {
+  auto data = Native::data<PDOStatementData>(this_);
+
+  return data->m_rowIndex >= 0;
 }
 
-Variant c_PDOStatement::t___wakeup() {
-  throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
+static Variant HHVM_METHOD(PDOStatement, __wakeup) {
+  throw_pdo_exception(uninit_null(), uninit_null(),
+                      "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return init_null();
 }
 
-Variant c_PDOStatement::t___sleep() {
-  throw_pdo_exception(uninit_null(), uninit_null(), "You cannot serialize or unserialize "
+static Variant HHVM_METHOD(PDOStatement, __sleep) {
+  throw_pdo_exception(uninit_null(), uninit_null(),
+                      "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return init_null();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
+static class PDOExtension : public Extension {
+public:
+  PDOExtension() : Extension("pdo", " 1.0.4dev") {}
+
+  virtual void moduleInit() {
+    HHVM_FE(pdo_drivers);
+    HHVM_ME(PDO, __construct);
+    HHVM_ME(PDO, prepare);
+    HHVM_ME(PDO, begintransaction);
+    HHVM_ME(PDO, commit);
+    HHVM_ME(PDO, intransaction);
+    HHVM_ME(PDO, rollback);
+    HHVM_ME(PDO, setattribute);
+    HHVM_ME(PDO, getattribute);
+    HHVM_ME(PDO, exec);
+    HHVM_ME(PDO, lastinsertid);
+    HHVM_ME(PDO, errorcode);
+    HHVM_ME(PDO, errorinfo);
+    HHVM_ME(PDO, query);
+    HHVM_ME(PDO, quote);
+    HHVM_ME(PDO, sqlitecreatefunction);
+    HHVM_ME(PDO, sqlitecreateaggregate);
+    HHVM_ME(PDO, __wakeup);
+    HHVM_ME(PDO, __sleep);
+    HHVM_STATIC_ME(PDO, getAvailableDrivers);
+    HHVM_ME(PDOStatement, execute);
+    HHVM_ME(PDOStatement, fetch);
+    HHVM_ME(PDOStatement, fetchobject);
+    HHVM_ME(PDOStatement, fetchcolumn);
+    HHVM_ME(PDOStatement, fetchall);
+    HHVM_ME(PDOStatement, bindvalue);
+    HHVM_ME(PDOStatement, bindparam);
+    HHVM_ME(PDOStatement, bindcolumn);
+    HHVM_ME(PDOStatement, rowcount);
+    HHVM_ME(PDOStatement, errorcode);
+    HHVM_ME(PDOStatement, errorinfo);
+    HHVM_ME(PDOStatement, setattribute);
+    HHVM_ME(PDOStatement, getattribute);
+    HHVM_ME(PDOStatement, columncount);
+    HHVM_ME(PDOStatement, getcolumnmeta);
+    HHVM_ME(PDOStatement, setfetchmode);
+    HHVM_ME(PDOStatement, nextrowset);
+    HHVM_ME(PDOStatement, closecursor);
+    HHVM_ME(PDOStatement, debugdumpparams);
+    HHVM_ME(PDOStatement, current);
+    HHVM_ME(PDOStatement, key);
+    HHVM_ME(PDOStatement, next);
+    HHVM_ME(PDOStatement, rewind);
+    HHVM_ME(PDOStatement, valid);
+    HHVM_ME(PDOStatement, __wakeup);
+    HHVM_ME(PDOStatement, __sleep);
+
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_BOOL.get(),
+      q_PDO$$PARAM_BOOL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_NULL.get(),
+      q_PDO$$PARAM_NULL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_INT.get(),
+      q_PDO$$PARAM_INT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_STR.get(),
+      q_PDO$$PARAM_STR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_LOB.get(),
+      q_PDO$$PARAM_LOB
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_STMT.get(),
+      q_PDO$$PARAM_STMT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_INPUT_OUTPUT.get(),
+      q_PDO$$PARAM_INPUT_OUTPUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_ALLOC.get(),
+      q_PDO$$PARAM_EVT_ALLOC
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_FREE.get(),
+      q_PDO$$PARAM_EVT_FREE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_EXEC_PRE.get(),
+      q_PDO$$PARAM_EVT_EXEC_PRE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_EXEC_POST.get(),
+      q_PDO$$PARAM_EVT_EXEC_POST
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_FETCH_PRE.get(),
+      q_PDO$$PARAM_EVT_FETCH_PRE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_FETCH_POST.get(),
+      q_PDO$$PARAM_EVT_FETCH_POST
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PARAM_EVT_NORMALIZE.get(),
+      q_PDO$$PARAM_EVT_NORMALIZE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_USE_DEFAULT.get(),
+      q_PDO$$FETCH_USE_DEFAULT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_LAZY.get(),
+      q_PDO$$FETCH_LAZY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ASSOC.get(),
+      q_PDO$$FETCH_ASSOC
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_NUM.get(),
+      q_PDO$$FETCH_NUM
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_BOTH.get(),
+      q_PDO$$FETCH_BOTH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_OBJ.get(),
+      q_PDO$$FETCH_OBJ
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_BOUND.get(),
+      q_PDO$$FETCH_BOUND
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_COLUMN.get(),
+      q_PDO$$FETCH_COLUMN
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_CLASS.get(),
+      q_PDO$$FETCH_CLASS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_INTO.get(),
+      q_PDO$$FETCH_INTO
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_FUNC.get(),
+      q_PDO$$FETCH_FUNC
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_GROUP.get(),
+      q_PDO$$FETCH_GROUP
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_UNIQUE.get(),
+      q_PDO$$FETCH_UNIQUE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_KEY_PAIR.get(),
+      q_PDO$$FETCH_KEY_PAIR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_CLASSTYPE.get(),
+      q_PDO$$FETCH_CLASSTYPE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_SERIALIZE.get(),
+      q_PDO$$FETCH_SERIALIZE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_PROPS_LATE.get(),
+      q_PDO$$FETCH_PROPS_LATE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_NAMED.get(),
+      q_PDO$$FETCH_NAMED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_AUTOCOMMIT.get(),
+      q_PDO$$ATTR_AUTOCOMMIT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_PREFETCH.get(),
+      q_PDO$$ATTR_PREFETCH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_TIMEOUT.get(),
+      q_PDO$$ATTR_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_ERRMODE.get(),
+      q_PDO$$ATTR_ERRMODE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_SERVER_VERSION.get(),
+      q_PDO$$ATTR_SERVER_VERSION
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_CLIENT_VERSION.get(),
+      q_PDO$$ATTR_CLIENT_VERSION
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_SERVER_INFO.get(),
+      q_PDO$$ATTR_SERVER_INFO
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_CONNECTION_STATUS.get(),
+      q_PDO$$ATTR_CONNECTION_STATUS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_CASE.get(),
+      q_PDO$$ATTR_CASE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_CURSOR_NAME.get(),
+      q_PDO$$ATTR_CURSOR_NAME
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_CURSOR.get(),
+      q_PDO$$ATTR_CURSOR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_ORACLE_NULLS.get(),
+      q_PDO$$ATTR_ORACLE_NULLS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_PERSISTENT.get(),
+      q_PDO$$ATTR_PERSISTENT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_STATEMENT_CLASS.get(),
+      q_PDO$$ATTR_STATEMENT_CLASS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_FETCH_TABLE_NAMES.get(),
+      q_PDO$$ATTR_FETCH_TABLE_NAMES
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_FETCH_CATALOG_NAMES.get(),
+      q_PDO$$ATTR_FETCH_CATALOG_NAMES
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_DRIVER_NAME.get(),
+      q_PDO$$ATTR_DRIVER_NAME
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_STRINGIFY_FETCHES.get(),
+      q_PDO$$ATTR_STRINGIFY_FETCHES
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_MAX_COLUMN_LEN.get(),
+      q_PDO$$ATTR_MAX_COLUMN_LEN
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_EMULATE_PREPARES.get(),
+      q_PDO$$ATTR_EMULATE_PREPARES
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ATTR_DEFAULT_FETCH_MODE.get(),
+      q_PDO$$ATTR_DEFAULT_FETCH_MODE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ERRMODE_SILENT.get(),
+      q_PDO$$ERRMODE_SILENT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ERRMODE_WARNING.get(),
+      q_PDO$$ERRMODE_WARNING
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_ERRMODE_EXCEPTION.get(),
+      q_PDO$$ERRMODE_EXCEPTION
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_CASE_NATURAL.get(),
+      q_PDO$$CASE_NATURAL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_CASE_LOWER.get(),
+      q_PDO$$CASE_LOWER
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_CASE_UPPER.get(),
+      q_PDO$$CASE_UPPER
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_NULL_NATURAL.get(),
+      q_PDO$$NULL_NATURAL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_NULL_EMPTY_STRING.get(),
+      q_PDO$$NULL_EMPTY_STRING
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_NULL_TO_STRING.get(),
+      q_PDO$$NULL_TO_STRING
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_NEXT.get(),
+      q_PDO$$FETCH_ORI_NEXT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_PRIOR.get(),
+      q_PDO$$FETCH_ORI_PRIOR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_FIRST.get(),
+      q_PDO$$FETCH_ORI_FIRST
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_LAST.get(),
+      q_PDO$$FETCH_ORI_LAST
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_ABS.get(),
+      q_PDO$$FETCH_ORI_ABS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_FETCH_ORI_REL.get(),
+      q_PDO$$FETCH_ORI_REL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_CURSOR_FWDONLY.get(),
+      q_PDO$$CURSOR_FWDONLY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_CURSOR_SCROLL.get(),
+      q_PDO$$CURSOR_SCROLL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_USE_BUFFERED_QUERY.get(),
+      q_PDO$$MYSQL_ATTR_USE_BUFFERED_QUERY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_LOCAL_INFILE.get(),
+      q_PDO$$MYSQL_ATTR_LOCAL_INFILE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_MAX_BUFFER_SIZE.get(),
+      q_PDO$$MYSQL_ATTR_MAX_BUFFER_SIZE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_INIT_COMMAND.get(),
+      q_PDO$$MYSQL_ATTR_INIT_COMMAND
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_READ_DEFAULT_FILE.get(),
+      q_PDO$$MYSQL_ATTR_READ_DEFAULT_FILE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_READ_DEFAULT_GROUP.get(),
+      q_PDO$$MYSQL_ATTR_READ_DEFAULT_GROUP
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_COMPRESS.get(),
+      q_PDO$$MYSQL_ATTR_COMPRESS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_DIRECT_QUERY.get(),
+      q_PDO$$MYSQL_ATTR_DIRECT_QUERY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_FOUND_ROWS.get(),
+      q_PDO$$MYSQL_ATTR_FOUND_ROWS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_IGNORE_SPACE.get(),
+      q_PDO$$MYSQL_ATTR_IGNORE_SPACE
+    );
+    Native::registerClassConstant<KindOfStaticString>(
+      s_PDO.get(),
+      s_ERR_NONE.get(),
+      q_PDO$$ERR_NONE.get()
+    );
+
+    Native::registerNativeDataInfo<PDOData>(
+      s_PDO.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<PDOStatementData>(
+      s_PDOStatement.get(), Native::NDIFlags::NO_SWEEP);
+
+    loadSystemlib("pdo");
+  }
+} s_pdo_extension;
+
+//////////////////////////////////////////////////////////////////////////////
 }

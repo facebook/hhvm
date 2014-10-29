@@ -609,7 +609,7 @@ org\bovigo\vfs\vfsStreamWrapperQuotaTestCase::writeMoreThanQotaWritesOnlyUpToQuo
 org\bovigo\vfs\vfsStreamWrapperQuotaTestCase::writeUpToQotaWritesEverything
 .
 org\bovigo\vfs\vfsStreamWrapperSelectStreamTestCase::selectStream
-F
+.
 org\bovigo\vfs\vfsStreamWrapperSetOptionTestCase::removeBlockingDoesNotWork
 .
 org\bovigo\vfs\vfsStreamWrapperSetOptionTestCase::setBlockingDoesNotWork

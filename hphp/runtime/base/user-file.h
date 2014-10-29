@@ -33,6 +33,8 @@ public:
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
+  int fd() const;
+
   virtual bool open(const String& filename, const String& mode) {
     return openImpl(filename, mode, 0);
   }
@@ -74,6 +76,7 @@ private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
   bool flushImpl(bool strict);
   bool invokeMetadata(const Array& args, const char* funcName);
+  Resource invokeCast(int castas);
 
 protected:
   const Func* m_StreamOpen;
@@ -88,6 +91,7 @@ protected:
   const Func* m_StreamLock;
   const Func* m_StreamStat;
   const Func* m_StreamMetadata;
+  const Func* m_StreamCast;
   const Func* m_UrlStat;
   const Func* m_Unlink;
   const Func* m_Rename;

@@ -430,6 +430,8 @@ private:
 
   void checkAssignThis(Token &var);
 
+  void checkAssignThis(ExpressionListPtr params);
+
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
 
   // for namespace support

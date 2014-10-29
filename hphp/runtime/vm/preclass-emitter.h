@@ -211,6 +211,10 @@ class PreClassEmitter {
     return std::make_pair(m_line1, m_line2);
   }
 
+  int getNextMemoizeCacheKey(bool bStatic) {
+    return bStatic ? m_memoizeStaticSerial++ : m_memoizeInstanceSerial++;
+  }
+
  private:
   typedef hphp_hash_map<LowStringPtr,
                         FuncEmitter*,
@@ -243,6 +247,9 @@ class PreClassEmitter {
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
+
+  int m_memoizeStaticSerial = 0;
+  int m_memoizeInstanceSerial = 0;
 };
 
 class PreClassRepoProxy : public RepoProxy {

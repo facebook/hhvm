@@ -6363,9 +6363,10 @@ void EmitterVisitor::emitPostponedMeths() {
     if (funcScope->userAttributes().count("__Memoize")) {
       auto classScope = meth->getClassScope();
 
-      // Due to an edge case with traits, we need to include the name for
-      // disambiguation when a trait function with no args is overridden by a
-      // trait function with args
+      std::string propNameBase = classScope && !funcScope->isStatic() ?
+        "instance" : "static";
+      // The prop definition in traits conflicts with the definition in a class
+      // so make a different prop for each trait
       std::string traitNamePart;
       if (classScope && classScope->isTrait()) {
         traitNamePart = classScope->getName();
@@ -6381,8 +6382,9 @@ void EmitterVisitor::emitPostponedMeths() {
       auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));
       auto const propName = makeStaticString(
-        folly::sformat("{}${}memoize_cache", fe->name->data(), traitNamePart));
+        folly::sformat("{}${}memoize_cache", propNameBase, traitNamePart));
 
+      int cacheKey = 0;
       FuncEmitter* memoizeFe = nullptr;
       if (meth->is(Statement::KindOfFunctionStatement)) {
         if (!p.m_top) {
@@ -6395,18 +6397,14 @@ void EmitterVisitor::emitPostponedMeths() {
         top_fes.push_back(memoizeFe);
       } else {
         PreClassEmitter *pce = fe->pce();
+        cacheKey = pce->getNextMemoizeCacheKey(funcScope->isStatic());
 
         // Add a property to hold the memoized results
-        TypedValue tvProp;
-        if (!meth->getParams() || meth->getParams()->getCount() == 0) {
-          tvWriteNull(&tvProp);
-        } else {
-          tvProp = make_tv<KindOfArray>(staticEmptyArray());
-        }
+        TypedValue tvProp = make_tv<KindOfArray>(staticEmptyArray());
         Attr attrs = AttrPrivate | AttrBuiltin;
         attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
-        pce->addProperty(propName, attrs, nullptr, nullptr,
-                         &tvProp, RepoAuthType{});
+        pce->addProperty(propName, attrs, nullptr, nullptr, &tvProp,
+                         RepoAuthType{});
 
         // Rename the method and create a new method with the original name
         pce->renameMethod(originalName, rewrittenName);
@@ -6419,7 +6417,7 @@ void EmitterVisitor::emitPostponedMeths() {
       m_curFunc = memoizeFe;
       m_curFunc->isMemoizeWrapper = true;
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMemoizeMethod(meth, rewrittenName, propName);
+      emitMemoizeMethod(meth, rewrittenName, propName, cacheKey);
 
       // Switch back to the original method and mark it as a memoize
       // implementation
@@ -6864,7 +6862,8 @@ bool EmitterVisitor::isMemoizeBlessedType(const TypeConstraint &tc) {
 
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
                                        const StringData* methName,
-                                       const StringData* propName) {
+                                       const StringData* propName,
+                                       int cacheKey) {
   if (meth->getFunctionScope()->isRefReturn()) {
     throw IncludeTimeFatalException(meth,
       "<<__Memoize>> cannot be used on functions that return by reference");
@@ -6882,7 +6881,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   bool isFunc = meth->is(Statement::KindOfFunctionStatement);
   int numParams = m_curFunc->params.size();
-  int staticLocalID = 0;
+  std::vector<Id> cacheLookup;
 
   auto region = createRegion(meth, Region::Kind::FuncBody);
   enterRegion(region);
@@ -6895,9 +6894,9 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   emitMethodPrologue(e, meth);
 
   // Function start
+  int staticLocalID = m_curFunc->allocUnnamedLocal();
   if (isFunc) {
     // static ${propName} = {numParams > 0 ? array() : null};
-    staticLocalID = m_curFunc->allocUnnamedLocal();
     emitVirtualLocal(staticLocalID);
     if (numParams == 0) {
       e.Null();
@@ -6905,15 +6904,22 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       e.Array(staticEmptyArray());
     }
     e.StaticLocInit(staticLocalID, propName);
-  } else if (!meth->getFunctionScope()->isStatic()) {
-    e.CheckThis();
+  } else {
+    if (!meth->getFunctionScope()->isStatic()) {
+      e.CheckThis();
+    }
+
+    // Methods use a shared array keyed by a cache key. So push that as a local
+    emitVirtualLocal(staticLocalID);
+    e.Int(cacheKey);
+    emitSet(e);
+    emitPop(e);
+    cacheLookup.push_back(staticLocalID);
   }
 
-  std::vector<Id> paramNumToLocalID(numParams);
-
-  if (numParams == 0) {
+  if (numParams == 0 && isFunc) {
     // if (${propName} !== null)
-    emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID, 0);
+    emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup, 0);
     emitIsType(e, IsTypeOp::Null);
     e.JmpNZ(cacheMiss);
   } else {
@@ -6928,7 +6934,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       }
 
       if (isMemoizeBlessedType(m_curFunc->params[i].typeConstraint)) {
-        paramNumToLocalID[i] = i;
+        cacheLookup.push_back(i);
         continue;
       }
 
@@ -6937,11 +6943,12 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       //  2: Otherwise, call the serialization function
       //  3: In either case, store the result in a new local
       Label notInt, storeLocal;
-      paramNumToLocalID[i] = m_curFunc->allocUnnamedLocal();
+      int serResultLocal = m_curFunc->allocUnnamedLocal();
+      cacheLookup.push_back(serResultLocal);
 
       // $valN = is_int($paramN) ?
       //   $paramN : HH\serialize_memoize_param($paramN);
-      emitVirtualLocal(paramNumToLocalID[i]);
+      emitVirtualLocal(serResultLocal);
       emitVirtualLocal(i);
       emitIsType(e, IsTypeOp::Int);
       e.JmpZ(notInt);
@@ -6972,34 +6979,38 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     //    array_key_exists() check
     //  - Otherwise we need an isset check to make sure we can dereference the
     //    first N - 1 args, and then an array_key_exists() check
+    int cacheLookupLen = cacheLookup.size();
     bool noRetNull =
       m_curFunc->retTypeConstraint.hasConstraint() &&
       !m_curFunc->retTypeConstraint.isSoft() &&
       !m_curFunc->retTypeConstraint.isNullable();
 
-    if (numParams > 1 || noRetNull) {
+    if (cacheLookupLen > 1 || noRetNull) {
       // if (isset(${propName}[$param1]...[noRetNull ? $paramN : $paramN-1]))
-      emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
-                      noRetNull ? numParams : numParams - 1);
+      emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
+                      noRetNull ? cacheLookupLen : cacheLookupLen - 1);
       emitIsset(e);
       e.JmpZ(cacheMiss);
     }
 
     if (!noRetNull) {
-      auto lastArgTC = m_curFunc->params[numParams - 1].typeConstraint;
-      bool lastArgBool =
-        isMemoizeBlessedType(lastArgTC) &&
-        lastArgTC.underlyingDataType() == DataType::KindOfBoolean &&
-        !lastArgTC.isNullable();
+      bool lastArgBool = false;
+      if (numParams > 0) {
+        auto lastArgTC = m_curFunc->params[numParams - 1].typeConstraint;
+        lastArgBool =
+          isMemoizeBlessedType(lastArgTC) &&
+          lastArgTC.underlyingDataType() == DataType::KindOfBoolean &&
+          !lastArgTC.isNullable();
+      }
 
       // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1]))
-      emitVirtualLocal(paramNumToLocalID[numParams - 1]);
+      emitVirtualLocal(cacheLookup[cacheLookupLen - 1]);
       emitCGet(e);
       if (lastArgBool) {
         e.CastInt();
       }
-      emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
-                      numParams - 1);
+      emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
+                      cacheLookupLen - 1);
       emitCGet(e);
       e.AKExists();
       e.JmpZ(cacheMiss);
@@ -7007,15 +7018,16 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   }
 
   // return $<propName>[$param1][...][$paramN]
-  emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
-                  numParams);
+  int cacheLookupLen = cacheLookup.size();
+  emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
+                  cacheLookupLen);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, meth, propName, staticLocalID, paramNumToLocalID,
-                  numParams);
+  emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
+                  cacheLookupLen);
   auto fpiStart = m_ue.bcPos();
   if (isFunc) {
     e.FPushFuncD(numParams, methName);
@@ -7038,7 +7050,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   }
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+    for (uint i = 0; i < numParams; i++) {
       emitVirtualLocal(i);
       emitFPass(e, i, PassByRefKind::ErrorOnCell);
     }

@@ -752,7 +752,7 @@ public:
                        const std::vector<Id>& paramIDs, uint numParams);
   bool isMemoizeBlessedType(const TypeConstraint &tc);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName,
-                         const StringData* propName);
+                         const StringData* propName, int cacheKey);
   void emitConstMethodCallNoParams(Emitter& e, string name);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,

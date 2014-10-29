@@ -426,6 +426,8 @@ private:
 
   bool hasType(Token &type);
 
+  void checkAssignThis(string var);
+
   void checkAssignThis(Token &var);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);

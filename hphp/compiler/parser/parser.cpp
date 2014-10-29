@@ -720,12 +720,17 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
-void Parser::checkAssignThis(Token &var) {
-  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    if (simp->getName() == "this") {
+void Parser::checkAssignThis(string var) {
+    if (var == "this") {
       PARSE_ERROR("Cannot re-assign $this");
     }
+}
+
+void Parser::checkAssignThis(Token &var) {
+  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
+    checkAssignThis(simp->getName());
   }
+  checkAssignThis(var->text());
 }
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
@@ -1208,6 +1213,7 @@ void Parser::onVariadicParam(Token &out, Token *params,
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
                      bool ref, Token *defValue, Token *attr, Token *modifier) {
+  checkAssignThis(var);
   ExpressionPtr expList;
   if (params) {
     expList = params->exp;

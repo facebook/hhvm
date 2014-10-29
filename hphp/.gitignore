@@ -1,8 +1,10 @@
 # HHVM build results
 *.hhbc
 *.[oa]
+/hhvm/hhbbc
 /hhvm/hhvm
 /hhvm/hphp
+/hhvm/php
 
 # CMake build artifacts
 CMakeFiles

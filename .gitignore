@@ -32,9 +32,6 @@ hphp.log
 /hphp/runtime/tmp/libtest.so
 
 /hphp/hhvm/gen
-/hphp/hhvm/hhvm
-/hphp/hhvm/php
-/hphp/hhvm/hhbbc
 
 *.ext_hhvm.cpp
 *.ext_hhvm.h

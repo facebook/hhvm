@@ -268,6 +268,23 @@ TEST(Type, Specialized) {
   EXPECT_GT(packed, Type::Bottom);
 
   EXPECT_TRUE(Type::Int <= (packed | Type::Int));
+
+  EXPECT_EQ(Type::Bottom, packed - Type::Arr);
+
+  auto const array = make_packed_array(1, 2, 3, 4);
+  auto const mixed = make_map_array(1, 1, 2, 2);
+  auto const arrData = ArrayData::GetScalarArray(array.get());
+  auto const arrDataMixed = ArrayData::GetScalarArray(mixed.get());
+  auto constArray = Type::cns(arrData);
+  auto constArrayMixed = Type::cns(arrDataMixed);
+  auto const spacked = Type::StaticArr.specialize(ArrayData::kPackedKind);
+  EXPECT_EQ(spacked, spacked - constArray); // conservative
+  EXPECT_EQ(constArray, constArray - spacked); // conservative (could be
+                                               // bottom if we did better)
+
+  // Implemented conservatively right now, but the following better not return
+  // bottom:
+  EXPECT_EQ(constArrayMixed, constArrayMixed - spacked);
 }
 
 TEST(Type, SpecializedObjects) {
@@ -305,6 +322,9 @@ TEST(Type, SpecializedObjects) {
   EXPECT_EQ(subA & exactA, exactA);
   EXPECT_EQ(exactB & subB, exactB);
   EXPECT_EQ(subB & exactB, exactB);
+
+  EXPECT_EQ(Type::Obj, Type::Obj - subA);  // conservative
+  EXPECT_EQ(subA, subA - exactA);  // conservative
 }
 
 TEST(Type, Const) {
@@ -326,8 +346,11 @@ TEST(Type, Const) {
   EXPECT_EQ("Int<5>", five.toString());
   EXPECT_EQ(five, five - Type::Arr);
   EXPECT_EQ(five, five - Type::cns(1));
+  EXPECT_EQ(Type::Int, Type::Int - five); // conservative
   EXPECT_EQ(Type::Bottom, five - Type::Int);
   EXPECT_EQ(Type::Bottom, five - five);
+  EXPECT_EQ(Type::PtrToGen,
+            (Type::PtrToGen|Type::Nullptr) - Type::Nullptr);
   EXPECT_EQ(Type::Int, five.dropConstVal());
   EXPECT_TRUE(five.not(Type::cns(2)));
 

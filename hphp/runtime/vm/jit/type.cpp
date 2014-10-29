@@ -508,24 +508,44 @@ Type Type::operator&(Type b) const {
 }
 
 Type Type::operator-(Type other) const {
-  auto const newBits = m_bits & ~other.m_bits;
-
   if (m_hasConstVal) {
-    // If other is a constant of the same type, the result is Bottom or this
-    // depending on whether or not it's the same constant.
+    /*
+     * If other is a constant of the same type, the result is Bottom or this
+     * depending on whether or not it's the same constant. It is ok to use
+     * m_bits == other.m_bits for this because m_hasConstVal implies only one
+     * type bit is set.
+     */
     if (other.m_bits == m_bits && other.m_hasConstVal) {
       return other.m_extra == m_extra ? Bottom : *this;
     }
+    // Bits are different, and m_bits has a single bit set.
 
-    // Otherwise, just check to see if the constant's type was removed in
-    // newBits.
-    return (newBits & m_bits) ? *this : Bottom;
+    /*
+     * Now we're going to try to handle the case where other removes the whole
+     * type that this is a constant of.  But we have to be careful because of
+     * overlap between constants and specialized values.
+     *
+     * If the other type is neither constant nor a specialized array, we can
+     * just check if removing that type removes the type of this's constant,
+     * and return either this or Bottom depending on that.
+     *
+     * For the case of arrays, it only matters if this is a subtype of Array,
+     * and in that case we can just potentially conservatively return this:
+     * this is always as big as this - x for any x.
+     */
+    if (!other.m_hasConstVal &&
+        (!other.isSpecialized() || !other.maybe(Arr) || !subtypeOf(Arr))) {
+      return m_bits & ~other.m_bits ? *this : Bottom;
+    }
+    return *this;
   }
 
-  // Rather than try to represent types like "all Ints except 24", treat t -
-  // Int<24> as t - Int.
-  other = other.dropConstVal();
+  // If the other value has a constant, but this doesn't, just (conservatively)
+  // return this, rather than trying to represent things like "everything
+  // except Int<24>".
+  if (other.m_hasConstVal) return *this;
 
+  auto const newBits = m_bits & ~other.m_bits;
   auto const spec1 = isSpecialized();
   auto const spec2 = other.isSpecialized();
 
@@ -534,19 +554,14 @@ Type Type::operator-(Type other) const {
 
   if (spec1 && spec2) {
     if (canSpecializeClass() != other.canSpecializeClass()) {
-      // Both are specialized but in different ways. Our specialization is
-      // preserved.
+      // Both are specialized but in different ways.  Take our specialization.
       return Type(newBits, m_extra);
     }
 
-    // Subtracting different specializations of the same type could get messy
-    // so we don't support it for now.
-    always_assert(specializedType() == other.specializedType() &&
-                  "Incompatible specialized types given to operator-");
-
-    // If we got here, both types have the same specialization, so it's removed
-    // from the result.
-    return Type(newBits);
+    // If we got here, both types have the same kind of specialization (array
+    // vs class).  We don't know how to deal with this yet, so just return
+    // *this conservatively.
+    return *this;
   }
 
   // If masking out other's bits removed all of the bits that correspond to our
@@ -565,11 +580,9 @@ Type Type::operator-(Type other) const {
 
   // Only other is specialized. This is where things get a little fuzzy. We
   // want to be able to support things like Obj - Obj<C> but we can't represent
-  // Obj<~C>. We compromise and return Bottom in cases like this, which means
-  // we need to be careful because (a - b) == Bottom doesn't imply a <= b in
-  // this world.
-  if (other.canSpecializeClass()) return Type(newBits & ~kAnyObj);
-  return Type(newBits & ~kAnyArr);
+  // Obj<~C>. We compromise and just return *this in cases like this, to make
+  // sure we don't return a type that is too small.
+  return *this;
 }
 
 bool Type::subtypeOfSpecialized(Type t2) const {

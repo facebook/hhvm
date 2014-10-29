@@ -339,7 +339,12 @@ public:
   // Combinators.
 
   /*
-   * Standard set operations: union, intersection, and difference.
+   * Set operations: union, intersection, and difference.
+   *
+   * These operations may all return larger types than the "true" union,
+   * intersection, or difference. (They must be conservative in that direction
+   * for types that are too hard for us to represent, or we could generate
+   * incorrect code by assuming certain possible values are impossible.)
    */
   Type operator|(Type other) const;
   Type& operator|=(Type other) { return *this = *this | other; }

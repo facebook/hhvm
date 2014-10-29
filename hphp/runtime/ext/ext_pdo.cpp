@@ -2648,11 +2648,19 @@ c_PDOStatement::c_PDOStatement(Class* cb) :
 }
 
 c_PDOStatement::~c_PDOStatement() {
-  m_stmt.reset();
+  if(m_stmt.get() != nullptr) {
+    m_stmt.reset();
+  }
 }
 
 Variant c_PDOStatement::t_execute(const Array& params /* = null_array */) {
   SYNC_VM_REGS_SCOPED();
+
+  //an execute w/o a driver statement returns NULL on php5
+  if(m_stmt.get() == nullptr) {
+    return init_null_variant;
+  }
+
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
@@ -2728,6 +2736,11 @@ Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
                                 int64_t orientation /* = q_PDO$$FETCH_ORI_NEXT */,
                                 int64_t offset /* = 0 */) {
   SYNC_VM_REGS_SCOPED();
+
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
     return false;
@@ -2744,6 +2757,10 @@ Variant c_PDOStatement::t_fetch(int64_t how /* = 0 */,
 
 Variant c_PDOStatement::t_fetchobject(const String& class_name /* = null_string */,
                                       const Variant& ctor_args /* = null */) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, PDO_FETCH_CLASS, false)) {
     return false;
@@ -2787,6 +2804,10 @@ Variant c_PDOStatement::t_fetchobject(const String& class_name /* = null_string 
 }
 
 Variant c_PDOStatement::t_fetchcolumn(int64_t column_numner /* = 0 */) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!do_fetch_common(m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
     PDO_HANDLE_STMT_ERR(m_stmt);
@@ -2800,6 +2821,10 @@ Variant c_PDOStatement::t_fetchcolumn(int64_t column_numner /* = 0 */) {
 Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
                                    const Variant& class_name /* = null */,
                                    const Variant& ctor_args /* = null */) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+  
   if (!pdo_stmt_verify_mode(m_stmt, how, true)) {
     return false;
   }
@@ -2924,37 +2949,62 @@ Variant c_PDOStatement::t_fetchall(int64_t how /* = 0 */,
 
 bool c_PDOStatement::t_bindvalue(const Variant& paramno, const Variant& param,
                                  int64_t type /* = q_PDO$$PARAM_STR */) {
-  return register_bound_param(paramno, param, type, 0, uninit_null(), m_stmt, true);
+  if(m_stmt.get() != nullptr) {
+    return register_bound_param(paramno, param, type, 0, uninit_null(), m_stmt, true);
+  } else {
+    return false;
+  }
 }
 
 bool c_PDOStatement::t_bindparam(const Variant& paramno, VRefParam param,
                                  int64_t type /* = q_PDO$$PARAM_STR */,
                                  int64_t max_value_len /* = 0 */,
                                  const Variant& driver_params /*= null */) {
-  return register_bound_param(paramno, ref(param), type, max_value_len,
+  if(m_stmt.get() != nullptr) {
+    return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, true);
+  } else {
+    return false;
+  }
 }
 
 bool c_PDOStatement::t_bindcolumn(const Variant& paramno, VRefParam param,
                                   int64_t type /* = q_PDO$$PARAM_STR */,
                                   int64_t max_value_len /* = 0 */,
                                   const Variant& driver_params /* = null */) {
-  return register_bound_param(paramno, ref(param), type, max_value_len,
+  if(m_stmt.get() != nullptr) {
+    return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, false);
+  } else {
+    return false;
+  }
 }
 
 int64_t c_PDOStatement::t_rowcount() {
-  return m_stmt->row_count;
+  //on php5 this returns false
+  if(m_stmt.get() != nullptr) {
+    return m_stmt->row_count;
+  } else {
+    return 0;
+  }
 }
 
 Variant c_PDOStatement::t_errorcode() {
-  if (m_stmt->error_code[0] == '\0') {
-    return init_null();
+  if(m_stmt.get() != nullptr) {
+    if (m_stmt->error_code[0] == '\0') {
+      return init_null();
+    }
+    return String(m_stmt->error_code, CopyString);
+  } else {
+    return false;
   }
-  return String(m_stmt->error_code, CopyString);
 }
 
 Array c_PDOStatement::t_errorinfo() {
+  if(m_stmt.get() == nullptr) {
+    return null_array;
+  }
+
   Array ret;
   ret.append(String(m_stmt->error_code, CopyString));
 
@@ -2974,6 +3024,10 @@ Array c_PDOStatement::t_errorinfo() {
 }
 
 Variant c_PDOStatement::t_setattribute(int64_t attribute, const Variant& value) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   if (!m_stmt->support(PDOStatement::MethodSetAttribute)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
                          "This driver doesn't support setting attributes");
@@ -2989,6 +3043,10 @@ Variant c_PDOStatement::t_setattribute(int64_t attribute, const Variant& value) 
 }
 
 Variant c_PDOStatement::t_getattribute(int64_t attribute) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   Variant ret;
   if (!m_stmt->support(PDOStatement::MethodGetAttribute)) {
     if (!generic_stmt_attr_get(m_stmt, ret, attribute)) {
@@ -3019,6 +3077,10 @@ Variant c_PDOStatement::t_getattribute(int64_t attribute) {
 }
 
 int64_t c_PDOStatement::t_columncount() {
+  //on php5 this returns false
+  if(m_stmt.get() == nullptr) {
+    return 0;
+  }
   return m_stmt->column_count;
 }
 
@@ -3029,6 +3091,10 @@ const StaticString
   s_pdo_type("pdo_type");
 
 Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   if (column < 0) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
                          "column number must be non-negative");
@@ -3062,10 +3128,18 @@ Variant c_PDOStatement::t_getcolumnmeta(int64_t column) {
 
 bool c_PDOStatement::t_setfetchmode(int _argc, int64_t mode,
                                     const Array& _argv /* = null_array */) {
-  return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
+  if(m_stmt.get() != nullptr) {
+    return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
+  } else {
+    return false;
+  }
 }
 
 bool c_PDOStatement::t_nextrowset() {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   if (!m_stmt->support(PDOStatement::MethodNextRowset)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
                          "driver does not support multiple rowsets");
@@ -3090,6 +3164,10 @@ bool c_PDOStatement::t_nextrowset() {
 }
 
 bool c_PDOStatement::t_closecursor() {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   if (!m_stmt->support(PDOStatement::MethodCursorCloser)) {
     /* emulate it by fetching and discarding rows */
     do {
@@ -3112,6 +3190,10 @@ bool c_PDOStatement::t_closecursor() {
 }
 
 Variant c_PDOStatement::t_debugdumpparams() {
+  if(m_stmt.get() == nullptr) {
+    return false;
+  }
+
   Resource resource = File::Open("php://output", "w");
   File *f = resource.getTyped<File>(true);
   if (!f) {

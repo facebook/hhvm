@@ -56,6 +56,8 @@ public:
   virtual uint16_t getRemotePort() override;
   virtual const std::string getScriptFilename() override;
   virtual const std::string getPathTranslated() override;
+  virtual const std::string getPathInfo() override;
+  virtual bool isPathInfoSet() override;
   virtual const std::string getDocumentRoot() override;
   virtual const char *getServerName() override;
   virtual const char *getServerAddr() override;
@@ -122,6 +124,7 @@ private:
   std::unordered_map<std::string, std::string> m_requestHeaders;
   std::string m_scriptFilename;
   std::string m_pathTranslated;
+  bool m_pathInfoSet = false;
   std::string m_requestURI;
   std::string m_documentRoot;
   std::string m_remoteHost;
@@ -139,6 +142,7 @@ private:
   ResponseHeaders m_responseHeaders;
   bool m_headersSent;
   bool m_readMore;
+  std::string m_pathInfo;
 
   apache::thrift::concurrency::Monitor m_monitor;
   int m_waiting;

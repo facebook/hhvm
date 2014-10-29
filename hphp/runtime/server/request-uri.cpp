@@ -89,7 +89,11 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
         m_origPathInfo = "/" + m_origPathInfo;
       }
     }
-    m_pathInfo = m_origPathInfo;
+    if (transport->isPathInfoSet()) {
+      m_pathInfo =transport->getPathInfo();
+    } else {
+      m_pathInfo = m_origPathInfo;
+    }
     return true;
   }
 

@@ -126,6 +126,8 @@ public:
   // The transport can say exactly what script to use
   virtual const std::string getScriptFilename() { return ""; }
   virtual const std::string getPathTranslated() { return ""; }
+  virtual const std::string getPathInfo() { return ""; }
+  virtual bool isPathInfoSet() {return false; }
 
   /**
    * Server Headers

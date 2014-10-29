@@ -50,12 +50,10 @@ TRACE_SET_MOD(hhir);
 HhbcTranslator::HhbcTranslator(TransContext ctx)
   : m_context(ctx)
   , m_unit(ctx)
-  , m_irb(new IRBuilder(m_unit, BCMarker { SrcKey { ctx.func,
-                                                    ctx.initBcOffset,
-                                                    ctx.resumed },
+  , m_irb(new IRBuilder(m_unit, BCMarker { ctx.srcKey(),
                                            ctx.initSpOffset,
                                            ctx.transID }))
-  , m_bcStateStack { BcState { ctx.initBcOffset, ctx.resumed, ctx.func } }
+  , m_bcStateStack { ctx.srcKey() }
   , m_lastBcOff{false}
   , m_mode{IRGenMode::Trace}
 {
@@ -297,9 +295,12 @@ void HhbcTranslator::beginInlining(unsigned numParams,
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
-  m_bcStateStack.emplace_back(BcState { target->getEntryForNumArgs(numParams),
-                                        false,
-                                        target});
+  auto const key = SrcKey {
+    target,
+    target->getEntryForNumArgs(numParams),
+    false
+  };
+  m_bcStateStack.emplace_back(key);
   updateMarker();
 
   always_assert_flog(
@@ -418,7 +419,7 @@ void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
     }
   );
 
-  m_bcStateStack.back().bcOff = newOff;
+  m_bcStateStack.back().setOffset(newOff);
   updateMarker();
   m_lastBcOff = lastBcOff;
 }
@@ -3333,15 +3334,15 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                                     std::vector<SSATmp*>& stackValues,
                                     const CustomExit& customFn,
                                     TransFlags trflags) {
-  Offset curBcOff = bcOff();
-  BCMarker currentMarker = makeMarker(curBcOff);
+  auto const curBcOff = bcOff();
+  auto const currentMarker = makeMarker(curBcOff);
   m_irb->evalStack().swap(stackValues);
   SCOPE_EXIT {
-    m_bcStateStack.back().bcOff = curBcOff;
+    m_bcStateStack.back().setOffset(curBcOff);
     m_irb->evalStack().swap(stackValues);
   };
 
-  BCMarker exitMarker = makeMarker(targetBcOff);
+  auto exitMarker = makeMarker(targetBcOff);
 
   auto const exit = m_irb->makeExit();
   BlockPusher tp(*m_irb,
@@ -3349,7 +3350,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
                  exit);
 
   if (flag != ExitFlag::DelayedMarker) {
-    m_bcStateStack.back().bcOff = targetBcOff;
+    m_bcStateStack.back().setOffset(targetBcOff);
   }
 
   auto stack = spillStack();
@@ -3368,7 +3369,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
 
   if (flag == ExitFlag::DelayedMarker) {
     m_irb->setMarker(exitMarker);
-    m_bcStateStack.back().bcOff = targetBcOff;
+    m_bcStateStack.back().setOffset(targetBcOff);
   }
 
   if (flag == ExitFlag::Interp) {

@@ -108,6 +108,9 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
+  /* The SrcKey for this translation. */
+  SrcKey srcKey() const;
+
   TransID transID;  // May be kInvalidTransID if not for a real translation.
   Offset initBcOffset;
   Offset initSpOffset;
@@ -252,7 +255,6 @@ struct Translator {
    * If no SrcRec exists, insert one into the SrcDB.
    */
   SrcRec* getSrcRec(const SrcKey& sk);
-
 
   /*
    * Current region being translated, if any.

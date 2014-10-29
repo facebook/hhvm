@@ -102,6 +102,13 @@ inline Lease& Translator::WriteLease() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// TransContext.
+
+inline SrcKey TransContext::srcKey() const {
+  return SrcKey { func, initBcOffset, resumed };
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Control flow information.
 
 inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {

@@ -170,13 +170,12 @@ public:
    * Accessors for the current function being compiled, its class and unit, the
    * current SrcKey, and the current eval stack.
    */
-  const Func* curFunc()     const { return m_bcStateStack.back().func; }
+  const Func* curFunc()     const { return m_bcStateStack.back().func(); }
   Class*      curClass()    const { return curFunc()->cls(); }
   Unit*       curUnit()     const { return curFunc()->unit(); }
-  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff(),
-                                                  resumed()); }
-  bool        resumed()     const { return m_bcStateStack.back().resumed; }
+  Offset      bcOff()       const { return m_bcStateStack.back().offset(); }
+  SrcKey      curSrcKey()   const { return m_bcStateStack.back(); }
+  bool        resumed()     const { return m_bcStateStack.back().resumed(); }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
@@ -969,20 +968,13 @@ private:
   bool inPseudoMain() const;
 
 private:
-  // Tracks information about the current bytecode offset and which
-  // function we are in.  Goes in m_bcStateStack; we push and pop as
-  // we deal with inlined calls.
-  struct BcState {
-    Offset bcOff;
-    bool resumed;
-    const Func* func;
-  };
-
-private:
   const TransContext m_context;
   IRUnit m_unit;
   std::unique_ptr<IRBuilder> const m_irb;
-  std::vector<BcState> m_bcStateStack;
+
+  // Tracks information about the current bytecode offset and which function
+  // we are in. We push and pop as we deal with inlined calls.
+  std::vector<SrcKey> m_bcStateStack;
 
   // The id of the profiling translation for the code we're currently
   // generating, if there was one, otherwise kInvalidTransID.

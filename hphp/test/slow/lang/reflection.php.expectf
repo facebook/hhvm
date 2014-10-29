@@ -11,7 +11,7 @@ int(13)
 int(20)
 
 --- getFileName("f") ---
-string(%d) "%s/test/quick/reflection.php"
+string(%d) "%s/test/slow/lang/reflection.php"
 
 --- getName("f") ---
 string(1) "f"
@@ -165,7 +165,7 @@ string(%d) "/**
  * This is f's doc comment.
  */
 Function [ <user> function &f ] {
-  @@ %s/test/quick/reflection.php 13 - 20
+  @@ %s/test/slow/lang/reflection.php 13 - 20
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
@@ -205,7 +205,7 @@ string(%d) "/**
  * This is g's doc comment.
  */
 Function [ <user> function g ] {
-  @@ %s/test/quick/reflection.php 92 - 94
+  @@ %s/test/slow/lang/reflection.php 92 - 94
 
   - Parameters [3] {
     Parameter #0 [ <optional> $a = NULL ]
@@ -224,7 +224,7 @@ string(%d) "/**
  * This is B's doc comment.
  */
 Class [ <user> class B extends A implements I, K, H, J ] {
-  @@ %s/test/quick/reflection.php 131-147
+  @@ %s/test/slow/lang/reflection.php 131-147
 
   - Constants [2] {
     Constant [ string C0 {B::C0}
@@ -239,10 +239,10 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Static methods [2] {
     Method [ <user> static public method smethB0 ] {
-      @@ %s/test/quick/reflection.php 141 - 141
+      @@ %s/test/slow/lang/reflection.php 141 - 141
     }
     Method [ <user> static private method smethB1 ] {
-      @@ %s/test/quick/reflection.php 142 - 142
+      @@ %s/test/slow/lang/reflection.php 142 - 142
     }
   }
 
@@ -255,22 +255,22 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Methods [6] {
     Method [ <user, implements I> public method methI ] {
-      @@ %s/test/quick/reflection.php 143 - 143
+      @@ %s/test/slow/lang/reflection.php 143 - 143
     }
     Method [ <user, implements J> public method methJ ] {
-      @@ %s/test/quick/reflection.php 144 - 144
+      @@ %s/test/slow/lang/reflection.php 144 - 144
     }
     Method [ <user, implements K> public method methK ] {
-      @@ %s/test/quick/reflection.php 145 - 145
+      @@ %s/test/slow/lang/reflection.php 145 - 145
     }
     Method [ <user> private method methB ] {
-      @@ %s/test/quick/reflection.php 146 - 146
+      @@ %s/test/slow/lang/reflection.php 146 - 146
     }
     Method [ <user, inherits A> public method methH ] {
-      @@ %s/test/quick/reflection.php 125 - 125
+      @@ %s/test/slow/lang/reflection.php 125 - 125
     }
     Method [ <user, inherits A> protected method methA ] {
-      @@ %s/test/quick/reflection.php 126 - 126
+      @@ %s/test/slow/lang/reflection.php 126 - 126
     }
   }
 }
@@ -303,7 +303,7 @@ int(131)
 int(147)
 
 --- getFileName() ---
-string(%d) "%s/test/quick/reflection.php"
+string(%d) "%s/test/slow/lang/reflection.php"
 
 --- getInterfaceNames() ---
 array(4) {

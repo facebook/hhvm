@@ -785,7 +785,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Suprise flag hook for function returns.
 
-| FunctionSuspendHook, ND, S(FramePtr,PtrToGen) C(Bool), Er|E
+| FunctionSuspendHook, ND, S(FramePtr) C(Bool), Er|E
 
   Suprise flag hook for suspending async functions.
 
@@ -2054,7 +2054,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Updates the internal index of generator with S1 if necessary, i.e. if S1
   is larger than the index. S0 is the pointer to the embedded ActRec.
 
-| LdContActRec, DParam, S(Obj), C
+| LdContActRec, D(FramePtr), S(Obj), C
 
   Loads the Generator object's ActRec, given a pointer to the generator
   object in S0.
@@ -2130,7 +2130,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
-| LdAFWHActRec<T>, DParam, S(Obj), C
+| LdAFWHActRec, D(FramePtr), S(Obj), C
 
   Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
   AsyncFunctionWaitHandle object in S0.

@@ -45,7 +45,7 @@ void HhbcTranslator::emitAwaitE(SSATmp* child, Block* catchBlock,
         resumeAddr, cns(resumeOffset),
         child);
 
-  SSATmp* asyncAR = gen(LdAFWHActRec, Type::PtrToGen, waitHandle);
+  auto const asyncAR = gen(LdAFWHActRec, waitHandle);
 
   // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
@@ -148,7 +148,7 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
                         resumeAddr, cns(resumeOffset));
 
   // Teleport local variables into the generator.
-  SSATmp* contAR = gen(LdContActRec, Type::PtrToGen, cont);
+  auto const contAR = gen(LdContActRec, cont);
 
   // Call the FunctionSuspend hook and put the return value on the stack so that
   // the unwinder would decref it.
@@ -171,7 +171,7 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
 
   // Load generator's FP and resume address.
   auto genObj = gen(LdThis, m_irb->fp());
-  auto genFp = gen(LdContActRec, Type::FramePtr, genObj);
+  auto genFp = gen(LdContActRec, genObj);
   auto resumeAddr = gen(LdContResumeAddr, genObj);
 
   // Make sure function enter hook is called if needed.

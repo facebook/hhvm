@@ -434,6 +434,8 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_ENUM:
       case T_ARRAY:
       case T_CALLABLE:
+      case T_UNRESOLVED_TYPE:
+      case T_UNRESOLVED_NEWTYPE:
         nextLookahead(pos);
         break;
       case T_SHAPE:

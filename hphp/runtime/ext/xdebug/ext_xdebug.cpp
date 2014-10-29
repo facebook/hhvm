@@ -48,9 +48,9 @@ static const StaticString
 static ActRec *get_call_fp(Offset *off = nullptr) {
   // We want the frame of our callee's callee
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp0 = g_context->getPrevVMState(vmfp());
+  ActRec* fp0 = g_context->getPrevVMStateUNSAFE(vmfp());
   assert(fp0);
-  ActRec* fp1 = g_context->getPrevVMState(fp0, off);
+  ActRec* fp1 = g_context->getPrevVMStateUNSAFE(fp0, off);
 
   // fp1 should only be NULL if fp0 is the top-level pseudo-main
   if (!fp1) {
@@ -368,12 +368,15 @@ static Variant HHVM_FUNCTION(xdebug_call_class) {
 static String HHVM_FUNCTION(xdebug_call_file) {
   // PHP5 xdebug returns the top-level file if the callee is top-level
   ActRec *fp = get_call_fp();
+  const Func *func;
   if (fp == nullptr) {
     VMRegAnchor _; // Ensure consistent state for vmfp
-    fp = g_context->getPrevVMState(vmfp());
-    assert(fp);
+    func = g_context->getPrevFunc(vmfp());
+    assert(func);
+  } else {
+    func = fp->func();
   }
-  return String(fp->m_func->filename()->data(), CopyString);
+  return String(func->filename()->data(), CopyString);
 }
 
 static int64_t HHVM_FUNCTION(xdebug_call_line) {
@@ -455,9 +458,10 @@ static Array HHVM_FUNCTION(xdebug_get_declared_vars) {
 
   // Grab the callee function
   VMRegAnchor _; // Ensure consistent state for vmfp
-  ActRec* fp = g_context->getPrevVMState(vmfp());
-  assert(fp);
-  const Func* func = fp->func();
+  auto func = g_context->getPrevFunc(vmfp());
+  if (!func) {
+    return Array::Create();
+  }
 
   // Add each named local to the returned array. Note that since this function
   // is supposed to return all _declared_ variables in scope, which includes

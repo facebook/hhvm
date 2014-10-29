@@ -68,7 +68,7 @@ static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
     *prevPc = 0;
     return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   }
-  return g_context->getPrevVMState(fp, prevPc);
+  return g_context->getPrevVMStateUNSAFE(fp, prevPc);
 }
 
 Array createBacktrace(const BacktraceArgs& btArgs) {

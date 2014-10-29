@@ -714,7 +714,7 @@ void ExecutionContext::handleError(const std::string& msg,
       VMRegAnchor _;
       auto fp = vmfp();
       if (fp->func()->isBuiltin()) {
-        fp = getPrevVMState(fp);
+        fp = getPrevVMStateUNSAFE(fp);
       }
       assert(fp);
       auto id = fp->func()->lookupVarId(s_php_errormsg.get());

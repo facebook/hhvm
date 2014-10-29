@@ -140,7 +140,7 @@ int XDebugUtils::stackDepth() {
   int depth = 0;
   for (ActRec* fp = g_context->getStackFrame();
       fp != nullptr;
-      fp = g_context->getPrevVMState(fp), depth++) {}
+      fp = g_context->getPrevVMStateUNSAFE(fp), depth++) {}
   return depth;
 }
 

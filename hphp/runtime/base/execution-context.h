@@ -516,10 +516,21 @@ public:
   void pushVMState(Cell* savedSP);
   void popVMState();
 
-  ActRec* getPrevVMState(const ActRec* fp,
-                         Offset* prevPc = nullptr,
-                         TypedValue** prevSp = nullptr,
-                         bool* fromVMEntry = nullptr);
+  /**
+   * If you call this, you might break some assumption that the JIT made.
+   * Ask a JIT expert if your use is ok. The most common use is coverted by
+   * getPrevFunc so use that if you only want the Func*. That's safe.
+   * */
+  ActRec* getPrevVMStateUNSAFE(const ActRec* fp,
+                               Offset* prevPc = nullptr,
+                               TypedValue** prevSp = nullptr,
+                               bool* fromVMEntry = nullptr);
+  const Func* getPrevFunc(const ActRec* fp) {
+    auto state = getPrevVMStateUNSAFE(fp, nullptr, nullptr, nullptr);
+    if (!state) return nullptr;
+    return state->func();
+  }
+
   VarEnv* getVarEnv(int frame = 0);
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);

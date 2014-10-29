@@ -237,7 +237,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
   if (doneFlag.toBoolean()) {
     Offset pcOff;
-    ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
+    ActRec* outer = g_context->getPrevVMStateUNSAFE(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
     Stack& stack = vmStack();

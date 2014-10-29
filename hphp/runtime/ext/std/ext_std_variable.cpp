@@ -262,10 +262,10 @@ static const Func* arGetContextFunc(const ActRec* ar) {
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
     auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMState(ar);
+    ar = context->getPrevVMStateUNSAFE(ar);
     while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMState(ar);
+      ar = context->getPrevVMStateUNSAFE(ar);
     }
     if (ar == nullptr) {
       return nullptr;

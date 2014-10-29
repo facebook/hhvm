@@ -25,9 +25,9 @@
 
 #include "folly/ScopeGuard.h"
 
-#include "hphp/runtime/ext/ext_socket.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/file.h"

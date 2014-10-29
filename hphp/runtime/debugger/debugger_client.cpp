@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/text-color.h"
@@ -621,7 +621,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
                               cur->ai_family, cur->ai_addr->sa_data, port);
     sock->unregister();
     Resource obj(sock); // Destroy sock if we don't connect.
-    if (f_socket_connect(sock, String(host), port)) {
+    if (HHVM_FN(socket_connect)(sock, String(host), port)) {
       if (clearmachines) {
         for (unsigned int i = 0; i < m_machines.size(); i++) {
           if (m_machines[i] == m_machine) {

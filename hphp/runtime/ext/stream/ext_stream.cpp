@@ -16,8 +16,9 @@
 */
 
 #include "hphp/runtime/ext/stream/ext_stream.h"
+
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
-#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -337,7 +338,8 @@ Variant HHVM_FUNCTION(stream_select,
                       VRefParam except,
                       const Variant& vtv_sec,
                       int tv_usec /* = 0 */) {
-  return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
+  return HHVM_FN(socket_select)(ref(read), ref(write), ref(except),
+                                vtv_sec, tv_usec);
 }
 
 bool HHVM_FUNCTION(stream_set_blocking,
@@ -362,7 +364,7 @@ bool HHVM_FUNCTION(stream_set_timeout,
                    int seconds,
                    int microseconds /* = 0 */) {
   if (stream.getTyped<Socket>(false, true)) {
-    return f_socket_set_option
+    return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
        make_map_array(s_sec, seconds, s_usec, microseconds));
   }
@@ -590,9 +592,9 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   Variant address, port;
   bool ret;
   if (want_peer) {
-    ret = f_socket_getpeername(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getpeername)(handle, ref(address), ref(port));
   } else {
-    ret = f_socket_getsockname(handle, ref(address), ref(port));
+    ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
   if (ret) {
     return address.toString() + ":" + port.toString();
@@ -605,7 +607,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!f_socket_create_pair(domain, type, protocol, ref(fd))) {
+  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
     return false;
   }
   return fd;
@@ -617,8 +619,8 @@ Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       int flags /* = 0 */,
                       VRefParam address /* = null_string */) {
   Variant ret, host, port;
-  Variant retval = f_socket_recvfrom(socket, ref(ret), length, flags,
-                                     ref(host), ref(port));
+  Variant retval = HHVM_FN(socket_recvfrom)(socket, ref(ret), length, flags,
+                                            ref(host), ref(port));
   if (!same(retval, false) && retval.toInt64() >= 0) {
     Socket *sock = socket.getTyped<Socket>();
     if (sock->getType() == AF_INET6) {
@@ -651,13 +653,13 @@ Variant HHVM_FUNCTION(stream_socket_sendto,
     port = hosturl.getPort();
   }
 
-  return f_socket_sendto(socket, data, data.size(), flags, host, port);
+  return HHVM_FN(socket_sendto)(socket, data, data.size(), flags, host, port);
 }
 
 bool HHVM_FUNCTION(stream_socket_shutdown,
                    const Resource& stream,
                    int how) {
-  return f_socket_shutdown(stream, how);
+  return HHVM_FN(socket_shutdown)(stream, how);
 }
 
 static StreamContext* get_stream_context(const Variant& stream_or_context) {

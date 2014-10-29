@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -311,7 +311,7 @@ static bool create_new_socket(const HostURL &hosturl,
   if (!sock->valid()) {
     SOCKET_ERROR(sock, "unable to create socket", errno);
     errnum = sock->getError();
-    errstr = f_socket_strerror(sock->getError());
+    errstr = HHVM_FN(socket_strerror)(sock->getError());
     return false;
   }
   return true;
@@ -403,7 +403,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
                              hosturl, sockerr, error) != 0) {
       SOCKET_ERROR(sock, sockerr.c_str(), error);
       errnum = sock->getLastError();
-      errstr = f_socket_strerror(sock->getLastError());
+      errstr = HHVM_FN(socket_strerror)(sock->getLastError());
       delete sock;
       return false;
     }
@@ -451,7 +451,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
     SOCKET_ERROR(sock,
         sockerr.empty() ? "unable to create socket" : sockerr.c_str(), error);
     errnum = sock->getLastError();
-    errstr = f_socket_strerror(sock->getLastError());
+    errstr = HHVM_FN(socket_strerror)(sock->getLastError());
     delete sock;
     return false;
   }
@@ -467,7 +467,10 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_socket_create(int domain, int type, int protocol) {
+Variant HHVM_FUNCTION(socket_create,
+                      int domain,
+                      int type,
+                      int protocol) {
   check_socket_parameters(domain, type);
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
@@ -480,7 +483,9 @@ Variant f_socket_create(int domain, int type, int protocol) {
   return ret;
 }
 
-Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
+Variant HHVM_FUNCTION(socket_create_listen,
+                      int port,
+                      int backlog /* = 128 */) {
   HostEnt result;
   if (!safe_gethostbyname("0.0.0.0", result)) {
     return false;
@@ -516,7 +521,11 @@ Variant f_socket_create_listen(int port, int backlog /* = 128 */) {
 const StaticString
   s_socktype_generic("generic_socket");
 
-bool f_socket_create_pair(int domain, int type, int protocol, VRefParam fd) {
+bool HHVM_FUNCTION(socket_create_pair,
+                   int domain,
+                   int type,
+                   int protocol,
+                   VRefParam fd) {
   check_socket_parameters(domain, type);
 
   int fds_array[2];
@@ -541,7 +550,10 @@ const StaticString
   s_sec("sec"),
   s_usec("usec");
 
-Variant f_socket_get_option(const Resource& socket, int level, int optname) {
+Variant HHVM_FUNCTION(socket_get_option,
+                      const Resource& socket,
+                      int level,
+                      int optname) {
   Socket *sock = socket.getTyped<Socket>();
   socklen_t optlen;
 
@@ -593,8 +605,10 @@ Variant f_socket_get_option(const Resource& socket, int level, int optname) {
   not_reached();
 }
 
-bool f_socket_getpeername(const Resource& socket, VRefParam address,
-                          VRefParam port /* = null */) {
+bool HHVM_FUNCTION(socket_getpeername,
+                   const Resource& socket,
+                   VRefParam address,
+                   VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
   sockaddr_storage sa_storage;
@@ -607,8 +621,10 @@ bool f_socket_getpeername(const Resource& socket, VRefParam address,
   return get_sockaddr(sa, salen, address, port);
 }
 
-bool f_socket_getsockname(const Resource& socket, VRefParam address,
-                          VRefParam port /* = null */) {
+bool HHVM_FUNCTION(socket_getsockname,
+                   const Resource& socket,
+                   VRefParam address,
+                   VRefParam port /* = null */) {
   Socket *sock = socket.getTyped<Socket>();
 
   sockaddr_storage sa_storage;
@@ -621,18 +637,23 @@ bool f_socket_getsockname(const Resource& socket, VRefParam address,
   return get_sockaddr(sa, salen, address, port);
 }
 
-bool f_socket_set_block(const Resource& socket) {
+bool HHVM_FUNCTION(socket_set_block,
+                   const Resource& socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(true);
 }
 
-bool f_socket_set_nonblock(const Resource& socket) {
+bool HHVM_FUNCTION(socket_set_nonblock,
+                   const Resource& socket) {
   Socket *sock = socket.getTyped<Socket>();
   return sock->setBlocking(false);
 }
 
-bool f_socket_set_option(const Resource& socket, int level, int optname,
-                         const Variant& optval) {
+bool HHVM_FUNCTION(socket_set_option,
+                   const Resource& socket,
+                   int level,
+                   int optname,
+                   const Variant& optval) {
   Socket *sock = socket.getTyped<Socket>();
 
   struct linger lv;
@@ -700,7 +721,10 @@ bool f_socket_set_option(const Resource& socket, int level, int optname,
   return true;
 }
 
-bool f_socket_connect(const Resource& socket, const String& address, int port /* = 0 */) {
+bool HHVM_FUNCTION(socket_connect,
+                   const Resource& socket,
+                   const String& address,
+                   int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   switch (sock->getType()) {
@@ -737,7 +761,10 @@ bool f_socket_connect(const Resource& socket, const String& address, int port /*
   return true;
 }
 
-bool f_socket_bind(const Resource& socket, const String& address, int port /* = 0 */) {
+bool HHVM_FUNCTION(socket_bind,
+                   const Resource& socket,
+                   const String& address,
+                   int port /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
 
   const char *addr = address.data();
@@ -761,7 +788,9 @@ bool f_socket_bind(const Resource& socket, const String& address, int port /* = 
   return true;
 }
 
-bool f_socket_listen(const Resource& socket, int backlog /* = 0 */) {
+bool HHVM_FUNCTION(socket_listen,
+                   const Resource& socket,
+                   int backlog /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (listen(sock->fd(), backlog) != 0) {
     SOCKET_ERROR(sock, "unable to listen on socket", errno);
@@ -770,8 +799,12 @@ bool f_socket_listen(const Resource& socket, int backlog /* = 0 */) {
   return true;
 }
 
-Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
-                        const Variant& vtv_sec, int tv_usec /* = 0 */) {
+Variant HHVM_FUNCTION(socket_select,
+                      VRefParam read,
+                      VRefParam write,
+                      VRefParam except,
+                      const Variant& vtv_sec,
+                      int tv_usec /* = 0 */) {
   int count = 0;
   if (!read.isNull()) {
     count += read.toArray().size();
@@ -851,9 +884,11 @@ Variant f_socket_select(VRefParam read, VRefParam write, VRefParam except,
   return count;
 }
 
-Variant f_socket_server(const String& hostname, int port /* = -1 */,
-                        VRefParam errnum /* = null */,
-                        VRefParam errstr /* = null */) {
+Variant HHVM_FUNCTION(socket_server,
+                      const String& hostname,
+                      int port /* = -1 */,
+                      VRefParam errnum /* = null */,
+                      VRefParam errstr /* = null */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
   return socket_server_impl(hosturl,
                             k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
@@ -893,7 +928,8 @@ Variant socket_server_impl(const HostURL &hosturl,
   return ret;
 }
 
-Variant f_socket_accept(const Resource& socket) {
+Variant HHVM_FUNCTION(socket_accept,
+                      const Resource& socket) {
   Socket *sock = socket.getTyped<Socket>();
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
@@ -907,7 +943,10 @@ Variant f_socket_accept(const Resource& socket) {
   return Resource(new_sock);
 }
 
-Variant f_socket_read(const Resource& socket, int length, int type /* = 0 */) {
+Variant HHVM_FUNCTION(socket_read,
+                      const Resource& socket,
+                      int length,
+                      int type /* = 0 */) {
   if (length <= 0) {
     return false;
   }
@@ -938,7 +977,10 @@ Variant f_socket_read(const Resource& socket, int length, int type /* = 0 */) {
   return String(tmpbuf, retval, AttachString);
 }
 
-Variant f_socket_write(const Resource& socket, const String& buffer, int length /* = 0 */) {
+Variant HHVM_FUNCTION(socket_write,
+                      const Resource& socket,
+                      const String& buffer,
+                      int length /* = 0 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
@@ -951,7 +993,11 @@ Variant f_socket_write(const Resource& socket, const String& buffer, int length 
   return retval;
 }
 
-Variant f_socket_send(const Resource& socket, const String& buf, int len, int flags) {
+Variant HHVM_FUNCTION(socket_send,
+                      const Resource& socket,
+                      const String& buf,
+                      int len,
+                      int flags) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -964,8 +1010,13 @@ Variant f_socket_send(const Resource& socket, const String& buf, int len, int fl
   return retval;
 }
 
-Variant f_socket_sendto(const Resource& socket, const String& buf, int len, int flags,
-                        const String& addr, int port /* = -1 */) {
+Variant HHVM_FUNCTION(socket_sendto,
+                      const Resource& socket,
+                      const String& buf,
+                      int len,
+                      int flags,
+                      const String& addr,
+                      int port /* = -1 */) {
   Socket *sock = socket.getTyped<Socket>();
   if (len > buf.size()) {
     len = buf.size();
@@ -1035,7 +1086,11 @@ Variant f_socket_sendto(const Resource& socket, const String& buf, int len, int 
   return retval;
 }
 
-Variant f_socket_recv(const Resource& socket, VRefParam buf, int len, int flags) {
+Variant HHVM_FUNCTION(socket_recv,
+                      const Resource& socket,
+                      VRefParam buf,
+                      int len,
+                      int flags) {
   if (len <= 0) {
     return false;
   }
@@ -1062,8 +1117,13 @@ const StaticString
   s_2colons("::"),
   s_0_0_0_0("0.0.0.0");
 
-Variant f_socket_recvfrom(const Resource& socket, VRefParam buf, int len, int flags,
-                      VRefParam name, VRefParam port /* = -1*/) {
+Variant HHVM_FUNCTION(socket_recvfrom,
+                      const Resource& socket,
+                      VRefParam buf,
+                      int len,
+                      int flags,
+                      VRefParam name,
+                      VRefParam port /* = -1*/) {
   if (len <= 0) {
     return false;
   }
@@ -1163,7 +1223,9 @@ Variant f_socket_recvfrom(const Resource& socket, VRefParam buf, int len, int fl
   return retval;
 }
 
-bool f_socket_shutdown(const Resource& socket, int how /* = 0 */) {
+bool HHVM_FUNCTION(socket_shutdown,
+                   const Resource& socket,
+                   int how /* = 0 */) {
   /* For some operations that are conceptually a socket operation
    * (eg fopen('http://...)) we actually complete it and store the result in
    * a memfile. As the fact that it's not really a socket is an implementation
@@ -1180,12 +1242,14 @@ bool f_socket_shutdown(const Resource& socket, int how /* = 0 */) {
   return true;
 }
 
-void f_socket_close(const Resource& socket) {
+void HHVM_FUNCTION(socket_close,
+                   const Resource& socket) {
   Socket *sock = socket.getTyped<Socket>();
   sock->close();
 }
 
-String f_socket_strerror(int errnum) {
+String HHVM_FUNCTION(socket_strerror,
+                     int errnum) {
   /*
    * PHP5 encodes both the h_errno and errno values into a single int:
    * < -10000: transformed h_errno value
@@ -1202,7 +1266,8 @@ String f_socket_strerror(int errnum) {
   return String(folly::errnoStr(errnum).toStdString());
 }
 
-int64_t f_socket_last_error(const Resource& socket /* = null_object */) {
+int64_t HHVM_FUNCTION(socket_last_error,
+                      const Resource& socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();
@@ -1210,7 +1275,8 @@ int64_t f_socket_last_error(const Resource& socket /* = null_object */) {
   return Socket::getLastError();
 }
 
-void f_socket_clear_error(const Resource& socket /* = null_object */) {
+void HHVM_FUNCTION(socket_clear_error,
+                   const Resource& socket /* = null_object */) {
   if (!socket.isNull()) {
     Socket *sock = socket.getTyped<Socket>();
     sock->setError(0);
@@ -1260,7 +1326,9 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   return ret;
 }
 
-Variant HHVM_FUNCTION(fsockopen, const String& hostname, int port /* = -1 */,
+Variant HHVM_FUNCTION(fsockopen,
+                      const String& hostname,
+                      int port /* = -1 */,
                       VRefParam errnum /* = null */,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
@@ -1268,10 +1336,12 @@ Variant HHVM_FUNCTION(fsockopen, const String& hostname, int port /* = -1 */,
   return sockopen_impl(hosturl, errnum, errstr, timeout, false);
 }
 
-Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port /* = -1 */,
-                                  VRefParam errnum /* = null */,
-                                  VRefParam errstr /* = null */,
-                                  double timeout /* = -1.0 */) {
+Variant HHVM_FUNCTION(pfsockopen,
+                      const String& hostname,
+                      int port /* = -1 */,
+                      VRefParam errnum /* = null */,
+                      VRefParam errstr /* = null */,
+                      double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
   return sockopen_impl(hosturl, errnum, errstr, timeout, true);
 }
@@ -1297,8 +1367,12 @@ const StaticString
   s_scope_id("scope_id"),
   s_sockaddr("sockaddr");
 
-Variant f_getaddrinfo(const String& host, const String& port, int family /* = 0 */,
-                      int socktype /* = 0 */, int protocol /* = 0 */,
+Variant HHVM_FUNCTION(getaddrinfo,
+                      const String& host,
+                      const String& port,
+                      int family /* = 0 */,
+                      int socktype /* = 0 */,
+                      int protocol /* = 0 */,
                       int flags /* = 0 */) {
   const char *hptr = NULL, *pptr = NULL;
   if (!host.empty()) {
@@ -1489,10 +1563,38 @@ class SocketsExtension : public Extension {
     Native::registerConstant<KindOfInt64>(s_SOL_UDP.get(), IPPROTO_UDP);
 
     SOCK_CONST(IPV6_UNICAST_HOPS);
-  }
-};
 
-SocketsExtension s_sockets_extension;
+    HHVM_FE(socket_create);
+    HHVM_FE(socket_create_listen);
+    HHVM_FE(socket_create_pair);
+    HHVM_FE(socket_get_option);
+    HHVM_FE(socket_getpeername);
+    HHVM_FE(socket_getsockname);
+    HHVM_FE(socket_set_block);
+    HHVM_FE(socket_set_nonblock);
+    HHVM_FE(socket_set_option);
+    HHVM_FE(socket_connect);
+    HHVM_FE(socket_bind);
+    HHVM_FE(socket_listen);
+    HHVM_FE(socket_select);
+    HHVM_FE(socket_server);
+    HHVM_FE(socket_accept);
+    HHVM_FE(socket_read);
+    HHVM_FE(socket_write);
+    HHVM_FE(socket_send);
+    HHVM_FE(socket_sendto);
+    HHVM_FE(socket_recv);
+    HHVM_FE(socket_recvfrom);
+    HHVM_FE(socket_shutdown);
+    HHVM_FE(socket_close);
+    HHVM_FE(socket_strerror);
+    HHVM_FE(socket_last_error);
+    HHVM_FE(socket_clear_error);
+    HHVM_FE(getaddrinfo);
+
+    loadSystemlib();
+  }
+} s_sockets_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -101,7 +101,7 @@ struct XDebugServer;
   XDEBUG_OPT(bool, "profiler_enable_trigger", ProfilerEnableTrigger, false) \
   XDEBUG_OPT(string, "profiler_output_dir", ProfilerOutputDir, "/tmp") \
   XDEBUG_OPT(string, "profiler_output_name", ProfilerOutputName, \
-             "cachegrind.out.%p") \
+             "cachegrind.out.%t") \
   XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false) \
   XDEBUG_OPT(bool, "remote_connect_back", RemoteConnectBack, false) \
   XDEBUG_OPT(int, "remote_cookie_expire_time", RemoteCookieExpireTime, 3600) \

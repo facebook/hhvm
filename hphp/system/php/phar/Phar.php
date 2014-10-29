@@ -35,8 +35,7 @@ class Phar extends RecursiveDirectoryIterator
    */
   private static $aliases = array();
   /**
-   * Preventing of check for __HALT_COMPILER(); in stub
-   * when calling for phar:// stream wrapper
+   * Prevent the check for __HALT_COMPILER()
    */
   private static $preventHaltTokenCheck = false;
 
@@ -81,7 +80,6 @@ class Phar extends RecursiveDirectoryIterator
     if ($pos === false && !self::$preventHaltTokenCheck) {
       throw new PharException("__HALT_COMPILER(); must be declared in a phar");
     }
-    self::$preventHaltTokenCheck = false;
     $this->stub = substr($data, 0, $pos);
 
     $pos += strlen($halt_token);
@@ -1192,12 +1190,11 @@ class Phar extends RecursiveDirectoryIterator
       if (is_file($filename)) {
 
         if (!isset(self::$aliases[$filename])) {
-          /**
-           * Hack is needed because stream wrapper should work
-           * even without stub at all
-           */
+          // We need this hack because the stream wrapper should work
+          // even without the __HALT_COMPILER token
           self::$preventHaltTokenCheck = true;
           self::loadPhar($filename);
+          self::$preventHaltTokenCheck = false;
         }
 
         return array(

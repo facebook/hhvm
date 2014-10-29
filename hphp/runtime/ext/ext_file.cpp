@@ -486,7 +486,7 @@ Variant f_file_get_contents(const String& filename,
   CHECK_PATH(filename, 1);
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
-  return f_stream_get_contents(stream.toResource(), maxlen, offset);
+  return HHVM_FN(stream_get_contents)(stream.toResource(), maxlen, offset);
 }
 
 Variant f_file_put_contents(const String& filename, const Variant& data,
@@ -1293,8 +1293,8 @@ bool f_copy(const String& source, const String& dest,
       return false;
     }
 
-    if (!f_stream_copy_to_stream(sfile.toResource(),
-                                 dfile.toResource()).toBoolean()) {
+    if (!HHVM_FN(stream_copy_to_stream)(sfile.toResource(),
+                                        dfile.toResource()).toBoolean()) {
       return false;
     }
 

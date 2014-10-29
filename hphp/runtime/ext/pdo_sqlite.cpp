@@ -510,7 +510,8 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
 
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toResource());
+          Variant buf = HHVM_FN(stream_get_contents)(
+                        param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {

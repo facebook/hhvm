@@ -942,7 +942,7 @@ Variant MimePart::extract(const Variant& filename, const Variant& callbackfunc, 
       return m_extract_context;
     }
     if (callbackfunc.isResource()) {
-      return f_stream_get_contents(callbackfunc.toResource());
+      return HHVM_FN(stream_get_contents)(callbackfunc.toResource());
     }
     return true;
   }

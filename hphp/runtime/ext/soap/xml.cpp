@@ -79,10 +79,11 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
 
   Variant content = HHVM_FN(apc_fetch)(cache_key);
   if (same(content, false)) {
-    Resource resource = File::Open(filename, "rb", 0, f_stream_context_create(
-                make_map_array(s_http, make_map_array(s_timeout, 1000))));
+    Variant cxt = HHVM_FN(stream_context_create)(make_map_array(
+                  s_http, make_map_array(s_timeout, 1000)));
+    Resource resource = File::Open(filename, "rb", 0, cxt);
     if (!resource.isNull()) {
-      content = f_stream_get_contents(resource);
+      content = HHVM_FN(stream_get_contents)(resource);
       if (!same(content, false)) {
         HHVM_FN(apc_store)(cache_key, content);
       }

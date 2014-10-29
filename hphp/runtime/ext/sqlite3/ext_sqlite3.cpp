@@ -643,7 +643,7 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
       {
         String sblob;
         if (p.value.isResource()) {
-          Variant blob = f_stream_get_contents(p.value.toResource());
+          Variant blob = HHVM_FN(stream_get_contents)(p.value.toResource());
           if (same(blob, false)) {
             raise_warning("Unable to read stream for parameter %d",
                           p.index);

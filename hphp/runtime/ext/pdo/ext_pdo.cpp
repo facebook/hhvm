@@ -2554,7 +2554,8 @@ safe:
       if (stmt->dbh->support(PDOConnection::MethodQuoter)) {
         if (param->param_type == PDO_PARAM_LOB &&
             param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toResource());
+          Variant buf = HHVM_FN(stream_get_contents)(
+                        param->parameter.toResource());
           if (!same(buf, false)) {
             if (!stmt->dbh->quoter(buf.toString(), plc->quoted,
                                    param->param_type)) {

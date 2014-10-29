@@ -55,96 +55,143 @@ private:
   Array m_params;
 };
 
-Variant f_stream_context_create(const Array& options = null_array,
-                                 const Array& params = null_array);
+Variant HHVM_FUNCTION(stream_context_create,
+                      const Variant& options = null_variant,
+                      const Variant& params = null_variant);
 
-Variant f_stream_context_get_options(const Resource& stream_or_context);
+Variant HHVM_FUNCTION(stream_context_get_options,
+                      const Resource& stream_or_context);
 
-bool f_stream_context_set_option(const Variant& stream_or_context,
-                                 const Variant& wrapper_or_options,
-                                 const Variant& option = null_variant,
-                                 const Variant& value = null_variant);
+bool HHVM_FUNCTION(stream_context_set_option,
+                   const Variant& stream_or_context,
+                   const Variant& wrapper,
+                   const Variant& option = null_variant,
+                   const Variant& value = null_variant);
 
-Variant f_stream_context_get_default(const Array& options = null_array);
+Variant HHVM_FUNCTION(stream_context_get_default,
+                      const Variant& options /* = null_variant */);
 
-Variant f_stream_context_set_default(const Array& options);
+Variant HHVM_FUNCTION(stream_context_get_params,
+                      const Resource& stream_or_context);
 
-Variant f_stream_context_get_params(const Resource& stream_or_context);
-
-bool f_stream_context_set_params(const Resource& stream_or_context,
-                                 const Array& params);
+bool HHVM_FUNCTION(stream_context_set_params,
+                   const Resource& stream_or_context,
+                   const Array& params);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_stream_copy_to_stream(const Resource& source, const Resource& dest,
-                                int maxlength = -1, int offset = 0);
+Variant HHVM_FUNCTION(stream_copy_to_stream,
+                      const Resource& source,
+                      const Resource& dest,
+                      int maxlength = -1,
+                      int offset = 0);
 
-bool f_stream_encoding(const Resource& stream, const String& encoding = null_string);
+Variant HHVM_FUNCTION(stream_get_contents,
+                      const Resource& handle,
+                      int maxlen = -1,
+                      int offset = -1);
 
-Variant f_stream_get_contents(const Resource& handle, int maxlen = -1,
-                              int offset = -1);
+Variant HHVM_FUNCTION(stream_get_line,
+                      const Resource& handle,
+                      int length = 0,
+                      const Variant& ending = null_variant);
 
-Variant f_stream_get_line(const Resource& handle, int length = 0,
-                          const String& ending = null_string);
+Variant HHVM_FUNCTION(stream_get_meta_data,
+                      const Resource& stream);
 
-Variant f_stream_get_meta_data(const Resource& stream);
+Array HHVM_FUNCTION(stream_get_transports);
 
-Array f_stream_get_transports();
+Array HHVM_FUNCTION(stream_get_wrappers);
+bool HHVM_FUNCTION(stream_is_local,
+                   const Variant& stream_or_url);
+bool HHVM_FUNCTION(stream_register_wrapper,
+                   const String& protocol,
+                   const String& classname,
+                   int flags);
+bool HHVM_FUNCTION(stream_wrapper_register,
+                   const String& protocol,
+                   const String& classname,
+                   int flags);
+bool HHVM_FUNCTION(stream_wrapper_restore,
+                   const String& protocol);
+bool HHVM_FUNCTION(stream_wrapper_unregister,
+                   const String& protocol);
 
-Array f_stream_get_wrappers();
-bool f_stream_is_local(const Variant& stream_or_url);
-bool f_stream_register_wrapper(const String& protocol, const String& classname,
-                               int flags);
-bool f_stream_wrapper_register(const String& protocol, const String& classname,
-                               int flags);
-bool f_stream_wrapper_restore(const String& protocol);
-bool f_stream_wrapper_unregister(const String& protocol);
+Variant HHVM_FUNCTION(stream_resolve_include_path,
+                      const String& filename,
+                      const Variant& context = null_variant);
 
-Variant f_stream_resolve_include_path(const String& filename,
-                                     const Resource& context = null_resource);
+Variant HHVM_FUNCTION(stream_select,
+                      VRefParam read,
+                      VRefParam write,
+                      VRefParam except,
+                      const Variant& vtv_sec,
+                      int tv_usec = 0);
 
-Variant f_stream_select(VRefParam read, VRefParam write, VRefParam except,
-                        const Variant& vtv_sec, int tv_usec = 0);
+bool HHVM_FUNCTION(stream_set_blocking,
+                   const Resource& stream,
+                   int mode);
 
-bool f_stream_set_blocking(const Resource& stream, int mode);
+bool HHVM_FUNCTION(stream_set_timeout,
+                   const Resource& stream,
+                   int seconds,
+                   int microseconds = 0);
 
-bool f_stream_set_timeout(const Resource& stream, int seconds, int microseconds = 0);
+int64_t HHVM_FUNCTION(stream_set_write_buffer,
+                      const Resource& stream,
+                      int buffer);
 
-int64_t f_stream_set_write_buffer(const Resource& stream, int buffer);
-
-int64_t f_set_file_buffer(const Resource& stream, int buffer);
+int64_t HHVM_FUNCTION(set_file_buffer,
+                      const Resource& stream,
+                      int buffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream sockets: ext_socket has better implementation of socket functions
 
-Variant f_stream_socket_accept(const Resource& server_socket, double timeout = -1.0,
-                               VRefParam peername = uninit_null());
+Variant HHVM_FUNCTION(stream_socket_accept,
+                      const Resource& server_socket,
+                      double timeout = -1.0,
+                      VRefParam peername = uninit_null());
 
-Variant f_stream_socket_server(const String& local_socket,
-                               VRefParam errnum = uninit_null(),
-                               VRefParam errstr = uninit_null(),
-                               int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
-                               const Resource& context = null_resource);
+Variant HHVM_FUNCTION(stream_socket_server,
+                      const String& local_socket,
+                      VRefParam errnum = uninit_null(),
+                      VRefParam errstr = uninit_null(),
+                      int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
+                      const Variant& context = null_variant);
 
-Variant f_stream_socket_client(const String& remote_socket, VRefParam errnum = uninit_null(),
-                              VRefParam errstr = uninit_null(), double timeout = -1.0,
-                              int flags = 0, const Resource& context = null_resource);
+Variant HHVM_FUNCTION(stream_socket_client,
+                      const String& remote_socket,
+                      VRefParam errnum = uninit_null(),
+                      VRefParam errstr = uninit_null(),
+                      double timeout = -1.0,
+                      int flags = 0,
+                      const Variant& context = null_variant);
 
-Variant f_stream_socket_enable_crypto(const Resource& stream, bool enable,
-                                      int crypto_type = 0,
-                                      const Resource& session_stream = null_resource);
+Variant HHVM_FUNCTION(stream_socket_get_name,
+                      const Resource& handle,
+                      bool want_peer);
 
-Variant f_stream_socket_get_name(const Resource& handle, bool want_peer);
+Variant HHVM_FUNCTION(stream_socket_pair,
+                      int domain,
+                      int type,
+                      int protocol);
 
-Variant f_stream_socket_pair(int domain, int type, int protocol);
+Variant HHVM_FUNCTION(stream_socket_recvfrom,
+                      const Resource& socket,
+                      int length,
+                      int flags = 0,
+                      VRefParam address = uninit_null());
 
-Variant f_stream_socket_recvfrom(const Resource& socket, int length, int flags = 0,
-                                 VRefParam address = uninit_null());
+Variant HHVM_FUNCTION(stream_socket_sendto,
+                      const Resource& socket,
+                      const String& data,
+                      int flags = 0,
+                      const Variant& address = null_variant);
 
-Variant f_stream_socket_sendto(const Resource& socket, const String& data, int flags = 0,
-                           const String& address = null_string);
-
-bool f_stream_socket_shutdown(const Resource& stream, int how);
+bool HHVM_FUNCTION(stream_socket_shutdown,
+                   const Resource& stream,
+                   int how);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

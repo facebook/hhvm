@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/thread-local.h"
 #include "folly/String.h"
@@ -749,7 +749,7 @@ bool HHVM_FUNCTION(ldap_set_rebind_proc,
   }
 
   /* callable? */
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("Callback argument is not a valid callback");
     return false;
   }

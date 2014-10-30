@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -420,7 +420,7 @@ void VerifyParamTypeSlow(const Class* cls,
 }
 
 void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyParamTypeFail(param);
   }
 }
@@ -445,7 +445,7 @@ void VerifyRetTypeSlow(const Class* cls,
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyRetTypeFail(value);
   }
 }

@@ -17,7 +17,7 @@
 #include "hphp/runtime/ext/array/ext_array.h"
 
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/request-local.h"

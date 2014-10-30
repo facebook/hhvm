@@ -30,7 +30,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/php-globals.h"
@@ -187,7 +187,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
     ai.append(String(const_cast<StringData*>(unit->filepath())));
     ai.append(Variant(unit->getLineNumber(callerOffset)));
     ai.append(assertion.isString() ? assertion : empty_string_variant_ref);
-    f_call_user_func(1, s_option_data->assertCallback, ai.toArray());
+    HHVM_FN(call_user_func)(s_option_data->assertCallback, ai.toArray());
   }
   String name(message.isNull() ? "Assertion" : message.toString());
   if (s_option_data->assertWarning) {

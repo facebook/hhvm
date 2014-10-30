@@ -18,6 +18,7 @@ class StandardExtension : public Extension {
     initOutput();
     initString();
     initVariable();
+    initFunction();
     initMisc();
     initStreamUserFilters();
   }
@@ -34,6 +35,7 @@ class StandardExtension : public Extension {
   void initOutput();
   void initString();
   void initVariable();
+  void initFunction();
   void initMisc();
   void initStreamUserFilters();
 

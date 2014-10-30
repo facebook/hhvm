@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 
 #ifdef USE_EDITLINE
 #include <editline/readline.h>
@@ -104,7 +104,7 @@ static char** _readline_completion_cb(const char* text, int start, int end) {
 static bool HHVM_FUNCTION(
     readline_completion_function,
     const Variant& function) {
-  if (!f_is_callable(function)) {
+  if (!HHVM_FN(is_callable)(function)) {
     raise_warning(
         "readline_completion_function(): %s is not callable",
         function.toString().data());

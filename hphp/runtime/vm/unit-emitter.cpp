@@ -621,12 +621,12 @@ std::unique_ptr<Unit> UnitEmitter::create() {
    * the line table here, because we can retrieve it from the repo later.
    *
    * On the other hand, if this unit was just created by parsing a php file (or
-   * whatnot), we'll have a m_sourceLocTab.  In this case we should populate
-   * m_lineTable (otherwise we might lose line info altogether, since it may
-   * not be backed by a repo).
+   * whatnot) which was not committed to the repo, we'll have a m_sourceLocTab.
+   * In this case we should populate m_lineTable (otherwise we might lose line
+   * info altogether, since it may not be backed by a repo).
    */
   if (m_sourceLocTab.size() != 0) {
-    u->m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+    stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
   }
 
   for (size_t i = 0; i < m_feTab.size(); ++i) {

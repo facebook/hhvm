@@ -138,6 +138,13 @@ using ExtendedLineInfoCache = tbb::concurrent_hash_map<
 >;
 ExtendedLineInfoCache s_extendedLineInfo;
 
+using LineTableStash = tbb::concurrent_hash_map<
+  const Unit*,
+  LineTable,
+  pointer_hash<Unit>
+>;
+LineTableStash s_lineTables;
+
 /*
  * Since line numbers are only used for generating warnings and backtraces, the
  * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
@@ -183,6 +190,7 @@ Unit::Unit()
 
 Unit::~Unit() {
   s_extendedLineInfo.erase(this);
+  s_lineTables.erase(this);
   s_lineInfo.erase(this);
 
   if (!RuntimeOption::RepoAuthoritative) {
@@ -312,7 +320,13 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
 
 static LineTable loadLineTable(const Unit* unit) {
   auto ret = LineTable{};
-  if (unit->repoID() == RepoIdInvalid) return ret;
+  if (unit->repoID() == RepoIdInvalid) {
+    LineTableStash::accessor acc;
+    if (s_lineTables.find(acc, unit)) {
+      return acc->second;
+    }
+    return ret;
+  }
 
   Lock lock(g_classesMutex);
   auto& urp = Repo::get().urp();
@@ -332,10 +346,6 @@ int getLineNumber(const LineTable& table, Offset pc) {
 }
 
 int Unit::getLineNumber(Offset pc) const {
-  if (m_lineTable.size() != 0) {
-    return HPHP::getLineNumber(m_lineTable, pc);
-  }
-
   {
     LineInfoCache::const_accessor acc;
     if (s_lineInfo.find(acc, this)) {
@@ -416,6 +426,12 @@ const Func* Unit::getFunc(Offset pc) const {
   return nullptr;
 }
 
+void stashLineTable(const Unit* unit, LineTable table) {
+  LineTableStash::accessor acc;
+  if (s_lineTables.insert(acc, unit)) {
+    acc->second = std::move(table);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.

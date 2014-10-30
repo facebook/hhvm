@@ -1110,7 +1110,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
 
-  if(type == FunctionType::Method && old_params &&
+  if (type == FunctionType::Method && old_params &&
      !modifiersExp->isStatic()) {
     checkAssignThis(old_params);
   }

@@ -188,7 +188,7 @@ def main():
     parser = argparse.ArgumentParser(description='Convenience wrapper for '
                                      'benchmarking multiple branches.')
     parser.add_argument('--no-build', action='store_const', const=True,
-                        help='Don\'t clean and build.')
+                        default=False, help='Don\'t clean and build.')
     parser.add_argument('--suite', action='append', type=str,
                         help='Run any suite that matches the provided regex')
     parser.add_argument('--benchmark', action='append', type=str,
@@ -210,6 +210,10 @@ def main():
                         default=False, help='Spit out the results as Remarkup')
     parser.add_argument('--perf', action='store_const', const=True,
                         default=False, help='Run perf for each VM invocation.')
+    parser.add_argument('--re-print', action='store_const', const=True,
+                        default=False, help='Re-print previous results without '
+                                            're-building or re-running '
+                                            'benchmarks.')
     parser.add_argument('-v', '--verbose', type=int, default=0,
                         help='Increase verbosity')
     args = parser.parse_args()
@@ -225,17 +229,19 @@ def main():
     set_verbose_level(args.verbose)
     inner = args.inner
     outer = args.outer
-    do_build = args.no_build is None
+    should_build = not (args.no_build or args.re_print)
+    should_run_benchmarks = not args.re_print
     run_perf = args.perf
     output_mode = 'remarkup' if args.remarkup else 'terminal'
 
     branches = parse_branches(args.branch)
 
-    if do_build:
+    if should_build:
         build_branches(branches)
-    run_benchmarks(included_suites,
-                   included_benchmarks,
-                   run_perf, inner, outer, branches)
+    if should_run_benchmarks:
+        run_benchmarks(included_suites,
+                      included_benchmarks,
+                      run_perf, inner, outer, branches)
     process_results(branches, output_mode)
 
 

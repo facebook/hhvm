@@ -783,7 +783,7 @@ void remove_unused_locals(Context const ctx,
       begin(func->locals) + func->params.size(),
       end(func->locals),
       [&] (const std::unique_ptr<php::Local>& l) {
-        if (!usedLocals.test(l->id)) {
+        if (l->id < kMaxTrackedLocals && !usedLocals.test(l->id)) {
           FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
           return true;
         }

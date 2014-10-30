@@ -187,7 +187,17 @@ def slower(out_format, text):
         raise RuntimeError("Unknown output format: %s" % out_format)
 
 
-def print_comparison_results(result_files, out_format):
+def is_slower(change, lower_is_better):
+    """Returns true if change represents a slowdown with the current
+    lower_is_better setting.
+
+    """
+    if lower_is_better:
+        return change > 0.0
+    return change < 0.0
+
+
+def print_comparison_results(result_files, out_format, lower_is_better):
     """Builds a table of the various gathered results and prints it out.
 
     The table also includes an extra column for deltas and adds entries for
@@ -207,7 +217,7 @@ def print_comparison_results(result_files, out_format):
             entries.append("")
         else:
             change = percent_delta(old_score, new_score)
-            if change < 0.0:
+            if is_slower(change, lower_is_better):
                 change_str = "%.4f%% slower" % (change * 100.0)
                 entries.append(slower(out_format, change_str))
             else:
@@ -249,6 +259,9 @@ def main():
                                             'that\'s nice for terminals')
     parser.add_argument('--json', action='store_const', const=True,
                         default=False, help='Spit out the results as JSON.')
+    parser.add_argument('--lower-is-better', action='store_const', const=True,
+                        default=False, help='Bases comparisons on the fact '
+                                            'that lower is better.')
     parser.add_argument('file', metavar='FILE', nargs='+', type=str,
                         help='Files to parse for statistics.')
     args = parser.parse_args()
@@ -263,12 +276,14 @@ def main():
     else:
         out_format = 'terminal'
 
+    lower_is_better = args.lower_is_better
+
     result_files = []
     for filename in args.file:
         with open(filename, 'r') as in_file:
             result_files.append(read_input(filename, in_file))
     if len(result_files) > 1:
-        print_comparison_results(result_files, out_format)
+        print_comparison_results(result_files, out_format, lower_is_better)
     else:
         print_results(result_files, out_format)
 

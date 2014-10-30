@@ -7,6 +7,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+import json
 import sys
 import re
 
@@ -75,6 +76,29 @@ class Table(object):
                 if width > max_widths[i]:
                     max_widths[i] = width
         return max_widths
+
+    def dump(self, out_format):
+        """Dumps the table in the specified out_format.  Valid values are
+        'terminal', 'remarkup', and 'json'.
+
+        """
+        if out_format == 'terminal':
+            self.dump_to_terminal()
+        elif out_format == 'remarkup':
+            self.dump_to_remarkup()
+        elif out_format == 'json':
+            self.dump_to_json()
+        else:
+            raise RuntimeError("Unknown output format: %s" % out_format)
+
+    def dump_to_json(self):
+        """Print the table in JSON format. The printed value will be an array
+        of JSON objects corresponding to each row.
+
+        """
+        rows = [dict((self._headers[i], row[i]) for i in range(len(row)))
+            for row in self._rows]
+        json.dump(rows, sys.stdout)
 
     def dump_to_remarkup(self):
         """Pretty print the table headers and rows in remarkup format.

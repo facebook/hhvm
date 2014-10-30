@@ -125,12 +125,7 @@ def print_results(result_files, out_format):
     if geomean is not None:
         table.add_row(geomean)
 
-    if out_format == 'terminal':
-        table.dump_to_terminal()
-    elif out_format == 'remarkup':
-        table.dump_to_remarkup()
-    else:
-        raise RuntimeError("Unknown output format: %s" % out_format)
+    table.dump(out_format)
 
 
 def red(text):
@@ -158,6 +153,8 @@ def bold(out_format, text):
         return "**%s**" % text
     elif out_format == 'terminal':
         return "\033[1m%s\033[0m" % text
+    elif out_format == 'json':
+        return text
     else:
         raise RuntimeError("Unknown output format: %s" % out_format)
 
@@ -170,6 +167,8 @@ def faster(out_format, text):
         return bold(out_format, text)
     elif out_format == 'terminal':
         return bold(out_format, green(text))
+    elif out_format == 'json':
+        return text
     else:
         raise RuntimeError("Unknown output format: %s" % out_format)
 
@@ -182,6 +181,8 @@ def slower(out_format, text):
         return bold(out_format, text)
     elif out_format == 'terminal':
         return bold(out_format, red(text))
+    elif out_format == 'json':
+        return text
     else:
         raise RuntimeError("Unknown output format: %s" % out_format)
 
@@ -232,12 +233,7 @@ def print_comparison_results(result_files, out_format):
     if geomean is not None:
         table.add_row(geomean)
 
-    if out_format == 'terminal':
-        table.dump_to_terminal()
-    elif out_format == 'remarkup':
-        table.dump_to_remarkup()
-    else:
-        raise RuntimeError("Unknown output format: %s" % out_format)
+    table.dump(out_format)
 
 
 def main():
@@ -251,6 +247,8 @@ def main():
     parser.add_argument('--terminal', action='store_const', const=True,
                         default=False, help='Spit out the results in format '
                                             'that\'s nice for terminals')
+    parser.add_argument('--json', action='store_const', const=True,
+                        default=False, help='Spit out the results as JSON.')
     parser.add_argument('file', metavar='FILE', nargs='+', type=str,
                         help='Files to parse for statistics.')
     args = parser.parse_args()
@@ -260,6 +258,8 @@ def main():
         out_format = 'terminal'
     elif args.remarkup:
         out_format = 'remarkup'
+    elif args.json:
+        out_format = 'json'
     else:
         out_format = 'terminal'
 

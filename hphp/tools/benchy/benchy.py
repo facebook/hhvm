@@ -208,6 +208,8 @@ def main():
                              'BRANCH:VAR1=VAL1:VAR2=VAL2')
     parser.add_argument('--remarkup', action='store_const', const=True,
                         default=False, help='Spit out the results as Remarkup')
+    parser.add_argument('--json', action='store_const', const=True,
+                        default=False, help='Spit out the results as JSON')
     parser.add_argument('--perf', action='store_const', const=True,
                         default=False, help='Run perf for each VM invocation.')
     parser.add_argument('--re-print', action='store_const', const=True,
@@ -232,7 +234,13 @@ def main():
     should_build = not (args.no_build or args.re_print)
     should_run_benchmarks = not args.re_print
     run_perf = args.perf
-    output_mode = 'remarkup' if args.remarkup else 'terminal'
+    output_mode = None
+    if args.remarkup:
+        output_mode = 'remarkup'
+    elif args.json:
+        output_mode = 'json'
+    else:
+        output_mode = 'terminal'
 
     branches = parse_branches(args.branch)
 

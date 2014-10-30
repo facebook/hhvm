@@ -64,11 +64,13 @@ protected:
    * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
-    : m_size(-1)
-    , m_pos(0)
-    , m_kind(kind)
-    , m_count(0)
-  {}
+    : m_sizeAndPos(uint32_t(-1))
+    , m_kindAndCount(kind << 24) {
+    assert(m_size == -1);
+    assert(m_pos == 0);
+    assert(m_kind == kind);
+    assert(m_count == 0);
+  }
 
   /*
    * NOTE: MixedArray no longer calls this destructor.  If you need to
@@ -443,6 +445,7 @@ private:
   void serializeImpl(VariableSerializer *serializer) const;
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
+    static_assert(offsetof(ArrayData, m_kind) == HeaderKindOffset, "");
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
@@ -499,6 +502,16 @@ protected:
     uint64_t m_kindAndCount;
   };
 };
+
+static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
+static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
+static_assert(ArrayData::kStrMapKind == uint8_t(HeaderKind::StrMap), "");
+static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");
+static_assert(ArrayData::kVPackedKind == uint8_t(HeaderKind::VPacked), "");
+static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
+static_assert(ArrayData::kSharedKind == uint8_t(HeaderKind::Shared), "");
+static_assert(ArrayData::kNvtwKind == uint8_t(HeaderKind::Nvtw), "");
+static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 
 //////////////////////////////////////////////////////////////////////
 

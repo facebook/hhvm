@@ -171,6 +171,7 @@ struct StringData {
    * a helper like decRefStr).
    */
   void release();
+  size_t heapSize() const;
 
   /*
    * StringData objects allocated with MakeStatic should be freed
@@ -470,7 +471,7 @@ private:
   union {
     struct {
       union {
-        struct { uint8_t m_pad[3], m_kind; };
+        struct { char m_pad[3]; HeaderKind m_kind; };
         uint32_t m_capCode;
       };
       mutable RefCount m_count;

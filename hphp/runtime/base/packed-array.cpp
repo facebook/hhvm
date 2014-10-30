@@ -606,9 +606,7 @@ void PackedArray::Release(ArrayData* ad) {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
   }
-
-  auto const cap = packedCodeToCap(ad->m_packedCapCode);
-  MM().objFreeLogged(ad, sizeof(ArrayData) + sizeof(TypedValue) * cap);
+  MM().objFreeLogged(ad, heapSize(ad));
 }
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {

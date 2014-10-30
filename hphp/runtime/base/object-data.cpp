@@ -1956,6 +1956,7 @@ const char* ObjectData::classname_cstr() const {
 }
 
 void ObjectData::compileTimeAssertions() {
+  static_assert(offsetof(ObjectData, m_kind) == HeaderKindOffset, "");
   static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 

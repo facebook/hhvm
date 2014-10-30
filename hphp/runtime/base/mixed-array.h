@@ -381,6 +381,7 @@ public:
   bool isTombstone(ssize_t pos) const;
 
   size_t hashSize() const;
+  size_t heapSize() const;
   static size_t computeMaxElms(uint32_t tableMask);
   static size_t computeDataSize(uint32_t tableMask);
   static size_t computeAllocBytesFromMaxElms(uint32_t maxElms);

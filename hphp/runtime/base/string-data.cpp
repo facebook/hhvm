@@ -127,7 +127,7 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   auto const capCode = packedCapToCode(encodable);
 
   sd->m_data        = data;
-  sd->m_capAndCount = capCode; // cap=encodable, kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -165,14 +165,14 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = 0; // capCode=0, kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24; // capCode=0 count=0
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
 
   assert(sd->m_len == 0);
   assert(sd->m_hash == 0);
-  assert(sd->m_capCode == 0);
-  assert(sd->m_kind == 0);
+  assert(sd->capacity() == 0);
+  assert(sd->m_kind == HeaderKind::String);
   assert(sd->m_count == 0);
   sd->setStatic();
   assert(sd->isFlat());
@@ -234,7 +234,7 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_capAndCount  = capCode; // kind=0, count=0
+  sd->m_capAndCount  = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -267,7 +267,7 @@ StringData* StringData::Make(size_t reserveLen) {
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_capAndCount = capCode; // kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->isFlat());
@@ -295,7 +295,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = capCode; // kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
@@ -320,7 +320,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = capCode; // kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -343,7 +343,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = capCode; // kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -361,15 +361,15 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE void StringData::enlist() {
- assert(isShared());
- auto& head = MM().getStringList();
- // insert after head
- auto const next = head.next;
- auto& payload = *sharedPayload();
- assert(uintptr_t(next) != kMallocFreeWord);
- payload.node.next = next;
- payload.node.prev = &head;
- next->prev = head.next = &payload.node;
+  assert(isShared());
+  auto& head = MM().getStringList();
+  // insert after head
+  auto const next = head.next;
+  auto& payload = *sharedPayload();
+  assert(uintptr_t(next) != kMallocFreeWord);
+  payload.node.next = next;
+  payload.node.prev = &head;
+  next->prev = head.next = &payload.node;
 }
 
 NEVER_INLINE
@@ -379,7 +379,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_capAndCount = data->m_capCode; // count=0
+  sd->m_capAndCount = data->m_capCode; // count=0, kind=data->kind
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -389,6 +389,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   assert(sd->m_count == 0);
   assert(sd->m_capCode == data->m_capCode);
   assert(sd->m_hash == data->m_hash);
+  assert(sd->m_kind == HeaderKind::String);
   assert(sd->isShared());
   assert(sd->checkSane());
   return sd;
@@ -420,7 +421,7 @@ StringData* StringData::Make(const APCString* shared) {
   assert(capCode == packedCapToCode(cap - kCapOverhead));
 
   sd->m_data = pdst;
-  sd->m_capAndCount = capCode; // kind=0, count=0
+  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
@@ -453,10 +454,7 @@ void StringData::releaseDataSlowPath() {
 
 void StringData::release() {
   assert(checkSane());
-
-  if (UNLIKELY(!isFlat())) {
-    return releaseDataSlowPath();
-  }
+  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
   freeForSize(this, capacity() + kCapOverhead);
 }
 
@@ -994,6 +992,7 @@ bool StringData::checkSane() const {
   static_assert(sizeof(StringData) == 24,
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
+  static_assert(offsetof(StringData, m_kind) == HeaderKindOffset, "");
   static_assert(offsetof(StringData, m_count) == FAST_REFCOUNT_OFFSET,
                 "m_count at wrong offset");
 

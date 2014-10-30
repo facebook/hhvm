@@ -108,6 +108,22 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 //////////////////////////////////////////////////////////////////////
 
+enum class HeaderKind : uint8_t {
+  // ArrayKind aliases
+  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Nvtw, Proxy,
+  // Other ordinary refcounted heap objects
+  String, Object, Resource, Ref,
+  Native, // a NativeData header preceding an HNI ObjectData
+  Sweepable, // a Sweepable header preceding an ObjectData ResourceData
+  Small, // small smart_malloc'd block
+  Free, // small block in a FreeList
+  Hole, // wasted space not in any freelist
+  Debug // a DebugHeader
+};
+
+const size_t HeaderKindOffset = 11;
+const unsigned NumHeaderKinds = (uint8_t)HeaderKind::Debug+1;
+
 /*
  * Debug mode header.
  *
@@ -128,8 +144,8 @@ struct DebugHeader {
   static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
-  char pad[3];
-  uint8_t kind; // TODO #5478458 use kind to parse heap
+  uint8_t pad[3];
+  HeaderKind kind;
   size_t requestedSize; // zero for size-untracked allocator
   size_t returnedCap;
 };
@@ -273,37 +289,46 @@ constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 //////////////////////////////////////////////////////////////////////
 
-// This is the header MemoryManager uses for large allocations
+// Header MemoryManager uses for StringDatas that wrap APCHandle
+struct StringDataNode {
+  StringDataNode* next;
+  StringDataNode* prev;
+};
+
+// This is the header MemoryManager uses to remember large allocations
+// so they can be auto-freed in MemoryManager::reset()
 struct BigNode {
   BigNode* next;
   BigNode* prev;
 };
 
-// And for small smart_malloc allocations (but not *Size allocs)
+// Header used for small smart_malloc allocations (but not *Size allocs)
 struct SmallNode {
   size_t padbytes;
-  uint8_t pad[3], kind; // TODO #5478458 use kind to parse heap
+  char pad[3];
+  HeaderKind kind;
 };
 
-// And for all FreeList entries.
+// all FreeList entries are parsed by inspecting this header.
 struct FreeNode {
   FreeNode* next;
-  uint8_t pad[3], kind; // TODO #5478458 use kind to parse heap
+  union {
+    struct {
+      char pad[3];
+      HeaderKind kind;
+      uint32_t size;
+    };
+    uint64_t kind_size;
+  };
 };
 
 // header for HNI objects with NativeData payloads. see native-data.h
+// for details about memory layout.
 struct NativeNode {
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset;
-  uint8_t pad[3], kind;
-};
-
-/*
- * Header MemoryManager uses for StringDatas that wrap APCHandle
- */
-struct StringDataNode {
-  StringDataNode* next;
-  StringDataNode* prev;
+  char pad[3];
+  HeaderKind kind;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -586,7 +611,7 @@ private:
 
   struct FreeList {
     void* maybePop();
-    void push(void*);
+    void push(void*, size_t size);
     FreeNode* head = nullptr;
   };
 
@@ -637,6 +662,12 @@ private:
 
   void logAllocation(void*, size_t);
   void logDeallocation(void*);
+
+  struct HeapIter;
+  void checkHeap();
+  void initHole();
+  HeapIter begin();
+  HeapIter end();
 
 private:
   TRACE_SET_MOD(smartalloc);

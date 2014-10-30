@@ -83,7 +83,8 @@ namespace HPHP {
     static_assert(std::is_base_of<ResourceData,T>::value, "");          \
     assert(sizeof(T) <= kMaxSmartSize);                                 \
     MM().smartFreeSizeLogged(p, sizeof(T));                             \
-  }
+  }\
+  virtual size_t heapSize() const { return sizeof(T); }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \

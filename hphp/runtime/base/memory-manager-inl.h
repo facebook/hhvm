@@ -132,15 +132,23 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+inline int operator<<(HeaderKind k, int bits) {
+  return int(k) << bits;
+}
+
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
   return ret;
 }
 
-inline void MemoryManager::FreeList::push(void* val) {
+inline void MemoryManager::FreeList::push(void* val, size_t size) {
+  auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
+  static_assert(kMaxSmartSize <= kMaxFreeSize, "");
+  assert(size > 0 && size <= kMaxFreeSize);
   auto const node = static_cast<FreeNode*>(val);
   node->next = head;
+  if (debug) node->kind_size = HeaderKind::Free << 24 | size << 32;
   head = node;
 }
 
@@ -252,9 +260,10 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = slabAlloc(bytes, i);
+    p = ((char*)p + kDebugExtraSize);
   }
+  p = ((char*)p - kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
-
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
   return debugPostAllocate(p, bytes, debug ? smartSizeClass(bytes) : bytes);
 }
@@ -268,7 +277,8 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
     return smartFreeSizeBig(ptr, bytes);
   }
   unsigned i = smartSize2Index(bytes);
-  m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
+  debugPreFree(ptr, bytes, bytes);
+  m_freelists[i].push(ptr, bytes);
   m_stats.usage -= bytes;
 
   FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);

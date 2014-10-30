@@ -153,7 +153,7 @@ struct RefData {
 
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
-  RefData() {
+  RefData() : m_kind(HeaderKind::Ref) {
 #ifndef NDEBUG
     m_magic = Magic::kMagic;
 #endif
@@ -246,7 +246,7 @@ struct RefData {
   }
 
 private:
-  RefData(DataType t, int64_t datum) {
+  RefData(DataType t, int64_t datum) : m_kind(HeaderKind::Ref) {
 #ifndef NDEBUG
     m_magic = Magic::kMagic;
 #endif
@@ -269,7 +269,7 @@ private:
   UNUSED uint8_t m_padding;
   mutable uint8_t m_cow;
   mutable uint8_t m_z;
-  UNUSED uint8_t m_kind;
+  HeaderKind m_kind;
   mutable RefCount m_count;
   TypedValue m_tv;
 #else
@@ -281,7 +281,7 @@ private:
       DataType shadow_type;
       mutable uint8_t m_cow;
       mutable uint8_t m_z;
-      UNUSED uint8_t m_kind;
+      HeaderKind m_kind;
       mutable RefCount m_count; // refcount field
     };
   };

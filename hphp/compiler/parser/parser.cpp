@@ -720,11 +720,23 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
+void Parser::checkAssignThis(string var) {
+  if (var == "this") {
+    PARSE_ERROR("Cannot re-assign $this");
+  }
+}
+
 void Parser::checkAssignThis(Token &var) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    if (simp->getName() == "this") {
-      PARSE_ERROR("Cannot re-assign $this");
-    }
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionListPtr params) {
+  for (int i = 0, count = params->getCount(); i < count; i++) {
+    ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+    checkAssignThis(param->getName());
   }
 }
 
@@ -1097,6 +1109,11 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
+
+  if (type == FunctionType::Method && old_params &&
+     !modifiersExp->isStatic()) {
+    checkAssignThis(old_params);
+  }
 
   string funcName = getFunctionName(type, name);
 

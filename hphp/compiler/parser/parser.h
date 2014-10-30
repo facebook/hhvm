@@ -426,7 +426,11 @@ private:
 
   bool hasType(Token &type);
 
+  void checkAssignThis(string var);
+
   void checkAssignThis(Token &var);
+
+  void checkAssignThis(ExpressionListPtr params);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
 

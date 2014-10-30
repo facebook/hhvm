@@ -2704,7 +2704,9 @@ PDOStatementData::PDOStatementData() : m_rowIndex(-1) {
 }
 
 PDOStatementData::~PDOStatementData() {
-  m_stmt.reset();
+  if (m_stmt.get() != nullptr) {
+    m_stmt.reset();
+  }
 }
 
 static Variant HHVM_METHOD(PDOStatement, execute,
@@ -2713,6 +2715,11 @@ static Variant HHVM_METHOD(PDOStatement, execute,
   auto params = paramsV.isNull() ? null_array : paramsV.toArray();
 
   SYNC_VM_REGS_SCOPED();
+
+  if (data->m_stmt.get() == nullptr) {
+    return init_null_variant;
+  }
+
   strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
@@ -2792,6 +2799,11 @@ static Variant HHVM_METHOD(PDOStatement, fetch, int64_t how  = 0,
   auto data = Native::data<PDOStatementData>(this_);
 
   SYNC_VM_REGS_SCOPED();
+
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
+
   strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(data->m_stmt, how, false)) {
     return false;
@@ -2810,6 +2822,9 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
                            const String& class_name /* = null_string */,
                            const Variant& ctor_args /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(data->m_stmt, PDO_FETCH_CLASS, false)) {
@@ -2856,6 +2871,9 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
                            int64_t column_numner /* = 0 */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   strcpy(data->m_stmt->error_code, PDO_ERR_NONE);
   if (!do_fetch_common(data->m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
@@ -2871,6 +2889,9 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
                            const Variant& class_name /* = null */,
                            const Variant& ctor_args /* = null */) {
   auto self = Native::data<PDOStatementData>(this_);
+  if (self->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   if (!pdo_stmt_verify_mode(self->m_stmt, how, true)) {
     return false;
@@ -2994,11 +3015,13 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
   return return_value;
 }
 
-
 static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
                         const Variant& param,
                         int64_t type /* = q_PDO$$PARAM_STR */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   return register_bound_param(paramno, param, type, 0,
                               uninit_null(), data->m_stmt, true);
@@ -3009,6 +3032,9 @@ static bool HHVM_METHOD(PDOStatement, bindparam, const Variant& paramno,
                         int64_t max_value_len /* = 0 */,
                         const Variant& driver_params /*= null */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, data->m_stmt, true);
@@ -3019,6 +3045,9 @@ static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
                         int64_t max_value_len /* = 0 */,
                         const Variant& driver_params /* = null */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, data->m_stmt, false);
@@ -3026,13 +3055,18 @@ static bool HHVM_METHOD(PDOStatement, bindcolumn, const Variant& paramno,
 
 static int64_t HHVM_METHOD(PDOStatement, rowcount) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return 0;
+  }
 
   return data->m_stmt->row_count;
 }
 
 static Variant HHVM_METHOD(PDOStatement, errorcode) {
   auto data = Native::data<PDOStatementData>(this_);
-
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
   if (data->m_stmt->error_code[0] == '\0') {
     return init_null();
   }
@@ -3041,6 +3075,9 @@ static Variant HHVM_METHOD(PDOStatement, errorcode) {
 
 static Array HHVM_METHOD(PDOStatement, errorinfo) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return null_array;
+  }
 
   Array ret;
   ret.append(String(data->m_stmt->error_code, CopyString));
@@ -3063,6 +3100,9 @@ static Array HHVM_METHOD(PDOStatement, errorinfo) {
 static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
                            const Variant& value) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   if (!data->m_stmt->support(PDOStatement::MethodSetAttribute)) {
     pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
@@ -3080,6 +3120,9 @@ static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
 
 static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   Variant ret;
   if (!data->m_stmt->support(PDOStatement::MethodGetAttribute)) {
@@ -3112,6 +3155,9 @@ static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
 
 static int64_t HHVM_METHOD(PDOStatement, columncount) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return 0;
+  }
 
   return data->m_stmt->column_count;
 }
@@ -3124,6 +3170,9 @@ const StaticString
 
 static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   if (column < 0) {
     pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "42P10",
@@ -3160,6 +3209,9 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
 static bool HHVM_METHOD(PDOStatement, setfetchmode,
                         int64_t mode, const Array& _argv /* = null_array */) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
   int argc = _argv.size() + 1;
 
   return pdo_stmt_set_fetch_mode(data->m_stmt, argc, mode, _argv);
@@ -3167,6 +3219,9 @@ static bool HHVM_METHOD(PDOStatement, setfetchmode,
 
 static bool HHVM_METHOD(PDOStatement, nextrowset) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   if (!data->m_stmt->support(PDOStatement::MethodNextRowset)) {
     pdo_raise_impl_error(data->m_stmt->dbh, data->m_stmt, "IM001",
@@ -3193,6 +3248,9 @@ static bool HHVM_METHOD(PDOStatement, nextrowset) {
 
 static bool HHVM_METHOD(PDOStatement, closecursor) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   if (!data->m_stmt->support(PDOStatement::MethodCursorCloser)) {
     /* emulate it by fetching and discarding rows */
@@ -3218,6 +3276,9 @@ static bool HHVM_METHOD(PDOStatement, closecursor) {
 
 static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
   auto data = Native::data<PDOStatementData>(this_);
+  if (data->m_stmt.get() == nullptr) {
+    return false;
+  }
 
   Resource resource = File::Open("php://output", "w");
   File *f = resource.getTyped<File>(true);

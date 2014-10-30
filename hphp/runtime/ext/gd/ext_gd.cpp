@@ -725,12 +725,7 @@ static unsigned int php_next_marker(const Resource& stream, int last_marker,
         last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
       }
     }
-    if (++a > 25)
-    {
-      /* who knows the maxim amount of 0xff? though 7 */
-      /* but found other implementations              */
-      return M_EOI;
-    }
+    ++a;
   } while (marker == 0xff);
   if (a < 2)
   {

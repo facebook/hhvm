@@ -72,7 +72,7 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
   global $test_run_id, $LOG_ROOT;
 
   $portConfig = ' -vServer.Port='.$serverPort;
-  $serverConfig = ' --config='.$home.'/config/server.hdf';
+  $serverConfig = ' --config='.$home.'/config/server.ini';
   $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
   $srcRootConfig = ' -vServer.SourceRoot='.$root;
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;

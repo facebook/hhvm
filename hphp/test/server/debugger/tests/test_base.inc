@@ -7,11 +7,11 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
   global $test_run_id, $LOG_ROOT;
 
   $home = hphp_home().'/hphp/test/server/debugger';
-  $hhvm = bin_root().'/hphp/hhvm/hhvm';
+  $hhvm = PHP_BINARY;
   $host = ' -h '.php_uname('n');
   $port = ' --debug-port '.$debugPort;
   $user = ' --user debugger';
-  $config = ' --config '.$home.'/config/client.hdf';
+  $config = ' --config '.$home.'/config/client.ini';
   $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_client$test_run_id.log";
   $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_client$test_run_id.hhbc";
   $debugConfig = ' --debug-config '.$home.'/config/hphpd.ini';

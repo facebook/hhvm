@@ -37,12 +37,15 @@ Variant f_min(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
+      raise_warning("min(): When only one parameter is given,"
+                    " it must be an array");
+      return init_null();
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return init_null();
+      raise_warning("min(): Array must contain at least one element");
+      return false;
     }
     Variant ret = iter.secondRefPlus();
     ++iter;
@@ -73,12 +76,15 @@ Variant f_max(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
+      raise_warning("max(): When only one parameter is given,"
+                    " it must be an array");
+      return init_null();
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return init_null();
+      raise_warning("max(): Array must contain at least one element");
+      return false;
     }
     Variant ret = iter.secondRefPlus();
     ++iter;

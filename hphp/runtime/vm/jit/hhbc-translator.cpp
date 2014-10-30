@@ -3531,7 +3531,7 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {
   assert(IMPLIES(exit == nullptr, !inPseudoMain()));
 
-  auto const opStr = inPseudoMain() ? "LdGbl" : "LdLoc";
+  auto const opStr = inPseudoMain() ? "LdLocPseudoMain" : "LdLoc";
   m_irb->constrainLocal(locId, tc, opStr);
 
   if (inPseudoMain()) {

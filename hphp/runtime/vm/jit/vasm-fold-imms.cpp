@@ -102,6 +102,14 @@ struct ImmFolder {
     if (match_int(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
     else if (match_int(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
   }
+  void fold(movzbl& in, Vinstr& out) {
+    int val;
+    if (match_byte(in.s, val)) {
+      out = copy{in.s, in.d};
+      valid.set(in.d);
+      vals[in.d] = vals[in.s];
+    }
+  }
 };
 } // namespace x64
 

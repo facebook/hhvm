@@ -231,9 +231,11 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerConvert.go genv env dirname;
         exit 0
 
+  let filter_update _genv _env update =
+    Find.is_php_path update || Find.is_js_path update
+
   let recheck genv env updates =
-    let diff_php, diff_js = updates in
-    let diff = SSet.union diff_php diff_js in
+    let diff = updates in
     if SSet.is_empty diff
     then env
     else

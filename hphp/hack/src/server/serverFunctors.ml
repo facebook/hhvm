@@ -23,7 +23,8 @@ module type SERVER_PROGRAM = sig
   val preinit : ServerArgs.options -> unit
   val init : genv -> env -> env
   val run_once_and_exit : genv -> env -> unit
-  val recheck: genv -> env -> (SSet.t * SSet.t) -> env
+  val filter_update : genv -> env -> string -> bool
+  val recheck: genv -> env -> SSet.t -> env
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
@@ -108,6 +109,7 @@ end = struct
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
       let updates = ServerDfind.get_updates genv root in
+      let updates = SSet.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
@@ -133,13 +135,10 @@ end = struct
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
         let updates = List.fold_left
-          (fun (diff_php, diff_js) fn ->
-            if Find.is_php_path fn
-            then (SSet.add fn diff_php, diff_js)
-            else if Find.is_js_path fn
-            then (diff_php, SSet.add fn diff_js)
-            else (diff_php, diff_js))
-          (SSet.empty, SSet.empty) to_recheck in
+          (fun acc update -> SSet.add update acc)
+          SSet.empty
+          to_recheck in
+        let updates = SSet.filter (Program.filter_update genv env) updates in
         Program.recheck genv env updates
 
   (* The main entry point of the daemon

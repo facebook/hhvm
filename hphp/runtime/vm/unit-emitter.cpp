@@ -418,15 +418,17 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   try {
     {
       m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
-      urp.insertUnit(repoId).insert(*this, txn, m_sn, m_md5, m_bc, m_bclen);
+      urp.insertUnit[repoId].insert(*this, txn, m_sn, m_md5, m_bc,
+                                    m_bclen);
     }
     int64_t usn = m_sn;
     urp.insertUnitLineTable(repoId, txn, usn, m_lineTable);
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
-      urp.insertUnitLitstr(repoId).insert(txn, usn, i, m_litstrs[i]);
+      urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      urp.insertUnitArray(repoId).insert(txn, usn, i, m_arrays[i].serialized);
+      urp.insertUnitArray[repoId].insert(txn, usn, i,
+                                         m_arrays[i].serialized);
     }
     for (auto& fe : m_fes) {
       fe->commit(txn);
@@ -442,7 +444,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
           not_reached();
         case MergeKind::Class: break;
         case MergeKind::ReqDoc: {
-          urp.insertUnitMergeable(repoId).insert(
+          urp.insertUnitMergeable[repoId].insert(
             txn, usn, i,
             m_mergeableStmts[i].first, m_mergeableStmts[i].second, nullptr);
           break;
@@ -451,7 +453,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         case MergeKind::PersistentDefine:
         case MergeKind::Global: {
           int ix = m_mergeableStmts[i].second;
-          urp.insertUnitMergeable(repoId).insert(
+          urp.insertUnitMergeable[repoId].insert(
             txn, usn, i,
             m_mergeableStmts[i].first,
             m_mergeableValues[ix].first, &m_mergeableValues[ix].second);
@@ -466,7 +468,7 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
                           ? m_sourceLocTab[i + 1].first
                           : m_bclen;
 
-        urp.insertUnitSourceLoc(repoId)
+        urp.insertUnitSourceLoc[repoId]
            .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
@@ -687,18 +689,12 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
 // UnitRepoProxy.
 
 UnitRepoProxy::UnitRepoProxy(Repo& repo)
-  : RepoProxy(repo)
+    : RepoProxy(repo)
 #define URP_OP(c, o) \
-  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
+    , o{c##Stmt(repo, 0), c##Stmt(repo, 1)}
     URP_OPS
 #undef URP_OP
-{
-#define URP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  URP_OPS
-#undef URP_OP
-}
+{}
 
 UnitRepoProxy::~UnitRepoProxy() {
 }
@@ -757,7 +753,7 @@ bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (!getUnit(repoId).get(ue, md5)) {
+    if (!getUnit[repoId].get(ue, md5)) {
       break;
     }
   }
@@ -767,12 +763,12 @@ bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
     return false;
   }
   try {
-    getUnitLitstrs(repoId).get(ue);
-    getUnitArrays(repoId).get(ue);
-    m_repo.pcrp().getPreClasses(repoId).get(ue);
-    getUnitMergeables(repoId).get(ue);
+    getUnitLitstrs[repoId].get(ue);
+    getUnitArrays[repoId].get(ue);
+    m_repo.pcrp().getPreClasses[repoId].get(ue);
+    getUnitMergeables[repoId].get(ue);
     getUnitLineTable(repoId, ue.m_sn, ue.m_lineTable);
-    m_repo.frp().getFuncs(repoId).get(ue);
+    m_repo.frp().getFuncs[repoId].get(ue);
   } catch (RepoExc& re) {
     TRACE(0,
           "Repo error loading '%s' (0x%016" PRIx64 "%016"

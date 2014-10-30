@@ -247,7 +247,7 @@ static SourceLocTable loadSourceLocTable(const Unit* unit) {
 
   Lock lock(g_classesMutex);
   auto& urp = Repo::get().urp();
-  urp.getSourceLocTab(unit->repoID()).get(unit->sn(), ret);
+  urp.getSourceLocTab[unit->repoID()].get(unit->sn(), ret);
   return ret;
 }
 

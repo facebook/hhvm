@@ -260,32 +260,20 @@ class PreClassRepoProxy : public RepoProxy {
   ~PreClassRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
 
-#define PCRP_IOP(o) PCRP_OP(Insert##o, insert##o)
-#define PCRP_GOP(o) PCRP_OP(Get##o, get##o)
-#define PCRP_OPS \
-  PCRP_IOP(PreClass) \
-  PCRP_GOP(PreClasses)
-  class InsertPreClassStmt : public RepoProxy::Stmt {
-   public:
+  struct InsertPreClassStmt : public RepoProxy::Stmt {
     InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const PreClassEmitter& pce, RepoTxn& txn, int64_t unitSn,
                 Id preClassId, const StringData* name,
                 PreClass::Hoistable hoistable);
   };
-  class GetPreClassesStmt : public RepoProxy::Stmt {
-   public:
+
+  struct GetPreClassesStmt : public RepoProxy::Stmt {
     GetPreClassesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
-#define PCRP_OP(c, o) \
- public: \
-  c##Stmt& o(int repoId) { return *m_##o[repoId]; } \
- private: \
-  c##Stmt m_##o##Local; \
-  c##Stmt m_##o##Central; \
-  c##Stmt* m_##o[RepoIdCount];
-  PCRP_OPS
-#undef PCRP_OP
+
+  InsertPreClassStmt insertPreClass[RepoIdCount];
+  GetPreClassesStmt getPreClasses[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

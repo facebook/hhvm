@@ -72,9 +72,6 @@ final class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {
   public function get_arg(int $index): mixed {}
 }
 
-// TODO(#4534682) Kill Continuation
-type Continuation<Tv> = Generator<int, Tv, void>;
-
 abstract class WaitHandle<T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
   public function import(): void {}

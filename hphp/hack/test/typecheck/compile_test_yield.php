@@ -9,7 +9,7 @@
  *
  */
 
-function gen(Continuation<int> $x): Continuation<int> {
+function gen(Generator<int, int, void> $x): Generator<int, int, void> {
   $i = 0;
   foreach($x as $k => $v) {
     yield $v;
@@ -24,7 +24,7 @@ function gen(Continuation<int> $x): Continuation<int> {
   }
 }
 
-function dump(): Continuation<int> {
+function dump(): Generator<int, int, void> {
   yield 33;
   yield 41;
   yield 42;
@@ -32,7 +32,7 @@ function dump(): Continuation<int> {
 }
 
 
-function bad(): Continuation<int> {
+function bad(): Generator<int, int, void> {
   if(false) {
     yield 1;
   }

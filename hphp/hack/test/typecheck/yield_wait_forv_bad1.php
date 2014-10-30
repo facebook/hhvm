@@ -9,6 +9,6 @@
  *
  */
 
-async function multiple_args(): Continuation<void> {
+async function multiple_args(): Generator<int, void, void> {
   await gena(foo(), foo());
 }

@@ -311,8 +311,7 @@ let check_variance env tparam =
 
 let get_class_variance root (pos, class_name) =
   match class_name with
-  | name when
-      (name = SN.Classes.cAwaitable || name = SN.Classes.cContinuation) ->
+  | name when (name = SN.Classes.cAwaitable) ->
       [Vcovariant [pos, Rtype_argument (Utils.strip_ns name), Pcovariant]]
   | _ ->
       let dep = Typing_deps.Dep.Class class_name in

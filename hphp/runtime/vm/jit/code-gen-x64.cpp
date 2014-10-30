@@ -447,9 +447,15 @@ Vlabel CodeGenerator::label(Block* b) {
 }
 
 void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
-  Vloc src, Type srcType) {
+                                        Vloc src, Type srcType) {
   if (srcType.needsValueReg()) {
-    v << store{src.reg(0), base[offset + TVOFF(m_data)]};
+    if (srcType.subtypeOf(Type::Bool)) {
+      auto extended = v.makeReg();
+      v << movzbl{src.reg(0), extended};
+      v << store{extended, base[offset + TVOFF(m_data)]};
+    } else {
+      v << store{src.reg(0), base[offset + TVOFF(m_data)]};
+    }
   }
 
   if (src.hasReg(1)) {

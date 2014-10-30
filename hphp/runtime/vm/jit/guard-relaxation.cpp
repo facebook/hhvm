@@ -376,7 +376,7 @@ Type relaxType(Type t, TypeConstraint tc) {
     (innerRelaxed - Type::Uninit).box();
 }
 
-void incCategory(DataTypeCategory& c) {
+static void incCategory(DataTypeCategory& c) {
   always_assert(c != DataTypeSpecialized);
   c = static_cast<DataTypeCategory>(static_cast<uint8_t>(c) + 1);
 }

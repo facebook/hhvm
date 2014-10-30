@@ -785,9 +785,8 @@ private:
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
                      folly::Optional<Type> pushedType);
 
-  template<typename G, typename L>
-  void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
-                         L loadAddr);
+  enum class ProfGuard { GuardLoc, CheckLoc, GuardStk, CheckStk };
+  void emitProfiledGuard(Type, ProfGuard, int32_t, Block* = nullptr);
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);

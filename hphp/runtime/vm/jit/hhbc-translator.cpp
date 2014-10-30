@@ -1667,16 +1667,48 @@ void HhbcTranslator::setThisAvailable() {
  * additional profiling code or modify the guarded type using previously
  * collected profiling information. Str -> StaticStr is the only supported
  * refinement for now.
- *
- * type: The original guard type.
- * location, id: Name and index used in a profile key like "Loc3" or "Stk0".
- * doGuard: Lambda which will be called exactly once to emit the actual guard.
- * loadAddr: Lambda which will be called up to once to get a pointer to the
- *           value being checked.
  */
-template<typename G, typename L>
-void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
-                                       int32_t id, G doGuard, L loadAddr) {
+void HhbcTranslator::emitProfiledGuard(Type type,
+                                       ProfGuard kind,
+                                       int32_t id, // locId or stackOff
+                                       Block* checkExit /* = nullptr */) {
+  auto doGuard = [&] (Type type) {
+    switch (kind) {
+    case ProfGuard::CheckLoc:
+      gen(CheckLoc, type, LocalId(id), checkExit, m_irb->fp());
+      return;
+    case ProfGuard::GuardLoc:
+      gen(GuardLoc, type, LocalId(id), m_irb->fp(), m_irb->sp());
+      return;
+    case ProfGuard::CheckStk:
+    case ProfGuard::GuardStk:
+      {
+        // Adjust 'id' to get an offset from the current m_irb->sp().
+        auto const adjOff =
+          static_cast<int32_t>(id + m_irb->stackDeficit()) -
+          static_cast<int32_t>(m_irb->evalStack().numCells());
+        if (kind == ProfGuard::CheckStk) {
+          gen(CheckStk, type, StackOffset { adjOff }, checkExit, m_irb->sp());
+          return;
+        }
+        gen(GuardStk, type, StackOffset { adjOff }, m_irb->sp(), m_irb->fp());
+        return;
+      }
+    }
+  };
+
+  auto loadAddr = [&]() -> SSATmp* {
+    switch (kind) {
+    case ProfGuard::CheckLoc:
+    case ProfGuard::GuardLoc:
+      return ldLocAddr(id, DataTypeSpecific);
+    case ProfGuard::CheckStk:
+    case ProfGuard::GuardStk:
+      return ldStackAddr(id, DataTypeSpecific);
+    }
+    not_reached();
+  };
+
   // We really do want to check for exact type equality here: if type
   // is StaticStr there's nothing for us to do, and we don't support
   // guarding on CountedStr.
@@ -1687,32 +1719,42 @@ void HhbcTranslator::emitProfiledGuard(Type type, const char* location,
     return doGuard(type);
   }
 
-  auto profileKey = makeStaticString(folly::to<std::string>(location, id));
+  auto const profileKey = [&] {
+    switch (kind) {
+    case ProfGuard::CheckLoc:
+    case ProfGuard::GuardLoc:
+      return makeStaticString(folly::to<std::string>("Loc", id));
+    case ProfGuard::CheckStk:
+    case ProfGuard::GuardStk:
+      // Note that for stacks we are using a profiling key on the unadjusted
+      // index (index from top of virtual stack).
+      return makeStaticString(folly::to<std::string>("Stk", id));
+    }
+    not_reached();
+  }();
   TargetProfile<StrProfile> profile(m_context, m_irb->marker(), profileKey);
+
   if (profile.profiling()) {
     doGuard(Type::Str);
-    auto addr = loadAddr();
-    m_irb->constrainValue(addr, DataTypeSpecific);
-    gen(ProfileStr, ProfileStrData(profileKey), addr);
-  } else if (profile.optimizing()) {
+    gen(ProfileStr, ProfileStrData { profileKey }, loadAddr());
+    return;
+  }
+
+  if (profile.optimizing()) {
     auto const data = profile.data(StrProfile::reduce);
     auto const total = data.total();
 
     if (data.staticStr == total) doGuard(Type::StaticStr);
     else                         doGuard(Type::Str);
-  } else {
-    doGuard(Type::Str);
+    return;
   }
+
+  // TransLive: just do a normal guard.
+  doGuard(Type::Str);
 }
 
 void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
-  emitProfiledGuard(
-    type, "Loc", locId,
-    [&](Type type) { gen(GuardLoc, type, LocalId(locId),
-                         m_irb->fp(), m_irb->sp()); },
-    [&] { return gen(LdLocAddr, Type::PtrToFrameStr, LocalId(locId),
-                     m_irb->fp()); }
-  );
+  emitProfiledGuard(type, ProfGuard::GuardLoc, locId);
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto const ldrefExit = makeExit();
@@ -1734,16 +1776,7 @@ void HhbcTranslator::guardTypeLocation(const RegionDesc::Location& loc,
 
 void HhbcTranslator::checkTypeLocal(uint32_t locId, Type type,
                                     Offset dest /* = -1 */) {
-  emitProfiledGuard(
-    type, "Loc", locId,
-    [&](Type type) {
-      gen(CheckLoc, type, LocalId(locId), makeExit(dest), m_irb->fp());
-    },
-    [&] {
-      return gen(LdLocAddr, Type::PtrToFrameStr, LocalId(locId),
-                 m_irb->fp());
-    }
-  );
+  emitProfiledGuard(type, ProfGuard::CheckLoc, locId, makeExit(dest));
 }
 
 void HhbcTranslator::assertTypeLocal(uint32_t locId, Type type) {
@@ -1779,11 +1812,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
   assert(m_irb->stackDeficit() == 0);
   auto stackOff = StackOffset(stackIndex);
 
-  emitProfiledGuard(
-    type, "Stk", stackIndex,
-    [&](Type type) { gen(GuardStk, type, stackOff, m_irb->sp(), m_irb->fp()); },
-    [&] { return gen(LdStackAddr, Type::PtrToStkStr, stackOff, m_irb->sp()); }
-  );
+  emitProfiledGuard(type, ProfGuard::GuardStk, stackIndex);
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto stk = gen(LdStack, Type::BoxedCell, stackOff, m_irb->sp());
@@ -1807,20 +1836,7 @@ void HhbcTranslator::checkTypeStack(uint32_t idx, Type type, Offset dest) {
     FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx, type.toString());
     // Just like CheckType, CheckStk only cares about its input type if the
     // simplifier does something with it.
-
-    auto const adjustedOffset =
-      StackOffset(idx - m_irb->evalStack().size() + m_irb->stackDeficit());
-    emitProfiledGuard(
-      type, "Stk", idx,
-      [&](Type t) {
-        gen(CheckStk, type, exit, adjustedOffset, m_irb->sp());
-      },
-      [&] {
-        return gen(
-          LdStackAddr, Type::PtrToStkStr, adjustedOffset, m_irb->sp()
-        );
-      }
-    );
+    emitProfiledGuard(type, ProfGuard::CheckStk, idx, exit);
   }
 }
 

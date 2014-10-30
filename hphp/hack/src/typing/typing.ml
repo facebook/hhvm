@@ -770,7 +770,7 @@ and expr_ in_cond is_lvalue env (p, e) =
   | This ->
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
-      then Errors.this_outside_class p;
+      then Errors.this_var_outside_class p;
       let env, (_, ty) = Env.get_local env this in
       let r = Reason.Rwitness p in
       let ty = (r, ty) in
@@ -1079,19 +1079,8 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env, _ = expr env e in
       Typing_hint.hint env ty
   | InstanceOf (e1, e2) ->
-      let env, _ = expr env e1 in
-      let () = match e2 with
-        | (_, Id (pos_c, name_c)) ->
-          let env, class_ = Env.get_class env name_c in
-          (match class_ with
-            | Some class_ when class_.tc_kind = Ast.Ctrait ->
-              Errors.uninstantiable_class pos_c class_.tc_pos class_.tc_name
-            | Some class_ when class_.tc_kind = Ast.Cabstract && class_.tc_final ->
-              Errors.uninstantiable_class pos_c class_.tc_pos class_.tc_name
-            | None | Some _-> ()
-          )
-        | _ -> () in
-      env, (Reason.Rwitness p, Tprim Tbool)
+    let env = instanceof_in_env p env e1 e2 in
+    env, (Reason.Rwitness p, Tprim Tbool)
   | Efun (f, idl) ->
       NastCheck.fun_ env f;
       let env, ft = fun_decl_in_env env f in
@@ -1243,10 +1232,6 @@ and new_object ~check_not_abstract p env c el uel =
   let env, class_ = class_id p env c in
   (match class_ with
   | None ->
-      (match c with
-      | CIstatic -> Errors.new_static_outside_class p
-      | CIself -> Errors.new_self_outside_class p
-      | _ -> ());
       let _ = lmap expr env el in
       let _ = lmap expr env uel in
       env, (Reason.Runknown_class p, Tobject)
@@ -1276,6 +1261,41 @@ and new_object ~check_not_abstract p env c el uel =
         env, obj_type
       | _ -> env, obj_type
   )
+
+and instanceof_naming = function
+  | (_, Id (pos_c, name_c)) ->
+    let cid = match name_c with
+      | x when x = SN.Classes.cParent -> CIparent
+      | x when x = SN.Classes.cSelf   -> CIself
+      | x when x = SN.Classes.cStatic -> CIstatic
+      | _ -> CI (pos_c, name_c)
+    in Some cid
+  | (_, Lvar var) as e ->
+    let cid = CIvar e in
+    Some cid
+  | _ -> None
+
+and instanceof_in_env p (env:Env.env) (e1:Nast.expr) (e2:Nast.expr) =
+  let env, _ = expr env e1 in
+  match instanceof_naming e2 with
+    | Some cid ->
+      let () = instanceof_cid p env cid in
+      env
+    | None ->
+      let env, _ = expr env e2 in
+      env
+
+and instanceof_cid p env cid =
+  let env, class_ = class_id p env cid in
+  (match class_ with
+    | Some ((pos, name), class_) when class_.tc_kind = Ast.Ctrait ->
+      (match cid with
+        | CI _ -> Errors.uninstantiable_class pos class_.tc_pos name
+        | CIstatic | CIparent | CIself -> ()
+        | CIvar _ -> ())
+    | Some ((pos, name), class_) when class_.tc_kind = Ast.Cabstract && class_.tc_final ->
+      Errors.uninstantiable_class pos class_.tc_pos name
+    | None | Some _ -> ())
 
 (* While converting code from PHP to Hack, some arrays are used
  * as tuples. Example: array('', 0). Since the elements have
@@ -1539,8 +1559,7 @@ and call_parent_construct pos env el uel =
               else Errors.undefined_parent pos;
               default
             | None -> assert false)
-        | _ ->
-          Errors.parent_outside_class pos; default
+        | _ -> Errors.parent_outside_class pos; default
 
 (* parent::method() in a class definition invokes the specific parent
  * version of the method ... it better be callable *)
@@ -2527,9 +2546,11 @@ and static_class_id p env = function
   | CI c ->
     let env, class_ = Env.get_class env (snd c) in
     (match class_ with
-      | None -> env, (Reason.Rnone, Tany)
+      | None -> env, (Reason.Rnone, Tany) (* Tobject *)
       | Some class_ ->
-        let params = List.map (fun x -> Env.fresh_type()) class_.tc_tparams in
+        let env, params = lfold begin fun env x ->
+          TUtils.in_var env (Reason.Rnone, Tunresolved [])
+        end env class_.tc_tparams in
         env, (Reason.Rwitness p, Tapply (c, params))
     )
   | CIvar e ->
@@ -2538,8 +2559,7 @@ and static_class_id p env = function
       let ty =
         match ty with
         | _, Tgeneric (_, Some (_, Tapply _))
-        | _, Tapply _ ->
-            ty
+        | _, Tapply _ -> ty
         | _ ->
             if env.Env.genv.Env.mode = Ast.Mstrict
             then Errors.dynamic_class p;
@@ -3015,42 +3035,53 @@ and condition env tparamet =
       is_type env lv Tresource
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
-  | _, InstanceOf (ivar, (_, Id (pc, c as cid)))
-    when tparamet && is_instance_var ivar ->
+  | _, InstanceOf (ivar, e2) when tparamet && is_instance_var ivar ->
       let env, (p, x) = get_instance_var env ivar in
       let env, x_ty = Env.get_local env x in
       let env, x_ty = Env.expand_type env x_ty in (* We don't want to modify x *)
-      let env, class_ = Env.get_class env c in
-      (match class_ with
-      | None ->
-          Env.set_local env x (Reason.Rwitness pc, Tany)
-      | Some class_ ->
-          let env, params = lfold begin fun env x ->
-            TUtils.in_var env (Reason.Rnone, Tunresolved [])
-          end env class_.tc_tparams in
-          let obj_ty = Reason.Rwitness pc, Tapply (cid, params) in
-          (* This is the case where you check that an object is
-           * an instance of a super type. In this case, since we
-           * already have a more specialized object, we don't touch
-           * the original object. Checkout the unit test srecko.php if
-           * this is unclear.
-           *)
-          if SubType.is_sub_type env obj_ty x_ty
-          then env
-          else
-            let env = Env.set_local env x obj_ty in
-            (match x_ty with
-            | _, Tapply ((_, c2), _) when c = c2 ->
-                Type.sub_type p Reason.URnone env x_ty obj_ty
-            | _ -> env)
-      )
+      begin match instanceof_naming e2 with
+        | None ->
+          let env, _ = expr env e2 in
+          Env.set_local env x (Reason.Rwitness p, Tobject)
+        | Some cid ->
+          let env, obj_ty = static_class_id (fst e2) env cid in
+          (match obj_ty with
+            | _, Tgeneric (this, Some (_, Tapply _))
+              when this = SN.Typehints.this ->
+              let env = Env.set_local env x obj_ty in
+              env
+            | _, Tapply ((_, cid as _c), _) ->
+              let env, class_ = Env.get_class env cid in
+              (match class_ with
+                | None -> Env.set_local env x (Reason.Rwitness p, Tobject)
+                | Some class_ ->
+                  if SubType.is_sub_type env obj_ty x_ty
+                  then
+                    (* If the right side of the `instanceof` object is
+                     * a super type of what we already knew. In this case, since we already
+                     * have a more specialized object, we don't touch
+                     * the original object. Check out the unit test
+                     * srecko.php if this is unclear.
+                     *
+                     * Note that if x_ty is Tany, no amount of subtype
+                     * checking will be able to specify it
+                     * further. This is arguably desirable to maintain
+                     * the invariant that removing annotations gets rid
+                     * of typing errors in partial mode (See also
+                     * t3216948).  *)
+                    env
+                  else Env.set_local env x obj_ty
+              )
+            | _ -> Env.set_local env x (Reason.Rwitness p, Tobject)
+          )
+      end
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, Null))
   | _, Binop ((Ast.Eqeq | Ast.EQeqeq), (_, Null), e) ->
-      let env, _ = expr env e in
-      env
+    let env, _ = expr env e in
+    env
   | e ->
-      let env, _ = expr env e in
-      env
+    let env, _ = expr env e in
+    env
 
 and is_instance_var = function
   | _, (Lvar _ | This) -> true
@@ -3061,11 +3092,11 @@ and is_instance_var = function
 
 and get_instance_var env = function
   | p, Class_get (cname, (_, member_name)) ->
-      let env, local = Env.FakeMembers.make_static p env cname member_name in
-      env, (p, local)
+    let env, local = Env.FakeMembers.make_static p env cname member_name in
+    env, (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-      let env, local = Env.FakeMembers.make p env obj member_name in
-      env, (p, local)
+    let env, local = Env.FakeMembers.make p env obj member_name in
+    env, (p, local)
   | _, Lvar (p, x) -> env, (p, x)
   | p, This -> env, (p, this)
   | _ -> failwith "Should only be called when is_instance_var is true"
@@ -3073,29 +3104,29 @@ and get_instance_var env = function
 and check_null_wtf env p ty =
   if Env.is_strict env then
     match ty with
-    | _, Toption ty ->
+      | _, Toption ty ->
         let env, ty = Env.expand_type env ty in
         (match ty with
-        | _, Tmixed
-        | _, Tany ->
+          | _, Tmixed
+          | _, Tany ->
             Errors.sketchy_null_check p
-        | _, Tprim _ ->
+          | _, Tprim _ ->
             Errors.sketchy_null_check_primitive p
-        | _ -> ())
-    | _ -> ()
+          | _ -> ())
+      | _ -> ()
 
 
 and is_type env e tprim =
   match e with
-  | p, Class_get (cname, (_, member_name)) ->
+    | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
       Env.set_local env local (Reason.Rwitness p, Tprim tprim)
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
+    | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
       Env.set_local env local (Reason.Rwitness p, Tprim tprim)
-  | _, Lvar (p, x) ->
+    | _, Lvar (p, x) ->
       Env.set_local env x (Reason.Rwitness p, Tprim tprim)
-  | _ -> env
+    | _ -> env
 
 and is_array env = function
   | p, Class_get (cname, (_, member_name)) ->

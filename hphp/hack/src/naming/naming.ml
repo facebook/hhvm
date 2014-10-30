@@ -755,15 +755,15 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         N.Hany
     | x when x = SN.Typehints.void -> N.Hprim N.Tvoid
     | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
-    | x when x = SN.Typehints.resource         -> N.Hprim N.Tresource
-    | x when x = SN.Typehints.arraykey         -> N.Hprim N.Tarraykey
-    | x when x = SN.Typehints.mixed            -> N.Hmixed
+    | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
+    | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
+    | x when x = SN.Typehints.mixed -> N.Hmixed
     | x when x = SN.Typehints.this && allow_this ->
         if hl != []
         then Errors.this_no_argument p;
         (match (fst env).cclass with
         | None ->
-          Errors.this_outside_of_class p;
+          Errors.this_hint_outside_class p;
           N.Hany
         | Some c ->
           let tparaml = (fst env).type_paraml in
@@ -776,7 +776,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | x when x = SN.Typehints.this ->
         (match (fst env).cclass with
         | None ->
-            Errors.this_outside_of_class p
+            Errors.this_hint_outside_class p
         | Some _ ->
             Errors.this_must_be_return p
         );
@@ -1790,7 +1790,26 @@ and expr_ env = function
       let e3 = expr env e3 in
       N.Eif (e1, e2opt, e3)
   | InstanceOf (e, (p, Id x)) ->
-      N.InstanceOf (expr env e, (p, N.Id (Env.class_name env x)))
+    let id = match x with
+      | px, n when n = SN.Classes.cParent ->
+        if (fst env).cclass = None then
+          let () = Errors.parent_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | px, n when n = SN.Classes.cSelf ->
+        if (fst env).cclass = None then
+          let () = Errors.self_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | px, n when n = SN.Classes.cStatic ->
+        if (fst env).cclass = None then
+          let () = Errors.static_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | _ ->
+        no_typedef env x;
+        (Env.class_name env x) in
+    N.InstanceOf (expr env e, (p, N.Id id))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
   | New (x, el, uel) ->
@@ -1854,9 +1873,20 @@ and expr_lambda env f =
 and make_class_id env (p, x as cid) =
   no_typedef env cid;
   match x with
-  | x when x = SN.Classes.cParent -> N.CIparent
-  | x when x = SN.Classes.cSelf -> N.CIself
-  | x when x = SN.Classes.cStatic -> N.CIstatic
+  | x when x = SN.Classes.cParent ->
+    if (fst env).cclass = None then
+      let () = Errors.parent_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIparent
+  | x when x = SN.Classes.cSelf ->
+    if (fst env).cclass = None then
+      let () = Errors.self_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIself
+  | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
+      let () = Errors.static_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIstatic
   | x when x = "$this" -> N.CIvar (p, N.This)
   | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
   | _ -> N.CI (Env.class_name env cid)

@@ -136,7 +136,7 @@ module Naming                               = struct
   let start_with_T                          = 2042 (* DONT MODIFY!!!! *)
   let this_must_be_return                   = 2043 (* DONT MODIFY!!!! *)
   let this_no_argument                      = 2044 (* DONT MODIFY!!!! *)
-  let this_outside_of_class                 = 2045 (* DONT MODIFY!!!! *)
+  let this_hint_outside_class               = 2045 (* DONT MODIFY!!!! *)
   let this_reserved                         = 2046 (* DONT MODIFY!!!! *)
   let tparam_with_tparam                    = 2047 (* DONT MODIFY!!!! *)
   let typedef_constraint                    = 2048 (* DONT MODIFY!!!! *)
@@ -241,9 +241,9 @@ module Typing                               = struct
   let missing_constructor                   = 4056 (* DONT MODIFY!!!! *)
   let missing_field                         = 4057 (* DONT MODIFY!!!! *)
   let negative_tuple_index                  = 4058 (* DONT MODIFY!!!! *)
-  let new_self_outside_class                = 4059 (* DONT MODIFY!!!! *)
+  let self_outside_class                    = 4059 (* DONT MODIFY!!!! *)
   let new_static_inconsistent               = 4060 (* DONT MODIFY!!!! *)
-  let new_static_outside_class              = 4061 (* DONT MODIFY!!!! *)
+  let static_outside_class                  = 4061 (* DONT MODIFY!!!! *)
   let non_object_member                     = 4062 (* DONT MODIFY!!!! *)
   let null_container                        = 4063 (* DONT MODIFY!!!! *)
   let null_member                           = 4064 (* DONT MODIFY!!!! *)
@@ -276,7 +276,7 @@ module Typing                               = struct
   let static_dynamic                        = 4091 (* DONT MODIFY!!!! *)
   let static_overflow                       = 4092 (* DONT MODIFY!!!! *)
   let this_in_static                        = 4094 (* DONT MODIFY!!!! *)
-  let this_outside_class                    = 4095 (* DONT MODIFY!!!! *)
+  let this_var_outside_class                = 4095 (* DONT MODIFY!!!! *)
   let trait_final                           = 4096 (* DONT MODIFY!!!! *)
   let tuple_arity                           = 4097 (* DONT MODIFY!!!! *)
   let tuple_arity_mismatch                  = 4098 (* DONT MODIFY!!!! *)
@@ -480,8 +480,8 @@ let object_cast pos x =
     "Try 'if ($var instanceof "^x^")' or "^
     "'invariant($var instanceof "^x^", ...)'.")
 
-let this_outside_of_class pos =
-   add Naming.this_outside_of_class pos
+let this_hint_outside_class pos =
+   add Naming.this_hint_outside_class pos
     "Cannot use \"this\" outside of a class"
 
 let this_must_be_return pos =
@@ -997,8 +997,8 @@ let return_in_void pos1 pos2 =
 let this_in_static p =
   add Typing.this_in_static p "Don't use $this in a static method"
 
-let this_outside_class p =
-  add Typing.this_outside_class p "Can't use $this outside of a class"
+let this_var_outside_class p =
+  add Typing.this_var_outside_class p "Can't use $this outside of a class"
 
 let unbound_global cst_pos =
   add Typing.unbound_global cst_pos "Unbound global constant (Typing)"
@@ -1040,13 +1040,13 @@ let anonymous_recursive pos =
   add Typing.anonymous_recursive pos
     "Anonymous functions cannot be recursive"
 
-let new_static_outside_class pos =
-  add Typing.new_static_outside_class pos
-    "Can't use new static() outside of a class"
+let static_outside_class pos =
+  add Typing.static_outside_class pos
+    "'static' is undefined outside of a class"
 
-let new_self_outside_class pos =
-  add Typing.new_self_outside_class pos
-    "Can't use new self() outside of a class"
+let self_outside_class pos =
+  add Typing.self_outside_class pos
+    "'self' is undefined outside of a class"
 
 let new_static_inconsistent new_pos (cpos, cname) =
   let name = Utils.strip_ns cname in
@@ -1071,7 +1071,7 @@ let undefined_parent pos =
 
 let parent_outside_class pos =
   add Typing.parent_outside_class pos
-    "parent is undefined outside of a class"
+    "'parent' is undefined outside of a class"
 
 let parent_abstract_call meth_name call_pos parent_pos =
   add_list Typing.parent_abstract_call [

@@ -52,7 +52,7 @@ val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit
 val this_no_argument : Pos.t -> unit
-val this_outside_of_class : Pos.t -> unit
+val this_hint_outside_class : Pos.t -> unit
 val this_must_be_return : Pos.t -> unit
 val lowercase_this : Pos.t -> string -> unit
 val tparam_with_tparam : Pos.t -> string -> unit
@@ -105,7 +105,7 @@ val void_parameter : Pos.t -> unit
 val nullable_parameter : Pos.t -> unit
 val return_in_void : Pos.t -> Pos.t -> unit
 val this_in_static : Pos.t -> unit
-val this_outside_class : Pos.t -> unit
+val this_var_outside_class : Pos.t -> unit
 val unbound_global : Pos.t -> unit
 val private_inst_meth : Pos.t -> Pos.t -> unit
 val protected_inst_meth : Pos.t -> Pos.t -> unit
@@ -113,8 +113,8 @@ val private_class_meth : Pos.t -> Pos.t -> unit
 val protected_class_meth : Pos.t -> Pos.t -> unit
 val array_cast : Pos.t -> unit
 val anonymous_recursive : Pos.t -> unit
-val new_static_outside_class : Pos.t -> unit
-val new_self_outside_class : Pos.t -> unit
+val static_outside_class : Pos.t -> unit
+val self_outside_class : Pos.t -> unit
 val new_static_inconsistent : Pos.t -> (Pos.t * string) -> unit
 val pair_arity : Pos.t -> unit
 val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit

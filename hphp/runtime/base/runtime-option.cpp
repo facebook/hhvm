@@ -366,7 +366,8 @@ void RuntimeOption::AddOptionHook(
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
   RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
-  RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF;
+  RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
+  RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
 bool RuntimeOption::LookForTypechecker = true;
 
 int RuntimeOption::GetScannerType() {
@@ -945,6 +946,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);
       Config::Bind(IconvIgnoreCorrect, ini, lang["IconvIgnoreCorrect"]);
+      Config::Bind(MinMaxAllowDegenerate, ini, lang["MinMaxAllowDegenerate"]);
       // Defaults to EnableHHSyntax since, if you have that on, you are
       // assumed to know what you're doing.
       Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],

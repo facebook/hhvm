@@ -349,6 +349,7 @@ public:
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
   static HackStrictOption IconvIgnoreCorrect;
+  static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
 
   static int GetScannerType();

@@ -79,6 +79,11 @@ struct LitstrTable {
   const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
 
   /*
+   * Set up the named info table.  Not thread-safe.
+   */
+  void setNamedEntityPairTable(NamedEntityPairTable&& namedInfo);
+
+  /*
    * Add an entry for `litstr' to the table.
    *
    * The "merge" terminology is inherited from Unit.

@@ -327,7 +327,7 @@ void FrameState::refineLocalValues(LocalStateHook& hook,
 
   walkAllInlinedLocals(
   [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
-    if (local.value == oldVal) {
+    if (canonical(local.value) == canonical(oldVal)) {
       hook.refineLocalValue(i, inlineIdx, oldVal, newVal);
     }
   });
@@ -397,7 +397,7 @@ void FrameState::updateLocalRefValues(LocalStateHook& hook,
 
   walkAllInlinedLocals(
   [&](uint32_t i, unsigned inlineIdx, const LocalState& local) {
-    if (local.value != oldRef) return;
+    if (canonical(local.value) != canonical(oldRef)) return;
 
     hook.updateLocalRefValue(i, inlineIdx, oldRef, newRef);
   });

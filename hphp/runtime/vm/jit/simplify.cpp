@@ -2365,6 +2365,8 @@ const SSATmp* canonical(const SSATmp* val) {
 }
 
 SSATmp* canonical(SSATmp* value) {
+  if (value == nullptr) return nullptr;
+
   auto inst = value->inst();
 
   while (inst->isPassthrough()) {

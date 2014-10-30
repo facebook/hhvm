@@ -167,7 +167,7 @@ MemoryManager::MemoryManager()
   resetStatsImpl(true);
   m_stats.maxBytes = std::numeric_limits<int64_t>::max();
   // make the circular-lists empty.
-  m_sweep.next = m_sweep.prev = &m_sweep;
+  m_bigs.next = m_bigs.prev = &m_bigs;
   m_strings.next = m_strings.prev = &m_strings;
 }
 
@@ -403,11 +403,11 @@ void MemoryManager::resetAllocator() {
   resetStatsImpl(true);
 
   // free large allocation blocks
-  for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
+  for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
     next = n->next;
     free(n);
   }
-  m_sweep.next = m_sweep.prev = &m_sweep;
+  m_bigs.next = m_bigs.prev = &m_bigs;
 
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
@@ -426,11 +426,11 @@ void MemoryManager::iterate(iterate_callback callback, void* user_data) {
   }
 
   // Iterate large alloc slabs (Size N/A for now)
-  for (SweepNode *n = m_sweep.next, *next; n != &m_sweep; n = next) {
+  for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
     next = n->next;
     size_t size = 16;
 #ifdef USE_JEMALLOC
-    size = malloc_usable_size(n) - sizeof(SweepNode);
+    size = malloc_usable_size(n) - sizeof(BigNode);
 #endif
     callback(n + 1, size, true, user_data);
   }
@@ -496,14 +496,20 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
   return ptr + 1;
 }
 
+union MallocNode {
+  BigNode big;
+  SmallNode small;
+};
+static_assert(sizeof(SmallNode) == sizeof(BigNode), "");
+
 inline void MemoryManager::smartFree(void* ptr) {
   assert(ptr != 0);
-  auto const n = static_cast<SweepNode*>(ptr) - 1;
-  auto const padbytes = n->padbytes;
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  auto const padbytes = n->small.padbytes;
   if (LIKELY(padbytes <= kMaxSmartSize)) {
-    return smartFreeSize(static_cast<SmallNode*>(ptr) - 1, n->padbytes);
+    return smartFreeSize(&n->small, n->small.padbytes);
   }
-  smartFreeBig(n);
+  smartFreeBig(&n->big);
 }
 
 inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
@@ -513,11 +519,11 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   void* ptr = debug ? static_cast<DebugHeader*>((void*)(uintptr_t(inputPtr) -
                                                 kDebugExtraSize)) : inputPtr;
 
-  auto const n = static_cast<SweepNode*>(ptr) - 1;
-  if (LIKELY(n->padbytes <= kMaxSmartSize)) {
+  auto const n = static_cast<MallocNode*>(ptr) - 1;
+  if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
-      n->padbytes - sizeof(SmallNode) - kDebugExtraSize,
+      n->small.padbytes - sizeof(SmallNode) - kDebugExtraSize,
       nbytes
     );
     newmem = memcpy(newmem, inputPtr, copySize);
@@ -528,15 +534,15 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   // Ok, it's a big allocation.  Since we don't know how big it is
   // (i.e. how much data we should memcpy), we have no choice but to
   // ask malloc to realloc for us.
-  auto const oldNext = n->next;
-  auto const oldPrev = n->prev;
+  auto const oldNext = n->big.next;
+  auto const oldPrev = n->big.prev;
 
-  auto const newNode = static_cast<SweepNode*>(
-    safe_realloc(n, debugAddExtra(nbytes + sizeof(SweepNode)))
+  auto const newNode = static_cast<BigNode*>(
+    safe_realloc(n, debugAddExtra(nbytes + sizeof(BigNode)))
   );
 
   refreshStats();
-  if (newNode != n) {
+  if (newNode != &n->big) {
     oldNext->prev = oldPrev->next = newNode;
   }
   return debugPostAllocate(newNode + 1, 0, 0);
@@ -604,7 +610,7 @@ void* MemoryManager::slabAlloc(size_t nbytes, unsigned index) {
   return ptr;
 }
 
-inline void* MemoryManager::smartEnlist(SweepNode* n) {
+inline void* MemoryManager::smartEnlist(BigNode* n) {
   // If we are using jemalloc, it is keeping track of allocations outside of
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
@@ -612,20 +618,20 @@ inline void* MemoryManager::smartEnlist(SweepNode* n) {
   if (use_jemalloc || UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
-  // link after m_sweep
-  SweepNode* next = m_sweep.next;
+  // link after m_bigs
+  auto next = m_bigs.next;
   n->next = next;
-  n->prev = &m_sweep;
-  next->prev = m_sweep.next = n;
-  assert(n->padbytes > kMaxSmartSize);
+  n->prev = &m_bigs;
+  next->prev = m_bigs.next = n;
+  assert(((MallocNode*)n)->small.padbytes > kMaxSmartSize);
   return n + 1;
 }
 
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto const n = static_cast<SweepNode*>(
-    safe_malloc(nbytes + sizeof(SweepNode))
+  auto const n = static_cast<BigNode*>(
+    safe_malloc(nbytes + sizeof(BigNode))
   );
   return smartEnlist(n);
 }
@@ -645,8 +651,8 @@ NEVER_INLINE
 void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
                                               size_t& szOut,
                                               size_t bytes) {
-  ptr = mallocx(debugAddExtra(bytes + sizeof(SweepNode)), 0);
-  szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(SweepNode));
+  ptr = mallocx(debugAddExtra(bytes + sizeof(BigNode)), 0);
+  szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(BigNode));
 
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
@@ -655,7 +661,7 @@ void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
   JEMALLOC_STATS_ADJUST(&m_stats, delta);
 
   return debugPostAllocate(
-    smartEnlist(static_cast<SweepNode*>(ptr)),
+    smartEnlist(static_cast<BigNode*>(ptr)),
     bytes,
     szOut
   );
@@ -665,16 +671,16 @@ void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
   assert(totalbytes > 0);
-  auto const n = static_cast<SweepNode*>(
-    safe_calloc(totalbytes + sizeof(SweepNode), 1)
+  auto const n = static_cast<BigNode*>(
+    safe_calloc(totalbytes + sizeof(BigNode), 1)
   );
   return smartEnlist(n);
 }
 
 NEVER_INLINE
-void MemoryManager::smartFreeBig(SweepNode* n) {
-  SweepNode* next = n->next;
-  SweepNode* prev = n->prev;
+void MemoryManager::smartFreeBig(BigNode* n) {
+  auto next = n->next;
+  auto prev = n->prev;
   next->prev = prev;
   prev->next = next;
   free(n);

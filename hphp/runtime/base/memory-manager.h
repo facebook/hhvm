@@ -108,13 +108,13 @@ template<class T> void smart_delete_array(T* t, size_t count);
  * Debug mode header.
  *
  * For size-untracked allocations, this sits in front of the user
- * payload for small allocations, and in front of the SweepNode in
+ * payload for small allocations, and in front of the BigNode in
  * big allocations.  The allocatedMagic aliases the space for the
  * FreeList::Node pointers, but should catch double frees due to
  * kAllocatedMagic.
  *
  * For size-tracked allocations, this always sits in front of
- * whatever header we're using (SmallNode or SweepNode).
+ * whatever header we're using (SmallNode or BigNode).
  *
  * We set requestedSize to kFreedMagic when a block is not
  * allocated.
@@ -268,19 +268,26 @@ constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This is the header MemoryManager uses for large allocations
- */
-struct SweepNode {
-  SweepNode* next;
-  union {
-    SweepNode* prev;
-    size_t padbytes;
-  };
+// This is the header MemoryManager uses for large allocations
+struct BigNode {
+  BigNode* next;
+  BigNode* prev;
+};
+
+// And for small smart_malloc allocations (but not *Size allocs)
+struct SmallNode {
+  size_t padbytes;
+  uint8_t pad[3], kind; // TODO #5478458 use kind to parse heap
+};
+
+// And for all FreeList entries.
+struct FreeNode {
+  FreeNode* next;
+  uint8_t pad[3], kind; // TODO #5478458 use kind to parse heap
 };
 
 /*
- * Header MemoryManager uses StringDatas that wrape APCHandle
+ * Header MemoryManager uses for StringDatas that wrap APCHandle
  */
 struct StringDataNode {
   StringDataNode* next;
@@ -553,15 +560,10 @@ private:
   friend void* smart_realloc(void* ptr, size_t nbytes);
   friend void  smart_free(void* ptr);
 
-  struct SmallNode;
-
   struct FreeList {
-    struct Node;
-
     void* maybePop();
     void push(void*);
-
-    Node* head = nullptr;
+    FreeNode* head = nullptr;
   };
 
   static void* TlsInitSetup;
@@ -574,10 +576,10 @@ private:
 private:
   void* slabAlloc(size_t nbytes, unsigned index);
   void* newSlab(size_t nbytes);
-  void* smartEnlist(SweepNode*);
+  void* smartEnlist(BigNode*);
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
-  void  smartFreeBig(SweepNode*);
+  void  smartFreeBig(BigNode*);
   void* smartMalloc(size_t nbytes);
   void* smartRealloc(void* ptr, size_t nbytes);
   void  smartFree(void* ptr);
@@ -607,7 +609,7 @@ private:
   void* m_front;
   void* m_limit;
   std::array<FreeList,kNumSmartSizes> m_freelists;
-  SweepNode m_sweep;   // oversize smart_malloc'd blocks
+  BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
   bool m_statsIntervalActive;

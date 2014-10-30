@@ -22,6 +22,11 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 // Class NativeData
 
+// LinkedList node for sweepable native objects
+struct NativeNode {
+  NativeNode *next, *prev;
+};
+
 struct NativeDataInfo {
   typedef void (*InitFunc)(ObjectData *obj);
   typedef void (*CopyFunc)(ObjectData *dest, ObjectData *src);
@@ -53,13 +58,13 @@ size_t getNativeDataSize(const Class* cls);
 
 template<class T>
 T* data(ObjectData *obj) {
-  auto node = reinterpret_cast<SweepNode*>(obj) - 1;
+  auto node = reinterpret_cast<NativeNode*>(obj) - 1;
   return reinterpret_cast<T*>(node) - 1;
 }
 
 template<class T>
 const T* data(const ObjectData *obj) {
-  const auto node = reinterpret_cast<const SweepNode*>(obj) - 1;
+  const auto node = reinterpret_cast<const NativeNode*>(obj) - 1;
   return reinterpret_cast<const T*>(node) - 1;
 }
 

@@ -132,14 +132,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct MemoryManager::SmallNode {
-  size_t padbytes;  // <= kMaxSmartSize means small block
-};
-
-struct MemoryManager::FreeList::Node {
-  Node* next;
-};
-
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
@@ -147,7 +139,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 }
 
 inline void MemoryManager::FreeList::push(void* val) {
-  auto const node = static_cast<Node*>(val);
+  auto const node = static_cast<FreeNode*>(val);
   node->next = head;
   head = node;
 }
@@ -305,7 +297,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   // them on allocation, we also need to adjust for them negatively on free.
   JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
   FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  smartFreeBig(static_cast<BigNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////

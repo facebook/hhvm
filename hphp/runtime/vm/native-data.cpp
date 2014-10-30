@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/base/memory-manager.h" // SweepNode
+#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -55,17 +55,17 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
   return &it->second;
 }
 
-static __thread SweepNode* s_sweep = nullptr;
+static __thread NativeNode* s_sweep = nullptr;
 
 DEBUG_ONLY
-static bool nodeInSweepList(SweepNode *check) {
+static bool nodeInSweepList(NativeNode *check) {
   for (auto node = s_sweep; node; node = node->next) {
     if (node == check) return true;
   }
   return false;
 }
 
-static void prependSweepNode(SweepNode *node) {
+static void prependSweepNode(NativeNode *node) {
   assert(!nodeInSweepList(node));
   if (s_sweep) {
     s_sweep->prev = node;
@@ -75,7 +75,7 @@ static void prependSweepNode(SweepNode *node) {
   s_sweep = node;
 }
 
-static void removeSweepNode(SweepNode *node) {
+static void removeSweepNode(NativeNode *node) {
   if (node->prev) {
     node->prev->next = node->next;
   }
@@ -87,13 +87,13 @@ static void removeSweepNode(SweepNode *node) {
   }
 }
 
-inline SweepNode* getSweepNode(ObjectData *obj) {
-  return reinterpret_cast<SweepNode*>(obj) - 1;
+inline NativeNode* getSweepNode(ObjectData *obj) {
+  return reinterpret_cast<NativeNode*>(obj) - 1;
 }
 
 DEBUG_ONLY
 static bool invalidateNativeData(ObjectData* obj, const NativeDataInfo* ndi) {
-  const size_t size = ndi->sz + sizeof(SweepNode);
+  const size_t size = ndi->sz + sizeof(NativeNode);
   void *ptr = reinterpret_cast<char*>(obj) - size;
   memset(ptr, kSmartFreeFill, size);
   return true;
@@ -115,14 +115,14 @@ void sweepNativeData() {
 /* Classes with NativeData structs allocate extra memory prior
  * to the ObjectData.
  *
- * [padding][NativeData][SweepNode][ObjectData](prop0)...(propN)
- *                                /\
+ * [padding][NativeData][NativeNode][ObjectData](prop0)...(propN)
+ *                                 /\
  *                             ObjectData* points here
  *
  * padding is added by alignTypedValue() to ensure that ObjectData*
  *   falls on a memory alignment boundary
  * NativeData is info.sz bytes for the custom class Native Data
- * SweepNode is a link in the NativeData sweep list for this ND block
+ * NativeNode is a link in the NativeData sweep list for this ND block
  */
 ObjectData* nativeDataInstanceCtor(Class* cls) {
   Attr attrs = cls->attrs();
@@ -131,7 +131,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     ObjectData::raiseAbstractClassError(cls);
   }
   auto ndi = cls->getNativeDataInfo();
-  size_t nativeDataSize = alignTypedValue(ndi->sz + sizeof(SweepNode));
+  size_t nativeDataSize = alignTypedValue(ndi->sz + sizeof(NativeNode));
   size_t nProps = cls->numDeclProperties();
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
 
@@ -183,7 +183,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
     removeSweepNode(getSweepNode(obj));
   }
 
-  size_t nativeDataSize = alignTypedValue(ndi->sz + sizeof(SweepNode));
+  size_t nativeDataSize = alignTypedValue(ndi->sz + sizeof(NativeNode));
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
   void *ptr = obj;
   ptr = static_cast<char*>(ptr) - nativeDataSize;

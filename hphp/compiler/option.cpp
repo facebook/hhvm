@@ -399,7 +399,7 @@ void initialize_hhbbc_options() {
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
   HHBBC::options.DisallowDynamicVarEnvFuncs =
-    (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ERROR);
+    (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 }
 
 //////////////////////////////////////////////////////////////////////

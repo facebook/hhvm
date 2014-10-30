@@ -139,7 +139,7 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
                        const std::string& msg) {
   if (option == HackStrictOption::WARN) {
     raise_warning(std::string("(hhvm.hack.") + ini_setting + "=warn) " + msg);
-  } else if (option == HackStrictOption::ERROR) {
+  } else if (option == HackStrictOption::ON) {
     raise_error(std::string("(hhvm.hack.") + ini_setting + "=error) " + msg);
   }
 }

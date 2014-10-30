@@ -168,7 +168,7 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   // array_fill_keys.  Even if at runtime this option will be off, it's fine to
   // compile as if it were on: we just won't fold the calls that could've
   // raised this error.
-  RuntimeOption::StrictArrayFillKeys = HackStrictOption::ERROR;
+  RuntimeOption::StrictArrayFillKeys = HackStrictOption::ON;
   X(s_array_fill_keys)
 
   // A few that you can't do:

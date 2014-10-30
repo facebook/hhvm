@@ -824,7 +824,7 @@ let enum_constant_type_bad pos ty_pos ty trail =
 
 let enum_type_bad pos ty trail =
   add_with_trail Typing.enum_type_bad
-    [pos, "Enums must have int, string, or mixed type, not " ^ ty]
+    [pos, "Enums must be int or string, not " ^ ty]
     trail
 
 let enum_type_typedef_mixed pos =

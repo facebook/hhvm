@@ -76,9 +76,14 @@ let enum_class_check env tc consts const_types =
         let env, (r, ty_exp'), trail =
           Typing_tdef.force_expand_typedef env ty_exp in
         (match ty_exp' with
+          (* We disallow first-class enums from being mixed *)
+          | Tmixed when tc.tc_enum_type <> None ->
+              Errors.enum_type_bad (Reason.to_pos r)
+                (Typing_print.error ty_exp') trail
           (* We disallow typedefs that point to mixed *)
-          | Tmixed -> if snd ty_exp <> Tmixed then
+          | Tmixed when snd ty_exp <> Tmixed ->
               Errors.enum_type_typedef_mixed (Reason.to_pos r)
+          | Tmixed -> ()
           | Tprim Tint | Tprim Tstring -> ()
           (* Allow enums in terms of other enums *)
           | Tapply ((_, x), _) when Typing_env.is_enum env x -> ()

@@ -47,6 +47,9 @@ def check_results(fnames):
         failures = list(compress(fnames, map(not_, results)))
         print("Failures:\n" + " ".join(failures))
         for f in failures:
+            print("mv {0}.out {0}.exp".format(f))
+        print()
+        for f in failures:
             print_file(f + '.out')
         print("Failed %d out of %d tests." % (len(failures), total))
     return success

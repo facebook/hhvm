@@ -1153,12 +1153,13 @@ let string_of_class_member_kind = function
   | `static_method  -> "static method"
   | `class_variable -> "class variable"
 
-let smember_not_found kind pos class_name member_name hint =
+let smember_not_found kind pos (cpos, class_name) member_name hint =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
+  let msg = "Could not find "^kind^" "^member_name^" in type "^class_name in
   add_list Typing.smember_not_found
-    ((pos, "Could not find "^kind^" "^member_name^" in type "^class_name)
-     :: snot_found_hint hint)
+    ((pos, msg) :: (snot_found_hint hint
+                    @ [(cpos, "Declaration of "^class_name^" is here")]))
 
 let not_found_hint = function
   | `no_hint ->
@@ -1168,18 +1169,19 @@ let not_found_hint = function
   | `did_you_mean (pos, v) ->
       [pos, "Did you mean: "^v]
 
-let member_not_found kind pos (cpos, class_name) member_name hint =
+let member_not_found kind pos (cpos, type_name) member_name hint =
+  let type_name = strip_ns type_name in
   let kind =
     match kind with
     | `method_ -> "method "
     | `member -> "member "
   in
   let msg = "The "^kind^member_name^" is undefined "
-    ^"in an object of type "^(strip_ns class_name)
+    ^"in an object of type "^type_name
   in
   add_list Typing.member_not_found
-    ((pos, msg) :: (cpos, "Check this out") ::
-     not_found_hint hint)
+    ((pos, msg) :: (not_found_hint hint
+                    @ [(cpos, "Declaration of "^type_name^" is here")]))
 
 let parent_in_trait pos =
   add Typing.parent_in_trait pos

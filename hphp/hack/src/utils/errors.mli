@@ -137,7 +137,7 @@ val expected_class : Pos.t -> unit
 val smember_not_found :
   [< `class_constant | `class_variable | `static_method ] ->
   Pos.t ->
-  string ->
+  Pos.t * string ->
   string ->
   [< `closest of Pos.t * string | `did_you_mean of Pos.t * string | `no_hint ] ->
   unit

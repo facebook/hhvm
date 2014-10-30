@@ -659,6 +659,12 @@
       - yii/tests/framework/caching/CFileCacheTest.php
       - yii/tests/framework/caching/CDbCacheTest.php
       - yii/tests/framework/caching/CDirectoryCacheDependencyTest.php
+  yii2:
+    url: https://github.com/yiisoft/yii2.git
+    branch: master
+    commit: ae8d9782707b89315194ec70a139fece122b8977
+    install_root: yii2
+    test_root: yii2
   zf2:
     url: https://github.com/zendframework/zf2.git
     branch: release-2.3.2

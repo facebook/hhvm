@@ -1272,6 +1272,9 @@ def walk(filename, dest_subdir):
         test = test.replace('"*"', '__DIR__."/../../../../../../sample_dir/*"')
         test = test.replace('opendir(".")', 'opendir(__DIR__."/../../../../../../sample_dir/")')
         test = test.replace('is_dir($file)', 'is_dir(__DIR__."/../../../../../../sample_dir/".$file)')
+    if '/ext/standard/tests/file/bug45181.php' in full_dest_filename:
+        test = test.replace('chdir("bug45181_x");', '$origdir = getcwd();\nchdir("bug45181_x");')
+        test = test.replace('rmdir("bug45181_x");', 'rmdir($origdir . "/bug45181_x");')
     if '/ext/standard/tests/file/fgets_socket_variation1.php' in full_dest_filename:
         test = test.replace("<?php", "<?php\n$port = rand(50000, 65535);")
         test = test.replace("31337'", "'.$port")

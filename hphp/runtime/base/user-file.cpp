@@ -436,7 +436,6 @@ bool UserFile::unlink(const String& filename) {
     return true;
   }
 
-  raise_warning("\"%s::unlink\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -456,7 +455,6 @@ bool UserFile::rename(const String& oldname, const String& newname) {
     return true;
   }
 
-  raise_warning("\"%s::rename\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -477,7 +475,6 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
     return true;
   }
 
-  raise_warning("\"%s::mkdir\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -497,7 +494,6 @@ bool UserFile::rmdir(const String& filename, int options) {
     return true;
   }
 
-  raise_warning("\"%s::rmdir\" call failed", m_cls->name()->data());
   return false;
 }
 

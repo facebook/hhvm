@@ -142,16 +142,16 @@ function stopServer($adminPort) {
     tlog("Server did not stop. Response was $r");
     dumpLogFilesToStdoutAndDie();
   }
-  unlink("${LOG_ROOT}_test$test_run_id.log");
-  unlink("${LOG_ROOT}_test_server$test_run_id.log");
-  unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");
-  unlink("${LOG_ROOT}_test_server_stdout$test_run_id.log");
-  unlink("${LOG_ROOT}_test_client$test_run_id.log");
-  unlink("${LOG_ROOT}_server$test_run_id.hhbc");
-  unlink("${LOG_ROOT}_client$test_run_id.hhbc");
-  unlink("${LOG_ROOT}_curl$test_run_id.log");
-  unlink("${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc");
-  rmdir("${LOG_ROOT}_bytecode$test_run_id");
+  @unlink("${LOG_ROOT}_test$test_run_id.log");
+  @unlink("${LOG_ROOT}_test_server$test_run_id.log");
+  @unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");
+  @unlink("${LOG_ROOT}_test_server_stdout$test_run_id.log");
+  @unlink("${LOG_ROOT}_test_client$test_run_id.log");
+  @unlink("${LOG_ROOT}_server$test_run_id.hhbc");
+  @unlink("${LOG_ROOT}_client$test_run_id.hhbc");
+  @unlink("${LOG_ROOT}_curl$test_run_id.log");
+  @unlink("${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc");
+  @rmdir("${LOG_ROOT}_bytecode$test_run_id");
 }
 
 function http_request($host, $port, $path, $timeout = 1200) {

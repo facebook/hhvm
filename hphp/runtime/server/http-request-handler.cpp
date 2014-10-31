@@ -134,6 +134,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
    * clear the hashtable after writing the log entry.
    */
   ServerStats::Reset();
+  m_sourceRootInfo.clear();
   hphp_session_exit();
 }
 
@@ -184,17 +185,17 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  SourceRootInfo sourceRootInfo(transport);
-
-  if (sourceRootInfo.error()) {
-    sourceRootInfo.handleError(transport);
+  m_sourceRootInfo.emplace(transport);
+  if (m_sourceRootInfo->error()) {
+    m_sourceRootInfo->handleError(transport);
     return;
   }
 
   // request URI
   string pathTranslation = m_pathTranslation ?
     vhost->getPathTranslation().c_str() : "";
-  RequestURI reqURI(vhost, transport, pathTranslation, sourceRootInfo.path());
+  RequestURI reqURI(vhost, transport, pathTranslation,
+                    m_sourceRootInfo->path());
   if (reqURI.done()) {
     return; // already handled with redirection or 404
   }
@@ -306,7 +307,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   bool ret = false;
   try {
-    ret = executePHPRequest(transport, reqURI, sourceRootInfo,
+    ret = executePHPRequest(transport, reqURI, m_sourceRootInfo.value(),
                             cachableDynamicContent);
   } catch (...) {
     string emsg;

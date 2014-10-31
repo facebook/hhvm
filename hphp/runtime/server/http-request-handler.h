@@ -21,6 +21,9 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
+#include "hphp/runtime/server/source-root-info.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -52,6 +55,7 @@ public:
 private:
   bool m_pathTranslation;
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
+  folly::Optional<SourceRootInfo> m_sourceRootInfo;
 
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,

@@ -578,6 +578,33 @@ static Array get_function_param_info(const Func* func) {
   const Func::ParamInfoVec& params = func->params();
   PackedArrayInit ai(func->numParams());
 
+  // Handle special case for constructor of ArrayObject
+  if (func->name()->equal(StringData::Make("__construct"))
+          && func->cls()->name()->equal(StringData::Make("ArrayObject"))) {
+    Array param = Array::Create();
+    param.set(s_index, VarNR(0));
+    param.set(s_name, VarNR(StringData::Make("array")));
+    param.set(s_type, VarNR(staticEmptyString()));
+    param.set(s_type_hint, VarNR(staticEmptyString()));
+    param.set(s_function, VarNR(func->name()));
+    if (func->preClass()) {
+      param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
+                               func->preClass()->name()));
+    }
+    param.set(s_nullable, true_varNR);
+
+    Variant v;
+    param.set(s_default, v);
+    param.set(s_defaultText, VarNR(StringData::Make("NULL")));
+
+    Array userAttrs = Array::Create();
+    param.set(s_attributes, VarNR(userAttrs));
+
+    ai.append(VarNR(param));
+    auto arr = ai.toArray();
+    return arr;
+  }
+
   for (int i = 0; i < func->numParams(); ++i) {
     Array param = Array::Create();
     const Func::ParamInfo& fpi = params[i];

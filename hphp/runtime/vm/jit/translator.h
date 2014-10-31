@@ -125,7 +125,7 @@ struct TransContext {
  * to do after we're done, so it's distinct from the TransContext above.
  */
 struct TranslArgs {
-  TranslArgs(const SrcKey& sk, bool align)
+  TranslArgs(SrcKey sk, bool align)
     : m_sk(sk)
     , m_align(align)
     , m_dryRun(false)
@@ -134,7 +134,7 @@ struct TranslArgs {
     , m_region(nullptr)
   {}
 
-  TranslArgs& sk(const SrcKey& sk) {
+  TranslArgs& sk(SrcKey sk) {
     m_sk = sk;
     return *this;
   }
@@ -254,7 +254,7 @@ struct Translator {
    *
    * If no SrcRec exists, insert one into the SrcDB.
    */
-  SrcRec* getSrcRec(const SrcKey& sk);
+  SrcRec* getSrcRec(SrcKey sk);
 
   /*
    * Current region being translated, if any.
@@ -358,7 +358,7 @@ struct Translator {
    *
    * Lazily populates m_dbgBLSrcKey from m_dbgBLPC if we don't find the entry.
    */
-  bool isSrcKeyInBL(const SrcKey& sk);
+  bool isSrcKeyInBL(SrcKey sk);
 
 
   /////////////////////////////////////////////////////////////////////////////

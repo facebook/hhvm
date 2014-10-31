@@ -98,7 +98,7 @@ TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
                            Offset        lastBcOff,
-                           const SrcKey& sk,
+                           SrcKey sk,
                            RegionDescPtr region)
     : m_id(id)
     , m_kind(kind)
@@ -110,7 +110,7 @@ ProfTransRec::ProfTransRec(TransID       id,
 
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
-                           const SrcKey& sk)
+                           SrcKey sk)
     : m_id(id)
     , m_kind(kind)
     , m_lastBcOff(-1)
@@ -122,7 +122,7 @@ ProfTransRec::ProfTransRec(TransID       id,
 
 ProfTransRec::ProfTransRec(TransID       id,
                            TransKind     kind,
-                           const SrcKey& sk,
+                           SrcKey sk,
                            int           nArgs)
     : m_id(id)
     , m_kind(kind)
@@ -299,7 +299,7 @@ int ProfData::prologueArgs(TransID id) const {
   return m_transRecs[id]->prologueArgs();
 }
 
-bool ProfData::optimized(const SrcKey& sk) const {
+bool ProfData::optimized(SrcKey sk) const {
   return m_optimizedSKs.count(sk);
 }
 
@@ -307,7 +307,7 @@ bool ProfData::optimized(FuncId funcId) const {
   return m_optimizedFuncs.count(funcId);
 }
 
-void ProfData::setOptimized(const SrcKey& sk) {
+void ProfData::setOptimized(SrcKey sk) {
   m_optimizedSKs.insert(sk);
 }
 
@@ -389,7 +389,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   return transId;
 }
 
-TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
+TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
                                    int nArgs) {
   assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
   TransID transId = m_numTrans++;
@@ -401,7 +401,7 @@ TransID ProfData::addTransPrologue(TransKind kind, const SrcKey& sk,
   return transId;
 }
 
-TransID ProfData::addTransNonProf(TransKind kind, const SrcKey& sk) {
+TransID ProfData::addTransNonProf(TransKind kind, SrcKey sk) {
   assert(kind == TransKind::Anchor || kind == TransKind::Interp ||
          kind == TransKind::Live   || kind == TransKind::Optimize);
   TransID transId = m_numTrans++;

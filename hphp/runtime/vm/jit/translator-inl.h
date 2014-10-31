@@ -38,7 +38,7 @@ inline const SrcDB& Translator::getSrcDB() const {
   return m_srcDB;
 }
 
-inline SrcRec* Translator::getSrcRec(const SrcKey& sk) {
+inline SrcRec* Translator::getSrcRec(SrcKey sk) {
   // XXX: Add a insert-or-find primitive to THM.
   if (SrcRec* r = m_srcDB.find(sk)) return r;
   assert(s_writeLease.amOwner());

@@ -1085,7 +1085,7 @@ void getInputsImpl(SrcKey startSk,
                    InputInfoVec& inputs,
                    const LocalTypeFn& localType) {
 #ifdef USE_TRACE
-  const SrcKey& sk = ni->source;
+  auto sk = ni->source;
 #endif
   if (isAlwaysNop(ni->op())) return;
 
@@ -1339,7 +1339,7 @@ Translator::Translator()
 }
 
 bool
-Translator::isSrcKeyInBL(const SrcKey& sk) {
+Translator::isSrcKeyInBL(SrcKey sk) {
   auto unit = sk.unit();
   if (unit->isInterpretOnly()) return true;
   Lock l(m_dbgBlacklistLock);

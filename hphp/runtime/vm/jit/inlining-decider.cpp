@@ -57,7 +57,7 @@ bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
  * Check if the funcd of `inst' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
  */
-bool isCalleeInlinable(const SrcKey& callSK, const Func* callee) {
+bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK.func(), callee, why);
   };
@@ -92,7 +92,7 @@ bool isCalleeInlinable(const SrcKey& callSK, const Func* callee) {
 /*
  * Check that we don't have any missing or extra arguments.
  */
-bool checkNumArgs(const SrcKey& callSK, const Func* callee) {
+bool checkNumArgs(SrcKey callSK, const Func* callee) {
   assert(callee);
 
   auto refuse = [&] (const char* why) {
@@ -125,7 +125,7 @@ bool checkNumArgs(const SrcKey& callSK, const Func* callee) {
  * We refuse to inline if the corresponding FPush is not found in the same
  * region as the FCall, or if other calls are made between the two.
  */
-bool checkFPIRegion(const SrcKey& callSK, const Func* callee,
+bool checkFPIRegion(SrcKey callSK, const Func* callee,
                     const RegionDesc& region) {
   assert(callee);
 
@@ -197,7 +197,7 @@ bool checkFPIRegion(const SrcKey& callSK, const Func* callee,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool InliningDecider::canInlineAt(const SrcKey& callSK, const Func* callee,
+bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
                                   const RegionDesc& region) const {
   if (!RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::EvalHHIREnableGenTimeInlining) {

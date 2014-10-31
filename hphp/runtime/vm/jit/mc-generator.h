@@ -272,7 +272,7 @@ public:
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
-  bool profileSrcKey(const SrcKey& sk) const;
+  bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   void traceCodeGen();

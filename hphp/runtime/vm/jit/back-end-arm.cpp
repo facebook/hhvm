@@ -182,7 +182,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);

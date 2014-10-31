@@ -152,7 +152,7 @@ CppCall MCGenerator::getDtorCall(DataType type) {
   }
 }
 
-bool MCGenerator::profileSrcKey(const SrcKey& sk) const {
+bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!sk.func()->shouldPGO()) return false;
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
   if (m_tx.profData()->profiling(sk.getFuncId())) return true;
@@ -216,9 +216,9 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   always_assert(m_tx.profData()->transRegion(transId) != nullptr);
 
-  Func*       func = m_tx.profData()->transFunc(transId);
-  FuncId    funcId = func->getFuncId();
-  const SrcKey& sk = m_tx.profData()->transSrcKey(transId);
+  auto func   = m_tx.profData()->transFunc(transId);
+  auto funcId = func->getFuncId();
+  auto sk     = m_tx.profData()->transSrcKey(transId);
 
   if (m_tx.profData()->optimized(funcId)) return nullptr;
   m_tx.profData()->setOptimized(funcId);
@@ -240,7 +240,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   for (auto region : regions) {
     m_tx.setMode(TransKind::Optimize);
     always_assert(!region->empty());
-    SrcKey regionSk = region->start();
+    auto regionSk = region->start();
     auto translArgs = TranslArgs(regionSk, align).region(region);
     if (setFuncBody && regionSk.offset() == func->base()) {
       translArgs.setFuncBody();
@@ -668,8 +668,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
  * address for the translation corresponding to triggerSk, if such
  * translation is generated; otherwise returns nullptr.
  */
-TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
-                                    SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   Func* func = m_tx.profData()->transFunc(prologueTransId);
   int  nArgs = m_tx.profData()->prologueArgs(prologueTransId);
 

@@ -107,7 +107,7 @@ struct InliningDecider {
    * NOTE: Inlining will fail during translation if the FPush was interpreted.
    * It is up to the client to ensure that this is not the case.
    */
-  bool canInlineAt(const SrcKey& callSK, const Func* callee,
+  bool canInlineAt(SrcKey callSK, const Func* callee,
                    const RegionDesc& region) const;
 
   /*

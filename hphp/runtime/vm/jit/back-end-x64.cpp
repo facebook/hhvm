@@ -145,7 +145,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {

@@ -1,0 +1,10 @@
+File "cannot_override_tconst.php", line 7, characters 7-11:
+This object is of type Child (Typing[4110])
+File "cannot_override_tconst.php", line 7, characters 21-26:
+It is incompatible with this object of type Parent
+because some of their methods are incompatible.
+Read the following to see why:
+File "cannot_override_tconst.php", line 8, characters 24-25:
+This is an int
+File "cannot_override_tconst.php", line 4, characters 24-25:
+It is incompatible with an array key (int/string)

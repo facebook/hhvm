@@ -35,6 +35,7 @@ class type ['a] hint_visitor_type = object
   method on_fun    : 'a -> Nast.hint list -> bool -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> Nast.hint ShapeMap.t -> 'a
+  method on_access : 'a -> Nast.sid -> Nast.sid -> Nast.sid list -> 'a
 end
 
 (*****************************************************************************)
@@ -56,6 +57,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hfun (hl, b, h)       -> this#on_fun    acc hl b h
     | Happly (i, hl)        -> this#on_apply  acc i hl
     | Hshape hm             -> this#on_shape  acc hm
+    | Haccess (i1, i2, il)  -> this#on_access acc i1 i2 il
 
   method on_any acc = acc
   method on_mixed acc = acc
@@ -96,6 +98,8 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
       let acc = this#on_hint acc h in
       acc
     end hm acc
+
+  method on_access acc id1 id2 idl = acc
 
 end
 
@@ -207,6 +211,10 @@ and hint_ p env = function
       let env = Env.add_wclass env c in
       let env, argl = lfold hint env argl in
       env, Tapply (id, argl)
+  | Haccess ((pos, class_) as root, id, ids) ->
+      Find_refs.process_class_ref pos class_ None;
+      let env = Env.add_wclass env class_ in
+      env, Taccess (root, id, ids)
   | Htuple hl ->
       let env, tyl = lfold hint env hl in
       env, Ttuple tyl

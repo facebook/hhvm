@@ -706,6 +706,13 @@ and hint_ ~allow_this is_static_var p env x =
   | Hoption h -> N.Hoption (hint env h)
   | Hfun (hl, opt, h) -> N.Hfun (List.map (hint env) hl, opt, hint env h)
   | Happly ((_, x) as id, hl) -> hint_id ~allow_this env is_static_var id hl
+  | Haccess (root_id, id, ids) ->
+    let root_hint = hint_id ~allow_this env is_static_var root_id [] in
+    (match root_hint with
+      | N.Happly (class_id, _) -> N.Haccess (class_id, id, ids)
+      | _ ->
+        Errors.invalid_type_access_root root_id;
+        N.Hany)
   | Hshape fdl -> N.Hshape
     begin
       List.fold_left begin fun fdm (pname, h) ->
@@ -949,6 +956,7 @@ and class_ genv c =
     (class_require env c.c_kind) c.c_body ([], []) in
   let tparam_l  = type_paraml env c.c_tparams in
   let consts   = List.fold_right (class_const env) c.c_body [] in
+  let typeconsts = List.fold_right (class_typeconst env) c.c_body [] in
   let implements = List.map (hint ~allow_this:true env) c.c_implements in
   let constructor = List.fold_left (constructor env) None c.c_body in
   let constructor, methods, smethods =
@@ -971,6 +979,7 @@ and class_ genv c =
     N.c_req_implements = req_implements;
     N.c_implements     = implements;
     N.c_consts         = consts;
+    N.c_typeconsts     = typeconsts;
     N.c_static_vars    = svars;
     N.c_vars           = vars;
     N.c_constructor    = constructor;
@@ -1011,6 +1020,7 @@ and class_use env x acc =
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_require env c_kind x acc =
   match x with
@@ -1034,6 +1044,7 @@ and class_require env c_kind x acc =
     (hint ~allow_this:true env h :: acc_impls, acc_exts)
   | ClassVars _ -> acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and constructor env acc = function
   | Attributes _ -> acc
@@ -1048,6 +1059,7 @@ and constructor env acc = function
       | None -> Some (method_ env m)
       | Some _ -> Errors.method_name_already_bound p name; acc)
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_const env x acc =
   match x with
@@ -1057,6 +1069,7 @@ and class_const env x acc =
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_var_static env x acc =
   match x with
@@ -1071,6 +1084,7 @@ and class_var_static env x acc =
     cvl @ acc
   | ClassVars _ -> acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_var env x acc =
   match x with
@@ -1087,6 +1101,7 @@ and class_var env x acc =
     cvl @ acc
   | ClassVars _ -> acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_static_method env x acc =
   match x with
@@ -1098,6 +1113,7 @@ and class_static_method env x acc =
   | Method m when snd m.m_name = SN.Members.__construct -> acc
   | Method m when List.mem Static m.m_kind -> method_ env m :: acc
   | Method _ -> acc
+  | TypeConst _ -> acc
 
 and class_method env sids cv_ids x acc =
   match x with
@@ -1112,6 +1128,17 @@ and class_method env sids cv_ids x acc =
       let env = ({ genv with in_member_fun = true}, lenv) in
       method_ env m :: acc
   | Method _ -> acc
+  | TypeConst _ -> acc
+
+and class_typeconst env x acc =
+  match x with
+  | Attributes _ -> acc
+  | Const _ -> acc
+  | ClassUse _ -> acc
+  | ClassTraitRequire _ -> acc
+  | ClassVars _ -> acc
+  | Method _ -> acc
+  | TypeConst t -> typeconst env t :: acc
 
 and check_constant_expr (pos, e) =
   match e with
@@ -1190,6 +1217,29 @@ and fill_cvar kl ty x =
     | Public    -> { x with N.cv_visibility = N.Public }
     | Protected -> { x with N.cv_visibility = N.Protected }
  ) x kl
+
+and typeconst env t =
+  let genv, lenv = env in
+  (* We use the same namespace as constants within the class so we cannot have
+   * a const and type const with the same name
+   *)
+  let name = Env.new_const env t.tconst_name in
+  (* if a typeconst is declared in an interface without an assigned type it is
+   * implicitly treated as abstract i.e.
+   *
+   * interface Foo { type const Bar;}
+   *
+   *  is the same as
+   * interface Foo { abstract type const Bar;}
+   *)
+  let abstract = match genv.cclass with
+    | Some {c_kind = Ast.Cinterface; _ } when t.tconst_type = None -> true
+    | _ -> List.mem Abstract t.tconst_kind in
+  let type_ = opt_map (hint env) t.tconst_type in
+  N.({ c_tconst_abstract = abstract;
+       c_tconst_name = name;
+       c_tconst_type = type_;
+     })
 
 and fun_kind env ft =
   match !((snd env).has_yield), ft with

@@ -49,6 +49,13 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | (_, Toption ty1), (_, Tprim _ as ty2)
   | (_, Tprim _ as ty1), (_, Toption ty2) ->
       assert_nontrivial p bop env ty1 ty2
+  (* shouldn't we expand typedefs here as well? *)
+  | (_, Taccess _), _ ->
+      let _, ty1 = Typing_utils.expand_type_access env, ty1 in
+      assert_nontrivial p bop env ty1 ty2
+  | _, (_, Taccess _) ->
+      let _, ty2 = Typing_utils.expand_type_access env, ty2 in
+      assert_nontrivial p bop env ty1 ty2
   | (_, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _)

@@ -1,0 +1,4 @@
+File "abstract_type_in_concrete_class.php", line 7, characters 7-27:
+This class must provide an implementation for the abstract method abstract_type (Typing[4047])
+File "abstract_type_in_concrete_class.php", line 4, characters 33-45:
+The abstract method abstract_type is defined here

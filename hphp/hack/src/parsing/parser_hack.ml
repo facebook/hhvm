@@ -206,6 +206,11 @@ let check_not_final env pos modifiers =
   then error_at env pos "class variable cannot be final";
   ()
 
+let tc_check_not_static env pos modifiers =
+  if List.exists (function Static -> true | _ -> false) modifiers
+  then error_at env pos "type constant cannot be static";
+  ()
+
 let check_toplevel env pos =
   if env.mode = Ast.Mstrict
   then error_at env pos "Remove all toplevel statements except for requires"
@@ -972,20 +977,14 @@ and hint env =
       let start = Pos.make env.file env.lb in
       let e = hint env in
       Pos.btw start (fst e), Hoption e
-  (* A<_> *)
-  | Tword when Lexing.lexeme env.lb <> "function" ->
-      let pos = Pos.make env.file env.lb in
-      let word = Lexing.lexeme env.lb in
-      class_hint_with_name env (pos, word)
+  (* A<_> *)(* :XHPNAME *)
+  | Tword | Tcolon when Lexing.lexeme env.lb <> "function" ->
+      L.back env.lb;
+      hint_apply_or_access env []
   | Tword ->
       let h = hint_function env in
       error_at env (fst h) "Function hints must be parenthesized";
       h
-  (* :XHPNAME *)
-  | Tcolon ->
-      L.back env.lb;
-      let cname = identifier env in
-      class_hint_with_name env cname
   (* (_) | (function(_): _) *)
   | Tlp ->
       let start_pos = Pos.make env.file env.lb in
@@ -999,6 +998,36 @@ and hint env =
       error_expect env "type";
       let pos = Pos.make env.file env.lb in
       pos, Happly ((pos, "*Unknown*"), [])
+
+and hint_apply_or_access env id_list =
+  match L.token env.file env.lb with
+    (* A | :XHPNAME *)
+    | Tword | Tcolon ->
+        L.back env.lb;
+        hint_apply_or_access_remainder env (identifier env :: id_list)
+    | _ ->
+        error_expect env "identifier";
+        let pos = Pos.make env.file env.lb in
+        pos, Happly ((pos, "*Unknown*"), [])
+
+and hint_apply_or_access_remainder env id_list =
+  match L.token env.file env.lb with
+    (* ...::... *)
+    | Tcolcol -> hint_apply_or_access env id_list
+    (* ...<_> | ... *)
+    | _ ->
+        L.back env.lb;
+        begin match List.rev id_list with
+          | [id] ->
+              let params = class_hint_params env in
+              let id = List.hd id_list in
+              fst id, Happly (id, params)
+          | id1 :: id2 :: ids -> fst id1, Haccess (id1, id2, ids)
+          | [] ->
+              error_expect env "identifier";
+              let pos = Pos.make env.file env.lb in
+              pos, Happly ((pos, "*Unknown*"), [])
+        end
 
 (* (_) | (function(_): _) *)
 and hint_paren start env =
@@ -1137,7 +1166,7 @@ and class_defs env =
       let word = Lexing.lexeme env.lb in
       class_toplevel_word env word
   | Tltlt ->
-  (* variable | method *)
+  (* variable | method | type const*)
       L.back env.lb;
       let error_state = !(env.errors) in
       let m = class_member_def env in
@@ -1170,7 +1199,7 @@ and class_toplevel_word env word =
       let traitl = trait_require env in
       traitl @ class_defs env
   | "abstract" | "public" | "protected" | "private" | "final" | "static"  ->
-      (* variable | method *)
+      (* variable | method | type const*)
       L.back env.lb;
       let start = Pos.make env.file env.lb in
       let error_state = !(env.errors) in
@@ -1402,6 +1431,8 @@ and class_member_def env =
       ClassVars (modifiers, None, cvars)
   | Tword ->
       let word = Lexing.lexeme env.lb in
+      if word = "type"
+      then tc_check_not_static env modifier_pos modifiers;
       class_member_word env ~modifiers ~attrs word
   | _ ->
       L.back env.lb;
@@ -1454,7 +1485,7 @@ and class_var_name name =
     String.sub name 1 (String.length name - 1)
 
 (*****************************************************************************)
-(* Methods *)
+(* Methods | Typeconst *)
 (*
  *  within a class body -->
  *    modifier_list async function ...
@@ -1463,6 +1494,11 @@ and class_var_name name =
 (*****************************************************************************)
 
 and class_member_word env ~attrs ~modifiers = function
+  | "type" ->
+      expect_word env "const";
+      let type_name = identifier env in
+      let typeconst = typeconst env ~modifiers ~attrs type_name in
+      TypeConst typeconst
   | "async" ->
       expect_word env "function";
       let is_ref = ref_opt env in
@@ -1489,6 +1525,17 @@ and class_member_word env ~attrs ~modifiers = function
             []
         | _ -> L.back env.lb; class_var_list env
       in ClassVars (modifiers, Some h, cvars)
+
+and typeconst env ~modifiers ~attrs pname =
+  let type_ = match L.token env.file env.lb with
+    | Teq -> Some (hint env)
+    | _ -> L.back env.lb; None
+  in
+  expect env Tsc;
+  { tconst_kind = modifiers;
+    tconst_name = pname;
+    tconst_type = type_;
+  }
 
 and method_ env ~modifiers ~attrs ~sync is_ref pname =
   let pos, name = pname in

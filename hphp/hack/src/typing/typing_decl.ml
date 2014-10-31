@@ -342,7 +342,7 @@ and class_naming_and_decl class_env cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let c = Naming.class_ class_env.nenv c in
   class_parents_decl class_env c;
-  class_decl c;
+  class_decl class_env.nenv c;
   (* It is important to add the "named" ast (nast.ml) only
    * AFTER we are done declaring the type type of the class.
    * Otherwise there is a subtle race condition.
@@ -391,7 +391,7 @@ and class_is_abstract c =
     | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
-and class_decl c =
+and class_decl nenv c =
   let is_abstract = class_is_abstract c in
   let cls_pos, cls_name = c.c_name in
   let env = Typing_env.empty (Pos.filename cls_pos) in
@@ -407,6 +407,9 @@ and class_decl c =
   let env, consts =
     List.fold_left (class_const_decl c) (env, consts) c.c_consts in
   let consts = SMap.add SN.Members.mClass (class_class_decl c.c_name) consts in
+  let typeconsts = inherited.Typing_inherit.ih_typeconsts in
+  let env, typeconsts =
+    List.fold_left (typeconst_decl nenv c) (env, typeconsts) c.c_typeconsts in
   let sclass_var = static_class_var_decl c in
   let scvars = inherited.Typing_inherit.ih_scvars in
   let env, scvars = List.fold_left sclass_var (env, scvars) c.c_static_vars in
@@ -495,6 +498,7 @@ and class_decl c =
     tc_pos = fst c.c_name;
     tc_tparams = tparams;
     tc_consts = consts;
+    tc_typeconsts = typeconsts;
     tc_cvars = cvars;
     tc_scvars = scvars;
     tc_methods = m;
@@ -509,10 +513,10 @@ and class_decl c =
     tc_enum_type = enum;
   } in
   if Ast.Cnormal = c.c_kind then
-    SMap.iter (method_check_trait_overrides c) m
-  else ();
-  if Ast.Cnormal = c.c_kind then
-    SMap.iter (method_check_trait_overrides c) sm
+    begin
+      SMap.iter (method_check_trait_overrides c) m;
+      SMap.iter (method_check_trait_overrides c) sm;
+    end
   else ();
   SMap.iter begin fun x _ ->
     Typing_deps.add_idep (Some class_dep) (Dep.Class x)
@@ -679,6 +683,82 @@ and visibility cid = function
   | Public    -> Vpublic
   | Protected -> Vprotected cid
   | Private   -> Vprivate cid
+
+and typeconst_decl nenv c (env, acc) typeconst =
+  match c.c_kind with
+  | Ast.Cinterface | Ast.Ctrait | Ast.Cenum ->
+      let kind = match c.c_kind with
+        | Ast.Cinterface -> "an interface"
+        | Ast.Ctrait -> "a trait"
+        | Ast.Cenum -> "an enum"
+        | _ -> assert false in
+      Errors.requires_non_class (fst c.c_name) (snd c.c_name) kind;
+      env, acc
+  | Ast.Cabstract | Ast.Cnormal ->
+      let pos, name = typeconst.c_tconst_name in
+      let typedef_name = typeconst_typedef_decl nenv c typeconst in
+      let reason = Reason.Rwitness pos in
+      let typedef_type = reason, Tapply ((pos, typedef_name), []) in
+      let ty =
+        if typeconst.c_tconst_abstract
+        then Reason.Rwitness pos, Tgeneric (name, Some typedef_type)
+        else typedef_type
+      in
+      let ce = {
+        ce_final = not typeconst.c_tconst_abstract;
+        ce_override = false;
+        ce_synthesized = false;
+        ce_visibility = Vpublic;
+        ce_type = ty;
+        ce_origin = snd (c.c_name);
+      } in
+      let acc = SMap.add name ce acc in
+      env, acc
+
+ (* Every Type Const is backed by a typedef. For instance:
+  *
+  * class C { type const tc = int; }
+  *
+  * Is translated too
+  *
+  * type C::tc = int;
+  *
+  * The identifier "C::tc" is not something that can be written in user land
+  * because of the "::", so we know that "C::tc" will be a unique name for a
+  * typedef.
+  *
+  * Another thing to note is we explicitly choose to use type instead of newtype
+  * because we want this to serve as an alias.
+  *
+  * IMPORTANT:
+  *
+  *   Since we are fabricating this type def we need to also add the type def
+  *   in Parsing_service.get_defs otherwise incremental mode will not work.
+  *)
+and typeconst_typedef_decl nenv c typeconst =
+  (* make name unique by combining with class name, i.e. Class::Typeconst *)
+  let typedef_name =
+    (snd (c.c_name)) ^ "::" ^ (snd (typeconst.c_tconst_name)) in
+  let tid = fst (typeconst.c_tconst_name), typedef_name in
+  let params = [] in
+  let concrete_type = match typeconst.c_tconst_type with
+    | None ->
+        if not typeconst.c_tconst_abstract
+        then Errors.missing_assign (fst tid);
+        fst tid, Hany
+    | Some x -> x in
+  let decl = false, params, concrete_type in
+  let filename = Pos.filename (fst tid) in
+  let env = Typing_env.empty filename in
+  let env = Typing_env.set_mode env c.c_mode in
+  let env = Env.set_root env (Typing_deps.Dep.Class (snd tid)) in
+  let env, concrete_type = Typing_hint.hint env concrete_type in
+  let visibility = Env.Typedef.Public in
+  let type_constraint = None in
+  let tdecl = visibility, params, type_constraint, concrete_type, (fst tid) in
+  Env.add_typedef (snd tid) tdecl;
+  Naming_heap.TypedefHeap.add (snd tid) decl;
+  typedef_name
 
 and method_decl c env m =
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in

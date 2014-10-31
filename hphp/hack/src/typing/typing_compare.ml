@@ -118,6 +118,9 @@ module CompareTypes = struct
         let acc = string_id acc sid1 sid2 in
         let acc = tyl acc tyl1 tyl2 in
         acc
+    | Taccess (rt1, id1, ids1), Taccess (rt2, id2, ids2)
+      when List.length ids1 = List.length ids2 ->
+        List.fold_left2 string_id acc (rt1 :: id1 :: ids1) (rt2 :: id2 :: ids2)
     | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
         tyl acc tyl1 tyl2
@@ -130,9 +133,9 @@ module CompareTypes = struct
           | Some v2 ->
               ty acc v1 v2
         end fdm1 acc
-    | (Tanon _ | Tany | Tmixed | Tarray (_, _) | Tshape _ |
-      Tgeneric (_, _)|Toption _|Tprim _|Tvar _| Tabstract _ |
-      Tfun _|Tapply (_, _)|Ttuple _|Tunresolved _|Tobject), _ -> default
+    | (Tanon _ | Tany | Tmixed | Tarray (_, _) | Tshape _ | Taccess (_, _, _) |
+      Tgeneric (_, _)| Toption _| Tprim _| Tvar _| Tabstract _ |
+      Tfun _| Tapply (_, _) | Ttuple _| Tunresolved _| Tobject), _ -> default
 
   and tyl acc tyl1 tyl2 =
     if List.length tyl1 <> List.length tyl2
@@ -231,6 +234,7 @@ module CompareTypes = struct
     let acc = members acc c1.tc_scvars c2.tc_scvars in
     let acc = members acc c1.tc_methods c2.tc_methods in
     let acc = members acc c1.tc_smethods c2.tc_smethods in
+    let acc = members acc c1.tc_typeconsts c2.tc_typeconsts in
     let acc = constructor acc c1.tc_construct c2.tc_construct in
     let acc = ancestry acc c1.tc_req_ancestors c2.tc_req_ancestors in
     let acc = ancestry acc c1.tc_ancestors c2.tc_ancestors in
@@ -319,6 +323,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Toption x            -> Toption (ty x)
     | Tfun ft              -> Tfun (fun_type ft)
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map (ty) xl)
+    | Taccess (root, id, ids) ->
+        Taccess (string_id root, string_id id, List.map string_id ids)
     | Tabstract (sid, xl, x) ->
         Tabstract (string_id sid, List.map (ty) xl, ty_opt x)
     | Tobject as x         -> x
@@ -362,6 +368,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       tc_req_ancestors_extends = tc.tc_req_ancestors_extends          ;
       tc_tparams               = List.map type_param tc.tc_tparams    ;
       tc_consts                = SMap.map class_elt tc.tc_consts      ;
+      tc_typeconsts            = SMap.map class_elt tc.tc_typeconsts  ;
       tc_cvars                 = SMap.map class_elt tc.tc_cvars       ;
       tc_scvars                = SMap.map class_elt tc.tc_scvars      ;
       tc_methods               = SMap.map class_elt tc.tc_methods     ;
@@ -417,9 +424,9 @@ module ClassDiff = struct
   type t = {
       consts   : SSet.t ;
       cvars    : SSet.t ;
-      scvars   : SSet.t ;
       methods  : SSet.t ;
       smethods : SSet.t ;
+      typeconsts : SSet.t;
       cstr     : bool   ;
     }
 
@@ -477,6 +484,12 @@ module ClassDiff = struct
     let is_unchanged = is_unchanged && not cstr_diff in
     let cstr_ideps = Typing_deps.get_ideps (Dep.Cstr cid) in
     let acc = if cstr_diff then ISet.union acc cstr_ideps else acc in
+
+    (* compare class type constants *)
+    let typeconsts_diff = smap class1.tc_typeconsts class2.tc_typeconsts in
+    let is_unchanged = is_unchanged && SSet.is_empty typeconsts_diff in
+    let acc =
+      add_inverted_deps acc (fun x -> Dep.Class (cid^"::"^x)) typeconsts_diff in
 
     acc, is_unchanged
 

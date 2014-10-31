@@ -104,7 +104,17 @@ UNSUPPORTED_FILES_UNPARSER = {
         'unpack_call5.php',
         'unpack_call6.php',
         'unpack_call7.php',
-    ]
+    ],
+    "TypeConst": [
+        'tconst/abstract_type_in_concrete_class.php',
+        'tconst/access_expand_error_1.php',
+        'tconst/bad_input_type.php',
+        'tconst/cannot_assign_tparam1.php',
+        'tconst/cannot_override_tconst.php',
+        'tconst/cannot_use_class_tparams.php',
+        'tconst/good_tconst_decl.php',
+        'tconst/unassigned_tconst.php',
+    ],
 }
 
 UNSUPPORTED_FILES_CONVERTER = {

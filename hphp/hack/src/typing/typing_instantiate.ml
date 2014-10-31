@@ -71,7 +71,7 @@ let rec instantiate_fun env fty el =
       instantiate_fun env fty el
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
     | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
-    | Tunresolved _ | Tobject | Tshape _) -> env, fty
+    | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _)) -> env, fty
 
 and instantiate_ft env ft =
   let env, tvarl = List.fold_left begin fun (env, vars) (_, (pos, _), _) ->
@@ -107,7 +107,8 @@ and check_constraint env ty x_ty =
   | Tany, _ -> fst (TUtils.unify env ty x_ty)
   | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tunresolved _ | Tobject | Tshape _), _ -> TUtils.sub_type env ty x_ty
+    | Tunresolved _ | Tobject | Tshape _
+    | Taccess _), _ -> TUtils.sub_type env ty x_ty
 
 and instantiate subst env (r, ty) =
   match ty with
@@ -141,13 +142,17 @@ and instantiate subst env (r, ty) =
       )
   | Tany | Tmixed | Tarray (_, _) | Tprim _ | Toption _ | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tunresolved _ | Tobject | Tshape _->
+    | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _) ->
       let p = Reason.to_pos r in
       let env, ty = instantiate_ p subst env ty in
       env, (r, ty)
 
 and instantiate_ p subst env = function
   | Tgeneric _ -> assert false
+  (* IMPORTANT: We cannot expand Taccess during instantiation because this can
+   * be called before all type consts have been declared and inherited.
+   *)
+  | Taccess (_, _, _) as ty -> env, ty
   | Tanon _ as x -> env, x
   | Tarray (ty1, ty2) ->
       let env, ty1 = opt (instantiate subst) env ty1 in

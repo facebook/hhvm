@@ -154,6 +154,7 @@ module Naming                               = struct
   let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
   let shape_typehint                        = 2059 (* DONT MODIFY!!!! *)
   let dynamic_new_in_strict_mode            = 2060 (* DONT MODIFY!!!! *)
+  let invalid_type_access_root              = 2061 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -184,6 +185,9 @@ module NastCheck                            = struct
   let toplevel_continue                     = 3023 (* DONT MODIFY!!!! *)
   let uses_non_trait                        = 3024 (* DONT MODIFY!!!! *)
   let illegal_function_name                 = 3025 (* DONT MODIFY!!!! *)
+  let not_abstract_without_typeconst        = 3026 (* DONT MODIFY!!!! *)
+  let typeconst_depends_on_external_tparam  = 3027 (* DONT MODIFY!!!! *)
+  let typeconst_assigned_tparam             = 3028 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -477,6 +481,10 @@ let dynamic_new_in_strict_mode pos =
   add Naming.dynamic_new_in_strict_mode pos
   "Cannot use dynamic new in strict mode"
 
+let invalid_type_access_root (pos, id) =
+  add Naming.invalid_type_access_root pos
+  (id ^ " must be an identifier for a class")
+
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"
 
@@ -708,6 +716,22 @@ let abstract_with_body (p, _) =
 let not_abstract_without_body (p, _) =
   add NastCheck.not_abstract_without_body p
     "This method is not declared as abstract, it must have a body"
+
+let not_abstract_without_typeconst (p, _) =
+  add NastCheck.not_abstract_without_typeconst p
+    ("This type constant is not declared as abstract, it must have"^
+     " an assigned type")
+
+let typeconst_depends_on_external_tparam pos ext_pos ext_name =
+  add_list NastCheck.typeconst_depends_on_external_tparam [
+    pos, ("A type constant can only use type parameters declared in its own"^
+      " type parameter list");
+    ext_pos, (ext_name ^ " was declared as a type parameter here");
+  ]
+
+let typeconst_assigned_tparam pos tp_name =
+  add NastCheck.typeconst_assigned_tparam pos
+    (tp_name ^" is a type parameter. It cannot be assigned to a type constant")
 
 let return_in_gen p =
   add NastCheck.return_in_gen p
@@ -1167,6 +1191,7 @@ let string_of_class_member_kind = function
   | `class_constant -> "class constant"
   | `static_method  -> "static method"
   | `class_variable -> "class variable"
+  | `class_typeconst -> "type constant"
 
 let smember_not_found kind pos (cpos, class_name) member_name hint =
   let kind = string_of_class_member_kind kind in

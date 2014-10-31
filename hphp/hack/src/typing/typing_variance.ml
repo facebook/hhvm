@@ -466,6 +466,8 @@ and type_ root variance env (reason, ty) =
       end env variancel tyl
   | Ttuple tyl ->
       type_list root variance env tyl
+  (* when we add type params to type consts might need to change *)
+  | Taccess _ -> env
   | Tanon _ -> assert false
   | Tunresolved _ -> assert false
   | Tobject -> env

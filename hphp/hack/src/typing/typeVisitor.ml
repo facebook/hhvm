@@ -18,6 +18,7 @@ class type ['a] type_visitor_type = object
   method on_tunresolved : 'a -> ty list -> 'a
   method on_tobject : 'a -> 'a
   method on_tshape : 'a -> ty Nast.ShapeMap.t -> 'a
+  method on_taccess : 'a -> Nast.sid -> Nast.sid -> Nast.sid list -> 'a
 end
 
 class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
@@ -41,6 +42,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     let acc = opt_fold_left this#on_type acc ty_opt in
     acc
   method on_tapply acc s tyl = List.fold_left this#on_type acc tyl
+  method on_taccess acc root id ids = acc
   method on_ttuple acc tyl = List.fold_left this#on_type acc tyl
   method on_tanon acc arity id = acc
   method on_tunresolved acc tyl = List.fold_left this#on_type acc tyl
@@ -60,6 +62,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | _, Tfun fty -> this#on_tfun acc fty
     | _, Tabstract (s, tyl, ty_opt) -> this#on_tabstract acc s tyl ty_opt
     | _, Tapply (s, tyl) -> this#on_tapply acc s tyl
+    | _, Taccess (root, id, ids) -> this#on_taccess acc root id ids
     | _, Ttuple tyl -> this#on_ttuple acc tyl
     | _, Tanon (arity, id) -> this#on_tanon acc arity id
     | _, Tunresolved tyl -> this#on_tunresolved acc tyl

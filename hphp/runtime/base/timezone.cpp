@@ -128,6 +128,7 @@ TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
       always_assert(result.first != s_tzCache->end());
       // A collision occurred, so we don't need our strdup'ed key.
       free(key);
+      tzi = result.first->second;
     }
   }
 

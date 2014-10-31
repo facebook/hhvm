@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "hphp/util/trace.h"
+#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -27,6 +28,41 @@ TRACE_SET_MOD(hhir);
 namespace HPHP { namespace jit {
 
 using Trace::Indent;
+
+/*
+ * Finds the least common ancestor of two SSATmps. A temp has a parent if it
+ * is the result of a passthrough instruction.
+ *
+ * Returns nullptr when there is no LCA.
+ */
+static SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
+  if (s1 == s2) return s1;
+  if (s1 == nullptr || s2 == nullptr) return nullptr;
+
+  IdSet<SSATmp> seen;
+
+  auto const step = [] (SSATmp* v) {
+    assert(v != nullptr);
+    return v->inst()->isPassthrough() ?
+      v->inst()->getPassthroughValue() :
+      nullptr;
+  };
+
+  auto const process = [&] (SSATmp*& v) {
+    if (v == nullptr) return false;
+    if (seen[v]) return true;
+    seen.add(v);
+    v = step(v);
+    return false;
+  };
+
+  while (s1 != nullptr || s2 != nullptr) {
+    if (process(s1)) return s1;
+    if (process(s2)) return s2;
+  }
+
+  return nullptr;
+}
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
   : FrameState(unit, marker.spOff(), marker.func())
@@ -570,24 +606,9 @@ void FrameState::merge(Snapshot& state) {
   for (unsigned i = 0; i < m_locals.size(); ++i) {
     auto& local = state.locals[i];
 
-    // preserve local values if they're the same in both states,
-    if (local.value != m_locals[i].value) {
-      // try to merge SSATmps for the local if one of them came from
-      // a passthrough instruction with the other as the source.
-      auto isParent = [](SSATmp* parent, SSATmp* child) -> bool {
-        if (!child) return false;
-        while (child->inst()->isPassthrough()) {
-          child = child->inst()->getPassthroughValue();
-          if (child == parent) return true;
-        }
-        return false;
-      };
-      if (isParent(m_locals[i].value, local.value)) {
-        local.value = m_locals[i].value;
-      } else if (!isParent(local.value, m_locals[i].value)) {
-        local.value = nullptr;
-      }
-    }
+    // Get the least common ancestor across both states.
+    local.value = least_common_ancestor(local.value, m_locals[i].value);
+
     // merge the typeSrcs
     for (auto newTypeSrc : m_locals[i].typeSrcs) {
       local.typeSrcs.insert(newTypeSrc);

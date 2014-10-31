@@ -264,10 +264,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.funcd = m_arStates.back().knownFunc();
   m_ht.setBcOff(m_sk.offset(), false);
 
-  InputInfoVec inputInfos;
-  getInputs(m_startSk, m_inst, inputInfos, [&] (int i) {
-    return m_ht.irBuilder().localType(i, DataTypeGeneric);
-  });
+  auto const inputInfos = getInputs(m_startSk, m_inst);
 
   // Read types for all the inputs and apply MetaData.
   auto newDynLoc = [&](const InputInfo& ii) {

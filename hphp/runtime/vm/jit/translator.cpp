@@ -96,8 +96,6 @@ static uint32_t get_random()
     return (m_z << 16) + m_w;  /* 32-bit result */
 }
 
-static const int kTooPolyRet = 6;
-
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
@@ -1078,12 +1076,10 @@ static void addMVectorInputs(NormalizedInstruction& ni,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
-static
-void getInputsImpl(SrcKey startSk,
-                   NormalizedInstruction* ni,
-                   int& currentStackOffset,
-                   InputInfoVec& inputs,
-                   const LocalTypeFn& localType) {
+static void getInputsImpl(SrcKey startSk,
+                          NormalizedInstruction* ni,
+                          int& currentStackOffset,
+                          InputInfoVec& inputs) {
 #ifdef USE_TRACE
   auto sk = ni->source;
 #endif
@@ -1167,32 +1163,8 @@ void getInputsImpl(SrcKey startSk,
     inputs.emplace(insertAt, Location(Location::Local, loc));
   }
 
-  auto wantInlineReturn = [&] {
-    const int localCount = ni->func()->numLocals();
-    // Inline return causes us to guard this tracelet more precisely. If
-    // we're already chaining to get here, just do a generic return in the
-    // hopes of avoiding further specialization. The localCount constraint
-    // is an unfortunate consequence of the current generic machinery not
-    // working for 0 locals.
-    if (mcg->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
-      return false;
-    }
-    int numRefCounted = 0;
-    for (int i = 0; i < localCount; ++i) {
-      if (localType(i).maybeCounted()) {
-        numRefCounted++;
-      }
-    }
-    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
-  };
-
-  if ((input & AllLocals) && wantInlineReturn()) {
-    ni->inlineReturn = true;
+  if (input & AllLocals) {
     ni->ignoreInnerType = true;
-    int n = ni->func()->numLocals();
-    for (int i = 0; i < n; ++i) {
-      inputs.emplace_back(Location(Location::Local, i));
-    }
   }
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", currentStackOffset);
@@ -1209,17 +1181,18 @@ void getInputsImpl(SrcKey startSk,
   }
 }
 
-void getInputs(SrcKey startSk, NormalizedInstruction& inst,
-               InputInfoVec& infos, const LocalTypeFn& localType) {
+InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction& inst) {
+  InputInfoVec infos;
   // MCGenerator expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
   int stackOff = 1;
-  getInputsImpl(startSk, &inst, stackOff, infos, localType);
+  getInputsImpl(startSk, &inst, stackOff, infos);
   for (auto& info : infos) {
     if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
   }
+  return infos;
 }
 
 bool dontGuardAnyInputs(Op op) {
@@ -1697,10 +1670,7 @@ Translator::translateRegion(const RegionDesc& region,
       // this is true.
       inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
-      InputInfoVec inputInfos;
-      getInputs(startSk, inst, inputInfos, [&] (int i) {
-        return irb.localType(i, DataTypeGeneric);
-      });
+      auto const inputInfos = getInputs(startSk, inst);
 
       // Populate the NormalizedInstruction's input vector, using types from
       // HhbcTranslator.

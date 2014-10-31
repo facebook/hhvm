@@ -396,11 +396,8 @@ public:
 
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
-
-  // freeInline indicates whether we should be doing decrefs inlined in
-  // the TC, or using the generic decref helper.
-  void emitRetC(bool freeInline);
-  void emitRetV(bool freeInline);
+  void emitRetC();
+  void emitRetV();
 
   // miscellaneous ops
   void emitFloor();
@@ -763,7 +760,7 @@ private:
   void emitNativeImplInlined();
   void emitEndInlinedCommon();
   void emitDecRefLocalsInline();
-  void emitRet(Type type, bool freeInline);
+  void emitRet(Type type);
   void emitCmp(Opcode opc);
   void emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);

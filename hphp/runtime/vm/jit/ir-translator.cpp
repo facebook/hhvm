@@ -265,30 +265,12 @@ void IRTranslator::translateJmpNS(const NormalizedInstruction& i) {
   HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
 }
 
-void
-IRTranslator::translateSwitch(const NormalizedInstruction& i) {
+void IRTranslator::translateSwitch(const NormalizedInstruction& i) {
   HHIR_EMIT(Switch, i.immVec, i.imm[1].u_I64A, i.imm[2].u_IVA);
 }
 
-void
-IRTranslator::translateSSwitch(const NormalizedInstruction& i) {
+void IRTranslator::translateSSwitch(const NormalizedInstruction& i) {
   HHIR_EMIT(SSwitch, i.immVec);
-}
-
-/*
- * translateRetC --
- *
- *   Return to caller with the current activation record replaced with the
- *   top-of-stack return value.
- */
-void
-IRTranslator::translateRetC(const NormalizedInstruction& i) {
-  HHIR_EMIT(RetC, i.inlineReturn);
-}
-
-void
-IRTranslator::translateRetV(const NormalizedInstruction& i) {
-  HHIR_EMIT(RetV, i.inlineReturn);
 }
 
 void IRTranslator::translateCreateCont(const NormalizedInstruction& i) {

@@ -978,7 +978,7 @@ void HhbcTranslator::emitDecRefLocalsInline() {
   }
 }
 
-void HhbcTranslator::emitRet(Type type, bool freeInline) {
+void HhbcTranslator::emitRet(Type type) {
   auto const func = curFunc();
   if (func->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
@@ -993,10 +993,24 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   SSATmp* retVal = pop(type, func->isGenerator() ? DataTypeSpecific
                                                  : DataTypeGeneric);
 
-  // Free local variables.
-  if (freeInline) {
+  // Free local variables.  We do the decrefs inline if there are less
+  // refcounted locals than a threshold.
+  auto const localCount = func->numLocals();
+  auto const shouldFreeInline = [&]() -> bool {
+    auto const count = mcg->numTranslations(m_irb->unit().context().srcKey());
+    constexpr int kTooPolyRet = 6;
+    if (localCount > 0 && count > kTooPolyRet) return false;
+    auto numRefCounted = int{0};
+    for (auto i = uint32_t{0}; i < localCount; ++i) {
+      if (m_irb->localType(i, DataTypeGeneric).maybeCounted()) {
+        ++numRefCounted;
+      }
+    }
+    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
+  }();
+  if (shouldFreeInline) {
     emitDecRefLocalsInline();
-    for (unsigned i = 0; i < func->numLocals(); ++i) {
+    for (unsigned i = 0; i < localCount; ++i) {
       m_irb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
     }
   } else {
@@ -1088,24 +1102,24 @@ void HhbcTranslator::emitRet(Type type, bool freeInline) {
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 }
 
-void HhbcTranslator::emitRetC(bool freeInline) {
+void HhbcTranslator::emitRetC() {
   if (curFunc()->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
 
   if (isInlining()) {
     assert(!resumed());
     emitRetFromInlined(Type::Cell);
   } else {
-    emitRet(Type::Cell, freeInline);
+    emitRet(Type::Cell);
   }
 }
 
-void HhbcTranslator::emitRetV(bool freeInline) {
+void HhbcTranslator::emitRetV() {
   assert(!resumed());
   assert(!curFunc()->isResumable());
   if (isInlining()) {
     emitRetFromInlined(Type::BoxedCell);
   } else {
-    emitRet(Type::BoxedCell, freeInline);
+    emitRet(Type::BoxedCell);
   }
 }
 

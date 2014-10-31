@@ -522,23 +522,13 @@ public:
 };
 
 /*
- * Callback used by getInputs() to get the type of a local variable with a
- * given index.
- */
-using LocalTypeFn = std::function<Type(int)>;
-
-/*
- * Get input location info and flags for `ni'.
- *
- * The result is returned via `infos'.  Some flags on `ni' may be updated.
+ * Get input location info and flags for a NormalizedInstruction.  Some flags
+ * on `ni' may be updated.
  *
  * `startSk' should be the SrcKey for the first instruction in the region
- * containing `ni'.
+ * containing the instruction.
  */
-void getInputs(SrcKey startSk,
-               NormalizedInstruction& inst,
-               InputInfoVec& infos,
-               const LocalTypeFn& localType);
+InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction&);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////

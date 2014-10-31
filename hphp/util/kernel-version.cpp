@@ -24,7 +24,7 @@
 namespace HPHP {
 
 void KernelVersion::parse(const char* s) {
-  char dashdot[1];
+  char dashdot[2];
   // Assume no part of the uname string will be more than 128 chars
   char release[128];
   release[0] = 0;

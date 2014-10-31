@@ -164,7 +164,7 @@ struct StringData {
    * decrefing the APCString they are fronting.  This function
    * must be called at request cleanup time to handle this.
    */
-  static void sweepAll();
+  static unsigned sweepAll();
 
   /*
    * Called to return a StringData to the smart allocator.  This is

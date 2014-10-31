@@ -22,11 +22,6 @@ namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 // Class NativeData
 
-// LinkedList node for sweepable native objects
-struct NativeNode {
-  NativeNode *next, *prev;
-};
-
 struct NativeDataInfo {
   typedef void (*InitFunc)(ObjectData *obj);
   typedef void (*CopyFunc)(ObjectData *dest, ObjectData *src);
@@ -44,28 +39,21 @@ struct NativeDataInfo {
   SleepFunc sleep; // serialize($obj)
   WakeupFunc wakeup; // unserialize($obj)
 
-  void setObjectDataAttribute(uint16_t attr) {
-    odattrs |= attr;
-  }
-
   bool isSerializable() const {
     return sleep != nullptr && wakeup != nullptr;
   }
 };
 
 NativeDataInfo* getNativeDataInfo(const StringData* name);
-size_t getNativeDataSize(const Class* cls);
 
 template<class T>
 T* data(ObjectData *obj) {
-  auto node = reinterpret_cast<NativeNode*>(obj) - 1;
-  return reinterpret_cast<T*>(node) - 1;
+  return reinterpret_cast<T*>(obj) - 1;
 }
 
 template<class T>
 const T* data(const ObjectData *obj) {
-  const auto node = reinterpret_cast<const NativeNode*>(obj) - 1;
-  return reinterpret_cast<const T*>(node) - 1;
+  return reinterpret_cast<const T*>(obj) - 1;
 }
 
 void registerNativeDataInfo(const StringData* name,
@@ -170,7 +158,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls);
 void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src);
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
-void sweepNativeData();
+void sweepNativeData(std::vector<NativeNode*>&);
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
 

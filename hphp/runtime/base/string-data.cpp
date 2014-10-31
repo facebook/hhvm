@@ -176,9 +176,11 @@ ALWAYS_INLINE void StringData::delist() {
   prev->next = next;
 }
 
-void StringData::sweepAll() {
+unsigned StringData::sweepAll() {
   auto& head = MM().getStringList();
+  auto count = 0;
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
+    count++;
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
@@ -190,6 +192,7 @@ void StringData::sweepAll() {
     s->sharedPayload()->shared->getHandle()->unreference();
   }
   head.next = head.prev = &head;
+  return count;
 }
 
 //////////////////////////////////////////////////////////////////////

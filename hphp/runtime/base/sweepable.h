@@ -41,7 +41,7 @@ public:
     void delist();
     void init();
   };
-  static void SweepAll();
+  static unsigned SweepAll();
   static void InitSweepableList();
 
 public:

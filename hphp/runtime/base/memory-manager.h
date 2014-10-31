@@ -286,6 +286,13 @@ struct FreeNode {
   uint8_t pad[3], kind; // TODO #5478458 use kind to parse heap
 };
 
+// header for HNI objects with NativeData payloads. see native-data.h
+struct NativeNode {
+  uint32_t sweep_index; // index in MM::m_natives
+  uint32_t obj_offset;
+  uint8_t pad[3], kind;
+};
+
 /*
  * Header MemoryManager uses for StringDatas that wrap APCHandle
  */
@@ -522,6 +529,9 @@ public:
    */
   void resetCouldOOM(bool state = true);
 
+  void addNativeObject(NativeNode*);
+  void removeNativeObject(NativeNode*);
+
   /*
    * Iterator to the allocated slabs. Used to traverse the memory
    * in profiling extensions.
@@ -532,7 +542,6 @@ public:
     bool is_big,
     void* callback_data
   );
-
 
   /*
    * Object tracking keeps instances of object data's by using track/untrack.
@@ -612,9 +621,8 @@ private:
   BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
   MemoryUsageStats m_stats;
-  bool m_statsIntervalActive;
-  bool m_couldOOM{true};
   std::vector<void*> m_slabs;
+  std::vector<NativeNode*> m_natives;
 
 #ifdef USE_JEMALLOC
   uint64_t* m_allocated;
@@ -627,6 +635,8 @@ private:
   static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
+  bool m_statsIntervalActive;
+  bool m_couldOOM{true};
 
 private:
   bool m_sweeping;

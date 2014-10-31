@@ -388,12 +388,15 @@ void MemoryManager::sweep() {
   assert(!sweeping());
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
-  Sweepable::SweepAll();
-  Native::sweepNativeData();
+  UNUSED auto sweepable = Sweepable::SweepAll();
+  UNUSED auto native = m_natives.size();
+  Native::sweepNativeData(m_natives);
+  TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
 }
 
 void MemoryManager::resetAllocator() {
-  StringData::sweepAll();
+  UNUSED auto nstrings = StringData::sweepAll();
+  UNUSED auto nslabs = m_slabs.size();
 
   // free smart-malloc slabs
   for (auto slab : m_slabs) {
@@ -403,7 +406,9 @@ void MemoryManager::resetAllocator() {
   resetStatsImpl(true);
 
   // free large allocation blocks
+  UNUSED size_t nbig = 0;
   for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
+    nbig++;
     next = n->next;
     free(n);
   }
@@ -417,6 +422,7 @@ void MemoryManager::resetAllocator() {
   }
 
   resetCouldOOM();
+  TRACE(1, "reset: strings %u slabs %lu big %lu\n", nstrings, nslabs, nbig);
 }
 
 void MemoryManager::iterate(iterate_callback callback, void* user_data) {
@@ -720,6 +726,23 @@ void smart_free(void* ptr) {
   if (!ptr) return;
   auto& mm = MM();
   mm.smartFree(mm.debugPreFree(ptr, 0, 0));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void MemoryManager::addNativeObject(NativeNode* node) {
+  if (debug) for (UNUSED auto n : m_natives) assert(n != node);
+  node->sweep_index = m_natives.size();
+  m_natives.push_back(node);
+}
+
+void MemoryManager::removeNativeObject(NativeNode* node) {
+  assert(m_natives[node->sweep_index] == node);
+  auto index = node->sweep_index;
+  auto last = m_natives.back();
+  m_natives.pop_back();
+  m_natives[index] = last;
+  last->sweep_index = index;
 }
 
 //////////////////////////////////////////////////////////////////////

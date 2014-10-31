@@ -433,7 +433,7 @@ org\bovigo\vfs\vfsStreamWrapperFileTestCase::file_put_contentsNonExistingFile
 org\bovigo\vfs\vfsStreamWrapperFileTestCase::file_put_contentsNonExistingFileNonWritableDirectory
 .
 org\bovigo\vfs\vfsStreamWrapperFileTestCase::is_file
-E
+.
 org\bovigo\vfs\vfsStreamWrapperFileTestCase::issue13CanNotOverwriteFiles
 .
 org\bovigo\vfs\vfsStreamWrapperFileTestCase::setsPointerToStartWhenOpenedWithModeC
@@ -535,7 +535,7 @@ org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canNotUnlinkDirectoryWithoutRoot
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::canRetrieveFolderOfSameNameAsParentFolder
 .
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::is_dir
-E
+.
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::issue17
 E
 org\bovigo\vfs\vfsStreamWrapperMkDirTestCase::mkDirShouldNotOverwriteExistingDirectories

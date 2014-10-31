@@ -105,7 +105,7 @@ array(2) {
   [0]=>
   string(7) "abc://e"
   [1]=>
-  int(0)
+  int(2)
 }
 string(10) "__destruct"
 array(0) {

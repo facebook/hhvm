@@ -418,7 +418,7 @@ int UserFile::lstat(const String& path, struct stat* buf) {
 }
 
 int UserFile::stat(const String& path, struct stat* buf) {
-  return urlStat(path, buf);
+  return urlStat(path, buf, k_STREAM_URL_STAT_QUIET);
 }
 
 bool UserFile::unlink(const String& filename) {

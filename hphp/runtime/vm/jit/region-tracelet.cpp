@@ -226,15 +226,11 @@ RegionDescPtr RegionFormer::go() {
 
   // If we failed while trying to inline, trigger retry without inlining.
   if (m_region && !m_region->empty() && m_ht.isInlining()) {
-    // Abort in dbg builds. While we can recover from this situation just fine,
-    // it's more often than not indicative of a real bug somewhere else in the
-    // system.
-    assert_flog(
-      false,
-      "selectTracelet: Failed while inlining:\n{}\n{}",
-      show(*m_region), m_ht.unit()
-    );
-
+    // We can recover from this situation just fine, but it's more often
+    // than not indicative of a real bug somewhere else in the system.
+    // TODO: 5515310 investigate whether legit bugs cause this.
+    FTRACE(1, "selectTracelet: Failed while inlining:\n{}\n{}",
+           show(*m_region), m_ht.unit());
     m_inl.disable();
     m_region.reset();
   }

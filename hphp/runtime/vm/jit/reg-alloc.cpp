@@ -62,6 +62,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == CoerceStk ||
       opc == SideExitGuardStk  ||
       opc == DefLabel ||
+      opc == HintStkInner ||
       MInstrEffects::supported(opc),
       "unexpected StkPtr dest from {}",
       opcodeName(opc)

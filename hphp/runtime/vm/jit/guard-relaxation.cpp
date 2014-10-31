@@ -41,17 +41,17 @@ bool shouldHHIRRelaxGuards() {
 #define ND             always_assert(false);
 #define D(t)           return false; // fixed type
 #define DofS(n)        return typeMightRelax(inst->src(n));
-#define DBox(n)        DofS(n)
+#define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
 #define DParam         return true;  // typeParam may relax
 #define DParamPtr(k)   return true;  // typeParam may relax
 #define DUnboxPtr      return typeMightRelax(inst->src(0));
 #define DBoxPtr        return typeMightRelax(inst->src(0));
-#define DLdRef         return true;  // typeParam may relax
+#define DLdRef         return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
 #define DArrElem       assert(inst->is(LdPackedArrayElem));     \
-  return typeMightRelax(inst->src(0));
+                         return typeMightRelax(inst->src(0));
 #define DThis          return false; // fixed type from ctx class
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
@@ -144,19 +144,6 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
       auto newType = getStackValue(inst->src(0), idx).knownType;
 
       retypeLoad(inst, newType);
-      break;
-    }
-
-    case LdRef: {
-      auto inner = inst->src(0)->type().innerType();
-      auto param = inst->typeParam();
-      assert(inner.maybe(param));
-
-      // If the type of the src has been relaxed past the LdRef's type param,
-      // update the type param.
-      if (inner > param) {
-        inst->setTypeParam(inner);
-      }
       break;
     }
 
@@ -281,19 +268,23 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
  * its location and type.
  */
 void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
-  typedef RegionDesc::Location L;
-
+  using L = RegionDesc::Location;
   for (auto const& inst : *unit.entry()) {
-    if (inst.hasTypeParam() && inst.typeParam().equals(Type::Gen)) continue;
-
-    if (inst.op() == GuardLoc) {
+    switch (inst.op()) {
+    case HintLocInner:
+    case GuardLoc:
       func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
-    } else if (inst.op() == GuardStk) {
-      uint32_t offsetFromSp =
-        safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
-      uint32_t offsetFromFp = inst.marker().spOff() - offsetFromSp;
-      func(L::Stack{offsetFromSp, offsetFromFp},
-           inst.typeParam());
+      break;
+    case HintStkInner:
+    case GuardStk:
+      {
+        uint32_t offsetFromSp =
+          safe_cast<uint32_t>(inst.extra<StackOffset>()->offset);
+        uint32_t offsetFromFp = inst.marker().spOff() - offsetFromSp;
+        func(L::Stack{offsetFromSp, offsetFromFp}, inst.typeParam());
+      }
+      break;
+    default: break;
     }
   }
 }

@@ -283,7 +283,7 @@ void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
 }
 
 bool insertLoopPreHeaders(IRUnit& unit) {
-  ITRACE(2, "making preheaders");
+  ITRACE(2, "making preheaders\n");
   Trace::Indent _i;
 
   bool changed = false;

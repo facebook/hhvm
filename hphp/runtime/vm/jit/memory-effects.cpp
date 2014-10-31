@@ -256,13 +256,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckNonNull:
   case CheckNullptr:
   case CheckPackedArrayBounds:
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
   case CheckRefs:
   case CheckStaticLocInit:
   case CheckStk:
   case CheckSurpriseFlags:
   case CheckType:
+  case CheckTypePackedArrayElem:
   case CIterFree:
   case Clone:
   case ClosureStaticLocInit:
@@ -370,6 +369,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GuardRefs:
   case GuardStk:
   case Halt:
+  case HintLocInner:
+  case HintStkInner:
   case IncProfCounter:
   case IncRef:
   case IncRefCtx:
@@ -389,6 +390,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:
   case IsNType:
+  case IsPackedArrayElemNull:
   case IsScalarType:
   case IsType:
   case IsWaitHandle:

@@ -38,16 +38,20 @@ void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
 template<class Lambda>
 void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
                                             Lambda genFunc) {
-  auto exit = makeExit();
+  auto const exit = makeExit();
+  auto const sp   = spillStack();
+  auto const pred = getStackInnerTypePrediction(sp, 0);
+  auto const src  = topV();
 
-  SSATmp* src = topV();
-  Type type = src->type();
+  if (!pred.subtypeOfAny(Type::Arr, Type::Obj)) {
+    PUNT(MIterInit-unsupportedSrcType);
+  }
 
-  assert(type.isBoxed());
-  m_irb->constrainValue(gen(LdRef, type.innerType(), exit, src),
-                        DataTypeSpecific);
-  SSATmp* res = genFunc(src);
-  SSATmp* out = popV();
+  // Guard the inner type before we call the helper.
+  gen(LdRef, pred, exit, src);
+
+  auto const res = genFunc(src, pred);
+  auto const out = popV();
   gen(DecRef, out);
   emitJmpCondHelper(offset, true, jmpFlags, res);
 }
@@ -191,10 +195,10 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
                                    uint32_t valLocalId,
                                    JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
+  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src, Type type) {
     return gen(
       MIterInit,
-      Type::Bool,
+      type,
       catchBlock,
       IterData(iterId, -1, valLocalId),
       src,
@@ -209,10 +213,10 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
                                     uint32_t keyLocalId,
                                     JmpFlags jmpFlags) {
   auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
+  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src, Type type) {
     return gen(
       MIterInitK,
-      Type::Bool,
+      type,
       catchBlock,
       IterData(iterId, keyLocalId, valLocalId),
       src,

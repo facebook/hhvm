@@ -283,7 +283,11 @@ bool RegionFormer::prepareInstruction() {
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());
   for (unsigned i = 0; i < inputInfos.size(); ++i) {
-    if (!consumeInput(i, inputInfos[i])) return false;
+    if (!consumeInput(i, inputInfos[i])) {
+      FTRACE(2, "Stopping tracelet consuming {} input {}\n",
+        opcodeToName(m_inst.op()), i);
+      return false;
+    }
   }
 
   if (inputInfos.needsRefCheck) {
@@ -541,12 +545,30 @@ void RegionFormer::recordDependencies() {
     changed = relaxGuards(unit, *m_ht.irBuilder().guards(), flags);
   }
 
+  auto guardMap = std::map<RegionDesc::Location,Type>{};
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     if (type <= Type::Cls) return;
-    RegionDesc::TypePred pred{loc, type};
+    auto inret = guardMap.insert(std::make_pair(loc, type));
+    if (inret.second) return;
+    auto& oldTy = inret.first->second;
+    if (oldTy == Type::Gen) {
+      // This is the case that we see an inner type prediction for a GuardLoc
+      // that got relaxed to Gen.
+      return;
+    }
+    oldTy &= type;
+  });
+
+  for (auto& kv : guardMap) {
+    if (kv.second == Type::Gen) {
+      // Guard was relaxed to Gen---don't record it.
+      continue;
+    }
+    auto const pred = RegionDesc::TypePred { kv.first, kv.second };
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
-  });
+  }
+
   if (changed) {
     printUnit(3, unit, " after guard relaxation ", nullptr,
               m_ht.irBuilder().guards());

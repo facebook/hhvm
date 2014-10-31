@@ -50,6 +50,8 @@ NOOP_OPCODE(DefLabel)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
+NOOP_OPCODE(HintLocInner)
+NOOP_OPCODE(HintStkInner)
 
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.

@@ -108,6 +108,7 @@ struct IRBuilder {
   bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
+  Type predictedInnerType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
@@ -419,6 +420,7 @@ private:
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
+  SSATmp*   preOptimizeHintLocInner(IRInstruction*);
 
   SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
                                     Type oldType,

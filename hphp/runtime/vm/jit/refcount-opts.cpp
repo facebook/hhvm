@@ -1515,13 +1515,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
     consumeValue(value);
   }
 
-  void updateLocalRefValue(uint32_t id, unsigned,
-                           SSATmp* oldVal, SSATmp* newVal) override {
-    ITRACE(3, "replacing {} with {} in local {} for updateLocalRefValue\n",
-           *oldVal, *newVal, id);
-    replaceValue(oldVal, newVal);
-  }
-
   /* The IRUnit being processed and its blocks */
   const IRUnit& m_unit;
   const BlockList& m_blocks;

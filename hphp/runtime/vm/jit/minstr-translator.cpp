@@ -69,7 +69,13 @@ void MInstrEffects::get(const IRInstruction* inst, LocalStateHook& hook) {
 
     MInstrEffects effects(inst);
     if (effects.baseTypeChanged || effects.baseValChanged) {
-      hook.setLocalType(loc, effects.baseType.derefIfPtr());
+      auto const ty = effects.baseType.derefIfPtr();
+      if (ty.isBoxed()) {
+        hook.setLocalType(loc, Type::BoxedInitCell);
+        hook.setBoxedLocalPrediction(loc, ty);
+      } else {
+        hook.setLocalType(loc, ty);
+      }
     }
   }
 }
@@ -408,6 +414,7 @@ void HhbcTranslator::MInstrTranslator::emitMPre() {
   // separately from m_ni.immVecM, so input indices (iInd) and member indices
   // (mInd) commonly differ.  Additionally, W members have no corresponding
   // inputs, so it is necessary to track the two indices separately.
+  m_simpleOp = computeSimpleCollectionOp();
   emitBaseOp();
   ++m_iInd;
 
@@ -581,106 +588,118 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
 
 void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   const MInstrAttr& mia = m_mii.getAttr(m_ni.immVec.locationCode());
-  const DynLocation& base = *m_ni.inputs[m_iInd];
+  const DynLocation& baseDL = *m_ni.inputs[m_iInd];
   // We use DataTypeGeneric here because we might not care about the type. If
   // we do, it's constrained further.
-  auto baseType = getBase(DataTypeGeneric)->type();
+  auto base = getBase(DataTypeGeneric);
+  auto baseType = base->type();
+  assert(baseType.isBoxed() || baseType.notBoxed());
 
-  if (base.location.isLocal()) {
+  if (baseDL.location.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
     if (baseType <= Type::Uninit) {
       if (mia & MIA_warn) {
         gen(RaiseUninitLoc, makeEmptyCatch(),
-            cns(m_ht.curFunc()->localVarName(base.location.offset)));
+            cns(m_ht.curFunc()->localVarName(baseDL.location.offset)));
       }
       if (mia & MIA_define) {
         // We care whether or not the local is Uninit, and
         // CountnessInit will tell us that.
-        m_irb.constrainLocal(base.location.offset, DataTypeSpecific,
+        m_irb.constrainLocal(baseDL.location.offset, DataTypeSpecific,
                             "emitBaseLCR: Uninit base local");
+        base = cns(Type::InitNull);
+        baseType = Type::InitNull;
         gen(
           StLoc,
-          LocalId(base.location.offset),
+          LocalId(baseDL.location.offset),
           m_irb.fp(),
-          cns(Type::InitNull)
+          base
         );
-        baseType = Type::InitNull;
       }
     }
   }
 
-  // If the base is a box with a type that's changed, we need to bail out of
-  // the tracelet and retranslate. This is the first code emitted for the
-  // minstr so it's ok to side-exit here.
+  /*
+   * If the base is boxed, and from a local, we can do a better translation
+   * using the inner type after guarding.  If we're going to do a generic
+   * translation that uses a pointer to the local we still want this
+   * LdRef---some of the translations will be smarter if they know the inner
+   * type.  This is the first code emitted for the minstr so it's ok to
+   * side-exit here.
+   */
   Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
-  if ((baseType.subtypeOfAny(Type::Obj, Type::BoxedObj) &&
-       mcodeIsProp(m_ni.immVecM[0])) ||
-      simpleCollectionOp() != SimpleOp::None) {
-    // In these cases we can pass the base by value, after unboxing if needed.
-    m_base = m_ht.unbox(getBase(DataTypeSpecific), failedRef);
+  if (baseType.isBoxed() && baseDL.location.isLocal()) {
+    base = gen(
+      LdRef,
+      m_irb.predictedInnerType(baseDL.location.offset),
+      failedRef,
+      base
+    );
+    baseType = base->type();
+  }
 
-    // Register that we care about the specific type of the base, and might
-    // care about its specialized type.
+  // Check for common cases where we can pass the base by value, we unboxed
+  // above if it was needed.
+  if ((baseType.subtypeOfAny(Type::Obj) && mcodeIsProp(m_ni.immVecM[0])) ||
+      m_simpleOp != SimpleOp::None) {
+    // Register that we care about the specific type of the base, though, and
+    // might care about its specialized type.
+    m_base = base;
     constrainBase(DataTypeSpecific);
     specializeBaseIfPossible(baseType);
-  } else {
-    // Everything else is passed by pointer. We don't have to worry about
-    // unboxing here, since all the generic helpers understand boxed bases.
-    if (baseType.isBoxed()) {
-      SSATmp* box = getBase(DataTypeSpecific);
-      Type innerType = baseType.innerType();
-      assert(box->isA(Type::BoxedCell));
-      assert(innerType.isKnownDataType() ||
-             innerType == Type::Cell || innerType == Type::InitCell);
-
-      // Guard that the inner type hasn't changed. Even though we don't use the
-      // unboxed value, some emit* methods change their behavior based on the
-      // inner type.
-      auto inner = gen(LdRef, innerType, failedRef, box);
-
-      // TODO(t2598894): We do this for consistency with the old guard
-      // relaxation code, but may change it in the future.
-      m_irb.constrainValue(inner, DataTypeSpecific);
-    }
-
-    if (base.location.space == Location::Local) {
-      m_base = m_ht.ldLocAddr(base.location.offset, DataTypeSpecific);
-    } else {
-      assert(base.location.space == Location::Stack);
-      // Make sure the stack is clean before getting a pointer to one of its
-      // elements.
-      m_ht.spillStack();
-      assert(m_stackInputs.count(m_iInd));
-      m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeSpecific);
-    }
-    assert(m_base->type().isPtr());
+    return;
   }
+
+  // Everything else is passed by pointer. We don't have to worry about
+  // unboxing, since all the generic helpers understand boxed bases. They still
+  // may rely on the LdRef guard above, though; the various emit* functions may
+  // do smarter things based on the guarded type.
+  if (baseDL.location.space == Location::Local) {
+    m_base = m_ht.ldLocAddr(baseDL.location.offset, DataTypeSpecific);
+  } else {
+    assert(baseDL.location.space == Location::Stack);
+    // Make sure the stack is clean before getting a pointer to one of its
+    // elements.
+    m_ht.spillStack();
+    assert(m_stackInputs.count(m_iInd));
+    m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeSpecific);
+  }
+  assert(m_base->type().isPtr());
 
   // TODO(t2598894): We do this for consistency with the old guard relaxation
   // code, but may change it in the future.
   constrainBase(DataTypeSpecific);
 }
 
-// Is the current instruction a 1-element simple collection (includes Array),
-// operation?
+// Compute whether the current instruction a 1-element simple collection
+// (includes Array) operation.
 HhbcTranslator::MInstrTranslator::SimpleOp
-HhbcTranslator::MInstrTranslator::simpleCollectionOp() {
+HhbcTranslator::MInstrTranslator::computeSimpleCollectionOp() {
   // DataTypeGeneric is used in here to avoid constraining the base in case we
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
-  auto const base = getInput(m_mii.valCount(), DataTypeGeneric);
+  auto const base = getBase(DataTypeGeneric); // XXX: generates unneeded instrs
+  if (!base->type().isBoxed() && base->type().maybeBoxed()) {
+    // We might be doing a Base NL or something similar.  Either way we can't
+    // do a simple op if we have a mixed boxed/unboxed type.
+    return SimpleOp::None;
+  }
 
-  auto const baseType = base->type().maybeBoxed()
-                          ? ldRefReturn(base->type().unbox())
-                          : base->type();
-  HPHP::Op op = m_ni.mInstrOp();
-  bool readInst = (op == OpCGetM || op == OpIssetM);
-  if ((op == OpSetM || readInst) &&
-      isSimpleBase() &&
-      isSingleMember()) {
+  auto const baseType = [&] {
+    const DynLocation& baseDL = *m_ni.inputs[m_iInd];
+    // Before we do any simpleCollectionOp on a local base, we will always emit
+    // the appropriate LdRef guard to allow us to use a predicted inner type.
+    // So when calculating the SimpleOp assume that type.
+    if (base->type().maybeBoxed() && baseDL.location.isLocal()) {
+      return m_irb.predictedInnerType(baseDL.location.offset);
+    }
+    return base->type();
+  }();
 
+  auto const op = m_ni.mInstrOp();
+  bool const readInst = (op == OpCGetM || op == OpIssetM);
+  if ((op == OpSetM || readInst) && isSimpleBase() && isSingleMember()) {
     if (baseType <= Type::Arr) {
-      // Use the raw base type to figure out if it is known to be packed.
       auto const isPacked =
         baseType.isSpecialized() &&
         baseType.hasArrayKind() &&
@@ -745,7 +764,7 @@ void HhbcTranslator::MInstrTranslator::specializeBaseIfPossible(Type baseType) {
 }
 
 bool HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
-  switch (simpleCollectionOp()) {
+  switch (m_simpleOp) {
     case SimpleOp::None:
       return false;
 
@@ -761,13 +780,11 @@ bool HhbcTranslator::MInstrTranslator::constrainCollectionOpBase() {
 
     case SimpleOp::Vector:
     case SimpleOp::Map:
-    case SimpleOp::Pair: {
-      SSATmp* base = getInput(m_mii.valCount(), DataTypeGeneric);
-      auto baseType = ldRefReturn(base->type().unbox());
-      always_assert(baseType < Type::Obj);
-      constrainBase(TypeConstraint(baseType.getClass()));
+    case SimpleOp::Pair:
+      always_assert(m_base->type() < Type::Obj &&
+                    m_base->type().isSpecialized());
+      constrainBase(TypeConstraint(m_base->type().getClass()));
       return true;
-    }
   }
 
   not_reached();
@@ -1424,7 +1441,7 @@ void HhbcTranslator::MInstrTranslator::emitPairGet(SSATmp* key) {
 void HhbcTranslator::MInstrTranslator::emitCGetElem() {
   auto const key = getKey();
 
-  switch (simpleCollectionOp()) {
+  switch (m_simpleOp) {
   case SimpleOp::Array:
     m_result = emitArrayGet(key);
     break;
@@ -1475,7 +1492,7 @@ void HhbcTranslator::MInstrTranslator::emitPackedArrayIsset() {
 }
 
 void HhbcTranslator::MInstrTranslator::emitIssetElem() {
-  switch (simpleCollectionOp()) {
+  switch (m_simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
     m_result = gen(ArrayIsset, makeCatch(), m_base, getKey());
@@ -1624,7 +1641,7 @@ void HhbcTranslator::MInstrTranslator::emitSetElem() {
   SSATmp* value = getValue();
   SSATmp* key = getKey();
 
-  switch (simpleCollectionOp()) {
+  switch (m_simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
     emitArraySet(key, value);

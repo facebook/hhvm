@@ -79,17 +79,24 @@ SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
 
 struct StackValueInfo {
   explicit StackValueInfo(SSATmp*);
-  explicit StackValueInfo(IRInstruction*, Type);
+  explicit StackValueInfo(IRInstruction*, Type, Type = Type::Bottom);
 
-  SSATmp* value;   // may be nullptr
-  Type knownType;  // the type of the value, for when value is nullptr
-  bool spansCall;  // whether the tmp's definition was above a call
-  IRInstruction* typeSrc; // the instruction that gave us knownType
+  SSATmp* value;       // may be nullptr
+  Type knownType;      // the type of the value, for when value is nullptr
+  Type predictedInner; // prediction for the inner type, if type is a ref
+  bool spansCall;      // whether the tmp's definition was above a call
+  IRInstruction* typeSrc; // the instruction that gave us knownType; or null
 };
 
 std::string show(const StackValueInfo&);
 
 StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
+
+/*
+ * Look up a predicted type for a stack offset that is known to be boxed.  (We
+ * generally know this from bytecode invariants.)
+ */
+Type getStackInnerTypePrediction(SSATmp* stack, uint32_t index);
 
 //////////////////////////////////////////////////////////////////////
 

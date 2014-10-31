@@ -1156,7 +1156,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DBox(n)         return boxType(inst->src(n)->type());
+#define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
 #define DParam          return inst->typeParam();

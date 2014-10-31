@@ -256,6 +256,12 @@ be rechecked before each use.
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the guarded local has type T.
 
+| HintLocInner<T,localId>, ND, S(FramePtr), E
+
+  Hint that the inner type of a BoxedCell in localId is likely type T, where T
+  is a subtype of BoxedCell. The type must be guarded on before it is known to
+  be true (via LdRef).
+
 | CheckLoc<T,localId>, ND, S(FramePtr), B|E
 
   Check that type of the given localId on the frame S0 is T; if not, branch to
@@ -266,9 +272,10 @@ be rechecked before each use.
 
 | AssertLoc<T,localId>, ND, S(FramePtr), E
 
-  Asserts that type of the supplied local on the frame S0 is T. This is used as
-  a hint for local type information, and is similar to GuardLoc except it
-  doesn't imply a runtime check and cannot cause control flow.
+  Asserts that type of the supplied local on the frame S0 is T. This is used
+  for local type information, and is similar to GuardLoc except it doesn't
+  imply a runtime check (the assertion must've already been proven to be true)
+  and cannot cause control flow.
 
   Returns a new frame pointer representing the same frame as S0 but with the
   knowledge that the asserted local has type T.
@@ -281,6 +288,15 @@ be rechecked before each use.
 
   Returns a new StkPtr that represents the same stack but with the knowledge
   that the slot at the index S1 has type T.
+
+| HintStkInner<T,offset>, D(StkPtr), S(StkPtr), E
+
+  Hint that the inner type of the BoxedInitCell on the stack pointed to by S0
+  at offset (in cells) is T. The type must be guarded on before it is known to
+  be true (via LdRef).
+
+  Returns a new StkPtr that represents the same stack but with the prediction
+  information.
 
 | CheckStk<T,offset>, D(StkPtr), S(StkPtr), B|E
 
@@ -1466,11 +1482,10 @@ ranges due to eagerly loaded values at the start of the tracelet.
   for pseudo-mains. We don't optimize StGbl the same way as StLoc, as we need
   intraprocedural analysis to know whether the store is truly dead.
 
-| StRef, DBox(1), S(BoxedCell) S(Cell), E|CRc|P
+| StRef, ND, S(BoxedCell) S(Cell), E|CRc
 
   Store the value in S1 into the RefData pointed to by S0. Stores the
-  RefData::m_type also. Returns a new value for S0, which will now have the
-  type of S1 after boxing.
+  RefData::m_type also.
 
 | SpillStack, D(StkPtr), S(StkPtr) C(Int) SVar(StackElem), CRc
 
@@ -2168,9 +2183,9 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
 | WIterInitK<IterData>, D(Bool), S(Arr,Obj) S(FramePtr), Er|E|CRc
 
-| MIterInit<IterData>,  D(Bool), S(BoxedCell) S(FramePtr), Er|E
+| MIterInit<T,IterData>,  D(Bool), S(BoxedCell) S(FramePtr), Er|E
 
-| MIterInitK<IterData>, D(Bool), S(BoxedCell) S(FramePtr), Er|E
+| MIterInitK<T,IterData>, D(Bool), S(BoxedCell) S(FramePtr), Er|E
 
   <IterData> consists of three indices, iterId, keyId and valId. iterId is
   the index of the iterator variable, keyId and valId are indices of local
@@ -2196,7 +2211,9 @@ ranges due to eagerly loaded values at the start of the tracelet.
   reference, and non-referenced array elements by value.
 
   The MIterInit and MIterInitK instructions always copy the array element by
-  reference.
+  reference, and take a type parameter indicating the inner type of S0.  (This
+  must have been proven via guards prior to running this opcode.)  Right now T
+  must be Obj or Arr.
 
   This instruction has the ConsumesRC property because it either decrements the
   reference count of S0 or stores a reference to S0 into the new iterator.
@@ -2411,9 +2428,11 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
   replace S0.
 
-| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedArr), E|CRc|K|Er
+| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), E|CRc|K|Er
 
-  Like ArraySet, but for binding operations on the array.
+  Like ArraySet, but for binding operations on the array. The parameter in S3
+  must point to a RefData with an array type when this instruction is executed,
+  and it must be the same array that is in S0.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), E|Er
 

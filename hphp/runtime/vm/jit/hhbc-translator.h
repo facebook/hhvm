@@ -667,7 +667,7 @@ private:
       // simple opcode on Map* (c_Pair*)
       Pair
     };
-    SimpleOp simpleCollectionOp();
+    SimpleOp computeSimpleCollectionOp();
     // Returns true if it successfully constrained the base, false otherwise.
     bool constrainCollectionOpBase();
     void specializeBaseIfPossible(Type baseType);
@@ -708,6 +708,10 @@ private:
      * for the whole instruction and is updated as the translator makes
      * progress. */
     SSATmp* m_base;
+
+    /* Value computed before we do anything to allow better translations for
+     * common, simple operations. */
+    SimpleOp m_simpleOp{SimpleOp::None};
 
     /* The result of the vector instruction. nullptr if the current instruction
      * doesn't produce a result. */

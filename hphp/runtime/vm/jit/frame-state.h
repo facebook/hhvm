@@ -100,13 +100,14 @@ struct LocalStateHook {
   virtual void setLocalValue(uint32_t id, SSATmp* value) {}
   virtual void refineLocalValue(uint32_t id, unsigned inlineIdx,
                                 SSATmp* oldVal, SSATmp* newVal) {}
-  virtual void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) {}
-  virtual void updateLocalRefValue(uint32_t id, unsigned inlineIdx,
-                                   SSATmp* oldRef, SSATmp* newRef) {}
+  virtual void killLocalForCall(uint32_t id,
+                                unsigned inlineIdx,
+                                SSATmp* val) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
   virtual void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {}
   virtual void setLocalType(uint32_t id, Type type) {}
+  virtual void setBoxedLocalPrediction(uint32_t id, Type type) {}
   virtual void setLocalTypeSource(uint32_t id, TypeSource typeSrc) {}
 };
 
@@ -228,6 +229,7 @@ struct FrameState final : private LocalStateHook {
   EvalStack& evalStack() { return m_evalStack; }
 
   Type localType(uint32_t id) const;
+  Type predictedInnerType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
@@ -262,6 +264,15 @@ struct FrameState final : private LocalStateHook {
     Type type{Type::Gen};
 
     /*
+     * Prediction for the type of a local, if it's boxed, otherwise Bottom.
+     *
+     * Invariants:
+     *   always a subtype of `type'
+     *   always a subtype of BoxedInitCell
+     */
+    Type boxedPrediction{Type::Bottom};
+
+    /*
      * The sources of the currently known type. They may be values. If
      * the value is unavailable, we won't hold onto it in the value field, but
      * we'll keep it around in typeSrcs for guard relaxation.
@@ -269,7 +280,9 @@ struct FrameState final : private LocalStateHook {
     TypeSourceSet typeSrcs;
 
     bool operator==(const LocalState& b) const {
-      if (value != b.value || type != b.type ||
+      if (value != b.value ||
+          type != b.type ||
+          boxedPrediction != b.boxedPrediction ||
           typeSrcs.size() != b.typeSrcs.size()) {
         return false;
       }
@@ -338,6 +351,8 @@ struct FrameState final : private LocalStateHook {
     Snapshot out;
   };
 
+private:
+  bool checkInvariants() const;
   /*
    * Clear the current state, but keeps the state associated with all
    * other blocks intact.
@@ -352,11 +367,10 @@ struct FrameState final : private LocalStateHook {
   void refineLocalValue(uint32_t id, unsigned inlineIdx,
                         SSATmp* oldVal, SSATmp* newVal) override;
   void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
-  void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
-                           SSATmp* newRef) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
   void setLocalType(uint32_t id, Type type) override;
+  void setBoxedLocalPrediction(uint32_t id, Type type) override;
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
 
   LocalVec& locals(unsigned inlineIdx);
@@ -370,8 +384,7 @@ struct FrameState final : private LocalStateHook {
   void killLocalsForCall(LocalStateHook& hook, bool skipThisFrame) const;
   void updateLocalValues(LocalStateHook& hook,
                          SSATmp* oldVal, SSATmp* newVal) const;
-  void updateLocalRefValues(LocalStateHook& hook,
-                            SSATmp* oldRef, SSATmp* newRef) const;
+  void updateLocalRefPredictions(LocalStateHook&, SSATmp*, SSATmp*) const;
   void dropLocalRefsInnerTypes(LocalStateHook& hook) const;
 
   void cseInsert(const IRInstruction* inst);

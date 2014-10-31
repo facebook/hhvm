@@ -308,6 +308,8 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
+NOOP_OPCODE(HintLocInner)
+NOOP_OPCODE(HintStkInner)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -2469,11 +2471,9 @@ void CodeGenerator::cgStMem(IRInstruction* inst) {
 
 void CodeGenerator::cgStRef(IRInstruction* inst) {
   always_assert(!srcLoc(inst, 1).isFullSIMD());
-  auto destReg = dstLoc(inst, 0).reg();
   auto ptr = srcLoc(inst, 0).reg();
   auto off = RefData::tvOffset();
   cgStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Full);
-  vmain() << copy{ptr, destReg};
 }
 
 int CodeGenerator::iterOffset(const BCMarker& marker, uint32_t id) {
@@ -5433,17 +5433,15 @@ void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
-  auto             fpReg = srcLoc(inst, 1).reg();
-  int         iterOffset = this->iterOffset(inst->marker(),
-                                            inst->extra<IterData>()->iterId);
-  int     valLocalOffset = localOffset(inst->extra<IterData>()->valId);
-  SSATmp*            src = inst->src(0);
+  auto const fpReg = srcLoc(inst, 1).reg();
+  auto const iterOffset = this->iterOffset(inst->marker(),
+                                           inst->extra<IterData>()->iterId);
+  auto const valLocalOffset = localOffset(inst->extra<IterData>()->valId);
 
   auto args = argGroup(inst);
   args.addr(fpReg, iterOffset).ssa(0/*src*/);
 
-  assert(src->type().isBoxed());
-  auto innerType = src->type().innerType();
+  auto innerType = inst->typeParam();
   assert(innerType.isKnownDataType());
 
   if (innerType <= Type::Arr) {
@@ -5458,25 +5456,26 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
                  callDest(inst),
                  SyncOptions::kSyncPoint,
                  args);
-  } else if (innerType <= Type::Obj) {
-    args.immPtr(getClass(inst->marker())).addr(fpReg, valLocalOffset);
-    if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-    } else {
-      args.imm(0);
-    }
-    // new_miter_object decrefs its src object if it propagates an
-    // exception out, so we use kSyncPointAdjustOne, which adjusts the
-    // stack pointer by 1 stack element on an unwind, skipping over
-    // the src object.
-    cgCallHelper(vmain(),
-                 CppCall::direct(new_miter_object),
-                 callDest(inst),
-                 SyncOptions::kSyncPointAdjustOne,
-                 args);
-  } else {
-    CG_PUNT(inst->marker(), MArrayIter-Unknown);
+    return;
   }
+
+  always_assert(innerType <= Type::Obj);
+
+  args.immPtr(getClass(inst->marker())).addr(fpReg, valLocalOffset);
+  if (inst->op() == MIterInitK) {
+    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
+  } else {
+    args.imm(0);
+  }
+  // new_miter_object decrefs its src object if it propagates an
+  // exception out, so we use kSyncPointAdjustOne, which adjusts the
+  // stack pointer by 1 stack element on an unwind, skipping over
+  // the src object.
+  cgCallHelper(vmain(),
+               CppCall::direct(new_miter_object),
+               callDest(inst),
+               SyncOptions::kSyncPointAdjustOne,
+               args);
 }
 
 void CodeGenerator::cgIterNext(IRInstruction* inst) {

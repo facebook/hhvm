@@ -46,8 +46,9 @@ public:
   // implementing RequestHandler
   void setupRequest(Transport* transport) override;
   void teardownRequest(Transport* transport) noexcept override;
-  void handleRequest(Transport *transport) override;
-  void abortRequest(Transport *transport) override;
+  void handleRequest(Transport* transport) override;
+  void abortRequest(Transport* transport) override;
+  void logToAccessLog(Transport* transport) override;
 
   // for internal invoke of a special URL
   void disablePathTranslation() { m_pathTranslation = false;}

@@ -123,6 +123,11 @@ static void malloc_write_cb(void *cbopaque, const char *s) {
 extern unsigned low_arena;
 #endif
 
+void AdminRequestHandler::logToAccessLog(Transport* transport) {
+  GetAccessLog().onNewRequest();
+  GetAccessLog().log(transport, nullptr);
+}
+
 void AdminRequestHandler::setupRequest(Transport* transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();

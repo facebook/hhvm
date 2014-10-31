@@ -118,6 +118,11 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   transport->sendRaw((void*)data, len, 200, compressed);
 }
 
+void HttpRequestHandler::logToAccessLog(Transport* transport) {
+  GetAccessLog().onNewRequest();
+  GetAccessLog().log(transport, VirtualHost::GetCurrent());
+}
+
 void HttpRequestHandler::setupRequest(Transport* transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
@@ -127,12 +132,12 @@ void HttpRequestHandler::setupRequest(Transport* transport) {
 
 void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   SCOPE_EXIT { always_assert(MM().empty()); };
+
   const VirtualHost *vhost = VirtualHost::GetCurrent();
   GetAccessLog().log(transport, vhost);
-  /*
-   * HPHP logs may need to access data in ServerStats, so we have to
-   * clear the hashtable after writing the log entry.
-   */
+
+  // HPHP logs may need to access data in ServerStats, so we have to clear the
+  // hashtable after writing the log entry.
   ServerStats::Reset();
   m_sourceRootInfo.clear();
   hphp_session_exit();

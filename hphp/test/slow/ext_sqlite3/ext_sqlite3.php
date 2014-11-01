@@ -19,8 +19,7 @@ function sumlen_fini($a) {
  return (int)$a;
 }
 
-$db = new SQLite3(':memory:');
-//$db->open(":memory:test");
+$db = new SQLite3(':memory:test');
 $db->exec("DROP TABLE IF EXISTS foo");
 $db->exec("CREATE TABLE foo (bar STRING)");
 

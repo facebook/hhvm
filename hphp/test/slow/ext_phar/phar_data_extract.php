@@ -46,5 +46,17 @@ foreach ($files as $path => $file) {
 
   var_dump($file);
   var_dump(getFileCount($tmpdir));
+
+  $delIter = new RecursiveIteratorIterator(
+    new RecursiveDirectoryIterator($tmpdir, FilesystemIterator::SKIP_DOTS),
+    RecursiveIteratorIterator::CHILD_FIRST
+  );
+  foreach($delIter as $info) {
+    if ($info->isDir()) {
+      rmdir($info->getPathname());
+    } else {
+      unlink($path);
+    }
+  }
   rmdir($tmpdir);
 }

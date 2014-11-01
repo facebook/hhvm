@@ -2473,6 +2473,37 @@ void Class::setRequirements() {
       }
       reqBuilder.add(reqName, &req);
     }
+  } else if (RuntimeOption::RepoAuthoritative) {
+    // The flattening of traits may result in requirements migrating from
+    // the trait's declaration into that of the "using" class.
+    for (auto const& req : m_preClass->requirements()) {
+      auto const reqName = req.name();
+      auto const reqCls = Unit::loadClass(reqName);
+      if (!reqCls) {
+        raise_error("%s '%s' required by trait '%s' cannot be loaded",
+                    req.is_extends() ? "Class" : "Interface",
+                    reqName->data(),
+                    m_preClass->name()->data());
+      }
+
+      if (req.is_extends()) {
+        if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+          raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      } else {
+        assert(req.is_implements());
+        if (!(reqCls->attrs() & AttrInterface)) {
+          raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+                      m_preClass->name()->data(),
+                      reqName->data(),
+                      reqName->data());
+        }
+      }
+      reqBuilder.add(reqName, &req);
+    }
   }
 
   m_requirements.create(reqBuilder);
@@ -2510,21 +2541,30 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
 
   auto const reqName = req->name();
   if (req->is_implements()) {
-    // "require implements" is only allowed on traits; in repo mode,
-    // m_usedTraits is expected to be empty, but errors due to unsatisfied
-    // "require implements" requirements are expected to be taken care of
-    // as part of RepoAuthoritative mode trait flattening.
-    assert(!RuntimeOption::RepoAuthoritative);
-    assert(m_extra && m_extra->m_usedTraits.size() > 0);
+    // "require implements" is only allowed on traits.
 
+    assert(RuntimeOption::RepoAuthoritative ||
+           (m_extra && m_extra->m_usedTraits.size() > 0));
     for (auto const& traitCls : m_extra->m_usedTraits) {
       if (traitCls->allRequirements().contains(reqName)) {
         raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
                     m_preClass->name()->data(),
                     reqName->data(),
-                    traitCls->preClass()->name()->data(),
-                    "use");
+                    traitCls->preClass()->name()->data());
       }
+    }
+
+    if (RuntimeOption::RepoAuthoritative) {
+      // As a result of trait flattening, the PreClass of this normal class
+      // contains a requirement. To save space, we don't include the source
+      // trait in the requirement. For details, see
+      // ClassScope::importUsedTraits in the compiler.
+      assert(!m_extra || m_extra->m_usedTraits.size() == 0);
+      assert(m_preClass->requirements().size() > 0);
+      raise_error(Strings::TRAIT_REQ_IMPLEMENTS,
+                  m_preClass->name()->data(),
+                  reqName->data(),
+                  "<<flattened>>");
     }
 
     always_assert(false); // requirements cannot spontaneously generate
@@ -2547,9 +2587,18 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       raise_error(Strings::TRAIT_REQ_EXTENDS,
                   m_preClass->name()->data(),
                   reqName->data(),
-                  traitCls->preClass()->name()->data(),
-                  "use");
+                  traitCls->preClass()->name()->data());
     }
+  }
+
+  if (RuntimeOption::RepoAuthoritative) {
+    // A result of trait flattening, as with the is_implements case above
+    assert(!m_extra || m_extra->m_usedTraits.size() == 0);
+    assert(m_preClass->requirements().size() > 0);
+    raise_error(Strings::TRAIT_REQ_EXTENDS,
+                m_preClass->name()->data(),
+                reqName->data(),
+                "<<flattened>>");
   }
 
   // calls to this method are expected to come as a result of an error due

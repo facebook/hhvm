@@ -160,7 +160,7 @@ struct IRBuilder {
    *
    * gen(CodeForMainBlock, ...);
    * {
-   *   BlockPusher bp(m_irb, marker, exitBlock);
+   *   BlockPusher<PauseExit> bp(m_irb, marker, exitBlock);
    *   gen(CodeForExitBlock, ...);
    * }
    * gen(CodeForMainBlock, ...);
@@ -170,7 +170,7 @@ struct IRBuilder {
    */
   void pushBlock(BCMarker marker, Block* b,
                  const folly::Optional<Block::iterator>& where);
-  void popBlock();
+  void popBlock(bool);
 
   /*
    * Run another pass of IRBuilder-managed optimizations on this
@@ -509,21 +509,25 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
  * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
  * for usage.
  */
-struct BlockPusher {
-  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
+template<bool pause>
+struct BlockPusherImpl {
+  BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block,
               const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);
   }
 
-  ~BlockPusher() {
-    m_irb.popBlock();
+  ~BlockPusherImpl() {
+    m_irb.popBlock(pause);
   }
 
  private:
   IRBuilder& m_irb;
 };
+
+using BlockPusher = BlockPusherImpl<false>;
+using BlockPauser = BlockPusherImpl<true>;
 
 }}
 

@@ -1762,7 +1762,7 @@ void HhbcTranslator::MInstrTranslator::emitMPost() {
       if (input->isA(Type::Gen)) {
         gen(DecRef, input);
         if (m_failedSetBlock) {
-          BlockPusher bp(m_irb, m_marker, m_failedSetBlock);
+          BlockPauser bp(m_irb, m_marker, m_failedSetBlock);
           gen(DecRefStack, StackOffset(m_stackInputs[i]), Type::Gen, catchSp);
         }
       }
@@ -1860,7 +1860,7 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
 
     auto exit = m_ht.makeExit(nextOff, toSpill);
     {
-      BlockPusher tp(m_irb, m_marker, exit, exit->skipHeader());
+      BlockPauser tp(m_irb, m_marker, exit, exit->skipHeader());
       gen(IncStat, cns(Stats::TC_SetMStrGuess_Miss), cns(1), cns(false));
       gen(DecRef, m_result);
       m_irb.add(str->inst());

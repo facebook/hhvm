@@ -310,6 +310,9 @@ TEST(Type, SpecializedObjects) {
   EXPECT_LT(exactA, obj);
   EXPECT_LT(subA, obj);
 
+  EXPECT_LE(Type::Bottom, subA);
+  EXPECT_LE(Type::Bottom, exactA);
+
   EXPECT_LT(exactA, subA);
 
   EXPECT_LT(exactA, subB);

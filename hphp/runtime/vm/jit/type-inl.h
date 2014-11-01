@@ -90,11 +90,14 @@ inline bool Type::subtypeOf(Type t2) const {
   if ((m_bits & t2.m_bits) != m_bits) {
     return false;
   }
-  // If t2 is a constant, we must be the same constant or Bottom.
+  // The rest of the checks want to avoid constantly checking bottom on the
+  // left side.
+  if (m_bits == kBottom) return true;
+  // If t2 is a constant, we must be the same constant (or Bottom, checked
+  // above).
   if (t2.m_hasConstVal) {
     assert(!t2.isUnion());
-    return m_bits == kBottom ||
-          (m_hasConstVal && m_extra == t2.m_extra);
+    return m_hasConstVal && m_extra == t2.m_extra;
   }
   if (!t2.isSpecialized()) {
     return true;

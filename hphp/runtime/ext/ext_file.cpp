@@ -661,6 +661,47 @@ bool f_move_uploaded_file(const String& filename, const String& destination) {
   return true;
 }
 
+// Resolves a filename for the `parse_ini_file`, considering
+// CWD, containing file name, and include paths.
+static String resolve_parse_ini_filename(const String& filename) {
+  String resolved = File::TranslatePath(filename);
+
+  if (!resolved.empty() && f_file_exists(resolved)) {
+    return resolved;
+  }
+
+  // Don't resolve further absolute paths.
+  if (filename[0] == '/') {
+    return null_string;
+  }
+
+  // Try to infer from containing file name.
+  auto const cfd = String::attach(g_context->getContainingFileName());
+  if (!cfd.empty()) {
+    int npos = cfd.rfind('/');
+    if (npos >= 0) {
+      resolved = cfd.substr(0, npos + 1) + filename;
+      if (f_file_exists(resolved)) {
+        return resolved;
+      }
+    }
+  }
+
+  // Next, see if include path was set in the ini settings.
+  auto const includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_reqInjectionData.getIncludePaths();
+
+  unsigned int pathCount = includePaths.size();
+  for (int i = 0; i < (int)pathCount; i++) {
+    resolved = includePaths[i] + '/' + filename;
+    if (f_file_exists(resolved)) {
+      return resolved;
+    }
+  }
+
+  return null_string;
+}
+
 Variant f_parse_ini_file(const String& filename,
                          bool process_sections /* = false */,
                          int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
@@ -670,19 +711,13 @@ Variant f_parse_ini_file(const String& filename,
     return false;
   }
 
-  String translated = File::TranslatePath(filename);
-  if (translated.empty() || !f_file_exists(translated)) {
-    if (filename[0] != '/') {
-      auto const cfd = String::attach(g_context->getContainingFileName());
-      if (!cfd.empty()) {
-        int npos = cfd.rfind('/');
-        if (npos >= 0) {
-          translated = cfd.substr(0, npos + 1) + filename;
-        }
-      }
-    }
+  String resolved = resolve_parse_ini_filename(filename);
+  if (resolved == null_string) {
+    raise_warning("No such file or directory");
+    return false;
   }
-  Variant content = f_file_get_contents(translated);
+
+  Variant content = f_file_get_contents(resolved);
   if (same(content, false)) return false;
   return IniSetting::FromString(content.toString(), filename, process_sections,
                                 scanner_mode);

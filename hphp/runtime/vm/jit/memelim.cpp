@@ -237,31 +237,34 @@ bool findPlacements(Global& genv,
 void sinkStore(Global& genv, uint32_t bit, IRInstruction& inst) {
   FTRACE(4, "      unanticipated\n");
 
- /*
-  * The findPlacements call will explore reachable blocks from
-  * inst.block()---every path must either lead to a block where the store is
-  * dead, or a block where the store is anticipated (either because all the
-  * successors of that block read it, or that block itself reads it).
-  *
-  * We however have to impose the following constraints:
-  *
-  *   o We aren't allowed to move it to a block that isn't dominated by
-  *     whichever block computed the value being stored, or we'd violate SSA
-  *     rules.
-  *
-  *   o We can't move it to our own block.  It is legitimate for this algorithm
-  *     to move the store earlier---to some predecessor of our own block---but
-  *     hosting it within our own block requires more information than we have,
-  *     since we're only looking at block-in states.  E.g. we only know if it
-  *     is anticipated coming into our block---it might also be read,
-  *     redefined, and then read again, or some similar sequence.  (This edge
-  *     case is possible, for example, if you have a single block loop both
-  *     reading and redefining a local, where the value being stored is loop
-  *     invariant so its computation dominates the loop body.)
-  *
-  * Note that `constraintBlock' will be null if the stored value is a
-  * constant---it won't be computed in any block.
-  */
+  // This isn't quite done (known incorrectness); don't turn it on yet.
+  if (!RuntimeOption::EvalHHIRSinkStores) return;
+
+  /*
+   * The findPlacements call will explore reachable blocks from
+   * inst.block()---every path must either lead to a block where the store is
+   * dead, or a block where the store is anticipated (either because all the
+   * successors of that block read it, or that block itself reads it).
+   *
+   * We however have to impose the following constraints:
+   *
+   *   o We aren't allowed to move it to a block that isn't dominated by
+   *     whichever block computed the value being stored, or we'd violate SSA
+   *     rules.
+   *
+   *   o We can't move it to our own block.  It is legitimate for this algorithm
+   *     to move the store earlier---to some predecessor of our own block---but
+   *     hosting it within our own block requires more information than we have,
+   *     since we're only looking at block-in states.  E.g. we only know if it
+   *     is anticipated coming into our block---it might also be read,
+   *     redefined, and then read again, or some similar sequence.  (This edge
+   *     case is possible, for example, if you have a single block loop both
+   *     reading and redefining a local, where the value being stored is loop
+   *     invariant so its computation dominates the loop body.)
+   *
+   * Note that `constraintBlock' will be null if the stored value is a
+   * constant---it won't be computed in any block.
+   */
   always_assert(inst.op() == StLoc || inst.op() == StLocNT);
   auto const value = inst.src(1);
   auto const constraintBlock = value->inst()->block();

@@ -468,6 +468,7 @@ public:
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
+  F(bool, HHIRSinkStores,              false)                           \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \

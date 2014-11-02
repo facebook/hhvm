@@ -1842,22 +1842,38 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = arr->arrVal()->nvGet(idx->intVal());
+  return value ? cns(env, *value) : nullptr;
+}
+
+SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = [&] {
+    int64_t val;
+    if (idx->strVal()->isStrictlyInteger(val)) {
+      return arr->arrVal()->nvGet(val);
+    }
+    return arr->arrVal()->nvGet(idx->strVal());
+  }();
+  return value ? cns(env, *value) : nullptr;
+}
+
 SSATmp* simplifyLdPackedArrayElem(State& env, const IRInstruction* inst) {
-  auto const arrayTmp = inst->src(0);
-  auto const idxTmp   = inst->src(1);
-  if (arrayTmp->isConst() && idxTmp->isConst()) {
-    auto const value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
-    if (!value) {
-      // The index doesn't exist. This code should be unreachable at runtime.
-      return nullptr;
-    }
+  if (inst->src(0)->isConst()) return arrIntKeyImpl(env, inst);
+  return nullptr;
+}
 
-    if (value->m_type == KindOfRef) {
-      return cns(env, *value->m_data.pref->tv());
-    }
-    return cns(env, *value);
+SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->isConst()) {
+    if (inst->src(1)->type() <= Type::Int) return arrIntKeyImpl(env, inst);
+    if (inst->src(1)->type() <= Type::Str) return arrStrKeyImpl(env, inst);
   }
-
   return nullptr;
 }
 
@@ -2057,6 +2073,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqInt)
   X(Same)
   X(NSame)
+  X(ArrayGet)
   default: break;
   }
 #undef X

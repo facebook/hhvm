@@ -6981,9 +6981,10 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     //    first N - 1 args, and then an array_key_exists() check
     int cacheLookupLen = cacheLookup.size();
     bool noRetNull =
-      m_curFunc->retTypeConstraint.hasConstraint() &&
-      !m_curFunc->retTypeConstraint.isSoft() &&
-      !m_curFunc->retTypeConstraint.isNullable();
+      meth->getFunctionScope()->isAsync() ||
+        (m_curFunc->retTypeConstraint.hasConstraint() &&
+        !m_curFunc->retTypeConstraint.isSoft() &&
+        !m_curFunc->retTypeConstraint.isNullable());
 
     if (cacheLookupLen > 1 || noRetNull) {
       // if (isset(${propName}[$param1]...[noRetNull ? $paramN : $paramN-1]))

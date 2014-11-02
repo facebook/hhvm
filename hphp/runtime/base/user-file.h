@@ -54,6 +54,8 @@ public:
   virtual bool lock(int operation, bool &wouldBlock);
   virtual bool stat(struct stat* buf);
 
+  virtual Variant getWrapperMetaData() { return Variant(m_obj); }
+
   int access(const String& path, int mode);
   int lstat(const String& path, struct stat* buf);
   int stat(const String& path, struct stat* buf);

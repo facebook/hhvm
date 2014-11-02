@@ -22,13 +22,6 @@ foreach ($mp->lazy()->keys()->map($mapFn)->filter($filtFn) as $x) {
   var_dump($x);
 }
 echo "------------------------\n";
-$smp = StableMap {
-0 => 'a', 3 => 'b', 6 => 'c', 9 => 'd'}
-;
-foreach ($smp->lazy()->keys()->map($mapFn)->filter($filtFn) as $x) {
-  var_dump($x);
-}
-echo "------------------------\n";
 $v = Vector {
 0, 1, 2, 3, 4}
 ;

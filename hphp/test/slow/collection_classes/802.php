@@ -27,17 +27,6 @@ function main() {
   }
   ksort($new_arr);
   var_dump($new_arr);
-  echo "------------------------\n\n";
-  $smp = StableMap::fromArray($arr);
-  foreach ($smp as $k => $v) {
-    var_dump($v);
-    var_dump($smp[$k]);
-    var_dump(isset($v));
-    var_dump(isset($smp[$k]));
-    var_dump(empty($v));
-    var_dump(empty($smp[$k]));
-    echo "\n";
-  }
   echo "Done\n";
 }
 main();

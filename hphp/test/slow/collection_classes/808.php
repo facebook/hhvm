@@ -1,6 +1,6 @@
 <?hh
 
-$m = new StableMap;
+$m = new Map;
 $m[3] = 'foo';
 $m['bar'] = 7;
 var_dump(serialize($m));
@@ -17,7 +17,7 @@ echo json_encode($m2) . "\n";
 var_export($m2);
  echo "\n";
 echo "------------------------\n";
-$m = new StableMap;
+$m = new Map;
 $m['bar'] = 7;
 $m[3] = 'foo';
 var_dump(serialize($m));

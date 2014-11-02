@@ -3,8 +3,6 @@ int(2)
 int(3)
 string(5) "Hello"
 string(5) "World"
-string(1) "A"
-string(1) "B"
 int(10)
 int(20)
 int(30)

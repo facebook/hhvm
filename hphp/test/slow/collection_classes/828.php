@@ -13,13 +13,6 @@ $obj, $obj}
 'a' => $obj, 'b' => $obj}
 ;
   $a = unserialize(serialize($a));
-  $a['a']->prop = 22;
-  var_dump($a['b']->prop);
-  $obj = new stdClass();
-  $a = StableMap {
-'a' => $obj, 'b' => $obj}
-;
-  $a = unserialize(serialize($a));
   $a['a']->prop = 33;
   var_dump($a['b']->prop);
   $obj = new stdClass();

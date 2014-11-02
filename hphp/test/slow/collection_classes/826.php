@@ -15,13 +15,6 @@ function f() {
   var_dump($mp->containsKey(2));
   var_dump($mp->containsKey('b'));
   echo "------------------------\n";
-  $smp = StableMap {
-'a' => 1, 2 => 'b'}
-;
-  var_dump($smp->containsKey('a'));
-  var_dump($smp->containsKey(2));
-  var_dump($smp->containsKey('b'));
-  echo "------------------------\n";
   $pair = Pair {
 1, 'b'}
 ;

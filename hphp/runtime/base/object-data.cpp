@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 
 #include "hphp/runtime/vm/class.h"
@@ -924,8 +923,6 @@ ObjectData* ObjectData::clone() {
       return c_DateTimeZone::Clone(this);
     } else if (instanceof(c_DateInterval::classof())) {
       return c_DateInterval::Clone(this);
-    } else if (instanceof(c_DOMNode::classof())) {
-      return c_DOMNode::Clone(this);
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }

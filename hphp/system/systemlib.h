@@ -45,7 +45,6 @@ namespace Eval {
   x(SplFileObject)                              \
   x(DateTimeInterface)                          \
   x(DateTimeImmutable)                          \
-  x(DOMDocument)                                \
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
@@ -93,8 +92,6 @@ class SystemLib {
   static ObjectData* AllocRuntimeExceptionObject(const Variant& message);
   static ObjectData* AllocOutOfBoundsExceptionObject(const Variant& message);
   static ObjectData* AllocInvalidOperationExceptionObject(const Variant& message);
-  static ObjectData* AllocDOMDocumentObject(const String& version = null_string,
-                                            const String& encoding = null_string);
   static ObjectData* AllocDOMExceptionObject(const Variant& message,
                                              const Variant& code);
   static ObjectData* AllocDirectoryObject();

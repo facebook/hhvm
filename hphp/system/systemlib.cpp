@@ -93,11 +93,6 @@ ObjectData* SystemLib::AllocInvalidOperationExceptionObject(const Variant& messa
   CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocDOMDocumentObject(const String& version,
-                                              const String& encoding) {
-  CREATE_AND_CONSTRUCT(DOMDocument, make_packed_array(version, encoding));
-}
-
 ObjectData* SystemLib::AllocDOMExceptionObject(const Variant& message, const Variant& code) {
   CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }

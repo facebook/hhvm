@@ -19,7 +19,7 @@
 #include <vector>
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -1092,7 +1092,7 @@ static Class* class_from_name(const String& class_name, const char* callee) {
 Variant f_simplexml_import_dom(
   const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
-  c_DOMNode *domnode = node.getTyped<c_DOMNode>();
+  DOMNode* domnode = toDOMNode(node.get());
   xmlNodePtr nodep = domnode->m_node;
 
   if (nodep) {

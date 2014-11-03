@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/xmlreader/ext_xmlreader.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 #include "hphp/util/functional.h"
@@ -667,20 +667,20 @@ Variant HHVM_METHOD(XMLReader, __get,
 Variant HHVM_METHOD(XMLReader, expand,
                     const Variant& basenode /* = null */) {
   auto* data = Native::data<XMLReader>(this_);
-  p_DOMDocument doc;
+  Object doc;
   xmlDocPtr docp = nullptr;
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    c_DOMNode *dombasenode = basenode.toObject().getTyped<c_DOMNode>();
+    DOMNode *dombasenode = toDOMNode(basenode.toObject().get());
     doc = dombasenode->doc();
-    docp = (xmlDocPtr) doc->m_node;
+    docp = (xmlDocPtr) toDOMNode(doc.get())->m_node;
     if (docp == nullptr) {
       raise_warning("Invalid State Error");
       return false;
     }
   } else {
-    doc = (p_DOMDocument) SystemLib::AllocDOMDocumentObject();
+    doc = DOMDocument::newInstance();
   }
 
   if (data->m_ptr) {

@@ -25,7 +25,7 @@
 namespace HPHP {
 
 using folly::IOBuf;
-using apache::thrift::async::TEventBase;
+using folly::EventBase;
 using apache::thrift::async::TAsyncTransport;
 using apache::thrift::async::TAsyncTimeout;
 using folly::SocketAddress;

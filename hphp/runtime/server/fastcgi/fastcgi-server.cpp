@@ -21,7 +21,7 @@
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
-#include "thrift/lib/cpp/async/TEventBaseManager.h" // @nolint
+#include "folly/io/async/EventBaseManager.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "proxygen/lib/workers/WorkerThread.h" // @nolint
 #include "proxygen/lib/services/Acceptor.h" // @nolint
@@ -31,7 +31,7 @@ namespace HPHP {
 using folly::IOBuf;
 using folly::IOBufQueue;
 using folly::io::Cursor;
-using apache::thrift::async::TEventBase;
+using folly::EventBase;
 using apache::thrift::async::TAsyncTransport;
 using apache::thrift::async::TAsyncTimeout;
 using apache::thrift::transport::TTransportException;

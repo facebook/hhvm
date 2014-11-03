@@ -312,7 +312,7 @@ let redo_type_decl ~update_pos workers nenv fast =
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let result =
     if List.length fnl < 10
-    then 
+    then
       let errors, failed = otf_decl_files nenv all_classes fast fnl in
       let to_redecl, to_recheck = compute_deps ~update_pos nenv fast fnl in
       errors, failed, to_redecl, to_recheck

@@ -378,18 +378,14 @@ let parse_prolog_args () =
       "Usage: %s prolog [WWW-ROOT]\n\
       run prolog interpreter on code database\n"
       Sys.argv.(0) in
-  let options = [
-  ] in
+  let options = [] in
   let args = parse_without_command options usage "prolog" in
   let root =
     match args with
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CProlog { ClientProlog.
-           root;
-         }
-
+  CProlog { ClientProlog.root; }
 
 let parse_args () =
   match parse_command () with

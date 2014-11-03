@@ -56,7 +56,7 @@ let set_of_idl l =
  * File foo.php was defining the class A.
  * The user gets rid of class A (in foo.php)
  * In general, the type-checker determines what must be re-declared or
- * re-chechecked, by comparing the old and the new type-definitions.
+ * re-typechecked, by comparing the old and the new type-definitions.
  * That's why we are adding the 'old' definitions to the file.
  * In this case, the redecl phase (typing/typing_redecl_service.ml) is going
  * to compare the 'old' definition of A with the new one. It will realize that
@@ -297,4 +297,3 @@ let check genv env =
     flush stdout;
   end;
   type_check genv env
-

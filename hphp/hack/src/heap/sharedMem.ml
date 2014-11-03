@@ -73,7 +73,7 @@ end = struct
   type old = string
   type md5 = string
 
-  (* The prefix we use for old keys. The prefix garantees that we never
+  (* The prefix we use for old keys. The prefix guarantees that we never
    * mix old and new data, because a key can never start with the prefix
    * "old_", it always starts with a number (cf Prefix.make()).
    *)
@@ -152,7 +152,7 @@ end
 
 module New: functor(Value: Value.Type) -> sig
   
-  (* Adds a binding to the table, the table is left unchanged in the
+  (* Adds a binding to the table, the table is left unchanged if the
    * key was already bound.
    *)
   val add         : Key.t -> Value.t -> unit
@@ -389,7 +389,6 @@ module FreqCache = functor(Config:ConfigType) -> struct
     Hashtbl.clear cache;
     size := 0
  
-
 (* The collection function is called when we reach twice original capacity
  * in size. When the collection is triggered, we only keep the most recent
  * object.
@@ -441,7 +440,7 @@ module FreqCache = functor(Config:ConfigType) -> struct
     if Hashtbl.mem cache x
     then decr size;
     Hashtbl.remove cache x
-      
+
 end
 
 (*****************************************************************************)
@@ -611,4 +610,3 @@ module WithCache = functor(Value:Value.Type) -> struct
   let remove_old_batch = SSet.iter remove_old
 
 end
-

@@ -263,7 +263,7 @@ Object get_traversable_object_iterator(const Variant& obj) {
   return itObj;
 }
 
-bool HHVM_FUNCTION(spl_autoload_register, 
+bool HHVM_FUNCTION(spl_autoload_register,
                    const Variant& autoload_function /* = null_variant */,
                    bool throws /* = true */,
                    bool prepend /* = false */) {

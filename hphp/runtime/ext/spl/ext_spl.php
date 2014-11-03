@@ -107,10 +107,15 @@ function iterator_to_array(\Traversable $obj,
   $ret = array();
   $obj->rewind();
   foreach ($obj as $key=>$val) {
-    if ($use_keys) {
-      $ret[$key] = clone $val;
+    if (is_object($val)) {
+      $value = clone $val;
     } else {
-      $ret[] = clone $val;
+      $value = $val;
+    }
+    if ($use_keys) {
+      $ret[$key] = $value;
+    } else {
+      $ret[] = $value;
     }
   }
   return $ret;
@@ -163,7 +168,7 @@ function spl_autoload_functions(): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
-function spl_autoload_register(mixed $autoload_function = null_variant,
+function spl_autoload_register(mixed $autoload_function = null,
                                bool $throws = true,
                                bool $prepend = false): bool;
 

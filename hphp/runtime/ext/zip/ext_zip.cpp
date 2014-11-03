@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 
 namespace HPHP {
@@ -520,7 +520,7 @@ static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
 
 static bool addFile(zip* zipStruct, const char* source, const char* dest,
                     int64_t start = 0, int64_t length = 0) {
-  if (!f_is_file(source)) {
+  if (!HHVM_FN(is_file)(source)) {
     return false;
   }
 
@@ -621,7 +621,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
 
   Array files;
   if (glob) {
-    auto match = f_glob(pattern, flags);
+    auto match = HHVM_FN(glob)(pattern, flags);
     if (match.isArray()) {
       files = match.toArrRef();
     } else {
@@ -631,7 +631,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     if (path[path.size() - 1] != '/') {
       path.push_back('/');
     }
-    auto allFiles = f_scandir(path);
+    auto allFiles = HHVM_FN(scandir)(path);
     if (allFiles.isArray()) {
       files = allFiles.toArrRef();
     } else {
@@ -649,7 +649,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
 
     auto source = var.asCStrRef();
-    if (f_is_dir(source)) {
+    if (HHVM_FN(is_dir)(source)) {
       continue;
     }
 
@@ -765,7 +765,7 @@ static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
   auto sep = file.rfind('/');
   if (sep != std::string::npos) {
     auto path = to + file.substr(0, sep);
-    if (!f_is_dir(path) && !f_mkdir(path, 0777, true)) {
+    if (!HHVM_FN(is_dir)(path) && !HHVM_FN(mkdir)(path, 0777, true)) {
       return false;
     }
 
@@ -825,7 +825,7 @@ static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
     to.push_back('/');
   }
 
-  if (!f_is_dir(to) && !f_mkdir(to)) {
+  if (!HHVM_FN(is_dir)(to) && !HHVM_FN(mkdir)(to)) {
     return false;
   }
 

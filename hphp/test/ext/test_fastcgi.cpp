@@ -25,7 +25,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -283,7 +283,7 @@ bool TestFastCGIServer::AddFile(const std::string& path,
                                 int line) {
   String source("test/ext/fastcgi/" + path);
   String dest("runtime/tmp/" + path);
-  if (!f_copy(source, dest)) {
+  if (!HHVM_FN(copy)(source, dest)) {
     printf("Unable to copy file from source: %s "
            "to destination: %s. Run this test from hphp/.\n",
            source.data(),
@@ -298,7 +298,7 @@ bool TestFastCGIServer::VerifyExchange(const TestMessageExchange& mx,
                                        const char* file,
                                        int line) {
 
-  Variant cwd = f_getcwd();
+  Variant cwd = HHVM_FN(getcwd)();
   CHECK(cwd.isString());
 
   CHECK(!mx.m_messages.empty());

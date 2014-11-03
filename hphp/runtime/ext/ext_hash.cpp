@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include <algorithm>
 #include <memory>
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
 #include "hphp/runtime/ext/hash/hash_sha.h"
@@ -213,7 +213,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   }
   Variant f;
   if (isfilename) {
-    f = f_fopen(data, "rb");
+    f = HHVM_FN(fopen)(data, "rb");
     if (same(f, false)) {
       return false;
     }
@@ -223,9 +223,9 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   ops->hash_init(context);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f.toResource(), 1024);
+    for (Variant chunk = HHVM_FN(fread)(f.toResource(), 1024);
          !is_empty_string(chunk);
-         chunk = f_fread(f.toResource(), 1024)) {
+         chunk = HHVM_FN(fread)(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }

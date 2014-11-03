@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 
 #include "hphp/runtime/base/directory.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ Directory* GlobStreamWrapper::opendir(const String& path) {
   path_str += strlen(prefix);
   path_len -= strlen(prefix);
 
-  auto glob = f_glob(String(path_str, path_len, CopyString));
+  auto glob = HHVM_FN(glob)(String(path_str, path_len, CopyString));
   if (!glob.isArray()) {
     return nullptr;
   }

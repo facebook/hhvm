@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/bz2/bz2-file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/alloc.h"
 #include "folly/String.h"
 
@@ -33,16 +33,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(bzclose, const Resource& bz) {
-  return f_fclose(bz);
+  return HHVM_FN(fclose)(bz);
 }
 
 Variant HHVM_FUNCTION(bzread, const Resource& bz, int length /* = 1024 */) {
-  return f_fread(bz, length);
+  return HHVM_FN(fread)(bz, length);
 }
 
 Variant HHVM_FUNCTION(bzwrite, const Resource& bz, const String& data,
                                int length /* = 0 */) {
-  return f_fwrite(bz, data, length);
+  return HHVM_FN(fwrite)(bz, data, length);
 }
 
 const StaticString s_r("r"), s_w("w");

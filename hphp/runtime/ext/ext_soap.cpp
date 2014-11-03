@@ -2110,7 +2110,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     }
 
     header_if_not_sent("Content-Type: text/xml; charset=utf-8");
-    Variant ret = f_readfile(m_sdl->source.c_str());
+    Variant ret = HHVM_FN(readfile)(m_sdl->source.c_str());
     if (same(ret, false)) {
       throw_soap_server_fault("Server", "Couldn't find WSDL");
     }

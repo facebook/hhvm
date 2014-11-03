@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include <pcre.h>
 #include "folly/Conv.h"
 
@@ -111,7 +111,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
   string expected;
   if (output) {
     if (fileoutput) {
-      String s = f_file_get_contents(output);
+      String s = HHVM_FN(file_get_contents)(output);
       expected = string(s.data(), s.size());
     } else {
       expected = output;
@@ -248,7 +248,7 @@ bool TestCodeRun::RecordMulti(const char *input, const char *output,
   if (output) {
     std::ofstream s((fullPath + "/test.result").c_str());
     if (fileoutput) {
-      String expected = f_file_get_contents(output);
+      String expected = HHVM_FN(file_get_contents)(output);
       s << string(expected.data(), expected.size());
     } else {
       s << output;

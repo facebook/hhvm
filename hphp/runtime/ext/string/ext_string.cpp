@@ -862,25 +862,39 @@ String HHVM_FUNCTION(str_repeat,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_sscanf(int _argc,
-                 const String& str,
-                 const String& format,
-                 const Array& _argv /* = null_array */) {
+Variant sscanfImpl(const String& str,
+                   const String& format,
+                   const std::vector<Variant*>& args) {
   Variant ret;
   int result;
-  result = string_sscanf(str.c_str(), format.c_str(), _argv.size(), ret);
+  result = string_sscanf(str.c_str(), format.c_str(), args.size(), ret);
   if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return init_null();
-  if (_argv.empty()) return ret;
+  if (args.empty()) return ret;
 
   if (ret.isArray()) {
     Array retArray = ret.toArray();
     for (int i = 0; i < retArray.size(); i++) {
-      ((Array&)_argv).lvalAt(i) = retArray[i];
+      *args.at(i)->getRefData() = retArray[i];
     }
     return retArray.size();
   }
   if (ret.isNull()) return 0;
   return ret;
+}
+
+TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
+  String str = getArg<KindOfString>(ar, 0);
+  if (ar->numArgs() < 1) {
+    return arReturn(ar, init_null());
+  }
+  String format = getArg<KindOfString>(ar, 1);
+
+  std::vector<Variant*> args;
+  for (int i = 2; i < ar->numArgs(); ++i) {
+    args.push_back(&getArg<KindOfRef>(ar, i));
+  }
+
+  return arReturn(ar, sscanfImpl(str, format, args));
 }
 
 String HHVM_FUNCTION(chr,
@@ -2137,6 +2151,7 @@ public:
     HHVM_FE(setlocale);
     HHVM_FE(localeconv);
     HHVM_FE(nl_langinfo);
+    HHVM_FE(sscanf);
     HHVM_FE(chr);
     HHVM_FE(ord);
     HHVM_FE(money_format);

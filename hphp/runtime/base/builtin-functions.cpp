@@ -28,7 +28,6 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/process/ext_process.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"

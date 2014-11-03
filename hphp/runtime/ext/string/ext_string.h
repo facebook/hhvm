@@ -213,11 +213,12 @@ Variant f_sprintf(int _argc,
                   const Array& _argv = null_array);
 Variant f_vsprintf(const String& format,
                    const Array& args);
-Variant f_sscanf(int _argc,
-                 const String& str,
-                 const String& format,
-                 const Array& _argv = null_array);
 
+
+Variant sscanfImpl(const String& str,
+                   const String& format,
+                   const std::vector<Variant*>& args);
+TypedValue* HHVM_FN(sscanf)(ActRec* ar);
 String HHVM_FUNCTION(chr,
                      Variant ascii);
 int64_t HHVM_FUNCTION(ord,

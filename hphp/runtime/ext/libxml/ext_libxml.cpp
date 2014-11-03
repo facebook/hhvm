@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 #include "folly/FBVector.h"
 
@@ -150,7 +150,7 @@ static Resource libxml_streams_IO_open_wrapper(
     Stream::Wrapper * wrapper = Stream::getWrapperFromURI(strFilename,
                                                           &pathIndex);
     if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
-      if (!f_file_exists(strFilename)) {
+      if (!HHVM_FN(file_exists)(strFilename)) {
         return Resource();
       }
     }
@@ -168,7 +168,7 @@ int libxml_streams_IO_read(void* context, char* buffer, int len) {
 
   Resource stream(static_cast<ResourceData*>(context));
   assert(len >= 0);
-  Variant ret = f_fread(stream, len);
+  Variant ret = HHVM_FN(fread)(stream, len);
   if (ret.isString()) {
     const String& str = ret.asCStrRef();
     if (str.size() <= len) {
@@ -186,7 +186,7 @@ int libxml_streams_IO_write(void* context, const char* buffer, int len) {
 
   Resource stream(static_cast<ResourceData*>(context));
   String strBuffer(StringData::Make(buffer, len, CopyString));
-  Variant ret = f_fwrite(stream, strBuffer);
+  Variant ret = HHVM_FN(fwrite)(stream, strBuffer);
   if (ret.isInteger() && ret.asInt64Val() < INT_MAX) {
     return (int)ret.asInt64Val();
   } else {
@@ -209,7 +209,7 @@ int libxml_streams_IO_close(void* context) {
   // we just created one belonging to stream.
   stream.get()->decRefCount();
 
-  return f_fclose(stream) ? 0 : -1;
+  return HHVM_FN(fclose)(stream) ? 0 : -1;
 }
 
 static xmlExternalEntityLoader s_default_entity_loader = nullptr;

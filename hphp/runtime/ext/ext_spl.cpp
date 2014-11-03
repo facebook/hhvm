@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/ext_file.h"
 
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
@@ -386,7 +386,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
     *prop = array_dir->path();
   }
 
-  return f_readdir(Resource(dir));
+  return HHVM_FN(readdir)(Resource(dir));
 }
 
 static int64_t HHVM_METHOD(GlobIterator, count) {

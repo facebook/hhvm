@@ -23,7 +23,7 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -1418,7 +1418,7 @@ public:
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Grab the file as an array
-    Variant file = f_file(m_filename);
+    Variant file = HHVM_FN(file)(m_filename);
     if (!file.isArray()) {
       throw XDebugServer::ERROR_CANT_OPEN_FILE;
     }

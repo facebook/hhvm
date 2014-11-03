@@ -21,9 +21,9 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
-#include "hphp/runtime/ext/ext_file.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -112,7 +112,7 @@ static String normalize_variable_name(const String& name) {
 
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */) {
-  String f = f_file_get_contents(filename);
+  String f = HHVM_FN(file_get_contents)(filename);
 
   Variant matches;
   HHVM_FN(preg_match_all)("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",

@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 
 namespace HPHP {
@@ -84,7 +84,7 @@ char* XDebugUtils::pathToUrl(const char* fileurl) {
     tmp = xdstrdup(fileurl);
   } else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
     String path(fileurl, CopyString);
-    Variant realpath = f_realpath(path);
+    Variant realpath = HHVM_FN(realpath)(path);
     if (realpath.isString()) {
       char* realpath_str = realpath.toString().get()->mutableData();
       tmp = xdebug_sprintf("file://%s", realpath_str);

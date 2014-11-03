@@ -20,7 +20,7 @@
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,8 @@ bool TestExtServer::RunTests(const std::string &which) {
 
   DECLARE_TEST_FUNCTIONS("");
 
-  std::string root = std::string(f_getcwd().toString().c_str()) + "/test/ext/";
+  std::string root = std::string(HHVM_FN(getcwd)().toString().c_str()) +
+                     "/test/ext/";
 
   RuntimeOption::SourceRoot = root;
   RuntimeOption::PageletServerThreadCount = 10;

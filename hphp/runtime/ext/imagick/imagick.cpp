@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 using std::pair;
@@ -230,7 +230,7 @@ String magickResolveFont(const String& fontName) {
       return fontName;
     }
   }
-  auto font = f_realpath(fontName);
+  auto font = HHVM_FN(realpath)(fontName);
   if (font.isBoolean() && !font.toBoolean()) {
     return String();
   } else {

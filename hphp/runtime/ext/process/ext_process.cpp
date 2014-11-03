@@ -40,7 +40,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
@@ -715,7 +715,7 @@ public:
   bool openFile(const String& zfile, const String& zmode) {
     mode = DESC_FILE;
       /* try a wrapper */
-    Variant vfile = f_fopen(zfile.c_str(), zmode.c_str());
+    Variant vfile = HHVM_FN(fopen)(zfile.c_str(), zmode.c_str());
     if (!vfile.isResource()) {
       raise_warning("Unable to open specified file: %s (mode %s)",
                       zfile.data(), zmode.data());

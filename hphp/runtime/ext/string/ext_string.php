@@ -1085,6 +1085,30 @@ function localeconv(): array;
 function nl_langinfo(int $item): string;
 
 /**
+ * The function sscanf() is the input analog of printf(). sscanf() reads from
+ *   the string str and interprets it according to the specified format, which
+ *   is described in the documentation for sprintf().  Any whitespace in the
+ *   format string matches any whitespace in the input string. This means that
+ *   even a tab \t in the format string can match a single space character in
+ *   the input string.
+ *
+ * @param string $str - The input string being parsed.
+ * @param string $format - The interpreted format for str, which is described
+ *   in the documentation for sprintf() with following differences: Function is
+ *   not locale-aware. F, g, G and b are not supported. D stands for decimal
+ *   number. i stands for integer with base detection. n stands for number of
+ *   characters processed so far.
+ *
+ * @return mixed - If only two parameters were passed to this function, the
+ *   values parsed will be returned as an array. Otherwise, if optional
+ *   parameters are passed, the function will return the number of assigned
+ *   values. The optional parameters must be passed by reference.
+ *
+ */
+<<__Native("ActRec", "VariadicByRef")>>
+function sscanf(string $str, string $format, ...): mixed;
+
+/**
  * Returns a one-character string containing the character specified by ascii.
  *    This function complements ord().
  *

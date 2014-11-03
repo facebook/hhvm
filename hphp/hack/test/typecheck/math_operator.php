@@ -28,6 +28,8 @@ function foo(): void {
   --$c;
   $c--;
 
+  $c = $a ** $b;
+
   // Bitwise Operators
   $c = $a ^ $b;
   $c = $a & $b;
@@ -56,8 +58,10 @@ function foo(): void {
   $d = $a && $b;
   $d = $a || $b;
 
+  // Float operations
   $float_1 = 4.0;
   $float_2 = 3.0;
   $float_3 = $float_1/$float_2;
   $float_3 /= $float_1;
+  $float_4 = $float_1 ** $float_3;
 }

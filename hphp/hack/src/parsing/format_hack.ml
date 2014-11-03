@@ -2181,7 +2181,7 @@ and expr_remain lowest env =
       expr_remain lowest env
   | Tnewline | Tspace  ->
       expr_remain lowest env
-  | Tplus | Tminus | Tstar | Tslash
+  | Tplus | Tminus | Tstar | Tslash | Tstarstar
   | Teqeqeq | Tpercent
   | Teqeq | Tampamp | Tbarbar
   | Tdiff | Tlt | Tdiff2 | Tgte

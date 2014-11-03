@@ -267,6 +267,7 @@ let priorities = [
   (Right, [Tem]);
   (NonAssoc, [Tinstanceof]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
+  (Right, [Tstarstar]);
   (Right, [Tat; Tref]);
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
@@ -2183,6 +2184,8 @@ and expr_remain env e1 =
       expr_binop env Tminus Minus e1
   | Tstar ->
       expr_binop env Tstar Star e1
+  | Tstarstar ->
+      expr_binop env Tstarstar Starstar e1
   | Tslash ->
       expr_binop env Tslash Slash e1
   | Teq ->

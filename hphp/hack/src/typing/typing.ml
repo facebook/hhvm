@@ -2803,6 +2803,11 @@ and unop p env uop ty =
       env, ty
 
 and binop in_cond p env bop p1 ty1 p2 ty2 =
+  let expand_num_type env p ty =
+    let env, ty = TUtils.fold_unresolved env ty in
+    let env = Type.sub_type p Reason.URnone env (Reason.Rarith p, Tprim Tnum) ty in
+    let env, ety = Env.expand_type env ty in
+    (env, ety) in
   match bop with
   | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -2842,15 +2847,18 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
            * See test/typecheck/generic_primitive_invariant.php as an example *)
           env, rty1)
   | Ast.Slash ->
-      let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env = Type.sub_type p1 Reason.URnone env (Reason.Rarith p1, Tprim Tnum) ty1 in
-      let env = Type.sub_type p2 Reason.URnone env (Reason.Rarith p2, Tprim Tnum) ty2 in
-      let env, ety1 = Env.expand_type env ty1 in
-      let env, ety2 = Env.expand_type env ty2 in
+      let env, ety1 = expand_num_type env p1 ty1 in
+      let env, ety2 = expand_num_type env p2 ty2 in
       (match ety1, ety2 with
       | (r, Tprim Tfloat), _ | _, (r, Tprim Tfloat) -> env, (r, Tprim Tfloat)
       | _ -> env, (Reason.Rret_div p, Tprim Tnum)
+      )
+  | Ast.Starstar ->
+      let env, ety1 = expand_num_type env p1 ty1 in
+      let env, ety2 = expand_num_type env p2 ty2 in
+      (match ety1, ety2 with
+      | (r, Tprim Tfloat), _ | _, (r, Tprim Tfloat) -> env, (r, Tprim Tfloat)
+      | _ -> env, (Reason.Rarith_ret p, Tprim Tnum)
       )
   | Ast.Percent ->
       let env, ty1 = Type.unify p Reason.URnone env ty1 (Reason.Rarith p1, Tprim Tint) in

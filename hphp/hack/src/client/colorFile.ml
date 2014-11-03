@@ -39,14 +39,24 @@ end
 
 (*****************************************************************************)
 (* Flatten nested positions (intervals).
- * E.g. if A, B, C are colors, we convert [AA[B]A[C]A] to [AA][B][A][C][A]. *)
+ * E.g. if A, B, C are colors, we convert [AA[B]A[C]A] to [AA][B][A][C][A].
+ *
+ * Invariant: the list of intervals is always sorted wrt the Compare module
+ * above, and every element on the stack is >= than the head element of the
+ * list. *)
 (*****************************************************************************)
 
 let rec flatten_ acc stack = function
   | [] | [_] as l when Stack.is_empty stack -> l @ acc
-  | [] | [_] as l ->
+  | [] ->
       let elem = Stack.pop stack in
-      flatten_ acc stack (elem :: l)
+      flatten_ acc stack [elem]
+  | (pos, _ as elt) :: rl when not (Stack.is_empty stack) &&
+    Compare.pos pos (fst (Stack.top stack)) = 1 ->
+      let elem = Stack.pop stack in
+      flatten_ acc stack (elem :: elt :: rl)
+  | [elt] ->
+      flatten_ (elt :: acc) stack []
   | (pos1, x as elt1) :: ((pos2, _) :: _ as rl) ->
       let _, char_end1 = Pos.info_raw pos1 in
       let char_start2, _ = Pos.info_raw pos2 in

@@ -1088,7 +1088,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       }
 
       if (uns->getType() != VariableUnserializer::Type::DebuggerSerialize ||
-          (cls && cls->isCppSerializable())) {
+          (cls && cls->instanceCtor() && cls->isCppSerializable())) {
         // Don't call wakeup when unserializing for the debugger, except for
         // natively implemented classes.
         obj->invokeWakeup();

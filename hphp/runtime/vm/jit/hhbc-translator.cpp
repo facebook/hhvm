@@ -1701,10 +1701,10 @@ void HhbcTranslator::emitProfiledGuard(Type type,
     switch (kind) {
     case ProfGuard::CheckLoc:
     case ProfGuard::GuardLoc:
-      return ldLocAddr(id, DataTypeSpecific);
+      return ldLocAddr(id);
     case ProfGuard::CheckStk:
     case ProfGuard::GuardStk:
-      return ldStackAddr(id, DataTypeSpecific);
+      return ldStackAddr(id);
     }
     not_reached();
   };
@@ -3583,8 +3583,8 @@ void HhbcTranslator::exceptionBarrier() {
   gen(ExceptionBarrier, sp);
 }
 
-SSATmp* HhbcTranslator::ldStackAddr(int32_t offset, TypeConstraint tc) {
-  m_irb->constrainStack(offset, tc);
+SSATmp* HhbcTranslator::ldStackAddr(int32_t offset) {
+  m_irb->constrainStack(offset, DataTypeSpecific);
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_irb->evalStack().
   assert(offset >= (int32_t)m_irb->evalStack().numCells());
@@ -3640,8 +3640,8 @@ SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {
   return gen(LdLoc, Type::Gen, LocalId(locId), m_irb->fp());
 }
 
-SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId, TypeConstraint tc) {
-  m_irb->constrainLocal(locId, tc, "LdLocAddr");
+SSATmp* HhbcTranslator::ldLocAddr(uint32_t locId) {
+  m_irb->constrainLocal(locId, DataTypeSpecific, "LdLocAddr");
   return gen(LdLocAddr, Type::PtrToFrameGen, LocalId(locId), m_irb->fp());
 }
 

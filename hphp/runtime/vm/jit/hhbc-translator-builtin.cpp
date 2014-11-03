@@ -608,7 +608,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
         }
       }
 
-      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
+      args[argIdx++] = ldStackAddr(offset);
       ++stackIdx;
     }
 

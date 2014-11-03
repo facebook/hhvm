@@ -919,7 +919,7 @@ private:
                          int64_t extraOffset = 0);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
+  SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
 
@@ -933,7 +933,7 @@ private:
   SSATmp* ldLoc(uint32_t id,
                 Block* ldPMExit,
                 TypeConstraint constraint);
-  SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
+  SSATmp* ldLocAddr(uint32_t id);
   SSATmp* ldLocInner(uint32_t id,
                      Block* ldrefExit,
                      Block* ldPMExit,

@@ -532,12 +532,12 @@ SSATmp* HhbcTranslator::MInstrTranslator::getValAddr() {
   const Location& l = dl.location;
   if (l.space == Location::Local) {
     assert(!m_stackInputs.count(0));
-    return m_ht.ldLocAddr(l.offset, DataTypeSpecific);
+    return m_ht.ldLocAddr(l.offset);
   } else {
     assert(l.space == Location::Stack);
     assert(m_stackInputs.count(0));
     m_ht.spillStack();
-    return m_ht.ldStackAddr(m_stackInputs[0], DataTypeSpecific);
+    return m_ht.ldStackAddr(m_stackInputs[0]);
   }
 }
 
@@ -655,14 +655,14 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
   // may rely on the LdRef guard above, though; the various emit* functions may
   // do smarter things based on the guarded type.
   if (baseDL.location.space == Location::Local) {
-    m_base = m_ht.ldLocAddr(baseDL.location.offset, DataTypeSpecific);
+    m_base = m_ht.ldLocAddr(baseDL.location.offset);
   } else {
     assert(baseDL.location.space == Location::Stack);
     // Make sure the stack is clean before getting a pointer to one of its
     // elements.
     m_ht.spillStack();
     assert(m_stackInputs.count(m_iInd));
-    m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd], DataTypeSpecific);
+    m_base = m_ht.ldStackAddr(m_stackInputs[m_iInd]);
   }
   assert(m_base->type().isPtr());
 

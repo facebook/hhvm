@@ -824,10 +824,9 @@ next_iter:
 static Variant sxe_object_cast(c_SimpleXMLElement* sxe, int8_t type) {
   if (type == HPHP::KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
-    if (node) return true;
     Array properties = Array::Create();
-    sxe_get_prop_hash(sxe, true, properties, true);
-    return properties.size() != 0;
+    sxe_get_prop_hash(sxe, true, properties);
+    return node != nullptr || properties.size();
   }
 
   xmlChar* contents = nullptr;

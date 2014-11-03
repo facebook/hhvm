@@ -146,7 +146,7 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
   }
 }
 
-Type relaxOuter(Type t, TypeConstraint tc) {
+Type relaxCell(Type t, TypeConstraint tc) {
   assert(t.notBoxed());
 
   switch (tc.category) {
@@ -221,7 +221,6 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
         }
       };
       simplifyCategory(constraint.category);
-      simplifyCategory(constraint.innerCat);
 
       auto const oldType = inst.typeParam();
       auto newType = relaxType(oldType, constraint);
@@ -284,10 +283,9 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   }
 }
 
-/*
- * Returns true iff tc.category is satisfied by t.
- */
-static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
+bool typeFitsConstraint(Type t, TypeConstraint tc) {
+  always_assert(t != Type::Bottom);
+
   switch (tc.category) {
     case DataTypeGeneric:
       return true;
@@ -301,7 +299,7 @@ static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
                             Type::Res, Type::BoxedCell);
 
     case DataTypeCountnessInit:
-      return typeFitsOuterConstraint(t, DataTypeCountness) &&
+      return typeFitsConstraint(t, DataTypeCountness) &&
              (t <= Type::Uninit || t.not(Type::Uninit));
 
     case DataTypeSpecific:
@@ -328,45 +326,16 @@ static bool typeFitsOuterConstraint(Type t, TypeConstraint tc) {
 }
 
 /*
- * Returns true iff t is not boxed, or if tc.innerCat is satisfied by t's inner
- * type.
- */
-static bool typeFitsInnerConstraint(Type t, TypeConstraint tc) {
-  return tc.innerCat == DataTypeGeneric || t.notBoxed() ||
-    typeFitsOuterConstraint((t & Type::BoxedCell).innerType(), tc.inner());
-}
-
-/*
- * Returns true iff t is specific enough to fit tc, meaning a consumer
- * constraining a value with tc would be satisfied with t as the value's type
- * after relaxation.
- */
-bool typeFitsConstraint(Type t, TypeConstraint tc) {
-  always_assert(t != Type::Bottom);
-  return typeFitsInnerConstraint(t, tc) &&
-    typeFitsOuterConstraint(t, tc);
-}
-
-/*
  * Returns the least specific supertype of t that maintains the properties
  * required by tc.
  */
 Type relaxType(Type t, TypeConstraint tc) {
   always_assert(t <= Type::Gen && t != Type::Bottom);
   if (tc.category == DataTypeGeneric) return Type::Gen;
-
-  auto outerRelaxed = relaxOuter(t & Type::Cell, tc);
-  if (t.notBoxed()) return outerRelaxed;
-
-  auto innerType = (t & Type::BoxedCell).innerType();
-  auto innerRelaxed = tc.innerCat == DataTypeGeneric ? Type::Cell
-                                                     : relaxOuter(innerType,
-                                                                  tc.inner());
-
-  // Only add outerRelax into the result type if t had a meaningful outer type
-  // coming in.
-  return (t.isBoxed() ? Type::Bottom : outerRelaxed) |
-    (innerRelaxed - Type::Uninit).box();
+  auto const relaxed =
+    (t & Type::Cell) <= Type::Bottom ? Type::Bottom
+                                     : relaxCell(t & Type::Cell, tc);
+  return t.notBoxed() ? relaxed : relaxed | Type::BoxedInitCell;
 }
 
 static void incCategory(DataTypeCategory& c) {
@@ -403,7 +372,7 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
                      knownType, toRelax, origTc);
 
   // Preserve origTc's weak property.
-  TypeConstraint newTc{DataTypeGeneric, DataTypeGeneric};
+  TypeConstraint newTc{DataTypeGeneric};
   newTc.weak = origTc.weak;
 
   while (true) {
@@ -418,23 +387,14 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
     auto const newDstType = refineType(relaxed, knownType);
     if (typeFitsConstraint(newDstType, origTc)) break;
 
-    ITRACE(5, "newDstType = {}, newTc = {}; ", newDstType, newTc);
-    if (newTc.category == DataTypeGeneric ||
-        !typeFitsOuterConstraint(newDstType, origTc)) {
-      FTRACE(5, "incrementing outer\n");
-      incCategory(newTc.category);
-    } else if (!typeFitsInnerConstraint(newDstType, origTc)) {
-      FTRACE(5, "incrementing inner\n");
-      incCategory(newTc.innerCat);
-    } else {
-      not_reached();
-    }
+    ITRACE(5, "newDstType = {}, newTc = {}; incrementing constraint\n",
+      newDstType, newTc);
+    incCategory(newTc.category);
   }
 
   ITRACE(4, "Returning {}\n", newTc);
   // newTc shouldn't be any more specific than origTc.
-  always_assert(newTc.category <= origTc.category &&
-                newTc.innerCat <= origTc.innerCat);
+  always_assert(newTc.category <= origTc.category);
   return newTc;
 }
 
@@ -443,7 +403,6 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
  */
 TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
   tc.category = std::max(newTc.category, tc.category);
-  tc.innerCat = std::max(newTc.innerCat, tc.innerCat);
 
   if (newTc.wantArrayKind()) tc.setWantArrayKind();
 

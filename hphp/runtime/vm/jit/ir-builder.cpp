@@ -821,8 +821,6 @@ bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
  */
 bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   if (!val) {
     ITRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
@@ -938,8 +936,6 @@ bool IRBuilder::constrainLocal(uint32_t locId,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainLocal({}, {}, {}, {})\n",
          locId, show(typeSrc), tc, why);
@@ -1014,8 +1010,6 @@ bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
 bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
                                TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
   Indent _i;

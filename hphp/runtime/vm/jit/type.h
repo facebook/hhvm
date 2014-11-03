@@ -987,8 +987,7 @@ struct TypeConstraint {
   /*
    * Constructors.
    */
-  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                DataTypeCategory inner = DataTypeGeneric);
+  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric);
   explicit TypeConstraint(const Class* cls);
 
   /*
@@ -1015,11 +1014,6 @@ struct TypeConstraint {
    */
   bool operator==(TypeConstraint tc2) const;
   bool operator!=(TypeConstraint tc2) const;
-
-  /*
-   * Get the inner constraint, preserving m_specialized if appropriate.
-   */
-  TypeConstraint inner() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1062,16 +1056,6 @@ struct TypeConstraint {
    * values by consumers of the type.
    */
   DataTypeCategory category;
-
-  /*
-   * When a value is boxed, `innerCat' is used to determine how we can relax
-   * the inner type
-   *
-   * `innerCat' is only meaningful when `category' is at least
-   * DataTypeCountness, since a category of DataTypeGeneric relaxes types all
-   * the way to Gen which has no meaningful inner type.
-   */
-  DataTypeCategory innerCat;
 
   /*
    * If weak is true, the consumer of the value being constrained doesn't

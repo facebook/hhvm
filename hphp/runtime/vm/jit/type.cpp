@@ -1124,15 +1124,6 @@ Type convertToType(RepoAuthType ty) {
 }
 
 Type refineTypeNoCheck(Type oldType, Type newType) {
-  // It's OK for the old and new inner types of boxed values not to
-  // intersect, since the inner type is really just a prediction.
-  // But if they do intersect, we keep the intersection.  This is
-  // necessary to keep the type known in situations like:
-  //   oldType: Boxed{Obj}
-  //   newType: Boxed{Obj<C>, InitNull}
-  if (oldType.isBoxed() && newType.isBoxed() && oldType.not(newType)) {
-    return oldType < newType ? oldType : newType;
-  }
   return oldType & newType;
 }
 
@@ -1446,10 +1437,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 
 std::string TypeConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
-
-  if (innerCat > DataTypeGeneric) {
-    folly::toAppend(",inner:", typeCategoryName(innerCat), &ret);
-  }
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";

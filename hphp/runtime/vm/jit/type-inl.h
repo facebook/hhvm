@@ -596,10 +596,8 @@ inline const RepoAuthType::Array* Type::arrayType(Type::ArrayInfo info) {
 // TypeConstraint.
 
 inline
-TypeConstraint::TypeConstraint(DataTypeCategory cat /* = DataTypeGeneric */,
-                               DataTypeCategory inner /* = DataTypeGeneric */)
+TypeConstraint::TypeConstraint(DataTypeCategory cat /* = DataTypeGeneric */)
   : category(cat)
-  , innerCat(inner)
   , weak(false)
   , m_specialized(0)
 {}
@@ -616,12 +614,11 @@ inline TypeConstraint& TypeConstraint::setWeak(bool w /* = true */) {
 }
 
 inline bool TypeConstraint::empty() const {
-  return category == DataTypeGeneric && innerCat == DataTypeGeneric && !weak;
+  return category == DataTypeGeneric && !weak;
 }
 
 inline bool TypeConstraint::operator==(TypeConstraint tc2) const {
   return category == tc2.category &&
-         innerCat == tc2.innerCat &&
          weak == tc2.weak &&
          m_specialized == tc2.m_specialized;
 }
@@ -630,19 +627,11 @@ inline bool TypeConstraint::operator!=(TypeConstraint tc2) const {
   return !(*this == tc2);
 }
 
-inline TypeConstraint TypeConstraint::inner() const {
-  auto tc = TypeConstraint{innerCat}.setWeak(weak);
-  if (tc.category == DataTypeSpecialized) {
-    tc.m_specialized = m_specialized;
-  }
-  return tc;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // TypeConstraint specialization.
 
 inline bool TypeConstraint::isSpecialized() const {
-  return category == DataTypeSpecialized || innerCat == DataTypeSpecialized;
+  return category == DataTypeSpecialized;
 }
 
 inline TypeConstraint& TypeConstraint::setWantArrayKind() {

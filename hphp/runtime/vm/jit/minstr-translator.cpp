@@ -549,7 +549,7 @@ void HhbcTranslator::MInstrTranslator::constrainBase(TypeConstraint tc) {
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   if (m_baseType.maybeBoxed()) {
-    tc.innerCat = tc.category;
+    //tc.innerCat = tc.category;
     tc.category = DataTypeCountness;
   }
   m_irb.constrainValue(m_base, tc);

@@ -3,6 +3,7 @@
 option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
 option(DEBUG_MEMORY_LEAK "Allow easier debugging of memory leaks" OFF)
 option(DEBUG_APC_LEAK "Allow easier debugging of apc leaks" OFF)
+option(ENABLE_SSP "Enabled GCC/LLVM stack-smashing protection" OFF)
 option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
 
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)

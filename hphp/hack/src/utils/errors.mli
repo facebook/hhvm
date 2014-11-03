@@ -223,6 +223,7 @@ val not_public_interface : Pos.t -> unit
 val interface_with_member_variable : Pos.t -> unit
 val interface_with_static_member_variable : Pos.t -> unit
 val dangerous_method_name : Pos.t -> unit
+val illegal_function_name : Pos.t -> string -> unit
 val case_fallthrough : Pos.t -> Pos.t -> unit
 val default_fallthrough : Pos.t -> unit
 val visibility_extends : string -> Pos.t -> Pos.t -> string -> unit

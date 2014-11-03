@@ -179,6 +179,7 @@ module NastCheck                            = struct
   let toplevel_break                        = 3022 (* DONT MODIFY!!!! *)
   let toplevel_continue                     = 3023 (* DONT MODIFY!!!! *)
   let uses_non_trait                        = 3024 (* DONT MODIFY!!!! *)
+  let illegal_function_name                 = 3025 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -763,6 +764,10 @@ let interface_with_member_variable pos =
 let interface_with_static_member_variable pos =
   add NastCheck.interface_with_static_member_variable pos
     "Interfaces cannot have static variables"
+
+let illegal_function_name pos mname =
+  add NastCheck.illegal_function_name pos
+    ("Illegal function name: " ^ strip_ns mname)
 
 let dangerous_method_name pos =
   add NastCheck.dangerous_method_name pos (

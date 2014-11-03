@@ -255,6 +255,9 @@ let rec fun_ tenv f =
   end
 
 and func env f =
+  let p, fname = f.f_name in
+  if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
+  then Errors.illegal_function_name p fname;
   let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;

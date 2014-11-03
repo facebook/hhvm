@@ -107,7 +107,7 @@ enum Attr {
                                         //       |          |         //
   // Indicates that a function is a builtin that takes variadic arguments,
   // where the arguments are either by ref or optionally by ref.  It is
-  // equivalent to ClassInfo's (RefVariableArguments | MixedVariableArguments).
+  // equivalent to ClassInfo's (RefVariableArguments).
   AttrVariadicByRef        = (1 << 15), //       |          |    X    //
                                         //       |          |         //
   // Indicates that a function may need to use a VarEnv or varargs (i.e.,

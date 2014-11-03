@@ -162,9 +162,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   // This block of code is not needed, if BlockScope directly takes flags.
-  if (attrs & ClassInfo::MixedVariableArguments) {
-    f->setVariableArgument(-1);
-  } else if (attrs & ClassInfo::RefVariableArguments) {
+  if (attrs & ClassInfo::RefVariableArguments) {
     f->setVariableArgument(1);
   } else if (attrs & ClassInfo::VariableArguments) {
     f->setVariableArgument(0);

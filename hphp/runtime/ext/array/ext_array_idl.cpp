@@ -19,39 +19,11 @@
 #include <vector>
 
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#define SORT_DESC               3
-#define SORT_ASC                4
 namespace HPHP {
-
-static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
-  switch (sort_flags) {
-  case SORT_NATURAL:
-    return Array::SortNatural;
-  case SORT_NATURAL_CASE:
-    return Array::SortNaturalCase;
-  case SORT_NUMERIC:
-    return ascending ?
-      Array::SortNumericAscending : Array::SortNumericDescending;
-  case SORT_STRING:
-    return ascending ?
-      Array::SortStringAscending : Array::SortStringDescending;
-  case SORT_STRING_CASE:
-    return ascending ?
-      Array::SortStringAscendingCase : Array::SortStringDescendingCase;
-  case SORT_LOCALE_STRING:
-    return ascending ?
-      Array::SortLocaleStringAscending : Array::SortLocaleStringDescending;
-  case SORT_REGULAR:
-  default:
-    return ascending ?
-      Array::SortRegularAscending : Array::SortRegularDescending;
-  }
-}
 
 Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1,
                     const Array& _argv /* = null_array */) {
@@ -142,51 +114,6 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1,
     }
   }
   return ret_ai.toVariant();
-}
-
-bool f_array_multisort(int _argc, VRefParam arr1, const Array& _argv) {
-  getCheckedArrayRet(arr1, false);
-  std::vector<Array::SortData> data;
-  std::vector<Array> arrays;
-  arrays.reserve(1 + _argv.size()); // so no resize would happen
-
-  Array::SortData sd;
-  sd.original = &arr1;
-  arrays.push_back(arr_arr1);
-  sd.array = &arrays.back();
-  sd.by_key = false;
-
-  int sort_flags = SORT_REGULAR;
-  bool ascending = true;
-  for (int i = 0; i < _argv.size(); i++) {
-    Variant *v = &((Array&)_argv).lvalAt(i);
-    auto const cell = v->asCell();
-    if (cell->m_type == KindOfArray) {
-      sd.cmp_func = get_cmp_func(sort_flags, ascending);
-      data.push_back(sd);
-
-      sort_flags = SORT_REGULAR;
-      ascending = true;
-
-      sd.original = v;
-      arrays.push_back(Array(cell->m_data.parr));
-      sd.array = &arrays.back();
-    } else {
-      int n = v->toInt32();
-      if (n == SORT_ASC) {
-        ascending = true;
-      } else if (n == SORT_DESC) {
-        ascending = false;
-      } else {
-        sort_flags = n;
-      }
-    }
-  }
-
-  sd.cmp_func = get_cmp_func(sort_flags, ascending);
-  data.push_back(sd);
-
-  return Array::MultiSort(data, true);
 }
 
 }

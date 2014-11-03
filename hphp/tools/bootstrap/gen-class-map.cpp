@@ -186,7 +186,7 @@ static void outputConstants(const fbstring &invocation_trace,
                         IsAbstract|IsStatic|IsFinal|\
                         AllowIntercept|NoProfile|ContextSensitive|\
                         HipHopSpecific|VariableArguments|\
-                        RefVariableArguments|MixedVariableArguments|\
+                        RefVariableArguments|\
                         NoFCallBuiltin|FunctionIsFoldable|\
                         NoInjection|NoEffect|HasOptFunction|ParamCoerceModeNull|\
                         ParamCoerceModeFalse|ZendCompat)
@@ -196,9 +196,6 @@ static void writeFunction(std::ostream& out, const PhpFunc& func) {
 
   if (flags & RefVariableArguments) {
     flags |= VariableArguments;
-  }
-  if (flags & MixedVariableArguments) {
-    flags |= RefVariableArguments | VariableArguments;
   }
   if (!func.isMethod() || !(flags & VISIBILITY_MASK)) {
     flags |= IsPublic;

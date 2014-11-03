@@ -1343,6 +1343,19 @@ function i18n_loc_get_error_code(): mixed;
 <<__Native, __HipHopSpecific, __IsFoldable>>
 function hphp_array_idx(mixed $search, mixed $key, mixed $def): mixed;
 
+/**
+ * array_multisort() can be used to sort several arrays at once, or a
+ *   multi-dimensional array by one or more dimensions.  Associative (string)
+ *   keys will be maintained, but numeric keys will be re-indexed.
+ *
+ * @param mixed $arr1 - An array being sorted.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ */
+<<__Native("ActRec", "VariadicByRef")>>
+function array_multisort(mixed &$arr1, ...): bool;
+
 namespace __SystemLib {
   /**
    * Creates an array containing variables and their values. For each of these,

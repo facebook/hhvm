@@ -142,7 +142,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"HipHopSpecific",                 HipHopSpecific},
   {"VariableArguments",              VariableArguments},
   {"RefVariableArguments",           RefVariableArguments},
-  {"MixedVariableArguments",         MixedVariableArguments},
   {"FunctionIsFoldable",             FunctionIsFoldable},
   {"NoEffect",                       NoEffect},
   {"NoInjection",                    NoInjection},

@@ -319,6 +319,7 @@ Variant HHVM_FUNCTION(hphp_array_idx,
                       const Variant& search,
                       const Variant& key,
                       const Variant& def);
+TypedValue* HHVM_FN(array_multisort)(ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 

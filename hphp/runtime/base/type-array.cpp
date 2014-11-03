@@ -963,7 +963,9 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
         sorted.set(k, arr->getValueRef(pos));
       }
     }
-    *opaque.original = sorted;
+    if (opaque.original->getRawType() == KindOfRef) {
+      *opaque.original->getRefData() = sorted;
+    }
   }
 
   free(indices);

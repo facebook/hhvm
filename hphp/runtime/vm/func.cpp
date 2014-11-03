@@ -506,11 +506,14 @@ bool Func::mustBeRef(int32_t arg) const {
       if (name() == s_array_multisort.get() && !cls()) return false;
     }
   }
+
+  // We force mustBeRef() to return false for array_multisort(). It tries to
+  // pass all variadic arguments by reference, but it also allow expressions
+  // that cannot be taken by reference (ex. SORT_REGULAR flag).
   return
     arg < numParams() ||
     !(m_attrs & AttrVariadicByRef) ||
-    !methInfo() ||
-    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+    !(name() == s_array_multisort.get() && !cls());
 }
 
 

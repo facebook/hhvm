@@ -59,7 +59,6 @@ enum FuncFlags {
   HipHopSpecific                = (1 << 16),
   VariableArguments             = (1 << 17),
   RefVariableArguments          = (1 << 18),
-  MixedVariableArguments        = (1 << 19),
   FunctionIsFoldable            = (1 << 20),
   NoEffect                      = (1 << 21),
   NoInjection                   = (1 << 22),
@@ -74,9 +73,7 @@ enum FuncFlags {
   NoFCallBuiltin                = (1 << 31),
 };
 
-#define VarArgsMask (VariableArguments | \
-                     RefVariableArguments | \
-                     MixedVariableArguments)
+#define VarArgsMask (VariableArguments | RefVariableArguments)
 
 bool isKindOfIndirect(DataType kindof);
 

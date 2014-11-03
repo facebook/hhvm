@@ -526,8 +526,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   assert(info);
   m_info = info;
   Attr attrs_ = AttrBuiltin;
-  if (info->attribute & (ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
+  if (info->attribute & ClassInfo::RefVariableArguments) {
     attrs_ |= AttrVariadicByRef;
   }
   if (info->attribute & ClassInfo::IsReference) {

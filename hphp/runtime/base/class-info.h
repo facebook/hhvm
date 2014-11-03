@@ -66,7 +66,6 @@ public:
 
     VariableArguments      = (1 << 17), //                  x      x
     RefVariableArguments   = (1 << 18), //                  x      x
-    MixedVariableArguments = (1 << 19), //                  x      x
 
     FunctionIsFoldable     = (1 << 20), //                  x
     NoEffect               = (1 << 21), //                  x

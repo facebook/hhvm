@@ -25,25 +25,6 @@
                     "desc": "An array to run through the callback function."
                 }
             ]
-        },
-        {
-            "name": "array_multisort",
-            "desc": "array_multisort() can be used to sort several arrays at once, or a multi-dimensional array by one or more dimensions.\n\nAssociative (string) keys will be maintained, but numeric keys will be re-indexed.",
-            "flags": [
-                "MixedVariableArguments"
-            ],
-            "return": {
-                "type": "Boolean",
-                "desc": "Returns TRUE on success or FALSE on failure."
-            },
-            "args": [
-                {
-                    "name": "arr1",
-                    "type": "Variant",
-                    "desc": "An array being sorted.",
-                    "ref": true
-                }
-            ]
         }
     ],
     "classes": [

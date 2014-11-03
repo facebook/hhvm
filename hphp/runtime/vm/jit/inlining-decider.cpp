@@ -261,8 +261,7 @@ bool isInlinableCPPBuiltin(const Func* f) {
   if (auto const info = f->methInfo()) {
     if (info->attribute & (ClassInfo::NoFCallBuiltin |
                            ClassInfo::VariableArguments |
-                           ClassInfo::RefVariableArguments |
-                           ClassInfo::MixedVariableArguments)) {
+                           ClassInfo::RefVariableArguments)) {
       return false;
     }
     // Note: there is no need for a similar-to-the-above check for HNI

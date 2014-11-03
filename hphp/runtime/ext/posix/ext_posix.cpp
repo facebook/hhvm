@@ -14,7 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/ext_posix.h"
+#include "hphp/runtime/ext/posix/ext_posix.h"
 
 #include <memory>
 
@@ -36,39 +36,121 @@
 
 namespace HPHP {
 
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(posix, NO_EXTENSION_VERSION_YET);
+#define DEFINE_POSIX_CONSTANT(name)                                            \
+  const int64_t k_POSIX_##name = name;                                         \
+  static const StaticString s_POSIX_##name("POSIX_"#name)                      \
+
+DEFINE_POSIX_CONSTANT(S_IFMT);
+DEFINE_POSIX_CONSTANT(S_IFSOCK);
+DEFINE_POSIX_CONSTANT(S_IFLNK);
+DEFINE_POSIX_CONSTANT(S_IFREG);
+DEFINE_POSIX_CONSTANT(S_IFBLK);
+DEFINE_POSIX_CONSTANT(S_IFDIR);
+DEFINE_POSIX_CONSTANT(S_IFCHR);
+DEFINE_POSIX_CONSTANT(S_IFIFO);
+DEFINE_POSIX_CONSTANT(S_ISUID);
+DEFINE_POSIX_CONSTANT(S_ISGID);
+DEFINE_POSIX_CONSTANT(S_ISVTX);
+DEFINE_POSIX_CONSTANT(S_IRWXU);
+DEFINE_POSIX_CONSTANT(S_IRUSR);
+DEFINE_POSIX_CONSTANT(S_IWUSR);
+DEFINE_POSIX_CONSTANT(S_IXUSR);
+DEFINE_POSIX_CONSTANT(S_IRWXG);
+DEFINE_POSIX_CONSTANT(S_IRGRP);
+DEFINE_POSIX_CONSTANT(S_IWGRP);
+DEFINE_POSIX_CONSTANT(S_IXGRP);
+DEFINE_POSIX_CONSTANT(S_IRWXO);
+DEFINE_POSIX_CONSTANT(S_IROTH);
+DEFINE_POSIX_CONSTANT(S_IWOTH);
+DEFINE_POSIX_CONSTANT(S_IXOTH);
+DEFINE_POSIX_CONSTANT(F_OK);
+DEFINE_POSIX_CONSTANT(X_OK);
+DEFINE_POSIX_CONSTANT(W_OK);
+DEFINE_POSIX_CONSTANT(R_OK);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t k_POSIX_S_IFMT = S_IFMT;
-const int64_t k_POSIX_S_IFSOCK = S_IFSOCK;
-const int64_t k_POSIX_S_IFLNK = S_IFLNK;
-const int64_t k_POSIX_S_IFREG = S_IFREG;
-const int64_t k_POSIX_S_IFBLK = S_IFBLK;
-const int64_t k_POSIX_S_IFDIR = S_IFDIR;
-const int64_t k_POSIX_S_IFCHR = S_IFCHR;
-const int64_t k_POSIX_S_IFIFO = S_IFIFO;
-const int64_t k_POSIX_S_ISUID = S_ISUID;
-const int64_t k_POSIX_S_ISGID = S_ISGID;
-const int64_t k_POSIX_S_ISVTX = S_ISVTX;
-const int64_t k_POSIX_S_IRWXU = S_IRWXU;
-const int64_t k_POSIX_S_IRUSR = S_IRUSR;
-const int64_t k_POSIX_S_IWUSR = S_IWUSR;
-const int64_t k_POSIX_S_IXUSR = S_IXUSR;
-const int64_t k_POSIX_S_IRWXG = S_IRWXG;
-const int64_t k_POSIX_S_IRGRP = S_IRGRP;
-const int64_t k_POSIX_S_IWGRP = S_IWGRP;
-const int64_t k_POSIX_S_IXGRP = S_IXGRP;
-const int64_t k_POSIX_S_IRWXO = S_IRWXO;
-const int64_t k_POSIX_S_IROTH = S_IROTH;
-const int64_t k_POSIX_S_IWOTH = S_IWOTH;
-const int64_t k_POSIX_S_IXOTH = S_IXOTH;
-const int64_t k_POSIX_F_OK = F_OK;
-const int64_t k_POSIX_X_OK = X_OK;
-const int64_t k_POSIX_W_OK = W_OK;
-const int64_t k_POSIX_R_OK = R_OK;
+#define REGISTER_POSIX_CONSTANT(name)                                          \
+  Native::registerConstant<KindOfInt64>(s_POSIX_##name.get(), k_POSIX_##name)  \
 
-bool f_posix_access(const String& file, int mode /* = 0 */) {
+static class POSIXExtension : public Extension {
+public:
+  POSIXExtension() : Extension("posix", NO_EXTENSION_VERSION_YET) {}
+  virtual void moduleInit() {
+    REGISTER_POSIX_CONSTANT(S_IFMT);
+    REGISTER_POSIX_CONSTANT(S_IFSOCK);
+    REGISTER_POSIX_CONSTANT(S_IFLNK);
+    REGISTER_POSIX_CONSTANT(S_IFREG);
+    REGISTER_POSIX_CONSTANT(S_IFBLK);
+    REGISTER_POSIX_CONSTANT(S_IFDIR);
+    REGISTER_POSIX_CONSTANT(S_IFCHR);
+    REGISTER_POSIX_CONSTANT(S_IFIFO);
+    REGISTER_POSIX_CONSTANT(S_ISUID);
+    REGISTER_POSIX_CONSTANT(S_ISGID);
+    REGISTER_POSIX_CONSTANT(S_ISVTX);
+    REGISTER_POSIX_CONSTANT(S_IRWXU);
+    REGISTER_POSIX_CONSTANT(S_IRUSR);
+    REGISTER_POSIX_CONSTANT(S_IWUSR);
+    REGISTER_POSIX_CONSTANT(S_IXUSR);
+    REGISTER_POSIX_CONSTANT(S_IRWXG);
+    REGISTER_POSIX_CONSTANT(S_IRGRP);
+    REGISTER_POSIX_CONSTANT(S_IWGRP);
+    REGISTER_POSIX_CONSTANT(S_IXGRP);
+    REGISTER_POSIX_CONSTANT(S_IRWXO);
+    REGISTER_POSIX_CONSTANT(S_IROTH);
+    REGISTER_POSIX_CONSTANT(S_IWOTH);
+    REGISTER_POSIX_CONSTANT(S_IXOTH);
+    REGISTER_POSIX_CONSTANT(F_OK);
+    REGISTER_POSIX_CONSTANT(X_OK);
+    REGISTER_POSIX_CONSTANT(W_OK);
+    REGISTER_POSIX_CONSTANT(R_OK);
+
+    HHVM_FE(posix_access);
+    HHVM_FE(posix_ctermid);
+    HHVM_FE(posix_get_last_error);
+    HHVM_FE(posix_errno);
+    HHVM_FE(posix_getcwd);
+    HHVM_FE(posix_getegid);
+    HHVM_FE(posix_geteuid);
+    HHVM_FE(posix_getgid);
+    HHVM_FE(posix_getgrgid);
+    HHVM_FE(posix_getgrnam);
+    HHVM_FE(posix_getgroups);
+    HHVM_FE(posix_getlogin);
+    HHVM_FE(posix_getpgid);
+    HHVM_FE(posix_getpgrp);
+    HHVM_FE(posix_getpid);
+    HHVM_FE(posix_getppid);
+    HHVM_FE(posix_getpwnam);
+    HHVM_FE(posix_getpwuid);
+    HHVM_FE(posix_getrlimit);
+    HHVM_FE(posix_getsid);
+    HHVM_FE(posix_getuid);
+    HHVM_FE(posix_initgroups);
+    HHVM_FE(posix_isatty);
+    HHVM_FE(posix_kill);
+    HHVM_FE(posix_mkfifo);
+    HHVM_FE(posix_mknod);
+    HHVM_FE(posix_setegid);
+    HHVM_FE(posix_seteuid);
+    HHVM_FE(posix_setgid);
+    HHVM_FE(posix_setpgid);
+    HHVM_FE(posix_setsid);
+    HHVM_FE(posix_setuid);
+    HHVM_FE(posix_strerror);
+    HHVM_FE(posix_times);
+    HHVM_FE(posix_ttyname);
+    HHVM_FE(posix_uname);
+
+    loadSystemlib();
+  }
+} s_posix_extension;
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool HHVM_FUNCTION(posix_access,
+                   const String& file,
+                   int mode /* = 0 */) {
   String path = File::TranslatePath(file);
   if (path.empty()) {
     return false;
@@ -76,7 +158,7 @@ bool f_posix_access(const String& file, int mode /* = 0 */) {
   return !access(path.data(), mode);
 }
 
-String f_posix_ctermid() {
+String HHVM_FUNCTION(posix_ctermid) {
   String s = String(L_ctermid, ReserveString);
   char *buffer = s.bufferSlice().ptr;
   ctermid(buffer);
@@ -84,15 +166,15 @@ String f_posix_ctermid() {
   return s;
 }
 
-int64_t f_posix_get_last_error() {
+int64_t HHVM_FUNCTION(posix_get_last_error) {
   return errno;
 }
 
-int64_t f_posix_errno() {
+int64_t HHVM_FUNCTION(posix_errno) {
   return errno;
 }
 
-String f_posix_getcwd() {
+String HHVM_FUNCTION(posix_getcwd) {
   String s = String(PATH_MAX, ReserveString);
   char *buffer = s.bufferSlice().ptr;
   if (getcwd(buffer, PATH_MAX) == NULL) {
@@ -102,15 +184,15 @@ String f_posix_getcwd() {
   return s;
 }
 
-int64_t f_posix_getegid() {
+int64_t HHVM_FUNCTION(posix_getegid) {
   return getegid();
 }
 
-int64_t f_posix_geteuid() {
+int64_t HHVM_FUNCTION(posix_geteuid) {
   return geteuid();
 }
 
-int64_t f_posix_getgid() {
+int64_t HHVM_FUNCTION(posix_getgid) {
   return getgid();
 }
 
@@ -169,15 +251,17 @@ static Variant php_posix_group_to_array(int gid,
   );
 }
 
-Variant f_posix_getgrgid(int gid) {
+Variant HHVM_FUNCTION(posix_getgrgid,
+                      int gid) {
   return php_posix_group_to_array(gid);
 }
 
-Variant f_posix_getgrnam(const String& name) {
+Variant HHVM_FUNCTION(posix_getgrnam,
+                      const String& name) {
   return php_posix_group_to_array(-1, name.data());
 }
 
-Variant f_posix_getgroups() {
+Variant HHVM_FUNCTION(posix_getgroups) {
   gid_t gidlist[NGROUPS_MAX];
   int result = getgroups(NGROUPS_MAX, gidlist);
   if (result < 0) {
@@ -191,7 +275,7 @@ Variant f_posix_getgroups() {
   return ret;
 }
 
-Variant f_posix_getlogin() {
+Variant HHVM_FUNCTION(posix_getlogin) {
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
   char buf[L_cuserid];
 #else
@@ -203,21 +287,22 @@ Variant f_posix_getlogin() {
   return false;
 }
 
-Variant f_posix_getpgid(int pid) {
+Variant HHVM_FUNCTION(posix_getpgid,
+                      int pid) {
   int ret = getpgid(pid);
   if (ret < 0) return false;
   return ret;
 }
 
-int64_t f_posix_getpgrp() {
+int64_t HHVM_FUNCTION(posix_getpgrp) {
   return getpgrp();
 }
 
-int64_t f_posix_getpid() {
+int64_t HHVM_FUNCTION(posix_getpid) {
   return getpid();
 }
 
-int64_t f_posix_getppid() {
+int64_t HHVM_FUNCTION(posix_getppid) {
   return getppid();
 }
 
@@ -264,11 +349,13 @@ static Variant php_posix_passwd_to_array(int uid,
   );
 }
 
-Variant f_posix_getpwnam(const String& username) {
+Variant HHVM_FUNCTION(posix_getpwnam,
+                      const String& username) {
   return php_posix_passwd_to_array(-1, username);
 }
 
-Variant f_posix_getpwuid(int uid) {
+Variant HHVM_FUNCTION(posix_getpwuid,
+                      int uid) {
   return php_posix_passwd_to_array(uid);
 }
 
@@ -324,7 +411,7 @@ static struct limitlist {
   { 0, NULL }
 };
 
-Variant f_posix_getrlimit() {
+Variant HHVM_FUNCTION(posix_getrlimit) {
   Array ret;
   for (struct limitlist *l = limits; l->name; l++) {
     if (!posix_addlimit(l->limit, l->name, ret)) {
@@ -334,17 +421,20 @@ Variant f_posix_getrlimit() {
   return ret;
 }
 
-Variant f_posix_getsid(int pid) {
+Variant HHVM_FUNCTION(posix_getsid,
+                      int pid) {
   int ret = getsid(pid);
   if (ret < 0) return false;
   return ret;
 }
 
-int64_t f_posix_getuid() {
+int64_t HHVM_FUNCTION(posix_getuid) {
   return getuid();
 }
 
-bool f_posix_initgroups(const String& name, int base_group_id) {
+bool HHVM_FUNCTION(posix_initgroups,
+                   const String& name,
+                   int base_group_id) {
   if (name.empty()) return false;
   return !initgroups(name.data(), base_group_id);
 }
@@ -363,19 +453,27 @@ static int php_posix_get_fd(const Variant& fd) {
   return nfd;
 }
 
-bool f_posix_isatty(const Variant& fd) {
+bool HHVM_FUNCTION(posix_isatty,
+                   const Variant& fd) {
   return isatty(php_posix_get_fd(fd));
 }
 
-bool f_posix_kill(int pid, int sig) {
+bool HHVM_FUNCTION(posix_kill,
+                   int pid,
+                   int sig) {
   return kill(pid, sig) >= 0;
 }
 
-bool f_posix_mkfifo(const String& pathname, int mode) {
+bool HHVM_FUNCTION(posix_mkfifo,
+                   const String& pathname,
+                   int mode) {
   return mkfifo(pathname.data(), mode) >= 0;
 }
 
-bool f_posix_mknod(const String& pathname, int mode, int major /* = 0 */,
+bool HHVM_FUNCTION(posix_mknod,
+                   const String& pathname,
+                   int mode,
+                   int major /* = 0 */,
                    int minor /* = 0 */) {
   dev_t php_dev = 0;
   if ((mode & S_IFCHR) || (mode & S_IFBLK)) {
@@ -395,31 +493,38 @@ bool f_posix_mknod(const String& pathname, int mode, int major /* = 0 */,
   return mknod(pathname.data(), mode, php_dev) >= 0;
 }
 
-bool f_posix_setegid(int gid) {
+bool HHVM_FUNCTION(posix_setegid,
+                   int gid) {
   return setegid(gid);
 }
 
-bool f_posix_seteuid(int uid) {
+bool HHVM_FUNCTION(posix_seteuid,
+                   int uid) {
   return seteuid(uid);
 }
 
-bool f_posix_setgid(int gid) {
+bool HHVM_FUNCTION(posix_setgid,
+                   int gid) {
   return setgid(gid);
 }
 
-bool f_posix_setpgid(int pid, int pgid) {
+bool HHVM_FUNCTION(posix_setpgid,
+                   int pid,
+                   int pgid) {
   return setpgid(pid, pgid) >= 0;
 }
 
-int64_t f_posix_setsid() {
+int64_t HHVM_FUNCTION(posix_setsid) {
   return setsid();
 }
 
-bool f_posix_setuid(int uid) {
+bool HHVM_FUNCTION(posix_setuid,
+                   int uid) {
   return setuid(uid);
 }
 
-String f_posix_strerror(int errnum) {
+String HHVM_FUNCTION(posix_strerror,
+                     int errnum) {
   return String(folly::errnoStr(errnum).toStdString());
 }
 
@@ -430,7 +535,7 @@ const StaticString
   s_cutime("cutime"),
   s_cstime("cstime");
 
-Variant f_posix_times() {
+Variant HHVM_FUNCTION(posix_times) {
   struct tms t;
   clock_t ticks = times(&t);
   if (ticks == -1) {
@@ -446,7 +551,8 @@ Variant f_posix_times() {
   );
 }
 
-Variant f_posix_ttyname(const Variant& fd) {
+Variant HHVM_FUNCTION(posix_ttyname,
+                      const Variant& fd) {
   int ttyname_maxlen = sysconf(_SC_TTY_NAME_MAX);
   if (ttyname_maxlen <= 0) {
     return false;
@@ -469,7 +575,7 @@ const StaticString
   s_machine("machine"),
   s_domainname("domainname");
 
-Variant f_posix_uname() {
+Variant HHVM_FUNCTION(posix_uname) {
   struct utsname u;
   if (uname(&u) < 0) {
     return false;

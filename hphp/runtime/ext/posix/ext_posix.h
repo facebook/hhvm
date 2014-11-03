@@ -54,77 +54,104 @@ extern const int64_t k_POSIX_X_OK;
 extern const int64_t k_POSIX_W_OK;
 extern const int64_t k_POSIX_R_OK;
 
-bool f_posix_access(const String& file, int mode = 0);
+bool HHVM_FUNCTION(posix_access,
+                   const String& file,
+                   int mode = 0);
 
-String f_posix_ctermid();
+String HHVM_FUNCTION(posix_ctermid);
 
-int64_t f_posix_get_last_error();
+int64_t HHVM_FUNCTION(posix_get_last_error);
 
-int64_t f_posix_errno();
+int64_t HHVM_FUNCTION(posix_errno);
 
-String f_posix_getcwd();
+String HHVM_FUNCTION(posix_getcwd);
 
-int64_t f_posix_getegid();
+int64_t HHVM_FUNCTION(posix_getegid);
 
-int64_t f_posix_geteuid();
+int64_t HHVM_FUNCTION(posix_geteuid);
 
-int64_t f_posix_getgid();
+int64_t HHVM_FUNCTION(posix_getgid);
 
-Variant f_posix_getgrgid(int gid);
+Variant HHVM_FUNCTION(posix_getgrgid,
+                      int gid);
 
-Variant f_posix_getgrnam(const String& name);
+Variant HHVM_FUNCTION(posix_getgrnam,
+                      const String& name);
 
-Variant f_posix_getgroups();
+Variant HHVM_FUNCTION(posix_getgroups);
 
-Variant f_posix_getlogin();
+Variant HHVM_FUNCTION(posix_getlogin);
 
-Variant f_posix_getpgid(int pid);
+Variant HHVM_FUNCTION(posix_getpgid,
+                      int pid);
 
-int64_t f_posix_getpgrp();
+int64_t HHVM_FUNCTION(posix_getpgrp);
 
-int64_t f_posix_getpid();
+int64_t HHVM_FUNCTION(posix_getpid);
 
-int64_t f_posix_getppid();
+int64_t HHVM_FUNCTION(posix_getppid);
 
-Variant f_posix_getpwnam(const String& username);
+Variant HHVM_FUNCTION(posix_getpwnam,
+                      const String& username);
 
-Variant f_posix_getpwuid(int uid);
+Variant HHVM_FUNCTION(posix_getpwuid,
+                      int uid);
 
-Variant f_posix_getrlimit();
+Variant HHVM_FUNCTION(posix_getrlimit);
 
-Variant f_posix_getsid(int pid);
+Variant HHVM_FUNCTION(posix_getsid,
+                      int pid);
 
-int64_t f_posix_getuid();
+int64_t HHVM_FUNCTION(posix_getuid);
 
-bool f_posix_initgroups(const String& name, int base_group_id);
+bool HHVM_FUNCTION(posix_initgroups,
+                   const String& name,
+                   int base_group_id);
 
-bool f_posix_isatty(const Variant& fd);
+bool HHVM_FUNCTION(posix_isatty,
+                   const Variant& fd);
 
-bool f_posix_kill(int pid, int sig);
+bool HHVM_FUNCTION(posix_kill,
+                   int pid,
+                   int sig);
 
-bool f_posix_mkfifo(const String& pathname, int mode);
+bool HHVM_FUNCTION(posix_mkfifo,
+                   const String& pathname,
+                   int mode);
 
-bool f_posix_mknod(const String& pathname, int mode, int major = 0, int minor = 0);
+bool HHVM_FUNCTION(posix_mknod,
+                   const String& pathname,
+                   int mode,
+                   int major = 0,
+                   int minor = 0);
 
-bool f_posix_setegid(int gid);
+bool HHVM_FUNCTION(posix_setegid,
+                   int gid);
 
-bool f_posix_seteuid(int uid);
+bool HHVM_FUNCTION(posix_seteuid,
+                   int uid);
 
-bool f_posix_setgid(int gid);
+bool HHVM_FUNCTION(posix_setgid,
+                   int gid);
 
-bool f_posix_setpgid(int pid, int pgid);
+bool HHVM_FUNCTION(posix_setpgid,
+                   int pid,
+                   int pgid);
 
-int64_t f_posix_setsid();
+int64_t HHVM_FUNCTION(posix_setsid);
 
-bool f_posix_setuid(int uid);
+bool HHVM_FUNCTION(posix_setuid,
+                   int uid);
 
-String f_posix_strerror(int errnum);
+String HHVM_FUNCTION(posix_strerror,
+                     int errnum);
 
-Variant f_posix_times();
+Variant HHVM_FUNCTION(posix_times);
 
-Variant f_posix_ttyname(const Variant& fd);
+Variant HHVM_FUNCTION(posix_ttyname,
+                      const Variant& fd);
 
-Variant f_posix_uname();
+Variant HHVM_FUNCTION(posix_uname);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

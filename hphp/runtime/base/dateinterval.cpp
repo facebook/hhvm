@@ -159,8 +159,8 @@ String DateInterval::format(const String& format_spec) {
 }
 
 SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return NEWOBJ(DateInterval)();
-  return NEWOBJ(DateInterval)(timelib_rel_time_clone(m_di.get()));
+  if (!m_di) return newres<DateInterval>();
+  return newres<DateInterval>(timelib_rel_time_clone(m_di.get()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

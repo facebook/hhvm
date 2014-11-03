@@ -36,7 +36,7 @@ MemFile* FileStreamWrapper::openFromCache(const String& filename,
 
   String relative =
     FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
-  std::unique_ptr<MemFile> file(NEWOBJ(MemFile)());
+  std::unique_ptr<MemFile> file(newres<MemFile>());
   bool ret = file->open(relative, mode);
   if (ret) {
     return file.release();
@@ -69,7 +69,7 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
     }
   }
 
-  std::unique_ptr<PlainFile> file(NEWOBJ(PlainFile)());
+  std::unique_ptr<PlainFile> file(newres<PlainFile>());
   bool ret = file->open(File::TranslatePath(fname), mode);
   if (!ret) {
     raise_warning("%s", file->getLastError().c_str());
@@ -80,7 +80,7 @@ File* FileStreamWrapper::open(const String& filename, const String& mode,
 
 Directory* FileStreamWrapper::opendir(const String& path) {
   std::unique_ptr<PlainDirectory> dir(
-    NEWOBJ(PlainDirectory)(File::TranslatePath(path))
+    newres<PlainDirectory>(File::TranslatePath(path))
   );
   if (!dir->isValid()) {
     raise_warning("%s", dir->getLastError().c_str());

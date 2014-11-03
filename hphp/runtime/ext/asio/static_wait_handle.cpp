@@ -34,7 +34,7 @@ void c_StaticWaitHandle::t___construct() {
  * - produces reference for the returned StaticWaitHandle object
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell& result) {
-  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
+  auto waitHandle = newobj<c_StaticWaitHandle>();
   waitHandle->setState(STATE_SUCCEEDED);
   waitHandle->incRefCount();
   cellCopy(result, waitHandle->m_resultOrException);
@@ -55,7 +55,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   assert(exception);
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
-  auto waitHandle = NEWOBJ(c_StaticWaitHandle)();
+  auto waitHandle = newobj<c_StaticWaitHandle>();
   waitHandle->setState(STATE_FAILED);
   waitHandle->incRefCount();
   cellCopy(make_tv<KindOfObject>(exception), waitHandle->m_resultOrException);

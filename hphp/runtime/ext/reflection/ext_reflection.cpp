@@ -998,7 +998,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
   c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();; // Object ensures set is freed
+  Object o = st = newobj<c_Set>(); // Object ensures set is freed
   auto const& allIfaces = cls->allInterfaces();
   st->reserve(allIfaces.size());
 
@@ -1096,7 +1096,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   c_Set* st;
-  Object ret = st = NEWOBJ(c_Set)();
+  Object ret = st = newobj<c_Set>();
   st->reserve(cls->numMethods());
 
   // const pointer to Class => pointer to a (const) Class
@@ -1180,7 +1180,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   }
 
   c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();
+  Object o = st = newobj<c_Set>();
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);

@@ -1415,7 +1415,7 @@ Array HHVM_FUNCTION(str_getcsv,
   char enclosure_char = check_arg(enclosure, '"');
   char escape_char = check_arg(escape, '\\');
 
-  auto dummy = NEWOBJ(PlainFile)();
+  auto dummy = newres<PlainFile>();
   auto wrapper = Resource(dummy);
   return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }

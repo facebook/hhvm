@@ -189,7 +189,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
-    PDOSqliteStatement *s = NEWOBJ(PDOSqliteStatement)(m_db, rawstmt);
+    PDOSqliteStatement *s = newres<PDOSqliteStatement>(m_db, rawstmt);
     *stmt = s;
     return true;
   }
@@ -412,7 +412,7 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(NEWOBJ(PDOColumn)));
+      columns.set(i, Resource(newres<PDOColumn>()));
     }
   }
 
@@ -621,7 +621,7 @@ PDOSqlite::PDOSqlite() : PDODriver("sqlite") {
 }
 
 PDOConnection *PDOSqlite::createConnectionObject() {
-  // Doesn't use NEWOBJ because PDOConnection is malloced
+  // Doesn't use newres<> because PDOConnection is malloced
   return new PDOSqliteConnection();
 }
 

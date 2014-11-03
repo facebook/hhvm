@@ -493,7 +493,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
-  PDOMySqlStatement *s = NEWOBJ(PDOMySqlStatement)(this, m_server);
+  PDOMySqlStatement *s = newres<PDOMySqlStatement>(this, m_server);
   *stmt = s;
 
   if (m_emulate_prepare) {
@@ -1024,7 +1024,7 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(NEWOBJ(PDOColumn)));
+      columns.set(i, Resource(newres<PDOColumn>()));
     }
   }
 
@@ -1300,7 +1300,7 @@ PDOMySql::PDOMySql() : PDODriver("mysql") {
 }
 
 PDOConnection *PDOMySql::createConnectionObject() {
-  // Doesn't use NEWOBJ because PDOConnection is malloced
+  // Doesn't use newres<> because PDOConnection is malloced
   return new PDOMySqlConnection();
 }
 

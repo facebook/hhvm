@@ -569,7 +569,7 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = NEWOBJ(MySQLStmt)(get_connection(obj.get())->get());
+  auto data = newres<MySQLStmt>(get_connection(obj.get())->get());
   this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
 }
 

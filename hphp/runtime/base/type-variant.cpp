@@ -535,7 +535,7 @@ Resource Variant::toResourceHelper() const {
     assert(false);
     break;
   }
-  return Resource(NEWOBJ(DummyResource));
+  return Resource(newres<DummyResource>());
 }
 
 VarNR Variant::toKey() const {
@@ -917,7 +917,7 @@ void Variant::unserialize(VariableUnserializer *uns,
       if (sep != '}') {
         throw Exception("Expected '}' but got '%c'", sep);
       }
-      DummyResource* rsrc = NEWOBJ(DummyResource);
+      DummyResource* rsrc = newres<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
       operator=(rsrc);

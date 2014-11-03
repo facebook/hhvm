@@ -388,7 +388,7 @@ Resource PageletServer::TaskStart(
       return Resource();
     }
   }
-  PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
+  PageletTask *task = newres<PageletTask>(url, headers, remote_host, post_data,
                                           get_uploaded_files(), files,
                                           timeoutSeconds);
   Resource ret(task);

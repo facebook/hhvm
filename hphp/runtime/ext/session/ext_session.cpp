@@ -1084,7 +1084,7 @@ public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+    WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
                                                 true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();

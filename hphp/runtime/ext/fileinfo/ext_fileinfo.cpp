@@ -68,7 +68,7 @@ static Variant HHVM_FUNCTION(finfo_open,
     return false;
   }
 
-  return NEWOBJ(FileinfoResource)(magic);
+  return newres<FileinfoResource>(magic);
 }
 
 static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {

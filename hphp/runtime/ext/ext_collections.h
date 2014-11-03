@@ -1707,7 +1707,7 @@ class BaseSet : public HashCollection {
   template<class TVector>
   Object  php_values() {
     TVector* vec;
-    Object o = vec = NEWOBJ(TVector)();
+    Object o = vec = newobj<TVector>();
     vec->init(VarNR(this));
     return o;
   }

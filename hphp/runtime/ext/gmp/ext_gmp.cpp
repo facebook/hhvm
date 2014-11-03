@@ -139,7 +139,7 @@ static Variant HHVM_FUNCTION(gmp_abs,
   mpz_init(gmpReturn);
   mpz_abs(gmpReturn, gmpData);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpReturn);
   mpz_clear(gmpData);
@@ -164,7 +164,7 @@ static Variant HHVM_FUNCTION(gmp_add,
   mpz_init(gmpReturn);
   mpz_add(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -190,7 +190,7 @@ static Variant HHVM_FUNCTION(gmp_and,
   mpz_init(gmpReturn);
   mpz_and(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -253,7 +253,7 @@ static Variant HHVM_FUNCTION(gmp_com,
   mpz_init(gmpReturn);
   mpz_com(gmpReturn, gmpData);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpReturn);
   mpz_clear(gmpData);
@@ -307,7 +307,7 @@ static Variant HHVM_FUNCTION(gmp_div_q,
       return null_variant;
   }
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -366,8 +366,8 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
   }
 
   ArrayInit returnArray(2, ArrayInit::Map{});
-  returnArray.set(0, NEWOBJ(GMPResource)(gmpReturnQ));
-  returnArray.set(1, NEWOBJ(GMPResource)(gmpReturnR));
+  returnArray.set(0, newres<GMPResource>(gmpReturnQ));
+  returnArray.set(1, newres<GMPResource>(gmpReturnR));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -430,7 +430,7 @@ static Variant HHVM_FUNCTION(gmp_div_r,
   if (dataB.isInteger() && dataB.getInt64() >= 0) {
     ret = (int64_t)mpz_get_ui(gmpReturn);
   } else {
-    ret = NEWOBJ(GMPResource)(gmpReturn);
+    ret = newres<GMPResource>(gmpReturn);
   }
 
   mpz_clear(gmpReturn);
@@ -463,7 +463,7 @@ static Variant HHVM_FUNCTION(gmp_divexact,
   mpz_init(gmpReturn);
   mpz_divexact(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -504,7 +504,7 @@ static Variant HHVM_FUNCTION(gmp_fact,
     mpz_init(gmpReturn);
     mpz_fac_ui(gmpReturn, data.toInt64());
   }
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpReturn);
 
@@ -528,7 +528,7 @@ static Variant HHVM_FUNCTION(gmp_gcd,
   mpz_init(gmpReturn);
   mpz_gcd(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -558,9 +558,9 @@ static Variant HHVM_FUNCTION(gmp_gcdext,
   mpz_gcdext(gmpReturnG, gmpReturnS, gmpReturnT, gmpDataA, gmpDataB);
 
   ArrayInit returnArray(3, ArrayInit::Map{});
-  returnArray.set(s_gmp_g, NEWOBJ(GMPResource)(gmpReturnG));
-  returnArray.set(s_gmp_s, NEWOBJ(GMPResource)(gmpReturnS));
-  returnArray.set(s_gmp_t, NEWOBJ(GMPResource)(gmpReturnT));
+  returnArray.set(s_gmp_g, newres<GMPResource>(gmpReturnG));
+  returnArray.set(s_gmp_s, newres<GMPResource>(gmpReturnS));
+  returnArray.set(s_gmp_t, newres<GMPResource>(gmpReturnT));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -611,7 +611,7 @@ static Variant HHVM_FUNCTION(gmp_init,
     return false;
   }
 
-  Variant ret = NEWOBJ(GMPResource)(gmpData);
+  Variant ret = newres<GMPResource>(gmpData);
 
   mpz_clear(gmpData);
 
@@ -664,7 +664,7 @@ static Variant HHVM_FUNCTION(gmp_invert,
     return false;
   }
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -747,7 +747,7 @@ static Variant HHVM_FUNCTION(gmp_mod,
   if (dataB.isInteger() && dataB.getInt64() >= 0) {
     ret = (int64_t)mpz_get_ui(gmpReturn);
   } else {
-    ret = NEWOBJ(GMPResource)(gmpReturn);
+    ret = newres<GMPResource>(gmpReturn);
   }
 
   mpz_clear(gmpDataA);
@@ -774,7 +774,7 @@ static Variant HHVM_FUNCTION(gmp_mul,
   mpz_init(gmpReturn);
   mpz_mul(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -795,7 +795,7 @@ static Variant HHVM_FUNCTION(gmp_neg,
   mpz_init(gmpReturn);
   mpz_neg(gmpReturn, gmpData);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -815,7 +815,7 @@ static Variant HHVM_FUNCTION(gmp_nextprime,
   mpz_init(gmpReturn);
   mpz_nextprime(gmpReturn, gmpData);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -840,7 +840,7 @@ static Variant HHVM_FUNCTION(gmp_or,
   mpz_init(gmpReturn);
   mpz_ior(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -899,7 +899,7 @@ static Variant HHVM_FUNCTION(gmp_pow,
   mpz_init(gmpReturn);
   mpz_pow_ui(gmpReturn, gmpData, exp);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -939,7 +939,7 @@ static Variant HHVM_FUNCTION(gmp_powm,
   mpz_init(gmpReturn);
   mpz_powm(gmpReturn, gmpDataA, gmpDataB, gmpDataC);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1073,7 +1073,7 @@ static Variant HHVM_FUNCTION(gmp_sqrt,
   mpz_init(gmpReturn);
   mpz_sqrt(gmpReturn, gmpData);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn);
@@ -1102,8 +1102,8 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
   ArrayInit returnArray(2, ArrayInit::Map{});
-  returnArray.set(0, NEWOBJ(GMPResource)(gmpSquareRoot));
-  returnArray.set(1, NEWOBJ(GMPResource)(gmpRemainder));
+  returnArray.set(0, newres<GMPResource>(gmpSquareRoot));
+  returnArray.set(1, newres<GMPResource>(gmpRemainder));
 
   mpz_clear(gmpData);
   mpz_clear(gmpSquareRoot);
@@ -1168,7 +1168,7 @@ static Variant HHVM_FUNCTION(gmp_sub,
   mpz_init(gmpReturn);
   mpz_sub(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1220,7 +1220,7 @@ static Variant HHVM_FUNCTION(gmp_xor,
   mpz_init(gmpReturn);
   mpz_xor(gmpReturn, gmpDataA, gmpDataB);
 
-  Variant ret = NEWOBJ(GMPResource)(gmpReturn);
+  Variant ret = newres<GMPResource>(gmpReturn);
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);

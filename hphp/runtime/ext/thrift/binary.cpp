@@ -193,7 +193,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Map)();
+        ret = newobj<c_Map>();
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
@@ -219,7 +219,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                                        AccessFlags::None).toString();
 
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec = NEWOBJ(c_Vector)();
+        auto const pvec = newobj<c_Vector>();
         ret = pvec;
         for (uint32_t s = 0; s < size; ++s) {
           Variant value = binary_deserialize(type, transport, elemspec);
@@ -247,7 +247,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = NEWOBJ(c_Set)();
+        p_Set set_ret = newobj<c_Set>();
 
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);

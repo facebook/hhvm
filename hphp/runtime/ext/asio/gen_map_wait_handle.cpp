@@ -86,7 +86,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       assert(child->instanceof(c_WaitableWaitHandle::classof()));
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
-      p_GenMapWaitHandle my_wh = NEWOBJ(c_GenMapWaitHandle)();
+      p_GenMapWaitHandle my_wh = newobj<c_GenMapWaitHandle>();
       my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
 
       AsioSession* session = AsioSession::Get();

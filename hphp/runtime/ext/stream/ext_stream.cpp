@@ -122,9 +122,9 @@ Variant HHVM_FUNCTION(stream_context_create,
   if (!arrOptions.isNull() && !StreamContext::validateOptions(arrOptions)) {
     raise_warning("options should have the form "
                   "[\"wrappername\"][\"optionname\"] = $value");
-    return Resource(NEWOBJ(StreamContext)(HPHP::null_array, HPHP::null_array));
+    return Resource(newres<StreamContext>(HPHP::null_array, HPHP::null_array));
   }
-  return Resource(NEWOBJ(StreamContext)(arrOptions, arrParams));
+  return Resource(newres<StreamContext>(arrOptions, arrParams));
 }
 
 Variant HHVM_FUNCTION(stream_context_get_options,
@@ -187,7 +187,7 @@ Variant HHVM_FUNCTION(stream_context_get_default,
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   Resource &resource = g_context->getStreamContext();
   if (resource.isNull()) {
-    resource = Resource(NEWOBJ(StreamContext)(Array::Create(),
+    resource = Resource(newres<StreamContext>(Array::Create(),
                                               Array::Create()));
     g_context->setStreamContext(resource);
   }
@@ -676,7 +676,7 @@ static StreamContext* get_stream_context(const Variant& stream_or_context) {
     Resource resource = file->getStreamContext();
     if (file->getStreamContext().isNull()) {
       resource =
-        Resource(NEWOBJ(StreamContext)(Array::Create(), Array::Create()));
+        Resource(newres<StreamContext>(Array::Create(), Array::Create()));
       file->setStreamContext(resource);
     }
     return resource.getTyped<StreamContext>();

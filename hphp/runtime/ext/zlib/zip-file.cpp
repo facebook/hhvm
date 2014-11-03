@@ -56,7 +56,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
       return false;
     }
     auto buffer = m_innerFile.getTyped<MemFile>();
-    auto file = NEWOBJ(TempFile);
+    auto file = newres<TempFile>();
     while (!buffer->eof()) {
       file->write(buffer->read(File::CHUNK_SIZE));
     }

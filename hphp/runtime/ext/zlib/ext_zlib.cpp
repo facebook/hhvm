@@ -70,7 +70,7 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       translated = fname;
     }
 
-    std::unique_ptr<ZipFile> file(NEWOBJ(ZipFile)());
+    std::unique_ptr<ZipFile> file(newres<ZipFile>());
     bool ret = file->open(translated, mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
@@ -309,7 +309,7 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path /* = 0 */) {
-  File *file = NEWOBJ(ZipFile)();
+  File *file = newres<ZipFile>();
   Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {

@@ -1026,14 +1026,14 @@ String File::applyFilters(const String& buffer,
   Resource in(null_resource);
   Resource out;
   if (buffer.empty()) {
-    out = Resource(NEWOBJ(BucketBrigade)());
+    out = Resource(newres<BucketBrigade>());
   } else {
-    out = Resource(NEWOBJ(BucketBrigade)(buffer));
+    out = Resource(newres<BucketBrigade>(buffer));
   }
 
   for (Resource& resource: filters) {
     in = out;
-    out = Resource(NEWOBJ(BucketBrigade)());
+    out = Resource(newres<BucketBrigade>());
 
     auto filter = resource.getTyped<StreamFilter>();
     assert(filter);

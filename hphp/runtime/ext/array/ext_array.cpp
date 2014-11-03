@@ -1520,7 +1520,7 @@ Variant HHVM_FUNCTION(array_diff,
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   st->reserve(largestSize);
   containerValuesToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1571,7 +1571,7 @@ Variant HHVM_FUNCTION(array_diff_key,
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   st->reserve(largestSize);
   containerKeysToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1780,7 +1780,7 @@ static void containerValuesIntersectHelper(c_Set* st,
                                            int count) {
   assert(count >= 2);
   c_Map* mp;
-  Object mapObj = mp = NEWOBJ(c_Map)();
+  Object mapObj = mp = newobj<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1820,7 +1820,7 @@ static void containerKeysIntersectHelper(c_Set* st,
                                          int count) {
   assert(count >= 2);
   c_Map* mp;
-  Object mapObj = mp = NEWOBJ(c_Map)();
+  Object mapObj = mp = newobj<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1899,7 +1899,7 @@ Variant HHVM_FUNCTION(array_intersect,
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can
     // just call containerValuesToSetHelper() to build the Set.
@@ -1955,7 +1955,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
   // Build up a Set containing the keys that are present in all the containers
   // (except container1)
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can just
     // call containerKeysToSetHelper() to build the Set.

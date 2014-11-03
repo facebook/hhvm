@@ -118,7 +118,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
       return nullptr;
     }
 
-    return NEWOBJ(ZipStream)(z, file);
+    return newres<ZipStream>(z, file);
   }
 };
 
@@ -156,12 +156,12 @@ class ZipEntry : public SweepableResourceData {
   }
 
   String read(int64_t len) {
-    auto sb  = NEWOBJ(StringBuffer)(len);
-    auto buf = sb->appendCursor(len);
+    StringBuffer sb(len);
+    auto buf = sb.appendCursor(len);
     auto n   = zip_fread(m_zipFile, buf, len);
     if (n > 0) {
-      sb->resize(n);
-      return sb->detach();
+      sb.resize(n);
+      return sb.detach();
     }
     return empty_string();
   }
@@ -245,7 +245,7 @@ class ZipDirectory: public SweepableResourceData {
       return false;
     }
 
-    auto zipEntry = NEWOBJ(ZipEntry)(m_zip, m_curIndex);
+    auto zipEntry = newres<ZipEntry>(m_zip, m_curIndex);
 
     if (!zipEntry->isValid()) {
       return false;
@@ -943,12 +943,12 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
     length = zipStat.size;
   }
 
-  auto sb  = NEWOBJ(StringBuffer)(length);
-  auto buf = sb->appendCursor(length);
+  StringBuffer sb(length);
+  auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
   if (n > 0) {
-    sb->resize(n);
-    return sb->detach();
+    sb.resize(n);
+    return sb.detach();
   }
   return empty_string_variant();
 }
@@ -980,12 +980,12 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
     length = zipStat.size;
   }
 
-  auto sb  = NEWOBJ(StringBuffer)(length);
-  auto buf = sb->appendCursor(length);
+  StringBuffer sb(length);
+  auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
   if (n > 0) {
-    sb->resize(n);
-    return sb->detach();
+    sb.resize(n);
+    return sb.detach();
   }
   return empty_string_variant();
 }
@@ -1023,7 +1023,7 @@ static Variant HHVM_METHOD(ZipArchive, getStream, const String& name) {
   FAIL_IF_INVALID_ZIPARCHIVE(getStream, zipDir);
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(getStream, name);
 
-  auto zipStream    = NEWOBJ(ZipStream)(zipDir->getZip(), name);
+  auto zipStream    = newres<ZipStream>(zipDir->getZip(), name);
   auto zipStreamRes = Resource(zipStream);
   if (zipStream->eof()) {
     return false;
@@ -1055,7 +1055,7 @@ static Variant HHVM_METHOD(ZipArchive, open, const String& filename,
     return err;
   }
 
-  auto zipDir = NEWOBJ(ZipDirectory)(z);
+  auto zipDir = newres<ZipDirectory>(z);
 
   setVariable(this_, "zipDir", Resource(zipDir));
   setVariable(this_, "filename", filename);
@@ -1350,7 +1350,7 @@ static Variant HHVM_FUNCTION(zip_open, const String& filename) {
     return err;
   }
 
-  auto zipDir = NEWOBJ(ZipDirectory)(z);
+  auto zipDir = newres<ZipDirectory>(z);
 
   return Resource(zipDir);
 }
@@ -1551,8 +1551,9 @@ class zipExtension : public Extension {
     HHVM_FE(zip_open);
     HHVM_FE(zip_read);
 
-    auto wrapper = NEWOBJ(ZipStreamWrapper)();
+    auto wrapper = new ZipStreamWrapper();
     if (wrapper == nullptr || !Stream::registerWrapper("zip", wrapper)) {
+      delete wrapper;
       raise_warning("Couldn't register Zip wrapper");
     }
 

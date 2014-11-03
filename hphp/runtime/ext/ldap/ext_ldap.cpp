@@ -457,7 +457,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
                              NULL, &ldap_res);
       }
       if (rcs[i] != -1) {
-        ret.append(Resource(NEWOBJ(LdapResult)(ldap_res)));
+        ret.append(Resource(newres<LdapResult>(ldap_res)));
       } else {
         ret.append(false);
       }
@@ -510,7 +510,7 @@ cleanup_parallel:
       }
 #endif
       parallel_search = 0;
-      ret.append(Resource(NEWOBJ(LdapResult)(ldap_res)));
+      ret.append(Resource(newres<LdapResult>(ldap_res)));
     }
   }
 cleanup:
@@ -602,7 +602,7 @@ Variant HHVM_FUNCTION(ldap_connect,
     return false;
   }
 
-  LdapLink *ld = NEWOBJ(LdapLink)();
+  LdapLink *ld = newres<LdapLink>();
   Resource ret(ld);
 
   LDAP *ldap = NULL;
@@ -1211,7 +1211,7 @@ Variant HHVM_FUNCTION(ldap_first_entry,
     return false;
   }
 
-  return NEWOBJ(LdapResultEntry)(entry, res);
+  return newres<LdapResultEntry>(entry, res);
 }
 
 Variant HHVM_FUNCTION(ldap_next_entry,
@@ -1225,7 +1225,7 @@ Variant HHVM_FUNCTION(ldap_next_entry,
     return false;
   }
 
-  return NEWOBJ(LdapResultEntry)(msg, entry->result.get());
+  return newres<LdapResultEntry>(msg, entry->result.get());
 }
 
 Array HHVM_FUNCTION(ldap_get_attributes,
@@ -1291,7 +1291,7 @@ Variant HHVM_FUNCTION(ldap_first_reference,
     return false;
   }
 
-  return NEWOBJ(LdapResultEntry)(entry, res);
+  return newres<LdapResultEntry>(entry, res);
 }
 
 Variant HHVM_FUNCTION(ldap_next_reference,
@@ -1305,7 +1305,7 @@ Variant HHVM_FUNCTION(ldap_next_reference,
     return false;
   }
 
-  return NEWOBJ(LdapResultEntry)(entry_next, entry->result.get());
+  return newres<LdapResultEntry>(entry_next, entry->result.get());
 }
 
 bool HHVM_FUNCTION(ldap_parse_reference,

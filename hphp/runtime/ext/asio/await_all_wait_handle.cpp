@@ -277,7 +277,7 @@ void c_AwaitAllWaitHandle::initialize() {
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
-    p_Vector vector = NEWOBJ(c_Vector)();
+    p_Vector vector = newobj<c_Vector>();
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);

@@ -285,7 +285,7 @@ Variant HHVM_FUNCTION(popen,
                       const String& command,
                       const String& mode) {
   CHECK_PATH_FALSE(command, 1);
-  File *file = NEWOBJ(Pipe)();
+  File *file = newres<Pipe>();
   Resource handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
@@ -1714,7 +1714,7 @@ Variant HHVM_FUNCTION(tempnam,
 Variant HHVM_FUNCTION(tmpfile) {
   FILE *f = tmpfile();
   if (f) {
-    return Resource(NEWOBJ(PlainFile)(f));
+    return Resource(newres<PlainFile>(f));
   }
   return false;
 }

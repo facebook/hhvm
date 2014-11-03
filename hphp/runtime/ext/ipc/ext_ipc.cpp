@@ -148,7 +148,7 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  MessageQueue *q = NEWOBJ(MessageQueue)();
+  MessageQueue *q = newres<MessageQueue>();
   q->key = key;
   q->id = id;
   return Resource(q);

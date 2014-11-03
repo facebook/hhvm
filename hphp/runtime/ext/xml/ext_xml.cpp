@@ -334,7 +334,7 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
     separator = ns_param;
   }
 
-  parser = NEWOBJ(XmlParser)();
+  parser = newres<XmlParser>();
   parser->parser = XML_ParserCreate_MM
     ((auto_detect ? NULL : encoding), &php_xml_mem_hdlrs,
      !separator.empty() ? (const XML_Char*)separator.data() : NULL);

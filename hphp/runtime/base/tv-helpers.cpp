@@ -416,7 +416,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
     break;
   }
   tv->m_type = KindOfResource;
-  tv->m_data.pres = NEWOBJ(DummyResource);
+  tv->m_data.pres = newres<DummyResource>();
   tv->m_data.pres->incRefCount();
   return;
 }

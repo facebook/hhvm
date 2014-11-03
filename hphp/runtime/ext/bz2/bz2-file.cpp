@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 BZ2File::BZ2File(): m_bzFile(nullptr) {
-  m_innerFile = NEWOBJ(PlainFile)();
+  m_innerFile = newres<PlainFile>();
   m_innerFile->unregister();
   m_isLocal = m_innerFile->m_isLocal;
 }

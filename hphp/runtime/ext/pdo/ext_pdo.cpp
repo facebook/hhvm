@@ -2098,7 +2098,7 @@ static int register_bound_param(const Variant& paramno, VRefParam param,
                                 int64_t type, int64_t max_value_len,
                                 const Variant& driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
-  SmartResource<PDOBoundParam> p(NEWOBJ(PDOBoundParam));
+  SmartResource<PDOBoundParam> p(newres<PDOBoundParam>());
   // need to make sure this is NULL, in case a fatal errors occurs before it's
   // set inside really_register_bound_param
   p->stmt = NULL;
@@ -2725,7 +2725,7 @@ static Variant HHVM_METHOD(PDOStatement, execute,
   if (!params.empty()) {
     data->m_stmt->bound_params.reset();
     for (ArrayIter iter(params); iter; ++iter) {
-      SmartResource<PDOBoundParam> param(NEWOBJ(PDOBoundParam));
+      SmartResource<PDOBoundParam> param(newres<PDOBoundParam>());
       param->param_type = PDO_PARAM_STR;
       param->parameter = iter.second();
       param->stmt = NULL;

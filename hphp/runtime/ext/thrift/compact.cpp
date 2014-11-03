@@ -835,7 +835,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        ret = NEWOBJ(c_Map)();
+        ret = newobj<c_Map>();
         auto const data = ret.getObjectData();
         if (size) static_cast<BaseMap*>(data)->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -868,7 +868,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec = NEWOBJ(c_Vector)();
+        auto const pvec = newobj<c_Vector>();
         ret = pvec;
         if (size) pvec->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -898,7 +898,7 @@ class CompactReader {
         AccessFlags::None).toString();
       Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        p_Set set_ret = NEWOBJ(c_Set)();
+        p_Set set_ret = newobj<c_Set>();
         if (size) set_ret->reserve(size);
 
         for (uint32_t i = 0; i < size; i++) {

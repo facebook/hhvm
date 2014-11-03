@@ -190,6 +190,17 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
   return res->decRefAndRelease();
 }
 
+template<class T, class... Args> T* newres(Args&&... args) {
+  static_assert(std::is_convertible<T*,ResourceData*>::value, "");
+  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  try {
+    return new (mem) T(std::forward<Args>(args)...);
+  } catch (...) {
+    MM().smartFreeSizeLogged(mem, sizeof(T));
+    throw;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

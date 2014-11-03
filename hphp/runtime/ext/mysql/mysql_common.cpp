@@ -1158,7 +1158,7 @@ Variant MySQLStmt::result_metadata() {
     return false;
   }
 
-  Resource res(NEWOBJ(MySQLResult)(mysql_result));
+  Resource res(newres<MySQLResult>(mysql_result));
 
   Array args;
   args.append(res);
@@ -1288,7 +1288,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result = Resource(NEWOBJ(MySQLResult)(nullptr, true));
+  Variant result = Resource(newres<MySQLResult>(nullptr, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return false;
   }
@@ -1476,7 +1476,7 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
     return true;
   }
 
-  MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
+  MySQLResult *r = newres<MySQLResult>(mysql_result);
   Resource ret(r);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&

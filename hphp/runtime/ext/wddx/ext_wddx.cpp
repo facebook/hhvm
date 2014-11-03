@@ -200,7 +200,7 @@ static TypedValue* add_vars_helper(ActRec* ar) {
 }
 
 static TypedValue* serialize_vars_helper(ActRec* ar) {
-  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+  WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
                                               true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
@@ -229,13 +229,13 @@ static String HHVM_FUNCTION(wddx_packet_end, const Resource& packet_id) {
 }
 
 static Resource HHVM_FUNCTION(wddx_packet_start, const Variant& comment) {
-  auto wddxPacket = NEWOBJ(WddxPacket)(comment, true, false);
+  auto wddxPacket = newres<WddxPacket>(comment, true, false);
   return Resource(wddxPacket);
 }
 
 static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
                             const Variant& comment) {
-  WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(comment, false, false);
+  WddxPacket* wddxPacket = newres<WddxPacket>(comment, false, false);
   wddxPacket->serialize_value(var);
   const std::string packetString = wddxPacket->packet_end();
   return String(packetString);

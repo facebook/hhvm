@@ -64,7 +64,7 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
   assert(!child->isFinished());
 
   checkCreateErrors(child);
-  auto const waitHandle = NEWOBJ(c_AsyncGeneratorWaitHandle)();
+  auto const waitHandle = newobj<c_AsyncGeneratorWaitHandle>();
   waitHandle->incRefCount();
   waitHandle->initialize(gen, child);
   return waitHandle;

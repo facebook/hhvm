@@ -1027,7 +1027,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        h = NEWOBJ(soapHeader)();
+        h = newres<soapHeader>();
         Resource hobj(h);
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
@@ -2336,7 +2336,7 @@ void c_SoapServer::t_fault(const Variant& code, const String& fault,
 
 void c_SoapServer::t_addsoapheader(const Object& fault) {
   SoapServerScope ss(this);
-  soapHeader *p = NEWOBJ(soapHeader)();
+  soapHeader *p = newres<soapHeader>();
   Resource obj(p);
   p->function = NULL;
   p->mustUnderstand = false;

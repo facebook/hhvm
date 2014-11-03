@@ -81,7 +81,7 @@ class c_DateTime : public ExtObjectDataFlags<ObjectData::HasClone> {
 
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartResource<DateTime> dt) {
-    c_DateTime *cdt = NEWOBJ(c_DateTime)();
+    c_DateTime *cdt = newobj<c_DateTime>();
     Object ret(cdt);
     cdt->m_dt = dt;
     return ret;
@@ -136,7 +136,7 @@ class c_DateTimeZone : public ExtObjectDataFlags<ObjectData::HasClone> {
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartResource<TimeZone> tz) {
-    c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+    c_DateTimeZone *ctz = newobj<c_DateTimeZone>();
     Object ret(ctz);
     ctz->m_tz = tz;
     return ret;
@@ -181,7 +181,7 @@ class c_DateInterval : public ExtObjectDataFlags<ObjectData::UseGet|
 
 
   public: static Object wrap(SmartResource<DateInterval> di) {
-    c_DateInterval *cdi = NEWOBJ(c_DateInterval)();
+    c_DateInterval *cdi = newobj<c_DateInterval>();
     Object ret(cdi);
     cdi->m_di = di;
     return ret;

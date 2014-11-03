@@ -63,7 +63,7 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       raise_warning("filename cannot be empty");
       return false;
     }
-    bz = NEWOBJ(BZ2File)();
+    bz = newres<BZ2File>();
     bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
       raise_warning("%s", folly::errnoStr(errno).c_str());
@@ -106,7 +106,7 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       return false;
     }
 
-    bz = NEWOBJ(BZ2File)(f);
+    bz = newres<BZ2File>(f);
   }
   Resource handle(bz);
   return handle;

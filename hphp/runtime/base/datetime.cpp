@@ -100,7 +100,7 @@ bool DateTime::IsValid(int y, int m, int d) {
 }
 
 SmartResource<DateTime> DateTime::Current(bool utc /* = false */) {
-  return NEWOBJ(DateTime)(time(0), utc);
+  return newres<DateTime>(time(0), utc);
 }
 
 const StaticString
@@ -866,14 +866,14 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = NEWOBJ(TimeZone)(timelib_tzinfo_clone(t->tz_info));
+    m_tz = newres<TimeZone>(timelib_tzinfo_clone(t->tz_info));
   }
   return true;
 }
 
 SmartResource<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartResource<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
+  SmartResource<DateTime> ret(newres<DateTime>(toTimeStamp(err), true));
   ret->setTimezone(m_tz);
   return ret;
 }
@@ -888,7 +888,7 @@ DateTime::diff(SmartResource<DateTime> datetime2, bool absolute) {
   if (absolute) {
     TIMELIB_REL_INVERT_SET(rel, 0);
   }
-  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(rel));
+  SmartResource<DateInterval> di(newres<DateInterval>(rel));
   return di;
 #else
   throw_not_implemented("timelib version too old");

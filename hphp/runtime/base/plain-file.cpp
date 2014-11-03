@@ -295,7 +295,7 @@ void BuiltinFiles::requestShutdown() {
 
 const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    BuiltinFile *f = NEWOBJ(BuiltinFile)(stdin);
+    BuiltinFile *f = newres<BuiltinFile>(stdin);
     g_builtin_files->m_stdin = f;
     f->o_setId(1);
     assert(f->o_getId() == 1);
@@ -305,7 +305,7 @@ const Variant& BuiltinFiles::GetSTDIN() {
 
 const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    BuiltinFile *f = NEWOBJ(BuiltinFile)(stdout);
+    BuiltinFile *f = newres<BuiltinFile>(stdout);
     g_builtin_files->m_stdout = f;
     f->o_setId(2);
     assert(f->o_getId() == 2);
@@ -315,7 +315,7 @@ const Variant& BuiltinFiles::GetSTDOUT() {
 
 const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    BuiltinFile *f = NEWOBJ(BuiltinFile)(stderr);
+    BuiltinFile *f = newres<BuiltinFile>(stderr);
     g_builtin_files->m_stderr = f;
     f->o_setId(3);
     assert(f->o_getId() == 3);

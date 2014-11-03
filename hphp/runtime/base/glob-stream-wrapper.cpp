@@ -57,7 +57,7 @@ Directory* GlobStreamWrapper::opendir(const String& path) {
   if (!glob.isArray()) {
     return nullptr;
   }
-  return NEWOBJ(ArrayDirectory)(glob.toArray());
+  return newres<ArrayDirectory>(glob.toArray());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

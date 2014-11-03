@@ -102,7 +102,7 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
       headers.set(s_User_Agent, default_user_agent);
     }
   }
-  file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
+  file = std::unique_ptr<UrlFile>(newres<UrlFile>(method.data(), headers,
                                                   post_data, max_redirs,
                                                   timeout, ignore_errors));
   bool ret = file->open(filename, mode);

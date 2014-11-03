@@ -42,7 +42,7 @@ namespace HPHP {
 template<typename TCollection>
 ALWAYS_INLINE
 static Object materializeImpl(ObjectData* obj) {
-  auto* col = NEWOBJ(TCollection)();
+  auto* col = newobj<TCollection>();
   Object o = col;
   col->init(VarNR(obj));
   return o;
@@ -162,7 +162,7 @@ bool BaseVector::containskey(const Variant& key) {
 
 // KeyedIterable
 Object BaseVector::getiterator() {
-  auto* it = NEWOBJ(c_VectorIterator)();
+  auto* it = newobj<c_VectorIterator>();
   it->m_obj = this;
   it->m_pos = 0;
   it->m_version = getVersion();
@@ -189,7 +189,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_fromKeysOf(const Variant& container) {
-  if (container.isNull()) { return NEWOBJ(TVector)(); }
+  if (container.isNull()) { return newobj<TVector>(); }
 
   const auto& cellContainer = *container.asCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
@@ -199,7 +199,7 @@ BaseVector::php_fromKeysOf(const Variant& container) {
   }
 
   ArrayIter iter(cellContainer);
-  auto* target = NEWOBJ(TVector)();
+  auto* target = newobj<TVector>();
   target->reserve(getContainerSize(cellContainer));
   assert(target->canMutateBuffer());
   Object ret = target;
@@ -220,7 +220,7 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
     throw e;
   }
 
-  TVector* nv = NEWOBJ(TVector);
+  TVector* nv = newobj<TVector>();
   uint32_t sz = m_size;
   nv->reserve(sz);
   assert(nv->canMutateBuffer());
@@ -250,7 +250,7 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TVector* nv = NEWOBJ(TVector);
+  TVector* nv = newobj<TVector>();
   uint32_t sz = m_size;
   int32_t version = m_version;
   assert(nv->canMutateBuffer());
@@ -278,7 +278,7 @@ BaseVector::php_take(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   if (len <= 0) {
     return obj;
@@ -305,7 +305,7 @@ BaseVector::php_takeWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   assert(vec->m_size == 0);
   Object obj = vec;
   int32_t version UNUSED;
@@ -336,7 +336,7 @@ BaseVector::php_skip(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, m_size);
@@ -362,7 +362,7 @@ BaseVector::php_skipWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   assert(vec->canMutateBuffer());
   Object obj = vec;
   uint32_t i = 0;
@@ -404,7 +404,7 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
@@ -429,7 +429,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
+    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&m_data[i]);
     pair->initAdd(v);
@@ -903,7 +903,7 @@ Object c_Vector::t_items() {
 }
 
 Object c_Vector::t_keys() {
-  auto* vec = NEWOBJ(c_Vector);
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   BaseVector::keys(vec);
   return obj;
@@ -1081,7 +1081,7 @@ Object c_Vector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_Vector::t_zip(const Variant& iterable) {
-  auto* vec = NEWOBJ(c_Vector);
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   BaseVector::zip(vec, iterable);
   return obj;
@@ -1142,7 +1142,7 @@ typename std::enable_if<
 BaseVector::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
@@ -1225,10 +1225,10 @@ Object c_Vector::t_setall(const Variant& iterable) {
 }
 
 Object c_Vector::ti_fromitems(const Variant& iterable) {
-  if (iterable.isNull()) return NEWOBJ(c_Vector)();
+  if (iterable.isNull()) return newobj<c_Vector>();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = NEWOBJ(c_Vector)();
+  auto* target = newobj<c_Vector>();
   Object ret = target;
   for (uint32_t i = 0; iter; ++i, ++iter) {
     target->addRaw(iter.second());
@@ -1250,7 +1250,7 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  auto* target = NEWOBJ(c_Vector)();
+  auto* target = newobj<c_Vector>();
   Object ret = target;
   auto* ad = arr.getArrayData();
   uint32_t sz = ad->size();
@@ -1374,7 +1374,7 @@ void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Vector::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* vec = NEWOBJ(c_ImmVector)();
+    auto* vec = newobj<c_ImmVector>();
     m_immCopy = vec;
     arrayData()->incRefCount();
     vec->m_data = m_data;
@@ -1511,14 +1511,14 @@ Object c_ImmVector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_ImmVector::t_zip(const Variant& iterable) {
-  auto* vec = NEWOBJ(c_ImmVector);
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   BaseVector::zip(vec, iterable);
   return obj;
 }
 
 Object c_ImmVector::t_keys() {
-  auto* vec = NEWOBJ(c_ImmVector);
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   BaseVector::keys(vec);
   return obj;
@@ -2180,7 +2180,7 @@ Object c_ImmMap::t_items() { return php_items(); }
 Object c_Map::t_items() { return php_items(); }
 
 Object BaseMap::php_keys() const {
-  auto* vec = NEWOBJ(c_Vector)();
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   vec->reserve(m_size);
   assert(vec->canMutateBuffer());
@@ -2300,7 +2300,7 @@ Array c_ImmMap::t_toarray() { return toArrayImpl(); }
 Array c_Map::t_toarray() { return toArrayImpl(); }
 
 Object BaseMap::php_values() const {
-  auto* target = NEWOBJ(c_Vector)();
+  auto* target = newobj<c_Vector>();
   Object ret = target;
   int64_t sz = m_size;
   target->reserve(sz);
@@ -2396,7 +2396,7 @@ Object c_Map::t_differencebykey(const Variant& it) {
 }
 
 Object BaseMap::php_getIterator() {
-  auto* it = NEWOBJ(c_MapIterator)();
+  auto* it = newobj<c_MapIterator>();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
@@ -2437,7 +2437,7 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  TMap* mp = NEWOBJ(TMap)();
+  TMap* mp = newobj<TMap>();
   Object obj = mp;
   if (!m_size) return obj;
   assert(posLimit() != 0);
@@ -2512,7 +2512,7 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (!m_size) return obj;
 
@@ -2606,7 +2606,7 @@ typename std::enable_if<
 BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (!m_size) {
     return obj;
@@ -2617,7 +2617,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
+    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
     Object pairObj = pair;
     pair->initAdd(&e.data);
     pair->initAdd(v);
@@ -2659,7 +2659,7 @@ BaseMap::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (len <= 0) {
     // We know the resulting Map will be empty, so we can return
@@ -2699,7 +2699,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (!m_size) return obj;
   int32_t version UNUSED;
@@ -2742,7 +2742,7 @@ BaseMap::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (len >= m_size) {
     // We know the resulting Map will be empty, so we can return
@@ -2784,7 +2784,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   if (!m_size) return obj;
   int32_t version;
@@ -2834,7 +2834,7 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object obj = mp;
   mp->reserve(sz);
   mp->setSize(sz);
@@ -2912,7 +2912,7 @@ typename std::enable_if<
 BaseMap::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
@@ -3021,10 +3021,10 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromItems(const Variant& iterable) {
-  if (iterable.isNull()) return NEWOBJ(TMap)();
+  if (iterable.isNull()) return newobj<TMap>();
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = NEWOBJ(TMap)();
+  auto* target = newobj<TMap>();
   Object ret = target;
   target->reserve(sz);
   for (; iter; ++iter) {
@@ -3060,7 +3060,7 @@ BaseMap::php_mapFromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  auto* mp = NEWOBJ(TMap)();
+  auto* mp = newobj<TMap>();
   Object ret = mp;
   ArrayData* ad = arr.getArrayData();
   auto pos_limit = ad->iter_end();
@@ -3586,7 +3586,7 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Map::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* mp = NEWOBJ(c_ImmMap)();
+    auto* mp = newobj<c_ImmMap>();
     m_immCopy = mp;
     arrayData()->incRefCount();
     mp->m_size = m_size;
@@ -4068,7 +4068,7 @@ bool BaseSet::ToBool(const ObjectData* obj) {
 // already exist) and then return it
 Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* st = NEWOBJ(c_ImmSet)();
+    auto* st = newobj<c_ImmSet>();
     m_immCopy = st;
     arrayData()->incRefCount();
     st->m_size = m_size;
@@ -4276,7 +4276,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 }
 
 Object BaseSet::php_getIterator() {
-  auto* it = NEWOBJ(c_SetIterator)();
+  auto* it = newobj<c_SetIterator>();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
@@ -4295,7 +4295,7 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   Object obj = st;
   if (!m_size) return obj;
   assert(posLimit() != 0);
@@ -4332,7 +4332,7 @@ BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
@@ -4370,7 +4370,7 @@ BaseSet::php_zip(const Variant& iterable) {
     // the zip operation will always fail
     throwBadValueType();
   }
-  Object obj = NEWOBJ(TSet)();
+  Object obj = newobj<TSet>();
   return obj;
 }
 
@@ -4427,7 +4427,7 @@ BaseSet::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   Object obj = st;
   if (len <= 0) {
     // We know the resulting Set will be empty, so we can return
@@ -4467,7 +4467,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = NEWOBJ(TSet);
+  auto* st = newobj<TSet>();
   assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
@@ -4513,7 +4513,7 @@ BaseSet::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   Object obj = st;
   if (len >= m_size) {
     // We know the resulting Set will be empty, so we can return
@@ -4558,7 +4558,7 @@ BaseSet::php_skipWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   assert(st->canMutateBuffer());
   Object obj = st;
   if (!m_size) return obj;
@@ -4612,7 +4612,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   Object obj = st;
   st->reserve(sz);
   st->setSize(sz);
@@ -4640,7 +4640,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(const Variant& iterable) {
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   Object ret = st;
   assert(st->canMutateBuffer());
   st->addAll(iterable);
@@ -4652,11 +4652,11 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromKeysOf(const Variant& container) {
-  if (container.isNull()) { return NEWOBJ(TSet)(); }
+  if (container.isNull()) { return newobj<TSet>(); }
 
   const auto& cellContainer = container_as_cell(container);
 
-  auto* target = NEWOBJ(TSet)();
+  auto* target = newobj<TSet>();
   Object ret = target;
   target->addAllKeysOf(cellContainer);
   return ret;
@@ -4672,7 +4672,7 @@ BaseSet::php_fromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   assert(st->canMutateBuffer());
   Object ret = st;
   ArrayData* ad = arr.getArrayData();
@@ -4692,7 +4692,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
-  auto* st = NEWOBJ(TSet)();
+  auto* st = newobj<TSet>();
   assert(st->canMutateBuffer());
   auto oldCap = st->cap();
   Object ret = st;
@@ -4969,7 +4969,7 @@ typename std::enable_if<
 BaseSet::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = NEWOBJ(TVector)();
+  auto* vec = newobj<TVector>();
   Object obj = vec;
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
@@ -5329,7 +5329,7 @@ Object c_Pair::t_items() {
 
 Object c_Pair::t_keys() {
   assert(isFullyConstructed());
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve(2);
   assert(vec->canMutateBuffer());
@@ -5342,7 +5342,7 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_values() {
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object o = vec;
   vec->init(VarNR(this));
   return o;
@@ -5415,7 +5415,7 @@ Array c_Pair::t_tovaluesarray() {
 
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
-  auto* it = NEWOBJ(c_PairIterator)();
+  auto* it = newobj<c_PairIterator>();
   it->m_obj = this;
   it->m_pos = 0;
   return it;
@@ -5430,7 +5430,7 @@ Object c_Pair::t_map(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve(2);
   assert(vec->canMutateBuffer());
@@ -5450,7 +5450,7 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve(2);
   assert(vec->canMutateBuffer());
@@ -5471,7 +5471,7 @@ Object c_Pair::t_filter(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
     if (invokeAndCastToBool(ctx, 1, &getElms()[i])) {
@@ -5490,7 +5490,7 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
@@ -5505,7 +5505,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
   assert(isFullyConstructed());
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve(std::min(sz, size_t(2)));
   assert(vec->canMutateBuffer());
@@ -5514,7 +5514,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    auto* pair = NEWOBJ(c_Pair)(c_Pair::NoInit{});
+    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
     pair->incRefCount();
     pair->initAdd(&getElms()[i]);
     pair->initAdd(v);
@@ -5532,7 +5532,7 @@ Object c_Pair::t_take(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = NEWOBJ(c_Vector)();
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   if (len <= 0) {
     return obj;
@@ -5555,7 +5555,7 @@ Object c_Pair::t_takewhile(const Variant& callback) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_Vector)();
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
@@ -5571,7 +5571,7 @@ Object c_Pair::t_skip(const Variant& n) {
     throw e;
   }
   int64_t len = n.toInt64();
-  auto* vec = NEWOBJ(c_Vector);
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, 2);
@@ -5593,7 +5593,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* vec = NEWOBJ(c_Vector)();
+  auto* vec = newobj<c_Vector>();
   Object obj = vec;
   uint32_t i = 0;
   for (; i < 2; ++i) {
@@ -5620,7 +5620,7 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, 2);
   size_t sz = std::min<size_t>(ilen, size_t(2) - skipAmt);
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
@@ -5634,7 +5634,7 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
 Object c_Pair::t_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = NEWOBJ(c_ImmVector)();
+  auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
   vec->reserve((size_t)2 + itSize);
   assert(vec->canMutateBuffer());
@@ -6397,13 +6397,13 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
 ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
   ObjectData* obj;
   switch (type) {
-    case Collection::VectorType: obj = NEWOBJ(c_Vector)(); break;
-    case Collection::MapType: obj = NEWOBJ(c_Map)(); break;
-    case Collection::SetType: obj = NEWOBJ(c_Set)(); break;
-    case Collection::PairType: obj = NEWOBJ(c_Pair)(c_Pair::NoInit{}); break;
-    case Collection::ImmVectorType: obj = NEWOBJ(c_ImmVector)(); break;
-    case Collection::ImmMapType: obj = NEWOBJ(c_ImmMap)(); break;
-    case Collection::ImmSetType: obj = NEWOBJ(c_ImmSet)(); break;
+    case Collection::VectorType: obj = newobj<c_Vector>(); break;
+    case Collection::MapType: obj = newobj<c_Map>(); break;
+    case Collection::SetType: obj = newobj<c_Set>(); break;
+    case Collection::PairType: obj = newobj<c_Pair>(c_Pair::NoInit{}); break;
+    case Collection::ImmVectorType: obj = newobj<c_ImmVector>(); break;
+    case Collection::ImmMapType: obj = newobj<c_ImmMap>(); break;
+    case Collection::ImmSetType: obj = newobj<c_ImmSet>(); break;
     case Collection::InvalidType:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");

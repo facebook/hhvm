@@ -1501,21 +1501,6 @@ void Translator::setSuccIRBlocks(const RegionDesc&          region,
 }
 
 /*
- * Compute the set of bytecode offsets that may follow the execution
- * of srcBlockId in the region.
- */
-static void findSuccOffsets(const RegionDesc&   region,
-                            RegionDesc::BlockId srcBlockId,
-                            OffsetSet&          set) {
-  set.clear();
-  for (auto dstBlockId : region.succs(srcBlockId)) {
-    auto rDstBlock = region.block(dstBlockId);
-    Offset bcOffset = rDstBlock->start().offset();
-    set.insert(bcOffset);
-  }
-}
-
-/*
  * Returns whether offset is a control-flow merge within region.
  */
 static bool isMergePoint(Offset offset, const RegionDesc& region) {
@@ -1619,7 +1604,6 @@ Translator::translateRegion(const RegionDesc& region,
     TransID profTransId = getTransId(blockId);
     ht.setProfTransID(profTransId);
 
-    OffsetSet succOffsets;
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
       auto unprocessedPred =
@@ -1633,7 +1617,6 @@ Translator::translateRegion(const RegionDesc& region,
         processedBlocks.insert(blockId);
         continue;
       }
-      findSuccOffsets(region, blockId, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock);
     }
 

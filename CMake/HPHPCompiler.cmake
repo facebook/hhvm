@@ -66,6 +66,22 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(GNUCC_OPT "${GNUCC_OPT} -pie -fPIC --param=ssp-buffer-size=4")
   endif()
 
+  # Enabled GCC/LLVM stack-smashing protection
+  if(ENABLE_SSP)
+    if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+      if(LINUX)
+        # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
+        set(GNUCC_OPT "${GNUCC_OPT} -Wl,-z,relro,-z,now")
+      endif()
+      if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+        set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector-strong")
+      endif()
+    else()
+      set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector")
+    endif()
+    set(GNUCC_OPT "${GNUCC_OPT} -pie -fPIC --param=ssp-buffer-size=4")
+  endif()
+
   # ARM64
   set(GNUCC_PLAT_OPT "")
   if(NOT IS_AARCH64)

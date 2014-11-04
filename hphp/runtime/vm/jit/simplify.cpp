@@ -1767,22 +1767,6 @@ SSATmp* simplifyTakeStack(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyLdStackAddr(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<StackOffset>()->offset);
-  // NB: strict subtype relation. Non-strict results in infinite recursion.
-  if (info.knownType.ptr(Ptr::Stk) < inst->typeParam()) {
-    return gen(
-      env,
-      LdStackAddr,
-      *inst->extra<StackOffset>(),
-      info.knownType.ptr(Ptr::Stk),
-      inst->src(0)
-    );
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyDecRefStack(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
@@ -2013,7 +1997,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdObjInvoke)
   X(LdPackedArrayElem)
   X(LdStack)
-  X(LdStackAddr)
   X(Mov)
   X(SpillStack)
   X(TakeStack)
@@ -2321,14 +2304,17 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   default:
     {
-      // Assume it's a vector instruction.  This will assert in
-      // minstrBaseIdx if not.
+      // Assume it's a vector instruction.  This will assert in minstrBaseIdx
+      // if not.
       auto const base = inst->src(minstrBaseIdx(inst));
-      assert(base->inst()->op() == LdStackAddr);
+      // Currently we require that the stack address is the immediate source of
+      // the base tmp.
+      always_assert(base->inst()->is(LdStackAddr));
       if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        MInstrEffects effects(inst);
+        auto const prev = getStackValue(base->inst()->src(0), index);
+        MInstrEffects effects(inst->op(), prev.knownType.ptr(Ptr::Stk));
         assert(effects.baseTypeChanged || effects.baseValChanged);
-        auto const ty = effects.baseType.derefIfPtr();
+        auto const ty = effects.baseType;
         if (ty.isBoxed()) {
           return StackValueInfo { inst, Type::BoxedInitCell, ty };
         }

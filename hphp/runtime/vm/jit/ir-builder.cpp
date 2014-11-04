@@ -88,10 +88,14 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
+  // Nothing is allowed to write anything to the init null variant, so this
+  // inner type is always true.
   return cns(Type::cns(&init_null_variant, Type::PtrToMemInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
+  // Nothing can write to the uninit null variant either, so the inner type
+  // here is also always true.
   return cns(Type::cns(&null_variant, Type::PtrToMemUninit));
 }
 
@@ -101,7 +105,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdLocPseudoMain)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocPseudoMain)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
@@ -501,14 +505,6 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLocAddr>()->locId;
-  auto const type = localType(locId, DataTypeGeneric);
-  assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(std::min(type.ptr(Ptr::Frame), inst->typeParam()));
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // Guard relaxation might change the current local type, so don't try to
   // change to StLocNT until after relaxation happens.
@@ -564,7 +560,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefLoc);
     X(LdLoc);
     X(LdLocPseudoMain);
-    X(LdLocAddr);
     X(StLoc);
   default:
     break;
@@ -838,11 +833,11 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocAddr, LdLocPseudoMain)) {
-    // We've hit a LdLoc, LdLocAddr, or LdLocPseudoMain. If the value's type
-    // source is non-null and not a FramePtr, it's a real value that was killed
-    // by a Call. The value won't be live but it's ok to use it to track down
-    // the guard.
+  if (inst->is(LdLoc, LdLocPseudoMain)) {
+    // We've hit a LdLoc, or LdLocPseudoMain. If the value's type source is
+    // non-null and not a FramePtr, it's a real value that was killed by a
+    // Call. The value won't be live but it's ok to use it to track down the
+    // guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
                        "No typeSrcs found for {}\n\n{}", *inst, m_unit);
@@ -861,7 +856,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       }
     }
     return changed;
-  } else if (inst->is(LdStack, LdStackAddr)) {
+  } else if (inst->is(LdStack)) {
     return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(AssertType)) {
     // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
@@ -904,15 +899,6 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       changed = constrainValue(inst->src(0), newTc) || changed;
     }
     return changed;
-  } else if (inst->is(Box, BoxPtr, UnboxPtr)) {
-    // All Box/Unbox opcodes are similar to StRef/LdRef in some situations and
-    // Mov in others (determined at runtime), so we need to constrain both
-    // outer and inner.
-
-    auto maxCat = std::max(tc.category, tc.innerCat);
-    tc.category = maxCat;
-    tc.innerCat = maxCat;
-    return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
   } else if (inst->is(DefLabel)) {

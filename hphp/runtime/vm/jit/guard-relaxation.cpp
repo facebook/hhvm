@@ -44,9 +44,9 @@ bool shouldHHIRRelaxGuards() {
 #define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
 #define DParam         return true;  // typeParam may relax
-#define DParamPtr(k)   return true;  // typeParam may relax
-#define DUnboxPtr      return typeMightRelax(inst->src(0));
-#define DBoxPtr        return typeMightRelax(inst->src(0));
+#define DParamPtr(k)   return false;
+#define DUnboxPtr      return false;
+#define DBoxPtr        return false;
 #define DLdRef         return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
@@ -104,9 +104,6 @@ namespace {
  * of the load to match the relaxed type of the guard.
  */
 void retypeLoad(IRInstruction* load, Type newType) {
-  newType = load->is(LdLocAddr) ? newType.ptr(Ptr::Frame) : newType;
-  newType = load->is(LdStackAddr) ? newType.ptr(Ptr::Stk) : newType;
-
   // Set new typeParam of 'load' if different from previous one,
   // but avoid doing it if newType is Bottom.  Note that we may end up
   // here with newType == Bottom, in case there's a type-check
@@ -129,7 +126,6 @@ void retypeLoad(IRInstruction* load, Type newType) {
 void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
     case LdLoc:
-    case LdLocAddr:
     case LdLocPseudoMain: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
@@ -138,8 +134,7 @@ void visitLoad(IRInstruction* inst, const FrameState& state) {
       break;
     }
 
-    case LdStack:
-    case LdStackAddr: {
+    case LdStack: {
       auto idx = inst->extra<StackOffset>()->offset;
       auto newType = getStackValue(inst->src(0), idx).knownType;
 

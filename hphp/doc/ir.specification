@@ -2382,9 +2382,9 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMemGen), S(PtrToArr) S(Int,Str), E|Er
+| ElemArray, D(PtrToMemGen), S(PtrToGen) S(Int,Str), E|Er
 
-| ElemArrayW, D(PtrToMemGen), S(PtrToArr) S(Int,Str), E|Er
+| ElemArrayW, D(PtrToMemGen), S(PtrToGen) S(Int,Str), E|Er
 
   Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
   int/str.  The ElemArrayW version is for Warn member instrs.
@@ -2468,7 +2468,7 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-|STK SetNewElemArray, ND, S(PtrToArr) S(Cell), MElem|E|Er
+|STK SetNewElemArray, ND, S(PtrToGen) S(Cell), MElem|E|Er
 
   Append the value in S1 to S0, where S0 must be a pointer to an array.
 

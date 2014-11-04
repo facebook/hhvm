@@ -436,7 +436,6 @@ private:
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
   SSATmp*   preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp*   preOptimizeLdLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 

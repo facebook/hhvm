@@ -37,6 +37,7 @@ struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
 struct LocalStateHook;
+struct FrameState;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -278,27 +279,21 @@ int minstrBaseIdx(Opcode opc);
 int minstrBaseIdx(const IRInstruction* inst);
 
 struct MInstrEffects {
+  MInstrEffects(Opcode op, Type base);
+
   static bool supported(Opcode op);
   static bool supported(const IRInstruction* inst);
 
   /*
    * MInstrEffects::get is used to allow multiple different consumers to deal
    * with the side effects of vector instructions. It takes an instruction and
-   * a LocalStateHook, which is defined in frame-state.h.
+   * a LocalStateHook, and a FrameState, which are defined in frame-state.h.
    */
-  static void get(const IRInstruction*, LocalStateHook&);
-
-  explicit MInstrEffects(const IRInstruction* inst);
-  MInstrEffects(Opcode op, Type base);
-  MInstrEffects(Opcode op, SSATmp* base);
-  MInstrEffects(Opcode opc, const std::vector<SSATmp*>& srcs);
+  static void get(const IRInstruction*, const FrameState&, LocalStateHook&);
 
   Type baseType;
   bool baseTypeChanged;
   bool baseValChanged;
-
-private:
-  void init(const Opcode op, const Type base);
 };
 
 using TcaRange = folly::Range<TCA>;

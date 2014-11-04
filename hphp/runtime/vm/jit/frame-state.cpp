@@ -349,7 +349,7 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     if (id != -1) hook.setLocalValue(id, nullptr);
   }
 
-  if (MInstrEffects::supported(inst)) MInstrEffects::get(inst, hook);
+  if (MInstrEffects::supported(inst)) MInstrEffects::get(inst, *this, hook);
 }
 
 ///// Support helpers for getLocalEffects /////

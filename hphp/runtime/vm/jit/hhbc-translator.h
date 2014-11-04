@@ -620,6 +620,7 @@ private:
     // Misc Helpers
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
+    void setBase(SSATmp*, folly::Optional<Type> = folly::none);
     SSATmp* genMisPtr();
     SSATmp* getInput(unsigned i, TypeConstraint tc);
     SSATmp* getBase(TypeConstraint tc);
@@ -704,10 +705,23 @@ private:
     /* The base for any accesses to the current MInstrState. */
     SSATmp* m_misBase;
 
-    /* The value of the base for the next member operation. Starts as the base
+    /*
+     * The value of the base for the next member operation. Starts as the base
      * for the whole instruction and is updated as the translator makes
-     * progress. */
+     * progress.
+     *
+     * We have a m_baseType in case we have more information about the type
+     * than m_base->type() has (this may be the case with pointers to locals or
+     * stack slots right now, for example). If m_base is not nullptr,
+     * m_base->type() is always a supertype of m_baseType, and m_baseType is
+     * always large enough to accommodate the type the base ends up having at
+     * runtime.
+     *
+     * Don't change m_base directly; use setBase, to update m_baseType
+     * automatically.
+     */
     SSATmp* m_base;
+    Type m_baseType;
 
     /* Value computed before we do anything to allow better translations for
      * common, simple operations. */

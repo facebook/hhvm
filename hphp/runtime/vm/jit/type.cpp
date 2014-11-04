@@ -1403,7 +1403,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DThis
 #define DCns
 
-#define O(opcode, dstinfo, srcinfo, flags)      \
+#define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
 
   switch (inst->op()) {

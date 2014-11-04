@@ -1136,15 +1136,13 @@ function array_intersect_ukey(mixed $array1,
  *   strings SORT_LOCALE_STRING - compare items as strings, based on the current
  *   locale. Added in PHP 4.4.0 and 5.0.2, it uses the system locale, which can
  *   be changed using setlocale().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function sort(mixed &$array,
-              int $sort_flags = 0,
-              bool $use_collator = false): bool;
+              int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array in reverse order (highest to lowest).
@@ -1152,15 +1150,13 @@ function sort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function rsort(mixed &$array,
-               int $sort_flags = 0,
-               bool $use_collator = false): bool;
+               int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1171,15 +1167,13 @@ function rsort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function asort(mixed &$array,
-               int $sort_flags = 0,
-               bool $use_collator = false): bool;
+               int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1190,15 +1184,13 @@ function asort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function arsort(mixed &$array,
-                int $sort_flags = 0,
-                bool $use_collator = false): bool;
+                int $sort_flags = 0): bool;
 
 /**
  * Sorts an array by key, maintaining key to data correlations. This is useful

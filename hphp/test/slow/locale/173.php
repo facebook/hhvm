@@ -11,5 +11,5 @@ class A {
  $b = new A;
  $b->a = 'b';
  $arr = array($a, $b);
- sort($arr, SORT_REGULAR, true);
+ sort($arr, SORT_REGULAR);
  print ((string)$arr[0]);

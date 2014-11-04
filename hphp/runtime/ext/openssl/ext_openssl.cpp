@@ -385,11 +385,13 @@ public:
     *seeded = 0;
     if (file == NULL) {
       file = RAND_file_name(buffer, sizeof(buffer));
+#ifndef OPENSSL_NO_RAND_EGD
     } else if (RAND_egd(file) > 0) {
       /* if the given filename is an EGD socket, don't
        * write anything back to it */
       *egdsocket = 1;
       return true;
+#endif
     }
 
     if (file == NULL || !RAND_load_file(file, -1)) {

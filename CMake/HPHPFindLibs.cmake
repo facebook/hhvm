@@ -285,6 +285,18 @@ include_directories(${Mcrypt_INCLUDE_DIR})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+# reSSL explicitly refuses to support RAND_egd()
+SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
+int main() {
+  return RAND_egd(\"/dev/null\");
+}" OPENSSL_HAVE_RAND_EGD)
+if (NOT OPENSSL_HAVE_RAND_EGD)
+  add_definitions("-DOPENSSL_NO_RAND_EGD")
+endif()
+
+
 # ZLIB
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})

@@ -43,13 +43,10 @@ TRACE_SET_MOD(hhir);
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
-NOOP_OPCODE(DefSP)
 NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
-NOOP_OPCODE(AssertStk)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
-NOOP_OPCODE(ExceptionBarrier)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
@@ -210,6 +207,14 @@ CALL_OPCODE(OODeclExists)
     m_xcg.cg##name(inst); \
   }
 
+DELEGATE_OPCODE(DefSP)
+DELEGATE_OPCODE(CheckNullptr)
+DELEGATE_OPCODE(CheckNonNull)
+DELEGATE_OPCODE(AssertNonNull)
+DELEGATE_OPCODE(ExceptionBarrier)
+DELEGATE_OPCODE(AssertStk)
+DELEGATE_OPCODE(AssertType)
+
 DELEGATE_OPCODE(ConvBoolToInt)
 
 /////////////////////////////////////////////////////////////////////
@@ -358,15 +363,12 @@ PUNT_OPCODE(ReleaseVVOrExit)
 PUNT_OPCODE(CheckInit)
 PUNT_OPCODE(CheckInitMem)
 PUNT_OPCODE(CheckCold)
-PUNT_OPCODE(CheckNullptr)
 PUNT_OPCODE(CheckBounds)
 PUNT_OPCODE(LdVectorSize)
 PUNT_OPCODE(CheckPackedArrayBounds)
 PUNT_OPCODE(IsPackedArrayElemNull)
 PUNT_OPCODE(VectorHasImmCopy)
 PUNT_OPCODE(VectorDoCow)
-PUNT_OPCODE(CheckNonNull)
-PUNT_OPCODE(AssertNonNull)
 PUNT_OPCODE(UnboxPtr)
 PUNT_OPCODE(BoxPtr)
 PUNT_OPCODE(LdVectorBase)
@@ -707,19 +709,6 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
     auto const sf = v.makeReg();
     v << cmpli{KindOfRefCountThreshold, loc.reg(1), sf};
     ifThen(v, CC_G, sf, [&](Vout& v) { increfMaybeStatic(v); });
-  }
-}
-
-void CodeGenerator::cgAssertType(IRInstruction* inst) {
-  auto const src = srcLoc(0);
-  auto const dst = dstLoc(0);
-  auto& v = vmain();
-  if (dst.reg(0) != InvalidReg && dst.reg(1) != InvalidReg) {
-    v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
-  } else if (dst.reg(0) != InvalidReg) {
-    v << copy{src.reg(0), dst.reg(0)};
-  } else if (dst.reg(1) != InvalidReg) {
-    v << copy{src.reg(1), dst.reg(1)};
   }
 }
 
@@ -1167,7 +1156,7 @@ static Vreg enregister(Vout& v, Vreg r) {
 
 template<class Loc, class JmpFn>
 void CodeGenerator::emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc,
-                                 Vreg sf, JmpFn doJcc) {
+                                 JmpFn doJcc) {
   assert(!(type <= Type::Cls));
   assert(typeReg.isVirt() || typeReg.isGP()); // expected W-type, ie 32-bit
 
@@ -1176,6 +1165,7 @@ void CodeGenerator::emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc,
   }
 
   ConditionCode cc;
+  auto sf = v.makeReg();
   if (type <= Type::Str) {
     // Note: ARM can actually do better here; it has a fused test-and-branch
     // instruction. The way this code is factored makes it difficult to use,
@@ -1202,23 +1192,25 @@ void CodeGenerator::emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc,
     v << cmpli{dataType, typeReg, sf};
     cc = CC_E;
   }
-  doJcc(cc);
+  doJcc(cc, sf);
   if (type < Type::Obj) {
     assert(type.getClass()->attrs() & AttrNoOverride);
     auto dataReg = enregister(v, dataSrc);
     auto vmclass = v.makeReg();
+    auto sf2 = v.makeReg();
     emitLdLowPtr(v, vmclass, dataReg[ObjectData::getVMClassOffset()],
                  sizeof(LowClassPtr));
-    emitCmpClass(v, sf, vmclass, type.getClass());
-    doJcc(CC_E);
+    emitCmpClass(v, sf2, vmclass, type.getClass());
+    doJcc(CC_E, sf2);
   } else if (type < Type::Res) {
     CG_PUNT(TypeTest-on-Resource);
   } else if (type <= Type::Arr && type.hasArrayKind()) {
     auto dataReg = enregister(v, dataSrc);
     auto kind = v.makeReg();
+    auto sf2 = v.makeReg();
     v << loadzbl{dataReg[ArrayData::offsetofKind()], kind};
-    v << cmpli{type.getArrayKind(), kind, sf};
-    doJcc(CC_E);
+    v << cmpli{type.getArrayKind(), kind, sf2};
+    doJcc(CC_E, sf2);
   }
 }
 
@@ -1228,9 +1220,8 @@ void CodeGenerator::cgGuardLoc(IRInstruction* inst) {
   auto& v = vmain();
   auto type = v.makeReg();
   v << loadzbl{rFP[baseOff + TVOFF(m_type)], type};
-  auto const sf = v.makeReg();
-  emitTypeTest(v, inst->typeParam(), type, rFP[baseOff + TVOFF(m_data)], sf,
-    [&] (ConditionCode cc) {
+  emitTypeTest(v, inst->typeParam(), type, rFP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc, Vreg sf) {
       auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
       v << fallbackcc{ccNegate(cc), sf, destSK};
     });
@@ -1242,9 +1233,8 @@ void CodeGenerator::cgGuardStk(IRInstruction* inst) {
   auto& v = vmain();
   auto type = v.makeReg();
   v << loadzbl{rSP[baseOff + TVOFF(m_type)], type};
-  auto const sf = v.makeReg();
-  emitTypeTest(v, inst->typeParam(), type, rSP[baseOff + TVOFF(m_data)], sf,
-    [&] (ConditionCode cc) {
+  emitTypeTest(v, inst->typeParam(), type, rSP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc, Vreg sf) {
       auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
       v << fallbackcc{ccNegate(cc), sf, destSK};
     });
@@ -1256,9 +1246,8 @@ void CodeGenerator::cgCheckStk(IRInstruction* inst) {
   auto& v = vmain();
   auto type = v.makeReg();
   v << loadzbl{rSP[baseOff + TVOFF(m_type)], type};
-  auto const sf = v.makeReg();
-  emitTypeTest(v, inst->typeParam(), type, rSP[baseOff + TVOFF(m_data)], sf,
-    [&] (ConditionCode cc) {
+  emitTypeTest(v, inst->typeParam(), type, rSP[baseOff + TVOFF(m_data)],
+    [&] (ConditionCode cc, Vreg sf) {
       auto next = v.makeBlock();
       v << jcc{ccNegate(cc), sf, {next, label(inst->taken())}};
       v = next;
@@ -1299,9 +1288,8 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
   }
 
   if (rType.isValid()) {
-    auto const sf = v.makeReg();
-    emitTypeTest(v, typeParam, rType, rVal, sf,
-      [&] (ConditionCode cc) {
+    emitTypeTest(v, typeParam, rType, rVal,
+      [&] (ConditionCode cc, Vreg sf) {
         auto next = v.makeBlock();
         v << jcc{ccNegate(cc), sf, {next, label(inst->taken())}};
         v = next;
@@ -1334,10 +1322,9 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 
   auto type = v.makeReg();
   v << loadzbl{sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_type)], type};
-  auto const sf = v.makeReg();
   emitTypeTest(v, inst->typeParam(), type,
-    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)], sf,
-    [&] (ConditionCode cc) {
+    sp[cellsToBytes(extra->checkedSlot) + TVOFF(m_data)],
+    [&] (ConditionCode cc, Vreg sf) {
       auto const sk = SrcKey(curFunc(), extra->taken, resumed());
       v << bindexit{ccNegate(cc), sf, sk};
     }
@@ -1347,7 +1334,7 @@ void CodeGenerator::cgSideExitGuardStk(IRInstruction* inst) {
 template <class JmpFn>
 void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
                                       JmpFn doJcc) {
-  assert(inst->numSrcs() == 5);
+  assert(inst->numSrcs() == 7);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);

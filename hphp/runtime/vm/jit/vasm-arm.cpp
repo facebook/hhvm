@@ -136,6 +136,7 @@ private:
   void emit(tbcc& i);
   void emit(testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(testli& i) { a->Tst(W(i.s1), i.s0.l()); }
+  void emit(ud2& i) { a->Brk(1); }
   void emit(xorq& i) { a->Eor(X(i.d), X(i.s1), X(i.s0) /* xxx flags */); }
   void emit(xorqi& i) { a->Eor(X(i.d), X(i.s1), i.s0.l() /* xxx flags */); }
 
@@ -544,6 +545,16 @@ void lower(Vunit& unit) {
     if (code.empty()) continue;
     if (code.back().op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{b}, code.back());
+    }
+    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
+      auto& inst = unit.blocks[b].code[i];
+      switch (inst.op) {
+        case Vinstr::defvmsp:
+          inst = copy{PhysReg{arm::rVmSp}, inst.defvmsp_.d};
+          break;
+        default:
+          break;
+      }
     }
   }
 }

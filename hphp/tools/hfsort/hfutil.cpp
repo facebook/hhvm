@@ -74,7 +74,11 @@ vector<Cluster*> clusterize() {
 
   sort(sortedFuncs.begin(), sortedFuncs.end(),
        [&](FuncId f1, FuncId f2) {
-         return cg.funcs[f1].samples > cg.funcs[f2].samples;
+         auto& func1 = cg.funcs[f1];
+         auto& func2 = cg.funcs[f2];
+         return
+           (uint64_t)func1.samples * func2.size >
+           (uint64_t)func2.samples * func1.size;
        });
 
   // Process each function, and consider merging its cluster with the

@@ -239,6 +239,10 @@ void FastCGIServer::start() {
                                     m_socketConfig.bindAddress.getPort());
     }
   }
+  if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
+    auto path = m_socketConfig.bindAddress.getPath();
+    chmod(path.c_str(), 0760);
+  }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
   m_acceptor->init(m_socket.get(), m_worker.getEventBase());
   m_worker.getEventBase()->runInEventBaseThread([&] {

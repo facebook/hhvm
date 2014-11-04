@@ -34,7 +34,7 @@ void delete_Generator(ObjectData* od, const Class*) {
   auto const size = cont->resumable()->size();
   auto const base = (char*)(cont + 1) - size;
   cont->~c_Generator();
-  MM().objFreeLogged(base, size);
+  smart_free(base);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -68,7 +68,7 @@ struct Resumable {
     // Allocate memory.
     size_t frameSize = numSlots * sizeof(TypedValue);
     size_t totalSize = frameSize + sizeof(Resumable) + objSize;
-    void* mem = MM().objMallocLogged(totalSize);
+    auto mem = smart_malloc(totalSize);
     auto resumable = (Resumable*)((char*)mem + frameSize);
     auto actRec = resumable->actRec();
 

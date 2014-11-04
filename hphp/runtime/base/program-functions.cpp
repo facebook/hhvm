@@ -125,7 +125,6 @@ void timezone_init();
 
 void pcre_init();
 void pcre_reinit();
-void pcre_session_exit();
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -1893,9 +1892,6 @@ void hphp_session_exit() {
 
   {
     ServerStatsHelper ssh("rollback");
-
-    // Clean up pcre state at the end of the request.
-    pcre_session_exit();
 
     hphp_memory_cleanup();
     // Do any post-sweep cleanup necessary for global variables

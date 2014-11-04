@@ -22,6 +22,8 @@
 #include <pcre.h>
 #include <onigposix.h>
 #include <utility>
+#include <boost/variant.hpp>
+#include <boost/variant/get.hpp>
 
 #include <folly/AtomicHashArray.h>
 
@@ -40,6 +42,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/thread-safe-scalable-cache.h"
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -47,10 +50,135 @@
 #endif
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
-// regex cache and helpers
+// PCRECache definition
+
+class PCRECache {
+  public:
+    typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
+    typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
+
+    enum CacheKind {
+      StaticKind,
+      LruKind,
+      ScalableKind
+    };
+
+  private:
+    struct ahm_string_data_same {
+      bool operator()(const StringData* s1, const StringData* s2) {
+        // ahm uses -1, -2, -3 as magic values
+        return int64_t(s1) > 0 && (s1 == s2 || s1->same(s2));
+      }
+    };
+
+    typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
+            string_data_hash, ahm_string_data_same> StaticCache;
+    typedef ThreadSafeLRUCache<LRUCacheKey, EntryPtr,
+            LRUCacheKey::HashCompare> LRUCache;
+    typedef ThreadSafeScalableCache<LRUCacheKey, EntryPtr,
+            LRUCacheKey::HashCompare> ScalableCache;
+    typedef std::pair<const StringData*, const pcre_cache_entry*>
+            StaticCachePair;
+
+  public:
+    class Accessor {
+      public:
+        Accessor()
+          : m_kind(PtrKind), m_ptr((pcre_cache_entry*)nullptr)
+        {}
+
+        // No assignment from LRUCache::ConstAccessor since it is non-copyable
+        // Use resetToLRU instead
+
+        Accessor & operator=(const pcre_cache_entry* ptr) {
+          m_kind = PtrKind;
+          m_ptr = ptr;
+          return *this;
+        }
+
+        Accessor & operator=(const EntryPtr & ep) {
+          m_kind = SmartPtrKind;
+          m_smart_ptr = ep;
+          return *this;
+        }
+
+        LRUCache::ConstAccessor & resetToLRU() {
+          m_kind = AccessorKind;
+          return m_accessor;
+        }
+
+        const pcre_cache_entry * get() {
+          switch (m_kind) {
+            case PtrKind:
+              return m_ptr;
+            case SmartPtrKind:
+              return m_smart_ptr.get();
+            case AccessorKind:
+              return m_accessor.get()->get();
+            default:
+              not_reached();
+              return nullptr;
+          }
+        }
+      private:
+        enum {
+          PtrKind,
+          SmartPtrKind,
+          AccessorKind
+        } m_kind;
+        const pcre_cache_entry* m_ptr;
+        EntryPtr m_smart_ptr;
+        LRUCache::ConstAccessor m_accessor;
+    };
+
+    PCRECache()
+      : m_kind(StaticKind), m_staticCache(nullptr)
+    {
+      reinit(StaticKind);
+    }
+
+    ~PCRECache() {
+      if (m_kind == StaticKind && m_staticCache) {
+        DestroyStatic(m_staticCache);
+      }
+    }
+
+    void reinit(CacheKind kind);
+    bool find(Accessor & accessor, const String & key,
+        TempKeyCache & keyCache);
+    void insert(Accessor & accessor, const String& regex,
+        TempKeyCache & keyCache, const pcre_cache_entry * ent);
+    void dump(const std::string& filename);
+    size_t size() const;
+
+  private:
+    CacheKind m_kind;
+    std::atomic<StaticCache*> m_staticCache;
+    std::unique_ptr<LRUCache> m_lruCache;
+    std::unique_ptr<ScalableCache> m_scalableCache;
+    std::atomic<time_t> m_expire;
+    std::mutex m_clearMutex;
+
+    void clearStatic();
+
+    static void DestroyStatic(StaticCache* cache);
+    StaticCache* CreateStatic();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Data
 
 IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
+
+static PCRECache s_pcreCache;
+
+// The last pcre error code is available for the whole thread.
+static __thread int tl_last_error_code;
+
+///////////////////////////////////////////////////////////////////////////////
+// pcre_cache_entry implementation
 
 pcre_cache_entry::~pcre_cache_entry() {
   if (extra) {
@@ -64,128 +192,184 @@ pcre_cache_entry::~pcre_cache_entry() {
   pcre_free(re);
 }
 
-void PCREglobals::onSessionExit() {
-  for (auto entry: m_overflow) {
-    delete entry;
-  }
-  smart::vector<const pcre_cache_entry*>().swap(m_overflow);
-}
+///////////////////////////////////////////////////////////////////////////////
+// PCRECache implementation
 
-PCREglobals::~PCREglobals() {
-  onSessionExit();
-}
-
-void pcre_session_exit() {
-  tl_pcre_globals->onSessionExit();
-}
-
-void PCREglobals::cleanupOnRequestEnd(const pcre_cache_entry* ent) {
-  m_overflow.push_back(ent);
-}
-
-struct ahm_string_data_same {
-  bool operator()(const StringData* s1, const StringData* s2) {
-    // ahm uses -1, -2, -3 as magic values
-    return int64_t(s1) > 0 && (s1 == s2 || s1->same(s2));
-  }
-};
-typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
-                         string_data_hash, ahm_string_data_same> PCREStringMap;
-typedef std::pair<const StringData*, const pcre_cache_entry*> PCREEntry;
-
-static std::atomic<PCREStringMap*> s_pcreCacheMap;
-static std::atomic<time_t> s_pcreCacheExpire;
-static std::mutex s_clearMutex;
-
-static PCREStringMap* pcre_cache_create() {
-  PCREStringMap::Config config;
+PCRECache::StaticCache*
+PCRECache::CreateStatic() {
+  StaticCache::Config config;
   config.maxLoadFactor = 0.5;
-  return PCREStringMap::create(
-    RuntimeOption::EvalPCRETableSize, config).release();
+  return StaticCache::create(
+      RuntimeOption::EvalPCRETableSize, config).release();
 }
 
-static void pcre_cache_destroy(PCREStringMap* cache) {
+void PCRECache::DestroyStatic(StaticCache* cache) {
   for (auto& it : *cache) {
     delete it.second;
   }
-  PCREStringMap::destroy(cache);
+  StaticCache::destroy(cache);
 }
 
-void pcre_init() {
-  assert(!s_pcreCacheMap);
-  s_pcreCacheMap = pcre_cache_create();
-  s_pcreCacheExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
-}
-
-void pcre_reinit() {
-  if (s_pcreCacheMap) {
-    // there should not be a lot of entries created before runtime
-    // options were parsed.
-    pcre_cache_destroy(s_pcreCacheMap);
+void PCRECache::reinit(CacheKind kind) {
+  if (m_kind == StaticKind) {
+    if (m_staticCache) {
+      DestroyStatic(m_staticCache);
+      m_staticCache = nullptr;
+    }
+  } else if (m_kind == LruKind) {
+    m_lruCache.reset();
+  } else {
+    m_scalableCache.reset();
   }
-  s_pcreCacheMap = pcre_cache_create();
-  s_pcreCacheExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+  m_kind = kind;
+
+  if (kind == StaticKind) {
+    m_staticCache = CreateStatic();
+    m_expire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+  } else if (kind == LruKind) {
+    m_lruCache.reset(new LRUCache(RuntimeOption::EvalPCRETableSize));
+  } else if (kind == ScalableKind) {
+    m_scalableCache.reset(new ScalableCache(RuntimeOption::EvalPCRETableSize));
+  } else {
+    not_reached();
+  }
 }
 
-void pcre_dump_cache(const std::string& filename) {
+bool PCRECache::find(Accessor & accessor,
+    const String& regex, TempKeyCache & keyCache)
+{
+  if (m_kind == StaticKind) {
+    assert(m_staticCache);
+    StaticCache::iterator it;
+    auto cache = m_staticCache.load(std::memory_order_acquire);
+    if ((it = cache->find(regex.get())) != cache->end()) {
+      accessor = it->second;
+      return true;
+    }
+    return false;
+  } else {
+    if (!keyCache) {
+      keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+    }
+    bool found;
+    if (m_kind == LruKind) {
+      found = m_lruCache->find(accessor.resetToLRU(), *keyCache);
+    } else {
+      found = m_scalableCache->find(accessor.resetToLRU(), *keyCache);
+    }
+    return found;
+  }
+}
+
+void PCRECache::clearStatic() {
+  std::unique_lock<std::mutex> lock(m_clearMutex, std::try_to_lock);
+  if (!lock) return;
+
+  auto newExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+  m_expire.store(newExpire, std::memory_order_relaxed);
+
+  auto tmpMap = CreateStatic();
+  tmpMap = m_staticCache.exchange(tmpMap, std::memory_order_acq_rel);
+
+  Treadmill::enqueue([tmpMap]() {
+      DestroyStatic(tmpMap);
+   });
+}
+
+void PCRECache::insert(Accessor & accessor,
+    const String& regex,
+    TempKeyCache & keyCache,
+    const pcre_cache_entry * ent)
+{
+  if (m_kind == StaticKind) {
+    assert(m_staticCache);
+    // Clear the cache if we haven't refreshed it in a while
+    if (time(nullptr) > m_expire) {
+      clearStatic();
+    }
+    auto cache = m_staticCache.load(std::memory_order_acquire);
+    auto pair = cache->insert(
+        StaticCachePair(makeStaticString(regex.get()), ent));
+    if (pair.second) {
+      // Inserted, container owns the pointer
+      accessor = ent;
+    } else {
+      // Not inserted, caller needs to own the pointer
+      accessor = EntryPtr(ent);
+    }
+  } else {
+    if (!keyCache) {
+      keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+    }
+    // Pointer ownership is shared between container and caller
+    EntryPtr ptr(ent);
+    accessor = ptr;
+    if (m_kind == LruKind) {
+      m_lruCache->insert(*keyCache, ptr);
+    } else {
+      m_scalableCache->insert(*keyCache, ptr);
+    }
+  }
+}
+
+void PCRECache::dump(const std::string& filename) {
   std::ofstream out(filename.c_str());
-  for (auto& it : *s_pcreCacheMap) {
-    out << it.first->data() << "\n";
+  if (m_kind == StaticKind) {
+    for (auto& it : *m_staticCache) {
+      out << it.first->data() << "\n";
+    }
+  } else {
+    std::vector<LRUCacheKey> keys;
+    if (m_kind == LruKind) {
+      m_lruCache->snapshotKeys(keys);
+    } else if (m_kind == ScalableKind) {
+      m_scalableCache->snapshotKeys(keys);
+    } else {
+      not_reached();
+    }
+    for (auto& key: keys) {
+      out << key.c_str() << "\n";
+    }
   }
   out.close();
 }
 
-static const pcre_cache_entry* lookup_cached_pcre(const String& regex) {
-  assert(s_pcreCacheMap);
-  PCREStringMap::iterator it;
-  auto cache = s_pcreCacheMap.load(std::memory_order_acquire);
-  if ((it = cache->find(regex.get())) != cache->end()) {
-    return it->second;
+size_t PCRECache::size() const {
+  if (m_kind == StaticKind) {
+    return (size_t)m_staticCache.load(std::memory_order_acquire)->size();
+  } else if (m_kind == LruKind) {
+    return m_lruCache->size();
+  } else if (m_kind == ScalableKind) {
+    return m_scalableCache->size();
+  } else {
+    not_reached();
   }
-  return 0;
 }
 
-static void pcre_clear_cache() {
-  std::unique_lock<std::mutex> lock(s_clearMutex, std::try_to_lock);
-  if (!lock) return;
+///////////////////////////////////////////////////////////////////////////////
+// Public interface and helper functions
 
-  auto newExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
-  s_pcreCacheExpire.store(newExpire, std::memory_order_relaxed);
-
-  auto tmpMap = pcre_cache_create();
-  tmpMap = s_pcreCacheMap.exchange(tmpMap, std::memory_order_acq_rel);
-
-  Treadmill::enqueue([tmpMap]() {
-      pcre_cache_destroy(tmpMap);
-   });
+void pcre_reinit() {
+  PCRECache::CacheKind kind;
+  if (RuntimeOption::EvalPCRECacheType == "static") {
+    kind = PCRECache::StaticKind;
+  } else if (RuntimeOption::EvalPCRECacheType == "lru") {
+    kind = PCRECache::LruKind;
+  } else if (RuntimeOption::EvalPCRECacheType == "scalable") {
+    kind = PCRECache::ScalableKind;
+  } else {
+    Logger::Warning("Eval.PCRECacheType should be either static, lru or scalable");
+    kind = PCRECache::ScalableKind;
+  }
+  s_pcreCache.reinit(kind);
 }
 
-static const pcre_cache_entry*
-insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
-  assert(s_pcreCacheMap);
-  // Clear the cache if we haven't refreshed it in a while
-  if (time(nullptr) > s_pcreCacheExpire) {
-    pcre_clear_cache();
-  }
-  auto cache = s_pcreCacheMap.load(std::memory_order_acquire);
-  auto pair = cache->insert(
-    PCREEntry(makeStaticString(regex.get()), ent));
-  if (!pair.second) {
-    if (pair.first == cache->end()) {
-      // Global Cache is full
-      // still return the entry and free it at the end of the request
-      tl_pcre_globals->cleanupOnRequestEnd(ent);
-      return ent;
-    }
-    // collision, delete the new one
-    delete ent;
-    return pair.first->second;
-  }
-  return ent;
+void pcre_init() {
 }
 
-// The last pcre error code is available for the whole thread.
-static __thread int tl_last_error_code;
+void pcre_dump_cache(const std::string& filename) {
+  s_pcreCache.dump(filename);
+}
 
 namespace {
 
@@ -290,12 +474,14 @@ static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
   return true;
 }
 
-static const pcre_cache_entry*
-pcre_get_compiled_regex_cache(const String& regex) {
+static bool
+pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor, const String& regex) {
+  PCRECache::TempKeyCache tkc;
+
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
-  if (const pcre_cache_entry* pce = lookup_cached_pcre(regex)) {
-    return pce;
+  if (s_pcreCache.find(accessor, regex, tkc)) {
+    return true;
   }
 
   /* Parse through the leading whitespace, and display a warning if we
@@ -304,7 +490,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
   while (isspace((int)*(unsigned char *)p)) p++;
   if (*p == 0) {
     raise_warning("Empty regular expression");
-    return nullptr;
+    return false;
   }
 
   /* Get the delimiter and display a warning if it is alphanumeric
@@ -312,7 +498,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
   char delimiter = *p++;
   if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
     raise_warning("Delimiter must not be alphanumeric or backslash");
-    return nullptr;
+    return false;
   }
 
   char start_delimiter = delimiter;
@@ -336,7 +522,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
     if (*pp == 0) {
       raise_warning("No ending delimiter '%c' found: [%s]", delimiter,
                       regex.data());
-      return nullptr;
+      return false;
     }
   } else {
     /* We iterate through the pattern, searching for the matching ending
@@ -357,7 +543,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
     if (*pp == 0) {
       raise_warning("No ending matching delimiter '%c' found: [%s]",
                       end_delimiter, regex.data());
-      return nullptr;
+      return false;
     }
   }
 
@@ -405,7 +591,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
 
     default:
       raise_warning("Unknown modifier '%c': [%s]", pp[-1], regex.data());
-      return nullptr;
+      return false;
     }
   }
 
@@ -421,7 +607,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
   pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, 0);
   if (re == nullptr) {
     raise_warning("Compilation failed: %s at offset %d", error, erroffset);
-    return nullptr;
+    return false;
   }
   // Careful: from here 're' needs to be freed if something throws.
 
@@ -446,7 +632,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
   }
 
   /* Store the compiled pattern and extra info in the cache. */
-  pcre_cache_entry *new_entry = new pcre_cache_entry();
+  pcre_cache_entry * new_entry = new pcre_cache_entry();
   new_entry->re = re;
   new_entry->extra = extra;
 
@@ -459,10 +645,11 @@ pcre_get_compiled_regex_cache(const String& regex) {
   /* Get pcre full info */
   if (!get_pcre_fullinfo(new_entry)) {
     delete new_entry;
-    return nullptr;
+    return false;
   }
 
-  return insert_cached_pcre(regex, new_entry);
+  s_pcreCache.insert(accessor, regex, tkc, new_entry);
+  return true;
 }
 
 static int *create_offset_array(const pcre_cache_entry *pce,
@@ -547,10 +734,11 @@ static void pcre_handle_exec_error(int pcre_code) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
-  if (pce == nullptr) {
+  PCRECache::Accessor accessor;
+  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
+  const pcre_cache_entry * pce = accessor.get();
 
   int size_offsets = 0;
   int *offsets = create_offset_array(pce, size_offsets);
@@ -608,10 +796,11 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 static Variant preg_match_impl(const String& pattern, const String& subject,
                                Variant *subpats, int flags, int start_offset,
                                bool global) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
-  if (pce == nullptr) {
+  PCRECache::Accessor accessor;
+  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
+  const pcre_cache_entry * pce = accessor.get();
 
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
@@ -906,10 +1095,11 @@ static bool preg_get_backref(const char **str, int *backref) {
 static Variant php_pcre_replace(const String& pattern, const String& subject,
                                 const Variant& replace_var, bool callable,
                                 int limit, int *replace_count) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
-  if (pce == nullptr) {
+  PCRECache::Accessor accessor;
+  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
+  const pcre_cache_entry * pce = accessor.get();
   bool eval = pce->preg_options & PREG_REPLACE_EVAL;
   if (eval) {
     if (RuntimeOption::EvalAuthoritativeMode) {
@@ -1318,10 +1508,11 @@ int preg_filter(Variant &result, const Variant& pattern, const Variant& replacem
 
 Variant preg_split(const String& pattern, const String& subject,
                    int limit /* = -1 */, int flags /* = 0 */) {
-  const pcre_cache_entry* pce = pcre_get_compiled_regex_cache(pattern);
-  if (pce == nullptr) {
+  PCRECache::Accessor accessor;
+  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
+  const pcre_cache_entry * pce = accessor.get();
 
   int no_empty = flags & PREG_SPLIT_NO_EMPTY;
   bool delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
@@ -1350,6 +1541,7 @@ Variant preg_split(const String& pattern, const String& subject,
   Array return_value = Array::Create();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
+  PCRECache::Accessor bump_accessor;
   const pcre_cache_entry* bump_pce = nullptr; /* instance for empty matches */
   while ((limit == -1 || limit > 1)) {
     int count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
@@ -1419,10 +1611,10 @@ Variant preg_split(const String& pattern, const String& subject,
       if (g_notempty != 0 && start_offset < subject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
           if (bump_pce == nullptr) {
-            bump_pce = pcre_get_compiled_regex_cache("/./us");
-            if (bump_pce == nullptr) {
+            if (!pcre_get_compiled_regex_cache(bump_accessor, "/./us")) {
               return false;
             }
+            bump_pce = bump_accessor.get();
           }
           pcre_extra bump_extra;
           init_local_extra(&bump_extra, bump_pce->extra);
@@ -1551,7 +1743,7 @@ int preg_last_error() {
 }
 
 size_t preg_pcre_cache_size() {
-  return (size_t)s_pcreCacheMap.load(std::memory_order_acquire)->size();
+  return s_pcreCache.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

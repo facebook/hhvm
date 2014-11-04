@@ -1261,6 +1261,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
+  CallerFrame cf;
   xpathobjp = xmlXPathEvalExpression((xmlChar*)expr.data(), ctxp);
   ctxp->node = nullptr;
   if (ns != nullptr) {
@@ -5490,7 +5491,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
       arg = String((char *)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
-    args.set(i, arg);
+    args.prepend(arg);
   }
 
   obj = valuePop(ctxt);

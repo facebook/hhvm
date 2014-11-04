@@ -558,7 +558,7 @@ public:
                *   curl_formadd
                * - Revert changes to postval at the end
                */
-              char* mutablePostval = const_cast<char*>(postval);
+              char* mutablePostval = val.bufferSlice().ptr + 1;
               char* type = strstr(mutablePostval, ";type=");
               char* filename = strstr(mutablePostval, ";filename=");
 
@@ -569,10 +569,11 @@ public:
                 *filename = '\0';
               }
 
+              String localName = File::TranslatePath(mutablePostval);
+
               /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
                * must be explicitly cast to long in curl_formadd
                * use since curl needs a long not an int. */
-              ++postval;
               m_error_no = (CURLcode)curl_formadd
                 (&first, &last,
                  CURLFORM_COPYNAME, key.data(),
@@ -583,7 +584,7 @@ public:
                  CURLFORM_CONTENTTYPE, type
                                        ? type + sizeof(";type=") - 1
                                        : "application/octet-stream",
-                 CURLFORM_FILE, postval,
+                 CURLFORM_FILE, localName.c_str(),
                  CURLFORM_END);
 
               if (type) {

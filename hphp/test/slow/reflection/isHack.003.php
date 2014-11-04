@@ -1,7 +1,7 @@
 <?php
 
 class A {
-	public function d() {}
+  public function d() {}
 }
 
 class B extends ReflectionClass {}

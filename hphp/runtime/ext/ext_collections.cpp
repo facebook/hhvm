@@ -5859,7 +5859,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   if (Collection::isVectorType(obj->getCollectionType()) ||
       Collection::isSetType(obj->getCollectionType()) ||
       obj->getCollectionType() == Collection::PairType) {
-    serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
+    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
         serializer->getType() == VariableSerializer::Type::APCSerialize ||
@@ -5885,7 +5885,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     serializer->writeArrayFooter();
   } else {
     assert(Collection::isMapType(obj->getCollectionType()));
-    serializer->setObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
+    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
       serializer->writeCollectionKey(iter.first());
@@ -5893,6 +5893,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     }
     serializer->writeArrayFooter();
   }
+  serializer->popObjectInfo();
 }
 
 void collectionDeepCopyTV(TypedValue* tv) {

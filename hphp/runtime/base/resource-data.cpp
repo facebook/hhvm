@@ -72,12 +72,9 @@ const String& ResourceData::o_getClassNameHook() const {
 }
 
 void ResourceData::serializeImpl(VariableSerializer *serializer) const {
-  String saveName;
-  int saveId;
-  serializer->getResourceInfo(saveName, saveId);
-  serializer->setResourceInfo(o_getResourceName(), o_id);
+  serializer->pushResourceInfo(o_getResourceName(), o_id);
   empty_array().serialize(serializer);
-  serializer->setResourceInfo(saveName, saveId);
+  serializer->popResourceInfo();
 }
 
 const String& ResourceData::o_getResourceName() const {

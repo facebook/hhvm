@@ -828,11 +828,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
                      "__sleep() but does not exist", propName.data());
         wanted.set(propName, init_null());
       }
-      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
+      serializer->pushObjectInfo(o_getClassName(), o_getId(), 'O');
       if (!serializableNativeData.isNull()) {
         wanted.set(s_serializedNativeDataKey, serializableNativeData);
       }
       wanted.serialize(serializer, true);
+      serializer->popObjectInfo();
     } else {
       raise_notice("serialize(): __sleep should return an array only "
                    "containing the names of instance-variables to "
@@ -870,17 +871,19 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* cname = const_cast<ObjectData*>(this)-> // XXX
           o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
-          serializer->setObjectInfo(cname->toCStrRef(), o_getId(), 'O');
+          serializer->pushObjectInfo(cname->toCStrRef(), o_getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           properties.serialize(serializer, true);
+          serializer->popObjectInfo();
           return;
         }
       }
-      serializer->setObjectInfo(className, o_getId(), 'O');
+      serializer->pushObjectInfo(className, o_getId(), 'O');
       if (!serializableNativeData.isNull()) {
         properties.set(s_serializedNativeDataKey, serializableNativeData);
       }
       properties.serialize(serializer, true);
+      serializer->popObjectInfo();
     }
   }
 }

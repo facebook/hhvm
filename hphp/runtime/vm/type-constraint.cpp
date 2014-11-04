@@ -87,6 +87,13 @@ void TypeConstraint::init() {
   if (mptr) dtype = *mptr;
   if (!mptr ||
       !(isHHType() || dtype.dt == KindOfArray ||
+        dtype.dt == KindOfBoolean ||
+        dtype.dt == KindOfString ||
+        dtype.dt == KindOfInt64 ||
+        dtype.dt == KindOfDouble ||
+        dtype.dt == KindOfResource ||
+        dtype.metatype == MetaType::ArrayKey ||
+        dtype.metatype == MetaType::Number ||
         dtype.metatype == MetaType::Parent ||
         dtype.metatype == MetaType::Self ||
         dtype.metatype == MetaType::Callable)) {

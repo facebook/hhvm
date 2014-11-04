@@ -4,11 +4,23 @@
 * Run the test suites in various configurations.
 */
 
-function get_expect_file($test, $type, $options) {
-  if (isset($options['repo']) && file_exists("$test.$type-repo")) {
-      return "$test.$type-repo";
+function get_expect_file_and_type($test, $options) {
+  $types = ['expect', 'expectf', 'expectregex'];
+  if (isset($options['repo'])) {
+    foreach ($types as $type) {
+      $fname = "$test.$type-repo";
+      if (file_exists($fname)) {
+        return [$fname, $type];
+      }
+    }
   }
-  return "$test.$type";
+  foreach ($types as $type) {
+    $fname = "$test.$type";
+    if (file_exists($fname)) {
+      return [$fname, $type];
+    }
+  }
+  return [null, null];
 }
 
 function usage() {
@@ -1006,8 +1018,14 @@ function run_config_post($outputs, $test, $options) {
     return true;
   }
 
-  if (file_exists("$test.expect")) {
-    $file = get_expect_file($test, 'expect', $options);
+  list($file, $type) = get_expect_file_and_type($test, $options);
+  if ($file === null || $type === null) {
+    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
+      "nor $test.expectregex. Is $test even a test?");
+    return false;
+  }
+
+  if ($type === 'expect') {
     $wanted = trim(file_get_contents($file));
     $passed = !strcmp($output, $wanted);
 
@@ -1016,8 +1034,7 @@ function run_config_post($outputs, $test, $options) {
     }
 
     return $passed;
-  } else if (file_exists("$test.expectf")) {
-    $file = get_expect_file($test, 'expectf', $options);
+  } else if ($type === 'expectf') {
     $wanted = trim(file_get_contents($file));
     $wanted_re = $wanted;
 
@@ -1097,8 +1114,7 @@ function run_config_post($outputs, $test, $options) {
 
     return $passed;
 
-  } else if (file_exists("$test.expectregex")) {
-    $file = get_expect_file($test, 'expectregex', $options);
+  } else if ($type === 'expectregex') {
     $wanted_re = trim(file_get_contents($file));
 
     $passed = preg_match("/^$wanted_re\$/s", $output);
@@ -1109,9 +1125,7 @@ function run_config_post($outputs, $test, $options) {
 
     return $passed;
   } else {
-    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
-      "nor $test.expectregex. Is $test even a test?");
-    return false;
+    throw new Exception("Unsupported expect file type: ".$type);
   }
 }
 

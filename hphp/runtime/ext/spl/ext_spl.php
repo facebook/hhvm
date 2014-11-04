@@ -71,55 +71,26 @@ function class_uses(mixed $obj,
  * @param array $params - Arguments to pass to the callback function.
  * @return mixed - Returns the iteration count.
  */
-function iterator_apply(\Traversable $obj,
-                        callable $func,
-                        array $params = []): mixed {
-  $obj->rewind();
-  $count = 0;
-  foreach ($obj as $value) {
-    if (call_user_func_array($func, $params) !== true) {
-      break;
-    }
-  }
-  return $count;
-}
+<<__Native>>
+function iterator_apply(mixed $obj,
+                        mixed $func,
+                        array $params = []): mixed;
 
 /* Count the elements in an iterator.
  * @param mixed $obj - The iterator being counted.
  * @return mixed - The number of elements in iterator.
  */
-function iterator_count(\Traversable $obj): mixed {
-  $obj->rewind();
-  $count = 0;
-  foreach ($obj as $value) {
-    $count++;
-  }
-  return $count;
-}
+<<__Native>>
+function iterator_count(mixed $obj): mixed;
 
 /* Copy the elements of an iterator into an array.
  * @param mixed $obj - The iterator being copied.
  * @param bool $use_keys - Whether to use the iterator element keys as index.
  * @return mixed - An array containing the elements of the iterator.
  */
-function iterator_to_array(\Traversable $obj,
-                           bool $use_keys = true): array {
-  $ret = array();
-  $obj->rewind();
-  foreach ($obj as $key=>$val) {
-    if (is_object($val)) {
-      $value = clone $val;
-    } else {
-      $value = $val;
-    }
-    if ($use_keys) {
-      $ret[$key] = $value;
-    } else {
-      $ret[] = $value;
-    }
-  }
-  return $ret;
-}
+<<__Native>>
+function iterator_to_array(mixed $obj,
+                           bool $use_keys = true): array;
 
 /* This function can be used to manually search for a class or interface using
  * the registered __autoload functions.

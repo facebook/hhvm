@@ -263,6 +263,58 @@ Object get_traversable_object_iterator(const Variant& obj) {
   return itObj;
 }
 
+
+Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
+                         const Array& params /* = null_array */) {
+  CHECK_TRAVERSABLE_IMPL(obj, 0);
+  Object pobj = get_traversable_object_iterator(obj);
+  pobj->o_invoke_few_args(s_rewind, 0);
+  int64_t count = 0;
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
+    if (!same(vm_call_user_func(func, params), true)) {
+      break;
+    }
+    ++count;
+    pobj->o_invoke_few_args(s_next, 0);
+  }
+  return count;
+}
+
+Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
+  CHECK_TRAVERSABLE_IMPL(obj, 0);
+  Object pobj = get_traversable_object_iterator(obj);
+  pobj->o_invoke_few_args(s_rewind, 0);
+  int64_t count = 0;
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
+    ++count;
+    pobj->o_invoke_few_args(s_next, 0);
+  }
+  return count;
+}
+
+Variant HHVM_FUNCTION(iterator_to_array, const Variant& obj,
+                                         bool use_keys /* = true */) {
+  Array ret(Array::Create());
+  CHECK_TRAVERSABLE_IMPL(obj, ret);
+  Object pobj = get_traversable_object_iterator(obj);
+
+  pobj->o_invoke_few_args(s_rewind, 0);
+  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
+    Variant val = pobj->o_invoke_few_args(s_current, 0);
+    if (val.isObject()) {
+      val = val.toObject()->clone();
+    }
+    if (use_keys) {
+      Variant key = pobj->o_invoke_few_args(s_key, 0);
+      ret.set(key, val);
+    } else {
+      ret.append(val);
+    }
+    pobj->o_invoke_few_args(s_next, 0);
+  }
+  return ret;
+}
+
 bool HHVM_FUNCTION(spl_autoload_register,
                    const Variant& autoload_function /* = null_variant */,
                    bool throws /* = true */,
@@ -372,6 +424,9 @@ public:
     HHVM_FE(class_implements);
     HHVM_FE(class_parents);
     HHVM_FE(class_uses);
+    HHVM_FE(iterator_apply);
+    HHVM_FE(iterator_count);
+    HHVM_FE(iterator_to_array);
     HHVM_FE(spl_autoload_call);
     HHVM_FE(spl_autoload_extensions);
     HHVM_FE(spl_autoload_functions);

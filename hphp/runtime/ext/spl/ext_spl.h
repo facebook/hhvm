@@ -35,6 +35,11 @@ void HHVM_FUNCTION(spl_autoload_call, const String& class_name);
 String HHVM_FUNCTION(spl_autoload_extensions, const String& file_extensions =
                                                 null_string);
 Variant HHVM_FUNCTION(spl_autoload_functions);
+Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
+                                      const Array& params = null_array);
+Variant HHVM_FUNCTION(iterator_count, const Variant& obj);
+Variant HHVM_FUNCTION(iterator_to_array, const Variant& obj,
+                                         bool use_keys = true);
 bool HHVM_FUNCTION(spl_autoload_register,
                    const Variant& autoload_function = null_variant,
                    bool throws = true,

@@ -69,6 +69,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
 
+  <<__Native, __HipHopSpecific>>
+  public function isHack(): bool;
+
   /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.isinternal.php )
@@ -1282,6 +1285,9 @@ class ReflectionClass implements Reflector {
     $pos = strrpos($name, '\\');
     return ($pos === false) ? $name : substr($name, $pos + 1);
   }
+
+  <<__Native, __HipHopSpecific>>
+  public function isHack(): bool;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.isinternal.php )

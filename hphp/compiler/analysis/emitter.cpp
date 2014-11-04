@@ -8257,9 +8257,10 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
   switch (initExpr->getKindOf()) {
     case Expression::KindOfScalarExpression:
-    case Expression::KindOfConstantExpression:
     case Expression::KindOfClassConstantExpression:
       return false;
+    case Expression::KindOfConstantExpression:
+      return !initExpr->isScalar();
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(
         static_pointer_cast<UnaryOpExpression>(initExpr));

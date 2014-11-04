@@ -264,7 +264,7 @@ Class::~Class() {
   }
 
   if (m_extra) {
-    free(m_extra.raw());
+    delete m_extra.raw();
   }
 
   // clean enum cache

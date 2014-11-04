@@ -6519,7 +6519,10 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   fe->docComment = makeStaticString(
     Option::GenerateDocComments ? meth->getDocComment().c_str() : ""
   );
-  fe->returnType = meth->retTypeAnnotation()->dataType();
+  auto retType = meth->retTypeAnnotation();
+  assert(retType || (meth->getName() == "__construct") ||
+                    (meth->getName() == "__destruct"));
+  fe->returnType = retType ? retType->dataType() : KindOfNull;
   fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   FunctionScopePtr funcScope = meth->getFunctionScope();

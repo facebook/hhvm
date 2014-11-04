@@ -30,9 +30,11 @@ void KernelVersion::parse(const char* s) {
   release[0] = 0;
   char build[128];
   build[0] = 0;
-  sscanf(s,
-         "%d.%d%[.-]%[A-Za-z0-9]-%[A-Za-z0-9]_fbk%d_",
-         &m_major, &m_minor, dashdot, release, build, &m_fbk);
+  DEBUG_ONLY auto ret =
+    sscanf(s,
+           "%d.%d%1[.-]%127[A-Za-z0-9]-%127[A-Za-z0-9]_fbk%d_",
+           &m_major, &m_minor, dashdot, release, build, &m_fbk);
+  assert(ret == 2 || ret == 5 || ret == 6);
   assert(m_major > 0 && m_minor > 0);
   m_release_str = release[0] == 0 ? "" : (const char*) release;
   m_build_str = build[0] == 0 ? "" : (const char*) build;

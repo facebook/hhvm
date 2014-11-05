@@ -116,7 +116,8 @@ private:
   void emit(cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(cmpqi& i) { a->Cmp(X(i.s1), i.s0.l()); }
-  void emit(imul& i) { a->Mul(X(i.d), X(i.s1), X(i.s0)); }
+  void emit(decq& i) { a->Sub(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
+  void emit(incq& i) { a->Add(X(i.d), X(i.s), 1LL, vixl::SetFlags); }
   void emit(jcc& i);
   void emit(jmp i);
   void emit(lea& i) { a->Add(X(i.d), X(i.s.base), i.s.disp); }
@@ -124,6 +125,9 @@ private:
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
+  void emit(mul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
+  void emit(neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
+  void emit(not& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(orq& i) { a->Orr(X(i.d), X(i.s1), X(i.s0) /* xxx flags? */); }
   void emit(orqi& i) { a->Orr(X(i.d), X(i.s1), i.s0.l() /* xxx flags? */); }
   void emit(ret& i) { a->Ret(); }

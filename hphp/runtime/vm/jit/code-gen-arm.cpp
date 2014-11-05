@@ -215,6 +215,21 @@ DELEGATE_OPCODE(ExceptionBarrier)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
 
+DELEGATE_OPCODE(AddInt)
+DELEGATE_OPCODE(SubInt)
+DELEGATE_OPCODE(AddIntO)
+DELEGATE_OPCODE(SubIntO)
+DELEGATE_OPCODE(AndInt)
+DELEGATE_OPCODE(OrInt)
+DELEGATE_OPCODE(XorInt)
+
+DELEGATE_OPCODE(LtInt)
+DELEGATE_OPCODE(GtInt)
+DELEGATE_OPCODE(LteInt)
+DELEGATE_OPCODE(GteInt)
+DELEGATE_OPCODE(EqInt)
+DELEGATE_OPCODE(NeqInt)
+
 DELEGATE_OPCODE(ConvBoolToInt)
 
 /////////////////////////////////////////////////////////////////////
@@ -540,8 +555,6 @@ PUNT_OPCODE(RBTrace)
 PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(DbgAssertType)
-PUNT_OPCODE(AddIntO)
-PUNT_OPCODE(SubIntO)
 PUNT_OPCODE(MulIntO)
 PUNT_OPCODE(EagerSyncVMRegs)
 PUNT_OPCODE(ColIsEmpty)
@@ -820,56 +833,16 @@ void CodeGenerator::cgDecRefMem(IRInstruction* inst) {
 //////////////////////////////////////////////////////////////////////
 // Arithmetic Instructions
 
-void CodeGenerator::cgAddInt(IRInstruction* inst) {
-  auto dstReg = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << addq{srcRegR, srcRegL, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::cgSubInt(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << subq{srcRegR, srcRegL, dstReg, v.makeReg()};
-}
-
 void CodeGenerator::cgMulInt(IRInstruction* inst) {
   auto dstReg  = dstLoc(0).reg();
   auto srcRegL = srcLoc(0).reg();
   auto srcRegR = srcLoc(1).reg();
   auto& v = vmain();
-  v << imul{srcRegR, srcRegL, dstReg, v.makeReg()};
+  v << mul{srcRegR, srcRegL, dstReg};
 }
 
 //////////////////////////////////////////////////////////////////////
 // Bitwise Operators
-
-void CodeGenerator::cgAndInt(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << andq{srcRegR, srcRegL, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::cgOrInt(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << orq{srcRegR, srcRegL, dstReg, v.makeReg()};
-}
-
-void CodeGenerator::cgXorInt(IRInstruction* inst) {
-  auto dstReg  = dstLoc(0).reg();
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  v << xorq{srcRegR, srcRegL, dstReg, v.makeReg()};
-}
 
 void CodeGenerator::cgShl(IRInstruction* inst) {
   auto dstReg  = dstLoc(0).reg();
@@ -887,51 +860,6 @@ void CodeGenerator::cgShr(IRInstruction* inst) {
 
   // TODO: t3870154 add shift-by-immediate support to vixl
   vmain() << asrv{srcRegL, srcRegR, dstReg};
-}
-
-//////////////////////////////////////////////////////////////////////
-// Comparison Operations
-
-void CodeGenerator::emitCompareIntAndSet(IRInstruction *inst,
-                                         ConditionCode cc) {
-  auto const sf = emitCompareInt(inst);
-  auto dst = dstLoc(0).reg();
-  vmain() << setcc{cc, sf, dst};
-}
-
-Vreg CodeGenerator::emitCompareInt(IRInstruction* inst) {
-  auto srcRegL = srcLoc(0).reg();
-  auto srcRegR = srcLoc(1).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpq{srcRegR, srcRegL, sf}; // att-style
-  return sf;
-}
-
-void CodeGenerator::cgLtInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_L);
-}
-
-void CodeGenerator::cgGtInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_G);
-}
-
-
-void CodeGenerator::cgGteInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_GE);
-}
-
-void CodeGenerator::cgLteInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_LE);
-}
-
-
-void CodeGenerator::cgEqInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_E);
-}
-
-void CodeGenerator::cgNeqInt(IRInstruction* inst) {
-  emitCompareIntAndSet(inst, CC_NE);
 }
 
 //////////////////////////////////////////////////////////////////////

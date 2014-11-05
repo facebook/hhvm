@@ -2413,7 +2413,7 @@ and expr_atomic_word env last_tok = function
   | "yield" ->
       last_token env;
       space env;
-      with_priority env Tyield expr
+      with_priority env Tyield array_element_single
   | "clone" ->
       last_token env;
       space env;

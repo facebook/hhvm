@@ -139,20 +139,20 @@ invokeAndCastToBool(const CallCtx& ctx, int argc,
 ///////////////////////////////////////////////////////////////////////////////
 
 // ConstCollection
-bool BaseVector::isempty() {
+bool BaseVector::t_isempty() {
   return !toBoolImpl();
 }
 
-int64_t BaseVector::count() {
+int64_t BaseVector::t_count() {
   return m_size;
 }
 
-Object BaseVector::items() {
+Object BaseVector::t_items() {
   return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 // ConstIndexAccess
-bool BaseVector::containskey(const Variant& key) {
+bool BaseVector::t_containskey(const Variant& key) {
   if (key.isInteger()) {
     return contains(key.toInt64());
   }
@@ -161,7 +161,7 @@ bool BaseVector::containskey(const Variant& key) {
 }
 
 // KeyedIterable
-Object BaseVector::getiterator() {
+Object BaseVector::t_getiterator() {
   auto* it = newobj<c_VectorIterator>();
   it->m_obj = this;
   it->m_pos = 0;
@@ -452,15 +452,18 @@ void BaseVector::keys(BaseVector* bvec) {
 
 // Others
 
-Object BaseVector::lazy() {
+Object BaseVector::t_lazy() {
   return SystemLib::AllocLazyKeyedIterableViewObject(this);
 }
 
-Array BaseVector::toarray() {
-  return toArrayImpl();
+Array BaseVector::t_toarray() {
+  if (!m_size) {
+    return empty_array();
+  }
+  return Array(const_cast<ArrayData*>(arrayData()));
 }
 
-Array BaseVector::tokeysarray() {
+Array BaseVector::t_tokeysarray() {
   PackedArrayInit ai(m_size);
   uint32_t sz = m_size;
   for (uint32_t i = 0; i < sz; ++i) {
@@ -469,11 +472,11 @@ Array BaseVector::tokeysarray() {
   return ai.toArray();
 }
 
-Array BaseVector::tovaluesarray() {
-  return toArrayImpl();
+Array BaseVector::t_tovaluesarray() {
+  return t_toarray();
 }
 
-int64_t BaseVector::linearsearch(const Variant& search_value) {
+int64_t BaseVector::t_linearsearch(const Variant& search_value) {
   uint32_t sz = m_size;
   for (uint32_t i = 0; i < sz; ++i) {
     if (same(search_value, tvAsCVarRef(&m_data[i]))) {
@@ -573,13 +576,6 @@ void BaseVector::Unserialize(const char* vectorType,
 }
 
 // Helpers
-
-Array BaseVector::toArrayImpl() const {
-  if (!m_size) {
-    return empty_array();
-  }
-  return Array(const_cast<ArrayData*>(arrayData()));
-}
 
 NEVER_INLINE
 void BaseVector::grow() {
@@ -747,7 +743,7 @@ c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */) : BaseVector(cls) {
   o_subclass_u8 = Collection::VectorType;
 }
 
-void c_Vector::t___construct(const Variant& iterable /* = null_variant */) {
+void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
@@ -890,18 +886,6 @@ Object c_Vector::t_clear() {
   return this;
 }
 
-bool c_Vector::t_isempty() {
-  return BaseVector::isempty();
-}
-
-int64_t c_Vector::t_count() {
-  return BaseVector::count();
-}
-
-Object c_Vector::t_items() {
-  return BaseVector::items();
-}
-
 Object c_Vector::t_keys() {
   auto* vec = newobj<c_Vector>();
   Object obj = vec;
@@ -913,24 +897,23 @@ Object c_Vector::t_values() {
   return Object::attach(BaseVector::Clone<c_Vector>(this));
 }
 
-Object c_Vector::t_lazy() {
-  return BaseVector::lazy();
+Variant BaseVector::t_at(const Variant& key) {
+  return tvAsCVarRef(at(key.asCell()));
 }
 
-Variant c_Vector::t_at(const Variant& key) {
-  return BaseVector::at(key);
-}
-
-Variant c_Vector::t_get(const Variant& key) {
-  return Variant(get(key), Variant::CellDup());
+Variant BaseVector::t_get(const Variant& key) {
+  const auto* k = key.asCell();
+  if (LIKELY(k->m_type == KindOfInt64)) {
+    if ((uint64_t)k->m_data.num >= (uint64_t)m_size) {
+      return null_variant;
+    }
+    return tvAsCVarRef(&m_data[k->m_data.num]);
+  }
+  throwBadKeyType();
 }
 
 bool c_Vector::t_contains(const Variant& key) {
   return t_containskey(key);
-}
-
-bool c_Vector::t_containskey(const Variant& key) {
-  return BaseVector::containskey(key);
 }
 
 Object c_Vector::t_removekey(const Variant& key) {
@@ -951,18 +934,6 @@ Object c_Vector::t_removekey(const Variant& key) {
   decSize();
   tvRefcountedDecRefHelper(t, datum);
   return this;
-}
-
-Array c_Vector::t_toarray() {
-  return BaseVector::toarray();
-}
-
-Array c_Vector::t_tokeysarray() {
-  return BaseVector::tokeysarray();
-}
-
-Array c_Vector::t_tovaluesarray() {
-  return BaseVector::tovaluesarray();
 }
 
 void c_Vector::t_reverse() {
@@ -1041,10 +1012,6 @@ void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
   setSize(m_size - (endPos - startPos));
 }
 
-int64_t c_Vector::t_linearsearch(const Variant& search_value) {
-  return BaseVector::linearsearch(search_value);
-}
-
 void c_Vector::t_shuffle() {
   if (m_size <= 1) {
     return;
@@ -1054,10 +1021,6 @@ void c_Vector::t_shuffle() {
     uint32_t j = f_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
   }
-}
-
-Object c_Vector::t_getiterator() {
-  return BaseVector::getiterator();
 }
 
 Object c_Vector::t_map(const Variant& callback) {
@@ -1157,54 +1120,22 @@ BaseVector::php_concat(const Variant& iterable) {
   return obj;
 }
 
-Variant c_Vector::t_firstvalue() {
-  return BaseVector::php_firstValue();
-}
-
-Variant c_ImmVector::t_firstvalue() {
-  return BaseVector::php_firstValue();
-}
-
-Variant BaseVector::php_firstValue() {
+Variant BaseVector::t_firstvalue() {
   if (!m_size) return init_null();
   return tvAsCVarRef(&m_data[0]);
 }
 
-Variant c_Vector::t_firstkey() {
-  return BaseVector::php_firstKey();
-}
-
-Variant c_ImmVector::t_firstkey() {
-  return BaseVector::php_firstKey();
-}
-
-Variant BaseVector::php_firstKey() {
+Variant BaseVector::t_firstkey() {
   if (!m_size) return init_null();
   return 0;
 }
 
-Variant c_Vector::t_lastvalue() {
-  return BaseVector::php_lastValue();
-}
-
-Variant c_ImmVector::t_lastvalue() {
-  return BaseVector::php_lastValue();
-}
-
-Variant BaseVector::php_lastValue() {
+Variant BaseVector::t_lastvalue() {
   if (!m_size) return init_null();
   return tvAsCVarRef(&m_data[m_size - 1]);
 }
 
-Variant c_Vector::t_lastkey() {
-  return BaseVector::php_lastKey();
-}
-
-Variant c_ImmVector::t_lastkey() {
-  return BaseVector::php_lastKey();
-}
-
-Variant BaseVector::php_lastKey() {
+Variant BaseVector::t_lastkey() {
   if (!m_size) return init_null();
   return (int64_t)m_size - 1;
 }
@@ -1389,19 +1320,20 @@ Object c_Vector::getImmutableCopy() {
 }
 
 Object c_Vector::t_tovector() { return Object::attach(c_Vector::Clone(this)); }
-Object c_Vector::t_toimmvector() { return getImmutableCopy(); }
-Object c_Vector::t_tomap() { return materializeImpl<c_Map>(this); }
-Object c_Vector::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
-Object c_Vector::t_toset() { return materializeImpl<c_Set>(this); }
-Object c_Vector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
-Object c_Vector::t_immutable() { return getImmutableCopy(); }
-
 Object c_ImmVector::t_tovector() { return materializeImpl<c_Vector>(this); }
+
+Object c_Vector::t_toimmvector() { return getImmutableCopy(); }
 Object c_ImmVector::t_toimmvector() { return this; }
-Object c_ImmVector::t_tomap() { return materializeImpl<c_Map>(this); }
-Object c_ImmVector::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
-Object c_ImmVector::t_toset() { return materializeImpl<c_Set>(this); }
-Object c_ImmVector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+
+Object BaseVector::t_tomap() { return materializeImpl<c_Map>(this); }
+
+Object BaseVector::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+
+Object BaseVector::t_toset() { return materializeImpl<c_Set>(this); }
+
+Object BaseVector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+
+Object c_Vector::t_immutable() { return getImmutableCopy(); }
 Object c_ImmVector::t_immutable() { return this; }
 
 c_VectorIterator::c_VectorIterator(
@@ -1460,39 +1392,7 @@ void c_VectorIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 // c_ImmVector
 
-// ConstCollection
-
-bool c_ImmVector::t_isempty() {
-  return BaseVector::isempty();
-}
-
-int64_t c_ImmVector::t_count() {
-  return BaseVector::count();
-}
-
-Object c_ImmVector::t_items() {
-  return BaseVector::items();
-}
-
-// ConstIndexAccess
-
-bool c_ImmVector::t_containskey(const Variant& key) {
-  return BaseVector::containskey(key);
-}
-
-Variant c_ImmVector::t_at(const Variant& key) {
-  return BaseVector::at(key);
-}
-
-Variant c_ImmVector::t_get(const Variant& key) {
-  return Variant(get(key), Variant::CellDup());
-}
-
 // KeyedIterable
-
-Object c_ImmVector::t_getiterator() {
-  return BaseVector::getiterator();
-}
 
 Object c_ImmVector::t_map(const Variant& callback) {
   return php_map<c_ImmVector>(callback, &makeArgsFromVectorValue);
@@ -1525,31 +1425,6 @@ Object c_ImmVector::t_keys() {
 }
 
 // Others
-
-void c_ImmVector::t___construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
-}
-
-Object c_ImmVector::t_lazy() {
-  return BaseVector::lazy();
-}
-
-Array c_ImmVector::t_toarray() {
-  return BaseVector::toarray();
-}
-
-Array c_ImmVector::t_tokeysarray() {
-  return BaseVector::tokeysarray();
-}
-
-Array c_ImmVector::t_tovaluesarray() {
-  return BaseVector::tovaluesarray();
-}
-
-int64_t c_ImmVector::t_linearsearch(const Variant& search_value) {
-  return BaseVector::linearsearch(search_value);
-}
 
 Object c_ImmVector::t_values() {
   return Object::attach(BaseVector::Clone<c_ImmVector>(this));
@@ -1609,7 +1484,7 @@ HashCollection::HashCollection(Class* cls)
     , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
 }
 
-Array HashCollection::toArrayImpl() const {
+Array HashCollection::t_toarray() {
   if (!m_size) {
     return empty_array();
   }
@@ -2078,7 +1953,7 @@ BaseMap::~BaseMap() {
   decRefArr(arrayData());
 }
 
-void c_Map::t___construct(const Variant& iterable /* = null_variant */) {
+void BaseMap::t___construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
   init(iterable);
 }
@@ -2142,7 +2017,7 @@ Object c_Map::t_addall(const Variant& iterable) {
   return this;
 }
 
-void c_Map::t_reserve(const Variant& sz) {
+void HashCollection::t_reserve(const Variant& sz) {
   if (UNLIKELY(!sz.isInteger())) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
                "Parameter sz must be a non-negative integer"));
@@ -2167,19 +2042,17 @@ Object c_Map::t_clear() {
   return this;
 }
 
-bool c_ImmMap::t_isempty() { return php_isEmpty(); }
+bool HashCollection::t_isempty() {
+  return size() == 0;
+}
 
-bool c_Map::t_isempty() { return php_isEmpty(); }
+int64_t HashCollection::t_count() {
+  return size();
+}
 
-int64_t c_ImmMap::t_count() { return size(); }
-
-int64_t c_Map::t_count() { return size(); }
-
-Object c_ImmMap::t_items() { return php_items(); }
-
-Object c_Map::t_items() { return php_items(); }
-
-Object BaseMap::php_keys() const {
+Object BaseMap::t_keys() {
+  // Task #5517643: ImmMap::keys() is supposed to return
+  // an ImmVector, not a Vector
   auto* vec = newobj<c_Vector>();
   Object obj = vec;
   vec->reserve(m_size);
@@ -2199,15 +2072,15 @@ Object BaseMap::php_keys() const {
   return obj;
 }
 
-Object c_ImmMap::t_keys() { return php_keys(); }
+Object HashCollection::t_lazy() {
+  return SystemLib::AllocLazyKeyedIterableViewObject(this);
+}
 
-Object c_Map::t_keys() { return php_keys(); }
+Object BaseMap::t_items() {
+  return SystemLib::AllocLazyKVZipIterableObject(this);
+}
 
-Object c_ImmMap::t_lazy() { return php_lazy(); }
-
-Object c_Map::t_lazy() { return php_lazy(); }
-
-Variant BaseMap::php_at(const Variant& key) const {
+Variant BaseMap::t_at(const Variant& key) {
   if (key.isInteger()) {
     return tvAsCVarRef(at(key.toInt64()));
   } else if (key.isString()) {
@@ -2217,11 +2090,7 @@ Variant BaseMap::php_at(const Variant& key) const {
   return init_null();
 }
 
-Variant c_ImmMap::t_at(const Variant& key) { return php_at(key); }
-
-Variant c_Map::t_at(const Variant& key) { return php_at(key); }
-
-Variant BaseMap::php_get(const Variant& key) const {
+Variant BaseMap::t_get(const Variant& key) {
   if (key.isInteger()) {
     TypedValue* tv = get(key.toInt64());
     if (tv) {
@@ -2241,10 +2110,6 @@ Variant BaseMap::php_get(const Variant& key) const {
   return init_null();
 }
 
-Variant c_ImmMap::t_get(const Variant& key) { return php_get(key); }
-
-Variant c_Map::t_get(const Variant& key) { return php_get(key); }
-
 Object c_Map::t_set(const Variant& key, const Variant& value) {
   set(key, value);
   return this;
@@ -2261,7 +2126,7 @@ Object c_Map::t_setall(const Variant& iterable) {
   return this;
 }
 
-bool BaseMap::php_contains(const Variant& key) const {
+bool BaseMap::t_contains(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -2273,13 +2138,7 @@ bool BaseMap::php_contains(const Variant& key) const {
   return false;
 }
 
-bool c_ImmMap::t_contains(const Variant& key) { return php_contains(key); }
-
-bool c_Map::t_contains(const Variant& key) { return php_contains(key); }
-
-bool c_ImmMap::t_containskey(const Variant& key) { return php_contains(key); }
-
-bool c_Map::t_containskey(const Variant& key) { return php_contains(key); }
+bool BaseMap::t_containskey(const Variant& key) { return t_contains(key); }
 
 Object c_Map::t_remove(const Variant& key) {
   DataType t = key.getType();
@@ -2295,11 +2154,9 @@ Object c_Map::t_remove(const Variant& key) {
 
 Object c_Map::t_removekey(const Variant& key) { return t_remove(key); }
 
-Array c_ImmMap::t_toarray() { return toArrayImpl(); }
-
-Array c_Map::t_toarray() { return toArrayImpl(); }
-
-Object BaseMap::php_values() const {
+Object BaseMap::t_values() {
+  // Task #5517643: ImmMap::values() is supposed to return
+  // an ImmVector, not a Vector
   auto* target = newobj<c_Vector>();
   Object ret = target;
   int64_t sz = m_size;
@@ -2314,11 +2171,7 @@ Object BaseMap::php_values() const {
   return ret;
 }
 
-Object c_ImmMap::t_values() { return php_values(); }
-
-Object c_Map::t_values() { return php_values(); }
-
-Array BaseMap::php_toKeysArray() const {
+Array HashCollection::t_tokeysarray() {
   PackedArrayInit ai(m_size);
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
@@ -2332,11 +2185,7 @@ Array BaseMap::php_toKeysArray() const {
   return ai.toArray();
 }
 
-Array c_ImmMap::t_tokeysarray() { return php_toKeysArray(); }
-
-Array c_Map::t_tokeysarray() { return php_toKeysArray(); }
-
-Array BaseMap::php_toValuesArray() const {
+Array HashCollection::t_tovaluesarray() {
   PackedArrayInit ai(m_size);
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
@@ -2344,10 +2193,6 @@ Array BaseMap::php_toValuesArray() const {
   }
   return ai.toArray();
 }
-
-Array c_ImmMap::t_tovaluesarray() { return php_toValuesArray(); }
-
-Array c_Map::t_tovaluesarray() { return php_toValuesArray(); }
 
 template<typename TMap>
 ALWAYS_INLINE
@@ -2395,17 +2240,13 @@ Object c_Map::t_differencebykey(const Variant& it) {
   return php_differenceByKey<c_Map>(it);
 }
 
-Object BaseMap::php_getIterator() {
+Object BaseMap::t_getiterator() {
   auto* it = newobj<c_MapIterator>();
   it->m_obj = this;
   it->m_pos = iter_begin();
   it->m_version = getVersion();
   return it;
 }
-
-Object c_ImmMap::t_getiterator() { return php_getIterator(); }
-
-Object c_Map::t_getiterator() { return php_getIterator(); }
 
 ALWAYS_INLINE static std::array<TypedValue, 2>
 makeArgsFromHashKeyAndValue(const HashCollection::Elm& e) {
@@ -2932,30 +2773,14 @@ BaseMap::php_concat(const Variant& iterable) {
   return obj;
 }
 
-Variant c_Map::t_firstvalue() {
-  return BaseMap::php_firstValue();
-}
-
-Variant c_ImmMap::t_firstvalue() {
-  return BaseMap::php_firstValue();
-}
-
-Variant BaseMap::php_firstValue() {
+Variant BaseMap::t_firstvalue() {
   if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
 
-Variant c_Map::t_firstkey() {
-  return BaseMap::php_firstKey();
-}
-
-Variant c_ImmMap::t_firstkey() {
-  return BaseMap::php_firstKey();
-}
-
-Variant BaseMap::php_firstKey() {
+Variant BaseMap::t_firstkey() {
   if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
@@ -2967,15 +2792,7 @@ Variant BaseMap::php_firstKey() {
   }
 }
 
-Variant c_Map::t_lastvalue() {
-  return BaseMap::php_lastValue();
-}
-
-Variant c_ImmMap::t_lastvalue() {
-  return BaseMap::php_lastValue();
-}
-
-Variant BaseMap::php_lastValue() {
+Variant BaseMap::t_lastvalue() {
   if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
@@ -2989,15 +2806,7 @@ Variant BaseMap::php_lastValue() {
   return tvAsCVarRef(&m_data[pos].data);
 }
 
-Variant c_Map::t_lastkey() {
-  return BaseMap::php_lastKey();
-}
-
-Variant c_ImmMap::t_lastkey() {
-  return BaseMap::php_lastKey();
-}
-
-Variant BaseMap::php_lastKey() {
+Variant BaseMap::t_lastkey() {
   if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
@@ -3301,7 +3110,9 @@ void BaseMap::throwBadKeyType() {
 
 Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return static_cast<const BaseMap*>(obj)->toArrayImpl();
+  return const_cast<BaseMap*>(
+    static_cast<const BaseMap*>(obj)
+  )->t_toarray();
 }
 
 bool BaseMap::ToBool(const ObjectData* obj) {
@@ -3717,20 +3528,21 @@ do_unserialize:
   }
 }
 
-Object c_Map::t_tovector() { return materializeImpl<c_Vector>(this); }
-Object c_Map::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
-Object c_Map::t_tomap() { return Object::attach(c_Map::Clone(this)); }
-Object c_Map::t_toimmmap() { return getImmutableCopy(); }
-Object c_Map::t_toset() { return materializeImpl<c_Set>(this); }
-Object c_Map::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
-Object c_Map::t_immutable() { return getImmutableCopy(); }
+Object BaseMap::t_tovector() { return materializeImpl<c_Vector>(this); }
 
-Object c_ImmMap::t_tovector() { return materializeImpl<c_Vector>(this); }
-Object c_ImmMap::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+Object BaseMap::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+
+Object c_Map::t_tomap() { return Object::attach(c_Map::Clone(this)); }
 Object c_ImmMap::t_tomap() { return materializeImpl<c_Map>(this); }
+
+Object c_Map::t_toimmmap() { return getImmutableCopy(); }
 Object c_ImmMap::t_toimmmap() { return this; }
-Object c_ImmMap::t_toset() { return materializeImpl<c_Set>(this); }
-Object c_ImmMap::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+
+Object BaseMap::t_toset() { return materializeImpl<c_Set>(this); }
+
+Object BaseMap::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
+
+Object c_Map::t_immutable() { return getImmutableCopy(); }
 Object c_ImmMap::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3803,11 +3615,6 @@ void c_MapIterator::t_rewind() {
 
 c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb) {
   o_subclass_u8 = Collection::ImmMapType;
-}
-
-void c_ImmMap::t___construct(const Variant& iterable /* = null_variant */) {
-  if (iterable.isNull()) return;
-  init(iterable);
 }
 
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
@@ -4057,7 +3864,9 @@ void BaseSet::throwNoMutableIndexAccess() {
 
 Array BaseSet::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return static_cast<const BaseSet*>(obj)->toArrayImpl();
+  return const_cast<BaseSet*>(
+    static_cast<const BaseSet*>(obj)
+  )->t_toarray();
 }
 
 bool BaseSet::ToBool(const ObjectData* obj) {
@@ -4161,7 +3970,7 @@ BaseSet::Clone(ObjectData* obj) {
   return target;
 }
 
-bool BaseSet::php_contains(const Variant& key) const {
+bool BaseSet::t_contains(const Variant& key) {
   DataType t = key.getType();
   if (t == KindOfInt64) {
     return contains(key.toInt64());
@@ -4183,15 +3992,6 @@ Object c_Set::t_remove(const Variant& key) {
     throwBadValueType();
   }
   return this;
-}
-
-Array BaseSet::php_toValuesArray() {
-  PackedArrayInit ai(m_size);
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    ai.append(tvAsCVarRef(&e->data));
-  }
-  return ai.toArray();
 }
 
 template <bool throwOnMiss>
@@ -4275,7 +4075,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   throwBadValueType();
 }
 
-Object BaseSet::php_getIterator() {
+Object BaseSet::t_getiterator() {
   auto* it = newobj<c_SetIterator>();
   it->m_obj = this;
   it->m_pos = iter_begin();
@@ -4769,25 +4569,6 @@ void BaseSet::throwBadValueType() {
   throw e;
 }
 
-Variant BaseSet::php_at(const Variant& key) const {
-  if (BaseSet::php_contains(key)) {
-    return key;
-  }
-  if (key.isInteger()) {
-    throwOOB(key.toInt64());
-  } else {
-    assert(key.isString());
-    throwOOB(key.getStringData());
-  }
-}
-
-Variant BaseSet::php_get(const Variant& key) const {
-  if (BaseSet::php_contains(key)) {
-    return key;
-  }
-  return uninit_null();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Set
 
@@ -4795,7 +4576,7 @@ c_Set::c_Set(Class* cls /* = c_Set::classof() */) : BaseSet(cls) {
   o_subclass_u8 = Collection::SetType;
 }
 
-void c_Set::t___construct(const Variant& iterable /* = null_variant */) {
+void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
   addAll(iterable);
 }
 
@@ -4817,21 +4598,6 @@ Object c_Set::t_addallkeysof(const Variant& container) {
   return this;
 }
 
-void c_Set::t_reserve(const Variant& sz) {
-  if (UNLIKELY(!sz.isInteger())) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter sz must be a non-negative integer"));
-    throw e;
-  }
-  int64_t intSz = sz.toInt64();
-  if (UNLIKELY(intSz < 0)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter sz must be a non-negative integer"));
-    throw e;
-  }
-  reserve(intSz); // checks for intSz > MaxReserveSize
-}
-
 Object c_Set::t_clear() {
   ++m_version;
   dropImmCopy();
@@ -4842,16 +4608,8 @@ Object c_Set::t_clear() {
   return this;
 }
 
-bool c_Set::t_isempty() {
-  return BaseSet::php_isEmpty();
-}
-
-int64_t c_Set::t_count() {
-  return BaseSet::php_count();
-}
-
-Object c_Set::t_items() {
-  return BaseSet::php_items();
+Object BaseSet::t_items() {
+  return SystemLib::AllocLazyIterableViewObject(this);
 }
 
 Object c_Set::t_values() {
@@ -4860,30 +4618,6 @@ Object c_Set::t_values() {
 
 Object c_Set::t_keys() {
   return BaseSet::php_values<c_Vector>();
-}
-
-Object c_Set::t_lazy() {
-  return BaseSet::php_lazy();
-}
-
-bool c_Set::t_contains(const Variant& key) {
-  return BaseSet::php_contains(key);
-}
-
-Array c_Set::t_toarray() {
-  return BaseSet::toArrayImpl();
-}
-
-Array c_Set::t_tokeysarray() {
-  return BaseSet::php_toKeysArray();
-}
-
-Array c_Set::t_tovaluesarray() {
-  return BaseSet::php_toValuesArray();
-}
-
-Object c_Set::t_getiterator() {
-  return BaseSet::php_getIterator();
 }
 
 Object c_Set::t_map(const Variant& callback) {
@@ -4990,46 +4724,18 @@ BaseSet::php_concat(const Variant& iterable) {
   return obj;
 }
 
-Variant c_Set::t_firstvalue() {
-  return BaseSet::php_firstValue();
-}
-
-Variant c_Set::t_firstkey() {
-  return BaseSet::php_firstValue();
-}
-
-Variant c_ImmSet::t_firstvalue() {
-  return BaseSet::php_firstValue();
-}
-
-Variant c_ImmSet::t_firstkey() {
-  return BaseSet::php_firstValue();
-}
-
-Variant BaseSet::php_firstValue() {
+Variant BaseSet::t_firstvalue() {
   if (!m_size) return init_null();
   auto* e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
 
-Variant c_Set::t_lastvalue() {
-  return BaseSet::php_lastValue();
+Variant BaseSet::t_firstkey() {
+  return t_firstvalue();
 }
 
-Variant c_Set::t_lastkey() {
-  return BaseSet::php_lastValue();
-}
-
-Variant c_ImmSet::t_lastvalue() {
-  return BaseSet::php_lastValue();
-}
-
-Variant c_ImmSet::t_lastkey() {
-  return BaseSet::php_lastValue();
-}
-
-Variant BaseSet::php_lastValue() {
+Variant BaseSet::t_lastvalue() {
   if (!m_size) return init_null();
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
@@ -5041,6 +4747,10 @@ Variant BaseSet::php_lastValue() {
     --pos;
   }
   return tvAsCVarRef(&m_data[pos].data);
+}
+
+Variant BaseSet::t_lastkey() {
+  return t_lastvalue();
 }
 
 Object c_Set::t_removeall(const Variant& iterable) {
@@ -5093,52 +4803,12 @@ c_Set* c_Set::Clone(ObjectData* obj) {
 ///////////////////////////////////////////////////////////////////////////////
 // ImmSet
 
-void c_ImmSet::t___construct(const Variant& iterable /* = null_variant */) {
-  addAll(iterable);
-}
-
-bool c_ImmSet::t_isempty() {
-  return BaseSet::php_isEmpty();
-}
-
-int64_t c_ImmSet::t_count() {
-  return BaseSet::php_count();
-}
-
-Object c_ImmSet::t_items() {
-  return BaseSet::php_items();
-}
-
 Object c_ImmSet::t_values() {
   return BaseSet::php_values<c_ImmVector>();
 }
 
 Object c_ImmSet::t_keys() {
   return BaseSet::php_values<c_ImmVector>();
-}
-
-Object c_ImmSet::t_lazy() {
-  return BaseSet::php_lazy();
-}
-
-bool c_ImmSet::t_contains(const Variant& key) {
-  return BaseSet::php_contains(key);
-}
-
-Array c_ImmSet::t_toarray() {
-  return BaseSet::toArrayImpl();
-}
-
-Array c_ImmSet::t_tokeysarray() {
-  return BaseSet::php_toKeysArray();
-}
-
-Array c_ImmSet::t_tovaluesarray() {
-  return BaseSet::php_toValuesArray();
-}
-
-Object c_ImmSet::t_getiterator() {
-  return BaseSet::php_getIterator();
 }
 
 Object c_ImmSet::t_map(const Variant& callback) {
@@ -5186,20 +4856,21 @@ c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_ImmSet>(obj);
 }
 
-Object c_Set::t_tovector() { return materializeImpl<c_Vector>(this); }
-Object c_Set::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
-Object c_Set::t_tomap() { return materializeImpl<c_Map>(this); }
-Object c_Set::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
-Object c_Set::t_toset() { return Object::attach(c_Set::Clone(this)); }
-Object c_Set::t_toimmset() { return getImmutableCopy(); }
-Object c_Set::t_immutable() { return getImmutableCopy(); }
+Object BaseSet::t_tovector() { return materializeImpl<c_Vector>(this); }
 
-Object c_ImmSet::t_tovector() { return materializeImpl<c_Vector>(this); }
-Object c_ImmSet::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
-Object c_ImmSet::t_tomap() { return materializeImpl<c_Map>(this); }
-Object c_ImmSet::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+Object BaseSet::t_toimmvector() { return materializeImpl<c_ImmVector>(this); }
+
+Object BaseSet::t_tomap() { return materializeImpl<c_Map>(this); }
+
+Object BaseSet::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
+
+Object c_Set::t_toset() { return Object::attach(c_Set::Clone(this)); }
 Object c_ImmSet::t_toset() { return materializeImpl<c_Set>(this); }
+
+Object c_Set::t_toimmset() { return getImmutableCopy(); }
 Object c_ImmSet::t_toimmset() { return this; }
+
+Object c_Set::t_immutable() { return getImmutableCopy(); }
 Object c_ImmSet::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5823,31 +5494,37 @@ void c_PairIterator::t_rewind() {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define COLLECTION_MAGIC_METHODS(cls) \
-  String c_##cls::t___tostring() { \
-    return #cls; \
-  } \
-  Variant c_##cls::t___get(Variant name) { \
+  Variant cls::t___get(Variant name) { \
     throw_collection_property_exception(); \
   } \
-  Variant c_##cls::t___set(Variant name, Variant value) { \
+  Variant cls::t___set(Variant name, Variant value) { \
     throw_collection_property_exception(); \
   } \
-  bool c_##cls::t___isset(Variant name) { \
+  bool cls::t___isset(Variant name) { \
     return false; \
   } \
-  Variant c_##cls::t___unset(Variant name) { \
+  Variant cls::t___unset(Variant name) { \
     throw_collection_property_exception(); \
   }
 
-COLLECTION_MAGIC_METHODS(Vector)
-COLLECTION_MAGIC_METHODS(ImmVector)
-COLLECTION_MAGIC_METHODS(Map)
-COLLECTION_MAGIC_METHODS(ImmMap)
-COLLECTION_MAGIC_METHODS(Set)
-COLLECTION_MAGIC_METHODS(ImmSet)
-COLLECTION_MAGIC_METHODS(Pair)
+COLLECTION_MAGIC_METHODS(BaseVector)
+COLLECTION_MAGIC_METHODS(HashCollection)
+COLLECTION_MAGIC_METHODS(c_Pair)
 
 #undef COLLECTION_MAGIC_METHODS
+
+#define COLLECTION_TOSTRING_METHOD(cls) \
+  String c_##cls::t___tostring() { return #cls; }
+
+COLLECTION_TOSTRING_METHOD(Vector)
+COLLECTION_TOSTRING_METHOD(ImmVector)
+COLLECTION_TOSTRING_METHOD(Map)
+COLLECTION_TOSTRING_METHOD(ImmMap)
+COLLECTION_TOSTRING_METHOD(Set)
+COLLECTION_TOSTRING_METHOD(ImmSet)
+COLLECTION_TOSTRING_METHOD(Pair)
+
+#undef COLLECTION_TOSTRING_METHOD
 
 static inline bool isKeylessCollectionType(Collection::Type ctype) {
   return Collection::isSetType(ctype);

@@ -27,6 +27,8 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/autoload-handler.h"
 
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/system/systemlib.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -266,6 +268,7 @@ Object get_traversable_object_iterator(const Variant& obj) {
 
 Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
                          const Array& params /* = null_array */) {
+  VMRegAnchor _;
   CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
@@ -374,7 +377,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
 
 String HHVM_FUNCTION(spl_autoload_extensions,
                      const String& file_extensions /* = null_string */) {
-  if (!file_extensions.isNull()) {
+  if (!file_extensions.empty()) {
     s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
                                    .toArray();
     return file_extensions;

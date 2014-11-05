@@ -48,8 +48,6 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
-const StaticString s_http_response_header("http_response_header");
-const StaticString s_php_errormsg("php_errormsg");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -116,18 +114,6 @@ State entry_state(const Index& index,
 
   auto afterParamsLocId = uint32_t{0};
   for (; locId < ctx.func->locals.size(); ++locId, ++afterParamsLocId) {
-    auto name = ctx.func->locals[locId]->name;
-
-    /*
-     * These can be set by various builtin calls, so we never try to track
-     * their type.
-     */
-    if (name && (name->isame(s_http_response_header.get()) ||
-                 name->isame(s_php_errormsg.get()))) {
-      ret.locals[locId] = TGen;
-      continue;
-    }
-
     /*
      * Some of the closure locals are mapped to used variables or static
      * locals.  The types of use vars are looked up from the index, but we
@@ -146,6 +132,14 @@ State entry_state(const Index& index,
 
     // Otherwise the local will start uninitialized, like normal.
     ret.locals[locId] = TUninit;
+  }
+
+  // Finally, make sure any volatile locals are set to Gen, even if they are
+  // parameters.
+  for (auto locId = uint32_t{0}; locId < ctx.func->locals.size(); ++locId) {
+    if (is_volatile_local(ctx.func, borrow(ctx.func->locals[locId]))) {
+      ret.locals[locId] = TGen;
+    }
   }
 
   return ret;

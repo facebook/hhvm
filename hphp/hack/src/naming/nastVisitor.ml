@@ -348,7 +348,10 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     let acc = List.fold_left this#on_expr acc uel in
     acc
 
-  method on_efun acc f _ = this#on_block acc f.f_body
+  method on_efun acc f _ = match f.f_body with
+    | UnnamedBody _ -> acc
+    | NamedBody block -> this#on_block acc block
+
   method on_xml acc _ attrl el =
     let acc = List.fold_left begin fun acc (_, e) ->
       this#on_expr acc e

@@ -244,25 +244,26 @@ let is_magic =
   fun (_, s) ->
     Hashtbl.mem h s
 
-let rec fun_ tenv f =
-  if f.f_mode = Ast.Mdecl || !auto_complete then () else begin
-  let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
-  let env = { t_is_finally = ref false;
-              class_name = None; class_kind = None;
-              imm_ctrl_ctx = Toplevel;
-              tenv = tenv } in
-  func env f
+let rec fun_ tenv f named_body =
+  if f.f_mode = Ast.Mdecl || !auto_complete then ()
+  else begin
+    let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
+    let env = { t_is_finally = ref false;
+                class_name = None; class_kind = None;
+                imm_ctrl_ctx = Toplevel;
+                tenv = tenv } in
+    func env f named_body
   end
 
-and func env f =
+and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
   let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
-  block env f.f_body;
-  CheckFunctionType.block f.f_fun_kind f.f_body
+  block env named_body;
+  CheckFunctionType.block f.f_fun_kind named_body
 
 and hint env (p, h) =
   hint_ env p h
@@ -408,7 +409,7 @@ and check_is_trait env (h : hint) =
 and interface env c =
   (* make sure that interfaces only have empty public methods *)
   liter begin fun env m ->
-    if m.m_body <> []
+    if m.m_body <> (UnnamedBody []) && m.m_body <> (NamedBody [])
     then Errors.abstract_body (fst m.m_name)
     else ();
     if m.m_visibility <> Public
@@ -449,14 +450,15 @@ and check__toString m is_static =
   end
 
 and method_ (env, is_static) m =
+  let named_body = assert_named_body m.m_body in
   check__toString m is_static;
   liter fun_param env m.m_params;
-  block env m.m_body;
+  block env named_body;
   maybe hint env m.m_ret;
-  CheckFunctionType.block m.m_fun_kind m.m_body;
-  if m.m_body <> [] && m.m_abstract
+  CheckFunctionType.block m.m_fun_kind named_body;
+  if m.m_abstract && named_body <> []
   then Errors.abstract_with_body m.m_name;
-  if m.m_body = [] && not m.m_abstract
+  if not m.m_abstract && named_body = []
   then Errors.not_abstract_without_body m.m_name;
   (match env.class_name with
   | Some cname ->
@@ -660,8 +662,8 @@ and expr_ env = function
       liter expr env uel;
       ()
   | Efun (f, _) ->
-      func env f;
-      ()
+    let body = Nast.assert_named_body f.f_body in
+    func env f body; ()
   | Xml (_, attrl, el) ->
       liter attribute env attrl;
       liter expr env el;

@@ -65,7 +65,6 @@ and terminal_cl in_try = function
 
 let is_terminal stl = try terminal false stl; false with Exit -> true
 
-
 (* Module calculating the locals for a statement
 * This is useful when someone uses $x on both sides
 * of an If statement, for example:

@@ -3279,8 +3279,9 @@ Variant HHVM_METHOD(DOMDocument, createAttribute,
   if (!node) {
     return false;
   }
-  Object ret = DOMAttr::newInstance(this_, (xmlNodePtr)node);
-  appendOrphan(*data->m_orphans, (xmlNodePtr)node);
+  node->doc = docp;
+  auto ret = php_dom_create_object((xmlNodePtr)node, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3333,8 +3334,9 @@ Variant HHVM_METHOD(DOMDocument, createAttributeNS,
   if (nodep == nullptr) {
     return false;
   }
-  Object ret = DOMAttr::newInstance(this_, nodep);
-  appendOrphan(*data->m_orphans, nodep);
+  nodep->doc = docp;
+  auto ret = php_dom_create_object(nodep, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3346,20 +3348,23 @@ Variant HHVM_METHOD(DOMDocument, createCDATASection,
   if (!node) {
     return false;
   }
-  Object ret = DOMCdataSection::newInstance(this_, node);
-  appendOrphan(*native_data->m_orphans, node);
+  node->doc = docp;
+  auto ret = php_dom_create_object(node, native_data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
 Variant HHVM_METHOD(DOMDocument, createComment,
                     const String& data) {
   auto* native_data = Native::data<DOMDocument>(this_);
+  xmlDocPtr docp = (xmlDocPtr)native_data->m_node;
   xmlNode *node = xmlNewComment((xmlChar*)data.data());
   if (!node) {
     return false;
   }
-  Object ret = DOMComment::newInstance(this_, node);
-  appendOrphan(*native_data->m_orphans, node);
+  node->doc = docp;
+  auto ret = php_dom_create_object(node, native_data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3370,8 +3375,9 @@ Variant HHVM_METHOD(DOMDocument, createDocumentFragment) {
   if (!node) {
     return false;
   }
-  Object ret = DOMDocumentFragment::newInstance(this_, node);
-  appendOrphan(*data->m_orphans, node);
+  node->doc = docp;
+  auto ret = php_dom_create_object(node, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3391,7 +3397,7 @@ Variant HHVM_METHOD(DOMDocument, createElement,
   if (!node) {
     return false;
   }
-
+  node->doc = docp;
   auto ret = php_dom_create_object(node, data->doc(), true);
   if (ret.isNull()) return false;
   return ret;
@@ -3442,6 +3448,7 @@ Variant HHVM_METHOD(DOMDocument, createElementNS,
   if (nodep == nullptr) {
     return false;
   }
+  nodep->doc = docp;
   nodep->ns = nsptr;
   auto ret = php_dom_create_object(nodep, data->doc(), true);
   if (ret.isNull()) return false;
@@ -3460,8 +3467,9 @@ Variant HHVM_METHOD(DOMDocument, createEntityReference,
   if (!node) {
     return false;
   }
-  Object ret = DOMEntity::newInstance(this_, node);
-  appendOrphan(*data->m_orphans, node);
+  node->doc = docp;
+  auto ret = php_dom_create_object(node, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3482,9 +3490,8 @@ Variant HHVM_METHOD(DOMDocument, createProcessingInstruction,
     return false;
   }
   node->doc = docp;
-  Object ret = DOMProcessingInstruction::newInstance(this_,
-                                  node);
-  appendOrphan(*native_data->m_orphans, node);
+  auto ret = php_dom_create_object(node, native_data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3496,8 +3503,9 @@ Variant HHVM_METHOD(DOMDocument, createTextNode,
   if (!node) {
     return false;
   }
-  Object ret = DOMText::newInstance(this_, node);
-  appendOrphan(*native_data->m_orphans, node);
+  node->doc = docp;
+  auto ret = php_dom_create_object(node, native_data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 

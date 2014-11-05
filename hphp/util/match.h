@@ -73,10 +73,10 @@ visitor<Ret,Funcs...> make_visitor(Funcs&&... funcs) {
 }
 
 template<class Ret, class Var, class... Funcs>
-Ret match(Var&& v, Funcs&&... funcs) {
+Ret match(Var& v, Funcs&&... funcs) {
   return boost::apply_visitor(
     match_detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...),
-    std::forward<Var>(v)
+    v
   );
 }
 

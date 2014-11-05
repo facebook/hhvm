@@ -639,7 +639,7 @@ and case_list_ parent_lenv ty env = function
 and catch parent_lenv after_try env (ety, exn, b) =
   let env = { env with Env.lenv = after_try } in
   let env = LEnv.fully_integrate env parent_lenv in
-  let env, ety = Typing_hint.hint env (fst ety, Happly (ety, [])) in
+  let env, ety = static_class_id (fst ety) env (CI ety) in
   let env = Env.set_local env (snd exn) ety in
   let env = block env b in
   (* Only keep the local bindings if this catch is non-terminal *)

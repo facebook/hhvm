@@ -560,22 +560,24 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       bool done = false;
 
       char *readptr = m_buffer + m_readpos;
-      const char *eol;
+      const char *eol = 0;
       const char *cr;
       const char *lf;
       cr = (const char *)memchr(readptr, '\r', avail);
       lf = (const char *)memchr(readptr, '\n', avail);
-      if (cr && lf != cr + 1 && !(lf && lf < cr)) {
+      if (eol && (readptr != lf)) {
+        break;
+      } else if (cr && lf != cr + 1 && !(lf && lf < cr)) {
         /* mac */
         eol = cr;
       } else if ((cr && lf && cr == lf - 1) || (lf)) {
-        /* dos or unix endings */
+        /* dos or unix endings. Possible LF for CR at end of previous buffer */
         eol = lf;
       } else {
         eol = cr;
       }
 
-      if (eol) {
+      if (eol && ((eol != cr) || (eol != (m_buffer + CHUNK_SIZE - 1)))) {
         cpysz = eol - readptr + 1;
         done = true;
       } else {

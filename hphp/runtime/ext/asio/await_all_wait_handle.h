@@ -65,8 +65,7 @@ class c_AwaitAllWaitHandle final : public c_BlockableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
   int32_t m_cur;
-  int32_t m_size;
-  c_WaitableWaitHandle* m_children[0];
+  c_WaitableWaitHandle* m_children[0]; // allocated off the end
 };
 
 inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {

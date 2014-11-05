@@ -560,18 +560,18 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       bool done = false;
 
       char *readptr = m_buffer + m_readpos;
-      const char *eol;
+      const char *eol = nullptr;
       const char *cr;
       const char *lf;
       cr = (const char *)memchr(readptr, '\r', avail);
       lf = (const char *)memchr(readptr, '\n', avail);
-      if (cr && lf != cr + 1 && !(lf && lf < cr)) {
+      if (cr && lf != cr + 1 && !(lf && lf < cr) && cr != &readptr[avail - 1]) {
         /* mac */
         eol = cr;
       } else if ((cr && lf && cr == lf - 1) || (lf)) {
         /* dos or unix endings */
         eol = lf;
-      } else {
+      } else if (cr != &readptr[avail - 1]) {
         eol = cr;
       }
 

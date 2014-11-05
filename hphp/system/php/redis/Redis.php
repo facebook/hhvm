@@ -619,7 +619,15 @@ class Redis {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
+  public function eval($script, array $args = [], $numKeys = 0) {
+    return $this->doEval('EVAL', $script, $args, $numKeys);
+  }
+
   public function evaluateSha($sha, array $args = [], $numKeys = 0) {
+    return $this->doEval('EVALSHA', $sha, $args, $numKeys);
+  }
+
+  public function evalSha($sha, array $args = [], $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
@@ -891,10 +899,6 @@ class Redis {
     'mget' => [ 'vararg' => self::VAR_KEY_ALL,
                 'return' => 'Vector', 'retargs' => [1] ],
     'getmultiple' => [ 'alias' => 'mget' ],
-
-    // Eval
-    'eval' => [ 'alias' => 'evaluate' ],
-    'evalsha' => [ 'alias' => 'evaluateSha' ],
   ];
 
 

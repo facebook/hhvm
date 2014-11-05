@@ -139,6 +139,9 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     return; // recursive
   }
 
+  // Allow multiple non-recursive references to the same array/object
+  SCOPE_EXIT { seen_arrs.erase(id); };
+
   Array arr;
   if (varr.is(KindOfObject)) {
     Object o = varr.toObject();

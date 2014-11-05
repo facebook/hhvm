@@ -516,10 +516,11 @@ void CodeGenerator::cgDefSP(IRInstruction* inst) {
   v << defvmsp{dstLoc(inst, 0).reg()};
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
+    auto const fp = srcLoc(inst, 0).reg();
     auto expectSp = v.makeReg();
     auto const sf = v.makeReg();
     // Verify that rVmSp == rbp - spOff
-    v << lea{rbp[-cellsToBytes(inst->extra<StackOffset>()->offset)], expectSp};
+    v << lea{fp[-cellsToBytes(inst->extra<StackOffset>()->offset)], expectSp};
     v << cmpq{expectSp, sp, sf};
     ifBlock(v, vcold(), CC_NE, sf, [](Vout& v) { v << ud2(); });
   }

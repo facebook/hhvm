@@ -11,7 +11,7 @@ words="stdin STDIN stdout STDOUT stderr STDERR \
     ob_list_handlers memory_get_usage PHP_SELF \
     php://fd/ proc_nice clearstatcache \
     php_sapi_name libxml_disable_entity_loader \
-    headers_sent ob_get_status \
+    headers_sent ob_get_status :memory: \
 "
 for word in $words; do
     # Doing this in parallel is racy, but the absolute worst that can happen is

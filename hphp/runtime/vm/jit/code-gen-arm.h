@@ -70,8 +70,7 @@ struct CodeGenerator {
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, Vreg sf,
-                    JmpFn doJcc);
+  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, JmpFn doJcc);
 
   void emitLoadTypedValue(Vout&, Vloc dst, Vreg base, ptrdiff_t offset,
                           Block* label);

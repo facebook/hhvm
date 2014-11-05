@@ -9,5 +9,5 @@ $a = new A;
  $b->a = 'b';
  $arr = array($b, $a);
 print $arr[0]->a;
-sort($arr, SORT_REGULAR, true);
+sort($arr, SORT_REGULAR);
  print $arr[0]->a;

@@ -480,6 +480,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
+  O(mul, Inone, U(s0) U(s1), D(d))\
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
@@ -594,6 +595,7 @@ struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
 struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 struct lslv { Vreg64 sl, sr, d; };
 struct asrv { Vreg64 sl, sr, d; };
+struct mul { Vreg64 s0, s1, d; };
 
 // ATT style operand order. for binary ops:
 // op   s0 s1 d:  d = s1 op s0    =>   d=s1; d op= s0

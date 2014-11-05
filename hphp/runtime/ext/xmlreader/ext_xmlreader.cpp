@@ -646,22 +646,30 @@ Variant HHVM_METHOD(XMLReader, __get,
   }
 
   switch (propertyMap->return_type) {
+    case KindOfBoolean:
+      return retint ? true : false;
+    case KindOfInt64:
+      return retint;
     case KindOfString:
       if (retchar) {
         return String((char*)retchar, CopyString);
       } else {
         return empty_string_variant();
       }
-    case KindOfBoolean:
-      return (retint ? true : false);
-
-    case KindOfInt64:
-      return retint;
-
-    default:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
       return init_null();
+
+    case KindOfClass:
+      break;
   }
-  return init_null();
+  not_reached();
 }
 
 Variant HHVM_METHOD(XMLReader, expand,

@@ -582,9 +582,9 @@ Variant HHVM_FUNCTION(file_put_contents,
   }
 
   int numbytes = 0;
+
   switch (data.getType()) {
-  case KindOfResource:
-    {
+    case KindOfResource: {
       File *fsrc = data.toResource().getTyped<File>(true, true);
       if (!fsrc) {
         raise_warning("Not a valid stream resource");
@@ -601,10 +601,10 @@ Variant HHVM_FUNCTION(file_put_contents,
           break;
         }
       }
+      break;
     }
-    break;
-  case KindOfArray:
-    {
+
+    case KindOfArray: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {
         String value = iter.second();
@@ -617,16 +617,23 @@ Variant HHVM_FUNCTION(file_put_contents,
           }
         }
       }
+      break;
     }
-    break;
-  case KindOfObject:
-    if (!data.getObjectData()->hasToString()) {
-      raise_warning("Not a valid stream resource");
-      return false;
-    }
-    // Fallthrough
-  default:
-    {
+
+    case KindOfObject:
+      if (!data.getObjectData()->hasToString()) {
+        raise_warning("Not a valid stream resource");
+        return false;
+      }
+      // fallthrough
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfRef: {
       String value = data.toString();
       if (!value.empty()) {
         numbytes += value.size();
@@ -635,8 +642,11 @@ Variant HHVM_FUNCTION(file_put_contents,
           numbytes = -1;
         }
       }
+      break;
     }
-    break;
+
+    case KindOfClass:
+      not_reached();
   }
 
   // like fwrite(), fclose() can error when fflush()ing

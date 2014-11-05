@@ -383,24 +383,35 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
 
   const void *value_ptr = nullptr;
   if (!value.isNull()) {
-    switch (*dt) {
-      case KindOfString:
-        other_value = value.toString();
-        value_ptr = other_value.getStringData()->data();
-        break;
-      case KindOfInt64:
-        other_value = value.toInt64();
-        value_ptr = other_value.getInt64Data();
-        break;
-      case KindOfBoolean:
-        bool_value = value.toBoolean();
-        value_ptr = &bool_value;
-        break;
-      case KindOfNull:
-        break;
-      default:
-        not_reached();
-    }
+    [&] {
+      switch (*dt) {
+        case KindOfNull:
+          break;
+        case KindOfBoolean:
+          bool_value = value.toBoolean();
+          value_ptr = &bool_value;
+          break;
+        case KindOfInt64:
+          other_value = value.toInt64();
+          value_ptr = other_value.getInt64Data();
+          break;
+        case KindOfString:
+          other_value = value.toString();
+          value_ptr = other_value.getStringData()->data();
+          break;
+        case KindOfUninit:
+        case KindOfDouble:
+        case KindOfStaticString:
+        case KindOfArray:
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRef:
+        case KindOfClass:
+          // Impossible.
+          break;
+      }
+      not_reached();
+    }();
   }
 
   return !mysql_options(conn->get(), (mysql_option)option,

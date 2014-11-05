@@ -2571,28 +2571,41 @@ safe:
             goto clean_up;
           }
         } else {
-          switch (param->parameter.getType()) {
-          case KindOfUninit:
-          case KindOfNull:
-            plc->quoted = "NULL";
-            break;
+          do {
+            switch (param->parameter.getType()) {
+              case KindOfUninit:
+              case KindOfNull:
+                plc->quoted = "NULL";
+                continue;
 
-          case KindOfInt64:
-          case KindOfDouble:
-            plc->quoted = param->parameter.toString();
-            break;
+              case KindOfInt64:
+              case KindOfDouble:
+                plc->quoted = param->parameter.toString();
+                continue;
 
-          case KindOfBoolean:
-            param->parameter = param->parameter.toInt64();
-          default:
-            if (!stmt->dbh->quoter(param->parameter.toString(), plc->quoted,
-                                   param->param_type)) {
-              /* bork */
-              ret = -1;
-              strcpy(stmt->error_code, stmt->dbh->error_code);
-              goto clean_up;
+              case KindOfBoolean:
+                param->parameter = param->parameter.toInt64();
+                // fallthru
+              case KindOfStaticString:
+              case KindOfString:
+              case KindOfArray:
+              case KindOfObject:
+              case KindOfResource:
+              case KindOfRef:
+                if (!stmt->dbh->quoter(param->parameter.toString(), plc->quoted,
+                                       param->param_type)) {
+                  /* bork */
+                  ret = -1;
+                  strcpy(stmt->error_code, stmt->dbh->error_code);
+                  goto clean_up;
+                }
+                continue;
+
+              case KindOfClass:
+                break;
             }
-          }
+            not_reached();
+          } while (0);
         }
       } else {
         plc->quoted = param->parameter;

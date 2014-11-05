@@ -1378,24 +1378,41 @@ Variant HHVM_FUNCTION(strlen,
                       const Variant& vstr) {
   auto const cell = vstr.asCell();
   switch (cell->m_type) {
-  case KindOfString:
-  case KindOfStaticString:
-    return Variant(cell->m_data.pstr->size());
-  case KindOfArray:
-    raise_warning("strlen() expects parameter 1 to be string, array given");
-    return init_null();
-  case KindOfResource:
-    raise_warning("strlen() expects parameter 1 to be string, resource given");
-    return init_null();
-  case KindOfObject:
-    if (!HHVM_FN(method_exists)(vstr, "__toString")) {
-      raise_warning("strlen() expects parameter 1 to be string, object given");
+    case KindOfStaticString:
+    case KindOfString:
+      return Variant(cell->m_data.pstr->size());
+
+    case KindOfArray:
+      raise_warning("strlen() expects parameter 1 to be string, "
+                    "array given");
       return init_null();
-    } //else fallback to default
-  default:
-    const String& str = vstr.toString();
-    return Variant(str.size());
+
+    case KindOfResource:
+      raise_warning("strlen() expects parameter 1 to be string, "
+                    "resource given");
+      return init_null();
+
+    case KindOfObject:
+      if (!HHVM_FN(method_exists)(vstr, "__toString")) {
+        raise_warning("strlen() expects parameter 1 to be string, "
+                      "object given");
+        return init_null();
+      }
+      // else fallback to default
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble: {
+      const String& str = vstr.toString();
+      return Variant(str.size());
+    }
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 Array HHVM_FUNCTION(str_getcsv,

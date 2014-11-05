@@ -124,16 +124,27 @@ static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
 
 static uint32_t memcache_get_flag_for_type(const Variant& var) {
   switch (var.getType()) {
-  case KindOfBoolean:
-    return MMC_TYPE_BOOL;
-  case KindOfInt64:
-    return MMC_TYPE_LONG;
-  case KindOfDouble:
-    return MMC_TYPE_DOUBLE;
-  case KindOfString:
-  default:
-    return MMC_TYPE_STRING;
+    case KindOfBoolean:
+      return MMC_TYPE_BOOL;
+    case KindOfInt64:
+      return MMC_TYPE_LONG;
+    case KindOfDouble:
+      return MMC_TYPE_DOUBLE;
+
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      return MMC_TYPE_STRING;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 static void memcache_set_type_from_flag(Variant& var, uint32_t flags) {

@@ -43,10 +43,14 @@ struct VariantController {
       case KindOfStaticString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-      default:
+      case KindOfResource:
+      case KindOfRef:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
   static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }

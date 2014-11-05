@@ -5898,15 +5898,22 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
 
 void collectionDeepCopyTV(TypedValue* tv) {
   switch (tv->m_type) {
+    DT_UNCOUNTED_CASE:
+    case KindOfString:
+    case KindOfResource:
+    case KindOfRef:
+      return;
+
     case KindOfArray: {
       ArrayData* arr = collectionDeepCopyArray(tv->m_data.parr);
       decRefArr(tv->m_data.parr);
       tv->m_data.parr = arr;
-      break;
+      return;
     }
+
     case KindOfObject: {
       ObjectData* obj = tv->m_data.pobj;
-      if (!obj->isCollection()) break;
+      if (!obj->isCollection()) return;
       switch (obj->getCollectionType()) {
         case Collection::VectorType:
           obj = collectionDeepCopyVector(static_cast<c_Vector*>(obj));
@@ -5937,10 +5944,13 @@ void collectionDeepCopyTV(TypedValue* tv) {
       }
       decRefObj(tv->m_data.pobj);
       tv->m_data.pobj = obj;
-      break;
+      return;
     }
-    default: break;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 ArrayData* collectionDeepCopyArray(ArrayData* arr) {

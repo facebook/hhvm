@@ -3391,8 +3391,9 @@ Variant HHVM_METHOD(DOMDocument, createElement,
   if (!node) {
     return false;
   }
-  Object ret = DOMElement::newInstance(this_, node);
-  appendOrphan(*data->m_orphans, node);
+
+  auto ret = php_dom_create_object(node, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 
@@ -3442,8 +3443,8 @@ Variant HHVM_METHOD(DOMDocument, createElementNS,
     return false;
   }
   nodep->ns = nsptr;
-  Object ret = DOMElement::newInstance(this_, nodep);
-  appendOrphan(*data->m_orphans, nodep);
+  auto ret = php_dom_create_object(nodep, data->doc(), true);
+  if (ret.isNull()) return false;
   return ret;
 }
 

@@ -67,7 +67,7 @@ struct RefData {
 #ifndef NDEBUG
     m_magic = Magic::kMagic;
 #endif
-    assert(m_cowAndZ == 0);
+    assert(!m_cow && !m_z); // because RDS is pre-zeroed
   }
 
   /*
@@ -87,6 +87,8 @@ struct RefData {
       RefData(tv.m_type, tv.m_data.num);
   }
 
+  ~RefData();
+
   /*
    * Deallocate a RefData.
    */
@@ -94,7 +96,7 @@ struct RefData {
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_cow)) {
       m_count = 1;
-      m_cowAndZ = 0;
+      m_cow = m_z = 0;
       return;
     }
     this->~RefData();
@@ -157,7 +159,7 @@ struct RefData {
 #endif
     m_tv.m_type = KindOfNull;
     m_count = 0;
-    m_cowAndZ = 0;
+    m_cow = m_z = 0;
   }
 
   bool zIsRef() const {
@@ -169,7 +171,7 @@ struct RefData {
     auto realCount = getRealCount();
     if (realCount >= 2) {
       m_count = realCount;
-      m_cowAndZ = 0;
+      m_cow = m_z = 0;
     } else {
       assert(!m_cow);
       m_z = 1;
@@ -206,7 +208,7 @@ struct RefData {
       return;
     }
     assert(!m_cow);
-    assert(m_z == 0 || m_z == 1);
+    assert(m_z < 2);
     m_count = m_z + 1;
     m_cow = !m_z;
     m_z = 0;
@@ -238,7 +240,7 @@ struct RefData {
 
   void zInit() {
     m_count = 1;
-    m_cowAndZ = 0;
+    m_cow = m_z = 0;
     m_tv.m_type = KindOfNull;
     m_tv.m_data.num = 0;
   }
@@ -250,7 +252,7 @@ private:
 #endif
     // Initialize this value by laundering uninitNull -> Null.
     m_count = 1;
-    m_cowAndZ = 0;
+    m_cow = m_z = 0;
     if (!IS_NULL_TYPE(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;
@@ -259,43 +261,29 @@ private:
     }
   }
 
-public:
-  ~RefData();
-
-private:
   static void compileTimeAsserts();
 
 #if defined(DEBUG) || defined(PACKED_TV)
-private:
   Magic m_magic;
-  UNUSED int32_t m_padding;
-public:
+  UNUSED uint8_t m_padding;
+  mutable uint8_t m_cow;
+  mutable uint8_t m_z;
+  UNUSED uint8_t m_kind;
+ public:
   mutable RefCount m_count;
-private:
+ private:
   TypedValue m_tv;
-public:
-  union {
-    struct {
-      mutable uint8_t m_cow;
-      mutable uint8_t m_z;
-    };
-    mutable uint32_t m_cowAndZ;
-  };
 #else
 // count comes after actual TypedValue, overlapping TypedValue.m_aux
-public:
   union {
     TypedValueAux m_tv;
     struct {
       void* shadow_data;
       DataType shadow_type;
-      union {
-        struct {
-          mutable uint8_t m_cow;
-          mutable uint8_t m_z;
-        };
-        mutable uint16_t m_cowAndZ;
-      };
+      mutable uint8_t m_cow;
+      mutable uint8_t m_z;
+      UNUSED uint8_t m_kind;
+ public:
       mutable RefCount m_count; // refcount field
     };
   };

@@ -84,14 +84,14 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
 
 namespace HPHP {
 
-const long k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
-const long k_ZLIB_ENCODING_GZIP    = 0x1f;
-const long k_ZLIB_ENCODING_DEFLATE = 0x0f;
+const int64_t k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
+const int64_t k_ZLIB_ENCODING_GZIP    = 0x1f;
+const int64_t k_ZLIB_ENCODING_DEFLATE = 0x0f;
 
-const long k_ZLIB_ENCODING_ANY     = 0x2f;
+const int64_t k_ZLIB_ENCODING_ANY     = 0x2f;
 
-const long k_FORCE_GZIP            = k_ZLIB_ENCODING_GZIP;
-const long k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
+const int64_t k_FORCE_GZIP            = k_ZLIB_ENCODING_GZIP;
+const int64_t k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions

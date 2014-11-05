@@ -23,8 +23,8 @@
 
 namespace HPHP {
 
-extern const long k_FORCE_GZIP;
-extern const long k_FORCE_DEFLATE;
+extern const int64_t k_FORCE_GZIP;
+extern const int64_t k_FORCE_DEFLATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions

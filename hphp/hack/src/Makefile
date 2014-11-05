@@ -199,8 +199,9 @@ test:
 	ocamlyacc -v parsing/parser.mly 2>&1 | grep -L conflict | grep -q .
 	rm -f parsing/parser.mli parsing/parser.ml
 	# Run tests
-	python3 ../test/verify.py ../test/typecheck
-	python3 ../test/verify.py ../test/suggest
+	python3 ../test/verify.py ../test/typecheck --hh_single_type_check ../bin/hh_single_type_check
+	python3 ../test/verify.py ../test/suggest --hh_single_type_check ../bin/hh_single_type_check
+	python3 ../test/integration/runner.py ../bin/hh_server ../bin/hh_client
 
 wwwtest:
 	../bin/hh_server --check /var/www

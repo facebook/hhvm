@@ -125,7 +125,7 @@ end = struct
         close_out_no_fail fn chan;
         (* We cannot save the shared memory to `chan` because the OCaml runtime
          * does not expose the underlying file descriptor to C code; so we use
-         * a separate ".sharedmem" file.  *)
+         * a separate ".sharedmem" file. *)
         SharedMem.save (fn^".sharedmem");
         env
     | Some (ServerArgs.Load { ServerArgs.filename; ServerArgs.to_recheck }) ->
@@ -198,8 +198,9 @@ end = struct
     end else begin
       (* let original parent exit *)
 
-      Printf.printf "Spawned %s (child pid=%d)\n" (Program.name) pid;
-      Printf.printf "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
+      Printf.fprintf stderr "Spawned %s (child pid=%d)\n" (Program.name) pid;
+      Printf.fprintf stderr
+        "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
       flush stdout;
       raise Exit
     end

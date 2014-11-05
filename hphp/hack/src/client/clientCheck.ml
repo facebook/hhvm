@@ -258,19 +258,17 @@ let rec main args retries =
         exit 4;
       end
   | Server_missing ->
-      if args.autostart
+      if retries > 1
       then begin
-        if retries > 1
-        then begin
-          Unix.sleep(3);
-          main args (retries-1)
-        end else begin
-          Printf.fprintf stderr "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n";
-          flush stderr;
-          exit 6;
-        end
+        Unix.sleep(3);
+        main args (retries-1)
       end else begin
-        Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
+        Printf.fprintf stderr begin
+          if args.autostart
+          then "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n"
+          else "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!"
+        end;
+        flush stderr;
         exit 6;
       end
   | Server_out_of_date ->

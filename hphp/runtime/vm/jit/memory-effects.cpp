@@ -178,11 +178,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInit:
   case MIterInit:
   case WIterInit:
-    return ReadLocal { inst.src(1), inst.extra<IterData>()->keyId };
+    return ReadLocal { inst.src(1), inst.extra<IterData>()->valId };
   case IterNext:
   case MIterNext:
   case WIterNext:
-    return ReadLocal { inst.src(0), inst.extra<IterData>()->keyId };
+    return ReadLocal { inst.src(0), inst.extra<IterData>()->valId };
 
   case IterInitK:
   case MIterInitK:

@@ -20,6 +20,8 @@
 
 #include "hphp/runtime/base/base-includes.h"
 
+#undef basename
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // constants

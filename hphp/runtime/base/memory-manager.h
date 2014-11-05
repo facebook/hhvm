@@ -526,17 +526,6 @@ struct MemoryManager {
   void removeNativeObject(NativeNode*);
 
   /*
-   * Iterator to the allocated slabs. Used to traverse the memory
-   * in profiling extensions.
-   */
-  typedef void (*iterate_callback)(
-    void* slab,
-    int slab_size,
-    bool is_big,
-    void* callback_data
-  );
-
-  /*
    * Object tracking keeps instances of object data's by using track/untrack.
    * It is then possible to iterate them by iterating the memory manager.
    * This entire feature is enabled/disabled by using setObjectTracking(bool).
@@ -551,11 +540,9 @@ struct MemoryManager {
   /*
    * Iterating the memory manager tracked objects.
    */
-  void iterate(iterate_callback p_callback, void* user_data);
   typedef typename std::unordered_set<void*>::iterator iterator;
   iterator objects_begin() { return m_instances.begin(); }
   iterator objects_end() { return m_instances.end(); }
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.

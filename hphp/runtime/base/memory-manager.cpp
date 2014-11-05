@@ -431,23 +431,6 @@ void MemoryManager::resetAllocator() {
   TRACE(1, "reset: strings %u slabs %lu big %lu\n", nstrings, nslabs, nbig);
 }
 
-void MemoryManager::iterate(iterate_callback callback, void* user_data) {
-  // Iterate smart alloc slabs
-  for (auto slab : m_slabs) {
-    callback(slab, kSlabSize, false, user_data);
-  }
-
-  // Iterate large alloc slabs (Size N/A for now)
-  for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
-    next = n->next;
-    size_t size = 16;
-#ifdef USE_JEMALLOC
-    size = malloc_usable_size(n) - sizeof(BigNode);
-#endif
-    callback(n + 1, size, true, user_data);
-  }
-}
-
 /*
  * smart_malloc & friends implementation notes
  *

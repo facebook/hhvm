@@ -737,11 +737,12 @@ void MemoryManager::addNativeObject(NativeNode* node) {
 }
 
 void MemoryManager::removeNativeObject(NativeNode* node) {
+  assert(node->sweep_index < m_natives.size());
   assert(m_natives[node->sweep_index] == node);
   auto index = node->sweep_index;
   auto last = m_natives.back();
-  m_natives.pop_back();
   m_natives[index] = last;
+  m_natives.pop_back();
   last->sweep_index = index;
 }
 

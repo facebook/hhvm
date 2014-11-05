@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
+#include "hphp/util/portability.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -73,8 +75,9 @@ protected:
   ~Sweepable();
 
 private:
+  UNUSED char m_pad[3], m_kind;
+  unsigned m_persistentCount;
   Node m_sweepNode;
-  unsigned int m_persistentCount;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

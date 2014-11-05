@@ -1,0 +1,3 @@
+<?php
+
+var_dump(setlocale(LC_CTYPE, 0) !== "C");

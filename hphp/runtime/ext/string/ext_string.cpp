@@ -2096,7 +2096,9 @@ String HHVM_FUNCTION(hebrevc,
 class StringExtension : public Extension {
 public:
   StringExtension() : Extension("string") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
+    setlocale(LC_CTYPE, "");
+
     HHVM_FE(addcslashes);
     HHVM_FE(stripcslashes);
     HHVM_FE(addslashes);

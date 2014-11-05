@@ -21,37 +21,50 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include <arpa/inet.h>
-#if defined(__FreeBSD__)
-# include <sys/endian.h>
-# elif defined(__APPLE__)
-# include <machine/endian.h>
-# include <libkern/OSByteOrder.h>
-#else
-# include <byteswap.h>
 #include <map>
 #include <memory>
 #include <utility>
 #include <vector>
-#endif
 
+/* Byte swap a 64-bit number. */
 #if !defined(htonll) && !defined(ntohll)
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER == __LITTLE_ENDIAN // #ifndef WORDS_BIGENDIAN
 # if defined(__FreeBSD__)
+#  include <sys/endian.h>
 #  define htonll(x) bswap64(x)
 #  define ntohll(x) bswap64(x)
 # elif defined(__APPLE__)
+#  include <libkern/OSByteOrder.h>
 #  define htonll(x) OSSwapInt64(x)
 #  define ntohll(x) OSSwapInt64(x)
+# elif defined(__OpenBSD__)
+#  include <sys/types.h>
+#  define htonll(x) swap64(x)
+#  define ntohll(x) swap64(x)
+# elif defined(__NetBSD__)
+#  include <sys/types.h>
+#  include <machine/bswap.h>
+#  if defined(__BSWAP_RENAME) && !defined(__bswap_32)
+#   define htonll(x) bswap64(x)
+#   define ntohll(x) bswap64(x)
+#  endif
+# elif defined(__sun) || defined(sun)
+#  include <sys/byteorder.h>
+#  define htonll(x) BSWAP_64(x)
+#  define ntohll(x) BSWAP_64(x)
+# elif defined(_MSC_VER)
+#  include <stdlib.h>
+#  define htonll(x) _byteswap_uint64(x)
+#  define ntohll(x) _byteswap_uint64(x)
 # else
+#  include <byteswap.h>
 #  define htonll(x) bswap_64(x)
 #  define ntohll(x) bswap_64(x)
 # endif
 #else
-#define htonll(x) (x)
-#define ntohll(x) (x)
+# define htonll(x) (x)
+# define ntohll(x) (x)
 #endif
-
 #endif
 
 namespace HPHP {

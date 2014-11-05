@@ -24,38 +24,73 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#if defined(__FreeBSD__)
-# include <sys/endian.h>
-#elif defined(__APPLE__)
-# include <machine/endian.h>
-# include <libkern/OSByteOrder.h>
-#else
-# include <endian.h>
-# include <byteswap.h>
-#endif
 #include <stdexcept>
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER == __LITTLE_ENDIAN // #ifndef WORDS_BIGENDIAN
 # define htolell(x) (x)
 # define letohll(x) (x)
 # if defined(__FreeBSD__)
+#  include <sys/endian.h>
 #  define htonll(x) bswap64(x)
 #  define ntohll(x) bswap64(x)
 # elif defined(__APPLE__)
+#  include <libkern/OSByteOrder.h>
 #  define htonll(x) OSSwapInt64(x)
 #  define ntohll(x) OSSwapInt64(x)
+# elif defined(__OpenBSD__)
+#  include <sys/types.h>
+#  define htonll(x) swap64(x)
+#  define ntohll(x) swap64(x)
+# elif defined(__NetBSD__)
+#  include <sys/types.h>
+#  include <machine/bswap.h>
+#  if defined(__BSWAP_RENAME) && !defined(__bswap_32)
+#   define htonll(x) bswap64(x)
+#   define ntohll(x) bswap64(x)
+#  endif
+# elif defined(__sun) || defined(sun)
+#  include <sys/byteorder.h>
+#  define htonll(x) BSWAP_64(x)
+#  define ntohll(x) BSWAP_64(x)
+# elif defined(_MSC_VER)
+#  include <stdlib.h>
+#  define htonll(x) _byteswap_uint64(x)
+#  define ntohll(x) _byteswap_uint64(x)
 # else
+#  include <byteswap.h>
 #  define htonll(x) bswap_64(x)
 #  define ntohll(x) bswap_64(x)
 # endif
 #else
 # if defined(__FreeBSD__)
+#  include <sys/endian.h>
 #  define htolell(x) bswap64(x)
 #  define letohll(x) bswap64(x)
 # elif defined(__APPLE__)
+#  include <libkern/OSByteOrder.h>
 #  define htolell(x) OSSwapInt64(x)
 #  define letohll(x) OSSwapInt64(x)
+# elif defined(__OpenBSD__)
+#  include <sys/types.h>
+#  define htolell(x) swap64(x)
+#  define letohll(x) swap64(x)
+# elif defined(__NetBSD__)
+#  include <sys/types.h>
+#  include <machine/bswap.h>
+#  if defined(__BSWAP_RENAME) && !defined(__bswap_32)
+#   define htolell(x) bswap64(x)
+#   define letohll(x) bswap64(x)
+#  endif
+# elif defined(__sun) || defined(sun)
+#  include <sys/byteorder.h>
+#  define htolell(x) BSWAP_64(x)
+#  define letohll(x) BSWAP_64(x)
+# elif defined(_MSC_VER)
+#  include <stdlib.h>
+#  define htolell(x) _byteswap_uint64(x)
+#  define letohll(x) _byteswap_uint64(x)
 # else
+#  include <byteswap.h>
 #  define htolell(x) bswap_64(x)
 #  define letohll(x) bswap_64(x)
 # endif

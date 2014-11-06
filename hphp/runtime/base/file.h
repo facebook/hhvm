@@ -152,7 +152,7 @@ public:
   virtual bool stat(struct stat *sb);
 
   virtual Array getMetaData();
-  virtual Array getWrapperMetaData() { return Array(); }
+  virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;
   String getStreamType() const { return m_streamType; }
   Resource &getStreamContext() { return m_streamContext; }

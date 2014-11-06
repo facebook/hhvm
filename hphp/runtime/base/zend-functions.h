@@ -30,8 +30,9 @@ namespace HPHP {
 /**
  * Testing whether a string is numeric or not.
  */
-DataType is_numeric_string(const char *str, int length, int64_t *lval,
-                           double *dval, int allow_errors = 0);
+DataType is_numeric_string(const char* str, int length, int64_t* lval,
+                           double* dval, int allow_errors = 0,
+                           int* overflow_info = nullptr);
 
 /**
  * Whether or not a string is a valid variable name.

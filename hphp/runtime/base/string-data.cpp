@@ -783,12 +783,12 @@ void StringData::setUncounted() const {
 // type conversions
 
 DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
-                                      int allow_errors) const {
+                                      int allow_errors, int* overflow) const {
   if (m_hash < 0) return KindOfNull;
   DataType ret = KindOfNull;
   StringSlice s = slice();
   if (s.len) {
-    ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors);
+    ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors, overflow);
     if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= STRHASH_MSB;
     }
@@ -867,14 +867,18 @@ bool StringData::equal(const StringData *s) const {
 int StringData::numericCompare(const StringData *v2) const {
   assert(v2);
 
+  int oflow1, oflow2;
   int64_t lval1, lval2;
   double dval1, dval2;
   DataType ret1, ret2;
-  if ((ret1 = isNumericWithVal(lval1, dval1, 0)) == KindOfNull ||
+  if ((ret1 = isNumericWithVal(lval1, dval1, 0, &oflow1)) == KindOfNull ||
       (ret1 == KindOfDouble && !finite(dval1)) ||
-      (ret2 = v2->isNumericWithVal(lval2, dval2, 0)) == KindOfNull ||
+      (ret2 = v2->isNumericWithVal(lval2, dval2, 0, &oflow2)) == KindOfNull ||
       (ret2 == KindOfDouble && !finite(dval2))) {
     return -2;
+  }
+  if (oflow1 && oflow1 == oflow2 && dval1 == dval2) {
+    return -2; // overflow in same direction, comparison will be inaccurate
   }
   if (ret1 == KindOfInt64 && ret2 == KindOfInt64) {
     if (lval1 > lval2) return 1;
@@ -888,10 +892,16 @@ int StringData::numericCompare(const StringData *v2) const {
   }
   if (ret1 == KindOfDouble) {
     assert(ret2 == KindOfInt64);
+    if (oflow1) {
+      return oflow1;
+    }
     dval2 = (double)lval2;
   } else {
     assert(ret1 == KindOfInt64);
     assert(ret2 == KindOfDouble);
+    if (oflow2) {
+      return oflow2;
+    }
     dval1 = (double)lval1;
   }
 

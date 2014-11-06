@@ -19,7 +19,8 @@ let make_genv ~multicore options =
   let check_mode   = ServerArgs.check_mode options in
   Relative_path.set_path_prefix Relative_path.Root (Path.string_of_path root);
   Typing_deps.trace :=
-    not check_mode || ServerArgs.convert options <> None;
+    not check_mode || ServerArgs.convert options <> None ||
+    ServerArgs.load_save_opt options <> None;
   let nbr_procs    = ServerConfig.nbr_procs in
   let workers = 
     if multicore then Some (Worker.make nbr_procs) else None

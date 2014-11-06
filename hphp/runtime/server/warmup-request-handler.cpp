@@ -27,14 +27,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void WarmupRequestHandler::setupRequest(Transport* transport) {
-  MemoryManager::requestInit();
-  g_context.getCheck();
+  m_reqHandler.setupRequest(transport);
 }
 
 void WarmupRequestHandler::teardownRequest(Transport* transport) noexcept {
-  SCOPE_EXIT { always_assert(MM().empty()); };
-  hphp_session_exit();
-  MemoryManager::requestShutdown();
+  m_reqHandler.teardownRequest(transport);
 }
 
 void WarmupRequestHandler::handleRequest(Transport *transport) {

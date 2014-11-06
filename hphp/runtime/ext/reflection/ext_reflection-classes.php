@@ -379,7 +379,7 @@ class ReflectionParameter implements Reflector {
          in_array($defaultText, array('NULL', 'true', 'false')) ||
          preg_match($quoted_pattern, $defaultText) ||
          preg_match($braketed_pattern, $defaultText) ||
-         substr($defaultText, 0, 5) === 'array'))
+         substr($defaultText, 0, 5) === 'array')
          return false;
 
       return true;

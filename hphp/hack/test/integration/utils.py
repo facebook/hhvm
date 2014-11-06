@@ -34,18 +34,3 @@ def proc_call(args):
     (stdout_data, stderr_data) = proc.communicate()
     print(stderr_data, file=sys.stderr)
     return stdout_data.decode()
-
-def relativize_error_paths(errs):
-    """
-    Converts the absolute path in "/foo/bar/baz.php:1:1: Error message ..." to
-    a relative path
-
-    errs: list of strings
-    """
-    def relativizer(matchobj):
-        return matchobj.group(1) + os.path.basename(matchobj.group(2))
-
-    return [
-        re.sub(r'(^ *)([^:]*)', relativizer, line)
-        for line in errs
-        ]

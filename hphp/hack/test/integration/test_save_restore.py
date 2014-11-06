@@ -10,7 +10,7 @@ import tempfile
 import time
 import unittest
 
-from utils import touch, write_files, proc_call, relativize_error_paths
+from utils import touch, write_files, proc_call
 
 def load_server(hh_server, repo_dir, saved_state_path, changed_files=[]):
     """
@@ -43,9 +43,14 @@ class TestSaveRestore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.maxDiff = 2000
+        # we create the state in a different dir from the one we run our tests
+        # on, to verify that the saved state does not depend on any absolute
+        # paths
+        init_dir = tempfile.mkdtemp()
         cls.repo_dir = tempfile.mkdtemp()
         cls.saved_state_dir = tempfile.mkdtemp()
 
+        touch(os.path.join(init_dir, '.hhconfig'))
         touch(os.path.join(cls.repo_dir, '.hhconfig'))
 
         cls.files = {}
@@ -72,21 +77,24 @@ class TestSaveRestore(unittest.TestCase):
         """
 
         cls.initial_errors = [
-            'foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  foo_2.php:3:23,28: It is incompatible with a string',
-            'foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  foo_3.php:3:23,28: This is a string',
-            '  foo_3.php:4:20,20: It is incompatible with an int',
+            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
+            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
+            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
+            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
+            '  {root}foo_3.php:3:23,28: This is a string',
+            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
         ]
 
+        write_files(cls.files, init_dir)
         write_files(cls.files, cls.repo_dir)
 
         subprocess.call([
             cls.hh_server,
-            '--check', cls.repo_dir,
+            '--check', init_dir,
             '--save', os.path.join(cls.saved_state_dir, 'foo'),
         ])
+
+        shutil.rmtree(init_dir)
 
     @classmethod
     def tearDownClass(cls):
@@ -113,9 +121,10 @@ class TestSaveRestore(unittest.TestCase):
             'false',
             self.repo_dir
         ])
+        root = self.repo_dir + os.path.sep
         self.assertCountEqual(
-            expected_errors,
-            relativize_error_paths(output.splitlines()))
+            map(lambda x: x.format(root=root), expected_errors),
+            output.splitlines())
 
     def test_mtime_update(self):
         """
@@ -152,12 +161,12 @@ class TestSaveRestore(unittest.TestCase):
         )
 
         self.check_errors([
-            'foo_2.php:4:24,26: Invalid return type (Typing[4110])',
-            '  foo_2.php:3:27,29: This is an int',
-            '  foo_2.php:4:24,26: It is incompatible with a string',
-            'foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  foo_3.php:3:23,28: This is a string',
-            '  foo_3.php:4:20,20: It is incompatible with an int',
+            '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
+            '  {root}foo_2.php:3:27,29: This is an int',
+            '  {root}foo_2.php:4:24,26: It is incompatible with a string',
+            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
+            '  {root}foo_3.php:3:23,28: This is a string',
+            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
         ])
 
     def test_new_error_after_load(self):
@@ -182,12 +191,12 @@ class TestSaveRestore(unittest.TestCase):
             """)
 
         self.check_errors([
-            'foo_2.php:4:24,26: Invalid return type (Typing[4110])',
-            '  foo_2.php:3:27,29: This is an int',
-            '  foo_2.php:4:24,26: It is incompatible with a string',
-            'foo_3.php:4:20,20: Invalid return type (Typing[4110])',
-            '  foo_3.php:3:23,28: This is a string',
-            '  foo_3.php:4:20,20: It is incompatible with an int',
+            '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
+            '  {root}foo_2.php:3:27,29: This is an int',
+            '  {root}foo_2.php:4:24,26: It is incompatible with a string',
+            '{root}foo_3.php:4:20,20: Invalid return type (Typing[4110])',
+            '  {root}foo_3.php:3:23,28: This is a string',
+            '  {root}foo_3.php:4:20,20: It is incompatible with an int',
         ])
 
     def test_new_file(self):
@@ -210,9 +219,9 @@ class TestSaveRestore(unittest.TestCase):
         )
 
         self.check_errors(self.initial_errors + [
-            'foo_4.php:4:24,26: Invalid return type (Typing[4110])',
-            '  foo_4.php:3:27,29: This is an int',
-            '  foo_4.php:4:24,26: It is incompatible with a string',
+            '{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])',
+            '  {root}foo_4.php:3:27,29: This is an int',
+            '  {root}foo_4.php:4:24,26: It is incompatible with a string',
         ])
 
     def test_deleted_file(self):
@@ -229,9 +238,9 @@ class TestSaveRestore(unittest.TestCase):
         )
 
         self.check_errors([
-            'foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  foo_2.php:3:23,28: It is incompatible with a string',
+            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
+            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
+            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
         ])
 
     def test_deleted_file_after_load(self):
@@ -248,9 +257,9 @@ class TestSaveRestore(unittest.TestCase):
         os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
 
         self.check_errors([
-            'foo_1.php:4:20,22: Typing error (Typing[4110])',
-            '  foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-            '  foo_2.php:3:23,28: It is incompatible with a string',
+            '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
+            '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
+            '  {root}foo_2.php:3:23,28: It is incompatible with a string',
         ])
 
     def test_moved_files(self):
@@ -279,12 +288,12 @@ class TestSaveRestore(unittest.TestCase):
 
         try:
             self.check_errors([
-                'foo_1.php:4:20,22: Typing error (Typing[4110])',
-                '  foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-                '  bar_2.php:3:23,28: It is incompatible with a string',
-                'bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  bar_3.php:3:23,28: This is a string',
-                '  bar_3.php:4:20,20: It is incompatible with an int',
+                '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
+                '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
+                '  {root}bar_2.php:3:23,28: It is incompatible with a string',
+                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
+                '  {root}bar_3.php:3:23,28: This is a string',
+                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
             ])
         except AssertionError:
             # FIXME: figure out why moving a file sometimes duplicates
@@ -292,13 +301,13 @@ class TestSaveRestore(unittest.TestCase):
             # a saved state or are running from a fresh initialized state,
             # and seems to be due to a race condition
             self.check_errors([
-                'foo_1.php:4:20,22: Typing error (Typing[4110])',
-                '  foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
-                '  bar_2.php:3:23,28: It is incompatible with a string',
-                'bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  bar_3.php:3:23,28: This is a string',
-                '  bar_3.php:4:20,20: It is incompatible with an int',
-                'bar_3.php:4:20,20: Invalid return type (Typing[4110])',
-                '  bar_3.php:3:23,28: This is a string',
-                '  bar_3.php:4:20,20: It is incompatible with an int',
+                '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
+                '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
+                '  {root}bar_2.php:3:23,28: It is incompatible with a string',
+                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
+                '  {root}bar_3.php:3:23,28: This is a string',
+                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
+                '{root}bar_3.php:4:20,20: Invalid return type (Typing[4110])',
+                '  {root}bar_3.php:3:23,28: This is a string',
+                '  {root}bar_3.php:4:20,20: It is incompatible with an int',
             ])

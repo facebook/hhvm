@@ -8191,7 +8191,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 1205 "hphp.y"
-    { (yyval) = (yyvsp[(1) - (1)]);;}
+    { (yyval) = (yyvsp[(1) - (1)]); (yyval) = 0;;}
     break;
 
   case 176:

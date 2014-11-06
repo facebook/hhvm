@@ -1763,6 +1763,9 @@ expr:
     expr_no_variable                   { $$ = $1;}
   | variable                           { $$ = $1;}
   | expr_with_parens                   { $$ = $1;}
+  | lambda_or_closure                  { $$ = $1;}
+  | lambda_or_closure_with_parens      { $$ = $1;}
+;
 
 expr_no_variable:
     T_LIST '(' assignment_list ')'
@@ -1841,8 +1844,6 @@ expr_no_variable:
   | varray_literal                     { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
-  | closure_expression                 { $$ = $1;}
-  | lambda_expression                  { $$ = $1;}
   | dim_expr                           { $$ = $1;}
 ;
 
@@ -2052,6 +2053,7 @@ dim_expr:
 dim_expr_base:
     array_literal                      { $$ = $1;}
   | class_constant                     { $$ = $1;}
+  | lambda_or_closure_with_parens      { $$ = $1;}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING, $1); }
   | '(' expr_no_variable ')'           { $$ = $2;}
@@ -2629,6 +2631,8 @@ variable:
     variable_no_objects                { _p->onStaticMember($$,$1,$3);}
   | callable_variable '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
+  | lambda_or_closure_with_parens '('
+    function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | '(' variable ')'                   { $$ = $2;}
 ;
 
@@ -2651,6 +2655,15 @@ callable_variable:
     variable_no_objects                { $$ = $1;}
   | dimmable_variable_access           { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
+;
+
+lambda_or_closure_with_parens:
+    '(' lambda_or_closure ')'          { $$ = $2;}
+;
+
+lambda_or_closure:
+    closure_expression                 { $$ = $1;}
+  | lambda_expression                  { $$ = $1;}
 ;
 
 object_method_call:
@@ -2863,6 +2876,8 @@ internal_functions:
     T_ISSET '(' variable_list ')'      { UEXP($$,$3,T_ISSET,1);}
   | T_EMPTY '(' variable ')'           { UEXP($$,$3,T_EMPTY,1);}
   | T_EMPTY '(' expr_no_variable ')'   { UEXP($$,$3,'!',1);}
+  | T_EMPTY '(' lambda_or_closure ')'  { UEXP($$,$3,'!',1);}
+  | T_EMPTY '(' lambda_or_closure_with_parens ')' { UEXP($$,$3,'!',1);}
   | T_EMPTY '(' expr_with_parens ')'   { UEXP($$,$3,'!',1);}
   | T_INCLUDE expr                     { UEXP($$,$2,T_INCLUDE,1);}
   | T_INCLUDE_ONCE expr                { UEXP($$,$2,T_INCLUDE_ONCE,1);}

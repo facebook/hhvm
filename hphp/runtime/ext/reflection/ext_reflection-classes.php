@@ -376,7 +376,7 @@ class ReflectionParameter implements Reflector {
       $braketed_pattern  = '/^\[.*\]$/';
 
       if(is_numeric($defaultText) ||
-         in_array($defaultText, array('NULL', 'true', 'false') ||
+         in_array($defaultText, array('NULL', 'true', 'false')) ||
          preg_match($quoted_pattern, $defaultText) ||
          preg_match($braketed_pattern, $defaultText) ||
          substr($defaultText, 0, 5) === 'array'))

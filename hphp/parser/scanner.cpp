@@ -733,10 +733,11 @@ std::string Scanner::escape(const char *str, int len, char quote_type) const {
             case '\\': output += '\\'; break;
             case '$':  output += '$';  break;
             case '"':
+            case '`':
               if (str[i] != quote_type) {
                 output += '\\';
               }
-              output += '"';
+              output += str[i];
               break;
             case 'x':
             case 'X': {

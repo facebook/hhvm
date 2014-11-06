@@ -64,7 +64,7 @@ let check_status connect (args:client_check_env) =
     if args.autostart
     then
       (* fork the server and raise an exception *)
-      ClientStart.start_server args.root;
+      ClientStart.start_server { ClientStart.root = args.root; wait = false };
     raise Server_missing
   end;
   let ic, oc = connect args in

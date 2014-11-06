@@ -56,7 +56,9 @@ let rec connect env retries =
 let rec main_ env retries =
   (* Check if a server is up *)
   if not (ClientUtils.server_exists env.ServerMsg.root)
-  then ClientStart.start_server env.ServerMsg.root;
+  then ClientStart.start_server { ClientStart.
+    root = env.ServerMsg.root; wait = false;
+  };
   let ic, oc = connect env retries in
   ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env);
   let response = ServerMsg.response_from_channel ic in

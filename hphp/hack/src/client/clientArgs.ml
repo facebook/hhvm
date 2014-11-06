@@ -277,7 +277,7 @@ let parse_restart_args () =
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1
-  in CRestart {ClientRestart.root = root; ClientRestart.wait = !wait;}
+  in CRestart {ClientStart.root = root; ClientStart.wait = !wait;}
 
 let parse_status_args () =
   let usage =

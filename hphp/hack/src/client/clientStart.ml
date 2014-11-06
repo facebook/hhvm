@@ -109,6 +109,3 @@ let main env =
       (Path.string_of_path env.root);
     exit 77
   end
-
-let start_server ?wait:(wait=false) root =
-  start_server {root = root; wait = wait;}

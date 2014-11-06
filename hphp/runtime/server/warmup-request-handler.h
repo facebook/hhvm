@@ -39,8 +39,10 @@ public:
       const std::shared_ptr<WarmupRequestHandlerFactory>& factory)
     : RequestHandler(timeout), m_factory(factory), m_reqHandler(timeout) {}
 
-  virtual void handleRequest(Transport *transport);
-  virtual void abortRequest(Transport *transport);
+  void setupRequest(Transport* transport) override;
+  void teardownRequest(Transport* transport) noexcept override;
+  void handleRequest(Transport* transport) override;
+  void abortRequest(Transport* transport) override;
 
 private:
   std::shared_ptr<WarmupRequestHandlerFactory> m_factory;

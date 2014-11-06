@@ -159,7 +159,7 @@ let hh_add_dep fn content =
   );
   Typing_deps.is_dep := false
 
-let hh_check ?(check_mode=true) fn =
+let hh_check fn =
   let fn = Relative_path.create Relative_path.Root fn in
   match Hashtbl.find parse_errors fn with
     | Some e -> error [e]
@@ -337,7 +337,7 @@ let infer_at_pos file line char =
   try
     clean();
     Typing_defs.infer_target := Some (line, char);
-    ignore (hh_check ~check_mode:false file);
+    ignore (hh_check file);
     let ty = !Typing_defs.infer_type in
     let pos = !Typing_defs.infer_pos in
     clean();
@@ -424,7 +424,7 @@ let hh_file_summary fn =
 
 let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
-  ignore (hh_check ~check_mode:false fn);
+  ignore (hh_check fn);
   let fn = Relative_path.create Relative_path.Root fn in
   let result = CL.mk_level_map (Some fn) !(Typing_defs.type_acc) in
   Typing_defs.accumulate_types := false;
@@ -448,7 +448,7 @@ let hh_hack_coloring fn =
 let hh_get_method_calls fn =
   Typing_defs.accumulate_method_calls := true;
   Typing_defs.accumulate_method_calls_result := [];
-  ignore (hh_check ~check_mode:false fn);
+  ignore (hh_check fn);
   let results = !Typing_defs.accumulate_method_calls_result in
   let results = List.map begin fun (p, name) ->
     JAssoc [ "method_name", JString name;

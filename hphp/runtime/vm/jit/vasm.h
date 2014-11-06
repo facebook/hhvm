@@ -72,6 +72,7 @@ void allocateRegisters(Vunit&, const Abi&);
 void optimizeJmps(Vunit&);
 void removeDeadCode(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
+void lowerForARM(Vunit&);
 
 /*
  * Get the successors of a block or instruction. If given a non-const

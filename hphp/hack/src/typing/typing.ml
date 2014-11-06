@@ -644,7 +644,9 @@ and case_list_ parent_lenv ty env = function
 and catch parent_lenv after_try env (ety, exn, b) =
   let env = { env with Env.lenv = after_try } in
   let env = LEnv.fully_integrate env parent_lenv in
-  let env, ety = static_class_id (fst ety) env (CI ety) in
+  let cid = CI ety in
+  instantiable_cid (fst ety) env cid;
+  let env, ety = static_class_id (fst ety) env cid in
   let env = Env.set_local env (snd exn) ety in
   let env = block env b in
   (* Only keep the local bindings if this catch is non-terminal *)
@@ -1284,13 +1286,13 @@ and instanceof_in_env p (env:Env.env) (e1:Nast.expr) (e2:Nast.expr) =
   let env, _ = expr env e1 in
   match instanceof_naming e2 with
     | Some cid ->
-      let () = instanceof_cid p env cid in
+      let () = instantiable_cid p env cid in
       env
     | None ->
       let env, _ = expr env e2 in
       env
 
-and instanceof_cid p env cid =
+and instantiable_cid p env cid =
   let env, class_ = class_id p env cid in
   (match class_ with
     | Some ((pos, name), class_) when class_.tc_kind = Ast.Ctrait ->

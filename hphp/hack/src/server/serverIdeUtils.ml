@@ -153,4 +153,4 @@ let check_file_input fi =
         fix_file_and_def content;
         revive funs classes;
     | ServerMsg.FileName fn ->
-        recheck [fn];
+        recheck [Relative_path.create Relative_path.Root fn];

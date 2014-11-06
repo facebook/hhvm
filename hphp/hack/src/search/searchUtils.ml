@@ -21,7 +21,7 @@ module Make(S : Searchable) = struct
   (* The results we'll return to the client *)
   type term = {
     name: string;
-    pos: Pos.t;
+    pos: Pos.absolute;
     result_type: S.t;
   }
 

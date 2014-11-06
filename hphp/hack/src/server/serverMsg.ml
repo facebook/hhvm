@@ -55,13 +55,13 @@ type file_input =
 | FileContent of string
 
 type insert_patch = {
-  pos: Pos.t;
+  pos: Pos.absolute;
   text: string;
 }
 
 type patch =
 | Insert of insert_patch
-| Remove of Pos.t
+| Remove of Pos.absolute
 | Replace of insert_patch
 
 type command =
@@ -107,7 +107,7 @@ type response =
 | SERVER_OUT_OF_DATE
 | DIRECTORY_MISMATCH of directory_mismatch
 | NO_ERRORS
-| ERRORS of Errors.error list
+| ERRORS of Pos.absolute Errors.error_ list
 | SERVER_DYING
 | PONG
 

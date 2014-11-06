@@ -102,7 +102,7 @@ module Program : Server.SERVER_PROGRAM = struct
           | None -> output_string oc "Missing from nenv\n"
           | Some canon ->
             let p, _ = SMap.find_unsafe canon (fst nenv.Naming.iclasses) in
-            output_string oc ((Pos.string p)^"\n")
+            output_string oc ((Pos.string (Pos.to_absolute p))^"\n")
         );
         let class_ = Typing_env.Classes.get qual_name in
         (match class_ with
@@ -113,7 +113,7 @@ module Program : Server.SERVER_PROGRAM = struct
         );
         output_string oc "function:\n";
         (match SMap.get qual_name nenv.Naming.ifuns with
-        | Some (p, _) -> output_string oc ((Pos.string p)^"\n")
+        | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
         | None -> output_string oc "Missing from nenv\n");
         let fun_ = Typing_env.Funs.get qual_name in
         (match fun_ with
@@ -209,12 +209,16 @@ module Program : Server.SERVER_PROGRAM = struct
     fun () -> php_next_files () @ js_next_files ()
 
   let init genv env =
+    let module RP = Relative_path in
     let root = ServerArgs.root genv.options in
     let next_files_hhi =
       match Hhi.get_hhi_root () with
-      | Some hhi_root -> make_next_files hhi_root
+      | Some hhi_root ->
+          compose (rev_rev_map (RP.create RP.Hhi)) (make_next_files hhi_root)
       | None -> print_endline "Could not locate hhi files"; exit 1 in
-    let next_files_root = make_next_files root in
+    let next_files_root = compose
+      (rev_rev_map (RP.create RP.Root)) (make_next_files root)
+    in
     let next_files = fun () ->
       match next_files_hhi () with
       | [] -> next_files_root ()
@@ -223,7 +227,7 @@ module Program : Server.SERVER_PROGRAM = struct
 
   let run_once_and_exit genv env =
     ServerError.print_errorl (ServerArgs.json_mode genv.options)
-                             env.errorl stdout;
+                             (List.map Errors.to_absolute env.errorl) stdout;
     match ServerArgs.convert genv.options with
     | None ->
         exit (if env.errorl = [] then 0 else 1)
@@ -232,14 +236,15 @@ module Program : Server.SERVER_PROGRAM = struct
         exit 0
 
   let filter_update _genv _env update =
-    Find.is_php_path update || Find.is_js_path update
+    Find.is_php_path (Relative_path.suffix update) ||
+    Find.is_js_path (Relative_path.suffix update)
 
   let recheck genv env updates =
     let diff = updates in
-    if SSet.is_empty diff
+    if Relative_path.Set.is_empty diff
     then env
     else
-      let failed_parsing = SSet.union diff env.failed_parsing in
+      let failed_parsing = Relative_path.Set.union diff env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
       ServerTypeCheck.check genv check_env
 

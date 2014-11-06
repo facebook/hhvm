@@ -18,7 +18,7 @@ module CL = Coverage_level
 
 let () = Ide.is_ide_mode := true
 
-let (files: (string, string) Hashtbl.t) = Hashtbl.create 23
+let (files: (Relative_path.t, string) Hashtbl.t) = Hashtbl.create 23
 
 let globals = Hashtbl.create 23
 let parse_errors = Hashtbl.create 23
@@ -35,11 +35,11 @@ let error el =
                "internal_error", JBool false;
              ]
     else
-      let errors_json = List.map Errors.to_json el in
-      JAssoc [ "passed",         JBool false;
-               "errors",         JList errors_json;
-               "internal_error", JBool false;
-             ]
+      let errors_json = List.map (compose Errors.to_json Errors.to_absolute) el
+      in JAssoc [ "passed",         JBool false;
+                  "errors",         JList errors_json;
+                  "internal_error", JBool false;
+                ]
   in
   to_js_object res
 
@@ -114,7 +114,7 @@ let declare_file fn content =
       Hashtbl.replace globals fn (is_php, funs, classes);
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
       let all_classes = List.fold_right begin fun (_, cname) acc ->
-        SMap.add cname (SSet.singleton fn) acc
+        SMap.add cname (Relative_path.Set.singleton fn) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes fn;
       let sub_classes = get_sub_classes all_classes in
@@ -136,6 +136,7 @@ let rec last_error errors =
     | _ :: tail -> last_error tail
 
 let hh_add_file fn content =
+  let fn = Relative_path.create Relative_path.Root fn in
   Hashtbl.replace files fn content;
   try
     let errors, _ = Errors.do_ begin fun () ->
@@ -146,6 +147,7 @@ let hh_add_file fn content =
     ()
 
 let hh_add_dep fn content =
+  let fn = Relative_path.create Relative_path.Root fn in
   Typing_deps.is_dep := true;
   (try
     Errors.ignore_ begin fun () ->
@@ -158,6 +160,7 @@ let hh_add_dep fn content =
   Typing_deps.is_dep := false
 
 let hh_check ?(check_mode=true) fn =
+  let fn = Relative_path.create Relative_path.Root fn in
   match Hashtbl.find parse_errors fn with
     | Some e -> error [e]
     | None ->
@@ -171,7 +174,7 @@ let hh_check ?(check_mode=true) fn =
           Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts
         in
         let all_classes = List.fold_right begin fun (_, cname) acc ->
-          SMap.add cname (SSet.singleton fn) acc
+          SMap.add cname (Relative_path.Set.singleton fn) acc
         end classes SMap.empty in
         Typing_decl.make_env nenv all_classes fn;
         List.iter (fun (_, fname) -> type_fun fname fn) funs;
@@ -183,6 +186,7 @@ let hh_check ?(check_mode=true) fn =
         end
 
 let hh_auto_complete fn =
+  let fn = Relative_path.create Relative_path.Root fn in
   AutocompleteService.attach_hooks();
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
@@ -230,6 +234,7 @@ let hh_get_method_at_position fn line char =
   Find_refs.find_method_at_cursor_result := None;
   Autocomplete.auto_complete := false;
   Find_refs.find_method_at_cursor_target := Some (line, char);
+  let fn = Relative_path.create Relative_path.Root fn in
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
     Errors.ignore_ begin fun () ->
@@ -280,7 +285,7 @@ let hh_get_method_at_position fn line char =
             | Find_refs.LocalVar -> "local" in
           JAssoc [ "name",           JString res.Find_refs.name;
                    "result_type",    JString result_type;
-                   "pos",            Pos.json res.Find_refs.pos;
+                   "pos",            Pos.json (Pos.to_absolute res.Find_refs.pos);
                    "internal_error", JBool false;
                  ]
       | _ -> JAssoc [ "internal_error", JBool false;
@@ -342,6 +347,7 @@ let infer_at_pos file line char =
     None, None
 
 let hh_find_lvar_refs file line char =
+  let file = Relative_path.create Relative_path.Root file in
   let clean() =
     Find_refs.find_refs_target := None;
     Find_refs.find_refs_result := [];
@@ -365,7 +371,8 @@ let hh_find_lvar_refs file line char =
         | _ -> ()
       end ast;
     end;
-    let res_list = List.map Pos.json !Find_refs.find_refs_result in
+    let res_list =
+      List.map (compose Pos.json Pos.to_absolute) !Find_refs.find_refs_result in
     clean();
     to_js_object (JAssoc [ "positions",      JList res_list;
                           "internal_error", JBool false;
@@ -389,7 +396,7 @@ let hh_infer_type file line char =
 let hh_infer_pos file line char =
   let pos, _ = infer_at_pos file line char in
   let output = match pos with
-  | Some pos -> JAssoc [ "pos",            Pos.json pos;
+  | Some pos -> JAssoc [ "pos",            Pos.json (Pos.to_absolute pos);
                          "internal_error", JBool false;
                        ]
   | None -> JAssoc [ "internal_error", JBool false;
@@ -398,6 +405,7 @@ let hh_infer_pos file line char =
   to_js_object output
 
 let hh_file_summary fn =
+  let fn = Relative_path.create Relative_path.Root fn in
   try
     let ast = Parser_heap.ParserHeap.find_unsafe fn in
     let outline = FileOutline.outline_ast ast in
@@ -417,9 +425,12 @@ let hh_file_summary fn =
 let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check ~check_mode:false fn);
+  let fn = Relative_path.create Relative_path.Root fn in
   let result = CL.mk_level_map (Some fn) !(Typing_defs.type_acc) in
   Typing_defs.accumulate_types := false;
-  Typing_defs.type_acc := PMap.empty;
+  Typing_defs.type_acc := Pos.Map.empty;
+  let result = Pos.Map.elements result in
+  let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
@@ -441,7 +452,7 @@ let hh_get_method_calls fn =
   let results = !Typing_defs.accumulate_method_calls_result in
   let results = List.map begin fun (p, name) ->
     JAssoc [ "method_name", JString name;
-             "pos",         Pos.json p;
+             "pos",         Pos.json (Pos.to_absolute p);
            ]
     end results in
   Typing_defs.accumulate_method_calls := false;
@@ -454,6 +465,7 @@ let hh_arg_info fn line char =
   (* all the hooks for arg info happen in typing,
    * so we only need to run typing*)
   ArgumentInfoService.attach_hooks (line, char);
+  let fn = Relative_path.create Relative_path.Root fn in
   let _, funs, classes = Hashtbl.find globals fn in
   Errors.ignore_ begin fun () ->
     List.iter begin fun (_, f_name) ->

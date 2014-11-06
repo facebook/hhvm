@@ -882,7 +882,7 @@ let print_error tok_str env =
     else buffer
   in
   let error =
-    (Pos.string (Pos.make env.lexbuf))^"\n"^
+    (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)))^"\n"^
     (Printf.sprintf "Expected: %s, found: '%s'\n" tok_str !(env.last_str))^
     buffer^"\n"
   in
@@ -903,7 +903,7 @@ let expect_xhp tok_str env = wrap_xhp env begin fun _ ->
   then last_token env
   else begin
     if debug then begin
-      output_string stderr (Pos.string (Pos.make env.lexbuf));
+      output_string stderr (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)));
       flush stderr
     end;
     raise Format_error

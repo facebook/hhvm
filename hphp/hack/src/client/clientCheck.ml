@@ -74,8 +74,8 @@ let rec main args retries =
         in
         let command = ServerMsg.PRINT_COVERAGE_LEVELS file_input in
         ServerMsg.cmd_to_channel oc command;
-        let pos_type_l = Marshal.from_channel ic in
-        ClientColorFile.go file_input args.output_json pos_type_l;
+        let pos_level_l : ServerColorFile.result = Marshal.from_channel ic in
+        ClientColorFile.go file_input args.output_json pos_level_l;
         exit 0
     | MODE_COVERAGE file ->
         let ic, oc = connect args in
@@ -88,7 +88,7 @@ let rec main args retries =
         let ic, oc = connect args in
         let command = ServerMsg.FIND_REFS (ServerMsg.Class name) in
         ServerMsg.cmd_to_channel oc command;
-        let results = Marshal.from_channel ic in
+        let results : ServerFindRefs.result = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_FIND_REFS name ->
@@ -104,7 +104,7 @@ let rec main args retries =
           with _ -> Printf.fprintf stderr "Invalid input\n"; exit 1 in
         let command = ServerMsg.FIND_REFS action in
         ServerMsg.cmd_to_channel oc command;
-        let results = Marshal.from_channel ic in
+        let results : ServerFindRefs.result = Marshal.from_channel ic in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_REFACTOR ->
@@ -146,7 +146,7 @@ let rec main args retries =
       in
       let ic, oc = connect args in
       ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
-      let (pos, ty) = Marshal.from_channel ic in
+      let ((pos, ty) : ServerInferType.result) = Marshal.from_channel ic in
       ClientTypeAtPos.go pos ty args.output_json;
       exit 0
     | MODE_ARGUMENT_INFO arg ->
@@ -164,7 +164,7 @@ let rec main args retries =
       let content = ClientUtils.read_stdin_to_string () in
       ServerMsg.cmd_to_channel oc
           (ServerMsg.ARGUMENT_INFO (content, line, char));
-      let results = Marshal.from_channel ic in
+      let results : ServerArgumentInfo.result = Marshal.from_channel ic in
       ClientArgumentInfo.go results args.output_json;
       exit 0
     | MODE_AUTO_COMPLETE ->
@@ -180,21 +180,21 @@ let rec main args retries =
       let ic, oc = connect args in
       let command = ServerMsg.OUTLINE content in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : ServerFileOutline.result = Marshal.from_channel ic in
       ClientOutline.go results args.output_json;
       exit 0
     | MODE_METHOD_JUMP_CHILDREN class_ ->
       let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, true) in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : MethodJumps.result list = Marshal.from_channel ic in
       ClientMethodJumps.go results true args.output_json;
       exit 0
     | MODE_METHOD_JUMP_ANCESTORS class_ ->
       let ic, oc = connect args in
       let command = ServerMsg.METHOD_JUMP (class_, false) in
       ServerMsg.cmd_to_channel oc command;
-      let results = Marshal.from_channel ic in
+      let results : MethodJumps.result list = Marshal.from_channel ic in
       ClientMethodJumps.go results false args.output_json;
       exit 0
     | MODE_STATUS -> ClientCheckStatus.check_status connect args

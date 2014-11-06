@@ -94,7 +94,7 @@ and genv = {
   fun_kind : Nast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
-  file    : string;
+  file    : Relative_path.t;
 }
 
 (* An anonymous function

@@ -70,8 +70,8 @@ val invalidate_caches: unit -> unit
 module type S = sig
   type key
   type t
-  module KeySet : Set.S
-  module KeyMap : MapSig
+  module KeySet : Set.S with type elt = key
+  module KeyMap : MapSig with type key = key
 
   (* Safe for concurrent writes, the first writer wins, the second write
    * is dismissed.

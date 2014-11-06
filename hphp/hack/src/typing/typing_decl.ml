@@ -315,7 +315,7 @@ let ifun_decl nenv (f: Ast.fun_) =
 type class_env = {
   nenv: Naming.env;
   stack: SSet.t;
-  all_classes: SSet.t SMap.t;
+  all_classes: Relative_path.Set.t SMap.t;
 }
 
 let check_if_cyclic class_env (pos, cid) =
@@ -378,7 +378,7 @@ and class_hint_decl class_env hint =
       when SMap.mem cid class_env.all_classes && not (is_class_ready cid) ->
       (* We are supposed to redeclare the class *)
       let files = SMap.find_unsafe cid class_env.all_classes in
-      SSet.iter begin fun fn ->
+      Relative_path.Set.iter begin fun fn ->
         let class_opt = Parser_heap.find_class_in_file fn cid in
         class_decl_if_missing_opt class_env class_opt
       end files

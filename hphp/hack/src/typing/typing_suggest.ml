@@ -15,7 +15,7 @@ open Utils
 open Typing_defs
 
 let compare_types x y =
-  let tenv = Typing_env.empty "" in
+  let tenv = Typing_env.empty Relative_path.default in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
 
@@ -45,7 +45,8 @@ let add_type env pos k type_ =
      * types part of the codebase at a time in worker threads. Fortunately we
      * don't actually need the whole env, so just keep the parts we do need for
      * typing, which *are* serializable. *)
-    {(Env.empty "") with Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
+    {(Env.empty Relative_path.default) with
+     Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
     pos,
     k,
     type_

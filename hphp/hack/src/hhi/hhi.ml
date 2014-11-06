@@ -8,6 +8,8 @@
  *
  *)
 
+open Utils
+
 external get_embedded_hhi_data : string -> string option =
   "get_embedded_hhi_data"
 
@@ -60,7 +62,12 @@ let get_hhi_root () =
   | None ->
       let r = get_hhi_root_impl () in
       root := Some r;
+      (* TODO(jezng) refactor this ugliness *)
+      Relative_path.set_path_prefix
+        Relative_path.Hhi
+        (Path.string_of_path (unsafe_opt r));
       r
 
 let set_hhi_root_for_unit_test dir =
-  root := Some (Some dir)
+  root := Some (Some dir);
+  Relative_path.set_path_prefix Relative_path.Hhi (Path.string_of_path dir)

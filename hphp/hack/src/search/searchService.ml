@@ -32,7 +32,7 @@ module Make(S : SearchUtils.Searchable) = struct
     let update_search_index files =
       Trie.MasterApi.index_files files;
       Fuzzy.index_files files;
-      (* At this point, users can start searching agian so we should clear the
+      (* At this point, users can start searching again so we should clear the
        * cache that contains the actual results. We don't have to worry
        * about the string->keys list shared memory because it's uncached *)
       SharedMem.invalidate_caches()

@@ -20,9 +20,10 @@ let check_if_extends_class target_class_name class_name acc =
 
 let find_child_classes target_class_name files_info files =
   SharedMem.invalidate_caches();
-  SSet.fold begin fun fn acc ->
+  Relative_path.Set.fold begin fun fn acc ->
     (try
-      let { FileInfo.classes; _ } = SMap.find_unsafe fn files_info in
+      let { FileInfo.classes; _ } =
+        Relative_path.Map.find_unsafe fn files_info in
       List.fold_left begin fun acc cid ->
          check_if_extends_class target_class_name (snd cid) acc
         end acc classes
@@ -41,7 +42,7 @@ let get_child_classes_files workers files_info class_name =
     in
     Typing_deps.get_files extend_deps
   | _ ->
-    SSet.empty
+    Relative_path.Set.empty
 
 let get_deps_set classes =
   SSet.fold (fun class_name acc ->
@@ -53,9 +54,9 @@ let get_deps_set classes =
         let dep = Typing_deps.Dep.Class cid in
         let bazooka = Typing_deps.get_bazooka dep in
         let files = Typing_deps.get_files bazooka in
-        let files = SSet.add fn files in
-        SSet.union files acc
-    | _ -> acc) classes SSet.empty
+        let files = Relative_path.Set.add fn files in
+        Relative_path.Set.union files acc
+    | _ -> acc) classes Relative_path.Set.empty
 
 let get_deps_set_function f_name =
   try
@@ -65,19 +66,19 @@ let get_deps_set_function f_name =
     let dep = Typing_deps.Dep.Fun fid in
     let bazooka = Typing_deps.get_bazooka dep in
     let files = Typing_deps.get_files bazooka in
-    SSet.add fn files
-  with Not_found -> SSet.empty
+    Relative_path.Set.add fn files
+  with Not_found -> Relative_path.Set.empty
 
 let find_refs target_classes target_method acc file_names =
   Find_refs.find_refs_class_name := target_classes;
   Find_refs.find_refs_method_name := target_method;
-  Find_refs.find_refs_results := Find_refs.PosMap.empty;
+  Find_refs.find_refs_results := Pos.Map.empty;
   ServerIdeUtils.recheck file_names;
   let result = !Find_refs.find_refs_results in
   Find_refs.find_refs_class_name := None;
   Find_refs.find_refs_method_name := None;
-  Find_refs.find_refs_results := Find_refs.PosMap.empty;
-  Find_refs.PosMap.fold begin fun p str acc ->
+  Find_refs.find_refs_results := Pos.Map.empty;
+  Pos.Map.fold begin fun p str acc ->
     (str, p) :: acc
   end result []
 

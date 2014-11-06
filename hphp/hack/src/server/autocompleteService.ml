@@ -77,7 +77,7 @@ let autocomplete_result_to_json res =
   let expected_ty = res.expected_ty in
   Hh_json.JAssoc [ "name", Hh_json.JString name;
            "type", Hh_json.JString ty;
-           "pos", Pos.json pos;
+           "pos", Pos.json (Pos.to_absolute pos);
            "func_details", func_details_to_json res.func_details;
            "expected_ty", Hh_json.JBool expected_ty;
          ]
@@ -318,7 +318,7 @@ let get_results funs classes =
   let results = !autocomplete_results in
   let env = match !ac_env with
     | Some e -> e
-    | None -> Typing_env.empty ""
+    | None -> Typing_env.empty Relative_path.default
   in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with

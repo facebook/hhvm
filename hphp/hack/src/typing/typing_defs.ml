@@ -188,4 +188,4 @@ let is_suggest_mode = ref false
 (* Print types mode *)
 (*****************************************************************************)
 let accumulate_types = ref false
-let (type_acc: ty PMap.t ref) = ref PMap.empty
+let (type_acc: ty Pos.Map.t ref) = ref Pos.Map.empty

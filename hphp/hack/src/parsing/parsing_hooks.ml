@@ -8,11 +8,11 @@
  *
  *)
 
-open Utils
+let (file_parsed_hooks:
+  (Relative_path.t -> Ast.program -> unit) list ref) = ref []
 
-let (file_parsed_hooks: (string -> Ast.program -> unit) list ref) = ref []
-
-let (parse_task_completed_hooks: (string list -> SSet.t -> unit) list ref) = ref []
+let (parse_task_completed_hooks:
+  (Relative_path.t list -> Relative_path.Set.t -> unit) list ref) = ref []
 
 let attach_file_parsed_hook hook =
   file_parsed_hooks := hook :: !file_parsed_hooks

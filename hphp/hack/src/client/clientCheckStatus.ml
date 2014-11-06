@@ -12,7 +12,7 @@ open ClientExceptions
 
 module C = Tty
 
-let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.t * string) =
+let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.absolute * string) =
   let line, start, end_ = Pos.info_pos p in
   let code_clr = C.Normal C.Yellow in
   let err_clr  = if first then C.Bold C.Red else C.Normal C.Green in
@@ -45,7 +45,7 @@ let print_reason_color ~(first:bool) ~(code:int) ((p, s): Pos.t * string) =
     let strings = List.map (fun (_,x) -> x) to_print in
     List.iter (Printf.printf "%s") strings
 
-let print_error_color (e:Errors.error) =
+let print_error_color e =
   let code = Errors.get_code e in
   let msg_list = Errors.to_list e in
   print_reason_color ~first:true ~code (List.hd msg_list);

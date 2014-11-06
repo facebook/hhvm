@@ -21,7 +21,7 @@ open Utils
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
-let otf_neutral =  [], SSet.empty
+let otf_neutral =  [], Relative_path.Set.empty
 let compute_deps_neutral = ISet.empty, ISet.empty
 
 (*****************************************************************************)
@@ -36,11 +36,10 @@ let compute_deps_neutral = ISet.empty, ISet.empty
  *)
 (*****************************************************************************)
 
-type fast = FileInfo.names SMap.t
-type classes = SSet.t SMap.t
+type classes = Relative_path.Set.t SMap.t
 
 module OnTheFlyStore = GlobalStorage.Make(struct
-  type t = Naming.env * classes * fast
+  type t = Naming.env * classes * FileInfo.fast
 end)
 
 (*****************************************************************************)
@@ -72,10 +71,10 @@ let on_the_fly_decl_file nenv all_classes fast (errors, failed) fn =
      * where the error occurs might be different from the file we
      * are declaring right now.
      *)
-      let file_with_error = Errors.filename error in
-      assert (file_with_error <> "");
-      let failed = SSet.add file_with_error failed in
-      let failed = SSet.add fn failed in
+      let file_with_error = Pos.filename (Errors.get_pos error) in
+      assert (file_with_error <> Relative_path.default);
+      let failed = Relative_path.Set.add file_with_error failed in
+      let failed = Relative_path.Set.add fn failed in
       error :: errors, failed
     end (errors, failed) decl_errors
 
@@ -174,7 +173,7 @@ let update_positions classes to_update =
 let redeclare_files nenv all_classes fast filel =
   List.fold_left
     (on_the_fly_decl_file nenv all_classes fast)
-    ([], SSet.empty)
+    ([], Relative_path.Set.empty)
     filel
 
 let otf_decl_files nenv all_classes fast filel =
@@ -184,7 +183,7 @@ let otf_decl_files nenv all_classes fast filel =
   errors, failed
 
 let compute_deps ~update_pos nenv fast filel =
-  let infol = List.map (fun fn -> SMap.find_unsafe fn fast) filel in
+  let infol = List.map (fun fn -> Relative_path.Map.find_unsafe fn fast) filel in
   let names = List.fold_left FileInfo.merge_names FileInfo.empty_names infol in
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
   let acc = ISet.empty, ISet.empty in
@@ -236,7 +235,7 @@ let load_and_compute_deps ~update_pos acc filel =
 (*****************************************************************************)
 
 let merge_on_the_fly (errorl1, failed1) (errorl2, failed2) =
-  errorl1 @ errorl2, SSet.union failed1 failed2
+  errorl1 @ errorl2, Relative_path.Set.union failed1 failed2
 
 let merge_compute_deps (to_redecl1, to_recheck1) (to_redecl2, to_recheck2) =
   ISet.union to_redecl1 to_redecl2, ISet.union to_recheck1 to_recheck2
@@ -292,7 +291,7 @@ let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } =
   ()
 
 let get_defs fast =
-  SMap.fold begin fun _ names1 names2 ->
+  Relative_path.Map.fold begin fun _ names1 names2 ->
     FileInfo.merge_names names1 names2
   end fast FileInfo.empty_names
 
@@ -301,7 +300,7 @@ let get_defs fast =
 (*****************************************************************************)
 
 let init workers fast =
-  let fnl = SMap.fold (fun x _ y -> x :: y) fast [] in
+  let fnl = Relative_path.Map.fold (fun x _ y -> x :: y) fast [] in
   let all_classes = Typing_decl_service.get_classes fast in
   all_classes, fnl
 

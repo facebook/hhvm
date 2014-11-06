@@ -44,7 +44,7 @@ type type_to_keyset = SSet.t TMap.t
  *   }
  * }
  *)
-module SearchKeys = SharedMem.NoCache (String) (struct
+module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
   type t = type_to_keyset
   let prefix = Prefix.make()
 end)
@@ -67,7 +67,7 @@ end)
  *   }
  * }
  *)
-module SearchKeyToTermMap = SharedMem.WithCache (String) (struct
+module SearchKeyToTermMap = SharedMem.WithCache (Relative_path.S) (struct
   type t = type_to_key_to_term_list
   let prefix = Prefix.make()
 end)
@@ -244,16 +244,16 @@ let update_term_lookup file add_terms remove_terms =
   SSet.iter begin fun term ->
     let old_val =
       try Hashtbl.find term_lookup term
-      with Not_found -> SSet.empty
+      with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace term_lookup term (SSet.remove file old_val);
+    Hashtbl.replace term_lookup term (Relative_path.Set.remove file old_val);
   end remove_terms;
   SSet.iter begin fun term ->
     let old_val =
       try Hashtbl.find term_lookup term
-      with Not_found -> SSet.empty
+      with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace term_lookup term (SSet.add file old_val);
+    Hashtbl.replace term_lookup term (Relative_path.Set.add file old_val);
   end add_terms
 
 (* Updates the keylist and defmap for a file (will be used to populate
@@ -271,7 +271,7 @@ let process_term key name pos type_ defs_acc =
 
   let updated_defmap = SMap.add key ({
     name = name;
-    pos = pos;
+    pos = Pos.to_absolute pos;
     result_type = type_;
   } :: existing_def_list) existing_defmap in
   TMap.add type_ updated_defmap defs_acc
@@ -295,7 +295,7 @@ let index_files files =
       TMap.add x (Hashtbl.create 30) acc
     end TMap.empty all_types
   end;
-  SSet.iter begin fun file ->
+  Relative_path.Set.iter begin fun file ->
     let new_terms = try SearchKeys.find_unsafe file
     with Not_found -> TMap.empty in
     let old_terms = try Hashtbl.find old_search_terms file
@@ -347,15 +347,15 @@ let get_terms needle type_ =
   with Invalid_argument _ -> [] (* Catches if the query is an empty string *)
 
 (* Looks up the actual `term` objects based on the given strings
- * i.e. use the preivously built `term_lookup` table so we can return
+ * i.e. use the previously built `term_lookup` table so we can return
  * `term` objects instead of just relevant strings *)
 let get_terms_from_string_and_type strings =
   List.fold_left begin fun acc ((str, type_), score) ->
     let files =
       try Hashtbl.find term_lookup str
-      with Not_found -> SSet.empty
+      with Not_found -> Relative_path.Set.empty
     in
-    SSet.fold begin fun file acc ->
+    Relative_path.Set.fold begin fun file acc ->
       let defmap =
         try SearchKeyToTermMap.find_unsafe file
         with Not_found -> TMap.empty

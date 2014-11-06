@@ -42,7 +42,8 @@ module SN           = Naming_special_names
  * only best-effort -- it's an approximation to point debugging in the right
  * direction, nothing more. *)
 let debug_last_pos = ref Pos.none
-let debug_print_last_pos _ = print_endline (Pos.string !debug_last_pos)
+let debug_print_last_pos _ = print_endline (Pos.string (Pos.to_absolute
+  !debug_last_pos))
 
 (*****************************************************************************)
 (* Helpers *)
@@ -705,7 +706,8 @@ and raw_expr in_cond env e =
   let env, ty = expr_ in_cond false env e in
   if !accumulate_types
   then begin
-    type_acc := PMap.add (fst e) (Typing_expand.fully_expand env ty) !type_acc;
+    type_acc :=
+      Pos.Map.add (fst e) (Typing_expand.fully_expand env ty) !type_acc;
   end;
   TUtils.save_infer env (fst e) ty;
   env, ty

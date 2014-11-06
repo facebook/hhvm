@@ -14,9 +14,7 @@
  *)
 (*****************************************************************************)
 
-open Utils
-
-module HH_FIXMES = SharedMem.WithCache (String) (struct
+module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
   type t = Pos.t Utils.IMap.t Utils.IMap.t
   let prefix = Prefix.make()
 end)
@@ -48,7 +46,7 @@ let () =
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
 (*****************************************************************************)
 
-module ParserHeap = SharedMem.NoCache (String) (struct
+module ParserHeap = SharedMem.NoCache (Relative_path.S) (struct
     type t = Ast.program
     let prefix = Prefix.make()
   end)

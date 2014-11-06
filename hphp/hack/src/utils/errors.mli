@@ -8,14 +8,14 @@
  *
  *)
 
-type error
+type 'a error_
+type error = Pos.t error_
 type t = error list
 
 val is_hh_fixme : (Pos.t -> int -> bool) ref
-val to_list : error -> (Pos.t * string) list
-val get_code : error -> int
+val to_list : 'a error_ -> ('a * string) list
+val get_code : 'a error_ -> int
 val get_pos : error -> Pos.t
-val filename : error -> string
 val make_error : (Pos.t * string) list -> error
 
 val error_code_to_string : int -> string
@@ -34,7 +34,7 @@ val unterminated_comment : Pos.t -> unit
 val unterminated_xhp_comment : Pos.t -> unit
 val name_already_bound : string -> Pos.t -> Pos.t -> unit
 val method_name_already_bound : Pos.t -> string -> unit
-val error_name_already_bound : string -> string -> string -> Pos.t -> Pos.t -> unit
+val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> unit
 val different_scope : Pos.t -> string -> Pos.t -> unit
 val undefined : Pos.t -> string -> unit
@@ -251,8 +251,8 @@ val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list
 val void_usage : Pos.t -> (Pos.t * string) list -> unit
 val generic_at_runtime : Pos.t -> unit
 
-val to_json : error -> Hh_json.json
-val to_string : error -> string
+val to_json : Pos.absolute error_ -> Hh_json.json
+val to_string : Pos.absolute error_ -> string
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 val try_add_err : Pos.t -> string -> (unit -> 'a) -> (unit -> 'a) -> 'a
@@ -260,3 +260,5 @@ val do_ : (unit -> 'a) -> error list * 'a
 val ignore_ : (unit -> 'a) -> 'a
 val try_when :
   (unit -> unit) -> when_:(unit -> bool) -> do_:(error -> unit) -> unit
+
+val to_absolute : error -> Pos.absolute error_

@@ -7,8 +7,6 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-module PosMap = Map.Make(Pos)
-
 open Utils
 
 (*****************************************************************************)
@@ -50,7 +48,7 @@ let is_find_method_target pos =
 
 let (find_refs_class_name: (SSet.t option) ref) = ref None
 let (find_refs_method_name: string option ref) = ref None
-let find_refs_results = ref PosMap.empty
+let find_refs_results = ref Pos.Map.empty
 
 let process_class_ref p class_name called_method_opt =
   (match !find_refs_class_name, !find_refs_method_name with
@@ -60,7 +58,7 @@ let process_class_ref p class_name called_method_opt =
          let class_name = match called_method_opt with
          | None -> class_name
          | Some n -> class_name^"::"^n in
-         find_refs_results := PosMap.add p class_name !find_refs_results
+         find_refs_results := Pos.Map.add p class_name !find_refs_results
        end;
       ()
   | _ -> ());
@@ -76,12 +74,12 @@ let process_find_refs class_name method_name p =
   (match (!find_refs_class_name, !find_refs_method_name, class_name) with
    | (Some c_names, Some m_name, Some class_name) ->
        if m_name = method_name && (SSet.mem class_name c_names) then
-         find_refs_results := PosMap.add p (class_name ^ "::" ^ method_name)
+         find_refs_results := Pos.Map.add p (class_name ^ "::" ^ method_name)
              !find_refs_results;
        ()
    | (None, Some m_name, None) ->
        if m_name = method_name then
-         find_refs_results := PosMap.add p method_name
+         find_refs_results := Pos.Map.add p method_name
              !find_refs_results;
        ()
    | _ -> ()

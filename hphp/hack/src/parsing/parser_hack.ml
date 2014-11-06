@@ -3475,5 +3475,6 @@ and namespace_use_list env acc =
 
 let from_file filename =
   Pos.file := filename;
-  let content = try Utils.cat filename with _ -> "" in
+  let content =
+    try Utils.cat (Relative_path.to_absolute filename) with _ -> "" in
   program content

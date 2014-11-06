@@ -110,18 +110,18 @@ let get_bazooka x =
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles: (int, SSet.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
+let (ifiles: (int, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
 let get_files deps =
   ISet.fold begin fun dep acc ->
     try
       let files = Hashtbl.find !ifiles dep in
-      SSet.union files acc
+      Relative_path.Set.union files acc
     with Not_found -> acc
-  end deps SSet.empty
+  end deps Relative_path.Set.empty
 
 let update_files fast =
-  SMap.iter begin fun filename info ->
+  Relative_path.Map.iter begin fun filename info ->
     let {FileInfo.funs; classes; types;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
@@ -139,8 +139,8 @@ let update_files fast =
     let defs = ISet.union funs classes in
     ISet.iter begin fun def ->
       let previous =
-        try Hashtbl.find !ifiles def with Not_found -> SSet.empty
+        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
       in
-      Hashtbl.replace !ifiles def (SSet.add filename previous)
+      Hashtbl.replace !ifiles def (Relative_path.Set.add filename previous)
     end defs
   end fast

@@ -317,8 +317,7 @@ module Env = struct
     if SMap.mem x !env
     then begin
       let p', _ = SMap.find_unsafe x !env in
-      let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-      Errors.error_name_already_bound hhi_root x x p p'
+      Errors.error_name_already_bound x x p p'
     end;
     let y = p, Ident.make x in
     env := SMap.add x y !env;
@@ -513,8 +512,8 @@ module Env = struct
     (* Don't let people use strictly internal classes
      * (except when they are being declared in .hhi files) *)
     if name = SN.Classes.cHH_BuiltinEnum &&
-      not (str_ends_with (Pos.filename pos) ".hhi") then
-      Errors.using_internal_class pos (strip_ns name);
+      not (str_ends_with (Relative_path.to_absolute (Pos.filename pos)) ".hhi")
+    then Errors.using_internal_class pos (strip_ns name);
     pos, name
 
   let fun_id (genv, _) x =
@@ -543,8 +542,7 @@ module Env = struct
         let p', id = SMap.find_unsafe canonical env in
         if Pos.compare p p' = 0 then (p, id)
         else begin
-          let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-          Errors.error_name_already_bound hhi_root name canonical p p';
+          Errors.error_name_already_bound name canonical p p';
           p', id
         end
       | None ->
@@ -559,8 +557,7 @@ module Env = struct
       let p', y = SMap.find_unsafe x !env in
       if Pos.compare p p' = 0 then (p, y)
       else begin
-        let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-        Errors.error_name_already_bound hhi_root x x p p';
+        Errors.error_name_already_bound x x p p';
         p', y
       end
     end
@@ -1996,7 +1993,7 @@ let add_files_to_rename nenv failed defl defs_in_env =
     | None -> failed
     | Some (previous_definition_position, _) ->
       let filename = Pos.filename previous_definition_position in
-      SSet.add filename failed
+      Relative_path.Set.add filename failed
   end failed defl
 
 let ndecl_file fn
@@ -2004,7 +2001,7 @@ let ndecl_file fn
      classes; types; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) =
   let errors, nenv = Errors.do_ begin fun () ->
-    dn ("Naming decl: "^fn);
+    dn ("Naming decl: "^Relative_path.to_absolute fn);
     if consider_names_just_for_autoload
     then nenv
     else make_env nenv ~funs ~classes ~typedefs:types ~consts
@@ -2044,4 +2041,4 @@ let ndecl_file fn
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed types nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
-  List.rev_append l errorl, SSet.add fn failed, nenv
+  List.rev_append l errorl, Relative_path.Set.add fn failed, nenv

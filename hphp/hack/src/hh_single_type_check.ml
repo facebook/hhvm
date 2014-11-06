@@ -101,7 +101,7 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.to_string l)
+let error l = die (Errors.to_string (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
@@ -144,9 +144,9 @@ let suggest_and_print fn funs classes typedefs consts =
   let n_types = make_set typedefs in
   let n_consts = make_set consts in
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
-  let fast = SMap.add fn names SMap.empty in
+  let fast = Relative_path.Map.add fn names Relative_path.Map.empty in
   let patch_map = Typing_suggest_service.go None fast in
-  match SMap.get fn patch_map with
+  match Relative_path.Map.get fn patch_map with
     | None -> ()
     | Some l -> begin
       (* Sort so that the unit tests come out in a consistent order, normally
@@ -171,14 +171,15 @@ let rec make_files = function
   | _ -> assert false
 
 let parse_file fn =
-  let content = cat fn in
+  let abs_fn = Relative_path.to_absolute fn in
+  let content = cat abs_fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
   then
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
-      Pos.file := fn^"--"^sub_fn ;
+      Pos.file := Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn);
       let {Parser_hack.is_hh_file; comments; ast = ast'} =
         Parser_hack.program content
       in
@@ -212,9 +213,12 @@ let replace_color input =
   | (None, str) -> str
 
 let print_colored fn =
-  let content = cat fn in
+  let content = cat (Relative_path.to_absolute fn) in
   let pos_level_m = CL.mk_level_map (Some fn) !Typing_defs.type_acc in
-  let results = ColorFile.go content pos_level_m in
+  let pos_level_l = Pos.Map.elements pos_level_m in
+  let raw_level_l =
+    rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) pos_level_l in
+  let results = ColorFile.go content raw_level_l in
   if Unix.isatty Unix.stdout
   then Tty.print (ClientColorFile.replace_colors results)
   else print_string (List.map replace_color results |> String.concat "")
@@ -244,10 +248,11 @@ let main_hack { filename; suggest; color; coverage; _ } =
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->
-      Pos.file := builtins_filename;
+      Pos.file := Relative_path.create Relative_path.Dummy builtins_filename;
       let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
         Parser_hack.program builtins
       in
+      let filename = Relative_path.create Relative_path.Dummy filename in
       Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in
@@ -255,7 +260,7 @@ let main_hack { filename; suggest; color; coverage; _ } =
       let funs, classes, typedefs, consts = collect_defs ast in
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
       let all_classes = List.fold_right begin fun (_, cname) acc ->
-        SMap.add cname (SSet.singleton filename) acc
+        SMap.add cname (Relative_path.Set.singleton filename) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
       Typing_defs.accumulate_types := color || coverage;

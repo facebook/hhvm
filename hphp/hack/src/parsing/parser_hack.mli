@@ -18,7 +18,7 @@ type parser_return = {
 val program : ?elaborate_namespaces:bool -> string -> parser_return
 
 (* Parses a file *)
-val from_file : string -> parser_return
+val from_file : Relative_path.t -> parser_return
 
 type saved_lb
 type assoc

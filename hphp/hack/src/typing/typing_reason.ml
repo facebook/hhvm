@@ -127,7 +127,7 @@ let rec to_string prefix r =
   | Rdynamic_yield (_, yield_pos, implicit_name, yield_name) ->
       [(p, prefix ^ (Printf.sprintf
         "\n%s\nDynamicYield implicitly defines %s() from the definition of %s()"
-        (Pos.string yield_pos)
+        (Pos.string (Pos.to_absolute yield_pos))
         implicit_name
         yield_name))]
   | Rmap_append _ ->

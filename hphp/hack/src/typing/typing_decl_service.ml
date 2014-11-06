@@ -19,7 +19,7 @@ module PHeap = Parser_heap.ParserHeap
 type fast = (SSet.t * SSet.t * SSet.t * SSet.t) SMap.t
 
 (* The set of files that failed *)
-type failed = SSet.t
+type failed = Relative_path.Set.t
 
 (* The result excepted from the service *)
 type result = Errors.t * failed
@@ -29,7 +29,7 @@ type result = Errors.t * failed
 (*****************************************************************************)
 
 module TypeDeclarationStore = GlobalStorage.Make(struct
-  type classes = SSet.t SMap.t
+  type classes = Relative_path.Set.t SMap.t
   type t = classes * Naming.env
 end)
 
@@ -43,12 +43,14 @@ end)
 
 let decl_file all_classes nenv (errorl, failed) fn =
   let errorl', () = Errors.do_ begin fun () ->
-    d ("Typing decl: "^fn);
+    d ("Typing decl: "^Relative_path.to_absolute fn);
     Typing_decl.make_env nenv all_classes fn;
     dn "OK";
   end
   in
-  let failed = if errorl' = [] then failed else SSet.add fn failed in
+  let failed =
+    if errorl' = [] then failed
+    else Relative_path.Set.add fn failed in
   let errorl = List.rev_append (List.rev errorl') errorl in
   errorl, failed
 
@@ -62,7 +64,7 @@ let decl_files (errors, failed) fnl =
 
 let merge_decl (errors1, failed1) (errors2, failed2) =
   errors1 @ errors2,
-  SSet.union failed1 failed2
+  Relative_path.Set.union failed1 failed2
 
 (*****************************************************************************)
 (* We need to know all the classes defined, because we want to declare
@@ -73,12 +75,13 @@ let merge_decl (errors1, failed1) (errors2, failed2) =
 (*****************************************************************************)
 
 let get_classes fast =
-  SMap.fold begin fun fn {FileInfo.n_classes = classes; _} acc ->
+  Relative_path.Map.fold begin fun fn {FileInfo.n_classes = classes; _} acc ->
     SSet.fold begin fun c_name acc ->
       let files =
-        try SMap.find_unsafe c_name acc with Not_found -> SSet.empty
+        try SMap.find_unsafe c_name acc
+        with Not_found -> Relative_path.Set.empty
       in
-      let files = SSet.add fn files in
+      let files = Relative_path.Set.add fn files in
       SMap.add c_name files acc
     end classes acc
   end fast SMap.empty
@@ -102,8 +105,8 @@ let init_bucket_size = 1000
 let go workers nenv fast =
   let all_classes = get_classes fast in
   TypeDeclarationStore.store (all_classes, nenv);
-  let fast_l = SMap.fold (fun x _ y -> x :: y) fast [] in
-  let neutral = [], SSet.empty in
+  let fast_l = Relative_path.Map.fold (fun x _ y -> x :: y) fast [] in
+  let neutral = [], Relative_path.Set.empty in
   dn "Declaring the types";
   let result =
     MultiWorker.call

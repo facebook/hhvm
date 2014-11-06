@@ -91,6 +91,6 @@ val is_null:   string
 val is_resource:  string
 
 val ndecl_file:
-  string -> FileInfo.t ->
-  Errors.t * SSet.t * env ->
-  Errors.t * SSet.t * env
+  Relative_path.t -> FileInfo.t ->
+  Errors.t * Relative_path.Set.t * env ->
+  Errors.t * Relative_path.Set.t * env

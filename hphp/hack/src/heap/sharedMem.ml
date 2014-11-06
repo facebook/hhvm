@@ -260,8 +260,8 @@ end
 module type S = sig
   type key
   type t
-  module KeySet : Set.S
-  module KeyMap : MapSig
+  module KeySet : Set.S with type elt = key
+  module KeyMap : MapSig with type key = key
 
   val add              : key -> t -> unit
   val get              : key -> t option

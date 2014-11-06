@@ -5,13 +5,14 @@ TOP=..
 TARGET=utils
 
 SRC= hh_json.ml \
-     path.ml pos.ml \
+     path.ml \
      sysConfig.ml tmp.ml build_id.ml \
      ident.ml \
      printSignal.ml tty.ml \
      sys_utils.ml \
      utils.ml \
-     errors.ml \
+     relative_path.ml \
+     pos.ml errors.ml \
      lock.ml wwwroot.ml \
      pidLog.ml fork.ml trie.ml \
 

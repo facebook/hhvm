@@ -18,13 +18,13 @@ module Make(S : SearchUtils.Searchable) = struct
   (* Shared memory for workers to put lists of pairs of keys and results
     * of our index. Indexed on file name. Cached because we read from here
     * every time the user searches *)
-  module SearchUpdates = SharedMem.WithCache (String) (struct
+  module SearchUpdates = SharedMem.WithCache (Relative_path.S) (struct
     type t = (string * term) list
     let prefix = Prefix.make()
   end)
   (* Maps file name to a list of keys that the file has results for *)
   (* This is only read once per update, so cache gives us no advantage *)
-  module SearchKeys = SharedMem.NoCache (String) (struct
+  module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
     type t = string list
     let prefix = Prefix.make()
   end)
@@ -50,7 +50,7 @@ module Make(S : SearchUtils.Searchable) = struct
   module WorkerApi = struct
     let process_term key name pos type_ trie_acc =
        let res =  {
-                    pos         = pos;
+                    pos         = Pos.to_absolute pos;
                     name        = name;
                     result_type = type_
                   } in
@@ -147,7 +147,7 @@ module Make(S : SearchUtils.Searchable) = struct
       SSet.iter (Trie.remove trie) removed_keys
 
     let index_files fns =
-      SSet.iter process_file fns
+      Relative_path.Set.iter process_file fns
 
     (* Note: the score should be able to compare to the scoring in
      * Fuzzy so that the results can be merged and the ordering still
@@ -178,14 +178,14 @@ module Make(S : SearchUtils.Searchable) = struct
       let files = List.fold_left begin fun acc key ->
         let filenames = Hashtbl.find main_index key in
         List.fold_left begin fun acc fn ->
-          SSet.add fn acc
+          Relative_path.Set.add fn acc
         end acc filenames
-      end SSet.empty keys in
+      end Relative_path.Set.empty keys in
       let results = ref [] in
       (* for every file, look in shared memory for all the results the file
        * contains. anything where the key starts with the full search
        * term is a match *)
-      SSet.iter begin fun fn ->
+      Relative_path.Set.iter begin fun fn ->
         let defs =
           try SearchUpdates.find_unsafe fn
           with Not_found -> []

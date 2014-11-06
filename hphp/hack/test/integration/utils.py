@@ -27,6 +27,7 @@ def proc_call(args):
     Invoke a subprocess, return stdout, send stderr to our stderr (for
     debugging)
     """
+    print(" ".join(args), file=sys.stderr)
     proc = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,

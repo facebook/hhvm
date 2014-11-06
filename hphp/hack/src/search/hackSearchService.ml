@@ -31,8 +31,6 @@ module SS = SearchService.Make(struct
     (type_num a) - (type_num b)
 end)
 
-module SUtils = SS.SUtils
-
 module WorkerApi = struct
   (* cleans off namespace and colon at the start of xhp name because the
    * user will want to search for xhp classes without typing a : at

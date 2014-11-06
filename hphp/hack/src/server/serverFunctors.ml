@@ -20,7 +20,7 @@ type files = SSet.t
 type client = in_channel * out_channel
 
 module type SERVER_PROGRAM = sig
-  val preinit : ServerArgs.options -> unit
+  val preinit : unit -> unit
   val init : genv -> env -> env
   val run_once_and_exit : genv -> env -> unit
   val filter_update : genv -> env -> Relative_path.t -> bool
@@ -153,7 +153,7 @@ end = struct
   * we look if env.modified changed.
   *)
   let main options =
-    Program.preinit options;
+    Program.preinit ();
     SharedMem.init();
     (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
     * someone C-c the client.

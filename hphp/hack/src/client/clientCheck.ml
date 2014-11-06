@@ -213,7 +213,7 @@ let rec main args retries =
     | MODE_SEARCH (query, type_) ->
         let ic, oc = connect args in
         ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH (query, type_));
-        let results = Marshal.from_channel ic in
+        let results : ServerSearch.result = Marshal.from_channel ic in
         ClientSearch.go results args.output_json;
         exit 0
     | MODE_UNSPECIFIED -> assert false

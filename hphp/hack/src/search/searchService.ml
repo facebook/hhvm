@@ -11,7 +11,6 @@
 module Make(S : SearchUtils.Searchable) = struct
   module Fuzzy = FuzzySearchService.Make(S)
   module Trie = TrieSearchService.Make(S)
-  module SUtils = SearchUtils.Make(S)
 
   module WorkerApi = struct
 
@@ -26,6 +25,14 @@ module Make(S : SearchUtils.Searchable) = struct
   end
 
   module MasterApi = struct
+
+    let marshal chan =
+      Fuzzy.marshal chan;
+      Trie.MasterApi.marshal chan
+
+    let unmarshal chan =
+      Fuzzy.unmarshal chan;
+      Trie.MasterApi.unmarshal chan
 
     (* Called by the master process when there is new information in
      * shared memory for us to index *)

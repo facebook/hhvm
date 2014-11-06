@@ -74,6 +74,9 @@ class TestSaveRestore(unittest.TestCase):
         function h(): string {
             return 1;
         }
+
+        function some_long_function_name() {
+        }
         """
 
         cls.initial_errors = [
@@ -113,17 +116,17 @@ class TestSaveRestore(unittest.TestCase):
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 
-    def check_errors(self, expected_errors):
+    def check_cmd(self, expected_output, options=[]):
         output = proc_call([
             self.hh_client,
             'check',
             '--autostart-server',
             'false',
             self.repo_dir
-        ])
+        ] + options)
         root = self.repo_dir + os.path.sep
         self.assertCountEqual(
-            map(lambda x: x.format(root=root), expected_errors),
+            map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
 
     def test_mtime_update(self):
@@ -135,11 +138,11 @@ class TestSaveRestore(unittest.TestCase):
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'))
 
-        self.check_errors(self.initial_errors)
+        self.check_cmd(self.initial_errors)
         touch(os.path.join(self.repo_dir, 'foo_1.php'))
-        self.check_errors(self.initial_errors)
+        self.check_cmd(self.initial_errors)
         touch(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.check_errors(self.initial_errors)
+        self.check_cmd(self.initial_errors)
 
     def test_new_error(self):
         """
@@ -160,7 +163,7 @@ class TestSaveRestore(unittest.TestCase):
             [os.path.join(self.repo_dir, 'foo_2.php')]
         )
 
-        self.check_errors([
+        self.check_cmd([
             '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
             '  {root}foo_2.php:3:27,29: This is an int',
             '  {root}foo_2.php:4:24,26: It is incompatible with a string',
@@ -190,7 +193,7 @@ class TestSaveRestore(unittest.TestCase):
             }
             """)
 
-        self.check_errors([
+        self.check_cmd([
             '{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])',
             '  {root}foo_2.php:3:27,29: This is an int',
             '  {root}foo_2.php:4:24,26: It is incompatible with a string',
@@ -218,7 +221,7 @@ class TestSaveRestore(unittest.TestCase):
             [os.path.join(self.repo_dir, 'foo_4.php')]
         )
 
-        self.check_errors(self.initial_errors + [
+        self.check_cmd(self.initial_errors + [
             '{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])',
             '  {root}foo_4.php:3:27,29: This is an int',
             '  {root}foo_4.php:4:24,26: It is incompatible with a string',
@@ -237,7 +240,7 @@ class TestSaveRestore(unittest.TestCase):
             [os.path.join(self.repo_dir, 'foo_3.php')]
         )
 
-        self.check_errors([
+        self.check_cmd([
             '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
             '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
             '  {root}foo_2.php:3:23,28: It is incompatible with a string',
@@ -256,7 +259,7 @@ class TestSaveRestore(unittest.TestCase):
 
         os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
 
-        self.check_errors([
+        self.check_cmd([
             '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
             '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
             '  {root}foo_2.php:3:23,28: It is incompatible with a string',
@@ -287,7 +290,7 @@ class TestSaveRestore(unittest.TestCase):
         )
 
         try:
-            self.check_errors([
+            self.check_cmd([
                 '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
                 '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
                 '  {root}bar_2.php:3:23,28: It is incompatible with a string',
@@ -300,7 +303,7 @@ class TestSaveRestore(unittest.TestCase):
             # errors. this occurs regardless of whether we are restoring from
             # a saved state or are running from a fresh initialized state,
             # and seems to be due to a race condition
-            self.check_errors([
+            self.check_cmd([
                 '{root}foo_1.php:4:20,22: Typing error (Typing[4110])',
                 '  {root}foo_1.php:4:20,22: This is a num (int/float) because this is used in an arithmetic operation',
                 '  {root}bar_2.php:3:23,28: It is incompatible with a string',
@@ -311,3 +314,17 @@ class TestSaveRestore(unittest.TestCase):
                 '  {root}bar_3.php:3:23,28: This is a string',
                 '  {root}bar_3.php:4:20,20: It is incompatible with an int',
             ])
+
+    def test_search(self):
+        """
+        Test hh_client --search
+        """
+
+        load_server(
+            self.hh_server,
+            self.repo_dir,
+            os.path.join(self.saved_state_dir, 'foo'))
+
+        self.check_cmd([
+            'File "{root}foo_3.php", line 7, characters 18-40: some_long_function_name, function'
+            ], options=['--search', 'some_lo'])

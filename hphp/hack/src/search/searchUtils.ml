@@ -16,13 +16,11 @@ module type Searchable = sig
   val compare_result_type : t -> t -> int
 end
 
-module Make(S : Searchable) = struct
+(* The results we'll return to the client *)
+type ('a, 'b) term = {
+  name: string;
+  pos: 'a;
+  result_type: 'b;
+}
 
-  (* The results we'll return to the client *)
-  type term = {
-    name: string;
-    pos: Pos.absolute;
-    result_type: S.t;
-  }
-
-end
+let to_absolute t = { t with pos = Pos.to_absolute t.pos }

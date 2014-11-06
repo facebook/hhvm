@@ -10,7 +10,7 @@
 
 module SS = HackSearchService
 module Json = Hh_json
-module SUtils = HackSearchService.SUtils
+module SUtils = SearchUtils
 
 let desc_string_from_type result_type =
   match result_type with

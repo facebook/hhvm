@@ -187,15 +187,16 @@ module Program : Server.SERVER_PROGRAM = struct
     try handle_connection_ genv env socket
     with
     | Unix.Unix_error (e, _, _) ->
-        Printf.printf "Unix error: %s\n" (Unix.error_message e);
-        flush stdout
+        Printf.fprintf stderr "Unix error: %s\n" (Unix.error_message e);
+        Printexc.print_backtrace stderr;
+        flush stderr
     | e ->
-        Printf.printf "Error: %s\n" (Printexc.to_string e);
-        flush stdout
+        Printf.fprintf stderr "Error: %s\n" (Printexc.to_string e);
+        Printexc.print_backtrace stderr;
+        flush stderr
 
-  let preinit options =
-    if not (ServerArgs.check_mode options)
-    then HackSearchService.attach_hooks ();
+  let preinit () =
+    HackSearchService.attach_hooks ();
     (* Force hhi files to be extracted and their location saved before workers
      * fork, so everyone can know about the same hhi path. *)
     ignore (Hhi.get_hhi_root());
@@ -251,8 +252,10 @@ module Program : Server.SERVER_PROGRAM = struct
   let parse_options = ServerArgs.parse_options
 
   let marshal chan =
-    Marshal.to_channel chan !Typing_deps.ifiles []
+    Marshal.to_channel chan !Typing_deps.ifiles [];
+    HackSearchService.SS.MasterApi.marshal chan
 
   let unmarshal chan =
-    Typing_deps.ifiles := Marshal.from_channel chan
+    Typing_deps.ifiles := Marshal.from_channel chan;
+    HackSearchService.SS.MasterApi.unmarshal chan
 end

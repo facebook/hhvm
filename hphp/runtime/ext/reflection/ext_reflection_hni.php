@@ -446,11 +446,15 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
    */
   public function getName(): string {
     if ($this->closure) {
-      $clsname = $this->getClosureScopeClassname($this->closure);
-      $pos = $clsname ? strrpos($clsname, '\\') : false;
-      return ($pos === false)
-        ? '{closure}'
-        : substr($clsname, 0, $pos + 1).'{closure}';
+      // Format: Closure$scope;hash
+      $cls = get_class($this->closure);
+      $ns_end = strrpos($cls, '\\');
+      if ($ns_end !== false) {
+        $ns_start = strpos($cls, '$') + 1;
+        $ns = substr($cls, $ns_start, $ns_end - $ns_start);
+        return $ns.'\\{closure}';
+      }
+      return '{closure}';
     }
     return parent::getName();
   }

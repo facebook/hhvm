@@ -83,6 +83,7 @@ public:
 
   static bool IsClosureName                (const std::string &name);
   std::string newClosureName(
+      const std::string &namespaceName,
       const std::string &className,
       const std::string &funcName);
 

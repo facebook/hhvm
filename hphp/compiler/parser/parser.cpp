@@ -1068,7 +1068,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_clsName, m_containingFuncName);
+      return newClosureName(m_namespace, m_clsName, m_containingFuncName);
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {

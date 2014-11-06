@@ -30,6 +30,7 @@ bool ParserBase::IsClosureName(const std::string &name) {
 }
 
 std::string ParserBase::newClosureName(
+    const std::string &namespaceName,
     const std::string &className,
     const std::string &funcName) {
   // Closure names must be globally unique.  The easiest way to do
@@ -39,6 +40,9 @@ std::string ParserBase::newClosureName(
   std::string name = "Closure$";
   if (!className.empty()) {
     name += className + "::";
+  } else if (!namespaceName.empty()) {
+    // If className is present, it already includes the namespace
+    name += namespaceName + "\\";
   }
   name += funcName;
 

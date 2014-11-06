@@ -152,7 +152,7 @@ struct IterData : IRExtraData {
     : iterId(iter), keyId(key), valId(val)
   {}
   std::string show() const {
-    return folly::format("{}::{}::{}", iterId, valId, valId).str();
+    return folly::format("{}::{}::{}", iterId, keyId, valId).str();
   }
 
   uint32_t iterId;

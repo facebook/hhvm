@@ -28,6 +28,11 @@ let dn s =
     flush stdout;
   end
 
+module String = struct
+  include String
+  let to_string x = x
+end
+
 module type MapSig = sig
   type +'a t
   type key

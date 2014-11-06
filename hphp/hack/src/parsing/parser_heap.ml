@@ -14,7 +14,9 @@
  *)
 (*****************************************************************************)
 
-module HH_FIXMES = SharedMem.WithCache(struct
+open Utils
+
+module HH_FIXMES = SharedMem.WithCache (String) (struct
   type t = Pos.t Utils.IMap.t Utils.IMap.t
   let prefix = Prefix.make()
 end)
@@ -46,10 +48,10 @@ let () =
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
 (*****************************************************************************)
 
-module ParserHeap = SharedMem.NoCache(struct
-  type t = Ast.program
-  let prefix = Prefix.make()
-end)
+module ParserHeap = SharedMem.NoCache (String) (struct
+    type t = Ast.program
+    let prefix = Prefix.make()
+  end)
 
 let find_class_in_file file_name class_name =
   match ParserHeap.get file_name with
@@ -60,4 +62,3 @@ let find_class_in_file file_name class_name =
         | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
         | _ -> acc
       end None defs
-

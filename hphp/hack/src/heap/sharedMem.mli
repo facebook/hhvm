@@ -68,26 +68,29 @@ val invalidate_caches: unit -> unit
 (*****************************************************************************)
 
 module type S = sig
+  type key
   type t
+  module KeySet : Set.S
+  module KeyMap : MapSig
 
   (* Safe for concurrent writes, the first writer wins, the second write
    * is dismissed.
    *)
-  val add: string -> t -> unit
+  val add: key -> t -> unit
 
   (* Safe for concurrent reads, but not if interleaved with any operation
    * mutating the table (add, remove etc ..).
    *)
-  val get: string -> t option
-  val get_old: string -> t option
-  val get_old_batch: SSet.t -> t option SMap.t
-  val remove_old_batch: SSet.t -> unit
-  val find_unsafe: string -> t
-  val get_batch: SSet.t -> t option SMap.t
-  val remove_batch: SSet.t -> unit
+  val get: key -> t option
+  val get_old: key -> t option
+  val get_old_batch: KeySet.t -> t option KeyMap.t
+  val remove_old_batch: KeySet.t -> unit
+  val find_unsafe: key -> t
+  val get_batch: KeySet.t -> t option KeyMap.t
+  val remove_batch: KeySet.t -> unit
 
   (* Safe for concurrent access. *)
-  val mem: string -> bool
+  val mem: key -> bool
 
   (* This function takes the elements present in the set and keep the "old"
    * version in a separate heap. This is useful when we want to compare 
@@ -95,10 +98,29 @@ module type S = sig
    * (cf typing/typing_redecl_service.ml) where we want to compare the type
    * of a class in the previous environment vs the current type.
    *)
-  val oldify_batch: SSet.t -> unit
+  val oldify_batch: KeySet.t -> unit
   (* Reverse operation of oldify *)
-  val revive_batch: SSet.t -> unit
+  val revive_batch: KeySet.t -> unit
 end
 
-module NoCache  : functor (Value:Value.Type) -> S with type t = Value.t
-module WithCache: functor (Value:Value.Type) -> S with type t = Value.t
+module type UserKeyType = sig
+  type t
+  val to_string : t -> string
+  val compare : t -> t -> int
+end
+
+module NoCache :
+  functor (UserKeyType : UserKeyType) ->
+  functor (Value:Value.Type) ->
+  S with type t = Value.t
+    and type key = UserKeyType.t
+    and module KeySet = Set.Make (UserKeyType)
+    and module KeyMap = MyMap (UserKeyType)
+
+module WithCache :
+  functor (UserKeyType : UserKeyType) ->
+  functor (Value:Value.Type) ->
+  S with type t = Value.t
+    and type key = UserKeyType.t
+    and module KeySet = Set.Make (UserKeyType)
+    and module KeyMap = MyMap (UserKeyType)

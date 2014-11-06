@@ -2943,7 +2943,7 @@ and encapsed_nested start env =
       | Tlvar ->
           L.back env.lb;
           let error_state = !(env.errors) in
-          let e = encapsed_expr env in
+          let e = expr env in
           (match L.string2 env.lb with
           | Trcb -> ()
           | _ -> error_expect env "}");

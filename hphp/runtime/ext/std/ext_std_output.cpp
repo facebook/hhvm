@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/hardware-counter.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -222,6 +223,19 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
   HardwareCounter::ClearPerfEvents();
 }
 
+// __SystemLib\print_hashbang
+void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
+  CallerFrame cf;
+  auto ar = cf();
+
+  if (ar->m_func->name()->empty()) {
+    // Print nothing in the lowest pseudomain
+    if (!g_context->getPrevFunc(ar)) return;
+  }
+
+  g_context->write(hashbang);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initOutput() {
@@ -253,6 +267,7 @@ void StandardExtension::initOutput() {
   HHVM_FE(hphp_get_hardware_counters);
   HHVM_FE(hphp_set_hardware_events);
   HHVM_FE(hphp_clear_hardware_events);
+  HHVM_FALIAS(__SystemLib\\print_hashbang, SystemLib_print_hashbang);
 
 #define INTCONST(v) Native::registerConstant<KindOfInt64> \
                   (makeStaticString(#v), k_##v);

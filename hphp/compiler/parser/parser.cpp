@@ -1808,6 +1808,19 @@ void Parser::onStatic(Token &out, Token &expr) {
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
 }
 
+void Parser::onHashBang(Token &out, Token &text) {
+  ExpressionPtr exp = NEW_EXP(ScalarExpression, T_STRING, text->text(),
+                              true);
+  ExpressionListPtr expList = NEW_EXP(ExpressionList);
+  expList->addElement(exp);
+  ExpressionPtr callExp = NEW_EXP(SimpleFunctionCall,
+                                  "__SystemLib\\print_hashbang",
+                                  true, expList, ExpressionPtr());
+  ExpStatementPtr expStmt(NEW_STMT(ExpStatement, callExp));
+  out->stmt = expStmt;
+  expStmt->onParse(m_ar, m_file);
+}
+
 void Parser::onEcho(Token &out, Token &expr, bool html) {
   if (html) {
     LocationPtr loc = getLocation();
@@ -2322,7 +2335,7 @@ void Parser::nns(int token, const std::string& text) {
   }
 
   if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
-      token != ';') {
+      token != ';' && token != T_HASHBANG) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

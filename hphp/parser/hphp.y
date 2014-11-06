@@ -608,6 +608,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_VARIABLE
 %token T_NUM_STRING
 %token T_INLINE_HTML
+%token T_HASHBANG
 %token T_CHARACTER
 %token T_BAD_CHARACTER
 %token T_ENCAPSED_AND_WHITESPACE
@@ -934,6 +935,8 @@ statement:
   | T_UNSET '(' variable_list ')' ';'  { _p->onUnset($$, $3);}
   | ';'                                { $$.reset(); $$ = ';';}
   | T_INLINE_HTML                      { _p->onEcho($$, $1, 1);}
+  | T_HASHBANG                         { _p->onHashBang($$, $1);
+                                         $$ = T_HASHBANG;}
   | T_FOREACH '(' expr
     T_AS foreach_variable
     foreach_optional_arg ')'           { _p->onNewLabelScope(false);

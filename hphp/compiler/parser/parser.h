@@ -248,6 +248,7 @@ public:
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
+  void onHashBang(Token &out, Token &text);
   void onEcho(Token &out, Token &expr, bool html);
   void onUnset(Token &out, Token &expr);
   void onExpStatement(Token &out, Token &expr);

@@ -769,10 +769,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
 <INITIAL>"#!"[^\n]*"\n" {
-        _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
+        SETTOKEN(T_HASHBANG);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
-        return T_INLINE_HTML;
+        return T_HASHBANG;
 }
 
 <INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {

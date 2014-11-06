@@ -53,22 +53,32 @@ def set_verbose_level(level):
 
 class Branch(object):
     """A branch within a repository, i.e. the basic unit of comparison."""
-    def __init__(self, name, env):
+    def __init__(self, name, env='', vm_path=None):
         self.name = name
         self.uid = _unique_id()
         self.env = env
+        self.vm_path = vm_path
+
+    def can_build(self):
+        return self.vm_path is None
 
     def build_dir(self):
         """Returns the build directory for this branch.
 
         """
-        return os.path.join(config.BUILD_ROOT, self.name)
+        if self.vm_path is None:
+            return os.path.join(config.BUILD_ROOT, self.name)
+        # We should never be asking for the build_dir if we've provided a VM
+        # path.
+        raise RuntimeError("It's invalid to query the build_dir.")
 
     def root_dir(self):
         """Returns the root directory inside the build directory for this
         branch.
 
         """
+        if self.vm_path is not None:
+            return self.vm_path
         return os.path.join(self.build_dir(), platform().build_internal_path)
 
     def result_file(self):
@@ -92,8 +102,20 @@ def parse_branches(raw_branches):
         if result is None:
             raise RuntimeError("Invalid branch format: %s" % raw_branch)
         name = result.group(1)
-        env = '' if result.group(2) is None else result.group(2)[1:]
-        branches.append(Branch(name, env))
+        if result.group(2) is None:
+            branches.append(Branch(name))
+            continue
+
+        env_and_path = result.group(2)[1:]  # Get rid of the leading colon.
+        pieces = env_and_path.split(':')
+        if '=' in pieces[-1]:
+            # The last segment looks like an environment setting.
+            branches.append(Branch(name, env_and_path))
+        else:
+            # The last segment looks like a path.
+            env = ':'.join(pieces[:-1])
+            path = os.path.expanduser(pieces[-1])
+            branches.append(Branch(name, env, path))
     return branches
 
 
@@ -123,6 +145,9 @@ def build_branches(branches):
 
     """
     for branch in unique_branches(branches):
+        if not branch.can_build():
+            continue
+
         build_dir = branch.build_dir()
         if os.path.isfile(build_dir):
             os.remove(build_dir)
@@ -205,7 +230,9 @@ def main():
                         help='Branch to benchmark. Can also add a colon-'
                              'separated list of environment variables to set '
                              'when benchmarking this branch. E.g. '
-                             'BRANCH:VAR1=VAL1:VAR2=VAL2')
+                             'BRANCH:VAR1=VAL1:VAR2=VAL2. Can also add the '
+                             'location of an already-built branch at the end, '
+                             'e.g. BRANCH:VAR1=VAL1:/path/to/build/root.')
     parser.add_argument('--remarkup', action='store_const', const=True,
                         default=False, help='Spit out the results as Remarkup')
     parser.add_argument('--json', action='store_const', const=True,

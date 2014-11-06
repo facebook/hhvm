@@ -371,13 +371,19 @@ class ReflectionParameter implements Reflector {
   public function isDefaultValueConstant() {
     if (array_key_exists('default', $this->info)) {
       $defaultText = $this->info['defaultText'];
-      $pattern = '/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/';
 
-      if (preg_match($pattern, $defaultText, $matches) === 1) {
-        return !in_array($defaultText, array('NULL', 'true', 'false'));
-      }
+      $quoted_pattern = '/^(["\']).*\1$/';
+      $braketed_pattern  = '/^\[.*\]$/';
 
-      return false;
+      if(is_numeric($defaultText) ||
+         in_array($defaultText, array('NULL', 'true', 'false') ||
+         preg_match($quoted_pattern, $defaultText) ||
+         preg_match($braketed_pattern, $defaultText) ||
+         substr($defaultText, 0, 5) === 'array'))
+         return false;
+
+      return true;
+
     }
     return NULL;
   }

@@ -75,7 +75,11 @@ class TestSaveRestore(unittest.TestCase):
             return 1;
         }
 
+        class Foo {}
+
         function some_long_function_name() {
+            new Foo();
+            h();
         }
         """
 
@@ -117,14 +121,14 @@ class TestSaveRestore(unittest.TestCase):
             os.remove(p)
 
     def check_cmd(self, expected_output, options=[]):
+        root = self.repo_dir + os.path.sep
         output = proc_call([
             self.hh_client,
             'check',
             '--autostart-server',
             'false',
             self.repo_dir
-        ] + options)
-        root = self.repo_dir + os.path.sep
+        ] + list(map(lambda x: x.format(root=root), options)))
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
@@ -315,9 +319,13 @@ class TestSaveRestore(unittest.TestCase):
                 '  {root}bar_3.php:4:20,20: It is incompatible with an int',
             ])
 
-    def test_search(self):
+    def test_ide_tools(self):
         """
-        Test hh_client --search
+        Test hh_client --search, --find-refs, --find-class-refs, --type-at-pos,
+        and --list-files
+
+        We *could* break this up into multiple tests, but starting the server
+        takes time and this test is slow enough already
         """
 
         load_server(
@@ -326,5 +334,24 @@ class TestSaveRestore(unittest.TestCase):
             os.path.join(self.saved_state_dir, 'foo'))
 
         self.check_cmd([
-            'File "{root}foo_3.php", line 7, characters 18-40: some_long_function_name, function'
+            'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
             ], options=['--search', 'some_lo'])
+
+        self.check_cmd([
+            'File "{root}foo_3.php", line 11, characters 13-13: h',
+            '1 total results'
+            ], options=['--find-refs', 'h'])
+
+        self.check_cmd([
+            'File "{root}foo_3.php", line 10, characters 17-19: Foo::__construct',
+            '1 total results'
+            ], options=['--find-class-refs', 'Foo'])
+
+        self.check_cmd([
+            'string'
+            ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
+
+        self.check_cmd([
+            '{root}foo_1.php',
+            '{root}foo_3.php',
+            ], options=['--list-files'])

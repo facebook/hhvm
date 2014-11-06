@@ -283,38 +283,36 @@ and bind_param env (_, ty1) param =
 and fun_def env _ f =
   if f.f_mode = Ast.Mdecl then () else begin
     NastCheck.fun_ env f;
-    (* Fresh type environment is actually unnecessary, but I prefer to have
-     * a garantee that we are using a clean typing enviroment.
-     *)
+    (* Fresh type environment is actually unnecessary, but I prefer to
+     * have a guarantee that we are using a clean typing environment. *)
     Env.fresh_tenv env (
-    fun env_up ->
-      let env = { env_up with Env.lenv = Env.empty_local } in
-      let env = Env.set_mode env f.f_mode in
-      let env = Env.set_root env (Dep.Fun (snd f.f_name)) in
-      let env, hret =
-        match f.f_ret with
-        | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
-        | Some ret ->
-          let env = Typing_hint.check_instantiable env ret in
-          Typing_hint.hint env ret in
-      let f_params = match f.f_variadic with
-        | FVvariadicArg param -> param :: f.f_params
-        | _ -> f.f_params
-      in
-      let env = Typing_hint.check_params_instantiable env f_params in
-      let env = Typing_hint.check_tparams_instantiable env f.f_tparams in
-      let env, params =
-        lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
-      let env = List.fold_left2 bind_param env params f_params in
-      let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_fun_kind in
-      let env = fold_fun_list env env.Env.todo in
-      if Env.is_strict env then begin
-        List.iter2 (check_param env) f_params params;
-        match f.f_ret with
-        | None -> suggest_return env (fst f.f_name) hret
-        | Some _ -> ()
-      end;
-   )
+      fun env_up ->
+        let env = { env_up with Env.lenv = Env.empty_local } in
+        let env = Env.set_mode env f.f_mode in
+        let env = Env.set_root env (Dep.Fun (snd f.f_name)) in
+        let env, hret =
+          match f.f_ret with
+            | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
+            | Some ret ->
+              Typing_hint.hint ~ensure_instantiable:true env ret in
+        let f_params = match f.f_variadic with
+          | FVvariadicArg param -> param :: f.f_params
+          | _ -> f.f_params
+        in
+        let env = Typing_hint.check_params_instantiable env f_params in
+        let env = Typing_hint.check_tparams_instantiable env f.f_tparams in
+        let env, params =
+          lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
+        let env = List.fold_left2 bind_param env params f_params in
+        let env = fun_ env f.f_unsafe (f.f_ret <> None) hret (fst f.f_name) f.f_body f.f_fun_kind in
+        let env = fold_fun_list env env.Env.todo in
+        if Env.is_strict env then begin
+          List.iter2 (check_param env) f_params params;
+          match f.f_ret with
+            | None -> suggest_return env (fst f.f_name) hret
+            | Some _ -> ()
+        end;
+    )
   end
 
 (*****************************************************************************)
@@ -3382,9 +3380,7 @@ and method_def env m =
   let env = Env.set_local env this (Env.get_self env) in
   let env, ret = (match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)
-    | Some ret ->
-      let env = Typing_hint.check_instantiable env ret in
-      Typing_hint.hint env ret) in
+    | Some ret -> Typing_hint.hint ~ensure_instantiable:true env ret) in
   let env = DynamicYield.method_def env m.m_name ret in
   let m_params = match m.m_variadic with
     | FVvariadicArg param -> param :: m.m_params

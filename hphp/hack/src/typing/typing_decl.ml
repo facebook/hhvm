@@ -645,7 +645,7 @@ and class_var_decl c (env, acc) cv =
   let env, ty =
     match cv.cv_type with
       | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' -> Typing_hint.hint env ty'
+      | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
@@ -656,10 +656,9 @@ and class_var_decl c (env, acc) cv =
   env, acc
 
 and static_class_var_decl c (env, acc) cv =
-  let env, ty =
-    match cv.cv_type with
-      | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty -> Typing_hint.hint env ty in
+  let env, ty = match cv.cv_type with
+    | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
+    | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -667,8 +666,7 @@ and static_class_var_decl c (env, acc) cv =
            }
   in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict ||
-      c.c_mode = Ast.Mpartial)
+  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)
@@ -781,14 +779,14 @@ and type_typedef_naming_and_decl nenv tdef =
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
-  let env = Typing_hint.check_instantiable env concrete_type in
-  let env, concrete_type = Typing_hint.hint env concrete_type in
+  let env, concrete_type =
+    Typing_hint.hint ~ensure_instantiable:true env concrete_type in
   let env, tcstr =
     match tcstr with
     | None -> env, None
     | Some constraint_type ->
-      let env = Typing_hint.check_instantiable env constraint_type in
-      let env, constraint_type = Typing_hint.hint env constraint_type in
+      let env, constraint_type =
+        Typing_hint.hint ~ensure_instantiable:true env constraint_type in
       let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
       let env = sub_type env constraint_type concrete_type in
       env, Some constraint_type

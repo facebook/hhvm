@@ -1530,15 +1530,7 @@ bool HHVM_FUNCTION(unlink,
   CHECK_PATH_FALSE(filename, 1);
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   if (!w) return false;
-  if (w->unlink(filename) != 0) {
-    raise_warning(
-      "%s(%s): %s",
-       __FUNCTION__ + 2,
-       filename.c_str(),
-       folly::errnoStr(errno).c_str()
-    );
-    return false;
-  }
+  CHECK_SYSTEM_SILENT(w->unlink(filename));
   return true;
 }
 
@@ -1741,7 +1733,7 @@ bool HHVM_FUNCTION(mkdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(pathname);
   if (!w) return false;
   int options = recursive ? k_STREAM_MKDIR_RECURSIVE : 0;
-  CHECK_SYSTEM(w->mkdir(pathname, mode, options));
+  CHECK_SYSTEM_SILENT(w->mkdir(pathname, mode, options));
   return true;
 }
 
@@ -1751,7 +1743,7 @@ bool HHVM_FUNCTION(rmdir,
   Stream::Wrapper* w = Stream::getWrapperFromURI(dirname);
   if (!w) return false;
   int options = 0;
-  CHECK_SYSTEM(w->rmdir(dirname, options));
+  CHECK_SYSTEM_SILENT(w->rmdir(dirname, options));
   return true;
 }
 

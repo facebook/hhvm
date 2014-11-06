@@ -72,7 +72,7 @@ end
 
 module type UserKeyType = sig
   type t
-  include Stringable.S with type t := t
+  val to_string : t -> string
   val compare : t -> t -> int
 end
 

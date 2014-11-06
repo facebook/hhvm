@@ -710,18 +710,20 @@ private:
      * for the whole instruction and is updated as the translator makes
      * progress.
      *
-     * We have a m_baseType in case we have more information about the type
-     * than m_base->type() has (this may be the case with pointers to locals or
-     * stack slots right now, for example). If m_base is not nullptr,
-     * m_base->type() is always a supertype of m_baseType, and m_baseType is
-     * always large enough to accommodate the type the base ends up having at
-     * runtime.
+     * We have a separate type in case we have more information about the type
+     * than m_base.value->type() has (this may be the case with pointers to
+     * locals or stack slots right now, for example). If m_base.value is not
+     * nullptr, m_base.value->type() is always a supertype of m_base.type, and
+     * m_base.type is always large enough to accommodate the type the base ends
+     * up having at runtime.
      *
-     * Don't change m_base directly; use setBase, to update m_baseType
+     * Don't change m_base directly; use setBase, to update m_base.type
      * automatically.
      */
-    SSATmp* m_base;
-    Type m_baseType;
+    struct {
+      SSATmp* value = nullptr;
+      Type type{Type::Bottom};
+    } m_base;
 
     /* Value computed before we do anything to allow better translations for
      * common, simple operations. */

@@ -20,7 +20,6 @@
  *)
 
 type build_opts = {
-  root: Path.path;
   steps: string list option; (* steps for hack build to run.
                          None means 'all' *)
   no_steps: string list option; (* ...but don't run these steps *)

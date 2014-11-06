@@ -356,21 +356,23 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CBuild { ServerMsg.
-           root = root;
-           steps = !steps;
-           no_steps = !no_steps;
-           run_scripts = !run_scripts;
-           serial = !serial;
-           test_dir = !test_dir;
-           grade = !grade;
-           list_classes = !list_classes;
-           is_push = !is_push;
-           clean = !clean;
-           clean_before_build = !clean_before_build;
-           check = !check;
-           verbose = !verbose;
-         }
+  CBuild { ClientBuild.
+    root = root;
+    build_opts = { ServerMsg.
+      steps = !steps;
+      no_steps = !no_steps;
+      run_scripts = !run_scripts;
+      serial = !serial;
+      test_dir = !test_dir;
+      grade = !grade;
+      list_classes = !list_classes;
+      is_push = !is_push;
+      clean = !clean;
+      clean_before_build = !clean_before_build;
+      check = !check;
+      verbose = !verbose;
+    }
+  }
 
 let parse_prolog_args () =
   let usage =

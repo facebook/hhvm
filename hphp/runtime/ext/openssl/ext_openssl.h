@@ -181,10 +181,10 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
                      const Variant& signature_alg = k_OPENSSL_ALGO_SHA1);
 bool HHVM_FUNCTION(openssl_x509_check_private_key, const Variant& cert,
                                                    const Variant& key);
-int64_t HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
-                                                 int purpose,
-                                         const Array& cainfo = null_array,
-                              const String& untrustedfile = null_string);
+Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
+                      int purpose,
+                      const Array& cainfo = null_array,
+                      const String& untrustedfile = null_string);
 bool HHVM_FUNCTION(openssl_x509_export_to_file, const Variant& x509,
                                                 const String& outfilename,
                                                 bool notext = true);

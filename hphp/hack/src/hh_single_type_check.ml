@@ -89,7 +89,8 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "}\n"^
   "function array_map($x, $y, ...);\n"^
-  "function idx<Tk, Tv>(?Indexish<Tk, Tv> $c, $i, $d = null) {}\n"
+  "function idx<Tk, Tv>(?Indexish<Tk, Tv> $c, $i, $d = null) {}\n"^
+  "final class stdClass {}\n"
 
 (*****************************************************************************)
 (* Helpers *)

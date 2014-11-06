@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -160,3 +160,10 @@ final class ExternalThreadEventWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, Exception): void) $callback) {}
 }
+
+/*
+ * stdClass is not really final. However, because stdClass has no
+ * properties of its own and is the result of casting an array to an
+ * object, it is exempt from 'property must exist' checks.
+ */
+final class stdClass {}

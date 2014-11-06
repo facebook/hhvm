@@ -2350,7 +2350,11 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
     | Tapply (x, paraml) ->
         let env, class_ = Env.get_class env (snd x) in
         (match class_ with
-          | None -> env, (Reason.Rnone, Tany), None
+          | None ->
+            env, (Reason.Rnone, Tany), None
+          | Some class_ when not is_method
+              && class_.tc_name = SN.Classes.cStdClass ->
+            env, (Reason.Rnone, Tany), None
           | Some class_ ->
             let paraml =
               if List.length paraml = 0

@@ -1,0 +1,2 @@
+File "stdclass_final.php", line 3, characters 7-18:
+You cannot extend a class declared as final (Typing[4035])

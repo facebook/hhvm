@@ -3237,7 +3237,7 @@ and check_parent env class_def class_type parent_type =
   if class_type.tc_members_fully_known
   then check_parent_abstract position parent_type class_type;
   if parent_type.tc_final
-  then Errors.extend_final position
+  then Errors.extend_final position parent_type.tc_pos parent_type.tc_name
   else ()
 
 and check_parent_abstract position parent_type class_type =

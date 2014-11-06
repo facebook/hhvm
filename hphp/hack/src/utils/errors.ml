@@ -1231,9 +1231,12 @@ let sketchy_null_check_primitive pos =
   "Use is_null, or $x === null instead"
  )
 
-let extend_final position =
-  add Typing.extend_final position
-    "You cannot extend a class declared as final"
+let extend_final extend_pos decl_pos name =
+  let name = (strip_ns name) in
+  add_list Typing.extend_final [
+    extend_pos, ("You cannot extend final class "^name);
+    decl_pos, "Declaration is here"
+  ]
 
 let read_before_write (pos, v) =
   add Typing.read_before_write pos (

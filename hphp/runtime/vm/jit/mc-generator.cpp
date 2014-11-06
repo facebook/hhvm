@@ -2254,13 +2254,31 @@ TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
 }
 
 void RelocationInfo::rewind(TCA start, TCA end) {
+  if (m_srcRanges.size() && m_srcRanges.back().first == start) {
+    assert(m_dstRanges.size() == m_srcRanges.size());
+    assert(m_srcRanges.back().second == end);
+    m_srcRanges.pop_back();
+    m_dstRanges.pop_back();
+  }
   // start and end could already exist (with start.first
-  // and end.second set respectively), so we shouldn't remove
-  // those nodes. And since they're added by recordRange,
-  // which is called after the failure-prone part of relocation
-  // is done, we can ignore them altogether.
-  auto it = m_adjustedAddresses.upper_bound(start);
+  // and end.second set respectively). In that case, we
+  // shouldn't remove those nodes.
+  auto it = m_adjustedAddresses.lower_bound(start);
+  if (it == m_adjustedAddresses.end()) return;
+  assert(it->first == start);
+  if (it->second.first) {
+    it++->second.second = 0;
+  } else {
+    m_adjustedAddresses.erase(it++);
+  }
   while (it != m_adjustedAddresses.end() && it->first < end) {
+    m_adjustedAddresses.erase(it++);
+  }
+  if (it == m_adjustedAddresses.end()) return;
+  assert(it->first == end);
+  if (it->second.second) {
+    it++->second.first = 0;
+  } else {
     m_adjustedAddresses.erase(it++);
   }
 }

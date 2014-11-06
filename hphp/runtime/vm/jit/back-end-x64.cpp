@@ -246,10 +246,27 @@ struct BackEnd : public jit::BackEnd {
     return true;
   }
 
+  typedef hphp_hash_set<void*> WideJmpSet;
+  struct JmpOutOfRange : std::exception {};
+
   size_t relocate(RelocationInfo& rel,
                   CodeBlock& destBlock,
                   TCA start, TCA end,
                   CodeGenFixups& fixups) override {
+    WideJmpSet wideJmps;
+    while (true) {
+      try {
+        return relocateImpl(rel, destBlock, start, end, fixups, wideJmps);
+      } catch (JmpOutOfRange& j) {
+      }
+    }
+  }
+
+  size_t relocateImpl(RelocationInfo& rel,
+                      CodeBlock& destBlock,
+                      TCA start, TCA end,
+                      CodeGenFixups& fixups,
+                      WideJmpSet& wideJmps) {
     TCA src = start;
     size_t range = end - src;
     bool hasInternalRefs = false;
@@ -288,8 +305,15 @@ struct BackEnd : public jit::BackEnd {
             bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
             assert(success);
           } else {
-            if (d2.isBranch() && d2.shrinkBranch()) {
-              internalRefsNeedUpdating = true;
+            if (d2.isBranch()) {
+              if (wideJmps.count(src)) {
+                if (d2.size() < kJmpLen) {
+                  d2.widenBranch();
+                  internalRefsNeedUpdating = true;
+                }
+              } else if (d2.shrinkBranch()) {
+                internalRefsNeedUpdating = true;
+              }
             }
             hasInternalRefs = true;
           }
@@ -347,6 +371,7 @@ struct BackEnd : public jit::BackEnd {
 
       if (hasInternalRefs && internalRefsNeedUpdating) {
         src = start;
+        bool ok = true;
         while (src != end) {
           DecodedInstruction di(src);
           TCA newPicAddress = nullptr;
@@ -367,18 +392,28 @@ struct BackEnd : public jit::BackEnd {
             TCA dest = rel.adjustedAddressAfter(src);
             DecodedInstruction d2(dest);
             if (newPicAddress) {
-              d2.setPicAddress(newPicAddress);
+              if (!d2.setPicAddress(newPicAddress)) {
+                always_assert(d2.isBranch() && d2.size() == 2);
+                wideJmps.insert(src);
+                ok = false;
+              }
             }
             if (newImmediate) {
-              d2.setImmediate(newImmediate);
+              if (!d2.setImmediate(newImmediate)) {
+                always_assert(false);
+              }
             }
           }
           src += di.size();
+        }
+        if (!ok) {
+          throw JmpOutOfRange();
         }
       }
       rel.markAddressImmediates(fixups.m_addressImmediates);
     } catch (...) {
       rel.rewind(start, end);
+      destBlock.setFrontier(destStart);
       throw;
     }
     return asm_count;

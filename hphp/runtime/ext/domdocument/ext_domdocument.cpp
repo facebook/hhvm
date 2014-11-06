@@ -1110,14 +1110,32 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
+/*
+ * If node is not nullptr, insert it into the given orphan set, which it must
+ * not already be a member of.
+ */
+static void appendOrphan(XmlNodeSet& orphans, xmlNodePtr node) {
   if (node) {
     assert(orphans.find(node) == orphans.end());
     orphans.insert(node);
   }
 }
 
-static void removeOrphanIfNeeded(XmlNodeSet &orphans, xmlNodePtr node) {
+/*
+ * If node is not nullptr, insert it into the given orphan set, which it may
+ * already be a member of.
+ */
+static void appendOrphanIfNeeded(XmlNodeSet& orphans, xmlNodePtr node) {
+  if (node) {
+    orphans.insert(node);
+  }
+}
+
+/*
+ * If node is not nullptr and is present in the given orphan set, remove it
+ * from the set.
+ */
+static void removeOrphanIfNeeded(XmlNodeSet& orphans, xmlNodePtr node) {
   if (node) {
     orphans.erase(node);
   }
@@ -1206,9 +1224,10 @@ Variant php_dom_create_object(xmlNodePtr obj, Object doc, bool owner) {
     od->incRefCount();
     nodeobj->m_doc = doc;
     nodeobj->m_node = obj;
-    if (owner && doc.get()) {
-      appendOrphan(*Native::data<DOMDocument>(doc.get())->m_orphans, obj);
-    }
+  }
+  if (owner && doc.get()) {
+    auto& orphans = *Native::data<DOMDocument>(doc.get())->m_orphans;
+    appendOrphanIfNeeded(orphans, obj);
   }
   return it->second;
 }
@@ -2452,7 +2471,12 @@ Variant HHVM_METHOD(DOMNode, replaceChild,
       xmlReplaceNode(oldchild, newchild);
       dom_reconcile_ns(nodep->doc, newchild);
     }
-    return create_node_object(oldchild, data->doc(), false);
+
+    if (auto newchilddoc = domnewchildnode->doc_data()) {
+      removeOrphanIfNeeded(*newchilddoc->m_orphans, domnewchildnode->m_node);
+    }
+    return create_node_object(oldchild, data->doc(),
+                              oldchild->parent == nullptr);
   }
 
   php_dom_throw_error(NOT_FOUND_ERR, data->doc_data()->m_stricterror);

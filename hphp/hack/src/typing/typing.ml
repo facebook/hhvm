@@ -565,9 +565,14 @@ and stmt env = function
   | Continue _
   | Break _ -> env
 
-and check_exhaustiveness env pos (r, ty) caselist =
+and check_exhaustiveness env pos ty caselist =
   (* Right now we only do exhaustiveness checking for enums. *)
+  let env, (r, ty) = Env.expand_type env ty in
   match ty with
+    | Tunresolved tyl ->
+      List.fold_left begin fun env ty ->
+        check_exhaustiveness env pos ty caselist
+      end env tyl
     | Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
       let env, ty = Typing_tdef.expand_typedef env r x argl in
       check_exhaustiveness env pos ty caselist

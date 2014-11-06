@@ -1455,14 +1455,25 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   return vm_call_user_func(*callback, make_packed_array(v1, v2)).toInt32();
 }
 
+// PHP 5.x does different things when diffing against the same array,
+// particularly when the comparison function is outside the norm of
+// return -1, 0, 1 specification. To do what PHP 5.x in these cases,
+// use the RuntimeOption
 #define COMMA ,
 #define diff_intersect_body(type,intersect_params,user_setup)   \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) return arr_array1;                    \
+  Array ret = Array::Create();                                  \
+  if (RuntimeOption::EnableZendSorting) {                       \
+    getCheckedArray(array2);                                    \
+    if (arr_array1.same(arr_array2)) {                          \
+      return ret;                                               \
+    }                                                           \
+  }                                                             \
   user_setup                                                    \
-  Array ret = arr_array1.type(array2, intersect_params);        \
+  ret = arr_array1.type(array2, intersect_params);              \
   if (ret.size()) {                                             \
-    for (ArrayIter iter(args); iter; ++iter) {                 \
+    for (ArrayIter iter(args); iter; ++iter) {                  \
       ret = ret.type(iter.second(), intersect_params);          \
       if (!ret.size()) break;                                   \
     }                                                           \

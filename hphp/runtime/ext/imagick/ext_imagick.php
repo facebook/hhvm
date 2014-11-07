@@ -1365,6 +1365,9 @@ class Imagick implements Countable, Iterator {
   <<__Native>>
   function getImageMatteColor(): ImagickPixel;
 
+  <<__Native>>
+  function getImageMimeType(): string;
+
   /**
    * Gets the image orientation
    *

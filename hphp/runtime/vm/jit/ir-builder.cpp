@@ -90,13 +90,13 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 SSATmp* IRBuilder::genPtrToInitNull() {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(Type::cns(&init_null_variant, Type::PtrToMemInitNull));
+  return cns(Type::cns(&init_null_variant, Type::PtrToMembInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(Type::cns(&null_variant, Type::PtrToMemUninit));
+  return cns(Type::cns(&null_variant, Type::PtrToMembUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {

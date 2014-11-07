@@ -881,9 +881,9 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
 
-| LdVectorBase, D(PtrToMemCell), S(Obj), E
+| LdVectorBase, D(PtrToMembCell), S(Obj), E
 
-| LdPairBase, D(PtrToMemCell), S(Obj), E
+| LdPairBase, D(PtrToMembCell), S(Obj), E
 
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
@@ -2312,13 +2312,14 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(PtrToRGblCell), S(Str), E|Er
+| BaseG, D(PtrToRMembCell), S(Str), E|Er
 
   Get a base from global named S0.
 
   NB: BaseG returns either a PtrToGblGen, OR a pointer to a ref that is rooted
   in a GblGen.  (I.e. the unbox happens in the C++ helper that this instruction
-  calls.)
+  calls.)  If it is not a defining BaseG it can also return the
+  init_null_variant, so for now it returns a PtrToRMembCell.
 
 | PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 

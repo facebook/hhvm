@@ -483,16 +483,16 @@ TEST(Type, PtrRefs) {
 
   EXPECT_TRUE(Type::PtrToPropCell < Type::PtrToRPropCell);
   EXPECT_TRUE(Type::PtrToPropCell <= Type::PtrToRPropCell);
-  EXPECT_TRUE(Type::PtrToPropCell < Type::PtrToMemCell);
-  EXPECT_TRUE(Type::PtrToPropCell < Type::PtrToRMemCell);
-  EXPECT_FALSE(Type::PtrToPropCell < Type::PtrToRMemInt);
-  EXPECT_TRUE(Type::PtrToPropCell.maybe(Type::PtrToRMemInt));
+  EXPECT_TRUE(Type::PtrToPropCell < Type::PtrToMembCell);
+  EXPECT_TRUE(Type::PtrToPropCell < Type::PtrToRMembCell);
+  EXPECT_FALSE(Type::PtrToPropCell < Type::PtrToRMembInt);
+  EXPECT_TRUE(Type::PtrToPropCell.maybe(Type::PtrToRMembInt));
   EXPECT_TRUE(!Type::PtrToPropInt.maybe(Type::PtrToRefInt));
   EXPECT_TRUE(!Type::PtrToPropInt.maybe(Type::PtrToRefBool));
   EXPECT_TRUE(!Type::PtrToPropInt.maybe(Type::PtrToPropBool));
 
   EXPECT_EQ(Type::Bottom, Type::PtrToRefInt & Type::PtrToClsInitCell);
-  EXPECT_EQ(Type::Bottom, Type::PtrToMemCell & Type::PtrToClsInitCell);
+  EXPECT_EQ(Type::Bottom, Type::PtrToMembCell & Type::PtrToClsInitCell);
 }
 
 } }

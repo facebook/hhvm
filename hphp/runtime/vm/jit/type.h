@@ -154,8 +154,8 @@ enum class Ptr : uint8_t {
   IRTP(PtrToSPropBoxed##name, SProp, (bits) << kPtrBoxShift)  \
   IRTP(PtrToMIS##name,          MIS, (bits) << kPtrShift)     \
   IRTP(PtrToMISBoxed##name,     MIS, (bits) << kPtrBoxShift)  \
-  IRTP(PtrToMem##name,         Memb, (bits) << kPtrShift)     \
-  IRTP(PtrToMemBoxed##name,    Memb, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToMemb##name,        Memb, (bits) << kPtrShift)     \
+  IRTP(PtrToMembBoxed##name,   Memb, (bits) << kPtrBoxShift)  \
   IRTP(PtrToClsInit##name,  ClsInit, (bits) << kPtrShift)     \
                                                               \
   IRTP(PtrToRFrame##name,    RFrame, (bits) << kPtrShift)     \
@@ -164,7 +164,7 @@ enum class Ptr : uint8_t {
   IRTP(PtrToRProp##name,      RProp, (bits) << kPtrShift)     \
   IRTP(PtrToRArr##name,        RArr, (bits) << kPtrShift)     \
   IRTP(PtrToRSProp##name,    RSProp, (bits) << kPtrShift)     \
-  IRTP(PtrToRMem##name,       RMemb, (bits) << kPtrShift)     \
+  IRTP(PtrToRMemb##name,      RMemb, (bits) << kPtrShift)     \
                                                               \
   IRTP(PtrToRef##name,          Ref, (bits) << kPtrShift)
 
@@ -269,8 +269,8 @@ enum class Ptr : uint8_t {
   IRTP(PtrToRSPropInit, RSProp, kInit << kPtrShift)               \
   IRTP(PtrToRMISGen,      RMIS, kGen << kPtrShift)                \
   IRTP(PtrToRMISInit,     RMIS, kInit << kPtrShift)               \
-  IRTP(PtrToRMemGen,     RMemb, kGen << kPtrShift)                \
-  IRTP(PtrToRMemInit,    RMemb, kInit << kPtrShift)               \
+  IRTP(PtrToRMembGen,     RMemb, kGen << kPtrShift)               \
+  IRTP(PtrToRMembInit,    RMemb, kInit << kPtrShift)              \
                                                                   \
   IRTP(PtrToRefGen,        Ref, kGen << kPtrShift)                \
   IRTP(PtrToRefInit,       Ref, kInit << kPtrShift)

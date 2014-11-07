@@ -209,14 +209,15 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       sb.append("\";");
       return sb.detach();
     }
+    case KindOfResource:
+      return "i:0;";
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
       if (arr->empty()) return "a:0:{}";
       // fall-through
     }
     case KindOfDouble:
-    case KindOfObject:
-    case KindOfResource: {
+    case KindOfObject: {
       VariableSerializer vs(VariableSerializer::Type::Serialize);
       return vs.serialize(value, true);
     }

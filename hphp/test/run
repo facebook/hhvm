@@ -1701,8 +1701,6 @@ function main($argv) {
       " in serial)\n";
   }
 
-  var_dump($test_buckets);
-
   if (isset($options['verbose'])) {
     Status::setMode(Status::MODE_VERBOSE);
   }

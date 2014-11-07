@@ -990,9 +990,9 @@ struct StackTransInfo {
     InsertMid
   };
   Kind kind;
-  int numPops;
-  int numPushes;
-  int pos;
+  int numPops;   // only for PushPop
+  int numPushes; // only for PushPop
+  int pos;       // only for InsertMid
 };
 
 bool instrIsNonCallControlFlow(Op opcode);

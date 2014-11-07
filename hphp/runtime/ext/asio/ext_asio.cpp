@@ -29,7 +29,7 @@ namespace HPHP {
 
 namespace {
 
-int HHVM_FUNCTION(asio_get_current_context_idx) {
+int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();
 }
 

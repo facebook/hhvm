@@ -1053,7 +1053,7 @@ void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
   }
 }
 
-int HHVM_FUNCTION(get_http_request_size) {
+int64_t HHVM_FUNCTION(get_http_request_size) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->getRequestSize();

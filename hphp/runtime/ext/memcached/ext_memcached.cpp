@@ -49,6 +49,10 @@ namespace HPHP {
 
 #define MEMC_COMPRESS_THRESHOLD 100
 
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX < 0x00052000
+#  define MEMCACHED_SERVER_TEMPORARILY_DISABLED (1024 << 2)
+#endif
+
 // Class options
 const int64_t q_Memcached$$OPT_COMPRESSION = -1001;
 const int64_t q_Memcached$$OPT_PREFIX_KEY  = -1002;
@@ -115,6 +119,14 @@ const int64_t q_Memcached$$OPT_CACHE_LOOKUPS
           = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
 const int64_t q_Memcached$$OPT_SERVER_FAILURE_LIMIT
           = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const int64_t q_Memcached$$OPT_DEAD_TIMEOUT
+          = MEMCACHED_BEHAVIOR_DEAD_TIMEOUT;
+#endif
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const int64_t q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+          = MEMCACHED_BEHAVIOR_REMOVE_FAILED_SERVERS;
+#endif
 
 // libmemcached result codes
 const int64_t q_Memcached$$RES_SUCCESS
@@ -165,6 +177,10 @@ const int64_t q_Memcached$$OPT_VERIFY_KEY
           = MEMCACHED_BEHAVIOR_VERIFY_KEY;
 const int64_t q_Memcached$$OPT_SORT_HOSTS
           = MEMCACHED_BEHAVIOR_SORT_HOSTS;
+const int64_t q_Memcached$$RES_SERVER_MARKED_DEAD
+          = MEMCACHED_SERVER_MARKED_DEAD;
+const int64_t q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+          = MEMCACHED_SERVER_TEMPORARILY_DISABLED;
 
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
@@ -1203,6 +1219,9 @@ const StaticString s_OPT_BUFFER_WRITES("OPT_BUFFER_WRITES");
 const StaticString s_OPT_CACHE_LOOKUPS("OPT_CACHE_LOOKUPS");
 const StaticString s_OPT_COMPRESSION("OPT_COMPRESSION");
 const StaticString s_OPT_CONNECT_TIMEOUT("OPT_CONNECT_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const StaticString s_OPT_DEAD_TIMEOUT("OPT_DEAD_TIMEOUT");
+#endif
 const StaticString s_OPT_DISTRIBUTION("OPT_DISTRIBUTION");
 const StaticString s_OPT_HASH("OPT_HASH");
 const StaticString s_OPT_LIBKETAMA_COMPATIBLE("OPT_LIBKETAMA_COMPATIBLE");
@@ -1210,6 +1229,9 @@ const StaticString s_OPT_NO_BLOCK("OPT_NO_BLOCK");
 const StaticString s_OPT_POLL_TIMEOUT("OPT_POLL_TIMEOUT");
 const StaticString s_OPT_PREFIX_KEY("OPT_PREFIX_KEY");
 const StaticString s_OPT_RECV_TIMEOUT("OPT_RECV_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const StaticString s_OPT_REMOVE_FAILED_SERVERS("OPT_REMOVE_FAILED_SERVERS");
+#endif
 const StaticString s_OPT_RETRY_TIMEOUT("OPT_RETRY_TIMEOUT");
 const StaticString s_OPT_SEND_TIMEOUT("OPT_SEND_TIMEOUT");
 const StaticString s_OPT_SERIALIZER("OPT_SERIALIZER");
@@ -1238,6 +1260,9 @@ const StaticString s_RES_PARTIAL_READ("RES_PARTIAL_READ");
 const StaticString s_RES_PAYLOAD_FAILURE("RES_PAYLOAD_FAILURE");
 const StaticString s_RES_PROTOCOL_ERROR("RES_PROTOCOL_ERROR");
 const StaticString s_RES_SERVER_ERROR("RES_SERVER_ERROR");
+const StaticString s_RES_SERVER_MARKED_DEAD("RES_SERVER_MARKED_DEAD");
+const StaticString
+ s_RES_SERVER_TEMPORARILY_DISABLED("RES_SERVER_TEMPORARILY_DISABLED");
 const StaticString s_RES_SOME_ERRORS("RES_SOME_ERRORS");
 const StaticString s_RES_SUCCESS("RES_SUCCESS");
 const StaticString s_RES_TIMEOUT("RES_TIMEOUT");
@@ -1490,6 +1515,27 @@ class MemcachedExtension : public Extension {
     Native::registerClassConstant<KindOfInt64>(
       s_Memcached.get(), s_OPT_SORT_HOSTS.get(), q_Memcached$$OPT_SORT_HOSTS
     );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_MARKED_DEAD.get(),
+      q_Memcached$$RES_SERVER_MARKED_DEAD
+    );
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_REMOVE_FAILED_SERVERS.get(),
+      q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+    );
+#endif
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_DEAD_TIMEOUT.get(),
+      q_Memcached$$OPT_DEAD_TIMEOUT
+    );
+#endif
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
+      q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+    );
+
 
 
     loadSystemlib();

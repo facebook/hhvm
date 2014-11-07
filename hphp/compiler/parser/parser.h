@@ -433,6 +433,8 @@ private:
 
   void checkAssignThis(Token &var);
 
+  void checkAssignThis(ExpressionPtr e);
+
   void checkAssignThis(ExpressionListPtr params);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);

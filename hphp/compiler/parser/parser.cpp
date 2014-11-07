@@ -722,6 +722,7 @@ void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
     checkAllowedInWriteContext((*el)[i]);
+    checkAssignThis((*el)[i]);
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
@@ -754,6 +755,12 @@ void Parser::checkAssignThis(string var) {
 
 void Parser::checkAssignThis(Token &var) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionPtr e) {
+  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(e)) {
     checkAssignThis(simp->getName());
   }
 }

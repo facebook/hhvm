@@ -236,6 +236,21 @@ function map_convenience_filename($file) {
   return hphp_home().'/'.$mappage[$file];
 }
 
+// Some tests have to be run together in the same test bucket, one after the
+// other in order to avoid races and collisions
+function serial_only_tests() {
+  // Can be a directory or a single test
+  $serial = array (
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/memcached-getallkeys.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/get_set.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcache/get_compressed.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/decompression.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/types.php',
+  );
+  $tests = find_tests($serial);
+  return $tests;
+}
+
 function find_tests($files, array $options = null) {
   if (!$files) {
     $files = array('quick');
@@ -1612,6 +1627,7 @@ function main($argv) {
   if (isset($options['list-tests'])) {
     error(list_tests());
   }
+
   $tests = find_tests($files, $options);
   if (isset($options['shuffle'])) {
     shuffle($tests);
@@ -1651,19 +1667,41 @@ function main($argv) {
     $servers = $options['servers'] = start_servers($options, $configs);
   }
 
-  if (!isset($options['fbmake'])) {
-    print "Running ".count($tests)." tests in ".
-      $options['threads']." threads\n";
-  }
-
   // Try to construct the buckets so the test results are ready in
   // approximately alphabetical order
   $test_buckets = array();
   $i = 0;
+  $serial_tests = serial_only_tests();
   foreach ($tests as $test) {
-    $test_buckets[$i][] = $test;
-    $i = ($i + 1) % $options['threads'];
+    if (!in_array($test, $serial_tests)) {
+      $test_buckets[$i][] = $test;
+      $i = ($i + 1) % $options['threads'];
+    }
   }
+
+  $actual_serial_count_for_this_run = 0;
+  foreach ($serial_tests as $test) {
+    // Only populate a test into the serial bucket if it was in the original
+    // test list provided by user to begin with. All serial tests are, of
+    // course, in the same bucket so they run sequentially.
+    if (in_array($test, $tests)) {
+      $test_buckets[$i][] = $test;
+      $actual_serial_count_for_this_run++;
+    }
+  }
+  // Get the threads right after accounting for serial only tests since
+  // originally we accounted for the serial tests in the number of threads
+  if (count($test_buckets) < $options['threads']) {
+    $options['threads'] = count($test_buckets);
+  }
+
+  if (!isset($options['fbmake'])) {
+    print "Running ".count($tests)." tests in ".
+      $options['threads']." threads (" . $actual_serial_count_for_this_run .
+      " in serial)\n";
+  }
+
+  var_dump($test_buckets);
 
   if (isset($options['verbose'])) {
     Status::setMode(Status::MODE_VERBOSE);

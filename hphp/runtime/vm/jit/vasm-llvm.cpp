@@ -77,6 +77,17 @@ struct LLVMErrorInit {
 static LLVMErrorInit s_llvmErrorInit;
 
 /*
+ * Map of global symbols used by LLVM.
+ */
+static jit::hash_map<std::string, uint64_t> globalSymbols;
+
+void registerGlobalSymbol(const std::string& name, uint64_t address) {
+  auto it = globalSymbols.emplace(name, address);
+  always_assert((it.second == true || it.first->second == address) &&
+                "symbol already registered with a different value");
+}
+
+/*
  * TCMemoryManager allows llvm to emit code into the appropriate places in the
  * TC. Currently all code goes into the Main code block.
  */
@@ -140,11 +151,8 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
   virtual uint64_t getSymbolAddress(const std::string& name) override {
     FTRACE(1, "getSymbolAddress({})\n", name);
-    // This is currently only called with '__unnamed_2', and the address we
-    // return doesn't appear anywhere in the generated code. This may change,
-    // and when it does we should figure out what llvm wants and return a
-    // meaningful address.
-    return 0xbadbadbad;
+    auto element = globalSymbols.find(name);
+    return element == globalSymbols.end() ? 0 : element->second;
   }
 
 private:
@@ -239,6 +247,7 @@ struct LLVMEmitter {
                              "personality0",
                              m_module.get());
     m_personalityFunc->setCallingConv(llvm::CallingConv::C);
+    registerGlobalSymbol("personality0", 0xbadbadbad);
 
     m_retFuncPtrPtrType = llvm::PointerType::get(llvm::PointerType::get(
           llvm::FunctionType::get(
@@ -298,8 +307,8 @@ struct LLVMEmitter {
       .setUseMCJIT(true)
       .setMCJITMemoryManager(new TCMemoryManager(m_areas))
       .setOptLevel(llvm::CodeGenOpt::Aggressive)
-      .setRelocationModel(llvm::Reloc::PIC_)
-      .setCodeModel(llvm::CodeModel::JITDefault)
+      .setRelocationModel(llvm::Reloc::Static)
+      .setCodeModel(llvm::CodeModel::Small)
       .setVerifyModules(true)
       .setTargetOptions(targetOptions)
       .create());
@@ -722,8 +731,15 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
   case CppCall::Kind::Direct:
-    funcPtr = m_irb.CreateIntToPtr(cns(uintptr_t(call.address())),
-                                   llvm::PointerType::get(funcType,0));
+    std::string funcName = getNativeFunctionName(call.address());
+    funcPtr = m_module->getFunction(funcName);
+    if (!funcPtr) {
+      registerGlobalSymbol(funcName, (uint64_t)call.address());
+      funcPtr = llvm::Function::Create(funcType,
+                                       llvm::GlobalValue::ExternalLinkage,
+                                       funcName,
+                                       m_module.get());
+    }
   }
 
   llvm::Instruction* callInst = nullptr;

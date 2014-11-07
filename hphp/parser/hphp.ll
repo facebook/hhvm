@@ -1024,6 +1024,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"</script"{WHITESPACE}*">"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: </script> not allowed");
+          return T_HH_ERROR;
+        }
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {
           RETSTEP(T_CLOSE_TAG);
@@ -1033,6 +1037,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: %%> not allowed");
+          return T_HH_ERROR;
+        }
         if (_scanner->aspTags()) {
                 yy_push_state(ST_IN_HTML, yyscanner);
                 if (_scanner->full()) {

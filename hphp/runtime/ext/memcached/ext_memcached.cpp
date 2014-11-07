@@ -381,9 +381,9 @@ class MemcachedData {
     }
     return true;
   }
-  memcached_return doCacheCallback(const Variant& callback, const String& key,
-                                   Variant& value) {
-    Array params(PackedArrayInit(3).append(Variant(this))
+  memcached_return doCacheCallback(const Variant& callback, ObjectData* this_,
+                                   const String& key, Variant& value) {
+    Array params(PackedArrayInit(3).append(Variant(this_))
                                    .append(key)
                                    .appendRef(value).toArray());
     if (!vm_call_user_func(callback, params).toBoolean()) {
@@ -614,7 +614,7 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                               &result.value, &status)) {
     if (status == MEMCACHED_END) status = MEMCACHED_NOTFOUND;
     if (status == MEMCACHED_NOTFOUND && !cache_cb.isNull()) {
-      status = data->doCacheCallback(cache_cb, key, returnValue);
+      status = data->doCacheCallback(cache_cb, this_, key, returnValue);
       if (!data->handleError(status)) return false;
       if (cas_token.isReferenced()) cas_token = 0.0;
       return returnValue;

@@ -337,6 +337,7 @@ public:
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
+  static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;

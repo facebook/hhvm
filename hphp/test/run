@@ -374,6 +374,7 @@ function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
     '-c',
     $config,
     '-vEval.EnableArgsInBacktraces=true',
+    '-vEval.EnableIntrinsicsExtension=true',
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',

@@ -75,6 +75,7 @@ bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
+bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -907,6 +908,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(EnableEmitSwitch, ini, eval["EnableEmitSwitch"], true);
     Config::Bind(EnableEmitterStats, ini, eval["EnableEmitterStats"],
                  EnableEmitterStats);
+    Config::Bind(EnableIntrinsicsExtension, ini,
+                 eval["EnableIntrinsicsExtension"], EnableIntrinsicsExtension);
     Config::Bind(RecordCodeCoverage, ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "

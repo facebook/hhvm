@@ -50,6 +50,18 @@ bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
   return false;
 }
 
+std::atomic<bool> hasCalledDisableInliningIntrinsic;
+hphp_hash_set<const StringData*,
+                    string_data_hash,
+                    string_data_isame> forbiddenInlinees;
+SimpleMutex forbiddenInlineesLock;
+
+bool inliningIsForbiddenFor(const Func* callee) {
+  if (!hasCalledDisableInliningIntrinsic.load()) return false;
+  SimpleLock locker(forbiddenInlineesLock);
+  return forbiddenInlinees.find(callee->fullName()) != forbiddenInlinees.end();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // canInlineAt() helpers.
 
@@ -64,6 +76,9 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
 
   if (!callee) {
     return refuse("callee not known");
+  }
+  if (inliningIsForbiddenFor(callee)) {
+    return refuse("inlining disabled for callee");
   }
   if (callee == callSK.func()) {
     return refuse("call is recursive");
@@ -195,6 +210,12 @@ bool checkFPIRegion(SrcKey callSK, const Func* callee,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+void InliningDecider::forbidInliningOf(const Func* callee) {
+  hasCalledDisableInliningIntrinsic.store(true);
+  SimpleLock locker(forbiddenInlineesLock);
+  forbiddenInlinees.insert(callee->fullName());
 }
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,

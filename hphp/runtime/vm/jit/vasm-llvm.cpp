@@ -195,8 +195,7 @@ struct LLVMEmitter {
     }
 
     auto args = m_function->arg_begin();
-    m_rVmSp = m_valueInfo[Vreg(x64::rVmSp)].llval = args++;
-    m_rVmSp->setName("rVmSp");
+    m_valueInfo[Vreg(x64::rVmSp)].llval = args++;
     m_rVmTl = m_valueInfo[Vreg(x64::rVmTl)].llval = args++;
     m_rVmTl->setName("rVmTl");
     m_rVmFp = m_valueInfo[Vreg(x64::rVmFp)].llval = args++;
@@ -504,8 +503,7 @@ VASM_OPCODES
   const Vunit& m_unit;
   Vasm::AreaList& m_areas;
 
-  // Reserved regs. We need to keep those before they get SSA-ified.
-  llvm::Value* m_rVmSp{nullptr};
+  // Special regs.
   llvm::Value* m_rVmTl{nullptr};
   llvm::Value* m_rVmFp{nullptr};
 
@@ -546,10 +544,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     auto& b = m_unit.blocks[label];
     m_irb.SetInsertPoint(block(label));
 
-    // TODO(#5376594): before these regs are SSA-ified we are using the
-    // hack below. Reset special registers for every block.
-    m_valueInfo[Vreg(x64::rVmSp)].llval = m_rVmSp;
-    m_valueInfo[Vreg(x64::rVmTl)].llval = m_rVmTl;
+    // TODO(#5376594): before rVmFp is SSA-ified we are using the hack below.
     m_valueInfo[Vreg(x64::rVmFp)].llval = m_rVmFp;
 
     for (auto& inst : b.code) {
@@ -560,6 +555,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
 O(addq) \
 O(addqi) \
 O(bindjmp) \
+O(defvmsp) \
 O(end) \
 O(cmpbi) \
 O(cmpbim) \
@@ -588,6 +584,8 @@ O(storeli) \
 O(storeqi) \
 O(svcreq) \
 O(syncpoint) \
+O(syncvmfp) \
+O(syncvmsp) \
 O(testbi) \
 O(testlim) \
 O(testq) \
@@ -639,6 +637,10 @@ void LLVMEmitter::emit(const addqi& inst) {
 
 void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
+}
+
+void LLVMEmitter::emit(const defvmsp& inst) {
+  defineValue(inst.d, value(x64::rVmSp));
 }
 
 void LLVMEmitter::emit(const end& inst) {
@@ -1037,6 +1039,14 @@ void LLVMEmitter::emit(const svcreq& inst) {
 }
 
 void LLVMEmitter::emit(const syncpoint& inst) {
+}
+
+void LLVMEmitter::emit(const syncvmfp& inst) {
+  // Nothing to do really.
+}
+
+void LLVMEmitter::emit(const syncvmsp& inst) {
+  defineValue(x64::rVmSp, value(inst.s));
 }
 
 void LLVMEmitter::emit(const testbi& inst) {

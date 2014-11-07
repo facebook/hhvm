@@ -284,6 +284,7 @@ Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
 }
 
 Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
+  VMRegAnchor _;
   CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
@@ -297,6 +298,7 @@ Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
 
 Variant HHVM_FUNCTION(iterator_to_array, const Variant& obj,
                                          bool use_keys /* = true */) {
+  VMRegAnchor _;
   Array ret(Array::Create());
   CHECK_TRAVERSABLE_IMPL(obj, ret);
   Object pobj = get_traversable_object_iterator(obj);

@@ -460,8 +460,6 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   return true;
 }
 
-#undef VALIDATE_CONN
-#undef VALIDATE_CONN_CONNECTED
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_driver
@@ -483,6 +481,17 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
     raise_warning("invalid object or resource mysqli_result");                 \
     return init_null();                                                        \
   }
+
+static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
+                           Variant connection) {
+  Object obj = connection.toObject();
+  auto res = get_connection_resource(obj.get());
+  VALIDATE_RESOURCE(res, MySQLState::CONNECTED);
+  return res;
+}
+
+#undef VALIDATE_CONN
+#undef VALIDATE_CONN_CONNECTED
 
 static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
   auto res = getResult(this_);
@@ -701,6 +710,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, ssl_set);
 
     // mysqli_result
+    HHVM_ME(mysqli_result, get_mysqli_conn_resource);
     HHVM_ME(mysqli_result, hh_field_tell);
     HHVM_ME(mysqli_result, fetch_field);
 

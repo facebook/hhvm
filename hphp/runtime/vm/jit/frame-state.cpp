@@ -482,7 +482,7 @@ SSATmp* FrameState::spLeavingBlock(Block* b) const {
 void FrameState::startBlock(Block* block,
                             BCMarker marker,
                             LocalStateHook* hook /* = nullptr */,
-                            bool unprocessedPred /* = false */) {
+                            bool isLoopHeader /* = false */) {
   auto const it = m_states.find(block);
   auto const end = m_states.end();
 
@@ -496,12 +496,12 @@ void FrameState::startBlock(Block* block,
     m_inlineSavedStates = it->second.in.inlineSavedStates;
   }
 
-  // Reset state if the block has an unprocessed predecessor.
-  if (unprocessedPred || findUnprocessedPred(block)) {
+  // Reset state if the block is a loop header.
+  if (isLoopHeader || findUnprocessedPred(block)) {
     Indent _;
     ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
            block->id());
-    unprocessedPredClear(marker, hook);
+    loopHeaderClear(marker, hook);
   }
 
   markVisited(block);
@@ -744,8 +744,8 @@ void FrameState::clearCurrentState() {
   clearLocals(*this);
 }
 
-void FrameState::unprocessedPredClear(BCMarker marker,
-                                      LocalStateHook* hook /* = nullptr */) {
+void FrameState::loopHeaderClear(BCMarker marker,
+                                 LocalStateHook* hook /* = nullptr */) {
   m_spValue        = nullptr;
   m_marker         = marker;
   m_spOffset       = marker.spOff();

@@ -1245,7 +1245,7 @@ repeat:
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
-                           bool unprocessedPred) {
+                           bool isLoopHeader) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
@@ -1267,8 +1267,8 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, nullptr, unprocessedPred);
-  insertPhis(unprocessedPred);
+  m_state.startBlock(m_curBlock, marker, nullptr, isLoopHeader);
+  insertPhis(isLoopHeader);
   always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),

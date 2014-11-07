@@ -160,16 +160,16 @@ struct FrameState final : private LocalStateHook {
 
   /*
    * Starts tracking state for a block and reloads any previously saved
-   * state. Can set local values to null if hitting a block with an unprocessed
-   * predecessor, so we pass in an optional LocalStateHook. The unprocessedPred
-   * parameter is used during initial IR generation to indicate that the given
-   * block has an unprocessed predecessor in the region that might not yet be
-   * linked into the IR cfg.
+   * state. Can set local values to null if hitting a block with an
+   * unprocessed predecessor, so we pass in an optional LocalStateHook. The
+   * isLoopHeader parameter is used during initial IR generation to indicate
+   * that the given block has a predecessor in the region that might not yet
+   * be linked into the IR cfg.
    */
   void startBlock(Block* b,
                   BCMarker marker,
                   LocalStateHook* hook = nullptr,
-                  bool unprocessedPred = false);
+                  bool isLoopHeader = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -310,10 +310,10 @@ struct FrameState final : private LocalStateHook {
   void markVisited(const Block*);
 
   /*
-   * Clears state upon hitting an unprocessed predecessor. Takes an optional
-   * hook whose locals will get nulled out.
+   * Clears state upon hitting an loop header. Takes an optional hook whose
+   * locals will get nulled out.
    */
-  void unprocessedPredClear(BCMarker, LocalStateHook* hook = nullptr);
+  void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
  private:
   /*

@@ -23,7 +23,6 @@
 #include "folly/io/IOBufQueue.h"
 #include "folly/io/async/EventBaseManager.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
-#include "proxygen/lib/workers/WorkerThread.h" // @nolint
 #include "proxygen/lib/services/Acceptor.h" // @nolint
 
 namespace HPHP {

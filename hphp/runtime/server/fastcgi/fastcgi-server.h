@@ -32,7 +32,7 @@
 #include "hphp/util/job-queue.h"
 #include "proxygen/lib/services/Acceptor.h"
 #include "proxygen/lib/services/AcceptorConfiguration.h"
-#include "proxygen/lib/workers/WorkerThread.h"
+#include "proxygen/lib/services/WorkerThread.h"
 #include "thrift/lib/cpp/async/TAsyncServerSocket.h"
 #include "thrift/lib/cpp/async/TEventBaseManager.h"
 

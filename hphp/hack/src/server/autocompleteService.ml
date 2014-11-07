@@ -26,7 +26,7 @@ type func_details_result = {
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos      : Pos.t;
+    res_pos      : Pos.absolute;
     res_ty       : string;
     res_name     : string;
     expected_ty  : bool;
@@ -40,6 +40,9 @@ type autocomplete_result = {
     name : string;
     desc : string option
   }
+
+(* The type returned to the client *)
+type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let ac_type = ref None
@@ -77,7 +80,7 @@ let autocomplete_result_to_json res =
   let expected_ty = res.expected_ty in
   Hh_json.JAssoc [ "name", Hh_json.JString name;
            "type", Hh_json.JString ty;
-           "pos", Pos.json (Pos.to_absolute pos);
+           "pos", Pos.json pos;
            "func_details", func_details_to_json res.func_details;
            "expected_ty", Hh_json.JBool expected_ty;
          ]
@@ -351,7 +354,7 @@ let get_results funs classes =
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
     {
-      res_pos      = pos;
+      res_pos      = Pos.to_absolute pos;
       res_ty       = desc_string;
       res_name     = x.name;
       expected_ty  = expected_ty;

@@ -18,21 +18,22 @@
 
 #include <list>
 #include <set>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <string>
 
+#include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
@@ -56,6 +57,7 @@ struct VMState {
   ActRec* fp;
   ActRec* firstAR;
   TypedValue* sp;
+  MInstrState mInstrState;
 };
 
 enum class CallType {

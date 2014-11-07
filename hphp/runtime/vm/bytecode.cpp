@@ -1992,7 +1992,7 @@ resume:
   not_reached();
 }
 
-void ExecutionContext::invokeFunc(TypedValue* retval,
+void ExecutionContext::invokeFunc(TypedValue* retptr,
                                   const Func* f,
                                   const Variant& args_,
                                   ObjectData* this_ /* = NULL */,
@@ -2000,7 +2000,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
                                   VarEnv* varEnv /* = NULL */,
                                   StringData* invName /* = NULL */,
                                   InvokeFlags flags /* = InvokeNormal */) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
   assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
@@ -2048,7 +2048,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     Unit* toMerge = f->unit();
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
-      *retval = *toMerge->getMainReturn();
+      *retptr = *toMerge->getMainReturn();
       return;
     }
   }
@@ -2091,36 +2091,43 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     auto prepResult = prepareArrayArgs(
       ar, prepArgs,
       vmStack(), 0,
-      (bool) (flags & InvokeCuf), retval);
+      (bool) (flags & InvokeCuf), retptr);
     if (UNLIKELY(!prepResult)) {
-      assert(KindOfNull == retval->m_type);
+      assert(KindOfNull == retptr->m_type);
       return;
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert_flog(
-      vmStack().top() == reentrySP,
-      "vmsp after reentry: {} doesn't match original vmsp: {}",
-      vmStack().top(), reentrySP
-    );
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert_flog(
+        vmStack().top() == reentrySP,
+        "vmsp after reentry: {} doesn't match original vmsp: {}",
+        vmStack().top(), reentrySP
+      );
+      popVMState();
+    };
 
-  enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
+    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
-void ExecutionContext::invokeFuncFew(TypedValue* retval,
+void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      const Func* f,
                                      void* thisOrCls,
                                      StringData* invName,
                                      int argc,
                                      const TypedValue* argv) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
   assert(f->preClass() || !thisOrCls);
@@ -2189,16 +2196,23 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert(vmStack().top() == reentrySP);
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert(vmStack().top() == reentrySP);
+      popVMState();
+    };
 
-  enterVM(ar, StackArgsState::Untrimmed);
+    enterVM(ar, StackArgsState::Untrimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
@@ -7518,7 +7532,7 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP };
+  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP, vmMInstrState() };
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
   if (debug && savedVM.fp &&
@@ -7554,6 +7568,7 @@ void ExecutionContext::popVMState() {
   vmfp() = savedVM.fp;
   vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
+  vmMInstrState() = savedVM.mInstrState;
 
   if (debug) {
     if (savedVM.fp &&

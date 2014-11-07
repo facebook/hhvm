@@ -14,16 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_RESERVED_STACK_H_
-#define incl_HPHP_VM_RESERVED_STACK_H_
+#ifndef incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
+#define incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
+
+namespace HPHP {
 
 /*
- * RESERVED_STACK_TOTAL_SPACE space (in bytes) at 8(%rsp) is
- * allocated on entry to the TC and made available for scratch
- * purposes (right above the return address).  It is used as spill
- * locations for vxls.
+ * MInstrState is used as scratch space by the VM while executing member
+ * instructions. It lives with the other VM registers in the RDS header, and is
+ * also saved and restored with them when we reenter the VM.
  */
-#define RESERVED_STACK_SPILL_SPACE        0x400
-#define RESERVED_STACK_TOTAL_SPACE        RESERVED_STACK_SPILL_SPACE
+struct MInstrState {
+  union {
+    // This space is used for both vector instructions and
+    // the return value of builtin functions that return by reference.
+    // Since we don't ever use the two at the same time, it is
+    // OK to use a union.
+    TypedValue tvScratch;
+    TypedValue tvBuiltinReturn;
+  };
+  TypedValue tvRef;
+  TypedValue tvRef2;
+};
+
+}
 
 #endif

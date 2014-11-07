@@ -282,7 +282,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::genMisPtr() {
   assert(m_base.value && "genMisPtr called before emitBaseOp");
 
   if (m_needMIS) {
-    return gen(LdMIStateAddr, m_misBase, cns(kReservedRSPSpillSpace));
+    return gen(LdMIStateAddr, m_misBase, cns(RDS::kVmMInstrStateOff));
   }
   return cns(Type::cns(nullptr, Type::PtrToMISUninit));
 }

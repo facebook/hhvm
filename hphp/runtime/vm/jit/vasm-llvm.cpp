@@ -236,10 +236,6 @@ struct LLVMEmitter {
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
-    m_mInstrStateArea =
-      m_irb.CreateAlloca(m_int8, cns(RESERVED_STACK_MINSTR_STATE_SPACE),
-                         "MIState");
-
     auto m_personalityFTy = llvm::FunctionType::get(m_int32, false);
     m_personalityFunc =
       llvm::Function::Create(m_personalityFTy,
@@ -500,8 +496,6 @@ VASM_OPCODES
   llvm::Function* m_llvmFrameAddress{nullptr};
   llvm::Function* m_llvmReadRegister{nullptr};
   llvm::Function* m_llvmReturnAddress{nullptr};
-
-  llvm::Value* m_mInstrStateArea{nullptr};
 
   // Vreg -> RegInfo map
   jit::vector<RegInfo> m_valueInfo;
@@ -1104,24 +1098,17 @@ void LLVMEmitter::emitTrap() {
 llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
   bool inFS = s.seg == Vptr::FS;
   llvm::Value* ptr = nullptr;
-  if (s.base == reg::rsp) {
-    // Translate %rsp-relative offsets into MInstrState offsets.
-    always_assert(!s.index.isValid());
-    ptr =  m_irb.CreateGEP(m_mInstrStateArea,
-                           cns(int64_t{s.disp} - RESERVED_STACK_SPILL_SPACE),
-                           "getelem");
-  } else {
-    ptr = s.base.isValid() ? value(s.base) : cns(0);
-    auto disp = cns(int64_t{s.disp});
-    if (s.index.isValid()) {
-      auto scaledIdx = m_irb.CreateMul(value(s.index),
-                                       cns(int64_t{s.scale}),
-                                       "mul");
-      disp = m_irb.CreateAdd(disp, scaledIdx, "add");
-    }
-    ptr = m_irb.CreateIntToPtr(ptr, inFS ? m_int8FSPtr : m_int8Ptr, "conv");
-    ptr = m_irb.CreateGEP(ptr, disp, "getelem");
+  always_assert(s.base != reg::rsp);
+  ptr = s.base.isValid() ? value(s.base) : cns(0);
+  auto disp = cns(int64_t{s.disp});
+  if (s.index.isValid()) {
+    auto scaledIdx = m_irb.CreateMul(value(s.index),
+                                     cns(int64_t{s.scale}),
+                                     "mul");
+    disp = m_irb.CreateAdd(disp, scaledIdx, "add");
   }
+  ptr = m_irb.CreateIntToPtr(ptr, inFS ? m_int8FSPtr : m_int8Ptr, "conv");
+  ptr = m_irb.CreateGEP(ptr, disp, "getelem");
 
   if (bits != 8) {
     ptr = m_irb.CreateBitCast(ptr, ptrIntNType(bits, inFS));

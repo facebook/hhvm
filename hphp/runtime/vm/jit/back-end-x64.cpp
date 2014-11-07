@@ -77,6 +77,10 @@ struct BackEnd : public jit::BackEnd {
     return x64::rVmFp;
   }
 
+  PhysReg rVmTl() override {
+    return x64::rVmTl;
+  }
+
   bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
     return x64::storesCell(inst, srcIdx);
   }

@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
@@ -1280,10 +1281,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     v << store{v.cns(pc), rds[RDS::kVmpcOff]};
   }
 
-  // The stack pointer currently points to the MInstrState we need to use.
-  PhysReg sp(vixl::sp); // C++ sp, not vmsp
-  auto mis = v.makeReg();
-  v << copy{sp, mis};//XXX why do this copy?
+  PhysReg mis(rVmTl);
 
   auto callArgs = argGroup();
   if (isBuiltinByRef(funcReturnType)) {
@@ -1325,7 +1323,6 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     return;
   }
 
-  mis = sp;
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
     assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));

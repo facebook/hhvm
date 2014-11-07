@@ -263,11 +263,9 @@ let rec main args retries =
         Unix.sleep(3);
         main args (retries-1)
       end else begin
-        Printf.fprintf stderr begin
-          if args.autostart
-          then "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n"
-          else "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!"
-        end;
+        if args.autostart
+        then Printf.fprintf stderr "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n"
+        else Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
         flush stderr;
         exit 6;
       end

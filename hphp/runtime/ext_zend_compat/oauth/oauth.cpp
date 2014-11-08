@@ -535,7 +535,7 @@ int oauth_http_build_query(php_so_object *soo, smart_str *s, HashTable *args, ze
   if (args) {
     if (soo && !soo->is_multipart) {
       for (zend_hash_internal_pointer_reset_ex(args, &pos);
-         HASH_KEY_NON_EXISTANT!=(hash_key_type=zend_hash_get_current_key_ex(args, &cur_key, &cur_key_len, &num_index, 0, &pos));
+         HASH_KEY_NON_EXISTENT!=(hash_key_type=zend_hash_get_current_key_ex(args, &cur_key, &cur_key_len, &num_index, 0, &pos));
          zend_hash_move_forward_ex(args, &pos)) {
         zend_hash_get_current_data_ex(args, (void **)&cur_val, &pos);
         if (hash_key_type == HASH_KEY_IS_STRING &&
@@ -547,7 +547,7 @@ int oauth_http_build_query(php_so_object *soo, smart_str *s, HashTable *args, ze
     }
 
     for (zend_hash_internal_pointer_reset_ex(args, &pos);
-        HASH_KEY_NON_EXISTANT!=(hash_key_type=zend_hash_get_current_key_ex(args, &cur_key, &cur_key_len, &num_index, 0, &pos));
+        HASH_KEY_NON_EXISTENT!=(hash_key_type=zend_hash_get_current_key_ex(args, &cur_key, &cur_key_len, &num_index, 0, &pos));
         zend_hash_move_forward_ex(args, &pos)) {
       zend_hash_get_current_data_ex(args, (void **)&cur_val, &pos);
 

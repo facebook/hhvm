@@ -2958,11 +2958,11 @@ Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testDuplicateFieldAndAssociationMa
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testEmptyFieldNameThrowsException
 .
-Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistanceOfNamedNativeQuery
+Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistenceOfNamedNativeQuery
 .
-Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistanceOfNamedQuery
+Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistenceOfNamedQuery
 .
-Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistanceOfSqlResultSetMapping
+Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testExistenceOfSqlResultSetMapping
 .
 Doctrine\Tests\ORM\Mapping\ClassMetadataTest::testFieldIsNullable
 .

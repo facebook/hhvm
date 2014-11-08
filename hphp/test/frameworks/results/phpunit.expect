@@ -1782,7 +1782,7 @@ Util_TestTest::testGetLinesToBeCovered3
 .
 Util_TestTest::testGetLinesToBeCovered4
 .
-Util_TestTest::testGetLinesToBeCoveredSkipsNonExistantMethods
+Util_TestTest::testGetLinesToBeCoveredSkipsNonExistentMethods
 .
 Util_TestTest::testGetProvidedDataRegEx
 .

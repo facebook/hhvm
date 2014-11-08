@@ -5324,7 +5324,7 @@ Joomla\Keychain\Tests\KeychainTest::testLoadKeychain
 .
 Joomla\Keychain\Tests\KeychainTest::testLoadKeychainInvalid
 .
-Joomla\Keychain\Tests\KeychainTest::testLoadKeychainNonexistant
+Joomla\Keychain\Tests\KeychainTest::testLoadKeychainNonexistent
 .
 Joomla\Keychain\Tests\KeychainTest::testSaveKeychain
 .

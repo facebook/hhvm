@@ -421,7 +421,7 @@ static struct gfxinfo *php_handle_gif(const Resource& stream) {
   result->width = (unsigned int)s[0] | (((unsigned int)s[1])<<8);
   result->height = (unsigned int)s[2] | (((unsigned int)s[3])<<8);
   result->bits = s[4]&0x80 ? ((((unsigned int)s[4])&0x07) + 1) : 0;
-  result->channels = 3; /* allways */
+  result->channels = 3; /* always */
   return result;
 }
 
@@ -913,7 +913,7 @@ static struct gfxinfo *php_handle_jpc(const Resource& stream) {
 
   /* JPEG 2000 components can be vastly different from one another.
      Each component can be sampled at a different resolution, use
-     a different colour space, have a seperate colour depth, and
+     a different colour space, have a separate colour depth, and
      be compressed totally differently! This makes giving a single
      "bit depth" answer somewhat problematic. For this implementation
      we'll use the highest depth encountered. */
@@ -6073,7 +6073,7 @@ static int exif_process_string_raw(char **result, char *value,
 /*
  * Copy a string in Exif header to a character string and return length of
    allocated buffer if any. In contrast to exif_process_string this function
-   does allways return a string buffer */
+   does always return a string buffer */
 static int exif_process_string(char **result, char *value,
                                size_t byte_count) {
   /* we cannot use strlcpy - here the problem is that we cannot use strlen to

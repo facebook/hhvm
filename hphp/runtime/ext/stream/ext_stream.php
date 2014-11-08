@@ -413,7 +413,7 @@ function stream_socket_accept(resource $server_socket,
  *   Depending on the environment, Unix domain sockets may not be available. A
  *   list of available transports can be retrieved using
  *   stream_get_transports(). See List of Supported Socket Transports for a list
- *   of bulitin transports.
+ *   of builtin transports.
  * @param mixed $errnum - If the optional errno and errstr arguments are
  *   present they will be set to indicate the actual system level error that
  *   occurred in the system-level socket(), bind(), and listen() calls. If the

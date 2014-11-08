@@ -72,7 +72,7 @@ ORMTest::testNullPrimaryKey
 .
 ORMTest::testNullPrimaryKeyPart
 .
-ORMTest::testStaticAtrributes
+ORMTest::testStaticAttributes
 .
 ORMTest::testUpdateNullPrimaryKey
 .

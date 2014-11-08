@@ -409,7 +409,7 @@ public:
   Cell lookupClsCns(const StringData* cls,
                     const StringData* cns);
 
-  // Get the next outermost VM frame, even accross re-entry
+  // Get the next outermost VM frame, even across re-entry
   ActRec* getOuterVMFrame(const ActRec* ar);
 
   std::string prettyStack(const std::string& prefix) const;

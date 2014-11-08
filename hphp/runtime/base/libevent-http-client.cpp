@@ -200,7 +200,7 @@ bool LibEventHttpClient::send(const std::string &url,
   }
   if (addHost) {
     // REVIEW: libevent never sends a Host header (nor does it properly send
-    // HTTP 400 for HTTP/1.1 requests without such a header), in blatent
+    // HTTP 400 for HTTP/1.1 requests without such a header), in blatant
     // violation of RFC2616; this should perhaps be fixed in the library
     // proper.  For now, add it if it wasn't set by the caller.
     if (m_port == 80) {

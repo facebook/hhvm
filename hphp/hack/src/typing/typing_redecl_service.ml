@@ -229,7 +229,7 @@ let load_and_compute_deps ~update_pos acc filel =
     raise e
 
 (*****************************************************************************)
-(* Merges the results comming back from the different workers *)
+(* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
 let merge_on_the_fly (errorl1, failed1) (errorl2, failed2) =

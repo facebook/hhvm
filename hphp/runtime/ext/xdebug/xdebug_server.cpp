@@ -75,7 +75,7 @@ static const char* getXDebugErrorString(XDebugServer::ErrorCode error) {
       return "error evaluating code";
     case XDebugServer::ERROR_INVALID_EXPRESSION:
       return "invalid expression";
-    case XDebugServer::ERROR_PROPERTY_NON_EXISTANT:
+    case XDebugServer::ERROR_PROPERTY_NON_EXISTENT:
       return "can not get property";
     case XDebugServer::ERROR_STACK_DEPTH_INVALID:
       return "stack depth invalid";

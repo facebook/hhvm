@@ -4059,7 +4059,7 @@ void HHVM_METHOD(DOMElement, __construct,
     return;
   }
 
-  /* Namespace logic is seperate and only when uri passed in to insure
+  /* Namespace logic is separate and only when uri passed in to insure
      no BC breakage */
   const String& str_namespaceuri = namespaceuri.isNull()
                                  ? null_string

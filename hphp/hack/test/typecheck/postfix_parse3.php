@@ -8,7 +8,7 @@ class Foo {
 
 function f(int $a, int $b, int $c) {
   // This checks that we are parsing it as $a && ($b++ === $c) and not ($a &&
-  // $b++) === $c. I.e. the occurence of a postfix operator should have no
+  // $b++) === $c. I.e. the occurrence of a postfix operator should have no
   // impact on the parse of the rest of the expression. If we misparsed this,
   // we should raise a trivial comparison error because it would appear that
   // a boolean value (i.e. $a && b++) was getting compared to an int.

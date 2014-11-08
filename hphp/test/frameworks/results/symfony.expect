@@ -212,7 +212,7 @@ Symfony\Bridge\Propel1\Tests\Form\ChoiceList\CompatModelChoiceListTest::testGetV
 .
 Symfony\Bridge\Propel1\Tests\Form\ChoiceList\CompatModelChoiceListTest::testGetValuesForChoicesPreservesOrder
 .
-Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testDifferentEqualObjectsAreChoosen
+Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testDifferentEqualObjectsAreChosen
 .
 Symfony\Bridge\Propel1\Tests\Form\ChoiceList\ModelChoiceListTest::testDontAllowInvalidChoiceValues
 .

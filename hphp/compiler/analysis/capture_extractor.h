@@ -34,7 +34,7 @@ namespace HPHP {
  *  outside of the scope of the query expression. Subexpressions that
  *  contain such references are turned into references to query parameter
  *  variables. The original expressions are collected into the list
- *  returned by getCapturedEpressions. Their runtime values are obtained
+ *  returned by getCapturedExpressions. Their runtime values are obtained
  *  before the query is evaluated and are passed as arguments to the query
  *  processor.
  */

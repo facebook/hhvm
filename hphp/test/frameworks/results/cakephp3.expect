@@ -800,7 +800,7 @@ Cake\Test\TestCase\Console\Command\Task\PluginTaskTest::testExecuteWithNoArgs
 .
 Cake\Test\TestCase\Console\Command\Task\PluginTaskTest::testExecuteWithOneArg
 .
-Cake\Test\TestCase\Console\Command\Task\PluginTaskTest::testFindPathNonExistant
+Cake\Test\TestCase\Console\Command\Task\PluginTaskTest::testFindPathNonExistent
 .
 Cake\Test\TestCase\Console\Command\Task\ProjectTaskTest::testExecuteWithAbsolutePath
 I
@@ -1762,7 +1762,7 @@ Cake\Test\TestCase\Controller\ControllerTest::testBeforeRenderCallbackChangingVi
 .
 Cake\Test\TestCase\Controller\ControllerTest::testBeforeRenderEventCancelsRender
 .
-Cake\Test\TestCase\Controller\ControllerTest::testChildComponentOptionsSupercedeParents
+Cake\Test\TestCase\Controller\ControllerTest::testChildComponentOptionsSupersedeParents
 .
 Cake\Test\TestCase\Controller\ControllerTest::testComponents
 .
@@ -1934,7 +1934,7 @@ Cake\Test\TestCase\Core\ConfigureTest::testEngineSetup
 .
 Cake\Test\TestCase\Core\ConfigureTest::testLoadDefaultConfig
 .
-Cake\Test\TestCase\Core\ConfigureTest::testLoadExceptionOnNonExistantFile
+Cake\Test\TestCase\Core\ConfigureTest::testLoadExceptionOnNonExistentFile
 .
 Cake\Test\TestCase\Core\ConfigureTest::testLoadMergeWithExistingData
 .

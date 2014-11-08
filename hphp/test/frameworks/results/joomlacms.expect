@@ -7476,7 +7476,7 @@ JKeychainTest::testLoadKeychain
 .
 JKeychainTest::testLoadKeychainInvalid
 .
-JKeychainTest::testLoadKeychainNonexistant
+JKeychainTest::testLoadKeychainNonexistent
 .
 JKeychainTest::testSaveKeychain
 .
@@ -10934,7 +10934,7 @@ JUserTest::testLoad with data set "existing"
 .
 JUserTest::testLoad with data set "existing-but-guest"
 .
-JUserTest::testLoad with data set "non-existant"
+JUserTest::testLoad with data set "non-existent"
 .
 JUserTest::testParameter
 .

@@ -710,7 +710,7 @@ Mockery_AdhocTest::testSimplestMockCreation
 .
 Mockery_LoaderTest::testCallingRegisterRegistersSelfAsSplAutoloaderFunction
 .
-Mockery_MockTest::testAnonymousMockWorksWithNotAllowingMockingOfNonExistantMethods
+Mockery_MockTest::testAnonymousMockWorksWithNotAllowingMockingOfNonExistentMethods
 .
 Mockery_MockTest::testMockAddsToString
 .

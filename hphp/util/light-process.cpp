@@ -581,7 +581,7 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
       }
       FILE *f = ::popen(cmd, type);
       if (chdir(old_cwd.c_str())) {
-        // error occured changing cwd back
+        // error occurred changing cwd back
       }
       return f;
     }

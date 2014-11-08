@@ -193,7 +193,7 @@ void HHVM_FUNCTION(pcntl_exec,
   std::vector<String> senvs; // holding those char *
   char **envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
-    raise_warning("Error has occured: (errno %d) %s",
+    raise_warning("Error has occurred: (errno %d) %s",
                     errno, folly::errnoStr(errno).c_str());
   }
 
@@ -241,7 +241,7 @@ Variant HHVM_FUNCTION(pcntl_getpriority,
       raise_warning("Error %d: Invalid identifier flag", errno);
       break;
     default:
-      raise_warning("Unknown error %d has occured", errno);
+      raise_warning("Unknown error %d has occurred", errno);
       break;
     }
     return false;
@@ -279,7 +279,7 @@ bool HHVM_FUNCTION(pcntl_setpriority,
                       "the process priority", errno);
       break;
     default:
-      raise_warning("Unknown error %d has occured", errno);
+      raise_warning("Unknown error %d has occurred", errno);
       break;
     }
     return false;
@@ -287,7 +287,7 @@ bool HHVM_FUNCTION(pcntl_setpriority,
   return true;
 }
 
-/* php_signal using sigaction is derrived from Advanced Programing
+/* php_signal using sigaction is derived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
 typedef void Sigfunc(int);
 static Sigfunc *php_signal(int signo, Sigfunc *func, bool restart) {

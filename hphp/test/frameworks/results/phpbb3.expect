@@ -814,7 +814,7 @@ phpbb_extension_metadata_manager_test::test_foo
 S
 phpbb_extension_metadata_manager_test::test_validator_invalid
 S
-phpbb_extension_metadata_manager_test::test_validator_non_existant
+phpbb_extension_metadata_manager_test::test_validator_non_existent
 S
 phpbb_extension_metadata_manager_test::test_validator_requirements
 S

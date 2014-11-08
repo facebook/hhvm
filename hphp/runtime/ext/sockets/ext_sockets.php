@@ -402,7 +402,7 @@ function socket_read(resource $socket, int $length, int $type = 0): mixed;
  * @param resource $socket
  * @param string $buffer - The buffer to be written.
  * @param int $length - The optional parameter length can specify an alternate
- *   length of bytes written to the socket. If this length is greater then the
+ *   length of bytes written to the socket. If this length is greater than the
  *   buffer length, it is silently truncated to the length of the buffer.
  *
  * @return mixed - Returns the number of bytes successfully written to the

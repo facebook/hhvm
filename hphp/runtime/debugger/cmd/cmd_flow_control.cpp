@@ -213,7 +213,7 @@ void CmdFlowControl::cleanupStepOuts() {
 // a StepDestination is constructed then it will not remove the
 // breakpoint when it is destructed. The move assignment operator
 // handles the transfer of ownership, and we delete the copy
-// constructor/assignment operators explictly to ensure no two
+// constructor/assignment operators explicitly to ensure no two
 // StepDestinations believe they can remove the same internal
 // breakpoint.
 //

@@ -4310,7 +4310,7 @@ eZ\Publish\Core\Helper\Tests\TranslationHelperTest::testGetTranslationSiteAccess
 .
 eZ\Publish\Core\Helper\Tests\TranslationHelperTest::testGetTranslationSiteAccess with data set #9
 .
-eZ\Publish\Core\Helper\Tests\TranslationHelperTest::testGetTranslationSiteAccessUnkownLanguage
+eZ\Publish\Core\Helper\Tests\TranslationHelperTest::testGetTranslationSiteAccessUnknownLanguage
 .
 eZ\Publish\Core\IO\Tests\Handler\DispatcherTest::testCreate
 S

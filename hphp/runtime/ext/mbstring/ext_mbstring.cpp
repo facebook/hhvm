@@ -4145,7 +4145,7 @@ static int php_mail(const char *to, const char *subject, const char *message,
   }
 
   /* Since popen() doesn't indicate if the internal fork() doesn't work
-   * (e.g. the shell can't be executed) we explicitely set it to 0 to be
+   * (e.g. the shell can't be executed) we explicitly set it to 0 to be
    * sure we don't catch any older errno value. */
   errno = 0;
   FILE *sendmail = popen(sendmail_cmd.data(), "w");

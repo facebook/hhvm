@@ -95,7 +95,7 @@ struct BlobEncoder {
 
   /*
    * Currently the most basic encoder/decode only works for integral
-   * types.  (We don't want this to accidently get used for things
+   * types.  (We don't want this to accidentally get used for things
    * like pointers or aggregates.)
    *
    * Floating point support could be added later if we need it ...

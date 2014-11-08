@@ -666,7 +666,7 @@ TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSCon
 .
 TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "four levels string with integer zero property, value, no properties"
 .
-TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "one level, not existant string"
+TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "one level, not existent string"
 .
 TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "single level string"
 .
@@ -680,7 +680,7 @@ TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSCon
 .
 TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "three levels string"
 .
-TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "two level, not existant string"
+TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "two level, not existent string"
 .
 TYPO3\CMS\Core\Tests\Unit\Authentication\BackendUserAuthenticationTest::getTSConfigReturnsCorrectArrayForGivenObjectString with data set "two level, where second level does not exist"
 .

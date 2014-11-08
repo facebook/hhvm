@@ -9,7 +9,7 @@ namespace HH {
  * @return array - an array with the following keys:
  *  'time' - unixtime when the snapshot was taken
  *  'phpStack' - array with the following keys: 'function', 'file', 'line'
- *  'ioWaitSample' - the snapshot occured while request was in asio scheduler
+ *  'ioWaitSample' - the snapshot occurred while request was in asio scheduler
  *
  *  It is possible for the output of this function to change in the future.
  */

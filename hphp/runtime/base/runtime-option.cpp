@@ -1436,7 +1436,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf mail = config["Mail"];
-    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "sendmail -t -i");
+    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "/usr/lib/sendmail -t -i");
     Config::Bind(MailForceExtraParameters, ini, mail["ForceExtraParameters"]);
   }
   {
@@ -1523,6 +1523,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "doc_root", &RuntimeOption::SourceRoot);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "sendmail_path", &RuntimeOption::SendmailPath);
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,

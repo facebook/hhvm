@@ -73,9 +73,18 @@ class AsioSession final {
     // Meager time abstractions.
     typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 
+    // The latest time we will wait for an I/O operation to complete.  If this
+    // time is exceeded, onIOWaitExit will throw after checking surprise.
     static TimePoint getLatestWakeTime() {
-      // Don't wait for over nine thousand hours.
-      return std::chrono::steady_clock::now() + std::chrono::hours(9000);
+      auto now = std::chrono::steady_clock::now();
+      auto info = ThreadInfo::s_threadInfo.getNoCheck();
+      auto& data = info->m_reqInjectionData;
+      if (!data.getTimeout()) {
+        // Don't wait for over nine thousand hours.
+        return now + std::chrono::hours(9000);
+      }
+      auto remaining = int64_t(data.getRemainingTime());
+      return now + std::chrono::seconds(remaining);
     }
 
     // Sleep event management.

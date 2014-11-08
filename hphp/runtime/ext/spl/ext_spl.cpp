@@ -296,13 +296,12 @@ Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
   return count;
 }
 
-Variant HHVM_FUNCTION(iterator_to_array, const Variant& obj,
+Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
                                          bool use_keys /* = true */) {
   VMRegAnchor _;
   Array ret(Array::Create());
   CHECK_TRAVERSABLE_IMPL(obj, ret);
   Object pobj = get_traversable_object_iterator(obj);
-
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     Variant val = pobj->o_invoke_few_args(s_current, 0);

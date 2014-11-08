@@ -671,23 +671,22 @@ class MemcachedException {
 }
 
 
-class MemcachedSessionModule implements \SessionHandlerInterface {
+class MemcachedSessionModule implements SessionHandlerInterface {
 
   const CONFIG_PERSISTENT = 'PERSISTENT=';
 
   private $memcached;
   private $persistentKey;
-  private $serverList;
 
   public function close() {
     $this->memcached = null;
     $this->persistentKey = null;
-    $this->serverList = null;
     return true;
   }
 
   public function destroy($sessionId) {
-    return $this->getMemcached()->delete($sessionId);
+    $this->memcached->delete($sessionId);
+    return true;
   }
 
   public function gc($maxLifetime) {
@@ -699,7 +698,6 @@ class MemcachedSessionModule implements \SessionHandlerInterface {
     if (!$serverList) {
       return false;
     }
-    $this->serverList = $serverList;
 
     $keyPrefix = trim((string)ini_get('memcached.sess_prefix'));
     // Validate non-empty values (empty values are accepted)
@@ -711,24 +709,36 @@ class MemcachedSessionModule implements \SessionHandlerInterface {
         return false;
     }
 
-    if (!$this->getMemcached()->setOption(Memcached::OPT_PREFIX_KEY,
-                                          $keyPrefix)) {
+    $memcached = new Memcached($this->persistentKey);
+    foreach ($serverList as $serverInfo) {
+      $memcached->addServer($serverInfo['host'], $serverInfo['port']);
+    }
+
+    if (!$memcached->setOption(Memcached::OPT_PREFIX_KEY,
+                               $keyPrefix)) {
       // setOption already throws a warning for bad values
       return false;
     }
+
+    $this->memcached = $memcached;
 
     return true;
   }
 
   public function read($sessionId) {
-    // Cast to string as false means "failure", not empty
-    return (string)$this->getMemcached()->get($sessionId);
+    $data = $this->memcached->get($sessionId);
+    if (!$data) {
+      // Return an empty string instead of false for new sessions as
+      // false values cause sessions to fail to init
+      return '';
+    }
+    return $data;
   }
 
   public function write($sessionId, $data) {
-    return $this->getMemcached()->set($sessionId,
-                                      $data,
-                                      ini_get('session.gc_maxlifetime'));
+    return $this->memcached->set($sessionId,
+                                 $data,
+                                 ini_get('session.gc_maxlifetime'));
   }
 
   private static function parseSavePath($savePath) {
@@ -744,7 +754,6 @@ class MemcachedSessionModule implements \SessionHandlerInterface {
                     self::CONFIG_PERSISTENT,
                     strlen(self::CONFIG_PERSISTENT)) === 0) {
       $savePath = substr($savePath, strlen(self::CONFIG_PERSISTENT) - 1);
-
       if (empty($savePath)) {
         trigger_error("Invalid persistent id for session storage",
                       E_WARNING);
@@ -783,21 +792,5 @@ class MemcachedSessionModule implements \SessionHandlerInterface {
     }
 
     return $return;
-  }
-
-  private function getMemcached() {
-    if ($this->memcached instanceof \Memcached) {
-      return $this->memcached;
-    }
-
-    $memcached = new \Memcached($this->persistentKey);
-    if (!empty($this->serverList)) {
-      foreach ($this->serverList as $serverInfo) {
-        $memcached->addServer($serverInfo['host'], $serverInfo['port']);
-      }
-    }
-
-    $this->memcached = $memcached;
-    return $memcached;
   }
 }

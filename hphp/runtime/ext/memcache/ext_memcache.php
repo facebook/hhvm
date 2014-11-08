@@ -730,7 +730,7 @@ function memcache_add_server(Memcache $memcache,
 // Signifies we have built-in session support
 define('MEMCACHE_HAVE_SESSION', true);
 
-class MemcacheSessionModule implements \SessionHandlerInterface {
+class MemcacheSessionModule implements SessionHandlerInterface {
 
   const UNIX_PREFIX = 'unix://';
   const FILE_PREFIX = 'file://';
@@ -741,19 +741,18 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
   const ZERO_PORT = ':0';
 
   private $memcache;
-  private $serverList;
 
   public function close() {
-    if ($this->memcache instanceof \Memcache) {
-      $this->memcache->close();
-    }
+    $this->memcache->close();
     $this->memcache = null;
-    $this->serverList = null;
     return true;
   }
 
   public function destroy($sessionId) {
-    return $this->getMemcache()->delete($sessionId);
+    // Memcache will return false if the session key doesn't exist
+    // so we return true no matter the result (matches redis module)
+    $this->memcache->delete($sessionId);
+    return true;
   }
 
   public function gc($maxLifetime) {
@@ -766,20 +765,34 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
       return false;
     }
 
-    $this->serverList = $serverList;
+    $this->memcache = new Memcache;
+    foreach ($serverList as $serverInfo) {
+      $this->memcache->addServer($serverInfo['host'],
+                                 $serverInfo['port'],
+                                 $serverInfo['persistent'],
+                                 $serverInfo['weight'],
+                                 $serverInfo['timeout'],
+                                 $serverInfo['retry_interval']);
+    }
+
     return true;
   }
 
   public function read($sessionId) {
-    // Cast to string as false means "failure", not empty data
-    return (string)$this->getMemcache()->get($sessionId);
+    $data = $this->memcache->get($sessionId);
+    if (!$data) {
+      // Return an empty string instead of false for new sessions as
+      // false values cause sessions to fail to init
+      return '';
+    }
+    return $data;
   }
 
   public function write($sessionId, $data) {
-    return $this->getMemcache()->set($sessionId,
-                                     $data,
-                                     MEMCACHE_COMPRESSED,
-                                     ini_get('session.gc_maxlifetime'));
+    return $this->memcache->set($sessionId,
+                                $data,
+                                MEMCACHE_COMPRESSED,
+                                ini_get('session.gc_maxlifetime'));
   }
 
   private static function parseSavePath($savePath) {
@@ -873,26 +886,5 @@ class MemcacheSessionModule implements \SessionHandlerInterface {
     }
 
     return $return;
-  }
-
-  private function getMemcache() {
-    if ($this->memcache instanceof \Memcache) {
-      return $this->memcache;
-    }
-
-    $memcache = new \Memcache;
-    if (!empty($this->serverList)) {
-      foreach ($this->serverList as $serverInfo) {
-        $memcache->addServer($serverInfo['host'],
-                             $serverInfo['port'],
-                             $serverInfo['persistent'],
-                             $serverInfo['weight'],
-                             $serverInfo['timeout'],
-                             $serverInfo['retry_interval']);
-      }
-    }
-
-    $this->memcache = $memcache;
-    return $memcache;
   }
 }

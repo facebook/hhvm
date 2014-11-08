@@ -1079,6 +1079,31 @@ public:
 };
 static PhpSessionSerializer s_php_session_serializer;
 
+class PhpSerializeSessionSerializer : public SessionSerializer {
+public:
+  PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
+
+  virtual String encode() {
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
+    return vs.serialize(php_global(s__SESSION).toArray(), true, true);
+  }
+
+  virtual bool decode(const String& value) {
+    VariableUnserializer vu(value.data(), value.size(),
+                            VariableUnserializer::Type::Serialize);
+
+    try {
+      auto sess = vu.unserialize();
+      php_global_set(s__SESSION, std::move(sess.toArray()));
+    } catch (const ResourceExceededException&) {
+      throw;
+    } catch (const Exception&) {}
+
+    return true;
+  }
+};
+static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
+
 class WddxSessionSerializer : public SessionSerializer {
 public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}

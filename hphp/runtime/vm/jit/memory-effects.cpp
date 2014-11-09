@@ -565,7 +565,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SubDbl:
   case SubInt:
   case SubIntO:
-  case SurpriseHook:
   case SyncABIRegs:
   case TakeRef:
   case TakeStack:

@@ -816,10 +816,10 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
     SSATmp* res = gen(DecodeCufIter, Type::Bool,
                       IterId(iterId), catchBlock, src, m_irb->fp());
     gen(DecRef, src);
-    emitJmpCondHelper(offset, true, jmpFlags, res);
+    jmpCondHelper(offset, true, jmpFlags, res);
   } else {
     gen(DecRef, src);
-    emitJmpImpl(offset, JmpFlagEndsRegion, nullptr);
+    jmpImpl(offset, JmpFlagEndsRegion);
   }
 }
 

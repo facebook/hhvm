@@ -1214,14 +1214,7 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-void HhbcTranslator::emitJmpImpl(int32_t offset,
-                                 JmpFlags flags,
-                                 Block* catchBlock) {
-  // If surprise flags are set, exit trace and handle surprise
-  bool backward = static_cast<uint32_t>(offset) <= bcOff();
-  if (backward && catchBlock) {
-    emitJmpSurpriseCheck(catchBlock);
-  }
+void HhbcTranslator::jmpImpl(int32_t offset, JmpFlags flags) {
   if (genMode() == IRGenMode::CFG) {
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
@@ -1236,14 +1229,22 @@ void HhbcTranslator::emitJmpImpl(int32_t offset,
 }
 
 void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
-  emitJmpImpl(offset, flags,
-              flags & JmpFlagSurprise ? makeCatch() : nullptr);
+  const bool backward = static_cast<uint32_t>(offset) <= bcOff();
+  if (backward) {
+    auto const exit = makeExitSlow();
+    gen(CheckSurpriseFlags, exit);
+  }
+  jmpImpl(offset, flags);
 }
 
-void HhbcTranslator::emitJmpCondHelper(int32_t taken,
-                                       bool negate,
-                                       JmpFlags flags,
-                                       SSATmp* src) {
+void HhbcTranslator::emitJmpNS(int32_t offset, JmpFlags flags) {
+  jmpImpl(offset, flags);
+}
+
+void HhbcTranslator::jmpCondHelper(int32_t taken,
+                                   bool negate,
+                                   JmpFlags flags,
+                                   SSATmp* src) {
   if (flags & JmpFlagEndsRegion) {
     spillStack();
   }
@@ -1263,12 +1264,12 @@ void HhbcTranslator::emitJmpCondHelper(int32_t taken,
 
 void HhbcTranslator::emitJmpZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpCondHelper(taken, true, flags, src);
+  jmpCondHelper(taken, true, flags, src);
 }
 
 void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
   auto const src = popC();
-  emitJmpCondHelper(taken, false, flags, src);
+  jmpCondHelper(taken, false, flags, src);
 }
 
 // Return a constant SSATmp representing a static value held in a
@@ -1522,16 +1523,6 @@ void HhbcTranslator::emitEndInlinedCommon() {
   m_irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc()->fullName()->data());
-}
-
-void HhbcTranslator::emitJmpSurpriseCheck(Block* catchBlock) {
-  m_irb->ifThen([&](Block* taken) {
-                 gen(CheckSurpriseFlags, taken);
-               },
-               [&] {
-                 m_irb->hint(Block::Hint::Unlikely);
-                 gen(SurpriseHook, catchBlock);
-               });
 }
 
 void HhbcTranslator::emitSwitch(const ImmVector& iv,
@@ -3837,9 +3828,7 @@ void HhbcTranslator::end(Offset nextPc) {
 }
 
 void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
-  emitJmpImpl(next,
-              nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone,
-              nullptr);
+  jmpImpl(next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
 }
 
 bool HhbcTranslator::inPseudoMain() const {

@@ -32,7 +32,7 @@ void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
   auto const type = src->type();
   if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
   auto const res = genFunc(src);
-  emitJmpCondHelper(offset, !invertCond, jmpFlags, res);
+  jmpCondHelper(offset, !invertCond, jmpFlags, res);
 }
 
 template<class Lambda>
@@ -53,7 +53,7 @@ void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
   auto const res = genFunc(src, pred);
   auto const out = popV();
   gen(DecRef, out);
-  emitJmpCondHelper(offset, true, jmpFlags, res);
+  jmpCondHelper(offset, true, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterInit(uint32_t iterId,
@@ -103,7 +103,7 @@ void HhbcTranslator::emitIterNext(uint32_t iterId,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
+  jmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterNextK(uint32_t iterId,
@@ -119,7 +119,7 @@ void HhbcTranslator::emitIterNextK(uint32_t iterId,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
+  jmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitWIterInit(uint32_t iterId,
@@ -171,7 +171,7 @@ void HhbcTranslator::emitWIterNext(uint32_t iterId,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
+  jmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitWIterNextK(uint32_t iterId,
@@ -187,7 +187,7 @@ void HhbcTranslator::emitWIterNextK(uint32_t iterId,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, invertCond, jmpFlags, res);
+  jmpCondHelper(offset, invertCond, jmpFlags, res);
 }
 
 void HhbcTranslator::emitMIterInit(uint32_t iterId,
@@ -235,7 +235,7 @@ void HhbcTranslator::emitMIterNext(uint32_t iterId,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, false, jmpFlags, res);
+  jmpCondHelper(offset, false, jmpFlags, res);
 }
 
 void HhbcTranslator::emitMIterNextK(uint32_t iterId,
@@ -249,7 +249,7 @@ void HhbcTranslator::emitMIterNextK(uint32_t iterId,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  emitJmpCondHelper(offset, false, jmpFlags, res);
+  jmpCondHelper(offset, false, jmpFlags, res);
 }
 
 void HhbcTranslator::emitIterFree(uint32_t iterId) {

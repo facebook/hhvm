@@ -775,10 +775,6 @@ generating efficient compare-and-branch instruction sequences.
   Tests the implementation-specific surprise flags. If they're true, branches
   to block B.
 
-| SurpriseHook, ND, NA, Er|E
-
-  Executes the implementation-specific surprise flag hook.
-
 | FunctionReturnHook, ND, S(FramePtr) S(Gen), Er|E
 
   Suprise flag hook for function returns.

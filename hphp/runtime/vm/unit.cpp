@@ -148,7 +148,7 @@ Unit::~Unit() {
   if (m_pseudoMainCache) {
     for (auto it = m_pseudoMainCache->begin();
          it != m_pseudoMainCache->end(); ++it) {
-      delete it->second;
+      Func::destroy(it->second);
     }
     delete m_pseudoMainCache;
   }

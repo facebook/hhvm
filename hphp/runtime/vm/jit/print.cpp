@@ -385,9 +385,10 @@ void printOpcodeStats(std::ostream& os, const BlockList& blocks) {
  * Unit
  */
 void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
-           const GuardConstraints* guards, bool dotBodies) {
+           const GuardConstraints* guards) {
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
+  static bool dotBodies = getenv("HHIR_DOT_BODIES");
 
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
@@ -428,11 +429,21 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
     auto* next = block->next();
     auto* taken = block->taken();
     if (!next && !taken) continue;
+    auto edge_color = [&] (Block* target) -> std::string {
+      return
+        target->isCatch() ? " [color=blue]" :
+        target->isExit() ? " [color=cyan]" :
+        target->hint() == Block::Hint::Unlikely ? " [color=green]" : "";
+    };
     if (next) {
-      os << folly::format("B{} -> B{}", block->id(), next->id());
+      os << folly::format("B{} -> B{}{}", block->id(), next->id(),
+        edge_color(next));
       if (taken) os << "; ";
     }
-    if (taken) os << folly::format("B{} -> B{}", block->id(), taken->id());
+    if (taken) {
+      os << folly::format("B{} -> B{}{}", block->id(), taken->id(),
+        edge_color(taken));
+    }
     os << "\n";
   }
   os << "}\n";

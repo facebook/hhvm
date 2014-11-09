@@ -925,7 +925,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
 | LdClsCtx, D(Cls), S(Ctx), C
 
   Loads into D the class representing the current context. Extracts the class
-  from the S0, which can be either the this pointer or the context class.
+  from S0, which can be either the this pointer or the context class.
 
 | LdClsCctx, D(Cls), S(Cctx), C
 
@@ -975,9 +975,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   If the optional block B is specified and the loaded value's type does not
   match T, this instruction does not load into D and branches to block B.
 
-  The result may be uninitialized if the class is not defined. Note that no
-  decref of the result is necessary because class constants will always be
-  static.
+  The result may be uninitialized if the class is not defined.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 

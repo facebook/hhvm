@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 
 #include "hphp/util/match.h"
+#include "hphp/util/safe-cast.h"
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -27,124 +28,57 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-MemEffects read_ptr(const SSATmp* locPtr) {
-  if (!locPtr->type().maybe(Type::PtrToFrameGen)) {
-    return IrrelevantEffects {};
+ALocation pointee(const SSATmp* ptr) {
+  always_assert(ptr->type().isPtr());
+
+  if (ptr->type() <= Type::PtrToFrameGen) {
+    auto const sinst = canonical(ptr)->inst();
+    if (sinst->is(LdLocAddr)) {
+      return AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
+    }
+    return AFrameAny;
   }
 
-  // We can figure out which one it might read if we can see a LdLocAddr.
-  auto const sinst = canonical(locPtr)->inst();
-  if (sinst->is(LdLocAddr)) {
-    return ReadLocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
+  if (ptr->type() <= Type::PtrToPropGen) {
+    auto const sinst = canonical(ptr)->inst();
+    if (sinst->is(LdPropAddr)) {
+      return AProp {
+        sinst->src(0),
+        safe_cast<uint32_t>(sinst->src(1)->intVal())
+      };
+    }
+    return APropAny;
   }
 
-  // As far as we can prove so far it may point at any of them.
-  return ReadAllLocals {};
+  // We have various other situations here that we don't track in this module
+  // yet, but we can possibly exclude the locations we care about so far.
+  if (!ptr->type().maybe(Type::PtrToFrameGen)) return ANonFrame;
+
+  // We don't have any idea what it might refer to for other things, yet.
+  // Return the set of all locations.
+  return AUnknown;
+}
+
+bool call_destroys_locals(const IRInstruction& inst) {
+  switch (inst.op()) {
+  case Call:         return inst.extra<Call>()->destroyLocals;
+  case CallArray:    return inst.extra<CallArray>()->destroyLocals;
+  case CallBuiltin:  return inst.extra<CallBuiltin>()->destroyLocals;
+  case ContEnter:    return false;
+  default:           break;
+  }
+  always_assert(0);
 }
 
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
-  case StLoc:
-    return StoreLocal { inst.src(0), inst.extra<StLoc>()->locId };
 
-  case StLocNT:
-    return StoreLocalNT { inst.src(0), inst.extra<StLocNT>()->locId };
+  //////////////////////////////////////////////////////////////////////
+  // Region exits
 
-  /*
-   * Before the FunctionReturnHook throws, it will set up the ActRec so the
-   * unwinder knows everything is already released (i.e. it calls
-   * ar->setLocalsDecRefd()).
-   *
-   * So it has no upward exposed uses, even though it has a catch block as a
-   * successor that looks like it can use any locals (and in fact it can, if it
-   * weren't for this instruction).
-   */
-  case FunctionReturnHook:
-    return KillFrameLocals { inst.src(0) };
-
-  /*
-   * If we're returning from a function, none of the locals can be read
-   * anymore.
-   */
-  case RetCtrl:
-    if (inst.extra<RetCtrl>()->suspendingResumed) {
-      return ReadAllLocals {};
-    }
-    assert(inst.src(1)->inst()->op() == FreeActRec);
-    return KillFrameLocals { inst.src(1)->inst()->src(0) };
-
-  case CheckLoc:
-  case DecRefLoc:
-  case GuardLoc:
-  case LdLocPseudoMain:
-  case LdLoc:
-    return ReadLocal { inst.src(0), inst.extra<LocalId>()->locId };
-
-  /*
-   * These call instructions potentially throw, even though we don't (yet) have
-   * explicit catch traces for them, which means it counts as possibly reading
-   * any local, on any frame.
-   */
-  case Call:
-  case CallArray:
-  case CallBuiltin:
-  case ContEnter:
-    return ReadAllLocals {};
-
-  case GenericRetDecRefs:
-    return ReadAllLocals {};
-
-  case InlineReturn:
-    return KillFrameLocals { inst.src(0) };
-
-  /*
-   * This has to act as a use of the locals for the outer frame, but really
-   * only because of how we deal with FramePtrs in the JIT.
-   *
-   * Since the frame is going to get allocated rbp, we can't push local stores
-   * into inlined callees, since their FramePtr isn't available anymore.  We'd
-   * be willing to do so without this, since there's no other constraint saying
-   * the caller's locals have to be in memory at this point.
-   */
-  case DefInlineFP:
-    /*
-     * TODO(#3634984): this is an unfortunate pessimization---we can still
-     * eliminate those stores if nothing reads them, we just can't move them
-     * past this point.  Reserved registers must die.
-     */
-    return ReadAllLocals {};
-
-  case EndCatch:
-  case FunctionSuspendHook:
-  case InterpOne:
-  case InterpOneCF:
-  case NativeImpl:
-  case TryEndCatch:
-    return UnknownEffects {};
-
-  // NB: on the failure path, these C++ helpers do a fixup and read frame
-  // locals before they throw.  Let's not worry about which ones because these
-  // things only happen at the very start of a function.
-  //
-  // TODO(#5372569): if we combine dv inits into the same regions we could
-  // possibly avoid storing KindOfUninits if we support this.
-  case VerifyParamCallable:
-  case VerifyParamCls:
-  case VerifyParamFail:
-    return UnknownEffects {};
-  // However the following ones are fine.
-  case VerifyRetCallable:
-  case VerifyRetCls:
-  case VerifyRetFail:
-    return IrrelevantEffects {};
-
-  // Resumable suspension takes everything from the frame and move it into the
-  // heap.
-  case CreateAFWH:
-  case CreateCont:
-    return ReadAllLocals {};
-
-  // Tracelet exits that don't leave the function act as reads of all locals.
+  // These exits don't leave the current php function, and could head to code
+  // that could read or write anything as far as we know (including frame
+  // locals).
   case ReqBindJmp:
   case ReqBindJmpEq:
   case ReqBindJmpEqInt:
@@ -188,21 +122,120 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SideExitJmpZero:
   case JmpSwitchDest:
   case JmpSSwitchDest:
-    return ReadAllLocals {};
+    return UnknownEffects {};
+
+  //////////////////////////////////////////////////////////////////////
+  // Unusual instructions
+
+  /*
+   * The FunctionReturnHook sets up the ActRec so the unwinder knows everything
+   * is already released (i.e. it calls ar->setLocalsDecRefd()).
+   *
+   * So it has no upward exposed uses of locals, even though it has a catch
+   * block as a successor that looks like it can use any locals (and in fact it
+   * can, if it weren't for this instruction).
+   */
+  case FunctionReturnHook:
+    return KillFrameLocals { inst.src(0) };
+
+  // The suspend hook can load anything, but can't write to frame locals.
+  case FunctionSuspendHook:
+    return MayLoadStore { AUnknown, ANonFrame };
+
+  /*
+   * If we're returning from a function, it's ReturnEffects.  The RetCtrl
+   * opcode also suspends resumables, which we model as having any possible
+   * effects.
+   */
+  case RetCtrl:
+    if (inst.extra<RetCtrl>()->suspendingResumed) {
+      // Suspending can go anywhere, and doesn't even kill locals.
+      return UnknownEffects {};
+    }
+    return ReturnEffects {};
+
+  case GenericRetDecRefs:
+    return MayLoadStore { AUnknown, ANonFrame };
+
+  /*
+   * This has to act as a use of the locals for the outer frame, but really
+   * only because of how we deal with FramePtrs in the JIT.
+   *
+   * Since the frame is going to get allocated rbp, we can't push local stores
+   * into inlined callees, since their FramePtr isn't available anymore.  We'd
+   * be willing to do so without this, since there's no other constraint saying
+   * the caller's locals have to be in memory at this point.
+   */
+  case DefInlineFP:
+    /*
+     * TODO(#3634984): this is an unfortunate pessimization---we can still
+     * eliminate those stores if nothing reads them, we just can't move them
+     * past this point.  Reserved registers must die.
+     */
+    return MayLoadStore { AFrameAny, AEmpty };
+
+  case InlineReturn:
+    return KillFrameLocals { inst.src(0) };
+
+  case InterpOne:
+  case InterpOneCF:
+    return InterpOneEffects {};
+
+  case EndCatch:
+  case NativeImpl:
+  case TryEndCatch:
+    return UnknownEffects {};
+
+  // NB: on the failure path, these C++ helpers do a fixup and read frame
+  // locals before they throw.  They can also invoke the user error handler and
+  // go do whatever they want to non-frame locations.
+  //
+  // TODO(#5372569): if we combine dv inits into the same regions we could
+  // possibly avoid storing KindOfUninits if we modify this.
+  case VerifyParamCallable:
+  case VerifyParamCls:
+  case VerifyParamFail:
+    return MayLoadStore { AUnknown, ANonFrame };
+  // However the following ones can't read locals from our frame on the way
+  // out.
+  case VerifyRetCallable:
+  case VerifyRetCls:
+  case VerifyRetFail:
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  case Call:
+  case CallArray:
+  case CallBuiltin:
+  case ContEnter:
+    return CallEffects { call_destroys_locals(inst) };
+
+  // Resumable suspension takes everything from the frame and moves it into the
+  // heap.
+  case CreateAFWH:
+  case CreateCont:
+    return MayLoadStore { AFrameAny, ANonFrame };
+
+  // This calls extension-defined instance constructors.  They can read or
+  // write whatever except frame locals.
+  case ConstructInstance:
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  //////////////////////////////////////////////////////////////////////
+  // Iterator instructions
 
   case IterInit:
   case MIterInit:
   case WIterInit:
-    return ReadLocal { inst.src(1), inst.extra<IterData>()->valId };
+    return IterEffects { inst.src(1), inst.extra<IterData>()->valId };
   case IterNext:
   case MIterNext:
   case WIterNext:
-    return ReadLocal { inst.src(0), inst.extra<IterData>()->valId };
+    return IterEffects { inst.src(0), inst.extra<IterData>()->valId };
 
   case IterInitK:
   case MIterInitK:
   case WIterInitK:
-    return ReadLocal2 {
+    return IterEffects2 {
       inst.src(1),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId
@@ -211,403 +244,151 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterNextK:
   case MIterNextK:
   case WIterNextK:
-    return ReadLocal2 {
+    return IterEffects2 {
       inst.src(0),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId
     };
 
-  case ABCUnblock:
-  case AbsDbl:
-  case AddDbl:
-  case AddElemIntKey:
-  case AddElemStrKey:
-  case AddInt:
-  case AddIntO:
-  case AddNewElem:
-  case AFWHBlockOn:
-  case AFWHPrepareChild:
-  case AKExists:
-  case AllocObj:
-  case AllocPackedArray:
-  case AndInt:
-  case ArrayAdd:
-  case ArrayGet:
-  case ArrayIdx:
-  case ArrayIsset:
-  case ArraySet:
-  case ArraySetRef:
-  case AssertLoc:
-  case AssertNonNull:
-  case AssertStk:
-  case AssertType:
-  case BaseG:
-  case BeginCatch:
-  case Box:
-  case CastStk:
-  case CastStkIntToDbl:
-  case Ceil:
-  case CheckBounds:
-  case CheckCold:
-  case CheckDefinedClsEq:
-  case CheckInit:
-  case CheckInitProps:
-  case CheckInitSProps:
-  case CheckNonNull:
-  case CheckNullptr:
-  case CheckPackedArrayBounds:
-  case CheckRefs:
-  case CheckStaticLocInit:
-  case CheckStk:
-  case CheckSurpriseFlags:
-  case CheckType:
-  case CheckTypePackedArrayElem:
-  case CIterFree:
-  case Clone:
-  case ClosureStaticLocInit:
-  case ClsNeq:
-  case CoerceCellToBool:
-  case CoerceCellToDbl:
-  case CoerceCellToInt:
-  case CoerceStk:
-  case CoerceStrToDbl:
-  case CoerceStrToInt:
-  case ColAddElemC:
-  case ColAddNewElemC:
-  case ColIsEmpty:
-  case ColIsNEmpty:
-  case ConcatCellCell:
-  case ConcatIntStr:
-  case ConcatStr3:
-  case ConcatStr4:
-  case ConcatStrInt:
-  case ConcatStrStr:
-  case Conjure:
-  case ConstructInstance:
-  case ContArIncIdx:
-  case ContArIncKey:
-  case ContArUpdateIdx:
-  case ContPreNext:
-  case ContStartedCheck:
-  case ContValid:
-  case ConvArrToBool:
-  case ConvArrToDbl:
-  case ConvArrToInt:
-  case ConvBoolToArr:
-  case ConvBoolToDbl:
-  case ConvBoolToInt:
-  case ConvBoolToStr:
-  case ConvCellToArr:
-  case ConvCellToBool:
-  case ConvCellToDbl:
-  case ConvCellToInt:
-  case ConvCellToObj:
-  case ConvCellToStr:
-  case ConvClsToCctx:
-  case ConvDblToArr:
-  case ConvDblToBool:
-  case ConvDblToInt:
-  case ConvDblToStr:
-  case ConvIntToArr:
-  case ConvIntToBool:
-  case ConvIntToDbl:
-  case ConvIntToStr:
-  case ConvObjToArr:
-  case ConvObjToBool:
-  case ConvObjToDbl:
-  case ConvObjToInt:
-  case ConvObjToStr:
-  case ConvResToStr:
-  case ConvStrToArr:
-  case ConvStrToBool:
-  case ConvStrToDbl:
-  case ConvStrToInt:
-  case Count:
-  case CountArray:
-  case CountArrayFast:
-  case CountCollection:
-  case CreateSSWH:
-  case CufIterSpillFrame:
-  case CustomInstanceInit:
-  case DbgAssertRefCount:
-  case DbgAssertRetAddr:
-  case DbgAssertType:
-  case DecodeCufIter:
-  case DecRef:
-  case DecRefNZ:
-  case DecRefStack:
-  case DecRefThis:
-  case DefConst:
-  case DefFP:
-  case DefLabel:
-  case DefMIStateBase:
-  case DefSP:
-  case DeleteUnwinderException:
-  case DerefClsRDSHandle:
-  case DivDbl:
-  case EagerSyncVMRegs:
-  case EndGuards:
-  case Eq:
-  case EqDbl:
-  case EqInt:
-  case EqX:
-  case ExceptionBarrier:
-  case ExtendsClass:
-  case Floor:
-  case FreeActRec:
-  case GenericIdx:
-  case GetCtxFwdCall:
-  case GetCtxFwdCallDyn:
-  case Gt:
-  case GtDbl:
-  case Gte:
-  case GteDbl:
-  case GteInt:
-  case GteX:
-  case GtInt:
-  case GtX:
-  case GuardRefs:
-  case GuardStk:
-  case Halt:
-  case HintLocInner:
-  case HintStkInner:
-  case IncProfCounter:
-  case IncRef:
-  case IncRefCtx:
-  case IncStat:
-  case IncStatGrouped:
-  case IncTransCounter:
-  case InitObjProps:
-  case InitPackedArray:
-  case InitPackedArrayLoop:
-  case InitProps:
-  case InitSProps:
-  case InstanceOf:
-  case InstanceOfBitmask:
-  case InstanceOfIface:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsDbl:
-  case InterfaceSupportsInt:
-  case InterfaceSupportsStr:
-  case IsNType:
-  case IsPackedArrayElemNull:
-  case IsScalarType:
-  case IsType:
-  case IsWaitHandle:
-  case IterFree:
-  case Jmp:
-  case JmpEq:
-  case JmpEqInt:
-  case JmpGt:
-  case JmpGte:
-  case JmpGteInt:
-  case JmpGtInt:
-  case JmpInstanceOfBitmask:
-  case JmpLt:
-  case JmpLte:
-  case JmpLteInt:
-  case JmpLtInt:
-  case JmpNeq:
-  case JmpNeqInt:
-  case JmpNInstanceOfBitmask:
-  case JmpNSame:
-  case JmpNZero:
-  case JmpSame:
-  case JmpZero:
-  case LdAFWHActRec:
-  case LdARFuncPtr:
-  case LdArrFPushCuf:
-  case LdArrFuncCtx:
-  case LdAsyncArParentChain:
-  case LdBindAddr:
-  case LdCctx:
-  case LdCls:
-  case LdClsCached:
-  case LdClsCachedSafe:
-  case LdClsCctx:
-  case LdClsCns:
-  case LdClsCtor:
-  case LdClsCtx:
-  case LdClsInitData:
-  case LdClsMethod:
-  case LdClsMethodCacheCls:
-  case LdClsMethodCacheFunc:
-  case LdClsMethodFCacheFunc:
-  case LdClsName:
-  case LdClsPropAddrKnown:
-  case LdClsPropAddrOrNull:
-  case LdClsPropAddrOrRaise:
-  case LdCns:
-  case LdContActRec:
-  case LdContArKey:
-  case LdContArValue:
-  case LdContField:
-  case LdContResumeAddr:
-  case LdCtx:
-  case LdFunc:
-  case LdFuncCached:
-  case LdFuncCachedSafe:
-  case LdFuncCachedU:
-  case LdFuncNumParams:
-  case LdGblAddr:
-  case LdGblAddrDef:
-  case LdLocAddr:
-  case LdMIStateAddr:
-  case LdObjClass:
-  case LdObjInvoke:
-  case LdObjMethod:
-  case LdPackedArrayElem:
-  case LdPairBase:
-  case LdPropAddr:
-  case LdRef:
-  case LdResumableArObj:
-  case LdRetAddr:
-  case LdSSwitchDestFast:
-  case LdSSwitchDestSlow:
-  case LdStack:
-  case LdStackAddr:
-  case LdStaticLocCached:
-  case LdStrFPushCuf:
-  case LdStrLen:
-  case LdSwitchDblIndex:
-  case LdSwitchObjIndex:
-  case LdSwitchStrIndex:
-  case LdThis:
-  case LdUnwinderValue:
-  case LdVectorBase:
-  case LdVectorSize:
-  case LdWHResult:
-  case LdWHState:
-  case LookupClsCns:
-  case LookupClsMethod:
-  case LookupClsMethodCache:
-  case LookupClsMethodFCache:
-  case LookupClsRDSHandle:
-  case LookupCns:
-  case LookupCnsE:
-  case LookupCnsU:
-  case Lt:
-  case LtDbl:
-  case Lte:
-  case LteDbl:
-  case LteInt:
-  case LteX:
-  case LtInt:
-  case LtX:
-  case MapGet:
-  case MapIsset:
-  case MapSet:
-  case MIterFree:
-  case Mod:
-  case Mov:
-  case MulDbl:
-  case MulInt:
-  case MulIntO:
-  case Neq:
-  case NeqDbl:
-  case NeqInt:
-  case NeqX:
-  case NewArray:
-  case NewCol:
-  case NewInstanceRaw:
-  case NewLikeArray:
-  case NewMIArray:
-  case NewMixedArray:
-  case NewMSArray:
-  case NewPackedArray:
-  case NewStructArray:
-  case NewVArray:
-  case NInstanceOfBitmask:
-  case Nop:
-  case NSame:
-  case OODeclExists:
-  case OrInt:
-  case PairIsset:
-  case PrintBool:
-  case PrintInt:
-  case PrintStr:
-  case ProfileArray:
-  case RaiseArrayIndexNotice:
-  case RaiseError:
-  case RaiseNotice:
-  case RaiseUndefProp:
-  case RaiseUninitLoc:
-  case RaiseWarning:
-  case RBTrace:
-  case ReDefSP:
-  case RegisterLiveObj:
-  case ReleaseVVOrExit:
-  case RestoreErrorLevel:
-  case RetAdjustStack:
-  case Same:
-  case Shl:
-  case Shr:
-  case SpillFrame:
-  case SpillStack:
-  case Sqrt:
-  case StAsyncArResult:
-  case StAsyncArResume:
-  case StAsyncArSucceeded:
-  case StaticLocInitCached:
-  case StClosureArg:
-  case StClosureCtx:
-  case StClosureFunc:
-  case StContArKey:
-  case StContArResume:
-  case StContArState:
-  case StContArValue:
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that explicitly manipulate locals
+
+  case StLoc:
+    return PureStore {
+      AFrame { inst.src(0), inst.extra<StLoc>()->locId },
+      inst.src(1)
+    };
+
+  case StLocNT:
+    return PureStoreNT {
+      AFrame { inst.src(0), inst.extra<StLocNT>()->locId },
+      inst.src(1)
+    };
+
+  case LdLoc:
+    return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
+
+  case CheckLoc:
+  case DecRefLoc:
+  case GuardLoc:
+  case LdLocPseudoMain:
+    return MayLoadStore {
+      AFrame { inst.src(0), inst.extra<LocalId>()->locId },
+      AEmpty
+    };
+
   case StLocPseudoMain:
-  case StProp:
-  case StRef:
-  case StRetVal:
-  case StringGet:
-  case StringIsset:
-  case SubDbl:
-  case SubInt:
-  case SubIntO:
-  case SyncABIRegs:
-  case TakeRef:
-  case TakeStack:
-  case TrackLoc:
-  case TypeProfileFunc:
-  case UnwindCheckSideExit:
-  case VectorDoCow:
-  case VectorHasImmCopy:
-  case VectorIsset:
-  case WarnNonObjProp:
-  case XorBool:
-  case XorInt:
-  case ZeroErrorLevel:
-    return IrrelevantEffects {};
+    // This can store to globals or locals, but we don't have globals in
+    // ALocation yet.
+    return PureStore { AUnknown };
+
+  case ClosureStaticLocInit:
+    return MayLoadStore { AFrameAny, AFrameAny };
+
+  //////////////////////////////////////////////////////////////////////
+  // Pointer-based loads and stores
+
+  case LdElem:
+  case LdMem:
+    return PureLoad { pointee(inst.src(0)) };
 
   case StElem:
   case StMem:
-    // We never generate this to write to locals, but we aren't precise about
-    // tracking writes right now so it's irrelevant in any case.
-    return IrrelevantEffects {};
+    return PureStore { pointee(inst.src(0)), inst.src(2) };
 
-  /*
-   * Various opcodes that take a PtrToGen in src 0, which may or may not alias
-   * frame locals.  Right now we can rule this out only if it has a pointer
-   * type that can't include pointers to the frame.
-   */
   case BoxPtr:
-  case CGetElem:
+  case UnboxPtr:
+    {
+      auto const mem = pointee(inst.src(0));
+      return MayLoadStore { mem, mem };
+    }
+
   case CheckInitMem:
   case CheckTypeMem:
   case DbgAssertPtr:
+  case IsNTypeMem:
+  case IsTypeMem:
+  case ProfileStr:
+    return MayLoadStore { pointee(inst.src(0)), AEmpty };
+
   case DecRefMem:
+    return MayLoadStore {
+      // DecRefMem can re-enter to run a destructor and read any non-frame
+      // locals.  We also need to union in the pointee in case it points to a
+      // local.
+      pointee(inst.src(0)) | ANonFrame,
+      ANonFrame
+    };
+
+  //////////////////////////////////////////////////////////////////////
+  // Object/Ref stores
+
+  case StProp:
+    return PureStore {
+      AProp { inst.src(0), safe_cast<uint32_t>(inst.src(1)->intVal()) },
+      inst.src(2)
+    };
+
+  case LdRef:
+    // LdRef potentially acts a guard, so it's not necessarily a PureLoad.
+    if (inst.taken()) return MayLoadStore { ANonFrame, AEmpty };
+    return PureLoad { ANonFrame };
+
+  case StRef:
+    // We don't have anything for ref locations at this point, but we know it
+    // can't be a frame location.
+    return PureStore { ANonFrame };
+
+  case InitObjProps:
+    return MayLoadStore { AEmpty, APropAny };
+
+  //////////////////////////////////////////////////////////////////////
+  // Array loads and stores
+
+  case InitPackedArray:
+    return PureStore {
+      AElemI { inst.src(0), inst.extra<InitPackedArray>()->index },
+      inst.src(1)
+    };
+
+  // TODO(#5575265): use LdMem for this instruction.
+  case LdPackedArrayElem:
+    if (inst.src(1)->isConst() && inst.src(1)->intVal() >= 0) {
+      return PureLoad {
+        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) }
+      };
+    }
+    return PureLoad { AElemIAny };
+
+  // TODO(#5575265): replace this instruction with CheckTypeMem.
+  case CheckTypePackedArrayElem:
+  case IsPackedArrayElemNull:
+    if (inst.src(1)->isConst() && inst.src(1)->intVal() >= 0) {
+      return MayLoadStore {
+        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) },
+        AEmpty
+      };
+    }
+    return MayLoadStore { AElemIAny, AEmpty };
+
+  case InitPackedArrayLoop:
+    return MayLoadStore { AEmpty, AElemIAny };
+
+  //////////////////////////////////////////////////////////////////////
+  // Member instructions
+
+  /*
+   * Various minstr opcodes that take a PtrToGen in src 0, which may or may not
+   * point to a frame local or the evaluation stack.  These instructions can
+   * all re-enter the VM and access arbitrary non-frame/stack locations, as
+   * well.
+   */
+  case CGetElem:
   case ElemArray:
   case ElemArrayW:
   case ElemX:
   case EmptyElem:
-  case IsNTypeMem:
   case IssetElem:
-  case IsTypeMem:
-  case LdMem:
-  case LdElem:
-  case ProfileStr:
-  case UnboxPtr:
   case BindElem:              case BindElemStk:
   case BindNewElem:           case BindNewElemStk:
   case ElemDX:                case ElemDXStk:
@@ -621,9 +402,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetWithRefNewElem:     case SetWithRefNewElemStk:
   case UnsetElem:             case UnsetElemStk:
   case VGetElem:              case VGetElemStk:
+    // Right now we generally can't limit any of these, since they can raise
+    // warnings and re-enter.
     assert(inst.src(0)->type() <= Type::PtrToGen);
-    return read_ptr(inst.src(0));
+    return MayLoadStore {
+      pointee(inst.src(0)) | ANonFrame,
+      pointee(inst.src(0)) | ANonFrame
+    };
 
+  /*
+   * These minstr opcodes either take a PtrToGen or an Obj as the base.  The
+   * pointer may point at frame locals or the stack.  These instructions can
+   * all re-enter the VM and access arbitrary non-frame/stack locations, as
+   * well.
+   */
   case CGetProp:
   case EmptyProp:
   case IssetProp:
@@ -635,12 +427,406 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpProp:             case SetOpPropStk:
   case SetProp:               case SetPropStk:
   case VGetProp:              case VGetPropStk:
-    if (inst.src(0)->type().maybe(Type::PtrToGen)) {
-      return read_ptr(inst.src(0));
+    if (inst.src(0)->type() <= Type::PtrToGen) {
+      return MayLoadStore {
+        pointee(inst.src(0)) | ANonFrame,
+        pointee(inst.src(0)) | ANonFrame
+      };
     }
-    // Some of these support Obj in this first arg, which we don't try to
-    // report anything about here yet.
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  /*
+   * Collection accessors can read from their inner array buffer, but stores
+   * COW and behave as if they only affect collection memory locations.  We
+   * don't track those, so it's returning AEmpty for now.
+   */
+  case MapGet:
+  case MapIsset:
+  case MapSet:
+  case PairIsset:
+  case VectorDoCow:
+  case VectorIsset:
+    return MayLoadStore { ANonFrame, AEmpty /* Note */ };
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that allocate new objects, so any effects they have on some
+  // types of memory locations we track are isolated from anything else we care
+  // about.
+
+  case NewArray:
+  case NewCol:
+  case NewInstanceRaw:
+  case NewLikeArray:
+  case NewMIArray:
+  case NewMixedArray:
+  case NewMSArray:
+  case NewPackedArray:
+  case NewStructArray:
+  case NewVArray:
+  case AllocPackedArray:
+  case ConvBoolToArr:
+  case ConvDblToStr:
+  case ConvDblToArr:
+  case ConvIntToArr:
+  case ConvIntToStr:
+  case ConvResToStr:
+  case CreateSSWH:
+  case Box:  // conditional allocation
     return IrrelevantEffects {};
+
+  case AllocObj:  // AllocObj calls constructors.
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that only affect the stack.  Currently memory-effects doesn't
+  // report anything about this.
+
+  case SpillFrame:
+  case SpillStack:
+  case AssertStk:
+  case HintStkInner:
+  case GuardStk:
+  case CheckStk:
+  case CastStkIntToDbl:
+  case CufIterSpillFrame:
+  case DecRefStack:
+  case LdStack:
+    return IrrelevantEffects {};
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that never do anything to memory
+
+  case AbsDbl:
+  case AddDbl:
+  case AddInt:
+  case AddIntO:
+  case AndInt:
+  case AssertLoc:
+  case AssertType:
+  case DefFP:
+  case DefSP:
+  case EndGuards:
+  case EqDbl:
+  case EqInt:
+  case GteInt:
+  case GtInt:
+  case HintLocInner:
+  case Jmp:
+  case JmpNZero:
+  case JmpZero:
+  case LdPropAddr:
+  case LdStackAddr:
+  case LteDbl:
+  case LteInt:
+  case LtInt:
+  case GtDbl:
+  case GteDbl:
+  case LtDbl:
+  case DivDbl:
+  case MulDbl:
+  case MulInt:
+  case MulIntO:
+  case NeqDbl:
+  case NeqInt:
+  case ReDefSP:
+  case SubDbl:
+  case SubInt:
+  case SubIntO:
+  case TrackLoc:
+  case XorBool:
+  case XorInt:
+  case OrInt:
+  case AssertNonNull:
+  case CheckNonNull:
+  case CheckNullptr:
+  case Ceil:
+  case Floor:
+  case DefLabel:
+  case JmpNeqInt:
+  case JmpGteInt:
+  case JmpGtInt:
+  case JmpLteInt:
+  case JmpLtInt:
+  case JmpEqInt:
+  case ExceptionBarrier:
+  case SyncABIRegs:
+  case DecRefNZ:
+  case CheckInit:
+  case Nop:
+  case ClsNeq:
+  case Mod:
+  case TakeRef:
+  case TakeStack:
+  case Conjure:
+  case DefMIStateBase:
+  case Halt:
+  case ConvBoolToInt:
+  case ConvBoolToDbl:
+  case DbgAssertType:
+  case DefConst:
+  case LdLocAddr:
+  case Sqrt:
+  case LdResumableArObj:
+  case Shl:
+  case Shr:
+  case IsNType:
+  case IsType:
+  case Mov:
+  case ConvClsToCctx:
+  case ConvDblToBool:
+  case ConvDblToInt:
+  case IsScalarType:
+  case LdClsCctx:
+  case LdMIStateAddr:
+  case LdPairBase:
+  case LdStaticLocCached:
+    return IrrelevantEffects {};
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that technically do some things w/ memory, but not in any way
+  // we currently care about.
+
+  case ABCUnblock:
+  case BeginCatch:
+  case CheckSurpriseFlags:
+  case CheckType:
+  case FreeActRec:
+  case IncRef:
+  case IncRefCtx:
+  case LdRetAddr:
+  case LdThis:
+  case RegisterLiveObj:
+  case RetAdjustStack:
+  case StClosureArg:
+  case StClosureCtx:
+  case StClosureFunc:
+  case StContArKey:
+  case StContArResume:
+  case StContArState:
+  case StContArValue:
+  case StRetVal:
+  case ZeroErrorLevel:
+  case RestoreErrorLevel:
+  case AFWHBlockOn:
+  case CheckCold:
+  case CheckDefinedClsEq:
+  case CheckInitProps:
+  case CheckInitSProps:
+  case CheckRefs:
+  case ContArIncIdx:
+  case ContArIncKey:
+  case ContArUpdateIdx:
+  case ContValid:
+  case ConcatIntStr:
+  case ConcatStr3:
+  case ConcatStr4:
+  case ConcatStrInt:
+  case ConcatStrStr:
+  case CoerceStrToDbl:
+  case CoerceStrToInt:
+  case ConvStrToInt:
+  case IncProfCounter:
+  case IncStat:
+  case IncStatGrouped:
+  case ContPreNext:
+  case ContStartedCheck:
+  case ConvArrToBool:
+  case ConvArrToDbl:
+  case ConvArrToInt:
+  case CoerceCellToBool:
+  case ConvBoolToStr:
+  case CountArray:
+  case CountArrayFast:
+  case StAsyncArResult:
+  case StAsyncArResume:
+  case StAsyncArSucceeded:
+  case InstanceOf:
+  case InstanceOfBitmask:
+  case JmpInstanceOfBitmask:
+  case NInstanceOfBitmask:
+  case JmpNInstanceOfBitmask:
+  case InstanceOfIface:
+  case InterfaceSupportsArr:
+  case InterfaceSupportsDbl:
+  case InterfaceSupportsInt:
+  case InterfaceSupportsStr:
+  case IsWaitHandle:
+  case DbgAssertRefCount:
+  case DbgAssertRetAddr:
+  case NSame:
+  case Same:
+  case JmpNSame:
+  case JmpSame:
+  case Gt:
+  case Gte:
+  case Eq:
+  case Lt:
+  case Lte:
+  case Neq:
+  case IncTransCounter:
+  case LdBindAddr:
+  case JmpEq:
+  case JmpGt:
+  case JmpGte:
+  case JmpLt:
+  case JmpLte:
+  case JmpNeq:
+  case LdClsCtor:
+  case LdAsyncArParentChain:
+  case GuardRefs:
+  case LdSSwitchDestFast:
+  case LdSSwitchDestSlow:
+  case RBTrace:
+  case ConvCellToInt:
+  case ConvIntToBool:
+  case ConvIntToDbl:
+  case ConvCellToDbl:
+  case ConvObjToDbl:
+  case ConvStrToArr:   // decrefs src, but src is a string
+  case ConvStrToBool:
+  case ConvStrToDbl:
+  case DeleteUnwinderException:
+  case DerefClsRDSHandle:
+  case EagerSyncVMRegs:
+  case ExtendsClass:
+  case LdUnwinderValue:
+  case GetCtxFwdCall:
+  case LdCctx:
+  case LdCtx:
+  case LdClsName:
+  case LdAFWHActRec:
+  case LdClsCtx:
+  case LdARFuncPtr:
+  case PrintBool:
+  case PrintInt:
+  case PrintStr:
+  case LdContActRec:
+  case LdContArKey:
+  case LdContArValue:
+  case LdContField:
+  case LdContResumeAddr:
+  case LdClsCachedSafe:
+  case LdClsCns:
+  case LdClsInitData:
+  case UnwindCheckSideExit:
+  case LdCns:
+  case LdClsMethod:
+  case LdClsMethodCacheCls:
+  case LdClsMethodCacheFunc:
+  case LdClsMethodFCacheFunc:
+  case ProfileArray:
+  case LdFuncCachedSafe:
+  case LdFuncNumParams:
+  case LdGblAddr:
+  case LdGblAddrDef:
+  case LdObjClass:
+  case LdObjInvoke:
+  case LdStrLen:
+  case StringIsset:
+  case LdSwitchDblIndex:
+  case LdSwitchStrIndex:
+  case LdVectorBase:
+  case LdWHResult:
+  case LdWHState:
+  case LookupClsRDSHandle:
+  case TypeProfileFunc:
+  case AFWHPrepareChild:
+  case CoerceCellToDbl:
+  case CoerceCellToInt:
+    return IrrelevantEffects {};
+
+  // Some that touch memory we might care about later, but currently don't:
+  case CheckStaticLocInit:
+  case StaticLocInitCached:
+  case ColAddElemC:
+  case ColAddNewElemC:
+  case ColIsEmpty:
+  case ColIsNEmpty:
+  case CheckBounds:
+  case ConvCellToBool:
+  case ConvObjToBool:
+  case ConvObjToInt:
+  case CountCollection:
+  case LdVectorSize:
+  case LdClsPropAddrKnown:
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
+  case VectorHasImmCopy:
+  case CheckPackedArrayBounds:
+    return IrrelevantEffects {};
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that can re-enter the VM and touch anything except frame
+  // memory.
+
+  case CastStk:
+  case BaseG:
+  case DecRef:
+  case DecRefThis:
+  case Clone:
+  case WarnNonObjProp:
+  case RaiseArrayIndexNotice:
+  case RaiseError:
+  case RaiseNotice:
+  case RaiseUndefProp:
+  case RaiseUninitLoc:
+  case RaiseWarning:
+  case ConvCellToStr:
+  case ConvObjToStr:
+  case ConcatCellCell:
+  case Count:      // re-enters on CountableClass
+  case CIterFree:  // decrefs context object in iter
+  case MIterFree:
+  case IterFree:
+  case EqX:
+  case GteX:
+  case GtX:
+  case LteX:
+  case LtX:
+  case NeqX:
+  case DecodeCufIter:
+  case ReleaseVVOrExit:  // can decref fields in an ExtraArgs structure
+  case ConvCellToArr:  // decrefs src, may read obj props
+  case ConvCellToObj:  // decrefs src
+  case ConvObjToArr:   // decrefs src
+  case CustomInstanceInit:
+  case GenericIdx:
+  case GetCtxFwdCallDyn: // autoload in StaticMethodCache
+  case InitProps:
+  case InitSProps:
+  case OODeclExists:
+  case LdArrFPushCuf:  // autoload
+  case LdArrFuncCtx:   // autoload
+  case LdCls:          // autoload
+  case LdClsCached:    // autoload
+  case LdFunc:         // autoload
+  case LdFuncCached:   // autoload
+  case LdFuncCachedU:  // autoload
+  case LdObjMethod:    // can't autoload, but can decref $this right now
+  case LdStrFPushCuf:  // autoload
+  case LdSwitchObjIndex:  // decrefs arg
+  case LookupClsCns:      // autoload
+  case LookupClsMethod:   // autoload
+  case LookupClsMethodCache:  // autoload
+  case LookupClsMethodFCache: // autoload
+  case LookupCns:
+  case LookupCnsE:
+  case LookupCnsU:
+  case StringGet:   // raise_warning
+  case CoerceStk:   // object __toString
+  case ArrayAdd:    // decrefs source
+  case AKExists:    // re-enters for warnings on kVPackedKind, etc
+  case AddElemIntKey:  // decrefs value
+  case AddElemStrKey:  // decrefs value
+  case AddNewElem:     // decrefs value
+  case ArrayIdx:       // kVPackedKind warnings
+  case ArrayGet:       // kVPackedKind warnings
+  case ArrayIsset:     // kVPackedKind warnings
+  case ArraySet:       // kVPackedKind warnings
+  case ArraySetRef:    // kVPackedKind warnings
+    return MayLoadStore { ANonFrame, ANonFrame };
+
+  //////////////////////////////////////////////////////////////////////
 
   }
 
@@ -652,44 +838,85 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 }
 
 MemEffects memory_effects(const IRInstruction& inst) {
+  always_assert_flog(
+    !RuntimeOption::EnableArgsInBacktraces,
+    "memory_effects currently doesn't report some possible "
+    "loads for EnableArgsInBacktraces, so you must not call it from "
+    "passes that run if that flag is on"
+  );
+
   auto const ret = memory_effects_impl(inst);
-  if (debug) {
-    // In debug let's do some type checking in case people move instruction
-    // argument numbers.
-    auto const fp = match<SSATmp*>(
-      ret,
-      [&] (UnknownEffects)    { return nullptr; },
-      [&] (IrrelevantEffects) { return nullptr; },
-      [&] (ReadAllLocals)     { return nullptr; },
-      [&] (KillFrameLocals l) { return l.fp; },
-      [&] (ReadLocal l)       { return l.fp; },
-      [&] (ReadLocal2 l)      { return l.fp; },
-      [&] (StoreLocal l)      { return l.fp; },
-      [&] (StoreLocalNT l)    { return l.fp; }
+  if (!debug) return ret;
+
+  auto check_fp = [&] (SSATmp* fp) {
+    always_assert_flog(
+      fp->type() <= Type::FramePtr,
+      "Non frame pointer in memory effects:\n  inst: {}\n  effects: {}",
+      inst.toString(),
+      show(ret)
     );
-    if (fp != nullptr) {
-      always_assert_flog(
-        fp->type() <= Type::FramePtr,
-        "Non frame pointer in memory effects:\n  inst: {}\n  effects: {}",
-        inst.toString(),
-        show(ret)
-      );
+  };
+
+  auto check_obj = [&] (SSATmp* obj) {
+    always_assert_flog(
+      // Maybe we should actually just give up on this (or check it /before/
+      // doing canonicalize?).
+      obj->type() <= Type::Obj,
+      "Non obj pointer in memory effects:\n  inst: {}\n  effects: {}",
+      inst.toString(),
+      show(ret)
+    );
+  };
+
+  auto check = [&] (ALocation loc) {
+    if (auto const fr = loc.frame()) {
+      check_fp(fr->fp);
+      return;
     }
-  }
+    if (auto const pr = loc.prop()) {
+      check_obj(pr->obj);
+    }
+  };
+
+  // In debug let's do some type checking in case people move instruction
+  // argument numbers.
+  match<void>(
+    ret,
+    [&] (MayLoadStore m)    { check(m.loads); check(m.stores); },
+    [&] (PureLoad m)        { check(m.loc); },
+    [&] (PureStore m)       { check(m.loc); },
+    [&] (PureStoreNT m)     { check(m.loc); },
+    [&] (IterEffects m)     { check_fp(m.fp); },
+    [&] (IterEffects2 m)    { check_fp(m.fp); },
+    [&] (KillFrameLocals m) { check_fp(m.fp); },
+    [&] (IrrelevantEffects) {},
+    [&] (UnknownEffects)    {},
+    [&] (InterpOneEffects)  {},
+    [&] (CallEffects)       {},
+    [&] (ReturnEffects)     {}
+  );
+
   return ret;
 }
 
-const char* show(MemEffects effects) {
-  return match<const char*>(
+std::string show(MemEffects effects) {
+  using folly::sformat;
+  return match<std::string>(
     effects,
-    [&] (UnknownEffects)    { return "UnknownEffects"; },
-    [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
+    [&] (MayLoadStore m) {
+      return sformat("mls({} ; {})", show(m.loads), show(m.stores));
+    },
+    [&] (PureLoad m)        { return sformat("ld({})", show(m.loc)); },
+    [&] (PureStore m)       { return sformat("st({})", show(m.loc)); },
+    [&] (PureStoreNT m)     { return sformat("stNT({})", show(m.loc)); },
+    [&] (IterEffects)       { return "IterEffects"; },
+    [&] (IterEffects2)      { return "IterEffects2"; },
     [&] (KillFrameLocals)   { return "KillFrameLocals"; },
-    [&] (ReadLocal)         { return "ReadLocal"; },
-    [&] (ReadLocal2)        { return "ReadLocal2"; },
-    [&] (StoreLocal)        { return "StoreLocal"; },
-    [&] (StoreLocalNT)      { return "StoreLocalNT"; },
-    [&] (ReadAllLocals)     { return "ReadAllLocals"; }
+    [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
+    [&] (UnknownEffects)    { return "UnknownEffects"; },
+    [&] (InterpOneEffects)  { return "InterpOneEffects"; },
+    [&] (CallEffects)       { return "CallEffects"; },
+    [&] (ReturnEffects)     { return "ReturnEffects"; }
   );
 }
 

@@ -4475,12 +4475,6 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
   }
 }
 
-/**
- * This method is similar to emitGetCtxFwdCallWithThis above, but
- * whether or not the callee is a static method is unknown at JIT
- * time, and that is determined dynamically by looking up into the
- * StaticMethodFCache.
- */
 void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   auto destCtxReg = dstLoc(inst, 0).reg(0);
   auto srcCtxTmp = inst->src(0);
@@ -4568,6 +4562,11 @@ Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
   });
 }
 
+/**
+ * This method is similar to emitGetCtxFwdCall above, but whether or not the
+ * callee is a static method is unknown at JIT time, and that is determined
+ * dynamically by looking up into the StaticMethodFCache.
+ */
 void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   auto srcCtxTmp  = inst->src(0);
   auto srcCtxReg  = srcLoc(inst, 0).reg();

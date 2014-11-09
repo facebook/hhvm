@@ -462,7 +462,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
         case ' ':
         case '\t':
         case '\n':
-          continue;
         default:
           doprint = 1;
           break;

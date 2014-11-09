@@ -33,6 +33,8 @@
 #include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
+struct APCLocalArray;
+struct MemoryManager;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -55,7 +57,6 @@ namespace HPHP {
  *     malloc implementation.  (This feature is gated on being
  *     compiled with jemalloc.)
  */
-struct MemoryManager;
 MemoryManager& MM();
 
 //////////////////////////////////////////////////////////////////////
@@ -304,7 +305,6 @@ struct StringDataNode {
   StringDataNode* prev;
 };
 
-
 //////////////////////////////////////////////////////////////////////
 
 struct MemoryManager {
@@ -522,8 +522,14 @@ struct MemoryManager {
    */
   void resetCouldOOM(bool state = true);
 
+  /*
+   * Methods for maintaining dedicated sweep lists of sweepable NativeData
+   * objects, and APCLocalArray instances.
+   */
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
+  void addApcArray(APCLocalArray*);
+  void removeApcArray(APCLocalArray*);
 
   /*
    * Object tracking keeps instances of object data's by using track/untrack.
@@ -644,6 +650,7 @@ private:
   std::array<FreeList,kNumSmartSizes> m_freelists;
   BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
+  std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
   std::vector<void*> m_slabs;
   std::vector<NativeNode*> m_natives;

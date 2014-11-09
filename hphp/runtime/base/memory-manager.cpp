@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/vm/native-data.h"
-
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -401,6 +401,12 @@ void MemoryManager::sweep() {
 }
 
 void MemoryManager::resetAllocator() {
+  UNUSED auto napcs = m_apc_arrays.size();
+  while (!m_apc_arrays.empty()) {
+    auto a = m_apc_arrays.back();
+    m_apc_arrays.pop_back();
+    a->sweep();
+  }
   UNUSED auto nstrings = StringData::sweepAll();
   UNUSED auto nslabs = m_slabs.size();
 
@@ -428,7 +434,8 @@ void MemoryManager::resetAllocator() {
   }
 
   resetCouldOOM();
-  TRACE(1, "reset: strings %u slabs %lu big %lu\n", nstrings, nslabs, nbig);
+  TRACE(1, "reset: apc-arrays %lu strings %u slabs %lu big %lu\n",
+        napcs, nstrings, nslabs, nbig);
 }
 
 /*
@@ -744,6 +751,21 @@ void MemoryManager::removeNativeObject(NativeNode* node) {
   m_natives[index] = last;
   m_natives.pop_back();
   last->sweep_index = index;
+}
+
+void MemoryManager::addApcArray(APCLocalArray* a) {
+  a->m_sweep_index = m_apc_arrays.size();
+  m_apc_arrays.push_back(a);
+}
+
+void MemoryManager::removeApcArray(APCLocalArray* a) {
+  assert(a->m_sweep_index < m_apc_arrays.size());
+  assert(m_apc_arrays[a->m_sweep_index] == a);
+  auto index = a->m_sweep_index;
+  auto last = m_apc_arrays.back();
+  m_apc_arrays[index] = last;
+  m_apc_arrays.pop_back();
+  last->m_sweep_index = index;
 }
 
 //////////////////////////////////////////////////////////////////////

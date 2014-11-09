@@ -21,7 +21,8 @@
 #include <resolv.h>
 #include <sys/utsname.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
+#include <folly/IPAddress.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/process.h"
@@ -45,13 +46,6 @@ public:
 static ResolverLibInitializer _resolver_lib_initializer;
 ///////////////////////////////////////////////////////////////////////////////
 // thread-safe network functions
-
-std::string safe_inet_ntoa(struct in_addr &in) {
-  char buf[256];
-  memset(buf, 0, sizeof(buf));
-  inet_ntop(AF_INET, &in, buf, sizeof(buf)-1);
-  return buf;
-}
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
 #if defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
@@ -86,19 +80,50 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-std::string GetPrimaryIP() {
+std::string GetPrimaryIPImpl(int af) {
+  const static std::string s_empty;
   struct utsname buf;
+  struct addrinfo hints;
+  struct addrinfo *res = nullptr;
+  int error;
+
+  SCOPE_EXIT {
+    if (res) {
+      freeaddrinfo(res);
+    }
+  };
+
   uname((struct utsname *)&buf);
 
-  HostEnt result;
-  if (!safe_gethostbyname(buf.nodename, result)) {
-    return buf.nodename;
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = af;
+
+  error = getaddrinfo(buf.nodename, nullptr, &hints, &res);
+  if (error) {
+    return s_empty;
   }
 
-  struct in_addr in;
-  memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  return safe_inet_ntoa(in);
+  try {
+    return folly::IPAddress(res->ai_addr).toFullyQualified();
+  } catch (folly::IPAddressFormatException &e) {
+    return s_empty;
+  }
+}
+
+std::string GetPrimaryIPv4() {
+  return GetPrimaryIPImpl(AF_INET);
+}
+
+std::string GetPrimaryIPv6() {
+  return GetPrimaryIPImpl(AF_INET6);
+}
+
+std::string GetPrimaryIP() {
+  auto ipaddress = GetPrimaryIPv4();
+  if (!ipaddress.empty()) {
+    ipaddress = GetPrimaryIPv6();
+  }
+  return ipaddress;
 }
 
 static std::string normalizeIPv6Address(const std::string& address) {

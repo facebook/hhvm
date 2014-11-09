@@ -109,7 +109,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string ServerPrimaryIP;
+  static std::string ServerPrimaryIPv4;
+  static std::string ServerPrimaryIPv6;
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;

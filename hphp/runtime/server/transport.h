@@ -136,7 +136,9 @@ public:
     return "";
   };
   virtual const char *getServerAddr() {
-    return RuntimeOption::ServerPrimaryIP.c_str();
+    return  RuntimeOption::ServerPrimaryIPv4.empty() ?
+       RuntimeOption::ServerPrimaryIPv6.c_str() :
+       RuntimeOption::ServerPrimaryIPv4.c_str();
   };
   virtual uint16_t getServerPort() {
     return RuntimeOption::ServerPort;

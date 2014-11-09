@@ -101,6 +101,11 @@ public:
   virtual const char *getUrl();
   virtual const char *getRemoteHost() { return "127.0.0.1"; }
   virtual uint16_t getRemotePort() { return 0; }
+  virtual const char *getServerAddr() {
+    return RuntimeOption::ServerPrimaryIPv4.empty() ?
+      RuntimeOption::ServerPrimaryIPv6.c_str() :
+      RuntimeOption::ServerPrimaryIPv4.c_str();
+  }
 
   /**
    * Request data.

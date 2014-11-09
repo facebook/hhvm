@@ -39,6 +39,7 @@ LibEventTransport::LibEventTransport(LibEventServer *server,
   m_requestSize = EVBUFFER_LENGTH(buf);
   m_remote_host = m_request->remote_host;
   m_remote_port = m_request->remote_port;
+  m_remote_ip = folly::IPAddress(m_remote_host);
 
   {
     char buf[6];
@@ -92,6 +93,12 @@ const char *LibEventTransport::getRemoteHost() {
 
 uint16_t LibEventTransport::getRemotePort() {
   return m_remote_port;
+}
+
+const char *LibEventTransport::getServerAddr() {
+  return m_remote_ip.isV6() ?
+    RuntimeOption::ServerPrimaryIPv6.c_str() :
+    RuntimeOption::ServerPrimaryIPv4.c_str();
 }
 
 const void *LibEventTransport::getPostData(int &size) {

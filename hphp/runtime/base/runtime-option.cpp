@@ -130,7 +130,8 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
-std::string RuntimeOption::ServerPrimaryIP;
+std::string RuntimeOption::ServerPrimaryIPv4;
+std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
@@ -1026,7 +1027,13 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerType, ini, server["Type"], ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
-    ServerPrimaryIP = GetPrimaryIP();
+    ServerPrimaryIPv4 = GetPrimaryIPv4();
+    ServerPrimaryIPv6 = GetPrimaryIPv6();
+    if (ServerPrimaryIPv4.empty() && ServerPrimaryIPv6.empty()) {
+      throw std::runtime_error("Unable to resolve the server's "
+          "IPv4 or IPv6 address");
+    }
+
     Config::Bind(ServerPort, ini, server["Port"], 80);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);

@@ -1484,8 +1484,17 @@ function print_failure($argv, $results, $options) {
 
   print_commands($failed, $options);
 
-  print make_header("Re-run just the failing tests:").
-        $argv[0].' '.implode(' ', $failed)."\n";
+  $rerun = make_header("Re-run just the failing tests:") . $argv[0];
+  foreach ($options as $option => $value) {
+    if ($option === "threads") {
+      // e.g., For a small number of failed tests, we don't need max threads
+      $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
+    } else {
+      $rerun .= " --" . $option . ' ' . escapeshellarg($value);
+    }
+  }
+  $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
+  print $rerun;
 
   if (idx($options, 'mode') == 'automain') {
     print make_header(
@@ -1617,6 +1626,11 @@ function drain_queue($queue) {
                       MSG_IPC_NOWAIT | MSG_NOERROR));
 }
 
+function get_num_threads($options, $tests) {
+  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
+  return min(count($tests), idx($options, 'threads', $cpus));
+}
+
 function main($argv) {
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
@@ -1635,9 +1649,7 @@ function main($argv) {
 
   hhvm_path(); // check that binary exists
 
-  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
-  $options['threads'] =
-    min(count($tests), idx($options, 'threads', $cpus));
+  $options['threads'] = get_num_threads($options, $tests);
 
   $servers = null;
   if (isset($options['server'])) {
@@ -1811,7 +1823,6 @@ function main($argv) {
     print_success($tests, $options);
     return $return_value;
   }
-
   print_failure($argv, $results, $options);
   return $return_value;
 }

@@ -901,6 +901,8 @@ Variant socket_server_impl(const HostURL &hosturl,
                            VRefParam errstr /* = null */) {
   Resource ret;
   Socket *sock = NULL;
+  errnum = 0;
+  errstr = empty_string();
   if (!create_new_socket(hosturl, errnum, errstr, ret, sock)) {
     return false;
   }
@@ -1287,7 +1289,8 @@ void HHVM_FUNCTION(socket_clear_error,
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
-
+  errnum = 0;
+  errstr = empty_string();
   std::string key;
   if (persistent) {
     key = hosturl.getHostURL() + ":" +

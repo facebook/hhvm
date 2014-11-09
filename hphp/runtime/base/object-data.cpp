@@ -843,6 +843,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   } else {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
+    } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
+               instanceof(c_Closure::classof())) {
+      serializer->write(o_getClassName());
     } else {
       auto className = o_getClassName();
       Array properties = getSerializeProps(this, serializer);

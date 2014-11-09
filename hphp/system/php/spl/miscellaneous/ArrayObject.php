@@ -488,7 +488,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
   }
 
   private function check_array_object_or_iterator($input) {
-    if (!is_array($input) && !is_object($input)) {
+    if (!is_array($input) && gettype($input) !== 'object') {
       $this->storage = array();
       throw new InvalidArgumentException(
         "Passed variable is not an array or object, using empty array instead"

@@ -103,7 +103,7 @@ class SplObjectStorage
    *                     otherwise.
    */
   public function contains($obj) {
-    if (is_object($obj)) {
+    if (gettype($obj) === 'object') {
       return isset($this->__storage[$this->getHashAndValidate($obj)]);
     }
     return false;
@@ -122,7 +122,7 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function attach($obj, $data = null) {
-    if (is_object($obj)) {
+    if (gettype($obj) === 'object') {
       $this->__storage[$this->getHashAndValidate($obj)] = array(
         'obj' => $obj, 'inf' => $data
       );
@@ -140,7 +140,7 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function detach($obj) {
-    if (is_object($obj)) {
+    if (gettype($obj) === 'object') {
       unset($this->__storage[$this->getHashAndValidate($obj)]);
     }
   }
@@ -176,7 +176,7 @@ class SplObjectStorage
    *                     the storage.
    */
   public function offsetGet($object) {
-    if (is_object($object)) {
+    if (gettype($object) === 'object') {
       if (!$this->contains($object)) {
         throw new UnexpectedValueException('Object not found');
       }

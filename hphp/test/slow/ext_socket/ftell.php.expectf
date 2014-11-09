@@ -1,0 +1,5 @@
+int(7)
+int(0)
+int(-1)
+
+Fatal error: seek is not supported: cannot seek other than SEEK_CUR in %s

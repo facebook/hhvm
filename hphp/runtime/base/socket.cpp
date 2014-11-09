@@ -242,7 +242,7 @@ Array Socket::getMetaData() {
 }
 
 int64_t Socket::tell() {
-  return m_bytesSent;
+  return 0;
 }
 
 // Tries to infer stream type based on getsockopt() values.

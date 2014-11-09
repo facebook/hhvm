@@ -1377,36 +1377,26 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
     return;
   }
 
-  m_ht.emitIncStat(Stats::ArrayGet_Total, 1, false);
   if (prof.optimizing()) {
-    m_ht.emitIncStat(Stats::ArrayGet_Opt, 1, false);
     auto const data = prof.data(NonPackedArrayProfile::reduce);
-    // NonPackedArrayProfile data counts how many times a non-packed
-    // array was observed.
+    // NonPackedArrayProfile data counts how many times a non-packed array was
+    // observed.  Zero means it was monomorphic (or never executed).
     auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
     if (data.count == 0 && m_base.type.maybe(typePackedArr)) {
-      m_ht.emitIncStat(Stats::ArrayGet_Mono, 1, false);
-      m_result = m_irb.cond(
-        1,
-        [&] (Block* taken) {
-          return gen(CheckType, typePackedArr, taken, m_base.value);
-        },
-        [&] (SSATmp* base) { // Next
-          m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
-          m_irb.constrainValue(
-            base, TypeConstraint(DataTypeSpecialized).setWantArrayKind());
-          SSATmp* packedBase = gen(AssertType, typePackedArr, base);
-          return emitPackedArrayGet(packedBase, key);
-        },
-        [&] { // Taken
-          m_irb.hint(Block::Hint::Unlikely);
-          m_ht.emitIncStat(Stats::ArrayGet_Mixed, 1, false);
-          return emitArrayGet(key);
-        }
+      // It's safe to side-exit still because we only do these profiled array
+      // gets on the first element, with simple bases and single-element dims.
+      // See computeSimpleCollectionOp.
+      auto const exit = m_ht.makeExit();
+      setBase(gen(CheckType, typePackedArr, exit, m_base.value));
+      m_irb.constrainValue(
+        m_base.value, TypeConstraint(DataTypeSpecialized).setWantArrayKind()
       );
+      m_result = emitPackedArrayGet(m_base.value, key);
       return;
     }
   }
+
+  // Fall back to a generic array get.
   m_result = emitArrayGet(key);
 }
 

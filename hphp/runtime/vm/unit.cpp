@@ -77,6 +77,8 @@
 
 #include "hphp/runtime/server/source-root-info.h"
 
+#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -1615,7 +1617,7 @@ Array getFunctions() {
       if (!func_ || (system ^ func_->isBuiltin()) || func_->isGenerated()) {
         continue;
       }
-      a.append(VarNR(func_->name()));
+      a.append(VarNR(HHVM_FN(strtolower)(func_->nameStr())));
     }
   }
   return a;

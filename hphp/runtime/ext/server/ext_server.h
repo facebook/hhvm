@@ -37,6 +37,7 @@ enum PageletStatusType {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+int64_t HHVM_FUNCTION(hphp_thread_type);
 bool HHVM_FUNCTION(dangling_server_proxy_old_request);
 bool HHVM_FUNCTION(pagelet_server_is_enabled);
 Resource HHVM_FUNCTION(pagelet_server_task_start,
@@ -51,6 +52,7 @@ String HHVM_FUNCTION(pagelet_server_task_result,
                      VRefParam headers,
                      VRefParam code,
                      int64_t timeout_ms);
+int64_t HHVM_FUNCTION(pagelet_server_tasks_started);
 void HHVM_FUNCTION(pagelet_server_flush);
 bool HHVM_FUNCTION(xbox_send_message,
                    const String& msg,

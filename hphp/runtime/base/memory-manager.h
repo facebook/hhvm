@@ -128,9 +128,10 @@ struct DebugHeader {
   static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
-  size_t requestedSize;     // zero for size-untracked allocator
+  char pad[3];
+  uint8_t kind; // TODO #5478458 use kind to parse heap
+  size_t requestedSize; // zero for size-untracked allocator
   size_t returnedCap;
-  size_t padding;
 };
 
 /*

@@ -615,10 +615,10 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   }
   for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
        p = (void*)(uintptr_t(p) - nbytes)) {
-    m_freelists[index].push(
-        debugPreFree(debugPostAllocate(p, debugRemoveExtra(nbytes),
-                                       debugRemoveExtra(nbytes)),
-                     debugRemoveExtra(nbytes), debugRemoveExtra(nbytes)));
+    auto usable = debugRemoveExtra(nbytes);
+    auto ptr = debugPostAllocate(p, usable, usable);
+    auto p2 = debugPreFree(ptr, usable, usable);
+    m_freelists[index].push(p2);
   }
   return ptr;
 }
@@ -779,7 +779,6 @@ void* MemoryManager::debugPostAllocate(void* p,
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
-  header->padding = 0;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
 }
 

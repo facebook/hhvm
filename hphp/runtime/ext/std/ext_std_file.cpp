@@ -1324,7 +1324,8 @@ bool HHVM_FUNCTION(chown,
 
   int uid = get_uid(user);
   if (uid == -1) {
-    raise_warning("chown(): Unable to find uid for %s", user.toString().c_str());
+    raise_warning("chown(): Unable to find uid for %s",
+                  user.toString().c_str());
     return false;
   }
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), uid, (gid_t)-1));
@@ -1352,7 +1353,8 @@ bool HHVM_FUNCTION(lchown,
 
   int uid = get_uid(user);
   if (uid == -1) {
-    raise_warning("lchown(): Unable to find uid for %s", user.toString().c_str());
+    raise_warning("lchown(): Unable to find uid for %s",
+                  user.toString().c_str());
     return false;
   }
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), uid, (gid_t)-1));

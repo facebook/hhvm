@@ -224,8 +224,13 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | InstanceOf _ | New _ | Efun _ | Lfun _ | Xml _
-  | Import _) ->
+  | Import _ | Ref _) ->
       error_at env pos "Invalid lvalue"
+
+(* The bound variable of a foreach can be a reference (but not inside
+  a list expression. *)
+let check_foreach_lvalue env = function
+  | (_, Ref e) | e -> check_lvalue env e
 
 (*****************************************************************************)
 (* Operator priorities.
@@ -375,8 +380,8 @@ let variable env =
 
 (* &$variable *)
 let ref_variable env =
-  ignore (ref_opt env);
-  variable env
+  let is_ref = ref_opt env in
+  (variable env, is_ref)
 
 (* &...$arg *)
 let ref_param env =
@@ -1953,11 +1958,11 @@ and foreach_as env =
   match L.token env.lb with
   | Tsarrow ->
       let e2 = expr env in
-      check_lvalue env e2;
+      check_foreach_lvalue env e2;
       expect env Trp;
       As_kv (e1, e2)
   | Trp ->
-      check_lvalue env e1;
+      check_foreach_lvalue env e1;
       As_v e1
   | _ ->
       error_expect env ")";
@@ -2378,7 +2383,7 @@ and expr_atomic ?(allow_class=false) env =
   | Tem | Tincr | Tdecr | Ttild | Tplus | Tminus as op ->
       expr_prefix_unary env pos op
   | Tamp ->
-      with_priority env Tref expr
+      expr_ref env pos
   | Tat ->
       with_priority env Tat expr
   | Tword ->
@@ -3221,6 +3226,15 @@ and expr_array_get env e1 =
         Pos.btw (fst e1) end_, Array_get (e1, Some e2)
   end
 
+(*****************************************************************************)
+(* Reference (&$v|&func()|&$obj->prop *)
+(*****************************************************************************)
+
+and expr_ref env start =
+  with_priority env Tref begin fun env ->
+    let e = expr env in
+    Pos.btw start (fst e), Ref e
+  end
 
 (*****************************************************************************)
 (* XHP *)

@@ -1812,6 +1812,7 @@ and expr_ env = function
   | New (x, el, uel) ->
       N.New (make_class_id env x, exprl env el, exprl env uel)
   | Efun (f, idl) ->
+      let idl = List.map fst idl in
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
       let idl' = List.map (Env.lvar env) idl in
       let env = (fst env, Env.empty_local ()) in
@@ -1848,6 +1849,7 @@ and expr_ env = function
       N.Any
   | Import _ ->
       N.Any
+  | Ref (p, e_) -> expr_ env e_
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true env) f.f_ret in

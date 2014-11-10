@@ -270,8 +270,9 @@ and expr_ =
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
   | New of id * expr list * expr list
-  (* Traditional PHP-style closure with a use list. *)
-  | Efun of fun_ * id list
+  (* Traditional PHP-style closure with a use list. Each use element is
+    a name and a bool indicating if its a reference or value *)
+  | Efun of fun_ * (id * bool) list
   (*
    * Hack-style lambda expressions (no id list, we'll find the captures
    * during name resolution).
@@ -280,6 +281,7 @@ and expr_ =
   | Xml of id * (id * expr) list * expr list
   | Unsafeexpr of expr
   | Import of import_flavor * expr
+  | Ref of expr
 
 and import_flavor =
   | Include

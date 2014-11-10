@@ -3361,6 +3361,18 @@
             "value": 1
         },
         {
+            "name": "SIG_BLOCK",
+            "value": 0
+        },
+        {
+            "name": "SIG_UNBLOCK",
+            "value": 1
+        },
+        {
+            "name": "SIG_SETMASK",
+            "value": 2
+        },
+        {
             "name": "SOAP_1_1",
             "value": 1
         },

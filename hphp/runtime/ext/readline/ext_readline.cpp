@@ -29,8 +29,13 @@
 namespace HPHP {
 
 namespace {
-  Variant* _readline_completion;
-  Array _readline_array;
+struct ReadlineVars {
+  Variant completion;
+  Array array;
+};
+
+IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
+
 }
 
 static Variant HHVM_FUNCTION(readline, const String& prompt) {
@@ -64,7 +69,7 @@ static bool HHVM_FUNCTION(readline_clear_history) {
 static char* _readline_command_generator(const char* text, int state) {
   static ArrayIter iter;
   if (state == 0) {
-    iter = _readline_array.begin();
+    iter = s_readline->array.begin();
   }
   auto text_str = String(text);
   while (iter) {
@@ -78,17 +83,17 @@ static char* _readline_command_generator(const char* text, int state) {
   return nullptr;
 }
 
-static char** _readline_completion_cb(const char* text, int start, int end) {
-  if (_readline_completion == nullptr) {
+static char** readline_completion_cb(const char* text, int start, int end) {
+  if (!s_readline->completion.isInitialized()) {
     return nullptr;
   }
   char** matches = nullptr;
   auto completion = vm_call_user_func(
-      *_readline_completion,
+      s_readline->completion,
       make_packed_array(text, start, end));
   if (completion.isArray()) {
-    _readline_array = completion.asArrRef();
-    if (_readline_array.length() > 0) {
+    s_readline->array = completion.toArrRef();
+    if (s_readline->array.length() > 0) {
       matches = rl_completion_matches(text, _readline_command_generator);
     } else {
       // readline frees this using free(), so we must use malloc() and not new
@@ -97,7 +102,7 @@ static char** _readline_completion_cb(const char* text, int start, int end) {
       matches[1] = "\0";
     }
   }
-  _readline_array.clear();
+  s_readline->array.clear();
   return matches;
 }
 
@@ -110,11 +115,8 @@ static bool HHVM_FUNCTION(
         function.toString().data());
     return false;
   }
-  if (_readline_completion != nullptr) {
-    delete _readline_completion;
-  }
-  _readline_completion = new Variant(function);
-  rl_attempted_completion_function = _readline_completion_cb;
+  s_readline->completion = function;
+  rl_attempted_completion_function = readline_completion_cb;
   return true;
 }
 
@@ -276,6 +278,13 @@ static class ReadlineExtension : public Extension {
       HHVM_FE(readline_read_history);
       HHVM_FE(readline_write_history);
       loadSystemlib();
+    }
+
+    void requestShutdown() override {
+      if (!s_readline.isNull()) {
+        s_readline->completion.releaseForSweep();
+        s_readline->array.detach();
+      }
     }
 } s_readline_extension;
 

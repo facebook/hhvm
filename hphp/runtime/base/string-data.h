@@ -472,7 +472,10 @@ private:
   // fields.  (gcc does not combine the stores itself.)
   union {
     struct {
-      uint32_t m_cap;
+      union {
+        struct { uint8_t m_pad[3], m_kind; };
+        uint32_t m_capCode;
+      };
       mutable RefCount m_count;
     };
     uint64_t m_capAndCount;

@@ -48,21 +48,40 @@ NEVER_INLINE void throw_string_too_large(size_t len) {
 
 ALWAYS_INLINE
 std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
+  static_assert(StringData::MaxSize + 1 < kMaxPackedCap, "");
+
+  if (len <= kPackedCapCodeThreshold - 1 - sizeof(StringData)) {
+    // fast path for most small strings
+    auto need = len + 1 + sizeof(StringData);
+    auto cap = MemoryManager::smartSizeClass(need);
+    auto sd = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
+    assert(cap <= kPackedCapCodeThreshold);
+    return std::make_pair(sd, cap);
+  }
+
   if (UNLIKELY(len > StringData::MaxSize)) {
     throw_string_too_large(len);
   }
 
-  auto const needed = safe_cast<uint32_t>(sizeof(StringData) + len + 1);
-  if (LIKELY(needed <= kMaxSmartSize)) {
-    auto const cap = MemoryManager::smartSizeClass(needed);
-    auto const sd  = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
+  auto const encodable = roundUpPackedCap(len + 1);
+  auto const need = sizeof(StringData) + encodable;
+  if (LIKELY(need <= kMaxSmartSize)) {
+    auto cap = MemoryManager::smartSizeClass(need);
+    if (!isEncodableCap(cap - sizeof(StringData))) {
+      cap -= (cap - sizeof(StringData)) & 0xFF;
+      assert(isEncodableCap(cap - sizeof(StringData)));
+    }
+    auto const sd = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
     return std::make_pair(sd, cap);
   }
 
-  auto const cap = needed;
-  auto const ret = MM().smartMallocSizeBigLogged<true>(cap);
-  return std::make_pair(static_cast<StringData*>(ret.first),
-                        static_cast<uint32_t>(ret.second));
+  auto const ret = MM().smartMallocSizeBigLogged<true>(need);
+  auto cap = ret.second;
+  if (!isEncodableCap(cap - sizeof(StringData))) {
+    cap -= (cap - sizeof(StringData)) & 0xFF;
+    assert(isEncodableCap(cap - sizeof(StringData)));
+  }
+  return std::make_pair(static_cast<StringData*>(ret.first), cap);
 }
 
 ALWAYS_INLINE
@@ -93,14 +112,16 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
     throw_string_too_large(sl.len);
   }
 
+  auto const encodable = roundUpPackedCap(sl.len + 1);
+  auto const need = sizeof(StringData) + encodable;
   auto const sd = static_cast<StringData*>(
-    trueStatic ? low_malloc(sizeof(StringData) + sl.len + 1)
-               : malloc(sizeof(StringData) + sl.len + 1)
+    trueStatic ? low_malloc(need) : malloc(need)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
+  auto const capCode = packedCapToCode(encodable);
 
   sd->m_data        = data;
-  sd->m_capAndCount = sl.len + 1; // cap=len+1, count=0
+  sd->m_capAndCount = capCode; // cap=encodable, kind=0, count=0
   sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -138,8 +159,8 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = 1; // cap=1 count=0
-  sd->m_lenAndHash  = 0; // len=0 hash=0
+  sd->m_capAndCount = 1; // capCode=1, kind=0, count=0
+  sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
 
   assert(sd->m_hash == 0);
@@ -202,9 +223,10 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const capCode  = packedCapToCode(cap - sizeof(StringData));
 
   sd->m_data         = data;
-  sd->m_capAndCount  = cap - sizeof(StringData); // count=0
+  sd->m_capAndCount  = capCode; // kind=0, count=0
   sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -215,7 +237,6 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   assert(ret == sd);
   assert(ret->m_len == sl.len);
   assert(ret->m_count == 0);
-  assert(ret->m_cap == cap - sizeof(StringData));
   assert(ret->m_hash == 0);
   assert(ret->isFlat());
   assert(ret->checkSane());
@@ -235,10 +256,11 @@ StringData* StringData::Make(size_t reserveLen) {
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const capCode  = packedCapToCode(cap - sizeof(StringData));
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_capAndCount = capCode; // kind=0, count=0
   sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->isFlat());
@@ -264,9 +286,10 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const capCode  = packedCapToCode(cap - sizeof(StringData));
 
   sd->m_data        = data;
-  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_capAndCount = capCode; // kind=0, count=0
   sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
@@ -289,9 +312,10 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const capCode  = packedCapToCode(cap - sizeof(StringData));
 
   sd->m_data        = data;
-  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_capAndCount = capCode; // kind=0, count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -312,9 +336,10 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const sd       = allocRet.first;
   auto const cap      = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
+  auto const capCode  = packedCapToCode(cap - sizeof(StringData));
 
   sd->m_data        = data;
-  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_capAndCount = capCode; // kind=0, count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -353,7 +378,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared,
   auto const hash = data->m_hash & STRHASH_MASK;
 
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_capAndCount = 0; // cap=count=0
+  sd->m_capAndCount = 0; // capCode=kind=count=0
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   sd->sharedPayload()->shared = shared;
@@ -362,7 +387,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared,
 
   assert(sd->m_len == len);
   assert(sd->m_count == 0);
-  assert(sd->m_cap == 0); // cap == 0 means shared
+  assert(sd->m_capCode == 0); // cap == 0 means shared
   assert(sd->m_hash == hash);
   assert(sd->checkSane());
   return sd;
@@ -379,17 +404,22 @@ StringData* StringData::Make(const APCString* shared) {
     return MakeAPCSlowPath(shared, len);
   }
 
+  // small-string path
   auto const psrc = data->data();
   auto const hash = data->m_hash & STRHASH_MASK;
   assert(hash != 0);
 
-  auto const needed = static_cast<uint32_t>(sizeof(StringData) + len + 1);
-  auto const cap = MemoryManager::smartSizeClass(needed);
+  static_assert(SmallStringReserve + sizeof(StringData) + 1 <
+                kPackedCapCodeThreshold, "");
+  auto const need = sizeof(StringData) + len + 1;
+  auto const cap = MemoryManager::smartSizeClass(need);
   auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
+  auto const capCode = cap - sizeof(StringData);
+  assert(capCode == packedCapToCode(cap - sizeof(StringData)));
 
   sd->m_data = pdst;
-  sd->m_capAndCount = (cap - sizeof(StringData)); // count=0
+  sd->m_capAndCount = capCode; // kind=0, count=0
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
@@ -403,7 +433,6 @@ StringData* StringData::Make(const APCString* shared) {
   assert(ret == sd);
   assert(ret->m_len == len);
   assert(ret->m_count == 0);
-  assert(ret->m_cap == cap - sizeof(StringData));
   assert(ret->m_hash == hash);
   assert(ret->isFlat());
   assert(ret->checkSane());
@@ -427,7 +456,7 @@ void StringData::release() {
   if (UNLIKELY(!isFlat())) {
     return releaseDataSlowPath();
   }
-  freeForSize(this, sizeof(StringData) + m_cap);
+  freeForSize(this, sizeof(StringData) + packedCodeToCap(m_capCode));
 }
 
 //////////////////////////////////////////////////////////////////////

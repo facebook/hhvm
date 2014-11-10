@@ -805,10 +805,9 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
 
   if (userSpecifiedBytes != 0) {
     // For size-specified frees, the size they report when freeing
-    // must be either what they asked for, or what we returned as the
-    // actual capacity;
-    assert(userSpecifiedBytes == p->requestedSize ||
-           userSpecifiedBytes == p->returnedCap);
+    // must be between the requested size and the actual capacity.
+    assert(userSpecifiedBytes >= p->requestedSize &&
+           userSpecifiedBytes <= p->returnedCap);
   }
   if (bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);

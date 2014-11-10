@@ -2405,11 +2405,8 @@ and expr_atomic_word env last_tok = function
       expr env;
   | "async" ->
       last_token env;
-      if next_token_str env = "function"
-      then begin
-        space env;
-        expr_atomic env
-      end
+      space env;
+      expr_atomic env
   | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
       space env;

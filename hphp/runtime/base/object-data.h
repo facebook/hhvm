@@ -62,6 +62,7 @@ class ObjectData {
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // stored in o_subclass_u8)
+    HasPropEmpty  = 0x4000, // has custom propEmpty logic
     InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
   };
 
@@ -396,6 +397,7 @@ class ObjectData {
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,
                 const StringData* key);
+  bool propEmptyImpl(Class* ctx, const StringData* key);
   bool invokeSet(TypedValue* retval, const StringData* key, TypedValue* val);
   bool invokeGet(TypedValue* retval, const StringData* key);
   bool invokeGetProp(TypedValue*& retval, TypedValue& tvRef,

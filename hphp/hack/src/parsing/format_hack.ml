@@ -1865,7 +1865,8 @@ and stmt_toplevel_word env = function
       last_token env;
       namespace env
   | "use" ->
-      seq env [last_token; space; name; semi_colon]
+      last_token env;
+      namespace_use env;
   | _ ->
       back env
 
@@ -1934,6 +1935,13 @@ and namespace env =
     | _ ->
         expect ";" env
   end
+
+and namespace_use env =
+  seq env [space; name;];
+  let rem = match (next_token_str env) with
+    | "as" -> [space; expect "as"; space; name; semi_colon;]
+    | _ -> [semi_colon] in
+  seq env rem
 
 (*****************************************************************************)
 (* Foreach loop *)

@@ -176,7 +176,6 @@ int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
-bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
 bool RuntimeOption::ExposeHPHP = true;
 bool RuntimeOption::ExposeXFBServer = false;
@@ -1092,7 +1091,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ForceCompressionParam, ini,
                  server["ForceCompression"]["Param"]);
 
-    Config::Bind(EnableMagicQuotesGpc, ini, server["EnableMagicQuotesGpc"]);
     Config::Bind(EnableKeepAlive, ini, server["EnableKeepAlive"], true);
     Config::Bind(ExposeHPHP, ini, server["ExposeHPHP"], true);
     Config::Bind(ExposeXFBServer, ini, server["ExposeXFBServer"], false);

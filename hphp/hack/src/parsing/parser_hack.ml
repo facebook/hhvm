@@ -333,11 +333,13 @@ let with_base_priority env f =
 let ref_opt env =
   match L.token env.lb with
   | Tamp when env.mode = Ast.Mstrict ->
-      error env "Don't use references!"
+      error env "Don't use references!";
+      true
   | Tamp ->
-      ()
+      true
   | _ ->
-      L.back env.lb
+      L.back env.lb;
+      false
 
 (*****************************************************************************)
 (* Identifiers *)
@@ -373,18 +375,18 @@ let variable env =
 
 (* &$variable *)
 let ref_variable env =
-  ref_opt env;
+  ignore (ref_opt env);
   variable env
 
 (* &...$arg *)
 let ref_param env =
-  ref_opt env;
+  let is_ref = ref_opt env in
   let is_variadic = match L.token env.lb with
     | Tellipsis -> true
     | _ -> L.back env.lb; false
   in
   let var = variable env in
-  is_variadic, var
+  is_ref, is_variadic, var
 
 (*****************************************************************************)
 (* Entry point *)
@@ -706,7 +708,7 @@ and attribute_list_remain acc env =
 (*****************************************************************************)
 
 and fun_ ~attr ~sync env =
-  ref_opt env;
+  ignore (ref_opt env);
   let name = identifier env in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -1453,12 +1455,12 @@ and class_var_name name =
 and class_member_word env ~attrs ~modifiers = function
   | "async" ->
       expect_word env "function";
-      ref_opt env;
+      ignore (ref_opt env);
       let fun_name = identifier env in
       let method_ = method_ env ~modifiers ~attrs ~sync:FAsync fun_name in
       Method method_
   | "function" ->
-      ref_opt env;
+      ignore (ref_opt env);
       let fun_name = identifier env in
       let method_ = method_ env ~modifiers ~attrs ~sync:FSync fun_name in
       Method method_
@@ -2063,7 +2065,7 @@ and param ~variadic env =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
-  let variadic_after_hint, name = ref_param env in
+  let is_ref, variadic_after_hint, name = ref_param env in
   assert ((not variadic_after_hint) || (not variadic));
   let variadic = variadic || variadic_after_hint in
   let default = parameter_default env in
@@ -2077,7 +2079,7 @@ and param ~variadic env =
     L.back env.lb
   end else ();
   { param_hint = h;
-    param_is_reference = false;
+    param_is_reference = is_ref;
     param_is_variadic = variadic;
     param_id = name;
     param_expr = default;

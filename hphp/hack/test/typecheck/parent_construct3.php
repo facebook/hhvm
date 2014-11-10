@@ -27,9 +27,8 @@ abstract class B extends A {
 
   public function __construct() {
     parent::__construct();
-    if(true) {
+    if (true) {
     }
     $this->z = 0;
   }
 }
-

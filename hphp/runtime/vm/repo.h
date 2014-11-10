@@ -21,6 +21,7 @@
 #include <utility>
 #include <string>
 #include <memory>
+#include <cstdlib>
 
 #include <sqlite3.h>
 
@@ -99,6 +100,12 @@ public:
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
 
   /*
+   * Return the largest size for a static string that can be inserted into the
+   * repo.
+   */
+  size_t stringLengthLimit() const;
+
+  /*
    * Return a vector of (filepath, MD5) for every unit in central
    * repo.
    */
@@ -132,30 +139,22 @@ public:
    */
   void saveGlobalData(GlobalData newData);
 
-#define RP_IOP(o) RP_OP(Insert##o, insert##o)
-#define RP_GOP(o) RP_OP(Get##o, get##o)
-#define RP_OPS \
-  RP_IOP(FileHash) \
-  RP_GOP(FileHash)
-  class InsertFileHashStmt : public RepoProxy::Stmt {
-    public:
-      InsertFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-      void insert(RepoTxn& txn, const StringData* path, const MD5& md5);
+ private:
+  /*
+   * RepoStmts for setting/getting file hashes.
+   */
+  struct InsertFileHashStmt : public RepoProxy::Stmt {
+    InsertFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn, const StringData* path, const MD5& md5);
   };
-  class GetFileHashStmt : public RepoProxy::Stmt {
-    public:
-      GetFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-      bool get(const char* path, MD5& md5);
+
+  struct GetFileHashStmt : public RepoProxy::Stmt {
+    GetFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    bool get(const char* path, MD5& md5);
   };
-#define RP_OP(c, o) \
- public: \
-  c##Stmt& o(int repoId) { return *m_##o[repoId]; } \
- private: \
-  c##Stmt m_##o##Local; \
-  c##Stmt m_##o##Central; \
-  c##Stmt* m_##o[RepoIdCount];
-  RP_OPS
-#undef RP_OP
+
+  InsertFileHashStmt m_insertFileHash[RepoIdCount];
+  GetFileHashStmt m_getFileHash[RepoIdCount];
 
  public:
   std::string table(int repoId, const char* tablePrefix);

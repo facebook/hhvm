@@ -24,6 +24,8 @@ module DynamicYield = Typing_dynamic_yield
 module Reason = Typing_reason
 module Inst = Typing_instantiate
 
+module SN = Naming_special_names
+
 (*****************************************************************************)
 (* Module used to track what classes are declared and which ones still need
  * to be processed. The declaration phase happens in parallel. Because of that
@@ -34,7 +36,7 @@ module Inst = Typing_instantiate
  *)
 (*****************************************************************************)
 
-module ClassStatus = SharedMem.NoCache(struct
+module ClassStatus = SharedMem.NoCache (String) (struct
   type t = unit
   let prefix = Prefix.make()
 end)
@@ -93,7 +95,7 @@ let desugar_class_hint = function
 let check_arity pos class_name class_type class_parameters =
   let arity = List.length class_type.tc_tparams in
   if List.length class_parameters <> arity
-  then Errors.class_arity pos class_name arity;
+  then Errors.class_arity pos class_type.tc_pos class_name arity;
   ()
 
 let make_substitution self_ty pos class_name class_type class_parameters =
@@ -313,7 +315,7 @@ let ifun_decl nenv (f: Ast.fun_) =
 type class_env = {
   nenv: Naming.env;
   stack: SSet.t;
-  all_classes: SSet.t SMap.t;
+  all_classes: Relative_path.Set.t SMap.t;
 }
 
 let check_if_cyclic class_env (pos, cid) =
@@ -333,7 +335,7 @@ and class_decl_if_missing class_env c =
   then ()
   else begin
     if Naming_heap.ClassHeap.mem cid then () else
-    class_naming_and_decl class_env cid c
+      class_naming_and_decl class_env cid c
   end
 
 and class_naming_and_decl class_env cid c =
@@ -375,11 +377,11 @@ and class_hint_decl class_env hint =
     | _, Happly ((p, cid), _)
       when SMap.mem cid class_env.all_classes && not (is_class_ready cid) ->
       (* We are supposed to redeclare the class *)
-        let files = SMap.find_unsafe cid class_env.all_classes in
-        SSet.iter begin fun fn ->
-          let class_opt = Parser_heap.find_class_in_file fn cid in
-          class_decl_if_missing_opt class_env class_opt
-        end files
+      let files = SMap.find_unsafe cid class_env.all_classes in
+      Relative_path.Set.iter begin fun fn ->
+        let class_opt = Parser_heap.find_class_in_file fn cid in
+        class_decl_if_missing_opt class_env class_opt
+      end files
     | _ ->
       (* This class lives in PHP land *)
       ()
@@ -404,7 +406,7 @@ and class_decl c =
   let consts = inherited.Typing_inherit.ih_consts in
   let env, consts =
     List.fold_left (class_const_decl c) (env, consts) c.c_consts in
-  let consts = SMap.add "class" (class_class_decl c.c_name) consts in
+  let consts = SMap.add SN.Members.mClass (class_class_decl c.c_name) consts in
   let sclass_var = static_class_var_decl c in
   let scvars = inherited.Typing_inherit.ih_scvars in
   let env, scvars = List.fold_left sclass_var (env, scvars) c.c_static_vars in
@@ -418,12 +420,12 @@ and class_decl c =
     | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
-  let impl = match SMap.get "__toString" m with
-    | Some {ce_type = (_, Tfun ft); _} when cls_name <> "\\Stringish" ->
+  let impl = match SMap.get SN.Members.__toString m with
+    | Some {ce_type = (_, Tfun ft); _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = ft.ft_pos in
-      let h = (pos, Nast.Happly ((pos, "\\Stringish"), [])) in
+      let h = (pos, Nast.Happly ((pos, SN.Classes.cStringish), [])) in
       h :: impl
     | _ -> impl
   in
@@ -470,6 +472,7 @@ and class_decl c =
     then SMap.fold SMap.add self_dimpl dimpl
     else dimpl
   in
+  let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
   let env, tparams = lfold Typing.type_param env c.c_tparams in
   let env, enum = match c.c_enum with
     | None -> env, None
@@ -543,7 +546,7 @@ and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
   let cconsist =
     class_.c_final ||
-    SMap.mem "__ConsistentConstruct" class_.c_user_attributes in
+      SMap.mem SN.UserAttributes.uaConsistentConstruct class_.c_user_attributes in
   match class_.c_constructor, pcstr with
     | None, _ -> env, (pcstr, cconsist || pconsist)
     | Some method_, Some {ce_final = true; ce_type = (r, _); _ } ->
@@ -565,11 +568,12 @@ and build_constructor env class_ method_ =
   let mconsist = match ty with
     | (_, Tfun ({ft_abstract = true; _})) -> true
     | _ -> mconsist in
-  (* the alternative to overriding <<__ConsistentConstruct>> is marking
-   * the corresponding 'new static()' UNSAFE, potentially impacting the safety
-   * of a large type hierarchy. *)
+  (* the alternative to overriding
+   * UserAttributes.uaConsistentConstruct is marking the corresponding
+   * 'new static()' UNSAFE, potentially impacting the safety of a large
+   * type hierarchy. *)
   let consist_override =
-    SMap.mem "__UNSAFE_Construct" method_.m_user_attributes in
+    SMap.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
     ce_override = consist_override;
@@ -612,9 +616,9 @@ and class_const_decl c (env, acc) (h, id, e) =
             if c.c_mode = Ast.Mstrict && c.c_kind <> Ast.Cenum
             then Errors.missing_typehint (fst id);
             Reason.Rwitness (fst id), Tany
-          in
-          (env, infer_const e)
-        end
+        in
+        (env, infer_const e)
+      end
       | Some h -> Typing_hint.hint env h
   in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -641,7 +645,7 @@ and class_var_decl c (env, acc) cv =
   let env, ty =
     match cv.cv_type with
       | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' -> Typing_hint.hint env ty'
+      | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
@@ -652,10 +656,9 @@ and class_var_decl c (env, acc) cv =
   env, acc
 
 and static_class_var_decl c (env, acc) cv =
-  let env, ty =
-    match cv.cv_type with
-      | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty -> Typing_hint.hint env ty in
+  let env, ty = match cv.cv_type with
+    | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
+    | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -663,8 +666,7 @@ and static_class_var_decl c (env, acc) cv =
            }
   in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict ||
-      c.c_mode = Ast.Mpartial)
+  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)
@@ -688,7 +690,7 @@ and method_decl c env m =
       | None, FAsync ->
         let pos = fst m.m_name in
         env, (Reason.Rasync_ret pos,
-              Tapply ((pos, "\\Awaitable"), [(Reason.Rwitness pos, Tany)]))
+              Tapply ((pos, SN.Classes.cAwaitable), [(Reason.Rwitness pos, Tany)]))
       | Some ret, _ -> Typing_hint.hint env ret in
   let env, arity = match m.m_variadic with
     | FVvariadicArg param ->
@@ -716,7 +718,7 @@ and method_decl c env m =
 and method_check_override c m acc =
   let pos, id = m.m_name in
   let class_pos, class_id = c.c_name in
-  let override = SMap.mem "__Override" m.m_user_attributes in
+  let override = SMap.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then
     Errors.private_override pos class_id id;
   match SMap.get id acc with
@@ -770,23 +772,24 @@ and type_typedef_naming_and_decl nenv tdef =
     | Ast.Alias x -> false
     | Ast.NewType x -> true
   in
-  let (params, tcstr, concrete_type) =
-    Naming.typedef nenv tdef in
+  let (params, tcstr, concrete_type) = Naming.typedef nenv tdef in
   let decl = is_abstract, params, concrete_type in
   let filename = Pos.filename pos in
   let env = Typing_env.empty filename in
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
-  let env, concrete_type = Typing_hint.hint env concrete_type in
+  let env, concrete_type =
+    Typing_hint.hint ~ensure_instantiable:true env concrete_type in
   let env, tcstr =
     match tcstr with
     | None -> env, None
     | Some constraint_type ->
-        let env, constraint_type = Typing_hint.hint env constraint_type in
-        let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
-        let env = sub_type env constraint_type concrete_type in
-        env, Some constraint_type
+      let env, constraint_type =
+        Typing_hint.hint ~ensure_instantiable:true env constraint_type in
+      let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
+      let env = sub_type env constraint_type concrete_type in
+      env, Some constraint_type
   in
   let visibility =
     if is_abstract then Env.Typedef.Private else Env.Typedef.Public

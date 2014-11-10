@@ -18,6 +18,8 @@ open Nast
 open Utils
 open Typing_defs
 
+module SN = Naming_special_names
+
 (* Figures out if a class needs to be treated like an enum and if so returns
  * Some(base, type, constraint), where base is the underlying type of the
  * enum, type is the actual type of enum elements, and constraint is
@@ -27,10 +29,10 @@ open Typing_defs
 let is_enum name enum ancestors =
   match enum with
     | None ->
-      (match SMap.get "\\Enum" ancestors with
-        | Some (_, (Tapply ((_, "\\Enum"), [ty_exp]))) ->
+      (match SMap.get SN.FB.cEnum ancestors with
+        | Some (_, (Tapply ((_, enum), [ty_exp]))) when enum = SN.FB.cEnum ->
           (* If the class is a subclass of UncheckedEnum, ignore it. *)
-          if SMap.mem "\\UncheckedEnum" ancestors then None
+          if SMap.mem SN.FB.cUncheckedEnum ancestors then None
           else Some (ty_exp, ty_exp, None)
         | _ -> None)
     | Some enum ->
@@ -74,9 +76,14 @@ let enum_class_check env tc consts const_types =
         let env, (r, ty_exp'), trail =
           Typing_tdef.force_expand_typedef env ty_exp in
         (match ty_exp' with
+          (* We disallow first-class enums from being mixed *)
+          | Tmixed when tc.tc_enum_type <> None ->
+              Errors.enum_type_bad (Reason.to_pos r)
+                (Typing_print.error ty_exp') trail
           (* We disallow typedefs that point to mixed *)
-          | Tmixed -> if snd ty_exp <> Tmixed then
+          | Tmixed when snd ty_exp <> Tmixed ->
               Errors.enum_type_typedef_mixed (Reason.to_pos r)
+          | Tmixed -> ()
           | Tprim Tint | Tprim Tstring -> ()
           (* Allow enums in terms of other enums *)
           | Tapply ((_, x), _) when Typing_env.is_enum env x -> ()
@@ -110,7 +117,7 @@ let enum_class_decl_rewrite env name enum ancestors consts =
       (* A special constant called "class" gets added, and we don't
        * want to rewrite its type. *)
       SMap.mapi (function k -> function c ->
-                 if k = "class" then c else {c with ce_type = ty})
+                 if k = SN.Members.mClass then c else {c with ce_type = ty})
         consts
 
 let get_constant tc (seen, has_default) = function
@@ -132,7 +139,7 @@ let get_constant tc (seen, has_default) = function
 let check_enum_exhaustiveness env pos tc caselist =
   let (seen, has_default) =
     List.fold_left (get_constant tc) (SMap.empty, false) caselist in
-  let consts = SMap.remove "class" tc.tc_consts in
+  let consts = SMap.remove SN.Members.mClass tc.tc_consts in
   let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
   match (all_cases_handled, has_default) with
     | false, false ->

@@ -232,15 +232,6 @@ getArg(ActRec *ar, unsigned arg,
 }
 
 /**
- * Reports the arg typed as passed
- */
-inline
-DataType getArgType(ActRec *ar, unsigned arg) {
-  TypedValue *tv = getArg(ar, arg);
-  return tv ? tv->m_type : KindOfUnknown;
-}
-
-/**
  * Parse typed values from the function call
  * based on an expect format.
  *

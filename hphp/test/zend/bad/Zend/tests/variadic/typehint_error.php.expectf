@@ -17,4 +17,5 @@ array(3) {
     int(2)
   }
 }
-Catchable fatal error: Argument 3 passed to test() must be of the type array, integer given, called in %s on line %d
+
+Catchable fatal error: %s

@@ -46,7 +46,7 @@ type names = {
   n_consts  : SSet.t;
 }
 
-type fast = names SMap.t
+type fast = names Relative_path.Map.t
 
 let empty_names = {
   n_funs    = SSet.empty;
@@ -81,4 +81,4 @@ let merge_names t_names1 t_names2 =
  }
 
 let simplify_fast fast =
-  SMap.map simplify fast
+  Relative_path.Map.map simplify fast

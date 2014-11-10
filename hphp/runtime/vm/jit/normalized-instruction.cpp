@@ -49,19 +49,19 @@ static void populateImmediates(NormalizedInstruction& inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 NormalizedInstruction::NormalizedInstruction(SrcKey sk, const Unit* u)
-    : source(sk)
-    , funcd(nullptr)
-    , m_unit(u)
-    , outPred(Type::Gen)
-    , immVec()
-    , nextOffset(kInvalidOffset)
-    , endsRegion(false)
-    , nextIsMerge(false)
-    , preppedByRef(false)
-    , outputPredicted(false)
-    , ignoreInnerType(false)
-    , interp(false)
-    , inlineReturn(false) {
+  : source(sk)
+  , funcd(nullptr)
+  , m_unit(u)
+  , outPred(Type::Gen)
+  , immVec()
+  , nextOffset(kInvalidOffset)
+  , endsRegion(false)
+  , nextIsMerge(false)
+  , preppedByRef(false)
+  , outputPredicted(false)
+  , ignoreInnerType(false)
+  , interp(false)
+{
   memset(imm, 0, sizeof(imm));
   populateImmediates(*this);
 }

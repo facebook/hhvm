@@ -45,8 +45,8 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -515,14 +515,8 @@ void ExecutionContext::popUserExceptionHandler() {
 
 void ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
-  assert(handler);
-  if (m_requestEventHandlerSet.find(handler) ==
-      m_requestEventHandlerSet.end()) {
-    m_requestEventHandlerSet.insert(handler);
-    m_requestEventHandlers.push_back(handler);
-  } else {
-    assert(false);
-  }
+  assert(handler && handler->getInited());
+  m_requestEventHandlers.push_back(handler);
 }
 
 static bool requestEventHandlerPriorityComp(RequestEventHandler *a,
@@ -531,20 +525,22 @@ static bool requestEventHandlerPriorityComp(RequestEventHandler *a,
 }
 
 void ExecutionContext::onRequestShutdown() {
-  // Sort handlers by priority so that lower priority values get shutdown
-  // first
-  sort(m_requestEventHandlers.begin(), m_requestEventHandlers.end(),
-       requestEventHandlerPriorityComp);
-  for (unsigned int i = 0; i < m_requestEventHandlers.size(); i++) {
-    RequestEventHandler *handler = m_requestEventHandlers[i];
-    assert(handler->getInited());
-    if (handler->getInited()) {
+  while (!m_requestEventHandlers.empty()) {
+    // handlers could cause other handlers to be registered,
+    // so need to repeat until done
+    decltype(m_requestEventHandlers) tmp;
+    tmp.swap(m_requestEventHandlers);
+
+    // Sort handlers by priority so that lower priority values get shutdown
+    // first
+    sort(tmp.begin(), tmp.end(),
+         requestEventHandlerPriorityComp);
+    for (auto* handler : tmp) {
+      assert(handler->getInited());
       handler->requestShutdown();
       handler->setInited(false);
     }
   }
-  m_requestEventHandlers.clear();
-  m_requestEventHandlerSet.clear();
 }
 
 void ExecutionContext::executeFunctions(ShutdownType type) {
@@ -585,7 +581,7 @@ extern void ext_session_request_shutdown();
 
 void ExecutionContext::onShutdownPostSend() {
   ServerStats::SetThreadMode(ServerStats::ThreadMode::PostProcessing);
-  MM().resetCouldOOM();
+  MM().resetCouldOOM(isStandardRequest());
   try {
     try {
       ServerStatsHelper ssh("psp", ServerStatsHelper::TRACK_HWINST);
@@ -718,7 +714,7 @@ void ExecutionContext::handleError(const std::string& msg,
       VMRegAnchor _;
       auto fp = vmfp();
       if (fp->func()->isBuiltin()) {
-        fp = getPrevVMState(fp);
+        fp = getPrevVMStateUNSAFE(fp);
       }
       assert(fp);
       auto id = fp->func()->lookupVarId(s_php_errormsg.get());
@@ -779,7 +775,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 }
 
 bool ExecutionContext::onFatalError(const Exception &e) {
-  MM().resetCouldOOM();
+  MM().resetCouldOOM(isStandardRequest());
 
   auto prefix = "\nFatal error: ";
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);

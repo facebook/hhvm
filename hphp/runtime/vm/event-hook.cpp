@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -237,7 +237,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
   if (doneFlag.toBoolean()) {
     Offset pcOff;
-    ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
+    ActRec* outer = g_context->getPrevVMStateUNSAFE(ar, &pcOff);
 
     frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
     Stack& stack = vmStack();

@@ -43,8 +43,8 @@ module Dep = struct
   (* 30 bits for the hash and 1 bit to determine if something is a class *)
   let mask = 1 lsl 30 - 1
 
-  let make = function 
-    | Class class_name -> 
+  let make = function
+    | Class class_name ->
         let h = Hashtbl.hash class_name land mask in
         let h = h lsl 1 in
         let h = h lor 1 in
@@ -53,7 +53,7 @@ module Dep = struct
         let h = Hashtbl.hash class_name land mask in
         let h = h lsl 1 in
         h
-    | variant -> 
+    | variant ->
         let h = Hashtbl.hash variant land mask in
         let h = h lsl 1 in
         h
@@ -75,7 +75,7 @@ let trace = ref true
 let add_idep root obj =
   if !trace
   then
-    let root = 
+    let root =
       match root with
       | None -> assert false
       | Some x -> x
@@ -110,19 +110,19 @@ let get_bazooka x =
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles: (int, SSet.t) Hashtbl.t) = Hashtbl.create 23
+let (ifiles: (int, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
 let get_files deps =
   ISet.fold begin fun dep acc ->
-    try 
-      let files = Hashtbl.find ifiles dep in
-      SSet.union files acc
+    try
+      let files = Hashtbl.find !ifiles dep in
+      Relative_path.Set.union files acc
     with Not_found -> acc
-  end deps SSet.empty
+  end deps Relative_path.Set.empty
 
 let update_files fast =
-  SMap.iter begin fun filename info ->
-    let {FileInfo.funs; classes; types; 
+  Relative_path.Map.iter begin fun filename info ->
+    let {FileInfo.funs; classes; types;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;
          consider_names_just_for_autoload = _;
@@ -139,9 +139,8 @@ let update_files fast =
     let defs = ISet.union funs classes in
     ISet.iter begin fun def ->
       let previous =
-        try Hashtbl.find ifiles def with Not_found -> SSet.empty
+        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
       in
-      Hashtbl.replace ifiles def (SSet.add filename previous)
+      Hashtbl.replace !ifiles def (Relative_path.Set.add filename previous)
     end defs
-  end fast 
-
+  end fast

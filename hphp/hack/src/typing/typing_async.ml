@@ -13,6 +13,7 @@ module Reason = Typing_reason
 module Type   = Typing_ops
 module Env    = Typing_env
 module TUtils = Typing_utils
+module SN     = Naming_special_names
 
 let enforce_not_awaitable env p ty =
   let _, ety = Env.expand_type env ty in
@@ -20,8 +21,9 @@ let enforce_not_awaitable env p ty =
   (* Match only a single unresolved -- this isn't typically how you
    * look into an unresolved, but the single list case is all we care
    * about since that's all you can get in this case (I think). *)
-  | _, Tunresolved [r, Tapply ((_, "\\Awaitable"), _)]
-  | r, Tapply ((_, "\\Awaitable"), _) ->
+  | _, Tunresolved [r, Tapply ((_, awaitable), _)]
+  | r, Tapply ((_, awaitable), _) when
+      awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
   | _ -> ()
 
@@ -54,8 +56,8 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     end tyl (env, []) in
     env, (r, Tunresolved rtyl)
   | _ ->
-    let expected_opt_type = r, Toption (r, Tapply ((p, "\\Awaitable"), [type_var])) in
-    let expected_non_opt_type = r, Tapply ((p, "\\Awaitable"), [type_var]) in
+    let expected_opt_type = r, Toption (r, Tapply ((p, SN.Classes.cAwaitable), [type_var])) in
+    let expected_non_opt_type = r, Tapply ((p, SN.Classes.cAwaitable), [type_var]) in
     let expected_type, return_type = (match e_opt_ty with
       | _, Toption _ ->
         expected_opt_type, (r, Toption type_var)
@@ -75,21 +77,21 @@ let overload_extract_from_awaitable_list env p tyl =
 
 let gena env p ty =
   match snd (TUtils.fold_unresolved env ty) with
-  | _, Tarray (_, None, None) ->
+  | _, Tarray (None, None) ->
     env, ty
-  | r, Tarray (is_local, Some ty1, None) ->
+  | r, Tarray (Some ty1, None) ->
     let env, ty1 = overload_extract_from_awaitable env p ty1 in
-    env, (r, Tarray (is_local, Some ty1, None))
-  | r, Tarray (is_local, Some ty1, Some ty2) ->
+    env, (r, Tarray (Some ty1, None))
+  | r, Tarray (Some ty1, Some ty2) ->
     let env, ty2 = overload_extract_from_awaitable env p ty2 in
-    env, (r, Tarray (is_local, Some ty1, Some ty2))
+    env, (r, Tarray (Some ty1, Some ty2))
   | r, Ttuple tyl ->
     let env, tyl =
       overload_extract_from_awaitable_list env p tyl in
     env, (r, Ttuple tyl)
   | r, ty ->
     (* Oh well...let's at least make sure it is array-ish *)
-    let expected_ty = r, Tarray (true, None, None) in
+    let expected_ty = r, Tarray (None, None) in
     let env =
       Errors.try_
         (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
@@ -104,7 +106,7 @@ let gena env p ty =
 let genva env p tyl =
   let env, rtyl =
     overload_extract_from_awaitable_list env p tyl in
-  let inner_type = (Reason.Rwitness p, Ttuple rtyl) in 
+  let inner_type = (Reason.Rwitness p, Ttuple rtyl) in
   env, inner_type
 
 let rec gen_array_rec env p ty =
@@ -133,12 +135,12 @@ let rec gen_array_rec env p ty =
       | _ -> overload_extract_from_awaitable env p ety
   end in
   match snd (TUtils.fold_unresolved env ty) with
-  | r, Tarray (is_local, Some vty, None) ->
+  | r, Tarray (Some vty, None) ->
     let env, vty = is_array env vty in
-    env, (r, Tarray (is_local, Some vty, None))
-  | r, Tarray (is_local, kty, Some vty) ->
+    env, (r, Tarray (Some vty, None))
+  | r, Tarray (kty, Some vty) ->
     let env, vty = is_array env vty in
-    env, (r, Tarray (is_local, kty, Some vty))
+    env, (r, Tarray (kty, Some vty))
   | r, Ttuple tyl -> gen_array_va_rec env p tyl
   | _ -> gena env p ty
 

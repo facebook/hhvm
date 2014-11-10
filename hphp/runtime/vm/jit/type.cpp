@@ -39,11 +39,137 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 
-#define IRT(name, ...) const Type Type::name(Type::k##name);
+/*
+ * All non-unknown pointer kinds are disjoint, except the ref bit and Memb.
+ * Unk is the top of the lattice, and all of the non-ref types are subtypes of
+ * their ref version.  The Memb type includes Prop, Arr, MIS, but not the other
+ * locations (it also includes some other special cases like the lvalBlackHole,
+ * and currently is the only type for pointers into collection memory).
+ *
+ * It looks something like this:
+ *
+ *                            Unk
+ *                             |
+ *         +-------------------+----+--------+
+ *         |                        |        |
+ *       RMemb                      |     ClsInit
+ *         |                        |
+ *  +------+---------+              |
+ *  |      |         |              |
+ *  |      |         |              |
+ *  |      |         |              |
+ *  |      |    +----+-----+        +--------+----- ... etc
+ *  |      |    |    |     |        |        |
+ *  |    Memb  RMIS RProp RArr    RFrame    RStk
+ *  |      |   /  | /   | /|        |  \      | \
+ *  |   +--+-+/---|/+   |/ |        |  Frame  |  Stk
+ *  |   |    /    / |   /  |        |         |
+ *  |   |   /|   /| |  /|  |        |         |
+ *  |   |  / |  / | | / |  |        |         |
+ *  |   MIS  Prop | Arr |  |        |         |
+ *  |             |     |  |        |         |
+ *  +-------------+--+--+--+--------+---------+
+ *                   |
+ *                  Ref
+ *
+ */
+
+constexpr auto kPtrRefBit = static_cast<uint32_t>(Ptr::Ref);
+
+bool has_ref(Ptr p) {
+  assert(p != Ptr::Unk);
+  return static_cast<uint32_t>(p) & kPtrRefBit;
+}
+
+Ptr add_ref(Ptr p) {
+  if (p == Ptr::Unk || p == Ptr::ClsInit) return p;
+  return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
+}
+
+Ptr remove_ref(Ptr p) {
+  // If p is unknown, or Ptr::Ref, we'll get back unknown.
+  return static_cast<Ptr>(static_cast<uint32_t>(p) & ~kPtrRefBit);
+}
+
+Ptr ptr_union(Ptr a, Ptr b) {
+  if (ptr_subtype(a, b)) return b;
+  if (ptr_subtype(b, a)) return a;
+#define X(y) if (ptr_subtype(a, y) && ptr_subtype(b, y)) return y;
+  X(Ptr::RFrame);
+  X(Ptr::RStk);
+  X(Ptr::RGbl);
+  X(Ptr::RProp);
+  X(Ptr::RArr);
+  X(Ptr::RSProp);
+  X(Ptr::RMIS);
+  X(Ptr::RMemb);
+#undef X
+  return Ptr::Unk;
+}
+
+folly::Optional<Ptr> ptr_isect(Ptr a, Ptr b) {
+  if (ptr_subtype(a, b)) return a;
+  if (ptr_subtype(b, a)) return b;
+  // The types are at least partially disjoint.  The lattice is small: just
+  // handle all the cases.  (If we only had more bits in Type this would be
+  // nicer...)
+  if (has_ref(a) && !has_ref(b)) {
+    if (a == Ptr::Ref) return folly::none;
+    return ptr_isect(remove_ref(a), b);
+  }
+  if (has_ref(b) && !has_ref(a)) {
+    // Do the above.
+    return ptr_isect(b, a);
+  }
+  if (has_ref(a) && has_ref(b)) {
+    auto const nonref = ptr_isect(remove_ref(a), remove_ref(b));
+    if (nonref) return ptr_union(Ptr::Ref, *nonref);
+    return Ptr::Ref;
+  }
+  // Now we only have to intersect things that don't contain refs, and aren't
+  // subtypes of each other, and we don't have any of that.  Anything here is
+  // disjoint.
+  return folly::none;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+bool ptr_subtype(Ptr a, Ptr b) {
+  if (a == b) return true;
+  if (b == Ptr::Unk) return true;
+  if (b == Ptr::RMemb) {
+    return ptr_subtype(a, Ptr::Memb) ||
+           a == Ptr::Ref ||
+           a == Ptr::RMIS ||
+           a == Ptr::RProp ||
+           a == Ptr::RArr;
+  }
+  if (b == Ptr::Memb) {
+    return a == Ptr::MIS ||
+           a == Ptr::Prop ||
+           a == Ptr::Arr;
+  }
+  // All the remaining cases are just the maybe-ref version of each pointer
+  // type.  (Equality was handled first.)
+  if (has_ref(b)) {
+    return a == Ptr::Ref || remove_ref(b) == a;
+  }
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#define IRT(name, ...) const Type Type::name(Type::k##name, Ptr::Unk);
+#define IRTP(name, ptr, ...) const Type Type::name(Type::k##name, Ptr::ptr);
 IR_TYPES
 #undef IRT
+#undef IRTP
 
 std::string Type::constValString() const {
   assert(isConst());
@@ -104,14 +230,45 @@ std::string Type::constValString() const {
 std::string Type::toString() const {
   // Try to find an exact match to a predefined type
 # define IRT(name, ...) if (*this == name) return #name;
+# define IRTP(name, ...) IRT(name)
   IR_TYPES
 # undef IRT
+# undef IRTP
+
+  if (maybe(Type::Nullptr)) {
+    return folly::to<std::string>(
+      "Nullptr|",
+      (*this - Type::Nullptr).toString()
+    );
+  }
 
   if (isBoxed()) {
     return folly::to<std::string>("Boxed", innerType().toString());
   }
   if (isPtr()) {
-    auto ret = folly::to<std::string>("PtrTo", deref().toString());
+    std::string ret = "PtrTo";
+    switch (ptrKind()) {
+    case Ptr::Unk:      break;
+    case Ptr::Frame:    ret += "Frame"; break;
+    case Ptr::Stk:      ret += "Stk"; break;
+    case Ptr::Gbl:      ret += "Gbl"; break;
+    case Ptr::Prop:     ret += "Prop"; break;
+    case Ptr::Arr:      ret += "Arr"; break;
+    case Ptr::SProp:    ret += "SProp"; break;
+    case Ptr::MIS:      ret += "MIS"; break;
+    case Ptr::Memb:     ret += "Memb"; break;
+    case Ptr::ClsInit:  ret += "ClsInit"; break;
+    case Ptr::RFrame:   ret += "RFrame"; break;
+    case Ptr::RStk:     ret += "RStk"; break;
+    case Ptr::RGbl:     ret += "RGbl"; break;
+    case Ptr::RProp:    ret += "RProp"; break;
+    case Ptr::RArr:     ret += "RArr"; break;
+    case Ptr::RSProp:   ret += "RSProp"; break;
+    case Ptr::RMIS:     ret += "RMIS"; break;
+    case Ptr::RMemb:    ret += "RMemb"; break;
+    case Ptr::Ref:      ret += "Ref"; break;
+    }
+    ret += deref().toString();
     if (isConst()) ret += folly::format("({})", m_ptrVal).str();
     return ret;
   }
@@ -127,7 +284,7 @@ std::string Type::toString() const {
     if (canSpecializeClass()) {
       assert(getClass());
 
-      auto const base = Type(m_bits & kAnyObj).toString();
+      auto const base = Type(m_bits & kAnyObj, Ptr::Unk).toString();
       auto const exact = getExactClass() ? "=" : "<=";
       auto const name = getClass()->name()->data();
       auto const partStr = folly::to<std::string>(base, exact, name);
@@ -135,7 +292,8 @@ std::string Type::toString() const {
       parts.push_back(partStr);
       t -= AnyObj;
     } else if (canSpecializeArray()) {
-      auto str = folly::to<std::string>(Type(m_bits & kAnyArr).toString());
+      auto str = folly::to<std::string>(
+        Type(m_bits & kAnyArr, Ptr::Unk).toString());
       if (hasArrayKind()) {
         str += "=";
         str += ArrayData::kindToString(getArrayKind());
@@ -152,8 +310,10 @@ std::string Type::toString() const {
 
   // Concat all of the primitive types in the custom union type
 # define IRT(name, ...) if (name <= t) parts.push_back(#name);
+# define IRTP(name, ...) IRT(name)
   IRT_PRIMITIVE
 # undef IRT
+# undef IRTP
   assert(!parts.empty());
   if (parts.size() == 1) {
     return parts.front();
@@ -166,10 +326,16 @@ std::string Type::debugString(Type t) {
 }
 
 bool Type::checkValid() const {
+  // Note: be careful, the Type::Foo objects aren't all constructed yet in this
+  // function.
   if (m_extra) {
     assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");
   }
+  if ((m_bits >> kPtrShift) == 0) { // !maybe(PtrToGen)
+    assert(m_ptrKind == 0);
+  }
+  static_assert(static_cast<uint32_t>(Ptr::Unk) == 0, "");
 
   return true;
 }
@@ -177,11 +343,20 @@ bool Type::checkValid() const {
 Type Type::unionOf(Type t1, Type t2) {
   if (t1 == t2 || t2 < t1) return t1;
   if (t1 < t2) return t2;
+
+  if (t1.isPtr() && t2.isPtr()) {
+    return unionOf(t1.deref(), t2.deref()).ptr(
+      ptr_union(t1.ptrKind(), t2.ptrKind())
+    );
+  }
+
   static const Type union_types[] = {
 #   define IRT(name, ...) name,
-    IRT_PHP(IRT_BOXES)
-    IRT_PHP_UNIONS(IRT_BOXES)
+#   define IRTP(name, ...) IRT(name)
+    IRT_PHP(IRT_BOXES_AND_PTRS)
+    IRT_PHP_UNIONS(IRT_BOXES_AND_PTRS)
 #   undef IRT
+#   undef IRTP
     Gen,
     PtrToGen,
   };
@@ -214,14 +389,9 @@ DataType Type::toDataType() const {
                      "Bad Type {} in Type::toDataType()", *this);
 }
 
-Type::Type(const DynLocation* dl)
-  : Type(dl->rtt)
-{}
-
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
-  assert(outer != KindOfInvalid);
   assert(inner != KindOfRef);
-  assert(IMPLIES(inner == KindOfNone, outer != KindOfRef));
+  assert(inner == KindOfUninit || outer == KindOfRef);
 
   switch (outer) {
     case KindOfUninit        : return kUninit;
@@ -235,17 +405,11 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfResource      : return kRes;
     case KindOfObject        : return kObj;
     case KindOfClass         : return kCls;
-    case KindOfAny           : return kGen;
-    case KindOfRef: {
-      if (inner == KindOfAny) {
-        return kBoxedCell;
-      } else {
-        assert(inner != KindOfUninit);
-        return bitsFromDataType(inner, KindOfNone) << kBoxShift;
-      }
-    }
-    default                  : always_assert(false && "Unsupported DataType");
+    case KindOfRef:
+      assert(inner != KindOfUninit);
+      return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
   }
+  not_reached();
 }
 
 // ClassOps and ArrayOps are used below to write code that can perform set
@@ -351,42 +515,49 @@ private:
 
 struct Type::Union {
   template<typename Ops, typename T>
-  static Type combineSame(bits_t bits, bits_t typeMask,
+  static Type combineSame(bits_t bits,
+                          bits_t typeMask,
+                          Ptr newPtrKind,
                           folly::Optional<T> aOpt,
                           folly::Optional<T> bOpt) {
     // If one or both types are not specialized, the specialization is lost
-    if (!(aOpt && bOpt)) return Type(bits);
+    if (!(aOpt && bOpt)) return Type(bits, newPtrKind);
 
     auto const a = *aOpt;
     auto const b = *bOpt;
 
     // If the specialization is the same, keep it.
-    if (a == b)            return Type(bits, a);
+    if (a == b) return Type(bits, newPtrKind, a);
 
     // If one is a subtype of the other, their union is the least specific of
     // the two.
-    if (Ops::subtypeOf(a, b))     return Type(bits, b);
-    if (Ops::subtypeOf(b, a))     return Type(bits, a);
+    if (Ops::subtypeOf(a, b)) return Type(bits, newPtrKind, b);
+    if (Ops::subtypeOf(b, a)) return Type(bits, newPtrKind, a);
 
     // Check for a common ancestor.
-    if (auto p = Ops::commonAncestor(a, b)) return Type(bits, *p);
+    if (auto p = Ops::commonAncestor(a, b)) return Type(bits, newPtrKind, *p);
 
     // a and b are unrelated but we can't hold both of them in a Type. Dropping
     // the specialization returns a supertype of their true union. It's not
     // optimal but not incorrect.
-    return Type(bits);
+    return Type(bits, newPtrKind);
   }
 
-  static Type combineDifferent(bits_t newBits, Type a, Type b) {
+  static Type combineDifferent(bits_t newBits,
+                               Ptr newPtrKind,
+                               Type a,
+                               Type b) {
     // a and b can specialize differently, so their union can't have any
     // specialization (it would be an ambiguously specialized type).
-    return Type(newBits);
+    return Type(newBits, newPtrKind);
   }
 };
 
 struct Type::Intersect {
   template<typename Ops, typename T>
-  static Type combineSame(bits_t bits, bits_t typeMask,
+  static Type combineSame(bits_t bits,
+                          bits_t typeMask,
+                          Ptr newPtrKind,
                           folly::Optional<T> aOpt,
                           folly::Optional<T> bOpt) {
     if (!bits) return Type::Bottom;
@@ -400,32 +571,37 @@ struct Type::Intersect {
       auto const b = *bOpt;
 
       // When a and b are the same, keep the specialization.
-      if (a == b)        return Type(bits, a);
+      if (a == b) return Type(bits, newPtrKind, a);
 
       // If one is a subtype of the other, their intersection is the most
       // specific of the two.
-      if (Ops::subtypeOf(a, b)) return Type(bits, a);
-      if (Ops::subtypeOf(b, a)) return Type(bits, b);
+      if (Ops::subtypeOf(a, b)) return Type(bits, newPtrKind, a);
+      if (Ops::subtypeOf(b, a)) return Type(bits, newPtrKind, b);
 
       // If we can intersect the specializations, use that.
-      if (auto info = Ops::intersect(a, b)) return Type(bits, *info);
+      if (auto info = Ops::intersect(a, b)) {
+        return Type(bits, newPtrKind, *info);
+      }
 
       // a and b are unrelated so we have to remove the specialized type. This
       // means dropping the specialization and the bits that correspond to the
       // type that was specialized.
-      return Type(bits & ~typeMask);
+      return Type(bits & ~typeMask, newPtrKind);
     }
 
-    if (aOpt) return Type(bits, *aOpt);
-    if (bOpt) return Type(bits, *bOpt);
+    if (aOpt) return Type(bits, newPtrKind, *aOpt);
+    if (bOpt) return Type(bits, newPtrKind, *bOpt);
 
     not_reached();
   }
 
-  static Type combineDifferent(bits_t newBits, Type a, Type b) {
+  static Type combineDifferent(bits_t newBits,
+                               Ptr newPtrKind,
+                               Type a,
+                               Type b) {
     // Since a and b are each eligible for different specializations, their
     // intersection can't have any specialization left.
-    return Type(newBits);
+    return Type(newBits, newPtrKind);
   }
 };
 
@@ -435,14 +611,14 @@ struct Type::Intersect {
  * cases delegate back to Oper.
  */
 template<typename Oper>
-Type Type::combine(bits_t newBits, Type a, Type b) {
+Type Type::combine(bits_t newBits, Ptr newPtrKind, Type a, Type b) {
   static_assert(std::is_same<Oper, Union>::value ||
                 std::is_same<Oper, Intersect>::value,
                 "Type::combine given unsupported template argument");
 
   // If neither type is specialized, the result is simple.
   if (LIKELY(!a.isSpecialized() && !b.isSpecialized())) {
-    return Type(newBits);
+    return Type(newBits, newPtrKind);
   }
 
   // If one of the types can't be specialized while the other is specialized,
@@ -453,8 +629,10 @@ Type Type::combine(bits_t newBits, Type a, Type b) {
 
     // If the specialized type doesn't exist in newBits, drop the
     // specialization.
-    if (newBits & specType.m_bits) return Type(newBits, specType.m_extra);
-    return Type(newBits);
+    if (newBits & specType.m_bits) {
+      return Type(newBits, newPtrKind, specType.m_extra);
+    }
+    return Type(newBits, newPtrKind);
   }
 
   // If both types are eligible for the same kind of specialization and at
@@ -464,8 +642,8 @@ Type Type::combine(bits_t newBits, Type a, Type b) {
     if (a.getClass()) aClass = a.m_class;
     if (b.getClass()) bClass = b.m_class;
 
-    return Oper::template combineSame<ClassOps>(newBits, kAnyObj,
-                                                aClass, bClass);
+    return Oper::template combineSame<ClassOps>(
+      newBits, kAnyObj, newPtrKind, aClass, bClass);
   }
 
   if (a.canSpecializeArray() && b.canSpecializeArray()) {
@@ -477,13 +655,13 @@ Type Type::combine(bits_t newBits, Type a, Type b) {
       bInfo = b.m_arrayInfo;
     }
 
-    return Oper::template combineSame<ArrayOps>(newBits, kAnyArr, aInfo,
-      bInfo);
+    return Oper::template combineSame<ArrayOps>(
+      newBits, kAnyArr, newPtrKind, aInfo, bInfo);
   }
 
   // The types are eligible for different kinds of specialization and at least
   // one is specialized, so delegate to Oper::combineDifferent.
-  return Oper::combineDifferent(newBits, a, b);
+  return Oper::combineDifferent(newBits, newPtrKind, a, b);
 }
 
 Type Type::operator|(Type b) const {
@@ -498,7 +676,16 @@ Type Type::operator|(Type b) const {
   a = a.dropConstVal();
   b = b.dropConstVal();
 
-  return combine<Union>(a.m_bits | b.m_bits, a, b);
+  auto const usePtrKind = [&] {
+    // Handle cases where one of the types has no intersection with pointer
+    // types.  We don't need to widen the resulting pointer kind at all in that
+    // case.
+    if (!a.maybe(Type::PtrToGen)) return b.rawPtrKind();
+    if (!b.maybe(Type::PtrToGen)) return a.rawPtrKind();
+    return ptr_union(a.rawPtrKind(), b.rawPtrKind());
+  }();
+
+  return combine<Union>(a.m_bits | b.m_bits, usePtrKind, a, b);
 }
 
 Type Type::operator&(Type b) const {
@@ -511,72 +698,96 @@ Type Type::operator&(Type b) const {
   if (a.m_hasConstVal) return a <= b ? a : Bottom;
   if (b.m_hasConstVal) return b <= a ? b : Bottom;
 
-  return combine<Intersect>(newBits, a, b);
+  bool const newIsPtr = newBits & Type::PtrToGen.m_bits;
+  auto const pisect = ptr_isect(a.rawPtrKind(), b.rawPtrKind());
+  if (!pisect) return Bottom;
+  return combine<Intersect>(newBits, newIsPtr ? *pisect : Ptr::Unk, a, b);
 }
 
 Type Type::operator-(Type other) const {
-  auto const newBits = m_bits & ~other.m_bits;
-
   if (m_hasConstVal) {
-    // If other is a constant of the same type, the result is Bottom or this
-    // depending on whether or not it's the same constant.
+    /*
+     * If other is a constant of the same type, the result is Bottom or this
+     * depending on whether or not it's the same constant. It is ok to use
+     * m_bits == other.m_bits for this because m_hasConstVal implies only one
+     * type bit is set.
+     */
     if (other.m_bits == m_bits && other.m_hasConstVal) {
       return other.m_extra == m_extra ? Bottom : *this;
     }
+    // Bits are different, and m_bits has a single bit set.
 
-    // Otherwise, just check to see if the constant's type was removed in
-    // newBits.
-    return (newBits & m_bits) ? *this : Bottom;
+    /*
+     * Now we're going to try to handle the case where other removes the whole
+     * type that this is a constant of.  But we have to be careful because of
+     * overlap between constants and specialized values.
+     *
+     * If the other type is neither constant nor a specialized array, we can
+     * just check if removing that type removes the type of this's constant,
+     * and return either this or Bottom depending on that.
+     *
+     * For the case of arrays, it only matters if this is a subtype of Array,
+     * and in that case we can just potentially conservatively return this:
+     * this is always as big as this - x for any x.
+     */
+    if (!other.m_hasConstVal &&
+        (!other.isSpecialized() || !other.maybe(Arr) || !subtypeOf(Arr))) {
+      return m_bits & ~other.m_bits ? *this : Bottom;
+    }
+    return *this;
   }
 
-  // Rather than try to represent types like "all Ints except 24", treat t -
-  // Int<24> as t - Int.
-  other = other.dropConstVal();
+  // If the other value has a constant, but this doesn't, just (conservatively)
+  // return this, rather than trying to represent things like "everything
+  // except Int<24>".
+  if (other.m_hasConstVal) return *this;
 
+  // If we have pointers to different kinds of things, be conservative unless
+  // other is an unknown pointer type.  Then we can just subtract the pointers
+  // but keep our kind.
+  if (rawPtrKind() != other.rawPtrKind()) {
+    if (other.rawPtrKind() != Ptr::Unk) return *this;
+  }
+  auto const newPtrKind = rawPtrKind();
+
+  auto const newBits = m_bits & ~other.m_bits;
   auto const spec1 = isSpecialized();
   auto const spec2 = other.isSpecialized();
 
   // The common easy case is when neither type is specialized.
-  if (LIKELY(!spec1 && !spec2)) return Type(newBits);
+  if (LIKELY(!spec1 && !spec2)) return Type(newBits, newPtrKind);
 
   if (spec1 && spec2) {
     if (canSpecializeClass() != other.canSpecializeClass()) {
-      // Both are specialized but in different ways. Our specialization is
-      // preserved.
-      return Type(newBits, m_extra);
+      // Both are specialized but in different ways.  Take our specialization.
+      return Type(newBits, newPtrKind, m_extra);
     }
 
-    // Subtracting different specializations of the same type could get messy
-    // so we don't support it for now.
-    always_assert(specializedType() == other.specializedType() &&
-                  "Incompatible specialized types given to operator-");
-
-    // If we got here, both types have the same specialization, so it's removed
-    // from the result.
-    return Type(newBits);
+    // If we got here, both types have the same kind of specialization (array
+    // vs class).  We don't know how to deal with this yet, so just return
+    // *this conservatively.
+    return *this;
   }
 
   // If masking out other's bits removed all of the bits that correspond to our
   // specialization, take it out. Otherwise, preserve it.
   if (spec1) {
     if (canSpecializeClass()) {
-      if (!(newBits & kAnyObj)) return Type(newBits);
-      return Type(newBits, m_class);
+      if (!(newBits & kAnyObj)) return Type(newBits, newPtrKind);
+      return Type(newBits, newPtrKind, m_class);
     }
     if (canSpecializeArray()) {
-      if (!(newBits & kAnyArr)) return Type(newBits);
-      return Type(newBits, m_arrayInfo);
+      if (!(newBits & kAnyArr)) return Type(newBits, newPtrKind);
+      return Type(newBits, newPtrKind, m_arrayInfo);
     }
     not_reached();
   }
 
   // Only other is specialized. This is where things get a little fuzzy. We
   // want to be able to support things like Obj - Obj<C> but we can't represent
-  // Obj<~C>. We compromise and return Bottom in cases like this, which means
-  // we need to be careful because (a - b) == Bottom doesn't imply a <= b in
-  // this world.
-  if (other.canSpecializeClass()) return Type(newBits & ~kAnyObj);
-  return Type(newBits & ~kAnyArr);
+  // Obj<~C>. We compromise and just return *this in cases like this, to make
+  // sure we don't return a type that is too small.
+  return *this;
 }
 
 bool Type::subtypeOfSpecialized(Type t2) const {
@@ -659,7 +870,7 @@ Type liveTVType(const TypedValue* tv) {
   }
 
   auto outer = tv->m_type;
-  auto inner = KindOfInvalid;
+  auto inner = KindOfUninit;
 
   if (outer == KindOfStaticString) outer = KindOfString;
   if (outer == KindOfRef) {
@@ -764,9 +975,12 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  if (inst->op() != LdPackedArrayElem) return Type::Gen;
+  assert(inst->op() == LdPackedArrayElem);
+  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
+
   auto const arrTy = inst->src(0)->type().getArrayType();
-  if (!arrTy) return Type::Gen;
+  if (!arrTy) return tyParam;
 
   using T = RepoAuthType::Array::Tag;
   switch (arrTy->tag()) {
@@ -775,15 +989,24 @@ Type arrElemReturn(const IRInstruction* inst) {
       auto const idx = inst->src(1);
       if (!idx->isConst()) return Type::Gen;
       if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-        return convertToType(arrTy->packedElem(idx->intVal()));
+        return convertToType(arrTy->packedElem(idx->intVal())) & tyParam;
       }
     }
     return Type::Gen;
   case T::PackedN:
-    return convertToType(arrTy->elemType());
+    return convertToType(arrTy->elemType()) & tyParam;
   }
 
-  return Type::Gen;
+  return tyParam;
+}
+
+Type unboxPtr(Type t) {
+  t = t - Type::PtrToBoxedCell;
+  return t.deref().ptr(add_ref(t.ptrKind()));
+}
+
+Type boxPtr(Type t) {
+  return t.deref().unbox().box().ptr(remove_ref(t.ptrKind()));
 }
 
 }
@@ -795,6 +1018,7 @@ Type ldRefReturn(Type typeParam) {
   // manually confirmed the benefit.
 
   if (typeParam.strictSubtypeOf(Type::Obj) &&
+      typeParam.isSpecialized() &&
       typeParam.getClass()->attrs() & AttrFinal &&
       typeParam.getClass()->isCollectionClass()) {
     /*
@@ -900,15 +1124,6 @@ Type convertToType(RepoAuthType ty) {
 }
 
 Type refineTypeNoCheck(Type oldType, Type newType) {
-  // It's OK for the old and new inner types of boxed values not to
-  // intersect, since the inner type is really just a prediction.
-  // But if they do intersect, we keep the intersection.  This is
-  // necessary to keep the type known in situations like:
-  //   oldType: Boxed{Obj}
-  //   newType: Boxed{Obj<C>, InitNull}
-  if (oldType.isBoxed() && newType.isBoxed() && oldType.not(newType)) {
-    return oldType < newType ? oldType : newType;
-  }
   return oldType & newType;
 }
 
@@ -921,8 +1136,10 @@ Type refineType(Type oldType, Type newType) {
 
 namespace TypeNames {
 #define IRT(name, ...) UNUSED const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
+#undef IRTP
 };
 
 Type outputType(const IRInstruction* inst, int dstId) {
@@ -930,11 +1147,14 @@ Type outputType(const IRInstruction* inst, int dstId) {
   using TypeNames::TCA;
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
-#define DUnbox(n)       return inst->src(n)->type().unbox();
-#define DBox(n)         return boxType(inst->src(n)->type());
+#define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
 #define DParam          return inst->typeParam();
+#define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
+                        return inst->typeParam();
+#define DUnboxPtr       return unboxPtr(inst->src(0)->type());
+#define DBoxPtr         return boxPtr(inst->src(0)->type());
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
@@ -947,7 +1167,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define ND              assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin        return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DLdRaw          return inst->extra<RawMemData>()->info().type;
 #define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
                                Type::Int | Type::Dbl | Type::Str | Type::Res;
 
@@ -962,10 +1181,12 @@ Type outputType(const IRInstruction* inst, int dstId) {
 
 #undef D
 #undef DofS
-#undef DUnbox
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
@@ -977,7 +1198,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef ND
 #undef DBuiltin
 #undef DSubtract
-#undef DLdRaw
 #undef DCns
 
 }
@@ -1100,10 +1320,19 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 
   auto requireTypeParam = [&] {
     checkDst(inst->hasTypeParam() || inst->is(DefConst),
-             "Invalid paramType for DParam instruction");
+             "Missing paramType for DParam instruction");
     if (inst->hasTypeParam()) {
       checkDst(inst->typeParam() != Type::Bottom,
              "Invalid paramType for DParam instruction");
+    }
+  };
+
+  auto requireTypeParamPtr = [&] (Ptr kind) {
+    checkDst(inst->hasTypeParam(),
+      "Missing paramType for DParamPtr instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() <= Type::Gen.ptr(kind),
+               "Invalid paramType for DParamPtr instruction");
     }
   };
 
@@ -1115,8 +1344,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   };
 
 #define IRT(name, ...) UNUSED static const Type name = Type::name;
+#define IRTP(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
+#undef IRTP
 
 #define NA            return checkNoArgs();
 #define S(...)        {                                   \
@@ -1145,8 +1376,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DBuiltin
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
-#define DUnbox(src) checkDst(src < inst->numSrcs(),  \
-                             "invalid src num");
 #define DBox(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
@@ -1154,16 +1383,18 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam();
-#define DParam      requireTypeParam();
-#define DLdRef      requireTypeParam();
+#define DParam       requireTypeParam();
+#define DParamPtr(k) requireTypeParamPtr(Ptr::k);
+#define DUnboxPtr
+#define DBoxPtr
+#define DLdRef       requireTypeParam();
 #define DAllocObj
 #define DArrElem
 #define DArrPacked
 #define DThis
-#define DLdRaw
 #define DCns
 
-#define O(opcode, dstinfo, srcinfo, flags)      \
+#define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
 
   switch (inst->op()) {
@@ -1184,7 +1415,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef D
 #undef DBuiltin
 #undef DSubtract
-#undef DUnbox
 #undef DMulti
 #undef DStk
 #undef DSetElem
@@ -1192,12 +1422,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DofS
 #undef DRefineS
 #undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
 #undef DLdRef
 #undef DThis
-#undef DLdRaw
 #undef DCns
 
   return true;
@@ -1205,10 +1437,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 
 std::string TypeConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
-
-  if (innerCat > DataTypeGeneric) {
-    folly::toAppend(",inner:", typeCategoryName(innerCat), &ret);
-  }
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";

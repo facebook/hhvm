@@ -9,6 +9,6 @@
  *
  */
 
-async function foo(): Continuation<int> {
+async function foo(): Generator<int, int, void> {
   return 123;
 }

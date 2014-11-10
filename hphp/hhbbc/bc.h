@@ -334,7 +334,7 @@ namespace bc {
 
 #define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
-                      not_reached();                          \
+                      return Flavor::CVU;                     \
                     }
 
 #define PUSH_UV  if (i == 0) return TUninit

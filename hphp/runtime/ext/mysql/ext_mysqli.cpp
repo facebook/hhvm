@@ -250,7 +250,13 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
                   conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
                   -1, -1);
-  return ret.toBoolean();
+  if (ret.toBoolean()) {
+    // replace the connection incase we get a different one back (persistent)
+    this_->o_set(s_connection, ret, s_mysqli.get());
+    return true;
+  } else {
+    return false;
+  }
 }
 
 static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
@@ -305,7 +311,7 @@ static Variant HHVM_METHOD(mysqli, kill, int64_t processid) {
   return !mysql_kill(conn->get(), processid);
 }
 
-static DataType get_option_value_type(int64_t option) {
+static MaybeDataType get_option_value_type(int64_t option) {
   switch (option) {
     case MYSQL_INIT_COMMAND:
     case MYSQL_READ_DEFAULT_FILE:
@@ -357,7 +363,7 @@ static DataType get_option_value_type(int64_t option) {
 #endif
       return KindOfNull;
     default:
-      return KindOfUnknown;
+      return folly::none;
   }
 
   not_reached();
@@ -368,10 +374,8 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
   auto conn = get_connection(this_);
   VALIDATE_CONN(conn, MySQLState::INITED)
 
-  DataType dt = get_option_value_type(option);
-  if (dt == KindOfUnknown) {
-    return false;
-  }
+  MaybeDataType dt = get_option_value_type(option);
+  if (!dt) return false;
 
   // Just holders for the value
   my_bool bool_value;
@@ -379,24 +383,35 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
 
   const void *value_ptr = nullptr;
   if (!value.isNull()) {
-    switch (dt) {
-      case KindOfString:
-        other_value = value.toString();
-        value_ptr = other_value.getStringData()->data();
-        break;
-      case KindOfInt64:
-        other_value = value.toInt64();
-        value_ptr = other_value.getInt64Data();
-        break;
-      case KindOfBoolean:
-        bool_value = value.toBoolean();
-        value_ptr = &bool_value;
-        break;
-      case KindOfNull:
-        break;
-      default:
-        not_reached();
-    }
+    [&] {
+      switch (*dt) {
+        case KindOfNull:
+          break;
+        case KindOfBoolean:
+          bool_value = value.toBoolean();
+          value_ptr = &bool_value;
+          break;
+        case KindOfInt64:
+          other_value = value.toInt64();
+          value_ptr = other_value.getInt64Data();
+          break;
+        case KindOfString:
+          other_value = value.toString();
+          value_ptr = other_value.getStringData()->data();
+          break;
+        case KindOfUninit:
+        case KindOfDouble:
+        case KindOfStaticString:
+        case KindOfArray:
+        case KindOfObject:
+        case KindOfResource:
+        case KindOfRef:
+        case KindOfClass:
+          // Impossible.
+          break;
+      }
+      not_reached();
+    }();
   }
 
   return !mysql_options(conn->get(), (mysql_option)option,
@@ -445,8 +460,6 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   return true;
 }
 
-#undef VALIDATE_CONN
-#undef VALIDATE_CONN_CONNECTED
 
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli_driver
@@ -468,6 +481,17 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
     raise_warning("invalid object or resource mysqli_result");                 \
     return init_null();                                                        \
   }
+
+static Variant HHVM_METHOD(mysqli_result, get_mysqli_conn_resource,
+                           Variant connection) {
+  Object obj = connection.toObject();
+  auto res = get_connection_resource(obj.get());
+  VALIDATE_RESOURCE(res, MySQLState::CONNECTED);
+  return res;
+}
+
+#undef VALIDATE_CONN
+#undef VALIDATE_CONN_CONNECTED
 
 static Variant HHVM_METHOD(mysqli_result, hh_field_tell) {
   auto res = getResult(this_);
@@ -565,7 +589,7 @@ static Variant HHVM_METHOD(mysqli_stmt, hh_field_count) {
 
 static void HHVM_METHOD(mysqli_stmt, hh_init, Variant connection) {
   Object obj = connection.toObject();
-  auto data = NEWOBJ(MySQLStmt)(get_connection(obj.get())->get());
+  auto data = newres<MySQLStmt>(get_connection(obj.get())->get());
   this_->o_set(s_stmt, Resource(data), s_mysqli_stmt.get());
 }
 
@@ -686,6 +710,7 @@ class mysqliExtension : public Extension {
     HHVM_ME(mysqli, ssl_set);
 
     // mysqli_result
+    HHVM_ME(mysqli_result, get_mysqli_conn_resource);
     HHVM_ME(mysqli_result, hh_field_tell);
     HHVM_ME(mysqli_result, fetch_field);
 

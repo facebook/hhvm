@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 namespace HPHP { namespace jit { namespace arm {
@@ -66,6 +66,10 @@ struct BackEnd : public jit::BackEnd {
 
   PhysReg rVmFp() override {
     return PhysReg(arm::rVmFp);
+  }
+
+  PhysReg rVmTl() override {
+    return PhysReg(arm::rVmTl);
   }
 
   bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
@@ -151,6 +155,9 @@ struct BackEnd : public jit::BackEnd {
 
     assert(sim.sp() == spOnEntry);
 
+    vmRegsUnsafe().fp = (ActRec*)sim.xreg(arm::rVmFp.code());
+    vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
+
     info.requestNum = sim.xreg(0);
     info.args[0] = sim.xreg(1);
     info.args[1] = sim.xreg(2);
@@ -179,7 +186,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);
@@ -338,6 +345,10 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    return retAddr - 8;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     vixl::MacroAssembler a { cb };
     vixl::Label afterData;
@@ -472,30 +483,22 @@ std::unique_ptr<jit::BackEnd> newBackEnd() {
   return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
 }
 
-static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
-                       CodegenState& state, Block* block) {
+static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  CodeGenerator cg(state, v, vc);
   size_t hhir_count{0};
-  for (IRInstruction& instr : *block) {
-    IRInstruction* inst = &instr;
+  for (IRInstruction& inst : *block) {
     hhir_count++;
-
-    if (instr.is(EndGuards)) state.pastGuards = true;
-
-    vasm.main().setOrigin(inst);
-    vasm.cold().setOrigin(inst);
-    vasm.frozen().setOrigin(inst);
-
-    cg.cgInst(inst);
+    if (inst.is(EndGuards)) state.pastGuards = true;
+    v.setOrigin(&inst);
+    vc.setOrigin(&inst);
+    cg.cgInst(&inst);
   }
   return hhir_count;
 }
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
-  CodegenState state(unit, asmInfo);
-
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
   CodeBlock* frozenCode   = &mcg->code.frozen();
@@ -532,20 +535,21 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       emitTraceCall(mainCode, unit.bcOff());
     }
 
-    auto const linfo = layoutBlocks(unit);
-    Vasm vasm(&state.meta);
+    CodegenState state(unit, asmInfo, *frozenCode);
+    auto const blocks = rpoSortCfg(unit);
+    Vasm vasm;
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, linfo.blocks, this);
+    assignRegs(unit, vunit, state, blocks, this);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
-    for (auto block : linfo.blocks) {
+    for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();
@@ -554,7 +558,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       auto b = state.labels[block];
       vunit.blocks[b].area = v.area();
       v.use(b);
-      hhir_count += genBlock(unit, v, vasm, state, block);
+      hhir_count += genBlock(state, v, vasm.cold(), block);
       assert(v.closed());
       assert(vasm.main().empty() || vasm.main().closed());
       assert(vasm.cold().empty() || vasm.cold().closed());

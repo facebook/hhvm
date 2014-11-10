@@ -1,0 +1,4 @@
+
+Warning: saveHTML() expects parameter 1 to be object, boolean given in %s on line 7
+
+Fatal error: Non-static method DOMDocument::saveHTML() cannot be called statically in %s on line 8

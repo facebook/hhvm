@@ -1,0 +1,10 @@
+object(stdClass)#%d (0) {
+}
+NULL
+
+Notice: %s
+
+Warning: %s
+NULL
+
+Catchable fatal error: %s

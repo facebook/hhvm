@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/vm/unit.h"
-
 #include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
@@ -73,15 +72,16 @@ bool LitstrRepoProxy::GetLitstrsStmt::get() {
       txn.prepare(*this, ssSelect.str());
     }
     RepoTxnQuery query(txn, *this);
+    NamedEntityPairTable namedInfo;
     do {
       query.step();
       if (query.row()) {
-        Id litstrId;        /**/ query.getId(0, litstrId);
         StringData* litstr; /**/ query.getStaticString(1, litstr);
-        Id id UNUSED = LitstrTable::get().mergeLitstr(litstr);
-        assert(id == litstrId);
+        namedInfo.emplace_back(litstr, nullptr);
       }
     } while (!query.done());
+    namedInfo.shrink_to_fit();
+    LitstrTable::get().setNamedEntityPairTable(std::move(namedInfo));
     txn.commit();
   } catch (RepoExc& re) {
     return true;

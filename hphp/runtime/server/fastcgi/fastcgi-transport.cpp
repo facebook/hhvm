@@ -23,7 +23,7 @@
 #include "folly/io/IOBufQueue.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include "thrift/lib/cpp/transport/TSocketAddress.h" // @nolint
+#include "folly/SocketAddress.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
@@ -62,6 +62,14 @@ const std::string FastCGITransport::getScriptFilename() {
 
 const std::string FastCGITransport::getPathTranslated() {
   return m_pathTranslated;
+}
+
+const std::string FastCGITransport::getPathInfo() {
+  return m_pathInfo;
+}
+
+bool FastCGITransport::isPathInfoSet() {
+  return m_pathInfoSet;
 }
 
 const std::string FastCGITransport::getDocumentRoot() {
@@ -389,6 +397,7 @@ static const std::string
   s_scriptFilename("SCRIPT_FILENAME"),
   s_queryString("QUERY_STRING"),
   s_https("HTTPS"),
+  s_pathInfo("PATH_INFO"),
   s_slash("/"),
   s_modProxy("proxy:"),
   s_modProxySearch("://"),
@@ -406,6 +415,10 @@ void FastCGITransport::onHeadersComplete() {
   m_serverObject = getRawHeader(s_scriptName);
   m_scriptFilename = getRawHeader(s_scriptFilename);
   m_pathTranslated = getRawHeader(s_pathTranslated);
+  if (getRawHeaderPtr(s_pathInfo) != nullptr) {
+    m_pathInfoSet = true;
+  }
+  m_pathInfo = getRawHeader(s_pathInfo);
   m_documentRoot = getRawHeader(s_documentRoot);
   if (!m_documentRoot.empty() &&
       m_documentRoot[m_documentRoot.length() - 1] != '/') {
@@ -482,6 +495,7 @@ void FastCGITransport::onHeadersComplete() {
       m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
     }
   }
+
   if (!m_scriptFilename.empty()) {
     if (m_scriptFilename.find(m_documentRoot) == 0) {
       m_scriptFilename = m_scriptFilename.substr(m_documentRoot.length());
@@ -501,4 +515,3 @@ void FastCGITransport::onHeadersComplete() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

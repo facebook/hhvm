@@ -506,11 +506,14 @@ bool Func::mustBeRef(int32_t arg) const {
       if (name() == s_array_multisort.get() && !cls()) return false;
     }
   }
+
+  // We force mustBeRef() to return false for array_multisort(). It tries to
+  // pass all variadic arguments by reference, but it also allow expressions
+  // that cannot be taken by reference (ex. SORT_REGULAR flag).
   return
     arg < numParams() ||
     !(m_attrs & AttrVariadicByRef) ||
-    !methInfo() ||
-    !(methInfo()->attribute & ClassInfo::MixedVariableArguments);
+    !(name() == s_array_multisort.get() && !cls());
 }
 
 
@@ -604,12 +607,11 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
   assert(o >= base() && o < past());
   const FPIEntVec& fpitab = shared()->m_fpitab;
   assert(fpitab.size());
-  const FPIEnt* fe = &fpitab[0];
-  unsigned int i;
-  for (i = 1; i < fpitab.size(); i++) {
+  const FPIEnt* fe = 0;
+  for (unsigned i = 0; i < fpitab.size(); i++) {
     const FPIEnt* cur = &fpitab[i];
     if (o > cur->m_fcallOff &&
-        fe->m_fcallOff < cur->m_fcallOff) {
+        (!fe || fe->m_fcallOff < cur->m_fcallOff)) {
       fe = cur;
     }
   }
@@ -732,117 +734,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
-
-void Func::getFuncInfo(ClassInfo::MethodInfo* mi) const {
-  assert(mi);
-  if (methInfo() != nullptr) {
-    // Very large operator=() invocation.
-    *mi = *methInfo();
-    // Deep copy the vectors of mi-owned pointers.
-    for (auto& p : mi->parameters)      p = new ClassInfo::ParameterInfo(*p);
-    for (auto& p : mi->staticVariables) p = new ClassInfo::ConstantInfo(*p);
-  } else {
-    // hphpc sets the ClassInfo::VariableArguments attribute if the method
-    // contains a call to func_get_arg, func_get_args, or func_num_args. We
-    // don't do this in the VM currently and hopefully we never will need to.
-    int attr = 0;
-    if (m_attrs & AttrReference) attr |= ClassInfo::IsReference;
-    if (m_attrs & AttrAbstract) attr |= ClassInfo::IsAbstract;
-    if (m_attrs & AttrFinal) attr |= ClassInfo::IsFinal;
-    if (m_attrs & AttrProtected) attr |= ClassInfo::IsProtected;
-    if (m_attrs & AttrPrivate) attr |= ClassInfo::IsPrivate;
-    if (m_attrs & AttrStatic) attr |= ClassInfo::IsStatic;
-    if (m_attrs & AttrHPHPSpecific) attr |= ClassInfo::HipHopSpecific;
-    if (!(attr & ClassInfo::IsProtected || attr & ClassInfo::IsPrivate)) {
-      attr |= ClassInfo::IsPublic;
-    }
-    if (attr == 0) attr = ClassInfo::IsNothing;
-    mi->attribute = (ClassInfo::Attribute)attr;
-    mi->name = m_name->data();
-    mi->file = m_unit->filepath()->data();
-    mi->line1 = line1();
-    mi->line2 = line2();
-    if (docComment() && !docComment()->empty()) {
-      mi->docComment = docComment()->data();
-    }
-    // Get the parameter info
-    auto limit = numParams();
-    for (unsigned i = 0; i < limit; ++i) {
-      ClassInfo::ParameterInfo* pi = new ClassInfo::ParameterInfo;
-      attr = 0;
-      if (byRef(i)) {
-        attr |= ClassInfo::IsReference;
-      }
-      if (attr == 0) {
-        attr = ClassInfo::IsNothing;
-      }
-      const ParamInfoVec& params = shared()->m_params;
-      const ParamInfo& fpi = params[i];
-      pi->attribute = (ClassInfo::Attribute)attr;
-      pi->name = shared()->m_localNames[i]->data();
-      if (params.size() <= i || !fpi.hasDefaultValue()) {
-        pi->value = nullptr;
-        pi->valueText = "";
-      } else {
-        if (fpi.hasScalarDefaultValue()) {
-          // Most of the time the default value is scalar, so we can
-          // avoid evaling in the common case
-          pi->value = strdup(f_serialize(
-            tvAsVariant((TypedValue*)&fpi.defaultValue)).get()->data());
-        } else {
-          // Eval PHP code to get default value, and serialize the result. Note
-          // that access of undefined class constants can cause the eval() to
-          // fatal. Zend lets such fatals propagate, so don't bother catching
-          // exceptions here.
-          const Variant& v = g_context->getEvaledArg(
-            fpi.phpCode,
-            cls() ? cls()->nameStr() : nameStr()
-          );
-          pi->value = strdup(f_serialize(v).get()->data());
-        }
-        // This is a raw char*, but its lifetime should be at least as long
-        // as the the Func*. At this writing, it's a merged anon string
-        // owned by ParamInfo.
-        pi->valueText = fpi.phpCode->data();
-      }
-      pi->type = fpi.typeConstraint.hasConstraint() ?
-        fpi.typeConstraint.typeName()->data() : "";
-      for (auto it = fpi.userAttributes.begin();
-          it != fpi.userAttributes.end(); ++it) {
-        // convert the typedvalue to a cvarref and push into pi.
-        auto userAttr = new ClassInfo::UserAttributeInfo;
-        assert(it->first->isStatic());
-        userAttr->name = const_cast<StringData*>(it->first.get());
-        userAttr->setStaticValue(tvAsCVarRef(&it->second));
-        pi->userAttrs.push_back(userAttr);
-      }
-      mi->parameters.push_back(pi);
-    }
-    // XXX ConstantInfo is abused to store static variable metadata, and
-    // although ConstantInfo::callbacks provides a mechanism for registering
-    // callbacks, it does not pass enough information through for the callback
-    // functions to know the function context whence the callbacks came.
-    // Furthermore, the callback mechanism isn't employed in a fashion that
-    // would allow repeated introspection to reflect updated values.
-    // Supporting introspection of static variable values will require
-    // different plumbing than currently exists in ConstantInfo.
-    const SVInfoVec& staticVars = shared()->m_staticVars;
-    for (SVInfoVec::const_iterator it = staticVars.begin();
-         it != staticVars.end(); ++it) {
-      ClassInfo::ConstantInfo* ci = new ClassInfo::ConstantInfo;
-      ci->name = StrNR(it->name);
-      if ((*it).phpCode != nullptr) {
-        ci->valueLen = (*it).phpCode->size();
-        ci->valueText = (*it).phpCode->data();
-      } else {
-        ci->valueLen = 0;
-        ci->valueText = "";
-      }
-
-      mi->staticVariables.push_back(ci);
-    }
-  }
-}
 
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;

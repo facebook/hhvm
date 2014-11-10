@@ -9,7 +9,7 @@ node's purpose. Listed values are defaults, unless examples.
   Log {
     Level = None (default) | Error | Warning | Info | Verbose
     NoSilencer = false
-    AlwaysLogUnhandledExceptions = true
+    AlwaysLogUnhandledExceptions = false
     RuntimeErrorReportingLevel = 8191
     ForceErrorReportingLevel = 0
     Header = false
@@ -85,7 +85,7 @@ flood error logs.
     # Bitmask of error constants to upgrade to E_USER_ERROR. Only E_WARNING,
     # E_USER_WARNING, E_NOTICE, and E_USER_NOTICE are supported.
     UpgradeLevel = 0 (default)
-    CallUserHandlerOnFatals = true
+    CallUserHandlerOnFatals = false
     MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
     WarnTooManyArguments = false

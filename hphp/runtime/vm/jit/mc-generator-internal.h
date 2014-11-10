@@ -25,8 +25,6 @@
 
 namespace HPHP { namespace jit {
 
-static const DataType BitwiseKindOfString = KindOfString;
-
 // Generate an if-then block into a.  thenBlock is executed if cc is true.
 template <class Then>
 void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {

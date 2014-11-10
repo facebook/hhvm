@@ -109,6 +109,15 @@ public:
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "HH\\this"); }
 
+  bool isAwaitable() const {
+    return !strcasecmp(m_name.c_str(), "HH\\Awaitable");
+  }
+
+  bool isWaitHandle() const {
+    return !strcasecmp(m_name.c_str(), "WaitHandle") ||
+           !strcasecmp(m_name.c_str(), "HH\\WaitHandle");
+  }
+
   /*
    * Returns whether this TypeAnnotation is "simple"---as described
    * above, this implies it has only one level of depth.  Both the
@@ -147,20 +156,20 @@ public:
   void appendToTypeList(TypeAnnotationPtr typeList);
 
   /*
-   * Root datatype, ignores inner types for generics
+   * Root datatype; ignores inner types for generics.
    *
-   * For nullable or soft types, KindOfUnknown will be returned
-   * since the annotation could represent more than one type.
-   *
-   * To get the expected type even with nullable/soft annotations
-   * pass TRUE for the optional argument.
+   * For nullable or soft types, folly::none will be returned since the
+   * annotation could represent more than one type.
    */
-  DataType dataType(bool expectedType = false) const;
+  MaybeDataType dataType() const;
 
   /*
    *  Serializes the type annotation using the given CodeGenerator.
    */
   void outputCodeModel(CodeGenerator& cg);
+
+  int numTypeArgs() const;
+  TypeAnnotationPtr getTypeArg(int n) const;
 
 private:
   void functionTypeName(std::string &name) const;

@@ -52,12 +52,8 @@ Arg extra(MemberType EDType::*ptr) {
 
 Arg immed(intptr_t imm) { return Arg(ArgType::Imm, imm); }
 
-FuncPtr fssa(uint64_t i) { return FuncPtr { FuncType::SSA, i }; }
-
 auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
-auto constexpr MemberKeyS  = ArgType::MemberKeyS;
-auto constexpr MemberKeyIS = ArgType::MemberKeyIS;
 
 using IFaceSupportFn = bool (*)(const StringData*);
 
@@ -77,7 +73,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  *     <function pointer>          - Raw function pointer
  *     <pointer to member>         - Dispatch to a C++ member function---the
  *                                   function must be non-virtual.
- *     fssa(idx)                   - Use a const TCA from inst->src(idx)
  *
  * Dest
  *   DSSA  - The helper returns a single-register value
@@ -94,9 +89,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  *     {SSA, idx}               - Pass the value in inst->src(idx)
  *     {TV, idx}                - Pass the value in inst->src(idx) as a
  *                                TypedValue, in two registers
- *     {MemberKeyS, idx}           - Like TV, but Str values are passed as a raw
- *                                StringData*, in a single register
- *     {MemberKeyIS, idx}          - Like MemberKeyS, including Int
  *     extra(&EDStruct::member) - extract an immediate from extra data
  *     immed(int64_t)           - constant immediate
  */
@@ -196,7 +188,9 @@ static CallMap s_callMap {
     {NewLikeArray,       MixedArray::MakeReserveLike, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
     {NewPackedArray,     MixedArray::MakePacked, DSSA, SNone,
-                           {{SSA, 0}, {SSA, 1}}},
+                           {{extra(&PackedArrayData::size)}, {SSA, 1}}},
+    {AllocPackedArray,   MixedArray::MakePackedUninitialized, DSSA, SNone,
+                           {{extra(&PackedArrayData::size)}}},
     {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
@@ -240,7 +234,6 @@ static CallMap s_callMap {
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},
     {WarnNonObjProp,     raisePropertyOnNonObject, DNone, SSync, {}},
-    {ThrowNonObjProp,    throw_null_object_prop, DNone, SSync, {}},
     {RaiseUndefProp,     raiseUndefProp, DNone, SSync,
                            {{SSA, 0}, {SSA, 1}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
@@ -249,8 +242,6 @@ static CallMap s_callMap {
     {ClosureStaticLocInit,
                          closureStaticLocInit, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {ArrayIdx,           fssa(0), DTV, SSync,
-                           {{SSA, 1}, {SSA, 2}, {TV, 3}}},
     {GenericIdx,         genericIdx, DTV, SSync,
                           {{TV, 0}, {TV, 1}, {TV, 2}}},
 
@@ -289,79 +280,27 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
-    {BaseG,    fssa(0), DSSA, SSync, {{TV, 1}}},
-    {PropX,    fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {PropDX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {CGetProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
-    {VGetProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {MemberKeyS, 3}, {SSA, 4}}},
-    {BindProp, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
-    {SetProp,  fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {TV, 4}}},
-    {UnsetProp, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {SetOpProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {TV, 4}, {SSA, 5}, {SSA, 6}}},
-    {IncDecProp, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}, {SSA, 5}}},
-    {EmptyProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {IssetProp, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {ElemX,    fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ElemArray, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {ElemDX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ElemUX,   fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {ArrayGet, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {StringGet, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {MapGet,   fssa(0), DTV, SSync,
-                 {{SSA, 1}, {SSA, 2}}},
-    {CGetElem, fssa(0), DTV, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {VGetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {BindElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
-    {SetWithRefElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
-    {ArraySet, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {MapSet,   fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}}},
-    {ArraySetRef, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {SSA, 2}, {TV, 3}, {SSA, 4}}},
-    {SetElem,  fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {TV, 3}}},
-    {UnsetElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}}},
     {SetOpElem, setOpElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}, {SSA, 4}}},
+                 {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3},
+                  extra(&SetOpData::op)}},
     {IncDecElem, incDecElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+                 {{SSA, 0}, {TV, 1}, {SSA, 2},
+                  extra(&IncDecData::op)}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
-    {SetWithRefNewElem, fssa(0), DNone, SSync,
-                 {{SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {BindNewElem, bindNewElemIR, DNone, SSync,
                  {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
-    {ArrayIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {VectorIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {PairIsset, fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {MapIsset,  fssa(0), DSSA, SSync, {{SSA, 1}, {SSA, 2}}},
-    {IssetElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
-    {EmptyElem, fssa(0), DSSA, SSync,
-                 {{SSA, 1}, {MemberKeyIS, 2}, {SSA, 3}}},
+    {StringGet, MInstrHelpers::stringGetI, DSSA, SSync,
+                 {{SSA, 0}, {SSA, 1}}},
+    {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SSync,
+                  {{SSA, 0}, {SSA, 1}}},
+    {BindElem, MInstrHelpers::bindElemC, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+    {SetWithRefElem, MInstrHelpers::setWithRefElemC, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}, {SSA, 2}, {SSA, 3}}},
+    {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
+                 {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
@@ -428,7 +367,8 @@ const CallInfo& CallMap::info(Opcode op) {
 } // NativeCalls
 
 using namespace NativeCalls;
-ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
+ArgGroup toArgGroup(const CallInfo& info,
+                    const StateVector<SSATmp,Vloc>& locs,
                     const IRInstruction* inst) {
   ArgGroup argGroup{inst, locs};
   for (auto const& arg : info.args) {
@@ -438,12 +378,6 @@ ArgGroup toArgGroup(const CallInfo& info, const jit::vector<Vloc>& locs,
       break;
     case ArgType::TV:
       argGroup.typedValue(arg.ival);
-      break;
-    case ArgType::MemberKeyS:
-      argGroup.memberKeyS(arg.ival);
-      break;
-    case ArgType::MemberKeyIS:
-      argGroup.memberKeyIS(arg.ival);
       break;
     case ArgType::ExtraImm:
       argGroup.imm(arg.extraFunc(inst));

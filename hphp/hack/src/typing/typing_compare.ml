@@ -93,8 +93,7 @@ module CompareTypes = struct
     | Tobject, Tobject
     | Tany, Tany
     | Tmixed, Tmixed -> acc
-    | Tarray (b1, ty1, ty2), Tarray (b2, ty3, ty4) ->
-        let same = same && b1 = b2 in
+    | Tarray (ty1, ty2), Tarray (ty3, ty4) ->
         let acc = ty_opt (subst, same) ty1 ty3 in
         let acc = ty_opt acc ty2 ty4 in
         acc
@@ -131,7 +130,7 @@ module CompareTypes = struct
           | Some v2 ->
               ty acc v1 v2
         end fdm1 acc
-    | (Tanon _|Tany|Tmixed|Tarray (_, _, _)| Tshape _ |
+    | (Tanon _ | Tany | Tmixed | Tarray (_, _) | Tshape _ |
       Tgeneric (_, _)|Toption _|Tprim _|Tvar _| Tabstract _ |
       Tfun _|Tapply (_, _)|Ttuple _|Tunresolved _|Tobject), _ -> default
 
@@ -298,6 +297,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
     | Rmap_append p          -> Rmap_append (pos p)
     | Rvar_param p           -> Rvar_param (pos p)
+    | Runpack_param p        -> Runpack_param (pos p)
     | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
     | Rarray_filter (p, r)   -> Rarray_filter (pos p, reason r)
 
@@ -311,7 +311,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tvar _               -> failwith "Internal error"
     | Tany
     | Tmixed as x          -> x
-    | Tarray (b, ty1, ty2) -> Tarray (b, ty_opt ty1, ty_opt ty2)
+    | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tprim _ as x         -> x
     | Tgeneric (s, t)      -> Tgeneric (s, ty_opt t)
     | Ttuple tyl           -> Ttuple (List.map (ty) tyl)

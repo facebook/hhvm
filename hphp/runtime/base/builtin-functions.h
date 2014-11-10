@@ -65,7 +65,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
 ///////////////////////////////////////////////////////////////////////////////
 
 void NEVER_INLINE throw_invalid_property_name(const String& name);
-void NEVER_INLINE throw_null_object_prop();
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
 void throw_exception(const Object& e);
@@ -80,7 +79,16 @@ inline bool is_int(const Variant& v)    { return v.isInteger();}
 inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
 inline bool is_string(const Variant& v) { return v.isString();}
 inline bool is_array(const Variant& v)  { return v.is(KindOfArray);}
-inline bool is_object(const Variant& var) { return var.is(KindOfObject); }
+
+inline bool is_object(const Variant& var) {
+  if (!var.is(KindOfObject)) {
+    return false;
+  }
+  auto cls = var.toObject().get()->getVMClass();
+  auto incompleteClass = SystemLib::s___PHP_Incomplete_ClassClass;
+  return cls != incompleteClass;
+}
+
 inline bool is_empty_string(const Variant& v) {
   return v.isString() && v.getStringData()->empty();
 }
@@ -89,9 +97,6 @@ inline bool is_empty_string(const Variant& v) {
 // misc functions
 
 bool array_is_valid_callback(const Array& arr);
-
-Variant f_call_user_func_array(const Variant& function, const Array& params,
-                               bool bound = false);
 
 const HPHP::Func*
 vm_decode_function(const Variant& function,

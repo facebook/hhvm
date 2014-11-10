@@ -1,0 +1,11 @@
+*** Testing preg_replace() : error conditions ***
+
+Arg value is: this is a string
+string(64) "this is a stringthis is a stringthis is a stringthis is a string"
+
+Arg value is: Array
+
+Warning: %s
+bool(false)
+
+Catchable fatal error: %s

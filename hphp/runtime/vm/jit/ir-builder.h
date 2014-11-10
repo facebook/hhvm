@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {
@@ -65,7 +65,7 @@ namespace HPHP { namespace jit {
  *
  *      After the preOptimize pass, IRBuilder calls out to
  *      Simplifier to perform state-independent optimizations, like
- *      copy propagation and strength reduction.  (See simplifier.h.)
+ *      copy propagation and strength reduction.  (See simplify.h.)
  *
  *
  * After all the instructions are linked into the trace, this module can also
@@ -73,7 +73,7 @@ namespace HPHP { namespace jit {
  * reoptimize() entry point.
  */
 struct IRBuilder {
-  IRBuilder(Offset initialSpOffsetFromFp, IRUnit&, const Func*);
+  IRBuilder(IRUnit&, BCMarker);
   ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
@@ -108,6 +108,7 @@ struct IRBuilder {
   bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
+  Type predictedInnerType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
@@ -126,10 +127,10 @@ struct IRBuilder {
    */
 
   /*
-   * Start the given block.  Returns whether or not it succeeded.  A
-   * failure may occur in case the block turned out to be unreachable.
+   * Start the given block.  Returns whether or not it succeeded.  A failure
+   * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker);
+  bool startBlock(Block* block, const BCMarker& marker, bool isLoopHeader);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -152,11 +153,6 @@ struct IRBuilder {
    */
   void setBlock(Offset offset, Block* block);
 
-  /*
-   * Clear the state associated with the given block.
-   */
-  void clearBlockState(Block* block);
-
  public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
@@ -165,7 +161,7 @@ struct IRBuilder {
    *
    * gen(CodeForMainBlock, ...);
    * {
-   *   BlockPusher bp(m_irb, marker, exitBlock);
+   *   BlockPusher<PauseExit> bp(m_irb, marker, exitBlock);
    *   gen(CodeForExitBlock, ...);
    * }
    * gen(CodeForMainBlock, ...);
@@ -175,7 +171,7 @@ struct IRBuilder {
    */
   void pushBlock(BCMarker marker, Block* b,
                  const folly::Optional<Block::iterator>& where);
-  void popBlock();
+  void popBlock(bool);
 
   /*
    * Run another pass of IRBuilder-managed optimizations on this
@@ -424,6 +420,7 @@ private:
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
+  SSATmp*   preOptimizeHintLocInner(IRInstruction*);
 
   SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
                                     Type oldType,
@@ -437,9 +434,8 @@ private:
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdGbl(IRInstruction*);
+  SSATmp*   preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp*   preOptimizeLdLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 
@@ -457,11 +453,10 @@ private:
 private:
   void      appendInstruction(IRInstruction* inst);
   void      appendBlock(Block* block);
-  void      insertLocalPhis();
+  void      insertPhis(bool forceSpPhi);
 
 private:
   IRUnit& m_unit;
-  Simplifier m_simplifier;
   FrameState m_state;
 
   /*
@@ -515,21 +510,25 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
  * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
  * for usage.
  */
-struct BlockPusher {
-  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block,
+template<bool pause>
+struct BlockPusherImpl {
+  BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block,
               const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);
   }
 
-  ~BlockPusher() {
-    m_irb.popBlock();
+  ~BlockPusherImpl() {
+    m_irb.popBlock(pause);
   }
 
  private:
   IRBuilder& m_irb;
 };
+
+using BlockPusher = BlockPusherImpl<false>;
+using BlockPauser = BlockPusherImpl<true>;
 
 }}
 

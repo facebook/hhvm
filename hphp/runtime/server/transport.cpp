@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/compression.h"
@@ -327,9 +328,7 @@ bool Transport::splitHeader(const String& header, String &name, const char *&val
       if (pos2 == String::npos) pos2 = header.size();
       if (pos2 - pos1 > 1) {
         setResponse(atoi(header.data() + pos1),
-                    getResponseInfo().empty() ? "splitHeader"
-                                              : getResponseInfo().c_str()
-                   );
+                    header.size() - pos2 > 1 ? header.data() + pos2 : nullptr);
         return false;
       }
     }
@@ -364,7 +363,7 @@ void Transport::addHeaderNoLock(const char *name, const char *value) {
       setResponse(302);
     }
     */
-    setResponse(302, "forced.302");
+    setResponse(302);
   }
 }
 
@@ -512,6 +511,11 @@ bool Transport::decideCompression() {
 
   m_compressionDecision = CompressionDecision::ShouldNot;
   return false;
+}
+
+void Transport::setResponse(int code, const char *info) {
+  m_responseCode = code;
+  m_responseCodeInfo = info ? info : HttpProtocol::GetReasonString(code);
 }
 
 std::string Transport::getHTTPVersion() const {
@@ -817,7 +821,7 @@ bool Transport::setHeaderCallback(const Variant& callback) {
 void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool compressed /* = false */,
                         bool chunked /* = false */,
-                        const char *codeInfo /* = "" */
+                        const char *codeInfo /* = nullptr */
                        ) {
   // There are post-send functions that can run. Any output from them should
   // be ignored as it doesn't make sense to try and send data after the
@@ -850,7 +854,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 void Transport::sendRawInternal(const void *data, int size,
                                 int code /* = 200 */,
                                 bool compressed /* = false */,
-                                const char *codeInfo /* = "" */
+                                const char *codeInfo /* = nullptr */
                                ) {
 
   bool chunked = m_chunkedEncoding;
@@ -874,8 +878,7 @@ void Transport::sendRawInternal(const void *data, int size,
   StringHolder response = prepareResponse(data, size, compressed, !chunked);
 
   if (m_responseCode < 0) {
-    m_responseCode = code;
-    m_responseCodeInfo = codeInfo ? codeInfo: "";
+    setResponse(code, codeInfo);
   }
 
   // HTTP header handling
@@ -916,7 +919,7 @@ void Transport::onSendEnd() {
 }
 
 void Transport::redirect(const char *location, int code /* = 302 */,
-                         const char *info) {
+                         const char *info /* = nullptr */) {
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendString("Moved", code);

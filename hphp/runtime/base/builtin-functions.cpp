@@ -26,11 +26,10 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/vm/repo.h"
@@ -429,10 +428,6 @@ void NEVER_INLINE raise_null_object_prop() {
 
 void NEVER_INLINE throw_null_get_object_prop() {
   raise_error("Trying to get property of non-object");
-}
-
-void NEVER_INLINE throw_null_object_prop() {
-  raise_error("Trying to set property of non-object");
 }
 
 void NEVER_INLINE throw_invalid_property_name(const String& name) {

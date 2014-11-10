@@ -32,11 +32,11 @@
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -754,7 +754,7 @@ get_doc_function(sdl *sdl, xmlNodePtr params) {
 static std::shared_ptr<sdlFunction>
 get_function(sdl *sdl, const char *function_name) {
   if (sdl) {
-    String lowered = f_strtolower(function_name);
+    String lowered = HHVM_FN(strtolower)(function_name);
     sdlFunctionMap::iterator iter = sdl->functions.find(lowered.data());
     if (iter == sdl->functions.end()) {
       iter = sdl->requests.find(lowered.data());
@@ -1027,7 +1027,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        h = NEWOBJ(soapHeader)();
+        h = newres<soapHeader>();
         Resource hobj(h);
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
@@ -2042,12 +2042,12 @@ void c_SoapServer::t_addfunction(const Variant& func) {
         return;
       }
       String function_name = iter.second().toString();
-      if (!f_function_exists(function_name)) {
+      if (!HHVM_FN(function_exists)(function_name)) {
         raise_warning("Tried to add a non existant function '%s'",
                         function_name.data());
         return;
       }
-      m_soap_functions.ft.set(f_strtolower(function_name), 1);
+      m_soap_functions.ft.set(HHVM_FN(strtolower)(function_name), 1);
       m_soap_functions.ftOriginal.set(function_name, 1);
     }
   }
@@ -2081,9 +2081,9 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
   } else if (server->m_type == SOAP_CLASS) {
     cls = soap_obj->getVMClass();
   } else if (server->m_soap_functions.functions_all) {
-    return f_function_exists(fn_name);
+    return HHVM_FN(function_exists)(fn_name);
   } else if (!server->m_soap_functions.ft.empty()) {
-    return server->m_soap_functions.ft.exists(f_strtolower(fn_name));
+    return server->m_soap_functions.ft.exists(HHVM_FN(strtolower)(fn_name));
   }
   HPHP::Func* f = cls ? cls->lookupMethod(fn_name.get()) : nullptr;
   return (f && f->isPublic()) || soap_obj->getAttribute(ObjectData::HasCall);
@@ -2110,7 +2110,7 @@ void c_SoapServer::t_handle(const String& request /* = null_string */) {
     }
 
     header_if_not_sent("Content-Type: text/xml; charset=utf-8");
-    Variant ret = f_readfile(m_sdl->source.c_str());
+    Variant ret = HHVM_FN(readfile)(m_sdl->source.c_str());
     if (same(ret, false)) {
       throw_soap_server_fault("Server", "Couldn't find WSDL");
     }
@@ -2336,7 +2336,7 @@ void c_SoapServer::t_fault(const Variant& code, const String& fault,
 
 void c_SoapServer::t_addsoapheader(const Object& fault) {
   SoapServerScope ss(this);
-  soapHeader *p = NEWOBJ(soapHeader)();
+  soapHeader *p = newres<soapHeader>();
   Resource obj(p);
   p->function = NULL;
   p->mustUnderstand = false;

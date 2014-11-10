@@ -287,7 +287,7 @@ public:
   SVInfoVec staticVars;
   int maxStackCells;
 
-  DataType returnType;
+  MaybeDataType returnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
 
@@ -338,32 +338,20 @@ struct FuncRepoProxy : public RepoProxy {
   ~FuncRepoProxy();
   void createSchema(int repoId, RepoTxn& txn);
 
-#define FRP_IOP(o) FRP_OP(Insert##o, insert##o)
-#define FRP_GOP(o) FRP_OP(Get##o, get##o)
-#define FRP_OPS \
-  FRP_IOP(Func) \
-  FRP_GOP(Funcs)
-  class InsertFuncStmt : public RepoProxy::Stmt {
-  public:
+  struct InsertFuncStmt : public RepoProxy::Stmt {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
                 const StringData* name, bool top);
   };
-  class GetFuncsStmt : public RepoProxy::Stmt {
-  public:
+
+  struct GetFuncsStmt : public RepoProxy::Stmt {
     GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void get(UnitEmitter& ue);
   };
-#define FRP_OP(c, o) \
- public: \
-  c##Stmt& o(int repoId) { return *m_##o[repoId]; } \
- private: \
-  c##Stmt m_##o##Local; \
-  c##Stmt m_##o##Central; \
-  c##Stmt* m_##o[RepoIdCount];
-FRP_OPS
-#undef FRP_OP
+
+  InsertFuncStmt insertFunc[RepoIdCount];
+  GetFuncsStmt getFuncs[RepoIdCount];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

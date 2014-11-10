@@ -41,7 +41,7 @@ module ErrorString = struct
   let rec type_ = function
     | Tany               -> "an untyped value"
     | Tunresolved l      -> unresolved l
-    | Tarray (x, y, z)   -> array (x, y, z)
+    | Tarray (x, y)      -> array (x, y)
     | Ttuple _           -> "a tuple"
     | Tmixed             -> "a mixed value"
     | Toption _          -> "a nullable type"
@@ -55,10 +55,10 @@ module ErrorString = struct
     | Tshape _           -> "a shape"
 
   and array = function
-    | _, None, None     -> "an array"
-    | _, Some _, None   -> "an array (used like a vector)"
-    | _, Some _, Some _ -> "an array (used like a hashtable)"
-    | _                 -> assert false
+    | None, None     -> "an array"
+    | Some _, None   -> "an array (used like a vector)"
+    | Some _, Some _ -> "an array (used like a hashtable)"
+    | _              -> assert false
 
   and generic = function
     | "this", Some x ->
@@ -151,10 +151,10 @@ module Full = struct
     match x with
     | Tany -> o "_"
     | Tmixed -> o "mixed"
-    | Tarray (_, None, None) -> o "array"
-    | Tarray (_, Some x, None) -> o "array<"; k x; o ">"
-    | Tarray (_, Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
-    | Tarray (_, None, Some _) -> assert false
+    | Tarray (None, None) -> o "array"
+    | Tarray (Some x, None) -> o "array<"; k x; o ">"
+    | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
+    | Tarray (None, Some _) -> assert false
     | Tabstract ((_, s), [], _)
     | Tapply ((_, s), [])
     | Tgeneric (s, _) -> o s
@@ -236,7 +236,7 @@ end
 
 module PrintClass = struct
 
-  let tenv = Typing_env.empty ""
+  let tenv = Typing_env.empty Relative_path.default
 
   let indent = "    "
   let bool = string_of_bool

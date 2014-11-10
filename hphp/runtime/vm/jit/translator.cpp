@@ -29,7 +29,6 @@
 
 #include "folly/Conv.h"
 #include "folly/MapUtil.h"
-#include "folly/Optional.h"
 
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
@@ -65,9 +64,6 @@
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#define KindOfUnknown DontUseKindOfUnknownInThisFile
-#define KindOfInvalid DontUseKindOfInvalidInThisFile
-
 TRACE_SET_MOD(trans);
 
 namespace HPHP { namespace jit {
@@ -99,8 +95,6 @@ static uint32_t get_random()
     m_w = 18000 * (m_w & 65535) + (m_w >> 16);
     return (m_z << 16) + m_w;  /* 32-bit result */
 }
-
-static const int kTooPolyRet = 6;
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            Class* ctx, const Class*& baseClass,
@@ -162,8 +156,20 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
   return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
-static folly::Optional<DataType>
-predictionForRepoAuthType(RepoAuthType repoTy) {
+
+///////////////////////////////////////////////////////////////////////////////
+// Type predictions.
+
+namespace {
+
+/*
+ * Pair of (predicted type, confidence).
+ *
+ * A folly::none prediction means mixed/unknown.
+ */
+using TypePred = std::pair<MaybeDataType, double>;
+
+MaybeDataType predictionForRepoAuthType(RepoAuthType repoTy) {
   using T = RepoAuthType::Tag;
   switch (repoTy.tag()) {
   case T::OptBool:  return KindOfBoolean;
@@ -210,8 +216,7 @@ predictionForRepoAuthType(RepoAuthType repoTy) {
   not_reached();
 }
 
-static std::pair<DataType,double>
-predictMVec(const NormalizedInstruction* ni) {
+TypePred predictMVec(const NormalizedInstruction* ni) {
   auto info = getFinalPropertyOffset(*ni,
                                      ni->func()->cls(),
                                      getMInstrInfo(ni->mInstrOp()));
@@ -219,14 +224,14 @@ predictMVec(const NormalizedInstruction* ni) {
     auto const predTy = predictionForRepoAuthType(info.repoAuthType);
     if (predTy) {
       FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
-        static_cast<int>(*predTy));
-      return std::make_pair(*predTy, 1.0);
+                static_cast<int>(*predTy));
+      return std::make_pair(predTy, 1.0);
     }
     // If the RepoAuthType converts to an exact data type, there's no
     // point in having a prediction because we know its type with 100%
     // accuracy.  Disable it in that case here.
     if (convertToDataType(info.repoAuthType)) {
-      return std::make_pair(KindOfAny, 0.0);
+      return std::make_pair(folly::none, 0.0);
     }
   }
 
@@ -238,28 +243,25 @@ predictMVec(const NormalizedInstruction* ni) {
     TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
           mc == MET ? "elt" : "prop",
           name->data(),
-          pred.first,
+          pred.first ? *pred.first : -1,
           pred.second);
     return pred;
   }
 
-  return std::make_pair(KindOfAny, 0.0);
+  return std::make_pair(folly::none, 0.0);
 }
 
 /*
- * predictOutputs --
- *
- *   Provide a best guess for the output type of this instruction.
+ * Provide a best guess for the output type of this instruction.
  */
-static DataType
-predictOutputs(const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return KindOfAny;
+MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
+  if (!RuntimeOption::EvalJitTypePrediction) return folly::none;
 
   if (RuntimeOption::EvalJitStressTypePredPercent &&
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
     while (true) {
-      dt = get_random() % (KindOfRef + 1);
+      dt = getDataTypeValue(get_random() % (kMaxDataType + 1));
       switch (dt) {
         case KindOfNull:
         case KindOfBoolean:
@@ -270,12 +272,15 @@ predictOutputs(const NormalizedInstruction* ni) {
         case KindOfObject:
         case KindOfResource:
           break;
-        // KindOfRef and KindOfUninit can't happen for lots of predicted
-        // types.
-        case KindOfRef:
+
+        // KindOfRef and KindOfUninit can't happen for lots of predicted types.
         case KindOfUninit:
-        default:
+        case KindOfStaticString:
+        case KindOfRef:
           continue;
+
+        case KindOfClass:
+          not_reached();
       }
       break;
     }
@@ -369,8 +374,9 @@ predictOutputs(const NormalizedInstruction* ni) {
      */
 
     auto inType = ni->inputs[0]->rtt;
-    auto const inDt = inType.isKnownDataType() ? inType.toDataType()
-                                               : KindOfAny;
+    auto const inDt = inType.isKnownDataType()
+      ? MaybeDataType(inType.toDataType())
+      : folly::none;
     // If the base is a string, the output is probably a string. Unless the
     // member code is MW, then we're either going to fatal or promote the
     // string to an array.
@@ -395,7 +401,9 @@ predictOutputs(const NormalizedInstruction* ni) {
 
   auto const op = ni->op();
   static const double kAccept = 1.0;
-  std::pair<DataType, double> pred = std::make_pair(KindOfAny, 0.0);
+
+  std::pair<MaybeDataType, double> pred = std::make_pair(folly::none, 0.0);
+
   if (op == OpCGetS) {
     auto nameType = ni->inputs[1]->rtt;
     if (nameType.isConst(Type::Str)) {
@@ -404,7 +412,7 @@ predictOutputs(const NormalizedInstruction* ni) {
                                         propName));
       TRACE(1, "prediction for static fields named %s: %d, %f\n",
             propName->data(),
-            pred.first,
+            pred.first ? *pred.first : -1,
             pred.second);
     }
   } else if (op == OpCGetM) {
@@ -419,17 +427,22 @@ predictOutputs(const NormalizedInstruction* ni) {
       pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
       FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
              invName->data(),
-             pred.first,
+             pred.first ? *pred.first : -1,
              pred.second);
     }
   }
   if (pred.second >= kAccept) {
-    FTRACE(1, "accepting prediction of type {}\n", pred.first);
-    assert(pred.first != KindOfUninit);
+    FTRACE(1, "accepting prediction of type {}\n",
+              pred.first ? *pred.first : -1);
+    assert(!pred.first || *pred.first != KindOfUninit);
     return pred.first;
   }
-  return KindOfAny;
+  return folly::none;
 }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * NB: this opcode structure is sparse; it cannot just be indexed by
@@ -922,8 +935,8 @@ bool outputIsPredicted(NormalizedInstruction& inst) {
     // All OutPred ops except for SetM have a single stack output for now.
     assert(iInfo.out == Stack1 || inst.op() == OpSetM);
     auto dt = predictOutputs(&inst);
-    if (dt != KindOfAny) {
-      inst.outPred = Type(dt, dt == KindOfRef ? KindOfAny : KindOfNone);
+    if (dt) {
+      inst.outPred = *dt == KindOfRef ? Type(*dt, KindOfAny{}) : Type(*dt);
       inst.outputPredicted = true;
     } else {
       doPrediction = false;
@@ -941,6 +954,7 @@ bool isAlwaysNop(Op op) {
   case Op::FPassVNop:
   case Op::Nop:
   case Op::UnboxRNop:
+  case Op::RGetCNop:
     return true;
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
@@ -1066,14 +1080,12 @@ static void addMVectorInputs(NormalizedInstruction& ni,
  *     Truncate the tracelet at the preceding instruction, which must
  *     exists because *something* modified something in it.
  */
-static
-void getInputsImpl(SrcKey startSk,
-                   NormalizedInstruction* ni,
-                   int& currentStackOffset,
-                   InputInfoVec& inputs,
-                   const LocalTypeFn& localType) {
+static void getInputsImpl(SrcKey startSk,
+                          NormalizedInstruction* ni,
+                          int& currentStackOffset,
+                          InputInfoVec& inputs) {
 #ifdef USE_TRACE
-  const SrcKey& sk = ni->source;
+  auto sk = ni->source;
 #endif
   if (isAlwaysNop(ni->op())) return;
 
@@ -1155,32 +1167,8 @@ void getInputsImpl(SrcKey startSk,
     inputs.emplace(insertAt, Location(Location::Local, loc));
   }
 
-  auto wantInlineReturn = [&] {
-    const int localCount = ni->func()->numLocals();
-    // Inline return causes us to guard this tracelet more precisely. If
-    // we're already chaining to get here, just do a generic return in the
-    // hopes of avoiding further specialization. The localCount constraint
-    // is an unfortunate consequence of the current generic machinery not
-    // working for 0 locals.
-    if (mcg->numTranslations(startSk) >= kTooPolyRet && localCount > 0) {
-      return false;
-    }
-    int numRefCounted = 0;
-    for (int i = 0; i < localCount; ++i) {
-      if (localType(i).maybeCounted()) {
-        numRefCounted++;
-      }
-    }
-    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
-  };
-
-  if ((input & AllLocals) && wantInlineReturn()) {
-    ni->inlineReturn = true;
+  if (input & AllLocals) {
     ni->ignoreInnerType = true;
-    int n = ni->func()->numLocals();
-    for (int i = 0; i < n; ++i) {
-      inputs.emplace_back(Location(Location::Local, i));
-    }
   }
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", currentStackOffset);
@@ -1197,17 +1185,18 @@ void getInputsImpl(SrcKey startSk,
   }
 }
 
-void getInputs(SrcKey startSk, NormalizedInstruction& inst,
-               InputInfoVec& infos, const LocalTypeFn& localType) {
+InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction& inst) {
+  InputInfoVec infos;
   // MCGenerator expected top of stack to be index -1, with indexes growing
   // down from there. hhir defines top of stack to be index 0, with indexes
   // growing up from there. To compensate we start with a stack offset of 1 and
   // negate the index of any stack input after the call to getInputs.
   int stackOff = 1;
-  getInputsImpl(startSk, &inst, stackOff, infos, localType);
+  getInputsImpl(startSk, &inst, stackOff, infos);
   for (auto& info : infos) {
     if (info.loc.isStack()) info.loc.offset = -info.loc.offset;
   }
+  return infos;
 }
 
 bool dontGuardAnyInputs(Op op) {
@@ -1327,7 +1316,7 @@ Translator::Translator()
 }
 
 bool
-Translator::isSrcKeyInBL(const SrcKey& sk) {
+Translator::isSrcKeyInBL(SrcKey sk) {
   auto unit = sk.unit();
   if (unit->isInterpretOnly()) return true;
   Lock l(m_dbgBlacklistLock);
@@ -1489,21 +1478,6 @@ void Translator::setSuccIRBlocks(const RegionDesc&          region,
 }
 
 /*
- * Compute the set of bytecode offsets that may follow the execution
- * of srcBlockId in the region.
- */
-static void findSuccOffsets(const RegionDesc&   region,
-                            RegionDesc::BlockId srcBlockId,
-                            OffsetSet&          set) {
-  set.clear();
-  for (auto dstBlockId : region.succs(srcBlockId)) {
-    auto rDstBlock = region.block(dstBlockId);
-    Offset bcOffset = rDstBlock->start().offset();
-    set.insert(bcOffset);
-  }
-}
-
-/*
  * Returns whether offset is a control-flow merge within region.
  */
 static bool isMergePoint(Offset offset, const RegionDesc& region) {
@@ -1519,7 +1493,7 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
   return false;
 }
 
-static bool blockHasUnprocessedPred(
+static bool blockIsLoopHeader(
   const RegionDesc&             region,
   RegionDesc::BlockId           blockId,
   const RegionDesc::BlockIdSet& processedBlocks)
@@ -1581,7 +1555,7 @@ Translator::translateRegion(const RegionDesc& region,
     // block to (they are not the same!).
 
     auto const entry = irb.unit().entry();
-    irb.startBlock(entry, entry->front().marker());
+    irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
 
     auto const irBlock = blockIdToIRBlock[region.entry()->id()];
     always_assert(irBlock != entry);
@@ -1607,21 +1581,20 @@ Translator::translateRegion(const RegionDesc& region,
     TransID profTransId = getTransId(blockId);
     ht.setProfTransID(profTransId);
 
-    OffsetSet succOffsets;
+    bool isLoopHeader = false;
+
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
-      if (blockHasUnprocessedPred(region, blockId, processedBlocks)) {
-        always_assert(RuntimeOption::EvalJitLoops);
-        irb.clearBlockState(irBlock);
-      }
+      isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
+      always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
+
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      if (!ht.irBuilder().startBlock(irBlock, marker)) {
+      if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
         FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
                blockId);
         processedBlocks.insert(blockId);
         continue;
       }
-      findSuccOffsets(region, blockId, succOffsets);
       setSuccIRBlocks(region, blockId, blockIdToIRBlock);
     }
 
@@ -1630,11 +1603,13 @@ Translator::translateRegion(const RegionDesc& region,
       // attributed to this instruction.
       ht.setBcOff(sk.offset(), false);
 
-      // Emit prediction guards. If this is the first instruction in the region
-      // the guards will go to a retranslate request. Otherwise, they'll go to
-      // a side exit.
-      bool isFirstRegionInstr = (block == region.entry() && i == 0);
-      if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
+      // Emit prediction guards. If this is the first instruction in the
+      // region, and the region's entry block is not a loop header, the guards
+      // will go to a retranslate request. Otherwise, they'll go to a side
+      // exit.
+      auto const isEntry = block == region.entry();
+      auto const useGuards = (isEntry && !isLoopHeader && i == 0);
+      if (useGuards) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
 
       // Emit type guards.
       while (typePreds.hasNext(sk)) {
@@ -1645,7 +1620,7 @@ Translator::translateRegion(const RegionDesc& region,
           // Do not generate guards for class; instead assert the type.
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
-        } else if (isFirstRegionInstr) {
+        } else if (useGuards) {
           bool checkOuterTypeOnly = m_mode != TransKind::Profile;
           ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
@@ -1655,7 +1630,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       while (refPreds.hasNext(sk)) {
         auto const& pred = refPreds.next();
-        if (isFirstRegionInstr) {
+        if (useGuards) {
           ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
         } else {
           ht.checkRefs(pred.arSpOffset, pred.mask, pred.vals, sk.offset());
@@ -1663,7 +1638,7 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Finish emitting guards, and emit profiling counters.
-      if (isFirstRegionInstr) {
+      if (useGuards) {
         ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
           ht.emitIncTransCounter();
@@ -1702,10 +1677,7 @@ Translator::translateRegion(const RegionDesc& region,
       // this is true.
       inst.interp = toInterp.count(ProfSrcKey{profTransId, sk});
 
-      InputInfoVec inputInfos;
-      getInputs(startSk, inst, inputInfos, [&] (int i) {
-        return irb.localType(i, DataTypeGeneric);
-      });
+      auto const inputInfos = getInputs(startSk, inst);
 
       // Populate the NormalizedInstruction's input vector, using types from
       // HhbcTranslator.

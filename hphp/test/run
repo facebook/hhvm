@@ -4,11 +4,23 @@
 * Run the test suites in various configurations.
 */
 
-function get_expect_file($test, $type, $options) {
-  if (isset($options['repo']) && file_exists("$test.$type-repo")) {
-      return "$test.$type-repo";
+function get_expect_file_and_type($test, $options) {
+  $types = ['expect', 'expectf', 'expectregex'];
+  if (isset($options['repo'])) {
+    foreach ($types as $type) {
+      $fname = "$test.$type-repo";
+      if (file_exists($fname)) {
+        return [$fname, $type];
+      }
+    }
   }
-  return "$test.$type";
+  foreach ($types as $type) {
+    $fname = "$test.$type";
+    if (file_exists($fname)) {
+      return [$fname, $type];
+    }
+  }
+  return [null, null];
 }
 
 function usage() {
@@ -63,7 +75,7 @@ Examples:
 
   # All tests whose name containing pdo_mysql
   % $argv[0] -i pdo_mysql -m jit -r zend
-  
+
   # Print all the standard tests
   % $argv[0] --list-tests
 
@@ -206,6 +218,8 @@ function map_convenience_filename($file) {
     'quick'      => 'hphp/test/quick',
     'slow'       => 'hphp/test/slow',
     'debugger'   => 'hphp/test/server/debugger/tests',
+    'http'       => 'hphp/test/server/http/tests',
+    'fastcgi'    => 'hphp/test/server/fastcgi/tests',
     'zend'       => 'hphp/test/zend/good',
     'facebook'   => 'hphp/facebook/test',
 
@@ -222,12 +236,27 @@ function map_convenience_filename($file) {
   return hphp_home().'/'.$mappage[$file];
 }
 
+// Some tests have to be run together in the same test bucket, one after the
+// other in order to avoid races and collisions
+function serial_only_tests() {
+  // Can be a directory or a single test
+  $serial = array (
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/memcached-getallkeys.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/get_set.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcache/get_compressed.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/decompression.php',
+    hphp_home().'/'.'hphp/test/slow/ext_memcached/types.php',
+  );
+  $tests = find_tests($serial);
+  return $tests;
+}
+
 function find_tests($files, array $options = null) {
   if (!$files) {
     $files = array('quick');
   }
   if ($files == array('all')) {
-    $files = array('quick', 'slow', 'zend');
+    $files = array('quick', 'slow', 'zend', 'fastcgi');
   }
   foreach ($files as &$file) {
     $file = map_convenience_filename($file);
@@ -360,6 +389,7 @@ function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
     '-c',
     $config,
     '-vEval.EnableArgsInBacktraces=true',
+    '-vEval.EnableIntrinsicsExtension=true',
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
@@ -1004,8 +1034,14 @@ function run_config_post($outputs, $test, $options) {
     return true;
   }
 
-  if (file_exists("$test.expect")) {
-    $file = get_expect_file($test, 'expect', $options);
+  list($file, $type) = get_expect_file_and_type($test, $options);
+  if ($file === null || $type === null) {
+    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
+      "nor $test.expectregex. Is $test even a test?");
+    return false;
+  }
+
+  if ($type === 'expect') {
     $wanted = trim(file_get_contents($file));
     $passed = !strcmp($output, $wanted);
 
@@ -1014,8 +1050,7 @@ function run_config_post($outputs, $test, $options) {
     }
 
     return $passed;
-  } else if (file_exists("$test.expectf")) {
-    $file = get_expect_file($test, 'expectf', $options);
+  } else if ($type === 'expectf') {
     $wanted = trim(file_get_contents($file));
     $wanted_re = $wanted;
 
@@ -1095,8 +1130,7 @@ function run_config_post($outputs, $test, $options) {
 
     return $passed;
 
-  } else if (file_exists("$test.expectregex")) {
-    $file = get_expect_file($test, 'expectregex', $options);
+  } else if ($type === 'expectregex') {
     $wanted_re = trim(file_get_contents($file));
 
     $passed = preg_match("/^$wanted_re\$/s", $output);
@@ -1107,9 +1141,7 @@ function run_config_post($outputs, $test, $options) {
 
     return $passed;
   } else {
-    file_put_contents("$test.diff", "No $test.expect, $test.expectf, ".
-      "nor $test.expectregex. Is $test even a test?");
-    return false;
+    throw new Exception("Unsupported expect file type: ".$type);
   }
 }
 
@@ -1452,8 +1484,17 @@ function print_failure($argv, $results, $options) {
 
   print_commands($failed, $options);
 
-  print make_header("Re-run just the failing tests:").
-        $argv[0].' '.implode(' ', $failed)."\n";
+  $rerun = make_header("Re-run just the failing tests:") . $argv[0];
+  foreach ($options as $option => $value) {
+    if ($option === "threads") {
+      // e.g., For a small number of failed tests, we don't need max threads
+      $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
+    } else {
+      $rerun .= " --" . $option . ' ' . escapeshellarg($value);
+    }
+  }
+  $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
+  print $rerun;
 
   if (idx($options, 'mode') == 'automain') {
     print make_header(
@@ -1506,7 +1547,6 @@ function start_server_impl($options, $config, $port) {
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
     '-vEval.JitASize=100000000',
-    '-vEval.JitAStubsSize=100000000',
     '-vEval.JitGlobalDataSize=32000000'
   );
   if (getenv('HHVM_TEST_SERVER_LOG')) {
@@ -1586,6 +1626,11 @@ function drain_queue($queue) {
                       MSG_IPC_NOWAIT | MSG_NOERROR));
 }
 
+function get_num_threads($options, $tests) {
+  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
+  return min(count($tests), idx($options, 'threads', $cpus));
+}
+
 function main($argv) {
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
@@ -1596,6 +1641,7 @@ function main($argv) {
   if (isset($options['list-tests'])) {
     error(list_tests());
   }
+
   $tests = find_tests($files, $options);
   if (isset($options['shuffle'])) {
     shuffle($tests);
@@ -1603,9 +1649,7 @@ function main($argv) {
 
   hhvm_path(); // check that binary exists
 
-  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
-  $options['threads'] =
-    min(count($tests), idx($options, 'threads', $cpus));
+  $options['threads'] = get_num_threads($options, $tests);
 
   $servers = null;
   if (isset($options['server'])) {
@@ -1635,18 +1679,38 @@ function main($argv) {
     $servers = $options['servers'] = start_servers($options, $configs);
   }
 
-  if (!isset($options['fbmake'])) {
-    print "Running ".count($tests)." tests in ".
-      $options['threads']." threads\n";
-  }
-
   // Try to construct the buckets so the test results are ready in
   // approximately alphabetical order
   $test_buckets = array();
   $i = 0;
+  $serial_tests = serial_only_tests();
   foreach ($tests as $test) {
-    $test_buckets[$i][] = $test;
-    $i = ($i + 1) % $options['threads'];
+    if (!in_array($test, $serial_tests)) {
+      $test_buckets[$i][] = $test;
+      $i = ($i + 1) % $options['threads'];
+    }
+  }
+
+  $actual_serial_count_for_this_run = 0;
+  foreach ($serial_tests as $test) {
+    // Only populate a test into the serial bucket if it was in the original
+    // test list provided by user to begin with. All serial tests are, of
+    // course, in the same bucket so they run sequentially.
+    if (in_array($test, $tests)) {
+      $test_buckets[$i][] = $test;
+      $actual_serial_count_for_this_run++;
+    }
+  }
+  // Get the threads right after accounting for serial only tests since
+  // originally we accounted for the serial tests in the number of threads
+  if (count($test_buckets) < $options['threads']) {
+    $options['threads'] = count($test_buckets);
+  }
+
+  if (!isset($options['fbmake'])) {
+    print "Running ".count($tests)." tests in ".
+      $options['threads']." threads (" . $actual_serial_count_for_this_run .
+      " in serial)\n";
   }
 
   if (isset($options['verbose'])) {
@@ -1759,7 +1823,6 @@ function main($argv) {
     print_success($tests, $options);
     return $return_value;
   }
-
   print_failure($argv, $results, $options);
   return $return_value;
 }

@@ -134,9 +134,10 @@ module CheckFunctionType = struct
         expr f_type e;
         maybe expr f_type eopt;
         ()
-    | _, Call (_, e, el) ->
+    | _, Call (_, e, el, uel) ->
         expr f_type e;
         liter expr f_type el;
+        liter expr f_type uel;
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
@@ -162,9 +163,10 @@ module CheckFunctionType = struct
     | _, Eif (e1, Some e2, e3) ->
         liter expr f_type [e1; e2; e3];
       ()
-    | _, New (_, el) ->
+    | _, New (_, el, uel) ->
       liter expr f_type el;
-        ()
+      liter expr f_type uel;
+      ()
     | _, InstanceOf (e, _) ->
         expr f_type e;
         ()
@@ -233,12 +235,12 @@ type env = {
 let is_magic =
   let h = Hashtbl.create 23 in
   let a x = Hashtbl.add h x true in
-  a "__set";
-  a "__isset";
-  a "__get";
-  a "__unset";
-  a "__call";
-  a "__callStatic";
+  a Naming_special_names.Members.__set;
+  a Naming_special_names.Members.__isset;
+  a Naming_special_names.Members.__get;
+  a Naming_special_names.Members.__unset;
+  a Naming_special_names.Members.__call;
+  a Naming_special_names.Members.__callStatic;
   fun (_, s) ->
     Hashtbl.mem h s
 
@@ -253,6 +255,9 @@ let rec fun_ tenv f =
   end
 
 and func env f =
+  let p, fname = f.f_name in
+  if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
+  then Errors.illegal_function_name p fname;
   let env = { env with tenv = Env.set_mode env.tenv f.f_mode } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
@@ -433,7 +438,7 @@ and class_var env cv =
   ()
 
 and check__toString m is_static =
-  if snd m.m_name = "__toString"
+  if snd m.m_name = Naming_special_names.Members.__toString
   then begin
     if m.m_visibility <> Public || is_static
     then Errors.toString_visibility (fst m.m_name);
@@ -585,9 +590,10 @@ and expr_ env = function
       expr env e;
       maybe expr env eopt;
       ()
-  | Call (_, e, el) ->
+  | Call (_, e, el, uel) ->
       expr env e;
       liter expr env el;
+      liter expr env uel;
       ()
   | True | False | Int _
   | Float _ | Null | String _ -> ()
@@ -649,8 +655,10 @@ and expr_ env = function
   | InstanceOf (e, _) ->
       expr env e;
       ()
-  | New (_, el) ->
-      liter expr env el
+  | New (_, el, uel) ->
+      liter expr env el;
+      liter expr env uel;
+      ()
   | Efun (f, _) ->
       func env f;
       ()

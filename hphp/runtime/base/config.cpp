@@ -210,7 +210,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
   auto val = Config::GetString(ini, config);
   if (val.empty()) {
     if (Option::EnableHipHopSyntax || RuntimeOption::EnableHipHopSyntax) {
-      return HackStrictOption::ERROR;
+      return HackStrictOption::ON;
     }
     return HackStrictOption::OFF;
   }
@@ -219,7 +219,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
   }
   bool ret;
   ini_on_update(val, ret);
-  return ret ? HackStrictOption::ERROR : HackStrictOption::OFF;
+  return ret ? HackStrictOption::ON : HackStrictOption::OFF;
 }
 
 void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,

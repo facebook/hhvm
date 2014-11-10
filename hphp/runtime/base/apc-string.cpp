@@ -26,9 +26,9 @@ APCHandle* APCString::MakeShared(
   auto const apcStr = new (cap) APCString(type);
   size = cap + sizeof(APCString);
 
-  apcStr->m_data.m_lenAndCount = len;
-  apcStr->m_data.m_cap         = cap;
   apcStr->m_data.m_data        = reinterpret_cast<char*>(apcStr + 1);
+  apcStr->m_data.m_capAndCount = cap; // count=0
+  apcStr->m_data.m_len         = len; // don't store hash
 
   apcStr->m_data.m_data[len] = 0;
   auto const mcret = memcpy(apcStr->m_data.m_data, data->data(), len);
@@ -39,6 +39,7 @@ APCHandle* APCString::MakeShared(
 
   assert(ret == apcStr);
   assert(apcStr->m_data.m_hash != 0);
+  assert(ret->m_data.m_data[len] == 0);
   assert(ret->m_data.m_count == 0);
   assert(ret->m_data.isFlat());
   assert(ret->m_data.checkSane());

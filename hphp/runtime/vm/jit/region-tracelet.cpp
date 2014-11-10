@@ -64,6 +64,8 @@ private:
   jit::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   uint32_t m_numJmps;
+  uint32_t m_numBCInstrs{0};
+  uint32_t m_pendingInlinedInstrs{0};
 
   InliningDecider& m_inl;
   const bool m_profiling;
@@ -77,7 +79,7 @@ private:
   void addInstruction();
   bool consumeInput(int i, const InputInfo& ii);
   bool traceThroughJmp();
-  bool tryInline();
+  bool tryInline(uint32_t& instrSize);
   void recordDependencies();
   void truncateLiterals();
 };
@@ -133,6 +135,13 @@ RegionDescPtr RegionFormer::go() {
   }
 
   while (true) {
+    assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+    if (m_numBCInstrs == RuntimeOption::EvalJitMaxRegionInstrs) {
+      FTRACE(1, "selectTracelet: breaking region due to size limit ({})\n",
+             m_numBCInstrs);
+      break;
+    }
+
     if (!prepareInstruction()) break;
 
     if (traceThroughJmp()) continue;
@@ -143,7 +152,8 @@ RegionDescPtr RegionFormer::go() {
     auto const doPrediction =
       m_profiling ? false : outputIsPredicted(m_inst);
 
-    if (tryInline()) {
+    uint32_t calleeInstrSize;
+    if (tryInline(calleeInstrSize)) {
       // If m_inst is an FCall and the callee is suitable for inlining, we can
       // translate the callee and potentially use its return type to extend the
       // tracelet.
@@ -163,6 +173,7 @@ RegionDescPtr RegionFormer::go() {
 
       m_sk = m_ht.curSrcKey();
       m_blockFinished = true;
+      m_pendingInlinedInstrs += calleeInstrSize;
       continue;
     }
 
@@ -215,15 +226,11 @@ RegionDescPtr RegionFormer::go() {
 
   // If we failed while trying to inline, trigger retry without inlining.
   if (m_region && !m_region->empty() && m_ht.isInlining()) {
-    // Abort in dbg builds. While we can recover from this situation just fine,
-    // it's more often than not indicative of a real bug somewhere else in the
-    // system.
-    assert_flog(
-      false,
-      "selectTracelet: Failed while inlining:\n{}\n{}",
-      show(*m_region), m_ht.unit()
-    );
-
+    // We can recover from this situation just fine, but it's more often
+    // than not indicative of a real bug somewhere else in the system.
+    // TODO: 5515310 investigate whether legit bugs cause this.
+    FTRACE(1, "selectTracelet: Failed while inlining:\n{}\n{}",
+           show(*m_region), m_ht.unit());
     m_inl.disable();
     m_region.reset();
   }
@@ -257,10 +264,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.funcd = m_arStates.back().knownFunc();
   m_ht.setBcOff(m_sk.offset(), false);
 
-  InputInfoVec inputInfos;
-  getInputs(m_startSk, m_inst, inputInfos, [&] (int i) {
-    return m_ht.irBuilder().localType(i, DataTypeGeneric);
-  });
+  auto const inputInfos = getInputs(m_startSk, m_inst);
 
   // Read types for all the inputs and apply MetaData.
   auto newDynLoc = [&](const InputInfo& ii) {
@@ -279,7 +283,11 @@ bool RegionFormer::prepareInstruction() {
   // Check all the inputs for unknown values.
   assert(inputInfos.size() == m_inst.inputs.size());
   for (unsigned i = 0; i < inputInfos.size(); ++i) {
-    if (!consumeInput(i, inputInfos[i])) return false;
+    if (!consumeInput(i, inputInfos[i])) {
+      FTRACE(2, "Stopping tracelet consuming {} input {}\n",
+        opcodeToName(m_inst.op()), i);
+      return false;
+    }
   }
 
   if (inputInfos.needsRefCheck) {
@@ -324,6 +332,8 @@ void RegionFormer::addInstruction() {
 
   FTRACE(2, "selectTracelet adding instruction {}\n", m_inst.toString());
   m_curBlock->addInstruction();
+  m_numBCInstrs++;
+  if (m_ht.isInlining()) m_pendingInlinedInstrs--;
 }
 
 bool RegionFormer::traceThroughJmp() {
@@ -375,15 +385,17 @@ bool RegionFormer::traceThroughJmp() {
                          : m_sk.advanced().offset());
   }
 
-  ++m_numJmps;
+  m_numJmps++;
   m_blockFinished = true;
   return true;
 }
 
-bool RegionFormer::tryInline() {
+bool RegionFormer::tryInline(uint32_t& instrSize) {
   assert(m_inst.source == m_sk);
   assert(m_inst.func() == curFunc());
   assert(m_sk.resumed() == resumed());
+
+  instrSize = 0;
 
   if (!m_inl.canInlineAt(m_inst.source, m_inst.funcd, *m_region)) {
     return false;
@@ -434,6 +446,11 @@ bool RegionFormer::tryInline() {
     return refuse("failed to select region in callee");
   }
 
+  instrSize = region->instrSize();
+  auto newInstrSize = instrSize + m_numBCInstrs + m_pendingInlinedInstrs;
+  if (newInstrSize > RuntimeOption::EvalJitMaxRegionInstrs) {
+    return refuse("new region would be too large");
+  }
   if (!m_inl.shouldInline(callee, *region)) {
     return refuse("shouldIRInline failed");
   }
@@ -528,12 +545,30 @@ void RegionFormer::recordDependencies() {
     changed = relaxGuards(unit, *m_ht.irBuilder().guards(), flags);
   }
 
+  auto guardMap = std::map<RegionDesc::Location,Type>{};
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
     if (type <= Type::Cls) return;
-    RegionDesc::TypePred pred{loc, type};
+    auto inret = guardMap.insert(std::make_pair(loc, type));
+    if (inret.second) return;
+    auto& oldTy = inret.first->second;
+    if (oldTy == Type::Gen) {
+      // This is the case that we see an inner type prediction for a GuardLoc
+      // that got relaxed to Gen.
+      return;
+    }
+    oldTy &= type;
+  });
+
+  for (auto& kv : guardMap) {
+    if (kv.second == Type::Gen) {
+      // Guard was relaxed to Gen---don't record it.
+      continue;
+    }
+    auto const pred = RegionDesc::TypePred { kv.first, kv.second };
     FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
     firstBlock.addPredicted(blockStart, pred);
-  });
+  }
+
   if (changed) {
     printUnit(3, unit, " after guard relaxation ", nullptr,
               m_ht.irBuilder().guards());

@@ -38,6 +38,15 @@ example:
 }
 ```
 
+Note that constructors and destructors should omit their types entirely.
+These special methods will ignore any value populated into return_value.
+
+```
+<<__NativeData("ZendCompat">> class Foo {
+  <<__Native("ZendCompat")>> function __construct(mixed $arg);
+}
+```
+
 This causes the create_object function to be called and thus allows 
 `zend_object_store_get_object()` to return a valid pointer.
 

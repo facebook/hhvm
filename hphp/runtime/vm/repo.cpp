@@ -91,19 +91,13 @@ void Repo::postfork(pid_t pid) {
 
 Repo::Repo()
   : RepoProxy(*this),
-#define RP_OP(c, o) \
-    m_##o##Local(*this, RepoIdLocal), m_##o##Central(*this, RepoIdCentral),
-    RP_OPS
-#undef RP_OP
+    m_insertFileHash{InsertFileHashStmt(*this, 0),
+                     InsertFileHashStmt(*this, 1)},
+    m_getFileHash{GetFileHashStmt(*this, 0), GetFileHashStmt(*this, 1)},
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_frp(*this), m_lsrp(*this) {
-#define RP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  RP_OPS
-#undef RP_OP
   {
     SimpleLock lock(s_lock);
     s_nRepos++;
@@ -124,6 +118,11 @@ void Repo::setCliFile(const std::string& cliFile) {
   assert(s_cliFile.empty());
   assert(t_dh.isNull());
   s_cliFile = cliFile;
+}
+
+size_t Repo::stringLengthLimit() const {
+  static const size_t limit = sqlite3_limit(m_dbc, SQLITE_LIMIT_LENGTH, -1);
+  return limit;
 }
 
 void Repo::loadGlobalData(bool allowFailure /* = false */) {
@@ -315,12 +314,12 @@ bool Repo::findFile(const char *path, const std::string &root, MD5& md5) {
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
     if (*path == '/' && !root.empty() &&
         !strncmp(root.c_str(), path, root.size()) &&
-        getFileHash(repoId).get(path + root.size(), md5)) {
+        m_getFileHash[repoId].get(path + root.size(), md5)) {
       TRACE(3, "Repo loaded file hash for '%s' from '%s'\n",
                path + root.size(), repoName(repoId).c_str());
       return true;
     }
-    if (getFileHash(repoId).get(path, md5)) {
+    if (m_getFileHash[repoId].get(path, md5)) {
       TRACE(3, "Repo loaded file hash for '%s' from '%s'\n",
                 path, repoName(repoId).c_str());
       return true;
@@ -338,7 +337,7 @@ bool Repo::insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn) {
     return true;
   }
   try {
-    insertFileHash(repoId).insert(txn, path, md5);
+    m_insertFileHash[repoId].insert(txn, path, md5);
     return false;
   } catch(RepoExc& re) {
     TRACE(3, "Failed to commit md5 for '%s' to '%s': %s\n",
@@ -707,6 +706,7 @@ void Repo::pragmas(int repoId) {
   // Valid synchronous values: 0 (OFF), 1 (NORMAL), 2 (FULL).
   static const int synchronous = 0;
   setIntPragma(repoId, "synchronous", synchronous);
+  setIntPragma(repoId, "cache_size", 20);
   // Valid journal_mode values: delete, truncate, persist, memory, wal, off.
   setTextPragma(repoId, "journal_mode", RuntimeOption::RepoJournal.c_str());
 }

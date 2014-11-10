@@ -64,8 +64,6 @@
   CASE(MIterNext) \
   CASE(MIterNextK) \
   CASE(NewStructArray) \
-  CASE(RetC) \
-  CASE(RetV) \
   CASE(SSwitch) \
   CASE(SetM) \
   CASE(SetOpL) \
@@ -176,6 +174,8 @@
   CASE(PopV) \
   CASE(Print) \
   CASE(PushL) \
+  CASE(RetC) \
+  CASE(RetV) \
   CASE(Self) \
   CASE(SetG) \
   CASE(SetS) \
@@ -228,6 +228,7 @@
   CASE(BoxR) \
   CASE(BoxRNop) \
   CASE(UnboxRNop) \
+  CASE(RGetCNop) \
   CASE(AddElemV) \
   CASE(AddNewElemV) \
   CASE(ClsCns) \

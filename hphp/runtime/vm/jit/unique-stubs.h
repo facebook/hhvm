@@ -112,6 +112,12 @@ struct UniqueStubs {
   TCA functionEnterHelper;
 
   /*
+   * BindCall stubs for immutable/non-immutable calls
+   */
+  TCA bindCallStub;
+  TCA immutableBindCallStub;
+
+  /*
    * Utility for logging stubs addresses during startup and registering the gdb
    * symbols. It's often useful to know where they were when debugging.
    */

@@ -100,13 +100,14 @@ struct LocalStateHook {
   virtual void setLocalValue(uint32_t id, SSATmp* value) {}
   virtual void refineLocalValue(uint32_t id, unsigned inlineIdx,
                                 SSATmp* oldVal, SSATmp* newVal) {}
-  virtual void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) {}
-  virtual void updateLocalRefValue(uint32_t id, unsigned inlineIdx,
-                                   SSATmp* oldRef, SSATmp* newRef) {}
+  virtual void killLocalForCall(uint32_t id,
+                                unsigned inlineIdx,
+                                SSATmp* val) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
   virtual void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {}
   virtual void setLocalType(uint32_t id, Type type) {}
+  virtual void setBoxedLocalPrediction(uint32_t id, Type type) {}
   virtual void setLocalTypeSource(uint32_t id, TypeSource typeSrc) {}
 };
 
@@ -152,11 +153,23 @@ struct FrameState final : private LocalStateHook {
   bool hasStateFor(Block*) const;
 
   /*
+   * Return an unprocessed predecessor of the given block, or nullptr if none
+   * exists.
+   */
+  Block* findUnprocessedPred(Block*) const;
+
+  /*
    * Starts tracking state for a block and reloads any previously saved
    * state. Can set local values to null if hitting a block with an
-   * unprocessed predecessor, so we pass in an optional LocalStateHook.
+   * unprocessed predecessor, so we pass in an optional LocalStateHook. The
+   * isLoopHeader parameter is used during initial IR generation to indicate
+   * that the given block has a predecessor in the region that might not yet
+   * be linked into the IR cfg.
    */
-  void startBlock(Block*, BCMarker, LocalStateHook* hook = nullptr);
+  void startBlock(Block* b,
+                  BCMarker marker,
+                  LocalStateHook* hook = nullptr,
+                  bool isLoopHeader = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -169,6 +182,11 @@ struct FrameState final : private LocalStateHook {
    * after working on another.
    */
   void pauseBlock(Block*);
+
+  /*
+   * Resumes processing a block that was stopped by pauseBlock.
+   */
+  void unpauseBlock(Block*);
 
   /*
    * Clear state associated with the given block.
@@ -211,6 +229,7 @@ struct FrameState final : private LocalStateHook {
   EvalStack& evalStack() { return m_evalStack; }
 
   Type localType(uint32_t id) const;
+  Type predictedInnerType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
@@ -245,6 +264,15 @@ struct FrameState final : private LocalStateHook {
     Type type{Type::Gen};
 
     /*
+     * Prediction for the type of a local, if it's boxed, otherwise Bottom.
+     *
+     * Invariants:
+     *   always a subtype of `type'
+     *   always a subtype of BoxedInitCell
+     */
+    Type boxedPrediction{Type::Bottom};
+
+    /*
      * The sources of the currently known type. They may be values. If
      * the value is unavailable, we won't hold onto it in the value field, but
      * we'll keep it around in typeSrcs for guard relaxation.
@@ -252,7 +280,9 @@ struct FrameState final : private LocalStateHook {
     TypeSourceSet typeSrcs;
 
     bool operator==(const LocalState& b) const {
-      if (value != b.value || type != b.type ||
+      if (value != b.value ||
+          type != b.type ||
+          boxedPrediction != b.boxedPrediction ||
           typeSrcs.size() != b.typeSrcs.size()) {
         return false;
       }
@@ -266,13 +296,24 @@ struct FrameState final : private LocalStateHook {
 
   using LocalVec = jit::vector<LocalState>;
 
-  const LocalVec& localsForBlock(Block*) const;
+  /*
+   * Info about state leaving a block. The block must have already been
+   * processed.
+   */
+  const LocalVec& localsLeavingBlock(Block*) const;
+  SSATmp* spLeavingBlock(Block*) const;
 
   /*
    * Marks a block as visited in the current iteration. FrameState::startBlock
    * does this automatically.
    */
   void markVisited(const Block*);
+
+  /*
+   * Clears state upon hitting an loop header. Takes an optional hook whose
+   * locals will get nulled out.
+   */
+  void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
  private:
   /*
@@ -305,17 +346,18 @@ struct FrameState final : private LocalStateHook {
     }
   };
 
+  struct BlockState {
+    Snapshot in;
+    Snapshot out;
+  };
+
+private:
+  bool checkInvariants() const;
   /*
    * Clear the current state, but keeps the state associated with all
    * other blocks intact.
    */
   void clearCurrentState();
-
-  /*
-   * Clears state upon hitting an unprocessed predecessor. Takes an optional
-   * hook whose locals will get nulled out.
-   */
-  void unprocessedPredClear(BCMarker, LocalStateHook* hook = nullptr);
 
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
@@ -325,11 +367,10 @@ struct FrameState final : private LocalStateHook {
   void refineLocalValue(uint32_t id, unsigned inlineIdx,
                         SSATmp* oldVal, SSATmp* newVal) override;
   void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
-  void updateLocalRefValue(uint32_t id, unsigned inlineIdx, SSATmp* oldRef,
-                           SSATmp* newRef) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
   void setLocalType(uint32_t id, Type type) override;
+  void setBoxedLocalPrediction(uint32_t id, Type type) override;
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
 
   LocalVec& locals(unsigned inlineIdx);
@@ -343,8 +384,7 @@ struct FrameState final : private LocalStateHook {
   void killLocalsForCall(LocalStateHook& hook, bool skipThisFrame) const;
   void updateLocalValues(LocalStateHook& hook,
                          SSATmp* oldVal, SSATmp* newVal) const;
-  void updateLocalRefValues(LocalStateHook& hook,
-                            SSATmp* oldRef, SSATmp* newRef) const;
+  void updateLocalRefPredictions(LocalStateHook&, SSATmp*, SSATmp*) const;
   void dropLocalRefsInnerTypes(LocalStateHook& hook) const;
 
   void cseInsert(const IRInstruction* inst);
@@ -352,6 +392,8 @@ struct FrameState final : private LocalStateHook {
   CSEHash* cseHashTable(const IRInstruction* inst);
 
   Snapshot createSnapshot() const;
+  Snapshot createSnapshotWithInline() const;
+
   void save(Block*);
   void load(Snapshot& state);
   void merge(Snapshot& s1);
@@ -427,9 +469,9 @@ struct FrameState final : private LocalStateHook {
   bool m_enableCse{false};
 
   /*
-   * Saved snapshots of the incoming state for Blocks.
+   * Saved snapshots of the incoming and outgoing state of blocks.
    */
-  jit::hash_map<Block*, Snapshot> m_snapshots;
+  jit::hash_map<Block*, BlockState> m_states;
 
   /*
    * Set of visited blocks during the traversal of the unit.

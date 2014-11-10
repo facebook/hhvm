@@ -627,33 +627,6 @@ ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
   return cls;
 }
 
-DataType Type::getDataType() const {
-  switch (m_kindOf) {
-    case KindOfBoolean:     return HPHP::KindOfBoolean;
-    case KindOfInt32:
-    case KindOfInt64:       return HPHP::KindOfInt64;
-    case KindOfDouble:      return HPHP::KindOfDouble;
-    case KindOfString:      return HPHP::KindOfString;
-    case KindOfArray:       return HPHP::KindOfArray;
-    case KindOfObject:      return HPHP::KindOfObject;
-    case KindOfResource:    return HPHP::KindOfResource;
-    case KindOfNumeric:
-    case KindOfPrimitive:
-    case KindOfPlusOperand:
-    case KindOfSequence:
-    default:                return HPHP::KindOfUnknown;
-  }
-}
-
-// This is similar to getDataType() except that it returns
-// HPHP::KindOfNull for KindOfVoid;
-DataType Type::getHhvmDataType() const {
-  switch (m_kindOf) {
-    case KindOfVoid:        return HPHP::KindOfNull;
-    default:                return getDataType();
-  }
-}
-
 std::string Type::getPHPName() {
   switch (m_kindOf) {
   case KindOfArray:       return "array";

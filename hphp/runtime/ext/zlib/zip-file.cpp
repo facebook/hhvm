@@ -56,7 +56,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
       return false;
     }
     auto buffer = m_innerFile.getTyped<MemFile>();
-    auto file = NEWOBJ(TempFile);
+    auto file = newres<TempFile>();
     while (!buffer->eof()) {
       file->write(buffer->read(File::CHUNK_SIZE));
     }
@@ -79,11 +79,11 @@ bool ZipFile::close() {
 
 bool ZipFile::closeImpl() {
   bool ret = true;
-  s_file_data->m_pcloseRet = 0;
+  s_pcloseRet = 0;
   if (!m_closed) {
     if (m_gzFile) {
-      s_file_data->m_pcloseRet = gzclose(m_gzFile);
-      ret = (s_file_data->m_pcloseRet == 0);
+      s_pcloseRet = gzclose(m_gzFile);
+      ret = (s_pcloseRet == 0);
       m_gzFile = nullptr;
     }
     m_closed = true;

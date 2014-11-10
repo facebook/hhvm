@@ -22,16 +22,15 @@ class B extends A {
 
   public function __construct() {
     parent::__construct();
-    if(true) {
+    if (true) {
       $this->foo();
-    }
-    else {
+    } else {
       $this->foo();
     }
   }
 
   private function foo(): void {
-    if(true) {
+    if (true) {
       return;
     }
   }

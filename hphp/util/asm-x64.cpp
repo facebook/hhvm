@@ -30,6 +30,11 @@ const char* cc_names[] = {
 void DecodedInstruction::decode(uint8_t* ip) {
   m_ip = ip;
   m_flagsVal = 0;
+  m_map_select = 0;
+  m_xtra_op = 0;
+  m_immSz = sz::nosize;
+  m_offSz = sz::nosize;
+
   while (decodePrefix(ip)) {
     ++ip;
   }
@@ -446,7 +451,6 @@ bool DecodedInstruction::shrinkBranch() {
     if (-128 > delta || delta > 127) return false;
     addr[-2] = 0x70 | (m_opcode & 0x0f); // make it an 8 bit conditional branch
     addr[-1] = delta;
-    m_size -= 4;
   } else {
     assert(m_opcode == 0xe9); // must be a 32-bit unconditional branch
     /*
@@ -457,11 +461,26 @@ bool DecodedInstruction::shrinkBranch() {
     if (-128 > delta || delta > 127) return false;
     addr[-1] = 0xeb;
     addr[0] = delta;
-    m_size -= 3;
   }
-  m_offSz = sz::byte;
-  m_opcode = m_ip[m_size - 2];
+  decode(m_ip);
+  assert(isBranch() && m_offSz == 1);
   return true;
+}
+
+void DecodedInstruction::widenBranch() {
+  assert(m_offSz == 1 && isBranch());
+  auto addr = m_ip + m_size - m_offSz;
+  auto delta = readValue(addr, 1);
+  if (m_opcode == 0xeb) {
+    addr[-1] = 0xe9;
+    writeValue(addr, 4, delta + 3);
+  } else {
+    addr[-1] = 0x0f;
+    addr[0] = 0x80 | (m_opcode & 0xf);
+    writeValue(addr + 1, 4, delta + 4);
+  }
+  decode(m_ip);
+  assert(isBranch() && m_offSz == 4);
 }
 
 } }

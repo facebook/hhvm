@@ -51,9 +51,10 @@ constexpr size_t kJmpTargetAlign = 16;
 
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
-void emitEagerSyncPoint(Asm& as, const Op* pc);
-void emitEagerSyncPoint(Vout& v, const Op* pc);
+void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp);
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp);
 void emitEagerVMRegSave(Asm& as, RegSaveFlags flags);
+void emitEagerVMRegSave(Vout& as, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
@@ -83,9 +84,7 @@ void emitCall(Vout& v, CppCall call, RegSet args);
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
-void emitJmpOrJcc(Asm& as, ConditionCode cc, TCA dest);
-
-void emitRB(Asm& a, Trace::RingBufferType t, const char* msgm);
+void emitRB(Vout& v, Trace::RingBufferType t, const char* msgm);
 
 void emitTraceCall(CodeBlock& cb, Offset pcOff);
 

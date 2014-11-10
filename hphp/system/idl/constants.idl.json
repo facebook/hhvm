@@ -728,15 +728,15 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.4.0-dev"
+            "value": "3.5.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.4.0-dev"
+            "value": "3.5.0-dev"
         },
         {
             "name": "HHVM_VERSION_ID",
-            "value": 30400
+            "value": 30500
         },
         {
             "name": "HTML_ENTITIES",

@@ -63,7 +63,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -136,23 +136,24 @@ MCGenerator* mcg;
 
 CppCall MCGenerator::getDtorCall(DataType type) {
   switch (type) {
-  case BitwiseKindOfString:
-    return CppCall::method(&StringData::release);
-  case KindOfArray:
-    return CppCall::method(&ArrayData::release);
-  case KindOfObject:
-    return CppCall::method(&ObjectData::release);
-  case KindOfResource:
-    return CppCall::method(&ResourceData::release);
-  case KindOfRef:
-    return CppCall::method(&RefData::release);
-  default:
-    assert(false);
-    not_reached();
+    case KindOfString:
+      return CppCall::method(&StringData::release);
+    case KindOfArray:
+      return CppCall::method(&ArrayData::release);
+    case KindOfObject:
+      return CppCall::method(&ObjectData::release);
+    case KindOfResource:
+      return CppCall::method(&ResourceData::release);
+    case KindOfRef:
+      return CppCall::method(&RefData::release);
+    DT_UNCOUNTED_CASE:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
-bool MCGenerator::profileSrcKey(const SrcKey& sk) const {
+bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!sk.func()->shouldPGO()) return false;
   if (m_tx.profData()->optimized(sk.getFuncId())) return false;
   if (m_tx.profData()->profiling(sk.getFuncId())) return true;
@@ -216,9 +217,9 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 
   always_assert(m_tx.profData()->transRegion(transId) != nullptr);
 
-  Func*       func = m_tx.profData()->transFunc(transId);
-  FuncId    funcId = func->getFuncId();
-  const SrcKey& sk = m_tx.profData()->transSrcKey(transId);
+  auto func   = m_tx.profData()->transFunc(transId);
+  auto funcId = func->getFuncId();
+  auto sk     = m_tx.profData()->transSrcKey(transId);
 
   if (m_tx.profData()->optimized(funcId)) return nullptr;
   m_tx.profData()->setOptimized(funcId);
@@ -240,7 +241,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   for (auto region : regions) {
     m_tx.setMode(TransKind::Optimize);
     always_assert(!region->empty());
-    SrcKey regionSk = region->start();
+    auto regionSk = region->start();
     auto translArgs = TranslArgs(regionSk, align).region(region);
     if (setFuncBody && regionSk.offset() == func->base()) {
       translArgs.setFuncBody();
@@ -668,8 +669,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
  * address for the translation corresponding to triggerSk, if such
  * translation is generated; otherwise returns nullptr.
  */
-TCA MCGenerator::regeneratePrologue(TransID prologueTransId,
-                                    SrcKey triggerSk) {
+TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   Func* func = m_tx.profData()->transFunc(prologueTransId);
   int  nArgs = m_tx.profData()->prologueArgs(prologueTransId);
 
@@ -1092,12 +1092,12 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
   bool smashed = false;
   switch (requestNum) {
   case REQ_BIND_CALL: {
-    ReqBindCall* req = reinterpret_cast<ReqBindCall*>(args[0]);
-    ActRec* calleeFrame = reinterpret_cast<ActRec*>(args[1]);
-    TCA toSmash = req->m_toSmash;
+    ActRec* calleeFrame = reinterpret_cast<ActRec*>(info.saved_rStashedAr);
+    TCA toSmash =
+      backEnd().smashableCallFromReturn((TCA)calleeFrame->m_savedRip);
     Func *func = const_cast<Func*>(calleeFrame->m_func);
-    int nArgs = req->m_nArgs;
-    bool isImmutable = req->m_isImmutable;
+    int nArgs = calleeFrame->numArgs();
+    bool isImmutable = args[0];
     TRACE(2, "enterTC: bindCall %s, ActRec %p\n",
           func->fullName()->data(), calleeFrame);
     TCA dest = getFuncPrologue(func, nArgs);
@@ -1122,7 +1122,6 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
           assert(backEnd().callTarget(toSmash));
           TRACE(2, "enterTC: bindCall smash %p -> %p\n", toSmash, dest);
           backEnd().smashCall(toSmash, dest);
-          smashed = true;
           // For functions to be PGO'ed, if their current prologues
           // are still profiling ones (living in code.prof()), then
           // save toSmash as a caller to the prologue, so that it can
@@ -1148,7 +1147,11 @@ bool MCGenerator::handleServiceRequest(TReqInfo& info,
       // should be safe to redo.
       TRACE(2, "enterTC: bindCall rollback smash %p -> %p\n",
             toSmash, dest);
-      sk = req->m_sourceInstr;
+
+      const FPIEnt* fe = liveFunc()->findPrecedingFPI(
+        liveFunc()->base() + calleeFrame->m_soff);
+
+      sk = SrcKey{liveFunc(), fe->m_fcallOff, vmfp()->resumed()};
 
       // EnterTCHelper pushes the return ip onto the stack when the
       // requestNum is REQ_BIND_CALL, but if start is NULL, it will
@@ -1974,13 +1977,6 @@ std::vector<UsageInfo> MCGenerator::getUsageInfo() {
                              a.capacity(),
                              true});
   });
-  // Report code.stubs usage = code.cold + code.frozen usage, so
-  // ODS doesn't break.
-  tcUsageInfo.emplace_back(UsageInfo{
-      std::string("code.stubs"),
-      code.realCold().used() + code.realFrozen().used(),
-      code.realCold().capacity() + code.realFrozen().capacity(),
-      false});
   tcUsageInfo.emplace_back(UsageInfo{
       "data",
       code.data().used(),
@@ -2258,13 +2254,31 @@ TCA RelocationInfo::adjustedAddressBefore(TCA addr) const {
 }
 
 void RelocationInfo::rewind(TCA start, TCA end) {
+  if (m_srcRanges.size() && m_srcRanges.back().first == start) {
+    assert(m_dstRanges.size() == m_srcRanges.size());
+    assert(m_srcRanges.back().second == end);
+    m_srcRanges.pop_back();
+    m_dstRanges.pop_back();
+  }
   // start and end could already exist (with start.first
-  // and end.second set respectively), so we shouldn't remove
-  // those nodes. And since they're added by recordRange,
-  // which is called after the failure-prone part of relocation
-  // is done, we can ignore them altogether.
-  auto it = m_adjustedAddresses.upper_bound(start);
+  // and end.second set respectively). In that case, we
+  // shouldn't remove those nodes.
+  auto it = m_adjustedAddresses.lower_bound(start);
+  if (it == m_adjustedAddresses.end()) return;
+  assert(it->first == start);
+  if (it->second.first) {
+    it++->second.second = 0;
+  } else {
+    m_adjustedAddresses.erase(it++);
+  }
   while (it != m_adjustedAddresses.end() && it->first < end) {
+    m_adjustedAddresses.erase(it++);
+  }
+  if (it == m_adjustedAddresses.end()) return;
+  assert(it->first == end);
+  if (it->second.second) {
+    it++->second.first = 0;
+  } else {
     m_adjustedAddresses.erase(it++);
   }
 }
@@ -2275,6 +2289,34 @@ emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
   intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
 
   mcg->backEnd().emitIncStat(cb, disp, n);
+}
+
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
+  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+}
+
+// generic vasm service-request generator. target specific details
+// are hidden by the svcreq{} instruction.
+void emitServiceReq(Vout& v, TCA stub_block,
+                    ServiceRequest req, const ServiceReqArgVec& argv) {
+  TRACE(3, "Emit Service Req %s(", serviceReqName(req));
+  VregList args;
+  for (auto& argInfo : argv) {
+    switch (argInfo.m_kind) {
+      case ServiceReqArgInfo::Immediate: {
+        TRACE(3, "%" PRIx64 ", ", argInfo.m_imm);
+        args.push_back(v.cns(argInfo.m_imm));
+        break;
+      }
+      default: {
+        always_assert(false);
+        break;
+      }
+    }
+  }
+  v << svcreq{req, v.makeTuple(args), stub_block};
 }
 
 } // HPHP::jit

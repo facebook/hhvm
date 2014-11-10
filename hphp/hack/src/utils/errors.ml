@@ -15,8 +15,11 @@ open Utils
 (*****************************************************************************)
 
 type error_code = int
-type message = Pos.t * string
-type error = error_code * message list
+(* We use `Pos.t message` on the server and convert to `Pos.absolute message`
+ * before sending it to the client *)
+type 'a message = 'a * string
+type 'a error_ = error_code * 'a message list
+type error = Pos.t error_
 type t = error list
 
 (*****************************************************************************)
@@ -48,10 +51,9 @@ let add_list code pos_msg_l =
   if !is_hh_fixme pos code then () else
   add_error (code, pos_msg_l)
 
-let get_code (error: error) = ((fst error): error_code)
-let to_list (error: error) = ((snd error): message list)
-let get_pos (error: error) = fst (List.hd (snd error))
-let filename (error: error) = Pos.filename (get_pos error)
+let get_code (error: 'a error_) = ((fst error): error_code)
+let get_pos (error : error) = fst (List.hd (snd error))
+let to_list (error : 'a error_) = snd error
 let make_error (x: (Pos.t * string) list) = ((0, x): error)
 
 (*****************************************************************************)
@@ -136,7 +138,7 @@ module Naming                               = struct
   let start_with_T                          = 2042 (* DONT MODIFY!!!! *)
   let this_must_be_return                   = 2043 (* DONT MODIFY!!!! *)
   let this_no_argument                      = 2044 (* DONT MODIFY!!!! *)
-  let this_outside_of_class                 = 2045 (* DONT MODIFY!!!! *)
+  let this_hint_outside_class               = 2045 (* DONT MODIFY!!!! *)
   let this_reserved                         = 2046 (* DONT MODIFY!!!! *)
   let tparam_with_tparam                    = 2047 (* DONT MODIFY!!!! *)
   let typedef_constraint                    = 2048 (* DONT MODIFY!!!! *)
@@ -179,13 +181,14 @@ module NastCheck                            = struct
   let toplevel_break                        = 3022 (* DONT MODIFY!!!! *)
   let toplevel_continue                     = 3023 (* DONT MODIFY!!!! *)
   let uses_non_trait                        = 3024 (* DONT MODIFY!!!! *)
+  let illegal_function_name                 = 3025 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
 module Typing                               = struct
-  let abstract_class_final                  = 4001 (* DONT MODIFY!!!! *)
-  let abstract_instantiate                  = 4002 (* DONT MODIFY!!!! *)
+  (* let abstract_class_final                  = 4001 (\* DONT MODIFY!!!! *\) *)
+  let uninstantiable_class                  = 4002 (* DONT MODIFY!!!! *)
   let anonymous_recursive                   = 4003 (* DONT MODIFY!!!! *)
   let anonymous_recursive_call              = 4004 (* DONT MODIFY!!!! *)
   let array_access                          = 4005 (* DONT MODIFY!!!! *)
@@ -241,9 +244,9 @@ module Typing                               = struct
   let missing_constructor                   = 4056 (* DONT MODIFY!!!! *)
   let missing_field                         = 4057 (* DONT MODIFY!!!! *)
   let negative_tuple_index                  = 4058 (* DONT MODIFY!!!! *)
-  let new_self_outside_class                = 4059 (* DONT MODIFY!!!! *)
+  let self_outside_class                    = 4059 (* DONT MODIFY!!!! *)
   let new_static_inconsistent               = 4060 (* DONT MODIFY!!!! *)
-  let new_static_outside_class              = 4061 (* DONT MODIFY!!!! *)
+  let static_outside_class                  = 4061 (* DONT MODIFY!!!! *)
   let non_object_member                     = 4062 (* DONT MODIFY!!!! *)
   let null_container                        = 4063 (* DONT MODIFY!!!! *)
   let null_member                           = 4064 (* DONT MODIFY!!!! *)
@@ -276,7 +279,7 @@ module Typing                               = struct
   let static_dynamic                        = 4091 (* DONT MODIFY!!!! *)
   let static_overflow                       = 4092 (* DONT MODIFY!!!! *)
   let this_in_static                        = 4094 (* DONT MODIFY!!!! *)
-  let this_outside_class                    = 4095 (* DONT MODIFY!!!! *)
+  let this_var_outside_class                = 4095 (* DONT MODIFY!!!! *)
   let trait_final                           = 4096 (* DONT MODIFY!!!! *)
   let tuple_arity                           = 4097 (* DONT MODIFY!!!! *)
   let tuple_arity_mismatch                  = 4098 (* DONT MODIFY!!!! *)
@@ -371,8 +374,7 @@ let method_name_already_bound pos name =
   "Method name already bound: "^name
  )
 
-let error_name_already_bound hhi_root name name_prev p p_prev =
-  (* hhi_root = *)
+let error_name_already_bound name name_prev p p_prev =
   let name = Utils.strip_ns name in
   let name_prev = Utils.strip_ns name_prev in
   let errs = [
@@ -387,12 +389,10 @@ let error_name_already_bound hhi_root name name_prev p p_prev =
     "typechecker and must be removed from your project. Typically, you can "^
     "do this by deleting the \"hhi\" directory you copied into your "^
     "project when first starting with Hack." in
-  (* unsafe_opt since init stack will refuse to continue if we don't have an
-   * hhi root. *)
   let errs =
-    if str_starts_with p.Pos.pos_file hhi_root
+    if (Relative_path.prefix p.Pos.pos_file) = Relative_path.Hhi
     then errs @ [p_prev, hhi_msg]
-    else if str_starts_with p_prev.Pos.pos_file hhi_root
+    else if (Relative_path.prefix p_prev.Pos.pos_file) = Relative_path.Hhi
     then errs @ [p, hhi_msg]
     else errs in
   add_list Naming.error_name_already_bound errs
@@ -480,8 +480,8 @@ let object_cast pos x =
     "Try 'if ($var instanceof "^x^")' or "^
     "'invariant($var instanceof "^x^", ...)'.")
 
-let this_outside_of_class pos =
-   add Naming.this_outside_of_class pos
+let this_hint_outside_class pos =
+   add Naming.this_hint_outside_class pos
     "Cannot use \"this\" outside of a class"
 
 let this_must_be_return pos =
@@ -600,6 +600,13 @@ let dynamic_class pos =
   add Typing.dynamic_class pos
     "Don't use dynamic classes"
 
+let uninstantiable_class usage_pos decl_pos name =
+  let name = (strip_ns name) in
+  add_list Typing.uninstantiable_class [
+    usage_pos, (name^" is uninstantiable");
+    decl_pos, "Declaration is here"
+  ]
+
 let typedef_constraint pos =
   add Naming.typedef_constraint pos
     "Constraints on typedefs are not supported"
@@ -636,7 +643,7 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
 
 let using_internal_class pos name =
   add Naming.using_internal_class pos (
-  name^" is an implementation internal class that can not be used directly"
+  name^" is an implementation internal class that cannot be used directly"
  )
 
 (*****************************************************************************)
@@ -757,6 +764,10 @@ let interface_with_static_member_variable pos =
   add NastCheck.interface_with_static_member_variable pos
     "Interfaces cannot have static variables"
 
+let illegal_function_name pos mname =
+  add NastCheck.illegal_function_name pos
+    ("Illegal function name: " ^ strip_ns mname)
+
 let dangerous_method_name pos =
   add NastCheck.dangerous_method_name pos (
   "This is a dangerous method name, "^
@@ -824,7 +835,7 @@ let enum_constant_type_bad pos ty_pos ty trail =
 
 let enum_type_bad pos ty trail =
   add_with_trail Typing.enum_type_bad
-    [pos, "Enums must have int, string, or mixed type, not " ^ ty]
+    [pos, "Enums must be int or string, not " ^ ty]
     trail
 
 let enum_type_typedef_mixed pos =
@@ -932,10 +943,11 @@ let tuple_syntax p =
   add Typing.tuple_syntax p
     ("Did you want a tuple? Try (X,Y), not tuple<X,Y>")
 
-let class_arity pos class_name arity =
-  add Typing.class_arity pos
-    ("The class "^(Utils.strip_ns class_name)^" expects "^
-     soi arity^" arguments")
+let class_arity usage_pos class_pos class_name arity =
+  add_list Typing.class_arity
+    [usage_pos, ("The class "^(Utils.strip_ns class_name)^" expects "^
+                    soi arity^" arguments");
+     class_pos, "Definition is here"]
 
 let dynamic_yield_private pos =
   add_list Typing.dynamic_yield_private
@@ -989,8 +1001,8 @@ let return_in_void pos1 pos2 =
 let this_in_static p =
   add Typing.this_in_static p "Don't use $this in a static method"
 
-let this_outside_class p =
-  add Typing.this_outside_class p "Can't use $this outside of a class"
+let this_var_outside_class p =
+  add Typing.this_var_outside_class p "Can't use $this outside of a class"
 
 let unbound_global cst_pos =
   add Typing.unbound_global cst_pos "Unbound global constant (Typing)"
@@ -1032,13 +1044,13 @@ let anonymous_recursive pos =
   add Typing.anonymous_recursive pos
     "Anonymous functions cannot be recursive"
 
-let new_static_outside_class pos =
-  add Typing.new_static_outside_class pos
-    "Can't use new static() outside of a class"
+let static_outside_class pos =
+  add Typing.static_outside_class pos
+    "'static' is undefined outside of a class"
 
-let new_self_outside_class pos =
-  add Typing.new_self_outside_class pos
-    "Can't use new self() outside of a class"
+let self_outside_class pos =
+  add Typing.self_outside_class pos
+    "'self' is undefined outside of a class"
 
 let new_static_inconsistent new_pos (cpos, cname) =
   let name = Utils.strip_ns cname in
@@ -1048,10 +1060,6 @@ let new_static_inconsistent new_pos (cpos, cname) =
     guaranteed to be consistent in child classes";
     cpos, ("This declaration neither defines an abstract/final __construct"
            ^" nor uses <<__ConsistentConstruct>> attribute")]
-
-let abstract_instantiate pos cname =
-  add Typing.abstract_instantiate pos
-    ("Can't instantiate " ^ Utils.strip_ns cname)
 
 let pair_arity pos =
   add Typing.pair_arity pos "A pair has exactly 2 elements"
@@ -1067,7 +1075,7 @@ let undefined_parent pos =
 
 let parent_outside_class pos =
   add Typing.parent_outside_class pos
-    "parent is undefined outside of a class"
+    "'parent' is undefined outside of a class"
 
 let parent_abstract_call meth_name call_pos parent_pos =
   add_list Typing.parent_abstract_call [
@@ -1149,12 +1157,13 @@ let string_of_class_member_kind = function
   | `static_method  -> "static method"
   | `class_variable -> "class variable"
 
-let smember_not_found kind pos class_name member_name hint =
+let smember_not_found kind pos (cpos, class_name) member_name hint =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
+  let msg = "Could not find "^kind^" "^member_name^" in type "^class_name in
   add_list Typing.smember_not_found
-    ((pos, "Could not find "^kind^" "^member_name^" in type "^class_name)
-     :: snot_found_hint hint)
+    ((pos, msg) :: (snot_found_hint hint
+                    @ [(cpos, "Declaration of "^class_name^" is here")]))
 
 let not_found_hint = function
   | `no_hint ->
@@ -1164,18 +1173,19 @@ let not_found_hint = function
   | `did_you_mean (pos, v) ->
       [pos, "Did you mean: "^v]
 
-let member_not_found kind pos (cpos, class_name) member_name hint =
+let member_not_found kind pos (cpos, type_name) member_name hint =
+  let type_name = strip_ns type_name in
   let kind =
     match kind with
     | `method_ -> "method "
     | `member -> "member "
   in
   let msg = "The "^kind^member_name^" is undefined "
-    ^"in an object of type "^(strip_ns class_name)
+    ^"in an object of type "^type_name
   in
   add_list Typing.member_not_found
-    ((pos, msg) :: (cpos, "Check this out") ::
-     not_found_hint hint)
+    ((pos, msg) :: (not_found_hint hint
+                    @ [(cpos, "Declaration of "^type_name^" is here")]))
 
 let parent_in_trait pos =
   add Typing.parent_in_trait pos
@@ -1234,10 +1244,6 @@ let read_before_write (pos, v) =
 let interface_final pos =
   add Typing.interface_final pos
     "Interfaces cannot be final"
-
-let abstract_class_final pos =
-  add Typing.abstract_class_final pos
-    "Abstract classes cannot be final"
 
 let trait_final pos =
   add Typing.trait_final pos
@@ -1475,10 +1481,18 @@ let void_usage p reason =
   add_list Typing.void_usage ((p, msg) :: reason)
 
 (*****************************************************************************)
+(* Convert relative paths to absolute. *)
+(*****************************************************************************)
+
+let to_absolute (code, msg_l) =
+  let msg_l = List.map (fun (p, s) -> Pos.to_absolute p, s) msg_l in
+  code, msg_l
+
+(*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 
-let to_json ((error_code, msgl) : error) = Hh_json.(
+let to_json ((error_code, msgl) : Pos.absolute error_) = Hh_json.(
   let elts = List.map (fun (p, w) ->
                         let line, scol, ecol = Pos.info_pos p in
                         JAssoc [ "descr", JString w;
@@ -1493,14 +1507,15 @@ let to_json ((error_code, msgl) : error) = Hh_json.(
   JAssoc [ "message", JList elts ]
 )
 
-let to_string ((error_code, msgl) : error) : string =
+let to_string ((error_code, msgl) : Pos.absolute error_) : string =
   let buf = Buffer.create 50 in
   (match msgl with
   | [] -> assert false
   | (pos1, msg1) :: rest_of_error ->
       Buffer.add_string buf begin
         let error_code = error_code_to_string error_code in
-        Printf.sprintf "%s\n%s (%s)\n" (Pos.string pos1) msg1 error_code
+        Printf.sprintf "%s\n%s (%s)\n"
+          (Pos.string pos1) msg1 error_code
       end;
       List.iter begin fun (p, w) ->
         let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in

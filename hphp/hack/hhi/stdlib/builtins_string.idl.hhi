@@ -36,10 +36,10 @@ function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/ { }
 function chop($str, $charlist = HPHP_TRIM_CHARLIST) { }
-function join($glue, $pieces = null_variant) { }
+function join($glue, $pieces = null) { }
 function str_split($str, $split_length = 1) { }
 function chunk_split($body, $chunklen = 76, $end = "\r\n") { }
-function strtok($str, $token = null_variant) { }
+function strtok($str, $token = null) { }
 function str_replace($search, $replace, $subject, &$count = null) { }
 function str_ireplace($search, $replace, $subject, &$count = null) { }
 function substr_replace($str, $replacement, $start, $length = 0x7FFFFFFF) { }
@@ -51,7 +51,6 @@ function html_entity_decode($str, $quote_style = ENT_COMPAT, $charset = "ISO-885
 function htmlentities($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
 function htmlspecialchars_decode($str, $quote_style = ENT_COMPAT) { }
 function htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $double_encode = true) { }
-function fb_htmlspecialchars($str, $quote_style = ENT_COMPAT, $charset = "ISO-8859-1", $extra = array()) { }
 function quoted_printable_encode($str) { }
 function quoted_printable_decode($str) { }
 function convert_uudecode($data) { }
@@ -61,7 +60,7 @@ function crc32($str) { }
 function crypt($str, $salt = "") { }
 function md5($str, $raw_output = false) { }
 function sha1($str, $raw_output = false) { }
-function strtr($str, $from, $to = null_variant) { }
+function strtr($str, $from, $to = null) { }
 function convert_cyr_string($str, $from, $to) { }
 function get_html_translation_table($table = 0, $quote_style = ENT_COMPAT) { }
 function hebrev($hebrew_text, $max_chars_per_line = 0) { }

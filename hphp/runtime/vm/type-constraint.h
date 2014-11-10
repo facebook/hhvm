@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_TYPE_CONSTRAINT_H_
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
@@ -142,13 +143,13 @@ struct TypeConstraint {
    * KindOfObject: it may either be a type alias or a class, depending
    * on what typeName() means in a given request.
    */
-  DataType underlyingDataType() const { return m_type.dt; }
+  MaybeDataType underlyingDataType() const { return m_type.dt; }
 
   /*
    * Returns the underlying DataType for this TypeConstraint,
    * chasing down type aliases.
    */
-  DataType underlyingDataTypeResolved() const;
+  MaybeDataType underlyingDataTypeResolved() const;
 
   /*
    * Predicates for various properties of the type constraint.
@@ -240,7 +241,7 @@ struct TypeConstraint {
 
 private:
   struct Type {
-    DataType dt;
+    MaybeDataType dt;
     MetaType metatype;
   };
   typedef hphp_hash_map<const StringData*, Type,

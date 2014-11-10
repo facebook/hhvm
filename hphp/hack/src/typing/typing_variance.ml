@@ -11,6 +11,8 @@
 open Utils
 open Typing_defs
 
+module SN = Naming_special_names
+
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
  *
@@ -309,7 +311,7 @@ let check_variance env tparam =
 
 let get_class_variance root (pos, class_name) =
   match class_name with
-  | "\\Awaitable" | "\\Continuation" as name ->
+  | name when (name = SN.Classes.cAwaitable) ->
       [Vcovariant [pos, Rtype_argument (Utils.strip_ns name), Pcovariant]]
   | _ ->
       let dep = Typing_deps.Dep.Class class_name in
@@ -402,7 +404,7 @@ and type_ root variance env (reason, ty) =
   match ty with
   | Tany -> env
   | Tmixed -> env
-  | Tarray (_, ty1, ty2) ->
+  | Tarray (ty1, ty2) ->
     let env = type_option root variance env ty1 in
     let env = type_option root variance env ty2 in
     env

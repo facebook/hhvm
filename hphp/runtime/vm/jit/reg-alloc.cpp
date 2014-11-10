@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
+#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -31,28 +32,41 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   auto inst = tmp.inst();
   auto opc = inst->op();
 
-  if (tmp.isA(Type::StkPtr)) {
-    assert(opc == DefSP ||
-           opc == ReDefSP ||
-           opc == Call ||
-           opc == CallArray ||
-           opc == ContEnter ||
-           opc == SpillStack ||
-           opc == SpillFrame ||
-           opc == CufIterSpillFrame ||
-           opc == ExceptionBarrier ||
-           opc == RetAdjustStack ||
-           opc == InterpOne ||
-           opc == InterpOneCF ||
-           opc == Mov ||
-           opc == CheckStk ||
-           opc == GuardStk ||
-           opc == AssertStk ||
-           opc == CastStk ||
-           opc == CastStkIntToDbl ||
-           opc == CoerceStk ||
-           opc == SideExitGuardStk  ||
-           MInstrEffects::supported(opc));
+  // TODO(t5485866) Our manipulations to vmsp must be SSA to play nice with
+  // LLVM. In the X64 backend, this causes enough extra reg-reg copies to
+  // measurably impact performance, so keep forcing things into rVmSp for
+  // now. We should be able to remove this completely once the necessary
+  // improvements are made to vxls.
+  auto const forceStkPtrs = arch() != Arch::X64 || !RuntimeOption::EvalJitLLVM;
+
+  if (forceStkPtrs && tmp.isA(Type::StkPtr)) {
+    assert_flog(
+      opc == DefSP ||
+      opc == ReDefSP ||
+      opc == Call ||
+      opc == CallArray ||
+      opc == ContEnter ||
+      opc == SpillStack ||
+      opc == SpillFrame ||
+      opc == CufIterSpillFrame ||
+      opc == ExceptionBarrier ||
+      opc == RetAdjustStack ||
+      opc == InterpOne ||
+      opc == InterpOneCF ||
+      opc == Mov ||
+      opc == CheckStk ||
+      opc == GuardStk ||
+      opc == AssertStk ||
+      opc == CastStk ||
+      opc == CastStkIntToDbl ||
+      opc == CoerceStk ||
+      opc == SideExitGuardStk  ||
+      opc == DefLabel ||
+      opc == HintStkInner ||
+      MInstrEffects::supported(opc),
+      "unexpected StkPtr dest from {}",
+      opcodeName(opc)
+    );
     return mcg->backEnd().rVmSp();
   }
 
@@ -63,8 +77,8 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   }
 
   if (opc == DefMIStateBase) {
-    assert(tmp.isA(Type::PtrToCell));
-    return mcg->backEnd().rSp();
+    assert(tmp.isA(Type::PtrToGen));
+    return mcg->backEnd().rVmTl();
   }
   return InvalidReg;
 }

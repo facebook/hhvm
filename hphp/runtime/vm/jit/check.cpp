@@ -58,6 +58,8 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  * 7. Any path from this block to a Block that expects values must be
  *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
+ * 9. If a DefLabel defines a value of type StkPtr, it must appear as the first
+ *    dest. This is necessary for the state tracking in FrameState::update.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();
@@ -65,7 +67,13 @@ bool checkBlock(Block* b) {
   assert(!b->empty());
 
   // Invariant #1
-  if (it->op() == DefLabel) ++it;
+  if (it->op() == DefLabel) {
+    // Invariant #9
+    for (unsigned i = 0, n = it->numDsts(); i < n; ++i) {
+      assert(IMPLIES(it->dst(i)->isA(Type::StkPtr), i == 0));
+    }
+    ++it;
+  }
 
   // Invariant #1
   if (it != end && it->op() == BeginCatch) {
@@ -123,6 +131,7 @@ bool checkBlock(Block* b) {
  * 5. Each predecessor of a reachable block must be reachable (deleted
  *    blocks must not have out-edges to reachable blocks).
  * 6. The entry block must not have any predecessors.
+ * 7. The entry block starts with a DefFP instruction.
  */
 bool checkCfg(const IRUnit& unit) {
   auto const blocksIds = rpoSortCfgWithIds(unit);
@@ -131,6 +140,9 @@ bool checkCfg(const IRUnit& unit) {
 
   // Entry block can't have predecessors.
   assert(unit.entry()->numPreds() == 0);
+
+  // Entry block starts with DefFP
+  assert(!unit.entry()->empty() && unit.entry()->begin()->op() == DefFP);
 
   // Check valid successor/predecessor edges.
   for (Block* b : blocks) {

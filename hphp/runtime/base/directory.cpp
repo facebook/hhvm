@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 #include <sys/types.h>
 
@@ -97,7 +97,7 @@ Variant ArrayDirectory::read() {
   auto ret = m_it.second();
   assert(ret.isString());
   ++m_it;
-  return Variant(f_basename(ret.toString()));
+  return Variant(HHVM_FN(basename)(ret.toString()));
 }
 
 void ArrayDirectory::rewind() {
@@ -115,7 +115,7 @@ String ArrayDirectory::path() {
 
   auto entry = m_it.second();
   assert(entry.isString());
-  return f_dirname(entry.toString());
+  return HHVM_FN(dirname)(entry.toString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

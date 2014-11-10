@@ -316,7 +316,7 @@ static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
   return true;
 }
 
-static int HHVM_FUNCTION(mysql_next_result,
+static int64_t HHVM_FUNCTION(mysql_next_result,
                   const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {
@@ -357,7 +357,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_result,
       return true;
     }
 
-    return Resource(NEWOBJ(MySQLResult)(mysql_result));
+    return Resource(newres<MySQLResult>(mysql_result));
 }
 
 static Variant HHVM_FUNCTION(mysql_unbuffered_query, const String& query,
@@ -379,7 +379,7 @@ static Variant HHVM_FUNCTION(mysql_list_dbs,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(NEWOBJ(MySQLResult)(res));
+  return Resource(newres<MySQLResult>(res));
 }
 
 static Variant HHVM_FUNCTION(mysql_list_tables, const String& database,
@@ -394,7 +394,7 @@ static Variant HHVM_FUNCTION(mysql_list_tables, const String& database,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(NEWOBJ(MySQLResult)(res));
+  return Resource(newres<MySQLResult>(res));
 }
 
 static Variant HHVM_FUNCTION(mysql_list_processes,
@@ -406,7 +406,7 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Resource(NEWOBJ(MySQLResult)(res));
+  return Resource(newres<MySQLResult>(res));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -500,7 +500,7 @@ static Variant HHVM_FUNCTION(mysql_async_query_result,
   mySQL->m_async_query.reset();
 
   MYSQL_RES* mysql_result = mysql_use_result(conn);
-  MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
+  MySQLResult *r = newres<MySQLResult>(mysql_result);
   r->setAsyncConnection(mySQL);
   Resource ret(r);
   return ret;

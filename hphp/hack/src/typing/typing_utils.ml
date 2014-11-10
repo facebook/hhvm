@@ -187,8 +187,8 @@ let is_array_as_tuple env ty =
   let env, ety = Env.expand_type env ty in
   let env, ty = fold_unresolved env ty in
   match ety with
-  | r, Tunresolved [_, Tarray (_, Some elt_type, None)]
-  | r, Tarray (_, Some elt_type, None) ->
+  | r, Tunresolved [_, Tarray (Some elt_type, None)]
+  | r, Tarray (Some elt_type, None) ->
       let env, normalized_elt_ty = Env.expand_type env elt_type in
       let env, normalized_elt_ty = fold_unresolved env normalized_elt_ty in
       (match normalized_elt_ty with
@@ -249,7 +249,7 @@ end = struct
     object(this)
       inherit [bool] TypeVisitor.type_visitor
       method! on_tany _ = true
-      method! on_tarray acc _ ty1_opt ty2_opt =
+      method! on_tarray acc ty1_opt ty2_opt =
         (* Check for array without its value type parameter specified *)
         (match ty2_opt with
         | None -> true

@@ -1,0 +1,48 @@
+# This input used to cause the HHIR simplifier to do a use-after-free in the IR
+# NSame opcode.
+
+.main {
+  Int 1
+  Int 2
+  Int 3
+  NewPackedArray 3
+  SetL $a
+  PopC
+  Int 1
+  Int 2
+  Int 3
+  NewPackedArray 3
+  SetL $b
+  PopC
+
+  FPushFuncD 2 "main"
+    FPassL 0 $a
+    UnsetL $a
+    FPassL 1 $b
+    UnsetL $b
+  FCall 2
+  UnboxR
+  RetC
+}
+
+.function main($a, $b) {
+  CGetL $a
+  Dup
+  CGetL $b
+  UnsetL $a
+  Same
+  SetL $k
+  PopC
+
+  CGetL $b
+  UnsetL $b
+  Same
+  Not
+  SetL $k2
+  PopC
+
+  CGetL $k
+  CGetL $k2
+  Add
+  RetC
+}

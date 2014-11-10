@@ -33,6 +33,7 @@ struct DFS {
       , m_cfg(c)
       , m_selectedSet(ts)
       , m_selectedVec(tv)
+      , m_numBCInstrs(0)
     {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -52,6 +53,12 @@ struct DFS {
  private:
 
   void visit(TransID tid) {
+    auto tidRegion = m_profData->transRegion(tid);
+    auto tidInstrs = tidRegion->instrSize();
+    if (m_numBCInstrs + tidInstrs > RuntimeOption::EvalJitMaxRegionInstrs) {
+      return;
+    }
+
     if (m_visited.count(tid)) return;
     m_visited.insert(tid);
     m_visiting.insert(tid);
@@ -61,8 +68,7 @@ struct DFS {
 
     if (!breaksRegion(*(m_profData->transLastInstr(tid)))) {
 
-      auto srcBlockId =
-        m_profData->transRegion(tid)->blocks().back().get()->id();
+      auto srcBlockId = tidRegion->blocks().back().get()->id();
 
       for (auto const arc : m_cfg.outArcs(tid)) {
         auto dst = arc->dst();
@@ -90,9 +96,11 @@ struct DFS {
     // Now insert the region for tid in the front of m_region.  We do
     // this last so that the region ends up in (quasi-)topological order
     // (it'll be in topological order for acyclic regions).
-    m_region->prepend(*m_profData->transRegion(tid));
+    m_region->prepend(*tidRegion);
     m_selectedSet.insert(tid);
     if (m_selectedVec) m_selectedVec->push_back(tid);
+    m_numBCInstrs += tidRegion->instrSize();
+    always_assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
 
     m_visiting.erase(tid);
   }
@@ -104,6 +112,7 @@ struct DFS {
   TransIDSet&                    m_selectedSet;
   TransIDVec*                    m_selectedVec;
   RegionDescPtr                  m_region;
+  uint32_t                       m_numBCInstrs;
   jit::hash_set<TransID>         m_visiting;
   jit::hash_set<TransID>         m_visited;
   jit::flat_map<SrcKey, TransID> m_srcKeyToTransID;

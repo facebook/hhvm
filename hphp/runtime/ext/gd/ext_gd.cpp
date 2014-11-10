@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-local.h"
@@ -412,8 +412,8 @@ static struct gfxinfo *php_handle_gif(const Resource& stream) {
   String dim;
   const unsigned char *s;
 
-  if (f_fseek(stream, 3, SEEK_CUR).toBoolean()) return NULL;
-  dim = f_fread(stream, 5);
+  if (HHVM_FN(fseek)(stream, 3, SEEK_CUR).toBoolean()) return NULL;
+  dim = HHVM_FN(fread)(stream, 5);
   if (dim.length() != 5) return NULL;
   s = (unsigned char *)dim.c_str();
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
@@ -430,9 +430,9 @@ static struct gfxinfo *php_handle_psd (const Resource& stream) {
   String dim;
   const unsigned char *s;
 
-  if (f_fseek(stream, 11, SEEK_CUR).toBoolean()) return NULL;
+  if (HHVM_FN(fseek)(stream, 11, SEEK_CUR).toBoolean()) return NULL;
 
-  dim = f_fread(stream, 8);
+  dim = HHVM_FN(fread)(stream, 8);
   if (dim.length() != 8) return NULL;
   s = (unsigned char *)dim.c_str();
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
@@ -454,9 +454,9 @@ static struct gfxinfo *php_handle_bmp (const Resource& stream) {
   const unsigned char *s;
   int size;
 
-  if (f_fseek(stream, 11, SEEK_CUR).toBoolean()) return NULL;
+  if (HHVM_FN(fseek)(stream, 11, SEEK_CUR).toBoolean()) return NULL;
 
-  dim = f_fread(stream, 16);
+  dim = HHVM_FN(fread)(stream, 16);
   if (dim.length() != 16) return NULL;
   s = (unsigned char *)dim.c_str();
 
@@ -521,12 +521,12 @@ static struct gfxinfo *php_handle_swc(const Resource& stream) {
   b = (unsigned char *)IM_CALLOC(1, len + 1);
   CHECK_ALLOC_R(b, (len + 1), NULL);
 
-  if (f_fseek(stream, 5, SEEK_CUR).toBoolean()) {
+  if (HHVM_FN(fseek)(stream, 5, SEEK_CUR).toBoolean()) {
     IM_FREE(b);
     return NULL;
   }
 
-  a = toString(f_fread(stream, 64));
+  a = toString(HHVM_FN(fread)(stream, 64));
   if (a.length() != 64) {
     IM_FREE(b);
     return NULL;
@@ -534,12 +534,12 @@ static struct gfxinfo *php_handle_swc(const Resource& stream) {
 
   if (uncompress((Bytef*)b, &len, (const Bytef*)a.c_str(), 64) != Z_OK) {
     /* failed to decompress the file, will try reading the rest of the file */
-    if (f_fseek(stream, 8, SEEK_SET).toBoolean()) {
+    if (HHVM_FN(fseek)(stream, 8, SEEK_SET).toBoolean()) {
       IM_FREE(b);
       return NULL;
     }
 
-    while (!(tmp = f_fread(stream, 8192)).empty()) {
+    while (!(tmp = HHVM_FN(fread)(stream, 8192)).empty()) {
       bufz += tmp;
     }
     slength = bufz.length();
@@ -592,9 +592,9 @@ static struct gfxinfo *php_handle_swf(const Resource& stream) {
   long bits;
   unsigned char *a;
 
-  if (f_fseek(stream, 5, SEEK_CUR).toBoolean()) return NULL;
+  if (HHVM_FN(fseek)(stream, 5, SEEK_CUR).toBoolean()) return NULL;
 
-  String str = toString(f_fread(stream, 32));
+  String str = toString(HHVM_FN(fread)(stream, 32));
   if (str.length() != 32) return NULL;
   a = (unsigned char *)str.c_str();
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof (struct gfxinfo));
@@ -622,9 +622,9 @@ static struct gfxinfo *php_handle_png(const Resource& stream) {
    * Interlace method:   1 byte
    */
 
- if (f_fseek(stream, 8, SEEK_CUR).toBoolean()) return NULL;
+ if (HHVM_FN(fseek)(stream, 8, SEEK_CUR).toBoolean()) return NULL;
 
-  dim = f_fread(stream, 9);
+  dim = HHVM_FN(fread)(stream, 9);
   if (dim.length() < 9) return NULL;
 
   s = (unsigned char *)dim.c_str();
@@ -685,7 +685,7 @@ static struct gfxinfo *php_handle_png(const Resource& stream) {
 
 static unsigned short php_read2(const Resource& stream) {
   unsigned char *a;
-  String str = toString(f_fread(stream, 2));
+  String str = toString(HHVM_FN(fread)(stream, 2));
   /* just return 0 if we hit the end-of-file */
   if (str.length() != 2) return 0;
   a = (unsigned char *)str.c_str();
@@ -725,12 +725,7 @@ static unsigned int php_next_marker(const Resource& stream, int last_marker,
         last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
       }
     }
-    if (++a > 25)
-    {
-      /* who knows the maxim amount of 0xff? though 7 */
-      /* but found other implementations              */
-      return M_EOI;
-    }
+    ++a;
   } while (marker == 0xff);
   if (a < 2)
   {
@@ -750,7 +745,7 @@ static int php_skip_variable(const Resource& stream) {
     return 0;
   }
   length = length - 2;
-  f_fseek(stream, (long)length, SEEK_CUR);
+  HHVM_FN(fseek)(stream, (long)length, SEEK_CUR);
   return 1;
 }
 
@@ -767,7 +762,7 @@ static int php_read_APP(const Resource& stream,
   }
   length -= 2;                /* length includes itself */
 
-  buffer = f_fread(stream, (long)length);
+  buffer = HHVM_FN(fread)(stream, (long)length);
   if (is_empty_string(buffer)) {
     return 0;
   }
@@ -818,7 +813,7 @@ static struct gfxinfo *php_handle_jpeg(const Resource& stream, Array& info) {
           /* if we don't want an extanded info -> return */
           return result;
         }
-        if (f_fseek(stream, length - 8, SEEK_CUR).toBoolean()) {
+        if (HHVM_FN(fseek)(stream, length - 8, SEEK_CUR).toBoolean()) {
           /* file error after info */
           return result;
         }
@@ -876,7 +871,7 @@ static struct gfxinfo *php_handle_jpeg(const Resource& stream, Array& info) {
 
 static unsigned short php_read4(const Resource& stream) {
   unsigned char *a;
-  String str = toString(f_fread(stream, 4));
+  String str = toString(HHVM_FN(fread)(stream, 4));
   /* just return 0 if we hit the end-of-file */
   if (str.length() != 4) return 0;
   a = (unsigned char *)str.c_str();
@@ -950,7 +945,7 @@ static struct gfxinfo *php_handle_jpc(const Resource& stream) {
   php_read4(stream); /* XTOsiz */
   php_read4(stream); /* YTOsiz */
 #else
-  if (f_fseek(stream, 24, SEEK_CUR).toBoolean()) {
+  if (HHVM_FN(fseek)(stream, 24, SEEK_CUR).toBoolean()) {
     IM_FREE(result);
     return NULL;
   }
@@ -1000,7 +995,7 @@ static struct gfxinfo *php_handle_jp2(const Resource& stream) {
   {
     box_length = php_read4(stream); /* LBox */
     /* TBox */
-    String str = toString(f_fread(stream, sizeof(box_type)));
+    String str = toString(HHVM_FN(fread)(stream, sizeof(box_type)));
     if (str.length() != sizeof(box_type)) {
       /* Use this as a general "out of stream" error */
       break;
@@ -1015,7 +1010,7 @@ static struct gfxinfo *php_handle_jp2(const Resource& stream) {
     if (!memcmp(&box_type, jp2c_box_id, 4))
     {
       /* Skip the first 3 bytes to emulate the file type examination */
-      f_fseek(stream, 3, SEEK_CUR);
+      HHVM_FN(fseek)(stream, 3, SEEK_CUR);
 
       result = php_handle_jpc(stream);
       break;
@@ -1027,7 +1022,7 @@ static struct gfxinfo *php_handle_jp2(const Resource& stream) {
     }
 
     /* Skip over LBox (Which includes both TBox and LBox itself */
-    if (f_fseek(stream, box_length - 8, SEEK_CUR).toBoolean()) {
+    if (HHVM_FN(fseek)(stream, box_length - 8, SEEK_CUR).toBoolean()) {
       break;
     }
   }
@@ -1158,14 +1153,14 @@ static struct gfxinfo *php_handle_tiff(const Resource& stream,
   ifd_ptr = stream.getTyped<File>()->read(4);
   if (ifd_ptr.length() != 4) return NULL;
   ifd_addr = php_ifd_get32u((void*)ifd_ptr.c_str(), motorola_intel);
-  if (f_fseek(stream, ifd_addr-8, SEEK_CUR).toBoolean()) return NULL;
-  ifd_data = f_fread(stream, 2);
+  if (HHVM_FN(fseek)(stream, ifd_addr-8, SEEK_CUR).toBoolean()) return NULL;
+  ifd_data = HHVM_FN(fread)(stream, 2);
   if (ifd_data.length() != 2) return NULL;
   num_entries = php_ifd_get16u((void*)ifd_data.c_str(), motorola_intel);
   dir_size = 2/*num dir entries*/ +12/*length of entry*/*
              num_entries +
              4/* offset to next ifd (points to thumbnail or NULL)*/;
-  ifd_data2 = f_fread(stream, dir_size-2);
+  ifd_data2 = HHVM_FN(fread)(stream, dir_size-2);
   if ((size_t)ifd_data2.length() != dir_size-2) return NULL;
   ifd_data += ifd_data2;
   /* now we have the directory we can look how long it should be */
@@ -1225,7 +1220,7 @@ static struct gfxinfo *php_handle_iff(const Resource& stream) {
   int size;
   short width, height, bits;
 
-  str = f_fread(stream, 8);
+  str = HHVM_FN(fread)(stream, 8);
   if (str.length() != 8) return NULL;
   a = (char *)str.c_str();
   if (strncmp(a+4, "ILBM", 4) && strncmp(a+4, "PBM ", 4)) {
@@ -1234,7 +1229,7 @@ static struct gfxinfo *php_handle_iff(const Resource& stream) {
 
   /* loop chunks to find BMHD chunk */
   do {
-    str = f_fread(stream, 8);
+    str = HHVM_FN(fread)(stream, 8);
     if (str.length() != 8) return NULL;
     a = (char *)str.c_str();
     chunkId = php_ifd_get32s(a+0, 1);
@@ -1245,7 +1240,7 @@ static struct gfxinfo *php_handle_iff(const Resource& stream) {
     }
     if (chunkId == 0x424d4844) { /* BMHD chunk */
       if (size < 9) return NULL;
-      str = f_fread(stream, 9);
+      str = HHVM_FN(fread)(stream, 9);
       if (str.length() != 9) return NULL;
       a = (char *)str.c_str();
       width = php_ifd_get16s(a+0, 1);
@@ -1261,7 +1256,7 @@ static struct gfxinfo *php_handle_iff(const Resource& stream) {
         return result;
       }
     } else {
-      if (f_fseek(stream, size, SEEK_CUR).toBoolean()) return NULL;
+      if (HHVM_FN(fseek)(stream, size, SEEK_CUR).toBoolean()) return NULL;
     }
   } while (1);
 }
@@ -1279,7 +1274,7 @@ static int php_get_wbmp(const Resource& stream,
                         struct gfxinfo **result, int check) {
   int i, width = 0, height = 0;
 
-  if (!f_rewind(stream)) {
+  if (!HHVM_FN(rewind)(stream)) {
     return 0;
   }
 
@@ -1352,10 +1347,10 @@ static int php_get_xbm(const Resource& stream, struct gfxinfo **result) {
   if (result) {
     *result = NULL;
   }
-  if (!f_rewind(stream)) {
+  if (!HHVM_FN(rewind)(stream)) {
     return 0;
   }
-  while (!(fline=f_fgets(stream, 0)).empty()) {
+  while (!(fline=HHVM_FN(fgets)(stream, 0)).empty()) {
     iname = (char *)IM_MALLOC(fline.size() + 1);
     CHECK_ALLOC_R(iname, (fline.size() + 1), 0);
     if (sscanf(fline.c_str(), "#define %s %d", iname, &value) == 2) {
@@ -1408,7 +1403,7 @@ static struct gfxinfo *php_handle_ico(const Resource& stream) {
   const unsigned char *s;
   int num_icons = 0;
 
-  dim = f_fread(stream, 2);
+  dim = HHVM_FN(fread)(stream, 2);
   if (dim.length() != 2) {
     return nullptr;
   }
@@ -1424,7 +1419,7 @@ static struct gfxinfo *php_handle_ico(const Resource& stream) {
   CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
 
   while (num_icons > 0) {
-    dim = f_fread(stream, 16);
+    dim = HHVM_FN(fread)(stream, 16);
     if (dim.length() != 16) {
       break;
     }
@@ -1741,12 +1736,12 @@ Variant getImageSize(Resource stream, VRefParam imageinfo) {
 
 Variant HHVM_FUNCTION(getimagesize, const String& filename,
                                     VRefParam imageinfo /*=null */) {
-  Variant stream = f_fopen(filename, "rb");
+  Variant stream = HHVM_FN(fopen)(filename, "rb");
   if (same(stream, false)) {
     return false;
   }
   Variant ret = getImageSize(stream.toResource(), imageinfo);
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
   return ret;
 }
 
@@ -1754,12 +1749,12 @@ Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
                                               VRefParam imageinfo /*=null */) {
   String data = "data://text/plain;base64,";
   data += StringUtil::Base64Encode(imagedata);
-  Variant stream = f_fopen(data, "r");
+  Variant stream = HHVM_FN(fopen)(data, "r");
   if (same(stream, false)) {
     return false;
   }
   Variant ret = getImageSize(stream.toResource(), imageinfo);
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
   return ret;
 }
 
@@ -1818,7 +1813,7 @@ static Resource php_open_plain_file(const String& filename, const char *mode,
   }
   FILE *fp = NULL;
   if (!plain_file || !(fp = plain_file->getStream())) {
-    f_fclose(resource);
+    HHVM_FN(fclose)(resource);
     return Resource();
   }
   if (fpp) *fpp = fp;
@@ -1932,7 +1927,7 @@ static bool _php_image_output_ctx(const Resource& image,
 
   if (fp) {
     fflush(fp);
-    f_fclose(resource);
+    HHVM_FN(fclose)(resource);
   }
 
   return true;
@@ -2135,7 +2130,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 
   gdImageDestroy(im_org);
 
-  f_fclose(org_resource);
+  HHVM_FN(fclose)(org_resource);
 
   im_dest = gdImageCreate(dest_width, dest_height);
   if (im_dest == NULL) {
@@ -2179,7 +2174,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   gdImageWBMP(im_dest, black , dest);
 
   fflush(dest);
-  f_fclose(dest_resource);
+  HHVM_FN(fclose)(dest_resource);
 
   gdImageDestroy(im_dest);
 
@@ -2261,7 +2256,7 @@ static bool _php_image_output(const Resource& image, const String& filename,
       break;
     }
     fflush(fp);
-    f_fclose(resource);
+    HHVM_FN(fclose)(resource);
   } else {
     int   b;
     FILE *tmp;
@@ -2438,13 +2433,13 @@ static gdImagePtr _php_image_create_from(const String& filename,
   }
 
   if (im) {
-    f_fclose(resource);
+    HHVM_FN(fclose)(resource);
     return im;
   }
 
   raise_warning("'%s' is not a valid %s file", filename.c_str(), tn);
 out_err:
-  f_fclose(resource);
+  HHVM_FN(fclose)(resource);
   return NULL;
 }
 
@@ -2898,14 +2893,15 @@ static Variant php_imagettftext_common(int mode, int extended,
 
   FILE *fp = NULL;
   if (!RuntimeOption::FontPath.empty()) {
-    fontname = String(RuntimeOption::FontPath.c_str()) + f_basename(fontname);
+    fontname = String(RuntimeOption::FontPath.c_str()) +
+               HHVM_FN(basename)(fontname);
   }
   Variant stream = php_open_plain_file(fontname, "rb", &fp);
   if (same(stream, false)) {
     raise_warning("Invalid font filename %s", fontname.c_str());
     return false;
   }
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
 
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_GD_STRINGFTEX
@@ -3044,7 +3040,7 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
   php_stream *stream;
 
 
-  stream = f_fopen(file, "rb");
+  stream = HHVM_FN(fopen)(file, "rb");
   if (same(stream, false)) {
     raise_warning("failed to open file: %s", file.c_str());
     return false;
@@ -3065,22 +3061,22 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
   font = (gdFontPtr) IM_MALLOC(sizeof(gdFont));
   CHECK_ALLOC_R(font, sizeof(gdFont), false);
   b = 0;
-  String hdr = f_fread(stream, hdr_size);
+  String hdr = HHVM_FN(fread)(stream, hdr_size);
   if (hdr.length() < hdr_size) {
     IM_FREE(font);
-    if (f_feof(stream)) {
+    if (HHVM_FN(feof)(stream)) {
       raise_warning("End of file while reading header");
     } else {
       raise_warning("Error while reading header");
     }
-    f_fclose(stream);
+    HHVM_FN(fclose)(stream);
     return false;
   }
   memcpy((void*)font, hdr.c_str(), hdr.length());
   i = toInt64(f_tell(stream));
-  f_fseek(stream, 0, SEEK_END);
+  HHVM_FN(fseek)(stream, 0, SEEK_END);
   body_size_check = toInt64(f_tell(stream)) - hdr_size;
-  f_fseek(stream, i, SEEK_SET);
+  HHVM_FN(fseek)(stream, i, SEEK_SET);
 
   body_size = font->w * font->h * font->nchars;
   if (body_size != body_size_check) {
@@ -3095,7 +3091,7 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
       font->nchars >= INT_MAX || font->h >= INT_MAX) {
     raise_warning("Error reading font, invalid font header");
     IM_FREE(font);
-    f_fclose(stream);
+    HHVM_FN(fclose)(stream);
     return false;
   }
 
@@ -3104,32 +3100,32 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
       (font->nchars * font->h) >= INT_MAX || font->w >= INT_MAX) {
     raise_warning("Error reading font, invalid font header");
     IM_FREE(font);
-    f_fclose(stream);
+    HHVM_FN(fclose)(stream);
     return false;
   }
 
   if (body_size != body_size_check) {
     raise_warning("Error reading font");
     IM_FREE(font);
-    f_fclose(stream);
+    HHVM_FN(fclose)(stream);
     return false;
   }
 
-  String body = f_fread(stream, body_size);
+  String body = HHVM_FN(fread)(stream, body_size);
   if (body.length() < body_size) {
     IM_FREE(font);
-    if (f_feof(stream)) {
+    if (HHVM_FN(feof)(stream)) {
       raise_warning("End of file while reading body");
     } else {
       raise_warning("Error while reading body");
     }
-    f_fclose(stream);
+    HHVM_FN(fclose)(stream);
     return false;
   }
   font->data = IM_MALLOC(body_size);
   CHECK_ALLOC_R(font->data, body_size, false);
   memcpy((void*)font->data, body.c_str(), body.length());
-  f_fclose(stream);
+  HHVM_FN(fclose)(stream);
 
   /* Adding 5 to the font index so we will never have font indices
    * that overlap with the old fonts (with indices 1-5).  The first
@@ -4393,13 +4389,13 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
   bool done = false;
   bool written = false;
 
-  Variant stream = f_fopen(jpeg_file_name, "rb");
+  Variant stream = HHVM_FN(fopen)(jpeg_file_name, "rb");
   if (same(stream, false)) {
     raise_warning("failed to open file: %s", jpeg_file_name.c_str());
     return false;
   }
   if (spool < 2) {
-    Array stat = f_fstat(stream.toResource()).toArray();
+    Array stat = HHVM_FN(fstat)(stream.toResource()).toArray();
     int st_size = stat[s_size].toInt32();
     size_t malloc_size = iptcdata_len + sizeof(psheader) + st_size + 1024 + 1;
     poi = spoolbuf = (unsigned char *)IM_MALLOC(malloc_size);
@@ -4408,7 +4404,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
   }
   File *file = stream.toResource().getTyped<File>();
   if (php_iptc_get1(file, spool, poi?&poi:0) != 0xFF) {
-    f_fclose(stream.toResource());
+    HHVM_FN(fclose)(stream.toResource());
     if (spoolbuf) {
       IM_FREE(spoolbuf);
     }
@@ -4416,7 +4412,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
   }
 
   if (php_iptc_get1(file, spool, poi?&poi:0) != 0xD8) {
-    f_fclose(stream.toResource());
+    HHVM_FN(fclose)(stream.toResource());
     if (spoolbuf) {
       IM_FREE(spoolbuf);
     }
@@ -4484,7 +4480,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
     }
   }
 
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
 
   if (spool < 2) {
     return String((char *)spoolbuf, poi - spoolbuf, AttachString);
@@ -6335,14 +6331,18 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
     offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
     /* If its bigger than 4 bytes, the dir entry contains an offset. */
     value_ptr = offset_base+offset_val;
-    if (offset_val+byte_count > IFDlength || value_ptr < dir_entry) {
+    if (byte_count > IFDlength ||
+        offset_val > IFDlength-byte_count ||
+        value_ptr < dir_entry ||
+        offset_val < (size_t)(dir_entry-offset_base)) {
       /*
       // It is important to check for IMAGE_FILETYPE_TIFF
       // JPEG does not use absolute pointers instead
       // its pointers are relative to the start
       // of the TIFF header in APP1 section.
       */
-      if (offset_val+byte_count>ImageInfo->FileSize ||
+      if (byte_count > ImageInfo->FileSize ||
+          offset_val>ImageInfo->FileSize-byte_count ||
           (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II &&
            ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM &&
            ImageInfo->FileType!=IMAGE_FILETYPE_JPEG)) {
@@ -7300,7 +7300,7 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
 
   ImageInfo->motorola_intel = -1; /* flag as unknown */
 
-  Variant stream = f_fopen(FileName, "rb");
+  Variant stream = HHVM_FN(fopen)(FileName, "rb");
   if (same(stream, false)) {
     raise_warning("Unable to open file %s", FileName.c_str());
     return 0;
@@ -7320,13 +7320,13 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
     ImageInfo->FileSize = st.st_size;
   } else {
     if (!ImageInfo->FileSize) {
-      f_fseek(stream.toResource(), 0, SEEK_END);
+      HHVM_FN(fseek)(stream.toResource(), 0, SEEK_END);
       ImageInfo->FileSize = ImageInfo->infile->tell();
-      f_fseek(stream.toResource(), 0, SEEK_SET);
+      HHVM_FN(fseek)(stream.toResource(), 0, SEEK_SET);
     }
   }
 
-  ImageInfo->FileName = f_basename(FileName);
+  ImageInfo->FileName = HHVM_FN(basename)(FileName);
   ImageInfo->read_thumbnail = read_thumbnail;
   ImageInfo->read_all = read_all;
   ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
@@ -7343,7 +7343,7 @@ static int exif_read_file(image_info_type *ImageInfo, String FileName,
     /* Scan the JPEG headers. */
   ret = exif_scan_FILE_header(ImageInfo);
 
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
   return ret;
 }
 
@@ -8016,13 +8016,13 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
 }
 
 Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
-  Variant stream = f_fopen(filename, "rb");
+  Variant stream = HHVM_FN(fopen)(filename, "rb");
   if (same(stream, false)) {
     raise_warning("failed to open file: %s", filename.c_str());
     return false;
   }
   int itype = php_getimagetype(stream.toResource());
-  f_fclose(stream.toResource());
+  HHVM_FN(fclose)(stream.toResource());
   if (itype == IMAGE_FILETYPE_UNKNOWN) return false;
   return itype;
 }

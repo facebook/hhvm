@@ -13,11 +13,14 @@
  * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
 let num_build_retries = 800
 
-type env = ServerMsg.build_opts
+type env = {
+  root : Path.path;
+  build_opts : ServerMsg.build_opts;
+}
 
 let rec connect env retries =
   try
-    let result = ClientUtils.connect env.ServerMsg.root in
+    let result = ClientUtils.connect env.root in
     if Tty.spinner_used() then Tty.print_clear_line stdout;
     result
   with
@@ -55,10 +58,12 @@ let rec connect env retries =
 
 let rec main_ env retries =
   (* Check if a server is up *)
-  if not (ClientUtils.server_exists env.ServerMsg.root)
-  then ClientStart.start_server env.ServerMsg.root;
+  if not (ClientUtils.server_exists env.root)
+  then ClientStart.start_server { ClientStart.
+    root = env.root; wait = false;
+  };
   let ic, oc = connect env retries in
-  ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env);
+  ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env.build_opts);
   let response = ServerMsg.response_from_channel ic in
   match response with
   | ServerMsg.SERVER_OUT_OF_DATE ->
@@ -68,14 +73,18 @@ let rec main_ env retries =
     main_ env (retries - 1)
   | ServerMsg.PONG -> (* successful case *)
     begin
+      let exit_code = ref 0 in
       EventLogger.client_begin_work (
-        ClientLogCommand.LCBuild env.ServerMsg.root);
+        ClientLogCommand.LCBuild env.root);
       try
         while true do
-          print_endline (input_line ic)
+          let line:ServerMsg.build_progress = Marshal.from_channel ic in
+          match line with
+          | ServerMsg.BUILD_PROGRESS s -> print_endline s
+          | ServerMsg.BUILD_ERROR s -> exit_code := 2; print_endline s
         done
       with End_of_file ->
-        ()
+        exit (!exit_code)
     end
   | resp -> Printf.printf "Unexpected server response %s.\n%!"
     (ServerMsg.response_to_string resp)

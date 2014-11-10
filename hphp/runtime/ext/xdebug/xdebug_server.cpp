@@ -21,7 +21,8 @@
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
@@ -352,9 +353,13 @@ void XDebugServer::onRequestInit() {
     String sess_start = sess_start_var.toString();
     cookie.set(s_SESSION,  sess_start);
     if (transport != nullptr) {
-      transport->setCookie(s_SESSION,
-                           sess_start,
-                           XDEBUG_GLOBAL(RemoteCookieExpireTime));
+      int64_t expire = XDEBUG_GLOBAL(RemoteCookieExpireTime);
+      if (expire > 0) {
+        timespec ts;
+        Timer::GetRealtimeTime(ts);
+        expire += ts.tv_sec;
+      }
+      transport->setCookie(s_SESSION, sess_start, expire);
     }
   }
 }
@@ -827,7 +832,7 @@ void XDebugServer::parseInput(String& cmd, Array& args) {
         if (args[opt].isNull()) {
           size_t size = ptr - value;
           StringData* val_data = StringData::Make(value, size, CopyString);
-          args.set(opt, f_stripcslashes(String(val_data)));
+          args.set(opt, HHVM_FN(stripcslashes)(String(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
           throw ERROR_DUP_ARG;

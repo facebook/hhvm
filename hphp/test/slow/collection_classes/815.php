@@ -9,7 +9,7 @@ function f() {
   var_dump(Vector {
 1, 2}
 );
-  var_dump(StableMap {
+  var_dump(Map {
 'a' => 1, 'b' => 2}
 );
 
@@ -22,7 +22,7 @@ function f() {
   var_dump(Vector<int> {
 1, 2}
 );
-  var_dump(StableMap<string,int> {
+  var_dump(Map<string,int> {
 'a' => 1, 'b' => 2}
 );
 }

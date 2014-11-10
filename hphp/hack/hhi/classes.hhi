@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -71,9 +71,6 @@ final class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {
   public function num_args(): int {}
   public function get_arg(int $index): mixed {}
 }
-
-// TODO(#4534682) Kill Continuation
-type Continuation<Tv> = Generator<int, Tv, void>;
 
 abstract class WaitHandle<T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
@@ -163,3 +160,10 @@ final class ExternalThreadEventWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, Exception): void) $callback) {}
 }
+
+/*
+ * stdClass is not really final. However, because stdClass has no
+ * properties of its own and is the result of casting an array to an
+ * object, it is exempt from 'property must exist' checks.
+ */
+final class stdClass {}

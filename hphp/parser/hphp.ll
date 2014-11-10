@@ -1,5 +1,6 @@
 %{ /* -*- mode: c++ -*- */
 #include "hphp/parser/scanner.h"
+#include "hphp/system/systemlib.h"
 #include <cassert>
 
 #ifdef __clang__
@@ -201,6 +202,7 @@ static int getNextTokenType(int t) {
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
 %x ST_LOOKING_FOR_COLON
+%x ST_LOOKING_FOR_FUNC_NAME
 %x ST_VAR_OFFSET
 %x ST_LT_CHECK
 %x ST_COMMENT
@@ -261,7 +263,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING>"exit"                 { RETTOKEN(T_EXIT);}
 <ST_IN_SCRIPTING>"die"                  { RETTOKEN(T_EXIT);}
-<ST_IN_SCRIPTING>"function"             { RETTOKEN(T_FUNCTION);}
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
@@ -270,7 +271,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
-<ST_IN_SCRIPTING>"elseif"               { RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if" {RETTOKEN(T_ELSEIF);}
 <ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
 <ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
 <ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}
@@ -306,6 +307,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"children"             { XHP_ONLY_KEYWORD(T_XHP_CHILDREN); }
 <ST_IN_SCRIPTING>"required"             { XHP_ONLY_KEYWORD(T_XHP_REQUIRED); }
 
+<ST_IN_SCRIPTING>"function" {
+  if (!HPHP::SystemLib::s_inited) {
+    yy_push_state(ST_LOOKING_FOR_FUNC_NAME, yyscanner);
+  }
+  RETTOKEN(T_FUNCTION);
+}
+
+<ST_LOOKING_FOR_FUNC_NAME>"&" {
+  yyless(1);
+  RETSTEP('&');
+}
+
 <ST_IN_SCRIPTING>"?->" {
         if (_scanner->isHHSyntaxEnabled()) {
           STEPPOS(T_NULLSAFE_OBJECT_OPERATOR);
@@ -326,17 +339,30 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETSTEP(T_OBJECT_OPERATOR);
 }
 
-<ST_LOOKING_FOR_PROPERTY>{LABEL} {
+<ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_FUNC_NAME>{LABEL} {
         SETTOKEN(T_STRING);
         yy_pop_state(yyscanner);
         return T_STRING;
 }
 
-<ST_LOOKING_FOR_PROPERTY>{WHITESPACE} {
+<ST_LOOKING_FOR_PROPERTY>":"{XHPLABEL}  {
+  if (_scanner->isHHSyntaxEnabled()) {
+    /* After -> or ?->, HH mode supports ":xhp-label"-style identifiers.
+       We strip off the first colon, but aside from that we do not mangle
+       the XHP name. */
+    yytext++; yyleng--;
+    yy_pop_state(yyscanner);
+    RETTOKEN(T_XHP_LABEL);
+  }
+  yyless(1);
+  RETSTEP(':');
+}
+
+<ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_FUNC_NAME>{WHITESPACE} {
         RETSTEP(T_WHITESPACE);
 }
 
-<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
+<ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_FUNC_NAME>{ANY_CHAR} {
         yyless(0);
         yy_pop_state(yyscanner);
 }
@@ -756,10 +782,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
 <INITIAL>"#!"[^\n]*"\n" {
-        _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
+        SETTOKEN(T_HASHBANG);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
-        return T_INLINE_HTML;
+        return T_HASHBANG;
 }
 
 <INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {
@@ -1011,6 +1037,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"</script"{WHITESPACE}*">"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: </script> not allowed");
+          return T_HH_ERROR;
+        }
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {
           RETSTEP(T_CLOSE_TAG);
@@ -1020,6 +1050,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: %%> not allowed");
+          return T_HH_ERROR;
+        }
         if (_scanner->aspTags()) {
                 yy_push_state(ST_IN_HTML, yyscanner);
                 if (_scanner->full()) {

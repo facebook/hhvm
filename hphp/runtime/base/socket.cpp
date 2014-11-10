@@ -110,9 +110,9 @@ bool Socket::close() {
 }
 
 bool Socket::closeImpl() {
-  s_file_data->m_pcloseRet = 0;
+  s_pcloseRet = 0;
   if (valid() && !m_closed) {
-    s_file_data->m_pcloseRet = ::close(m_fd);
+    s_pcloseRet = ::close(m_fd);
     m_closed = true;
     m_fd = -1;
   }
@@ -242,7 +242,7 @@ Array Socket::getMetaData() {
 }
 
 int64_t Socket::tell() {
-  return m_bytesSent;
+  return 0;
 }
 
 // Tries to infer stream type based on getsockopt() values.

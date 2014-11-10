@@ -8,7 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function assert_options($what, $value = null_variant) { }
+function assert_options($what, $value = null) { }
 function assert($assertion) { }
 function dl($library) { }
 function extension_loaded($name) { }
@@ -16,7 +16,7 @@ function get_loaded_extensions($zend_extensions = false) { }
 function get_extension_funcs($module_name) { }
 function get_cfg_var($option) { }
 function get_current_user() { }
-function get_defined_constants($categorize = null_variant) { }
+function get_defined_constants($categorize = null) { }
 function get_include_path() { }
 function restore_include_path() { }
 function set_include_path($new_include_path) { }
@@ -30,7 +30,7 @@ function getmygid() { }
 function getmyinode() { }
 function getmypid() { }
 function getmyuid() { }
-function getopt($options, $longopts = null_variant) { }
+function getopt($options, $longopts = null) { }
 function getrusage($who = 0) { }
 function clock_getres($clk_id, &$sec, &$nsec) { }
 function clock_gettime($clk_id, &$sec, &$nsec) { }

@@ -237,6 +237,10 @@ struct RegSet {
     return *this;
   }
 
+  RegSet& operator|=(PhysReg r) {
+    return add(r);
+  }
+
   // Intersection
   RegSet operator&(const RegSet& rhs) const {
     RegSet retval;
@@ -362,15 +366,13 @@ private:
   static_assert(sizeof(m_bits) * 8 >= PhysReg::kMaxRegs, "");
 };
 
-// this could be a std::pair<PhysReg> but initializing them using
-// Reg64, e.g. {rax,rdx} causes an internal error in gcc-4.7.1.
-struct RegPair {
-  RegPair() {}
-  explicit RegPair(PhysReg r) : first(r) {}
-  RegPair(PhysReg r0, PhysReg r1) : first(r0), second(r1) {}
-  PhysReg first, second;
-};
-const RegPair InvalidRegPair; // {InvalidReg,InvalidReg}
+inline RegSet operator|(PhysReg r1, PhysReg r2) {
+  return RegSet(r1).add(r2);
+}
+
+inline RegSet operator|(RegSet regs, PhysReg r) {
+  return regs.add(r);
+}
 
 static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");

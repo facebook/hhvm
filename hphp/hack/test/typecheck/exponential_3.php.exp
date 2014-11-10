@@ -1,0 +1,6 @@
+File "exponential_3.php", line 12, characters 16-22:
+Invalid argument (Typing[4110])
+File "exponential_3.php", line 3, characters 22-26:
+This is a float
+File "exponential_3.php", line 12, characters 16-22:
+It is incompatible with a num (int/float) because this is the result of an arithmetic operation

@@ -81,7 +81,8 @@ let declare content =
             (match c.Nast.c_constructor with
             | Some method_ ->
                 Find_refs.process_find_refs (Some (snd c.Nast.c_name))
-                  "__construct" (fst method_.Nast.m_name)
+                  Naming_special_names.Members.__construct
+                  (fst method_.Nast.m_name)
             | None -> ());
             declared_classes := SSet.add cname !declared_classes;
             Typing_decl.class_decl c;
@@ -152,4 +153,4 @@ let check_file_input fi =
         fix_file_and_def content;
         revive funs classes;
     | ServerMsg.FileName fn ->
-        recheck [fn];
+        recheck [Relative_path.create Relative_path.Root fn];

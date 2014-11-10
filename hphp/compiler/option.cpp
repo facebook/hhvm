@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/db-query.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/process.h"
 #include "hphp/hhbbc/hhbbc.h"
@@ -155,8 +154,6 @@ bool Option::AllVolatile = false;
 StringBag Option::OptionStrings;
 
 bool Option::GenerateDocComments = true;
-
-bool (*Option::PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr file);
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -402,7 +399,7 @@ void initialize_hhbbc_options() {
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
   HHBBC::options.DisallowDynamicVarEnvFuncs =
-    (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ERROR);
+    (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 }
 
 //////////////////////////////////////////////////////////////////////

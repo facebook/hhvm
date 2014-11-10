@@ -701,9 +701,9 @@ array(177) {
   ["hhvm.error_handling.call_user_handler_on_fatals"]=>
   array(3) {
     ["global_value"]=>
-    string(1) "1"
+    string(1) "0"
     ["local_value"]=>
-    string(1) "1"
+    string(1) "0"
     ["access"]=>
     int(4)
   }

@@ -69,16 +69,16 @@ void moveToAlign(CodeBlock& cb,
   }
 }
 
-void emitEagerSyncPoint(Vout& v, const Op* pc) {
-  v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
-  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
+void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg vmfp, Vreg vmsp) {
+  v << store{vmfp, rVmTl[RDS::kVmfpOff]};
+  v << store{vmsp, rVmTl[RDS::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
-void emitEagerSyncPoint(Asm& as, const Op* pc) {
+void emitEagerSyncPoint(Asm& as, const Op* pc, PhysReg vmfp, PhysReg vmsp) {
   // keep this in sync with vasm code above.
-  as.  storeq(rVmFp, rVmTl[RDS::kVmfpOff]);
-  as.  storeq(rVmSp, rVmTl[RDS::kVmspOff]);
+  as.  storeq(vmfp, rVmTl[RDS::kVmfpOff]);
+  as.  storeq(vmsp, rVmTl[RDS::kVmspOff]);
   emitImmStoreq(as, intptr_t(pc), rVmTl[RDS::kVmpcOff]);
 }
 
@@ -93,7 +93,7 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
          RegSaveFlags::None);
 
   Reg64 pcReg = rdi;
-  assert(!kSpecialCrossTraceRegs.contains(rdi));
+  assert(!kCrossCallRegs.contains(rdi));
 
   as.   storeq (rVmSp, rVmTl[RDS::kVmspOff]);
   if (savePC) {
@@ -110,6 +110,34 @@ void emitEagerVMRegSave(Asm& as, RegSaveFlags flags) {
   }
   if (saveFP) {
     as. storeq (rVmFp, rVmTl[RDS::kVmfpOff]);
+  }
+}
+
+// Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
+// the bytecode offset is expected to be in rdi and is clobbered
+void emitEagerVMRegSave(Vout& v, RegSaveFlags flags) {
+  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
+  bool savePC = bool(flags & RegSaveFlags::SavePC);
+  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
+         RegSaveFlags::None);
+
+  assert(!kCrossCallRegs.contains(rdi));
+
+  v << store{rVmSp, rVmTl[RDS::kVmspOff]};
+  if (savePC) {
+    PhysReg pc{rdi};
+    auto func = v.makeReg();
+    auto unit = v.makeReg();
+    auto bc = v.makeReg();
+    // m_fp -> m_func -> m_unit -> m_bc + pcReg
+    v << load{rVmFp[AROFF(m_func)], func};
+    v << load{func[Func::unitOff()], unit};
+    v << load{unit[Unit::bcOff()], bc};
+    v << addq{bc, pc, pc, v.makeReg()};
+    v << store{pc, rVmTl[RDS::kVmpcOff]};
+  }
+  if (saveFP) {
+    v << store{rVmFp, rVmTl[RDS::kVmfpOff]};
   }
 }
 
@@ -135,9 +163,8 @@ struct IfCountNotStatic {
                     int32_t> NonStaticCondBlock;
   static_assert(UncountedValue < 0 && StaticValue < 0, "");
   NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(Asm& as,
-                   PhysReg reg,
-                   DataType t = KindOfInvalid) {
+  IfCountNotStatic(Asm& as, PhysReg reg,
+                   MaybeDataType t = folly::none) {
 
     // Objects and variants cannot be static
     if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {
@@ -263,7 +290,7 @@ Vreg emitLdClsCctx(Vout& v, Vreg srcReg, Vreg dstReg) {
 
 void emitCall(Asm& a, TCA dest, RegSet args) {
   // warning: keep this in sync with vasm-x64 call{}
-  if (a.jmpDeltaFits(dest) && !Stats::enabled()) {
+  if (a.jmpDeltaFits(dest)) {
     a.call(dest);
   } else {
     // can't do a near call; store address in data section.
@@ -273,7 +300,6 @@ void emitCall(Asm& a, TCA dest, RegSet args) {
     // more compact than loading a 64-bit immediate.
     auto addr = mcg->allocLiteral((uint64_t)dest);
     a.call(rip[(intptr_t)addr]);
-    assert(((int32_t*)a.frontier())[-1] + a.frontier() == dest);
   }
 }
 
@@ -333,26 +359,13 @@ void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
   }
 }
 
-void emitJmpOrJcc(Asm& a, ConditionCode cc, TCA dest) {
-  if (cc == CC_None) {
-    a.   jmp(dest);
-  } else {
-    a.   jcc((ConditionCode)cc, dest);
-  }
-}
-
-void emitRB(X64Assembler& a,
-            Trace::RingBufferType t,
-            const char* msg) {
+void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
     return;
   }
-  PhysRegSaver save(a, kSpecialCrossTraceRegs);
-  int arg = 0;
-  a.    emitImmReg((uintptr_t)msg, argNumToRegName[arg++]);
-  a.    emitImmReg(strlen(msg), argNumToRegName[arg++]);
-  a.    emitImmReg(t, argNumToRegName[arg++]);
-  a.    call((TCA)Trace::ringbufferMsg);
+  v << vcall{CppCall::direct(Trace::ringbufferMsg),
+             v.makeVcallArgs({{v.cns(msg), v.cns(strlen(msg)), v.cns(t)}}),
+             v.makeTuple({})};
 }
 
 void emitTraceCall(CodeBlock& cb, Offset pcOff) {

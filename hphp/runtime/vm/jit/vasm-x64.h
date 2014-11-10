@@ -163,8 +163,6 @@ template<class Reg, VregKind Kind, int Bits> struct Vr {
   bool isVirt() const { return rn >= Vreg::V0 && isValid(); }
   bool operator==(Vr<Reg,Kind,Bits> r) const { return rn == r.rn; }
   bool operator!=(Vr<Reg,Kind,Bits> r) const { return rn != r.rn; }
-  bool operator==(PhysReg) const = delete;
-  bool operator!=(PhysReg) const = delete;
   bool isValid() const { return rn != Vreg::kInvalidReg; }
   Vptr operator[](int disp) const;
   Vptr operator[](ScaledIndex si) const;
@@ -366,43 +364,47 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 // DH(d,h)  define d, try assigning same register as h
 // Un,Dn    no uses, defs
 
-#define X64_OPCODES\
-  /* intrinsics */\
+#define VASM_OPCODES\
+  /* service requests, PHP-level function calls */\
   O(bindaddr, I(dest) I(sk), Un, Dn)\
-  O(bindcall, I(sk) I(callee) I(argc), Un, Dn)\
-  O(bindexit, I(cc) I(target), U(sf), Dn)\
-  O(bindjcc1, I(cc) I(targets[0]) I(targets[1]), U(sf), Dn)\
-  O(bindjcc2, I(cc) I(target), U(sf), Dn)\
-  O(bindjmp, I(target) I(trflags), Un, Dn)\
+  O(bindcall, I(stub), U(args), Dn)\
+  O(bindexit, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
+  O(bindjcc2nd, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
-  O(contenter, Inone, U(fp) U(target), Dn)\
+  O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(resume, Inone, U(args), Dn)\
+  O(retransopt, I(sk) I(id), U(args), Dn)\
+  /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
+  O(debugtrap, Inone, Un, Dn)\
   O(end, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
-  O(fallback, I(dest), Un, Dn)\
-  O(fallbackcc, I(cc) I(dest), U(sf), Dn)\
-  O(incstat, I(stat) I(n) I(force), Un, Dn)\
-  O(kpcall, I(target) I(callee) I(prologIndex), Un, Dn)\
+  O(fallback, I(dest), U(args), Dn)\
+  O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
+  O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
   O(ldpoint, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
-  O(nativeimpl, I(sk) I(callee) I(argc), Un, Dn)\
-  O(nop, Inone, Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
+  O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(point, I(p), Un, Dn)\
-  O(resume, Inone, Un, Dn)\
-  O(retransopt, I(sk) I(id), Un, Dn)\
   O(store, Inone, U(s) U(d), Dn)\
+  O(svcreq, I(req) I(stub_block), U(args), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
   O(landingpad, Inone, Un, Dn)\
+  O(defvmsp, Inone, Un, D(d))\
+  O(syncvmsp, Inone, U(s), Dn)\
+  O(syncvmfp, Inone, U(s), Dn)\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -418,6 +420,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(addlm, Inone, U(s0) U(m), D(sf)) \
   O(addq, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(addqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
+  O(addqim, I(s0), U(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(andb, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(andbi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -463,7 +466,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(jcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target), Dn)\
-  O(jmpm, Inone, U(target), Dn)\
+  O(jmpm, Inone, U(target) U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
   O(loaddqu, Inone, U(s), D(d))\
@@ -477,7 +480,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
+  O(mul, Inone, U(s0) U(s1), D(d))\
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(nop, Inone, Un, Dn)\
   O(not, Inone, UH(s,d), DH(d,s))\
   O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
@@ -489,7 +494,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(push, Inone, U(s), Dn)\
   O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
-  O(ret, Inone, Un, Dn)\
+  O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, U(s), D(d) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -534,44 +539,49 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 
 // intrinsics
 struct bindaddr { TCA* dest; SrcKey sk; };
-struct bindcall { SrcKey sk; const Func* callee; unsigned argc; };
+struct bindcall { TCA stub; RegSet args; };
 struct bindexit { ConditionCode cc; VregSF sf; SrcKey target;
-                  TransFlags trflags; };
-struct bindjcc1 { ConditionCode cc; VregSF sf; Offset targets[2]; };
-struct bindjcc2 { ConditionCode cc; VregSF sf; Offset target; };
-struct bindjmp { SrcKey target; TransFlags trflags; };
+                  TransFlags trflags; RegSet args; };
+struct bindjcc1st { ConditionCode cc; VregSF sf; Offset targets[2];
+                    RegSet args; };
+struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
+struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
+struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
+struct contenter { Vreg64 fp, target; RegSet args; };
+struct resume { RegSet args; };
+struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
-                 Fixup fixup; DestType destType; bool smashable;};
-struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
-struct contenter { Vreg64 fp, target; };
+                 Fixup fixup; DestType destType; bool smashable; };
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
+struct debugtrap {};
 struct end {};
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
-struct fallback { SrcKey dest; TransFlags trflags; };
+struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
-                    TransFlags trflags; };
-struct incstat { Stats::StatCounter stat; int n; bool force; };
-struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex; };
+                    TransFlags trflags; RegSet args; };
+struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
+                RegSet args; };
 struct ldpoint { Vpoint s; Vreg64 d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
-struct nativeimpl { SrcKey sk; const Func* callee; unsigned argc; };
-struct nop {};
 struct nothrow {};
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
+struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct point { Vpoint p; };
-struct resume {};
-struct retransopt { SrcKey sk; TransID id; };
 struct store { Vreg s; Vptr d; };
+struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 struct landingpad {};
+struct defvmsp { Vreg d; };
+struct syncvmsp { Vreg s; };
+struct syncvmfp { Vreg s; };
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -585,6 +595,7 @@ struct cbcc { vixl::Condition cc; Vreg64 s; Vlabel targets[2]; };
 struct tbcc { vixl::Condition cc; unsigned bit; Vreg64 s; Vlabel targets[2]; };
 struct lslv { Vreg64 sl, sr, d; };
 struct asrv { Vreg64 sl, sr, d; };
+struct mul { Vreg64 s0, s1, d; };
 
 // ATT style operand order. for binary ops:
 // op   s0 s1 d:  d = s1 op s0    =>   d=s1; d op= s0
@@ -605,6 +616,7 @@ struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct addlm { Vreg32 s0; Vptr m; VregSF sf; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct addqim { Immed s0; Vptr m; VregSF sf; };
 struct addsd  { VregDbl s0, s1, d; };
 struct andb  { Vreg8 s0, s1, d; VregSF sf; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; };
@@ -650,7 +662,7 @@ struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; };
-struct jmpm { Vptr target; };
+struct jmpm { Vptr target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
 struct loaddqu { Vptr s; Vreg128 d; };
@@ -665,6 +677,7 @@ struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
+struct nop {};
 struct not { Vreg64 s, d; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
@@ -676,7 +689,7 @@ struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
 struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
-struct ret {};
+struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
@@ -721,7 +734,7 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 
 struct Vinstr {
 #define O(name, imms, uses, defs) name,
-  enum Opcode : uint8_t { X64_OPCODES };
+  enum Opcode : uint8_t { VASM_OPCODES };
 #undef O
 
   Vinstr()
@@ -730,7 +743,19 @@ struct Vinstr {
 
 #define O(name, imms, uses, defs)                               \
   /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
-  X64_OPCODES
+  VASM_OPCODES
+#undef O
+
+  /*
+   * Define an operator= for all instructions to preserve origin and pos.
+   */
+#define O(name, ...)                            \
+  Vinstr& operator=(const jit::name& i) {       \
+    op = Vinstr::name;                          \
+    name##_ = i;                                \
+    return *this;                               \
+  }
+  VASM_OPCODES
 #undef O
 
   Opcode op;
@@ -749,7 +774,7 @@ struct Vinstr {
    * A union of all possible instructions, descriminated by the op field.
    */
 #define O(name, imms, uses, defs) jit::name name##_;
-  union { X64_OPCODES };
+  union { VASM_OPCODES };
 #undef O
 };
 
@@ -814,6 +839,7 @@ struct Vunit {
   bool needsRegAlloc() const;
 
   unsigned next_vr{Vreg::V0};
+  unsigned next_point{0};
   Vlabel entry;
   jit::vector<Vblock> blocks;
   jit::hash_map<uint64_t,Vreg> cpool;
@@ -823,12 +849,12 @@ struct Vunit {
 
 // writer stream to add instructions to a block
 struct Vout {
-  Vout(Vmeta* m, Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
-    : m_meta(m), m_unit(u), m_block(b), m_origin(origin)
+  Vout(Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
+    : m_unit(u), m_block(b), m_origin(origin)
   {}
 
   Vout& operator=(const Vout& v) {
-    assert(&v.m_unit == &m_unit && v.m_meta == m_meta);
+    assert(&v.m_unit == &m_unit);
     m_block = v.m_block;
     m_origin = v.m_origin;
     return *this;
@@ -844,8 +870,7 @@ struct Vout {
   // instruction emitter
   Vout& operator<<(const Vinstr& inst);
 
-  Vpoint makePoint() { return m_meta->makePoint(); }
-  Vmeta& meta() { return *m_meta; }
+  Vpoint makePoint() { return Vpoint{m_unit.next_point++}; }
   Vunit& unit() { return m_unit; }
   template<class T> Vreg cns(T v) { return m_unit.makeConst(v); }
   void use(Vlabel b) { m_block = b; }
@@ -863,7 +888,6 @@ struct Vout {
   }
 
 private:
-  Vmeta* const m_meta;
   Vunit& m_unit;
   Vlabel m_block;
   const IRInstruction* m_origin;
@@ -880,7 +904,7 @@ struct Vasm {
   };
   typedef jit::vector<Area> AreaList;
 
-  explicit Vasm(Vmeta* meta) : m_meta(meta) {
+  explicit Vasm() {
     m_areas.reserve(size_t(AreaIndex::Max));
   }
 
@@ -910,7 +934,6 @@ private:
   }
 
 private:
-  Vmeta* const m_meta;
   Vunit m_unit;
   jit::vector<Area> m_areas; // indexed by AreaIndex
 };
@@ -922,9 +945,7 @@ private:
  * scope, it will finalize and emit any code it contains.
  */
 struct Vauto : Vasm {
-  explicit Vauto(CodeBlock& code)
-    : Vasm(nullptr)
-  {
+  explicit Vauto(CodeBlock& code) {
     unit().entry = Vlabel(main(code));
   }
   ~Vauto();
@@ -963,7 +984,7 @@ void visitUses(const Vunit& unit, Vinstr& inst, Use use) {
 #define UA(s) visit(unit, i.s, use);
 #define UH(s,h) visit(unit, i.s, use);
 #define Un
-    X64_OPCODES
+    VASM_OPCODES
 #undef Un
 #undef UH
 #undef UA
@@ -984,7 +1005,7 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
 #define D(d) visit(unit, i.d, def);
 #define DH(d,h) visit(unit, i.d, def);
 #define Dn
-    X64_OPCODES
+    VASM_OPCODES
 #undef Dn
 #undef DH
 #undef D
@@ -995,7 +1016,7 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
 /*
  * visitOperands visits all operands of the given instruction, calling
  * visitor.imm(), visitor.use(), visitor.across(), and visitor.def() as defined
- * in the X64_OPCODES macro.
+ * in the VASM_OPCODES macro.
  *
  * The template spew is necessary to support callers that only have a const
  * Vinstr& as well as callers with a Vinstr& that wish to mutate the
@@ -1025,7 +1046,7 @@ visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
 #define Inone
 #define Un
 #define Dn
-    X64_OPCODES
+    VASM_OPCODES
 #undef Dn
 #undef Un
 #undef Inone

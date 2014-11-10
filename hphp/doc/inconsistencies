@@ -146,3 +146,6 @@ func_get_args() returns the new value. This behavior matches PHP7, but not PHP5.
 
 (9) Under HHVM, PharData will extract symlinks from tar files. PHP5 will create
 empty files instead.
+
+(10) XDebug defaults to using the time for naming the output file. PHP5 uses the
+PID instead.

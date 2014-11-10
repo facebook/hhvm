@@ -272,7 +272,7 @@ public:
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   TCA getTranslatedCaller() const;
   void setJmpTransID(TCA jmp);
-  bool profileSrcKey(const SrcKey& sk) const;
+  bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   void traceCodeGen();
@@ -381,10 +381,17 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
 extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
                         int n = 1, bool force = false);
+
 inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
                         bool force = false) {
   emitIncStat(cb, &Stats::tl_counters[0], stat, n, force);
 }
+
+extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
+                        bool force = false);
+
+void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
+                    const ServiceReqArgVec& argv);
 
 }}
 

@@ -1182,10 +1182,12 @@ typedef   OptWorker<Pre>           PreOptWorker;
 template<>
 void OptWorker<Pre>::onThreadEnter() {
   hphp_session_init();
+  hphp_context_init();
 }
 
 template<>
 void OptWorker<Pre>::onThreadExit() {
+  hphp_context_exit();
   hphp_session_exit();
 }
 

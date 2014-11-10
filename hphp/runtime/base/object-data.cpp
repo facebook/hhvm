@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_datetime.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 
 #include "hphp/runtime/vm/class.h"
@@ -64,6 +63,9 @@ const StaticString
   s_call("__call"),
   s_serialize("serialize"),
   s_clone("__clone");
+
+const StaticString
+  ObjectData::s_serializedNativeDataKey(std::string("\0native", 7));
 
 static Array convert_to_array(const ObjectData* obj, HPHP::Class* cls) {
   bool visible, accessible, unset;
@@ -677,15 +679,15 @@ inline Array getSerializeProps(const ObjectData* obj,
   auto cls = obj->getVMClass();
   auto debuginfo = cls->lookupMethod(s_debugInfo.get());
   if (!debuginfo) {
-    // When ArrayIterator is casted to an array, it return it's array object,
-    // however when it's being var_dump'd or print_r'd, it shows it's properties
+    // When ArrayIterator is cast to an array, it returns its array object,
+    // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
       Array ret(ArrayData::Create());
       obj->o_getArray(ret);
       return ret;
     }
 
-    // Same with Closure, since it's a dynamic object but still has it's own
+    // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
       Array ret(ArrayData::Create());
@@ -714,6 +716,7 @@ inline Array getSerializeProps(const ObjectData* obj,
 
 void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   bool handleSleep = false;
+  Variant serializableNativeData = init_null();
   Variant ret;
 
   if (LIKELY(serializer->getType() == VariableSerializer::Type::Serialize ||
@@ -746,6 +749,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     if (getAttribute(HasSleep)) {
       handleSleep = true;
       ret = const_cast<ObjectData*>(this)->invokeSleep();
+    }
+    if (getAttribute(HasNativeData)) {
+      auto* ndi = cls->getNativeDataInfo();
+      if (ndi->isSerializable()) {
+        serializableNativeData = Native::nativeDataSleep(this);
+      }
     }
   } else if (UNLIKELY(serializer->getType() ==
                       VariableSerializer::Type::DebuggerSerialize)) {
@@ -819,8 +828,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
                      "__sleep() but does not exist", propName.data());
         wanted.set(propName, init_null());
       }
-      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
+      serializer->pushObjectInfo(o_getClassName(), o_getId(), 'O');
+      if (!serializableNativeData.isNull()) {
+        wanted.set(s_serializedNativeDataKey, serializableNativeData);
+      }
       wanted.serialize(serializer, true);
+      serializer->popObjectInfo();
     } else {
       raise_notice("serialize(): __sleep should return an array only "
                    "containing the names of instance-variables to "
@@ -830,6 +843,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   } else {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
+    } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
+               instanceof(c_Closure::classof())) {
+      serializer->write(o_getClassName());
     } else {
       auto className = o_getClassName();
       Array properties = getSerializeProps(this, serializer);
@@ -858,14 +874,19 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* cname = const_cast<ObjectData*>(this)-> // XXX
           o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
-          serializer->setObjectInfo(cname->toCStrRef(), o_getId(), 'O');
+          serializer->pushObjectInfo(cname->toCStrRef(), o_getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           properties.serialize(serializer, true);
+          serializer->popObjectInfo();
           return;
         }
       }
-      serializer->setObjectInfo(className, o_getId(), 'O');
+      serializer->pushObjectInfo(className, o_getId(), 'O');
+      if (!serializableNativeData.isNull()) {
+        properties.set(s_serializedNativeDataKey, serializableNativeData);
+      }
       properties.serialize(serializer, true);
+      serializer->popObjectInfo();
     }
   }
 }
@@ -908,8 +929,6 @@ ObjectData* ObjectData::clone() {
       return c_DateTimeZone::Clone(this);
     } else if (instanceof(c_DateInterval::classof())) {
       return c_DateInterval::Clone(this);
-    } else if (instanceof(c_DOMNode::classof())) {
-      return c_DOMNode::Clone(this);
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }
@@ -1716,7 +1735,10 @@ void ObjectData::getProp(const Class* klass, bool pubOnly,
                          const PreClass::Prop* prop,
                          Array& props,
                          std::vector<bool>& inserted) const {
-  if (prop->attrs() & AttrStatic) {
+  if (prop->attrs()
+      & (AttrStatic | // statics aren't part of individual instances
+         AttrBuiltin  // runtime-internal attrs, such as the <<Memoize>> cache
+        )) {
     return;
   }
 

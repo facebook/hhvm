@@ -16,13 +16,13 @@ class OAuth {
   public function __construct(mixed $consumer_key,
                               mixed $consumer_secret,
                               mixed $signature_method = OAUTH_SIG_METHOD_HMACSHA1,
-                              mixed $auth_type = 0): void;
+                              mixed $auth_type = 0);
 
   /* The destructor. Warning: This function is currently not documented; only
    * its argument list is available.
    */
   <<__Native("ZendCompat")>>
-  public function __destruct(): mixed;
+  public function __destruct();
 
   /* Turns off verbose request information (off by default). Alternatively, the
    * debug property can be set to a FALSE value to turn debug off.
@@ -227,7 +227,7 @@ class OAuthProvider {
    * not documented; only its argument list is available.
    */
   <<__Native("ZendCompat")>>
-  public function __construct(mixed $params_array): mixed;
+  public function __construct(mixed $params_array);
 
   /* Sets the consumer handler callback, which will later be called with
    * OAuthProvider::callConsumerHandler(). Warning: This function is currently
@@ -306,7 +306,7 @@ class OAuthException extends Exception {
   public mixed $debugInfo;
 
   <<__Native("ZendCompat")>>
-  public function __construct(): void;
+  public function __construct();
 }
 
 /* Generates a Signature Base String according to pecl/oauth.

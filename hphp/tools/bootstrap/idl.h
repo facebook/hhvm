@@ -27,6 +27,9 @@
 using folly::fbstring;
 using folly::fbvector;
 
+#define KindOfInvalid kInvalidDataType
+#define KindOfAny     static_cast<DataType>(-8)
+
 namespace HPHP { namespace IDL {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +59,6 @@ enum FuncFlags {
   HipHopSpecific                = (1 << 16),
   VariableArguments             = (1 << 17),
   RefVariableArguments          = (1 << 18),
-  MixedVariableArguments        = (1 << 19),
   FunctionIsFoldable            = (1 << 20),
   NoEffect                      = (1 << 21),
   NoInjection                   = (1 << 22),
@@ -71,16 +73,14 @@ enum FuncFlags {
   NoFCallBuiltin                = (1 << 31),
 };
 
-#define VarArgsMask (VariableArguments | \
-                     RefVariableArguments | \
-                     MixedVariableArguments)
+#define VarArgsMask (VariableArguments | RefVariableArguments)
 
 bool isKindOfIndirect(DataType kindof);
 
 static inline fbstring kindOfString(DataType t) {
-  switch (t) {
+  switch ((int)t) {
+    case KindOfInvalid:      return "Unknown";
     case KindOfAny:          return "Any";
-    case KindOfUnknown:      return "Unknown";
     case KindOfNull:         return "Null";
     case KindOfBoolean:      return "Boolean";
     case KindOfInt64:        return "Int64";
@@ -253,7 +253,8 @@ class PhpFunc {
               (m_idlName == "__call")));
   }
 
-  fbstring getCppSig() const;
+  fbstring getCppSig(bool fullyQualified = true) const;
+  fbstring getPrefixedCppName(bool fullyQualified = true) const;
 
   fbstring getPrettyName() const {
     if (isMethod()) {

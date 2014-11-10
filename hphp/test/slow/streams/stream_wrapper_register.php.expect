@@ -74,6 +74,21 @@ array(1) {
 string(11) "__construct"
 array(0) {
 }
+string(15) "stream_metadata"
+array(3) {
+  [0]=>
+  string(7) "abc://c"
+  [1]=>
+  int(6)
+  [2]=>
+  int(83)
+}
+string(10) "__destruct"
+array(0) {
+}
+string(11) "__construct"
+array(0) {
+}
 string(6) "unlink"
 array(1) {
   [0]=>
@@ -90,7 +105,7 @@ array(2) {
   [0]=>
   string(7) "abc://e"
   [1]=>
-  int(0)
+  int(2)
 }
 string(10) "__destruct"
 array(0) {

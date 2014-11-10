@@ -93,6 +93,7 @@ class BackEnd {
   virtual PhysReg rSp() = 0;
   virtual PhysReg rVmSp() = 0;
   virtual PhysReg rVmFp() = 0;
+  virtual PhysReg rVmTl() = 0;
   virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
   virtual bool loadsCell(const IRInstruction& inst) = 0;
 
@@ -105,7 +106,7 @@ class BackEnd {
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
   virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                             const SrcKey& sk) = 0;
+                             SrcKey sk) = 0;
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
   virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;
   virtual SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -135,6 +136,12 @@ class BackEnd {
    */
   virtual void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) = 0;
   virtual void emitSmashableCall(CodeBlock& cb, TCA dest) = 0;
+  /*
+   * Find the start of a smashable call from the return address
+   * observed in the callee
+   */
+  virtual TCA smashableCallFromReturn(TCA returnAddr) = 0;
+
   /*
    * Decodes jump instructions and returns their target. This includes handling
    * for ARM's multi-instruction "smashable jump" sequences. If the code does

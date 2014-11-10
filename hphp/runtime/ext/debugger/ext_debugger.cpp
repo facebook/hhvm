@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
-#include "hphp/runtime/ext/ext_socket.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_proxy.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"

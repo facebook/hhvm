@@ -30,6 +30,8 @@ PDODriverMap PDODriver::s_drivers;
 static PDOSqlite s_sqlite_driver;
 static PDOMySql s_mysql_driver;
 
+const StaticString s_general_error_code("HY000");
+
 PDODriver::PDODriver(const char *name) : m_name(name) {
   s_drivers[name] = this;
 }
@@ -49,7 +51,13 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
   }
 
   if (!conn->create(options)) {
+    Array err;
+    bool hasError = conn->fetchErr(nullptr, err);
     delete conn;
+    if (hasError && !err.empty()) {
+      throw_pdo_exception(s_general_error_code, uninit_null(), "[%ld]: %s",
+                          err[0].toInt64(), err[1].toString().data());
+    }
     return NULL;
   }
   return conn;

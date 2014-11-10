@@ -20,6 +20,7 @@ open Ast
 
 module N = Nast
 module ShapeMap = N.ShapeMap
+module SN = Naming_special_names
 
 (*****************************************************************************)
 (* The types *)
@@ -181,13 +182,13 @@ let predef_fun x =
   x
 
 let anon      = predef_fun "?anon"
-let is_int    = predef_fun "\\is_int"
-let is_bool   = predef_fun "\\is_bool"
-let is_array  = predef_fun "\\is_array"
-let is_float  = predef_fun "\\is_float"
-let is_string = predef_fun "\\is_string"
-let is_null   = predef_fun "\\is_null"
-let is_resource = predef_fun "\\is_resource"
+let is_int    = predef_fun SN.StdlibFunctions.is_int
+let is_bool   = predef_fun SN.StdlibFunctions.is_bool
+let is_array  = predef_fun SN.StdlibFunctions.is_array
+let is_float  = predef_fun SN.StdlibFunctions.is_float
+let is_string = predef_fun SN.StdlibFunctions.is_string
+let is_null   = predef_fun SN.StdlibFunctions.is_null
+let is_resource = predef_fun SN.StdlibFunctions.is_resource
 
 let predef_tests_list =
   [is_int; is_bool; is_float; is_string; is_null; is_array; is_resource]
@@ -316,8 +317,7 @@ module Env = struct
     if SMap.mem x !env
     then begin
       let p', _ = SMap.find_unsafe x !env in
-      let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-      Errors.error_name_already_bound hhi_root x x p p'
+      Errors.error_name_already_bound x x p p'
     end;
     let y = p, Ident.make x in
     env := SMap.add x y !env;
@@ -511,9 +511,9 @@ module Env = struct
     let pos, name = canonicalize genv genv.classes x in
     (* Don't let people use strictly internal classes
      * (except when they are being declared in .hhi files) *)
-    if name = "\\HH\\BuiltinEnum" &&
-      not (str_ends_with (Pos.filename pos) ".hhi") then
-      Errors.using_internal_class pos (strip_ns name);
+    if name = SN.Classes.cHH_BuiltinEnum &&
+      not (str_ends_with (Relative_path.to_absolute (Pos.filename pos)) ".hhi")
+    then Errors.using_internal_class pos (strip_ns name);
     pos, name
 
   let fun_id (genv, _) x =
@@ -542,8 +542,7 @@ module Env = struct
         let p', id = SMap.find_unsafe canonical env in
         if Pos.compare p p' = 0 then (p, id)
         else begin
-          let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-          Errors.error_name_already_bound hhi_root name canonical p p';
+          Errors.error_name_already_bound name canonical p p';
           p', id
         end
       | None ->
@@ -558,8 +557,7 @@ module Env = struct
       let p', y = SMap.find_unsafe x !env in
       if Pos.compare p p' = 0 then (p, y)
       else begin
-        let hhi_root = Path.string_of_path (unsafe_opt (Hhi.get_hhi_root ())) in
-        Errors.error_name_already_bound hhi_root x x p p';
+        Errors.error_name_already_bound x x p p';
         p', y
       end
     end
@@ -673,6 +671,10 @@ let convert_shape_name env = function
     let class_name = Env.class_name env x in
     (pos, N.SFclass_const (class_name, (pos, y)))
 
+let splat_unexpected = function
+  | [] -> ()
+  | (pos, _) :: _ -> Errors.naming_too_few_arguments pos; ()
+
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
@@ -730,32 +732,35 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
   | Some h -> h
   | None -> begin
     match x with
-    | "\\void"
-    | "\\int"
-    | "\\bool"
-    | "\\float"
-    | "\\num"
-    | "\\string"
-    | "\\resource"
-    | "\\mixed"
-    | "\\array"
-    | "\\integer"
-    | "\\boolean"
-    | "\\double"
-    | "\\real" ->
+      | x when x.[0] = '\\' &&
+        ( x = ("\\"^SN.Typehints.void)
+        || x = ("\\"^SN.Typehints.int)
+        || x = ("\\"^SN.Typehints.bool)
+        || x = ("\\"^SN.Typehints.float)
+        || x = ("\\"^SN.Typehints.num)
+        || x = ("\\"^SN.Typehints.string)
+        || x = ("\\"^SN.Typehints.resource)
+        || x = ("\\"^SN.Typehints.mixed)
+        || x = ("\\"^SN.Typehints.array)
+        || x = ("\\"^SN.Typehints.arraykey)
+        || x = ("\\"^SN.Typehints.integer)
+        || x = ("\\"^SN.Typehints.boolean)
+        || x = ("\\"^SN.Typehints.double)
+        || x = ("\\"^SN.Typehints.real)
+        ) ->
         Errors.primitive_toplevel p;
         N.Hany
-    | "void"             -> N.Hprim N.Tvoid
-    | "num"              -> N.Hprim N.Tnum
-    | "resource"         -> N.Hprim N.Tresource
-    | "arraykey"         -> N.Hprim N.Tarraykey
-    | "mixed"            -> N.Hmixed
-    | "this" when allow_this ->
+    | x when x = SN.Typehints.void -> N.Hprim N.Tvoid
+    | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
+    | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
+    | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
+    | x when x = SN.Typehints.mixed -> N.Hmixed
+    | x when x = SN.Typehints.this && allow_this ->
         if hl != []
         then Errors.this_no_argument p;
         (match (fst env).cclass with
         | None ->
-          Errors.this_outside_of_class p;
+          Errors.this_hint_outside_class p;
           N.Hany
         | Some c ->
           let tparaml = (fst env).type_paraml in
@@ -764,16 +769,16 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
             let cstr = opt_map (hint env) cstr in
             param_pos, N.Habstr (param_name, cstr)
           end tparaml in
-          N.Habstr ("this", Some (fst c.c_name, N.Happly (c.c_name, tparaml))))
-    | "this" ->
+          N.Habstr (SN.Typehints.this, Some (fst c.c_name, N.Happly (c.c_name, tparaml))))
+    | x when x = SN.Typehints.this ->
         (match (fst env).cclass with
         | None ->
-            Errors.this_outside_of_class p
+            Errors.this_hint_outside_class p
         | Some _ ->
             Errors.this_must_be_return p
         );
         N.Hany
-    | _ when String.lowercase x = "this" ->
+    | _ when String.lowercase x = SN.Typehints.this ->
         Errors.lowercase_this p x;
         N.Hany
     | _ when SMap.mem x params ->
@@ -783,7 +788,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         N.Habstr (x, opt_map (hint env) gen_constraint)
     | _ ->
         (* In the future, when we have proper covariant support, we can
-         * allow "this" to instantiate any covariant type variable. For
+         * allow SN.Typehints.this to instantiate any covariant type variable. For
          * example, let us pretend that we have this defined:
          *
          *   interface IFoo<read Tread, write Twrite>
@@ -801,13 +806,13 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
          *)
       let cname = snd (Env.class_name env id) in
       let gen_read_api_covariance =
-        (cname = "\\GenReadApi" || cname = "\\GenReadIdxApi") in
+        (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
       let privacy_policy_base_covariance =
-        (cname = "\\PrivacyPolicyBase") in
+        (cname = SN.FB.cPrivacyPolicyBase) in
       let data_type_covariance =
-        (cname = "\\DataType" || cname = "\\DataTypeImplProvider") in
+        (cname = SN.FB.cDataType || cname = SN.FB.cDataTypeImplProvider) in
       let awaitable_covariance =
-        (cname = "\\Awaitable" || cname = "\\WaitHandle") in
+        (cname = SN.Classes.cAwaitable || cname = SN.Classes.cWaitHandle) in
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
          privacy_policy_base_covariance || data_type_covariance) in
@@ -820,27 +825,27 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
 and try_castable_hint ?(allow_this=false) env p x hl =
   let hint = hint ~allow_this in
   match x with
-  | "int"    -> Some (N.Hprim N.Tint)
-  | "bool"   -> Some (N.Hprim N.Tbool)
-  | "float"  -> Some (N.Hprim N.Tfloat)
-  | "string" -> Some (N.Hprim N.Tstring)
-  | "array"  ->
+  | x when x = SN.Typehints.int    -> Some (N.Hprim N.Tint)
+  | x when x = SN.Typehints.bool   -> Some (N.Hprim N.Tbool)
+  | x when x = SN.Typehints.float  -> Some (N.Hprim N.Tfloat)
+  | x when x = SN.Typehints.string -> Some (N.Hprim N.Tstring)
+  | x when x = SN.Typehints.array  ->
       Some (match hl with
       | [] -> N.Harray (None, None)
       | [x] -> N.Harray (Some (hint env x), None)
       | [x; y] -> N.Harray (Some (hint env x), Some (hint env y))
       | _ -> Errors.naming_too_many_arguments p; N.Hany
       )
-  | "integer" ->
+  | x when x = SN.Typehints.integer ->
       Errors.integer_instead_of_int p;
       Some (N.Hprim N.Tint)
-  | "boolean" ->
+  | x when x = SN.Typehints.boolean ->
       Errors.boolean_instead_of_bool p;
       Some (N.Hprim N.Tbool)
-  | "double" ->
+  | x when x = SN.Typehints.double ->
       Errors.double_instead_of_float p;
       Some (N.Hprim N.Tfloat)
-  | "real" ->
+  | x when x = SN.Typehints.real ->
       Errors.real_instead_of_float p;
       Some (N.Hprim N.Tfloat)
   | _ -> None
@@ -1034,7 +1039,7 @@ and constructor env acc = function
   | ClassUse _ -> acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
-  | Method ({ m_name = (p, name); _ } as m) when name = "__construct" ->
+  | Method ({ m_name = (p, name); _ } as m) when name = SN.Members.__construct ->
       let genv, lenv = env in
       let env = ({ genv with in_member_fun = true}, lenv) in
       (match acc with
@@ -1088,7 +1093,7 @@ and class_static_method env x acc =
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars _ -> acc
-  | Method m when snd m.m_name = "__construct" -> acc
+  | Method m when snd m.m_name = SN.Members.__construct -> acc
   | Method m when List.mem Static m.m_kind -> method_ env m :: acc
   | Method _ -> acc
 
@@ -1099,7 +1104,7 @@ and class_method env sids cv_ids x acc =
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars _ -> acc
-  | Method m when snd m.m_name = "__construct" -> acc
+  | Method m when snd m.m_name = SN.Members.__construct -> acc
   | Method m when not (List.mem Static m.m_kind) ->
       let genv, lenv = env in
       let env = ({ genv with in_member_fun = true}, lenv) in
@@ -1502,22 +1507,24 @@ and expr_ env = function
   | Collection (id, l) -> begin
     let p, cn = Namespaces.elaborate_id ((fst env).namespace) id in
     match cn with
-      | "\\Vector"
-      | "\\ImmVector"
-      | "\\Set"
-      | "\\ImmSet" ->
+      | x when
+          x = SN.Collections.cVector
+          || x = SN.Collections.cImmVector
+          || x = SN.Collections.cSet
+          || x = SN.Collections.cImmSet ->
         N.ValCollection (cn, (List.map (afield_value env cn) l))
-      | "\\Map"
-      | "\\ImmMap"
-      | "\\StableMap" ->
+      | x when
+          x = SN.Collections.cMap
+          || x = SN.Collections.cImmMap
+          || x = SN.Collections.cStableMap ->
         N.KeyValCollection (cn, (List.map (afield_kvalue env cn) l))
-      | "\\Pair" ->
+      | x when x = SN.Collections.cPair ->
         (match l with
           | [] ->
               Errors.naming_too_few_arguments p;
               N.Any
           | e1::e2::[] ->
-            let pn = "Pair" in
+            let pn = SN.Collections.cPair in
             N.Pair (afield_value env pn e1, afield_value env pn e2)
           | _ ->
               Errors.naming_too_many_arguments p;
@@ -1537,8 +1544,8 @@ and expr_ env = function
   | String2 (idl, (_, s)) -> N.String2 (string2 env (List.rev idl), s)
   | Id x ->
     (match snd x with
-      | "__LINE__" -> N.Int x
-      | "__CLASS__" ->
+      | const when const = SN.PseudoConsts.g__LINE__ -> N.Int x
+      | const when const = SN.PseudoConsts.g__CLASS__ ->
         (match (fst env).cclass with
           | None -> Errors.illegal_CLASS (fst x); N.Any
           | Some c ->
@@ -1548,29 +1555,33 @@ and expr_ env = function
              * subclass to be compatible with the trait member/method
              * declarations) *)
             N.String c.c_name)
-      | "__TRAIT__" ->
+      | const when const = SN.PseudoConsts.g__TRAIT__ ->
         (match (fst env).cclass with
           | Some c when c.c_kind = Ctrait -> N.String c.c_name
           | _ -> Errors.illegal_TRAIT (fst x); N.Any)
-      | "__FILE__" | "__DIR__"
-      (* could actually check that we are in a function, method, etc *)
-      | "__FUNCTION__" | "__METHOD__"
-      | "__NAMESPACE__"
-        -> N.String x
+      | const when
+          const = SN.PseudoConsts.g__FILE__
+          || const = SN.PseudoConsts.g__DIR__
+          (* could actually check that we are in a function, method, etc *)
+          || const = SN.PseudoConsts.g__FUNCTION__
+          || const = SN.PseudoConsts.g__METHOD__
+          || const = SN.PseudoConsts.g__NAMESPACE__ ->
+        N.String x
       | _ -> N.Id (Env.global_const env x)
       )
   | Lvar (_, "$this") -> N.This
   | Lvar x ->
       Naming_hooks.dispatch_lvar_hook x !((snd env).locals);
       N.Lvar (Env.lvar env x)
-  | Obj_get (e1, (p, _ as e2), OG_nullthrows) ->
-      N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullthrows)
-  (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
-     is being used for instance property access; see the case below for
-     handling nullsafe instance method calls to see how this works *)
-  | Obj_get (_, (p, _), OG_nullsafe) ->
-      Errors.nullsafe_property_access p;
-      N.Any
+  | Obj_get (e1, (p, _ as e2), nullsafe) ->
+      (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
+         is being used for instance property access; see the case below for
+         handling nullsafe instance method calls to see how this works *)
+      let nullsafe = match nullsafe with
+        | OG_nullsafe -> Errors.nullsafe_property_access p; N.OG_nullsafe
+        | OG_nullthrows -> N.OG_nullthrows
+      in
+      N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe)
   | Array_get ((p, Lvar x), None) ->
       let id = p, N.Lvar (Env.lvar env x) in
       N.Array_get (id, None)
@@ -1579,15 +1590,18 @@ and expr_ env = function
       N.Class_get (make_class_id env x1, x2)
   | Class_const (x1, x2) ->
       N.Class_const (make_class_id env x1, x2)
-  | Call ((_, Id (p, "echo")), el) ->
-      N.Call (N.Cnormal, (p, N.Id (p, "echo")), List.map (expr env) el)
-  | Call ((p, Id (_, "call_user_func")), el) ->
+  | Call ((_, Id (p, pseudo_func)), el, uel)
+      when pseudo_func = SN.SpecialFunctions.echo ->
+      splat_unexpected uel ;
+      N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), exprl env el, [])
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.call_user_func ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
-      | f :: el ->
-          N.Call (N.Cuser_func, expr env f, List.map (expr env) el)
+      | f :: el -> N.Call (N.Cuser_func, expr env f, exprl env el, [])
       )
-  | Call ((p, Id (_, "fun")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.fun_ ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_, String (p2, s)] when String.contains s ':' ->
@@ -1598,7 +1612,8 @@ and expr_ env = function
           N.Any
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, "inst_meth")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.inst_meth ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
@@ -1609,14 +1624,17 @@ and expr_ env = function
         N.Any
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, "meth_caller")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.meth_caller ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
-          | (_, N.String cl), (_, N.String meth)
-          | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
+          | (_, N.String cl), (_, N.String meth) ->
+            N.Method_caller (Env.class_name env cl, meth)
+          | (_, N.Class_const (N.CI cl, (_, mem))), (_, N.String meth)
+            when mem = SN.Members.mClass ->
             N.Method_caller (Env.class_name env cl, meth)
           | (p, _), (_) ->
             Errors.illegal_meth_caller p;
@@ -1624,17 +1642,20 @@ and expr_ env = function
           )
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, "class_meth")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.class_meth ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
       | [_] -> Errors.naming_too_few_arguments p; N.Any
       | e1::e2::[] ->
           (match (expr env e1), (expr env e2) with
-          | (_, N.String cl), (_, N.String meth)
-          | (_, N.Class_const (N.CI cl, (_, "class"))), (_, N.String meth) ->
+          | (_, N.String cl), (_, N.String meth) ->
             N.Smethod_id (Env.class_name env cl, meth)
-          | (p, N.Class_const ((N.CIself|N.CIstatic), (_, "class"))),
-            (_, N.String meth) ->
+          | (_, N.Class_const (N.CI cl, (_, mem))), (_, N.String meth)
+            when mem = SN.Members.mClass ->
+            N.Smethod_id (Env.class_name env cl, meth)
+          | (p, N.Class_const ((N.CIself|N.CIstatic), (_, mem))),
+              (_, N.String meth) when mem = SN.Members.mClass ->
             (match (fst env).cclass with
               | Some cl -> N.Smethod_id (cl.c_name, meth)
               | None -> Errors.illegal_class_meth p; N.Any)
@@ -1642,70 +1663,79 @@ and expr_ env = function
           )
       | _ -> Errors.naming_too_many_arguments p; N.Any
       )
-  | Call ((p, Id (_, "assert")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.assert_ ->
+      splat_unexpected uel ;
       if List.length el <> 1
       then Errors.assert_arity p;
       N.Assert (N.AE_assert (expr env (List.hd el)))
-  | Call ((p, Id (_, "invariant")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.invariant ->
+      splat_unexpected uel ;
       (match el with
       | st :: format :: el ->
-          let el = List.map (expr env) el in
+          let el = exprl env el in
           N.Assert (N.AE_invariant (expr env st, expr env format, el))
         | _ ->
           Errors.naming_too_few_arguments p;
           N.Any
       )
-  | Call ((p, Id (_, "invariant_violation")), el) ->
+  | Call ((p, Id (_, cn)), el, uel)
+      when cn = SN.SpecialFunctions.invariant_violation ->
+      splat_unexpected uel ;
       (match el with
       | format :: el ->
-        let el = List.map (expr env) el in
+        let el = exprl env el in
         N.Assert (N.AE_invariant_violation (expr env format, el))
       | _ ->
         Errors.naming_too_few_arguments p;
         N.Any
       )
-  | Call ((p, Id (_, "tuple")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.tuple ->
+      splat_unexpected uel ;
       (match el with
       | [] -> Errors.naming_too_few_arguments p; N.Any
-      | el -> N.List (List.map (expr env) el)
+      | el -> N.List (exprl env el)
       )
-  | Call ((p, Id (_, "gena")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgena ->
+      splat_unexpected uel ;
       (match el with
       | [e] -> N.Special_func (N.Gena (expr env e))
       | _ -> Errors.gena_arity p; N.Any
       )
-  | Call ((p, Id (_, "genva")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgenva ->
+      splat_unexpected uel ;
       if List.length el < 1
       then (Errors.genva_arity p; N.Any)
-      else N.Special_func (N.Genva (List.map (expr env) el))
-  | Call ((p, Id (_, "gen_array_rec")), el) ->
+      else N.Special_func (N.Genva (exprl env el))
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgen_array_rec ->
+      splat_unexpected uel ;
       (match el with
       | [e] -> N.Special_func (N.Gen_array_rec (expr env e))
       | _ -> Errors.gen_array_rec_arity p; N.Any
       )
-  | Call ((p, Id (_, "gen_array_va_rec_DEPRECATED")), el) ->
+  | Call ((p, Id (_, cn)), el, uel) when cn = SN.FB.fgen_array_va_rec_DEPRECATED ->
+      splat_unexpected uel ;
       if List.length el < 1
       then begin
         Errors.gen_array_va_rec_arity p;
         N.Any
       end
-      else N.Special_func (N.Gen_array_va_rec (List.map (expr env) el))
-  | Call ((p, Id f), el) ->
+      else N.Special_func (N.Gen_array_va_rec (exprl env el))
+  | Call ((p, Id f), el, uel) ->
       N.Call (N.Cnormal, (p, N.Id (Env.fun_id env f)),
-        List.map (expr env) el)
+              exprl env el, exprl env uel)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
      for both instance property access and instance method calls, we need
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
      only match instance method calls *)
-  | Call ((p, Obj_get (e1, e2, OG_nullsafe)), el) ->
+  | Call ((p, Obj_get (e1, e2, OG_nullsafe)), el, uel) ->
       N.Call
         (N.Cnormal,
          (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
-         List.map (expr env) el)
+         exprl env el, exprl env uel)
   (* Handle all kinds of calls that weren't handled by any of
      the cases above *)
-  | Call (e, el) ->
-      N.Call (N.Cnormal, expr env e, List.map (expr env) el)
+  | Call (e, el, uel) ->
+      N.Call (N.Cnormal, expr env e, exprl env el, exprl env uel)
   | Yield_break -> (snd env).has_yield := true; N.Yield_break
   | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
@@ -1720,17 +1750,17 @@ and expr_ env = function
       | Some ty -> p, ty
       | None    -> begin
       match x with
-      | "object" ->
+      | x when x = SN.Typehints.object_cast ->
           (* (object) is a valid cast but not a valid type annotation *)
           (* FIXME we are not modeling the correct runtime behavior here -- the
            * runtime result type is an stdClass if the original type is
            * primitive. But we should probably just disallow object casts
            * altogether. *)
           p, N.Hany
-      | "void"  ->
+      | x when x = SN.Typehints.void  ->
           Errors.void_cast p;
           p, N.Hany
-      | "unset"  ->
+      | x when x = SN.Typehints.unset_cast  ->
           Errors.unset_cast p;
           p, N.Hany
       | _       ->
@@ -1757,11 +1787,30 @@ and expr_ env = function
       let e3 = expr env e3 in
       N.Eif (e1, e2opt, e3)
   | InstanceOf (e, (p, Id x)) ->
-      N.InstanceOf (expr env e, (p, N.Id (Env.class_name env x)))
+    let id = match x with
+      | px, n when n = SN.Classes.cParent ->
+        if (fst env).cclass = None then
+          let () = Errors.parent_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | px, n when n = SN.Classes.cSelf ->
+        if (fst env).cclass = None then
+          let () = Errors.self_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | px, n when n = SN.Classes.cStatic ->
+        if (fst env).cclass = None then
+          let () = Errors.static_outside_class p in
+          (px, "*Unknown*")
+        else (px, n)
+      | _ ->
+        no_typedef env x;
+        (Env.class_name env x) in
+    N.InstanceOf (expr env e, (p, N.Id id))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
-  | New (x, el) ->
-      N.New (make_class_id env x, exprl env el)
+  | New (x, el, uel) ->
+      N.New (make_class_id env x, exprl env el, exprl env uel)
   | Efun (f, idl) ->
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
       let idl' = List.map (Env.lvar env) idl in
@@ -1786,7 +1835,7 @@ and expr_ env = function
       let env = (fst env, lenv) in
       let f = expr_lambda env f in
       N.Efun (f, !to_capture)
-  | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, List.map (expr env) el)
+  | Xml (x, al, el) -> N.Xml (Env.class_name env x, attrl env al, exprl env el)
   | Shape fdl ->
       N.Shape begin List.fold_left begin fun fdm (pname, value) ->
         let pos, name = convert_shape_name env pname in
@@ -1821,9 +1870,20 @@ and expr_lambda env f =
 and make_class_id env (p, x as cid) =
   no_typedef env cid;
   match x with
-  | "parent" -> N.CIparent
-  | "self" ->  N.CIself
-  | "static" -> N.CIstatic
+  | x when x = SN.Classes.cParent ->
+    if (fst env).cclass = None then
+      let () = Errors.parent_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIparent
+  | x when x = SN.Classes.cSelf ->
+    if (fst env).cclass = None then
+      let () = Errors.self_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIself
+  | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
+      let () = Errors.static_outside_class p in
+      N.CI (p, "*Unknown*")
+    else N.CIstatic
   | x when x = "$this" -> N.CIvar (p, N.This)
   | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
   | _ -> N.CI (Env.class_name env cid)
@@ -1933,7 +1993,7 @@ let add_files_to_rename nenv failed defl defs_in_env =
     | None -> failed
     | Some (previous_definition_position, _) ->
       let filename = Pos.filename previous_definition_position in
-      SSet.add filename failed
+      Relative_path.Set.add filename failed
   end failed defl
 
 let ndecl_file fn
@@ -1941,7 +2001,7 @@ let ndecl_file fn
      classes; types; consts; consider_names_just_for_autoload; comments}
     (errorl, failed, nenv) =
   let errors, nenv = Errors.do_ begin fun () ->
-    dn ("Naming decl: "^fn);
+    dn ("Naming decl: "^Relative_path.to_absolute fn);
     if consider_names_just_for_autoload
     then nenv
     else make_env nenv ~funs ~classes ~typedefs:types ~consts
@@ -1981,4 +2041,4 @@ let ndecl_file fn
   let failed = add_files_to_rename nenv failed classes (fst nenv.iclasses) in
   let failed = add_files_to_rename nenv failed types nenv.itypedefs in
   let failed = add_files_to_rename nenv failed consts nenv.iconsts in
-  List.rev_append l errorl, SSet.add fn failed, nenv
+  List.rev_append l errorl, Relative_path.Set.add fn failed, nenv

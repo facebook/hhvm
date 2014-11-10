@@ -78,6 +78,7 @@ type token =
   | Tplus
   | Tminus
   | Tstar
+  | Tstarstar
   | Tslash
   | Tbslash
   | Txor
@@ -191,6 +192,7 @@ let token_to_string = function
   | Tplus         -> "+"
   | Tminus        -> "-"
   | Tstar         -> "*"
+  | Tstarstar     -> "**"
   | Tslash        -> "/"
   | Tbslash       -> "\\"
   | Txor          -> "^"
@@ -355,6 +357,7 @@ rule token = parse
   | '+'                { Tplus        }
   | '-'                { Tminus       }
   | '*'                { Tstar        }
+  | "**"               { Tstarstar    }
   | '/'                { Tslash       }
   | '^'                { Txor         }
   | '%'                { Tpercent     }
@@ -648,6 +651,7 @@ and format_token = parse
   | '+'                { Tplus         }
   | '-'                { Tminus        }
   | '*'                { Tstar         }
+  | "**"               { Tstarstar     }
   | '/'                { Tslash        }
   | '\\'               { Tbslash       }
   | '^'                { Txor          }

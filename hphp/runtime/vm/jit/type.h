@@ -63,18 +63,114 @@ namespace constToBits_detail {
   promoteIfNeeded(T t) { return t; }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * The Ptr enum is a sub-lattice for the PtrToFoo types, giving types like
+ * PtrToFrameInt, PtrToGblBool, etc.
+ *
+ * The values must be less than 32, for packing into Type below (we are using 5
+ * bits for it right now).  We have a pointer "kind" for each of the major
+ * segregated locations in which php values can live, and for most of them a
+ * union of that location with "inside of a Ref".  These classify PtrTo* types
+ * into some categories that cannot possibly alias, without any smarter
+ * analysis needed to prove it.  There is also a union for the various
+ * locations things can point after a fully generic member operation (see Mem
+ * below).
+ *
+ * The reason we have the category "Ref|Foo" for each of these Foos is that it
+ * is very common to need to do a generic unbox on some value if you have no
+ * type information.  For example:
+ *
+ *     t1 = LdPropAddr ...
+ *     t2 = UnboxPtr t1
+ *
+ * At this point, t2 is a pointer into either an object property or a inner
+ * RefData, which will be a PtrToRPropCell, which means it still can't alias,
+ * for example, a PtrToStkGen or a PtrToGblGen.  (Although it could generally
+ * alias a PtrToRGblGen because both could be inside the same RefData.)
+ */
+enum class Ptr : uint8_t {
+  Unk     = 0x00,
+
+  Frame   = 0x01,
+  Stk     = 0x02,
+  Gbl     = 0x03,
+  Prop    = 0x04,
+  Arr     = 0x05,
+  SProp   = 0x06,
+  MIS     = 0x07,
+  /*
+   * Mem is a number of possible locations that result from the more generic
+   * types of member operations.
+   *
+   * This is a pointer to something living either an object property, an array
+   * element, a collection instance, the MinstrState, a object's dynamic
+   * property array, the init_null_variant or null_variant, or the
+   * lvalBlackHole.
+   *
+   * Fortunately they still can't alias the eval stack or frame locals, or
+   * globals or sprops.  And unless it has the R bit it can't point to an
+   * inner-RefData either.
+   */
+  Memb    = 0x08,
+  /*
+   * Pointer to class property initializer data.  These can never be refs, so
+   * we don't have a RClsInit type.
+   */
+  ClsInit = 0x09,
+
+  RFrame  = 0x11,
+  RStk    = 0x12,
+  RGbl    = 0x13,
+  RProp   = 0x14,
+  RArr    = 0x15,
+  RSProp  = 0x16,
+  RMIS    = 0x17,
+  RMemb   = 0x18,
+
+  Ref     = 0x10,
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define IRT_BOXES(name, bits)                                           \
-  IRT(name,             (bits))                                         \
-  IRT(Boxed##name,      (bits) << kBoxShift)                            \
-  IRT(PtrTo##name,      (bits) << kPtrShift)                            \
-  IRT(PtrToBoxed##name, (bits) << kPtrBoxShift)
+#define IRT_BOXES_AND_PTRS(name, bits)                        \
+  IRT(name,              (bits))                              \
+  IRT(Boxed##name,       (bits) << kBoxShift)                 \
+  IRT(PtrTo##name,       (bits) << kPtrShift)                 \
+  IRT(PtrToBoxed##name,  (bits) << kPtrBoxShift)              \
+                                                              \
+  IRTP(PtrToFrame##name,      Frame, (bits) << kPtrShift)     \
+  IRTP(PtrToFrameBoxed##name, Frame, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToStk##name,          Stk, (bits) << kPtrShift)     \
+  IRTP(PtrToStkBoxed##name,     Stk, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToGbl##name,          Gbl, (bits) << kPtrShift)     \
+  IRTP(PtrToGblBoxed##name,     Gbl, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToProp##name,        Prop, (bits) << kPtrShift)     \
+  IRTP(PtrToPropBoxed##name,   Prop, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToArr##name,          Arr, (bits) << kPtrShift)     \
+  IRTP(PtrToArrBoxed##name,     Arr, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToSProp##name,      SProp, (bits) << kPtrShift)     \
+  IRTP(PtrToSPropBoxed##name, SProp, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToMIS##name,          MIS, (bits) << kPtrShift)     \
+  IRTP(PtrToMISBoxed##name,     MIS, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToMem##name,         Memb, (bits) << kPtrShift)     \
+  IRTP(PtrToMemBoxed##name,    Memb, (bits) << kPtrBoxShift)  \
+  IRTP(PtrToClsInit##name,  ClsInit, (bits) << kPtrShift)     \
+                                                              \
+  IRTP(PtrToRFrame##name,    RFrame, (bits) << kPtrShift)     \
+  IRTP(PtrToRStk##name,        RStk, (bits) << kPtrShift)     \
+  IRTP(PtrToRGbl##name,        RGbl, (bits) << kPtrShift)     \
+  IRTP(PtrToRProp##name,      RProp, (bits) << kPtrShift)     \
+  IRTP(PtrToRArr##name,        RArr, (bits) << kPtrShift)     \
+  IRTP(PtrToRSProp##name,    RSProp, (bits) << kPtrShift)     \
+  IRTP(PtrToRMem##name,       RMemb, (bits) << kPtrShift)     \
+                                                              \
+  IRTP(PtrToRef##name,          Ref, (bits) << kPtrShift)
 
-#define IRT_BOXES_WITH_ANY(name, bits)                                  \
-  IRT_BOXES(name, bits)                                                 \
-  IRT(Any##name, k##name | kBoxed##name | kPtrTo##name |                \
+#define IRT_WITH_ANY(name, bits)                          \
+  IRT_BOXES_AND_PTRS(name, bits)                          \
+  IRT(Any##name, k##name | kBoxed##name | kPtrTo##name |  \
                  kPtrToBoxed##name)
 
 #define IRT_PHP(c)                                                      \
@@ -121,6 +217,7 @@ namespace constToBits_detail {
   IRT(RDSHandle,   1ULL << 54) /* RDS::Handle */                        \
   IRT(Nullptr,     1ULL << 55)                                          \
   IRT(ABC,         1ULL << 56) /* AsioBlockableChain */
+  /* bits 58-62 are pointer kind */
 
 #define IRT_UNIONS                                                      \
   IRT(Ctx,         kObj|kCctx)                                          \
@@ -130,32 +227,68 @@ namespace constToBits_detail {
  * because boxing them (e.g., BoxedGen, PtrToBoxedGen) would yield nonsense
  * types.
  */
-#define IRT_SPECIAL                                                 \
-  IRT(Bottom,       0)                                              \
-  IRT(Top,          0xffffffffffffffffULL)                          \
-  IRT(Counted,      kCountedStr|kCountedArr|kObj|kRes|kBoxedCell)   \
-  IRT(PtrToCounted, kCounted << kPtrShift)                          \
-  IRT(Gen,          kCell|kBoxedCell)                               \
-  IRT(StackElem,    kGen|kCls)                                      \
-  IRT(Init,         kGen & ~kUninit)                                \
-  IRT(PtrToGen,     kGen << kPtrShift)                              \
-  IRT(PtrToInit,    kInit << kPtrShift)
+#define IRT_SPECIAL                                               \
+  IRT(Bottom,       0)                                            \
+  IRT(Top,          0xffffffffffffffffULL)                        \
+  IRT(Counted,      kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \
+  IRT(PtrToCounted, kCounted << kPtrShift)                        \
+  IRT(Gen,          kCell|kBoxedCell)                             \
+  IRT(StackElem,    kGen|kCls)                                    \
+  IRT(Init,         kGen & ~kUninit)                              \
+  IRT(PtrToGen,     kGen << kPtrShift)                            \
+  IRT(PtrToInit,    kInit << kPtrShift)                           \
+                                                                  \
+  IRTP(PtrToFrameGen,    Frame, kGen << kPtrShift)                \
+  IRTP(PtrToFrameInit,   Frame, kInit << kPtrShift)               \
+  IRTP(PtrToStkGen,        Stk, kGen << kPtrShift)                \
+  IRTP(PtrToStkInit,       Stk, kInit << kPtrShift)               \
+  IRTP(PtrToGblGen,        Gbl, kGen << kPtrShift)                \
+  IRTP(PtrToGblInit,       Gbl, kInit << kPtrShift)               \
+  IRTP(PtrToPropGen,      Prop, kGen << kPtrShift)                \
+  IRTP(PtrToPropInit,     Prop, kInit << kPtrShift)               \
+  IRTP(PtrToArrGen,        Arr, kGen << kPtrShift)                \
+  IRTP(PtrToArrInit,       Arr, kInit << kPtrShift)               \
+  IRTP(PtrToSPropGen,    SProp, kGen << kPtrShift)                \
+  IRTP(PtrToSPropInit,   SProp, kInit << kPtrShift)               \
+  IRTP(PtrToMISGen,        MIS, kGen << kPtrShift)                \
+  IRTP(PtrToMISInit,       MIS, kInit << kPtrShift)               \
+  IRTP(PtrToMemGen,       Memb, kGen << kPtrShift)                \
+  IRTP(PtrToMemInit,      Memb, kInit << kPtrShift)               \
+                                                                  \
+  IRTP(PtrToRFrameGen,  RFrame, kGen << kPtrShift)                \
+  IRTP(PtrToRFrameInit, RFrame, kInit << kPtrShift)               \
+  IRTP(PtrToRStkGen,      RStk, kGen << kPtrShift)                \
+  IRTP(PtrToRStkInit,     RStk, kInit << kPtrShift)               \
+  IRTP(PtrToRGblGen,      RGbl, kGen << kPtrShift)                \
+  IRTP(PtrToRGblInit,     RGbl, kInit << kPtrShift)               \
+  IRTP(PtrToRPropGen,    RProp, kGen << kPtrShift)                \
+  IRTP(PtrToRPropInit,   RProp, kInit << kPtrShift)               \
+  IRTP(PtrToRArrGen,      RArr, kGen << kPtrShift)                \
+  IRTP(PtrToRArrInit,     RArr, kInit << kPtrShift)               \
+  IRTP(PtrToRSPropGen,  RSProp, kGen << kPtrShift)                \
+  IRTP(PtrToRSPropInit, RSProp, kInit << kPtrShift)               \
+  IRTP(PtrToRMISGen,      RMIS, kGen << kPtrShift)                \
+  IRTP(PtrToRMISInit,     RMIS, kInit << kPtrShift)               \
+  IRTP(PtrToRMemGen,     RMemb, kGen << kPtrShift)                \
+  IRTP(PtrToRMemInit,    RMemb, kInit << kPtrShift)               \
+                                                                  \
+  IRTP(PtrToRefGen,        Ref, kGen << kPtrShift)                \
+  IRTP(PtrToRefInit,       Ref, kInit << kPtrShift)
 
 /*
  * All types with just a single bit set.
  */
-#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES) IRT_RUNTIME
+#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES_AND_PTRS) IRT_RUNTIME
 
 /*
  * All types.
  */
-#define IR_TYPES                      \
-  IRT_PHP(IRT_BOXES_WITH_ANY)         \
-  IRT_PHP_UNIONS(IRT_BOXES_WITH_ANY)  \
-  IRT_RUNTIME                         \
-  IRT_UNIONS                          \
+#define IR_TYPES                                \
+  IRT_PHP(IRT_WITH_ANY)                         \
+  IRT_PHP_UNIONS(IRT_WITH_ANY)                  \
+  IRT_RUNTIME                                   \
+  IRT_UNIONS                                    \
   IRT_SPECIAL
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -188,13 +321,14 @@ struct ConstCctx {
  * A, Obj<A> | Obj<B> == Obj<B>, which can be represented as a Type.
  */
 struct Type {
-
   /*
    * Predefined constants for all primitive types and many common unions.
    */
 #define IRT(name, ...) static const Type name;
+#define IRTP(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
+#undef IRTP
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -203,14 +337,16 @@ struct Type {
 private:
   using bits_t = uint64_t;
 
-  static constexpr size_t kBoxShift = 11;
-  static constexpr size_t kPtrShift = kBoxShift * 2;
-  static constexpr size_t kPtrBoxShift = kBoxShift + kPtrShift;
+  static constexpr size_t kBoxShift     = 11;
+  static constexpr size_t kPtrShift     = kBoxShift + kBoxShift;
+  static constexpr size_t kPtrBoxShift  = kBoxShift + kPtrShift;
 
   enum TypedBits {
-#define IRT(name, bits) k##name = (bits),
+#define IRT(name, bits)       k##name = (bits),
+#define IRTP(name, ptr, bits) k##name = (bits),
     IR_TYPES
 #undef IRT
+#undef IRTP
   };
 
   /*
@@ -246,12 +382,19 @@ private:
 
 public:
   /*
-   * Constructors.
+   * Default bottom constructor.
    */
   Type();
-  explicit Type(DataType outerType, DataType innerType = KindOfInvalid);
-  explicit Type(const DynLocation* dl);
 
+  /*
+   * Regular constructors.
+   */
+  explicit Type(DataType outer, DataType inner = KindOfUninit);
+  explicit Type(DataType outer, KindOfAny);
+
+  /*
+   * Assignment.
+   */
   Type& operator=(Type b);
 
   /*
@@ -327,7 +470,12 @@ public:
   // Combinators.
 
   /*
-   * Standard set operations: union, intersection, and difference.
+   * Set operations: union, intersection, and difference.
+   *
+   * These operations may all return larger types than the "true" union,
+   * intersection, or difference. (They must be conservative in that direction
+   * for types that are too hard for us to represent, or we could generate
+   * incorrect code by assuming certain possible values are impossible.)
    */
   Type operator|(Type other) const;
   Type& operator|=(Type other) { return *this = *this | other; }
@@ -647,7 +795,7 @@ public:
    *    deref:      isPtr()
    *    derefIfPtr: subtypeOf(Gen | PtrToGen)
    */
-  Type ptr() const;
+  Type ptr(Ptr kind) const;
   Type deref() const;
   Type derefIfPtr() const;
 
@@ -656,6 +804,12 @@ public:
    */
   Type strip() const;
 
+  /*
+   * Return the pointer category of a possibly-pointer type.
+   *
+   * Pre: maybe(Type::PtrToGen)
+   */
+  Ptr ptrKind() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.                                                     [const]
@@ -672,17 +826,21 @@ public:
    */
   Type relaxToGuardable() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
-  // Private methods.
+
+private:
+  struct Union;
+  struct Intersect;
+  struct ArrayOps;
+  struct ClassOps;
 
 private:
   /*
    * Raw constructors.
    */
-  explicit Type(bits_t bits, uintptr_t extra = 0);
-  explicit Type(bits_t bits, ClassInfo classInfo);
-  explicit Type(bits_t bits, ArrayInfo arrayInfo);
+  explicit Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
+  explicit Type(bits_t bits, Ptr kind, ClassInfo classInfo);
+  explicit Type(bits_t bits, Ptr kind, ArrayInfo arrayInfo);
 
   explicit Type(bits_t bits, ArrayData::ArrayKind) = delete;
 
@@ -701,13 +859,9 @@ private:
    * details.
    */
   template<typename Oper>
-  static Type combine(bits_t newBits, Type a, Type b);
+  static Type combine(bits_t newBits, Ptr newPtrKind, Type a, Type b);
 
-  struct Union;
-  struct Intersect;
-  struct ArrayOps;
-  struct ClassOps;
-
+  Ptr rawPtrKind() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // ArrayInfo helpers.                                                [static]
@@ -734,8 +888,14 @@ private:
   // Data members.
 
 private:
-  bits_t m_bits : 63;
-  bool m_hasConstVal : 1;
+  union {
+    struct {
+      bits_t m_bits : 58;
+      bits_t m_ptrKind : 5;
+      bool m_hasConstVal : 1;
+    };
+    uint64_t m_rawInt;
+  };
 
   union {
     uintptr_t m_extra;
@@ -827,8 +987,7 @@ struct TypeConstraint {
   /*
    * Constructors.
    */
-  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric,
-                                DataTypeCategory inner = DataTypeGeneric);
+  /* implicit */ TypeConstraint(DataTypeCategory cat = DataTypeGeneric);
   explicit TypeConstraint(const Class* cls);
 
   /*
@@ -855,11 +1014,6 @@ struct TypeConstraint {
    */
   bool operator==(TypeConstraint tc2) const;
   bool operator!=(TypeConstraint tc2) const;
-
-  /*
-   * Get the inner constraint, preserving m_specialized if appropriate.
-   */
-  TypeConstraint inner() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -902,16 +1056,6 @@ struct TypeConstraint {
    * values by consumers of the type.
    */
   DataTypeCategory category;
-
-  /*
-   * When a value is boxed, `innerCat' is used to determine how we can relax
-   * the inner type
-   *
-   * `innerCat' is only meaningful when `category' is at least
-   * DataTypeCountness, since a category of DataTypeGeneric relaxes types all
-   * the way to Gen which has no meaningful inner type.
-   */
-  DataTypeCategory innerCat;
 
   /*
    * If weak is true, the consumer of the value being constrained doesn't

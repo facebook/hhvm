@@ -70,7 +70,7 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       translated = fname;
     }
 
-    std::unique_ptr<ZipFile> file(NEWOBJ(ZipFile)());
+    std::unique_ptr<ZipFile> file(newres<ZipFile>());
     bool ret = file->open(translated, mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
@@ -84,14 +84,14 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
 
 namespace HPHP {
 
-const long k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
-const long k_ZLIB_ENCODING_GZIP    = 0x1f;
-const long k_ZLIB_ENCODING_DEFLATE = 0x0f;
+const int64_t k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
+const int64_t k_ZLIB_ENCODING_GZIP    = 0x1f;
+const int64_t k_ZLIB_ENCODING_DEFLATE = 0x0f;
 
-const long k_ZLIB_ENCODING_ANY     = 0x2f;
+const int64_t k_ZLIB_ENCODING_ANY     = 0x2f;
 
-const long k_FORCE_GZIP            = k_ZLIB_ENCODING_GZIP;
-const long k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
+const int64_t k_FORCE_GZIP            = k_ZLIB_ENCODING_GZIP;
+const int64_t k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
@@ -309,7 +309,7 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path /* = 0 */) {
-  File *file = NEWOBJ(ZipFile)();
+  File *file = newres<ZipFile>();
   Resource handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
@@ -319,177 +319,41 @@ Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
 }
 
 bool HHVM_FUNCTION(gzclose, const Resource& zp) {
-  return f_fclose(zp);
+  return HHVM_FN(fclose)(zp);
 }
 Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length /* = 0 */) {
-  return f_fread(zp, length);
+  return HHVM_FN(fread)(zp, length);
 }
 Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
                               int64_t whence /* = k_SEEK_SET */) {
-  return f_fseek(zp, offset, whence);
+  return HHVM_FN(fseek)(zp, offset, whence);
 }
 Variant HHVM_FUNCTION(gztell, const Resource& zp) {
-  return f_ftell(zp);
+  return HHVM_FN(ftell)(zp);
 }
 bool HHVM_FUNCTION(gzeof, const Resource& zp) {
-  return f_feof(zp);
+  return HHVM_FN(feof)(zp);
 }
 bool HHVM_FUNCTION(gzrewind, const Resource& zp) {
-  return f_rewind(zp);
+  return HHVM_FN(rewind)(zp);
 }
 Variant HHVM_FUNCTION(gzgetc, const Resource& zp) {
-  return f_fgetc(zp);
+  return HHVM_FN(fgetc)(zp);
 }
 Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length /* = 1024 */) {
-  return f_fgets(zp, length);
+  return HHVM_FN(fgets)(zp, length);
 }
 Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length /* = 0 */,
                             const String& allowable_tags /* = null_string */) {
-  return f_fgetss(zp, length, allowable_tags);
+  return HHVM_FN(fgetss)(zp, length, allowable_tags);
 }
 Variant HHVM_FUNCTION(gzpassthru, const Resource& zp) {
-  return f_fpassthru(zp);
+  return HHVM_FN(fpassthru)(zp);
 }
 Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
                                int64_t length /* = 0 */) {
-  return f_fwrite(zp, str, length);
+  return HHVM_FN(fwrite)(zp, str, length);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// QuickLZ functions
-
-#ifdef HAVE_QUICKLZ
-
-#define QLZ_MEMORY_SAFE
-
-namespace QuickLZ1 {
-#ifdef QLZ_COMPRESSION_LEVEL
-#undef QLZ_COMPRESSION_LEVEL
-#endif
-#ifdef QLZ_STREAMING_BUFFER
-#undef QLZ_STREAMING_BUFFER
-#endif
-#define QLZ_COMPRESSION_LEVEL 1
-#define QLZ_STREAMING_BUFFER 0
-#include "hphp/runtime/ext/zlib/quicklz.inc"
-}
-
-namespace QuickLZ2 {
-#ifdef QLZ_COMPRESSION_LEVEL
-#undef QLZ_COMPRESSION_LEVEL
-#endif
-#ifdef QLZ_STREAMING_BUFFER
-#undef QLZ_STREAMING_BUFFER
-#endif
-#define QLZ_COMPRESSION_LEVEL 2
-#define QLZ_STREAMING_BUFFER 100000
-#include "hphp/runtime/ext/zlib/quicklz.inc"
-}
-
-namespace QuickLZ3 {
-#ifdef QLZ_COMPRESSION_LEVEL
-#undef QLZ_COMPRESSION_LEVEL
-#endif
-#ifdef QLZ_STREAMING_BUFFER
-#undef QLZ_STREAMING_BUFFER
-#endif
-#define QLZ_COMPRESSION_LEVEL 3
-#define QLZ_STREAMING_BUFFER 1000000
-#include "hphp/runtime/ext/zlib/quicklz.inc"
-}
-
-Variant HHVM_FUNCTION(qlzcompress, const String& data, int level /* = 1 */) {
-  if (level < 1 || level > 3) {
-    throw_invalid_argument("level: %d", level);
-    return false;
-  }
-
-  String str(data.size() + 400, ReserveString);
-  char* compressed = str.bufferSlice().ptr;
-  size_t size = 0;
-
-  switch (level) {
-    case 1: {
-      QuickLZ1::qlz_state_compress state;
-      memset(&state, 0, sizeof(state));
-      size = QuickLZ1::qlz_compress(data.data(), compressed, data.size(),
-                                    &state);
-      break;
-    }
-    case 2: {
-      QuickLZ2::qlz_state_compress state;
-      memset(&state, 0, sizeof(state));
-      size = QuickLZ2::qlz_compress(data.data(), compressed, data.size(),
-                                    &state);
-      break;
-    }
-    case 3:
-      QuickLZ3::qlz_state_compress *state = new QuickLZ3::qlz_state_compress();
-      memset(state, 0, sizeof(*state));
-      size = QuickLZ3::qlz_compress(data.data(), compressed, data.size(),
-                                    state);
-      delete state;
-      break;
-  }
-
-  assert(size <= (size_t)data.size() + 400);
-  str.shrink(size);
-  return str;
-}
-
-Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level /* = 1 */) {
-  if (level < 1 || level > 3) {
-    throw_invalid_argument("level: %d", level);
-    return false;
-  }
-
-  if (data.size() < 9) {
-    raise_notice("passing invalid data to qlzuncompress()");
-    return false;
-  }
-
-  size_t size = QuickLZ1::qlz_size_decompressed(data.data());
-  if ((int64_t)size < 0 ||
-      (RuntimeOption::SerializationSizeLimit > 0 &&
-       (int64_t)size > RuntimeOption::SerializationSizeLimit)) {
-    raise_notice("invalid size in compressed header: %zd", size);
-    return false;
-  }
-
-  String s = String(size, ReserveString);
-  char *decompressed = s.bufferSlice().ptr;
-  size_t dsize = 0;
-
-  switch (level) {
-    case 1: {
-      QuickLZ1::qlz_state_decompress state;
-      memset(&state, 0, sizeof(state));
-      dsize = QuickLZ1::qlz_decompress(data.data(), decompressed, &state);
-      break;
-    }
-    case 2: {
-      QuickLZ2::qlz_state_decompress state;
-      memset(&state, 0, sizeof(state));
-      dsize = QuickLZ2::qlz_decompress(data.data(), decompressed, &state);
-      break;
-    }
-    case 3: {
-      QuickLZ3::qlz_state_decompress *state =
-        new QuickLZ3::qlz_state_decompress();
-      memset(state, 0, sizeof(*state));
-      dsize = QuickLZ3::qlz_decompress(data.data(), decompressed, state);
-      delete state;
-      break;
-    }
-  }
-
-  if (dsize != size) {
-    return false;
-  }
-  s.setSize(dsize);
-  return s;
-}
-#endif // HAVE_QUICKLZ
 
 ///////////////////////////////////////////////////////////////////////////////
 // Snappy functions
@@ -687,7 +551,7 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
     return false;
   }
 #else
-  int ret = LZ4_uncompress(compressed_ptr, uncompressed, dsize);
+  int ret = LZ4_decompress_fast(compressed_ptr, uncompressed, dsize);
 
   if (ret <= 0 || ret > inSize) {
     return false;

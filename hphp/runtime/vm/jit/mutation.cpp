@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {
@@ -124,7 +123,10 @@ void retypeDst(IRInstruction* inst, int num) {
   if (newType != Type::Bottom) {
     ssa->setType(newType);
   } else {
-    always_assert(inst->op() == CheckType || inst->op() == AssertType);
+    always_assert(inst->op() == CheckType || inst->op() == AssertType ||
+                  inst->op() == AssertNonNull);
+    // This type doesn't matter, as long as it's not Bottom.
+    ssa->setType(Type::cns(0));
   }
 }
 }

@@ -33,7 +33,7 @@ typedef folly::dynamic IniSettingMap;
 enum class HackStrictOption {
   OFF, // PHP5 behavior
   WARN,
-  ERROR
+  ON
 };
 
 struct Config {

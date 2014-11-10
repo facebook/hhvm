@@ -537,7 +537,7 @@ public:
               (&first, &last,
                CURLFORM_COPYNAME, key.data(),
                CURLFORM_NAMELENGTH, (long)key.size(),
-               CURLFORM_FILENAME, s_postname.empty()
+               CURLFORM_FILENAME, postname.empty()
                                   ? name.c_str()
                                   : postname.c_str(),
                CURLFORM_CONTENTTYPE, mime.empty()
@@ -558,7 +558,7 @@ public:
                *   curl_formadd
                * - Revert changes to postval at the end
                */
-              char* mutablePostval = const_cast<char*>(postval);
+              char* mutablePostval = val.bufferSlice().ptr + 1;
               char* type = strstr(mutablePostval, ";type=");
               char* filename = strstr(mutablePostval, ";filename=");
 
@@ -569,10 +569,11 @@ public:
                 *filename = '\0';
               }
 
+              String localName = File::TranslatePath(mutablePostval);
+
               /* The arguments after _NAMELENGTH and _CONTENTSLENGTH
                * must be explicitly cast to long in curl_formadd
                * use since curl needs a long not an int. */
-              ++postval;
               m_error_no = (CURLcode)curl_formadd
                 (&first, &last,
                  CURLFORM_COPYNAME, key.data(),
@@ -583,7 +584,7 @@ public:
                  CURLFORM_CONTENTTYPE, type
                                        ? type + sizeof(";type=") - 1
                                        : "application/octet-stream",
-                 CURLFORM_FILE, postval,
+                 CURLFORM_FILE, localName.c_str(),
                  CURLFORM_END);
 
               if (type) {
@@ -995,15 +996,15 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   if (url.isNull()) {
-    return NEWOBJ(CurlResource)(null_string);
+    return newres<CurlResource>(null_string);
   } else {
-    return NEWOBJ(CurlResource)(url.toString());
+    return newres<CurlResource>(url.toString());
   }
 }
 
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch) {
   CHECK_RESOURCE(curl);
-  return NEWOBJ(CurlResource)(curl);
+  return newres<CurlResource>(curl);
 }
 
 const StaticString
@@ -1370,7 +1371,7 @@ void CurlMultiResource::sweep() {
   }                                                                      \
 
 Resource HHVM_FUNCTION(curl_multi_init) {
-  return NEWOBJ(CurlMultiResource)();
+  return newres<CurlMultiResource>();
 }
 
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
@@ -1462,7 +1463,7 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
   Array ret = Array::Create();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
-      BuiltinFile *file = NEWOBJ(BuiltinFile)(i);
+      BuiltinFile *file = newres<BuiltinFile>(i);
       ret.append(file);
     }
   }

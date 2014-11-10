@@ -118,7 +118,8 @@ private:
 struct ArgGroup {
   typedef jit::vector<ArgDesc> ArgVec;
 
-  explicit ArgGroup(const IRInstruction* inst, const jit::vector<Vloc>& locs)
+  explicit ArgGroup(const IRInstruction* inst,
+                    const StateVector<SSATmp,Vloc>& locs)
     : m_inst(inst), m_locs(locs), m_override(nullptr)
   {}
 
@@ -162,7 +163,8 @@ struct ArgGroup {
   }
 
   ArgGroup& ssa(int i, bool isFP = false) {
-    ArgDesc arg(m_inst->src(i), m_locs[i]);
+    auto s = m_inst->src(i);
+    ArgDesc arg(s, m_locs[s]);
     if (isFP) {
       push_SIMDarg(arg);
     } else {
@@ -194,6 +196,10 @@ struct ArgGroup {
     return memberKeyImpl(i, false);
   }
 
+  const IRInstruction* inst() const {
+    return m_inst;
+  }
+
 private:
   void push_arg(const ArgDesc& arg) {
     // If m_override is set, use it unconditionally. Otherwise, select
@@ -219,7 +225,8 @@ private:
    * For passing the m_type field of a TypedValue.
    */
   ArgGroup& type(int i) {
-    push_arg(ArgDesc(m_inst->src(i), m_locs[i], false));
+    auto s = m_inst->src(i);
+    push_arg(ArgDesc(s, m_locs[s], false));
     return *this;
   }
 
@@ -233,14 +240,15 @@ private:
 
 private:
   const IRInstruction* m_inst;
-  const jit::vector<Vloc>& m_locs;
+  const StateVector<SSATmp,Vloc>& m_locs;
   ArgVec* m_override; // used to force args to go into a specific ArgVec
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
 };
 
-ArgGroup toArgGroup(const NativeCalls::CallInfo&, const jit::vector<Vloc>& locs,
+ArgGroup toArgGroup(const NativeCalls::CallInfo&,
+                    const StateVector<SSATmp,Vloc>& locs,
                     const IRInstruction*);
 
 }}

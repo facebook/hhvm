@@ -33,6 +33,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define PHP_LOCK_SH 1
+#define PHP_LOCK_EX 2
+#define PHP_LOCK_UN 3
+#define PHP_LOCK_NB 4
+
 StaticString s_stream_open("stream_open");
 StaticString s_stream_close("stream_close");
 StaticString s_stream_read("stream_read");
@@ -289,12 +294,12 @@ bool UserFile::truncate(int64_t size) {
 bool UserFile::lock(int operation, bool &wouldBlock) {
   int64_t op = 0;
   if (operation & LOCK_NB) {
-    op |= LOCK_NB;
+    op |= PHP_LOCK_NB;
   }
   switch (operation & ~LOCK_NB) {
-    case LOCK_SH: op |= LOCK_SH; break;
-    case LOCK_EX: op |= LOCK_EX; break;
-    case LOCK_UN: op |= LOCK_UN; break;
+    case LOCK_SH: op |= PHP_LOCK_SH; break;
+    case LOCK_EX: op |= PHP_LOCK_EX; break;
+    case LOCK_UN: op |= PHP_LOCK_UN; break;
   }
 
   // bool stream_lock(int $operation)
@@ -398,9 +403,10 @@ int UserFile::access(const String& path, int mode) {
                (buf.st_mode & S_IWOTH));
     case X_OK: // Test for execute permission.
       return simulateAccessResult(
-               (buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
+               !(buf.st_mode & S_IFDIR) &&  // Directories are not executable
+               ((buf.st_uid == uid && (buf.st_mode & S_IXUSR)) ||
                (buf.st_gid == gid && (buf.st_mode & S_IXGRP)) ||
-               (buf.st_mode & S_IXOTH));
+               (buf.st_mode & S_IXOTH)));
     default: // Unknown mode.
       return -1;
   }
@@ -412,7 +418,7 @@ int UserFile::lstat(const String& path, struct stat* buf) {
 }
 
 int UserFile::stat(const String& path, struct stat* buf) {
-  return urlStat(path, buf);
+  return urlStat(path, buf, k_STREAM_URL_STAT_QUIET);
 }
 
 bool UserFile::unlink(const String& filename) {
@@ -430,7 +436,6 @@ bool UserFile::unlink(const String& filename) {
     return true;
   }
 
-  raise_warning("\"%s::unlink\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -450,7 +455,6 @@ bool UserFile::rename(const String& oldname, const String& newname) {
     return true;
   }
 
-  raise_warning("\"%s::rename\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -471,7 +475,6 @@ bool UserFile::mkdir(const String& filename, int mode, int options) {
     return true;
   }
 
-  raise_warning("\"%s::mkdir\" call failed", m_cls->name()->data());
   return false;
 }
 
@@ -491,7 +494,19 @@ bool UserFile::rmdir(const String& filename, int options) {
     return true;
   }
 
-  raise_warning("\"%s::rmdir\" call failed", m_cls->name()->data());
+  return false;
+}
+
+bool UserFile::invokeMetadata(const Array& args, const char* funcName) {
+  bool invoked = false;
+  Variant ret = invoke(m_StreamMetadata, s_stream_metadata, args, invoked);
+  if (!invoked) {
+    raise_warning("%s(): %s::stream_metadata is not implemented!",
+                  funcName, m_cls->name()->data());
+    return false;
+  } else if (ret.toBoolean() == true) {
+    return true;
+  }
   return false;
 }
 
@@ -499,23 +514,64 @@ bool UserFile::touch(const String& path, int64_t mtime, int64_t atime) {
   if (atime == 0) {
     atime = mtime;
   }
-  bool invoked = false;
-  Variant ret = invoke(
-    m_StreamMetadata,
-    s_stream_metadata,
+
+  return invokeMetadata(
     PackedArrayInit(3)
       .append(path)
       .append(1) // STREAM_META_TOUCH
       .append(atime ? make_packed_array(mtime, atime) : Array::Create())
       .toArray(),
-    invoked
-  );
-  if (invoked && (ret.toBoolean() == true)) {
-    return true;
-  }
+    "touch");
+}
 
-  raise_warning("\"%s::touch\" call failed", m_cls->name()->data());
-  return false;
+bool UserFile::chmod(const String& path, int64_t mode) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(6) // STREAM_META_ACCESS
+      .append(mode)
+      .toArray(),
+    "chmod");
+}
+
+bool UserFile::chown(const String& path, int64_t uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(3) // STREAM_META_OWNER
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chown(const String& path, const String& uid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(2) // STREAM_META_OWNER_NAME
+      .append(uid)
+      .toArray(),
+    "chown");
+}
+
+bool UserFile::chgrp(const String& path, int64_t gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(5) // STREAM_META_GROUP
+      .append(gid)
+      .toArray(),
+      "chgrp");
+}
+
+bool UserFile::chgrp(const String& path, const String& gid) {
+  return invokeMetadata(
+    PackedArrayInit(3)
+      .append(path)
+      .append(4) // STREAM_META_GROUP_NAME
+      .append(gid)
+      .toArray(),
+    "chgrp");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

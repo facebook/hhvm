@@ -76,7 +76,8 @@ struct ArrayInit {
   ArrayInit& operator=(const ArrayInit&) = delete;
 
   ~ArrayInit() {
-    if (m_data) MixedArray::Release(m_data);
+    // Use non-specialized release call so ArrayTracer can track its destruction
+    if (m_data) m_data->release();
   }
 
   ArrayInit& set(const Variant& v) = delete;

@@ -64,9 +64,9 @@ protected:
    * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
-    : m_kind(kind)
-    , m_size(-1)
+    : m_size(-1)
     , m_pos(0)
+    , m_kind(kind)
     , m_count(0)
   {}
 
@@ -475,6 +475,13 @@ protected:
   // this on its own.)
   union {
     struct {
+      uint32_t m_size;
+      int32_t m_pos;
+    };
+    uint64_t m_sizeAndPos; // careful, m_pos is signed
+  };
+  union {
+    struct {
       union {
         struct {
           UNUSED uint16_t m_unused1;
@@ -487,16 +494,9 @@ protected:
         // encoding see the definition of packedCapToCode().
         uint32_t m_packedCapCode;
       };
-      uint32_t m_size;
-    };
-    uint64_t m_kindAndSize;
-  };
-  union {
-    struct {
-      int32_t m_pos;
       mutable RefCount m_count;
     };
-    uint64_t m_posAndCount;   // be careful, m_pos is signed
+    uint64_t m_kindAndCount;
   };
 };
 

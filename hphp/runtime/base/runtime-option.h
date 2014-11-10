@@ -109,7 +109,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string ServerPrimaryIP;
+  static std::string ServerPrimaryIPv4;
+  static std::string ServerPrimaryIPv6;
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;
@@ -337,6 +338,7 @@ public:
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
+  static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;
@@ -348,6 +350,8 @@ public:
   static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
+  static HackStrictOption IconvIgnoreCorrect;
+  static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
 
   static int GetScannerType();
@@ -398,6 +402,7 @@ public:
          E_WARNING if soft type hint fails; note that in repo mode the
          error handler is not allowed to resume on recoverable errors */ \
   F(int32_t, CheckReturnTypeHints,     2)                               \
+  F(bool, SoftClosureReturnTypeHints,  true)                            \
   /* HackArrayWarnFrequency:
      0 - no warnings
      [1-UINT32_MAX] - raise warning every X times
@@ -422,6 +427,7 @@ public:
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
+  F(uint32_t, JitMaxRegionInstrs,      1000)                            \
   F(string, JitProfilePath,            std::string(""))                 \
   F(bool, JitTypePrediction,           true)                            \
   F(int32_t, JitStressTypePredPercent, 0)                               \
@@ -463,6 +469,7 @@ public:
   F(bool, HHIRDirectExit,              true)                            \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
+  F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStressCodegenBlocks,     false)                           \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
@@ -474,7 +481,7 @@ public:
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
-  F(bool,     JitPGOHotOnly,           ServerExecutionMode())           \
+  F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
@@ -496,7 +503,6 @@ public:
   F(uint32_t, TCNumHugeColdMB,         4)                               \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
-  F(bool, CheckRepoAuthDeserialize,    true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \
                         kDefaultInitialStaticStringTableSize)           \

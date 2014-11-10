@@ -13,21 +13,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/type-constraint.h"
 
-#include "folly/MapUtil.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext/ext_function.h"
+
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/autoload-handler.h"
+
+#include "hphp/runtime/ext/std/ext_std_function.h"
 
 namespace HPHP {
 
@@ -66,13 +69,13 @@ void TypeConstraint::init() {
   if (isTypeVar()) {
     // We kept the type variable type constraint to correctly check child
     // classes implementing abstract methods or interfaces.
-    m_type.dt = KindOfInvalid;
+    m_type.dt = folly::none;
     m_type.metatype = MetaType::Precise;
     return;
   }
 
   if (m_typeName == nullptr) {
-    m_type.dt = KindOfInvalid;
+    m_type.dt = folly::none;
     m_type.metatype = MetaType::Precise;
     return;
   }
@@ -84,6 +87,13 @@ void TypeConstraint::init() {
   if (mptr) dtype = *mptr;
   if (!mptr ||
       !(isHHType() || dtype.dt == KindOfArray ||
+        dtype.dt == KindOfBoolean ||
+        dtype.dt == KindOfString ||
+        dtype.dt == KindOfInt64 ||
+        dtype.dt == KindOfDouble ||
+        dtype.dt == KindOfResource ||
+        dtype.metatype == MetaType::ArrayKey ||
+        dtype.metatype == MetaType::Number ||
         dtype.metatype == MetaType::Parent ||
         dtype.metatype == MetaType::Self ||
         dtype.metatype == MetaType::Callable)) {
@@ -209,7 +219,7 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
-std::pair<const TypeAliasReq *, Class *> getTypeAliasOrClassWithAutoload(
+std::pair<const TypeAliasReq*, Class*> getTypeAliasOrClassWithAutoload(
     const NamedEntity* ne,
     const StringData* name) {
 
@@ -236,19 +246,20 @@ std::pair<const TypeAliasReq *, Class *> getTypeAliasOrClassWithAutoload(
 
 }
 
-DataType TypeConstraint::underlyingDataTypeResolved() const {
+MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   assert(!isSelf() && !isParent());
-  if (!hasConstraint()) return KindOfAny;
+  if (!hasConstraint()) return folly::none;
 
-  DataType t = underlyingDataType();
-  // If we aren't a class or type alias, nothing special to do
+  auto t = underlyingDataType();
+
+  // If we aren't a class or type alias, nothing special to do.
   if (!isObjectOrTypeAlias()) return t;
 
   auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
   auto td = p.first;
   auto c = p.second;
 
-  // See if this is a type alias
+  // See if this is a type alias.
   if (td) {
     if (td->kind != KindOfObject) {
       t = td->kind;
@@ -257,7 +268,7 @@ DataType TypeConstraint::underlyingDataTypeResolved() const {
     }
   }
 
-  // If the underlying type is a class, see if it is an enum and get that
+  // If the underlying type is a class, see if it is an enum and get that.
   if (c && isEnum(c)) {
     t = c->enumBaseTy();
   }
@@ -276,7 +287,7 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
   // Common case is that we actually find the alias:
   if (td) {
     if (td->nullable && tv->m_type == KindOfNull) return true;
-    return td->kind == KindOfAny || equivDataTypes(td->kind, tv->m_type);
+    return td->any || equivDataTypes(td->kind, tv->m_type);
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -287,10 +298,10 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
     auto dt = c->enumBaseTy();
     // For an enum, if the underlying type is mixed, we still require
     // it is either an int or a string!
-    if (dt == KindOfAny) {
-      return tv->m_type == KindOfInt64 || IS_STRING_TYPE(tv->m_type);
+    if (dt) {
+      return equivDataTypes(*dt, tv->m_type);
     } else {
-      return equivDataTypes(dt, tv->m_type);
+      return IS_INT_TYPE(tv->m_type) || IS_STRING_TYPE(tv->m_type);
     }
   }
   return false;
@@ -303,12 +314,11 @@ bool TypeConstraint::checkTypeAliasObj(const TypedValue* tv) const {
   auto const td = getTypeAliasWithAutoload(m_namedEntity, m_typeName);
   if (!td) return false;
   if (td->nullable && tv->m_type == KindOfNull) return true;
-  if (td->kind != KindOfObject) return td->kind == KindOfAny;
+  if (td->kind != KindOfObject) return td->any;
   return td->klass && tv->m_data.pobj->instanceof(td->klass);
 }
 
-bool
-TypeConstraint::check(TypedValue* tv, const Func* func) const {
+bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
   assert(hasConstraint());
 
   // This is part of the interpreter runtime; perf matters.
@@ -342,7 +352,7 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
         parentToClass(func, &c);
       } else {
         assert(isCallable());
-        return f_is_callable(tvAsCVarRef(tv));
+        return HHVM_FN(is_callable)(tvAsCVarRef(tv));
       }
     } else {
       // We can't save the Class* since it moves around from request
@@ -360,49 +370,63 @@ TypeConstraint::check(TypedValue* tv, const Func* func) const {
   }
 
   if (isObjectOrTypeAlias()) {
-    switch (tv->m_type) {
-      case KindOfArray:
-        if (interface_supports_array(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfString:
-      case KindOfStaticString:
-        if (interface_supports_string(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfInt64:
-        if (interface_supports_int(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfDouble:
-        if (interface_supports_double(m_typeName)) {
-          return true;
-        }
-        break;
-      default:
-        break;
-    }
+    do {
+      switch (tv->m_type) {
+        case KindOfInt64:
+          if (interface_supports_int(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfDouble:
+          if (interface_supports_double(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfStaticString:
+        case KindOfString:
+          if (interface_supports_string(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfArray:
+          if (interface_supports_array(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfUninit:
+        case KindOfNull:
+        case KindOfBoolean:
+        case KindOfObject:
+        case KindOfResource:
+          continue;
+
+        case KindOfRef:
+        case KindOfClass:
+          break;
+      }
+      not_reached();
+    } while (0);
 
     if (isCallable()) {
-      return f_is_callable(tvAsCVarRef(tv));
+      return HHVM_FN(is_callable)(tvAsCVarRef(tv));
     }
     return isPrecise() && checkTypeAliasNonObj(tv);
   }
 
-  return equivDataTypes(m_type.dt, tv->m_type);
+  return m_type.dt && equivDataTypes(*m_type.dt, tv->m_type);
 }
 
-bool
-TypeConstraint::checkPrimitive(DataType dt) const {
+bool TypeConstraint::checkPrimitive(DataType dt) const {
   assert(m_type.dt != KindOfObject);
   assert(dt != KindOfRef);
   if (isNullable() && dt == KindOfNull) return true;
   if (isNumber()) { return IS_INT_TYPE(dt) || IS_DOUBLE_TYPE(dt); }
   if (isArrayKey()) { return IS_INT_TYPE(dt) || IS_STRING_TYPE(dt); }
-  return equivDataTypes(m_type.dt, dt);
+  return m_type.dt && equivDataTypes(*m_type.dt, dt);
 }
 
 static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
@@ -418,8 +442,10 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->o_getClassName().c_str();
     case KindOfResource:      return tv->m_data.pres->o_getClassName().c_str();
-    default:
-      assert(false);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }
@@ -431,24 +457,32 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
   auto const givenType = describe_actual_type(tv, isHHType());
   // Handle return type constraint failures
   if (id == ReturnId) {
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
-      raise_typehint_error(
+    std::string msg;
+    if (func->isClosureBody()) {
+      msg =
         folly::format(
-          "Value returned from {}() must be of type {}, {} given",
-          func->fullName()->data(),
+          "Value returned from {}closure must be of type {}, {} given",
+          func->isAsync() ? "async " : "",
           name,
           givenType
-        ).str()
-      );
+        ).str();
     } else {
-      raise_debugging(
+      msg =
         folly::format(
-          "Value returned from {}() must be of type {}, {} given",
+          "Value returned from {}{} {}() must be of type {}, {} given",
+          func->isAsync() ? "async " : "",
+          func->preClass() ? "method" : "function",
           func->fullName()->data(),
           name,
           givenType
-        ).str()
-      );
+        ).str();
+    }
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft() &&
+        (!func->isClosureBody() ||
+         !RuntimeOption::EvalSoftClosureReturnTypeHints)) {
+      raise_typehint_error(msg);
+    } else {
+      raise_debugging(msg);
     }
     return;
   }

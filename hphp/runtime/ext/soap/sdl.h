@@ -339,6 +339,8 @@ struct sdlCtx {
   xmlNodeMap      portTypes;
   xmlNodeMap      bindings;
   xmlNodeMap      services;
+  
+  ~sdlCtx();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

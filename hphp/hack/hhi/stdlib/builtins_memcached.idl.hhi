@@ -81,12 +81,12 @@ class Memcached {
   public function fetch() { }
   public function fetchAll() { }
   public function flush($delay = 0) { }
-  public function get($key, $cache_cb = null_variant, &$cas_token = null_variant) { }
-  public function getByKey($server_key, $key, $cache_cb = null_variant, &$cas_token = null_variant) { }
-  public function getDelayed($keys, $with_cas = false, $value_cb = null_variant) { }
-  public function getDelayedByKey($server_key, $keys, $with_cas = false, $value_cb = null_variant) { }
-  public function getMulti($keys, &$cas_tokens = null_variant, $flags = 0) { }
-  public function getMultiByKey($server_key, $keys, &$cas_tokens = null_variant, $flags = 0) { }
+  public function get($key, $cache_cb = null, &$cas_token = null) { }
+  public function getByKey($server_key, $key, $cache_cb = null, &$cas_token = null) { }
+  public function getDelayed($keys, $with_cas = false, $value_cb = null) { }
+  public function getDelayedByKey($server_key, $keys, $with_cas = false, $value_cb = null) { }
+  public function getMulti($keys, &$cas_tokens = null, $flags = 0) { }
+  public function getMultiByKey($server_key, $keys, &$cas_tokens = null, $flags = 0) { }
   public function getOption($option) { }
   public function getResultCode() { }
   public function getResultMessage() { }

@@ -37,12 +37,27 @@ Variant f_min(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
+      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
+        raise_warning("min(): This will return the value instead of null, "
+                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
+      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
+        return value;
+      }
+      raise_warning("min(): When only one parameter is given,"
+                    " it must be an array");
+      return init_null();
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return init_null();
+      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
+        raise_warning("min(): This will return null instead of false, "
+                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
+      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
+        return init_null();
+      }
+      raise_warning("min(): Array must contain at least one element");
+      return false;
     }
     Variant ret = iter.secondRefPlus();
     ++iter;
@@ -73,12 +88,27 @@ Variant f_max(int _argc, const Variant& value,
   if (_argc == 1) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      return value;
+      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
+        raise_warning("max(): This will return the value instead of null, "
+                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
+      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
+        return value;
+      }
+      raise_warning("max(): When only one parameter is given,"
+                    " it must be an array");
+      return init_null();
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      return init_null();
+      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
+        raise_warning("max(): This will return null instead of false, "
+                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
+      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
+        return init_null();
+      }
+      raise_warning("max(): Array must contain at least one element");
+      return false;
     }
     Variant ret = iter.secondRefPlus();
     ++iter;
@@ -218,11 +248,11 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
   return string_numeric_to_base(v, tobase);
 }
 
-static DataType convert_for_pow(const Variant& val,
-                                int64_t& ival, double& dval) {
+static MaybeDataType convert_for_pow(const Variant& val,
+                                     int64_t& ival, double& dval) {
   switch (val.getType()) {
-    case KindOfNull:
     case KindOfUninit:
+    case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfResource:
@@ -234,8 +264,8 @@ static DataType convert_for_pow(const Variant& val,
       dval = val.toDouble();
       return KindOfDouble;
 
-    case KindOfString:
-    case KindOfStaticString: {
+    case KindOfStaticString:
+    case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
       if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
         ival = 0;
@@ -245,21 +275,24 @@ static DataType convert_for_pow(const Variant& val,
     }
 
     case KindOfArray:
-      // Not reachable since f_pow() deals with these base cases first
-    default:
-      // Unknown data type
-      raise_error("Unsupported operand types");
-      return KindOfUnknown; // Not Reached
+      // Not reachable since f_pow() deals with these base cases first.
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+
+  // Unknown data type.
+  raise_error("Unsupported operand types");
+  not_reached();
 }
 
 Variant f_pow(const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
   if (base.isArray()) return 0LL;
-  DataType bt = convert_for_pow(base, bint, bdbl);
+  MaybeDataType bt = convert_for_pow(base, bint, bdbl);
   if (exp.isArray()) return 1LL;
-  DataType et = convert_for_pow(exp,  eint, edbl);
+  MaybeDataType et = convert_for_pow(exp,  eint, edbl);
   if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
     if (eint == 0) return 1LL;
     if (bint == 0) return 0LL;

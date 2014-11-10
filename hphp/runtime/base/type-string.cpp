@@ -609,7 +609,6 @@ const StaticString
   s_array("array"),
   s_object("object"),
   s_resource("resource"),
-  s_namedlocal("namedlocal"),
   s_ref("reference");
 
 String getDataTypeString(DataType t) {
@@ -625,13 +624,11 @@ String getDataTypeString(DataType t) {
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
     case KindOfRef:        return s_ref;
-    case KindOfNamedLocal: return s_namedlocal;
 
-    default:
-      assert(false);
+    case KindOfClass:
       break;
   }
-  return empty_string();
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////////////

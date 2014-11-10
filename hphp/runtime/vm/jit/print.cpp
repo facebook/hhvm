@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-color.h"
@@ -28,8 +29,8 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/layout.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace jit {
 
@@ -309,13 +310,23 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
     os << '\n';
 
     if (asmInfo) {
-      TcaRange instRange = asmInfo->instRangesForArea(area)[inst];
-      if (!instRange.empty()) {
-        disasmRange(os, instRange.begin(), instRange.end());
-        os << '\n';
-        assert(instRange.end() >= blockRange.start());
-        assert(instRange.end() <= blockRange.end());
-        blockRange = TcaRange(instRange.end(), blockRange.end());
+      // There can be asm ranges in areas other than the one this blocks claims
+      // to be in so we have to iterate all the areas to be sure to get
+      // everything.
+      for (auto i = 0; i < static_cast<int>(AreaIndex::Max); ++i) {
+        AreaIndex currentArea = static_cast<AreaIndex>(i);
+        TcaRange instRange = asmInfo->instRangesForArea(currentArea)[inst];
+        if (!instRange.empty()) {
+          os << std::string(kIndent + 4, ' ') << areaAsString(currentArea);
+          os << ":\n";
+          disasmRange(os, instRange.begin(), instRange.end());
+          os << '\n';
+          if (currentArea == area) {
+            assert(instRange.end() >= blockRange.start());
+            assert(instRange.end() <= blockRange.end());
+            blockRange = TcaRange(instRange.end(), blockRange.end());
+          }
+        }
       }
     }
   }
@@ -378,8 +389,17 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
 
-  auto const layout = layoutBlocks(unit);
-  auto const& blocks = layout.blocks;
+  auto blocks = rpoSortCfg(unit);
+  // Partition into main, cold and frozen, without changing relative order.
+  auto cold = std::stable_partition(blocks.begin(), blocks.end(),
+    [&] (Block* b) {
+      return b->hint() == Block::Hint::Neither ||
+             b->hint() == Block::Hint::Likely;
+    }
+  );
+  auto frozen = std::stable_partition(cold, blocks.end(),
+    [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
+  );
 
   if (dumpIREnabled(kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
@@ -420,11 +440,11 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   AreaIndex currentArea = AreaIndex::Main;
   curMarker = BCMarker();
   for (auto it = blocks.begin(); it != blocks.end(); ++it) {
-    if (it == layout.acoldIt) {
+    if (it == cold) {
       os << folly::format("\n{:-^60}", "cold blocks");
       currentArea = AreaIndex::Cold;
     }
-    if (it == layout.afrozenIt) {
+    if (it == frozen) {
       os << folly::format("\n{:-^60}", "frozen blocks");
       currentArea = AreaIndex::Frozen;
     }

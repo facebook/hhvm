@@ -14,4 +14,4 @@ type env = {
 }
 
 val main : env -> unit
-val start_server : ?wait:bool -> Path.path -> unit
+val start_server : env -> unit

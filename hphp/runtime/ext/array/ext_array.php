@@ -291,13 +291,13 @@ function array_pop(mixed &$array): mixed;
 /**
  * array_product() returns the product of values in an array.
  *
- * @param mixed $array - The array.
+ * @param Container<T> $input - The input array or Collection.
  *
- * @return mixed - Returns the product as an integer or float.
+ * @return num - Returns the product as an integer or float.
  *
  */
 <<__Native, __IsFoldable>>
-function array_product(mixed $array): mixed;
+function array_product(mixed $input): mixed;
 
 /**
  * array_push() treats array as a stack, and pushes the passed variables onto
@@ -475,13 +475,13 @@ function array_splice(mixed &$input,
 /**
  * array_sum() returns the sum of values in an array.
  *
- * @param mixed $array - The input array.
+ * @param Container<T> $input - The input array or Collection.
  *
- * @return mixed - Returns the sum of values as an integer or float.
+ * @return num - Returns the sum of values as an integer or float.
  *
  */
 <<__Native, __IsFoldable>>
-function array_sum(mixed $array): mixed;
+function array_sum(mixed $input): mixed;
 
 /**
  * Takes an input array and returns a new array without duplicate values.
@@ -1136,15 +1136,13 @@ function array_intersect_ukey(mixed $array1,
  *   strings SORT_LOCALE_STRING - compare items as strings, based on the current
  *   locale. Added in PHP 4.4.0 and 5.0.2, it uses the system locale, which can
  *   be changed using setlocale().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function sort(mixed &$array,
-              int $sort_flags = 0,
-              bool $use_collator = false): bool;
+              int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array in reverse order (highest to lowest).
@@ -1152,15 +1150,13 @@ function sort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function rsort(mixed &$array,
-               int $sort_flags = 0,
-               bool $use_collator = false): bool;
+               int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1171,15 +1167,13 @@ function rsort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function asort(mixed &$array,
-               int $sort_flags = 0,
-               bool $use_collator = false): bool;
+               int $sort_flags = 0): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1190,15 +1184,13 @@ function asort(mixed &$array,
  * @param mixed $array - The input array.
  * @param int $sort_flags - You may modify the behavior of the sort using the
  *   optional parameter sort_flags, for details see sort().
- * @param bool $use_collator
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
 function arsort(mixed &$array,
-                int $sort_flags = 0,
-                bool $use_collator = false): bool;
+                int $sort_flags = 0): bool;
 
 /**
  * Sorts an array by key, maintaining key to data correlations. This is useful
@@ -1342,6 +1334,19 @@ function i18n_loc_get_error_code(): mixed;
  */
 <<__Native, __HipHopSpecific, __IsFoldable>>
 function hphp_array_idx(mixed $search, mixed $key, mixed $def): mixed;
+
+/**
+ * array_multisort() can be used to sort several arrays at once, or a
+ *   multi-dimensional array by one or more dimensions.  Associative (string)
+ *   keys will be maintained, but numeric keys will be re-indexed.
+ *
+ * @param mixed $arr1 - An array being sorted.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ */
+<<__Native("ActRec", "VariadicByRef")>>
+function array_multisort(mixed &$arr1, ...): bool;
 
 namespace __SystemLib {
   /**

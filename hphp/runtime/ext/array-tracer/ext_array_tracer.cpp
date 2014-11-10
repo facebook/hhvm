@@ -27,7 +27,7 @@ namespace HPHP {
 typedef folly::AtomicHashMap<const ArrayData*, ArrayUsage> ArrayUsageMap;
 
 ArrayTracer* getArrayTracer() {
-  assert(RuntimeOption::EvalTraceArrays);
+  always_assert(RuntimeOption::EvalTraceArrays);
   static ArrayTracer arrayTracer{};
   return &arrayTracer;
 }
@@ -178,7 +178,7 @@ void ArrayTracer::updateStaticArrayStats() {
     const auto ad = pair.first;
     const auto usage = pair.second;
     auto kind = ad->kind();
-    assert(kind < ArrayData::kNumKinds);
+    always_assert(kind < ArrayData::kNumKinds);
     staticKindCntrs[kind]++;
     staticClassCntrs[classifyUsage(kind, usage)]++;
   }
@@ -202,19 +202,19 @@ bool usageIsSane(const ArrayUsage u) {
 
 ArrayClass ArrayTracer::classifyUsage(const ArrayData::ArrayKind kind,
                                       const ArrayUsage u) {
-  assert(usageIsSane(u));
+  always_assert(usageIsSane(u));
   if (isIntKey(u) && isStrKey(u)) {
-    assert(kind == ArrayData::kMixedKind);
+    always_assert(kind == ArrayData::kMixedKind);
     return ArrayClass::MixedMap;
   } else if (isIntKey(u)) {
     if (kind == ArrayData::kMixedKind) {
       return ArrayClass::MixedIntMap;
     } else {
-      assert(kind == ArrayData::kPackedKind);
+      always_assert(kind == ArrayData::kPackedKind);
       return ArrayClass::PackedVector;
     }
   } else if (isStrKey(u)) {
-    assert(kind == ArrayData::kMixedKind);
+    always_assert(kind == ArrayData::kMixedKind);
     return ArrayClass::MixedStrMap;
   } else if (kind == ArrayData::kEmptyKind) {
     return ArrayClass::Empty;
@@ -285,6 +285,8 @@ void ArrayTracer::dumpToFile(const std::string& filename) {
       << m_numPackedToMixed.load() << "\n";
   out << s_numUnknownReleases.data() << " ==> "
       << m_numUnknownReleases.load() << "\n";
+  out << "===No Info Size Histogram===\n"
+      << m_noInfoSizes.toString();
 
   out.close();
 }
@@ -363,13 +365,16 @@ void ArrayTracer::readElementsUsage(const ArrayData* ad, ArrayUsage& usage) {
 // in liveArrays()
 void ArrayTracer::handleAccounting(const ArrayData* ad) {
   auto kind = ad->kind();
-  assert(kind < ArrayData::kNumKinds);
+  always_assert(kind < ArrayData::kNumKinds);
   m_kindCntrs[kind]++;
 
   auto itr = liveArrays()->find(ad);
   if (itr != liveArrays()->end()) {
     auto arrayClass = classifyUsage(kind, itr->second);
     m_classCntrs[arrayClass]++;
+    if (arrayClass == ArrayClass::NoInfo) {
+      m_noInfoSizes.addValue(ad->getSize());
+    }
   } else {
     // Keep internal bookkeeping about arrays we don't know about
     m_numUnknownReleases++;
@@ -377,7 +382,7 @@ void ArrayTracer::handleAccounting(const ArrayData* ad) {
 }
 
 void ArrayTracer::handleRelease(const ArrayData* ad) {
-  assert(!ad->isStatic());
+  always_assert(!ad->isStatic());
   {
     std::lock_guard<std::mutex> statsLock(m_statsMutex);
     handleAccounting(ad);

@@ -21,7 +21,8 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
@@ -403,7 +404,7 @@ void Extension::loadSystemlib(const std::string& name) {
   std::string n = name.empty() ?
     std::string(m_name.data(), m_name.size()) : name;
   std::string section("ext.");
-  section += f_md5(n, false).substr(0, 12).data();
+  section += HHVM_FN(md5)(n, false).substr(0, 12).data();
   std::string hhas;
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
@@ -437,16 +438,19 @@ static void countArgs(const char *format, unsigned &min, unsigned &max) {
 
 static const char *argTypeName(DataType dt) {
   switch (dt) {
-    case KindOfNull: return "null";
-    case KindOfBoolean: return "boolean";
-    case KindOfInt64: return "integer";
-    case KindOfDouble: return "double";
-    case KindOfString:
-    case KindOfStaticString: return "string";
-    case KindOfArray: return "array";
-    case KindOfObject: return "object";
-    case KindOfResource: return "resource";
-    default: return "unknown";
+    case KindOfNull:          return "null";
+    case KindOfBoolean:       return "boolean";
+    case KindOfInt64:         return "integer";
+    case KindOfDouble:        return "double";
+    case KindOfStaticString:
+    case KindOfString:        return "string";
+    case KindOfArray:         return "array";
+    case KindOfObject:        return "object";
+    case KindOfResource:      return "resource";
+
+    case KindOfUninit:
+    case KindOfRef:
+    case KindOfClass:         return "unknown";
   }
   not_reached();
 }

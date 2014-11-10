@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include <vector>
 #include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
+#include "hphp/runtime/ext/domdocument/ext_domdocument.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -1092,7 +1092,7 @@ static Class* class_from_name(const String& class_name, const char* callee) {
 Variant f_simplexml_import_dom(
   const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
-  c_DOMNode *domnode = node.getTyped<c_DOMNode>();
+  DOMNode* domnode = toDOMNode(node.get());
   xmlNodePtr nodep = domnode->m_node;
 
   if (nodep) {
@@ -1113,7 +1113,7 @@ Variant f_simplexml_import_dom(
     }
     Object obj = create_object(cls->nameStr(), Array(), false);
     c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-    sxe->document = Resource(NEWOBJ(XmlDocWrapper)(nodep->doc, node));
+    sxe->document = Resource(newres<XmlDocWrapper>(nodep->doc, node));
     sxe->node = nodep;
     return obj;
   } else {
@@ -1143,7 +1143,7 @@ Variant f_simplexml_load_string(
 
   Object obj = create_object(cls->nameStr(), Array(), false);
   c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(NEWOBJ(XmlDocWrapper)(doc));
+  sxe->document = Resource(newres<XmlDocWrapper>(doc));
   sxe->node = xmlDocGetRootElement(doc);
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
@@ -1187,7 +1187,7 @@ Variant f_simplexml_load_file(const String& filename,
 
   Object obj = create_object(cls->nameStr(), Array(), false);
   c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(NEWOBJ(XmlDocWrapper)(doc));
+  sxe->document = Resource(newres<XmlDocWrapper>(doc));
   sxe->node = xmlDocGetRootElement(doc);
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
@@ -1247,7 +1247,7 @@ void c_SimpleXMLElement::t___construct(const String& data,
   }
   iter.nsprefix = !ns.empty() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   iter.isprefix = is_prefix;
-  document = Resource(NEWOBJ(XmlDocWrapper)(docp));
+  document = Resource(newres<XmlDocWrapper>(docp));
   node = xmlDocGetRootElement(docp);
 }
 

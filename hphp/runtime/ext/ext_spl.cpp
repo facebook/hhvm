@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
@@ -227,12 +227,14 @@ Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
   return ret;
 }
 
-Object get_traversable_object_iterator(const Variant& obj) {
-  if (!obj.isObject() ||
-      !obj.getObjectData()->instanceof(SystemLib::s_TraversableClass)) {
-    raise_error("Argument must implement interface Traversable");
+#define CHECK_TRAVERSABLE_IMPL(obj, ret) \
+  if (!obj.isObject() || \
+      !obj.getObjectData()->instanceof(SystemLib::s_TraversableClass)) { \
+    raise_recoverable_error("Argument must implement interface Traversable"); \
+    return ret; \
   }
 
+Object get_traversable_object_iterator(const Variant& obj) {
   bool isIteratorAggregate;
   Object itObj = obj.getObjectData()
     ->iterableObject(isIteratorAggregate, true);
@@ -256,6 +258,7 @@ Object get_traversable_object_iterator(const Variant& obj) {
 
 Variant f_iterator_apply(const Variant& obj, const Variant& func,
                          const Array& params /* = null_array */) {
+  CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
@@ -270,6 +273,7 @@ Variant f_iterator_apply(const Variant& obj, const Variant& func,
 }
 
 Variant f_iterator_count(const Variant& obj) {
+  CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
   int64_t count = 0;
@@ -281,8 +285,9 @@ Variant f_iterator_count(const Variant& obj) {
 }
 
 Variant f_iterator_to_array(const Variant& obj, bool use_keys /* = true */) {
-  Object pobj = get_traversable_object_iterator(obj);
   Array ret(Array::Create());
+  CHECK_TRAVERSABLE_IMPL(obj, ret);
+  Object pobj = get_traversable_object_iterator(obj);
 
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
@@ -381,7 +386,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
     *prop = array_dir->path();
   }
 
-  return f_readdir(Resource(dir));
+  return HHVM_FN(readdir)(Resource(dir));
 }
 
 static int64_t HHVM_METHOD(GlobIterator, count) {

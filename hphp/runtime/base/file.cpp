@@ -51,7 +51,7 @@ namespace HPHP {
 
 StaticString File::s_resource_name("stream");
 
-IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
+int __thread s_pcloseRet;
 
 const int File::CHUNK_SIZE = 8192;
 const int File::USE_INCLUDE_PATH = 1;
@@ -560,18 +560,18 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       bool done = false;
 
       char *readptr = m_buffer + m_readpos;
-      const char *eol;
+      const char *eol = nullptr;
       const char *cr;
       const char *lf;
       cr = (const char *)memchr(readptr, '\r', avail);
       lf = (const char *)memchr(readptr, '\n', avail);
-      if (cr && lf != cr + 1 && !(lf && lf < cr)) {
+      if (cr && lf != cr + 1 && !(lf && lf < cr) && cr != &readptr[avail - 1]) {
         /* mac */
         eol = cr;
       } else if ((cr && lf && cr == lf - 1) || (lf)) {
         /* dos or unix endings */
         eol = lf;
-      } else {
+      } else if (cr != &readptr[avail - 1]) {
         eol = cr;
       }
 
@@ -1026,14 +1026,14 @@ String File::applyFilters(const String& buffer,
   Resource in(null_resource);
   Resource out;
   if (buffer.empty()) {
-    out = Resource(NEWOBJ(BucketBrigade)());
+    out = Resource(newres<BucketBrigade>());
   } else {
-    out = Resource(NEWOBJ(BucketBrigade)(buffer));
+    out = Resource(newres<BucketBrigade>(buffer));
   }
 
   for (Resource& resource: filters) {
     in = out;
-    out = Resource(NEWOBJ(BucketBrigade)());
+    out = Resource(newres<BucketBrigade>());
 
     auto filter = resource.getTyped<StreamFilter>();
     assert(filter);

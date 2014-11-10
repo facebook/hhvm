@@ -7,25 +7,25 @@ string(2) "N;"
 NULL
 array(27) {
   [0]=>
-  string(11) "__construct"
-  [1]=>
   string(5) "__get"
-  [2]=>
+  [1]=>
   string(5) "__set"
-  [3]=>
+  [2]=>
   string(7) "__isset"
-  [4]=>
+  [3]=>
   string(11) "__debuginfo"
-  [5]=>
+  [4]=>
   string(10) "appendData"
-  [6]=>
+  [5]=>
   string(10) "deleteData"
-  [7]=>
+  [6]=>
   string(10) "insertData"
-  [8]=>
+  [7]=>
   string(11) "replaceData"
-  [9]=>
+  [8]=>
   string(13) "substringData"
+  [9]=>
+  string(11) "__construct"
   [10]=>
   string(11) "appendChild"
   [11]=>
@@ -73,25 +73,25 @@ string(2) "N;"
 NULL
 array(27) {
   [0]=>
-  string(11) "__construct"
-  [1]=>
   string(5) "__get"
-  [2]=>
+  [1]=>
   string(5) "__set"
-  [3]=>
+  [2]=>
   string(7) "__isset"
-  [4]=>
+  [3]=>
   string(11) "__debuginfo"
-  [5]=>
+  [4]=>
   string(10) "appendData"
-  [6]=>
+  [5]=>
   string(10) "deleteData"
-  [7]=>
+  [6]=>
   string(10) "insertData"
-  [8]=>
+  [7]=>
   string(11) "replaceData"
-  [9]=>
+  [8]=>
   string(13) "substringData"
+  [9]=>
+  string(11) "__construct"
   [10]=>
   string(11) "appendChild"
   [11]=>

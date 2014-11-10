@@ -112,6 +112,11 @@ public:
     handleRequest(transport);
   }
 
+  /**
+   * Write an entry to the handler's access log.
+   */
+  virtual void logToAccessLog(Transport* transport) {}
+
   int getDefaultTimeout() const { return m_timeout; }
 
 private:

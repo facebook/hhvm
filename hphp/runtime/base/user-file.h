@@ -54,6 +54,8 @@ public:
   virtual bool lock(int operation, bool &wouldBlock);
   virtual bool stat(struct stat* buf);
 
+  virtual Variant getWrapperMetaData() { return Variant(m_obj); }
+
   int access(const String& path, int mode);
   int lstat(const String& path, struct stat* buf);
   int stat(const String& path, struct stat* buf);
@@ -62,10 +64,16 @@ public:
   bool mkdir(const String& path, int mode, int options);
   bool rmdir(const String& path, int options);
   bool touch(const String& path, int64_t mtime, int64_t atime);
+  bool chmod(const String& path, int64_t mode);
+  bool chown(const String& path, int64_t uid);
+  bool chown(const String& path, const String& uid);
+  bool chgrp(const String& path, int64_t gid);
+  bool chgrp(const String& path, const String& gid);
 
 private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
   bool flushImpl(bool strict);
+  bool invokeMetadata(const Array& args, const char* funcName);
 
 protected:
   const Func* m_StreamOpen;

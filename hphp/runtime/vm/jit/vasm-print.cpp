@@ -99,6 +99,9 @@ struct FormatVisitor {
       str << "nullptr";
     }
   }
+  void imm(ServiceRequest req) {
+    str << sep() << serviceReqName(req);
+  }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }

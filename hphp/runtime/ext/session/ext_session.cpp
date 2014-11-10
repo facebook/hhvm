@@ -43,7 +43,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
@@ -137,23 +137,19 @@ const int64_t k_PHP_SESSION_NONE     = Session::None;
 const int64_t k_PHP_SESSION_ACTIVE   = Session::Active;
 const StaticString s_session_ext_name("session");
 
-struct SessionRequestData final : RequestEventHandler, Session {
+struct SessionRequestData final : Session {
   SessionRequestData() {}
+
+  void init() {
+    m_id.detach();
+    m_session_status = Session::None;
+    m_ps_session_handler = nullptr;
+  }
 
   void destroy() {
     m_id.reset();
     m_session_status = Session::None;
     m_ps_session_handler = nullptr;
-  }
-
-  void requestInit() override {
-    destroy();
-  }
-
-  void requestShutdown() override {
-    // We don't actually want to do our requestShutdownImpl here---it
-    // is run explicitly from the execution context, because it could
-    // run user code.
   }
 
   void requestShutdownImpl();
@@ -162,7 +158,7 @@ public:
   String m_id;
 
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(SessionRequestData, s_session);
+static __thread SessionRequestData* s_session;
 #define PS(name) s_session->m_ ## name
 
 void SessionRequestData::requestShutdownImpl() {
@@ -1083,12 +1079,37 @@ public:
 };
 static PhpSessionSerializer s_php_session_serializer;
 
+class PhpSerializeSessionSerializer : public SessionSerializer {
+public:
+  PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
+
+  virtual String encode() {
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
+    return vs.serialize(php_global(s__SESSION).toArray(), true, true);
+  }
+
+  virtual bool decode(const String& value) {
+    VariableUnserializer vu(value.data(), value.size(),
+                            VariableUnserializer::Type::Serialize);
+
+    try {
+      auto sess = vu.unserialize();
+      php_global_set(s__SESSION, std::move(sess.toArray()));
+    } catch (const ResourceExceededException&) {
+      throw;
+    } catch (const Exception&) {}
+
+    return true;
+  }
+};
+static PhpSerializeSessionSerializer s_php_serialize_session_serializer;
+
 class WddxSessionSerializer : public SessionSerializer {
 public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    WddxPacket* wddxPacket = NEWOBJ(WddxPacket)(empty_string_variant_ref,
+    WddxPacket* wddxPacket = newres<WddxPacket>(empty_string_variant_ref,
                                                 true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();
@@ -1564,7 +1585,7 @@ static bool HHVM_FUNCTION(session_set_save_handler,
   g_context->removeShutdownFunction(s_session_write_close,
                                     ExecutionContext::ShutDown);
   if (register_shutdown) {
-    f_register_shutdown_function(1, s_session_write_close);
+    HHVM_FN(register_shutdown_function)(s_session_write_close);
   }
 
   if (ini_get_save_handler() != "user") {
@@ -1880,6 +1901,10 @@ static class SessionExtension : public Extension {
   }
 
   virtual void threadInit() {
+    // TODO: t5226715 We shouldn't need to check s_session here, but right now
+    // this is called for every request.
+    if (s_session) return;
+    s_session = new SessionRequestData;
     Extension* ext = Extension::GetExtension(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -1963,10 +1988,19 @@ static class SessionExtension : public Extension {
                      &PS(hash_bits_per_character));
   }
 
-  virtual void requestInit() {
-    // warm up the session data
-    s_session->requestInit();
+  virtual void threadShutdown() override {
+    delete s_session;
+    s_session = nullptr;
   }
+
+  virtual void requestInit() override {
+    s_session->init();
+  }
+
+  /*
+    No need for requestShutdown; its handled explicitly by a call to
+    ext_session_request_shutdown()
+  */
 } s_session_extension;
 
 ///////////////////////////////////////////////////////////////////////////////

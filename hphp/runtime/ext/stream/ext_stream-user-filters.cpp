@@ -192,7 +192,7 @@ private:
       return Resource();
     }
 
-    return Resource(NEWOBJ(StreamFilter)(obj, stream));
+    return Resource(newres<StreamFilter>(obj, stream));
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);

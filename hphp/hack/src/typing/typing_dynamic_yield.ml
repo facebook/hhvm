@@ -12,8 +12,8 @@
 (* Module used to type DynamicYield
  * Each class that uses the DynamicYield trait or which extends a class that
  * uses the DynamicYield trait implicitly defines a few methods. If it
- * explicitly defines a yieldFoo method, then it implicitly also defines genFoo,
- * prepareFoo, and getFoo (unless any of those methods are explicitly defined).
+ * explicitly defines a yieldFoo method, then it implicitly also defines genFoo
+ * (unless this method is explicitly defined).
  * It does this with __call().
  *)
 (*****************************************************************************)
@@ -24,10 +24,10 @@ open Typing_defs
 module Reason = Typing_reason
 module Type   = Typing_ops
 module Env    = Typing_env
-
+module SN     = Naming_special_names
 
 (* Classes that use the DynamicYield trait and implement yieldFoo also provide
- * prepareFoo, genFoo(), and getFoo()
+ * genFoo()
  *)
 let rec decl env methods =
   SMap.fold begin fun name ce (env, acc) ->
@@ -50,19 +50,9 @@ let rec decl env methods =
         let gen_name = "gen"^base in
         let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
         let gen_ty = ce_r, Tfun {ft with
-          ft_ret =  gen_r, Tapply ((p, "\\Awaitable"), [base_ty])
+          ft_ret =  gen_r, Tapply ((p, SN.Classes.cAwaitable), [base_ty])
         } in
         let acc = add gen_name {ce with ce_type = gen_ty} acc in
-
-        (* Define getFoo(), which is T if yieldFoo() is Awaitable<T>. As an
-         * annoying special-case, unfinalize this, since the runtime allows you
-         * to "override" a yieldFoo() with a getFoo(), and people unfortunately
-         * do this quite a bit. *)
-        let get_name = "get"^base in
-        let base_p = Reason.to_pos (fst base_ty) in
-        let get_r = Reason.Rdynamic_yield (base_p, ft.ft_pos, get_name, name) in
-        let get_ty = ce_r, Tfun {ft with ft_ret = get_r, snd base_ty} in
-        let acc = add get_name {ce with ce_type = get_ty ; ce_final = false} acc in
         env, acc
       | None ->
         (match parse_get_name name with
@@ -82,7 +72,7 @@ let rec decl env methods =
               let p = Reason.to_pos (fst ft.ft_ret) in
               let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
               let gen_ty = ce_r, Tfun {ft with
-                ft_ret = gen_r, Tapply ((p, "\\Awaitable"), [ft.ft_ret])
+                ft_ret = gen_r, Tapply ((p, SN.Classes.cAwaitable), [ft.ft_ret])
               } in
               let acc = add gen_name {ce with ce_type = gen_ty} acc in
               env, acc
@@ -92,15 +82,15 @@ let rec decl env methods =
 and check_yield_types env p hret =
   let type_var = Env.fresh_type() in
   let r = Reason.Rwitness p in
-  let expected_type = r, Tapply ((p, "\\Awaitable"), [type_var]) in
+  let expected_type = r, Tapply ((p, SN.Classes.cAwaitable), [type_var]) in
   let env = Type.sub_type p (Reason.URdynamic_yield) env expected_type hret in
   (* Fully expand to make doubly sure we don't leak any type variables *)
   env, Typing_expand.fully_expand env type_var
 
-and contains_dynamic_yield = SSet.mem "\\DynamicYield"
-and contains_dynamic_yield_interface = SSet.mem "\\IUseDynamicYield"
-and implements_dynamic_yield_interface ancestors = SMap.mem "\\IUseDynamicYield" ancestors
-and is_dynamic_yield name = (name = "\\DynamicYield")
+and contains_dynamic_yield = SSet.mem SN.FB.cDynamicYield
+and contains_dynamic_yield_interface = SSet.mem SN.FB.cIUseDynamicYield
+and implements_dynamic_yield_interface ancestors = SMap.mem SN.FB.cIUseDynamicYield ancestors
+and is_dynamic_yield name = (name = SN.FB.cDynamicYield)
 
 and remove_prefix prefix str =
   if str_starts_with str prefix
@@ -150,7 +140,9 @@ and add name ce acc =
     | _ -> acc
 
 let clean_dynamic_yield env methods =
-  env, SMap.filter begin fun name _ -> name <> "__call" end methods
+  env, SMap.filter begin
+    fun name _ -> name <> Naming_special_names.Members.__call
+  end methods
 
 let method_def env name hret =
   let env, class_ = Env.get_class env (Env.get_self_id env) in

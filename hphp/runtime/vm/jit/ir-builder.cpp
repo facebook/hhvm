@@ -55,12 +55,9 @@ using Trace::Indent;
 
 TRACE_SET_MOD(hhir);
 
-IRBuilder::IRBuilder(Offset initialSpOffsetFromFp,
-                     IRUnit& unit,
-                     const Func* func)
+IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
-  , m_simplifier(unit)
-  , m_state(unit, initialSpOffsetFromFp, func)
+  , m_state(unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
@@ -91,11 +88,15 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
-  return cns(Type::cns(&init_null_variant, Type::PtrToInitNull));
+  // Nothing is allowed to write anything to the init null variant, so this
+  // inner type is always true.
+  return cns(Type::cns(&init_null_variant, Type::PtrToMemInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
-  return cns(Type::cns(&null_variant, Type::PtrToUninit));
+  // Nothing can write to the uninit null variant either, so the inner type
+  // here is also always true.
+  return cns(Type::cns(&null_variant, Type::PtrToMemUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -104,12 +105,18 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdGbl)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocPseudoMain)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
+    }
+
+    // And a LdRef automatically constrains the value to be a boxed cell,
+    // specifically.
+    if (inst->is(LdRef)) {
+      constrainValue(inst->src(0), DataTypeSpecific);
     }
   }
 
@@ -124,17 +131,25 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
     if (prev.isBlockEnd()) {
       assert(where == m_curBlock->end());
-      // start a new block
-      m_state.pauseBlock(m_curBlock);
+
+      auto oldBlock = m_curBlock;
+
+      // First make the inst's next block, so we can save state to it in
+      // finishBlock.
       m_curBlock = m_unit.defBlock();
-      m_state.startBlock(m_curBlock, inst->marker());
-      where = m_curBlock->begin();
-      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
       if (!prev.isTerminal()) {
-        // new block is reachable from old block so link it.
+        // New block is reachable from old block so link it.
         prev.setNext(m_curBlock);
         m_curBlock->setHint(prev.block()->hint());
       }
+
+      m_state.finishBlock(oldBlock);
+
+      m_state.startBlock(m_curBlock, inst->marker());
+      where = m_curBlock->begin();
+
+      FTRACE(2, "lazily adding B{}\n", m_curBlock->id());
+
     }
   }
 
@@ -178,9 +193,10 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
 
   if (oldType.isBoxed() && typeParam.isBoxed() &&
       (oldType.not(typeParam) || typeParam < oldType)) {
-    /* This CheckType serves to update the inner type hint for a boxed value,
-     * which requires no runtime work. This depends on the type being boxed,
-     * and constraining it with DataTypeCountness will do it. */
+    // TODO(#2939547): this used to update inner type predictions, but now it's
+    // really just serving to change BoxedCell into BoxedInitCell in some
+    // cases.  We should make sure all boxed values are BoxedInitCell subtypes
+    // and then remove this code.
     return constrainBoxed(typeParam);
   }
 
@@ -243,6 +259,16 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
       constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
       return gen(AssertLoc, newType, LocalId(locId), inst->src(0));
     });
+}
+
+SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
+  auto const locId = inst->extra<HintLocInner>()->locId;
+  if (!localType(locId, DataTypeGeneric).subtypeOf(Type::BoxedCell) ||
+      predictedInnerType(locId).box() <= inst->typeParam()) {
+    inst->convertToNop();
+    return nullptr;
+  }
+  return nullptr;
 }
 
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
@@ -453,8 +479,8 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdGbl(IRInstruction* inst) {
-  auto const locId = inst->extra<LdGbl>()->locId;
+SSATmp* IRBuilder::preOptimizeLdLocPseudoMain(IRInstruction* inst) {
+  auto const locId = inst->extra<LdLocPseudoMain>()->locId;
   auto const locType = localType(locId, DataTypeGeneric);
   auto const minType = std::min(locType, inst->typeParam()).relaxToGuardable();
   inst->setTypeParam(minType);
@@ -479,14 +505,6 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLocAddr>()->locId;
-  auto const type = localType(locId, DataTypeGeneric);
-  assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(std::min(type.ptr(), inst->typeParam()));
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // Guard relaxation might change the current local type, so don't try to
   // change to StLocNT until after relaxation happens.
@@ -495,8 +513,6 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   auto locId = inst->extra<StLoc>()->locId;
   auto const curType = localType(locId, DataTypeGeneric);
   auto const newType = inst->src(1)->type();
-
-  assert(!inst->hasTypeParam());
 
   /*
    * There's no need to store the type if it's going to be the same
@@ -534,6 +550,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(CheckType);
     X(CheckStk);
     X(CheckLoc);
+    X(HintLocInner);
     X(AssertLoc);
     X(AssertStk);
     X(AssertType);
@@ -542,8 +559,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
-    X(LdGbl);
-    X(LdLocAddr);
+    X(LdLocPseudoMain);
     X(StLoc);
   default:
     break;
@@ -616,7 +632,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   // instruction based on tracked state before we do anything else.
   // May mutate the IRInstruction in place (and return nullptr) or
   // return an SSATmp*.
-  if (SSATmp* preOpt = preOptimize(inst)) {
+  if (auto const preOpt = preOptimize(inst)) {
     FTRACE(1, "  {}preOptimize returned: {}\n",
            indent(), preOpt->inst()->toString());
     return preOpt;
@@ -627,7 +643,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     return cloneAndAppendOriginal();
   }
 
-  auto simpResult = m_simplifier.simplify(inst, shouldConstrainGuards());
+  auto const simpResult = simplify(m_unit, inst, shouldConstrainGuards());
 
   // These are the possible outputs:
   //
@@ -805,8 +821,6 @@ bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
  */
 bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   if (!val) {
     ITRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
@@ -817,8 +831,8 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocAddr, LdGbl)) {
-    // We've hit a LdLoc, LdLocAddr, or LdGbl. If the value's type source is
+  if (inst->is(LdLoc, LdLocPseudoMain)) {
+    // We've hit a LdLoc, or LdLocPseudoMain. If the value's type source is
     // non-null and not a FramePtr, it's a real value that was killed by a
     // Call. The value won't be live but it's ok to use it to track down the
     // guard.
@@ -840,7 +854,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       }
     }
     return changed;
-  } else if (inst->is(LdStack, LdStackAddr)) {
+  } else if (inst->is(LdStack)) {
     return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(AssertType)) {
     // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
@@ -883,30 +897,6 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       changed = constrainValue(inst->src(0), newTc) || changed;
     }
     return changed;
-  } else if (inst->is(StRef)) {
-    // StRef requires that src(0) is boxed so we're relying on callers to
-    // appropriately constrain the values they pass to it. Any innerCat in tc
-    // should be applied to the value being stored.
-
-    tc.category = tc.innerCat;
-    tc.innerCat = DataTypeGeneric;
-    return constrainValue(inst->src(1), tc);
-  } else if (inst->is(Box, BoxPtr, UnboxPtr)) {
-    // All Box/Unbox opcodes are similar to StRef/LdRef in some situations and
-    // Mov in others (determined at runtime), so we need to constrain both
-    // outer and inner.
-
-    auto maxCat = std::max(tc.category, tc.innerCat);
-    tc.category = maxCat;
-    tc.innerCat = maxCat;
-    return constrainValue(inst->src(0), tc);
-  } else if (inst->is(LdRef)) {
-    // Constrain the inner type of the box with tc, using DataTypeCountness for
-    // the outer constraint to preserve the fact that it's a box.
-
-    tc.innerCat = tc.category;
-    tc.category = DataTypeCountness;
-    return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
   } else if (inst->is(DefLabel)) {
@@ -928,7 +918,6 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     ITRACE(2, "value is new in this trace, bailing\n");
     return false;
   }
-  // TODO(t2598894): Should be able to do something with LdMem<T> here
 }
 
 bool IRBuilder::constrainLocal(uint32_t locId,
@@ -947,8 +936,6 @@ bool IRBuilder::constrainLocal(uint32_t locId,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainLocal({}, {}, {}, {})\n",
          locId, show(typeSrc), tc, why);
@@ -1023,8 +1010,6 @@ bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
 bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
                                TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
   Indent _i;
@@ -1041,7 +1026,11 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
   // to constrain.
   if (!typeFitsConstraint(stackInfo.knownType, tc)) return false;
 
-  IRInstruction* typeSrc = stackInfo.typeSrc;
+  auto const typeSrc = stackInfo.typeSrc;
+  if (!typeSrc) {
+    ITRACE(1, "  no typesrc\n");
+    return false;
+  }
   if (stackInfo.value) {
     ITRACE(1, "value = {}\n", *stackInfo.value->inst());
     return constrainValue(stackInfo.value, tc);
@@ -1090,6 +1079,10 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   return m_state.localType(id);
 }
 
+Type IRBuilder::predictedInnerType(uint32_t id) {
+  return m_state.predictedInnerType(id);
+}
+
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localValue");
   return m_state.localValue(id);
@@ -1105,12 +1098,34 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void IRBuilder::insertLocalPhis() {
-  if (m_curBlock->numPreds() < 2) return;
+void IRBuilder::insertPhis(bool forceSpPhi) {
+  ITRACE(2, "insertPhis starting for B{} with {} preds, forceSpPhi = {}\n",
+         m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
+  Trace::Indent _i;
+
+  if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
 
   jit::hash_map<Block*, jit::vector<SSATmp*>> blockToPhiTmpsMap;
   jit::hash_map<Block*, jit::vector<SSATmp*>> blockToLdLocs;
   jit::vector<uint32_t> localIds;
+
+  // First, determine if we need a phi for vmsp.
+  auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
+  auto needSpPhi = forceSpPhi;
+  for (auto& e : m_curBlock->preds()) {
+    auto predSp = m_state.spLeavingBlock(e.from());
+    ITRACE(4, "sp for pred B{}: {}\n", e.from()->id(), *predSp->inst());
+    if (predSp != sp) needSpPhi = true;
+  }
+
+  ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
+  if (needSpPhi) {
+    for (auto& e : m_curBlock->preds()) {
+      auto inBlock = e.from();
+      auto inSp = m_state.spLeavingBlock(inBlock);
+      blockToPhiTmpsMap[inBlock].push_back(inSp);
+    }
+  }
 
   // Determine which SSATmps must receive a phi. To make some optimizations
   // simpler, we require that an SSATmp for a local is either provided in no
@@ -1122,11 +1137,12 @@ void IRBuilder::insertLocalPhis() {
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.from();
-      auto local = m_state.localsForBlock(pred)[i].value;
+      auto local = m_state.localsLeavingBlock(pred)[i].value;
       if (local == nullptr) missingPreds.insert(&e);
       incomingValues.insert(local);
     }
 
+    ITRACE(3, "local {} needs phi: {}\n", i, incomingValues.size() == 1);
     // If there's only one unique incoming value, we don't need a phi. This
     // includes situations where no incoming blocks provide the value, since
     // they're really providing nullptr.
@@ -1135,7 +1151,7 @@ void IRBuilder::insertLocalPhis() {
 
     for (auto& e : m_curBlock->preds()) {
       Block* pred = e.from();
-      auto& local = m_state.localsForBlock(pred)[i];
+      auto& local = m_state.localsLeavingBlock(pred)[i];
       if (missingPreds.count(&e)) {
         // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
         // the fpValue from m_curBlock since we currently require that all our
@@ -1163,8 +1179,8 @@ void IRBuilder::insertLocalPhis() {
     }
   }
 
-  if (localIds.empty()) return;
-  auto const numPhis = localIds.size();
+  auto const numPhis = localIds.size() + needSpPhi;
+  if (numPhis == 0) return;
 
   // Split incoming critical edges so we can modify Jmp srcs of preds.
 repeat:
@@ -1218,16 +1234,18 @@ repeat:
   // reference to its value.
   IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
                                          jit::vector<unsigned>(numPhis, 1));
-  m_curBlock->prepend(label);
+  assert(m_curBlock->empty());
+  appendInstruction(label);
   retypeDests(label, &m_unit);
 
   // Add TrackLoc's to update local state.
-  for (unsigned i = 0; i < numPhis; ++i) {
-    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i));
+  for (unsigned i = 0, n = localIds.size(); i < n; ++i) {
+    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i + needSpPhi));
   }
 }
 
-bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
+bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
+                           bool isLoopHeader) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
@@ -1246,21 +1264,16 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker) {
   always_assert(lastInst.isBlockEnd());
   always_assert(lastInst.isTerminal() || m_curBlock->next() != nullptr);
 
-  m_state.pauseBlock(m_curBlock);
+  m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker);
-  insertLocalPhis();
-
-  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
+  m_state.startBlock(m_curBlock, marker, nullptr, isLoopHeader);
+  insertPhis(isLoopHeader);
+  always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));
   return true;
-}
-
-void IRBuilder::clearBlockState(Block* block) {
-  m_state.clearBlock(block);
 }
 
 Block* IRBuilder::makeBlock(Offset offset) {
@@ -1286,7 +1299,8 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
   m_offsetToBlockMap[offset] = block;
 }
 
-void IRBuilder::pushBlock(BCMarker marker, Block* b,
+void IRBuilder::pushBlock(BCMarker marker,
+                          Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_state.marker().show(), b, marker.show());
@@ -1308,14 +1322,18 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b,
   }
 }
 
-void IRBuilder::popBlock() {
+void IRBuilder::popBlock(bool pause) {
   assert(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_state.marker().show(), top.block, top.marker.show());
-  m_state.pauseBlock(m_curBlock);
-  m_state.startBlock(top.block, top.marker);
+  if (pause) {
+    m_state.pauseBlock(m_curBlock);
+  } else {
+    m_state.finishBlock(m_curBlock);
+  }
+  m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
   setMarker(top.marker);
   m_curWhere = top.where;

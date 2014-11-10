@@ -67,6 +67,11 @@ enum class ClosureType {
   Long,
 };
 
+enum ObjPropType {
+  ObjPropNormal,
+  ObjPropXhpAttr
+};
+
 //////////////////////////////////////////////////////////////////////
 
 typedef void* TStatementPtr;
@@ -83,6 +88,7 @@ public:
 
   static bool IsClosureName                (const std::string &name);
   std::string newClosureName(
+      const std::string &namespaceName,
       const std::string &className,
       const std::string &funcName);
 

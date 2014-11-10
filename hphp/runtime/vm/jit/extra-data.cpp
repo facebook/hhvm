@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/extra-data.h"
 
-#include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/util/text-util.h"
@@ -34,38 +32,6 @@ std::string NewStructData::show() const {
     delim = ",";
   }
   return os.str();
-}
-
-const RawMemData::Info& RawMemData::info() const {
-  static const Info infos[] = {
-    {c_WaitHandle::stateOff(),    sz::byte,  jit::Type::Int},
-    {c_AsyncFunctionWaitHandle::resumeAddrOff(),
-                                  sz::qword, jit::Type::TCA|jit::Type::Nullptr},
-    {c_AsyncFunctionWaitHandle::resumeOffsetOff(),
-                                  sz::dword, jit::Type::Int},
-    {c_Generator::resumeAddrOff(),
-                                  sz::qword, jit::Type::TCA|jit::Type::Nullptr},
-    {c_Generator::resumeOffsetOff(),
-                                  sz::dword, jit::Type::Int},
-    {c_Generator::stateOff(),  sz::byte,  jit::Type::Int},
-    {CONTOFF(m_index),            sz::qword, jit::Type::Int},
-    {StringData::sizeOff(),       sz::dword, jit::Type::Int},
-    {Func::paramCountsOff(),      sz::dword, jit::Type::Int},
-  };
-  static_assert(sizeof infos / sizeof infos[0] == kNumTypes,
-                "Incorrect size of infos array");
-
-  always_assert(type < kNumTypes);
-  return infos[type];
-}
-
-std::string RawMemData::show() const {
-  switch (type) {
-#   define RAW_TYPE(name) case name: return #name;
-    RAW_MEM_DATA_TYPES
-#   undef RAW_TYPE
-  }
-  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -184,7 +150,9 @@ MAKE_DISPATCHER(EqualsDispatcher, bool, cseEqualsExtraImpl);
 MAKE_DISPATCHER(CloneDispatcher, IRExtraData*, cloneExtraImpl);
 MAKE_DISPATCHER(ShowDispatcher, std::string, showExtraImpl);
 
-} // namespace
+}
+
+//////////////////////////////////////////////////////////////////////
 
 size_t cseHashExtra(Opcode opc, IRExtraData* data) {
   return dispatchExtra<size_t,HashDispatcher>(opc, data);
@@ -203,4 +171,6 @@ std::string showExtra(Opcode opc, const IRExtraData* data) {
       const_cast<IRExtraData*>(data));
 }
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+}}

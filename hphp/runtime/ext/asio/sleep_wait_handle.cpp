@@ -46,7 +46,7 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
     throw e;
   }
 
-  c_SleepWaitHandle* wh = NEWOBJ(c_SleepWaitHandle);
+  c_SleepWaitHandle* wh = newobj<c_SleepWaitHandle>();
   wh->initialize(usecs);
   return wh;
 }

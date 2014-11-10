@@ -214,7 +214,7 @@ let check_toplevel env pos =
 
 let rec check_lvalue env = function
   | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
-  | pos, Call ((_, Id (_, "tuple")), _) ->
+  | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter (check_lvalue env) el
@@ -267,6 +267,7 @@ let priorities = [
   (Right, [Tem]);
   (NonAssoc, [Tinstanceof]);
   (Right, [Ttild; Tincr; Tdecr; Tcast]);
+  (Right, [Tstarstar]);
   (Right, [Tat; Tref]);
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
@@ -389,7 +390,7 @@ let ref_param env =
 (* Entry point *)
 (*****************************************************************************)
 
-let rec program content =
+let rec program ?(elaborate_namespaces = true) content =
   L.comment_list := [];
   L.fixmes := Utils.IMap.empty;
   let lb = Lexing.from_string content in
@@ -402,7 +403,9 @@ let rec program content =
   Parser_heap.HH_FIXMES.add !(Pos.file) fixmes;
   if !(env.errors) <> []
   then Errors.parsing_error (List.hd (List.rev !(env.errors)));
-  let ast = Namespaces.elaborate_defs ast in
+  let ast = if elaborate_namespaces
+    then Namespaces.elaborate_defs ast
+    else ast in
   {is_hh_file; comments; ast}
 
 (*****************************************************************************)
@@ -552,9 +555,13 @@ and toplevel acc env terminate =
 
 and toplevel_word ~attr env = function
   | "abstract" ->
-      expect_word env "class";
-      let class_ = class_ ~attr ~final:false ~kind:Cabstract env in
-      [Class class_]
+    let final = (match L.token env.lb with
+      | Tword when Lexing.lexeme env.lb = "final" -> true
+      | _ -> begin L.back env.lb; false end
+    ) in
+    expect_word env "class";
+    let class_ = class_ ~attr ~final ~kind:Cabstract env in
+    [Class class_]
   | "final" ->
       expect_word env "class";
       let class_ = class_ ~attr ~final:true ~kind:Cnormal env in
@@ -600,10 +607,7 @@ and toplevel_word ~attr env = function
       }]
   | "namespace" ->
       let id, body = namespace env in
-      (* Check for an empty name and omit the Namespace wrapper *)
-      (match id with
-      | (_, "") -> body
-      | _ -> [Namespace (id, body)])
+      [Namespace (id, body)]
   | "use" ->
       let usel = namespace_use_list env [] in
       [NamespaceUse usel]
@@ -633,7 +637,7 @@ and toplevel_word ~attr env = function
       [define_or_stmt env stmt]
 
 and define_or_stmt env = function
-  | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value])) ->
+  | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value], [])) ->
       Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
@@ -814,7 +818,7 @@ and class_extends env =
       (match Lexing.lexeme env.lb with
       | "extends" -> class_extends_list env
       | "implements" -> L.back env.lb; []
-      | _ -> error env "Expected: extends"; []
+      | s -> error env ("Expected: extends; Got: "^s); []
       )
   | Tlcb ->
       L.back env.lb;
@@ -829,7 +833,7 @@ and class_implements env =
       (match Lexing.lexeme env.lb with
       | "implements" -> class_extends_list env
       | "extends" -> L.back env.lb; []
-      | _ -> error env "Expected: implements"; []
+      | s -> error env ("Expected: implements; Got: "^s); []
       )
   | Tlcb ->
       L.back env.lb;
@@ -873,26 +877,10 @@ and class_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [cst]
-      else cst :: class_param_list_remain env
+      else cst :: class_param_list env
   | _ ->
       error_expect env ">";
       [cst]
-
-and class_param_list_remain env =
-  match L.gt_or_comma env.lb with
-  | Tgt -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let cst = class_param env in
-      match L.gt_or_comma env.lb with
-      | Tgt ->
-          [cst]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [cst]
-          else cst :: class_param_list_remain env
-      | _ -> error_expect env ">"; [cst]
 
 and class_param env =
   match L.token env.lb with
@@ -957,25 +945,9 @@ and class_hint_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [h]
-      else h :: class_hint_param_list_remain env
+      else h :: class_hint_param_list env
   | _ ->
       error_expect env ">"; [h]
-
-and class_hint_param_list_remain env =
-  match L.gt_or_comma env.lb with
-  | Tgt -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let h = hint env in
-      match L.gt_or_comma env.lb with
-      | Tgt ->
-          [h]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [h]
-          else h :: class_hint_param_list_remain env
-      | _ -> error_expect env ">"; [h]
 
 (*****************************************************************************)
 (* Type hints: int, ?int, A<T>, array<...> etc ... *)
@@ -2025,7 +1997,7 @@ and statement_echo env =
   let pos = Pos.make env.lb in
   let args = echo_args env in
   let f = pos, Id (pos, "echo") in
-  Expr (pos, Call (f, args))
+  Expr (pos, Call (f, args, []))
 
 and echo_args env =
   let e = expr env in
@@ -2180,6 +2152,8 @@ and expr_remain env e1 =
       expr_binop env Tminus Minus e1
   | Tstar ->
       expr_binop env Tstar Star e1
+  | Tstarstar ->
+      expr_binop env Tstarstar Starstar e1
   | Tslash ->
       expr_binop env Tslash Slash e1
   | Teq ->
@@ -2565,16 +2539,48 @@ and expr_colcol_remain ~allow_class env e1 cname =
       e1
 
 (*****************************************************************************)
-(* Function call (foo(params)) *)
+(* Function call (f(params)) *)
 (*****************************************************************************)
 
 and expr_call env e1 =
   reduce env e1 Tlp begin fun e1 env ->
     L.back env.lb;
-    let args = expr_list env in
+    let args1, args2 = expr_call_list env in
     let end_ = Pos.make env.lb in
-    Pos.btw (fst e1) end_, Call (e1, args)
+    Pos.btw (fst e1) end_, Call (e1, args1, args2)
   end
+
+(* An expr_call_list is the same as an expr_list except for the possibility
+ * of ParamUnpack (aka splat) calls of the form:
+ *   f(...$unpacked);
+ *)
+and expr_call_list env =
+  expect env Tlp;
+  expr_call_list_remain env
+
+and expr_call_list_remain env =
+  match L.token env.lb with
+    | Trp -> [], []
+    | Tellipsis -> (* f($x, $y, << ...$args >> ) *)
+      let unpack_e = expr { env with priority = 0 } in
+      (* no regular params after an unpack *)
+      (match L.token env.lb with
+        | Trp -> [], [unpack_e]
+        | _ -> error_expect env ")"; [], [unpack_e])
+    | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let e = expr { env with priority = 0 } in
+      match L.token env.lb with
+        | Trp -> [e], []
+        | Tcomma ->
+          if !(env.errors) != error_state
+          then [e], []
+          else begin
+            let reg, unpack = expr_call_list_remain env
+            in e :: reg, unpack
+          end
+        | _ -> error_expect env ")"; [e], []
 
 (*****************************************************************************)
 (* Collections *)
@@ -2619,7 +2625,7 @@ and collection_field_list_remain env =
 (*****************************************************************************)
 
 and is_import r =
-  List.exists ((=) r) ["require"; "require_once"; "include"; "include_once"]
+  List.mem r ["require"; "require_once"; "include"; "include_once"]
 
 and expr_import r env start =
   let flavor = match r with
@@ -2778,9 +2784,9 @@ and expr_new env pos_start =
           error_expect env "class name";
           p, "*Unknown*"
     in
-    let args = expr_list env in
+    let args1, args2 = expr_call_list env in
     let pos_end = Pos.make env.lb in
-    Pos.btw pos_start pos_end, New (cname, args)
+    Pos.btw pos_start pos_end, New (cname, args1, args2)
   end
 
 (*****************************************************************************)
@@ -2937,7 +2943,7 @@ and encapsed_nested start env =
       | Tlvar ->
           L.back env.lb;
           let error_state = !(env.errors) in
-          let e = encapsed_expr env in
+          let e = expr env in
           (match L.string2 env.lb with
           | Trcb -> ()
           | _ -> error_expect env "}");
@@ -3469,5 +3475,6 @@ and namespace_use_list env acc =
 
 let from_file filename =
   Pos.file := filename;
-  let content = try Utils.cat filename with _ -> "" in
+  let content =
+    try Utils.cat (Relative_path.to_absolute filename) with _ -> "" in
   program content

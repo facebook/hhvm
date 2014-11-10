@@ -24,9 +24,10 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace jit {
 namespace {
@@ -515,11 +516,9 @@ void eliminateDeadCode(IRUnit& unit) {
       if (srcInst->op() == DefConst) continue;
 
       if (RuntimeOption::EvalHHIRInlineFrameOpts) {
-        if (src->isA(Type::FramePtr) && !srcInst->is(LdRaw, LdContActRec)) {
-          if (srcInst->is(DefInlineFP)) {
-            FTRACE(3, "adding use to {} from {}\n", *src, *inst);
-            ++uses[src];
-          }
+        if (srcInst->is(DefInlineFP)) {
+          FTRACE(3, "adding use to {} from {}\n", *src, *inst);
+          ++uses[src];
         }
       }
 

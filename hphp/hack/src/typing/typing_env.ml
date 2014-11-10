@@ -13,6 +13,7 @@ open Utils
 open Typing_defs
 open Nast
 
+module SN = Naming_special_names
 module Dep = Typing_deps.Dep
 
 (* The following classes are used to make sure we make no typing
@@ -56,10 +57,10 @@ module GConst = struct
   let prefix = Prefix.make()
 end
 
-module Funs = SharedMem.WithCache(Fun)
-module Classes = SharedMem.WithCache(Class)
-module Typedefs = SharedMem.WithCache(Typedef)
-module GConsts = SharedMem.WithCache(GConst)
+module Funs = SharedMem.WithCache (String) (Fun)
+module Classes = SharedMem.WithCache (String) (Class)
+module Typedefs = SharedMem.WithCache (String) (Typedef)
+module GConsts = SharedMem.WithCache (String) (GConst)
 
 type funs    = Funs.t
 type classes = Classes.t
@@ -93,7 +94,7 @@ and genv = {
   fun_kind : Nast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
-  file    : string;
+  file    : Relative_path.t;
 }
 
 (* An anonymous function
@@ -179,9 +180,9 @@ let rec debug stack env (r, ty) =
   match ty with
   | Tunresolved tyl -> o "intersect("; debugl stack env tyl; o ")"
   | Ttuple _ -> o "tuple"
-  | Tarray (_, None, None) -> o "array"
-  | Tarray (_, Some x, None) -> o "array<"; debug stack env x; o ">"
-  | Tarray (_, Some x, Some y) -> o "array<"; debug stack env x; o ", ";
+  | Tarray (None, None) -> o "array"
+  | Tarray (Some x, None) -> o "array<"; debug stack env x; o ">"
+  | Tarray (Some x, Some y) -> o "array<"; debug stack env x; o ", ";
       debug stack env y; o ">"
   | Tarray _ -> assert false
   | Tmixed -> o "mixed"
@@ -562,9 +563,9 @@ module FakeMembers = struct
   let make_static_id cid member_name =
     let class_name =
       match cid with
-      | CIparent -> "parent"
-      | CIself -> "self"
-      | CIstatic -> "static"
+      | CIparent -> SN.Classes.cParent
+      | CIself -> SN.Classes.cSelf
+      | CIstatic -> SN.Classes.cStatic
       | CIvar (_, This) -> "$this"
       | CIvar (_, Lvar (_, x)) -> "$"^string_of_int(x)
       | CIvar _ -> assert false

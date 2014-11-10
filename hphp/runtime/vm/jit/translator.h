@@ -108,6 +108,9 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
+  /* The SrcKey for this translation. */
+  SrcKey srcKey() const;
+
   TransID transID;  // May be kInvalidTransID if not for a real translation.
   Offset initBcOffset;
   Offset initSpOffset;
@@ -122,7 +125,7 @@ struct TransContext {
  * to do after we're done, so it's distinct from the TransContext above.
  */
 struct TranslArgs {
-  TranslArgs(const SrcKey& sk, bool align)
+  TranslArgs(SrcKey sk, bool align)
     : m_sk(sk)
     , m_align(align)
     , m_dryRun(false)
@@ -131,7 +134,7 @@ struct TranslArgs {
     , m_region(nullptr)
   {}
 
-  TranslArgs& sk(const SrcKey& sk) {
+  TranslArgs& sk(SrcKey sk) {
     m_sk = sk;
     return *this;
   }
@@ -251,8 +254,7 @@ struct Translator {
    *
    * If no SrcRec exists, insert one into the SrcDB.
    */
-  SrcRec* getSrcRec(const SrcKey& sk);
-
+  SrcRec* getSrcRec(SrcKey sk);
 
   /*
    * Current region being translated, if any.
@@ -356,7 +358,7 @@ struct Translator {
    *
    * Lazily populates m_dbgBLSrcKey from m_dbgBLPC if we don't find the entry.
    */
-  bool isSrcKeyInBL(const SrcKey& sk);
+  bool isSrcKeyInBL(SrcKey sk);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -520,23 +522,13 @@ public:
 };
 
 /*
- * Callback used by getInputs() to get the type of a local variable with a
- * given index.
- */
-using LocalTypeFn = std::function<Type(int)>;
-
-/*
- * Get input location info and flags for `ni'.
- *
- * The result is returned via `infos'.  Some flags on `ni' may be updated.
+ * Get input location info and flags for a NormalizedInstruction.  Some flags
+ * on `ni' may be updated.
  *
  * `startSk' should be the SrcKey for the first instruction in the region
- * containing `ni'.
+ * containing the instruction.
  */
-void getInputs(SrcKey startSk,
-               NormalizedInstruction& inst,
-               InputInfoVec& infos,
-               const LocalTypeFn& localType);
+InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction&);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
@@ -744,20 +736,9 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   Class* ctx);
 
 /*
- * Check whether return types of builtins are not simple types.
- *
- * This is different from IS_REFCOUNTED_TYPE because builtins can return
- * Variants, and we use KindOfUnknown to denote these return types.
- */
-inline bool isCppByRef(DataType t) {
-  return t != KindOfBoolean && t != KindOfInt64 &&
-         t != KindOfNull && t != KindOfDouble;
-}
-
-/*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
  */
-inline bool isSmartPtrRef(DataType t) {
+inline bool isSmartPtrRef(MaybeDataType t) {
   return t == KindOfString || t == KindOfStaticString ||
          t == KindOfArray || t == KindOfObject ||
          t == KindOfResource;

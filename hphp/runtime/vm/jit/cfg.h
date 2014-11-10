@@ -33,6 +33,12 @@ template <class Visitor>
 void postorderWalk(const IRUnit&, Visitor visitor, Block* start = nullptr);
 
 /*
+ * Compute a postorder list of the basic blocks reachable from the IR's entry
+ * block.
+ */
+BlockList poSortCfg(const IRUnit&);
+
+/*
  * Compute a reverse postorder list of the basic blocks reachable from
  * the IR's entry block.
  */

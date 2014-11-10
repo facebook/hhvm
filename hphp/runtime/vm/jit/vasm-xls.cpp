@@ -220,6 +220,7 @@ struct Vxls {
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
   unsigned nearestSplitBefore(unsigned pos);
+  void forwardJmp(Vlabel middleLabel, Vlabel destLabel);
   // debugging
   void print(const char* caption);
   void printInstr(std::ostringstream& out, Vinstr* instr, unsigned pos, Vlabel);
@@ -538,6 +539,27 @@ void Vxls::allocate() {
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
 }
 
+void Vxls::forwardJmp(Vlabel middleLabel, Vlabel destLabel) {
+  auto& middle = unit.blocks[middleLabel];
+  auto& dest = unit.blocks[destLabel];
+  // We need to preserve any phidefs in the forwarding block if they're present
+  // in the original destination block.
+  auto& headInst = dest.code.front();
+  if (headInst.op == Vinstr::phidef) {
+    auto tuple = headInst.phidef_.defs;
+    auto forwardedRegs = unit.tuples[tuple];
+    VregList regs(forwardedRegs.size());
+    for (unsigned i = 0; i < forwardedRegs.size(); ++i) {
+      regs[i] = unit.makeReg();
+    }
+    auto newTuple = unit.makeTuple(regs);
+    middle.code.emplace_back(phidef{newTuple});
+    middle.code.emplace_back(phijmp{destLabel, newTuple});
+    return;
+  }
+  middle.code.emplace_back(jmp{destLabel});
+}
+
 void Vxls::splitCritEdges() {
   jit::vector<unsigned> preds(unit.blocks.size());
   for (auto pred : blocks) {
@@ -554,7 +576,7 @@ void Vxls::splitCritEdges() {
       if (preds[succ] <= 1) continue;
       // split the critical edge.
       auto middle = unit.makeBlock(unit.blocks[succ].area);
-      unit.blocks[middle].code.emplace_back(jmp{succ});
+      forwardJmp(middle, succ);
       succ = middle;
       resort = true;
     }
@@ -613,6 +635,14 @@ int Vxls::spEffect(Vinstr& inst) const {
       if (i.d == Vreg64(m_sp)) {
         assert(i.s1 == Vreg64(m_sp));
         return -i.s0.l();
+      }
+      return 0;
+    }
+    case Vinstr::lea: {
+      auto& i = inst.lea_;
+      if (i.d == Vreg64(m_sp)) {
+        assert(i.s.base == i.d && !i.s.index.isValid());
+        return i.s.disp;
       }
       return 0;
     }
@@ -781,13 +811,16 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
     case Vinstr::callm:
     case Vinstr::callr:
       defs = m_abi.all() - m_abi.calleeSaved;
+      switch (arch()) {
+        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
+        case Arch::X64: break;
+      }
       break;
     case Vinstr::callstub:
       defs = i.callstub_.kills;
       break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
-    case Vinstr::nativeimpl:
       defs = m_abi.all();
       break;
     case Vinstr::cqo:
@@ -801,11 +834,9 @@ void Vxls::getEffects(const Vinstr& i, RegSet& uses, RegSet& across,
     case Vinstr::sarq:
       across = RegSet(reg::rcx);
       break;
-    case Vinstr::resume:
-    case Vinstr::retransopt:
     case Vinstr::bindaddr:
-    case Vinstr::bindjcc1:
-    case Vinstr::bindjcc2:
+    case Vinstr::bindjcc1st:
+    case Vinstr::bindjcc2nd:
     case Vinstr::bindjmp:
     case Vinstr::bindexit:
       defs = m_srkill;
@@ -1249,7 +1280,7 @@ private:
   void rename(Vreg128& r) { r = lookup(r, VregKind::Simd); }
   void rename(VregSF& r) { r = lookup(r, VregKind::Sf); }
   void rename(Vreg& r) { r = lookup(r, VregKind::Any); }
-  void rename(Vtuple t) { /* phijmp+phidef handled by resolveEdges */ }
+  void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
   PhysReg lookup(Vreg vreg, VregKind kind) {
     auto ivl = xls.intervals[vreg];
     if (!ivl || vreg.isPhys()) return vreg;
@@ -1348,6 +1379,20 @@ void Vxls::lowerCopyargs() {
 }
 
 void Vxls::resolveEdges() {
+  auto addEdgeCopiesForPhiUseDefIntervalConflicts = [&](
+    Vlabel block, Vlabel target, uint32_t targetIndex, const VregList& uses) {
+    auto p1 = block_ranges[block].end - 2;
+    auto& defs = unit.tuples[findDefs(unit, target)];
+    for (unsigned i = 0, n = uses.size(); i < n; ++i) {
+      auto i1 = intervals[uses[i]];
+      if (i1 && !i1->fixed()) i1 = i1->childAt(p1);
+      auto i2 = intervals[defs[i]];
+      if (i2->reg != i1->reg) {
+        assert((edge_copies[{block,targetIndex}][i2->reg] == nullptr));
+        edge_copies[{block,targetIndex}][i2->reg] = i1;
+      }
+    }
+  };
   for (auto b1 : blocks) {
     auto& block1 = unit.blocks[b1];
     auto p1 = block_ranges[b1].end - 2;
@@ -1356,18 +1401,22 @@ void Vxls::resolveEdges() {
     if (inst1.op == Vinstr::phijmp) {
       auto target = inst1.phijmp_.target;
       auto& uses = unit.tuples[inst1.phijmp_.uses];
-      auto& defs = unit.tuples[findDefs(unit, target)];
-      for (unsigned i = 0, n = uses.size(); i < n; ++i) {
-        auto i1 = intervals[uses[i]];
-        if (i1) i1 = i1->childAt(p1);
-        auto i2 = intervals[defs[i]];
-        if (i2->reg != i1->reg) {
-          assert((edge_copies[{b1,0}][i2->reg] == nullptr));
-          edge_copies[{b1,0}][i2->reg] = i1;
-        }
-      }
+      addEdgeCopiesForPhiUseDefIntervalConflicts(b1, target, 0, uses);
+
       auto tmp_pos = inst1.pos;
       inst1 = jmp{target};
+      inst1.pos = tmp_pos;
+    } else if (inst1.op == Vinstr::phijcc) {
+      auto& uses = unit.tuples[inst1.phijcc_.uses];
+      uint32_t i = 0;
+      for (auto target : succs(inst1)) {
+        addEdgeCopiesForPhiUseDefIntervalConflicts(b1, target, i, uses);
+        i += 1;
+      }
+
+      auto& targets = inst1.phijcc_.targets;
+      auto tmp_pos = inst1.pos;
+      inst1 = jcc{inst1.phijcc_.cc, inst1.phijcc_.sf, {targets[0], targets[1]}};
       inst1.pos = tmp_pos;
     }
     for (unsigned i = 0, n = succlist.size(); i < n; i++) {
@@ -1703,6 +1752,7 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::jcc: return {inst.jcc_.targets, 2};
     case Vinstr::jmp: return {&inst.jmp_.target, 1};
     case Vinstr::phijmp: return {&inst.phijmp_.target, 1};
+    case Vinstr::phijcc: return {inst.phijcc_.targets, 2};
     case Vinstr::unwind: return {inst.unwind_.targets, 2};
     case Vinstr::vinvoke: return {inst.vinvoke_.targets, 2};
     case Vinstr::cbcc: return {inst.cbcc_.targets, 2};

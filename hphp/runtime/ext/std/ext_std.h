@@ -18,8 +18,11 @@ class StandardExtension : public Extension {
     initOutput();
     initString();
     initVariable();
+    initFunction();
     initMisc();
     initStreamUserFilters();
+    initFile();
+    initIntrinsics();
   }
 
   void threadInit() {
@@ -34,8 +37,11 @@ class StandardExtension : public Extension {
   void initOutput();
   void initString();
   void initVariable();
+  void initFunction();
   void initMisc();
   void initStreamUserFilters();
+  void initFile();
+  void initIntrinsics();
 
   void threadInitMisc();
 };

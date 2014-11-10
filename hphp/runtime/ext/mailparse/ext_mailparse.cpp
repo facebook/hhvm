@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(mailparse_msg_create) {
-  return NEWOBJ(MimePart)();
+  return newres<MimePart>();
 }
 
 bool HHVM_FUNCTION(mailparse_msg_free, const Resource& mimemail) {
@@ -37,7 +37,7 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
   File *f = resource.getTyped<File>(true);
   if (!f) return false;
 
-  MimePart *p = NEWOBJ(MimePart)();
+  MimePart *p = newres<MimePart>();
   Resource ret(p);
   while (!f->eof()) {
     String line = f->readLine();
@@ -263,7 +263,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
 
-  File *outstream = NEWOBJ(TempFile)(false);
+  File *outstream = newres<TempFile>(false);
   Resource deleter(outstream);
 
   Array return_value;
@@ -299,7 +299,7 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
       item.set(s_origfilename, String(origfilename, CopyString));
 
       /* create a temp file for the data */
-      File *partstream = NEWOBJ(TempFile)(false);
+      File *partstream = newres<TempFile>(false);
       Resource deleter(partstream);
       if (partstream)  {
         nparts++;

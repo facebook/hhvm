@@ -20,8 +20,8 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/ext/php_unicode.h"
 #include "hphp/runtime/ext/unicode_data.h"
-#include "hphp/runtime/ext/ext_process.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -4096,7 +4096,7 @@ static int _php_mbstr_parse_mail_headers(Array &ht, const char *str,
           if (!fld_name.empty() && !fld_val.empty()) {
             /* FIXME: some locale free implementation is
              * really required here,,, */
-            ht.set(f_strtoupper(fld_name), fld_val);
+            ht.set(HHVM_FN(strtoupper)(fld_name), fld_val);
           }
           state = 1;
         }
@@ -4129,7 +4129,7 @@ out:
     if (!fld_name.empty() && !fld_val.empty()) {
       /* FIXME: some locale free implementation is
        * really required here,,, */
-      ht.set(f_strtoupper(fld_name), fld_val);
+      ht.set(HHVM_FN(strtoupper)(fld_name), fld_val);
     }
   }
   return state;
@@ -4419,7 +4419,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   char *all_headers = (char *)device.buffer;
 
-  String cmd = f_escapeshellcmd(extra_cmd);
+  String cmd = HHVM_FN(escapeshellcmd)(extra_cmd);
   bool ret = (!err && php_mail(to_r, encoded_subject.data(),
                                encoded_message.data(),
                                all_headers, cmd.data()));

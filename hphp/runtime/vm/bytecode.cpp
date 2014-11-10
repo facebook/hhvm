@@ -74,12 +74,9 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_math.h"
-#include "hphp/runtime/ext/ext_string.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator.h"
@@ -88,6 +85,9 @@
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -183,10 +183,10 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
   if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
     // Pseudomains inherit the context of their caller
     auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMState(ar);
+    ar = context->getPrevVMStateUNSAFE(ar);
     while (ar != nullptr &&
              (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMState(ar);
+      ar = context->getPrevVMStateUNSAFE(ar);
     }
     if (ar == nullptr) {
       return nullptr;
@@ -347,7 +347,7 @@ void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
     assert(isGlobalScope() && m_depth == 0);
   } else {
     assert(m_depth >= 1);
-    assert(g_context->getPrevVMState(newFP) == oldFP);
+    assert(g_context->getPrevVMStateUNSAFE(newFP) == oldFP);
     m_nvTable.detach(oldFP);
   }
 
@@ -372,7 +372,7 @@ void VarEnv::exitFP(ActRec* fp) {
       smart_delete(this);
     }
   } else {
-    m_nvTable.attach(g_context->getPrevVMState(fp));
+    m_nvTable.attach(g_context->getPrevVMStateUNSAFE(fp));
   }
 }
 
@@ -636,71 +636,71 @@ static std::string toStringElm(const TypedValue* tv) {
     break;
   }
 
-  switch (tv->m_type) {
-  case KindOfUninit:
-    os << "Uninit";
-    break;
-  case KindOfNull:
-    os << "Null";
-    break;
-  case KindOfBoolean:
-    os << (tv->m_data.num ? "True" : "False");
-    break;
-  case KindOfInt64:
-    os << "0x" << std::hex << tv->m_data.num << std::dec;
-    break;
-  case KindOfDouble:
-    os << tv->m_data.dbl;
-    break;
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int len = tv->m_data.pstr->size();
-      bool truncated = false;
-      if (len > 128) {
-        len = 128;
-        truncated = true;
+  do {
+    switch (tv->m_type) {
+    case KindOfUninit:
+      os << "Uninit";
+      continue;
+    case KindOfNull:
+      os << "Null";
+      continue;
+    case KindOfBoolean:
+      os << (tv->m_data.num ? "True" : "False");
+      continue;
+    case KindOfInt64:
+      os << "0x" << std::hex << tv->m_data.num << std::dec;
+      continue;
+    case KindOfDouble:
+      os << tv->m_data.dbl;
+      continue;
+    case KindOfStaticString:
+    case KindOfString:
+      {
+        int len = tv->m_data.pstr->size();
+        bool truncated = false;
+        if (len > 128) {
+          len = 128;
+          truncated = true;
+        }
+        os << tv->m_data.pstr;
+        print_count();
+        os << ":\""
+           << escapeStringForCPP(tv->m_data.pstr->data(), len)
+           << "\"" << (truncated ? "..." : "");
       }
-      os << tv->m_data.pstr;
+      continue;
+    case KindOfArray:
+      assert_refcount_realistic_nz(tv->m_data.parr->getCount());
+      os << tv->m_data.parr;
       print_count();
-      os << ":\""
-         << escapeStringForCPP(tv->m_data.pstr->data(), len)
-         << "\"" << (truncated ? "..." : "");
+      os << ":Array";
+      continue;
+    case KindOfObject:
+      assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
+      os << tv->m_data.pobj;
+      print_count();
+      os << ":Object("
+         << tv->m_data.pobj->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfResource:
+      assert_refcount_realistic_nz(tv->m_data.pres->getCount());
+      os << tv->m_data.pres;
+      print_count();
+      os << ":Resource("
+         << const_cast<ResourceData*>(tv->m_data.pres)
+              ->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfRef:
+      break;
+    case KindOfClass:
+      os << tv->m_data.pcls
+         << ":" << tv->m_data.pcls->name()->data();
+      continue;
     }
-    break;
-  case KindOfArray:
-    assert_refcount_realistic_nz(tv->m_data.parr->getCount());
-    os << tv->m_data.parr;
-    print_count();
-    os << ":Array";
-    break;
-  case KindOfObject:
-    assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
-    os << tv->m_data.pobj;
-    print_count();
-    os << ":Object("
-       << tv->m_data.pobj->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfResource:
-    assert_refcount_realistic_nz(tv->m_data.pres->getCount());
-    os << tv->m_data.pres;
-    print_count();
-    os << ":Resource("
-       << const_cast<ResourceData*>(tv->m_data.pres)
-            ->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfRef:
     not_reached();
-  case KindOfClass:
-    os << tv->m_data.pcls
-       << ":" << tv->m_data.pcls->name()->data();
-    break;
-  default:
-    os << "?";
-    break;
-  }
+  } while (0);
 
   return os.str();
 }
@@ -752,7 +752,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   {
     Offset prevPc = 0;
     TypedValue* prevStackTop = nullptr;
-    ActRec* prevFp = g_context->getPrevVMState(fp, &prevPc, &prevStackTop);
+    ActRec* prevFp = g_context->getPrevVMStateUNSAFE(fp, &prevPc, &prevStackTop);
     if (prevFp != nullptr) {
       toStringFrame(os, prevFp, prevPc, prevStackTop, prefix, false);
     }
@@ -1189,7 +1189,7 @@ ObjectData* ExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = vmfp();
   if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
+    fp = getPrevVMStateUNSAFE(fp);
     if (!fp) return nullptr;
   }
   if (fp->hasThis()) {
@@ -1203,7 +1203,7 @@ Class* ExecutionContext::getContextClass() {
   ActRec* ar = vmfp();
   assert(ar != nullptr);
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateUNSAFE(ar);
     if (!ar) return nullptr;
   }
   return ar->m_func->cls();
@@ -1221,7 +1221,7 @@ StringData* ExecutionContext::getContainingFileName() {
   ActRec* ar = vmfp();
   if (ar == nullptr) return staticEmptyString();
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateUNSAFE(ar);
     if (ar == nullptr) return staticEmptyString();
   }
   Unit* unit = ar->m_func->unit();
@@ -1237,7 +1237,7 @@ int ExecutionContext::getLine() {
   Offset pc = unit ? pcOff() : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar, &pc);
+    ar = getPrevVMStateUNSAFE(ar, &pc);
   }
   if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
@@ -1248,18 +1248,18 @@ Array ExecutionContext::getCallerInfo() {
   Array result = Array::Create();
   ActRec* ar = vmfp();
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateUNSAFE(ar);
   }
   while (ar->m_func->name()->isame(s_call_user_func.get())
          || ar->m_func->name()->isame(s_call_user_func_array.get())) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateUNSAFE(ar);
     if (ar == nullptr) {
       return result;
     }
   }
 
   Offset pc = 0;
-  ar = getPrevVMState(ar, &pc);
+  ar = getPrevVMStateUNSAFE(ar, &pc);
   while (ar != nullptr) {
     if (!ar->m_func->name()->isame(s_call_user_func.get())
         && !ar->m_func->name()->isame(s_call_user_func_array.get())) {
@@ -1271,7 +1271,7 @@ Array ExecutionContext::getCallerInfo() {
         return result;
       }
     }
-    ar = getPrevVMState(ar, &pc);
+    ar = getPrevVMStateUNSAFE(ar, &pc);
   }
   return result;
 }
@@ -1282,11 +1282,11 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
   ActRec* fp = vmfp();
   for (; frame > 0; --frame) {
     if (!fp) break;
-    fp = getPrevVMState(fp);
+    fp = getPrevVMStateUNSAFE(fp);
   }
   if (UNLIKELY(!fp)) return NULL;
   if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
+    fp = getPrevVMStateUNSAFE(fp);
   }
   if (!fp) return nullptr;
   assert(!fp->hasInvName());
@@ -1300,7 +1300,7 @@ void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  if (fp->skipFrame()) fp = getPrevVMStateUNSAFE(fp);
   fp->getVarEnv()->set(name, v);
 }
 
@@ -1308,7 +1308,7 @@ void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
+  if (fp->skipFrame()) fp = getPrevVMStateUNSAFE(fp);
   fp->getVarEnv()->bind(name, v);
 }
 
@@ -1317,7 +1317,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   ActRec *fp = vmfp();
   for (; frame > 0; --frame) {
     if (!fp) break;
-    fp = getPrevVMState(fp);
+    fp = getPrevVMStateUNSAFE(fp);
   }
   if (!fp) {
     return empty_array();
@@ -1992,7 +1992,7 @@ resume:
   not_reached();
 }
 
-void ExecutionContext::invokeFunc(TypedValue* retval,
+void ExecutionContext::invokeFunc(TypedValue* retptr,
                                   const Func* f,
                                   const Variant& args_,
                                   ObjectData* this_ /* = NULL */,
@@ -2000,7 +2000,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
                                   VarEnv* varEnv /* = NULL */,
                                   StringData* invName /* = NULL */,
                                   InvokeFlags flags /* = InvokeNormal */) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
   assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
@@ -2048,7 +2048,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     Unit* toMerge = f->unit();
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
-      *retval = *toMerge->getMainReturn();
+      *retptr = *toMerge->getMainReturn();
       return;
     }
   }
@@ -2091,36 +2091,43 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     auto prepResult = prepareArrayArgs(
       ar, prepArgs,
       vmStack(), 0,
-      (bool) (flags & InvokeCuf), retval);
+      (bool) (flags & InvokeCuf), retptr);
     if (UNLIKELY(!prepResult)) {
-      assert(KindOfNull == retval->m_type);
+      assert(KindOfNull == retptr->m_type);
       return;
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert_flog(
-      vmStack().top() == reentrySP,
-      "vmsp after reentry: {} doesn't match original vmsp: {}",
-      vmStack().top(), reentrySP
-    );
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert_flog(
+        vmStack().top() == reentrySP,
+        "vmsp after reentry: {} doesn't match original vmsp: {}",
+        vmStack().top(), reentrySP
+      );
+      popVMState();
+    };
 
-  enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
+    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
-void ExecutionContext::invokeFuncFew(TypedValue* retval,
+void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      const Func* f,
                                      void* thisOrCls,
                                      StringData* invName,
                                      int argc,
                                      const TypedValue* argv) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
   assert(f->preClass() || !thisOrCls);
@@ -2189,16 +2196,23 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert(vmStack().top() == reentrySP);
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert(vmStack().top() == reentrySP);
+      popVMState();
+    };
 
-  enterVM(ar, StackArgsState::Untrimmed);
+    enterVM(ar, StackArgsState::Untrimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
@@ -2301,10 +2315,10 @@ void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
  * If there is no previous VM frame, this function returns NULL and does not
  * set prevPc and prevSp.
  */
-ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
-                                         Offset* prevPc /* = NULL */,
-                                         TypedValue** prevSp /* = NULL */,
-                                         bool* fromVMEntry /* = NULL */) {
+ActRec* ExecutionContext::getPrevVMStateUNSAFE(const ActRec* fp,
+                                               Offset* prevPc /* = NULL */,
+                                               TypedValue** prevSp /* = NULL */,
+                                               bool* fromVMEntry /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -2456,8 +2470,8 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
   assert(handle->isUncounted() && size > 0);
   assert(handle->type() == KindOfString ||
          handle->type() == KindOfArray);
-  m_apcHandles.m_handles.push_back(handle);
-  m_apcHandles.m_memSize += size;
+  m_apcHandles.push_back(handle);
+  m_apcMemSize += size;
 }
 
 // Treadmill solution for the SharedVariant memory management
@@ -2479,14 +2493,14 @@ public:
 }
 
 void ExecutionContext::manageAPCHandle() {
-  assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
-  if (m_apcHandles.m_handles.size() > 0) {
+  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
+  if (m_apcHandles.size() > 0) {
     std::vector<APCHandle*> handles;
-    handles.swap(m_apcHandles.m_handles);
+    handles.swap(m_apcHandles);
     Treadmill::enqueue(
-        FreedAPCHandle(std::move(handles),
-                       m_apcHandles.m_memSize));
-    APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
+      FreedAPCHandle(std::move(handles), m_apcMemSize)
+    );
+    APCStats::getAPCStats().addPendingDelete(m_apcMemSize);
   }
 }
 
@@ -2602,7 +2616,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   ActRec *fp = vmfp();
   if (fp) {
     for (; frame > 0; --frame) {
-      ActRec* prevFp = getPrevVMState(fp);
+      ActRec* prevFp = getPrevVMStateUNSAFE(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp. This would mean we've
         // been asked to eval in a frame which is beyond the top of the stack.
@@ -2742,7 +2756,7 @@ void ExecutionContext::preventReturnsToTC() {
     ActRec *ar = vmfp();
     while (ar) {
       preventReturnToTC(ar);
-      ar = getPrevVMState(ar);
+      ar = getPrevVMStateUNSAFE(ar);
     }
   }
 }
@@ -3399,6 +3413,10 @@ OPTBLD_INLINE void ExecutionContext::iopUnboxRNop(IOP_ARGS) {
   assert(cellIsPlausible(*vmStack().topTV()));
 }
 
+OPTBLD_INLINE void ExecutionContext::iopRGetCNop(IOP_ARGS) {
+  NEXT();
+}
+
 OPTBLD_INLINE void ExecutionContext::iopNull(IOP_ARGS) {
   NEXT();
   vmStack().pushNull();
@@ -3972,39 +3990,38 @@ OPTBLD_INLINE bool ExecutionContext::cellInstanceOf(
   assert(tv->m_type != KindOfRef);
   Class* cls = nullptr;
   switch (tv->m_type) {
-    case KindOfObject:
-      cls = Unit::lookupClass(ne);
-      if (cls) return tv->m_data.pobj->instanceof(cls);
-      break;
-    case KindOfArray:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_array(cls->name())) {
-        return true;
-      }
-      break;
-    case KindOfString:
-    case KindOfStaticString:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_string(cls->name())) {
-        return true;
-      }
-      break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfResource:
+      return false;
+
     case KindOfInt64:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_int(cls->name())) {
-        return true;
-      }
-      break;
+      return cls && interface_supports_int(cls->name());
+
     case KindOfDouble:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_double(cls->name())) {
-        return true;
-      }
+      return cls && interface_supports_double(cls->name());
+
+    case KindOfStaticString:
+    case KindOfString:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_string(cls->name());
+
+    case KindOfArray:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_array(cls->name());
+
+    case KindOfObject:
+      cls = Unit::lookupClass(ne);
+      return cls && tv->m_data.pobj->instanceof(cls);
+
+    case KindOfRef:
+    case KindOfClass:
       break;
-    default:
-      return false;
   }
-  return false;
+  not_reached();
 }
 
 ALWAYS_INLINE
@@ -4232,71 +4249,80 @@ OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
     int64_t intval;
     SwitchMatch match = SwitchMatch::NORMAL;
 
-    switch (val->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        intval = 0;
-        break;
-
-      case KindOfBoolean:
-        // bool(true) is equal to any non-zero int, bool(false) == 0
-        if (val->m_data.num) {
-          match = SwitchMatch::NONZERO;
-        } else {
+    [&] {
+      switch (val->m_type) {
+        case KindOfUninit:
+        case KindOfNull:
           intval = 0;
-        }
-        break;
+          return;
 
-      case KindOfInt64:
-        intval = val->m_data.num;
-        break;
-
-      case KindOfDouble:
-        match = doubleCheck(val->m_data.dbl, intval);
-        break;
-
-      case KindOfStaticString:
-      case KindOfString: {
-        double dval = 0.0;
-        DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
-        switch (t) {
-          case KindOfNull:
+        case KindOfBoolean:
+          // bool(true) is equal to any non-zero int, bool(false) == 0
+          if (val->m_data.num) {
+            match = SwitchMatch::NONZERO;
+          } else {
             intval = 0;
-            break;
+          }
+          return;
 
-          case KindOfDouble:
-            match = doubleCheck(dval, intval);
-            break;
+        case KindOfInt64:
+          intval = val->m_data.num;
+          return;
 
-          case KindOfInt64:
-            // do nothing
-            break;
+        case KindOfDouble:
+          match = doubleCheck(val->m_data.dbl, intval);
+          return;
 
-          default:
-            not_reached();
+        case KindOfStaticString:
+        case KindOfString: {
+          double dval = 0.0;
+          DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
+          switch (t) {
+            case KindOfNull:
+              intval = 0;
+              break;
+            case KindOfInt64:
+              // do nothing
+              break;
+            case KindOfDouble:
+              match = doubleCheck(dval, intval);
+              break;
+            case KindOfUninit:
+            case KindOfBoolean:
+            case KindOfStaticString:
+            case KindOfString:
+            case KindOfArray:
+            case KindOfObject:
+            case KindOfResource:
+            case KindOfRef:
+            case KindOfClass:
+              not_reached();
+          }
+          tvRefcountedDecRef(val);
+          return;
         }
-        tvRefcountedDecRef(val);
-        break;
+
+        case KindOfArray:
+          match = SwitchMatch::DEFAULT;
+          tvDecRef(val);
+          return;
+
+        case KindOfObject:
+          intval = val->m_data.pobj->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfResource:
+          intval = val->m_data.pres->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfRef:
+        case KindOfClass:
+          break;
       }
-
-      case KindOfArray:
-        match = SwitchMatch::DEFAULT;
-        tvDecRef(val);
-        break;
-
-      case KindOfObject:
-        intval = val->m_data.pobj->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      case KindOfResource:
-        intval = val->m_data.pres->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      default:
-        not_reached();
-    }
+      not_reached();
+    }();
     vmStack().discard();
 
     if (match != SwitchMatch::NORMAL ||
@@ -7213,7 +7239,7 @@ OPTBLD_INLINE void ExecutionContext::iopStrlen(IOP_ARGS) {
     subj->m_type = KindOfInt64;
     subj->m_data.num = ans;
   } else {
-    Variant ans = f_strlen(tvAsVariant(subj));
+    Variant ans = HHVM_FN(strlen)(tvAsVariant(subj));
     tvAsVariant(subj) = ans;
   }
 }
@@ -7294,7 +7320,7 @@ void ExecutionContext::DumpCurUnit(int skip) {
   ActRec* fp = vmfp();
   Offset pc = fp->m_func->unit() ? pcOff() : 0;
   while (skip--) {
-    fp = g_context->getPrevVMState(fp, &pc);
+    fp = g_context->getPrevVMStateUNSAFE(fp, &pc);
   }
   if (fp == nullptr) {
     std::cout << "Don't have a valid fp\n";
@@ -7506,7 +7532,7 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP };
+  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP, vmMInstrState() };
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
   if (debug && savedVM.fp &&
@@ -7542,6 +7568,7 @@ void ExecutionContext::popVMState() {
   vmfp() = savedVM.fp;
   vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
+  vmMInstrState() = savedVM.mInstrState;
 
   if (debug) {
     if (savedVM.fp &&

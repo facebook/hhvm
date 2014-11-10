@@ -11,4 +11,5 @@ bool(false)
 
 Warning: %s
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
-Catchable fatal error: Argument 1 passed to intlcal_to_date_time() must be an instance of IntlCalendar, integer given in %s on line %d
+
+Catchable fatal error: %s

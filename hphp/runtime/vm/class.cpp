@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/enum-cache.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/debug.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -264,7 +264,7 @@ Class::~Class() {
   }
 
   if (m_extra) {
-    free(m_extra.raw());
+    delete m_extra.raw();
   }
 
   // clean enum cache
@@ -416,6 +416,10 @@ const Func* Class::getDeclaredCtor() const {
 
 bool Class::isCppSerializable() const {
   assert(instanceCtor()); // Only call this on CPP classes
+  auto* ndi = m_extra ? m_extra.raw()->m_nativeDataInfo : nullptr;
+  if (ndi != nullptr && ndi->isSerializable()) {
+    return true;
+  }
   auto info = clsInfo();
   auto p = this;
   while ((!info) && (p = p->parent())) {
@@ -1334,8 +1338,13 @@ inline void raiseIncompat(const PreClass* implementor,
 // Check compatibility vs interface and abstract declarations
 void checkDeclarationCompat(const PreClass* preClass,
                             const Func* func, const Func* imeth) {
+  bool relaxedCheck = !RuntimeOption::EnableHipHopSyntax
+                        && func->isNative()
+                        && !imeth->unit()->isHHFile();
+
   const Func::ParamInfoVec& params = func->params();
   const Func::ParamInfoVec& iparams = imeth->params();
+
   auto const ivariadic = imeth->hasVariadicCaptureParam();
   if (ivariadic && !func->hasVariadicCaptureParam()) {
     raiseIncompat(preClass, imeth);
@@ -1356,9 +1365,11 @@ void checkDeclarationCompat(const PreClass* preClass,
       auto const& p = params[i];
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       auto const& ip = iparams[i];
-      if (!p.typeConstraint.compat(ip.typeConstraint)
-          && !ip.typeConstraint.isTypeVar()) {
-        raiseIncompat(preClass, imeth);
+      if (!relaxedCheck) {
+        if (!p.typeConstraint.compat(ip.typeConstraint)
+            && !ip.typeConstraint.isTypeVar()) {
+          raiseIncompat(preClass, imeth);
+        }
       }
       if (!iparams[i].hasDefaultValue()) {
         // The leftmost of imeth's contiguous trailing optional parameters
@@ -1390,13 +1401,15 @@ void checkDeclarationCompat(const PreClass* preClass,
     }
   }
 
-  // Verify that meth provides defaults, starting with the parameter that
-  // corresponds to the leftmost of imeth's contiguous trailing optional
-  // parameters and *not* including any variadic last param (variadics
-  // don't have any default values).
-  for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
-    if (!params[i].hasDefaultValue()) {
-      raiseIncompat(preClass, imeth);
+  if (!relaxedCheck) {
+    // Verify that meth provides defaults, starting with the parameter that
+    // corresponds to the leftmost of imeth's contiguous trailing optional
+    // parameters and *not* including any variadic last param (variadics
+    // don't have any default values).
+    for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
+      if (!params[i].hasDefaultValue()) {
+        raiseIncompat(preClass, imeth);
+      }
     }
   }
 }
@@ -2036,16 +2049,29 @@ void Class::setProperties() {
 
 bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   if (tv1.m_type != tv2.m_type) return false;
+
   switch (tv1.m_type) {
-    case KindOfNull: return true;
+    case KindOfNull:
+      return true;
+
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
-    default: return false;
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      return false;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void Class::importTraitInstanceProp(Class*      trait,
@@ -2431,9 +2457,11 @@ void Class::setRequirements() {
 void Class::setEnumType() {
   if (attrs() & AttrEnum) {
     m_enumBaseTy = m_preClass->enumBaseTy().underlyingDataTypeResolved();
-    // Make sure we've loaded a valid underlying type
-    if (!IS_INT_TYPE(m_enumBaseTy) && !IS_STRING_TYPE(m_enumBaseTy) &&
-        m_enumBaseTy != KindOfAny) {
+
+    // Make sure we've loaded a valid underlying type.
+    if (m_enumBaseTy &&
+        !IS_INT_TYPE(*m_enumBaseTy) &&
+        !IS_STRING_TYPE(*m_enumBaseTy)) {
       raise_error("Invalid base type for enum %s",
                   m_preClass->name()->data());
     }

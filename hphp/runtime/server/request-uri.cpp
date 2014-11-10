@@ -89,7 +89,11 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
         m_origPathInfo = "/" + m_origPathInfo;
       }
     }
-    m_pathInfo = m_origPathInfo;
+    if (transport->isPathInfoSet()) {
+      m_pathInfo =transport->getPathInfo();
+    } else {
+      m_pathInfo = m_origPathInfo;
+    }
     return true;
   }
 
@@ -165,7 +169,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != s_https) {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL.c_str(), redirect, "rewriteURL");
+      transport->redirect(m_rewrittenURL.c_str(), redirect);
       return false;
     }
     splitURL(m_rewrittenURL, m_rewrittenURL, m_queryString);
@@ -195,7 +199,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != s_https) {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL.c_str(), 301, "rewriteURL");
+      transport->redirect(m_rewrittenURL.c_str(), 301);
       return false;
     }
   }

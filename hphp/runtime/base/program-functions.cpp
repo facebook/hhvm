@@ -40,12 +40,12 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/array-tracer/ext_array_tracer.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/ext_fb.h"
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_function.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
@@ -121,6 +121,10 @@ void initialize_repo();
 void (*g_vmProcessInit)();
 
 void timezone_init();
+
+void pcre_init();
+void pcre_reinit();
+void pcre_session_exit();
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -400,7 +404,7 @@ static void handle_exception_helper(bool& ret,
       ret = false;
     } else if (where != ContextOfException::Handler &&
         !context->getExitCallback().isNull() &&
-        f_is_callable(context->getExitCallback())) {
+        HHVM_FN(is_callable)(context->getExitCallback())) {
       Array stack = e.getBacktrace();
       Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
@@ -1401,7 +1405,7 @@ static int execute_program_impl(int argc, char** argv) {
       return 1;
     } catch (const FatalErrorException& e) {
       RuntimeOption::CallUserHandlerOnFatals = false;
-      RuntimeOption::AlwaysLogUnhandledExceptions = true;
+      RuntimeOption::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
       return 1;
     }
@@ -1784,7 +1788,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     return false;
   }
 
-  MM().resetCouldOOM();
+  MM().resetCouldOOM(isStandardRequest());
 
   LitstrTable::get().setReading();
 
@@ -1834,6 +1838,10 @@ void hphp_context_shutdown() {
 
   // Extensions could have shutdown handlers
   Extension::RequestShutdownModules();
+
+  // Extension shutdown could have re-initialized some
+  // request locals
+  context->onRequestShutdown();
 }
 
 void hphp_context_exit(bool shutdown /* = true */) {
@@ -1860,7 +1868,16 @@ void hphp_memory_cleanup() {
   // so we can't destroy it yet
   mm.sweep();
 
-  // But its smart allocated, and has some members that need
+  // We should never have any registered RequestEventHandlers. If we do
+  // something after onRequestShutdown registered a RequestEventHandler.
+  // Its now too late to run the requestShutdown functions, but if we carry
+  // on, requestInit and requestShutdown will never be called again.
+  // I considered just clearing the inited flags; which works for some
+  // RequestEventHandlers - but its a disaster for others. So just fail hard
+  // here.
+  always_assert(!g_context->hasRequestEventHandlers());
+
+  // g_context is smart allocated, and has some members that need
   // cleanup, so destroy it before its too late
   g_context.destroy();
 

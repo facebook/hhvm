@@ -41,7 +41,7 @@ static void bt_handler(int sig) {
                   O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   if (RuntimeOption::EvalDumpRingBufferOnCrash) {
-    Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash);
+    Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash, 0);
   }
 
   if (RuntimeOption::EvalSpinOnCrash) {

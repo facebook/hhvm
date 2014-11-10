@@ -62,7 +62,6 @@ public:
     NoEffect                 = 0x0100, // does not side effect
     HelperFunction           = 0x0200, // runtime helper function
     ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
-    MixedVariableArgument    = 0x0800, // variable args, may or may not be ref'd
     IsFoldable               = 0x01000,// function can be constant folded
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
     AllowOverride            = 0x04000,// allow override of systemlib or builtin

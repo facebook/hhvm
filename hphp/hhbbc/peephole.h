@@ -17,6 +17,9 @@
 #define incl_HPHP_HHBBC_PEEPHOLE_H_
 
 #include <vector>
+#include <utility>
+
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/hhbbc/interp-state.h"
@@ -27,27 +30,67 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Single-block peephole optimization manager.
+ * Very simple peephole rules based on 1-token of lookahead.  This runs behind
+ * the ConcatPeephole.
  */
-class BytecodeAccumulator {
-public:
-  explicit BytecodeAccumulator(std::vector<Bytecode>& stream)
-    : m_stream(stream) {}
+struct BasicPeephole {
+  explicit BasicPeephole(std::vector<Bytecode>& stream)
+    : m_next(stream)
+  {}
+
+  void finalize() { if (m_pending) flush(); }
+
+  void push_back(const Bytecode& op) {
+    if (!m_pending) {
+      m_pending = op;
+      return;
+    }
+
+    auto const peeped = peep(op);
+    flush();
+    if (!peeped) {
+      m_pending = op;
+    }
+  }
 
 private:
-  /*
-   * A working stream used to reorder and accumulate Concat's as ConcatN's.
-   * The stream is reorderable up through the concats-th Concat opcode.
-   */
-  struct ConcatStream {
-    std::vector<std::pair<Bytecode, bool>> stream;
-                  // The working stream; contains bytecode, plus whether
-                  // or not the bytecode is a rewriteable Concat.
-    int stacksz;  // Stack size at the beginning of the stream.
-    int concats;  // Number of concats to accumulate.
-  };
+  bool peep(const Bytecode& next) {
+    auto nop = [&] (Op a, Op b) -> bool {
+      if (m_pending->op == a && next.op == b) {
+        m_pending = bc::Nop {};
+        return true;
+      }
+      return false;
+    };
 
-public:
+    return false
+      || nop(Op::RGetCNop, Op::UnboxRNop)
+      ;
+  }
+
+  void flush() {
+    m_next.push_back(*m_pending);
+    m_pending = folly::none;
+  }
+
+private:
+  std::vector<Bytecode>& m_next;
+  folly::Optional<Bytecode> m_pending;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Perform a block-local optimization that folds sequences of Concat opcodes
+ * into ConcatN opcodes.
+ */
+struct ConcatPeephole {
+  explicit ConcatPeephole(BasicPeephole next)
+    : m_next(next)
+  {}
+  ConcatPeephole(ConcatPeephole&&) = default;
+  ConcatPeephole& operator=(const ConcatPeephole&) = delete;
+
   /*
    * Ensure the output stream is in a finished state.
    */
@@ -58,31 +101,47 @@ public:
    *
    * The State `state' is the pre-step interp state.
    */
-  void append(const Bytecode& op, const State& state,
-              const std::vector<Op> srcStack);
+  void append(const Bytecode& op,
+              const State& state,
+              const std::vector<Op>& srcStack);
 
 private:
   /*
-   * Push to the innermost stream.
+   * A working stream used to reorder and accumulate Concat's as ConcatN's.
+   * The stream is reorderable up through the concats-th Concat opcode.
    */
-  void push_back(const Bytecode& op, bool is_concat = false);
+  struct ConcatStream {
+    std::vector<std::pair<Bytecode,bool>> stream;
+                  // The working stream; contains bytecode, plus whether
+                  // or not the bytecode is a rewriteable Concat.
+    int stacksz;  // Stack size at the beginning of the stream.
+    int concats;  // Number of concats to accumulate.
+  };
 
-  /*
-   * Reorder and rewrite the most nested concat subsequence, and append it to
-   * the previous subsequence in the stack.
-   */
+private:
+  void push_back(const Bytecode& op, bool is_concat = false);
   void squash();
 
 private:
-  // The managed output stream; only appended to.
-  std::vector<Bytecode>& m_stream;
-
+  BasicPeephole m_next;
   // Concat streams, nested at increasing stack depths.
   std::vector<ConcatStream> m_working;
 };
 
 //////////////////////////////////////////////////////////////////////
 
+using Peephole = ConcatPeephole;
+
+/*
+ * Create the chain of peephole objects.  The interface to all the Peepholes is
+ * the same as the interface to ConcatPeephole, above.
+ */
+inline Peephole make_peephole(std::vector<Bytecode>& sink) {
+  return ConcatPeephole(BasicPeephole(sink));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}
 
-#endif // incl_HPHP_HHBBC_PEEPHOLE_H_
+#endif

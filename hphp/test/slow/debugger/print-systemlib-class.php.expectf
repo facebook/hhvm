@@ -1,0 +1,15 @@
+Program %s/print-systemlib-class.php loaded. Type '[r]un' or '[c]ontinue' to go.
+=new stdClass()
+stdClass Object
+(
+)
+
+=new __SystemLib\TarArchiveHandler('/dev/null');
+__SystemLib\TarArchiveHandler Object
+(
+    [entries":"__SystemLib\TarArchiveHandler":private] => HH\Map Object
+        (
+        )
+
+    [contents":"__SystemLib\TarArchiveHandler":private] => HH\Map Ob
+There are 247 more characters. Continue? [y/N]quit

@@ -101,13 +101,6 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 
-#ifdef FACEBOOK
-#include "hphp/facebook/src/compiler/fb_compiler_hooks.h"
-#define RealSimpleFunctionCall FBSimpleFunctionCall
-#else
-#define RealSimpleFunctionCall SimpleFunctionCall
-#endif
-
 #define NEW_EXP0(cls)                                           \
   cls##Ptr(new cls(BlockScopePtr(),                             \
                    getLocation()))
@@ -132,7 +125,7 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls) {
   return SimpleFunctionCallPtr(
-    new RealSimpleFunctionCall(
+    new SimpleFunctionCall(
       EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES,
       name, hadBackslash, params, cls));
 }
@@ -506,7 +499,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     }
 
     SimpleFunctionCallPtr call
-      (new RealSimpleFunctionCall
+      (new SimpleFunctionCall
        (BlockScopePtr(), getLocation(),
         funcName, hadBackslash,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
@@ -531,6 +524,21 @@ void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
                               Token &prop) {
   if (nullsafe) {
     PARSE_ERROR("?-> is not supported for property access");
+  }
+  if (prop.num() == ObjPropXhpAttr) {
+    // Handle "$obj->:xhp-attr" transform
+    ExpressionListPtr paramsExp = NEW_EXP0(ExpressionList);
+    ScalarExpressionPtr name =
+      NEW_EXP(ScalarExpression, T_CONSTANT_ENCAPSED_STRING,
+              prop->text(), true);
+    paramsExp->addElement(name);
+    ScalarExpressionPtr getAttributeMethodName =
+      NEW_EXP(ScalarExpression, T_STRING, std::string("getAttribute"));
+    auto om = NEW_EXP(ObjectMethodExpression, base->exp,
+                      getAttributeMethodName, paramsExp, nullsafe);
+    om->setIsXhpGetAttr();
+    out->exp = om;
+    return;
   }
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
@@ -696,13 +704,25 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   out->exp = expList;
 }
 
+void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
+  if (dynamic_pointer_cast<FunctionCall>(e)) {
+    if (e->is(Expression::KindOfObjectMethodExpression)) {
+      ObjectMethodExpressionPtr om =
+        dynamic_pointer_cast<ObjectMethodExpression>(e);
+      if (om->isXhpGetAttr()) {
+        PARSE_ERROR("Using ->: syntax in write context is not supported");
+      }
+    }
+    PARSE_ERROR("Can't use return value in write context");
+  }
+}
+
 void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
                               bool rhsFirst /* = false */) {
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
-    if (dynamic_pointer_cast<FunctionCall>((*el)[i])) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext((*el)[i]);
+    checkAssignThis((*el)[i]);
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
@@ -727,24 +747,41 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
+void Parser::checkAssignThis(string var) {
+  if (var == "this") {
+    PARSE_ERROR("Cannot re-assign $this");
+  }
+}
+
 void Parser::checkAssignThis(Token &var) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    if (simp->getName() == "this") {
-      PARSE_ERROR("Cannot re-assign $this");
-    }
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionPtr e) {
+  if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(e)) {
+    checkAssignThis(simp->getName());
+  }
+}
+
+void Parser::checkAssignThis(ExpressionListPtr params) {
+  for (int i = 0, count = params->getCount(); i < count; i++) {
+    ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+    checkAssignThis(param->getName());
   }
 }
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
                       bool rhsFirst /* = false */) {
-  if (dynamic_pointer_cast<FunctionCall>(var->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref, rhsFirst);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
+  checkAllowedInWriteContext(var->exp);
   checkAssignThis(var);
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
@@ -776,9 +813,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
   case T_DEC:
   case T_ISSET:
   case T_UNSET:
-    if (dynamic_pointer_cast<FunctionCall>(operand->exp)) {
-      PARSE_ERROR("Can't use return value in write context");
-    }
+    checkAllowedInWriteContext(operand->exp);
   default:
     {
       UnaryOpExpressionPtr exp = NEW_EXP(UnaryOpExpression, operand->exp, op,
@@ -795,9 +830,8 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   BinaryOpExpressionPtr bop =
     NEW_EXP(BinaryOpExpression, operand1->exp, operand2->exp, op);
 
-  if (bop->isAssignmentOp() &&
-      dynamic_pointer_cast<FunctionCall>(operand1->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
+  if (bop->isAssignmentOp()) {
+    checkAllowedInWriteContext(operand1->exp);
   }
 
   out->exp = bop;
@@ -1063,7 +1097,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_clsName, m_containingFuncName);
+      return newClosureName(m_namespace, m_clsName, m_containingFuncName);
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {
@@ -1104,6 +1138,11 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   ExpressionListPtr old_params =
     dynamic_pointer_cast<ExpressionList>(params->exp);
+
+  if (type == FunctionType::Method && old_params &&
+     !modifiersExp->isStatic()) {
+    checkAssignThis(old_params);
+  }
 
   string funcName = getFunctionName(type, name);
 
@@ -1798,6 +1837,19 @@ void Parser::onStatic(Token &out, Token &expr) {
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
 }
 
+void Parser::onHashBang(Token &out, Token &text) {
+  ExpressionPtr exp = NEW_EXP(ScalarExpression, T_STRING, text->text(),
+                              true);
+  ExpressionListPtr expList = NEW_EXP(ExpressionList);
+  expList->addElement(exp);
+  ExpressionPtr callExp = NEW_EXP(SimpleFunctionCall,
+                                  "__SystemLib\\print_hashbang",
+                                  true, expList, ExpressionPtr());
+  ExpStatementPtr expStmt(NEW_STMT(ExpStatement, callExp));
+  out->stmt = expStmt;
+  expStmt->onParse(m_ar, m_file);
+}
+
 void Parser::onEcho(Token &out, Token &expr, bool html) {
   if (html) {
     LocationPtr loc = getLocation();
@@ -1831,10 +1883,8 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt, bool awaitAs) {
-  if (dynamic_pointer_cast<FunctionCall>(name->exp) ||
-      dynamic_pointer_cast<FunctionCall>(value->exp)) {
-    PARSE_ERROR("Can't use return value in write context");
-  }
+  checkAllowedInWriteContext(name->exp);
+  checkAllowedInWriteContext(value->exp);
   if (value->exp && name->num()) {
     PARSE_ERROR("Key element cannot be a reference");
   }
@@ -1921,15 +1971,15 @@ Token Parser::onClosure(ClosureType type,
                         Token& ref,
                         Token& params,
                         Token& cparams,
-                        Token& stmts) {
+                        Token& stmts,
+                        Token& ret) {
   Token out;
   Token name;
 
-  Token retIgnore;
   auto stmt = onFunctionHelper(
     FunctionType::Closure,
     modifiers,
-    retIgnore,
+    ret,
     ref,
     nullptr,
     params,
@@ -2312,7 +2362,7 @@ void Parser::nns(int token, const std::string& text) {
   }
 
   if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
-      token != ';') {
+      token != ';' && token != T_HASHBANG) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }

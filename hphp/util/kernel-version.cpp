@@ -20,35 +20,48 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <stdio.h>
-
+#include <iostream>
 namespace HPHP {
 
 void KernelVersion::parse(const char* s) {
-  int numFields = sscanf(s,
-                         "%d.%d.%d-%d_fbk%d_",
-                         &m_major, &m_dot, &m_dotdot, &m_dash,
-                         &m_fbk);
-  // The first release in each series is x.y, not x.y.0, so we need a different
-  // pattern.
-  if (numFields == 2) {
-    m_dotdot = 0;
-    numFields = sscanf(s,
-                       "%d.%d-%d_fbk%d_",
-                       &m_major, &m_dot, &m_dash, &m_fbk);
+  char dashdot[2];
+  // Assume no part of the uname string will be more than 128 chars
+  char release[128];
+  release[0] = 0;
+  char build[128];
+  build[0] = 0;
+  DEBUG_ONLY auto ret =
+    sscanf(s,
+           "%d.%d%1[.-]%127[A-Za-z0-9]-%127[A-Za-z0-9]_fbk%d_",
+           &m_major, &m_minor, dashdot, release, build, &m_fbk);
+  assert(ret == 2 || ret == 5 || ret == 6);
+  assert(m_major > 0 && m_minor > 0);
+  m_release_str = release[0] == 0 ? "" : (const char*) release;
+  m_build_str = build[0] == 0 ? "" : (const char*) build;
+  // Populate the int-based release and build, if we have all digits in them
+  if (isNumber(m_release_str)) {
+    m_release = atoi(m_release_str.c_str());
   }
-  assert(numFields >= 3);
+  if (isNumber(m_build_str)) {
+    m_build = atoi(m_build_str.c_str());
+  }
 }
 
 KernelVersion::KernelVersion() {
   struct utsname uts;
   DEBUG_ONLY int err = uname(&uts);
   assert(err == 0);
-  m_major = m_dot = m_dotdot = m_dash = m_fbk = -1;
   parse(uts.release);
 }
 
 KernelVersion::KernelVersion(const char* s) {
+  m_major = m_minor = m_fbk = m_release = m_build = -1;
+  m_release_str = m_build_str = "";
   parse(s);
+}
+
+bool KernelVersion::isNumber(const std::string s) {
+  return !s.empty() && s.find_first_not_of("0123456789") == std::string::npos;
 }
 
 }

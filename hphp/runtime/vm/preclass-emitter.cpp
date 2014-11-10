@@ -166,7 +166,7 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   PreClassRepoProxy& pcrp = repo.pcrp();
   int repoId = m_ue.m_repoId;
   int64_t usn = m_ue.m_sn;
-  pcrp.insertPreClass(repoId)
+  pcrp.insertPreClass[repoId]
       .insert(*this, txn, usn, m_id, m_name, m_hoistable);
 
   for (MethodVec::const_iterator it = m_methods.begin();
@@ -318,18 +318,10 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
 // PreClassRepoProxy.
 
 PreClassRepoProxy::PreClassRepoProxy(Repo& repo)
-  : RepoProxy(repo)
-#define PCRP_OP(c, o) \
-  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
-    PCRP_OPS
-#undef PCRP_OP
-{
-#define PCRP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  PCRP_OPS
-#undef PCRP_OP
-}
+    : RepoProxy(repo),
+      insertPreClass{InsertPreClassStmt(repo, 0), InsertPreClassStmt(repo, 1)},
+      getPreClasses{GetPreClassesStmt(repo, 0), GetPreClassesStmt(repo, 1)}
+{}
 
 PreClassRepoProxy::~PreClassRepoProxy() {
 }

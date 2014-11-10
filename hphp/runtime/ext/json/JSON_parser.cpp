@@ -415,8 +415,11 @@ static int dehexchar(char c) {
 static void json_create_zval(Variant &z, StringBuffer &buf, int type,
                              int64_t options) {
   switch (type) {
-  case KindOfInt64:
-    {
+    case KindOfBoolean:
+      z = (buf.data() && (*buf.data() == 't'));
+      return;
+
+    case KindOfInt64: {
       bool bigint = false;
       const char *p = buf.data();
       assert(p);
@@ -449,30 +452,40 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
       } else {
         z = int64_t(strtoll(buf.data(), nullptr, 10));
       }
+      return;
     }
-    break;
-  case KindOfDouble:
-    // Can't use strtod() here since it's locale dependent
-    // JSON specifies using a '.' for decimal separators
-    // regardless of locale.
-    // Fallback on Variant's toDouble() machinery.
-    if (buf.data()) {
+
+    case KindOfDouble:
+      // Can't use strtod() here since it's locale dependent
+      // JSON specifies using a '.' for decimal separators
+      // regardless of locale.
+      // Fallback on Variant's toDouble() machinery.
+      if (buf.data()) {
+        z = buf.detach();
+        z = z.toDouble();
+      } else {
+        z = 0.0;
+      }
+      return;
+
+    case KindOfString:
       z = buf.detach();
-      z = z.toDouble();
-    } else {
-      z = 0.0;
-    }
-    break;
-  case KindOfString:
-    z = buf.detach();
-    break;
-  case KindOfBoolean:
-    z = (buf.data() && (*buf.data() == 't'));
-    break;
-  default:
-    z = uninit_null();
-    break;
+      return;
+
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfStaticString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      z = uninit_null();
+      return;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
@@ -686,7 +699,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           if (collections) {
             // stable_maps is meaningless
-            top = NEWOBJ(c_Map)();
+            top = newobj<c_Map>();
           } else {
           /*</fb>*/
             if (!assoc) {
@@ -757,7 +770,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           }
           /*<fb>*/
           if (collections) {
-            top = NEWOBJ(c_Vector)();
+            top = newobj<c_Vector>();
           } else {
             top = Array::Create();
           }

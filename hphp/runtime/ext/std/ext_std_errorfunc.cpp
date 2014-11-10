@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/ext/ext_file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -174,13 +174,13 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
   }
   case 3:
   {
-    Variant outfile = f_fopen(destination, "a"); // open for append only
+    Variant outfile = HHVM_FN(fopen)(destination, "a"); // open for append only
     if (outfile.isNull()) {
       Logger::Error("can't open error_log file!\n");
       return false;
     }
-    f_fwrite(outfile.toResource(), message);
-    f_fclose(outfile.toResource());
+    HHVM_FN(fwrite)(outfile.toResource(), message);
+    HHVM_FN(fclose)(outfile.toResource());
     return true;
   }
   case 2: // not used per PHP

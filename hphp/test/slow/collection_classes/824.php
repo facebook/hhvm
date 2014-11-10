@@ -6,7 +6,7 @@ $v = Vector {
 foreach ($v->keys() as $x) {
   var_dump($x);
 }
-$mp = StableMap {
+$mp = Map {
 'a' => 1, 2 => 'b', 'z' => 9}
 ;
 foreach ($mp->keys() as $x) {

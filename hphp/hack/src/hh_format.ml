@@ -8,6 +8,8 @@
  *
  *)
 
+open Utils
+
 (*****************************************************************************)
 (* Debugging sections.
  *
@@ -25,9 +27,10 @@
 exception Format_error
 
 let debug () fnl =
-  List.fold_left begin fun () filename ->
+  List.fold_left begin fun () filepath ->
+    let filename = Relative_path.to_absolute filepath in
     try
-      Pos.file := filename;
+      Pos.file := filepath;
       let content = Utils.cat filename in
 
       (* Checking that we can parse the output *)
@@ -110,7 +113,9 @@ let debug () fnl =
 
 let debug_directory dir =
   let path = Path.mk_path dir in
-  let next = Find.make_next_files_php path in
+  let next = compose
+    (rev_rev_map (Relative_path.create Relative_path.Root))
+    (Find.make_next_files_php path) in
   let workers = Worker.make ServerConfig.nbr_procs in
   MultiWorker.call
     (Some workers)
@@ -161,8 +166,9 @@ let parse_args() =
 (* Formats a file in place *)
 (*****************************************************************************)
 
-let format_in_place filename =
-  Pos.file := filename;
+let format_in_place filepath =
+  Pos.file := filepath;
+  let filename = Relative_path.to_absolute filepath in
   match Format_hack.program (Utils.cat filename) with
   | Format_hack.Success result ->
       let oc = open_out filename in
@@ -172,7 +178,7 @@ let format_in_place filename =
   | Format_hack.Internal_error ->
       Some "Internal error\n"
   | Format_hack.Parsing_error errorl ->
-      Some (Errors.to_string (List.hd errorl))
+      Some (Errors.to_string (Errors.to_absolute (List.hd errorl)))
   | Format_hack.Php_or_decl ->
       None
 
@@ -189,7 +195,9 @@ let job_in_place acc fnl =
 
 let directory dir =
   let path = Path.mk_path dir in
-  let next = Find.make_next_files_php path in
+  let next = compose
+    (rev_rev_map (Relative_path.create Relative_path.Root))
+    (Find.make_next_files_php path) in
   let workers = Worker.make ServerConfig.nbr_procs in
   let messages =
     MultiWorker.call
@@ -214,7 +222,7 @@ let format_string from to_ content =
       exit 2
   | Format_hack.Parsing_error error ->
       Printf.fprintf stderr "Parsing error\n%s\n"
-        (Errors.to_string (List.hd error));
+        (Errors.to_string (Errors.to_absolute (List.hd error)));
       exit 2
   | Format_hack.Php_or_decl ->
       exit 0
@@ -254,8 +262,9 @@ let () =
         let root = Path.string_of_path root in
         Printf.printf "Guessed root: %s\n" root;
         root
-    | Some root -> root
+    | Some root -> Path.string_of_path (Path.mk_path root)
   in
+  Relative_path.set_path_prefix Relative_path.Root root;
   let in_place = in_place || diff in
   match files with
   | [] when diff ->
@@ -274,10 +283,12 @@ let () =
       then debug_directory dir
       else directory dir
   | [filename] ->
-      Pos.file := filename;
+      let filename = Path.string_of_path (Path.mk_path filename) in
+      let filepath = Relative_path.create Relative_path.Root filename in
+      Pos.file := filepath;
       if in_place
       then
-        match format_in_place filename with
+        match format_in_place filepath with
         | None -> ()
         | Some error ->
             Printf.fprintf stderr "Error: %s\n" error;

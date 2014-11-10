@@ -7,14 +7,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
-open Utils
-
 val empty_file_info: FileInfo.t
 
 val go:
   Worker.t list option ->
-  get_next:(unit -> string list) ->
-  FileInfo.t SMap.t * Errors.t * SSet.t
+  get_next:(unit -> Relative_path.t list) ->
+  FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
 
 (* used by hack build *)
-val legacy_php_file_info: (string -> FileInfo.t) ref
+val legacy_php_file_info: (Relative_path.t -> FileInfo.t) ref

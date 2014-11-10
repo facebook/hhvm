@@ -84,6 +84,7 @@ struct RegionDesc {
   bool              isSideExitingBlock(BlockId bid) const;
   void              append(const RegionDesc&  other);
   void              prepend(const RegionDesc& other);
+  uint32_t          instrSize() const;
   std::string       toString() const;
 
   template<class Work>

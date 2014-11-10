@@ -70,7 +70,17 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
         global_defs.set(v);
       });
     }
-    for (auto s : succs(unit.blocks[b])) {
+    auto& block = unit.blocks[b];
+    auto lastOp = block.code.back().op;
+    if (lastOp == Vinstr::phijmp || lastOp == Vinstr::phijcc) {
+      for (DEBUG_ONLY auto s : succs(block)) {
+        assert_flog(!unit.blocks[s].code.empty()
+          && unit.blocks[s].code.front().op == Vinstr::phidef,
+          "B{} ends in {} but successor B{} doesn't begin with phidef\n",
+          size_t(b), vinst_names[lastOp], size_t(s));
+      }
+    }
+    for (auto s : succs(block)) {
       if (block_defs[s].empty()) {
         block_defs[s] = local_defs;
       } else {
@@ -143,18 +153,18 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
 bool isBlockEnd(Vinstr& inst) {
   switch (inst.op) {
     // service request-y things
-    case Vinstr::bindjcc1:
+    case Vinstr::bindjcc1st:
     case Vinstr::bindjmp:
     case Vinstr::fallback:
-    case Vinstr::retransopt:
+    case Vinstr::svcreq:
     // control flow
     case Vinstr::jcc:
     case Vinstr::jmp:
     case Vinstr::jmpr:
     case Vinstr::jmpm:
     case Vinstr::phijmp:
+    case Vinstr::phijcc:
     // terminal
-    case Vinstr::resume:
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vinvoke:

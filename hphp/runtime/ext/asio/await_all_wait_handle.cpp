@@ -33,9 +33,8 @@ namespace HPHP {
 
 void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
   auto const waitHandle = static_cast<c_AwaitAllWaitHandle*>(od);
-  auto const size = waitHandle->m_size;
   waitHandle->~c_AwaitAllWaitHandle();
-  MM().objFreeLogged(waitHandle, size);
+  smart_free(waitHandle);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -263,12 +262,11 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 }
 
 c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
-  size_t size = sizeof(c_AwaitAllWaitHandle) +
-                cnt * sizeof(c_WaitableWaitHandle*);
-  void* mem = MM().objMallocLogged(size);
+  auto size = sizeof(c_AwaitAllWaitHandle) +
+              cnt * sizeof(c_WaitableWaitHandle*);
+  auto mem = smart_malloc(size);
   auto const waitHandle = new (mem) c_AwaitAllWaitHandle();
   waitHandle->m_cur = cnt - 1;
-  waitHandle->m_size = size;
   return waitHandle;
 }
 
@@ -277,7 +275,7 @@ void c_AwaitAllWaitHandle::initialize() {
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
-    p_Vector vector = NEWOBJ(c_Vector)();
+    p_Vector vector = newobj<c_Vector>();
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);

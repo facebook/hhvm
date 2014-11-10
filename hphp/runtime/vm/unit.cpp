@@ -26,6 +26,8 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/container/flat_map.hpp>
+
 #include <folly/Format.h>
 
 #include <tbb/concurrent_hash_map.h>
@@ -136,6 +138,28 @@ using ExtendedLineInfoCache = tbb::concurrent_hash_map<
 >;
 ExtendedLineInfoCache s_extendedLineInfo;
 
+using LineTableStash = tbb::concurrent_hash_map<
+  const Unit*,
+  LineTable,
+  pointer_hash<Unit>
+>;
+LineTableStash s_lineTables;
+
+/*
+ * Since line numbers are only used for generating warnings and backtraces, the
+ * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
+ * these mappings lazily from the repo and cache only the ones we actually use.
+*/
+
+using LineMap = boost::container::flat_map<Offset,int>;
+
+using LineInfoCache = tbb::concurrent_hash_map<
+  const Unit*,
+  LineMap,
+  pointer_hash<Unit>
+>;
+LineInfoCache s_lineInfo;
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -166,6 +190,8 @@ Unit::Unit()
 
 Unit::~Unit() {
   s_extendedLineInfo.erase(this);
+  s_lineTables.erase(this);
+  s_lineInfo.erase(this);
 
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
@@ -221,7 +247,7 @@ static SourceLocTable loadSourceLocTable(const Unit* unit) {
 
   Lock lock(g_classesMutex);
   auto& urp = Repo::get().urp();
-  urp.getSourceLocTab(unit->repoID()).get(unit->sn(), ret);
+  urp.getSourceLocTab[unit->repoID()].get(unit->sn(), ret);
   return ret;
 }
 
@@ -292,6 +318,23 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
   return acc->second.lineToOffsetRange;
 }
 
+static LineTable loadLineTable(const Unit* unit) {
+  auto ret = LineTable{};
+  if (unit->repoID() == RepoIdInvalid) {
+    LineTableStash::accessor acc;
+    if (s_lineTables.find(acc, unit)) {
+      return acc->second;
+    }
+    return ret;
+  }
+
+  Lock lock(g_classesMutex);
+  auto& urp = Repo::get().urp();
+  urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
+
+  return ret;
+}
+
 int getLineNumber(const LineTable& table, Offset pc) {
   auto const key = LineEntry(pc, -1);
   auto it = std::upper_bound(begin(table), end(table), key);
@@ -303,7 +346,35 @@ int getLineNumber(const LineTable& table, Offset pc) {
 }
 
 int Unit::getLineNumber(Offset pc) const {
-  return HPHP::getLineNumber(m_lineTable, pc);
+  {
+    LineInfoCache::const_accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      auto const it = lineMap.find(pc);
+      if (it != lineMap.end()) {
+        return it->second;
+      }
+    }
+  }
+
+  auto line = HPHP::getLineNumber(loadLineTable(this), pc);
+
+  {
+    LineInfoCache::accessor acc;
+    if (s_lineInfo.find(acc, this)) {
+      auto& lineMap = acc->second;
+      lineMap.insert(std::pair<Offset,int>(pc, line));
+      return line;
+    }
+  }
+
+  LineMap newLineMap{};
+  newLineMap.insert(std::pair<Offset,int>(pc, line));
+  LineInfoCache::accessor acc;
+  if (s_lineInfo.insert(acc, this)) {
+    acc->second = std::move(newLineMap);
+  }
+  return line;
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
@@ -324,10 +395,11 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
   LineEntry key = LineEntry(pc, -1);
-  auto it = std::upper_bound(m_lineTable.begin(), m_lineTable.end(), key);
-  if (it != m_lineTable.end()) {
+  auto lineTable = loadLineTable(this);
+  auto it = std::upper_bound(lineTable.begin(), lineTable.end(), key);
+  if (it != lineTable.end()) {
     assert(pc < it->pastOffset());
-    Offset base = it == m_lineTable.begin() ? 0 : (it-1)->pastOffset();
+    Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
     range.m_base = base;
     range.m_past = it->pastOffset();
     return true;
@@ -354,6 +426,12 @@ const Func* Unit::getFunc(Offset pc) const {
   return nullptr;
 }
 
+void stashLineTable(const Unit* unit, LineTable table) {
+  LineTableStash::accessor acc;
+  if (s_lineTables.insert(acc, unit)) {
+    acc->second = std::move(table);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
@@ -801,18 +879,25 @@ void Unit::defDynamicSystemConstant(const StringData* cnsName,
 namespace {
 
 TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
-  // If the class is an enum, pull out the actual base type.
+  TypeAliasReq req;
+
   if (isEnum(klass)) {
-    return TypeAliasReq { klass->enumBaseTy(),
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    // If the class is an enum, pull out the actual base type.
+    if (auto const enumType = klass->enumBaseTy()) {
+      req.kind     = *enumType;
+      req.nullable = thisType->nullable;
+      req.name     = thisType->name;
+    } else {
+      req.any  = true;
+      req.name = thisType->name;
+    }
   } else {
-    return TypeAliasReq { KindOfObject,
-                          thisType->nullable,
-                          klass,
-                          thisType->name };
+    req.kind     = KindOfObject;
+    req.nullable = thisType->nullable;
+    req.klass    = klass;
+    req.name     = thisType->name;
   }
+  return req;
 }
 
 TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
@@ -829,10 +914,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    */
 
   if (thisType->kind != KindOfObject) {
-    return TypeAliasReq { thisType->kind,
-                          thisType->nullable,
-                          nullptr,
-                          thisType->name };
+    return TypeAliasReq::From(*thisType);
   }
 
   /*
@@ -857,10 +939,7 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq { targetTd->kind,
-                          thisType->nullable || targetTd->nullable,
-                          targetTd->klass,
-                          thisType->name };
+    return TypeAliasReq::From(*targetTd, *thisType);
   }
 
   if (AutoloadHandler::s_instance->autoloadClassOrType(
@@ -870,14 +949,11 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq { targetTd->kind,
-                            thisType->nullable || targetTd->nullable,
-                            targetTd->klass,
-                            thisType->name };
+      return TypeAliasReq::From(*targetTd, *thisType);
     }
   }
 
-  return TypeAliasReq { KindOfInvalid, false, nullptr, nullptr };
+  return TypeAliasReq::Invalid();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -900,17 +976,12 @@ void Unit::defTypeAlias(Id id) {
     };
     if (thisType->attrs & AttrPersistent) {
       // We may have cached the fully resolved type in a previous request.
-      auto resolved = resolveTypeAlias(thisType);
-      if (resolved.kind != current->kind ||
-          resolved.nullable != current->nullable ||
-          resolved.klass != current->klass) {
+      if (resolveTypeAlias(thisType) != *current) {
         raiseIncompatible();
       }
       return;
     }
-    if (thisType->kind != current->kind ||
-        thisType->nullable != current->nullable ||
-        Unit::lookupClass(typeName) != current->klass) {
+    if (!current->compat(*thisType)) {
       raiseIncompatible();
     }
     return;
@@ -933,7 +1004,7 @@ void Unit::defTypeAlias(Id id) {
   }
 
   auto resolved = resolveTypeAlias(thisType);
-  if (resolved.kind == KindOfInvalid) {
+  if (resolved.invalid) {
     raise_error("Unknown type or class %s", typeName->data());
     return;
   }

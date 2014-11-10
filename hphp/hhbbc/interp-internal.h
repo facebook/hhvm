@@ -192,17 +192,6 @@ Type popF(ISS& env)  { return popT(env); }
 Type popCV(ISS& env) { return popT(env); }
 Type popU(ISS& env)  { return popT(env); }
 
-void popFlav(ISS& env, Flavor flav) {
-  switch (flav) {
-  case Flavor::C: popC(env); break;
-  case Flavor::V: popV(env); break;
-  case Flavor::U: popU(env); break;
-  case Flavor::F: popF(env); break;
-  case Flavor::R: popR(env); break;
-  case Flavor::A: popA(env); break;
-  }
-}
-
 Type topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1];

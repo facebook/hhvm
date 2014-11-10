@@ -385,11 +385,13 @@ public:
     *seeded = 0;
     if (file == NULL) {
       file = RAND_file_name(buffer, sizeof(buffer));
+#ifndef OPENSSL_NO_RAND_EGD
     } else if (RAND_egd(file) > 0) {
       /* if the given filename is an EGD socket, don't
        * write anything back to it */
       *egdsocket = 1;
       return true;
+#endif
     }
 
     if (file == NULL || !RAND_load_file(file, -1)) {
@@ -1649,10 +1651,14 @@ Variant openssl_pkcs7_verify_core(
     goto clean_exit;
   }
   if (ignore_cert_expiration) {
+#if (OPENSSL_VERSION_NUMBER >= 0x10000000)
     // make sure no other callback is specified
     assert(!store->verify_cb);
     // ignore expired certs
     X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
+#else
+    always_assert(false);
+#endif
   }
   in = BIO_new_file(filename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
   if (in == NULL) {
@@ -2286,10 +2292,10 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
   return ret;
 }
 
-int64_t HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
-                                                 int purpose,
-                                         const Array& cainfo /* = null_array */,
-                              const String& untrustedfile /* = null_string */) {
+Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
+                      int purpose,
+                      const Array& cainfo /* = null_array */,
+                      const String& untrustedfile /* = null_string */) {
   int ret = -1;
   STACK_OF(X509) *untrustedchain = NULL;
   X509_STORE *pcainfo = NULL;
@@ -2325,7 +2331,7 @@ int64_t HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   if (untrustedchain) {
     sk_X509_pop_free(untrustedchain, X509_free);
   }
-  return ret;
+  return ret == 1 ? true : ret == 0 ? false : -1;
 }
 
 static bool openssl_x509_export_impl(const Variant& x509, BIO *bio_out,

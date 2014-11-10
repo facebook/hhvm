@@ -19,13 +19,13 @@ function mb_list_encodings_alias_names($name = null) { }
 function mb_list_mime_names($name = null) { }
 function mb_check_encoding($var = null, $encoding = null) { }
 function mb_convert_case($str, $mode, $encoding = null) { }
-function mb_convert_encoding($str, $to_encoding, $from_encoding = null_variant) { }
+function mb_convert_encoding($str, $to_encoding, $from_encoding = null) { }
 function mb_convert_kana($str, $option = null, $encoding = null) { }
 function mb_convert_variables($to_encoding, $from_encoding, &$vars, ...) { }
 function mb_decode_mimeheader($str) { }
 function mb_decode_numericentity($str, $convmap, $encoding = null) { }
-function mb_detect_encoding($str, $encoding_list = null_variant, $strict = null_variant) { }
-function mb_detect_order($encoding_list = null_variant) { }
+function mb_detect_encoding($str, $encoding_list = null, $strict = null) { }
+function mb_detect_order($encoding_list = null) { }
 function mb_encode_mimeheader($str, $charset = null, $transfer_encoding = null, $linefeed = "\r\n", $indent = 0) { }
 function mb_encode_numericentity($str, $convmap, $encoding = null) { }
 function mb_ereg_match($pattern, $str, $option = null) { }
@@ -66,6 +66,6 @@ function mb_strstr($haystack, $needle, $part = false, $encoding = null) { }
 function mb_strtolower($str, $encoding = null) { }
 function mb_strtoupper($str, $encoding = null) { }
 function mb_strwidth($str, $encoding = null) { }
-function mb_substitute_character($substrchar = null_variant) { }
+function mb_substitute_character($substrchar = null) { }
 function mb_substr_count($haystack, $needle, $encoding = null) { }
 function mb_substr($str, $start, $length = 0x7FFFFFFF, $encoding = null) { }

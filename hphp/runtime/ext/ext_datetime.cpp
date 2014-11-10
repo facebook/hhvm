@@ -64,10 +64,10 @@ struct DateGlobals {
 };
 IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
 
-static class DateExtension : public Extension {
+static class DateExtension final : public Extension {
  public:
   DateExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
-  void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",
@@ -162,7 +162,7 @@ Object c_DateTime::t_add(const Object& interval) {
 
 void c_DateTime::t___construct(const String& time /*= "now"*/,
                                const Object& timezone /*= null_object*/) {
-  m_dt = NEWOBJ(DateTime)(TimeStamp::Current());
+  m_dt = newres<DateTime>(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
   } else if (!timezone.isNull()) {
@@ -175,9 +175,9 @@ void c_DateTime::t___construct(const String& time /*= "now"*/,
 Variant c_DateTime::ti_createfromformat(const String& format,
                                         const String& time,
                                         const Object& timezone /*= null_object */) {
-  c_DateTime *datetime = NEWOBJ(c_DateTime);
+  c_DateTime *datetime = newobj<c_DateTime>();
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
-  datetime->m_dt = NEWOBJ(DateTime)(curr, false);
+  datetime->m_dt = newres<DateTime>(curr, false);
   if (!datetime->m_dt->fromString(time, c_DateTimeZone::unwrap(timezone),
                                  format.data(), false)) {
     return false;
@@ -203,7 +203,7 @@ int64_t c_DateTime::GetTimestamp(const Object& obj) {
     return obj.getTyped<c_DateTime>(true)->t_gettimestamp();
   }
   assert(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
-  Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
+  Variant result = obj->o_invoke(s_getTimestamp, empty_array());
   return result.toInt64();
 }
 
@@ -214,8 +214,9 @@ int64_t c_DateTime::GetTimestamp(const ObjectData* od) {
 SmartResource<DateTime> c_DateTime::unwrap(const Object& datetime) {
   if (LIKELY(datetime.is<c_DateTime>())) {
     SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
-    if (cdt.get() == nullptr)
+    if (cdt.get() == nullptr) {
       return SmartResource<DateTime>();
+    }
     return cdt->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
@@ -241,14 +242,12 @@ const StaticString
 Array c_DateTime::ti_getlasterrors() {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
-  Array ret = Array::Create();
-
-  ret.add(s_warning_count, warnings.size());
-  ret.add(s_warnings, warnings);
-  ret.add(s_error_count, errors.size());
-  ret.add(s_errors, errors);
-
-  return ret;
+  return make_map_array(
+    s_warning_count, warnings.size(),
+    s_warnings, warnings,
+    s_error_count, errors.size(),
+    s_errors, errors
+  );
 }
 
 int64_t c_DateTime::t_getoffset() {
@@ -325,7 +324,7 @@ Array c_DateTime::t___sleep() {
 }
 
 void c_DateTime::t___wakeup() {
-  c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+  c_DateTimeZone *ctz = newobj<c_DateTimeZone>();
   Object timezone(ctz);
   ctz->t___construct(o_get(s_timezone).toString());
 
@@ -352,7 +351,7 @@ c_DateTime* c_DateTime::Clone(ObjectData* obj) {
 }
 
 void c_DateTimeZone::t___construct(const String& timezone) {
-  m_tz = NEWOBJ(TimeZone)(timezone);
+  m_tz = newres<TimeZone>(timezone);
   if (!m_tz->isValid()) {
     std::string msg = "DateTimeZone::__construct(): Unknown or bad timezone (";
     msg += timezone.data();
@@ -417,7 +416,7 @@ c_DateTimeZone* c_DateTimeZone::Clone(ObjectData* obj) {
 }
 
 void c_DateInterval::t___construct(const String& interval_spec) {
-  m_di = NEWOBJ(DateInterval)(interval_spec);
+  m_di = newres<DateInterval>(interval_spec);
   if (!m_di->isValid()) {
     std::string msg = "DateInterval::__construct: Invalid interval (";
     msg += interval_spec.data();
@@ -502,7 +501,7 @@ Variant c_DateInterval::t___set(Variant member, Variant value) {
 }
 
 Object c_DateInterval::ti_createfromdatestring(const String& time) {
-  SmartResource<DateInterval> di(NEWOBJ(DateInterval)(time, true));
+  SmartResource<DateInterval> di(newres<DateInterval>(time, true));
   return c_DateInterval::wrap(di);
 }
 
@@ -661,7 +660,7 @@ Variant f_timezone_name_from_abbr(const String& abbr, int gmtoffset /* = -1 */,
 }
 
 Object f_timezone_open(const String& timezone) {
-  c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
+  c_DateTimeZone *ctz = newobj<c_DateTimeZone>();
   Object ret(ctz);
   ctz->t___construct(timezone);
   return ret;
@@ -715,7 +714,7 @@ Variant f_date_parse_from_format(const String& format, const String& date) {
 
 Variant f_date_create(const String& time /* = null_string */,
                       const Object& timezone /* = null_object */) {
-  c_DateTime *cdt = NEWOBJ(c_DateTime)();
+  c_DateTime *cdt = newobj<c_DateTime>();
   Object ret(cdt);
   // Don't set the time here because it will throw if it is bad
   cdt->t___construct();

@@ -1670,26 +1670,6 @@ Composer\Test\Util\ProcessExecutorTest::testSplitLines
 .
 Composer\Test\Util\ProcessExecutorTest::testTimeout
 .
-Composer\Test\Util\RemoteFilesystemTest::testCallbackGetFileSize
-.
-Composer\Test\Util\RemoteFilesystemTest::testCallbackGetNotifyProgress
-.
-Composer\Test\Util\RemoteFilesystemTest::testCallbackGetPassesThrough404
-.
-Composer\Test\Util\RemoteFilesystemTest::testCaptureAuthenticationParamsFromUrl
-.
-Composer\Test\Util\RemoteFilesystemTest::testCopy
-.
-Composer\Test\Util\RemoteFilesystemTest::testGetContents
-.
-Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrl
-.
-Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithAuthorization
-.
-Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithCallOptionsKeepsHeader
-.
-Composer\Test\Util\RemoteFilesystemTest::testGetOptionsForUrlWithStreamOptions
-.
 Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #0
 .
 Composer\Test\Util\SpdxLicenseIdentifierTest::testInvalidArgument with data set #1

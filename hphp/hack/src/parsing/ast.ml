@@ -254,7 +254,7 @@ and expr_ =
   | Array_get of expr * expr option
   | Class_get of id * pstring
   | Class_const of id * pstring
-  | Call of expr * expr list
+  | Call of expr * expr list * expr list
   | Int of pstring
   | Float of pstring
   | String of pstring
@@ -269,7 +269,7 @@ and expr_ =
   | Binop of bop * expr * expr
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
-  | New of id * expr list
+  | New of id * expr list * expr list
   (* Traditional PHP-style closure with a use list. *)
   | Efun of fun_ * id list
   (*
@@ -293,7 +293,7 @@ and afield =
 
 and bop =
 | Plus
-| Minus | Star | Slash | Eqeq | EQeqeq
+| Minus | Star | Slash | Eqeq | EQeqeq | Starstar
 | Diff | Diff2 | AMpamp | BArbar | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
 | Gtgt | Percent | Xor

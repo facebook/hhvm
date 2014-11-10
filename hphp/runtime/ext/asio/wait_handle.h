@@ -99,7 +99,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
  public:
   static constexpr ptrdiff_t stateOff() {
-    return offsetof(c_WaitHandle, o_subclassData.u8[0]);
+    return offsetof(c_WaitHandle, o_subclass_u8);
   }
   static constexpr ptrdiff_t resultOff() {
     return offsetof(c_WaitHandle, m_resultOrException);
@@ -123,14 +123,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     return m_resultOrException.m_data.pobj;
   }
 
-  Kind getKind() const { return static_cast<Kind>(o_subclassData.u8[0] >> 4); }
-  uint8_t getState() const { return o_subclassData.u8[0] & 0x0F; }
+  Kind getKind() const { return static_cast<Kind>(o_subclass_u8 >> 4); }
+  uint8_t getState() const { return o_subclass_u8 & 0x0F; }
   static uint8_t toKindState(Kind kind, uint8_t state) {
     assert((uint8_t)kind < 0x10 && state < 0x10);
     return ((uint8_t)kind << 4) | state;
   }
   void setKindState(Kind kind, uint8_t state) {
-    o_subclassData.u8[0] = toKindState(kind, state);
+    o_subclass_u8 = toKindState(kind, state);
   }
   void setContextVectorIndex(uint32_t idx) {
     m_ctxVecIndex = idx;

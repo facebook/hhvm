@@ -89,7 +89,7 @@ array(52) {
   [5]=>
   string(15) "createAttribute"
   [6]=>
-  string(17) "createAttributens"
+  string(17) "createAttributeNS"
   [7]=>
   string(18) "createCDATASection"
   [8]=>
@@ -275,7 +275,7 @@ array(52) {
   [5]=>
   string(15) "createAttribute"
   [6]=>
-  string(17) "createAttributens"
+  string(17) "createAttributeNS"
   [7]=>
   string(18) "createCDATASection"
   [8]=>

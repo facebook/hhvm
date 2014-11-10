@@ -177,6 +177,7 @@ using FuncTable      = std::vector<FuncEntry>;
  */
 int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
+void stashLineTable(const Unit* unit, LineTable table);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -792,7 +793,6 @@ private:
   unsigned char const* m_bc{nullptr};
   Offset m_bclen{0};
   LowStringPtr m_filepath{nullptr};
-  LineTable m_lineTable;
   MergeInfo* m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};

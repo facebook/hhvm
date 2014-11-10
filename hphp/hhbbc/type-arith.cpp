@@ -192,11 +192,12 @@ Type typeIncDec(IncDecOp op, Type t) {
     }
     return c;
   });
+  if (!resultTy) resultTy = TInitCell;
 
   // We may have inferred a TSStr or TSArr with a value here, but at
   // runtime it will not be static.
-  resultTy = loosen_statics(resultTy);
-  return resultTy;
+  resultTy = loosen_statics(*resultTy);
+  return *resultTy;
 }
 
 Type typeArithSetOp(SetOpOp op, Type lhs, Type rhs) {

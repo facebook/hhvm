@@ -31,7 +31,8 @@ find $TEST_DIRS -name \*.log* -exec sed -i \
     -e 's/VerifyParamCls.*/VerifyParamCls/g' \
     -e 's/code-gen.cpp [0-9]* /code-gen.cpp 0000 /g' \
     -e 's/0x[0-9a-f]*/0xdeadbeef/g' \
-    -e 's/Arr<[0-9]>/Arr/g' {} +
+    -e 's/Arr<[0-9]>/Arr/g' \
+    -e 's/([0-9][0-9]*)/(nn)/' {} +
 
 #
 # Diff against the old results

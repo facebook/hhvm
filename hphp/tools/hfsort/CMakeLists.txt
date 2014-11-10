@@ -1,0 +1,6 @@
+find_package(ZLIB REQUIRED)
+if (ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+    add_executable(hfsort "hfsort.cpp" "hfutil.cpp")
+    target_link_libraries(hfsort folly hphp_util ${ZLIB_LIBRARIES})
+endif(ZLIB_FOUND)

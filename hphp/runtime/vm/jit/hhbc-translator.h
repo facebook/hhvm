@@ -27,7 +27,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -35,6 +34,8 @@
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
+
+//////////////////////////////////////////////////////////////////////
 
 struct PropInfo;
 
@@ -169,13 +170,12 @@ public:
    * Accessors for the current function being compiled, its class and unit, the
    * current SrcKey, and the current eval stack.
    */
-  const Func* curFunc()     const { return m_bcStateStack.back().func; }
+  const Func* curFunc()     const { return m_bcStateStack.back().func(); }
   Class*      curClass()    const { return curFunc()->cls(); }
   Unit*       curUnit()     const { return curFunc()->unit(); }
-  Offset      bcOff()       const { return m_bcStateStack.back().bcOff; }
-  SrcKey      curSrcKey()   const { return SrcKey(curFunc(), bcOff(),
-                                                  resumed()); }
-  bool        resumed()     const { return m_bcStateStack.back().resumed; }
+  Offset      bcOff()       const { return m_bcStateStack.back().offset(); }
+  SrcKey      curSrcKey()   const { return m_bcStateStack.back(); }
+  bool        resumed()     const { return m_bcStateStack.back().resumed(); }
   size_t      spOffset()    const;
   Type        topType(uint32_t i, TypeConstraint c = DataTypeSpecific) const;
 
@@ -224,7 +224,7 @@ public:
   void emitNewMIArray(int capacity);
   void emitNewMSArray(int capacity);
   void emitNewLikeArrayL(int id, int capacity);
-  void emitNewPackedArray(int n);
+  void emitNewPackedArray(uint32_t n);
   void emitNewStructArray(uint32_t n, StringData** keys);
   void emitNewCol(int capacity);
   void emitClone();
@@ -396,11 +396,8 @@ public:
 
   void emitSwitch(const ImmVector&, int64_t base, bool bounded);
   void emitSSwitch(const ImmVector&);
-
-  // freeInline indicates whether we should be doing decrefs inlined in
-  // the TC, or using the generic decref helper.
-  void emitRetC(bool freeInline);
-  void emitRetV(bool freeInline);
+  void emitRetC();
+  void emitRetV();
 
   // miscellaneous ops
   void emitFloor();
@@ -546,6 +543,8 @@ public:
   REGULAR_INSTRS
 #undef CASE
 
+  static constexpr auto kMaxUnrolledInitArray = 8;
+
 private:
   /*
    * MInstrTranslator is responsible for translating one of the m-instr
@@ -578,7 +577,6 @@ private:
     void emitPropGeneric();
     void emitPropSpecialized(const MInstrAttr mia, PropInfo propInfo);
     void emitElem();
-    void emitElemArray(SSATmp* key, bool warn);
     void emitNewElem();
     void emitRatchetRefs();
 
@@ -588,8 +586,6 @@ private:
     void emit##instr##Prop();
     MINSTRS
 #   undef MII
-    void emitIssetEmptyElem(bool isEmpty);
-    void emitIssetEmptyProp(bool isEmpty);
     void emitNotSuppNewElem();
     void emitVGetNewElem();
     void emitSetNewElem();
@@ -600,19 +596,12 @@ private:
     void emitArraySet(SSATmp* key, SSATmp* value);
     SSATmp* emitArrayGet(SSATmp* key);
     void emitProfiledArrayGet(SSATmp* key);
-    void emitArrayIsset();
     SSATmp* emitPackedArrayGet(SSATmp* base, SSATmp* key);
     void emitPackedArrayIsset();
     void emitStringGet(SSATmp* key);
-    void emitStringIsset();
     void emitVectorSet(SSATmp* key, SSATmp* value);
     void emitVectorGet(SSATmp* key);
-    void emitVectorIsset();
     void emitPairGet(SSATmp* key);
-    void emitPairIsset();
-    void emitMapSet(SSATmp* key, SSATmp* value);
-    void emitMapGet(SSATmp* key);
-    void emitMapIsset();
 
     // Generate a catch block that does not perform any final DecRef operations
     // on scratch space, and return its first block.
@@ -631,6 +620,7 @@ private:
     // Misc Helpers
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
+    void setBase(SSATmp*, folly::Optional<Type> = folly::none);
     SSATmp* genMisPtr();
     SSATmp* getInput(unsigned i, TypeConstraint tc);
     SSATmp* getBase(TypeConstraint tc);
@@ -652,8 +642,9 @@ private:
      * inputs, replacing the opcode with the version that returns a new StkPtr
      * if appropriate.
      */
-    template<typename... Srcs>
-    SSATmp* genStk(Opcode op, Block* taken, Srcs... srcs);
+    template<class MaybeExtra, class... Srcs>
+    SSATmp* genStk(Opcode op, Block* taken, const MaybeExtra&, Srcs... srcs);
+    template<class MaybeExtra> struct genStkImpl;
 
     /* Various predicates about the current instruction */
     bool isSimpleBase();
@@ -677,7 +668,7 @@ private:
       // simple opcode on Map* (c_Pair*)
       Pair
     };
-    SimpleOp simpleCollectionOp();
+    SimpleOp computeSimpleCollectionOp();
     // Returns true if it successfully constrained the base, false otherwise.
     bool constrainCollectionOpBase();
     void specializeBaseIfPossible(Type baseType);
@@ -714,10 +705,29 @@ private:
     /* The base for any accesses to the current MInstrState. */
     SSATmp* m_misBase;
 
-    /* The value of the base for the next member operation. Starts as the base
+    /*
+     * The value of the base for the next member operation. Starts as the base
      * for the whole instruction and is updated as the translator makes
-     * progress. */
-    SSATmp* m_base;
+     * progress.
+     *
+     * We have a separate type in case we have more information about the type
+     * than m_base.value->type() has (this may be the case with pointers to
+     * locals or stack slots right now, for example). If m_base.value is not
+     * nullptr, m_base.value->type() is always a supertype of m_base.type, and
+     * m_base.type is always large enough to accommodate the type the base ends
+     * up having at runtime.
+     *
+     * Don't change m_base directly; use setBase, to update m_base.type
+     * automatically.
+     */
+    struct {
+      SSATmp* value = nullptr;
+      Type type{Type::Bottom};
+    } m_base;
+
+    /* Value computed before we do anything to allow better translations for
+     * common, simple operations. */
+    SimpleOp m_simpleOp{SimpleOp::None};
 
     /* The result of the vector instruction. nullptr if the current instruction
      * doesn't produce a result. */
@@ -758,10 +768,6 @@ private:
    * Emit helpers.
    */
   void emitBindMem(SSATmp* ptr, SSATmp* src);
-  void emitEmptyMem(SSATmp* ptr);
-  void emitIncDecMem(bool pre, bool inc, SSATmp* ptr, Block* exit);
-  void checkStrictlyInteger(SSATmp*& key, KeyType& keyType,
-                            bool& checkForInt, bool& converted);
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,
@@ -774,7 +780,7 @@ private:
   void emitNativeImplInlined();
   void emitEndInlinedCommon();
   void emitDecRefLocalsInline();
-  void emitRet(Type type, bool freeInline);
+  void emitRet(Type type);
   void emitCmp(Opcode opc);
   void emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
@@ -791,6 +797,7 @@ private:
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
   SSATmp* emitInstanceOfDImpl(SSATmp*, const StringData*);
+  SSATmp* ldCls(Block* catchBlock, SSATmp* clsName);
 
   folly::Optional<Type> interpOutputType(const NormalizedInstruction&,
                                          folly::Optional<Type>&) const;
@@ -798,9 +805,8 @@ private:
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
                      folly::Optional<Type> pushedType);
 
-  template<typename G, typename L>
-  void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
-                         L loadAddr);
+  enum class ProfGuard { GuardLoc, CheckLoc, GuardStk, CheckStk };
+  void emitProfiledGuard(Type, ProfGuard, int32_t, Block* = nullptr);
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
@@ -810,8 +816,7 @@ private:
   SSATmp* optimizedCallCount();
   SSATmp* optimizedCallGetClass(uint32_t);
   SSATmp* optimizedCallGetCalledClass();
-
-  SSATmp* optimizedAKExists(SSATmp* arr, SSATmp* key);
+  SSATmp* optimizedCallIsObject(SSATmp* src);
 
 private: // Exit trace creation routines.
   Block* makeExit(Offset targetBcOff = -1);
@@ -830,6 +835,8 @@ private: // Exit trace creation routines.
 
   void emitBinaryBitOp(Op op);
   void emitBinaryArith(Op op);
+
+  SSATmp* touchArgsSpillStackAndPopArgs(int numArgs);
 
   /*
    * Create a custom side exit---that is, an exit that does some
@@ -862,53 +869,6 @@ private: // Exit trace creation routines.
                    std::vector<SSATmp*>(),
                    int64_t numPop = 0);
   Block* makeCatchNoSpill();
-
-  /*
-   * CoerceStk can generate two types of exceptions:
-   *
-   * TVCoercionException: Indicates parameter coersion failed and designates
-   *                      a return value to push onto the stack. These types
-   *                      of exceptions will trigger a side exit which will
-   *                      push a return value and continue execution at the
-   *                      next BC.
-   *
-   * PHP exceptions: Potentially generated when user code is reentered as part
-   *                 of coercion. These exceptions should be treated normally
-   *                 and allowed to continue unwinding the stack.
-   *
-   *
-   * The commonBody parameter is a function to be run before checking if we are
-   * handling a TVCoercionException or not. It should contain any common cleanup
-   * shared between this and regular exceptions.
-   *
-   * The sideExitBody parameter is a function to be run before pushing the
-   * return value. It should pop any parameters off the stack and perform the
-   * associated DecRefs if necessary.
-   *
-   * The takenBody parameter is a function to be run should a non-
-   * TVCoercionException be raised from user code. In this case any cleanup
-   * necessary should be performed before the undwinder resumes.
-   *
-   * Three blocks are emitted when this function is called, and they follow this
-   * template, B0 is returned:
-   *
-   * B0:
-   *  BeginCatch
-   *  <<commonBody>>
-   *  CheckSideExit FP, SP -> B2
-   *  -> B1
-   * B1:
-   *  <<sideExitBody>>
-   *  val = LdUnwinderValue<Cell>
-   *  DeleteUnwinderException
-   *  SP = SpillStack<...>
-   *  SyncABIRegs FP, SP
-   *  EagerSyncABIRegs FP, SP
-   *  ReqBindJmp<nextBcOff>
-   * B2:
-   *  <<takenBody>>
-   *  EndCatch FP, SP
-   */
   template<typename CommonBody, typename SideExitBody, typename TakenBody>
   Block* makeParamCoerceExit(CommonBody commonBody, SideExitBody sideExitBody,
                              TakenBody takenBody);
@@ -975,46 +935,46 @@ private:
                          int64_t extraOffset = 0);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
+  SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
 
   SSATmp* unbox(SSATmp* val, Block* exit);
 
   /*
-   * Local instruction helpers. The ldgblExit is so helpers can emit the guard
-   * for LdGbl insts if we're in the pseudomain. The ldrefExit is for helpers
-   * that might need to emit a LdRef to unbox a local.
+   * Local instruction helpers. The ldPMExit is so helpers can emit the guard
+   * for LdLocPseudoMain insts if we're in the pseudomain. The ldrefExit is for
+   * helpers that might need to emit a LdRef to unbox a local.
    */
   SSATmp* ldLoc(uint32_t id,
-                Block* ldgblExit,
+                Block* ldPMExit,
                 TypeConstraint constraint);
-  SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
+  SSATmp* ldLocAddr(uint32_t id);
   SSATmp* ldLocInner(uint32_t id,
                      Block* ldrefExit,
-                     Block* ldgblExit,
+                     Block* ldPMExit,
                      TypeConstraint constraint);
   SSATmp* ldLocInnerWarn(uint32_t id,
                          Block* ldrefExit,
-                         Block* ldgblExit,
+                         Block* ldPMExit,
                          TypeConstraint constraint,
                          Block* catchBlock = nullptr);
 
   SSATmp* pushStLoc(uint32_t id,
                     Block* ldrefExit,
-                    Block* ldgblExit,
+                    Block* ldPMExit,
                     SSATmp* newVal);
   SSATmp* stLoc(uint32_t id,
                 Block* ldrefExit,
-                Block* ldgblExit,
+                Block* ldPMExit,
                 SSATmp* newVal);
   SSATmp* stLocNRC(uint32_t id,
                    Block* ldrefExit,
-                   Block* ldgblExit,
+                   Block* ldPMExit,
                    SSATmp* newVal);
   SSATmp* stLocImpl(uint32_t id,
                     Block* ldrefExit,
-                    Block* ldgblExit,
+                    Block* ldPMExit,
                     SSATmp* newVal,
                     bool decRefOld,
                     bool incRefOld);
@@ -1024,20 +984,13 @@ private:
   bool inPseudoMain() const;
 
 private:
-  // Tracks information about the current bytecode offset and which
-  // function we are in.  Goes in m_bcStateStack; we push and pop as
-  // we deal with inlined calls.
-  struct BcState {
-    Offset bcOff;
-    bool resumed;
-    const Func* func;
-  };
-
-private:
   const TransContext m_context;
   IRUnit m_unit;
   std::unique_ptr<IRBuilder> const m_irb;
-  std::vector<BcState> m_bcStateStack;
+
+  // Tracks information about the current bytecode offset and which function
+  // we are in. We push and pop as we deal with inlined calls.
+  std::vector<SrcKey> m_bcStateStack;
 
   // The id of the profiling translation for the code we're currently
   // generating, if there was one, otherwise kInvalidTransID.
@@ -1063,6 +1016,20 @@ private:
 
   IRGenMode m_mode;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool classIsUnique(const Class* cls) {
+  return RuntimeOption::RepoAuthoritative && cls && (cls->attrs() & AttrUnique);
+}
+
+inline bool classIsUniqueNormalClass(const Class* cls) {
+  return classIsUnique(cls) && isNormalClass(cls);
+}
+
+inline bool classIsUniqueInterface(const Class* cls) {
+  return classIsUnique(cls) && isInterface(cls);
+}
 
 //////////////////////////////////////////////////////////////////////
 

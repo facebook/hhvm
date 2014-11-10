@@ -267,7 +267,6 @@ public:
   static bool RecordErrors;
   static std::string DocJson; // filename to dump doc JSON to
 
-  static bool (*PersistenceHook)(BlockScopeRawPtr scope, FileScopeRawPtr fs);
 private:
   static StringBag OptionStrings;
 

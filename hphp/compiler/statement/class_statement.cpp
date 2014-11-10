@@ -110,9 +110,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     return;
   }
 
-  if (Option::PersistenceHook) {
-    classScope->setPersistent(Option::PersistenceHook(classScope, fs));
-  }
+  classScope->setPersistent(false);
 
   if (m_stmt) {
     MethodStatementPtr constructor;

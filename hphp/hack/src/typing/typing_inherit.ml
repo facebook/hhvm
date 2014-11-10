@@ -130,7 +130,7 @@ let desugar_class_hint = function
 let check_arity pos class_name class_type class_parameters =
   let arity = List.length class_type.tc_tparams in
   if List.length class_parameters <> arity
-  then Errors.class_arity pos class_name arity;
+  then Errors.class_arity pos class_type.tc_pos class_name arity;
   ()
 
 let make_substitution ?this:(this=None) pos class_name class_type class_parameters =
@@ -271,8 +271,9 @@ let from_parent env c =
       | Ast.Cenum ->
         let pos = fst c.c_name in
         let enum_type = pos, Happly (c.c_name, []) in
-        let parent = pos, Happly ((pos, "\\HH\\BuiltinEnum"),
-                                  [enum_type]) in
+        let parent =
+          pos, Happly ((pos, Naming_special_names.Classes.cHH_BuiltinEnum),
+                       [enum_type]) in
         [parent]
       | _ -> c.c_extends
   in

@@ -45,7 +45,7 @@ struct Vpoint {
   explicit Vpoint(size_t n) : n(safe_cast<unsigned>(n)) {}
   /* implicit */ operator size_t() const { return n; }
 private:
-  unsigned n; // index in Vmeta::points
+  unsigned n;
 };
 
 // Vtuple is an index to a tuple in Vunit::tuples
@@ -67,22 +67,12 @@ private:
 
 enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
 
-// holds information generated while assembling final code;
-// designed to outlive instances of Vunit and Vasm.
-struct Vmeta {
-  Vpoint makePoint() {
-    auto next = points.size();
-    points.push_back(nullptr);
-    return Vpoint{next};
-  }
-  jit::vector<CodeAddress> points;
-};
-
 // passes
 void allocateRegisters(Vunit&, const Abi&);
 void optimizeJmps(Vunit&);
 void removeDeadCode(Vunit&);
-void foldImms(Vunit&);
+template<typename Folder> void foldImms(Vunit&);
+void lowerForARM(Vunit&);
 
 /*
  * Get the successors of a block or instruction. If given a non-const
@@ -93,7 +83,11 @@ folly::Range<Vlabel*> succs(Vblock& block);
 folly::Range<const Vlabel*> succs(const Vinstr& inst);
 folly::Range<const Vlabel*> succs(const Vblock& block);
 
+// Sort blocks in reverse-postorder starting from unit.entry
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
+
+// Group blocks into main, cold, and frozen while preserving relative
+// order with each section.
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
 
 }}

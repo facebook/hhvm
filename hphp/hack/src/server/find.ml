@@ -32,7 +32,7 @@ let is_directory path = try Sys.is_directory path with Sys_error _ -> false
 let is_dot_file path =
   let filename = Filename.basename path in
   String.length filename > 0 && filename.[0] = '.'
-  
+
 let is_php_path path =
   not (is_dot_file path) &&
   List.exists (Filename.check_suffix path) extensions &&
@@ -47,8 +47,9 @@ let is_js_path path =
 (* Main entry point *)
 (*****************************************************************************)
 
-let make_next_files_with_find filter root =
-  let ic = Unix.open_process_in ("find "^Path.string_of_path root) in
+let make_next_files_with_find filter  ?(others=[]) root =
+  let paths = String.concat " " (List.map Path.string_of_path (root::others)) in
+  let ic = Unix.open_process_in ("find "^paths) in
   let done_ = ref false in
   (* This is subtle, but to optimize latency, we open the process and
    * then return a closure immediately. That way 'find' gets started
@@ -59,7 +60,7 @@ let make_next_files_with_find filter root =
   fun () ->
     if !done_
     (* see multiWorker.mli, this is the protocol for nextfunc *)
-    then [] 
+    then []
     else
       let result = ref [] in
       let i = ref 0 in
@@ -77,7 +78,7 @@ let make_next_files_with_find filter root =
         done_ := true;
         (try ignore (Unix.close_process_in ic) with _ -> ());
         !result
-          
+
 let make_next_files_php = make_next_files_with_find is_php_path
 let make_next_files_js ~filter =
   make_next_files_with_find (fun x -> is_js_path x && filter x)

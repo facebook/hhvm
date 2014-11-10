@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/base/arch.h"
 
 #include <algorithm>
 
@@ -35,15 +36,17 @@ namespace HPHP { namespace jit {
 using namespace reg;
 using namespace x64;
 
+namespace x64 { struct ImmFolder; }
+
 #define O(name, ...)                                                    \
   static_assert(sizeof(name) <= 48, "vasm struct " #name " is too big");
-X64_OPCODES
+VASM_OPCODES
 #undef O
 static_assert(sizeof(Vinstr) <= 64, "Vinstr should be <= 64 bytes");
 
 const char* vinst_names[] = {
 #define O(name, imms, uses, defs) #name,
-  X64_OPCODES
+  VASM_OPCODES
 #undef O
 };
 
@@ -116,12 +119,11 @@ Vout& Vout::operator<<(const Vinstr& inst) {
 }
 
 Vout Vout::makeBlock() {
-  return {m_meta, m_unit, m_unit.makeBlock(area()), m_origin};
+  return {m_unit, m_unit.makeBlock(area()), m_origin};
 }
 
 // implicit cast to label for initializing branch instructions
 Vout::operator Vlabel() const {
-  assert(empty());
   return m_block;
 }
 
@@ -135,14 +137,14 @@ bool Vout::closed() const {
 
 namespace {
 struct Vgen {
-  Vgen(Vunit& u, Vasm::AreaList& areas, Vmeta* meta, AsmInfo* asmInfo)
+  Vgen(Vunit& u, Vasm::AreaList& areas, AsmInfo* asmInfo)
     : unit(u)
     , backend(mcg->backEnd())
     , areas(areas)
-    , meta(meta)
-    , m_asmInfo(asmInfo)
-    , addrs(u.blocks.size(), nullptr)
-  {}
+    , m_asmInfo(asmInfo) {
+    addrs.resize(u.blocks.size());
+    points.resize(u.next_point);
+  }
   void emit(jit::vector<Vlabel>&);
 
 private:
@@ -154,32 +156,25 @@ private:
   void emit(bindaddr& i);
   void emit(bindcall& i);
   void emit(bindexit& i);
-  void emit(bindjcc1& i);
-  void emit(bindjcc2& i);
+  void emit(bindjcc1st& i);
+  void emit(bindjcc2nd& i);
   void emit(bindjmp& i);
   void emit(callstub& i);
   void emit(contenter& i);
   void emit(copy i);
   void emit(copy2& i);
-  void emit(copyargs& i) { always_assert(false); }
+  void emit(debugtrap& i) { a->int3(); }
   void emit(end& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
-  void emit(incstat& i) { emitIncStat(a->code(), i.stat, i.n, i.force); }
   void emit(kpcall& i);
   void emit(ldpoint& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
-  void emit(nativeimpl& i);
   void emit(nothrow& i);
-  void emit(nop& i) { a->nop(); }
-  void emit(phidef& i) { always_assert(false); }
-  void emit(phijmp& i) { always_assert(false); }
-  void emit(point& i) { meta->points[i.p] = a->frontier(); }
-  void emit(resume& i) { emitServiceReq(a->code(), REQ_RESUME); }
-  void emit(retransopt& i);
+  void emit(point& i) { points[i.p] = a->frontier(); }
   void emit(store& i);
   void emit(syncpoint i);
   void emit(unwind& i);
@@ -197,6 +192,7 @@ private:
   void emit(addlm& i) { a->addl(i.s0, i.m); }
   void emit(addq& i) { commuteSF(i); a->addq(i.s0, i.d); }
   void emit(addqi& i) { binary(i); a->addq(i.s0, i.d); }
+  void emit(addqim& i);
   void emit(addsd& i) { commute(i); a->addsd(i.s0, i.d); }
   void emit(call i);
   void emit(callm& i) { a->call(i.target); }
@@ -250,6 +246,7 @@ private:
   void emit(movsbl& i) { a->movsbl(i.s, i.d); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
+  void emit(nop& i) { a->nop(); }
   void emit(not& i) { unary(i); a->not(i.d); }
   void emit(orq& i) { commuteSF(i); a->orq(i.s0, i.d); }
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
@@ -334,11 +331,10 @@ private:
   Vunit& unit;
   BackEnd& backend;
   Vasm::AreaList& areas;
-  Vmeta* meta;
   AsmInfo* m_asmInfo;
   X64Assembler* a;
   Vlabel current{0}, next{0}; // in linear order
-  jit::vector<CodeAddress> addrs;
+  jit::vector<CodeAddress> addrs, points;
   jit::vector<LabelPatch> jccs, jmps, calls, catches;
   jit::vector<PointPatch> ldpoints;
   jit::hash_map<uint64_t,uint64_t*> cpool;
@@ -369,9 +365,14 @@ template<class Inst> void Vgen::commute(Inst& i) {
   }
 }
 
+void Vgen::emit(addqim& i) {
+  if (i.m.seg == Vptr::FS) a->fs();
+  a->addq(i.s0, i.m.mr());
+}
+
 void Vgen::emit(call i) {
   // warning: this is a copy of emitCall(TCA) in code-gen-helpers-x64.cpp
-  if (a->jmpDeltaFits(i.target) && !Stats::enabled()) {
+  if (a->jmpDeltaFits(i.target)) {
     a->call(i.target);
   } else {
     // can't do a near call; store address in data section.
@@ -381,7 +382,6 @@ void Vgen::emit(call i) {
     // more compact than loading a 64-bit immediate.
     auto addr = mcg->allocLiteral((uint64_t)i.target);
     a->call(rip[(intptr_t)addr]);
-    assert(((int32_t*)a->frontier())[-1] + a->frontier() == (TCA)addr);
   }
 }
 
@@ -477,18 +477,15 @@ void Vgen::emit(bindaddr& i) {
 }
 
 void Vgen::emit(bindcall& i) {
-  emitBindCall(a->code(), frozen(), i.sk, i.callee, i.argc);
-}
-
-void Vgen::emit(nativeimpl& i) {
-  emitCallNativeImpl(a->code(), cold(), i.sk, i.callee, i.argc);
+  mcg->backEnd().prepareForSmash(a->code(), kCallLen);
+  a->call(i.stub);
 }
 
 void Vgen::emit(bindexit& i) {
   emitBindSideExit(a->code(), frozen(), i.cc, i.target, i.trflags);
 }
 
-void Vgen::emit(bindjcc1& i) {
+void Vgen::emit(bindjcc1st& i) {
   backend.prepareForTestAndSmash(a->code(), 0,
                                  TestAndSmashFlags::kAlignJccAndJmp);
   auto const patchAddr = a->frontier();
@@ -508,7 +505,7 @@ void Vgen::emit(bindjcc1& i) {
   a->jmp(jccStub);
 }
 
-void Vgen::emit(bindjcc2& i) {
+void Vgen::emit(bindjcc2nd& i) {
   backend.prepareForSmash(a->code(), kJmpccLen);
   auto def = emitEphemeralServiceReq(frozen(),
                                      mcg->getFreeStub(frozen(),
@@ -610,11 +607,6 @@ void Vgen::emit(mcprep& i) {
   after[-1] = (movAddrUInt << 1) | 1;
   mcg->cgFixups().m_addressImmediates.insert(
     reinterpret_cast<TCA>(~movAddrUInt));
-}
-
-void Vgen::emit(retransopt& i) {
-  emitServiceReq(a->code(), REQ_RETRANSLATE_OPT,
-                 i.sk.toAtomicInt(), i.id);
 }
 
 void Vgen::emit(store& i) {
@@ -737,7 +729,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
       switch (inst.op) {
 #define O(name, imms, uses, defs) \
         case Vinstr::name: emit(inst.name##_); break;
-        X64_OPCODES
+        VASM_OPCODES
 #undef O
       }
     }
@@ -762,7 +754,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
   for (auto& p : ldpoints) {
     auto after_lea = p.instr + 7;
-    auto d = meta->points[p.pos] - after_lea;
+    auto d = points[p.pos] - after_lea;
     assert(deltaFits(d, sz::dword));
     ((int32_t*)after_lea)[-1] = d;
   }
@@ -835,12 +827,11 @@ void Vgen::emit(lea& i) {
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
   assert(size_t(area) == m_areas.size());
   auto b = m_unit.makeBlock(area);
-  Vout v{m_meta, m_unit, b};
+  Vout v{m_unit, b};
   m_areas.push_back(Area{v, cb, cb.frontier()});
   return m_areas.back().out;
 }
 
-// copy of layoutBlocks in layout.cpp
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
   auto blocks = sortBlocks(unit);
   // partition into main/cold/frozen areas without changing relative order,
@@ -881,137 +872,204 @@ static void vector_splice(V& out, size_t idx, size_t count, V& in) {
   in.clear();
 }
 
+// Lower svcreq{} by making copies to abi registers explicit, saving
+// vm regs, and returning to the VM. svcreq{} is guaranteed to be
+// at the end of a block, so we can just keep appending to the same
+// block.
+static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
+  assert(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
+  auto svcreq = inst.svcreq_; // copy it
+  auto origin = inst.origin;
+  auto& argv = unit.tuples[svcreq.args];
+  unit.blocks[b].code.pop_back(); // delete the svcreq instruction
+  Vout v(unit, b, origin);
+
+  RegSet arg_regs = kCrossTraceRegs;
+  VregList arg_dests;
+  for (int i = 0, n = argv.size(); i < n; ++i) {
+    PhysReg d{serviceReqArgRegs[i]};
+    arg_dests.push_back(d);
+    arg_regs |= d;
+  }
+  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  if (svcreq.stub_block) {
+    v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
+  } else {
+    v << ldimm{0, rAsm}; // because persist flag
+  }
+  v << ldimm{svcreq.req, rdi};
+  arg_regs |= rAsm | rdi | rVmFp | rVmSp;
+
+  // Weird hand-shaking with enterTC: reverse-call a service routine.
+  // In the case of some special stubs (m_callToExit, m_retHelper), we
+  // have already unbalanced the return stack by doing a ret to
+  // something other than enterTCHelper.  In that case
+  // SRJmpInsteadOfRet indicates to fake the return.
+  v << ret{arg_regs};
+}
+
+static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
+  auto& blocks = unit.blocks;
+  auto& inst = blocks[b].code[iInst];
+  auto const is_vcall = inst.op == Vinstr::vcall;
+  auto const vcall = inst.vcall_;
+  auto const vinvoke = inst.vinvoke_;
+
+  // Extract all the relevant information from the appropriate instruction.
+  auto const is_smashable = !is_vcall && vinvoke.smashable;
+  auto const call = is_vcall ? vcall.call : vinvoke.call;
+  auto const& vargs = unit.vcallArgs[is_vcall ? vcall.args : vinvoke.args];
+  auto const& stkArgs = vargs.stkArgs;
+  auto const dests = unit.tuples[is_vcall ? vcall.d : vinvoke.d];
+  auto const fixup = is_vcall ? vcall.fixup : vinvoke.fixup;
+  auto const destType = is_vcall ? vcall.destType : vinvoke.destType;
+
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+
+  int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
+  if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
+
+  // Push stack arguments, in reverse order.
+  for (int i = stkArgs.size() - 1; i >= 0; --i) v << push{stkArgs[i]};
+
+  // Get the arguments in the proper registers.
+  RegSet argRegs;
+  auto doArgs = [&](const VregList& srcs, const PhysReg argNames[]) {
+    VregList argDests;
+    for (size_t i = 0; i < srcs.size(); ++i) {
+      auto reg = argNames[i];
+      argDests.push_back(reg);
+      argRegs |= reg;
+    }
+    if (argDests.size()) {
+      v << copyargs{v.makeTuple(srcs),
+                    v.makeTuple(std::move(argDests))};
+    }
+  };
+  doArgs(vargs.args, argNumToRegName);
+  doArgs(vargs.simdArgs, argNumToSIMDRegName);
+
+  // Emit the call.
+  if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
+  else              emitCall(v, call, argRegs);
+
+  // Handle fixup and unwind information.
+  if (fixup.isValid()) v << syncpoint{fixup};
+
+  if (!is_vcall) {
+    auto& targets = vinvoke.targets;
+    v << unwind{{targets[0], targets[1]}};
+
+    // Write out the code so far to the end of b. Remaining code will be
+    // emitted to the next block.
+    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
+  } else if (vcall.nothrow) {
+    v << nothrow{};
+  }
+
+  // Copy the call result to the destination register(s)
+  switch (destType) {
+    case DestType::TV: {
+      // rax contains m_type and m_aux but we're expecting just the type in
+      // the lower bits, so shift the type result register.
+      auto rval = packed_tv ? reg::rdx : reg::rax;
+      auto rtyp = packed_tv ? reg::rax : reg::rdx;
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
+      assert(dests.size() == 2);
+      v << copy2{rval, rtyp, dests[0], dests[1]};
+      break;
+    }
+    case DestType::SIMD: {
+      // rax contains m_type and m_aux but we're expecting just the type in
+      // the lower bits, so shift the type result register.
+      auto rval = packed_tv ? reg::rdx : reg::rax;
+      auto rtyp = packed_tv ? reg::rax : reg::rdx;
+      if (kTypeShiftBits > 0) {
+        v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
+      }
+      assert(dests.size() == 1);
+      pack2(v, rval, rtyp, dests[0]);
+      break;
+    }
+    case DestType::SSA:
+      // copy the single-register result to dests[0]
+      assert(dests.size() == 1);
+      assert(dests[0].isValid());
+      v << copy{reg::rax, dests[0]};
+      break;
+    case DestType::None:
+      assert(dests.empty());
+      break;
+    case DestType::Dbl:
+      // copy the single-register result to dests[0]
+      assert(dests.size() == 1);
+      assert(dests[0].isValid());
+      v << copy{reg::xmm0, dests[0]};
+      break;
+  }
+
+  if (stkArgs.size() > 0) {
+    v << addqi{safe_cast<int32_t>(stkArgs.size() * sizeof(uintptr_t)
+                                  + adjust),
+               reg::rsp,
+               reg::rsp,
+               v.makeReg()};
+  }
+
+  // Insert new instructions to the appropriate block
+  if (is_vcall) {
+    vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
+  } else {
+    vector_splice(blocks[vinvoke.targets[0]].code, 0, 0,
+                  blocks[scratch].code);
+  }
+}
+
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
-static void lowerCalls(Vunit& unit, const Abi& abi) {
+static void lowerForX64(Vunit& unit, const Abi& abi) {
   Timer _t(Timer::vasm_lower);
 
   // Scratch block can change blocks allocation, hence cannot use regular
   // iterators.
   auto& blocks = unit.blocks;
   for (size_t ib = 0; ib < blocks.size(); ++ib) {
+    if (blocks[ib].code.empty()) continue;
+    if (blocks[ib].code.back().op == Vinstr::svcreq) {
+      lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
+    }
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
-      if (inst.op != Vinstr::vcall && inst.op != Vinstr::vinvoke) continue;
-      auto const is_vcall = inst.op == Vinstr::vcall;
-      auto const vcall = inst.vcall_;
-      auto const vinvoke = inst.vinvoke_;
+      switch (inst.op) {
+        case Vinstr::vcall:
+        case Vinstr::vinvoke:
+          lowerVcall(unit, Vlabel{ib}, ii);
+          break;
 
-      // Extract all the relevant information from the appropriate instruction.
-      auto const is_smashable = !is_vcall && vinvoke.smashable;
-      auto const call = is_vcall ? vcall.call : vinvoke.call;
-      auto const& vargs = unit.vcallArgs[is_vcall ? vcall.args : vinvoke.args];
-      auto const& stkArgs = vargs.stkArgs;
-      auto const dests = unit.tuples[is_vcall ? vcall.d : vinvoke.d];
-      auto const fixup = is_vcall ? vcall.fixup : vinvoke.fixup;
-      auto const destType = is_vcall ? vcall.destType : vinvoke.destType;
+        case Vinstr::defvmsp:
+          inst = copy{rVmSp, inst.defvmsp_.d};
+          break;
 
-      auto scratch = unit.makeScratchBlock();
-      SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-      Vout v(nullptr, unit, scratch, inst.origin);
+        case Vinstr::syncvmsp:
+          inst = copy{inst.syncvmsp_.s, rVmSp};
+          break;
 
-      int32_t const adjust = (stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-      if (adjust) v << subqi{adjust, reg::rsp, reg::rsp, v.makeReg()};
+        case Vinstr::syncvmfp:
+          inst = copy{inst.syncvmfp_.s, rVmFp};
+          break;
 
-      // Push stack arguments, in reverse order.
-      for (int i = stkArgs.size() - 1; i >= 0; --i) v << push{stkArgs[i]};
-
-      // Get the arguments in the proper registers.
-      RegSet argRegs;
-      auto doArgs = [&](const VregList& srcs, const PhysReg argNames[]) {
-        VregList argDests;
-        for (size_t i = 0; i < srcs.size(); ++i) {
-          auto reg = argNames[i];
-          argDests.push_back(reg);
-          argRegs.add(reg);
-        }
-        if (argDests.size()) {
-          v << copyargs{v.makeTuple(srcs),
-                        v.makeTuple(std::move(argDests))};
-        }
-      };
-      doArgs(vargs.args, argNumToRegName);
-      doArgs(vargs.simdArgs, argNumToSIMDRegName);
-
-      // Emit the call.
-      if (is_smashable) v << mccall{(TCA)call.address(), argRegs};
-      else              emitCall(v, call, argRegs);
-
-      // Handle fixup and unwind information.
-      if (fixup.isValid()) v << syncpoint{fixup};
-
-      if (!is_vcall) {
-        auto& targets = vinvoke.targets;
-        v << unwind{{targets[0], targets[1]}};
-
-        // Write out the code so far to the end of ib. Remaining code will be
-        // emitted to the next block.
-        vector_splice(blocks[ib].code, ii, 1, unit.blocks[scratch].code);
-      } else if (vcall.nothrow) {
-        v << nothrow{};
-      }
-
-      // Copy the call result to the destination register(s)
-      switch (destType) {
-      case DestType::TV: {
-          // rax contains m_type and m_aux but we're expecting just the type in
-          // the lower bits, so shift the type result register.
-          auto rval = packed_tv ? reg::rdx : reg::rax;
-          auto rtyp = packed_tv ? reg::rax : reg::rdx;
-          if (kTypeShiftBits > 0) {
-            v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-          }
-          assert(dests.size() == 2);
-          v << copy2{rval, rtyp, dests[0], dests[1]};
-        }
-        break;
-      case DestType::SIMD: {
-          // rax contains m_type and m_aux but we're expecting just the type in
-          // the lower bits, so shift the type result register.
-          auto rval = packed_tv ? reg::rdx : reg::rax;
-          auto rtyp = packed_tv ? reg::rax : reg::rdx;
-          if (kTypeShiftBits > 0) {
-            v << shrqi{kTypeShiftBits, rtyp, rtyp, v.makeReg()};
-          }
-          assert(dests.size() == 1);
-          pack2(v, rval, rtyp, dests[0]);
-        }
-        break;
-      case DestType::SSA:
-        // copy the single-register result to dests[0]
-        assert(dests.size() == 1);
-        assert(dests[0].isValid());
-        v << copy{reg::rax, dests[0]};
-        break;
-      case DestType::None:
-        assert(dests.empty());
-        break;
-      case DestType::Dbl:
-        // copy the single-register result to dests[0]
-        assert(dests.size() == 1);
-        assert(dests[0].isValid());
-        v << copy{reg::xmm0, dests[0]};
-        break;
-      }
-
-      if (stkArgs.size() > 0) {
-        v << addqi{safe_cast<int32_t>(stkArgs.size() * sizeof(uintptr_t)
-                                      + adjust),
-                   reg::rsp,
-                   reg::rsp,
-                   v.makeReg()};
-      }
-
-      // Insert new instructions to the appropriate block
-      if (is_vcall) {
-        vector_splice(blocks[ib].code, ii, 1, unit.blocks[scratch].code);
-      } else {
-        vector_splice(unit.blocks[vinvoke.targets[0]].code, 0, 0,
-                      unit.blocks[scratch].code);
+        default:
+          break;
       }
     }
   }
+
+  printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
 
 void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
@@ -1019,10 +1077,10 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
   always_assert(!busy);
   busy = true;
   SCOPE_EXIT { busy = false; };
-  lowerCalls(m_unit, abi);
+  lowerForX64(m_unit, abi);
 
   if (!m_unit.cpool.empty()) {
-    foldImms(m_unit);
+    foldImms<x64::ImmFolder>(m_unit);
   }
   if (m_unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);
@@ -1036,11 +1094,11 @@ void Vasm::finishX64(const Abi& abi, AsmInfo* asmInfo) {
 
   Timer _t(Timer::vasm_gen);
   auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, m_meta, asmInfo).emit(blocks);
+  Vgen(m_unit, m_areas, asmInfo).emit(blocks);
 }
 
-auto const vauto_gp = RegSet(rAsm).add(r11);
-auto const vauto_simd = RegSet(xmm5).add(xmm6).add(xmm7);
+auto const vauto_gp = rAsm | r11;
+auto const vauto_simd = xmm5 | xmm6 | xmm7;
 UNUSED const Abi vauto_abi {
   .gpUnreserved = vauto_gp,
   .gpReserved = x64::abi.gp() - vauto_gp,
@@ -1059,7 +1117,10 @@ Vauto::~Vauto() {
       assert(areas.size() < 2 || cold().empty() || cold().closed());
       assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
-      finishX64(vauto_abi, nullptr);
+      switch (arch()) {
+        case Arch::X64: finishX64(vauto_abi, nullptr); break;
+        case Arch::ARM: finishARM(vauto_abi, nullptr); break;
+      }
       return;
     }
   }

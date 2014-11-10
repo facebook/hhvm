@@ -16,6 +16,7 @@
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
 
 namespace HPHP { namespace jit {
 
@@ -57,6 +58,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   using namespace HPHP::Verifier;
 
   if (!isFuncEntry(context.func, context.bcOffset)) return nullptr;
+  if (context.func->isPseudoMain()) return nullptr;
   FTRACE(1, "function entry for {}: using selectMethod\n",
          context.func->fullName()->data());
 
@@ -66,6 +68,8 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   GraphBuilder gb(arena, context.func);
   auto const graph = gb.build();
   auto const unit = context.func->unit();
+
+  jit::hash_map<Block*,RegionDesc::BlockId> blockMap;
 
   /*
    * Spit out the blocks in a RPO, but skip DV-initializer blocks
@@ -79,8 +83,21 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     auto const start  = unit->offsetOf(b->start);
     auto const length = numInstrs(b->start, b->end);
     SrcKey sk{context.func, start, context.resumed};
-    ret->addBlock(sk, length, spOffset);
+    auto const rblock = ret->addBlock(sk, length, spOffset);
+    blockMap[b] = rblock->id();
     spOffset = -1; // flag SP offset as unknown for all but the first block
+  }
+
+  // Add all the ARCs.
+  for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
+    auto const myId = blockMap[b];
+    auto const numSuccs = numSuccBlocks(b);
+    for (auto i = uint32_t{0}; i < numSuccs; ++i) {
+      auto const succIt = blockMap.find(b->succs[i]);
+      if (succIt != end(blockMap)) {
+        ret->addArc(myId, succIt->second);
+      }
+    }
   }
 
   assert(!ret->empty());

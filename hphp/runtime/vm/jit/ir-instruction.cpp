@@ -67,10 +67,6 @@ bool IRInstruction::naryDst() const {
   return opcodeHasFlags(op(), NaryDest | ModifiesStack);
 }
 
-bool IRInstruction::isNative() const {
-  return opcodeHasFlags(op(), CallsNative);
-}
-
 bool IRInstruction::producesReference(int dstNo) const {
   return opcodeHasFlags(op(), ProducesRC);
 }
@@ -121,7 +117,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case ArraySet:
     case ArraySetRef:
       // Only consumes the reference to its input array
-      return srcNo == 1;
+      return srcNo == 0;
 
     case SpillStack:
       // Inputs 2+ are values to store
@@ -144,6 +140,12 @@ bool IRInstruction::consumesReference(int srcNo) const {
 
     case CreateAFWH:
       return srcNo == 4;
+
+    case InitPackedArray:
+      return srcNo == 1;
+
+    case InitPackedArrayLoop:
+      return srcNo > 0;
 
     default:
       return true;
@@ -179,9 +181,9 @@ bool IRInstruction::isRawLoad() const {
     case LdRef:
     case LdStack:
     case LdElem:
-    case LdProp:
+    case LdContField:
     case LdPackedArrayElem:
-    case LdGbl:
+    case LdLocPseudoMain:
       return true;
 
     default:
@@ -193,7 +195,6 @@ SSATmp* IRInstruction::getPassthroughValue() const {
   assert(isPassthrough());
   assert(is(IncRef,
             CheckType, AssertType, AssertNonNull,
-            StRef,
             ColAddElemC, ColAddNewElemC,
             Mov));
   return src(0);
@@ -243,10 +244,7 @@ SSATmp* IRInstruction::modifiedStkPtr() const {
 
 SSATmp* IRInstruction::previousStkPtr() const {
   assert(modifiesStack());
-  assert(MInstrEffects::supported(this));
-  auto base = src(minstrBaseIdx(this));
-  assert(base->inst()->is(LdStackAddr));
-  return base->inst()->src(0);
+  return src(numSrcs() - 1);
 }
 
 bool IRInstruction::hasMainDst() const {

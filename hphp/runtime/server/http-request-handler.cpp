@@ -27,7 +27,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/server/request-uri.h"
@@ -118,18 +118,35 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   transport->sendRaw((void*)data, len, 200, compressed);
 }
 
+void HttpRequestHandler::logToAccessLog(Transport* transport) {
+  GetAccessLog().onNewRequest();
+  GetAccessLog().log(transport, VirtualHost::GetCurrent());
+}
+
 void HttpRequestHandler::setupRequest(Transport* transport) {
+  MemoryManager::requestInit();
+
   g_context.getCheck();
   GetAccessLog().onNewRequest();
-  // set current virtual host
-  (void)HttpProtocol::GetVirtualHost(transport);
+
+  // Set current virtual host.
+  HttpProtocol::GetVirtualHost(transport);
 }
 
 void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   SCOPE_EXIT { always_assert(MM().empty()); };
+
   const VirtualHost *vhost = VirtualHost::GetCurrent();
   GetAccessLog().log(transport, vhost);
+
+  // HPHP logs may need to access data in ServerStats, so we have to clear the
+  // hashtable after writing the log entry.
+  ServerStats::Reset();
+  m_sourceRootInfo.clear();
+
   hphp_session_exit();
+
+  MemoryManager::requestShutdown();
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
@@ -179,17 +196,18 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
                             vhost->getName().c_str());
 
   // resolve source root
-  SourceRootInfo sourceRootInfo(transport);
-
-  if (sourceRootInfo.error()) {
-    sourceRootInfo.handleError(transport);
+  always_assert(!m_sourceRootInfo.hasValue());
+  m_sourceRootInfo.emplace(transport);
+  if (m_sourceRootInfo->error()) {
+    m_sourceRootInfo->handleError(transport);
     return;
   }
 
   // request URI
   string pathTranslation = m_pathTranslation ?
     vhost->getPathTranslation().c_str() : "";
-  RequestURI reqURI(vhost, transport, pathTranslation, sourceRootInfo.path());
+  RequestURI reqURI(vhost, transport, pathTranslation,
+                    m_sourceRootInfo->path());
   if (reqURI.done()) {
     return; // already handled with redirection or 404
   }
@@ -301,7 +319,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   bool ret = false;
   try {
-    ret = executePHPRequest(transport, reqURI, sourceRootInfo,
+    ret = executePHPRequest(transport, reqURI, m_sourceRootInfo.value(),
                             cachableDynamicContent);
   } catch (...) {
     string emsg;
@@ -333,14 +351,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     hphp_context_exit();
   }
   HttpProtocol::ClearRecord(ret, tmpfile);
-  /*
-   * HPHP logs may need to access data in ServerStats, so we have to
-   * clear the hashtable after writing the log entry.
-   */
-  ServerStats::Reset();
 }
 
-void HttpRequestHandler::abortRequest(Transport *transport) {
+void HttpRequestHandler::abortRequest(Transport* transport) {
   // TODO: t5284137 add some tests for abortRequest
   transport->sendString("Service Unavailable", 503);
   transport->onSendEnd();

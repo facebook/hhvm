@@ -25,14 +25,19 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
 
-BlockList rpoSortCfg(const IRUnit& unit) {
-  BlockList blocks;
+BlockList poSortCfg(const IRUnit& unit) {
+  auto blocks = BlockList{};
   blocks.reserve(unit.numBlocks());
   postorderWalk(unit,
-    [&](Block* block) {
+    [&] (Block* block) {
       blocks.push_back(block);
-    });
+    }
+  );
+  return blocks;
+}
 
+BlockList rpoSortCfg(const IRUnit& unit) {
+  auto blocks = poSortCfg(unit);
   std::reverse(blocks.begin(), blocks.end());
   assert(blocks.size() <= unit.numBlocks());
   return blocks;
@@ -278,7 +283,7 @@ void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
 }
 
 bool insertLoopPreHeaders(IRUnit& unit) {
-  ITRACE(2, "making preheaders");
+  ITRACE(2, "making preheaders\n");
   Trace::Indent _i;
 
   bool changed = false;

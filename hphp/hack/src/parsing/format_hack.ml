@@ -882,7 +882,7 @@ let print_error tok_str env =
     else buffer
   in
   let error =
-    (Pos.string (Pos.make env.lexbuf))^"\n"^
+    (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)))^"\n"^
     (Printf.sprintf "Expected: %s, found: '%s'\n" tok_str !(env.last_str))^
     buffer^"\n"
   in
@@ -903,7 +903,7 @@ let expect_xhp tok_str env = wrap_xhp env begin fun _ ->
   then last_token env
   else begin
     if debug then begin
-      output_string stderr (Pos.string (Pos.make env.lexbuf));
+      output_string stderr (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)));
       flush stderr
     end;
     raise Format_error
@@ -1228,7 +1228,7 @@ and hint_list_paren env =
   expect ")" env
 
 and hint env = wrap env begin function
-  | Tplus | Tminus | Tqm | Tat ->
+  | Tplus | Tminus | Tqm | Tat | Tbslash ->
       last_token env;
       hint env
   | Tpercent | Tcolon ->
@@ -1928,7 +1928,7 @@ and namespace env =
   wrap env begin function
     | Tsc -> back env; semi_colon env;
     | Tlcb ->
-        space env; last_token env;
+        space env; last_token env; newline env;
         right env (stmt_list ~is_toplevel:true);
         expect "}" env
     | _ ->
@@ -2181,7 +2181,7 @@ and expr_remain lowest env =
       expr_remain lowest env
   | Tnewline | Tspace  ->
       expr_remain lowest env
-  | Tplus | Tminus | Tstar | Tslash
+  | Tplus | Tminus | Tstar | Tslash | Tstarstar
   | Teqeqeq | Tpercent
   | Teqeq | Tampamp | Tbarbar
   | Tdiff | Tlt | Tdiff2 | Tgte
@@ -2413,7 +2413,7 @@ and expr_atomic_word env last_tok = function
   | "yield" ->
       last_token env;
       space env;
-      with_priority env Tyield expr
+      with_priority env Tyield array_element_single
   | "clone" ->
       last_token env;
       space env;

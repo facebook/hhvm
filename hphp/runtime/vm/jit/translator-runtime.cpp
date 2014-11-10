@@ -16,18 +16,19 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/vm/jit/mc-generator-internal.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/mc-generator-internal.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/autoload-handler.h"
 
 namespace HPHP {
 
@@ -284,23 +285,31 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   return reinterpretDblAsInt(sd->toDouble());
 }
 
-int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func) {
+int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assert(cellIsPlausible(tv));
 
   switch (tv.m_type) {
-    case KindOfInt64:
-    case KindOfDouble:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
       return convCellToDblHelper(tv);
-    case KindOfString:
+
     case KindOfStaticString:
+    case KindOfString:
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
-    default:
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
       break;
   }
-
-  coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
   not_reached();
 }
 
@@ -319,19 +328,27 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assert(cellIsPlausible(tv));
 
   switch (tv.m_type) {
-    case KindOfInt64:
-    case KindOfDouble:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
       return cellToInt(tv);
-    case KindOfString:
+
     case KindOfStaticString:
+    case KindOfString:
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
-    default:
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
+      break;
+
+    case KindOfRef:
+    case KindOfClass:
       break;
   }
-
-  coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
   not_reached();
 }
 
@@ -341,21 +358,23 @@ const StaticString
 
 StringData* convCellToStrHelper(TypedValue tv) {
   switch (tv.m_type) {
-  case KindOfUninit:
-  case KindOfNull:     return s_empty.get();
-  case KindOfBoolean:  return tv.m_data.num ? s_1.get() : s_empty.get();
-  case KindOfInt64:    return convIntToStrHelper(tv.m_data.num);
-  case KindOfDouble:   return convDblToStrHelper(tv.m_data.num);
-  case KindOfString:   tv.m_data.pstr->incRefCount();
-                       /* fallthrough */
-  case KindOfStaticString:
-                       return tv.m_data.pstr;
-  case KindOfArray:    raise_notice("Array to string conversion");
-                       return array_string.get();
-  case KindOfObject:   return convObjToStrHelper(tv.m_data.pobj);
-  case KindOfResource: return convResToStrHelper(tv.m_data.pres);
-  default:             not_reached();
+    case KindOfUninit:
+    case KindOfNull:          return s_empty.get();
+    case KindOfBoolean:       return tv.m_data.num ? s_1.get() : s_empty.get();
+    case KindOfInt64:         return convIntToStrHelper(tv.m_data.num);
+    case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
+    case KindOfString:        tv.m_data.pstr->incRefCount();
+                              /* fallthrough */
+    case KindOfStaticString:
+                              return tv.m_data.pstr;
+    case KindOfArray:         raise_notice("Array to string conversion");
+                              return array_string.get();
+    case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
+    case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
+    case KindOfRef:
+    case KindOfClass:         break;
   }
+  not_reached();
 }
 
 void raisePropertyOnNonObject() {
@@ -399,11 +418,11 @@ static bool VerifyTypeSlowImpl(const Class* cls,
       // we already know we're checking a non-null object with the
       // class `cls'.  We do however need to check for typedefs to
       // mixed.
-      if (def->kind == KindOfObject) {
+      if (def->any) {
+        return true;
+      } else if (def->kind == KindOfObject) {
         constraint = def->klass;
         if (constraint && cls->classof(constraint)) return true;
-      } else if (def->kind == KindOfAny) {
-        return true;
       }
     }
   }
@@ -420,7 +439,7 @@ void VerifyParamTypeSlow(const Class* cls,
 }
 
 void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyParamTypeFail(param);
   }
 }
@@ -445,7 +464,7 @@ void VerifyRetTypeSlow(const Class* cls,
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
-  if (UNLIKELY(!f_is_callable(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
     VerifyRetTypeFail(value);
   }
 }
@@ -626,22 +645,33 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets) {
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
   int64_t ival;
   double dval;
-  switch (s->isNumericWithVal(ival, dval, 1)) {
-    case KindOfNull:
-      ival = switchBoundsCheck(0, base, nTargets);
-      break;
 
-    case KindOfDouble:
-      ival = switchBoundsCheck(dval, base, nTargets);
-      break;
+  [&] {
+    switch (s->isNumericWithVal(ival, dval, 1)) {
+      case KindOfNull:
+        ival = switchBoundsCheck(0, base, nTargets);
+        return;
+      case KindOfInt64:
+        ival = switchBoundsCheck(ival, base, nTargets);
+        return;
+      case KindOfDouble:
+        ival = switchBoundsCheck(dval, base, nTargets);
+        return;
 
-    case KindOfInt64:
-      ival = switchBoundsCheck(ival, base, nTargets);
-      break;
+      case KindOfUninit:
+      case KindOfBoolean:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }();
 
-    default:
-      not_reached();
-  }
   decRefStr(s);
   return ival;
 }
@@ -779,8 +809,7 @@ Cell lookupCnsUHelper(const TypedValue* tv,
       return c1;
     }
   }
-  c1.m_type = cns->m_type;
-  c1.m_data = cns->m_data;
+  tvDup(*cns, c1);
   return c1;
 }
 
@@ -1224,6 +1253,58 @@ RDS::Handle lookupClsRDSHandle(const StringData* name) {
 void registerLiveObj(ObjectData* obj) {
   assert(RuntimeOption::EnableObjDestructCall && obj->getVMClass()->getDtor());
   g_context->m_liveBCObjs.insert(obj);
+}
+
+namespace MInstrHelpers {
+
+StringData* stringGetI(StringData* str, uint64_t x) {
+  if (LIKELY(x < str->size())) {
+    return str->getChar(x);
+  }
+  if (RuntimeOption::EnableHipHopSyntax) {
+    raise_warning("Out of bounds");
+  }
+  return s_empty.get();
+}
+
+uint64_t pairIsset(c_Pair* pair, int64_t index) {
+  auto result = pair->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+uint64_t vectorIsset(c_Vector* vec, int64_t index) {
+  auto result = vec->get(index);
+  return result ? !cellIsNull(result) : false;
+}
+
+void bindElemC(TypedValue* base, TypedValue key, RefData* val,
+               MInstrState* mis) {
+  base = HPHP::ElemD<false, true>(mis->tvScratch, mis->tvRef, base, key);
+  if (!(base == &mis->tvScratch && base->m_type == KindOfUninit)) {
+    tvBindRef(val, base);
+  }
+}
+
+void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue* val,
+                     MInstrState* mis) {
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
+void setWithRefNewElem(TypedValue* base, TypedValue* val,
+                       MInstrState* mis) {
+  base = NewElem<false>(mis->tvScratch, mis->tvRef, base);
+  if (base != &mis->tvScratch) {
+    tvDup(*val, *base);
+  } else {
+    assert(base->m_type == KindOfUninit);
+  }
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

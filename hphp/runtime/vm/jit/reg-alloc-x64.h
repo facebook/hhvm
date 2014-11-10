@@ -41,7 +41,7 @@ bool loadsCell(Opcode op) {
     case LdStack:
     case LdLoc:
     case LdMem:
-    case LdProp:
+    case LdContField:
     case LdElem:
     case LdPackedArrayElem:
     case LdRef:
@@ -75,7 +75,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // may give it an XMM register, and the instruction will store the whole 16
   // bytes into memory.  Therefore it's important *not* to return true if the
   // TypedValue.m_aux field in memory has important data.  This is the case for
-  // MixedArray elements, // Map elements, and RefData inner values.  We don't
+  // MixedArray elements, Map elements, and RefData inner values.  We don't
   // have StMem in here since it sometimes stores to RefDatas.
   switch (inst.op()) {
     case StRetVal:
@@ -86,10 +86,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     case StProp:
     case StElem:
       return srcIdx == 2;
-
-    case ArraySet:
-    case MapSet:
-      return srcIdx == 3;
 
     case SpillStack:
       return srcIdx >= 2 && srcIdx < inst.numSrcs();

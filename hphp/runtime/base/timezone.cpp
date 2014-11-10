@@ -128,6 +128,7 @@ TimeZoneInfo TimeZone::GetTimeZoneInfo(char* name, const timelib_tzdb* db) {
       always_assert(result.first != s_tzCache->end());
       // A collision occurred, so we don't need our strdup'ed key.
       free(key);
+      tzi = result.first->second;
     }
   }
 
@@ -168,7 +169,7 @@ String TimeZone::CurrentName() {
 }
 
 SmartResource<TimeZone> TimeZone::Current() {
-  return NEWOBJ(TimeZone)(CurrentName());
+  return newres<TimeZone>(CurrentName());
 }
 
 bool TimeZone::SetCurrent(const String& zone) {
@@ -253,8 +254,8 @@ TimeZone::TimeZone(timelib_tzinfo *tzi) {
 }
 
 SmartResource<TimeZone> TimeZone::cloneTimeZone() const {
-  if (!m_tzi) return NEWOBJ(TimeZone)();
-  return NEWOBJ(TimeZone)(timelib_tzinfo_clone(m_tzi.get()));
+  if (!m_tzi) return newres<TimeZone>();
+  return newres<TimeZone>(timelib_tzinfo_clone(m_tzi.get()));
 }
 
 String TimeZone::name() const {

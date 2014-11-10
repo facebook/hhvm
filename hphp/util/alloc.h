@@ -73,6 +73,19 @@ extern "C" {
 #endif
 }
 
+enum class NotNull {};
+
+/*
+ * The placement-new provided by the standard library is required by the
+ * C++ specification to perform a null check because it is marked with noexcept
+ * or throw() depending on the compiler version. This override of placement
+ * new doesn't use either of these, so it is allowed to omit the null check.
+ */
+inline void* operator new(size_t, NotNull, void* location) {
+  assert(location);
+  return location;
+}
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

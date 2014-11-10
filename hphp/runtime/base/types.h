@@ -124,7 +124,7 @@ enum class Mode {
 }
 
 namespace Collection {
-enum Type : uint16_t { // stored in ObjectData::o_subclassData
+enum Type : uint8_t { // stored in ObjectData::o_subclassData
   // values must be contiguous integers (for ArrayIter::initFuncTable)
   InvalidType = 0,
   VectorType = 1,

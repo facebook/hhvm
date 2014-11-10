@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 
 // Include last to localize effects to this file
@@ -47,8 +46,6 @@ TRACE_SET_MOD(hhir);
 #define C      CanCSE
 #define E      Essential
 #define Er     MayRaiseError
-#define N      CallsNative|MayRaiseError
-#define NNT    CallsNative
 #define PRc    ProducesRC
 #define CRc    ConsumesRC
 #define T      Terminal
@@ -62,10 +59,12 @@ TRACE_SET_MOD(hhir);
 #define ND             0
 #define D(n)           HasDest
 #define DofS(n)        HasDest
-#define DUnbox(n)      HasDest
 #define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
 #define DParam         HasDest
+#define DParamPtr(k)   HasDest
+#define DUnboxPtr      HasDest
+#define DBoxPtr        HasDest
 #define DAllocObj      HasDest
 #define DArrElem       HasDest
 #define DArrPacked     HasDest
@@ -77,7 +76,6 @@ TRACE_SET_MOD(hhir);
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
 #define DSubtract(n,t) HasDest
-#define DLdRaw         HasDest
 #define DCns           HasDest
 
 OpInfo g_opInfo[] = {
@@ -108,10 +106,12 @@ OpInfo g_opInfo[] = {
 #undef ND
 #undef D
 #undef DofS
-#undef DUnbox
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamPtr
+#undef DUnboxPtr
+#undef DBoxPtr
 #undef DArrElem
 #undef DArrPacked
 #undef DAllocObj
@@ -123,7 +123,6 @@ OpInfo g_opInfo[] = {
 #undef DPtrToParam
 #undef DBuiltin
 #undef DSubtract
-#undef DLdRaw
 #undef DCns
 
 //////////////////////////////////////////////////////////////////////
@@ -467,10 +466,6 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case NeqInt:return NeqDbl;
   default: always_assert(0);
   }
-}
-
-bool isRefCounted(SSATmp* tmp) {
-  return tmp->type().maybeCounted() && !tmp->isConst();
 }
 
 int32_t spillValueCells(const IRInstruction* spillStack) {

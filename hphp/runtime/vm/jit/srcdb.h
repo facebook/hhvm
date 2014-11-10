@@ -270,12 +270,12 @@ public:
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
 
-  SrcRec* find(const SrcKey& sk) const {
+  SrcRec* find(SrcKey sk) const {
     SrcRec* const* p = m_map.find(sk.toAtomicInt());
     return p ? *p : 0;
   }
 
-  SrcRec* insert(const SrcKey& sk) {
+  SrcRec* insert(SrcKey sk) {
     return *m_map.insert(sk.toAtomicInt(), new SrcRec);
   }
 

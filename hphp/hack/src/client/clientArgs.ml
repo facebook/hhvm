@@ -277,7 +277,7 @@ let parse_restart_args () =
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1
-  in CRestart {ClientRestart.root = root; ClientRestart.wait = !wait;}
+  in CRestart {ClientStart.root = root; ClientStart.wait = !wait;}
 
 let parse_status_args () =
   let usage =
@@ -356,21 +356,23 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CBuild { ServerMsg.
-           root = root;
-           steps = !steps;
-           no_steps = !no_steps;
-           run_scripts = !run_scripts;
-           serial = !serial;
-           test_dir = !test_dir;
-           grade = !grade;
-           list_classes = !list_classes;
-           is_push = !is_push;
-           clean = !clean;
-           clean_before_build = !clean_before_build;
-           check = !check;
-           verbose = !verbose;
-         }
+  CBuild { ClientBuild.
+    root = root;
+    build_opts = { ServerMsg.
+      steps = !steps;
+      no_steps = !no_steps;
+      run_scripts = !run_scripts;
+      serial = !serial;
+      test_dir = !test_dir;
+      grade = !grade;
+      list_classes = !list_classes;
+      is_push = !is_push;
+      clean = !clean;
+      clean_before_build = !clean_before_build;
+      check = !check;
+      verbose = !verbose;
+    }
+  }
 
 let parse_prolog_args () =
   let usage =
@@ -378,18 +380,14 @@ let parse_prolog_args () =
       "Usage: %s prolog [WWW-ROOT]\n\
       run prolog interpreter on code database\n"
       Sys.argv.(0) in
-  let options = [
-  ] in
+  let options = [] in
   let args = parse_without_command options usage "prolog" in
   let root =
     match args with
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CProlog { ClientProlog.
-           root;
-         }
-
+  CProlog { ClientProlog.root; }
 
 let parse_args () =
   match parse_command () with

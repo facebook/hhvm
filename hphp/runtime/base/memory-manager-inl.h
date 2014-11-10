@@ -36,18 +36,18 @@ static_assert(
 inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
 
 template<class T, class... Args> T* smart_new(Args&&... args) {
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  auto const mem = smart_malloc(sizeof(T));
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
+    smart_free(mem);
     throw;
   }
 }
 
 template<class T> void smart_delete(T* t) {
   t->~T();
-  MM().smartFreeSize(t, sizeof *t);
+  smart_free(t);
 }
 
 template<class T> T* smart_new_array(size_t count) {
@@ -132,14 +132,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct MemoryManager::SmallNode {
-  size_t padbytes;  // <= kMaxSmartSize means small block
-};
-
-struct MemoryManager::FreeList::Node {
-  Node* next;
-};
-
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
@@ -147,7 +139,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 }
 
 inline void MemoryManager::FreeList::push(void* val) {
-  auto const node = static_cast<Node*>(val);
+  auto const node = static_cast<FreeNode*>(val);
   node->next = head;
   head = node;
 }
@@ -259,7 +251,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   unsigned i = smartSize2Index(bytes);
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(debugAddExtra(MemoryManager::smartSizeClass(bytes)), i);
+    p = slabAlloc(bytes, i);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
 
@@ -272,6 +264,9 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes <= kMaxSmartSize + kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
+  if (UNLIKELY(m_profctx.flag)) {
+    return smartFreeSizeBig(ptr, bytes);
+  }
   unsigned i = smartSize2Index(bytes);
   m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
   m_stats.usage -= bytes;
@@ -305,7 +300,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   // them on allocation, we also need to adjust for them negatively on free.
   JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
   FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  smartFreeBig(static_cast<SweepNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  smartFreeBig(static_cast<BigNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -463,7 +458,7 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 ALWAYS_INLINE
 void MemoryManager::setObjectTracking(bool val) {
   if (val) {
-    m_instances.clear();
+    m_instances = std::unordered_set<void*>();
   }
   m_trackingInstances = val;
 }

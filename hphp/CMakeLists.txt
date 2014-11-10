@@ -65,6 +65,7 @@ add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")
 
 add_subdirectory(tools/bootstrap)
+add_subdirectory(tools/hfsort)
 
 add_subdirectory(compiler)
 add_subdirectory(hack)

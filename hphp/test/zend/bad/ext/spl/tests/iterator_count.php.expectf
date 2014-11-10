@@ -1,5 +1,0 @@
-
-Warning: %s
-
-Warning: %s
-Catchable fatal error: Argument 1 passed to iterator_count() must implement interface Traversable, %unicode_string_optional% given %s

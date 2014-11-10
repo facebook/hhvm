@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/tiny-vector.h"
 
+#include <algorithm>
+
 namespace HPHP {
 
 #define INC_OUTPUTPOS(a,b)                                              \
@@ -294,7 +296,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'a':
     case 'A':
     case 'Z': {
-      int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
+      int arg_cp = (code != 'Z') ? arg : std::max(0, arg - 1);
       memset(&output[outputpos], (code != 'A') ? '\0' : ' ', arg);
       val = argv[currentarg++].toString();
       s = val.c_str();

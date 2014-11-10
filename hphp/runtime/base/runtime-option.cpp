@@ -67,14 +67,34 @@ std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::PidFile = "www.pid";
 
+bool RuntimeOption::EnableHipHopSyntax = false;
+bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
+bool RuntimeOption::EnableShortTags = true;
+bool RuntimeOption::EnableAspTags = false;
+bool RuntimeOption::EnableXHP = false;
+bool RuntimeOption::EnableObjDestructCall = true;
+bool RuntimeOption::EnableEmitSwitch = true;
+bool RuntimeOption::EnableEmitterStats = true;
+bool RuntimeOption::EnableIntrinsicsExtension = false;
+bool RuntimeOption::CheckSymLink = true;
+int RuntimeOption::MaxUserFunctionId = (2 * 65536);
+bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableZendCompat = false;
+bool RuntimeOption::EnableZendSorting = false;
+bool RuntimeOption::TimeoutsUseWallTime = true;
+bool RuntimeOption::CheckFlushOnUserClose = true;
+bool RuntimeOption::EvalAuthoritativeMode = false;
+bool RuntimeOption::IntsOverflowToInts = false;
+
 std::string RuntimeOption::LogFile;
 std::string RuntimeOption::LogFileSymLink;
 int RuntimeOption::LogHeaderMangle = 0;
 bool RuntimeOption::AlwaysEscapeLog = false;
-bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
+bool RuntimeOption::AlwaysLogUnhandledExceptions =
+  RuntimeOption::EnableHipHopSyntax;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
-bool RuntimeOption::CallUserHandlerOnFatals = true;
+bool RuntimeOption::CallUserHandlerOnFatals = false;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
@@ -110,7 +130,8 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
-std::string RuntimeOption::ServerPrimaryIP;
+std::string RuntimeOption::ServerPrimaryIPv4;
+std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
@@ -321,24 +342,6 @@ std::map<std::string, std::string> RuntimeOption::EnvVariables;
 std::string RuntimeOption::LightProcessFilePrefix = "./lightprocess";
 int RuntimeOption::LightProcessCount = 0;
 
-bool RuntimeOption::EnableHipHopSyntax = false;
-bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
-bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnableAspTags = false;
-bool RuntimeOption::EnableXHP = false;
-bool RuntimeOption::EnableObjDestructCall = true;
-bool RuntimeOption::EnableEmitSwitch = true;
-bool RuntimeOption::EnableEmitterStats = true;
-bool RuntimeOption::CheckSymLink = true;
-int RuntimeOption::MaxUserFunctionId = (2 * 65536);
-bool RuntimeOption::EnableArgsInBacktraces = true;
-bool RuntimeOption::EnableZendCompat = false;
-bool RuntimeOption::EnableZendSorting = false;
-bool RuntimeOption::TimeoutsUseWallTime = true;
-bool RuntimeOption::CheckFlushOnUserClose = true;
-bool RuntimeOption::EvalAuthoritativeMode = false;
-bool RuntimeOption::IntsOverflowToInts = false;
-
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
 #else
@@ -364,7 +367,9 @@ void RuntimeOption::AddOptionHook(
 
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
-  RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
+  RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
+  RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
+  RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
 bool RuntimeOption::LookForTypechecker = true;
 
 int RuntimeOption::GetScannerType() {
@@ -399,9 +404,9 @@ static inline bool pgoDefault() {
 
 static inline uint64_t pgoThresholdDefault() {
 #ifdef HHVM_WHOLE_CFG
-  return 10;
+  return 100;
 #else
-  return debug ? 2 : 10;
+  return debug ? 2 : 100;
 #endif
 }
 
@@ -785,7 +790,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  0);
 
     Config::Bind(AlwaysLogUnhandledExceptions, ini,
-                 logger["AlwaysLogUnhandledExceptions"], true);
+                 logger["AlwaysLogUnhandledExceptions"],
+                 RuntimeOption::EnableHipHopSyntax);
     Config::Bind(NoSilencer, ini, logger["NoSilencer"]);
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
@@ -823,7 +829,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxSerializedStringSize, ini,
                  error["MaxSerializedStringSize"], 64 * 1024 * 1024);
     Config::Bind(CallUserHandlerOnFatals, ini,
-                 error["CallUserHandlerOnFatals"], true);
+                 error["CallUserHandlerOnFatals"], false);
     Config::Bind(ThrowExceptionOnBadMethodCall, ini,
                  error["ThrowExceptionOnBadMethodCall"], true);
     Config::Bind(LogNativeStackOnOOM, ini,
@@ -903,6 +909,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(EnableEmitSwitch, ini, eval["EnableEmitSwitch"], true);
     Config::Bind(EnableEmitterStats, ini, eval["EnableEmitterStats"],
                  EnableEmitterStats);
+    Config::Bind(EnableIntrinsicsExtension, ini,
+                 eval["EnableIntrinsicsExtension"], EnableIntrinsicsExtension);
     Config::Bind(RecordCodeCoverage, ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "
@@ -941,6 +949,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
       Config::Bind(DisallowDynamicVarEnvFuncs, ini,
                    lang["DisallowDynamicVarEnvFuncs"]);
+      Config::Bind(IconvIgnoreCorrect, ini, lang["IconvIgnoreCorrect"]);
+      Config::Bind(MinMaxAllowDegenerate, ini, lang["MinMaxAllowDegenerate"]);
       // Defaults to EnableHHSyntax since, if you have that on, you are
       // assumed to know what you're doing.
       Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],
@@ -1017,7 +1027,13 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerType, ini, server["Type"], ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
-    ServerPrimaryIP = GetPrimaryIP();
+    ServerPrimaryIPv4 = GetPrimaryIPv4();
+    ServerPrimaryIPv6 = GetPrimaryIPv6();
+    if (ServerPrimaryIPv4.empty() && ServerPrimaryIPv6.empty()) {
+      throw std::runtime_error("Unable to resolve the server's "
+          "IPv4 or IPv6 address");
+    }
+
     Config::Bind(ServerPort, ini, server["Port"], 80);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);
@@ -1383,7 +1399,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf stats = config["Stats"];
-    Config::Bind(EnableStats, ini, stats); // main switch
+    Config::Bind(EnableStats, ini, stats["Enable"], false); // main switch
 
     Config::Bind(EnableAPCStats, ini, stats["APC"], false);
     Config::Bind(EnableWebStats, ini, stats["Web"]);
@@ -1427,7 +1443,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf mail = config["Mail"];
-    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "sendmail -t -i");
+    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "/usr/lib/sendmail -t -i");
     Config::Bind(MailForceExtraParameters, ini, mail["ForceExtraParameters"]);
   }
   {
@@ -1514,6 +1530,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "doc_root", &RuntimeOption::SourceRoot);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "sendmail_path", &RuntimeOption::SendmailPath);
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,

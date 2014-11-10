@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -165,7 +164,7 @@ struct StringData {
    * decrefing the APCString they are fronting.  This function
    * must be called at request cleanup time to handle this.
    */
-  static void sweepAll();
+  static unsigned sweepAll();
 
   /*
    * Called to return a StringData to the smart allocator.  This is
@@ -311,12 +310,17 @@ struct StringData {
    * The allow_errors flag is a boolean that does something currently
    * undocumented.
    *
+   * If overflow is set its value is initialized to either zero to
+   * indicate that no overflow occurred or 1/-1 to inidicate the direction
+   * of overflow.
+   *
    * Returns: KindOfNull, KindOfInt64 or KindOfDouble.  The int64_t or
    * double out reference params are populated in the latter two cases
    * with the numeric value of the string.  The KindOfNull case
    * indicates the string is not numeric.
    */
-  DataType isNumericWithVal(int64_t&, double&, int allowErrors) const;
+  DataType isNumericWithVal(int64_t&, double&, int allowErrors,
+                            int* overflow = nullptr) const;
 
   /*
    * Returns true if this string is numeric.
@@ -426,7 +430,7 @@ struct StringData {
 
 private:
   struct SharedPayload {
-    SweepNode node;
+    StringDataNode node;
     const APCString* shared;
   };
 
@@ -468,17 +472,17 @@ private:
   // fields.  (gcc does not combine the stores itself.)
   union {
     struct {
-      uint32_t m_len;
+      uint32_t m_cap;
       mutable RefCount m_count;
     };
-    uint64_t m_lenAndCount;
+    uint64_t m_capAndCount;
   };
   union {
     struct {
-      int32_t m_cap;
+      uint32_t m_len;
       mutable strhash_t m_hash;   // precompute hash codes for static strings
     };
-    uint64_t m_capAndHash;
+    uint64_t m_lenAndHash;
   };
 
   friend class APCString;

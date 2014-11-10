@@ -133,10 +133,10 @@ class PrologueToTransMap {
  */
 class ProfTransRec {
  public:
-  ProfTransRec(TransID id, TransKind kind, Offset lastBcOff, const SrcKey& sk,
+  ProfTransRec(TransID id, TransKind kind, Offset lastBcOff, SrcKey sk,
                RegionDescPtr region);
-  ProfTransRec(TransID id, TransKind kind, const SrcKey& sk);
-  ProfTransRec(TransID id, TransKind kind, const SrcKey& sk, int nArgs);
+  ProfTransRec(TransID id, TransKind kind, SrcKey sk);
+  ProfTransRec(TransID id, TransKind kind, SrcKey sk, int nArgs);
 
   TransID              transId()    const;
   TransKind            kind()       const;
@@ -204,9 +204,8 @@ public:
 
   TransID                 addTransProfile(const RegionDescPtr&  region,
                                           const PostConditions& pconds);
-  TransID                 addTransNonProf(TransKind kind,
-                                          const SrcKey& sk);
-  TransID                 addTransPrologue(TransKind kind, const SrcKey& sk,
+  TransID                 addTransNonProf(TransKind kind, SrcKey sk);
+  TransID                 addTransPrologue(TransKind kind, SrcKey sk,
                                            int nArgs);
   PrologueCallersRec*     findPrologueCallersRec(const Func* func,
                                                  int nArgs) const;
@@ -214,9 +213,9 @@ public:
                                                 TCA caller);
   void                    addPrologueGuardCaller(const Func* func, int nArgs,
                                                  TCA caller);
-  bool                    optimized(const SrcKey& sk) const;
+  bool                    optimized(SrcKey sk) const;
   bool                    optimized(FuncId funcId) const;
-  void                    setOptimized(const SrcKey& sk);
+  void                    setOptimized(SrcKey sk);
   void                    setOptimized(FuncId funcId);
   bool                    profiling(FuncId funcId) const;
   void                    setProfiling(FuncId funcId);

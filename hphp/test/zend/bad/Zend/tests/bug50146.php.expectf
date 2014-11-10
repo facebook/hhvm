@@ -1,3 +1,0 @@
-bool(false)
-bool(false)
-Catchable fatal error: Closure%s object cannot have properties in %s on line %d

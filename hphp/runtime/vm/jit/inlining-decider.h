@@ -107,7 +107,7 @@ struct InliningDecider {
    * NOTE: Inlining will fail during translation if the FPush was interpreted.
    * It is up to the client to ensure that this is not the case.
    */
-  bool canInlineAt(const SrcKey& callSK, const Func* callee,
+  bool canInlineAt(SrcKey callSK, const Func* callee,
                    const RegionDesc& region) const;
 
   /*
@@ -132,6 +132,12 @@ struct InliningDecider {
    * function (even if it's nested in another inlined function).
    */
   void registerEndInlining(const Func* callee);
+
+  /*
+   * Prevents any Func with the same fullName() as the specified callee from
+   * being inlined in the future.
+   */
+  static void forbidInliningOf(const Func* callee);
 
 private:
   // The function being inlined into.

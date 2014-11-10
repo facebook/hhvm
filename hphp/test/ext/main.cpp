@@ -25,8 +25,6 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern "C" void compiler_hook_initialize();
-
 int main(int argc, char **argv) {
   HPHP::register_process_init();
 
@@ -36,10 +34,6 @@ int main(int argc, char **argv) {
   // building/running tests.)
   setenv("TEST_OVERRIDE_HHVM", "_bin/hphp/hhvm/hhvm", true);
   setenv("TEST_OVERRIDE_HPHP", "_bin/hphp/hhvm/hphp", true);
-#endif
-
-#ifdef FACEBOOK
-  compiler_hook_initialize();
 #endif
 
   std::string suite, which, set;

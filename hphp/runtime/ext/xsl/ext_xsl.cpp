@@ -19,9 +19,9 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/ext/ext_domdocument.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/domdocument/ext_domdocument.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -319,23 +319,22 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
             xmlNodePtr node = obj->nodesetval->nodeTab[j];
 
             if (node->type == XML_ELEMENT_NODE) {
-              c_DOMElement *elemobj = NEWOBJ(c_DOMElement)();
-              elemobj->m_node = xmlCopyNode(node, /*extended*/ 1);
-              arg.toArrRef().append(elemobj);
+              Object element = DOMElement::newInstance(
+                  Object(), xmlCopyNode(node, /*extended*/ 1));
+              arg.toArrRef().append(element);
             } else if (node->type == XML_ATTRIBUTE_NODE) {
-              c_DOMAttr *attrobj = NEWOBJ(c_DOMAttr)();
-              attrobj->m_node = (xmlNodePtr)xmlCopyProp(nullptr,
-                                                        (xmlAttrPtr)node);
-              arg.toArrRef().append(attrobj);
+              Object attribute = DOMAttr::newInstance(
+                  Object(), (xmlNodePtr)xmlCopyProp(nullptr, (xmlAttrPtr)node));
+              arg.toArrRef().append(attribute);
             } else if (node->type == XML_TEXT_NODE) {
-              c_DOMText *textobj = NEWOBJ(c_DOMText)();
-              textobj->m_node = (xmlNodePtr)xmlNewText(xmlNodeGetContent(node));
-              arg.toArrRef().append(textobj);
+              Object text = DOMText::newInstance(
+                  Object(), (xmlNodePtr)xmlNewText(xmlNodeGetContent(node)));
+              arg.toArrRef().append(text);
             } else {
               raise_warning("Unhandled node type '%d'", node->type);
               // Use a generic DOMNode as fallback for now.
-              c_DOMNode *nodeobj = NEWOBJ(c_DOMNode)();
-              nodeobj->m_node = xmlCopyNode(node, /*extended*/ 1);
+              Object nodeobj = DOMNode::newInstance(
+                  Object(), xmlCopyNode(node, /*extended*/ 1));
               arg.toArrRef().append(nodeobj);
             }
           }
@@ -360,7 +359,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   String handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
-  if (!f_is_callable(handler)) {
+  if (!HHVM_FN(is_callable)(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
     // Push an empty string to get an xslt result.
     valuePush(ctxt, xmlXPathNewString((xmlChar*)""));
@@ -372,8 +371,9 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   } else {
     Variant retval = vm_call_user_func(handler, args);
     if (retval.isObject() &&
-        retval.getObjectData()->instanceof(c_DOMNode::classof())) {
-      xmlNode *nodep = retval.asCObjRef().getTyped<c_DOMNode>()->m_node;
+        retval.getObjectData()->instanceof(DOMNode::getClass())) {
+      ObjectData *retval_data = retval.asCObjRef().get();
+      xmlNode *nodep = toDOMNode(retval_data)->m_node;
       valuePush(ctxt, xmlXPathNewNodeSet(nodep));
     } else if (retval.is(KindOfBoolean)) {
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));
@@ -445,8 +445,8 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
   auto data = Native::data<XSLTProcessorData>(this_);
   xmlDocPtr doc = nullptr;
 
-  if (stylesheet.instanceof(c_DOMDocument::classof())) {
-    c_DOMDocument *domdoc = stylesheet.getTyped<c_DOMDocument>();
+  if (stylesheet.instanceof(DOMDocument::getClass())) {
+    DOMDocument *domdoc = Native::data<DOMDocument>(stylesheet.get());
     // This doc will be freed by xsltFreeStylesheet.
     doc = xmlCopyDoc((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
     if (doc == nullptr) {
@@ -594,15 +594,16 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToDoc,
                            const Object& doc) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
-  if (doc.instanceof(c_DOMNode::classof())) {
-    c_DOMNode *domnode = doc.getTyped<c_DOMNode>();
+  if (doc.instanceof(DOMNode::getClass())) {
+    DOMNode *domnode = toDOMNode(doc.get());
     data->m_doc = xmlCopyDoc((xmlDocPtr)domnode->m_node, /*recursive*/ 1);
 
-    c_DOMDocument *res = NEWOBJ(c_DOMDocument)();
-    res->m_node = (xmlNodePtr)data->apply_stylesheet();
-    res->m_owner = true;
+    ObjectData* ret = ObjectData::newInstance(DOMDocument::c_Class);
+    DOMDocument* doc_data = Native::data<DOMDocument>(ret);
+    doc_data->m_node = (xmlNodePtr)data->apply_stylesheet();
+    doc_data->m_owner = true;
 
-    return res;
+    return Object(ret);
   }
 
   return false;
@@ -613,8 +614,8 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
                            const String& uri) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
-  if (doc.instanceof(c_DOMDocument::classof())) {
-    c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
+  if (doc.instanceof(DOMDocument::getClass())) {
+    DOMDocument *domdoc = Native::data<DOMDocument>(doc.get());
     data->m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 
     String translated = libxml_get_valid_file_path(uri);
@@ -648,8 +649,8 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
                            const Object& doc) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
-  if (doc.instanceof(c_DOMDocument::classof())) {
-    c_DOMDocument *domdoc = doc.getTyped<c_DOMDocument>();
+  if (doc.instanceof(DOMDocument::getClass())) {
+    DOMDocument *domdoc = Native::data<DOMDocument>(doc.get());
     data->m_doc = xmlCopyDoc ((xmlDocPtr)domdoc->m_node, /*recursive*/ 1);
 
     xmlDocPtr res = data->apply_stylesheet();

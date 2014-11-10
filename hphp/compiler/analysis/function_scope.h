@@ -204,7 +204,6 @@ public:
   bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);
-  bool isMixedVariableArgument() const;
 
   /**
    * Whether this function has no side effects

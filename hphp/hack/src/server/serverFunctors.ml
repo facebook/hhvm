@@ -19,22 +19,22 @@ type failed_parsing = SSet.t
 type files = SSet.t
 type client = in_channel * out_channel
 
-type program_ret =
-  | Die
-  | Continue of env
-  | Exit of int
-
 module type SERVER_PROGRAM = sig
-  val preinit : ServerArgs.options -> unit
-  val init : genv -> env -> Path.path -> env
-  val run_once_and_exit : genv -> env -> Path.path -> unit
-  val recheck: genv -> env -> (SSet.t * SSet.t) -> string list ref -> program_ret
+  val preinit : unit -> unit
+  val init : genv -> env -> env
+  val run_once_and_exit : genv -> env -> unit
+  val filter_update : genv -> env -> Relative_path.t -> bool
+  val recheck: genv -> env -> Relative_path.Set.t -> env
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
   val name: string
   val get_errors: ServerEnv.env -> Errors.t
   val handle_connection : genv -> env -> Unix.file_descr -> unit
+  (* This is a hack for us to save / restore the global state that is not
+   * already captured by ServerEnv *)
+  val marshal : out_channel -> unit
+  val unmarshal : in_channel -> unit
 end
 
 (*****************************************************************************)
@@ -92,9 +92,9 @@ end = struct
     let ready_socket_l, _, _ = Unix.select [socket] [] [] (1.0) in
     ready_socket_l <> []
 
-  let serve genv env socket root =
+  let serve genv env socket =
+    let root = ServerArgs.root genv.options in
     let env = ref env in
-    let report = ref [] in
     while true do
       if not (Lock.check root "lock") then begin
         Printf.printf "Lost %s lock; reacquiring.\n" Program.name;
@@ -109,12 +109,42 @@ end = struct
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
       let updates = ServerDfind.get_updates genv root in
-      (match Program.recheck genv !env updates report with
-      | Die -> die ()
-      | Exit code -> exit code
-      | Continue env' -> env := env');
+      let updates = Relative_path.relativize_set Relative_path.Root updates in
+      let updates = Relative_path.Set.filter (Program.filter_update genv !env) updates in
+      env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
+
+  let create_program_init genv env = fun () ->
+    match ServerArgs.load_save_opt genv.options with
+    | None -> Program.init genv env
+    | Some (ServerArgs.Save fn) ->
+        let chan = open_out_no_fail fn in
+        let env = Program.init genv env in
+        Marshal.to_channel chan env [];
+        Program.marshal chan;
+        close_out_no_fail fn chan;
+        (* We cannot save the shared memory to `chan` because the OCaml runtime
+         * does not expose the underlying file descriptor to C code; so we use
+         * a separate ".sharedmem" file. *)
+        SharedMem.save (fn^".sharedmem");
+        env
+    | Some (ServerArgs.Load { ServerArgs.filename; ServerArgs.to_recheck }) ->
+        let chan = open_in_no_fail filename in
+        let env = Marshal.from_channel chan in
+        Program.unmarshal chan;
+        close_in_no_fail filename chan;
+        SharedMem.load (filename^".sharedmem");
+        let to_recheck =
+          rev_rev_map (Relative_path.create Relative_path.Root) to_recheck
+        in
+        let updates = List.fold_left
+          (fun acc update -> Relative_path.Set.add update acc)
+          Relative_path.Set.empty
+          to_recheck in
+        let updates =
+          Relative_path.Set.filter (Program.filter_update genv env) updates in
+        Program.recheck genv env updates
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set
@@ -123,7 +153,7 @@ end = struct
   * we look if env.modified changed.
   *)
   let main options =
-    Program.preinit options;
+    Program.preinit ();
     SharedMem.init();
     (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
     * someone C-c the client.
@@ -135,17 +165,17 @@ end = struct
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in
     let env = ServerEnvBuild.make_env options in
+    let program_init = create_program_init genv env in
     let is_check_mode = ServerArgs.check_mode genv.options in
     if is_check_mode
     then
-      let env = Program.init genv env root in
-      Program.run_once_and_exit genv env root
+      let env = program_init () in
+      Program.run_once_and_exit genv env
     else
-      let env = MainInit.go root
-                  (fun () -> Program.init genv env root) in
+      let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
       EventLogger.init_done ();
-      serve genv env socket root
+      serve genv env socket
 
   let get_log_file root =
     let user = Sys.getenv "USER" in
@@ -173,10 +203,11 @@ end = struct
     end else begin
       (* let original parent exit *)
 
-      Printf.printf "Spawned %s (child pid=%d)\n" (Program.name) pid;
-      Printf.printf "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
+      Printf.fprintf stderr "Spawned %s (child pid=%d)\n" (Program.name) pid;
+      Printf.fprintf stderr
+        "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
       flush stdout;
-      raise Pervasives.Exit
+      raise Exit
     end
 
   let start () =
@@ -185,6 +216,6 @@ end = struct
       if ServerArgs.should_detach options
       then daemonize options;
       main options
-    with Pervasives.Exit ->
+    with Exit ->
       ()
 end

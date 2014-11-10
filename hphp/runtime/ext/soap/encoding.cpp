@@ -22,9 +22,9 @@
 
 #include "folly/Conv.h"
 
-#include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/ext_soap.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/soap/soap.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
@@ -906,7 +906,7 @@ static Variant to_zval_hexbin(encodeTypePtr type, xmlNodePtr data) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
     String str =
-      f_hex2bin(String((const char*)data->children->content));
+      HHVM_FN(hex2bin)(String((const char*)data->children->content));
     if (str.isNull()) {
       throw SoapException("Encoding: Violation of encoding rules");
     }
@@ -1010,7 +1010,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, const Variant& data, int sty
   xmlAddChild(parent, ret);
   FIND_ZVAL_NULL(data, ret, style);
 
-  String str = f_bin2hex(data.toString());
+  String str = HHVM_FN(bin2hex)(data.toString());
   xmlAddChild(ret, xmlNewTextLen(BAD_CAST(str.data()), str.size()));
 
   if (style == SOAP_ENCODED) {
@@ -1028,25 +1028,31 @@ static Variant to_zval_double(encodeTypePtr type, xmlNodePtr data) {
       int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
       String content((char*)data->children->content, CopyString);
-      switch (is_numeric_string((const char *)data->children->content,
-                                data->children->content ?
-                                strlen((char*)data->children->content) : 0,
-                                &lval, &dval, 0)) {
-      case KindOfInt64:  ret = lval; break;
-      case KindOfDouble: ret = dval; break;
-      default:
+
+      auto dt = is_numeric_string((const char *)data->children->content,
+                                  data->children->content ?
+                                  strlen((char*)data->children->content) : 0,
+                                  &lval, &dval, 0);
+      if (IS_INT_TYPE(dt)) {
+        ret = lval;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        ret = dval;
+      } else {
         if (data->children->content) {
           if (strcasecmp((const char *)data->children->content, "NaN") == 0) {
-            ret = atof("nan"); break;
+            ret = atof("nan");
           } else if (strcasecmp((const char *)data->children->content, "INF")
                      == 0) {
-            ret = atof("inf"); break;
+            ret = atof("inf");
           } else if (strcasecmp((const char *)data->children->content, "-INF")
                      == 0) {
-            ret = -atof("inf"); break;
+            ret = -atof("inf");
+          } else {
+            throw SoapException("Encoding: Violation of encoding rules");
           }
+        } else {
+          throw SoapException("Encoding: Violation of encoding rules");
         }
-        throw SoapException("Encoding: Violation of encoding rules");
       }
     } else {
       throw SoapException("Encoding: Violation of encoding rules");
@@ -1063,13 +1069,16 @@ static Variant to_zval_long(encodeTypePtr type, xmlNodePtr data) {
         data->children->next == NULL) {
       int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
-      switch (is_numeric_string((const char *)data->children->content,
-                                data->children->content ?
-                                strlen((char*)data->children->content) : 0,
-                                &lval, &dval, 0)) {
-      case KindOfInt64:  ret = (int64_t)lval; break;
-      case KindOfDouble: ret = dval; break;
-      default:
+
+      auto dt = is_numeric_string((const char *)data->children->content,
+                                  data->children->content ?
+                                  strlen((char*)data->children->content) : 0,
+                                  &lval, &dval, 0);
+      if (IS_INT_TYPE(dt)) {
+        ret = (int64_t)lval;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        ret = dval;
+      } else {
         throw SoapException("Encoding: Violation of encoding rules");
       }
     } else {
@@ -2658,7 +2667,7 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    c_SoapVar *soapvar = NEWOBJ(c_SoapVar)();
+    c_SoapVar *soapvar = newobj<c_SoapVar>();
     soapvar->m_type = enc->details.type;
     soapvar->m_value = ret;
 

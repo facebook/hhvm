@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -28,19 +29,15 @@
 
 namespace HPHP { namespace jit { namespace arm {
 
-struct CodeGenerator : public jit::CodeGenerator {
-
-  CodeGenerator(const IRUnit& unit, Vout& main, Vout& cold, Vout& frozen,
-                CodegenState& state)
-    : m_unit(unit)
+struct CodeGenerator {
+  CodeGenerator(CodegenState& state, Vout& main, Vout& cold)
+    : m_xcg{state, main, cold}
+    , m_state(state)
     , m_vmain(main)
     , m_vcold(cold)
-    , m_vfrozen(frozen)
-    , m_state(state)
   {}
 
-  virtual ~CodeGenerator() {}
-  void cgInst(IRInstruction* inst) override;
+  void cgInst(IRInstruction* inst);
 
  private:
   const Func* curFunc() const { return m_curInst->marker().func(); }
@@ -73,8 +70,7 @@ struct CodeGenerator : public jit::CodeGenerator {
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);
 
   template<class Loc, class JmpFn>
-  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, Vreg sf,
-                    JmpFn doJcc);
+  void emitTypeTest(Vout& v, Type type, Vreg typeReg, Loc dataSrc, JmpFn doJcc);
 
   void emitLoadTypedValue(Vout&, Vloc dst, Vreg base, ptrdiff_t offset,
                           Block* label);
@@ -100,14 +96,18 @@ struct CodeGenerator : public jit::CodeGenerator {
 
   Vout& vmain() { return m_vmain; }
   Vout& vcold() { return m_vcold; }
-  Vout& vfrozen() { return m_vfrozen; }
 
  private:
-  const IRUnit&         m_unit;
+  /*
+   * TODO(4894527): this is a temporary measure while we merge the two
+   * CodeGenerator implementations. We call through to the x64 CodeGenerator for
+   * opcodes where the two platforms can use identical vasm implementations.
+   */
+  x64::CodeGenerator    m_xcg;
+
+  CodegenState&         m_state;
   Vout&                 m_vmain;
   Vout&                 m_vcold;
-  Vout&                 m_vfrozen;
-  CodegenState&         m_state;
   IRInstruction*        m_curInst{nullptr};
   jit::vector<Vloc>     m_slocs, m_dlocs;
 };

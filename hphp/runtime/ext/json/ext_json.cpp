@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
@@ -37,7 +37,7 @@ const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
 const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
 
 // json_decode() options
-const int64_t k_JSON_BIGINT_AS_STRING  = 1<<0;
+const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
 
 // FB json_decode() options
 // intentionally higher so when PHP adds more options we're fine
@@ -75,18 +75,36 @@ String HHVM_FUNCTION(json_last_error_msg) {
   return json_get_last_error_msg();
 }
 
+// Handles output of `json_encode` with fallback value for
+// partial output on errors, and `false` otherwise.
+Variant json_guard_error_result(const String& partial_error_output,
+                                int64_t options /* = 0*/) {
+  int is_partial_output = options & k_JSON_PARTIAL_OUTPUT_ON_ERROR;
+
+   // Issue a warning on unsupported type in case of HH syntax.
+  if (json_get_last_error_code() ==
+      json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE &&
+      RuntimeOption::EnableHipHopSyntax) {
+    // Unhandled case is always returned as `false`; for partial output
+    // we render "null" value.
+    raise_warning("json_encode(): type is unsupported, encoded as %s",
+      is_partial_output ? "null" : "false");
+  }
+
+  if (is_partial_output) {
+    return partial_error_output;
+  }
+
+  return false;
+}
+
 Variant HHVM_FUNCTION(json_encode, const Variant& value,
                                    int64_t options /* = 0 */,
                                    int64_t depth /* = 512 */) {
   // Special case for resource since VariableSerializer does not take care of it
   if (value.isResource()) {
     json_set_last_error_code(json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
-
-    if (options & k_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-      return "null";
-    }
-
-    return false;
+    return json_guard_error_result("null", options);
   }
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -95,9 +113,8 @@ Variant HHVM_FUNCTION(json_encode, const Variant& value,
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
 
-  if ((json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE) &&
-      !(options & k_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
-    return false;
+  if (json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE) {
+    return json_guard_error_result(json, options);
   }
 
   return json;
@@ -123,7 +140,7 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
     return z;
   }
 
-  String trimmed = f_trim(json, "\t\n\r ");
+  String trimmed = HHVM_FN(trim)(json, "\t\n\r ");
 
   if (trimmed.size() == 4) {
     if (!strcasecmp(trimmed.data(), "null")) {

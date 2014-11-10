@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/func-prologues-x64.h"
-#include "hphp/runtime/vm/jit/layout.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/reg-alloc-x64.h"
@@ -75,6 +75,10 @@ struct BackEnd : public jit::BackEnd {
 
   PhysReg rVmFp() override {
     return x64::rVmFp;
+  }
+
+  PhysReg rVmTl() override {
+    return x64::rVmTl;
   }
 
   bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
@@ -145,7 +149,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     const SrcKey& sk) override {
+                     SrcKey sk) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
@@ -246,10 +250,27 @@ struct BackEnd : public jit::BackEnd {
     return true;
   }
 
+  typedef hphp_hash_set<void*> WideJmpSet;
+  struct JmpOutOfRange : std::exception {};
+
   size_t relocate(RelocationInfo& rel,
                   CodeBlock& destBlock,
                   TCA start, TCA end,
                   CodeGenFixups& fixups) override {
+    WideJmpSet wideJmps;
+    while (true) {
+      try {
+        return relocateImpl(rel, destBlock, start, end, fixups, wideJmps);
+      } catch (JmpOutOfRange& j) {
+      }
+    }
+  }
+
+  size_t relocateImpl(RelocationInfo& rel,
+                      CodeBlock& destBlock,
+                      TCA start, TCA end,
+                      CodeGenFixups& fixups,
+                      WideJmpSet& wideJmps) {
     TCA src = start;
     size_t range = end - src;
     bool hasInternalRefs = false;
@@ -288,8 +309,15 @@ struct BackEnd : public jit::BackEnd {
             bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
             assert(success);
           } else {
-            if (d2.isBranch() && d2.shrinkBranch()) {
-              internalRefsNeedUpdating = true;
+            if (d2.isBranch()) {
+              if (wideJmps.count(src)) {
+                if (d2.size() < kJmpLen) {
+                  d2.widenBranch();
+                  internalRefsNeedUpdating = true;
+                }
+              } else if (d2.shrinkBranch()) {
+                internalRefsNeedUpdating = true;
+              }
             }
             hasInternalRefs = true;
           }
@@ -347,6 +375,7 @@ struct BackEnd : public jit::BackEnd {
 
       if (hasInternalRefs && internalRefsNeedUpdating) {
         src = start;
+        bool ok = true;
         while (src != end) {
           DecodedInstruction di(src);
           TCA newPicAddress = nullptr;
@@ -367,18 +396,28 @@ struct BackEnd : public jit::BackEnd {
             TCA dest = rel.adjustedAddressAfter(src);
             DecodedInstruction d2(dest);
             if (newPicAddress) {
-              d2.setPicAddress(newPicAddress);
+              if (!d2.setPicAddress(newPicAddress)) {
+                always_assert(d2.isBranch() && d2.size() == 2);
+                wideJmps.insert(src);
+                ok = false;
+              }
             }
             if (newImmediate) {
-              d2.setImmediate(newImmediate);
+              if (!d2.setImmediate(newImmediate)) {
+                always_assert(false);
+              }
             }
           }
           src += di.size();
+        }
+        if (!ok) {
+          throw JmpOutOfRange();
         }
       }
       rel.markAddressImmediates(fixups.m_addressImmediates);
     } catch (...) {
       rel.rewind(start, end);
+      destBlock.setFrontier(destStart);
       throw;
     }
     return asm_count;
@@ -628,6 +667,12 @@ struct BackEnd : public jit::BackEnd {
     }
   }
 
+  TCA smashableCallFromReturn(TCA retAddr) override {
+    auto addr = retAddr - x64::kCallLen;
+    assert(isSmashable(addr, x64::kCallLen));
+    return addr;
+  }
+
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
     assert(isSmashable(cb.frontier(), x64::kCallLen));
@@ -687,22 +732,16 @@ std::unique_ptr<jit::BackEnd> newBackEnd() {
   return folly::make_unique<BackEnd>();
 }
 
-static size_t genBlock(IRUnit& unit, Vout& v, Vasm& vasm,
-                       CodegenState& state, Block* block) {
+static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
   FTRACE(6, "genBlock: {}\n", block->id());
-  CodeGenerator cg(unit, v, vasm.cold(), vasm.frozen(), state);
+  CodeGenerator cg(state, v, vc);
   size_t hhir_count{0};
-  for (IRInstruction& instr : *block) {
-    IRInstruction* inst = &instr;
+  for (IRInstruction& inst : *block) {
     hhir_count++;
-
-    if (instr.is(EndGuards)) state.pastGuards = true;
-
-    vasm.main().setOrigin(inst);
-    vasm.cold().setOrigin(inst);
-    vasm.frozen().setOrigin(inst);
-
-    cg.cgInst(inst);
+    if (inst.is(EndGuards)) state.pastGuards = true;
+    v.setOrigin(&inst);
+    vc.setOrigin(&inst);
+    cg.cgInst(&inst);
   }
   return hhir_count;
 }
@@ -720,8 +759,6 @@ UNUSED const Abi vasm_abi {
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
-  CodegenState state(unit, asmInfo);
-
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();
   CodeBlock* frozenCode   = &mcg->code.frozen();
@@ -788,20 +825,21 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       emitTraceCall(mainCode, unit.bcOff());
     }
 
-    auto const linfo = layoutBlocks(unit);
-    Vasm vasm(&state.meta);
+    CodegenState state(unit, asmInfo, *frozenCode);
+    auto const blocks = rpoSortCfg(unit);
+    Vasm vasm;
     auto& vunit = vasm.unit();
     // create the initial set of vasm numbered the same as hhir blocks.
     for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, linfo.blocks, this);
+    assignRegs(unit, vunit, state, blocks, this);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
-    for (auto block : linfo.blocks) {
+    for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
                vasm.main();
@@ -810,7 +848,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       auto b = state.labels[block];
       vunit.blocks[b].area = v.area();
       v.use(b);
-      hhir_count += genBlock(unit, v, vasm, state, block);
+      hhir_count += genBlock(state, v, vasm.cold(), block);
       assert(v.closed());
       assert(vasm.main().empty() || vasm.main().closed());
       assert(vasm.cold().empty() || vasm.cold().closed());

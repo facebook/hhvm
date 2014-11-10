@@ -202,14 +202,7 @@ public:
     m_px->setRefCount(1);
   }
 
-  static String attach(const String& s) {
-    String result;
-    result.m_px = s.m_px;
-    return result;
-  }
-
-  static ALWAYS_INLINE String attach(StringData* sd) {
-    assert(sd->isStatic());
+  static String attach(StringData* sd) {
     return String(sd, StringBase::NoIncRef{});
   }
 

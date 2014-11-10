@@ -39,6 +39,7 @@ class ReflectionClass {
   public function getFileName(): mixed;
   public function getInterfaceNames(): array<string>;
   public function getInterfaces(): array<string, ReflectionClass>;
+  public function getAttribute($attr) {}
   public function getMethod(string $name): ReflectionMethod;
   public function getMethods(?int $filter = null): array<ReflectionMethod>;
   public function getModifiers(): int;
@@ -70,6 +71,7 @@ class ReflectionClass {
   public function isInstance(mixed $object): bool;
   public function isInstantiable(): bool;
   public function isInterface(): bool;
+  public function isEnum(): bool;
   public function isInternal(): bool;
   public function isIterateable(): bool;
   /**

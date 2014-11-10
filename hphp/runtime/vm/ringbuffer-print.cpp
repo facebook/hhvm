@@ -80,7 +80,7 @@ void dumpEntry(const RingBufferEntry* e) {
 //
 //    (gdb) call HPHP::Trace::dumpRingBufferMasked(100,
 //       (1 << HPHP::Trace::RBTypeFuncEntry))
-void dumpRingBufferMasked(int numEntries, uint32_t types) {
+void dumpRingBufferMasked(int numEntries, uint32_t types, uint32_t threadId) {
   if (!g_ring_ptr) return;
   int startIdx = (g_ringIdx.load() - numEntries) % kMaxRBEntries;
   while (startIdx < 0) {
@@ -90,7 +90,8 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
     RingBufferEntry* rb = &g_ring_ptr[(startIdx + i) % kMaxRBEntries];
-    if ((1 << rb->m_type) & types) {
+    if ((1 << rb->m_type) & types &&
+        (!threadId || threadId == rb->m_threadId)) {
       numDumped++;
       dumpEntry(rb);
     }
@@ -98,8 +99,8 @@ void dumpRingBufferMasked(int numEntries, uint32_t types) {
 }
 
 KEEP_SECTION
-void dumpRingBuffer(int numEntries) {
-  dumpRingBufferMasked(numEntries, -1u);
+void dumpRingBuffer(int numEntries, uint32_t threadId) {
+  dumpRingBufferMasked(numEntries, -1u, threadId);
 }
 
 } }

@@ -343,7 +343,7 @@ inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
   return m_extra->m_nativeDataInfo;
 }
 
-inline DataType Class::enumBaseTy() const {
+inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
 }
 

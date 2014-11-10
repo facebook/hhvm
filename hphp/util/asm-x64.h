@@ -2232,6 +2232,7 @@ struct DecodedInstruction {
   bool isNop() const;
   bool isBranch() const;
   bool shrinkBranch();
+  void widenBranch();
 private:
   void decode(uint8_t* ip);
   bool decodePrefix(uint8_t* ip);
@@ -2244,8 +2245,8 @@ private:
   int decodeModRm(uint8_t* ip);
   int decodeImm(uint8_t* ip);
 
-  uint8_t*   m_ip{nullptr};
-  uint32_t   m_size{0};
+  uint8_t*   m_ip;
+  uint32_t   m_size;
 
   union {
     uint32_t m_flagsVal;
@@ -2284,11 +2285,11 @@ private:
     } m_flags;
   };
 
-  uint8_t       m_map_select{0};
-  uint8_t       m_xtra_op{0};
-  uint8_t       m_opcode{0};
-  uint8_t       m_immSz{sz::nosize};
-  uint8_t       m_offSz{sz::nosize};
+  uint8_t       m_map_select;
+  uint8_t       m_xtra_op;
+  uint8_t       m_opcode;
+  uint8_t       m_immSz;
+  uint8_t       m_offSz;
 };
 
 #undef TRACEMOD

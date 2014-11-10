@@ -20,6 +20,7 @@ type options = {
   filename : string;
   suggest : bool;
   color : bool;
+  coverage : bool;
   rest : string list
 }
 
@@ -62,7 +63,6 @@ let builtins = "<?hh // decl\n"^
   "  public function valid(): bool;\n"^
   "  public function send(?Ts $v): void;\n"^
   "}\n"^
-  "type Continuation<Tv> = Generator<int, Tv, void>;\n"^
   "final class Pair<Tk, Tv> extends Indexish<int,mixed> {public function isEmpty(): bool {}}\n"^
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
@@ -88,7 +88,9 @@ let builtins = "<?hh // decl\n"^
   "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
   "}\n"^
   "}\n"^
-  "function array_map($x, $y, ...);\n"
+  "function array_map($x, $y, ...);\n"^
+  "function idx<Tk, Tv>(?Indexish<Tk, Tv> $c, $i, $d = null) {}\n"^
+  "final class stdClass {}\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -100,12 +102,13 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = die (Errors.to_string l)
+let error l = die (Errors.to_string (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
   let suggest = ref false in
   let color = ref false in
+  let coverage = ref false in
   let rest_options = ref [] in
   let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -116,6 +119,9 @@ let parse_options () =
     "--color",
       Arg.Set color,
       "Produce color output";
+    "--coverage",
+      Arg.Set coverage,
+      "Produce coverage output";
     "--",
       Arg.Rest rest,
       "";
@@ -124,7 +130,12 @@ let parse_options () =
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn; suggest = !suggest; color = !color; rest = !rest_options }
+  { filename = fn;
+    suggest = !suggest;
+    color = !color;
+    coverage = !coverage;
+    rest = !rest_options;
+  }
 
 let suggest_and_print fn funs classes typedefs consts =
   let make_set =
@@ -134,9 +145,9 @@ let suggest_and_print fn funs classes typedefs consts =
   let n_types = make_set typedefs in
   let n_consts = make_set consts in
   let names = { FileInfo.n_funs; n_classes; n_types; n_consts } in
-  let fast = SMap.add fn names SMap.empty in
+  let fast = Relative_path.Map.add fn names Relative_path.Map.empty in
   let patch_map = Typing_suggest_service.go None fast in
-  match SMap.get fn patch_map with
+  match Relative_path.Map.get fn patch_map with
     | None -> ()
     | Some l -> begin
       (* Sort so that the unit tests come out in a consistent order, normally
@@ -161,14 +172,15 @@ let rec make_files = function
   | _ -> assert false
 
 let parse_file fn =
-  let content = cat fn in
+  let abs_fn = Relative_path.to_absolute fn in
+  let content = cat abs_fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
   then
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
-      Pos.file := fn^"--"^sub_fn ;
+      Pos.file := Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn);
       let {Parser_hack.is_hh_file; comments; ast = ast'} =
         Parser_hack.program content
       in
@@ -202,12 +214,24 @@ let replace_color input =
   | (None, str) -> str
 
 let print_colored fn =
-  let content = cat fn in
-  let pos_level_l = CL.mk_level_list (Some fn) !Typing_defs.type_acc in
-  let results = ColorFile.go content pos_level_l in
+  let content = cat (Relative_path.to_absolute fn) in
+  let pos_level_m = CL.mk_level_map (Some fn) !Typing_defs.type_acc in
+  let pos_level_l = Pos.Map.elements pos_level_m in
+  let raw_level_l =
+    rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) pos_level_l in
+  let results = ColorFile.go content raw_level_l in
   if Unix.isatty Unix.stdout
   then Tty.print (ClientColorFile.replace_colors results)
   else print_string (List.map replace_color results |> String.concat "")
+
+let print_coverage fn =
+  let module CLMap = ServerCoverageMetric.CL.CLMap in
+  let counts = ServerCoverageMetric.count_exprs fn !Typing_defs.type_acc in
+  let score = ServerCoverageMetric.calc_percentage counts in
+  Printf.printf "Unchecked: %d\n" (CLMap.find_unsafe CL.Unchecked counts);
+  Printf.printf "Partial: %d\n" (CLMap.find_unsafe CL.Partial counts);
+  Printf.printf "Checked: %d\n" (CLMap.find_unsafe CL.Checked counts);
+  Printf.printf "Score: %f\n" score
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -219,16 +243,17 @@ let print_colored fn =
  * a given file. You can then inspect this typing environment, e.g.
  * with 'Typing_env.Classes.get "Foo";;'
  *)
-let main_hack { filename; suggest; color; _ } =
+let main_hack { filename; suggest; color; coverage; _ } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->
-      Pos.file := builtins_filename;
+      Pos.file := Relative_path.create Relative_path.Dummy builtins_filename;
       let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
         Parser_hack.program builtins
       in
+      let filename = Relative_path.create Relative_path.Dummy filename in
       Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in
@@ -236,15 +261,17 @@ let main_hack { filename; suggest; color; _ } =
       let funs, classes, typedefs, consts = collect_defs ast in
       let nenv = Naming.make_env Naming.empty ~funs ~classes ~typedefs ~consts in
       let all_classes = List.fold_right begin fun (_, cname) acc ->
-        SMap.add cname (SSet.singleton filename) acc
+        SMap.add cname (Relative_path.Set.singleton filename) acc
       end classes SMap.empty in
       Typing_decl.make_env nenv all_classes filename;
-      Typing_defs.accumulate_types := color;
+      Typing_defs.accumulate_types := color || coverage;
       List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
       List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
       List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
       if color
       then print_colored filename;
+      if coverage
+      then print_coverage filename;
       if suggest
       then suggest_and_print filename funs classes typedefs consts
     end

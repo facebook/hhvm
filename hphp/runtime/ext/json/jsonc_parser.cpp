@@ -99,7 +99,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
   Variant var, tmpvar;
   nb = json_object_array_length(new_obj);
   if (collections) {
-    var = NEWOBJ(c_Vector)();
+    var = newres<c_Vector>();
   } else {
     var = Array::Create();
   }
@@ -123,7 +123,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
     Variant       var, tmpvar;
 
   if (collections) {
-    var = NEWOBJ(c_Map)();
+    var = newres<c_Map>();
   } else if (assoc) {
     var = Array::Create();
   } else {

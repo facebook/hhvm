@@ -22,12 +22,11 @@ val remove_classes: SSet.t -> unit
  * in Typing_env.Class, Typing_env.Fun, and Typing_env.Typedef.
  *)
 val name_and_declare_types_program:
-  Naming.env -> SSet.t SMap.t (* set of classes in all files *) -> Ast.program->
-  unit
+  Naming.env -> Relative_path.Set.t SMap.t (* set of classes in all files *) ->
+  Ast.program -> unit
 
 val make_env:
-  Naming.env -> SSet.t SMap.t -> string -> unit
-
+  Naming.env -> Relative_path.Set.t SMap.t -> Relative_path.t -> unit
 
 val class_decl:
   Nast.class_ -> unit

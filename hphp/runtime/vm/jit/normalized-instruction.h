@@ -66,12 +66,6 @@ struct NormalizedInstruction {
    */
   bool interp:1;
 
-  /*
-   * Indicates that a RetC/RetV should generate inlined return code
-   * rather than calling the shared stub.
-   */
-  bool inlineReturn:1;
-
   Op op() const;
   Op mInstrOp() const;
   PC pc() const;

@@ -58,6 +58,7 @@ let send_errorl el oc =
   then
     ServerMsg.response_to_channel oc ServerMsg.NO_ERRORS
   else begin
+    let el = rev_rev_map Errors.to_absolute el in
     ServerMsg.response_to_channel oc (ServerMsg.ERRORS el);
   end;
   flush oc

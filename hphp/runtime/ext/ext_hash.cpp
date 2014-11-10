@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include <algorithm>
 #include <memory>
-#include "hphp/runtime/ext/ext_file.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_md.h"
 #include "hphp/runtime/ext/hash/hash_sha.h"
 #include "hphp/runtime/ext/hash/hash_ripemd.h"
@@ -161,10 +161,6 @@ public:
   }
 
   ~HashContext() {
-    HashContext::sweep();
-  }
-
-  void sweep() override {
     /* Just in case the algo has internally allocated resources */
     if (context) {
       assert(ops->digest_size >= 0);
@@ -196,7 +192,7 @@ Array HHVM_FUNCTION(hash_algos) {
 
 static HashEnginePtr php_hash_fetch_ops(const String& algo) {
   HashEngineMap::const_iterator iter =
-    HashEngines.find(f_strtolower(algo).data());
+    HashEngines.find(HHVM_FN(strtolower)(algo).data());
   if (iter == HashEngines.end()) {
     return HashEnginePtr();
   }
@@ -213,7 +209,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   }
   Variant f;
   if (isfilename) {
-    f = f_fopen(data, "rb");
+    f = HHVM_FN(fopen)(data, "rb");
     if (same(f, false)) {
       return false;
     }
@@ -223,9 +219,9 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   ops->hash_init(context);
 
   if (isfilename) {
-    for (Variant chunk = f_fread(f.toResource(), 1024);
+    for (Variant chunk = HHVM_FN(fread)(f.toResource(), 1024);
          !is_empty_string(chunk);
-         chunk = f_fread(f.toResource(), 1024)) {
+         chunk = HHVM_FN(fread)(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());
     }
@@ -242,7 +238,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   if (raw_output) {
     return raw;
   }
-  return f_bin2hex(raw);
+  return HHVM_FN(bin2hex)(raw);
 }
 
 Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
@@ -357,7 +353,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
   if (raw_output) {
     return raw;
   }
-  return f_bin2hex(raw);
+  return HHVM_FN(bin2hex)(raw);
 }
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {

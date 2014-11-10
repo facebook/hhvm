@@ -1,38 +1,41 @@
+#include "hphp/runtime/vm/jit/etch-helpers.h"
+
+#if defined(__x86_64__)
 	.file	"memcpy-x64.S"
 	.text
-	.globl	_Z10memcpyPvPKvm
-	.type	_Z10memcpyPvPKvm, @function
-_Z10memcpyPvPKvm:
-.LFB524:
-	.cfi_startproc
+	.globl	ETCH_NAME(memcpy)
+	.type	ETCH_NAME(memcpy), @function
+ETCH_NAME(memcpy):
+ETCH_LABEL(FB524):
+	CFI(startproc)
 
 	testb	$63, %dl
 	movq	%rdi, %rax
 	movq	%rdi, %rcx
-	je	.L2
+	je	ETCH_LABEL(2)
 	movq	%rdx, %rdi
 	andl	$7, %edi
-	jmp	*.L5(,%rdi,8)
+	jmp	*ETCH_LABEL(5)(,%rdi,8)
 	.section	.rodata
-	.align 8
-	.align 4
-.L5:
-	.quad	.L3
-	.quad	.L4
-	.quad	.L6
-	.quad	.L7
-	.quad	.L8
-	.quad	.L9
-	.quad	.L10
-	.quad	.L11
+	ETCH_ALIGN8
+	ETCH_ALIGN4
+ETCH_LABEL(5):
+	.quad	ETCH_LABEL(3)
+	.quad	ETCH_LABEL(4)
+	.quad	ETCH_LABEL(6)
+	.quad	ETCH_LABEL(7)
+	.quad	ETCH_LABEL(8)
+	.quad	ETCH_LABEL(9)
+	.quad	ETCH_LABEL(10)
+	.quad	ETCH_LABEL(11)
 	
-    .text
-    .align 8
-	.align 4 
-.L11:
+	.text
+	ETCH_ALIGN8
+	ETCH_ALIGN4
+ETCH_LABEL(11):
 	movzbl	6(%rsi), %ecx
 	movb	%cl, 6(%rax)
-.L10:
+ETCH_LABEL(10):
 	movl	(%rsi), %ecx
 	movl	%ecx, (%rax)
 	movzwl	4(%rsi), %ecx
@@ -45,11 +48,11 @@ _Z10memcpyPvPKvm:
 	andl	$63, %edi
 	movl	%edi, %r8d
 	shrl	$3, %r8d
-	jmp	*.L14(,%r8,8)
-.L9:
+	jmp	*ETCH_LABEL(14)(,%r8,8)
+ETCH_LABEL(9):
 	movzbl	4(%rsi), %ecx
 	movb	%cl, 4(%rax)
-.L8:
+ETCH_LABEL(8):
 	movl	(%rsi), %ecx
 	movl	%ecx, (%rax)
 
@@ -60,18 +63,18 @@ _Z10memcpyPvPKvm:
 	andl	$63, %edi
 	movl	%edi, %r8d
 	shrl	$3, %r8d
-	jmp	*.L14(,%r8,8)
+	jmp	*ETCH_LABEL(14)(,%r8,8)
 
-.L7:
+ETCH_LABEL(7):
 	movzbl	2(%rsi), %ecx
-	movb	%cl, 2(%rax)   
-.L6:
+	movb	%cl, 2(%rax)
+ETCH_LABEL(6):
 	movzbl	1(%rsi), %ecx
 	movb	%cl, 1(%rax)
-.L4:
+ETCH_LABEL(4):
 	movzbl	(%rsi), %ecx
-	movb	%cl, (%rax)   
-.L3:
+	movb	%cl, (%rax)
+ETCH_LABEL(3):
 	subq	%rdi, %rdx
 	leaq	(%rax,%rdi), %rcx
 	addq	%rdi, %rsi
@@ -79,54 +82,54 @@ _Z10memcpyPvPKvm:
 	andl	$63, %edi
 	movl	%edi, %r8d
 	shrl	$3, %r8d
-	jmp	*.L14(,%r8,8)
+	jmp	*ETCH_LABEL(14)(,%r8,8)
 	.section	.rodata
-	.align 8
-	.align 4
-.L14:
-	.quad	.L12
-	.quad	.L13
-	.quad	.L15
-	.quad	.L16
-	.quad	.L17
-	.quad	.L18
-	.quad	.L19
-	.quad	.L20
+	ETCH_ALIGN8
+	ETCH_ALIGN4
+ETCH_LABEL(14):
+	.quad	ETCH_LABEL(12)
+	.quad	ETCH_LABEL(13)
+	.quad	ETCH_LABEL(15)
+	.quad	ETCH_LABEL(16)
+	.quad	ETCH_LABEL(17)
+	.quad	ETCH_LABEL(18)
+	.quad	ETCH_LABEL(19)
+	.quad	ETCH_LABEL(20)
 	.text
-.L20:
+ETCH_LABEL(20):
 	movq	48(%rsi), %r8
 	movq	%r8, 48(%rcx)
-.L19:
+ETCH_LABEL(19):
 	movq	40(%rsi), %r8
 	movq	%r8, 40(%rcx)
-.L18:
+ETCH_LABEL(18):
 	movq	32(%rsi), %r8
 	movq	%r8, 32(%rcx)
-.L17:
+ETCH_LABEL(17):
 	movq	24(%rsi), %r8
 	movq	%r8, 24(%rcx)
-.L16:
+ETCH_LABEL(16):
 	movq	16(%rsi), %r8
 	movq	%r8, 16(%rcx)
-.L15:
+ETCH_LABEL(15):
 	movq	8(%rsi), %r8
 	movq	%r8, 8(%rcx)
-.L13:
+ETCH_LABEL(13):
 	movq	(%rsi), %r8
 	movq	%r8, (%rcx)
-.L12:
+ETCH_LABEL(12):
 	subq	%rdi, %rdx
 	addq	%rdi, %rcx
 	addq	%rdi, %rsi
-.L2:
+ETCH_LABEL(2):
 	testq	%rdx, %rdx
-	jne	.L28
-	jmp	.L26
+	jne	ETCH_LABEL(28)
+	jmp	ETCH_LABEL(26)
 	.p2align 4,,10
 	.p2align 3
-.L32:
+ETCH_LABEL(32):
 	movq	%r8, %rcx
-.L28:
+ETCH_LABEL(28):
 	movdqu	(%rsi), %xmm3
 	addq	$64, %rsi
 	leaq	64(%rcx), %r8
@@ -138,11 +141,12 @@ _Z10memcpyPvPKvm:
 	movdqu	%xmm2, 16(%rcx)
 	movdqu	%xmm1, 32(%rcx)
 	movdqu	%xmm0, 48(%rcx)
-	jne	.L32
-.L26:
+	jne	ETCH_LABEL(32)
+ETCH_LABEL(26):
 	rep; ret
-    .cfi_endproc
-.LFE524:
-	.size	_Z10memcpyPvPKvm, .-_Z10memcpyPvPKvm
+	CFI(endproc)
+ETCH_LABEL(FE524):
+	ETCH_SIZE(memcpy)
 	.ident	"GCC: (GNU) 4.8.2"
 	.section	.note.GNU-stack,"",@progbits
+#endif

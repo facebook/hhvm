@@ -53,7 +53,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_id(id)
   , name(n)
   , top(false)
-  , returnType(KindOfInvalid)
+  , returnType(folly::none)
   , retUserType(nullptr)
   , isClosureBody(false)
   , isAsync(false)
@@ -83,7 +83,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_id(kInvalidId)
   , name(n)
   , top(false)
-  , returnType(KindOfInvalid)
+  , returnType(folly::none)
   , retUserType(nullptr)
   , isClosureBody(false)
   , isAsync(false)
@@ -143,7 +143,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
   int repoId = m_ue.m_repoId;
   int64_t usn = m_ue.m_sn;
 
-  frp.insertFunc(repoId)
+  frp.insertFunc[repoId]
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
 }
 
@@ -526,8 +526,7 @@ void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
   assert(info);
   m_info = info;
   Attr attrs_ = AttrBuiltin;
-  if (info->attribute & (ClassInfo::RefVariableArguments |
-                         ClassInfo::MixedVariableArguments)) {
+  if (info->attribute & ClassInfo::RefVariableArguments) {
     attrs_ |= AttrVariadicByRef;
   }
   if (info->attribute & ClassInfo::IsReference) {
@@ -597,18 +596,10 @@ void FuncEmitter::setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
 // FuncRepoProxy.
 
 FuncRepoProxy::FuncRepoProxy(Repo& repo)
-  : RepoProxy(repo)
-#define FRP_OP(c, o) \
-  , m_##o##Local(repo, RepoIdLocal), m_##o##Central(repo, RepoIdCentral)
-    FRP_OPS
-#undef FRP_OP
-{
-#define FRP_OP(c, o) \
-  m_##o[RepoIdLocal] = &m_##o##Local; \
-  m_##o[RepoIdCentral] = &m_##o##Central;
-  FRP_OPS
-#undef FRP_OP
-}
+    : RepoProxy(repo),
+      insertFunc{InsertFuncStmt(repo, 0), InsertFuncStmt(repo, 1)},
+      getFuncs{GetFuncsStmt(repo, 0), GetFuncsStmt(repo, 1)}
+{}
 
 FuncRepoProxy::~FuncRepoProxy() {
 }

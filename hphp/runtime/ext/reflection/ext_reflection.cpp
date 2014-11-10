@@ -17,10 +17,10 @@
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -165,9 +165,11 @@ int get_modifiers(Attr attrs, bool cls) {
   if (attrs & AttrAbstract)  php_modifier |= cls ? 0x20 : 0x02;
   if (attrs & AttrFinal)     php_modifier |= cls ? 0x40 : 0x04;
   if (attrs & AttrStatic)    php_modifier |= 0x01;
-  if (attrs & AttrPublic)    php_modifier |= 0x100;
-  if (attrs & AttrProtected) php_modifier |= 0x200;
-  if (attrs & AttrPrivate)   php_modifier |= 0x400;
+  if (!cls) {  // AttrPublic bits are not valid on class (have other meaning)
+    if (attrs & AttrPublic)    php_modifier |= 0x100;
+    if (attrs & AttrProtected) php_modifier |= 0x200;
+    if (attrs & AttrPrivate)   php_modifier |= 0x400;
+  }
   return php_modifier;
 }
 
@@ -181,9 +183,11 @@ static Attr attrs_from_modifiers(int php_modifier, bool cls) {
     attrs = (Attr)(attrs | AttrFinal);
   }
   if (php_modifier & 0x01) { attrs = (Attr)(attrs | AttrStatic); }
-  if (php_modifier & 0x100) { attrs = (Attr)(attrs | AttrPublic); }
-  if (php_modifier & 0x200) { attrs = (Attr)(attrs | AttrProtected); }
-  if (php_modifier & 0x400) { attrs = (Attr)(attrs | AttrPrivate); }
+  if (!cls) {  // AttrPublic bits are not valid on class (have other meaning)
+    if (php_modifier & 0x100) { attrs = (Attr)(attrs | AttrPublic); }
+    if (php_modifier & 0x200) { attrs = (Attr)(attrs | AttrProtected); }
+    if (php_modifier & 0x400) { attrs = (Attr)(attrs | AttrPrivate); }
+  }
   return attrs;
 }
 
@@ -539,6 +543,14 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   return String(ret);
 }
 
+static bool HHVM_METHOD(ReflectionFunctionAbstract, isHack) {
+  if (RuntimeOption::EnableHipHopSyntax) {
+    return true;
+  }
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->unit()->isHHFile();
+}
+
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isInternal) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->isBuiltin();
@@ -870,10 +882,7 @@ const StaticString s_ReflectionClassHandle("ReflectionClassHandle");
 
 // helper for __construct
 static String HHVM_METHOD(ReflectionClass, __init, const String& name) {
-  auto const cls = Unit::loadClass(name.get());
-  if (!cls) return empty_string();
-  ReflectionClassHandle::Get(this_)->setClass(cls);
-  return cls->nameStr();
+  return ReflectionClassHandle::Get(this_)->init(name);
 }
 
 static String HHVM_METHOD(ReflectionClass, getName) {
@@ -884,6 +893,14 @@ static String HHVM_METHOD(ReflectionClass, getName) {
 static String HHVM_METHOD(ReflectionClass, getParentName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->parentStr();
+}
+
+static bool HHVM_METHOD(ReflectionClass, isHack) {
+  if (RuntimeOption::EnableHipHopSyntax) {
+    return true;
+  }
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return cls->preClass()->unit()->isHHFile();
 }
 
 static bool HHVM_METHOD(ReflectionClass, isInternal) {
@@ -997,7 +1014,7 @@ static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
   c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();; // Object ensures set is freed
+  Object o = st = newobj<c_Set>(); // Object ensures set is freed
   auto const& allIfaces = cls->allInterfaces();
   st->reserve(allIfaces.size());
 
@@ -1073,7 +1090,7 @@ static void addInterfaceMethods(const Class* iface, c_Set* st) {
     const Func* m = methods[i];
     if (m->isGenerated()) continue;
 
-    st->add(f_strtolower(m->nameStr()).get());
+    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
   }
 
   for (auto const& parentIface: iface->declInterfaces()) {
@@ -1090,12 +1107,12 @@ static void addInterfaceMethods(const Class* iface, c_Set* st) {
 // helper for getMethods: returns a Set
 static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  Attr mask = attrs_from_modifiers(filter, true);
+  Attr mask = attrs_from_modifiers(filter, false);
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   c_Set* st;
-  Object ret = st = NEWOBJ(c_Set)();
+  Object ret = st = newobj<c_Set>();
   st->reserve(cls->numMethods());
 
   // const pointer to Class => pointer to a (const) Class
@@ -1107,7 +1124,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
       const Func* m = methods[i];
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
 
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
 
     for (Slot i = currentCls->traitsBeginIdx();
@@ -1115,7 +1132,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
          ++i) {
       const Func* m = currentCls->getMethod(i);
       if (m->isGenerated() || !(m->attrs() & mask)) continue;
-      st->add(f_strtolower(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
   } while ((currentCls = currentCls->parent()));
 
@@ -1179,7 +1196,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   }
 
   c_Set* st;
-  Object o = st = NEWOBJ(c_Set)();
+  Object o = st = newobj<c_Set>();
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);
@@ -1320,6 +1337,24 @@ static String HHVM_METHOD(ReflectionClass, getConstructorName) {
   return String(ret);
 }
 
+void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
+    if (!content.isString()) {
+      throw Exception("Native data of ReflectionClass should be a class name");
+    }
+
+    String clsName = content.toString();
+    String result = init(clsName);
+    if (result.empty()) {
+      auto msg = folly::format("Class {} does not exist", clsName.data()).str();
+      throw Object(Reflection::AllocReflectionExceptionObject(String(msg)));
+    }
+
+    // It is possible that $name does not get serialized. If a class derives
+    // from ReflectionClass and the return value of its __sleep() function does
+    // not contain 'name', $name gets ignored. So, we restore $name here.
+    obj->o_set(s_name, result);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ReflectionExtension : public Extension {
@@ -1338,6 +1373,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_set_static_property);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
+    HHVM_ME(ReflectionFunctionAbstract, isHack);
     HHVM_ME(ReflectionFunctionAbstract, isInternal);
     HHVM_ME(ReflectionFunctionAbstract, isGenerator);
     HHVM_ME(ReflectionFunctionAbstract, isAsync);
@@ -1374,6 +1410,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
+    HHVM_ME(ReflectionClass, isHack);
     HHVM_ME(ReflectionClass, isInternal);
     HHVM_ME(ReflectionClass, isInstantiable);
     HHVM_ME(ReflectionClass, isInterface);
@@ -1629,7 +1666,7 @@ Array get_class_info(const String& name) {
       const Func* m = methods[i];
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       if (RuntimeOption::EvalRuntimeTypeProfile) {
         set_debugger_type_profiling_info(info, cls, m);
@@ -1642,7 +1679,7 @@ Array get_class_info(const String& name) {
       const Func* m = cls->getMethod(i);
       if (m->isGenerated()) continue;
 
-      auto lowerName = f_strtolower(m->nameStr());
+      auto lowerName = HHVM_FN(strtolower)(m->nameStr());
       Array info = Array::Create();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info));

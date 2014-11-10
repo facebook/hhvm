@@ -375,14 +375,6 @@ bool FunctionScope::isReferenceVariableArgument() const {
   return res;
 }
 
-bool FunctionScope::isMixedVariableArgument() const {
-  bool res = (m_attribute & FileScope::MixedVariableArgument) && !m_overriding;
-  // If this method returns true, then isReferenceVariableArgument()
-  // must also return true.
-  assert(!res || isReferenceVariableArgument());
-  return res;
-}
-
 bool FunctionScope::noFCallBuiltin() const {
   bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
@@ -406,9 +398,6 @@ void FunctionScope::setVariableArgument(int reference) {
   m_attribute |= FileScope::VariableArgument;
   if (reference) {
     m_attribute |= FileScope::ReferenceVariableArgument;
-    if (reference < 0) {
-      m_attribute |= FileScope::MixedVariableArgument;
-    }
   }
 }
 
@@ -583,8 +572,7 @@ bool FunctionScope::matchParams(FunctionScopePtr func) {
   }
   if (hasVariadicParam() != func->hasVariadicParam() ||
       usesVariableArgumentFunc() != func->usesVariableArgumentFunc() ||
-      isReferenceVariableArgument() != func->isReferenceVariableArgument() ||
-      isMixedVariableArgument() != func->isMixedVariableArgument()) {
+      isReferenceVariableArgument() != func->isReferenceVariableArgument()) {
     return false;
   }
 

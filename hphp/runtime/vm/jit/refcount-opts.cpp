@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/simplifier.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -1236,6 +1236,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     assertCanConsume(value);
 
+    // Drop one IncRef right before a DecRef, so that we don't end up
+    // missing opportunities because we sunk IncRefs too late.
+    if (m_inst->is(DecRef, DecRefNZ) && valState.optDelta() > 0) {
+      placeSinkPoint(value, valState, sinkPoint);
+    }
+
     // Note that we're treating consumers and observers the same here, which is
     // necessary until we have better alias analysis.
     observeValue(value, valState, sinkPoint);
@@ -1507,13 +1513,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
            id, inlineIdx);
     Indent _i;
     consumeValue(value);
-  }
-
-  void updateLocalRefValue(uint32_t id, unsigned,
-                           SSATmp* oldVal, SSATmp* newVal) override {
-    ITRACE(3, "replacing {} with {} in local {} for updateLocalRefValue\n",
-           *oldVal, *newVal, id);
-    replaceValue(oldVal, newVal);
   }
 
   /* The IRUnit being processed and its blocks */

@@ -54,7 +54,7 @@ File *PhpStreamWrapper::openFD(const char *sFD) {
     return nullptr;
   }
 
-  return NEWOBJ(PlainFile)(dup(nFD), true, s_php);
+  return newres<PlainFile>(dup(nFD), true, s_php);
 }
 
 static void phpStreamApplyFilterList(const Resource& fpres,
@@ -123,13 +123,13 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
   const char *req = filename.c_str() + sizeof("php://") - 1;
 
   if (!strcasecmp(req, "stdin")) {
-    return NEWOBJ(PlainFile)(dup(STDIN_FILENO), true, s_php);
+    return newres<PlainFile>(dup(STDIN_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stdout")) {
-    return NEWOBJ(PlainFile)(dup(STDOUT_FILENO), true, s_php);
+    return newres<PlainFile>(dup(STDOUT_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stderr")) {
-    return NEWOBJ(PlainFile)(dup(STDERR_FILENO), true, s_php);
+    return newres<PlainFile>(dup(STDERR_FILENO), true, s_php);
   }
   if (!strncasecmp(req, "fd/", sizeof("fd/") - 1)) {
     return openFD(req + sizeof("fd/") - 1);
@@ -140,7 +140,7 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
   }
 
   if (!strncasecmp(req, "temp", sizeof("temp") - 1)) {
-    std::unique_ptr<TempFile> file(NEWOBJ(TempFile)(true, s_php, s_temp));
+    std::unique_ptr<TempFile> file(newres<TempFile>(true, s_php, s_temp));
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
@@ -148,7 +148,7 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
     return file.release();
   }
   if (!strcasecmp(req, "memory")) {
-    std::unique_ptr<TempFile> file(NEWOBJ(TempFile)(true, s_php, s_memory));
+    std::unique_ptr<TempFile> file(newres<TempFile>(true, s_php, s_memory));
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
@@ -158,11 +158,11 @@ File* PhpStreamWrapper::open(const String& filename, const String& mode,
 
   if (!strcasecmp(req, "input")) {
     auto raw_post = g_context->getRawPostData();
-    return NEWOBJ(MemFile)(raw_post.c_str(), raw_post.size(), s_php, s_input);
+    return newres<MemFile>(raw_post.c_str(), raw_post.size(), s_php, s_input);
   }
 
   if (!strcasecmp(req, "output")) {
-    return NEWOBJ(OutputFile)(filename);
+    return newres<OutputFile>(filename);
   }
 
   return nullptr;

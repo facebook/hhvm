@@ -223,7 +223,7 @@ and expr_ =
   | Array_get of expr * expr option
   | Class_get of class_id * pstring
   | Class_const of class_id * pstring
-  | Call of call_type * expr * expr list
+  | Call of call_type * expr * expr list * expr list
   | True
   | False
   | Int of pstring
@@ -243,7 +243,7 @@ and expr_ =
   | Binop of Ast.bop * expr * expr
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
-  | New of class_id * expr list
+  | New of class_id * expr list * expr list
   | Efun of fun_ * id list
   | Xml of sid * (pstring * expr) list * expr list
   | Assert of assert_expr

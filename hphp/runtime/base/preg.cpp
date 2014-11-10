@@ -35,8 +35,8 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/ext_function.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
@@ -223,8 +223,12 @@ static void set_extra_limits(pcre_extra*& extra) {
   extra->match_limit_recursion = s_pcre_globals->m_preg_recursion_limit;
 }
 
-static char** get_subpat_names(pcre_cache_entry* pce) {
-  if (pce->subpat_names) return pce->subpat_names;
+static const char* const*
+get_subpat_names(const pcre_cache_entry* pce) {
+  char **subpat_names = pce->subpat_names.load(std::memory_order_relaxed);
+  if (subpat_names) {
+    return subpat_names;
+  }
 
   /*
   * Build a mapping from subpattern numbers to their names. We will always
@@ -236,7 +240,7 @@ static char** get_subpat_names(pcre_cache_entry* pce) {
 
   int name_count;
 
-  pce->subpat_names = (char **)calloc(pce->num_subpats, sizeof(char *));
+  subpat_names = (char **)calloc(pce->num_subpats, sizeof(char *));
   int rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_NAMECOUNT, &name_count);
   if (rc < 0) {
     raise_warning("Internal pcre_fullinfo() error %d", rc);
@@ -258,9 +262,9 @@ static char** get_subpat_names(pcre_cache_entry* pce) {
     while (ni++ < name_count) {
       name_idx = 0xff * (unsigned char)name_table[0] +
                  (unsigned char)name_table[1];
-      pce->subpat_names[name_idx] = name_table + 2;
-      if (is_numeric_string(pce->subpat_names[name_idx],
-                            strlen(pce->subpat_names[name_idx]),
+      subpat_names[name_idx] = name_table + 2;
+      if (is_numeric_string(subpat_names[name_idx],
+                            strlen(subpat_names[name_idx]),
                             nullptr, nullptr, 0) != KindOfNull) {
         raise_warning("Numeric named subpatterns are not allowed");
         return nullptr;
@@ -268,7 +272,16 @@ static char** get_subpat_names(pcre_cache_entry* pce) {
       name_table += name_size;
     }
   }
-  return pce->subpat_names;
+  // Store subpat_names into the cache entry
+  char **expected = nullptr;
+  if (!pce->subpat_names.compare_exchange_strong(expected, subpat_names)) {
+    // Another thread stored subpat_names already. The array created by the
+    // other thread is now in expected, return it instead and delete the one
+    // we just made.
+    free(subpat_names);
+    return expected;
+  }
+  return subpat_names;
 }
 
 static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
@@ -652,7 +665,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
     return false;
   }
 
-  char** subpat_names = get_subpat_names(const_cast<pcre_cache_entry *>(pce));
+  const char* const* subpat_names = get_subpat_names(pce);
   if (subpat_names == nullptr) {
     return false;
   }
@@ -843,7 +856,8 @@ Variant preg_match_all(const String& pattern, const String& subject,
 ///////////////////////////////////////////////////////////////////////////////
 
 static String preg_do_repl_func(const Variant& function, const String& subject,
-                                int* offsets, char** subpat_names, int count) {
+                                int* offsets, const char* const* subpat_names,
+                                int count) {
   Array subpats = Array::Create();
   for (int i = 0; i < count; i++) {
     auto off1 = offsets[i<<1];
@@ -932,7 +946,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
 
-  char** subpat_names = get_subpat_names(const_cast<pcre_cache_entry *>(pce));
+  const char* const* subpat_names = get_subpat_names(pce);
   if (subpat_names == nullptr) {
     return false;
   }
@@ -1010,7 +1024,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
                   if (eval) {
-                    String esc_match = f_addslashes(
+                    String esc_match = HHVM_FN(addslashes)(
                       String(
                         subject.data() + offsets[backref<<1],
                         match_len,
@@ -1063,7 +1077,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
                   if (eval) {
-                    String esc_match = f_addslashes(
+                    String esc_match = HHVM_FN(addslashes)(
                       String(
                         subject.data() + offsets[backref<<1],
                         match_len,

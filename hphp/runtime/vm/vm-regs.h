@@ -99,6 +99,11 @@ inline ActRec*& vmFirstAR() {
   return vmRegsUnsafe().firstAR;
 }
 
+inline MInstrState& vmMInstrState() {
+  // This is safe because mInstrState is always updated directly.
+  return vmRegsUnsafe().mInstrState;
+}
+
 inline void assert_native_stack_aligned() {
   assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 }
@@ -163,13 +168,13 @@ struct EagerVMRegAnchor {
 inline ActRec* regAnchorFP(Offset* pc = nullptr) {
   // In builtins, m_fp points to the caller's frame if called through
   // FCallBuiltin, else it points to the builtin's frame, in which case,
-  // getPrevVMState() gets the caller's frame.  In addition, we need to skip
+  // getPrevVMStateUNSAFE() gets the caller's frame.  In addition, we need to skip
   // over php-defined builtin functions in order to find the true context.
   auto const context = g_context.getNoCheck();
   auto cur = vmfp();
   if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
   while (cur && cur->skipFrame()) {
-    cur = context->getPrevVMState(cur, pc);
+    cur = context->getPrevVMStateUNSAFE(cur, pc);
   }
   return cur;
 }
@@ -179,7 +184,7 @@ inline ActRec* regAnchorFPForArgs() {
   auto const context = g_context.getNoCheck();
   ActRec* cur = vmfp();
   if (cur && cur->m_func->isCPPBuiltin()) {
-    cur = context->getPrevVMState(cur);
+    cur = context->getPrevVMStateUNSAFE(cur);
   }
   return cur;
 }

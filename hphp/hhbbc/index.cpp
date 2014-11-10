@@ -25,6 +25,7 @@
 #include <memory>
 #include <unordered_set>
 #include <vector>
+#include <utility>
 
 #include <boost/range/iterator_range.hpp>
 #include <tbb/concurrent_hash_map.h>
@@ -64,6 +65,9 @@ namespace {
 const StaticString s_construct("__construct");
 const StaticString s_call("__call");
 const StaticString s_get("__get");
+const StaticString s_set("__set");
+const StaticString s_isset("__isset");
+const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
 
@@ -383,12 +387,31 @@ struct ClassInfo {
    * flags imply the derived flags, even if the class is final, so you
    * don't need to check both in those situations.
    */
-  bool hasMagicCall              = false;
-  bool hasMagicCallStatic        = false;
-  bool hasMagicGet               = false;
-  bool derivedHasMagicCall       = false;
-  bool derivedHasMagicCallStatic = false;
-  bool derivedHasMagicGet        = false;
+  struct MagicFnInfo {
+    bool thisHas{false};
+    bool derivedHas{false};
+  };
+  MagicFnInfo
+    magicCall,
+    magicCallStatic,
+    magicGet,
+    magicSet,
+    magicIsset,
+    magicUnset;
+};
+
+using MagicMapInfo = struct {
+  ClassInfo::MagicFnInfo (ClassInfo::*pmem);
+  Attr attrBit;
+};
+
+const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
+  { s_call.get(),       { &ClassInfo::magicCall,       AttrNone } },
+  { s_callStatic.get(), { &ClassInfo::magicCallStatic, AttrNone } },
+  { s_get.get(),        { &ClassInfo::magicGet,   AttrNoOverrideMagicGet } },
+  { s_set.get(),        { &ClassInfo::magicSet,   AttrNoOverrideMagicSet } },
+  { s_isset.get(),      { &ClassInfo::magicIsset, AttrNoOverrideMagicIsset } },
+  { s_unset.get(),      { &ClassInfo::magicUnset, AttrNoOverrideMagicUnset } }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -460,7 +483,7 @@ bool Class::couldHaveMagicGet() const {
   return val.match(
     [] (SString) { return true; },
     [] (borrowed_ptr<ClassInfo> cinfo) {
-      return cinfo->derivedHasMagicGet;
+      return cinfo->magicGet.derivedHas;
     }
   );
 }
@@ -1018,31 +1041,25 @@ void define_func_families(IndexData& index) {
   }
 }
 
-void mark_magic_on_parents(ClassInfo& cinfo,
-                           bool call,
-                           bool callStatic,
-                           bool get) {
-  if (call)       cinfo.derivedHasMagicCall = true;
-  if (callStatic) cinfo.derivedHasMagicCallStatic = true;
-  if (get)        cinfo.derivedHasMagicGet = true;
-  if (cinfo.parent) {
-    mark_magic_on_parents(*cinfo.parent, call, callStatic, get);
+void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
+  for (auto& kv : magicMethodMap) {
+    if ((derived.*kv.second.pmem).thisHas) {
+      (cinfo.*kv.second.pmem).derivedHas = true;
+    }
   }
+  if (cinfo.parent) return mark_magic_on_parents(*cinfo.parent, derived);
 }
 
 void find_magic_methods(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto& methods         = cinfo->methods;
-    auto const call       = methods.find(s_call.get()) != end(methods);
-    auto const callStatic = methods.find(s_callStatic.get()) != end(methods);
-    auto const get        = methods.find(s_get.get()) != end(methods);
-
-    cinfo->hasMagicCall       = call;
-    cinfo->hasMagicCallStatic = callStatic;
-    cinfo->hasMagicGet        = get;
-    if (call || callStatic || get) {
-      mark_magic_on_parents(*cinfo, call, callStatic, get);
+    bool any = false;
+    for (auto& kv : magicMethodMap) {
+      bool const found = methods.find(kv.first) != end(methods);
+      any = any || found;
+      (cinfo.get()->*kv.second.pmem).thisHas = found;
     }
+    if (any) mark_magic_on_parents(*cinfo, *cinfo);
   }
 }
 
@@ -1069,6 +1086,16 @@ void mark_no_override_classes(IndexData& index) {
         FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
       }
       add_attribute(cinfo->cls, AttrNoOverride);
+    }
+
+    for (auto& kv : magicMethodMap) {
+      if (kv.second.attrBit == AttrNone) continue;
+      if (!(cinfo.get()->*kv.second.pmem).derivedHas) {
+        FTRACE(2, "Adding no-override of {} to {}\n",
+          kv.first->data(),
+          cinfo->cls->name->data());
+        add_attribute(cinfo->cls, kv.second.attrBit);
+      }
     }
   }
 }
@@ -1147,20 +1174,17 @@ void check_invariants(borrowed_ptr<const ClassInfo> cinfo) {
   always_assert(!cinfo->baseList.empty());
   always_assert(cinfo->baseList.back() == cinfo);
 
-  // Magic method flags should be consistent with the method table.
-  always_assert(
-    cinfo->hasMagicCall ==
-      (cinfo->methods.find(s_call.get()) != end(cinfo->methods))
-  );
-  always_assert(
-    cinfo->hasMagicCallStatic ==
-      (cinfo->methods.find(s_callStatic.get()) != end(cinfo->methods))
-  );
+  for (auto& kv : magicMethodMap) {
+    auto& info = cinfo->*kv.second.pmem;
 
-  // Non-'derived' flags about magic methods imply the derived ones.
-  always_assert(!cinfo->hasMagicCallStatic ||
-                cinfo->derivedHasMagicCallStatic);
-  always_assert(!cinfo->hasMagicCall || cinfo->derivedHasMagicCall);
+    // Magic method flags should be consistent with the method table.
+    always_assert(info.thisHas ==
+      (cinfo->methods.find(kv.first) != end(cinfo->methods)));
+
+    // Non-'derived' flags (thisHas) about magic methods imply the derived
+    // ones.
+    always_assert(!info.thisHas || info.derivedHas);
+  }
 }
 
 void check_invariants(IndexData& data) {
@@ -1617,12 +1641,12 @@ res::Func Index::resolve_method(Context ctx,
 
   switch (dcls.type) {
   case DCls::Exact:
-    if (cinfo->hasMagicCall || cinfo->hasMagicCallStatic) {
+    if (cinfo->magicCall.thisHas || cinfo->magicCallStatic.thisHas) {
       if (couldBeInaccessible()) return name_only();
     }
     return do_resolve(ftarget);
   case DCls::Sub:
-    if (cinfo->derivedHasMagicCall || cinfo->derivedHasMagicCallStatic) {
+    if (cinfo->magicCall.derivedHas || cinfo->magicCallStatic.derivedHas) {
       if (couldBeInaccessible()) return name_only();
     }
     if (ftarget->attrs & AttrNoOverride) {
@@ -1714,7 +1738,10 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Precise:
     {
       auto const mainType = [&]() -> const Type {
-        switch (tc.underlyingDataType()) {
+        auto const dt = tc.underlyingDataType();
+        if (!dt) return TInitCell;
+
+        switch (*dt) {
         case KindOfString:       return TStr;
         case KindOfStaticString: return TStr;
         case KindOfArray:        return TArr;
@@ -1746,6 +1773,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         }
         return TInitCell;
       }();
+
       return mainType == TInitCell || !tc.isNullable() ? mainType
         : opt(mainType);
     }

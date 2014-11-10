@@ -100,8 +100,8 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = sl.len;
-  sd->m_capAndHash  = sl.len + 1;
+  sd->m_capAndCount = sl.len + 1; // cap=len+1, count=0
+  sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
@@ -138,8 +138,8 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = 0;
-  sd->m_capAndHash  = 1;
+  sd->m_capAndCount = 1; // cap=1 count=0
+  sd->m_lenAndHash  = 0; // len=0 hash=0
   data[0] = 0;
 
   assert(sd->m_hash == 0);
@@ -176,9 +176,11 @@ ALWAYS_INLINE void StringData::delist() {
   prev->next = next;
 }
 
-void StringData::sweepAll() {
-  auto& head = MM().m_strings;
-  for (SweepNode *next, *n = head.next; n != &head; n = next) {
+unsigned StringData::sweepAll() {
+  auto& head = MM().getStringList();
+  auto count = 0;
+  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
+    count++;
     next = n->next;
     assert(next && uintptr_t(next) != kSmartFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
@@ -190,6 +192,7 @@ void StringData::sweepAll() {
     s->sharedPayload()->shared->getHandle()->unreference();
   }
   head.next = head.prev = &head;
+  return count;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -201,8 +204,8 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_lenAndCount  = sl.len;
-  sd->m_capAndHash   = cap - sizeof(StringData);
+  sd->m_capAndCount  = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
   auto const mcret = memcpy(data, sl.ptr, sl.len);
@@ -235,8 +238,8 @@ StringData* StringData::Make(size_t reserveLen) {
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_lenAndCount = 0;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->isFlat());
   assert(sd->checkSane());
@@ -263,8 +266,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
   memcpy(data + r1.len, r2.ptr, r2.len);
@@ -288,8 +291,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   void* p;
   p = memcpy(data,              r1.ptr, r1.len);
@@ -311,8 +314,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash  = cap - sizeof(StringData);
+  sd->m_capAndCount = cap - sizeof(StringData); // count=0
+  sd->m_lenAndHash  = len; // hash=0
 
   void* p;
   p = memcpy(data,              r1.ptr, r1.len);
@@ -330,7 +333,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
 
 ALWAYS_INLINE void StringData::enlist() {
  assert(isShared());
- auto& head = MM().m_strings;
+ auto& head = MM().getStringList();
  // insert after head
  auto const next = head.next;
  auto& payload = *sharedPayload();
@@ -343,17 +346,15 @@ ALWAYS_INLINE void StringData::enlist() {
 NEVER_INLINE
 StringData* StringData::MakeAPCSlowPath(const APCString* shared,
                                         uint32_t len) {
-  auto const data = shared->getStringData();
-  auto const hash = data->m_hash & STRHASH_MASK;
-  auto const capAndHash = static_cast<uint64_t>(hash) << 32;
-
   auto const sd = static_cast<StringData*>(
       MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
   );
+  auto const data = shared->getStringData();
+  auto const hash = data->m_hash & STRHASH_MASK;
 
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash = capAndHash;
+  sd->m_capAndCount = 0; // cap=count=0
+  sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -387,12 +388,9 @@ StringData* StringData::Make(const APCString* shared) {
   auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
 
-  auto const capAndHash = static_cast<uint64_t>(hash) << 32 |
-                                            (cap - sizeof(StringData));
-
   sd->m_data = pdst;
-  sd->m_lenAndCount = len;
-  sd->m_capAndHash = capAndHash;
+  sd->m_capAndCount = (cap - sizeof(StringData)); // count=0
+  sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
   auto const mcret = memcpy(pdst, psrc, len);
@@ -785,12 +783,12 @@ void StringData::setUncounted() const {
 // type conversions
 
 DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
-                                      int allow_errors) const {
+                                      int allow_errors, int* overflow) const {
   if (m_hash < 0) return KindOfNull;
   DataType ret = KindOfNull;
   StringSlice s = slice();
   if (s.len) {
-    ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors);
+    ret = is_numeric_string(s.ptr, s.len, &lval, &dval, allow_errors, overflow);
     if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= STRHASH_MSB;
     }
@@ -803,14 +801,23 @@ bool StringData::isNumeric() const {
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
-  case KindOfNull:   return false;
-  case KindOfInt64:
-  case KindOfDouble: return true;
-  default:
-    assert(false);
-    break;
+    case KindOfNull:
+      return false;
+    case KindOfInt64:
+    case KindOfDouble:
+      return true;
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return false;
+  not_reached();
 }
 
 bool StringData::isInteger() const {
@@ -818,14 +825,23 @@ bool StringData::isInteger() const {
   int64_t lval; double dval;
   DataType ret = isNumericWithVal(lval, dval, 0);
   switch (ret) {
-  case KindOfNull:   return false;
-  case KindOfInt64:  return true;
-  case KindOfDouble: return false;
-  default:
-    assert(false);
-    break;
+    case KindOfNull:
+    case KindOfDouble:
+      return false;
+    case KindOfInt64:
+      return true;
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return false;
+  not_reached();
 }
 
 bool StringData::toBoolean() const {
@@ -869,14 +885,18 @@ bool StringData::equal(const StringData *s) const {
 int StringData::numericCompare(const StringData *v2) const {
   assert(v2);
 
+  int oflow1, oflow2;
   int64_t lval1, lval2;
   double dval1, dval2;
   DataType ret1, ret2;
-  if ((ret1 = isNumericWithVal(lval1, dval1, 0)) == KindOfNull ||
+  if ((ret1 = isNumericWithVal(lval1, dval1, 0, &oflow1)) == KindOfNull ||
       (ret1 == KindOfDouble && !finite(dval1)) ||
-      (ret2 = v2->isNumericWithVal(lval2, dval2, 0)) == KindOfNull ||
+      (ret2 = v2->isNumericWithVal(lval2, dval2, 0, &oflow2)) == KindOfNull ||
       (ret2 == KindOfDouble && !finite(dval2))) {
     return -2;
+  }
+  if (oflow1 && oflow1 == oflow2 && dval1 == dval2) {
+    return -2; // overflow in same direction, comparison will be inaccurate
   }
   if (ret1 == KindOfInt64 && ret2 == KindOfInt64) {
     if (lval1 > lval2) return 1;
@@ -890,10 +910,16 @@ int StringData::numericCompare(const StringData *v2) const {
   }
   if (ret1 == KindOfDouble) {
     assert(ret2 == KindOfInt64);
+    if (oflow1) {
+      return oflow1;
+    }
     dval2 = (double)lval2;
   } else {
     assert(ret1 == KindOfInt64);
     assert(ret2 == KindOfDouble);
+    if (oflow2) {
+      return oflow2;
+    }
     dval1 = (double)lval1;
   }
 
@@ -942,10 +968,6 @@ bool StringData::checkSane() const {
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(offsetof(StringData, m_count) == FAST_REFCOUNT_OFFSET,
                 "m_count at wrong offset");
-  static_assert(offsetof(StringSlice, ptr) == offsetof(StringData, m_data) &&
-                offsetof(StringSlice, len) == offsetof(StringData, m_len),
-                "StringSlice and StringData must have same pointer and size "
-                "layout for the StaticString map");
 
   assert(uint32_t(size()) <= MaxSize);
   assert(uint32_t(capacity()) <= MaxCap);

@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/ext_objprof.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/memory-manager.h"

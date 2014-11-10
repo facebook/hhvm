@@ -187,7 +187,7 @@ void setWandResource(const StaticString& className,
                      ObjectData* obj,
                      Wand* wand,
                      bool destroy = true) {
-  auto res = Resource(NEWOBJ(WandResource<Wand>)(wand, destroy));
+  auto res = Resource(newres<WandResource<Wand>>(wand, destroy));
   obj->o_set("wand", res, className.get());
 }
 

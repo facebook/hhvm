@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/runtime/ext/ext_server.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -388,7 +388,7 @@ Resource PageletServer::TaskStart(
       return Resource();
     }
   }
-  PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
+  PageletTask *task = newres<PageletTask>(url, headers, remote_host, post_data,
                                           get_uploaded_files(), files,
                                           timeoutSeconds);
   Resource ret(task);

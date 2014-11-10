@@ -4,7 +4,7 @@ open Typing_defs
 class type ['a] type_visitor_type = object
   method on_tany : 'a -> 'a
   method on_tmixed : 'a -> 'a
-  method on_tarray : 'a -> is_local_array -> ty option -> ty option -> 'a
+  method on_tarray : 'a -> ty option -> ty option -> 'a
   method on_tgeneric : 'a -> string -> ty option -> 'a
   method on_toption : 'a -> ty -> 'a
   method on_tprim : 'a -> Nast.tprim -> 'a
@@ -23,7 +23,7 @@ end
 class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tany acc = acc
   method on_tmixed acc = acc
-  method on_tarray acc _ ty1_opt ty2_opt =
+  method on_tarray acc ty1_opt ty2_opt =
     let acc = opt_fold_left this#on_type acc ty1_opt in
     let acc = opt_fold_left this#on_type acc ty2_opt in
     acc
@@ -51,8 +51,8 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_type acc = function
     | _, Tany -> this#on_tany acc
     | _, Tmixed -> this#on_tmixed acc
-    | _, Tarray (is_local_array, ty1_opt, ty2_opt) ->
-      this#on_tarray acc is_local_array ty1_opt ty2_opt
+    | _, Tarray (ty1_opt, ty2_opt) ->
+      this#on_tarray acc ty1_opt ty2_opt
     | _, Tgeneric (s, ty_opt) -> this#on_tgeneric acc s ty_opt
     | _, Toption ty -> this#on_toption acc ty
     | _, Tprim prim -> this#on_tprim acc prim

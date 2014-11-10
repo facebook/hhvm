@@ -58,7 +58,7 @@ function lchgrp($filename, $group) { }
 function touch($filename, $mtime = 0, $atime = 0) { }
 function copy($source, $dest, $context = null) { }
 function rename($oldname, $newname, $context = null) { }
-function umask($mask = null_variant) { }
+function umask($mask = null) { }
 function unlink($filename, $context = null) { }
 function link($target, $link) { }
 function symlink($target, $link) { }

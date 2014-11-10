@@ -25,12 +25,6 @@
 #include "folly/Format.h"
 #include "folly/json.h"
 
-#ifdef __APPLE__
-#define INT64_TYPE "long long"
-#else
-#define INT64_TYPE "long"
-#endif
-
 namespace HPHP {
 
 /* Our assert() macro uses a function that ends up in a library we don't want
@@ -100,7 +94,7 @@ static const std::unordered_map<int, fbstring> g_typeMap =
   {(int)KindOfInvalid,     "void"},
   {(int)KindOfNull,        "HPHP::Variant"},
   {(int)KindOfBoolean,     "bool"},
-  {(int)KindOfInt64,       INT64_TYPE},
+  {(int)KindOfInt64,       "int64_t"},
   {(int)KindOfDouble,      "double"},
   {(int)KindOfString,      "HPHP::String"},
   {(int)KindOfArray,       "HPHP::Array"},
@@ -114,7 +108,7 @@ static const std::unordered_map<int, fbstring> g_phpTypeMap =
   {(int)KindOfInvalid,     "void"},
   {(int)KindOfNull,        "void"},
   {(int)KindOfBoolean,     "bool"},
-  {(int)KindOfInt64,       INT64_TYPE},
+  {(int)KindOfInt64,       "int64_t"},
   {(int)KindOfDouble,      "double"},
   {(int)KindOfString,      "String"},
   {(int)KindOfArray,       "Array"},
@@ -142,7 +136,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"HipHopSpecific",                 HipHopSpecific},
   {"VariableArguments",              VariableArguments},
   {"RefVariableArguments",           RefVariableArguments},
-  {"MixedVariableArguments",         MixedVariableArguments},
   {"FunctionIsFoldable",             FunctionIsFoldable},
   {"NoEffect",                       NoEffect},
   {"NoInjection",                    NoInjection},
@@ -327,7 +320,7 @@ fbstring PhpParam::getDefault() const {
   }
   auto value = m_param["value"].asString();
   if (value == "null") {
-    switch (kindOf()) {
+    switch (static_cast<int>(kindOf())) {
       case KindOfString: return "null_string";
       case KindOfArray: return "null_array";
       case KindOfObject: return "null_object";
@@ -747,7 +740,8 @@ PhpFunc::PhpFunc(const folly::dynamic& d,
   }
 }
 
-fbstring PhpFunc::getCppSig() const {
+fbstring
+PhpFunc::getPrefixedCppName(bool fullyQualified /* = true */) const {
   std::ostringstream out;
 
   fbstring nm = getCppName();
@@ -755,15 +749,26 @@ fbstring PhpFunc::getCppSig() const {
   std::transform(nm.begin(), nm.end(), lowername.begin(),
                  std::ptr_fun<int, int>(std::tolower));
 
+  if (fullyQualified) {
+    out << "HPHP::";
+  }
   if (!isMethod()) {
-    out << "HPHP::f_" << lowername << "(";
+    out << "f_" << lowername;
   } else {
     if (isStatic()) {
-      out << "HPHP::c_" << className() << "::ti_" << lowername << "(";
+      out << "c_" << className() << "::ti_" << lowername;
     } else {
-      out << "HPHP::c_" << className() << "::t_" << lowername << "(";
+      out << "c_" << className() << "::t_" << lowername;
     }
   }
+
+  return out.str();
+}
+
+fbstring PhpFunc::getCppSig(bool fullyQualified /* = true */) const {
+  std::ostringstream out;
+
+  out << getPrefixedCppName(fullyQualified) << "(";
 
   bool firstParam = true;
   if (isVarArgs()) {

@@ -102,7 +102,7 @@ module Program : Server.SERVER_PROGRAM = struct
           | None -> output_string oc "Missing from nenv\n"
           | Some canon ->
             let p, _ = SMap.find_unsafe canon (fst nenv.Naming.iclasses) in
-            output_string oc ((Pos.string p)^"\n")
+            output_string oc ((Pos.string (Pos.to_absolute p))^"\n")
         );
         let class_ = Typing_env.Classes.get qual_name in
         (match class_ with
@@ -113,7 +113,7 @@ module Program : Server.SERVER_PROGRAM = struct
         );
         output_string oc "function:\n";
         (match SMap.get qual_name nenv.Naming.ifuns with
-        | Some (p, _) -> output_string oc ((Pos.string p)^"\n")
+        | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
         | None -> output_string oc "Missing from nenv\n");
         let fun_ = Typing_env.Funs.get qual_name in
         (match fun_ with
@@ -187,15 +187,16 @@ module Program : Server.SERVER_PROGRAM = struct
     try handle_connection_ genv env socket
     with
     | Unix.Unix_error (e, _, _) ->
-        Printf.printf "Unix error: %s\n" (Unix.error_message e);
-        flush stdout
+        Printf.fprintf stderr "Unix error: %s\n" (Unix.error_message e);
+        Printexc.print_backtrace stderr;
+        flush stderr
     | e ->
-        Printf.printf "Error: %s\n" (Printexc.to_string e);
-        flush stdout
+        Printf.fprintf stderr "Error: %s\n" (Printexc.to_string e);
+        Printexc.print_backtrace stderr;
+        flush stderr
 
-  let preinit options =
-    if not (ServerArgs.check_mode options)
-    then HackSearchService.attach_hooks ();
+  let preinit () =
+    HackSearchService.attach_hooks ();
     (* Force hhi files to be extracted and their location saved before workers
      * fork, so everyone can know about the same hhi path. *)
     ignore (Hhi.get_hhi_root());
@@ -208,51 +209,53 @@ module Program : Server.SERVER_PROGRAM = struct
     let js_next_files = Find.make_next_files_js ~filter:(fun _ -> true) dir in
     fun () -> php_next_files () @ js_next_files ()
 
-  let init genv env root =
+  let init genv env =
+    let module RP = Relative_path in
+    let root = ServerArgs.root genv.options in
     let next_files_hhi =
       match Hhi.get_hhi_root () with
-      | Some hhi_root -> make_next_files hhi_root
+      | Some hhi_root ->
+          compose (rev_rev_map (RP.create RP.Hhi)) (make_next_files hhi_root)
       | None -> print_endline "Could not locate hhi files"; exit 1 in
-    let next_files_root = make_next_files root in
+    let next_files_root = compose
+      (rev_rev_map (RP.create RP.Root)) (make_next_files root)
+    in
     let next_files = fun () ->
       match next_files_hhi () with
       | [] -> next_files_root ()
       | x -> x in
     ServerInit.init genv env next_files
 
-  let run_once_and_exit genv env root =
+  let run_once_and_exit genv env =
     ServerError.print_errorl (ServerArgs.json_mode genv.options)
-                             env.errorl stdout;
+                             (List.map Errors.to_absolute env.errorl) stdout;
     match ServerArgs.convert genv.options with
     | None ->
         exit (if env.errorl = [] then 0 else 1)
     | Some dirname ->
-        ServerConvert.go genv env root dirname;
+        ServerConvert.go genv env dirname;
         exit 0
 
-  let recheck genv env updates report =
-    let diff_php, diff_js = updates in
-    let diff = SSet.union diff_php diff_js in
-    if not (SSet.is_empty diff)
-    then
-      let failed_parsing = SSet.union diff env.failed_parsing in
-      let check_env = { env with failed_parsing = failed_parsing } in
-      Server.Continue (ServerTypeCheck.check genv check_env);
+  let filter_update _genv _env update =
+    Find.is_php_path (Relative_path.suffix update) ||
+    Find.is_js_path (Relative_path.suffix update)
+
+  let recheck genv env updates =
+    let diff = updates in
+    if Relative_path.Set.is_empty diff
+    then env
     else
-      if !report <> []
-        then begin
-          (* We have a report that the state is inconsistent, at the same
-          * time, dfind is telling us that nothing changed between the moment
-          * where we produced the report and now. Basically: we have a bug!
-          *)
-          Printf.printf "SERVER PANIC!!!!!!!!!!!!!\n";
-          Printf.printf "*************************************************\n";
-          Printf.printf "CRASH REPORT:\n";
-          Printf.printf "*************************************************\n";
-          List.iter (Printf.printf "%s\n") !report;
-          Printf.printf "*************************************************\n";
-          Server.Die
-        end else Server.Continue env
+      let failed_parsing = Relative_path.Set.union diff env.failed_parsing in
+      let check_env = { env with failed_parsing = failed_parsing } in
+      ServerTypeCheck.check genv check_env
 
   let parse_options = ServerArgs.parse_options
+
+  let marshal chan =
+    Marshal.to_channel chan !Typing_deps.ifiles [];
+    HackSearchService.SS.MasterApi.marshal chan
+
+  let unmarshal chan =
+    Typing_deps.ifiles := Marshal.from_channel chan;
+    HackSearchService.SS.MasterApi.unmarshal chan
 end

@@ -679,7 +679,7 @@ void XMLWriterResource::sweep() {}
 XMLWRITER_METHOD_NO_ARGS(bool, openMemory)
 
 static Variant HHVM_FUNCTION(xmlwriter_open_memory) {
-  auto data = NEWOBJ(XMLWriterResource)();
+  auto data = newres<XMLWriterResource>();
 
   bool opened = data->m_writer.openMemory();
   if (!opened) {
@@ -693,7 +693,7 @@ XMLWRITER_METHOD(bool, openURI,
 
 static Variant HHVM_FUNCTION(xmlwriter_open_uri,
                              const String& uri) {
-  auto data = NEWOBJ(XMLWriterResource)();
+  auto data = newres<XMLWriterResource>();
 
   bool opened = data->m_writer.openURI(uri);
   if (!opened) {

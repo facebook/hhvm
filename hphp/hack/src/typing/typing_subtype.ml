@@ -19,6 +19,7 @@ module TDef = Typing_tdef
 module TUtils = Typing_utils
 module TUEnv = Typing_unification_env
 module ShapeMap = Nast.ShapeMap
+module SN = Naming_special_names
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
@@ -151,57 +152,52 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
          (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
       )
   (* Dirty covariance hacks *)
-  | (_, (Tapply ((_, "\\Awaitable"), [ty_super]))),
-    (_, (Tapply ((_, "\\Awaitable"), [ty_sub]))) ->
+  | (_, (Tapply ((_, name_super), [ty_super]))), (_, (Tapply ((_, name_sub), [ty_sub])))
+    when name_super = SN.Classes.cAwaitable &&
+      name_sub = SN.Classes.cAwaitable ->
       let old_allow_null_as_void = Env.allow_null_as_void env in
       let env = Env.set_allow_null_as_void env in
       let env = sub_type env ty_super ty_sub in
       Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
-  | (_, (Tapply (
-      (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
-            "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
-            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase" |
-            "\\DataTypeImplProvider") as name_super)),
-      [ty_super]
-    ))),
-    (_, (Tapply (
-      (_, (("\\Traversable" | "\\Container" | "\\Iterable" | "\\Iterator" |
-            "\\ConstCollection" | "\\ConstVector" | "\\ConstSet" |
-            "\\ImmVector" | "\\ImmSet" | "\\PrivacyPolicyBase" |
-            "\\DataTypeImplProvider") as name_sub)),
-      [ty_sub]
-    )))
-    when name_super = name_sub ->
+  | (_, (Tapply ((_, name_super), [ty_super]))),
+    (_, (Tapply ((_, name_sub), [ty_sub])))
+    when name_super = name_sub &&
+      (name_super = SN.Collections.cTraversable
+       || name_super = SN.Collections.cContainer
+       || name_super = SN.Collections.cIterable
+       || name_super = SN.Collections.cIterator
+       || name_super = SN.Collections.cConstCollection
+       || name_super = SN.Collections.cConstVector
+       || name_super = SN.Collections.cConstSet
+       || name_super = SN.Collections.cImmVector
+       || name_super = SN.Collections.cImmSet
+       || name_super = SN.FB.cPrivacyPolicyBase
+       || name_super = SN.FB.cDataTypeImplProvider) ->
       sub_type env ty_super ty_sub
-  | (_, (Tapply (
-      (_, (("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish" |
-            "\\KeyedIterable" | "\\KeyedIterator" | "\\ConstMap" | "\\ImmMap" |
-            "\\Pair" | "\\GenReadApi" | "\\GenReadIdxApi") as name_super)),
-      [tk_super; tv_super]
-    ))),
-    (_, (Tapply (
-      (_, (("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish" |
-            "\\KeyedIterable" | "\\KeyedIterator" | "\\ConstMap" | "\\ImmMap" |
-            "\\Pair" | "\\GenReadApi" | "\\GenReadIdxApi") as name_sub)),
-      [tk_sub; tv_sub]
-    )))
-    when name_super = name_sub ->
+  | (_, (Tapply ((_, name_super), [tk_super; tv_super]))),
+    (_, (Tapply ((_, name_sub), [tk_sub; tv_sub])))
+    when name_super = name_sub &&
+      (name_super = SN.Collections.cKeyedTraversable
+       || name_super = SN.Collections.cKeyedContainer
+       || name_super = SN.Collections.cIndexish
+       || name_super = SN.Collections.cKeyedIterable
+       || name_super = SN.Collections.cKeyedIterator
+       || name_super = SN.Collections.cConstMap
+       || name_super = SN.Collections.cImmMap
+       || name_super = SN.Collections.cPair
+       || name_super = SN.FB.cGenReadApi
+       || name_super = SN.FB.cGenReadIdxApi) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
-  | (_, (Tapply (
-      (_, (("\\DataType") as name_super)),
-      [t1_super; t2_super; t3_super]
-    ))),
-    (_, (Tapply (
-      (_, (("\\DataType") as name_sub)),
-      [t1_sub; t2_sub; t3_sub]
-    )))
-    when name_super = name_sub ->
+  | (_, (Tapply ((_, name_super), [t1_super; t2_super; t3_super]))),
+    (_, (Tapply ((_, name_sub), [t1_sub; t2_sub; t3_sub])))
+    when name_super = name_sub && (name_super = SN.FB.cDataType) ->
       let env = sub_type env t1_super t1_sub in
       let env = sub_type env t2_super t2_sub in
       sub_type env t3_super t3_sub
-  | (_, (Tapply ((_, "\\Generator"), [tk_super; tv_super; ts_super]))),
-    (_, (Tapply ((_, "\\Generator"), [tk_sub; tv_sub; ts_sub]))) ->
+  | (_, (Tapply ((_, name_super), [tk_super; tv_super; ts_super]))),
+    (_, (Tapply ((_, name_sub), [tk_sub; tv_sub; ts_sub])))
+    when name_super = name_sub && (name_super = SN.Classes.cGenerator) ->
       (* Currently, we are only covariant in the type of the value yielded. I
        * think we could also be covariant in the type of the key yielded and
        * also *contravariant* in the type of the value sent in, but since this
@@ -278,7 +274,9 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tapply ((_, ("\\Traversable" | "\\Container")), [tv_super])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, coll), [tv_super])), (r, Tarray (ty3, ty4))
+    when (coll = SN.Collections.cTraversable ||
+        coll = SN.Collections.cContainer) ->
       (match ty3, ty4 with
       | None, _ -> env
       | Some ty3, None ->
@@ -286,7 +284,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | Some ty3, Some ty4 ->
           sub_type env tv_super ty4
       )
-  | (_, Tapply ((_, ("\\KeyedTraversable" | "\\KeyedContainer" | "\\Indexish")), [tk_super; tv_super])), (r, Tarray (_, ty3, ty4)) ->
+  | (_, Tapply ((_, coll), [tk_super; tv_super])), (r, Tarray (ty3, ty4))
+    when (coll = SN.Collections.cKeyedTraversable
+         || coll = SN.Collections.cKeyedContainer
+         || coll = SN.Collections.cIndexish) ->
       (match ty3 with
       | None -> env
       | Some ty3 ->
@@ -299,21 +300,23 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
               sub_type env tv_super ty4
           )
       )
-  | (_, Tapply ((_, "\\Stringish"), _)), (_, Tprim Nast.Tstring) -> env
-  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tarray _) -> env
-  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tint) -> env
-  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tfloat) -> env
-  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tstring) -> env
-  | (_, Tapply ((_, "\\XHPChild"), _)), (_, Tprim Nast.Tnum) -> env
-  | (_, (Tarray (_, Some ty_super, None))), (_, (Tarray (_, Some ty_sub, None))) ->
+  | (_, Tapply ((_, stringish), _)), (_, Tprim Nast.Tstring)
+    when stringish = SN.Classes.cStringish -> env
+  | (_, Tapply ((_, xhp_child), _)), (_, Tarray _)
+  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tint)
+  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tfloat)
+  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tstring)
+  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tnum)
+    when xhp_child = SN.Classes.cXHPChild -> env
+  | (_, (Tarray (Some ty_super, None))), (_, (Tarray (Some ty_sub, None))) ->
       sub_type env ty_super ty_sub
-  | (_, (Tarray (_, Some tk_super, Some tv_super))), (_, Tarray (_, Some tk_sub, Some tv_sub)) ->
+  | (_, (Tarray (Some tk_super, Some tv_super))), (_, Tarray (Some tk_sub, Some tv_sub)) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
-  | (_, Tarray (_, Some _, Some _)), (reason, Tarray (is_local, Some elt_ty, None)) ->
+  | (_, Tarray (Some _, Some _)), (reason, Tarray (Some elt_ty, None)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason) in
       let int_type = int_reason, Tprim Nast.Tint in
-      sub_type env ty_super (reason, Tarray (is_local, Some int_type, Some elt_ty))
+      sub_type env ty_super (reason, Tarray (Some int_type, Some elt_ty))
   | _, (_, Tany) -> env
   | (_, Tany), _ -> fst (Unify.unify env ty_super ty_sub)
   | (_, Toption ty_super), _ when uenv_super.TUEnv.non_null ->
@@ -392,14 +395,21 @@ and sub_string p env ty2 =
       let env, class_ = Env.get_class env (snd x) in
       (match class_ with
       | None -> env
-      | Some {tc_name = "\\Stringish"; _} -> env
-      | Some tc when SMap.mem "\\Stringish" tc.tc_ancestors -> env
+      | Some tc
+          (* A Stringish is a string or an object with a __toString method
+           * that will be converted to a string *)
+          when tc.tc_name = SN.Classes.cStringish
+          || SMap.mem SN.Classes.cStringish tc.tc_ancestors
+          (* Apply enum means that we're dealing with enum values,
+           * which are primitives (int/string) *)
+          || tc.tc_kind = Ast.Cenum ->
+        env
       | Some _ ->
-          Errors.object_string p (Reason.to_pos r2);
-          env
+        Errors.object_string p (Reason.to_pos r2);
+        env
       )
   | _, Tany ->
-      env (* Unifies with anything *)
+    env (* Unifies with anything *)
   | _, Tobject -> env
   | _ -> fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 

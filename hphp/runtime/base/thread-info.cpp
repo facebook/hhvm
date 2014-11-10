@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/ext/ext_string.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
@@ -77,6 +77,7 @@ void ThreadInfo::init() {
 
   Lock lock(s_thread_info_mutex);
   s_thread_infos.insert(this);
+  Sweepable::InitSweepableList();
 }
 
 bool ThreadInfo::valid(ThreadInfo* info) {
@@ -180,8 +181,8 @@ ssize_t check_request_surprise(ThreadInfo* info) {
     }
   }
   if (do_signaled) {
-    extern bool f_pcntl_signal_dispatch();
-    f_pcntl_signal_dispatch();
+    extern bool HHVM_FN(pcntl_signal_dispatch)();
+    HHVM_FN(pcntl_signal_dispatch)();
   }
 
   if (pendingException) {

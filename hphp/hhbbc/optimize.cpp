@@ -313,6 +313,12 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       break;
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
+    case Flavor::CVU:
+      // Note that we only support C's for CVU so far (this only comes up with
+      // FCallBuiltin)---we'll fail the verifier if something changes to send
+      // V's or U's through here.
+      gen(bc::PopC {});
+      break;
     }
   }
 
@@ -354,6 +360,15 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       // We should only ever const prop for FPassL right now.
       always_assert(numPush == 1 && op.op == Op::FPassL);
       gen(bc::FPassC { op.FPassL.arg1 });
+      continue;
+    }
+
+    // Similar special case for FCallBuiltin.  We need to turn things into R
+    // flavors since opcode that followed the call are going to expect that
+    // flavor.
+    if (op.op == Op::FCallBuiltin) {
+      gen(bc::RGetCNop {});
+      continue;
     }
   }
 
@@ -397,22 +412,21 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  BytecodeAccumulator accumulator(newBCs);
-
   CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
 
+  auto peephole = make_peephole(newBCs);
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(op));
 
-    auto const stateIn = state; // The accumulator expects input eval state.
+    auto const stateIn = state; // Peephole expects input eval state.
     auto gen = [&,srcStack] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(newBC));
       if (options.Peephole) {
-        accumulator.append(newBC, stateIn, srcStack);
+        peephole.append(newBC, stateIn, srcStack);
       } else {
         newBCs.push_back(newBC);
       }
@@ -488,7 +502,7 @@ void first_pass(const Index& index,
   }
 
   if (options.Peephole) {
-    accumulator.finalize();
+    peephole.finalize();
   }
   blk->hhbcs = std::move(newBCs);
 }

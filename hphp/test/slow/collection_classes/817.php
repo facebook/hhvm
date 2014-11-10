@@ -4,7 +4,6 @@ function main() {
   $ctypes = array(
     'Vector' => new Vector(),
     'Map' => new Map(),
-    'StableMap' => new StableMap(),
   );
   foreach ($ctypes as $ctype => $c) {
     echo "=== $ctype ===\n";

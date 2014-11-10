@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/type-profile.h"
 
 #include <string.h>
@@ -24,7 +25,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/lock.h"
@@ -399,7 +400,12 @@ void recordType(TypeProfileKey key, DataType dt) {
   ONTRACE(2, prof->dump());
 }
 
-typedef std::pair<DataType, double> PredVal;
+/*
+ * Pair of (predicted type, confidence).
+ *
+ * A folly::none prediction means mixed/unknown.
+ */
+typedef std::pair<MaybeDataType, double> PredVal;
 
 PredVal predictType(TypeProfileKey key) {
   PredVal kNullPred = std::make_pair(KindOfUninit, 0.0);
@@ -437,6 +443,7 @@ PredVal predictType(TypeProfileKey key) {
   if (maxProb > 1.0) maxProb = 1.0;
   return std::make_pair(pred, maxProb);
 }
+
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
@@ -787,8 +788,10 @@ public:
 
   /*
    * Get the underlying enum base type if this is an enum.
+   *
+   * A return of folly::none represents the `mixed' type.
    */
-  DataType enumBaseTy() const;
+  MaybeDataType enumBaseTy() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1043,7 +1046,7 @@ private:
   // contains initialization information.
   PropMap m_declProperties;
 
-  DataType m_enumBaseTy;
+  MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
   mutable RDS::Link<PropInitVec*> m_propDataCache{RDS::kInvalidHandle};
 

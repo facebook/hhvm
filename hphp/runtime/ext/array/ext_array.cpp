@@ -17,13 +17,13 @@
 #include "hphp/runtime/ext/array/ext_array.h"
 
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -32,6 +32,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+#define SORT_DESC               3
+#define SORT_ASC                4
 
 #define DEFINE_CONSTANT(name)                                                  \
   const int64_t k_##name = name;                                               \
@@ -312,25 +315,36 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asCell();
   switch (cell->m_type) {
-  case KindOfString:
-  case KindOfStaticString: {
-    int64_t n = 0;
-    StringData *sd = cell->m_data.pstr;
-    if (sd->isStrictlyInteger(n)) {
-      return ad->exists(n);
+    case KindOfUninit:
+    case KindOfNull:
+      return ad->exists(staticEmptyString());
+
+    case KindOfInt64:
+      return ad->exists(cell->m_data.num);
+
+    case KindOfStaticString:
+    case KindOfString: {
+      int64_t n = 0;
+      StringData *sd = cell->m_data.pstr;
+      if (sd->isStrictlyInteger(n)) {
+        return ad->exists(n);
+      }
+      return ad->exists(StrNR(sd));
     }
-    return ad->exists(StrNR(sd));
+
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      raise_warning("Array key should be either a string or an integer");
+      return false;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfInt64:
-    return ad->exists(cell->m_data.num);
-  case KindOfUninit:
-  case KindOfNull:
-    return ad->exists(staticEmptyString());
-  default:
-    break;
-  }
-  raise_warning("Array key should be either a string or an integer");
-  return false;
+  not_reached();
 }
 
 bool HHVM_FUNCTION(key_exists,
@@ -600,15 +614,77 @@ Variant HHVM_FUNCTION(array_pop,
 }
 
 Variant HHVM_FUNCTION(array_product,
-                      const Variant& array) {
-  getCheckedArray(array);
-  int64_t i;
-  double d;
-  if (ArrayUtil::Product(arr_array, &i, &d) == KindOfInt64) {
-    return i;
-  } else {
-    return d;
+                      const Variant& input) {
+  if (UNLIKELY(!isContainer(input))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
+    return init_null();
   }
+
+  int64_t i = 1;
+  ArrayIter iter(input);
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+
+    switch (entry.getType()) {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i *= entry.toInt64();
+        continue;
+
+      case KindOfDouble:
+        goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i *= ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
+      }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }
+  return i;
+
+DOUBLE:
+  double d = i;
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d *= entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }
+  return d;
 }
 
 Variant HHVM_FUNCTION(array_push,
@@ -823,15 +899,77 @@ Variant HHVM_FUNCTION(array_splice,
 }
 
 Variant HHVM_FUNCTION(array_sum,
-                      const Variant& array) {
-  getCheckedArray(array);
-  int64_t i;
-  double d;
-  if (ArrayUtil::Sum(arr_array, &i, &d) == KindOfInt64) {
-    return i;
-  } else {
-    return d;
+                      const Variant& input) {
+  if (UNLIKELY(!isContainer(input))) {
+    raise_warning("Invalid operand type was used: %s expects "
+                  "an array or collection as argument 1",
+                  __FUNCTION__+2);
+    return init_null();
   }
+
+  int64_t i = 0;
+  ArrayIter iter(input);
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRefPlus());
+
+    switch (entry.getType()) {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i += entry.toInt64();
+        continue;
+
+      case KindOfDouble:
+        goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i += ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
+      }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }
+  return i;
+
+DOUBLE:
+  double d = i;
+  for (; iter; ++iter) {
+    const Variant& entry(iter.secondRef());
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d += entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }
+  return d;
 }
 
 Variant HHVM_FUNCTION(array_unshift,
@@ -941,8 +1079,9 @@ static void walk_func(VRefParam value,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
   Variant sink;
+  int nargs = userdata.isInitialized() ? 3 : 2;
   TypedValue args[3] = { *value->asRef(), *key.asCell(), *userdata.asCell() };
-  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, 3, args);
+  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, nargs, args);
 }
 
 bool HHVM_FUNCTION(array_walk_recursive,
@@ -1054,30 +1193,42 @@ int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode /* = 0 */) {
   switch (var.getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return 0;
-  case KindOfObject:
-    {
-      Object obj = var.toObject();
-      if (obj->isCollection()) {
-        return getCollectionSize(obj.get());
+    case KindOfUninit:
+    case KindOfNull:
+      return 0;
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfResource:
+      return 1;
+
+    case KindOfArray:
+      if (mode) {
+        const Array& arr_var = var.toCArrRef();
+        return php_count_recursive(arr_var);
       }
-      if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke_few_args(s_count, 0).toInt64();
+      return var.getArrayData()->size();
+
+    case KindOfObject:
+      {
+        Object obj = var.toObject();
+        if (obj->isCollection()) {
+          return getCollectionSize(obj.get());
+        }
+        if (obj.instanceof(SystemLib::s_CountableClass)) {
+          return obj->o_invoke_few_args(s_count, 0).toInt64();
+        }
       }
-    }
-    break;
-  case KindOfArray:
-    if (mode) {
-      const Array& arr_var = var.toCArrRef();
-      return php_count_recursive(arr_var);
-    }
-    return var.getArrayData()->size();
-  default:
-    break;
+      return 1;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return 1;
+  not_reached();
 }
 
 int64_t HHVM_FUNCTION(sizeof,
@@ -1304,14 +1455,25 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   return vm_call_user_func(*callback, make_packed_array(v1, v2)).toInt32();
 }
 
+// PHP 5.x does different things when diffing against the same array,
+// particularly when the comparison function is outside the norm of
+// return -1, 0, 1 specification. To do what PHP 5.x in these cases,
+// use the RuntimeOption
 #define COMMA ,
 #define diff_intersect_body(type,intersect_params,user_setup)   \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) return arr_array1;                    \
+  Array ret = Array::Create();                                  \
+  if (RuntimeOption::EnableZendSorting) {                       \
+    getCheckedArray(array2);                                    \
+    if (arr_array1.same(arr_array2)) {                          \
+      return ret;                                               \
+    }                                                           \
+  }                                                             \
   user_setup                                                    \
-  Array ret = arr_array1.type(array2, intersect_params);        \
+  ret = arr_array1.type(array2, intersect_params);              \
   if (ret.size()) {                                             \
-    for (ArrayIter iter(args); iter; ++iter) {                 \
+    for (ArrayIter iter(args); iter; ++iter) {                  \
       ret = ret.type(iter.second(), intersect_params);          \
       if (!ret.size()) break;                                   \
     }                                                           \
@@ -1432,7 +1594,7 @@ Variant HHVM_FUNCTION(array_diff,
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   st->reserve(largestSize);
   containerValuesToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1483,7 +1645,7 @@ Variant HHVM_FUNCTION(array_diff_key,
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   st->reserve(largestSize);
   containerKeysToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1692,7 +1854,7 @@ static void containerValuesIntersectHelper(c_Set* st,
                                            int count) {
   assert(count >= 2);
   c_Map* mp;
-  Object mapObj = mp = NEWOBJ(c_Map)();
+  Object mapObj = mp = newobj<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1732,7 +1894,7 @@ static void containerKeysIntersectHelper(c_Set* st,
                                          int count) {
   assert(count >= 2);
   c_Map* mp;
-  Object mapObj = mp = NEWOBJ(c_Map)();
+  Object mapObj = mp = newobj<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1811,7 +1973,7 @@ Variant HHVM_FUNCTION(array_intersect,
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can
     // just call containerValuesToSetHelper() to build the Set.
@@ -1867,7 +2029,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
   // Build up a Set containing the keys that are present in all the containers
   // (except container1)
   c_Set* st;
-  Object setObj = st = NEWOBJ(c_Set)();
+  Object setObj = st = newobj<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can just
     // call containerKeysToSetHelper() to build the Set.
@@ -2166,9 +2328,18 @@ php_asort(VRefParam container, int sort_flags,
 }
 
 static bool
-php_ksort(VRefParam container, int sort_flags, bool ascending) {
+php_ksort(VRefParam container, int sort_flags, bool ascending,
+          bool use_collator) {
   if (container.isArray()) {
     Array& arr_array = container.wrapped().toArrRef();
+    if (use_collator && sort_flags != SORT_LOCALE_STRING) {
+      UCollator *coll = s_collator->getCollator();
+      if (coll) {
+        Intl::IntlError &errcode = s_collator->getErrorRef();
+        return collator_ksort(container, sort_flags, ascending,
+                              coll, &errcode);
+      }
+    }
     ArraySortTmp ast(arr_array);
     ast->ksort(sort_flags, ascending);
     return true;
@@ -2188,42 +2359,44 @@ php_ksort(VRefParam container, int sort_flags, bool ascending) {
 
 bool HHVM_FUNCTION(sort,
                   VRefParam array,
-                  int sort_flags /* = 0 */,
-                  bool use_collator /* = false */) {
+                  int sort_flags /* = 0 */) {
+  bool use_collator = RuntimeOption::EnableZendSorting;
   return php_sort(array, sort_flags, true, use_collator);
 }
 
 bool HHVM_FUNCTION(rsort,
                    VRefParam array,
-                   int sort_flags /* = 0 */,
-             bool use_collator /* = false */) {
+                   int sort_flags /* = 0 */) {
+  bool use_collator = RuntimeOption::EnableZendSorting;
   return php_sort(array, sort_flags, false, use_collator);
 }
 
 bool HHVM_FUNCTION(asort,
                    VRefParam array,
-                   int sort_flags /* = 0 */,
-                   bool use_collator /* = false */) {
+                   int sort_flags /* = 0 */) {
+  bool use_collator = RuntimeOption::EnableZendSorting;
   return php_asort(array, sort_flags, true, use_collator);
 }
 
 bool HHVM_FUNCTION(arsort,
                    VRefParam array,
-                   int sort_flags /* = 0 */,
-                   bool use_collator /* = false */) {
+                   int sort_flags /* = 0 */) {
+  bool use_collator = RuntimeOption::EnableZendSorting;
   return php_asort(array, sort_flags, false, use_collator);
 }
 
 bool HHVM_FUNCTION(ksort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  return php_ksort(array, sort_flags, true);
+  bool use_collator = RuntimeOption::EnableZendSorting;
+  return php_ksort(array, sort_flags, true, use_collator);
 }
 
 bool HHVM_FUNCTION(krsort,
                    VRefParam array,
                    int sort_flags /* = 0 */) {
-  return php_ksort(array, sort_flags, false);
+  bool use_collator = RuntimeOption::EnableZendSorting;
+  return php_ksort(array, sort_flags, false, use_collator);
 }
 
 // NOTE: PHP's implementation of natsort and natcasesort accepts ArrayAccess
@@ -2390,6 +2563,79 @@ Variant HHVM_FUNCTION(hphp_array_idx,
   return def;
 }
 
+static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
+  switch (sort_flags) {
+  case SORT_NATURAL:
+    return Array::SortNatural;
+  case SORT_NATURAL_CASE:
+    return Array::SortNaturalCase;
+  case SORT_NUMERIC:
+    return ascending ?
+      Array::SortNumericAscending : Array::SortNumericDescending;
+  case SORT_STRING:
+    return ascending ?
+      Array::SortStringAscending : Array::SortStringDescending;
+  case SORT_STRING_CASE:
+    return ascending ?
+      Array::SortStringAscendingCase : Array::SortStringDescendingCase;
+  case SORT_LOCALE_STRING:
+    return ascending ?
+      Array::SortLocaleStringAscending : Array::SortLocaleStringDescending;
+  case SORT_REGULAR:
+  default:
+    return ascending ?
+      Array::SortRegularAscending : Array::SortRegularDescending;
+  }
+}
+
+TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
+  TypedValue* tv = getArg(ar, 0);
+  if (tv == nullptr || !tvAsVariant(tv).isArray()) {
+    throw_expected_array_exception();
+    return arReturn(ar, false);
+  }
+
+  std::vector<Array::SortData> data;
+  std::vector<Array> arrays;
+  arrays.reserve(ar->numArgs()); // so no resize would happen
+
+  Array::SortData sd;
+  sd.original = &tvAsVariant(tv);
+  arrays.push_back(Array(sd.original->getArrayData()));
+  sd.array = &arrays.back();
+  sd.by_key = false;
+
+  int sort_flags = SORT_REGULAR;
+  bool ascending = true;
+  for (int i = 1; i < ar->numArgs(); i++) {
+    tv = getArg(ar, i);
+    if (tvAsVariant(tv).isArray()) {
+      sd.cmp_func = get_cmp_func(sort_flags, ascending);
+      data.push_back(sd);
+
+      sort_flags = SORT_REGULAR;
+      ascending = true;
+
+      sd.original = &tvAsVariant(tv);
+      arrays.push_back(Array(sd.original->getArrayData()));
+      sd.array = &arrays.back();
+    } else {
+      int n = toInt32(getArg<KindOfInt64>(ar, i));
+      if (n == SORT_ASC) {
+      } else if (n == SORT_DESC) {
+        ascending = false;
+      } else {
+        sort_flags = n;
+      }
+    }
+  }
+
+  sd.cmp_func = get_cmp_func(sort_flags, ascending);
+  data.push_back(sd);
+
+  return arReturn(ar, Array::MultiSort(data, true));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define REGISTER_CONSTANT(name)                                                \
@@ -2501,6 +2747,7 @@ public:
     HHVM_FE(i18n_loc_set_strength);
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
+    HHVM_FE(array_multisort);
 
     loadSystemlib();
   }

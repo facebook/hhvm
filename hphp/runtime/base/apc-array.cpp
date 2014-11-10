@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 
 namespace HPHP {
 

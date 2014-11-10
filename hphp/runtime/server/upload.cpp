@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/ext/ext_apc.h"
+#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/util/text-util.h"
@@ -800,7 +800,7 @@ void rfc1867PostHandler(Transport* transport,
         new_val_len = value_len;
         if (php_rfc1867_callback != nullptr) {
           multipart_event_formdata event_formdata;
-          size_t newlength = 0;
+          size_t newlength = new_val_len;
 
           event_formdata.post_bytes_processed = mbuff->read_post_bytes;
           event_formdata.name = param;

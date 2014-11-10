@@ -97,9 +97,7 @@ int BuiltinSymbols::NumGlobalNames() {
 const StaticString
   s_fb_call_user_func_safe("fb_call_user_func_safe"),
   s_fb_call_user_func_safe_return("fb_call_user_func_safe_return"),
-  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe"),
-  s_is_callable("is_callable"),
-  s_call_user_func_array("call_user_func_array");
+  s_fb_call_user_func_array_safe("fb_call_user_func_array_safe");
 
 FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
                  ClassInfo *cls, ClassInfo::MethodInfo *method) {
@@ -149,10 +147,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
         method->name.same(s_fb_call_user_func_safe_return) ||
         method->name.same(s_fb_call_user_func_array_safe)) {
       f->setOptFunction(hphp_opt_fb_call_user_func);
-    } else if (method->name.same(s_is_callable)) {
-      f->setOptFunction(hphp_opt_is_callable);
-    } else if (method->name.same(s_call_user_func_array)) {
-      f->setOptFunction(hphp_opt_call_user_func);
     }
   }
 
@@ -168,9 +162,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   }
 
   // This block of code is not needed, if BlockScope directly takes flags.
-  if (attrs & ClassInfo::MixedVariableArguments) {
-    f->setVariableArgument(-1);
-  } else if (attrs & ClassInfo::RefVariableArguments) {
+  if (attrs & ClassInfo::RefVariableArguments) {
     f->setVariableArgument(1);
   } else if (attrs & ClassInfo::VariableArguments) {
     f->setVariableArgument(0);

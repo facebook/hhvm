@@ -40,7 +40,10 @@ ObjectMethodExpression::ObjectMethodExpression
   : FunctionCall(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectMethodExpression),
       method, "", false, params, ExpressionPtr()),
-    m_object(object), m_nullsafe(nullsafe), m_bindClass(true) {
+    m_object(object),
+    m_nullsafe(nullsafe),
+    m_xhpGetAttr(false),
+    m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
   m_object->clearContext(Expression::AccessContext);

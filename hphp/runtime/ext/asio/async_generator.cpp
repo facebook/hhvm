@@ -36,7 +36,7 @@ void delete_AsyncGenerator(ObjectData* od, const Class*) {
   auto const size = gen->resumable()->size();
   auto const base = (char*)(gen + 1) - size;
   gen->~c_AsyncGenerator();
-  MM().objFreeLogged(base, size);
+  smart_free(base);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

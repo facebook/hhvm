@@ -179,15 +179,23 @@ void StringBuffer::append(int64_t n) {
 void StringBuffer::append(const Variant& v) {
   auto const cell = v.asCell();
   switch (cell->m_type) {
-  case KindOfStaticString:
-  case KindOfString:
-    append(cell->m_data.pstr);
-    break;
-  case KindOfInt64:
-    append(cell->m_data.num);
-    break;
-  default:
-    append(v.toString());
+    case KindOfInt64:
+      append(cell->m_data.num);
+      break;
+    case KindOfStaticString:
+    case KindOfString:
+      append(cell->m_data.pstr);
+      break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      append(v.toString());
   }
 }
 

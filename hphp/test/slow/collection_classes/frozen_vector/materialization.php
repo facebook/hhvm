@@ -16,9 +16,6 @@ function testToImmVector() {
   printNormalized((Vector { 1, 2, 3 })->toImmVector());
   printNormalized((Map { 10 => "Hello", 20 => "World" })->toImmVector());
 
-  printNormalized((StableMap { "first" => "A", "second" => "B" })
-    ->toImmVector());
-
   printNormalized((Set { 10, 20, 30 })->toImmVector());
   printNormalized((Pair {1, 2})->toImmVector());
 }

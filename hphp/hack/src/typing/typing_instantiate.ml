@@ -143,10 +143,10 @@ and instantiate subst env (r, ty) =
 and instantiate_ p subst env = function
   | Tgeneric _ -> assert false
   | Tanon _ as x -> env, x
-  | Tarray (b1, ty1, ty2) ->
+  | Tarray (ty1, ty2) ->
       let env, ty1 = opt (instantiate subst) env ty1 in
       let env, ty2 = opt (instantiate subst) env ty2 in
-      env, Tarray (b1, ty1, ty2)
+      env, Tarray (ty1, ty2)
   | Tmixed -> env, Tmixed
   | Tvar n ->
       let env, ty = Env.get_type env n in

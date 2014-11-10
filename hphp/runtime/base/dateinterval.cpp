@@ -87,6 +87,13 @@ bool DateInterval::setInterval(const String& date_interval) {
     timelib_rel_time_dtor(di);
     return false;
   } else {
+#ifdef TIMELIB_HAVE_INTERVAL
+    if (UNLIKELY(!di && start && end)) {
+      timelib_update_ts(start, nullptr);
+      timelib_update_ts(end, nullptr);
+      di = timelib_diff(start, end);
+    }
+#endif
     m_di = DateIntervalPtr(di, dateinterval_deleter());
     return true;
   }
@@ -159,8 +166,8 @@ String DateInterval::format(const String& format_spec) {
 }
 
 SmartResource<DateInterval> DateInterval::cloneDateInterval() const {
-  if (!m_di) return NEWOBJ(DateInterval)();
-  return NEWOBJ(DateInterval)(timelib_rel_time_clone(m_di.get()));
+  if (!m_di) return newres<DateInterval>();
+  return newres<DateInterval>(timelib_rel_time_clone(m_di.get()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

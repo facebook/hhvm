@@ -27,7 +27,7 @@ function shell_exec($cmd) { }
 function exec($command, &$output = null, &$return_var = null) { }
 function passthru($command, &$return_var = null) { }
 function system($command, &$return_var = null) { }
-function proc_open($cmd, $descriptorspec, &$pipes, $cwd = null, $env = null_variant, $other_options = null_variant) { }
+function proc_open($cmd, $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null) { }
 function proc_terminate($process, $signal = 0) { }
 function proc_close($process) { }
 function proc_get_status($process) { }

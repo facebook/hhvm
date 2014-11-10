@@ -24,10 +24,11 @@
 #include <resolv.h>
 
 #include "folly/ScopeGuard.h"
+#include "folly/IPAddress.h"
 
-#include "hphp/runtime/ext/ext_string.h"
-#include "hphp/runtime/ext/ext_socket.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/file.h"
@@ -156,6 +157,8 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
   return ip_address;
 }
 
+const StaticString s_empty("");
+
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
 
@@ -166,7 +169,11 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
 
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  return String(safe_inet_ntoa(in));
+  try {
+    return String(folly::IPAddressV4(in).str());
+  } catch (folly::IPAddressFormatException &e) {
+    return hostname;
+  }
 }
 
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
@@ -179,7 +186,11 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   Array ret;
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
-    ret.append(String(safe_inet_ntoa(in)));
+    try {
+      ret.append(String(folly::IPAddressV4(in).str()));
+    } catch (folly::IPAddressFormatException &e) {
+        // ok to skip
+    }
   }
   return ret;
 }
@@ -274,9 +285,11 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
 }
 
 String HHVM_FUNCTION(long2ip, int64_t proper_address) {
-  struct in_addr myaddr;
-  myaddr.s_addr = htonl(proper_address);
-  return safe_inet_ntoa(myaddr);
+  try {
+    return folly::IPAddress::fromLongHBO(proper_address).str();
+  } catch (folly::IPAddressFormatException &e) {
+    return s_empty;
+  }
 }
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
@@ -911,7 +924,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     raise_warning("Cannot modify header information - headers already sent");
   }
 
-  String header = f_rtrim(str);
+  String header = HHVM_FN(rtrim)(str);
 
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
@@ -968,8 +981,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
       transport->addHeader(newHeader.empty() ? header : newHeader);
     }
     if (http_response_code) {
-      transport->setResponse(http_response_code,
-                             "explicit_header_response_code");
+      transport->setResponse(http_response_code);
     }
   }
 }
@@ -981,7 +993,7 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   if (transport) {
     *s_response_code = transport->getResponseCode();
     if (response_code) {
-      transport->setResponse(response_code, "explicit_header_response_code");
+      transport->setResponse(response_code);
     }
   }
 
@@ -1054,7 +1066,7 @@ void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
   }
 }
 
-int HHVM_FUNCTION(get_http_request_size) {
+int64_t HHVM_FUNCTION(get_http_request_size) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->getRequestSize();

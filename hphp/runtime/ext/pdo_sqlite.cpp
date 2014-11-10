@@ -16,9 +16,9 @@
 */
 
 #include "hphp/runtime/ext/pdo_sqlite.h"
-#include "hphp/runtime/ext/ext_function.h"
+#include "hphp/runtime/ext/sqlite3/ext_sqlite3.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-#include "hphp/runtime/ext/ext_sqlite3.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include <sqlite3.h>
 
@@ -189,7 +189,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
-    PDOSqliteStatement *s = NEWOBJ(PDOSqliteStatement)(m_db, rawstmt);
+    PDOSqliteStatement *s = newres<PDOSqliteStatement>(m_db, rawstmt);
     *stmt = s;
     return true;
   }
@@ -292,12 +292,12 @@ void php_sqlite3_callback_func(sqlite3_context* context, int argc,
 bool PDOSqliteConnection::createFunction(const String& name,
                                          const Variant& callback,
                                          int argcount) {
-  if (!f_is_callable(callback)) {
+  if (!HHVM_FN(is_callable)(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());
     return false;
   }
 
-  auto udf = std::make_shared<c_SQLite3::UserDefinedFunc>();
+  auto udf = std::make_shared<SQLite3::UserDefinedFunc>();
   auto stat = sqlite3_create_function(m_db, name.data(), argcount, SQLITE_UTF8,
                                       udf.get(), php_sqlite3_callback_func,
                                       nullptr, nullptr);
@@ -412,7 +412,7 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Resource(NEWOBJ(PDOColumn)));
+      columns.set(i, Resource(newres<PDOColumn>()));
     }
   }
 
@@ -510,7 +510,8 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam *param,
 
       case PDO_PARAM_LOB:
         if (param->parameter.isResource()) {
-          Variant buf = f_stream_get_contents(param->parameter.toResource());
+          Variant buf = HHVM_FN(stream_get_contents)(
+                        param->parameter.toResource());
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
@@ -620,7 +621,7 @@ PDOSqlite::PDOSqlite() : PDODriver("sqlite") {
 }
 
 PDOConnection *PDOSqlite::createConnectionObject() {
-  // Doesn't use NEWOBJ because PDOConnection is malloced
+  // Doesn't use newres<> because PDOConnection is malloced
   return new PDOSqliteConnection();
 }
 

@@ -213,7 +213,12 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   funcScope->setParamCounts(ar, -1, -1);
 
   if (funcScope->isNative()) {
-    if (m_retTypeAnnotation) {
+    if ((m_name == "__construct") || (m_name == "__destruct")) {
+      funcScope->setReturnType(ar, Type::Null);
+      assert(!m_retTypeAnnotation ||
+             !m_retTypeAnnotation->dataType().hasValue() ||
+             (m_retTypeAnnotation->dataType() == KindOfNull));
+    } else if (m_retTypeAnnotation) {
       funcScope->setReturnType(
         ar, Type::FromDataType(m_retTypeAnnotation->dataType(), Type::Variant));
     } else {
@@ -320,9 +325,17 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
       }
-      if (!m_retTypeAnnotation) {
+      auto is_ctordtor = (m_name == "__construct") || (m_name == "__destruct");
+      if (!m_retTypeAnnotation && !is_ctordtor) {
         parseTimeFatal(Compiler::InvalidAttribute,
                        "Native method %s::%s() must have a return type hint",
+                       classScope->getOriginalName().c_str(),
+                       getOriginalName().c_str());
+      } else if (m_retTypeAnnotation &&
+                 is_ctordtor &&
+                (m_retTypeAnnotation->dataType() != KindOfNull)) {
+        parseTimeFatal(Compiler::InvalidAttribute,
+                       "Native method %s::%s() must return void",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
       }

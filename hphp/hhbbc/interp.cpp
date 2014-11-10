@@ -55,6 +55,8 @@ namespace HPHP { namespace HHBBC {
 MINSTRS
 #undef MII
 
+void builtin(ISS&, const bc::FCallBuiltin&);
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -65,6 +67,7 @@ const StaticString s_Exception("Exception");
 const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
+const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -193,6 +196,8 @@ void in(ISS& env, const bc::UnboxR&) {
   popT(env);
   push(env, TInitCell);
 }
+
+void in(ISS& env, const bc::RGetCNop&) { nothrow(env); }
 
 void in(ISS& env, const bc::UnboxRNop&) {
   nothrow(env);
@@ -356,11 +361,11 @@ void in(ISS& env, const bc::Concat& op) {
     if (v1->m_type == KindOfStaticString &&
         v2->m_type == KindOfStaticString) {
       constprop(env);
-      return push(env, eval_cell([&] {
-        String s(StringData::Make(v2->m_data.pstr,
-                                  v1->m_data.pstr->slice()));
+      auto const cell = eval_cell([&] {
+        String s(StringData::Make(v2->m_data.pstr, v1->m_data.pstr->slice()));
         return make_tv<KindOfString>(s.detach());
-      }));
+      });
+      return push(env, cell ? *cell : TInitCell);
     }
   }
   // Not nothrow even if both are strings: can throw for strings
@@ -407,11 +412,12 @@ void in(ISS& env, const bc::BitNot& op) {
   auto const v = tv(t);
   if (v) {
     constprop(env);
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       auto c = *v;
       cellBitNot(c);
       return c;
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   push(env, TInitCell);
 }
@@ -478,9 +484,11 @@ void castBoolImpl(ISS& env, bool negate) {
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
-    }));
+    });
+    always_assert_flog(!!cell, "cellToBool should never throw");
+    return push(env, *cell);
   }
 
   if (t.subtypeOf(TArrE)) return push(env, negate ? TTrue : TFalse);
@@ -507,9 +515,10 @@ void in(ISS& env, const bc::CastInt&) {
   // Objects can raise a warning about converting to int.
   if (!t.couldBe(TObj)) nothrow(env);
   if (auto const v = tv(t)) {
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       return make_tv<KindOfInt64>(cellToInt(*v));
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   push(env, TInt);
 }
@@ -954,24 +963,37 @@ void isTypeImpl(ISS& env, Type locOrCell, Type test) {
   push(env, TBool);
 }
 
+void isTypeObj(ISS& env, const Type& ty) {
+  if (!ty.couldBe(TObj)) return push(env, TFalse);
+  if (ty.subtypeOf(TObj)) {
+    auto const incompl = objExact(
+      env.index.builtin_class(s_PHP_Incomplete_Class.get()));
+    if (!ty.couldBe(incompl))  return push(env, TTrue);
+    if (ty.subtypeOf(incompl)) return push(env, TFalse);
+  }
+  push(env, TBool);
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   auto const loc = locAsCell(env, op.loc1);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, loc);
+  default: return isTypeImpl(env, loc, type_of_istype(op.subop));
   }
-  isTypeImpl(env, loc, type_of_istype(op.subop));
 }
 
 template<class Op>
 void isTypeCImpl(ISS& env, const Op& op) {
   nothrow(env);
   auto const t1 = popC(env);
-  if (op.subop == IsTypeOp::Scalar) {
-    return push(env, TBool);
+  switch (op.subop) {
+  case IsTypeOp::Scalar: return push(env, TBool);
+  case IsTypeOp::Obj: return isTypeObj(env, t1);
+  default: return isTypeImpl(env, t1, type_of_istype(op.subop));
   }
-  isTypeImpl(env, t1, type_of_istype(op.subop));
 }
 
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }
@@ -1086,15 +1108,16 @@ void in(ISS& env, const bc::SetOpL& op) {
       SETOP_BODY_CELL(&c, op.subop, &rhs);
       return c;
     });
+    if (!resultTy) resultTy = TInitCell;
 
     // We may have inferred a TSStr or TSArr with a value here, but
     // at runtime it will not be static.  For now just throw that
     // away.  TODO(#3696042): should be able to loosen_statics here.
-    if (resultTy.subtypeOf(TStr))      resultTy = TStr;
-    else if (resultTy.subtypeOf(TArr)) resultTy = TArr;
+    if (resultTy->subtypeOf(TStr))      resultTy = TStr;
+    else if (resultTy->subtypeOf(TArr)) resultTy = TArr;
 
-    setLoc(env, op.loc1, resultTy);
-    push(env, resultTy);
+    setLoc(env, op.loc1, *resultTy);
+    push(env, *resultTy);
     return;
   }
 
@@ -1665,11 +1688,7 @@ void in(ISS& env, const bc::FCallUnpack& op) {
   fcallArrayImpl(env);
 }
 
-void in(ISS& env, const bc::FCallBuiltin& op) {
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, op.str3);
-  push(env, TInitGen);
-}
+void in(ISS& env, const bc::FCallBuiltin& op) { builtin(env, op); }
 
 void in(ISS& env, const bc::CufSafeArray&) {
   popR(env); popC(env); popC(env);
@@ -2045,12 +2064,13 @@ void in(ISS& env, const bc::Abs&) {
   auto const v1 = tv(t1);
   if (v1) {
     constprop(env);
-    return push(env, eval_cell([&] {
+    auto const cell = eval_cell([&] {
       auto const cell = *v1;
       auto const ret = f_abs(tvAsCVarRef(&cell));
       assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
       return *ret.asCell();
-    }));
+    });
+    return push(env, cell ? *cell : TInitCell);
   }
   if (t1.subtypeOf(TInt)) return push(env, TInt);
   if (t1.subtypeOf(TDbl)) return push(env, TDbl);

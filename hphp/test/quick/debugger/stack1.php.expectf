@@ -190,4 +190,8 @@ where
 variable
 $y = 1
 $x = 3
+$this = cls Object
+(
+)
+
 quit

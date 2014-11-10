@@ -15,7 +15,7 @@ open Utils
 open Typing_defs
 
 let compare_types x y =
-  let tenv = Typing_env.empty "" in
+  let tenv = Typing_env.empty Relative_path.default in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
 
@@ -45,7 +45,8 @@ let add_type env pos k type_ =
      * types part of the codebase at a time in worker threads. Fortunately we
      * don't actually need the whole env, so just keep the parts we do need for
      * typing, which *are* serializable. *)
-    {(Env.empty "") with Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
+    {(Env.empty Relative_path.default) with
+     Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
     pos,
     k,
     type_
@@ -124,7 +125,7 @@ let rec my_unify depth env ty1 ty2 =
       r, Toption (my_unify env ty1 ty2)
   | (r, Tarray _), (_, Tarray _) ->
       (try snd (Typing_ops.unify Pos.none Typing_reason.URnone env ty1 ty2)
-      with _ -> (r, Tarray (false, None, None)))
+      with _ -> (r, Tarray (None, None)))
   | (_, Tunresolved tyl), ty2
   | ty2, (_, Tunresolved tyl) ->
       List.fold_left (my_unify env) ty2 tyl
@@ -181,9 +182,9 @@ and normalize_ = function
       normalize_ (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
-  | Tarray (is_local, k, v) -> begin
-    try Tarray (is_local, opt_map normalize k, opt_map normalize v)
-    with Exit -> Tarray (false, None, None)
+  | Tarray (k, v) -> begin
+    try Tarray (opt_map normalize k, opt_map normalize v)
+    with Exit -> Tarray (None, None)
   end
   | Tgeneric _ as x -> x
   | Toption (_, (Toption (_, _) as ty)) -> normalize_ ty

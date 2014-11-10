@@ -63,11 +63,11 @@ static void insertSpillStackAsserts(IRInstruction& inst, IRUnit& unit) {
   for (unsigned i = 0, n = vals.size(); i < n; ++i) {
     Type t = vals[i]->type();
     if (t <= Type::Gen) {
-      IRInstruction* addr = unit.gen(LdStackAddr,
-                                     inst.marker(),
-                                     Type::PtrToGen,
-                                     StackOffset(i),
-                                     sp);
+      auto const addr = unit.gen(LdStackAddr,
+                                 inst.marker(),
+                                 Type::PtrToStkGen,
+                                 StackOffset(i),
+                                 sp);
       block->insert(pos, addr);
       IRInstruction* check = unit.gen(DbgAssertPtr, inst.marker(), addr->dst());
       block->insert(pos, check);
@@ -90,11 +90,11 @@ static void insertAsserts(IRUnit& unit) {
         }
         if (inst.op() == Call) {
           SSATmp* sp = inst.dst();
-          IRInstruction* addr = unit.gen(LdStackAddr,
-                                         inst.marker(),
-                                         Type::PtrToGen,
-                                         StackOffset(0),
-                                         sp);
+          auto const addr = unit.gen(LdStackAddr,
+                                     inst.marker(),
+                                     Type::PtrToStkGen,
+                                     StackOffset(0),
+                                     sp);
           insertAfter(&inst, addr);
           insertAfter(addr, unit.gen(DbgAssertPtr, inst.marker(), addr->dst()));
           continue;
@@ -176,10 +176,21 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (doReoptimize) {
     irBuilder.reoptimize();
     finishPass("reoptimize");
-    // Cleanup any dead code left around by CSE/Simplification
-    // Ideally, this would be controlled by a flag returned
-    // by optimizeTrace indicating whether DCE is necessary
     dce("reoptimize");
+  }
+
+  /*
+   * Note: doing this pass this late might not be ideal, in particular because
+   * we've already turned some StLoc instructions into StLocNT.
+   *
+   * But right now there are assumptions preventing us from doing it before
+   * refcount opts.  (Refcount opts needs to see all the StLocs explicitly
+   * because it makes assumptions about whether references are consumed based
+   * on that.)
+   */
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeMemory, "memelim");
+    dce("memelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

@@ -36,6 +36,5 @@ class B extends A {
 
   protected function setX(string $x): void {
   }
-  
-}
 
+}

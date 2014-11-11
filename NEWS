@@ -1,5 +1,77 @@
-NEXT 23-Oct-2014
+NEXT 4-Dec-2014
  -
+
+"Xzibit" 20-Nov-2014
+ - Fix readline request locals
+ - Don't leak HashContexts
+ - Fix a race freeing an APCHandle
+ - Don't clean up memory in AdminRequestHandler::abortRequest
+ - Fix setup/teardown for requests handled by WarmupRequestHandler
+ - Extend IR type system for more information about pointers
+ - Use proxygen as a git submodule
+ - Version of memcpy-x64 optimized for the tail end of 7,6,5,4 bytes in an N byte copy
+ - Eliminate default cases in DataType switches
+ - Match PHP5 backquote processing
+ - Add overflow info to is_numeric_string
+ - Add support for pre-built branches to benchy
+ - Allow calling closures inline
+ - Allow systemlib function declarations to use reserved words for function names
+ - Add HH\{int,float,bool} typehints to PHP
+ - Deep initialization for constant properties
+ - Enforce void return on native class constructors/destructors
+ - Replace NEWOBJ with newobj<T> and newres<T> functions
+ - Change default FCGI socket permissions
+ - Support openssl replacements which don't export RANG_egd()
+ - Fix use-after-free in TimeZone
+ - Support GCC/LLVM stack-smashing protection
+ - Make sure Type::Bottom is a subtype of everything
+ - Fix hphpd crash when printing systemlib classes
+ - Convert file extension to HNI
+ - Convert DOMDocument extension to HNI
+ - Convert POSIX extension to HNI
+ - Convert array_multisort to HNI
+ - Add fribidi extension for HHVM
+ - Mechanism for enabling request-local heap profiling
+ - Make prediction opts deal with arbitrary load/check instructions
+ - Add JSON output support to benchy
+ - HHIR pass to do dead store elimination on frame locals
+ - Adjust single parameter warnings for min()/max()
+ - Make AlwaysLogUnhandledExceptions=off and CallUserHandlerOnFatals=EnableHipHopSyntax
+ - Always use RuntimeOption::SourceRoot to resolve repo-auth lookups
+ - Refactor debugger tests
+ - Fix parser to allow "type" and "newtype" to be used as typevars
+ - Convert system/idl/function to HNI
+ - Remove type annotations for array_sum and array_product
+ - Don't populate the litstr-to-id map in RepoAuthoritative mode
+ - Move m_lineTable to a side table
+ - Only try to autoload classes with valid names
+ - Proper PDO connection errors
+ - Move hfsort linker script tool to OSS
+ - Move slow 'quick' tests to 'slow'
+ - Add option to make inconv actually match the docs
+ - Convert socket extension to HNI
+ - Convert stream extension to HNI
+ - Fix UserFile::access behavior to match PHP5
+ - Fix for wrong PATH_INFO and PATH_TRANSLATED (maybe)
+ - Move generated .h and .cpp to unique dir
+ - Fix for phat:// stream wrapper with no stub
+ - JSON encode closures as empty objects for PHP compat
+ - Disable parameter typehints for builtins to match PHP5
+ - Convert PDO extension to HNI
+ - Fix assert related to async return typehints
+ - Allow collections in array_sum() and array_product()
+ - Use the time in default xdebug output file
+ - Allow vxls to allocate vmsp during traces
+ - Only initialize sweepables on new threads
+ - Load Offset->line number mappings on demand
+ - Fix SOAP memory leak
+ - Add OSS support for benchy
+
+"will.i.am" 6-Nov-2014
+ - TODO
+
+"Vanilla Ice" 23-Oct-2014
+ - TODO
 
 "Ultramagnetic" 9-Oct-2014
  - Optimize strtr

@@ -279,6 +279,17 @@ public:
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
   /*
+   * Set/get if we're going to try using LLVM as the codegen backend for the
+   * current translation.
+   */
+  void setUseLLVM(bool llvm) {
+    m_useLLVM = llvm;
+  }
+  bool useLLVM() const {
+    return m_useLLVM;
+  }
+
+  /*
    * Dump translation cache.  True if successful.
    */
   bool dumpTC(bool ignoreLease = false);
@@ -358,6 +369,7 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
+  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;

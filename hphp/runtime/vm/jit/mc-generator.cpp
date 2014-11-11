@@ -1590,6 +1590,14 @@ MCGenerator::translateWork(const TranslArgs& args) {
   UndoMarker undoAfrozen(code.frozen());
   UndoMarker undoGlobalData(code.data());
 
+  setUseLLVM(
+    RuntimeOption::EvalJitLLVM > 1 ||
+    (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize)
+  );
+  SCOPE_EXIT {
+    setUseLLVM(false);
+  };
+
   auto resetState = [&] {
     undoA.undo();
     undoAcold.undo();

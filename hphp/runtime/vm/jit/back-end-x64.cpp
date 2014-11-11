@@ -765,7 +765,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   CodeBlock mainCode;
   CodeBlock coldCode;
-  const bool useLLVM = RuntimeOption::EvalJitLLVM;
+  const bool useLLVM = mcg->useLLVM();
   bool relocate = false;
   if (!useLLVM &&
       RuntimeOption::EvalJitRelocationSize &&

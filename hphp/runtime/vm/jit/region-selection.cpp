@@ -568,7 +568,8 @@ bool breaksRegion(Op opc) {
       return true;
 
     default:
-      return false;
+      return RuntimeOption::EvalJitLLVM &&
+        opcodeControlFlowInfo(opc) == ControlFlowInfo::ChangesPC;
   }
 }
 

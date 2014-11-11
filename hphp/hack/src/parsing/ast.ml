@@ -163,6 +163,7 @@ and method_ = {
   m_body: block;
   m_user_attributes : user_attribute SMap.t;
   m_ret: hint option;
+  m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
 }
 
@@ -187,6 +188,7 @@ and fun_ = {
   f_mode            : mode;
   f_tparams         : tparam list;
   f_ret             : hint option;
+  f_ret_by_ref      : bool;
   f_name            : id;
   f_params          : fun_param list;
   f_body            : block;

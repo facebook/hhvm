@@ -713,7 +713,9 @@ and attribute_list_remain acc env =
 (*****************************************************************************)
 
 and fun_ ~attr ~sync env =
-  ignore (ref_opt env);
+  let is_ref = ref_opt env in
+  if is_ref && sync = FAsync
+    then error env ("Asynchronous function cannot return reference");
   let name = identifier env in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -723,6 +725,7 @@ and fun_ ~attr ~sync env =
     f_tparams = tparams;
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = is_ref;
     f_body = body;
     f_user_attributes = attr;
     f_fun_kind = sync;
@@ -1460,14 +1463,18 @@ and class_var_name name =
 and class_member_word env ~attrs ~modifiers = function
   | "async" ->
       expect_word env "function";
-      ignore (ref_opt env);
+      let is_ref = ref_opt env in
+      if is_ref
+        then error env ("Asynchronous function cannot return reference");
       let fun_name = identifier env in
-      let method_ = method_ env ~modifiers ~attrs ~sync:FAsync fun_name in
+      let method_ =
+        method_ env ~modifiers ~attrs ~sync:FAsync is_ref fun_name in
       Method method_
   | "function" ->
-      ignore (ref_opt env);
+      let is_ref = ref_opt env in
       let fun_name = identifier env in
-      let method_ = method_ env ~modifiers ~attrs ~sync:FSync fun_name in
+      let method_ =
+        method_ env ~modifiers ~attrs ~sync:FSync is_ref fun_name in
       Method method_
   | _ ->
       L.back env.lb;
@@ -1481,7 +1488,7 @@ and class_member_word env ~attrs ~modifiers = function
         | _ -> L.back env.lb; class_var_list env
       in ClassVars (modifiers, Some h, cvars)
 
-and method_ env ~modifiers ~attrs ~sync pname =
+and method_ env ~modifiers ~attrs ~sync is_ref pname =
   let pos, name = pname in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -1494,6 +1501,7 @@ and method_ env ~modifiers ~attrs ~sync pname =
     m_tparams = tparams;
     m_params = params;
     m_ret = ret;
+    m_ret_by_ref = is_ref;
     m_body = body;
     m_kind = modifiers;
     m_user_attributes = attrs;
@@ -2306,6 +2314,7 @@ and lambda_body env params ret ~sync =
     f_tparams = [];
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = false;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
     f_fun_kind = sync;
@@ -2730,6 +2739,7 @@ and expr_anon_fun env pos ~sync =
     f_tparams = [];
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = false;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
     f_fun_kind = sync;

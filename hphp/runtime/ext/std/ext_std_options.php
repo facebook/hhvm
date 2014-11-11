@@ -112,7 +112,7 @@ function get_required_files(): array {
  * that attempting to set magic_quotes_gpc at runtime will not work.  For more
  * information about magic_quotes, see this security section.
  */
-function get_magic_quotes_gpc(): mixed {
+function get_magic_quotes_gpc(): ?bool {
   if (($argc = func_num_args()) != 0) {
     trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
                   " $argc given", E_USER_WARNING);
@@ -121,7 +121,7 @@ function get_magic_quotes_gpc(): mixed {
   return false;
 }
 
-function get_magic_quotes_runtime(): mixed {
+function get_magic_quotes_runtime(): ?bool {
   if (($argc = func_num_args()) != 0) {
     trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
                   " $argc given", E_USER_WARNING);

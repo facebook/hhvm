@@ -37,8 +37,8 @@ let rec convert_impl mode = function
   | AT.ATuint when mode = Loose -> H.Hint
   | AT.ATuint -> raise (Conv_fail "Hack doesn't have a uint type")
 
-  | AT.ATnumeric when mode = Loose -> H.Hnum
-  | AT.ATnumeric -> raise (Conv_fail "Hack num disallows int-like strings")
+  | AT.ATnum when mode = Loose -> H.Hnum
+  | AT.ATnum -> raise (Conv_fail "Hack num disallows int-like strings")
 
   | AT.ATmixed when mode = Loose -> H.Hmixed
   | AT.ATmixed -> raise (Conv_fail "Hack mixed is nullable")

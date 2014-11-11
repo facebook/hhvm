@@ -1174,6 +1174,11 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
     FTRACE(3, "\n{:-^80}\n{}\n",
            " x64 after LLVM codegen ", showNewCode(areas));
   } catch (const FailedLLVMCodeGen& e) {
+    always_assert_flog(
+      RuntimeOption::EvalJitLLVM < 3,
+      "Mandatory LLVM codegen failed with reason `{}' on unit:\n{}",
+      e.what(), show(unit)
+    );
     FTRACE(1, "LLVM codegen failed: {}\n", e.what());
 
     // Undo any code/data we may have allocated.

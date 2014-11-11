@@ -1420,7 +1420,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   return tv.m_data.num;
 }
 
-bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
+bool ObjectData::propEmptyImpl(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
@@ -1443,6 +1443,15 @@ bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
     }
   }
   return false;
+}
+
+bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
+  if (UNLIKELY(getAttribute(HasPropEmpty))) {
+    if (instanceof(c_SimpleXMLElement::classof())) {
+      return c_SimpleXMLElement::PropEmpty(this, key);
+    }
+  }
+  return propEmptyImpl(ctx, key);
 }
 
 void ObjectData::setProp(Class* ctx,

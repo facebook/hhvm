@@ -53,7 +53,8 @@ class c_SimpleXMLElement :
                                 ObjectData::UseIsset|
                                 ObjectData::UseUnset|
                                 ObjectData::CallToImpl|
-                                ObjectData::HasClone>,
+                                ObjectData::HasClone|
+                                ObjectData::HasPropEmpty>,
       public Sweepable {
  public:
   DECLARE_CLASS(SimpleXMLElement)
@@ -92,6 +93,7 @@ class c_SimpleXMLElement :
   public: Variant t___unset(Variant name);
 
  public:
+  static bool    PropEmpty(ObjectData* obj, const StringData* key);
   static c_SimpleXMLElement* Clone(ObjectData* obj);
   static bool    ToBool(const ObjectData* obj) noexcept;
   static int64_t ToInt64(const ObjectData* obj) noexcept;

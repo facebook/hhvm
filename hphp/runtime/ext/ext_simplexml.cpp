@@ -1203,7 +1203,8 @@ c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
                        ObjectData::UseIsset|
                        ObjectData::UseUnset|
                        ObjectData::CallToImpl|
-                       ObjectData::HasClone>(cb),
+                       ObjectData::HasClone|
+                       ObjectData::HasPropEmpty>(cb),
       document(nullptr), node(nullptr), xpath(nullptr) {
   iter.name     = nullptr;
   iter.nsprefix = nullptr;
@@ -1608,6 +1609,11 @@ bool c_SimpleXMLElement::t___isset(Variant name) {
 
 Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
   return sxe_prop_dim_write(this, name, value, true, false, nullptr);
+}
+
+bool c_SimpleXMLElement::PropEmpty(ObjectData* obj, const StringData* key) {
+  return !sxe_prop_dim_exists(static_cast<c_SimpleXMLElement*>(obj),
+    Variant(key->toCppString()), true, true, false);
 }
 
 c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {

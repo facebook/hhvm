@@ -1955,6 +1955,24 @@ lambda_expression:
                                                             u,$4,v,$7,$6);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
+  | T_ASYNC
+    '{'                                { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    inner_statement_list
+    '}'                                { Token u; Token v; Token w; Token x;
+                                         Token y;
+                                         $1 = T_ASYNC;
+                                         _p->onMemberModifier($1, nullptr, $1);
+                                         _p->finishStatement($4, $4); $4 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            &$1,
+                                                            u,v,w,$4,x);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);
+                                         _p->onCall($$,1,$$,y,NULL);}
 ;
 
 lambda_body:

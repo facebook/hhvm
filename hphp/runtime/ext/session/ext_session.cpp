@@ -867,28 +867,28 @@ static FileSessionModule s_file_session_module;
 // UserSessionModule
 
 class UserSessionModule : public SessionModule {
-public:
+ public:
   UserSessionModule() : SessionModule("user") {}
 
-  virtual bool open(const char *save_path, const char *session_name) {
+  bool open(const char *save_path, const char *session_name) override {
     auto func = make_packed_array(Object(PS(ps_session_handler)), s_open);
     auto args = make_packed_array(String(save_path), String(session_name));
 
     auto res = vm_call_user_func(func, args);
     PS(mod_user_implemented) = true;
-    return res.toBoolean();
+    return handleReturnValue(res);
   }
 
-  virtual bool close() {
+  bool close() override {
     auto func = make_packed_array(Object(PS(ps_session_handler)), s_close);
     auto args = Array::Create();
 
     auto res = vm_call_user_func(func, args);
     PS(mod_user_implemented) = false;
-    return res.toBoolean();
+    return handleReturnValue(res);
   }
 
-  virtual bool read(const char *key, String &value) {
+  bool read(const char *key, String &value) override {
     Variant ret = vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_read),
        make_packed_array(String(key))
@@ -900,25 +900,40 @@ public:
     return false;
   }
 
-  virtual bool write(const char *key, const String& value) {
-    return vm_call_user_func(
+  bool write(const char *key, const String& value) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_write),
        make_packed_array(String(key, CopyString), value)
-    ).toBoolean();
+    ));
   }
 
-  virtual bool destroy(const char *key) {
-    return vm_call_user_func(
+  bool destroy(const char *key) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_destroy),
        make_packed_array(String(key))
-    ).toBoolean();
+    ));
   }
 
-  virtual bool gc(int maxlifetime, int *nrdels) {
-    return vm_call_user_func(
+  bool gc(int maxlifetime, int *nrdels) override {
+    return handleReturnValue(vm_call_user_func(
        make_packed_array(Object(PS(ps_session_handler)), s_gc),
        make_packed_array((int64_t)maxlifetime)
-    ).toBoolean();
+    ));
+  }
+
+ private:
+  bool handleReturnValue(const Variant& ret) {
+    if (ret.isBoolean()) {
+      return ret.toBoolean();
+    }
+    if (ret.isInteger()) {
+      // BC fallbacks for values which work in PHP5 & PHP7
+      auto i = ret.toInt64();
+      if (i == -1) return false;
+      if (i ==  0) return true;
+    }
+    raise_warning("Session callback expects true/false return value");
+    return false;
   }
 };
 static UserSessionModule s_user_session_module;

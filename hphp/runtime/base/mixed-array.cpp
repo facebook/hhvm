@@ -930,8 +930,9 @@ ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
         // Hacky: don't removed the unsigned cast, else g++ can optimize away
         // the check for == 0x7fff..., since there is no signed int k
         // for which k-1 == 0x7fff...
-        if ((uint64_t)ki == (uint64_t)m_nextKI-1
-              && (ki == 0x7fffffffffffffffLL || updateNext)) {
+        if (((uint64_t)ki == (uint64_t)m_nextKI-1) &&
+            (ki >= 0) &&
+            (ki == 0x7fffffffffffffffLL || updateNext)) {
           --m_nextKI;
         }
       }

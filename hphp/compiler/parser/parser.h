@@ -494,6 +494,7 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   AliasTable m_nsAliasTable;
+  std::vector<uint32_t> m_nsStack;
 
   // Function aliases
   hphp_string_iset m_fnTable;

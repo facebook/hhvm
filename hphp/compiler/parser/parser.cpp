@@ -2382,14 +2382,26 @@ void Parser::onNamespaceStart(const std::string &ns,
   m_nsState = InsideNamespace;
   m_nsFileScope = file_scope;
   pushComment();
-  m_namespace = ns;
+  if (file_scope) {
+    m_nsStack.clear();
+    m_namespace.clear();
+  }
+  m_nsStack.push_back(m_namespace.size());
+  if (!ns.empty()) {
+    if (!m_namespace.empty()) m_namespace += NAMESPACE_SEP;
+    m_namespace += ns;
+  }
   m_nsAliasTable.clear();
   m_fnAliasTable.clear();
   m_cnstAliasTable.clear();
 }
 
 void Parser::onNamespaceEnd() {
-  m_nsState = SeenNamespaceStatement;
+  m_namespace.resize(m_nsStack.back());
+  m_nsStack.pop_back();
+  if (m_nsStack.empty()) {
+    m_nsState = SeenNamespaceStatement;
+  }
 }
 
 void Parser::onUse(const std::string &ns, const std::string &as) {

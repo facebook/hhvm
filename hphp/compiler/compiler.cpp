@@ -349,6 +349,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
+  if (po.target != "run"
+      && po.target != "lint"
+      && po.target != "php"
+      && po.target != "hhbc"
+      && po.target != "filecache") {
+    Logger::Error("Error in command line: target '%s' is not supported.",
+                  po.target.c_str());
+    // desc[ription] is the --help output
+    cout << desc << "\n";
+    return -1;
+  }
+
   if ((po.target == "hhbc" || po.target == "run") &&
       po.format.find("exe") == string::npos) {
     if (po.program == "program") {

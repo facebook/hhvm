@@ -9,7 +9,7 @@ class Reflection  {
   public static function export(Reflector $reflector, $return = false) {}
 }
 
-class ReflectionClass {
+class ReflectionClass implements Reflector {
 
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
@@ -87,7 +87,7 @@ class ReflectionClass {
   public function __toString(): string;
 }
 
-class ReflectionObject extends ReflectionClass implements Reflector {}
+class ReflectionObject extends ReflectionClass {}
 
 class ReflectionException extends Exception {}
 

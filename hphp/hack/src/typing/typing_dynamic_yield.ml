@@ -35,7 +35,10 @@ let rec decl env methods =
       | Some base ->
         let ce_r, ft = match ce.ce_type with
           | r, Tfun ft -> r, ft
-          | _ ->  assert false in
+          | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+            | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _)
+            | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) ->
+              assert false in
         let r = fst ft.ft_ret in
         let p = Reason.to_pos r in
         (* Fail silently, since we're in an early stage. A later check will assert
@@ -68,7 +71,10 @@ let rec decl env methods =
                * If getFoo() is Tany, then genFoo() is Awaitable<Tany> *)
               let ce_r, ft = match ce.ce_type with
                 | r, Tfun ft -> r, ft
-                | _ ->  assert false in
+                | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+                  | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _)
+                  | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject
+                  | Tshape _) -> assert false in
               let p = Reason.to_pos (fst ft.ft_ret) in
               let gen_r = Reason.Rdynamic_yield (p, ft.ft_pos, gen_name, name) in
               let gen_ty = ce_r, Tfun {ft with

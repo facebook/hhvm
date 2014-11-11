@@ -19,6 +19,7 @@ type options = {
     should_detach    : bool;
     convert          : Path.path option;
     load_save_opt    : env_store_action option;
+    version          : bool;
   }
 
 and env_store_action =

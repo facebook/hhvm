@@ -102,16 +102,6 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
   assert((uint32_t)count - 1 < (uint32_t)RefCountMaxRealistic);
 }
 
-#define DECREF_AND_RELEASE_MAYBE_STATIC(thiz, action) do {              \
-    assert(!MemoryManager::sweeping());                                 \
-    assert_refcount_realistic_nz(thiz->m_count);                        \
-    if (thiz->m_count == 1) {                                           \
-      action;                                                           \
-    } else if (thiz->m_count > 1) {                                     \
-      --thiz->m_count;                                                  \
-    }                                                                   \
-  } while (false)
-
 /**
  * Ref-counted types have a m_count field at FAST_REFCOUNT_OFFSET
  * and define counting methods with these macros.
@@ -148,9 +138,15 @@ inline void assert_refcount_realistic_ns_nz(int32_t count) {
     assert_refcount_realistic_nz(m_count);                              \
     return isRefCounted() ? --m_count : m_count;                        \
   }                                                                     \
-                                                                        \
+  ALWAYS_INLINE bool decReleaseCheck() {                                \
+    assert(!MemoryManager::sweeping());                                 \
+    assert_refcount_realistic_nz(this->m_count);                        \
+    if (this->m_count == 1) return true;                                \
+    if (this->m_count > 1) --this->m_count;                             \
+    return false;                                                       \
+  }                                                                     \
   ALWAYS_INLINE void decRefAndRelease() {                               \
-    DECREF_AND_RELEASE_MAYBE_STATIC(this, release());                   \
+    if (decReleaseCheck()) release();                                   \
   }
 
 #define IMPLEMENT_COUNTABLE_METHODS             \

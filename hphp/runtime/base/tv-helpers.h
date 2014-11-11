@@ -444,7 +444,7 @@ inline void tvUnset(TypedValue * to) {
 inline bool tvIsStatic(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   return !IS_REFCOUNTED_TYPE(tv->m_type) ||
-    tv->m_data.pref->m_count == StaticValue;
+         tv->m_data.parr->isStatic();
 }
 
 /**

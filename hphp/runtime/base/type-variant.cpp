@@ -250,9 +250,9 @@ void tvDecRefHelper(DataType type, uint64_t datum) {
   assert(type == KindOfString || type == KindOfArray ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
-  DECREF_AND_RELEASE_MAYBE_STATIC(
-    ((RefData*)datum),
-    g_destructors[typeToDestrIndex(type)]((void*)datum));
+  if (((ArrayData*)datum)->decReleaseCheck()) {
+    g_destructors[typeToDestrIndex(type)]((void*)datum);
+  }
 }
 
 Variant &Variant::assign(const Variant& v) {

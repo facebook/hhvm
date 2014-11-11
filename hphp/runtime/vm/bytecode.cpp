@@ -606,18 +606,18 @@ static std::string toStringElm(const TypedValue* tv) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0 &&
-      tv->m_data.pref->m_count != StaticValue) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.parr->getCount() <= 0 &&
+      !tv->m_data.parr->isStatic()) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
+    os << " ??? inner_count " << tv->m_data.parr->getCount() << " ";
     return os.str();
   }
 
   auto print_count = [&] {
-    if (tv->m_data.pref->m_count == StaticValue) {
+    if (tv->m_data.parr->isStatic()) {
       os << ":c(static)";
     } else {
-      os << ":c(" << tv->m_data.pref->m_count << ")";
+      os << ":c(" << tv->m_data.parr->getCount() << ")";
     }
   };
 
@@ -1591,7 +1591,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
       if (LIKELY(!f->byRef(i))) {
         cellDup(*tvToCell(from), *to);
       } else if (LIKELY(from->m_type == KindOfRef &&
-                        from->m_data.pref->m_count >= 2)) {
+                        from->m_data.pref->getCount() >= 2)) {
         refDup(*from, *to);
       } else {
         if (doCufRefParamChecks && f->mustBeRef(i)) {
@@ -2898,7 +2898,7 @@ static UNUSED int innerCount(const TypedValue* tv) {
     if (tv->m_type == KindOfRef) {
       return tv->m_data.pref->getRealCount();
     } else {
-      return tv->m_data.pref->m_count;
+      return tv->m_data.pref->getCount();
     }
   }
   return -1;

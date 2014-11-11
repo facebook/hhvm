@@ -25,8 +25,13 @@ msg_send($queue, 1, "ok");
 msg_receive($queue, 2, $type, 100, $msg);
 var_dump($msg);
 
-@msg_receive($queue, 0, $type, 100, $msg, false, MSG_IPC_NOWAIT, $errorcode);
-var_dump(MSG_ENOMSG === $errorcode);
+$ret = @msg_send($queue, 0, 'msg', false, false, $s_error_code);
+var_dump($ret);
+var_dump(22 === $s_error_code); // 22 - invalid argument
+
+$ret = @msg_receive($queue, 0, $type, 100, $msg, false, MSG_IPC_NOWAIT, $r_error_code);
+var_dump($ret);
+var_dump(MSG_ENOMSG === $r_error_code);
 
 $ret = msg_stat_queue($queue);
 var_dump($ret[$s_msg_qnum]);

@@ -267,9 +267,7 @@ bool HHVM_FUNCTION(msg_send,
     int err = errno;
     raise_warning("Unable to send message: %s",
                     folly::errnoStr(err).c_str());
-    if (!errorcode.isNull()) {
-      errorcode = err;
-    }
+    errorcode = err;
     return false;
   }
   return true;

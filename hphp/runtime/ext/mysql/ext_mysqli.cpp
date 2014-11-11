@@ -386,19 +386,19 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
     [&] {
       switch (*dt) {
         case KindOfNull:
-          break;
+          return;
         case KindOfBoolean:
           bool_value = value.toBoolean();
           value_ptr = &bool_value;
-          break;
+          return;
         case KindOfInt64:
           other_value = value.toInt64();
           value_ptr = other_value.getInt64Data();
-          break;
+          return;
         case KindOfString:
           other_value = value.toString();
           value_ptr = other_value.getStringData()->data();
-          break;
+          return;
         case KindOfUninit:
         case KindOfDouble:
         case KindOfStaticString:

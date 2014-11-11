@@ -117,7 +117,7 @@ class TestSaveRestore(unittest.TestCase):
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 
-    def check_cmd(self, expected_output, options=[]):
+    def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
         output = proc_call([
             self.hh_client,
@@ -125,7 +125,8 @@ class TestSaveRestore(unittest.TestCase):
             '--retries',
             '5',
             self.repo_dir
-        ] + list(map(lambda x: x.format(root=root), options)))
+            ] + list(map(lambda x: x.format(root=root), options)),
+            stdin=stdin)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
@@ -352,3 +353,19 @@ class TestSaveRestore(unittest.TestCase):
             '{root}foo_1.php',
             '{root}foo_3.php',
             ], options=['--list-files'])
+
+        self.check_cmd([
+            # the doubled curly braces are because this string gets passed
+            # through format()
+            '[{{"name":"some_long_function_name",'
+            '"type":"(function(): _)",'
+            '"pos":{{"filename":"{root}foo_3.php",'
+            '"line":9,"char_start":18,"char_end":40}},'
+            '"func_details":{{"min_arity":0,"return_type":"_","params":[]}},'
+            '"expected_ty":false}}]'
+            ],
+            # test the --json output because the non-json one doesn't contain
+            # the filename, and we are especially interested in testing file
+            # paths
+            options=['--auto-complete', '--json'],
+            stdin='<?hh function f() { some_AUTO332\n')

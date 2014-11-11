@@ -22,7 +22,7 @@ def write_files(files, dir_path):
         with open(path, 'w') as f:
             f.write(content)
 
-def proc_call(args):
+def proc_call(args, stdin=None):
     """
     Invoke a subprocess, return stdout, send stderr to our stderr (for
     debugging)
@@ -30,9 +30,11 @@ def proc_call(args):
     print(" ".join(args), file=sys.stderr)
     proc = subprocess.Popen(
             args,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-    (stdout_data, stderr_data) = proc.communicate()
-    sys.stderr.write(stderr_data.decode())
+            stderr=subprocess.PIPE,
+            universal_newlines=True)
+    (stdout_data, stderr_data) = proc.communicate(stdin)
+    sys.stderr.write(stderr_data)
     sys.stderr.flush()
-    return stdout_data.decode()
+    return stdout_data

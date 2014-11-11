@@ -5,8 +5,66 @@
  * @return array - Returns an array containing the currently available SPL
  * classes.
  */
-<<__Native>>
-function spl_classes(): array;
+function spl_classes(): array {
+  return array (
+    'AppendIterator' => 'AppendIterator',
+    'ArrayIterator' => 'ArrayIterator',
+    'ArrayObject' => 'ArrayObject',
+    'BadFunctionCallException' => 'BadFunctionCallException',
+    'BadMethodCallException' => 'BadMethodCallException',
+    'CachingIterator' => 'CachingIterator',
+    'CallbackFilterIterator' => 'CallbackFilterIterator',
+    'Countable' => 'Countable',
+    'DirectoryIterator' => 'DirectoryIterator',
+    'DomainException' => 'DomainException',
+    'EmptyIterator' => 'EmptyIterator',
+    'FilesystemIterator' => 'FilesystemIterator',
+    'FilterIterator' => 'FilterIterator',
+    'GlobIterator' => 'GlobIterator',
+    'InfiniteIterator' => 'InfiniteIterator',
+    'InvalidArgumentException' => 'InvalidArgumentException',
+    'IteratorIterator' => 'IteratorIterator',
+    'LengthException' => 'LengthException',
+    'LimitIterator' => 'LimitIterator',
+    'LogicException' => 'LogicException',
+    'MultipleIterator' => 'MultipleIterator',
+    'NoRewindIterator' => 'NoRewindIterator',
+    'OuterIterator' => 'OuterIterator',
+    'OutOfBoundsException' => 'OutOfBoundsException',
+    'OutOfRangeException' => 'OutOfRangeException',
+    'OverflowException' => 'OverflowException',
+    'ParentIterator' => 'ParentIterator',
+    'RangeException' => 'RangeException',
+    'RecursiveArrayIterator' => 'RecursiveArrayIterator',
+    'RecursiveCachingIterator' => 'RecursiveCachingIterator',
+    'RecursiveCallbackFilterIterator' => 'RecursiveCallbackFilterIterator',
+    'RecursiveDirectoryIterator' => 'RecursiveDirectoryIterator',
+    'RecursiveFilterIterator' => 'RecursiveFilterIterator',
+    'RecursiveIterator' => 'RecursiveIterator',
+    'RecursiveIteratorIterator' => 'RecursiveIteratorIterator',
+    'RecursiveRegexIterator' => 'RecursiveRegexIterator',
+    'RecursiveTreeIterator' => 'RecursiveTreeIterator',
+    'RegexIterator' => 'RegexIterator',
+    'RuntimeException' => 'RuntimeException',
+    'SeekableIterator' => 'SeekableIterator',
+    'SplDoublyLinkedList' => 'SplDoublyLinkedList',
+    'SplFileInfo' => 'SplFileInfo',
+    'SplFileObject' => 'SplFileObject',
+    'SplFixedArray' => 'SplFixedArray',
+    'SplHeap' => 'SplHeap',
+    'SplMinHeap' => 'SplMinHeap',
+    'SplMaxHeap' => 'SplMaxHeap',
+    'SplObjectStorage' => 'SplObjectStorage',
+    'SplObserver' => 'SplObserver',
+    'SplPriorityQueue' => 'SplPriorityQueue',
+    'SplQueue' => 'SplQueue',
+    'SplStack' => 'SplStack',
+    'SplSubject' => 'SplSubject',
+    'SplTempFileObject' => 'SplTempFileObject',
+    'UnderflowException' => 'UnderflowException',
+    'UnexpectedValueException' => 'UnexpectedValueException',
+  );
+}
 
 /* This function returns a unique identifier for the object. This id can be
  * used as a hash key for storing objects or for identifying an object.

@@ -47,73 +47,6 @@ const StaticString
   s_getIterator("getIterator"),
   s_directory_iterator("DirectoryIterator");
 
-const StaticString spl_classes[] = {
-  StaticString("AppendIterator"),
-  StaticString("ArrayIterator"),
-  StaticString("ArrayObject"),
-  StaticString("BadFunctionCallException"),
-  StaticString("BadMethodCallException"),
-  StaticString("CachingIterator"),
-  StaticString("CallbackFilterIterator"),
-  StaticString("Countable"),
-  s_directory_iterator,
-  StaticString("DomainException"),
-  StaticString("EmptyIterator"),
-  StaticString("FilesystemIterator"),
-  StaticString("FilterIterator"),
-  StaticString("GlobIterator"),
-  StaticString("InfiniteIterator"),
-  StaticString("InvalidArgumentException"),
-  StaticString("IteratorIterator"),
-  StaticString("LengthException"),
-  StaticString("LimitIterator"),
-  StaticString("LogicException"),
-  StaticString("MultipleIterator"),
-  StaticString("NoRewindIterator"),
-  StaticString("OuterIterator"),
-  StaticString("OutOfBoundsException"),
-  StaticString("OutOfRangeException"),
-  StaticString("OverflowException"),
-  StaticString("ParentIterator"),
-  StaticString("RangeException"),
-  StaticString("RecursiveArrayIterator"),
-  StaticString("RecursiveCachingIterator"),
-  StaticString("RecursiveCallbackFilterIterator"),
-  StaticString("RecursiveDirectoryIterator"),
-  StaticString("RecursiveFilterIterator"),
-  StaticString("RecursiveIterator"),
-  StaticString("RecursiveIteratorIterator"),
-  StaticString("RecursiveRegexIterator"),
-  StaticString("RecursiveTreeIterator"),
-  StaticString("RegexIterator"),
-  StaticString("RuntimeException"),
-  StaticString("SeekableIterator"),
-  StaticString("SplDoublyLinkedList"),
-  StaticString("SplFileInfo"),
-  StaticString("SplFileObject"),
-  StaticString("SplFixedArray"),
-  StaticString("SplHeap"),
-  StaticString("SplMinHeap"),
-  StaticString("SplMaxHeap"),
-  StaticString("SplObjectStorage"),
-  StaticString("SplObserver"),
-  StaticString("SplPriorityQueue"),
-  StaticString("SplQueue"),
-  StaticString("SplStack"),
-  StaticString("SplSubject"),
-  StaticString("SplTempFileObject"),
-  StaticString("UnderflowException"),
-  StaticString("UnexpectedValueException"),
-};
-
-Array HHVM_FUNCTION(spl_classes) {
-  const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
-  ArrayInit ret(num_classes, ArrayInit::Map{});
-  for (size_t i = 0; i < num_classes; ++i) {
-    ret.set(spl_classes[i], spl_classes[i]);
-  }
-  return ret.toArray();
-}
 
 void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
@@ -305,9 +238,6 @@ Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     Variant val = pobj->o_invoke_few_args(s_current, 0);
-    if (val.isObject()) {
-      val = val.toObject()->clone();
-    }
     if (use_keys) {
       Variant key = pobj->o_invoke_few_args(s_key, 0);
       ret.set(key, val);
@@ -421,7 +351,6 @@ public:
     HHVM_ME(GlobIterator, count);
   }
   virtual void moduleInit() {
-    HHVM_FE(spl_classes);
     HHVM_FE(spl_object_hash);
     HHVM_FE(hphp_object_pointer);
     HHVM_FE(hphp_get_this);

@@ -23,7 +23,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array HHVM_FUNCTION(spl_classes);
 String HHVM_FUNCTION(spl_object_hash, const Object& obj);
 int64_t HHVM_FUNCTION(hphp_object_pointer, const Object& obj);
 Variant HHVM_FUNCTION(hphp_get_this);

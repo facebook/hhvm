@@ -1962,8 +1962,46 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
   }
 }
+
 void in(ISS& env, const bc::VerifyRetTypeV& op) {}
-void in(ISS& env, const bc::VerifyRetTypeC& op) {}
+
+void in(ISS& env, const bc::VerifyRetTypeC& op) {
+  auto const constraint = env.ctx.func->retTypeConstraint;
+  auto const stackT = topC(env);
+
+  // If there is no return type constraint, or if the return type
+  // constraint is a typevar, or if the top of stack is the same
+  // or a subtype of the type constraint, then this is a no-op.
+  if (env.index.satisfies_constraint(env.ctx, stackT, constraint)) {
+    reduce(env, bc::Nop {});
+    return;
+  }
+
+  // If HardReturnTypeHints is false OR if the constraint is soft,
+  // then there are no optimizations we can safely do here, so
+  // just leave the top of stack as is.
+  if (!options.HardReturnTypeHints || constraint.isSoft()) {
+    return;
+  }
+
+  // If we reach here, then HardReturnTypeHints is true AND the constraint
+  // is not soft.  We can safely assume that either VerifyRetTypeC will
+  // throw or it will produce a value whose type is compatible with the
+  // return type constraint.
+  auto const tcT =
+    remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
+  // If stackT is a subtype of tcT, use stackT. Otherwise, if tc is an opt
+  // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
+  // In all other cases, use tcT.
+  // TODO(4441939): We could do better here if we had an intersect_of()
+  // function that provided a formal way to compute the intersection of
+  // two Types.
+  auto const retT = stackT.subtypeOf(tcT) ? stackT :
+                    is_opt(tcT) && !TInitNull.subtypeOf(stackT) ? unopt(tcT) :
+                    tcT;
+  popC(env);
+  push(env, retT);
+}
 
 // These only occur in traits, so we don't need to do better than
 // this.

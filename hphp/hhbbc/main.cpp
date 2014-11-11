@@ -126,6 +126,7 @@ void parse_options(int argc, char** argv) {
 
     ("hard-const-prop",         po::value(&options.HardConstProp))
     ("hard-type-hints",         po::value(&options.HardTypeHints))
+    ("hard-return-type-hints",  po::value(&options.HardReturnTypeHints))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
@@ -229,6 +230,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   auto gd                     = Repo::GlobalData{};
   gd.UsedHHBBC                = true;
   gd.HardTypeHints            = options.HardTypeHints;
+  gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
 

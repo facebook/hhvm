@@ -110,7 +110,7 @@ function main() {
       call_wrapper($f(), 'foobar');
       call_wrapper($f(), true);
       call_wrapper($f(), 14.1);
-      call_wrapper($f(), STDIN);
+      call_wrapper($f(), imagecreate(10, 10));
       call_wrapper($f(), array());
       call_wrapper($f(), function($x){return $x*$x;});
       call_wrapper($f(), new Shapes());
@@ -152,7 +152,7 @@ function main() {
     call_wrapper($f(), 'foobar');
     call_wrapper($f(), true);
     call_wrapper($f(), 14.1);
-    call_wrapper($f(), STDIN);
+    call_wrapper($f(), imagecreate(10, 10));
     call_wrapper($f(), array());
     call_wrapper($f(), function($x){return $x*$x;});
     call_wrapper($f(), new Shapes());

@@ -114,6 +114,7 @@ public:
   static bool PostOptimization;
   static bool AnalyzePerfectVirtuals;
   static bool HardTypeHints;
+  static bool HardReturnTypeHints;
 
   /*
    * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for

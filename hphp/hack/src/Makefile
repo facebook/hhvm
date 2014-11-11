@@ -94,7 +94,7 @@ all: build-hhi-archive build-hack copy-hack-files
 
 clean:
 	ocamlbuild -clean
-	rm -rf ../bin
+	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
 build-hack: build-hack-native-deps build-hhi-archive

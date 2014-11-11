@@ -1053,6 +1053,12 @@ static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   }
 }
 
+static void appendOrphanIfNeeded(XmlNodeSet& orphans, xmlNodePtr node) {
+  if (node) {
+    orphans.insert(node);
+  }
+}
+
 static void removeOrphanIfNeeded(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
     orphans.erase(node);
@@ -1138,9 +1144,9 @@ Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc, bool owner) {
     nodeobj->incRefCount();
     nodeobj->m_doc = doc;
     nodeobj->m_node = obj;
-    if (owner && doc.get()) {
-      appendOrphan(*doc->m_orphans, obj);
-    }
+  }
+  if (owner && doc.get()) {
+    appendOrphanIfNeeded(*doc->m_orphans, obj);
   }
   return it->second;
 }
@@ -2357,7 +2363,11 @@ Variant c_DOMNode::t_replacechild(const Object& newchildobj, const Object& oldch
       xmlReplaceNode(oldchild, newchild);
       dom_reconcile_ns(nodep->doc, newchild);
     }
-    return create_node_object(oldchild, doc(), false);
+
+    if (auto newchilddoc = domnewchildnode->doc().get()) {
+      removeOrphanIfNeeded(*newchilddoc->m_orphans, domnewchildnode->m_node);
+    }
+    return create_node_object(oldchild, doc(), oldchild->parent == nullptr);
   }
 
   php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);

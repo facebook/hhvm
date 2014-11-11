@@ -112,11 +112,23 @@ function get_required_files(): array {
  * that attempting to set magic_quotes_gpc at runtime will not work.  For more
  * information about magic_quotes, see this security section.
  */
-<<__Native>>
-function get_magic_quotes_gpc(): bool;
+function get_magic_quotes_gpc(): mixed {
+  if (($argc = func_num_args()) != 0) {
+    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
+                  " $argc given", E_USER_WARNING);
+    return null;
+  }
+  return false;
+}
 
-<<__Native>>
-function get_magic_quotes_runtime(): bool;
+function get_magic_quotes_runtime(): mixed {
+  if (($argc = func_num_args()) != 0) {
+    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
+                  " $argc given", E_USER_WARNING);
+    return null;
+  }
+  return false;
+}
 
 <<__Native>>
 function getenv(string $varname): mixed;
@@ -320,14 +332,23 @@ function putenv(string $setting): bool;
  * WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this
  * feature is highly discouraged.
  */
-<<__Native>>
-function set_magic_quotes_runtime(bool $new_setting): bool;
+function set_magic_quotes_runtime(mixed $new_setting): bool {
+  trigger_error("Function set_magic_quotes_runtime() is deprecated",
+                E_USER_DEPRECATED);
+
+  if ($new_setting) {
+    trigger_error(__FUNCTION__ . "() is not supported anymore", E_USER_ERROR);
+  }
+
+  return false;
+}
 
 /*
  * Alias of set_magic_quotes_runtime()
  */
-<<__Native>>
-function magic_quotes_runtime(bool $new_setting): bool;
+function magic_quotes_runtime(mixed $new_setting): bool {
+  return set_magic_quotes_runtime($new_setting);
+}
 
 /* Set the number of seconds a script is allowed to run. If this is reached,
  * the script returns a fatal error. The default limit is 30 seconds or, if it

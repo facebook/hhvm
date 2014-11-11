@@ -273,14 +273,6 @@ static Array HHVM_FUNCTION(get_included_files) {
   return pai.toArray();
 }
 
-static bool HHVM_FUNCTION(get_magic_quotes_gpc) {
-  return false;
-}
-
-static bool HHVM_FUNCTION(get_magic_quotes_runtime) {
-  return false;
-}
-
 static Variant HHVM_FUNCTION(getenv, const String& varname) {
   String ret = g_context->getenv(varname);
   if (!ret.isNull()) {
@@ -932,15 +924,6 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
   return true;
 }
 
-static bool HHVM_FUNCTION(set_magic_quotes_runtime, bool new_setting) {
-  raise_deprecated("Function set_magic_quotes_runtime() is deprecated");
-
-  if (new_setting) {
-    throw_not_supported("set_magic_quotes_runtime", "not using magic quotes");
-  }
-  return false;
-}
-
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
@@ -1197,8 +1180,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
-  HHVM_FE(get_magic_quotes_gpc);
-  HHVM_FE(get_magic_quotes_runtime);
   HHVM_FE(getenv);
   HHVM_FE(getlastmod);
   HHVM_FE(getmygid);
@@ -1227,8 +1208,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(phpinfo);
   HHVM_FE(phpversion);
   HHVM_FE(putenv);
-  HHVM_FE(set_magic_quotes_runtime);
-  HHVM_FALIAS(magic_quotes_runtime, set_magic_quotes_runtime);
   HHVM_FE(set_time_limit);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(zend_version);

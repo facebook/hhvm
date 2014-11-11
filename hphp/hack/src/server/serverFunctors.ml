@@ -11,14 +11,6 @@
 open Utils
 open ServerEnv
 
-(*****************************************************************************)
-(* Types *)
-(*****************************************************************************)
-
-type failed_parsing = SSet.t
-type files = SSet.t
-type client = in_channel * out_channel
-
 module type SERVER_PROGRAM = sig
   val preinit : unit -> unit
   val init : genv -> env -> env

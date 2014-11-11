@@ -279,11 +279,20 @@ class ReflectionParameter implements Reflector {
     if (isset($nonClassTypehints[$ltype])) {
       return null;
     }
+    if ($ltype === "self" && !empty($this->info['class'])) {
+      return getDeclaringClass();
+    }
     return new ReflectionClass($this->info['type']);
   }
 
   public function getTypehintText() {
-    return isset($this->info['type']) ? $this->info['type'] : '';
+    if (isset($this->info['type'])) {
+      if ($this->info['type'] === 'self' && !empty($this->info['class'])) {
+        return $this->info['class'];
+      }
+      return $this->info['type'];
+    }
+    return '';
   }
 
   public function getTypeText() {

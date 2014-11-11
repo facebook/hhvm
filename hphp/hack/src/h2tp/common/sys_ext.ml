@@ -13,6 +13,8 @@ include Sys
 module CE = Common_exns
 module Str = Str_ext
 
+open Utils
+
 exception NotADirectory of string
 let (=~) = Str.(=~)
 

@@ -618,6 +618,11 @@ void FrameState::merge(Snapshot& state) {
     local.type = Type::unionOf(local.type, m_locals[i].type);
     local.boxedPrediction =
       Type::unionOf(local.boxedPrediction, m_locals[i].boxedPrediction);
+
+    // Throw away the prediction if we merged Type::Gen for the type.
+    if (!(local.type <= Type::BoxedInitCell)) {
+      local.boxedPrediction = Type::Bottom;
+    }
   }
 
   // For now, we shouldn't be merging states with different inline states.
@@ -721,7 +726,9 @@ bool FrameState::checkInvariants() const {
     [&] (uint32_t id, unsigned inlineIdx, const LocalState& local) {
       always_assert_flog(
         local.boxedPrediction <= local.type &&
-        local.boxedPrediction <= Type::BoxedInitCell,
+        local.boxedPrediction <= Type::BoxedInitCell &&
+        IMPLIES(local.boxedPrediction != Type::Bottom,
+                local.type <= Type::BoxedInitCell),
         "local {} failed boxed invariants; pred = {}, type = {}\n",
         id,
         local.boxedPrediction,

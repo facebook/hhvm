@@ -52,6 +52,11 @@ MODULES=\
   hhi\
   dfind\
   avl\
+  h2tp/common\
+  h2tp/mapper\
+  h2tp/unparser\
+  h2tp/test\
+  h2tp\
   $(INOTIFY)\
   $(FSNOTIFY)
 
@@ -93,7 +98,7 @@ clean:
 	rm -f utils/get_build_id.gen.c
 
 build-hack: build-hack-native-deps build-hhi-archive
-	ocamlbuild -no-links  $(INCLUDE_OPTS) $(LIB_OPTS) -lflags "$(LINKER_FLAGS)" hh_server.native hh_client.native hh_single_type_check.native
+	ocamlbuild -no-links  $(INCLUDE_OPTS) $(LIB_OPTS) -lflags "$(LINKER_FLAGS)" hh_server.native hh_client.native hh_single_type_check.native h2tp.native test_unparser.native
 
 build-hack-native-deps: build-hack-stubs
 	ocamlbuild -cflags "$(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
@@ -114,6 +119,7 @@ else
 endif
 	cp _build/hh_client.native ../bin/hh_client
 	cp _build/hh_single_type_check.native ../bin/hh_single_type_check
+	cp _build/h2tp/h2tp.native ../bin/h2tp
 
 test: build-hack copy-hack-files
 	python3 ../test/verify.py --hh_single_type_check ../bin/hh_single_type_check ../test

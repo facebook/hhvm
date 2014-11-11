@@ -33,5 +33,6 @@ def proc_call(args):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
     (stdout_data, stderr_data) = proc.communicate()
-    print(stderr_data, file=sys.stderr)
+    sys.stderr.write(stderr_data.decode())
+    sys.stderr.flush()
     return stdout_data.decode()

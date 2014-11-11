@@ -87,7 +87,7 @@ let populate_options () =
   let cdir          = fun s -> convert_dir := Some s in
   let save          = fun s -> load_save_opt := Some (Save s) in
   let load          = fun s ->
-    let arg_l       = Str.split (Str.regexp " ") s in
+    let arg_l       = Str.split (Str.regexp " +") s in
     match arg_l with
     | [] -> raise (Invalid_argument "--load needs at least one argument")
     | filename :: to_recheck ->
@@ -104,7 +104,7 @@ let populate_options () =
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
      "--save"          , Arg.String save   , Messages.save;
-     "--load"          , Arg.Rest load     , Messages.load;
+     "--load"          , Arg.String load   , Messages.load;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;

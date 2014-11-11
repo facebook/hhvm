@@ -11,6 +11,7 @@
 type env = {
   root: Path.path;
   wait: bool;
+  server_options_cmd : string option;
 }
 
 val main : env -> unit

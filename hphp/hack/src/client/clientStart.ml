@@ -19,6 +19,7 @@ let get_hhserver () =
 type env = {
   root: Path.path;
   wait: bool;
+  server_options_cmd : string option;
 }
 
 let rec wait env =
@@ -38,11 +39,15 @@ let rec wait env =
   end
 
 let start_server env =
-  Printf.fprintf stderr "Server launched for %s\n%!"
-    (Path.string_of_path env.root);
-  let hh_server =  Printf.sprintf "%s -d %s"
+  let server_options = match env.server_options_cmd with
+    | Some cmd -> (try Utils.exec_read cmd with _ -> "")
+    | None -> "" in
+  let hh_server = Printf.sprintf "%s -d %s %s"
     (get_hhserver())
-    (Path.string_of_path env.root) in
+    (Path.string_of_path env.root)
+    server_options in
+  Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
+    hh_server;
   match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
     | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);

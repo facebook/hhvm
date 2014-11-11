@@ -10,6 +10,7 @@
 
 open ClientCommand
 open ClientEnv
+open Utils
 
 let rec guess_root config start recursion_limit : Path.path option =
   let fs_root = Path.mk_path "/" in
@@ -53,6 +54,9 @@ let get_root ?(config=".hhconfig") path_opt =
     | Some p -> Path.mk_path p
   in Wwwroot.assert_www_directory ~config root;
   root
+
+let get_config ?(config=".hhconfig") root =
+  Config_file.parse (Path.string_of_path (Path.concat root config))
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/src/man/hh_client.1 --
@@ -203,6 +207,7 @@ let parse_check_args cmd =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
   in
+  let config = get_config root in
   let () = if (!from) = "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
@@ -215,6 +220,7 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
+    server_options_cmd = SMap.get "server_options_cmd" config;
   }
 
 let parse_start_args () =
@@ -236,8 +242,13 @@ let parse_start_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CStart {ClientStart.root = root; ClientStart.wait = !wait}
+        exit 1 in
+  let config = get_config root in
+  CStart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_stop_args () =
   let usage =
@@ -276,8 +287,13 @@ let parse_restart_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CRestart {ClientStart.root = root; ClientStart.wait = !wait;}
+        exit 1 in
+  let config = get_config root in
+  CRestart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_status_args () =
   let usage =
@@ -356,8 +372,10 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
+  let config = get_config root in
   CBuild { ClientBuild.
     root = root;
+    server_options_cmd = SMap.get "server_options_cmd" config;
     build_opts = { ServerMsg.
       steps = !steps;
       no_steps = !no_steps;

@@ -32,20 +32,21 @@ static bool variantToGMPData(const char* fnCaller,
                              int64_t base = 0,
                              bool canBeEmptyStr = false) {
   switch (data.getType()) {
-  case KindOfResource:
-    {
-      auto gmpRes = data.toResource().getTyped<GMPResource>(false, true);
-      if (!gmpRes) {
-        raise_warning(cs_GMP_INVALID_RESOURCE, fnCaller);
+    case KindOfBoolean:
+    case KindOfInt64:
+      mpz_init_set_si(gmpData, data.toInt64());
+      return true;
+
+    case KindOfDouble:
+      if (data.toDouble() > DBL_MAX || data.toDouble() < DBL_MIN) {
+        raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
         return false;
       }
-      mpz_init_set(gmpData, gmpRes->getData());
+      mpz_init_set_d(gmpData, data.toDouble());
       return true;
-    }
 
-  case KindOfString:
-  case KindOfStaticString:
-    {
+    case KindOfStaticString:
+    case KindOfString: {
       String strNum = data.toString();
       int64_t strLength = strNum.length();
 
@@ -108,23 +109,28 @@ static bool variantToGMPData(const char* fnCaller,
       return true;
     }
 
-  case KindOfInt64:
-  case KindOfBoolean:
-    mpz_init_set_si(gmpData, data.toInt64());
-    return true;
+    case KindOfResource: {
+      auto gmpRes = data.toResource().getTyped<GMPResource>(false, true);
+      if (!gmpRes) {
+        raise_warning(cs_GMP_INVALID_RESOURCE, fnCaller);
+        return false;
+      }
+      mpz_init_set(gmpData, gmpRes->getData());
+      return true;
+    }
 
-  case KindOfDouble:
-    if (data.toDouble() > DBL_MAX || data.toDouble() < DBL_MIN) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfRef:
       raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
       return false;
-    }
-    mpz_init_set_d(gmpData, data.toDouble());
-    return true;
 
-  default:
-    raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
-    return false;
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 

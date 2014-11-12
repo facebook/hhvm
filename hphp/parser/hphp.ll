@@ -271,7 +271,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
-<ST_IN_SCRIPTING>"elseif"               { RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if" {RETTOKEN(T_ELSEIF);}
 <ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
 <ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
 <ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}
@@ -343,6 +343,19 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         SETTOKEN(T_STRING);
         yy_pop_state(yyscanner);
         return T_STRING;
+}
+
+<ST_LOOKING_FOR_PROPERTY>":"{XHPLABEL}  {
+  if (_scanner->isHHSyntaxEnabled()) {
+    /* After -> or ?->, HH mode supports ":xhp-label"-style identifiers.
+       We strip off the first colon, but aside from that we do not mangle
+       the XHP name. */
+    yytext++; yyleng--;
+    yy_pop_state(yyscanner);
+    RETTOKEN(T_XHP_LABEL);
+  }
+  yyless(1);
+  RETSTEP(':');
 }
 
 <ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_FUNC_NAME>{WHITESPACE} {
@@ -491,7 +504,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
 <ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
 <ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
-<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff($] {
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
 
@@ -769,10 +782,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
 
 <INITIAL>"#!"[^\n]*"\n" {
-        _scanner->setHashBang(yytext, yyleng, T_INLINE_HTML);
+        SETTOKEN(T_HASHBANG);
         BEGIN(ST_IN_SCRIPTING);
         yy_push_state(ST_AFTER_HASHBANG, yyscanner);
-        return T_INLINE_HTML;
+        return T_HASHBANG;
 }
 
 <INITIAL>(([^<#]|"<"[^?%s<]|"#"[^!]){1,400})|"<s"|"<" {
@@ -1024,6 +1037,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"</script"{WHITESPACE}*">"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: </script> not allowed");
+          return T_HH_ERROR;
+        }
         yy_push_state(ST_IN_HTML, yyscanner);
         if (_scanner->full()) {
           RETSTEP(T_CLOSE_TAG);
@@ -1033,6 +1050,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
+        if (_scanner->isHHFile()) {
+          _scanner->error("HH mode: %%> not allowed");
+          return T_HH_ERROR;
+        }
         if (_scanner->aspTags()) {
                 yy_push_state(ST_IN_HTML, yyscanner);
                 if (_scanner->full()) {

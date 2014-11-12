@@ -624,7 +624,8 @@ const int UserTokenId_T_MIARRAY = 434;
 const int UserTokenId_T_MSARRAY = 435;
 const int UserTokenId_T_VARRAY = 436;
 const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 437;
-const int MaxUserTokenId = 438; // Marker, not a real user token ID
+const int UserTokenId_T_HASHBANG = 438;
+const int MaxUserTokenId = 439; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP

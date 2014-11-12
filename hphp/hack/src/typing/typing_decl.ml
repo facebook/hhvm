@@ -36,7 +36,7 @@ module SN = Naming_special_names
  *)
 (*****************************************************************************)
 
-module ClassStatus = SharedMem.NoCache(struct
+module ClassStatus = SharedMem.NoCache (String) (struct
   type t = unit
   let prefix = Prefix.make()
 end)
@@ -315,7 +315,7 @@ let ifun_decl nenv (f: Ast.fun_) =
 type class_env = {
   nenv: Naming.env;
   stack: SSet.t;
-  all_classes: SSet.t SMap.t;
+  all_classes: Relative_path.Set.t SMap.t;
 }
 
 let check_if_cyclic class_env (pos, cid) =
@@ -378,7 +378,7 @@ and class_hint_decl class_env hint =
       when SMap.mem cid class_env.all_classes && not (is_class_ready cid) ->
       (* We are supposed to redeclare the class *)
       let files = SMap.find_unsafe cid class_env.all_classes in
-      SSet.iter begin fun fn ->
+      Relative_path.Set.iter begin fun fn ->
         let class_opt = Parser_heap.find_class_in_file fn cid in
         class_decl_if_missing_opt class_env class_opt
       end files
@@ -645,7 +645,7 @@ and class_var_decl c (env, acc) cv =
   let env, ty =
     match cv.cv_type with
       | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' -> Typing_hint.hint env ty'
+      | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
@@ -656,10 +656,9 @@ and class_var_decl c (env, acc) cv =
   env, acc
 
 and static_class_var_decl c (env, acc) cv =
-  let env, ty =
-    match cv.cv_type with
-      | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty -> Typing_hint.hint env ty in
+  let env, ty = match cv.cv_type with
+    | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
+    | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
   let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
@@ -667,8 +666,7 @@ and static_class_var_decl c (env, acc) cv =
            }
   in
   let acc = SMap.add ("$"^id) ce acc in
-  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict ||
-      c.c_mode = Ast.Mpartial)
+  if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
     | None
     | Some (_, Hmixed)
@@ -781,14 +779,14 @@ and type_typedef_naming_and_decl nenv tdef =
   let env = Typing_env.set_mode env tdef.Ast.t_mode in
   let env = Env.set_root env (Typing_deps.Dep.Class tid) in
   let env, params = lfold Typing.type_param env params in
-  let env = Typing_hint.check_instantiable env concrete_type in
-  let env, concrete_type = Typing_hint.hint env concrete_type in
+  let env, concrete_type =
+    Typing_hint.hint ~ensure_instantiable:true env concrete_type in
   let env, tcstr =
     match tcstr with
     | None -> env, None
     | Some constraint_type ->
-      let env = Typing_hint.check_instantiable env constraint_type in
-      let env, constraint_type = Typing_hint.hint env constraint_type in
+      let env, constraint_type =
+        Typing_hint.hint ~ensure_instantiable:true env constraint_type in
       let sub_type = Typing_ops.sub_type pos Reason.URnewtype_cstr in
       let env = sub_type env constraint_type concrete_type in
       env, Some constraint_type

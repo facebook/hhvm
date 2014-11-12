@@ -224,8 +224,13 @@ let rec check_lvalue env = function
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
   | Binop _ | Eif _ | InstanceOf _ | New _ | Efun _ | Lfun _ | Xml _
-  | Import _) ->
+  | Import _ | Ref _) ->
       error_at env pos "Invalid lvalue"
+
+(* The bound variable of a foreach can be a reference (but not inside
+  a list expression. *)
+let check_foreach_lvalue env = function
+  | (_, Ref e) | e -> check_lvalue env e
 
 (*****************************************************************************)
 (* Operator priorities.
@@ -333,11 +338,13 @@ let with_base_priority env f =
 let ref_opt env =
   match L.token env.lb with
   | Tamp when env.mode = Ast.Mstrict ->
-      error env "Don't use references!"
+      error env "Don't use references!";
+      true
   | Tamp ->
-      ()
+      true
   | _ ->
-      L.back env.lb
+      L.back env.lb;
+      false
 
 (*****************************************************************************)
 (* Identifiers *)
@@ -373,18 +380,18 @@ let variable env =
 
 (* &$variable *)
 let ref_variable env =
-  ref_opt env;
-  variable env
+  let is_ref = ref_opt env in
+  (variable env, is_ref)
 
 (* &...$arg *)
 let ref_param env =
-  ref_opt env;
+  let is_ref = ref_opt env in
   let is_variadic = match L.token env.lb with
     | Tellipsis -> true
     | _ -> L.back env.lb; false
   in
   let var = variable env in
-  is_variadic, var
+  is_ref, is_variadic, var
 
 (*****************************************************************************)
 (* Entry point *)
@@ -706,7 +713,9 @@ and attribute_list_remain acc env =
 (*****************************************************************************)
 
 and fun_ ~attr ~sync env =
-  ref_opt env;
+  let is_ref = ref_opt env in
+  if is_ref && sync = FAsync
+    then error env ("Asynchronous function cannot return reference");
   let name = identifier env in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -716,6 +725,7 @@ and fun_ ~attr ~sync env =
     f_tparams = tparams;
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = is_ref;
     f_body = body;
     f_user_attributes = attr;
     f_fun_kind = sync;
@@ -877,26 +887,10 @@ and class_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [cst]
-      else cst :: class_param_list_remain env
+      else cst :: class_param_list env
   | _ ->
       error_expect env ">";
       [cst]
-
-and class_param_list_remain env =
-  match L.gt_or_comma env.lb with
-  | Tgt -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let cst = class_param env in
-      match L.gt_or_comma env.lb with
-      | Tgt ->
-          [cst]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [cst]
-          else cst :: class_param_list_remain env
-      | _ -> error_expect env ">"; [cst]
 
 and class_param env =
   match L.token env.lb with
@@ -961,25 +955,9 @@ and class_hint_param_list env =
   | Tcomma ->
       if !(env.errors) != error_state
       then [h]
-      else h :: class_hint_param_list_remain env
+      else h :: class_hint_param_list env
   | _ ->
       error_expect env ">"; [h]
-
-and class_hint_param_list_remain env =
-  match L.gt_or_comma env.lb with
-  | Tgt -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let h = hint env in
-      match L.gt_or_comma env.lb with
-      | Tgt ->
-          [h]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [h]
-          else h :: class_hint_param_list_remain env
-      | _ -> error_expect env ">"; [h]
 
 (*****************************************************************************)
 (* Type hints: int, ?int, A<T>, array<...> etc ... *)
@@ -1485,14 +1463,18 @@ and class_var_name name =
 and class_member_word env ~attrs ~modifiers = function
   | "async" ->
       expect_word env "function";
-      ref_opt env;
+      let is_ref = ref_opt env in
+      if is_ref
+        then error env ("Asynchronous function cannot return reference");
       let fun_name = identifier env in
-      let method_ = method_ env ~modifiers ~attrs ~sync:FAsync fun_name in
+      let method_ =
+        method_ env ~modifiers ~attrs ~sync:FAsync is_ref fun_name in
       Method method_
   | "function" ->
-      ref_opt env;
+      let is_ref = ref_opt env in
       let fun_name = identifier env in
-      let method_ = method_ env ~modifiers ~attrs ~sync:FSync fun_name in
+      let method_ =
+        method_ env ~modifiers ~attrs ~sync:FSync is_ref fun_name in
       Method method_
   | _ ->
       L.back env.lb;
@@ -1506,7 +1488,7 @@ and class_member_word env ~attrs ~modifiers = function
         | _ -> L.back env.lb; class_var_list env
       in ClassVars (modifiers, Some h, cvars)
 
-and method_ env ~modifiers ~attrs ~sync pname =
+and method_ env ~modifiers ~attrs ~sync is_ref pname =
   let pos, name = pname in
   let tparams = class_params env in
   let params = parameter_list env in
@@ -1519,6 +1501,7 @@ and method_ env ~modifiers ~attrs ~sync pname =
     m_tparams = tparams;
     m_params = params;
     m_ret = ret;
+    m_ret_by_ref = is_ref;
     m_body = body;
     m_kind = modifiers;
     m_user_attributes = attrs;
@@ -1983,11 +1966,11 @@ and foreach_as env =
   match L.token env.lb with
   | Tsarrow ->
       let e2 = expr env in
-      check_lvalue env e2;
+      check_foreach_lvalue env e2;
       expect env Trp;
       As_kv (e1, e2)
   | Trp ->
-      check_lvalue env e1;
+      check_foreach_lvalue env e1;
       As_v e1
   | _ ->
       error_expect env ")";
@@ -2095,7 +2078,7 @@ and param ~variadic env =
   let attrs = attribute env in
   let modifs = parameter_modifier env in
   let h = parameter_hint env in
-  let variadic_after_hint, name = ref_param env in
+  let is_ref, variadic_after_hint, name = ref_param env in
   assert ((not variadic_after_hint) || (not variadic));
   let variadic = variadic || variadic_after_hint in
   let default = parameter_default env in
@@ -2109,7 +2092,7 @@ and param ~variadic env =
     L.back env.lb
   end else ();
   { param_hint = h;
-    param_is_reference = false;
+    param_is_reference = is_ref;
     param_is_variadic = variadic;
     param_id = name;
     param_expr = default;
@@ -2331,6 +2314,7 @@ and lambda_body env params ret ~sync =
     f_tparams = [];
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = false;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
     f_fun_kind = sync;
@@ -2408,7 +2392,7 @@ and expr_atomic ?(allow_class=false) env =
   | Tem | Tincr | Tdecr | Ttild | Tplus | Tminus as op ->
       expr_prefix_unary env pos op
   | Tamp ->
-      with_priority env Tref expr
+      expr_ref env pos
   | Tat ->
       with_priority env Tat expr
   | Tword ->
@@ -2755,6 +2739,7 @@ and expr_anon_fun env pos ~sync =
     f_tparams = [];
     f_params = params;
     f_ret = ret;
+    f_ret_by_ref = false;
     f_body = body;
     f_user_attributes = Utils.SMap.empty;
     f_fun_kind = sync;
@@ -2975,7 +2960,7 @@ and encapsed_nested start env =
       | Tlvar ->
           L.back env.lb;
           let error_state = !(env.errors) in
-          let e = encapsed_expr env in
+          let e = expr env in
           (match L.string2 env.lb with
           | Trcb -> ()
           | _ -> error_expect env "}");
@@ -3251,6 +3236,15 @@ and expr_array_get env e1 =
         Pos.btw (fst e1) end_, Array_get (e1, Some e2)
   end
 
+(*****************************************************************************)
+(* Reference (&$v|&func()|&$obj->prop *)
+(*****************************************************************************)
+
+and expr_ref env start =
+  with_priority env Tref begin fun env ->
+    let e = expr env in
+    Pos.btw start (fst e), Ref e
+  end
 
 (*****************************************************************************)
 (* XHP *)
@@ -3507,5 +3501,6 @@ and namespace_use_list env acc =
 
 let from_file filename =
   Pos.file := filename;
-  let content = try Utils.cat filename with _ -> "" in
+  let content =
+    try Utils.cat (Relative_path.to_absolute filename) with _ -> "" in
   program content

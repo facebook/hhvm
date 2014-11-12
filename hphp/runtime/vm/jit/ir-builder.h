@@ -108,6 +108,7 @@ struct IRBuilder {
   bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
 
   Type localType(uint32_t id, TypeConstraint tc);
+  Type predictedInnerType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
@@ -129,7 +130,7 @@ struct IRBuilder {
    * Start the given block.  Returns whether or not it succeeded.  A failure
    * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker, bool unprocessedPred);
+  bool startBlock(Block* block, const BCMarker& marker, bool isLoopHeader);
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -419,6 +420,7 @@ private:
   SSATmp*   preOptimizeCheckType(IRInstruction*);
   SSATmp*   preOptimizeCheckStk(IRInstruction*);
   SSATmp*   preOptimizeCheckLoc(IRInstruction*);
+  SSATmp*   preOptimizeHintLocInner(IRInstruction*);
 
   SSATmp*   preOptimizeAssertTypeOp(IRInstruction* inst,
                                     Type oldType,
@@ -434,7 +436,6 @@ private:
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);
   SSATmp*   preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp*   preOptimizeLdLoc(IRInstruction*);
-  SSATmp*   preOptimizeLdLocAddr(IRInstruction*);
   SSATmp*   preOptimizeStLoc(IRInstruction*);
   SSATmp*   preOptimize(IRInstruction* inst);
 

@@ -139,7 +139,6 @@ public:
 
       case DataType::KindOfUninit:
       case DataType::KindOfRef:
-      case DataType::KindOfNamedLocal:
       case DataType::KindOfClass:
         return unknown;
     }

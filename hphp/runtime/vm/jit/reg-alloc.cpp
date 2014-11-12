@@ -62,6 +62,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == CoerceStk ||
       opc == SideExitGuardStk  ||
       opc == DefLabel ||
+      opc == HintStkInner ||
       MInstrEffects::supported(opc),
       "unexpected StkPtr dest from {}",
       opcodeName(opc)
@@ -76,8 +77,8 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   }
 
   if (opc == DefMIStateBase) {
-    assert(tmp.isA(Type::PtrToCell));
-    return mcg->backEnd().rSp();
+    assert(tmp.isA(Type::PtrToGen));
+    return mcg->backEnd().rVmTl();
   }
   return InvalidReg;
 }

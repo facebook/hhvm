@@ -22,6 +22,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+inline APCLocalArray::APCLocalArray(const APCArray* source)
+  : ArrayData(kSharedKind)
+  , m_arr(source)
+  , m_localCache(nullptr)
+{
+  m_size = m_arr->size();
+  source->getHandle()->reference();
+  MM().addApcArray(this);
+}
+
 template<class... Args>
 APCLocalArray* APCLocalArray::Make(Args&&... args) {
   return new (MM().smartMallocSize(sizeof(APCLocalArray)))

@@ -4,19 +4,19 @@ if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with
   # build systems and don't really care to make this work the right way. libelf
   # is all we need right now ayways.
-  unset(hackcflags)
+  unset(extra_include_paths)
+  unset(extra_lib_paths)
+  unset(extra_cc_flags)
   foreach(lib ${LIBELF_INCLUDE_DIRS})
-    list(APPEND hackcflags -ccopt -I${lib})
+    list(APPEND extra_include_paths ${lib})
   endforeach()
   if(ELF_GETSHDRSTRNDX)
-    list(APPEND hackcflags -ccopt -DHAVE_ELF_GETSHDRSTRNDX)
+    list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
   endif()
 
   foreach(lib ${LIBELF_LIBRARIES})
     get_filename_component(pth ${lib} PATH)
-    get_filename_component(base ${lib} NAME_WE)
-    string(REGEX REPLACE "^lib" "" libname ${base})
-    list(APPEND hackcflags -ccopt -L${pth} -cclib -l${libname})
+    list(APPEND extra_lib_paths ${pth})
   endforeach()
 
   # Xcode/Ninja generators undefined MAKE
@@ -27,10 +27,11 @@ if (OCAMLC_FOUND)
   add_custom_target(
     hack
     ALL
-    COMMAND $(MAKE) depend &&
+    COMMAND
       env OPTBIN="${OCAMLC_OPT_SUFFIX}"
-          OCAMLCFLAGS_EXTRA="${hackcflags}"
-          $(MAKE)
+          $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+          EXTRA_LIB_PATHS="${extra_lib_paths}"
+          EXTRA_CC_FLAGS="${extra_cc_flags}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 

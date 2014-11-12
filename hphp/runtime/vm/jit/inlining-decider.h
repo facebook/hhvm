@@ -133,6 +133,12 @@ struct InliningDecider {
    */
   void registerEndInlining(const Func* callee);
 
+  /*
+   * Prevents any Func with the same fullName() as the specified callee from
+   * being inlined in the future.
+   */
+  static void forbidInliningOf(const Func* callee);
+
 private:
   // The function being inlined into.
   const Func* const m_topFunc;

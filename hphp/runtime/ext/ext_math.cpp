@@ -251,8 +251,8 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
 static MaybeDataType convert_for_pow(const Variant& val,
                                      int64_t& ival, double& dval) {
   switch (val.getType()) {
-    case KindOfNull:
     case KindOfUninit:
+    case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfResource:
@@ -264,8 +264,8 @@ static MaybeDataType convert_for_pow(const Variant& val,
       dval = val.toDouble();
       return KindOfDouble;
 
-    case KindOfString:
-    case KindOfStaticString: {
+    case KindOfStaticString:
+    case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
       if ((dt != KindOfInt64) && (dt != KindOfDouble)) {
         ival = 0;
@@ -275,12 +275,15 @@ static MaybeDataType convert_for_pow(const Variant& val,
     }
 
     case KindOfArray:
-      // Not reachable since f_pow() deals with these base cases first
-    default:
-      // Unknown data type
-      raise_error("Unsupported operand types");
-      return folly::none; // Not Reached
+      // Not reachable since f_pow() deals with these base cases first.
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+
+  // Unknown data type.
+  raise_error("Unsupported operand types");
+  not_reached();
 }
 
 Variant f_pow(const Variant& base, const Variant& exp) {

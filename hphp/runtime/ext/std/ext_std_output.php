@@ -291,3 +291,12 @@ function hphp_set_hardware_events(string $events = null): bool;
 
 <<__HipHopSpecific, __Native("NoInjection")>>
 function hphp_clear_hardware_events(): void;
+
+namespace __SystemLib {
+  /* Print a hashbang if not run from the first source file executed. Otherwise
+   * do nothing.
+   * @param string $hashBang - the hashbang to print
+   */
+  <<__HipHopSpecific, __Native("NoInjection")>>
+  function print_hashbang(string $hashBang): void;
+}

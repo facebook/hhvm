@@ -1767,22 +1767,6 @@ SSATmp* simplifyTakeStack(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyLdStackAddr(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<StackOffset>()->offset);
-  // NB: strict subtype relation. Non-strict results in infinite recursion.
-  if (info.knownType.ptr() < inst->typeParam()) {
-    return gen(
-      env,
-      LdStackAddr,
-      *inst->extra<StackOffset>(),
-      info.knownType.ptr(),
-      inst->src(0)
-    );
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyDecRefStack(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<StackOffset>()->offset);
@@ -2013,7 +1997,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdObjInvoke)
   X(LdPackedArrayElem)
   X(LdStack)
-  X(LdStackAddr)
   X(Mov)
   X(SpillStack)
   X(TakeStack)
@@ -2088,15 +2071,19 @@ SimplifyResult simplify(IRUnit& unit,
 StackValueInfo::StackValueInfo(SSATmp* value)
   : value(value)
   , knownType(value->type())
+  , predictedInner(Type::Bottom)
   , spansCall(false)
   , typeSrc(value->inst())
 {
   ITRACE(5, "{} created\n", show(*this));
 }
 
-StackValueInfo::StackValueInfo(IRInstruction* inst, Type type)
+StackValueInfo::StackValueInfo(IRInstruction* inst,
+                               Type type,
+                               Type predictedInner)
   : value(nullptr)
   , knownType(type)
+  , predictedInner(predictedInner)
   , spansCall(false)
   , typeSrc(inst)
 {
@@ -2111,8 +2098,11 @@ std::string show(const StackValueInfo& info) {
   } else {
     folly::toAppend(
       info.knownType.toString(),
+      info.knownType <= Type::BoxedInitCell
+        ? folly::sformat(" ({})", info.predictedInner.toString())
+        : std::string{},
       " from ",
-      info.typeSrc->toString(),
+      info.typeSrc ? info.typeSrc->toString() : "N/A",
       &out
     );
   }
@@ -2179,9 +2169,20 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     // CheckStk's and AssertStk's resulting type is the intersection
     // of its typeParam with whatever type preceded it.
     if (inst->extra<StackOffset>()->offset == index) {
-      Type prevType = getStackValue(inst->src(0), index).knownType;
-      return StackValueInfo { inst,
-                              refineTypeNoCheck(prevType, inst->typeParam())};
+      auto const prev = getStackValue(inst->src(0), index);
+      return StackValueInfo {
+        inst,
+        refineTypeNoCheck(prev.knownType, inst->typeParam()),
+        prev.predictedInner
+      };
+    }
+    return getStackValue(inst->src(0), index);
+
+  case HintStkInner:
+    if (inst->extra<HintStkInner>()->offset == index) {
+      return StackValueInfo {
+        nullptr, Type::BoxedInitCell, inst->typeParam()
+      };
     }
     return getStackValue(inst->src(0), index);
 
@@ -2303,20 +2304,39 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
 
   default:
     {
-      // Assume it's a vector instruction.  This will assert in
-      // minstrBaseIdx if not.
+      // Assume it's a vector instruction.  This will assert in minstrBaseIdx
+      // if not.
       auto const base = inst->src(minstrBaseIdx(inst));
-      assert(base->inst()->op() == LdStackAddr);
+      // Currently we require that the stack address is the immediate source of
+      // the base tmp.
+      always_assert(base->inst()->is(LdStackAddr));
       if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        MInstrEffects effects(inst);
+        auto const prev = getStackValue(base->inst()->src(0), index);
+        MInstrEffects effects(inst->op(), prev.knownType.ptr(Ptr::Stk));
         assert(effects.baseTypeChanged || effects.baseValChanged);
-        return StackValueInfo { inst, effects.baseType.derefIfPtr() };
+        auto const ty = effects.baseType;
+        if (ty.isBoxed()) {
+          return StackValueInfo { inst, Type::BoxedInitCell, ty };
+        }
+        return StackValueInfo { inst, ty.derefIfPtr() };
       }
       return getStackValue(base->inst()->src(0), index);
     }
   }
 
   not_reached();
+}
+
+Type getStackInnerTypePrediction(SSATmp* sp, uint32_t offset) {
+  auto const info = getStackValue(sp, offset);
+  assert(info.knownType <= Type::BoxedInitCell);
+  if (info.predictedInner <= Type::Bottom) {
+    ITRACE(2, "no boxed stack prediction {}\n", offset);
+    return Type::BoxedInitCell;
+  }
+  auto t = ldRefReturn(info.predictedInner.unbox());
+  ITRACE(2, "stack {} prediction: {}\n", offset, t);
+  return t;
 }
 
 jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {

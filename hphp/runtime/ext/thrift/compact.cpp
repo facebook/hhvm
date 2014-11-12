@@ -1016,8 +1016,8 @@ class CompactReader {
 
 };
 
-int HHVM_FUNCTION(thrift_protocol_set_compact_version,
-                  int version) {
+int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
+                      int version) {
   int result = s_compact_request_data->version;
   s_compact_request_data->version = (uint8_t)version;
   return result;

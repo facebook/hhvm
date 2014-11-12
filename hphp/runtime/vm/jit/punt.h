@@ -68,6 +68,7 @@ struct FailedCodeGen : std::runtime_error {
 #define PUNT(instr) SPUNT(#instr)
 
 #define TRACE_PUNT(why) do { \
+  FTRACE(1, "punting: {}\n", why); \
   throw FailedTraceGen(__FILE__, __LINE__, why); \
 } while(0)
 

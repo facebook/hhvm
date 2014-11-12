@@ -28,23 +28,23 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
 
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/complex-types.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/rds-util.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/asio/asio_blockable.h"
-#include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
+#include "hphp/runtime/ext/asio/wait_handle.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -53,9 +53,9 @@
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
-#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
@@ -66,6 +66,8 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-x64.h"
+#include "hphp/runtime/vm/runtime.h"
+
 
 #define rVmSp DontUseRVmSpInThisFile
 
@@ -308,6 +310,8 @@ NOOP_OPCODE(Nop)
 NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
+NOOP_OPCODE(HintLocInner)
+NOOP_OPCODE(HintStkInner)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -433,7 +437,6 @@ CALL_OPCODE(RestoreErrorLevel)
 
 CALL_OPCODE(Count)
 
-CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionSuspendHook)
 CALL_OPCODE(FunctionReturnHook)
 
@@ -2469,11 +2472,9 @@ void CodeGenerator::cgStMem(IRInstruction* inst) {
 
 void CodeGenerator::cgStRef(IRInstruction* inst) {
   always_assert(!srcLoc(inst, 1).isFullSIMD());
-  auto destReg = dstLoc(inst, 0).reg();
   auto ptr = srcLoc(inst, 0).reg();
   auto off = RefData::tvOffset();
   cgStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Full);
-  vmain() << copy{ptr, destReg};
 }
 
 int CodeGenerator::iterOffset(const BCMarker& marker, uint32_t id) {
@@ -3433,10 +3434,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(pc),
                        srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
   }
-  // RSP points to the MInstrState we need to use.  Workaround the
-  // fact that rsp moves when we spill registers around call
-  auto misReg = v.makeReg();
-  v << copy{reg::rsp, misReg};
+  // The MInstrState we need to use is at a constant offset from the base of the
+  // RDS header.
+  PhysReg rdsReg(rVmTl);
 
   auto callArgs = argGroup(inst);
   if (isBuiltinByRef(funcReturnType)) {
@@ -3444,10 +3444,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     if (isSmartPtrRef(funcReturnType)) {
       returnOffset += TVOFF(m_data);
     }
-    // misReg is pointing to an MInstrState struct on the C stack.  Pass
-    // the address of tvBuiltinReturn to the native function as the location
-    // it can construct the return Array, String, Object, or Variant.
-    callArgs.addr(misReg, returnOffset); // &misReg[returnOffset]
+    // Pass the address of tvBuiltinReturn to the native function as the
+    // location it can construct the return Array, String, Object, or Variant.
+    callArgs.addr(rdsReg, returnOffset); // &rdsReg[returnOffset]
   }
 
   // Non-pointer args are plain values passed by value.  String, Array,
@@ -3497,10 +3496,6 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     return;
   }
 
-  // after the call, RSP is back pointing to MInstrState and rSratch
-  // has been clobberred.
-  misReg = rsp;
-
   // For return by reference (String, Object, Array, Variant),
   // the builtin writes the return value into MInstrState::tvBuiltinReturn
   // TV, from where it has to be tested and copied.
@@ -3509,7 +3504,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // return type is String, Array, or Object; fold nullptr to KindOfNull
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
-    v << load{misReg[returnOffset], dstReg};
+    v << load{rdsReg[returnOffset], dstReg};
     auto const sf = v.makeReg();
     v << testq{dstReg, dstReg, sf};
     v << cmovq{CC_Z, sf, rtype, nulltype, dstType};
@@ -3518,11 +3513,10 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // return type is Variant; fold KindOfUninit to KindOfNull
     assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
-    assert(misReg != Vreg{dstType});
     auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();
-    emitLoadTVType(v, misReg[returnOffset + TVOFF(m_type)], tmp_type);
-    v << load{misReg[returnOffset + TVOFF(m_data)], dstReg};
+    emitLoadTVType(v, rdsReg[returnOffset + TVOFF(m_type)], tmp_type);
+    v << load{rdsReg[returnOffset + TVOFF(m_data)], dstReg};
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
     auto const sf = v.makeReg();
     v << testb{tmp_type, tmp_type, sf};
@@ -3758,14 +3752,12 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
 
 void CodeGenerator::cgLdContField(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
-         inst->taken());
+         srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
 void CodeGenerator::cgLdMem(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
-         inst->taken());
+         srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
@@ -4178,7 +4170,7 @@ void CodeGenerator::cgExitJccInt(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefMIStateBase(IRInstruction* inst) {
-  assert(dstLoc(inst, 0).reg() == rsp);
+  assert(dstLoc(inst, 0).reg() == rVmTl);
 }
 
 void CodeGenerator::cgCheckType(IRInstruction* inst) {
@@ -5433,17 +5425,15 @@ void CodeGenerator::cgMIterInitK(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
-  auto             fpReg = srcLoc(inst, 1).reg();
-  int         iterOffset = this->iterOffset(inst->marker(),
-                                            inst->extra<IterData>()->iterId);
-  int     valLocalOffset = localOffset(inst->extra<IterData>()->valId);
-  SSATmp*            src = inst->src(0);
+  auto const fpReg = srcLoc(inst, 1).reg();
+  auto const iterOffset = this->iterOffset(inst->marker(),
+                                           inst->extra<IterData>()->iterId);
+  auto const valLocalOffset = localOffset(inst->extra<IterData>()->valId);
 
   auto args = argGroup(inst);
   args.addr(fpReg, iterOffset).ssa(0/*src*/);
 
-  assert(src->type().isBoxed());
-  auto innerType = src->type().innerType();
+  auto innerType = inst->typeParam();
   assert(innerType.isKnownDataType());
 
   if (innerType <= Type::Arr) {
@@ -5458,25 +5448,26 @@ void CodeGenerator::cgMIterInitCommon(IRInstruction* inst) {
                  callDest(inst),
                  SyncOptions::kSyncPoint,
                  args);
-  } else if (innerType <= Type::Obj) {
-    args.immPtr(getClass(inst->marker())).addr(fpReg, valLocalOffset);
-    if (inst->op() == MIterInitK) {
-      args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
-    } else {
-      args.imm(0);
-    }
-    // new_miter_object decrefs its src object if it propagates an
-    // exception out, so we use kSyncPointAdjustOne, which adjusts the
-    // stack pointer by 1 stack element on an unwind, skipping over
-    // the src object.
-    cgCallHelper(vmain(),
-                 CppCall::direct(new_miter_object),
-                 callDest(inst),
-                 SyncOptions::kSyncPointAdjustOne,
-                 args);
-  } else {
-    CG_PUNT(inst->marker(), MArrayIter-Unknown);
+    return;
   }
+
+  always_assert(innerType <= Type::Obj);
+
+  args.immPtr(getClass(inst->marker())).addr(fpReg, valLocalOffset);
+  if (inst->op() == MIterInitK) {
+    args.addr(fpReg, localOffset(inst->extra<IterData>()->keyId));
+  } else {
+    args.imm(0);
+  }
+  // new_miter_object decrefs its src object if it propagates an
+  // exception out, so we use kSyncPointAdjustOne, which adjusts the
+  // stack pointer by 1 stack element on an unwind, skipping over
+  // the src object.
+  cgCallHelper(vmain(),
+               CppCall::direct(new_miter_object),
+               callDest(inst),
+               SyncOptions::kSyncPointAdjustOne,
+               args);
 }
 
 void CodeGenerator::cgIterNext(IRInstruction* inst) {

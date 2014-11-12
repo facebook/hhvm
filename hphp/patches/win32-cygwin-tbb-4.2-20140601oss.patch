@@ -443,31 +443,34 @@ diff -rupN tbb42_20140601oss/src/tbb/dynamic_link.cpp tbb_patched/src/tbb/dynami
  /*
  dynamic_link is a common interface for searching for required symbols in an
  executable and dynamic libraries.
-@@ -290,25 +296,35 @@ OPEN_INTERNAL_NAMESPACE
+@@ -290,7 +296,7 @@ OPEN_INTERNAL_NAMESPACE
          #if __TBB_WEAK_SYMBOLS_PRESENT
              if ( !dladdr || !dlerror ) return;
          #endif /* __TBB_WEAK_SYMBOLS_PRESENT */
 -        Dl_info dlinfo;
--        int res = dladdr( (void*)&dynamic_link, &dlinfo ); // any function inside the library can be used for the address
--        if ( !res ) {
--            char const * err = dlerror();
--            DYNAMIC_LINK_WARNING( dl_sys_fail, "dladdr", err );
--            return;
--        } else {
--            LIBRARY_ASSERT( dlinfo.dli_fname!=NULL, "Unbelievable." );
++        /*Dl_info dlinfo;
+         int res = dladdr( (void*)&dynamic_link, &dlinfo ); // any function inside the library can be used for the address
+         if ( !res ) {
+             char const * err = dlerror();
+@@ -298,17 +304,42 @@ OPEN_INTERNAL_NAMESPACE
+             return;
+         } else {
+             LIBRARY_ASSERT( dlinfo.dli_fname!=NULL, "Unbelievable." );
 -        }
-+		
+-
+-        char const *slash = strrchr( dlinfo.dli_fname, '/' );
++        }*/
 +		char *dli_fname;
-+		
++
 +		#ifdef __CYGWIN__
 +			MEMORY_BASIC_INFORMATION mbi;
-			char path[MAX_PATH];
-			VirtualQuery((void*)&dynamic_link, &mbi,
-                sizeof(mbi));
-			GetModuleFileNameA((HINSTANCE)mbi.AllocationBase, path, MAX_PATH);
-
-			char posix_path[MAX_PATH];
-			cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE, path, posix_path, MAX_PATH);
++			char path[MAX_PATH];
++			VirtualQuery((void*)&dynamic_link, &mbi,
++                sizeof(mbi));
++			GetModuleFileNameA((HINSTANCE)mbi.AllocationBase, path, MAX_PATH);
++
++			char posix_path[MAX_PATH];
++			cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_RELATIVE, path, posix_path, MAX_PATH);
 +			dli_fname = posix_path;
 +
 +		#else
@@ -482,8 +485,7 @@ diff -rupN tbb42_20140601oss/src/tbb/dynamic_link.cpp tbb_patched/src/tbb/dynami
 +			}
 +			dli_fname = dlinfo.dli_fname;
 +		#endif
- 
--        char const *slash = strrchr( dlinfo.dli_fname, '/' );
++
 +        char const *slash = strrchr( dli_fname, '/' );
          size_t fname_len=0;
          if ( slash ) {
@@ -499,7 +501,7 @@ diff -rupN tbb42_20140601oss/src/tbb/dynamic_link.cpp tbb_patched/src/tbb/dynami
              // The library path is absolute
              rc = 0;
              ap_data._len = 0;
-@@ -329,7 +345,7 @@ OPEN_INTERNAL_NAMESPACE
+@@ -329,7 +360,7 @@ OPEN_INTERNAL_NAMESPACE
                  ap_data._len=0;
                  return;
              }
@@ -508,7 +510,7 @@ diff -rupN tbb42_20140601oss/src/tbb/dynamic_link.cpp tbb_patched/src/tbb/dynami
              ap_data._len += fname_len;
              ap_data._path[ap_data._len]=0;
          }
-@@ -446,11 +462,25 @@ OPEN_INTERNAL_NAMESPACE
+@@ -446,11 +477,25 @@ OPEN_INTERNAL_NAMESPACE
          // But after we obtained the symbol the library can be unloaded by another thread
          // invalidating our symbol. Therefore we need to pin the library in memory.
          dynamic_link_handle library_handle;
@@ -535,7 +537,7 @@ diff -rupN tbb42_20140601oss/src/tbb/dynamic_link.cpp tbb_patched/src/tbb/dynami
              if ( library_handle ) {
                  // If original library was unloaded before we pinned it
                  // and then another module loaded in its place, the earlier
-@@ -462,7 +492,7 @@ OPEN_INTERNAL_NAMESPACE
+@@ -462,7 +507,7 @@ OPEN_INTERNAL_NAMESPACE
                  }
              } else {
                  char const * err = dlerror();

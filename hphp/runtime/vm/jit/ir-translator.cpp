@@ -257,12 +257,11 @@ void IRTranslator::translateConcatN(const NormalizedInstruction& i) {
 }
 
 void IRTranslator::translateJmp(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA,
-            instrJmpFlags(i) | JmpFlagSurprise);
+  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
 }
 
 void IRTranslator::translateJmpNS(const NormalizedInstruction& i) {
-  HHIR_EMIT(Jmp, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
+  HHIR_EMIT(JmpNS, i.offset() + i.imm[0].u_BA, instrJmpFlags(i));
 }
 
 void IRTranslator::translateSwitch(const NormalizedInstruction& i) {

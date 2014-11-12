@@ -161,10 +161,6 @@ public:
   }
 
   ~HashContext() {
-    HashContext::sweep();
-  }
-
-  void sweep() override {
     /* Just in case the algo has internally allocated resources */
     if (context) {
       assert(ops->digest_size >= 0);

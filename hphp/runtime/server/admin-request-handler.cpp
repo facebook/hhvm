@@ -647,7 +647,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
 void AdminRequestHandler::abortRequest(Transport *transport) {
   g_context.getCheck();
-  SCOPE_EXIT { hphp_memory_cleanup(); };
   transport->sendString("Service Unavailable", 503);
   transport->onSendEnd();
 }

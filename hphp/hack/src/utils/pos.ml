@@ -9,58 +9,30 @@
  *)
 
 open Lexing
+open Utils
 
 (* Note: While Pos.string prints out positions as closed intervals, pos_start
  * and pos_end actually form a half-open interval (i.e. pos_end points to the
  * character *after* the last character of the relevant lexeme.) *)
-type t = {
-  pos_file: string ;
+type 'a pos = {
+  pos_file: 'a ;
   pos_start: Lexing.position ;
   pos_end: Lexing.position ;
 }
 
-let file = ref ""
+let file = ref Relative_path.default
+
+type t = Relative_path.t pos
+
+type absolute = string pos
 
 let none = {
-  pos_file = "" ;
+  pos_file = Relative_path.default ;
   pos_start = dummy_pos ;
   pos_end = dummy_pos ;
 }
 
 let filename p = p.pos_file
-
-let make (lb:Lexing.lexbuf) =
- let pos_start = lexeme_start_p lb in
- let pos_end = lexeme_end_p lb in
- { pos_file = !file; pos_start = pos_start ;
-   pos_end = pos_end }
-
-let make_from_file() =
-  let pos = Lexing.dummy_pos in
-  { pos_file = !file;
-    pos_start = pos;
-    pos_end = pos;
-  }
-
-let make_from file =
-  let pos = Lexing.dummy_pos in
-  { pos_file = file;
-    pos_start = pos;
-    pos_end = pos;
-  }
-
-let btw x1 x2 =
-  if x1.pos_file <> x2.pos_file
-  then failwith "Position in separate files" ;
-  if x1.pos_end > x2.pos_end
-  then failwith "Invalid positions Pos.btw" ;
-  { x1 with pos_end = x2.pos_end }
-
-let lhs p =
-  { p with pos_end = p.pos_start }
-
-let rhs p =
-  { p with pos_start = p.pos_end }
 
 let info_pos t =
   let line = t.pos_start.pos_lnum in
@@ -79,11 +51,12 @@ let string t =
 let json pos =
     let line, start, end_ = info_pos pos in
     let fn = filename pos in
-    Hh_json.JAssoc [ "filename",   Hh_json.JString fn;
-             "line",       Hh_json.JInt line;
-             "char_start", Hh_json.JInt start;
-             "char_end",   Hh_json.JInt end_;
-           ]
+    Hh_json.JAssoc [
+      "filename",   Hh_json.JString fn;
+      "line",       Hh_json.JInt line;
+      "char_start", Hh_json.JInt start;
+      "char_end",   Hh_json.JInt end_;
+    ]
 
 let inside p line char_pos =
   let first_line = p.pos_start.pos_lnum in
@@ -96,8 +69,27 @@ let inside p line char_pos =
     else if line = last_line then char_pos <= (p.pos_end.pos_cnum - p.pos_end.pos_bol)
     else line > first_line && line < last_line
 
-let compare x y =
-  String.compare (string x) (string y)
+let make (lb:Lexing.lexbuf) =
+  let pos_start = lexeme_start_p lb in
+  let pos_end = lexeme_end_p lb in
+  { pos_file = !file;
+    pos_start = pos_start;
+    pos_end = pos_end;
+  }
+
+let make_from file =
+  let pos = Lexing.dummy_pos in
+  { pos_file = file;
+    pos_start = pos;
+    pos_end = pos;
+  }
+
+let btw x1 x2 =
+  if x1.pos_file <> x2.pos_file
+  then failwith "Position in separate files" ;
+  if x1.pos_end > x2.pos_end
+  then failwith "Invalid positions Pos.btw" ;
+  { x1 with pos_end = x2.pos_end }
 
 let set_line pos value =
   let pos_start = pos.pos_start in
@@ -105,3 +97,16 @@ let set_line pos value =
   let pos_start = { pos_start with pos_lnum = value } in
   let pos_end = { pos_end with pos_lnum = value } in
   { pos with pos_start; pos_end }
+
+let to_absolute p = { p with pos_file = Relative_path.to_absolute (p.pos_file) }
+
+let compare x y =
+  String.compare (string (to_absolute x)) (string (to_absolute y))
+
+module Map = MyMap (struct
+  type path = t
+  (* The definition below needs to refer to the t in the outer scope, but MyMap
+   * expects a module with a type of name t, so we define t in a second step *)
+  type t = path
+  let compare = compare
+end)

@@ -1,6 +1,14 @@
 <?hh
 
 /**
+ * Return thread type. See enum class ThreadType.
+ *
+ * @return int - thread type. Returns -1 if unknown.
+ */
+<<__HipHopSpecific, __Native>>
+function hphp_thread_type(): int;
+
+/**
  * When I'm running a newer version of the server software and I'm getting an
  *   HTTP request that's from old version of a web page, proxy it to a local
  *   instance that is still running or dangling just for handling old version of
@@ -73,6 +81,14 @@ function pagelet_server_task_result(resource $task,
                                     mixed &$headers,
                                     mixed &$code,
                                     int $timeout_ms = 0): string;
+
+/**
+ * Return the number of pagelet tasks started during this request.
+ *
+ * @return int - Number of pagelet tasks started.
+ */
+<<__HipHopSpecific, __Native>>
+function pagelet_server_tasks_started(): int;
 
 /**
  * Flush all the currently buffered output, so that the main thread can read

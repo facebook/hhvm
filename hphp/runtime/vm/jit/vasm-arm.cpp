@@ -556,6 +556,12 @@ void lower(Vunit& unit) {
         case Vinstr::defvmsp:
           inst = copy{PhysReg{arm::rVmSp}, inst.defvmsp_.d};
           break;
+        case Vinstr::syncvmsp:
+          inst = copy{inst.syncvmsp_.s, PhysReg{arm::rVmSp}};
+          break;
+        case Vinstr::syncvmfp:
+          inst = copy{inst.syncvmfp_.s, PhysReg{arm::rVmFp}};
+          break;
         default:
           break;
       }
@@ -570,6 +576,7 @@ void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
   if (!m_unit.cpool.empty()) {
     foldImms<arm::ImmFolder>(m_unit);
   }
+  lowerForARM(m_unit);
   if (m_unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);
     removeDeadCode(m_unit);

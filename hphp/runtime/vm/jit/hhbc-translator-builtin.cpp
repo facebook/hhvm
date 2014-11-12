@@ -377,17 +377,29 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
       ++numParamsThroughStack;
       paramThroughStack[offset] = true;
     } else if (dt && !callee->byRef(offset)) {
-      switch (*dt) {
-        case KindOfBoolean:
-        case KindOfInt64:
-        case KindOfDouble:
-          paramThroughStack[offset] = false;
-          break;
-        default:
-          ++numParamsThroughStack;
-          paramThroughStack[offset] = true;
-          break;
-      }
+      [&] {
+        switch (*dt) {
+          case KindOfBoolean:
+          case KindOfInt64:
+          case KindOfDouble:
+            paramThroughStack[offset] = false;
+            return;
+          case KindOfUninit:
+          case KindOfNull:
+          case KindOfStaticString:
+          case KindOfString:
+          case KindOfArray:
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfRef:
+            ++numParamsThroughStack;
+            paramThroughStack[offset] = true;
+            return;
+          case KindOfClass:
+            break;
+        }
+        not_reached();
+      }();
     } else {
       ++numParamsThroughStack;
       paramThroughStack[offset] = true;
@@ -596,7 +608,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
         }
       }
 
-      args[argIdx++] = ldStackAddr(offset, DataTypeSpecific);
+      args[argIdx++] = ldStackAddr(offset);
       ++stackIdx;
     }
 

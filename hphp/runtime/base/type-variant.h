@@ -482,12 +482,17 @@ struct Variant : private TypedValue {
       case KindOfObject:
       case KindOfResource:
         return true;
+      case KindOfDouble:
+      case KindOfStaticString:
+      case KindOfString:
+      case KindOfArray:
+        return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
-      default:
+      case KindOfClass:
         break;
     }
-    return false;
+    not_reached();
   }
   bool isArray() const {
     return getType() == KindOfArray;
@@ -649,23 +654,19 @@ struct Variant : private TypedValue {
   /**
    * Whether or not calling toKey() will throw a bad type exception
    */
-  bool  canBeValidKey() const {
-    switch (getType()) {
-    case KindOfArray:  return false;
-    case KindOfObject: return false;
-    default:           return true;
-    }
+  bool canBeValidKey() const {
+    return !IS_ARRAY_TYPE(getType()) && getType() != KindOfObject;
   }
-  VarNR toKey   () const;
+  VarNR toKey() const;
   /* Creating a temporary Array, String, or Object with no ref-counting and
    * no type checking, use it only when we have checked the variant type and
    * we are sure the internal data will have a reference until the temporary
    * one gets out-of-scope.
    */
-  StrNR toStrNR () const {
+  StrNR toStrNR() const {
     return StrNR(getStringData());
   }
-  ArrNR toArrNR () const {
+  ArrNR toArrNR() const {
     return ArrNR(getArrayData());
   }
   ObjNR toObjNR() const {
@@ -1079,25 +1080,28 @@ private:
   }
   void checkRefCount() {
     assert(m_type != KindOfRef);
-    if (!IS_REFCOUNTED_TYPE(m_type)) return;
-    assert(varNrFlag() == NR_FLAG);
+    assert(IS_REFCOUNTED_TYPE(m_type) ? varNrFlag() == NR_FLAG : true);
+
     switch (m_type) {
-    case KindOfArray:
-      assert_refcount_realistic(m_data.parr->getCount());
-      return;
-    case KindOfString:
-      assert_refcount_realistic(m_data.pstr->getCount());
-      return;
-    case KindOfObject:
-      assert_refcount_realistic(m_data.pobj->getCount());
-      return;
-    case KindOfResource:
-      assert_refcount_realistic(m_data.pres->getCount());
-      return;
-    default:
-      break;
+      DT_UNCOUNTED_CASE:
+        return;
+      case KindOfString:
+        assert_refcount_realistic(m_data.pstr->getCount());
+        return;
+      case KindOfArray:
+        assert_refcount_realistic(m_data.parr->getCount());
+        return;
+      case KindOfObject:
+        assert_refcount_realistic(m_data.pobj->getCount());
+        return;
+      case KindOfResource:
+        assert_refcount_realistic(m_data.pres->getCount());
+        return;
+      case KindOfRef:
+      case KindOfClass:
+        break;
     }
-    assert(false);
+    not_reached();
   }
 };
 

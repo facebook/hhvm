@@ -15,7 +15,7 @@ open Utils
 open Typing_defs
 
 let compare_types x y =
-  let tenv = Typing_env.empty "" in
+  let tenv = Typing_env.empty Relative_path.default in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
 
@@ -45,7 +45,8 @@ let add_type env pos k type_ =
      * types part of the codebase at a time in worker threads. Fortunately we
      * don't actually need the whole env, so just keep the parts we do need for
      * typing, which *are* serializable. *)
-    {(Env.empty "") with Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
+    {(Env.empty Relative_path.default) with
+     Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
     pos,
     k,
     type_
@@ -67,7 +68,9 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _ -> ()
+    | _, (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+      | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+      | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
 
 let save_return env x arg = save_type Kreturn env x arg
@@ -141,7 +144,10 @@ let get_implements (_, x) =
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _ -> raise Exit
+        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+          | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+          | Tshape _) -> raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
@@ -158,7 +164,9 @@ and normalize_ = function
     when List.exists (function _, (Tany | Tunresolved []) -> true | _ -> false) tyl ->
       let tyl = List.filter begin function
         |  _, (Tany |  Tunresolved []) -> false
-        | _ -> true
+        | _, (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+          | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> true
       end tyl in
       normalize_ (Tunresolved tyl)
   | Tunresolved ((r, Tapply (x, [])) :: rl) ->
@@ -167,7 +175,10 @@ and normalize_ = function
        *)
       let rl = List.map begin function
         | _, Tapply (x, []) -> x
-        | _ -> raise Exit
+        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+          | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+          | Tshape _) -> raise Exit
       end rl in
       let x_imp = get_implements x in
       let set = List.fold_left begin fun x_imp x ->

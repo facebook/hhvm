@@ -22,6 +22,11 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_http_response_header("http_response_header");
+const StaticString s_php_errormsg("php_errormsg");
+
+//////////////////////////////////////////////////////////////////////
+
 uint32_t closure_num_use_vars(borrowed_ptr<const php::Func> f) {
   // Properties on the closure object are either use vars, or storage
   // for static locals.  The first N are the use vars.
@@ -30,6 +35,16 @@ uint32_t closure_num_use_vars(borrowed_ptr<const php::Func> f) {
 
 bool is_pseudomain(borrowed_ptr<const php::Func> f) {
   return borrow(f->unit->pseudomain) == f;
+}
+
+bool is_volatile_local(borrowed_ptr<const php::Func> func,
+                       borrowed_ptr<const php::Local> l) {
+  if (is_pseudomain(func)) return true;
+  // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
+  // changed through $GLOBALS), but for now we don't bother.
+  if (!l->name) return false;
+  return l->name->same(s_http_response_header.get()) ||
+         l->name->same(s_php_errormsg.get());
 }
 
 //////////////////////////////////////////////////////////////////////

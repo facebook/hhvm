@@ -400,37 +400,44 @@ void APCDetailedStats::addType(APCHandle* handle) {
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);
-  if (!IS_REFCOUNTED_TYPE(type)) {
-    m_uncounted->increment();
-    return;
-  }
+
   switch (type) {
-  case KindOfString:
-    if (handle->isUncounted()) {
-      m_uncString->increment();
-    } else {
-      m_apcString->increment();
-    }
-    return;
-  case KindOfArray:
-    if (handle->isUncounted()) {
-      m_uncArray->increment();
-    } else if (handle->isSerializedArray()) {
-      m_serArray->increment();
-    } else {
-      m_apcArray->increment();
-    }
-    return;
-  case KindOfObject:
-    if (handle->isSerializedObj()) {
-      m_serObject->increment();
-    } else {
-      m_apcObject->increment();
-    }
-    return;
-  default:
-    return;
+    DT_UNCOUNTED_CASE:
+      m_uncounted->increment();
+      return;
+
+    case KindOfString:
+      if (handle->isUncounted()) {
+        m_uncString->increment();
+      } else {
+        m_apcString->increment();
+      }
+      return;
+
+    case KindOfArray:
+      if (handle->isUncounted()) {
+        m_uncArray->increment();
+      } else if (handle->isSerializedArray()) {
+        m_serArray->increment();
+      } else {
+        m_apcArray->increment();
+      }
+      return;
+
+    case KindOfObject:
+      if (handle->isSerializedObj()) {
+        m_serObject->increment();
+      } else {
+        m_apcObject->increment();
+      }
+      return;
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void APCDetailedStats::removeType(APCHandle* handle) {
@@ -439,37 +446,44 @@ void APCDetailedStats::removeType(APCHandle* handle) {
          type == KindOfString ||
          type == KindOfArray ||
          type == KindOfObject);
-  if (!IS_REFCOUNTED_TYPE(type)) {
-    m_uncounted->decrement();
-    return;
-  }
+
   switch (type) {
-  case KindOfString:
-    if (handle->isUncounted()) {
-      m_uncString->decrement();
-    } else {
-      m_apcString->decrement();
-    }
-    return;
-  case KindOfArray:
-    if (handle->isUncounted()) {
-      m_uncArray->decrement();
-    } else if (handle->isSerializedArray()) {
-      m_serArray->decrement();
-    } else {
-      m_apcArray->decrement();
-    }
-    return;
-  case KindOfObject:
-    if (handle->isSerializedObj()) {
-      m_serObject->decrement();
-    } else {
-      m_apcObject->decrement();
-    }
-    return;
-  default:
-    return;
+    DT_UNCOUNTED_CASE:
+      m_uncounted->decrement();
+      return;
+
+    case KindOfString:
+      if (handle->isUncounted()) {
+        m_uncString->decrement();
+      } else {
+        m_apcString->decrement();
+      }
+      return;
+
+    case KindOfArray:
+      if (handle->isUncounted()) {
+        m_uncArray->decrement();
+      } else if (handle->isSerializedArray()) {
+        m_serArray->decrement();
+      } else {
+        m_apcArray->decrement();
+      }
+      return;
+
+    case KindOfObject:
+      if (handle->isSerializedObj()) {
+        m_serObject->decrement();
+      } else {
+        m_apcObject->decrement();
+      }
+      return;
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

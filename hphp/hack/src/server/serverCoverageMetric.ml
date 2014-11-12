@@ -16,7 +16,7 @@ module SE = ServerEnv
 (* Count the number of expressions of each kind of Coverage_level. *)
 let count_exprs fn pos_ty_m =
   let pos_level_m = CL.mk_level_map (Some fn) pos_ty_m in
-  PMap.fold (fun _ lvl c -> CL.incr_counter lvl c)
+  Pos.Map.fold (fun _ lvl c -> CL.incr_counter lvl c)
             pos_level_m CL.empty_counter
 
 (* Calculate the percentage of code we have covered as a ratio of typed
@@ -43,10 +43,10 @@ let get_coverage neutral fnl =
     match Parser_heap.ParserHeap.get fn with
     | None -> None
     | Some defs ->
-        assert (!(Typing_defs.type_acc) = PMap.empty);
+        assert (!(Typing_defs.type_acc) = Pos.Map.empty);
         List.iter ServerIdeUtils.check_def defs;
         let counts = count_exprs fn !Typing_defs.type_acc in
-        Typing_defs.type_acc := PMap.empty;
+        Typing_defs.type_acc := Pos.Map.empty;
         Some (fn, counts)
   end fnl |> cat_opts in
   Typing_defs.accumulate_types := false;
@@ -110,7 +110,11 @@ let relativize root path =
 let go_ fn genv =
   let path = Path.mk_path fn in
   let root = Path.parent path in
-  let next_files = Find.make_next_files_php path in
+  let module RP = Relative_path in
+  let next_files = compose
+    (rev_rev_map (RP.create RP.Root))
+    (Find.make_next_files_php path)
+  in
   let annotate_percents ctr = {
     CL.counts = ctr;
     CL.percentage = calc_percentage ctr;
@@ -124,7 +128,7 @@ let go_ fn genv =
       ~next:next_files
   in
   let relativize_list = List.map (fun (p, c) ->
-    (relativize root p |> unsafe_opt, c)) in
+    (relativize root (Relative_path.to_absolute p) |> unsafe_opt, c)) in
   let result = List.map relativize_list result in
   match List.fold_left mk_trie None result with
   | None -> None

@@ -153,15 +153,6 @@ Scanner::~Scanner() {
   }
 }
 
-void Scanner::setHashBang(const char *rawText, int rawLeng, int type) {
-  if (m_type & ReturnAllTokens) {
-    setToken(rawText, rawLeng);
-  } else {
-    m_token->setText("", 0);
-    incLoc(rawText, rawLeng, type);
-  }
-}
-
 // scanToken() will always get a new token from the frontier
 // regardless of whether there are tokens in the lookahead store
 int Scanner::scanToken(ScannerToken &t, Location &l) {
@@ -733,10 +724,11 @@ std::string Scanner::escape(const char *str, int len, char quote_type) const {
             case '\\': output += '\\'; break;
             case '$':  output += '$';  break;
             case '"':
+            case '`':
               if (str[i] != quote_type) {
                 output += '\\';
               }
-              output += '"';
+              output += str[i];
               break;
             case 'x':
             case 'X': {

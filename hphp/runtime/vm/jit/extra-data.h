@@ -152,7 +152,7 @@ struct IterData : IRExtraData {
     : iterId(iter), keyId(key), valId(val)
   {}
   std::string show() const {
-    return folly::format("{}::{}::{}", iterId, valId, valId).str();
+    return folly::format("{}::{}::{}", iterId, keyId, valId).str();
   }
 
   uint32_t iterId;
@@ -856,6 +856,7 @@ X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
 X(GuardLoc,                     LocalId);
+X(HintLocInner,                 LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
@@ -893,6 +894,7 @@ X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
+X(HintStkInner,                 StackOffset);
 X(CheckStk,                     StackOffset);
 X(CastStk,                      StackOffset);
 X(CastStkIntToDbl,              StackOffset);

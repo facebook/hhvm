@@ -12,19 +12,18 @@ open Utils
 
 module Make(S : SearchUtils.Searchable) = struct
 
-  module SUtils = SearchUtils.Make(S)
-  open SUtils
+  open SearchUtils
 
   (* Shared memory for workers to put lists of pairs of keys and results
     * of our index. Indexed on file name. Cached because we read from here
     * every time the user searches *)
-  module SearchUpdates = SharedMem.WithCache(struct
-    type t = (string * term) list
+  module SearchUpdates = SharedMem.WithCache (Relative_path.S) (struct
+    type t = (string * (Pos.t, S.t) term) list
     let prefix = Prefix.make()
   end)
   (* Maps file name to a list of keys that the file has results for *)
   (* This is only read once per update, so cache gives us no advantage *)
-  module SearchKeys = SharedMem.NoCache(struct
+  module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
     type t = string list
     let prefix = Prefix.make()
   end)
@@ -72,23 +71,33 @@ module Make(S : SearchUtils.Searchable) = struct
     (* what keys a specific file currently has results for *)
     (* 10000 is a number that seemed reasonable for the amount of files
      * in a codebase *)
-    let removal_index = Hashtbl.create 1000
+    let removal_index = ref (Hashtbl.create 1000)
 
     (* Hashtable the names of files with results for a string key *)
-    let main_index = Hashtbl.create 1000
+    let main_index = ref (Hashtbl.create 1000)
 
     (* trie used to store ONLY KEYS to give a typeahead feeling for searching *)
-    let trie = Trie.create()
+    let trie = ref (Trie.create ())
+
+    let marshal chan =
+      Marshal.to_channel chan !removal_index [];
+      Marshal.to_channel chan !main_index [];
+      Marshal.to_channel chan !trie []
+
+    let unmarshal chan =
+      removal_index := Marshal.from_channel chan;
+      main_index := Marshal.from_channel chan;
+      trie := Marshal.from_channel chan
 
     let lookup str =
      try
-       Hashtbl.find main_index str
+       Hashtbl.find !main_index str
      with Not_found ->
        []
 
     let replace key value =
-      if value = [] then Hashtbl.remove main_index key
-      else Hashtbl.replace main_index key value
+      if value = [] then Hashtbl.remove !main_index key
+      else Hashtbl.replace !main_index key value
 
     (* Insert the selected filename into the hashtable, and the trie
      * Takes in a set of keys that are currently empty that we plan to delete
@@ -100,7 +109,7 @@ module Make(S : SearchUtils.Searchable) = struct
       then begin
         (* We don't actually store useful stuff in the trie. Just
          * whether a key exists or not *)
-        Trie.add trie key ()
+        Trie.add !trie key ()
           ~if_exist: (fun _ _ -> ()) (* this can probably throw an exception *)
           ~transform: (fun _ -> ())
       end;
@@ -121,7 +130,7 @@ module Make(S : SearchUtils.Searchable) = struct
 
     let process_file fn =
       let old_keys =
-        try Hashtbl.find removal_index fn
+        try Hashtbl.find !removal_index fn
         with Not_found ->
           [] (* This will happen when we haven't seen this file before *)
       in
@@ -140,14 +149,14 @@ module Make(S : SearchUtils.Searchable) = struct
       let to_remove = SSet.diff old_keys_set new_keys_set in
 
       let removed_keys = SSet.fold (remove_fn fn) to_remove SSet.empty in
-      Hashtbl.replace removal_index fn new_keys;
+      Hashtbl.replace !removal_index fn new_keys;
       let removed_keys = SSet.fold (insert_fn fn) to_add removed_keys in
       (* removed keys now contains any keys that we removed and didn't
        * add again for this file change. So we remove from the trie *)
-      SSet.iter (Trie.remove trie) removed_keys
+      SSet.iter (Trie.remove !trie) removed_keys
 
     let index_files fns =
-      SSet.iter process_file fns
+      Relative_path.Set.iter process_file fns
 
     (* Note: the score should be able to compare to the scoring in
      * Fuzzy so that the results can be merged and the ordering still
@@ -171,21 +180,21 @@ module Make(S : SearchUtils.Searchable) = struct
       let short_key = simplify_key str in
       (* get all the keys beneath short_key in the trie *)
       let keys =
-        try Trie.find_prefix_limit 25 trie short_key (fun k _ -> k)
+        try Trie.find_prefix_limit 25 !trie short_key (fun k _ -> k)
         with Not_found -> []
       in
       (* Get set of filenames that contain results for those keys *)
       let files = List.fold_left begin fun acc key ->
-        let filenames = Hashtbl.find main_index key in
+        let filenames = Hashtbl.find !main_index key in
         List.fold_left begin fun acc fn ->
-          SSet.add fn acc
+          Relative_path.Set.add fn acc
         end acc filenames
-      end SSet.empty keys in
+      end Relative_path.Set.empty keys in
       let results = ref [] in
       (* for every file, look in shared memory for all the results the file
        * contains. anything where the key starts with the full search
        * term is a match *)
-      SSet.iter begin fun fn ->
+      Relative_path.Set.iter begin fun fn ->
         let defs =
           try SearchUpdates.find_unsafe fn
           with Not_found -> []

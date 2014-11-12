@@ -298,7 +298,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, const char *mode, int
     MAKE_STD_ZVAL(stream->wrapperdata);
     Z_TYPE_P(stream->wrapperdata) = IS_ARRAY;
     Z_ARRVAL_P(stream->wrapperdata) = HPHP::ProxyArray::Make(
-      urlFile->getWrapperMetaData().detach()
+      urlFile->getWrapperMetaData().getArrayData()
     );
   } else {
     stream->wrapperdata = nullptr;

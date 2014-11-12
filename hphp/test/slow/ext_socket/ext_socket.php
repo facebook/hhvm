@@ -116,6 +116,10 @@ $port = pfsockopen_random_port($fsock, "udp://[0:0:0:0:0:0:0:1]");
 var_dump($port != 0);
 var_dump(fwrite($fsock, "foo") > 0);
 
-$fsock2 = pfsockopen("udp://[::1]", $port);
+$errnum = null;
+$errstr = null;
+$fsock2 = pfsockopen("udp://[::1]", $port, $errnum, $errstr);
 var_dump($fsock !== false);
 var_dump($fsock != $fsock2);
+var_dump($errnum);
+var_dump($errstr);

@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/vm/native-data.h"
-
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -401,6 +401,12 @@ void MemoryManager::sweep() {
 }
 
 void MemoryManager::resetAllocator() {
+  UNUSED auto napcs = m_apc_arrays.size();
+  while (!m_apc_arrays.empty()) {
+    auto a = m_apc_arrays.back();
+    m_apc_arrays.pop_back();
+    a->sweep();
+  }
   UNUSED auto nstrings = StringData::sweepAll();
   UNUSED auto nslabs = m_slabs.size();
 
@@ -428,24 +434,8 @@ void MemoryManager::resetAllocator() {
   }
 
   resetCouldOOM();
-  TRACE(1, "reset: strings %u slabs %lu big %lu\n", nstrings, nslabs, nbig);
-}
-
-void MemoryManager::iterate(iterate_callback callback, void* user_data) {
-  // Iterate smart alloc slabs
-  for (auto slab : m_slabs) {
-    callback(slab, kSlabSize, false, user_data);
-  }
-
-  // Iterate large alloc slabs (Size N/A for now)
-  for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
-    next = n->next;
-    size_t size = 16;
-#ifdef USE_JEMALLOC
-    size = malloc_usable_size(n) - sizeof(BigNode);
-#endif
-    callback(n + 1, size, true, user_data);
-  }
+  TRACE(1, "reset: apc-arrays %lu strings %u slabs %lu big %lu\n",
+        napcs, nstrings, nslabs, nbig);
 }
 
 /*
@@ -625,10 +615,10 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   }
   for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
        p = (void*)(uintptr_t(p) - nbytes)) {
-    m_freelists[index].push(
-        debugPreFree(debugPostAllocate(p, debugRemoveExtra(nbytes),
-                                       debugRemoveExtra(nbytes)),
-                     debugRemoveExtra(nbytes), debugRemoveExtra(nbytes)));
+    auto usable = debugRemoveExtra(nbytes);
+    auto ptr = debugPostAllocate(p, usable, usable);
+    auto p2 = debugPreFree(ptr, usable, usable);
+    m_freelists[index].push(p2);
   }
   return ptr;
 }
@@ -754,12 +744,28 @@ void MemoryManager::addNativeObject(NativeNode* node) {
 }
 
 void MemoryManager::removeNativeObject(NativeNode* node) {
+  assert(node->sweep_index < m_natives.size());
   assert(m_natives[node->sweep_index] == node);
   auto index = node->sweep_index;
   auto last = m_natives.back();
-  m_natives.pop_back();
   m_natives[index] = last;
+  m_natives.pop_back();
   last->sweep_index = index;
+}
+
+void MemoryManager::addApcArray(APCLocalArray* a) {
+  a->m_sweep_index = m_apc_arrays.size();
+  m_apc_arrays.push_back(a);
+}
+
+void MemoryManager::removeApcArray(APCLocalArray* a) {
+  assert(a->m_sweep_index < m_apc_arrays.size());
+  assert(m_apc_arrays[a->m_sweep_index] == a);
+  auto index = a->m_sweep_index;
+  auto last = m_apc_arrays.back();
+  m_apc_arrays[index] = last;
+  m_apc_arrays.pop_back();
+  last->m_sweep_index = index;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -773,7 +779,6 @@ void* MemoryManager::debugPostAllocate(void* p,
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
-  header->padding = 0;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
 }
 

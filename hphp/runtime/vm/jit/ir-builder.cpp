@@ -88,11 +88,15 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 }
 
 SSATmp* IRBuilder::genPtrToInitNull() {
-  return cns(Type::cns(&init_null_variant, Type::PtrToInitNull));
+  // Nothing is allowed to write anything to the init null variant, so this
+  // inner type is always true.
+  return cns(Type::cns(&init_null_variant, Type::PtrToMembInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
-  return cns(Type::cns(&null_variant, Type::PtrToUninit));
+  // Nothing can write to the uninit null variant either, so the inner type
+  // here is also always true.
+  return cns(Type::cns(&null_variant, Type::PtrToMembUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -101,12 +105,18 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocAddr, LdLocPseudoMain)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocPseudoMain)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
         m_constraints.prevTypes[inst] = localType(locId, DataTypeGeneric);
       }
+    }
+
+    // And a LdRef automatically constrains the value to be a boxed cell,
+    // specifically.
+    if (inst->is(LdRef)) {
+      constrainValue(inst->src(0), DataTypeSpecific);
     }
   }
 
@@ -183,9 +193,10 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst,
 
   if (oldType.isBoxed() && typeParam.isBoxed() &&
       (oldType.not(typeParam) || typeParam < oldType)) {
-    /* This CheckType serves to update the inner type hint for a boxed value,
-     * which requires no runtime work. This depends on the type being boxed,
-     * and constraining it with DataTypeCountness will do it. */
+    // TODO(#2939547): this used to update inner type predictions, but now it's
+    // really just serving to change BoxedCell into BoxedInitCell in some
+    // cases.  We should make sure all boxed values are BoxedInitCell subtypes
+    // and then remove this code.
     return constrainBoxed(typeParam);
   }
 
@@ -248,6 +259,16 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
       constrainLocal(locId, DataTypeCountness, "preOptimizeCheckLoc");
       return gen(AssertLoc, newType, LocalId(locId), inst->src(0));
     });
+}
+
+SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
+  auto const locId = inst->extra<HintLocInner>()->locId;
+  if (!localType(locId, DataTypeGeneric).subtypeOf(Type::BoxedCell) ||
+      predictedInnerType(locId).box() <= inst->typeParam()) {
+    inst->convertToNop();
+    return nullptr;
+  }
+  return nullptr;
 }
 
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
@@ -484,14 +505,6 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLocAddr>()->locId;
-  auto const type = localType(locId, DataTypeGeneric);
-  assert(inst->typeParam().deref() >= type);
-  inst->setTypeParam(std::min(type.ptr(), inst->typeParam()));
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
   // Guard relaxation might change the current local type, so don't try to
   // change to StLocNT until after relaxation happens.
@@ -537,6 +550,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(CheckType);
     X(CheckStk);
     X(CheckLoc);
+    X(HintLocInner);
     X(AssertLoc);
     X(AssertStk);
     X(AssertType);
@@ -546,7 +560,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefLoc);
     X(LdLoc);
     X(LdLocPseudoMain);
-    X(LdLocAddr);
     X(StLoc);
   default:
     break;
@@ -808,8 +821,6 @@ bool IRBuilder::constrainGuard(const IRInstruction* inst, TypeConstraint tc) {
  */
 bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   if (!val) {
     ITRACE(1, "constrainValue(nullptr, {}), bailing\n", tc);
@@ -820,11 +831,11 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocAddr, LdLocPseudoMain)) {
-    // We've hit a LdLoc, LdLocAddr, or LdLocPseudoMain. If the value's type
-    // source is non-null and not a FramePtr, it's a real value that was killed
-    // by a Call. The value won't be live but it's ok to use it to track down
-    // the guard.
+  if (inst->is(LdLoc, LdLocPseudoMain)) {
+    // We've hit a LdLoc, or LdLocPseudoMain. If the value's type source is
+    // non-null and not a FramePtr, it's a real value that was killed by a
+    // Call. The value won't be live but it's ok to use it to track down the
+    // guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
                        "No typeSrcs found for {}\n\n{}", *inst, m_unit);
@@ -843,7 +854,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       }
     }
     return changed;
-  } else if (inst->is(LdStack, LdStackAddr)) {
+  } else if (inst->is(LdStack)) {
     return constrainStack(inst->src(0), inst->extra<StackOffset>()->offset, tc);
   } else if (inst->is(AssertType)) {
     // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
@@ -886,30 +897,6 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
       changed = constrainValue(inst->src(0), newTc) || changed;
     }
     return changed;
-  } else if (inst->is(StRef)) {
-    // StRef requires that src(0) is boxed so we're relying on callers to
-    // appropriately constrain the values they pass to it. Any innerCat in tc
-    // should be applied to the value being stored.
-
-    tc.category = tc.innerCat;
-    tc.innerCat = DataTypeGeneric;
-    return constrainValue(inst->src(1), tc);
-  } else if (inst->is(Box, BoxPtr, UnboxPtr)) {
-    // All Box/Unbox opcodes are similar to StRef/LdRef in some situations and
-    // Mov in others (determined at runtime), so we need to constrain both
-    // outer and inner.
-
-    auto maxCat = std::max(tc.category, tc.innerCat);
-    tc.category = maxCat;
-    tc.innerCat = maxCat;
-    return constrainValue(inst->src(0), tc);
-  } else if (inst->is(LdRef)) {
-    // Constrain the inner type of the box with tc, using DataTypeCountness for
-    // the outer constraint to preserve the fact that it's a box.
-
-    tc.innerCat = tc.category;
-    tc.category = DataTypeCountness;
-    return constrainValue(inst->src(0), tc);
   } else if (inst->isPassthrough()) {
     return constrainValue(inst->getPassthroughValue(), tc);
   } else if (inst->is(DefLabel)) {
@@ -931,7 +918,6 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     ITRACE(2, "value is new in this trace, bailing\n");
     return false;
   }
-  // TODO(t2598894): Should be able to do something with LdMem<T> here
 }
 
 bool IRBuilder::constrainLocal(uint32_t locId,
@@ -950,8 +936,6 @@ bool IRBuilder::constrainLocal(uint32_t locId,
                                TypeConstraint tc,
                                const std::string& why) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainLocal({}, {}, {}, {})\n",
          locId, show(typeSrc), tc, why);
@@ -1026,8 +1010,6 @@ bool IRBuilder::constrainStack(int32_t idx, TypeConstraint tc) {
 bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
                                TypeConstraint tc) {
   if (!shouldConstrainGuards() || tc.empty()) return false;
-  always_assert(IMPLIES(tc.innerCat > DataTypeGeneric,
-                        tc.category >= DataTypeCountness));
 
   ITRACE(1, "constrainStack({}, {}, {})\n", *sp->inst(), idx, tc);
   Indent _i;
@@ -1044,7 +1026,11 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
   // to constrain.
   if (!typeFitsConstraint(stackInfo.knownType, tc)) return false;
 
-  IRInstruction* typeSrc = stackInfo.typeSrc;
+  auto const typeSrc = stackInfo.typeSrc;
+  if (!typeSrc) {
+    ITRACE(1, "  no typesrc\n");
+    return false;
+  }
   if (stackInfo.value) {
     ITRACE(1, "value = {}\n", *stackInfo.value->inst());
     return constrainValue(stackInfo.value, tc);
@@ -1091,6 +1077,10 @@ bool IRBuilder::constrainStack(SSATmp* sp, int32_t idx,
 Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
   constrainLocal(id, tc, "localType");
   return m_state.localType(id);
+}
+
+Type IRBuilder::predictedInnerType(uint32_t id) {
+  return m_state.predictedInnerType(id);
 }
 
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
@@ -1255,7 +1245,7 @@ repeat:
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
-                           bool unprocessedPred) {
+                           bool isLoopHeader) {
   assert(block);
   assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
@@ -1277,8 +1267,8 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, nullptr, unprocessedPred);
-  insertPhis(unprocessedPred);
+  m_state.startBlock(m_curBlock, marker, nullptr, isLoopHeader);
+  insertPhis(isLoopHeader);
   always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),

@@ -57,10 +57,10 @@ module GConst = struct
   let prefix = Prefix.make()
 end
 
-module Funs = SharedMem.WithCache(Fun)
-module Classes = SharedMem.WithCache(Class)
-module Typedefs = SharedMem.WithCache(Typedef)
-module GConsts = SharedMem.WithCache(GConst)
+module Funs = SharedMem.WithCache (String) (Fun)
+module Classes = SharedMem.WithCache (String) (Class)
+module Typedefs = SharedMem.WithCache (String) (Typedef)
+module GConsts = SharedMem.WithCache (String) (GConst)
 
 type funs    = Funs.t
 type classes = Classes.t
@@ -94,7 +94,7 @@ and genv = {
   fun_kind : Nast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
-  file    : string;
+  file    : Relative_path.t;
 }
 
 (* An anonymous function

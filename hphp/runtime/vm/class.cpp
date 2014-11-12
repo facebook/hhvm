@@ -1335,6 +1335,28 @@ inline void raiseIncompat(const PreClass* implementor,
               imeth->cls()->preClass()->name()->data(), name);
 }
 
+static bool checkTypeConstraint(const PreClass* implCls, const Class* iface,
+                                TypeConstraint tc, TypeConstraint itc) {
+  const StringData* iSelf;
+  const StringData* iParent;
+  if (isTrait(iface)) {
+    iSelf = implCls->name();
+    iParent = implCls->parent();
+  } else {
+    iSelf = iface->name();
+    iParent = iface->parent() ? iface->parent()->name() : nullptr;
+  }
+
+  if (tc.isExtended() || itc.isExtended()) return true;
+
+  if (tc.isSelf())     tc = TypeConstraint { implCls->name(), tc.flags() };
+  if (tc.isParent())   tc = TypeConstraint { implCls->parent(), tc.flags() };
+  if (itc.isSelf())   itc = TypeConstraint { iSelf, itc.flags() };
+  if (itc.isParent()) itc = TypeConstraint { iParent, itc.flags() };
+
+  return tc.compat(itc);
+}
+
 // Check compatibility vs interface and abstract declarations
 void checkDeclarationCompat(const PreClass* preClass,
                             const Func* func, const Func* imeth) {
@@ -1366,9 +1388,11 @@ void checkDeclarationCompat(const PreClass* preClass,
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       auto const& ip = iparams[i];
       if (!relaxedCheck) {
-        if (!p.typeConstraint.compat(ip.typeConstraint)
-            && !ip.typeConstraint.isTypeVar()) {
-          raiseIncompat(preClass, imeth);
+        if (!checkTypeConstraint(preClass, imeth->cls(),
+                                 p.typeConstraint, ip.typeConstraint)) {
+          if (!ip.typeConstraint.isTypeVar()) {
+            raiseIncompat(preClass, imeth);
+          }
         }
       }
       if (!iparams[i].hasDefaultValue()) {
@@ -1393,7 +1417,8 @@ void checkDeclarationCompat(const PreClass* preClass,
       if (!ivarConstraint.isTypeVar()) {
         for (; i < func->numParams(); ++i) {
           auto const& p = params[i];
-          if (!p.typeConstraint.compat(ivarConstraint)) {
+          if (!checkTypeConstraint(preClass, imeth->cls(),
+                                   p.typeConstraint, ivarConstraint)) {
             raiseIncompat(preClass, imeth);
           }
         }
@@ -2049,16 +2074,29 @@ void Class::setProperties() {
 
 bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
   if (tv1.m_type != tv2.m_type) return false;
+
   switch (tv1.m_type) {
-    case KindOfNull: return true;
+    case KindOfNull:
+      return true;
+
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
     case KindOfStaticString:
     case KindOfString:
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
-    default: return false;
+
+    case KindOfUninit:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+      return false;
+
+    case KindOfClass:
+      break;
   }
+  not_reached();
 }
 
 void Class::importTraitInstanceProp(Class*      trait,

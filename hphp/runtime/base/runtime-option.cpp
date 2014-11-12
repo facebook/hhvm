@@ -75,6 +75,7 @@ bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableEmitSwitch = true;
 bool RuntimeOption::EnableEmitterStats = true;
+bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 int RuntimeOption::MaxUserFunctionId = (2 * 65536);
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -129,7 +130,8 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
-std::string RuntimeOption::ServerPrimaryIP;
+std::string RuntimeOption::ServerPrimaryIPv4;
+std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
 int RuntimeOption::ServerPortFd = -1;
 int RuntimeOption::ServerBacklog = 128;
@@ -432,6 +434,11 @@ static inline bool controlFlowDefault() {
 #else
   return false;
 #endif
+}
+
+static bool refcountOptsDefault() {
+  // TODO(#5216936)
+  return !RuntimeOption::EvalHHIRBytecodeControlFlow;
 }
 
 static inline bool evalJitDefault() {
@@ -907,6 +914,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(EnableEmitSwitch, ini, eval["EnableEmitSwitch"], true);
     Config::Bind(EnableEmitterStats, ini, eval["EnableEmitterStats"],
                  EnableEmitterStats);
+    Config::Bind(EnableIntrinsicsExtension, ini,
+                 eval["EnableIntrinsicsExtension"], EnableIntrinsicsExtension);
     Config::Bind(RecordCodeCoverage, ini, eval["RecordCodeCoverage"]);
     if (EvalJit && RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "
@@ -1023,7 +1032,13 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerType, ini, server["Type"], ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
-    ServerPrimaryIP = GetPrimaryIP();
+    ServerPrimaryIPv4 = GetPrimaryIPv4();
+    ServerPrimaryIPv6 = GetPrimaryIPv6();
+    if (ServerPrimaryIPv4.empty() && ServerPrimaryIPv6.empty()) {
+      throw std::runtime_error("Unable to resolve the server's "
+          "IPv4 or IPv6 address");
+    }
+
     Config::Bind(ServerPort, ini, server["Port"], 80);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);
     Config::Bind(ServerConnectionLimit, ini, server["ConnectionLimit"], 0);
@@ -1433,7 +1448,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   }
   {
     Hdf mail = config["Mail"];
-    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "sendmail -t -i");
+    Config::Bind(SendmailPath, ini, mail["SendmailPath"], "/usr/lib/sendmail -t -i");
     Config::Bind(MailForceExtraParameters, ini, mail["ForceExtraParameters"]);
   }
   {
@@ -1520,6 +1535,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   // Paths and Directories
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                    "doc_root", &RuntimeOption::SourceRoot);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                   "sendmail_path", &RuntimeOption::SendmailPath);
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ONLY,

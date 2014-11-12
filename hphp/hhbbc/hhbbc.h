@@ -233,6 +233,17 @@ struct Options {
   bool HardTypeHints = true;
 
   /*
+   * Whether or not to assume that VerifyRetType* instructions must
+   * throw if the parameter does not match the associated type
+   * constraint.
+   *
+   * This changes program behavior because return type hint validation
+   * is normally a recoverable fatal.  When this option is on, hhvm will
+   * fatal if the error handler tries to recover in this situation.
+   */
+  bool HardReturnTypeHints = false;
+
+  /*
    * If true, we'll try to infer the types of declared private class
    * properties.
    *

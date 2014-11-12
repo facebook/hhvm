@@ -32,6 +32,7 @@
 #include <poll.h>
 
 #include "folly/String.h"
+#include "folly/SocketAddress.h"
 
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/socket.h"
@@ -63,23 +64,41 @@ static void check_socket_parameters(int &domain, int &type) {
   }
 }
 
+const StaticString
+  s_2colons("::"),
+  s_0_0_0_0("0.0.0.0");
+
 static bool get_sockaddr(sockaddr *sa, socklen_t salen,
                          Variant &address, Variant &port) {
   switch (sa->sa_family) {
   case AF_INET6:
     {
       struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
-      char addr6[INET6_ADDRSTRLEN+1];
-      inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-      address = String(addr6, CopyString);
-      port = htons(sin6->sin6_port);
+      try {
+        folly::SocketAddress addr;
+        addr.setFromSockaddr(sin6);
+
+        address = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
+      } catch (...) {
+        address = s_2colons;
+        port = 0;
+      }
     }
     return true;
   case AF_INET:
     {
       struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-      address = String(safe_inet_ntoa(sin->sin_addr));
-      port = htons(sin->sin_port);
+      try {
+        folly::SocketAddress addr;
+        addr.setFromSockaddr(sin);
+
+        address = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
+      } catch (...) {
+        address = s_0_0_0_0;
+        port = 0;
+      }
     }
     return true;
   case AF_UNIX:
@@ -901,6 +920,8 @@ Variant socket_server_impl(const HostURL &hosturl,
                            VRefParam errstr /* = null */) {
   Resource ret;
   Socket *sock = NULL;
+  errnum = 0;
+  errstr = empty_string();
   if (!create_new_socket(hosturl, errnum, errstr, ret, sock)) {
     return false;
   }
@@ -1113,10 +1134,6 @@ Variant HHVM_FUNCTION(socket_recv,
   return retval;
 }
 
-const StaticString
-  s_2colons("::"),
-  s_0_0_0_0("0.0.0.0");
-
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
                       VRefParam buf,
@@ -1164,6 +1181,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       struct sockaddr_in sin;
       slen = sizeof(sin);
       memset(&sin, 0, slen);
+      sin.sin_family = AF_INET; // recvfrom doesn't fill this in
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin, (socklen_t *)&slen);
@@ -1175,11 +1193,16 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       recv_buf[retval] = 0;
       buf = String(recv_buf, retval, AttachString);
 
-      name = String(safe_inet_ntoa(sin.sin_addr));
-      if (name.toString().empty()) {
+      try {
+        folly::SocketAddress addr;
+        addr.setFromSockaddr(&sin);
+
+        name = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
+      } catch (...) {
         name = s_0_0_0_0;
+        port = 0;
       }
-      port = ntohs(sin.sin_port);
     }
     break;
   case AF_INET6:
@@ -1192,6 +1215,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       struct sockaddr_in6 sin6;
       slen = sizeof(sin6);
       memset(&sin6, 0, slen);
+      sin6.sin6_family = AF_INET6; // recvfrom doesn't fill this in
 
       retval = recvfrom(sock->fd(), recv_buf, len, flags,
                         (struct sockaddr *)&sin6, (socklen_t *)&slen);
@@ -1201,18 +1225,19 @@ Variant HHVM_FUNCTION(socket_recvfrom,
         return false;
       }
 
-      char addr6[INET6_ADDRSTRLEN];
-      const char* succ =
-        inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
-
       recv_buf[retval] = 0;
       buf = String(recv_buf, retval, AttachString);
-      if (succ) {
-        name = String(addr6, CopyString);
-      } else {
+
+      try {
+        folly::SocketAddress addr;
+        addr.setFromSockaddr(&sin6);
+
+        name = String(addr.getAddressStr(), CopyString);
+        port = addr.getPort();
+      } catch (...) {
         name = s_2colons;
+        port = 0;
       }
-      port = ntohs(sin6.sin6_port);
     }
     break;
   default:
@@ -1287,7 +1312,8 @@ void HHVM_FUNCTION(socket_clear_error,
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
-
+  errnum = 0;
+  errstr = empty_string();
   std::string key;
   if (persistent) {
     key = hosturl.getHostURL() + ":" +

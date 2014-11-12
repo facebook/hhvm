@@ -15,16 +15,18 @@ from operator import not_
 
 verbose = False
 
-def run_typechecker(files, hh_single_type_check, hh_flags):
+def run_typechecker(files, hh_single_type_check):
     """
     Generate all the .out files.
     """
     def run(f):
         with open(f + '.out', 'w') as outfile:
-            cmd = [hh_single_type_check, f] + hh_flags
+            test_dir, test_name = os.path.split(f)
+            hh_flags = get_hh_flags(test_dir)
+            cmd = [hh_single_type_check, test_name] + hh_flags
             if verbose:
                 print('Executing', ' '.join(cmd))
-            subprocess.call(cmd, stdout=outfile, stderr=outfile)
+            subprocess.call(cmd, stdout=outfile, stderr=outfile, cwd=test_dir)
 
     executor = ThreadPoolExecutor(max_workers=48)
     futures = [executor.submit(run, f) for f in files]
@@ -69,20 +71,33 @@ def print_file(fname):
     with open(fname) as f:
         print(f.read())
 
-def get_hh_flags():
-    if not os.path.isfile('HH_FLAGS'):
+def get_hh_flags(test_dir):
+    path = os.path.join(test_dir, 'HH_FLAGS')
+    if not os.path.isfile(path):
         if verbose:
             print("No HH_FLAGS file found")
         return []
-    with open('HH_FLAGS') as f:
+    with open(path) as f:
         return f.read().strip().split(' ')
+
+def list_test_files(root):
+    if os.path.isfile(root):
+        return [root] if root.endswith('.php') else []
+    elif os.path.isdir(root):
+        result = []
+        for child in os.listdir(root):
+            if child != 'disabled':
+                result.extend(list_test_files(os.path.join(root, child)))
+        return result
+    else:
+        raise Exception('Could not find test file or directory at %s' %
+            args.test_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
             'test_path',
-            help='A file or a directory. '
-                 'Note: We do not recurse into subdirectories.')
+            help='A file or a directory. ')
     parser.add_argument('--hh_single_type_check',
         type=os.path.abspath,
         default=os.path.abspath(os.path.join(
@@ -101,19 +116,10 @@ if __name__ == '__main__':
         raise Exception('Could not find hh_single_typecheck at %s' %
             args.hh_single_type_check)
 
-    if os.path.isfile(args.test_path):
-        test_dir, test_file = os.path.split(args.test_path)
-        files = [test_file]
-    elif os.path.isdir(args.test_path):
-        test_dir = args.test_path
-        files = list(map(os.path.basename, glob('%s/*.php' % test_dir)))
-    else:
-        raise Exception('Could not find test file or directory at %s' %
-            args.test_path)
+    files = list_test_files(args.test_path)
 
     # The .exp files that describe expected error output hardcode the path of
     # the source files, so we chdir to ensure that they match.
-    os.chdir(test_dir)
-    run_typechecker(files, args.hh_single_type_check, get_hh_flags())
+    run_typechecker(files, args.hh_single_type_check)
     if not check_results(files):
         sys.exit(1)

@@ -403,6 +403,7 @@ Resource PageletServer::TaskStart(
     }
 
     s_dispatcher->enqueue(job);
+    g_context->incrPageletTasksStarted();
     return ret;
   }
   return Resource();

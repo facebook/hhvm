@@ -187,21 +187,33 @@ void callFunc(const Func* func, void *ctx,
       ret.m_data.num =
         callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count) & 1;
       return;
+
     case KindOfInt64:
       ret.m_data.num =
         callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
       return;
+
     case KindOfDouble:
       ret.m_data.dbl =
         callFuncDoubleImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
       return;
-    default:
+
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
       assert(isBuiltinByRef(ret.m_type));
       callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
       if (ret.m_data.num == 0) {
         ret.m_type = KindOfNull;
       }
       return;
+
+    case KindOfUninit:
+    case KindOfClass:
+      break;
   }
 
   not_reached();
@@ -283,7 +295,6 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfNull:
       case KindOfStaticString:
       case KindOfRef:
-      case KindOfNamedLocal:
       case KindOfClass:
         not_reached();
     }

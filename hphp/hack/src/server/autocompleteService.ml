@@ -26,7 +26,7 @@ type func_details_result = {
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-    res_pos      : Pos.t;
+    res_pos      : Pos.absolute;
     res_ty       : string;
     res_name     : string;
     expected_ty  : bool;
@@ -40,6 +40,9 @@ type autocomplete_result = {
     name : string;
     desc : string option
   }
+
+(* The type returned to the client *)
+type result = complete_autocomplete_result list
 
 let ac_env = ref None
 let ac_type = ref None
@@ -318,7 +321,7 @@ let get_results funs classes =
   let results = !autocomplete_results in
   let env = match !ac_env with
     | Some e -> e
-    | None -> Typing_env.empty ""
+    | None -> Typing_env.empty Relative_path.default
   in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with
@@ -351,7 +354,7 @@ let get_results funs classes =
     let expected_ty = result_matches_expected_ty x.ty in
     let pos = Typing_reason.to_pos (fst x.ty) in
     {
-      res_pos      = pos;
+      res_pos      = Pos.to_absolute pos;
       res_ty       = desc_string;
       res_name     = x.name;
       expected_ty  = expected_ty;

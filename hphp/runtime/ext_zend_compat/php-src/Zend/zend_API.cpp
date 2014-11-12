@@ -1596,7 +1596,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
         name += "->";
       }
       name += fe->fname;
-      HPHP::Native::registerBuiltinFunction(name.detach(), fe->handler);
+      HPHP::Native::registerBuiltinFunction(name, fe->handler);
       fe++;
     }
   }

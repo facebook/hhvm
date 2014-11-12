@@ -564,14 +564,14 @@ function openssl_x509_check_private_key(mixed $cert,
  * PEM encoded file holding certificates that can be used to help verify the
  * certificate, although no trust is placed in the certificates that come from
  * that file.
- * @return int - Returns TRUE if the certificate can be used for the intended
+ * @return mixed - Returns TRUE if the certificate can be used for the intended
  * purpose, FALSE if it cannot, or -1 on error.
  */
 <<__Native>>
 function openssl_x509_checkpurpose(mixed $x509cert,
                                    int $purpose,
                                    array $cainfo = [],
-                                   string $untrustedfile = ""): int;
+                                   string $untrustedfile = ""): mixed;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename
  * in a PEM encoded format.

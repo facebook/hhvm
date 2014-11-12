@@ -99,6 +99,7 @@ bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardTypeHints = true;
+bool Option::HardReturnTypeHints = false;
 bool Option::HardConstProp = true;
 
 bool Option::KeepStatementsWithNoEffect = false;
@@ -243,6 +244,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   }
 
   Config::Bind(HardTypeHints, ini, config["HardTypeHints"], true);
+  Config::Bind(HardReturnTypeHints, ini, config["HardReturnTypeHints"], false);
   Config::Bind(HardConstProp, ini, config["HardConstProp"], true);
 
   Config::Bind(EnableHipHopSyntax, ini, config["EnableHipHopSyntax"]);
@@ -398,6 +400,7 @@ void initialize_hhbbc_options() {
                                             Option::DynamicInvokeFunctions);
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.HardTypeHints          = Option::HardTypeHints;
+  HHBBC::options.HardReturnTypeHints    = Option::HardReturnTypeHints;
   HHBBC::options.DisallowDynamicVarEnvFuncs =
     (Option::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 }

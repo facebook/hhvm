@@ -310,12 +310,17 @@ struct StringData {
    * The allow_errors flag is a boolean that does something currently
    * undocumented.
    *
+   * If overflow is set its value is initialized to either zero to
+   * indicate that no overflow occurred or 1/-1 to inidicate the direction
+   * of overflow.
+   *
    * Returns: KindOfNull, KindOfInt64 or KindOfDouble.  The int64_t or
    * double out reference params are populated in the latter two cases
    * with the numeric value of the string.  The KindOfNull case
    * indicates the string is not numeric.
    */
-  DataType isNumericWithVal(int64_t&, double&, int allowErrors) const;
+  DataType isNumericWithVal(int64_t&, double&, int allowErrors,
+                            int* overflow = nullptr) const;
 
   /*
    * Returns true if this string is numeric.

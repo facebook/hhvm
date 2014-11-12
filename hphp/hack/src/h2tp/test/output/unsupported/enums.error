@@ -1,0 +1,3 @@
+Conversion Error:
+File "$filename/enums.php", line 2, characters 6-14:
+Enums are currently not supported. (Other[0])

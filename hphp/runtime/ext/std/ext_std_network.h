@@ -54,7 +54,7 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file = null_variant,
                                  VRefParam line = null_variant);
 bool HHVM_FUNCTION(header_register_callback, const Variant& callback);
 void HHVM_FUNCTION(header_remove, const Variant& name = null_string);
-int HHVM_FUNCTION(get_http_request_size);
+int64_t HHVM_FUNCTION(get_http_request_size);
 bool HHVM_FUNCTION(setcookie, const String& name,
                               const String& value = null_string,
                               int64_t expire = 0,

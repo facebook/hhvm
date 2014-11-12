@@ -236,7 +236,7 @@ end
 
 module PrintClass = struct
 
-  let tenv = Typing_env.empty ""
+  let tenv = Typing_env.empty Relative_path.default
 
   let indent = "    "
   let bool = string_of_bool

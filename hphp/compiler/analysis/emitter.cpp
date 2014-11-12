@@ -1611,6 +1611,11 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
   auto& t = region->m_returnTargets[sym].target;
   cases[t->m_state]->set(e);
 
+  bool hasConstraint = m_curFunc->retTypeConstraint.hasConstraint();
+  if (m_curFunc->isGenerator) {
+    // Suppress return type checking for generators
+    hasConstraint = false;
+  }
   IterVec iters;
   // We are emitting a case in a finally epilogue, therefore skip
   // the current try region and start from its parent
@@ -1628,10 +1633,16 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
       emitVirtualLocal(retLocal);
       if (sym == StackSym::C) {
         e.CGetL(retLocal);
+        if (hasConstraint) {
+          e.VerifyRetTypeC();
+        }
         e.RetC();
       } else {
         assert(sym == StackSym::V);
         e.VGetL(retLocal);
+        if (hasConstraint) {
+          e.VerifyRetTypeV();
+        }
         e.RetV();
       }
       return;
@@ -4477,22 +4488,32 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         Variant v;
         ex->getScalarValue(v);
         switch (v.getType()) {
-          case KindOfString:
-          case KindOfStaticString:
-          {
-            StringData* nValue = makeStaticString(v.getStringData());
-            e.String(nValue);
-            break;
-          }
           case KindOfInt64:
             e.Int(v.getInt64());
-            break;
+            return true;
+
           case KindOfDouble:
-            e.Double(v.getDouble()); break;
-          default:
-            assert(false);
+            e.Double(v.getDouble());
+            return true;
+
+          case KindOfStaticString:
+          case KindOfString: {
+            StringData* nValue = makeStaticString(v.getStringData());
+            e.String(nValue);
+            return true;
+          }
+
+          case KindOfUninit:
+          case KindOfNull:
+          case KindOfBoolean:
+          case KindOfArray:
+          case KindOfObject:
+          case KindOfResource:
+          case KindOfRef:
+          case KindOfClass:
+            break;
         }
-        return true;
+        not_reached();
       }
 
       case Expression::KindOfSimpleVariable: {
@@ -5306,48 +5327,67 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
 void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
                                            MaybeDataType t, int paramId) {
   switch (v.getType()) {
-    case KindOfString:
-    case KindOfStaticString: {
-      StringData *nValue = makeStaticString(v.getStringData());
-      e.String(nValue);
-      break;
-    }
-    case KindOfInt64:
-      e.Int(v.getInt64());
-      break;
-    case KindOfDouble:
-      e.Double(v.toDouble());
-      break;
+    case KindOfNull:
+      if (t) {
+        [&] {
+          switch (*t) {
+            case KindOfStaticString:
+            case KindOfString:
+            case KindOfArray:
+            case KindOfObject:
+            case KindOfResource:
+              e.Int(0);
+              return;
+            case KindOfUninit:
+            case KindOfNull:
+            case KindOfBoolean:
+            case KindOfInt64:
+            case KindOfDouble:
+            case KindOfRef:
+            case KindOfClass:
+              break;
+          }
+          not_reached();
+        }();
+      } else {
+        e.NullUninit();
+      }
+      return;
+
     case KindOfBoolean:
       if (v.getBoolean()) {
         e.True();
       } else {
         e.False();
       }
-      break;
-    case KindOfNull:
-      if (t) {
-        switch (*t) {
-          case KindOfString:
-          case KindOfStaticString:
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfArray:
-            e.Int(0);
-            break;
-          default:
-            not_reached();
-        }
-      } else {
-        e.NullUninit();
-      }
-      break;
+      return;
+
+    case KindOfInt64:
+      e.Int(v.getInt64());
+      return;
+
+    case KindOfDouble:
+      e.Double(v.toDouble());
+      return;
+
+    case KindOfStaticString:
+    case KindOfString: {
+      StringData *nValue = makeStaticString(v.getStringData());
+      e.String(nValue);
+      return;
+    }
     case KindOfArray:
       e.Array(v.getArrayData());
+      return;
+
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
       break;
-    default:
-      not_reached();
   }
+  not_reached();
 }
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
@@ -8520,8 +8560,8 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
 bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {
   switch (initExpr->getKindOf()) {
     case Expression::KindOfScalarExpression:
-    case Expression::KindOfClassConstantExpression:
       return false;
+    case Expression::KindOfClassConstantExpression:
     case Expression::KindOfConstantExpression:
       return !initExpr->isScalar();
     case Expression::KindOfUnaryOpExpression: {
@@ -9096,6 +9136,7 @@ static void
 commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = Option::HardTypeHints;
+  gd.HardReturnTypeHints      = Option::HardReturnTypeHints;
   gd.UsedHHBBC                = Option::UseHHBBC;
   gd.HardPrivatePropInference = true;
 
@@ -9255,6 +9296,9 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
+    Option::HardReturnTypeHints =
+      (RuntimeOption::EvalCheckReturnTypeHints >= 3 &&
+       RuntimeOption::EvalSoftClosureReturnTypeHints == false);
     Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
     Option::JitEnableRenameFunction = RuntimeOption::EvalJitEnableRenameFunction;
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {

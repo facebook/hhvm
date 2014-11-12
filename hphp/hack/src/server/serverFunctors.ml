@@ -11,20 +11,12 @@
 open Utils
 open ServerEnv
 
-(*****************************************************************************)
-(* Types *)
-(*****************************************************************************)
-
-type failed_parsing = SSet.t
-type files = SSet.t
-type client = in_channel * out_channel
-
 module type SERVER_PROGRAM = sig
-  val preinit : ServerArgs.options -> unit
+  val preinit : unit -> unit
   val init : genv -> env -> env
   val run_once_and_exit : genv -> env -> unit
-  val filter_update : genv -> env -> string -> bool
-  val recheck: genv -> env -> SSet.t -> env
+  val filter_update : genv -> env -> Relative_path.t -> bool
+  val recheck: genv -> env -> Relative_path.Set.t -> env
   val infer: (ServerMsg.file_input * int * int) -> out_channel -> unit
   val suggest: string list -> out_channel -> unit
   val parse_options: unit -> ServerArgs.options
@@ -109,7 +101,8 @@ end = struct
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
       let updates = ServerDfind.get_updates genv root in
-      let updates = SSet.filter (Program.filter_update genv !env) updates in
+      let updates = Relative_path.relativize_set Relative_path.Root updates in
+      let updates = Relative_path.Set.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
       if has_client then Program.handle_connection genv !env socket;
     done
@@ -125,7 +118,7 @@ end = struct
         close_out_no_fail fn chan;
         (* We cannot save the shared memory to `chan` because the OCaml runtime
          * does not expose the underlying file descriptor to C code; so we use
-         * a separate ".sharedmem" file.  *)
+         * a separate ".sharedmem" file. *)
         SharedMem.save (fn^".sharedmem");
         env
     | Some (ServerArgs.Load { ServerArgs.filename; ServerArgs.to_recheck }) ->
@@ -134,11 +127,15 @@ end = struct
         Program.unmarshal chan;
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
+        let to_recheck =
+          rev_rev_map (Relative_path.create Relative_path.Root) to_recheck
+        in
         let updates = List.fold_left
-          (fun acc update -> SSet.add update acc)
-          SSet.empty
+          (fun acc update -> Relative_path.Set.add update acc)
+          Relative_path.Set.empty
           to_recheck in
-        let updates = SSet.filter (Program.filter_update genv env) updates in
+        let updates =
+          Relative_path.Set.filter (Program.filter_update genv env) updates in
         Program.recheck genv env updates
 
   (* The main entry point of the daemon
@@ -148,7 +145,7 @@ end = struct
   * we look if env.modified changed.
   *)
   let main options =
-    Program.preinit options;
+    Program.preinit ();
     SharedMem.init();
     (* this is to transform SIGPIPE in an exception. A SIGPIPE can happen when
     * someone C-c the client.
@@ -198,14 +195,19 @@ end = struct
     end else begin
       (* let original parent exit *)
 
-      Printf.printf "Spawned %s (child pid=%d)\n" (Program.name) pid;
-      Printf.printf "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
+      Printf.fprintf stderr "Spawned %s (child pid=%d)\n" (Program.name) pid;
+      Printf.fprintf stderr
+        "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
       flush stdout;
       raise Exit
     end
 
   let start () =
     let options = Program.parse_options() in
+    if options.ServerArgs.version then begin
+      print_string Build_id.build_id_ohai;
+      exit 0
+    end;
     try
       if ServerArgs.should_detach options
       then daemonize options;

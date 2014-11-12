@@ -438,16 +438,19 @@ static void countArgs(const char *format, unsigned &min, unsigned &max) {
 
 static const char *argTypeName(DataType dt) {
   switch (dt) {
-    case KindOfNull: return "null";
-    case KindOfBoolean: return "boolean";
-    case KindOfInt64: return "integer";
-    case KindOfDouble: return "double";
-    case KindOfString:
-    case KindOfStaticString: return "string";
-    case KindOfArray: return "array";
-    case KindOfObject: return "object";
-    case KindOfResource: return "resource";
-    default: return "unknown";
+    case KindOfNull:          return "null";
+    case KindOfBoolean:       return "boolean";
+    case KindOfInt64:         return "integer";
+    case KindOfDouble:        return "double";
+    case KindOfStaticString:
+    case KindOfString:        return "string";
+    case KindOfArray:         return "array";
+    case KindOfObject:        return "object";
+    case KindOfResource:      return "resource";
+
+    case KindOfUninit:
+    case KindOfRef:
+    case KindOfClass:         return "unknown";
   }
   not_reached();
 }

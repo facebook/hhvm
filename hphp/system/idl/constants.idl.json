@@ -728,15 +728,15 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.4.0-dev"
+            "value": "3.5.0-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.4.0-dev"
+            "value": "3.5.0-dev"
         },
         {
             "name": "HHVM_VERSION_ID",
-            "value": 30400
+            "value": 30500
         },
         {
             "name": "HTML_ENTITIES",
@@ -3359,6 +3359,18 @@
         {
             "name": "SIG_IGN",
             "value": 1
+        },
+        {
+            "name": "SIG_BLOCK",
+            "value": 0
+        },
+        {
+            "name": "SIG_UNBLOCK",
+            "value": 1
+        },
+        {
+            "name": "SIG_SETMASK",
+            "value": 2
         },
         {
             "name": "SOAP_1_1",

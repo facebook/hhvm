@@ -416,8 +416,20 @@ struct Index {
    * This function returns a subtype of Cell, although TypeConstraints
    * at runtime can match reference parameters.  The caller should
    * make sure to handle that case.
+   *
+   * For soft constraints (@), this function returns Cell.
+   *
+   * For some non-soft constraints (such as "Stringish"), this
+   * function may return a Type that is a strict supertype of the
+   * constraint's type.
    */
   Type lookup_constraint(Context, const TypeConstraint&) const;
+
+  /*
+   * If this function returns true, it is safe to assume that Type t
+   * will always satisfy TypeConstraint tc at run time.
+   */
+  bool satisfies_constraint(Context, Type t, const TypeConstraint& tc) const;
 
   /*
    * Lookup what the best known Type for a class constant would be,
@@ -574,6 +586,7 @@ private:
                             borrowed_ptr<const php::Class>) const;
   bool could_be_related(borrowed_ptr<const php::Class>,
                         borrowed_ptr<const php::Class>) const;
+  Type satisfies_constraint_helper(Context, const TypeConstraint&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

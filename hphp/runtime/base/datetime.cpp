@@ -479,6 +479,8 @@ void DateTime::internalModifyRelative(timelib_rel_time *rel,
   m_time->relative.weekday = rel->weekday;
   m_time->have_relative = have_relative;
 #ifdef TIMELIB_HAVE_INTERVAL
+  m_time->relative.special = rel->special;
+  m_time->relative.have_special_relative = rel->have_special_relative;
   m_time->relative.have_weekday_relative = rel->have_weekday_relative;
   m_time->relative.weekday_behavior = rel->weekday_behavior;
 #endif

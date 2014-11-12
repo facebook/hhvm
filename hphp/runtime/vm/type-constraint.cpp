@@ -370,31 +370,46 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
   }
 
   if (isObjectOrTypeAlias()) {
-    switch (tv->m_type) {
-      case KindOfArray:
-        if (interface_supports_array(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfString:
-      case KindOfStaticString:
-        if (interface_supports_string(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfInt64:
-        if (interface_supports_int(m_typeName)) {
-          return true;
-        }
-        break;
-      case KindOfDouble:
-        if (interface_supports_double(m_typeName)) {
-          return true;
-        }
-        break;
-      default:
-        break;
-    }
+    do {
+      switch (tv->m_type) {
+        case KindOfInt64:
+          if (interface_supports_int(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfDouble:
+          if (interface_supports_double(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfStaticString:
+        case KindOfString:
+          if (interface_supports_string(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfArray:
+          if (interface_supports_array(m_typeName)) {
+            return true;
+          }
+          continue;
+
+        case KindOfUninit:
+        case KindOfNull:
+        case KindOfBoolean:
+        case KindOfObject:
+        case KindOfResource:
+          continue;
+
+        case KindOfRef:
+        case KindOfClass:
+          break;
+      }
+      not_reached();
+    } while (0);
 
     if (isCallable()) {
       return HHVM_FN(is_callable)(tvAsCVarRef(tv));
@@ -427,8 +442,10 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->o_getClassName().c_str();
     case KindOfResource:      return tv->m_data.pres->o_getClassName().c_str();
-    default:
-      assert(false);
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
   not_reached();
 }
@@ -463,7 +480,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft() &&
         (!func->isClosureBody() ||
          !RuntimeOption::EvalSoftClosureReturnTypeHints)) {
-      raise_typehint_error(msg);
+      raise_return_typehint_error(msg);
     } else {
       raise_debugging(msg);
     }

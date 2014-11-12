@@ -186,45 +186,46 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
   switch (value.getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return "N;";
-  case KindOfBoolean:
-    return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfInt64: {
-    StringBuffer sb;
-    sb.append("i:");
-    sb.append(value.getInt64());
-    sb.append(';');
-    return sb.detach();
+    case KindOfUninit:
+    case KindOfNull:
+      return "N;";
+    case KindOfBoolean:
+      return value.getBoolean() ? "b:1;" : "b:0;";
+    case KindOfInt64: {
+      StringBuffer sb;
+      sb.append("i:");
+      sb.append(value.getInt64());
+      sb.append(';');
+      return sb.detach();
+    }
+    case KindOfStaticString:
+    case KindOfString: {
+      StringData *str = value.getStringData();
+      StringBuffer sb;
+      sb.append("s:");
+      sb.append(str->size());
+      sb.append(":\"");
+      sb.append(str->data(), str->size());
+      sb.append("\";");
+      return sb.detach();
+    }
+    case KindOfResource:
+      return "i:0;";
+    case KindOfArray: {
+      ArrayData *arr = value.getArrayData();
+      if (arr->empty()) return "a:0:{}";
+      // fall-through
+    }
+    case KindOfDouble:
+    case KindOfObject: {
+      VariableSerializer vs(VariableSerializer::Type::Serialize);
+      return vs.serialize(value, true);
+    }
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfStaticString:
-  case KindOfString: {
-    StringData *str = value.getStringData();
-    StringBuffer sb;
-    sb.append("s:");
-    sb.append(str->size());
-    sb.append(":\"");
-    sb.append(str->data(), str->size());
-    sb.append("\";");
-    return sb.detach();
-  }
-  case KindOfArray: {
-    ArrayData *arr = value.getArrayData();
-    if (arr->empty()) return "a:0:{}";
-    // fall-through
-  }
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfDouble: {
-    VariableSerializer vs(VariableSerializer::Type::Serialize);
-    return vs.serialize(value, true);
-  }
-  default:
-    assert(false);
-    break;
-  }
-  return empty_string();
+  not_reached();
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,

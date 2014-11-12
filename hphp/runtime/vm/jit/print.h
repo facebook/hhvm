@@ -59,8 +59,7 @@ void print(const Block* block);
 // Unit
 void print(std::ostream& ostream, const IRUnit&,
            const AsmInfo* asmInfo = nullptr,
-           const GuardConstraints* guards = nullptr,
-           bool dotBodies = false);
+           const GuardConstraints* guards = nullptr);
 void print(const IRUnit& unit);
 
 /*

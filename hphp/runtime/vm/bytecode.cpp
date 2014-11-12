@@ -606,18 +606,18 @@ static std::string toStringElm(const TypedValue* tv) {
     os << " ??? type " << tv->m_type << "\n";
     return os.str();
   }
-  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.pref->m_count <= 0 &&
-      tv->m_data.pref->m_count != StaticValue) {
+  if (IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_data.parr->getCount() <= 0 &&
+      !tv->m_data.parr->isStatic()) {
     // OK in the invoking frame when running a destructor.
-    os << " ??? inner_count " << tv->m_data.pref->m_count << " ";
+    os << " ??? inner_count " << tv->m_data.parr->getCount() << " ";
     return os.str();
   }
 
   auto print_count = [&] {
-    if (tv->m_data.pref->m_count == StaticValue) {
+    if (tv->m_data.parr->isStatic()) {
       os << ":c(static)";
     } else {
-      os << ":c(" << tv->m_data.pref->m_count << ")";
+      os << ":c(" << tv->m_data.parr->getCount() << ")";
     }
   };
 
@@ -636,71 +636,71 @@ static std::string toStringElm(const TypedValue* tv) {
     break;
   }
 
-  switch (tv->m_type) {
-  case KindOfUninit:
-    os << "Uninit";
-    break;
-  case KindOfNull:
-    os << "Null";
-    break;
-  case KindOfBoolean:
-    os << (tv->m_data.num ? "True" : "False");
-    break;
-  case KindOfInt64:
-    os << "0x" << std::hex << tv->m_data.num << std::dec;
-    break;
-  case KindOfDouble:
-    os << tv->m_data.dbl;
-    break;
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int len = tv->m_data.pstr->size();
-      bool truncated = false;
-      if (len > 128) {
-        len = 128;
-        truncated = true;
+  do {
+    switch (tv->m_type) {
+    case KindOfUninit:
+      os << "Uninit";
+      continue;
+    case KindOfNull:
+      os << "Null";
+      continue;
+    case KindOfBoolean:
+      os << (tv->m_data.num ? "True" : "False");
+      continue;
+    case KindOfInt64:
+      os << "0x" << std::hex << tv->m_data.num << std::dec;
+      continue;
+    case KindOfDouble:
+      os << tv->m_data.dbl;
+      continue;
+    case KindOfStaticString:
+    case KindOfString:
+      {
+        int len = tv->m_data.pstr->size();
+        bool truncated = false;
+        if (len > 128) {
+          len = 128;
+          truncated = true;
+        }
+        os << tv->m_data.pstr;
+        print_count();
+        os << ":\""
+           << escapeStringForCPP(tv->m_data.pstr->data(), len)
+           << "\"" << (truncated ? "..." : "");
       }
-      os << tv->m_data.pstr;
+      continue;
+    case KindOfArray:
+      assert_refcount_realistic_nz(tv->m_data.parr->getCount());
+      os << tv->m_data.parr;
       print_count();
-      os << ":\""
-         << escapeStringForCPP(tv->m_data.pstr->data(), len)
-         << "\"" << (truncated ? "..." : "");
+      os << ":Array";
+      continue;
+    case KindOfObject:
+      assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
+      os << tv->m_data.pobj;
+      print_count();
+      os << ":Object("
+         << tv->m_data.pobj->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfResource:
+      assert_refcount_realistic_nz(tv->m_data.pres->getCount());
+      os << tv->m_data.pres;
+      print_count();
+      os << ":Resource("
+         << const_cast<ResourceData*>(tv->m_data.pres)
+              ->o_getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfRef:
+      break;
+    case KindOfClass:
+      os << tv->m_data.pcls
+         << ":" << tv->m_data.pcls->name()->data();
+      continue;
     }
-    break;
-  case KindOfArray:
-    assert_refcount_realistic_nz(tv->m_data.parr->getCount());
-    os << tv->m_data.parr;
-    print_count();
-    os << ":Array";
-    break;
-  case KindOfObject:
-    assert_refcount_realistic_nz(tv->m_data.pobj->getCount());
-    os << tv->m_data.pobj;
-    print_count();
-    os << ":Object("
-       << tv->m_data.pobj->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfResource:
-    assert_refcount_realistic_nz(tv->m_data.pres->getCount());
-    os << tv->m_data.pres;
-    print_count();
-    os << ":Resource("
-       << const_cast<ResourceData*>(tv->m_data.pres)
-            ->o_getClassName().get()->data()
-       << ")";
-    break;
-  case KindOfRef:
     not_reached();
-  case KindOfClass:
-    os << tv->m_data.pcls
-       << ":" << tv->m_data.pcls->name()->data();
-    break;
-  default:
-    os << "?";
-    break;
-  }
+  } while (0);
 
   return os.str();
 }
@@ -1591,7 +1591,7 @@ static bool prepareArrayArgs(ActRec* ar, const Cell& args,
       if (LIKELY(!f->byRef(i))) {
         cellDup(*tvToCell(from), *to);
       } else if (LIKELY(from->m_type == KindOfRef &&
-                        from->m_data.pref->m_count >= 2)) {
+                        from->m_data.pref->getCount() >= 2)) {
         refDup(*from, *to);
       } else {
         if (doCufRefParamChecks && f->mustBeRef(i)) {
@@ -1992,7 +1992,7 @@ resume:
   not_reached();
 }
 
-void ExecutionContext::invokeFunc(TypedValue* retval,
+void ExecutionContext::invokeFunc(TypedValue* retptr,
                                   const Func* f,
                                   const Variant& args_,
                                   ObjectData* this_ /* = NULL */,
@@ -2000,7 +2000,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
                                   VarEnv* varEnv /* = NULL */,
                                   StringData* invName /* = NULL */,
                                   InvokeFlags flags /* = InvokeNormal */) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If f is a regular function, this_ and cls must be NULL
   assert(f->preClass() || f->isPseudoMain() || (!this_ && !cls));
@@ -2048,7 +2048,7 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     Unit* toMerge = f->unit();
     toMerge->merge();
     if (toMerge->isMergeOnly()) {
-      *retval = *toMerge->getMainReturn();
+      *retptr = *toMerge->getMainReturn();
       return;
     }
   }
@@ -2091,36 +2091,43 @@ void ExecutionContext::invokeFunc(TypedValue* retval,
     auto prepResult = prepareArrayArgs(
       ar, prepArgs,
       vmStack(), 0,
-      (bool) (flags & InvokeCuf), retval);
+      (bool) (flags & InvokeCuf), retptr);
     if (UNLIKELY(!prepResult)) {
-      assert(KindOfNull == retval->m_type);
+      assert(KindOfNull == retptr->m_type);
       return;
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert_flog(
-      vmStack().top() == reentrySP,
-      "vmsp after reentry: {} doesn't match original vmsp: {}",
-      vmStack().top(), reentrySP
-    );
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert_flog(
+        vmStack().top() == reentrySP,
+        "vmsp after reentry: {} doesn't match original vmsp: {}",
+        vmStack().top(), reentrySP
+      );
+      popVMState();
+    };
 
-  enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
+    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
-void ExecutionContext::invokeFuncFew(TypedValue* retval,
+void ExecutionContext::invokeFuncFew(TypedValue* retptr,
                                      const Func* f,
                                      void* thisOrCls,
                                      StringData* invName,
                                      int argc,
                                      const TypedValue* argv) {
-  assert(retval);
+  assert(retptr);
   assert(f);
   // If this is a regular function, this_ and cls must be NULL
   assert(f->preClass() || !thisOrCls);
@@ -2189,16 +2196,23 @@ void ExecutionContext::invokeFuncFew(TypedValue* retval,
     }
   }
 
-  pushVMState(originalSP);
-  SCOPE_EXIT {
-    assert(vmStack().top() == reentrySP);
-    popVMState();
-  };
+  TypedValue retval;
+  {
+    pushVMState(originalSP);
+    SCOPE_EXIT {
+      assert(vmStack().top() == reentrySP);
+      popVMState();
+    };
 
-  enterVM(ar, StackArgsState::Untrimmed);
+    enterVM(ar, StackArgsState::Untrimmed);
 
-  tvCopy(*vmStack().topTV(), *retval);
-  vmStack().discard();
+    // retptr might point somewhere that is affected by (push|pop)VMState, so
+    // don't write to it until after we pop the nested VM state.
+    tvCopy(*vmStack().topTV(), retval);
+    vmStack().discard();
+  }
+
+  tvCopy(retval, *retptr);
 }
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
@@ -2456,8 +2470,8 @@ void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
   assert(handle->isUncounted() && size > 0);
   assert(handle->type() == KindOfString ||
          handle->type() == KindOfArray);
-  m_apcHandles.m_handles.push_back(handle);
-  m_apcHandles.m_memSize += size;
+  m_apcHandles.push_back(handle);
+  m_apcMemSize += size;
 }
 
 // Treadmill solution for the SharedVariant memory management
@@ -2479,14 +2493,14 @@ public:
 }
 
 void ExecutionContext::manageAPCHandle() {
-  assert(apcExtension::UseUncounted || m_apcHandles.m_handles.size() == 0);
-  if (m_apcHandles.m_handles.size() > 0) {
+  assert(apcExtension::UseUncounted || m_apcHandles.size() == 0);
+  if (m_apcHandles.size() > 0) {
     std::vector<APCHandle*> handles;
-    handles.swap(m_apcHandles.m_handles);
+    handles.swap(m_apcHandles);
     Treadmill::enqueue(
-        FreedAPCHandle(std::move(handles),
-                       m_apcHandles.m_memSize));
-    APCStats::getAPCStats().addPendingDelete(m_apcHandles.m_memSize);
+      FreedAPCHandle(std::move(handles), m_apcMemSize)
+    );
+    APCStats::getAPCStats().addPendingDelete(m_apcMemSize);
   }
 }
 
@@ -2884,7 +2898,7 @@ static UNUSED int innerCount(const TypedValue* tv) {
     if (tv->m_type == KindOfRef) {
       return tv->m_data.pref->getRealCount();
     } else {
-      return tv->m_data.pref->m_count;
+      return tv->m_data.pref->getCount();
     }
   }
   return -1;
@@ -3976,39 +3990,38 @@ OPTBLD_INLINE bool ExecutionContext::cellInstanceOf(
   assert(tv->m_type != KindOfRef);
   Class* cls = nullptr;
   switch (tv->m_type) {
-    case KindOfObject:
-      cls = Unit::lookupClass(ne);
-      if (cls) return tv->m_data.pobj->instanceof(cls);
-      break;
-    case KindOfArray:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_array(cls->name())) {
-        return true;
-      }
-      break;
-    case KindOfString:
-    case KindOfStaticString:
-      cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_string(cls->name())) {
-        return true;
-      }
-      break;
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfResource:
+      return false;
+
     case KindOfInt64:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_int(cls->name())) {
-        return true;
-      }
-      break;
+      return cls && interface_supports_int(cls->name());
+
     case KindOfDouble:
       cls = Unit::lookupClass(ne);
-      if (cls && interface_supports_double(cls->name())) {
-        return true;
-      }
+      return cls && interface_supports_double(cls->name());
+
+    case KindOfStaticString:
+    case KindOfString:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_string(cls->name());
+
+    case KindOfArray:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_array(cls->name());
+
+    case KindOfObject:
+      cls = Unit::lookupClass(ne);
+      return cls && tv->m_data.pobj->instanceof(cls);
+
+    case KindOfRef:
+    case KindOfClass:
       break;
-    default:
-      return false;
   }
-  return false;
+  not_reached();
 }
 
 ALWAYS_INLINE
@@ -4236,71 +4249,80 @@ OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
     int64_t intval;
     SwitchMatch match = SwitchMatch::NORMAL;
 
-    switch (val->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        intval = 0;
-        break;
-
-      case KindOfBoolean:
-        // bool(true) is equal to any non-zero int, bool(false) == 0
-        if (val->m_data.num) {
-          match = SwitchMatch::NONZERO;
-        } else {
+    [&] {
+      switch (val->m_type) {
+        case KindOfUninit:
+        case KindOfNull:
           intval = 0;
-        }
-        break;
+          return;
 
-      case KindOfInt64:
-        intval = val->m_data.num;
-        break;
-
-      case KindOfDouble:
-        match = doubleCheck(val->m_data.dbl, intval);
-        break;
-
-      case KindOfStaticString:
-      case KindOfString: {
-        double dval = 0.0;
-        DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
-        switch (t) {
-          case KindOfNull:
+        case KindOfBoolean:
+          // bool(true) is equal to any non-zero int, bool(false) == 0
+          if (val->m_data.num) {
+            match = SwitchMatch::NONZERO;
+          } else {
             intval = 0;
-            break;
+          }
+          return;
 
-          case KindOfDouble:
-            match = doubleCheck(dval, intval);
-            break;
+        case KindOfInt64:
+          intval = val->m_data.num;
+          return;
 
-          case KindOfInt64:
-            // do nothing
-            break;
+        case KindOfDouble:
+          match = doubleCheck(val->m_data.dbl, intval);
+          return;
 
-          default:
-            not_reached();
+        case KindOfStaticString:
+        case KindOfString: {
+          double dval = 0.0;
+          DataType t = val->m_data.pstr->isNumericWithVal(intval, dval, 1);
+          switch (t) {
+            case KindOfNull:
+              intval = 0;
+              break;
+            case KindOfInt64:
+              // do nothing
+              break;
+            case KindOfDouble:
+              match = doubleCheck(dval, intval);
+              break;
+            case KindOfUninit:
+            case KindOfBoolean:
+            case KindOfStaticString:
+            case KindOfString:
+            case KindOfArray:
+            case KindOfObject:
+            case KindOfResource:
+            case KindOfRef:
+            case KindOfClass:
+              not_reached();
+          }
+          tvRefcountedDecRef(val);
+          return;
         }
-        tvRefcountedDecRef(val);
-        break;
+
+        case KindOfArray:
+          match = SwitchMatch::DEFAULT;
+          tvDecRef(val);
+          return;
+
+        case KindOfObject:
+          intval = val->m_data.pobj->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfResource:
+          intval = val->m_data.pres->o_toInt64();
+          tvDecRef(val);
+          return;
+
+        case KindOfRef:
+        case KindOfClass:
+          break;
       }
-
-      case KindOfArray:
-        match = SwitchMatch::DEFAULT;
-        tvDecRef(val);
-        break;
-
-      case KindOfObject:
-        intval = val->m_data.pobj->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      case KindOfResource:
-        intval = val->m_data.pres->o_toInt64();
-        tvDecRef(val);
-        break;
-
-      default:
-        not_reached();
-    }
+      not_reached();
+    }();
     vmStack().discard();
 
     if (match != SwitchMatch::NORMAL ||
@@ -7510,7 +7532,7 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP };
+  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP, vmMInstrState() };
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
   if (debug && savedVM.fp &&
@@ -7546,6 +7568,7 @@ void ExecutionContext::popVMState() {
   vmfp() = savedVM.fp;
   vmFirstAR() = savedVM.firstAR;
   vmStack().top() = savedVM.sp;
+  vmMInstrState() = savedVM.mInstrState;
 
   if (debug) {
     if (savedVM.fp &&

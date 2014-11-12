@@ -30,49 +30,17 @@ namespace HPHP {
 
 struct Func;
 struct c_Vector;
+struct MInstrState;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct TypeConstraint;
 
-/* MInstrState is stored right above the reserved spill space on the C++
- * stack. */
-#define MISOFF(nm)                                         \
-  (offsetof(MInstrState, nm) + kReservedRSPSpillSpace)
-
-constexpr size_t kReservedRSPMInstrStateSpace =
-  RESERVED_STACK_MINSTR_STATE_SPACE;
 constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
 constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
 
 //////////////////////////////////////////////////////////////////////
-
-struct MInstrState {
-  // Room for this structure is allocated on the stack before we
-  // make a call into the tc, so this first element is padding for
-  // the return address pushed by the call.
-  uintptr_t returnAddress;
-  uintptr_t padding; // keep the following TV's SSE friendly.
-  union {
-    // This space is used for both vector instructions and
-    // the return value of builtin functions that return by reference.
-    // Since we don't ever use the two at the same time, it is
-    // OK to use a union.
-    TypedValue tvScratch;
-    TypedValue tvBuiltinReturn;
-  };
-  TypedValue tvRef;
-  TypedValue tvRef2;
-  TypedValue tvResult;
-  TypedValue tvVal;
-} __attribute__((__aligned__(16)));
-static_assert(offsetof(MInstrState, tvScratch) % 16 == 0,
-              "MInstrState members require 16-byte alignment for SSE");
-static_assert(sizeof(MInstrState) - sizeof(uintptr_t) // return address
-              < kReservedRSPTotalSpace,
-              "MInstrState is too large for the rsp scratch space "
-              "in enterTCHelper");
 
 /* Helper functions for translated code */
 

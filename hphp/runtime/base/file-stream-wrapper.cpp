@@ -101,9 +101,12 @@ int FileStreamWrapper::rename(const String& oldname, const String& newname) {
 }
 
 int FileStreamWrapper::mkdir(const String& path, int mode, int options) {
-  if (options & k_STREAM_MKDIR_RECURSIVE)
-    return mkdir_recursive(path, mode);
-  return ::mkdir(File::TranslatePath(path).data(), mode);
+  if (options & k_STREAM_MKDIR_RECURSIVE) {
+    ERROR_RAISE_WARNING(mkdir_recursive(path, mode));
+    return ret;
+  }
+  ERROR_RAISE_WARNING(::mkdir(File::TranslatePath(path).data(), mode));
+  return ret;
 }
 
 int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {

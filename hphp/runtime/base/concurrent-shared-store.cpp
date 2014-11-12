@@ -71,31 +71,36 @@ bool StoreValue::expired() const {
 
 EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
   DataType type = handle->type();
-  if (!IS_REFCOUNTED_TYPE(type)) {
-    return EntryInfo::Type::Uncounted;
-  }
+
   switch (type) {
-  case KindOfString:
-    if (handle->isUncounted()) {
-      return EntryInfo::Type::UncountedString;
-    }
-    return EntryInfo::Type::APCString;
-  case KindOfArray:
-    if (handle->isUncounted()) {
-      return EntryInfo::Type::UncountedArray;
-    }
-    if (handle->isSerializedArray()) {
-      return EntryInfo::Type::SerializedArray;
-    }
-    return EntryInfo::Type::APCArray;
-  case KindOfObject:
-    if (handle->isSerializedObj()) {
-      return EntryInfo::Type::SerializedObject;
-    }
-    return EntryInfo::Type::APCObject;
-  default:
-    return EntryInfo::Type::Unknown;
+    DT_UNCOUNTED_CASE:
+      return EntryInfo::Type::Uncounted;
+
+    case KindOfString:
+      if (handle->isUncounted()) {
+        return EntryInfo::Type::UncountedString;
+      }
+      return EntryInfo::Type::APCString;
+    case KindOfArray:
+      if (handle->isUncounted()) {
+        return EntryInfo::Type::UncountedArray;
+      }
+      if (handle->isSerializedArray()) {
+        return EntryInfo::Type::SerializedArray;
+      }
+      return EntryInfo::Type::APCArray;
+    case KindOfObject:
+      if (handle->isSerializedObj()) {
+        return EntryInfo::Type::SerializedObject;
+      }
+      return EntryInfo::Type::APCObject;
+
+    case KindOfResource:
+    case KindOfRef:
+    case KindOfClass:
+      return EntryInfo::Type::Unknown;
   }
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -64,8 +64,10 @@ namespace {
   }
 
   inline void onIOWaitExit(AsioSession* session) {
-    // The web request may have timed out while we were waiting for I/O.
-    // Fail early to avoid further execution of PHP code.
+    // The web request may have timed out while we were waiting for I/O.  Fail
+    // early to avoid further execution of PHP code.  We limit I/O waiting to
+    // the time currently remaining in the request (see
+    // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkConditionFlags())) {
       ssize_t flags = EventHook::CheckSurprise();
       if (flags & RequestInjectionData::XenonSignalFlag) {

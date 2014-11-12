@@ -315,25 +315,36 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asCell();
   switch (cell->m_type) {
-  case KindOfString:
-  case KindOfStaticString: {
-    int64_t n = 0;
-    StringData *sd = cell->m_data.pstr;
-    if (sd->isStrictlyInteger(n)) {
-      return ad->exists(n);
+    case KindOfUninit:
+    case KindOfNull:
+      return ad->exists(staticEmptyString());
+
+    case KindOfInt64:
+      return ad->exists(cell->m_data.num);
+
+    case KindOfStaticString:
+    case KindOfString: {
+      int64_t n = 0;
+      StringData *sd = cell->m_data.pstr;
+      if (sd->isStrictlyInteger(n)) {
+        return ad->exists(n);
+      }
+      return ad->exists(StrNR(sd));
     }
-    return ad->exists(StrNR(sd));
+
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      raise_warning("Array key should be either a string or an integer");
+      return false;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  case KindOfInt64:
-    return ad->exists(cell->m_data.num);
-  case KindOfUninit:
-  case KindOfNull:
-    return ad->exists(staticEmptyString());
-  default:
-    break;
-  }
-  raise_warning("Array key should be either a string or an integer");
-  return false;
+  not_reached();
 }
 
 bool HHVM_FUNCTION(key_exists,
@@ -615,32 +626,41 @@ Variant HHVM_FUNCTION(array_product,
   ArrayIter iter(input);
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
+
     switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i *= ti;
-        break;
-      } else {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i *= entry.toInt64();
+        continue;
+
+      case KindOfDouble:
         goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i *= ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
       }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i *= entry.toInt64();
-      break;
-    }
-    }
+    not_reached();
   }
   return i;
 
@@ -648,10 +668,21 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d *= entry.toDouble();
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d *= entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   return d;
 }
@@ -880,32 +911,41 @@ Variant HHVM_FUNCTION(array_sum,
   ArrayIter iter(input);
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRefPlus());
+
     switch (entry.getType()) {
-    case KindOfDouble: {
-      goto DOUBLE;
-    }
-    case KindOfStaticString:
-    case KindOfString: {
-      int64_t ti;
-      double td;
-      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
-          KindOfInt64) {
-        i += ti;
-        break;
-      } else {
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfInt64:
+      case KindOfRef:
+        i += entry.toInt64();
+        continue;
+
+      case KindOfDouble:
         goto DOUBLE;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        int64_t ti;
+        double td;
+        if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+            KindOfInt64) {
+          i += ti;
+          continue;
+        } else {
+          goto DOUBLE;
+        }
       }
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource: {
-      break;
-    }
-    default: {
-      i += entry.toInt64();
-      break;
-    }
-    }
+    not_reached();
   }
   return i;
 
@@ -913,10 +953,21 @@ DOUBLE:
   double d = i;
   for (; iter; ++iter) {
     const Variant& entry(iter.secondRef());
-    if (!entry.is(KindOfArray) && !entry.is(KindOfObject) &&
-        !entry.is(KindOfResource)) {
-      d += entry.toDouble();
+    switch (entry.getType()) {
+      DT_UNCOUNTED_CASE:
+      case KindOfString:
+      case KindOfRef:
+        d += entry.toDouble();
+
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+        continue;
+
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
   return d;
 }
@@ -1142,30 +1193,42 @@ int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode /* = 0 */) {
   switch (var.getType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return 0;
-  case KindOfObject:
-    {
-      Object obj = var.toObject();
-      if (obj->isCollection()) {
-        return getCollectionSize(obj.get());
+    case KindOfUninit:
+    case KindOfNull:
+      return 0;
+
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfResource:
+      return 1;
+
+    case KindOfArray:
+      if (mode) {
+        const Array& arr_var = var.toCArrRef();
+        return php_count_recursive(arr_var);
       }
-      if (obj.instanceof(SystemLib::s_CountableClass)) {
-        return obj->o_invoke_few_args(s_count, 0).toInt64();
+      return var.getArrayData()->size();
+
+    case KindOfObject:
+      {
+        Object obj = var.toObject();
+        if (obj->isCollection()) {
+          return getCollectionSize(obj.get());
+        }
+        if (obj.instanceof(SystemLib::s_CountableClass)) {
+          return obj->o_invoke_few_args(s_count, 0).toInt64();
+        }
       }
-    }
-    break;
-  case KindOfArray:
-    if (mode) {
-      const Array& arr_var = var.toCArrRef();
-      return php_count_recursive(arr_var);
-    }
-    return var.getArrayData()->size();
-  default:
-    break;
+      return 1;
+
+    case KindOfRef:
+    case KindOfClass:
+      break;
   }
-  return 1;
+  not_reached();
 }
 
 int64_t HHVM_FUNCTION(sizeof,
@@ -1392,14 +1455,25 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   return vm_call_user_func(*callback, make_packed_array(v1, v2)).toInt32();
 }
 
+// PHP 5.x does different things when diffing against the same array,
+// particularly when the comparison function is outside the norm of
+// return -1, 0, 1 specification. To do what PHP 5.x in these cases,
+// use the RuntimeOption
 #define COMMA ,
 #define diff_intersect_body(type,intersect_params,user_setup)   \
   getCheckedArray(array1);                                      \
   if (!arr_array1.size()) return arr_array1;                    \
+  Array ret = Array::Create();                                  \
+  if (RuntimeOption::EnableZendSorting) {                       \
+    getCheckedArray(array2);                                    \
+    if (arr_array1.same(arr_array2)) {                          \
+      return ret;                                               \
+    }                                                           \
+  }                                                             \
   user_setup                                                    \
-  Array ret = arr_array1.type(array2, intersect_params);        \
+  ret = arr_array1.type(array2, intersect_params);              \
   if (ret.size()) {                                             \
-    for (ArrayIter iter(args); iter; ++iter) {                 \
+    for (ArrayIter iter(args); iter; ++iter) {                  \
       ret = ret.type(iter.second(), intersect_params);          \
       if (!ret.size()) break;                                   \
     }                                                           \

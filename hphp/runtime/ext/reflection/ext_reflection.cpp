@@ -543,6 +543,14 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
   return String(ret);
 }
 
+static bool HHVM_METHOD(ReflectionFunctionAbstract, isHack) {
+  if (RuntimeOption::EnableHipHopSyntax) {
+    return true;
+  }
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->unit()->isHHFile();
+}
+
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isInternal) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return func->isBuiltin();
@@ -861,7 +869,11 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
                           CopyString);
       ai.setKeyUnconverted(VarNR(strippedName), *val);
     } else {
-      ai.setKeyUnconverted(VarNR(prop.m_name), *val);
+      if (val->isReferenced()) {
+        ai.setRef(VarNR(prop.m_name), *val, false /* = keyConverted */);
+      } else {
+        ai.setKeyUnconverted(VarNR(prop.m_name), *val);
+      }
     }
   }
   return ai.toArray();
@@ -885,6 +897,14 @@ static String HHVM_METHOD(ReflectionClass, getName) {
 static String HHVM_METHOD(ReflectionClass, getParentName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->parentStr();
+}
+
+static bool HHVM_METHOD(ReflectionClass, isHack) {
+  if (RuntimeOption::EnableHipHopSyntax) {
+    return true;
+  }
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  return cls->preClass()->unit()->isHHFile();
 }
 
 static bool HHVM_METHOD(ReflectionClass, isInternal) {
@@ -1357,6 +1377,7 @@ class ReflectionExtension : public Extension {
     HHVM_FE(hphp_set_static_property);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
+    HHVM_ME(ReflectionFunctionAbstract, isHack);
     HHVM_ME(ReflectionFunctionAbstract, isInternal);
     HHVM_ME(ReflectionFunctionAbstract, isGenerator);
     HHVM_ME(ReflectionFunctionAbstract, isAsync);
@@ -1393,6 +1414,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
+    HHVM_ME(ReflectionClass, isHack);
     HHVM_ME(ReflectionClass, isInternal);
     HHVM_ME(ReflectionClass, isInstantiable);
     HHVM_ME(ReflectionClass, isInterface);

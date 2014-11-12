@@ -320,7 +320,7 @@ class Memcached {
    *
    * @param string $server_key -
    * @param string $key - The key of the item to fetch.
-   * @param callable $cache_cb - Read-through caching callback or NULL
+   * @param mixed $cache_cb - Read-through caching callback or NULL
    * @param float $cas_token - The variable to store the CAS token in.
    *
    * @return mixed - Returns the value stored in the cache or FALSE
@@ -330,7 +330,7 @@ class Memcached {
   <<__Native>>
   public function getByKey(string $server_key,
                            string $key,
-                           ?callable $cache_cb = null,
+                           mixed $cache_cb = null,
                            mixed &$cas_token = null): mixed;
 
   /**

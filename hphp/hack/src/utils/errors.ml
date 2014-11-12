@@ -15,8 +15,11 @@ open Utils
 (*****************************************************************************)
 
 type error_code = int
-type message = Pos.t * string
-type error = error_code * message list
+(* We use `Pos.t message` on the server and convert to `Pos.absolute message`
+ * before sending it to the client *)
+type 'a message = 'a * string
+type 'a error_ = error_code * 'a message list
+type error = Pos.t error_
 type t = error list
 
 (*****************************************************************************)
@@ -48,10 +51,9 @@ let add_list code pos_msg_l =
   if !is_hh_fixme pos code then () else
   add_error (code, pos_msg_l)
 
-let get_code (error: error) = ((fst error): error_code)
-let to_list (error: error) = ((snd error): message list)
-let get_pos (error: error) = fst (List.hd (snd error))
-let filename (error: error) = Pos.filename (get_pos error)
+let get_code (error: 'a error_) = ((fst error): error_code)
+let get_pos (error : error) = fst (List.hd (snd error))
+let to_list (error : 'a error_) = snd error
 let make_error (x: (Pos.t * string) list) = ((0, x): error)
 
 (*****************************************************************************)
@@ -372,8 +374,7 @@ let method_name_already_bound pos name =
   "Method name already bound: "^name
  )
 
-let error_name_already_bound hhi_root name name_prev p p_prev =
-  (* hhi_root = *)
+let error_name_already_bound name name_prev p p_prev =
   let name = Utils.strip_ns name in
   let name_prev = Utils.strip_ns name_prev in
   let errs = [
@@ -388,12 +389,10 @@ let error_name_already_bound hhi_root name name_prev p p_prev =
     "typechecker and must be removed from your project. Typically, you can "^
     "do this by deleting the \"hhi\" directory you copied into your "^
     "project when first starting with Hack." in
-  (* unsafe_opt since init stack will refuse to continue if we don't have an
-   * hhi root. *)
   let errs =
-    if str_starts_with p.Pos.pos_file hhi_root
+    if (Relative_path.prefix p.Pos.pos_file) = Relative_path.Hhi
     then errs @ [p_prev, hhi_msg]
-    else if str_starts_with p_prev.Pos.pos_file hhi_root
+    else if (Relative_path.prefix p_prev.Pos.pos_file) = Relative_path.Hhi
     then errs @ [p, hhi_msg]
     else errs in
   add_list Naming.error_name_already_bound errs
@@ -1232,9 +1231,12 @@ let sketchy_null_check_primitive pos =
   "Use is_null, or $x === null instead"
  )
 
-let extend_final position =
-  add Typing.extend_final position
-    "You cannot extend a class declared as final"
+let extend_final extend_pos decl_pos name =
+  let name = (strip_ns name) in
+  add_list Typing.extend_final [
+    extend_pos, ("You cannot extend final class "^name);
+    decl_pos, "Declaration is here"
+  ]
 
 let read_before_write (pos, v) =
   add Typing.read_before_write pos (
@@ -1482,10 +1484,18 @@ let void_usage p reason =
   add_list Typing.void_usage ((p, msg) :: reason)
 
 (*****************************************************************************)
+(* Convert relative paths to absolute. *)
+(*****************************************************************************)
+
+let to_absolute (code, msg_l) =
+  let msg_l = List.map (fun (p, s) -> Pos.to_absolute p, s) msg_l in
+  code, msg_l
+
+(*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)
 
-let to_json ((error_code, msgl) : error) = Hh_json.(
+let to_json ((error_code, msgl) : Pos.absolute error_) = Hh_json.(
   let elts = List.map (fun (p, w) ->
                         let line, scol, ecol = Pos.info_pos p in
                         JAssoc [ "descr", JString w;
@@ -1500,14 +1510,15 @@ let to_json ((error_code, msgl) : error) = Hh_json.(
   JAssoc [ "message", JList elts ]
 )
 
-let to_string ((error_code, msgl) : error) : string =
+let to_string ((error_code, msgl) : Pos.absolute error_) : string =
   let buf = Buffer.create 50 in
   (match msgl with
   | [] -> assert false
   | (pos1, msg1) :: rest_of_error ->
       Buffer.add_string buf begin
         let error_code = error_code_to_string error_code in
-        Printf.sprintf "%s\n%s (%s)\n" (Pos.string pos1) msg1 error_code
+        Printf.sprintf "%s\n%s (%s)\n"
+          (Pos.string pos1) msg1 error_code
       end;
       List.iter begin fun (p, w) ->
         let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in

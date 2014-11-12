@@ -25,7 +25,9 @@ let enforce_not_awaitable env p ty =
   | r, Tapply ((_, awaitable), _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
-  | _ -> ()
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+    | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) -> ()
 
 (* We would like to pretend that the wait_for*() functions are overloaded like
  * function wait_for<T>(Awaitable<T> $a): _AsyncWaitHandle<T>
@@ -55,7 +57,9 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       env, rtyl
     end tyl (env, []) in
     env, (r, Tunresolved rtyl)
-  | _ ->
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+    | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
+    | Tanon (_, _) | Tobject | Tshape _) ->
     let expected_opt_type = r, Toption (r, Tapply ((p, SN.Classes.cAwaitable), [type_var])) in
     let expected_non_opt_type = r, Tapply ((p, SN.Classes.cAwaitable), [type_var]) in
     let expected_type, return_type = (match e_opt_ty with
@@ -63,7 +67,9 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
         expected_opt_type, (r, Toption type_var)
       | _, Tany ->
         expected_non_opt_type, (r, Tany)
-      | _ ->
+      | _, (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _ | Tfun _
+        | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+        | Tunresolved _ | Tobject | Tshape _)->
         expected_non_opt_type, type_var) in
     let env = Type.sub_type p Reason.URawait env expected_type opt_ty_maybe in
     env, return_type
@@ -132,7 +138,9 @@ let rec gen_array_rec env p ty =
         end tyl (env, []) in
         env, (r, Tunresolved rtyl)
       end
-      | _ -> overload_extract_from_awaitable env p ety
+      | _, (Tany | Tmixed | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
+        | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Tanon (_, _) | Tobject
+        | Tshape _) -> overload_extract_from_awaitable env p ety
   end in
   match snd (TUtils.fold_unresolved env ty) with
   | r, Tarray (Some vty, None) ->
@@ -142,7 +150,9 @@ let rec gen_array_rec env p ty =
     let env, vty = is_array env vty in
     env, (r, Tarray (kty, Some vty))
   | r, Ttuple tyl -> gen_array_va_rec env p tyl
-  | _ -> gena env p ty
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+    | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _)
+    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) -> gena env p ty
 
 and gen_array_va_rec env p tyl =
   (* For each item in the type list, treat it differently *)
@@ -154,7 +164,9 @@ and gen_array_va_rec env p tyl =
       env, (r, Toption opt_ty)
     | _, Tarray _ -> gen_array_rec env p ty
     | _, Ttuple tyl -> genva env p tyl
-    | _, _ ->
+    | _, (Tany | Tmixed | Tprim _ | Tgeneric (_, _) | Tvar _ | Tfun _
+      | Tabstract (_, _, _) | Tapply (_, _) | Tanon (_, _) | Tunresolved _
+      | Tobject | Tshape _) ->
       overload_extract_from_awaitable env p ty) in
 
   let env, rtyl = List.fold_right begin fun ty (env, rtyl) ->

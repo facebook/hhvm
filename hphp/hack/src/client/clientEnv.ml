@@ -41,4 +41,5 @@ type client_check_env = {
   retries: int;
   timeout: float option;
   autostart: bool;
+  server_options_cmd: string option;
 }

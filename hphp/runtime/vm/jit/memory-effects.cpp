@@ -23,9 +23,24 @@
 
 namespace HPHP { namespace jit {
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 
-namespace {
+MemEffects read_ptr(const SSATmp* locPtr) {
+  if (!locPtr->type().maybe(Type::PtrToFrameGen)) {
+    return IrrelevantEffects {};
+  }
+
+  // We can figure out which one it might read if we can see a LdLocAddr.
+  auto const sinst = canonical(locPtr)->inst();
+  if (sinst->is(LdLocAddr)) {
+    return ReadLocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
+  }
+
+  // As far as we can prove so far it may point at any of them.
+  return ReadAllLocals {};
+}
 
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
@@ -178,11 +193,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInit:
   case MIterInit:
   case WIterInit:
-    return ReadLocal { inst.src(1), inst.extra<IterData>()->keyId };
+    return ReadLocal { inst.src(1), inst.extra<IterData>()->valId };
   case IterNext:
   case MIterNext:
   case WIterNext:
-    return ReadLocal { inst.src(0), inst.extra<IterData>()->keyId };
+    return ReadLocal { inst.src(0), inst.extra<IterData>()->valId };
 
   case IterInitK:
   case MIterInitK:
@@ -201,23 +216,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId
     };
-
-  case DbgAssertPtr:
-    if (inst.src(0)->inst()->is(LdStackAddr)) {
-      return IrrelevantEffects {};
-    }
-    return UnknownEffects {};
-  case ProfileStr:
-    {
-      auto const sinst = inst.src(0)->inst();
-      if (sinst->is(LdLocAddr)) {
-        return ReadLocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
-      }
-      if (sinst->is(LdStackAddr)) {
-        return IrrelevantEffects {};
-      }
-      return UnknownEffects {};
-    }
 
   case ABCUnblock:
   case AbsDbl:
@@ -246,7 +244,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BaseG:
   case BeginCatch:
   case Box:
-  case BoxPtr:
   case CastStk:
   case CastStkIntToDbl:
   case Ceil:
@@ -254,19 +251,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckCold:
   case CheckDefinedClsEq:
   case CheckInit:
-  case CheckInitMem:
   case CheckInitProps:
   case CheckInitSProps:
   case CheckNonNull:
   case CheckNullptr:
   case CheckPackedArrayBounds:
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
   case CheckRefs:
   case CheckStaticLocInit:
   case CheckStk:
   case CheckSurpriseFlags:
   case CheckType:
+  case CheckTypePackedArrayElem:
   case CIterFree:
   case Clone:
   case ClosureStaticLocInit:
@@ -339,7 +334,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgAssertType:
   case DecodeCufIter:
   case DecRef:
-  case DecRefMem:
   case DecRefNZ:
   case DecRefStack:
   case DecRefThis:
@@ -375,6 +369,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GuardRefs:
   case GuardStk:
   case Halt:
+  case HintLocInner:
+  case HintStkInner:
   case IncProfCounter:
   case IncRef:
   case IncRefCtx:
@@ -394,10 +390,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:
   case IsNType:
-  case IsNTypeMem:
+  case IsPackedArrayElemNull:
   case IsScalarType:
   case IsType:
-  case IsTypeMem:
   case IsWaitHandle:
   case IterFree:
   case Jmp:
@@ -449,7 +444,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdContField:
   case LdContResumeAddr:
   case LdCtx:
-  case LdElem:
   case LdFunc:
   case LdFuncCached:
   case LdFuncCachedSafe:
@@ -562,9 +556,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StContArResume:
   case StContArState:
   case StContArValue:
-  case StElem:
   case StLocPseudoMain:
-  case StMem:
   case StProp:
   case StRef:
   case StRetVal:
@@ -573,7 +565,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SubDbl:
   case SubInt:
   case SubIntO:
-  case SurpriseHook:
   case SyncABIRegs:
   case TakeRef:
   case TakeStack:
@@ -589,60 +580,76 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ZeroErrorLevel:
     return IrrelevantEffects {};
 
+  case StElem:
+  case StMem:
+    // We never generate this to write to locals, but we aren't precise about
+    // tracking writes right now so it's irrelevant in any case.
+    return IrrelevantEffects {};
+
   /*
-   * Some instructions can read locals only if they have an initial argument
-   * that points at a local address.  There are ir.spec rules ensuring that the
-   * only case this is allowed to point to a local is when the source comes
-   * canonically from a LdLocAddr.
+   * Various opcodes that take a PtrToGen in src 0, which may or may not alias
+   * frame locals.  Right now we can rule this out only if it has a pointer
+   * type that can't include pointers to the frame.
    */
-  case CheckTypeMem:
-  case LdMem:
-  case CGetProp:
-  case UnboxPtr:
-  case PropX:
-  case UnsetProp:
+  case BoxPtr:
   case CGetElem:
+  case CheckInitMem:
+  case CheckTypeMem:
+  case DbgAssertPtr:
+  case DecRefMem:
   case ElemArray:
   case ElemArrayW:
   case ElemX:
   case EmptyElem:
-  case EmptyProp:
+  case IsNTypeMem:
   case IssetElem:
-  case IssetProp:
+  case IsTypeMem:
+  case LdMem:
+  case LdElem:
+  case ProfileStr:
+  case UnboxPtr:
   case BindElem:              case BindElemStk:
   case BindNewElem:           case BindNewElemStk:
-  case BindProp:              case BindPropStk:
   case ElemDX:                case ElemDXStk:
   case ElemUX:                case ElemUXStk:
   case IncDecElem:            case IncDecElemStk:
-  case IncDecProp:            case IncDecPropStk:
-  case PropDX:                case PropDXStk:
   case SetElem:               case SetElemStk:
-  case SetNewElem:            case SetNewElemStk:
   case SetNewElemArray:       case SetNewElemArrayStk:
+  case SetNewElem:            case SetNewElemStk:
   case SetOpElem:             case SetOpElemStk:
-  case SetOpProp:             case SetOpPropStk:
-  case SetProp:               case SetPropStk:
   case SetWithRefElem:        case SetWithRefElemStk:
   case SetWithRefNewElem:     case SetWithRefNewElemStk:
   case UnsetElem:             case UnsetElemStk:
   case VGetElem:              case VGetElemStk:
+    assert(inst.src(0)->type() <= Type::PtrToGen);
+    return read_ptr(inst.src(0));
+
+  case CGetProp:
+  case EmptyProp:
+  case IssetProp:
+  case PropX:
+  case UnsetProp:
+  case BindProp:              case BindPropStk:
+  case IncDecProp:            case IncDecPropStk:
+  case PropDX:                case PropDXStk:
+  case SetOpProp:             case SetOpPropStk:
+  case SetProp:               case SetPropStk:
   case VGetProp:              case VGetPropStk:
-    {
-      auto const sinst = canonical(inst.src(0))->inst();
-      if (sinst->is(LdLocAddr)) {
-        return ReadLocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
-      }
-      return IrrelevantEffects {};
+    if (inst.src(0)->type().maybe(Type::PtrToGen)) {
+      return read_ptr(inst.src(0));
     }
+    // Some of these support Obj in this first arg, which we don't try to
+    // report anything about here yet.
+    return IrrelevantEffects {};
+
   }
 
   not_reached();
 }
 
-}
-
 //////////////////////////////////////////////////////////////////////
+
+}
 
 MemEffects memory_effects(const IRInstruction& inst) {
   auto const ret = memory_effects_impl(inst);

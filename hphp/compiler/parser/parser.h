@@ -168,6 +168,8 @@ public:
   void onObjectMethodCall(Token &out, Token &base, bool nullsafe, Token &prop,
                           Token &params);
 
+  void checkAllowedInWriteContext(ExpressionPtr e);
+
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);
   void onAListVar(Token &out, Token *list, Token *var);
@@ -248,6 +250,7 @@ public:
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
+  void onHashBang(Token &out, Token &text);
   void onEcho(Token &out, Token &expr, bool html);
   void onUnset(Token &out, Token &expr);
   void onExpStatement(Token &out, Token &expr);
@@ -430,6 +433,8 @@ private:
 
   void checkAssignThis(Token &var);
 
+  void checkAssignThis(ExpressionPtr e);
+
   void checkAssignThis(ExpressionListPtr params);
 
   void addStatement(StatementPtr stmt, StatementPtr new_stmt);
@@ -489,6 +494,7 @@ private:
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
   AliasTable m_nsAliasTable;
+  std::vector<uint32_t> m_nsStack;
 
   // Function aliases
   hphp_string_iset m_fnTable;

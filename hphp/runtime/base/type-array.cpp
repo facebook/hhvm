@@ -480,53 +480,57 @@ Variant Array::rvalAt(const String& key, ACCESSPARAMS_IMPL) const {
 const Variant& Array::rvalAtRef(const Variant& key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.getRawType()) {
-  case KindOfUninit:
-  case KindOfNull:
-    return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
-  case KindOfBoolean:
-  case KindOfInt64:
-    return m_px->get(key.asTypedValue()->m_data.num,
-      flags & AccessFlags::Error);
-  case KindOfDouble:
-    return m_px->get((int64_t)key.asTypedValue()->m_data.dbl,
-      flags & AccessFlags::Error);
-  case KindOfStaticString:
-  case KindOfString:
-    {
-      int64_t n;
-      if (!(flags & AccessFlags::Key) &&
-          key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
-        if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
-          if (m_px->isVPackedArray()) {
-            PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-          } else {
-            MixedArray::warnUsage(MixedArray::Reason::kNumericString,
-                                  ArrayData::kIntMapKind);
-          }
-        }
+    case KindOfUninit:
+    case KindOfNull:
+      return m_px->get(staticEmptyString(), flags & AccessFlags::Error);
 
-        return m_px->get(n, flags & AccessFlags::Error);
+    case KindOfBoolean:
+    case KindOfInt64:
+      return m_px->get(key.asTypedValue()->m_data.num,
+                       flags & AccessFlags::Error);
+
+    case KindOfDouble:
+      return m_px->get((int64_t)key.asTypedValue()->m_data.dbl,
+                       flags & AccessFlags::Error);
+
+    case KindOfStaticString:
+    case KindOfString:
+      {
+        int64_t n;
+        if (!(flags & AccessFlags::Key) &&
+            key.asTypedValue()->m_data.pstr->isStrictlyInteger(n)) {
+          if (UNLIKELY(m_px->isVPackedArrayOrIntMapArray())) {
+            if (m_px->isVPackedArray()) {
+              PackedArray::warnUsage(PackedArray::Reason::kGetStr);
+            } else {
+              MixedArray::warnUsage(MixedArray::Reason::kNumericString,
+                                    ArrayData::kIntMapKind);
+            }
+          }
+
+          return m_px->get(n, flags & AccessFlags::Error);
+        }
       }
-    }
-    if (UNLIKELY(m_px->isVPackedArray())) {
-      PackedArray::warnUsage(PackedArray::Reason::kGetStr);
-    }
-    return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
-  case KindOfArray:
-    throw_bad_type_exception("Invalid type used as key");
-    break;
-  case KindOfObject:
-    throw_bad_type_exception("Invalid type used as key");
-    break;
-  case KindOfResource:
-    return m_px->get(key.toInt64(), flags & AccessFlags::Error);
-  case KindOfRef:
-    return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
-  default:
-    assert(false);
-    break;
+      if (UNLIKELY(m_px->isVPackedArray())) {
+        PackedArray::warnUsage(PackedArray::Reason::kGetStr);
+      }
+      return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
+
+    case KindOfArray:
+    case KindOfObject:
+      throw_bad_type_exception("Invalid type used as key");
+      return null_variant;
+
+    case KindOfResource:
+      return m_px->get(key.toInt64(), flags & AccessFlags::Error);
+
+    case KindOfRef:
+      return rvalAtRef(*(key.asTypedValue()->m_data.pref->var()), flags);
+
+    case KindOfClass:
+      break;
   }
-  return null_variant;
+  not_reached();
 }
 
 Variant Array::rvalAt(const Variant& key, ACCESSPARAMS_IMPL) const {
@@ -669,12 +673,9 @@ bool Array::exists(const String& key, bool isKey /* = false */) const {
 }
 
 bool Array::exists(const Variant& key, bool isKey /* = false */) const {
-  switch(key.getType()) {
-  case KindOfBoolean:
-  case KindOfInt64:
+  if (IS_BOOL_TYPE(key.getType()) ||
+      IS_INT_TYPE(key.getType())) {
     return existsImpl(key.toInt64());
-  default:
-    break;
   }
   if (isKey) return existsImpl(key);
   VarNR k(key.toKey());
@@ -693,13 +694,10 @@ void Array::remove(const String& key, bool isString /* = false */) {
 }
 
 void Array::remove(const Variant& key) {
-  switch(key.getType()) {
-  case KindOfBoolean:
-  case KindOfInt64:
+  if (IS_BOOL_TYPE(key.getType()) ||
+      IS_INT_TYPE(key.getType())) {
     removeImpl(key.toInt64());
     return;
-  default:
-    break;
   }
   VarNR k(key.toKey());
   if (!k.isNull()) {

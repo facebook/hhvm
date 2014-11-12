@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 (*****************************************************************************)
 (* Dependencies *)
 (*****************************************************************************)
@@ -57,7 +55,10 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
-let neutral = (SMap.empty, [], SSet.empty, SSet.empty)
+let neutral = (
+  Relative_path.Map.empty, [],
+  Relative_path.Set.empty, Relative_path.Set.empty
+  )
 
 let empty_file_info : FileInfo.t = {
   FileInfo.funs = [];
@@ -89,7 +90,7 @@ let legacy_php_file_info = ref (fun fn ->
 (* Parsing a file without failing
  * acc is a file_info
  * errorl is a list of errors
- * error_files is SSet.t of files that we failed to parse
+ * error_files is Relative_path.Set.t of files that we failed to parse
  *)
 let parse (acc, errorl, error_files, php_files) fn =
   let errorl', {Parser_hack.is_hh_file; comments; ast} =
@@ -106,19 +107,19 @@ let parse (acc, errorl, error_files, php_files) fn =
       {FileInfo.funs; classes; types; consts; comments;
        consider_names_just_for_autoload = false}
     in
-    let acc = SMap.add fn defs acc in
+    let acc = Relative_path.Map.add fn defs acc in
     let errorl = List.rev_append errorl' errorl in
     let error_files =
       if errorl' = []
       then error_files
-      else SSet.add fn error_files
+      else Relative_path.Set.add fn error_files
     in
     acc, errorl, error_files, php_files
   end
   else begin
     let info = try !legacy_php_file_info fn with _ -> empty_file_info in
-    let acc = SMap.add fn info acc in
-    let php_files = SSet.add fn php_files in
+    let acc = Relative_path.Map.add fn info acc in
+    let php_files = Relative_path.Set.add fn php_files in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
      *)
@@ -129,9 +130,10 @@ let parse (acc, errorl, error_files, php_files) fn =
 let merge_parse
     (acc1, status1, files1, pfiles1)
     (acc2, status2, files2, pfiles2) =
-  SMap.fold SMap.add acc1 acc2, List.rev_append status1 status2,
-  SSet.union files1 files2,
-  SSet.union pfiles1 pfiles2
+  Relative_path.Map.fold Relative_path.Map.add acc1 acc2,
+  List.rev_append status1 status2,
+  Relative_path.Set.union files1 files2,
+  Relative_path.Set.union pfiles1 pfiles2
 
 let parse_files acc fnl =
   List.fold_left parse acc fnl
@@ -151,5 +153,6 @@ let parse_parallel workers get_next =
 let go workers ~get_next =
   let fast, errorl, failed_parsing, php_files =
     parse_parallel workers get_next in
-  Parsing_hooks.dispatch_parse_task_completed_hook (SMap.keys fast) php_files;
+  Parsing_hooks.dispatch_parse_task_completed_hook
+    (Relative_path.Map.keys fast) php_files;
   fast, errorl, failed_parsing

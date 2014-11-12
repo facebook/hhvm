@@ -28,6 +28,11 @@ let dn s =
     flush stdout;
   end
 
+module String = struct
+  include String
+  let to_string x = x
+end
+
 module type MapSig = sig
   type +'a t
   type key
@@ -96,7 +101,6 @@ module MyMap: functor (Ord: Map.OrderedType)
 
 module SMap = MyMap(String)
 module IMap = MyMap(Ident)
-module PMap = MyMap(Pos)
 module ISet = Set.Make(Ident)
 module SSet = Set.Make(String)
 module CSet = Set.Make(Char)
@@ -263,9 +267,13 @@ let maybe f env = function
   | None -> ()
   | Some x -> f env x
 
-let unsafe_opt = function
-  | None -> raise (Invalid_argument "unsafe_opt got None")
+(* Since OCaml usually runs w/o backtraces enabled, the note makes errors
+ * easier to debug. *)
+let unsafe_opt_note note = function
+  | None -> raise (Invalid_argument note)
   | Some x -> x
+
+let unsafe_opt x = unsafe_opt_note "unsafe_opt got None" x
 
 let liter f env l = List.iter (f env) l
 
@@ -362,3 +370,5 @@ let rev_rev_map f l = List.rev (List.rev_map f l)
 
 let fold_fun_list acc fl =
   List.fold_left (|>) acc fl
+
+let compose f g x = f (g x)

@@ -828,11 +828,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
                      "__sleep() but does not exist", propName.data());
         wanted.set(propName, init_null());
       }
-      serializer->setObjectInfo(o_getClassName(), o_getId(), 'O');
+      serializer->pushObjectInfo(o_getClassName(), o_getId(), 'O');
       if (!serializableNativeData.isNull()) {
         wanted.set(s_serializedNativeDataKey, serializableNativeData);
       }
       wanted.serialize(serializer, true);
+      serializer->popObjectInfo();
     } else {
       raise_notice("serialize(): __sleep should return an array only "
                    "containing the names of instance-variables to "
@@ -842,6 +843,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
   } else {
     if (isCollection()) {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
+    } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
+               instanceof(c_Closure::classof())) {
+      serializer->write(o_getClassName());
     } else {
       auto className = o_getClassName();
       Array properties = getSerializeProps(this, serializer);
@@ -870,17 +874,19 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* cname = const_cast<ObjectData*>(this)-> // XXX
           o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
-          serializer->setObjectInfo(cname->toCStrRef(), o_getId(), 'O');
+          serializer->pushObjectInfo(cname->toCStrRef(), o_getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           properties.serialize(serializer, true);
+          serializer->popObjectInfo();
           return;
         }
       }
-      serializer->setObjectInfo(className, o_getId(), 'O');
+      serializer->pushObjectInfo(className, o_getId(), 'O');
       if (!serializableNativeData.isNull()) {
         properties.set(s_serializedNativeDataKey, serializableNativeData);
       }
       properties.serialize(serializer, true);
+      serializer->popObjectInfo();
     }
   }
 }
@@ -1414,7 +1420,7 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   return tv.m_data.num;
 }
 
-bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
+bool ObjectData::propEmptyImpl(Class* ctx, const StringData* key) {
   bool visible, accessible, unset;
   auto propVal = getProp(ctx, key, visible, accessible, unset);
   if (visible && accessible && !unset) {
@@ -1437,6 +1443,15 @@ bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
     }
   }
   return false;
+}
+
+bool ObjectData::propEmpty(Class* ctx, const StringData* key) {
+  if (UNLIKELY(getAttribute(HasPropEmpty))) {
+    if (instanceof(c_SimpleXMLElement::classof())) {
+      return c_SimpleXMLElement::PropEmpty(this, key);
+    }
+  }
+  return propEmptyImpl(ctx, key);
 }
 
 void ObjectData::setProp(Class* ctx,

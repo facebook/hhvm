@@ -64,15 +64,19 @@ StringSlice conv_10(int64_t num, char* buf_end) {
 }
 
 DataType is_numeric_string(const char *str, int length, int64_t *lval,
-                           double *dval, int allow_errors /* = 0 */) {
+                           double *dval, int allow_errors /* = 0 */,
+                           int* overflow_info /* = nullptr */) {
   DataType type;
   const char *ptr;
-  int base = 10, digits = 0, dp_or_e = 0;
+  int base = 10, digits = 0, dp_or_e = 0, info_unused;
   double local_dval = 0.0;
+  int& overflow = overflow_info ? *overflow_info : info_unused;
 
   if (!length || ((unsigned char)(*str)) > '9') {
     return KindOfNull;
   }
+
+  overflow = 0;
 
   /* Skip any whitespace
    * This is much faster than the isspace() function */
@@ -133,6 +137,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
 
     if (base == 10) {
       if (digits >= MAX_LENGTH_OF_LONG) {
+        overflow = *str == '-' ? -1 : 1;
         dp_or_e = -1;
         goto process_double;
       }
@@ -141,6 +146,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
       if (dval) {
         local_dval = zend_hex_strtod(str, (const char **)&ptr);
       }
+      overflow = 1;
       type = KindOfDouble;
     }
   } else if (*ptr == '.' && IS_DIGIT(ptr[1])) {
@@ -175,6 +181,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
         if (dval) {
           *dval = strtod(str, nullptr);
         }
+        overflow = *str == '-' ? -1 : 1;
         return KindOfDouble;
       }
     }

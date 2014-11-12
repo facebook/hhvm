@@ -263,15 +263,14 @@ private:
 
   static void compileTimeAsserts();
 
+private:
 #if defined(DEBUG) || defined(PACKED_TV)
   Magic m_magic;
   UNUSED uint8_t m_padding;
   mutable uint8_t m_cow;
   mutable uint8_t m_z;
   UNUSED uint8_t m_kind;
- public:
   mutable RefCount m_count;
- private:
   TypedValue m_tv;
 #else
 // count comes after actual TypedValue, overlapping TypedValue.m_aux
@@ -283,7 +282,6 @@ private:
       mutable uint8_t m_cow;
       mutable uint8_t m_z;
       UNUSED uint8_t m_kind;
- public:
       mutable RefCount m_count; // refcount field
     };
   };

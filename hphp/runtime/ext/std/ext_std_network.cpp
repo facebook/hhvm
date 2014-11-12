@@ -24,6 +24,7 @@
 #include <resolv.h>
 
 #include "folly/ScopeGuard.h"
+#include "folly/IPAddress.h"
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
@@ -156,6 +157,8 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
   return ip_address;
 }
 
+const StaticString s_empty("");
+
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
 
@@ -166,7 +169,11 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
 
   struct in_addr in;
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
-  return String(safe_inet_ntoa(in));
+  try {
+    return String(folly::IPAddressV4(in).str());
+  } catch (folly::IPAddressFormatException &e) {
+    return hostname;
+  }
 }
 
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
@@ -179,7 +186,11 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
   Array ret;
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
-    ret.append(String(safe_inet_ntoa(in)));
+    try {
+      ret.append(String(folly::IPAddressV4(in).str()));
+    } catch (folly::IPAddressFormatException &e) {
+        // ok to skip
+    }
   }
   return ret;
 }
@@ -274,9 +285,11 @@ Variant HHVM_FUNCTION(ip2long, const String& ip_address) {
 }
 
 String HHVM_FUNCTION(long2ip, int64_t proper_address) {
-  struct in_addr myaddr;
-  myaddr.s_addr = htonl(proper_address);
-  return safe_inet_ntoa(myaddr);
+  try {
+    return folly::IPAddress::fromLongHBO(proper_address).str();
+  } catch (folly::IPAddressFormatException &e) {
+    return s_empty;
+  }
 }
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
@@ -927,10 +940,11 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     const char *header_line = header.data();
 
     // handle single line of status code
-    if (header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if ((header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) ||
+        (header.size() >= 7 && strncasecmp(header_line, "Status:", 7) == 0)) {
       int code = 200;
       const char *reason = nullptr;
-      for (const char *ptr = header_line; *ptr; ptr++) {
+      for (const char *ptr = header_line + 5; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
           code = atoi(ptr + 1);
           for (ptr++; *ptr; ptr++) {
@@ -1053,7 +1067,7 @@ void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
   }
 }
 
-int HHVM_FUNCTION(get_http_request_size) {
+int64_t HHVM_FUNCTION(get_http_request_size) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     return transport->getRequestSize();

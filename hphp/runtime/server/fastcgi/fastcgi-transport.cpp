@@ -23,7 +23,7 @@
 #include "folly/io/IOBufQueue.h"
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "thrift/lib/cpp/async/TAsyncTimeout.h" // @nolint
-#include "thrift/lib/cpp/transport/TSocketAddress.h" // @nolint
+#include "folly/SocketAddress.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 #include "folly/MoveWrapper.h"
@@ -495,7 +495,7 @@ void FastCGITransport::onHeadersComplete() {
       m_pathTranslated = m_pathTranslated.substr(m_documentRoot.length());
     }
   }
-  
+
   if (!m_scriptFilename.empty()) {
     if (m_scriptFilename.find(m_documentRoot) == 0) {
       m_scriptFilename = m_scriptFilename.substr(m_documentRoot.length());
@@ -515,4 +515,3 @@ void FastCGITransport::onHeadersComplete() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

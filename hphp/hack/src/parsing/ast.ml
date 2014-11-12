@@ -163,6 +163,7 @@ and method_ = {
   m_body: block;
   m_user_attributes : user_attribute SMap.t;
   m_ret: hint option;
+  m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
 }
 
@@ -187,6 +188,7 @@ and fun_ = {
   f_mode            : mode;
   f_tparams         : tparam list;
   f_ret             : hint option;
+  f_ret_by_ref      : bool;
   f_name            : id;
   f_params          : fun_param list;
   f_body            : block;
@@ -270,8 +272,9 @@ and expr_ =
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
   | New of id * expr list * expr list
-  (* Traditional PHP-style closure with a use list. *)
-  | Efun of fun_ * id list
+  (* Traditional PHP-style closure with a use list. Each use element is
+    a name and a bool indicating if its a reference or value *)
+  | Efun of fun_ * (id * bool) list
   (*
    * Hack-style lambda expressions (no id list, we'll find the captures
    * during name resolution).
@@ -280,6 +283,7 @@ and expr_ =
   | Xml of id * (id * expr) list * expr list
   | Unsafeexpr of expr
   | Import of import_flavor * expr
+  | Ref of expr
 
 and import_flavor =
   | Include

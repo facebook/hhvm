@@ -1028,25 +1028,31 @@ static Variant to_zval_double(encodeTypePtr type, xmlNodePtr data) {
       int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
       String content((char*)data->children->content, CopyString);
-      switch (is_numeric_string((const char *)data->children->content,
-                                data->children->content ?
-                                strlen((char*)data->children->content) : 0,
-                                &lval, &dval, 0)) {
-      case KindOfInt64:  ret = lval; break;
-      case KindOfDouble: ret = dval; break;
-      default:
+
+      auto dt = is_numeric_string((const char *)data->children->content,
+                                  data->children->content ?
+                                  strlen((char*)data->children->content) : 0,
+                                  &lval, &dval, 0);
+      if (IS_INT_TYPE(dt)) {
+        ret = lval;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        ret = dval;
+      } else {
         if (data->children->content) {
           if (strcasecmp((const char *)data->children->content, "NaN") == 0) {
-            ret = atof("nan"); break;
+            ret = atof("nan");
           } else if (strcasecmp((const char *)data->children->content, "INF")
                      == 0) {
-            ret = atof("inf"); break;
+            ret = atof("inf");
           } else if (strcasecmp((const char *)data->children->content, "-INF")
                      == 0) {
-            ret = -atof("inf"); break;
+            ret = -atof("inf");
+          } else {
+            throw SoapException("Encoding: Violation of encoding rules");
           }
+        } else {
+          throw SoapException("Encoding: Violation of encoding rules");
         }
-        throw SoapException("Encoding: Violation of encoding rules");
       }
     } else {
       throw SoapException("Encoding: Violation of encoding rules");
@@ -1063,13 +1069,16 @@ static Variant to_zval_long(encodeTypePtr type, xmlNodePtr data) {
         data->children->next == NULL) {
       int64_t lval; double dval;
       whiteSpace_collapse(data->children->content);
-      switch (is_numeric_string((const char *)data->children->content,
-                                data->children->content ?
-                                strlen((char*)data->children->content) : 0,
-                                &lval, &dval, 0)) {
-      case KindOfInt64:  ret = (int64_t)lval; break;
-      case KindOfDouble: ret = dval; break;
-      default:
+
+      auto dt = is_numeric_string((const char *)data->children->content,
+                                  data->children->content ?
+                                  strlen((char*)data->children->content) : 0,
+                                  &lval, &dval, 0);
+      if (IS_INT_TYPE(dt)) {
+        ret = (int64_t)lval;
+      } else if (IS_DOUBLE_TYPE(dt)) {
+        ret = dval;
+      } else {
         throw SoapException("Encoding: Violation of encoding rules");
       }
     } else {

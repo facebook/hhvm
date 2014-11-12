@@ -207,14 +207,12 @@ private:
   }
 
   void realDecRef() const {
-    assert(m_count.load());
+    assert(m_count.load() > 0);
     if (m_count > 1) {
       assert(IS_REFCOUNTED_TYPE(m_type));
-      --m_count;
-    } else {
-      assert(m_count.load() == 1);
-      const_cast<APCHandle*>(this)->deleteShared();
+      if (--m_count) return;
     }
+    const_cast<APCHandle*>(this)->deleteShared();
   }
 
   void deleteShared();

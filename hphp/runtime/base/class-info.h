@@ -298,10 +298,15 @@ public:
         return *(Object*)addr;
       case KindOfResource:
         return *(Resource*)addr;
-      default:
-        assert(false);
-        return uninit_null();
+
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfStaticString:
+      case KindOfRef:
+      case KindOfClass:
+        break;
     }
+    not_reached();
   }
 
 public:

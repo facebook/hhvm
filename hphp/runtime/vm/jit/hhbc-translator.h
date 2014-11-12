@@ -48,7 +48,6 @@ enum JmpFlags {
   JmpFlagNone        = 0,
   JmpFlagEndsRegion  = 1,
   JmpFlagNextIsMerge = 2,
-  JmpFlagSurprise    = 4
 };
 
 inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
@@ -295,8 +294,9 @@ public:
   void emitUnbox();
   void emitJmpZ(Offset taken, JmpFlags);
   void emitJmpNZ(Offset taken, JmpFlags);
-  void emitJmpImpl(int32_t offset, JmpFlags, Block* catchBlock);
+  void jmpImpl(int32_t offset, JmpFlags);
   void emitJmp(int32_t offset, JmpFlags);
+  void emitJmpNS(int32_t offset, JmpFlags);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -620,6 +620,7 @@ private:
     // Misc Helpers
     void numberStackInputs();
     void setNoMIState() { m_needMIS = false; }
+    void setBase(SSATmp*, folly::Optional<Type> = folly::none);
     SSATmp* genMisPtr();
     SSATmp* getInput(unsigned i, TypeConstraint tc);
     SSATmp* getBase(TypeConstraint tc);
@@ -667,7 +668,7 @@ private:
       // simple opcode on Map* (c_Pair*)
       Pair
     };
-    SimpleOp simpleCollectionOp();
+    SimpleOp computeSimpleCollectionOp();
     // Returns true if it successfully constrained the base, false otherwise.
     bool constrainCollectionOpBase();
     void specializeBaseIfPossible(Type baseType);
@@ -704,10 +705,29 @@ private:
     /* The base for any accesses to the current MInstrState. */
     SSATmp* m_misBase;
 
-    /* The value of the base for the next member operation. Starts as the base
+    /*
+     * The value of the base for the next member operation. Starts as the base
      * for the whole instruction and is updated as the translator makes
-     * progress. */
-    SSATmp* m_base;
+     * progress.
+     *
+     * We have a separate type in case we have more information about the type
+     * than m_base.value->type() has (this may be the case with pointers to
+     * locals or stack slots right now, for example). If m_base.value is not
+     * nullptr, m_base.value->type() is always a supertype of m_base.type, and
+     * m_base.type is always large enough to accommodate the type the base ends
+     * up having at runtime.
+     *
+     * Don't change m_base directly; use setBase, to update m_base.type
+     * automatically.
+     */
+    struct {
+      SSATmp* value = nullptr;
+      Type type{Type::Bottom};
+    } m_base;
+
+    /* Value computed before we do anything to allow better translations for
+     * common, simple operations. */
+    SimpleOp m_simpleOp{SimpleOp::None};
 
     /* The result of the vector instruction. nullptr if the current instruction
      * doesn't produce a result. */
@@ -762,7 +782,7 @@ private:
   void emitDecRefLocalsInline();
   void emitRet(Type type);
   void emitCmp(Opcode opc);
-  void emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
+  void jmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   void emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
@@ -772,7 +792,6 @@ private:
   template<class Lambda>
   void emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
-  void emitJmpSurpriseCheck(Block* catchBlock);
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
@@ -785,9 +804,8 @@ private:
   interpOutputLocals(const NormalizedInstruction&, bool& smashAll,
                      folly::Optional<Type> pushedType);
 
-  template<typename G, typename L>
-  void emitProfiledGuard(Type t, const char* location, int32_t id, G doGuard,
-                         L loadAddr);
+  enum class ProfGuard { GuardLoc, CheckLoc, GuardStk, CheckStk };
+  void emitProfiledGuard(Type, ProfGuard, int32_t, Block* = nullptr);
 
   bool optimizedFCallBuiltin(const Func* func, uint32_t numArgs,
                              uint32_t numNonDefault);
@@ -916,7 +934,7 @@ private:
                          int64_t extraOffset = 0);
   SSATmp* spillStack();
   void    exceptionBarrier();
-  SSATmp* ldStackAddr(int32_t offset, TypeConstraint tc);
+  SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
   void    replace(uint32_t index, SSATmp* tmp);
 
@@ -930,7 +948,7 @@ private:
   SSATmp* ldLoc(uint32_t id,
                 Block* ldPMExit,
                 TypeConstraint constraint);
-  SSATmp* ldLocAddr(uint32_t id, TypeConstraint constraint);
+  SSATmp* ldLocAddr(uint32_t id);
   SSATmp* ldLocInner(uint32_t id,
                      Block* ldrefExit,
                      Block* ldPMExit,

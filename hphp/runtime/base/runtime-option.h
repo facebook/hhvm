@@ -109,7 +109,8 @@ public:
   static std::string ServerType;
   static std::string ServerIP;
   static std::string ServerFileSocket;
-  static std::string ServerPrimaryIP;
+  static std::string ServerPrimaryIPv4;
+  static std::string ServerPrimaryIPv6;
   static int ServerPort;
   static int ServerPortFd;
   static int ServerBacklog;
@@ -337,6 +338,7 @@ public:
   static bool EnableObjDestructCall;
   static bool EnableEmitSwitch;
   static bool EnableEmitterStats;
+  static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static int MaxUserFunctionId;
   static bool EnableArgsInBacktraces;
@@ -394,11 +396,18 @@ public:
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
-     0 - no checks or enforcement
-     1 - raises E_WARNING if regular type hint or soft type hint fails
-     2 - raises E_RECOVERABLE_ERROR if regular type hint fails, raises
-         E_WARNING if soft type hint fails; note that in repo mode the
-         error handler is not allowed to resume on recoverable errors */ \
+     0 - No checks or enforcement for return type hints.
+     1 - Raises E_WARNING if a return type hint fails.
+     2 - Raises E_RECOVERABLE_ERROR if regular return type hint fails,
+         raises E_WARNING if soft return type hint fails. If a regular
+         return type hint fails, it's possible for execution to resume
+         normally if the user error handler doesn't throw and returns
+         something other than boolean false.
+     3 - Same as 2, except if a regular type hint fails the runtime
+         will not allow execution to resume normally; if the user
+         error handler returns something other than boolean false,
+         the runtime will throw a fatal error (this goes together
+         with Option::HardReturnTypeHints). */                          \
   F(int32_t, CheckReturnTypeHints,     2)                               \
   F(bool, SoftClosureReturnTypeHints,  true)                            \
   /* HackArrayWarnFrequency:
@@ -451,7 +460,7 @@ public:
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRJumpOpts,                true)                            \
-  F(bool, HHIRRefcountOpts,            true)                            \
+  F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
   F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \

@@ -37,12 +37,12 @@ module TypingSuggestFastStore = GlobalStorage.Make(struct
 end)
 
 let insert_resolved_result fn acc result =
-  let pl = try SMap.find_unsafe fn acc with Not_found -> [] in
+  let pl = try Relative_path.Map.find_unsafe fn acc with Not_found -> [] in
   let pl = result :: pl in
-  SMap.add fn pl acc
+  Relative_path.Map.add fn pl acc
 
 let merge_resolved_result x y =
-  SMap.fold begin fun k vs acc ->
+  Relative_path.Map.fold begin fun k vs acc ->
     List.fold_left (insert_resolved_result k) acc vs
   end x y
 
@@ -156,7 +156,7 @@ let parallel_resolve_types workers collated =
     MultiWorker.call
       workers
       ~job:resolve_types
-      ~neutral:SMap.empty
+      ~neutral:Relative_path.Map.empty
       ~merge:merge_resolved_result
       ~next:(Bucket.make values)
   in
@@ -167,14 +167,15 @@ let parallel_resolve_types workers collated =
  * at all the positions in the code where we have a suggestion and unify across
  * all the suggestions to see if we can find something that works. *)
 let collate_types fast all_types =
-  let tbl = Hashtbl.create (SMap.cardinal fast) in
+  let tbl = Hashtbl.create (Relative_path.Map.cardinal fast) in
   List.iter begin fun (env, pos, k, ty) ->
     let fn = Pos.filename pos in
     let line, _, _ = Pos.info_pos pos in
     (* Discard patches from files we aren't concerned about. This can happen if
      * a file we do care about calls a function in a file we don't, causing us
      * to infer a parameter type in the target file. *)
-    if SMap.mem fn fast then Hashtbl.add tbl (fn, line, k) (env, ty);
+    if Relative_path.Map.mem fn fast
+    then Hashtbl.add tbl (fn, line, k) (env, ty);
   end all_types;
   tbl
 
@@ -198,7 +199,7 @@ let type_class fn x =
   with Not_found ->
     ()
 
-let keys map = SMap.fold (fun x _ y -> x :: y) map []
+let keys map = Relative_path.Map.fold (fun x _ y -> x :: y) map []
 
 (* Typecheck a part of the codebase, in order to record the type suggestions in
  * Type_suggest.types. *)
@@ -208,7 +209,8 @@ let suggest_files fast fnl =
   Typing_suggest.types := [];
   Typing_suggest.initalized_members := SMap.empty;
   List.iter begin fun fn ->
-    let { FileInfo.n_funs; n_classes; _ } = SMap.find_unsafe fn fast in
+    let { FileInfo.n_funs; n_classes; _ } =
+      Relative_path.Map.find_unsafe fn fast in
     SSet.iter (type_fun fn) n_funs;
     SSet.iter (type_class fn) n_classes;
   end fnl;
@@ -252,6 +254,8 @@ let go workers fast =
   let resolved =
     match workers with
     | Some _ -> parallel_resolve_types workers collated
-    | None -> resolve_types SMap.empty (hashtbl_all_values collated) in
+    | None ->
+      resolve_types Relative_path.Map.empty (hashtbl_all_values collated)
+  in
   Typing_deps.trace := trace;
   resolved

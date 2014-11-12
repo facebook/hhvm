@@ -26,6 +26,7 @@ module Classes = struct
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 
   let cException = "\\Exception"
+  let cStdClass = "\\stdClass"
 
   let cAsyncIterator = "\\AsyncIterator"
   let cAsyncKeyedIterator = "\\AsyncKeyedIterator"

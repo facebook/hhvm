@@ -77,6 +77,17 @@ struct LLVMErrorInit {
 static LLVMErrorInit s_llvmErrorInit;
 
 /*
+ * Map of global symbols used by LLVM.
+ */
+static jit::hash_map<std::string, uint64_t> globalSymbols;
+
+void registerGlobalSymbol(const std::string& name, uint64_t address) {
+  auto it = globalSymbols.emplace(name, address);
+  always_assert((it.second == true || it.first->second == address) &&
+                "symbol already registered with a different value");
+}
+
+/*
  * TCMemoryManager allows llvm to emit code into the appropriate places in the
  * TC. Currently all code goes into the Main code block.
  */
@@ -140,11 +151,8 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
   virtual uint64_t getSymbolAddress(const std::string& name) override {
     FTRACE(1, "getSymbolAddress({})\n", name);
-    // This is currently only called with '__unnamed_2', and the address we
-    // return doesn't appear anywhere in the generated code. This may change,
-    // and when it does we should figure out what llvm wants and return a
-    // meaningful address.
-    return 0xbadbadbad;
+    auto element = globalSymbols.find(name);
+    return element == globalSymbols.end() ? 0 : element->second;
   }
 
 private:
@@ -195,8 +203,7 @@ struct LLVMEmitter {
     }
 
     auto args = m_function->arg_begin();
-    m_rVmSp = m_valueInfo[Vreg(x64::rVmSp)].llval = args++;
-    m_rVmSp->setName("rVmSp");
+    m_valueInfo[Vreg(x64::rVmSp)].llval = args++;
     m_rVmTl = m_valueInfo[Vreg(x64::rVmTl)].llval = args++;
     m_rVmTl->setName("rVmTl");
     m_rVmFp = m_valueInfo[Vreg(x64::rVmFp)].llval = args++;
@@ -229,10 +236,6 @@ struct LLVMEmitter {
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
-    m_mInstrStateArea =
-      m_irb.CreateAlloca(m_int8, cns(RESERVED_STACK_MINSTR_STATE_SPACE),
-                         "MIState");
-
     auto m_personalityFTy = llvm::FunctionType::get(m_int32, false);
     m_personalityFunc =
       llvm::Function::Create(m_personalityFTy,
@@ -240,6 +243,7 @@ struct LLVMEmitter {
                              "personality0",
                              m_module.get());
     m_personalityFunc->setCallingConv(llvm::CallingConv::C);
+    registerGlobalSymbol("personality0", 0xbadbadbad);
 
     m_retFuncPtrPtrType = llvm::PointerType::get(llvm::PointerType::get(
           llvm::FunctionType::get(
@@ -299,8 +303,8 @@ struct LLVMEmitter {
       .setUseMCJIT(true)
       .setMCJITMemoryManager(new TCMemoryManager(m_areas))
       .setOptLevel(llvm::CodeGenOpt::Aggressive)
-      .setRelocationModel(llvm::Reloc::PIC_)
-      .setCodeModel(llvm::CodeModel::JITDefault)
+      .setRelocationModel(llvm::Reloc::Static)
+      .setCodeModel(llvm::CodeModel::Small)
       .setVerifyModules(true)
       .setTargetOptions(targetOptions)
       .create());
@@ -493,8 +497,6 @@ VASM_OPCODES
   llvm::Function* m_llvmReadRegister{nullptr};
   llvm::Function* m_llvmReturnAddress{nullptr};
 
-  llvm::Value* m_mInstrStateArea{nullptr};
-
   // Vreg -> RegInfo map
   jit::vector<RegInfo> m_valueInfo;
 
@@ -504,8 +506,7 @@ VASM_OPCODES
   const Vunit& m_unit;
   Vasm::AreaList& m_areas;
 
-  // Reserved regs. We need to keep those before they get SSA-ified.
-  llvm::Value* m_rVmSp{nullptr};
+  // Special regs.
   llvm::Value* m_rVmTl{nullptr};
   llvm::Value* m_rVmFp{nullptr};
 
@@ -546,10 +547,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     auto& b = m_unit.blocks[label];
     m_irb.SetInsertPoint(block(label));
 
-    // TODO(#5376594): before these regs are SSA-ified we are using the
-    // hack below. Reset special registers for every block.
-    m_valueInfo[Vreg(x64::rVmSp)].llval = m_rVmSp;
-    m_valueInfo[Vreg(x64::rVmTl)].llval = m_rVmTl;
+    // TODO(#5376594): before rVmFp is SSA-ified we are using the hack below.
     m_valueInfo[Vreg(x64::rVmFp)].llval = m_rVmFp;
 
     for (auto& inst : b.code) {
@@ -560,6 +558,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
 O(addq) \
 O(addqi) \
 O(bindjmp) \
+O(defvmsp) \
 O(end) \
 O(cmpbi) \
 O(cmpbim) \
@@ -588,6 +587,8 @@ O(storeli) \
 O(storeqi) \
 O(svcreq) \
 O(syncpoint) \
+O(syncvmfp) \
+O(syncvmsp) \
 O(testbi) \
 O(testlim) \
 O(testq) \
@@ -639,6 +640,10 @@ void LLVMEmitter::emit(const addqi& inst) {
 
 void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
+}
+
+void LLVMEmitter::emit(const defvmsp& inst) {
+  defineValue(inst.d, value(x64::rVmSp));
 }
 
 void LLVMEmitter::emit(const end& inst) {
@@ -720,8 +725,15 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
   case CppCall::Kind::Direct:
-    funcPtr = m_irb.CreateIntToPtr(cns(uintptr_t(call.address())),
-                                   llvm::PointerType::get(funcType,0));
+    std::string funcName = getNativeFunctionName(call.address());
+    funcPtr = m_module->getFunction(funcName);
+    if (!funcPtr) {
+      registerGlobalSymbol(funcName, (uint64_t)call.address());
+      funcPtr = llvm::Function::Create(funcType,
+                                       llvm::GlobalValue::ExternalLinkage,
+                                       funcName,
+                                       m_module.get());
+    }
   }
 
   llvm::Instruction* callInst = nullptr;
@@ -1039,6 +1051,14 @@ void LLVMEmitter::emit(const svcreq& inst) {
 void LLVMEmitter::emit(const syncpoint& inst) {
 }
 
+void LLVMEmitter::emit(const syncvmfp& inst) {
+  // Nothing to do really.
+}
+
+void LLVMEmitter::emit(const syncvmsp& inst) {
+  defineValue(x64::rVmSp, value(inst.s));
+}
+
 void LLVMEmitter::emit(const testbi& inst) {
   auto result = m_irb.CreateAnd(m_irb.CreateTruncOrBitCast(value(inst.s1),
                                                            m_int8),
@@ -1078,24 +1098,17 @@ void LLVMEmitter::emitTrap() {
 llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
   bool inFS = s.seg == Vptr::FS;
   llvm::Value* ptr = nullptr;
-  if (s.base == reg::rsp) {
-    // Translate %rsp-relative offsets into MInstrState offsets.
-    always_assert(!s.index.isValid());
-    ptr =  m_irb.CreateGEP(m_mInstrStateArea,
-                           cns(int64_t{s.disp} - RESERVED_STACK_SPILL_SPACE),
-                           "getelem");
-  } else {
-    ptr = s.base.isValid() ? value(s.base) : cns(0);
-    auto disp = cns(int64_t{s.disp});
-    if (s.index.isValid()) {
-      auto scaledIdx = m_irb.CreateMul(value(s.index),
-                                       cns(int64_t{s.scale}),
-                                       "mul");
-      disp = m_irb.CreateAdd(disp, scaledIdx, "add");
-    }
-    ptr = m_irb.CreateIntToPtr(ptr, inFS ? m_int8FSPtr : m_int8Ptr, "conv");
-    ptr = m_irb.CreateGEP(ptr, disp, "getelem");
+  always_assert(s.base != reg::rsp);
+  ptr = s.base.isValid() ? value(s.base) : cns(0);
+  auto disp = cns(int64_t{s.disp});
+  if (s.index.isValid()) {
+    auto scaledIdx = m_irb.CreateMul(value(s.index),
+                                     cns(int64_t{s.scale}),
+                                     "mul");
+    disp = m_irb.CreateAdd(disp, scaledIdx, "add");
   }
+  ptr = m_irb.CreateIntToPtr(ptr, inFS ? m_int8FSPtr : m_int8Ptr, "conv");
+  ptr = m_irb.CreateGEP(ptr, disp, "getelem");
 
   if (bits != 8) {
     ptr = m_irb.CreateBitCast(ptr, ptrIntNType(bits, inFS));

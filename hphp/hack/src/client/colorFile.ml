@@ -21,9 +21,7 @@ module CL = Coverage_level
 
 module Compare = struct
 
-  let pos pos1 pos2 =
-    let char_start1, char_end1 = Pos.info_raw pos1 in
-    let char_start2, char_end2 = Pos.info_raw pos2 in
+  let pos (char_start1, char_end1) (char_start2, char_end2) =
     if char_end1 <= char_start2
     then -1
     else if char_end2 <= char_start1
@@ -58,9 +56,7 @@ let rec flatten_ acc stack = function
   | [elt] ->
       flatten_ (elt :: acc) stack []
   | (pos1, x as elt1) :: ((pos2, _) :: _ as rl) ->
-      let _, char_end1 = Pos.info_raw pos1 in
-      let char_start2, _ = Pos.info_raw pos2 in
-      if char_end1 <= char_start2
+      if snd pos1 <= fst pos2
       then (* Intervals are disjoint *)
         if Stack.is_empty stack
         then
@@ -70,11 +66,11 @@ let rec flatten_ acc stack = function
           flatten_ (elt1 :: acc) stack (elem :: rl)
       else begin (* interval 2 is nested within interval 1 *)
         (* avoid creating zero-length intervals *)
-        if pos1.Pos.pos_end <> pos2.Pos.pos_end
+        if snd pos1 <> snd pos2
         then
-          (let pos1_rest = { pos1 with Pos.pos_start = pos2.Pos.pos_end } in
+          (let pos1_rest = (snd pos2, snd pos1) in
           Stack.push (pos1_rest, x) stack);
-        let pos1_head = { pos1 with Pos.pos_end = pos2.Pos.pos_start } in
+        let pos1_head = (fst pos1, fst pos2) in
         flatten_ ((pos1_head, x) :: acc) stack rl
       end
 
@@ -94,8 +90,7 @@ let walk content pos_level_list =
     result := (level_opt, String.sub content !i size) :: !result;
     i := !i + size
   in
-  List.iter begin fun (pos, level) ->
-    let char_start, char_end = Pos.info_raw pos in
+  List.iter begin fun ((char_start, char_end), level) ->
     add None char_start;
     add (Some level) char_end;
   end pos_level_list;
@@ -106,8 +101,7 @@ let walk content pos_level_list =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str (pos_level_m : Coverage_level.t PMap.t) =
-  let pos_level_l = PMap.elements pos_level_m in
+let go str pos_level_l =
   let cmp x y = Compare.pos (fst x) (fst y) in
   let pos_level_l = List.sort cmp pos_level_l in
   let pos_level_l = flatten pos_level_l in

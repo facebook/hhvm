@@ -12,43 +12,15 @@
  */
 
 #include "hphp/runtime/vm/jit/reserved-stack.h"
-
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
-#define CFI(x)         .cfi_##x
-#define CFI2(x, y)     .cfi_##x y
-#define CFI3C(x, y, z) .cfi_##x y##, z
-#define ETCH_ALIGNMENT .align 16
-#define ETCH_SECTION   .section .text.enterTCHelper
-#define ETCH_SIZE      /* Not used with PE/COFF on windows */
-#define ETCH_NAME(x)   x
-#define ETCH_LABEL(x)  .L##x
-#elif defined(__APPLE__)
-#define CFI(x)         /* not used on OSX */
-#define CFI2(x, y)     /* not used on OSX */
-#define CFI3C(x, y, z) /* not used on OSX */
-#define ETCH_ALIGNMENT .align 4 // on OSX this is 2^value
-#define ETCH_SECTION   .text
-#define ETCH_SIZE      /* not used on OSX */
-#define ETCH_NAME(x)   _##x
-#define ETCH_LABEL(x)  .L##_##x
-#else
-#define CFI(x)         .cfi_##x
-#define CFI2(x, y)     .cfi_##x y
-#define CFI3C(x, y, z) .cfi_##x y##, z
-#define ETCH_ALIGNMENT .align 16
-#define ETCH_SECTION   .section .text.enterTCHelper
-#define ETCH_SIZE      .size enterTCHelper, .-enterTCHelper
-#define ETCH_NAME(x)   x
-#define ETCH_LABEL(x)  .L##x
-#endif
+#include "hphp/runtime/vm/jit/etch-helpers.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(__x86_64__)
   .byte 0
-  ETCH_ALIGNMENT
-  ETCH_SECTION
+  ETCH_ALIGN16
+  ETCH_SECTION(enterTCHelper)
   .globl ETCH_NAME(enterTCHelper)
-ETCH_NAME(enterTCHelper:)
+ETCH_NAME(enterTCHelper):
   // Prologue
   CFI(startproc)             // amongst other things, cfa reg is now rsp, and offset is 8
   push %rbp
@@ -90,16 +62,16 @@ ETCH_NAME(enterTCHelper:)
   push %rax
   push 0x8(%r15)
   jmp *%rdx
-ETCH_LABEL(enterTCHelper$jumpToTC:)
+ETCH_LABEL(enterTCHelper$jumpToTC):
   call *%rdx
-ETCH_LABEL(enterTCHelper$serviceReqLabel:)
+ETCH_LABEL(enterTCHelper$serviceReqLabel):
 
   /*
    * enterTCServiceReq is never called directly; this exists to give the jit
    * access to the address of the expected return address while in the TC.
    */
   .globl ETCH_NAME(enterTCServiceReq)
-  ETCH_NAME(enterTCServiceReq:)
+  ETCH_NAME(enterTCServiceReq):
   /*
    * Eager vm-reg save. Must match values in rds-header.h
    */
@@ -121,7 +93,7 @@ ETCH_LABEL(enterTCHelper$serviceReqLabel:)
   CFI2(adjust_cfa_offset, -8)
   ret
 
-ETCH_LABEL(enterTCHelper$copyReqArgs:)
+ETCH_LABEL(enterTCHelper$copyReqArgs):
   CFI(restore_state)
   mov %rsi, 0x8(%rbx)
   mov %rdx, 0x10(%rbx)
@@ -141,7 +113,7 @@ ETCH_LABEL(enterTCHelper$copyReqArgs:)
   CFI2(adjust_cfa_offset, -8)
   ret
   CFI(endproc)
-  ETCH_SIZE
+  ETCH_SIZE(enterTCHelper)
 ///////////////////////////////////////////////////////////////////////////////
 #elif defined(__AARCH64EL__)
   .globl enterTCHelper

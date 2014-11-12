@@ -54,7 +54,7 @@ type 'a trie =
   | Node of 'a * 'a trie SMap.t
 
 let mk_level_map fn_opt pos_ty_m =
-  let pos_lvl_m = PMap.map (function
+  let pos_lvl_m = Pos.Map.map (function
     | _, Typing_defs.Tany -> Unchecked
     | ty when TUtils.HasTany.check ty -> Partial
     | _ -> Checked) pos_ty_m
@@ -67,7 +67,7 @@ let mk_level_map fn_opt pos_ty_m =
     match Parser_heap.HH_FIXMES.get fn with
     | None -> pos_lvl_m
     | Some fixme_map ->
-        PMap.mapi (fun p lvl ->
+        Pos.Map.mapi (fun p lvl ->
           let line = p.Pos.pos_start.Lexing.pos_lnum in
           match lvl with
           | Checked when IMap.mem line fixme_map ->

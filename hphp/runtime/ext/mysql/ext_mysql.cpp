@@ -316,7 +316,7 @@ static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
   return true;
 }
 
-static int HHVM_FUNCTION(mysql_next_result,
+static int64_t HHVM_FUNCTION(mysql_next_result,
                   const Variant& link_identifier /* = null */) {
   MYSQL *conn = MySQL::GetConn(link_identifier);
   if (conn == nullptr) {

@@ -78,7 +78,7 @@ class Object;
  * Or an explicit call to registerBuildinFunction()
  *   static const StaticString s_sum("sum");
  *   virtual moduleLoad(const IniSetting::Map& ini, Hdf config) {
- *     Native::registerBuiltinFunction(s_sum.get(), (void*)my_sum_function);
+ *     Native::registerBuiltinFunction(s_sum, (void*)my_sum_function);
  *   }
  *
  ****************************************************************************
@@ -92,8 +92,8 @@ class Object;
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
-#define HHVM_NAMED_FE(fn, fimpl) Native::registerBuiltinFunction(\
-                          makeStaticString(#fn), fimpl)
+#define HHVM_NAMED_FE(fn, fimpl) \
+        Native::registerBuiltinFunction(#fn, fimpl)
 #define HHVM_FE(fn) HHVM_NAMED_FE(fn, HHVM_FN(fn))
 #define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE(fn, HHVM_FN(falias))
 
@@ -109,9 +109,8 @@ class Object;
 #define HHVM_MN(cn,fn) c_ ## cn ## _ni_ ## fn
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
-#define HHVM_NAMED_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
-                          makeStaticString(#cn "->" #fn), \
-                          mimpl)
+#define HHVM_NAMED_ME(cn,fn,mimpl) \
+        Native::registerBuiltinFunction(#cn "->" #fn, mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
@@ -128,9 +127,8 @@ class Object;
 #define HHVM_STATIC_MN(cn,fn) c_ ## cn ## _ns_ ## fn
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
-#define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) Native::registerBuiltinFunction(\
-                          makeStaticString(#cn "::" #fn), \
-                          mimpl)
+#define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
+        Native::registerBuiltinFunction(#cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
@@ -228,7 +226,9 @@ TypedValue* unimplementedWrapper(ActRec* ar);
  * Case insensitive map of "name" to function pointer
  *
  * Extensions should generally add items to this map using
- * the HHVM_FE/ME macros above
+ * the HHVM_FE/ME macros above. The function name (key) must
+ * be a static string because this table is shared and outlives
+ * individual requests.
  */
 typedef hphp_hash_map<const StringData*, BuiltinFunction,
                       string_data_hash, string_data_isame> BuiltinFunctionMap;
@@ -236,12 +236,21 @@ typedef hphp_hash_map<const StringData*, BuiltinFunction,
 extern BuiltinFunctionMap s_builtinFunctions;
 
 template <class Fun>
-inline void registerBuiltinFunction(const StringData* fname, Fun func) {
+inline void registerBuiltinFunction(const char* name, Fun func) {
   static_assert(
     std::is_pointer<Fun>::value &&
     std::is_function<typename std::remove_pointer<Fun>::type>::value,
     "You can only register pointers to function.");
-  s_builtinFunctions[fname] = (BuiltinFunction)func;
+  s_builtinFunctions[makeStaticString(name)] = (BuiltinFunction)func;
+}
+
+template <class Fun>
+inline void registerBuiltinFunction(const String& name, Fun func) {
+  static_assert(
+    std::is_pointer<Fun>::value &&
+    std::is_function<typename std::remove_pointer<Fun>::type>::value,
+    "You can only register pointers to function.");
+  s_builtinFunctions[makeStaticString(name)] = (BuiltinFunction)func;
 }
 
 inline BuiltinFunction GetBuiltinFunction(const StringData* fname,

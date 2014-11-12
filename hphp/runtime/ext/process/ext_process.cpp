@@ -130,6 +130,7 @@ public:
     HHVM_FE(pcntl_getpriority);
     HHVM_FE(pcntl_setpriority);
     HHVM_FE(pcntl_signal);
+    HHVM_FE(pcntl_sigprocmask);
     HHVM_FE(pcntl_wait);
     HHVM_FE(pcntl_waitpid);
     HHVM_FE(pcntl_wexitstatus);
@@ -405,6 +406,50 @@ bool HHVM_FUNCTION(pcntl_signal,
     return false;
   }
   return true;
+}
+
+bool HHVM_FUNCTION(pcntl_sigprocmask,
+                   int how,
+                   const Array& set,
+                   VRefParam oldset) {
+  if (how != SIG_BLOCK && how != SIG_UNBLOCK && how != SIG_SETMASK) {
+    goto invalid_argument;
+  }
+
+  { // Variable scope so that goto doesn't cross definitions
+    sigset_t cset;
+    sigset_t coldset;
+
+    sigemptyset(&cset);
+    for (ArrayIter iter(set); iter; ++iter) {
+      auto value = iter.second().toInt64();
+      if (sigaddset(&cset, value) == -1) {
+        goto invalid_argument;
+      }
+    }
+
+    int result = pthread_sigmask(how, &cset, &coldset);
+    if (result != 0) {
+      return false;
+    }
+    Array aoldset;
+    for (int signum = 1; true; ++signum) {
+      result = sigismember(&coldset, signum);
+      if (result == 1) {
+        aoldset.append(signum);
+      } else if (result == -1) {
+        // invalid signal number
+        break;
+      }
+    }
+    oldset = aoldset;
+
+    return true;
+  }
+
+invalid_argument:
+  raise_warning("pcntl_sigprocmask(): Invalid argument");
+  return false;
 }
 
 int64_t HHVM_FUNCTION(pcntl_wait,

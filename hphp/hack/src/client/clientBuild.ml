@@ -13,11 +13,15 @@
  * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
 let num_build_retries = 800
 
-type env = ServerMsg.build_opts
+type env = {
+  root : Path.path;
+  build_opts : ServerMsg.build_opts;
+  server_options_cmd : string option;
+}
 
 let rec connect env retries =
   try
-    let result = ClientUtils.connect env.ServerMsg.root in
+    let result = ClientUtils.connect env.root in
     if Tty.spinner_used() then Tty.print_clear_line stdout;
     result
   with
@@ -55,10 +59,14 @@ let rec connect env retries =
 
 let rec main_ env retries =
   (* Check if a server is up *)
-  if not (ClientUtils.server_exists env.ServerMsg.root)
-  then ClientStart.start_server env.ServerMsg.root;
+  if not (ClientUtils.server_exists env.root)
+  then ClientStart.start_server { ClientStart.
+    root = env.root;
+    wait = false;
+    server_options_cmd = env.server_options_cmd;
+  };
   let ic, oc = connect env retries in
-  ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env);
+  ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env.build_opts);
   let response = ServerMsg.response_from_channel ic in
   match response with
   | ServerMsg.SERVER_OUT_OF_DATE ->
@@ -70,7 +78,7 @@ let rec main_ env retries =
     begin
       let exit_code = ref 0 in
       EventLogger.client_begin_work (
-        ClientLogCommand.LCBuild env.ServerMsg.root);
+        ClientLogCommand.LCBuild env.root);
       try
         while true do
           let line:ServerMsg.build_progress = Marshal.from_channel ic in

@@ -22,6 +22,7 @@ class StandardExtension : public Extension {
     initMisc();
     initStreamUserFilters();
     initFile();
+    initIntrinsics();
   }
 
   void threadInit() {
@@ -40,6 +41,7 @@ class StandardExtension : public Extension {
   void initMisc();
   void initStreamUserFilters();
   void initFile();
+  void initIntrinsics();
 
   void threadInitMisc();
 };

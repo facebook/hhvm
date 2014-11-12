@@ -261,7 +261,7 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
       RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
     int dt;
     while (true) {
-      dt = get_random() % (KindOfRef + 1);
+      dt = getDataTypeValue(get_random() % (kMaxDataType + 1));
       switch (dt) {
         case KindOfNull:
         case KindOfBoolean:
@@ -272,11 +272,15 @@ MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
         case KindOfObject:
         case KindOfResource:
           break;
+
         // KindOfRef and KindOfUninit can't happen for lots of predicted types.
-        case KindOfRef:
         case KindOfUninit:
-        default:
+        case KindOfStaticString:
+        case KindOfRef:
           continue;
+
+        case KindOfClass:
+          not_reached();
       }
       break;
     }
@@ -1489,7 +1493,7 @@ static bool isMergePoint(Offset offset, const RegionDesc& region) {
   return false;
 }
 
-static bool blockHasUnprocessedPred(
+static bool blockIsLoopHeader(
   const RegionDesc&             region,
   RegionDesc::BlockId           blockId,
   const RegionDesc::BlockIdSet& processedBlocks)
@@ -1551,7 +1555,7 @@ Translator::translateRegion(const RegionDesc& region,
     // block to (they are not the same!).
 
     auto const entry = irb.unit().entry();
-    irb.startBlock(entry, entry->front().marker(), false /* unprocessedPred */);
+    irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
 
     auto const irBlock = blockIdToIRBlock[region.entry()->id()];
     always_assert(irBlock != entry);
@@ -1577,14 +1581,15 @@ Translator::translateRegion(const RegionDesc& region,
     TransID profTransId = getTransId(blockId);
     ht.setProfTransID(profTransId);
 
+    bool isLoopHeader = false;
+
     if (ht.genMode() == IRGenMode::CFG) {
       Block* irBlock = blockIdToIRBlock[blockId];
-      auto unprocessedPred =
-        blockHasUnprocessedPred(region, blockId, processedBlocks);
-      always_assert(IMPLIES(unprocessedPred, RuntimeOption::EvalJitLoops));
+      isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
+      always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
 
       BCMarker marker(sk, block->initialSpOffset(), profTransId);
-      if (!ht.irBuilder().startBlock(irBlock, marker, unprocessedPred)) {
+      if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
         FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
                blockId);
         processedBlocks.insert(blockId);
@@ -1598,11 +1603,13 @@ Translator::translateRegion(const RegionDesc& region,
       // attributed to this instruction.
       ht.setBcOff(sk.offset(), false);
 
-      // Emit prediction guards. If this is the first instruction in the region
-      // the guards will go to a retranslate request. Otherwise, they'll go to
-      // a side exit.
-      bool isFirstRegionInstr = (block == region.entry() && i == 0);
-      if (isFirstRegionInstr) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
+      // Emit prediction guards. If this is the first instruction in the
+      // region, and the region's entry block is not a loop header, the guards
+      // will go to a retranslate request. Otherwise, they'll go to a side
+      // exit.
+      auto const isEntry = block == region.entry();
+      auto const useGuards = (isEntry && !isLoopHeader && i == 0);
+      if (useGuards) ht.emitRB(Trace::RBTypeTraceletGuards, sk);
 
       // Emit type guards.
       while (typePreds.hasNext(sk)) {
@@ -1613,7 +1620,7 @@ Translator::translateRegion(const RegionDesc& region,
           // Do not generate guards for class; instead assert the type.
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
-        } else if (isFirstRegionInstr) {
+        } else if (useGuards) {
           bool checkOuterTypeOnly = m_mode != TransKind::Profile;
           ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
@@ -1623,7 +1630,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       while (refPreds.hasNext(sk)) {
         auto const& pred = refPreds.next();
-        if (isFirstRegionInstr) {
+        if (useGuards) {
           ht.guardRefs(pred.arSpOffset, pred.mask, pred.vals);
         } else {
           ht.checkRefs(pred.arSpOffset, pred.mask, pred.vals, sk.offset());
@@ -1631,7 +1638,7 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       // Finish emitting guards, and emit profiling counters.
-      if (isFirstRegionInstr) {
+      if (useGuards) {
         ht.endGuards();
         if (RuntimeOption::EvalJitTransCounters) {
           ht.emitIncTransCounter();

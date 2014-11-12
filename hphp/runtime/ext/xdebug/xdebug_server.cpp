@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
@@ -352,9 +353,13 @@ void XDebugServer::onRequestInit() {
     String sess_start = sess_start_var.toString();
     cookie.set(s_SESSION,  sess_start);
     if (transport != nullptr) {
-      transport->setCookie(s_SESSION,
-                           sess_start,
-                           XDEBUG_GLOBAL(RemoteCookieExpireTime));
+      int64_t expire = XDEBUG_GLOBAL(RemoteCookieExpireTime);
+      if (expire > 0) {
+        timespec ts;
+        Timer::GetRealtimeTime(ts);
+        expire += ts.tv_sec;
+      }
+      transport->setCookie(s_SESSION, sess_start, expire);
     }
   }
 }

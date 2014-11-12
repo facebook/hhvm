@@ -73,6 +73,16 @@ void raise_typehint_error(const std::string& msg) {
   }
 }
 
+void raise_return_typehint_error(const std::string& msg) {
+  raise_recoverable_error(msg);
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 3 ||
+      (RuntimeOption::RepoAuthoritative &&
+       Repo::global().HardReturnTypeHints)) {
+    raise_error("Error handler tried to recover from a return typehint "
+                "violation");
+  }
+}
+
 void raise_disallowed_dynamic_call(const std::string& msg) {
   if (RuntimeOption::RepoAuthoritative &&
       Repo::global().DisallowDynamicVarEnvFuncs) {

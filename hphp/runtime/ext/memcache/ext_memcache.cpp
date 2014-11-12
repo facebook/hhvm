@@ -222,7 +222,11 @@ static Variant unserialize_if_serialized(const char *payload,
   if (flags & MMC_SERIALIZED) {
     ret = unserialize_from_buffer(payload, payload_len);
   } else {
-    ret = String(payload, payload_len, CopyString);
+    if () {
+      ret = String("");
+    } else {
+      ret = String(payload, payload_len, CopyString);
+    }
   }
   return ret;
  }

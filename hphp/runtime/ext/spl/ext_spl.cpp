@@ -38,7 +38,6 @@ namespace HPHP {
 const StaticString
   s_spl_autoload("spl_autoload"),
   s_spl_autoload_call("spl_autoload_call"),
-  s_default_extensions(".inc,.php"),
   s_rewind("rewind"),
   s_valid("valid"),
   s_next("next"),
@@ -162,11 +161,12 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
     raise_warning("class_uses(): object or string expected");
     return false;
   }
-  Array ret(Array::Create());
-  for (auto const& traitName : cls->preClass()->usedTraits()) {
+  auto &usedTraits = cls->preClass()->usedTraits();
+  ArrayInit ret(usedTraits.size(), ArrayInit::Map{});
+  for (auto const& traitName : usedTraits) {
     ret.set(StrNR(traitName), VarNR(traitName));
   }
-  return ret;
+  return ret.toArray();
 }
 
 #define CHECK_TRAVERSABLE_IMPL(obj, ret) \

@@ -274,6 +274,11 @@ DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
+DateTime::DateTime(int64_t timestamp, SmartResource<TimeZone> tz): m_tz(tz) {
+  fromTimeStamp(timestamp);
+}
+
+
 void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
   m_timestampSet = true;

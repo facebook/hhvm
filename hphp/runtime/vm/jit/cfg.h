@@ -45,8 +45,8 @@ BlockList poSortCfg(const IRUnit&);
 BlockList rpoSortCfg(const IRUnit&);
 
 /*
- * Similar to repoSortCfg, but also returns a StateVector mapping Blocks to
- * their index in the BlockList.
+ * Similar to rpoSortCfg, but also returns a StateVector mapping Blocks to
+ * their RPO ids.
  */
 struct BlocksWithIds {
   BlockList blocks;

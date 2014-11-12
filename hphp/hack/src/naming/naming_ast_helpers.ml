@@ -82,6 +82,11 @@ module GetLocals = struct
     | _, List lv -> List.fold_left lvalue acc lv
     | _ -> acc
 
+  let lvalue_foreach acc = function
+    (* Ref forms a local only inside a foreach *)
+    | (_, Ref (p, Lvar (_, x))) ->  SMap.add x p acc
+    | e -> lvalue acc e
+
   let rec stmt acc st =
     match st with
     | Expr (_, Binop (Eq None, lv, rv))

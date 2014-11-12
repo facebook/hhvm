@@ -1871,7 +1871,6 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
-  Treadmill::startRequest();
   memset(&s_perfCounters, 0, sizeof(s_perfCounters));
   Stats::init();
   s_initialTCSize = code.totalUsed();
@@ -1883,7 +1882,6 @@ void MCGenerator::requestExit() {
             " kept, %15" PRId64 " grabbed\n",
             Process::GetThreadIdForTrace(), Translator::WriteLease().m_hintKept,
             Translator::WriteLease().m_hintGrabbed);
-  Treadmill::finishRequest();
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();

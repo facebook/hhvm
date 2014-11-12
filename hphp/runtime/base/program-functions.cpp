@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
@@ -1740,6 +1741,7 @@ void hphp_session_init() {
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
   if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestStart();
+  Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1888,6 +1890,10 @@ void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  // Similarly, apc strings could be in the ServerNote array, and
+  // its possible they are scheduled to be destroyed after this request
+  // finishes.
+  Treadmill::finishRequest();
 
   ThreadInfo::s_threadInfo->clearPendingException();
 

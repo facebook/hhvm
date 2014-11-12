@@ -74,6 +74,8 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
   $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
+  $logFileConfig.= ' -vLog.Access.Default.File='.
+    "${LOG_ROOT}_access_log$test_run_id.log";
   $srcRootConfig = ' -vServer.SourceRoot='.$root;
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = ' -vAdminServer.Port='.$adminPort;
@@ -98,7 +100,8 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
       " -vRepo.Authoritative=true";
   }
 
-  $cmd = $hhvm.' --mode=server' . $serverConfig . $logFileConfig .
+  $cmd = 'MALLOC_CONF=junk:true ' . $hhvm .
+    ' --mode=server' . $serverConfig . $logFileConfig .
     ' -vEval.JitProfileInterpRequests=0' . $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $repoConfig . $jitConfig .

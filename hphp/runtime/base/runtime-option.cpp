@@ -330,7 +330,7 @@ int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
-int64_t RuntimeOption::SocketDefaultTimeout = 5;
+int64_t RuntimeOption::SocketDefaultTimeout = 60;
 bool RuntimeOption::LockCodeMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -870,7 +870,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(s_rss, ini, rlimit["RSS"], 0);
 
     Config::Bind(MaxRSS, ini, rlimit["MaxRSS"], 0);
-    Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 5);
+    Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 60);
     Config::Bind(MaxRSSPollingCycle, ini, rlimit["MaxRSSPollingCycle"], 0);
     Config::Bind(DropCacheCycle, ini, rlimit["DropCacheCycle"], 0);
     Config::Bind(MaxSQLRowCount, ini, rlimit["MaxSQLRowCount"], 0);

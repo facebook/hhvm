@@ -415,6 +415,8 @@ void HttpServer::stopOnSignal(int sig) {
   if (m_adminServer) {
     m_adminServer->stop();
   }
+
+  waitForServers();
 }
 
 void HttpServer::createPid() {

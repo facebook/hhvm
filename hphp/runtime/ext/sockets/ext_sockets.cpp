@@ -251,7 +251,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
     pollfd &fd = fds[nfds++];
     assert(fd.fd == iter.second().toResource().getTyped<File>()->fd());
     if (fd.revents & flag) {
-      ret.append(iter.second());
+      ret.set(iter.first(), iter.second());
       count++;
     }
   }

@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
 
+struct _Unwind_Exception;
+
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
@@ -217,9 +219,9 @@ RDS::Handle lookupClsRDSHandle(const StringData* name);
 void registerLiveObj(ObjectData* obj);
 
 /*
- * Just calls tlsBase, but not inlined, so it can be called from the TC.
+ * Set tl_regState to DIRTY and call _Unwind_Resume.
  */
-uintptr_t tlsBaseNoInline();
+void unwindResumeHelper(_Unwind_Exception* data);
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);
@@ -229,6 +231,11 @@ void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
 void setWithRefElemC(TypedValue*, TypedValue, TypedValue*, MInstrState*);
 void setWithRefNewElem(TypedValue*, TypedValue*, MInstrState*);
 }
+
+/*
+ * Just calls tlsBase, but not inlined, so it can be called from the TC.
+ */
+uintptr_t tlsBaseNoInline();
 
 //////////////////////////////////////////////////////////////////////
 

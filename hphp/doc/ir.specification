@@ -175,7 +175,7 @@ ProducesRC
 
 MayRaiseError
 
-  The instruction may raise an error, and therefore has an implicit exit edge.
+  The instruction may raise an error, and must have an edge to a catch block.
 
 Terminal
 

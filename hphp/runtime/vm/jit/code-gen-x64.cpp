@@ -594,11 +594,6 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   }
 }
 
-static void unwindResumeHelper(_Unwind_Exception* data) {
-  tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(data);
-}
-
 static void callUnwindResumeHelper(Vout& v) {
   auto exnReg = v.makeReg();
   v << load{rVmTl[unwinderScratchOff()], exnReg};

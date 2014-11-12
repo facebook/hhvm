@@ -2231,8 +2231,10 @@ struct DecodedInstruction {
   bool setImmediate(int64_t value);
   bool isNop() const;
   bool isBranch() const;
+  bool isCall() const;
   bool shrinkBranch();
   void widenBranch();
+  uint8_t getModRm() const;
 private:
   void decode(uint8_t* ip);
   bool decodePrefix(uint8_t* ip);

@@ -92,6 +92,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
                          bool do_side_exit, TypedValue unwinder_tv) {
   auto const rip = (TCA)_Unwind_GetIP(ctx);
   auto catchTraceOpt = mcg->getCatchTrace(rip);
+  FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
   if (!catchTraceOpt) return false;
 
   auto catchTrace = *catchTraceOpt;
@@ -160,7 +161,8 @@ tc_unwind_personality(int version,
   // any other runtimes but this may change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
-  assert(exceptionClass == kMagicClass || exceptionClass == kMagicDependentClass);
+  assert(exceptionClass == kMagicClass ||
+         exceptionClass == kMagicDependentClass);
   assert(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
@@ -181,7 +183,7 @@ tc_unwind_personality(int version,
     auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assert(status == 0);
-    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}. ",
+    FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}.\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
            (TCA)_Unwind_GetIP(context), exnType);
@@ -221,6 +223,8 @@ tc_unwind_personality(int version,
       return _URC_INSTALL_CONTEXT;
     }
   }
+
+  always_assert(!(actions & _UA_HANDLER_FRAME));
 
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;

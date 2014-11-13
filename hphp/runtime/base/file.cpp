@@ -91,17 +91,11 @@ String File::TranslatePathKeepRelative(const String& filename) {
 }
 
 String File::TranslatePath(const String& filename) {
-  String canonicalized = TranslatePathKeepRelative(filename);
-
-  if (canonicalized.charAt(0) == '/') {
-    return canonicalized;
+  if (filename.charAt(0) != '/') {
+    String cwd = g_context->getCwd();
+    return TranslatePathKeepRelative(cwd + "/" + filename);
   }
-
-  String cwd = g_context->getCwd();
-  if (!cwd.empty() && cwd[cwd.length() - 1] == '/') {
-    return cwd + canonicalized;
-  }
-  return cwd + "/" + canonicalized;
+  return TranslatePathKeepRelative(filename);
 }
 
 String File::TranslatePathWithFileCache(const String& filename) {

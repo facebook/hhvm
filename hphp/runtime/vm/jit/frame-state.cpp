@@ -214,8 +214,6 @@ void FrameState::update(const IRInstruction* inst) {
   }
 }
 
-static const StaticString s_php_errormsg("php_errormsg");
-
 void FrameState::getLocalEffects(const IRInstruction* inst,
                                  LocalStateHook& hook) const {
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
@@ -339,14 +337,6 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     }
     default:
       break;
-  }
-
-  // If this instruction may raise an error and our function has a local named
-  // "php_errormsg", we have to clobber it. See
-  // http://www.php.net/manual/en/reserved.variables.phperrormsg.php
-  if (inst->mayRaiseError()) {
-    auto id = m_curFunc->lookupVarId(s_php_errormsg.get());
-    if (id != -1) hook.setLocalValue(id, nullptr);
   }
 
   if (MInstrEffects::supported(inst)) MInstrEffects::get(inst, *this, hook);

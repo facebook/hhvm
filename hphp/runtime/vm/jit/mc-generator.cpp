@@ -186,7 +186,7 @@ TCA MCGenerator::retranslate(const TranslArgs& args) {
     return nullptr;
   }
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate()) return nullptr;
+  if (!writer || !shouldTranslate(args.m_sk.func())) return nullptr;
   if (!locked) {
     // Even though we knew above that we were going to skip
     // doing another translation, we wait until we get the
@@ -305,12 +305,30 @@ MCGenerator::numTranslations(SrcKey sk) const {
   return 0;
 }
 
-bool MCGenerator::shouldTranslate() const {
+const StaticString
+  s_php_errormsg("php_errormsg"),
+  s_http_response_header("http_response_header");
+
+bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (m_numTrans >= RuntimeOption::EvalJitGlobalTranslationLimit) {
     return false;
   }
 
+  /*
+   * We don't support JIT compiling functions that use some super-dynamic php
+   * variables.
+   */
+  if (func->lookupVarId(s_php_errormsg.get()) != -1 ||
+      func->lookupVarId(s_http_response_header.get()) != -1) {
+    return false;
+  }
+
+  return true;
+}
+
+bool MCGenerator::shouldTranslate(const Func* func) const {
+  if (!shouldTranslateNoSizeLimit(func)) return false;
   // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do
   // allow Optimize translations past that limit.
   return code.mainUsed() < RuntimeOption::EvalJitAMaxUsage ||
@@ -363,7 +381,7 @@ static void populateLiveContext(RegionContext& ctx) {
 
 TCA
 MCGenerator::createTranslation(const TranslArgs& args) {
-  if (!shouldTranslate()) return nullptr;
+  if (!shouldTranslate(args.m_sk.func())) return nullptr;
 
   /*
    * Try to become the writer. We delay this until we *know* we will have
@@ -373,7 +391,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
    */
   auto sk = args.m_sk;
   LeaseHolder writer(Translator::WriteLease());
-  if (!writer || !shouldTranslate()) return nullptr;
+  if (!writer || !shouldTranslate(args.m_sk.func())) return nullptr;
 
   if (SrcRec* sr = m_tx.getSrcDB().find(sk)) {
     TCA tca = sr->getTopTranslation();
@@ -444,7 +462,7 @@ MCGenerator::translate(const TranslArgs& args) {
   assert(m_tx.mode() != TransKind::Invalid);
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  if (!shouldTranslate()) return nullptr;
+  if (!shouldTranslate(args.m_sk.func())) return nullptr;
 
   Func* func = const_cast<Func*>(args.m_sk.func());
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
@@ -557,7 +575,7 @@ static void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
 
 TCA
 MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
-                             bool ignoreTCLimit) {
+                             bool forRegeneratePrologue) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int const numParams = func->numNonVariadicParams();
@@ -586,7 +604,15 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
 
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
-  if (!ignoreTCLimit && !shouldTranslate()) return nullptr;
+
+  // If we're regenerating a prologue, and we want to check shouldTranslate()
+  // but ignore the code size limits.  We still want to respect the global
+  // translation limit and other restrictions, though.
+  if (forRegeneratePrologue) {
+    if (!shouldTranslateNoSizeLimit(func)) return nullptr;
+  } else {
+    if (!shouldTranslate(func)) return nullptr;
+  }
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
@@ -677,9 +703,12 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   func->resetPrologue(nArgs);
   m_tx.setMode(TransKind::Prologue);
   SCOPE_EXIT { m_tx.setMode(TransKind::Invalid); };
-  bool ignoreTCLimit =
-    RuntimeOption::EvalJitGlobalTranslationLimit == (uint64_t)-1;
-  TCA start = getFuncPrologue(func, nArgs, nullptr /* ActRec */, ignoreTCLimit);
+  auto const start = getFuncPrologue(
+    func,
+    nArgs,
+    nullptr /* ActRec */,
+    true /* regeneratePrologue */
+  );
   if (!start) return nullptr;
 
   func->setPrologue(nArgs, start);

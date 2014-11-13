@@ -206,7 +206,7 @@ public:
    * Handlers for function prologues.
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool ignoreTCLimit = false);
+                      bool forRegeneratePrologue = false);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 
@@ -330,7 +330,8 @@ private:
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  bool shouldTranslate() const;
+  bool shouldTranslate(const Func*) const;
+  bool shouldTranslateNoSizeLimit(const Func*) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return m_tx.getSrcRec(sk)->getTopTranslation();

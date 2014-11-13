@@ -817,7 +817,7 @@ O(addq) \
 O(addqi) \
 O(bindjmp) \
 O(defvmsp) \
-O(end) \
+O(fallthru) \
 O(cmpbi) \
 O(cmpbim) \
 O(cmplim) \
@@ -907,7 +907,7 @@ void LLVMEmitter::emit(const defvmsp& inst) {
   defineValue(inst.d, value(x64::rVmSp));
 }
 
-void LLVMEmitter::emit(const end& inst) {
+void LLVMEmitter::emit(const fallthru& inst) {
   // no-op
 }
 

@@ -381,7 +381,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
-  O(end, Inone, Un, Dn)\
+  O(fallthru, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
@@ -558,7 +558,11 @@ struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct debugtrap {};
-struct end {};
+
+// No-op, used for marking the end of a block that is intentionally going to
+// fall-through.  Only for use with Vauto.
+struct fallthru {};
+
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;

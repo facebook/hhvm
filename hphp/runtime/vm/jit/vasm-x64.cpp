@@ -164,7 +164,7 @@ private:
   void emit(copy i);
   void emit(copy2& i);
   void emit(debugtrap& i) { a->int3(); }
-  void emit(end& i) {}
+  void emit(fallthru& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
@@ -839,12 +839,12 @@ jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
   auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
     [&](Vlabel b) {
       return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::end;
+             unit.blocks[b].code.back().op != Vinstr::fallthru;
     });
   std::stable_partition(coldIt, blocks.end(),
     [&](Vlabel b) {
       return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::end;
+             unit.blocks[b].code.back().op != Vinstr::fallthru;
     });
   return blocks;
 }
@@ -1113,7 +1113,7 @@ Vauto::~Vauto() {
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // found at least one nonempty block. finish up.
-      if (!main().closed()) main() << end{};
+      if (!main().closed()) main() << fallthru{};
       assert(areas.size() < 2 || cold().empty() || cold().closed());
       assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir

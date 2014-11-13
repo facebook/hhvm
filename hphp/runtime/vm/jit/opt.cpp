@@ -133,32 +133,17 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
 
   if (shouldHHIRRelaxGuards()) {
-    /*
-     * In TransProfile mode, we can only relax the guards in tracelet
-     * region mode.  If the region came from analyze() and we relax the
-     * guards here, then the RegionDesc's TypePreds in ProfData won't
-     * accurately reflect the generated guards.  This can result in a
-     * TransOptimze region to be formed with types that are incompatible,
-     * e.g.:
-     *    B1: TypePred: Loc0: Bool      // but this gets relaxed to Uncounted
-     *        PostCond: Loc0: Uncounted // post-conds are accurate
-     *    B2: TypePred: Loc0: Int       // this will always fail
-     */
-    const bool relax = kind != TransKind::Profile ||
-                       RuntimeOption::EvalJitRegionSelector == "tracelet";
-    if (relax) {
-      Timer _t(Timer::optimize_relaxGuards);
-      const bool simple = kind == TransKind::Profile &&
-                          RuntimeOption::EvalJitRegionSelector == "tracelet";
-      RelaxGuardsFlags flags = (RelaxGuardsFlags)
-        (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
-      auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
-      if (changed) finishPass("guard relaxation");
+    Timer _t(Timer::optimize_relaxGuards);
+    const bool simple = kind == TransKind::Profile &&
+                        RuntimeOption::EvalJitRegionSelector == "tracelet";
+    RelaxGuardsFlags flags = (RelaxGuardsFlags)
+      (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
+    auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
+    if (changed) finishPass("guard relaxation");
 
-      if (doReoptimize) {
-        irBuilder.reoptimize();
-        finishPass("guard relaxation reoptimize");
-      }
+    if (doReoptimize) {
+      irBuilder.reoptimize();
+      finishPass("guard relaxation reoptimize");
     }
   }
 

@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 namespace HPHP { namespace jit {
 

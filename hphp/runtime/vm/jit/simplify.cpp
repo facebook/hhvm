@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
@@ -2395,49 +2396,6 @@ void copyProp(IRInstruction* inst) {
     // copyPropped.
     assert(!inst->src(i)->inst()->is(Mov));
   }
-}
-
-const SSATmp* canonical(const SSATmp* val) {
-  return canonical(const_cast<SSATmp*>(val));
-}
-
-SSATmp* canonical(SSATmp* value) {
-  if (value == nullptr) return nullptr;
-
-  auto inst = value->inst();
-
-  while (inst->isPassthrough()) {
-    value = inst->getPassthroughValue();
-    inst = value->inst();
-  }
-  return value;
-}
-
-IRInstruction* findSpillFrame(SSATmp* sp) {
-  auto inst = sp->inst();
-  while (!inst->is(SpillFrame)) {
-    if (debug) {
-      [&] {
-        for (auto const& dst : inst->dsts()) {
-          if (dst.isA(Type::StkPtr)) return;
-        }
-        assert(false);
-      }();
-    }
-
-    assert(!inst->is(RetAdjustStack));
-    if (inst->is(DefSP)) return nullptr;
-    if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
-      // A non-punted translation of this bytecode would contain a SpillFrame.
-      return nullptr;
-    }
-
-    // M-instr support opcodes have the previous sp in varying sources.
-    if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
-    else                       inst = inst->src(0)->inst();
-  }
-
-  return inst;
 }
 
 bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {

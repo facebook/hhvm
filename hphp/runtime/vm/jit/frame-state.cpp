@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 TRACE_SET_MOD(hhir);

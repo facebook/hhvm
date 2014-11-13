@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
 #include "hphp/runtime/vm/jit/hhbc-translator-internal.h"

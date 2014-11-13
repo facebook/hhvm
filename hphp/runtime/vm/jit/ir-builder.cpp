@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP { namespace jit {

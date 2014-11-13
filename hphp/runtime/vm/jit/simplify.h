@@ -118,20 +118,6 @@ jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth);
 void copyProp(IRInstruction*);
 
 /*
- * Returns the canonical version of the given value by tracing through any
- * passthrough instructions (Mov, CheckType, etc...).
- */
-const SSATmp* canonical(const SSATmp*);
-SSATmp* canonical(SSATmp*);
-
-/*
- * Assuming sp is the VM stack pointer either from inside an FPI region or an
- * inlined call, find the SpillFrame instruction that defined the current
- * frame. Returns nullptr if the frame can't be found.
- */
-IRInstruction* findSpillFrame(SSATmp* sp);
-
-/*
  * Checks whether a packed array bounds check is unnecessary.  We share this
  * logic with gen time so that cases that are visible immediately don't require
  * generating IR with control flow that we have to clean up later.

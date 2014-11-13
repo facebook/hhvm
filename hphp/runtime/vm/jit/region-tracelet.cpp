@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/ref-deps.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 #include "hphp/util/trace.h"
 

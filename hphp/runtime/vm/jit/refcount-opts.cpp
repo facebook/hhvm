@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {

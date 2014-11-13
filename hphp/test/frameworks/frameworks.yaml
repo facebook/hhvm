@@ -630,9 +630,9 @@
   vfsstream:
     # We're using Graham's fork to unskip a couple of tests
     # The latest stable is v1.3.0 - the fork is slightly ahead
-    url: https://github.com/GrahamCampbell/vfsStream.git
-    branch: hhvm
-    commit: 00f21956ccf6cdff6201f28e598ff3ab5ccbd3c6
+    url: https://github.com/mikey179/vfsStream.git
+    branch: v1.4.0
+    commit: 61b12172292cf539685507aa65b076c1530e83c1
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist

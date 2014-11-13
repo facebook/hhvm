@@ -50,6 +50,8 @@ org\bovigo\vfs\UnlinkTestCase::canNotRemoveWritableFileFromNonWritableDirectory
 .
 org\bovigo\vfs\UnlinkTestCase::canRemoveNonWritableFileFromWritableDirectory
 .
+org\bovigo\vfs\UnlinkTestCase::unlinkNonExistingFileTriggersError
+.
 org\bovigo\vfs\content\LargeFileContentTestCase::contentIsFilledUpWithSpacesIfNoDataWritten
 .
 org\bovigo\vfs\content\LargeFileContentTestCase::createInstanceWithGigabytes
@@ -170,6 +172,14 @@ org\bovigo\vfs\vfsStreamAbstractContentTestCase::writePermissionsForOther
 .
 org\bovigo\vfs\vfsStreamAbstractContentTestCase::writePermissionsForUser
 .
+org\bovigo\vfs\vfsStreamBlockTestCase::addStructure
+.
+org\bovigo\vfs\vfsStreamBlockTestCase::createWithEmptyName
+.
+org\bovigo\vfs\vfsStreamBlockTestCase::defaultValues
+.
+org\bovigo\vfs\vfsStreamBlockTestCase::external
+.
 org\bovigo\vfs\vfsStreamContainerIteratorTestCase::iteration with data set #0
 .
 org\bovigo\vfs\vfsStreamContainerIteratorTestCase::iteration with data set #1
@@ -259,9 +269,9 @@ org\bovigo\vfs\vfsStreamFileTestCase::writeEmptyFile
 org\bovigo\vfs\vfsStreamGlobTestCase::globDoesNotWorkWithVfsStreamUrls
 .
 org\bovigo\vfs\vfsStreamResolveIncludePathTestCase::knownFileCanBeResolved
-.
+S
 org\bovigo\vfs\vfsStreamResolveIncludePathTestCase::unknownFileCanNotBeResolvedYieldsFalse
-.
+S
 org\bovigo\vfs\vfsStreamTestCase::copyFromEmptyFolder
 .
 org\bovigo\vfs\vfsStreamTestCase::copyFromEmptyFolderWithRoot
@@ -714,6 +724,8 @@ org\bovigo\vfs\vfsStreamZipTestCase::createZipArchive
 S
 org\bovigo\vfs\visitor\vfsStreamAbstractVisitorTestCase::visitThrowsInvalidArgumentExceptionOnUnknownContentType
 .
+org\bovigo\vfs\visitor\vfsStreamAbstractVisitorTestCase::visitWithBlockCallsVisitFile
+.
 org\bovigo\vfs\visitor\vfsStreamAbstractVisitorTestCase::visitWithDirectoryCallsVisitDirectory
 .
 org\bovigo\vfs\visitor\vfsStreamAbstractVisitorTestCase::visitWithFileCallsVisitFile
@@ -724,11 +736,15 @@ org\bovigo\vfs\visitor\vfsStreamPrintVisitorTestCase::constructWithNonStreamReso
 .
 org\bovigo\vfs\visitor\vfsStreamPrintVisitorTestCase::visitDirectoryWritesDirectoryNameToStream
 .
+org\bovigo\vfs\visitor\vfsStreamPrintVisitorTestCase::visitFileWritesBlockDeviceToStream
+.
 org\bovigo\vfs\visitor\vfsStreamPrintVisitorTestCase::visitFileWritesFileNameToStream
 .
 org\bovigo\vfs\visitor\vfsStreamPrintVisitorTestCase::visitRecursiveDirectoryStructure
 .
 org\bovigo\vfs\visitor\vfsStreamStructureVisitorTestCase::visitDirectoryCreatesStructureForDirectory
+.
+org\bovigo\vfs\visitor\vfsStreamStructureVisitorTestCase::visitFileCreatesStructureForBlock
 .
 org\bovigo\vfs\visitor\vfsStreamStructureVisitorTestCase::visitFileCreatesStructureForFile
 .

@@ -41,6 +41,7 @@ SOFTWARE.
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/base/zend-strtod.h"
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -412,6 +413,19 @@ static int dehexchar(char c) {
   return -1;
 }
 
+static String copy_and_clear(StringBuffer &buf) {
+  auto ret = buf.size() > 0 ? buf.copy() : empty_string();
+  buf.clear();
+  return ret;
+}
+
+static Variant to_double(StringBuffer &buf) {
+  auto data = buf.data();
+  auto ret = data ? zend_strtod(data, nullptr) : 0.0;
+  buf.clear();
+  return ret;
+}
+
 static void json_create_zval(Variant &z, StringBuffer &buf, int type,
                              int64_t options) {
   switch (type) {
@@ -444,10 +458,11 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
       }
 
       if (bigint) {
-        z = buf.detach();
         if (!(options & k_JSON_BIGINT_AS_STRING)) {
           // See KindOfDouble (below)
-          z = z.toDouble();
+          z = to_double(buf);
+        } else {
+          z = copy_and_clear(buf);
         }
       } else {
         z = int64_t(strtoll(buf.data(), nullptr, 10));
@@ -456,20 +471,13 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
     }
 
     case KindOfDouble:
-      // Can't use strtod() here since it's locale dependent
-      // JSON specifies using a '.' for decimal separators
-      // regardless of locale.
-      // Fallback on Variant's toDouble() machinery.
-      if (buf.data()) {
-        z = buf.detach();
-        z = z.toDouble();
-      } else {
-        z = 0.0;
-      }
+      // Use zend_strtod() instead of strtod() here since JSON specifies using
+      // a '.' for decimal separators regardless of locale.
+      z = to_double(buf);
       return;
 
     case KindOfString:
-      z = buf.detach();
+      z = copy_and_clear(buf);
       return;
 
     case KindOfUninit:
@@ -710,7 +718,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           /*<fb>*/
           }
           /*</fb>*/
-          the_json->the_kstack[the_json->the_top] = key->detach();
+          the_json->the_kstack[the_json->the_top] = copy_and_clear(*key);
           JSON_RESET_TYPE();
         }
         break;
@@ -737,7 +745,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = the_json->the_zstack[the_json->the_top];
-          object_set(top, key->detach(), mval, assoc, collections);
+          object_set(top, copy_and_clear(*key), mval, assoc, collections);
           buf->clear();
           JSON_RESET_TYPE();
         }
@@ -775,7 +783,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top = Array::Create();
           }
           /*</fb>*/
-          the_json->the_kstack[the_json->the_top] = key->detach();
+          the_json->the_kstack[the_json->the_top] = copy_and_clear(*key);
           JSON_RESET_TYPE();
         }
         break;
@@ -824,7 +832,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           break;
         case MODE_DONE:
           if (type == KindOfString) {
-            z = buf->detach();
+            z = copy_and_clear(*buf);
             the_state = 9;
             break;
           }
@@ -852,7 +860,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                 push(the_json, MODE_KEY)) {
               if (type != -1) {
                 Variant &top = the_json->the_zstack[the_json->the_top];
-                object_set(top, key->detach(), mval, assoc, collections);
+                object_set(top, copy_and_clear(*key), mval, assoc, collections);
               }
               the_state = 29;
             }

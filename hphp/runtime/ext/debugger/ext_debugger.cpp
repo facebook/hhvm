@@ -28,10 +28,10 @@ TRACE_SET_MOD(debugger);
 
 using namespace Eval;
 
-class DebuggerExtension : public Extension {
+class DebuggerExtension final : public Extension {
  public:
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() override {
+  void moduleInit() override {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);

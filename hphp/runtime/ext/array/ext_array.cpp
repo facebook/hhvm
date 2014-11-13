@@ -2642,10 +2642,10 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-class ArrayExtension : public Extension {
+class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(UCOL_DEFAULT);
     REGISTER_CONSTANT(UCOL_PRIMARY);
     REGISTER_CONSTANT(UCOL_SECONDARY);

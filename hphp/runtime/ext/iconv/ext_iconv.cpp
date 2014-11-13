@@ -1903,11 +1903,11 @@ const StaticString
   s_glibc("glibc"),
   s_2_5("2.5");
 
-class iconvExtension : public Extension {
+class iconvExtension final : public Extension {
 public:
   iconvExtension() : Extension("iconv") {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfStaticString>(
         s_ICONV_IMPL.get(), s_glibc.get()
     );

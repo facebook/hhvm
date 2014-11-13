@@ -5945,10 +5945,10 @@ Variant HHVM_FUNCTION(dom_import_simplexml,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DOMDocumentExtension : public Extension {
+class DOMDocumentExtension final : public Extension {
 public:
   DOMDocumentExtension() : Extension("domdocument") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(DOMNode, appendChild);
     HHVM_ME(DOMNode, cloneNode);
     HHVM_ME(DOMNode, getLineNo);

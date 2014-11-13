@@ -3405,11 +3405,11 @@ static Variant HHVM_METHOD(PDOStatement, __sleep) {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-static class PDOExtension : public Extension {
+static class PDOExtension final : public Extension {
 public:
   PDOExtension() : Extension("pdo", " 1.0.4dev") {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(pdo_drivers);
     HHVM_ME(PDO, __construct);
     HHVM_ME(PDO, prepare);

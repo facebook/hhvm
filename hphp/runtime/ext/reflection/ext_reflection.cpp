@@ -1385,10 +1385,10 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ReflectionExtension : public Extension {
+class ReflectionExtension final : public Extension {
  public:
   ReflectionExtension() : Extension("reflection", "$Id$") { }
-  void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);
     HHVM_FE(hphp_get_extension_info);

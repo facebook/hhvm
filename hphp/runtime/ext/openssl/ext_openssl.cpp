@@ -2901,10 +2901,10 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
-class opensslExtension : public Extension {
+class opensslExtension final : public Extension {
  public:
   opensslExtension() : Extension("openssl") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
 #define SSLCNS(cns) Native::registerConstant<KindOfInt64> \
                       (makeStaticString("OPENSSL_"#cns), k_OPENSSL_##cns)
     SSLCNS(RAW_DATA);

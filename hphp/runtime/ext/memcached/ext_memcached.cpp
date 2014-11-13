@@ -1298,7 +1298,7 @@ const StaticString s_SERIALIZER_IGBINARY("SERIALIZER_IGBINARY");
 const StaticString s_SERIALIZER_JSON("SERIALIZER_JSON");
 const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 
-class MemcachedExtension : public Extension {
+class MemcachedExtension final : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
   void threadInit() override {
@@ -1315,7 +1315,7 @@ class MemcachedExtension : public Extension {
     s_memcached_globals = nullptr;
   }
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(Memcached, __construct);
     HHVM_ME(Memcached, quit);
     HHVM_ME(Memcached, getallkeys);

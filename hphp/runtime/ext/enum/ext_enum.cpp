@@ -79,10 +79,10 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class enumExtension : public Extension {
+class enumExtension final : public Extension {
  public:
   enumExtension() : Extension("enum", "1.0.0-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getValues, BuiltinEnum, getValues);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);

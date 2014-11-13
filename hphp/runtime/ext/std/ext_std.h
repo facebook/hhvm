@@ -6,7 +6,7 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class StandardExtension : public Extension {
+class StandardExtension final : public Extension {
  public:
   StandardExtension() : Extension("standard") {}
 
@@ -26,7 +26,7 @@ class StandardExtension : public Extension {
     initMath();
   }
 
-  void threadInit() {
+  void threadInit() override {
     threadInitMisc();
   }
 

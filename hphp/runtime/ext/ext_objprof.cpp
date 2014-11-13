@@ -687,7 +687,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
   return objs;
 }
 
-class objprofExtension : public Extension {
+class objprofExtension final : public Extension {
  public:
   objprofExtension() : Extension("objprof", "1.0") { }
 

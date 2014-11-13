@@ -61,10 +61,10 @@ static StreamContext* get_stream_context(const Variant& stream_or_context);
 #define REGISTER_CONSTANT(name, value)                                         \
   Native::registerConstant<KindOfInt64>(makeStaticString(#name), value)        \
 
-static class StreamExtension : public Extension {
+static class StreamExtension final : public Extension {
 public:
   StreamExtension() : Extension("stream") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(STREAM_CLIENT_CONNECT, k_STREAM_CLIENT_CONNECT);
     REGISTER_CONSTANT(STREAM_CLIENT_ASYNC_CONNECT,
                       k_STREAM_CLIENT_ASYNC_CONNECT);

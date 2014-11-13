@@ -869,10 +869,10 @@ bool HHVM_FUNCTION(odbc_rollback, const Resource& link)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-static class ODBCExtension : public Extension {
+static class ODBCExtension final : public Extension {
  public:
   ODBCExtension() : Extension("odbc") { }
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(odbc_set_autocommit);
     HHVM_FE(odbc_get_autocommit);
     HHVM_FE(odbc_commit);

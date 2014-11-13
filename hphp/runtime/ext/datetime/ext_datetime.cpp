@@ -937,11 +937,11 @@ TypedValue* HHVM_FN(date_sunset)(ActRec* ar) {
     DateTimeZoneData::s_className.get(), s_DateTimeZone$$##name.get(),         \
     q_DateTimeZone$$##name)                                                    \
 
-static class DateTimeExtension : public Extension {
+static class DateTimeExtension final : public Extension {
 public:
   DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(DateTime, __construct);
     HHVM_ME(DateTime, add);
     HHVM_ME(DateTime, diff);
@@ -1030,7 +1030,7 @@ public:
     loadSystemlib("datetime");
   }
 
-  void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
       "date.timezone",

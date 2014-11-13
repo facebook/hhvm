@@ -19,10 +19,10 @@
 
 namespace HPHP {
 
-static class ThriftExtension : public Extension {
+static class ThriftExtension final : public Extension {
 public:
   ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(thrift_protocol_write_binary);
     HHVM_FE(thrift_protocol_read_binary);
     HHVM_FE(thrift_protocol_read_binary_struct);

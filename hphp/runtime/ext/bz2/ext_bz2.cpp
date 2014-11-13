@@ -202,10 +202,10 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class bz2Extension : public Extension {
+class bz2Extension final : public Extension {
  public:
   bz2Extension() : Extension("bz2") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);
     HHVM_FE(bzwrite);

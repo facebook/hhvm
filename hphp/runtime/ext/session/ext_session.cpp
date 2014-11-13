@@ -1888,10 +1888,10 @@ const StaticString s_PHP_SESSION_DISABLED("PHP_SESSION_DISABLED");
 const StaticString s_PHP_SESSION_NONE("PHP_SESSION_NONE");
 const StaticString s_PHP_SESSION_ACTIVE("PHP_SESSION_ACTIVE");
 
-static class SessionExtension : public Extension {
+static class SessionExtension final : public Extension {
  public:
   SessionExtension() : Extension("session", NO_EXTENSION_VERSION_YET) { }
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_PHP_SESSION_DISABLED.get(), k_PHP_SESSION_DISABLED
     );
@@ -1926,7 +1926,7 @@ static class SessionExtension : public Extension {
     loadSystemlib();
   }
 
-  virtual void threadInit() {
+  void threadInit() override {
     // TODO: t5226715 We shouldn't need to check s_session here, but right now
     // this is called for every request.
     if (s_session) return;
@@ -2014,12 +2014,12 @@ static class SessionExtension : public Extension {
                      &PS(hash_bits_per_character));
   }
 
-  virtual void threadShutdown() override {
+  void threadShutdown() override {
     delete s_session;
     s_session = nullptr;
   }
 
-  virtual void requestInit() override {
+  void requestInit() override {
     s_session->init();
   }
 

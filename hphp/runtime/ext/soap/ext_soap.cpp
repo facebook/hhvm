@@ -3062,10 +3062,10 @@ void HHVM_METHOD(SoapHeader, __construct,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SoapExtension : public Extension {
+static class SoapExtension final : public Extension {
 public:
   SoapExtension() : Extension("soap", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(SoapServer, __construct);
     HHVM_ME(SoapServer, setclass);
     HHVM_ME(SoapServer, setobject);

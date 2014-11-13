@@ -33,10 +33,10 @@
 
 namespace HPHP {
 
-static class LdapExtension : public Extension {
+static class LdapExtension final : public Extension {
 public:
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);
     HHVM_FE(ldap_dn2ufn);

@@ -8032,7 +8032,7 @@ Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ExifExtension : public Extension {
+class ExifExtension final : public Extension {
  public:
   ExifExtension() : Extension("exif", NO_EXTENSION_VERSION_YET) {}
 
@@ -8046,7 +8046,7 @@ class ExifExtension : public Extension {
   }
 } s_exif_extension;
 
-class GdExtension : public Extension {
+class GdExtension final : public Extension {
  public:
   GdExtension() : Extension("gd", NO_EXTENSION_VERSION_YET) {}
 

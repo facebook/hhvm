@@ -1366,10 +1366,10 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension : public Extension {
+class zipExtension final : public Extension {
  public:
   zipExtension() : Extension("zip", "1.12.4-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_ME(ZipArchive, getProperty);
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);

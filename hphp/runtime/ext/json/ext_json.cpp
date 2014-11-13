@@ -242,10 +242,10 @@ const StaticString
   s_JSON_ERROR_INF_OR_NAN("JSON_ERROR_INF_OR_NAN"),
   s_JSON_ERROR_UNSUPPORTED_TYPE("JSON_ERROR_UNSUPPORTED_TYPE");
 
-class JsonExtension : public Extension {
+class JsonExtension final : public Extension {
  public:
   JsonExtension() : Extension("json", "1.2.1") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_JSON_HEX_TAG.get(), k_JSON_HEX_TAG
     );

@@ -35,13 +35,13 @@
 
 namespace HPHP {
 
-class mysqlExtension : public Extension {
+class mysqlExtension final : public Extension {
 public:
   mysqlExtension() : Extension("mysql", "1.0") {}
 
   // implementing IDebuggable
-  virtual int debuggerSupport();
-  virtual void debuggerInfo(InfoVec &info);
+  virtual int debuggerSupport() override;
+  virtual void debuggerInfo(InfoVec &info) override;
 
   static bool ReadOnly;
 #ifdef FACEBOOK
@@ -57,8 +57,8 @@ public:
   static std::string Socket;
   static bool TypedResults;
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config);
-  void moduleInit();
+  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
+  void moduleInit() override;
 };
 
 extern mysqlExtension s_mysql_extension;

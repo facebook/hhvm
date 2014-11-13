@@ -2224,10 +2224,10 @@ const StaticString s_CURL_VERSION_KERBEROS4("CURL_VERSION_KERBEROS4");
 const StaticString s_CURL_VERSION_LIBZ("CURL_VERSION_LIBZ");
 const StaticString s_CURL_VERSION_SSL("CURL_VERSION_SSL");
 
-class CurlExtension : public Extension {
+class CurlExtension final : public Extension {
  public:
   CurlExtension() : Extension("curl") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
 #if LIBCURL_VERSION_NUM >= 0x071500
     Native::registerConstant<KindOfInt64>(
       s_CURLINFO_LOCAL_PORT.get(), k_CURLINFO_LOCAL_PORT

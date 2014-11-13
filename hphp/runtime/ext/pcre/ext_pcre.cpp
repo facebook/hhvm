@@ -174,11 +174,11 @@ const StaticString s_PCRE_VERSION("PCRE_VERSION");
 
 extern IMPLEMENT_THREAD_LOCAL(PCREglobals, s_pcre_globals);
 
-class PcreExtension : public Extension {
+class PcreExtension final : public Extension {
 public:
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfString>(
       s_PCRE_VERSION.get(), makeStaticString(pcre_version())
     );
@@ -230,7 +230,7 @@ public:
                      &s_pcre_has_jit);
   }
 
-  virtual void threadInit() {
+  void threadInit() override {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.backtrack_limit",
                      std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),

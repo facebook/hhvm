@@ -549,7 +549,7 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 
-class LibXMLExtension : public Extension {
+class LibXMLExtension final : public Extension {
   public:
     LibXMLExtension() : Extension("libxml") {}
 

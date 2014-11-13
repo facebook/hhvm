@@ -74,10 +74,10 @@ DEFINE_POSIX_CONSTANT(R_OK);
 #define REGISTER_POSIX_CONSTANT(name)                                          \
   Native::registerConstant<KindOfInt64>(s_POSIX_##name.get(), k_POSIX_##name)  \
 
-static class POSIXExtension : public Extension {
+static class POSIXExtension final : public Extension {
 public:
   POSIXExtension() : Extension("posix", NO_EXTENSION_VERSION_YET) {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_POSIX_CONSTANT(S_IFMT);
     REGISTER_POSIX_CONSTANT(S_IFSOCK);
     REGISTER_POSIX_CONSTANT(S_IFLNK);

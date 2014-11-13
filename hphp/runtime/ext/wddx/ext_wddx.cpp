@@ -257,10 +257,10 @@ static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
 
 //////////////////////////////////////////////////////////////////////////////
 
-class wddxExtension : public Extension {
+class wddxExtension final : public Extension {
  public:
   wddxExtension() : Extension("wddx") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(wddx_add_vars);
     HHVM_FE(wddx_packet_end);
     HHVM_FE(wddx_packet_start);

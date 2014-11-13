@@ -2114,7 +2114,7 @@ String HHVM_FUNCTION(hebrevc,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StringExtension : public Extension {
+class StringExtension final : public Extension {
 public:
   StringExtension() : Extension("string") {}
   void moduleInit() override {

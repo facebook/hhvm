@@ -99,7 +99,7 @@ inline String u8(const icu::UnicodeString& u16, UErrorCode& error) {
   return u8(u16.getBuffer(), u16.length(), error);
 }
 
-class IntlExtension : public Extension {
+class IntlExtension final : public Extension {
  public:
   IntlExtension() : Extension("intl", "1.1.0") {}
 

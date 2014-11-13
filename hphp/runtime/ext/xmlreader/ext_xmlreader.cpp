@@ -718,10 +718,10 @@ Variant HHVM_METHOD(XMLReader, expand,
                                              makeStaticString(#name),          \
                                              q_XMLReader$$##name)              \
 
-static class XMLReaderExtension : public Extension {
+static class XMLReaderExtension final : public Extension {
 public:
   XMLReaderExtension() : Extension("xmlreader", "0.1") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_XML_READER_CONSTANT(NONE);
     REGISTER_XML_READER_CONSTANT(ELEMENT);
     REGISTER_XML_READER_CONSTANT(ATTRIBUTE);

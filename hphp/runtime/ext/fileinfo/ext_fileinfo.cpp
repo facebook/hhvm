@@ -255,10 +255,10 @@ const StaticString s_FILEINFO_CONTINUE("FILEINFO_CONTINUE");
 const StaticString s_FILEINFO_PRESERVE_ATIME("FILEINFO_PRESERVE_ATIME");
 const StaticString s_FILEINFO_RAW("FILEINFO_RAW");
 
-class fileinfoExtension : public Extension {
+class fileinfoExtension final : public Extension {
  public:
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_FILEINFO_NONE.get(), MAGIC_NONE
     );

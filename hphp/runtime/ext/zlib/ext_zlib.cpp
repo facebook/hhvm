@@ -646,13 +646,13 @@ String HHVM_METHOD(__SystemLib_ChunkedInflator,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ZlibExtension : public Extension {
+class ZlibExtension final : public Extension {
  public:
   ZlibExtension() : Extension("zlib", "2.0") {}
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
-  virtual void moduleInit() {
+  void moduleInit() override {
 #define X(cns) \
     Native::registerConstant<KindOfInt64>(makeStaticString(#cns), k_##cns);
     X(ZLIB_ENCODING_RAW);

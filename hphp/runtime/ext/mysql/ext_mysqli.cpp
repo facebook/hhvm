@@ -685,10 +685,10 @@ static bool HHVM_FUNCTION(mysqli_thread_safe) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class mysqliExtension : public Extension {
+class mysqliExtension final : public Extension {
  public:
   mysqliExtension() : Extension("mysqli") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     // mysqli
     HHVM_ME(mysqli, autocommit);
     HHVM_ME(mysqli, change_user);

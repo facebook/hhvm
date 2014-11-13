@@ -357,10 +357,10 @@ Variant HHVM_FUNCTION(mailparse_determine_best_xfer_encoding,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MailparseExtension : public Extension {
+class MailparseExtension final : public Extension {
  public:
   MailparseExtension() : Extension("mailparse") { }
-  void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(mailparse_msg_create);
     HHVM_FE(mailparse_msg_free);
     HHVM_FE(mailparse_msg_parse_file);

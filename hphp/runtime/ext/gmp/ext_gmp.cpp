@@ -1424,10 +1424,10 @@ void GMPData::setGMPMpz(const mpz_t data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class GMPExtension : public Extension {
+class GMPExtension final : public Extension {
 public:
   GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
-  virtual void moduleInit() {
+  void moduleInit() override {
     Native::registerConstant<KindOfInt64>(
       s_GMP_MAX_BASE.get(), GMP_MAX_BASE
     );

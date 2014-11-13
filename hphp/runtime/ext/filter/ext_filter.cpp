@@ -136,16 +136,16 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(FilterRequestData, s_filter_request_data);
 #define REGISTER_CONSTANT(name)                                                \
   Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)              \
 
-static class FilterExtension : public Extension {
+static class FilterExtension final : public Extension {
 public:
   FilterExtension() : Extension("filter", "0.11.0") {}
 
-  virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     HHVM_FE(__SystemLib_filter_input_get_var);
     HHVM_FE(_filter_snapshot_globals);
   }
 
-  virtual void moduleInit() {
+  void moduleInit() override {
     REGISTER_CONSTANT(INPUT_POST);
     REGISTER_CONSTANT(INPUT_GET);
     REGISTER_CONSTANT(INPUT_COOKIE);
@@ -208,7 +208,7 @@ public:
     loadSystemlib();
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     // warm up the s_filter_request_data
     s_filter_request_data->requestInit();
   }

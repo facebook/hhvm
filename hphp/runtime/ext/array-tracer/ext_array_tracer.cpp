@@ -570,10 +570,10 @@ Array HHVM_FUNCTION(hphp_array_tracer_dump) {
   return ret;
 }
 
-class ArrayTracerExtension : public Extension {
+class ArrayTracerExtension final : public Extension {
   public:
   ArrayTracerExtension() : Extension("array_tracer") {}
-  virtual void moduleInit() {
+  void moduleInit() override {
     HHVM_FE(hphp_array_tracer_dump);
 
     loadSystemlib();

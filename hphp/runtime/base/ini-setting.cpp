@@ -658,11 +658,11 @@ static SettingMap s_system_settings;
 // Changed during the course of the request
 static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
 
-class IniSettingExtension : public Extension {
+class IniSettingExtension final : public Extension {
 public:
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
-  void requestShutdown() {
+  void requestShutdown() override {
     // Put all the defaults back to the way they were before any ini_set()
     for (auto &item : *s_saved_defaults) {
       IniSetting::SetUser(item.first, item.second, IniSetting::FollyDynamic());

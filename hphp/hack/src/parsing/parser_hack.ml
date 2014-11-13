@@ -2239,6 +2239,9 @@ and expr_remain env e1 =
       expr_call env e1
   | Tlb ->
       expr_array_get env e1
+  | Tlcb ->
+      error env "Do not use { to subscript, use [";
+      expr_array_get env e1
   | Tqm ->
       expr_if env e1
   | Tword when Lexing.lexeme env.lb = "instanceof" ->

@@ -804,7 +804,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
          *
          *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
          *)
-      let cname = snd (Env.class_name env id) in
+      let (_, cname) as name = Env.class_name env id in
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
       let privacy_policy_base_covariance =
@@ -816,7 +816,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
          privacy_policy_base_covariance || data_type_covariance) in
-      N.Happly (Env.class_name env id, hintl ~allow_this env hl)
+      N.Happly (name, hintl ~allow_this env hl)
   end
 
 (* Hints that are valid both as casts and type annotations.  Neither casts nor

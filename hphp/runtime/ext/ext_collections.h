@@ -283,7 +283,7 @@ class BaseVector : public ExtCollectionObjectData {
   explicit BaseVector(Class* cls);
   /*virtual*/ ~BaseVector();
 
-  Cell* data() const { return tvAssertCell(m_data); }
+  Cell* data() const { return m_data; }
   void grow();
   void reserveImpl(uint32_t newCap);
 

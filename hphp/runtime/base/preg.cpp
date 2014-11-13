@@ -71,7 +71,12 @@ void PCREglobals::onSessionExit() {
   smart::vector<const pcre_cache_entry*>().swap(m_overflow);
 }
 
+PCREglobals::PCREglobals() {
+  m_jit_stack = pcre_jit_stack_alloc(32768, 524288);
+}
+
 PCREglobals::~PCREglobals() {
+  pcre_jit_stack_free(m_jit_stack);
   onSessionExit();
 }
 
@@ -195,6 +200,10 @@ static __thread pcre_extra t_extra_data;
 
 // The last pcre error code is available for the whole thread.
 static __thread int t_last_error_code;
+
+static pcre_jit_stack *alloc_jit_stack(void* data) {
+  return s_pcre_globals->m_jit_stack;
+}
 
 namespace {
 
@@ -443,6 +452,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
     if (extra) {
       extra->flags |= PCRE_EXTRA_MATCH_LIMIT |
         PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+      pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
     }
     if (error != nullptr) {
       try {

@@ -219,7 +219,7 @@ org\bovigo\vfs\vfsStreamDirectoryTestCase::rename
 org\bovigo\vfs\vfsStreamDirectoryTestCase::renameToInvalidNameThrowsvfsStreamException
 .
 org\bovigo\vfs\vfsStreamExLockTestCase::filePutContentsLockShouldReportError
-F
+.
 org\bovigo\vfs\vfsStreamExLockTestCase::flockSouldPass
 .
 org\bovigo\vfs\vfsStreamFileTestCase::content

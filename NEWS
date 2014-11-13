@@ -67,11 +67,16 @@ NEXT 4-Dec-2014
  - Fix SOAP memory leak
  - Add OSS support for benchy
 
-"will.i.am" 6-Nov-2014
- - TODO
+"Will.i.am" 13-Nov-2014
+ - Add benchy.py for benchmarking HHVM
+ - Tune and enable PGO for all functions
+ - Generate HHIR opcode table by extracting lines from ir.specification
+ - Convert a few more extensions to HNI
+ - Limit the maximum number of bytecode instructions in a region
+ - Improvements to <<__Memoize>>
 
-"Vanilla Ice" 23-Oct-2014
- - TODO
+"Vanilla Ice" 27-Oct-2014
+ - TODO: Task #5530455
 
 "Ultramagnetic" 9-Oct-2014
  - Optimize strtr

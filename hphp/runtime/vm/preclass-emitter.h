@@ -211,8 +211,8 @@ class PreClassEmitter {
     return std::make_pair(m_line1, m_line2);
   }
 
-  int getNextMemoizeCacheKey(bool bStatic) {
-    return bStatic ? m_memoizeStaticSerial++ : m_memoizeInstanceSerial++;
+  int getNextMemoizeCacheKey() {
+    return m_memoizeInstanceSerial++;
   }
 
  private:
@@ -248,7 +248,6 @@ class PreClassEmitter {
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
 
-  int m_memoizeStaticSerial = 0;
   int m_memoizeInstanceSerial = 0;
 };
 

@@ -283,7 +283,7 @@ and bind_param env (_, ty1) param =
 (*****************************************************************************)
 and fun_def env _ f =
   if f.f_mode = Ast.Mdecl then () else begin
-    NastCheck.fun_ env f;
+    NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
     (* Fresh type environment is actually unnecessary, but I prefer to
      * have a guarantee that we are using a clean typing environment. *)
     Env.fresh_tenv env (
@@ -319,11 +319,13 @@ and fun_def env _ f =
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
+
 and fun_ ?(abstract=false) env unsafe has_ret hret pos b fun_type =
   Env.with_return env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env hret in
     let env = Env.set_fn_kind env fun_type in
+    let b = Nast.assert_named_body b in
     let env = block env b in
     let ret = Env.get_return env in
     let env =
@@ -1095,13 +1097,13 @@ and expr_ in_cond is_lvalue env (p, e) =
     let env = instanceof_in_env p env e1 e2 in
     env, (Reason.Rwitness p, Tprim Tbool)
   | Efun (f, idl) ->
-      NastCheck.fun_ env f;
-      let env, ft = fun_decl_in_env env f in
+    NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
+    let env, ft = fun_decl_in_env env f in
       (* check for recursive function calls *)
-      let anon = anon_make env.Env.lenv p f in
-      let env, anon_id = Env.add_anonymous env anon in
-      ignore (anon env ft.ft_params);
-      env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
+    let anon = anon_make env.Env.lenv p f in
+    let env, anon_id = Env.add_anonymous env anon in
+    ignore (anon env ft.ft_params);
+    env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let env, obj = expr env (fst sid, New (CI sid, [], [])) in
       let env, attr_tyl = lfold expr env (List.map snd attrl) in
@@ -1209,11 +1211,12 @@ and anon_make anon_lenv p f =
           | Some x -> Typing_hint.hint env x in
         let env = Env.set_return env hret in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let env = block env f.f_body in
+        let body = Nast.assert_named_body f.f_body in
+        let env = block env body in
         let env =
-          if Nast_terminality.Terminal.block f.f_body || f.f_unsafe || !auto_complete
+          if Nast_terminality.Terminal.block body || f.f_unsafe || !auto_complete
           then env
-          else fun_implicit_return env p hret f.f_body f.f_fun_kind
+          else fun_implicit_return env p hret body f.f_fun_kind
         in
         is_typing_self := false;
         env, hret
@@ -3333,7 +3336,7 @@ and class_def env_up _ c =
     let env_tmp = Env.set_root env_up (Dep.Class (snd c.c_name)) in
     let _, tc = Env.get_class env_tmp (snd c.c_name) in
     match tc with
-    | None ->
+      | None ->
         (* This can happen if there was an error during the declaration
          * of the class.
          *)

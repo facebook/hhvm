@@ -183,7 +183,6 @@ struct TranslArgs {
  * whose state is reset in between translations.
  */
 struct Translator {
-
   Translator();
 
   /////////////////////////////////////////////////////////////////////////////

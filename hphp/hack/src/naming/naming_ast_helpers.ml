@@ -65,7 +65,6 @@ and terminal_cl in_try = function
 
 let is_terminal stl = try terminal false stl; false with Exit -> true
 
-
 (* Module calculating the locals for a statement
 * This is useful when someone uses $x on both sides
 * of an If statement, for example:
@@ -81,6 +80,11 @@ module GetLocals = struct
     | (p, Lvar (_, x)) -> SMap.add x p acc
     | _, List lv -> List.fold_left lvalue acc lv
     | _ -> acc
+
+  let lvalue_foreach acc = function
+    (* Ref forms a local only inside a foreach *)
+    | (_, Ref (p, Lvar (_, x))) ->  SMap.add x p acc
+    | e -> lvalue acc e
 
   let rec stmt acc st =
     match st with

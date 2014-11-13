@@ -178,7 +178,6 @@ int RuntimeOption::GzipMaxCompressionLevel = 9;
 std::string RuntimeOption::ForceCompressionURL;
 std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
-bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
 bool RuntimeOption::ExposeHPHP = true;
 bool RuntimeOption::ExposeXFBServer = false;
@@ -330,7 +329,7 @@ int64_t RuntimeOption::MaxRSSPollingCycle = 0;
 int64_t RuntimeOption::DropCacheCycle = 0;
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::MaxMemcacheKeyCount = 0;
-int64_t RuntimeOption::SocketDefaultTimeout = 5;
+int64_t RuntimeOption::SocketDefaultTimeout = 60;
 bool RuntimeOption::LockCodeMemory = false;
 int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
@@ -870,7 +869,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(s_rss, ini, rlimit["RSS"], 0);
 
     Config::Bind(MaxRSS, ini, rlimit["MaxRSS"], 0);
-    Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 5);
+    Config::Bind(SocketDefaultTimeout, ini, rlimit["SocketDefaultTimeout"], 60);
     Config::Bind(MaxRSSPollingCycle, ini, rlimit["MaxRSSPollingCycle"], 0);
     Config::Bind(DropCacheCycle, ini, rlimit["DropCacheCycle"], 0);
     Config::Bind(MaxSQLRowCount, ini, rlimit["MaxSQLRowCount"], 0);
@@ -1107,7 +1106,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ForceCompressionParam, ini,
                  server["ForceCompression"]["Param"]);
 
-    Config::Bind(EnableMagicQuotesGpc, ini, server["EnableMagicQuotesGpc"]);
     Config::Bind(EnableKeepAlive, ini, server["EnableKeepAlive"], true);
     Config::Bind(ExposeHPHP, ini, server["ExposeHPHP"], true);
     Config::Bind(ExposeXFBServer, ini, server["ExposeXFBServer"], false);

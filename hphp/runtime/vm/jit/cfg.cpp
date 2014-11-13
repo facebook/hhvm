@@ -46,11 +46,11 @@ BlockList rpoSortCfg(const IRUnit& unit) {
 BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
   auto ret = BlocksWithIds{rpoSortCfg(unit), {unit, 0xffffffff}};
 
-  auto id = ret.blocks.size();
-  for (auto* block : ret.blocks) {
-    ret.ids[block] = --id;
+  uint32_t id = 0;
+  for (auto block : ret.blocks) {
+    ret.ids[block] = id++;
   }
-  assert(id == 0);
+  assert(id == ret.blocks.size());
 
   return ret;
 }
@@ -164,7 +164,7 @@ bool removeUnreachable(IRUnit& unit) {
  */
 IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
   auto& blocks = blockIds.blocks;
-  auto& postIds = blockIds.ids;
+  auto& rpoIds = blockIds.ids;
 
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
@@ -190,10 +190,10 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
         auto p2 = predIter->from();
         if (p2 == p1 || !idom[p2]) continue;
         // find earliest common predecessor of p1 and p2
-        // (higher postIds are earlier in flow and in dom-tree).
+        // (lower RPO ids are earlier in flow and in dom-tree).
         do {
-          while (postIds[p1] < postIds[p2]) p1 = idom[p1];
-          while (postIds[p2] < postIds[p1]) p2 = idom[p2];
+          while (rpoIds[p1] < rpoIds[p2]) p2 = idom[p2];
+          while (rpoIds[p2] < rpoIds[p1]) p1 = idom[p1];
         } while (p1 != p2);
       }
       if (idom[block] != p1) {

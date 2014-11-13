@@ -84,19 +84,19 @@ and typedef_kind =
   | NewType of hint
 
 and class_ = {
-    c_mode: mode;
-    c_user_attributes: user_attribute SMap.t;
-    c_final: bool;
-    c_kind: class_kind;
-    c_is_xhp: bool;
-    c_name: id;
-    c_tparams: tparam list;
-    c_extends: hint list;
-    c_implements: hint list;
-    c_body: class_elt list;
-    c_namespace: Namespace_env.env;
-    c_enum: enum_ option;
-  }
+  c_mode: mode;
+  c_user_attributes: user_attribute SMap.t;
+  c_final: bool;
+  c_kind: class_kind;
+  c_is_xhp: bool;
+  c_name: id;
+  c_tparams: tparam list;
+  c_extends: hint list;
+  c_implements: hint list;
+  c_body: class_elt list;
+  c_namespace: Namespace_env.env;
+  c_enum: enum_ option;
+}
 
 and enum_ = {
   e_base       : hint;

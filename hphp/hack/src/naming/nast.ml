@@ -114,7 +114,7 @@ and method_ = {
   m_tparams         : tparam list               ;
   m_variadic        : fun_variadicity           ;
   m_params          : fun_param list            ;
-  m_body            : block                     ;
+  m_body            : body_block                ;
   m_user_attributes : Ast.user_attribute SMap.t ;
   m_ret             : hint option               ;
   m_fun_kind        : fun_kind                  ;
@@ -159,7 +159,7 @@ and fun_ = {
   f_tparams  : tparam list;
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
-  f_body     : block;
+  f_body     : body_block;
   f_fun_kind : fun_kind;
 }
 
@@ -171,6 +171,10 @@ and gconst = {
   cst_type: hint option;
   cst_value: expr option;
 }
+
+and body_block =
+  | UnnamedBody of Ast.block
+  | NamedBody of block
 
 and stmt =
   | Expr of expr
@@ -277,3 +281,7 @@ type def =
  | Typedef of typedef
 
 type program = def list
+
+let assert_named_body = function
+  | NamedBody b -> b
+  | UnnamedBody _ -> failwith "Expecting a named function body"

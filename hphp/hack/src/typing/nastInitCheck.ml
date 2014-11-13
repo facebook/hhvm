@@ -60,12 +60,12 @@ module Env = struct
     | Done
 
     (* We have never computed this private bethod before *)
-    | Todo of block
+    | Todo of body_block
 
   type t = {
-      methods : method_status ref SMap.t ;
-      cvars   : SSet.t ;
-    }
+    methods : method_status ref SMap.t ;
+    cvars   : SSet.t ;
+  }
 
   (* If we need to call parent::__construct, we treat it as if it were
    * a class variable that needs to be initialized. It's a bit hacky
@@ -191,7 +191,9 @@ and class_ tenv c =
 and constructor env cstr =
   match cstr with
     | None -> SSet.empty
-    | Some cstr -> toplevel env SSet.empty cstr.m_body
+    | Some cstr -> match cstr.m_body with
+        | NamedBody b -> toplevel env SSet.empty b
+        | UnnamedBody _ -> (* FIXME FIXME *) SSet.empty
 
 and assign env acc x =
   SSet.add x acc
@@ -334,8 +336,11 @@ and expr_ env acc p e =
           (match !method_ with
           | Done -> acc
           | Todo b ->
-              method_ := Done;
-              toplevel env acc b
+            method_ := Done;
+            (match b with
+              | NamedBody b -> toplevel env acc b
+              | UnnamedBody b -> (* FIXME *) acc
+            )
           )
       )
   | Assert (AE_invariant_violation (e, el)) ->

@@ -62,6 +62,7 @@ end = struct
 
   (* This code is only executed when the options --check is NOT present *)
   let go root init_fun =
+    let t = Unix.gettimeofday () in
     grab_lock root;
     init_message();
     grab_init_lock root;
@@ -70,6 +71,8 @@ end = struct
     let env = init_fun () in
     release_init_lock root;
     ready_message ();
+    let t' = Unix.gettimeofday () in
+    Printf.printf "Took %f seconds to initialize.\n" (t' -. t);
     env
 end
 

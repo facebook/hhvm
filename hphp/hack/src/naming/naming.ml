@@ -1429,7 +1429,7 @@ and foreach_stmt env e aw ae b =
 
 and as_expr env aw = function
   | As_v ev ->
-      let vars = Naming_ast_helpers.GetLocals.lvalue_foreach SMap.empty ev in
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       let ev = expr env ev in
       (match aw with
@@ -1437,7 +1437,7 @@ and as_expr env aw = function
         | Some p -> N.Await_as_v (p, ev))
   | As_kv ((p1, Lvar k), ev) ->
       let k = p1, N.Lvar (Env.new_lvar env k) in
-      let vars = Naming_ast_helpers.GetLocals.lvalue_foreach SMap.empty ev in
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       let ev = expr env ev in
       (match aw with

@@ -300,12 +300,16 @@ public:
   bool isPairGenerator;
   bool isMemoizeImpl;
   bool isMemoizeWrapper;
+  bool hasMemoizeSharedProp;
   bool containsCalls;
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;
 
   UserAttributeMap userAttributes;
+
+  StringData *memoizePropName;
+  int memoizeSharedPropIndex;
 
 private:
   /*

@@ -6401,30 +6401,10 @@ void EmitterVisitor::emitPostponedMeths() {
     }
 
     if (funcScope->userAttributes().count("__Memoize")) {
-      auto classScope = meth->getClassScope();
-
-      std::string propNameBase = classScope && !funcScope->isStatic() ?
-        "instance" : "static";
-      // The prop definition in traits conflicts with the definition in a class
-      // so make a different prop for each trait
-      std::string traitNamePart;
-      if (classScope && classScope->isTrait()) {
-        traitNamePart = classScope->getName();
-        // the backslash comes from namespaces. @jan thought that would cause
-        // issues, so use $ instead
-        for (char &c: traitNamePart) {
-          c = (c == '\\' ? '$' : c);
-        }
-        traitNamePart += "$";
-      }
-
       auto const originalName = fe->name;
       auto const rewrittenName = makeStaticString(
         folly::sformat("{}$memoize_impl", fe->name->data()));
-      auto const propName = makeStaticString(
-        folly::sformat("{}${}memoize_cache", propNameBase, traitNamePart));
 
-      int cacheKey = 0;
       FuncEmitter* memoizeFe = nullptr;
       if (meth->is(Statement::KindOfFunctionStatement)) {
         if (!p.m_top) {
@@ -6436,28 +6416,19 @@ void EmitterVisitor::emitPostponedMeths() {
         fe->name = rewrittenName;
         top_fes.push_back(memoizeFe);
       } else {
-        PreClassEmitter *pce = fe->pce();
-        cacheKey = pce->getNextMemoizeCacheKey(funcScope->isStatic());
-
-        // Add a property to hold the memoized results
-        TypedValue tvProp = make_tv<KindOfArray>(staticEmptyArray());
-        Attr attrs = AttrPrivate | AttrBuiltin;
-        attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
-        pce->addProperty(propName, attrs, nullptr, nullptr, &tvProp,
-                         RepoAuthType{});
-
         // Rename the method and create a new method with the original name
-        pce->renameMethod(originalName, rewrittenName);
-        memoizeFe = m_ue.newMethodEmitter(originalName, pce);
-        bool added UNUSED = pce->addMethod(memoizeFe);
+        fe->pce()->renameMethod(originalName, rewrittenName);
+        memoizeFe = m_ue.newMethodEmitter(originalName, fe->pce());
+        bool added UNUSED = fe->pce()->addMethod(memoizeFe);
         assert(added);
       }
 
       // Emit the new method that handles the memoization
       m_curFunc = memoizeFe;
       m_curFunc->isMemoizeWrapper = true;
+      addMemoizeProp(meth);
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
-      emitMemoizeMethod(meth, rewrittenName, propName, cacheKey);
+      emitMemoizeMethod(meth, rewrittenName);
 
       // Switch back to the original method and mark it as a memoize
       // implementation
@@ -6862,30 +6833,89 @@ void EmitterVisitor::emitMethodDVInitializers(Emitter& e,
   if (hasOptional) e.JmpNS(topOfBody);
 }
 
+void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
+  assert(m_curFunc->isMemoizeWrapper);
+
+  if (meth->is(Statement::KindOfFunctionStatement)) {
+    // Functions use statics within themselves. So all we need to do here is
+    // set the name
+    m_curFunc->memoizePropName = makeStaticString("static$memoize_cache");
+    return;
+  }
+
+  auto pce = m_curFunc->pce();
+  auto classScope = meth->getClassScope();
+  auto funcScope = meth->getFunctionScope();
+  bool useSharedProp = !funcScope->isStatic();
+
+  std::string propNameBase;
+  if (useSharedProp) {
+    propNameBase = "$shared";
+    m_curFunc->hasMemoizeSharedProp = true;
+    m_curFunc->memoizeSharedPropIndex = pce->getNextMemoizeCacheKey();
+  } else {
+    propNameBase = funcScope->getName();
+  }
+
+  // The prop definition in traits conflicts with the definition in a class
+  // so make a different prop for each trait
+  std::string traitNamePart;
+  if (classScope && classScope->isTrait()) {
+    traitNamePart = classScope->getName();
+    // the backslash comes from namespaces. @jan thought that would cause
+    // issues, so use $ instead
+    for (char &c: traitNamePart) {
+      c = (c == '\\' ? '$' : c);
+    }
+    traitNamePart += "$";
+  }
+
+  m_curFunc->memoizePropName = makeStaticString(
+    folly::sformat("{}${}memoize_cache", propNameBase, traitNamePart));
+
+  TypedValue tvProp;
+  if (useSharedProp ||
+      (meth->getParams() && meth->getParams()->getCount() > 0)) {
+    tvProp = make_tv<KindOfArray>(staticEmptyArray());
+  } else {
+    tvWriteNull(&tvProp);
+  }
+
+  Attr attrs = AttrPrivate | AttrBuiltin;
+  attrs = attrs | (funcScope->isStatic() ? AttrStatic : AttrNone);
+  pce->addProperty(m_curFunc->memoizePropName, attrs, nullptr, nullptr, &tvProp,
+                   RepoAuthType{});
+}
+
 void EmitterVisitor::emitMemoizeProp(Emitter& e,
                                      MethodStatementPtr meth,
-                                     const StringData* propName,
                                      Id localID,
                                      const std::vector<Id>& paramIDs,
                                      uint numParams) {
+  assert(m_curFunc->isMemoizeWrapper);
+
   if (meth->is(Statement::KindOfFunctionStatement)) {
     emitVirtualLocal(localID);
   } else if (meth->getFunctionScope()->isStatic()) {
     m_evalStack.push(StackSym::K);
     m_evalStack.setClsBaseType(SymbolicStack::CLS_SELF);
-    e.String(propName);
+    e.String(m_curFunc->memoizePropName);
     markSProp(e);
   } else {
     m_evalStack.push(StackSym::H);
     m_evalStack.setKnownCls(m_curFunc->pce()->name(), false);
     m_evalStack.push(StackSym::T);
-    m_evalStack.setString(propName);
+    m_evalStack.setString(m_curFunc->memoizePropName);
     markProp(e);
   }
 
   assert(numParams <= paramIDs.size());
   for (uint i = 0; i < numParams; i++) {
-    emitVirtualLocal(paramIDs[i]);
+    if (i == 0 && m_curFunc->hasMemoizeSharedProp) {
+      e.Int(m_curFunc->memoizeSharedPropIndex);
+    } else {
+      emitVirtualLocal(paramIDs[i]);
+    }
     markElem(e);
   }
 }
@@ -6904,9 +6934,9 @@ bool EmitterVisitor::isMemoizeBlessedType(const TypeConstraint &tc) {
 }
 
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
-                                       const StringData* methName,
-                                       const StringData* propName,
-                                       int cacheKey) {
+                                       const StringData* methName) {
+  assert(m_curFunc->isMemoizeWrapper);
+
   if (meth->getFunctionScope()->isRefReturn()) {
     throw IncludeTimeFatalException(meth,
       "<<__Memoize>> cannot be used on functions that return by reference");
@@ -6937,32 +6967,31 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   emitMethodPrologue(e, meth);
 
   // Function start
-  int staticLocalID = m_curFunc->allocUnnamedLocal();
+  int staticLocalID = 0;
   if (isFunc) {
     // static ${propName} = {numParams > 0 ? array() : null};
+    staticLocalID = m_curFunc->allocUnnamedLocal();
     emitVirtualLocal(staticLocalID);
     if (numParams == 0) {
       e.Null();
     } else {
       e.Array(staticEmptyArray());
     }
-    e.StaticLocInit(staticLocalID, propName);
-  } else {
-    if (!meth->getFunctionScope()->isStatic()) {
-      e.CheckThis();
-    }
-
-    // Methods use a shared array keyed by a cache key. So push that as a local
-    emitVirtualLocal(staticLocalID);
-    e.Int(cacheKey);
-    emitSet(e);
-    emitPop(e);
-    cacheLookup.push_back(staticLocalID);
+    e.StaticLocInit(staticLocalID, m_curFunc->memoizePropName);
+  } else if (!meth->getFunctionScope()->isStatic()) {
+    e.CheckThis();
   }
 
-  if (numParams == 0 && isFunc) {
+  if (m_curFunc->hasMemoizeSharedProp) {
+    // The code below depends on cacheLookup having the right number of elements
+    // Push a dummy value even though we'll use the cacheID as an int instead
+    // instead of emitting a local
+    cacheLookup.push_back(0);
+  }
+
+  if (numParams == 0 && cacheLookup.size() == 0) {
     // if (${propName} !== null)
-    emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup, 0);
+    emitMemoizeProp(e, meth, staticLocalID, cacheLookup, 0);
     emitIsType(e, IsTypeOp::Null);
     e.JmpNZ(cacheMiss);
   } else {
@@ -7031,7 +7060,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
     if (cacheLookupLen > 1 || noRetNull) {
       // if (isset(${propName}[$param1]...[noRetNull ? $paramN : $paramN-1]))
-      emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
+      emitMemoizeProp(e, meth, staticLocalID, cacheLookup,
                       noRetNull ? cacheLookupLen : cacheLookupLen - 1);
       emitIsset(e);
       e.JmpZ(cacheMiss);
@@ -7048,13 +7077,16 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
       }
 
       // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1]))
-      emitVirtualLocal(cacheLookup[cacheLookupLen - 1]);
-      emitCGet(e);
-      if (lastArgBool) {
-        e.CastInt();
+      if (cacheLookupLen == 1 && m_curFunc->hasMemoizeSharedProp) {
+        e.Int(m_curFunc->memoizeSharedPropIndex);
+      } else {
+        emitVirtualLocal(cacheLookup[cacheLookupLen - 1]);
+        emitCGet(e);
+        if (lastArgBool) {
+          e.CastInt();
+        }
       }
-      emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
-                      cacheLookupLen - 1);
+      emitMemoizeProp(e, meth, staticLocalID, cacheLookup, cacheLookupLen - 1);
       emitCGet(e);
       e.AKExists();
       e.JmpZ(cacheMiss);
@@ -7063,15 +7095,13 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
   // return $<propName>[$param1][...][$paramN]
   int cacheLookupLen = cacheLookup.size();
-  emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
-                  cacheLookupLen);
+  emitMemoizeProp(e, meth, staticLocalID, cacheLookup, cacheLookupLen);
   emitCGet(e);
   e.RetC();
 
   // Otherwise, call the memoized func, store the result, and return it
   cacheMiss.set(e);
-  emitMemoizeProp(e, meth, propName, staticLocalID, cacheLookup,
-                  cacheLookupLen);
+  emitMemoizeProp(e, meth, staticLocalID, cacheLookup, cacheLookupLen);
   auto fpiStart = m_ue.bcPos();
   if (isFunc) {
     e.FPushFuncD(numParams, methName);

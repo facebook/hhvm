@@ -215,19 +215,30 @@ let unparser _env =
                cst_namespace = v_cst_namespace
              } =
     u_in_mode v_cst_mode (fun () ->
-      invariant (v_cst_kind = Cst_const) (pos, "Unsupported Constant Type");
       invariant (is_empty_ns v_cst_namespace)
         (pos, "Namespaces are expected to not be elaborated");
-      let v_cst_name = u_id v_cst_name in
-      let v_cst_type = u_of_option u_hint v_cst_type in
       let v_cst_value = u_expr v_cst_value in
-      StrStatement [
-        Str "const";
-        v_cst_type;
-        v_cst_name;
-        Str "=";
-      v_cst_value
-      ])
+      match v_cst_kind with
+      | Cst_const ->
+          let v_cst_name = u_id v_cst_name in
+          let v_cst_type = u_of_option u_hint v_cst_type in
+          StrStatement [
+            Str "const";
+            v_cst_type;
+            v_cst_name;
+            Str "=";
+            v_cst_value
+          ]
+      | Cst_define ->
+          invariant (v_cst_type = None) (pos, "Constants using the define " ^
+            "syntax cannot use type hints");
+          StrStatement [
+            Str "define";
+            StrParens (StrCommaList [
+              u_expr_ (String v_cst_name);
+              v_cst_value;
+            ])
+          ])
   and u_variance =
     function
     | Covariant -> u_todo "Covariant" (fun () -> StrEmpty )

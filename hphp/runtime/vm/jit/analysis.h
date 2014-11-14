@@ -20,6 +20,7 @@ namespace HPHP { namespace jit {
 
 struct SSATmp;
 struct IRInstruction;
+struct Block;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -46,6 +47,29 @@ SSATmp* canonical(SSATmp*);
  * frame. Returns nullptr if the frame can't be found.
  */
 IRInstruction* findSpillFrame(SSATmp* sp);
+
+/*
+ * Given a non-const SSATmp `t', return the earliest block B such that `t' is
+ * defined on all of B's outgoing edges, and `t' is defined in all blocks
+ * dominated by B.
+ *
+ * Such a block may not exist if the CFG has critical edges, so this function
+ * may return nullptr.
+ *
+ * Details: we have several instructions that conditionally define values on
+ * their fallthrough edge---if this fallthrough edge is a critical edge, the
+ * value is actually only defined on that edge, and there is no block with the
+ * desired properties.
+ *
+ * A normal use for this function is when you have computed that an SSATmp has
+ * the same value as another computation, but want to know if it is defined at
+ * some program point so you can add a new use to it.  The precondition that
+ * `t' is not const is because this function makes no sense for that use case
+ * for constants, which are defined everywhere.
+ *
+ * Pre: !t->isConst()
+ */
+Block* findDefiningBlock(const SSATmp* t);
 
 //////////////////////////////////////////////////////////////////////
 

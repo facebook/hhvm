@@ -15,8 +15,10 @@
 */
 #include "hphp/runtime/vm/jit/analysis.h"
 
+#include "hphp/util/assertions.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/block.h"
 
 namespace HPHP { namespace jit {
 
@@ -65,6 +67,39 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
   }
 
   return inst;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Block* findDefiningBlock(const SSATmp* t) {
+  assert(!t->isConst());
+  auto const srcInst = t->inst();
+
+  /*
+   * Instructions that define temporaries that also have edges define the
+   * temporary only if they do not take the taken edge.  Since the temporary is
+   * defined on the fallthrough edge, this means we only have a block that we
+   * can return if this edge is not the only edge leading to its target.
+   */
+  if (srcInst->hasEdges()) {
+    auto const next = srcInst->next();
+    UNUSED auto const taken = srcInst->taken();
+    if (taken) {
+      always_assert_flog(
+        next != nullptr,
+        "Instruction defining a dst had a taken but no next:\n  {}\n",
+        srcInst->toString()
+      );
+    }
+    if (next) {
+      return next && next->numPreds() == 1 ? next : nullptr;
+    }
+    // Not acting as a control flow instruction, fall through.  Some
+    // instructions like LdThis have this property of conditionally having
+    // edges.
+  }
+
+  return srcInst->block();
 }
 
 //////////////////////////////////////////////////////////////////////

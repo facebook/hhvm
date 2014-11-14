@@ -154,6 +154,8 @@ module Typehints = struct
   let double  = "double"
   let real    = "real"
 
+  let shape = "shape"
+
   let object_cast = "object"
   let unset_cast = "unset"
 

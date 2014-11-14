@@ -152,6 +152,7 @@ module Naming                               = struct
   let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
   let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
   let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
+  let shape_typehint                        = 2059 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -465,6 +466,11 @@ let real_instead_of_float pos =
     "Invalid Hack type. Using \"real\" in Hack is considered \
     an error. Use \"float\" instead. They are equivalent data types and \
     the codebase remains consistent."
+
+let shape_typehint pos =
+  add Naming.shape_typehint pos
+  "\"shape\" is an invalid type; you need to declare and use a specific shape \
+  type."
 
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"

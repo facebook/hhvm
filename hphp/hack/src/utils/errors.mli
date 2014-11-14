@@ -48,6 +48,7 @@ val integer_instead_of_int : Pos.t -> unit
 val boolean_instead_of_bool : Pos.t -> unit
 val double_instead_of_float : Pos.t -> unit
 val real_instead_of_float : Pos.t -> unit
+val shape_typehint : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit

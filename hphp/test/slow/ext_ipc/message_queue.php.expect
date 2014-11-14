@@ -1,4 +1,8 @@
 bool(true)
 string(5) "start"
 string(2) "ok"
+bool(false)
+bool(true)
+bool(false)
+bool(true)
 int(0)

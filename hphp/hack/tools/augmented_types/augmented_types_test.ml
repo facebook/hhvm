@@ -49,20 +49,31 @@ let test_convert_ty () =
      strict = Common.Right "";
      loose = Common.Left H.Hmixed;
     };
-    (* TODO enable these tests (and write more), testing currently unimplemented
-     * behavior. *)
-    (*
-    {name = "nullable mixed";
+    {name = "nullable class";
+     input = T.ATcomposite [T.ATclass "foo"; T.ATnull];
+     strict = Common.Left (H.Hnullable (H.Hclass "foo"));
+     loose = Common.Left (H.Hnullable (H.Hclass "foo"));
+    };
+    {name = "nullable mixed 1";
      input = T.ATcomposite [T.ATmixed; T.ATnull];
      strict = Common.Left H.Hmixed;
      loose = Common.Left H.Hmixed;
+    };
+    {name = "nullable mixed 2";
+     input = T.ATcomposite [T.ATmixed]; (* Not sure how meaningful this is. *)
+     strict = Common.Right "";
+     loose = Common.Left H.Hmixed;
+    };
+    {name = "loose composite";
+     input = T.ATcomposite [T.ATuint; T.ATfloat];
+     strict = Common.Right "";
+     loose = Common.Left H.Hnum;
     };
     {name = "multiple reduce";
      input = T.ATcomposite [T.ATint; T.ATnull; T.ATfloat];
      strict = Common.Left (H.Hnullable H.Hnum);
      loose = Common.Left (H.Hnullable H.Hnum);
     };
-    *)
   ] in
   let check_single name output expected = match output, expected with
     | Common.Left e1, Common.Left e2 when e1 = e2 -> ()

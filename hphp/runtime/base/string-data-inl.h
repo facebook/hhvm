@@ -84,7 +84,7 @@ inline StringSlice StringData::slice() const {
 
 inline MutableSlice StringData::bufferSlice() {
   assert(!isImmutable());
-  return MutableSlice(m_data, capacity() - 1);
+  return MutableSlice(m_data, capacity());
 }
 
 inline void StringData::invalidateHash() {
@@ -95,7 +95,7 @@ inline void StringData::invalidateHash() {
 }
 
 inline void StringData::setSize(int len) {
-  assert(len >= 0 && len < capacity() && !isImmutable());
+  assert(len >= 0 && len <= capacity() && !isImmutable());
   assert(!hasMultipleRefs());
   m_data[len] = 0;
   m_len = len;

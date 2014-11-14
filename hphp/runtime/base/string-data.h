@@ -76,7 +76,6 @@ struct StringData {
    *   ... = size + 1; // oops, wraparound.
    */
   static constexpr uint32_t MaxSize = 0x7ffffffe; // 2^31-2
-  static constexpr uint32_t MaxCap = MaxSize + 1;
 
   /*
    * Creates an empty request-local string with an unspecified amount
@@ -296,7 +295,7 @@ struct StringData {
   bool empty() const;
 
   /*
-   * Return the capacity of this string's buffer, including the space
+   * Return the capacity of this string's buffer, not including the space
    * for the null terminator.
    */
   uint32_t capacity() const;

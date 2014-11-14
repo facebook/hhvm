@@ -21,11 +21,20 @@ def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     saved_state_path: Path to file containing saved server state
     changed_files: list of strings
     """
-    with open(repo_dir + os.path.sep + '.hhconfig', 'w') as f:
+    with open(os.path.join(repo_dir, 'server_options.sh'), 'w') as f:
+        f.write(r"""
+#! /bin/sh
+echo --load \"%s\"
+        """ % " ".join([saved_state_path] + changed_files))
+        os.fchmod(f.fileno(), 0o700)
+
+    with open(os.path.join(repo_dir, '.hhconfig'), 'w') as f:
+        # we can't just write 'echo ...' inline because Hack server will
+        # be passing this command some command-line options
         f.write(r"""
 # some comment
-server_options_cmd = echo --load \"%s\"
-        """ % " ".join([saved_state_path] + changed_files))
+server_options_cmd = %s
+        """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
     @classmethod
@@ -369,3 +378,37 @@ class TestSaveRestore(unittest.TestCase):
             # paths
             options=['--auto-complete', '--json'],
             stdin='<?hh function f() { some_AUTO332\n')
+
+    def test_options_cmd(self):
+        """
+        Make sure we are invoking the server_options_cmd with the right flags
+        """
+        args_file = os.path.join(self.saved_state_dir, 'cmd_args')
+        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
+            f.write(r"""
+#! /bin/sh
+echo "$1" > {out}
+echo "$2" >> {out}
+            """.format(out=args_file))
+            os.fchmod(f.fileno(), 0o700)
+
+        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
+            f.write(r"""
+# some comment
+server_options_cmd = %s
+            """ % os.path.join(self.repo_dir, 'server_options.sh'))
+
+        proc_call([
+            self.hh_client,
+            'start',
+            self.repo_dir
+        ])
+
+        version = proc_call([
+            self.hh_server,
+            self.repo_dir,
+            '--version'
+        ])
+
+        with open(args_file) as f:
+            self.assertEqual(f.read().splitlines(), [self.repo_dir, version])

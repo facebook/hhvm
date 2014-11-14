@@ -40,7 +40,10 @@ let rec wait env =
 
 let start_server env =
   let server_options = match env.server_options_cmd with
-    | Some cmd -> (try Utils.exec_read cmd with _ -> "")
+    | Some cmd ->
+      let cmd = Printf.sprintf "%s \"%s\" \"%s\"" cmd
+        (Path.string_of_path env.root) Build_id.build_id_ohai in
+      (try Utils.exec_read cmd with _ -> "")
     | None -> "" in
   let hh_server = Printf.sprintf "%s -d %s %s"
     (get_hhserver())

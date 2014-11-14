@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/id-set.h"
 
 namespace HPHP { namespace jit {
 
@@ -100,6 +101,37 @@ Block* findDefiningBlock(const SSATmp* t) {
   }
 
   return srcInst->block();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
+  if (s1 == s2) return s1;
+  if (s1 == nullptr || s2 == nullptr) return nullptr;
+
+  IdSet<SSATmp> seen;
+
+  auto const step = [] (SSATmp* v) {
+    assert(v != nullptr);
+    return v->inst()->isPassthrough() ?
+      v->inst()->getPassthroughValue() :
+      nullptr;
+  };
+
+  auto const process = [&] (SSATmp*& v) {
+    if (v == nullptr) return false;
+    if (seen[v]) return true;
+    seen.add(v);
+    v = step(v);
+    return false;
+  };
+
+  while (s1 != nullptr || s2 != nullptr) {
+    if (process(s1)) return s1;
+    if (process(s2)) return s2;
+  }
+
+  return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////

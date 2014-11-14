@@ -18,7 +18,6 @@
 #include <algorithm>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -29,41 +28,6 @@ TRACE_SET_MOD(hhir);
 namespace HPHP { namespace jit {
 
 using Trace::Indent;
-
-/*
- * Finds the least common ancestor of two SSATmps. A temp has a parent if it
- * is the result of a passthrough instruction.
- *
- * Returns nullptr when there is no LCA.
- */
-static SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
-  if (s1 == s2) return s1;
-  if (s1 == nullptr || s2 == nullptr) return nullptr;
-
-  IdSet<SSATmp> seen;
-
-  auto const step = [] (SSATmp* v) {
-    assert(v != nullptr);
-    return v->inst()->isPassthrough() ?
-      v->inst()->getPassthroughValue() :
-      nullptr;
-  };
-
-  auto const process = [&] (SSATmp*& v) {
-    if (v == nullptr) return false;
-    if (seen[v]) return true;
-    seen.add(v);
-    v = step(v);
-    return false;
-  };
-
-  while (s1 != nullptr || s2 != nullptr) {
-    if (process(s1)) return s1;
-    if (process(s2)) return s2;
-  }
-
-  return nullptr;
-}
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
   : FrameState(unit, marker.spOff(), marker.func())

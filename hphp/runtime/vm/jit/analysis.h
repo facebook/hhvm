@@ -71,6 +71,15 @@ IRInstruction* findSpillFrame(SSATmp* sp);
  */
 Block* findDefiningBlock(const SSATmp* t);
 
+/*
+ * Finds the least common ancestor of two SSATmps.  A temp has a `parent' for
+ * purposes of finding this LCA if it is the result of a passthrough
+ * instruction.  Either argument to this function may be nullptr.
+ *
+ * Returns nullptr when there is no LCA.
+ */
+SSATmp* least_common_ancestor(SSATmp*, SSATmp*);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

@@ -169,7 +169,11 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      EventLogger.init_done ();
+      let load_file = match ServerArgs.load_save_opt genv.options with
+        | Some (ServerArgs.Load { ServerArgs.filename; _ }) ->
+          Some (Filename.basename filename)
+        | _ -> None in
+      EventLogger.init_done load_file;
       serve genv env socket
 
   let get_log_file root =

@@ -477,7 +477,7 @@ String FileUtil::canonicalize(const std::string &path) {
 
 String FileUtil::canonicalize(const char *addpath, size_t addlen,
                               bool collapse_slashes /* = true */) {
-  assert(strlen(addpath) == addlen);
+  assert(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;

@@ -47,7 +47,7 @@ let is_js_path path =
 (* Main entry point *)
 (*****************************************************************************)
 
-let make_next_files_with_find filter  ?(others=[]) root =
+let make_next_files_with_find filter ?(others=[]) root =
   let paths = String.concat " " (List.map Path.string_of_path (root::others)) in
   let ic = Unix.open_process_in ("find "^paths) in
   let done_ = ref false in

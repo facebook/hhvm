@@ -20,8 +20,6 @@ type 'a pos = {
   pos_end: Lexing.position ;
 }
 
-let file = ref Relative_path.default
-
 type t = Relative_path.t pos
 
 type absolute = string pos
@@ -69,10 +67,10 @@ let inside p line char_pos =
     else if line = last_line then char_pos <= (p.pos_end.pos_cnum - p.pos_end.pos_bol)
     else line > first_line && line < last_line
 
-let make (lb:Lexing.lexbuf) =
+let make file (lb:Lexing.lexbuf) =
   let pos_start = lexeme_start_p lb in
   let pos_end = lexeme_end_p lb in
-  { pos_file = !file;
+  { pos_file = file;
     pos_start = pos_start;
     pos_end = pos_end;
   }

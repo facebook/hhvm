@@ -942,12 +942,14 @@ let unparse_internal program =
   *)
   StrWords [(u_file_type HhFile); (unparser {mode = Mdecl} program)]
 
-let unparse : file_type -> program -> string = fun filetype program ->
+let unparse :
+    file_type -> Relative_path.t -> program -> string =
+    fun filetype file program ->
   unparse_internal program |>
   to_string |>
   fun s ->
     dn s;
-    let s' = match Format_hack.program ~no_trailing_commas:true s with
+    let s' = match Format_hack.program file ~no_trailing_commas:true s with
     | Format_hack.Php_or_decl -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'

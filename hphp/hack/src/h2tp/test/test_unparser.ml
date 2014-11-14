@@ -82,7 +82,7 @@ let _ =
               then Erase_types.map ast
               else ast in
 
-    let unparsed = Unparser.unparse !output_file_type ast in
+    let unparsed = Unparser.unparse !output_file_type src ast in
 
     match dest with
     | Some f -> Sys.write_file unparsed f

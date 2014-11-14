@@ -101,10 +101,9 @@ let declare_file fn content =
     Typing_env.Classes.remove cname;
   end old_classes;
   try
-    Pos.file := fn ;
     Autocomplete.auto_complete := false;
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+      Parser_hack.program fn content
     in
     let is_php = not is_hh_file in
     Parser_heap.ParserHeap.add fn ast;
@@ -164,7 +163,6 @@ let hh_check fn =
   match Hashtbl.find parse_errors fn with
     | Some e -> error [e]
     | None ->
-      Pos.file := fn;
       Autocomplete.auto_complete := false;
       Errors.try_
         begin fun () ->
@@ -491,7 +489,7 @@ let hh_arg_info fn line char =
   to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let result = Format_hack.region start end_ contents in
+  let result = Format_hack.region Relative_path.default start end_ contents in
   let error, result, internal_error = match result with
     | Format_hack.Php_or_decl -> "Php_or_decl", "", false
     | Format_hack.Parsing_error _ -> "Parsing_error", "", false

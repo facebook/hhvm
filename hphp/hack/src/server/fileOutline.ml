@@ -38,6 +38,6 @@ let outline_ast ast =
 
 let outline content =
   let {Parser_hack.ast; _} = Errors.ignore_ begin fun () ->
-    Parser_hack.program content
+    Parser_hack.program Relative_path.default content
   end in
   outline_ast ast

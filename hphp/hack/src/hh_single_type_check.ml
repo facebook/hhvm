@@ -171,8 +171,8 @@ let rec make_files = function
       (filename, content) :: make_files rl
   | _ -> assert false
 
-let parse_file fn =
-  let abs_fn = Relative_path.to_absolute fn in
+let parse_file file =
+  let abs_fn = Relative_path.to_absolute file in
   let content = cat abs_fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
@@ -180,16 +180,16 @@ let parse_file fn =
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
-      Pos.file := Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn);
+      let file =
+        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
       let {Parser_hack.is_hh_file; comments; ast = ast'} =
-        Parser_hack.program content
+        Parser_hack.program file content
       in
       ast' @ ast
     end files []
   else begin
-    Pos.file := fn ;
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+      Parser_hack.program file content
     in
     ast
   end
@@ -249,12 +249,11 @@ let main_hack { filename; suggest; color; coverage; _ } =
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->
-      Pos.file := Relative_path.create Relative_path.Dummy builtins_filename;
+      let file = Relative_path.create Relative_path.Dummy builtins_filename in
       let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
-        Parser_hack.program builtins
+        Parser_hack.program file builtins
       in
       let filename = Relative_path.create Relative_path.Dummy filename in
-      Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in
       Parser_heap.ParserHeap.add filename ast;

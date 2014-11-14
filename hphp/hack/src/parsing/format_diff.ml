@@ -36,7 +36,7 @@ let split_lines =
  *)
 (*****************************************************************************)
 
-type filename = string
+type filename = Relative_path.t
 type interval = int * int
 type file_diff = filename * interval list
 
@@ -46,12 +46,12 @@ module ParseDiff: sig
 
 end = struct
 
-  type filename = string
+  type filename = Relative_path.t
   type interval = int * int
   type file_diff = filename * interval list
 
   type env = {
-      (* The file we are currenlty parsing (None for '/dev/null') *)
+      (* The file we are currently parsing (None for '/dev/null') *)
       mutable file: string option;
 
       (* The list of lines that have been modified *)
@@ -133,7 +133,8 @@ end = struct
     match env.file with
     | None -> ()
     | Some filename ->
-        env.result <- (filename, lines_modified) :: env.result
+        let path = Relative_path.concat Relative_path.Root filename in
+        env.result <- (path, lines_modified) :: env.result
 
   (* Merges intervals when necessary.
    * For example: '[(1, 2), (2, 2), (2, 5); ...]' becomes '[(1, 5); ...]'.
@@ -339,27 +340,25 @@ and show_change start_block end_block old_content new_content =
   List.iter (Printf.printf "+%s\n") new_lines
 
 (*****************************************************************************)
-(* Formats a diff (in place)
- * -) 'root' is the root directory of the diff.
- * -) 'diff' is the diff itself.
- *)
+(* Formats a diff (in place) *)
 (*****************************************************************************)
 
 let parse_diff diff_text =
   ParseDiff.go diff_text
 
-let rec apply ~root ~diff:file_and_lines_modified =
-  List.iter begin fun (filename, modified_lines) ->
-    let filename = Filename.concat root filename in
+let rec apply ~diff:file_and_lines_modified =
+  List.iter begin fun (filepath, modified_lines) ->
+    let filename = Relative_path.to_absolute filepath in
     Printf.printf "File: %s\n" filename;
     let file_content = Utils.cat filename in
-    apply_file filename file_content modified_lines
+    apply_file filepath file_content modified_lines
   end file_and_lines_modified
 
-and apply_file filename file_content modified_lines =
-  match Format_hack.program_with_source_metadata file_content with
+and apply_file filepath file_content modified_lines =
+  let filename = Relative_path.to_absolute filepath in
+  match Format_hack.program_with_source_metadata filepath file_content with
   | Format_hack.Success formatted_content ->
-      apply_formatted filename formatted_content file_content modified_lines
+      apply_formatted filepath formatted_content file_content modified_lines
   | Format_hack.Php_or_decl ->
       Printf.printf "PHP FILE: skipping\n"
   | Format_hack.Parsing_error _ ->
@@ -367,7 +366,8 @@ and apply_file filename file_content modified_lines =
   | Format_hack.Internal_error ->
       Printf.fprintf stderr "*** PANIC *** Internal error!: %s\n" filename
 
-and apply_formatted filename formatted_content file_content modified_lines =
+and apply_formatted filepath formatted_content file_content modified_lines =
+  let filename = Relative_path.to_absolute filepath in
   let blocks = TextBlocks.make formatted_content in
   let blocks = matching_blocks [] modified_lines blocks in
   let lines = split_lines file_content in

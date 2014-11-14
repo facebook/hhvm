@@ -1075,8 +1075,16 @@ static void set_stack_size() {
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
   if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+#ifdef __CYGWIN__
+    Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+                  AsyncFuncImpl::kStackSizeMinimum);
+#else
     rlim.rlim_cur = AsyncFuncImpl::kStackSizeMinimum;
-    setrlimit(RLIMIT_STACK, &rlim);
+    if (setrlimit(RLIMIT_STACK, &rlim)) {
+      Logger::Error("failed to set stack limit to %zd\n",
+                    AsyncFuncImpl::kStackSizeMinimum);
+    }
+#endif
   }
 }
 
@@ -1346,27 +1354,6 @@ static int execute_program_impl(int argc, char** argv) {
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount,
                            inherited_fds);
-
-  {
-    const size_t stackSizeMinimum = 8 * 1024 * 1024;
-    struct rlimit rlim;
-    if (getrlimit(RLIMIT_STACK, &rlim) == 0 &&
-        (rlim.rlim_cur == RLIM_INFINITY ||
-         rlim.rlim_cur < stackSizeMinimum)) {
-      rlim.rlim_cur = stackSizeMinimum;
-      if (stackSizeMinimum > rlim.rlim_max) {
-        rlim.rlim_max = stackSizeMinimum;
-      }
-#ifdef __CYGWIN__
-      Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
-                    stackSizeMinimum);
-#else
-      if (setrlimit(RLIMIT_STACK, &rlim)) {
-        Logger::Error("failed to set stack limit to %zd\n", stackSizeMinimum);
-      }
-#endif
-    }
-  }
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);

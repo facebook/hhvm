@@ -691,9 +691,9 @@ SSATmp* FrameState::cseLookup(IRInstruction* inst,
     // During a reoptimize pass, we need to make sure that any values
     // we want to reuse for CSE are only reused in blocks dominated by
     // the block that defines it.
-    if (!dominates(tmp->inst()->block(), srcBlock, *idoms)) {
-      return nullptr;
-    }
+    if (tmp->isConst()) return tmp;
+    auto const dom = findDefiningBlock(tmp);
+    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
   }
   return tmp;
 }

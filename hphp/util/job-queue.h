@@ -22,6 +22,7 @@
 #include <vector>
 #include <set>
 #include <boost/range/adaptors.hpp>
+#include <folly/Memory.h>
 #include "hphp/util/alloc.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/atomic.h"
@@ -583,7 +584,7 @@ public:
       // thread just for expiring off old requests so we guarantee requests are
       // taken off the queue as soon as possible when they expire even if all
       // other worker threads are stalled.
-      m_queue.setJobReaperId(addWorkerImpl(true));
+      m_queue.setJobReaperId(addReaper());
     }
   }
 
@@ -649,6 +650,9 @@ public:
    * enqueued at this moment, or this call may block for longer time.
    */
   void stop() {
+    // TODO(t5572120): If stop has already been called when the destructor
+    // runs, we'd bail out here and potentially start destroying AsyncFuncs
+    // that are still running.
     if (m_stopped) return;
     m_stopped = true;
 
@@ -663,6 +667,8 @@ public:
         if (!m_funcs.empty()) {
           func = *m_funcs.begin();
           m_funcs.erase(func);
+        } else if (m_reaperFunc) {
+          func = m_reaperFunc.release();
         }
       }
       if (func == nullptr) {
@@ -713,7 +719,19 @@ private:
   Mutex m_mutex;
   std::set<TWorker*> m_workers;
   std::set<AsyncFunc<TWorker> *> m_funcs;
+  std::unique_ptr<TWorker> m_reaper;
+  std::unique_ptr<AsyncFunc<TWorker>> m_reaperFunc;
   const bool m_startReaperThread;
+
+  int addReaper() {
+    m_reaper = folly::make_unique<TWorker>();
+    m_reaperFunc = folly::make_unique<AsyncFunc<TWorker>>(m_reaper.get(),
+                                                          &TWorker::start);
+    int id = m_id++;
+    m_reaper->create(id, &m_queue, m_reaperFunc.get(), m_context);
+    m_reaperFunc->start();
+    return id;
+  }
 
   // return the id for the worker.
   int addWorkerImpl(bool start) {

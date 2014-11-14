@@ -229,6 +229,11 @@ void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
   assert(server == m_pageServer.get());
   removePid();
+
+  auto sockFile = RuntimeOption::ServerFileSocket;
+  if (!sockFile.empty()) {
+    unlink(sockFile.c_str());
+  }
 }
 
 HttpServer::~HttpServer() {

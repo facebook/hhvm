@@ -281,7 +281,7 @@ void FastCGIServer::stop() {
       } else {
         terminateServer();
       }
-    });
+  });
 }
 
 void FastCGIServer::onConnectionsDrained() {
@@ -298,10 +298,18 @@ void FastCGIServer::timeoutExpired() noexcept {
 }
 
 void FastCGIServer::terminateServer() {
+  if (getStatus() != RunStatus::STOPPING) {
+    setStatus(RunStatus::STOPPING);
+  }
+
   m_worker.stopWhenIdle();
   m_dispatcher.stop();
 
   setStatus(RunStatus::STOPPED);
+
+  for (auto listener: m_listeners) {
+    listener->serverStopped(this);
+  }
 }
 
 bool FastCGIServer::canAccept() {

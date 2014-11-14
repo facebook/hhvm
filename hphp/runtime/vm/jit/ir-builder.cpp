@@ -729,10 +729,15 @@ void IRBuilder::reoptimize() {
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);
+  boost::dynamic_bitset<> reachable(m_unit.numBlocks());
+  reachable.set(m_unit.entry()->id());
 
   for (auto* block : blocksIds.blocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
+
+    // Skip block if it's unreachable.
+    if (!reachable.test(block->id())) continue;
 
     m_state.startBlock(block, block->front().marker());
     m_curBlock = block;
@@ -789,7 +794,9 @@ void IRBuilder::reoptimize() {
       // Set its next block appropriately.
       block->back().setNext(nextBlock);
     }
-
+    // Mark successor blocks as reachable.
+    if (block->back().next())  reachable.set(block->back().next()->id());
+    if (block->back().taken()) reachable.set(block->back().taken()->id());
     m_state.finishBlock(block);
   }
 }

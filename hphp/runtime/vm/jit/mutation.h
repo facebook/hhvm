@@ -71,7 +71,9 @@ void moveToBlock(Block::iterator first,
  * from their inputs.
  *
  * The new types of any changed SSATmps must be related to their old
- * types.
+ * types.  However, notice that the new types may result in
+ * inconsistent operand types for instructions that are unreachable
+ * (but not yet removed from the IR unit).
  */
 void reflowTypes(IRUnit&);
 

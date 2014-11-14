@@ -496,10 +496,9 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
   not_reached();
 }
 
-void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
-  if (utf16 < 0x80) {
-    buf.append((char)utf16);
-  } else if (utf16 < 0x800) {
+NEVER_INLINE
+void utf16_to_utf8_tail(StringBuffer &buf, unsigned short utf16) {
+  if (utf16 < 0x800) {
     buf.append((char)(0xc0 | (utf16 >> 6)));
     buf.append((char)(0x80 | (utf16 & 0x3f)));
   } else if ((utf16 & 0xfc00) == 0xdc00
@@ -524,6 +523,15 @@ void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
     buf.append((char)(0x80 | ((utf16 >> 6) & 0x3f)));
     buf.append((char)(0x80 | (utf16 & 0x3f)));
   }
+}
+
+ALWAYS_INLINE
+void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
+  if (LIKELY(utf16 < 0x80)) {
+    buf.append((char)utf16);
+    return;
+  }
+  return utf16_to_utf8_tail(buf, utf16);
 }
 
 StaticString s__empty_("_empty_");

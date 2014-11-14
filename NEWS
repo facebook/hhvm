@@ -1,5 +1,5 @@
 NEXT 4-Dec-2014
- -
+ - Removed support for Magic Quotes (also removed in PHP 5.4)
 
 "Xzibit" 20-Nov-2014
  - Fix readline request locals

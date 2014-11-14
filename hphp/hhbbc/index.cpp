@@ -1783,9 +1783,7 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Callable:
     break;
   case TypeConstraint::MetaType::Number:
-    // TODO(5593119): It's probably a bug to return TNum here
-    // when tc.isNullable() is true, we should fix this
-    return TNum;
+    return tc.isNullable() ? TOptNum : TNum;
   case TypeConstraint::MetaType::ArrayKey:
     // TODO(3774082): Support TInt | TStr type constraint
     return TInitCell;

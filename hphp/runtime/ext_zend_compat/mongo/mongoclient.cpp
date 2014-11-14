@@ -204,7 +204,7 @@ HashTable *mongo_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 				break;
 			}
 			case HASH_KEY_IS_LONG:
-			case HASH_KEY_NON_EXISTENT:
+			case HASH_KEY_NON_EXISTANT:
 				break;
 		}
 		zend_hash_move_forward_ex(props, &pos);

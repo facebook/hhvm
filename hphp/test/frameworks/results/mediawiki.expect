@@ -2440,11 +2440,11 @@ JpegMetadataExtractorTest::testBinaryCommentStripped
 .
 JpegMetadataExtractorTest::testExifByteOrder
 .
-JpegMetadataExtractorTest::testIPTCHashComparisonBadHash
+JpegMetadataExtractorTest::testIPTCHashComparisionBadHash
 .
-JpegMetadataExtractorTest::testIPTCHashComparisonGoodHash
+JpegMetadataExtractorTest::testIPTCHashComparisionGoodHash
 .
-JpegMetadataExtractorTest::testIPTCHashComparisonNoHash
+JpegMetadataExtractorTest::testIPTCHashComparisionNoHash
 .
 JpegMetadataExtractorTest::testIso88591Comment
 .

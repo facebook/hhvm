@@ -2608,7 +2608,7 @@ ZendTest\Barcode\Renderer\ImageTest::testConstructorWithZendConfig
 .
 ZendTest\Barcode\Renderer\ImageTest::testDrawReturnResource
 .
-ZendTest\Barcode\Renderer\ImageTest::testDrawWithExistentResourceReturnResource
+ZendTest\Barcode\Renderer\ImageTest::testDrawWithExistantResourceReturnResource
 .
 ZendTest\Barcode\Renderer\ImageTest::testGoodHeight
 .
@@ -2662,7 +2662,7 @@ ZendTest\Barcode\Renderer\ImageTest::testObjectImageResource
 .
 ZendTest\Barcode\Renderer\ImageTest::testRendererNamespace
 .
-ZendTest\Barcode\Renderer\ImageTest::testRendererWithUnknownInstructionProvideByObject
+ZendTest\Barcode\Renderer\ImageTest::testRendererWithUnkownInstructionProvideByObject
 .
 ZendTest\Barcode\Renderer\ImageTest::testSetBarcodeObject
 .
@@ -2696,7 +2696,7 @@ ZendTest\Barcode\Renderer\PdfTest::testConstructorWithZendConfig
 S
 ZendTest\Barcode\Renderer\PdfTest::testDrawReturnResource
 S
-ZendTest\Barcode\Renderer\PdfTest::testDrawWithExistentResourceReturnResource
+ZendTest\Barcode\Renderer\PdfTest::testDrawWithExistantResourceReturnResource
 S
 ZendTest\Barcode\Renderer\PdfTest::testGoodHorizontalPosition
 S
@@ -2724,7 +2724,7 @@ ZendTest\Barcode\Renderer\PdfTest::testModuleSizeLessThan0
 S
 ZendTest\Barcode\Renderer\PdfTest::testRendererNamespace
 S
-ZendTest\Barcode\Renderer\PdfTest::testRendererWithUnknownInstructionProvideByObject
+ZendTest\Barcode\Renderer\PdfTest::testRendererWithUnkownInstructionProvideByObject
 S
 ZendTest\Barcode\Renderer\PdfTest::testSetBarcodeObject
 S
@@ -2762,7 +2762,7 @@ ZendTest\Barcode\Renderer\SvgTest::testConstructorWithZendConfig
 .
 ZendTest\Barcode\Renderer\SvgTest::testDrawReturnResource
 .
-ZendTest\Barcode\Renderer\SvgTest::testDrawWithExistentResourceReturnResource
+ZendTest\Barcode\Renderer\SvgTest::testDrawWithExistantResourceReturnResource
 .
 ZendTest\Barcode\Renderer\SvgTest::testGoodHeight
 .
@@ -2794,7 +2794,7 @@ ZendTest\Barcode\Renderer\SvgTest::testModuleSizeLessThan0
 .
 ZendTest\Barcode\Renderer\SvgTest::testRendererNamespace
 .
-ZendTest\Barcode\Renderer\SvgTest::testRendererWithUnknownInstructionProvideByObject
+ZendTest\Barcode\Renderer\SvgTest::testRendererWithUnkownInstructionProvideByObject
 .
 ZendTest\Barcode\Renderer\SvgTest::testSetBarcodeObject
 .
@@ -13806,7 +13806,7 @@ ZendTest\Filter\RealPathTest::testFileNonexistent
 .
 ZendTest\Filter\RealPathTest::testGetAndSetExistsParameter
 .
-ZendTest\Filter\RealPathTest::testNonExistentPath
+ZendTest\Filter\RealPathTest::testNonExistantPath
 .
 ZendTest\Filter\RealPathTest::testReturnUnfiltered with data set #0
 .
@@ -14018,7 +14018,7 @@ ZendTest\Filter\Word\CamelCaseToSeparatorNoPcreUnicodeTest::testFilterSeparatesC
 .
 ZendTest\Filter\Word\CamelCaseToSeparatorNoPcreUnicodeTest::testFilterSeparatesCamelCasedWordsWithSpacesByDefault
 .
-ZendTest\Filter\Word\CamelCaseToSeparatorNoPcreUnicodeTest::testFilterSeparatesMultipleUppercasedLettersAndUnderscores
+ZendTest\Filter\Word\CamelCaseToSeparatorNoPcreUnicodeTest::testFilterSeperatesMultipleUppercasedLettersAndUnderscores
 .
 ZendTest\Filter\Word\CamelCaseToSeparatorNoPcreUnicodeTest::testFilterSupportArray
 .
@@ -14030,7 +14030,7 @@ ZendTest\Filter\Word\CamelCaseToSeparatorTest::testFilterSeparatesCamelCasedWord
 .
 ZendTest\Filter\Word\CamelCaseToSeparatorTest::testFilterSeparatesCamelCasedWordsWithSpacesByDefault
 .
-ZendTest\Filter\Word\CamelCaseToSeparatorTest::testFilterSeparatesMultipleUppercasedLettersAndUnderscores
+ZendTest\Filter\Word\CamelCaseToSeparatorTest::testFilterSeperatesMultipleUppercasedLettersAndUnderscores
 .
 ZendTest\Filter\Word\CamelCaseToSeparatorTest::testFilterSupportArray
 .
@@ -14268,7 +14268,7 @@ ZendTest\Form\Element\CollectionTest::testExtractThroughTargetElementHydrator
 .
 ZendTest\Form\Element\CollectionTest::testGetTargetElement
 .
-ZendTest\Form\Element\CollectionTest::testMininumLengthIsMaintanedWhenSettingASmallerCollection
+ZendTest\Form\Element\CollectionTest::testMininumLenghtIsMaintanedWhenSettingASmallerCollection
 .
 ZendTest\Form\Element\CollectionTest::testNestedCollections
 .
@@ -20042,7 +20042,7 @@ ZendTest\I18n\Translator\TranslatorTest::testNoMessagesLoadedEvent
 .
 ZendTest\I18n\Translator\TranslatorTest::testTranslate
 .
-ZendTest\I18n\Translator\TranslatorTest::testTranslateNonExistentLocale
+ZendTest\I18n\Translator\TranslatorTest::testTranslateNonExistantLocale
 .
 ZendTest\I18n\Translator\TranslatorTest::testTranslatePlurals
 .
@@ -22482,9 +22482,9 @@ ZendTest\Json\Server\RequestTest::testVersionShouldBeLimitedToV1AndV2
 .
 ZendTest\Json\Server\ResponseTest::testCastToStringShouldCastToJSON
 .
-ZendTest\Json\Server\ResponseTest::testErrorAccessorsShouldWorkWithNullInput
+ZendTest\Json\Server\ResponseTest::testErrorAccesorsShouldWorkWithNullInput
 .
-ZendTest\Json\Server\ResponseTest::testIdAccessorsShouldWorkWithNormalInput
+ZendTest\Json\Server\ResponseTest::testIdAccesorsShouldWorkWithNormalInput
 .
 ZendTest\Json\Server\ResponseTest::testIdShouldBeNullByDefault
 .
@@ -23266,7 +23266,7 @@ ZendTest\Ldap\Ldif\SimpleEncoderTest::testStringEncoding with data set #8
 .
 ZendTest\Ldap\Ldif\SimpleEncoderTest::testStringEncoding with data set #9
 .
-ZendTest\Ldap\Ldif\SimpleEncoderTest::testSuppressVersionHeader
+ZendTest\Ldap\Ldif\SimpleEncoderTest::testSupressVersionHeader
 .
 ZendTest\Ldap\Node\AttributeIterationTest::testSimpleIteration
 .
@@ -23642,7 +23642,7 @@ ZendTest\Loader\ModuleAutoloaderTest::testPathsNormalizedWithTrailingSlash
 .
 ZendTest\Loader\ModuleAutoloaderTest::testProvidesFluidInterface
 .
-ZendTest\Loader\ModuleAutoloaderTest::testReturnsFalseForNonExistentModuleClass
+ZendTest\Loader\ModuleAutoloaderTest::testReturnsFalseForNonExistantModuleClass
 .
 ZendTest\Loader\ModuleAutoloaderTest::testReturnsFalseForNonModuleClass
 .
@@ -24558,7 +24558,7 @@ ZendTest\Mail\Storage\ImapTest::testInvalidService
 S
 ZendTest\Mail\Storage\ImapTest::testKeyLocalName
 S
-ZendTest\Mail\Storage\ImapTest::testLoadUnknownFolder
+ZendTest\Mail\Storage\ImapTest::testLoadUnkownFolder
 S
 ZendTest\Mail\Storage\ImapTest::testLocalName
 S
@@ -24640,7 +24640,7 @@ ZendTest\Mail\Storage\MaildirFolderTest::testLoadFailure
 S
 ZendTest\Mail\Storage\MaildirFolderTest::testLoadOk
 S
-ZendTest\Mail\Storage\MaildirFolderTest::testLoadUnknownFolder
+ZendTest\Mail\Storage\MaildirFolderTest::testLoadUnkownFolder
 S
 ZendTest\Mail\Storage\MaildirFolderTest::testLocalName
 S
@@ -24826,7 +24826,7 @@ ZendTest\Mail\Storage\MboxFolderTest::testLoadFailure
 .
 ZendTest\Mail\Storage\MboxFolderTest::testLoadOk
 .
-ZendTest\Mail\Storage\MboxFolderTest::testLoadUnknownFolder
+ZendTest\Mail\Storage\MboxFolderTest::testLoadUnkownFolder
 .
 ZendTest\Mail\Storage\MboxFolderTest::testLocalName
 .
@@ -25872,7 +25872,7 @@ ZendTest\Mvc\Controller\Plugin\FilePostRedirectGetTest::testRedirectsToRouteOnPo
 .
 ZendTest\Mvc\Controller\Plugin\FilePostRedirectGetTest::testRedirectsToUrlOnPost
 .
-ZendTest\Mvc\Controller\Plugin\FilePostRedirectGetTest::testReturnsFalseOnInitialGet
+ZendTest\Mvc\Controller\Plugin\FilePostRedirectGetTest::testReturnsFalseOnIntialGet
 .
 ZendTest\Mvc\Controller\Plugin\FilePostRedirectGetTest::testReturnsPostOnRedirectGet
 .
@@ -25982,7 +25982,7 @@ ZendTest\Mvc\Controller\Plugin\PostRedirectGetTest::testRedirectsToRouteOnPost
 .
 ZendTest\Mvc\Controller\Plugin\PostRedirectGetTest::testRedirectsToUrlOnPost
 .
-ZendTest\Mvc\Controller\Plugin\PostRedirectGetTest::testReturnsFalseOnInitialGet
+ZendTest\Mvc\Controller\Plugin\PostRedirectGetTest::testReturnsFalseOnIntialGet
 .
 ZendTest\Mvc\Controller\Plugin\PostRedirectGetTest::testReturnsPostOnRedirectGet
 .
@@ -26442,7 +26442,7 @@ ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "middle-subd
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "missing-middle-subdomain-optional"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "missing-non-standard-delimiter-optional"
+ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "missing-non-standard-delimeter-optional"
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "missing-optional-subdomain"
 .
@@ -26456,9 +26456,9 @@ ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "no-match-wi
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "no-match-with-different-number-of-parts-and-optional-subdomain"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "non-standard-delimiter"
+ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "non-standard-delimeter"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "non-standard-delimiter-optional"
+ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "non-standard-delimeter-optional"
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testAssembling with data set "one-of-two-missing-optional-subdomain"
 .
@@ -26500,7 +26500,7 @@ ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "middle-subdom
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "missing-middle-subdomain-optional"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "missing-non-standard-delimiter-optional"
+ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "missing-non-standard-delimeter-optional"
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "missing-optional-subdomain"
 .
@@ -26514,9 +26514,9 @@ ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "no-match-with
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "no-match-with-different-number-of-parts-and-optional-subdomain"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "non-standard-delimiter"
+ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "non-standard-delimeter"
 .
-ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "non-standard-delimiter-optional"
+ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "non-standard-delimeter-optional"
 .
 ZendTest\Mvc\Router\Http\HostnameTest::testMatching with data set "one-of-two-missing-optional-subdomain"
 .
@@ -26718,7 +26718,7 @@ ZendTest\Mvc\Router\Http\SegmentTest::testAssembling with data set "constraints-
 .
 ZendTest\Mvc\Router\Http\SegmentTest::testAssembling with data set "constraints-prevent-match"
 .
-ZendTest\Mvc\Router\Http\SegmentTest::testAssembling with data set "constraints-with-parentheses-dont-break-parameter-map"
+ZendTest\Mvc\Router\Http\SegmentTest::testAssembling with data set "constraints-with-parantheses-dont-break-parameter-map"
 .
 ZendTest\Mvc\Router\Http\SegmentTest::testAssembling with data set "empty-matches-are-replaced-with-defaults"
 .
@@ -26784,7 +26784,7 @@ ZendTest\Mvc\Router\Http\SegmentTest::testMatching with data set "constraints-ov
 .
 ZendTest\Mvc\Router\Http\SegmentTest::testMatching with data set "constraints-prevent-match"
 .
-ZendTest\Mvc\Router\Http\SegmentTest::testMatching with data set "constraints-with-parentheses-dont-break-parameter-map"
+ZendTest\Mvc\Router\Http\SegmentTest::testMatching with data set "constraints-with-parantheses-dont-break-parameter-map"
 .
 ZendTest\Mvc\Router\Http\SegmentTest::testMatching with data set "empty-matches-are-replaced-with-defaults"
 .
@@ -27564,7 +27564,7 @@ ZendTest\Navigation\Page\PageFactoryTest::testMvcShouldHaveDetectionPrecedence
 .
 ZendTest\Navigation\Page\PageFactoryTest::testShouldFailForInvalidType
 .
-ZendTest\Navigation\Page\PageFactoryTest::testShouldFailForNonExistentType
+ZendTest\Navigation\Page\PageFactoryTest::testShouldFailForNonExistantType
 .
 ZendTest\Navigation\Page\PageFactoryTest::testShouldFailIfUnableToDetermineType
 .
@@ -28630,7 +28630,7 @@ ZendTest\Server\Method\DefinitionTest::testDefinitionShouldAllowAddingMultiplePr
 .
 ZendTest\Server\Method\DefinitionTest::testDefinitionShouldAllowAddingSinglePrototypes
 .
-ZendTest\Server\Method\DefinitionTest::testDefinitionShouldSerializeToArray
+ZendTest\Server\Method\DefinitionTest::testDefintionShouldSerializeToArray
 .
 ZendTest\Server\Method\DefinitionTest::testInvokeArgumentsShouldBeEmptyArrayByDefault
 .
@@ -30224,7 +30224,7 @@ ZendTest\Soap\AutoDiscoverTest::testAddFunctionMultiple
 .
 ZendTest\Soap\AutoDiscoverTest::testAddFunctionSimple
 .
-ZendTest\Soap\AutoDiscoverTest::testAddFunctionSimpleInReturnNameCompatibilityMode
+ZendTest\Soap\AutoDiscoverTest::testAddFunctionSimpleInReturnNameCompabilityMode
 .
 ZendTest\Soap\AutoDiscoverTest::testAddFunctionSimpleWithDifferentStyle
 .
@@ -30320,7 +30320,7 @@ ZendTest\Soap\AutoDiscoverTest::testSetClass
 .
 ZendTest\Soap\AutoDiscoverTest::testSetClassWithDifferentStyles
 .
-ZendTest\Soap\AutoDiscoverTest::testSetClassWithResponseReturnPartCompatibilityMode
+ZendTest\Soap\AutoDiscoverTest::testSetClassWithResponseReturnPartCompabilityMode
 .
 ZendTest\Soap\AutoDiscoverTest::testSetNonStringNonZendUriUriThrowsException
 .
@@ -30672,7 +30672,7 @@ ZendTest\Soap\WsdlTest::testDumpToFile
 .
 ZendTest\Soap\WsdlTest::testDumpToOutput
 .
-ZendTest\Soap\WsdlTest::testGetComplexTypeBasedOnStrategiesBackwardsCompatibilityBoolean
+ZendTest\Soap\WsdlTest::testGetComplexTypeBasedOnStrategiesBackwardsCompabilityBoolean
 .
 ZendTest\Soap\WsdlTest::testGetComplexTypeBasedOnStrategiesStringNames
 .
@@ -31348,11 +31348,11 @@ ZendTest\Stdlib\Strategy\SerializableStrategyTest::testCanSerialize
 .
 ZendTest\Stdlib\Strategy\SerializableStrategyTest::testCanUnserialize
 .
-ZendTest\Stdlib\Strategy\SerializableStrategyTest::testCannotUseBadArgumentSerializer
+ZendTest\Stdlib\Strategy\SerializableStrategyTest::testCannotUseBadArgumentSerilizer
 .
-ZendTest\Stdlib\Strategy\SerializableStrategyTest::testUseBadSerializerObject
+ZendTest\Stdlib\Strategy\SerializableStrategyTest::testUseBadSerilizerObject
 .
-ZendTest\Stdlib\Strategy\SerializableStrategyTest::testUseBadSerializerString
+ZendTest\Stdlib\Strategy\SerializableStrategyTest::testUseBadSerilizerString
 .
 ZendTest\Stdlib\StringUtilsTest::testGetWrapper
 .
@@ -32064,7 +32064,7 @@ ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testDispatchReq
 E
 ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testExplicitDispatchMethodOverrideRequestMethod
 E
-ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testExplicitlyPutParamsOverrideRequestContent
+ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testExplicityPutParamsOverrideRequestContent
 E
 ZendTest\Test\PHPUnit\Controller\AbstractControllerTestCaseTest::testModuleCacheIsDisabled
 E
@@ -37170,21 +37170,21 @@ ZendTest\View\Helper\Placeholder\ContainerTest::testGetValueReturnsArrayWhenMult
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testGetValueReturnsScalarWhenOneElementRegistered
 .
-ZendTest\View\Helper\Placeholder\ContainerTest::testIndentAccessorsWork
+ZendTest\View\Helper\Placeholder\ContainerTest::testIndentAccesorsWork
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testIndentationIsHonored
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testNestedCapturesThrowsException
 .
-ZendTest\View\Helper\Placeholder\ContainerTest::testPostfixAccessorsWork
+ZendTest\View\Helper\Placeholder\ContainerTest::testPostfixAccesorsWork
 .
-ZendTest\View\Helper\Placeholder\ContainerTest::testPrefixAccessorsWork
+ZendTest\View\Helper\Placeholder\ContainerTest::testPrefixAccesorsWork
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testPrependImplementsFluentInterface
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testPrependPushesValueToTopOfContainer
 .
-ZendTest\View\Helper\Placeholder\ContainerTest::testSeparatorAccessorsWork
+ZendTest\View\Helper\Placeholder\ContainerTest::testSeparatorAccesorsWork
 .
 ZendTest\View\Helper\Placeholder\ContainerTest::testSetImplementsFluentInterface
 .
@@ -37904,7 +37904,7 @@ ZendTest\XmlRpc\ClientTest::testSkippingSystemCallDisabledByDefault
 .
 ZendTest\XmlRpc\ClientTest::testSkipsSystemCallWhenDirected
 E
-ZendTest\XmlRpc\ClientTest::testSuccessfulRpcMethodCallWithXmlRpcValueParameters
+ZendTest\XmlRpc\ClientTest::testSuccesfulRpcMethodCallWithXmlRpcValueParameters
 E
 ZendTest\XmlRpc\ClientTest::testSuccessfulRpcMethodCallWithMixedDateParameters
 E

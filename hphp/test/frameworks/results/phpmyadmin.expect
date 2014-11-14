@@ -1302,7 +1302,7 @@ PMA_FormDisplay_Test::testDisplayErrors
 .
 PMA_FormDisplay_Test::testFixErrors
 .
-PMA_FormDisplay_Test::testFormDisplayConstructor
+PMA_FormDisplay_Test::testFormDisplayContructor
 .
 PMA_FormDisplay_Test::testGetDocLink
 .
@@ -1346,7 +1346,7 @@ PMA_FormDisplay_Tpl_Test::testDisplayTabsBottom
 .
 PMA_FormDisplay_Tpl_Test::testDisplayTabsTop
 .
-PMA_Form_Test::testConstructor
+PMA_Form_Test::testContructor
 .
 PMA_Form_Test::testGetOptionType
 .

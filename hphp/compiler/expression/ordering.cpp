@@ -105,7 +105,7 @@ void Ordering::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(" ascending");
     break;
   case PHP_DESCENDING:
-    cg_printf(" descending");
+    cg_printf(" decending");
     break;
   default:
     break;

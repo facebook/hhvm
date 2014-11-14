@@ -2658,7 +2658,7 @@ Guzzle\Tests\Service\Command\OperationResponseParserTest::testEnsuresResponseCla
 .
 Guzzle\Tests\Service\Command\OperationResponseParserTest::testHasVisitors
 .
-Guzzle\Tests\Service\Command\OperationResponseParserTest::testSkipsUnknownModels
+Guzzle\Tests\Service\Command\OperationResponseParserTest::testSkipsUnkownModels
 .
 Guzzle\Tests\Service\Command\OperationResponseParserTest::testUsesParentParser
 .

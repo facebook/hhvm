@@ -306,7 +306,7 @@ DatabaseConnectionTest::testAffectingStatementProperlyCallsPDO
 .
 DatabaseConnectionTest::testBeganTransactionFiresEventsIfSet
 .
-DatabaseConnectionTest::testCommittedFiresEventsIfSet
+DatabaseConnectionTest::testCommitedFiresEventsIfSet
 .
 DatabaseConnectionTest::testDeleteCallsTheAffectingStatementMethod
 .

@@ -156,9 +156,9 @@ Monolog\Handler\ElasticSearchHandlerTest::testSetFormatter
 .
 Monolog\Handler\ElasticSearchHandlerTest::testSetFormatterInvalid
 .
-Monolog\Handler\ErrorLogHandlerTest::testShouldLogMessagesUsingErrorLogFunction
+Monolog\Handler\ErrorLogHandlerTest::testShouldLogMessagesUsingErrorLogFuncion
 .
-Monolog\Handler\ErrorLogHandlerTest::testShouldNotAcceptAnInvalidTypeOnConstructor
+Monolog\Handler\ErrorLogHandlerTest::testShouldNotAcceptAnInvalidTypeOnContructor
 .
 Monolog\Handler\FingersCrossedHandlerTest::testChannelLevelActivationStrategy
 .

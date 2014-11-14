@@ -239,6 +239,8 @@ struct TypeConstraint {
     verifyFail(func, tv, ReturnId);
   }
 
+  static MaybeDataType typeNameToMaybeDataType(const StringData* typeName);
+
 private:
   struct Type {
     MaybeDataType dt;
@@ -254,6 +256,7 @@ private:
   void init();
   void selfToTypeName(const Func* func, const StringData **typeName) const;
   void parentToTypeName(const Func* func, const StringData **typeName) const;
+  static const Type* typeNameToType(const StringData* typeName);
 
 private:
   // m_type represents the DataType to check on.  We don't know

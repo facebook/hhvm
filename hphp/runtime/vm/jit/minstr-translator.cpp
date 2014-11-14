@@ -871,22 +871,35 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
 }
 
 PropInfo HhbcTranslator::MInstrTranslator::getCurrentPropertyOffset(
-  const Class*& knownCls
-) {
+    const Class*& knownCls) {
   auto const baseType = m_base.type.derefIfPtr();
   if (!knownCls) {
     if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
       knownCls = baseType.getClass();
     }
   }
+
+  /*
+   * TODO(#5616733): If we still don't have a knownCls, we can't do anything
+   * good.  It's possible we still have the known information statically, and
+   * it might be in m_ni.inputs, but right now we can't really trust that
+   * because it's not very clear what it means.  See task for more information.
+   */
+  if (!knownCls) return PropInfo{};
+
   auto const info = getPropertyOffset(m_ni, contextClass(), knownCls,
                                       m_mii, m_mInd, m_iInd);
   if (info.offset == -1) return info;
 
-  auto baseCls = baseType.getClass();
+  auto const baseCls = baseType.getClass();
 
-  // baseCls and knownCls may differ due to a number of factors but they must
-  // always be related to each other somehow.
+  /*
+   * baseCls and knownCls may differ due to a number of factors but they must
+   * always be related to each other somehow if they are both non-null.
+   *
+   * TODO(#5616733): stop using ni.inputs here.  Just use the class we know
+   * from this translation, if there is one.
+   */
   always_assert_flog(
     baseCls->classof(knownCls) || knownCls->classof(baseCls),
     "Class mismatch between baseType({}) and knownCls({})",

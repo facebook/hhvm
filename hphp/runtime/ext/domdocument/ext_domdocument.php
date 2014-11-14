@@ -1464,13 +1464,17 @@ class DOMXPath {
    * @param DOMNode $context - The optional contextnode can be specified for
    *   doing relative XPath queries. By default, the queries are relative to the
    *   root element.
+   * @param bool $registgerNodeNS - disable automatic registration of the
+   *   context node.
    *
    * @return mixed - Returns a typed result if possible or a DOMNodeList
    *   containing all nodes matching the given XPath expression.
    *
    */
   <<__Native>>
-  function evaluate(string $expr, ?DOMNode $context = null): mixed;
+  function evaluate(string $expr,
+                    ?DOMNode $context = null,
+                    bool $registerNodeNS = true): mixed;
 
   /**
    * Executes the given XPath expression.
@@ -1479,6 +1483,8 @@ class DOMXPath {
    * @param DOMNode $context - The optional contextnode can be specified for
    *   doing relative XPath queries. By default, the queries are relative to the
    *   root element.
+   * @param bool $registgerNodeNS - disable automatic registration of the
+   *   context node.
    *
    * @return mixed - Returns a DOMNodeList containing all nodes matching the
    *   given XPath expression. Any expression which do not return nodes will
@@ -1486,7 +1492,9 @@ class DOMXPath {
    *
    */
   <<__Native>>
-  function query(string $expr, ?DOMNode $context = null): mixed;
+  function query(string $expr,
+                 ?DOMNode $context = null,
+                 bool $registerNodeNS = true): mixed;
 
   /**
    * Registers the namespaceURI and prefix with the DOMXPath object.

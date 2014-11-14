@@ -36,6 +36,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "folly/String.h"
 
 namespace HPHP {
@@ -772,14 +773,20 @@ StringHolder Transport::prepareResponse(const void *data, int size,
     return std::move(response);
   }
 
+  String compression;
   int compressionLevel = RuntimeOption::GzipCompressionLevel;
-  String compressionLevelStr;
-  IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
-  int level = compressionLevelStr.toInt64();
-  if (level > compressionLevel
-      && level <= RuntimeOption::GzipMaxCompressionLevel) {
-    compressionLevel = level;
+  IniSetting::Get("zlib.output_compression", compression);
+  String on = makeStaticString("on");
+  if (HHVM_FN(strtolower)(compression) == on) {
+    String compressionLevelStr;
+    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+    int level = compressionLevelStr.toInt64();
+    if (level > compressionLevel
+        && level <= RuntimeOption::GzipMaxCompressionLevel) {
+      compressionLevel = level;
+    }
   }
+
 
   // There isn't that much need to gzip response, when it can fit into one
   // Ethernet packet (1500 bytes), unless we are doing chunked encoding,

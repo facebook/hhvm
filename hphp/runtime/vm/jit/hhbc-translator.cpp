@@ -3750,10 +3750,14 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
   // It's important that the IncRef happens after the guard on the inner type
   // of the ref, since it may side-exit.
   auto const predTy = m_irb->predictedInnerType(id);
+
+  // We may not have a ldrefExit, but if so we better not be loading the inner
+  // ref.
+  if (ldrefExit == nullptr) always_assert(!decRefOld);
   if (ldrefExit != nullptr) {
     gen(CheckRefInner, predTy, ldrefExit, oldLoc);
   }
-  auto const innerCell = gen(LdRef, predTy, oldLoc);
+  auto const innerCell = decRefOld ? gen(LdRef, predTy, oldLoc) : nullptr;
   gen(StRef, oldLoc, newVal);
   if (incRefNew) gen(IncRef, newVal);
   if (decRefOld) {

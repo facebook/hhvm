@@ -40,19 +40,14 @@ let parse_without_command options usage command =
   | args -> args
 
 let get_root ?(config=".hhconfig") path_opt =
-  let root =
-    match path_opt with
-    | None ->
-      (match guess_root config (Path.mk_path ".") 50 with
-      | Some path -> path
-      | None ->
-        Printf.fprintf stderr
-        "Error: could not find a valid root containing %s in this directory or any of the parent directories: %s\n"
-        config
-        (Path.string_of_path (Path.mk_path "."));
-        exit 1;)
-    | Some p -> Path.mk_path p
-  in Wwwroot.assert_www_directory ~config root;
+  let start_str = match path_opt with
+    | None -> "."
+    | Some s -> s in
+  let start_path = Path.mk_path start_str in
+  let root = match guess_root config start_path 50 with
+    | None -> start_path
+    | Some r -> r in
+  Wwwroot.assert_www_directory ~config root;
   root
 
 let get_config ?(config=".hhconfig") root =

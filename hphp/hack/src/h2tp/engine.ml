@@ -49,6 +49,7 @@ let maps = [
   (Misc.map, true_fn);
   (Hack_variadic.map, true_fn);
   (Deleted_constructs.map, true_fn);
+  (Enum.map, true_fn);
 ]
 
 let convert ast src dest =

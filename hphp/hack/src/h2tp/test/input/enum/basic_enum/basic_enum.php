@@ -8,3 +8,8 @@ enum DayOfWeek: int {
   Friday = 5;
   Saturday = 6;
 }
+
+function foo(): DayOfWeek {
+  return DayOfWeek::Wednesday;
+}
+echo (foo()."\n");

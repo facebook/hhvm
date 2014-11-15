@@ -701,7 +701,8 @@ public:
   /*
    * Return a copy of this Type specialized with `klass'.
    *
-   * @requires: canSpecializeClass() && getClass()
+   * Pre: canSpecializeClass() && getClass() == nullptr
+   *      `klass' != nullptr
    */
   Type specialize(const Class* klass) const;
   Type specializeExact(const Class* klass) const;

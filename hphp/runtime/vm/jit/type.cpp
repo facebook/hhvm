@@ -989,7 +989,10 @@ Type thisReturn(const IRInstruction* inst) {
   // is not a subclass of the context return an unspecialized type.
   if (func->hasForeignThis()) return Type::Obj;
 
-  return Type::Obj.specialize(func->cls());
+  if (auto const cls = func->cls()) {
+    return Type::Obj.specialize(cls);
+  }
+  return Type::Obj;
 }
 
 Type allocObjReturn(const IRInstruction* inst) {

@@ -408,11 +408,14 @@ inline bool Type::canSpecializeAny() const {
 }
 
 inline Type Type::specialize(const Class* klass) const {
+  assert(klass != nullptr);
   assert(canSpecializeClass() && getClass() == nullptr);
+  if (klass->attrs() & AttrNoOverride) return specializeExact(klass);
   return Type(m_bits, rawPtrKind(), ClassInfo(klass, ClassTag::Sub));
 }
 
 inline Type Type::specializeExact(const Class* klass) const {
+  assert(klass != nullptr);
   assert(canSpecializeClass() && getClass() == nullptr);
   return Type(m_bits, rawPtrKind(), ClassInfo(klass, ClassTag::Exact));
 }

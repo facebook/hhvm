@@ -1927,7 +1927,10 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
     case Location::This:
       // Don't specialize $this for cloned closures which may have been re-bound
       if (curFunc()->hasForeignThis()) return Type::Obj;
-      return Type::Obj.specialize(curFunc()->cls());
+      if (auto const cls = curFunc()->cls()) {
+        return Type::Obj.specialize(cls);
+      }
+      return Type::Obj;
 
     default:
       always_assert(false && "Bad location in typeFromLocation");

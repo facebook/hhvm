@@ -16,3 +16,5 @@ let memoized h k f =
       Hashtbl.add h k v;
       v
     end
+
+let const x  = fun _ -> x

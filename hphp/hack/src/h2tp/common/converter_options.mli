@@ -8,6 +8,10 @@
  *
  *)
 
-val memoized : ('a, 'b) Hashtbl.t -> 'a -> (unit -> 'b) -> 'b
+type options = {
+  convert_collections: bool;
+}
 
-val const : 'a -> ('b -> 'a)
+val set : options -> unit
+
+val get : unit -> options

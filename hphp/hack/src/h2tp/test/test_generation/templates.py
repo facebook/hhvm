@@ -25,6 +25,9 @@ class ${name}(ConverterTestCase):
 
   def changeHH(self):
     return ${changeHH}
+
+  def additional_options(self):
+    return [${additional_opts}]
 """)
 
 SKIP_TMPL = Template("""

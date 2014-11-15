@@ -127,6 +127,7 @@ class ConverterTestCase(unittest.TestCase):
 
         tmp_path = os.path.join(self.tmpdir, filename)
         command = [self.binary_path(), in_path, tmp_path]
+        command += self.additional_options()
 
         # hacky code to pass an additional option to the unparser
         # we use the test input extension as a cue for what option we

@@ -11,6 +11,7 @@ module Sys = Sys_ext
 module CE = Common_exns
 module List = List_ext
 module Parser_hack = Parser_hack_ext
+module Opts = Converter_options
 
 (*
   The order of maps is important since some of the maps depend upon
@@ -31,24 +32,30 @@ module Parser_hack = Parser_hack_ext
   Ref_collections.
 *)
 
+let true_fn = Fun.const true
+let collection_mode_only {Opts.convert_collections; _} = convert_collections
+
 let maps = [
-  Unsupported_constructs.map;
-  Erase_types.map;
-  Constructor_arg_promotion.map;
-  Lambda_expressions.map;
-  Yield_break.map;
-  Value_collections.map;
-  Empty_collection_as_bool.map;
-  Initializer_expressions.map;
-  Ref_collections.map;
-  Misc.map;
-  Hack_variadic.map;
-  Deleted_constructs.map;
+  (Unsupported_constructs.map, true_fn);
+  (Detect_collections.map, Utils.compose not collection_mode_only);
+  (Erase_types.map, true_fn);
+  (Constructor_arg_promotion.map, true_fn);
+  (Lambda_expressions.map, true_fn);
+  (Yield_break.map, true_fn);
+  (Value_collections.map, true_fn);
+  (Empty_collection_as_bool.map, collection_mode_only);
+  (Initializer_expressions.map, collection_mode_only);
+  (Ref_collections.map, collection_mode_only);
+  (Misc.map, true_fn);
+  (Hack_variadic.map, true_fn);
+  (Deleted_constructs.map, true_fn);
 ]
 
 let convert ast src dest =
   try
-    let ast = List.fold_left (fun ast map -> map ast) ast maps in
+    let env = Opts.get () in
+    let fold_fn ast (map, shouldMap) = if shouldMap env then map ast else ast in
+    let ast = List.fold_left fold_fn ast maps in
     let src_path = Relative_path.create Relative_path.Dummy src in
     let ast = Prepend_require.prepend ast src_path in
     let str = Unparser.unparse Ast.PhpFile src_path ast in

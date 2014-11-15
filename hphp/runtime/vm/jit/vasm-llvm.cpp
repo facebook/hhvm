@@ -1324,7 +1324,7 @@ void LLVMEmitter::emit(const ret& inst) {
       { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
     auto callInst = m_irb.CreateCall(m_addressToReturn, args);
     callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
-    callInst->setTailCall(true);
+    callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
     m_addressToReturn = nullptr;
   }
   m_irb.CreateRetVoid();

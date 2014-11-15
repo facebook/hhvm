@@ -823,7 +823,7 @@ let unparser _env =
           u_expr_nested hintExpr;
         ];
     | New (klass, paramExprs, unpackParamExprs) ->
-      let klassStr = u_id klass
+      let klassStr = u_expr klass
       and paramStr = u_of_list_parens_comma u_expr paramExprs in
       if unpackParamExprs <> [] then
         u_todo "Call with splat" (fun () -> StrEmpty)

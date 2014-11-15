@@ -2793,18 +2793,15 @@ and expr_new env pos_start =
     let cname =
       let e = expr env in
       match e with
-      | p, Lvar _
-      | p, Array_get _
-      | p, Obj_get _
-      | p, Class_get _
-      | p, Call _ ->
-          if env.mode = Ast.Mstrict
-          then error env "Cannot use dynamic new in strict mode";
-          p, "*Unknown*"
-      | _, Id x -> x
+      | _, Lvar _
+      | _, Array_get _
+      | _, Obj_get _
+      | _, Class_get _
+      | _, Call _
+      | _, Id _ -> e
       | p, _ ->
           error_expect env "class name";
-          p, "*Unknown*"
+          e
     in
     let args1, args2 = expr_call_list env in
     let pos_end = Pos.make env.file env.lb in

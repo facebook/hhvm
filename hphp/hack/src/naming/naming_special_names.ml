@@ -16,6 +16,7 @@ module Classes = struct
   let cParent = "parent"
   let cStatic = "static"
   let cSelf   = "self"
+  let cUnknown = "*Unknown*"
 
   let cAwaitable = "\\Awaitable"
   let cWaitHandle = "\\WaitHandle"

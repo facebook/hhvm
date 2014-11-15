@@ -1806,17 +1806,17 @@ and expr_ env = function
       | px, n when n = SN.Classes.cParent ->
         if (fst env).cclass = None then
           let () = Errors.parent_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cSelf ->
         if (fst env).cclass = None then
           let () = Errors.self_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cStatic ->
         if (fst env).cclass = None then
           let () = Errors.static_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | _ ->
         no_typedef env x;
@@ -1824,8 +1824,12 @@ and expr_ env = function
     N.InstanceOf (expr env e, (p, N.Id id))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
-  | New (x, el, uel) ->
+  | New ((_, Id x), el, uel) ->
       N.New (make_class_id env x, exprl env el, exprl env uel)
+  | New ((p, e_), el, uel) ->
+      if (fst env).in_mode = Mstrict
+      then Errors.dynamic_new_in_strict_mode p;
+      N.New (make_class_id env (p, SN.Classes.cUnknown), exprl env el, exprl env uel)
   | Efun (f, idl) ->
       let idl = List.map fst idl in
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
@@ -1893,16 +1897,16 @@ and make_class_id env (p, x as cid) =
     | x when x = SN.Classes.cParent ->
       if (fst env).cclass = None then
         let () = Errors.parent_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIparent
     | x when x = SN.Classes.cSelf ->
       if (fst env).cclass = None then
         let () = Errors.self_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIself
     | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
         let () = Errors.static_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIstatic
     | x when x = "$this" -> N.CIvar (p, N.This)
     | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))

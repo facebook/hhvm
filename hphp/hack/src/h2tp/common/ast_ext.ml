@@ -155,16 +155,16 @@ let is_collection_str name =
 
 let rec is_collection_expr_ = function
   | Collection _ -> Some true
-  | New ((_, name), _, _) when is_collection_str name -> Some true
-
+  | New ((_, Id (_, name)), _, _) when is_collection_str name -> Some true
+  | New ((_, Id (_, _)), _, _) -> Some false
   | Lvar _ | Clone _ | Obj_get _ | Array_get _ | Class_get _  | Yield _
   (* casts to object are the only type we need to worry about *)
   | Cast ((_, Happly ((_, "object"), [])), _) | Eif _ | Call _
-  | Unsafeexpr _ | Expr_list _ -> None
+  | Unsafeexpr _ | Expr_list _ | New _ -> None
   | Binop ((Eq None), _, (_, e)) | Ref (_, e) -> is_collection_expr_ e
   | Array _  | Shape _ | Null | True | False | Class_const _ | Int _
   | Float _ | String _ | String2 _ | Yield_break | List _  | InstanceOf _
   | Efun _ | Lfun _ | Xml _ | Import _ | Id _
    (* await returns an awaitable *)
-  | Await _  | New _ | Unop _ | Binop _
+  | Await _ | Unop _ | Binop _
   | Cast _ -> Some false

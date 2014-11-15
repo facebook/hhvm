@@ -77,7 +77,8 @@ let create_collection p afields name =
     | "\\HH\\Pair" -> create_pair p afields
     | "\\HH\\Map" | "\\HH\\ImmMap" -> create_map p name afields
     | "\\HH\\Vector" | "\\HH\\ImmVector"
-    | "\\HH\\Set" | "\\HH\\ImmSet" -> New ((p, name), [(p, Array afields)], [])
+    | "\\HH\\Set" | "\\HH\\ImmSet" ->
+        New ((p, Id (p, name)), [(p, Array afields)], [])
     | _ -> raise CE.Impossible
 
 let create_static_call_if_collection p pstring name =
@@ -85,10 +86,10 @@ let create_static_call_if_collection p pstring name =
   | None -> Class_const ((p, name), pstring)
   | Some name -> Class_const ((p, name), pstring)
 
-let create_constructor_call_if_collection p es1 es2 name =
+let create_constructor_call_if_collection p1 p2 es1 es2 name =
   match base_collection_str name with
-  | None -> New ((p, name), es1, es2)
-  | Some name -> New ((p, name), es1, es2)
+  | None -> New ((p1, Id (p2, name)), es1, es2)
+  | Some name -> New ((p1, Id (p2, name)), es1, es2)
 
 let contains_collection es =
   List.exists (fun e -> is_collection_expr_ e <> Some false) es
@@ -112,8 +113,13 @@ let convert_collections = function
       Array_get (collExpr, Some (call_func p "\\hacklib_id" [strExpr]))
   | Class_const ((p, name), pstring) ->
       create_static_call_if_collection p pstring name
-  | New ((p, name), es1, es2) ->
-      create_constructor_call_if_collection p es1 es2 name
+  | New ((p1, Id (p2, name)), es1, es2) ->
+      create_constructor_call_if_collection p1 p2 es1 es2 name
+  (*
+    we only care about calls to new that use the Id since we're only trying to
+    adjust namespaces. Any call using dynamic new must already be using
+    the fully qualified namespace.
+  *)
   | Cast ((p1, Happly ((p2, "array"), [])), expr) ->
       Cast (
         (p1, Happly ((p2, "array"), [])),

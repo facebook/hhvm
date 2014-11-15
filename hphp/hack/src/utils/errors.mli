@@ -49,6 +49,7 @@ val boolean_instead_of_bool : Pos.t -> unit
 val double_instead_of_float : Pos.t -> unit
 val real_instead_of_float : Pos.t -> unit
 val shape_typehint : Pos.t -> unit
+val dynamic_new_in_strict_mode : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit

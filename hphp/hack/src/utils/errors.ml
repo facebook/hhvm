@@ -153,6 +153,7 @@ module Naming                               = struct
   let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
   let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
   let shape_typehint                        = 2059 (* DONT MODIFY!!!! *)
+  let dynamic_new_in_strict_mode            = 2060 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -471,6 +472,10 @@ let shape_typehint pos =
   add Naming.shape_typehint pos
   "\"shape\" is an invalid type; you need to declare and use a specific shape \
   type."
+
+let dynamic_new_in_strict_mode pos =
+  add Naming.dynamic_new_in_strict_mode pos
+  "Cannot use dynamic new in strict mode"
 
 let this_no_argument pos =
   add Naming.this_no_argument pos "\"this\" expects no arguments"

@@ -165,6 +165,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("reoptimize");
   }
 
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeLoads, "loadelim");
+    dce("loadelim");
+  }
+
   /*
    * Note: doing this pass this late might not be ideal, in particular because
    * we've already turned some StLoc instructions into StLocNT.

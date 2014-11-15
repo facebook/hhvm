@@ -899,6 +899,37 @@ MemEffects memory_effects(const IRInstruction& inst) {
   return ret;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+MemEffects canonicalize(MemEffects me) {
+  using R = MemEffects;
+  return match<R>(
+    me,
+    [&] (MayLoadStore l) -> R {
+      return MayLoadStore { canonicalize(l.loads), canonicalize(l.stores) };
+    },
+    [&] (PureLoad l) -> R {
+      return PureLoad { canonicalize(l.loc) };
+    },
+    [&] (PureStore l) -> R {
+      return PureStore { canonicalize(l.loc), l.value };
+    },
+    [&] (PureStoreNT l)     -> R {
+      return PureStoreNT { canonicalize(l.loc), l.value };
+    },
+    [&] (KillFrameLocals l)   -> R { return l; },
+    [&] (IterEffects l)       -> R { return l; },
+    [&] (IterEffects2 l)      -> R { return l; },
+    [&] (CallEffects l)       -> R { return l; },
+    [&] (ReturnEffects l)     -> R { return l; },
+    [&] (InterpOneEffects l)  -> R { return l; },
+    [&] (IrrelevantEffects l) -> R { return l; },
+    [&] (UnknownEffects l)    -> R { return l; }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
 std::string show(MemEffects effects) {
   using folly::sformat;
   return match<std::string>(

@@ -134,6 +134,13 @@ using MemEffects = boost::variant< MayLoadStore
 MemEffects memory_effects(const IRInstruction&);
 
 /*
+ * Replace any abstract locations in a MemEffects structure with their
+ * canonical name (chasing passthrough instructions like canonical() from
+ * analysis.h)
+ */
+MemEffects canonicalize(MemEffects);
+
+/*
  * Produces a string about some MemEffects for debug-printing.
  */
 std::string show(MemEffects);

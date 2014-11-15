@@ -177,6 +177,12 @@ auto const AUnknown  = ALocation{ALocation::BUnknown};
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Replace any SSATmps in an ALocation with their canonical name (chasing
+ * passthrough instructions as with canonical() from analysis.h.)
+ */
+ALocation canonicalize(ALocation);
+
+/*
  * Produce a debug string for an abstract location.
  */
 std::string show(ALocation);

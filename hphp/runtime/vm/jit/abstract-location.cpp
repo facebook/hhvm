@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -180,6 +181,15 @@ folly::Optional<AElemI> ALocation::elemI() const {
 folly::Optional<AElemS> ALocation::elemS() const {
   if (m_stag == STag::ElemS) return m_elemS;
   return folly::none;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ALocation canonicalize(ALocation loc) {
+  if (auto const x = loc.prop()) return AProp { canonical(x->obj), x->offset };
+  if (auto const x = loc.elemI()) return AElemI { canonical(x->arr), x->idx };
+  if (auto const x = loc.elemS()) return AElemS { canonical(x->arr), x->key };
+  return loc;
 }
 
 //////////////////////////////////////////////////////////////////////

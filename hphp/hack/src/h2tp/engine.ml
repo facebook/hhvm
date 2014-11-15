@@ -61,10 +61,8 @@ let convert ast src dest =
     let str = Unparser.unparse Ast.PhpFile src_path ast in
     let dest = Sys.set_extension dest ".php" in
     Sys.write_file str dest
-  with
-    | CE.Impossible ->
-      let m = "error processing " ^ src in
-      raise (CE.InternalError m)
+  with e ->
+  match e with
     | CE.Todo m ->
       let m = "error unparsing " ^ src ^ ". " ^ m in
       raise (CE.InternalError m)
@@ -75,6 +73,10 @@ let convert ast src dest =
       let m = "duplicate file named \"" ^ src ^ "\". Do you have two" ^
         "files with the same name and different extensions? (.hh and .php)" in
         raise (CE.InputError m)
+    | CE.ConversionError _ | CE.ParseErrors _ | CE.CompoundError _ -> raise e
+    | CE.Impossible | _ ->
+        let m = "error processing " ^ src in
+        raise (CE.InternalError m)
 
 let process_php_file src dest =
   let {Parser_hack.is_hh_file; Parser_hack.ast; _} =

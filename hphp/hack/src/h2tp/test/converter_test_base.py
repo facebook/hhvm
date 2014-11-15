@@ -5,70 +5,21 @@ from __future__ import print_function
 from os import listdir
 from os.path import isfile, isdir
 from string import Template
+from .engine import PHP5, HPHP
+from .converter import Converter
 import unittest
-import subprocess
 import os
 import difflib
 import tempfile
 import shutil
 import re
-import abc
-
-class Engine(object):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def environ_name(self):
-        return
-
-    def cmd(self):
-        return os.environ.get(self.environ_name())
-
-    def exists(self):
-        return bool(self.cmd())
-
-    def code(self, file_path):
-        return "require_once('%s');" % file_path
-
-    def execute_file(self, file_path):
-        proc = subprocess.Popen([self.cmd(), '-r', self.code(file_path)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=False)
-        res = proc.wait()
-        output = '\n'.join([l for l in proc.stdout])
-        return (res == 0, output)
-
-    def parse(self, file_path):
-        proc = subprocess.Popen([self.cmd(), '-l', file_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=False)
-        res = proc.wait()
-        output = '\n'.join([l for l in proc.stdout])
-        return (res == 0, output)
-
-
-class PHP5(Engine):
-    def __init__(self, preload):
-        self.preload = preload
-
-    def environ_name(self):
-        return 'ZEND_PHP'
-
-    def code(self, file_path):
-        return self.preload + super(PHP5, self).code(file_path)
-
-class HPHP(Engine):
-    def environ_name(self):
-        return 'HPHP'
-
 
 class ConverterTestCase(unittest.TestCase):
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         self.PHP5 = PHP5(self.execution_prefix())
         self.HPHP = HPHP()
+        self.converter = Converter(self.binary_path())
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
@@ -124,29 +75,22 @@ class ConverterTestCase(unittest.TestCase):
 
     def compare(self, in_path, out_path, filename):
         file_extension = os.path.splitext(filename)[1]
-
         tmp_path = os.path.join(self.tmpdir, filename)
-        command = [self.binary_path(), in_path, tmp_path]
-        command += self.additional_options()
 
+        options = self.additional_options()
         # hacky code to pass an additional option to the unparser
         # we use the test input extension as a cue for what option we
         # want to pass to the test_unparser
         if self.binary_name() == 'test_unparser':
-            command.append("-output-type")
+            options.append("-output-type")
             output_type = "php" if file_extension == ".php" else "hack"
-            command.append(output_type)
+            options.append(output_type)
 
-        proc = subprocess.Popen(command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=False)
-        res = proc.wait()
-        if (res != 0):
-            output = '\n'.join([l for l in proc.stdout])
+        (success, output) = self.converter.convert(in_path, tmp_path, options)
+        if success:
+            self.compare_output(tmp_path, in_path, out_path)
+        else:
             self.verify_expected_failure(output, in_path, out_path)
-            return
-        self.compare_output(tmp_path, in_path, out_path)
 
     # this allows one level of nesting. i.e either we compare files,
     # or directories of depth 1. In principle this could be extended to

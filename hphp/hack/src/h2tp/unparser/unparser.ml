@@ -279,7 +279,7 @@ let unparser _env =
                c_enum = v_c_enum
              } =
       u_in_mode v_c_mode (fun () ->
-          invariant (List.length v_c_extends <= 1)
+          invariant (List.length v_c_extends <= 1 || v_c_kind = Cinterface)
             (pos, "Multiple inheritance is not supported.");
           invariant (is_empty_ns v_c_namespace)
             (pos, "Namespaces are expected to not be elaborated");
@@ -294,7 +294,7 @@ let unparser _env =
           let str_c_kind = u_class_kind v_c_kind in
           let str_c_name = u_id v_c_name in
           let str_c_body = u_of_list_braces_spc u_elt v_c_body in
-          let str_c_extends = u_of_list_spc u_extends v_c_extends in
+          let str_c_extends = u_extends v_c_extends in
           let str_c_implements = u_implements v_c_implements in
             StrWords [
               str_c_final;
@@ -304,7 +304,9 @@ let unparser _env =
               str_c_implements;
               str_c_body;
             ]))
-  and u_extends hint = StrWords [Str "extends"; u_hint hint]
+  and u_extends = function
+    | [] -> StrBlank
+    | hints -> StrWords [Str "extends"; u_of_list_comma u_hint hints]
   and u_implements = function
   | [] -> StrEmpty
   | implements -> StrWords [Str "implements"; u_of_list_comma u_hint implements]

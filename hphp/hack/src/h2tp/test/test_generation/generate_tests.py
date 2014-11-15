@@ -147,6 +147,24 @@ class HHVMCollectionTestGenerator:
             code_dir=self.options.code_dir,
             test_input_dir=test_input_dir)
 
+class HackTestInputTestGenerator:
+    def __init__(self, options):
+        self.options = options
+
+    def generate(self):
+        bin_path = os.path.join(
+            self.options.bin_dir,
+            self.options.binary)
+        test_input_dir = os.path.join(
+            self.options.fbcode_dir,
+            "hphp/hack/test/typecheck/")
+
+        return templates.HACK_TEST_INPUT_TEST_TMPL.substitute(
+            bin_path=bin_path,
+            code_dir=self.options.code_dir,
+            test_input_dir=test_input_dir)
+
+
 def parse_args():
     parser = optparse.OptionParser()
     parser.add_option('--fbcode_dir')
@@ -183,13 +201,15 @@ def mkdir_safe(dirname):
 if __name__ == '__main__':
     options = parse_args()
     compute_additional_paths(options)
-    generator = ConverterTestGenerator(options, "", True)
-    unparser_generator = ConverterTestGenerator(options, "unparser_", False)
-    hhvm_collection_tests_generator = HHVMCollectionTestGenerator(options)
+    generators = [
+        ConverterTestGenerator(options, "", True),
+        ConverterTestGenerator(options, "unparser_", False),
+        HHVMCollectionTestGenerator(options),
+        HackTestInputTestGenerator(options),
+    ]
     mkdir_safe(options.gen_file_dir)
     f = open(options.gen_file_path, 'w')
     print(templates.FILE_STR, file=f)
-    print(generator.generate(), file=f)
-    print(unparser_generator.generate(), file=f)
-    print(hhvm_collection_tests_generator.generate(), file=f)
+    for g in generators:
+        print(g.generate(), file=f)
     f.close()

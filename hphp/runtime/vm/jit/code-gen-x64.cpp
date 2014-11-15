@@ -1465,9 +1465,6 @@ void CodeGenerator::emitTypeTest(Type type, Loc1 typeSrc, Loc2 dataSrc,
   } else if (type == Type::Gen) {
     // nothing to check
     return;
-  } else if (type == Type::InitCell) {
-    // nothing to check: Refs cannot contain Uninit or another Ref.
-    return;
   } else {
     always_assert(type.isKnownDataType());
     DataType dataType = type.toDataType();
@@ -3756,10 +3753,16 @@ void CodeGenerator::cgLdMem(IRInstruction* inst) {
          srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
+void CodeGenerator::cgCheckRefInner(IRInstruction* inst) {
+  if (inst->typeParam() >= Type::InitCell) return;
+  auto const base = srcLoc(inst, 0).reg()[RefData::tvOffset()];
+  emitTypeCheck(inst->typeParam(), refTVType(base), refTVData(base),
+    inst->taken());
+}
+
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[RefData::tvOffset()],
-         inst->taken());
+         srcLoc(inst, 0).reg()[RefData::tvOffset()]);
 }
 
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {

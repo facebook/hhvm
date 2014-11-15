@@ -838,9 +838,8 @@ void HhbcTranslator::emitFPassR() {
 }
 
 void HhbcTranslator::emitFPassV() {
-  Block* exit = makeExit();
-  SSATmp* tmp = popV();
-  pushIncRef(gen(LdRef, exit, tmp->type().innerType(), tmp));
+  auto const tmp = popV();
+  pushIncRef(gen(LdRef, Type::InitCell, tmp));
   gen(DecRef, tmp);
 }
 

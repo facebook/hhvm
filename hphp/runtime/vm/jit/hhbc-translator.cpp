@@ -483,8 +483,8 @@ void HhbcTranslator::emitSingletonSLoc(const Func* func, const Op* op) {
   gen(CheckStaticLocInit, exit, box);
 
   // Side exit if the static local is null.
-  auto value = gen(LdRef, Type::Cell, exit, box);
-  auto isnull = gen(IsType, Type::Null, value);
+  auto const value  = gen(LdRef, Type::InitCell, box);
+  auto const isnull = gen(IsType, Type::InitNull, value);
   gen(JmpNZero, exit, isnull);
 
   // Return the singleton.
@@ -1187,7 +1187,7 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
 void HhbcTranslator::emitIsScalarL(int id) {
   auto const ldrefExit = makeExit();
   auto const ldPMExit = makePseudoMainExit();
-  SSATmp* src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
   push(gen(IsScalarType, src));
 }
 
@@ -1761,7 +1761,7 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
     auto const ldrefExit = makeExit();
     auto const ldPMExit = makePseudoMainExit();
     auto const val = ldLoc(locId, ldPMExit, DataTypeSpecific);
-    gen(LdRef, m_irb->predictedInnerType(locId), ldrefExit, val);
+    gen(CheckRefInner, m_irb->predictedInnerType(locId), ldrefExit, val);
   }
 }
 
@@ -1835,7 +1835,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto stk = gen(LdStack, Type::BoxedInitCell, stackOff, m_irb->sp());
-    gen(LdRef,
+    gen(CheckRefInner,
         getStackInnerTypePrediction(m_irb->sp(), stackIndex),
         makeExit(),
         stk);
@@ -2014,7 +2014,8 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t const id) {
     if (!val->type().isBoxed()) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = m_irb->predictedInnerType(id);
-    val = gen(LdRef, pred, makeExit(), val);
+    gen(CheckRefInner, pred, makeExit(), val);
+    val = gen(LdRef, pred, val);
     return pred;
   }();
 
@@ -3595,7 +3596,11 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
 
   if (type.isBoxed() || type.notBoxed()) {
     m_irb->constrainValue(val, DataTypeCountness);
-    return type.isBoxed() ? gen(LdRef, inner, exit, val) : val;
+    if (type.isBoxed()) {
+      gen(CheckRefInner, inner, exit, val);
+      return gen(LdRef, inner, val);
+    }
+    return val;
   }
 
   return m_irb->cond(
@@ -3605,7 +3610,8 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
     },
     [&](SSATmp* box) { // Next: val is a ref
       m_irb->constrainValue(box, DataTypeCountness);
-      return gen(LdRef, inner, exit, box);
+      gen(CheckRefInner, inner, exit, box);
+      return gen(LdRef, inner, box);
     },
     [&] { // Taken: val is unboxed
       return gen(AssertType, Type::Cell, val);
@@ -3660,12 +3666,9 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId,
     return loc;
   }
 
-  return gen(
-    LdRef,
-    m_irb->predictedInnerType(locId),
-    ldrefExit,
-    loc
-  );
+  auto const predTy = m_irb->predictedInnerType(locId);
+  gen(CheckRefInner, predTy, ldrefExit, loc);
+  return gen(LdRef, predTy, loc);
 }
 
 /*
@@ -3744,11 +3747,13 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
     return newVal;
   }
 
-  // It's important that the IncRef happens after the LdRef, since the
-  // LdRef is also a guard on the inner type and may side-exit.
-  auto const innerCell = gen(
-    LdRef, m_irb->predictedInnerType(id), ldrefExit, oldLoc
-  );
+  // It's important that the IncRef happens after the guard on the inner type
+  // of the ref, since it may side-exit.
+  auto const predTy = m_irb->predictedInnerType(id);
+  if (ldrefExit != nullptr) {
+    gen(CheckRefInner, predTy, ldrefExit, oldLoc);
+  }
+  auto const innerCell = gen(LdRef, predTy, oldLoc);
   gen(StRef, oldLoc, newVal);
   if (incRefNew) gen(IncRef, newVal);
   if (decRefOld) {

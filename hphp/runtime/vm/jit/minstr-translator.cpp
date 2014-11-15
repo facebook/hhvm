@@ -511,11 +511,11 @@ SSATmp* HhbcTranslator::MInstrTranslator::getBase(TypeConstraint tc) {
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::getKey() {
-  SSATmp* key = getInput(m_iInd, DataTypeSpecific);
-  auto keyType = key->type();
+  auto key = getInput(m_iInd, DataTypeSpecific);
+  auto const keyType = key->type();
   assert(keyType.isBoxed() || keyType.notBoxed());
   if (keyType.isBoxed()) {
-    key = gen(LdRef, Type::Cell, key);
+    key = gen(LdRef, Type::InitCell, key);
   }
   return key;
 }
@@ -628,12 +628,9 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
    */
   Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
   if (baseType.isBoxed() && baseDL.location.isLocal()) {
-    base = gen(
-      LdRef,
-      m_irb.predictedInnerType(baseDL.location.offset),
-      failedRef,
-      base
-    );
+    auto const predTy = m_irb.predictedInnerType(baseDL.location.offset);
+    gen(CheckRefInner, predTy, failedRef, base);
+    base = gen(LdRef, predTy, base);
     baseType = base->type();
   }
 
@@ -651,8 +648,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
 
   // Everything else is passed by pointer. We don't have to worry about
   // unboxing, since all the generic helpers understand boxed bases. They still
-  // may rely on the LdRef guard above, though; the various emit* functions may
-  // do smarter things based on the guarded type.
+  // may rely on the CheckRefInner guard above, though; the various emit*
+  // functions may do smarter things based on the guarded type.
   if (baseDL.location.space == Location::Local) {
     setBase(
       m_ht.ldLocAddr(baseDL.location.offset),
@@ -695,8 +692,8 @@ HhbcTranslator::MInstrTranslator::computeSimpleCollectionOp() {
   auto const baseType = [&] {
     const DynLocation& baseDL = *m_ni.inputs[m_iInd];
     // Before we do any simpleCollectionOp on a local base, we will always emit
-    // the appropriate LdRef guard to allow us to use a predicted inner type.
-    // So when calculating the SimpleOp assume that type.
+    // the appropriate CheckRefInner guard to allow us to use a predicted inner
+    // type.  So when calculating the SimpleOp assume that type.
     if (base->type().maybeBoxed() && baseDL.location.isLocal()) {
       return m_irb.predictedInnerType(baseDL.location.offset);
     }

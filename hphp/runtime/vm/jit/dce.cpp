@@ -108,6 +108,7 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   });
 }
 
+// TODO(#5623309): remove this
 bool isUnguardedLoad(IRInstruction* inst) {
   if (!inst->hasDst() || !inst->dst()) return false;
   Opcode opc = inst->op();
@@ -115,7 +116,6 @@ bool isUnguardedLoad(IRInstruction* inst) {
   Type type = dst->type();
   return ((opc == LdStack && (type == Type::Gen || type == Type::Cell)) ||
           (opc == LdLoc && type == Type::Gen) ||
-          (opc == LdRef && type == Type::Cell) ||
           (opc == LdMem && type == Type::Cell &&
            inst->src(0)->type() == Type::PtrToCell));
 }

@@ -1187,6 +1187,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
 #define DParam          return inst->typeParam();
+#define DParamNRel      return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DUnboxPtr       return unboxPtr(inst->src(0)->type());
@@ -1194,7 +1195,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
-#define DLdRef          return ldRefReturn(inst->typeParam());
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
 #define DStk(in)        return stkReturn(inst, dstId, \
@@ -1220,13 +1220,13 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DMulti
 #undef DStk
@@ -1420,10 +1420,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                                "invalid src num");     \
                       requireTypeParam();
 #define DParam       requireTypeParam();
+#define DParamNRel   requireTypeParam();
 #define DParamPtr(k) requireTypeParamPtr(Ptr::k);
 #define DUnboxPtr
 #define DBoxPtr
-#define DLdRef       requireTypeParam();
 #define DAllocObj
 #define DArrElem
 #define DArrPacked
@@ -1458,13 +1458,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DofS
 #undef DRefineS
 #undef DParam
+#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DCns
 

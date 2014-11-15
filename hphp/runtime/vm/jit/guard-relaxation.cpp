@@ -45,10 +45,10 @@ bool shouldHHIRRelaxGuards() {
 #define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
 #define DParam         return true;  // typeParam may relax
+#define DParamNRel     return false;
 #define DParamPtr(k)   return false;
 #define DUnboxPtr      return false;
 #define DBoxPtr        return false;
-#define DLdRef         return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
 #define DArrElem       assert(inst->is(LdPackedArrayElem));     \
@@ -84,10 +84,10 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DBox
 #undef DRefineS
 #undef DParam
+#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
-#undef DLdRef
 #undef DAllocObj
 #undef DArrPacked
 #undef DArrElem

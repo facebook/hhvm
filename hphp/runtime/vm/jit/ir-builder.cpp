@@ -114,9 +114,9 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
       }
     }
 
-    // And a LdRef automatically constrains the value to be a boxed cell,
-    // specifically.
-    if (inst->is(LdRef)) {
+    // And a LdRef or CheckRefInner automatically constrains the value to be a
+    // boxed cell, specifically.
+    if (inst->is(LdRef, CheckRefInner)) {
       constrainValue(inst->src(0), DataTypeSpecific);
     }
   }

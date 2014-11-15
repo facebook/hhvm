@@ -977,7 +977,6 @@ Type refineTypeNoCheck(Type oldType, Type newType);
  */
 Type ldRefReturn(Type typeParam);
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

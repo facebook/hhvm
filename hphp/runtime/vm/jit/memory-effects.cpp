@@ -321,7 +321,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   //////////////////////////////////////////////////////////////////////
-  // Object/Ref stores
+  // Object/Ref loads/stores
 
   case StProp:
     return PureStore {
@@ -329,9 +329,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(2)
     };
 
+  case CheckRefInner:
+    // We don't have ALocations for refs yet.
+    return MayLoadStore { ANonFrame, AEmpty };
   case LdRef:
-    // LdRef potentially acts a guard, so it's not necessarily a PureLoad.
-    if (inst.taken()) return MayLoadStore { ANonFrame, AEmpty };
     return PureLoad { ANonFrame };
 
   case StRef:

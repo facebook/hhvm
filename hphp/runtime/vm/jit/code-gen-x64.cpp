@@ -1099,10 +1099,7 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   auto const divisor = srcLoc(inst, 1).reg();
   auto& v = vmain();
 
-  v << copy{dividend, rax};
-  v << cqo{};                      // sign-extend rax => rdx:rax
-  v << idiv{divisor, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
-  v << copy{rdx, dst};
+  v << srem{dividend, divisor, dst};
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
@@ -4904,7 +4901,7 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
-  v << jmpr{srcLoc(inst, 0).reg()};
+  v << jmpr{srcLoc(inst, 0).reg(), kCrossTraceRegs};
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

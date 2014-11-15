@@ -140,11 +140,11 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label loopHead;
 
   /*
-   * Note: the IR currently requires that we preserve r13 across
-   * calls to these free locals helpers.  These helpers assume the
-   * stack is balanced (rsp%16 == 0) on entry, unlike normal ABI calls
-   * where the stack was balanced before the call, and now has the
-   * return address on the stack (rsp%16 == 8).
+   * Note: the IR currently requires that we preserve r13 across calls to these
+   * free locals helpers.  These helpers assume the stack is balanced (rsp%16
+   * == 0) on entry, unlike normal ABI calls where the stack was balanced
+   * before the call, and now has the return address on the stack (rsp%16 ==
+   * 8).
    */
   auto const rIter     = r14;
   auto const rFinished = r15;
@@ -183,8 +183,7 @@ asm_label(a, doRelease);
   asm_label(a, skipDecRef);
   };
 
-  // Loop for the first few locals, but unroll the final
-  // kNumFreeLocalsHelpers.
+  // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
   emitDecLocal();
   a.    addq   (tvSize, rIter);

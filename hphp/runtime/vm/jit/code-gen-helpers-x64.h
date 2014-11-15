@@ -196,19 +196,9 @@ void jccBlock(Asm& a, Lambda body) {
 }
 
 /*
- * callDestructor/jumpDestructor --
+ * lookupDestructor --
  *
- * Emit a call or jump to the appropriate destructor for a dynamically
- * typed value.
- *
- * No registers are saved; most translated code should be using
- * emitDecRefGeneric{Reg,} instead of this.
- *
- *   Inputs:
- *
- *     - typeReg is destroyed and may not be argNumToRegName[0].
- *     - argNumToRegName[0] should contain the m_data for this value.
- *     - scratch is destoyed.
+ * Return a MemoryRef pointer to the destructor for the type in typeReg.
  */
 
 inline MemoryRef lookupDestructor(X64Assembler& a, PhysReg typeReg) {

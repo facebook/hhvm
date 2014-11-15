@@ -374,7 +374,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(resume, Inone, U(args), Dn)\
   O(retransopt, I(sk) I(id), U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
@@ -405,6 +404,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(syncvmfp, Inone, U(s), Dn)\
+  O(srem, Inone, U(s0) U(s1), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -455,9 +455,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(decq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(decqm, Inone, U(m), D(sf))\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
-  O(incwm, Inone, U(m), D(sf))\
   O(idiv, Inone, U(s), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(incwm, Inone, U(m), D(sf))\
   O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
   O(inclm, Inone, U(m), D(sf))\
   O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -465,7 +465,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(incqmlock, Inone, U(m), D(sf))\
   O(jcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
-  O(jmpr, Inone, U(target), Dn)\
+  O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
@@ -475,9 +475,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
   O(movb, Inone, UH(s,d), DH(d,s))\
-  O(movbi, I(s), Un, D(d))\
   O(movl, Inone, UH(s,d), DH(d,s))\
-  O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(mul, Inone, U(s0) U(s1), D(d))\
@@ -548,7 +546,6 @@ struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; };
-struct resume { RegSet args; };
 struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
@@ -586,6 +583,7 @@ struct landingpad {};
 struct defvmsp { Vreg d; };
 struct syncvmsp { Vreg s; };
 struct syncvmfp { Vreg s; };
+struct srem { Vreg s0, s1, d; };
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -665,7 +663,7 @@ struct incqmlock { Vptr m; VregSF sf; };
 struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
-struct jmpr { Vreg64 target; };
+struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
@@ -675,9 +673,7 @@ struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadsd { Vptr s; VregDbl d; };
 struct loadzbl { Vptr s; Vreg32 d; };
 struct movb { Vreg8 s, d; };
-struct movbi { Immed s; Vreg8 d; };
 struct movl { Vreg32 s, d; };
-struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };

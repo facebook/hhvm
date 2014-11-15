@@ -404,10 +404,10 @@ struct LLVMEmitter {
     m_int32Ptr = llvm::Type::getInt32PtrTy(m_context);
     m_int64Ptr = llvm::Type::getInt64PtrTy(m_context);
 
-    m_int8FSPtr  = llvm::Type::getInt8PtrTy(m_context,  257);
-    m_int16FSPtr = llvm::Type::getInt16PtrTy(m_context, 257);
-    m_int32FSPtr = llvm::Type::getInt32PtrTy(m_context, 257);
-    m_int64FSPtr = llvm::Type::getInt64PtrTy(m_context, 257);
+    m_int8FSPtr  = llvm::Type::getInt8PtrTy(m_context,  kFSAddressSpace);
+    m_int16FSPtr = llvm::Type::getInt16PtrTy(m_context, kFSAddressSpace);
+    m_int32FSPtr = llvm::Type::getInt32PtrTy(m_context, kFSAddressSpace);
+    m_int64FSPtr = llvm::Type::getInt64PtrTy(m_context, kFSAddressSpace);
 
     m_int8Zero  = m_irb.getInt8(0);
     m_int8One   = m_irb.getInt8(1);
@@ -679,7 +679,7 @@ struct LLVMEmitter {
   /*
    * Return val, bitcast to an approriately-sized integer type.
    */
-  llvm::Value* asInt(llvm::Value* val, size_t bits = 64) {
+  llvm::Value* asInt(llvm::Value* val, size_t bits) {
     return m_irb.CreateBitCast(val, intNType(bits));
   }
 
@@ -704,6 +704,8 @@ private:
     Fixup fixup;
   };
 
+  static constexpr unsigned kFSAddressSpace = 257;
+
 #define O(name, ...) void emit(const name&);
 VASM_OPCODES
 #undef O
@@ -712,10 +714,12 @@ VASM_OPCODES
   void emitCall(const Vinstr& instr);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
-  //
-  /// Emit code for the pointer. Return value is of type <i{bits} *>.
+  // Emit code for the pointer. Return value is of the given type, or
+  // <i{bits} *> for the second overload.
+  llvm::Value* emitPtr(const Vptr s, llvm::Type* ptrTy);
   llvm::Value* emitPtr(const Vptr s, size_t bits = 64);
 
+  llvm::Type* ptrType(llvm::Type* ty, unsigned addressSpace = 0) const;
   llvm::Type* intNType(size_t bits) const;
   llvm::Type* ptrIntNType(size_t bits, bool inFS) const;
 
@@ -813,29 +817,74 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
 // This list will eventually go away; for now only a very small subset of
 // operations are supported.
 #define SUPPORTED_OPS \
+O(addli) \
+O(addlm) \
 O(addq) \
 O(addqi) \
+O(addqim) \
+O(addsd) \
+O(andb) \
+O(andbi) \
+O(andbim) \
+O(andl) \
+O(andli) \
+O(andq) \
+O(andqi) \
 O(bindjmp) \
+O(debugtrap) \
 O(defvmsp) \
 O(fallthru) \
+O(cloadq) \
+O(cmovq) \
+O(cmpb) \
 O(cmpbi) \
 O(cmpbim) \
+O(cmpl) \
+O(cmpli) \
 O(cmplim) \
+O(cmplm) \
 O(cmpq) \
 O(cmpqim) \
+O(cmpqm) \
+O(cvttsd2siq) \
+O(cvtsi2sd) \
+O(cvtsi2sdm) \
 O(copy) \
+O(copy2) \
+O(copyargs) \
+O(decl) \
 O(declm) \
+O(decq) \
 O(decqm) \
+O(divsd) \
+O(imul) \
 O(fallbackcc) \
-O(inclm) \
 O(incwm) \
+O(incl) \
+O(inclm) \
+O(incq) \
+O(incqm) \
+O(incqmlock) \
 O(jcc) \
 O(jmp) \
 O(ldimm) \
 O(lea) \
+O(loaddqu) \
 O(load) \
+O(loadl) \
+O(loadsd) \
 O(loadzbl) \
-O(nothrow) \
+O(movb) \
+O(movl) \
+O(movzbl) \
+O(mulsd) \
+O(mul) \
+O(neg) \
+O(nop) \
+O(not) \
+O(orq) \
+O(orqi) \
+O(orqim) \
 O(pushm) \
 O(ret) \
 O(store) \
@@ -864,8 +913,13 @@ O(landingpad)
         break;
 
       case Vinstr::call:
+      case Vinstr::callm:
+      case Vinstr::callr:
       case Vinstr::unwind:
+      case Vinstr::nothrow:
       case Vinstr::syncpoint:
+      case Vinstr::cqo:
+      case Vinstr::idiv:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -886,18 +940,70 @@ O(landingpad)
   finalize();
 }
 
+void LLVMEmitter::emit(const addli& inst) {
+  defineValue(inst.d, m_irb.CreateAdd(cns(inst.s0.l()), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const addlm& inst) {
+  auto ptr = emitPtr(inst.m, 32);
+  auto result = m_irb.CreateAdd(value(inst.s0), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, result);
+  m_irb.CreateStore(result, ptr);
+}
+
 void LLVMEmitter::emit(const addq& inst) {
-  auto result = m_irb.CreateAdd(value(inst.s0), value(inst.s1));
-  defineValue(inst.d, result);
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s0), value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const addqi& inst) {
   // TODO(#5134526): ignore %rsp adjustments for now. They are typically
   // emitted in unwind handler.
   if (inst.s1 == reg::rsp) return;
-  auto result = m_irb.CreateAdd(value(inst.s1), cns(inst.s0.q()));
-  defineValue(inst.d, result);
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s1), cns(inst.s0.q())));
 }
+
+void LLVMEmitter::emit(const addqim& inst) {
+  auto ptr = emitPtr(inst.m, 64);
+  auto result = m_irb.CreateAdd(cns(inst.s0.q()), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, result);
+  m_irb.CreateStore(result, ptr);
+}
+
+void LLVMEmitter::emit(const addsd& inst) {
+  defineValue(inst.d, m_irb.CreateFAdd(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andb& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andbi& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.b()), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andbim& inst) {
+  auto ptr = emitPtr(inst.m, 8);
+  auto result = m_irb.CreateAnd(cns(inst.s.b()), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, result);
+  m_irb.CreateStore(result, ptr);
+}
+
+void LLVMEmitter::emit(const andl& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andli& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.l()), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andq& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const andqi& inst) {
+  defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.q()), value(inst.s1)));
+}
+
 
 void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
@@ -1065,27 +1171,103 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   }
 }
 
+void LLVMEmitter::emit(const cloadq& inst) {
+  auto trueVal = m_irb.CreateLoad(emitPtr(inst.t, 64));
+  auto falseVal = value(inst.f);
+  auto cond = emitCmpForCC(inst.sf, inst.cc);
+  defineValue(inst.d, m_irb.CreateSelect(cond, trueVal, falseVal));
+}
+
+void LLVMEmitter::emit(const cmovq& inst) {
+  auto cond = emitCmpForCC(inst.sf, inst.cc);
+  defineValue(inst.d, m_irb.CreateSelect(cond, value(inst.t), value(inst.f)));
+}
+
+void LLVMEmitter::emit(const cmpb& inst) {
+  // no-op. The real work for this and other non-memory cmps happens in
+  // emitCmpForCC.
+}
+
 void LLVMEmitter::emit(const cmpbi& inst) {
+  // no-op.
 }
 
 void LLVMEmitter::emit(const cmpbim& inst) {
   defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 8)));
 }
 
+void LLVMEmitter::emit(const cmpl& inst) {
+  // no-op.
+}
+
+void LLVMEmitter::emit(const cmpli& inst) {
+  // no-op.
+}
+
 void LLVMEmitter::emit(const cmplim& inst) {
   defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 32)));
 }
 
+void LLVMEmitter::emit(const cmplm& inst) {
+  defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 32)));
+}
+
 void LLVMEmitter::emit(const cmpq& inst) {
-  // no-op. The real work happens in jcc
+  // no-op.
+}
+
+void LLVMEmitter::emit(const cmpqi& inst) {
+  // no-op.
 }
 
 void LLVMEmitter::emit(const cmpqim& inst) {
   defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 64)));
 }
 
+void LLVMEmitter::emit(const cmpqm& inst) {
+  defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 64)));
+}
+
+void LLVMEmitter::emit(const cvttsd2siq& inst) {
+  defineValue(inst.d, m_irb.CreateFPToSI(value(inst.s), m_int64));
+}
+
+void LLVMEmitter::emit(const cvtsi2sd& inst) {
+  defineValue(inst.d, m_irb.CreateSIToFP(value(inst.s), m_irb.getDoubleTy()));
+}
+
+void LLVMEmitter::emit(const cvtsi2sdm& inst) {
+  auto intVal = m_irb.CreateLoad(emitPtr(inst.s, 64));
+  defineValue(inst.d, m_irb.CreateSIToFP(intVal, m_irb.getDoubleTy()));
+}
+
 void LLVMEmitter::emit(const copy& inst) {
   defineValue(inst.d, value(inst.s));
+}
+
+void LLVMEmitter::emit(const copy2& inst) {
+  defineValue(inst.d0, value(inst.s0));
+  defineValue(inst.d1, value(inst.s1));
+}
+
+void LLVMEmitter::emit(const copyargs& inst) {
+  auto& srcs = m_unit.tuples[inst.s];
+  auto& dsts = m_unit.tuples[inst.d];
+  assert(srcs.size() == dsts.size());
+  for (unsigned i = 0, n = srcs.size(); i < n; ++i) {
+    defineValue(dsts[i], value(srcs[i]));
+  }
+}
+
+void LLVMEmitter::emit(const debugtrap& inst) {
+  auto trap = llvm::Intrinsic::getDeclaration(m_module.get(),
+                                              llvm::Intrinsic::debugtrap);
+  m_irb.CreateCall(trap);
+  m_irb.CreateUnreachable();
+}
+
+void LLVMEmitter::emit(const decl& inst) {
+  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int32One));
 }
 
 void LLVMEmitter::emit(const declm& inst) {
@@ -1096,12 +1278,24 @@ void LLVMEmitter::emit(const declm& inst) {
   m_irb.CreateStore(sub, ptr);
 }
 
+void LLVMEmitter::emit(const decq& inst) {
+  defineValue(inst.d, m_irb.CreateSub(value(inst.s), m_int64One));
+}
+
 void LLVMEmitter::emit(const decqm& inst) {
   auto ptr = emitPtr(inst.m, 64);
   auto oldVal = m_irb.CreateLoad(ptr);
   auto newVal = m_irb.CreateSub(oldVal, m_int64One);
   defineFlagTmp(inst.sf, newVal);
   m_irb.CreateStore(newVal, ptr);
+}
+
+void LLVMEmitter::emit(const divsd& inst) {
+  defineValue(inst.d, m_irb.CreateFDiv(value(inst.s1), value(inst.s0)));
+}
+
+void LLVMEmitter::emit(const imul& inst) {
+  defineValue(inst.d, m_irb.CreateMul(value(inst.s0), value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const fallbackcc& inst) {
@@ -1124,6 +1318,18 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
   m_irb.SetInsertPoint(next);
 }
 
+void LLVMEmitter::emit(const incwm& inst) {
+  auto ptr = emitPtr(inst.m, 16);
+  auto oldVal = m_irb.CreateLoad(ptr);
+  auto newVal = m_irb.CreateAdd(oldVal, m_int16One);
+  defineFlagTmp(inst.sf, newVal);
+  m_irb.CreateStore(newVal, ptr);
+}
+
+void LLVMEmitter::emit(const incl& inst) {
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int32One));
+}
+
 void LLVMEmitter::emit(const inclm& inst) {
   auto ptr = emitPtr(inst.m, 32);
   auto load = m_irb.CreateLoad(ptr);
@@ -1132,12 +1338,27 @@ void LLVMEmitter::emit(const inclm& inst) {
   m_irb.CreateStore(add, ptr);
 }
 
-void LLVMEmitter::emit(const incwm& inst) {
-  auto ptr = emitPtr(inst.m, 16);
-  auto oldVal = m_irb.CreateLoad(ptr);
-  auto newVal = m_irb.CreateAdd(oldVal, m_int16One);
-  defineFlagTmp(inst.sf, newVal);
-  m_irb.CreateStore(newVal, ptr);
+void LLVMEmitter::emit(const incq& inst) {
+  defineValue(inst.d, m_irb.CreateAdd(value(inst.s), m_int64One));
+}
+
+void LLVMEmitter::emit(const incqm& inst) {
+  auto ptr = emitPtr(inst.m, 64);
+  auto load = m_irb.CreateLoad(ptr);
+  auto add = m_irb.CreateAdd(load, m_int64One);
+  defineFlagTmp(inst.sf, add);
+  m_irb.CreateStore(add, ptr);
+}
+
+void LLVMEmitter::emit(const incqmlock& inst) {
+  auto ptr = emitPtr(inst.m, 64);
+  m_irb.CreateAtomicRMW(llvm::AtomicRMWInst::Add, ptr,
+                        m_int64One, llvm::SequentiallyConsistent);
+  // Unlike the other inc*m instruction, we don't define a flagTmp here. The
+  // value returned by llvm's atomicrmw is the old value, while the x64 incq
+  // instruction this is based on sets flags based on the new value. Nothing
+  // currently consumes the sf from an incqmlock instruction; if this changes
+  // we'll deal with it then.
 }
 
 static llvm::CmpInst::Predicate ccToPred(ConditionCode cc) {
@@ -1163,29 +1384,50 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   llvm::Value* rhs = nullptr;
 
   if (cmp.op == Vinstr::addq) {
-    lhs = asInt(value(cmp.addq_.d));
+    lhs = asInt(value(cmp.addq_.d), 64);
     rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::addqi) {
-    lhs = asInt(value(cmp.addqi_.d));
+    lhs = asInt(value(cmp.addqi_.d), 64);
     rhs = m_int64Zero;
-  } else if (cmp.op == Vinstr::cmpq) {
-    lhs = asInt(value(cmp.cmpq_.s1));
-    rhs = asInt(value(cmp.cmpq_.s0));
+  } else if (cmp.op == Vinstr::cmpb) {
+    lhs = asInt(value(cmp.cmpb_.s1), 8);
+    rhs = asInt(value(cmp.cmpb_.s0), 8);
   } else if (cmp.op == Vinstr::cmpbi) {
     lhs = asInt(value(cmp.cmpbi_.s1), 8);
     rhs = cns(cmp.cmpbi_.s0.b());
   } else if (cmp.op == Vinstr::cmpbim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpbim_.s0.b());
+  } else if (cmp.op == Vinstr::cmpl) {
+    lhs = asInt(value(cmp.cmpl_.s1), 32);
+    rhs = asInt(value(cmp.cmpl_.s0), 32);
+  } else if (cmp.op == Vinstr::cmpli) {
+    lhs = asInt(value(cmp.cmpli_.s1), 32);
+    rhs = cns(cmp.cmpli_.s0.l());
   } else if (cmp.op == Vinstr::cmplim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmplim_.s0.l());
+  } else if (cmp.op == Vinstr::cmplm) {
+    lhs = flagTmp(sf);
+    rhs = asInt(value(cmp.cmplm_.s0), 32);
+  } else if (cmp.op == Vinstr::cmpq) {
+    lhs = asInt(value(cmp.cmpq_.s1), 64);
+    rhs = asInt(value(cmp.cmpq_.s0), 64);
   } else if (cmp.op == Vinstr::cmpqim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpqim_.s0.q());
+  } else if (cmp.op == Vinstr::cmpqm) {
+    lhs = flagTmp(sf);
+    rhs = asInt(value(cmp.cmpqm_.s0), 64);
+  } else if (cmp.op == Vinstr::decl) {
+    lhs = asInt(value(cmp.decl_.d), 32);
+    rhs = m_int32Zero;
   } else if (cmp.op == Vinstr::declm) {
     lhs = flagTmp(sf);
     rhs = m_int32Zero;
+  } else if (cmp.op == Vinstr::decq) {
+    lhs = asInt(value(cmp.decq_.d), 64);
+    rhs = m_int64Zero;
   } else if (cmp.op == Vinstr::decqm) {
     lhs = flagTmp(sf);
     rhs = m_int64Zero;
@@ -1237,6 +1479,13 @@ void LLVMEmitter::emit(const lea& inst) {
   defineValue(inst.d, value);
 }
 
+void LLVMEmitter::emit(const loaddqu& inst) {
+  // This will need to change if we ever use loaddqu with values that aren't
+  // TypedValues. Ideally, we'd leave this kind of decision to llvm anyway.
+  auto value = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_typedValueType)));
+  defineValue(inst.d, value);
+}
+
 void LLVMEmitter::emit(const load& inst) {
   llvm::Value* value = nullptr;
   // Special: load      [%rsp] => dest
@@ -1248,12 +1497,66 @@ void LLVMEmitter::emit(const load& inst) {
   defineValue(inst.d, value);
 }
 
-void LLVMEmitter::emit(const loadzbl& inst) {
-  auto value = m_irb.CreateLoad(emitPtr(inst.s, 8));
-  defineValue(inst.d, m_irb.CreateZExt(value, m_int32));
+void LLVMEmitter::emit(const loadl& inst) {
+  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 32)));
 }
 
-void LLVMEmitter::emit(const nothrow& inst) {
+void LLVMEmitter::emit(const loadsd& inst) {
+  defineValue(inst.d,
+              m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_irb.getDoubleTy()))));
+}
+
+void LLVMEmitter::emit(const loadzbl& inst) {
+  // loadzbl writes all 64 bits of its destination, despite the name
+  auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
+  defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int64));
+}
+
+void LLVMEmitter::emit(const movb& inst) {
+  defineValue(inst.d, value(inst.s));
+}
+
+void LLVMEmitter::emit(const movl& inst) {
+  defineValue(inst.d, value(inst.s));
+}
+
+void LLVMEmitter::emit(const movzbl& inst) {
+  // movzbl writes all 64 bits of its destination, despite the name
+  defineValue(inst.d, m_irb.CreateZExt(value(inst.s), m_int64));
+}
+
+void LLVMEmitter::emit(const mulsd& inst) {
+  defineValue(inst.d, m_irb.CreateFMul(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const mul& inst) {
+  defineValue(inst.d, m_irb.CreateFMul(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const neg& inst) {
+  defineValue(inst.d, m_irb.CreateSub(m_int64Zero, value(inst.s)));
+}
+
+void LLVMEmitter::emit(const nop& inst) {
+}
+
+void LLVMEmitter::emit(const not& inst) {
+  defineValue(inst.d, m_irb.CreateXor(value(inst.s), cns(int64_t{-1})));
+}
+
+void LLVMEmitter::emit(const orq& inst) {
+  defineValue(inst.d, m_irb.CreateOr(value(inst.s0), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const orqi& inst) {
+  defineValue(inst.d, m_irb.CreateOr(cns(inst.s0.q()), value(inst.s1)));
+}
+
+void LLVMEmitter::emit(const orqim& inst) {
+  auto ptr = emitPtr(inst.m, 64);
+  auto value = m_irb.CreateOr(cns(inst.s0.q()), m_irb.CreateLoad(ptr));
+  defineFlagTmp(inst.sf, value);
+  m_irb.CreateStore(value, ptr);
 }
 
 llvm::Value* LLVMEmitter::getReturnAddress() {
@@ -1376,19 +1679,16 @@ void LLVMEmitter::emit(const testbi& inst) {
 
 void LLVMEmitter::emit(const testbim& inst) {
   auto lhs = m_irb.CreateLoad(emitPtr(inst.s1, 8));
-  auto result = m_irb.CreateAnd(lhs, inst.s0.b());
-  defineFlagTmp(inst.sf, result);
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.b()));
 }
 
 void LLVMEmitter::emit(const testlim& inst) {
   auto lhs = m_irb.CreateLoad(emitPtr(inst.s1, 32));
-  auto result = m_irb.CreateAnd(lhs, inst.s0.w());
-  defineFlagTmp(inst.sf, result);
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.w()));
 }
 
 void LLVMEmitter::emit(const testq& inst) {
-  auto result = m_irb.CreateAnd(value(inst.s1), value(inst.s0));
-  defineFlagTmp(inst.sf, result);
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(value(inst.s1), value(inst.s0)));
 }
 
 void LLVMEmitter::emit(const ud2& inst) {
@@ -1409,8 +1709,9 @@ void LLVMEmitter::emitTrap() {
   m_irb.CreateUnreachable();
 }
 
-llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
-  bool inFS = s.seg == Vptr::FS;
+llvm::Value* LLVMEmitter::emitPtr(const Vptr s, llvm::Type* ptrTy) {
+  bool inFS = llvm::cast<llvm::PointerType>(ptrTy)->getAddressSpace() ==
+    kFSAddressSpace;
   llvm::Value* ptr = nullptr;
   always_assert(s.base != reg::rsp);
   ptr = s.base.isValid() ? value(s.base) : cns(0);
@@ -1424,11 +1725,19 @@ llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
   ptr = m_irb.CreateIntToPtr(ptr, inFS ? m_int8FSPtr : m_int8Ptr, "conv");
   ptr = m_irb.CreateGEP(ptr, disp, "getelem");
 
-  if (bits != 8) {
-    ptr = m_irb.CreateBitCast(ptr, ptrIntNType(bits, inFS));
+  if (ptrTy != m_int8) {
+    ptr = m_irb.CreateBitCast(ptr, ptrTy);
   }
 
   return ptr;
+}
+
+llvm::Value* LLVMEmitter::emitPtr(const Vptr s, size_t bits) {
+  return emitPtr(s, ptrIntNType(bits, s.seg == Vptr::FS));
+}
+
+llvm::Type* LLVMEmitter::ptrType(llvm::Type* ty, unsigned addressSpace) const {
+  return llvm::PointerType::get(ty, addressSpace);
 }
 
 llvm::Type* LLVMEmitter::intNType(size_t bits) const {

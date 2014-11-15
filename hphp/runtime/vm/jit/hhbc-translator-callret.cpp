@@ -996,7 +996,7 @@ void HhbcTranslator::emitRet(Type type) {
   // Free local variables.  We do the decrefs inline if there are less
   // refcounted locals than a threshold.
   auto const localCount = func->numLocals();
-  auto const shouldFreeInline = [&]() -> bool {
+  auto const shouldFreeInline = mcg->useLLVM() || [&]() -> bool {
     auto const count = mcg->numTranslations(m_irb->unit().context().srcKey());
     constexpr int kTooPolyRet = 6;
     if (localCount > 0 && count > kTooPolyRet) return false;

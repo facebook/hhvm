@@ -240,10 +240,8 @@ private:
   void emit(loadsd& i) { a->movsd(i.s, i.d); }
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
   void emit(movb& i) { a->movb(i.s, i.d); }
-  void emit(movbi& i) { a->movb(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movzbl& i) { a->movzbl(i.s, i.d); }
-  void emit(movsbl& i) { a->movsbl(i.s, i.d); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(nop& i) { a->nop(); }
@@ -908,6 +906,20 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   v << ret{arg_regs};
 }
 
+static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& srem = inst.srem_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+  v << copy{srem.s0, rax};
+  v << cqo{};                      // sign-extend rax => rdx:rax
+  v << idiv{srem.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
+  v << copy{rdx, srem.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
 static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   auto& blocks = unit.blocks;
   auto& inst = blocks[b].code[iInst];
@@ -1049,6 +1061,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
         case Vinstr::vcall:
         case Vinstr::vinvoke:
           lowerVcall(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::srem:
+          lowerSrem(unit, Vlabel{ib}, ii);
           break;
 
         case Vinstr::defvmsp:

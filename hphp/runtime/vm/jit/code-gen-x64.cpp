@@ -4612,16 +4612,6 @@ void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   });
 }
 
-void CodeGenerator::cgLdClsPropAddrKnown(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-
-  auto cls  = inst->src(0)->clsVal();
-  auto name = inst->src(1)->strVal();
-
-  auto ch = cls->sPropHandle(cls->lookupSProp(name));
-  vmain() << lea{rVmTl[ch], dstReg};
-}
-
 RDS::Handle CodeGenerator::cgLdClsCachedCommon(Vout& v, IRInstruction* inst,
                                                Vreg dst, Vreg sf) {
   const StringData* className = inst->src(0)->strVal();

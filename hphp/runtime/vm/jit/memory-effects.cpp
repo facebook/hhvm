@@ -750,7 +750,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToInt:
   case CountCollection:
   case LdVectorSize:
-  case LdClsPropAddrKnown:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
   case VectorHasImmCopy:

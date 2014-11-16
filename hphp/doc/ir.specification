@@ -1094,14 +1094,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.
 
-| LdClsPropAddrKnown<T>, DParamPtr(SProp), C(Cls) CStr, C
-
-  Loads a pointer to a static class property. S0 points to the class, and S1 is
-  the property name. Should only be called when S0 is known statically, and
-  when it is known to have a visible and accessible static property named S1.
-  The type of D will be a Ptr of whatever type the static property has. The
-  type parameter T must be a subtype of PtrToSPropGen.
-
 | LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
 |                      S(Cls) S(Str) C(Cls),
 |                      C|E|Er

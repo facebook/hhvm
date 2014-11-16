@@ -432,7 +432,6 @@ PUNT_OPCODE(GetCtxFwdCallDyn);
 PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
 PUNT_OPCODE(LdPropAddr)
-PUNT_OPCODE(LdClsPropAddrKnown)
 PUNT_OPCODE(LdObjMethod)
 PUNT_OPCODE(LdObjInvoke)
 PUNT_OPCODE(LdGblAddr)

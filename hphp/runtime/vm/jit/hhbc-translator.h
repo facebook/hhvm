@@ -771,7 +771,8 @@ private:
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,
-                             SSATmp* cls, SSATmp* name);
+                             const Class* cls,
+                             const StringData* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
                         SSATmp* name, bool raise);
   void emitUnboxRAux();

@@ -2007,6 +2007,15 @@ void HhbcTranslator::endGuards() {
   gen(EndGuards);
 }
 
+void HhbcTranslator::prepareEntry() {
+  /*
+   * We automatically hoist a load of the context to the beginning of every
+   * region.  The reason is that it's trivially CSEable, so we might as well
+   * make it available everywhere.  If nothing uses it, it'll just be DCE'd.
+   */
+  ldCtx();
+}
+
 void HhbcTranslator::emitVerifyTypeImpl(int32_t const id) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;

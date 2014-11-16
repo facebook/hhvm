@@ -129,6 +129,7 @@ struct HhbcTranslator {
                  const std::vector<bool>& vals,
                  Offset dest);
   void endGuards();
+  void prepareEntry();
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);

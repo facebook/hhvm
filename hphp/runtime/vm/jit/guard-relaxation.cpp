@@ -35,6 +35,7 @@ using Trace::Indent;
 bool shouldHHIRRelaxGuards() {
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
+     RuntimeOption::EvalJitRegionSelector == "method" ||
      mcg->tx().mode() == TransKind::Optimize);
 }
 

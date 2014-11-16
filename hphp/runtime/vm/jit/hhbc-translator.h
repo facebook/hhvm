@@ -156,7 +156,6 @@ struct HhbcTranslator {
   void emitSingletonSLoc(const Func* func, const Op* op);
 
   // Other public functions for irtranslator.
-  void setThisAvailable();
   void emitInterpOne(const NormalizedInstruction&);
   void emitInterpOne(int popped);
   void emitInterpOne(Type t, int popped);
@@ -939,6 +938,19 @@ private:
   void    replace(uint32_t index, SSATmp* tmp);
 
   SSATmp* unbox(SSATmp* val, Block* exit);
+
+  /*
+   * Get a Ctx for the current frame.  This may return a Ctx, a Cctx, or an Obj
+   * (if $this is known to be available).
+   */
+  SSATmp* ldCtx();
+
+  /*
+   * Get the $this for the current frame.  Only use this function when
+   * semantically we must have a non-null $this (guarding it is not null
+   * requires more code).
+   */
+  SSATmp* ldThis();
 
   /*
    * Local instruction helpers. The ldPMExit is so helpers can emit the guard

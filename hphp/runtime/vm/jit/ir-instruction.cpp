@@ -369,7 +369,8 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
    * earlier guarded load even though the instruction we may have
    * generated here would've exited to a different trace.
    *
-   * For example, we use this to cse LdThis regardless of its label.
+   * For example, we use this to cse some guarded loads regardless of the
+   * label.  TODO(#5623309): remove loads-are-sometimes-guards
    */
   return true;
 }

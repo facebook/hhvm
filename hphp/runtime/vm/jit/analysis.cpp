@@ -95,9 +95,9 @@ Block* findDefiningBlock(const SSATmp* t) {
     if (next) {
       return next && next->numPreds() == 1 ? next : nullptr;
     }
-    // Not acting as a control flow instruction, fall through.  Some
-    // instructions like LdThis have this property of conditionally having
-    // edges.
+    // Not acting as a control flow instruction, fall through.  Some "guarded
+    // load" instructions have this property of conditionally having edges.
+    // TODO(#5623309): remove remaining guarded load instrs
   }
 
   return srcInst->block();

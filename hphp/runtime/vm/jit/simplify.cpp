@@ -188,25 +188,43 @@ SSATmp* simplifySpillStack(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
-  auto const func = inst->extra<LdCtx>()->func;
-  if (func->isStatic()) {
-    auto const src = inst->src(0);
-    auto const srcInst = src->inst();
-    if (srcInst->is(DefInlineFP)) {
-      auto const stackPtr = srcInst->src(0);
-      if (auto const spillFrame = findSpillFrame(stackPtr)) {
-        auto const cls = spillFrame->src(2);
-        if (cls->isConst(Type::Cls)) {
-          return cns(env, ConstCctx::cctx(cls->clsVal()));
-        }
-      }
-    }
-    // ActRec->m_cls of a static function is always a valid class pointer with
-    // the bottom bit set
-    return gen(env, LdCctx, src);
+SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  auto const srcTy = inst->src(0)->type();
+  if (srcTy <= Type::Obj) return gen(env, Nop);
+  if (!func->mayHaveThis() || !srcTy.maybe(Type::Obj)) {
+    return gen(env, Jmp, inst->taken());
   }
   return nullptr;
+}
+
+SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
+  // TODO(#5623596): this transformation is required for correctness in
+  // refcount opts right now.
+  if (inst->src(0)->type() <= Type::Obj) return inst->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  if (!func->isStatic()) return nullptr;
+
+  // Change LdCtx in static functions to LdCctx, or if we're inlining try to
+  // fish out a constant context.
+  auto const src = inst->src(0);
+  auto const srcInst = src->inst();
+  if (srcInst->is(DefInlineFP)) {
+    auto const stackPtr = srcInst->src(0);
+    if (auto const spillFrame = findSpillFrame(stackPtr)) {
+      auto const cls = spillFrame->src(2);
+      if (cls->isConst(Type::Cls)) {
+        return cns(env, ConstCctx::cctx(cls->clsVal()));
+      }
+    }
+  }
+  // ActRec->m_cls of a static function is always a valid class pointer with
+  // the bottom bit set
+  return gen(env, LdCctx, src);
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
@@ -246,10 +264,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
-  SSATmp* srcCtx = inst->src(0);
-  if (srcCtx->isA(Type::Cctx)) {
-    return srcCtx;
-  }
+  auto const srcCtx = inst->src(0);
+  if (srcCtx->isA(Type::Cctx)) return srcCtx;
   return nullptr;
 }
 
@@ -2022,6 +2038,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsCtx)
   X(LdClsName)
   X(LdCtx)
+  X(CheckCtxThis)
+  X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(LdPackedArrayElem)

@@ -527,11 +527,15 @@ void HhbcTranslator::emitUnbox() {
 }
 
 void HhbcTranslator::emitThis() {
-  pushIncRef(gen(LdThis, makeExitNullThis(), m_irb->fp()));
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitNullThis(), ctx);
+  auto const this_ = gen(CastCtxThis, ctx);
+  pushIncRef(this_);
 }
 
 void HhbcTranslator::emitCheckThis() {
-  gen(LdThis, makeExitNullThis(), m_irb->fp());
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitNullThis(), ctx);
 }
 
 void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk, int level) {
@@ -567,10 +571,13 @@ void HhbcTranslator::emitBareThis(int notice) {
     emitInterpOne(Type::InitNull, 0); // will raise notice and push null
     return;
   }
+  auto const ctx = gen(LdCtx, m_irb->fp());
   if (notice == static_cast<int>(BareThisOp::NeverNull)) {
-    setThisAvailable();
+    m_irb->setThisAvailable();
+  } else {
+    gen(CheckCtxThis, makeExitSlow(), ctx);
   }
-  pushIncRef(gen(LdThis, makeExitSlow(), m_irb->fp()));
+  pushIncRef(gen(CastCtxThis, ctx));
 }
 
 void HhbcTranslator::emitArray(int arrayId) {
@@ -870,7 +877,7 @@ void HhbcTranslator::emitLateBoundCls() {
     emitInterpOne(Type::Cls, 0);
     return;
   }
-  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const ctx = ldCtx();
   push(gen(LdClsCtx, ctx));
 }
 
@@ -934,10 +941,12 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
     return;
   }
   auto const ldrefExit = makeExit();
-  auto const oldLoc = ldLoc(id, ldrefExit, DataTypeCountness);
-  auto const tmpThis = gen(LdThis, makeExitSlow(), m_irb->fp());
-  gen(IncRef, tmpThis);
-  genStLocal(id, m_irb->fp(), tmpThis);
+  auto const oldLoc    = ldLoc(id, ldrefExit, DataTypeCountness);
+  auto const ctx       = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitSlow(), ctx);
+  auto const this_     = gen(CastCtxThis, ctx);
+  gen(IncRef, this_);
+  genStLocal(id, m_irb->fp(), this_);
   gen(DecRef, oldLoc);
 }
 
@@ -1429,7 +1438,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
 
   auto const ctx = [&]{
     if (!curClass()) return cns(nullptr);
-    auto const ldctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+    auto const ldctx = gen(LdCtx, m_irb->fp());
     if (invokeFunc->attrs() & AttrStatic) {
       return gen(ConvClsToCctx, gen(LdClsCtx, ldctx));
     }
@@ -1647,10 +1656,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   auto const stack = spillStack();
   gen(SyncABIRegs, m_irb->fp(), stack);
   gen(JmpSSwitchDest, dest);
-}
-
-void HhbcTranslator::setThisAvailable() {
-  m_irb->setThisAvailable();
 }
 
 /*
@@ -3619,6 +3624,16 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
     [&] { // Taken: val is unboxed
       return gen(AssertType, Type::Cell, val);
     });
+}
+
+SSATmp* HhbcTranslator::ldCtx() {
+  if (m_irb->thisAvailable()) return ldThis();
+  return gen(LdCtx, m_irb->fp());
+}
+
+SSATmp* HhbcTranslator::ldThis() {
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  return gen(CastCtxThis, ctx);
 }
 
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {

@@ -577,16 +577,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToBool:
   case ConvDblToInt:
   case IsScalarType:
-  case LdClsCctx:
   case LdMIStateAddr:
   case LdPairBase:
   case LdStaticLocCached:
+  case CheckCtxThis:
+  case CastCtxThis:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that technically do some things w/ memory, but not in any way
   // we currently care about.
 
+  case LdClsCctx:
   case ABCUnblock:
   case BeginCatch:
   case CheckSurpriseFlags:
@@ -595,7 +597,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IncRef:
   case IncRefCtx:
   case LdRetAddr:
-  case LdThis:
   case RegisterLiveObj:
   case RetAdjustStack:
   case StClosureArg:

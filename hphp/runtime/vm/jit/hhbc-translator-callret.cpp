@@ -239,7 +239,7 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
     }
 
     if (forward) {
-      ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+      ctx = ldCtx();
       ctx = gen(GetCtxFwdCall, ctx, cns(callee));
     } else {
       ctx = genClsMethodCtx(callee, cls);
@@ -628,7 +628,7 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
     // might not be a static call and $this is available, so we know it's
     // definitely not static
     assert(curClass());
-    auto this_ = gen(LdThis, m_irb->fp());
+    auto this_ = ldThis();
     gen(IncRef, this_);
     return this_;
   }
@@ -772,7 +772,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   auto const catchBlock = vmfunc ? nullptr : makeCatch();
   discard(2);
 
-  auto const curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const curCtxTmp = ldCtx();
   if (vmfunc) {
     auto const funcTmp = cns(vmfunc);
     auto const newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);

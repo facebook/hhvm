@@ -144,7 +144,7 @@ void FrameState::update(const IRInstruction* inst) {
     break;
   }
 
-  case LdThis:
+  case CheckCtxThis:
     m_thisAvailable = true;
     break;
 

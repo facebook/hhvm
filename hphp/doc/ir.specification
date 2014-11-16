@@ -910,17 +910,21 @@ ranges due to eagerly loaded values at the start of the tracelet.
   inner type of S0 must be a subtype of T (usually ensured with a previous
   CheckRefInner).
 
-| LdThis, DThis, S(FramePtr), B|C
-
-  Loads the this pointer out of the ActRec pointed to by S0, and puts it in D.
-  If the optional block B is supplied, if the this pointer in S0 is null, this
-  instruction does not load it into D and branches to block B.
-
-| LdCtx<func>, D(Ctx), S(FramePtr), C
+| LdCtx, D(Ctx), S(FramePtr), C
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
-  which must be a frame of the function in the function parameter. The result
+  which must be a frame for the function in the LdCtx's Marker. The result
   could be either an object representing the this pointer or a class context.
+
+| CheckCtxThis, ND, S(Ctx), B|E
+
+  Check that the context (m_this or m_cls) in S0 is a non-null $this
+  pointer. If not, branch to B.
+
+| CastCtxThis, DThis, S(Ctx), C
+
+  Convert a Ctx known to contain a $this pointer to a specific object type,
+  based on the marker func for this instruction.
 
 | LdCctx, D(Cctx), S(FramePtr), C
 

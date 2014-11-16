@@ -974,16 +974,7 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type thisReturn(const IRInstruction* inst) {
-  auto fpInst = inst->src(0)->inst();
-
-  // Find the instruction that created the current frame and grab the context
-  // class from it. $this, if present, is always going to be the context class
-  // or a subclass of the context.
-  always_assert(fpInst->is(DefFP, DefInlineFP));
-  auto const func = fpInst->is(DefFP) ? fpInst->marker().func()
-                                      : fpInst->extra<DefInlineFP>()->target;
-  func->validate();
-  assert(func->isMethod() || func->isPseudoMain());
+  auto const func = inst->marker().func();
 
   // If the function is a cloned closure which may have a re-bound $this which
   // is not a subclass of the context return an unspecialized type.

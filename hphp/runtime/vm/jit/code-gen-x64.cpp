@@ -3553,25 +3553,25 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
   };
 }
 
-void CodeGenerator::cgLdThis(IRInstruction* inst) {
-  Block* taken  = inst->taken();
-  auto dstReg = dstLoc(inst, 0).reg();
+void CodeGenerator::cgCastCtxThis(IRInstruction* inst) {
+  vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
+}
+
+void CodeGenerator::cgCheckCtxThis(IRInstruction* inst) {
+  auto const rctx = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  v << load{srcLoc(inst, 0).reg()[AROFF(m_this)], dstReg};
-  if (!taken) return;  // no need to perform its checks
-
-  auto func = getFunc(inst->marker());
+  auto const func = getFunc(inst->marker());
   if (func->isPseudoMain() || !func->mayHaveThis()) {
     // Check for a null $this pointer first.
     auto const sf = v.makeReg();
-    v << testq{dstReg, dstReg, sf};
-    emitFwdJcc(v, CC_Z, sf, taken);
+    v << testq{rctx, rctx, sf};
+    emitFwdJcc(v, CC_Z, sf, inst->taken());
   }
 
   auto const sf = v.makeReg();
-  v << testbi{1, dstReg, sf};
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(taken)}};
+  v << testbi{1, rctx, sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgLdClsCtx(IRInstruction* inst) {

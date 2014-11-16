@@ -578,8 +578,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
       // If we don't have a current class context, this instruction will be
       // unreachable.
       if (!m_ht.curClass()) PUNT(Unreachable-LdThis);
-
-      return gen(LdThis, m_irb.fp());
+      return m_ht.ldThis();
 
     default: not_reached();
   }

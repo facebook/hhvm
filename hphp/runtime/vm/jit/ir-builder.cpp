@@ -391,49 +391,36 @@ SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
   );
 }
 
-SSATmp* IRBuilder::preOptimizeLdThis(IRInstruction* inst) {
-  if (!curFunc()->mayHaveThis()) {
-    if (!inst->taken()) {
-      // No taken branch. This code had better be unreachable.
-      return nullptr;
-    }
-
-    // The instruction will always branch but we still need to produce a value
-    // for code that's generated after it.
-    gen(Jmp, inst->taken());
-    return gen(Conjure, Type::Obj);
-  }
-
-  if (m_state.thisAvailable()) {
-    auto fpInst = inst->src(0)->inst();
-
-    if (fpInst->is(DefInlineFP)) {
-      if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
-        auto spInst = findSpillFrame(fpInst->src(0));
-        // In an inlined call, we should always be able to find our SpillFrame.
-        always_assert(spInst && spInst->src(0) == fpInst->src(1));
-        if (spInst->src(2)->isA(Type::Obj)) {
-          return spInst->src(2);
-        }
-      }
-    }
-    inst->setTaken(nullptr);
-  }
+SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
+  if (m_state.thisAvailable()) inst->convertToNop();
   return nullptr;
 }
 
 SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
-  if (m_state.thisAvailable()) return gen(LdThis, m_state.fp());
+  auto const fpInst = inst->src(0)->inst();
+  if (fpInst->is(DefInlineFP)) {
+    // TODO(#5623596): this optimization required for correctness in refcount
+    // opts right now.
+    if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
+      auto spInst = findSpillFrame(fpInst->src(0));
+      // In an inlined call, we should always be able to find our SpillFrame.
+      always_assert(spInst && spInst->src(0) == fpInst->src(1));
+      if (spInst->src(2)->isA(Type::Obj)) {
+        return spInst->src(2);
+      }
+    }
+  }
   return nullptr;
 }
 
 SSATmp* IRBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
   /*
-   * If $this is available, convert to an instruction sequence that
-   * doesn't need to test if it's already live.
+   * If $this is available, convert to an instruction sequence that doesn't
+   * need to test $this is available.  (Hopefully we CSE the load, too.)
    */
   if (thisAvailable()) {
-    auto const thiss = gen(LdThis, m_state.fp());
+    auto const ctx   = gen(LdCtx, m_state.fp());
+    auto const thiss = gen(CastCtxThis, ctx);
     gen(DecRef, thiss);
     inst->convertToNop();
   }
@@ -555,7 +542,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(AssertLoc);
     X(AssertStk);
     X(AssertType);
-    X(LdThis);
+    X(CheckCtxThis);
     X(LdCtx);
     X(DecRefThis);
     X(DecRefLoc);

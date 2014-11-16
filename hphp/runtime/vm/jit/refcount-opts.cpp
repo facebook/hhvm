@@ -250,14 +250,14 @@ struct Frame {
   {}
 
   /* The canonical form of $this. For the outermost frame of the trace, this
-   * will be nullptr if we haven't loaded $this yet, or a LdThis if we
-   * have. For inlined frames, this will be the canonical SSATmp* for the $this
-   * pointer given to the SpillFrame. */
+   * will be nullptr if we haven't loaded the context yet, or a pointer to the
+   * first CastCtxThis we saw. For inlined frames, this will be the canonical
+   * SSATmp* for the $this pointer given to the SpillFrame. */
   SSATmp* mainThis;
 
   /* Latest live temp holding $this. This is updated whenever we see a new
-   * LdThis in a frame, and it's set to nullptr after any instructions that
-   * kill all live temps (calls, mostly). */
+   * CastCtxThis in a frame, and it's set to nullptr after any instructions
+   * that kill all live temps (calls, mostly). */
   SSATmp* currentThis;
 
   bool operator==(const Frame b) const {
@@ -988,14 +988,20 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   /* jit::canonical() traces through passthrough instructions to get the root
    * of a value. Since we're tracking the state of inlined frames in the trace,
-   * there are often cases where the root value for a LdThis is really a value
-   * up in some enclosing frame. */
+   * there are often cases where the root value for a $this context is really a
+   * value up in some enclosing frame. */
   SSATmp* canonical(SSATmp* value) {
     auto* root = jit::canonical(value);
     auto* inst = root->inst();
-    if (!inst->is(LdThis)) return root;
+    if (!inst->is(CastCtxThis)) return root;
 
-    auto* fpInst = inst->src(0)->inst();
+    // TODO(#5623596): This code is not correct if we have a phi of a LdCtx or
+    // for some situations in inlined functions.  Right now this code is
+    // relying on other passes (simplifier and ir-builder) to make this work.
+    auto const ctx = jit::canonical(root->inst()->src(0));
+    assert(ctx->inst()->is(LdCtx));
+
+    auto* fpInst = ctx->inst()->src(0)->inst();
     auto it = m_state.frames.live.find(fpInst);
     if (it == m_state.frames.live.end()) {
       it = m_state.frames.dead.find(fpInst);
@@ -1376,16 +1382,14 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // LdLoc's output is the new value of the local we loaded, and this has
       // already been tracked in setLocalValue().
       return;
-    } else if (m_inst->is(LdThis)) {
-      if (!m_inst->marker().func()->mayHaveThis()) {
-        // If this function can't have a $this pointer everything after the
-        // LdThis is unreachable. More importantly, we aren't going to decref
-        // the non-existent $this pointer in RetC, so don't track a reference
-        // to it.
-        return;
-      }
+    } else if (m_inst->is(CastCtxThis)) {
+      // TODO(#5623596): This code is not correct if we have a phi of a LdCtx
+      // or for some situations in inlined functions.  Right now this code is
+      // relying on other passes (simplifier and ir-builder) to make this work.
+      auto const ctx = canonical(m_inst->src(0));
+      assert(ctx->inst()->is(LdCtx));
 
-      auto* fpInst = m_inst->src(0)->inst();
+      auto* fpInst = ctx->inst()->src(0)->inst();
       assert(m_state.frames.live.count(fpInst));
       auto& frame = m_state.frames.live[fpInst];
       frame.currentThis = m_inst->dst();
@@ -1611,7 +1615,7 @@ bool validateDeltas(BlockMap& orig, BlockMap& opt) {
       SSATmp* src = it2->first;
       double delta = deltaOrig[src];
       if (fabs(delta - it2->second) > deltaThreshold) {
-        if (src->inst()->is(LdThis)) {
+        if (src->inst()->is(CastCtxThis)) {
           // The optimization does some nontrivial state tracking to keep track
           // of $this pointers, so this is probably a false positive.
           FTRACE(1, "possible ");
@@ -1621,7 +1625,7 @@ bool validateDeltas(BlockMap& orig, BlockMap& opt) {
                    deltaOrig[src],
                    it2->second,
                    it->first->id());
-        return src->inst()->is(LdThis);
+        return src->inst()->is(CastCtxThis);
       }
     }
   }

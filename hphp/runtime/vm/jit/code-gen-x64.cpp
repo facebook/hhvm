@@ -581,7 +581,7 @@ void CodeGenerator::cgAssertType(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
-  cgLoad(inst->dst(), dstLoc(inst, 0), rVmTl[unwinderTvOff()], inst->taken());
+  cgLoad(inst->dst(), dstLoc(inst, 0), rVmTl[unwinderTvOff()]);
 }
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
@@ -4703,11 +4703,9 @@ void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdCns(IRInstruction* inst) {
-  const StringData* cnsName = inst->src(0)->strVal();
-
+  auto const cnsName = inst->src(0)->strVal();
   auto const ch = makeCnsHandle(cnsName, false);
-  // Has an unlikely branch to a LookupCns
-  cgLoad(inst->dst(), dstLoc(inst, 0), rVmTl[ch], inst->taken());
+  cgLoad(inst->dst(), dstLoc(inst, 0), rVmTl[ch]);
 }
 
 void CodeGenerator::cgLookupCnsCommon(IRInstruction* inst) {
@@ -5159,7 +5157,7 @@ void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   const int64_t valueOff = CONTOFF(m_value);
   int64_t off = valueOff - c_Generator::arOff();
-  cgLoad(inst->dst(), dstLoc(inst, 0), contArReg[off], inst->taken());
+  cgLoad(inst->dst(), dstLoc(inst, 0), contArReg[off]);
 }
 
 void CodeGenerator::cgStContArValue(IRInstruction* inst) {
@@ -5175,7 +5173,7 @@ void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   const int64_t keyOff = CONTOFF(m_key);
   int64_t off = keyOff - c_Generator::arOff();
-  cgLoad(inst->dst(), dstLoc(inst, 0), contArReg[off], inst->taken());
+  cgLoad(inst->dst(), dstLoc(inst, 0), contArReg[off]);
 }
 
 void CodeGenerator::cgStContArKey(IRInstruction* inst) {

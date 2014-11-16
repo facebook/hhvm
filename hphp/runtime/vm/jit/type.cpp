@@ -54,9 +54,9 @@ namespace {
  *
  *                            Unk
  *                             |
- *         +-------------------+----+--------+
- *         |                        |        |
- *       RMemb                      |     ClsInit
+ *         +-------------------+----+--------+-------+
+ *         |                        |        |       |
+ *       RMemb                      |     ClsInit  ClsCns
  *         |                        |
  *  +------+---------+              |
  *  |      |         |              |
@@ -86,7 +86,9 @@ bool has_ref(Ptr p) {
 }
 
 Ptr add_ref(Ptr p) {
-  if (p == Ptr::Unk || p == Ptr::ClsInit) return p;
+  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
+    return p;
+  }
   return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
 }
 
@@ -258,6 +260,7 @@ std::string Type::toString() const {
     case Ptr::MIS:      ret += "MIS"; break;
     case Ptr::Memb:     ret += "Memb"; break;
     case Ptr::ClsInit:  ret += "ClsInit"; break;
+    case Ptr::ClsCns:   ret += "ClsCns"; break;
     case Ptr::RFrame:   ret += "RFrame"; break;
     case Ptr::RStk:     ret += "RStk"; break;
     case Ptr::RGbl:     ret += "RGbl"; break;

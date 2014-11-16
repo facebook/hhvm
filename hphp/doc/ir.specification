@@ -874,6 +874,11 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
 
+| LdRDSAddr<T,RDSHandle>, DParam, NA, C
+
+  Load the address of a Gen that lives at the specified RDS handle. The type
+  param must be a subtype of PtrToGen.
+
 | LdVectorBase, D(PtrToMembCell), S(Obj), E
 
 | LdPairBase, D(PtrToMembCell), S(Obj), E
@@ -975,17 +980,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
   returns null and optionally branches to block B.
-
-| LdClsCns<T,className,constName>, DParam, NA, B
-
-  Loads the named class constant for a class via the RDS. This instruction
-  should generally be followed by CheckInit, unless we know the class is
-  already loaded.
-
-  If the optional block B is specified and the loaded value's type does not
-  match T, this instruction does not load into D and branches to block B.
-
-  The result may be uninitialized if the class is not defined.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 

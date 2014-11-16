@@ -119,6 +119,10 @@ enum class Ptr : uint8_t {
    * we don't have a RClsInit type.
    */
   ClsInit = 0x09,
+  /*
+   * Pointer to class constant values in RDS.
+   */
+  ClsCns  = 0x0a,
 
   RFrame  = 0x11,
   RStk    = 0x12,

@@ -1342,10 +1342,16 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
     }
   }
 
-  auto guardType = Type::UncountedInit;
-  if (outPred.strictSubtypeOf(guardType)) guardType = outPred;
-  auto const cns = gen(LdClsCns, sideExit, clsCnsName, guardType);
-  push(cns);
+  auto const link = RDS::bindClassConstant(clsNameStr, cnsNameStr);
+  auto const prds = gen(
+    LdRDSAddr,
+    RDSHandleData { link.handle() },
+    Type::Cell.ptr(Ptr::ClsCns)
+  );
+  auto const guardType = outPred < Type::UncountedInit ? outPred
+                                                       : Type::UncountedInit;
+  gen(CheckTypeMem, guardType, sideExit, prds);
+  push(gen(LdMem, guardType, prds, cns(0)));
 }
 
 void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {

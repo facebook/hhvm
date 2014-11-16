@@ -582,6 +582,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdStaticLocCached:
   case CheckCtxThis:
   case CastCtxThis:
+  case LdRDSAddr:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -708,7 +709,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdContField:
   case LdContResumeAddr:
   case LdClsCachedSafe:
-  case LdClsCns:
   case LdClsInitData:
   case UnwindCheckSideExit:
   case LdCns:

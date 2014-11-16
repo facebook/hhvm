@@ -4681,10 +4681,9 @@ void CodeGenerator::cgLdCls(IRInstruction* inst) {
                argGroup(inst).imm(ch).ssa(0/*className*/));
 }
 
-void CodeGenerator::cgLdClsCns(IRInstruction* inst) {
-  auto const extra = inst->extra<LdClsCns>();
-  auto const link  = RDS::bindClassConstant(extra->clsName, extra->cnsName);
-  cgLoad(inst->dst(), dstLoc(inst, 0), rVmTl[link.handle()], inst->taken());
+void CodeGenerator::cgLdRDSAddr(IRInstruction* inst) {
+  auto const handle = inst->extra<LdRDSAddr>()->handle;
+  vmain() << lea{rVmTl[handle], dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLookupClsCns(IRInstruction* inst) {

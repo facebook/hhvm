@@ -828,21 +828,6 @@ generating efficient compare-and-branch instruction sequences.
 7. Loads
 
 
-Some of the load instructions have an optional label parameter that make the
-load also perform a runtime type check. A load that has a label parameter
-present checks that the value it loads has the type T, where T is load
-instruction's type parameter, and branches to its label if the type check
-fails.
-
-LdLoc and LdStack have corresponding GuardLoc and GuardStk instructions that
-allow the compiler to decouple type checks from the load operation. The type
-guards for locals and stacks are generated eagerly at the start of a tracelet,
-while other guards (typically generated due to type prediction) are generated
-at the point where the guarded value is loaded. Allowing the checks for locals
-and stack to be decoupled gives the compiler the flexibility to avoid partially
-dead loads of local and stack values and to avoid unnecessarily long live
-ranges due to eagerly loaded values at the start of the tracelet.
-
 | LdStack<T,offset>, DParam, S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.

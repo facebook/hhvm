@@ -365,12 +365,14 @@ bool IRInstruction::cseEquals(IRInstruction* inst) const {
     return false;
   }
   /*
-   * Don't CSE on the edges--it's ok to use the destination of some
-   * earlier guarded load even though the instruction we may have
-   * generated here would've exited to a different trace.
+   * Don't CSE on the edges--it's ok to use the destination of some earlier
+   * branching instruction even though the instruction we may have generated
+   * here would've exited to a different block.
    *
-   * For example, we use this to cse some guarded loads regardless of the
-   * label.  TODO(#5623309): remove loads-are-sometimes-guards
+   * This is currently only used for CSE'ing some instructions that can take a
+   * branch deterministically, based on thier inputs, like DivDbl. If we CSE
+   * the result, it's safe because the place we would have had second one is
+   * dominated by the first one, so it can't exit.
    */
   return true;
 }

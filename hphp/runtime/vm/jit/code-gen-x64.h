@@ -73,11 +73,8 @@ private:
   void cgStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
   void cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
 
-  // helpers to load a value in dst. When label is not null a type check
-  // is performed against value to ensure it is of the type expected by dst
-  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label = nullptr);
-  void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
-                        Block* label = nullptr);
+  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
+  void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
 
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);

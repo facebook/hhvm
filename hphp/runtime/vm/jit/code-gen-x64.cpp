@@ -3704,15 +3704,12 @@ void CodeGenerator::cgStore(Vptr dst, SSATmp* src, Vloc srcLoc, Width width) {
   }
 }
 
-void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label) {
-  Type type = dst->type();
+void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base) {
+  auto const type = dst->type();
   if (type.needsReg()) {
-    return cgLoadTypedValue(dst, dstLoc, base, label);
+    return cgLoadTypedValue(dst, dstLoc, base);
   }
-  if (label) {
-    emitTypeCheck(type, refTVType(base), refTVData(base), label);
-  }
-  auto dstReg = dstLoc.reg();
+  auto const dstReg = dstLoc.reg();
   if (type <= Type::Bool) {
     vmain() << loadl{refTVData(base), dstReg};
   } else {
@@ -3720,26 +3717,16 @@ void CodeGenerator::cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base, Block* label) {
   }
 }
 
-// If label is not null and type is not Gen, this method generates a check
-// that bails to the label if the loaded typed value doesn't match dst type.
-void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
-                                     Block* label) {
-  auto valueDstReg = dstLoc.reg(0);
+void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref) {
+  auto const valueDstReg = dstLoc.reg(0);
   auto& v = vmain();
   if (dstLoc.isFullSIMD()) {
     // Whole typed value is stored in single SIMD reg valueDstReg
-    assert(!label);
     v << loaddqu{refTVData(ref), valueDstReg};
     return;
   }
-  auto typeDstReg = dstLoc.reg(1);
-  Type type = dst->type();
-  // Load type
+  auto const typeDstReg = dstLoc.reg(1);
   emitLoadTVType(v, refTVType(ref), typeDstReg);
-  if (label) {
-    emitTypeCheck(type, typeDstReg, valueDstReg, label);
-  }
-  // Load value
   v << load{refTVData(ref), valueDstReg};
 }
 
@@ -3753,16 +3740,16 @@ void CodeGenerator::cgLdMem(IRInstruction* inst) {
          srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
+void CodeGenerator::cgLdRef(IRInstruction* inst) {
+  cgLoad(inst->dst(), dstLoc(inst, 0),
+         srcLoc(inst, 0).reg()[RefData::tvOffset()]);
+}
+
 void CodeGenerator::cgCheckRefInner(IRInstruction* inst) {
   if (inst->typeParam() >= Type::InitCell) return;
   auto const base = srcLoc(inst, 0).reg()[RefData::tvOffset()];
   emitTypeCheck(inst->typeParam(), refTVType(base), refTVData(base),
     inst->taken());
-}
-
-void CodeGenerator::cgLdRef(IRInstruction* inst) {
-  cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[RefData::tvOffset()]);
 }
 
 void CodeGenerator::cgStringIsset(IRInstruction* inst) {
@@ -4049,12 +4036,15 @@ void CodeGenerator::cgLdLocAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdLocPseudoMain(IRInstruction* inst) {
-  cgLoad(
-    inst->dst(),
-    dstLoc(inst, 0),
-    srcLoc(inst, 0).reg()[localOffset(inst->extra<LdLocPseudoMain>()->locId)],
+  auto const rsrc = srcLoc(inst, 0).reg();
+  auto const lmem = rsrc[localOffset(inst->extra<LdLocPseudoMain>()->locId)];
+  emitTypeCheck(
+    inst->typeParam(),
+    refTVType(lmem),
+    refTVData(lmem),
     inst->taken()
   );
+  cgLoad(inst->dst(), dstLoc(inst, 0), lmem);
 }
 
 void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {

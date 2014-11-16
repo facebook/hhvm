@@ -85,19 +85,12 @@ Block* findDefiningBlock(const SSATmp* t) {
   if (srcInst->hasEdges()) {
     auto const next = srcInst->next();
     UNUSED auto const taken = srcInst->taken();
-    if (taken) {
-      always_assert_flog(
-        next != nullptr,
-        "Instruction defining a dst had a taken but no next:\n  {}\n",
-        srcInst->toString()
-      );
-    }
-    if (next) {
-      return next && next->numPreds() == 1 ? next : nullptr;
-    }
-    // Not acting as a control flow instruction, fall through.  Some "guarded
-    // load" instructions have this property of conditionally having edges.
-    // TODO(#5623309): remove remaining guarded load instrs
+    always_assert_flog(
+      next && taken,
+      "hasEdges instruction defining a dst had no edges:\n  {}\n",
+      srcInst->toString()
+    );
+    return next->numPreds() == 1 ? next : nullptr;
   }
 
   return srcInst->block();

@@ -22,10 +22,11 @@
 
 #include "folly/Conv.h"
 
-#include "hphp/runtime/ext/ext_soap.h"
+#include "hphp/runtime/ext/soap/ext_soap.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -562,9 +563,9 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
   bool add_type = false;
 
   /* Special handling of class SoapVar */
-  if (data.isObject() && data.toObject().instanceof(c_SoapVar::classof())) {
+  if (data.isObject() && data.toObject().instanceof(SoapVar::getClass())) {
     encodePtr enc;
-    c_SoapVar *p = data.toObject().getTyped<c_SoapVar>();
+    SoapVar *p = Native::data<SoapVar>(data.toObject().get());
     if (!p->m_ns.empty()) {
       enc = get_encoder(SOAP_GLOBAL(sdl), p->m_ns.data(), p->m_stype.data());
     } else {
@@ -2667,7 +2668,8 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    c_SoapVar *soapvar = newobj<c_SoapVar>();
+    ObjectData* obj_soapvar = ObjectData::newInstance(SoapVar::getClass());
+    SoapVar* soapvar = Native::data<SoapVar>(obj_soapvar);
     soapvar->m_type = enc->details.type;
     soapvar->m_value = ret;
 
@@ -2679,7 +2681,7 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
     if (nsptr) {
       soapvar->m_ns = String((char*)nsptr->href, CopyString);
     }
-    ret = Object(soapvar);
+    ret = Object(obj_soapvar);
   }
   return ret;
 }
@@ -3269,8 +3271,8 @@ static encodePtr get_array_type(xmlNodePtr node, const Variant& array,
   for (i = 0;i < count;i++) {
     Variant tmp = iter.second();
 
-    if (tmp.isObject() && tmp.toObject().instanceof(c_SoapVar::classof())) {
-      c_SoapVar *var = tmp.toObject().getTyped<c_SoapVar>();
+    if (tmp.isObject() && tmp.toObject().instanceof(SoapVar::getClass())) {
+      SoapVar *var = Native::data<SoapVar>(tmp.toObject().get());
       cur_type = var->m_type;
       if (!var->m_stype.empty()) {
         cur_stype = var->m_stype.c_str();

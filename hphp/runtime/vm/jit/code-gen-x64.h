@@ -70,11 +70,11 @@ private:
   void cgInterpOneCommon(IRInstruction* inst);
 
   enum class Width { Value, Full };
-  void cgStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
-  void cgStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
+  void emitStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
+  void emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
 
-  void cgLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
-  void cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
+  void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
+  void emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref);
 
   template <class JmpFn>
   void emitReffinessTest(IRInstruction* inst, Vreg sf, JmpFn doJcc);

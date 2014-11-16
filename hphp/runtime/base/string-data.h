@@ -286,7 +286,7 @@ struct StringData {
    * Accessor for the length of a string.
    *
    * Note: size() returns a signed int for historical reasons.  It is
-   * guaranteed to be greater than zero and less than MaxSize.
+   * guaranteed to be in the range (0 <= size() <= MaxSize)
    */
   int size() const;
 
@@ -298,8 +298,6 @@ struct StringData {
   /*
    * Return the capacity of this string's buffer, including the space
    * for the null terminator.
-   *
-   * For shared strings, returns zero.
    */
   uint32_t capacity() const;
 
@@ -436,7 +434,7 @@ private:
 
 private:
   static StringData* MakeShared(StringSlice sl, bool trueStatic);
-  static StringData* MakeAPCSlowPath(const APCString*, uint32_t len);
+  static StringData* MakeAPCSlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;

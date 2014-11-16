@@ -369,26 +369,23 @@ ALWAYS_INLINE void StringData::enlist() {
 }
 
 NEVER_INLINE
-StringData* StringData::MakeAPCSlowPath(const APCString* shared,
-                                        uint32_t len) {
+StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   auto const sd = static_cast<StringData*>(
       MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
   );
   auto const data = shared->getStringData();
-  auto const hash = data->m_hash & STRHASH_MASK;
-
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_capAndCount = 0; // capCode=kind=count=0
-  sd->m_lenAndHash = len | int64_t{hash} << 32;
-
+  sd->m_capAndCount = data->m_capCode; // count=0
+  sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();
   shared->getHandle()->reference();
 
-  assert(sd->m_len == len);
+  assert(sd->m_len == data->size());
   assert(sd->m_count == 0);
-  assert(sd->m_capCode == 0); // cap == 0 means shared
-  assert(sd->m_hash == hash);
+  assert(sd->m_capCode == data->m_capCode);
+  assert(sd->m_hash == data->m_hash);
+  assert(sd->isShared());
   assert(sd->checkSane());
   return sd;
 }
@@ -401,7 +398,7 @@ StringData* StringData::Make(const APCString* shared) {
   auto const data = shared->getStringData();
   auto const len = data->size();
   if (UNLIKELY(len > SmallStringReserve)) {
-    return MakeAPCSlowPath(shared, len);
+    return MakeAPCSlowPath(shared);
   }
 
   // small-string path
@@ -1001,19 +998,9 @@ bool StringData::checkSane() const {
   assert(uint32_t(size()) <= MaxSize);
   assert(uint32_t(capacity()) <= MaxCap);
   assert(size() >= 0);
-
-  if (!isShared()) {
-    assert(size() < capacity());
-  } else {
-    assert(capacity() == 0);
-  }
-
-  if (isFlat()) {
-    assert(m_data == voidPayload());
-  } else {
-    assert(m_data && m_data != voidPayload());
-  }
-
+  assert(size() < capacity());
+  // isFlat() and isShared() both check whether m_data == voidPayload,
+  // which guarantees by definition that isFlat() != isShared()
   return true;
 }
 

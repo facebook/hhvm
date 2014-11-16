@@ -182,8 +182,8 @@ inline StringData::SharedPayload* StringData::sharedPayload() {
   return static_cast<SharedPayload*>(voidPayload());
 }
 
-inline bool StringData::isShared() const { return !m_capCode; }
 inline bool StringData::isFlat() const { return m_data == voidPayload(); }
+inline bool StringData::isShared() const { return m_data != voidPayload(); }
 inline bool StringData::isImmutable() const {
   return isStatic() || isShared() ||  isUncounted();
 }

@@ -26,6 +26,7 @@
 #include <folly/gen/String.h>
 
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 
@@ -61,6 +62,12 @@ namespace HPHP {
  *      to EqualityComparable, Assignable, and swap(), for reasons relating to
  *      moving potentially changing universe size.
  *
+ *    o Lookups and insertions can be done through a different type than the
+ *      containers actually hold.  This is to ease using non-integer types as
+ *      "keys" in these classes, as long as they can be mapped down to ids.  An
+ *      'extractor' function object type can be provided as a template
+ *      parameter to control how the mapping works.
+ *
  * Also, note that for very small universes, even if the bits are sparse
  * there's a good chance you'll be better off with some kind of bitset than the
  * set version of this.
@@ -69,7 +76,25 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T>
+namespace sparse_id_detail {
+
+template<class T, class Lookup>
+struct default_extract {
+  T operator()(Lookup l) const {
+    size_t convert = l;
+    return safe_cast<T>(convert);
+  }
+};
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<
+  class T,
+  class LookupT = T,
+  class Extract = sparse_id_detail::default_extract<T,LookupT>
+>
 struct sparse_id_set {
   using value_type     = T;
   using size_type      = value_type;
@@ -216,20 +241,19 @@ struct sparse_id_set {
   /*
    * Returns: whether this sparse_id_set contains a particular value.  O(1).
    */
-  bool contains(T t) const {
-    assert(t < m_universe_size);
-    auto const didx = sparse()[t];  // may read uninitialized memory
-    return didx < m_next && dense()[didx] == t;
+  bool contains(LookupT lt) const {
+    return containsImpl(Extract()(lt));
   }
 
   /*
    * Insert a new value into the set.  O(1)
    *
-   * Post: contains(t)
+   * Post: contains an element with the id of `lt'
    */
-  void insert(T t) {
+  void insert(LookupT lt) {
+    auto const t = Extract()(lt);
     assert(t < m_universe_size);
-    if (contains(t)) return;
+    if (containsImpl(t)) return;
     dense()[m_next] = t;
     sparse()[t] = m_next;
     ++m_next;
@@ -239,13 +263,14 @@ struct sparse_id_set {
    * Remove an element from the set, if it is a member.  (Does not assume that
    * it is.)
    *
-   * Post: !contains(t)
+   * Post: !contains(lt)
    */
-  void erase(T t) {
+  void erase(LookupT lt) {
+    auto const t = Extract()(lt);
     assert(t < m_universe_size);
     // Swap with back element and update sparse ptrs.
     auto const didx = sparse()[t];  // possibly reads uninitialized mem
-    if (didx >= m_next) return;
+    if (didx >= m_next || dense()[didx] != t) return;
     auto const moving = dense()[m_next - 1];
     sparse()[moving] = didx;
     dense()[didx] = moving;
@@ -269,7 +294,7 @@ struct sparse_id_set {
   bool operator==(const sparse_id_set& o) const {
     if (universe_size() != o.universe_size()) return false;
     if (size() != o.size()) return false;
-    for (auto v : *this) if (!o.contains(v)) return false;
+    for (auto v : *this) if (!o.containsImpl(v)) return false;
     return true;
   }
   bool operator!=(const sparse_id_set& o) const { return !(*this == o); }
@@ -303,7 +328,7 @@ struct sparse_id_set {
     auto back = m_next;
     while (fwd != back) {
       assert(fwd < back);
-      if (!o.contains(dense()[fwd])) {
+      if (!o.containsImpl(dense()[fwd])) {
         auto const val = dense()[--back];
         sparse()[val] = fwd;
         dense()[fwd] = val;
@@ -339,6 +364,13 @@ struct sparse_id_set {
   }
 
 private:
+  bool containsImpl(T t) const {
+    assert(t < m_universe_size);
+    auto const didx = sparse()[t];  // may read uninitialized memory
+    return didx < m_next && dense()[didx] == t;
+  }
+
+private:
   T* sparse()             { return m_mem; }
   T* dense()              { return m_mem + m_universe_size; }
   const T* sparse() const { return m_mem; }
@@ -352,7 +384,12 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-template<class K, class V>
+template<
+  class K,
+  class V,
+  class LookupKey = K,
+  class KExtract = sparse_id_detail::default_extract<K,LookupKey>
+>
 struct sparse_id_map {
   using value_type     = std::pair<const K,V>;
   using size_type      = K;
@@ -536,29 +573,28 @@ struct sparse_id_map {
   /*
    * Returns: whether this sparse_id_map contains a particular key.  O(1).
    */
-  bool contains(K k) const {
-    assert(k < m_universe_size);
-    auto const didx = sparse()[k];  // may read uninitialized memory
-    return didx < m_next && dense()[didx].first == k;
+  bool contains(LookupKey lk) const {
+    return containsImpl(KExtract()(lk));
   }
 
   /*
    * Get a reference to the value for key `k', inserting it with a default
    * constructed value if it doesn't exist.  Strong guarantee.
    */
-  V& operator[](K k) {
-    if (!contains(k)) insert(std::make_pair(k, V{}));
+  V& operator[](LookupKey lk) {
+    auto const k = KExtract()(lk);
+    if (!containsImpl(k)) insert(std::make_pair(k, V{}));
     return dense()[sparse()[k]].second;
   }
 
   /*
    * Insert a new value into the set.  O(1).  Strong exception guarantee.
    *
-   * Post: contains(v.first)
+   * Post: contains an element with id v.first
    */
   void insert(const value_type& v) {
     assert(v.first < m_universe_size);
-    if (contains(v.first)) return;
+    if (containsImpl(v.first)) return;
     new (&dense()[m_next]) value_type(v);
     sparse()[v.first] = m_next;
     ++m_next;
@@ -568,11 +604,11 @@ struct sparse_id_map {
    * Insert a new value into the set, moving it if we need it.  O(1).  Strong
    * exception guarantee.
    *
-   * Post: contains(v.first)
+   * Post: contains an element with id v.first
    */
   void insert(value_type&& v) {
     assert(v.first < m_universe_size);
-    if (contains(v.first)) return;
+    if (containsImpl(v.first)) return;
     new (&dense()[m_next]) value_type(std::move(v));
     sparse()[v.first] = m_next;
     ++m_next;
@@ -583,13 +619,14 @@ struct sparse_id_map {
    * it is.)  No throw as long as V has a nothrow move assignment operator.
    * Strong guarantee otherwise.
    *
-   * Post: !contains(key)
+   * Post: !contains(lk)
    */
-  void erase(K key) {
+  void erase(LookupKey lk) {
+    auto const key = KExtract()(lk);
     assert(key < m_universe_size);
     // Move in back element and update sparse ptrs.
     auto const didx = sparse()[key];  // possibly reads uninitialized mem
-    if (didx >= m_next) return;
+    if (didx >= m_next || dense()[didx].first != key) return;
     auto& moving = dense()[m_next - 1];
     auto const moved_key = moving.first;
     if (didx < m_next - 1) {
@@ -613,7 +650,7 @@ struct sparse_id_map {
     if (universe_size() != o.universe_size()) return false;
     if (size() != o.size()) return false;
     for (auto kv : *this) {
-      if (!o.contains(kv.first)) return false;
+      if (!o.containsImpl(kv.first)) return false;
       if (o.dense()[o.sparse()[kv.first]].second != kv.second) {
         return false;
       }
@@ -629,6 +666,13 @@ struct sparse_id_map {
     std::swap(m_universe_size, o.m_universe_size);
     std::swap(m_mem, o.m_mem);
     std::swap(m_next, o.m_next);
+  }
+
+private:
+  bool containsImpl(K k) const {
+    assert(k < m_universe_size);
+    auto const didx = sparse()[k];  // may read uninitialized memory
+    return didx < m_next && dense()[didx].first == k;
   }
 
 private:
@@ -652,13 +696,13 @@ private:
 
 // Non-member swaps for ADL swap idiom.
 
-template<class T>
-void swap(sparse_id_set<T>& a, sparse_id_set<T>& b) {
+template<class T, class LT, class EX>
+void swap(sparse_id_set<T,LT,EX>& a, sparse_id_set<T,LT,EX>& b) {
   a.swap(b);
 }
 
-template<class K, class V>
-void swap(sparse_id_map<K,V>& a, sparse_id_map<K,V>& b) {
+template<class K, class V, class LK, class LKE>
+void swap(sparse_id_map<K,V,LK,LKE>& a, sparse_id_map<K,V,LK,LKE>& b) {
   a.swap(b);
 }
 

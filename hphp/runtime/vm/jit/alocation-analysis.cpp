@@ -147,7 +147,7 @@ ALocationAnalysis collect_locations(const IRUnit& unit,
     }
     if (auto const frame = loc.frame()) {
       ret.all_frame.set(meta.index);
-      ret.per_frame_bits[frame->fp->id()].set(meta.index);
+      ret.per_frame_bits[frame->fp].set(meta.index);
       return;
     }
   };

@@ -109,7 +109,7 @@ struct ALocationAnalysis {
    * Map from frame SSATmp ids to the location bits for all of the frame's
    * locals.
    */
-  sparse_id_map<uint32_t,ALocBits> per_frame_bits;
+  jit::sparse_idptr_map<SSATmp,ALocBits> per_frame_bits;
 };
 
 //////////////////////////////////////////////////////////////////////

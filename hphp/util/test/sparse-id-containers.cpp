@@ -329,4 +329,50 @@ TEST(SparseIdMap, ExceptionCleanup) {
 
 //////////////////////////////////////////////////////////////////////
 
+TEST(SparseId, StructyLookups) {
+  struct StrongerTypedId {
+    uint32_t id;
+    /* implicit */ operator uint32_t() { return id; }
+  };
+
+  sparse_id_map<uint32_t,int,StrongerTypedId> map(12);
+  map[StrongerTypedId{0}] = 2;
+  EXPECT_EQ(1, map.size());
+  map.erase(StrongerTypedId{0});
+  EXPECT_EQ(0, map.size());
+
+  sparse_id_set<uint32_t,StrongerTypedId> set(12);
+  set.insert(StrongerTypedId{2});
+  EXPECT_EQ(1, set.size());
+  set.erase(StrongerTypedId{0});
+  EXPECT_EQ(1, set.size());
+  set.erase(StrongerTypedId{2});
+  EXPECT_EQ(0, set.size());
+}
+
+TEST(SparseId, PointeryLookups) {
+  struct SSATmp {
+    uint32_t id() const { return m_id; }
+    uint32_t m_id;
+  };
+
+  struct IDEx {
+    uint32_t operator()(SSATmp* tmp) const { return tmp->id(); }
+  };
+
+  SSATmp one { 1 };
+  SSATmp two { 2 };
+  SSATmp three { 3 };
+
+  sparse_id_map<uint32_t,int,SSATmp*,IDEx> map(5);
+
+  map[&one] = 2;
+  map[&two] = 3;
+  map[&three] = 4;
+
+  EXPECT_EQ(3, map.size());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }

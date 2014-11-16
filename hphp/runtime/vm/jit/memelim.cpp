@@ -123,7 +123,7 @@ void addKill(Local& env, folly::Optional<uint32_t> bit) {
 }
 
 void killFrame(Local& env, const SSATmp* fp) {
-  auto const killSet = env.global.linfo.per_frame_bits[fp->id()];
+  auto const killSet = env.global.linfo.per_frame_bits[fp];
   FTRACE(4, "      kill: {}\n", show(killSet));
   env.kill |= killSet;
   env.gen  &= ~killSet;

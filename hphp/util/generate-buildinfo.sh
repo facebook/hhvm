@@ -9,7 +9,7 @@
 # contents would've changed.
 #
 
-DIR="$( cd "$( dirname "$0" )" && pwd )"
+DIR="$( cd "$( dirname "$0" )" > /dev/null && pwd )"
 
 # OSS version depends on this fallback since it's
 # obviously not using fbmake

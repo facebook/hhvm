@@ -445,7 +445,7 @@ String FileUtil::relativePath(const std::string& fromDir,
 
   // Ensure the result is null-terminated after the strcpy
   assert(to_start - to_file <= toFile.size());
-  assert(path_end - path + strlen(to_start) <= ret.get()->capacity());
+  assert(path_end - path + strlen(to_start) <= ret.capacity());
 
   strcpy(path_end, to_start);
   return ret.setSize(strlen(path));

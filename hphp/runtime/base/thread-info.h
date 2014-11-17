@@ -112,6 +112,12 @@ inline void check_recursion(const ThreadInfo* info) {
 ssize_t check_request_surprise(ThreadInfo *info);
 ssize_t check_request_surprise_unlikely();
 
+inline void check_native_recursion() {
+  char marker;
+  if (UNLIKELY(uintptr_t(&marker) < s_stackLimit + ThreadInfo::StackSlack)) {
+    throw Exception("Maximum stack size reached");
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 
@@ -119,6 +125,8 @@ ssize_t check_request_surprise_unlikely();
   ThreadInfo *info ATTRIBUTE_UNUSED =           \
     ThreadInfo::s_threadInfo.getNoCheck();      \
   int lc ATTRIBUTE_UNUSED = 0;
+
+//////////////////////////////////////////////////////////////////////
 
 }
 

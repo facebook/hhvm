@@ -975,6 +975,9 @@ void Variant::unserialize(VariableUnserializer *uns,
     break;
   case 'a':
     {
+      // check stack depth to avoid overflow
+      check_native_recursion();
+
       Array v = Array::Create();
       v.unserialize(uns);
       operator=(v);
@@ -1089,6 +1092,9 @@ void Variant::unserialize(VariableUnserializer *uns,
       operator=(obj);
 
       if (size > 0) {
+        // check stack depth to avoid overflow
+        check_native_recursion();
+
         if (type == 'O') {
           // Collections are not allowed
           if (obj->isCollection()) {

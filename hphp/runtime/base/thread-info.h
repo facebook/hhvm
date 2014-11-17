@@ -20,6 +20,7 @@
 #include <map>
 #include <functional>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/request-injection-data.h"
@@ -106,6 +107,13 @@ inline void check_recursion(const ThreadInfo* info) {
 ssize_t check_request_surprise(ThreadInfo *info);
 ssize_t check_request_surprise_unlikely();
 
+//////////////////////////////////////////////////////////////////////
+inline void check_native_recursion() {
+  char marker;
+  if (UNLIKELY(uintptr_t(&marker) < s_stackLimit + ThreadInfo::StackSlack)) {
+    throw Exception("Maximum stack size reached");
+  }
+}
 //////////////////////////////////////////////////////////////////////
 
 }

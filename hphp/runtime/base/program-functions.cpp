@@ -195,6 +195,8 @@ String k_PHP_BINDIR;
 String k_PHP_OS;
 String k_PHP_SAPI;
 
+static __thread bool s_sessionInitialized{false};
+
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
   Array argvArray(staticEmptyArray());
@@ -1726,6 +1728,7 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init() {
+  assert(!s_sessionInitialized);
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
@@ -1742,6 +1745,7 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_context->requestInit();
+  s_sessionInitialized = true;
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1876,6 +1880,7 @@ void hphp_memory_cleanup() {
 }
 
 void hphp_session_exit() {
+  assert(s_sessionInitialized);
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
@@ -1899,6 +1904,8 @@ void hphp_session_exit() {
 
   ThreadInfo::s_threadInfo->onSessionExit();
   assert(MM().empty());
+
+  s_sessionInitialized = false;
 }
 
 void hphp_process_exit() {
@@ -1917,6 +1924,10 @@ void hphp_process_exit() {
   delete jit::mcg;
   jit::mcg = nullptr;
   folly::SingletonVault::singleton()->destroyInstances();
+}
+
+bool is_hphp_session_initialized() {
+  return s_sessionInitialized;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

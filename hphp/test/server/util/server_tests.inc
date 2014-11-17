@@ -68,7 +68,8 @@ function get_random_port() {
   return rand($BasePort, $BasePort+$PortRange);
 }
 
-function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
+function startServer($serverPort, $adminPort, $debugPort, $home, $root,
+                     $customArgs = '') {
   global $test_run_id, $LOG_ROOT;
 
   $portConfig = ' -vServer.Port='.$serverPort;
@@ -105,6 +106,7 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
     ' -vEval.JitProfileInterpRequests=0' . $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $repoConfig . $jitConfig .
+    ' ' . $customArgs .
      " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
      " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
 

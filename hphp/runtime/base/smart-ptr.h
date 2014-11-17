@@ -51,7 +51,7 @@ public:
   }
 
   // Move ctor
-  SmartPtr(SmartPtr&& src) : m_px(src.get()) {
+  SmartPtr(SmartPtr&& src) noexcept : m_px(src.get()) {
     src.m_px = nullptr;
   }
 
@@ -118,8 +118,7 @@ public:
    * Magic delegation.
    */
   T* operator->() const {
-    if (UNLIKELY(!m_px)) throw_null_pointer_exception();
-    return m_px;
+    return m_px; // intentionally skip nullptr check.
   }
 
   /**

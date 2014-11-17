@@ -141,9 +141,9 @@ struct StringData {
   static StringData* MakeStatic(StringSlice);
 
   /*
-   * Same as MakeStatic but the string alloated will *not* be in the static
-   * string table, will not be in low-memory, and will be deleted once the
-   * root goes out of scope. Currently only used by APC.
+   * Same as MakeStatic but the string allocated will *not* be in the static
+   * string table, will not be in low-memory, and should be deleted using
+   * destructUncounted once the root goes out of scope.
    */
   static StringData* MakeUncounted(StringSlice);
 

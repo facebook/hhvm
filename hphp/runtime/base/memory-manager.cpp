@@ -175,6 +175,7 @@ MemoryManager::MemoryManager()
   // make the circular-lists empty.
   m_bigs.next = m_bigs.prev = &m_bigs;
   m_strings.next = m_strings.prev = &m_strings;
+  m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
@@ -582,7 +583,7 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   assert((nbytes & kSmartSizeAlignMask) == 0);
   assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
 
-  if (UNLIKELY(m_profctx.flag)) {
+  if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
     return smartMallocSizeBig<false>(nbytes).first;
@@ -809,7 +810,7 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
     assert(userSpecifiedBytes >= p->requestedSize &&
            userSpecifiedBytes <= p->returnedCap);
   }
-  if (bytes != 0 && bytes <= kMaxSmartSize) {
+  if (!m_bypassSlabAlloc && bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       std::begin(m_slabs), std::end(m_slabs),
@@ -868,6 +869,7 @@ void MemoryManager::requestInit() {
   auto& profctx = MM().m_profctx;
   assert(!profctx.flag);
 
+  MM().m_bypassSlabAlloc = true;
   profctx = *trigger;
   delete trigger;
 
@@ -912,6 +914,7 @@ void MemoryManager::requestShutdown() {
           &profctx.prof_active, sizeof(bool));
 #endif
 
+  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
   profctx = ReqProfContext{};
 }
 

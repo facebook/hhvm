@@ -319,6 +319,8 @@ public:
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
 
+  static bool DisableSmartAllocator;
+
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;

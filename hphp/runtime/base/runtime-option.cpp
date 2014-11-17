@@ -335,6 +335,12 @@ int RuntimeOption::MaxArrayChain = INT_MAX;
 bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
+#ifdef FOLLY_SANITIZE_ADDRESS
+bool RuntimeOption::DisableSmartAllocator = true;
+#else
+bool RuntimeOption::DisableSmartAllocator = false;
+#endif
+
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
@@ -920,6 +926,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
+    Config::Bind(DisableSmartAllocator, ini, eval["DisableSmartAllocator"],
+                 DisableSmartAllocator);
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, eval["CodeCoverageOutputFile"]);
     {

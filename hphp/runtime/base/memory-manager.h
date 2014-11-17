@@ -663,6 +663,8 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
 
+  bool m_bypassSlabAlloc;
+
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;
 

@@ -113,6 +113,13 @@ ssize_t check_request_surprise(ThreadInfo *info);
 ssize_t check_request_surprise_unlikely();
 
 //////////////////////////////////////////////////////////////////////
+inline void check_native_recursion() {
+  char marker;
+  if (UNLIKELY(uintptr_t(&marker) < s_stackLimit + ThreadInfo::StackSlack)) {
+    throw Exception("Maximum stack size reached");
+  }
+}
+//////////////////////////////////////////////////////////////////////
 
 }
 

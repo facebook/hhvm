@@ -2760,6 +2760,37 @@ Variant HHVM_METHOD(SoapClient, __gettypes) {
   return init_null();
 }
 
+static bool content_type_is_xml(const String& response,
+                                const std::vector<String>& responseHeaders) {
+  if (response.empty()) return false;
+  for (auto header : responseHeaders) {
+    auto cheader = header.c_str();
+    auto cheader_len = header.size();
+    if ((cheader_len > sizeof("Content-type: ")) &&
+        !strncasecmp(cheader, "Content-type: ", strlen("Content-type: "))) {
+      // We got an explicit content-type header, trust if it says soap or xml
+      const char* s = cheader + strlen("Content-type: ");
+      const char* e = strchr(s, ';');
+      if (!e) e = cheader + cheader_len;
+      if (!strncmp("text/xml", s, e - s) ||
+          !strncmp("application/soap+xml", s, e - s)) {
+        return true;
+      }
+    }
+  }
+
+  // If we didn't see a header we like, just ignore the ones we don't like
+  // and see if the response looks xmlish
+  const char* p = response.c_str();
+  const char* e = p + response.size();
+  while ((p < e) && (*p == ' ')) ++p;
+  if (((p - e) >= 5) &&
+      !strncmp(p, "<?xml", strlen("<?xml"))) {
+    return true;
+  }
+  return false;
+}
+
 Variant HHVM_METHOD(SoapClient, __dorequest,
                     const String& buf,
                     const String& location,
@@ -2829,26 +2860,32 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
     http.auth(data->m_login.data(), data->m_password.data(), !data->m_digest);
   }
   http.setStreamContextOptions(data->m_stream_context_options);
-  StringBuffer response;
-  int code = http.post(location.data(), buffer.data(), buffer.size(), response,
-                       &headers);
+
+  StringBuffer responseBuffer;
+  std::vector<String> responseHeaders;
+  int code = http.post(location.data(), buffer.data(), buffer.size(),
+                       responseBuffer, &headers, &responseHeaders);
+  String response = responseBuffer.detach();
+
   if (code == 0) {
     String msg = "Failed Sending HTTP Soap request";
     if (!http.getLastError().empty()) {
       msg += ": " + http.getLastError();
     }
-    data->m_soap_fault = Object(SystemLib::AllocSoapFaultObject(
-      "HTTP", msg));
+    data->m_soap_fault =
+      Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
     return init_null();
   }
-  if ((code >= 400) &&
-      (data->m_exceptions || response.empty())) {
-    String msg = response.detach();
-    if (msg.empty()) {
-      msg = HttpProtocol::GetReasonString(code);
+
+  if ((code >= 400) && !content_type_is_xml(response, responseHeaders)) {
+    if (response.empty()) {
+      response = HttpProtocol::GetReasonString(code);
     }
-    data->m_soap_fault = Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
-    return init_null();
+    if (data->m_exceptions) {
+      data->m_soap_fault =
+        Object(SystemLib::AllocSoapFaultObject("HTTP", response));
+      return init_null();
+    }
   }
 
   // return response
@@ -2858,7 +2895,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   if (oneway) {
     return empty_string_variant();
   }
-  return response.detach();
+  return response;
 }
 
 Variant HHVM_METHOD(SoapClient, __setcookie,

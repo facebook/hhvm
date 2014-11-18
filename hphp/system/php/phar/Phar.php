@@ -34,6 +34,10 @@ class Phar extends RecursiveDirectoryIterator
    * A map from filename_or_alias => Phar object
    */
   private static $aliases = array();
+  /**
+  * Prevent the check for __HALT_COMPILER()
+  */
+  private static $preventHaltTokenCheck = false;
 
   private $alias;
   private $fileInfo = array();
@@ -71,9 +75,9 @@ class Phar extends RecursiveDirectoryIterator
     }
     $data = file_get_contents($filename);
 
-    $halt_token = "\n__HALT_COMPILER();";
+    $halt_token = "__HALT_COMPILER();";
     $pos = strpos($data, $halt_token);
-    if ($pos === false) {
+    if ($pos === false && !self::$preventHaltTokenCheck) {
       throw new PharException("__HALT_COMPILER(); must be declared in a phar");
     }
     $this->stub = substr($data, 0, $pos);
@@ -1186,7 +1190,11 @@ class Phar extends RecursiveDirectoryIterator
       if (is_file($filename)) {
 
         if (!isset(self::$aliases[$filename])) {
+          // We need this hack because the stream wrapper should work
+          // even without the __HALT_COMPILER token
+          self::$preventHaltTokenCheck = true;
           self::loadPhar($filename);
+          self::$preventHaltTokenCheck = false;
         }
 
         return array(

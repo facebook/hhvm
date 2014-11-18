@@ -311,7 +311,6 @@ NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
-NOOP_OPCODE(HintStkInner)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -570,6 +569,10 @@ void CodeGenerator::cgExceptionBarrier(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAssertStk(IRInstruction* inst) {
+  vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
+}
+
+void CodeGenerator::cgHintStkInner(IRInstruction* inst) {
   vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
 }
 
@@ -1120,18 +1123,16 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
     int n = src1->intVal() & 0x3f; // only use low 6 bits.
     v << Opi{n, srcReg0, dstReg, v.makeReg()};
   } else {
-    // assume srcs and dsts are vregs and rcx isn't live
-    v << copy{srcReg1, rcx};
-    v << Op{srcReg0, dstReg, v.makeReg()};
+    v << Op{srcReg1, srcReg0, dstReg, v.makeReg()};
   }
 }
 
 void CodeGenerator::cgShl(IRInstruction* inst) {
-  cgShiftCommon<shlq,shlqi>(inst);
+  cgShiftCommon<shl,shlqi>(inst);
 }
 
 void CodeGenerator::cgShr(IRInstruction* inst) {
-  cgShiftCommon<sarq,sarqi>(inst);
+  cgShiftCommon<sar,sarqi>(inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2538,7 +2539,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
       auto const sf = v.makeReg();
       v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, base); });
+      ifThen(v, CC_GE, sf, [&](Vout& v) { emitIncRef(v, base); });
     }
   };
 
@@ -3547,9 +3548,12 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
                        fp, sp);
   }
-  v << vcall{CppCall::direct(builtinFuncPtr),
-             v.makeVcallArgs({{fp}}), v.makeTuple({})};
-  v << syncpoint{makeFixup(inst->marker(), SyncOptions::kSyncPoint)};
+  v << vcall{
+    CppCall::direct(builtinFuncPtr),
+    v.makeVcallArgs({{fp}}),
+    v.makeTuple({}),
+    makeFixup(inst->marker(), SyncOptions::kSyncPoint)
+  };
 }
 
 void CodeGenerator::cgLdThis(IRInstruction* inst) {

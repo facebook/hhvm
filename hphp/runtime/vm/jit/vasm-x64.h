@@ -405,6 +405,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(syncvmsp, Inone, U(s), Dn)\
   O(syncvmfp, Inone, U(s), Dn)\
   O(srem, Inone, U(s0) U(s1), D(d))\
+  O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -494,12 +496,12 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
-  O(sarq, Inone, U(s), D(d) D(sf))\
+  O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(sbbl, Inone, U(sfu) UA(s0) U(s1), D(d) D(sfd))\
   O(setcc, I(cc), U(sf), D(d))\
   O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shlq, Inone, U(s), D(d) D(sf))\
+  O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -584,6 +586,8 @@ struct defvmsp { Vreg d; };
 struct syncvmsp { Vreg s; };
 struct syncvmfp { Vreg s; };
 struct srem { Vreg s0, s1, d; };
+struct sar { Vreg s0, s1, d; VregSF sf; };
+struct shl { Vreg s0, s1, d; VregSF sf; };
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -758,6 +762,21 @@ struct Vinstr {
   VASM_OPCODES
 #undef O
 
+  template<typename Op>
+  struct matcher;
+
+  /*
+   * Templated accessors for the union members.
+   */
+  template<typename Op>
+  typename matcher<Op>::type& get() {
+    return matcher<Op>::get(*this);
+  }
+  template<typename Op>
+  const typename matcher<Op>::type& get() const {
+    return matcher<Op>::get(*this);
+  }
+
   Opcode op;
 
   /*
@@ -777,6 +796,21 @@ struct Vinstr {
   union { VASM_OPCODES };
 #undef O
 };
+
+#define O(name, ...)                             \
+  template<> struct Vinstr::matcher<name> {      \
+    using type = jit::name;                      \
+    static type& get(Vinstr& inst) {             \
+      assert(inst.op == name);                   \
+      return inst.name##_;                       \
+    }                                            \
+    static const type& get(const Vinstr& inst) { \
+      assert(inst.op == name);                   \
+      return inst.name##_;                       \
+    }                                            \
+  };
+VASM_OPCODES
+#undef O
 
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}

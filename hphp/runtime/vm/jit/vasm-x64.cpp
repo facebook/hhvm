@@ -920,6 +920,19 @@ static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
   vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
+template<typename FromOp, typename ToOp>
+static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& shift = inst.get<FromOp>();
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+  v << copy{shift.s0, rcx};
+  v << ToOp{shift.s1, shift.d, shift.sf};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
 static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   auto& blocks = unit.blocks;
   auto& inst = blocks[b].code[iInst];
@@ -1065,6 +1078,14 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::srem:
           lowerSrem(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::sar:
+          lowerShift<sar, sarq>(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::shl:
+          lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
           break;
 
         case Vinstr::defvmsp:

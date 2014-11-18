@@ -32,3 +32,17 @@ function eregi($pattern, $str, &$regs = null) { }
 function split($pattern, $str, $limit = -1) { }
 function spliti($pattern, $str, $limit = -1) { }
 function sql_regcase($str) { }
+
+CONST int PREG_PATTERN_ORDER = 1;
+CONST int PREG_SET_ORDER = 1 << 1;
+CONST int PREG_OFFSET_CAPTURE = 1 << 2;
+CONST int PREG_SPLIT_NO_EMPTY = 1 << 3;
+CONST int PREG_SPLIT_DELIM_CAPTURE = 1 << 4;
+CONST int PREG_SPLIT_OFFSET_CAPTURE = 1 << 5;
+CONST int PREG_NO_ERROR = 1 << 6;
+CONST int PREG_INTERNAL_ERROR = 1 << 7;
+CONST int PREG_BACKTRACK_LIMIT_ERROR = 1 << 8;
+CONST int PREG_RECURSION_LIMIT_ERROR = 1 << 9;
+CONST int PREG_BAD_UTF8_ERROR = 1 << 10;
+CONST int PREG_BAD_UTF8_OFFSET_ERROR = 1 << 11;
+CONST int PCRE_VERSION = 1 << 12;

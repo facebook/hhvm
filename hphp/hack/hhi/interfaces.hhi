@@ -108,6 +108,19 @@ interface Countable {
   public function count(): int;
 }
 
+interface RecursiveIterator<Tv> extends Iterator<Tv> {
+  public function getChildren(): this;
+  public function hasChildren(): bool;
+}
+
+interface SeekableIterator<Tv> extends Iterator<Tv> {
+  public function seek(int $position): void;
+}
+
+interface OuterIterator<Tv> extends Iterator<Tv> {
+  public function getInnerIterator(): Iterator<Tv>;
+}
+
 interface ArrayAccess<Tk, Tv> {
   public function offsetExists(Tk $key): bool;
   public function offsetGet(Tk $key): Tv;

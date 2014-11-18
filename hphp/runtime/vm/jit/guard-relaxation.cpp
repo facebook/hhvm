@@ -45,8 +45,8 @@ bool shouldHHIRRelaxGuards() {
 #define DofS(n)        return typeMightRelax(inst->src(n));
 #define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
-#define DParam         return true;  // typeParam may relax
-#define DParamNRel     return false;
+#define DParamMayRelax return true;  // typeParam may relax
+#define DParam         return false;
 #define DParamPtr(k)   return false;
 #define DUnboxPtr      return false;
 #define DBoxPtr        return false;
@@ -84,8 +84,8 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DofS
 #undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
-#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -127,8 +127,7 @@ void retypeLoad(IRInstruction* load, Type newType) {
  */
 void visitLoad(IRInstruction* inst, const FrameState& state) {
   switch (inst->op()) {
-    case LdLoc:
-    case LdLocPseudoMain: {
+    case LdLoc: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
 

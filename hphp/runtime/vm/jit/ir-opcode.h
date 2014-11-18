@@ -57,7 +57,7 @@ struct FrameState;
  *     DBox(N)      single dst has boxed type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
  *     DParam       single dst has type of the instruction's type parameter
- *     DParamNRel   DParam "no relax", like DParam except the dest can't relax
+ *     DParamMayRelax like DParam, except type may relax
  *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
  *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
  *     DBoxPtr      Boxed PtrTo*T

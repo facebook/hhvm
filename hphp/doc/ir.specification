@@ -828,7 +828,7 @@ generating efficient compare-and-branch instruction sequences.
 7. Loads
 
 
-| LdStack<T,offset>, DParam, S(StkPtr), NF
+| LdStack<T,offset>, DParamMayRelax, S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
@@ -837,7 +837,7 @@ generating efficient compare-and-branch instruction sequences.
   Does nothing at runtime. Acts as a hint to the optimizer that the code is
   taking ownership of a reference to S0.
 
-| LdLoc<T,localId>, DParam, S(FramePtr), NF
+| LdLoc<T,localId>, DParamMayRelax, S(FramePtr), NF
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
@@ -892,7 +892,7 @@ generating efficient compare-and-branch instruction sequences.
   Check that the inner type of the boxed cell in S0 is T, and if not take the
   branch to B.
 
-| LdRef<T>, DParamNRel, S(BoxedCell), NF
+| LdRef<T>, DParam, S(BoxedCell), NF
 
   TODO(#2939547): this should take BoxedInitCell
 

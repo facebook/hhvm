@@ -106,7 +106,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocPseudoMain)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
@@ -826,11 +826,10 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocPseudoMain)) {
-    // We've hit a LdLoc, or LdLocPseudoMain. If the value's type source is
-    // non-null and not a FramePtr, it's a real value that was killed by a
-    // Call. The value won't be live but it's ok to use it to track down the
-    // guard.
+  if (inst->is(LdLoc)) {
+    // We've hit a LdLoc. If the value's type source is non-null and not a
+    // FramePtr, it's a real value that was killed by a Call. The value won't
+    // be live but it's ok to use it to track down the guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
                        "No typeSrcs found for {}\n\n{}", *inst, m_unit);

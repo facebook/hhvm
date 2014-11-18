@@ -490,13 +490,12 @@ void MemoryManager::resetAllocator() {
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (UNLIKELY(nbytes_padded > kMaxSmartSize)) {
-    return smartMallocBig(nbytes);
+  if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
+    auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+    ptr->padbytes = nbytes_padded;
+    return ptr + 1;
   }
-
-  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
-  ptr->padbytes = nbytes_padded;
-  return ptr + 1;
+  return smartMallocBig(nbytes);
 }
 
 union MallocNode {
@@ -515,22 +514,18 @@ inline void MemoryManager::smartFree(void* ptr) {
   smartFreeBig(&n->big);
 }
 
-inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
-  FTRACE(3, "smartRealloc: {} to {}\n", inputPtr, nbytes);
+inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
+  FTRACE(3, "smartRealloc: {} to {}\n", ptr, nbytes);
   assert(nbytes > 0);
-
-  void* ptr = debug ? static_cast<DebugHeader*>((void*)(uintptr_t(inputPtr) -
-                                                kDebugExtraSize)) : inputPtr;
-
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
-      n->small.padbytes - sizeof(SmallNode) - kDebugExtraSize,
+      n->small.padbytes - sizeof(SmallNode),
       nbytes
     );
-    newmem = memcpy(newmem, inputPtr, copySize);
-    smart_free(inputPtr);
+    newmem = memcpy(newmem, ptr, copySize);
+    smart_free(ptr);
     return newmem;
   }
 
@@ -541,14 +536,14 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->big.prev;
 
   auto const newNode = static_cast<BigNode*>(
-    safe_realloc(n, debugAddExtra(nbytes + sizeof(BigNode)))
+    safe_realloc(n, nbytes + sizeof(BigNode))
   );
 
   refreshStats();
   if (newNode != &n->big) {
     oldNext->prev = oldPrev->next = newNode;
   }
-  return debugPostAllocate(newNode + 1, 0, 0);
+  return newNode + 1;
 }
 
 /*
@@ -704,8 +699,8 @@ void MemoryManager::smartFreeBig(BigNode* n) {
 
 void* smart_malloc(size_t nbytes) {
   auto& mm = MM();
-  auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
-  return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
+  auto const size = std::max(nbytes, size_t(1));
+  return mm.smartMalloc(size);
 }
 
 void* smart_calloc(size_t count, size_t nbytes) {
@@ -714,10 +709,7 @@ void* smart_calloc(size_t count, size_t nbytes) {
   if (totalBytes <= kMaxSmartSize) {
     return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
-  auto const withExtra = mm.debugAddExtra(totalBytes);
-  return mm.debugPostAllocate(
-    mm.smartCallocBig(withExtra), 0, 0
-  );
+  return mm.smartCallocBig(totalBytes);
 }
 
 void* smart_realloc(void* ptr, size_t nbytes) {
@@ -731,9 +723,7 @@ void* smart_realloc(void* ptr, size_t nbytes) {
 }
 
 void smart_free(void* ptr) {
-  if (!ptr) return;
-  auto& mm = MM();
-  mm.smartFree(mm.debugPreFree(ptr, 0, 0));
+  if (ptr) MM().smartFree(ptr);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -78,7 +78,7 @@ class ThreadSafeLRUCache {
       }
     };
 
-    static constexpr ListNode * OutOfListMarker = (ListNode*)-1;
+    static ListNode * const OutOfListMarker;
 
     /**
      * The value that we store in the hashtable. The list node is allocated from
@@ -234,11 +234,14 @@ class ThreadSafeLRUCache {
 };
 
 template <class TKey, class TValue, class THash>
+typename ThreadSafeLRUCache<TKey, TValue, THash>::ListNode * const
+ThreadSafeLRUCache<TKey, TValue, THash>::OutOfListMarker = (ListNode*)-1;
+
+template <class TKey, class TValue, class THash>
 ThreadSafeLRUCache<TKey, TValue, THash>::
 ThreadSafeLRUCache(size_t maxSize)
   : m_maxSize(maxSize), m_size(0),
-  //m_map(std::thread::hardware_concurrency() * 4) // it will automatically grow
-  m_map(65536)
+  m_map(std::thread::hardware_concurrency() * 4) // it will automatically grow
 {
   m_head.m_prev = nullptr;
   m_head.m_next = &m_tail;

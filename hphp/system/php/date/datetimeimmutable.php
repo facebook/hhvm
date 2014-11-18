@@ -95,9 +95,8 @@ class DateTimeImmutable implements DateTimeInterface {
     $out->data = DateTime::createFromFormat($format, $time, $timezone);
     if ($out->data === false) {
       return false;
-    } else {
-      return $out;
     }
+    return $out;
   }
 
   public static function getLastErrors(): array {

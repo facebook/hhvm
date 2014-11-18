@@ -313,21 +313,27 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
-  // Copy all but m_id, m_edges[].from, m_listNode, m_marker, and don't clone
-  // dests---the whole point of become() is things still point to us.
-  if (hasEdges() && !other->hasEdges()) {
-    clearEdges();
-  } else if (!hasEdges() && other->hasEdges()) {
-    m_edges = new (arena) Edge[2];
-    setNext(other->next());
-    setTaken(other->taken());
-  }
+  // Copy all but m_id, m_listNode, m_marker, and don't clone dests---part of
+  // the point of point of become() is things will still point to this
+  // instruction.
+
+  if (hasEdges()) clearEdges();
+
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+
+  if (other->hasEdges()) {
+    assert(hasEdges());  // m_op changed to it
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[1].setInst(this);
+    setNext(other->next());
+    setTaken(other->taken());
+  }
 }
 
 void IRInstruction::setOpcode(Opcode newOpc) {

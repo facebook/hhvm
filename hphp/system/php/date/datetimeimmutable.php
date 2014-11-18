@@ -90,10 +90,14 @@ class DateTimeImmutable implements DateTimeInterface {
     string $format,
     string $time,
     DateTimeZone $timezone = null
-  ): DateTimeImmutable {
+  ): mixed {
     $out = new DateTimeImmutable();
     $out->data = DateTime::createFromFormat($format, $time, $timezone);
-    return $out;
+    if ($out->data === false) {
+      return false;
+    } else {
+      return $out;
+    }
   }
 
   public static function getLastErrors(): array {

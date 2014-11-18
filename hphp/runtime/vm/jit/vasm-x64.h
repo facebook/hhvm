@@ -831,6 +831,10 @@ struct Vunit {
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
 
+  template<class T>
+  typename std::enable_if<std::is_integral<T>::value, Vreg>::type
+  makeConst(T l) { return makeConst(uint64_t(l)); }
+
   /*
    * Returns true iff this Vunit needs register allocation before it can be
    * emitted, either because it uses virtual registers or contains instructions

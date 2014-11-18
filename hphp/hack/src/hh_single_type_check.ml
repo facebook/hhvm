@@ -214,8 +214,7 @@ let replace_color input =
 
 let print_colored fn =
   let content = cat (Relative_path.to_absolute fn) in
-  let pos_level_m = mk_level_map (Some fn) !Typing_defs.type_acc in
-  let pos_level_l = Pos.Map.elements pos_level_m in
+  let pos_level_l = mk_level_list (Some fn) !Typing_defs.type_acc in
   let raw_level_l =
     rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) pos_level_l in
   let results = ColorFile.go content raw_level_l in

@@ -17,9 +17,9 @@ type result = level_counts trie option
 
 (* Count the number of expressions of each kind of Coverage_level. *)
 let count_exprs fn pos_ty_m =
-  let pos_level_m = mk_level_map (Some fn) pos_ty_m in
-  Pos.Map.fold (fun _ lvl c -> incr_counter lvl c)
-            pos_level_m empty_counter
+  let pos_level_l = mk_level_list (Some fn) pos_ty_m in
+  List.fold_left (fun c (_, lvl) -> incr_counter lvl c)
+            empty_counter pos_level_l
 
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage neutral fnl =
@@ -29,10 +29,10 @@ let get_coverage neutral fnl =
     match Parser_heap.ParserHeap.get fn with
     | None -> None
     | Some defs ->
-        assert (!(Typing_defs.type_acc) = Pos.Map.empty);
+        assert (!Typing_defs.type_acc = []);
         List.iter ServerIdeUtils.check_def defs;
         let counts = count_exprs fn !Typing_defs.type_acc in
-        Typing_defs.type_acc := Pos.Map.empty;
+        Typing_defs.type_acc := [];
         Some (fn, counts)
   end fnl |> cat_opts in
   Typing_defs.accumulate_types := false;

@@ -46,24 +46,35 @@ type 'a trie =
   | Leaf of 'a
   | Node of 'a * 'a trie SMap.t
 
-let mk_level_map fn_opt pos_ty_m =
-  let pos_lvl_m = Pos.Map.map (function
-    | _, Typing_defs.Tany -> Unchecked
-    | ty when TUtils.HasTany.check ty -> Partial
-    | _ -> Checked) pos_ty_m
+(* Converts types to coverage levels, and also dedups multiple types at the
+ * same position, favoring the most recently added type. Duplicates can occur
+ * when we take multiple passes to determine an expression's type, and we want
+ * to use the last result as it is usually the most specific type. *)
+let mk_level_list fn_opt pos_ty_l =
+  let seen = HashSet.create 997 in
+  let pos_lvl_l = List.fold_left (fun acc (p, ty) ->
+    if HashSet.mem seen p then acc
+    else begin
+      HashSet.add seen p;
+      let lvl = match ty with
+        | _, Typing_defs.Tany -> Unchecked
+        | ty when TUtils.HasTany.check ty -> Partial
+        | _ -> Checked in
+      (p, lvl) :: acc
+    end) [] pos_ty_l
   in
   (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
   (* NOTE(jez): can we monadize this? *)
   match fn_opt with
-  | None -> pos_lvl_m
+  | None -> pos_lvl_l
   | Some fn ->
     match Parser_heap.HH_FIXMES.get fn with
-    | None -> pos_lvl_m
+    | None -> pos_lvl_l
     | Some fixme_map ->
-        Pos.Map.mapi (fun p lvl ->
+        rev_rev_map (fun (p, lvl) ->
           let line = p.Pos.pos_start.Lexing.pos_lnum in
-          match lvl with
+          p, match lvl with
           | Checked when IMap.mem line fixme_map ->
               Partial
           | Unchecked | Partial | Checked -> lvl
-        ) pos_lvl_m
+        ) pos_lvl_l

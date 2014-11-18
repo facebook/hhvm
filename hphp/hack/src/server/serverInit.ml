@@ -19,6 +19,7 @@ let init_hack genv env get_next =
 
   let t2 = Unix.gettimeofday() in
   Printf.printf "Parsing: %f\n%!" (t2 -. t);
+  Printf.printf "Heap size: %d\n%!" (SharedMem.heap_size ());
   let t = t2 in
 
   let is_check_mode =
@@ -47,6 +48,7 @@ let init_hack genv env get_next =
 
   let t2 = Unix.gettimeofday() in
   Printf.printf "Type-decl: %f\n%!" (t2 -. t);
+  Printf.printf "Heap size: %d\n%!" (SharedMem.heap_size ());
   let t = t2 in
 
   let errorl4, failed4 = Typing_check_service.go genv.workers fast in

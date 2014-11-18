@@ -175,6 +175,12 @@ static char* heap_init;
 /* This should only be used by the master */
 static size_t heap_init_size = 0;
 
+/* For debugging */
+value hh_heap_size() {
+  CAMLparam0();
+  CAMLreturn(Val_long(*heap - heap_init));
+}
+
 /*****************************************************************************/
 /* Given a pointer to the shared memory address space, initializes all
  * the globals that live in shared memory.

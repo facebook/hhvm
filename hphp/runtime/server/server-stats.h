@@ -129,6 +129,7 @@ private:
   static void Report(std::string &out, Writer::Format format,
                      const std::list<TimeSlot*> &slots,
                      const std::string &prefix);
+  static void ReportSlots(Writer* writer, const std::list<TimeSlot*> &slots);
 
   Mutex m_lock;
   std::vector<TimeSlot> m_slots;

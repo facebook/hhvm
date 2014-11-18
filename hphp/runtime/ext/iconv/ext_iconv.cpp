@@ -915,17 +915,24 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
 
         if (cd == (iconv_t)(-1)) {
           if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+            auto qmarks = 2;
+            while (qmarks > 0 && str_left > 1) {
+              p1++;
+              qmarks -= *p1 == '?' ? 1 : 0 ;
+              str_left--;
+            }
+
+            if (*(p1+1) == '=') {
+              ++p1;
+              --str_left;
+            }
+
             err = _php_iconv_appendl(retval, encoded_word,
                                      (size_t)((p1 + 1) - encoded_word), cd_pl);
             if (err != PHP_ICONV_ERR_SUCCESS) {
               goto out;
             }
-            encoded_word = NULL;
-            if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-              scan_stat = 12;
-            } else {
-              scan_stat = 0;
-            }
+            scan_stat = 12;
             break;
           } else {
 #if ICONV_SUPPORTS_ERRNO

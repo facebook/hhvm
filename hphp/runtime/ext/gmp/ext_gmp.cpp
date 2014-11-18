@@ -22,6 +22,9 @@
 
 namespace HPHP {
 
+HPHP::Class* GMP::cls = nullptr;
+IMPLEMENT_OBJECT_ALLOCATION(GMPResource)
+
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
@@ -122,12 +125,12 @@ static bool variantToGMPData(const char* const fnCaller,
 
   case KindOfObject: {
     Object gmpObject = data.toObject();
-    if (!gmpObject.instanceof(s_GMP_GMP)) {
+    if (!gmpObject.instanceof(GMP::cls)) {
       raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
       return false;
     }
 
-    auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP.get()).
+    auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP).
                   toResource().getTyped<GMPResource>(false, true);
     if (!gmpRes) {
       raise_warning(cs_GMP_INVALID_RESOURCE, fnCaller);
@@ -262,7 +265,7 @@ static void HHVM_FUNCTION(gmp_clrbit,
     return;
   }
 
-  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP.get()).
+  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP).
                 toResource().getTyped<GMPResource>(false, true);
   if (!gmpRes) {
     raise_warning(cs_GMP_INVALID_RESOURCE, cs_GMP_FUNC_NAME_GMP_CLRBIT);
@@ -677,7 +680,7 @@ static int64_t HHVM_FUNCTION(gmp_intval,
   if (data.isArray()
       || data.isResource()
       || (data.isString() && data.toString().empty())
-      || (data.isObject() && !data.toObject().instanceof(s_GMP_GMP))
+      || (data.isObject() && !data.toObject().instanceof(GMP::cls))
       || !variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
     return data.toInt64();
   }
@@ -1155,7 +1158,7 @@ static void HHVM_FUNCTION(gmp_setbit,
     return;
   }
 
-  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP.get()).
+  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP).
                 toResource().getTyped<GMPResource>(false, true);
   if (!gmpRes) {
     raise_warning(cs_GMP_INVALID_RESOURCE, cs_GMP_FUNC_NAME_GMP_SETBIT);
@@ -1195,7 +1198,8 @@ static Variant HHVM_FUNCTION(gmp_sqrt,
   }
 
   if (mpz_sgn(gmpData) < 0) {
-    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE, cs_GMP_FUNC_NAME_GMP_SQRT);
+    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE,
+                  cs_GMP_FUNC_NAME_GMP_SQRT);
     return false;
   }
 
@@ -1308,7 +1312,7 @@ static bool HHVM_FUNCTION(gmp_testbit,
     return false;
   }
 
-  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP.get()).
+  auto gmpRes = gmpObject->o_get(s_GMP_gmpResource, false, s_GMP_GMP).
                 toResource().getTyped<GMPResource>(false, true);
   if (!gmpRes) {
     raise_warning(cs_GMP_INVALID_RESOURCE, cs_GMP_FUNC_NAME_GMP_TESTBIT);
@@ -1349,7 +1353,7 @@ static Variant HHVM_FUNCTION(gmp_xor,
 
 static String HHVM_METHOD(GMP, serialize) {
   Variant gmpVariant =
-    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP.get());
+    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP);
   auto resource = gmpVariant.toResource().getTyped<GMPResource>(false, true);
   if (!resource) {
     throw Exception(cs_GMP_COULD_NOT_SERIALIZE);
@@ -1381,23 +1385,13 @@ static void HHVM_METHOD(GMP, unserialize,
   mpz_t gmpData;
 
   // First value is a string (our number value)
-  Variant num;
-  try {
-    num = unserializer.unserialize();
-  } catch (Exception e) {
-    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_NUMBER);
-  }
+  Variant num = unserializer.unserialize();
   if (!num.isString() || !setMPZFromString(gmpData, num.toString(), 10)) {
     throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_NUMBER);
   }
 
   // Second value is an array of object properties optionally set by the user
-  Variant props;
-  try {
-    props = unserializer.unserialize();
-  } catch (Exception e) {
-    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_PROPERTIES);
-  }
+  Variant props = unserializer.unserialize();
   if (!props.isArray()) {
     mpz_clear(gmpData);
     throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_PROPERTIES);
@@ -1405,7 +1399,7 @@ static void HHVM_METHOD(GMP, unserialize,
 
   this_->o_set(s_GMP_gmpResource.get(),
                newres<GMPResource>(gmpData),
-               s_GMP_GMP.get());
+               s_GMP_GMP);
   this_->o_setArray(props.toArray());
 
   mpz_clear(gmpData);
@@ -1415,7 +1409,7 @@ static void HHVM_METHOD(GMP, unserialize,
 static Array HHVM_METHOD(GMP, __debugInfo,
                         const Variant& data) {
   Variant gmpVariant =
-    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP.get());
+    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP);
   auto resource = gmpVariant.toResource().getTyped<GMPResource>();
 
   Array ret = this_->o_toArray(true);
@@ -1428,7 +1422,7 @@ static Array HHVM_METHOD(GMP, __debugInfo,
 
 static void HHVM_METHOD(GMP, __clone) {
   Variant gmpVariant =
-    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP.get());
+    this_->o_get(s_GMP_gmpResource.get(), false, s_GMP_GMP);
   auto resource = gmpVariant.toResource().getTyped<GMPResource>(false, true);
   if (!resource) {
     throw Exception(cs_GMP_COULD_NOT_CLONE);

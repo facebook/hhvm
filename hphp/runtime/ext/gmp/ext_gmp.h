@@ -167,17 +167,15 @@ private:
   mpz_t    m_gmpMpz;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION(GMPResource);
-
 
 class GMP {
   static void initClass() {
-    cls = Unit::lookupClass(StringData::Make("GMP"));
+    cls = Unit::lookupClass(s_GMP_GMP.get());
   }
 
 public:
   static Object allocObject() {
-    if (cls == nullptr) {
+    if (UNLIKELY(cls == nullptr)) {
       initClass();
     }
     return ObjectData::newInstance(cls);
@@ -195,8 +193,6 @@ public:
 
   static HPHP::Class* cls;
 };
-
-HPHP::Class* GMP::cls = nullptr;
 
 } /* namespace HPHP */
 

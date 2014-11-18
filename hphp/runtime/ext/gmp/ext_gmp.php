@@ -218,6 +218,6 @@ class GMP implements Serializable {
   <<__Native>>
   public function __debugInfo() : array;
 
-	<<__Native>>
-	public function __clone(): void;
+  <<__Native>>
+  public function __clone(): void;
 }

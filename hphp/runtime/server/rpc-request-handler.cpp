@@ -157,6 +157,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
     reqData.setTimeout(0);  // can't throw when you pass zero
+    reqData.setCPUTimeout(0);
     reqData.reset();
   };
 

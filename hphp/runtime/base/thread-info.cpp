@@ -136,6 +136,7 @@ void ThreadInfo::onSessionExit() {
   // Clear any timeout handlers to they don't fire when the request has already
   // been destroyed
   m_reqInjectionData.setTimeout(0);
+  m_reqInjectionData.setCPUTimeout(0);
 
   m_reqInjectionData.reset();
   RDS::requestExit();
@@ -154,10 +155,12 @@ void throw_infinite_recursion_exception() {
 
 ssize_t check_request_surprise(ThreadInfo* info) {
   auto& p = info->m_reqInjectionData;
-  bool do_timedout, do_memExceeded, do_signaled;
+  bool do_timedout, do_cpuTimedOut, do_memExceeded, do_signaled;
 
   ssize_t flags = p.fetchAndClearFlags();
   do_timedout = (flags & RequestInjectionData::TimedOutFlag) &&
+    !p.getDebuggerAttached();
+  do_cpuTimedOut = (flags & RequestInjectionData::CPUTimedOutFlag) &&
     !p.getDebuggerAttached();
   do_memExceeded = (flags & RequestInjectionData::MemExceededFlag);
   do_signaled = (flags & RequestInjectionData::SignaledFlag);
@@ -167,10 +170,20 @@ ssize_t check_request_surprise(ThreadInfo* info) {
   info->m_pendingException = nullptr;
 
   if (do_timedout) {
+    p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
     if (pendingException) {
       p.setTimedOutFlag();
     } else {
       pendingException = generate_request_timeout_exception();
+    }
+  }
+  // Don't bother with the CPU timeout if we're already handling a wall timeout.
+  if (do_cpuTimedOut && !do_timedout) {
+    p.setTimeout(0);  // Stop wall timer so we won't time out twice.
+    if (pendingException) {
+      p.setCPUTimedOutFlag();
+    } else {
+      pendingException = generate_request_cpu_timeout_exception();
     }
   }
   if (do_memExceeded) {

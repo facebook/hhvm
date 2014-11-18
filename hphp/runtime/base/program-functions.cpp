@@ -368,6 +368,19 @@ void bump_counter_and_rethrow(bool isPsp) {
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
     throw;
+  } catch (const RequestCPUTimeoutException& e) {
+    if (isPsp) {
+      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutPSPCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.psp", 1);
+    } else {
+      static auto requestCPUTimeoutCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_non_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.non_psp", 1);
+    }
+    throw;
   } catch (const RequestMemoryExceededException& e) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
@@ -512,6 +525,8 @@ static void handle_resource_exceeded_exception() {
     throw;
   } catch (RequestTimeoutException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimedOutFlag();
+  } catch (RequestCPUTimeoutException&) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setCPUTimedOutFlag();
   } catch (RequestMemoryExceededException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setMemExceededFlag();
   } catch (...) {}
@@ -1599,7 +1614,7 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
-    auto data = (RequestInjectionData*)info->si_value.sival_ptr;
+    auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
       data->onTimeout();
     } else {

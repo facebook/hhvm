@@ -117,6 +117,13 @@ struct RequestTimeoutException : ResourceExceededException {
   EXCEPTION_COMMON_IMPL(RequestTimeoutException);
 };
 
+struct RequestCPUTimeoutException : ResourceExceededException {
+  RequestCPUTimeoutException(const std::string& msg, const Array& backtrace)
+    : ResourceExceededException(msg, backtrace)
+  {}
+  EXCEPTION_COMMON_IMPL(RequestCPUTimeoutException);
+};
+
 struct RequestMemoryExceededException : ResourceExceededException {
   RequestMemoryExceededException(const std::string& msg,
                                  const Array& backtrace)

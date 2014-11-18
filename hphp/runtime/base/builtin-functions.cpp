@@ -641,6 +641,19 @@ Exception* generate_request_timeout_exception() {
   return ret;
 }
 
+Exception* generate_request_cpu_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg =
+    folly::format("Maximum CPU time of {} seconds exceeded",
+                  data.getCPUTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
+}
+
 Exception* generate_memory_exceeded_exception() {
   Array exceptionStack = createBacktrace(BacktraceArgs()
                                          .withSelf()

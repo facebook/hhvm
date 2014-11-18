@@ -10,7 +10,7 @@
 
 open Utils
 
-type result = ((int * int) * Coverage_level.t) list
+type result = ((int * int) * Coverage_level.level) list
 
 let go f_in oc =
   assert (!(Typing_defs.type_acc) = Pos.Map.empty);

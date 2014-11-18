@@ -12,24 +12,21 @@ open Utils
 
 module TUtils = Typing_utils
 
-module Level = struct
-  type t =
-    | Unchecked (* Completely unchecked code, i.e. Tanys *)
-    | Checked   (* Completely checked code *)
-    | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
-                   concrete type parameters *)
+type level =
+  | Unchecked (* Completely unchecked code, i.e. Tanys *)
+  | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
+                 concrete type parameters *)
+  | Checked   (* Completely checked code *)
 
-  let compare x y = Pervasives.compare x y
-end
-
-include Level
-
-let string = function
+let string_of_level = function
   | Checked   -> "checked"
   | Partial   -> "partial"
   | Unchecked -> "unchecked"
 
-module CLMap = MyMap(Level)
+module CLMap = MyMap(struct
+  type t = level
+  let compare x y = Pervasives.compare x y
+end)
 
 let empty_counter =
   let m = CLMap.empty in
@@ -40,12 +37,8 @@ let empty_counter =
 let incr_counter k c =
   CLMap.add k (1 + CLMap.find_unsafe k c) c
 
-type result = {
-  (* An assoc list that counts the number of expressions at each coverage level *)
-  counts     : int CLMap.t;
-  (* A number between 0 to 1 that summarizes the extent of coverage *)
-  percentage : float;
-}
+(* An assoc list that counts the number of expressions at each coverage level *)
+type level_counts = int CLMap.t
 
 (* There is a trie in utils/, but it is not quite what we need ... *)
 

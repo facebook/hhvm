@@ -8,9 +8,9 @@
  *
  *)
 
+open Coverage_level
 open Utils
 open Hh_json
-module CL = Coverage_level
 
 (*****************************************************************************)
 (* Globals *)
@@ -424,7 +424,7 @@ let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check fn);
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = CL.mk_level_map (Some fn) !(Typing_defs.type_acc) in
+  let result = mk_level_map (Some fn) !(Typing_defs.type_acc) in
   Typing_defs.accumulate_types := false;
   Typing_defs.type_acc := Pos.Map.empty;
   let result = Pos.Map.elements result in
@@ -432,7 +432,7 @@ let hh_hack_coloring fn =
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
-                        | (Some lvl, str) -> (CL.string lvl, str)
+                        | (Some lvl, str) -> (string_of_level lvl, str)
                         | (None, str) -> ("default", str)
                         ) result in
   let result = List.map (fun (checked, text) ->

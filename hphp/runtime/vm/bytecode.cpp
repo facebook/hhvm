@@ -957,7 +957,7 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
     assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
-      if (UNLIKELY(methodName == s_construct.get())) {
+      if (UNLIKELY(methodName->isame(s_construct.get()))) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
         method = cls->getCtor();

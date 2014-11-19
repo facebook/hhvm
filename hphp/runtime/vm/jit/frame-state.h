@@ -80,12 +80,118 @@ struct EvalStack {
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
-  void swap(std::vector<SSATmp*>& vector) {
+  void swap(jit::vector<SSATmp*>& vector) {
     m_vector.swap(vector);
   }
+
 private:
-  std::vector<SSATmp*> m_vector;
+  jit::vector<SSATmp*> m_vector;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * LocalState stores information about a local variable in the current
+ * function.
+ */
+struct LocalState {
+  /*
+   * The current value of the local.
+   */
+  SSATmp* value{nullptr};
+
+  /*
+   * The current type of the local.
+   */
+  Type type{Type::Gen};
+
+  /*
+   * Prediction for the type of a local, if it's boxed, otherwise Bottom.
+   *
+   * Invariants:
+   *   always a subtype of `type'
+   *   always a subtype of BoxedInitCell
+   *   only boxed if `type' is also boxed
+   */
+  Type boxedPrediction{Type::Bottom};
+
+  /*
+   * The sources of the currently known type. They may be values. If the value
+   * is unavailable, we won't hold onto it in the value field, but we'll keep
+   * it around in typeSrcs for guard relaxation.
+   */
+  TypeSourceSet typeSrcs;
+};
+
+inline bool operator==(const LocalState& a, const LocalState& b) {
+  return a.value           == b.value &&
+         a.type            == b.type &&
+         a.boxedPrediction == b.boxedPrediction &&
+         a.typeSrcs        == b.typeSrcs;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * TODO: rename
+ */
+struct Snapshot {
+  /*
+   * Current Func, VM stack pointer, VM frame pointer, offset between sp and
+   * fp, and bytecode position.
+   */
+  const Func* curFunc;
+  SSATmp* spValue{nullptr};
+  SSATmp* fpValue{nullptr};
+  int32_t spOffset;
+  BCMarker marker;
+
+  /*
+   * m_thisAvailable tracks whether the current frame is known to have a
+   * non-null $this pointer.
+   */
+  bool thisAvailable{false};
+
+  /*
+   * Tracking of the state of the virtual execution stack:
+   *
+   *   During HhbcTranslator's run over the bytecode, these stacks
+   *   contain SSATmp values representing the execution stack state
+   *   since the last SpillStack.
+   *
+   *   The EvalStack contains cells and ActRecs that need to be
+   *   spilled in order to materialize the stack.
+   *
+   *   m_stackDeficit represents the number of cells we've popped off
+   *   the virtual stack since the last sync.
+   */
+  uint32_t stackDeficit{0};
+  EvalStack evalStack;
+
+  /*
+   * Vector of local variable inforation; sized for numLocals on the curFunc
+   * (if the state is initialized).
+   */
+  jit::vector<LocalState> locals;
+
+  /*
+   * m_frameSpansCall is true iff a Call instruction has been seen since the
+   * definition of the current frame pointer.
+   */
+  bool frameSpansCall{false};
+};
+
+inline bool operator==(const Snapshot& a, const Snapshot& b) {
+  return
+    a.spValue        == b.spValue &&
+    a.fpValue        == b.fpValue &&
+    a.curFunc        == b.curFunc &&
+    a.spOffset       == b.spOffset &&
+    a.thisAvailable  == b.thisAvailable &&
+    a.locals         == b.locals &&
+    a.frameSpansCall == b.frameSpansCall &&
+    a.marker         == b.marker;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -182,8 +288,12 @@ struct FrameState final : private LocalStateHook {
   bool finishBlock(Block*);
 
   /*
-   * Save current state of a block so we can resume processing it
-   * after working on another.
+   * Save current state of a block so we can resume processing it after working
+   * on another.
+   *
+   * Leaves the current state for this FrameStateMgr untouched: if you
+   * startBlock something new it'll keep using it.  Right now we rely on this
+   * for exit and catch traces (relevant: TODO(#4323657)).
    */
   void pauseBlock(Block*);
 
@@ -209,12 +319,6 @@ struct FrameState final : private LocalStateHook {
   void clearCse();
 
   /*
-   * Clears the current state and resets the current marker to the
-   * given value.
-   */
-  void resetCurrentState(BCMarker);
-
-  /*
    * Iterates through a control-flow graph, until a fixed-point is
    * reached. Drops all previous state.
    */
@@ -226,23 +330,24 @@ struct FrameState final : private LocalStateHook {
    */
   void loadBlock(Block*);
 
-  const Func* func() const { return m_curFunc; }
-  Offset spOffset() const { return m_spOffset; }
-  SSATmp* sp() const { return m_spValue; }
-  SSATmp* fp() const { return m_fpValue; }
-  bool thisAvailable() const { return m_thisAvailable; }
-  void setThisAvailable() { m_thisAvailable = true; }
-  bool frameSpansCall() const { return m_frameSpansCall; }
-  BCMarker marker() const { return m_marker; }
-  void setMarker(BCMarker m) { m_marker = m; }
+  const Func* func() const { return cur().curFunc; }
+  Offset spOffset() const { return cur().spOffset; }
+  SSATmp* sp() const { return cur().spValue; }
+  SSATmp* fp() const { return cur().fpValue; }
+  bool thisAvailable() const { return cur().thisAvailable; }
+  void setThisAvailable() { cur().thisAvailable = true; }
+  bool frameSpansCall() const { return cur().frameSpansCall; }
+  BCMarker marker() const { return cur().marker; }
+  void setMarker(BCMarker m) { cur().marker = m; }
+  unsigned inlineDepth() const { return m_stack.size() - 1; }
+  uint32_t stackDeficit() const { return cur().stackDeficit; }
+  void incStackDeficit() { cur().stackDeficit++; }
+  void clearStackDeficit() { cur().stackDeficit = 0; }
+  EvalStack& evalStack() { return cur().evalStack; }
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
-  unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
+
   void setBuilding(bool b) { m_status = b ? Status::Building : Status::None; }
-  uint32_t stackDeficit() const { return m_stackDeficit; }
-  void incStackDeficit() { m_stackDeficit++; }
-  void clearStackDeficit() { m_stackDeficit = 0; }
-  EvalStack& evalStack() { return m_evalStack; }
 
   Type localType(uint32_t id) const;
   Type predictedInnerType(uint32_t id) const;
@@ -283,58 +388,10 @@ struct FrameState final : private LocalStateHook {
   };
 
   /*
-   * LocalState stores information about a local in the current function.
-   */
-  struct LocalState {
-    /*
-     * The current value of the local.
-     */
-    SSATmp* value{nullptr};
-
-    /*
-     * The current type of the local.
-     */
-    Type type{Type::Gen};
-
-    /*
-     * Prediction for the type of a local, if it's boxed, otherwise Bottom.
-     *
-     * Invariants:
-     *   always a subtype of `type'
-     *   always a subtype of BoxedInitCell
-     *   only boxed if `type' is also boxed
-     */
-    Type boxedPrediction{Type::Bottom};
-
-    /*
-     * The sources of the currently known type. They may be values. If
-     * the value is unavailable, we won't hold onto it in the value field, but
-     * we'll keep it around in typeSrcs for guard relaxation.
-     */
-    TypeSourceSet typeSrcs;
-
-    bool operator==(const LocalState& b) const {
-      if (value != b.value ||
-          type != b.type ||
-          boxedPrediction != b.boxedPrediction ||
-          typeSrcs.size() != b.typeSrcs.size()) {
-        return false;
-      }
-      for (auto it = typeSrcs.begin(), itb = b.typeSrcs.begin();
-           it != typeSrcs.end(); it++, itb++) {
-        if (*it != *itb) return false;
-      }
-      return true;
-    }
-  };
-
-  using LocalVec = jit::vector<LocalState>;
-
-  /*
    * Info about state leaving a block. The block must have already been
    * processed.
    */
-  const LocalVec& localsLeavingBlock(Block*) const;
+  const jit::vector<LocalState>& localsLeavingBlock(Block*) const;
   SSATmp* spLeavingBlock(Block*) const;
 
   /*
@@ -350,43 +407,9 @@ struct FrameState final : private LocalStateHook {
   void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
  private:
-  /*
-   * Snapshot stores fields of FrameState to be saved, restored, and merged for
-   * inlining and control flow.
-   */
-  struct Snapshot {
-    SSATmp* spValue;
-    SSATmp* fpValue;
-    const Func* curFunc;
-    int32_t spOffset;
-    bool thisAvailable;
-    uint32_t stackDeficit;
-    EvalStack evalStack;
-    LocalVec locals;
-    bool frameSpansCall;
-    BCMarker curMarker;
-    jit::vector<Snapshot> inlineSavedStates;
-
-    bool operator==(const Snapshot& b) const {
-      return spValue == b.spValue &&
-        fpValue == b.fpValue &&
-        curFunc == b.curFunc &&
-        spOffset == b.spOffset &&
-        thisAvailable == b.thisAvailable &&
-        locals == b.locals &&
-        frameSpansCall == b.frameSpansCall &&
-        curMarker == b.curMarker &&
-        inlineSavedStates == b.inlineSavedStates;
-    }
-
-    bool operator!=(const Snapshot& b) const {
-      return !operator==(b);
-    }
-  };
-
   struct BlockState {
-    Snapshot in;
-    Snapshot out;
+    jit::vector<Snapshot> in;
+    jit::vector<Snapshot> out;
   };
 
 private:
@@ -396,6 +419,11 @@ private:
    * other blocks intact.
    */
   void clearCurrentState();
+  /*
+   * Clears the current state and resets the current marker to the
+   * given value.
+   */
+  void resetCurrentState(BCMarker);
 
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
@@ -411,7 +439,7 @@ private:
   void setBoxedLocalPrediction(uint32_t id, Type type) override;
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
 
-  LocalVec& locals(unsigned inlineIdx);
+  jit::vector<LocalState>& locals(unsigned inlineIdx);
 
   /* Support for getLocalEffects */
   void clearLocals(LocalStateHook& hook) const;
@@ -429,43 +457,23 @@ private:
   void cseKill(SSATmp* src);
   CSEHash* cseHashTable(const IRInstruction* inst);
 
-  Snapshot createSnapshot() const;
-  Snapshot createSnapshotWithInline() const;
-
-  void load(Snapshot&);
-
   bool save(Block*);
-  bool merge(Snapshot&);
 
   /*
    * Whether a block has been visited in the current iteration.
    */
   bool isVisited(const Block*) const;
 
+  Snapshot& cur() {
+    assert(!m_stack.empty());
+    return m_stack.back();
+  }
+  const Snapshot& cur() const {
+    return const_cast<FrameState*>(this)->cur();
+  }
+
  private:
   IRUnit& m_unit;
-
-  /*
-   * Current Func, VM stack pointer, VM frame pointer, offset between sp and
-   * fp, and bytecode position.
-   */
-  const Func* m_curFunc;
-  SSATmp* m_spValue{nullptr};
-  SSATmp* m_fpValue{nullptr};
-  int32_t m_spOffset;
-  BCMarker m_marker;
-
-  /*
-   * m_thisAvailable tracks whether the current frame is known to have a
-   * non-null $this pointer.
-   */
-  bool m_thisAvailable{false};
-
-  /*
-   * m_frameSpansCall is true iff a Call instruction has been seen since the
-   * definition of the current frame pointer.
-   */
-  bool m_frameSpansCall{false};
 
   /*
    * Status of the FrameState.
@@ -473,31 +481,10 @@ private:
   Status m_status{Status::None};
 
   /*
-   * Tracking of the state of the virtual execution stack:
-   *
-   *   During HhbcTranslator's run over the bytecode, these stacks
-   *   contain SSATmp values representing the execution stack state
-   *   since the last SpillStack.
-   *
-   *   The EvalStack contains cells and ActRecs that need to be
-   *   spilled in order to materialize the stack.
-   *
-   *   m_stackDeficit represents the number of cells we've popped off
-   *   the virtual stack since the last sync.
+   * Stack of states.  We push and pop frames as we enter and leave inlined
+   * calls.
    */
-  uint32_t m_stackDeficit{0};
-  EvalStack m_evalStack;
-
-  /*
-   * m_locals tracks the current types and values of locals.
-   */
-  LocalVec m_locals;
-
-  /*
-   * m_inlineSavedStates holds snapshots of the caller(s)'s state while in an
-   * inlined callee.
-   */
-  jit::vector<Snapshot> m_inlineSavedStates;
+  jit::vector<Snapshot> m_stack;
 
   /*
    * m_cseHash holds the destination of all tracked instructions that produced
@@ -509,7 +496,7 @@ private:
   /*
    * Saved snapshots of the incoming and outgoing state of blocks.
    */
-  jit::hash_map<Block*, BlockState> m_states;
+  jit::hash_map<Block*,BlockState> m_states;
 
   /*
    * Set of visited blocks during the traversal of the unit.
@@ -517,10 +504,14 @@ private:
   boost::dynamic_bitset<> m_visited;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Debug stringification.
  */
 std::string show(const FrameState&);
+
+//////////////////////////////////////////////////////////////////////
 
 } }
 

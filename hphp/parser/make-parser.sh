@@ -6,6 +6,7 @@ if [ ! -x "$SED" ]; then
   exit 1
 fi
 
+unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 if [ -z "${INSTALL_DIR}" ]; then
@@ -23,11 +24,9 @@ else
   OUTFILE=${INSTALL_DIR}/hphp.tab.cpp
   OUTHEADER=${INSTALL_DIR}/hphp.tab.hpp
 
-  EXTERNAL_TOOLS_ROOT=`readlink -f ${FBCODE_DIR}/third-party/centos5.2-native/`
-  BISON_DIR=${EXTERNAL_TOOLS_ROOT}/bison/bison-2.4.1/da39a3e/
+  BISON=$(readlink -f $(ls -t ${FBCODE_DIR}/third-party2/bison/2.4.1/centos5.2-native/*/bin/bison | head -1))
+  BISON_DIR=$(dirname $(dirname $BISON))
   export BISON_PKGDATADIR=${BISON_DIR}/share/bison
-
-  BISON=${BISON_DIR}/bin/bison
 fi
 
 $BISON -pCompiler --verbose --locations -d -o${OUTFILE} ${INFILE}
@@ -35,7 +34,7 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
-# Lots of our logic relies on knowing the shape of the token table. Sadly it is 
+# Lots of our logic relies on knowing the shape of the token table. Sadly it is
 # an enum without introspection, so instead make it macros so we can control its
 # shape on re-requires of the .hpp file
 $SED -i -r \

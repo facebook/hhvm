@@ -1714,7 +1714,7 @@ generating efficient compare-and-branch instruction sequences.
   with a restriction on the input type.
 
   CountArray expects any array. CountArrayFast expects an array whose kind is not
-  kNvtwKind. CountCollection expects a collection object.
+  kGlobalsKind. CountCollection expects a collection object.
 
 | Nop, ND, NA, NF
 

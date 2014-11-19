@@ -101,7 +101,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
@@ -279,8 +279,8 @@ VarEnv::VarEnv()
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   assert(!g_context->m_globalVarEnv);
   g_context->m_globalVarEnv = this;
-  auto globals = new (MM().objMalloc(sizeof(NameValueTableWrapper)))
-                 NameValueTableWrapper(&m_nvTable);
+  auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
+                 GlobalsArray(&m_nvTable);
   auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
   m_nvTable.set(s_GLOBALS.get(), &globalArray);
 }

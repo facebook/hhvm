@@ -110,7 +110,7 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Nvtw, Proxy,
+  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Globals, Proxy,
   // Other ordinary refcounted heap objects
   String, Object, Resource, Ref,
   Native, // a NativeData header preceding an HNI ObjectData

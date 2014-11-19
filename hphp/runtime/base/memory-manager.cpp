@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
@@ -556,7 +556,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 namespace {
 const char* header_names[] = {
   "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Shared",
-  "Nvtw", "Proxy", "String", "Object", "Resource", "Ref", "Native",
+  "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
   "Sweepable", "Small", "Free", "Hole", "Debug"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
@@ -606,10 +606,8 @@ size_t Header::size() const {
       return sizeof(ArrayData);
     case HeaderKind::Shared: // this occurs in the Sweepable header
       return sizeof(APCLocalArray);
-    case HeaderKind::Nvtw:
-      // GlobalNamedValueTableWrapper is allocated with smart_new, so
-      // we might never get here. see #5522778
-      return sizeof(NameValueTableWrapper);
+    case HeaderKind::Globals:
+      return sizeof(GlobalsArray);
     case HeaderKind::Proxy:
       return sizeof(ProxyArray);
     case HeaderKind::String:

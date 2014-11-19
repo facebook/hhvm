@@ -21,10 +21,10 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static __thread NameValueTableWrapper* g_variables;
+static __thread GlobalsArray* g_variables;
 static __thread EnvConstants* g_envConstants;
 
-NameValueTableWrapper* get_global_variables() {
+GlobalsArray* get_global_variables() {
   assert(g_variables);
   return g_variables;
 }
@@ -49,8 +49,8 @@ void EnvConstants::requestExit() {
   g_envConstants = nullptr;
 }
 
-NameValueTableWrapper::NameValueTableWrapper(NameValueTable* tab)
-  : ArrayData(kNvtwKind)
+GlobalsArray::GlobalsArray(NameValueTable* tab)
+  : ArrayData(kGlobalsKind)
   , m_tab(tab)
 {
   Variant arr(staticEmptyArray());

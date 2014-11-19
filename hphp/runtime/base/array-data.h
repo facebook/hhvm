@@ -53,7 +53,7 @@ struct ArrayData {
     kVPackedKind = 4, // PackedArray with extra warnings for certain operations
     kEmptyKind = 5,   // The singleton static empty array
     kSharedKind = 6,  // SharedArray
-    kNvtwKind = 7,    // NameValueTableWrapper
+    kGlobalsKind = 7, // GlobalsArray
     kProxyKind = 8,   // ProxyArray
     kNumKinds = 9     // insert new values before kNumKinds.
   };
@@ -125,7 +125,7 @@ public:
 
   // unlike ArrayData::size(), this functions doesn't delegate
   // to the vsize() function, so its more efficient to use this when
-  // you know you don't have a NameValueTableWrapper or ProxyArray
+  // you know you don't have a GlobalsArray or ProxyArray
   size_t getSize() const {
     return m_size;
   }
@@ -201,7 +201,7 @@ public:
   }
 
   bool isSharedArray() const { return m_kind == kSharedKind; }
-  bool isNameValueTableWrapper() const { return m_kind == kNvtwKind; }
+  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
   bool isProxyArray() const { return m_kind == kProxyKind; }
 
   /*
@@ -510,7 +510,7 @@ static_assert(ArrayData::kIntMapKind == uint8_t(HeaderKind::IntMap), "");
 static_assert(ArrayData::kVPackedKind == uint8_t(HeaderKind::VPacked), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
 static_assert(ArrayData::kSharedKind == uint8_t(HeaderKind::Shared), "");
-static_assert(ArrayData::kNvtwKind == uint8_t(HeaderKind::Nvtw), "");
+static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kProxyKind == uint8_t(HeaderKind::Proxy), "");
 
 //////////////////////////////////////////////////////////////////////

@@ -1921,10 +1921,10 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  auto const notNvtw =
-    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kNvtwKind;
+  auto const notGlobals =
+    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kGlobalsKind;
 
-  if (!mightRelax(env, src) && notNvtw) {
+  if (!mightRelax(env, src) && notGlobals) {
     return gen(env, CountArrayFast, src);
   }
 

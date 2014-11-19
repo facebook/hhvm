@@ -290,8 +290,8 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.borrow(-bytes);
-  FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  smartFreeBig(static_cast<BigNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  FTRACE(3, "smartFreeSizeBig: {} ({} bytes)\n", vp, bytes);
+  m_heap.freeBig(debugPreFree(vp, bytes, 0));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -457,7 +457,6 @@ ALWAYS_INLINE
 bool MemoryManager::getObjectTracking() {
   return m_trackingInstances;
 }
-
 
 }
 

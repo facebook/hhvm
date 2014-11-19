@@ -592,6 +592,7 @@ void flush_evaluation_stack() {
      */
     hphp_memory_cleanup();
   }
+  MM().flush();
 
   if (!t_se.isNull()) {
     t_se->flush();

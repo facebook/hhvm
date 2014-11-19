@@ -507,16 +507,13 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * RAII helper for emitting code to exit traces. See IRBuilder::pushBlock
+ * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
  * for usage.
- *
- * The pause template parameter determines whether to pause the new block upon
- * destruction or to finish it.
  */
 template<bool pause>
 struct BlockPusherImpl {
   BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block,
-                  const folly::Optional<Block::iterator>& where = folly::none)
+              const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);

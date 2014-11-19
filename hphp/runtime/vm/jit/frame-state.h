@@ -144,10 +144,8 @@ struct FrameState final : private LocalStateHook {
 
   /*
    * Update state by computing the effects of an instruction.
-   *
-   * Returns true iff the state for the instruction's taken edge is changed.
    */
-  bool update(const IRInstruction*);
+  void update(const IRInstruction*);
 
   /*
    * Whether we have state saved for the given block.
@@ -176,10 +174,8 @@ struct FrameState final : private LocalStateHook {
   /*
    * Finish tracking state for a block and save the current state to
    * any successors.
-   *
-   * Returns true iff the out-state for the block has changed.
    */
-  bool finishBlock(Block*);
+  void finishBlock(Block*);
 
   /*
    * Save current state of a block so we can resume processing it
@@ -214,18 +210,6 @@ struct FrameState final : private LocalStateHook {
    */
   void resetCurrentState(BCMarker);
 
-  /*
-   * Iterates through a control-flow graph, until a fixed-point is
-   * reached. Drops all previous state.
-   */
-  void computeFixedPoint(const BlocksWithIds&);
-
-  /*
-   * Loads the in-state for a block. Requires that the block has already been
-   * processed. Intended to be used after computing the fixed-point of a CFG.
-   */
-  void loadBlock(Block*);
-
   const Func* func() const { return m_curFunc; }
   Offset spOffset() const { return m_spOffset; }
   SSATmp* sp() const { return m_spValue; }
@@ -238,7 +222,7 @@ struct FrameState final : private LocalStateHook {
   bool enableCse() const { return m_enableCse; }
   void setEnableCse(bool e) { m_enableCse = e; }
   unsigned inlineDepth() const { return m_inlineSavedStates.size(); }
-  void setBuilding(bool b) { m_status = b ? Status::Building : Status::None; }
+  void setBuilding(bool b) { m_building = b; }
   uint32_t stackDeficit() const { return m_stackDeficit; }
   void incStackDeficit() { m_stackDeficit++; }
   void clearStackDeficit() { m_stackDeficit = 0; }
@@ -264,23 +248,6 @@ struct FrameState final : private LocalStateHook {
                     const folly::Optional<IdomVector>&);
 
   void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
-
-  /*
-   * What the FrameState is doing.
-   *
-   * Building - Changes when we propagate state to taken blocks.
-   *
-   * RunningFixedPoint - Changes how we handle predecessors we haven't visited
-   * yet.
-   *
-   * FinishedFixedPoint - Stops us from merging new state to blocks.
-   */
-  enum class Status : uint8_t {
-    None,
-    Building,
-    RunningFixedPoint,
-    FinishedFixedPoint,
-  };
 
   /*
    * LocalState stores information about a local in the current function.
@@ -378,10 +345,6 @@ struct FrameState final : private LocalStateHook {
         curMarker == b.curMarker &&
         inlineSavedStates == b.inlineSavedStates;
     }
-
-    bool operator!=(const Snapshot& b) const {
-      return !operator==(b);
-    }
   };
 
   struct BlockState {
@@ -432,10 +395,9 @@ private:
   Snapshot createSnapshot() const;
   Snapshot createSnapshotWithInline() const;
 
-  void load(Snapshot&);
-
-  bool save(Block*);
-  bool merge(Snapshot&);
+  void save(Block*);
+  void load(Snapshot& state);
+  void merge(Snapshot& s1);
 
   /*
    * Whether a block has been visited in the current iteration.
@@ -468,9 +430,10 @@ private:
   bool m_frameSpansCall{false};
 
   /*
-   * Status of the FrameState.
+   * m_building is true if we're using FrameState to build the IR,
+   * since some state updates are conditional in that case.
    */
-  Status m_status{Status::None};
+  bool m_building{false};
 
   /*
    * Tracking of the state of the virtual execution stack:

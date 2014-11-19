@@ -868,7 +868,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = newres<TimeZone>(timelib_tzinfo_clone(t->tz_info));
+    m_tz = newres<TimeZone>(t->tz_info);
   }
   return true;
 }

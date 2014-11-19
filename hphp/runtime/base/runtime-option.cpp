@@ -1041,10 +1041,12 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
     ServerPrimaryIPv4 = GetPrimaryIPv4();
     ServerPrimaryIPv6 = GetPrimaryIPv6();
+#ifdef FACEBOOK
     if (ServerPrimaryIPv4.empty() && ServerPrimaryIPv6.empty()) {
       throw std::runtime_error("Unable to resolve the server's "
           "IPv4 or IPv6 address");
     }
+#endif
 
     Config::Bind(ServerPort, ini, server["Port"], 80);
     Config::Bind(ServerBacklog, ini, server["Backlog"], 128);

@@ -120,7 +120,7 @@ std::string GetPrimaryIPv6() {
 
 std::string GetPrimaryIP() {
   auto ipaddress = GetPrimaryIPv4();
-  if (!ipaddress.empty()) {
+  if (ipaddress.empty()) {
     ipaddress = GetPrimaryIPv6();
   }
   return ipaddress;

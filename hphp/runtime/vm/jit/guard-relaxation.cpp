@@ -239,7 +239,8 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
 
   // Make a second pass to reflow types, with some special logic for loads.
   FrameState state{unit, unit.entry()->front().marker()};
-  for (auto* block : blocks) {
+
+  for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
     Indent _i;
     state.startBlock(block, block->front().marker());

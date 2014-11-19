@@ -96,42 +96,18 @@ ETCH_LABEL(14):
 	.quad	ETCH_LABEL(19)
 	.quad	ETCH_LABEL(20)
 	.text
-	ETCH_ALIGN8
-	ETCH_ALIGN4
 ETCH_LABEL(20):
 	movq	48(%rsi), %r8
 	movq	%r8, 48(%rcx)
 ETCH_LABEL(19):
-	movdqu	(%rsi), %xmm2
-	movdqu	16(%rsi), %xmm1
-	movdqu	32(%rsi), %xmm0
-	movups	%xmm2, (%rcx)
-	movups	%xmm1, 16(%rcx)
-	movups	%xmm0, 32(%rcx)
-	
-	subq	%rdi, %rdx
-	addq	%rdi, %rcx
-	addq	%rdi, %rsi
-	testq	%rdx, %rdx
-	jne 	ETCH_LABEL(28)
-	rep; ret
-
+	movq	40(%rsi), %r8
+	movq	%r8, 40(%rcx)
 ETCH_LABEL(18):
 	movq	32(%rsi), %r8
 	movq	%r8, 32(%rcx)
 ETCH_LABEL(17):
-	movdqu	(%rsi), %xmm1
-	movdqu	16(%rsi), %xmm0
-	movups	%xmm1, (%rcx)
-	movups	%xmm0, 16(%rcx)
-	
-	subq	%rdi, %rdx
-	addq	%rdi, %rcx
-	addq	%rdi, %rsi
-	testq	%rdx, %rdx
-	jne		ETCH_LABEL(28)
-	rep; ret
-
+	movq	24(%rsi), %r8
+	movq	%r8, 24(%rcx)
 ETCH_LABEL(16):
 	movq	16(%rsi), %r8
 	movq	%r8, 16(%rcx)
@@ -149,7 +125,8 @@ ETCH_LABEL(2):
 	testq	%rdx, %rdx
 	jne	ETCH_LABEL(28)
 	jmp	ETCH_LABEL(26)
-	ETCH_ALIGN8
+	.p2align 4,,10
+	.p2align 3
 ETCH_LABEL(32):
 	movq	%r8, %rcx
 ETCH_LABEL(28):

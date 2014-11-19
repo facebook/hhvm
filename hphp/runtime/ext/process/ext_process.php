@@ -111,6 +111,24 @@ function pcntl_signal(int $signo,
                       bool $restart_syscalls = true): bool;
 
 /**
+ * The pcntl_sigprocmask() function adds, removes or sets blocked signals,
+ * depending on the how parameter.
+ *
+ * @param int $how - Sets the behavior of pcntl_sigprocmask(). Possible values:
+ *  - SIG_BLOCK: Add the signals to the currently blocked signals.
+ *  - SIG_UNBLOCK: Remove the signals from the currently blocked signals.
+ *  - SIG_SETMASK: Replace the currently blocked signals by the given list of
+ *    signals.
+ * @param array $set - List of signals.
+ * @param array& $oldset - The oldset parameter is set to an array containing
+ *   the list of the previously blocked signals.
+ *
+ * @return bool - Returns TRUE on success or FALSE on failure.
+ */
+<<__Native>>
+function pcntl_sigprocmask(int $how, array $set, mixed &$oldset = null): bool;
+
+/**
  * The wait function suspends execution of the current process until a child
  *   has exited, or until a signal is delivered whose action is to terminate the
  *   current process or to call a signal handling function. If a child has

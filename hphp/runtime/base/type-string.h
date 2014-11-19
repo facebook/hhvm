@@ -247,6 +247,9 @@ public:
   int length() const {
     return m_px ? m_px->size() : 0;
   }
+  uint32_t capacity() const {
+    return m_px->capacity(); // intentionally skip nullptr check
+  }
   StringSlice slice() const {
     return m_px ? m_px->slice() : StringSlice("", 0);
   }
@@ -272,11 +275,6 @@ public:
    */
   String substr(int start, int length = 0x7FFFFFFF,
                 bool nullable = false) const;
-
-  /**
-   * Returns the last token if string is delimited by the specified.
-   */
-  String lastToken(char delimiter);
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -540,6 +538,10 @@ public:
   const char* c_str() const { return data(); }
   int size() const { return m_px ? m_px->size() : 0; }
   bool empty() const { return size() == 0; }
+
+  uint32_t capacity() const {
+    return m_px->capacity(); // intentionally skip nullptr check
+  }
 
   String& asString() {
     return *reinterpret_cast<String*>(this);

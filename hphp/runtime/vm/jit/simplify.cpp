@@ -20,12 +20,15 @@
 #include <type_traits>
 #include <limits>
 
+#include "hphp/runtime/vm/jit/mc-generator.h" // TODO(#5593564): temporary
+
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
@@ -1251,6 +1254,16 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
+  // This is trying to get some information about a bug that's in another
+  // module:
+  auto show_failure = [&]() -> std::string {
+    auto msg = std::string{};
+    msg += show(*mcg->tx().region()) + "\n";
+    msg += "ConvArrToBool issue:\n";
+    msg += env.unit.toString();
+    return msg;
+  };
+  always_assert_log(inst->src(0)->type() <= Type::Arr, show_failure);
   if (src->isConst()) {
     // const_cast is safe. We're only making use of a cell helper.
     auto arr = const_cast<ArrayData*>(src->arrVal());
@@ -1830,22 +1843,38 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = arr->arrVal()->nvGet(idx->intVal());
+  return value ? cns(env, *value) : nullptr;
+}
+
+SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = [&] {
+    int64_t val;
+    if (idx->strVal()->isStrictlyInteger(val)) {
+      return arr->arrVal()->nvGet(val);
+    }
+    return arr->arrVal()->nvGet(idx->strVal());
+  }();
+  return value ? cns(env, *value) : nullptr;
+}
+
 SSATmp* simplifyLdPackedArrayElem(State& env, const IRInstruction* inst) {
-  auto const arrayTmp = inst->src(0);
-  auto const idxTmp   = inst->src(1);
-  if (arrayTmp->isConst() && idxTmp->isConst()) {
-    auto const value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
-    if (!value) {
-      // The index doesn't exist. This code should be unreachable at runtime.
-      return nullptr;
-    }
+  if (inst->src(0)->isConst()) return arrIntKeyImpl(env, inst);
+  return nullptr;
+}
 
-    if (value->m_type == KindOfRef) {
-      return cns(env, *value->m_data.pref->tv());
-    }
-    return cns(env, *value);
+SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->isConst()) {
+    if (inst->src(1)->type() <= Type::Int) return arrIntKeyImpl(env, inst);
+    if (inst->src(1)->type() <= Type::Str) return arrStrKeyImpl(env, inst);
   }
-
   return nullptr;
 }
 
@@ -2045,6 +2074,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqInt)
   X(Same)
   X(NSame)
+  X(ArrayGet)
   default: break;
   }
 #undef X
@@ -2366,49 +2396,6 @@ void copyProp(IRInstruction* inst) {
     // copyPropped.
     assert(!inst->src(i)->inst()->is(Mov));
   }
-}
-
-const SSATmp* canonical(const SSATmp* val) {
-  return canonical(const_cast<SSATmp*>(val));
-}
-
-SSATmp* canonical(SSATmp* value) {
-  if (value == nullptr) return nullptr;
-
-  auto inst = value->inst();
-
-  while (inst->isPassthrough()) {
-    value = inst->getPassthroughValue();
-    inst = value->inst();
-  }
-  return value;
-}
-
-IRInstruction* findSpillFrame(SSATmp* sp) {
-  auto inst = sp->inst();
-  while (!inst->is(SpillFrame)) {
-    if (debug) {
-      [&] {
-        for (auto const& dst : inst->dsts()) {
-          if (dst.isA(Type::StkPtr)) return;
-        }
-        assert(false);
-      }();
-    }
-
-    assert(!inst->is(RetAdjustStack));
-    if (inst->is(DefSP)) return nullptr;
-    if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
-      // A non-punted translation of this bytecode would contain a SpillFrame.
-      return nullptr;
-    }
-
-    // M-instr support opcodes have the previous sp in varying sources.
-    if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
-    else                       inst = inst->src(0)->inst();
-  }
-
-  return inst;
 }
 
 bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {

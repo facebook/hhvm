@@ -53,7 +53,7 @@ and ty_atomic buf =
     | "boolean" -> T.ATbool
     | "uint"
     | "unsigned_integer" -> T.ATuint
-    | "numeric" -> T.ATnum
+    | "numeric" -> T.ATnumeric
     | "callable" -> T.ATcallable
     | "array" -> T.ATanyarray
     | "null" -> T.ATnull

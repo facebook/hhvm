@@ -1732,11 +1732,11 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   BlockSorter s(unit);
   s.dfs(unit.entry);
   std::reverse(s.blocks.begin(), s.blocks.end());
-  // put the blocks containing "end" last; expect at most one per area.
+  // put the blocks containing "fallthru" last; expect at most one per Vunit
   std::stable_partition(s.blocks.begin(), s.blocks.end(), [&] (Vlabel b) {
     auto& block = unit.blocks[b];
     auto& code = block.code;
-    return code.back().op != Vinstr::end;
+    return code.back().op != Vinstr::fallthru;
   });
   return s.blocks;
 }

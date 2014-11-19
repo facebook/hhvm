@@ -1423,6 +1423,11 @@ static Object HHVM_METHOD(Imagick, getImageMatteColor) {
   return createImagickPixel(pixel.releaseWand(), true);
 }
 
+static String HHVM_METHOD(Imagick, getImageMimeType) {
+  auto wand = getMagickWandResource(this_);
+  return getImageMimeType(wand->getWand());
+}
+
 static int64_t HHVM_METHOD(Imagick, getImageOrientation) {
   auto wand = getMagickWandResource(this_);
   return MagickGetImageOrientation(wand->getWand());
@@ -1822,7 +1827,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   ret.set(s_imageName,
     convertMagickString(MagickGetImageFilename(wand->getWand())));
 
-  String mimetype = getImageMimeType(wand->getWand());
+  String mimetype = HHVM_MN(Imagick, getImageMimeType)(this_);
   ret.set(s_mimetype, mimetype.empty() ? s_unknown.get() : mimetype);
 
   for (const auto& i: parsedIdentify) {
@@ -3897,6 +3902,7 @@ void loadImagickClass() {
   HHVM_ME(Imagick, getImageLength);
   HHVM_ME(Imagick, getImageMatte);
   HHVM_ME(Imagick, getImageMatteColor);
+  HHVM_ME(Imagick, getImageMimeType);
   HHVM_ME(Imagick, getImageOrientation);
   HHVM_ME(Imagick, getImagePage);
   HHVM_ME(Imagick, getImagePixelColor);

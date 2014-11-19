@@ -755,6 +755,9 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
     | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
     | x when x = SN.Typehints.mixed -> N.Hmixed
+    | x when x = SN.Typehints.shape ->
+        Errors.shape_typehint p;
+        N.Hany
     | x when x = SN.Typehints.this && allow_this ->
         if hl != []
         then Errors.this_no_argument p;
@@ -804,7 +807,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
          *
          *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
          *)
-      let cname = snd (Env.class_name env id) in
+      let (_, cname) as name = Env.class_name env id in
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
       let privacy_policy_base_covariance =
@@ -816,7 +819,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
          privacy_policy_base_covariance || data_type_covariance) in
-      N.Happly (Env.class_name env id, hintl ~allow_this env hl)
+      N.Happly (name, hintl ~allow_this env hl)
   end
 
 (* Hints that are valid both as casts and type annotations.  Neither casts nor
@@ -1205,14 +1208,20 @@ and method_ env m =
   let name = Env.new_const env m.m_name in
   let acc = false, false, N.Public in
   let final, abs, vis = List.fold_left kind acc m.m_kind in
-  let unsafe = is_unsafe_body m.m_body in
   List.iter check_constraint m.m_tparams;
   let tparam_l = type_paraml env m.m_tparams in
+  (* Naming method body: *)
+  let unsafe = is_unsafe_body m.m_body in
   let body =
     match genv.in_mode with
     | Ast.Mpartial | Ast.Mstrict ->
         block env m.m_body
     | Ast.Mdecl -> [] in
+  let body = N.NamedBody body in
+  (* If not naming: ... *)
+  (* let body = N.UnnamedBody m.m_body in *)
+  (* ... and don't forget that fun_kind (generators) and unsafe
+   * both depend upon the processing of the unnamed ast *)
   let attrs = m.m_user_attributes in
   let method_type = fun_kind env m.m_fun_kind in
   let ret = opt_map (hint ~allow_this:true env) m.m_ret in
@@ -1222,7 +1231,7 @@ and method_ env m =
        m_abstract   = abs    ;
        m_name       = name   ;
        m_tparams    = tparam_l;
-       m_params     = paraml   ;
+       m_params     = paraml ;
        m_body       = body   ;
        m_user_attributes = attrs;
        m_ret        = ret    ;
@@ -1303,27 +1312,33 @@ and fun_ genv f =
   let h = opt_map (hint ~allow_this:true env) f.f_ret in
   let variadicity, paraml = fun_paraml env f.f_params in
   let x = Env.fun_id env f.f_name in
-  let unsafe = is_unsafe_body f.f_body in
   List.iter check_constraint f.f_tparams;
   let f_tparams = type_paraml env f.f_tparams in
+  (* Naming func body: *)
+  let unsafe = is_unsafe_body f.f_body in
   let body =
     match genv.in_mode with
     | Ast.Mstrict | Ast.Mpartial -> block env f.f_body
     | Ast.Mdecl -> []
   in
+  let body = N.NamedBody body in
+  (* If not naming: ... *)
+  (* let body = N.UnnamedBody f.f_body in *)
+  (* let unsafe = false in *)
+  (* ... and don't forget that fun_kind (generators) and unsafe
+   * both depend upon the processing of the unnamed ast *)
   let kind = fun_kind env f.f_fun_kind in
-  let fun_ =
-    { N.f_unsafe = unsafe;
-      f_mode = f.f_mode;
-      f_ret = h;
-      f_name = x;
-      f_tparams = f_tparams;
-      f_params = paraml;
-      f_body = body;
-      f_variadic = variadicity;
-      f_fun_kind = kind;
-    } in
-  fun_
+  {
+    N.f_unsafe = unsafe;
+    f_mode = f.f_mode;
+    f_ret = h;
+    f_name = x;
+    f_tparams = f_tparams;
+    f_params = paraml;
+    f_body = body;
+    f_variadic = variadicity;
+    f_fun_kind = kind;
+  }
 
 and cut_and_flatten ?(replacement=Noop) = function
   | [] -> []
@@ -1791,17 +1806,17 @@ and expr_ env = function
       | px, n when n = SN.Classes.cParent ->
         if (fst env).cclass = None then
           let () = Errors.parent_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cSelf ->
         if (fst env).cclass = None then
           let () = Errors.self_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cStatic ->
         if (fst env).cclass = None then
           let () = Errors.static_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | _ ->
         no_typedef env x;
@@ -1809,9 +1824,14 @@ and expr_ env = function
     N.InstanceOf (expr env e, (p, N.Id id))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
-  | New (x, el, uel) ->
+  | New ((_, Id x), el, uel) ->
       N.New (make_class_id env x, exprl env el, exprl env uel)
+  | New ((p, e_), el, uel) ->
+      if (fst env).in_mode = Mstrict
+      then Errors.dynamic_new_in_strict_mode p;
+      N.New (make_class_id env (p, SN.Classes.cUnknown), exprl env el, exprl env uel)
   | Efun (f, idl) ->
+      let idl = List.map fst idl in
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
       let idl' = List.map (Env.lvar env) idl in
       let env = (fst env, Env.empty_local ()) in
@@ -1848,12 +1868,16 @@ and expr_ env = function
       N.Any
   | Import _ ->
       N.Any
+  | Ref (p, e_) -> expr_ env e_
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true env) f.f_ret in
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
-  let body = block env f.f_body in
+  (* The bodies of lambdas go through naming in the containing local
+   * environment *)
+  let named_body = block env f.f_body in
+  let body = N.NamedBody named_body in
   let f_kind = fun_kind env f.f_fun_kind in
   {
     N.f_unsafe = unsafe;
@@ -1870,39 +1894,39 @@ and expr_lambda env f =
 and make_class_id env (p, x as cid) =
   no_typedef env cid;
   match x with
-  | x when x = SN.Classes.cParent ->
-    if (fst env).cclass = None then
-      let () = Errors.parent_outside_class p in
-      N.CI (p, "*Unknown*")
-    else N.CIparent
-  | x when x = SN.Classes.cSelf ->
-    if (fst env).cclass = None then
-      let () = Errors.self_outside_class p in
-      N.CI (p, "*Unknown*")
-    else N.CIself
-  | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
-      let () = Errors.static_outside_class p in
-      N.CI (p, "*Unknown*")
-    else N.CIstatic
-  | x when x = "$this" -> N.CIvar (p, N.This)
-  | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
-  | _ -> N.CI (Env.class_name env cid)
+    | x when x = SN.Classes.cParent ->
+      if (fst env).cclass = None then
+        let () = Errors.parent_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIparent
+    | x when x = SN.Classes.cSelf ->
+      if (fst env).cclass = None then
+        let () = Errors.self_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIself
+    | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
+        let () = Errors.static_outside_class p in
+        N.CI (p, SN.Classes.cUnknown)
+      else N.CIstatic
+    | x when x = "$this" -> N.CIvar (p, N.This)
+    | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))
+    | _ -> N.CI (Env.class_name env cid)
 
 and casel env l =
   lfold (case env) SMap.empty l
 
 and case env acc = function
   | Default b ->
-      let b = cut_and_flatten ~replacement:Fallthrough b in
-      let all_locals, b = branch env b in
-      let acc = SMap.union all_locals acc in
-      acc, N.Default b
+    let b = cut_and_flatten ~replacement:Fallthrough b in
+    let all_locals, b = branch env b in
+    let acc = SMap.union all_locals acc in
+    acc, N.Default b
   | Case (e, b) ->
-      let e = expr env e in
-      let b = cut_and_flatten ~replacement:Fallthrough b in
-      let all_locals, b = branch env b in
-      let acc = SMap.union all_locals acc in
-      acc, N.Case (e, b)
+    let e = expr env e in
+    let b = cut_and_flatten ~replacement:Fallthrough b in
+    let all_locals, b = branch env b in
+    let acc = SMap.union all_locals acc in
+    acc, N.Case (e, b)
 
 and catchl env l = lfold (catch env) SMap.empty l
 and catch env acc (x1, x2, b) =
@@ -1921,13 +1945,13 @@ and afield env = function
 and afield_value env cname = function
   | AFvalue e -> expr env e
   | AFkvalue (e1, e2) ->
-      Errors.unexpected_arrow (fst e1) cname;
-      expr env e1
+    Errors.unexpected_arrow (fst e1) cname;
+    expr env e1
 
 and afield_kvalue env cname = function
   | AFvalue e ->
-      Errors.missing_arrow (fst e) cname;
-      expr env e, expr env (fst e, Lvar (fst e, "__internal_placeholder"))
+    Errors.missing_arrow (fst e) cname;
+    expr env e, expr env (fst e, Lvar (fst e, "__internal_placeholder"))
   | AFkvalue (e1, e2) -> expr env e1, expr env e2
 
 and attrl env l = List.map (attr env) l

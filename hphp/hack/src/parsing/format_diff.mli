@@ -15,9 +15,9 @@
  *)
 (*****************************************************************************)
 
-type filename = string
+type filename = Relative_path.t
 type interval = int * int
 type file_diff = filename * interval list
 
 val parse_diff: string -> file_diff list
-val apply: root:string -> diff:(file_diff list) -> unit
+val apply: diff:(file_diff list) -> unit

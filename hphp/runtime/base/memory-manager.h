@@ -33,6 +33,8 @@
 #include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
+struct APCLocalArray;
+struct MemoryManager;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -55,7 +57,6 @@ namespace HPHP {
  *     malloc implementation.  (This feature is gated on being
  *     compiled with jemalloc.)
  */
-struct MemoryManager;
 MemoryManager& MM();
 
 //////////////////////////////////////////////////////////////////////
@@ -127,9 +128,10 @@ struct DebugHeader {
   static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
-  size_t requestedSize;     // zero for size-untracked allocator
+  char pad[3];
+  uint8_t kind; // TODO #5478458 use kind to parse heap
+  size_t requestedSize; // zero for size-untracked allocator
   size_t returnedCap;
-  size_t padding;
 };
 
 /*
@@ -303,7 +305,6 @@ struct StringDataNode {
   StringDataNode* next;
   StringDataNode* prev;
 };
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -522,8 +523,14 @@ struct MemoryManager {
    */
   void resetCouldOOM(bool state = true);
 
+  /*
+   * Methods for maintaining dedicated sweep lists of sweepable NativeData
+   * objects, and APCLocalArray instances.
+   */
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
+  void addApcArray(APCLocalArray*);
+  void removeApcArray(APCLocalArray*);
 
   /*
    * Object tracking keeps instances of object data's by using track/untrack.
@@ -644,6 +651,7 @@ private:
   std::array<FreeList,kNumSmartSizes> m_freelists;
   BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
+  std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
   std::vector<void*> m_slabs;
   std::vector<NativeNode*> m_natives;
@@ -654,6 +662,8 @@ private:
 
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
+
+  bool m_bypassSlabAlloc;
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;

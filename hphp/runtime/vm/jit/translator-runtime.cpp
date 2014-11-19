@@ -1255,6 +1255,11 @@ void registerLiveObj(ObjectData* obj) {
   g_context->m_liveBCObjs.insert(obj);
 }
 
+void unwindResumeHelper(_Unwind_Exception* data) {
+  tl_regState = VMRegState::CLEAN;
+  _Unwind_Resume(data);
+}
+
 namespace MInstrHelpers {
 
 StringData* stringGetI(StringData* str, uint64_t x) {

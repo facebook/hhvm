@@ -175,7 +175,7 @@ ProducesRC
 
 MayRaiseError
 
-  The instruction may raise an error, and therefore has an implicit exit edge.
+  The instruction may raise an error, and must have an edge to a catch block.
 
 Terminal
 
@@ -775,10 +775,6 @@ generating efficient compare-and-branch instruction sequences.
   Tests the implementation-specific surprise flags. If they're true, branches
   to block B.
 
-| SurpriseHook, ND, NA, Er|E
-
-  Executes the implementation-specific surprise flag hook.
-
 | FunctionReturnHook, ND, S(FramePtr) S(Gen), Er|E
 
   Suprise flag hook for function returns.
@@ -881,27 +877,23 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
 
-| LdVectorBase, D(PtrToMemCell), S(Obj), E
+| LdVectorBase, D(PtrToMembCell), S(Obj), E
 
-| LdPairBase, D(PtrToMemCell), S(Obj), E
+| LdPairBase, D(PtrToMembCell), S(Obj), E
 
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
 
-| LdMem<T>, DParam, S(PtrToGen) C(Int), B
+| LdMem<T>, DParam, S(PtrToGen) C(Int), NF
 
-  Loads from S0 + S1 (in bytes) and puts the value in D. If the optional target
-  block B is specified and the loaded value's type does not match T, this
-  instruction does not load into D and branches to block B.
+  Loads from S0 + S1 (in bytes) and puts the value in D.
 
-| LdContField, DParam, S(Obj) C(Int), B
+| LdContField<T>, DParam, S(Obj) C(Int), NF
 
   Loads a property from the object referenced by S0 at the offset given by S1
-  and puts the value in D. If the optional target B is specified and the loaded
-  value's type does not match T, this instruction does not load into D and
-  branches to block B. S0 must be a Generator.
+  and puts the value in D. S0 must be a Generator.
 
-| LdElem, D(Cell), S(PtrToCell) S(Int), E
+| LdElem, D(Cell), S(PtrToCell) S(Int), NF
 
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
@@ -933,7 +925,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
 | LdClsCtx, D(Cls), S(Ctx), C
 
   Loads into D the class representing the current context. Extracts the class
-  from the S0, which can be either the this pointer or the context class.
+  from S0, which can be either the this pointer or the context class.
 
 | LdClsCctx, D(Cls), S(Cctx), C
 
@@ -983,9 +975,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   If the optional block B is specified and the loaded value's type does not
   match T, this instruction does not load into D and branches to block B.
 
-  The result may be uninitialized if the class is not defined. Note that no
-  decref of the result is necessary because class constants will always be
-  static.
+  The result may be uninitialized if the class is not defined.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 
@@ -2316,13 +2306,14 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(PtrToRGblCell), S(Str), E|Er
+| BaseG, D(PtrToRMembCell), S(Str), E|Er
 
   Get a base from global named S0.
 
   NB: BaseG returns either a PtrToGblGen, OR a pointer to a ref that is rooted
   in a GblGen.  (I.e. the unbox happens in the C++ helper that this instruction
-  calls.)
+  calls.)  If it is not a defining BaseG it can also return the
+  init_null_variant, so for now it returns a PtrToRMembCell.
 
 | PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), E|Er
 

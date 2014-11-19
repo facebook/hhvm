@@ -8,6 +8,8 @@
  *
  *)
 
+module C = Convert_ty
+module H = Hack_ty
 module T = At_ty
 
 exception Test_failure of string
@@ -28,8 +30,65 @@ let test_at_parse () =
   in
   List.iter check cases
 
+type test_convert_ty_case =
+  {name: string;
+   input: T.at_ty;
+   strict: C.result;
+   loose: C.result;
+  }
+
+let test_convert_ty () =
+  let cases = [
+    {name = "simple";
+     input = T.ATstring;
+     strict = Common.Left H.Hstring;
+     loose = Common.Left H.Hstring;
+    };
+    {name = "mixed";
+     input = T.ATmixed;
+     strict = Common.Right "";
+     loose = Common.Left H.Hmixed;
+    };
+    {name = "nullable class";
+     input = T.ATcomposite [T.ATclass "foo"; T.ATnull];
+     strict = Common.Left (H.Hnullable (H.Hclass "foo"));
+     loose = Common.Left (H.Hnullable (H.Hclass "foo"));
+    };
+    {name = "nullable mixed 1";
+     input = T.ATcomposite [T.ATmixed; T.ATnull];
+     strict = Common.Left H.Hmixed;
+     loose = Common.Left H.Hmixed;
+    };
+    {name = "nullable mixed 2";
+     input = T.ATcomposite [T.ATmixed]; (* Not sure how meaningful this is. *)
+     strict = Common.Right "";
+     loose = Common.Left H.Hmixed;
+    };
+    {name = "loose composite";
+     input = T.ATcomposite [T.ATuint; T.ATfloat];
+     strict = Common.Right "";
+     loose = Common.Left H.Hnum;
+    };
+    {name = "multiple reduce";
+     input = T.ATcomposite [T.ATint; T.ATnull; T.ATfloat];
+     strict = Common.Left (H.Hnullable H.Hnum);
+     loose = Common.Left (H.Hnullable H.Hnum);
+    };
+  ] in
+  let check_single name output expected = match output, expected with
+    | Common.Left e1, Common.Left e2 when e1 = e2 -> ()
+    | Common.Right _, Common.Right _ -> ()
+    | _ -> raise (Test_failure name) in
+  let check {name; input; strict; loose} =
+    check_single (name ^ " (strict)") (C.convert C.Strict input) strict;
+    check_single (name ^ " (loose)") (C.convert C.Loose input) loose;
+    ()
+  in
+  List.iter check cases
+
 let test () =
   test_at_parse ();
+  test_convert_ty ();
   print_endline "Success!"
 
 let () = test ()

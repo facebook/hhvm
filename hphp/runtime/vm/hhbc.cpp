@@ -664,9 +664,8 @@ StackTransInfo instrStackTransInfo(const Op* opcode) {
     ret.numPushes = 0;
     ret.pos = peekPokeType[uint8_t(*opcode)];
     return ret;
-  default:
-    not_reached();
   }
+  not_reached();
 }
 
 bool pushesActRec(Op opcode) {

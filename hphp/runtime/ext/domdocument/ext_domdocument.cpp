@@ -1110,14 +1110,32 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
+/*
+ * If node is not nullptr, insert it into the given orphan set, which it must
+ * not already be a member of.
+ */
+static void appendOrphan(XmlNodeSet& orphans, xmlNodePtr node) {
   if (node) {
     assert(orphans.find(node) == orphans.end());
     orphans.insert(node);
   }
 }
 
-static void removeOrphanIfNeeded(XmlNodeSet &orphans, xmlNodePtr node) {
+/*
+ * If node is not nullptr, insert it into the given orphan set, which it may
+ * already be a member of.
+ */
+static void appendOrphanIfNeeded(XmlNodeSet& orphans, xmlNodePtr node) {
+  if (node) {
+    orphans.insert(node);
+  }
+}
+
+/*
+ * If node is not nullptr and is present in the given orphan set, remove it
+ * from the set.
+ */
+static void removeOrphanIfNeeded(XmlNodeSet& orphans, xmlNodePtr node) {
   if (node) {
     orphans.erase(node);
   }
@@ -1206,9 +1224,10 @@ Variant php_dom_create_object(xmlNodePtr obj, Object doc, bool owner) {
     od->incRefCount();
     nodeobj->m_doc = doc;
     nodeobj->m_node = obj;
-    if (owner && doc.get()) {
-      appendOrphan(*Native::data<DOMDocument>(doc.get())->m_orphans, obj);
-    }
+  }
+  if (owner && doc.get()) {
+    auto& orphans = *Native::data<DOMDocument>(doc.get())->m_orphans;
+    appendOrphanIfNeeded(orphans, obj);
   }
   return it->second;
 }
@@ -1226,11 +1245,12 @@ static Variant create_node_object(xmlNodePtr node, Object doc,
 }
 
 static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
-                              const Object& context, int type) {
+                              const Object& context, int type,
+                              bool registerNodeNS) {
   xmlXPathObjectPtr xpathobjp;
   int nsnbr = 0, xpath_type;
   xmlDoc *docp = nullptr;
-  xmlNsPtr *ns;
+  xmlNsPtr *ns = nullptr;
   xmlXPathContextPtr ctxp = (xmlXPathContextPtr)domxpath->m_node;
   if (ctxp == nullptr) {
     raise_warning("Invalid XPath Context");
@@ -1255,9 +1275,11 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->node = nodep;
   /* Register namespaces in the node */
-  ns = xmlGetNsList(docp, nodep);
-  if (ns != nullptr) {
-    while (ns[nsnbr] != nullptr) nsnbr++;
+  if (registerNodeNS) {
+    ns = xmlGetNsList(docp, nodep);
+    if (ns != nullptr) {
+      while (ns[nsnbr] != nullptr) nsnbr++;
+    }
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
@@ -2452,7 +2474,12 @@ Variant HHVM_METHOD(DOMNode, replaceChild,
       xmlReplaceNode(oldchild, newchild);
       dom_reconcile_ns(nodep->doc, newchild);
     }
-    return create_node_object(oldchild, data->doc(), false);
+
+    if (auto newchilddoc = domnewchildnode->doc_data()) {
+      removeOrphanIfNeeded(*newchilddoc->m_orphans, domnewchildnode->m_node);
+    }
+    return create_node_object(oldchild, data->doc(),
+                              oldchild->parent == nullptr);
   }
 
   php_dom_throw_error(NOT_FOUND_ERR, data->doc_data()->m_stricterror);
@@ -5608,22 +5635,26 @@ Array HHVM_METHOD(DOMXPath, __debuginfo) {
 
 Variant HHVM_METHOD(DOMXPath, evaluate,
                     const String& expr,
-                    const Variant& context /* = null_object */) {
+                    const Variant& context /* = null_object */,
+                    bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
-  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE);
+  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE,
+                        registerNodeNS);
 }
 
 Variant HHVM_METHOD(DOMXPath, query,
                     const String& expr,
-                    const Variant& context /* = null_object */) {
+                    const Variant& context /* = null_object */,
+                    bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
-  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY);
+  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY,
+                        registerNodeNS);
 }
 
 bool HHVM_METHOD(DOMXPath, registerNamespace,

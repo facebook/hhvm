@@ -269,6 +269,7 @@ struct FrameState final : private LocalStateHook {
      * Invariants:
      *   always a subtype of `type'
      *   always a subtype of BoxedInitCell
+     *   only boxed if `type' is also boxed
      */
     Type boxedPrediction{Type::Bottom};
 

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/hhbc-translator-internal.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 namespace HPHP { namespace jit {
 

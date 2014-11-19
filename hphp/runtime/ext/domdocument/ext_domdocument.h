@@ -136,7 +136,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMDocument
 
-typedef hphp_hash_set<xmlNodePtr, pointer_hash<xmlNode> > XmlNodeSet;
+typedef hphp_hash_set<xmlNodePtr, pointer_hash<xmlNode>> XmlNodeSet;
 
 class DOMDocument : public DOMNode {
 public:
@@ -166,7 +166,7 @@ public:
   bool m_stricterror;
   bool m_recover;
   Array m_classmap;
-  std::auto_ptr<XmlNodeSet> m_orphans;
+  std::unique_ptr<XmlNodeSet> m_orphans;
   bool m_owner;
   ObjectData* m_self;
 

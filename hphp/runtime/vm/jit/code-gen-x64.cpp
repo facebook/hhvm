@@ -311,7 +311,6 @@ NOOP_OPCODE(TakeStack)
 NOOP_OPCODE(TakeRef)
 NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
-NOOP_OPCODE(HintStkInner)
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
@@ -437,7 +436,6 @@ CALL_OPCODE(RestoreErrorLevel)
 
 CALL_OPCODE(Count)
 
-CALL_OPCODE(SurpriseHook)
 CALL_OPCODE(FunctionSuspendHook)
 CALL_OPCODE(FunctionReturnHook)
 
@@ -574,6 +572,10 @@ void CodeGenerator::cgAssertStk(IRInstruction* inst) {
   vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
 }
 
+void CodeGenerator::cgHintStkInner(IRInstruction* inst) {
+  vmain() << copy{srcLoc(inst, 0).reg(), dstLoc(inst, 0).reg()};
+}
+
 void CodeGenerator::cgAssertType(IRInstruction* inst) {
   copyTV(vmain(), srcLoc(inst, 0), dstLoc(inst, 0));
 }
@@ -593,11 +595,6 @@ void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   if (auto offset = m_state.catch_offsets[inst->block()]) {
     v << lea{rsp[offset], rsp};
   }
-}
-
-static void unwindResumeHelper(_Unwind_Exception* data) {
-  tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(data);
 }
 
 static void callUnwindResumeHelper(Vout& v) {
@@ -1105,10 +1102,7 @@ void CodeGenerator::cgMod(IRInstruction* inst) {
   auto const divisor = srcLoc(inst, 1).reg();
   auto& v = vmain();
 
-  v << copy{dividend, rax};
-  v << cqo{};                      // sign-extend rax => rdx:rax
-  v << idiv{divisor, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
-  v << copy{rdx, dst};
+  v << srem{dividend, divisor, dst};
 }
 
 void CodeGenerator::cgSqrt(IRInstruction* inst) {
@@ -1129,18 +1123,16 @@ void CodeGenerator::cgShiftCommon(IRInstruction* inst) {
     int n = src1->intVal() & 0x3f; // only use low 6 bits.
     v << Opi{n, srcReg0, dstReg, v.makeReg()};
   } else {
-    // assume srcs and dsts are vregs and rcx isn't live
-    v << copy{srcReg1, rcx};
-    v << Op{srcReg0, dstReg, v.makeReg()};
+    v << Op{srcReg1, srcReg0, dstReg, v.makeReg()};
   }
 }
 
 void CodeGenerator::cgShl(IRInstruction* inst) {
-  cgShiftCommon<shlq,shlqi>(inst);
+  cgShiftCommon<shl,shlqi>(inst);
 }
 
 void CodeGenerator::cgShr(IRInstruction* inst) {
-  cgShiftCommon<sarq,sarqi>(inst);
+  cgShiftCommon<sar,sarqi>(inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2547,7 +2539,7 @@ void CodeGenerator::cgIncRefWork(Type type, SSATmp* src, Vloc srcLoc) {
       auto const sf = v.makeReg();
       v << cmplim{0, base[FAST_REFCOUNT_OFFSET], sf};
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
-      ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, base); });
+      ifThen(v, CC_GE, sf, [&](Vout& v) { emitIncRef(v, base); });
     }
   };
 
@@ -3556,9 +3548,12 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
     emitEagerSyncPoint(v, reinterpret_cast<const Op*>(func->getEntry()),
                        fp, sp);
   }
-  v << vcall{CppCall::direct(builtinFuncPtr),
-             v.makeVcallArgs({{fp}}), v.makeTuple({})};
-  v << syncpoint{makeFixup(inst->marker(), SyncOptions::kSyncPoint)};
+  v << vcall{
+    CppCall::direct(builtinFuncPtr),
+    v.makeVcallArgs({{fp}}),
+    v.makeTuple({}),
+    makeFixup(inst->marker(), SyncOptions::kSyncPoint)
+  };
 }
 
 void CodeGenerator::cgLdThis(IRInstruction* inst) {
@@ -3753,14 +3748,12 @@ void CodeGenerator::cgLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref,
 
 void CodeGenerator::cgLdContField(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
-         inst->taken());
+         srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
 void CodeGenerator::cgLdMem(IRInstruction* inst) {
   cgLoad(inst->dst(), dstLoc(inst, 0),
-         srcLoc(inst, 0).reg()[inst->src(1)->intVal()],
-         inst->taken());
+         srcLoc(inst, 0).reg()[inst->src(1)->intVal()]);
 }
 
 void CodeGenerator::cgLdRef(IRInstruction* inst) {
@@ -4486,12 +4479,6 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
   }
 }
 
-/**
- * This method is similar to emitGetCtxFwdCallWithThis above, but
- * whether or not the callee is a static method is unknown at JIT
- * time, and that is determined dynamically by looking up into the
- * StaticMethodFCache.
- */
 void CodeGenerator::cgGetCtxFwdCall(IRInstruction* inst) {
   auto destCtxReg = dstLoc(inst, 0).reg(0);
   auto srcCtxTmp = inst->src(0);
@@ -4579,6 +4566,11 @@ Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
   });
 }
 
+/**
+ * This method is similar to emitGetCtxFwdCall above, but whether or not the
+ * callee is a static method is unknown at JIT time, and that is determined
+ * dynamically by looking up into the StaticMethodFCache.
+ */
 void CodeGenerator::cgGetCtxFwdCallDyn(IRInstruction* inst) {
   auto srcCtxTmp  = inst->src(0);
   auto srcCtxReg  = srcLoc(inst, 0).reg();
@@ -4912,7 +4904,7 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
-  v << jmpr{srcLoc(inst, 0).reg()};
+  v << jmpr{srcLoc(inst, 0).reg(), kCrossTraceRegs};
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

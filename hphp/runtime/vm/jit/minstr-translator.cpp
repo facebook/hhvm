@@ -871,22 +871,35 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
 }
 
 PropInfo HhbcTranslator::MInstrTranslator::getCurrentPropertyOffset(
-  const Class*& knownCls
-) {
+    const Class*& knownCls) {
   auto const baseType = m_base.type.derefIfPtr();
   if (!knownCls) {
     if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
       knownCls = baseType.getClass();
     }
   }
+
+  /*
+   * TODO(#5616733): If we still don't have a knownCls, we can't do anything
+   * good.  It's possible we still have the known information statically, and
+   * it might be in m_ni.inputs, but right now we can't really trust that
+   * because it's not very clear what it means.  See task for more information.
+   */
+  if (!knownCls) return PropInfo{};
+
   auto const info = getPropertyOffset(m_ni, contextClass(), knownCls,
                                       m_mii, m_mInd, m_iInd);
   if (info.offset == -1) return info;
 
-  auto baseCls = baseType.getClass();
+  auto const baseCls = baseType.getClass();
 
-  // baseCls and knownCls may differ due to a number of factors but they must
-  // always be related to each other somehow.
+  /*
+   * baseCls and knownCls may differ due to a number of factors but they must
+   * always be related to each other somehow if they are both non-null.
+   *
+   * TODO(#5616733): stop using ni.inputs here.  Just use the class we know
+   * from this translation, if there is one.
+   */
   always_assert_flog(
     baseCls->classof(knownCls) || knownCls->classof(baseCls),
     "Class mismatch between baseType({}) and knownCls({})",
@@ -1377,36 +1390,27 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
     return;
   }
 
-  m_ht.emitIncStat(Stats::ArrayGet_Total, 1, false);
   if (prof.optimizing()) {
-    m_ht.emitIncStat(Stats::ArrayGet_Opt, 1, false);
     auto const data = prof.data(NonPackedArrayProfile::reduce);
-    // NonPackedArrayProfile data counts how many times a non-packed
-    // array was observed.
+    // NonPackedArrayProfile data counts how many times a non-packed array was
+    // observed.  Zero means it was monomorphic (or never executed).
     auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
-    if (data.count == 0 && m_base.type.maybe(typePackedArr)) {
-      m_ht.emitIncStat(Stats::ArrayGet_Mono, 1, false);
-      m_result = m_irb.cond(
-        1,
-        [&] (Block* taken) {
-          return gen(CheckType, typePackedArr, taken, m_base.value);
-        },
-        [&] (SSATmp* base) { // Next
-          m_ht.emitIncStat(Stats::ArrayGet_Packed, 1, false);
-          m_irb.constrainValue(
-            base, TypeConstraint(DataTypeSpecialized).setWantArrayKind());
-          SSATmp* packedBase = gen(AssertType, typePackedArr, base);
-          return emitPackedArrayGet(packedBase, key);
-        },
-        [&] { // Taken
-          m_irb.hint(Block::Hint::Unlikely);
-          m_ht.emitIncStat(Stats::ArrayGet_Mixed, 1, false);
-          return emitArrayGet(key);
-        }
+    if (m_base.type.maybe(typePackedArr) &&
+        (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
+      // It's safe to side-exit still because we only do these profiled array
+      // gets on the first element, with simple bases and single-element dims.
+      // See computeSimpleCollectionOp.
+      auto const exit = m_ht.makeExit();
+      setBase(gen(CheckType, typePackedArr, exit, m_base.value));
+      m_irb.constrainValue(
+        m_base.value, TypeConstraint(DataTypeSpecialized).setWantArrayKind()
       );
+      m_result = emitPackedArrayGet(m_base.value, key);
       return;
     }
   }
+
+  // Fall back to a generic array get.
   m_result = emitArrayGet(key);
 }
 

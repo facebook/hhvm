@@ -10,6 +10,7 @@
 
 open ClientCommand
 open ClientEnv
+open Utils
 
 let rec guess_root config start recursion_limit : Path.path option =
   let fs_root = Path.mk_path "/" in
@@ -39,20 +40,18 @@ let parse_without_command options usage command =
   | args -> args
 
 let get_root ?(config=".hhconfig") path_opt =
-  let root =
-    match path_opt with
-    | None ->
-      (match guess_root config (Path.mk_path ".") 50 with
-      | Some path -> path
-      | None ->
-        Printf.fprintf stderr
-        "Error: could not find a valid root containing %s in this directory or any of the parent directories: %s\n"
-        config
-        (Path.string_of_path (Path.mk_path "."));
-        exit 1;)
-    | Some p -> Path.mk_path p
-  in Wwwroot.assert_www_directory ~config root;
+  let start_str = match path_opt with
+    | None -> "."
+    | Some s -> s in
+  let start_path = Path.mk_path start_str in
+  let root = match guess_root config start_path 50 with
+    | None -> start_path
+    | Some r -> r in
+  Wwwroot.assert_www_directory ~config root;
   root
+
+let get_config ?(config=".hhconfig") root =
+  Config_file.parse (Path.string_of_path (Path.concat root config))
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/src/man/hh_client.1 --
@@ -203,6 +202,7 @@ let parse_check_args cmd =
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
   in
+  let config = get_config root in
   let () = if (!from) = "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
@@ -215,6 +215,7 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
+    server_options_cmd = SMap.get "server_options_cmd" config;
   }
 
 let parse_start_args () =
@@ -236,8 +237,13 @@ let parse_start_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CStart {ClientStart.root = root; ClientStart.wait = !wait}
+        exit 1 in
+  let config = get_config root in
+  CStart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_stop_args () =
   let usage =
@@ -276,8 +282,13 @@ let parse_restart_args () =
     | [x] -> get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
-        exit 1
-  in CRestart {ClientStart.root = root; ClientStart.wait = !wait;}
+        exit 1 in
+  let config = get_config root in
+  CRestart { ClientStart.
+    root = root;
+    wait = !wait;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_status_args () =
   let usage =
@@ -356,8 +367,10 @@ let parse_build_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
+  let config = get_config root in
   CBuild { ClientBuild.
     root = root;
+    server_options_cmd = SMap.get "server_options_cmd" config;
     build_opts = { ServerMsg.
       steps = !steps;
       no_steps = !no_steps;

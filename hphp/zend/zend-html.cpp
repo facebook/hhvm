@@ -701,6 +701,23 @@ char *string_html_encode(const char *input, int &len,
       if (LIKELY(c < 0x80)) {
         *q++ = c;
         break;
+      } else if (htmlEnt && !utf8 && (c - 160) < sizeof(ent_iso_8859_1) - 1) {
+        /**
+          * https://github.com/facebook/hhvm/issues/2186
+          * If not UTF8, and we are converting to HTML entities, use known
+          * entity equivalent of the character, if possible.
+          * Since we only support ISO-8859-1 or UTF8 right now, and they use
+          * the same mapping array, use it.
+          * Start at 0xA0 = 160
+          */
+        *q++ = '&';
+        const char *s = ent_iso_8859_1[c - 160];
+        int len = strlen(s);
+        for (int n = 0; n < len; n++) {
+          *q++ = *s++;
+        }
+        *q++ = ';';
+        break;
       }
 
       bool should_skip =

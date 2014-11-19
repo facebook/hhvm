@@ -262,6 +262,7 @@ public:
   void setId(BlockId id) {
     m_id = id;
   }
+  void setInitialSpOffset(int32_t sp) { m_initialSpOffset = sp; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined

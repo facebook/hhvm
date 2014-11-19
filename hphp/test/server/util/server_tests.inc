@@ -68,12 +68,15 @@ function get_random_port() {
   return rand($BasePort, $BasePort+$PortRange);
 }
 
-function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
+function startServer($serverPort, $adminPort, $debugPort, $home, $root,
+                     $customArgs = '') {
   global $test_run_id, $LOG_ROOT;
 
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
   $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
+  $logFileConfig.= ' -vLog.Access.Default.File='.
+    "${LOG_ROOT}_access_log$test_run_id.log";
   $srcRootConfig = ' -vServer.SourceRoot='.$root;
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = ' -vAdminServer.Port='.$adminPort;
@@ -98,10 +101,12 @@ function startServer($serverPort, $adminPort, $debugPort, $home, $root) {
       " -vRepo.Authoritative=true";
   }
 
-  $cmd = $hhvm.' --mode=server' . $serverConfig . $logFileConfig .
+  $cmd = 'MALLOC_CONF=junk:true ' . $hhvm .
+    ' --mode=server' . $serverConfig . $logFileConfig .
     ' -vEval.JitProfileInterpRequests=0' . $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $repoConfig . $jitConfig .
+    ' ' . $customArgs .
      " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
      " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
 

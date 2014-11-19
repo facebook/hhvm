@@ -48,7 +48,6 @@ enum JmpFlags {
   JmpFlagNone        = 0,
   JmpFlagEndsRegion  = 1,
   JmpFlagNextIsMerge = 2,
-  JmpFlagSurprise    = 4
 };
 
 inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
@@ -295,8 +294,9 @@ public:
   void emitUnbox();
   void emitJmpZ(Offset taken, JmpFlags);
   void emitJmpNZ(Offset taken, JmpFlags);
-  void emitJmpImpl(int32_t offset, JmpFlags, Block* catchBlock);
+  void jmpImpl(int32_t offset, JmpFlags);
   void emitJmp(int32_t offset, JmpFlags);
+  void emitJmpNS(int32_t offset, JmpFlags);
   void emitGt()    { emitCmp(Gt);    }
   void emitGte()   { emitCmp(Gte);   }
   void emitLt()    { emitCmp(Lt);    }
@@ -782,7 +782,7 @@ private:
   void emitDecRefLocalsInline();
   void emitRet(Type type);
   void emitCmp(Opcode opc);
-  void emitJmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
+  void jmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
   SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
   template<class Lambda>
   void emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
@@ -792,7 +792,6 @@ private:
   template<class Lambda>
   void emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
-  void emitJmpSurpriseCheck(Block* catchBlock);
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);

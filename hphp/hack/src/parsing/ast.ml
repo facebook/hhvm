@@ -84,19 +84,19 @@ and typedef_kind =
   | NewType of hint
 
 and class_ = {
-    c_mode: mode;
-    c_user_attributes: user_attribute SMap.t;
-    c_final: bool;
-    c_kind: class_kind;
-    c_is_xhp: bool;
-    c_name: id;
-    c_tparams: tparam list;
-    c_extends: hint list;
-    c_implements: hint list;
-    c_body: class_elt list;
-    c_namespace: Namespace_env.env;
-    c_enum: enum_ option;
-  }
+  c_mode: mode;
+  c_user_attributes: user_attribute SMap.t;
+  c_final: bool;
+  c_kind: class_kind;
+  c_is_xhp: bool;
+  c_name: id;
+  c_tparams: tparam list;
+  c_extends: hint list;
+  c_implements: hint list;
+  c_body: class_elt list;
+  c_namespace: Namespace_env.env;
+  c_enum: enum_ option;
+}
 
 and enum_ = {
   e_base       : hint;
@@ -163,6 +163,7 @@ and method_ = {
   m_body: block;
   m_user_attributes : user_attribute SMap.t;
   m_ret: hint option;
+  m_ret_by_ref: bool;
   m_fun_kind: fun_kind;
 }
 
@@ -187,6 +188,7 @@ and fun_ = {
   f_mode            : mode;
   f_tparams         : tparam list;
   f_ret             : hint option;
+  f_ret_by_ref      : bool;
   f_name            : id;
   f_params          : fun_param list;
   f_body            : block;
@@ -269,9 +271,10 @@ and expr_ =
   | Binop of bop * expr * expr
   | Eif of expr * expr option * expr
   | InstanceOf of expr * expr
-  | New of id * expr list * expr list
-  (* Traditional PHP-style closure with a use list. *)
-  | Efun of fun_ * id list
+  | New of expr * expr list * expr list
+  (* Traditional PHP-style closure with a use list. Each use element is
+    a name and a bool indicating if its a reference or value *)
+  | Efun of fun_ * (id * bool) list
   (*
    * Hack-style lambda expressions (no id list, we'll find the captures
    * during name resolution).
@@ -280,6 +283,7 @@ and expr_ =
   | Xml of id * (id * expr) list * expr list
   | Unsafeexpr of expr
   | Import of import_flavor * expr
+  | Ref of expr
 
 and import_flavor =
   | Include

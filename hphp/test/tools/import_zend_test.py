@@ -202,6 +202,11 @@ flaky_tests = (
     # a new process can crop up
     '/ext/posix/tests/posix_kill_basic.php',
 
+    # Using PHP7 versions of these tests
+    '/ext/session/tests/session_set_save_handler_class_002.php',
+    '/ext/session/tests/session_set_save_handler_class_016.php',
+    '/ext/session/tests/session_set_save_handler_iface_001.php',
+
     # unsure why
     '/ext/standard/tests/file/symlink_link_linkinfo_is_link_variation4.php',
 

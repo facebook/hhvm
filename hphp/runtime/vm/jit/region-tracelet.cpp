@@ -21,12 +21,14 @@
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/ref-deps.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 #include "hphp/util/trace.h"
 
@@ -203,8 +205,7 @@ RegionDescPtr RegionFormer::go() {
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 
-    auto const endsRegion = m_inst.endsRegion ||
-      (m_profiling && instrBreaksProfileBB(&m_inst));
+    auto const endsRegion = m_inst.endsRegion;
 
     if (endsRegion) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
@@ -258,9 +259,12 @@ RegionDescPtr RegionFormer::go() {
 bool RegionFormer::prepareInstruction() {
   m_inst.~NormalizedInstruction();
   new (&m_inst) NormalizedInstruction(m_sk, curUnit());
-  m_inst.endsRegion = opcodeBreaksBB(m_inst.op()) ||
-                            (dontGuardAnyInputs(m_inst.op()) &&
-                             opcodeChangesPC(m_inst.op()));
+  auto const breaksBB =
+    (m_profiling && instrBreaksProfileBB(&m_inst)) ||
+    (mcg->useLLVM() ? opcodeChangesPC(m_inst.op())
+                    : opcodeBreaksBB(m_inst.op()));
+  m_inst.endsRegion = breaksBB ||
+    (dontGuardAnyInputs(m_inst.op()) && opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();
   m_ht.setBcOff(m_sk.offset(), false);
 

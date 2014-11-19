@@ -74,6 +74,9 @@ type env = {
     (* The output buffer *)
     buffer     : Buffer.t             ;
 
+    (* The path of the current file *)
+    file       : Relative_path.t      ;
+
     (* The state of the lexer *)
     lexbuf     : Lexing.lexbuf        ;
 
@@ -195,13 +198,14 @@ type saved_env = {
     sv_source_pos_l  : source_pos list     ;
   }
 
-let empty lexbuf from to_ keep_source_pos no_trailing_commas = {
+let empty file lexbuf from to_ keep_source_pos no_trailing_commas = {
   margin     = ref 0                          ;
   last       = ref Newline                    ;
   last_token = ref Terror                     ;
   last_str   = ref ""                         ;
   last_out   = ref ""                         ;
   buffer     = Buffer.create 256              ;
+  file       = file                           ;
   lexbuf     = lexbuf                         ;
   lb_line    = ref 1                          ;
   priority   = 0                              ;
@@ -228,7 +232,7 @@ let empty lexbuf from to_ keep_source_pos no_trailing_commas = {
 
 (* Saves all the references of the environment *)
 let save_env env =
-  let { margin; last; last_token; buffer; lexbuf; lb_line;
+  let { margin; last; last_token; buffer; file; lexbuf; lb_line;
         priority; char_pos; abs_pos; char_break;
         char_size; silent; one_line;
         last_str; last_out; keep_source_pos; source_pos_l;
@@ -882,7 +886,7 @@ let print_error tok_str env =
     else buffer
   in
   let error =
-    (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)))^"\n"^
+    (Pos.string (Pos.to_absolute (Pos.make env.file env.lexbuf)))^"\n"^
     (Printf.sprintf "Expected: %s, found: '%s'\n" tok_str !(env.last_str))^
     buffer^"\n"
   in
@@ -903,7 +907,8 @@ let expect_xhp tok_str env = wrap_xhp env begin fun _ ->
   then last_token env
   else begin
     if debug then begin
-      output_string stderr (Pos.string (Pos.to_absolute (Pos.make env.lexbuf)));
+      output_string stderr (Pos.string (Pos.to_absolute
+        (Pos.make env.file env.lexbuf)));
       flush stderr
     end;
     raise Format_error
@@ -1123,16 +1128,17 @@ type 'a return =
   | Internal_error
   | Success of 'a
 
-let rec entry ~keep_source_metadata ~no_trailing_commas from to_ content k =
+let rec entry ~keep_source_metadata ~no_trailing_commas
+    file from to_ content k =
   let errorl, () = Errors.do_ begin fun () ->
-    let _ = Parser_hack.program content in
+    let _ = Parser_hack.program file content in
     ()
   end in
   if errorl <> []
   then Parsing_error errorl
   else try
     let lb = Lexing.from_string content in
-    let env = empty lb from to_ keep_source_metadata no_trailing_commas in
+    let env = empty file lb from to_ keep_source_metadata no_trailing_commas in
     header env;
     Success (k env)
   with
@@ -1865,7 +1871,8 @@ and stmt_toplevel_word env = function
       last_token env;
       namespace env
   | "use" ->
-      seq env [last_token; space; name; semi_colon]
+      last_token env;
+      namespace_use env;
   | _ ->
       back env
 
@@ -1934,6 +1941,13 @@ and namespace env =
     | _ ->
         expect ";" env
   end
+
+and namespace_use env =
+  seq env [space; name;];
+  let rem = match (next_token_str env) with
+    | "as" -> [space; expect "as"; space; name; semi_colon;]
+    | _ -> [semi_colon] in
+  seq env rem
 
 (*****************************************************************************)
 (* Foreach loop *)
@@ -2397,11 +2411,8 @@ and expr_atomic_word env last_tok = function
       expr env;
   | "async" ->
       last_token env;
-      if next_token_str env = "function"
-      then begin
-        space env;
-        expr_atomic env
-      end
+      space env;
+      expr_atomic env
   | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
       space env;
@@ -2557,16 +2568,19 @@ and arrow_opt env =
 (* The outside API *)
 (*****************************************************************************)
 
-let region ~start ~end_ content =
-  entry ~keep_source_metadata:false start end_ content ~no_trailing_commas:false
+let region file ~start ~end_ content =
+  entry ~keep_source_metadata:false file start end_ content
+    ~no_trailing_commas:false
     (fun env -> Buffer.contents env.buffer)
 
-let program ?no_trailing_commas:(no_trailing_commas = false) content =
-  entry ~keep_source_metadata:false 0 max_int content ~no_trailing_commas:no_trailing_commas
+let program ?no_trailing_commas:(no_trailing_commas = false) file content =
+  entry ~keep_source_metadata:false file 0 max_int content
+    ~no_trailing_commas:no_trailing_commas
     (fun env -> Buffer.contents env.buffer)
 
-let program_with_source_metadata content =
-  entry ~keep_source_metadata:true 0 max_int content ~no_trailing_commas:false begin
+let program_with_source_metadata file content =
+  entry ~keep_source_metadata:true file 0 max_int content
+    ~no_trailing_commas:false begin
     fun env ->
       Buffer.contents env.buffer, List.rev !(env.source_pos_l)
   end

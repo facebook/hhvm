@@ -940,10 +940,11 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
     const char *header_line = header.data();
 
     // handle single line of status code
-    if (header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if ((header.size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) ||
+        (header.size() >= 7 && strncasecmp(header_line, "Status:", 7) == 0)) {
       int code = 200;
       const char *reason = nullptr;
-      for (const char *ptr = header_line; *ptr; ptr++) {
+      for (const char *ptr = header_line + 5; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
           code = atoi(ptr + 1);
           for (ptr++; *ptr; ptr++) {

@@ -16,6 +16,7 @@ module Classes = struct
   let cParent = "parent"
   let cStatic = "static"
   let cSelf   = "self"
+  let cUnknown = "*Unknown*"
 
   let cAwaitable = "\\Awaitable"
   let cWaitHandle = "\\WaitHandle"
@@ -153,6 +154,8 @@ module Typehints = struct
   let boolean = "boolean"
   let double  = "double"
   let real    = "real"
+
+  let shape = "shape"
 
   let object_cast = "object"
   let unset_cast = "unset"

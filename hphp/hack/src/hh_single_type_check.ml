@@ -8,9 +8,8 @@
  *
  *)
 
+open Coverage_level
 open Utils
-
-module CL = Coverage_level
 
 (*****************************************************************************)
 (* Types, constants *)
@@ -171,8 +170,8 @@ let rec make_files = function
       (filename, content) :: make_files rl
   | _ -> assert false
 
-let parse_file fn =
-  let abs_fn = Relative_path.to_absolute fn in
+let parse_file file =
+  let abs_fn = Relative_path.to_absolute file in
   let content = cat abs_fn in
   let delim = Str.regexp "////.*" in
   if Str.string_match delim content 0
@@ -180,16 +179,16 @@ let parse_file fn =
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_right begin fun (sub_fn, content) ast ->
-      Pos.file := Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn);
+      let file =
+        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
       let {Parser_hack.is_hh_file; comments; ast = ast'} =
-        Parser_hack.program content
+        Parser_hack.program file content
       in
       ast' @ ast
     end files []
   else begin
-    Pos.file := fn ;
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+      Parser_hack.program file content
     in
     ast
   end
@@ -208,15 +207,14 @@ let collect_defs ast =
 (* Make readable test output *)
 let replace_color input =
   match input with
-  | (Some CL.Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
-  | (Some CL.Checked, str) -> "<checked>"^str^"</checked>"
-  | (Some CL.Partial, str) -> "<partial>"^str^"</partial>"
+  | (Some Unchecked, str) -> "<unchecked>"^str^"</unchecked>"
+  | (Some Checked, str) -> "<checked>"^str^"</checked>"
+  | (Some Partial, str) -> "<partial>"^str^"</partial>"
   | (None, str) -> str
 
 let print_colored fn =
   let content = cat (Relative_path.to_absolute fn) in
-  let pos_level_m = CL.mk_level_map (Some fn) !Typing_defs.type_acc in
-  let pos_level_l = Pos.Map.elements pos_level_m in
+  let pos_level_l = mk_level_list (Some fn) !Typing_defs.type_acc in
   let raw_level_l =
     rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) pos_level_l in
   let results = ColorFile.go content raw_level_l in
@@ -225,13 +223,8 @@ let print_colored fn =
   else print_string (List.map replace_color results |> String.concat "")
 
 let print_coverage fn =
-  let module CLMap = ServerCoverageMetric.CL.CLMap in
   let counts = ServerCoverageMetric.count_exprs fn !Typing_defs.type_acc in
-  let score = ServerCoverageMetric.calc_percentage counts in
-  Printf.printf "Unchecked: %d\n" (CLMap.find_unsafe CL.Unchecked counts);
-  Printf.printf "Partial: %d\n" (CLMap.find_unsafe CL.Partial counts);
-  Printf.printf "Checked: %d\n" (CLMap.find_unsafe CL.Checked counts);
-  Printf.printf "Score: %f\n" score
+  ClientCoverageMetric.go false (Some (Leaf counts))
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -249,12 +242,11 @@ let main_hack { filename; suggest; color; coverage; _ } =
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
   let errors, () =
     Errors.do_ begin fun () ->
-      Pos.file := Relative_path.create Relative_path.Dummy builtins_filename;
+      let file = Relative_path.create Relative_path.Dummy builtins_filename in
       let {Parser_hack.is_hh_file; comments; ast = ast_builtins} =
-        Parser_hack.program builtins
+        Parser_hack.program file builtins
       in
       let filename = Relative_path.create Relative_path.Dummy filename in
-      Pos.file := filename;
       let ast_file = parse_file filename in
       let ast = ast_builtins @ ast_file in
       Parser_heap.ParserHeap.add filename ast;

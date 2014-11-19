@@ -72,5 +72,7 @@ let create prefix s =
   assert (str_starts_with s prefix_s);
   prefix, String.sub s prefix_len (String.length s - prefix_len)
 
+let concat prefix s = prefix, s
+
 let relativize_set prefix m =
   SSet.fold (fun k a -> Set.add (create prefix k) a) m Set.empty

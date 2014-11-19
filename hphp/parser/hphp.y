@@ -1329,12 +1329,12 @@ non_empty_method_parameter_list:
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,NULL,$3,$5,1,
+    '=' expr                           { _p->onParam($$,NULL,$3,$5,1,
                                                      &$7,&$1,&$2);}
   | optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,NULL,$3,$4,0,
+    '=' expr                           { _p->onParam($$,NULL,$3,$4,0,
                                                      &$6,&$1,&$2);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
@@ -1350,13 +1350,13 @@ non_empty_method_parameter_list:
     optional_user_attributes
     parameter_modifiers
     hh_type_opt '&' T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,&$1,$5,$7,1,
+    '=' expr                           { _p->onParam($$,&$1,$5,$7,1,
                                                      &$9,&$3,&$4);}
   | non_empty_method_parameter_list ','
     optional_user_attributes
     parameter_modifiers
     hh_type_opt T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,&$1,$5,$6,0,
+    '=' expr                           { _p->onParam($$,&$1,$5,$6,0,
                                                      &$8,&$3,&$4);}
 ;
 
@@ -1404,11 +1404,11 @@ non_empty_parameter_list:
                                                      NULL,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,NULL,$2,$4,true,
+    '=' expr                           { _p->onParam($$,NULL,$2,$4,true,
                                                      &$6,&$1,NULL); }
   | optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,NULL,$2,$3,false,
+    '=' expr                           { _p->onParam($$,NULL,$2,$3,false,
                                                      &$5,&$1,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
@@ -1421,12 +1421,12 @@ non_empty_parameter_list:
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt '&' T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,&$1,$4,$6,true,
+    '=' expr                           { _p->onParam($$,&$1,$4,$6,true,
                                                      &$8,&$3,NULL); }
   | non_empty_parameter_list ','
     optional_user_attributes
     hh_type_opt T_VARIABLE
-    '=' static_expr                    { _p->onParam($$,&$1,$4,$5,false,
+    '=' expr                           { _p->onParam($$,&$1,$4,$5,false,
                                                      &$7,&$3,NULL); }
 ;
 
@@ -1955,6 +1955,24 @@ lambda_expression:
                                                             u,$4,v,$7,$6);
                                          _p->popLabelInfo();
                                          _p->onCompleteLabelScope(true);}
+  | T_ASYNC
+    '{'                                { _p->pushFuncLocation();
+                                         Token t;
+                                         _p->onNewLabelScope(true);
+                                         _p->onClosureStart(t);
+                                         _p->pushLabelInfo();}
+    inner_statement_list
+    '}'                                { Token u; Token v; Token w; Token x;
+                                         Token y;
+                                         $1 = T_ASYNC;
+                                         _p->onMemberModifier($1, nullptr, $1);
+                                         _p->finishStatement($4, $4); $4 = 1;
+                                         $$ = _p->onClosure(ClosureType::Short,
+                                                            &$1,
+                                                            u,v,w,$4,x);
+                                         _p->popLabelInfo();
+                                         _p->onCompleteLabelScope(true);
+                                         _p->onCall($$,1,$$,y,NULL);}
 ;
 
 lambda_body:

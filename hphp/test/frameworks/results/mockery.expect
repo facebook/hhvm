@@ -3,7 +3,7 @@ ContainerTest::canMockClassesThatDescendFromInternalClasses
 ContainerTest::canMockClassesThatImplementSerializable
 .
 ContainerTest::canMockInternalClassesThatImplementSerializable
-FATAL
+.
 ContainerTest::testBlockForwardingToPartialObject
 .
 ContainerTest::testCallingSelfOnlyReturnsLastMockCreatedOrCurrentMockBeingProgrammedSinceTheyAreOneAndTheSame

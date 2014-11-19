@@ -1742,12 +1742,12 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         if (!dt) return TInitCell;
 
         switch (*dt) {
+        case KindOfBoolean:      return TBool;
+        case KindOfInt64:        return TInt;
+        case KindOfDouble:       return TDbl;
         case KindOfString:       return TStr;
         case KindOfStaticString: return TStr;
         case KindOfArray:        return TArr;
-        case KindOfInt64:        return TInt;
-        case KindOfBoolean:      return TBool;
-        case KindOfDouble:       return TDbl;
         case KindOfResource:     return TRes;
         case KindOfObject:
           /*
@@ -1769,12 +1769,13 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
           }
           return TInitCell;
         default:
+          always_assert_flog(false, "Unexpected DataType");
           break;
         }
         return TInitCell;
       }();
 
-      return mainType == TInitCell || !tc.isNullable() ? mainType
+      return (mainType == TInitCell || !tc.isNullable()) ? mainType
         : opt(mainType);
     }
   case TypeConstraint::MetaType::Self:
@@ -1782,13 +1783,73 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
   case TypeConstraint::MetaType::Callable:
     break;
   case TypeConstraint::MetaType::Number:
-    return TNum;
+    return tc.isNullable() ? TOptNum : TNum;
   case TypeConstraint::MetaType::ArrayKey:
     // TODO(3774082): Support TInt | TStr type constraint
     return TInitCell;
   }
 
   return TCell;
+}
+
+bool Index::satisfies_constraint(Context ctx, const Type t,
+                                 const TypeConstraint& tc) const {
+  return t.subtypeOf(satisfies_constraint_helper(ctx, tc));
+}
+
+Type Index::satisfies_constraint_helper(Context ctx,
+                                        const TypeConstraint& tc) const {
+  if (!tc.hasConstraint() || tc.isTypeVar()) {
+    return TGen;
+  }
+
+  switch (tc.metaType()) {
+  case TypeConstraint::MetaType::Precise:
+    {
+      auto const mainType = [&]() -> const Type {
+        auto const dt = tc.underlyingDataType();
+        if (!dt) return TBottom;
+
+        switch (*dt) {
+        case KindOfBoolean:      return TBool;
+        case KindOfInt64:        return TInt;
+        case KindOfDouble:       return TDbl;
+        case KindOfString:       return TStr;
+        case KindOfStaticString: return TStr;
+        case KindOfArray:        return TArr;
+        case KindOfResource:     return TRes;
+        case KindOfObject:
+          if (auto const rcls = resolve_class(ctx, tc.typeName())) {
+            if (auto const cinfo = rcls->val.right()) {
+              if (cinfo->cls->attrs & AttrEnum) {
+                return
+                  satisfies_constraint_helper(ctx, cinfo->cls->enumBaseTy);
+              }
+            }
+            return subObj(*rcls);
+          }
+          return TBottom;
+        default:
+          always_assert_flog(false, "Unexpected DataType");
+          break;
+        }
+        return TBottom;
+      }();
+
+      return (mainType == TBottom || !tc.isNullable()) ? mainType
+        : opt(mainType);
+    }
+  case TypeConstraint::MetaType::Self:
+  case TypeConstraint::MetaType::Parent:
+  case TypeConstraint::MetaType::Callable:
+    break;
+  case TypeConstraint::MetaType::Number:
+    return tc.isNullable() ? TOptNum : TNum;
+  case TypeConstraint::MetaType::ArrayKey:
+    // TODO(3774082): Support TInt | TStr type constraint
+    break;
+  }
+  return TBottom;
 }
 
 Type Index::lookup_class_constant(Context ctx,

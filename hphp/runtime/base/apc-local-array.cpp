@@ -86,12 +86,13 @@ APCLocalArray::~APCLocalArray() {
     smart_free(m_localCache);
   }
   m_arr->getHandle()->unreference();
+  MM().removeApcArray(this);
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
-  auto const smap = asSharedArray(ad);
-  smap->~APCLocalArray();
-  MM().smartFreeSize(smap, sizeof(APCLocalArray));
+  auto const a = asSharedArray(ad);
+  a->~APCLocalArray();
+  MM().smartFreeSize(a, sizeof(APCLocalArray));
 }
 
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }

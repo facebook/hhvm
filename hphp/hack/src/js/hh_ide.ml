@@ -8,9 +8,9 @@
  *
  *)
 
+open Coverage_level
 open Utils
 open Hh_json
-module CL = Coverage_level
 
 (*****************************************************************************)
 (* Globals *)
@@ -101,10 +101,9 @@ let declare_file fn content =
     Typing_env.Classes.remove cname;
   end old_classes;
   try
-    Pos.file := fn ;
     Autocomplete.auto_complete := false;
     let {Parser_hack.is_hh_file; comments; ast} =
-      Parser_hack.program content
+      Parser_hack.program fn content
     in
     let is_php = not is_hh_file in
     Parser_heap.ParserHeap.add fn ast;
@@ -164,7 +163,6 @@ let hh_check fn =
   match Hashtbl.find parse_errors fn with
     | Some e -> error [e]
     | None ->
-      Pos.file := fn;
       Autocomplete.auto_complete := false;
       Errors.try_
         begin fun () ->
@@ -426,15 +424,14 @@ let hh_hack_coloring fn =
   Typing_defs.accumulate_types := true;
   ignore (hh_check fn);
   let fn = Relative_path.create Relative_path.Root fn in
-  let result = CL.mk_level_map (Some fn) !(Typing_defs.type_acc) in
+  let result = mk_level_list (Some fn) !Typing_defs.type_acc in
   Typing_defs.accumulate_types := false;
-  Typing_defs.type_acc := Pos.Map.empty;
-  let result = Pos.Map.elements result in
+  Typing_defs.type_acc := [];
   let result = rev_rev_map (fun (p, cl) -> Pos.info_raw p, cl) result in
   let result = ColorFile.go (Hashtbl.find files fn) result in
   let result = List.map (fun input ->
                         match input with
-                        | (Some lvl, str) -> (CL.string lvl, str)
+                        | (Some lvl, str) -> (string_of_level lvl, str)
                         | (None, str) -> ("default", str)
                         ) result in
   let result = List.map (fun (checked, text) ->
@@ -491,7 +488,7 @@ let hh_arg_info fn line char =
   to_js_object (JAssoc json_res)
 
 let hh_format contents start end_ =
-  let result = Format_hack.region start end_ contents in
+  let result = Format_hack.region Relative_path.default start end_ contents in
   let error, result, internal_error = match result with
     | Format_hack.Php_or_decl -> "Php_or_decl", "", false
     | Format_hack.Parsing_error _ -> "Parsing_error", "", false

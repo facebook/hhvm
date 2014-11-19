@@ -230,6 +230,12 @@ void RequestInjectionData::threadInit() {
                    &m_socketDefaultTimeout);
 
   // Response handling.
+  // TODO(T5601927): output_compression supports int values where the value
+  // represents the output buffer size. Also need to add a
+  // zlib.output_handler ini setting as well.
+  // http://docs.hhvm.com/zlib.configuration.php
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "zlib.output_compression", &m_gzipCompression);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 }

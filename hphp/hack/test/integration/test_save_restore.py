@@ -12,22 +12,29 @@ import unittest
 
 from utils import touch, write_files, proc_call
 
-def load_server(hh_server, repo_dir, saved_state_path, changed_files=[]):
+def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     """
-    Loads hh_server from a saved state archive.
+    Writes a .hhconfig that allows hh_client to launch hh_server from a saved
+    state archive.
 
-    hh_server: path to hh_server binary
     repo_dir: Repository to run hh_server on
     saved_state_path: Path to file containing saved server state
     changed_files: list of strings
     """
-    subprocess.check_call([
-        hh_server,
-        '-d',
-        repo_dir,
-        '--load', " ".join([saved_state_path] + changed_files),
-    ])
-    time.sleep(1)
+    with open(os.path.join(repo_dir, 'server_options.sh'), 'w') as f:
+        f.write(r"""
+#! /bin/sh
+echo --load \"%s\"
+        """ % " ".join([saved_state_path] + changed_files))
+        os.fchmod(f.fileno(), 0o700)
+
+    with open(os.path.join(repo_dir, '.hhconfig'), 'w') as f:
+        # we can't just write 'echo ...' inline because Hack server will
+        # be passing this command some command-line options
+        f.write(r"""
+# some comment
+server_options_cmd = %s
+        """ % os.path.join(repo_dir, 'server_options.sh'))
 
 class TestSaveRestore(unittest.TestCase):
     @classmethod
@@ -51,7 +58,6 @@ class TestSaveRestore(unittest.TestCase):
         cls.saved_state_dir = tempfile.mkdtemp()
 
         touch(os.path.join(init_dir, '.hhconfig'))
-        touch(os.path.join(cls.repo_dir, '.hhconfig'))
 
         cls.files = {}
 
@@ -120,15 +126,16 @@ class TestSaveRestore(unittest.TestCase):
         for p in glob.glob(os.path.join(self.repo_dir, '*')):
             os.remove(p)
 
-    def check_cmd(self, expected_output, options=[]):
+    def check_cmd(self, expected_output, stdin=None, options=[]):
         root = self.repo_dir + os.path.sep
         output = proc_call([
             self.hh_client,
             'check',
-            '--autostart-server',
-            'false',
+            '--retries',
+            '5',
             self.repo_dir
-        ] + list(map(lambda x: x.format(root=root), options)))
+            ] + list(map(lambda x: x.format(root=root), options)),
+            stdin=stdin)
         self.assertCountEqual(
             map(lambda x: x.format(root=root), expected_output),
             output.splitlines())
@@ -137,8 +144,7 @@ class TestSaveRestore(unittest.TestCase):
         """
         Update mtimes of files and check that errors remain unchanged.
         """
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'))
 
@@ -160,8 +166,7 @@ class TestSaveRestore(unittest.TestCase):
             }
             """)
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_2.php')]
@@ -182,8 +187,7 @@ class TestSaveRestore(unittest.TestCase):
         from saved state.
         """
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_2.php')]
@@ -218,8 +222,7 @@ class TestSaveRestore(unittest.TestCase):
             }
             """)
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_4.php')]
@@ -237,8 +240,7 @@ class TestSaveRestore(unittest.TestCase):
         """
         os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_3.php')]
@@ -254,8 +256,7 @@ class TestSaveRestore(unittest.TestCase):
         """
         Delete a file containing an error after restoring from a saved state.
         """
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_3.php')]
@@ -283,8 +284,7 @@ class TestSaveRestore(unittest.TestCase):
             os.path.join(self.repo_dir, 'bar_3.php'),
         )
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
             [os.path.join(self.repo_dir, 'foo_2.php'),
@@ -328,10 +328,17 @@ class TestSaveRestore(unittest.TestCase):
         takes time and this test is slow enough already
         """
 
-        load_server(
-            self.hh_server,
+        write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'))
+
+        # adding flags to hh_client check disables the autostart behavior, so
+        # we start up hh_server manually
+        proc_call([
+            self.hh_client,
+            'start',
+            self.repo_dir
+        ])
 
         self.check_cmd([
             'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
@@ -355,3 +362,53 @@ class TestSaveRestore(unittest.TestCase):
             '{root}foo_1.php',
             '{root}foo_3.php',
             ], options=['--list-files'])
+
+        self.check_cmd([
+            # the doubled curly braces are because this string gets passed
+            # through format()
+            '[{{"name":"some_long_function_name",'
+            '"type":"(function(): _)",'
+            '"pos":{{"filename":"{root}foo_3.php",'
+            '"line":9,"char_start":18,"char_end":40}},'
+            '"func_details":{{"min_arity":0,"return_type":"_","params":[]}},'
+            '"expected_ty":false}}]'
+            ],
+            # test the --json output because the non-json one doesn't contain
+            # the filename, and we are especially interested in testing file
+            # paths
+            options=['--auto-complete', '--json'],
+            stdin='<?hh function f() { some_AUTO332\n')
+
+    def test_options_cmd(self):
+        """
+        Make sure we are invoking the server_options_cmd with the right flags
+        """
+        args_file = os.path.join(self.saved_state_dir, 'cmd_args')
+        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
+            f.write(r"""
+#! /bin/sh
+echo "$1" > {out}
+echo "$2" >> {out}
+            """.format(out=args_file))
+            os.fchmod(f.fileno(), 0o700)
+
+        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
+            f.write(r"""
+# some comment
+server_options_cmd = %s
+            """ % os.path.join(self.repo_dir, 'server_options.sh'))
+
+        proc_call([
+            self.hh_client,
+            'start',
+            self.repo_dir
+        ])
+
+        version = proc_call([
+            self.hh_server,
+            self.repo_dir,
+            '--version'
+        ])
+
+        with open(args_file) as f:
+            self.assertEqual(f.read().splitlines(), [self.repo_dir, version])

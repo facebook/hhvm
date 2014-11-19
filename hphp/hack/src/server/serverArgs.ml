@@ -23,6 +23,7 @@ type options = {
     should_detach    : bool;
     convert          : Path.path option;
     load_save_opt    : env_store_action option;
+    version          : bool;
   }
 
 and env_store_action =
@@ -84,10 +85,11 @@ let populate_options () =
   let should_detach = ref false in
   let convert_dir   = ref None  in
   let load_save_opt = ref None  in
+  let version       = ref false in
   let cdir          = fun s -> convert_dir := Some s in
   let save          = fun s -> load_save_opt := Some (Save s) in
   let load          = fun s ->
-    let arg_l       = Str.split (Str.regexp " ") s in
+    let arg_l       = Str.split (Str.regexp " +") s in
     match arg_l with
     | [] -> raise (Invalid_argument "--load needs at least one argument")
     | filename :: to_recheck ->
@@ -104,7 +106,8 @@ let populate_options () =
      "--from-hhclient" , arg from_hhclient , Messages.from_hhclient;
      "--convert"       , Arg.String cdir   , Messages.convert;
      "--save"          , Arg.String save   , Messages.save;
-     "--load"          , Arg.Rest load     , Messages.load;
+     "--load"          , Arg.String load   , Messages.load;
+     "--version"       , arg version       , "";
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -124,6 +127,7 @@ let populate_options () =
     should_detach = !should_detach;
     convert       = convert;
     load_save_opt = !load_save_opt;
+    version       = !version;
   }
 
 (* useful in testing code *)
@@ -135,6 +139,7 @@ let default_options ~root =
   should_detach = false;
   convert = None;
   load_save_opt = None;
+  version = false;
 }
 
 (*****************************************************************************)

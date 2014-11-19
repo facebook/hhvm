@@ -18,9 +18,9 @@
 #include <algorithm>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 TRACE_SET_MOD(hhir);
@@ -28,41 +28,6 @@ TRACE_SET_MOD(hhir);
 namespace HPHP { namespace jit {
 
 using Trace::Indent;
-
-/*
- * Finds the least common ancestor of two SSATmps. A temp has a parent if it
- * is the result of a passthrough instruction.
- *
- * Returns nullptr when there is no LCA.
- */
-static SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
-  if (s1 == s2) return s1;
-  if (s1 == nullptr || s2 == nullptr) return nullptr;
-
-  IdSet<SSATmp> seen;
-
-  auto const step = [] (SSATmp* v) {
-    assert(v != nullptr);
-    return v->inst()->isPassthrough() ?
-      v->inst()->getPassthroughValue() :
-      nullptr;
-  };
-
-  auto const process = [&] (SSATmp*& v) {
-    if (v == nullptr) return false;
-    if (seen[v]) return true;
-    seen.add(v);
-    v = step(v);
-    return false;
-  };
-
-  while (s1 != nullptr || s2 != nullptr) {
-    if (process(s1)) return s1;
-    if (process(s2)) return s2;
-  }
-
-  return nullptr;
-}
 
 FrameState::FrameState(IRUnit& unit, BCMarker marker)
   : FrameState(unit, marker.spOff(), marker.func())
@@ -214,8 +179,6 @@ void FrameState::update(const IRInstruction* inst) {
   }
 }
 
-static const StaticString s_php_errormsg("php_errormsg");
-
 void FrameState::getLocalEffects(const IRInstruction* inst,
                                  LocalStateHook& hook) const {
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
@@ -339,14 +302,6 @@ void FrameState::getLocalEffects(const IRInstruction* inst,
     }
     default:
       break;
-  }
-
-  // If this instruction may raise an error and our function has a local named
-  // "php_errormsg", we have to clobber it. See
-  // http://www.php.net/manual/en/reserved.variables.phperrormsg.php
-  if (inst->mayRaiseError()) {
-    auto id = m_curFunc->lookupVarId(s_php_errormsg.get());
-    if (id != -1) hook.setLocalValue(id, nullptr);
   }
 
   if (MInstrEffects::supported(inst)) MInstrEffects::get(inst, *this, hook);
@@ -618,6 +573,11 @@ void FrameState::merge(Snapshot& state) {
     local.type = Type::unionOf(local.type, m_locals[i].type);
     local.boxedPrediction =
       Type::unionOf(local.boxedPrediction, m_locals[i].boxedPrediction);
+
+    // Throw away the prediction if we merged Type::Gen for the type.
+    if (!(local.type <= Type::BoxedInitCell)) {
+      local.boxedPrediction = Type::Bottom;
+    }
   }
 
   // For now, we shouldn't be merging states with different inline states.
@@ -695,9 +655,9 @@ SSATmp* FrameState::cseLookup(IRInstruction* inst,
     // During a reoptimize pass, we need to make sure that any values
     // we want to reuse for CSE are only reused in blocks dominated by
     // the block that defines it.
-    if (!dominates(tmp->inst()->block(), srcBlock, *idoms)) {
-      return nullptr;
-    }
+    if (tmp->isConst()) return tmp;
+    auto const dom = findDefiningBlock(tmp);
+    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
   }
   return tmp;
 }
@@ -721,7 +681,9 @@ bool FrameState::checkInvariants() const {
     [&] (uint32_t id, unsigned inlineIdx, const LocalState& local) {
       always_assert_flog(
         local.boxedPrediction <= local.type &&
-        local.boxedPrediction <= Type::BoxedInitCell,
+        local.boxedPrediction <= Type::BoxedInitCell &&
+        IMPLIES(local.boxedPrediction != Type::Bottom,
+                local.type <= Type::BoxedInitCell),
         "local {} failed boxed invariants; pred = {}, type = {}\n",
         id,
         local.boxedPrediction,

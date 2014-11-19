@@ -374,14 +374,13 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(resume, Inone, U(args), Dn)\
   O(retransopt, I(sk) I(id), U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
-  O(end, Inone, Un, Dn)\
+  O(fallthru, Inone, Un, Dn)\
   O(ldimm, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
@@ -405,6 +404,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(syncvmfp, Inone, U(s), Dn)\
+  O(srem, Inone, U(s0) U(s1), D(d))\
+  O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -455,9 +457,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(decq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(decqm, Inone, U(m), D(sf))\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
-  O(incwm, Inone, U(m), D(sf))\
   O(idiv, Inone, U(s), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(incwm, Inone, U(m), D(sf))\
   O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
   O(inclm, Inone, U(m), D(sf))\
   O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -465,7 +467,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(incqmlock, Inone, U(m), D(sf))\
   O(jcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
-  O(jmpr, Inone, U(target), Dn)\
+  O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
@@ -475,9 +477,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
   O(movb, Inone, UH(s,d), DH(d,s))\
-  O(movbi, I(s), Un, D(d))\
   O(movl, Inone, UH(s,d), DH(d,s))\
-  O(movsbl, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(mul, Inone, U(s0) U(s1), D(d))\
@@ -496,12 +496,12 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
-  O(sarq, Inone, U(s), D(d) D(sf))\
+  O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(sbbl, Inone, U(sfu) UA(s0) U(s1), D(d) D(sfd))\
   O(setcc, I(cc), U(sf), D(d))\
   O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shlq, Inone, U(s), D(d) D(sf))\
+  O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -548,7 +548,6 @@ struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; };
-struct resume { RegSet args; };
 struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
@@ -558,7 +557,11 @@ struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct debugtrap {};
-struct end {};
+
+// No-op, used for marking the end of a block that is intentionally going to
+// fall-through.  Only for use with Vauto.
+struct fallthru {};
+
 struct ldimm { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
@@ -582,6 +585,9 @@ struct landingpad {};
 struct defvmsp { Vreg d; };
 struct syncvmsp { Vreg s; };
 struct syncvmfp { Vreg s; };
+struct srem { Vreg s0, s1, d; };
+struct sar { Vreg s0, s1, d; VregSF sf; };
+struct shl { Vreg s0, s1, d; VregSF sf; };
 
 // arm-specific intrinsics
 struct hcsync { Fixup fix; Vpoint call; };
@@ -661,7 +667,7 @@ struct incqmlock { Vptr m; VregSF sf; };
 struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
-struct jmpr { Vreg64 target; };
+struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
@@ -671,9 +677,7 @@ struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadsd { Vptr s; VregDbl d; };
 struct loadzbl { Vptr s; Vreg32 d; };
 struct movb { Vreg8 s, d; };
-struct movbi { Immed s; Vreg8 d; };
 struct movl { Vreg32 s, d; };
-struct movsbl { Vreg8 s; Vreg32 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; };
@@ -758,6 +762,21 @@ struct Vinstr {
   VASM_OPCODES
 #undef O
 
+  template<typename Op>
+  struct matcher;
+
+  /*
+   * Templated accessors for the union members.
+   */
+  template<typename Op>
+  typename matcher<Op>::type& get() {
+    return matcher<Op>::get(*this);
+  }
+  template<typename Op>
+  const typename matcher<Op>::type& get() const {
+    return matcher<Op>::get(*this);
+  }
+
   Opcode op;
 
   /*
@@ -777,6 +796,21 @@ struct Vinstr {
   union { VASM_OPCODES };
 #undef O
 };
+
+#define O(name, ...)                             \
+  template<> struct Vinstr::matcher<name> {      \
+    using type = jit::name;                      \
+    static type& get(Vinstr& inst) {             \
+      assert(inst.op == name);                   \
+      return inst.name##_;                       \
+    }                                            \
+    static const type& get(const Vinstr& inst) { \
+      assert(inst.op == name);                   \
+      return inst.name##_;                       \
+    }                                            \
+  };
+VASM_OPCODES
+#undef O
 
 struct Vblock {
   explicit Vblock(AreaIndex area) : area(area) {}
@@ -830,6 +864,10 @@ struct Vunit {
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
+
+  template<class T>
+  typename std::enable_if<std::is_integral<T>::value, Vreg>::type
+  makeConst(T l) { return makeConst(uint64_t(l)); }
 
   /*
    * Returns true iff this Vunit needs register allocation before it can be

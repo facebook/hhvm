@@ -504,7 +504,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"select"             { HH_ONLY_KEYWORD(T_SELECT); }
 <ST_IN_SCRIPTING>"group"              { HH_ONLY_KEYWORD(T_GROUP); }
 <ST_IN_SCRIPTING>"by"                 { HH_ONLY_KEYWORD(T_BY); }
-<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff($] {
+<ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
 

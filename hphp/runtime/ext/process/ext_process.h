@@ -44,6 +44,10 @@ bool HHVM_FUNCTION(pcntl_signal,
                    int signo,
                    const Variant& handler,
                    bool restart_syscalls = true);
+bool HHVM_FUNCTION(pcntl_sigprocmask,
+                   int how,
+                   const Array& set,
+                   VRefParam oldset = uninit_null());
 int64_t HHVM_FUNCTION(pcntl_wait,
                       VRefParam status,
                       int options = 0);

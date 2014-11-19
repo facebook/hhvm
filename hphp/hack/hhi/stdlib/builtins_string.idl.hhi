@@ -93,7 +93,7 @@ function strripos($haystack, $needle, $offset = 0) { }
 function substr_count($haystack, $needle, $offset = 0, $length = 0x7FFFFFFF) { }
 function strspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF) { }
 function strcspn($str1, $str2, $start = 0, $length = 0x7FFFFFFF) { }
-function strlen($vstr) { }
+function strlen($vstr): int { }
 function count_chars($str, $mode = 0) { }
 function str_word_count($str, $format = 0, $charlist = "") { }
 function levenshtein($str1, $str2, $cost_ins = 1, $cost_rep = 1, $cost_del = 1) { }

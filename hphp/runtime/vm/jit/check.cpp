@@ -232,8 +232,13 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
         live.forEach([&](uint32_t tmp) {
           auto msg = folly::format("checkTmpsSpanningCalls failed\n"
                                    "  instruction: {}\n"
-                                   "  src:         t{}\n",
-                                   inst.toString(), tmp).str();
+                                   "  src:         t{}\n"
+                                   "\n"
+                                   "Unit:\n"
+                                   "{}\n",
+                                   inst.toString(),
+                                   tmp,
+                                   unit.toString()).str();
           std::cerr << msg;
           FTRACE(1, "{}", msg);
           isValid = false;

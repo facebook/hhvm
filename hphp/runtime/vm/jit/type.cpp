@@ -416,11 +416,11 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 // operations on both Class and ArrayKind specializations.
 struct Type::ClassOps {
   static bool subtypeOf(ClassInfo a, ClassInfo b) {
-    return a == b || (a.get()->classof(b.get()) && !b.isExact());
+    if (a == b) return true;
+    return !b.isExact() && a.get()->classof(b.get());
   }
 
-  static folly::Optional<ClassInfo> commonAncestor(ClassInfo a,
-                                                   ClassInfo b) {
+  static folly::Optional<ClassInfo> commonAncestor(ClassInfo a, ClassInfo b) {
     if (!isNormalClass(a.get()) || !isNormalClass(b.get())) return folly::none;
     if (auto result = a.get()->commonAncestor(b.get())) {
       return ClassInfo(result, ClassTag::Sub);
@@ -429,9 +429,36 @@ struct Type::ClassOps {
     return folly::none;
   }
 
+  static bool canIntersect(ClassInfo a, ClassInfo b) {
+    // If either is an interface, we'd need to explore all implementing classes
+    // in the program to know if they have a non-empty intersection.  Easy
+    // cases where one is a subtype of the other still will have been handled,
+    // though.
+    return isNormalClass(a.get()) && isNormalClass(b.get());
+  }
+  static ClassInfo conservativeHeuristic(ClassInfo a, ClassInfo b) {
+    /*
+     * When we can't intersect, we try to take the "better" of the two.  We
+     * consider a non-interface better than an interface, because it might
+     * influence important things like method dispatch or property accesses
+     * better than an interface type could.  (Note that at least one of our
+     * ClassInfo's is not a normal class if we're in this code path.)
+     *
+     * If they are both interfaces we have to pick one arbitrarily, but we must
+     * do so in a way that is stable regardless of which one was passed as a or
+     * b (to guarantee that operator& is commutative).  We use the class name
+     * in that last case to ensure that the ordering is dependent only on the
+     * source program (Class* or something like that seems less desirable).
+     */
+    if (isNormalClass(b.get())) return b;
+    if (isNormalClass(a.get())) return a;
+    return a.get()->name()->compare(b.get()->name()) < 0 ? a : b;
+  }
+
   static folly::Optional<ClassInfo> intersect(ClassInfo a, ClassInfo b) {
-    // There shouldn't be any cases we could cover here that aren't already
-    // handled by the subtype checks.
+    assert(canIntersect(a, b));
+    // Since these classes are not interfaces, they must have a non-empty
+    // intersection if we failed the subtype checks.
     return folly::none;
   }
 };
@@ -466,6 +493,11 @@ struct Type::ArrayOps {
     return folly::none;
   }
 
+  static bool canIntersect(ArrayInfo a, ArrayInfo b) { return true; }
+  static ArrayInfo conservativeHeuristic(ArrayInfo, ArrayInfo) {
+    not_reached();
+  }
+
   static folly::Optional<ArrayInfo> intersect(ArrayInfo a, ArrayInfo b) {
     assert(a != b);
 
@@ -483,10 +515,7 @@ struct Type::ArrayOps {
     }
     if (aka && akb) {
       assert(aka != akb);
-      if (ata == atb) {
-        return makeArrayInfo(folly::none, ata);
-      }
-      return folly::none;
+      return folly::none;  // arrays of different kinds don't intersect.
     }
     assert(aka.hasValue() || akb.hasValue());
     assert(!(aka.hasValue() && akb.hasValue()));
@@ -579,14 +608,21 @@ struct Type::Intersect {
       if (Ops::subtypeOf(b, a)) return Type(bits, newPtrKind, b);
 
       // If we can intersect the specializations, use that.
-      if (auto info = Ops::intersect(a, b)) {
-        return Type(bits, newPtrKind, *info);
+      if (Ops::canIntersect(a, b)) {
+        if (auto info = Ops::intersect(a, b)) {
+          return Type(bits, newPtrKind, *info);
+        }
+        // a and b are unrelated so we have to remove the specialized type.
+        // This means dropping the specialization and the bits that correspond
+        // to the type that was specialized.
+        return Type(bits & ~typeMask, newPtrKind);
       }
 
-      // a and b are unrelated so we have to remove the specialized type. This
-      // means dropping the specialization and the bits that correspond to the
-      // type that was specialized.
-      return Type(bits & ~typeMask, newPtrKind);
+      // We can't represent the true intersection of these two types, but
+      // whatever the intersection is it must be smaller than one of the two.
+      // It's not incorrect to just pick one arbitrarily, but we can pick the
+      // "better" one by a Ops-specific heuristic.
+      return Type(bits, newPtrKind, Ops::conservativeHeuristic(a, b));
     }
 
     if (aOpt) return Type(bits, newPtrKind, *aOpt);

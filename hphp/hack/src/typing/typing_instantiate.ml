@@ -69,7 +69,9 @@ let rec instantiate_fun env fty el =
   | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
       let env, fty = TUtils.expand_typedef env r x argl in
       instantiate_fun env fty el
-  | _ -> env, fty
+  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+    | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+    | Tunresolved _ | Tobject | Tshape _) -> env, fty
 
 and instantiate_ft env ft =
   let env, tvarl = List.fold_left begin fun (env, vars) (_, (pos, _), _) ->
@@ -103,7 +105,9 @@ and check_constraint env ty x_ty =
        *)
       env
   | Tany, _ -> fst (TUtils.unify env ty x_ty)
-  | _ -> TUtils.sub_type env ty x_ty
+  | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
+    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tunresolved _ | Tobject | Tshape _), _ -> TUtils.sub_type env ty x_ty
 
 and instantiate subst env (r, ty) =
   match ty with
@@ -135,7 +139,9 @@ and instantiate subst env (r, ty) =
               let env, ty = instantiate subst env ty in
               env, (r, Tgeneric (x, Some ty))
       )
-  | _ ->
+  | Tany | Tmixed | Tarray (_, _) | Tprim _ | Toption _ | Tvar _
+    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tunresolved _ | Tobject | Tshape _->
       let p = Reason.to_pos r in
       let env, ty = instantiate_ p subst env ty in
       env, (r, ty)

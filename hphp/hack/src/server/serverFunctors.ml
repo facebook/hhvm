@@ -11,14 +11,6 @@
 open Utils
 open ServerEnv
 
-(*****************************************************************************)
-(* Types *)
-(*****************************************************************************)
-
-type failed_parsing = SSet.t
-type files = SSet.t
-type client = in_channel * out_channel
-
 module type SERVER_PROGRAM = sig
   val preinit : unit -> unit
   val init : genv -> env -> env
@@ -70,6 +62,7 @@ end = struct
 
   (* This code is only executed when the options --check is NOT present *)
   let go root init_fun =
+    let t = Unix.gettimeofday () in
     grab_lock root;
     init_message();
     grab_init_lock root;
@@ -78,6 +71,8 @@ end = struct
     let env = init_fun () in
     release_init_lock root;
     ready_message ();
+    let t' = Unix.gettimeofday () in
+    Printf.printf "Took %f seconds to initialize.\n" (t' -. t);
     env
 end
 
@@ -174,7 +169,11 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      EventLogger.init_done ();
+      let load_file = match ServerArgs.load_save_opt genv.options with
+        | Some (ServerArgs.Load { ServerArgs.filename; _ }) ->
+          Some (Filename.basename filename)
+        | _ -> None in
+      EventLogger.init_done load_file;
       serve genv env socket
 
   let get_log_file root =
@@ -212,6 +211,10 @@ end = struct
 
   let start () =
     let options = Program.parse_options() in
+    if options.ServerArgs.version then begin
+      print_string Build_id.build_id_ohai;
+      exit 0
+    end;
     try
       if ServerArgs.should_detach options
       then daemonize options;

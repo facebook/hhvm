@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP { namespace jit {
@@ -90,13 +91,13 @@ bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
 SSATmp* IRBuilder::genPtrToInitNull() {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(Type::cns(&init_null_variant, Type::PtrToMemInitNull));
+  return cns(Type::cns(&init_null_variant, Type::PtrToMembInitNull));
 }
 
 SSATmp* IRBuilder::genPtrToUninit() {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(Type::cns(&null_variant, Type::PtrToMemUninit));
+  return cns(Type::cns(&null_variant, Type::PtrToMembUninit));
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -729,10 +730,15 @@ void IRBuilder::reoptimize() {
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);
+  boost::dynamic_bitset<> reachable(m_unit.numBlocks());
+  reachable.set(m_unit.entry()->id());
 
   for (auto* block : blocksIds.blocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
+
+    // Skip block if it's unreachable.
+    if (!reachable.test(block->id())) continue;
 
     m_state.startBlock(block, block->front().marker());
     m_curBlock = block;
@@ -789,7 +795,9 @@ void IRBuilder::reoptimize() {
       // Set its next block appropriately.
       block->back().setNext(nextBlock);
     }
-
+    // Mark successor blocks as reachable.
+    if (block->back().next())  reachable.set(block->back().next()->id());
+    if (block->back().taken()) reachable.set(block->back().taken()->id());
     m_state.finishBlock(block);
   }
 }

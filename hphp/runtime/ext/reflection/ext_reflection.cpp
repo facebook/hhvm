@@ -869,7 +869,11 @@ static Array HHVM_METHOD(ReflectionFunction, getClosureUseVariables,
                           CopyString);
       ai.setKeyUnconverted(VarNR(strippedName), *val);
     } else {
-      ai.setKeyUnconverted(VarNR(prop.m_name), *val);
+      if (val->isReferenced()) {
+        ai.setRef(VarNR(prop.m_name), *val, false /* = keyConverted */);
+      } else {
+        ai.setKeyUnconverted(VarNR(prop.m_name), *val);
+      }
     }
   }
   return ai.toArray();

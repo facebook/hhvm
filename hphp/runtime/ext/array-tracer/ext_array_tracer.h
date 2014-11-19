@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EXT_ARRAY_TRACER_H_
 #define incl_HPHP_EXT_ARRAY_TRACER_H_
 
-#include <memory>
+#include <atomic>
 #include <folly/AtomicHashMap.h>
 
 #include "hphp/runtime/base/array-data.h"
@@ -67,9 +67,61 @@ enum ArrayClass : uint8_t {
   NumArrayClasses = 6,
 };
 
-enum class ArrayFunc {
-  None,
+enum class ArrayFunc : uint8_t {
+  Release = 0,
+  NvGetInt,
+  NvGetIntConverted,
+  NvGetStr,
+  NvGetKey,
+  SetInt,
+  SetIntConverted,
+  SetStr,
+  Vsize,
+  GetValueRef,
+  IsVectorData,
+  ExistsInt,
+  ExistsStr,
+  LvalInt,
+  LvalStr,
+  LvalNew,
+  LvalNewRef,
+  SetRefInt,
+  SetRefStr,
+  AddInt,
+  AddStr,
+  RemoveInt,
+  RemoveStr,
+  IterBegin,
+  IterLast,
+  IterEnd,
+  IterAdvance,
+  IterRewind,
+  ValidMArrayIter,
+  AdvanceMArrayIter,
+  EscalateForSort,
+  Ksort,
+  Sort,
+  Asort,
+  Uksort,
+  Usort,
+  Uasort,
+  Copy,
+  CopyWithStrongIterators,
   NonSmartCopy,
+  Append,
+  AppendRef,
+  AppendWithRef,
+  PlusEq,
+  Merge,
+  Pop,
+  Dequeue,
+  Prepend,
+  Renumber,
+  OnSetEvalScalar,
+  Escalate,
+  ZSetInt,
+  ZSetStr,
+  ZAppend,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +228,12 @@ public:
                            const ArrayUsage usage);
   const char* usageToCStr(const ArrayUsage u);
 
+  /*
+   * Bump the frequency counter for the given ArrayKind/ArrayFunc pair
+   */
+  void bumpArrayFuncStats(ArrayData::ArrayKind kind,
+                          ArrayFunc func);
+
 public:
   template <class UpdateUsage>
   ArrayUsage registerArray(const ArrayData* ad,
@@ -206,13 +264,15 @@ public:
                                     bool copy,
                                     UpdateUsage updateUsage,
                                     ArrayOp arrayOp,
-                                    ArrayFunc func = ArrayFunc::None) {
+                                    ArrayFunc func) {
     // (1) Register ad, which we may or may not have seen before and
     // record what its previous usage was.
     auto oldUsage = registerArray(ad, ArrayUsage{}, [&](ArrayUsage& usg){});
 
     // (2) Record information about ad before it (possibly) gets mutated
     auto oldKind = ad->kind();
+    // (2a) Bump the ArrayFunc frequency stats
+    bumpArrayFuncStats(oldKind, func);
 
     // (3) Perform the array operation
     auto ret = arrayOp();
@@ -240,13 +300,16 @@ public:
       registerArray(ret, oldUsage, updateUsage,
                     func == ArrayFunc::NonSmartCopy);
     }
+
     return ret;
   }
 
   template <class UpdateUsage>
   void handleArrayFunc(const ArrayData* ad,
-                       UpdateUsage updateUsage) {
+                       UpdateUsage updateUsage,
+                       ArrayFunc func) {
     registerArray(ad, ArrayUsage{}, updateUsage);
+    bumpArrayFuncStats(ad->kind(), func);
   }
 
   void updateStaticArrayStats();
@@ -292,6 +355,16 @@ public:
   std::vector<uint64_t> m_staticClassCntrs;
 
   LogarithmicHistogram m_noInfoSizes;
+  // kNumKind * kNumArrayFuncs matrix of counters
+  static_assert(sizeof(g_array_funcs_unmodified) %
+                sizeof(g_array_funcs_unmodified.release) == 0,
+                "The calculation below will be incorrect if it's not"
+                " a strict multiple");
+  static constexpr size_t kNumArrayFuncs = sizeof(g_array_funcs_unmodified)
+    / sizeof(g_array_funcs_unmodified.release);
+  std::array<std::atomic<uint64_t>,
+    (static_cast<size_t>(ArrayData::kNumKinds) *
+     kNumArrayFuncs)> m_atomicArrayFuncCntrs;
 };
 
 ArrayTracer* getArrayTracer();
@@ -321,8 +394,8 @@ struct ArrayFunctionsWrapper {
   template <ArrayData::ArrayKind kind>
   static const TypedValue* nvGetInt(const ArrayData* ad, int64_t ikey) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::NvGetInt);
     return g_array_funcs_unmodified.nvGetInt[kind](ad, ikey);
   }
 
@@ -330,8 +403,8 @@ struct ArrayFunctionsWrapper {
   static const TypedValue* nvGetIntConverted(const ArrayData* ad,
                                              int64_t ikey) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::NvGetIntConverted);
     return g_array_funcs_unmodified.nvGetIntConverted[kind](ad, ikey);
   }
 
@@ -339,16 +412,16 @@ struct ArrayFunctionsWrapper {
   static const TypedValue* nvGetStr(const ArrayData* ad,
                                     const StringData* skey) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::NvGetStr);
     return g_array_funcs_unmodified.nvGetStr[kind](ad, skey);
   }
 
   template <ArrayData::ArrayKind kind>
   static void nvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::NvGetKey);
     g_array_funcs_unmodified.nvGetKey[kind](ad, out, pos);
     getArrayTracer()->registerArray(ad, ArrayUsage{},
         // We expect to find this array, we're just now going to update
@@ -371,7 +444,8 @@ struct ArrayFunctionsWrapper {
         },
         [&]() {
           return g_array_funcs_unmodified.setInt[kind](ad, ikey, v, copy);
-        });
+        },
+        ArrayFunc::SetInt);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -384,7 +458,8 @@ struct ArrayFunctionsWrapper {
         [&]() {
           return g_array_funcs_unmodified.setIntConverted[kind](ad, ikey,
                                                                 v, copy);
-        });
+        },
+        ArrayFunc::SetIntConverted);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -395,22 +470,23 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.setStr[kind](ad, skey, v, copy);
-        });
+        },
+        ArrayFunc::SetStr);
   }
 
   template <ArrayData::ArrayKind kind>
   static size_t vsize(const ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Vsize);
     return g_array_funcs_unmodified.vsize[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static const Variant& getValueRef(const ArrayData* ad, ssize_t pos) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::GetValueRef);
     auto& ret = g_array_funcs_unmodified.getValueRef[kind](ad, pos);
     getArrayTracer()->registerArray(ad, ArrayUsage{},
         // We expect to find this array, we're just now going to update
@@ -426,24 +502,24 @@ struct ArrayFunctionsWrapper {
   template <ArrayData::ArrayKind kind>
   static bool isVectorData(const ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IsVectorData);
     return g_array_funcs_unmodified.isVectorData[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static bool existsInt(const ArrayData* ad, int64_t ikey) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::ExistsInt);
     return g_array_funcs_unmodified.existsInt[kind](ad, ikey);
   }
 
   template <ArrayData::ArrayKind kind>
   static bool existsStr(const ArrayData* ad, const StringData* skey) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::ExistsStr);
     return g_array_funcs_unmodified.existsStr[kind](ad, skey);
   }
 
@@ -456,7 +532,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.lvalInt[kind](ad, ikey, ret, copy);
-        });
+        },
+        ArrayFunc::LvalInt);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -468,7 +545,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.lvalStr[kind](ad, skey, ret, copy);
-        });
+        },
+        ArrayFunc::LvalStr);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -479,7 +557,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.lvalNew[kind](ad, ret, copy);
-        });
+        },
+        ArrayFunc::LvalNew);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -491,7 +570,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.lvalNewRef[kind](ad, ret, copy);
-        });
+        },
+        ArrayFunc::LvalNewRef);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -504,7 +584,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.setRefInt[kind](ad, ikey, v, copy);
-        });
+        },
+        ArrayFunc::SetRefInt);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -517,7 +598,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.setRefStr[kind](ad, skey, v, copy);
-        });
+        },
+        ArrayFunc::SetRefStr);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -528,7 +610,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.addInt[kind](ad, ikey, v, copy);
-        });
+        },
+        ArrayFunc::AddInt);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -539,65 +622,68 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.addStr[kind](ad, skey, v, copy);
-        });
+        },
+        ArrayFunc::AddStr);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* removeInt(ArrayData* ad, int64_t ikey, bool copy) {
-    getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
-    return g_array_funcs_unmodified.removeInt[kind](ad, ikey, copy);
+    return getArrayTracer()->handleArrayFuncMutable(ad, copy,
+        [&](ArrayUsage& usage) {},
+        [&]() {
+          return g_array_funcs_unmodified.removeInt[kind](ad, ikey, copy);
+        },
+        ArrayFunc::RemoveInt);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* removeStr(ArrayData* ad, const StringData* skey,
                               bool copy) {
     return getArrayTracer()->handleArrayFuncMutable(ad, copy,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.removeStr[kind](ad, skey, copy);
-        });
+        },
+        ArrayFunc::RemoveStr);
   }
 
   template <ArrayData::ArrayKind kind>
   static ssize_t iterBegin(const ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IterBegin);
     return g_array_funcs_unmodified.iterBegin[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static ssize_t iterLast(const ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IterLast);
     return g_array_funcs_unmodified.iterLast[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static ssize_t iterEnd(const ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IterEnd);
     return g_array_funcs_unmodified.iterEnd[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static ssize_t iterAdvance(const ArrayData* ad, ssize_t pos) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IterAdvance);
     return g_array_funcs_unmodified.iterAdvance[kind](ad, pos);
   }
 
   template <ArrayData::ArrayKind kind>
   static ssize_t iterRewind(const ArrayData* ad, ssize_t pos) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::IterRewind);
     return g_array_funcs_unmodified.iterRewind[kind](ad, pos);
   }
 
@@ -606,7 +692,8 @@ struct ArrayFunctionsWrapper {
     getArrayTracer()->handleArrayFunc(ad,
                                       [&](ArrayUsage& usage) {
                                         setReffy(usage);
-                                      });
+                                      },
+                                      ArrayFunc::ValidMArrayIter);
     return g_array_funcs_unmodified.validMArrayIter[kind](ad, fp);
   }
 
@@ -615,97 +702,98 @@ struct ArrayFunctionsWrapper {
     getArrayTracer()->handleArrayFunc(ad,
                                       [&](ArrayUsage& usage) {
                                         setReffy(usage);
-                                      });
+                                      },
+                                      ArrayFunc::AdvanceMArrayIter);
     return g_array_funcs_unmodified.advanceMArrayIter[kind](ad, fp);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* escalateForSort(ArrayData* ad) {
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&]() {
           return g_array_funcs_unmodified.escalateForSort[kind](ad);
-        });
+        },
+        ArrayFunc::EscalateForSort);
   }
 
   template <ArrayData::ArrayKind kind>
   static void ksort(ArrayData* ad, int sort_flags, bool ascending) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Ksort);
     return g_array_funcs_unmodified.ksort[kind](ad, sort_flags, ascending);
   }
 
   template <ArrayData::ArrayKind kind>
   static void sort(ArrayData* ad, int sort_flags, bool ascending) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Sort);
     return g_array_funcs_unmodified.sort[kind](ad, sort_flags, ascending);
   }
 
   template <ArrayData::ArrayKind kind>
   static void asort(ArrayData* ad, int sort_flags, bool ascending) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Asort);
     return g_array_funcs_unmodified.asort[kind](ad, sort_flags, ascending);
   }
 
   template <ArrayData::ArrayKind kind>
   static bool uksort(ArrayData* ad, const Variant& cmp_function) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Uksort);
     return g_array_funcs_unmodified.uksort[kind](ad, cmp_function);
   }
 
   template <ArrayData::ArrayKind kind>
   static bool usort(ArrayData* ad, const Variant& cmp_function) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Usort);
     return g_array_funcs_unmodified.usort[kind](ad, cmp_function);
   }
 
   template <ArrayData::ArrayKind kind>
   static bool uasort(ArrayData* ad, const Variant& cmp_function) {
     getArrayTracer()->handleArrayFunc(ad,
-                                      [&](ArrayUsage& usage) {
-                                      });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Uasort);
     return g_array_funcs_unmodified.uasort[kind](ad, cmp_function);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* copy(const ArrayData* ad) {
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.copy[kind](ad);
-        });
+        },
+        ArrayFunc::Copy);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* copyWithStrongIterators(const ArrayData* ad) {
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.copyWithStrongIterators[kind](ad);
-        });
+        },
+        ArrayFunc::CopyWithStrongIterators);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* nonSmartCopy(const ArrayData* ad) {
     // Whatever we return here is actually going to be a static array...
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.nonSmartCopy[kind](ad);
-        }, ArrayFunc::NonSmartCopy);
+        },
+        ArrayFunc::NonSmartCopy);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -716,7 +804,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.append[kind](ad, v, copy);
-        });
+        },
+        ArrayFunc::Append);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -728,7 +817,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.appendRef[kind](ad, v, copy);
-        });
+        },
+        ArrayFunc::AppendRef);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -740,7 +830,8 @@ struct ArrayFunctionsWrapper {
         },
         [&]() {
           return g_array_funcs_unmodified.appendWithRef[kind](ad, v, copy);
-        });
+        },
+        ArrayFunc::AppendWithRef);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -762,7 +853,8 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.plusEq[kind](ad, elems);
-        });
+        },
+        ArrayFunc::PlusEq);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -785,27 +877,28 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.merge[kind](ad, elems);
-        });
+        },
+        ArrayFunc::Merge);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* pop(ArrayData* ad, Variant& value) {
     return getArrayTracer()->handleArrayFuncMutable(ad, ad->hasMultipleRefs(),
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.pop[kind](ad, value);
-        });
+        },
+        ArrayFunc::Pop);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* dequeue(ArrayData* ad, Variant& value) {
     return getArrayTracer()->handleArrayFuncMutable(ad, ad->hasMultipleRefs(),
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&](){
           return g_array_funcs_unmodified.dequeue[kind](ad, value);
-        });
+        },
+        ArrayFunc::Dequeue);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -816,33 +909,34 @@ struct ArrayFunctionsWrapper {
         },
         [&](){
           return g_array_funcs_unmodified.prepend[kind](ad, v, copy);
-        });
+        },
+        ArrayFunc::Prepend);
   }
 
   template <ArrayData::ArrayKind kind>
   static void renumber(ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-        [&](ArrayUsage& usage) {
-        });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::Renumber);
     return g_array_funcs_unmodified.renumber[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static void onSetEvalScalar(ArrayData* ad) {
     getArrayTracer()->handleArrayFunc(ad,
-        [&](ArrayUsage& usage) {
-        });
+                                      [&](ArrayUsage& usage) {},
+                                      ArrayFunc::OnSetEvalScalar);
     return g_array_funcs_unmodified.onSetEvalScalar[kind](ad);
   }
 
   template <ArrayData::ArrayKind kind>
   static ArrayData* escalate(const ArrayData* ad) {
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
-        [&](ArrayUsage& usage) {
-        },
+        [&](ArrayUsage& usage) {},
         [&]() {
           return g_array_funcs_unmodified.escalate[kind](ad);
-        });
+        },
+        ArrayFunc::Escalate);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -853,7 +947,8 @@ struct ArrayFunctionsWrapper {
         },
         [&]() {
           return g_array_funcs_unmodified.zSetInt[kind](ad, ikey, v);
-        });
+        },
+        ArrayFunc::ZSetInt);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -864,7 +959,8 @@ struct ArrayFunctionsWrapper {
         },
         [&]() {
           return g_array_funcs_unmodified.zSetStr[kind](ad, skey, v);
-        });
+        },
+        ArrayFunc::ZSetStr);
   }
 
   template <ArrayData::ArrayKind kind>
@@ -875,7 +971,8 @@ struct ArrayFunctionsWrapper {
         },
         [&]() {
           return g_array_funcs_unmodified.zAppend[kind](ad, v, key_ptr);
-        });
+        },
+        ArrayFunc::ZAppend);
   }
 
 };

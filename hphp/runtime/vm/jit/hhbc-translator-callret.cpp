@@ -816,10 +816,10 @@ void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
     SSATmp* res = gen(DecodeCufIter, Type::Bool,
                       IterId(iterId), catchBlock, src, m_irb->fp());
     gen(DecRef, src);
-    emitJmpCondHelper(offset, true, jmpFlags, res);
+    jmpCondHelper(offset, true, jmpFlags, res);
   } else {
     gen(DecRef, src);
-    emitJmpImpl(offset, JmpFlagEndsRegion, nullptr);
+    jmpImpl(offset, JmpFlagEndsRegion);
   }
 }
 
@@ -996,7 +996,7 @@ void HhbcTranslator::emitRet(Type type) {
   // Free local variables.  We do the decrefs inline if there are less
   // refcounted locals than a threshold.
   auto const localCount = func->numLocals();
-  auto const shouldFreeInline = [&]() -> bool {
+  auto const shouldFreeInline = mcg->useLLVM() || [&]() -> bool {
     auto const count = mcg->numTranslations(m_irb->unit().context().srcKey());
     constexpr int kTooPolyRet = 6;
     if (localCount > 0 && count > kTooPolyRet) return false;

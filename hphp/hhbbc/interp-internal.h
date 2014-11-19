@@ -43,9 +43,6 @@ const StaticString s_compact_sl("__SystemLib\\compact_sl");
 const StaticString s_get_defined_vars("get_defined_vars");
 const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
 
-const StaticString s_http_response_header("http_response_header");
-const StaticString s_php_errormsg("php_errormsg");
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -249,22 +246,6 @@ PrepKind prepKind(ISS& env, uint32_t paramId) {
 //////////////////////////////////////////////////////////////////////
 // locals
 
-/*
- * Locals with certain special names can be set in the enclosing scope by
- * various php routines.  We don't attempt to track their types.  Furthermore,
- * in a pseudomain effectively all 'locals' are volatile, because any re-entry
- * could modify them through $GLOBALS, so in a pseudomain we don't track any
- * local types.
- */
-bool isVolatileLocal(ISS& env, borrowed_ptr<const php::Local> l) {
-  if (is_pseudomain(env.ctx.func)) return true;
-  // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
-  // changed through $GLOBALS), but for now we don't bother.
-  if (!l->name) return false;
-  return l->name->same(s_http_response_header.get()) ||
-         l->name->same(s_php_errormsg.get());
-}
-
 void mayReadLocal(ISS& env, uint32_t id) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
@@ -274,7 +255,7 @@ void mayReadLocal(ISS& env, uint32_t id) {
 Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
   mayReadLocal(env, l->id);
   auto ret = env.state.locals[l->id];
-  if (isVolatileLocal(env, l)) {
+  if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(ret == TGen, "volatile local was not TGen");
   }
   return ret;
@@ -282,7 +263,7 @@ Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
-  if (isVolatileLocal(env, l)) {
+  if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l->id];
     always_assert_flog(current == TGen, "volatile local was not TGen");
     return;
@@ -310,7 +291,7 @@ Type derefLoc(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void ensureInit(ISS& env, borrowed_ptr<const php::Local> l) {
   auto t = locRaw(env, l);
-  if (isVolatileLocal(env, l)) {
+  if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(t == TGen, "volatile local was not TGen");
     return;
   }
@@ -332,7 +313,7 @@ bool locCouldBeUninit(ISS& env, borrowed_ptr<const php::Local> l) {
  */
 void setLoc(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   auto v = locRaw(env, l);
-  if (isVolatileLocal(env, l)) {
+  if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(v == TGen, "volatile local was not TGen");
     return;
   }

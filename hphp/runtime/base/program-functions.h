@@ -91,6 +91,7 @@ void hphp_thread_exit();
 void hphp_memory_cleanup();
 void hphp_session_exit();
 void hphp_process_exit();
+bool is_hphp_session_initialized();
 std::string get_systemlib(std::string* hhas = nullptr,
                           const std::string &section = "systemlib",
                           const std::string &filename = "");

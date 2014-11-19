@@ -45,7 +45,6 @@ RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
     m_reset(false),
     m_logResets(info),
     m_returnEncodeType(ReturnEncodeType::Json) {
-  initState();
 }
 
 RPCRequestHandler::~RPCRequestHandler() {

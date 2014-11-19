@@ -370,7 +370,10 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           (fun () -> fst (Unify.unify env ty_super ty_sub))
           (fun _ -> sub_type env ty_super base)
       | None -> assert false)
-  | _ -> fst (Unify.unify env ty_super ty_sub)
+  | (_, (Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
+    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tobject | Tshape _)
+    ), _ -> fst (Unify.unify env ty_super ty_sub)
 
 and is_sub_type env ty_super ty_sub =
   Errors.try_
@@ -411,7 +414,9 @@ and sub_string p env ty2 =
   | _, Tany ->
     env (* Unifies with anything *)
   | _, Tobject -> env
-  | _ -> fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
+  | _, (Tmixed | Tarray (_, _) | Tgeneric (_, _) | Tvar _ | Tabstract (_, _, _)
+    | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
+      fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 
 (* and subtype_params env l_super l_sub def_super = *)
 (*   match l_super, l_sub with *)

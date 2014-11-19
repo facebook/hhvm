@@ -25,20 +25,28 @@
  *    read-only mode with all the workers.
  *    The master stores, the workers read.
  *    Only concurrent reads allowed. No concurrent write/read and write/write.
+ *    There are a few different OCaml modules that act as interfaces to this
+ *    global storage. They all use the same area of memory, so only one can be
+ *    active at any one time. The first word indicates the size of the global
+ *    storage currently in use; callers are responsible for setting it to zero
+ *    once they are done.
  *
  * II) The dependency table. It's a hashtable that contains all the
  *    dependencies between Hack objects. It is filled concurrently by
  *    the workers. The dependency table is made of 2 hashtables, one that
  *    can is used to quickly answer if a dependency exists. The other one
  *    to retrieve the list of dependencies associated with an object.
+ *    Only the hashes of the objects are stored, so this uses relatively
+ *    little memory. No dynamic allocation is required.
  *
- * III) The Hashtable.
+ * III) The Hashtable that maps string keys to string values. (The strings
+ *    are really serialized / marshalled representations of OCaml structures.)
  *    Key observation of the table is that data with the same key are
  *    considered equivalent, and so you can arbitrarily get any copy of it;
  *    furthermore if data is missing it can be recomputed, so incorrectly
  *    saying data is missing when it is being written is only a potential perf
  *    loss. Note that "equivalent" doesn't necessarily mean "identical", e.g.,
- *    two alpha-converted types are "equivalent" though not litterally byte-
+ *    two alpha-converted types are "equivalent" though not literally byte-
  *    identical. (That said, I'm pretty sure the Hack typechecker actually does
  *    always write identical data, but the hashtable doesn't need quite that
  *    strong of an invariant.)
@@ -60,6 +68,11 @@
  *    -) Concurrent removes: NOT SUPPORTED
  *       Only the master can remove, and can only do so if there are no other
  *       concurrent operations (reads or writes).
+ *
+ *    Since the values are variably sized and can get quite large, they are
+ *    stored separately from the hashes in a garbage-collected heap.
+ *
+ * Both II and III resolve hash collisions via linear probing.
  */
 /*****************************************************************************/
 
@@ -120,6 +133,11 @@
  * hashtable easily */
 #define SHARED_MEM_INIT 0x500000000000
 
+/* The global section is always reset after each typechecking phase, so we
+ * don't need to save it. Resetting is done by setting the count of used bytes
+ * of the global section to zero. */
+#define SAVE_START (SHARED_MEM_INIT + GLOBAL_SIZE_B)
+
 /* As a sanity check when loading from a file */
 static uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000;
 
@@ -175,6 +193,12 @@ static char* heap_init;
 /* This should only be used by the master */
 static size_t heap_init_size = 0;
 
+/* For debugging */
+value hh_heap_size() {
+  CAMLparam0();
+  CAMLreturn(Val_long(*heap - heap_init));
+}
+
 /*****************************************************************************/
 /* Given a pointer to the shared memory address space, initializes all
  * the globals that live in shared memory.
@@ -182,13 +206,21 @@ static size_t heap_init_size = 0;
 /*****************************************************************************/
 static void init_shared_globals(char* mem) {
   int page_size = getpagesize();
-  char* bottom  = mem;
+  char* bottom = mem;
 
-  /* We keep all the small objects in the first page.
-   * There are on different cache lines because we modify them atomically.
+  /* Global storage initialization:
+   * We store this at the start of the shared memory section as it never
+   * needs to get saved (always reset after each typechecking run) */
+  global_storage = (value*)mem;
+  // Initial size is zero
+  global_storage[0] = 0;
+  mem += GLOBAL_SIZE_B;
+
+  /* BEGINNING OF THE SMALL OBJECTS PAGE
+   * We keep all the small objects in this page.
+   * They are on different cache lines because we modify them atomically.
    */
 
-  /* BEGINING OF THE FIRST PAGE */
   /* The pointer to the top of the heap.
    * We will atomically increment *heap every time we want to allocate.
    */
@@ -205,13 +237,7 @@ static void init_shared_globals(char* mem) {
   mem += page_size;
   // Just checking that the page is large enough.
   assert(page_size > CACHE_LINE_SIZE + (int)sizeof(int));
-  /* END OF THE FIRST PAGE */
-
-  /* Global storage initialization */
-  global_storage = (value*)mem;
-  // Initial size is zero
-  global_storage[0] = 0;
-  mem += GLOBAL_SIZE_B;
+  /* END OF THE SMALL OBJECTS PAGE */
 
   /* Dependencies */
   deptbl = (uint64_t*)mem;
@@ -326,9 +352,9 @@ void hh_save(value out_filename) {
 
   fwrite_no_fail(&heap_init_size, sizeof heap_init_size, 1, fp);
 
-  uintptr_t heap_size = (uintptr_t)*heap - (uintptr_t)SHARED_MEM_INIT;
-  fwrite_no_fail(&heap_size, sizeof heap_size, 1, fp);
-  fwrite_no_fail((void*)SHARED_MEM_INIT, 1, heap_size, fp);
+  uintptr_t save_size = (uintptr_t)*heap - (uintptr_t)SAVE_START;
+  fwrite_no_fail(&save_size, sizeof save_size, 1, fp);
+  fwrite_no_fail((void*)SAVE_START, 1, save_size, fp);
 
   fclose(fp);
   CAMLreturn0;
@@ -364,10 +390,10 @@ void hh_load(value in_filename) {
 
   read_all(fileno(fp), (void*)&heap_init_size, sizeof heap_init_size);
 
-  uintptr_t heap_size = 0;
-  read_all(fileno(fp), (void*)&heap_size, sizeof heap_size);
-  read_all(fileno(fp), (void*)SHARED_MEM_INIT, heap_size * sizeof(char));
-  assert(*heap == (char*)(SHARED_MEM_INIT + heap_size));
+  uintptr_t save_size = 0;
+  read_all(fileno(fp), (void*)&save_size, sizeof save_size);
+  read_all(fileno(fp), (void*)SAVE_START, save_size * sizeof(char));
+  assert(*heap == (char*)(SAVE_START + save_size));
 
   fclose(fp);
   CAMLreturn0;

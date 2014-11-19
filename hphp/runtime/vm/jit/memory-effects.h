@@ -16,7 +16,13 @@
 #ifndef incl_HPHP_MEMORY_EFFECTS_H_
 #define incl_HPHP_MEMORY_EFFECTS_H_
 
+#include <string>
+
+#include <folly/Optional.h>
+
 #include <boost/variant.hpp>
+
+#include "hphp/runtime/vm/jit/abstract-location.h"
 
 namespace HPHP { namespace jit {
 
@@ -26,28 +32,65 @@ struct IRInstruction;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Has the effect of possibly reading a local slot, or two.
+ * Has the effect of possibly loading from a location, and possibly storing to
+ * another.  Either may be empty locations, we don't know the value potentially
+ * stored, and the instruction may have other non-pure side effects.
  */
-struct ReadLocal      { SSATmp* fp; uint32_t id; };
-struct ReadLocal2     { SSATmp* fp; uint32_t id1; uint32_t id2; };
+struct MayLoadStore   { ALocation loads; ALocation stores; };
 
 /*
- * The effect of definitely storing to a local slot.  The NT variation means it
- * is not storing a type tag.
+ * The effect of definitely loading from an abstract location, without
+ * performing any other work.  Instructions with these memory effects can be
+ * removed and replaced with a Mov if we have a value available that's known to
+ * be in the location.
  */
-struct StoreLocal     { SSATmp* fp; uint32_t id; };
-struct StoreLocalNT   { SSATmp* fp; uint32_t id; };
+struct PureLoad       { ALocation loc; };
+
+/*
+ * The effect of definitely storing to a location, without performing any other
+ * work.  Instructions with these memory effects can be removed if we know the
+ * value being stored does not change the value of the location, or if we know
+ * the location can never be loaded from again.
+ *
+ * The NT variation means it is not storing a type tag.
+ */
+struct PureStore    { ALocation loc; SSATmp* value; };
+struct PureStoreNT  { ALocation loc; SSATmp* value; };
+
+/*
+ * Iterator instructions are special enough that they just have their own
+ * top-level memory effect type.  In general, they can both read and write to
+ * the relevant locals, and can read and write anything non-local.
+ */
+struct IterEffects    { SSATmp* fp; uint32_t id; };
+struct IterEffects2   { SSATmp* fp; uint32_t id1; uint32_t id2; };
+
+/*
+ * Calls are somewhat special enough that they get a top-level effect.  The
+ * destroys_locals flag indicates whether the call can change locals in the
+ * calling frame (e.g. extract() or parse_str().)
+ */
+struct CallEffects    { bool destroys_locals; };
+
+/*
+ * ReturnEffects is a real return from the php function.  It does not cover
+ * things like suspending a resumable or "returning" from an inlined function.
+ */
+struct ReturnEffects  {};
+
+/*
+ * InterpOne instructions carry a bunch of information about how they may
+ * affect locals.  It's special enough that we just pass it through.
+ */
+struct InterpOneEffects {};
 
 /*
  * An instruction that does KillFrameLocals prevents any upward exposed uses of
- * frame local slots.  This is for example an effect of a return instruction.
+ * frame local slots, with no other memory effects.  This effect means that the
+ * instruction semantically prevents any future loads from locals on that
+ * frame.
  */
 struct KillFrameLocals { SSATmp* fp; };
-
-/*
- * An instruction that potentially reads any local.
- */
-struct ReadAllLocals  {};
 
 /*
  * "Irrelevant" effects means it doesn't do anything we currently care about
@@ -57,18 +100,23 @@ struct ReadAllLocals  {};
 struct IrrelevantEffects {};
 
 /*
- * Instruction hasn't been audited for effects that we care about.
+ * Instruction hasn't been audited for effects that we care about.  Users of
+ * this module should do the most pessimistic thing possible.
  */
 struct UnknownEffects {};
 
-using MemEffects = boost::variant< UnknownEffects
-                                 , IrrelevantEffects
-                                 , ReadLocal
-                                 , ReadLocal2
-                                 , StoreLocal
-                                 , StoreLocalNT
+using MemEffects = boost::variant< MayLoadStore
+                                 , PureLoad
+                                 , PureStore
+                                 , PureStoreNT
                                  , KillFrameLocals
-                                 , ReadAllLocals
+                                 , IterEffects
+                                 , IterEffects2
+                                 , CallEffects
+                                 , ReturnEffects
+                                 , InterpOneEffects
+                                 , IrrelevantEffects
+                                 , UnknownEffects
                                  >;
 
 //////////////////////////////////////////////////////////////////////
@@ -88,11 +136,10 @@ MemEffects memory_effects(const IRInstruction&);
 /*
  * Produces a string about some MemEffects for debug-printing.
  */
-const char* show(MemEffects);
+std::string show(MemEffects);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-
 
 #endif

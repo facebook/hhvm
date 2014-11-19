@@ -599,7 +599,8 @@ void ScalarExpression::setCompilerHaltOffset(int64_t ofs) {
 
 int64_t ScalarExpression::getIntValue() const {
   // binary number syntax "0b" is not supported by strtoll
-  if (m_value.compare(0, 2, "0b") == 0) {
+  if ((m_value.compare(0, 2, "0b") == 0) ||
+      (m_value.compare(0, 2, "0B") == 0)) {
     return strtoll(m_value.c_str() + 2, nullptr, 2);
   }
   return strtoll(m_value.c_str(), nullptr, 0);

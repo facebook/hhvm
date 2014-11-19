@@ -1,0 +1,3 @@
+string(7) "Foo\Biz"
+string(11) "Foo\Bar\Baz"
+string(7) "Foo\Fiz"

@@ -949,6 +949,10 @@ class Redis {
   const TYPE_MULTIBULK = '*';
 
   protected function checkConnection($auto_reconnect = true) {
+    // Check if we have hit the stream timeout
+    if (stream_get_meta_data($this->connection)['timed_out']) {
+      throw new RedisException("read error on connection");
+    }
     if ($this->connection AND !feof($this->connection)) {
       // Connection seems fine
       return true;
@@ -1599,14 +1603,14 @@ class Redis {
     $this->multiHandler = [];
     $this->mode = self::ATOMIC;
 
-    if (!$conn) {
+    if (!$this->connection) {
       trigger_error(
         "Failed connecting to redis server at {$host}: {$errstr}",
         E_WARNING);
       return false;
     }
-    stream_set_blocking($conn, true);
-    $this->setOption(Redis::OPT_READ_TIMEOUT,$timeout);
+    stream_set_blocking($this->connection, true);
+    $this->setOption(Redis::OPT_READ_TIMEOUT, $timeout);
 
     return true;
   }

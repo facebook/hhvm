@@ -186,24 +186,51 @@ void killFrame(Local& env, const SSATmp* fp) {
 
 //////////////////////////////////////////////////////////////////////
 
+void visitLoad(Local& env, ALocation loc) {
+  if (auto const fr = loc.frame()) return addGen(env, local_bit(env, *fr));
+  if (loc.maybe(AFrameAny))        return addAllGen(env);
+}
+
+folly::Optional<uint32_t> pure_store_bit(Local& env, ALocation loc) {
+  if (auto const fr = loc.frame()) {
+    return local_bit(env, *fr);
+  }
+  return folly::none;
+}
+
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
-  FTRACE(3, "    {: <20} -- {}\n", show(effects), inst.toString());
+  FTRACE(3, "    {: <30} -- {}\n", show(effects), inst.toString());
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
-    [&] (ReadAllLocals)     { addAllGen(env); },
+    [&] (InterpOneEffects)  { addAllGen(env); },
+    [&] (PureLoad l)        { visitLoad(env, l.loc); },
+    [&] (MayLoadStore l)    { visitLoad(env, l.loads); },
     [&] (KillFrameLocals l) { killFrame(env, l.fp); },
-    [&] (ReadLocal l)       { addGen(env, local_bit(env, l)); },
+    [&] (ReturnEffects)     { killFrame(env, env.global.mainFp); },
 
-    [&] (ReadLocal2 l) {
-      addGen(env, local_bit(env, ReadLocal { l.fp, l.id1 }));
-      addGen(env, local_bit(env, ReadLocal { l.fp, l.id2 }));
+    /*
+     * Call instructions potentially throw, even though we don't (yet) have
+     * explicit catch traces for them, which means it counts as possibly
+     * reading any local, on any frame---if it enters the unwinder it could
+     * read them.
+     */
+    [&] (CallEffects) { addAllGen(env); },
+
+    // Iterator effects can possibly redefine the local, but don't definitely
+    // do so, so they add to GEN but not KILL.
+    [&] (IterEffects l) {
+      addGen(env, local_bit(env, AFrame { l.fp, l.id }));
+    },
+    [&] (IterEffects2 l) {
+      addGen(env, local_bit(env, AFrame { l.fp, l.id1 }));
+      addGen(env, local_bit(env, AFrame { l.fp, l.id2 }));
     },
 
-    [&] (StoreLocal l) {
-      auto bit = local_bit(env, l);
+    [&] (PureStore l) {
+      auto bit = pure_store_bit(env, l.loc);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }
@@ -211,16 +238,16 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * A StoreLocalNT means it's writing the local's m_data, but not its
-     * m_type.  If the local is dead, we don't need to do this.  However, we
-     * can't count it as a redefinition (can't add to KILL), because it only
-     * partially defines it.
+     * A PureStoreNT means it's writing the local's m_data, but not its m_type.
+     * If the local is dead, we don't need to do this.  However, we can't count
+     * it as a redefinition (can't add to KILL), because it only partially
+     * defines it.
      *
      * Normally this pass should run before we've lowered StLocs into StLocNTs
      * where we can, but we must support this anyway for correctness.
      */
-    [&] (StoreLocalNT l) {
-      auto bit = local_bit(env, l);
+    [&] (PureStoreNT l) {
+      auto bit = pure_store_bit(env, l.loc);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }

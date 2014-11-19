@@ -26,16 +26,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Normalizes hdf string names to their ini counterparts
- *
- * We have special handling for a few hdf strings such as those containing
- * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
- */
-static std::string normalize(const std::string &name) {
+std::string hdfToIni(const std::string& name) {
   std::string out = "hhvm.";
   size_t idx = 0;
-  for (auto &c : name) {
+  for (auto& c : name) {
     // This is the first or last character
     if (idx == 0 || idx == name.length() - 1) {
       out += tolower(c);
@@ -82,8 +76,8 @@ std::string Config::IniName(const Hdf& config) {
   return Config::IniName(config.getFullPath());
 }
 
-std::string Config::IniName(const std::string config) {
-  return normalize(config);
+std::string Config::IniName(const std::string& config) {
+  return hdfToIni(config);
 }
 
 void Config::ParseIniString(const std::string iniStr, IniSetting::Map &ini) {

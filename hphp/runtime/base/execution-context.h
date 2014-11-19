@@ -254,6 +254,9 @@ public:
   void setStreamContext(Resource &context) { m_streamContext = context; }
   Resource &getStreamContext() { return m_streamContext; }
 
+  int getPageletTasksStarted() const { return m_pageletTasksStarted; }
+  void incrPageletTasksStarted() { ++m_pageletTasksStarted; }
+
   const VirtualHost* getVirtualHost() const { return m_vhost; }
   void setVirtualHost(const VirtualHost* vhost) { m_vhost = vhost; }
 
@@ -596,6 +599,7 @@ private:
   smart::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
   String m_sandboxId; // cache the sandbox id for the request
+  int m_pageletTasksStarted;
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;

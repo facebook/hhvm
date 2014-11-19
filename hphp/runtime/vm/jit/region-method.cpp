@@ -78,14 +78,16 @@ RegionDescPtr selectMethod(const RegionContext& context) {
    * compiler and then may branch to the main entry point.
    */
   sortRpo(graph);
-  Offset spOffset = context.spOffset;
-  for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
-    auto const start  = unit->offsetOf(b->start);
-    auto const length = numInstrs(b->start, b->end);
-    SrcKey sk{context.func, start, context.resumed};
-    auto const rblock = ret->addBlock(sk, length, spOffset);
-    blockMap[b] = rblock->id();
-    spOffset = -1; // flag SP offset as unknown for all but the first block
+  {
+    auto spOffset = Offset{context.spOffset};
+    for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
+      auto const start  = unit->offsetOf(b->start);
+      auto const length = numInstrs(b->start, b->end);
+      SrcKey sk{context.func, start, context.resumed};
+      auto const rblock = ret->addBlock(sk, length, spOffset);
+      blockMap[b] = rblock->id();
+      spOffset = -1; // flag SP offset as unknown for all but the first block
+    }
   }
 
   // Add all the ARCs.
@@ -100,6 +102,51 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     }
   }
 
+  // Compute stack depths for each block.
+  for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
+    uint32_t sp = ret->block(blockMap[b])->initialSpOffset();
+    assert(sp != -1);
+    for (InstrRange inst = blockInstrs(b); !inst.empty();) {
+      auto const pc   = inst.popFront();
+      auto const info = instrStackTransInfo(reinterpret_cast<const Op*>(pc));
+      switch (info.kind) {
+      case StackTransInfo::Kind::InsertMid:
+        ++sp;
+        break;
+      case StackTransInfo::Kind::PushPop:
+        sp += info.numPushes - info.numPops;
+        break;
+      }
+    }
+
+    for (auto idx = uint32_t{0}; idx < numSuccBlocks(b); ++idx) {
+      if (!b->succs[idx]) continue;
+      auto const succ = ret->block(blockMap[b->succs[idx]]);
+      if (succ->initialSpOffset() != -1) {
+        always_assert_flog(
+          succ->initialSpOffset() == sp,
+          "Stack depth mismatch in region method on {}\n"
+          "  srcblkoff={}, dstblkoff={}, src={}, target={}",
+          context.func->fullName()->data(),
+          context.func->unit()->offsetOf(b->start),
+          context.func->unit()->offsetOf(b->succs[idx]->start),
+          sp,
+          succ->initialSpOffset()
+        );
+        continue;
+      }
+      succ->setInitialSpOffset(sp);
+      FTRACE(2,
+        "spOff for {} -> {}\n",
+        context.func->unit()->offsetOf(b->succs[idx]->start),
+        sp
+      );
+    }
+  }
+
+  /*
+   * Fill the first block predictions with the live types.
+   */
   assert(!ret->empty());
   auto const startSK = ret->start();
   for (auto& lt : context.liveTypes) {

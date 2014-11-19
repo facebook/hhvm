@@ -256,7 +256,7 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
 
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
-  return debugPostAllocate(p, bytes, bytes);
+  return debugPostAllocate(p, bytes, debug ? smartSizeClass(bytes) : bytes);
 }
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
@@ -264,7 +264,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes <= kMaxSmartSize + kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
-  if (UNLIKELY(m_profctx.flag)) {
+  if (UNLIKELY(m_bypassSlabAlloc)) {
     return smartFreeSizeBig(ptr, bytes);
   }
   unsigned i = smartSize2Index(bytes);

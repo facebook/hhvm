@@ -9,6 +9,7 @@
 # contents would've changed.
 #
 
+unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # OSS version depends on this fallback since it's
@@ -20,31 +21,44 @@ fi
 BUILDINFO_FILE="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-build-info.cpp"
 REPO_SCHEMA_H="$FBMAKE_PRE_COMMAND_OUTDIR/hphp-repo-schema.h"
 
-GIT_TLD=$(git rev-parse --show-toplevel 2>/dev/null)
-GIT="yes"
-if [ x"$GIT_TLD" = x"" ]; then
-  GIT_TLD=$DIR/../../
-  GIT="no"
+if git rev-parse --show-toplevel >& /dev/null; then
+    scm=git
+    root=$(git rev-parse --show-toplevel)
+    compiler="git describe --all --long --abbrev=40 --always"
+    alias scm_update='git fetch origin && git rebase origin/master'
+else
+    if hg root >& /dev/null; then
+        scm=hg
+        root=$(hg root)
+        compiler="hg log -r . --template '{branch}-0-g{gitnode}' 2> /dev/null"
+        compiler="$compiler || hg log -r . --template '{branch}-0-h{node}'"
+        alias scm_update='hg pull && hg rebase -d master'
+    else
+        scm=""
+        root=$DIR/../../
+    fi
 fi
-cd $GIT_TLD
+
+cd $root
 
 ######################################################################
 
 # First check if they configured anything hphp-related.  If not, skip
-# this stuff, because these git commands take .5s or so.
-if [ -d $GIT_TLD/.fbbuild ]; then
-  if cat $GIT_TLD/.fbbuild/generated/info 2>/dev/null \
+# this stuff, because these commands take upwards of .5s.
+if [ -d $root/.fbbuild ]; then
+  if cat $root/.fbbuild/generated/info 2>/dev/null \
     | grep fbconfig_argv \
     | grep -v hphp >/dev/null 2>&1 ; then
     exit 0
   fi
 fi
 
+
 ######################################################################
 
 if [ x"$COMPILER_ID" = x"" ]; then
-  if [ "$GIT" = "yes" ]; then
-    COMPILER_ID=$(git describe --all --long --abbrev=40 --always)
+  if [ -n "$scm" ]; then
+    COMPILER_ID=$(sh -c "$compiler")
   else
     # Building outside of a git repo, use system time instead.
     # This will make the sha appear to change constantly,
@@ -60,7 +74,7 @@ fi
 # schema), because for some work flows the added instability of schema IDs is a
 # cure worse than the disease.
 if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
-  if [ "$GIT" = "yes" ]; then
+  if [ "$scm" == "git" ]; then
     repo_mods=$(git diff --name-only HEAD)
     # find the sha1 of the tree-object corresponding to the HEAD commit
     repo_tree=$(git log -n1 --pretty=format:%T HEAD)
@@ -85,10 +99,15 @@ if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
         grep -v hphp/test | \
         git hash-object --stdin)
   else
-    # As with COMPILER_ID above, we're not in git so we have to
-    # use a fallback state where we assume to repo is constantly
-    # changing by using the system time
-    HHVM_REPO_SCHEMA=$(date +%N_%s)
+    if [ "$scm" == "hg" ]; then
+        HHVM_REPO_SCHEMA=$(((hg manifest --debug | grep " hphp/" | grep -v " hphp/test") && \
+            (hg diff -- hphp)) | git hash-object --stdin)
+    else
+        # As with COMPILER_ID above, we're not in git so we have to
+        # use a fallback state where we assume to repo is constantly
+        # changing by using the system time
+        HHVM_REPO_SCHEMA=$(date +%N_%s)
+    fi
   fi
 fi
 

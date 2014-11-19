@@ -48,6 +48,8 @@ val integer_instead_of_int : Pos.t -> unit
 val boolean_instead_of_bool : Pos.t -> unit
 val double_instead_of_float : Pos.t -> unit
 val real_instead_of_float : Pos.t -> unit
+val shape_typehint : Pos.t -> unit
+val dynamic_new_in_strict_mode : Pos.t -> unit
 val void_cast: Pos.t -> unit
 val object_cast: Pos.t -> string -> unit
 val unset_cast: Pos.t -> unit
@@ -161,7 +163,7 @@ val anonymous_recursive_call : Pos.t -> unit
 val bad_call : Pos.t -> string -> unit
 val sketchy_null_check : Pos.t -> unit
 val sketchy_null_check_primitive : Pos.t -> unit
-val extend_final : Pos.t -> unit
+val extend_final : Pos.t -> Pos.t -> string -> unit
 val read_before_write : Pos.t * string -> unit
 val interface_final : Pos.t -> unit
 val trait_final : Pos.t -> unit

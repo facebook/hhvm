@@ -1,0 +1,7 @@
+Foo::go()
+Foo::go()
+Triggered E_WARNING: Value returned from function test3() must be of type @Bar, Foo given
+Foo::go()
+Triggered E_RECOVERABLE_ERROR: Value returned from function test4() must be of type Bar, Foo given
+
+Fatal error: Error handler tried to recover from a return typehint violation in %s on line 30

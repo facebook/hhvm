@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/vm/native-data.h"
-
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -175,6 +175,7 @@ MemoryManager::MemoryManager()
   // make the circular-lists empty.
   m_bigs.next = m_bigs.prev = &m_bigs;
   m_strings.next = m_strings.prev = &m_strings;
+  m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
@@ -401,6 +402,12 @@ void MemoryManager::sweep() {
 }
 
 void MemoryManager::resetAllocator() {
+  UNUSED auto napcs = m_apc_arrays.size();
+  while (!m_apc_arrays.empty()) {
+    auto a = m_apc_arrays.back();
+    m_apc_arrays.pop_back();
+    a->sweep();
+  }
   UNUSED auto nstrings = StringData::sweepAll();
   UNUSED auto nslabs = m_slabs.size();
 
@@ -428,7 +435,8 @@ void MemoryManager::resetAllocator() {
   }
 
   resetCouldOOM();
-  TRACE(1, "reset: strings %u slabs %lu big %lu\n", nstrings, nslabs, nbig);
+  TRACE(1, "reset: apc-arrays %lu strings %u slabs %lu big %lu\n",
+        napcs, nstrings, nslabs, nbig);
 }
 
 /*
@@ -482,13 +490,12 @@ void MemoryManager::resetAllocator() {
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (UNLIKELY(nbytes_padded > kMaxSmartSize)) {
-    return smartMallocBig(nbytes);
+  if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
+    auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+    ptr->padbytes = nbytes_padded;
+    return ptr + 1;
   }
-
-  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
-  ptr->padbytes = nbytes_padded;
-  return ptr + 1;
+  return smartMallocBig(nbytes);
 }
 
 union MallocNode {
@@ -507,22 +514,18 @@ inline void MemoryManager::smartFree(void* ptr) {
   smartFreeBig(&n->big);
 }
 
-inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
-  FTRACE(3, "smartRealloc: {} to {}\n", inputPtr, nbytes);
+inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
+  FTRACE(3, "smartRealloc: {} to {}\n", ptr, nbytes);
   assert(nbytes > 0);
-
-  void* ptr = debug ? static_cast<DebugHeader*>((void*)(uintptr_t(inputPtr) -
-                                                kDebugExtraSize)) : inputPtr;
-
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
-      n->small.padbytes - sizeof(SmallNode) - kDebugExtraSize,
+      n->small.padbytes - sizeof(SmallNode),
       nbytes
     );
-    newmem = memcpy(newmem, inputPtr, copySize);
-    smart_free(inputPtr);
+    newmem = memcpy(newmem, ptr, copySize);
+    smart_free(ptr);
     return newmem;
   }
 
@@ -533,14 +536,14 @@ inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
   auto const oldPrev = n->big.prev;
 
   auto const newNode = static_cast<BigNode*>(
-    safe_realloc(n, debugAddExtra(nbytes + sizeof(BigNode)))
+    safe_realloc(n, nbytes + sizeof(BigNode))
   );
 
   refreshStats();
   if (newNode != &n->big) {
     oldNext->prev = oldPrev->next = newNode;
   }
-  return debugPostAllocate(newNode + 1, 0, 0);
+  return newNode + 1;
 }
 
 /*
@@ -575,7 +578,7 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   assert((nbytes & kSmartSizeAlignMask) == 0);
   assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
 
-  if (UNLIKELY(m_profctx.flag)) {
+  if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
     return smartMallocSizeBig<false>(nbytes).first;
@@ -608,10 +611,10 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   }
   for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
        p = (void*)(uintptr_t(p) - nbytes)) {
-    m_freelists[index].push(
-        debugPreFree(debugPostAllocate(p, debugRemoveExtra(nbytes),
-                                       debugRemoveExtra(nbytes)),
-                     debugRemoveExtra(nbytes), debugRemoveExtra(nbytes)));
+    auto usable = debugRemoveExtra(nbytes);
+    auto ptr = debugPostAllocate(p, usable, usable);
+    auto p2 = debugPreFree(ptr, usable, usable);
+    m_freelists[index].push(p2);
   }
   return ptr;
 }
@@ -696,8 +699,8 @@ void MemoryManager::smartFreeBig(BigNode* n) {
 
 void* smart_malloc(size_t nbytes) {
   auto& mm = MM();
-  auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
-  return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
+  auto const size = std::max(nbytes, size_t(1));
+  return mm.smartMalloc(size);
 }
 
 void* smart_calloc(size_t count, size_t nbytes) {
@@ -706,10 +709,7 @@ void* smart_calloc(size_t count, size_t nbytes) {
   if (totalBytes <= kMaxSmartSize) {
     return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
-  auto const withExtra = mm.debugAddExtra(totalBytes);
-  return mm.debugPostAllocate(
-    mm.smartCallocBig(withExtra), 0, 0
-  );
+  return mm.smartCallocBig(totalBytes);
 }
 
 void* smart_realloc(void* ptr, size_t nbytes) {
@@ -723,9 +723,7 @@ void* smart_realloc(void* ptr, size_t nbytes) {
 }
 
 void smart_free(void* ptr) {
-  if (!ptr) return;
-  auto& mm = MM();
-  mm.smartFree(mm.debugPreFree(ptr, 0, 0));
+  if (ptr) MM().smartFree(ptr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -746,6 +744,21 @@ void MemoryManager::removeNativeObject(NativeNode* node) {
   last->sweep_index = index;
 }
 
+void MemoryManager::addApcArray(APCLocalArray* a) {
+  a->m_sweep_index = m_apc_arrays.size();
+  m_apc_arrays.push_back(a);
+}
+
+void MemoryManager::removeApcArray(APCLocalArray* a) {
+  assert(a->m_sweep_index < m_apc_arrays.size());
+  assert(m_apc_arrays[a->m_sweep_index] == a);
+  auto index = a->m_sweep_index;
+  auto last = m_apc_arrays.back();
+  m_apc_arrays[index] = last;
+  m_apc_arrays.pop_back();
+  last->m_sweep_index = index;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG
@@ -757,7 +770,6 @@ void* MemoryManager::debugPostAllocate(void* p,
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
-  header->padding = 0;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
 }
 
@@ -784,12 +796,11 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
 
   if (userSpecifiedBytes != 0) {
     // For size-specified frees, the size they report when freeing
-    // must be either what they asked for, or what we returned as the
-    // actual capacity;
-    assert(userSpecifiedBytes == p->requestedSize ||
-           userSpecifiedBytes == p->returnedCap);
+    // must be between the requested size and the actual capacity.
+    assert(userSpecifiedBytes >= p->requestedSize &&
+           userSpecifiedBytes <= p->returnedCap);
   }
-  if (bytes != 0 && bytes <= kMaxSmartSize) {
+  if (!m_bypassSlabAlloc && bytes != 0 && bytes <= kMaxSmartSize) {
     auto const ptrInt = reinterpret_cast<uintptr_t>(p);
     DEBUG_ONLY auto it = std::find_if(
       std::begin(m_slabs), std::end(m_slabs),
@@ -848,6 +859,7 @@ void MemoryManager::requestInit() {
   auto& profctx = MM().m_profctx;
   assert(!profctx.flag);
 
+  MM().m_bypassSlabAlloc = true;
   profctx = *trigger;
   delete trigger;
 
@@ -892,6 +904,7 @@ void MemoryManager::requestShutdown() {
           &profctx.prof_active, sizeof(bool));
 #endif
 
+  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
   profctx = ReqProfContext{};
 }
 

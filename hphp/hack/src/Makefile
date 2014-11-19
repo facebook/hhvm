@@ -52,6 +52,11 @@ MODULES=\
   hhi\
   dfind\
   avl\
+  h2tp/common\
+  h2tp/mapper\
+  h2tp/unparser\
+  h2tp/test\
+  h2tp\
   $(INOTIFY)\
   $(FSNOTIFY)
 
@@ -77,10 +82,10 @@ NATIVE_LIBRARIES=\
 
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I $(dir))
 LIB_OPTS=$(foreach lib,$(OCAML_LIBRARIES),-lib $(lib))
-NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l -cclib $(lib))
-EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I -ccopt $(dir))
+NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
+EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
-EXTRA_LIB_OPTS=$(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L -cclib $(dir))
+EXTRA_LIB_OPTS=$(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
 
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LIB_OPTS) $(FRAMEWORK_OPTS) $(SECTCREATE)
@@ -89,11 +94,11 @@ all: build-hhi-archive build-hack copy-hack-files
 
 clean:
 	ocamlbuild -clean
-	rm -rf ../bin
+	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
 build-hack: build-hack-native-deps build-hhi-archive
-	ocamlbuild -no-links  $(INCLUDE_OPTS) $(LIB_OPTS) -lflags "$(LINKER_FLAGS)" hh_server.native hh_client.native hh_single_type_check.native
+	ocamlbuild -no-links  $(INCLUDE_OPTS) $(LIB_OPTS) -lflags "$(LINKER_FLAGS)" hh_server.native hh_client.native hh_single_type_check.native h2tp.native test_unparser.native
 
 build-hack-native-deps: build-hack-stubs
 	ocamlbuild -cflags "$(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
@@ -114,6 +119,7 @@ else
 endif
 	cp _build/hh_client.native ../bin/hh_client
 	cp _build/hh_single_type_check.native ../bin/hh_single_type_check
+	cp _build/h2tp/h2tp.native ../bin/h2tp
 
 test: build-hack copy-hack-files
 	python3 ../test/verify.py --hh_single_type_check ../bin/hh_single_type_check ../test

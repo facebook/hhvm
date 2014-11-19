@@ -30,6 +30,7 @@
 #include "folly/Format.h"
 
 #include "hphp/util/logger.h"
+#include "hphp/util/async-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

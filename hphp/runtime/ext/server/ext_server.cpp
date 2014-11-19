@@ -45,11 +45,13 @@ public:
                                           k_PAGELET_READY);
     Native::registerConstant<KindOfInt64>(s_PAGELET_DONE.get(), k_PAGELET_DONE);
 
+    HHVM_FE(hphp_thread_type);
     HHVM_FE(dangling_server_proxy_old_request);
     HHVM_FE(pagelet_server_is_enabled);
     HHVM_FE(pagelet_server_task_start);
     HHVM_FE(pagelet_server_task_status);
     HHVM_FE(pagelet_server_task_result);
+    HHVM_FE(pagelet_server_tasks_started);
     HHVM_FE(pagelet_server_flush);
     HHVM_FE(xbox_send_message);
     HHVM_FE(xbox_post_message);
@@ -65,6 +67,11 @@ public:
     loadSystemlib();
   }
 } s_server_extension;
+
+int64_t HHVM_FUNCTION(hphp_thread_type) {
+  Transport *transport = g_context->getTransport();
+  return transport ? static_cast<int64_t>(transport->getThreadType()) : -1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // dangling server
@@ -156,6 +163,10 @@ String HHVM_FUNCTION(pagelet_server_task_result,
   headers = rheaders;
   code = rcode;
   return response;
+}
+
+int64_t HHVM_FUNCTION(pagelet_server_tasks_started) {
+  return g_context->getPageletTasksStarted();
 }
 
 void HHVM_FUNCTION(pagelet_server_flush) {

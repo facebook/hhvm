@@ -1244,13 +1244,10 @@ bool builtinFuncDestroysLocals(const Func* callee) {
 
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
-  auto locals = caller->localNames();
-  for (int i = 0; i < caller->numNamedLocals(); ++i) {
-    if (locals[i]->same(s_http_response_header.get()) ||
-        locals[i]->same(s_php_errormsg.get())) {
-      return true;
-    }
-  }
+  // We don't handle these two cases, because we don't compile functions
+  // containing them:
+  assert(caller->lookupVarId(s_php_errormsg.get()) == -1);
+  assert(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {

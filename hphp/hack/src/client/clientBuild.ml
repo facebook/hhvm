@@ -16,6 +16,7 @@ let num_build_retries = 800
 type env = {
   root : Path.path;
   build_opts : ServerMsg.build_opts;
+  server_options_cmd : string option;
 }
 
 let rec connect env retries =
@@ -60,7 +61,9 @@ let rec main_ env retries =
   (* Check if a server is up *)
   if not (ClientUtils.server_exists env.root)
   then ClientStart.start_server { ClientStart.
-    root = env.root; wait = false;
+    root = env.root;
+    wait = false;
+    server_options_cmd = env.server_options_cmd;
   };
   let ic, oc = connect env retries in
   ServerMsg.cmd_to_channel oc (ServerMsg.BUILD env.build_opts);

@@ -189,7 +189,10 @@ and unify_ env r1 ty1 r2 ty2 =
              ~when_: begin fun () ->
                match ty2 with
                | Tapply ((_, y), _) -> y = x
-               | _ -> false
+               | Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
+                | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
+                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+                | Tshape _ -> false
              end
              ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );
@@ -241,9 +244,11 @@ and unify_ env r1 ty1 r2 ty2 =
       let env = TUtils.apply_shape ~f env (r1, fdm1) (r2, fdm2) in
       let env = TUtils.apply_shape ~f env (r2, fdm2) (r1, fdm1) in
       env, Tshape fdm1
-  | _ ->
-      TUtils.uerror r1 ty1 r2 ty2;
-      env, Tany
+  | (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
+      | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+      | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
+        TUtils.uerror r1 ty1 r2 ty2;
+        env, Tany
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with

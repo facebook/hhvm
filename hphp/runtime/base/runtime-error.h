@@ -113,11 +113,18 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
                        const char *fmt, ...);
 
 /*
- * Raise typehint error is the same as raise_recoverable_error, except
- * when compiled in RepoAuthoritative mode with HardTypeHints the
- * error handler is not allowed to recover.
+ * raise_typehint_error() is the same as raise_recoverable_error(), except
+ * when compiled in RepoAuthoritative mode with HardTypeHints the error
+ * handler is not allowed to recover.
  */
 void raise_typehint_error(const std::string& msg);
+
+/*
+ * raise_return_typehint_error() is the same as raise_recoverable_error(),
+ * except when compiled in RepoAuthoritative mode with HardReturnTypeHints
+ * the error handler is not allowed to recover.
+ */
+void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const std::string& msg);
 

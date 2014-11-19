@@ -349,6 +349,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
+  if (po.target != "run"
+      && po.target != "lint"
+      && po.target != "php"
+      && po.target != "hhbc"
+      && po.target != "filecache") {
+    Logger::Error("Error in command line: target '%s' is not supported.",
+                  po.target.c_str());
+    // desc[ription] is the --help output
+    cout << desc << "\n";
+    return -1;
+  }
+
   if ((po.target == "hhbc" || po.target == "run") &&
       po.format.find("exe") == string::npos) {
     if (po.program == "program") {
@@ -765,6 +777,10 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
+  if (Option::HardReturnTypeHints) {
+    RuntimeOption::EvalCheckReturnTypeHints = 3;
+    RuntimeOption::EvalSoftClosureReturnTypeHints = false;
+  }
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
   RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;

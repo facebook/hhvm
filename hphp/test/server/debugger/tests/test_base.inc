@@ -39,22 +39,13 @@ function startDebuggerClient($debugPort, $input_path, &$pipes) {
 
 function runTest($testName, $testController) {
   try {
-    $serverPort = get_random_port();
-    $adminPort = get_random_port();
-    while ($adminPort === $serverPort) {
-      $adminPort = get_random_port();
-    }
-    $debugPort = get_random_port();
-    while ($debugPort === $serverPort || $debugPort === $adminPort) {
-      $debugPort = get_random_port();
-    }
-
     $pid = posix_getpid();
     $serverProc = null;
     $clientProcessId = 0;
+
+    $serverPort = $adminPort = $debugPort = null;
     $serverProc = startServer($serverPort, $adminPort, $debugPort,
                               __DIR__.'/..', __DIR__.'/../debugger');
-    waitForServerToGetGoing($serverPort);
     startDebuggerClient($debugPort, "/debugger/$testName.in", $pipes);
     $clientProcessId = getClientProcessId($pipes[1]);
     if (!$clientProcessId ||

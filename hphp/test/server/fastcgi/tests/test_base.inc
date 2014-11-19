@@ -6,21 +6,14 @@ require __DIR__ . '/../Adoy/Client.php';
 
 $DOC_ROOT = dirname(__DIR__).'/server_root';
 
-function runTest($testName, $testController) {
+function runTest($testController, $customArgs = '') {
   global $DOC_ROOT;
   $pid = posix_getpid();
   try {
-    $serverPort = get_random_port();
-    $adminPort = get_random_port();
-    while ($adminPort === $serverPort) {
-      $adminPort = get_random_port();
-    }
-
-    $serverProc = null;
-    $clientProcessId = 0;
-    $serverProc = startServer($serverPort, $adminPort, 0,
-                              dirname(__DIR__), $DOC_ROOT);
-    waitForServerToGetGoing($serverPort);
+    $serverPort = $adminPort = null;
+    $debugPort = false;
+    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+                              dirname(__DIR__), $DOC_ROOT, $customArgs);
     $testController($serverPort);
     stopServer($adminPort);
   } catch (Exception $e) {

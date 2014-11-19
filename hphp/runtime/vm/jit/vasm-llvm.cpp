@@ -1078,8 +1078,8 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
 
-  std::vector<llvm::Type*> argTypes;
-  std::vector<llvm::Value*> args;
+  std::vector<llvm::Type*> argTypes = { m_int64 };
+  std::vector<llvm::Value*> args = { value(x64::rVmFp) };
   auto doArgs = [&] (const VregList& srcs) {
     for(int i = 0; i < srcs.size(); ++i) {
       args.push_back(value(srcs[i]));
@@ -1156,13 +1156,13 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   llvm::Instruction* callInst = nullptr;
   if (is_vcall) {
     auto call = m_irb.CreateCall(funcPtr, args);
-    call->setCallingConv(llvm::CallingConv::C);
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_C);
     callInst = call;
   } else {
     auto normal = block(vinvoke.targets[0]);
     auto unwind = block(vinvoke.targets[1]);
     auto invoke = m_irb.CreateInvoke(funcPtr, normal, unwind, args);
-    invoke->setCallingConv(llvm::CallingConv::C);
+    invoke->setCallingConv(llvm::CallingConv::X86_64_HHVM_C);
     callInst = invoke;
     // The result can only be used on normal path. The unwind branch cannot
     // access return values.

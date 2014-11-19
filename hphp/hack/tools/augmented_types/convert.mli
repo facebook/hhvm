@@ -8,5 +8,5 @@
  *
  *)
 
-exception Parse_error
-val parse : string -> At_ty.at_ty
+(* filename -> (output if changed * list of errors *)
+val convert : string -> string option * string list

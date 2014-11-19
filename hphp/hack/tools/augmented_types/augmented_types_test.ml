@@ -11,6 +11,8 @@
 module C = Convert_ty
 module DP = Docblock_parse
 module H = Hack_ty
+module PC = Common
+module PC2 = Common2
 module T = At_ty
 
 exception Test_failure of string
@@ -108,10 +110,45 @@ let test_docblock_parse () =
   check DP.ret_key T.ATbool;
   ()
 
+let test_integration () =
+  let testdir = Sys.argv.(1) in
+  let testfiles = PC2.glob (testdir ^ "/*.php") in
+  List.iter begin fun testfile ->
+    let (dir, base, _) = PC2.dbe_of_filename testfile in
+    let outfile = PC2.filename_of_dbe (dir, base, "out") in
+    let errfile = PC2.filename_of_dbe (dir, base, "err") in
+
+    let outopt, errl = Convert.convert testfile in
+    let out = match outopt with
+      | Some out -> out
+      | None -> "" in
+    let err = (String.concat "\n" errl) ^ "\n" in
+
+    let outtmpfile = PC.new_temp_file "augtytest" "php" in
+    PC.write_file ~file:outtmpfile out;
+    let errtmpfile = PC.new_temp_file "augtytest" "err" in
+    PC.write_file ~file:errtmpfile err;
+
+    let outdiff = PC2.unix_diff outtmpfile outfile in
+    if List.length outdiff > 1 then begin
+      List.iter prerr_endline outdiff;
+      raise (Test_failure "output differs")
+    end;
+
+    let errdiff = PC2.unix_diff errtmpfile errfile in
+    if List.length errdiff > 1 then begin
+      List.iter prerr_endline errdiff;
+      raise (Test_failure "err differs")
+    end;
+    ()
+  end testfiles;
+  ()
+
 let test () =
   test_at_parse ();
   test_convert_ty ();
   test_docblock_parse ();
+  test_integration ();
   print_endline "Success!"
 
 let () = test ()

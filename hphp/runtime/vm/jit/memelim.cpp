@@ -24,6 +24,7 @@
 
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -266,7 +267,7 @@ void optimizeMemory(IRUnit& unit) {
   // otherwise we would leave alone.
   splitCriticalEdges(unit);
 
-  auto incompleteQ = std::set<PostOrderId>{};
+  auto incompleteQ = dataflow_worklist<PostOrderId>(unit.numBlocks());
 
   /*
    * Global state for this pass, visible while processing any block.
@@ -285,7 +286,7 @@ void optimizeMemory(IRUnit& unit) {
    */
   for (auto poId = uint32_t{0}; poId < poBlockList.size(); ++poId) {
     genv.blockStates[poBlockList[poId]->id()].id = poId;
-    incompleteQ.insert(poId);
+    incompleteQ.push(poId);
   }
 
   /*
@@ -326,9 +327,8 @@ void optimizeMemory(IRUnit& unit) {
    */
   FTRACE(4, "Iterating\n");
   while (!incompleteQ.empty()) {
-    auto const poId = *begin(incompleteQ);
+    auto const poId = incompleteQ.pop();
     auto const blk  = poBlockList[poId];
-    incompleteQ.erase(begin(incompleteQ));
 
     auto& state         = genv.blockStates[blk->id()];
     auto const transfer = blockAnalysis[poId];
@@ -360,7 +360,7 @@ void optimizeMemory(IRUnit& unit) {
       predState.liveOut |= state.liveIn;
 
       if (predState.liveOut != oldLiveOut) {
-        incompleteQ.insert(predState.id);
+        incompleteQ.push(predState.id);
       }
     });
   }

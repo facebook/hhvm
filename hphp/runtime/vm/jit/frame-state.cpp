@@ -13,11 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/jit/frame-state.h"
+
 #include <algorithm>
 
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -777,21 +778,19 @@ void FrameState::computeFixedPoint(const BlocksWithIds& blocks) {
 
   // Use a worklist of RPO ids. That way, when we remove an active item to
   // process, we'll always pick the block earliest in RPO.
-  jit::set<uint32_t> worklist;
+  auto worklist = dataflow_worklist<uint32_t>(blocks.blocks.size());
 
   // Start with entry.
-  worklist.insert(0);
+  worklist.push(0);
 
   while (!worklist.empty()) {
-    auto const rpoId = *worklist.begin();
-    worklist.erase(worklist.begin());
-
+    auto const rpoId = worklist.pop();
     auto const block = blocks.blocks[rpoId];
 
     ITRACE(5, "Processing block {}\n", block->id());
 
     auto const insert = [&] (Block* block) {
-      if (block != nullptr) worklist.insert(blocks.ids[block]);
+      if (block != nullptr) worklist.push(blocks.ids[block]);
     };
 
     startBlock(block, block->front().marker());

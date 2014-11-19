@@ -1,5 +1,39 @@
-NEXT 23-Oct-2014
- -
+"Will.i.am" 13-Nov-2014
+ - Add benchy.py for benchmarking HHVM
+ - Tune and enable PGO for all functions
+ - Generate HHIR opcode table by extracting lines from ir.specification
+ - Convert a few more extensions to HNI
+ - Limit the maximum number of bytecode instructions in a region
+ - Improvements to <<__Memoize>>
+
+"Vanilla Ice" 27-Oct-2014
+ - Fix logging
+ - An async method's return annotation (if there is one) must be "Awaitable"
+ - Fix a bug in how __Memoize sets up FPI regions
+ - Fix issues with shutdown/postsend functions
+ - Fix is_callable for interface and abstract methods
+ - Added support for ReflectionFunction::getClosureThis()
+ - Add option to run perf to hhvm_wrapper
+ - Use a global cache for timezone info
+ - Implement readline_info()
+ - Fix NumberFormatter::format for string values
+ - Corrected socket connect for IPv6 hosts
+ - [hack] Fix parsing of postfix operators.
+ - Region selector improvements
+ - Disallow <<__Memoize>> on interfaces
+ - Convert APC to HNI
+ - Align recoverable fatal error's message with PHP
+ - [hack] Make hhi for some builtin constants.
+ - HHBBC improvements (enums, etc.)
+ - Properly shutdown debugger threads on exit
+ - [hack] support for 'abstract final' classes
+ - [hack] reflection support for first-class enums: ReflectionClass::isEnum [2/2]
+ - [hack] adding ReflectionClass.hhi
+ - Convert string to HNI
+ - Fix SOAP extension type encoding
+ - make test runner not puke when run with xargs
+ - [hack] reflection support for first-class enums
+ - Make `yield;` a valid statement
 
 "Ultramagnetic" 9-Oct-2014
  - Optimize strtr

@@ -641,7 +641,8 @@ struct sparse_id_map {
   }
 
   /*
-   * Model EqualityComparable.  Note that it's O(size()) worst case.
+   * Model EqualityComparable, as long as the value is EqualityComparable.
+   * Note that it's O(size()) worst case.
    *
    * This returns whether the two maps have equivalent key value pairs,
    * regardless of the order they were inserted.
@@ -651,13 +652,61 @@ struct sparse_id_map {
     if (size() != o.size()) return false;
     for (auto kv : *this) {
       if (!o.containsImpl(kv.first)) return false;
-      if (o.dense()[o.sparse()[kv.first]].second != kv.second) {
+      if (!(o.dense()[o.sparse()[kv.first]].second == kv.second)) {
         return false;
       }
     }
     return true;
   }
   bool operator!=(const sparse_id_map& o) const { return !(*this == o); }
+
+  /*
+   * Merge a map into this one by intersecting the keys, and using a
+   * user-defined function to merge values that were present in both this and
+   * `o'.  The user-defined value merge function should return a bool,
+   * indicating whether the value should be considered changed.
+   *
+   * Basic guarantee only.  Nothrow if V has a nothrow move constructor or a
+   * nothrow copy constructor.
+   *
+   * Complexity: O(size()).
+   *
+   * Returns: true if this map changed keys, or if the user-supplied function
+   * returned true for any pair of values.
+   *
+   * Pre: universe_size() == o.universe_size()
+   */
+  template<class Fun>
+  bool merge(const sparse_id_map& o, Fun val_merge) {
+    assert(m_universe_size == o.m_universe_size);
+    auto fwd = K{0};
+    auto changed = false;
+    while (fwd != m_next) {
+      assert(fwd < m_next);
+      auto const k = dense()[fwd].first;
+      if (!o.containsImpl(k)) {
+        changed = true;
+        if (fwd == m_next - 1) {  // Avoid self-move assigning values.
+          --m_next;
+          continue;
+        }
+        // Order here is important for exception safety: we can't decrement
+        // m_next until we've moved-from and then destroyed the old value.
+        auto& tomove = dense()[m_next - 1];
+        sparse()[tomove.first] = fwd;
+        dense()[fwd].second = std::move(tomove.second);
+        const_cast<K&>(dense()[fwd].first) = tomove.first;
+        tomove.~value_type();
+        --m_next;
+        continue;
+      }
+      if (val_merge(dense()[fwd].second, o.dense()[o.sparse()[k]].second)) {
+        changed = true;
+      }
+      ++fwd;
+    }
+    return changed;
+  }
 
   /*
    * Swap the contents of two maps.

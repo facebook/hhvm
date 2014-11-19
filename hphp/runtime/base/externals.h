@@ -63,7 +63,7 @@ extern const char *g_class_map[];
 /**
  * Returns a thread local global variable class pointer.
  */
-typedef GlobalNameValueTableWrapper GlobalVariables;
+typedef NameValueTableWrapper GlobalVariables;
 extern GlobalVariables *get_global_variables();
 extern void free_global_variables();
 extern void free_global_variables_after_sweep();

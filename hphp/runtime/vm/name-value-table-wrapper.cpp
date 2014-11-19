@@ -24,8 +24,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-NameValueTableWrapper::~NameValueTableWrapper() {}
-
 inline NameValueTableWrapper* NameValueTableWrapper::asNVTW(ArrayData* ad) {
   assert(ad->kind() == kNvtwKind);
   return static_cast<NameValueTableWrapper*>(ad);

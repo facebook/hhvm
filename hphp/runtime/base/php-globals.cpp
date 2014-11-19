@@ -25,7 +25,7 @@ namespace HPHP {
 
 const StaticString s_GLOBALS("GLOBALS");
 
-extern GlobalNameValueTableWrapper* get_global_variables();
+extern NameValueTableWrapper* get_global_variables();
 
 Array php_globals_as_array() {
   return Array(get_global_variables()->asArrayData());

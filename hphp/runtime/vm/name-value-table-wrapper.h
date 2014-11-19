@@ -53,11 +53,8 @@ namespace HPHP {
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
 struct NameValueTableWrapper : private ArrayData {
-  explicit NameValueTableWrapper(NameValueTable* tab)
-    : ArrayData(kNvtwKind)
-    , m_tab(tab)
-  {}
-  ~NameValueTableWrapper();
+  explicit NameValueTableWrapper(NameValueTable* tab);
+  ~NameValueTableWrapper() {}
 
   // We only allow explicit conversions to ArrayData.  Generally you
   // should not be talking to the NameValueTableWrapper directly (see
@@ -137,11 +134,6 @@ private:
 
 private:
   NameValueTable* const m_tab;
-};
-
-class GlobalNameValueTableWrapper : public NameValueTableWrapper {
- public:
-  explicit GlobalNameValueTableWrapper(NameValueTable* tab);
 };
 
 //////////////////////////////////////////////////////////////////////

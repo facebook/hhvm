@@ -222,11 +222,11 @@ inline RefResult ref(Variant& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GlobalNameValueTableWrapper;
+class NameValueTableWrapper;
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
-typedef GlobalNameValueTableWrapper GlobalVariables;
+typedef NameValueTableWrapper GlobalVariables;
 
 ///////////////////////////////////////////////////////////////////////////////
 

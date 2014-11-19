@@ -1402,7 +1402,15 @@ function msg_loop($num_tests, $queue) {
 }
 
 function print_success($tests, $options) {
-  if (!$tests) {
+  $ran_tests = false;
+  foreach (Status::getResults() as $result) {
+    if ($result['status'] == 'passed') {
+      $ran_tests = true;
+      break;
+    }
+  }
+
+  if (!$tests || !$ran_tests) {
     print "\nCLOWNTOWN: No tests!\n";
     if (empty($options['no-fun'])) {
       print <<<CLOWN

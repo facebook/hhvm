@@ -49,8 +49,6 @@ struct BlockState {
   ALocBits liveOut;
 };
 
-struct FrameBits { uint32_t numLocals; uint32_t startIndex; };
-
 // Environment for the whole optimization pass.
 struct Global {
   explicit Global(IRUnit& unit)
@@ -253,15 +251,15 @@ void optimize_block(Global& genv, Block* block) {
 
 }
 
-void optimizeMemory(IRUnit& unit) {
+void optimizeStores(IRUnit& unit) {
   if (RuntimeOption::EnableArgsInBacktraces) {
     // We don't run this pass if this is enabled, because it could omit stores
     // to argument locals.
     return;
   }
 
-  FTRACE(1, "optimizeMemory:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "optimizeMemory:^^^^^^^^^^^^^^^^^^^^\n"); };
+  FTRACE(1, "optimizeStores:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(1, "optimizeStores:^^^^^^^^^^^^^^^^^^^^\n"); };
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.

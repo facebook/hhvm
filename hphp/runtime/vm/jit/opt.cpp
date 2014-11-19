@@ -180,8 +180,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
    * on that.)
    */
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(optimizeMemory, "memelim");
-    dce("memelim");
+    doPass(optimizeStores, "storeelim");
+    dce("storeelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

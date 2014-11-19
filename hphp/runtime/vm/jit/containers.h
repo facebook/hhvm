@@ -20,9 +20,9 @@
 #include <deque>
 #include <functional>
 #include <list>
-#include <map>
 #include <memory>
 #include <queue>
+#include <set>
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
@@ -46,6 +46,9 @@ using priority_queue = std::priority_queue<T, vector<T>, Compare>;
 
 template <class T>
 using list = std::list<T>;
+
+template <class K, class Pred = std::less<K>>
+using set = std::set<K, Pred>;
 
 // subclass and pass 0 to the constructor to override the default
 // (large) buckets size.

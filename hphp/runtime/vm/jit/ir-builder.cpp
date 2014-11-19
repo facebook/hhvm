@@ -342,7 +342,6 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
 SSATmp* IRBuilder::preOptimizeAssertType(IRInstruction* inst) {
   auto const src = inst->src(0);
-
   return preOptimizeAssertTypeOp(inst, src->type(), src, src->inst());
 }
 
@@ -716,8 +715,7 @@ void IRBuilder::reoptimize() {
   always_assert(m_savedBlocks.empty());
   always_assert(!m_curWhere);
 
-  auto const changed = splitCriticalEdges(m_unit);
-  if (changed) {
+  if (splitCriticalEdges(m_unit)) {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
   }
 
@@ -733,14 +731,16 @@ void IRBuilder::reoptimize() {
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
-  for (auto* block : blocksIds.blocks) {
+  m_state.computeFixedPoint(blocksIds);
+
+  for (auto block : blocksIds.blocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
 
     // Skip block if it's unreachable.
     if (!reachable.test(block->id())) continue;
 
-    m_state.startBlock(block, block->front().marker());
+    m_state.loadBlock(block);
     m_curBlock = block;
 
     auto nextBlock = block->next();
@@ -798,7 +798,6 @@ void IRBuilder::reoptimize() {
     // Mark successor blocks as reachable.
     if (block->back().next())  reachable.set(block->back().next()->id());
     if (block->back().taken()) reachable.set(block->back().taken()->id());
-    m_state.finishBlock(block);
   }
 }
 

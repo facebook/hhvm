@@ -44,18 +44,20 @@ FrameState::FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func)
 {
 }
 
-void FrameState::update(const IRInstruction* inst) {
+bool FrameState::update(const IRInstruction* inst) {
   ITRACE(3, "FrameState::update processing {}\n", *inst);
   Indent _i;
 
-  if (auto* taken = inst->taken()) {
+  auto changed = false;
+
+  if (auto const taken = inst->taken()) {
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
     // call makeExit() before gen(JmpZero).  It doesn't make sense to
     // update the target block state at this point, so don't.  The
     // state doesn't have this problem during optimization passes,
     // because we'll always process the jump before the target block.
-    if (!m_building || taken->empty()) save(taken);
+    if (m_status != Status::Building || taken->empty()) changed |= save(taken);
   }
 
   auto const opc = inst->op();
@@ -177,6 +179,8 @@ void FrameState::update(const IRInstruction* inst) {
       }
     }
   }
+
+  return changed;
 }
 
 void FrameState::getLocalEffects(const IRInstruction* inst,
@@ -451,7 +455,11 @@ void FrameState::startBlock(Block* block,
     m_inlineSavedStates = it->second.in.inlineSavedStates;
   }
 
-  // Reset state if the block is a loop header.
+  // Don't reset state for unprocessed predecessors if we're trying to reach a
+  // fixed-point.
+  if (m_status == Status::RunningFixedPoint) return;
+
+  // Reset state if the block has an unprocessed predecessor.
   if (isLoopHeader || findUnprocessedPred(block)) {
     Indent _;
     ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
@@ -462,12 +470,19 @@ void FrameState::startBlock(Block* block,
   markVisited(block);
 }
 
-void FrameState::finishBlock(Block* block) {
-  assert(block->back().isTerminal() == !block->next() || m_building);
+bool FrameState::finishBlock(Block* block) {
+  assert(block->back().isTerminal() == !block->next());
 
-  m_states[block].out = createSnapshotWithInline();
+  auto& old = m_states[block].out;
+  auto snap = createSnapshotWithInline();
 
-  if (!block->back().isTerminal()) save(block->next());
+  auto changed = old != snap;
+
+  old = snap;
+
+  if (!block->back().isTerminal()) changed |= save(block->next());
+
+  return changed;
 }
 
 void FrameState::pauseBlock(Block* block) {
@@ -508,15 +523,23 @@ FrameState::Snapshot FrameState::createSnapshotWithInline() const {
  * block, create a new snapshot.  Otherwise merge the current state into the
  * existing snapshot.
  */
-void FrameState::save(Block* block) {
+bool FrameState::save(Block* block) {
+  // Don't save any new state if we've already reached a fixed-point.
+  if (m_status == Status::FinishedFixedPoint) return false;
+
   ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show(*this));
+
   auto const it = m_states.find(block);
+  auto changed = true;
+
   if (it != m_states.end()) {
-    merge(it->second.in);
+    changed = merge(it->second.in);
     ITRACE(4, "Merged state: {}\n", show(*this));
   } else {
     m_states[block].in = createSnapshotWithInline();
   }
+
+  return changed;
 }
 
 void FrameState::load(Snapshot& state) {
@@ -541,8 +564,10 @@ void FrameState::load(Snapshot& state) {
  * local variable values are preserved if the match in both states.
  * types are combined using Type::unionOf.
  */
-void FrameState::merge(Snapshot& state) {
-  // cannot merge spOffset state, so assert they match
+bool FrameState::merge(Snapshot& state) {
+  auto const original = state;
+
+  // Cannot merge spOffset state, so assert they match.
   assert(state.spOffset == m_spOffset);
   assert(state.curFunc == m_curFunc);
   if (state.spValue != m_spValue) {
@@ -580,8 +605,16 @@ void FrameState::merge(Snapshot& state) {
     }
   }
 
-  // For now, we shouldn't be merging states with different inline states.
-  assert(m_inlineSavedStates == state.inlineSavedStates);
+  // If we're not computing a fixed-point, then we should never get into a
+  // situation where we're merging states with different states for
+  // callers. If we are computing a fixed-point, then we can just drop the old
+  // caller states and replace them with the new ones.
+  assert(IMPLIES(m_status != Status::RunningFixedPoint,
+                 m_inlineSavedStates == state.inlineSavedStates));
+
+  state.inlineSavedStates = m_inlineSavedStates;
+
+  return state != original;
 }
 
 void FrameState::trackDefInlineFP(const IRInstruction* inst) {
@@ -674,6 +707,7 @@ void FrameState::clear() {
   m_states.clear();
   m_visited.clear();
   assert(m_inlineSavedStates.empty());
+  m_status = Status::None;
 }
 
 bool FrameState::checkInvariants() const {
@@ -725,6 +759,66 @@ void FrameState::resetCurrentState(BCMarker marker) {
   m_marker   = marker;
   m_spOffset = marker.spOff();
   m_curFunc  = marker.func();
+}
+
+void FrameState::computeFixedPoint(const BlocksWithIds& blocks) {
+  ITRACE(4, "FrameState computing fixed-point\n");
+
+  clear();
+
+  m_status = Status::RunningFixedPoint;
+
+  auto const entry = blocks.blocks[0];
+  auto const entryMarker = entry->front().marker();
+
+  // So that we can actually call startBlock on the entry block.
+  m_states[entry].in.curFunc = entryMarker.func();
+  m_states[entry].in.curMarker = entryMarker;
+  m_states[entry].in.locals.resize(entryMarker.func()->numLocals());
+  resetCurrentState(entryMarker);
+
+  // Use a worklist of RPO ids. That way, when we remove an active item to
+  // process, we'll always pick the block earliest in RPO.
+  jit::set<uint32_t> worklist;
+
+  // Start with entry.
+  worklist.insert(0);
+
+  while (!worklist.empty()) {
+    auto const rpoId = *worklist.begin();
+    worklist.erase(worklist.begin());
+
+    auto const block = blocks.blocks[rpoId];
+
+    ITRACE(5, "Processing block {}\n", block->id());
+
+    auto const insert = [&] (Block* block) {
+      if (block != nullptr) worklist.insert(blocks.ids[block]);
+    };
+
+    startBlock(block, block->front().marker());
+
+    for (auto& inst : *block) {
+      setMarker(inst.marker());
+      if (update(&inst)) insert(block->taken());
+    }
+
+    if (finishBlock(block)) insert(block->next());
+  }
+
+  resetCurrentState(entryMarker);
+
+  m_status = Status::FinishedFixedPoint;
+}
+
+void FrameState::loadBlock(Block* block) {
+  auto const it = m_states.find(block);
+  assert(it != m_states.end());
+
+  auto& snap = it->second.in;
+
+  load(snap);
+  m_inlineSavedStates = snap.inlineSavedStates;
 }
 
 SSATmp* FrameState::localValue(uint32_t id) const {
@@ -849,6 +943,8 @@ void FrameState::refineLocalValue(uint32_t id, unsigned inlineIdx,
   auto& locs = locals(inlineIdx);
   always_assert(id < locs.size());
   auto& local = locs[id];
+  ITRACE(2, "refining local {}'s ({}) value: {} -> {}\n",
+         id, inlineIdx, *local.value, *newVal);
   local.value = newVal;
   local.type = newVal->type();
   local.typeSrcs.clear();

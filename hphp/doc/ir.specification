@@ -2595,7 +2595,7 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| DeleteUnwinderException, ND, NA, NF
+| DeleteUnwinderException, ND, NA, E
 
   Deletes the current unwinder exception.
 

@@ -626,12 +626,7 @@ private:
   void refreshStats();
   template<bool live> void refreshStatsImpl(MemoryUsageStats& stats);
   void refreshStatsHelperExceeded();
-
-#ifdef USE_JEMALLOC
   void refreshStatsHelperStop();
-  template<bool callerSavesActualSize>
-  void* smartMallocSizeBigHelper(void*&, size_t&, size_t);
-#endif
 
   void resetStatsImpl(bool isInternalCall);
   bool checkPreFree(DebugHeader*, size_t, size_t) const;

@@ -645,37 +645,35 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
   return smartEnlist(n);
 }
 
+template NEVER_INLINE std::pair<void*,size_t>
+MemoryManager::smartMallocSizeBig<true>(size_t);
+template NEVER_INLINE std::pair<void*,size_t>
+MemoryManager::smartMallocSizeBig<false>(size_t);
+
+template<bool callerSavesActualSize> NEVER_INLINE std::pair<void*,size_t>
+MemoryManager::smartMallocSizeBig(size_t bytes) {
 #ifdef USE_JEMALLOC
-template
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper<true>(
-    void*&, size_t&, size_t);
-template
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper<false>(
-    void*&, size_t&, size_t);
-
-template<bool callerSavesActualSize>
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
-                                              size_t& szOut,
-                                              size_t bytes) {
-  ptr = mallocx(debugAddExtra(bytes + sizeof(BigNode)), 0);
-  szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(BigNode));
-
+  auto const n = static_cast<BigNode*>(
+    mallocx(debugAddExtra(bytes + sizeof(BigNode)), 0)
+  );
+  auto szOut = debugRemoveExtra(sallocx(n, 0) - sizeof(BigNode));
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
   m_stats.usage += int64_t(delta);
   // Adjust jemalloc otherwise we'll double count the direct allocation.
   JEMALLOC_STATS_ADJUST(&m_stats, delta);
-
-  return debugPostAllocate(
-    smartEnlist(static_cast<BigNode*>(ptr)),
-    bytes,
-    szOut
+#else
+  m_stats.usage += bytes;
+  auto const n = static_cast<BigNode*>(
+    safe_malloc(debugAddExtra(bytes + sizeof(BigNode)))
   );
-}
+  auto szOut = bytes;
 #endif
+  auto ptrOut = debugPostAllocate(smartEnlist(n), bytes, szOut);
+  FTRACE(3, "smartMallocSizeBig: {} ({} requested, {} usable)\n",
+         ptrOut, bytes, szOut);
+  return {ptrOut, szOut};
+}
 
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {

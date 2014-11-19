@@ -274,25 +274,6 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
 }
 
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
-#ifdef USE_JEMALLOC
-  void* ptr;
-  size_t sz;
-  auto const retptr =
-    smartMallocSizeBigHelper<callerSavesActualSize>(ptr, sz, bytes);
-  FTRACE(3, "smartMallocBig: {} ({} requested, {} usable)\n",
-         retptr, bytes, sz);
-  return std::make_pair(retptr, sz);
-#else
-  m_stats.usage += bytes;
-  auto const ret = smartMallocBig(debugAddExtra(bytes));
-  FTRACE(3, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
-  return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
-#endif
-}
-
 ALWAYS_INLINE
 void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;

@@ -331,6 +331,12 @@ struct NativeNode {
   HeaderKind kind;
 };
 
+// POD type for tracking arbitrary memory ranges
+struct MemBlock {
+  void* ptr;
+  size_t size; // bytes
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct MemoryManager {
@@ -418,7 +424,7 @@ struct MemoryManager {
    * Pre: size > kMaxSmartSize
    */
   template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBig(size_t size);
+  MemBlock smartMallocSizeBig(size_t size);
   void smartFreeSizeBig(void* vp, size_t size);
 
   /*
@@ -451,7 +457,7 @@ struct MemoryManager {
   void objFreeLogged(void* vp, size_t size);
   void* smartMallocSizeLoggedTracked(uint32_t size);
   template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
+  MemBlock smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
 
   /*

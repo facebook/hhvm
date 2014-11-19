@@ -789,7 +789,7 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
-    return smartMallocSizeBig<false>(nbytes).first;
+    return smartMallocSizeBig<false>(nbytes).ptr;
   }
 
   void* ptr = m_front;
@@ -852,13 +852,13 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
   return smartEnlist(n);
 }
 
-template NEVER_INLINE std::pair<void*,size_t>
-MemoryManager::smartMallocSizeBig<true>(size_t);
-template NEVER_INLINE std::pair<void*,size_t>
-MemoryManager::smartMallocSizeBig<false>(size_t);
+template NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig<true>(size_t);
+template NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
 
-template<bool callerSavesActualSize> NEVER_INLINE std::pair<void*,size_t>
-MemoryManager::smartMallocSizeBig(size_t bytes) {
+template<bool callerSavesActualSize> NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
 #ifdef USE_JEMALLOC
   auto const n = static_cast<BigNode*>(
     mallocx(debugAddExtra(bytes + sizeof(BigNode)), 0)

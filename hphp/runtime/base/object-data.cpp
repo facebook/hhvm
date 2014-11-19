@@ -1019,7 +1019,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   auto& mm = MM();
-  auto obj = new (mm.smartMallocSizeBigLogged<false>(size).first)
+  auto obj = new (mm.smartMallocSizeBigLogged<false>(size).ptr)
     ObjectData(cls, NoInit::noinit);
   mm.track(obj);
   return obj;

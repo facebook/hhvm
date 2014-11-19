@@ -1401,15 +1401,14 @@ function msg_loop($num_tests, $queue) {
   }
 }
 
-function print_success($tests, $options) {
+function print_success($tests, $results, $options) {
   $ran_tests = false;
-  foreach (Status::getResults() as $result) {
+  foreach ($results as $result) {
     if ($result['status'] == 'passed') {
       $ran_tests = true;
       break;
     }
   }
-
   if (!$tests || !$ran_tests) {
     print "\nCLOWNTOWN: No tests!\n";
     if (empty($options['no-fun'])) {
@@ -1828,7 +1827,7 @@ function main($argv) {
   }
 
   if (!$return_value) {
-    print_success($tests, $options);
+    print_success($tests, $results, $options);
     return $return_value;
   }
   print_failure($argv, $results, $options);

@@ -1070,8 +1070,9 @@ class Phar extends RecursiveDirectoryIterator
         $pieces[$i-1] = '';
       }
     }
+    // strlen is used to remove empty strings, but keep values of 0 (zero)
     return ($starts_with_slash ? '/' : '') .
-           implode('/', array_filter($pieces));
+           implode('/', array_filter($pieces, 'strlen'));
   }
 
   /**

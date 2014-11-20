@@ -39,12 +39,12 @@ using Trace::Indent;
  */
 
 /*
- * Merge one Snapshot into another, returning whether it changed.  Frame
+ * Merge one FrameState into another, returning whether it changed.  Frame
  * pointers and stack depth must match.  If the stack pointer tmps are
  * different, clear the tracked value (we can make a new one, given fp and
  * spOffset).
  */
-bool merge_into(Snapshot& dst, const Snapshot& src) {
+bool merge_into(FrameState& dst, const FrameState& src) {
   auto const original = dst;  // FIXME: we shouldn't need to copy it for this
 
   // Cannot merge spOffset state, so assert they match.
@@ -93,7 +93,7 @@ bool merge_into(Snapshot& dst, const Snapshot& src) {
 /*
  * Merge two state-stacks.  The stacks must have the same depth.
  */
-bool merge_into(jit::vector<Snapshot>& dst, const jit::vector<Snapshot>& src) {
+bool merge_into(jit::vector<FrameState>& dst, const jit::vector<FrameState>& src) {
   always_assert(src.size() == dst.size());
   bool changed = false;
   for (auto idx = uint32_t{0}; idx < dst.size(); ++idx) {
@@ -118,7 +118,7 @@ FrameStateMgr::FrameStateMgr(IRUnit& unit,
   : m_unit(unit)
   , m_visited(unit.numBlocks())
 {
-  m_stack.push_back(Snapshot{});
+  m_stack.push_back(FrameState{});
   cur().curFunc = func;
   cur().spOffset = initialSpOffset;
   cur().locals.resize(func ? func->numLocals() : 0);
@@ -542,7 +542,7 @@ void FrameStateMgr::startBlock(Block* block,
        * information.  But this is pretty dangerous right now, because we're
        * starting with things like spValue as null.
        */
-      m_stack.push_back(Snapshot{});
+      m_stack.push_back(FrameState{});
     }
   }
   assert(!m_stack.empty());
@@ -769,7 +769,7 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
   auto const entryMarker = entry->front().marker();
 
   // So that we can actually call startBlock on the entry block.
-  m_states[entry].in.push_back(Snapshot{});
+  m_states[entry].in.push_back(FrameState{});
   m_states[entry].in.back().curFunc = entryMarker.func();
   m_states[entry].in.back().marker = entryMarker;
   m_states[entry].in.back().locals.resize(entryMarker.func()->numLocals());

@@ -133,9 +133,10 @@ inline bool operator==(const LocalState& a, const LocalState& b) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * TODO: rename
+ * State related to a particular frame.  These state structures are stored in a
+ * stack, that we push and pop as we enter and leave inlined frames.
  */
-struct Snapshot {
+struct FrameState {
   /*
    * Current Func, VM stack pointer, VM frame pointer, offset between sp and
    * fp, and bytecode position.
@@ -181,7 +182,7 @@ struct Snapshot {
   bool frameSpansCall{false};
 };
 
-inline bool operator==(const Snapshot& a, const Snapshot& b) {
+inline bool operator==(const FrameState& a, const FrameState& b) {
   return
     a.spValue        == b.spValue &&
     a.fpValue        == b.fpValue &&
@@ -408,8 +409,8 @@ struct FrameStateMgr final : private LocalStateHook {
 
  private:
   struct BlockState {
-    jit::vector<Snapshot> in;
-    jit::vector<Snapshot> out;
+    jit::vector<FrameState> in;
+    jit::vector<FrameState> out;
   };
 
 private:
@@ -464,11 +465,11 @@ private:
    */
   bool isVisited(const Block*) const;
 
-  Snapshot& cur() {
+  FrameState& cur() {
     assert(!m_stack.empty());
     return m_stack.back();
   }
-  const Snapshot& cur() const {
+  const FrameState& cur() const {
     return const_cast<FrameStateMgr*>(this)->cur();
   }
 
@@ -484,7 +485,7 @@ private:
    * Stack of states.  We push and pop frames as we enter and leave inlined
    * calls.
    */
-  jit::vector<Snapshot> m_stack;
+  jit::vector<FrameState> m_stack;
 
   /*
    * m_cseHash holds the destination of all tracked instructions that produced

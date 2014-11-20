@@ -82,9 +82,8 @@
 #include <assert.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>
+#include <caml/fail.h>
 #include <fcntl.h>
-#include <lz4.h>
-#include <lz4hc.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -96,6 +95,11 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#ifndef NO_LZ4
+#include <lz4.h>
+#include <lz4hc.h>
+#endif
 
 #define GIG (1024l * 1024l * 1024l)
 
@@ -337,6 +341,19 @@ void hh_shared_init() {
   set_priorities();
 }
 
+#ifdef NO_LZ4
+void hh_save(value out_filename) {
+  CAMLparam1(out_filename);
+  caml_failwith("Program not linked with lz4, so saving is not supported!");
+  CAMLreturn0;
+}
+
+void hh_load(value in_filename) {
+  CAMLparam1(in_filename);
+  caml_failwith("Program not linked with lz4, so loading is not supported!");
+  CAMLreturn0;
+}
+#else
 static void fwrite_no_fail(const void* ptr, size_t size, size_t nmemb, FILE* fp) {
   size_t nmemb_written = fwrite(ptr, size, nmemb, fp);
   assert(nmemb_written == nmemb);
@@ -439,6 +456,7 @@ void hh_load(value in_filename) {
   fclose(fp);
   CAMLreturn0;
 }
+#endif /* NO_LZ4 */
 
 /* Must be called by every worker before any operation is performed */
 void hh_worker_init() {

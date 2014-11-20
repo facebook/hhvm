@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/reserved-stack.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
@@ -833,6 +834,7 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindjmp) \
+O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
 O(fallthru) \
@@ -846,6 +848,7 @@ O(cmpli) \
 O(cmplim) \
 O(cmplm) \
 O(cmpq) \
+O(cmpqi) \
 O(cmpqim) \
 O(cmpqm) \
 O(cvttsd2siq) \
@@ -890,6 +893,7 @@ O(orqim) \
 O(pushm) \
 O(ret) \
 O(roundsd) \
+O(srem) \
 O(sar) \
 O(sarqi) \
 O(setcc) \
@@ -942,6 +946,8 @@ O(landingpad)
         emitCall(inst);
         break;
 
+      // These instructions are intentionally unsupported for a variety of
+      // reasons, and if code-gen-x64.cpp emits one it's a bug:
       case Vinstr::call:
       case Vinstr::callm:
       case Vinstr::callr:
@@ -950,10 +956,23 @@ O(landingpad)
       case Vinstr::syncpoint:
       case Vinstr::cqo:
       case Vinstr::idiv:
+      case Vinstr::sarq:
+      case Vinstr::shlq:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
 
+      // ARM opcodes:
+      case Vinstr::asrv:
+      case Vinstr::brk:
+      case Vinstr::cbcc:
+      case Vinstr::hcsync:
+      case Vinstr::hcnocatch:
+      case Vinstr::hcunwind:
+      case Vinstr::hostcall:
+      case Vinstr::lslv:
+      case Vinstr::tbcc:
+      // Fallthrough. Eventually we won't have a default case.
       default:
         throw FailedLLVMCodeGen(
           folly::format(
@@ -1037,6 +1056,22 @@ void LLVMEmitter::emit(const andqi& inst) {
 
 void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
+}
+
+void LLVMEmitter::emit(const bindaddr& inst) {
+  // inst.dest is a pointer to memory allocated in globalData, so we can just
+  // do what vasm does here.
+
+  mcg->setJmpTransID((TCA)inst.dest);
+  *inst.dest = emitEphemeralServiceReq(
+    mcg->code.frozen(),
+    mcg->getFreeStub(mcg->code.frozen(), &mcg->cgFixups()),
+    REQ_BIND_ADDR,
+    inst.dest,
+    inst.sk.toAtomicInt(),
+    TransFlags{}.packed
+  );
+  mcg->cgFixups().m_codePointers.insert(inst.dest);
 }
 
 void LLVMEmitter::emit(const defvmsp& inst) {
@@ -1446,6 +1481,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   } else if (cmp.op == Vinstr::cmpq) {
     lhs = asInt(value(cmp.cmpq_.s1), 64);
     rhs = asInt(value(cmp.cmpq_.s0), 64);
+  } else if (cmp.op == Vinstr::cmpqi) {
+    lhs = asInt(value(cmp.cmpqi_.s1), 64);
+    rhs = cns(cmp.cmpqi_.s0.q());
   } else if (cmp.op == Vinstr::cmpqim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpqim_.s0.q());
@@ -1701,6 +1739,10 @@ void LLVMEmitter::emit(const roundsd& inst) {
 
   auto func = llvm::Intrinsic::getDeclaration(m_module.get(), roundID);
   defineValue(inst.d, m_irb.CreateCall(func, value(inst.s)));
+}
+
+void LLVMEmitter::emit(const srem& inst) {
+  defineValue(inst.d, m_irb.CreateSRem(value(inst.s0), value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const sar& inst) {

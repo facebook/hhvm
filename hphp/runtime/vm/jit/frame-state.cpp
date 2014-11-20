@@ -444,13 +444,11 @@ void FrameStateMgr::walkAllInlinedLocals(L body, bool skipThisFrame) const {
     }
   };
 
-  // For historical reasons: inlineIdx == 0 means current frame, and otherwise
-  // it's m_stack index + 1.
   assert(!m_stack.empty());
   auto const thisFrame = m_stack.size() - 1;
-  if (!skipThisFrame) doBody(m_stack[thisFrame].locals, 0);
-  for (int i = 0; i < thisFrame; ++i) {
-    doBody(m_stack[i].locals, i + 1);
+  if (!skipThisFrame) doBody(m_stack[thisFrame].locals, thisFrame);
+  for (auto i = uint32_t{0}; i < thisFrame; ++i) {
+    doBody(m_stack[i].locals, i);
   }
 }
 
@@ -907,19 +905,12 @@ void FrameStateMgr::setLocalTypeSource(uint32_t id, TypeSource typeSrc) {
 }
 
 /*
- * Get a reference to the locals from an inline index. 0 means the current
- * frame, otherwise it's index (inlineIdx - 1) in m_inlineSavedStates.
- *
- * FIXME: change what inlineIdx means
+ * Get a reference to the locals from an inline index, which is the index in
+ * m_stack.
  */
 jit::vector<LocalState>& FrameStateMgr::locals(unsigned inlineIdx) {
-  if (inlineIdx == 0) {
-    return cur().locals;
-  } else {
-    --inlineIdx;
-    assert(inlineIdx < m_stack.size());
-    return m_stack[inlineIdx].locals;
-  }
+  assert(inlineIdx < m_stack.size());
+  return m_stack[inlineIdx].locals;
 }
 
 void FrameStateMgr::refineLocalValue(uint32_t id, unsigned inlineIdx,

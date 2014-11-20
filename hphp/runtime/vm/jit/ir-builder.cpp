@@ -1208,10 +1208,15 @@ repeat:
   }
   always_assert(blockToLdLocs.empty());
 
-  // Modify the incoming Jmps to set the phi inputs.
+  // Modify the incoming Jmps to set the phi inputs.  Copy to a vector before
+  // modifying things---we're going to be changing the pred EdgeList (by
+  // modifying jump instructions).
+  auto pred_vec = jit::vector<Block*>{};
   for (auto& e : m_curBlock->preds()) {
-    Block* pred = e.from();
-    jit::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
+    pred_vec.push_back(e.from());
+  }
+  for (auto const pred : pred_vec) {
+    auto& tmpVec = blockToPhiTmpsMap[pred];
     auto& jmp = pred->back();
     always_assert_log(
       jmp.is(Jmp),
@@ -1220,7 +1225,8 @@ repeat:
                              jmp.toString()).str();
       });
     always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
-    m_unit.replace(&jmp, Jmp, std::make_pair(tmpVec.size(), tmpVec.data()));
+    m_unit.replace(&jmp, Jmp, jmp.taken(),
+      std::make_pair(tmpVec.size(), tmpVec.data()));
   }
 
   // Create a DefLabel with appropriately-typed dests. We pass a vector of 1's

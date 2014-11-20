@@ -230,9 +230,9 @@ struct LocalStateHook {
  *
  * The types of state tracked by FrameStateMgr include:
  *
- *   - value availability
+ *   - value availability for values stored in locals, or the $this pointer
  *
- *      Used for value propagation and tracking which values can be CSE'd.
+ *      Used for value propagation.
  *
  *   - local types and values
  *
@@ -343,8 +343,6 @@ struct FrameStateMgr final : private LocalStateHook {
   void incStackDeficit() { cur().stackDeficit++; }
   void clearStackDeficit() { cur().stackDeficit = 0; }
   EvalStack& evalStack() { return cur().evalStack; }
-  bool enableCse() const { return m_enableCse; }
-  void setEnableCse(bool e) { m_enableCse = e; }
 
   void setBuilding(bool b) { m_status = b ? Status::Building : Status::None; }
 
@@ -362,10 +360,6 @@ struct FrameStateMgr final : private LocalStateHook {
   // Call func with all tracked locals, including callers if this is an inlined
   // frame.
   void forEachLocal(LocalFunc func) const;
-
-  SSATmp* cseLookup(IRInstruction* inst,
-                    Block* srcBlock,
-                    const folly::Optional<IdomVector>&);
 
   void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
 
@@ -413,7 +407,7 @@ private:
 
 private:
   bool checkInvariants() const;
-  void clearCse();
+  bool save(Block*);
 
   /*
    * Clear the current state, but keeps the state associated with all
@@ -454,12 +448,6 @@ private:
   void updateLocalRefPredictions(LocalStateHook&, SSATmp*, SSATmp*) const;
   void dropLocalRefsInnerTypes(LocalStateHook& hook) const;
 
-  void cseInsert(const IRInstruction* inst);
-  void cseKill(SSATmp* src);
-  CSEHash* cseHashTable(const IRInstruction* inst);
-
-  bool save(Block*);
-
   /*
    * Whether a block has been visited in the current iteration.
    */
@@ -486,13 +474,6 @@ private:
    * calls.
    */
   jit::vector<FrameState> m_stack;
-
-  /*
-   * m_cseHash holds the destination of all tracked instructions that produced
-   * values eligible for CSE.
-   */
-  CSEHash m_cseHash;
-  bool m_enableCse{false};
 
   /*
    * Saved snapshots of the incoming and outgoing state of blocks.

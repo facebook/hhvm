@@ -194,7 +194,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spOffset -= kNumActRecCells + inst->extra<Call>()->numParams;
     cur().spOffset += 1;
     assert(cur().spOffset >= 0);
-    clearCse();
     break;
 
   case CallArray:
@@ -203,13 +202,11 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     // A CallArray pops the ActRec an array arg and pushes a return value.
     cur().spOffset -= kNumActRecCells;
     assert(cur().spOffset >= 0);
-    clearCse();
     break;
 
   case ContEnter:
     cur().spValue = inst->dst();
     for (auto& st : m_stack) st.frameSpansCall = true;
-    clearCse();
     break;
 
   case DefFP:
@@ -280,21 +277,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   if (inst->modifiesStack()) {
     cur().spValue = inst->modifiedStkPtr();
-  }
-
-  // update the CSE table
-  if (m_enableCse && inst->canCSE()) {
-    cseInsert(inst);
-  }
-
-  // if the instruction kills any of its sources, remove them from the
-  // CSE table
-  if (inst->killsSources()) {
-    for (int i = 0; i < inst->numSrcs(); ++i) {
-      if (inst->killsSource(i)) {
-        cseKill(inst->src(i));
-      }
-    }
   }
 
   return changed;
@@ -696,39 +678,6 @@ void FrameStateMgr::trackInlineReturn() {
   assert(!m_stack.empty());
 }
 
-CSEHash* FrameStateMgr::cseHashTable(const IRInstruction* inst) {
-  return inst->is(DefConst) ? &m_unit.constTable() : &m_cseHash;
-}
-
-void FrameStateMgr::cseInsert(const IRInstruction* inst) {
-  cseHashTable(inst)->insert(inst->dst());
-}
-
-void FrameStateMgr::cseKill(SSATmp* src) {
-  if (src->inst()->canCSE()) {
-    cseHashTable(src->inst())->erase(src);
-  }
-}
-
-void FrameStateMgr::clearCse() {
-  m_cseHash.clear();
-}
-
-SSATmp* FrameStateMgr::cseLookup(IRInstruction* inst,
-                              Block* srcBlock,
-                              const folly::Optional<IdomVector>& idoms) {
-  auto tmp = cseHashTable(inst)->lookup(inst);
-  if (tmp && idoms) {
-    // During a reoptimize pass, we need to make sure that any values
-    // we want to reuse for CSE are only reused in blocks dominated by
-    // the block that defines it.
-    if (tmp->isConst()) return tmp;
-    auto const dom = findDefiningBlock(tmp);
-    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
-  }
-  return tmp;
-}
-
 void FrameStateMgr::clear() {
   // A previous run of reoptimize could've legitimately exited the trace in an
   // inlined callee. If that happened, just pop all the saved states to return
@@ -737,7 +686,6 @@ void FrameStateMgr::clear() {
     trackInlineReturn();
   }
   clearCurrentState();
-  clearCse();
   m_states.clear();
   m_visited.clear();
   assert(m_stack.size() == 1);

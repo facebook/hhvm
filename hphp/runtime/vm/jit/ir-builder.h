@@ -74,7 +74,6 @@ namespace HPHP { namespace jit {
  */
 struct IRBuilder {
   IRBuilder(IRUnit&, BCMarker);
-  ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
@@ -398,17 +397,19 @@ private:
   // control flow, where we currently don't allow CSE.
   struct DisableCseGuard {
     explicit DisableCseGuard(IRBuilder& irb)
-      : m_state(irb.m_state)
-      , m_oldEnable(m_state.enableCse())
+      : m_irb(irb)
+      , m_oldEnable(irb.m_enableCse)
     {
-      m_state.setEnableCse(false);
+      m_irb.m_enableCse = false;
     }
     ~DisableCseGuard() {
-      m_state.setEnableCse(m_oldEnable);
+      m_irb.m_enableCse = m_oldEnable;
     }
+    DisableCseGuard(const DisableCseGuard&) = delete;
+    DisableCseGuard& operator=(const DisableCseGuard&) = delete;
 
-   private:
-    FrameStateMgr& m_state;
+  private:
+    IRBuilder& m_irb;
     bool m_oldEnable;
   };
 
@@ -451,13 +452,22 @@ private:
                          const folly::Optional<IdomVector>& idoms);
 
 private:
-  void      appendInstruction(IRInstruction* inst);
-  void      appendBlock(Block* block);
-  void      insertPhis(bool forceSpPhi);
+  void appendInstruction(IRInstruction* inst);
+  void appendBlock(Block* block);
+  void insertPhis(bool forceSpPhi);
+  SSATmp* cseLookup(const IRInstruction&,
+                    const Block*,
+                    const folly::Optional<IdomVector>&) const;
+  void clearCse();
+  const CSEHash& cseHashTable(const IRInstruction& inst) const;
+  CSEHash& cseHashTable(const IRInstruction& inst);
+  void cseUpdate(const IRInstruction& inst);
 
 private:
   IRUnit& m_unit;
   FrameStateMgr m_state;
+  CSEHash m_cseHash;
+  bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
@@ -532,6 +542,8 @@ struct BlockPusherImpl {
 
 using BlockPusher = BlockPusherImpl<false>;
 using BlockPauser = BlockPusherImpl<true>;
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

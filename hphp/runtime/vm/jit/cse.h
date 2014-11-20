@@ -32,12 +32,10 @@ namespace HPHP { namespace jit {
  * by value (opcode and operands).
  */
 struct CSEHash {
-  SSATmp* lookup(IRInstruction* inst) {
-    MapType::iterator it = map.find(inst);
-    if (it == map.end()) {
-      return nullptr;
-    }
-    return (*it).second;
+  SSATmp* lookup(IRInstruction* inst) const {
+    auto const it = map.find(inst);
+    if (it == end(map)) return nullptr;
+    return it->second;
   }
   SSATmp* insert(SSATmp* opnd) {
     return insert(opnd, opnd->inst());
@@ -79,9 +77,7 @@ private:
     }
   };
 
-  typedef std::unordered_map<IRInstruction*, SSATmp*,
-                             HashOp, EqualsOp>  MapType;
-  MapType map;
+  std::unordered_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> map;
 };
 
 }}

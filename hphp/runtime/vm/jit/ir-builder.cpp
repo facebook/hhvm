@@ -35,6 +35,12 @@
 namespace HPHP { namespace jit {
 
 namespace {
+
+TRACE_SET_MOD(hhir);
+using Trace::Indent;
+
+//////////////////////////////////////////////////////////////////////
+
 template<typename M>
 const typename M::mapped_type& get_required(const M& m,
                                             typename M::key_type key) {
@@ -50,11 +56,10 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   inst->convertToNop();
   return nullptr;
 }
+
+//////////////////////////////////////////////////////////////////////
+
 }
-
-using Trace::Indent;
-
-TRACE_SET_MOD(hhir);
 
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
@@ -65,8 +70,8 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
 {
   m_state.setBuilding(true);
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_state.setEnableCse(RuntimeOption::EvalHHIRCse &&
-                         !RuntimeOption::EvalHHIRBytecodeControlFlow);
+    m_enableCse = RuntimeOption::EvalHHIRCse &&
+      !RuntimeOption::EvalHHIRBytecodeControlFlow;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 
@@ -74,9 +79,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   // don't always call IRBuilder::startBlock when starting to emit IR, namely
   // in selectTracelet.
   m_state.markVisited(m_curBlock);
-}
-
-IRBuilder::~IRBuilder() {
 }
 
 /*
@@ -172,6 +174,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   }
 
   m_state.update(inst);
+  cseUpdate(*inst);
 }
 
 void IRBuilder::appendBlock(Block* block) {
@@ -577,9 +580,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   FTRACE(1, "optimize: {}\n", inst->toString());
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
-    if (m_state.enableCse() && cseInput->canCSE()) {
-      SSATmp* cseResult = m_state.cseLookup(cseInput, srcBlock, idoms);
-      if (cseResult) {
+    if (m_enableCse && cseInput->canCSE()) {
+      if (auto const cseResult = cseLookup(*cseInput, srcBlock, idoms)) {
         // Found a dominating instruction that can be used instead of input
         FTRACE(1, "  {}cse found: {}\n",
                indent(), cseResult->inst()->toString());
@@ -707,9 +709,10 @@ void IRBuilder::reoptimize() {
   }
 
   m_state.clear();
-  m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
+  m_cseHash.clear();
+  m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
-  if (!m_state.enableCse() && !m_enableSimplification) return;
+  if (!m_enableCse && !m_enableSimplification) return;
   setConstrainGuards(false);
   m_state.setBuilding(false);
 
@@ -1349,5 +1352,55 @@ void IRBuilder::popBlock(bool pause) {
   m_curWhere = top.where;
   m_savedBlocks.pop_back();
 }
+
+//////////////////////////////////////////////////////////////////////
+
+CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) {
+  return inst.is(DefConst) ? m_unit.constTable() : m_cseHash;
+}
+
+const CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) const {
+  return const_cast<IRBuilder*>(this)->cseHashTable(inst);
+}
+
+SSATmp* IRBuilder::cseLookup(const IRInstruction& inst,
+                             const Block* srcBlock,
+                             const folly::Optional<IdomVector>& idoms) const {
+  auto tmp = cseHashTable(inst).lookup(const_cast<IRInstruction*>(&inst));
+  if (tmp && idoms) {
+    // During a reoptimize pass, we need to make sure that any values we want
+    // to reuse for CSE are only reused in blocks dominated by the block that
+    // defines it.
+    if (tmp->isConst()) return tmp;
+    auto const dom = findDefiningBlock(tmp);
+    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
+  }
+  return tmp;
+}
+
+void IRBuilder::cseUpdate(const IRInstruction& inst) {
+  switch (inst.op()) {
+  case Call:
+  case CallArray:
+  case ContEnter:
+    m_cseHash.clear();
+    break;
+  default:
+    break;
+  }
+
+  if (m_enableCse && inst.canCSE()) {
+    cseHashTable(inst).insert(inst.dst());
+  }
+  if (inst.killsSources()) {
+    for (auto i = uint32_t{0}; i < inst.numSrcs(); ++i) {
+      if (inst.killsSource(i) && inst.src(i)->inst()->canCSE()) {
+        cseHashTable(inst).erase(inst.src(i));
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

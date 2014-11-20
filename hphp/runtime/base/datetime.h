@@ -230,6 +230,7 @@ public:
   // constructor
   DateTime();
   explicit DateTime(int64_t timestamp, bool utc = false); // from a timestamp
+  explicit DateTime(int64_t timestamp, SmartResource<TimeZone> tz);
 
   CLASSNAME_IS("DateTime");
   // overriding ResourceData

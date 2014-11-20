@@ -304,7 +304,7 @@ class PharData extends Phar {
    *
    * @return     mixed   A PharData object is returned.
    */
-  public function decompress(string $extension) {
+  public function decompress(string $extension = ".phar.tar") {
     throw new Exception('Not implemented yet');
   }
 

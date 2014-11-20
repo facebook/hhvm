@@ -179,7 +179,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait precedence rule.  Describes a usage of the `insteadof' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitPrecRule {
     TraitPrecRule();
@@ -205,7 +205,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait alias rule.  Describes a usage of the `as' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitAliasRule {
     TraitAliasRule();

@@ -3,14 +3,11 @@ define('REDIS_HOST', getenv('REDIS_TEST_HOST'));
 define('REDIS_PORT', getenv('REDIS_TEST_PORT')
                    ? (int)getenv('REDIS_TEST_PORT')
                    : Redis::DEFAULT_PORT);
-define('REDIS_PASS', getenv('REDIS_TEST_PASS')
-                   ? getenv('REDIS_TEST_PASS')
-                   : null);
 	
 function NewRedisTestInstance() {
     $expecting = array(
-			'timeout' => 0
-		);
+	    'timeout' => 0
+    );
     $r = new Redis();
     $conn = $r->pconnect(REDIS_HOST, REDIS_PORT, $expecting['timeout']);
     var_dump($conn);
@@ -18,8 +15,5 @@ function NewRedisTestInstance() {
     var_dump($authok);
     return $r;
 }
-
 $r = NewRedisTestInstance();
 if($r) echo true;
-
-

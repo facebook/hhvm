@@ -1568,9 +1568,7 @@ class Redis {
                                $persistent_id,
                                $retry_interval,
                                $persistent = false) {
-    if (!empty($persistent_id)) {
-      throw new RedisException("Named persistent connections not supported");
-    }
+  
 
     if ($port <= 0) {
       if ((strlen($host) > 0) && ($host[0] == '/')) {
@@ -1587,7 +1585,14 @@ class Redis {
     }
 
     if ($persistent) {
-      $conn = pfsockopen($host, $port, $errno, $errstr, $timeout);
+      if (!empty($persistent_id)) {
+          $pid = array('id'=>array('persistent_id'=>$persistent_id));
+          $context = stream_context_create($pid);
+          $sok  = $host.':'.$port;
+          $conn  = stream_socket_client($sok, $errno, $errstr, $timeout,2,$context);
+      }else{
+        $conn = pfsockopen($host, $port, $errno, $errstr, $timeout);
+      }
     } else {
       $conn = fsockopen($host, $port, $errno, $errstr, $timeout);
     }
@@ -1597,6 +1602,7 @@ class Redis {
     $this->retry_interval = $retry_interval;
     $this->timeout_connect = $timeout;
     $this->persistent = $persistent;
+    $this->persistent_id = $persistent_id;
     $this->connection = $conn;
     $this->dbNumber = 0;
     $this->commands = [];

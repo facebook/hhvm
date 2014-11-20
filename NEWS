@@ -27,8 +27,6 @@
  - HHBBC improvements (enums, etc.)
  - Properly shutdown debugger threads on exit
  - [hack] support for 'abstract final' classes
- - [hack] reflection support for first-class enums: ReflectionClass::isEnum [2/2]
- - [hack] adding ReflectionClass.hhi
  - Convert string to HNI
  - Fix SOAP extension type encoding
  - make test runner not puke when run with xargs

@@ -7,27 +7,21 @@ define('REDIS_PASS', getenv('REDIS_TEST_PASS')
                    ? getenv('REDIS_TEST_PASS')
                    : null);
 	
-function NewRedisTestInstance($status = false) {
-$expecting = array(
-			'port' => 6379,
+function NewRedisTestInstance() {
+		$expecting = array(
 			'timeout' => 0,
-			'persistent' => true,
 			'database' => 0
 		);
-  $r = new Redis();
-  $persistentId = $expecting['port'] . $expecting['timeout'] . $expecting['database'];
-  $conn = $r->pconnect(REDIS_HOST, REDIS_PORT,$expecting['timeout'],$persistentId);
-  
-  if ($status) var_dump($conn);
-  $authok = REDIS_PASS ? $r->auth(REDIS_PASS) : true;
-  if ($status) var_dump($authok);
-  return $r;
+	$r = new Redis();
+	$persistentId = REDIS_PORT . $expecting['timeout'] . $expecting['database'];
+	$conn = $r->pconnect(REDIS_HOST, REDIS_PORT, $expecting['timeout'], $persistentId);
+	var_dump($conn);
+	$authok = REDIS_PASS ? $r->auth(REDIS_PASS) : true;
+	var_dump($authok);
+	return $r;
 }
 
-
-
-$r = NewRedisTestInstance(true);
-if($r)
-	echo true;
+$r = NewRedisTestInstance();
+if($r) echo true;
 
 

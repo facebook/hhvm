@@ -126,6 +126,7 @@
  - Support self parameter typehint
  - [h2tp] modify build to support h2tp
  - [hh] hh_format: understand async lambdas
+ - [hack] added support for abstract class constants
 
 "Xzibit" 20-Nov-2014
  - Fix readline request locals

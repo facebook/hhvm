@@ -20,16 +20,19 @@ function reflect() {
   var_dump(get_class_constants(I::class));
   $rc = new ReflectionClass(I::class);
   var_dump($rc->getConstants());
+  var_dump($rc->getAbstractConstantNames());
   var_dump($rc->hasConstant('X'));
 
   var_dump(get_class_constants(C::class));
   $rc = new ReflectionClass(C::class);
   var_dump($rc->getConstants());
+  var_dump($rc->getAbstractConstantNames());
   var_dump($rc->hasConstant('X'));
 
   var_dump(get_class_constants(J::class));
   $rc = new ReflectionClass(J::class);
   var_dump($rc->getConstants());
+  var_dump($rc->getAbstractConstantNames());
   var_dump($rc->hasConstant('X'));
 }
 

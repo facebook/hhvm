@@ -1217,6 +1217,30 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
   return ai.toArray();
 }
 
+// helper for getAbstractConstantNames
+static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+
+  size_t numConsts = cls->numConstants();
+  if (!numConsts) {
+    return Array::Create();
+  }
+
+  c_Set* st;
+  Object o = st = newobj<c_Set>();
+  st->reserve(numConsts);
+
+  const Class::Const* consts = cls->constants();
+  for (size_t i = 0; i < numConsts; i++) {
+    if (consts[i].m_val.isAbstractConst()) {
+      st->add(const_cast<StringData*>(consts[i].m_name.get()));
+    }
+  }
+
+  assert(st->size() <= numConsts);
+  return st->t_toarray();
+}
+
 static Array HHVM_METHOD(ReflectionClass, getAttributes) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   // UserAttributes are stored exclusively on the PreClass.
@@ -1439,6 +1463,7 @@ class ReflectionExtension : public Extension {
     HHVM_ME(ReflectionClass, hasConstant);
     HHVM_ME(ReflectionClass, getConstant);
     HHVM_ME(ReflectionClass, getOrderedConstants);
+    HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
 
     HHVM_ME(ReflectionClass, getAttributes);
     HHVM_ME(ReflectionClass, getAttributesRecursive);

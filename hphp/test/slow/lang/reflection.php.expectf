@@ -227,8 +227,8 @@ Class [ <user> class B extends A implements I, K, H, J ] {
   @@ %s/test/slow/lang/reflection.php 131-147
 
   - Constants [2] {
-    Constant [ string C0 {B::C0}
-    Constant [ string C1 {B::C1}
+    Constant [ string C0 {B::C0} ]
+    Constant [ string C1 {B::C1} ]
   }
 
   - Static properties [3] {

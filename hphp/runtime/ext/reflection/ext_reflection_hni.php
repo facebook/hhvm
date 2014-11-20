@@ -222,17 +222,50 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     return $this->getReturnTypeHint() ?: false;
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributes.php )
+   *
+   * Gets all attributes
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
   <<__Native>>
   final public function getAttributes(): array;
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattribute.php )
+   *
+   * Returns all attributes with given key.
+   *
+   * @return  array<int, mixed>
+   */
   final public function getAttribute(string $name) {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributes.php )
+   *
+   * Gets all attributes
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
   public function getAttributesRecursive(): array {
     return $this->getAttributes();
   }
 
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getattributerecursive.php
+   * )
+   *
+   * Returns all attributes with given key from a class and its parents.
+   *
+   * @return  array<arraykey, array<int, mixed>>
+   */
   public function getAttributeRecursive($name) {
     return $this->getAttribute($name);
   }
@@ -1141,9 +1174,13 @@ class ReflectionClass implements Reflector {
     }
 
     $consts = $this->getConstants();
-    $ret .= "\n  - Constants [" . count($consts) . "] {\n";
+    $abs_consts = $this->getAbstractConstantNames();
+    $ret .= "\n  - Constants [" . (count($consts) + count($abs_consts)) . "] {\n";
     foreach ($consts as $k => $v) {
-      $ret .= '    Constant [ ' . gettype($v) . " $k {" . (string)$v . "}\n";
+      $ret .= '    Constant [ ' . gettype($v) . " $k {" . (string)$v . "} ]\n";
+    }
+    foreach ($abs_consts as $k) {
+      $ret .= '    Abstract Constant [ '. $k ."]\n";
     }
     $ret .= "  }\n";
 
@@ -1450,8 +1487,32 @@ class ReflectionClass implements Reflector {
     return self::$constCache[$clsname] = $this->getOrderedConstants();
   }
 
+  private static $absConstCache = array();
+
+  /**
+   * ( excerpt from
+   *   http://docs.hhvm.com/manual/en/reflectionclass.getabstractconstantnames.php
+   * )
+   *
+   * Returns an array containing the names of abstract constants as both
+   * keys and values.
+   *
+   * @return  array<string, string>
+   */
+  public function getAbstractConstantNames(): array<string, string> {
+    $clsname = $this->getName();
+    $cached = hphp_array_idx(self::$absConstCache, $clsname, null);
+    if (null !== $cached) {
+      return $cached;
+    }
+    return self::$absConstCache[$clsname] = $this->getOrderedAbstractConstants();
+  }
+
   <<__Native>>
   private function getOrderedConstants(): array<string, mixed>;
+
+  <<__Native>>
+  private function getOrderedAbstractConstants(): array<string, string>;
 
   /**
    * ( excerpt from

@@ -44,7 +44,7 @@ let declare content =
   try
     Errors.ignore_ begin fun () ->
       let {Parser_hack.is_hh_file; comments; ast} =
-        Parser_hack.program content
+        Parser_hack.program Relative_path.default content
       in
       let funs, classes = List.fold_left begin fun (funs, classes) def ->
         match def with
@@ -97,7 +97,8 @@ let declare content =
 
 let fix_file_and_def content = try
   Errors.ignore_ begin fun () ->
-    let {Parser_hack.is_hh_file; comments; ast} = Parser_hack.program content in
+    let {Parser_hack.is_hh_file; comments; ast} =
+      Parser_hack.program Relative_path.default content in
     List.iter begin fun def ->
       match def with
       | Ast.Fun f ->

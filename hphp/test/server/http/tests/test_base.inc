@@ -3,20 +3,14 @@
 $LOG_ROOT = '/tmp/hhvm_server';
 require __DIR__ . '/../../util/server_tests.inc';
 
-function runTest($testName, $testController) {
+function runTest($testController, $customArgs = '') {
   $pid = posix_getpid();
   try {
-    $serverPort = get_random_port();
-    $adminPort = get_random_port();
-    while ($adminPort === $serverPort) {
-      $adminPort = get_random_port();
-    }
-
-    $serverProc = null;
-    $clientProcessId = 0;
-    $serverProc = startServer($serverPort, $adminPort, 0,
-                              __DIR__.'/..', __DIR__.'/../server_root');
-    waitForServerToGetGoing($serverPort);
+    $serverPort = $adminPort = null;
+    $debugPort = false;
+    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+                              __DIR__.'/..', __DIR__.'/../server_root',
+                              $customArgs);
     $testController($serverPort);
     stopServer($adminPort);
   } catch (Exception $e) {

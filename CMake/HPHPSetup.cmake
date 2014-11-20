@@ -22,7 +22,7 @@ if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,-u,_register_fastcgi_server
-    -Wl,-segaddr __text 0
+    -Wl,-segaddr,__text,0
     -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
@@ -195,6 +195,10 @@ endif ()
 if(DISABLE_HARDWARE_COUNTERS)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
+
+if(ENABLE_AVX2)
+  add_definitions(-DENABLE_AVX2=1)
+endif()
 
 if(PACKED_TV)
   # Allows a packed tv build

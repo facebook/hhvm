@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/util/overflow.h"
 
@@ -187,25 +188,43 @@ SSATmp* simplifySpillStack(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
-  auto const func = inst->extra<LdCtx>()->func;
-  if (func->isStatic()) {
-    auto const src = inst->src(0);
-    auto const srcInst = src->inst();
-    if (srcInst->is(DefInlineFP)) {
-      auto const stackPtr = srcInst->src(0);
-      if (auto const spillFrame = findSpillFrame(stackPtr)) {
-        auto const cls = spillFrame->src(2);
-        if (cls->isConst(Type::Cls)) {
-          return cns(env, ConstCctx::cctx(cls->clsVal()));
-        }
-      }
-    }
-    // ActRec->m_cls of a static function is always a valid class pointer with
-    // the bottom bit set
-    return gen(env, LdCctx, src);
+SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  auto const srcTy = inst->src(0)->type();
+  if (srcTy <= Type::Obj) return gen(env, Nop);
+  if (!func->mayHaveThis() || !srcTy.maybe(Type::Obj)) {
+    return gen(env, Jmp, inst->taken());
   }
   return nullptr;
+}
+
+SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
+  // TODO(#5623596): this transformation is required for correctness in
+  // refcount opts right now.
+  if (inst->src(0)->type() <= Type::Obj) return inst->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  if (!func->isStatic()) return nullptr;
+
+  // Change LdCtx in static functions to LdCctx, or if we're inlining try to
+  // fish out a constant context.
+  auto const src = inst->src(0);
+  auto const srcInst = src->inst();
+  if (srcInst->is(DefInlineFP)) {
+    auto const stackPtr = srcInst->src(0);
+    if (auto const spillFrame = findSpillFrame(stackPtr)) {
+      auto const cls = spillFrame->src(2);
+      if (cls->isConst(Type::Cls)) {
+        return cns(env, ConstCctx::cctx(cls->clsVal()));
+      }
+    }
+  }
+  // ActRec->m_cls of a static function is always a valid class pointer with
+  // the bottom bit set
+  return gen(env, LdCctx, src);
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
@@ -245,10 +264,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
-  SSATmp* srcCtx = inst->src(0);
-  if (srcCtx->isA(Type::Cctx)) {
-    return srcCtx;
-  }
+  auto const srcCtx = inst->src(0);
+  if (srcCtx->isA(Type::Cctx)) return srcCtx;
   return nullptr;
 }
 
@@ -1842,22 +1859,38 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = arr->arrVal()->nvGet(idx->intVal());
+  return value ? cns(env, *value) : nullptr;
+}
+
+SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const idx = inst->src(1);
+  if (!idx->isConst()) return nullptr;
+  auto const value = [&] {
+    int64_t val;
+    if (idx->strVal()->isStrictlyInteger(val)) {
+      return arr->arrVal()->nvGet(val);
+    }
+    return arr->arrVal()->nvGet(idx->strVal());
+  }();
+  return value ? cns(env, *value) : nullptr;
+}
+
 SSATmp* simplifyLdPackedArrayElem(State& env, const IRInstruction* inst) {
-  auto const arrayTmp = inst->src(0);
-  auto const idxTmp   = inst->src(1);
-  if (arrayTmp->isConst() && idxTmp->isConst()) {
-    auto const value = arrayTmp->arrVal()->nvGet(idxTmp->intVal());
-    if (!value) {
-      // The index doesn't exist. This code should be unreachable at runtime.
-      return nullptr;
-    }
+  if (inst->src(0)->isConst()) return arrIntKeyImpl(env, inst);
+  return nullptr;
+}
 
-    if (value->m_type == KindOfRef) {
-      return cns(env, *value->m_data.pref->tv());
-    }
-    return cns(env, *value);
+SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->isConst()) {
+    if (inst->src(1)->type() <= Type::Int) return arrIntKeyImpl(env, inst);
+    if (inst->src(1)->type() <= Type::Str) return arrStrKeyImpl(env, inst);
   }
-
   return nullptr;
 }
 
@@ -1888,10 +1921,10 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  auto const notNvtw =
-    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kNvtwKind;
+  auto const notGlobals =
+    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kGlobalsKind;
 
-  if (!mightRelax(env, src) && notNvtw) {
+  if (!mightRelax(env, src) && notGlobals) {
     return gen(env, CountArrayFast, src);
   }
 
@@ -2005,6 +2038,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsCtx)
   X(LdClsName)
   X(LdCtx)
+  X(CheckCtxThis)
+  X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(LdPackedArrayElem)
@@ -2057,6 +2092,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqInt)
   X(Same)
   X(NSame)
+  X(ArrayGet)
   default: break;
   }
 #undef X
@@ -2378,49 +2414,6 @@ void copyProp(IRInstruction* inst) {
     // copyPropped.
     assert(!inst->src(i)->inst()->is(Mov));
   }
-}
-
-const SSATmp* canonical(const SSATmp* val) {
-  return canonical(const_cast<SSATmp*>(val));
-}
-
-SSATmp* canonical(SSATmp* value) {
-  if (value == nullptr) return nullptr;
-
-  auto inst = value->inst();
-
-  while (inst->isPassthrough()) {
-    value = inst->getPassthroughValue();
-    inst = value->inst();
-  }
-  return value;
-}
-
-IRInstruction* findSpillFrame(SSATmp* sp) {
-  auto inst = sp->inst();
-  while (!inst->is(SpillFrame)) {
-    if (debug) {
-      [&] {
-        for (auto const& dst : inst->dsts()) {
-          if (dst.isA(Type::StkPtr)) return;
-        }
-        assert(false);
-      }();
-    }
-
-    assert(!inst->is(RetAdjustStack));
-    if (inst->is(DefSP)) return nullptr;
-    if (inst->is(InterpOne) && isFPush(inst->extra<InterpOne>()->opcode)) {
-      // A non-punted translation of this bytecode would contain a SpillFrame.
-      return nullptr;
-    }
-
-    // M-instr support opcodes have the previous sp in varying sources.
-    if (inst->modifiesStack()) inst = inst->previousStkPtr()->inst();
-    else                       inst = inst->src(0)->inst();
-  }
-
-  return inst;
 }
 
 bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {

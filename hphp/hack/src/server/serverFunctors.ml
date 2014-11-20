@@ -62,6 +62,7 @@ end = struct
 
   (* This code is only executed when the options --check is NOT present *)
   let go root init_fun =
+    let t = Unix.gettimeofday () in
     grab_lock root;
     init_message();
     grab_init_lock root;
@@ -70,6 +71,8 @@ end = struct
     let env = init_fun () in
     release_init_lock root;
     ready_message ();
+    let t' = Unix.gettimeofday () in
+    Printf.printf "Took %f seconds to initialize.\n" (t' -. t);
     env
 end
 
@@ -100,7 +103,7 @@ end = struct
       ServerHealth.check();
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
-      let updates = ServerDfind.get_updates genv root in
+      let updates = ServerDfind.get_updates root in
       let updates = Relative_path.relativize_set Relative_path.Root updates in
       let updates = Relative_path.Set.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
@@ -128,7 +131,7 @@ end = struct
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
         let to_recheck =
-          rev_rev_map (Relative_path.create Relative_path.Root) to_recheck
+          rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
         in
         let updates = List.fold_left
           (fun acc update -> Relative_path.Set.add update acc)
@@ -166,7 +169,11 @@ end = struct
     else
       let env = MainInit.go root program_init in
       let socket = Socket.init_unix_socket root in
-      EventLogger.init_done ();
+      let load_file = match ServerArgs.load_save_opt genv.options with
+        | Some (ServerArgs.Load { ServerArgs.filename; _ }) ->
+          Some (Filename.basename filename)
+        | _ -> None in
+      EventLogger.init_done load_file;
       serve genv env socket
 
   let get_log_file root =

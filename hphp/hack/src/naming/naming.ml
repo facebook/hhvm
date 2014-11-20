@@ -755,6 +755,9 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
     | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
     | x when x = SN.Typehints.mixed -> N.Hmixed
+    | x when x = SN.Typehints.shape ->
+        Errors.shape_typehint p;
+        N.Hany
     | x when x = SN.Typehints.this && allow_this ->
         if hl != []
         then Errors.this_no_argument p;
@@ -804,7 +807,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
          *
          *   private ?WaitHandle<this> wh = ...; // e.g. generic preparables
          *)
-      let cname = snd (Env.class_name env id) in
+      let (_, cname) as name = Env.class_name env id in
       let gen_read_api_covariance =
         (cname = SN.FB.cGenReadApi || cname = SN.FB.cGenReadIdxApi) in
       let privacy_policy_base_covariance =
@@ -816,7 +819,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
          privacy_policy_base_covariance || data_type_covariance) in
-      N.Happly (Env.class_name env id, hintl ~allow_this env hl)
+      N.Happly (name, hintl ~allow_this env hl)
   end
 
 (* Hints that are valid both as casts and type annotations.  Neither casts nor
@@ -1429,7 +1432,7 @@ and foreach_stmt env e aw ae b =
 
 and as_expr env aw = function
   | As_v ev ->
-      let vars = Naming_ast_helpers.GetLocals.lvalue_foreach SMap.empty ev in
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       let ev = expr env ev in
       (match aw with
@@ -1437,7 +1440,7 @@ and as_expr env aw = function
         | Some p -> N.Await_as_v (p, ev))
   | As_kv ((p1, Lvar k), ev) ->
       let k = p1, N.Lvar (Env.new_lvar env k) in
-      let vars = Naming_ast_helpers.GetLocals.lvalue_foreach SMap.empty ev in
+      let vars = Naming_ast_helpers.GetLocals.lvalue SMap.empty ev in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       let ev = expr env ev in
       (match aw with
@@ -1803,17 +1806,17 @@ and expr_ env = function
       | px, n when n = SN.Classes.cParent ->
         if (fst env).cclass = None then
           let () = Errors.parent_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cSelf ->
         if (fst env).cclass = None then
           let () = Errors.self_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | px, n when n = SN.Classes.cStatic ->
         if (fst env).cclass = None then
           let () = Errors.static_outside_class p in
-          (px, "*Unknown*")
+          (px, SN.Classes.cUnknown)
         else (px, n)
       | _ ->
         no_typedef env x;
@@ -1821,8 +1824,12 @@ and expr_ env = function
     N.InstanceOf (expr env e, (p, N.Id id))
   | InstanceOf (e1, e2) ->
       N.InstanceOf (expr env e1, expr env e2)
-  | New (x, el, uel) ->
+  | New ((_, Id x), el, uel) ->
       N.New (make_class_id env x, exprl env el, exprl env uel)
+  | New ((p, e_), el, uel) ->
+      if (fst env).in_mode = Mstrict
+      then Errors.dynamic_new_in_strict_mode p;
+      N.New (make_class_id env (p, SN.Classes.cUnknown), exprl env el, exprl env uel)
   | Efun (f, idl) ->
       let idl = List.map fst idl in
       let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
@@ -1890,16 +1897,16 @@ and make_class_id env (p, x as cid) =
     | x when x = SN.Classes.cParent ->
       if (fst env).cclass = None then
         let () = Errors.parent_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIparent
     | x when x = SN.Classes.cSelf ->
       if (fst env).cclass = None then
         let () = Errors.self_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIself
     | x when x = SN.Classes.cStatic -> if (fst env).cclass = None then
         let () = Errors.static_outside_class p in
-        N.CI (p, "*Unknown*")
+        N.CI (p, SN.Classes.cUnknown)
       else N.CIstatic
     | x when x = "$this" -> N.CIvar (p, N.This)
     | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.new_lvar env cid))

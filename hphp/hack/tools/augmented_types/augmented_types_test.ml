@@ -9,6 +9,7 @@
  *)
 
 module C = Convert_ty
+module DP = Docblock_parse
 module H = Hack_ty
 module T = At_ty
 
@@ -17,6 +18,7 @@ exception Test_failure of string
 let test_at_parse () =
   let cases = [
     "string", T.ATstring;
+    "My_klass", T.ATclass "My_klass";
     "string|Klass", T.ATcomposite [T.ATstring; T.ATclass "Klass"];
     "*int[]", T.ATvariadic (T.ATarray (T.ATint));
     "int|string[]", T.ATcomposite [T.ATint; T.ATarray T.ATstring];
@@ -49,20 +51,31 @@ let test_convert_ty () =
      strict = Common.Right "";
      loose = Common.Left H.Hmixed;
     };
-    (* TODO enable these tests (and write more), testing currently unimplemented
-     * behavior. *)
-    (*
-    {name = "nullable mixed";
+    {name = "nullable class";
+     input = T.ATcomposite [T.ATclass "foo"; T.ATnull];
+     strict = Common.Left (H.Hnullable (H.Hclass "foo"));
+     loose = Common.Left (H.Hnullable (H.Hclass "foo"));
+    };
+    {name = "nullable mixed 1";
      input = T.ATcomposite [T.ATmixed; T.ATnull];
      strict = Common.Left H.Hmixed;
      loose = Common.Left H.Hmixed;
+    };
+    {name = "nullable mixed 2";
+     input = T.ATcomposite [T.ATmixed]; (* Not sure how meaningful this is. *)
+     strict = Common.Right "";
+     loose = Common.Left H.Hmixed;
+    };
+    {name = "loose composite";
+     input = T.ATcomposite [T.ATuint; T.ATfloat];
+     strict = Common.Right "";
+     loose = Common.Left H.Hnum;
     };
     {name = "multiple reduce";
      input = T.ATcomposite [T.ATint; T.ATnull; T.ATfloat];
      strict = Common.Left (H.Hnullable H.Hnum);
      loose = Common.Left (H.Hnullable H.Hnum);
     };
-    *)
   ] in
   let check_single name output expected = match output, expected with
     | Common.Left e1, Common.Left e2 when e1 = e2 -> ()
@@ -75,9 +88,30 @@ let test_convert_ty () =
   in
   List.iter check cases
 
+let test_docblock_parse () =
+  let input =
+    "\
+    /**\n\
+      * This is a cool docblock!\n\
+      * @param int|Fun_class $first_arg\n\
+      * @param string $second_arg\n\
+      * @return bool\n\
+      */" in
+  let m = DP.parse input in
+  let check var expected =
+    let actual = match Smap.find var m with
+      | None -> raise (Test_failure var)
+      | Some x -> x in
+    if actual <> expected then raise (Test_failure var) else () in
+  check "$first_arg" (T.ATcomposite [T.ATint; T.ATclass "Fun_class"]);
+  check "$second_arg" T.ATstring;
+  check DP.ret_key T.ATbool;
+  ()
+
 let test () =
   test_at_parse ();
   test_convert_ty ();
+  test_docblock_parse ();
   print_endline "Success!"
 
 let () = test ()

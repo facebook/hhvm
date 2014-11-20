@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
 #include "hphp/runtime/vm/jit/hhbc-translator-internal.h"
@@ -456,7 +457,7 @@ void HhbcTranslator::emitSingletonSProp(const Func* func,
   }
 
   // Look up the static property.
-  auto const sprop   = ldClsPropAddrKnown(catchBlock, cns(cls), cns(propName));
+  auto const sprop   = ldClsPropAddrKnown(catchBlock, cls, propName);
   auto const unboxed = gen(UnboxPtr, sprop);
   auto const value   = gen(LdMem, unboxed->type().deref(), unboxed, cns(0));
 
@@ -482,8 +483,8 @@ void HhbcTranslator::emitSingletonSLoc(const Func* func, const Op* op) {
   gen(CheckStaticLocInit, exit, box);
 
   // Side exit if the static local is null.
-  auto value = gen(LdRef, Type::Cell, exit, box);
-  auto isnull = gen(IsType, Type::Null, value);
+  auto const value  = gen(LdRef, Type::InitCell, box);
+  auto const isnull = gen(IsType, Type::InitNull, value);
   gen(JmpNZero, exit, isnull);
 
   // Return the singleton.
@@ -526,11 +527,15 @@ void HhbcTranslator::emitUnbox() {
 }
 
 void HhbcTranslator::emitThis() {
-  pushIncRef(gen(LdThis, makeExitNullThis(), m_irb->fp()));
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitNullThis(), ctx);
+  auto const this_ = gen(CastCtxThis, ctx);
+  pushIncRef(this_);
 }
 
 void HhbcTranslator::emitCheckThis() {
-  gen(LdThis, makeExitNullThis(), m_irb->fp());
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitNullThis(), ctx);
 }
 
 void HhbcTranslator::emitRB(Trace::RingBufferType t, SrcKey sk, int level) {
@@ -566,10 +571,13 @@ void HhbcTranslator::emitBareThis(int notice) {
     emitInterpOne(Type::InitNull, 0); // will raise notice and push null
     return;
   }
+  auto const ctx = gen(LdCtx, m_irb->fp());
   if (notice == static_cast<int>(BareThisOp::NeverNull)) {
-    setThisAvailable();
+    m_irb->setThisAvailable();
+  } else {
+    gen(CheckCtxThis, makeExitSlow(), ctx);
   }
-  pushIncRef(gen(LdThis, makeExitSlow(), m_irb->fp()));
+  pushIncRef(gen(CastCtxThis, ctx));
 }
 
 void HhbcTranslator::emitArray(int arrayId) {
@@ -869,7 +877,7 @@ void HhbcTranslator::emitLateBoundCls() {
     emitInterpOne(Type::Cls, 0);
     return;
   }
-  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const ctx = ldCtx();
   push(gen(LdClsCtx, ctx));
 }
 
@@ -933,10 +941,12 @@ void HhbcTranslator::emitInitThisLoc(int32_t id) {
     return;
   }
   auto const ldrefExit = makeExit();
-  auto const oldLoc = ldLoc(id, ldrefExit, DataTypeCountness);
-  auto const tmpThis = gen(LdThis, makeExitSlow(), m_irb->fp());
-  gen(IncRef, tmpThis);
-  genStLocal(id, m_irb->fp(), tmpThis);
+  auto const oldLoc    = ldLoc(id, ldrefExit, DataTypeCountness);
+  auto const ctx       = gen(LdCtx, m_irb->fp());
+  gen(CheckCtxThis, makeExitSlow(), ctx);
+  auto const this_     = gen(CastCtxThis, ctx);
+  gen(IncRef, this_);
+  genStLocal(id, m_irb->fp(), this_);
   gen(DecRef, oldLoc);
 }
 
@@ -1124,15 +1134,15 @@ void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
 }
 
 void HhbcTranslator::emitIncTransCounter() {
-  m_irb->gen(IncTransCounter);
+  gen(IncTransCounter);
 }
 
 void HhbcTranslator::emitIncProfCounter(TransID transId) {
-  m_irb->gen(IncProfCounter, TransIDData(transId));
+  gen(IncProfCounter, TransIDData(transId));
 }
 
 void HhbcTranslator::emitCheckCold(TransID transId) {
-  m_irb->gen(CheckCold, makeExitOpt(transId), TransIDData(transId));
+  gen(CheckCold, makeExitOpt(transId), TransIDData(transId));
 }
 
 void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
@@ -1186,7 +1196,7 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
 void HhbcTranslator::emitIsScalarL(int id) {
   auto const ldrefExit = makeExit();
   auto const ldPMExit = makePseudoMainExit();
-  SSATmp* src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
   push(gen(IsScalarType, src));
 }
 
@@ -1332,10 +1342,16 @@ void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
     }
   }
 
-  auto guardType = Type::UncountedInit;
-  if (outPred.strictSubtypeOf(guardType)) guardType = outPred;
-  auto const cns = gen(LdClsCns, sideExit, clsCnsName, guardType);
-  push(cns);
+  auto const link = RDS::bindClassConstant(clsNameStr, cnsNameStr);
+  auto const prds = gen(
+    LdRDSAddr,
+    RDSHandleData { link.handle() },
+    Type::Cell.ptr(Ptr::ClsCns)
+  );
+  auto const guardType = outPred < Type::UncountedInit ? outPred
+                                                       : Type::UncountedInit;
+  gen(CheckTypeMem, guardType, sideExit, prds);
+  push(gen(LdMem, guardType, prds, cns(0)));
 }
 
 void HhbcTranslator::emitInitProps(const Class* cls, Block* catchBlock) {
@@ -1428,7 +1444,7 @@ void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
 
   auto const ctx = [&]{
     if (!curClass()) return cns(nullptr);
-    auto const ldctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+    auto const ldctx = gen(LdCtx, m_irb->fp());
     if (invokeFunc->attrs() & AttrStatic) {
       return gen(ConvClsToCctx, gen(LdClsCtx, ldctx));
     }
@@ -1648,10 +1664,6 @@ void HhbcTranslator::emitSSwitch(const ImmVector& iv) {
   gen(JmpSSwitchDest, dest);
 }
 
-void HhbcTranslator::setThisAvailable() {
-  m_irb->setThisAvailable();
-}
-
 /*
  * Emit a type guard, possibly using profiling information. Depending on the
  * current translation mode and type to be guarded, this function may emit
@@ -1760,7 +1772,7 @@ void HhbcTranslator::guardTypeLocal(uint32_t locId, Type type, bool outerOnly) {
     auto const ldrefExit = makeExit();
     auto const ldPMExit = makePseudoMainExit();
     auto const val = ldLoc(locId, ldPMExit, DataTypeSpecific);
-    gen(LdRef, m_irb->predictedInnerType(locId), ldrefExit, val);
+    gen(CheckRefInner, m_irb->predictedInnerType(locId), ldrefExit, val);
   }
 }
 
@@ -1834,7 +1846,7 @@ void HhbcTranslator::guardTypeStack(uint32_t stackIndex, Type type,
 
   if (!outerOnly && type.isBoxed() && type.unbox() < Type::Cell) {
     auto stk = gen(LdStack, Type::BoxedInitCell, stackOff, m_irb->sp());
-    gen(LdRef,
+    gen(CheckRefInner,
         getStackInnerTypePrediction(m_irb->sp(), stackIndex),
         makeExit(),
         stk);
@@ -1926,7 +1938,10 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
     case Location::This:
       // Don't specialize $this for cloned closures which may have been re-bound
       if (curFunc()->hasForeignThis()) return Type::Obj;
-      return Type::Obj.specialize(curFunc()->cls());
+      if (auto const cls = curFunc()->cls()) {
+        return Type::Obj.specialize(cls);
+      }
+      return Type::Obj;
 
     default:
       always_assert(false && "Bad location in typeFromLocation");
@@ -1998,6 +2013,15 @@ void HhbcTranslator::endGuards() {
   gen(EndGuards);
 }
 
+void HhbcTranslator::prepareEntry() {
+  /*
+   * We automatically hoist a load of the context to the beginning of every
+   * region.  The reason is that it's trivially CSEable, so we might as well
+   * make it available everywhere.  If nothing uses it, it'll just be DCE'd.
+   */
+  ldCtx();
+}
+
 void HhbcTranslator::emitVerifyTypeImpl(int32_t const id) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
@@ -2013,7 +2037,8 @@ void HhbcTranslator::emitVerifyTypeImpl(int32_t const id) {
     if (!val->type().isBoxed()) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = m_irb->predictedInnerType(id);
-    val = gen(LdRef, pred, makeExit(), val);
+    gen(CheckRefInner, pred, makeExit(), val);
+    val = gen(LdRef, pred, val);
     return pred;
   }();
 
@@ -2422,20 +2447,17 @@ void HhbcTranslator::destroyName(SSATmp* name) {
 }
 
 SSATmp* HhbcTranslator::ldClsPropAddrKnown(Block* catchBlock,
-                                           SSATmp* ssaCls,
-                                           SSATmp* ssaName) {
-  auto const cls = ssaCls->clsVal();
-
-  auto const repoTy = [&] {
-    if (!RuntimeOption::RepoAuthoritative) return RepoAuthType{};
-    auto const slot = cls->lookupSProp(ssaName->strVal());
-    return cls->staticPropRepoAuthType(slot);
-  }();
-
+                                           const Class* cls,
+                                           const StringData* name) {
+  emitInitSProps(cls, catchBlock); // calls init; must be above sPropHandle()
+  auto const slot = cls->lookupSProp(name);
+  auto const handle = cls->sPropHandle(slot);
+  auto const repoTy =
+    !RuntimeOption::RepoAuthoritative
+      ? RepoAuthType{}
+      : cls->staticPropRepoAuthType(slot);
   auto const ptrTy = convertToType(repoTy).ptr(Ptr::SProp);
-
-  emitInitSProps(cls, catchBlock);
-  return gen(LdClsPropAddrKnown, ptrTy, ssaCls, ssaName);
+  return gen(LdRDSAddr, RDSHandleData { handle }, ptrTy);
 }
 
 SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
@@ -2443,7 +2465,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
                                       SSATmp* ssaName,
                                       bool raise) {
   /*
-   * We can use LdClsPropAddrKnown if either we know which property it is and
+   * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
    * class itself.
    */
@@ -2461,7 +2483,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
   }();
 
   if (sPropKnown) {
-    return ldClsPropAddrKnown(catchBlock, ssaCls, ssaName);
+    return ldClsPropAddrKnown(catchBlock, ssaCls->clsVal(), ssaName->strVal());
   }
 
   if (raise) {
@@ -2682,30 +2704,32 @@ void HhbcTranslator::emitCheckProp(Id propId) {
 }
 
 void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
-  StringData* propName = lookupStringId(propId);
-  SSATmp* val = popC();
-
-  auto* ctx = curClass();
+  auto const propName = lookupStringId(propId);
+  auto const val      = popC();
+  auto const ctx      = curClass();
 
   SSATmp* base;
   Slot idx = 0;
-
-  switch(op) {
-    case InitPropOp::Static:
+  switch (op) {
+  case InitPropOp::Static:
+    {
       // For sinit, the context class is always the same as the late-bound
       // class, so we can just use curClass().
-      base = gen(LdClsPropAddrKnown, Type::PtrToSPropCell, cns(ctx),
-        cns(propName));
-      break;
+      auto const handle = ctx->sPropHandle(ctx->lookupSProp(propName));
+      base = gen(LdRDSAddr, RDSHandleData { handle }, Type::PtrToSPropCell);
+    }
+    break;
 
-    case InitPropOp::NonStatic: {
+  case InitPropOp::NonStatic:
+    {
       // The above is not the case for pinit, so we need to load.
       auto* cctx = gen(LdCctx, m_irb->fp());
       auto* cls = gen(LdClsCtx, cctx);
 
       base = gen(LdClsInitData, cls);
       idx = ctx->lookupDeclProp(propName);
-    } break;
+    }
+    break;
   }
 
   gen(StElem, base, cns(idx * sizeof(TypedValue)), val);
@@ -3594,7 +3618,11 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
 
   if (type.isBoxed() || type.notBoxed()) {
     m_irb->constrainValue(val, DataTypeCountness);
-    return type.isBoxed() ? gen(LdRef, inner, exit, val) : val;
+    if (type.isBoxed()) {
+      gen(CheckRefInner, inner, exit, val);
+      return gen(LdRef, inner, val);
+    }
+    return val;
   }
 
   return m_irb->cond(
@@ -3604,11 +3632,22 @@ SSATmp* HhbcTranslator::unbox(SSATmp* val, Block* exit) {
     },
     [&](SSATmp* box) { // Next: val is a ref
       m_irb->constrainValue(box, DataTypeCountness);
-      return gen(LdRef, inner, exit, box);
+      gen(CheckRefInner, inner, exit, box);
+      return gen(LdRef, inner, box);
     },
     [&] { // Taken: val is unboxed
       return gen(AssertType, Type::Cell, val);
     });
+}
+
+SSATmp* HhbcTranslator::ldCtx() {
+  if (m_irb->thisAvailable()) return ldThis();
+  return gen(LdCtx, m_irb->fp());
+}
+
+SSATmp* HhbcTranslator::ldThis() {
+  auto const ctx = gen(LdCtx, m_irb->fp());
+  return gen(CastCtxThis, ctx);
 }
 
 SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {
@@ -3659,12 +3698,9 @@ SSATmp* HhbcTranslator::ldLocInner(uint32_t locId,
     return loc;
   }
 
-  return gen(
-    LdRef,
-    m_irb->predictedInnerType(locId),
-    ldrefExit,
-    loc
-  );
+  auto const predTy = m_irb->predictedInnerType(locId);
+  gen(CheckRefInner, predTy, ldrefExit, loc);
+  return gen(LdRef, predTy, loc);
 }
 
 /*
@@ -3743,11 +3779,17 @@ SSATmp* HhbcTranslator::stLocImpl(uint32_t id,
     return newVal;
   }
 
-  // It's important that the IncRef happens after the LdRef, since the
-  // LdRef is also a guard on the inner type and may side-exit.
-  auto const innerCell = gen(
-    LdRef, m_irb->predictedInnerType(id), ldrefExit, oldLoc
-  );
+  // It's important that the IncRef happens after the guard on the inner type
+  // of the ref, since it may side-exit.
+  auto const predTy = m_irb->predictedInnerType(id);
+
+  // We may not have a ldrefExit, but if so we better not be loading the inner
+  // ref.
+  if (ldrefExit == nullptr) always_assert(!decRefOld);
+  if (ldrefExit != nullptr) {
+    gen(CheckRefInner, predTy, ldrefExit, oldLoc);
+  }
+  auto const innerCell = decRefOld ? gen(LdRef, predTy, oldLoc) : nullptr;
   gen(StRef, oldLoc, newVal);
   if (incRefNew) gen(IncRef, newVal);
   if (decRefOld) {

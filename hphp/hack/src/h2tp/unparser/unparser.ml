@@ -215,19 +215,30 @@ let unparser _env =
                cst_namespace = v_cst_namespace
              } =
     u_in_mode v_cst_mode (fun () ->
-      invariant (v_cst_kind = Cst_const) (pos, "Unsupported Constant Type");
       invariant (is_empty_ns v_cst_namespace)
         (pos, "Namespaces are expected to not be elaborated");
-      let v_cst_name = u_id v_cst_name in
-      let v_cst_type = u_of_option u_hint v_cst_type in
       let v_cst_value = u_expr v_cst_value in
-      StrStatement [
-        Str "const";
-        v_cst_type;
-        v_cst_name;
-        Str "=";
-      v_cst_value
-      ])
+      match v_cst_kind with
+      | Cst_const ->
+          let v_cst_name = u_id v_cst_name in
+          let v_cst_type = u_of_option u_hint v_cst_type in
+          StrStatement [
+            Str "const";
+            v_cst_type;
+            v_cst_name;
+            Str "=";
+            v_cst_value
+          ]
+      | Cst_define ->
+          invariant (v_cst_type = None) (pos, "Constants using the define " ^
+            "syntax cannot use type hints");
+          StrStatement [
+            Str "define";
+            StrParens (StrCommaList [
+              u_expr_ (String v_cst_name);
+              v_cst_value;
+            ])
+          ])
   and u_variance =
     function
     | Covariant -> u_todo "Covariant" (fun () -> StrEmpty )
@@ -268,7 +279,7 @@ let unparser _env =
                c_enum = v_c_enum
              } =
       u_in_mode v_c_mode (fun () ->
-          invariant (List.length v_c_extends <= 1)
+          invariant (List.length v_c_extends <= 1 || v_c_kind = Cinterface)
             (pos, "Multiple inheritance is not supported.");
           invariant (is_empty_ns v_c_namespace)
             (pos, "Namespaces are expected to not be elaborated");
@@ -283,7 +294,7 @@ let unparser _env =
           let str_c_kind = u_class_kind v_c_kind in
           let str_c_name = u_id v_c_name in
           let str_c_body = u_of_list_braces_spc u_elt v_c_body in
-          let str_c_extends = u_of_list_spc u_extends v_c_extends in
+          let str_c_extends = u_extends v_c_extends in
           let str_c_implements = u_implements v_c_implements in
             StrWords [
               str_c_final;
@@ -293,7 +304,9 @@ let unparser _env =
               str_c_implements;
               str_c_body;
             ]))
-  and u_extends hint = StrWords [Str "extends"; u_hint hint]
+  and u_extends = function
+    | [] -> StrBlank
+    | hints -> StrWords [Str "extends"; u_of_list_comma u_hint hints]
   and u_implements = function
   | [] -> StrEmpty
   | implements -> StrWords [Str "implements"; u_of_list_comma u_hint implements]
@@ -812,7 +825,7 @@ let unparser _env =
           u_expr_nested hintExpr;
         ];
     | New (klass, paramExprs, unpackParamExprs) ->
-      let klassStr = u_id klass
+      let klassStr = u_expr klass
       and paramStr = u_of_list_parens_comma u_expr paramExprs in
       if unpackParamExprs <> [] then
         u_todo "Call with splat" (fun () -> StrEmpty)
@@ -931,12 +944,14 @@ let unparse_internal program =
   *)
   StrWords [(u_file_type HhFile); (unparser {mode = Mdecl} program)]
 
-let unparse : file_type -> program -> string = fun filetype program ->
+let unparse :
+    file_type -> Relative_path.t -> program -> string =
+    fun filetype file program ->
   unparse_internal program |>
   to_string |>
   fun s ->
     dn s;
-    let s' = match Format_hack.program ~no_trailing_commas:true s with
+    let s' = match Format_hack.program file ~no_trailing_commas:true s with
     | Format_hack.Php_or_decl -> raise Impossible
     | Format_hack.Internal_error -> raise (FormatterError "")
     | Format_hack.Success s' -> s'

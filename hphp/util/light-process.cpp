@@ -242,7 +242,7 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     } else {
       execl("/bin/sh", "sh", "-c", cmd.c_str(), nullptr);
     }
-    _exit(127);
+    _Exit(HPHP_EXIT_FAILURE);
   } else if (child > 0) {
     // successfully created the child process
     lwp_write(fout, "success");
@@ -414,14 +414,14 @@ bool LightProcess::initShadow(const std::string &prefix, int id,
     pid_t sid = setsid();
     if (sid < 0) {
       Logger::Warning("Unable to setsid");
-      exit(-1);
+      exit(HPHP_EXIT_FAILURE);
     }
     m_afdt_fd = afdt_connect(m_afdtFilename.c_str(), &err);
     if (m_afdt_fd < 0) {
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
                       m_afdtFilename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
-      exit(-1);
+      exit(HPHP_EXIT_FAILURE);
     }
     int fd1 = p1.detachOut();
     int fd2 = p2.detachIn();

@@ -231,9 +231,17 @@ void finishRequest() {
   }
 }
 
+/*
+ * Return the start time of the oldest request in seconds, rounded such that
+ * time(nullptr) >= getOldestStartTime() is guaranteed to be true.
+ *
+ * Subtract s_nextThreadIdx because if n threads start at the same time,
+ * one of their start times will be increased by n-1 (and we need to subtract
+ * 1 anyway, to deal with exact seconds).
+ */
 int64_t getOldestStartTime() {
   int64_t time = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  return time / ONE_SEC_IN_MICROSEC + 1; // round up 1 sec
+  return (time - s_nextThreadIdx)/ ONE_SEC_IN_MICROSEC + 1;
 }
 
 int64_t getAgeOldestRequest() {

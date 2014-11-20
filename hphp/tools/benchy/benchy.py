@@ -19,8 +19,10 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 
 import benchy_config as config
+import benchy_utils as utils
 from platform import platform
 
 def _unique_id():
@@ -130,16 +132,6 @@ def unique_branches(branches):
     return result
 
 
-def run_command(cmd, env=None, stdout=None):
-    """Runs a command and checks the return code for errors.
-
-    """
-    cmd = shlex.split(cmd.encode('utf8'))
-    if verbose() >= 1:
-        print(cmd)
-    subprocess.check_call(cmd, env=env, stdout=stdout)
-
-
 def build_branches(branches):
     """Builds each of the branches into their own directories.
 
@@ -154,8 +146,13 @@ def build_branches(branches):
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
 
-        platform().switch_to_branch(branch)
-        platform().build_branch(branch)
+        try:
+            stdout = sys.stdout
+            sys.stdout = sys.stderr
+            platform().switch_to_branch(branch)
+            platform().build_branch(branch)
+        finally:
+            sys.stdout = stdout
 
 
 def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
@@ -172,13 +169,13 @@ def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
     branch_str = ' '.join([b.format() for b in branches])
 
     command = "{harness} {suites} {benchmarks} {perf} {inner} {outer} {branch}"
-    run_command(command.format(harness=benchy_path,
+    utils.run_command(command.format(harness=benchy_path,
                                suites=suite_str,
                                benchmarks=benchmark_str,
                                perf=perf_str,
                                inner=inner_str,
                                outer=outer_str,
-                               branch=branch_str))
+                               branch=branch_str), verbose=verbose() > 0)
 
 
 def process_results(branches, output_mode):
@@ -196,14 +193,16 @@ def process_results(branches, output_mode):
         result_path = os.path.join(config.WORK_DIR, branch.result_file())
         with open(result_path, 'w') as result_file:
             cmd = "{anymean} --geomean {runlog}"
-            run_command(cmd.format(anymean=anymean, runlog=runlog),
-                        stdout=result_file)
+            utils.run_command(cmd.format(anymean=anymean, runlog=runlog),
+                        stdout=result_file, verbose=verbose() > 0)
         result_paths.append(result_path)
 
     cmd = "{significance} --{output_mode} {results}"
-    run_command(cmd.format(significance=significance,
-                           output_mode=output_mode,
-                           results=' '.join(result_paths)))
+    utils.run_command(cmd.format(significance=significance,
+                                 output_mode=output_mode,
+                                 results=' '.join(result_paths)),
+                      stdout=sys.stdout,
+                      verbose=verbose() > 0)
 
 
 def main():
@@ -280,5 +279,23 @@ def main():
     process_results(branches, output_mode)
 
 
+def check_python_version():
+    """Checks the current python version and raises an error if it's not within
+    the range of supported versions.
+
+    """
+    min_supported_version = 0x02070000  # 2.7
+    if sys.hexversion >= min_supported_version:
+        return
+    msg = """benchy doesn't support your version of python.
+    Found: {0}.{1}.{2}, Min required: {3}""".format(
+        sys.version_info[0],
+        sys.version_info[1],
+        sys.version_info[2],
+        "2.7")
+    raise RuntimeError(msg)
+
+
 if __name__ == "__main__":
+    check_python_version()
     main()

@@ -55,7 +55,7 @@ unsigned Sweepable::SweepAll() {
     n->init();
     auto s = reinterpret_cast<Sweepable*>(uintptr_t(n)
                                           - offsetof(Sweepable, m_sweepNode));
-    if (s->m_persistentCount == 0) {
+    if (s->m_persist == 0) {
       s->sweep();
     } else {
       n->enlist(persist);
@@ -68,8 +68,12 @@ unsigned Sweepable::SweepAll() {
   return count;
 }
 
-Sweepable::Sweepable() : m_persistentCount(0) {
+Sweepable::Sweepable(HeaderKind kind)
+  : m_kind_persist(kind << 24) {
   m_sweepNode.enlist(t_sweep);
+  assert(m_kind == kind);
+  assert(m_persist == 0);
+  static_assert(offsetof(Sweepable, m_kind) == HeaderKindOffset, "");
 }
 
 Sweepable::~Sweepable() {

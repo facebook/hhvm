@@ -15,12 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include <bitset>
 #include <iterator>
-#include <sstream>
 #include <string>
-
-#include <boost/variant.hpp>
 
 #include <folly/Format.h>
 #include <folly/Optional.h>
@@ -34,6 +30,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/alocation-analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -43,23 +40,12 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr auto kMaxLocations = 128u;
-using BitSet = std::bitset<kMaxLocations>;
-
-std::string show(BitSet set) {
-  std::ostringstream out;
-  out << set;
-  return out.str();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 using PostOrderId = uint32_t;
 
 struct BlockState {
   PostOrderId id;
-  BitSet liveIn;
-  BitSet liveOut;
+  ALocBits liveIn;
+  ALocBits liveOut;
 };
 
 struct FrameBits { uint32_t numLocals; uint32_t startIndex; };
@@ -68,80 +54,33 @@ struct FrameBits { uint32_t numLocals; uint32_t startIndex; };
 struct Global {
   explicit Global(IRUnit& unit)
     : unit(unit)
+    , poBlockList(poSortCfg(unit))
+    , linfo(collect_locations(unit, poBlockList))
     , blockStates(unit, BlockState{})
     , mainFp{unit.entry()->begin()->dst()}
-    , numMainFpLocals(unit.entry()->begin()->marker().func()->numLocals())
-    , allocatedBits{numMainFpLocals}
   {}
 
   IRUnit& unit;
+  BlockList poBlockList;
+  ALocationAnalysis linfo;
 
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
   StateVector<Block,BlockState> blockStates;
 
-  // Keep the main FP---any locals on the main frame are 'pre-allocated' the
-  // first N location bits.
+  // Keep the main FP so we can easily find killed locals on it for
+  // ReturnEffects.
   const SSATmp* const mainFp;
-  uint32_t const numMainFpLocals;
-  uint32_t allocatedBits;
-
-  // Map from frames to the number of local bits they've got allocated, and
-  // what offset they start at.  The main frame is special (doesn't use this
-  // map).
-  jit::flat_map<const SSATmp*,folly::Optional<FrameBits>> frameBitsMap;
 };
 
 // Block-local environment.
 struct Local {
   Global& global;
 
-  BitSet gen;
-  BitSet kill;
-  BitSet live;
+  ALocBits gen;
+  ALocBits kill;
+  ALocBits live;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * If the local doesn't live on the main frame, we can dynamically allocate a
- * bit to represent it here during the initial analysis pass that computes
- * per-block transfer functions.  Currently this is only possible for frames
- * produced by DefInlineFP.
- *
- * The reason this works for locals is that when we deal with memory effects
- * that affect all tracked locations, we flip the entire gen or kill set bits
- * instead of just the ones we have already allocated.  This means transfer
- * functions that were computed before all these bits are allocated will still
- * be correct.
- */
-FrameBits frame_bits(Global& genv, const SSATmp* fp) {
-  if (fp == genv.mainFp) {
-    return FrameBits { genv.numMainFpLocals, 0 };
-  }
-
-  auto& info = genv.frameBitsMap[fp];
-  if (!info) {
-    auto const func = fp->inst()->extra<DefInlineFP>()->target;
-    info = FrameBits { static_cast<uint32_t>(func->numLocals()),
-                       genv.allocatedBits };
-    genv.allocatedBits += func->numLocals();
-    FTRACE(2, "      alloc [{}, {}) for {}\n",
-      info->startIndex,
-      info->startIndex + info->numLocals,
-      fp->toString());
-  }
-
-  return *info;
-}
-
-template<class LocalInfo>
-folly::Optional<uint32_t> local_bit(Local& env, LocalInfo li) {
-  auto const info  = frame_bits(env.global, li.fp);
-  auto const bitId = info.startIndex + li.id;
-  if (bitId >= kMaxLocations) return folly::none;
-  return bitId;
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -162,6 +101,13 @@ void addGen(Local& env, folly::Optional<uint32_t> bit) {
   env.live[*bit] = 1;
 }
 
+void addGenSet(Local& env, const ALocBits& bits) {
+  FTRACE(4, "      gen:  {}\n", show(bits));
+  env.gen |= bits;
+  env.kill &= ~bits;
+  env.live |= bits;
+}
+
 void addAllGen(Local& env) {
   env.kill.reset();
   env.gen.set();
@@ -177,33 +123,67 @@ void addKill(Local& env, folly::Optional<uint32_t> bit) {
 }
 
 void killFrame(Local& env, const SSATmp* fp) {
-  auto const info = frame_bits(env.global, fp);
-  auto const stop = std::min(kMaxLocations, info.startIndex + info.numLocals);
-  for (auto bit = info.startIndex; bit < stop; ++bit) {
-    addKill(env, bit);
-  }
+  auto const killSet = env.global.linfo.per_frame_bits[fp];
+  FTRACE(4, "      kill: {}\n", show(killSet));
+  env.kill |= killSet;
+  env.gen  &= ~killSet;
+  env.live &= ~killSet;
 }
 
 //////////////////////////////////////////////////////////////////////
 
+void load(Local& env, ALocation loc) {
+  if (auto const meta = env.global.linfo.find(canonicalize(loc))) {
+    addGen(env, meta->index);
+    addGenSet(env, meta->conflicts);
+    return;
+  }
+
+  addGenSet(env, env.global.linfo.may_alias(loc));
+}
+
+folly::Optional<uint32_t> pure_store_bit(Local& env, ALocation loc) {
+  if (auto const meta = env.global.linfo.find(canonicalize(loc))) {
+    return meta->index;
+  }
+  return folly::none;
+}
+
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
-  FTRACE(3, "    {: <20} -- {}\n", show(effects), inst.toString());
+  FTRACE(3, "    {: <30} -- {}\n", show(effects), inst.toString());
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
-    [&] (ReadAllLocals)     { addAllGen(env); },
+    [&] (InterpOneEffects)  { addAllGen(env); },
+    [&] (PureLoad l)        { load(env, l.loc); },
+    [&] (MayLoadStore l)    { load(env, l.loads); },
     [&] (KillFrameLocals l) { killFrame(env, l.fp); },
-    [&] (ReadLocal l)       { addGen(env, local_bit(env, l)); },
+    [&] (ReturnEffects)     { killFrame(env, env.global.mainFp); },
 
-    [&] (ReadLocal2 l) {
-      addGen(env, local_bit(env, ReadLocal { l.fp, l.id1 }));
-      addGen(env, local_bit(env, ReadLocal { l.fp, l.id2 }));
+    /*
+     * Call instructions potentially throw, even though we don't (yet) have
+     * explicit catch traces for them, which means it counts as possibly
+     * reading any local, on any frame---if it enters the unwinder it could
+     * read them.
+     */
+    [&] (CallEffects) { addAllGen(env); },
+
+    // Iterator effects can possibly redefine the local, but don't definitely
+    // do so, so they add to GEN but not KILL.
+    [&] (IterEffects l) {
+      load(env, AFrame { l.fp, l.id });
+      load(env, ANonFrame);
+    },
+    [&] (IterEffects2 l) {
+      load(env, AFrame { l.fp, l.id1 });
+      load(env, AFrame { l.fp, l.id2 });
+      load(env, ANonFrame);
     },
 
-    [&] (StoreLocal l) {
-      auto bit = local_bit(env, l);
+    [&] (PureStore l) {
+      auto bit = pure_store_bit(env, l.loc);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }
@@ -211,16 +191,16 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * A StoreLocalNT means it's writing the local's m_data, but not its
-     * m_type.  If the local is dead, we don't need to do this.  However, we
-     * can't count it as a redefinition (can't add to KILL), because it only
-     * partially defines it.
+     * A PureStoreNT means it's writing the local's m_data, but not its m_type.
+     * If the local is dead, we don't need to do this.  However, we can't count
+     * it as a redefinition (can't add to KILL), because it only partially
+     * defines it.
      *
      * Normally this pass should run before we've lowered StLocs into StLocNTs
      * where we can, but we must support this anyway for correctness.
      */
-    [&] (StoreLocalNT l) {
-      auto bit = local_bit(env, l);
+    [&] (PureStoreNT l) {
+      auto bit = pure_store_bit(env, l.loc);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }
@@ -245,7 +225,7 @@ void block_visit(Local& env, Block* block) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct BlockAnalysis { BitSet gen; BitSet kill; };
+struct BlockAnalysis { ALocBits gen; ALocBits kill; };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
   auto env = Local { genv };
@@ -292,11 +272,17 @@ void optimizeMemory(IRUnit& unit) {
    * Global state for this pass, visible while processing any block.
    */
   auto genv = Global { unit };
+  auto const& poBlockList = genv.poBlockList;
+  if (genv.linfo.locations.size() == 0) {
+    FTRACE(1, "no memory accesses to possibly optimize\n");
+    return;
+  }
+  FTRACE(1, "\nLocations:\n{}\n", show(genv.linfo));
 
   /*
-   * Initialize the block state structures.
+   * Initialize the block state structures, and collect information about
+   * memory locations.
    */
-  auto const poBlockList = poSortCfg(unit);
   for (auto poId = uint32_t{0}; poId < poBlockList.size(); ++poId) {
     genv.blockStates[poBlockList[poId]->id()].id = poId;
     incompleteQ.insert(poId);

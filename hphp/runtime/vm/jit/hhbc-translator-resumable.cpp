@@ -170,9 +170,9 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
   assert(curFunc()->contains(returnOffset));
 
   // Load generator's FP and resume address.
-  auto genObj = gen(LdThis, m_irb->fp());
-  auto genFp = gen(LdContActRec, genObj);
-  auto resumeAddr = gen(LdContResumeAddr, genObj);
+  auto const genObj = ldThis();
+  auto const genFp  = gen(LdContActRec, genObj);
+  auto resumeAddr   = gen(LdContResumeAddr, genObj);
 
   // Make sure function enter hook is called if needed.
   auto exitSlow = makeExitSlow();
@@ -270,31 +270,31 @@ void HhbcTranslator::emitContCheck(bool checkStarted) {
   assert(curClass());
   assert(curClass()->classof(c_AsyncGenerator::classof()) ||
          curClass()->classof(c_Generator::classof()));
-  SSATmp* cont = gen(LdThis, m_irb->fp());
+  auto const cont = ldThis();
   gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
 }
 
 void HhbcTranslator::emitContValid() {
   assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
+  auto const cont = ldThis();
   push(gen(ContValid, cont));
 }
 
 void HhbcTranslator::emitContKey() {
   assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
+  auto const cont = ldThis();
   gen(ContStartedCheck, makeExitSlow(), cont);
-  SSATmp* offset = cns(offsetof(c_Generator, m_key));
-  SSATmp* value = gen(LdContField, Type::Cell, cont, offset);
+  auto const offset = cns(offsetof(c_Generator, m_key));
+  auto const value = gen(LdContField, Type::Cell, cont, offset);
   pushIncRef(value);
 }
 
 void HhbcTranslator::emitContCurrent() {
   assert(curClass());
-  SSATmp* cont = gen(LdThis, m_irb->fp());
+  auto const cont = ldThis();
   gen(ContStartedCheck, makeExitSlow(), cont);
-  SSATmp* offset = cns(offsetof(c_Generator, m_value));
-  SSATmp* value = gen(LdContField, Type::Cell, cont, offset);
+  auto const offset = cns(offsetof(c_Generator, m_value));
+  auto const value = gen(LdContField, Type::Cell, cont, offset);
   pushIncRef(value);
 }
 

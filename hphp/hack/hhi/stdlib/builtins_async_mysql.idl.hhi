@@ -146,6 +146,7 @@ class AsyncMysqlRowIterator implements KeyedIterator<string, mixed> {
 */
 interface MysqlRow extends Countable, KeyedTraversable<string, mixed>, IteratorAggregate<mixed>
 {
+  public function at(mixed $field): mixed;
   public function getFieldAsInt(mixed $field): int;
   public function getFieldAsDouble(mixed $field): float;
   public function getFieldAsString(mixed $field): string;

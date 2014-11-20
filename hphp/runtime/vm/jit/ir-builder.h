@@ -430,7 +430,7 @@ private:
   SSATmp*   preOptimizeAssertStk(IRInstruction*);
   SSATmp*   preOptimizeAssertLoc(IRInstruction*);
 
-  SSATmp*   preOptimizeLdThis(IRInstruction*);
+  SSATmp*   preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp*   preOptimizeLdCtx(IRInstruction*);
   SSATmp*   preOptimizeDecRefThis(IRInstruction*);
   SSATmp*   preOptimizeDecRefLoc(IRInstruction*);

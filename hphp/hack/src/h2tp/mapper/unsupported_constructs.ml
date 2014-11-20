@@ -77,8 +77,6 @@ let map program =
     | _ -> () in
 
   let detect_invalid_class = function
-    | {c_name = (p, _); c_kind = Cenum; _} ->
-      unsupported (p, "Enums are currently not supported.")
     | {c_name = (p, _); c_kind = Ctrait; c_implements = _::_; _} ->
       unsupported (p,
         "Traits implementing interfaces are currently not supported. ")

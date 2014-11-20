@@ -18,7 +18,7 @@
 class ArrayIterator<T> implements KeyedIterator<int, T>,
                                   KeyedTraversable<int, T>,
                                   ArrayAccess<int, T>,
-                                  SeekableIterator,
+                                  SeekableIterator<T>,
                                   Countable,
                                   Serializable {
   public function __construct (mixed $array);
@@ -37,7 +37,6 @@ class ArrayIterator<T> implements KeyedIterator<int, T>,
   public function offsetGet(string $index): mixed;
   public function offsetUnset(string $index): void;
   public function rewind(): void;
-  public function seek(int $position): void;
   public function serialize(): string;
   public function setFlags(string $flags): void;
   public function uasort(string $cmp_function): void;

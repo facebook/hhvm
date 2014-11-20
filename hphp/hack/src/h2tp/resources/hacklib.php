@@ -11,6 +11,8 @@ require_once(__DIR__.SEP.'containers'.SEP.'map.php');
 require_once(__DIR__.SEP.'containers'.SEP.'immMap.php');
 require_once(__DIR__.SEP.'containers'.SEP.'set.php');
 require_once(__DIR__.SEP.'containers'.SEP.'immSet.php');
+require_once(__DIR__.SEP.'hacklib_enum_like.php');
+require_once(__DIR__.SEP.'invariant.ns.php');
 
 
 class InvalidOperationException extends RuntimeException {}

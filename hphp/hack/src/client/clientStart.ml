@@ -9,6 +9,7 @@
  *)
 
 open ClientExceptions
+open Utils
 
 let get_hhserver () =
   let server_next_to_client = (Filename.dirname Sys.argv.(0)) ^ "/hh_server" in
@@ -40,14 +41,18 @@ let rec wait env =
 
 let start_server env =
   let server_options = match env.server_options_cmd with
-    | Some cmd -> (try Utils.exec_read cmd with _ -> "")
+    | Some cmd ->
+      let cmd = Printf.sprintf "%s %s %s" cmd
+        (Shell.escape_string_for_shell (Path.string_of_path env.root))
+        (Shell.escape_string_for_shell Build_id.build_id_ohai) in
+      (try Utils.exec_read cmd with _ -> "")
     | None -> "" in
   let hh_server = Printf.sprintf "%s -d %s %s"
     (get_hhserver())
     (Path.string_of_path env.root)
     server_options in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
-    hh_server;
+    (truncate_string_beyond 150 hh_server);
   match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
     | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);

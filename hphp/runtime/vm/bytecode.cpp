@@ -101,7 +101,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
@@ -268,6 +268,8 @@ static Offset pcOff() {
 //=============================================================================
 // VarEnv.
 
+const StaticString s_GLOBALS("GLOBALS");
+
 VarEnv::VarEnv()
   : m_nvTable()
   , m_extraArgs(nullptr)
@@ -277,10 +279,10 @@ VarEnv::VarEnv()
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   assert(!g_context->m_globalVarEnv);
   g_context->m_globalVarEnv = this;
-
-  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&m_nvTable);
-  auto globalArray = make_tv<KindOfArray>(tableWrapper->asArrayData());
-  m_nvTable.set(makeStaticString("GLOBALS"), &globalArray);
+  auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
+                 GlobalsArray(&m_nvTable);
+  auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
+  m_nvTable.set(s_GLOBALS.get(), &globalArray);
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -957,7 +959,7 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
     assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
-      if (UNLIKELY(methodName == s_construct.get())) {
+      if (UNLIKELY(methodName->isame(s_construct.get()))) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
         method = cls->getCtor();

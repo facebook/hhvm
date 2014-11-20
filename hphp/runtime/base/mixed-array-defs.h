@@ -394,6 +394,11 @@ MixedArray* mallocArray(uint32_t cap, uint32_t mask) {
   return static_cast<MixedArray*>(std::malloc(allocBytes));
 }
 
+ALWAYS_INLINE
+size_t MixedArray::heapSize() const {
+  return computeAllocBytes(m_cap, m_tableMask);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

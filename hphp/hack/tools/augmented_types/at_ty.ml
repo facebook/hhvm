@@ -20,7 +20,7 @@ type at_ty =
   | ATuint
   | ATfloat
   | ATbool
-  | ATnum
+  | ATnumeric
   | ATcallable
   | ATanyarray
   | ATnull

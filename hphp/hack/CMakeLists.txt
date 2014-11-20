@@ -3,9 +3,10 @@ find_package(OCaml)
 if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with
   # build systems and don't really care to make this work the right way. libelf
-  # is all we need right now ayways.
+  # and lz4 are all we need right now anyways.
   unset(extra_include_paths)
   unset(extra_lib_paths)
+  unset(extra_native_lib_paths)
   unset(extra_cc_flags)
   foreach(lib ${LIBELF_INCLUDE_DIRS})
     list(APPEND extra_include_paths ${lib})
@@ -18,6 +19,15 @@ if (OCAMLC_FOUND)
     get_filename_component(pth ${lib} PATH)
     list(APPEND extra_lib_paths ${pth})
   endforeach()
+
+  if(LZ4_FOUND)
+    list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
+    get_filename_component(pth ${LZ4_LIBRARY} PATH)
+    list(APPEND extra_lib_paths ${pth})
+  else()
+    list(APPEND extra_include_paths "${TP_DIR}/lz4")
+    list(APPEND extra_native_lib_paths "${TP_DIR}/lz4/liblz4.a")
+  endif()
 
   # Xcode/Ninja generators undefined MAKE
   if(NOT MAKE)
@@ -32,8 +42,15 @@ if (OCAMLC_FOUND)
           $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
+          EXTRA_NATIVE_LIB_PATHS="${extra_native_lib_paths}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
+
+  if(NOT LZ4_FOUND)
+    # if the system does not have lz4, make sure that the one in public_tld
+    # gets built
+    add_dependencies(hack lz4)
+  endif()
 
   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
     DESTINATION bin

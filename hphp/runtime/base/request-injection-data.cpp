@@ -102,11 +102,35 @@ void RequestInjectionData::threadInit() {
                    "include_path", getDefaultIncludePath().c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       auto paths = HHVM_FN(explode)(":", value);
                        m_include_paths.clear();
-                       for (ArrayIter iter(paths); iter; ++iter) {
-                         m_include_paths.push_back(
-                           iter.second().toString().toCppString());
+                       int pos = value.find(':');
+                       if (pos < 0) {
+                         m_include_paths.push_back(value);
+                       } else {
+                         int pos0 = 0;
+                         do {
+                           // Check for stream wrapper
+                           if (value.length() > pos + 2 &&
+                               value[pos + 1] == '/' &&
+                               value[pos + 2] == '/') {
+                             // .:// or ..:// is not stream wrapper
+                             if (((pos - pos0) >= 1 && value[pos - 1] != '.') ||
+                                 ((pos - pos0) >= 2 && value[pos - 2] != '.') ||
+                                 (pos - pos0) > 2) {
+                               pos += 3;
+                               continue;
+                             }
+                           }
+                           m_include_paths.push_back(
+                             value.substr(pos0, pos - pos0));
+                           pos++;
+                           pos0 = pos;
+                         } while ((pos = value.find(':', pos)) >= 0);
+
+                         if (pos0 <= value.length()) {
+                           m_include_paths.push_back(
+                             value.substr(pos0));
+                         }
                        }
                        return true;
                      },
@@ -230,6 +254,12 @@ void RequestInjectionData::threadInit() {
                    &m_socketDefaultTimeout);
 
   // Response handling.
+  // TODO(T5601927): output_compression supports int values where the value
+  // represents the output buffer size. Also need to add a
+  // zlib.output_handler ini setting as well.
+  // http://docs.hhvm.com/zlib.configuration.php
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "zlib.output_compression", &m_gzipCompression);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 }

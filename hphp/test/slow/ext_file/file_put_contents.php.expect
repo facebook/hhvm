@@ -1,1 +1,2 @@
 string(25) "testing file_put_contents"
+string(54) "testing file_put_contents with File:// url and LOCK_EX"

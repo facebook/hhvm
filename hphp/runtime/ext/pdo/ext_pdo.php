@@ -325,6 +325,8 @@ class PDO {
 <<__NativeData("PDOStatement")>>
 class PDOStatement implements Iterator {
 
+  public ?string $queryString = null;
+
   /* Execute the prepared statement. If the prepared statement included
    * parameter markers, you must either: PDOStatement::bindParam() to bind PHP
    * variables to the parameter markers: bound variables pass their value as

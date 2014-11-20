@@ -9,3 +9,5 @@
  *)
 
 val memoized : ('a, 'b) Hashtbl.t -> 'a -> (unit -> 'b) -> 'b
+
+val const : 'a -> ('b -> 'a)

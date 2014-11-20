@@ -41,17 +41,25 @@ namespace HPHP {
 constexpr uint32_t kMaxPackedCap = 0xFF00FF00ul; // max encodable value
 constexpr uint32_t kPackedCapCodeThreshold = 0x10000ul;
 
+inline bool isEncodableCap(uint32_t cap) {
+  return cap <= kPackedCapCodeThreshold ||
+         (cap <= kMaxPackedCap && (cap & 0xff) == 0);
+}
+
+// convert raw capacity to an encoded capcode.
 ALWAYS_INLINE
 uint32_t packedCapToCode(uint32_t cap) {
-  assert(cap <= kMaxPackedCap);
+  assert(isEncodableCap(cap));
   if (UNLIKELY(cap > kPackedCapCodeThreshold)) {
     auto const capCode = (cap + 0xFF00FFul) >> 8;
     assert(capCode <= 0xFFFFFFul && capCode <= cap);
+    assert(((capCode - 0xFF00ul) << 8) == cap); // don't lose precision.
     return capCode;
   }
   return cap;
 }
 
+// convert encoded capcode to raw capacity
 ALWAYS_INLINE
 uint32_t packedCodeToCap(uint32_t capCode) {
   capCode = (capCode & 0xFFFFFFul);
@@ -63,6 +71,7 @@ uint32_t packedCodeToCap(uint32_t capCode) {
   return capCode;
 }
 
+// round cap up to an encodable value
 ALWAYS_INLINE
 uint32_t roundUpPackedCap(uint32_t cap) {
   assert(cap <= kMaxPackedCap);
@@ -71,7 +80,7 @@ uint32_t roundUpPackedCap(uint32_t cap) {
   }
   // The capacity should not change if it round trips into
   // encoded form and back
-  assert(packedCodeToCap(packedCapToCode(cap)) == cap);
+  assert(isEncodableCap(cap));
   return cap;
 }
 

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/hhbc-translator-internal.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -177,7 +178,7 @@ SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
 SSATmp* HhbcTranslator::optimizedCallGetCalledClass() {
   if (!curClass()) return nullptr;
 
-  auto const ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const ctx = ldCtx();
   auto const cls = gen(LdClsCtx, ctx);
   return gen(LdClsName, cls);
 }
@@ -670,8 +671,7 @@ void HhbcTranslator::emitNativeImplInlined() {
   // determine which ones will need to be passed through the eval
   // stack.
   auto const numArgs = callee->numParams();
-  auto const paramThis = instanceMethod ? gen(LdThis, m_irb->fp())
-                                        : nullptr;
+  auto const paramThis = instanceMethod ? ldThis() : nullptr;
 
   emitBuiltinCall(callee,
                   numArgs,

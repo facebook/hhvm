@@ -162,14 +162,6 @@ String String::substr(int start, int length /* = 0x7FFFFFFF */,
   return nullable ? String() : String("", 0, CopyString);
 }
 
-String String::lastToken(char delimiter) {
-  int pos = rfind(delimiter);
-  if (pos >= 0) {
-    return substr(pos + 1);
-  }
-  return *this;
-}
-
 int String::find(char ch, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
   if (empty()) return -1;

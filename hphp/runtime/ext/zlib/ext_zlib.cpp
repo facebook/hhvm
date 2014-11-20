@@ -169,7 +169,7 @@ static Variant hhvm_zlib_encode(const String& data,
     Z.next_in = (Bytef *) data.c_str();
     Z.next_out = (Bytef *) ret.bufferSlice().ptr;
     Z.avail_in = data.size();
-    Z.avail_out = ret.get()->capacity();
+    Z.avail_out = ret.capacity(); // not counting null terminator
 
     if (Z_STREAM_END == (status = deflate(&Z, Z_FINISH))) {
       ret.setSize(Z.total_out);
@@ -224,10 +224,10 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
     }
 
     char *retbuf = ret.reserve(retsize + 1).ptr;
-    Z->avail_out = (ret.get()->capacity() - retused) - 1;
+    Z->avail_out = ret.capacity() - retused;
     Z->next_out = (Bytef *) (retbuf + retused);
     status = inflate(Z, Z_NO_FLUSH);
-    retused = (ret.get()->capacity() - 1) - Z->avail_out;
+    retused = ret.capacity() - Z->avail_out;
     ret.setSize(retused);
 
     retsize += (retsize >> 3) + 1;

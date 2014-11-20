@@ -108,13 +108,13 @@ void PreClass::prettyPrint(std::ostream &out) const {
       it != properties() + numProperties();
       ++it) {
     out << " ";
-    it->prettyPrint(out);
+    it->prettyPrint(out, this);
   }
   for (const Const* it = constants();
       it != constants() + numConstants();
       ++it) {
     out << " ";
-    it->prettyPrint(out);
+    it->prettyPrint(out, this);
   }
 }
 
@@ -128,8 +128,7 @@ PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* docComment,
                      const TypedValue& val,
                      RepoAuthType repoAuthType)
-  : m_preClass(preClass)
-  , m_name(name)
+  : m_name(name)
   , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
   , m_typeConstraint(typeConstraint)
@@ -138,14 +137,15 @@ PreClass::Prop::Prop(PreClass* preClass,
   , m_repoAuthType{repoAuthType}
 {}
 
-void PreClass::Prop::prettyPrint(std::ostream& out) const {
+void PreClass::Prop::prettyPrint(std::ostream& out,
+                                 const PreClass* preClass) const {
   out << "Property ";
   if (m_attrs & AttrStatic) { out << "static "; }
   if (m_attrs & AttrPublic) { out << "public "; }
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
-  out << m_preClass->name()->data() << "::" << m_name->data() << " = ";
+  out << preClass->name()->data() << "::" << m_name->data() << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";
   } else {
@@ -159,20 +159,19 @@ void PreClass::Prop::prettyPrint(std::ostream& out) const {
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::Const.
 
-PreClass::Const::Const(PreClass* preClass,
-                       const StringData* name,
+PreClass::Const::Const(const StringData* name,
                        const StringData* typeConstraint,
                        const TypedValue& val,
                        const StringData* phpCode)
-  : m_preClass(preClass)
-  , m_name(name)
+  : m_name(name)
   , m_typeConstraint(typeConstraint)
   , m_val(val)
   , m_phpCode(phpCode)
 {}
 
-void PreClass::Const::prettyPrint(std::ostream& out) const {
-  out << "Constant " << m_preClass->name()->data() << "::" << m_name->data()
+void PreClass::Const::prettyPrint(std::ostream& out,
+                                  const PreClass* preClass) const {
+  out << "Constant " << preClass->name()->data() << "::" << m_name->data()
       << " = ";
   if (m_val.m_type == KindOfUninit) {
     out << "<non-scalar>";

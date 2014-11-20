@@ -175,7 +175,7 @@ ProducesRC
 
 MayRaiseError
 
-  The instruction may raise an error, and therefore has an implicit exit edge.
+  The instruction may raise an error, and must have an edge to a catch block.
 
 Terminal
 
@@ -224,10 +224,7 @@ Instruction set
 Note: Instructions that guard or check boxed types only check that the operand
 is boxed, and they ignore the type of the value inside the box (the inner
 type). The inner type is normally checked when the value within the box is
-loaded by a LdRef instruction (which takes box/ref values, and only checks the
-inner type). The reasoning for this approach is that boxed values may alias.
-Therefore, in lack of memory alias analysis, the inner types generally need to
-be rechecked before each use.
+about to be loaded, using a separate CheckRefInner instruction.
 
 | CheckType<T>, DRefineS(0), S(Gen), B|E|P
 
@@ -831,21 +828,6 @@ generating efficient compare-and-branch instruction sequences.
 7. Loads
 
 
-Some of the load instructions have an optional label parameter that make the
-load also perform a runtime type check. A load that has a label parameter
-present checks that the value it loads has the type T, where T is load
-instruction's type parameter, and branches to its label if the type check
-fails.
-
-LdLoc and LdStack have corresponding GuardLoc and GuardStk instructions that
-allow the compiler to decouple type checks from the load operation. The type
-guards for locals and stacks are generated eagerly at the start of a tracelet,
-while other guards (typically generated due to type prediction) are generated
-at the point where the guarded value is loaded. Allowing the checks for locals
-and stack to be decoupled gives the compiler the flexibility to avoid partially
-dead loads of local and stack values and to avoid unnecessarily long live
-ranges due to eagerly loaded values at the start of the tracelet.
-
 | LdStack<T,offset>, DParam, S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
@@ -877,6 +859,11 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the address of the local slot localId from the frame S0 into D. T must
   be a subtype of PtrToFrameGen.
 
+| LdRDSAddr<T,RDSHandle>, DParam, NA, C
+
+  Load the address of a Gen that lives at the specified RDS handle. The type
+  param must be a subtype of PtrToGen.
+
 | LdVectorBase, D(PtrToMembCell), S(Obj), E
 
 | LdPairBase, D(PtrToMembCell), S(Obj), E
@@ -898,23 +885,36 @@ ranges due to eagerly loaded values at the start of the tracelet.
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
 
-| LdRef<T>, DLdRef, S(BoxedCell), B
+| CheckRefInner<T>, ND, S(BoxedCell), B|E
 
-  Loads the value held in the box referenced by S0 and puts the value in D. If
-  the optional target B is specified and the loaded value's type does not match
-  T, this instruction does not load into D and branches to block B.
+  TODO(#2939547): this should take BoxedInitCell
 
-| LdThis, DThis, S(FramePtr), B|C
+  Check that the inner type of the boxed cell in S0 is T, and if not take the
+  branch to B.
 
-  Loads the this pointer out of the ActRec pointed to by S0, and puts it in D.
-  If the optional block B is supplied, if the this pointer in S0 is null, this
-  instruction does not load it into D and branches to block B.
+| LdRef<T>, DParamNRel, S(BoxedCell), NF
 
-| LdCtx<func>, D(Ctx), S(FramePtr), C
+  TODO(#2939547): this should take BoxedInitCell
+
+  Loads the value held in the box referenced by S0 and puts the value in D. The
+  inner type of S0 must be a subtype of T (usually ensured with a previous
+  CheckRefInner).
+
+| LdCtx, D(Ctx), S(FramePtr), C
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
-  which must be a frame of the function in the function parameter. The result
+  which must be a frame for the function in the LdCtx's Marker. The result
   could be either an object representing the this pointer or a class context.
+
+| CheckCtxThis, ND, S(Ctx), B|E
+
+  Check that the context (m_this or m_cls) in S0 is a non-null $this
+  pointer. If not, branch to B.
+
+| CastCtxThis, DThis, S(Ctx), C
+
+  Convert a Ctx known to contain a $this pointer to a specific object type,
+  based on the marker func for this instruction.
 
 | LdCctx, D(Cctx), S(FramePtr), C
 
@@ -925,7 +925,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
 | LdClsCtx, D(Cls), S(Ctx), C
 
   Loads into D the class representing the current context. Extracts the class
-  from the S0, which can be either the this pointer or the context class.
+  from S0, which can be either the this pointer or the context class.
 
 | LdClsCctx, D(Cls), S(Cctx), C
 
@@ -965,19 +965,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
   returns null and optionally branches to block B.
-
-| LdClsCns<T,className,constName>, DParam, NA, B
-
-  Loads the named class constant for a class via the RDS. This instruction
-  should generally be followed by CheckInit, unless we know the class is
-  already loaded.
-
-  If the optional block B is specified and the loaded value's type does not
-  match T, this instruction does not load into D and branches to block B.
-
-  The result may be uninitialized if the class is not defined. Note that no
-  decref of the result is necessary because class constants will always be
-  static.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 
@@ -1091,14 +1078,6 @@ ranges due to eagerly loaded values at the start of the tracelet.
 
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.
-
-| LdClsPropAddrKnown<T>, DParamPtr(SProp), C(Cls) CStr, C
-
-  Loads a pointer to a static class property. S0 points to the class, and S1 is
-  the property name. Should only be called when S0 is known statically, and
-  when it is known to have a visible and accessible static property named S1.
-  The type of D will be a Ptr of whatever type the static property has. The
-  type parameter T must be a subtype of PtrToSPropGen.
 
 | LdClsPropAddrOrNull, D(PtrToSPropGen|Nullptr),
 |                      S(Cls) S(Str) C(Cls),
@@ -1735,7 +1714,7 @@ ranges due to eagerly loaded values at the start of the tracelet.
   with a restriction on the input type.
 
   CountArray expects any array. CountArrayFast expects an array whose kind is not
-  kNvtwKind. CountCollection expects a collection object.
+  kGlobalsKind. CountCollection expects a collection object.
 
 | Nop, ND, NA, NF
 
@@ -2597,7 +2576,7 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| DeleteUnwinderException, ND, NA, NF
+| DeleteUnwinderException, ND, NA, E
 
   Deletes the current unwinder exception.
 

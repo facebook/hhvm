@@ -6,9 +6,8 @@ from string import Template
 
 FILE_STR = """
 from converter_test_base import ConverterTestCase
-import unittest
-
 from convert_hhvm_collection_base import ConvertHHVMCollectionBase
+from convert_hack_test_inputs_base import ConvertHackTestInputsBase
 import unittest
 """
 
@@ -25,6 +24,9 @@ class ${name}(ConverterTestCase):
 
   def changeHH(self):
     return ${changeHH}
+
+  def additional_options(self):
+    return [${additional_opts}]
 """)
 
 SKIP_TMPL = Template("""
@@ -47,6 +49,22 @@ unparser_FUNC_TMPL = Template("""
 HHVM_COLL_TEST_TMPL = Template("""
 class ConvertHHVMCollectionTestsTestCase(ConvertHHVMCollectionBase):
   def test_hhvm_coll_test_inputs_can_be_converted(self):
+    self.verify()
+
+  def testsDir(self):
+    return '${test_input_dir}'
+
+  def binary_path(self):
+    return '${bin_path}'
+
+  def execution_prefix(self):
+    return "$$GLOBALS['HACKLIB_ROOT'] = '${code_dir}/resources/hacklib.php';"
+
+""")
+
+HACK_TEST_INPUT_TEST_TMPL = Template("""
+class ConvertHackTestInputsTestCase(ConvertHackTestInputsBase):
+  def test_hack_test_inputs_can_be_converted(self):
     self.verify()
 
   def testsDir(self):

@@ -510,10 +510,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-
-  auto const cap  = ad->m_cap;
-  auto const mask = ad->m_tableMask;
-  MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
+  MM().objFreeLogged(ad, ad->heapSize());
 }
 
 static void release_unk_tv(TypedValue& tv) {

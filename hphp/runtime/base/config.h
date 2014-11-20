@@ -36,6 +36,15 @@ enum class HackStrictOption {
   ON
 };
 
+
+/*
+ * Normalizes hdf string names to their ini counterparts
+ *
+ * We have special handling for a few hdf strings such as those containing
+ * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
+ */
+std::string hdfToIni(const std::string&);
+
 struct Config {
   static void ParseConfigFile(const std::string &filename, IniSettingMap &ini,
                               Hdf &hdf);
@@ -165,7 +174,7 @@ struct Config {
   private:
 
   static std::string IniName(const Hdf& config);
-  static std::string IniName(const std::string config);
+  static std::string IniName(const std::string& config);
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,
                            const std::string filename, bool extensions_only);

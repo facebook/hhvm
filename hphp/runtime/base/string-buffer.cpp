@@ -90,7 +90,7 @@ void StringBuffer::absorb(StringBuffer& buf) {
     if (str) {
       buf.m_buffer = (char*)str->data();
       buf.m_len = str->size();
-      buf.m_cap = str->capacity() - 1;
+      buf.m_cap = str->capacity();
     } else {
       buf.m_buffer = 0;
       buf.m_len = 0;
@@ -212,7 +212,7 @@ void StringBuffer::makeValid(int minCap) {
   assert(!m_len);
   m_str = StringData::Make(std::max(m_initialCap, minCap));
   m_buffer = (char*)m_str->data();
-  m_cap = m_str->capacity() - 1;
+  m_cap = m_str->capacity();
 }
 
 void StringBuffer::appendHelper(const char *s, int len) {

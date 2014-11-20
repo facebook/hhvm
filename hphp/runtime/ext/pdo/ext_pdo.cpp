@@ -2849,7 +2849,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
   bool error = false;
 
   data->m_stmt->fetch.clsname = class_name;
-  if (class_name.isNull()) {
+  if (class_name.empty()) {
     data->m_stmt->fetch.clsname = "stdclass";
   }
   if (!HHVM_FN(class_exists)(data->m_stmt->fetch.clsname)) {

@@ -93,6 +93,7 @@ protected:
     SCOPE_EXIT { m_handler->teardownRequest(transport); };
 
     try {
+      transport->onRequestStart(job->getStartTimer());
       m_handler->setupRequest(transport);
 
       if (abort) {
@@ -103,7 +104,6 @@ protected:
       cmd = std::string("/") + cmd;
 
       if (server->shouldHandle(cmd)) {
-        transport->onRequestStart(job->getStartTimer());
         m_handler->handleRequest(transport);
         error = false;
       } else {

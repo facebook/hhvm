@@ -66,7 +66,8 @@ class ConverterTestGenerator:
 
     def find_input_files(self):
         input_files = {}
-        for d in os.walk(self.input_dir).next()[1]:
+        dir_data = os.walk(self.input_dir).next()
+        for d in dir_data[1]:
             input_files[d] = {}
             d_path = os.path.join(self.input_dir, d)
             for f in os.listdir(d_path):
@@ -79,7 +80,15 @@ class ConverterTestGenerator:
                 else:
                     filedata = input_files[d].get(f, {})
                     input_files[d][f] = filedata
+        for f in dir_data[2]:
+            (root, ext) = os.path.splitext(f)
+            if (ext == '.opts'):
+                #special options for all files in this dir
+                dirdata = input_files.get(root, {})
+                with open(os.path.join(self.input_dir, f), "r") as opt_file:
+                    dirdata['__opts'] = opt_file.read()
         return input_files
+
 
     def generate_test_class(self, dirname, files):
         class_name = (self.prefix + dirname).replace(' ', '_').title()
@@ -88,9 +97,12 @@ class ConverterTestGenerator:
             bin_path=self.bin_path,
             bin_name=self.bin_name,
             code_dir=self.options.code_dir,
-            changeHH=self.changeHH
+            changeHH=self.changeHH,
+            additional_opts=files.get('__opts', ''),
         )
         for f in files:
+            if f == '__opts':
+                continue
             func_name = os.path.basename(f).replace('.', '_').replace(' ', '_')
             in_path = os.path.relpath(
                 os.path.join(self.input_dir, dirname, f),
@@ -135,6 +147,24 @@ class HHVMCollectionTestGenerator:
             code_dir=self.options.code_dir,
             test_input_dir=test_input_dir)
 
+class HackTestInputTestGenerator:
+    def __init__(self, options):
+        self.options = options
+
+    def generate(self):
+        bin_path = os.path.join(
+            self.options.bin_dir,
+            self.options.binary)
+        test_input_dir = os.path.join(
+            self.options.fbcode_dir,
+            "hphp/hack/test/typecheck/")
+
+        return templates.HACK_TEST_INPUT_TEST_TMPL.substitute(
+            bin_path=bin_path,
+            code_dir=self.options.code_dir,
+            test_input_dir=test_input_dir)
+
+
 def parse_args():
     parser = optparse.OptionParser()
     parser.add_option('--fbcode_dir')
@@ -171,13 +201,15 @@ def mkdir_safe(dirname):
 if __name__ == '__main__':
     options = parse_args()
     compute_additional_paths(options)
-    generator = ConverterTestGenerator(options, "", True)
-    unparser_generator = ConverterTestGenerator(options, "unparser_", False)
-    hhvm_collection_tests_generator = HHVMCollectionTestGenerator(options)
+    generators = [
+        ConverterTestGenerator(options, "", True),
+        ConverterTestGenerator(options, "unparser_", False),
+        HHVMCollectionTestGenerator(options),
+        HackTestInputTestGenerator(options),
+    ]
     mkdir_safe(options.gen_file_dir)
     f = open(options.gen_file_path, 'w')
     print(templates.FILE_STR, file=f)
-    print(generator.generate(), file=f)
-    print(unparser_generator.generate(), file=f)
-    print(hhvm_collection_tests_generator.generate(), file=f)
+    for g in generators:
+        print(g.generate(), file=f)
     f.close()

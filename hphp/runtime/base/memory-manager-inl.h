@@ -132,15 +132,23 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+inline int operator<<(HeaderKind k, int bits) {
+  return int(k) << bits;
+}
+
 inline void* MemoryManager::FreeList::maybePop() {
   auto ret = head;
   if (LIKELY(ret != nullptr)) head = ret->next;
   return ret;
 }
 
-inline void MemoryManager::FreeList::push(void* val) {
+inline void MemoryManager::FreeList::push(void* val, size_t size) {
+  auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
+  static_assert(kMaxSmartSize <= kMaxFreeSize, "");
+  assert(size > 0 && size <= kMaxFreeSize);
   auto const node = static_cast<FreeNode*>(val);
   node->next = head;
+  if (debug) node->kind_size = HeaderKind::Free << 24 | size << 32;
   head = node;
 }
 
@@ -252,11 +260,12 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = slabAlloc(bytes, i);
+    p = ((char*)p + kDebugExtraSize);
   }
+  p = ((char*)p - kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
-
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
-  return debugPostAllocate(p, bytes, bytes);
+  return debugPostAllocate(p, bytes, debug ? smartSizeClass(bytes) : bytes);
 }
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
@@ -264,33 +273,15 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes <= kMaxSmartSize + kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
-  if (UNLIKELY(m_profctx.flag)) {
+  if (UNLIKELY(m_bypassSlabAlloc)) {
     return smartFreeSizeBig(ptr, bytes);
   }
   unsigned i = smartSize2Index(bytes);
-  m_freelists[i].push(debugPreFree(ptr, bytes, bytes));
+  debugPreFree(ptr, bytes, bytes);
+  m_freelists[i].push(ptr, bytes);
   m_stats.usage -= bytes;
 
   FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
-}
-
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBig(size_t bytes) {
-#ifdef USE_JEMALLOC
-  void* ptr;
-  size_t sz;
-  auto const retptr =
-    smartMallocSizeBigHelper<callerSavesActualSize>(ptr, sz, bytes);
-  FTRACE(3, "smartMallocBig: {} ({} requested, {} usable)\n",
-         retptr, bytes, sz);
-  return std::make_pair(retptr, sz);
-#else
-  m_stats.usage += bytes;
-  auto const ret = smartMallocBig(debugAddExtra(bytes));
-  FTRACE(3, "smartMallocBig: {} ({} bytes)\n", ret, bytes);
-  return std::make_pair(debugPostAllocate(ret, bytes, bytes), bytes);
-#endif
 }
 
 ALWAYS_INLINE
@@ -308,7 +299,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmartSize)) return smartMallocSize(size);
-  return smartMallocSizeBig<false>(size).first;
+  return smartMallocSizeBig<false>(size).ptr;
 }
 
 ALWAYS_INLINE
@@ -339,12 +330,11 @@ void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   smartFreeSize(p, size);
 }
 
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBigLogged(size_t size) {
-  auto const retptr = smartMallocSizeBig<callerSavesActualSize>(size);
-  if (memory_profiling) { logAllocation(retptr.first, size); }
-  return retptr;
+template<bool callerSavesActualSize> ALWAYS_INLINE
+MemBlock MemoryManager::smartMallocSizeBigLogged(size_t size) {
+  auto const block = smartMallocSizeBig<callerSavesActualSize>(size);
+  if (memory_profiling) { logAllocation(block.ptr, size); }
+  return block;
 }
 
 ALWAYS_INLINE

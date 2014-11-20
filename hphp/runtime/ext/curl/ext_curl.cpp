@@ -547,7 +547,7 @@ public:
                CURLFORM_END);
           } else {
             String val = var_val.toString();
-            const char *postval = val.data();
+            const char* const postval = val.bufferSlice().ptr;
 
             if (*postval == '@') {
               /* Given a string like:
@@ -558,7 +558,7 @@ public:
                *   curl_formadd
                * - Revert changes to postval at the end
                */
-              char* mutablePostval = val.bufferSlice().ptr + 1;
+              char* mutablePostval = const_cast<char*>(postval) + 1;
               char* type = strstr(mutablePostval, ";type=");
               char* filename = strstr(mutablePostval, ";filename=");
 

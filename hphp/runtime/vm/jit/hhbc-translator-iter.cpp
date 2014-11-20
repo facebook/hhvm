@@ -48,7 +48,7 @@ void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
   }
 
   // Guard the inner type before we call the helper.
-  gen(LdRef, pred, exit, src);
+  gen(CheckRefInner, pred, exit, src);
 
   auto const res = genFunc(src, pred);
   auto const out = popV();

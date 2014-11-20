@@ -30,12 +30,11 @@ let debug () fnl =
   List.fold_left begin fun () filepath ->
     let filename = Relative_path.to_absolute filepath in
     try
-      Pos.file := filepath;
       let content = Utils.cat filename in
 
       (* Checking that we can parse the output *)
       let parsing_errors1, parser_output1 = Errors.do_ begin fun () ->
-        Parser_hack.program content
+        Parser_hack.program filepath content
       end in
       if not parser_output1.Parser_hack.is_hh_file || parsing_errors1 <> []
       then raise Exit;
@@ -48,7 +47,7 @@ let debug () fnl =
         flush stdout
       end;
 
-      let content = Format_hack.program content in
+      let content = Format_hack.program filepath content in
       let content =
         match content with
         | Format_hack.Success content -> content
@@ -63,7 +62,7 @@ let debug () fnl =
       in
 
       (* Checking for idempotence *)
-      let content2 = Format_hack.program content in
+      let content2 = Format_hack.program filepath content in
       let content2 =
         match content2 with
         | Format_hack.Success content2 -> content2
@@ -92,7 +91,7 @@ let debug () fnl =
 
       (* Checking that we can parse the output *)
       let parsing_errors2, _parser_output2 = Errors.do_ begin fun () ->
-        Parser_hack.program content
+        Parser_hack.program filepath content
       end in
       if parsing_errors2 <> []
       then begin
@@ -167,9 +166,8 @@ let parse_args() =
 (*****************************************************************************)
 
 let format_in_place filepath =
-  Pos.file := filepath;
   let filename = Relative_path.to_absolute filepath in
-  match Format_hack.program (Utils.cat filename) with
+  match Format_hack.program filepath (Utils.cat filename) with
   | Format_hack.Success result ->
       let oc = open_out filename in
       output_string oc result;
@@ -213,8 +211,8 @@ let directory dir =
 (* Applies the formatter directly to a string. *)
 (*****************************************************************************)
 
-let format_string from to_ content =
-  match Format_hack.region from to_ content with
+let format_string file from to_ content =
+  match Format_hack.region file from to_ content with
   | Format_hack.Success content ->
       output_string stdout content
   | Format_hack.Internal_error ->
@@ -244,7 +242,7 @@ let read_stdin () =
 
 let format_stdin from to_ =
   let content = read_stdin () in
-  format_string from to_ content
+  format_string Relative_path.default from to_ content
 
 (*****************************************************************************)
 (* The main entry point. *)
@@ -270,7 +268,7 @@ let () =
   | [] when diff ->
       let diff = read_stdin () in
       let file_and_modified_lines = Format_diff.parse_diff diff in
-     Format_diff.apply ~root ~diff:file_and_modified_lines
+      Format_diff.apply ~diff:file_and_modified_lines
   | _ when diff ->
       Printf.fprintf stderr "--diff mode expects no files\n";
       exit 2
@@ -285,7 +283,6 @@ let () =
   | [filename] ->
       let filename = Path.string_of_path (Path.mk_path filename) in
       let filepath = Relative_path.create Relative_path.Root filename in
-      Pos.file := filepath;
       if in_place
       then
         match format_in_place filepath with
@@ -293,7 +290,7 @@ let () =
         | Some error ->
             Printf.fprintf stderr "Error: %s\n" error;
             exit 2
-      else format_string from to_ (Utils.cat filename)
+      else format_string filepath from to_ (Utils.cat filename)
   | _ ->
       Printf.fprintf stderr "More than one file given\n";
       exit 2

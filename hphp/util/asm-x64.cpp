@@ -434,6 +434,13 @@ bool DecodedInstruction::isBranch() const {
   return false;
 }
 
+bool DecodedInstruction::isCall() const {
+  if (m_map_select != 0) return false;
+  if (m_opcode == 0xe8) return true;
+  if (m_opcode != 0xff) return false;
+  return ((getModRm() >> 3) & 0x6) == 2;
+}
+
 bool DecodedInstruction::shrinkBranch() {
   assert(isBranch());
   if (m_offSz != sz::dword) return false;
@@ -481,6 +488,11 @@ void DecodedInstruction::widenBranch() {
   }
   decode(m_ip);
   assert(isBranch() && m_offSz == 4);
+}
+
+uint8_t DecodedInstruction::getModRm() const {
+  assert(m_flags.hasModRm);
+  return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
 
 } }

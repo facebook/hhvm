@@ -171,6 +171,14 @@ void ArrayTracer::requestEnd() {
   *liveArrays() = std::unordered_map<const ArrayData*, ArrayUsage>{};
 }
 
+void ArrayTracer::bumpArrayFuncStats(ArrayData::ArrayKind kind,
+                                     ArrayFunc func) {
+  const auto sKind = static_cast<size_t>(kind);
+  const auto sFunc = static_cast<size_t>(func);
+  const auto numFuncs = kNumArrayFuncs;
+  m_atomicArrayFuncCntrs[(sKind * numFuncs) + sFunc]++;
+}
+
 void ArrayTracer::updateStaticArrayStats() {
   std::vector<uint64_t> staticKindCntrs(ArrayData::kNumKinds);
   std::vector<uint64_t> staticClassCntrs(ArrayClass::NumArrayClasses);
@@ -232,7 +240,123 @@ const char* classToCStr(const ArrayClass aClass) {
     "Empty",
     "NoInfo",
   }};
+  static_assert(names.size() == ArrayClass::NumArrayClasses,
+                "Update names with new ArrayClass");
   return names[aClass];
+}
+
+const char* arrayFuncToCStr(const ArrayFunc func) {
+  switch (func) {
+    case ArrayFunc::Release:
+      return "Release";
+    case ArrayFunc::NvGetInt:
+      return "NvGetInt";
+    case ArrayFunc::NvGetIntConverted:
+      return "NvGetIntConverted";
+    case ArrayFunc::NvGetStr:
+      return "NvGetStr";
+    case ArrayFunc::NvGetKey:
+      return "NvGetKey";
+    case ArrayFunc::SetInt:
+      return "SetInt";
+    case ArrayFunc::SetIntConverted:
+      return "SetIntConverted";
+    case ArrayFunc::SetStr:
+      return "SetStr";
+    case ArrayFunc::Vsize:
+      return "Vsize";
+    case ArrayFunc::GetValueRef:
+      return "GetValueRef";
+    case ArrayFunc::IsVectorData:
+      return "IsVectorData";
+    case ArrayFunc::ExistsInt:
+      return "ExistsInt";
+    case ArrayFunc::ExistsStr:
+      return "ExistsStr";
+    case ArrayFunc::LvalInt:
+      return "LvalInt";
+    case ArrayFunc::LvalStr:
+      return "LvalStr";
+    case ArrayFunc::LvalNew:
+      return "LvalNew";
+    case ArrayFunc::LvalNewRef:
+      return "LvalNewRef";
+    case ArrayFunc::SetRefInt:
+      return "SetRefInt";
+    case ArrayFunc::SetRefStr:
+      return "SetRefStr";
+    case ArrayFunc::AddInt:
+      return "AddInt";
+    case ArrayFunc::AddStr:
+      return "AddStr";
+    case ArrayFunc::RemoveInt:
+      return "RemoveInt";
+    case ArrayFunc::RemoveStr:
+      return "RemoveStr";
+    case ArrayFunc::IterBegin:
+      return "IterBegin";
+    case ArrayFunc::IterLast:
+      return "IterLast";
+    case ArrayFunc::IterEnd:
+      return "IterEnd";
+    case ArrayFunc::IterAdvance:
+      return "IterAdvance";
+    case ArrayFunc::IterRewind:
+      return "IterRewind";
+    case ArrayFunc::ValidMArrayIter:
+      return "ValidMArrayIter";
+    case ArrayFunc::AdvanceMArrayIter:
+      return "AdvanceMArrayIter";
+    case ArrayFunc::EscalateForSort:
+      return "EscalateForSort";
+    case ArrayFunc::Ksort:
+      return "Ksort";
+    case ArrayFunc::Sort:
+      return "Sort";
+    case ArrayFunc::Asort:
+      return "Asort";
+    case ArrayFunc::Uksort:
+      return "Uksort";
+    case ArrayFunc::Usort:
+      return "Usort";
+    case ArrayFunc::Uasort:
+      return "Uasort";
+    case ArrayFunc::Copy:
+      return "Copy";
+    case ArrayFunc::CopyWithStrongIterators:
+      return "CopyWithStrongIterators";
+    case ArrayFunc::NonSmartCopy:
+      return "NonSmartCopy";
+    case ArrayFunc::Append:
+      return "Append";
+    case ArrayFunc::AppendRef:
+      return "AppendRef";
+    case ArrayFunc::AppendWithRef:
+      return "AppendWithRef";
+    case ArrayFunc::PlusEq:
+      return "PlusEq";
+    case ArrayFunc::Merge:
+      return "Merge";
+    case ArrayFunc::Pop:
+      return "Pop";
+    case ArrayFunc::Dequeue:
+      return "Dequeue";
+    case ArrayFunc::Prepend:
+      return "Prepend";
+    case ArrayFunc::Renumber:
+      return "Renumber";
+    case ArrayFunc::OnSetEvalScalar:
+      return "OnSetEvalScalar";
+    case ArrayFunc::Escalate:
+      return "Escalate";
+    case ArrayFunc::ZSetInt:
+      return "ZSetInt";
+    case ArrayFunc::ZSetStr:
+      return "ZSetStr";
+    case ArrayFunc::ZAppend:
+      return "ZAppend";
+  }
+  always_assert(false); // unreachable
 }
 
 static const StaticString s_numCows("numCopyOnWrites");
@@ -245,6 +369,7 @@ void ArrayTracer::dumpToFile(const std::string& filename) {
   std::vector<uint64_t> kindCntrsCopy;
   std::vector<uint64_t> staticClassCntrsCopy;
   std::vector<uint64_t> staticKindCntrsCopy;
+  std::vector<uint64_t> arrayFuncCntrsCopy(m_atomicArrayFuncCntrs.size());
 
   updateStaticArrayStats();
   {
@@ -254,36 +379,56 @@ void ArrayTracer::dumpToFile(const std::string& filename) {
     staticClassCntrsCopy = m_staticClassCntrs;
     staticKindCntrsCopy = m_staticKindCntrs;
   }
+  for (size_t i = 0; i < m_atomicArrayFuncCntrs.size(); i++) {
+    arrayFuncCntrsCopy[i] = m_atomicArrayFuncCntrs[i].load();
+  }
+  out << "===Array Func Calls By Kind===\n";
+  for (size_t kind = 0;
+       static_cast<ArrayData::ArrayKind>(kind) < ArrayData::kNumKinds;
+       kind++) {
+    out << "==="
+        << ArrayData::kindToString(static_cast<ArrayData::ArrayKind>(kind))
+        << "===\n";
+    for (size_t arrFunc = 0;
+         arrFunc < kNumArrayFuncs;
+         arrFunc++) {
+      const auto count =
+        arrayFuncCntrsCopy[kind * kNumArrayFuncs
+                           + arrFunc];
+      out << arrayFuncToCStr(static_cast<ArrayFunc>(arrFunc))
+          << ": " << count << "\n";
+    }
+  }
   out << "===Request Local Arrays===\n";
   for (auto i = 0; i < classCntrsCopy.size(); i++) {
     const auto arrayClass = static_cast<ArrayClass>(i);
     const auto count = classCntrsCopy[i];
-    out << classToCStr(arrayClass) << " ==> " << count << "\n";
+    out << classToCStr(arrayClass) << ": " << count << "\n";
   }
   for (auto i = 0; i < kindCntrsCopy.size(); i++) {
     const auto arrayKind =
       static_cast<ArrayData::ArrayKind>(i);
     const auto count = kindCntrsCopy[i];
-    out << ArrayData::kindToString(arrayKind) << " ==> " << count << "\n";
+    out << ArrayData::kindToString(arrayKind) << ": " << count << "\n";
   }
   out << "===Static Arrays===\n";
   for (auto i = 0; i < staticClassCntrsCopy.size(); i++) {
     const auto arrayClass = static_cast<ArrayClass>(i);
     const auto count = staticClassCntrsCopy[i];
-    out << classToCStr(arrayClass) << " ==> " << count << "\n";
+    out << classToCStr(arrayClass) << ": " << count << "\n";
   }
   for (auto i = 0; i < staticKindCntrsCopy.size(); i++) {
     const auto arrayKind =
       static_cast<ArrayData::ArrayKind>(i);
     const auto count = staticKindCntrsCopy[i];
-    out << ArrayData::kindToString(arrayKind) << " ==> " << count << "\n";
+    out << ArrayData::kindToString(arrayKind) << ": " << count << "\n";
   }
 
   out << "===General Stats===\n";
-  out << s_numCows.data() << " ==> " << m_numCows.load() << "\n";
-  out << s_numPackedToMixed.data() << " ==> "
+  out << s_numCows.data() << ": " << m_numCows.load() << "\n";
+  out << s_numPackedToMixed.data() << ": "
       << m_numPackedToMixed.load() << "\n";
-  out << s_numUnknownReleases.data() << " ==> "
+  out << s_numUnknownReleases.data() << ": "
       << m_numUnknownReleases.load() << "\n";
   out << "===No Info Size Histogram===\n"
       << m_noInfoSizes.toString();
@@ -297,6 +442,7 @@ Array ArrayTracer::dumpToArray() {
   std::vector<uint64_t> kindCntrsCopy;
   std::vector<uint64_t> staticClassCntrsCopy;
   std::vector<uint64_t> staticKindCntrsCopy;
+  std::vector<uint64_t> arrayFuncCntrsCopy(m_atomicArrayFuncCntrs.size());
   {
     std::lock_guard<std::mutex> statsLock(m_statsMutex);
     classCntrsCopy = m_classCntrs;
@@ -304,8 +450,29 @@ Array ArrayTracer::dumpToArray() {
     staticClassCntrsCopy = m_staticClassCntrs;
     staticKindCntrsCopy = m_staticKindCntrs;
   }
+  for (size_t i = 0; i < m_atomicArrayFuncCntrs.size(); i++) {
+    arrayFuncCntrsCopy[i] = m_atomicArrayFuncCntrs[i].load();
+  }
 
   Array ret;
+  for (size_t kind = 0;
+       static_cast<ArrayData::ArrayKind>(kind) < ArrayData::kNumKinds;
+       kind++) {
+    Array kindArr;
+    for (size_t arrFunc = 0;
+         arrFunc < kNumArrayFuncs;
+         arrFunc++) {
+      const auto count =
+        arrayFuncCntrsCopy[kind * kNumArrayFuncs
+                           + arrFunc];
+      kindArr.set(String(arrayFuncToCStr(static_cast<ArrayFunc>(arrFunc))),
+                  count);
+    }
+    ret.set(
+      String(std::string("Array Func Calls For ") +
+             ArrayData::kindToString(static_cast<ArrayData::ArrayKind>(kind))),
+      kindArr);
+  }
   for (auto i = 0; i < classCntrsCopy.size(); i++) {
     const auto arrayClass = static_cast<ArrayClass>(i);
     const auto count = classCntrsCopy[i];

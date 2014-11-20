@@ -150,7 +150,7 @@ static Variant HHVM_METHOD(Collator, getSortKey, const String& val) {
   sortkey_len = ucol_getSortKey(data->collator(),
                                 strval.getBuffer(), strval.length(),
                                 (uint8_t*) ret.get()->mutableData(),
-                                ret.get()->capacity());
+                                ret.capacity() + 1);
   if (sortkey_len <= 0) {
     return false;
   }

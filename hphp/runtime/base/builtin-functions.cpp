@@ -818,8 +818,9 @@ String resolve_include(const String& file, const char* currentDir,
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
       String includePath(includePaths[i]);
+      bool is_stream_wrapper = (includePath.find("://") > 0);
 
-      if (includePath[0] != '/') {
+      if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
@@ -830,7 +831,13 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path = FileUtil::canonicalize(path);
+
+      String can_path;
+      if (!is_stream_wrapper) {
+        can_path = FileUtil::canonicalize(path);
+      } else {
+        can_path = String(path.c_str());
+      }
 
       if (tryFile(can_path, ctx)) {
         return can_path;

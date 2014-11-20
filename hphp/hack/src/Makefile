@@ -74,7 +74,8 @@ OCAML_LIBRARIES=\
   str
 
 NATIVE_LIBRARIES=\
-  $(ELF)
+  $(ELF)\
+  pthread
 
 ################################################################################
 #                                    Rules                                     #

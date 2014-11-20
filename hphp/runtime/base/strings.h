@@ -42,6 +42,8 @@ const char* const CANT_ACCESS_PARENT_WHEN_NO_PARENT =
   "Cannot access parent:: when current class scope has no parent";
 const char* const CANT_ACCESS_STATIC =
   "Cannot access static:: when no class scope is active";
+const char* const METHOD_SHOULD_NOT_BE_CALLED_STATICALLY =
+  "Non-static method %s::%s() should not be called statically";
 const char* const UNDEFINED_INDEX =
   "Undefined index: %s";
 const char* const CANNOT_USE_SCALAR_AS_ARRAY =

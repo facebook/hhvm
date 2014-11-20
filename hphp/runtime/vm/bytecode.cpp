@@ -1120,6 +1120,11 @@ ExecutionContext::lookupClsMethod(const Func*& f,
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
     return LookupResult::MethodFoundWithThis;
   }
+  if (!obj && !(f->attrs() & AttrStatic)) {
+    raise_strict_warning(Strings::METHOD_SHOULD_NOT_BE_CALLED_STATICALLY,
+      cls->name()->data(),
+      f->name()->data());
+  }
   return LookupResult::MethodFoundNoThis;
 }
 

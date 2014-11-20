@@ -103,28 +103,37 @@ class PreClassEmitter {
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)
+      , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
           const TypedValue* val, const StringData* phpCode)
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
-      memcpy(&m_val, val, sizeof(TypedValue));
+      if (!val) {
+        m_val.clear();
+      } else {
+        m_val = *val;
+      }
     }
     ~Const() {}
 
     const StringData* name() const { return m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val() const { return m_val; }
+    const TypedValue& val() const { return m_val.value(); }
+    const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
+    bool isAbstract()       const { return !m_val.hasValue(); }
 
     template<class SerDe> void serde(SerDe& sd) {
-      sd(m_name)(m_val)(m_phpCode);
+      sd(m_name)
+        (m_val)
+        (m_phpCode);
     }
 
    private:
     LowStringPtr m_name;
     LowStringPtr m_typeConstraint;
-    TypedValue m_val;
+    folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
   };
 
@@ -171,6 +180,8 @@ class PreClassEmitter {
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode);
+  bool addAbstractConstant(const StringData* n,
+                           const StringData* typeConstraint);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

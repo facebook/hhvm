@@ -1,0 +1,2 @@
+
+Fatal error: Cannot re-declare as abstract previously defined constant C::X in D in %stest/slow/class_constant/abstract_const1.php on line 15

@@ -420,8 +420,10 @@ struct Const {
   /*
    * The value will be KindOfUninit if the class constant is defined
    * using an 86cinit method.
+   *
+   * The lack of a value represents an abstract class constant.
    */
-  Cell val;
+  folly::Optional<Cell> val;
 
   /*
    * We pass through eval'able php code and a string type constraint,

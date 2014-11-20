@@ -275,7 +275,10 @@ inline const Class::Const* Class::constants() const {
 }
 
 inline bool Class::hasConstant(const StringData* clsCnsName) const {
-  return m_constants.contains(clsCnsName);
+  // m_constants.contains(clsCnsName) returns abstract constants
+  auto clsCnsInd = m_constants.findIndex(clsCnsName);
+  return (clsCnsInd != kInvalidSlot) &&
+    !m_constants[clsCnsInd].m_val.isAbstractConst();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

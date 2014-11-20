@@ -158,21 +158,24 @@ struct PreClass : AtomicCountable {
    */
   struct Const {
     Const(const StringData* name,
-          const StringData* typeConstraint,
-          const TypedValue& val,
+          const TypedValueAux& val,
           const StringData* phpCode);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
-    const StringData* name()           const { return m_name; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
-    const TypedValue& val()            const { return m_val; }
-    const StringData* phpCode()        const { return m_phpCode; }
+    const StringData* name()     const { return m_name; }
+    const TypedValueAux& val()   const { return m_val; }
+    const StringData* phpCode()  const { return m_phpCode; }
+    bool isAbstract()            const { return m_val.isAbstractConst(); }
+
+    template<class SerDe> void serde(SerDe& sd);
 
   private:
     LowStringPtr m_name;
-    LowStringPtr m_typeConstraint;
-    TypedValue m_val;
+    /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
+     * with KindOfUninit represents a constant whose value is not
+     * statically available (e.g. "const X = self::Y + 5;") */
+    TypedValueAux m_val;
     LowStringPtr m_phpCode;
   };
 

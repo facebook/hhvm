@@ -834,8 +834,11 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  auto const ret = const_cast<Cell*>(&m_constants[clsCnsInd].m_val);
-  assert(cellIsPlausible(*ret));
+  if (m_constants[clsCnsInd].m_val.isAbstractConst()) {
+    return nullptr;
+  }
+  auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].m_val);
+  assert(tvIsPlausible(*ret));
   return ret;
 }
 
@@ -1687,15 +1690,23 @@ void Class::setConstants() {
     for (Slot slot = 0; slot < iface->m_constants.size(); ++slot) {
       auto const iConst = iface->m_constants[slot];
 
-      // If you're inheriting a constant with the same name as an
-      // existing one, they must originate from the same place.
+      // If you're inheriting a constant with the same name as an existing
+      // one, they must originate from the same place.
       auto const existing = builder.find(iConst.m_name);
-      if (existing != builder.end() &&
-          builder[existing->second].m_class != iConst.m_class) {
+
+      if (existing == builder.end()) {
+        builder.add(iConst.m_name, iConst);
+        continue;
+      }
+
+      if (iConst.m_val.isAbstractConst()) {
+        continue;
+      }
+
+      if (builder[existing->second].m_class != iConst.m_class) {
         raise_error("Cannot inherit previously-inherited constant %s",
                     iConst.m_name->data());
       }
-
       builder.add(iConst.m_name, iConst);
     }
   }
@@ -1719,6 +1730,15 @@ void Class::setConstants() {
           }
         }
       }
+
+      if (preConst->isAbstract() &&
+          !builder[it2->second].m_val.isAbstractConst()) {
+        raise_error("Cannot re-declare as abstract previously defined "
+                    "constant %s::%s in %s",
+                    builder[it2->second].m_class->name()->data(),
+                    preConst->name()->data(),
+                    m_preClass->name()->data());
+      }
       builder[it2->second].m_class = this;
       builder[it2->second].m_val = preConst->val();
     } else {
@@ -1727,8 +1747,36 @@ void Class::setConstants() {
       constant.m_class = this;
       constant.m_name = preConst->name();
       constant.m_val = preConst->val();
-      constant.m_phpCode = preConst->phpCode();
       builder.add(preConst->name(), constant);
+    }
+  }
+
+  // If class is not abstract, all abstract constants should have been
+  // defined
+  if (!(attrs() & (AttrTrait | AttrInterface | AttrAbstract))) {
+    for (Slot i = 0; i < builder.size(); i++) {
+      const Const& constant = builder[i];
+      if (constant.m_val.isAbstractConst()) {
+        raise_error("Class %s contains abstract constant (%s) and "
+                    "must therefore be declared abstract or define "
+                    "the remaining constants",
+                    m_preClass->name()->data(),
+                    constant.m_name->data());
+      }
+    }
+  }
+
+  // If class is abstract final, its constants should not be abstract
+  else if (
+    (attrs() & (AttrAbstract | AttrFinal)) == (AttrAbstract | AttrFinal)) {
+    for (Slot i = 0; i < builder.size(); i++) {
+      const Const& constant = builder[i];
+      if (constant.m_val.isAbstractConst()) {
+        raise_error(
+          "Class %s contains abstract constant (%s) and "
+          "therefore cannot be declared 'abstract final'",
+          m_preClass->name()->data(), constant.m_name->data());
+      }
     }
   }
 

@@ -138,9 +138,7 @@ struct Class : AtomicCountable {
     // Most derived class that declared this constant.
     LowClassPtr m_class;
     LowStringPtr m_name;
-    TypedValue m_val;
-    LowStringPtr m_phpCode;
-    LowStringPtr m_typeConstraint;
+    TypedValueAux m_val;
   };
 
   /*

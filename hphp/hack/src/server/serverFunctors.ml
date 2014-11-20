@@ -131,7 +131,7 @@ end = struct
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
         let to_recheck =
-          rev_rev_map (Relative_path.create Relative_path.Root) to_recheck
+          rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
         in
         let updates = List.fold_left
           (fun acc update -> Relative_path.Set.add update acc)

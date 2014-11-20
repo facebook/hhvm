@@ -101,7 +101,10 @@ struct LocalState {
   SSATmp* value{nullptr};
 
   /*
-   * The current type of the local.
+   * The current type of the local.  We may have a tracked type even if we
+   * don't have an available value.  This happens across PHP-level calls, for
+   * example, or at some joint points where we couldn't find the same available
+   * value for all incoming edges.
    */
   Type type{Type::Gen};
 
@@ -315,11 +318,6 @@ struct FrameStateMgr final : private LocalStateHook {
   void clear();
 
   /*
-   * Clear the CSE table.
-   */
-  void clearCse();
-
-  /*
    * Iterates through a control-flow graph, until a fixed-point is
    * reached. Drops all previous state.
    */
@@ -407,7 +405,7 @@ struct FrameStateMgr final : private LocalStateHook {
    */
   void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
- private:
+private:
   struct BlockState {
     jit::vector<FrameState> in;
     jit::vector<FrameState> out;
@@ -415,6 +413,8 @@ struct FrameStateMgr final : private LocalStateHook {
 
 private:
   bool checkInvariants() const;
+  void clearCse();
+
   /*
    * Clear the current state, but keeps the state associated with all
    * other blocks intact.

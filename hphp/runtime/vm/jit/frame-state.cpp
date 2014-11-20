@@ -34,9 +34,55 @@ using Trace::Indent;
 
 //////////////////////////////////////////////////////////////////////
 
+// Helper that sets a value to a new value and also returns whether it changed.
+template<class T>
+bool merge_util(T& oldVal, const T& newVal) {
+  auto changed = oldVal != newVal;
+  oldVal = newVal;
+  return changed;
+}
+
 /*
- * TODO: make a merge_into for LocalState.
+ * Merge TypeSourceSets, returning whether anything changed.
+ *
+ * TypeSourceSets are merged a join points by unioning the type sources.  The
+ * reason for this is that if a type is constrained, we need to be able to find
+ * "all" possible sources of the type and constrain them.
  */
+bool merge_into(TypeSourceSet& dst, const TypeSourceSet& src) {
+  auto changed = false;
+  for (auto x : src) changed = dst.insert(x).second || changed;
+  return changed;
+}
+
+/*
+ * Merge LocalStates, returning whether anything changed.
+ */
+bool merge_into(LocalState& dst, const LocalState& src) {
+  auto changed = false;
+
+  // Get the least common ancestor across both states.
+  if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
+    changed = true;
+  }
+
+  if (merge_into(dst.typeSrcs, src.typeSrcs)) {
+    changed = true;
+  }
+
+  changed =
+    merge_util(dst.type, Type::unionOf(dst.type, src.type)) ||
+    merge_util(dst.boxedPrediction,
+               Type::unionOf(dst.boxedPrediction, src.boxedPrediction)) ||
+    changed;
+
+  // Throw away the prediction if we merged Type::Gen for the type.
+  if (!(dst.type <= Type::BoxedInitCell)) {
+    changed = merge_util(dst.boxedPrediction, Type::Bottom);
+  }
+
+  return changed;
+}
 
 /*
  * Merge one FrameState into another, returning whether it changed.  Frame
@@ -45,57 +91,48 @@ using Trace::Indent;
  * spOffset).
  */
 bool merge_into(FrameState& dst, const FrameState& src) {
-  auto const original = dst;  // FIXME: we shouldn't need to copy it for this
+  auto changed = false;
 
   // Cannot merge spOffset state, so assert they match.
-  assert(dst.spOffset == src.spOffset);
-  assert(dst.curFunc == src.curFunc);
-  if (dst.spValue != src.spValue) {
-    // we have two different sp definitions but we know they're equal
-    // because spOffset matched.
-    dst.spValue = nullptr;
-  }
+  always_assert(dst.spOffset == src.spOffset);
+  always_assert(dst.curFunc == src.curFunc);
 
   // The only thing that can change the FP is inlining, but we can't have one
   // of the predecessors in an inlined callee while the other isn't.
   always_assert(dst.fpValue == src.fpValue);
 
+  // FrameState for the same function must always have the same number of
+  // locals.
+  always_assert(src.locals.size() == dst.locals.size());
+
+  if (dst.spValue != src.spValue) {
+    // We have two different sp definitions but we know they're equal because
+    // spOffset matched.
+    dst.spValue = nullptr;
+    changed = true;
+  }
+
   // this is available iff it's available in both states
-  dst.thisAvailable &= src.thisAvailable;
+  if (merge_util(dst.thisAvailable, dst.thisAvailable && src.thisAvailable)) {
+    changed = true;
+  }
 
-  assert(src.locals.size() == dst.locals.size());
-  for (unsigned i = 0; i < src.locals.size(); ++i) {
-    auto& local = dst.locals[i];
-
-    // Get the least common ancestor across both states.
-    local.value = least_common_ancestor(local.value,
-      src.locals[i].value);
-
-    // merge the typeSrcs
-    for (auto newTypeSrc : src.locals[i].typeSrcs) {
-      local.typeSrcs.insert(newTypeSrc);
-    }
-
-    local.type = Type::unionOf(local.type, src.locals[i].type);
-    local.boxedPrediction =
-      Type::unionOf(local.boxedPrediction,
-                    src.locals[i].boxedPrediction);
-
-    // Throw away the prediction if we merged Type::Gen for the type.
-    if (!(local.type <= Type::BoxedInitCell)) {
-      local.boxedPrediction = Type::Bottom;
+  for (auto i = uint32_t{0}; i < src.locals.size(); ++i) {
+    if (merge_into(dst.locals[i], src.locals[i])) {
+      changed = true;
     }
   }
 
-  return !(dst == original);
+  return changed;
 }
 
 /*
- * Merge two state-stacks.  The stacks must have the same depth.
+ * Merge two state-stacks.  The stacks must have the same depth.  Returns
+ * whether any states changed.
  */
 bool merge_into(jit::vector<FrameState>& dst, const jit::vector<FrameState>& src) {
   always_assert(src.size() == dst.size());
-  bool changed = false;
+  auto changed = false;
   for (auto idx = uint32_t{0}; idx < dst.size(); ++idx) {
     if (merge_into(dst[idx], src[idx])) changed = true;
   }

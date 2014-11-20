@@ -485,7 +485,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // unreachable code elimination take care of it later.
   if (type.not(inst->typeParam())) return nullptr;
 
-  // If FrameState's type isn't as good as the type param, we're missing
+  // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);
   inst->setTypeParam(std::min(type, inst->typeParam()));
@@ -1209,7 +1209,7 @@ repeat:
                 blockToPhiTmpsMap[pred].end(),
                 std::inserter(vec, vec.begin()));
 
-      // Mark the new block as visited so FrameState doesn't see an
+      // Mark the new block as visited so FrameStateMgr doesn't see an
       // unprocessed predecessor for the join point.
       m_state.markVisited(middle);
 

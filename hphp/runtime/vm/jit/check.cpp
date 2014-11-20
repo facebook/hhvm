@@ -59,7 +59,7 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
  *    from a Jmp instruciton.
  * 8. Every instruction's BCMarker must point to a valid bytecode instruction.
  * 9. If a DefLabel defines a value of type StkPtr, it must appear as the first
- *    dest. This is necessary for the state tracking in FrameState::update.
+ *    dest. This is necessary for the state tracking in FrameStateMgr::update.
  */
 bool checkBlock(Block* b) {
   auto it = b->begin();

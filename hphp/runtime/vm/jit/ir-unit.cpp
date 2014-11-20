@@ -116,7 +116,7 @@ void IRUnit::collectPostConditions() {
   Block* mainExit = nullptr;
   Block* lastMainBlock = nullptr;
 
-  FrameState state{*this, entry()->front().marker()};
+  FrameStateMgr state{*this, entry()->front().marker()};
   ITRACE(2, "collectPostConditions starting\n");
   Trace::Indent _i;
 

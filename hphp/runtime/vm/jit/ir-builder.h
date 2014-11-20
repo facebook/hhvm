@@ -408,7 +408,7 @@ private:
     }
 
    private:
-    FrameState& m_state;
+    FrameStateMgr& m_state;
     bool m_oldEnable;
   };
 
@@ -457,7 +457,7 @@ private:
 
 private:
   IRUnit& m_unit;
-  FrameState m_state;
+  FrameStateMgr m_state;
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other

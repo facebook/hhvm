@@ -57,7 +57,7 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 }
 
 void MInstrEffects::get(const IRInstruction* inst,
-                        const FrameState& frame,
+                        const FrameStateMgr& frame,
                         LocalStateHook& hook) {
   // If the base for this instruction is a local address, the helper call might
   // have side effects on the local's value
@@ -1863,7 +1863,8 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     };
 
     // Need to save FP, we're switching to our side exit block, but it hasn't
-    // had a predecessor propagate state to it via FrameState::finishBlock yet.
+    // had a predecessor propagate state to it via FrameStateMgr::finishBlock
+    // yet.
     auto const fp = m_irb.fp();
 
     BlockPusher bp(m_irb, m_marker, m_failedSetBlock);

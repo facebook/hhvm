@@ -125,7 +125,7 @@ void retypeLoad(IRInstruction* load, Type newType) {
  * only changes the load's type param; the caller is responsible for retyping
  * the dest if needed.
  */
-void visitLoad(IRInstruction* inst, const FrameState& state) {
+void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   switch (inst->op()) {
     case LdLoc: {
       auto const id = inst->extra<LocalId>()->locId;
@@ -238,7 +238,7 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   if (!reflow) return true;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameState state{unit, unit.entry()->front().marker()};
+  FrameStateMgr state{unit, unit.entry()->front().marker()};
 
   for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());

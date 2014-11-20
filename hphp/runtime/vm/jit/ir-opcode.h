@@ -37,7 +37,7 @@ struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
 struct LocalStateHook;
-struct FrameState;
+struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -286,9 +286,9 @@ struct MInstrEffects {
   /*
    * MInstrEffects::get is used to allow multiple different consumers to deal
    * with the side effects of vector instructions. It takes an instruction and
-   * a LocalStateHook, and a FrameState, which are defined in frame-state.h.
+   * a LocalStateHook, and a FrameStateMgr, which are defined in frame-state.h.
    */
-  static void get(const IRInstruction*, const FrameState&, LocalStateHook&);
+  static void get(const IRInstruction*, const FrameStateMgr&, LocalStateHook&);
 
   Type baseType;
   bool baseTypeChanged;

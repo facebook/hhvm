@@ -198,9 +198,9 @@ inline bool operator==(const Snapshot& a, const Snapshot& b) {
 /*
  * LocalStateHook is used to separate the acts of determining which locals are
  * affected by an instruction and recording those changes. It allows consumers
- * of FrameState to get details about how an instruction affects the locals
+ * of FrameStateMgr to get details about how an instruction affects the locals
  * without having to query the state of each local before and after having
- * FrameState process the instruction.
+ * FrameStateMgr process the instruction.
  */
 struct LocalStateHook {
   virtual void setLocalValue(uint32_t id, SSATmp* value) {}
@@ -220,11 +220,11 @@ struct LocalStateHook {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * FrameState tracks state about the VM stack frame in the function currently
+ * FrameStateMgr tracks state about the VM stack frame in the function currently
  * being translated. It is responsible for both storing the state and updating
  * it appropriately as instructions and blocks are processed.
  *
- * The types of state tracked by FrameState include:
+ * The types of state tracked by FrameStateMgr include:
  *
  *   - value availability
  *
@@ -239,14 +239,14 @@ struct LocalStateHook {
  *
  *   - current function and bytecode offset
  */
-struct FrameState final : private LocalStateHook {
-  FrameState(IRUnit& unit, BCMarker firstMarker);
-  FrameState(IRUnit& unit, Offset initialSpOffset, const Func* func);
+struct FrameStateMgr final : private LocalStateHook {
+  FrameStateMgr(IRUnit& unit, BCMarker firstMarker);
+  FrameStateMgr(IRUnit& unit, Offset initialSpOffset, const Func* func);
 
-  FrameState(const FrameState&) = delete;
-  FrameState& operator=(const FrameState&) = delete;
+  FrameStateMgr(const FrameStateMgr&) = delete;
+  FrameStateMgr& operator=(const FrameStateMgr&) = delete;
 
-  FrameState(FrameState&&) = default;
+  FrameStateMgr(FrameStateMgr&&) = default;
 
   /*
    * Update state by computing the effects of an instruction.
@@ -371,7 +371,7 @@ struct FrameState final : private LocalStateHook {
   void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
 
   /*
-   * What the FrameState is doing.
+   * What the FrameStateMgr is doing.
    *
    * Building - Changes when we propagate state to taken blocks.
    *
@@ -395,8 +395,8 @@ struct FrameState final : private LocalStateHook {
   SSATmp* spLeavingBlock(Block*) const;
 
   /*
-   * Marks a block as visited in the current iteration. FrameState::startBlock
-   * does this automatically.
+   * Marks a block as visited in the current iteration.
+   * FrameStateMgr::startBlock does this automatically.
    */
   void markVisited(const Block*);
 
@@ -469,14 +469,14 @@ private:
     return m_stack.back();
   }
   const Snapshot& cur() const {
-    return const_cast<FrameState*>(this)->cur();
+    return const_cast<FrameStateMgr*>(this)->cur();
   }
 
  private:
   IRUnit& m_unit;
 
   /*
-   * Status of the FrameState.
+   * Status of the FrameStateMgr.
    */
   Status m_status{Status::None};
 
@@ -509,7 +509,7 @@ private:
 /*
  * Debug stringification.
  */
-std::string show(const FrameState&);
+std::string show(const FrameStateMgr&);
 
 //////////////////////////////////////////////////////////////////////
 

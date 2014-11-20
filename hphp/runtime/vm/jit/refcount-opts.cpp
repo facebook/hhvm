@@ -502,7 +502,7 @@ const StaticString s_get_defined_vars("get_defined_vars"),
  */
 struct SinkPointAnalyzer : private LocalStateHook {
   SinkPointAnalyzer(const BlockList* blocks, const IdMap* ids,
-                    IRUnit& unit, FrameState&& frameState)
+                    IRUnit& unit, FrameStateMgr&& frameState)
     : m_unit(unit)
     , m_blocks(*blocks)
     , m_loopHeaders(findLoopHeaders(unit))
@@ -534,7 +534,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         m_savedStates.erase(block);
       }
 
-      // Hack so that FrameState::startBlock can place sink points correctly
+      // Hack so that FrameStateMgr::startBlock can place sink points correctly
       // if it ends up consuming locals.
       if (m_loopHeaders.count(block) != 0) {
         // oldBlock must be the loop pre-header as we're processing the unit
@@ -1148,8 +1148,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
 
     // Many instructions have complicated effects on the state of the
-    // locals. Get this information from FrameState.
-    ITRACE(3, "getting local effects from FrameState\n");
+    // locals. Get this information from FrameStateMgr.
+    ITRACE(3, "getting local effects from FrameStateMgr\n");
     Indent _i;
     m_frameState.getLocalEffects(m_inst, *this);
   }
@@ -1368,7 +1368,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void resolveValueEraseOnly(SSATmp* val) { resolveValueImpl(val, true); }
 
   /* Remember that oldVal has been replace by newVal, either because of a
-   * passthrough instruction or something from FrameState. */
+   * passthrough instruction or something from FrameStateMgr. */
   void replaceValue(SSATmp* oldVal, SSATmp* newVal) {
     ITRACE(3, "replacing {} with {}\n", *oldVal, *newVal);
 
@@ -1546,7 +1546,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   SinkPointsMap m_ret;
 
   /* Used to track local state and other information about the trace */
-  FrameState m_frameState;
+  FrameStateMgr m_frameState;
 };
 
 ////////// Refcount validation pass //////////
@@ -1864,7 +1864,7 @@ void eliminateTakes(const BlockList& blocks) {
  * complete, a separate validation pass is run to ensure the net effect on the
  * refcount of each object has not changed.
  */
-void optimizeRefcounts(IRUnit& unit, FrameState&& fs) {
+void optimizeRefcounts(IRUnit& unit, FrameStateMgr&& fs) {
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
 

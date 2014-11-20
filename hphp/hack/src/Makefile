@@ -102,7 +102,9 @@ build-hack: build-hack-native-deps build-hhi-archive
 	ocamlbuild -no-links  $(INCLUDE_OPTS) $(LIB_OPTS) -lflags "$(LINKER_FLAGS)" hh_server.native hh_client.native hh_single_type_check.native h2tp.native test_unparser.native
 
 build-hack-native-deps: build-hack-stubs
-	ocamlbuild -cflags "$(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
+	# ocamlbuild before 4.00 does not pass thru cflags when building native C
+	# objects, because they're not important, right? So use this super ugly hack.
+	ocamlbuild -ocamlc "ocamlc.opt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
 
 build-hack-stubs:
 	echo 'const char* const BuildInfo_kRevision = "${SHA}";' > utils/get_build_id.gen.c

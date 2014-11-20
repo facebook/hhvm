@@ -418,7 +418,7 @@ struct sparse_id_map {
     // Note: the sparse part of m_mem is deliberately uninitialized, but we do
     // it for valgrind or asan builds.
 #if defined(FOLLY_SANITIZE_ADDRESS) || defined(VALGRIND)
-    std::memset(m_mem, 0, sizeof(T) * universe_size);
+    std::memset(m_mem, 0, sizeof(K) * universe_size);
 #endif
   }
   ~sparse_id_map() {

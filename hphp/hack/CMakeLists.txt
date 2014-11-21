@@ -26,6 +26,7 @@ if (OCAMLC_FOUND)
     list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
     get_filename_component(pth ${LZ4_LIBRARY} PATH)
     list(APPEND extra_lib_paths ${pth})
+    list(APPEND extra_native_libraries "lz4")
   else()
     list(APPEND extra_include_paths "${TP_DIR}/lz4")
     list(APPEND extra_native_lib_paths "${TP_DIR}/lz4/liblz4.a")
@@ -45,6 +46,7 @@ if (OCAMLC_FOUND)
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIB_PATHS="${extra_native_lib_paths}"
+          EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
 

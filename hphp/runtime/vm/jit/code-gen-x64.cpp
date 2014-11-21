@@ -2097,10 +2097,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  auto const sf = cgLdFuncCachedCommon(inst, dstLoc(inst, 0).reg());
-  if (auto const taken = inst->taken()) {
-    vmain() << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
-  }
+  cgLdFuncCachedCommon(inst, dstLoc(inst, 0).reg());
 }
 
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
@@ -4639,9 +4636,6 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = v.makeReg();
   cgLdClsCachedCommon(v, inst, dstLoc(inst, 0).reg(), sf);
-  if (Block* taken = inst->taken()) {
-    v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
-  }
 }
 
 void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {

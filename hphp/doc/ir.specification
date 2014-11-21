@@ -399,7 +399,7 @@ exceptions depending on how coercion is implemented.
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA,Cls), B
 
   If the value in S0 is Nullptr, branch to block B.
 
@@ -645,7 +645,7 @@ To string conversions:
   Perform comparisons of doubles. Comparisons that are unordered according to
   IEEE 754 (such as when at least one operand is NaN) result in false.
 
-| InstanceOf, D(Bool), S(Cls) S(Cls), C
+| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), C
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
   in S1. (Note that this is always false for a trait). S1 may be null at
@@ -961,10 +961,10 @@ generating efficient compare-and-branch instruction sequences.
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
 
-| LdClsCachedSafe, D(Cls), CStr, B
+| LdClsCachedSafe, D(Cls|Nullptr), CStr, NF
 
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
-  returns null and optionally branches to block B.
+  returns a null pointer.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 
@@ -1142,10 +1142,10 @@ generating efficient compare-and-branch instruction sequences.
   Loads the Func whose name is funcName from the RDS, invoking autoload if it
   not defined yet. Fatal if function autoloader fails to define it.
 
-| LdFuncCachedSafe<funcName>, D(Func), NA, B
+| LdFuncCachedSafe<funcName>, D(Func|Nullptr), NA, NF
 
   Try to load the Func named funcName from the RDS. If the function is not
-  defined, returns null and optionally branches to B.
+  defined, returns a null pointer.
 
 | LdFuncCachedU<funcName,fallbackName>, D(Func), NA, E|Er
 
@@ -1725,7 +1725,7 @@ generating efficient compare-and-branch instruction sequences.
 14. Runtime helpers
 
 
-| VerifyParamCls, ND, S(Cls) S(Cls) C(Int) C(Int), E|Er
+| VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), E|Er
 
   Verify parameter type for classes or traits. If S0 does not extend (if S1 is
   a class) or implement (if S1 is an interface) S1, this instruction will raise
@@ -1746,7 +1746,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Verify a return type hint.
 
-| VerifyRetCls, ND, S(Cls) S(Cls) C(Int) S(Cell), E|Er
+| VerifyRetCls, ND, S(Cls) S(Cls|Nullptr) C(Int) S(Cell), E|Er
 
   Verify a return type hint.
 

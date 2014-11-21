@@ -232,10 +232,11 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
   if (cls) {
     auto const exitSlow = makeExitSlow();
     if (!RDS::isPersistentHandle(cls->classHandle())) {
-      // The miss path is complicated and rare.  Punt for now.  This
-      // must be checked before we IncRef the context below, because
-      // the slow exit will want to do that same IncRef via InterpOne.
-      gen(LdClsCachedSafe, exitSlow, cns(cls->name()));
+      // The miss path is complicated and rare.  Punt for now.  This must be
+      // checked before we IncRef the context below, because the slow exit will
+      // want to do that same IncRef via InterpOne.
+      auto const clsOrNull = gen(LdClsCachedSafe, cns(cls->name()));
+      gen(CheckNonNull, exitSlow, clsOrNull);
     }
 
     if (forward) {
@@ -248,9 +249,8 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
     ctx = cns(Type::Nullptr);
     if (!RDS::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
-      func = gen(
-        LdFuncCachedSafe, LdFuncCachedData(callee->name()), makeExitSlow()
-      );
+      func = gen(LdFuncCachedSafe, LdFuncCachedData(callee->name()));
+      func = gen(CheckNonNull, makeExitSlow(), func);
     }
   }
 

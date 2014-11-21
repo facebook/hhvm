@@ -24,16 +24,13 @@
 #include <zlib.h>
 #include <ctype.h>
 
+namespace HPHP { namespace hfsort {
+
 using std::string;
 using std::vector;
 using std::map;
 
 CallGraph cg;
-
-void error(const char* msg) {
-  printf("ERROR: %s\n", msg);
-  exit(1);
-}
 
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2) {
   return (double) c1->samples / c1->size > (double) c2->samples / c2->size;
@@ -321,3 +318,5 @@ std::vector<Cluster*> pettisAndHansen() {
 
   return clusters;
 }
+
+} }

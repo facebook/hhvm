@@ -87,7 +87,9 @@ let rec main_ env retries =
           | ServerMsg.BUILD_ERROR s -> exit_code := 2; print_endline s
         done
       with End_of_file ->
-        exit (!exit_code)
+        if !exit_code = 0
+        then ()
+        else exit (!exit_code)
     end
   | resp -> Printf.printf "Unexpected server response %s.\n%!"
     (ServerMsg.response_to_string resp)

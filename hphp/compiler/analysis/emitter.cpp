@@ -7944,6 +7944,11 @@ void EmitterVisitor::emitClass(Emitter& e,
         }
       } else if (ClassConstantPtr cc =
                  dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
+
+        if (cc->isAbstract()) {
+          continue; // FIXME: discard for now
+        }
+
         ExpressionListPtr el(cc->getConList());
         StringData* typeConstraint = makeStaticString(
           cc->getTypeConstraint());

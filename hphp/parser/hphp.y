@@ -1495,6 +1495,9 @@ class_statement:
                                          ($$,&$1,$4,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL);}
+  | class_abstract_constant_declaration ';'
+                                       { _p->onClassVariableStart
+                                         ($$,NULL,$1,NULL, true);}
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
                                        { _p->onNewLabelScope(true);
@@ -1714,6 +1717,12 @@ class_constant_declaration:
     hh_name_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
   | T_CONST hh_name_with_type '='
     static_expr                         { _p->onClassConstant($$,0,$2,$4);}
+;
+class_abstract_constant_declaration:
+    class_abstract_constant_declaration ','
+    hh_name_with_type                   { _p->onClassAbstractConstant($$,&$1,$3);}
+  | T_ABSTRACT T_CONST hh_name_with_type
+                                        { _p->onClassAbstractConstant($$,NULL,$3);}
 ;
 
 expr_with_parens:
@@ -2777,7 +2786,7 @@ dimmable_variable_no_calls:
                                     { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_property_name_no_variables 
+    object_property_name_no_variables
                                     { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | '(' variable ')'                   { $$ = $2;}
 ;

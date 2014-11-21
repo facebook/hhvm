@@ -1900,12 +1900,10 @@ void HhbcTranslator::assertTypeStack(uint32_t idx, Type type) {
   }
 }
 
-/*
- * Returns the Type of the given location. All accesses to the stack and locals
- * use DataTypeGeneric so this function should only be used for inspecting
- * state; when the values are actually used they must be constrained further.
- */
-Type HhbcTranslator::typeFromLocation(const Location& loc) {
+// All accesses to the stack and locals in this function use DataTypeGeneric so
+// this function should only be used for inspecting state; when the values are
+// actually used they must be constrained further.
+Type HhbcTranslator::predictedTypeFromLocation(const Location& loc) {
   switch (loc.space) {
     case Location::Stack: {
       auto i = loc.offset;
@@ -1923,14 +1921,8 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
         return stackVal.knownType;
       }
     } break;
-    case Location::Local: {
-      auto l = loc.offset;
-      auto ty = m_irb->localType(l, DataTypeGeneric);
-      if (!ty.isBoxed()) {
-        return ty;
-      }
-      return m_irb->predictedInnerType(l).box();
-    } break;
+    case Location::Local:
+      return m_irb->predictedLocalType(loc.offset);
     case Location::Litstr:
       return Type::cns(curUnit()->lookupLitstrId(loc.offset));
     case Location::Litint:
@@ -1943,9 +1935,11 @@ Type HhbcTranslator::typeFromLocation(const Location& loc) {
       }
       return Type::Obj;
 
-    default:
-      always_assert(false && "Bad location in typeFromLocation");
+    case Location::Iter:
+    case Location::Invalid:
+      break;
   }
+  not_reached();
 }
 
 static uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
@@ -2736,8 +2730,11 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
 }
 
 void HhbcTranslator::emitSilence(Id localId, unsigned char ucsubop) {
-  SilenceOp subop = static_cast<SilenceOp>(ucsubop);
-  switch (subop) {
+  // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
+  // invariant).
+  if (inPseudoMain()) PUNT(PseudoMain-Silence);
+
+  switch (static_cast<SilenceOp>(ucsubop)) {
     case SilenceOp::Start: {
       // We assume that whatever is in the local is dead and doesn't need to be
       // refcounted before being overwritten.
@@ -2935,7 +2932,7 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
   };
 
   auto boxed = [&] (Type t) -> Type {
-    if (t.equals(Type::Gen)) return t;
+    if (t.equals(Type::Gen)) return Type::BoxedInitCell;
     assert(t.isBoxed() || t.notBoxed());
     checkTypeType = t.isBoxed() ? t : boxType(t); // inner type is predicted
     return Type::BoxedInitCell;
@@ -3046,6 +3043,12 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   };
   auto* func = curFunc();
 
+  auto handleBoxiness = [&] (Type testTy, Type useTy) {
+    return testTy.isBoxed() ? Type::BoxedInitCell :
+           testTy.maybeBoxed() ? Type::Gen :
+           useTy;
+  };
+
   switch (inst.op()) {
     case OpSetN:
     case OpSetOpN:
@@ -3060,10 +3063,10 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     case OpIncDecL: {
       assert(pushedType.hasValue());
       auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
-      assert(locType < Type::Gen);
+      assert(locType < Type::Gen || inPseudoMain());
 
       auto stackType = inst.outputPredicted ? inst.outPred : pushedType.value();
-      setImmLocType(0, locType.isBoxed() ? Type::BoxedInitCell : stackType);
+      setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }
 
@@ -3079,7 +3082,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
       auto stackType = topType(0);
       // SetL preserves reffiness of a local.
-      setImmLocType(0, locType.isBoxed() ? Type::BoxedInitCell : stackType);
+      setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }
     case OpVGetL:
@@ -3127,8 +3130,8 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert(ty.isBoxed() || ty.notBoxed());
-            setLocType(base.offset, ty.isBoxed() ? Type::BoxedInitCell : ty);
+            assert((ty.isBoxed() || ty.notBoxed()) || inPseudoMain());
+            setLocType(base.offset, handleBoxiness(ty, ty));
           }
           break;
         }
@@ -3169,7 +3172,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
           (locType <= Type::Obj || locType.maybeBoxed())) {
-        setImmLocType(0, locType.isBoxed() ? Type::BoxedInitCell : Type::Cell);
+        setImmLocType(0, handleBoxiness(locType, Type::Cell));
       }
       break;
     }
@@ -3657,7 +3660,7 @@ SSATmp* HhbcTranslator::ldLoc(uint32_t locId, Block* exit, TypeConstraint tc) {
   m_irb->constrainLocal(locId, tc, opStr);
 
   if (inPseudoMain()) {
-    auto const type = m_irb->localType(locId, tc).relaxToGuardable();
+    auto const type = m_irb->predictedLocalType(locId).relaxToGuardable();
     assert(!type.isSpecialized());
     assert(type == type.dropConstVal());
 

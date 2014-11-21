@@ -108,6 +108,7 @@ struct IRBuilder {
 
   Type localType(uint32_t id, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
+  Type predictedLocalType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);

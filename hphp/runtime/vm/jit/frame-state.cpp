@@ -70,18 +70,11 @@ bool merge_into(LocalState& dst, const LocalState& src) {
     changed = true;
   }
 
-  changed =
+  return
     merge_util(dst.type, Type::unionOf(dst.type, src.type)) ||
-    merge_util(dst.boxedPrediction,
-               Type::unionOf(dst.boxedPrediction, src.boxedPrediction)) ||
+    merge_util(dst.predictedType,
+               Type::unionOf(dst.predictedType, src.predictedType)) ||
     changed;
-
-  // Throw away the prediction if we merged Type::Gen for the type.
-  if (!(dst.type <= Type::BoxedInitCell)) {
-    changed = merge_util(dst.boxedPrediction, Type::Bottom);
-  }
-
-  return changed;
 }
 
 /*
@@ -137,6 +130,40 @@ bool merge_into(jit::vector<FrameState>& dst, const jit::vector<FrameState>& src
     if (merge_into(dst[idx], src[idx])) changed = true;
   }
   return changed;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool check_invariants(const FrameState& state) {
+  for (auto id = uint32_t{0}; id < state.locals.size(); ++id) {
+    auto const& local = state.locals[id];
+
+    always_assert_flog(
+      local.predictedType <= local.type,
+      "local {} failed prediction invariants; pred = {}, type = {}\n",
+      id,
+      local.predictedType,
+      local.type
+    );
+
+    if (state.curFunc->isPseudoMain()) {
+      always_assert_flog(
+        local.value == nullptr,
+        "We should never be tracking values for locals in a pseudomain "
+          "right now.  Local {} had value {}",
+        id,
+        local.value->toString()
+      );
+      always_assert_flog(
+        local.type == Type::Gen,
+        "We should never be tracking non-predicted types for locals in "
+          "a pseudomain right now.  Local {} had type {}",
+        id,
+        local.type.toString()
+      );
+    }
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -314,19 +341,6 @@ void FrameStateMgr::getLocalEffects(const IRInstruction* inst,
       hook.setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
       break;
 
-    case LdLocPseudoMain: {
-      auto const type = inst->typeParam().relaxToGuardable();
-      auto id = inst->extra<LdLocPseudoMain>()->locId;
-      hook.setLocalType(id, type);  // TODO(#5635167): not always true
-      break;
-    }
-    case StLocPseudoMain: {
-      auto const type = inst->src(1)->type().relaxToGuardable();
-      auto id = inst->extra<StLocPseudoMain>()->locId;
-      hook.setLocalType(id, type);  // TODO(#5635167): not always true
-      break;
-    }
-
     case LdLoc:
       hook.setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
       break;
@@ -335,7 +349,13 @@ void FrameStateMgr::getLocalEffects(const IRInstruction* inst,
     case GuardLoc:
     case CheckLoc: {
       auto id = inst->extra<LocalId>()->locId;
-      hook.refineLocalType(id, inst->typeParam(), TypeSource::makeGuard(inst));
+      if (cur().curFunc->isPseudoMain()) {
+        hook.predictLocalType(id, inst->typeParam());
+      } else {
+        hook.refineLocalType(id,
+                             inst->typeParam(),
+                             TypeSource::makeGuard(inst));
+      }
       break;
     }
 
@@ -386,7 +406,7 @@ void FrameStateMgr::getLocalEffects(const IRInstruction* inst,
     case InterpOneCF: {
       auto const& id = *inst->extra<InterpOneData>();
       assert(!id.smashesAllLocals || id.nChangedLocals == 0);
-      if (id.smashesAllLocals) {
+      if (id.smashesAllLocals || cur().curFunc->isPseudoMain()) {
         clearLocals(hook);
       } else {
         auto it = id.changedLocals;
@@ -483,8 +503,8 @@ void FrameStateMgr::killLocalsForCall(LocalStateHook& hook,
  * point to that cell can have their inner type predictions updated.
  */
 void FrameStateMgr::updateLocalRefPredictions(LocalStateHook& hook,
-                                           SSATmp* boxedCell,
-                                           SSATmp* val) const {
+                                              SSATmp* boxedCell,
+                                              SSATmp* val) const {
   assert(boxedCell->type().isBoxed());
   for (auto id = uint32_t{0}; id < cur().locals.size(); ++id) {
     if (canonical(cur().locals[id].value) == canonical(boxedCell)) {
@@ -691,20 +711,9 @@ void FrameStateMgr::clear() {
 }
 
 bool FrameStateMgr::checkInvariants() const {
-  walkAllInlinedLocals(
-    [&] (uint32_t id, unsigned inlineIdx, const LocalState& local) {
-      always_assert_flog(
-        local.boxedPrediction <= local.type &&
-        local.boxedPrediction <= Type::BoxedInitCell &&
-        IMPLIES(local.boxedPrediction != Type::Bottom,
-                local.type <= Type::BoxedInitCell),
-        "local {} failed boxed invariants; pred = {}, type = {}\n",
-        id,
-        local.boxedPrediction,
-        local.type
-      );
-    }
-  );
+  for (auto idx = uint32_t{0}; idx < m_stack.size(); ++idx) {
+    assert(check_invariants(m_stack[idx]));
+  }
   return true;
 }
 
@@ -812,16 +821,11 @@ Type FrameStateMgr::localType(uint32_t id) const {
   return cur().locals[id].type;
 }
 
-Type FrameStateMgr::predictedInnerType(uint32_t id) const {
+Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   always_assert(id < cur().locals.size());
-  always_assert(cur().locals[id].type.isBoxed());
-  if (cur().locals[id].boxedPrediction <= Type::Bottom) {
-    ITRACE(2, "No prediction: {}\n", id);
-    return Type::InitCell;
-  }
-  auto t = ldRefReturn(cur().locals[id].boxedPrediction.unbox());
-  ITRACE(2, "Predicting{}: {}\n", id, t);
-  return t;
+  auto const ty = cur().locals[id].predictedType;
+  ITRACE(2, "Predicting {}: {}\n", id, ty);
+  return ty;
 }
 
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
@@ -830,30 +834,31 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   cur().locals[id].type = value ? value->type() : Type::Gen;
 
   /*
-   * Update the inner-type prediction for boxed values in some special cases to
+   * Update the predicted type for boxed values in some special cases to
    * something smart.  The rest of the time, throw it away.
    */
   auto const newInnerPred = [&]() -> Type {
-    if (!value) return Type::Bottom;
-    auto const inst = value->inst();
-    switch (inst->op()) {
-    case LdLoc:
-      if (value->type().isBoxed()) {
-        // Keep the same prediction as this local.
-        return cur().locals[inst->extra<LdLoc>()->locId].boxedPrediction;
+    if (value) {
+      auto const inst = value->inst();
+      switch (inst->op()) {
+      case LdLoc:
+        if (value->type().isBoxed()) {
+          // Keep the same prediction as this local.
+          return cur().locals[inst->extra<LdLoc>()->locId].predictedType;
+        }
+        break;
+      case Box:
+        return boxType(inst->src(0)->type());
+      default:
+        break;
       }
-      break;
-    case Box:
-      return boxType(inst->src(0)->type());
-    default:
-      break;
     }
-    return Type::Bottom;
+    return cur().locals[id].type;  // just predict what we know
   }();
 
-  FTRACE(3, "setLocalValue setting inner prediction {} to {}\n",
+  FTRACE(3, "setLocalValue setting prediction {} to {}\n",
     id, newInnerPred);
-  cur().locals[id].boxedPrediction = newInnerPred;
+  cur().locals[id].predictedType = newInnerPred;
 
   cur().locals[id].typeSrcs.clear();
   if (value) {
@@ -866,18 +871,28 @@ void FrameStateMgr::refineLocalType(uint32_t id,
                                     TypeSource typeSrc) {
   always_assert(id < cur().locals.size());
   auto& local = cur().locals[id];
-  Type newType = refineTypeNoCheck(local.type, type);
+  auto const newType = refineTypeNoCheck(local.type, type);
   ITRACE(2, "updating local {}'s type: {} -> {}\n", id, local.type, newType);
   local.type = newType;
+  local.predictedType = newType;
   local.typeSrcs.clear();
   local.typeSrcs.insert(typeSrc);
+}
+
+void FrameStateMgr::predictLocalType(uint32_t id, Type type) {
+  always_assert(id < cur().locals.size());
+  auto& local = cur().locals[id];
+  always_assert(type <= local.type);
+  ITRACE(2, "updating local {}'s type prediction: {} -> {}\n",
+    id, local.predictedType, type);
+  local.predictedType = type;
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   cur().locals[id].value = nullptr;
   cur().locals[id].type = type;
-  cur().locals[id].boxedPrediction = Type::Bottom;
+  cur().locals[id].predictedType = type;
   cur().locals[id].typeSrcs.clear();
 }
 
@@ -892,9 +907,9 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
     cur().locals[id].type
   );
   if (cur().locals[id].type <= Type::BoxedCell) {
-    cur().locals[id].boxedPrediction = type;
+    cur().locals[id].predictedType = type;
   } else {
-    cur().locals[id].boxedPrediction = Type::Bottom;
+    cur().locals[id].predictedType = cur().locals[id].type;
   }
 }
 
@@ -922,6 +937,7 @@ void FrameStateMgr::refineLocalValue(uint32_t id, unsigned inlineIdx,
          id, inlineIdx, *local.value, *newVal);
   local.value = newVal;
   local.type = newVal->type();
+  local.predictedType = local.type;
   local.typeSrcs.clear();
   local.typeSrcs.insert(TypeSource::makeValue(newVal));
 }
@@ -936,7 +952,7 @@ void FrameStateMgr::killLocalForCall(uint32_t id, unsigned inlineIdx,
 void FrameStateMgr::dropLocalInnerType(uint32_t id, unsigned inlineIdx) {
   auto& local = locals(inlineIdx)[id];
   assert(local.type.isBoxed());
-  local.boxedPrediction = local.type = Type::BoxedInitCell;
+  local.predictedType = local.type = Type::BoxedInitCell;
 }
 
 void FrameStateMgr::markVisited(const Block* b) {

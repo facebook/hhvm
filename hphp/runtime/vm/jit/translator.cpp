@@ -1695,8 +1695,8 @@ Translator::translateRegion(const RegionDesc& region,
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
       auto newDynLoc = [&] (const InputInfo& ii) {
-        dynLocs.emplace_back(ii.loc, ht.typeFromLocation(ii.loc));
-        FTRACE(2, "typeFromLocation: {} -> {}\n",
+        dynLocs.emplace_back(ii.loc, ht.predictedTypeFromLocation(ii.loc));
+        FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt);
         return &dynLocs.back();
       };

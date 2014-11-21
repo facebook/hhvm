@@ -272,8 +272,8 @@ bool RegionFormer::prepareInstruction() {
 
   // Read types for all the inputs and apply MetaData.
   auto newDynLoc = [&](const InputInfo& ii) {
-    auto dl = m_inst.newDynLoc(ii.loc, m_ht.typeFromLocation(ii.loc));
-    FTRACE(2, "typeFromLocation: {} -> {}\n",
+    auto dl = m_inst.newDynLoc(ii.loc, m_ht.predictedTypeFromLocation(ii.loc));
+    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
            ii.loc.pretty(), dl->rtt);
     return dl;
   };

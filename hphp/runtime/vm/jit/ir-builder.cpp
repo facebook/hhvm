@@ -469,14 +469,6 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocPseudoMain(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLocPseudoMain>()->locId;
-  auto const locType = localType(locId, DataTypeGeneric);
-  auto const minType = std::min(locType, inst->typeParam()).relaxToGuardable();
-  inst->setTypeParam(minType);
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
@@ -549,7 +541,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
-    X(LdLocPseudoMain);
     X(StLoc);
   default:
     break;
@@ -1087,7 +1078,13 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
 }
 
 Type IRBuilder::predictedInnerType(uint32_t id) {
-  return m_state.predictedInnerType(id);
+  auto const ty = m_state.predictedLocalType(id);
+  assert(ty.isBoxed());
+  return ldRefReturn(ty.unbox());
+}
+
+Type IRBuilder::predictedLocalType(uint32_t id) {
+  return m_state.predictedLocalType(id);
 }
 
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {

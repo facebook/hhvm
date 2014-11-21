@@ -109,14 +109,13 @@ struct LocalState {
   Type type{Type::Gen};
 
   /*
-   * Prediction for the type of a local, if it's boxed, otherwise Bottom.
+   * Prediction for the type of a local, if it's boxed or if we're in a
+   * pseudomain.  Otherwise it will be the same as `type'.
    *
    * Invariants:
    *   always a subtype of `type'
-   *   always a subtype of BoxedInitCell
-   *   only boxed if `type' is also boxed
    */
-  Type boxedPrediction{Type::Bottom};
+  Type predictedType{Type::Gen};
 
   /*
    * The sources of the currently known type. They may be values. If the value
@@ -127,10 +126,10 @@ struct LocalState {
 };
 
 inline bool operator==(const LocalState& a, const LocalState& b) {
-  return a.value           == b.value &&
-         a.type            == b.type &&
-         a.boxedPrediction == b.boxedPrediction &&
-         a.typeSrcs        == b.typeSrcs;
+  return a.value         == b.value &&
+         a.type          == b.type &&
+         a.predictedType == b.predictedType &&
+         a.typeSrcs      == b.typeSrcs;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -215,10 +214,11 @@ struct LocalStateHook {
                                 SSATmp* val) {}
   virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
 
-  virtual void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) {}
-  virtual void setLocalType(uint32_t id, Type type) {}
-  virtual void setBoxedLocalPrediction(uint32_t id, Type type) {}
-  virtual void setLocalTypeSource(uint32_t id, TypeSource typeSrc) {}
+  virtual void refineLocalType(uint32_t id, Type, TypeSource) {}
+  virtual void predictLocalType(uint32_t id, Type) {}
+  virtual void setLocalType(uint32_t id, Type) {}
+  virtual void setBoxedLocalPrediction(uint32_t id, Type) {}
+  virtual void setLocalTypeSource(uint32_t id, TypeSource) {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -347,7 +347,7 @@ struct FrameStateMgr final : private LocalStateHook {
   void setBuilding(bool b) { m_status = b ? Status::Building : Status::None; }
 
   Type localType(uint32_t id) const;
-  Type predictedInnerType(uint32_t id) const;
+  Type predictedLocalType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
@@ -430,6 +430,7 @@ private:
   void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
   void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
+  void predictLocalType(uint32_t id, Type type) override;
   void setLocalType(uint32_t id, Type type) override;
   void setBoxedLocalPrediction(uint32_t id, Type type) override;
   void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;

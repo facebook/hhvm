@@ -139,7 +139,12 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type, Offset dest);
-  Type typeFromLocation(const Location& loc);
+
+  /*
+   * Returns a predicted Type for the given location, used for tracelet
+   * analysis.
+   */
+  Type predictedTypeFromLocation(const Location& loc);
 
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,

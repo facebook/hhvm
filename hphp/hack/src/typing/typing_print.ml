@@ -434,5 +434,6 @@ let suggest ty = Suggest.type_ ty
 let full env ty = Full.to_string env ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let class_ c = PrintClass.class_type c
+let gconst gc = Full.to_string PrintClass.tenv gc
 let fun_ f = PrintFun.fun_type f
 let typedef td = PrintTypedef.typedef td

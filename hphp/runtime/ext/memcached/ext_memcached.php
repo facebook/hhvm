@@ -204,12 +204,11 @@ class Memcached {
    *
    * @return int - Returns item's new value on success.
    */
+  <<__Native>>
   public function decrement(string $key,
                             int $offset = 1,
                             int $initial_value = 0,
-                            int $expiry = 0): mixed {
-    return $this->decrementByKey('', $key, $offset, $initial_value, $expiry);
-  }
+                            int $expiry = 0): mixed;
 
   /**
    * Decrement numeric item's value, stored on a specific server

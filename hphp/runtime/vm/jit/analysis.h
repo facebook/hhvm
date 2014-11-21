@@ -64,10 +64,11 @@ IRInstruction* findSpillFrame(SSATmp* sp);
  * A normal use for this function is when you have computed that an SSATmp has
  * the same value as another computation, but want to know if it is defined at
  * some program point so you can add a new use to it.  The precondition that
- * `t' is not const is because this function makes no sense for that use case
- * for constants, which are defined everywhere.
+ * `t' is not the result of a DefConst is because this function makes no sense
+ * for that instruction, which is used to produce values that are defined
+ * everywhere.
  *
- * Pre: !t->isConst()
+ * Pre: !t->inst()->is(DefConst)
  */
 Block* findDefiningBlock(const SSATmp* t);
 

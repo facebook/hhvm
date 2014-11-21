@@ -206,17 +206,8 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
   return idom;
 }
 
-DomChildren findDomChildren(const IRUnit& unit, const BlocksWithIds& blocks) {
-  IdomVector idom = findDominators(unit, blocks);
-  DomChildren children(unit, BlockList());
-  for (Block* block : blocks.blocks) {
-    auto idomBlock = idom[block];
-    if (idomBlock) children[idomBlock].push_back(block);
-  }
-  return children;
-}
-
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
+  assert(b1 != nullptr && b2 != nullptr);
   for (auto b = b2; b != nullptr; b = idoms[b]) {
     if (b == b1) return true;
   }

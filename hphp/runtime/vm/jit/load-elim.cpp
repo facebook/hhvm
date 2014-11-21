@@ -317,7 +317,7 @@ void optimize_block(Local& env, Block* blk) {
         return false;
       }
 
-      if (what->isConst()) return true;
+      if (what->inst()->is(DefConst)) return true;
       auto const defBlock = findDefiningBlock(what);
       if (!defBlock) return false;
       return dominates(defBlock, inst.block(), env.global.idoms);

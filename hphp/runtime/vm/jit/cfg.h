@@ -90,17 +90,6 @@ typedef StateVector<Block,Block*> IdomVector;
 IdomVector findDominators(const IRUnit&, const BlocksWithIds& blocks);
 
 /*
- * A vector of children lists, indexed by block
- */
-typedef StateVector<Block,BlockList> DomChildren;
-
-/*
- * Compute the dominator tree, then populate a list of dominator children
- * for each block.
- */
-DomChildren findDomChildren(const IRUnit&, const BlocksWithIds& blocks);
-
-/*
  * return true if b1 == b2 or if b1 dominates b2.
  */
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
@@ -128,17 +117,6 @@ BlockSet findLoopHeaders(const IRUnit&);
  * Returns true iff the CFG is changed.
  */
 bool insertLoopPreHeaders(IRUnit&);
-
-/*
- * Visit basic blocks in a preorder traversal over the dominator tree.
- * The state argument is passed by value (copied) as we move down the tree,
- * so each child in the tree gets the state after the parent was processed.
- * The body lambda should take State& (by reference) so it can modify it
- * as each block is processed.
- */
-template <class State, class Body>
-void forPreorderDoms(Block* block, const DomChildren& children,
-                     State state, Body body);
 
 /*
  * Visit the instructions in this blocklist, in block order.
@@ -206,15 +184,6 @@ template <class Visitor>
 void postorderWalk(const IRUnit& unit, Visitor visitor, Block* start) {
   detail::PostorderSort<Visitor> ps(visitor, unit.numBlocks());
   ps.walk(start ? start : unit.entry());
-}
-
-template <class State, class Body>
-void forPreorderDoms(Block* block, const DomChildren& children,
-                     State state, Body body) {
-  body(block, state);
-  for (Block* child : children[block]) {
-    forPreorderDoms(child, children, state, body);
-  }
 }
 
 template <class BlockList, class Body>

@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -64,13 +65,13 @@ DEBUG_ONLY static int numBlockParams(Block* b) {
 bool checkBlock(Block* b) {
   auto it = b->begin();
   auto end = b->end();
-  assert(!b->empty());
+  always_assert(!b->empty());
 
   // Invariant #1
   if (it->op() == DefLabel) {
     // Invariant #9
     for (unsigned i = 0, n = it->numDsts(); i < n; ++i) {
-      assert(IMPLIES(it->dst(i)->isA(Type::StkPtr), i == 0));
+      always_assert(IMPLIES(it->dst(i)->isA(Type::StkPtr), i == 0));
     }
     ++it;
   }
@@ -81,38 +82,39 @@ bool checkBlock(Block* b) {
   }
 
   // Invariants #2, #4
-  assert(it != end && b->back().isBlockEnd());
+  always_assert(it != end && b->back().isBlockEnd());
   --end;
-  for (DEBUG_ONLY IRInstruction& inst : folly::range(it, end)) {
-    assert(inst.op() != DefLabel);
-    assert(inst.op() != BeginCatch);
-    assert(!inst.isBlockEnd());
+  for (IRInstruction& inst : folly::range(it, end)) {
+    always_assert(inst.op() != DefLabel);
+    always_assert(inst.op() != BeginCatch);
+    always_assert(!inst.isBlockEnd());
   }
-  for (DEBUG_ONLY IRInstruction& inst : *b) {
+  for (IRInstruction& inst : *b) {
     // Invariant #8
-    assert(inst.marker().valid());
-    assert(inst.block() == b);
+    always_assert(inst.marker().valid());
+    always_assert(inst.block() == b);
     // Invariant #6
-    assert_log(inst.mayRaiseError() ==
-               (inst.taken() && inst.taken()->isCatch()),
-               [&]{ return inst.toString(); });
+    always_assert_log(
+      inst.mayRaiseError() == (inst.taken() && inst.taken()->isCatch()),
+      [&]{ return inst.toString(); }
+    );
   }
 
   // Invariant #5
-  assert(IMPLIES(b->back().isTerminal(), !b->next()));
+  always_assert(IMPLIES(b->back().isTerminal(), !b->next()));
 
   // Invariant #7
   if (b->taken()) {
     // only Jmp can branch to a join block expecting values.
-    DEBUG_ONLY IRInstruction* branch = &b->back();
-    DEBUG_ONLY auto numArgs = branch->op() == Jmp ? branch->numSrcs() : 0;
-    assert(numBlockParams(b->taken()) == numArgs);
+    IRInstruction* branch = &b->back();
+    auto numArgs = branch->op() == Jmp ? branch->numSrcs() : 0;
+    always_assert(numBlockParams(b->taken()) == numArgs);
   }
 
   // Invariant #3
   if (b->isCatch()) {
     // keyed off a tca, so there needs to be exactly one
-    assert(b->preds().size() <= 1);
+    always_assert(b->preds().size() <= 1);
   }
 
   return true;
@@ -139,54 +141,48 @@ bool checkCfg(const IRUnit& unit) {
   jit::hash_set<const Edge*> edges;
 
   // Entry block can't have predecessors.
-  assert(unit.entry()->numPreds() == 0);
+  always_assert(unit.entry()->numPreds() == 0);
 
   // Entry block starts with DefFP
-  assert(!unit.entry()->empty() && unit.entry()->begin()->op() == DefFP);
+  always_assert(!unit.entry()->empty() &&
+                unit.entry()->begin()->op() == DefFP);
 
   // Check valid successor/predecessor edges.
   for (Block* b : blocks) {
     auto checkEdge = [&] (const Edge* e) {
-      assert(e->from() == b);
+      always_assert(e->from() == b);
       edges.insert(e);
       for (auto& p : e->to()->preds()) if (&p == e) return;
-      assert(false); // did not find edge.
+      always_assert(false); // did not find edge.
     };
     checkBlock(b);
     if (auto *e = b->nextEdge())  checkEdge(e);
     if (auto *e = b->takenEdge()) checkEdge(e);
   }
   for (Block* b : blocks) {
-    for (DEBUG_ONLY auto const &e : b->preds()) {
-      assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
-      assert(e.to() == b);
+    for (auto const &e : b->preds()) {
+      always_assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
+      always_assert(e.to() == b);
     }
   }
 
-  // visit dom tree in preorder, checking all tmps
-  auto const children = findDomChildren(unit, blocksIds);
-  StateVector<SSATmp, bool> defined0(unit, false);
-  forPreorderDoms(blocks.front(), children, defined0,
-                  [] (Block* block, StateVector<SSATmp, bool>& defined) {
-    for (IRInstruction& inst : *block) {
-      for (DEBUG_ONLY SSATmp* src : inst.srcs()) {
-        assert(src->inst() != &inst);
-        assert_log(src->inst()->op() == DefConst ||
-                   defined[src],
-                   [&]{ return folly::format(
-                       "src '{}' in '{}' came from '{}', which is not a "
-                       "DefConst and is not defined at this use site",
-                       src->toString(), inst.toString(),
-                       src->inst()->toString()).str();
-                   });
-      }
-      for (SSATmp& dst : inst.dsts()) {
-        assert(dst.inst() == &inst && inst.op() != DefConst);
-        assert(!defined[dst]);
-        defined[dst] = true;
-      }
+  // Visit every instruction and make sure their sources are defined in a block
+  // that dominates the block containing the instruction.
+  auto const idoms = findDominators(unit, blocksIds);
+  forEachInst(blocks, [&] (const IRInstruction* inst) {
+    for (auto src : inst->srcs()) {
+      if (src->inst()->is(DefConst)) continue;
+      auto const dom = findDefiningBlock(src);
+      always_assert_flog(
+        dom && dominates(dom, inst->block(), idoms),
+        "src '{}' in '{}' came from '{}', which is not a "
+        "DefConst and is not defined at this use site",
+        src->toString(), inst->toString(),
+        src->inst()->toString()
+      );
     }
   });
+
   return true;
 }
 

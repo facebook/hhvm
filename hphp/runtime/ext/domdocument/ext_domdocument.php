@@ -651,7 +651,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function load(string $filename, int $options = 0): mixed;
 
   /**
@@ -669,7 +669,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadHTML(string $source, int $options = 0): mixed;
 
   /**
@@ -688,7 +688,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadHTMLFile(string $filename, int $options = 0): mixed;
 
   /**
@@ -704,7 +704,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
-  <<__Native>>
+  <<__Native("ActRec")>>
   function loadXML(string $source, int $options = 0): mixed;
 
   /**

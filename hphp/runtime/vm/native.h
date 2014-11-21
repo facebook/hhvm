@@ -201,6 +201,12 @@ void callFunc(const Func* func, void* ctx,
               TypedValue* args, TypedValue& ret);
 
 /**
+ * Extract the name used to invoke the function from the ActRec where name
+ * maybe be stored in invName, or may include the classname (e.g. Class::func)
+ */
+const StringData* getInvokeName(ActRec* ar);
+
+/**
  * Returns a specialization of either functionWrapper or methodWrapper
  *
  * functionWrapper() Unpacks args and coerces types according

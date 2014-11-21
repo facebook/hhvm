@@ -46,7 +46,8 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
 
-const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
+FILE * file_devnull = fopen("/dev/null", "w+");
+const std::string s_0("0"), s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
@@ -111,6 +112,10 @@ void StandardExtension::threadInitMisc() {
       "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
+          if (value == s_0) {
+            Logger::SetStandardOut(file_devnull);
+            return true;
+          }
           if (value == s_1 || value == s_stdout) {
             Logger::SetStandardOut(stdout);
             return true;
@@ -121,7 +126,9 @@ void StandardExtension::threadInitMisc() {
           }
           return false;
         },
-        nullptr
+        /*[]() {
+          return "hello";
+        }*/ nullptr
       ),
       s_misc_display_errors.get()
     );
@@ -413,11 +420,7 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
 
   String uniqid(prefix.size() + 64, ReserveString);
   auto ptr = uniqid.bufferSlice().ptr;
-  // StringData::capacity() returns the buffer size without the null
-  // terminator. snprintf expects a the buffer capacity including room
-  // for the null terminator, writes the null termintor, and returns
-  // the full length not counting the null terminator.
-  auto capacity = uniqid.capacity() + 1;
+  auto capacity = uniqid.get()->capacity();
   int64_t len;
   if (more_entropy) {
     len = snprintf(ptr, capacity, "%s%08x%05x%.8F",

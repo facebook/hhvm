@@ -325,8 +325,7 @@ folly::dynamic ini_get(uint16_t& p) {
 }
 
 folly::dynamic ini_get(uint32_t& p) {
-  return p;
-}
+  return p;}
 
 folly::dynamic ini_get(uint64_t& p) {
   return p;

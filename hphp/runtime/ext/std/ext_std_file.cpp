@@ -128,6 +128,12 @@
 # define GLOB_FLAGMASK (~0)
 #endif
 
+#define PHP_GLOB_FLAGS (0 | GLOB_BRACE | GLOB_MARK  \
+                          | GLOB_NOSORT | GLOB_NOCHECK \
+                          | GLOB_NOESCAPE | GLOB_ERR \
+                          | GLOB_ONLYDIR)
+#define PHP_GLOB_FLAGMASK (GLOB_FLAGMASK & PHP_GLOB_FLAGS)
+
 namespace HPHP {
 
 static const StaticString s_STREAM_URL_STAT_LINK("STREAM_URL_STAT_LINK");
@@ -1662,7 +1668,10 @@ Variant HHVM_FUNCTION(glob,
       cwd_skip = cwd.length() + 1;
     }
   }
-  int nret = glob(work_pattern.data(), flags & GLOB_FLAGMASK, NULL, &globbuf);
+  int nret = glob(work_pattern.data(),
+                  flags & PHP_GLOB_FLAGMASK,
+                  nullptr,
+                  &globbuf);
   if (nret == GLOB_NOMATCH) {
     return empty_array();
   }

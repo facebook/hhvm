@@ -126,9 +126,13 @@ bool WddxPacket::recursiveAddVar(const String& varName,
 
   std::string varType = getDataTypeString(varVariant.getType()).data();
   if (!getWddxEncoded(varType, "", varName, false).empty()) {
-    std::string varValue = varVariant.toString().data();
+    std::string varValue;
     if (varType.compare("boolean") == 0) {
       varValue = varVariant.toBoolean() ? "true" : "false";
+    } else {
+      varValue = StringUtil::HtmlEncode(varVariant.toString(),
+                                        StringUtil::QuoteStyle::Double,
+                                        "UTF-8", false, false).toCppString();
     }
     m_packetString += getWddxEncoded(varType, varValue, varName, hasVarTag);
     return true;

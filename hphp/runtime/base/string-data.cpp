@@ -944,7 +944,7 @@ int StringData::numericCompare(const StringData *v2) const {
     assert(ret1 == KindOfInt64);
     assert(ret2 == KindOfDouble);
     if (oflow2) {
-      return oflow2;
+      return -oflow2;
     }
     dval1 = (double)lval1;
   }

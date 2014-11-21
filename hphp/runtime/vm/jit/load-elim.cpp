@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/alocation-analysis.h"
+#include "hphp/runtime/vm/jit/alias-analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -88,14 +88,14 @@ struct Global {
     : unit(unit)
     , idoms(findDominators(unit, sortedBlocks))
     , rpoBlocks(std::move(sortedBlocks.blocks))
-    , linfo(collect_locations(unit, rpoBlocks))
+    , ainfo(collect_aliases(unit, rpoBlocks))
     , blockInfo(unit, BlockInfo{})
   {}
 
   IRUnit& unit;
   IdomVector idoms;
   BlockList rpoBlocks;
-  ALocationAnalysis linfo;
+  AliasAnalysis ainfo;
 
   /*
    * Map from each block to its information.  Before we've done the fixed point
@@ -161,17 +161,17 @@ void clear_everything(Local& env) {
 
 TrackedLoc* find_tracked(Local& env,
                          const IRInstruction& inst,
-                         ALocation loc) {
-  auto const meta = env.global.linfo.find(canonicalize(loc));
+                         AliasClass acls) {
+  auto const meta = env.global.ainfo.find(canonicalize(acls));
   if (!meta) return nullptr;
   assert(meta->index < kMaxTrackedALocs);
   return env.state.avail[meta->index] ? &env.state.tracked[meta->index]
                                       : nullptr;
 }
 
-SSATmp* load(Local& env, const IRInstruction& inst, ALocation loc) {
-  loc = canonicalize(loc);
-  auto const meta = env.global.linfo.find(loc);
+SSATmp* load(Local& env, const IRInstruction& inst, AliasClass acls) {
+  acls = canonicalize(acls);
+  auto const meta = env.global.ainfo.find(acls);
   if (!meta) return nullptr;
   assert(meta->index < kMaxTrackedALocs);
   auto& tracked = env.state.tracked[meta->index];
@@ -192,17 +192,17 @@ SSATmp* load(Local& env, const IRInstruction& inst, ALocation loc) {
   }
   tracked.knownValue = inst.dst();
 
-  FTRACE(4, "       {} <- {}\n", show(loc), inst.dst()->toString());
+  FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
   FTRACE(5, "       av: {}\n", show(env.state.avail));
   return nullptr;
 }
 
-void store(Local& env, ALocation loc, SSATmp* value) {
-  loc = canonicalize(loc);
+void store(Local& env, AliasClass acls, SSATmp* value) {
+  acls = canonicalize(acls);
 
-  auto const meta = env.global.linfo.find(loc);
+  auto const meta = env.global.ainfo.find(acls);
   if (!meta) {
-    env.state.avail &= ~env.global.linfo.may_alias(loc);
+    env.state.avail &= ~env.global.ainfo.may_alias(acls);
     return;
   }
 
@@ -213,7 +213,7 @@ void store(Local& env, ALocation loc, SSATmp* value) {
   current.knownValue = value;
   current.knownType = value ? value->type() : Type::Top;
   env.state.avail.set(meta->index);
-  FTRACE(4, "       {} <- {}\n", show(loc),
+  FTRACE(4, "       {} <- {}\n", show(acls),
     value ? value->toString() : std::string("<>"));
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
@@ -253,9 +253,9 @@ Flags analyze_inst(Local& env,
     [&] (IterEffects)       { clear_everything(env); },
     [&] (IterEffects2)      { clear_everything(env); },
 
-    [&] (PureLoad m)    { flags.replaceable = load(env, inst, m.loc); },
-    [&] (PureStore m)   { store(env, m.loc, m.value); },
-    [&] (PureStoreNT m) { store(env, m.loc, m.value); },
+    [&] (PureLoad m)    { flags.replaceable = load(env, inst, m.src); },
+    [&] (PureStore m)   { store(env, m.dst, m.value); },
+    [&] (PureStoreNT m) { store(env, m.dst, m.value); },
 
     [&] (MayLoadStore m) {
       store(env, m.stores, nullptr);
@@ -362,7 +362,7 @@ bool merge_into(Global& genv, State& dst, const State& src) {
   }
 
   always_assert(dst.tracked.size() == src.tracked.size());
-  always_assert(dst.tracked.size() == genv.linfo.locations.size());
+  always_assert(dst.tracked.size() == genv.ainfo.locations.size());
 
   auto changed = false;
 
@@ -376,7 +376,7 @@ bool merge_into(Global& genv, State& dst, const State& src) {
 
   for (auto idx = uint32_t{0}; idx < kMaxTrackedALocs; ++idx) {
     if (!src.avail[idx]) continue;
-    mod_avail(~genv.linfo.locations_inv[idx].conflicts);
+    mod_avail(~genv.ainfo.locations_inv[idx].conflicts);
 
     if (dst.avail[idx]) {
       if (merge_into(dst.tracked[idx], src.tracked[idx])) {
@@ -404,7 +404,7 @@ void analyze(Global& genv) {
   {
     auto& entryIn = genv.blockInfo[genv.unit.entry()].stateIn;
     entryIn.initialized = true;
-    entryIn.tracked.resize(genv.linfo.locations.size());
+    entryIn.tracked.resize(genv.ainfo.locations.size());
   }
   incompleteQ.push(0);
 
@@ -459,11 +459,11 @@ void optimizeLoads(IRUnit& unit) {
   SCOPE_EXIT { FTRACE(1, "optimizeLoads:^^^^^^^^^^^^^^^^^^^^\n"); };
 
   auto genv = Global { unit, rpoSortCfgWithIds(unit) };
-  if (genv.linfo.locations.size() == 0) {
+  if (genv.ainfo.locations.size() == 0) {
     FTRACE(1, "no memory accesses to possibly optimize\n");
     return;
   }
-  FTRACE(1, "\nLocations:\n{}\n", show(genv.linfo));
+  FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
   analyze(genv);
 
   FTRACE(1, "\n\nFixed point:\n{}\n",

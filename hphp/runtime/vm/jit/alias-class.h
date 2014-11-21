@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ABSTRACT_LOCATION_H_
-#define incl_HPHP_ABSTRACT_LOCATION_H_
+#ifndef incl_HPHP_ALIAS_CLASS_H_
+#define incl_HPHP_ALIAS_CLASS_H_
 
 #include <string>
 #include <cstdint>
@@ -29,26 +29,22 @@ struct SSATmp;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * An ALocation (abstract location) represents some part of memory that we know
- * something about.
+ * AliasClass represents a lattice of abstract memory locations.  These support
+ * type-system-like operations (operator<= for subset, operator| for union, and
+ * maybe() to test for non-zero intersections).
  *
- * Each abstract location represents a set of potential concrete locations, and
- * the set of abstract locations is a lattice.  These support type-system-like
- * operations (operator<= for subset, operator| for union, and maybe() to test
- * for non-zero intersections).
- *
- * AUnknown is the top of the lattice (includes all possible locations).  We
- * don't subdivide very much yet, so many things should end up there.  AEmpty
- * is the bottom.  The various special location types AFoo all have an AFooAny,
- * which is the superset of all AFoos.
+ * AUnknown is the top of the lattice (is the class of all possible memory
+ * locations we care about).  We don't subdivide very much yet, so many things
+ * should end up there.  AEmpty is the bottom.  The various special location
+ * types AFoo all have an AFooAny, which is the superset of all AFoos.
  */
-struct ALocation;
+struct AliasClass;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Special ALocation data for locations known to be exactly a specific local on
- * the frame `fp'.
+ * Special data for locations known to be exactly a specific local on the frame
+ * `fp'.
  */
 struct AFrame { SSATmp* fp; uint32_t id; };
 
@@ -72,7 +68,7 @@ struct AElemS { SSATmp* arr; const StringData* key; };
 
 //////////////////////////////////////////////////////////////////////
 
-struct ALocation {
+struct AliasClass {
   enum rep : uint32_t {  // bits for various location classes
     BEmpty   = 0,
 
@@ -89,50 +85,51 @@ struct ALocation {
   };
 
   /*
-   * A hashing function for abstract locations.
+   * A hashing function for alias classes.
    */
-  struct Hash { size_t operator()(ALocation) const; };
+  struct Hash { size_t operator()(AliasClass) const; };
 
   /*
-   * Create a location from a bit representation.
+   * Create an alias class from a bit representation.  Usually you should use
+   * one of the other functions to create these.
    */
-  explicit ALocation(rep bits) : m_bits{bits} {}
+  explicit AliasClass(rep bits) : m_bits{bits} {}
 
   /*
-   * Create a location with more precise specialized information about where it
-   * is.
+   * Create an alias class with more precise specialized information about
+   * where it is.
    */
-  /* implicit */ ALocation(AFrame);
-  /* implicit */ ALocation(AProp);
-  /* implicit */ ALocation(AElemI);
-  /* implicit */ ALocation(AElemS);
+  /* implicit */ AliasClass(AFrame);
+  /* implicit */ AliasClass(AProp);
+  /* implicit */ AliasClass(AElemI);
+  /* implicit */ AliasClass(AElemS);
 
   /*
    * Exact equality.
    */
-  bool operator==(ALocation) const;
+  bool operator==(AliasClass) const;
 
   /*
-   * Create an abstract location that is at least as big as the union of this
-   * location and another one.
+   * Create an alias class that is at least as big as the true union of this
+   * alias class and another one.
    */
-  ALocation operator|(ALocation) const;
+  AliasClass operator|(AliasClass) const;
 
   /*
-   * Returns whether this location represents a non-strict-subset of the
-   * possible locations in another one.
+   * Returns whether this alias class is a non-strict-subset of another one.
    */
-  bool operator<=(ALocation) const;
+  bool operator<=(AliasClass) const;
 
   /*
-   * Returns whether an abstract location could possibly refer to the same
-   * concrete location as another abstract location.
+   * Returns whether an alias class could possibly refer to the same concrete
+   * memory location as another one.  Basically, do they have a non-empty
+   * intersection.
    */
-  bool maybe(ALocation) const;
+  bool maybe(AliasClass) const;
 
   /*
    * Conditionally access specific known information of various kinds.  Return
-   * folly::none if this abstract location is not specialized in that way.
+   * folly::none if this alias class is not specialized in that way.
    */
   folly::Optional<AFrame> frame() const;
   folly::Optional<AProp> prop() const;
@@ -149,9 +146,9 @@ private:
   };
 
 private:
-  friend std::string show(ALocation);
+  friend std::string show(AliasClass);
   bool checkInvariants() const;
-  bool equivData(ALocation) const;
+  bool equivData(AliasClass) const;
 
 private:
   rep m_bits;
@@ -166,26 +163,26 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-auto const AEmpty    = ALocation{ALocation::BEmpty};
-auto const AFrameAny = ALocation{ALocation::BFrame};
-auto const APropAny  = ALocation{ALocation::BProp};
-auto const ANonFrame = ALocation{ALocation::BNonFrame};
-auto const AElemIAny = ALocation{ALocation::BElemI};
-auto const AElemAny  = ALocation{ALocation::BElem};
-auto const AUnknown  = ALocation{ALocation::BUnknown};
+auto const AEmpty    = AliasClass{AliasClass::BEmpty};
+auto const AFrameAny = AliasClass{AliasClass::BFrame};
+auto const APropAny  = AliasClass{AliasClass::BProp};
+auto const ANonFrame = AliasClass{AliasClass::BNonFrame};
+auto const AElemIAny = AliasClass{AliasClass::BElemI};
+auto const AElemAny  = AliasClass{AliasClass::BElem};
+auto const AUnknown  = AliasClass{AliasClass::BUnknown};
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Replace any SSATmps in an ALocation with their canonical name (chasing
+ * Replace any SSATmps in an AliasClass with their canonical name (chasing
  * passthrough instructions as with canonical() from analysis.h.)
  */
-ALocation canonicalize(ALocation);
+AliasClass canonicalize(AliasClass);
 
 /*
- * Produce a debug string for an abstract location.
+ * Produce a debug string for an alias class.
  */
-std::string show(ALocation);
+std::string show(AliasClass);
 
 //////////////////////////////////////////////////////////////////////
 

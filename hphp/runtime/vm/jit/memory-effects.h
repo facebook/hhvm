@@ -22,7 +22,7 @@
 
 #include <boost/variant.hpp>
 
-#include "hphp/runtime/vm/jit/abstract-location.h"
+#include "hphp/runtime/vm/jit/alias-class.h"
 
 namespace HPHP { namespace jit {
 
@@ -36,7 +36,7 @@ struct IRInstruction;
  * another.  Either may be empty locations, we don't know the value potentially
  * stored, and the instruction may have other non-pure side effects.
  */
-struct MayLoadStore   { ALocation loads; ALocation stores; };
+struct MayLoadStore   { AliasClass loads; AliasClass stores; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -44,7 +44,7 @@ struct MayLoadStore   { ALocation loads; ALocation stores; };
  * removed and replaced with a Mov if we have a value available that's known to
  * be in the location.
  */
-struct PureLoad       { ALocation loc; };
+struct PureLoad       { AliasClass src; };
 
 /*
  * The effect of definitely storing to a location, without performing any other
@@ -54,8 +54,8 @@ struct PureLoad       { ALocation loc; };
  *
  * The NT variation means it is not storing a type tag.
  */
-struct PureStore    { ALocation loc; SSATmp* value; };
-struct PureStoreNT  { ALocation loc; SSATmp* value; };
+struct PureStore    { AliasClass dst; SSATmp* value; };
+struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 
 /*
  * Iterator instructions are special enough that they just have their own

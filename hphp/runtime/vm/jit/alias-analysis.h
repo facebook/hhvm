@@ -22,7 +22,7 @@
 
 #include "hphp/util/sparse-id-containers.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/abstract-location.h"
+#include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace jit {
@@ -32,11 +32,11 @@ struct IRUnit;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Sets of abstract locations.
+ * Sets of abstract locations tracked by AliasAnalysis come in ALocBits.
  *
  * Right now we have a static maximum number of tracked locations---passes
  * using information from this module must be conservative about locations that
- * aren't assigned an id.  (E.g. via may_alias in ALocationAnalysis.)
+ * aren't assigned an id.  (E.g. via may_alias in AliasAnalysis.)
  */
 constexpr uint32_t kMaxTrackedALocs = 128;
 using ALocBits = std::bitset<kMaxTrackedALocs>;
@@ -49,33 +49,33 @@ struct ALocMeta {
 };
 
 /*
- * Information about the various abstract locations an IR unit may be concerned
- * with.  See collect_locations.
+ * Information about various abstract locations an IR unit may be concerned
+ * with.  See collect_aliases.
  */
-struct ALocationAnalysis {
-  explicit ALocationAnalysis(const IRUnit&);
+struct AliasAnalysis {
+  explicit AliasAnalysis(const IRUnit&);
 
-  ALocationAnalysis(const ALocationAnalysis&) = delete;
-  ALocationAnalysis(ALocationAnalysis&&) = default;
-  ALocationAnalysis& operator=(const ALocationAnalysis&) = delete;
-  ALocationAnalysis& operator=(ALocationAnalysis&&) = default;
+  AliasAnalysis(const AliasAnalysis&) = delete;
+  AliasAnalysis(AliasAnalysis&&) = default;
+  AliasAnalysis& operator=(const AliasAnalysis&) = delete;
+  AliasAnalysis& operator=(AliasAnalysis&&) = default;
 
   /*
-   * Bidirectional map from abstract locations to metadata about that location,
-   * primarily an assigned id.  There is also an inverse map from location id
-   * to the metadata structure.
+   * Bidirectional map from alias classes to metadata about that abstract
+   * memory location, primarily an assigned id.  There is also an inverse map
+   * from id to the metadata structure.
    *
    * The keyed locations in this map take their canonical form.  You should use
    * canonicalize before doing lookups.
    */
-  jit::hash_map<ALocation,ALocMeta,ALocation::Hash> locations;
+  jit::hash_map<AliasClass,ALocMeta,AliasClass::Hash> locations;
   jit::vector<ALocMeta> locations_inv;
 
   /*
-   * Short-hand to find an abstract location in the locations map, or get
-   * folly::none.
+   * Short-hand to find an alias class in the locations map, or get folly::none
+   * if the alias class wasn't assigned an ALocMeta structure.
    */
-  folly::Optional<ALocMeta> find(ALocation) const;
+  folly::Optional<ALocMeta> find(AliasClass) const;
 
   /*
    * Several larger sets of locations, we have a set of all the ids assigned to
@@ -89,8 +89,8 @@ struct ALocationAnalysis {
    * Return a set of locations that we've assigned ids to that may be affected
    * by a memory operation.  This function is used to get information about
    * possible effects from an operation on a location that we aren't tracking.
-   * This is often needed for instructions that affect very large abstract
-   * locations like ANonFrame.
+   * This is often needed for instructions that affect very large alias classes
+   * like ANonFrame.
    *
    * Also, note that because of the kMaxTrackedALocs limit, this location could
    * be very 'concrete' (a prop on a known object for example).  But even in
@@ -101,9 +101,9 @@ struct ALocationAnalysis {
    * conflict set in ALocMeta if we have one for `loc'---it'll be much less
    * conservative.
    *
-   * Pre: find(loc) == folly::none
+   * Pre: find(acls) == folly::none
    */
-  ALocBits may_alias(ALocation loc) const;
+  ALocBits may_alias(AliasClass acls) const;
 
   /*
    * Map from frame SSATmp ids to the location bits for all of the frame's
@@ -115,29 +115,29 @@ struct ALocationAnalysis {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Perform a flow-insensitive analysis on the supplied blocks, collecting all
- * the possibly distinct abstract memory locations that are explicitly
- * referenced, and assign them ids and may-alias sets.  Only certain types of
- * locations are assigned ids, based on whether it is an ALocation that passes
- * can currently plausibly optimize.
+ * Perform a flow-insensitive analysis on the supplied blocks, collecting
+ * possibly distinct abstract memory locations that are explicitly referenced,
+ * and assigning them ids and may-alias sets.  Only certain types of locations
+ * are assigned ids, based on whether it maps to an AliasClass that that passes
+ * can currently plausibly optimize (because it is sufficiently concrete).
  *
- * Note: it is fine to continue to reuse one ALocationAnalysis structure after
+ * Note: it is fine to continue to reuse one AliasAnalysis structure after
  * mutating the IR, because the information it contains is both
  * flow-insensitive and conservative.  That is: if you change the IR to
- * reference new abstract memory locations, the fact that ALocationAnalysis
- * didn't know about it won't invalidate the things it knows about (and the
- * general may_alias function will still work on the new location).  Similarly,
+ * reference new abstract memory locations, the fact that AliasAnalysis didn't
+ * know about it won't invalidate the things it knows about (and the general
+ * may_alias function will still work on the new location).  Similarly,
  * removing references to locations or changing control flow won't invalidate
  * anything.
  */
-ALocationAnalysis collect_locations(const IRUnit&, const BlockList&);
+AliasAnalysis collect_aliases(const IRUnit&, const BlockList&);
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Produce summary information for debug printing.
  */
-std::string show(const ALocationAnalysis&);
+std::string show(const AliasAnalysis&);
 std::string show(ALocBits);
 
 //////////////////////////////////////////////////////////////////////

@@ -324,10 +324,6 @@ let rec cut_after n = function
   | l when n <= 0 -> []
   | x :: rl -> x :: cut_after (n-1) rl
 
-let truncate_string_beyond max s =
-  if String.length s <= max then s
-  else (String.sub s 0 max)^"..."
-
 let iter_n_acc n f acc =
   let acc = ref acc in
   for i = 1 to n do

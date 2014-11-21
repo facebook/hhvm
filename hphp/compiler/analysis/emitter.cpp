@@ -26,9 +26,9 @@
 #include <set>
 #include <utility>
 
-#include "folly/MapUtil.h"
-#include "folly/Memory.h"
-#include "folly/ScopeGuard.h"
+#include <folly/MapUtil.h>
+#include <folly/Memory.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"

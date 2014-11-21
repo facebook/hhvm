@@ -26,9 +26,9 @@
 #include <execinfo.h>
 #endif
 
-#include "folly/String.h"
-#include "folly/Hash.h"
-#include "folly/Bits.h"
+#include <folly/String.h>
+#include <folly/Hash.h>
+#include <folly/Bits.h>
 
 #include "hphp/util/maphuge.h"
 #include "hphp/util/logger.h"

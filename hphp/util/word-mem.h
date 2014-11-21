@@ -17,7 +17,7 @@
 #define incl_HPHP_WORD_MEM_H_
 
 #include <limits>
-#include "folly/Portability.h"
+#include <folly/Portability.h>
 
 namespace HPHP {
 

@@ -24,8 +24,8 @@
 #include <random>
 #include <string>
 
-#include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/cache/mmap-file.h"

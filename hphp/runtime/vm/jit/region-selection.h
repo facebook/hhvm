@@ -22,7 +22,7 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"

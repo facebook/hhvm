@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include <vector>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"

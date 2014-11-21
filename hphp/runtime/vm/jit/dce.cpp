@@ -16,7 +16,7 @@
 
 #include <array>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"

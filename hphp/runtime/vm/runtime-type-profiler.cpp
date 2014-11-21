@@ -23,9 +23,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "folly/AtomicHashMap.h"
-#include "folly/dynamic.h"
-#include "folly/json.h"
+#include <folly/AtomicHashMap.h>
+#include <folly/dynamic.h>
+#include <folly/json.h>
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"

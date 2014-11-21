@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/util/thread-local.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <lber.h>
 #include "hphp/util/text-util.h"
 

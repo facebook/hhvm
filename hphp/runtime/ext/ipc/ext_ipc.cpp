@@ -21,7 +21,7 @@
 #include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include <memory>
 

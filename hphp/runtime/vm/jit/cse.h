@@ -19,7 +19,7 @@
 
 #include <unordered_map>
 
-#include "folly/Hash.h"
+#include <folly/Hash.h>
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"

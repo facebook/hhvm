@@ -27,8 +27,8 @@
 #include <utility>
 #include <vector>
 
-#include "folly/Conv.h"
-#include "folly/MapUtil.h"
+#include <folly/Conv.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"

@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/server/ext_server.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/pagelet-server.h"

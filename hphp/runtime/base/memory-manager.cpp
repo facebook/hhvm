@@ -34,7 +34,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"

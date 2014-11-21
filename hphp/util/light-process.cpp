@@ -32,7 +32,7 @@
 #include <pwd.h>
 #include <signal.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"

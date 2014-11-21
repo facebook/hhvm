@@ -32,7 +32,7 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/constants.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 using std::set;
 

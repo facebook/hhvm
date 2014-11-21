@@ -19,7 +19,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 #include "hphp/runtime/base/complex-types.h"
 

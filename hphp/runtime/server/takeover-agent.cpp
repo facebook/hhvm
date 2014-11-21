@@ -18,7 +18,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <afdt.h>
 
 /*

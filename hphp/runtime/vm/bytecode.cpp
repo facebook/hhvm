@@ -29,7 +29,7 @@
 #include <libgen.h>
 #include <sys/mman.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"

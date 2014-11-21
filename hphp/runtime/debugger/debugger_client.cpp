@@ -34,7 +34,7 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/config.h"
 #include <boost/scoped_ptr.hpp>
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #define USE_VARARGS
 #define PREFER_STDARG

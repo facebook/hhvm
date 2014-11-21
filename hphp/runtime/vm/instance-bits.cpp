@@ -20,8 +20,8 @@
 #include <atomic>
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/MapUtil.h"
+#include <folly/ScopeGuard.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"

@@ -20,8 +20,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
-#include "folly/Optional.h"
+#include <folly/ScopeGuard.h>
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"

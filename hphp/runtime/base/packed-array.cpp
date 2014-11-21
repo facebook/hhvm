@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/mixed-array.h"

@@ -22,7 +22,7 @@
 #include <utility>
 #include <set>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"

@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_MYSQL_H_
 #define incl_HPHP_EXT_MYSQL_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"

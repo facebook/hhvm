@@ -22,8 +22,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "folly/Format.h"
-#include "folly/Traits.h"
+#include <folly/Format.h>
+#include <folly/Traits.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/string-data.h"

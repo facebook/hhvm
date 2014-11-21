@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/util/text-util.h"
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 using folly::make_unique;
 using std::set;

@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include "hphp/util/exception.h"
 #include <errno.h>
-#include "folly/String.h"
+#include <folly/String.h>
 #include <type_traits>
 
 namespace HPHP {

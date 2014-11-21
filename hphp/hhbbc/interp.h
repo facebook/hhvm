@@ -20,7 +20,7 @@
 #include <vector>
 #include <bitset>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/index.h"

@@ -20,8 +20,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "folly/FBString.h"
-#include "folly/FBVector.h"
+#include <folly/FBString.h>
+#include <folly/FBVector.h>
 
 #include "hphp/tools/bootstrap/idl.h"
 

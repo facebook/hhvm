@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/file-util.h"

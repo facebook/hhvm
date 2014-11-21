@@ -37,7 +37,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

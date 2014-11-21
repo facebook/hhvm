@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"

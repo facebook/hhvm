@@ -25,8 +25,8 @@
 #include <boost/variant.hpp>
 #include <tbb/concurrent_hash_map.h>
 
-#include "folly/Optional.h"
-#include "folly/Hash.h"
+#include <folly/Optional.h>
+#include <folly/Hash.h>
 
 #include "hphp/util/either.h"
 #include "hphp/runtime/base/complex-types.h"

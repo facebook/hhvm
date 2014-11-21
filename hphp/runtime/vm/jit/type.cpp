@@ -18,10 +18,10 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/MapUtil.h"
-#include "folly/gen/Base.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/MapUtil.h>
+#include <folly/gen/Base.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-util.h"

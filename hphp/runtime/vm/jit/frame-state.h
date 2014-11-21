@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"

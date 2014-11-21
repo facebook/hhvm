@@ -22,7 +22,7 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/copy-ptr.h"
 

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_STRING_HOLDER_H_
 #define incl_HPHP_STRING_HOLDER_H_
 
-#include "folly/io/IOBuf.h"
+#include <folly/io/IOBuf.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CONFIG_H_
 #define incl_HPHP_CONFIG_H_
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 #include "hphp/util/hdf.h"
 
 namespace HPHP {

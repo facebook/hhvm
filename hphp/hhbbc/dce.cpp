@@ -25,8 +25,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"

@@ -44,8 +44,8 @@
 
 #include "hphp/system/systemlib.h"
 
-#include "folly/Hash.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Hash.h>
+#include <folly/ScopeGuard.h>
 
 #include <vector>
 

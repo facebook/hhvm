@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/variable-serializer.h"

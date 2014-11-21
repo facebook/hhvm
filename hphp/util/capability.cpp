@@ -18,7 +18,7 @@
 
 #include "hphp/util/capability.h"
 #include "hphp/util/logger.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <linux/types.h>
 #include <sys/capability.h>
 #include <sys/prctl.h>

@@ -20,12 +20,12 @@
 #include <memory>
 #include <vector>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/String.h"
-#include "folly/Range.h"
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/String.h>
+#include <folly/Range.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/type-system.h"

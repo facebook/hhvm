@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"

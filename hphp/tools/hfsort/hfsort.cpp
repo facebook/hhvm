@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace hfsort {

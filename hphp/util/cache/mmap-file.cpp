@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/logger.h"
 
 namespace HPHP {

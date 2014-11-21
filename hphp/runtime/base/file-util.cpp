@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <libgen.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"

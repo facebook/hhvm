@@ -21,7 +21,7 @@
 
 #include <boost/variant.hpp>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/match.h"
 #include "hphp/runtime/vm/as-shared.h"

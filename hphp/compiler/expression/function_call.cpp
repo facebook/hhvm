@@ -36,7 +36,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 using namespace HPHP;
 

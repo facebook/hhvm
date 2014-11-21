@@ -9,7 +9,7 @@
 #define YYLEX_PARAM _p
 
 #include "hphp/compiler/parser/parser.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 

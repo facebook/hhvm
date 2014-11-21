@@ -21,7 +21,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <type_traits>
 #include <utility>
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 #include "hphp/util/atomic.h"
 
 namespace HPHP {

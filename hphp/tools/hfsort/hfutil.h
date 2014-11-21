@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 #define incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include <string>
 #include <vector>

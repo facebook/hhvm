@@ -21,9 +21,9 @@
 #include <utility>
 #include <iostream>
 
-#include "folly/Memory.h"
-#include "folly/Conv.h"
-#include "folly/String.h"
+#include <folly/Memory.h>
+#include <folly/Conv.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"

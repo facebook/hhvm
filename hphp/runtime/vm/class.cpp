@@ -28,7 +28,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 #include <iostream>
 #include <algorithm>
 

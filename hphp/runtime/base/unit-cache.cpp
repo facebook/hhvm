@@ -24,7 +24,7 @@
 #include <cstdlib>
 #include <thread>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"

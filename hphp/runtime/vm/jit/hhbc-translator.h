@@ -22,7 +22,7 @@
 #include <stack>
 #include <utility>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"

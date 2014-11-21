@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 #define ERROR_RAISE_WARNING(exp)        \
   int ret = (exp);                      \

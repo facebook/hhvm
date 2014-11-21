@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/code-coverage.h"

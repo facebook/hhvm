@@ -16,7 +16,7 @@
 
 #include "asm-x64.h"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 namespace HPHP { namespace jit {
 

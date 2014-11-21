@@ -20,7 +20,7 @@
 #include <climits>
 #include <vector>
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"

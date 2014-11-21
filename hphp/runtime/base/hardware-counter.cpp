@@ -18,7 +18,7 @@
 
 #ifndef NO_HARDWARE_COUNTERS
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/logger.h"
 
@@ -39,7 +39,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

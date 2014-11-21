@@ -23,7 +23,7 @@
 #include <boost/mpl/has_xxx.hpp>
 #include <algorithm>
 
-#include "folly/Hash.h"
+#include <folly/Hash.h>
 
 #include "hphp/util/tiny-vector.h"
 #include "hphp/runtime/vm/hhbc.h"

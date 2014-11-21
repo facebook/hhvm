@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"

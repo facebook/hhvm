@@ -21,7 +21,7 @@
 #include <vector>
 #include <utility>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"

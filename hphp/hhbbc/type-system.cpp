@@ -20,9 +20,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "folly/Optional.h"
-#include "folly/Traits.h"
-#include "folly/Hash.h"
+#include <folly/Optional.h>
+#include <folly/Traits.h>
+#include <folly/Hash.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"

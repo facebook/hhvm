@@ -18,9 +18,9 @@
 #include <algorithm>
 #include <utility>
 
-#include "folly/Lazy.h"
-#include "folly/Optional.h"
-#include "folly/MapUtil.h"
+#include <folly/Lazy.h>
+#include <folly/Optional.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"

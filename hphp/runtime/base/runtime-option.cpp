@@ -27,7 +27,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"

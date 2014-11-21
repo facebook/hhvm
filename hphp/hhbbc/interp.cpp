@@ -20,7 +20,7 @@
 #include <string>
 #include <iterator>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/static-string-table.h"

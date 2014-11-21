@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/bz2/bz2-file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/alloc.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 // Don't do the do { ... } while(0) trick here because we need 'f' outside of
 // the macro

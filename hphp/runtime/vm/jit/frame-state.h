@@ -267,10 +267,7 @@ struct FrameStateMgr final : private LocalStateHook {
    * that the given block has a predecessor in the region that might not yet
    * be linked into the IR cfg.
    */
-  void startBlock(Block* b,
-                  BCMarker marker,
-                  LocalStateHook* hook = nullptr,
-                  bool isLoopHeader = false);
+  void startBlock(Block* b, BCMarker marker, bool isLoopHeader = false);
 
   /*
    * Finish tracking state for a block and save the current state to
@@ -407,7 +404,7 @@ private:
   jit::vector<LocalState>& locals(unsigned inlineIdx);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
+  void loopHeaderClear(BCMarker);
 
 private:
   FrameState& cur() {

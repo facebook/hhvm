@@ -355,7 +355,6 @@ SSATmp* FrameStateMgr::spLeavingBlock(Block* b) const {
 
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
-                               LocalStateHook* hook /* = nullptr */,
                                bool isLoopHeader /* = false */) {
   assert(m_status != Status::None);
   auto const it = m_states.find(block);
@@ -391,7 +390,7 @@ void FrameStateMgr::startBlock(Block* block,
     Indent _;
     ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
            block->id());
-    loopHeaderClear(marker, hook);
+    loopHeaderClear(marker);
   }
 
   markVisited(block);
@@ -507,8 +506,7 @@ bool FrameStateMgr::checkInvariants() const {
  * We do not support unprocessed predecessors from different frames.  fpValue
  * must be the same, so it is not cleared.
  */
-void FrameStateMgr::loopHeaderClear(BCMarker marker,
-                                    LocalStateHook* hook /* = nullptr */) {
+void FrameStateMgr::loopHeaderClear(BCMarker marker) {
   cur().spValue        = nullptr;
   cur().marker         = marker;
   cur().spOffset       = marker.spOff();
@@ -520,8 +518,6 @@ void FrameStateMgr::loopHeaderClear(BCMarker marker,
   cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
 
-  // Clear hook first so that it can read local info from the FrameStateMgr.
-  if (hook != nullptr) hook->clearLocals();
   clearLocals();
 }
 

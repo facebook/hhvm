@@ -2833,10 +2833,10 @@ folly::Optional<Type> HhbcTranslator::ratToAssertType(RepoAuthType rat) const {
   case T::Gen:
     return folly::none;
 
-  // The JIT can't currently handle the exact information in these
-  // type assertions in some cases:
-  case T::InitUnc:    return folly::none;
-  case T::Unc:        return folly::none;
+  case T::InitUnc:    return Type::UncountedInit;
+  case T::Unc:        return Type::Uncounted;
+  // The JIT can't currently handle the exact information in this type
+  // assertion in some cases:
   case T::InitCell:   return Type::Cell; // - Type::Uninit
   }
   not_reached();

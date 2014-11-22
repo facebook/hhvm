@@ -488,6 +488,10 @@ static inline int nsjrDefault() {
   return RuntimeOption::ServerExecutionMode() ? 5 : 0;
 }
 
+uint64_t ahotDefault() {
+  return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
+}
+
 const uint64_t kEvalVMStackElmsDefault =
 #ifdef VALGRIND
  0x800

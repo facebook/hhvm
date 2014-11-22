@@ -386,7 +386,7 @@ public:
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(uint64_t, JitAHotSize,             4 << 20)                         \
+  F(uint64_t, JitAHotSize,             ahotDefault())                   \
   F(uint64_t, JitASize,                60 << 20)                        \
   F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
   F(uint64_t, JitAProfSize,            64 << 20)                        \

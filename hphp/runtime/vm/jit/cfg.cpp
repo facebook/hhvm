@@ -55,7 +55,7 @@ BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
   return ret;
 }
 
-Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
+Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   auto& branch = from->back();
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
@@ -67,7 +67,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
     branch.setNext(middle);
   }
 
-  middle->prepend(unit.gen(Jmp, marker, to));
+  middle->prepend(unit.gen(Jmp, branch.marker(), to));
   auto const unlikely = Block::Hint::Unlikely;
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
@@ -88,7 +88,7 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
   auto* from = branch->block();
   if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
-  splitEdge(unit, from, to, to->front().marker());
+  splitEdge(unit, from, to);
 }
 }
 

@@ -360,7 +360,7 @@ BCMarker HhbcTranslator::makeMarker(Offset bcOff) {
 }
 
 void HhbcTranslator::updateMarker() {
-  m_irb->setMarker(makeMarker(bcOff()));
+  m_irb->setNextMarker(makeMarker(bcOff()));
 }
 
 void HhbcTranslator::profileFunctionEntry(const char* category) {
@@ -1731,7 +1731,9 @@ void HhbcTranslator::emitProfiledGuard(Type type,
     }
     not_reached();
   }();
-  TargetProfile<StrProfile> profile(m_context, m_irb->marker(), profileKey);
+  TargetProfile<StrProfile> profile(m_context,
+                                    m_irb->nextMarker(),
+                                    profileKey);
 
   if (profile.profiling()) {
     doGuard(Type::Str);
@@ -3388,7 +3390,7 @@ Block* HhbcTranslator::makeExitWarn(Offset targetBcOff,
 
 Block* HhbcTranslator::makeExitError(SSATmp* msg, Block* catchBlock) {
   auto exit = m_irb->makeExit();
-  BlockPusher bp(*m_irb, m_irb->marker(), exit);
+  BlockPusher bp(*m_irb, m_irb->nextMarker(), exit);
   gen(RaiseError, catchBlock, msg);
   return exit;
 }
@@ -3473,7 +3475,7 @@ Block* HhbcTranslator::makeExitImpl(Offset targetBcOff, ExitFlag flag,
   }
 
   if (flag == ExitFlag::DelayedMarker) {
-    m_irb->setMarker(exitMarker);
+    m_irb->setNextMarker(exitMarker);
     m_bcStateStack.back().setOffset(targetBcOff);
   }
 

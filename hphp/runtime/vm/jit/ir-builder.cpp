@@ -64,6 +64,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
+  , m_nextMarker(initMarker)
   , m_state(m_unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
@@ -185,7 +186,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_state.marker());
+  m_state.startBlock(block, m_nextMarker);
   m_curBlock = block;
 }
 
@@ -745,11 +746,11 @@ void IRBuilder::reoptimize() {
       auto* inst = &instructions.front();
       instructions.pop_front();
 
-      // merging state looks at the current marker, and optimizeWork
-      // below may create new instructions. Use the marker from this
+      // optimizeWork below may create new instructions, and will use
+      // m_nextMarker to decide where they are. Use the marker from this
       // instruction.
       assert(inst->marker().valid());
-      setMarker(inst->marker());
+      setNextMarker(inst->marker());
 
       auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
@@ -1097,17 +1098,16 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.localValue(id);
 }
 
-void IRBuilder::setMarker(BCMarker marker) {
-  auto const oldMarker = m_state.marker();
-
-  if (marker == oldMarker) return;
+void IRBuilder::setNextMarker(BCMarker newMarker) {
+  if (newMarker == m_nextMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         oldMarker.valid() ? oldMarker.show() : "<invalid>", marker.show());
-  assert(marker.valid());
-  m_state.setMarker(marker);
+         m_nextMarker.valid() ? m_nextMarker.show() : "<invalid>",
+         newMarker.show());
+  assert(newMarker.valid());
+  m_nextMarker = newMarker;
 }
 
-void IRBuilder::insertSPPhi(bool forceSpPhi) {
+void IRBuilder::insertSPPhi(bool forceSpPhi, BCMarker marker) {
   ITRACE(2, "insertSPPhi starting for B{} with {} preds, forceSpPhi = {}\n",
          m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
   Trace::Indent _i;
@@ -1141,8 +1141,7 @@ repeat:
     IRInstruction* branch = e.inst();
     Block* pred = branch->block();
     if (pred->numSuccs() > 1) {
-      auto const middle = splitEdge(m_unit, pred, m_curBlock,
-        m_state.marker());
+      auto const middle = splitEdge(m_unit, pred, m_curBlock);
       blockToPhiTmpsMap[middle] = blockToPhiTmpsMap[pred];
 
       // Mark the new block as visited so FrameStateMgr doesn't see an
@@ -1175,7 +1174,7 @@ repeat:
   }
 
   // Create a DefLabel for the sp phi.
-  auto const label = m_unit.defLabel(1, m_state.marker(), {0u});
+  auto const label = m_unit.defLabel(1, marker, {0u});
   assert(m_curBlock->empty());
   appendInstruction(label);
   retypeDests(label, &m_unit);
@@ -1205,7 +1204,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, isLoopHeader);
-  insertSPPhi(isLoopHeader);
+  insertSPPhi(isLoopHeader, marker);
   always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
@@ -1240,15 +1239,15 @@ void IRBuilder::pushBlock(BCMarker marker,
                           Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, m_state.marker().show(), b, marker.show());
+         m_curBlock, m_nextMarker.show(), b, marker.show());
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState{ m_curBlock, m_state.marker(), m_curWhere });
+    BlockState{ m_curBlock, m_nextMarker, m_curWhere });
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
   m_curBlock = b;
-  setMarker(marker);
+  setNextMarker(marker);
   m_curWhere = where ? where : b->end();
 
   if (do_assert) {
@@ -1264,7 +1263,7 @@ void IRBuilder::popBlock(bool pause) {
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, m_state.marker().show(), top.block, top.marker.show());
+         m_curBlock, m_nextMarker.show(), top.block, top.marker.show());
   if (pause) {
     m_state.pauseBlock(m_curBlock);
   } else {
@@ -1272,7 +1271,7 @@ void IRBuilder::popBlock(bool pause) {
   }
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
-  setMarker(top.marker);
+  setNextMarker(top.marker);
   m_curWhere = top.where;
   m_savedBlocks.pop_back();
 }

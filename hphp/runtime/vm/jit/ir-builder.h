@@ -79,7 +79,7 @@ struct IRBuilder {
   bool typeMightRelax(SSATmp* val = nullptr) const;
 
   IRUnit& unit() const { return m_unit; }
-  BCMarker marker() const { return m_state.marker(); }
+  BCMarker nextMarker() const { return m_nextMarker; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
@@ -119,7 +119,7 @@ struct IRBuilder {
    * Updates the marker used for instructions generated without one
    * supplied.
    */
-  void setMarker(BCMarker marker);
+  void setNextMarker(BCMarker);
 
  public:
   /*
@@ -186,7 +186,7 @@ struct IRBuilder {
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
-    return gen(op, m_state.marker(), std::forward<Args>(args)...);
+    return gen(op, m_nextMarker, std::forward<Args>(args)...);
   }
 
   template<class... Args>
@@ -289,7 +289,7 @@ struct IRBuilder {
     gen(Jmp, done_block, v2);
 
     appendBlock(done_block);
-    IRInstruction* label = m_unit.defLabel(1, m_state.marker(), {producedRefs});
+    IRInstruction* label = m_unit.defLabel(1, m_nextMarker, {producedRefs});
     done_block->push_back(label);
     SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
@@ -455,7 +455,7 @@ private:
 private:
   void appendInstruction(IRInstruction* inst);
   void appendBlock(Block* block);
-  void insertSPPhi(bool forceSpPhi);
+  void insertSPPhi(bool forceSpPhi, BCMarker);
   SSATmp* cseLookup(const IRInstruction&,
                     const Block*,
                     const folly::Optional<IdomVector>&) const;
@@ -467,13 +467,14 @@ private:
 private:
   IRUnit& m_unit;
   BCMarker m_initialMarker;
+  BCMarker m_nextMarker;
   FrameStateMgr m_state;
   CSEHash m_cseHash;
   bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
-   * than the main block. m_curMarker, m_curBlock, m_curWhere are
+   * than the main block. m_nextMarker, m_curBlock, m_curWhere are
    * all set from the most recent call to pushBlock() or popBlock().
    */
   struct BlockState {

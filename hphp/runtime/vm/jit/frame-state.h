@@ -148,7 +148,6 @@ struct FrameState {
   SSATmp* spValue{nullptr};
   SSATmp* fpValue{nullptr};
   int32_t spOffset;
-  BCMarker marker;
 
   /*
    * m_thisAvailable tracks whether the current frame is known to have a
@@ -193,10 +192,8 @@ inline bool operator==(const FrameState& a, const FrameState& b) {
     a.spOffset         == b.spOffset &&
     a.thisAvailable    == b.thisAvailable &&
     a.locals           == b.locals &&
-    a.frameMaySpanCall == b.frameMaySpanCall &&
-    a.marker           == b.marker;
+    a.frameMaySpanCall == b.frameMaySpanCall;
 }
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -316,8 +313,6 @@ struct FrameStateMgr final : private LocalStateHook {
   bool thisAvailable() const { return cur().thisAvailable; }
   void setThisAvailable() { cur().thisAvailable = true; }
   bool frameMaySpanCall() const { return cur().frameMaySpanCall; }
-  BCMarker marker() const { return cur().marker; }
-  void setMarker(BCMarker m) { cur().marker = m; }
   unsigned inlineDepth() const { return m_stack.size() - 1; }
   uint32_t stackDeficit() const { return cur().stackDeficit; }
   void incStackDeficit() { cur().stackDeficit++; }

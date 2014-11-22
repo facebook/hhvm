@@ -248,7 +248,6 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
     state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
-      state.setMarker(inst.marker());
       copyProp(&inst);
       visitLoad(&inst, state);
       retypeDests(&inst, &unit);

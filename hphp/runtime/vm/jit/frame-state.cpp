@@ -508,7 +508,6 @@ bool FrameStateMgr::checkInvariants() const {
  */
 void FrameStateMgr::loopHeaderClear(BCMarker marker) {
   cur().spValue        = nullptr;
-  cur().marker         = marker;
   cur().spOffset       = marker.spOff();
   cur().curFunc        = marker.func();
   cur().stackDeficit   = 0;
@@ -533,7 +532,6 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
   assert(m_stack.size() == 1);
   m_states[entry].in = m_stack;
   assert(m_states[entry].in.back().curFunc == entryMarker.func());
-  assert(m_states[entry].in.back().marker == entryMarker);
 
   // Use a worklist of RPO ids. That way, when we remove an active item to
   // process, we'll always pick the block earliest in RPO.
@@ -555,7 +553,6 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
     startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
-      setMarker(inst.marker());
       if (update(&inst)) insert(block->taken());
     }
 
@@ -777,14 +774,12 @@ bool FrameStateMgr::isVisited(const Block* b) const {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(const FrameStateMgr& state) {
-  auto bcOff = state.marker().valid() ? state.marker().bcOff() : -1;
   auto func = state.func();
   auto funcName = func ? func->fullName() : makeStaticString("null");
 
   return folly::format(
-    "func: {}, bcOff: {}, spOff: {}{}{}",
+    "func: {}, spOff: {}{}{}",
     funcName->data(),
-    bcOff,
     state.spOffset(),
     state.thisAvailable() ? ", thisAvailable" : "",
     state.frameMaySpanCall() ? ", frameMaySpanCall" : ""

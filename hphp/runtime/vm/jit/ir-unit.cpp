@@ -126,7 +126,6 @@ void IRUnit::collectPostConditions() {
     state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
-      state.setMarker(inst.marker());
       state.update(&inst);
     }
 

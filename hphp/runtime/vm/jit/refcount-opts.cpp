@@ -891,7 +891,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
     Indent _i;
 
     auto const nSrcs = m_inst->numSrcs();
-    m_frameState.setMarker(m_inst->marker());
 
     if (auto* taken = m_inst->taken()) {
       // If an instruction's branch is ever taken, none of its sources will be

@@ -6,7 +6,6 @@ if (OCAMLC_FOUND)
   # and lz4 are all we need right now anyways.
   unset(extra_include_paths)
   unset(extra_lib_paths)
-  unset(extra_native_lib_paths)
   unset(extra_cc_flags)
   foreach(lib ${LIBELF_INCLUDE_DIRS})
     list(APPEND extra_include_paths ${lib})
@@ -29,7 +28,8 @@ if (OCAMLC_FOUND)
     list(APPEND extra_native_libraries "lz4")
   else()
     list(APPEND extra_include_paths "${TP_DIR}/lz4")
-    list(APPEND extra_native_lib_paths "${TP_DIR}/lz4/liblz4.a")
+    list(APPEND extra_lib_paths "${TP_DIR}/lz4")
+    list(APPEND extra_native_libraries "lz4")
   endif()
 
   # Xcode/Ninja generators undefined MAKE
@@ -45,7 +45,6 @@ if (OCAMLC_FOUND)
           $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
-          EXTRA_NATIVE_LIB_PATHS="${extra_native_lib_paths}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )

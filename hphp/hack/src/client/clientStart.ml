@@ -46,9 +46,9 @@ let start_server env =
         (Shell.escape_string_for_shell Build_id.build_id_ohai) in
       (try Utils.exec_read cmd with _ -> "")
     | None -> "" in
-  let hh_server = Printf.sprintf "'%s' -d '%s' %s"
-    (get_hhserver())
-    (Path.string_of_path env.root)
+  let hh_server = Printf.sprintf "%s -d %s %s"
+    (Filename.quote (get_hhserver()))
+    (Filename.quote (Path.string_of_path env.root))
     server_options in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
   hh_server;

@@ -886,6 +886,60 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  10 * 1024 * 1024);
   }
   {
+    Hdf repo = config["Repo"];
+    {
+      Hdf repoLocal = repo["Local"];
+      // Repo.Local.Mode.
+      Config::Bind(RepoLocalMode, ini, repoLocal["Mode"]);
+      if (RepoLocalMode.empty()) {
+        const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+        if (HHVM_REPO_LOCAL_MODE != nullptr) {
+          RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+        }
+        RepoLocalMode = "r-";
+      }
+      if (RepoLocalMode.compare("rw")
+          && RepoLocalMode.compare("r-")
+          && RepoLocalMode.compare("--")) {
+        Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                      RepoLocalMode.c_str());
+        RepoLocalMode = "rw";
+      }
+      // Repo.Local.Path.
+      Config::Bind(RepoLocalPath, ini, repoLocal["Path"]);
+      if (RepoLocalPath.empty()) {
+        const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+        if (HHVM_REPO_LOCAL_PATH != nullptr) {
+          RepoLocalPath = HHVM_REPO_LOCAL_PATH;
+        }
+      }
+    }
+    {
+      Hdf repoCentral = repo["Central"];
+      // Repo.Central.Path.
+      Config::Bind(RepoCentralPath, ini, repoCentral["Path"]);
+    }
+    {
+      Hdf repoEval = repo["Eval"];
+      // Repo.Eval.Mode.
+      Config::Bind(RepoEvalMode, ini, repoEval["Mode"]);
+      if (RepoEvalMode.empty()) {
+        RepoEvalMode = "readonly";
+      } else if (RepoEvalMode.compare("local")
+                 && RepoEvalMode.compare("central")
+                 && RepoEvalMode.compare("readonly")) {
+        Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                      RepoEvalMode.c_str());
+        RepoEvalMode = "readonly";
+      }
+    }
+    Config::Bind(RepoJournal, ini, repo["Journal"], "delete");
+    Config::Bind(RepoCommit, ini, repo["Commit"], true);
+    Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], true);
+    Config::Bind(RepoAuthoritative, ini, repo["Authoritative"], false);
+    Config::Bind(RepoPreload, ini, repo["Preload"], RepoAuthoritative);
+  }
+  {
     Hdf eval = config["Eval"];
     Config::Bind(EnableHipHopSyntax, ini, eval["EnableHipHopSyntax"]);
     Config::Bind(EnableHipHopExperimentalSyntax, ini,
@@ -930,6 +984,13 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  DisableSmartAllocator);
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, eval["CodeCoverageOutputFile"]);
+    // NB: after we know the value of RepoAuthoritative.
+    Config::Bind(EnableArgsInBacktraces, ini, eval["EnableArgsInBacktraces"],
+                 !RepoAuthoritative);
+    Config::Bind(EvalAuthoritativeMode, ini, eval["AuthoritativeMode"], false);
+    if (RepoAuthoritative) {
+      EvalAuthoritativeMode = true;
+    }
     {
       Hdf debugger = eval["Debugger"];
       Config::Bind(EnableDebugger, ini, debugger["EnableDebugger"]);
@@ -954,82 +1015,20 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       Config::Bind(DebuggerDefaultRpcTimeout, ini,
                    debugger["RPC.DefaultTimeout"], 30);
     }
-    {
-      Hdf lang = config["Hack"]["Lang"];
-      Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
-                   EnableHipHopSyntax);
-      Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
-      Config::Bind(DisallowDynamicVarEnvFuncs, ini,
-                   lang["DisallowDynamicVarEnvFuncs"]);
-      Config::Bind(IconvIgnoreCorrect, ini, lang["IconvIgnoreCorrect"]);
-      Config::Bind(MinMaxAllowDegenerate, ini, lang["MinMaxAllowDegenerate"]);
-      // Defaults to EnableHHSyntax since, if you have that on, you are
-      // assumed to know what you're doing.
-      Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],
-                   !EnableHipHopSyntax);
-    }
-    {
-      Hdf repo = config["Repo"];
-      {
-        Hdf repoLocal = repo["Local"];
-        // Repo.Local.Mode.
-        Config::Bind(RepoLocalMode, ini, repoLocal["Mode"]);
-        if (RepoLocalMode.empty()) {
-          const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-          if (HHVM_REPO_LOCAL_MODE != nullptr) {
-            RepoLocalMode = HHVM_REPO_LOCAL_MODE;
-          }
-          RepoLocalMode = "r-";
-        }
-        if (RepoLocalMode.compare("rw")
-            && RepoLocalMode.compare("r-")
-            && RepoLocalMode.compare("--")) {
-          Logger::Error("Bad config setting: Repo.Local.Mode=%s",
-                        RepoLocalMode.c_str());
-          RepoLocalMode = "rw";
-        }
-        // Repo.Local.Path.
-        Config::Bind(RepoLocalPath, ini, repoLocal["Path"]);
-        if (RepoLocalPath.empty()) {
-          const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-          if (HHVM_REPO_LOCAL_PATH != nullptr) {
-            RepoLocalPath = HHVM_REPO_LOCAL_PATH;
-          }
-        }
-      }
-      {
-        Hdf repoCentral = repo["Central"];
-        // Repo.Central.Path.
-        Config::Bind(RepoCentralPath, ini, repoCentral["Path"]);
-      }
-      {
-        Hdf repoEval = repo["Eval"];
-        // Repo.Eval.Mode.
-        Config::Bind(RepoEvalMode, ini, repoEval["Mode"]);
-        if (RepoEvalMode.empty()) {
-          RepoEvalMode = "readonly";
-        } else if (RepoEvalMode.compare("local")
-                   && RepoEvalMode.compare("central")
-                   && RepoEvalMode.compare("readonly")) {
-          Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
-                        RepoEvalMode.c_str());
-          RepoEvalMode = "readonly";
-        }
-      }
-      Config::Bind(RepoJournal, ini, repo["Journal"], "delete");
-      Config::Bind(RepoCommit, ini, repo["Commit"], true);
-      Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], true);
-      Config::Bind(RepoAuthoritative, ini, repo["Authoritative"], false);
-      Config::Bind(RepoPreload, ini, repo["Preload"], RepoAuthoritative);
-    }
-
-    // NB: after we know the value of RepoAuthoritative.
-    Config::Bind(EnableArgsInBacktraces, ini, eval["EnableArgsInBacktraces"],
-                 !RepoAuthoritative);
-    Config::Bind(EvalAuthoritativeMode, ini, eval["AuthoritativeMode"], false);
-    if (RepoAuthoritative) {
-      EvalAuthoritativeMode = true;
-    }
+  }
+  {
+    Hdf lang = config["Hack"]["Lang"];
+    Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
+                 EnableHipHopSyntax);
+    Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
+    Config::Bind(DisallowDynamicVarEnvFuncs, ini,
+                 lang["DisallowDynamicVarEnvFuncs"]);
+    Config::Bind(IconvIgnoreCorrect, ini, lang["IconvIgnoreCorrect"]);
+    Config::Bind(MinMaxAllowDegenerate, ini, lang["MinMaxAllowDegenerate"]);
+    // Defaults to EnableHHSyntax since, if you have that on, you are
+    // assumed to know what you're doing.
+    Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],
+                 !EnableHipHopSyntax);
   }
   {
     Hdf server = config["Server"];

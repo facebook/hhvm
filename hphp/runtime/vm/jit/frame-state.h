@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
+#include "hphp/runtime/vm/jit/local-effects.h"
 
 namespace HPHP {
 
@@ -199,31 +200,6 @@ inline bool operator==(const FrameState& a, const FrameState& b) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * LocalStateHook is used to separate the acts of determining which locals are
- * affected by an instruction and recording those changes. It allows consumers
- * of FrameStateMgr to get details about how an instruction affects the locals
- * without having to query the state of each local before and after having
- * FrameStateMgr process the instruction.
- */
-struct LocalStateHook {
-  virtual void setLocalValue(uint32_t id, SSATmp* value) {}
-  virtual void refineLocalValue(uint32_t id, unsigned inlineIdx,
-                                SSATmp* oldVal, SSATmp* newVal) {}
-  virtual void killLocalForCall(uint32_t id,
-                                unsigned inlineIdx,
-                                SSATmp* val) {}
-  virtual void dropLocalInnerType(uint32_t id, unsigned inlineIdx) {}
-
-  virtual void refineLocalType(uint32_t id, Type, TypeSource) {}
-  virtual void predictLocalType(uint32_t id, Type) {}
-  virtual void setLocalType(uint32_t id, Type) {}
-  virtual void setBoxedLocalPrediction(uint32_t id, Type) {}
-  virtual void setLocalTypeSource(uint32_t id, TypeSource) {}
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * FrameStateMgr tracks state about the VM stack frame in the function currently
  * being translated. It is responsible for both storing the state and updating
  * it appropriately as instructions and blocks are processed.
@@ -351,18 +327,6 @@ struct FrameStateMgr final : private LocalStateHook {
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
-  typedef std::function<void(SSATmp*, int32_t)> FrameFunc;
-  // Call func for all enclosing frames, starting with the current one and
-  // proceeding upward through callers.
-  void forEachFrame(FrameFunc func) const;
-
-  typedef std::function<void(uint32_t, SSATmp*)> LocalFunc;
-  // Call func with all tracked locals, including callers if this is an inlined
-  // frame.
-  void forEachLocal(LocalFunc func) const;
-
-  void getLocalEffects(const IRInstruction* inst, LocalStateHook& hook) const;
-
   /*
    * What the FrameStateMgr is doing.
    *
@@ -403,6 +367,20 @@ struct FrameStateMgr final : private LocalStateHook {
    */
   void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
+  /*
+   * Call a function with const access to the LocalState& for each local we're
+   * tracking.
+   */
+  void walkAllInlinedLocals(
+    const std::function<void (uint32_t, unsigned, const LocalState&)>& body,
+    bool skipThisFrame) const;
+
+  /*
+   * Call `func' with all non-null tracked local values, including callers if
+   * this is an inlined frame.
+   */
+  void forEachLocalValue(const std::function<void (SSATmp*)>& func) const;
+
 private:
   struct BlockState {
     jit::vector<FrameState> in;
@@ -412,52 +390,14 @@ private:
 private:
   bool checkInvariants() const;
   bool save(Block*);
-
-  /*
-   * Clear the current state, but keeps the state associated with all
-   * other blocks intact.
-   */
+  bool isVisited(const Block*) const;
+  jit::vector<LocalState>& locals(unsigned inlineIdx);
   void clearCurrentState();
-  /*
-   * Clears the current state and resets the current marker to the
-   * given value.
-   */
   void resetCurrentState(BCMarker);
-
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
 
-  /* LocalStateHook overrides */
-  void setLocalValue(uint32_t id, SSATmp* value) override;
-  void refineLocalValue(uint32_t id, unsigned inlineIdx,
-                        SSATmp* oldVal, SSATmp* newVal) override;
-  void killLocalForCall(uint32_t id, unsigned inlineIdx, SSATmp* val) override;
-  void dropLocalInnerType(uint32_t id, unsigned inlineIdx) override;
-  void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
-  void predictLocalType(uint32_t id, Type type) override;
-  void setLocalType(uint32_t id, Type type) override;
-  void setBoxedLocalPrediction(uint32_t id, Type type) override;
-  void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
-
-  jit::vector<LocalState>& locals(unsigned inlineIdx);
-
-  /* Support for getLocalEffects */
-  void clearLocals(LocalStateHook& hook) const;
-  void refineLocalValues(LocalStateHook& hook,
-                         SSATmp* oldVal, SSATmp* newVal) const;
-  template<typename L>
-  void walkAllInlinedLocals(L body, bool skipThisFrame = false) const;
-  void killLocalsForCall(LocalStateHook& hook, bool skipThisFrame) const;
-  void updateLocalValues(LocalStateHook& hook,
-                         SSATmp* oldVal, SSATmp* newVal) const;
-  void updateLocalRefPredictions(LocalStateHook&, SSATmp*, SSATmp*) const;
-  void dropLocalRefsInnerTypes(LocalStateHook& hook) const;
-
-  /*
-   * Whether a block has been visited in the current iteration.
-   */
-  bool isVisited(const Block*) const;
-
+private:
   FrameState& cur() {
     assert(!m_stack.empty());
     return m_stack.back();
@@ -466,12 +406,21 @@ private:
     return const_cast<FrameStateMgr*>(this)->cur();
   }
 
- private:
-  IRUnit& m_unit;
+private: // LocalStateHook overrides
+  void setLocalValue(uint32_t id, SSATmp* value) override;
+  void refineLocalValues(SSATmp* oldVal, SSATmp* newVal) override;
+  void dropLocalRefsInnerTypes() override;
+  void killLocalsForCall(bool) override;
+  void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
+  void predictLocalType(uint32_t id, Type type) override;
+  void setLocalType(uint32_t id, Type type) override;
+  void setBoxedLocalPrediction(uint32_t id, Type type) override;
+  void updateLocalRefPredictions(SSATmp*, SSATmp*) override;
+  void setLocalTypeSource(uint32_t id, TypeSource typeSrc) override;
+  void clearLocals() override;
 
-  /*
-   * Status of the FrameStateMgr.
-   */
+private:
+  IRUnit& m_unit;
   Status m_status{Status::None};
 
   /*

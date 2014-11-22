@@ -1016,9 +1016,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void consumeAllLocals() {
     ITRACE(3, "consuming all locals\n");
     Indent _i;
-    m_frameState.forEachLocal(
-      [&](uint32_t id, SSATmp* value) {
-        if (value) consumeValue(value);
+    m_frameState.forEachLocalValue(
+      [&](SSATmp* value) {
+        consumeValue(value);
       }
     );
   }
@@ -1147,11 +1147,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
     }
 
-    // Many instructions have complicated effects on the state of the
-    // locals. Get this information from FrameStateMgr.
-    ITRACE(3, "getting local effects from FrameStateMgr\n");
+    ITRACE(3, "getting local effects\n");
     Indent _i;
-    m_frameState.getLocalEffects(m_inst, *this);
+    local_effects(m_frameState, m_inst, *this);
   }
 
   /*
@@ -1329,10 +1327,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void observeLocalRefs() {
     // If any locals are RefDatas, the behavior of get_defined_vars can
     // depend on whether or not the count is >= 2.
-    m_frameState.forEachLocal(
-      [&](uint32_t id, SSATmp* value) {
-        if (!value) return;
-
+    m_frameState.forEachLocalValue(
+      [&](SSATmp* value) {
         auto const sp = SinkPoint(m_ids.before(m_inst), value, false);
         value = canonical(value);
         observeValue(value, m_state.values[value], sp, RefObserver());
@@ -1375,6 +1371,21 @@ struct SinkPointAnalyzer : private LocalStateHook {
     assert(canonical(oldVal) == canonical(newVal) &&
            oldVal != newVal);
     m_state.canon[canonical(newVal)] = newVal;
+  }
+
+  // Helper for refineLocalValues.
+  void refineLocalValue(SSATmp* oldVal, SSATmp* newVal) {
+    if (oldVal->type().maybeCounted() && newVal->type().notCounted()) {
+      assert(newVal->inst()->is(CheckType, AssertType));
+      assert(newVal->inst()->src(0) == oldVal);
+      // Similar to what we do when processing the CheckType directly, we
+      // "consume" the value on behalf of the CheckType.
+      oldVal = canonical(oldVal);
+      auto& valState = m_state.values[oldVal];
+      ITRACE(2, "'consuming' reference to {} for refineLocalValue\n",
+             *oldVal->inst());
+      if (valState.realCount) --valState.realCount;
+    }
   }
 
   void defineOutputs() {
@@ -1464,6 +1475,14 @@ struct SinkPointAnalyzer : private LocalStateHook {
   }
 
   ///// LocalStateHook overrides /////
+
+  void dropLocalRefsInnerTypes() override {}
+  void refineLocalType(uint32_t, Type, TypeSource) override {}
+  void predictLocalType(uint32_t, Type) override {}
+  void setBoxedLocalPrediction(uint32_t, Type) override {}
+  void updateLocalRefPredictions(SSATmp*, SSATmp*) override {}
+  void setLocalTypeSource(uint32_t, TypeSource) override {}
+
   void setLocalValue(uint32_t id, SSATmp* newVal) override {
     // When a local's value is updated by StLoc(NT), the consumption of the old
     // value should've been visible to us, so we ignore that here.
@@ -1484,19 +1503,16 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
   }
 
-  void refineLocalValue(uint32_t id, unsigned inlineIdx,
-                        SSATmp* oldVal, SSATmp* newVal) override {
-    if (oldVal->type().maybeCounted() && newVal->type().notCounted()) {
-      assert(newVal->inst()->is(CheckType, AssertType));
-      assert(newVal->inst()->src(0) == oldVal);
-      // Similar to what we do when processing the CheckType directly, we
-      // "consume" the value on behalf of the CheckType.
-      oldVal = canonical(oldVal);
-      auto& valState = m_state.values[oldVal];
-      ITRACE(2, "'consuming' reference to {} for refineLocalValue\n",
-             *oldVal->inst());
-      if (valState.realCount) --valState.realCount;
-    }
+  void clearLocals() override { consumeCurrentLocals(); }
+
+  void refineLocalValues(SSATmp* oldVal, SSATmp* newVal) override {
+    m_frameState.forEachLocalValue(
+      [&] (SSATmp* curVal) {
+        if (canonical(curVal) == canonical(oldVal)) {
+          refineLocalValue(oldVal, newVal);
+        }
+      }
+    );
   }
 
   void setLocalType(uint32_t id, Type) override {
@@ -1505,12 +1521,25 @@ struct SinkPointAnalyzer : private LocalStateHook {
     consumeLocal(id);
   }
 
-  void killLocalForCall(uint32_t id, unsigned inlineIdx,
-                        SSATmp* value) override {
-    ITRACE(3, "consuming local {} at inline level {} for killLocalForCall\n",
-           id, inlineIdx);
-    Indent _i;
-    consumeValue(value);
+  void killLocalsForCall(bool callDestroysLocals) override {
+    if (callDestroysLocals) {
+      // Consume the current frame's locals.
+      clearLocals();
+    }
+    m_frameState.walkAllInlinedLocals(
+      [&](uint32_t id, unsigned inlineIdx, const LocalState& local) {
+        auto* value = local.value;
+        if (!value || value->inst()->is(DefConst)) return;
+        ITRACE(3, "consuming local {} at inline level {} for "
+          "killLocalsForCall\n", id, inlineIdx);
+        Indent _i;
+        consumeValue(value);
+      },
+      // We have to skip the first frame if we already did it, because
+      // otherwise we think we're consuming locals more than once, which
+      // currently doesn't work here.
+      callDestroysLocals
+    );
   }
 
   /* The IRUnit being processed and its blocks */

@@ -2240,7 +2240,7 @@ void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = srcLoc(inst, 0).reg(0);
-  vmain() << pushm{fpReg[AROFF(m_savedRip)]};
+  vmain() << ldretaddr{fpReg[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -2270,7 +2270,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{fp, sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << ret{kCrossTraceRegs};
+  v << retctrl{srcLoc(inst, 2).reg()};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {

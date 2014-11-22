@@ -750,9 +750,6 @@ VASM_OPCODES
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
 
-  // Address to return if any.
-  llvm::Value* m_addressToReturn{nullptr};
-
   // Saved LLVM intrinsics.
   llvm::Function* m_llvmFrameAddress{nullptr};
   llvm::Function* m_llvmReadRegister{nullptr};
@@ -894,8 +891,6 @@ O(not) \
 O(orq) \
 O(orqi) \
 O(orqim) \
-O(pushm) \
-O(ret) \
 O(roundsd) \
 O(srem) \
 O(sar) \
@@ -939,7 +934,9 @@ O(xorb) \
 O(xorbi) \
 O(xorq) \
 O(xorqi) \
-O(landingpad)
+O(landingpad) \
+O(ldretaddr) \
+O(retctrl)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -962,6 +959,11 @@ O(landingpad)
       case Vinstr::idiv:
       case Vinstr::sarq:
       case Vinstr::shlq:
+      case Vinstr::ret:
+      case Vinstr::push:
+      case Vinstr::pushm:
+      case Vinstr::pop:
+      case Vinstr::popm:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -1704,30 +1706,21 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const pushm& inst) {
-  // Expect 'push 0x8(rVmFp)' i.e. the return address.
-  always_assert_flog(inst.s.base == Vreg64(x64::rVmFp) && inst.s.disp == 8 &&
-      !inst.s.index.isValid() && inst.s.seg == Vptr::DS, "unexpected push");
-
-  // If we use inline asm statement to emit push of the return address,
-  // then it will conflict with LLVM's frame whenever it's non-empty.
+void LLVMEmitter::emit(const ldretaddr& inst) {
   auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
                                        m_retFuncPtrPtrType,
                                        "bcast");
-  m_addressToReturn = m_irb.CreateLoad(ptr);
+  defineValue(inst.d, m_irb.CreateLoad(ptr));
 }
 
-void LLVMEmitter::emit(const ret& inst) {
-  if (m_addressToReturn) {
-    // Tail call to faux pushed value.
-    // (*value)(rVmSp, rVmTl, rVmFp)
-    std::vector<llvm::Value*> args =
-      { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
-    auto callInst = m_irb.CreateCall(m_addressToReturn, args);
-    callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
-    callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
-    m_addressToReturn = nullptr;
-  }
+void LLVMEmitter::emit(const retctrl& inst) {
+  // "Return" with a tail call to the loaded address
+  // (*value)(rVmSp, rVmTl, rVmFp)
+  std::vector<llvm::Value*> args =
+    { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
+  auto callInst = m_irb.CreateCall(value(inst.s), args);
+  callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
   m_irb.CreateRetVoid();
 }
 

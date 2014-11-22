@@ -406,6 +406,8 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(ldretaddr, Inone, U(s), D(d))\
+  O(retctrl, Inone, U(s), Dn)\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -491,7 +493,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
-  O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
@@ -555,6 +556,8 @@ struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct debugtrap {};
+struct ldretaddr { Vptr s; Vreg d; };
+struct retctrl { Vreg s; };
 
 // No-op, used for marking the end of a block that is intentionally going to
 // fall-through.  Only for use with Vauto.
@@ -689,7 +692,6 @@ struct popm { Vptr m; };
 struct psllq { Immed s0; VregDbl s1, d; };
 struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
-struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };

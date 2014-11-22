@@ -254,7 +254,6 @@ private:
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushl& i) { a->pushl(i.s); }
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
@@ -1097,6 +1096,14 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::syncvmfp:
           inst = copy{inst.syncvmfp_.s, rVmFp};
+          break;
+
+        case Vinstr::ldretaddr:
+          inst = pushm{inst.ldretaddr_.s};
+          break;
+
+        case Vinstr::retctrl:
+          inst = ret{kCrossTraceRegs};
           break;
 
         default:

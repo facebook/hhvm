@@ -26,6 +26,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
 
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -257,9 +258,7 @@ void optimizeStores(IRUnit& unit) {
     // to argument locals.
     return;
   }
-
-  FTRACE(1, "optimizeStores:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "optimizeStores:^^^^^^^^^^^^^^^^^^^^\n"); };
+  PassTracer tracer{&unit, Trace::hhir_meme, "optimizeStores"};
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.

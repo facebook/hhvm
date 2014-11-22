@@ -22,6 +22,7 @@
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
@@ -454,9 +455,7 @@ void optimizeLoads(IRUnit& unit) {
     // memory_effects about it first.
     return;
   }
-
-  FTRACE(1, "optimizeLoads:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "optimizeLoads:^^^^^^^^^^^^^^^^^^^^\n"); };
+  PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
 
   auto genv = Global { unit, rpoSortCfgWithIds(unit) };
   if (genv.ainfo.locations.size() == 0) {

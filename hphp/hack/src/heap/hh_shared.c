@@ -84,6 +84,7 @@
 #include <caml/alloc.h>
 #include <caml/fail.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -420,6 +421,23 @@ static void read_all(int fd, void* start, size_t size) {
   } while (total_read < size);
 }
 
+typedef struct {
+  char* compressed;
+  char* decompress_start;
+  int compressed_size;
+  int decompressed_size;
+} decompress_args;
+
+/* Return value must be an intptr_t instead of an int because pthread returns
+ * a void*-sized value */
+static intptr_t decompress(const decompress_args* args) {
+  int actual_compressed_size = LZ4_decompress_fast(
+      args->compressed,
+      args->decompress_start,
+      args->decompressed_size);
+  return args->compressed_size == actual_compressed_size;
+}
+
 void hh_load(value in_filename) {
   CAMLparam1(in_filename);
   FILE* fp = fopen(String_val(in_filename), "rb");
@@ -440,6 +458,13 @@ void hh_load(value in_filename) {
   read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
   char* chunk_start = (char*)SAVE_START;
 
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_t thread;
+  decompress_args args;
+  int thread_started = 0;
+
   // see hh_save for a description of what we are parsing here.
   while (compressed_size > 0) {
     char* compressed = malloc(compressed_size * sizeof(char));
@@ -447,10 +472,29 @@ void hh_load(value in_filename) {
     uintptr_t chunk_size = 0;
     read_all(fileno(fp), (void*)&chunk_size, sizeof chunk_size);
     read_all(fileno(fp), compressed, compressed_size * sizeof(char));
-    LZ4_decompress_fast(compressed, chunk_start, chunk_size);
-    free(compressed);
+    if (thread_started) {
+      intptr_t success = 0;
+      int rc = pthread_join(thread, (void*)&success);
+      free(args.compressed);
+      assert(rc == 0);
+      assert(success);
+    }
+    args.compressed = compressed;
+    args.compressed_size = compressed_size;
+    args.decompress_start = chunk_start;
+    args.decompressed_size = chunk_size;
+    pthread_create(&thread, &attr, (void* (*)(void*))decompress, &args);
+    thread_started = 1;
     chunk_start += chunk_size;
     read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
+  }
+
+  if (thread_started) {
+    int success;
+    int rc = pthread_join(thread, (void*)&success);
+    free(args.compressed);
+    assert(rc == 0);
+    assert(success);
   }
 
   fclose(fp);

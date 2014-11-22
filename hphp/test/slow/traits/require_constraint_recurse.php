@@ -4,6 +4,8 @@ interface I1 {
   public function baz();
 }
 
+interface I2 {}
+
 class Super {
   protected function foo() {
     echo "Super::foo\n";
@@ -20,7 +22,7 @@ trait T1 {
   }
 }
 
-trait T2 {
+trait T2 implements I2 {
   use T1;
 }
 trait T3 {

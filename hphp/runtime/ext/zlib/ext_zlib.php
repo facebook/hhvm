@@ -13,7 +13,7 @@
 function gzclose(resource $zp): bool;
 
 /**
- * ( excerpt from http://php.net/manual/en/function.zlib-encode.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-encode.php )
  *
  * Compress data with the specified encoding. Warning: This function is
  * currently not documented; only its argument list is available.
@@ -26,7 +26,7 @@ function gzclose(resource $zp): bool;
 function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
 
 /**
- * ( excerpt from http://php.net/manual/en/function.zlib-decode.php )
+ * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-decode.php )
  *
  * Uncompress any raw/gzip/zlib encoded data. Warning: This function is
  * currently not documented; only its argument list is available.

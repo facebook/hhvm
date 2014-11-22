@@ -73,10 +73,10 @@ const char* const METHOD_IN_MULTIPLE_TRAITS =
   "Method '%s' declared in multiple traits";
 const char* const TRAIT_REQ_EXTENDS =
   "Class '%s' required to extend class '%s'"
-  " by trait '%s' (via %s)";
+  " by trait '%s'";
 const char* const TRAIT_REQ_IMPLEMENTS =
   "Class '%s' required to implement interface '%s'"
-  " by trait '%s' (via %s)";
+  " by trait '%s'";
 const char* const TRAIT_BAD_REQ_EXTENDS =
   "Trait '%s' requires extension of '%s', but %s "
   "is not an extendable class";

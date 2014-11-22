@@ -116,6 +116,7 @@ enum class HeaderKind : uint8_t {
   Native, // a NativeData header preceding an HNI ObjectData
   Sweepable, // a Sweepable header preceding an ObjectData ResourceData
   Small, // small smart_malloc'd block
+  Big, // big smart_malloc'd or size-tracked block
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Debug // a DebugHeader
@@ -298,8 +299,10 @@ struct StringDataNode {
 // This is the header MemoryManager uses to remember large allocations
 // so they can be auto-freed in MemoryManager::reset()
 struct BigNode {
-  BigNode* next;
-  BigNode* prev;
+  size_t nbytes;
+  char pad[3];
+  HeaderKind kind;
+  uint32_t index;
 };
 
 // Header used for small smart_malloc allocations (but not *Size allocs)
@@ -639,7 +642,7 @@ private:
 private:
   void* slabAlloc(uint32_t bytes, unsigned index);
   void* newSlab(size_t nbytes);
-  void* smartEnlist(BigNode*);
+  void* smartEnlist(BigNode*, size_t nbytes);
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
   void  smartFreeBig(BigNode*);
@@ -681,12 +684,12 @@ private:
   void* m_front;
   void* m_limit;
   std::array<FreeList,kNumSmartSizes> m_freelists;
-  BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
   std::vector<void*> m_slabs;
   std::vector<NativeNode*> m_natives;
+  std::vector<BigNode*> m_bigs;
 
   bool m_sweeping;
   bool m_trackingInstances;

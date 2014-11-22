@@ -502,8 +502,9 @@ bool parseArgPointer(TypedValue *tv,
 bool parseArgs(ActRec *ar, const char *format, ...) {
   unsigned min, max, count = ar->numArgs();
   countArgs(format, min, max);
-  if (count < min) {
-    throw_wrong_arguments_nr(ar->func()->name()->data(), count, min, max);
+  if (count < min || max < count) {
+    throw_wrong_arguments_nr(Native::getInvokeName(ar)->data(),
+                             count, min, max);
     return false;
   }
 

@@ -1581,6 +1581,10 @@ xhp_attribute_decl:
 
 xhp_attribute_decl_type:
     T_ARRAY                            { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type
+    T_TYPELIST_GT                      { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type ','
+    hh_type T_TYPELIST_GT              { $$ = 4;}
   | fully_qualified_class_name         { /* This case handles all types other
                                             than "array", "var" and "enum".
                                             For now we just use type code 5;

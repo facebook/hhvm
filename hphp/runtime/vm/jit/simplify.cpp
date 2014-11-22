@@ -971,7 +971,7 @@ SSATmp* cmpImpl(State& env,
 
   // ---------------------------------------------------------------------
   // Perform type juggling and type canonicalization for different types
-  // see http://www.php.net/manual/en/language.operators.comparison.php
+  // see http://docs.hhvm.com/manual/en/language.operators.comparison.php
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right

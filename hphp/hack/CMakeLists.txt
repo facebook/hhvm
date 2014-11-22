@@ -15,6 +15,8 @@ if (OCAMLC_FOUND)
     list(APPEND extra_cc_flags -DHAVE_ELF_GETSHDRSTRNDX)
   endif()
 
+  list(APPEND extra_cc_flags -pthread)
+
   foreach(lib ${LIBELF_LIBRARIES})
     get_filename_component(pth ${lib} PATH)
     list(APPEND extra_lib_paths ${pth})

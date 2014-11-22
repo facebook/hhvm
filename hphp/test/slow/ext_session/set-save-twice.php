@@ -25,8 +25,6 @@ class ProxySessionHandler implements SessionHandlerInterface {
   }
 
   public function gc($maxlifetime) {
-    var_dump(__FUNCTION__);
-    var_dump(func_get_args());
     return $this->handler->gc($maxlifetime);
   }
 

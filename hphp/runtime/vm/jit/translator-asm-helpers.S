@@ -91,6 +91,13 @@ ETCH_LABEL(enterTCHelper$serviceReqLabel):
   pop %rbp
   CFI2(restore, rbp)
   CFI2(adjust_cfa_offset, -8)
+
+  /*
+   * Like enterTCServiceReq, this is never called directly, but we need
+   * access to its address.
+   */
+  .globl ETCH_NAME(enterTCReturn)
+  ETCH_NAME(enterTCReturn):
   ret
 
 ETCH_LABEL(enterTCHelper$copyReqArgs):

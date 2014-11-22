@@ -717,6 +717,10 @@ VASM_OPCODES
   void emitCall(const Vinstr& instr);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
+  llvm::Value* emitFuncPtr(const std::string& name,
+                           llvm::FunctionType* type,
+                           uintptr_t address);
+
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
   llvm::Value* emitPtr(const Vptr s, llvm::Type* ptrTy);
@@ -1082,6 +1086,20 @@ void LLVMEmitter::emit(const fallthru& inst) {
   // no-op
 }
 
+llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
+                                      llvm::FunctionType* type,
+                                      uintptr_t address) {
+  auto funcPtr = m_module->getFunction(name);
+  if (!funcPtr) {
+    registerGlobalSymbol(name, address);
+    funcPtr = llvm::Function::Create(type,
+                                     llvm::GlobalValue::ExternalLinkage,
+                                     name,
+                                     m_module.get());
+  }
+  return funcPtr;
+}
+
 void LLVMEmitter::emitCall(const Vinstr& inst) {
   auto const is_vcall = inst.op == Vinstr::vcall;
   auto const vcall = inst.vcall_;
@@ -1158,15 +1176,9 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
   case CppCall::Kind::Direct:
-    std::string funcName = getNativeFunctionName(call.address());
-    funcPtr = m_module->getFunction(funcName);
-    if (!funcPtr) {
-      registerGlobalSymbol(funcName, (uint64_t)call.address());
-      funcPtr = llvm::Function::Create(funcType,
-                                       llvm::GlobalValue::ExternalLinkage,
-                                       funcName,
-                                       m_module.get());
-    }
+    funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
+                          funcType,
+                          uintptr_t(call.address()));
   }
 
   if (fixup.isValid()) {
@@ -1847,8 +1859,38 @@ void LLVMEmitter::emit(const subsd& inst) {
   defineValue(inst.d, m_irb.CreateFSub(value(inst.s1), value(inst.s0)));
 }
 
+/*
+ * To leave the TC and perform a service request, translated code is supposed
+ * to execute a ret instruction after populating the right registers. There are
+ * a number of different ways to do this, but the most straightforward for now
+ * is to do a tail call with the right calling convention to a stub with a
+ * single ret instruction. Rather than emitting a dedicated stub for this, we
+ * just reuse the ret at the end of enterTCHelper().
+ */
+extern "C" void enterTCReturn();
+
 void LLVMEmitter::emit(const svcreq& inst) {
-  emitTrap();
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp),
+    value(x64::rVmTl),
+    value(x64::rVmFp),
+    cns(reinterpret_cast<uintptr_t>(inst.stub_block)),
+    cns(uint64_t{inst.req})
+  };
+  for (auto arg : m_unit.tuples[inst.args]) {
+    args.push_back(value(arg));
+  }
+
+  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
+  auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
+  auto func = emitFuncPtr(folly::to<std::string>("enterTCServiceReqLLVM_",
+                                                 argTypes.size()),
+                          funcType,
+                          uintptr_t(enterTCReturn));
+  auto call = m_irb.CreateCall(func, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
+  call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emit(const syncvmfp& inst) {

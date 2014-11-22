@@ -374,7 +374,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(retransopt, I(sk) I(id), U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
@@ -548,7 +547,6 @@ struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; };
-struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];

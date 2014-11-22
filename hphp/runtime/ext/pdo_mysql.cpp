@@ -425,6 +425,8 @@ bool PDOMySqlConnection::closer() {
   return false;
 }
 
+static const int s_hidden_error_codes[] = {1064};
+
 int PDOMySqlConnection::handleError(const char *file, int line,
                                     PDOMySqlStatement *stmt) {
   PDOErrorType *pdo_err;
@@ -484,9 +486,18 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     if (stmt) {
       stmt->dbh->fetchErr(stmt, info);
     }
-    throw_pdo_exception(String(*pdo_err, CopyString), info,
+    bool throw_exception = true;
+    for(int i = 0; i < sizeof(s_hidden_error_codes); i++) {
+      if(einfo->errcode == s_hidden_error_codes[i]) {
+        throw_exception = false;
+        break;
+      }
+    }
+    if(throw_exception) {
+      throw_pdo_exception(String(*pdo_err, CopyString), info,
                         "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
+    }
   }
   return einfo->errcode;
 }

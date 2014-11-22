@@ -79,7 +79,7 @@ fi
 if [ x"$HHVM_REPO_SCHEMA" = x"" ] ; then
   HHVM_REPO_SCHEMA=$(sh -c '$find_files' | \
       grep -v '^hphp/\(benchmarks\|bin\|hack\|hphp\|neo\|public_tld\|test\|tools\|util\|vixl\|zend\)' | \
-      xargs -d '\n' cat | shasum | cut -b-40)
+      xargs -d '\n' cat | sha1sum | cut -b-40)
 fi
 
 ######################################################################

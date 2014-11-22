@@ -455,7 +455,7 @@ private:
 private:
   void appendInstruction(IRInstruction* inst);
   void appendBlock(Block* block);
-  void insertPhis(bool forceSpPhi);
+  void insertSPPhi(bool forceSpPhi);
   SSATmp* cseLookup(const IRInstruction&,
                     const Block*,
                     const folly::Optional<IdomVector>&) const;

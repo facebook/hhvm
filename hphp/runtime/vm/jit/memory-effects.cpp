@@ -533,7 +533,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SubDbl:
   case SubInt:
   case SubIntO:
-  case TrackLoc:
   case XorBool:
   case XorInt:
   case OrInt:

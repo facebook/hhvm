@@ -383,8 +383,12 @@ struct FrameStateMgr final : private LocalStateHook {
   /*
    * Info about state leaving a block. The block must have already been
    * processed.
+   *
+   * TODO(#5428663, #4810319): this function returns incorrect state for blocks
+   * that end with CheckStk.  It's only used for insertSPPhi, which will be
+   * removed when StkPtrs aren't threaded around anymore; but do not add new
+   * uses.
    */
-  const jit::vector<LocalState>& localsLeavingBlock(Block*) const;
   SSATmp* spLeavingBlock(Block*) const;
 
   /*

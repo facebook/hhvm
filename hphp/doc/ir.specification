@@ -1595,12 +1595,6 @@ generating efficient compare-and-branch instruction sequences.
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
 
-| TrackLoc<localId>, ND, S(Gen), E
-
-  Defines localId as having value given by S0.  This does not generate code; it
-  is used by the translator to track values that are stored in locals. It can
-  be thought of as a store (which does not physically store anything).
-
 | IncRef, ND, S(Gen), E
 
   If S0 is a refcounted type, increment its refcount.

@@ -1102,16 +1102,14 @@ void IRBuilder::setMarker(BCMarker marker) {
   m_state.setMarker(marker);
 }
 
-void IRBuilder::insertPhis(bool forceSpPhi) {
-  ITRACE(2, "insertPhis starting for B{} with {} preds, forceSpPhi = {}\n",
+void IRBuilder::insertSPPhi(bool forceSpPhi) {
+  ITRACE(2, "insertSPPhi starting for B{} with {} preds, forceSpPhi = {}\n",
          m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
   Trace::Indent _i;
 
   if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
 
-  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToPhiTmpsMap;
-  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToLdLocs;
-  jit::vector<uint32_t> localIds;
+  jit::hash_map<Block*,SSATmp*> blockToPhiTmpsMap;
 
   // First, determine if we need a phi for vmsp.
   auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
@@ -1125,66 +1123,12 @@ void IRBuilder::insertPhis(bool forceSpPhi) {
   ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
   if (needSpPhi) {
     for (auto& e : m_curBlock->preds()) {
-      auto inBlock = e.from();
-      auto inSp = m_state.spLeavingBlock(inBlock);
-      blockToPhiTmpsMap[inBlock].push_back(inSp);
+      auto const inBlock = e.from();
+      blockToPhiTmpsMap[inBlock] = m_state.spLeavingBlock(inBlock);
     }
   }
 
-  // Determine which SSATmps must receive a phi. To make some optimizations
-  // simpler, we require that an SSATmp for a local is either provided in no
-  // incoming branches, or all incoming branches. Sometimes we have to insert
-  // LdLocs in our preds to make this true.
-  for (int i = 0; i < m_state.func()->numLocals(); i++) {
-    jit::hash_set<Edge*> missingPreds;
-    jit::hash_set<SSATmp*> incomingValues;
-
-    for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.from();
-      auto local = m_state.localsLeavingBlock(pred)[i].value;
-      if (local == nullptr) missingPreds.insert(&e);
-      incomingValues.insert(local);
-    }
-
-    ITRACE(3, "local {} needs phi: {}\n", i, incomingValues.size() == 1);
-    // If there's only one unique incoming value, we don't need a phi. This
-    // includes situations where no incoming blocks provide the value, since
-    // they're really providing nullptr.
-    if (incomingValues.size() == 1) continue;
-    localIds.push_back(i);
-
-    for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.from();
-      auto& local = m_state.localsLeavingBlock(pred)[i];
-      if (missingPreds.count(&e)) {
-        // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
-        // the fpValue from m_curBlock since we currently require that all our
-        // preds share the same fp.
-        auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
-                                 local.type, LocalId(i), m_state.fp());
-        if (shouldConstrainGuards()) {
-          m_constraints.typeSrcs[ldLoc] = TypeSourceSet();
-          for (auto typeSrc : local.typeSrcs) {
-            m_constraints.typeSrcs[ldLoc].insert(typeSrc);
-          }
-        }
-
-        if (pred->numSuccs() > 1) {
-          // The edge is critical so don't insert the LdLoc until after
-          // splitting it.
-          blockToLdLocs[pred].push_back(ldLoc->dst());
-        } else {
-          pred->insert(pred->iteratorTo(e.inst()), ldLoc);
-        }
-        blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
-      } else {
-        blockToPhiTmpsMap[pred].push_back(local.value);
-      }
-    }
-  }
-
-  auto const numPhis = localIds.size() + needSpPhi;
-  if (numPhis == 0) return;
+  if (!needSpPhi) return;
 
   // Split incoming critical edges so we can modify Jmp srcs of preds.
 repeat:
@@ -1192,22 +1136,9 @@ repeat:
     IRInstruction* branch = e.inst();
     Block* pred = branch->block();
     if (pred->numSuccs() > 1) {
-      Block* middle = splitEdge(m_unit, pred, m_curBlock, m_state.marker());
-
-      auto ldLocIt = blockToLdLocs.find(pred);
-      if (ldLocIt != blockToLdLocs.end()) {
-        // There are one or more LdLocs that need to be inserted on the
-        // newly-split edge.
-        for (auto tmp : ldLocIt->second) {
-          middle->insert(middle->backIter(), tmp->inst());
-        }
-        blockToLdLocs.erase(ldLocIt);
-      }
-
-      auto& vec = blockToPhiTmpsMap[middle];
-      std::copy(blockToPhiTmpsMap[pred].begin(),
-                blockToPhiTmpsMap[pred].end(),
-                std::inserter(vec, vec.begin()));
+      auto const middle = splitEdge(m_unit, pred, m_curBlock,
+        m_state.marker());
+      blockToPhiTmpsMap[middle] = blockToPhiTmpsMap[pred];
 
       // Mark the new block as visited so FrameStateMgr doesn't see an
       // unprocessed predecessor for the join point.
@@ -1216,7 +1147,6 @@ repeat:
       goto repeat;
     }
   }
-  always_assert(blockToLdLocs.empty());
 
   // Modify the incoming Jmps to set the phi inputs.  Copy to a vector before
   // modifying things---we're going to be changing the pred EdgeList (by
@@ -1226,7 +1156,6 @@ repeat:
     pred_vec.push_back(e.from());
   }
   for (auto const pred : pred_vec) {
-    auto& tmpVec = blockToPhiTmpsMap[pred];
     auto& jmp = pred->back();
     always_assert_log(
       jmp.is(Jmp),
@@ -1234,24 +1163,17 @@ repeat:
         return folly::format("Need Jmp to create a phi, instead got: {}",
                              jmp.toString()).str();
       });
+    // TODO(#4810319): this function can't handle already having a phi, but
+    // we're going to stop phi'ing stacks eventually anyway.
     always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
-    m_unit.replace(&jmp, Jmp, jmp.taken(),
-      std::make_pair(tmpVec.size(), tmpVec.data()));
+    m_unit.replace(&jmp, Jmp, jmp.taken(), blockToPhiTmpsMap[pred]);
   }
 
-  // Create a DefLabel with appropriately-typed dests. We pass a vector of 1's
-  // for the producedRefs argument to defLabel since each local owns a single
-  // reference to its value.
-  IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
-                                         jit::vector<unsigned>(numPhis, 1));
+  // Create a DefLabel for the sp phi.
+  auto const label = m_unit.defLabel(1, m_state.marker(), {0u});
   assert(m_curBlock->empty());
   appendInstruction(label);
   retypeDests(label, &m_unit);
-
-  // Add TrackLoc's to update local state.
-  for (unsigned i = 0, n = localIds.size(); i < n; ++i) {
-    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i + needSpPhi));
-  }
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
@@ -1278,7 +1200,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, nullptr, isLoopHeader);
-  insertPhis(isLoopHeader);
+  insertSPPhi(isLoopHeader);
   always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),

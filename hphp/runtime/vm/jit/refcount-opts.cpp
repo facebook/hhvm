@@ -1465,13 +1465,6 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   ///// LocalStateHook overrides /////
   void setLocalValue(uint32_t id, SSATmp* newVal) override {
-    // TrackLoc is only used for the dests of labels, and those references are
-    // handled in mergeStates.
-    if (m_inst->is(TrackLoc)) {
-      assert(newVal->inst()->is(DefLabel));
-      return;
-    }
-
     // When a local's value is updated by StLoc(NT), the consumption of the old
     // value should've been visible to us, so we ignore that here.
     if (!m_inst->is(StLoc, StLocNT)) {

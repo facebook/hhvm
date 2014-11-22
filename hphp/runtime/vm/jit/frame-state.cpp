@@ -364,10 +364,6 @@ void FrameStateMgr::getLocalEffects(const IRInstruction* inst,
                                    inst->typeParam());
       break;
 
-    case TrackLoc:
-      hook.setLocalValue(inst->extra<TrackLoc>()->locId, inst->src(0));
-      break;
-
     case CheckType:
     case AssertType: {
       SSATmp* newVal = inst->dst();
@@ -539,14 +535,6 @@ Block* FrameStateMgr::findUnprocessedPred(Block* block) const {
     if (!isVisited(pred)) return pred;
   }
   return nullptr;
-}
-
-const jit::vector<LocalState>&
-FrameStateMgr::localsLeavingBlock(Block* block) const {
-  auto const it = m_states.find(block);
-  assert(it != m_states.end());
-  assert(!it->second.out.empty());
-  return it->second.out.back().locals;
 }
 
 SSATmp* FrameStateMgr::spLeavingBlock(Block* b) const {

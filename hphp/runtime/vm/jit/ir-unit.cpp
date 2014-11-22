@@ -32,7 +32,7 @@ IRUnit::IRUnit(TransContext context)
 {}
 
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
-                                const jit::vector<unsigned>& producedRefs) {
+                                const jit::vector<uint32_t>& producedRefs) {
   IRInstruction inst(DefLabel, marker);
   IRInstruction* label = cloneInstruction(&inst);
   always_assert(producedRefs.size() == numDst);

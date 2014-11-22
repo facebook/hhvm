@@ -1521,7 +1521,7 @@ void HhbcTranslator::emitEndInlinedCommon() {
     ReDefSP,
     ReDefSPData {
       m_irb->spOffset(),
-      m_irb->inlinedFrameSpansCall()
+      m_irb->frameMaySpanCall()
     },
     m_irb->sp(),
     m_irb->fp()

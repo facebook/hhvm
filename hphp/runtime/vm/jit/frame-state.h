@@ -179,23 +179,24 @@ struct FrameState {
   jit::vector<LocalState> locals;
 
   /*
-   * m_frameSpansCall is true iff a Call instruction has been seen since the
-   * definition of the current frame pointer.
+   * frameMaySpan is true iff a Call instruction has been seen on any path
+   * since the definition of the current frame pointer.
    */
-  bool frameSpansCall{false};
+  bool frameMaySpanCall{false};
 };
 
 inline bool operator==(const FrameState& a, const FrameState& b) {
   return
-    a.spValue        == b.spValue &&
-    a.fpValue        == b.fpValue &&
-    a.curFunc        == b.curFunc &&
-    a.spOffset       == b.spOffset &&
-    a.thisAvailable  == b.thisAvailable &&
-    a.locals         == b.locals &&
-    a.frameSpansCall == b.frameSpansCall &&
-    a.marker         == b.marker;
+    a.spValue          == b.spValue &&
+    a.fpValue          == b.fpValue &&
+    a.curFunc          == b.curFunc &&
+    a.spOffset         == b.spOffset &&
+    a.thisAvailable    == b.thisAvailable &&
+    a.locals           == b.locals &&
+    a.frameMaySpanCall == b.frameMaySpanCall &&
+    a.marker           == b.marker;
 }
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -220,13 +221,25 @@ inline bool operator==(const FrameState& a, const FrameState& b) {
  *   - current function and bytecode offset
  */
 struct FrameStateMgr final : private LocalStateHook {
-  FrameStateMgr(IRUnit& unit, BCMarker firstMarker);
-  FrameStateMgr(IRUnit& unit, Offset initialSpOffset, const Func* func);
+  explicit FrameStateMgr(const IRUnit&, BCMarker);
 
   FrameStateMgr(const FrameStateMgr&) = delete;
-  FrameStateMgr& operator=(const FrameStateMgr&) = delete;
-
   FrameStateMgr(FrameStateMgr&&) = default;
+  FrameStateMgr& operator=(const FrameStateMgr&) = delete;
+  FrameStateMgr& operator=(FrameStateMgr&&) = default;
+
+  /*
+   * Put the FrameStateMgr in building mode.  This function must be called
+   * after constructing a FrameStateMgr before you start updating it, unless
+   * you're using it for fixed point mode.
+   */
+  void setBuilding() { m_status = Status::Building; }
+
+  /*
+   * Tell the FrameStateMgr we're doing reoptimize without being aware of all
+   * types of control flow.
+   */
+  void setLegacyReoptimize() { m_status = Status::LegacyReoptimize; }
 
   /*
    * Update state by computing the effects of an instruction.
@@ -288,14 +301,8 @@ struct FrameStateMgr final : private LocalStateHook {
   void clearBlock(Block*);
 
   /*
-   * Clear all tracked state, including both the current state and the
-   * state associated with all blocks.
-   */
-  void clear();
-
-  /*
    * Iterates through a control-flow graph, until a fixed-point is
-   * reached. Drops all previous state.
+   * reached. Must be called before this FrameStateMgr has any state.
    */
   void computeFixedPoint(const BlocksWithIds&);
 
@@ -311,7 +318,7 @@ struct FrameStateMgr final : private LocalStateHook {
   SSATmp* fp() const { return cur().fpValue; }
   bool thisAvailable() const { return cur().thisAvailable; }
   void setThisAvailable() { cur().thisAvailable = true; }
-  bool frameSpansCall() const { return cur().frameSpansCall; }
+  bool frameMaySpanCall() const { return cur().frameMaySpanCall; }
   BCMarker marker() const { return cur().marker; }
   void setMarker(BCMarker m) { cur().marker = m; }
   unsigned inlineDepth() const { return m_stack.size() - 1; }
@@ -320,29 +327,10 @@ struct FrameStateMgr final : private LocalStateHook {
   void clearStackDeficit() { cur().stackDeficit = 0; }
   EvalStack& evalStack() { return cur().evalStack; }
 
-  void setBuilding(bool b) { m_status = b ? Status::Building : Status::None; }
-
   Type localType(uint32_t id) const;
   Type predictedLocalType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
-
-  /*
-   * What the FrameStateMgr is doing.
-   *
-   * Building - Changes when we propagate state to taken blocks.
-   *
-   * RunningFixedPoint - Changes how we handle predecessors we haven't visited
-   * yet.
-   *
-   * FinishedFixedPoint - Stops us from merging new state to blocks.
-   */
-  enum class Status : uint8_t {
-    None,
-    Building,
-    RunningFixedPoint,
-    FinishedFixedPoint,
-  };
 
   /*
    * Info about state leaving a block. The block must have already been
@@ -360,12 +348,6 @@ struct FrameStateMgr final : private LocalStateHook {
    * FrameStateMgr::startBlock does this automatically.
    */
   void markVisited(const Block*);
-
-  /*
-   * Clears state upon hitting an loop header. Takes an optional hook whose
-   * locals will get nulled out.
-   */
-  void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
   /*
    * Call a function with const access to the LocalState& for each local we're
@@ -387,15 +369,45 @@ private:
     jit::vector<FrameState> out;
   };
 
+  enum class Status : uint8_t {
+    /*
+     * Status we have after initially being created.
+     */
+    None,
+
+    /*
+     * Changes when we propagate state to taken blocks.  This status is used
+     * during IR generation time.
+     */
+    Building,
+
+    /*
+     * Changes how we handle predecessors we haven't visited yet.  This state
+     * means we're doing computeFixedPoint() still.
+     */
+    RunningFixedPoint,
+
+    /*
+     * Stops us from merging new state to blocks.  The computeFixedPoint call
+     * has finished, and blocks may be inspected with that information, but we
+     * don't need to propagate anything anywhere anymore.
+     */
+    FinishedFixedPoint,
+
+    /*
+     * We're doing a reoptimize that's not based on a fixed-point computation.
+     */
+    LegacyReoptimize,
+  };
+
 private:
   bool checkInvariants() const;
   bool save(Block*);
   bool isVisited(const Block*) const;
   jit::vector<LocalState>& locals(unsigned inlineIdx);
-  void clearCurrentState();
-  void resetCurrentState(BCMarker);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
+  void loopHeaderClear(BCMarker, LocalStateHook* hook = nullptr);
 
 private:
   FrameState& cur() {
@@ -420,7 +432,6 @@ private: // LocalStateHook overrides
   void clearLocals() override;
 
 private:
-  IRUnit& m_unit;
   Status m_status{Status::None};
 
   /*

@@ -200,8 +200,8 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   Timer _t(Timer::optimize_relaxGuards);
   ITRACE(2, "entering relaxGuards\n");
   Indent _i;
-  bool simple = flags & RelaxSimple;
-  bool reflow = flags & RelaxReflow;
+  bool const simple = flags & RelaxSimple;
+  bool const reflow = flags & RelaxReflow;
   splitCriticalEdges(unit);
   auto& guards = constraints.guards;
   auto blocks = rpoSortCfg(unit);
@@ -239,6 +239,8 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
 
   // Make a second pass to reflow types, with some special logic for loads.
   FrameStateMgr state{unit, unit.entry()->front().marker()};
+  // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
+  state.setLegacyReoptimize();
 
   for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());

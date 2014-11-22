@@ -113,7 +113,7 @@ struct IRBuilder {
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
   }
-  bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
+  bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
 
   /*
    * Updates the marker used for instructions generated without one
@@ -466,6 +466,7 @@ private:
 
 private:
   IRUnit& m_unit;
+  BCMarker m_initialMarker;
   FrameStateMgr m_state;
   CSEHash m_cseHash;
   bool m_enableCse{false};

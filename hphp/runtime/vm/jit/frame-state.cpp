@@ -105,8 +105,14 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
-  // this is available iff it's available in both states
+  // This is available iff it's available in both states
   if (merge_util(dst.thisAvailable, dst.thisAvailable && src.thisAvailable)) {
+    changed = true;
+  }
+
+  // The frame may span a call if it could have done so in either state.
+  if (merge_util(dst.frameMaySpanCall,
+                 dst.frameMaySpanCall || src.frameMaySpanCall)) {
     changed = true;
   }
 
@@ -170,25 +176,17 @@ bool check_invariants(const FrameState& state) {
 
 }
 
-FrameStateMgr::FrameStateMgr(IRUnit& unit, BCMarker marker)
-  : FrameStateMgr(unit, marker.spOff(), marker.func())
-{
-  assert(!marker.isDummy());
-}
-
-FrameStateMgr::FrameStateMgr(IRUnit& unit,
-                             Offset initialSpOffset,
-                             const Func* func)
-  : m_unit(unit)
-  , m_visited(unit.numBlocks())
+FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker)
+  : m_visited(unit.numBlocks())
 {
   m_stack.push_back(FrameState{});
-  cur().curFunc = func;
-  cur().spOffset = initialSpOffset;
-  cur().locals.resize(func ? func->numLocals() : 0);
+  cur().curFunc = marker.func();
+  cur().spOffset = marker.spOff();
+  cur().locals.resize(marker.func()->numLocals());
 }
 
 bool FrameStateMgr::update(const IRInstruction* inst) {
+  assert(m_status != Status::None);
   ITRACE(3, "FrameStateMgr::update processing {}\n", *inst);
   Indent _i;
 
@@ -213,7 +211,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case Call:
     cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameSpansCall = true;
+    for (auto& st : m_stack) st.frameMaySpanCall = true;
     // A call pops the ActRec and the arguments, and then pushes a
     // return value.
     cur().spOffset -= kNumActRecCells + inst->extra<Call>()->numParams;
@@ -223,7 +221,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case CallArray:
     cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameSpansCall = true;
+    for (auto& st : m_stack) st.frameMaySpanCall = true;
     // A CallArray pops the ActRec an array arg and pushes a return value.
     cur().spOffset -= kNumActRecCells;
     assert(cur().spOffset >= 0);
@@ -231,7 +229,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case ContEnter:
     cur().spValue = inst->dst();
-    for (auto& st : m_stack) st.frameSpansCall = true;
+    for (auto& st : m_stack) st.frameMaySpanCall = true;
     break;
 
   case DefFP:
@@ -359,6 +357,7 @@ void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
                                LocalStateHook* hook /* = nullptr */,
                                bool isLoopHeader /* = false */) {
+  assert(m_status != Status::None);
   auto const it = m_states.find(block);
   auto const end = m_states.end();
 
@@ -480,11 +479,11 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * We set m_thisIsAvailable to true on any object method, because we
    * just don't inline calls to object methods with a null $this.
    */
-  cur().fpValue         = calleeFP;
-  cur().spValue         = calleeSP;
-  cur().thisAvailable   = target->cls() != nullptr && !target->isStatic();
-  cur().curFunc         = target;
-  cur().frameSpansCall  = false;
+  cur().fpValue          = calleeFP;
+  cur().spValue          = calleeSP;
+  cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
+  cur().curFunc          = target;
+  cur().frameMaySpanCall = false;
 
   cur().locals.clear();
   cur().locals.resize(target->numLocals());
@@ -495,43 +494,19 @@ void FrameStateMgr::trackInlineReturn() {
   assert(!m_stack.empty());
 }
 
-void FrameStateMgr::clear() {
-  // A previous run of reoptimize could've legitimately exited the trace in an
-  // inlined callee. If that happened, just pop all the saved states to return
-  // to the top-level func.
-  while (inlineDepth()) {
-    trackInlineReturn();
-  }
-  clearCurrentState();
-  m_states.clear();
-  m_visited.clear();
-  assert(m_stack.size() == 1);
-  m_status = Status::None;
-}
-
 bool FrameStateMgr::checkInvariants() const {
-  for (auto idx = uint32_t{0}; idx < m_stack.size(); ++idx) {
-    assert(check_invariants(m_stack[idx]));
+  for (auto& state : m_stack) {
+    always_assert(check_invariants(state));
   }
   return true;
 }
 
 /*
- * Clear the current state, but keeps the state associated with all
- * other blocks intact.
+ * Modify state to conservative values given an unprocessed predecessor.
+ *
+ * We do not support unprocessed predecessors from different frames.  fpValue
+ * must be the same, so it is not cleared.
  */
-void FrameStateMgr::clearCurrentState() {
-  cur().spValue        = nullptr;
-  cur().fpValue        = nullptr;
-  cur().spOffset       = 0;
-  cur().marker         = BCMarker();
-  cur().thisAvailable  = false;
-  cur().frameSpansCall = false;
-  cur().stackDeficit   = 0;
-  cur().evalStack      = EvalStack();
-  clearLocals();
-}
-
 void FrameStateMgr::loopHeaderClear(BCMarker marker,
                                     LocalStateHook* hook /* = nullptr */) {
   cur().spValue        = nullptr;
@@ -541,37 +516,28 @@ void FrameStateMgr::loopHeaderClear(BCMarker marker,
   cur().stackDeficit   = 0;
   cur().evalStack      = EvalStack();
 
+  // These two values must go toward their conservative state.
+  cur().thisAvailable    = false;
+  cur().frameMaySpanCall = true;
+
   // Clear hook first so that it can read local info from the FrameStateMgr.
   if (hook != nullptr) hook->clearLocals();
   clearLocals();
 }
 
-/*
- * Clears the current state and resets the current marker to the given value.
- */
-void FrameStateMgr::resetCurrentState(BCMarker marker) {
-  clearCurrentState();
-  cur().marker   = marker;
-  cur().spOffset = marker.spOff();
-  cur().curFunc  = marker.func();
-}
-
 void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
   ITRACE(4, "FrameStateMgr computing fixed-point\n");
 
-  clear();
-
+  assert(m_status == Status::None);  // we should have a clear state
   m_status = Status::RunningFixedPoint;
 
   auto const entry = blocks.blocks[0];
-  auto const entryMarker = entry->front().marker();
-
+  DEBUG_ONLY auto const entryMarker = entry->front().marker();
   // So that we can actually call startBlock on the entry block.
-  m_states[entry].in.push_back(FrameState{});
-  m_states[entry].in.back().curFunc = entryMarker.func();
-  m_states[entry].in.back().marker = entryMarker;
-  m_states[entry].in.back().locals.resize(entryMarker.func()->numLocals());
-  resetCurrentState(entryMarker);
+  assert(m_stack.size() == 1);
+  m_states[entry].in = m_stack;
+  assert(m_states[entry].in.back().curFunc == entryMarker.func());
+  assert(m_states[entry].in.back().marker == entryMarker);
 
   // Use a worklist of RPO ids. That way, when we remove an active item to
   // process, we'll always pick the block earliest in RPO.
@@ -599,8 +565,6 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
 
     if (finishBlock(block)) insert(block->next());
   }
-
-  resetCurrentState(entryMarker);
 
   m_status = Status::FinishedFixedPoint;
 }
@@ -821,13 +785,14 @@ std::string show(const FrameStateMgr& state) {
   auto func = state.func();
   auto funcName = func ? func->fullName() : makeStaticString("null");
 
-  return folly::format("func: {}, bcOff: {}, spOff: {}{}{}",
-                       funcName->data(),
-                       bcOff,
-                       state.spOffset(),
-                       state.thisAvailable() ? ", thisAvailable" : "",
-                       state.frameSpansCall() ? ", frameSpansCall" : ""
-                      ).str();
+  return folly::format(
+    "func: {}, bcOff: {}, spOff: {}{}{}",
+    funcName->data(),
+    bcOff,
+    state.spOffset(),
+    state.thisAvailable() ? ", thisAvailable" : "",
+    state.frameMaySpanCall() ? ", frameMaySpanCall" : ""
+  ).str();
 }
 
 //////////////////////////////////////////////////////////////////////

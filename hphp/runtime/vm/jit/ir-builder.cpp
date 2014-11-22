@@ -63,12 +63,13 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
-  , m_state(unit, initMarker)
+  , m_initialMarker(initMarker)
+  , m_state(m_unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
 {
-  m_state.setBuilding(true);
+  m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
     m_enableCse = RuntimeOption::EvalHHIRCse &&
       !RuntimeOption::EvalHHIRBytecodeControlFlow;
@@ -403,7 +404,8 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (fpInst->is(DefInlineFP)) {
     // TODO(#5623596): this optimization required for correctness in refcount
     // opts right now.
-    if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
+    // check that we haven't nuked the SSATmp
+    if (!m_state.frameMaySpanCall()) {
       auto spInst = findSpillFrame(fpInst->src(0));
       // In an inlined call, we should always be able to find our SpillFrame.
       always_assert(spInst && spInst->src(0) == fpInst->src(1));
@@ -699,13 +701,12 @@ void IRBuilder::reoptimize() {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
   }
 
-  m_state.clear();
+  m_state = FrameStateMgr(m_unit, m_initialMarker);
   m_cseHash.clear();
   m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   if (!m_enableCse && !m_enableSimplification) return;
   setConstrainGuards(false);
-  m_state.setBuilding(false);
 
   // This is a work in progress that we want committed, but that has some
   // issues still.
@@ -716,7 +717,11 @@ void IRBuilder::reoptimize() {
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
-  if (use_fixed_point) m_state.computeFixedPoint(blocksIds);
+  if (use_fixed_point) {
+    m_state.computeFixedPoint(blocksIds);
+  } else {
+    m_state.setLegacyReoptimize();
+  }
 
   for (auto block : blocksIds.blocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());

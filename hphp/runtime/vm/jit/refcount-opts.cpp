@@ -1887,6 +1887,7 @@ void eliminateTakes(const BlockList& blocks) {
  * refcount of each object has not changed.
  */
 void optimizeRefcounts(IRUnit& unit, FrameStateMgr&& fs) {
+  fs.setLegacyReoptimize();
   Timer _t(Timer::optimize_refcountOpts);
   FTRACE(2, "vvvvvvvvvv refcount opts vvvvvvvvvv\n");
 

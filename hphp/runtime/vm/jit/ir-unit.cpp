@@ -117,6 +117,8 @@ void IRUnit::collectPostConditions() {
   Block* lastMainBlock = nullptr;
 
   FrameStateMgr state{*this, entry()->front().marker()};
+  // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
+  state.setLegacyReoptimize();
   ITRACE(2, "collectPostConditions starting\n");
   Trace::Indent _i;
 

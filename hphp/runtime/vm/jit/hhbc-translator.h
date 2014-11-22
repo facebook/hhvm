@@ -942,7 +942,6 @@ private:
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
-  void    replace(uint32_t index, SSATmp* tmp);
 
   SSATmp* unbox(SSATmp* val, Block* exit);
 

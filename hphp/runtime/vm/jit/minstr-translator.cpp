@@ -1574,7 +1574,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     gen(StLoc, LocalId(base.location.offset), m_irb.fp(), newArr);
   } else if (base.location.space == Location::Stack) {
     m_ht.extendStack(baseStkIdx, Type::Gen);
-    m_ht.replace(baseStkIdx, newArr);
+    m_irb.evalStack().replace(baseStkIdx, newArr);
   } else {
     not_reached();
   }

@@ -207,10 +207,6 @@ SSATmp* HhbcTranslator::top(Type type, uint32_t index,
   return tmp;
 }
 
-void HhbcTranslator::replace(uint32_t index, SSATmp* tmp) {
-  m_irb->evalStack().replace(index, tmp);
-}
-
 Type HhbcTranslator::topType(uint32_t idx, TypeConstraint constraint) const {
   FTRACE(5, "Asking for type of stack elem {}\n", idx);
   if (idx < m_irb->evalStack().size()) {

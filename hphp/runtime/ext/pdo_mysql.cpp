@@ -487,7 +487,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
       stmt->dbh->fetchErr(stmt, info);
     }
     bool throw_exception = true;
-    for(int i = 0; i < sizeof(s_hidden_error_codes); i++) {
+    for(int i = 0; i < sizeof(s_hidden_error_codes)/sizeof(int); i++) {
       if(einfo->errcode == s_hidden_error_codes[i]) {
         throw_exception = false;
         break;

@@ -25,12 +25,11 @@ if (OCAMLC_FOUND)
     list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
     get_filename_component(pth ${LZ4_LIBRARY} PATH)
     list(APPEND extra_lib_paths ${pth})
-    list(APPEND extra_native_libraries "lz4")
   else()
     list(APPEND extra_include_paths "${TP_DIR}/lz4")
     list(APPEND extra_lib_paths "${TP_DIR}/lz4")
-    list(APPEND extra_native_libraries "lz4")
   endif()
+  list(APPEND extra_native_libraries "lz4")
 
   # Xcode/Ninja generators undefined MAKE
   if(NOT MAKE)

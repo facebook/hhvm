@@ -9,7 +9,6 @@
  *)
 
 open ClientExceptions
-open Utils
 
 let get_hhserver () =
   let server_next_to_client = (Filename.dirname Sys.argv.(0)) ^ "/hh_server" in
@@ -52,7 +51,7 @@ let start_server env =
     (Path.string_of_path env.root)
     server_options in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
-    (truncate_string_beyond 150 hh_server);
+  hh_server;
   match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
     | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);

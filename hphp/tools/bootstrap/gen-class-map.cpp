@@ -75,7 +75,7 @@ static fbstring genDocCommentPreamble(const fbstring& name,
   if (flags & HipHopSpecific) {
     ret = "( HipHop specific )";
   } else {
-    ret = "( excerpt from http://php.net/manual/en/";
+    ret = "( excerpt from http://docs.hhvm.com/manual/en/";
     if (classname.size()) {
       ret += classname + ".";
     } else {

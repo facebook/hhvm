@@ -7,4 +7,4 @@ function headerTestController($serverPort) {
   var_dump(request(php_uname('n'), $serverPort, "test_headers.php", $args));
 }
 
-runTest('headerTest', "headerTestController");
+runTest("headerTestController");

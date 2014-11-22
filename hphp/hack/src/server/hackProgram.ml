@@ -123,6 +123,18 @@ module Program : Server.SERVER_PROGRAM = struct
             let fun_str = Typing_print.fun_ f in
             output_string oc (fun_str^"\n")
         );
+        output_string oc "typedef:\n";
+        (match SMap.get qual_name nenv.Naming.itypedefs with
+        | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
+        | None -> output_string oc "Missing from nenv\n");
+        let tdef = Typing_env.Typedefs.get qual_name in
+        (match tdef with
+        | None ->
+            output_string oc "Missing from Typing_env\n"
+        | Some td ->
+            let td_str = Typing_print.typedef td in
+            output_string oc (td_str^"\n")
+        );
         flush oc
     | ServerMsg.KILL -> die_nicely oc
     | ServerMsg.PING -> ServerMsg.response_to_channel oc ServerMsg.PONG

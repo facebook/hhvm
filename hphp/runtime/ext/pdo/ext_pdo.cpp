@@ -1740,6 +1740,9 @@ static bool really_register_bound_param(PDOBoundParam *param,
 
 static inline void fetch_value(sp_PDOStatement stmt, Variant &dest, int colno,
                                int *type_override) {
+  if (colno < 0 || colno >= stmt->column_count) {
+    return;
+  }
   PDOColumn *col = stmt->columns[colno].toResource().getTyped<PDOColumn>();
   int type = PDO_PARAM_TYPE(col->param_type);
   int new_type = type_override ? PDO_PARAM_TYPE(*type_override) : type;

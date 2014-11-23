@@ -269,9 +269,9 @@ org\bovigo\vfs\vfsStreamFileTestCase::writeEmptyFile
 org\bovigo\vfs\vfsStreamGlobTestCase::globDoesNotWorkWithVfsStreamUrls
 .
 org\bovigo\vfs\vfsStreamResolveIncludePathTestCase::knownFileCanBeResolved
-S
+.
 org\bovigo\vfs\vfsStreamResolveIncludePathTestCase::unknownFileCanNotBeResolvedYieldsFalse
-S
+.
 org\bovigo\vfs\vfsStreamTestCase::copyFromEmptyFolder
 .
 org\bovigo\vfs\vfsStreamTestCase::copyFromEmptyFolderWithRoot

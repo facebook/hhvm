@@ -33,7 +33,7 @@ public:
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
 
-  int fd() const;
+  virtual int fd() const;
 
   virtual bool open(const String& filename, const String& mode) {
     return openImpl(filename, mode, 0);

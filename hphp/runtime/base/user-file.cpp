@@ -152,8 +152,12 @@ Resource UserFile::invokeCast(int castas) {
 }
 
 int UserFile::fd() const {
-  Resource handle = const_cast<UserFile*>(this)->invokeCast(PHP_STREAM_AS_FD_FOR_SELECT);
+  Resource handle = const_cast<UserFile*>(this)->invokeCast(
+    PHP_STREAM_AS_FD_FOR_SELECT);
   if (handle.isNull()) {
+    raise_warning(
+      "cannot represent a stream of type user-space as a file descriptor"
+    );
     return -1;
   }
   File *f = handle.getTyped<File>();

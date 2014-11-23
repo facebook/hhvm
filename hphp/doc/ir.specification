@@ -25,59 +25,54 @@ used for just in time compilation, with these goals:
      Nevertheless, we rely on machine independence in order to separate
      concerns and increase portability of the VM. Passes which manipulate IR
      based on PHP or HHBC semantics should be portable. Passes which deal with
-     machine specifics (such as register allocation) should be self contained.
-     For example, register allocation may insert machine-specific loads,
-     stores, or swaps, according to a specific cpu model. But those
-     instructions are still well behaved Instruction classes. Types are machine
-     independent.
+     machine specifics (such as register allocation) should be done in the
+     lower level IR (vasm). Types are machine independent.
 
-The unit of compilation is the Trace, which is a sequence of Blocks of
-Instructions that produce and consume Variables. Blocks are single-entry,
-single-exit sequences of instructions (i.e. basic blocks). Instructions may be
-annotated with Type which modifies the instruction's behavior. Each Variable
-has a Type which describes the set of values it may hold at the point it is
-defined. Instructions may have side effects, which occur in execution order.
+The unit of compilation is the IRUnit, which is a collection of Blocks
+containing IRInstructions that produce and consume SSATmp values. Blocks are
+single-entry, single-exit sequences of instructions (i.e. basic
+blocks). Instructions may be annotated with Type parameter which modifies the
+instruction's behavior, or with additional compile-time constant data (see
+extra-data.h). Each SSATmp has a Type which describes the set of values it may
+hold, over its entire live range. Instructions may have side effects, which
+occur in execution order.
 
 The static single assignment form guarantees the following two invariants for a
-well-formed Trace:
+well-formed compilation unit:
 
-  1. Each Variable is assigned to by exactly one Instruction.
+  1. Each SSATmp is assigned to by exactly one IRInstruction.
 
-  2. Definitions dominate uses. Every path to an Instruction using a Variable
-     first executes the Instruction defining the Variable.
+  2. Definitions dominate uses. Every path to an IRInstruction using an SSATmp
+     first executes the IRInstruction defining the SSATmp.
 
 Any pass that generates or manipulates IR must preserve these invariants,
 however it is possible and expected for the invariants to be temporarily broken
-during trace creation or during an optimizer pass.
+during IR generation or during an optimization pass.
 
 
 Control Flow
 ------------
 
-Traces have one entry block and zero or more exit traces. Blocks may branch
-within a trace or to an exit trace; blocks form a restricted control flow
-graph. This control flow may contain join points (two or more branches exiting
-at the same point, or two jumps within the trace to a target in the same
-trace), but may not form loops.
+IRUnits have one entry block, zero or more exit blocks, and zero or more catch
+blocks. Exit blocks leave the compilation unit in the middle of the same PHP
+function using one of several instructions that exit a compilation unit
+(e.g. ReqBindJmp). Catch blocks are blocks that are reachable from exceptional
+control flow edges, and are executed during unwinding if an exception
+propagates through the instruction that had it as a `taken' edge.
 
-No Variables are defined on entry to the main Trace.
+No SSATmps are defined on entry to the main Block.
 
 Blocks which are join points may start with a DefLabel with destination
-Variables. In that case, each predecessor must be a Jmp passing a matching
-number of source Variables. In this case the Jmp acts as a tail-call, passing
-arguments the same way a plain call would.
+SSATmps. In that case, each predecessor must be a Jmp passing a matching number
+of sources. In this case the Jmp acts as a tail-call, passing arguments the
+same way a plain call would.
 
 Together, the sources of the Jmp instructions and the destinations of the
 DefLabel instructions act as traditional SSA Phi pseudo-functions; The type of
-the label's destination is the type-union of the corresponding sources.
+the DefLabel's destination is the type-union of the corresponding sources.
 Because the Jmp sources are at the ends of blocks, they do not violate the SSA
 dominator rule (rule 2, above).
 
-Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
-consists of one or more instances of the Trace class. There is exactly one main
-trace, and zero or more exit traces which handle side exits. Instructions in
-exit traces may use Variables defined on the main trace, so these exits are not
-separate compilation units.
 
 Types
 -----
@@ -85,33 +80,24 @@ Types
 For an overview of the HHIR type system, see the "Type System" section in
 hackers-guide/jit-core.md.
 
-Variables
----------
 
-A Variable represents a storage location which takes on various concrete values
-at runtime. Since HHIR uses SSA, a variable may only be assigned to by one
-instruction. A variable's type represents the set of values it may hold at the
-point it is defined. The type is invariant over the lifetime of the variable
-(from the definition point to the last use).
+SSATmps
+-------
 
-Implementation note: this the proposed semantics. The current implementation is
-not this strict; during IR generation, we overload instruction type
-(IRInstruction::m_type), variable type (SSATmp::getType returns instr->type),
-and types known at points *after* definition, due to guards. E.g. after a
-guard, we change src->instr->type to the refined type, then propagate this
-backwards through copies. This effectively uses IRInstruction::m_type as a
-scratch variable, which is only valid at certain times during construction).
-This is probably unsound in later passes; after such a refinement, instructions
-using the variable before the guard see the refined type.
+An SSATmp represents a virtual register. Since HHIR uses SSA, an SSATmp may
+only be assigned to by one instruction. The type of an SSATmp represents the
+set of values it may hold at the point it is defined, which is invariant over
+the lifetime of the variable (from the definition point to the last use).
 
 
-Instructions
-------------
+IRInstructions
+--------------
 
 An instruction is an executable operation with zero or more inputs (sources),
 zero or one result (destination), and possible side effects such as accessing
 memory, doing I/O, and which may branch or throw an exception. Some
-instructions have a Type parameter which modifies its behavior.
+instructions have a Type parameter which modifies its behavior, or other "extra
+data" in an arbitrary C++ struct (see extra-data.h).
 
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
@@ -215,6 +201,7 @@ MInstrElem
 
   The instruction may affect the type and/or value of its base operand,
   operating on array elements.
+
 
 Instruction set
 ---------------

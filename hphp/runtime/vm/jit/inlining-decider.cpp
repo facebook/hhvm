@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 
 #include "hphp/util/trace.h"
 

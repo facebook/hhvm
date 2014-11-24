@@ -2088,11 +2088,6 @@ ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool isOptimizableCollectionClass(const Class* klass) {
-  return klass == c_Vector::classof() || klass == c_Map::classof() ||
-    klass == c_Pair::classof();
-}
-
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
 ///////////////////////////////////////////////////////////////////////////////

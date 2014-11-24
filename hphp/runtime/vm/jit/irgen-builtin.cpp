@@ -13,19 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/irgen-builtin.h"
 
-#include <folly/CpuId.h>
-
-#include "hphp/util/trace.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/hhbc-translator-internal.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 
-namespace HPHP { namespace jit {
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 
-TRACE_SET_MOD(hhir);
+namespace HPHP { namespace jit { namespace irgen {
+
+namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,11 +42,11 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* HhbcTranslator::optimizedCallIsA() {
+SSATmp* optimizedCallIsA(HTS& env) {
   // The last param of is_a has a default argument of false, which makes it
   // behave the same as instanceof (which doesn't allow a string as the tested
   // object). Don't do the conversion if we're not sure this arg is false.
-  auto const allowStringType = topType(0);
+  auto const allowStringType = topType(env, 0);
   if (!(allowStringType <= Type::Bool)
       || !allowStringType.isConst()
       || allowStringType.boolVal()) {
@@ -54,15 +56,19 @@ SSATmp* HhbcTranslator::optimizedCallIsA() {
   // Unlike InstanceOfD, is_a doesn't support interfaces like Stringish, so e.g.
   // "is_a('x', 'Stringish')" is false even though "'x' instanceof Stringish" is
   // true. So if the first arg is not an object, the return is always false.
-  auto const objType = topType(2);
+  auto const objType = topType(env, 2);
   if (!objType.maybe(Type::Obj)) {
-    return cns(false);
+    return cns(env, false);
   }
 
   if (objType <= Type::Obj) {
-    auto const classnameType = topType(1);
+    auto const classnameType = topType(env, 1);
     if (classnameType <= Type::StaticStr && classnameType.isConst()) {
-      return emitInstanceOfDImpl(topC(2), top(Type::Str, 1)->strVal());
+      return implInstanceOfD(
+        env,
+        topC(env, 2),
+        top(env, Type::Str, 1)->strVal()
+      );
     }
   }
 
@@ -70,28 +76,28 @@ SSATmp* HhbcTranslator::optimizedCallIsA() {
   return nullptr;
 }
 
-SSATmp* HhbcTranslator::optimizedCallCount() {
-  auto const mode = top(Type::Int, 0);
-  auto const val = topC(1);
+SSATmp* optimizedCallCount(HTS& env) {
+  auto const mode = top(env, Type::Int, 0);
+  auto const val = topC(env, 1);
 
   // Bail if we're trying to do a recursive count()
   if (!mode->isConst(0)) return nullptr;
 
-  return gen(Count, makeCatch(), val);
+  return gen(env, Count, makeCatch(env), val);
 }
 
-SSATmp* HhbcTranslator::optimizedCallIniGet() {
+SSATmp* optimizedCallIniGet(HTS& env) {
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  Type argType = topType(0);
+  auto const argType = topType(env, 0);
   if (!(argType <= Type::StaticStr) || !argType.isConst()) {
-      return nullptr;
+    return nullptr;
   }
 
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.
-  std::string settingName = top(Type::Str, 0)->strVal()->toCppString();
+  auto const settingName = top(env, Type::Str, 0)->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode) ||
       !(mode & IniSetting::PHP_INI_SYSTEM)) {
@@ -104,7 +110,7 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
   // Only return a string, get out of here if we are something
   // else like an array
   if (value.isString()) {
-    return cns(makeStaticString(value.toString()));
+    return cns(env, makeStaticString(value.toString()));
   }
   return nullptr;
 }
@@ -113,15 +119,15 @@ SSATmp* HhbcTranslator::optimizedCallIniGet() {
  * Transforms in_array with a static haystack argument into an AKExists with the
  * haystack flipped.
  */
-SSATmp* HhbcTranslator::optimizedCallInArray() {
+SSATmp* optimizedCallInArray(HTS& env) {
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(topType(2) <= Type::Str)) {
+  if (!(topType(env, 2) <= Type::Str)) {
     return nullptr;
   }
 
-  auto const haystackType = topType(1);
+  auto const haystackType = topType(env, 1);
   if (!(haystackType <= Type::StaticArr) || !haystackType.isConst()) {
     // Haystack isn't statically known
     return nullptr;
@@ -129,7 +135,7 @@ SSATmp* HhbcTranslator::optimizedCallInArray() {
 
   auto const haystack = haystackType.arrVal();
   if (haystack->size() == 0) {
-    return cns(false);
+    return cns(env, false);
   }
 
   ArrayInit flipped{haystack->size(), ArrayInit::Map{}};
@@ -153,112 +159,87 @@ SSATmp* HhbcTranslator::optimizedCallInArray() {
     flipped.set(key.asCStrRef(), init_null_variant);
   }
 
-  auto needle = topC(2);
+  auto needle = topC(env, 2);
   auto array = flipped.toArray();
-  return gen(AKExists, cns(ArrayData::GetScalarArray(array.get())), needle);
+  return gen(env,
+             AKExists,
+             cns(env, ArrayData::GetScalarArray(array.get())),
+             needle);
 }
 
-SSATmp* HhbcTranslator::optimizedCallGetClass(uint32_t numNonDefault) {
-  auto const curCls = curClass();
+SSATmp* optimizedCallGetClass(HTS& env, uint32_t numNonDefault) {
+  auto const curCls = curClass(env);
   auto const curName = [&] {
-    return curCls != nullptr ? cns(curCls->name()) : nullptr;
+    return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
   };
 
   if (numNonDefault == 0) return curName();
   assert(numNonDefault == 1);
 
-  auto const val = topC(0);
+  auto const val = topC(env, 0);
   if (val->isA(Type::Null)) return curName();
 
-  if (val->isA(Type::Obj)) return gen(LdClsName, gen(LdObjClass, val));
+  if (val->isA(Type::Obj)) {
+    return gen(env, LdClsName, gen(env, LdObjClass, val));
+  }
 
   return nullptr;
 }
 
-SSATmp* HhbcTranslator::optimizedCallGetCalledClass() {
-  if (!curClass()) return nullptr;
-
-  auto const ctx = ldCtx();
-  auto const cls = gen(LdClsCtx, ctx);
-  return gen(LdClsName, cls);
+SSATmp* optimizedCallGetCalledClass(HTS& env) {
+  if (!curClass(env)) return nullptr;
+  auto const ctx = ldCtx(env);
+  auto const cls = gen(env, LdClsCtx, ctx);
+  return gen(env, LdClsName, cls);
 }
 
-SSATmp* HhbcTranslator::optimizedCallIsObject(SSATmp* src) {
-  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
-    auto const cls = src->type().getClass();
-    if (!m_irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
-      // If we know the class without having to specialize a guard
-      // any further, use it.
-      return cns(cls != SystemLib::s___PHP_Incomplete_ClassClass);
-    }
-  }
+//////////////////////////////////////////////////////////////////////
 
-  if (src->type().not(Type::Obj)) {
-    return cns(false);
-  }
-
-  auto checkClass = [this] (SSATmp* obj) {
-    auto cls = gen(LdObjClass, obj);
-    auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
-    return gen(ClsNeq, ClsNeqData { testCls }, cls);
-  };
-
-  return m_irb->cond(
-    0, // references produced
-    [&] (Block* taken) {
-      auto isObj = gen(IsType, Type::Obj, src);
-      gen(JmpZero, taken, isObj);
-    },
-    [&] { // Next: src is an object
-      auto obj = gen(AssertType, Type::Obj, src);
-      return checkClass(obj);
-    },
-    [&] {// Taken: src is not an object
-      return cns(false);
-    }
-  );
-}
-
-bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
-                                           uint32_t numArgs,
-                                           uint32_t numNonDefault) {
+bool optimizedFCallBuiltin(HTS& env,
+                           const Func* func,
+                           uint32_t numArgs,
+                           uint32_t numNonDefault) {
   SSATmp* res = nullptr;
   switch (numArgs) {
-    case 0:
-      if (func->name()->isame(s_get_called_class.get())) {
-        res = optimizedCallGetCalledClass();
-      }
-      break;
-    case 1:
-      if (func->name()->isame(s_ini_get.get())) {
-        res = optimizedCallIniGet();
-      } else if (func->name()->isame(s_get_class.get())) {
-        res = optimizedCallGetClass(numNonDefault);
-      }
-      break;
-    case 2:
-      if (func->name()->isame(s_count.get())) res = optimizedCallCount();
-      break;
-    case 3:
-      if (func->name()->isame(s_is_a.get())) res = optimizedCallIsA();
-      else if (func->name()->isame(s_in_array.get())) {
-        res = optimizedCallInArray();
-      }
-      break;
-    default: break;
+  case 0:
+    if (func->name()->isame(s_get_called_class.get())) {
+      res = optimizedCallGetCalledClass(env);
+    }
+    break;
+  case 1:
+    if (func->name()->isame(s_ini_get.get())) {
+      res = optimizedCallIniGet(env);
+    } else if (func->name()->isame(s_get_class.get())) {
+      res = optimizedCallGetClass(env, numNonDefault);
+    }
+    break;
+  case 2:
+    if (func->name()->isame(s_count.get())) {
+      res = optimizedCallCount(env);
+    }
+    break;
+  case 3:
+    if (func->name()->isame(s_is_a.get())) {
+      res = optimizedCallIsA(env);
+    } else if (func->name()->isame(s_in_array.get())) {
+      res = optimizedCallInArray(env);
+    }
+    break;
+  default:
+    break;
   }
 
   if (res == nullptr) return false;
 
   // Decref and free args
   for (int i = 0; i < numArgs; i++) {
-    auto const arg = popR();
+    auto const arg = popR(env);
     if (i >= numArgs - numNonDefault) {
-      gen(DecRef, arg);
+      gen(env, DecRef, arg);
     }
   }
 
-  push(res);
+  push(env, res);
   return true;
 }
 
@@ -310,53 +291,55 @@ bool HhbcTranslator::optimizedFCallBuiltin(const Func* func,
  *  <<takenBody>>
  *  EndCatch FP, SP
  */
-template<typename CommonBody, typename SideExitBody, typename TakenBody>
-Block* HhbcTranslator::makeParamCoerceExit(CommonBody commonBody,
-                                           SideExitBody sideExitBody,
-                                           TakenBody takenBody) {
-  auto exit = m_irb->makeExit(Block::Hint::Unused);
-  auto taken = m_irb->makeExit(Block::Hint::Unused);
+template<class CommonBody, class SideExitBody, class TakenBody>
+Block* makeParamCoerceExit(HTS& env,
+                           CommonBody commonBody,
+                           SideExitBody sideExitBody,
+                           TakenBody takenBody) {
+  auto exit = env.irb->makeExit(Block::Hint::Unused);
+  auto taken = env.irb->makeExit(Block::Hint::Unused);
 
-  BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
-  gen(BeginCatch);
+  BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
+  gen(env, BeginCatch);
   commonBody();
-  gen(UnwindCheckSideExit, taken, m_irb->fp(), m_irb->sp());
+  gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
 
   // prepare for regular exception
   {
-    BlockPusher bpTaken(*m_irb, makeMarker(bcOff()), taken);
+    BlockPusher bpTaken(*env.irb, makeMarker(env, bcOff(env)), taken);
 
-    auto sp = takenBody();
-    gen(EndCatch, m_irb->fp(), sp);
+    auto const stack = takenBody();
+    gen(env, EndCatch, fp(env), stack);
   }
 
   // prepare for side exit
   sideExitBody();
 
   // Push the side exit return value onto the stack and cleanup the exception
-  auto val = gen(LdUnwinderValue, Type::Cell);
-  gen(DeleteUnwinderException);
+  auto const val = gen(env, LdUnwinderValue, Type::Cell);
+  gen(env, DeleteUnwinderException);
 
   // Spill the stack
-  auto spills = peekSpillValues();
+  auto spills = peekSpillValues(env);
   spills.insert(spills.begin(), val);
-  auto stack = emitSpillStack(m_irb->sp(), spills, 0);
+  auto const stack = implSpillStack(env, sp(env), spills, 0);
 
-  gen(SyncABIRegs, m_irb->fp(), stack);
-  gen(EagerSyncVMRegs, m_irb->fp(), stack);
-  gen(ReqBindJmp, ReqBindJmpData(nextBcOff()));
+  gen(env, SyncABIRegs, fp(env), stack);
+  gen(env, EagerSyncVMRegs, fp(env), stack);
+  gen(env, ReqBindJmp, ReqBindJmpData(nextBcOff(env)));
 
   return exit;
 }
 
 template<class GetArg>
-void HhbcTranslator::emitBuiltinCall(const Func* callee,
-                                     uint32_t numArgs,
-                                     uint32_t numNonDefault,
-                                     SSATmp* paramThis,
-                                     bool inlining,
-                                     bool wasInliningConstructor,
-                                     GetArg getArg) {
+void builtinCall(HTS& env,
+                 const Func* callee,
+                 uint32_t numArgs,
+                 uint32_t numNonDefault,
+                 SSATmp* paramThis,
+                 bool inlining,
+                 bool wasInliningConstructor,
+                 GetArg getArg) {
   auto const destroyLocals = builtinFuncDestroysLocals(callee);
 
   // collect the parameter locals---we'll need them later.  Also
@@ -412,9 +395,9 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
   // For the same reason that we have to IncRef the locals above, we
   // need to grab one on the $this.
-  if (paramThis) gen(IncRef, paramThis);
+  if (paramThis) gen(env, IncRef, paramThis);
 
-  if (inlining) emitEndInlinedCommon();   /////// leaving inlined function
+  if (inlining) endInlinedCommon(env);   /////// leaving inlined function
 
   /*
    * Everything that needs to be on the stack gets spilled now.
@@ -422,17 +405,17 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   if (numParamsThroughStack != 0 || !inlining) {
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
       if (paramThroughStack[i]) {
-        push(paramSSAs[i]);
+        push(env, paramSSAs[i]);
       }
     }
     // We're going to do ldStackAddrs on these, so the stack must be
     // materialized:
-    spillStack();
+    spillStack(env);
     // This marker update is to make sure rbx points to the bottom of
     // our stack when we enter our catch trace.  The catch trace
     // twiddles the VM registers directly on the execution context to
     // make the unwinder understand the situation, however.
-    updateMarker();
+    updateMarker(env);
   }
 
   auto const decRefForCatch =  [&] {
@@ -441,9 +424,9 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
     // correctly in a catch block.
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
       if (paramThroughStack[i]) {
-        popDecRef(Type::Gen);
+        popDecRef(env, Type::Gen);
       } else {
-        gen(DecRef, paramSSAs[i]);
+        gen(env, DecRef, paramSSAs[i]);
       }
     }
   };
@@ -464,36 +447,42 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
    */
   auto const prepareForCatch = [&] {
     if (inlining) {
-      emitFPushActRec(cns(callee),
-                      paramThis ? paramThis : cns(Type::Nullptr),
-                      ActRec::encodeNumArgs(numArgs,
-                                            false /* localsDecRefd */,
-                                            false /* resumed */,
-                                            wasInliningConstructor),
-                      nullptr);
+      fpushActRec(env,
+                  cns(env, callee),
+                  paramThis ? paramThis : cns(env, Type::Nullptr),
+                  ActRec::encodeNumArgs(numArgs,
+                                        false /* localsDecRefd */,
+                                        false /* resumed */,
+                                        wasInliningConstructor),
+                  nullptr);
     }
     for (auto i = uint32_t{0}; i < numArgs; ++i) {
       // TODO(#4313939): it's not actually necessary to push these
       // nulls.
-      push(cns(Type::InitNull));
+      push(env, cns(env, Type::InitNull));
     }
-    auto const stack = spillStack();
-    gen(SyncABIRegs, m_irb->fp(), stack);
-    gen(EagerSyncVMRegs, m_irb->fp(), stack);
+    auto const stack = spillStack(env);
+    gen(env, SyncABIRegs, fp(env), stack);
+    gen(env, EagerSyncVMRegs, fp(env), stack);
     return stack;
   };
 
-
-  auto const prepareForSideExit = [&] { if (paramThis) gen(DecRef, paramThis);};
+  auto const prepareForSideExit = [&] {
+    if (paramThis) gen(env, DecRef, paramThis);
+  };
   auto const makeUnusualCatch = [&] {
-    return makeCatchImpl([&] {
-      decRefForCatch();
-      return prepareForCatch();
-    });
+    return makeCatchImpl(
+      env,
+      [&] {
+        decRefForCatch();
+        return prepareForCatch();
+      }
+    );
   };
 
   auto const makeParamCoerceCatch = [&] {
-    return makeParamCoerceExit(decRefForCatch,
+    return makeParamCoerceExit(env,
+                               decRefForCatch,
                                prepareForSideExit,
                                prepareForCatch);
   };
@@ -505,8 +494,8 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   auto const cbNumArgs = 2 + numArgs + (paramThis ? 1 : 0);
   SSATmp* args[cbNumArgs];
   auto argIdx = uint32_t{0};
-  args[argIdx++] = m_irb->fp();
-  args[argIdx++] = m_irb->sp();
+  args[argIdx++] = fp(env);
+  args[argIdx++] = sp(env);
   {
 
     auto stackIdx = uint32_t{0};
@@ -533,19 +522,22 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
           if (callee->isParamCoerceMode()) {
             auto conv = [&](Type t, SSATmp* src) {
               if (t <= Type::Int) {
-                return gen(CoerceCellToInt,
+                return gen(env,
+                           CoerceCellToInt,
                            CoerceData(callee, i + 1),
                            makeParamCoerceCatch(),
                            src);
               }
               if (t <= Type::Dbl) {
-                return gen(CoerceCellToDbl,
+                return gen(env,
+                           CoerceCellToDbl,
                            CoerceData(callee, i + 1),
                            makeParamCoerceCatch(),
                            src);
               }
               always_assert(t <= Type::Bool);
-              return gen(CoerceCellToBool,
+              return gen(env,
+                         CoerceCellToBool,
                          CoerceData(callee, i + 1),
                          makeParamCoerceCatch(),
                          src);
@@ -553,35 +545,36 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
 
             paramSSAs[i] = [&] {
               if (Type::Null < t) {
-                return m_irb->cond(
+                return env.irb->cond(
                   0,
                   [&] (Block* taken) {
-                    auto isnull = gen(IsType, Type::Null, oldVal);
-                    gen(JmpNZero, taken, isnull);
+                    auto isnull = gen(env, IsType, Type::Null, oldVal);
+                    gen(env, JmpNZero, taken, isnull);
                   },
                   [&] { // Next: oldVal is non-null
                     t -= Type::Null;
                     return conv(t, oldVal);
                   },
                   [&] { // Taken: oldVal is null
-                    return gen(AssertType, Type::Null, oldVal);
-                  });
+                    return gen(env, AssertType, Type::Null, oldVal);
+                  }
+                );
               }
               return conv(t, oldVal);
             }();
           } else {
             paramSSAs[i] = [&] {
               if (t <= Type::Int) {
-                return gen(ConvCellToInt, makeUnusualCatch(), oldVal);
+                return gen(env, ConvCellToInt, makeUnusualCatch(), oldVal);
               }
               if (t <= Type::Dbl) {
-                return gen(ConvCellToDbl, makeUnusualCatch(), oldVal);
+                return gen(env, ConvCellToDbl, makeUnusualCatch(), oldVal);
               }
               always_assert(t <= Type::Bool);
-              return gen(ConvCellToBool, oldVal);
+              return gen(env, ConvCellToBool, oldVal);
             }();
           }
-          gen(DecRef, oldVal);
+          gen(env, DecRef, oldVal);
         }
         args[argIdx++] = paramSSAs[i];
         continue;
@@ -596,21 +589,23 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
         }
 
         if (callee->isParamCoerceMode()) {
-          gen(CoerceStk,
+          gen(env,
+              CoerceStk,
               t,
               CoerceStkData(offset, callee, i + 1),
               makeParamCoerceCatch(),
-              m_irb->sp());
+              sp(env));
         } else {
-          gen(CastStk,
+          gen(env,
+              CastStk,
               t,
               StackOffset(offset),
               makeUnusualCatch(),
-              m_irb->sp());
+              sp(env));
         }
       }
 
-      args[argIdx++] = ldStackAddr(offset);
+      args[argIdx++] = ldStackAddr(env, offset);
       ++stackIdx;
     }
 
@@ -626,6 +621,7 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   }();
   SSATmp** decayedPtr = &args[0];
   auto const ret = gen(
+    env,
     CallBuiltin,
     retType,
     CallBuiltinData { callee, destroyLocals },
@@ -634,34 +630,33 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
   );
 
   // Pop the stack params and push the return value.
-  if (paramThis) gen(DecRef, paramThis);
+  if (paramThis) gen(env, DecRef, paramThis);
   for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
-    popDecRef(Type::Gen);
+    popDecRef(env, Type::Gen);
   }
-  push(ret);
+  push(env, ret);
 }
 
 /*
- * When we're inlining a NativeImpl opcode, we know this is the only
- * opcode in the callee method body (bytecode invariant).  So in
- * order to make sure we can eliminate the SpillFrame, we do the
- * CallBuiltin instruction after we've left the inlined frame.
+ * When we're inlining a NativeImpl opcode, we know this is the only opcode in
+ * the callee method body aside from AssertRATs (bytecode invariant).  So in
+ * order to make sure we can eliminate the SpillFrame, we do the CallBuiltin
+ * instruction after we've left the inlined frame.
  *
- * We may need to pass some arguments to the builtin through the
- * stack (e.g. if it takes const Variant&'s)---these are spilled to
- * the stack after leaving the callee.
+ * We may need to pass some arguments to the builtin through the stack (e.g. if
+ * it takes const Variant&'s)---these are spilled to the stack after leaving
+ * the callee.
  *
- * To make this work, we need to do some weird things in the catch
- * trace.  ;)
+ * To make this work, we need to do some weird things in the catch trace.  ;)
  */
-void HhbcTranslator::emitNativeImplInlined() {
-  auto const callee = curFunc();
+void nativeImplInlined(HTS& env) {
+  auto const callee = curFunc(env);
   assert(callee->nativeFuncPtr());
 
   // Figure out if this inlined function was for an FPushCtor.  We'll
   // need this creating the unwind block blow.
   auto const wasInliningConstructor = [&]() -> bool {
-    auto const sframe = findSpillFrame(m_irb->sp());
+    auto const sframe = findSpillFrame(sp(env));
     assert(sframe);
     return sframe->extra<ActRecInfo>()->isFromFPushCtor();
   }();
@@ -672,137 +667,203 @@ void HhbcTranslator::emitNativeImplInlined() {
   // determine which ones will need to be passed through the eval
   // stack.
   auto const numArgs = callee->numParams();
-  auto const paramThis = instanceMethod ? ldThis() : nullptr;
+  auto const paramThis = instanceMethod ? ldThis(env) : nullptr;
 
-  emitBuiltinCall(callee,
-                  numArgs,
-                  numArgs,  /* numNonDefault */
-                  paramThis,
-                  true,     /* inlining */
-                  wasInliningConstructor,
-                  [&](uint32_t i) {
-                    auto ret = ldLoc(i, nullptr, DataTypeSpecific);
-                    gen(IncRef, ret);
-                    return ret;
-                  });
+  builtinCall(env,
+              callee,
+              numArgs,
+              numArgs,  /* numNonDefault */
+              paramThis,
+              true,     /* inlining */
+              wasInliningConstructor,
+              [&](uint32_t i) {
+                auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
+                gen(env, IncRef, ret);
+                return ret;
+              });
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void HhbcTranslator::emitAbs() {
-  auto value = popC();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
+  if (src->isA(Type::Obj) && src->type().isSpecialized()) {
+    auto const cls = src->type().getClass();
+    if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
+      // If we know the class without having to specialize a guard
+      // any further, use it.
+      return cns(env, cls != SystemLib::s___PHP_Incomplete_ClassClass);
+    }
+  }
+
+  if (src->type().not(Type::Obj)) {
+    return cns(env, false);
+  }
+
+  auto checkClass = [&] (SSATmp* obj) {
+    auto cls = gen(env, LdObjClass, obj);
+    auto testCls = SystemLib::s___PHP_Incomplete_ClassClass;
+    return gen(env, ClsNeq, ClsNeqData { testCls }, cls);
+  };
+
+  return env.irb->cond(
+    0, // references produced
+    [&] (Block* taken) {
+      auto isObj = gen(env, IsType, Type::Obj, src);
+      gen(env, JmpZero, taken, isObj);
+    },
+    [&] { // Next: src is an object
+      auto obj = gen(env, AssertType, Type::Obj, src);
+      return checkClass(obj);
+    },
+    [&] { // Taken: src is not an object
+      return cns(env, false);
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitFCallBuiltin(HTS& env,
+                      int32_t numArgs,
+                      int32_t numNonDefault,
+                      const StringData* funcName) {
+  auto const callee = Unit::lookupFunc(funcName);
+
+  if (optimizedFCallBuiltin(env, callee, numArgs, numNonDefault)) return;
+
+  builtinCall(env,
+              callee,
+              numArgs,
+              numNonDefault,
+              nullptr,  /* no this */
+              false,    /* not inlining */
+              false,    /* not inlining constructor */
+              [&](uint32_t) { return popC(env); });
+}
+
+void emitNativeImpl(HTS& env) {
+  if (isInlining(env)) return nativeImplInlined(env);
+
+  gen(env, NativeImpl, fp(env), sp(env));
+  auto const stack   = gen(env, RetAdjustStack, fp(env));
+  auto const retAddr = gen(env, LdRetAddr, fp(env));
+  auto const frame   = gen(env, FreeActRec, fp(env));
+  gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitAbs(HTS& env) {
+  auto const value = popC(env);
 
   if (value->isA(Type::Int)) {
     // compute integer absolute value ((src>>63) ^ src) - (src>>63)
-    auto t1 = gen(Shr, value, cns(63));
-    auto t2 = gen(XorInt, t1, value);
-    push(gen(SubInt, t2, t1));
+    auto const t1 = gen(env, Shr, value, cns(env, 63));
+    auto const t2 = gen(env, XorInt, t1, value);
+    push(env, gen(env, SubInt, t2, t1));
     return;
   }
 
   if (value->isA(Type::Dbl)) {
-    push(gen(AbsDbl, value));
+    push(env, gen(env, AbsDbl, value));
     return;
   }
 
   if (value->isA(Type::Arr)) {
-    gen(DecRef, value);
-    push(cns(false));
+    gen(env, DecRef, value);
+    push(env, cns(env, false));
     return;
   }
 
   PUNT(Abs);
 }
 
-void HhbcTranslator::emitIdx() {
-  Type keyType = topC(1, DataTypeGeneric)->type();
-  SSATmp* base = topC(2, DataTypeGeneric);
-  Type baseType = base->type();
-
-  if (baseType <= Type::Arr &&
-      (keyType <= Type::Int || keyType <= Type::Str)) {
-    emitArrayIdx();
-  } else {
-    emitIdxCommon(GenericIdx, makeCatch());
-  }
-}
-
-// NOTE: #3233688 talks about making an idx fast path for collections and
-// that is where this function will be used and make more sense. It's only
-// called once now.
-void HhbcTranslator::emitIdxCommon(Opcode opc, Block* catchBlock) {
-  SSATmp* def = popC(DataTypeSpecific);
-  SSATmp* key = popC(DataTypeSpecific);
-  SSATmp* arr = popC(DataTypeSpecific);
-  push(gen(opc, catchBlock, arr, key, def));
-  gen(DecRef, arr);
-  gen(DecRef, key);
-  gen(DecRef, def);
-}
-
-
-void HhbcTranslator::emitArrayIdx() {
+void emitArrayIdx(HTS& env) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
-  auto const keyType = topC(1, DataTypeGeneric)->type();
-  auto const arrType = topC(2, DataTypeGeneric)->type();
+  auto const keyType = topC(env, 1, DataTypeGeneric)->type();
+  auto const arrType = topC(env, 2, DataTypeGeneric)->type();
 
   if (!(arrType <= Type::Arr)) {
     // raise fatal
-    emitInterpOne(Type::Cell, 3);
+    interpOne(env, Type::Cell, 3);
     return;
   }
 
   if (keyType <= Type::Null) {
-    auto const def = popC(DataTypeGeneric); // def is just pushed back on the
-                                            // stack
-    auto const key = popC();
-    auto const arr = popC();
+    auto const def = popC(env, DataTypeGeneric);
+    auto const key = popC(env);
+    auto const arr = popC(env);
 
     // if the key is null it will not be found so just return the default
-    push(def);
-    gen(DecRef, arr);
-    gen(DecRef, key);
+    push(env, def);
+    gen(env, DecRef, arr);
+    gen(env, DecRef, key);
     return;
   }
   if (!(keyType <= Type::Int || keyType <= Type::Str)) {
-    emitInterpOne(Type::Cell, 3);
+    interpOne(env, Type::Cell, 3);
     return;
   }
 
-  auto const def = popC(DataTypeGeneric); // a helper will decref it but the
-                                          // translated code doesn't care about
-                                          // the type
-  auto const key = popC();
-  auto const arr = popC();
+  auto const def = popC(env, DataTypeGeneric); // a helper will decref it but
+                                               // the translated code doesn't
+                                               // care about the type
+  auto const key = popC(env);
+  auto const arr = popC(env);
 
-  push(gen(ArrayIdx, arr, key, def));
-  gen(DecRef, arr);
-  gen(DecRef, key);
-  gen(DecRef, def);
+  push(env, gen(env, ArrayIdx, arr, key, def));
+  gen(env, DecRef, arr);
+  gen(env, DecRef, key);
+  gen(env, DecRef, def);
 }
 
-void HhbcTranslator::emitSqrt() {
-  auto const srcType = topC()->type();
+void emitIdx(HTS& env) {
+  auto const keyType  = topC(env, 1, DataTypeGeneric)->type();
+  auto const base     = topC(env, 2, DataTypeGeneric);
+  auto const baseType = base->type();
+
+  if (baseType <= Type::Arr &&
+      (keyType <= Type::Int || keyType <= Type::Str)) {
+    emitArrayIdx(env);
+    return;
+  }
+
+  auto const catchBlock = makeCatch(env);
+  auto const def = popC(env, DataTypeSpecific);
+  auto const key = popC(env, DataTypeSpecific);
+  auto const arr = popC(env, DataTypeSpecific);
+  push(env, gen(env, GenericIdx, catchBlock, arr, key, def));
+  gen(env, DecRef, arr);
+  gen(env, DecRef, key);
+  gen(env, DecRef, def);
+}
+
+void emitSqrt(HTS& env) {
+  auto const srcType = topC(env)->type();
   if (srcType <= Type::Int) {
-    auto const src = gen(ConvIntToDbl, popC());
-    push(gen(Sqrt, src));
+    auto const src = gen(env, ConvIntToDbl, popC(env));
+    push(env, gen(env, Sqrt, src));
     return;
   }
 
   if (srcType <= Type::Dbl) {
-    auto const src = popC();
-    push(gen(Sqrt, src));
+    auto const src = popC(env);
+    push(env, gen(env, Sqrt, src));
     return;
   }
 
-  emitInterpOne(Type::UncountedInit, 1);
+  interpOne(env, Type::UncountedInit, 1);
 }
 
-void HhbcTranslator::emitAKExists() {
-  SSATmp* arr = popC();
-  SSATmp* key = popC();
+void emitAKExists(HTS& env) {
+  auto const arr = popC(env);
+  auto const key = popC(env);
 
   if (!arr->isA(Type::Arr) && !arr->isA(Type::Obj)) {
     PUNT(AKExists_badArray);
@@ -811,94 +872,91 @@ void HhbcTranslator::emitAKExists() {
     PUNT(AKExists_badKey);
   }
 
-  push(gen(AKExists, arr, key));
-  gen(DecRef, arr);
-  gen(DecRef, key);
+  push(env, gen(env, AKExists, arr, key));
+  gen(env, DecRef, arr);
+  gen(env, DecRef, key);
 }
 
-void HhbcTranslator::emitStrlen() {
-  Type inType = topC()->type();
+void emitStrlen(HTS& env) {
+  auto const inType = topC(env)->type();
 
   if (inType <= Type::Str) {
-    SSATmp* input = popC();
+    auto const input = popC(env);
     if (input->isConst()) {
       // static string; fold its strlen operation
-      push(cns(input->strVal()->size()));
+      push(env, cns(env, input->strVal()->size()));
       return;
     }
 
-    push(gen(LdStrLen, input));
-    gen(DecRef, input);
+    push(env, gen(env, LdStrLen, input));
+    gen(env, DecRef, input);
     return;
   }
 
   if (inType <= Type::Null) {
-    popC();
-    push(cns(0));
+    popC(env);
+    push(env, cns(env, 0));
     return;
   }
 
   if (inType <= Type::Bool) {
     // strlen(true) == 1, strlen(false) == 0.
-    push(gen(ConvBoolToInt, popC()));
+    push(env, gen(env, ConvBoolToInt, popC(env)));
     return;
   }
 
-  emitInterpOne(Type::Int | Type::InitNull, 1);
+  interpOne(env, Type::Int | Type::InitNull, 1);
 }
 
-void HhbcTranslator::emitFloor() {
+void emitFloor(HTS& env) {
   // need SSE 4.1 support to use roundsd
   if (!folly::CpuId().sse41()) {
     PUNT(Floor);
   }
 
-  auto catchBlock = makeCatch();
-  auto val    = popC();
-  auto dblVal = gen(ConvCellToDbl, catchBlock, val);
-  gen(DecRef, val);
-  push(gen(Floor, dblVal));
+  auto const catchBlock = makeCatch(env);
+  auto const val = popC(env);
+  auto const dblVal = gen(env, ConvCellToDbl, catchBlock, val);
+  gen(env, DecRef, val);
+  push(env, gen(env, Floor, dblVal));
 }
 
-void HhbcTranslator::emitCeil() {
+void emitCeil(HTS& env) {
   // need SSE 4.1 support to use roundsd
   if (!folly::CpuId().sse41()) {
     PUNT(Ceil);
   }
 
-  auto catchBlock = makeCatch();
-  auto val = popC();
-  auto dblVal = gen(ConvCellToDbl, catchBlock, val);
-  gen(DecRef, val);
-  push(gen(Ceil, dblVal));
+  auto const catchBlock = makeCatch(env);
+  auto const val = popC(env);
+  auto const dblVal = gen(env, ConvCellToDbl, catchBlock, val);
+  gen(env, DecRef, val);
+  push(env, gen(env, Ceil, dblVal));
 }
 
-void HhbcTranslator::emitFCallBuiltin(int32_t numArgs,
-                                      int32_t numNonDefault,
-                                      const StringData* funcName) {
-  auto const callee = Unit::lookupFunc(funcName);
+void emitSilence(HTS& env, Id localId, SilenceOp subop) {
+  // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
+  // invariant).
+  if (curFunc(env)->isPseudoMain()) PUNT(PseudoMain-Silence);
 
-  if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
-
-  emitBuiltinCall(callee,
-                  numArgs,
-                  numNonDefault,
-                  nullptr,  /* no this */
-                  false,    /* not inlining */
-                  false,    /* not inlining constructor */
-                  [&](uint32_t) { return popC(); });
-}
-
-void HhbcTranslator::emitNativeImpl() {
-  if (isInlining()) return emitNativeImplInlined();
-
-  gen(NativeImpl, m_irb->fp(), m_irb->sp());
-  SSATmp* sp = gen(RetAdjustStack, m_irb->fp());
-  SSATmp* retAddr = gen(LdRetAddr, m_irb->fp());
-  SSATmp* fp = gen(FreeActRec, m_irb->fp());
-  gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
+  switch (subop) {
+  case SilenceOp::Start:
+    // We assume that whatever is in the local is dead and doesn't need to be
+    // refcounted before being overwritten.
+    gen(env, AssertLoc, Type::Uncounted, LocalId(localId), fp(env));
+    gen(env, StLoc, LocalId(localId), fp(env), gen(env, ZeroErrorLevel));
+    break;
+  case SilenceOp::End:
+    {
+      gen(env, AssertLoc, Type::Int, LocalId(localId), fp(env));
+      auto const level = ldLoc(env, localId, makeExit(env), DataTypeGeneric);
+      gen(env, RestoreErrorLevel, level);
+    }
+    break;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
+

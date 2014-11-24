@@ -49,7 +49,7 @@ struct TReqInfo;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
-struct HhbcTranslator;
+struct HTS;
 
 extern MCGenerator* mcg;
 extern void* interpOneEntryPoints[];
@@ -280,7 +280,7 @@ public:
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen(HhbcTranslator&);
+  void traceCodeGen(HTS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
   /*

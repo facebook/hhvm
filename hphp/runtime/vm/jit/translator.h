@@ -61,7 +61,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
-struct HhbcTranslator;
+struct HTS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -659,7 +659,7 @@ bool builtinFuncDestroysLocals(const Func* callee);
  */
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,
-                                  Class* ctx);
+                                  const Class* ctx);
 
 /*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
@@ -687,11 +687,10 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
 int locPhysicalOffset(Location l, const Func* f = nullptr);
 
 /*
- * Take a NormalizedInstruction and turn it into a call to the appropriate
- * HhbcTranslator functions.  Updates HhbcTranslator's bytecode marker, handles
- * interp one flags, etc.
+ * Take a NormalizedInstruction and turn it into a call to the appropriate ht
+ * functions.  Updates the bytecode marker, handles interp one flags, etc.
  */
-void translateInstr(HhbcTranslator&, const NormalizedInstruction&);
+void translateInstr(HTS&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

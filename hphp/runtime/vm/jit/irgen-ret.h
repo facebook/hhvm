@@ -13,47 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANSLATE_REGION_H_
-#define incl_HPHP_TRANSLATE_REGION_H_
-
-#include "hphp/runtime/vm/jit/types.h"  // TransFlags
-#include "hphp/runtime/vm/jit/prof-data.h"
+#ifndef incl_HPHP_JIT_IRGEN_RET_H_
+#define incl_HPHP_JIT_IRGEN_RET_H_
 
 namespace HPHP { namespace jit {
-
 struct HTS;
-
-//////////////////////////////////////////////////////////////////////
-
-enum class TranslateResult {
-  Failure,
-  Retry,
-  Success
-};
-const char* show(TranslateResult);
-
-/*
- * Blacklisted instruction set.
- *
- * Used by translateRegion() to track instructions that must be interpreted.
- */
-using RegionBlacklist = ProfSrcKeySet;
-
-/*
- * Translate `region'.
- *
- * The `toInterp' RegionBlacklist is a set of instructions which must be
- * interpreted.  When an instruction fails in translation, Retry is returned,
- * and the instruction is added to `interp' so that it will be interpreted on
- * the next attempt.
- */
-TranslateResult translateRegion(HTS&,
-                                const RegionDesc&,
-                                RegionBlacklist& toInterp,
-                                TransFlags trflags);
-
-//////////////////////////////////////////////////////////////////////
-
+struct SSATmp;
+struct Block;
 }}
+
+namespace HPHP { namespace jit { namespace irgen {
+
+//////////////////////////////////////////////////////////////////////
+
+void retSurpriseCheck(HTS& env, SSATmp* fp, SSATmp* retVal, Block* catchBlock,
+                      bool suspendingResumed);
+
+//////////////////////////////////////////////////////////////////////
+
+}}}
+
 
 #endif

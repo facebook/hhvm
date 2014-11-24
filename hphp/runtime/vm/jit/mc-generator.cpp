@@ -73,7 +73,7 @@
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
-#include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
@@ -1675,7 +1675,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         region.get()
       };
 
-      HhbcTranslator hhbcTrans(transContext);
+      HTS hhbcTrans { transContext };
       FTRACE(1, "{}{:-^40}{}\n",
              color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
              " HHIR during translation ",
@@ -1691,7 +1691,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (m_tx.mode() == TransKind::Profile &&
             result == TranslateResult::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = hhbcTrans.unit().postConditions();
+          pconds = hhbcTrans.unit.postConditions();
         }
 
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
@@ -1815,11 +1815,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
   return start;
 }
 
-void MCGenerator::traceCodeGen(HhbcTranslator& ht) {
-  auto& unit = ht.unit();
+void MCGenerator::traceCodeGen(HTS& hts) {
+  auto& unit = hts.unit;
 
   auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, unit, msg, nullptr, ht.irBuilder().guards());
+    printUnit(level, unit, msg, nullptr, hts.irb->guards());
     assert(checkCfg(unit));
   };
 
@@ -1830,7 +1830,7 @@ void MCGenerator::traceCodeGen(HhbcTranslator& ht) {
     "IRUnit has loop but Eval.JitLoops=0:\n{}\n", unit
   );
 
-  optimize(unit, ht.irBuilder(), m_tx.mode());
+  optimize(unit, *hts.irb, m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
 
   if (m_tx.mode() == TransKind::Profile &&

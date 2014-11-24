@@ -13,17 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 #include <cstdlib>
 
-#include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
-namespace HPHP { namespace jit {
+#include "hphp/runtime/vm/jit/irgen-guards.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 
-TRACE_SET_MOD(hhir);
+namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
@@ -90,20 +90,16 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
   }
 }
 
-//////////////////////////////////////////////////////////////////////
-
-}
-
-folly::Optional<Type> HhbcTranslator::interpOutputType(
-    const NormalizedInstruction& inst,
-    folly::Optional<Type>& checkTypeType) const {
+folly::Optional<Type> interpOutputType(HTS& env,
+                                       const NormalizedInstruction& inst,
+                                       folly::Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
     static_assert(std::is_unsigned<typeof(locId)>::value,
                   "locId should be unsigned");
-    assert(locId < curFunc()->numLocals());
-    return m_irb->localType(locId, DataTypeSpecific);
+    assert(locId < curFunc(env)->numLocals());
+    return env.irb->localType(locId, DataTypeSpecific);
   };
 
   auto boxed = [&] (Type t) -> Type {
@@ -151,33 +147,35 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedInitCell;
 
-    case OutSameAsInput: return topType(0);
-    case OutVInput:      return boxed(topType(0));
+    case OutSameAsInput: return topType(env, 0);
+    case OutVInput:      return boxed(topType(env, 0));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
     case OutFInputR:     not_reached();
 
-    case OutArith:       return arithOpResult(topType(0), topType(1));
-    case OutArithO:      return arithOpOverResult(topType(0), topType(1));
+    case OutArith:       return arithOpResult(topType(env, 0),
+                                              topType(env, 1));
+    case OutArithO:      return arithOpOverResult(topType(env, 0),
+                                                  topType(env, 1));
     case OutBitOp:
-      return bitOpResult(topType(0),
+      return bitOpResult(topType(env, 0),
                          inst.op() == HPHP::OpBitNot ? Type::Bottom
-                                                     : topType(1));
-    case OutSetOp:      return setOpResult(localType(), topType(0),
+                                                     : topType(env, 1));
+    case OutSetOp:      return setOpResult(localType(), topType(env, 0),
                                            SetOpOp(inst.imm[1].u_OA));
     case OutIncDec: {
       auto ty = localType().unbox();
       return ty <= Type::Dbl ? ty : Type::Cell;
     }
     case OutStrlen:
-      return topType(0) <= Type::Str ? Type::Int : Type::UncountedInit;
+      return topType(env, 0) <= Type::Str ? Type::Int : Type::UncountedInit;
     case OutClassRef:   return Type::Cls;
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
 
     case OutCInput: {
-      auto ttype = topType(0);
+      auto ttype = topType(env, 0);
       if (ttype.notBoxed()) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
@@ -200,9 +198,10 @@ folly::Optional<Type> HhbcTranslator::interpOutputType(
 }
 
 jit::vector<InterpOneData::LocalType>
-HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
-                                   bool& smashesAllLocals,
-                                   folly::Optional<Type> pushedType) {
+interpOutputLocals(HTS& env,
+                   const NormalizedInstruction& inst,
+                   bool& smashesAllLocals,
+                   folly::Optional<Type> pushedType) {
   using namespace jit::InstrFlags;
   if (!(getInstrInfo(inst.op()).out & Local)) return {};
 
@@ -216,7 +215,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   auto setImmLocType = [&](uint32_t id, Type t) {
     setLocType(inst.imm[id].u_LA, t);
   };
-  auto* func = curFunc();
+  auto const func = curFunc(env);
 
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
     return testTy.isBoxed() ? Type::BoxedInitCell :
@@ -237,8 +236,8 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     case OpSetOpL:
     case OpIncDecL: {
       assert(pushedType.hasValue());
-      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
-      assert(locType < Type::Gen || inPseudoMain());
+      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
+      assert(locType < Type::Gen || curFunc(env)->isPseudoMain());
 
       auto stackType = inst.outputPredicted ? inst.outPred : pushedType.value();
       setImmLocType(0, handleBoxiness(locType, stackType));
@@ -254,8 +253,8 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
       break;
 
     case OpSetL: {
-      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
-      auto stackType = topType(0);
+      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
+      auto stackType = topType(env, 0);
       // SetL preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
@@ -294,7 +293,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           // supply an IR opcode representing the operation. SetWithRefElem is
           // used instead of SetElem because SetElem makes a few assumptions
           // about side exits that interpOne won't do.
-          auto const baseType = m_irb->localType(
+          auto const baseType = env.irb->localType(
             base.offset, DataTypeSpecific
           ).ptr(Ptr::Frame);
           auto const isUnset = inst.op() == OpUnsetM;
@@ -305,7 +304,9 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert((ty.isBoxed() || ty.notBoxed()) || inPseudoMain());
+            assert((ty.isBoxed() ||
+                    ty.notBoxed()) ||
+                    curFunc(env)->isPseudoMain());
             setLocType(base.offset, handleBoxiness(ty, ty));
           }
           break;
@@ -344,7 +345,7 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
     case OpVerifyParamType: {
       auto paramId = inst.imm[0].u_LA;
       auto const& tc = func->params()[paramId].typeConstraint;
-      auto locType = m_irb->localType(localInputId(inst), DataTypeSpecific);
+      auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
           (locType <= Type::Obj || locType.maybeBoxed())) {
         setImmLocType(0, handleBoxiness(locType, Type::Cell));
@@ -365,9 +366,13 @@ HhbcTranslator::interpOutputLocals(const NormalizedInstruction& inst,
   return locals;
 }
 
-void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
+//////////////////////////////////////////////////////////////////////
+
+}
+
+void interpOne(HTS& env, const NormalizedInstruction& inst) {
   folly::Optional<Type> checkTypeType;
-  auto stackType = interpOutputType(inst, checkTypeType);
+  auto stackType = interpOutputType(env, inst, checkTypeType);
   auto popped = getStackPopped(inst.pc());
   auto pushed = getStackPushed(inst.pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
@@ -376,52 +381,56 @@ void HhbcTranslator::emitInterpOne(const NormalizedInstruction& inst) {
          popped, pushed);
 
   InterpOneData idata;
-  auto locals = interpOutputLocals(inst, idata.smashesAllLocals, stackType);
+  auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
+    stackType);
   idata.nChangedLocals = locals.size();
   idata.changedLocals = locals.data();
 
-  emitInterpOne(stackType, popped, pushed, idata);
+  interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
     auto const checkIdx = (out & InstrFlags::StackIns2) ? 2
                         : (out & InstrFlags::StackIns1) ? 1
                         : 0;
-    checkTypeStack(checkIdx, *checkTypeType, inst.nextSk().offset());
+    checkTypeStack(env, checkIdx, *checkTypeType, inst.nextSk().offset());
   }
 }
 
-void HhbcTranslator::emitInterpOne(int popped) {
+void interpOne(HTS& env, int popped) {
   InterpOneData idata;
-  emitInterpOne(folly::none, popped, 0, idata);
+  interpOne(env, folly::none, popped, 0, idata);
 }
 
-void HhbcTranslator::emitInterpOne(Type outType, int popped) {
+void interpOne(HTS& env, Type outType, int popped) {
   InterpOneData idata;
-  emitInterpOne(outType, popped, 1, idata);
+  interpOne(env, outType, popped, 1, idata);
 }
 
-void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
-                                   int pushed, InterpOneData& idata) {
-  auto unit = curFunc()->unit();
-  auto sp = spillStack();
-  auto op = unit->getOpcode(bcOff());
+void interpOne(HTS& env,
+               folly::Optional<Type> outType,
+               int popped,
+               int pushed,
+               InterpOneData& idata) {
+  auto const unit = curUnit(env);
+  auto const sp = spillStack(env);
+  auto const op = unit->getOpcode(bcOff(env));
 
   auto& iInfo = getInstrInfo(op);
   if (iInfo.type == jit::InstrFlags::OutFDesc) {
-    m_fpiStack.emplace(sp, m_irb->spOffset());
-  } else if (isFCallStar(op) && !m_fpiStack.empty()) {
-    m_fpiStack.pop();
+    env.fpiStack.emplace(sp, env.irb->spOffset());
+  } else if (isFCallStar(op) && !env.fpiStack.empty()) {
+    env.fpiStack.pop();
   }
 
-  idata.bcOff = bcOff();
+  idata.bcOff = bcOff(env);
   idata.cellsPopped = popped;
   idata.cellsPushed = pushed;
   idata.opcode = op;
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
-  gen(changesPC ? InterpOneCF : InterpOne, outType,
-      makeCatch(), idata, sp, m_irb->fp());
-  assert(m_irb->stackDeficit() == 0);
+  gen(env, changesPC ? InterpOneCF : InterpOne, outType,
+      makeCatch(env), idata, sp, fp(env));
+  assert(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -431,50 +440,50 @@ void HhbcTranslator::emitInterpOne(folly::Optional<Type> outType, int popped,
  * translated here.
  */
 
-#define INTERP emitInterpOne(*m_currentNormalizedInstruction);
+#define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void HhbcTranslator::emitFPushObjMethod(int32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(HTS& env, int32_t, ObjMethodOp) { INTERP }
 
-void HhbcTranslator::emitLowInvalid()              { std::abort(); }
-void HhbcTranslator::emitCGetL3(int32_t)           { INTERP }
-void HhbcTranslator::emitBox()                     { INTERP }
-void HhbcTranslator::emitBoxR()                    { INTERP }
-void HhbcTranslator::emitAddElemV()                { INTERP }
-void HhbcTranslator::emitAddNewElemV()             { INTERP }
-void HhbcTranslator::emitClsCns(const StringData*) { INTERP }
-void HhbcTranslator::emitExit()                    { INTERP }
-void HhbcTranslator::emitFatal(FatalOp)            { INTERP }
-void HhbcTranslator::emitUnwind()                  { INTERP }
-void HhbcTranslator::emitThrow()                   { INTERP }
-void HhbcTranslator::emitCGetN()                   { INTERP }
-void HhbcTranslator::emitVGetN()                   { INTERP }
-void HhbcTranslator::emitIssetN()                  { INTERP }
-void HhbcTranslator::emitEmptyN()                  { INTERP }
-void HhbcTranslator::emitSetN()                    { INTERP }
-void HhbcTranslator::emitSetOpN(SetOpOp)           { INTERP }
-void HhbcTranslator::emitSetOpG(SetOpOp)           { INTERP }
-void HhbcTranslator::emitSetOpS(SetOpOp)           { INTERP }
-void HhbcTranslator::emitIncDecN(IncDecOp)         { INTERP }
-void HhbcTranslator::emitIncDecG(IncDecOp)         { INTERP }
-void HhbcTranslator::emitIncDecS(IncDecOp)         { INTERP }
-void HhbcTranslator::emitBindN()                   { INTERP }
-void HhbcTranslator::emitUnsetN()                  { INTERP }
-void HhbcTranslator::emitUnsetG()                  { INTERP }
-void HhbcTranslator::emitFPassN(int32_t)           { INTERP }
-void HhbcTranslator::emitFCallUnpack(int32_t)      { INTERP }
-void HhbcTranslator::emitCufSafeArray()            { INTERP }
-void HhbcTranslator::emitCufSafeReturn()           { INTERP }
-void HhbcTranslator::emitIncl()                    { INTERP }
-void HhbcTranslator::emitInclOnce()                { INTERP }
-void HhbcTranslator::emitReq()                     { INTERP }
-void HhbcTranslator::emitReqDoc()                  { INTERP }
-void HhbcTranslator::emitReqOnce()                 { INTERP }
-void HhbcTranslator::emitEval()                    { INTERP }
-void HhbcTranslator::emitDefTypeAlias(int32_t)     { INTERP }
-void HhbcTranslator::emitCatch()                   { INTERP }
-void HhbcTranslator::emitHighInvalid()             { std::abort(); }
+void emitLowInvalid(HTS& env)                { std::abort(); }
+void emitCGetL3(HTS& env, int32_t)           { INTERP }
+void emitBox(HTS& env)                       { INTERP }
+void emitBoxR(HTS& env)                      { INTERP }
+void emitAddElemV(HTS& env)                  { INTERP }
+void emitAddNewElemV(HTS& env)               { INTERP }
+void emitClsCns(HTS& env, const StringData*) { INTERP }
+void emitExit(HTS& env)                      { INTERP }
+void emitFatal(HTS& env, FatalOp)            { INTERP }
+void emitUnwind(HTS& env)                    { INTERP }
+void emitThrow(HTS& env)                     { INTERP }
+void emitCGetN(HTS& env)                     { INTERP }
+void emitVGetN(HTS& env)                     { INTERP }
+void emitIssetN(HTS& env)                    { INTERP }
+void emitEmptyN(HTS& env)                    { INTERP }
+void emitSetN(HTS& env)                      { INTERP }
+void emitSetOpN(HTS& env, SetOpOp)           { INTERP }
+void emitSetOpG(HTS& env, SetOpOp)           { INTERP }
+void emitSetOpS(HTS& env, SetOpOp)           { INTERP }
+void emitIncDecN(HTS& env, IncDecOp)         { INTERP }
+void emitIncDecG(HTS& env, IncDecOp)         { INTERP }
+void emitIncDecS(HTS& env, IncDecOp)         { INTERP }
+void emitBindN(HTS& env)                     { INTERP }
+void emitUnsetN(HTS& env)                    { INTERP }
+void emitUnsetG(HTS& env)                    { INTERP }
+void emitFPassN(HTS& env, int32_t)           { INTERP }
+void emitFCallUnpack(HTS& env, int32_t)      { INTERP }
+void emitCufSafeArray(HTS& env)              { INTERP }
+void emitCufSafeReturn(HTS& env)             { INTERP }
+void emitIncl(HTS& env)                      { INTERP }
+void emitInclOnce(HTS& env)                  { INTERP }
+void emitReq(HTS& env)                       { INTERP }
+void emitReqDoc(HTS& env)                    { INTERP }
+void emitReqOnce(HTS& env)                   { INTERP }
+void emitEval(HTS& env)                      { INTERP }
+void emitDefTypeAlias(HTS& env, int32_t)     { INTERP }
+void emitCatch(HTS& env)                     { INTERP }
+void emitHighInvalid(HTS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}}}
 

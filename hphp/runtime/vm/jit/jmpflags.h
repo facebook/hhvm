@@ -13,44 +13,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANSLATE_REGION_H_
-#define incl_HPHP_TRANSLATE_REGION_H_
-
-#include "hphp/runtime/vm/jit/types.h"  // TransFlags
-#include "hphp/runtime/vm/jit/prof-data.h"
+#ifndef incl_HPHP_JMPFLAGS_H_
+#define incl_HPHP_JMPFLAGS_H_
 
 namespace HPHP { namespace jit {
 
-struct HTS;
+struct NormalizedInstruction;
 
 //////////////////////////////////////////////////////////////////////
 
-enum class TranslateResult {
-  Failure,
-  Retry,
-  Success
+enum JmpFlags {
+  JmpFlagNone        = 0,
+  JmpFlagEndsRegion  = 1,
+  JmpFlagNextIsMerge = 2,
 };
-const char* show(TranslateResult);
 
-/*
- * Blacklisted instruction set.
- *
- * Used by translateRegion() to track instructions that must be interpreted.
- */
-using RegionBlacklist = ProfSrcKeySet;
+inline JmpFlags operator|(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) | static_cast<unsigned>(f2));
+}
 
-/*
- * Translate `region'.
- *
- * The `toInterp' RegionBlacklist is a set of instructions which must be
- * interpreted.  When an instruction fails in translation, Retry is returned,
- * and the instruction is added to `interp' so that it will be interpreted on
- * the next attempt.
- */
-TranslateResult translateRegion(HTS&,
-                                const RegionDesc&,
-                                RegionBlacklist& toInterp,
-                                TransFlags trflags);
+inline JmpFlags operator&(JmpFlags f1, JmpFlags f2) {
+  return static_cast<JmpFlags>(
+    static_cast<unsigned>(f1) & static_cast<unsigned>(f2));
+}
+
+JmpFlags instrJmpFlags(const NormalizedInstruction& ni);
 
 //////////////////////////////////////////////////////////////////////
 

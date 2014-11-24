@@ -13,35 +13,23 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHBC_TRANSLATOR_INTERNAL_H_
-#define incl_HPHP_HHBC_TRANSLATOR_INTERNAL_H_
+#ifndef incl_HPHP_JIT_IRGEN_TYPES_H_
+#define incl_HPHP_JIT_IRGEN_TYPES_H_
 
+namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Create a catch block with a user-defined body (usually empty or a
- * SpillStack). Regardless of what body() does, it must return the current
- * stack pointer. This is a block to be invoked by the unwinder while unwinding
- * through a call to C++ from translated code. When attached to an instruction
- * as its taken field, code will be generated and the block will be registered
- * with the unwinder automatically.
- */
-template<typename Body>
-Block* HhbcTranslator::makeCatchImpl(Body body) {
-  auto exit = m_irb->makeExit(Block::Hint::Unused);
-
-  BlockPusher bp(*m_irb, makeMarker(bcOff()), exit);
-  gen(BeginCatch);
-  auto sp = body();
-  gen(EndCatch, m_irb->fp(), sp);
-
-  return exit;
-}
-
-//////////////////////////////////////////////////////////////////////
-
+struct SSATmp;
+struct HTS;
 }}
+
+namespace HPHP { namespace jit { namespace irgen {
+
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className);
+
+//////////////////////////////////////////////////////////////////////
+
+}}}
 
 #endif

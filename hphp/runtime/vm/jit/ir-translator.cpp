@@ -232,11 +232,9 @@ IRTranslator::tryTranslateSingletonInline(const NormalizedInstruction& i,
  * supports##nm is not true).
  */
 #define O(nm, imms, pop, push, flags)                                   \
-  template<class HT>                                                    \
-  typename std::enable_if<HT::supports##nm, void>::type                 \
+  void                                                                  \
   IRTranslator::unpack##nm(std::nullptr_t, const NormalizedInstruction& ni) { \
-    HT& ht = m_hhbcTrans; /* delay resolution of the call */            \
-    ht.emit##nm(imms);                                                  \
+    m_hhbcTrans.emit##nm(imms);                                         \
   }
 
 OPCODES
@@ -267,22 +265,9 @@ OPCODES
 
 void IRTranslator::translateInstrWork(const NormalizedInstruction& i) {
   auto const op = i.op();
-
-  switch (op) {
-#define CASE(iNm) case Op::iNm: return unpack ## iNm(nullptr, i);
-  REGULAR_INSTRS
-#undef CASE
-
-#define CASE(op) case Op::op:
-  INTERP_ONE_INSTRS
-#undef CASE
-    always_assert(false);
-  }
-}
-
-void IRTranslator::interpretInstr(const NormalizedInstruction& i) {
-  FTRACE(5, "HHIR: BC Instr {}\n",  i.toString());
-  m_hhbcTrans.emitInterpOne(i);
+#define O(name, ...) case Op::name: return unpack ## name(nullptr, i);
+  switch (op) { OPCODES }
+#undef O
 }
 
 static Type flavorToType(FlavorDesc f) {
@@ -324,8 +309,8 @@ void IRTranslator::translateInstr(const NormalizedInstruction& ni) {
 
   if (isAlwaysNop(ni.op())) {
     // Do nothing
-  } else if (instrMustInterp(ni) || ni.interp) {
-    interpretInstr(ni);
+  } else if (ni.interp) {
+    m_hhbcTrans.emitInterpOne(ni);
   } else {
     translateInstrWork(ni);
   }

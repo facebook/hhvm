@@ -241,7 +241,7 @@ Opcode HhbcTranslator::promoteBinaryDoubles(Op op,
   return opc;
 }
 
-void HhbcTranslator::emitSetOpL(uint32_t id, SetOpOp subop) {
+void HhbcTranslator::emitSetOpL(int32_t id, SetOpOp subop) {
   auto const subOpc = [&]() -> folly::Optional<Op> {
     switch (subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
@@ -708,6 +708,15 @@ void HhbcTranslator::emitShr() {
   gen(DecRef, lhs);
   gen(DecRef, shiftAmount);
 }
+
+void HhbcTranslator::emitGt()    { implCmp(Gt);    }
+void HhbcTranslator::emitGte()   { implCmp(Gte);   }
+void HhbcTranslator::emitLt()    { implCmp(Lt);    }
+void HhbcTranslator::emitLte()   { implCmp(Lte);   }
+void HhbcTranslator::emitEq()    { implCmp(Eq);    }
+void HhbcTranslator::emitNeq()   { implCmp(Neq);   }
+void HhbcTranslator::emitSame()  { implCmp(Same);  }
+void HhbcTranslator::emitNSame() { implCmp(NSame); }
 
 //////////////////////////////////////////////////////////////////////
 

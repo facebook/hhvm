@@ -47,7 +47,6 @@ struct IRTranslator {
 
  private:
   void translateInstrWork(const NormalizedInstruction& i);
-  void interpretInstr(const NormalizedInstruction& i);
 
   // Generated callers to HhbcTranslator.
   //
@@ -69,16 +68,10 @@ struct IRTranslator {
   // If you're hitting the always_assert below, that means there's an opcode in
   // REGULAR_INSTRS that doesn't have a corresponding method in HhbcTranslator
   // with the correct signature.
+  //
+  // TODO: fix this comment
 # define O(nm, a_, b_, c_, d_) \
-  template<class HT = HhbcTranslator> \
-  typename std::enable_if<HT::supports##nm, void>::type \
-  unpack##nm(std::nullptr_t, const NormalizedInstruction& i); \
-  \
-  template<class HT = HhbcTranslator> \
-  void unpack##nm(void*, const NormalizedInstruction& i) { \
-    always_assert(false); \
-  }
-
+  void unpack##nm(std::nullptr_t, const NormalizedInstruction& i);
   OPCODES
 # undef O
 

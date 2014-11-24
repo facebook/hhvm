@@ -834,7 +834,7 @@ void HhbcTranslator::emitDecodeCufIter(int32_t iterId, Offset relOffset) {
   }
 }
 
-void HhbcTranslator::emitCIterFree(uint32_t iterId) {
+void HhbcTranslator::emitCIterFree(int32_t iterId) {
   gen(CIterFree, IterId(iterId), m_irb->fp());
 }
 

@@ -273,12 +273,12 @@ void HhbcTranslator::emitYieldK() {
   emitYieldReturnControl(catchBlock);
 }
 
-void HhbcTranslator::emitContCheck(bool checkStarted) {
+void HhbcTranslator::emitContCheck(int32_t checkStarted) {
   assert(curClass());
   assert(curClass()->classof(c_AsyncGenerator::classof()) ||
          curClass()->classof(c_Generator::classof()));
   auto const cont = ldThis();
-  gen(ContPreNext, makeExitSlow(), cont, cns(checkStarted));
+  gen(ContPreNext, makeExitSlow(), cont, cns(static_cast<bool>(checkStarted)));
 }
 
 void HhbcTranslator::emitContValid() {

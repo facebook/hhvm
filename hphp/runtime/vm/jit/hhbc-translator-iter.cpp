@@ -280,11 +280,11 @@ void HhbcTranslator::emitMIterNextK(int32_t iterId,
   implCondJmp(bcOff() + relOffset, false, res);
 }
 
-void HhbcTranslator::emitIterFree(uint32_t iterId) {
+void HhbcTranslator::emitIterFree(int32_t iterId) {
   gen(IterFree, IterId(iterId), m_irb->fp());
 }
 
-void HhbcTranslator::emitMIterFree(uint32_t iterId) {
+void HhbcTranslator::emitMIterFree(int32_t iterId) {
   gen(MIterFree, IterId(iterId), m_irb->fp());
 }
 

@@ -655,8 +655,8 @@ SSATmp* HhbcTranslator::touchArgsSpillStackAndPopArgs(int numArgs) {
   return sp;
 }
 
-void HhbcTranslator::emitNewPackedArray(uint32_t numArgs) {
-  auto const extra = PackedArrayData { numArgs };
+void HhbcTranslator::emitNewPackedArray(int32_t numArgs) {
+  auto const extra = PackedArrayData { static_cast<uint32_t>(numArgs) };
   if (numArgs > kPackedCapCodeThreshold) {
     // The NewPackedArray opcode's helper needs array values passed to it
     // via the stack.  We use spillStack() to flush the eval stack and
@@ -680,7 +680,12 @@ void HhbcTranslator::emitNewPackedArray(uint32_t numArgs) {
   }
 
   for (int i = 0; i < numArgs; ++i) {
-    gen(InitPackedArray, IndexData{ numArgs - i - 1 }, array, popC());
+    gen(
+      InitPackedArray,
+      IndexData { static_cast<uint32_t>(numArgs - i - 1) },
+      array,
+      popC()
+    );
   }
   push(array);
 }
@@ -839,19 +844,19 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
   push(result);
 }
 
-void HhbcTranslator::emitCns(uint32_t id) {
+void HhbcTranslator::emitCns(int32_t id) {
   emitCnsCommon(id, kInvalidId, false);
 }
 
-void HhbcTranslator::emitCnsE(uint32_t id) {
+void HhbcTranslator::emitCnsE(int32_t id) {
   emitCnsCommon(id, kInvalidId, true);
 }
 
-void HhbcTranslator::emitCnsU(uint32_t id, uint32_t fallbackId) {
+void HhbcTranslator::emitCnsU(int32_t id, int32_t fallbackId) {
   emitCnsCommon(id, fallbackId, false);
 }
 
-void HhbcTranslator::emitDefCns(uint32_t id) {
+void HhbcTranslator::emitDefCns(int32_t id) {
   emitInterpOne(Type::Bool, 1);
 }
 
@@ -952,7 +957,7 @@ void HhbcTranslator::emitCGetL(int32_t id) {
   pushIncRef(ldLocInnerWarn(id, ldrefExit, ldPMExit, cat));
 }
 
-void HhbcTranslator::emitPushL(uint32_t id) {
+void HhbcTranslator::emitPushL(int32_t id) {
   assertTypeLocal(id, Type::InitCell);
   auto* locVal = ldLoc(id, makeExit(), DataTypeGeneric);
   push(locVal);
@@ -1044,7 +1049,7 @@ void HhbcTranslator::emitOODeclExists(OODeclExistsOp subop) {
   gen(DecRef, tCls);
 }
 
-void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
+void HhbcTranslator::emitStaticLocInit(int32_t locId, int32_t litStrId) {
   if (inPseudoMain()) PUNT(StaticLocInit);
 
   auto const ldPMExit = makePseudoMainExit();
@@ -1079,7 +1084,7 @@ void HhbcTranslator::emitStaticLocInit(uint32_t locId, uint32_t litStrId) {
   // our Cell was not ref-counted.
 }
 
-void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
+void HhbcTranslator::emitStaticLoc(int32_t locId, int32_t litStrId) {
   if (inPseudoMain()) PUNT(StaticLoc);
 
   auto const ldPMExit = makePseudoMainExit();
@@ -3910,5 +3915,14 @@ void HhbcTranslator::endBlock(Offset next, bool nextIsMerge) {
 bool HhbcTranslator::inPseudoMain() const {
   return curFunc()->isPseudoMain();
 }
+
+void HhbcTranslator::emitNop()              {}
+void HhbcTranslator::emitBoxRNop()          {}
+void HhbcTranslator::emitUnboxRNop()        {}
+void HhbcTranslator::emitRGetCNop()         {}
+void HhbcTranslator::emitFPassC(int32_t)    {}
+void HhbcTranslator::emitFPassVNop(int32_t) {}
+void HhbcTranslator::emitDefClsNop(Id)      {}
+void HhbcTranslator::emitBreakTraceHint()   {}
 
 }}

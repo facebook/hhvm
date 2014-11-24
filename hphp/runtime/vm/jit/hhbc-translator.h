@@ -173,6 +173,13 @@ struct HhbcTranslator {
   void emitInterpOne(Type t, int popped);
   void emitInterpOne(folly::Optional<Type> t, int popped, int pushed,
                      InterpOneData& id);
+  void emitRB(Trace::RingBufferType t, SrcKey sk, int level = 1);
+  void emitRB(Trace::RingBufferType t, std::string msg, int level = 1);
+  void emitRB(Trace::RingBufferType t, const StringData* msg, int level = 1);
+  void emitIncProfCounter(TransID transId);
+  void emitCheckCold(TransID transId);
+  void emitIncTransCounter();
+  void emitDbgAssertRetAddr();
   std::string showStack() const;
 
 public:
@@ -219,122 +226,58 @@ public:
   SSATmp* topR(uint32_t i = 0) { return top(Type::Gen, i); }
 
 public:
-  /*
-   * An emit* function for each HHBC opcode.
-   */
-  void emitPrint();
-  void emitThis();
-  void emitCheckThis();
-  void emitBareThis(BareThisOp subop);
-  void emitInitThisLoc(int32_t id);
-  void emitArray(int arrayId);
-  void emitNewArray(int capacity);
-  void emitNewMixedArray(int capacity);
-  void emitNewVArray(int capacity);
-  void emitNewMIArray(int capacity);
-  void emitNewMSArray(int capacity);
-  void emitNewLikeArrayL(int id, int capacity);
-  void emitNewPackedArray(uint32_t n);
-  void emitNewStructArray(const ImmVector&);
-  void emitNewCol(int capacity);
-  void emitClone();
+#define IMM_MA         int /* unused dummy placeholder */
+#define IMM_BLA        const ImmVector&
+#define IMM_SLA        const ImmVector&
+#define IMM_ILA        const ImmVector&
+#define IMM_VSA        const ImmVector&
+#define IMM_IVA        int32_t
+#define IMM_I64A       int64_t
+#define IMM_LA         int32_t
+#define IMM_IA         int32_t
+#define IMM_DA         double
+#define IMM_SA         Id
+#define IMM_RATA       RepoAuthType
+#define IMM_AA         Id
+#define IMM_BA         Offset
+#define IMM_OA(subop)  subop
 
-  void emitAddElemC();
-  void emitAddNewElemC();
-  void emitNewCol(int type, int numElems);
-  void emitColAddElemC();
-  void emitColAddNewElemC();
-  void emitDefCns(uint32_t id);
+#define NA /*  */
+#define ONE(x0)              IMM_##x0
+#define TWO(x0, x1)          IMM_##x0, IMM_##x1
+#define THREE(x0, x1, x2)    IMM_##x0, IMM_##x1, IMM_##x2
+#define FOUR(x0, x1, x2, x3) IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3
+
+#define O(name, imms, ...) void emit##name(imms);
+  OPCODES
+#undef O
+
+#undef NA
+#undef ONE
+#undef TWO
+#undef THREE
+#undef FOUR
+
+#undef IMM_MA
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_ILA
+#undef IMM_VSA
+#undef IMM_IVA
+#undef IMM_I64A
+#undef IMM_LA
+#undef IMM_IA
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA
+
+private:
   void emitCnsCommon(uint32_t id, uint32_t fallbackId, bool error);
-  void emitCns(uint32_t id);
-  void emitCnsE(uint32_t id);
-  void emitCnsU(uint32_t id, uint32_t fallbackId);
-  void emitConcat();
-  void emitConcatN(int32_t n);
-  void emitDefCls(int32_t id);
-  void emitDefFunc(int32_t id);
-
-  void emitLateBoundCls();
-  void emitSelf();
-  void emitParent();
-
-  void emitString(int strId);
-  void emitInt(int64_t val);
-  void emitDouble(double val);
-  void emitNullUninit();
-  void emitNull();
-  void emitTrue();
-  void emitFalse();
-  void emitDir();
-  void emitFile();
-  void emitCGetL(int32_t id);
-  void emitFPassL(int32_t argNum, int32_t id);
-  void emitFPassS(int32_t argNum);
-  void emitFPassG(int32_t argNum);
-  void emitPushL(uint32_t id);
-  void emitCGetL2(int32_t id);
-  void emitCGetS();
-  void emitCGetG();
-  void implMInstr();
-  void emitBindM(int);
-  void emitCGetM(int);
-  void emitEmptyM(int);
-  void emitFPassM(int32_t, int);
-  void emitIncDecM(IncDecOp, int);
-  void emitIssetM(int);
-  void emitSetM(int);
-  void emitSetOpM(SetOpOp, int);
-  void emitSetWithRefLM(int, int32_t);
-  void emitSetWithRefRM(int);
-  void emitUnsetM(int);
-  void emitVGetM(int);
-  void emitVGetL(int32_t id);
-  void emitVGetS();
-  void emitVGetG();
-  void emitSetL(int32_t id);
-  void emitSetS();
-  void emitSetG();
-  void emitBindL(int32_t id);
-  void emitBindS();
-  void emitBindG();
-  void emitUnsetL(int32_t id);
-  void emitIssetL(int32_t id);
-  void emitIssetS();
-  void emitIssetG();
-  void emitEmptyL(int32_t id);
-  void emitEmptyS();
-  void emitEmptyG();
-  void emitSetOpL(uint32_t id, SetOpOp subop);
-  void emitIncDecL(int32_t id, IncDecOp subop);
-  void emitPopA();
-  void emitPopC();
-  void emitPopV();
-  void emitPopR();
-  void emitDup();
-  void emitUnboxR();
-  void emitUnbox();
   void jmpImpl(Offset offset, JmpFlags);
-  void emitJmpZ(Offset);
-  void emitJmpNZ(Offset);
-  void emitJmp(Offset);
-  void emitJmpNS(Offset);
-  void emitGt()    { implCmp(Gt);    }
-  void emitGte()   { implCmp(Gte);   }
-  void emitLt()    { implCmp(Lt);    }
-  void emitLte()   { implCmp(Lte);   }
-  void emitEq()    { implCmp(Eq);    }
-  void emitNeq()   { implCmp(Neq);   }
-  void emitSame()  { implCmp(Same);  }
-  void emitNSame() { implCmp(NSame); }
-  void emitFPassR(int32_t argNum);
-  void emitFPassV(int32_t argNum);
-  void emitFPassCE(int32_t argNum);
-  void emitFPassCW(int32_t argNum);
-  void emitFPushCufIter(int32_t numParams, int32_t itId);
   void implFPushCufOp(Op op, int32_t numArgs);
-  void emitFPushCuf(int32_t numArgs);
-  void emitFPushCufF(int32_t numArgs);
-  void emitFPushCufSafe(int32_t numArgs);
   bool emitFPushCufArray(SSATmp* callable, int32_t numParams);
   void emitFPushCufUnknown(Op op, int32_t numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
@@ -343,21 +286,9 @@ public:
                            const StringData* name,
                            const StringData* fallback,
                            int32_t numParams);
-  void emitFPushFuncD(int32_t numParams, int32_t funcId);
-  void emitFPushFuncU(int32_t numParams,
-                      int32_t funcId,
-                      int32_t fallbackFuncId);
-  void emitFPushFunc(int32_t numParams);
   void emitFPushFuncObj(int32_t numParams);
   void emitFPushFuncArr(int32_t numParams);
   SSATmp* genClsMethodCtx(const Func* callee, const Class* cls);
-  void emitFPushClsMethod(int32_t numParams);
-  void emitFPushClsMethodD(int32_t numParams,
-                           int32_t methodNameStrId,
-                           int32_t clssNamedEntityPairId);
-  void emitFPushObjMethodD(int32_t numParams,
-                           int32_t methodNameStrId,
-                           ObjMethodOp subop);
   void emitFPushObjMethodCommon(SSATmp* obj,
                                 const StringData* methodName,
                                 int32_t numParams,
@@ -368,20 +299,11 @@ public:
                              int32_t numParams,
                              bool shouldFatal,
                              SSATmp* extraSpill);
-  void emitFPushClsMethodF(int32_t numParams);
-  void emitInitProps(const Class* cls, Block* catchBlock);
-  void emitInitSProps(const Class* cls, Block* catchBlock);
   SSATmp* emitAllocObjFast(const Class* cls);
-  void emitFPushCtorD(int32_t numParams, int32_t classNameStrId);
-  void emitFPushCtor(int32_t numParams);
   void emitFPushCtorCommon(SSATmp* cls,
                            SSATmp* obj,
                            const Func* func,
                            int32_t numParams);
-  void emitCreateCl(int32_t numParams, int32_t classNameStrId);
-  void emitFCallArray();
-  void emitFCall(int32_t numParams);
-  void emitFCallD(int32_t numParams, Id, Id);
   template<class GetArg>
   void emitBuiltinCall(const Func* callee,
                        uint32_t numArgs,
@@ -394,132 +316,18 @@ public:
                               uint32_t numArgs,
                               uint32_t numNonDefault,
                               bool destroyLocals);
-  void emitFCallBuiltin(int32_t numArgs, int32_t numNonDefault, Id funcId);
-  void emitClsCnsD(Id cnsNameStrId, Id clsNameStrId);
-  void emitClsCns(int32_t cnsNameStrId);
-  void emitAKExists();
-  void emitAGetC();
-  void emitAGetL(int localId);
   void implIsScalarL(int32_t id);
   void implIsScalarC();
-  void emitVerifyTypeImpl(int32_t id);
-  void emitVerifyParamType(int32_t paramId);
-  void emitVerifyRetTypeC();
-  void emitVerifyRetTypeV();
-  void emitInstanceOfD(int classNameStrId);
-  void emitInstanceOf();
-  void emitCastBool();
-  void emitCastInt();
-  void emitCastDouble();
-  void emitCastString();
-  void emitCastArray();
-  void emitCastObject();
-
-  void emitNameA();
-
-  void emitSwitch(const ImmVector&, int64_t base, int32_t bounded);
-  void emitSSwitch(const ImmVector&);
-  void emitRetC();
-  void emitRetV();
-
-  // miscellaneous ops
-  void emitFloor();
-  void emitCeil();
-  void emitCheckProp(Id propId);
-  void emitInitProp(Id propId, InitPropOp subop);
-  void emitBreakTraceHint() {}
-  void emitAssertRATL(int32_t loc, RepoAuthType rat);
-  void emitAssertRATStk(int32_t offset, RepoAuthType rat);
-  void emitSilence(Id localId, SilenceOp subop);
-
-  // arithmetic ops
-  void emitAdd();
-  void emitSub();
-  void emitMul();
-  void emitBitAnd();
-  void emitBitOr();
-  void emitBitXor();
-  void emitBitNot();
-  void emitAbs();
-  void emitMod();
-  void emitDiv();
-  void emitPow();
-  void emitSqrt();
-  void emitShl();
-  void emitShr();
-  void emitAddO();
-  void emitSubO();
-  void emitMulO();
-
-  // boolean ops
-  void emitXor();
-  void emitNot();
-
-  void emitNativeImpl();
-  void emitOODeclExists(OODeclExistsOp subop);
-
-  void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
-  void emitStaticLoc(uint32_t varId, uint32_t litStrId);
-  void emitReqDoc(const StringData* name);
-
-  // iterators
-  void emitIterInit   (int32_t, Offset, int32_t);
-  void emitIterInitK  (int32_t, Offset, int32_t, int32_t);
-  void emitIterNext   (int32_t, Offset, int32_t);
-  void emitIterNextK  (int32_t, Offset, int32_t, int32_t);
-  void emitMIterInit  (int32_t, Offset, int32_t);
-  void emitMIterInitK (int32_t, Offset, int32_t, int32_t);
-  void emitMIterNext  (int32_t, Offset, int32_t);
-  void emitMIterNextK (int32_t, Offset, int32_t, int32_t);
-  void emitWIterInit  (int32_t, Offset, int32_t);
-  void emitWIterInitK (int32_t, Offset, int32_t, int32_t);
-  void emitWIterNext  (int32_t, Offset, int32_t);
-  void emitWIterNextK (int32_t, Offset, int32_t, int32_t);
-
-  void emitIterFree(uint32_t iterId);
-  void emitMIterFree(uint32_t iterId);
-  void emitDecodeCufIter(int32_t iterId, Offset);
-  void emitCIterFree(uint32_t iterId);
-  void emitIterBreak(const ImmVector& iv, Offset);
-  void emitVerifyParamType(uint32_t paramId);
-
-  // generators
-  void emitCreateCont();
-  void emitContEnter();
-  void emitContRaise();
   void emitYieldReturnControl(Block* catchBlock);
   void emitYieldImpl(Offset resumeOffset);
-  void emitYield();
-  void emitYieldK();
-  void emitContCheck(bool checkStarted);
-  void emitContValid();
-  void emitContKey();
-  void emitContCurrent();
-
-  // async functions
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
                   int iters);
   void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
-  void emitAwait(int32_t iters);
-
-  void emitStrlen();
-  void emitIncStat(int32_t counter, int32_t value);
-  void emitIncTransCounter();
-  void emitIncProfCounter(TransID transId);
-  void emitCheckCold(TransID transId);
-  void emitRB(Trace::RingBufferType t, SrcKey sk, int level = 1);
-  void emitRB(Trace::RingBufferType t, std::string msg, int level = 1);
-  void emitRB(Trace::RingBufferType t, const StringData* msg, int level = 1);
-  void emitDbgAssertRetAddr();
-  void emitIdx();
+  void implMInstr();
+  void emitInitProps(const Class*, Block*);
+  void emitInitSProps(const Class*, Block*);
+  void emitVerifyTypeImpl(int32_t);
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
-  void emitArrayIdx();
-  void emitIsTypeC(IsTypeOp subop);
-  void emitIsTypeL(int32_t id, IsTypeOp subop);
-
-#define CASE(nm) static constexpr bool supports##nm = true;
-  REGULAR_INSTRS
-#undef CASE
 
   static constexpr auto kMaxUnrolledInitArray = 8;
 

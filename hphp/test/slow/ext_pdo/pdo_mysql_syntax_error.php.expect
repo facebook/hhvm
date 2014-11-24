@@ -1,0 +1,1 @@
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'se t @@time_zone="+3:00"' at line 1 in /home/matt/hhvm/hphp/runtime/ext/pdo_mysql.cpp:526

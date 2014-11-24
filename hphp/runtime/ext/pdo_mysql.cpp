@@ -492,7 +492,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
                         pdo_err[0], einfo->errcode, einfo->errmsg);
     }
     else {
-      Logger::Verbose("%s at %s:%d", einfo->errmsg, file, line);
+      Logger::Error("%s in %s:%d", einfo->errmsg, file, line);
     }
   }
   return einfo->errcode;

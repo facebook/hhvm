@@ -814,7 +814,10 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
-    return smartMallocSizeBig<false>(nbytes).ptr;
+    // smartMallocSizeBig already wraps its allocation in a debug header, but
+    // the caller will try to do it again, so we need to adjust this pointer
+    // before returning it.
+    return ((char*)smartMallocSizeBig<false>(nbytes).ptr) - kDebugExtraSize;
   }
 
   void* ptr = m_front;

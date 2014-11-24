@@ -220,7 +220,7 @@ RegionDescPtr RegionFormer::go() {
     // before emitting the prediction (if any).
     if (doPrediction &&
         m_ht.topType(0, DataTypeGeneric).maybe(m_inst.outPred)) {
-      m_ht.setBcOff(m_sk.offset(), false);
+      m_ht.setBcOff(&m_inst, m_sk.offset(), false);
       m_ht.checkTypeStack(0, m_inst.outPred, m_sk.offset());
     }
   }
@@ -266,7 +266,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(m_inst.op()) && opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();
-  m_ht.setBcOff(m_sk.offset(), false);
+  m_ht.setBcOff(&m_inst, m_sk.offset(), false);
 
   auto const inputInfos = getInputs(m_startSk, m_inst);
 

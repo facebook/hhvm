@@ -2009,4 +2009,29 @@ int HhbcTranslator::MInstrTranslator::ratchetInd() const {
   return needFirstRatchet() ? int(m_mInd) : int(m_mInd) - 1;
 }
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+void HhbcTranslator::implMInstr() {
+  if (inPseudoMain()) {
+    emitInterpOne(*m_currentNormalizedInstruction);
+    return;
+  }
+  MInstrTranslator(*m_currentNormalizedInstruction, *this).emit();
+}
+
+void HhbcTranslator::emitBindM(int)                 { implMInstr(); }
+void HhbcTranslator::emitCGetM(int)                 { implMInstr(); }
+void HhbcTranslator::emitEmptyM(int)                { implMInstr(); }
+void HhbcTranslator::emitFPassM(int32_t, int)       { implMInstr(); }
+void HhbcTranslator::emitIncDecM(IncDecOp, int)     { implMInstr(); }
+void HhbcTranslator::emitIssetM(int)                { implMInstr(); }
+void HhbcTranslator::emitSetM(int)                  { implMInstr(); }
+void HhbcTranslator::emitSetOpM(SetOpOp, int)       { implMInstr(); }
+void HhbcTranslator::emitSetWithRefLM(int, int32_t) { implMInstr(); }
+void HhbcTranslator::emitSetWithRefRM(int)          { implMInstr(); }
+void HhbcTranslator::emitUnsetM(int)                { implMInstr(); }
+void HhbcTranslator::emitVGetM(int)                 { implMInstr(); }
+
+//////////////////////////////////////////////////////////////////////
+
+}}

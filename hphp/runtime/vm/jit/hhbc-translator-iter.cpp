@@ -17,6 +17,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 namespace HPHP { namespace jit {
 
@@ -24,20 +25,36 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Lambda>
-void HhbcTranslator::emitIterInitCommon(int offset, JmpFlags jmpFlags,
-                                        Lambda genFunc,
-                                        bool invertCond) {
-  auto const src = popC();
-  auto const type = src->type();
-  if (!type.subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
-  auto const res = genFunc(src);
-  jmpCondHelper(offset, !invertCond, jmpFlags, res);
+namespace {
+
+/*
+ * This function returns the offset of instruction i's branch target.
+ * This is normally the offset corresponding to the branch being
+ * taken.  However, if i does not break a trace and it's followed in
+ * the trace by the instruction in the taken branch, then this
+ * function returns the offset of the i's fall-through instruction.
+ * In that case, the invertCond output argument is set to true;
+ * otherwise it's set to false.
+ */
+Offset iterBranchTarget(const NormalizedInstruction& i, bool& invertCond) {
+  assert(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
+  auto targetOffset = i.offset() + i.imm[1].u_BA;
+  invertCond = false;
+  if (!i.endsRegion && i.nextOffset == targetOffset) {
+    invertCond = true;
+    targetOffset = i.offset() + instrLen((Op*)i.pc());
+  }
+  return targetOffset;
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
 template<class Lambda>
-void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
-                                            Lambda genFunc) {
+void HhbcTranslator::implMIterInit(Offset relOffset, Lambda genFunc) {
+  // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
+
   auto const exit = makeExit();
   auto const sp   = spillStack();
   auto const pred = getStackInnerTypePrediction(sp, 0);
@@ -53,149 +70,163 @@ void HhbcTranslator::emitMIterInitCommon(int offset, JmpFlags jmpFlags,
   auto const res = genFunc(src, pred);
   auto const out = popV();
   gen(DecRef, out);
-  jmpCondHelper(offset, true, jmpFlags, res);
+  implCondJmp(bcOff() + relOffset, true, res);
 }
 
-void HhbcTranslator::emitIterInit(uint32_t iterId,
-                                  int offset,
-                                  uint32_t valLocalId,
-                                  bool invertCond,
-                                  JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
-      return gen(IterInit,
-                 Type::Bool,
-                 catchBlock,
-                 IterData(iterId, -1, valLocalId),
-                 src,
-                 m_irb->fp());
-    },
-    invertCond);
+void HhbcTranslator::emitIterInit(int32_t iterId,
+                                  Offset relOffset,
+                                  int32_t valLocalId) {
+  auto const catchBlock = makeCatch();
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const src = popC();
+  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
+  auto const res = gen(
+    IterInit,
+    Type::Bool,
+    catchBlock,
+    IterData(iterId, -1, valLocalId),
+    src,
+    m_irb->fp()
+  );
+  implCondJmp(targetOffset, !invertCond, res);
 }
 
-void HhbcTranslator::emitIterInitK(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   uint32_t keyLocalId,
-                                   bool invertCond,
-                                   JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitIterInitCommon(offset, jmpFlags, [&] (SSATmp* src) {
-      return gen(IterInitK,
-                 Type::Bool,
-                 catchBlock,
-                 IterData(iterId, keyLocalId, valLocalId),
-                 src,
-                 m_irb->fp());
-    },
-    invertCond);
+void HhbcTranslator::emitIterInitK(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId,
+                                   int32_t keyLocalId) {
+  auto const catchBlock = makeCatch();
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+
+  auto const src = popC();
+  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInitK);
+  auto const res = gen(
+    IterInitK,
+    Type::Bool,
+    catchBlock,
+    IterData(iterId, keyLocalId, valLocalId),
+    src,
+    m_irb->fp()
+  );
+  implCondJmp(targetOffset, !invertCond, res);
 }
 
-void HhbcTranslator::emitIterNext(uint32_t iterId,
-                                  int offset,
-                                  uint32_t valLocalId,
-                                  bool invertCond,
-                                  JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitIterNext(int32_t iterId,
+                                  Offset relOffset,
+                                  int32_t valLocalId) {
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const res = gen(
     IterNext,
     Type::Bool,
     makeCatch(),
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, invertCond, jmpFlags, res);
+  implCondJmp(targetOffset, invertCond, res);
 }
 
-void HhbcTranslator::emitIterNextK(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   uint32_t keyLocalId,
-                                   bool invertCond,
-                                   JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitIterNextK(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId,
+                                   int32_t keyLocalId) {
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const res = gen(
     IterNextK,
     Type::Bool,
     makeCatch(),
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, invertCond, jmpFlags, res);
+  implCondJmp(targetOffset, invertCond, res);
 }
 
-void HhbcTranslator::emitWIterInit(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   bool invertCond,
-                                   JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitIterInitCommon(
-    offset, jmpFlags, [&] (SSATmp* src) {
-      return gen(WIterInit,
-                 Type::Bool,
-                 catchBlock,
-                 IterData(iterId, -1, valLocalId),
-                 src,
-                 m_irb->fp());
-    },
-    invertCond);
+void HhbcTranslator::emitWIterInit(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId) {
+  auto const catchBlock = makeCatch();
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const src = popC();
+  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInit);
+  auto const res = gen(
+    WIterInit,
+    Type::Bool,
+    catchBlock,
+    IterData(iterId, -1, valLocalId),
+    src,
+    m_irb->fp()
+  );
+  implCondJmp(targetOffset, !invertCond, res);
 }
 
-void HhbcTranslator::emitWIterInitK(uint32_t iterId,
-                                    int offset,
-                                    uint32_t valLocalId,
-                                    uint32_t keyLocalId,
-                                    bool invertCond,
-                                    JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitIterInitCommon(
-    offset, jmpFlags, [&] (SSATmp* src) {
-      return gen(WIterInitK,
-                 Type::Bool,
-                 catchBlock,
-                 IterData(iterId, keyLocalId, valLocalId),
-                 src,
-                 m_irb->fp());
-    },
-    invertCond);
+void HhbcTranslator::emitWIterInitK(int32_t iterId,
+                                    Offset relOffset,
+                                    int32_t valLocalId,
+                                    int32_t keyLocalId) {
+  auto const catchBlock = makeCatch();
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const src = popC();
+  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInitK);
+  auto const res = gen(
+    WIterInitK,
+    Type::Bool,
+    catchBlock,
+    IterData(iterId, keyLocalId, valLocalId),
+    src,
+    m_irb->fp()
+  );
+  implCondJmp(targetOffset, !invertCond, res);
 }
 
-void HhbcTranslator::emitWIterNext(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   bool invertCond,
-                                   JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitWIterNext(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId) {
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const res = gen(
     WIterNext,
     Type::Bool,
     makeCatch(),
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, invertCond, jmpFlags, res);
+  implCondJmp(targetOffset, invertCond, res);
 }
 
-void HhbcTranslator::emitWIterNextK(uint32_t iterId,
-                                    int offset,
-                                    uint32_t valLocalId,
-                                    uint32_t keyLocalId,
-                                    bool invertCond,
-                                    JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitWIterNextK(int32_t iterId,
+                                    Offset relOffset,
+                                    int32_t valLocalId,
+                                    int32_t keyLocalId) {
+  bool invertCond = false;
+  auto const targetOffset = iterBranchTarget(*m_currentNormalizedInstruction,
+                                             invertCond);
+  auto const res = gen(
     WIterNextK,
     Type::Bool,
     makeCatch(),
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, invertCond, jmpFlags, res);
+  implCondJmp(targetOffset, invertCond, res);
 }
 
-void HhbcTranslator::emitMIterInit(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src, Type type) {
+void HhbcTranslator::emitMIterInit(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId) {
+  auto const catchBlock = makeCatch();
+  implMIterInit(relOffset, [&] (SSATmp* src, Type type) {
     return gen(
       MIterInit,
       type,
@@ -207,13 +238,12 @@ void HhbcTranslator::emitMIterInit(uint32_t iterId,
   });
 }
 
-void HhbcTranslator::emitMIterInitK(uint32_t iterId,
-                                    int offset,
-                                    uint32_t valLocalId,
-                                    uint32_t keyLocalId,
-                                    JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  emitMIterInitCommon(offset, jmpFlags, [&] (SSATmp* src, Type type) {
+void HhbcTranslator::emitMIterInitK(int32_t iterId,
+                                    Offset relOffset,
+                                    int32_t valLocalId,
+                                    int32_t keyLocalId) {
+  auto const catchBlock = makeCatch();
+  implMIterInit(relOffset, [&] (SSATmp* src, Type type) {
     return gen(
       MIterInitK,
       type,
@@ -225,31 +255,29 @@ void HhbcTranslator::emitMIterInitK(uint32_t iterId,
   });
 }
 
-void HhbcTranslator::emitMIterNext(uint32_t iterId,
-                                   int offset,
-                                   uint32_t valLocalId,
-                                   JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitMIterNext(int32_t iterId,
+                                   Offset relOffset,
+                                   int32_t valLocalId) {
+  auto const res = gen(
     MIterNext,
     Type::Bool,
     IterData(iterId, -1, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, false, jmpFlags, res);
+  implCondJmp(bcOff() + relOffset, false, res);
 }
 
-void HhbcTranslator::emitMIterNextK(uint32_t iterId,
-                                    int offset,
-                                    uint32_t valLocalId,
-                                    uint32_t keyLocalId,
-                                    JmpFlags jmpFlags) {
-  SSATmp* res = gen(
+void HhbcTranslator::emitMIterNextK(int32_t iterId,
+                                    Offset relOffset,
+                                    int32_t valLocalId,
+                                    int32_t keyLocalId) {
+  auto const res = gen(
     MIterNextK,
     Type::Bool,
     IterData(iterId, keyLocalId, valLocalId),
     m_irb->fp()
   );
-  jmpCondHelper(offset, false, jmpFlags, res);
+  implCondJmp(bcOff() + relOffset, false, res);
 }
 
 void HhbcTranslator::emitIterFree(uint32_t iterId) {
@@ -261,10 +289,10 @@ void HhbcTranslator::emitMIterFree(uint32_t iterId) {
 }
 
 void HhbcTranslator::emitIterBreak(const ImmVector& iv,
-                                   uint32_t offset,
-                                   bool endsRegion) {
-  int iterIndex;
-  for (iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
+                                   Offset relOffset) {
+  always_assert(m_currentNormalizedInstruction->endsRegion);
+
+  for (int iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
     Id       iterId   = iv.vec32()[iterIndex + 1];
     switch (iterKind) {
@@ -274,8 +302,8 @@ void HhbcTranslator::emitIterBreak(const ImmVector& iv,
     }
   }
 
-  if (!endsRegion) return;
-  gen(Jmp, makeExit(offset));
+  // Would need to change this if we support not ending regions on this:
+  gen(Jmp, makeExit(bcOff() + relOffset));
 }
 
 //////////////////////////////////////////////////////////////////////

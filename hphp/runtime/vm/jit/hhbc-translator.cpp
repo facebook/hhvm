@@ -48,6 +48,19 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
+JmpFlags instrJmpFlags(const NormalizedInstruction& ni) {
+  auto flags = JmpFlagNone;
+  if (ni.endsRegion) {
+    flags = flags | JmpFlagEndsRegion;
+  }
+  if (ni.nextIsMerge) {
+    flags = flags | JmpFlagNextIsMerge;
+  }
+  return flags;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 HhbcTranslator::HhbcTranslator(TransContext ctx)
   : m_context(ctx)
   , m_unit(ctx)
@@ -407,7 +420,11 @@ void HhbcTranslator::setProfTransID(TransID id) {
   m_profTransID = id;
 }
 
-void HhbcTranslator::setBcOff(Offset newOff, bool lastBcOff) {
+void HhbcTranslator::setBcOff(const NormalizedInstruction* ni,
+                              Offset newOff,
+                              bool lastBcOff) {
+  m_currentNormalizedInstruction = ni;
+
   always_assert_log(
     IMPLIES(isInlining(), !lastBcOff),
     [&] {
@@ -555,19 +572,13 @@ void HhbcTranslator::emitDbgAssertRetAddr() {
   gen(DbgAssertRetAddr);
 }
 
-void HhbcTranslator::emitBareThis(int notice) {
-  // We just exit the trace in the case $this is null. Before exiting
-  // the trace, we could also push null onto the stack and raise a
-  // notice if the notice argument is set. By exiting the trace when
-  // $this is null, we can be sure in the rest of the trace that we
-  // have the this object on top of the stack, and we can eliminate
-  // further null checks of this.
+void HhbcTranslator::emitBareThis(BareThisOp subop) {
   if (!curClass()) {
     emitInterpOne(Type::InitNull, 0); // will raise notice and push null
     return;
   }
   auto const ctx = gen(LdCtx, m_irb->fp());
-  if (notice == static_cast<int>(BareThisOp::NeverNull)) {
+  if (subop == BareThisOp::NeverNull) {
     m_irb->setThisAvailable();
   } else {
     gen(CheckCtxThis, makeExitSlow(), ctx);
@@ -674,7 +685,10 @@ void HhbcTranslator::emitNewPackedArray(uint32_t numArgs) {
   push(array);
 }
 
-void HhbcTranslator::emitNewStructArray(uint32_t numArgs, StringData** keys) {
+void HhbcTranslator::emitNewStructArray(const ImmVector& immVec) {
+  auto const numArgs = immVec.size();
+  auto const ids = immVec.vec32();
+
   // The NewPackedArray opcode's helper needs array values passed to it
   // via the stack.  We use spillStack() to flush the eval stack and
   // obtain a pointer to the topmost item; if over-flushing becomes
@@ -685,26 +699,10 @@ void HhbcTranslator::emitNewStructArray(uint32_t numArgs, StringData** keys) {
   NewStructData extra;
   extra.numKeys = numArgs;
   extra.keys = new (m_unit.arena()) StringData*[numArgs];
-  memcpy(extra.keys, keys, numArgs * sizeof(*keys));
-  push(gen(NewStructArray, extra, sp));
-}
-
-void HhbcTranslator::emitArrayAdd() {
-  if (!topC(0)->isA(Type::Arr) || !topC(1)->isA(Type::Arr)) {
-    // This happens when we have a prior spillstack that optimizes away
-    // its spilled values because they were already on the stack. This
-    // prevents us from getting to type of the SSATmps popped from the
-    // eval stack. Most likely we had an interpone before this
-    // instruction.
-    emitInterpOne(Type::Arr, 2);
-    return;
+  for (auto i = size_t{0}; i < numArgs; ++i) {
+    extra.keys[i] = curUnit()->lookupLitstrId(ids[i]);
   }
-
-  auto catchBlock = makeCatch();
-  SSATmp* tr = popC();
-  SSATmp* tl = popC();
-  // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
-  push(gen(ArrayAdd, catchBlock, tl, tr));
+  push(gen(NewStructArray, extra, sp));
 }
 
 void HhbcTranslator::emitAddElemC() {
@@ -857,11 +855,11 @@ void HhbcTranslator::emitDefCns(uint32_t id) {
   emitInterpOne(Type::Bool, 1);
 }
 
-void HhbcTranslator::emitDefCls(int cid, Offset after) {
+void HhbcTranslator::emitDefCls(int32_t cid) {
   emitInterpOne(0);
 }
 
-void HhbcTranslator::emitDefFunc(int fid) {
+void HhbcTranslator::emitDefFunc(int32_t fid) {
   emitInterpOne(0);
 }
 
@@ -1026,8 +1024,7 @@ void HhbcTranslator::emitSetL(int32_t id) {
   pushStLoc(id, ldrefExit, ldPMExit, src);
 }
 
-void HhbcTranslator::emitOODeclExists(unsigned char ucsubop) {
-  auto const subop = static_cast<OODeclExistsOp>(ucsubop);
+void HhbcTranslator::emitOODeclExists(OODeclExistsOp subop) {
   auto const catchTrace = makeCatch();
 
   auto const tAutoload = popC();
@@ -1122,9 +1119,9 @@ void HhbcTranslator::emitStaticLoc(uint32_t locId, uint32_t litStrId) {
 }
 
 
-void HhbcTranslator::emitIncStat(int32_t counter, int32_t value, bool force) {
-  if (Stats::enabled() || force) {
-    gen(IncStat, cns(counter), cns(value), cns(force));
+void HhbcTranslator::emitIncStat(int32_t counter, int32_t value) {
+  if (Stats::enabled()) {
+    gen(IncStat, cns(counter), cns(value), cns(false));
   }
 }
 
@@ -1138,14 +1135,6 @@ void HhbcTranslator::emitIncProfCounter(TransID transId) {
 
 void HhbcTranslator::emitCheckCold(TransID transId) {
   gen(CheckCold, makeExitOpt(transId), TransIDData(transId));
-}
-
-void HhbcTranslator::emitMInstr(const NormalizedInstruction& ni) {
-  if (inPseudoMain()) {
-    emitInterpOne(ni);
-    return;
-  }
-  MInstrTranslator(ni, *this).emit();
 }
 
 /*
@@ -1166,8 +1155,37 @@ void HhbcTranslator::emitEmptyL(int32_t id) {
   push(gen(XorBool, gen(ConvCellToBool, ld), cns(true)));
 }
 
-void HhbcTranslator::emitIsTypeC(DataType t) {
-  SSATmp* src = popC(DataTypeSpecific);
+static inline DataType typeOpToDataType(IsTypeOp op) {
+  switch (op) {
+  case IsTypeOp::Null:  return KindOfNull;
+  case IsTypeOp::Int:   return KindOfInt64;
+  case IsTypeOp::Dbl:   return KindOfDouble;
+  case IsTypeOp::Bool:  return KindOfBoolean;
+  case IsTypeOp::Str:   return KindOfString;
+  case IsTypeOp::Arr:   return KindOfArray;
+  case IsTypeOp::Obj:   return KindOfObject;
+  case IsTypeOp::Scalar: not_reached();
+  }
+  not_reached();
+}
+
+void HhbcTranslator::implIsScalarL(int32_t id) {
+  auto const ldrefExit = makeExit();
+  auto const ldPMExit = makePseudoMainExit();
+  auto const src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
+  push(gen(IsScalarType, src));
+}
+
+void HhbcTranslator::implIsScalarC() {
+  auto const src = popC();
+  push(gen(IsScalarType, src));
+  gen(DecRef, src);
+}
+
+void HhbcTranslator::emitIsTypeC(IsTypeOp subop) {
+  if (subop == IsTypeOp::Scalar) return implIsScalarC();
+  auto const t = typeOpToDataType(subop);
+  auto const src = popC(DataTypeSpecific);
   if (t == KindOfObject) {
     push(optimizedCallIsObject(src));
   } else {
@@ -1176,7 +1194,9 @@ void HhbcTranslator::emitIsTypeC(DataType t) {
   gen(DecRef, src);
 }
 
-void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
+void HhbcTranslator::emitIsTypeL(int32_t id, IsTypeOp subop) {
+  if (subop == IsTypeOp::Scalar) return implIsScalarL(id);
+  auto const t = typeOpToDataType(subop);
   auto const ldrefExit = makeExit();
   auto const ldPMExit = makePseudoMainExit();
   auto const val =
@@ -1186,19 +1206,6 @@ void HhbcTranslator::emitIsTypeL(uint32_t id, DataType t) {
   } else {
     push(gen(IsType, Type(t), val));
   }
-}
-
-void HhbcTranslator::emitIsScalarL(int id) {
-  auto const ldrefExit = makeExit();
-  auto const ldPMExit = makePseudoMainExit();
-  auto const src = ldLocInner(id, ldrefExit, ldPMExit, DataTypeSpecific);
-  push(gen(IsScalarType, src));
-}
-
-void HhbcTranslator::emitIsScalarC() {
-  SSATmp* src = popC();
-  push(gen(IsScalarType, src));
-  gen(DecRef, src);
 }
 
 void HhbcTranslator::emitPopA() { popA(); }
@@ -1219,7 +1226,7 @@ void HhbcTranslator::emitDup() {
   pushIncRef(topC());
 }
 
-void HhbcTranslator::jmpImpl(int32_t offset, JmpFlags flags) {
+void HhbcTranslator::jmpImpl(Offset offset, JmpFlags flags) {
   if (genMode() == IRGenMode::CFG) {
     if (flags & JmpFlagNextIsMerge) {
       exceptionBarrier();
@@ -1233,17 +1240,17 @@ void HhbcTranslator::jmpImpl(int32_t offset, JmpFlags flags) {
   gen(Jmp, makeExit(offset));
 }
 
-void HhbcTranslator::emitJmp(int32_t offset, JmpFlags flags) {
-  const bool backward = static_cast<uint32_t>(offset) <= bcOff();
-  if (backward) {
+void HhbcTranslator::emitJmp(Offset relOffset) {
+  auto const offset = bcOff() + relOffset;
+  if (relOffset < 0) {
     auto const exit = makeExitSlow();
     gen(CheckSurpriseFlags, exit);
   }
-  jmpImpl(offset, flags);
+  jmpImpl(offset, instrJmpFlags(*m_currentNormalizedInstruction));
 }
 
-void HhbcTranslator::emitJmpNS(int32_t offset, JmpFlags flags) {
-  jmpImpl(offset, flags);
+void HhbcTranslator::emitJmpNS(Offset relOffset) {
+  jmpImpl(bcOff() + relOffset, instrJmpFlags(*m_currentNormalizedInstruction));
 }
 
 void HhbcTranslator::jmpCondHelper(int32_t taken,
@@ -1267,14 +1274,42 @@ void HhbcTranslator::jmpCondHelper(int32_t taken,
   gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpZ(Offset taken, JmpFlags flags) {
-  auto const src = popC();
-  jmpCondHelper(taken, true, flags, src);
+void HhbcTranslator::implCondJmp(Offset taken, bool negate, SSATmp* src) {
+  auto const flags = instrJmpFlags(*m_currentNormalizedInstruction);
+  if (flags & JmpFlagEndsRegion) {
+    spillStack();
+  }
+  if (genMode() == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
+    // Before jumping to a merge point we have to ensure that the
+    // stack pointer is sync'ed.  Without an ExceptionBarrier the
+    // SpillStack can be removed by DCE (especially since merge points
+    // start with a DefSP to block SP-chain walking).
+    exceptionBarrier();
+  }
+  auto const target = getBlock(taken);
+  assert(target != nullptr);
+  auto const boolSrc = gen(ConvCellToBool, src);
+  gen(DecRef, src);
+  gen(negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
-void HhbcTranslator::emitJmpNZ(Offset taken, JmpFlags flags) {
-  auto const src = popC();
-  jmpCondHelper(taken, false, flags, src);
+// Right now information in m_currentNormalizedInstruction is how the region
+// translator tells us what to branch to.
+void HhbcTranslator::condJmpInversion(Offset relOffset, bool isJmpZ) {
+  auto const takenOff = bcOff() + relOffset;
+  if (m_currentNormalizedInstruction->nextOffset == takenOff) {
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "hottrace");
+    return implCondJmp(nextBcOff(), !isJmpZ, popC());
+  }
+  implCondJmp(takenOff, isJmpZ, popC());
+}
+
+void HhbcTranslator::emitJmpZ(Offset relOffset) {
+  condJmpInversion(relOffset, true);
+}
+
+void HhbcTranslator::emitJmpNZ(Offset relOffset) {
+  condJmpInversion(relOffset, false);
 }
 
 // Return a constant SSATmp representing a static value held in a
@@ -1300,8 +1335,8 @@ SSATmp* HhbcTranslator::staticTVCns(const TypedValue* tv) {
   always_assert(false);
 }
 
-void HhbcTranslator::emitClsCnsD(int32_t cnsNameId, int32_t clsNameId,
-                                 Type outPred) {
+void HhbcTranslator::emitClsCnsD(Id cnsNameId, Id clsNameId) {
+  auto const outPred = m_currentNormalizedInstruction->outPred; // TODO: rm
   auto const clsNameStr = lookupStringId(clsNameId);
   auto const cnsNameStr = lookupStringId(cnsNameId);
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
@@ -1538,7 +1573,7 @@ void HhbcTranslator::emitEndInlinedCommon() {
 
 void HhbcTranslator::emitSwitch(const ImmVector& iv,
                                 int64_t base,
-                                bool bounded) {
+                                int32_t bounded) {
   int nTargets = bounded ? iv.size() - 2 : iv.size();
 
   auto catchBlock = topC()->isA(Type::Obj) ? makeCatch() : nullptr;
@@ -2725,12 +2760,12 @@ void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
   gen(StElem, base, cns(idx * sizeof(TypedValue)), val);
 }
 
-void HhbcTranslator::emitSilence(Id localId, unsigned char ucsubop) {
+void HhbcTranslator::emitSilence(Id localId, SilenceOp subop) {
   // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
   // invariant).
   if (inPseudoMain()) PUNT(PseudoMain-Silence);
 
-  switch (static_cast<SilenceOp>(ucsubop)) {
+  switch (subop) {
     case SilenceOp::Start: {
       // We assume that whatever is in the local is dead and doesn't need to be
       // refcounted before being overwritten.
@@ -3862,7 +3897,7 @@ void HhbcTranslator::end(Offset nextPc) {
     // default params.
     return;
   }
-  setBcOff(nextPc, true);
+  setBcOff(nullptr, nextPc, true);
   auto const sp = spillStack();
   gen(SyncABIRegs, m_irb->fp(), sp);
   gen(ReqBindJmp, ReqBindJmpData(nextPc));

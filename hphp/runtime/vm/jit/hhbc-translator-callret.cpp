@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 namespace HPHP { namespace jit {
 
@@ -215,7 +216,7 @@ void HhbcTranslator::emitFPushCufUnknown(Op op, int32_t numParams) {
 }
 
 
-void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
+void HhbcTranslator::implFPushCufOp(Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
   SSATmp* callable = topC(safe ? 1 : 0);
@@ -262,6 +263,16 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
   }
 
   emitFPushActRec(func, ctx, numArgs, invName);
+}
+
+void HhbcTranslator::emitFPushCuf(int32_t numArgs) {
+  implFPushCufOp(Op::FPushCuf, numArgs);
+}
+void HhbcTranslator::emitFPushCufF(int32_t numArgs) {
+  implFPushCufOp(Op::FPushCufF, numArgs);
+}
+void HhbcTranslator::emitFPushCufSafe(int32_t numArgs) {
+  implFPushCufOp(Op::FPushCufSafe, numArgs);
 }
 
 void HhbcTranslator::emitFPushActRec(SSATmp* func,
@@ -595,7 +606,7 @@ void HhbcTranslator::fpushObjMethodUnknown(SSATmp* obj,
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
                                          int32_t methodNameStrId,
-                                         unsigned char subop) {
+                                         ObjMethodOp subop) {
   auto const obj = popC();
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
   auto const methodName = lookupStringId(methodNameStrId);
@@ -807,19 +818,19 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
 
 //////////////////////////////////////////////////////////////////////
 
-void HhbcTranslator::emitDecodeCufIter(uint32_t iterId, int offset,
-                                       JmpFlags jmpFlags) {
-  auto catchBlock = makeCatch();
-  SSATmp* src = popC();
-  Type type = src->type();
+void HhbcTranslator::emitDecodeCufIter(int32_t iterId, Offset relOffset) {
+  auto const catchBlock = makeCatch();
+  auto const src        = popC();
+  auto const type       = src->type();
   if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
-    SSATmp* res = gen(DecodeCufIter, Type::Bool,
+    auto const res = gen(DecodeCufIter, Type::Bool,
                       IterId(iterId), catchBlock, src, m_irb->fp());
     gen(DecRef, src);
-    jmpCondHelper(offset, true, jmpFlags, res);
+    implCondJmp(bcOff() + relOffset, true, res);
   } else {
     gen(DecRef, src);
-    jmpImpl(offset, JmpFlagEndsRegion);
+    jmpImpl(bcOff() + relOffset,
+            instrJmpFlags(*m_currentNormalizedInstruction));
   }
 }
 
@@ -827,20 +838,61 @@ void HhbcTranslator::emitCIterFree(uint32_t iterId) {
   gen(CIterFree, IterId(iterId), m_irb->fp());
 }
 
-void HhbcTranslator::emitFPassL(int32_t id) {
-  auto ldrefExit = makeExit();
-  auto ldPMExit = makePseudoMainExit();
-  pushIncRef(ldLocInnerWarn(id, ldrefExit, ldPMExit, DataTypeSpecific));
+void HhbcTranslator::emitFPassL(int32_t argNum, int32_t id) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    emitVGetL(id);
+  } else {
+    emitCGetL(id);
+  }
 }
 
-void HhbcTranslator::emitFPassR() {
+void HhbcTranslator::emitFPassS(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    emitVGetS();
+  } else {
+    emitCGetS();
+  }
+}
+
+void HhbcTranslator::emitFPassG(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    emitVGetG();
+  } else {
+    emitCGetG();
+  }
+}
+
+void HhbcTranslator::emitFPassR(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    PUNT(FPassR-byRef);
+  }
+
   emitUnboxRAux();
 }
 
-void HhbcTranslator::emitFPassV() {
+void HhbcTranslator::emitFPassV(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    // FPassV is a no-op when the callee expects by ref.
+    return;
+  }
+
   auto const tmp = popV();
   pushIncRef(gen(LdRef, Type::InitCell, tmp));
   gen(DecRef, tmp);
+}
+
+void HhbcTranslator::emitFPassCE(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    // Need to raise an error
+    PUNT(FPassCE-byRef);
+  }
+}
+
+void HhbcTranslator::emitFPassCW(int32_t argNum) {
+  if (m_currentNormalizedInstruction->preppedByRef) {
+    // Need to raise a warning
+    PUNT(FPassCW-byRef);
+  }
 }
 
 void HhbcTranslator::emitUnboxRAux() {
@@ -862,18 +914,28 @@ void HhbcTranslator::emitUnboxR() {
 
 //////////////////////////////////////////////////////////////////////
 
-void HhbcTranslator::emitFCallArray(const Offset pcOffset,
-                                    const Offset after,
-                                    bool destroyLocals) {
+void HhbcTranslator::emitFCallArray() {
+  auto const data = CallArrayData {
+    bcOff(),
+    nextBcOff(),
+    callDestroysLocals(*m_currentNormalizedInstruction, curFunc())
+  };
   auto const stack = spillStack();
-  gen(CallArray, CallArrayData { pcOffset, after, destroyLocals }, stack,
-      m_irb->fp());
+  gen(CallArray, data, stack, m_irb->fp());
 }
 
-void HhbcTranslator::emitFCall(uint32_t numParams,
-                               Offset returnBcOffset,
-                               const Func* callee,
-                               bool destroyLocals) {
+void HhbcTranslator::emitFCallD(int32_t numParams, Id, Id) {
+  emitFCall(numParams);
+}
+
+void HhbcTranslator::emitFCall(int32_t numParams) {
+  auto const returnBcOffset = nextBcOff() - curFunc()->base();
+  auto const callee = m_currentNormalizedInstruction->funcd;
+  auto const destroyLocals = callDestroysLocals(
+    *m_currentNormalizedInstruction,
+    curFunc()
+  );
+
   if (RuntimeOption::EvalRuntimeTypeProfile) {
     for (auto i = uint32_t{0}; i < numParams; ++i) {
       auto const val = topF(numParams - i - 1);
@@ -920,7 +982,7 @@ void HhbcTranslator::emitFCall(uint32_t numParams,
   gen(
     Call,
     CallData {
-      numParams,
+      static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
       destroyLocals,

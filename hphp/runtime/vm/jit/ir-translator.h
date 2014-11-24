@@ -82,12 +82,6 @@ struct IRTranslator {
   OPCODES
 # undef O
 
-  // Handwritten callers to HhbcTranslator.
-# define CASE(nm) void translate##nm(const NormalizedInstruction& i);
-  IRREGULAR_INSTRS
-  PSEUDOINSTRS
-# undef CASE
-
   HhbcTranslator m_hhbcTrans;
 };
 

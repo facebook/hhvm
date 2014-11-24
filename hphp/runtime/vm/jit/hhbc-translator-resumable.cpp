@@ -91,7 +91,8 @@ void HhbcTranslator::emitAwaitR(SSATmp* child, Block* catchBlock,
   gen(RetCtrl, RetCtrlData(true), sp, fp, retAddr);
 }
 
-void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
+void HhbcTranslator::emitAwait(int32_t numIters) {
+  auto const resumeOffset = nextBcOff();
   assert(curFunc()->isAsync());
 
   if (curFunc()->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
@@ -133,7 +134,8 @@ void HhbcTranslator::emitAwait(Offset resumeOffset, int numIters) {
 
 //////////////////////////////////////////////////////////////////////
 
-void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
+void HhbcTranslator::emitCreateCont() {
+  auto const resumeOffset = nextBcOff();
   assert(!resumed());
   assert(curFunc()->isGenerator());
 
@@ -163,7 +165,8 @@ void HhbcTranslator::emitCreateCont(Offset resumeOffset) {
   gen(RetCtrl, RetCtrlData(false), sp, fp, retAddr);
 }
 
-void HhbcTranslator::emitContEnter(Offset returnOffset) {
+void HhbcTranslator::emitContEnter() {
+  auto const returnOffset = nextBcOff();
   assert(curClass());
   assert(curClass()->classof(c_AsyncGenerator::classof()) ||
          curClass()->classof(c_Generator::classof()));
@@ -188,6 +191,8 @@ void HhbcTranslator::emitContEnter(Offset returnOffset) {
   auto returnBcOffset = returnOffset - curFunc()->base();
   gen(ContEnter, sp, m_irb->fp(), genFp, resumeAddr, cns(returnBcOffset));
 }
+
+void HhbcTranslator::emitContRaise() { PUNT(ContRaise); }
 
 void HhbcTranslator::emitYieldReturnControl(Block* catchBlock) {
   // Push return value of next()/send()/raise().
@@ -219,7 +224,8 @@ void HhbcTranslator::emitYieldImpl(Offset resumeOffset) {
       m_irb->fp());
 }
 
-void HhbcTranslator::emitYield(Offset resumeOffset) {
+void HhbcTranslator::emitYield() {
+  auto const resumeOffset = nextBcOff();
   assert(resumed());
   assert(curFunc()->isGenerator());
 
@@ -243,7 +249,8 @@ void HhbcTranslator::emitYield(Offset resumeOffset) {
   emitYieldReturnControl(catchBlock);
 }
 
-void HhbcTranslator::emitYieldK(Offset resumeOffset) {
+void HhbcTranslator::emitYieldK() {
+  auto const resumeOffset = nextBcOff();
   assert(resumed());
   assert(curFunc()->isGenerator());
 

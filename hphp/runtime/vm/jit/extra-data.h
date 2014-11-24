@@ -432,8 +432,8 @@ struct CallArrayData : IRExtraData {
                                   destroyLocals ? ",destroyLocals" : "");
   }
 
-  Offset pc;                    // XXX why isn't this available in the marker?
-  Offset after;
+  Offset pc;     // XXX why isn't this available in the marker?
+  Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   bool destroyLocals;
 };
 
@@ -481,7 +481,7 @@ struct CallData : IRExtraData {
   }
 
   uint32_t numParams;
-  Offset after;
+  Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
   bool destroyLocals;
   TCA knownPrologue;   // nullptr if not statically known

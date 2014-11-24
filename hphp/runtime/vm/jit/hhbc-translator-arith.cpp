@@ -35,7 +35,7 @@ void HhbcTranslator::emitConcat() {
   gen(DecRef, tr);
 }
 
-void HhbcTranslator::emitConcatN(int n) {
+void HhbcTranslator::emitConcatN(int32_t n) {
   if (n == 2) return emitConcat();
 
   auto const catchBlock = makeCatch();
@@ -69,44 +69,11 @@ void HhbcTranslator::emitConcatN(int n) {
   }
 }
 
-void HhbcTranslator::emitIncDecL(bool pre, bool inc, bool over, uint32_t id) {
-  auto const ldrefExit = makeExit();
-  auto const ldPMExit = makePseudoMainExit();
-  auto const src = ldLocInnerWarn(
-    id,
-    ldrefExit,
-    ldPMExit,
-    DataTypeSpecific
-  );
-
-  if (src->isA(Type::Bool)) {
-    push(src);
-    return;
-  }
-
-  if (src->type().subtypeOfAny(Type::Arr, Type::Obj)) {
-    pushIncRef(src);
-    return;
-  }
-
-  if (src->isA(Type::Null)) {
-    push(inc && pre ? cns(1) : src);
-    if (inc) {
-      stLoc(id, ldrefExit, ldPMExit, cns(1));
-    }
-    return;
-  }
-
-  if (!src->type().subtypeOfAny(Type::Int, Type::Dbl)) {
-    PUNT(IncDecL);
-  }
-
-  auto const res = emitIncDec(pre, inc, over, src);
-  stLoc(id, ldrefExit, ldPMExit, res);
-}
-
 // only handles integer or double inc/dec
-SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, bool over, SSATmp* src) {
+SSATmp* HhbcTranslator::implIncDec(bool pre,
+                                   bool inc,
+                                   bool over,
+                                   SSATmp* src) {
   assert(src->isA(Type::Int) || src->isA(Type::Dbl));
 
   Opcode op;
@@ -140,6 +107,45 @@ SSATmp* HhbcTranslator::emitIncDec(bool pre, bool inc, bool over, SSATmp* src) {
   return res;
 }
 
+void HhbcTranslator::emitIncDecL(int32_t id, IncDecOp subop) {
+  auto const pre = isPre(subop);
+  auto const inc = isInc(subop);
+  auto const over = isIncDecO(subop);
+
+  auto const ldrefExit = makeExit();
+  auto const ldPMExit = makePseudoMainExit();
+  auto const src = ldLocInnerWarn(
+    id,
+    ldrefExit,
+    ldPMExit,
+    DataTypeSpecific
+  );
+
+  if (src->isA(Type::Bool)) {
+    push(src);
+    return;
+  }
+
+  if (src->type().subtypeOfAny(Type::Arr, Type::Obj)) {
+    pushIncRef(src);
+    return;
+  }
+
+  if (src->isA(Type::Null)) {
+    push(inc && pre ? cns(1) : src);
+    if (inc) {
+      stLoc(id, ldrefExit, ldPMExit, cns(1));
+    }
+    return;
+  }
+
+  if (!src->type().subtypeOfAny(Type::Int, Type::Dbl)) {
+    PUNT(IncDecL);
+  }
+
+  auto const res = implIncDec(pre, inc, over, src);
+  stLoc(id, ldrefExit, ldPMExit, res);
+}
 
 #define BINARY_ARITH          \
   AOP(Add, AddInt, AddDbl)    \
@@ -235,7 +241,29 @@ Opcode HhbcTranslator::promoteBinaryDoubles(Op op,
   return opc;
 }
 
-void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
+void HhbcTranslator::emitSetOpL(uint32_t id, SetOpOp subop) {
+  auto const subOpc = [&]() -> folly::Optional<Op> {
+    switch (subop) {
+    case SetOpOp::PlusEqual:   return Op::Add;
+    case SetOpOp::MinusEqual:  return Op::Sub;
+    case SetOpOp::MulEqual:    return Op::Mul;
+    case SetOpOp::PlusEqualO:  return Op::AddO;
+    case SetOpOp::MinusEqualO: return Op::SubO;
+    case SetOpOp::MulEqualO:   return Op::MulO;
+    case SetOpOp::DivEqual:    return folly::none;
+    case SetOpOp::ConcatEqual: return Op::Concat;
+    case SetOpOp::ModEqual:    return folly::none;
+    case SetOpOp::PowEqual:    return folly::none;
+    case SetOpOp::AndEqual:    return Op::BitAnd;
+    case SetOpOp::OrEqual:     return Op::BitOr;
+    case SetOpOp::XorEqual:    return Op::BitXor;
+    case SetOpOp::SlEqual:     return folly::none;
+    case SetOpOp::SrEqual:     return folly::none;
+    }
+    not_reached();
+  }();
+  if (!subOpc) PUNT(SetOpL-Unsupported);
+
   // Needs to modify locals after doing effectful operations like
   // ConcatCellCell, so we can't guard on their types.
   if (inPseudoMain()) PUNT(SetOpL-PseudoMain);
@@ -247,7 +275,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
    * Handle array addition first because we don't want to bother with
    * boxed locals.
    */
-  bool isAdd = (subOp == Op::Add || subOp == Op::AddO);
+  bool isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
   if (isAdd && (m_irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
       topC()->isA(Type::Arr)) {
     /*
@@ -267,7 +295,7 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
   auto const ldrefExit = makeExit();
   auto loc = ldLocInnerWarn(id, ldrefExit, ldPMExit, DataTypeGeneric);
 
-  if (subOp == Op::Concat) {
+  if (*subOpc == Op::Concat) {
     /*
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
@@ -295,16 +323,16 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
     return;
   }
 
-  if (areBinaryArithTypesSupported(subOp, loc->type(), topC()->type())) {
+  if (areBinaryArithTypesSupported(*subOpc, loc->type(), topC()->type())) {
     auto val = popC();
     m_irb->constrainValue(loc, DataTypeSpecific);
     loc = promoteBool(loc);
     val = promoteBool(val);
     Opcode opc;
-    if (isBitOp(subOp)) {
-      opc = bitOp(subOp);
+    if (isBitOp(*subOpc)) {
+      opc = bitOp(*subOpc);
     } else {
-      opc = promoteBinaryDoubles(subOp, loc, val);
+      opc = promoteBinaryDoubles(*subOpc, loc, val);
     }
 
     SSATmp* result = nullptr;
@@ -360,9 +388,25 @@ Opcode matchReentrantCmp(Opcode opc) {
   }
 }
 
-void HhbcTranslator::emitCmp(Opcode opc) {
+void HhbcTranslator::implCmp(Opcode opc) {
+  // The following if-block is historical behavior from ir-translator: this
+  // should be re-evaluated.
+  if (opc == Lt || opc == Lte || opc == Gt || opc == Gte) {
+    auto leftType = topC(1)->type();
+    auto rightType = topC(0)->type();
+    if (!leftType.isKnownDataType() || !rightType.isKnownDataType()) {
+      PUNT(LtGtOp-UnknownInput);
+    }
+    auto const ok =
+      leftType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl) &&
+      rightType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl);
+    if (!ok) {
+      PUNT(LtGtOp-NotOk);
+    }
+  }
+
   Block* catchBlock = nullptr;
-  Opcode opc2 = matchReentrantCmp(opc);
+  auto const opc2 = matchReentrantCmp(opc);
   // if the comparison operator could re-enter, convert it to the re-entrant
   // form and add the required catch block.
   // TODO #3446092 un-overload these opcodes.
@@ -371,8 +415,8 @@ void HhbcTranslator::emitCmp(Opcode opc) {
     opc = opc2;
   }
   // src2 opc src1
-  SSATmp* src1 = popC();
-  SSATmp* src2 = popC();
+  auto const src1 = popC();
+  auto const src2 = popC();
   push(gen(opc, catchBlock, src2, src1));
   gen(DecRef, src2);
   gen(DecRef, src1);
@@ -431,10 +475,25 @@ void HhbcTranslator::emitNot() {
 }
 
 
-#define AOP(OP, OPI, OPD) \
-  void HhbcTranslator::emit ## OP() { emitBinaryArith(Op::OP); }
-BINARY_ARITH
-#undef AOP
+void HhbcTranslator::emitSub()  { emitBinaryArith(Op::Sub); }
+void HhbcTranslator::emitMul()  { emitBinaryArith(Op::Mul); }
+void HhbcTranslator::emitSubO() { emitBinaryArith(Op::SubO); }
+void HhbcTranslator::emitMulO() { emitBinaryArith(Op::MulO); }
+
+void HhbcTranslator::addImpl(Op op) {
+  if (topC(0)->type() <= Type::Arr && topC(1)->type() <= Type::Arr) {
+    auto const catchBlock = makeCatch();
+    auto const tr = popC();
+    auto const tl = popC();
+    // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
+    push(gen(ArrayAdd, catchBlock, tl, tr));
+    return;
+  }
+  emitBinaryArith(op);
+}
+
+void HhbcTranslator::emitAdd()  { addImpl(Op::Add); }
+void HhbcTranslator::emitAddO() { addImpl(Op::AddO); }
 
 #define BOP(OP, OPI) \
   void HhbcTranslator::emit ## OP() { emitBinaryBitOp(Op::OP); }

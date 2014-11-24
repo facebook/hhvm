@@ -356,9 +356,10 @@ void HhbcTranslator::emitBuiltinCall(const Func* callee,
                                      SSATmp* paramThis,
                                      bool inlining,
                                      bool wasInliningConstructor,
-                                     bool destroyLocals,
                                      GetArg getArg) {
-  // Collect the parameter locals---we'll need them later.  Also
+  auto const destroyLocals = builtinFuncDestroysLocals(callee);
+
+  // collect the parameter locals---we'll need them later.  Also
   // determine which ones will need to be passed through the eval
   // stack.
   jit::vector<SSATmp*> paramSSAs(numArgs);
@@ -679,7 +680,6 @@ void HhbcTranslator::emitNativeImplInlined() {
                   paramThis,
                   true,     /* inlining */
                   wasInliningConstructor,
-                  builtinFuncDestroysLocals(callee), /* destroyLocals */
                   [&](uint32_t i) {
                     auto ret = ldLoc(i, nullptr, DataTypeSpecific);
                     gen(IncRef, ret);
@@ -873,14 +873,11 @@ void HhbcTranslator::emitCeil() {
   push(gen(Ceil, dblVal));
 }
 
-void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
-                                      uint32_t numNonDefault,
-                                      int32_t funcId,
-                                      bool destroyLocals) {
-  const NamedEntity* ne = lookupNamedEntityId(funcId);
-  const Func* callee = Unit::lookupFunc(ne);
-
-  callee->validate();
+void HhbcTranslator::emitFCallBuiltin(int32_t numArgs,
+                                      int32_t numNonDefault,
+                                      Id funcId) {
+  auto const ne = lookupNamedEntityId(funcId);
+  auto const callee = Unit::lookupFunc(ne);
 
   if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
 
@@ -890,7 +887,6 @@ void HhbcTranslator::emitFCallBuiltin(uint32_t numArgs,
                   nullptr,  /* no this */
                   false,    /* not inlining */
                   false,    /* not inlining constructor */
-                  destroyLocals,
                   [&](uint32_t) { return popC(); });
 }
 

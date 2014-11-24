@@ -60,6 +60,8 @@ inline JmpFlags operator&(JmpFlags f1, JmpFlags f2) {
     static_cast<unsigned>(f1) & static_cast<unsigned>(f2));
 }
 
+JmpFlags instrJmpFlags(const NormalizedInstruction&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -88,15 +90,19 @@ struct HhbcTranslator {
   IRUnit& unit() { return m_unit; }
 
   /*
-   * In between each emit* call, irtranslator indicates the new
-   * bytecode offset (or whether we're finished) using this API.
+   * In between each emit* call, irtranslator indicates the new bytecode offset
+   * (or whether we're finished) using this API, and passes a
+   * NormalizedInstruction pointer.
    *
-   * Also updated is the id of the profiling translation for the code
-   * we're about to generate next, if there was one.  (Otherwise,
-   * kInvalidTransID.)
+   * Note: the NormalizedInstruction is only present because there are certain
+   * bits of information that aren't accessible to hhbc-translator in other
+   * ways; try not to add new uses of it.
+   *
+   * Also updated is the id of the profiling translation for the code we're
+   * about to generate next, if there was one.  (Otherwise, kInvalidTransID.)
    */
   void setProfTransID(TransID);
-  void setBcOff(Offset newOff, bool lastBcOff);
+  void setBcOff(const NormalizedInstruction*, Offset newOff, bool lastBcOff);
 
   void      setGenMode(IRGenMode mode);
   IRGenMode genMode() const { return m_mode; }
@@ -219,7 +225,7 @@ public:
   void emitPrint();
   void emitThis();
   void emitCheckThis();
-  void emitBareThis(int notice);
+  void emitBareThis(BareThisOp subop);
   void emitInitThisLoc(int32_t id);
   void emitArray(int arrayId);
   void emitNewArray(int capacity);
@@ -229,11 +235,10 @@ public:
   void emitNewMSArray(int capacity);
   void emitNewLikeArrayL(int id, int capacity);
   void emitNewPackedArray(uint32_t n);
-  void emitNewStructArray(uint32_t n, StringData** keys);
+  void emitNewStructArray(const ImmVector&);
   void emitNewCol(int capacity);
   void emitClone();
 
-  void emitArrayAdd();
   void emitAddElemC();
   void emitAddNewElemC();
   void emitNewCol(int type, int numElems);
@@ -245,9 +250,9 @@ public:
   void emitCnsE(uint32_t id);
   void emitCnsU(uint32_t id, uint32_t fallbackId);
   void emitConcat();
-  void emitConcatN(int n);
-  void emitDefCls(int id, Offset after);
-  void emitDefFunc(int id);
+  void emitConcatN(int32_t n);
+  void emitDefCls(int32_t id);
+  void emitDefFunc(int32_t id);
 
   void emitLateBoundCls();
   void emitSelf();
@@ -263,12 +268,26 @@ public:
   void emitDir();
   void emitFile();
   void emitCGetL(int32_t id);
-  void emitFPassL(int32_t id);
+  void emitFPassL(int32_t argNum, int32_t id);
+  void emitFPassS(int32_t argNum);
+  void emitFPassG(int32_t argNum);
   void emitPushL(uint32_t id);
   void emitCGetL2(int32_t id);
   void emitCGetS();
   void emitCGetG();
-  void emitMInstr(const NormalizedInstruction& ni);
+  void implMInstr();
+  void emitBindM(int);
+  void emitCGetM(int);
+  void emitEmptyM(int);
+  void emitFPassM(int32_t, int);
+  void emitIncDecM(IncDecOp, int);
+  void emitIssetM(int);
+  void emitSetM(int);
+  void emitSetOpM(SetOpOp, int);
+  void emitSetWithRefLM(int, int32_t);
+  void emitSetWithRefRM(int);
+  void emitUnsetM(int);
+  void emitVGetM(int);
   void emitVGetL(int32_t id);
   void emitVGetS();
   void emitVGetG();
@@ -285,11 +304,8 @@ public:
   void emitEmptyL(int32_t id);
   void emitEmptyS();
   void emitEmptyG();
-  // The subOp param can be one of either
-  // Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor
-  void emitSetOpL(Op subOp, uint32_t id);
-  // the pre, inc, and over params encode the 8 possible sub opcodes
-  void emitIncDecL(bool pre, bool inc, bool over, uint32_t id);
+  void emitSetOpL(uint32_t id, SetOpOp subop);
+  void emitIncDecL(int32_t id, IncDecOp subop);
   void emitPopA();
   void emitPopC();
   void emitPopV();
@@ -297,23 +313,28 @@ public:
   void emitDup();
   void emitUnboxR();
   void emitUnbox();
-  void emitJmpZ(Offset taken, JmpFlags);
-  void emitJmpNZ(Offset taken, JmpFlags);
-  void jmpImpl(int32_t offset, JmpFlags);
-  void emitJmp(int32_t offset, JmpFlags);
-  void emitJmpNS(int32_t offset, JmpFlags);
-  void emitGt()    { emitCmp(Gt);    }
-  void emitGte()   { emitCmp(Gte);   }
-  void emitLt()    { emitCmp(Lt);    }
-  void emitLte()   { emitCmp(Lte);   }
-  void emitEq()    { emitCmp(Eq);    }
-  void emitNeq()   { emitCmp(Neq);   }
-  void emitSame()  { emitCmp(Same);  }
-  void emitNSame() { emitCmp(NSame); }
-  void emitFPassR();
-  void emitFPassV();
+  void jmpImpl(Offset offset, JmpFlags);
+  void emitJmpZ(Offset);
+  void emitJmpNZ(Offset);
+  void emitJmp(Offset);
+  void emitJmpNS(Offset);
+  void emitGt()    { implCmp(Gt);    }
+  void emitGte()   { implCmp(Gte);   }
+  void emitLt()    { implCmp(Lt);    }
+  void emitLte()   { implCmp(Lte);   }
+  void emitEq()    { implCmp(Eq);    }
+  void emitNeq()   { implCmp(Neq);   }
+  void emitSame()  { implCmp(Same);  }
+  void emitNSame() { implCmp(NSame); }
+  void emitFPassR(int32_t argNum);
+  void emitFPassV(int32_t argNum);
+  void emitFPassCE(int32_t argNum);
+  void emitFPassCW(int32_t argNum);
   void emitFPushCufIter(int32_t numParams, int32_t itId);
-  void emitFPushCufOp(Op op, int32_t numArgs);
+  void implFPushCufOp(Op op, int32_t numArgs);
+  void emitFPushCuf(int32_t numArgs);
+  void emitFPushCufF(int32_t numArgs);
+  void emitFPushCufSafe(int32_t numArgs);
   bool emitFPushCufArray(SSATmp* callable, int32_t numParams);
   void emitFPushCufUnknown(Op op, int32_t numArgs);
   void emitFPushActRec(SSATmp* func, SSATmp* objOrClass, int32_t numArgs,
@@ -336,7 +357,7 @@ public:
                            int32_t clssNamedEntityPairId);
   void emitFPushObjMethodD(int32_t numParams,
                            int32_t methodNameStrId,
-                           unsigned char subop);
+                           ObjMethodOp subop);
   void emitFPushObjMethodCommon(SSATmp* obj,
                                 const StringData* methodName,
                                 int32_t numParams,
@@ -358,10 +379,9 @@ public:
                            const Func* func,
                            int32_t numParams);
   void emitCreateCl(int32_t numParams, int32_t classNameStrId);
-  void emitFCallArray(const Offset pcOffset, const Offset after,
-                      bool destroyLocals);
-  void emitFCall(uint32_t numParams, Offset returnBcOffset,
-                 const Func* callee, bool destroyLocals);
+  void emitFCallArray();
+  void emitFCall(int32_t numParams);
+  void emitFCallD(int32_t numParams, Id, Id);
   template<class GetArg>
   void emitBuiltinCall(const Func* callee,
                        uint32_t numArgs,
@@ -369,21 +389,19 @@ public:
                        SSATmp* paramThis,
                        bool inlining,
                        bool wasInliningConstructor,
-                       bool destroyLocals,
                        GetArg getArg);
   void emitFCallBuiltinCoerce(const Func* callee,
                               uint32_t numArgs,
                               uint32_t numNonDefault,
                               bool destroyLocals);
-  void emitFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault,
-                        int32_t funcId, bool destroyLocals);
-  void emitClsCnsD(int32_t cnsNameStrId, int32_t clsNameStrId, Type outPred);
+  void emitFCallBuiltin(int32_t numArgs, int32_t numNonDefault, Id funcId);
+  void emitClsCnsD(Id cnsNameStrId, Id clsNameStrId);
   void emitClsCns(int32_t cnsNameStrId);
   void emitAKExists();
   void emitAGetC();
   void emitAGetL(int localId);
-  void emitIsScalarL(int id);
-  void emitIsScalarC();
+  void implIsScalarL(int32_t id);
+  void implIsScalarC();
   void emitVerifyTypeImpl(int32_t id);
   void emitVerifyParamType(int32_t paramId);
   void emitVerifyRetTypeC();
@@ -399,7 +417,7 @@ public:
 
   void emitNameA();
 
-  void emitSwitch(const ImmVector&, int64_t base, bool bounded);
+  void emitSwitch(const ImmVector&, int64_t base, int32_t bounded);
   void emitSSwitch(const ImmVector&);
   void emitRetC();
   void emitRetV();
@@ -408,10 +426,11 @@ public:
   void emitFloor();
   void emitCeil();
   void emitCheckProp(Id propId);
-  void emitInitProp(Id propId, InitPropOp op);
+  void emitInitProp(Id propId, InitPropOp subop);
+  void emitBreakTraceHint() {}
   void emitAssertRATL(int32_t loc, RepoAuthType rat);
   void emitAssertRATStk(int32_t offset, RepoAuthType rat);
-  void emitSilence(Id localId, unsigned char subop);
+  void emitSilence(Id localId, SilenceOp subop);
 
   // arithmetic ops
   void emitAdd();
@@ -437,87 +456,41 @@ public:
   void emitNot();
 
   void emitNativeImpl();
-  void emitOODeclExists(unsigned char subop);
+  void emitOODeclExists(OODeclExistsOp subop);
 
   void emitStaticLocInit(uint32_t varId, uint32_t litStrId);
   void emitStaticLoc(uint32_t varId, uint32_t litStrId);
   void emitReqDoc(const StringData* name);
 
   // iterators
-  void emitIterInit(uint32_t iterId,
-                    int targetOffset,
-                    uint32_t valLocalId,
-                    bool invertCond,
-                    JmpFlags jmpFlags);
-  void emitIterInitK(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     uint32_t keyLocalId,
-                     bool invertCond,
-                     JmpFlags jmpFlags);
-  void emitIterNext(uint32_t iterId,
-                    int targetOffset,
-                    uint32_t valLocalId,
-                    bool invertCond,
-                    JmpFlags jmpFlags);
-  void emitIterNextK(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     uint32_t keyLocalId,
-                     bool invertCond,
-                     JmpFlags jmpFlags);
-  void emitMIterInit(uint32_t iterId, int targetOffset, uint32_t valLocalId,
-                     JmpFlags jmpFlags);
-  void emitMIterInitK(uint32_t iterId,
-                      int targetOffset,
-                      uint32_t valLocalId,
-                      uint32_t keyLocalId,
-                      JmpFlags jmpFlags);
-  void emitMIterNext(uint32_t iterId, int targetOffset, uint32_t valLocalId,
-                     JmpFlags jmpFlags);
-  void emitMIterNextK(uint32_t iterId,
-                      int targetOffset,
-                      uint32_t valLocalId,
-                      uint32_t keyLocalId,
-                      JmpFlags jmpFlags);
-  void emitWIterInit(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     bool invertCond,
-                     JmpFlags jmpFlags);
-  void emitWIterInitK(uint32_t iterId,
-                      int targetOffset,
-                      uint32_t valLocalId,
-                      uint32_t keyLocalId,
-                      bool invertCond,
-                      JmpFlags jmpFlags);
-  void emitWIterNext(uint32_t iterId,
-                     int targetOffset,
-                     uint32_t valLocalId,
-                     bool invertCond,
-                     JmpFlags jmpFlags);
-  void emitWIterNextK(uint32_t iterId,
-                      int targetOffset,
-                      uint32_t valLocalId,
-                      uint32_t keyLocalId,
-                      bool invertCond,
-                      JmpFlags jmpFlags);
+  void emitIterInit   (int32_t, Offset, int32_t);
+  void emitIterInitK  (int32_t, Offset, int32_t, int32_t);
+  void emitIterNext   (int32_t, Offset, int32_t);
+  void emitIterNextK  (int32_t, Offset, int32_t, int32_t);
+  void emitMIterInit  (int32_t, Offset, int32_t);
+  void emitMIterInitK (int32_t, Offset, int32_t, int32_t);
+  void emitMIterNext  (int32_t, Offset, int32_t);
+  void emitMIterNextK (int32_t, Offset, int32_t, int32_t);
+  void emitWIterInit  (int32_t, Offset, int32_t);
+  void emitWIterInitK (int32_t, Offset, int32_t, int32_t);
+  void emitWIterNext  (int32_t, Offset, int32_t);
+  void emitWIterNextK (int32_t, Offset, int32_t, int32_t);
 
   void emitIterFree(uint32_t iterId);
   void emitMIterFree(uint32_t iterId);
-  void emitDecodeCufIter(uint32_t iterId, int targetOffset,
-                    JmpFlags jmpFlags);
+  void emitDecodeCufIter(int32_t iterId, Offset);
   void emitCIterFree(uint32_t iterId);
-  void emitIterBreak(const ImmVector& iv, uint32_t offset, bool endsRegion);
+  void emitIterBreak(const ImmVector& iv, Offset);
   void emitVerifyParamType(uint32_t paramId);
 
   // generators
-  void emitCreateCont(Offset resumeOffset);
-  void emitContEnter(Offset returnOffset);
+  void emitCreateCont();
+  void emitContEnter();
+  void emitContRaise();
   void emitYieldReturnControl(Block* catchBlock);
   void emitYieldImpl(Offset resumeOffset);
-  void emitYield(Offset resumeOffset);
-  void emitYieldK(Offset resumeOffset);
+  void emitYield();
+  void emitYieldK();
   void emitContCheck(bool checkStarted);
   void emitContValid();
   void emitContKey();
@@ -527,10 +500,10 @@ public:
   void emitAwaitE(SSATmp* child, Block* catchBlock, Offset resumeOffset,
                   int iters);
   void emitAwaitR(SSATmp* child, Block* catchBlock, Offset resumeOffset);
-  void emitAwait(Offset resumeOffset, int iters);
+  void emitAwait(int32_t iters);
 
   void emitStrlen();
-  void emitIncStat(int32_t counter, int32_t value, bool force);
+  void emitIncStat(int32_t counter, int32_t value);
   void emitIncTransCounter();
   void emitIncProfCounter(TransID transId);
   void emitCheckCold(TransID transId);
@@ -541,8 +514,8 @@ public:
   void emitIdx();
   void emitIdxCommon(Opcode opc, Block* catchBlock = nullptr);
   void emitArrayIdx();
-  void emitIsTypeC(DataType t);
-  void emitIsTypeL(uint32_t id, DataType t);
+  void emitIsTypeC(IsTypeOp subop);
+  void emitIsTypeL(int32_t id, IsTypeOp subop);
 
 #define CASE(nm) static constexpr bool supports##nm = true;
   REGULAR_INSTRS
@@ -787,20 +760,20 @@ private:
   void emitEndInlinedCommon();
   void emitDecRefLocalsInline();
   void emitRet(Type type);
-  void emitCmp(Opcode opc);
+  void implCmp(Opcode opc);
   void jmpCondHelper(int32_t taken, bool negate, JmpFlags, SSATmp* src);
-  SSATmp* emitIncDec(bool pre, bool inc, bool over, SSATmp* src);
-  template<class Lambda>
-  void emitIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc,
-                          bool invertCond);
+  void implCondJmp(Offset taken, bool negate, SSATmp* src);
+  void condJmpInversion(Offset, bool);
+  SSATmp* implIncDec(bool pre, bool inc, bool over, SSATmp* src);
   BCMarker makeMarker(Offset bcOff);
   void updateMarker();
   template<class Lambda>
-  void emitMIterInitCommon(int offset, JmpFlags jmpFlags, Lambda genFunc);
+  void implMIterInit(Offset offset, Lambda genFunc);
   SSATmp* staticTVCns(const TypedValue*);
   void emitRetSurpriseCheck(SSATmp* fp, SSATmp* retVal, Block* catchBlock,
                             bool suspendingResumed);
   void classExistsImpl(ClassKind);
+  void addImpl(Op);
   SSATmp* emitInstanceOfDImpl(SSATmp*, const StringData*);
   SSATmp* ldCls(Block* catchBlock, SSATmp* clsName);
 
@@ -1012,6 +985,11 @@ private:
   // The id of the profiling translation for the code we're currently
   // generating, if there was one, otherwise kInvalidTransID.
   TransID m_profTransID{kInvalidTransID};
+
+  // Some information is only passed through the nearly-dead
+  // NormalizedInstruction structure.  Don't add new uses since we're gradually
+  // removing this (the long, ugly name is deliberate).
+  const NormalizedInstruction* m_currentNormalizedInstruction{nullptr};
 
   // True if we're on the last HHBC opcode that will be emitted for
   // this tracelet.

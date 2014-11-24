@@ -3232,7 +3232,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   v << copy2{pc, after, argNumToRegName[0], argNumToRegName[1]};
   v << callstub{target, argSet(2) | kCrossTraceRegs,
                 x64::abi.all(), makeFixup(inst->marker())};
- v << defvmsp{dstLoc(inst, 0).reg()};
+  v << defvmsp{dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {

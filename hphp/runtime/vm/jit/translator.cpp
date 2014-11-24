@@ -1202,11 +1202,8 @@ InputInfoVec getInputs(SrcKey startSk, NormalizedInstruction& inst) {
 bool dontGuardAnyInputs(Op op) {
   switch (op) {
 #define CASE(iNm) case Op ## iNm:
-#define NOOP(...)
-  INSTRS
-  PSEUDOINSTR_DISPATCH(NOOP)
+  REGULAR_INSTRS
     return false;
-#undef NOOP
 #undef CASE
 
 #define CASE(op) case Op::op:
@@ -1228,16 +1225,13 @@ const StaticString s_assert("assert");
 const StaticString s_assertNative("__SystemLib\\assert");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
-  if (fname) {
-    return fname->isame(s_extract.get()) ||
-           fname->isame(s_extractNative.get()) ||
-           fname->isame(s_parse_str.get()) ||
-           fname->isame(s_parse_strNative.get()) ||
-           fname->isame(s_assert.get()) ||
-           fname->isame(s_assertNative.get());
-  }
-
-  return false;
+  if (!fname) return false;
+  return fname->isame(s_extract.get()) ||
+         fname->isame(s_extractNative.get()) ||
+         fname->isame(s_parse_str.get()) ||
+         fname->isame(s_parse_strNative.get()) ||
+         fname->isame(s_assert.get()) ||
+         fname->isame(s_assertNative.get());
 }
 
 bool builtinFuncDestroysLocals(const Func* callee) {
@@ -1372,11 +1366,8 @@ bool instrMustInterp(const NormalizedInstruction& inst) {
 
   switch (inst.op()) {
 #define CASE(name) case Op::name:
-  INSTRS
+  REGULAR_INSTRS
 #undef CASE
-#define NOTHING(...) // PSEUDOINSTR_DISPATCH has the cases in it
-  PSEUDOINSTR_DISPATCH(NOTHING)
-#undef NOTHING
     return false;
 
 #define CASE(name) case Op::name:
@@ -1602,7 +1593,7 @@ Translator::translateRegion(const RegionDesc& region,
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      ht.setBcOff(sk.offset(), false);
+      ht.setBcOff(nullptr, sk.offset(), false);
 
       // Emit prediction guards. If this is the first instruction in the
       // region, and the region's entry block is not a loop header, the guards

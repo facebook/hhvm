@@ -8,6 +8,8 @@
 EXTRA_INCLUDE_PATHS=
 EXTRA_LIB_PATHS=
 EXTRA_CC_FLAGS=
+EXTRA_NATIVE_LIBRARIES=
+EXTRA_NATIVE_OBJECT_FILES=
 
 ################################################################################
 #                              OS-dependent stuff                              #
@@ -61,6 +63,7 @@ MODULES=\
   $(FSNOTIFY)
 
 NATIVE_OBJECT_FILES=\
+  $(EXTRA_NATIVE_OBJECT_FILES)\
   heap/hh_shared.o\
   utils/realpath.o\
   $(INOTIFY)/$(INOTIFY)_stubs.o\
@@ -74,6 +77,7 @@ OCAML_LIBRARIES=\
   str
 
 NATIVE_LIBRARIES=\
+  $(EXTRA_NATIVE_LIBRARIES)\
   $(ELF)\
   pthread
 
@@ -90,7 +94,7 @@ EXTRA_LIB_OPTS=$(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
 
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LIB_OPTS) \
-	     $(FRAMEWORK_OPTS) $(SECTCREATE) $(EXTRA_NATIVE_LIB_PATHS)
+	     $(FRAMEWORK_OPTS) $(SECTCREATE)
 
 all: build-hhi-archive build-hack copy-hack-files
 

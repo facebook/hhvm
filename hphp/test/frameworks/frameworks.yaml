@@ -314,8 +314,8 @@
       - joomla-cms/tests/unit/suites/libraries/joomla/form/rule/JFormRuleUsernameTest.php
   klein:
     url: https://github.com/chriso/klein.php.git
-    branch: v2.0.2
-    commit: 6e1f228ce82333b437402dafad049713eb3eeac6
+    branch: master
+    commit: 744c07b7d4d168f146d0295073d85af13e576316
     install_root: klein
     test_root: klein
     test_find_mode: token

@@ -173,7 +173,7 @@ Klein\Tests\KleinTest::testWith
 Klein\Tests\KleinTest::testWithStringCallable
 .
 Klein\Tests\KleinTest::testWithUsingFileInclude
-E
+.
 Klein\Tests\RequestTest::testBody
 .
 Klein\Tests\RequestTest::testConstructorAndGetters
@@ -224,8 +224,6 @@ Klein\Tests\ResponsesTest::testAppend
 .
 Klein\Tests\ResponsesTest::testBodyGetSet
 .
-Klein\Tests\ResponsesTest::testChunk
-.
 Klein\Tests\ResponsesTest::testCodeGetSet
 .
 Klein\Tests\ResponsesTest::testCookie
@@ -265,15 +263,15 @@ Klein\Tests\ResponsesTest::testSend
 Klein\Tests\ResponsesTest::testSendBody
 .
 Klein\Tests\ResponsesTest::testSendCallsFastCGIFinishRequest
-E
+.
 Klein\Tests\ResponsesTest::testSendCookies
 .
 Klein\Tests\ResponsesTest::testSendCookiesInIsolateProcess
-E
+.
 Klein\Tests\ResponsesTest::testSendHeaders
 .
 Klein\Tests\ResponsesTest::testSendHeadersInIsolateProcess
-E
+.
 Klein\Tests\ResponsesTest::testSendWhenAlreadySent
 .
 Klein\Tests\ResponsesTest::testStatusGetter

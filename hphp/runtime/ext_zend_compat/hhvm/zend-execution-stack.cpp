@@ -28,7 +28,7 @@ ZendExecutionStack & ZendExecutionStack::getStack() {
   return *tl_stack.get();
 }
 
-zval* ZendExecutionStack::getArg(int i) {
+zval** ZendExecutionStack::getArg(int i) {
   auto& stack = getStack();
   auto& entry = stack.m_stack.back();
   switch (entry.mode) {
@@ -44,11 +44,15 @@ zval* ZendExecutionStack::getArg(int i) {
         if (!stack.m_nullArg) {
           stack.m_nullArg = RefData::Make(make_tv<KindOfNull>());
         }
-        return stack.m_nullArg;
+        return &stack.m_nullArg;
       }
 
       zBoxAndProxy(arg);
-      return arg->m_data.pref;
+      // The 'Z' type specifier in zend_parse_parameters() demands a zval**
+      // which remains valid until the caller returns. We will give it a
+      // pointer to the pref member of the TypedValue which is stored on the
+      // HHVM stack.
+      return &arg->m_data.pref;
     }
 
     case ZendStackMode::SIDE_STACK: {
@@ -56,10 +60,10 @@ zval* ZendExecutionStack::getArg(int i) {
       int numargs = uintptr_t(entry.value);
       assert(numargs < 4096);
       assert(i < numargs);
-      zval* zv =
-        (zval*) stack.m_stack[stack.m_stack.size() - 1 - numargs + i].value;
-      zv->assertValid();
-      return zv;
+      zval** zvpp =
+        (zval**) &stack.m_stack[stack.m_stack.size() - 1 - numargs + i].value;
+      (*zvpp)->assertValid();
+      return zvpp;
     }
   }
   not_reached();

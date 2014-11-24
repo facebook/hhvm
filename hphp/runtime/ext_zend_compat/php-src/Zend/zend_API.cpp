@@ -417,7 +417,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
         if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
           *p = NULL;
         } else {
-          not_implemented();
+          *p = arg;
         }
       }
       break;
@@ -574,22 +574,14 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
         *n_varargs = num_varargs;
 
-        /* Allocate space for the args. Zend already has single pointers
-         * persistently stored, and only needs to allocate space for the double
-         * pointers, but we need to allocate space for both.
-         *
-         * We need to allocate it in such a way that a single efree(varargs)
-         * in the caller will free all relevant memory. So we allocate a single
-         * block and then split it.
+        /* Allocate space for the args. We need to allocate it in such a way
+         * that a single efree(varargs) in the caller will free all relevant
+         * memory.
          */
-        zval *** double_ptrs = (zval***)safe_emalloc(num_varargs * 2,
-                                                     sizeof(void*), 0);
-        *varargs = double_ptrs;
-        zval ** single_ptrs = (zval**)(double_ptrs + num_varargs);
+        *varargs = (zval***)safe_emalloc(num_varargs, sizeof(void*), 0);
 
         for (iv = 0; iv < num_varargs; iv++) {
-          double_ptrs[iv] = &single_ptrs[iv];
-          single_ptrs[iv] = HPHP::ZendExecutionStack::getArg(i + iv);
+          (*varargs)[iv] = HPHP::ZendExecutionStack::getArg(i + iv);
         }
 
         /* adjust how many args we have left and restart loop */
@@ -602,8 +594,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
       }
     }
 
-    auto tmp = HPHP::ZendExecutionStack::getArg(i);
-    arg = &tmp;
+    arg = HPHP::ZendExecutionStack::getArg(i);
 
     if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
       /* clean up varargs array if it was used */

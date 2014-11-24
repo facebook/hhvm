@@ -572,7 +572,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
         auto showFailure = [&]{
           std::string ret;
-          ret += show(*(mcg->tx().region())) + "\n";
+          if (auto const rd = m_unit.context().regionDesc) {
+            ret += show(*rd) + "\n";
+          }
           ret += folly::format("Unconsumed reference(s) leaving B{}\n",
                                block->id()).str();
           ret += show(m_state);

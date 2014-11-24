@@ -117,6 +117,12 @@ struct TransContext {
   Offset initSpOffset;
   bool resumed;
   const Func* func;
+
+  /*
+   * If available, the RegionDesc that we're compiling.  Might be
+   * nullptr---only used for debug output.
+   */
+  const RegionDesc* regionDesc;
 };
 
 /*
@@ -208,13 +214,6 @@ struct Translator {
   static const char* ResultName(TranslateResult r);
 
   /*
-   * Start, end, or free a trace of code to be translated.
-   */
-  void traceStart(TransContext context);
-  void traceEnd();
-  void traceFree();
-
-  /*
    * Translate `region'.
    *
    * The `toInterp' RegionBlacklist is a set of instructions which must be
@@ -222,20 +221,14 @@ struct Translator {
    * and the instruction is added to `interp' so that it will be interpreted on
    * the next attempt.
    */
-  TranslateResult translateRegion(const RegionDesc& region,
+  TranslateResult translateRegion(HhbcTranslator&,
+                                  const RegionDesc& region,
                                   RegionBlacklist& interp,
                                   TransFlags trflags = TransFlags{});
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Accessors.
-
-  /*
-   * Get the HhbcTranslator for the current translation.
-   *
-   * This is reset whenever traceStart() is called.
-   */
-  HhbcTranslator* hhbcTrans() const;
 
   /*
    * Get the Translator's ProfData.
@@ -256,10 +249,6 @@ struct Translator {
    */
   SrcRec* getSrcRec(SrcKey sk);
 
-  /*
-   * Current region being translated, if any.
-   */
-  const RegionDesc* region() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.
@@ -370,25 +359,6 @@ struct Translator {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Other methods.
-
-public:
-  static bool liveFrameIsPseudoMain();
-
-private:
-  void createBlockMap(const RegionDesc&    region,
-                      BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setSuccIRBlocks(const RegionDesc&          region,
-                       RegionDesc::BlockId        srcBlockId,
-                       const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-  void setIRBlock(RegionDesc::BlockId        blockId,
-                  const RegionDesc&          region,
-                  const BlockIdToIRBlockMap& blockIdToIRBlock);
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
@@ -398,11 +368,9 @@ private:
   int64_t m_createdTime;
 
   TransKind m_mode;
-  const RegionDesc* m_region{nullptr};
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 
-  std::unique_ptr<HhbcTranslator> m_hhbcTranslator;
   SrcDB m_srcDB;
 
   // Translation DB.

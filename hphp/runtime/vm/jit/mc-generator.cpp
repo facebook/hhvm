@@ -265,6 +265,11 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   return start;
 }
 
+static bool liveFrameIsPseudoMain() {
+  ActRec* ar = (ActRec*)vmfp();
+  return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
+}
+
 /*
  * Find or create a translation for sk. Returns TCA of "best" current
  * translation. May return NULL if it is currently impossible to create
@@ -281,8 +286,7 @@ MCGenerator::getTranslation(const TranslArgs& args) {
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
-  if (Translator::liveFrameIsPseudoMain() &&
-      !RuntimeOption::EvalJitPseudomain) {
+  if (liveFrameIsPseudoMain() && !RuntimeOption::EvalJitPseudomain) {
     SKTRACE(2, sk, "punting on pseudoMain\n");
     return nullptr;
   }
@@ -1658,35 +1662,35 @@ MCGenerator::translateWork(const TranslArgs& args) {
     Offset const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
 
-    auto const transContext = TransContext {
-      RuntimeOption::EvalJitPGO
-        ? m_tx.profData()->curTransID()
-        : kInvalidTransID,
-      sk.offset(),
-      initSpOffset,
-      sk.resumed(),
-      sk.func()
-    };
+    while (region && result == Translator::Retry) {
+      auto const transContext = TransContext {
+        RuntimeOption::EvalJitPGO
+          ? m_tx.profData()->curTransID()
+          : kInvalidTransID,
+        sk.offset(),
+        initSpOffset,
+        sk.resumed(),
+        sk.func(),
+        region.get()
+      };
 
-    while (result == Translator::Retry) {
-      m_tx.traceStart(transContext);
-
-      if (!region) {
-        m_tx.setMode(TransKind::Interp);
-        m_tx.traceFree();
-        break;
-      }
+      HhbcTranslator hhbcTrans(transContext);
+      FTRACE(1, "{}{:-^40}{}\n",
+             color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
+             " HHIR during translation ",
+             color(ANSI_COLOR_END));
 
       try {
         assertCleanState();
-        result = m_tx.translateRegion(*region, regionInterps, args.m_flags);
+        result = m_tx.translateRegion(hhbcTrans, *region, regionInterps,
+          args.m_flags);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to retranslate.
         if (m_tx.mode() == TransKind::Profile &&
             result == Translator::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_tx.hhbcTrans()->unit().postConditions();
+          pconds = hhbcTrans.unit().postConditions();
         }
 
         FTRACE(2, "translateRegion finished with result {}\n",
@@ -1724,9 +1728,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
           }
         }
       }
-
-      m_tx.traceFree();
     }
+
+    if (!region) m_tx.setMode(TransKind::Interp);
 
     if (result == Translator::Success) {
       assert(m_tx.mode() == TransKind::Live    ||
@@ -1811,8 +1815,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   return start;
 }
 
-void MCGenerator::traceCodeGen() {
-  auto& ht = *m_tx.hhbcTrans();
+void MCGenerator::traceCodeGen(HhbcTranslator& ht) {
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {

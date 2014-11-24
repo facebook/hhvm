@@ -81,11 +81,6 @@ int locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
-bool Translator::liveFrameIsPseudoMain() {
-  ActRec* ar = (ActRec*)vmfp();
-  return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
-}
-
 static uint32_t m_w = 1;    /* must not be zero */
 static uint32_t m_z = 1;    /* must not be zero */
 
@@ -1605,38 +1600,12 @@ const char* Translator::ResultName(TranslateResult r) {
   return names[r];
 }
 
-void Translator::traceStart(TransContext context) {
-  assert(!m_hhbcTranslator);
-
-  FTRACE(1, "{}{:-^40}{}\n",
-         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
-         " HHIR during translation ",
-         color(ANSI_COLOR_END));
-
-  m_hhbcTranslator.reset(new HhbcTranslator(context));
-}
-
-void Translator::traceEnd() {
-  assert(!m_hhbcTranslator->isInlining());
-  m_hhbcTranslator->end();
-  FTRACE(1, "{}{:-^40}{}\n",
-         color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
-         "",
-         color(ANSI_COLOR_END));
-}
-
-void Translator::traceFree() {
-  FTRACE(1, "HHIR free: arena size: {}\n",
-         m_hhbcTranslator->unit().arena().size());
-  m_hhbcTranslator.reset();
-}
-
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-void Translator::createBlockMap(const RegionDesc&    region,
-                                BlockIdToIRBlockMap& blockIdToIRBlock) {
-  auto& ht = *m_hhbcTranslator;
+static void createBlockMap(HhbcTranslator& ht,
+                           const RegionDesc& region,
+                           BlockIdToIRBlockMap& blockIdToIRBlock) {
   auto& irb = ht.irBuilder();
   blockIdToIRBlock.clear();
   auto const& blocks = region.blocks();
@@ -1662,10 +1631,11 @@ void Translator::createBlockMap(const RegionDesc&    region,
  * Set IRBuilder's Block associated to blockId's block according to
  * the mapping in blockIdToIRBlock.
  */
-void Translator::setIRBlock(RegionDesc::BlockId        blockId,
-                            const RegionDesc&          region,
-                            const BlockIdToIRBlockMap& blockIdToIRBlock) {
-  auto& irb = m_hhbcTranslator->irBuilder();
+static void setIRBlock(HhbcTranslator& ht,
+                       RegionDesc::BlockId blockId,
+                       const RegionDesc& region,
+                       const BlockIdToIRBlockMap& blockIdToIRBlock) {
+  auto& irb = ht.irBuilder();
   auto rBlock = region.block(blockId);
   Offset bcOffset = rBlock->start().offset();
 
@@ -1682,14 +1652,15 @@ void Translator::setIRBlock(RegionDesc::BlockId        blockId,
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
  * the region.
  */
-void Translator::setSuccIRBlocks(const RegionDesc&          region,
-                                 RegionDesc::BlockId        srcBlockId,
-                                 const BlockIdToIRBlockMap& blockIdToIRBlock) {
+static void setSuccIRBlocks(HhbcTranslator& ht,
+                            const RegionDesc& region,
+                            RegionDesc::BlockId srcBlockId,
+                            const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
-  auto& irb = m_hhbcTranslator->irBuilder();
+  auto& irb = ht.irBuilder();
   irb.resetOffsetMapping();
   for (auto dstBlockId : region.succs(srcBlockId)) {
-    setIRBlock(dstBlockId, region, blockIdToIRBlock);
+    setIRBlock(ht, dstBlockId, region, blockIdToIRBlock);
   }
 }
 
@@ -1982,20 +1953,17 @@ void translateInstr(HhbcTranslator& ht, const NormalizedInstruction& ni) {
 //////////////////////////////////////////////////////////////////////
 
 Translator::TranslateResult
-Translator::translateRegion(const RegionDesc& region,
+Translator::translateRegion(HhbcTranslator& ht,
+                            const RegionDesc& region,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
-  m_region = &region;
-  SCOPE_EXIT { m_region = nullptr; };
-
   std::string errorMsg;
   always_assert_log(check(region, errorMsg),
                     [&] { return errorMsg + "\n" + show(region); });
 
-  auto& ht = *m_hhbcTranslator;
   auto& irb = ht.irBuilder();
 
   auto const startSk = region.start();
@@ -2003,7 +1971,7 @@ Translator::translateRegion(const RegionDesc& region,
   BlockIdToIRBlockMap blockIdToIRBlock;
   if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
     ht.setGenMode(IRGenMode::CFG);
-    createBlockMap(region, blockIdToIRBlock);
+    createBlockMap(ht, region, blockIdToIRBlock);
 
     // Make the IR entry block jump to the IR block we mapped the region entry
     // block to (they are not the same!).
@@ -2049,7 +2017,7 @@ Translator::translateRegion(const RegionDesc& region,
         processedBlocks.insert(blockId);
         continue;
       }
-      setSuccIRBlocks(region, blockId, blockIdToIRBlock);
+      setSuccIRBlocks(ht, region, blockId, blockIdToIRBlock);
     }
 
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
@@ -2264,7 +2232,7 @@ Translator::translateRegion(const RegionDesc& region,
           [&] {
             std::ostringstream oss;
             oss << folly::format("IR generation failed with {}\n", exn.what());
-            print(oss, m_hhbcTranslator->unit());
+            print(oss, ht.unit());
             return oss.str();
           });
         toInterp.insert(psk);
@@ -2316,12 +2284,12 @@ Translator::translateRegion(const RegionDesc& region,
     assert(!knownFuncs.hasNext());
   }
 
-  if (ht.genMode() == IRGenMode::Trace) traceEnd();
+  if (ht.genMode() == IRGenMode::Trace) ht.end();
 
   irGenTimer.end();
 
   try {
-    mcg->traceCodeGen();
+    mcg->traceCodeGen(ht);
     if (m_mode == TransKind::Profile) {
       profData()->setProfiling(startSk.func()->getFuncId());
     }

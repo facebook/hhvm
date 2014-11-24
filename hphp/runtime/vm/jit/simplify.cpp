@@ -1270,16 +1270,6 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  // This is trying to get some information about a bug that's in another
-  // module:
-  auto show_failure = [&]() -> std::string {
-    auto msg = std::string{};
-    msg += show(*mcg->tx().region()) + "\n";
-    msg += "ConvArrToBool issue:\n";
-    msg += env.unit.toString();
-    return msg;
-  };
-  always_assert_log(inst->src(0)->type() <= Type::Arr, show_failure);
   if (src->isConst()) {
     // const_cast is safe. We're only making use of a cell helper.
     auto arr = const_cast<ArrayData*>(src->arrVal());

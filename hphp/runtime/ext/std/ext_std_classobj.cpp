@@ -265,6 +265,9 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
   if (class_or_object.isString() && !allow_string) {
     return false;
   }
+  if (!(class_or_object.isString() || class_or_object.isObject())) {
+    return false;
+  }
 
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;

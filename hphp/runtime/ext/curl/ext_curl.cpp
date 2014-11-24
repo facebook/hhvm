@@ -547,7 +547,7 @@ public:
                CURLFORM_END);
           } else {
             String val = var_val.toString();
-            const char* const postval = val.bufferSlice().ptr;
+            const char *postval = val.data();
 
             if (*postval == '@') {
               /* Given a string like:

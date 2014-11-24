@@ -8,9 +8,4 @@
  *
  *)
 
-(** This is probably not fully safe. It'll do a reasonable job of escaping
-    silly things like spaces, quotes and so on but there are probably ways
-    to break it. *)
-let escape_string_for_shell str =
-  let escaped = Str.global_replace (Str.regexp "'") "'\"'\"'" str in
-  "'" ^ escaped ^ "'"
+let escape_string_for_shell = Filename.quote

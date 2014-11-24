@@ -289,7 +289,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
+  m_stats.borrow(-bytes);
   FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
   smartFreeBig(static_cast<BigNode*>(debugPreFree(vp, bytes, 0)) - 1);
 }

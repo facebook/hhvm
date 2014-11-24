@@ -788,7 +788,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   if (debug) checkHeap();
   void* slab = safe_malloc(kSlabSize);
   assert((uintptr_t(slab) & kSmartSizeAlignMask) == 0);
-  JEMALLOC_STATS_ADJUST(&m_stats, kSlabSize);
+  m_stats.borrow(kSlabSize);
   m_stats.alloc += kSlabSize;
   if (m_stats.alloc > m_stats.peakAlloc) {
     m_stats.peakAlloc = m_stats.alloc;
@@ -896,7 +896,7 @@ MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
   auto const delta = callerSavesActualSize ? szOut : bytes;
   m_stats.usage += int64_t(delta);
   // Adjust jemalloc otherwise we'll double count the direct allocation.
-  JEMALLOC_STATS_ADJUST(&m_stats, delta);
+  m_stats.borrow(delta);
 #else
   m_stats.usage += bytes;
   auto cap = bytes + sizeof(BigNode);

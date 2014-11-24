@@ -706,6 +706,7 @@ private:
   static void* TlsInitSetup;
 
 #ifdef USE_JEMALLOC
+  // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
   uint64_t m_prevAllocated;

@@ -38,15 +38,9 @@ struct MemoryUsageStats {
 #if defined(USE_JEMALLOC)
   int64_t jemallocDebt; // how many bytes of jemalloced memory have not
                       // been processed by MemoryManager::refreshStats
+#endif
   int64_t alloc;      // how many bytes are currently malloc-ed in slabs
                       // by the smart allocator size class APIs
-#else
-  union {
-    int64_t jemallocDebt; // unused
-    int64_t alloc;    // how many bytes are currently malloc-ed in slabs
-                      // by the smart allocator size class APIs
-  };
-#endif
   int64_t peakUsage;  // how many bytes have been used at maximum
   int64_t peakAlloc;  // how many bytes malloc-ed in slabs by the smart
                       // allocator size class APIs at maximum
@@ -54,10 +48,13 @@ struct MemoryUsageStats {
                       // by the underlying allocator
   int64_t peakIntervalUsage; // peakUsage during a userland specified interval
   int64_t peakIntervalAlloc; // peakAlloc during a userland specified interval
-};
 
-#define JEMALLOC_STATS_ADJUST(stats, amt)       \
-  ((void)(use_jemalloc && ((stats)->jemallocDebt += (amt))))
+#ifdef USE_JEMALLOC
+  void borrow(size_t amt) { jemallocDebt += amt; }
+#else
+  void borrow(size_t) {}
+#endif
+};
 
 //////////////////////////////////////////////////////////////////////
 

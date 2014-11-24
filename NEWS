@@ -1,5 +1,131 @@
-NEXT 4-Dec-2014
- - Removed support for Magic Quotes (also removed in PHP 5.4)
+"Yelawolf" 4-Dec-2014
+ - Fix comparison of overflowing strings
+ - Fix potential memory corruption during ArrayData::set
+ - Introduce util to restart current process
+ - Share variable environment in eval'd assert
+ - [Find] Only escape spaces in paths for find
+ - Don't ignore Eval.JitAHotSize
+ - Fix checkCfg's defined-tmp checks to be aware of edge-defined tmps
+ - Fix bugs relating to edges in IRInstruction::become
+ - Fix insertPhis calls to IRUnit::replace()
+ - Use sha1sum for the repo-schema
+ - [hh] typechecker: add constants to hh_client --show
+ - [hack] Dump typedef info in `hh_client --show`
+ - Make BigNode parsable, extend HeapIter to visit BigNodes.
+ - Allow static invocation of DOMDocument::load* methods
+ - Allow "array" with type args to be used in XHP attribute declarations
+ - HTMLEncode strings in wddx_serialize_value()
+ - [hack] Make dependency on lz4 optional for OSS build.
+ - [hack] Have hh_server take the list of files to recheck as relative paths
+ - [hack] Docblock parser for AT
+ - Add version number to imagick extension
+ - Support Authorization header in apache_request_headers()
+ - [hack][build] Add needs_rerun hook for XController build step
+ - Fix call to fetchObject without class name
+ - Add possibility to create a DateTime object with timezone
+ - DateTimeImmutable::createFromFormat returns false on failure
+ - [hh] typechecker add PREG_* constants to hhi
+ - Raise warning when put_contents on non-regular file with exclusive lock.
+ - Use uncounted strings to cache non-static regexes
+ - Use specializeExact whenever we know AttrNoOverride from whole program analysis
+ - Fix some not-type-safe LdRef code generated in a situation with SetOpL
+ - Split inner ref type checks into a separate instruction from LdRef
+ - Add support for stream wrapper in include_path.
+ - cmake option to enable avx2 instruction support
+ - Add missing default to PharData::decompress()
+ - [hack] Add lz4 compression when saving server state.
+ - Fix leak in tvCoerce*
+ - Trie Search - optimizations for JS
+ - Don't throw an exception on unknown IP address for OSS
+ - [hh] parity: match php 5.6 in treatment of array_fill with num = 0
+ - Make ob_start function signature PHP 5.6 compatible
+ - Fix issues with private properties and apc
+ - Implement remaining straightforward vasm ops in llvm backend
+ - [hack] Type strlen's return value.
+ - [hack] add additional iterator interfaces
+ - Improve segaddr fixing for 32-bit destructors
+ - Fix parent::__cOnStRuCt and similar with PHP4 constructors
+ - Make stats.json on the admin server return valid json
+ - [hack] Simplify coverage JSON output, and add non-JSON output option.
+ - Remove kernel version assertions
+ - [hack] Fix bad escaping of directory names
+ - [hack] Add some hhi constants for pcntl.
+ - Fix problems in getCurrentPropertyOffset relating to m_ni.inputs
+ - Fix CSE to be aware of where SSATmps are known to be defined
+ - Add an analysis module for functions that query information about the IR
+ - Don't JIT functions that use $php_errormsg or $http_response_code
+ - Fix default SOAP HTTP client
+ - [hack] Member access is `->` followed by lvar, not word
+ - Fix comparison between doubles and hex numeric strings
+ - Implement a bunch more vasm instructions in llvm backend
+ - Enable ASAN for smart allocator
+ - Record the start time for every request
+ - Fix parsing of binary literals denoted with a capital '0B'
+ - Fix Symfony's it's not safe to rely on system timezone setting errors
+ - Allow non-static expressions in function parameter defaults
+ - Fix a bug in Index::lookup_constraint
+ - [hack] Add logging to server_options_cmd.
+ - Fix optional 'errorcode' parameter is not set up properly
+ - Fix PHP primitive default parameter type check
+ - Weaken assert in FileUtil::canonicalize
+ - [hack] Error when using "shape" as a type
+ - Fix getOldestStartTime
+ - Add zlib.output_compression ini option
+ - Add missing argument to DOMXPath::{query,execute}()
+ - htmlentities() should output valid ISO-8859-1 characeters to appropriate entities
+ - Remove bad assert from BaseVector::data()
+ - Cleanup sock and pid files on graceful exit from FastCGI
+ - [hack] Add script for determining server startup options
+ - [hack] Record init time in log output.
+ - Fix some bugs in intersecting specialized types
+ - [hack] Fix duplicate unbound name errors
+ - Update OCaml to 4.02.1
+ - [hhvm] Add per kind ArrayFunc counters for ArrayTracer
+ - Fix use-after-free in the access logs
+ - Wait for clean shutdown on SIGHUP
+ - [hhi] add at() to MysqlRow in hhi file
+ - [memoize] Go back to individual cache props for statics
+ - Break regions after FCall & friends when using LLVM
+ - Remove support for magic quotes (also removed in PHP 5.4)
+ - qlzcompress is not available everywhere, and there's no support for it in OSS
+ - Change the Profiler constructor to not necessarily force CPU affinity.
+ - Add getTypeText to ReflectionParameter
+ - Remove trailing junk from IP addresses for sockets
+ - Preserve index of sockets passed into/out-of socket_select()
+ - Fix lchown when no user found
+ - [hh] typechecker: split function bodies into named and unnamed
+ - [hack] fix error with capturing locals for a foreach using a ref
+ - guess root from supplied filename, where that makes sense
+ - Show a nice error when an invalid argument is passed to hphp -t
+ - Expose Imagick::getImageMimeType to userland
+ - SplFixedArray::FromArray() throws InvalidArgumentException not Exception
+ - Make default_socket_timeout match PHP 5.x
+ - VerifyRetTypeC optimizations for repo-mode
+ - Turn off refcount opts by default when HHIRBytecodeControlFlow is on
+ - Make profiled packed array gets not rejoin the main line
+ - Side exit on surprise flags for backward jumps
+ - Print edges with colors in IR dot graphs; make dotBodies usable
+ - Fix region-method support for loops
+ - Correct the return type of BaseG; fix some missing renames of Mem -> Memb
+ - Adopt PHP7's looser handling of return values in user session handler
+ - Honor the Redis timeout
+ - Fix mysqli_options. Stop asserting.
+ - Fix some bugs in hhbbc support for http_response_code, php_errormsg
+ - Introduce immediately executed async lambdas
+ - Allow nested namespaces with sane behavior
+ - Updated win32-cygwin patch Fixes Issue #4062
+ - [hh] typechecker: ReflectionClass hhi fixup
+ - [hack] Add hh_server --version
+ - Fix a few memory management issues in DOMDocument
+ - Prevent m_nextKI from going negative in MixedArray
+ - [hh] typechecker: declaration location in extend_final error
+ - [hack] Enable .hhconfig to control hh_server flags
+ - Respect status codes from `Status:` header in addition to `HTTP/` header
+ - Fix number_format() to deal with very large precisions/very large numbers
+ - Fix closure use var reflection for referenced vars
+ - Support self parameter typehint
+ - [h2tp] modify build to support h2tp
+ - [hh] hh_format: understand async lambdas
 
 "Xzibit" 20-Nov-2014
  - Fix readline request locals

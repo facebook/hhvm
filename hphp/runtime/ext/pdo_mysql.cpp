@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/network.h"
+#include "hphp/util/logger.h"
 #include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -425,8 +426,6 @@ bool PDOMySqlConnection::closer() {
   return false;
 }
 
-static const int s_hidden_error_codes[] = {1064};
-
 int PDOMySqlConnection::handleError(const char *file, int line,
                                     PDOMySqlStatement *stmt) {
   PDOErrorType *pdo_err;
@@ -486,17 +485,14 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     if (stmt) {
       stmt->dbh->fetchErr(stmt, info);
     }
-    bool throw_exception = true;
-    for(int i = 0; i < sizeof(s_hidden_error_codes)/sizeof(int); i++) {
-      if(einfo->errcode == s_hidden_error_codes[i]) {
-        throw_exception = false;
-        break;
-      }
-    }
-    if(throw_exception) {
+    constexpr int kSQLSyntaxErrorCode = 1064;
+    if(einfo->errcode != kSQLSyntaxErrorCode) {
       throw_pdo_exception(String(*pdo_err, CopyString), info,
                         "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
+    }
+    else {
+      Logger::Verbose("%s at %s:%d", einfo->errmsg, file, line);
     }
   }
   return einfo->errcode;

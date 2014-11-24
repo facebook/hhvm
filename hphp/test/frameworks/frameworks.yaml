@@ -315,7 +315,7 @@
   klein:
     url: https://github.com/chriso/klein.php.git
     branch: master
-    commit: 744c07b7d4d168f146d0295073d85af13e576316
+    commit: 2ec9a802632da1f92cf3f47cbc4020e2df2a432d
     install_root: klein
     test_root: klein
     test_find_mode: token

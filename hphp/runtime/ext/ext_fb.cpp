@@ -986,6 +986,8 @@ bool f_fb_intercept(const String& name, const Variant& handler,
 
 const StaticString s_extract("extract");
 const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_assert("assert");
+const StaticString s_assert_sl("__SystemLib\\assert");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_str_sl("__SystemLib\\parse_str");
 const StaticString s_compact("compact");
@@ -997,6 +999,8 @@ bool is_dangerous_varenv_function(const StringData* name) {
   return
     name->isame(s_extract.get()) ||
     name->isame(s_extract_sl.get()) ||
+    name->isame(s_assert.get()) ||
+    name->isame(s_assert_sl.get()) ||
     name->isame(s_parse_str.get()) ||
     name->isame(s_parse_str_sl.get()) ||
     name->isame(s_compact.get()) ||

@@ -96,6 +96,7 @@ protected:
     Create,
     VariableArgument,
     Extract,
+    Assert,
     Compact,
     StaticCompact, // compact() with statically known variable names
     ShellExec,

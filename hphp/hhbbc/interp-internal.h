@@ -36,6 +36,8 @@ TRACE_SET_MOD(hhbbc);
 
 const StaticString s_extract("extract");
 const StaticString s_extract_sl("__SystemLib\\extract");
+const StaticString s_assert("assert");
+const StaticString s_assert_sl("__SystemLib\\assert");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_str_sl("__SystemLib\\parse_str");
 const StaticString s_compact("compact");
@@ -122,11 +124,12 @@ void specialFunctionEffects(ISS& env, SString name) {
     killLocals(env);
     return;
   }
-  // compact() and get_defined_vars() read the local variable
+  // assert(), compact() and get_defined_vars() read the local variable
   // environment.  We could check which locals for compact, but for
   // now we just include them all.
   if (special_fn(s_get_defined_vars_sl, s_get_defined_vars) ||
-      special_fn(s_compact_sl, s_compact)) {
+      special_fn(s_compact_sl, s_compact) ||
+      special_fn(s_assert_sl, s_assert)) {
     readUnknownLocals(env);
     return;
   }

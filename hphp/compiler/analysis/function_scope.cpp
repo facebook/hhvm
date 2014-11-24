@@ -177,6 +177,9 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   if (m_attribute & FileScope::ContainsExtract) {
     m_variables->setAttribute(VariableTable::ContainsExtract);
   }
+  if (m_attribute & FileScope::ContainsAssert) {
+    m_variables->setAttribute(VariableTable::ContainsAssert);
+  }
   if (m_attribute & FileScope::ContainsCompact) {
     m_variables->setAttribute(VariableTable::ContainsCompact);
   }
@@ -555,6 +558,7 @@ bool FunctionScope::mayUseVV() const {
      usesVariableArgumentFunc() ||
      variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
      variables->getAttribute(VariableTable::ContainsExtract) ||
+     variables->getAttribute(VariableTable::ContainsAssert) ||
      variables->getAttribute(VariableTable::ContainsCompact) ||
      variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
      (!Option::EnableHipHopSyntax &&

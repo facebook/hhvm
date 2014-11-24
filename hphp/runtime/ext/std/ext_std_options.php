@@ -408,3 +408,8 @@ function gc_collect_cycles(): int;
  */
 <<__Native>>
 function zend_version(): string;
+
+namespace __SystemLib {
+  <<__Native>>
+  function assert(mixed $assertion, ?string $message = null): ?bool;
+}

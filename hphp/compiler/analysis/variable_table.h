@@ -61,6 +61,7 @@ public:
     ContainsDynamicStatic  = 512,
     ContainsGetDefinedVars = 1024,
     ContainsDynamicFunctionCall = 2048,
+    ContainsAssert = 4096,
   };
 
   enum JumpTableType {

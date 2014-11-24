@@ -333,9 +333,8 @@ void HhbcTranslator::emitFPushCtor(int32_t numParams) {
   emitFPushCtorCommon(cls, obj, nullptr, numParams);
 }
 
-void HhbcTranslator::emitFPushCtorD(int32_t numParams, int32_t classNameStrId) {
-  const StringData* className = lookupStringId(classNameStrId);
-
+void HhbcTranslator::emitFPushCtorD(int32_t numParams,
+                                    const StringData* className) {
   const Class* cls = Unit::lookupUniqueClass(className);
   bool uniqueCls = classIsUnique(cls);
   bool persistentCls = classHasPersistentRDS(cls);
@@ -403,22 +402,17 @@ void HhbcTranslator::emitFPushFuncCommon(const Func* func,
                   nullptr);
 }
 
-void HhbcTranslator::emitFPushFuncD(int32_t numParams, int32_t funcId) {
-  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
-  const StringData* name = nep.first;
-  const Func* func       = Unit::lookupFunc(nep.second);
-  emitFPushFuncCommon(func, name, nullptr, numParams);
+void HhbcTranslator::emitFPushFuncD(int32_t numParams,
+                                    const StringData* funcName) {
+  auto const func = Unit::lookupFunc(funcName);
+  emitFPushFuncCommon(func, funcName, nullptr, numParams);
 }
 
 void HhbcTranslator::emitFPushFuncU(int32_t numParams,
-                                    int32_t funcId,
-                                    int32_t fallbackFuncId) {
-  const NamedEntityPair& nep = lookupNamedEntityPairId(funcId);
-  const StringData* name     = nep.first;
-  const Func* func           = Unit::lookupFunc(nep.second);
-  const NamedEntityPair& fallbackNep = lookupNamedEntityPairId(fallbackFuncId);
-  const StringData* fallbackName     = fallbackNep.first;
-  emitFPushFuncCommon(func, name, fallbackName, numParams);
+                                    const StringData* funcName,
+                                    const StringData* fallbackName) {
+  auto const func = Unit::lookupFunc(funcName);
+  emitFPushFuncCommon(func, funcName, fallbackName, numParams);
 }
 
 void HhbcTranslator::emitFPushFunc(int32_t numParams) {
@@ -605,11 +599,10 @@ void HhbcTranslator::fpushObjMethodUnknown(SSATmp* obj,
 }
 
 void HhbcTranslator::emitFPushObjMethodD(int32_t numParams,
-                                         int32_t methodNameStrId,
+                                         const StringData* methodName,
                                          ObjMethodOp subop) {
   auto const obj = popC();
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
-  auto const methodName = lookupStringId(methodNameStrId);
   emitFPushObjMethodCommon(obj, methodName, numParams, true /* shouldFatal */);
 }
 
@@ -648,13 +641,9 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
 }
 
 void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
-                                         int32_t methodNameStrId,
-                                         int32_t clssNamedEntityPairId) {
-
-  auto const methodName = lookupStringId(methodNameStrId);
-  auto const& np        = lookupNamedEntityPairId(clssNamedEntityPairId);
-  auto const className  = np.first;
-  auto const baseClass  = Unit::lookupUniqueClass(np.second);
+                                         const StringData* methodName,
+                                         const StringData* className) {
+  auto const baseClass  = Unit::lookupUniqueClass(className);
   bool magicCall        = false;
 
   if (auto const func = lookupImmutableMethod(baseClass,
@@ -671,7 +660,8 @@ void HhbcTranslator::emitFPushClsMethodD(int32_t numParams,
   }
 
   auto const slowExit = makeExitSlow();
-  auto const data = ClsMethodData{className, methodName, np.second};
+  auto const ne = NamedEntity::get(className);
+  auto const data = ClsMethodData { className, methodName, ne };
 
   // Look up the Func* in the targetcache. If it's not there, try the slow
   // path. If that fails, slow exit.
@@ -924,7 +914,9 @@ void HhbcTranslator::emitFCallArray() {
   gen(CallArray, data, stack, m_irb->fp());
 }
 
-void HhbcTranslator::emitFCallD(int32_t numParams, Id, Id) {
+void HhbcTranslator::emitFCallD(int32_t numParams,
+                                const StringData*,
+                                const StringData*) {
   emitFCall(numParams);
 }
 

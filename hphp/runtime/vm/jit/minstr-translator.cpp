@@ -569,7 +569,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
       return m_ht.ldLoc(l.offset, nullptr, tc);
 
     case Location::Litstr:
-      return cns(m_ht.lookupStringId(l.offset));
+      return cns(m_ht.curUnit()->lookupLitstrId(l.offset));
 
     case Location::Litint:
       return cns(l.offset);

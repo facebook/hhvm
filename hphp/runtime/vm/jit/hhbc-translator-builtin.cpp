@@ -875,9 +875,8 @@ void HhbcTranslator::emitCeil() {
 
 void HhbcTranslator::emitFCallBuiltin(int32_t numArgs,
                                       int32_t numNonDefault,
-                                      Id funcId) {
-  auto const ne = lookupNamedEntityId(funcId);
-  auto const callee = Unit::lookupFunc(ne);
+                                      const StringData* funcName) {
+  auto const callee = Unit::lookupFunc(funcName);
 
   if (optimizedFCallBuiltin(callee, numArgs, numNonDefault)) return;
 

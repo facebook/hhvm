@@ -1636,10 +1636,6 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * TODO: turn SA into const StringData* automatically?
- */
-
 #define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
 #define IMM_BLA(n)     ni.immVec
 #define IMM_SLA(n)     ni.immVec
@@ -1650,9 +1646,9 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
 #define IMM_LA(n)      ni.imm[n].u_LA
 #define IMM_IA(n)      ni.imm[n].u_IA
 #define IMM_DA(n)      ni.imm[n].u_DA
-#define IMM_SA(n)      ni.imm[n].u_SA
+#define IMM_SA(n)      ni.unit()->lookupLitstrId(ni.imm[n].u_SA)
 #define IMM_RATA(n)    ni.imm[n].u_RATA
-#define IMM_AA(n)      ni.imm[n].u_AA
+#define IMM_AA(n)      ni.unit()->lookupArrayId(ni.imm[n].u_AA)
 #define IMM_BA(n)      ni.imm[n].u_BA
 #define IMM_OA_IMPL(n) ni.imm[n].u_OA
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL

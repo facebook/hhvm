@@ -235,9 +235,9 @@ public:
 #define IMM_LA         int32_t
 #define IMM_IA         int32_t
 #define IMM_DA         double
-#define IMM_SA         Id
+#define IMM_SA         const StringData*
 #define IMM_RATA       RepoAuthType
-#define IMM_AA         Id
+#define IMM_AA         const ArrayData*
 #define IMM_BA         Offset
 #define IMM_OA(subop)  subop
 
@@ -274,7 +274,7 @@ public:
 #undef IMM_OA
 
 private:
-  void emitCnsCommon(uint32_t id, uint32_t fallbackId, bool error);
+  void implCns(const StringData* name, const StringData* fallback, bool error);
   void jmpImpl(Offset offset, JmpFlags);
   void implFPushCufOp(Op op, int32_t numArgs);
   bool emitFPushCufArray(SSATmp* callable, int32_t numParams);
@@ -705,15 +705,8 @@ private:
   Offset nextBcOff() const;
 
   /*
-   * Helpers for resolving bytecode immediate ids.
+   * Stack-related.
    */
-  ArrayData*  lookupArrayId(int arrId);
-  StringData* lookupStringId(int strId);
-  Func*       lookupFuncId(int funcId);
-  PreClass*   lookupPreClassId(int preClassId);
-  const NamedEntityPair& lookupNamedEntityPairId(int id);
-  const NamedEntity* lookupNamedEntityId(int id);
-
   std::vector<SSATmp*> peekSpillValues() const;
   SSATmp* emitSpillStack(SSATmp* sp,
                          const std::vector<SSATmp*>& spillVals,
@@ -723,6 +716,9 @@ private:
   SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
 
+  /*
+   * Dynamically check if val is boxed, and unbox it if so.
+   */
   SSATmp* unbox(SSATmp* val, Block* exit);
 
   /*

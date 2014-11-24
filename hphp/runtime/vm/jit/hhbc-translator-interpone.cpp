@@ -36,7 +36,7 @@ void HhbcTranslator::emitBox()                     { INTERP }
 void HhbcTranslator::emitBoxR()                    { INTERP }
 void HhbcTranslator::emitAddElemV()                { INTERP }
 void HhbcTranslator::emitAddNewElemV()             { INTERP }
-void HhbcTranslator::emitClsCns(int32_t)           { INTERP }
+void HhbcTranslator::emitClsCns(const StringData*) { INTERP }
 void HhbcTranslator::emitExit()                    { INTERP }
 void HhbcTranslator::emitFatal(FatalOp)            { INTERP }
 void HhbcTranslator::emitUnwind()                  { INTERP }

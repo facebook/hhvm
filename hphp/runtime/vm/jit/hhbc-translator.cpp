@@ -104,30 +104,6 @@ Offset HhbcTranslator::nextBcOff() const {
   return nextSrcKey().offset();
 }
 
-ArrayData* HhbcTranslator::lookupArrayId(int arrId) {
-  return curUnit()->lookupArrayId(arrId);
-}
-
-StringData* HhbcTranslator::lookupStringId(int strId) {
-  return curUnit()->lookupLitstrId(strId);
-}
-
-Func* HhbcTranslator::lookupFuncId(int funcId) {
-  return curUnit()->lookupFuncId(funcId);
-}
-
-PreClass* HhbcTranslator::lookupPreClassId(int preClassId) {
-  return curUnit()->lookupPreClassId(preClassId);
-}
-
-const NamedEntityPair& HhbcTranslator::lookupNamedEntityPairId(int id) {
-  return curUnit()->lookupNamedEntityPairId(id);
-}
-
-const NamedEntity* HhbcTranslator::lookupNamedEntityId(int id) {
-  return curUnit()->lookupNamedEntityId(id);
-}
-
 SSATmp* HhbcTranslator::push(SSATmp* tmp) {
   assert(tmp);
   FTRACE(2, "HhbcTranslator pushing {}\n", *tmp->inst());
@@ -586,8 +562,8 @@ void HhbcTranslator::emitBareThis(BareThisOp subop) {
   pushIncRef(gen(CastCtxThis, ctx));
 }
 
-void HhbcTranslator::emitArray(int arrayId) {
-  push(cns(lookupArrayId(arrayId)));
+void HhbcTranslator::emitArray(const ArrayData* array) {
+  push(cns(array));
 }
 
 void HhbcTranslator::emitNewArray(int capacity) {
@@ -788,18 +764,16 @@ void HhbcTranslator::emitColAddNewElemC() {
   push(gen(ColAddNewElemC, catchBlock, coll, val));
 }
 
-void HhbcTranslator::emitCnsCommon(uint32_t id,
-                                   uint32_t fallback,
-                                   bool error) {
-  assert(fallback == kInvalidId || !error);
-  StringData* name = curUnit()->lookupLitstrId(id);
-  SSATmp* cnsNameTmp = cns(name);
-  const TypedValue* tv = Unit::lookupPersistentCns(name);
+void HhbcTranslator::implCns(const StringData* name,
+                             const StringData* fallbackName,
+                             bool error) {
+  assert(fallbackName == nullptr || !error);
+  auto const cnsNameTmp = cns(name);
+  auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
 
   SSATmp* fallbackNameTmp = nullptr;
-  if (fallback != kInvalidId) {
-    StringData* fallbackName = curUnit()->lookupLitstrId(fallback);
+  if (fallbackName != nullptr) {
     fallbackNameTmp = cns(fallbackName);
   }
   if (tv) {
@@ -844,32 +818,33 @@ void HhbcTranslator::emitCnsCommon(uint32_t id,
   push(result);
 }
 
-void HhbcTranslator::emitCns(int32_t id) {
-  emitCnsCommon(id, kInvalidId, false);
+void HhbcTranslator::emitCns(const StringData* name) {
+  implCns(name, nullptr, false);
 }
 
-void HhbcTranslator::emitCnsE(int32_t id) {
-  emitCnsCommon(id, kInvalidId, true);
+void HhbcTranslator::emitCnsE(const StringData* name) {
+  implCns(name, nullptr, true);
 }
 
-void HhbcTranslator::emitCnsU(int32_t id, int32_t fallbackId) {
-  emitCnsCommon(id, fallbackId, false);
+void HhbcTranslator::emitCnsU(const StringData* name,
+                              const StringData* fallback) {
+  implCns(name, fallback, false);
 }
 
-void HhbcTranslator::emitDefCns(int32_t id) {
+void HhbcTranslator::emitDefCns(const StringData*) {
   emitInterpOne(Type::Bool, 1);
 }
 
-void HhbcTranslator::emitDefCls(int32_t cid) {
+void HhbcTranslator::emitDefCls(int32_t) {
   emitInterpOne(0);
 }
 
-void HhbcTranslator::emitDefFunc(int32_t fid) {
+void HhbcTranslator::emitDefFunc(int32_t) {
   emitInterpOne(0);
 }
 
 void HhbcTranslator::emitLateBoundCls() {
-  Class* clss = curClass();
+  auto const clss = curClass();
   if (!clss) {
     // no static context class, so this will raise an error
     emitInterpOne(Type::Cls, 0);
@@ -880,7 +855,7 @@ void HhbcTranslator::emitLateBoundCls() {
 }
 
 void HhbcTranslator::emitSelf() {
-  Class* clss = curClass();
+  auto const clss = curClass();
   if (clss == nullptr) {
     emitInterpOne(Type::Cls, 0);
   } else {
@@ -897,8 +872,8 @@ void HhbcTranslator::emitParent() {
   }
 }
 
-void HhbcTranslator::emitString(int strId) {
-  push(cns(lookupStringId(strId)));
+void HhbcTranslator::emitString(const StringData* s) {
+  push(cns(s));
 }
 
 void HhbcTranslator::emitInt(int64_t val) {
@@ -1049,11 +1024,11 @@ void HhbcTranslator::emitOODeclExists(OODeclExistsOp subop) {
   gen(DecRef, tCls);
 }
 
-void HhbcTranslator::emitStaticLocInit(int32_t locId, int32_t litStrId) {
+void HhbcTranslator::emitStaticLocInit(int32_t locId,
+                                       const StringData* name) {
   if (inPseudoMain()) PUNT(StaticLocInit);
 
   auto const ldPMExit = makePseudoMainExit();
-  auto const name  = lookupStringId(litStrId);
   auto const value = popC();
 
   // Closures and generators from closures don't satisfy the "one static per
@@ -1084,11 +1059,11 @@ void HhbcTranslator::emitStaticLocInit(int32_t locId, int32_t litStrId) {
   // our Cell was not ref-counted.
 }
 
-void HhbcTranslator::emitStaticLoc(int32_t locId, int32_t litStrId) {
+void HhbcTranslator::emitStaticLoc(int32_t locId,
+                                   const StringData* name) {
   if (inPseudoMain()) PUNT(StaticLoc);
 
   auto const ldPMExit = makePseudoMainExit();
-  auto const name = lookupStringId(litStrId);
 
   auto const box = curFunc()->isClosureBody() ?
     gen(ClosureStaticLocInit, cns(name), m_irb->fp(), cns(Type::Uninit)) :
@@ -1340,10 +1315,9 @@ SSATmp* HhbcTranslator::staticTVCns(const TypedValue* tv) {
   always_assert(false);
 }
 
-void HhbcTranslator::emitClsCnsD(Id cnsNameId, Id clsNameId) {
+void HhbcTranslator::emitClsCnsD(const StringData* cnsNameStr,
+                                 const StringData* clsNameStr) {
   auto const outPred = m_currentNormalizedInstruction->outPred; // TODO: rm
-  auto const clsNameStr = lookupStringId(clsNameId);
-  auto const cnsNameStr = lookupStringId(cnsNameId);
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
   // If we have to side exit, do the RDS lookup before chaining to
@@ -1468,8 +1442,9 @@ const StaticString s_uuinvoke("__invoke");
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void HhbcTranslator::emitCreateCl(int32_t numParams, int32_t funNameStrId) {
-  auto const cls = Unit::lookupUniqueClass(lookupStringId(funNameStrId));
+void HhbcTranslator::emitCreateCl(int32_t numParams,
+                                  const StringData* clsName) {
+  auto const cls = Unit::lookupUniqueClass(clsName);
   auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
   auto const clonedFunc = invokeFunc->cloneAndSetClass(curClass());
   assert(cls && (cls->attrs() & AttrUnique));
@@ -2304,10 +2279,8 @@ SSATmp* HhbcTranslator::emitInstanceOfDImpl(SSATmp* src,
     : gen(InstanceOf, objClass, checkClass);
 }
 
-void HhbcTranslator::emitInstanceOfD(int classNameStrId) {
-  const StringData* className = lookupStringId(classNameStrId);
-  SSATmp* src = popC();
-
+void HhbcTranslator::emitInstanceOfD(const StringData* className) {
+  auto const src = popC();
   push(emitInstanceOfDImpl(src, className));
   gen(DecRef, src);
 }
@@ -2719,22 +2692,19 @@ void HhbcTranslator::emitEmptyG() {
   push(ret);
 }
 
-void HhbcTranslator::emitCheckProp(Id propId) {
-  StringData* propName = lookupStringId(propId);
+void HhbcTranslator::emitCheckProp(const StringData* propName) {
+  auto const cctx = gen(LdCctx, m_irb->fp());
+  auto const cls = gen(LdClsCtx, cctx);
+  auto const propInitVec = gen(LdClsInitData, cls);
 
-  auto* cctx = gen(LdCctx, m_irb->fp());
-  auto* cls = gen(LdClsCtx, cctx);
-  auto* propInitVec = gen(LdClsInitData, cls);
+  auto const ctx = curClass();
+  auto const idx = ctx->lookupDeclProp(propName);
 
-  auto* ctx = curClass();
-  auto idx = ctx->lookupDeclProp(propName);
-
-  auto* curVal = gen(LdElem, propInitVec, cns(idx * sizeof(TypedValue)));
+  auto const curVal = gen(LdElem, propInitVec, cns(idx * sizeof(TypedValue)));
   push(gen(IsNType, Type::Uninit, curVal));
 }
 
-void HhbcTranslator::emitInitProp(Id propId, InitPropOp op) {
-  auto const propName = lookupStringId(propId);
+void HhbcTranslator::emitInitProp(const StringData* propName, InitPropOp op) {
   auto const val      = popC();
   auto const ctx      = curClass();
 

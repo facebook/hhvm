@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Tim Starling
+ * Copyright (c) 2014 Tim Starling
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ class ThreadSafeLRUCache {
      * Get the approximate size of the container. May be slightly too low when
      * insertion is in progress.
      */
-    size_t size() {
+    size_t size() const {
       return m_size.load();
     }
 

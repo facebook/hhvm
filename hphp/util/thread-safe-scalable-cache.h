@@ -1,5 +1,5 @@
 /*
- * Copyright © 2014 Tim Starling
+ * Copyright (c) 2014 Tim Starling
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 namespace HPHP {
 
 /**
- * ThreadSafeScalableCache is a thread-safe distributed hashtable with limited
+ * ThreadSafeScalableCache is a thread-safe sharded hashtable with limited
  * size. When it is full, it evicts a rough approximation to the least recently
  * used item.
  *
@@ -37,10 +37,10 @@ namespace HPHP {
  * a key with a memoized hash function. ThreadSafeStringCache is provided for
  * this purpose.
  */
-template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey> >
+template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
 class ThreadSafeScalableCache {
   public:
-    typedef ThreadSafeLRUCache<TKey, TValue, THash> Shard;
+    using Shard = ThreadSafeLRUCache<TKey, TValue, THash>;
     typedef typename Shard::ConstAccessor ConstAccessor;
 
     /**
@@ -88,7 +88,7 @@ class ThreadSafeScalableCache {
      * Get the approximate size of the container. May be slightly too low when
      * insertion is in progress.
      */
-    size_t size();
+    size_t size() const;
 
   private:
     /**
@@ -114,17 +114,8 @@ class ThreadSafeScalableCache {
  * string keys.
  */
 template <class TValue>
-class ThreadSafeStringCache
-  : public ThreadSafeScalableCache<
-    LRUCacheKey, TValue, LRUCacheKey::HashCompare>
-{
-  public:
-    explicit ThreadSafeStringCache(size_t maxSize, size_t numShards = 0)
-      : ThreadSafeScalableCache<
-        LRUCacheKey, TValue, LRUCacheKey::HashCompare
-        >(maxSize, numShards)
-    {}
-};
+using ThreadSafeStringCache = ThreadSafeScalableCache<
+    LRUCacheKey, TValue, LRUCacheKey::HashCompare>;
 
 template <class TKey, class TValue, class THash>
 ThreadSafeScalableCache<TKey, TValue, THash>::
@@ -183,7 +174,7 @@ snapshotKeys(std::vector<TKey>& keys) {
 
 template <class TKey, class TValue, class THash>
 size_t ThreadSafeScalableCache<TKey, TValue, THash>::
-size() {
+size() const {
   size_t size;
   for (size_t i = 0; i < m_numShards; i++) {
     size += m_shards[i]->size();

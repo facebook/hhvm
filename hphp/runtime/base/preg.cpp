@@ -22,8 +22,6 @@
 #include <pcre.h>
 #include <onigposix.h>
 #include <utility>
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
 
 #include <folly/AtomicHashArray.h>
 
@@ -59,10 +57,10 @@ public:
   typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
   typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
 
-  enum CacheKind {
-    StaticKind,
-    LruKind,
-    ScalableKind
+  enum class CacheKind {
+    Static,
+    Lru,
+    Scalable
   };
 
 private:
@@ -86,47 +84,46 @@ public:
   class Accessor {
     public:
       Accessor()
-        : m_kind(PtrKind), m_ptr((pcre_cache_entry*)nullptr)
+        : m_kind(AccessorKind::Ptr), m_ptr((pcre_cache_entry*)nullptr)
       {}
 
       // No assignment from LRUCache::ConstAccessor since it is non-copyable
       // Use resetToLRU instead
 
       Accessor& operator=(const pcre_cache_entry* ptr) {
-        m_kind = PtrKind;
+        m_kind = AccessorKind::Ptr;
         m_ptr = ptr;
         return *this;
       }
 
       Accessor& operator=(const EntryPtr& ep) {
-        m_kind = SmartPtrKind;
+        m_kind = AccessorKind::SmartPtr;
         m_smart_ptr = ep;
         return *this;
       }
 
       LRUCache::ConstAccessor& resetToLRU() {
-        m_kind = AccessorKind;
+        m_kind = AccessorKind::Accessor;
         return m_accessor;
       }
 
       const pcre_cache_entry* get() {
         switch (m_kind) {
-          case PtrKind:
+          case AccessorKind::Ptr:
             return m_ptr;
-          case SmartPtrKind:
+          case AccessorKind::SmartPtr:
             return m_smart_ptr.get();
-          case AccessorKind:
+          case AccessorKind::Accessor:
             return m_accessor.get()->get();
-          default:
-            not_reached();
-            return nullptr;
         }
+        not_reached();
+        return nullptr;
       }
     private:
-      enum {
-        PtrKind,
-        SmartPtrKind,
-        AccessorKind
+      enum class AccessorKind {
+        Ptr,
+        SmartPtr,
+        Accessor
       } m_kind;
       const pcre_cache_entry* m_ptr;
       EntryPtr m_smart_ptr;
@@ -134,13 +131,13 @@ public:
   };
 
   PCRECache()
-    : m_kind(StaticKind), m_staticCache(nullptr)
+    : m_kind(CacheKind::Static), m_staticCache(nullptr)
   {
-    reinit(StaticKind);
+    reinit(CacheKind::Static);
   }
 
   ~PCRECache() {
-    if (m_kind == StaticKind && m_staticCache) {
+    if (m_kind == CacheKind::Static && m_staticCache) {
       DestroyStatic(m_staticCache);
     }
   }
@@ -195,8 +192,7 @@ pcre_cache_entry::~pcre_cache_entry() {
 ///////////////////////////////////////////////////////////////////////////////
 // PCRECache implementation
 
-PCRECache::StaticCache*
-PCRECache::CreateStatic() {
+PCRECache::StaticCache* PCRECache::CreateStatic() {
   StaticCache::Config config;
   config.maxLoadFactor = 0.5;
   return StaticCache::create(
@@ -211,34 +207,39 @@ void PCRECache::DestroyStatic(StaticCache* cache) {
 }
 
 void PCRECache::reinit(CacheKind kind) {
-  if (m_kind == StaticKind) {
-    if (m_staticCache) {
-      DestroyStatic(m_staticCache);
-      m_staticCache = nullptr;
-    }
-  } else if (m_kind == LruKind) {
-    m_lruCache.reset();
-  } else {
-    m_scalableCache.reset();
+  switch (m_kind) {
+    case CacheKind::Static:
+      if (m_staticCache) {
+        DestroyStatic(m_staticCache);
+        m_staticCache = nullptr;
+      }
+      break;
+    case CacheKind::Lru:
+      m_lruCache.reset();
+      break;
+    case CacheKind::Scalable:
+      m_scalableCache.reset();
   }
   m_kind = kind;
 
-  if (kind == StaticKind) {
-    m_staticCache = CreateStatic();
-    m_expire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
-  } else if (kind == LruKind) {
-    m_lruCache.reset(new LRUCache(RuntimeOption::EvalPCRETableSize));
-  } else if (kind == ScalableKind) {
-    m_scalableCache.reset(new ScalableCache(RuntimeOption::EvalPCRETableSize));
-  } else {
-    not_reached();
+  switch (kind) {
+    case CacheKind::Static:
+      m_staticCache = CreateStatic();
+      m_expire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+      break;
+    case CacheKind::Lru:
+      m_lruCache.reset(new LRUCache(RuntimeOption::EvalPCRETableSize));
+      break;
+    case CacheKind::Scalable:
+      m_scalableCache.reset(new ScalableCache(RuntimeOption::EvalPCRETableSize));
   }
 }
 
 bool PCRECache::find(Accessor& accessor,
-    const String& regex, TempKeyCache& keyCache)
+                     const String& regex,
+                     TempKeyCache& keyCache)
 {
-  if (m_kind == StaticKind) {
+  if (m_kind == CacheKind::Static) {
     assert(m_staticCache);
     StaticCache::iterator it;
     auto cache = m_staticCache.load(std::memory_order_acquire);
@@ -252,7 +253,7 @@ bool PCRECache::find(Accessor& accessor,
       keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
     }
     bool found;
-    if (m_kind == LruKind) {
+    if (m_kind == CacheKind::Lru) {
       found = m_lruCache->find(accessor.resetToLRU(), *keyCache);
     } else {
       found = m_scalableCache->find(accessor.resetToLRU(), *keyCache);
@@ -281,7 +282,7 @@ void PCRECache::insert(Accessor& accessor,
     TempKeyCache& keyCache,
     const pcre_cache_entry* ent)
 {
-  if (m_kind == StaticKind) {
+  if (m_kind == CacheKind::Static) {
     assert(m_staticCache);
     // Clear the cache if we haven't refreshed it in a while
     if (time(nullptr) > m_expire) {
@@ -304,7 +305,7 @@ void PCRECache::insert(Accessor& accessor,
     // Pointer ownership is shared between container and caller
     EntryPtr ptr(ent);
     accessor = ptr;
-    if (m_kind == LruKind) {
+    if (m_kind == CacheKind::Lru) {
       m_lruCache->insert(*keyCache, ptr);
     } else {
       m_scalableCache->insert(*keyCache, ptr);
@@ -314,18 +315,16 @@ void PCRECache::insert(Accessor& accessor,
 
 void PCRECache::dump(const std::string& filename) {
   std::ofstream out(filename.c_str());
-  if (m_kind == StaticKind) {
+  if (m_kind == CacheKind::Static) {
     for (auto& it : *m_staticCache) {
       out << it.first->data() << "\n";
     }
   } else {
     std::vector<LRUCacheKey> keys;
-    if (m_kind == LruKind) {
+    if (m_kind == CacheKind::Lru) {
       m_lruCache->snapshotKeys(keys);
-    } else if (m_kind == ScalableKind) {
-      m_scalableCache->snapshotKeys(keys);
     } else {
-      not_reached();
+      m_scalableCache->snapshotKeys(keys);
     }
     for (auto& key: keys) {
       out << key.c_str() << "\n";
@@ -335,15 +334,16 @@ void PCRECache::dump(const std::string& filename) {
 }
 
 size_t PCRECache::size() const {
-  if (m_kind == StaticKind) {
-    return (size_t)m_staticCache.load(std::memory_order_acquire)->size();
-  } else if (m_kind == LruKind) {
-    return m_lruCache->size();
-  } else if (m_kind == ScalableKind) {
-    return m_scalableCache->size();
-  } else {
-    not_reached();
+  switch (m_kind) {
+    case CacheKind::Static:
+      return (size_t)m_staticCache.load(std::memory_order_acquire)->size();
+    case CacheKind::Lru:
+      return m_lruCache->size();
+    case CacheKind::Scalable:
+     return m_scalableCache->size();
   }
+  not_reached();
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -352,14 +352,15 @@ size_t PCRECache::size() const {
 void pcre_reinit() {
   PCRECache::CacheKind kind;
   if (RuntimeOption::EvalPCRECacheType == "static") {
-    kind = PCRECache::StaticKind;
+    kind = PCRECache::CacheKind::Static;
   } else if (RuntimeOption::EvalPCRECacheType == "lru") {
-    kind = PCRECache::LruKind;
+    kind = PCRECache::CacheKind::Lru;
   } else if (RuntimeOption::EvalPCRECacheType == "scalable") {
-    kind = PCRECache::ScalableKind;
+    kind = PCRECache::CacheKind::Scalable;
   } else {
-    Logger::Warning("Eval.PCRECacheType should be either static, lru or scalable");
-    kind = PCRECache::ScalableKind;
+    Logger::Warning("Eval.PCRECacheType should be either static, "
+       "lru or scalable");
+    kind = PCRECache::CacheKind::Scalable;
   }
   s_pcreCache.reinit(kind);
 }
@@ -475,7 +476,8 @@ static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
 }
 
 static bool
-pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor, const String& regex) {
+pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
+                              const String& regex) {
   PCRECache::TempKeyCache tkc;
 
   /* Try to lookup the cached regex entry, and if successful, just pass

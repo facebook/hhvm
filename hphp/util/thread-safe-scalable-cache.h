@@ -58,7 +58,7 @@ class ThreadSafeScalableCache {
      * otherwise. Updates the eviction list, making the element the
      * most-recently used.
      */
-    bool find(ConstAccessor & ac, const TKey& key);
+    bool find(ConstAccessor& ac, const TKey& key);
 
     /**
      * Insert a value into the container. Both the key and value will be copied.
@@ -82,7 +82,7 @@ class ThreadSafeScalableCache {
      * supplied vector. This will block inserts and prevent LRU updates while it
      * completes. The keys will be inserted in a random order.
      */
-    void snapshotKeys(std::vector<TKey> & keys);
+    void snapshotKeys(std::vector<TKey>& keys);
 
     /**
      * Get the approximate size of the container. May be slightly too low when
@@ -94,7 +94,7 @@ class ThreadSafeScalableCache {
     /**
      * Get the child container for a given key
      */
-    Shard & getShard(const TKey& key);
+    Shard& getShard(const TKey& key);
 
     /**
      * The maximum number of elements in the container.
@@ -144,7 +144,7 @@ ThreadSafeScalableCache(size_t maxSize, size_t numShards)
 }
 
 template <class TKey, class TValue, class THash>
-typename ThreadSafeScalableCache<TKey, TValue, THash>::Shard &
+typename ThreadSafeScalableCache<TKey, TValue, THash>::Shard&
 ThreadSafeScalableCache<TKey, TValue, THash>::
 getShard(const TKey& key) {
   THash hashObj;
@@ -175,7 +175,7 @@ clear() {
 
 template <class TKey, class TValue, class THash>
 void ThreadSafeScalableCache<TKey, TValue, THash>::
-snapshotKeys(std::vector<TKey> & keys) {
+snapshotKeys(std::vector<TKey>& keys) {
   for (size_t i = 0; i < m_numShards; i++) {
     m_shards[i]->snapshotKeys(keys);
   }

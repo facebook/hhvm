@@ -55,116 +55,116 @@ namespace HPHP {
 // PCRECache definition
 
 class PCRECache {
-  public:
-    typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
-    typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
+public:
+  typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
+  typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
 
-    enum CacheKind {
-      StaticKind,
-      LruKind,
-      ScalableKind
-    };
+  enum CacheKind {
+    StaticKind,
+    LruKind,
+    ScalableKind
+  };
 
-  private:
-    struct ahm_string_data_same {
-      bool operator()(const StringData* s1, const StringData* s2) {
-        // ahm uses -1, -2, -3 as magic values
-        return int64_t(s1) > 0 && (s1 == s2 || s1->same(s2));
-      }
-    };
-
-    typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
-            string_data_hash, ahm_string_data_same> StaticCache;
-    typedef ThreadSafeLRUCache<LRUCacheKey, EntryPtr,
-            LRUCacheKey::HashCompare> LRUCache;
-    typedef ThreadSafeScalableCache<LRUCacheKey, EntryPtr,
-            LRUCacheKey::HashCompare> ScalableCache;
-    typedef std::pair<const StringData*, const pcre_cache_entry*>
-            StaticCachePair;
-
-  public:
-    class Accessor {
-      public:
-        Accessor()
-          : m_kind(PtrKind), m_ptr((pcre_cache_entry*)nullptr)
-        {}
-
-        // No assignment from LRUCache::ConstAccessor since it is non-copyable
-        // Use resetToLRU instead
-
-        Accessor & operator=(const pcre_cache_entry* ptr) {
-          m_kind = PtrKind;
-          m_ptr = ptr;
-          return *this;
-        }
-
-        Accessor & operator=(const EntryPtr & ep) {
-          m_kind = SmartPtrKind;
-          m_smart_ptr = ep;
-          return *this;
-        }
-
-        LRUCache::ConstAccessor & resetToLRU() {
-          m_kind = AccessorKind;
-          return m_accessor;
-        }
-
-        const pcre_cache_entry * get() {
-          switch (m_kind) {
-            case PtrKind:
-              return m_ptr;
-            case SmartPtrKind:
-              return m_smart_ptr.get();
-            case AccessorKind:
-              return m_accessor.get()->get();
-            default:
-              not_reached();
-              return nullptr;
-          }
-        }
-      private:
-        enum {
-          PtrKind,
-          SmartPtrKind,
-          AccessorKind
-        } m_kind;
-        const pcre_cache_entry* m_ptr;
-        EntryPtr m_smart_ptr;
-        LRUCache::ConstAccessor m_accessor;
-    };
-
-    PCRECache()
-      : m_kind(StaticKind), m_staticCache(nullptr)
-    {
-      reinit(StaticKind);
+private:
+  struct ahm_string_data_same {
+    bool operator()(const StringData* s1, const StringData* s2) {
+      // ahm uses -1, -2, -3 as magic values
+      return int64_t(s1) > 0 && (s1 == s2 || s1->same(s2));
     }
+  };
 
-    ~PCRECache() {
-      if (m_kind == StaticKind && m_staticCache) {
-        DestroyStatic(m_staticCache);
+  typedef folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
+          string_data_hash, ahm_string_data_same> StaticCache;
+  typedef ThreadSafeLRUCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare> LRUCache;
+  typedef ThreadSafeScalableCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare> ScalableCache;
+  typedef std::pair<const StringData*, const pcre_cache_entry*>
+          StaticCachePair;
+
+public:
+  class Accessor {
+    public:
+      Accessor()
+        : m_kind(PtrKind), m_ptr((pcre_cache_entry*)nullptr)
+      {}
+
+      // No assignment from LRUCache::ConstAccessor since it is non-copyable
+      // Use resetToLRU instead
+
+      Accessor& operator=(const pcre_cache_entry* ptr) {
+        m_kind = PtrKind;
+        m_ptr = ptr;
+        return *this;
       }
+
+      Accessor& operator=(const EntryPtr& ep) {
+        m_kind = SmartPtrKind;
+        m_smart_ptr = ep;
+        return *this;
+      }
+
+      LRUCache::ConstAccessor& resetToLRU() {
+        m_kind = AccessorKind;
+        return m_accessor;
+      }
+
+      const pcre_cache_entry* get() {
+        switch (m_kind) {
+          case PtrKind:
+            return m_ptr;
+          case SmartPtrKind:
+            return m_smart_ptr.get();
+          case AccessorKind:
+            return m_accessor.get()->get();
+          default:
+            not_reached();
+            return nullptr;
+        }
+      }
+    private:
+      enum {
+        PtrKind,
+        SmartPtrKind,
+        AccessorKind
+      } m_kind;
+      const pcre_cache_entry* m_ptr;
+      EntryPtr m_smart_ptr;
+      LRUCache::ConstAccessor m_accessor;
+  };
+
+  PCRECache()
+    : m_kind(StaticKind), m_staticCache(nullptr)
+  {
+    reinit(StaticKind);
+  }
+
+  ~PCRECache() {
+    if (m_kind == StaticKind && m_staticCache) {
+      DestroyStatic(m_staticCache);
     }
+  }
 
-    void reinit(CacheKind kind);
-    bool find(Accessor & accessor, const String & key,
-        TempKeyCache & keyCache);
-    void insert(Accessor & accessor, const String& regex,
-        TempKeyCache & keyCache, const pcre_cache_entry * ent);
-    void dump(const std::string& filename);
-    size_t size() const;
+  void reinit(CacheKind kind);
+  bool find(Accessor& accessor, const String& key,
+      TempKeyCache& keyCache);
+  void insert(Accessor& accessor, const String& regex,
+      TempKeyCache& keyCache, const pcre_cache_entry* ent);
+  void dump(const std::string& filename);
+  size_t size() const;
 
-  private:
-    CacheKind m_kind;
-    std::atomic<StaticCache*> m_staticCache;
-    std::unique_ptr<LRUCache> m_lruCache;
-    std::unique_ptr<ScalableCache> m_scalableCache;
-    std::atomic<time_t> m_expire;
-    std::mutex m_clearMutex;
+private:
+  CacheKind m_kind;
+  std::atomic<StaticCache*> m_staticCache;
+  std::unique_ptr<LRUCache> m_lruCache;
+  std::unique_ptr<ScalableCache> m_scalableCache;
+  std::atomic<time_t> m_expire;
+  std::mutex m_clearMutex;
 
-    void clearStatic();
+  void clearStatic();
 
-    static void DestroyStatic(StaticCache* cache);
-    StaticCache* CreateStatic();
+  static void DestroyStatic(StaticCache* cache);
+  StaticCache* CreateStatic();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -235,8 +235,8 @@ void PCRECache::reinit(CacheKind kind) {
   }
 }
 
-bool PCRECache::find(Accessor & accessor,
-    const String& regex, TempKeyCache & keyCache)
+bool PCRECache::find(Accessor& accessor,
+    const String& regex, TempKeyCache& keyCache)
 {
   if (m_kind == StaticKind) {
     assert(m_staticCache);
@@ -276,10 +276,10 @@ void PCRECache::clearStatic() {
    });
 }
 
-void PCRECache::insert(Accessor & accessor,
+void PCRECache::insert(Accessor& accessor,
     const String& regex,
-    TempKeyCache & keyCache,
-    const pcre_cache_entry * ent)
+    TempKeyCache& keyCache,
+    const pcre_cache_entry* ent)
 {
   if (m_kind == StaticKind) {
     assert(m_staticCache);
@@ -652,8 +652,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor, const String& regex
   return true;
 }
 
-static int *create_offset_array(const pcre_cache_entry *pce,
-                                int &size_offsets) {
+static int *create_offset_array(const pcre_cache_entry* pce,
+                                int& size_offsets) {
   /* Allocate memory for the offsets array */
   size_offsets = pce->num_subpats * 3;
   return (int *)smart_malloc(size_offsets * sizeof(int));
@@ -662,7 +662,7 @@ static int *create_offset_array(const pcre_cache_entry *pce,
 static inline void add_offset_pair(Array& result,
                                    const String& str,
                                    int offset,
-                                   const char *name) {
+                                   const char* name) {
   auto match_pair = make_packed_array(str, offset);
   if (name) result.set(String(name), match_pair);
   result.append(match_pair);
@@ -674,25 +674,25 @@ static inline bool pcre_need_log_error(int pcre_code) {
           pcre_code == PCRE_ERROR_RECURSIONLIMIT);
 }
 
-static void pcre_log_error(const char *func, int line, int pcre_code,
-                           const char *pattern, int pattern_size,
-                           const char *subject, int subject_size,
-                           const char *repl, int repl_size,
+static void pcre_log_error(const char* func, int line, int pcre_code,
+                           const char* pattern, int pattern_size,
+                           const char* subject, int subject_size,
+                           const char* repl, int repl_size,
                            int arg1 = 0, int arg2 = 0,
                            int arg3 = 0, int arg4 = 0) {
   if (!RuntimeOption::EnableHipHopSyntax) {
     return;
   }
-  const char *escapedPattern;
-  const char *escapedSubject;
-  const char *escapedRepl;
+  const char* escapedPattern;
+  const char* escapedSubject;
+  const char* escapedRepl;
   std::string p(pattern, pattern_size);
   std::string s(subject, subject_size);
   std::string r(repl, repl_size);
   escapedPattern = Logger::EscapeString(p);
   escapedSubject = Logger::EscapeString(s);
   escapedRepl = Logger::EscapeString(r);
-  const char *errString =
+  const char* errString =
     (pcre_code == PCRE_ERROR_MATCHLIMIT) ? "PCRE_ERROR_MATCHLIMIT" :
     (pcre_code == PCRE_ERROR_RECURSIONLIMIT) ? "PCRE_ERROR_RECURSIONLIMIT" :
     "UNKNOWN";
@@ -738,10 +738,10 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
-  const pcre_cache_entry * pce = accessor.get();
+  const pcre_cache_entry* pce = accessor.get();
 
   int size_offsets = 0;
-  int *offsets = create_offset_array(pce, size_offsets);
+  int* offsets = create_offset_array(pce, size_offsets);
   if (offsets == nullptr) {
     return false;
   }
@@ -794,13 +794,13 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant preg_match_impl(const String& pattern, const String& subject,
-                               Variant *subpats, int flags, int start_offset,
+                               Variant* subpats, int flags, int start_offset,
                                bool global) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
-  const pcre_cache_entry * pce = accessor.get();
+  const pcre_cache_entry* pce = accessor.get();
 
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
@@ -838,7 +838,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   }
 
   int size_offsets = 0;
-  int *offsets = create_offset_array(pce, size_offsets);
+  int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   int num_subpats = size_offsets / 3;
   if (offsets == nullptr) {
@@ -863,7 +863,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   tl_last_error_code = PHP_PCRE_NO_ERROR;
 
   int g_notempty = 0; // If the match should not be empty
-  const char **stringlist; // Holds list of subpatterns
+  const char** stringlist; // Holds list of subpatterns
   int i;
   do {
     /* Execute the regular expression. */
@@ -1024,7 +1024,7 @@ Variant preg_match(const String& pattern, const String& subject,
 }
 
 Variant preg_match_all(const String& pattern, const String& subject,
-                       Variant &matches,
+                       Variant& matches,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, &matches, flags, offset, true);
 }
@@ -1055,9 +1055,9 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
   return vm_call_user_func(function, args);
 }
 
-static bool preg_get_backref(const char **str, int *backref) {
+static bool preg_get_backref(const char** str, int* backref) {
   char in_brace = 0;
-  const char *walk = *str;
+  const char* walk = *str;
 
   if (walk[1] == 0) {
     return false;
@@ -1094,12 +1094,12 @@ static bool preg_get_backref(const char **str, int *backref) {
 
 static Variant php_pcre_replace(const String& pattern, const String& subject,
                                 const Variant& replace_var, bool callable,
-                                int limit, int *replace_count) {
+                                int limit, int* replace_count) {
   PCRECache::Accessor accessor;
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
-  const pcre_cache_entry * pce = accessor.get();
+  const pcre_cache_entry* pce = accessor.get();
   bool eval = pce->preg_options & PREG_REPLACE_EVAL;
   if (eval) {
     if (RuntimeOption::EvalAuthoritativeMode) {
@@ -1121,7 +1121,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   }
 
   int size_offsets;
-  int *offsets = create_offset_array(pce, size_offsets);
+  int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   if (offsets == nullptr) {
     return false;
@@ -1132,8 +1132,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
 
-  const char *replace = nullptr;
-  const char *replace_end = nullptr;
+  const char* replace = nullptr;
+  const char* replace_end = nullptr;
   int replace_len = 0;
   String replace_val;
 
@@ -1149,13 +1149,13 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
   try {
 
     /* Initialize */
-    const char *match = nullptr;
+    const char* match = nullptr;
     int start_offset = 0;
     tl_last_error_code = PHP_PCRE_NO_ERROR;
     pcre_extra extra;
     init_local_extra(&extra, pce->extra);
 
-    const char *walk;     // Used to walk the replacement string
+    const char* walk;     // Used to walk the replacement string
     char walk_last;       // Last walked character
     int match_len;        // Length of the current match
     int backref;          // Backreference number
@@ -1177,7 +1177,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         count = size_offsets / 3;
       }
 
-      const char *piece = subject.data() + start_offset;
+      const char* piece = subject.data() + start_offset;
       if (count > 0 && (limit == -1 || limit > 0)) {
         if (replace_count) {
           ++*replace_count;
@@ -1327,7 +1327,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         }
       } else {
         if (pcre_need_log_error(count)) {
-          const char *s;
+          const char* s;
           int size;
           String stemp;
           if (callable) {
@@ -1371,7 +1371,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
 
 static Variant php_replace_in_subject(const Variant& regex, const Variant& replace,
                                       String subject, int limit, bool callable,
-                                      int *replace_count) {
+                                      int* replace_count) {
   if (!regex.is(KindOfArray)) {
     Variant ret = php_pcre_replace(regex.toString(), subject, replace,
                                    callable, limit, replace_count);
@@ -1435,7 +1435,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 }
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant &count,
+                          const Variant& subject, int limit, Variant& count,
                           bool is_callable, bool is_filter) {
   assert(!(is_callable && is_filter));
   if (!is_callable &&
@@ -1480,7 +1480,7 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
   return return_value;
 }
 
-int preg_replace(Variant &result, const Variant& pattern, const Variant& replacement,
+int preg_replace(Variant& result, const Variant& pattern, const Variant& replacement,
                  const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
@@ -1488,7 +1488,7 @@ int preg_replace(Variant &result, const Variant& pattern, const Variant& replace
   return count.toInt32();
 }
 
-int preg_replace_callback(Variant &result, const Variant& pattern, const Variant& callback,
+int preg_replace_callback(Variant& result, const Variant& pattern, const Variant& callback,
                           const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, callback, subject,
@@ -1496,7 +1496,7 @@ int preg_replace_callback(Variant &result, const Variant& pattern, const Variant
   return count.toInt32();
 }
 
-int preg_filter(Variant &result, const Variant& pattern, const Variant& replacement,
+int preg_filter(Variant& result, const Variant& pattern, const Variant& replacement,
                 const Variant& subject, int limit /* = -1 */) {
   Variant count;
   result = preg_replace_impl(pattern, replacement, subject,
@@ -1512,7 +1512,7 @@ Variant preg_split(const String& pattern, const String& subject,
   if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
     return false;
   }
-  const pcre_cache_entry * pce = accessor.get();
+  const pcre_cache_entry* pce = accessor.get();
 
   int no_empty = flags & PREG_SPLIT_NO_EMPTY;
   bool delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
@@ -1523,7 +1523,7 @@ Variant preg_split(const String& pattern, const String& subject,
   }
 
   int size_offsets = 0;
-  int *offsets = create_offset_array(pce, size_offsets);
+  int* offsets = create_offset_array(pce, size_offsets);
   SmartFreeHelper offsetsFreer(offsets);
   if (offsets == nullptr) {
     return false;
@@ -1532,7 +1532,7 @@ Variant preg_split(const String& pattern, const String& subject,
   /* Start at the beginning of the string */
   int start_offset = 0;
   int next_offset = 0;
-  const char *last_match = subject.data();
+  const char* last_match = subject.data();
   tl_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
@@ -1686,8 +1686,8 @@ Variant preg_split(const String& pattern, const String& subject,
 
 String preg_quote(const String& str,
                   const String& delimiter /* = null_string */) {
-  const char *in_str = str.data();
-  const char *in_str_end = in_str + str.size();
+  const char* in_str = str.data();
+  const char* in_str_end = in_str + str.size();
 
   /* Nothing to do if we got an empty string */
   if (in_str == in_str_end) {
@@ -1703,11 +1703,11 @@ String preg_quote(const String& str,
 
   /* Allocate enough memory so that even if each character
      is quoted, we won't run out of room */
-  char *out_str = (char *)malloc(4 * str.size() + 1);
+  char* out_str = (char *)malloc(4 * str.size() + 1);
 
   /* Go through the string and quote necessary characters */
-  const char *p;
-  char *q;
+  const char* p;
+  char* q;
   for (p = in_str, q = out_str; p != in_str_end; p++) {
     char c = *p;
     switch (c) {
@@ -1749,7 +1749,7 @@ size_t preg_pcre_cache_size() {
 ///////////////////////////////////////////////////////////////////////////////
 // regexec
 
-static void php_reg_eprint(int err, regex_t *re) {
+static void php_reg_eprint(int err, regex_t* re) {
   char *buf = nullptr, *message = nullptr;
   size_t len;
   size_t buf_len;
@@ -1786,8 +1786,8 @@ static void php_reg_eprint(int err, regex_t *re) {
 
 Variant php_split(const String& spliton, const String& str, int count,
                   bool icase) {
-  const char *strp = str.data();
-  const char *endp = strp + str.size();
+  const char* strp = str.data();
+  const char* endp = strp + str.size();
 
   regex_t re;
   int copts = icase ? REG_ICASE : 0;

@@ -42,15 +42,15 @@ class LRUCacheKey {
       return m_storage->m_size;
     }
 
-    const char * data() const {
+    const char* data() const {
       return m_storage->m_data;
     }
 
-    const char * c_str() const {
+    const char* c_str() const {
       return data();
     }
 
-    bool operator==(const LRUCacheKey & other) const {
+    bool operator==(const LRUCacheKey& other) const {
       size_t s = size();
       return s == other.size() && 0 == std::memcmp(data(), other.data(), s);
     }
@@ -79,7 +79,7 @@ class LRUCacheKey {
         delete[] m_data;
       }
 
-      char * m_data;
+      char* m_data;
       size_t m_size;
       mutable std::atomic<size_t> m_hash;
 

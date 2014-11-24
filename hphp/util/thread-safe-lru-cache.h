@@ -140,6 +140,7 @@ class ThreadSafeLRUCache {
     explicit ThreadSafeLRUCache(size_t maxSize);
 
     ThreadSafeLRUCache(const ThreadSafeLRUCache& other) = delete;
+    ThreadSafeLRUCache & operator=(const ThreadSafeLRUCache&) = delete;
 
     ~ThreadSafeLRUCache() {
       clear();

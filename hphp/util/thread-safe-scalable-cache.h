@@ -52,6 +52,9 @@ class ThreadSafeScalableCache {
      */
     explicit ThreadSafeScalableCache(size_t maxSize, size_t numShards = 0);
 
+    ThreadSafeScalableCache(const ThreadSafeScalableCache&) = delete;
+    ThreadSafeScalableCache& operator=(const ThreadSafeScalableCache&) = delete;
+
     /**
      * Find a value by key, and return it by filling the ConstAccessor, which
      * can be default-constructed. Returns true if the element was found, false

@@ -75,7 +75,6 @@
 #include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -1687,7 +1686,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         if (m_tx.mode() == TransKind::Profile &&
             result == Translator::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
-          pconds = m_tx.irTrans()->hhbcTrans().unit().postConditions();
+          pconds = m_tx.hhbcTrans()->unit().postConditions();
         }
 
         FTRACE(2, "translateRegion finished with result {}\n",
@@ -1813,7 +1812,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 }
 
 void MCGenerator::traceCodeGen() {
-  HhbcTranslator& ht = m_tx.irTrans()->hhbcTrans();
+  auto& ht = *m_tx.hhbcTrans();
   auto& unit = ht.unit();
 
   auto finishPass = [&](const char* msg, int level) {

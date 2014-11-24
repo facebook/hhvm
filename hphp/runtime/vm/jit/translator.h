@@ -61,6 +61,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
+struct HhbcTranslator;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -230,11 +231,11 @@ struct Translator {
   // Accessors.
 
   /*
-   * Get the IRTranslator for the current translation.
+   * Get the HhbcTranslator for the current translation.
    *
    * This is reset whenever traceStart() is called.
    */
-  IRTranslator* irTrans() const;
+  HhbcTranslator* hhbcTrans() const;
 
   /*
    * Get the Translator's ProfData.
@@ -401,7 +402,7 @@ private:
   std::unique_ptr<ProfData> m_profData;
   bool m_useAHot;
 
-  std::unique_ptr<IRTranslator> m_irTrans;
+  std::unique_ptr<HhbcTranslator> m_hhbcTranslator;
   SrcDB m_srcDB;
 
   // Translation DB.
@@ -691,13 +692,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 bool isAlwaysNop(Op op);
 
 /*
- * Return true if we have absolutely no JIT support for `inst'.
- *
- * Always returns true if JitAlwaysInterpOne is set.
- */
-bool instrMustInterp(const NormalizedInstruction& inst);
-
-/*
  * Could `inst' clobber the locals in the environment of `caller'?
  *
  * This occurs, e.g., if `inst' is a call to extract().
@@ -758,6 +752,13 @@ inline bool isNativeImplCall(const Func* funcd, int numArgs) {
  * in a non-default `f'.
  */
 int locPhysicalOffset(Location l, const Func* f = nullptr);
+
+/*
+ * Take a NormalizedInstruction and turn it into a call to the appropriate
+ * HhbcTranslator functions.  Updates HhbcTranslator's bytecode marker, handles
+ * interp one flags, etc.
+ */
+void translateInstr(HhbcTranslator&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

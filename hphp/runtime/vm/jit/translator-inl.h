@@ -22,8 +22,8 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Translator accessors.
 
-inline jit::IRTranslator* Translator::irTrans() const {
-  return m_irTrans.get();
+inline jit::HhbcTranslator* Translator::hhbcTrans() const {
+  return m_hhbcTranslator.get();
 }
 
 inline ProfData* Translator::profData() const {

@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -61,8 +60,7 @@ private:
   RegionDescPtr m_region;
   RegionDesc::Block* m_curBlock;
   bool m_blockFinished;
-  IRTranslator m_irTrans;
-  HhbcTranslator& m_ht;
+  HhbcTranslator m_ht;
   jit::vector<ActRecState> m_arStates;
   RefDeps m_refDeps;
   uint32_t m_numJmps;
@@ -97,12 +95,11 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_region(std::make_shared<RegionDesc>())
   , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset))
   , m_blockFinished(false)
-  , m_irTrans(TransContext { kInvalidTransID,
-                             ctx.bcOffset,
-                             ctx.spOffset,
-                             ctx.resumed,
-                             ctx.func })
-  , m_ht(m_irTrans.hhbcTrans())
+  , m_ht(TransContext { kInvalidTransID,
+                        ctx.bcOffset,
+                        ctx.spOffset,
+                        ctx.resumed,
+                        ctx.func })
   , m_arStates(1)
   , m_numJmps(0)
   , m_inl(inl)
@@ -182,7 +179,7 @@ RegionDescPtr RegionFormer::go() {
     auto const inlineReturn = m_ht.isInlining() &&
       (isRet(m_inst.op()) || m_inst.op() == OpNativeImpl);
     try {
-      m_irTrans.translateInstr(m_inst);
+      translateInstr(m_ht, m_inst);
     } catch (const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              m_inst.toString(), exn.what());

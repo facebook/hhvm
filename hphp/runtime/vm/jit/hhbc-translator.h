@@ -90,8 +90,8 @@ struct HhbcTranslator {
   IRUnit& unit() { return m_unit; }
 
   /*
-   * In between each emit* call, irtranslator indicates the new bytecode offset
-   * (or whether we're finished) using this API, and passes a
+   * In between each emit* call, the translator indicates the new bytecode
+   * offset (or whether we're finished) using this API, and passes a
    * NormalizedInstruction pointer.
    *
    * Note: the NormalizedInstruction is only present because there are certain
@@ -137,7 +137,7 @@ struct HhbcTranslator {
   void endGuards();
   void prepareEntry();
 
-  // Interface to irtranslator for predicted and inferred types.
+  // Interface for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);
   void assertTypeStack(uint32_t stackIndex, Type type);
   void checkTypeLocal(uint32_t localIndex, Type type, Offset dest = -1);
@@ -167,7 +167,6 @@ struct HhbcTranslator {
                           const Op* clsOp, const Op* propOp);
   void emitSingletonSLoc(const Func* func, const Op* op);
 
-  // Other public functions for irtranslator.
   void emitInterpOne(const NormalizedInstruction&);
   void emitInterpOne(int popped);
   void emitInterpOne(Type t, int popped);

@@ -48,10 +48,10 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/bc-pattern.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
-#include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-instrs.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 
 TRACE_SET_MOD(trans);
 
@@ -1361,37 +1362,20 @@ const char* Translator::ResultName(TranslateResult r) {
   return names[r];
 }
 
-bool instrMustInterp(const NormalizedInstruction& inst) {
-  if (RuntimeOption::EvalJitAlwaysInterpOne) return true;
-
-  switch (inst.op()) {
-#define CASE(name) case Op::name:
-  REGULAR_INSTRS
-#undef CASE
-    return false;
-
-#define CASE(name) case Op::name:
-  INTERP_ONE_INSTRS
-#undef CASE
-    return true;
-  }
-  always_assert_flog(0, "invalid opcode {}", static_cast<uint32_t>(inst.op()));
-}
-
 void Translator::traceStart(TransContext context) {
-  assert(!m_irTrans);
+  assert(!m_hhbcTranslator);
 
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
          " HHIR during translation ",
          color(ANSI_COLOR_END));
 
-  m_irTrans.reset(new IRTranslator(context));
+  m_hhbcTranslator.reset(new HhbcTranslator(context));
 }
 
 void Translator::traceEnd() {
-  assert(!m_irTrans->hhbcTrans().isInlining());
-  m_irTrans->hhbcTrans().end();
+  assert(!m_hhbcTranslator->isInlining());
+  m_hhbcTranslator->end();
   FTRACE(1, "{}{:-^40}{}\n",
          color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
          "",
@@ -1400,18 +1384,17 @@ void Translator::traceEnd() {
 
 void Translator::traceFree() {
   FTRACE(1, "HHIR free: arena size: {}\n",
-         m_irTrans->hhbcTrans().unit().arena().size());
-  m_irTrans.reset();
+         m_hhbcTranslator->unit().arena().size());
+  m_hhbcTranslator.reset();
 }
 
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
 void Translator::createBlockMap(const RegionDesc&    region,
-                                BlockIdToIRBlockMap& blockIdToIRBlock)
-{
-  HhbcTranslator& ht = m_irTrans->hhbcTrans();
-  IRBuilder& irb = ht.irBuilder();
+                                BlockIdToIRBlockMap& blockIdToIRBlock) {
+  auto& ht = *m_hhbcTranslator;
+  auto& irb = ht.irBuilder();
   blockIdToIRBlock.clear();
   auto const& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
@@ -1438,9 +1421,8 @@ void Translator::createBlockMap(const RegionDesc&    region,
  */
 void Translator::setIRBlock(RegionDesc::BlockId        blockId,
                             const RegionDesc&          region,
-                            const BlockIdToIRBlockMap& blockIdToIRBlock)
-{
-  IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
+                            const BlockIdToIRBlockMap& blockIdToIRBlock) {
+  auto& irb = m_hhbcTranslator->irBuilder();
   auto rBlock = region.block(blockId);
   Offset bcOffset = rBlock->start().offset();
 
@@ -1459,14 +1441,146 @@ void Translator::setIRBlock(RegionDesc::BlockId        blockId,
  */
 void Translator::setSuccIRBlocks(const RegionDesc&          region,
                                  RegionDesc::BlockId        srcBlockId,
-                                 const BlockIdToIRBlockMap& blockIdToIRBlock)
-{
+                                 const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
-  IRBuilder& irb = m_irTrans->hhbcTrans().irBuilder();
+  auto& irb = m_hhbcTranslator->irBuilder();
   irb.resetOffsetMapping();
   for (auto dstBlockId : region.succs(srcBlockId)) {
     setIRBlock(dstBlockId, region, blockIdToIRBlock);
   }
+}
+
+/*
+ * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall{,D} to a
+ * function with a singleton pattern, and if so, inline it.  Returns true if
+ * this succeeds, else false.
+ */
+static bool tryTranslateSingletonInline(HhbcTranslator& hhbcTrans,
+                                        const NormalizedInstruction& i,
+                                        const Func* funcd) {
+  using Atom = BCPattern::Atom;
+  using Captures = BCPattern::CaptureVec;
+
+  if (!funcd) return false;
+
+  // Make sure we have an acceptable FPush and non-null callee.
+  assert(i.op() == Op::FPushFuncD ||
+         i.op() == Op::FPushClsMethodD);
+
+  auto fcall = i.nextSk();
+
+  // Check if the next instruction is an acceptable FCall.
+  if ((fcall.op() != Op::FCall && fcall.op() != Op::FCallD) ||
+      funcd->isResumable() || funcd->isReturnRef()) {
+    return false;
+  }
+
+  // First, check for the static local singleton pattern...
+
+  // Lambda to check if CGetL and StaticLocInit refer to the same local.
+  auto has_same_local = [] (PC pc, const Captures& captures) {
+    if (captures.size() == 0) return false;
+
+    auto cgetl = (const Op*)pc;
+    auto sli = (const Op*)captures[0];
+
+    assert(*cgetl == Op::CGetL);
+    assert(*sli == Op::StaticLocInit);
+
+    return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
+  };
+
+  auto cgetl = Atom(Op::CGetL).onlyif(has_same_local);
+  auto retc  = Atom(Op::RetC);
+
+  // Look for a static local singleton pattern.
+  auto result = BCPattern {
+    Atom(Op::Null),
+    Atom(Op::StaticLocInit).capture(),
+    Atom(Op::IsTypeL),
+    Atom::alt(
+      Atom(Op::JmpZ).taken({cgetl, retc}),
+      Atom::seq(Atom(Op::JmpNZ), cgetl, retc)
+    )
+  }.ignore(
+    {Op::AssertRATL, Op::AssertRATStk}
+  ).matchAnchored(funcd);
+
+  if (result.found()) {
+    try {
+      hhbcTrans.emitSingletonSLoc(
+        funcd,
+        (const Op*)result.getCapture(0)
+      );
+    } catch (const FailedIRGen& e) {
+      return false;
+    } catch (const FailedCodeGen& e) {
+      return false;
+    }
+    TRACE(1, "[singleton-sloc] %s <- %s\n",
+        funcd->fullName()->data(),
+        fcall.func()->fullName()->data());
+    return true;
+  }
+
+  // Not found; check for the static property pattern.
+
+  // Factory for String atoms that are required to match another captured
+  // String opcode.
+  auto same_string_as = [&] (int i) {
+    return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
+      auto string1 = (const Op*)pc;
+      auto string2 = (const Op*)captures[i];
+      assert(*string1 == Op::String);
+      assert(*string2 == Op::String);
+
+      auto const unit = funcd->unit();
+      auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
+      auto sd2 = unit->lookupLitstrId(getImmPtr(string2, 0)->u_SA);
+
+      return (sd1 && sd1 == sd2);
+    });
+  };
+
+  auto stringProp = same_string_as(0);
+  auto stringCls  = same_string_as(1);
+  auto agetc = Atom(Op::AGetC);
+  auto cgets = Atom(Op::CGetS);
+
+  // Look for a class static singleton pattern.
+  result = BCPattern {
+    Atom(Op::String).capture(),
+    Atom(Op::String).capture(),
+    Atom(Op::AGetC),
+    Atom(Op::CGetS),
+    Atom(Op::IsTypeC),
+    Atom::alt(
+      Atom(Op::JmpZ).taken({stringProp, stringCls, agetc, cgets, retc}),
+      Atom::seq(Atom(Op::JmpNZ), stringProp, stringCls, agetc, cgets, retc)
+    )
+  }.ignore(
+    {Op::AssertRATL, Op::AssertRATStk}
+  ).matchAnchored(funcd);
+
+  if (result.found()) {
+    try {
+      hhbcTrans.emitSingletonSProp(
+        funcd,
+        (const Op*)result.getCapture(1),
+        (const Op*)result.getCapture(0)
+      );
+    } catch (const FailedIRGen& e) {
+      return false;
+    } catch (const FailedCodeGen& e) {
+      return false;
+    }
+    TRACE(1, "[singleton-sprop] %s <- %s\n",
+        funcd->fullName()->data(),
+        fcall.func()->fullName()->data());
+    return true;
+  }
+
+  return false;
 }
 
 /*
@@ -1520,6 +1634,114 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * TODO: turn SA into const StringData* automatically?
+ */
+
+#define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
+#define IMM_BLA(n)     ni.immVec
+#define IMM_SLA(n)     ni.immVec
+#define IMM_ILA(n)     ni.immVec
+#define IMM_VSA(n)     ni.immVec
+#define IMM_IVA(n)     ni.imm[n].u_IVA
+#define IMM_I64A(n)    ni.imm[n].u_I64A
+#define IMM_LA(n)      ni.imm[n].u_LA
+#define IMM_IA(n)      ni.imm[n].u_IA
+#define IMM_DA(n)      ni.imm[n].u_DA
+#define IMM_SA(n)      ni.imm[n].u_SA
+#define IMM_RATA(n)    ni.imm[n].u_RATA
+#define IMM_AA(n)      ni.imm[n].u_AA
+#define IMM_BA(n)      ni.imm[n].u_BA
+#define IMM_OA_IMPL(n) ni.imm[n].u_OA
+#define IMM_OA(subop)  (subop)IMM_OA_IMPL
+
+#define ONE(x0)              IMM_##x0(0)
+#define TWO(x0, x1)          IMM_##x0(0), IMM_##x1(1)
+#define THREE(x0, x1, x2)    IMM_##x0(0), IMM_##x1(1), IMM_##x2(2)
+#define FOUR(x0, x1, x2, x3) IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
+#define NA                   /*  */
+
+static void translateDispatch(HhbcTranslator& hhbcTranslator,
+                              const NormalizedInstruction& ni) {
+#define O(nm, imms, ...) case Op::nm: hhbcTranslator.emit##nm(imms); return;
+  switch (ni.op()) { OPCODES }
+#undef O
+}
+
+#undef FOUR
+#undef THREE
+#undef TWO
+#undef ONE
+#undef NA
+
+#undef IMM_MA
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_ILA
+#undef IMM_IVA
+#undef IMM_I64A
+#undef IMM_LA
+#undef IMM_IA
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA_IMPL
+#undef IMM_OA
+#undef IMM_VSA
+
+//////////////////////////////////////////////////////////////////////
+
+static Type flavorToType(FlavorDesc f) {
+  switch (f) {
+    case NOV: not_reached();
+
+    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
+    case UV: return Type::Uninit;
+    case VV: return Type::BoxedCell;
+    case AV: return Type::Cls;
+    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+  }
+  not_reached();
+}
+
+void translateInstr(HhbcTranslator& ht, const NormalizedInstruction& ni) {
+  ht.setBcOff(&ni,
+              ni.source.offset(),
+              ni.endsRegion && !ht.isInlining());
+  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
+                                         ni.offset(), ni.toString(),
+                                         ht.showStack()));
+  // When profiling, we disable type predictions to avoid side exits
+  assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
+
+  ht.emitRB(Trace::RBTypeBytecodeStart, ni.source, 2);
+  ht.emitIncStat(Stats::Instr_TC, 1);
+
+  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    auto const type = flavorToType(instrInputFlavor(pc, i));
+    if (type != Type::Gen) ht.assertTypeStack(i, type);
+  }
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
+    ht.emitDbgAssertRetAddr();
+  }
+
+  if (isAlwaysNop(ni.op())) {
+    // Do nothing
+  } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+    ht.emitInterpOne(ni);
+  } else {
+    translateDispatch(ht, ni);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 Translator::TranslateResult
 Translator::translateRegion(const RegionDesc& region,
                             RegionBlacklist& toInterp,
@@ -1534,8 +1756,9 @@ Translator::translateRegion(const RegionDesc& region,
   always_assert_log(check(region, errorMsg),
                     [&] { return errorMsg + "\n" + show(region); });
 
-  HhbcTranslator& ht = m_irTrans->hhbcTrans();
-  IRBuilder& irb = ht.irBuilder();
+  auto& ht = *m_hhbcTranslator;
+  auto& irb = ht.irBuilder();
+
   auto const startSk = region.start();
 
   BlockIdToIRBlockMap blockIdToIRBlock;
@@ -1777,7 +2000,7 @@ Translator::translateRegion(const RegionDesc& region,
             topFunc = knownFuncs.next();
 
             // Detect a singleton pattern and inline it if found.
-            return m_irTrans->tryTranslateSingletonInline(inst, topFunc);
+            return tryTranslateSingletonInline(ht, inst, topFunc);
           }
 
           return false;
@@ -1794,7 +2017,7 @@ Translator::translateRegion(const RegionDesc& region,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) m_irTrans->translateInstr(inst);
+        if (!skipTrans) translateInstr(ht, inst);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
         always_assert_log(
@@ -1802,7 +2025,7 @@ Translator::translateRegion(const RegionDesc& region,
           [&] {
             std::ostringstream oss;
             oss << folly::format("IR generation failed with {}\n", exn.what());
-            print(oss, m_irTrans->hhbcTrans().unit());
+            print(oss, m_hhbcTranslator->unit());
             return oss.str();
           });
         toInterp.insert(psk);
@@ -1871,7 +2094,7 @@ Translator::translateRegion(const RegionDesc& region,
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
-        print(oss, m_irTrans->hhbcTrans().unit());
+        print(oss, ht.unit());
         return oss.str();
       });
     toInterp.insert(psk);

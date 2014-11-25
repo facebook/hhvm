@@ -77,8 +77,8 @@ let rec main_ env retries =
   | ServerMsg.PONG -> (* successful case *)
     begin
       let exit_code = ref 0 in
-      EventLogger.client_begin_work (
-        ClientLogCommand.LCBuild env.root);
+      EventLogger.client_begin_work (ClientLogCommand.LCBuild
+        (env.root, env.build_opts.ServerMsg.incremental));
       try
         while true do
           let line:ServerMsg.build_progress = Marshal.from_channel ic in

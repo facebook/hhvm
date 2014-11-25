@@ -647,6 +647,31 @@ private:
     char* raw_;
   };
 };
+
+// Reverse lookup table from size class index back to block size.
+struct SizeTable {
+  size_t table[kNumSmartSizes];
+  SizeTable() {
+#define SMART_SIZE(i,d,s) table[i] = s;
+    SMART_SIZES
+#undef SMART_SIZE
+    assert(table[27] == 4096 && table[28] == 0);
+    // pick up where the macros left off
+    auto i = 28;
+    auto s = 4096;
+    auto d = s/4;
+    for (; i < kNumSmartSizes; d *= 2) {
+      // each power of two size has 4 linear spaced size classes
+      table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+    }
+  }
+  static_assert(LG_SMART_SIZES_PER_DOUBLING == 2, "");
+};
+SizeTable s_index2size;
+
 }
 
 // Iterator over all the slabs and bigs
@@ -721,8 +746,19 @@ void MemoryManager::initHole() {
   }
 }
 
+// initialize the FreeNode header on all freelist entries.
+void MemoryManager::initFree() {
+  for (size_t i = 0; i < kNumSmartSizes; i++) {
+    auto size = s_index2size.table[i];
+    for (auto n = m_freelists[i].head; n; n = n->next) {
+      n->kind_size = HeaderKind::Free<<24 | size<<32;
+    }
+  }
+}
+
 BigHeap::iterator MemoryManager::begin() {
   initHole();
+  initFree();
   return m_heap.begin();
 }
 

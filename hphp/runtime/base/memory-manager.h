@@ -718,6 +718,7 @@ private:
 
   void checkHeap();
   void initHole();
+  void initFree();
   BigHeap::iterator begin();
   BigHeap::iterator end();
 

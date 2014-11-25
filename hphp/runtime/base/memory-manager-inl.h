@@ -148,7 +148,8 @@ inline void MemoryManager::FreeList::push(void* val, size_t size) {
   assert(size > 0 && size <= kMaxFreeSize);
   auto const node = static_cast<FreeNode*>(val);
   node->next = head;
-  if (debug) node->kind_size = HeaderKind::Free << 24 | size << 32;
+  // The extra store to initialize a free header here is expensive.
+  // Instead, initFree() initializes all free headers just before iterating
   head = node;
 }
 

@@ -931,6 +931,21 @@ static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
   vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
+static void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& absdbl = inst.absdbl_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+
+  // clear the high bit
+  auto tmp = v.makeReg();
+  v << psllq{1, absdbl.s, tmp};
+  v << psrlq{1, tmp, absdbl.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
 static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   auto& blocks = unit.blocks;
   auto& inst = blocks[b].code[iInst];
@@ -1084,6 +1099,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::shl:
           lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::absdbl:
+          lowerAbsdbl(unit, Vlabel{ib}, ii);
           break;
 
         case Vinstr::defvmsp:

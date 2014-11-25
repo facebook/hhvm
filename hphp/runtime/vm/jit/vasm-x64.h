@@ -408,6 +408,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(ldretaddr, Inone, U(s), D(d))\
   O(retctrl, Inone, U(s), Dn)\
+  O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -558,6 +559,7 @@ struct copyargs { Vtuple s, d; };
 struct debugtrap {};
 struct ldretaddr { Vptr s; Vreg d; };
 struct retctrl { Vreg s; };
+struct absdbl { Vreg s, d; };
 
 // No-op, used for marking the end of a block that is intentionally going to
 // fall-through.  Only for use with Vauto.

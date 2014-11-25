@@ -451,8 +451,7 @@ exceptions depending on how coercion is implemented.
   Undefined behavior occurs if Mod is given a divisor of zero, or if the
   divisor is -1 and the dividend is the minimum representable integer.
 
-  AbsDbl computes the absolute value of a double-precision value by clearing
-  the sign bit.
+  AbsDbl computes the absolute value of a double-precision value.
 
   DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
   result of the division is a real valued number DivDbl conforms to IEEE 754.

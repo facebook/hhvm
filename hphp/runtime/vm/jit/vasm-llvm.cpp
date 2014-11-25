@@ -936,7 +936,8 @@ O(xorq) \
 O(xorqi) \
 O(landingpad) \
 O(ldretaddr) \
-O(retctrl)
+O(retctrl) \
+O(absdbl)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -964,6 +965,8 @@ O(retctrl)
       case Vinstr::pushm:
       case Vinstr::pop:
       case Vinstr::popm:
+      case Vinstr::psllq:
+      case Vinstr::psrlq:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -1722,6 +1725,12 @@ void LLVMEmitter::emit(const retctrl& inst) {
   callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
   callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
   m_irb.CreateRetVoid();
+}
+
+void LLVMEmitter::emit(const absdbl& inst) {
+  auto abs = llvm::Intrinsic::getDeclaration(m_module.get(),
+                                             llvm::Intrinsic::fabs);
+  defineValue(inst.d, m_irb.CreateCall(abs, value(inst.s)));
 }
 
 void LLVMEmitter::emit(const roundsd& inst) {

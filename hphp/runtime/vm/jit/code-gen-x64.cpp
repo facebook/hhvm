@@ -925,10 +925,7 @@ void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = srcLoc(inst, 0).reg();
   auto dst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  // clear the high bit
-  auto tmp = v.makeReg();
-  v << psllq{1, src, tmp};
-  v << psrlq{1, tmp, dst};
+  v << absdbl{src, dst};
 }
 
 Vreg CodeGenerator::emitAddInt(Vout& v, IRInstruction* inst) {

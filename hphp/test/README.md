@@ -24,11 +24,6 @@ all sub-suites.
 * Slow tests with the JIT in PGO mode -
 `test/run test/slow -m pgo`
 
-* Slow tests with the JIT, using `pseudomain_wrapper.php` to ensure that
-  statements in global scope get jitted (may have false positives due to,
-  e.g. backtraces changing) -
-`test/run test/slow -m automain`
-
 * Run everything that is supposed to pass -
 `test/run all`
 

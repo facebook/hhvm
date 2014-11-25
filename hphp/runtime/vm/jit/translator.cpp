@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 
 TRACE_SET_MOD(trans);
 
@@ -1591,13 +1592,13 @@ Translator::addDbgBLPC(PC pc) {
   return true;
 }
 
-const char* Translator::ResultName(TranslateResult r) {
-  static const char* const names[] = {
-    "Failure",
-    "Retry",
-    "Success",
-  };
-  return names[r];
+const char* show(TranslateResult r) {
+  switch (r) {
+  case TranslateResult::Failure: return "Failure";
+  case TranslateResult::Retry:   return "Retry";
+  case TranslateResult::Success: return "Success";
+  }
+  not_reached();
 }
 
 /*
@@ -1952,11 +1953,10 @@ void translateInstr(HhbcTranslator& ht, const NormalizedInstruction& ni) {
 
 //////////////////////////////////////////////////////////////////////
 
-Translator::TranslateResult
-Translator::translateRegion(HhbcTranslator& ht,
-                            const RegionDesc& region,
-                            RegionBlacklist& toInterp,
-                            TransFlags trflags) {
+TranslateResult translateRegion(HhbcTranslator& ht,
+                                const RegionDesc& region,
+                                RegionBlacklist& toInterp,
+                                TransFlags trflags) {
   const Timer translateRegionTimer(Timer::translateRegion);
   FTRACE(1, "translateRegion starting with:\n{}\n", show(region));
 
@@ -2043,7 +2043,7 @@ Translator::translateRegion(HhbcTranslator& ht,
           assert(loc.tag() == RegionDesc::Location::Tag::Stack);
           ht.assertType(loc, type);
         } else if (useGuards) {
-          bool checkOuterTypeOnly = m_mode != TransKind::Profile;
+          bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
           ht.guardTypeLocation(loc, type, checkOuterTypeOnly);
         } else {
           ht.checkType(loc, type, sk.offset());
@@ -2066,11 +2066,11 @@ Translator::translateRegion(HhbcTranslator& ht,
           ht.emitIncTransCounter();
         }
 
-        if (m_mode == TransKind::Profile) {
+        if (mcg->tx().mode() == TransKind::Profile) {
           if (block->func()->isEntry(block->start().offset())) {
-            ht.emitCheckCold(m_profData->curTransID());
+            ht.emitCheckCold(mcg->tx().profData()->curTransID());
           } else {
-            ht.emitIncProfCounter(m_profData->curTransID());
+            ht.emitIncProfCounter(mcg->tx().profData()->curTransID());
           }
         }
         ht.emitRB(Trace::RBTypeTraceletBody, sk);
@@ -2145,7 +2145,7 @@ Translator::translateRegion(HhbcTranslator& ht,
        * essentially does the role of type prediction.  And, if the value is
        * also inferred, then the guard is omitted.
        */
-      auto const doPrediction = mode() == TransKind::Live &&
+      auto const doPrediction = mcg->tx().mode() == TransKind::Live &&
                                   outputIsPredicted(inst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
@@ -2236,7 +2236,7 @@ Translator::translateRegion(HhbcTranslator& ht,
             return oss.str();
           });
         toInterp.insert(psk);
-        return Retry;
+        return TranslateResult::Retry;
       }
 
       skipTrans = false;
@@ -2290,8 +2290,8 @@ Translator::translateRegion(HhbcTranslator& ht,
 
   try {
     mcg->traceCodeGen(ht);
-    if (m_mode == TransKind::Profile) {
-      profData()->setProfiling(startSk.func()->getFuncId());
+    if (mcg->tx().mode() == TransKind::Profile) {
+      mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
     }
   } catch (const FailedCodeGen& exn) {
     SrcKey sk{exn.vmFunc, exn.bcOff, exn.resumed};
@@ -2305,20 +2305,20 @@ Translator::translateRegion(HhbcTranslator& ht,
         return oss.str();
       });
     toInterp.insert(psk);
-    return Retry;
+    return TranslateResult::Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
-      assert(m_useAHot);
-      m_useAHot = false;
+      assert(mcg->tx().useAHot());
+      mcg->tx().setUseAHot(false);
       // We can't return Retry here because the code block selection
       // will still say hot.
-      return Translator::Failure;
+      return TranslateResult::Failure;
     } else {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbFull.name, dbFull.what());
     }
   }
-  return Success;
+  return TranslateResult::Success;
 }
 
 uint64_t* Translator::getTransCounterAddr() {

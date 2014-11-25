@@ -92,6 +92,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 
@@ -1657,12 +1658,12 @@ MCGenerator::translateWork(const TranslArgs& args) {
       region = selectRegion(rContext, m_tx.mode());
     }
 
-    Translator::TranslateResult result = Translator::Retry;
-    Translator::RegionBlacklist regionInterps;
+    auto result = TranslateResult::Retry;
+    auto regionInterps = RegionBlacklist{};
     Offset const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
 
-    while (region && result == Translator::Retry) {
+    while (region && result == TranslateResult::Retry) {
       auto const transContext = TransContext {
         RuntimeOption::EvalJitPGO
           ? m_tx.profData()->curTransID()
@@ -1682,32 +1683,31 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-        result = m_tx.translateRegion(hhbcTrans, *region, regionInterps,
+        result = translateRegion(hhbcTrans, *region, regionInterps,
           args.m_flags);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to retranslate.
         if (m_tx.mode() == TransKind::Profile &&
-            result == Translator::Success &&
+            result == TranslateResult::Success &&
             RuntimeOption::EvalJitPGOUsePostConditions) {
           pconds = hhbcTrans.unit().postConditions();
         }
 
-        FTRACE(2, "translateRegion finished with result {}\n",
-               Translator::ResultName(result));
+        FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
-        result = Translator::Failure;
+        result = TranslateResult::Failure;
       }
 
-      if (result != Translator::Success) {
+      if (result != TranslateResult::Success) {
         // Translation failed or will be retried. Free resources for this
         // trace, rollback the translation cache frontiers, and discard any
         // pending fixups.
         resetState();
       }
 
-      if (result == Translator::Failure) {
+      if (result == TranslateResult::Failure) {
         // If the region translator failed for an Optimize translation, it's OK
         // to do a Live translation for the function entry. Otherwise, fall
         // back to Interp.
@@ -1732,7 +1732,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     if (!region) m_tx.setMode(TransKind::Interp);
 
-    if (result == Translator::Success) {
+    if (result == TranslateResult::Success) {
       assert(m_tx.mode() == TransKind::Live    ||
              m_tx.mode() == TransKind::Profile ||
              m_tx.mode() == TransKind::Optimize);

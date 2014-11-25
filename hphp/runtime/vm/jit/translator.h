@@ -193,41 +193,6 @@ struct Translator {
   Translator();
 
   /////////////////////////////////////////////////////////////////////////////
-  // Types.
-
-  /*
-   * Blacklisted instruction set.
-   *
-   * Used by translateRegion() to track instructions that must be interpreted.
-   */
-  typedef ProfSrcKeySet RegionBlacklist;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Main translation API.
-
-  enum TranslateResult {
-    Failure,
-    Retry,
-    Success
-  };
-  static const char* ResultName(TranslateResult r);
-
-  /*
-   * Translate `region'.
-   *
-   * The `toInterp' RegionBlacklist is a set of instructions which must be
-   * interpreted.  When an instruction fails in translation, Retry is returned,
-   * and the instruction is added to `interp' so that it will be interpreted on
-   * the next attempt.
-   */
-  TranslateResult translateRegion(HhbcTranslator&,
-                                  const RegionDesc& region,
-                                  RegionBlacklist& interp,
-                                  TransFlags trflags = TransFlags{});
-
-
-  /////////////////////////////////////////////////////////////////////////////
   // Accessors.
 
   /*

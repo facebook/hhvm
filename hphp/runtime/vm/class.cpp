@@ -924,27 +924,39 @@ void Class::setInstanceBitsImpl() {
 // These are mostly for the class creation path.
 
 void Class::setParent() {
+  // Cache m_preClass->attrs()
+  m_attrCopy = m_preClass->attrs();
+
   // Validate the parent
   if (m_parent.get() != nullptr) {
-    Attr attrs = m_parent->attrs();
-    if (UNLIKELY(attrs & (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
+    Attr parentAttrs = m_parent->attrs();
+    if (UNLIKELY(parentAttrs &
+                 (AttrFinal | AttrInterface | AttrTrait | AttrEnum))) {
       static StringData* sd___MockClass = makeStaticString("__MockClass");
-      if (!(attrs & AttrFinal) || (attrs & AttrEnum) ||
+      if (!(parentAttrs & AttrFinal) ||
+          (parentAttrs & AttrEnum) ||
           m_preClass->userAttributes().find(sd___MockClass) ==
           m_preClass->userAttributes().end() ||
           m_parent->isCollectionClass()) {
         raise_error("Class %s may not inherit from %s (%s)",
                     m_preClass->name()->data(),
-                    ((attrs & AttrEnum)      ? "enum" :
-                     (attrs & AttrFinal)     ? "final class" :
-                     (attrs & AttrInterface) ? "interface"   : "trait"),
+                    ((parentAttrs & AttrEnum)      ? "enum" :
+                     (parentAttrs & AttrFinal)     ? "final class" :
+                     (parentAttrs & AttrInterface) ? "interface"   : "trait"),
                     m_parent->name()->data());
+      }
+      if ((parentAttrs & AttrAbstract) &&
+          ((m_attrCopy & (AttrAbstract|AttrFinal)) != (AttrAbstract|AttrFinal))) {
+        raise_error(
+          "Class %s with %s inheriting 'abstract final' class %s"
+          " must also be 'abstract final'",
+          m_preClass->name()->data(),
+          sd___MockClass->data(),
+          m_parent->name()->data()
+        );
       }
     }
   }
-
-  // Cache m_preClass->attrs()
-  m_attrCopy = m_preClass->attrs();
 
   // Handle stuff specific to cppext classes
   if (m_preClass->instanceCtor()) {

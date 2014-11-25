@@ -82,52 +82,52 @@ private:
 
 public:
   class Accessor {
-    public:
-      Accessor()
-        : m_kind(AccessorKind::Ptr), m_ptr((pcre_cache_entry*)nullptr)
-      {}
+  public:
+    Accessor()
+      : m_kind(AccessorKind::Ptr), m_ptr((pcre_cache_entry*)nullptr)
+    {}
 
-      // No assignment from LRUCache::ConstAccessor since it is non-copyable
-      // Use resetToLRU instead
+    // No assignment from LRUCache::ConstAccessor since it is non-copyable
+    // Use resetToLRU instead
 
-      Accessor& operator=(const pcre_cache_entry* ptr) {
-        m_kind = AccessorKind::Ptr;
-        m_ptr = ptr;
-        return *this;
+    Accessor& operator=(const pcre_cache_entry* ptr) {
+      m_kind = AccessorKind::Ptr;
+      m_ptr = ptr;
+      return *this;
+    }
+
+    Accessor& operator=(const EntryPtr& ep) {
+      m_kind = AccessorKind::SmartPtr;
+      m_smart_ptr = ep;
+      return *this;
+    }
+
+    LRUCache::ConstAccessor& resetToLRU() {
+      m_kind = AccessorKind::Accessor;
+      return m_accessor;
+    }
+
+    const pcre_cache_entry* get() {
+      switch (m_kind) {
+        case AccessorKind::Ptr:
+          return m_ptr;
+        case AccessorKind::SmartPtr:
+          return m_smart_ptr.get();
+        case AccessorKind::Accessor:
+          return m_accessor.get()->get();
       }
-
-      Accessor& operator=(const EntryPtr& ep) {
-        m_kind = AccessorKind::SmartPtr;
-        m_smart_ptr = ep;
-        return *this;
-      }
-
-      LRUCache::ConstAccessor& resetToLRU() {
-        m_kind = AccessorKind::Accessor;
-        return m_accessor;
-      }
-
-      const pcre_cache_entry* get() {
-        switch (m_kind) {
-          case AccessorKind::Ptr:
-            return m_ptr;
-          case AccessorKind::SmartPtr:
-            return m_smart_ptr.get();
-          case AccessorKind::Accessor:
-            return m_accessor.get()->get();
-        }
-        not_reached();
-        return nullptr;
-      }
-    private:
-      enum class AccessorKind {
-        Ptr,
-        SmartPtr,
-        Accessor
-      } m_kind;
-      const pcre_cache_entry* m_ptr;
-      EntryPtr m_smart_ptr;
-      LRUCache::ConstAccessor m_accessor;
+      not_reached();
+      return nullptr;
+    }
+  private:
+    enum class AccessorKind {
+      Ptr,
+      SmartPtr,
+      Accessor
+    } m_kind;
+    const pcre_cache_entry* m_ptr;
+    EntryPtr m_smart_ptr;
+    LRUCache::ConstAccessor m_accessor;
   };
 
   PCRECache()

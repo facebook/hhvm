@@ -39,77 +39,77 @@ namespace HPHP {
  */
 template <class TKey, class TValue, class THash = tbb::tbb_hash_compare<TKey>>
 class ThreadSafeScalableCache {
-  public:
-    using Shard = ThreadSafeLRUCache<TKey, TValue, THash>;
-    typedef typename Shard::ConstAccessor ConstAccessor;
+public:
+  using Shard = ThreadSafeLRUCache<TKey, TValue, THash>;
+  typedef typename Shard::ConstAccessor ConstAccessor;
 
-    /**
-     * Constructor
-     *   - maxSize: the maximum number of items in the container
-     *   - numShards: the number of child containers. If this is zero, the
-     *     "hardware concurrency" will be used (typically the logical processor
-     *     count).
-     */
-    explicit ThreadSafeScalableCache(size_t maxSize, size_t numShards = 0);
+  /**
+   * Constructor
+   *   - maxSize: the maximum number of items in the container
+   *   - numShards: the number of child containers. If this is zero, the
+   *     "hardware concurrency" will be used (typically the logical processor
+   *     count).
+   */
+  explicit ThreadSafeScalableCache(size_t maxSize, size_t numShards = 0);
 
-    ThreadSafeScalableCache(const ThreadSafeScalableCache&) = delete;
-    ThreadSafeScalableCache& operator=(const ThreadSafeScalableCache&) = delete;
+  ThreadSafeScalableCache(const ThreadSafeScalableCache&) = delete;
+  ThreadSafeScalableCache& operator=(const ThreadSafeScalableCache&) = delete;
 
-    /**
-     * Find a value by key, and return it by filling the ConstAccessor, which
-     * can be default-constructed. Returns true if the element was found, false
-     * otherwise. Updates the eviction list, making the element the
-     * most-recently used.
-     */
-    bool find(ConstAccessor& ac, const TKey& key);
+  /**
+   * Find a value by key, and return it by filling the ConstAccessor, which
+   * can be default-constructed. Returns true if the element was found, false
+   * otherwise. Updates the eviction list, making the element the
+   * most-recently used.
+   */
+  bool find(ConstAccessor& ac, const TKey& key);
 
-    /**
-     * Insert a value into the container. Both the key and value will be copied.
-     * The new element will put into the eviction list as the most-recently
-     * used.
-     *
-     * If there was already an element in the container with the same key, it
-     * will not be updated, and false will be returned. Otherwise, true will be
-     * returned.
-     */
-    bool insert(const TKey& key, const TValue& value);
+  /**
+   * Insert a value into the container. Both the key and value will be copied.
+   * The new element will put into the eviction list as the most-recently
+   * used.
+   *
+   * If there was already an element in the container with the same key, it
+   * will not be updated, and false will be returned. Otherwise, true will be
+   * returned.
+   */
+  bool insert(const TKey& key, const TValue& value);
 
-    /**
-     * Clear the container. NOT THREAD SAFE -- do not use while other threads
-     * are accessing the container.
-     */
-    void clear();
+  /**
+   * Clear the container. NOT THREAD SAFE -- do not use while other threads
+   * are accessing the container.
+   */
+  void clear();
 
-    /**
-     * Get a snapshot of the keys in the container by copying them into the
-     * supplied vector. This will block inserts and prevent LRU updates while it
-     * completes. The keys will be inserted in a random order.
-     */
-    void snapshotKeys(std::vector<TKey>& keys);
+  /**
+   * Get a snapshot of the keys in the container by copying them into the
+   * supplied vector. This will block inserts and prevent LRU updates while it
+   * completes. The keys will be inserted in a random order.
+   */
+  void snapshotKeys(std::vector<TKey>& keys);
 
-    /**
-     * Get the approximate size of the container. May be slightly too low when
-     * insertion is in progress.
-     */
-    size_t size() const;
+  /**
+   * Get the approximate size of the container. May be slightly too low when
+   * insertion is in progress.
+   */
+  size_t size() const;
 
-  private:
-    /**
-     * Get the child container for a given key
-     */
-    Shard& getShard(const TKey& key);
+private:
+  /**
+   * Get the child container for a given key
+   */
+  Shard& getShard(const TKey& key);
 
-    /**
-     * The maximum number of elements in the container.
-     */
-    size_t m_maxSize;
+  /**
+   * The maximum number of elements in the container.
+   */
+  size_t m_maxSize;
 
-    /**
-     * The child containers
-     */
-    size_t m_numShards;
-    typedef std::shared_ptr<Shard> ShardPtr;
-    std::vector<ShardPtr> m_shards;
+  /**
+   * The child containers
+   */
+  size_t m_numShards;
+  typedef std::shared_ptr<Shard> ShardPtr;
+  std::vector<ShardPtr> m_shards;
 };
 
 /**

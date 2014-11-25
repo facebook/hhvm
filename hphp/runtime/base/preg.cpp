@@ -239,27 +239,35 @@ bool PCRECache::find(Accessor& accessor,
                      const String& regex,
                      TempKeyCache& keyCache)
 {
-  if (m_kind == CacheKind::Static) {
-    assert(m_staticCache);
-    StaticCache::iterator it;
-    auto cache = m_staticCache.load(std::memory_order_acquire);
-    if ((it = cache->find(regex.get())) != cache->end()) {
-      accessor = it->second;
-      return true;
-    }
-    return false;
-  } else {
-    if (!keyCache) {
-      keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
-    }
-    bool found;
-    if (m_kind == CacheKind::Lru) {
-      found = m_lruCache->find(accessor.resetToLRU(), *keyCache);
-    } else {
-      found = m_scalableCache->find(accessor.resetToLRU(), *keyCache);
-    }
-    return found;
+  switch (m_kind) {
+    case CacheKind::Static:
+      {
+        assert(m_staticCache);
+        StaticCache::iterator it;
+        auto cache = m_staticCache.load(std::memory_order_acquire);
+        if ((it = cache->find(regex.get())) != cache->end()) {
+          accessor = it->second;
+          return true;
+        }
+        return false;
+      }
+    case CacheKind::Lru:
+    case CacheKind::Scalable:
+      {
+        if (!keyCache) {
+          keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+        }
+        bool found;
+        if (m_kind == CacheKind::Lru) {
+          found = m_lruCache->find(accessor.resetToLRU(), *keyCache);
+        } else {
+          found = m_scalableCache->find(accessor.resetToLRU(), *keyCache);
+        }
+        return found;
+      }
   }
+  not_reached();
+  return false;
 }
 
 void PCRECache::clearStatic() {
@@ -282,53 +290,71 @@ void PCRECache::insert(Accessor& accessor,
     TempKeyCache& keyCache,
     const pcre_cache_entry* ent)
 {
-  if (m_kind == CacheKind::Static) {
-    assert(m_staticCache);
-    // Clear the cache if we haven't refreshed it in a while
-    if (time(nullptr) > m_expire) {
-      clearStatic();
-    }
-    auto cache = m_staticCache.load(std::memory_order_acquire);
-    auto pair = cache->insert(
-        StaticCachePair(makeStaticString(regex.get()), ent));
-    if (pair.second) {
-      // Inserted, container owns the pointer
-      accessor = ent;
-    } else {
-      // Not inserted, caller needs to own the pointer
-      accessor = EntryPtr(ent);
-    }
-  } else {
-    if (!keyCache) {
-      keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
-    }
-    // Pointer ownership is shared between container and caller
-    EntryPtr ptr(ent);
-    accessor = ptr;
-    if (m_kind == CacheKind::Lru) {
-      m_lruCache->insert(*keyCache, ptr);
-    } else {
-      m_scalableCache->insert(*keyCache, ptr);
-    }
+  switch (m_kind) {
+    case CacheKind::Static:
+      {
+        assert(m_staticCache);
+        // Clear the cache if we haven't refreshed it in a while
+        if (time(nullptr) > m_expire) {
+          clearStatic();
+        }
+        auto cache = m_staticCache.load(std::memory_order_acquire);
+        auto pair = cache->insert(
+            StaticCachePair(makeStaticString(regex.get()), ent));
+        if (pair.second) {
+          // Inserted, container owns the pointer
+          accessor = ent;
+        } else {
+          // Not inserted, caller needs to own the pointer
+          accessor = EntryPtr(ent);
+        }
+      }
+      break;
+    case CacheKind::Lru:
+    case CacheKind::Scalable:
+      {
+        if (!keyCache) {
+          keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+        }
+        // Pointer ownership is shared between container and caller
+        EntryPtr ptr(ent);
+        accessor = ptr;
+        if (m_kind == CacheKind::Lru) {
+          m_lruCache->insert(*keyCache, ptr);
+        } else {
+          m_scalableCache->insert(*keyCache, ptr);
+        }
+      }
+      break;
+    default:
+      not_reached();
   }
 }
 
 void PCRECache::dump(const std::string& filename) {
   std::ofstream out(filename.c_str());
-  if (m_kind == CacheKind::Static) {
-    for (auto& it : *m_staticCache) {
-      out << it.first->data() << "\n";
-    }
-  } else {
-    std::vector<LRUCacheKey> keys;
-    if (m_kind == CacheKind::Lru) {
-      m_lruCache->snapshotKeys(keys);
-    } else {
-      m_scalableCache->snapshotKeys(keys);
-    }
-    for (auto& key: keys) {
-      out << key.c_str() << "\n";
-    }
+  switch (m_kind) {
+    case CacheKind::Static:
+      for (auto& it : *m_staticCache) {
+        out << it.first->data() << "\n";
+      }
+      break;
+    case CacheKind::Lru:
+    case CacheKind::Scalable:
+      {
+        std::vector<LRUCacheKey> keys;
+        if (m_kind == CacheKind::Lru) {
+          m_lruCache->snapshotKeys(keys);
+        } else {
+          m_scalableCache->snapshotKeys(keys);
+        }
+        for (auto& key: keys) {
+          out << key.c_str() << "\n";
+        }
+      }
+      break;
+    default:
+      not_reached();
   }
   out.close();
 }

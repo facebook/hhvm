@@ -54,7 +54,10 @@ let start_server env =
   hh_server;
   match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
-    | _ -> (Printf.fprintf stderr "Could not start hh_server!\n"; exit 77);
+    | _ -> begin
+      Printf.fprintf stderr "Could not start hh_server!\n";
+      ignore (exit 77)
+    end;
   if env.wait then wait env;
   ()
 

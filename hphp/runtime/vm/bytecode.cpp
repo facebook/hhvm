@@ -2563,8 +2563,8 @@ StrNR ExecutionContext::createFunction(const String& args,
   codeStr << "<?php function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
-  StringData* evalCode = makeStaticString(codeStr.str());
-  Unit* unit = compile_string(evalCode->data(), evalCode->size());
+  std::string evalCode = codeStr.str();
+  Unit* unit = compile_string(evalCode.data(), evalCode.size());
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;

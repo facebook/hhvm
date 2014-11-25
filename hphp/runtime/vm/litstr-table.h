@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
+#include "hphp/util/mutex.h"
 
 #include <vector>
 
@@ -33,7 +34,7 @@ struct StringData;
 /*
  * Global litstr Id's are all above this mark.
  */
-const int kGlobalLitstrOffset = 0x40000000;
+constexpr int kGlobalLitstrOffset = 0x40000000;
 
 ///////////////////////////////////////////////////////////////////////////////
 

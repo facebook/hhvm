@@ -151,7 +151,7 @@ public:
 
   LDAPMessage *data;
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapResult)
+IMPLEMENT_RESOURCE_ALLOCATION(LdapResult)
 
 class LdapResultEntry : public SweepableResourceData {
 public:

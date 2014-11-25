@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(PlainDirectory)
+IMPLEMENT_RESOURCE_ALLOCATION(PlainDirectory)
 
 ///////////////////////////////////////////////////////////////////////////////
 

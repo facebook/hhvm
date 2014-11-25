@@ -31,7 +31,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(TimeZone)
+IMPLEMENT_RESOURCE_ALLOCATION(TimeZone)
 ///////////////////////////////////////////////////////////////////////////////
 
 class GuessedTimeZone {

@@ -67,7 +67,7 @@ public:
   int64_t m_flag;
 };
 
-IMPLEMENT_OBJECT_ALLOCATION(ImapStream);
+IMPLEMENT_RESOURCE_ALLOCATION(ImapStream);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -141,8 +141,8 @@ class ResourceData {
  *    When deriving from SweepableResourceData, either "new" or "NEW" can
  *    be used, but we prefer people use NEW with these macros:
  *
- *       DECLARE_OBJECT_ALLOCATION(T);
- *       IMPLEMENT_OBJECT_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T);
+ *       IMPLEMENT_RESOURCE_ALLOCATION(T);
  *
  * 3. If a ResourceData is a mix of smart allocated data members and non-
  *    smart allocated data members, sweep() has to be overwritten to only

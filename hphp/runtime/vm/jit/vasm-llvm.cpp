@@ -912,6 +912,7 @@ O(storeqi) \
 O(storesd) \
 O(storew) \
 O(storewi) \
+O(subbi) \
 O(subl) \
 O(subli) \
 O(subq) \
@@ -1525,6 +1526,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   } else if (cmp.op == Vinstr::incwm) {
     lhs = flagTmp(sf);
     rhs = m_int16Zero;
+  } else if (cmp.op == Vinstr::subbi) {
+    lhs = asInt(value(cmp.subbi_.d), 8);
+    rhs = m_int8Zero;
   } else if (cmp.op == Vinstr::subl) {
     lhs = asInt(value(cmp.subl_.d), 32);
     rhs = m_int32Zero;
@@ -1839,6 +1843,11 @@ void LLVMEmitter::emit(const storew& inst) {
 
 void LLVMEmitter::emit(const storewi& inst) {
   m_irb.CreateStore(cns(inst.s.w()), emitPtr(inst.m, 16));
+}
+
+void LLVMEmitter::emit(const subbi& inst) {
+  defineValue(inst.d, m_irb.CreateSub(asInt(value(inst.s1), 8),
+                                      cns(inst.s0.b())));
 }
 
 void LLVMEmitter::emit(const subl& inst) {

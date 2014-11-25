@@ -1614,16 +1614,14 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
     v << copy{v.cns(imm), dstReg};
     return;
   }
-  auto t1 = v.makeReg();
-  auto t2 = v.makeReg();
-  auto t3 = v.makeReg();
-  auto t4 = v.makeReg();
-  v << movzbl{typeReg, t1};
-  v << subli{KindOfBoolean, t1, t2, v.makeReg()};
+
+  auto diff = v.makeReg();
+  v << subbi{KindOfBoolean, typeReg, diff, v.makeReg()};
   auto const sf = v.makeReg();
-  v << subli{KindOfString - KindOfBoolean + 1, t2, t3, sf};
-  v << sbbl{sf, t3, t3, t4, v.makeReg()};
-  v << neg{t4, dstReg, v.makeReg()};
+  v << cmpbi{KindOfString - KindOfBoolean, diff, sf};
+  auto byteDst = v.makeReg();
+  v << setcc{CC_BE, sf, byteDst};
+  v << movzbl{byteDst, dstReg};
 }
 
 void CodeGenerator::cgIsNType(IRInstruction* inst) {

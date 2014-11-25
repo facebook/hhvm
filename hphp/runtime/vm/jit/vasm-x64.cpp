@@ -259,7 +259,6 @@ private:
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
-  void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
   void emit(setcc& i) { a->setcc(i.cc, i.d); }
   void emit(shlli& i) { binary(i); a->shll(i.s0, i.d); }
   void emit(shlq& i) { unary(i); a->shlq(i.d); }
@@ -276,6 +275,7 @@ private:
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
   void emit(storewi& i) { a->storew(i.s, i.m); }
+  void emit(subbi& i) { binary(i); a->subb(i.s0, i.d); }
   void emit(subl& i) { noncommute(i); a->subl(i.s0, i.d); }
   void emit(subli& i) { binary(i); a->subl(i.s0, i.d); }
   void emit(subq& i) { noncommute(i); a->subq(i.s0, i.d); }

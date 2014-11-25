@@ -499,7 +499,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(sbbl, Inone, U(sfu) UA(s0) U(s1), D(d) D(sfd))\
   O(setcc, I(cc), U(sf), D(d))\
   O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -516,6 +515,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(storesd, Inone, U(s) U(m), Dn)\
   O(storew, Inone, U(s) U(m), Dn)\
   O(storewi, I(s), U(m), Dn)\
+  O(subbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, Inone, UA(s0) U(s1), D(d) D(sf))\
@@ -699,7 +699,6 @@ struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct sbbl { VregSF sfu; Vreg32 s0, s1, d; VregSF sfd; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
 struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
@@ -716,6 +715,7 @@ struct storeqi { Immed s; Vptr m; };
 struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewi { Immed s; Vptr m; };
+struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; };

@@ -51,13 +51,10 @@ let start_server env =
     (Path.string_of_path env.root)
     server_options in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
-  hh_server;
-  match Unix.system hh_server with
+    hh_server;
+  let () = match Unix.system hh_server with
     | Unix.WEXITED 0 -> ()
-    | _ -> begin
-      Printf.fprintf stderr "Could not start hh_server!\n";
-      ignore (exit 77)
-    end;
+    | _ -> Printf.fprintf stderr "Could not start hh_server!\n"; exit 77 in
   if env.wait then wait env;
   ()
 

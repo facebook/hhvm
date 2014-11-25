@@ -419,7 +419,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
     '--file',
-    escapeshellarg($test_run),
+    escapeshellarg($test_run)
   );
 
   if (file_exists($test.'.ini')) {

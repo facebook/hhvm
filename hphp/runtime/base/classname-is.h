@@ -15,34 +15,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DUMMY_RESOURCE_H_
-#define incl_HPHP_DUMMY_RESOURCE_H_
-
-#include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/type-string.h"
+#ifndef incl_HPHP_CLASSNAME_IS_H
+#define incl_HPHP_CLASSNAME_IS_H
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
 /**
- * DummyResource is used in a number of places where the runtime wants
- * to cast a value to the resource type. Ideally, casting a non-resource
- * value to a resource would throw or produce null, but there are a few
- * places in the runtime and the extensions that would need to be updated
- * first to make that work.
+ * InstantStatic allows defining a static in-class variable that is
+ * initialized during program startup, without actually needing to define
+ * it anywhere. When defining the static, just specify its type (T), the
+ * type that T's constructor will receive (TInit), and the name of the
+ * function that will be called for construction (init). One copy of
+ * static data is generated per T/init.
  */
-class DummyResource : public ResourceData {
-public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(DummyResource);
-  CLASSNAME_IS("Unknown");
-  DummyResource();
-  String m_class_name;
-  virtual const String& o_getClassNameHook() const;
-  virtual bool isInvalid() const { return m_class_name.empty(); }
-  void o_setResourceId(int64_t id) { o_id = id; }
+template <class T, class TInit, TInit init()>
+struct InstantStatic {
+  static T value;
 };
 
-///////////////////////////////////////////////////////////////////////////////
+template <class T, class TInit, TInit init()>
+T InstantStatic<T, TInit, init>::value { init() };
+
+#define CLASSNAME_IS(str)                                               \
+  static const char *GetClassName() { return str; }                     \
+  static const StaticString& classnameof() {                            \
+    return InstantStatic<const StaticString, const char*, GetClassName> \
+      ::value;                                                          \
+  }
 }
 
 #endif

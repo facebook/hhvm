@@ -23,7 +23,6 @@
  * This is the file that's included at top of a code generated system file.
  */
 
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type-conversions.h"

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/classname-is.h"
 
 #include "hphp/util/thread-local.h"
 
@@ -206,6 +207,23 @@ template<class T, class... Args> T* newres(Args&&... args) {
     throw;
   }
 }
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
+  public:                                                               \
+  ALWAYS_INLINE void operator delete(void* p) {                         \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    assert(sizeof(T) <= kMaxSmartSize);                                 \
+    MM().smartFreeSizeLogged(p, sizeof(T));                             \
+  }\
+  virtual size_t heapSize() const { return sizeof(T); }
+
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  void sweep() override;
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
+  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

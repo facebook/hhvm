@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/globals-array.h"

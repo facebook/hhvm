@@ -112,7 +112,13 @@ inline void check_recursion(const ThreadInfo* info) {
 ssize_t check_request_surprise(ThreadInfo *info);
 ssize_t check_request_surprise_unlikely();
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// code instrumentation or injections
+
+#define DECLARE_THREAD_INFO                     \
+  ThreadInfo *info ATTRIBUTE_UNUSED =           \
+    ThreadInfo::s_threadInfo.getNoCheck();      \
+  int lc ATTRIBUTE_UNUSED = 0;
 
 }
 

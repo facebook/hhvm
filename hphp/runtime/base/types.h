@@ -33,7 +33,6 @@
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {

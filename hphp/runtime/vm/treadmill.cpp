@@ -34,7 +34,6 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/service-data.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {  namespace Treadmill {

@@ -597,6 +597,16 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   return ret;
 }
 
+#define INVOKE_FEW_ARGS_IMPL3                        \
+  const Variant& a0, const Variant& a1, const Variant& a2
+#define INVOKE_FEW_ARGS_IMPL6                        \
+  INVOKE_FEW_ARGS_IMPL3,                             \
+  const Variant& a3, const Variant& a4, const Variant& a5
+#define INVOKE_FEW_ARGS_IMPL10                       \
+  INVOKE_FEW_ARGS_IMPL6,                             \
+  const Variant& a6, const Variant& a7, const Variant& a8, const Variant& a9
+#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
+
 Variant ObjectData::o_invoke_few_args(const String& s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
 

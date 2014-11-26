@@ -18,7 +18,6 @@
 #define incl_HPHP_VARIANT_H_
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/typed-value.h"

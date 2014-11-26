@@ -18,10 +18,10 @@
 #define incl_HPHP_OBJECT_DATA_H_
 
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/classname-is.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -39,6 +39,27 @@ class MixedArray;
 struct TypedValue;
 class PreClass;
 class Class;
+
+#define INVOKE_FEW_ARGS_COUNT 6
+#define INVOKE_FEW_ARGS_DECL3                        \
+  const Variant& a0 = null_variant,                  \
+  const Variant& a1 = null_variant,                  \
+  const Variant& a2 = null_variant
+#define INVOKE_FEW_ARGS_DECL6                        \
+  INVOKE_FEW_ARGS_DECL3,                             \
+  const Variant& a3 = null_variant,                  \
+  const Variant& a4 = null_variant,                  \
+  const Variant& a5 = null_variant
+#define INVOKE_FEW_ARGS_DECL10                       \
+  INVOKE_FEW_ARGS_DECL6,                             \
+  const Variant& a6 = null_variant,                  \
+  const Variant& a7 = null_variant,                  \
+  const Variant& a8 = null_variant,                  \
+  const Variant& a9 = null_variant
+#define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
+#define INVOKE_FEW_ARGS(kind,num) \
+  INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
+#define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
 
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
@@ -544,7 +565,42 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+#define FORWARD_DECLARE_CLASS(cls)              \
+  class c_##cls;                                \
+  typedef SmartObject<c_##cls> p_##cls;         \
+
+#define DECLARE_OBJECT_ALLOCATION(T)                                    \
+  static void typeCheck() {                                             \
+    static_assert(std::is_base_of<ObjectData,T>::value, "");            \
+  }                                                                     \
+  virtual void sweep() override;
+
+#define IMPLEMENT_OBJECT_ALLOCATION(T) \
+  static_assert(std::is_base_of<ObjectData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
+
+#define DECLARE_CLASS_NO_SWEEP(originalName)                    \
+  public:                                                       \
+  CLASSNAME_IS(#originalName)                                   \
+  friend ObjectData* new_##originalName##_Instance(Class*);     \
+  friend void delete_##originalName(ObjectData*, const Class*); \
+  static inline HPHP::LowClassPtr& classof() {                  \
+    static HPHP::LowClassPtr result;                            \
+    return result;                                              \
+  }
+
+/**
+ * By this declaration a class introduced with DECLARE_CLASS can only
+ * be smart-allocated.
+ */
+#define DECLARE_CLASS(cls)                      \
+  DECLARE_OBJECT_ALLOCATION(c_##cls)            \
+  DECLARE_CLASS_NO_SWEEP(cls)
+
+#define IMPLEMENT_CLASS_NO_SWEEP(cls)
+
+#define IMPLEMENT_CLASS(cls)                    \
+  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
 
 }
 

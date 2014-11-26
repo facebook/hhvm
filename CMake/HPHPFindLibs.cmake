@@ -79,7 +79,7 @@ include_directories(${LIBMEMCACHED_INCLUDE_DIR})
 link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
 
 # pcre checks
-find_package(PCRE REQUIRED)
+find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
 
 # libevent checks

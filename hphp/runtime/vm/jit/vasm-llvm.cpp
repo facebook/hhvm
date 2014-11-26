@@ -338,6 +338,10 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return m_data.at(name).get();
   }
 
+  bool hasDataSection(const std::string& name) const {
+    return m_data.count(name);
+  }
+
 private:
   Vasm::AreaList& m_areas;
 
@@ -430,12 +434,12 @@ struct LLVMEmitter {
     m_personalityFunc->setCallingConv(llvm::CallingConv::C);
     registerGlobalSymbol("personality0", 0xbadbadbad);
 
-    m_retFuncPtrPtrType = llvm::PointerType::get(llvm::PointerType::get(
-          llvm::FunctionType::get(
-              m_irb.getVoidTy(),
-              std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
-              false),
-          0), 0);
+    m_traceletFnPtrTy = ptrType(
+      llvm::FunctionType::get(
+        m_irb.getVoidTy(),
+        std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
+        false)
+    );
 
     m_typedValueType = llvm::StructType::get(
         m_context,
@@ -529,16 +533,27 @@ struct LLVMEmitter {
 
     // Now that codegen is done, we need to parse the stack map and
     // gcc_except_table sections and update our own metadata.
-    auto const maps = parseStackMaps(tcMM->getDataSection(".llvm_stackmaps"));
-    FTRACE(2, "LLVM stackmaps:\n{}", show(maps));
-    always_assert(maps.stkSizeRecords.size() == 1);
-    auto const funcStart = maps.stkSizeRecords.front().funcAddr;
+    static auto constexpr kStackMapsSection = ".llvm_stackmaps";
+    static auto constexpr kExceptSection = ".gcc_except_table";
 
-    processFixups(maps, funcStart);
+    if (tcMM->hasDataSection(kStackMapsSection)) {
+      auto const maps = parseStackMaps(tcMM->getDataSection(kStackMapsSection));
+      FTRACE(2, "LLVM stackmaps:\n{}", show(maps));
+      always_assert(maps.stkSizeRecords.size() == 1);
+      auto const funcStart = maps.stkSizeRecords.front().funcAddr;
 
-    auto const ehInfos =
-      parse_gcc_except_table(tcMM->getDataSection(".gcc_except_table"));
-    processEHInfos(ehInfos, funcStart);
+      processFixups(maps, funcStart);
+
+      if (tcMM->hasDataSection(kExceptSection)) {
+        auto const ehInfos =
+          parse_gcc_except_table(tcMM->getDataSection(kExceptSection));
+        processEHInfos(ehInfos, funcStart);
+      }
+    } else if (tcMM->hasDataSection(kExceptSection)) {
+      always_assert(false &&
+                    "Exception table with no stackmaps to get function "
+                    "start address");
+    }
   }
 
   /*
@@ -720,6 +735,7 @@ VASM_OPCODES
   llvm::Value* emitFuncPtr(const std::string& name,
                            llvm::FunctionType* type,
                            uintptr_t address);
+  void emitTraceletTailCall(llvm::Value* target);
 
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
@@ -744,8 +760,8 @@ VASM_OPCODES
   llvm::Function* m_function;
   llvm::IRBuilder<> m_irb;
 
-  // Function type used for tail call return.
-  llvm::Type* m_retFuncPtrPtrType{nullptr};
+  // Function type used for tail calls to other tracelets.
+  llvm::Type* m_traceletFnPtrTy{nullptr};
 
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
@@ -835,10 +851,10 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindjmp) \
+O(bindjcc2nd) \
 O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
-O(fallthru) \
 O(cloadq) \
 O(cmovq) \
 O(cmpb) \
@@ -873,6 +889,8 @@ O(incqm) \
 O(incqmlock) \
 O(jcc) \
 O(jmp) \
+O(jmpr) \
+O(jmpm) \
 O(ldimm) \
 O(lea) \
 O(loaddqu) \
@@ -880,6 +898,8 @@ O(load) \
 O(loadl) \
 O(loadsd) \
 O(loadzbl) \
+O(loadqp) \
+O(leap) \
 O(movb) \
 O(movl) \
 O(movzbl) \
@@ -968,6 +988,7 @@ O(absdbl)
       case Vinstr::popm:
       case Vinstr::psllq:
       case Vinstr::psrlq:
+      case Vinstr::fallthru:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -1068,14 +1089,35 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
 }
 
+void LLVMEmitter::emit(const bindjcc2nd& inst) {
+  auto blockName = m_irb.GetInsertBlock()->getName().str();
+  auto taken =
+    llvm::BasicBlock::Create(m_context,
+                             folly::to<std::string>(blockName, "_jcc"),
+                             m_function);
+  auto next =
+    llvm::BasicBlock::Create(m_context,
+                             folly::to<std::string>(blockName, '_'),
+                             m_function);
+  auto cond = emitCmpForCC(inst.sf, inst.cc);
+  m_irb.CreateCondBr(cond, taken, next);
+
+  m_irb.SetInsertPoint(taken);
+  // We don't yet support smashing jumps, so trap if the jcc is taken.
+  emitTrap();
+
+  m_irb.SetInsertPoint(next);
+}
+
 void LLVMEmitter::emit(const bindaddr& inst) {
   // inst.dest is a pointer to memory allocated in globalData, so we can just
   // do what vasm does here.
 
+  auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
   mcg->setJmpTransID((TCA)inst.dest);
   *inst.dest = emitEphemeralServiceReq(
-    mcg->code.frozen(),
-    mcg->getFreeStub(mcg->code.frozen(), &mcg->cgFixups()),
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
     REQ_BIND_ADDR,
     inst.dest,
     inst.sk.toAtomicInt(),
@@ -1086,10 +1128,6 @@ void LLVMEmitter::emit(const bindaddr& inst) {
 
 void LLVMEmitter::emit(const defvmsp& inst) {
   defineValue(inst.d, value(x64::rVmSp));
-}
-
-void LLVMEmitter::emit(const fallthru& inst) {
-  // no-op
 }
 
 llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
@@ -1104,6 +1142,16 @@ llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
                                      m_module.get());
   }
   return funcPtr;
+}
+
+void LLVMEmitter::emitTraceletTailCall(llvm::Value* target) {
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
+  };
+  auto call = m_irb.CreateCall(target, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  call->setTailCallKind(llvm::CallInst::TCK_MustTail);
+  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emitCall(const Vinstr& inst) {
@@ -1576,6 +1624,17 @@ void LLVMEmitter::emit(const jmp& inst) {
   m_irb.CreateBr(block(inst.target));
 }
 
+void LLVMEmitter::emit(const jmpr& inst) {
+  auto func = m_irb.CreateIntToPtr(value(inst.target), m_traceletFnPtrTy);
+  emitTraceletTailCall(func);
+}
+
+void LLVMEmitter::emit(const jmpm& inst) {
+  auto func = m_irb.CreateLoad(emitPtr(inst.target,
+                                       ptrType(m_traceletFnPtrTy)));
+  emitTraceletTailCall(func);
+}
+
 void LLVMEmitter::emit(const ldimm& inst) {
   assert(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
@@ -1617,6 +1676,18 @@ void LLVMEmitter::emit(const loadzbl& inst) {
   // loadzbl writes all 64 bits of its destination, despite the name
   auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
   defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int64));
+}
+
+// loadqp/leap are intended to be rip-relative instructions, but that's not
+// necessary for correctness. Depending on the target of the load, it may be
+// needed to work with code relocation - see t5662452 for details.
+void LLVMEmitter::emit(const loadqp& inst) {
+  auto addr = m_irb.CreateIntToPtr(cns(inst.s.r.disp), m_int64Ptr);
+  defineValue(inst.d, m_irb.CreateLoad(addr));
+}
+
+void LLVMEmitter::emit(const leap& inst) {
+  defineValue(inst.d, cns(inst.s.r.disp));
 }
 
 void LLVMEmitter::emit(const movb& inst) {
@@ -1715,20 +1786,14 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
 
 void LLVMEmitter::emit(const ldretaddr& inst) {
   auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
-                                       m_retFuncPtrPtrType,
+                                       ptrType(m_traceletFnPtrTy),
                                        "bcast");
   defineValue(inst.d, m_irb.CreateLoad(ptr));
 }
 
 void LLVMEmitter::emit(const retctrl& inst) {
   // "Return" with a tail call to the loaded address
-  // (*value)(rVmSp, rVmTl, rVmFp)
-  std::vector<llvm::Value*> args =
-    { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
-  auto callInst = m_irb.CreateCall(value(inst.s), args);
-  callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
-  callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
-  m_irb.CreateRetVoid();
+  emitTraceletTailCall(value(inst.s));
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {
@@ -2089,6 +2154,10 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
       marker.undo();
     }
     throw e;
+  } catch (const std::exception& e) {
+    always_assert_flog(false,
+                       "Unexpected exception during LLVM codegen: {}\n",
+                       e.what());
   }
 }
 

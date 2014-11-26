@@ -17,10 +17,10 @@
 #ifndef incl_HPHP_VM_CLASS_H_
 #define incl_HPHP_VM_CLASS_H_
 
-#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/preclass.h"
 
 #include "hphp/util/default-ptr.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 #include <boost/range/iterator_range.hpp>
 

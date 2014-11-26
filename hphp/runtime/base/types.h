@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <limits>
 
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/low-ptr.h"
 
 namespace HPHP {
@@ -283,7 +282,6 @@ constexpr bool isValidTransID(TransID transID) {
  */
 using Offset = int32_t;
 constexpr Offset kInvalidOffset = std::numeric_limits<Offset>::max();
-using OffsetSet = hphp_hash_set<Offset>;
 
 /*
  * Various fields in the VM's runtime have indexes that are addressed

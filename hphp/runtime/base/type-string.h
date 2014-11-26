@@ -18,11 +18,13 @@
 #define incl_HPHP_STRING_H_
 
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/functional.h"
 
 #include <algorithm>
 
@@ -52,7 +54,7 @@ constexpr int kMinShrinkThreshold = 1024;
 //////////////////////////////////////////////////////////////////////
 
 StringData* buildStringData(int     n);
-StringData* buildStringData(int64_t   n);
+StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
 
 std::string convDblToStrWithPhpFormat(double n);

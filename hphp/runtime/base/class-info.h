@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_CLASS_INFO_H_
 #define incl_HPHP_CLASS_INFO_H_
 
-#include "hphp/runtime/base/types.h"
 #include <utility>
 #include <vector>
+
 #include "hphp/runtime/base/complex-types.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/functional.h"
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

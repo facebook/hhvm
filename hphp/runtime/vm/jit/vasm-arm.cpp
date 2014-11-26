@@ -91,6 +91,7 @@ private:
   void emit(copy2& i);
   void emit(debugtrap& i) { a->Brk(0); }
   void emit(fallbackcc i);
+  void emit(fallback& i);
   void emit(hcsync& i);
   void emit(hcnocatch& i);
   void emit(hcunwind& i);
@@ -368,6 +369,10 @@ void Vgen::emit(fallbackcc i) {
   } else {
     destSR->emitFallbackJumpCustom(*codeBlock, frozen(), i.dest, i.trflags);
   }
+}
+
+void Vgen::emit(fallback& i) {
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
 }
 
 void Vgen::emit(hcsync& i) {

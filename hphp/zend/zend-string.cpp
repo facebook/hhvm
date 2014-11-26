@@ -226,17 +226,18 @@ char *string_crypt(const char *key, const char *salt) {
 //////////////////////////////////////////////////////////////////////
 
 char *string_bin2hex(const char *input, int len, char* result) {
-  static char hexconvtab[] = "0123456789abcdef";
 
   assert(input);
   if (len == 0) {
     return nullptr;
   }
 
-  int i, j;
+  int i, j, b = 0;
   for (i = j = 0; i < len; i++) {
-    result[j++] = hexconvtab[(unsigned char)input[i] >> 4];
-    result[j++] = hexconvtab[(unsigned char)input[i] & 15];
+    b = input[i] >> 4;
+    result->val[j++] = (unsigned char) (87 + b + (((b - 10) >> 31) & -39));
+    b = input[i] & 0xf;
+    result->val[j++] = (unsigned char) (87 + b + (((b - 10) >> 31) & -39));
   }
   result[j] = '\0';
   len = j;

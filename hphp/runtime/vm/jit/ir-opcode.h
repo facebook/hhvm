@@ -273,28 +273,6 @@ Type outputType(const IRInstruction*, int dstId = 0);
  */
 bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
-
-int minstrBaseIdx(Opcode opc);
-int minstrBaseIdx(const IRInstruction* inst);
-
-struct MInstrEffects {
-  MInstrEffects(Opcode op, Type base);
-
-  static bool supported(Opcode op);
-  static bool supported(const IRInstruction* inst);
-
-  /*
-   * MInstrEffects::get is used to allow multiple different consumers to deal
-   * with the side effects of vector instructions. It takes an instruction and
-   * a LocalStateHook, and a FrameStateMgr, which are defined in frame-state.h.
-   */
-  static void get(const IRInstruction*, const FrameStateMgr&, LocalStateHook&);
-
-  Type baseType;
-  bool baseTypeChanged;
-  bool baseValChanged;
-};
-
 using TcaRange = folly::Range<TCA>;
 
 /*

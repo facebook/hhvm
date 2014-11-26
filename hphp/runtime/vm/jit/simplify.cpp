@@ -20,8 +20,8 @@
 #include <type_traits>
 #include <limits>
 
-#include "hphp/runtime/vm/jit/mc-generator.h" // TODO(#5593564): temporary
-
+#include "hphp/util/overflow.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
@@ -29,8 +29,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/util/overflow.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 
 namespace HPHP { namespace jit {
 
@@ -2348,7 +2347,7 @@ StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
     {
       // Assume it's a vector instruction.  This will assert in minstrBaseIdx
       // if not.
-      auto const base = inst->src(minstrBaseIdx(inst));
+      auto const base = inst->src(minstrBaseIdx(inst->op()));
       // Currently we require that the stack address is the immediate source of
       // the base tmp.
       always_assert(base->inst()->is(LdStackAddr));

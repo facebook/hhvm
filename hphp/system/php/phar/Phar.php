@@ -1055,7 +1055,7 @@ class Phar extends RecursiveDirectoryIterator
    */
   private static function resolveDotDots($pieces) {
     $starts_with_slash = false;
-    if (count($pieces) > 0 && !$pieces[0]) {
+    if (count($pieces) > 0 && !strlen($pieces[0])) {
       $starts_with_slash = true;
     }
 

@@ -51,8 +51,8 @@ let start_server env =
         "")
     | None -> "" in
   let hh_server = Printf.sprintf "%s -d %s %s"
-    (get_hhserver())
-    (Path.string_of_path env.root)
+    (Filename.quote (get_hhserver()))
+    (Filename.quote (Path.string_of_path env.root))
     server_options in
   Printf.fprintf stderr "Server launched with the following command:\n\t%s\n%!"
     hh_server;

@@ -57,7 +57,7 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 }
 
 void MInstrEffects::get(const IRInstruction* inst,
-                        const FrameState& frame,
+                        const FrameStateMgr& frame,
                         LocalStateHook& hook) {
   // If the base for this instruction is a local address, the helper call might
   // have side effects on the local's value
@@ -1378,7 +1378,7 @@ const StaticString s_PackedArray("PackedArray");
 
 void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
   TargetProfile<NonPackedArrayProfile> prof(m_ht.m_context,
-                                            m_irb.marker(),
+                                            m_irb.nextMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
     gen(ProfileArray, RDSHandleData { prof.handle() }, m_base.value);
@@ -1574,7 +1574,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     gen(StLoc, LocalId(base.location.offset), m_irb.fp(), newArr);
   } else if (base.location.space == Location::Stack) {
     m_ht.extendStack(baseStkIdx, Type::Gen);
-    m_ht.replace(baseStkIdx, newArr);
+    m_irb.evalStack().replace(baseStkIdx, newArr);
   } else {
     not_reached();
   }
@@ -1863,7 +1863,8 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     };
 
     // Need to save FP, we're switching to our side exit block, but it hasn't
-    // had a predecessor propagate state to it via FrameState::finishBlock yet.
+    // had a predecessor propagate state to it via FrameStateMgr::finishBlock
+    // yet.
     auto const fp = m_irb.fp();
 
     BlockPusher bp(m_irb, m_marker, m_failedSetBlock);

@@ -327,6 +327,59 @@ TEST(SparseIdMap, ExceptionCleanup) {
   EXPECT_EQ(0, LiveCount::count);
 }
 
+TEST(SparseIdMap, Merge) {
+  struct Foo {
+    bool operator==(Foo f) const { return value == f.value; }
+    uint32_t value;
+  };
+
+  sparse_id_map<uint32_t,Foo> a(1024);
+  sparse_id_map<uint32_t,Foo> b(1024);
+
+  a[0] = Foo { 0 };
+  a[7] = Foo { 7 };
+  for (auto i = uint32_t{0}; i < 200; ++i) {
+    a[30 + i] = Foo { 30 + i };
+  }
+  a[7] = Foo { 3 };
+  b[2] = Foo { 10 };
+  b[7] = Foo { 70 };
+  b[1] = Foo { 10 };
+  b[0] = Foo { 10 };
+
+  EXPECT_EQ(202, a.size());
+  EXPECT_EQ(4, b.size());
+
+  auto merge_calls = uint32_t{0};
+  auto merge_fn = [&] (Foo& dst, const Foo& src) {
+    auto const old = dst.value;
+    dst.value = std::max(dst.value, src.value);
+    ++merge_calls;
+    return old != dst.value;
+  };
+
+  EXPECT_TRUE(a.merge(b, merge_fn));
+  EXPECT_EQ(2, merge_calls);
+
+  EXPECT_EQ(2, a.size());
+
+  EXPECT_EQ(10, a[0].value);
+  EXPECT_EQ(70, a[7].value);
+
+  // Merge a back into b.  They should be the same now.
+  EXPECT_EQ(4, b.size());
+  merge_calls = 0;
+  EXPECT_EQ(2, a.size());
+  EXPECT_TRUE(b.merge(a, merge_fn));
+  EXPECT_EQ(2, merge_calls);
+  EXPECT_EQ(a.size(), b.size());
+  EXPECT_EQ(a, b);
+
+  // Now they shouldn't change either direction:
+  EXPECT_FALSE(a.merge(b, merge_fn));
+  EXPECT_FALSE(b.merge(a, merge_fn));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 TEST(SparseId, StructyLookups) {

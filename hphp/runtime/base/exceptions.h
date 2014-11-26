@@ -22,7 +22,7 @@
 #include <atomic>
 #include <utility>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"

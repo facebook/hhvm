@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "folly/Hash.h"
+#include <folly/Hash.h>
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/typed-value.h"

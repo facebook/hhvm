@@ -25,10 +25,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "folly/gen/Base.h"
-#include "folly/gen/String.h"
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/analyze.h"
@@ -882,10 +883,10 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * Every block must be visited at least once, so we throw them all
    * in to start.
    */
-  std::set<uint32_t,std::greater<uint32_t>> incompleteQ;
-  for (auto& b : ai.rpoBlocks) {
-    incompleteQ.insert(rpoId(b));
-  }
+  auto incompleteQ = dataflow_worklist<uint32_t,std::less<uint32_t>>(
+    ai.rpoBlocks.size()
+  );
+  for (auto& b : ai.rpoBlocks) incompleteQ.push(rpoId(b));
 
   auto const normalPreds   = computeNormalPreds(ai.rpoBlocks);
   auto const factoredPreds = computeFactoredPreds(ai.rpoBlocks);
@@ -899,8 +900,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * block has factored exits.
    */
   while (!incompleteQ.empty()) {
-    auto const blk = ai.rpoBlocks[*begin(incompleteQ)];
-    incompleteQ.erase(begin(incompleteQ));
+    auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
     FTRACE(2, "block #{}\n", blk->id);
 
@@ -931,7 +931,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
-        incompleteQ.insert(rpoId(pred));
+        incompleteQ.push(rpoId(pred));
       }
     }
 
@@ -944,7 +944,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
-        incompleteQ.insert(rpoId(pred));
+        incompleteQ.push(rpoId(pred));
       }
     }
   }

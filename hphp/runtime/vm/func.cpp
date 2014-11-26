@@ -240,13 +240,8 @@ void Func::init(int numParams) {
   }
   if (isSpecial(m_name)) {
     /*
-     * i)  We dont want these compiler generated functions to
-     *     appear in backtraces.
-     *
-     * ii) 86sinit and 86pinit construct NameValueTableWrappers
-     *     on the stack. So we MUST NOT allow those to leak into
-     *     the backtrace (since the backtrace will outlive the
-     *     variables).
+     * We dont want these compiler generated functions to
+     * appear in backtraces.
      */
     m_attrs = m_attrs | AttrNoInjection;
   }

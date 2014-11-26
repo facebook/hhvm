@@ -25,16 +25,17 @@ namespace HPHP { namespace jit {
 struct IRBuilder;
 struct IRUnit;
 struct IRInstruction;
-struct FrameState;
+struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * The main optimization passes, in the order they run.
  */
-void optimizeRefcounts(IRUnit&, FrameState&&);
+void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
 void optimizePredictions(IRUnit&);
-void optimizeMemory(IRUnit&);
+void optimizeLoads(IRUnit&);
+void optimizeStores(IRUnit&);
 void optimizeJumps(IRUnit&);
 
 /*

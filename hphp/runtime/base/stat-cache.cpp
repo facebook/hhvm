@@ -22,7 +22,7 @@
 #include <sys/param.h>
 #include <vector>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/logger.h"

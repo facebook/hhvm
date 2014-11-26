@@ -336,6 +336,10 @@ void Parser::onClassConstant(Token &out, Token *exprs, Token &var,
   onVariable(out, exprs, var, &value, true, m_scanner.detachDocComment());
 }
 
+void Parser::onClassAbstractConstant(Token &out, Token *exprs, Token &var) {
+  onVariable(out, exprs, var, nullptr, true, m_scanner.detachDocComment());
+}
+
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
                         bool constant /* = false */,
                         const std::string &docComment /* = "" */) {
@@ -1482,21 +1486,22 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type) {
+                                  Token *type, bool abstract /* = false */) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
       : NEW_EXP0(ModifierExpression);
 
-    out->stmt = NEW_STMT
-      (ClassVariable, exp,
-       (type) ? type->typeAnnotationName() : "",
-       dynamic_pointer_cast<ExpressionList>(decl->exp));
+    out->stmt = NEW_STMT(
+      ClassVariable, exp,
+      (type) ? type->typeAnnotationName() : "",
+      dynamic_pointer_cast<ExpressionList>(decl->exp));
   } else {
-    out->stmt =
-      NEW_STMT(ClassConstant,
-        (type) ? type->typeAnnotationName() : "",
-        dynamic_pointer_cast<ExpressionList>(decl->exp));
+    out->stmt = NEW_STMT(
+      ClassConstant,
+      (type) ? type->typeAnnotationName() : "",
+      dynamic_pointer_cast<ExpressionList>(decl->exp),
+      abstract);
   }
 }
 

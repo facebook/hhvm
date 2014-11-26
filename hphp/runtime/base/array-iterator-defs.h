@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_ARRAY_ITERATOR_DEFS_H_
 #define incl_HPHP_ARRAY_ITERATOR_DEFS_H_
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 namespace HPHP {
 

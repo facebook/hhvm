@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -35,6 +35,12 @@
 namespace HPHP { namespace jit {
 
 namespace {
+
+TRACE_SET_MOD(hhir);
+using Trace::Indent;
+
+//////////////////////////////////////////////////////////////////////
+
 template<typename M>
 const typename M::mapped_type& get_required(const M& m,
                                             typename M::key_type key) {
@@ -50,23 +56,24 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   inst->convertToNop();
   return nullptr;
 }
+
+//////////////////////////////////////////////////////////////////////
+
 }
-
-using Trace::Indent;
-
-TRACE_SET_MOD(hhir);
 
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
-  , m_state(unit, initMarker)
+  , m_initialMarker(initMarker)
+  , m_nextMarker(initMarker)
+  , m_state(m_unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
   , m_constrainGuards(shouldHHIRRelaxGuards())
 {
-  m_state.setBuilding(true);
+  m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_state.setEnableCse(RuntimeOption::EvalHHIRCse &&
-                         !RuntimeOption::EvalHHIRBytecodeControlFlow);
+    m_enableCse = RuntimeOption::EvalHHIRCse &&
+      !RuntimeOption::EvalHHIRBytecodeControlFlow;
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 
@@ -74,9 +81,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   // don't always call IRBuilder::startBlock when starting to emit IR, namely
   // in selectTracelet.
   m_state.markVisited(m_curBlock);
-}
-
-IRBuilder::~IRBuilder() {
 }
 
 /*
@@ -106,7 +110,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   if (shouldConstrainGuards()) {
     // If we're constraining guards, some instructions need certain information
     // to be recorded in side tables.
-    if (inst->is(AssertLoc, CheckLoc, LdLoc, LdLocPseudoMain)) {
+    if (inst->is(AssertLoc, CheckLoc, LdLoc)) {
       auto const locId = inst->extra<LocalId>()->locId;
       m_constraints.typeSrcs[inst] = localTypeSources(locId);
       if (inst->is(AssertLoc, CheckLoc)) {
@@ -172,6 +176,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   }
 
   m_state.update(inst);
+  cseUpdate(*inst);
 }
 
 void IRBuilder::appendBlock(Block* block) {
@@ -181,7 +186,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_state.marker());
+  m_state.startBlock(block, m_nextMarker);
   m_curBlock = block;
 }
 
@@ -342,7 +347,6 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
 SSATmp* IRBuilder::preOptimizeAssertType(IRInstruction* inst) {
   auto const src = inst->src(0);
-
   return preOptimizeAssertTypeOp(inst, src->type(), src, src->inst());
 }
 
@@ -401,7 +405,8 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (fpInst->is(DefInlineFP)) {
     // TODO(#5623596): this optimization required for correctness in refcount
     // opts right now.
-    if (!m_state.frameSpansCall()) { // check that we haven't nuked the SSATmp
+    // check that we haven't nuked the SSATmp
+    if (!m_state.frameMaySpanCall()) {
       auto spInst = findSpillFrame(fpInst->src(0));
       // In an inlined call, we should always be able to find our SpillFrame.
       always_assert(spInst && spInst->src(0) == fpInst->src(1));
@@ -467,14 +472,6 @@ SSATmp* IRBuilder::preOptimizeDecRefLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocPseudoMain(IRInstruction* inst) {
-  auto const locId = inst->extra<LdLocPseudoMain>()->locId;
-  auto const locType = localType(locId, DataTypeGeneric);
-  auto const minType = std::min(locType, inst->typeParam()).relaxToGuardable();
-  inst->setTypeParam(minType);
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
@@ -486,7 +483,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // unreachable code elimination take care of it later.
   if (type.not(inst->typeParam())) return nullptr;
 
-  // If FrameState's type isn't as good as the type param, we're missing
+  // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
   assert(inst->typeParam() >= type);
   inst->setTypeParam(std::min(type, inst->typeParam()));
@@ -547,7 +544,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
     X(DecRefThis);
     X(DecRefLoc);
     X(LdLoc);
-    X(LdLocPseudoMain);
     X(StLoc);
   default:
     break;
@@ -578,9 +574,8 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   FTRACE(1, "optimize: {}\n", inst->toString());
 
   auto doCse = [&] (IRInstruction* cseInput) -> SSATmp* {
-    if (m_state.enableCse() && cseInput->canCSE()) {
-      SSATmp* cseResult = m_state.cseLookup(cseInput, srcBlock, idoms);
-      if (cseResult) {
+    if (m_enableCse && cseInput->canCSE()) {
+      if (auto const cseResult = cseLookup(*cseInput, srcBlock, idoms)) {
         // Found a dominating instruction that can be used instead of input
         FTRACE(1, "  {}cse found: {}\n",
                indent(), cseResult->inst()->toString());
@@ -703,31 +698,44 @@ void IRBuilder::reoptimize() {
   always_assert(m_savedBlocks.empty());
   always_assert(!m_curWhere);
 
-  auto const changed = splitCriticalEdges(m_unit);
-  if (changed) {
+  if (splitCriticalEdges(m_unit)) {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
   }
 
-  m_state.clear();
-  m_state.setEnableCse(RuntimeOption::EvalHHIRCse);
+  m_state = FrameStateMgr(m_unit, m_initialMarker);
+  m_cseHash.clear();
+  m_enableCse = RuntimeOption::EvalHHIRCse;
   m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
-  if (!m_state.enableCse() && !m_enableSimplification) return;
+  if (!m_enableCse && !m_enableSimplification) return;
   setConstrainGuards(false);
-  m_state.setBuilding(false);
+
+  // This is a work in progress that we want committed, but that has some
+  // issues still.
+  auto const use_fixed_point = false;
 
   auto blocksIds = rpoSortCfgWithIds(m_unit);
   auto const idoms = findDominators(m_unit, blocksIds);
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
-  for (auto* block : blocksIds.blocks) {
+  if (use_fixed_point) {
+    m_state.computeFixedPoint(blocksIds);
+  } else {
+    m_state.setLegacyReoptimize();
+  }
+
+  for (auto block : blocksIds.blocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
 
     // Skip block if it's unreachable.
     if (!reachable.test(block->id())) continue;
 
-    m_state.startBlock(block, block->front().marker());
+    if (use_fixed_point) {
+      m_state.loadBlock(block);
+    } else {
+      m_state.startBlock(block, block->front().marker());
+    }
     m_curBlock = block;
 
     auto nextBlock = block->next();
@@ -738,11 +746,11 @@ void IRBuilder::reoptimize() {
       auto* inst = &instructions.front();
       instructions.pop_front();
 
-      // merging state looks at the current marker, and optimizeWork
-      // below may create new instructions. Use the marker from this
+      // optimizeWork below may create new instructions, and will use
+      // m_nextMarker to decide where they are. Use the marker from this
       // instruction.
       assert(inst->marker().valid());
-      setMarker(inst->marker());
+      setNextMarker(inst->marker());
 
       auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
@@ -785,7 +793,9 @@ void IRBuilder::reoptimize() {
     // Mark successor blocks as reachable.
     if (block->back().next())  reachable.set(block->back().next()->id());
     if (block->back().taken()) reachable.set(block->back().taken()->id());
-    m_state.finishBlock(block);
+    if (!use_fixed_point) {
+      m_state.finishBlock(block);
+    }
   }
 }
 
@@ -826,11 +836,10 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   Indent _i;
 
   auto inst = val->inst();
-  if (inst->is(LdLoc, LdLocPseudoMain)) {
-    // We've hit a LdLoc, or LdLocPseudoMain. If the value's type source is
-    // non-null and not a FramePtr, it's a real value that was killed by a
-    // Call. The value won't be live but it's ok to use it to track down the
-    // guard.
+  if (inst->is(LdLoc)) {
+    // We've hit a LdLoc. If the value's type source is non-null and not a
+    // FramePtr, it's a real value that was killed by a Call. The value won't
+    // be live but it's ok to use it to track down the guard.
 
     always_assert_flog(m_constraints.typeSrcs.count(inst),
                        "No typeSrcs found for {}\n\n{}", *inst, m_unit);
@@ -1075,7 +1084,13 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
 }
 
 Type IRBuilder::predictedInnerType(uint32_t id) {
-  return m_state.predictedInnerType(id);
+  auto const ty = m_state.predictedLocalType(id);
+  assert(ty.isBoxed());
+  return ldRefReturn(ty.unbox());
+}
+
+Type IRBuilder::predictedLocalType(uint32_t id) {
+  return m_state.predictedLocalType(id);
 }
 
 SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
@@ -1083,26 +1098,23 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.localValue(id);
 }
 
-void IRBuilder::setMarker(BCMarker marker) {
-  auto const oldMarker = m_state.marker();
-
-  if (marker == oldMarker) return;
+void IRBuilder::setNextMarker(BCMarker newMarker) {
+  if (newMarker == m_nextMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         oldMarker.valid() ? oldMarker.show() : "<invalid>", marker.show());
-  assert(marker.valid());
-  m_state.setMarker(marker);
+         m_nextMarker.valid() ? m_nextMarker.show() : "<invalid>",
+         newMarker.show());
+  assert(newMarker.valid());
+  m_nextMarker = newMarker;
 }
 
-void IRBuilder::insertPhis(bool forceSpPhi) {
-  ITRACE(2, "insertPhis starting for B{} with {} preds, forceSpPhi = {}\n",
+void IRBuilder::insertSPPhi(bool forceSpPhi, BCMarker marker) {
+  ITRACE(2, "insertSPPhi starting for B{} with {} preds, forceSpPhi = {}\n",
          m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
   Trace::Indent _i;
 
   if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
 
-  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToPhiTmpsMap;
-  jit::hash_map<Block*, jit::vector<SSATmp*>> blockToLdLocs;
-  jit::vector<uint32_t> localIds;
+  jit::hash_map<Block*,SSATmp*> blockToPhiTmpsMap;
 
   // First, determine if we need a phi for vmsp.
   auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
@@ -1116,66 +1128,12 @@ void IRBuilder::insertPhis(bool forceSpPhi) {
   ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
   if (needSpPhi) {
     for (auto& e : m_curBlock->preds()) {
-      auto inBlock = e.from();
-      auto inSp = m_state.spLeavingBlock(inBlock);
-      blockToPhiTmpsMap[inBlock].push_back(inSp);
+      auto const inBlock = e.from();
+      blockToPhiTmpsMap[inBlock] = m_state.spLeavingBlock(inBlock);
     }
   }
 
-  // Determine which SSATmps must receive a phi. To make some optimizations
-  // simpler, we require that an SSATmp for a local is either provided in no
-  // incoming branches, or all incoming branches. Sometimes we have to insert
-  // LdLocs in our preds to make this true.
-  for (int i = 0; i < m_state.func()->numLocals(); i++) {
-    jit::hash_set<Edge*> missingPreds;
-    jit::hash_set<SSATmp*> incomingValues;
-
-    for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.from();
-      auto local = m_state.localsLeavingBlock(pred)[i].value;
-      if (local == nullptr) missingPreds.insert(&e);
-      incomingValues.insert(local);
-    }
-
-    ITRACE(3, "local {} needs phi: {}\n", i, incomingValues.size() == 1);
-    // If there's only one unique incoming value, we don't need a phi. This
-    // includes situations where no incoming blocks provide the value, since
-    // they're really providing nullptr.
-    if (incomingValues.size() == 1) continue;
-    localIds.push_back(i);
-
-    for (auto& e : m_curBlock->preds()) {
-      Block* pred = e.from();
-      auto& local = m_state.localsLeavingBlock(pred)[i];
-      if (missingPreds.count(&e)) {
-        // We need to insert a LdLoc<i> on this incoming edge. It's safe to use
-        // the fpValue from m_curBlock since we currently require that all our
-        // preds share the same fp.
-        auto* ldLoc = m_unit.gen(LdLoc, e.inst()->marker(),
-                                 local.type, LocalId(i), m_state.fp());
-        if (shouldConstrainGuards()) {
-          m_constraints.typeSrcs[ldLoc] = TypeSourceSet();
-          for (auto typeSrc : local.typeSrcs) {
-            m_constraints.typeSrcs[ldLoc].insert(typeSrc);
-          }
-        }
-
-        if (pred->numSuccs() > 1) {
-          // The edge is critical so don't insert the LdLoc until after
-          // splitting it.
-          blockToLdLocs[pred].push_back(ldLoc->dst());
-        } else {
-          pred->insert(pred->iteratorTo(e.inst()), ldLoc);
-        }
-        blockToPhiTmpsMap[pred].push_back(ldLoc->dst());
-      } else {
-        blockToPhiTmpsMap[pred].push_back(local.value);
-      }
-    }
-  }
-
-  auto const numPhis = localIds.size() + needSpPhi;
-  if (numPhis == 0) return;
+  if (!needSpPhi) return;
 
   // Split incoming critical edges so we can modify Jmp srcs of preds.
 repeat:
@@ -1183,36 +1141,25 @@ repeat:
     IRInstruction* branch = e.inst();
     Block* pred = branch->block();
     if (pred->numSuccs() > 1) {
-      Block* middle = splitEdge(m_unit, pred, m_curBlock, m_state.marker());
+      auto const middle = splitEdge(m_unit, pred, m_curBlock);
+      blockToPhiTmpsMap[middle] = blockToPhiTmpsMap[pred];
 
-      auto ldLocIt = blockToLdLocs.find(pred);
-      if (ldLocIt != blockToLdLocs.end()) {
-        // There are one or more LdLocs that need to be inserted on the
-        // newly-split edge.
-        for (auto tmp : ldLocIt->second) {
-          middle->insert(middle->backIter(), tmp->inst());
-        }
-        blockToLdLocs.erase(ldLocIt);
-      }
-
-      auto& vec = blockToPhiTmpsMap[middle];
-      std::copy(blockToPhiTmpsMap[pred].begin(),
-                blockToPhiTmpsMap[pred].end(),
-                std::inserter(vec, vec.begin()));
-
-      // Mark the new block as visited so FrameState doesn't see an
+      // Mark the new block as visited so FrameStateMgr doesn't see an
       // unprocessed predecessor for the join point.
       m_state.markVisited(middle);
 
       goto repeat;
     }
   }
-  always_assert(blockToLdLocs.empty());
 
-  // Modify the incoming Jmps to set the phi inputs.
+  // Modify the incoming Jmps to set the phi inputs.  Copy to a vector before
+  // modifying things---we're going to be changing the pred EdgeList (by
+  // modifying jump instructions).
+  auto pred_vec = jit::vector<Block*>{};
   for (auto& e : m_curBlock->preds()) {
-    Block* pred = e.from();
-    jit::vector<SSATmp*>& tmpVec = blockToPhiTmpsMap[pred];
+    pred_vec.push_back(e.from());
+  }
+  for (auto const pred : pred_vec) {
     auto& jmp = pred->back();
     always_assert_log(
       jmp.is(Jmp),
@@ -1220,23 +1167,17 @@ repeat:
         return folly::format("Need Jmp to create a phi, instead got: {}",
                              jmp.toString()).str();
       });
+    // TODO(#4810319): this function can't handle already having a phi, but
+    // we're going to stop phi'ing stacks eventually anyway.
     always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
-    m_unit.replace(&jmp, Jmp, std::make_pair(tmpVec.size(), tmpVec.data()));
+    m_unit.replace(&jmp, Jmp, jmp.taken(), blockToPhiTmpsMap[pred]);
   }
 
-  // Create a DefLabel with appropriately-typed dests. We pass a vector of 1's
-  // for the producedRefs argument to defLabel since each local owns a single
-  // reference to its value.
-  IRInstruction* label = m_unit.defLabel(numPhis, m_state.marker(),
-                                         jit::vector<unsigned>(numPhis, 1));
+  // Create a DefLabel for the sp phi.
+  auto const label = m_unit.defLabel(1, marker, {0u});
   assert(m_curBlock->empty());
   appendInstruction(label);
   retypeDests(label, &m_unit);
-
-  // Add TrackLoc's to update local state.
-  for (unsigned i = 0, n = localIds.size(); i < n; ++i) {
-    gen(TrackLoc, LocalId(localIds.at(i)), label->dst(i + needSpPhi));
-  }
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
@@ -1262,8 +1203,8 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_state.finishBlock(m_curBlock);
   m_curBlock = block;
 
-  m_state.startBlock(m_curBlock, marker, nullptr, isLoopHeader);
-  insertPhis(isLoopHeader);
+  m_state.startBlock(m_curBlock, marker, isLoopHeader);
+  insertSPPhi(isLoopHeader, marker);
   always_assert(sp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
@@ -1298,15 +1239,15 @@ void IRBuilder::pushBlock(BCMarker marker,
                           Block* b,
                           const folly::Optional<Block::iterator>& where) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, m_state.marker().show(), b, marker.show());
+         m_curBlock, m_nextMarker.show(), b, marker.show());
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState{ m_curBlock, m_state.marker(), m_curWhere });
+    BlockState{ m_curBlock, m_nextMarker, m_curWhere });
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
   m_curBlock = b;
-  setMarker(marker);
+  setNextMarker(marker);
   m_curWhere = where ? where : b->end();
 
   if (do_assert) {
@@ -1322,7 +1263,7 @@ void IRBuilder::popBlock(bool pause) {
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, m_state.marker().show(), top.block, top.marker.show());
+         m_curBlock, m_nextMarker.show(), top.block, top.marker.show());
   if (pause) {
     m_state.pauseBlock(m_curBlock);
   } else {
@@ -1330,9 +1271,59 @@ void IRBuilder::popBlock(bool pause) {
   }
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
-  setMarker(top.marker);
+  setNextMarker(top.marker);
   m_curWhere = top.where;
   m_savedBlocks.pop_back();
 }
+
+//////////////////////////////////////////////////////////////////////
+
+CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) {
+  return inst.is(DefConst) ? m_unit.constTable() : m_cseHash;
+}
+
+const CSEHash& IRBuilder::cseHashTable(const IRInstruction& inst) const {
+  return const_cast<IRBuilder*>(this)->cseHashTable(inst);
+}
+
+SSATmp* IRBuilder::cseLookup(const IRInstruction& inst,
+                             const Block* srcBlock,
+                             const folly::Optional<IdomVector>& idoms) const {
+  auto tmp = cseHashTable(inst).lookup(const_cast<IRInstruction*>(&inst));
+  if (tmp && idoms) {
+    // During a reoptimize pass, we need to make sure that any values we want
+    // to reuse for CSE are only reused in blocks dominated by the block that
+    // defines it.
+    if (tmp->inst()->is(DefConst)) return tmp;
+    auto const dom = findDefiningBlock(tmp);
+    if (!dom || !dominates(dom, srcBlock, *idoms)) return nullptr;
+  }
+  return tmp;
+}
+
+void IRBuilder::cseUpdate(const IRInstruction& inst) {
+  switch (inst.op()) {
+  case Call:
+  case CallArray:
+  case ContEnter:
+    m_cseHash.clear();
+    break;
+  default:
+    break;
+  }
+
+  if (m_enableCse && inst.canCSE()) {
+    cseHashTable(inst).insert(inst.dst());
+  }
+  if (inst.killsSources()) {
+    for (auto i = uint32_t{0}; i < inst.numSrcs(); ++i) {
+      if (inst.killsSource(i) && inst.src(i)->inst()->canCSE()) {
+        cseHashTable(inst).erase(inst.src(i));
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

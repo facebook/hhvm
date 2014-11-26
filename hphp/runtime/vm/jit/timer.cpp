@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include <map>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/timer.h"

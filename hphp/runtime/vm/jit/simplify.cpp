@@ -971,7 +971,7 @@ SSATmp* cmpImpl(State& env,
 
   // ---------------------------------------------------------------------
   // Perform type juggling and type canonicalization for different types
-  // see http://www.php.net/manual/en/language.operators.comparison.php
+  // see http://docs.hhvm.com/manual/en/language.operators.comparison.php
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right
@@ -1496,7 +1496,11 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
-  if (ty < Type::Obj && ty.getClass() && ty.getClass()->isCollectionClass()) {
+
+  if (!typeMightRelax(inst->src(0)) &&
+      ty < Type::Obj &&
+      ty.getClass() &&
+      ty.getClass()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -1921,10 +1925,10 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   if (src->isConst()) return cns(env, src->arrVal()->size());
 
-  auto const notNvtw =
-    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kNvtwKind;
+  auto const notGlobals =
+    ty.hasArrayKind() && ty.getArrayKind() != ArrayData::kGlobalsKind;
 
-  if (!mightRelax(env, src) && notNvtw) {
+  if (!mightRelax(env, src) && notGlobals) {
     return gen(env, CountArrayFast, src);
   }
 

@@ -73,7 +73,7 @@ IRInstruction* findSpillFrame(SSATmp* sp) {
 //////////////////////////////////////////////////////////////////////
 
 Block* findDefiningBlock(const SSATmp* t) {
-  assert(!t->isConst());
+  assert(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();
 
   /*

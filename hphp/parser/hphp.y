@@ -9,7 +9,7 @@
 #define YYLEX_PARAM _p
 
 #include "hphp/compiler/parser/parser.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 
@@ -1495,6 +1495,9 @@ class_statement:
                                          ($$,&$1,$4,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
                                          ($$,NULL,$1,NULL);}
+  | class_abstract_constant_declaration ';'
+                                       { _p->onClassVariableStart
+                                         ($$,NULL,$1,NULL, true);}
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
                                        { _p->onNewLabelScope(true);
@@ -1581,6 +1584,10 @@ xhp_attribute_decl:
 
 xhp_attribute_decl_type:
     T_ARRAY                            { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type
+    T_TYPELIST_GT                      { $$ = 4;}
+  | T_ARRAY T_TYPELIST_LT hh_type ','
+    hh_type T_TYPELIST_GT              { $$ = 4;}
   | fully_qualified_class_name         { /* This case handles all types other
                                             than "array", "var" and "enum".
                                             For now we just use type code 5;
@@ -1710,6 +1717,12 @@ class_constant_declaration:
     hh_name_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
   | T_CONST hh_name_with_type '='
     static_expr                         { _p->onClassConstant($$,0,$2,$4);}
+;
+class_abstract_constant_declaration:
+    class_abstract_constant_declaration ','
+    hh_name_with_type                   { _p->onClassAbstractConstant($$,&$1,$3);}
+  | T_ABSTRACT T_CONST hh_name_with_type
+                                        { _p->onClassAbstractConstant($$,NULL,$3);}
 ;
 
 expr_with_parens:
@@ -2773,7 +2786,7 @@ dimmable_variable_no_calls:
                                     { _p->onObjectProperty($$,$1,$2.num(),$3);}
   | '(' expr_with_parens ')'
     object_operator
-    object_property_name_no_variables 
+    object_property_name_no_variables
                                     { _p->onObjectProperty($$,$2,$4.num(),$5);}
   | '(' variable ')'                   { $$ = $2;}
 ;

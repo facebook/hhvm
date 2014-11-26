@@ -20,9 +20,25 @@
 #include <assert.h>
 #include <zlib.h>
 #include <ctype.h>
+#include <stdarg.h>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
+
+namespace HPHP { namespace hfsort {
+
+void error(const char* msg) {
+  printf("ERROR: %s\n", msg);
+  exit(1);
+}
+
+void trace(const char* fmt, ...) {
+  va_list args;
+
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+}
 
 void readSymbols(FILE *file) {
   char     line[BUFLEN];
@@ -83,11 +99,8 @@ void readPerfData(gzFile file, bool computeArcWeight) {
   if (!computeArcWeight) return;
 
   // Normalize incoming arc weights for each node.
-  for (size_t f = 0; f < cg.funcs.size(); f++) {
-    Func& func = cg.funcs[f];
-    auto& inArcs = func.inArcs;
-    for (size_t a = 0; a < inArcs.size(); a++) {
-      Arc* arc = inArcs[a];
+  for (auto& func : cg.funcs) {
+    for (auto arc : func.inArcs) {
       arc->normalizedWeight = arc->weight / func.samples;
     }
   }
@@ -172,7 +185,11 @@ Algorithm checkAlgorithm(const char* algorithm) {
   return Algorithm::Invalid;
 }
 
+} }
+
 int main(int argc, char* argv[]) {
+  using namespace HPHP::hfsort;
+
   char* symbFileName = nullptr;
   char* perfFileName = nullptr;
   char* edgcntFileName = nullptr;

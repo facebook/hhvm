@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <poll.h>
 #include <sys/time.h>
 

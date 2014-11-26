@@ -1,15 +1,19 @@
 <?hh
-require __DIR__.'/require_constraint_repo_ifaces.inc';
+require __DIR__.'/require_constraint_repo_ifaces1.inc';
+require __DIR__.'/require_constraint_repo_ifaces2.inc';
 
-trait DYI implements IDY {}
+class C1 {
+  use ChildRequiresT;
+  use ChildProvidesT;
+}
 
-class C {
-  use MyT; // requires IDY
-  use DYI; // provides IDY
+class C2 extends Super {
+  use ChildRequiresT;
 }
 
 function main() {
-  $c = new C();
+  $c1 = new C1();
+  $c2 = new C2();
   echo 'Done', "\n";
 }
 main();

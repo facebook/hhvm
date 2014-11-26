@@ -2230,7 +2230,7 @@ struct DecodedInstruction {
   int64_t immediate() const;
   bool setImmediate(int64_t value);
   bool isNop() const;
-  bool isBranch() const;
+  bool isBranch(bool allowCond = true) const;
   bool isCall() const;
   bool shrinkBranch();
   void widenBranch();

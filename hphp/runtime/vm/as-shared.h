@@ -17,7 +17,7 @@
 #define incl_HPHP_AS_SHARED_H_
 
 #include <string>
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {

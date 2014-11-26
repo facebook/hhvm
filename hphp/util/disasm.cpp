@@ -20,7 +20,7 @@
 
 #include "boost/algorithm/string.hpp"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-color.h"

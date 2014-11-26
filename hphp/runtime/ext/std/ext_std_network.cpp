@@ -23,8 +23,8 @@
 #include <resolv.h>
 #include <sys/socket.h>
 
-#include "folly/IPAddress.h"
-#include "folly/ScopeGuard.h"
+#include <folly/IPAddress.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"

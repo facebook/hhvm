@@ -21,8 +21,8 @@
 #include <functional>
 #include "hphp/runtime/base/strings.h"
 
-#include "folly/Format.h"
-#include "folly/Conv.h"
+#include <folly/Format.h>
+#include <folly/Conv.h>
 #include "hphp/util/trace.h"
 #include "hphp/util/stack-trace.h"
 

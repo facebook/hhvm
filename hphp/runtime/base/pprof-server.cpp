@@ -18,8 +18,8 @@
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 
-#include "folly/Format.h"
-#include "folly/Conv.h"
+#include <folly/Format.h>
+#include <folly/Conv.h>
 
 #include <mutex>
 #include <condition_variable>

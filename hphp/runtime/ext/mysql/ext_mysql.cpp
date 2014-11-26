@@ -20,8 +20,8 @@
 #include <netdb.h>
 #include <poll.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"

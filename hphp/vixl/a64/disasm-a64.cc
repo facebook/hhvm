@@ -27,7 +27,7 @@
 #include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/util/text-color.h"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 namespace vixl {
 

@@ -19,9 +19,9 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-worker.h"
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
-#include "folly/io/async/EventBaseManager.h" // @nolint
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
+#include <folly/io/async/EventBaseManager.h> // @nolint
 #include "thrift/lib/cpp/async/TAsyncTransport.h" // @nolint
 #include "proxygen/lib/services/Acceptor.h" // @nolint
 

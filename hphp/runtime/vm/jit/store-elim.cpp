@@ -24,13 +24,15 @@
 
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/alocation-analysis.h"
+#include "hphp/runtime/vm/jit/alias-analysis.h"
 
 namespace HPHP { namespace jit {
 
@@ -48,21 +50,19 @@ struct BlockState {
   ALocBits liveOut;
 };
 
-struct FrameBits { uint32_t numLocals; uint32_t startIndex; };
-
 // Environment for the whole optimization pass.
 struct Global {
   explicit Global(IRUnit& unit)
     : unit(unit)
     , poBlockList(poSortCfg(unit))
-    , linfo(collect_locations(unit, poBlockList))
+    , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
     , mainFp{unit.entry()->begin()->dst()}
   {}
 
   IRUnit& unit;
   BlockList poBlockList;
-  ALocationAnalysis linfo;
+  AliasAnalysis ainfo;
 
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
@@ -123,7 +123,7 @@ void addKill(Local& env, folly::Optional<uint32_t> bit) {
 }
 
 void killFrame(Local& env, const SSATmp* fp) {
-  auto const killSet = env.global.linfo.per_frame_bits[fp];
+  auto const killSet = env.global.ainfo.per_frame_bits[fp];
   FTRACE(4, "      kill: {}\n", show(killSet));
   env.kill |= killSet;
   env.gen  &= ~killSet;
@@ -132,18 +132,18 @@ void killFrame(Local& env, const SSATmp* fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-void load(Local& env, ALocation loc) {
-  if (auto const meta = env.global.linfo.find(canonicalize(loc))) {
+void load(Local& env, AliasClass acls) {
+  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
     addGen(env, meta->index);
     addGenSet(env, meta->conflicts);
     return;
   }
 
-  addGenSet(env, env.global.linfo.may_alias(loc));
+  addGenSet(env, env.global.ainfo.may_alias(acls));
 }
 
-folly::Optional<uint32_t> pure_store_bit(Local& env, ALocation loc) {
-  if (auto const meta = env.global.linfo.find(canonicalize(loc))) {
+folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
+  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
     return meta->index;
   }
   return folly::none;
@@ -157,7 +157,7 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllGen(env); },
     [&] (InterpOneEffects)  { addAllGen(env); },
-    [&] (PureLoad l)        { load(env, l.loc); },
+    [&] (PureLoad l)        { load(env, l.src); },
     [&] (MayLoadStore l)    { load(env, l.loads); },
     [&] (KillFrameLocals l) { killFrame(env, l.fp); },
     [&] (ReturnEffects)     { killFrame(env, env.global.mainFp); },
@@ -183,7 +183,7 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (PureStore l) {
-      auto bit = pure_store_bit(env, l.loc);
+      auto bit = pure_store_bit(env, l.dst);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }
@@ -200,7 +200,7 @@ void visit(Local& env, IRInstruction& inst) {
      * where we can, but we must support this anyway for correctness.
      */
     [&] (PureStoreNT l) {
-      auto bit = pure_store_bit(env, l.loc);
+      auto bit = pure_store_bit(env, l.dst);
       if (isDead(env, bit)) {
         removeDead(env, inst);
       }
@@ -252,32 +252,30 @@ void optimize_block(Global& genv, Block* block) {
 
 }
 
-void optimizeMemory(IRUnit& unit) {
+void optimizeStores(IRUnit& unit) {
   if (RuntimeOption::EnableArgsInBacktraces) {
     // We don't run this pass if this is enabled, because it could omit stores
     // to argument locals.
     return;
   }
-
-  FTRACE(1, "optimizeMemory:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "optimizeMemory:^^^^^^^^^^^^^^^^^^^^\n"); };
+  PassTracer tracer{&unit, Trace::hhir_meme, "optimizeStores"};
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.
   splitCriticalEdges(unit);
 
-  auto incompleteQ = std::set<PostOrderId>{};
+  auto incompleteQ = dataflow_worklist<PostOrderId>(unit.numBlocks());
 
   /*
    * Global state for this pass, visible while processing any block.
    */
   auto genv = Global { unit };
   auto const& poBlockList = genv.poBlockList;
-  if (genv.linfo.locations.size() == 0) {
+  if (genv.ainfo.locations.size() == 0) {
     FTRACE(1, "no memory accesses to possibly optimize\n");
     return;
   }
-  FTRACE(1, "\nLocations:\n{}\n", show(genv.linfo));
+  FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
 
   /*
    * Initialize the block state structures, and collect information about
@@ -285,7 +283,7 @@ void optimizeMemory(IRUnit& unit) {
    */
   for (auto poId = uint32_t{0}; poId < poBlockList.size(); ++poId) {
     genv.blockStates[poBlockList[poId]->id()].id = poId;
-    incompleteQ.insert(poId);
+    incompleteQ.push(poId);
   }
 
   /*
@@ -326,9 +324,8 @@ void optimizeMemory(IRUnit& unit) {
    */
   FTRACE(4, "Iterating\n");
   while (!incompleteQ.empty()) {
-    auto const poId = *begin(incompleteQ);
+    auto const poId = incompleteQ.pop();
     auto const blk  = poBlockList[poId];
-    incompleteQ.erase(begin(incompleteQ));
 
     auto& state         = genv.blockStates[blk->id()];
     auto const transfer = blockAnalysis[poId];
@@ -360,7 +357,7 @@ void optimizeMemory(IRUnit& unit) {
       predState.liveOut |= state.liveIn;
 
       if (predState.liveOut != oldLiveOut) {
-        incompleteQ.insert(predState.id);
+        incompleteQ.push(predState.id);
       }
     });
   }

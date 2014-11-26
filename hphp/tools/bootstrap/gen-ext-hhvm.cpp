@@ -24,9 +24,9 @@
 #include <unordered_set>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "folly/FBString.h"
-#include "folly/Format.h"
-#include "folly/ScopeGuard.h"
+#include <folly/FBString.h>
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/tools/bootstrap/idl.h"
 

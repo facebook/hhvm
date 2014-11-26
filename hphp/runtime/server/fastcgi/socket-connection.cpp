@@ -16,11 +16,11 @@
 
 #include "hphp/runtime/server/fastcgi/socket-connection.h"
 #include "hphp/util/assertions.h"
-#include "folly/io/IOBuf.h"
+#include <folly/io/IOBuf.h>
 #include "thrift/lib/cpp/async/TAsyncTransport.h"
-#include "folly/SocketAddress.h"
+#include <folly/SocketAddress.h>
 #include "thrift/lib/cpp/transport/TTransportException.h"
-#include "folly/experimental/wangle/ManagedConnection.h"
+#include <folly/experimental/wangle/ManagedConnection.h>
 
 namespace HPHP {
 

@@ -31,8 +31,8 @@
 #include <sys/uio.h>
 #include <poll.h>
 
-#include "folly/String.h"
-#include "folly/SocketAddress.h"
+#include <folly/String.h>
+#include <folly/SocketAddress.h>
 
 #include "hphp/util/network.h"
 #include "hphp/runtime/base/socket.h"

@@ -96,7 +96,12 @@ namespace HPHP {
   }                                                                     \
   virtual void sweep() override;
 
-#define IMPLEMENT_OBJECT_ALLOCATION(T)          \
+#define IMPLEMENT_OBJECT_ALLOCATION(T) \
+  static_assert(std::is_base_of<ObjectData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
+  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
   void HPHP::T::sweep() { this->~T(); }
 
 /**

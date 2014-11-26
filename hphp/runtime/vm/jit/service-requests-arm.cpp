@@ -16,7 +16,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"

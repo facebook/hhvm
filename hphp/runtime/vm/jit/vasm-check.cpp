@@ -169,6 +169,7 @@ bool isBlockEnd(Vinstr& inst) {
     case Vinstr::unwind:
     case Vinstr::vinvoke:
     case Vinstr::ret:
+    case Vinstr::retctrl:
     case Vinstr::fallthru:
     // arm specific
     case Vinstr::hcunwind:

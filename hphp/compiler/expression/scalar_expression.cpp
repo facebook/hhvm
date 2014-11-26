@@ -33,7 +33,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include <sstream>
 #include <cmath>

@@ -43,7 +43,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/base/file-util.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <dirent.h>
 #include <glob.h>
 #include <sys/types.h>

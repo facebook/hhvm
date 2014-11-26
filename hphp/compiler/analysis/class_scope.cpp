@@ -45,7 +45,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/util/text-util.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
@@ -465,7 +465,9 @@ void ClassScope::addImportTraitMethod(const TraitMethod &traitMethod,
 
 void ClassScope::addClassRequirement(const string &requiredName,
                                      bool isExtends) {
-  assert(isTrait() || (isInterface() && isExtends));
+  assert(isTrait() || (isInterface() && isExtends)
+         // when flattening traits, their requirements get flattened
+         || Option::WholeProgram);
   if (isExtends) {
     m_requiredExtends.insert(requiredName);
   } else {
@@ -552,38 +554,13 @@ void ClassScope::findTraitMethodsToImport(AnalysisResultPtr ar,
 
 void ClassScope::importClassRequirements(AnalysisResultPtr ar,
                                          ClassScopePtr trait) {
-  if (isTrait()) {
-    for (auto const& req : trait->getClassRequiredExtends()) {
-      addClassRequirement(req, true);
-    }
-    for (auto const& req : trait->getClassRequiredImplements()) {
-      addClassRequirement(req, false);
-    }
-  } else {
-    for (auto const& req : trait->getClassRequiredExtends()) {
-      if (!derivesFrom(ar, req, true, false)) {
-        getStmt()->analysisTimeFatal(
-          Compiler::InvalidDerivation,
-          Strings::TRAIT_REQ_EXTENDS,
-          m_originalName.c_str(),
-          req.c_str(),
-          trait->getOriginalName().c_str(),
-          "use"
-        );
-      }
-    }
-    for (auto const& req : trait->getClassRequiredImplements()) {
-      if (!derivesFrom(ar, req, true, false)) {
-        getStmt()->analysisTimeFatal(
-          Compiler::InvalidDerivation,
-          Strings::TRAIT_REQ_IMPLEMENTS,
-          m_originalName.c_str(),
-          req.c_str(),
-          trait->getOriginalName().c_str(),
-          "use"
-        );
-      }
-    }
+  /* Defer enforcement of requirements until the creation of the class
+   * happens at runtime. */
+  for (auto const& req : trait->getClassRequiredExtends()) {
+    addClassRequirement(req, true);
+  }
+  for (auto const& req : trait->getClassRequiredImplements()) {
+    addClassRequirement(req, false);
   }
 }
 
@@ -860,13 +837,8 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
     findTraitMethodsToImport(ar, tCls);
 
     // Import any interfaces implemented
-    tCls->getInterfaces(ar, m_bases, false);
-  }
-  for (unsigned i = 0; i < m_usedTraitNames.size(); i++) {
-    // Requirements must be checked in a separate loop because the
-    // interfaces required by one trait may be implemented by another trait
-    // whose "use" appears later in the class' scope
-    ClassScopePtr tCls = ar->findClass(m_usedTraitNames[i]);
+    tCls->getInterfaces(ar, m_bases, /* recursive */ false);
+
     importClassRequirements(ar, tCls);
   }
 

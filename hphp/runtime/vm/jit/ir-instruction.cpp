@@ -269,65 +269,36 @@ folly::Range<const SSATmp*> IRInstruction::dsts() const {
 void IRInstruction::convertToNop() {
   if (hasEdges()) clearEdges();
   IRInstruction nop(Nop, marker());
-  // copy all but m_id, m_edges, m_listNode
-  m_op = nop.m_op;
+  m_op        = nop.m_op;
   m_typeParam = nop.m_typeParam;
-  m_numSrcs = nop.m_numSrcs;
-  m_srcs = nop.m_srcs;
-  m_numDsts = nop.m_numDsts;
-  m_dst = nop.m_dst;
-  m_extra = nullptr;
-}
-
-void IRInstruction::convertToJmp() {
-  assert(isControlFlow());
-  assert(IMPLIES(block(), &block()->back() == this));
-  m_op = Jmp;
-  m_typeParam.clear();
-  m_numSrcs = 0;
-  m_numDsts = 0;
-  m_srcs = nullptr;
-  m_dst = nullptr;
-  m_extra = nullptr;
-  // Instructions in the simplifier don't have blocks yet.
-  setNext(nullptr);
-}
-
-void IRInstruction::convertToJmp(Block* target) {
-  convertToJmp();
-  setTaken(target);
-}
-
-void IRInstruction::convertToMov() {
-  assert(!isControlFlow());
-  m_op = Mov;
-  m_typeParam.clear();
-  m_extra = nullptr;
-  if (m_numDsts == 1) m_dst->setInstruction(this); // recompute type
-  assert(m_numSrcs == 1);
-  // Instructions in the simplifier don't have dests yet
-  assert((m_numDsts == 1) != isTransient());
+  m_numSrcs   = nop.m_numSrcs;
+  m_srcs      = nop.m_srcs;
+  m_numDsts   = nop.m_numDsts;
+  m_dst       = nop.m_dst;
+  m_extra     = nullptr;
 }
 
 void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   assert(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
-  // Copy all but m_id, m_edges[].from, m_listNode, m_marker, and don't clone
-  // dests---the whole point of become() is things still point to us.
-  if (hasEdges() && !other->hasEdges()) {
-    clearEdges();
-  } else if (!hasEdges() && other->hasEdges()) {
-    m_edges = new (arena) Edge[2];
-    setNext(other->next());
-    setTaken(other->taken());
-  }
+  if (hasEdges()) clearEdges();
+
   m_op = other->m_op;
   m_typeParam = other->m_typeParam;
   m_numSrcs = other->m_numSrcs;
   m_extra = other->m_extra ? cloneExtra(m_op, other->m_extra, arena) : nullptr;
   m_srcs = new (arena) SSATmp*[m_numSrcs];
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
+
+  if (hasEdges()) {
+    assert(other->hasEdges());  // m_op is from other now
+    m_edges = new (arena) Edge[2];
+    m_edges[0].setInst(this);
+    m_edges[1].setInst(this);
+    setNext(other->next());
+    setTaken(other->taken());
+  }
 }
 
 void IRInstruction::setOpcode(Opcode newOpc) {

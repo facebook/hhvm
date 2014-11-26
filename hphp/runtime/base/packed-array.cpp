@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "folly/Likely.h"
+#include <folly/Likely.h>
 
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -729,12 +729,12 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   if (size_t(k) < adIn->m_size) {
     auto const ad = copy ? Copy(adIn) : adIn;
     auto& dst = *tvToCell(&packedData(ad)[k]);
-    cellSet(v, dst);
     // TODO(#3888164): we should restructure things so we don't have to
     // check KindOfUninit here.
-    if (UNLIKELY(dst.m_type == KindOfUninit)) {
-      dst.m_type = KindOfNull;
+    if (UNLIKELY(v.m_type == KindOfUninit)) {
+      v = make_tv<KindOfNull>();
     }
+    cellSet(v, dst);
     return ad;
   }
 

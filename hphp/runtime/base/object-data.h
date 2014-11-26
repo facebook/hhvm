@@ -492,7 +492,7 @@ private:
 #endif
 } __attribute__((__aligned__(16)));
 
-typedef GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalsArray GlobalVariables;
 
 inline
 CountableHelper::CountableHelper(ObjectData* object) : m_object(object) {

@@ -19,7 +19,7 @@
 *
 * @return string|false The hashed password, or false on error.
 */
-function password_hash(string $password,
+function password_hash(?string $password,
                        int $algo,
                        array $options = array()) : mixed {
   if (!function_exists('crypt')) {
@@ -27,7 +27,8 @@ function password_hash(string $password,
                   E_WARNING);
     return null;
   }
-  if (!is_string($password)) {
+
+  if ($password !== null && !is_string($password)) {
     trigger_error("password_hash(): Password must be a string",
                   E_WARNING);
     return null;

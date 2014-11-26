@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/util/logger.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/Cursor.h"
-#include "folly/Memory.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/Cursor.h>
+#include <folly/Memory.h>
 #include <limits>
 #include <map>
 

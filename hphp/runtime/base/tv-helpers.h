@@ -239,7 +239,7 @@ inline void cellCopy(const Cell& fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
 }
-inline void refCopy(const Ref& fr, Ref& to) {
+inline void refCopy(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   tvCopy(fr, to);
 }
@@ -270,7 +270,7 @@ inline void cellDup(const Cell& fr, Cell& to) {
  * m_type fields and increments the reference count. Does not perform
  * as decRef on the value that was overwritten.
  */
-inline void refDup(const Ref& fr, Ref& to) {
+inline void refDup(const Ref fr, Ref& to) {
   assert(refIsPlausible(fr));
   to.m_data.num = fr.m_data.num;
   to.m_type = KindOfRef;

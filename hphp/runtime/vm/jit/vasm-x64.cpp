@@ -254,13 +254,11 @@ private:
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushl& i) { a->pushl(i.s); }
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
-  void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
   void emit(setcc& i) { a->setcc(i.cc, i.d); }
   void emit(shlli& i) { binary(i); a->shll(i.s0, i.d); }
   void emit(shlq& i) { unary(i); a->shlq(i.d); }
@@ -277,6 +275,7 @@ private:
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
   void emit(storewi& i) { a->storew(i.s, i.m); }
+  void emit(subbi& i) { binary(i); a->subb(i.s0, i.d); }
   void emit(subl& i) { noncommute(i); a->subl(i.s0, i.d); }
   void emit(subli& i) { binary(i); a->subl(i.s0, i.d); }
   void emit(subq& i) { noncommute(i); a->subq(i.s0, i.d); }
@@ -649,8 +648,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   // This is under the printir tracemod because it mostly shows you IR and
   // machine code, not vasm and machine code (not implemented).
-  bool shouldUpdateAsmInfo = !!m_asmInfo
-    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+  bool shouldUpdateAsmInfo = !!m_asmInfo;
 
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
@@ -933,6 +931,21 @@ static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
   vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
+static void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& absdbl = inst.absdbl_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+
+  // clear the high bit
+  auto tmp = v.makeReg();
+  v << psllq{1, absdbl.s, tmp};
+  v << psrlq{1, tmp, absdbl.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
 static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   auto& blocks = unit.blocks;
   auto& inst = blocks[b].code[iInst];
@@ -1088,6 +1101,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
           break;
 
+        case Vinstr::absdbl:
+          lowerAbsdbl(unit, Vlabel{ib}, ii);
+          break;
+
         case Vinstr::defvmsp:
           inst = copy{rVmSp, inst.defvmsp_.d};
           break;
@@ -1098,6 +1115,14 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::syncvmfp:
           inst = copy{inst.syncvmfp_.s, rVmFp};
+          break;
+
+        case Vinstr::ldretaddr:
+          inst = pushm{inst.ldretaddr_.s};
+          break;
+
+        case Vinstr::retctrl:
+          inst = ret{kCrossTraceRegs};
           break;
 
         default:

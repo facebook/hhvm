@@ -108,7 +108,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
   auto finishPass = [&](const char* msg) {
-    printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    if (msg) {
+      printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    }
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
     if (debug) {
@@ -118,7 +120,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   };
 
-  auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {
+  auto doPass = [&](void (*fn)(IRUnit&), const char* msg = nullptr) {
     fn(unit);
     finishPass(msg);
   };
@@ -149,7 +151,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
+    optimizeRefcounts(
+      unit,
+      FrameStateMgr{unit, unit.entry()->front().marker()}
+    );
     finishPass("refcount opts");
   }
 
@@ -165,6 +170,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("reoptimize");
   }
 
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeLoads);
+    dce("loadelim");
+  }
+
   /*
    * Note: doing this pass this late might not be ideal, in particular because
    * we've already turned some StLoc instructions into StLocNT.
@@ -175,8 +185,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
    * on that.)
    */
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(optimizeMemory, "memelim");
-    dce("memelim");
+    doPass(optimizeStores);
+    dce("storeelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

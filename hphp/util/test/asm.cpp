@@ -26,8 +26,8 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "folly/Format.h"
-#include "folly/String.h"
+#include <folly/Format.h>
+#include <folly/String.h>
 
 #include "hphp/util/disasm.h"
 

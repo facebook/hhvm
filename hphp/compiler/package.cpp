@@ -24,7 +24,7 @@
 #include <set>
 #include <utility>
 #include <vector>
-#include "folly/String.h"
+#include <folly/String.h>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"

@@ -289,9 +289,9 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
-  JEMALLOC_STATS_ADJUST(&m_stats, -bytes);
-  FTRACE(3, "smartFreeBig: {} ({} bytes)\n", vp, bytes);
-  smartFreeBig(static_cast<BigNode*>(debugPreFree(vp, bytes, 0)) - 1);
+  m_stats.borrow(-bytes);
+  FTRACE(3, "smartFreeSizeBig: {} ({} bytes)\n", vp, bytes);
+  m_heap.freeBig(debugPreFree(vp, bytes, 0));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -299,7 +299,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
   if (LIKELY(size <= kMaxSmartSize)) return smartMallocSize(size);
-  return smartMallocSizeBig<false>(size).first;
+  return smartMallocSizeBig<false>(size).ptr;
 }
 
 ALWAYS_INLINE
@@ -330,12 +330,11 @@ void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   smartFreeSize(p, size);
 }
 
-template<bool callerSavesActualSize>
-ALWAYS_INLINE
-std::pair<void*,size_t> MemoryManager::smartMallocSizeBigLogged(size_t size) {
-  auto const retptr = smartMallocSizeBig<callerSavesActualSize>(size);
-  if (memory_profiling) { logAllocation(retptr.first, size); }
-  return retptr;
+template<bool callerSavesActualSize> ALWAYS_INLINE
+MemBlock MemoryManager::smartMallocSizeBigLogged(size_t size) {
+  auto const block = smartMallocSizeBig<callerSavesActualSize>(size);
+  if (memory_profiling) { logAllocation(block.ptr, size); }
+  return block;
 }
 
 ALWAYS_INLINE
@@ -458,7 +457,6 @@ ALWAYS_INLINE
 bool MemoryManager::getObjectTracking() {
   return m_trackingInstances;
 }
-
 
 }
 

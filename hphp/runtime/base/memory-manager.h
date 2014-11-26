@@ -22,7 +22,7 @@
 #include <utility>
 #include <set>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
@@ -110,12 +110,13 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
-  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Nvtw, Proxy,
+  Packed, Mixed, StrMap, IntMap, VPacked, Empty, Shared, Globals, Proxy,
   // Other ordinary refcounted heap objects
   String, Object, Resource, Ref,
   Native, // a NativeData header preceding an HNI ObjectData
   Sweepable, // a Sweepable header preceding an ObjectData ResourceData
   Small, // small smart_malloc'd block
+  Big, // big smart_malloc'd or size-tracked block
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Debug // a DebugHeader
@@ -298,8 +299,10 @@ struct StringDataNode {
 // This is the header MemoryManager uses to remember large allocations
 // so they can be auto-freed in MemoryManager::reset()
 struct BigNode {
-  BigNode* next;
-  BigNode* prev;
+  size_t nbytes;
+  char pad[3];
+  HeaderKind kind;
+  uint32_t index;
 };
 
 // Header used for small smart_malloc allocations (but not *Size allocs)
@@ -329,6 +332,51 @@ struct NativeNode {
   uint32_t obj_offset;
   char pad[3];
   HeaderKind kind;
+};
+
+// POD type for tracking arbitrary memory ranges
+struct MemBlock {
+  void* ptr;
+  size_t size; // bytes
+};
+
+// allocator for slabs and big blocks
+struct BigHeap {
+  struct iterator;
+  BigHeap() {}
+  bool empty() const {
+    return m_slabs.empty() && m_bigs.empty();
+  }
+
+  // return true if ptr points into one of the slabs
+  bool contains(void* ptr) const;
+
+  // allocate a MemBlock of at least size bytes, track in m_slabs.
+  MemBlock allocSlab(size_t size);
+
+  // allocation api for big blocks. These get a BigNode header and
+  // are tracked in m_bigs
+  MemBlock allocBig(size_t size);
+  MemBlock callocBig(size_t size);
+  MemBlock resizeBig(void* p, size_t size);
+  void freeBig(void*);
+
+  // free all slabs and big blocks
+  void reset();
+
+  // Release auxiliary structures to prepare to be idle for a while
+  void flush();
+
+  // allow whole-heap iteration
+  iterator begin();
+  iterator end();
+
+ private:
+  void enlist(BigNode*, size_t size);
+
+ private:
+  std::vector<MemBlock> m_slabs;
+  std::vector<BigNode*> m_bigs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -418,7 +466,7 @@ struct MemoryManager {
    * Pre: size > kMaxSmartSize
    */
   template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBig(size_t size);
+  MemBlock smartMallocSizeBig(size_t size);
   void smartFreeSizeBig(void* vp, size_t size);
 
   /*
@@ -451,7 +499,7 @@ struct MemoryManager {
   void objFreeLogged(void* vp, size_t size);
   void* smartMallocSizeLoggedTracked(uint32_t size);
   template<bool callerSavesActualSize>
-  std::pair<void*,size_t> smartMallocSizeBigLogged(size_t size);
+  MemBlock smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
 
   /*
@@ -471,7 +519,7 @@ struct MemoryManager {
   /*
    * Returns true if there are no allocated slabs
    */
-  bool empty() const { return m_slabs.empty(); }
+  bool empty() const { return m_heap.empty(); }
 
   /*
    * Release all the request-local allocations.  Zeros all the free
@@ -481,6 +529,12 @@ struct MemoryManager {
    * This is called after sweep in the end-of-request path.
    */
   void resetAllocator();
+
+  /*
+   * Prepare for being idle for a while by releasing or madvising
+   * as much as possible.
+   */
+  void flush();
 
   /*
    * Reset all stats that are synchronzied externally from the memory manager.
@@ -633,10 +687,9 @@ private:
 private:
   void* slabAlloc(uint32_t bytes, unsigned index);
   void* newSlab(size_t nbytes);
-  void* smartEnlist(BigNode*);
+  void  updateBigStats();
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
-  void  smartFreeBig(BigNode*);
   void* smartMalloc(size_t nbytes);
   void* smartRealloc(void* ptr, size_t nbytes);
   void  smartFree(void* ptr);
@@ -663,11 +716,10 @@ private:
   void logAllocation(void*, size_t);
   void logDeallocation(void*);
 
-  struct HeapIter;
   void checkHeap();
   void initHole();
-  HeapIter begin();
-  HeapIter end();
+  BigHeap::iterator begin();
+  BigHeap::iterator end();
 
 private:
   TRACE_SET_MOD(smartalloc);
@@ -675,11 +727,10 @@ private:
   void* m_front;
   void* m_limit;
   std::array<FreeList,kNumSmartSizes> m_freelists;
-  BigNode m_bigs;   // oversize smart_malloc'd blocks
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   MemoryUsageStats m_stats;
-  std::vector<void*> m_slabs;
+  BigHeap m_heap;
   std::vector<NativeNode*> m_natives;
 
   bool m_sweeping;
@@ -697,6 +748,7 @@ private:
   static void* TlsInitSetup;
 
 #ifdef USE_JEMALLOC
+  // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
   uint64_t m_prevAllocated;

@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/reserved-stack.h"
+#include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
@@ -716,6 +717,10 @@ VASM_OPCODES
   void emitCall(const Vinstr& instr);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
+  llvm::Value* emitFuncPtr(const std::string& name,
+                           llvm::FunctionType* type,
+                           uintptr_t address);
+
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
   llvm::Value* emitPtr(const Vptr s, llvm::Type* ptrTy);
@@ -744,9 +749,6 @@ VASM_OPCODES
 
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
-
-  // Address to return if any.
-  llvm::Value* m_addressToReturn{nullptr};
 
   // Saved LLVM intrinsics.
   llvm::Function* m_llvmFrameAddress{nullptr};
@@ -833,6 +835,7 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindjmp) \
+O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
 O(fallthru) \
@@ -846,6 +849,7 @@ O(cmpli) \
 O(cmplim) \
 O(cmplm) \
 O(cmpq) \
+O(cmpqi) \
 O(cmpqim) \
 O(cmpqm) \
 O(cvttsd2siq) \
@@ -887,9 +891,8 @@ O(not) \
 O(orq) \
 O(orqi) \
 O(orqim) \
-O(pushm) \
-O(ret) \
 O(roundsd) \
+O(srem) \
 O(sar) \
 O(sarqi) \
 O(setcc) \
@@ -909,6 +912,7 @@ O(storeqi) \
 O(storesd) \
 O(storew) \
 O(storewi) \
+O(subbi) \
 O(subl) \
 O(subli) \
 O(subq) \
@@ -931,7 +935,10 @@ O(xorb) \
 O(xorbi) \
 O(xorq) \
 O(xorqi) \
-O(landingpad)
+O(landingpad) \
+O(ldretaddr) \
+O(retctrl) \
+O(absdbl)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -942,6 +949,8 @@ O(landingpad)
         emitCall(inst);
         break;
 
+      // These instructions are intentionally unsupported for a variety of
+      // reasons, and if code-gen-x64.cpp emits one it's a bug:
       case Vinstr::call:
       case Vinstr::callm:
       case Vinstr::callr:
@@ -950,10 +959,30 @@ O(landingpad)
       case Vinstr::syncpoint:
       case Vinstr::cqo:
       case Vinstr::idiv:
+      case Vinstr::sarq:
+      case Vinstr::shlq:
+      case Vinstr::ret:
+      case Vinstr::push:
+      case Vinstr::pushm:
+      case Vinstr::pop:
+      case Vinstr::popm:
+      case Vinstr::psllq:
+      case Vinstr::psrlq:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
 
+      // ARM opcodes:
+      case Vinstr::asrv:
+      case Vinstr::brk:
+      case Vinstr::cbcc:
+      case Vinstr::hcsync:
+      case Vinstr::hcnocatch:
+      case Vinstr::hcunwind:
+      case Vinstr::hostcall:
+      case Vinstr::lslv:
+      case Vinstr::tbcc:
+      // Fallthrough. Eventually we won't have a default case.
       default:
         throw FailedLLVMCodeGen(
           folly::format(
@@ -1039,12 +1068,42 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   emitTrap();
 }
 
+void LLVMEmitter::emit(const bindaddr& inst) {
+  // inst.dest is a pointer to memory allocated in globalData, so we can just
+  // do what vasm does here.
+
+  mcg->setJmpTransID((TCA)inst.dest);
+  *inst.dest = emitEphemeralServiceReq(
+    mcg->code.frozen(),
+    mcg->getFreeStub(mcg->code.frozen(), &mcg->cgFixups()),
+    REQ_BIND_ADDR,
+    inst.dest,
+    inst.sk.toAtomicInt(),
+    TransFlags{}.packed
+  );
+  mcg->cgFixups().m_codePointers.insert(inst.dest);
+}
+
 void LLVMEmitter::emit(const defvmsp& inst) {
   defineValue(inst.d, value(x64::rVmSp));
 }
 
 void LLVMEmitter::emit(const fallthru& inst) {
   // no-op
+}
+
+llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
+                                      llvm::FunctionType* type,
+                                      uintptr_t address) {
+  auto funcPtr = m_module->getFunction(name);
+  if (!funcPtr) {
+    registerGlobalSymbol(name, address);
+    funcPtr = llvm::Function::Create(type,
+                                     llvm::GlobalValue::ExternalLinkage,
+                                     name,
+                                     m_module.get());
+  }
+  return funcPtr;
 }
 
 void LLVMEmitter::emitCall(const Vinstr& inst) {
@@ -1123,15 +1182,9 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
   case CppCall::Kind::Direct:
-    std::string funcName = getNativeFunctionName(call.address());
-    funcPtr = m_module->getFunction(funcName);
-    if (!funcPtr) {
-      registerGlobalSymbol(funcName, (uint64_t)call.address());
-      funcPtr = llvm::Function::Create(funcType,
-                                       llvm::GlobalValue::ExternalLinkage,
-                                       funcName,
-                                       m_module.get());
-    }
+    funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
+                          funcType,
+                          uintptr_t(call.address()));
   }
 
   if (fixup.isValid()) {
@@ -1446,6 +1499,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   } else if (cmp.op == Vinstr::cmpq) {
     lhs = asInt(value(cmp.cmpq_.s1), 64);
     rhs = asInt(value(cmp.cmpq_.s0), 64);
+  } else if (cmp.op == Vinstr::cmpqi) {
+    lhs = asInt(value(cmp.cmpqi_.s1), 64);
+    rhs = cns(cmp.cmpqi_.s0.q());
   } else if (cmp.op == Vinstr::cmpqim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpqim_.s0.q());
@@ -1470,6 +1526,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   } else if (cmp.op == Vinstr::incwm) {
     lhs = flagTmp(sf);
     rhs = m_int16Zero;
+  } else if (cmp.op == Vinstr::subbi) {
+    lhs = asInt(value(cmp.subbi_.d), 8);
+    rhs = m_int8Zero;
   } else if (cmp.op == Vinstr::subl) {
     lhs = asInt(value(cmp.subl_.d), 32);
     rhs = m_int32Zero;
@@ -1654,31 +1713,28 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const pushm& inst) {
-  // Expect 'push 0x8(rVmFp)' i.e. the return address.
-  always_assert_flog(inst.s.base == Vreg64(x64::rVmFp) && inst.s.disp == 8 &&
-      !inst.s.index.isValid() && inst.s.seg == Vptr::DS, "unexpected push");
-
-  // If we use inline asm statement to emit push of the return address,
-  // then it will conflict with LLVM's frame whenever it's non-empty.
+void LLVMEmitter::emit(const ldretaddr& inst) {
   auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
                                        m_retFuncPtrPtrType,
                                        "bcast");
-  m_addressToReturn = m_irb.CreateLoad(ptr);
+  defineValue(inst.d, m_irb.CreateLoad(ptr));
 }
 
-void LLVMEmitter::emit(const ret& inst) {
-  if (m_addressToReturn) {
-    // Tail call to faux pushed value.
-    // (*value)(rVmSp, rVmTl, rVmFp)
-    std::vector<llvm::Value*> args =
-      { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
-    auto callInst = m_irb.CreateCall(m_addressToReturn, args);
-    callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
-    callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
-    m_addressToReturn = nullptr;
-  }
+void LLVMEmitter::emit(const retctrl& inst) {
+  // "Return" with a tail call to the loaded address
+  // (*value)(rVmSp, rVmTl, rVmFp)
+  std::vector<llvm::Value*> args =
+    { value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp) };
+  auto callInst = m_irb.CreateCall(value(inst.s), args);
+  callInst->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
+  callInst->setTailCallKind(llvm::CallInst::TCK_MustTail);
   m_irb.CreateRetVoid();
+}
+
+void LLVMEmitter::emit(const absdbl& inst) {
+  auto abs = llvm::Intrinsic::getDeclaration(m_module.get(),
+                                             llvm::Intrinsic::fabs);
+  defineValue(inst.d, m_irb.CreateCall(abs, value(inst.s)));
 }
 
 void LLVMEmitter::emit(const roundsd& inst) {
@@ -1701,6 +1757,10 @@ void LLVMEmitter::emit(const roundsd& inst) {
 
   auto func = llvm::Intrinsic::getDeclaration(m_module.get(), roundID);
   defineValue(inst.d, m_irb.CreateCall(func, value(inst.s)));
+}
+
+void LLVMEmitter::emit(const srem& inst) {
+  defineValue(inst.d, m_irb.CreateSRem(value(inst.s0), value(inst.s1)));
 }
 
 void LLVMEmitter::emit(const sar& inst) {
@@ -1785,6 +1845,11 @@ void LLVMEmitter::emit(const storewi& inst) {
   m_irb.CreateStore(cns(inst.s.w()), emitPtr(inst.m, 16));
 }
 
+void LLVMEmitter::emit(const subbi& inst) {
+  defineValue(inst.d, m_irb.CreateSub(asInt(value(inst.s1), 8),
+                                      cns(inst.s0.b())));
+}
+
 void LLVMEmitter::emit(const subl& inst) {
   defineValue(inst.d, m_irb.CreateSub(value(inst.s1), value(inst.s0)));
 }
@@ -1805,8 +1870,38 @@ void LLVMEmitter::emit(const subsd& inst) {
   defineValue(inst.d, m_irb.CreateFSub(value(inst.s1), value(inst.s0)));
 }
 
+/*
+ * To leave the TC and perform a service request, translated code is supposed
+ * to execute a ret instruction after populating the right registers. There are
+ * a number of different ways to do this, but the most straightforward for now
+ * is to do a tail call with the right calling convention to a stub with a
+ * single ret instruction. Rather than emitting a dedicated stub for this, we
+ * just reuse the ret at the end of enterTCHelper().
+ */
+extern "C" void enterTCReturn();
+
 void LLVMEmitter::emit(const svcreq& inst) {
-  emitTrap();
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp),
+    value(x64::rVmTl),
+    value(x64::rVmFp),
+    cns(reinterpret_cast<uintptr_t>(inst.stub_block)),
+    cns(uint64_t{inst.req})
+  };
+  for (auto arg : m_unit.tuples[inst.args]) {
+    args.push_back(value(arg));
+  }
+
+  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
+  auto funcType = llvm::FunctionType::get(m_irb.getVoidTy(), argTypes, false);
+  auto func = emitFuncPtr(folly::to<std::string>("enterTCServiceReqLLVM_",
+                                                 argTypes.size()),
+                          funcType,
+                          uintptr_t(enterTCReturn));
+  auto call = m_irb.CreateCall(func, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
+  call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  m_irb.CreateRetVoid();
 }
 
 void LLVMEmitter::emit(const syncvmfp& inst) {

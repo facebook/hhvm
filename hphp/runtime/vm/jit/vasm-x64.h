@@ -374,7 +374,6 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
-  O(retransopt, I(sk) I(id), U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
@@ -407,6 +406,9 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(ldretaddr, Inone, U(s), D(d))\
+  O(retctrl, Inone, U(s), Dn)\
+  O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
   O(brk, I(code), Un, Dn)\
@@ -492,13 +494,11 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
-  O(pushl, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(sbbl, Inone, U(sfu) UA(s0) U(s1), D(d) D(sfd))\
   O(setcc, I(cc), U(sf), D(d))\
   O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -515,6 +515,7 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
   O(storesd, Inone, U(s) U(m), Dn)\
   O(storew, Inone, U(s) U(m), Dn)\
   O(storewi, I(s), U(m), Dn)\
+  O(subbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, Inone, UA(s0) U(s1), D(d) D(sf))\
@@ -548,7 +549,6 @@ struct bindjcc2nd { ConditionCode cc; VregSF sf; Offset target; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; };
-struct retransopt { SrcKey sk; TransID id; RegSet args; };
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
@@ -557,6 +557,9 @@ struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
 struct debugtrap {};
+struct ldretaddr { Vptr s; Vreg d; };
+struct retctrl { Vreg s; };
+struct absdbl { Vreg s, d; };
 
 // No-op, used for marking the end of a block that is intentionally going to
 // fall-through.  Only for use with Vauto.
@@ -691,13 +694,11 @@ struct popm { Vptr m; };
 struct psllq { Immed s0; VregDbl s1, d; };
 struct psrlq { Immed s0; VregDbl s1, d; };
 struct push { Vreg64 s; };
-struct pushl { Vreg32 s; };
 struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
 struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct sbbl { VregSF sfu; Vreg32 s0, s1, d; VregSF sfd; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
 struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
@@ -714,6 +715,7 @@ struct storeqi { Immed s; Vptr m; };
 struct storesd { VregDbl s; Vptr m; };
 struct storew { Vreg16 s; Vptr m; };
 struct storewi { Immed s; Vptr m; };
+struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; };

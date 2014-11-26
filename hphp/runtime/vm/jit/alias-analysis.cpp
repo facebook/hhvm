@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/alocation-analysis.h"
+#include "hphp/runtime/vm/jit/alias-analysis.h"
 
 #include <utility>
 #include <sstream>
@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
-#include "hphp/runtime/vm/jit/abstract-location.h"
+#include "hphp/runtime/vm/jit/alias-class.h"
 
 namespace HPHP { namespace jit {
 
@@ -50,9 +50,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (IterEffects)       {},
         [&] (IterEffects2)      {},
         [&] (MayLoadStore x)    { visit(x.loads); visit(x.stores); },
-        [&] (PureLoad x)        { visit(x.loc); },
-        [&] (PureStore x)       { visit(x.loc); },
-        [&] (PureStoreNT x)     { visit(x.loc); }
+        [&] (PureLoad x)        { visit(x.src); },
+        [&] (PureStore x)       { visit(x.dst); },
+        [&] (PureStoreNT x)     { visit(x.dst); }
       );
     }
   }
@@ -62,30 +62,29 @@ void visit_locations(const BlockList& blocks, Visit visit) {
 
 }
 
-ALocationAnalysis::ALocationAnalysis(const IRUnit& unit)
+AliasAnalysis::AliasAnalysis(const IRUnit& unit)
   : per_frame_bits(unit.numTmps())
 {}
 
-folly::Optional<ALocMeta> ALocationAnalysis::find(ALocation loc) const {
-  auto const it = locations.find(loc);
+folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
+  auto const it = locations.find(acls);
   if (it == end(locations)) return folly::none;
   return it->second;
 }
 
-ALocBits ALocationAnalysis::may_alias(ALocation loc) const {
+ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   auto ret = ALocBits{};
-  if (loc.maybe(APropAny))   ret |= all_props;
-  if (loc.maybe(AElemIAny))  ret |= all_elemIs;
-  if (loc.maybe(AFrameAny))  ret |= all_frame;
+  if (acls.maybe(APropAny))   ret |= all_props;
+  if (acls.maybe(AElemIAny))  ret |= all_elemIs;
+  if (acls.maybe(AFrameAny))  ret |= all_frame;
   return ret;
 }
 
-ALocationAnalysis collect_locations(const IRUnit& unit,
-                                   const BlockList& blocks) {
-  FTRACE(1, "collect_locations:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "collect_locations:^^^^^^^^^^^^^^^^^^^^\n"); };
+AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
+  FTRACE(1, "collect_aliases:vvvvvvvvvvvvvvvvvvvv\n");
+  SCOPE_EXIT { FTRACE(1, "collect_aliases:^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  auto ret = ALocationAnalysis{unit};
+  auto ret = AliasAnalysis{unit};
 
   /*
    * Right now we compute the conflict sets for object properties based only on
@@ -95,33 +94,33 @@ ALocationAnalysis collect_locations(const IRUnit& unit,
   auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
   auto conflict_array_index = jit::hash_map<uint64_t,ALocBits>{};
 
-  visit_locations(blocks, [&] (ALocation loc) {
+  visit_locations(blocks, [&] (AliasClass acls) {
     if (blocks.size() >= kMaxTrackedALocs) return;
 
-    if (auto const prop = loc.prop()) {
-      auto const ins = ret.locations.insert(std::make_pair(loc, ALocMeta{}));
+    if (auto const prop = acls.prop()) {
+      auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
       if (!ins.second) return;
-      FTRACE(1, "    new: {}\n", show(loc));
+      FTRACE(1, "    new: {}\n", show(acls));
       auto& meta = ins.first->second;
       meta.index = ret.locations.size() - 1;
       conflict_prop_offset[prop->offset].set(meta.index);
       return;
     }
 
-    if (auto const elemI = loc.elemI()) {
-      auto const ins = ret.locations.insert(std::make_pair(loc, ALocMeta{}));
+    if (auto const elemI = acls.elemI()) {
+      auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
       if (!ins.second) return;
-      FTRACE(1, "    new: {}\n", show(loc));
+      FTRACE(1, "    new: {}\n", show(acls));
       auto& meta = ins.first->second;
       meta.index = ret.locations.size() - 1;
       conflict_array_index[elemI->idx].set(meta.index);
       return;
     }
 
-    if (auto const frame = loc.frame()) {
-      auto const ins = ret.locations.insert(std::make_pair(loc, ALocMeta{}));
+    if (auto const frame = acls.frame()) {
+      auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
       if (!ins.second) return;
-      FTRACE(1, "   new: {}\n", show(loc));
+      FTRACE(1, "   new: {}\n", show(acls));
       auto& meta = ins.first->second;
       meta.index = ret.locations.size() - 1;
       return;
@@ -132,20 +131,20 @@ ALocationAnalysis collect_locations(const IRUnit& unit,
     FTRACE(1, "max locations limit was reached\n");
   }
 
-  auto make_conflict_set = [&] (ALocation loc, ALocMeta& meta) {
-    if (auto const prop = loc.prop()) {
+  auto make_conflict_set = [&] (AliasClass acls, ALocMeta& meta) {
+    if (auto const prop = acls.prop()) {
       meta.conflicts = conflict_prop_offset[prop->offset];
       meta.conflicts.reset(meta.index);
       ret.all_props.set(meta.index);
       return;
     }
-    if (auto const elemI = loc.elemI()) {
+    if (auto const elemI = acls.elemI()) {
       meta.conflicts = conflict_array_index[elemI->idx];
       meta.conflicts.reset(meta.index);
       ret.all_elemIs.set(meta.index);
       return;
     }
-    if (auto const frame = loc.frame()) {
+    if (auto const frame = acls.frame()) {
       ret.all_frame.set(meta.index);
       ret.per_frame_bits[frame->fp].set(meta.index);
       return;
@@ -169,7 +168,7 @@ std::string show(ALocBits bits) {
   return out.str();
 }
 
-std::string show(const ALocationAnalysis& linfo) {
+std::string show(const AliasAnalysis& linfo) {
   auto ret = std::string{};
   for (auto& kv : linfo.locations) {
     folly::format(&ret, " {: <20} = {: >3} : {}\n",

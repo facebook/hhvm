@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 #define incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include <string>
 #include <vector>
@@ -25,6 +25,8 @@
 #include <map>
 
 #include <cxxabi.h>
+
+namespace HPHP { namespace hfsort {
 
 // The number of pages to reserve for the functions with highest
 // density (samples / size).  The functions put in these pages are not
@@ -53,8 +55,9 @@ constexpr uint8_t tracing = 1;
 
 enum class Algorithm { Hfsort, PettisHansen, Invalid };
 
-#define TRACE(LEVEL, ...)                                       \
-  if (tracing >= LEVEL) { fprintf(stderr, __VA_ARGS__); }
+void trace(const char* fmt, ...);
+#define TRACE(LEVEL, ...)                  \
+  if (tracing >= LEVEL) { trace(__VA_ARGS__); }
 
 typedef   int32_t FuncId;
 constexpr int32_t InvalidId = -1;
@@ -65,12 +68,11 @@ struct Arc {
   Arc(FuncId s, FuncId d, double w)
       : src(s)
       , dst(d)
-      , weight(w)
-      , normalizedWeight(0) {}
+      , weight(w) {}
   FuncId src;
   FuncId dst;
   double weight;
-  double normalizedWeight;
+  double normalizedWeight{0};
 };
 
 struct Func {
@@ -240,5 +242,7 @@ void error(const char*);
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2);
 std::vector<Cluster*> clusterize();
 std::vector<Cluster*> pettisAndHansen();
+
+} }
 
 #endif

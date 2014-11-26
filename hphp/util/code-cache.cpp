@@ -58,8 +58,7 @@ CodeCache::CodeCache()
 
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
 
-  const size_t kAHotSize    = ru(RuntimeOption::RepoAuthoritative ?
-                                 RuntimeOption::EvalJitAHotSize : 0);
+  const size_t kAHotSize    = ru(RuntimeOption::EvalJitAHotSize);
   const size_t kASize       = ru(RuntimeOption::EvalJitASize);
   const size_t kAProfSize   = ru(RuntimeOption::EvalJitPGO ?
                                  RuntimeOption::EvalJitAProfSize : 0);

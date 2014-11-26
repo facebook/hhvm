@@ -359,7 +359,6 @@ function mode_cmd($options) {
   switch ($mode) {
     case '':
     case 'jit':
-    case 'automain':
       return "$jit_args";
     case 'llvm':
       return "$jit_args -vEval.JitLLVM=2";
@@ -371,7 +370,7 @@ function mode_cmd($options) {
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     default:
-      error("-m must be one of jit | pgo | interp | automain. Got: '$mode'");
+      error("-m must be one of jit | pgo | interp. Got: '$mode'");
   }
 }
 
@@ -383,7 +382,7 @@ function hhvm_path() {
   return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
 }
 
-function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
+function hhvm_cmd_impl($options, $config, ...$extra_args) {
   $args = array(
     hhvm_path(),
     '-c',
@@ -399,19 +398,13 @@ function hhvm_cmd_impl($options, $config /*, $extra_args... */) {
     $args[] = '-vResourceLimit.CoreFileSize=0';
   }
 
-  $extra_args = array_slice(func_get_args(), 2);
   return implode(' ', array_merge($args, $extra_args));
 }
 
 // Return the command and the env to run it in.
 function hhvm_cmd($options, $test, $test_run = null) {
-  $use_automain = false;
   if ($test_run === null) {
-    $use_automain = 'automain' === idx($options, 'mode')
-      && 'php' === pathinfo($test, PATHINFO_EXTENSION);
-    $test_run = $use_automain
-      ? __DIR__.'/tools/pseudomain_wrapper.php'
-      : $test;
+    $test_run = $test;
   }
   // hdf support is only temporary until we fully migrate to ini
   // Discourage broad use.
@@ -427,7 +420,6 @@ function hhvm_cmd($options, $test, $test_run = null) {
     read_file(find_test_ext($test, 'opts')),
     '--file',
     escapeshellarg($test_run),
-    $use_automain ? escapeshellarg($test) : ''
   );
 
   if (file_exists($test.'.ini')) {
@@ -1502,17 +1494,6 @@ function print_failure($argv, $results, $options) {
   }
   $rerun .= ' ' . implode(' ', array_map('escapeshellarg', $failed)) . "\n";
   print $rerun;
-
-  if (idx($options, 'mode') == 'automain') {
-    print make_header(
-      'Automain caveat: wrapper script may change semantics');
-    print 'The automain wrapper script '
-      .__DIR__.'/tools/pseudomain_wrapper.php'
-      .' may have changed behavior'."\n"
-      .'(e.g. extra frames in backtraces) by moving code from '
-      .'pseudo-main to file top-level and adding a wrapper function.'
-      ."\n";
-  }
 }
 
 function port_is_listening($port) {
@@ -1530,10 +1511,6 @@ function find_open_port() {
 }
 
 function start_server_impl($options, $config, $port) {
-  if (idx($options, 'mode') === 'automain') {
-    error("Mode 'automain' not supported in server mode");
-  }
-
   $threads = $options['threads'];
   $command = hhvm_cmd_impl(
     $options,

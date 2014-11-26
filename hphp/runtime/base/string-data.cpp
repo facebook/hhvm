@@ -80,13 +80,13 @@ std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
     return std::make_pair(sd, packedCapToCode(cap - kCapOverhead));
   }
 
-  auto const ret = MM().smartMallocSizeBigLogged<true>(need);
-  auto cap = ret.second;
+  auto const block = MM().smartMallocSizeBigLogged<true>(need);
+  auto cap = block.size;
   if (!isEncodableCap(cap - kCapOverhead)) {
     cap -= (cap - kCapOverhead) & 0xFF;
     assert(isEncodableCap(cap - kCapOverhead));
   }
-  return std::make_pair(static_cast<StringData*>(ret.first),
+  return std::make_pair(static_cast<StringData*>(block.ptr),
                         packedCapToCode(cap - kCapOverhead));
 }
 
@@ -944,7 +944,7 @@ int StringData::numericCompare(const StringData *v2) const {
     assert(ret1 == KindOfInt64);
     assert(ret2 == KindOfDouble);
     if (oflow2) {
-      return oflow2;
+      return -oflow2;
     }
     dval1 = (double)lval1;
   }

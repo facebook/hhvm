@@ -22,8 +22,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "folly/Format.h"
-#include "folly/Traits.h"
+#include <folly/Format.h>
+#include <folly/Traits.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/string-data.h"
@@ -61,8 +61,8 @@ TRACE_SET_MOD(hhir);
 #define DofS(n)        HasDest
 #define DBox(n)        HasDest
 #define DRefineS(n)    HasDest
+#define DParamMayRelax HasDest
 #define DParam         HasDest
-#define DParamNRel     HasDest
 #define DParamPtr(k)   HasDest
 #define DUnboxPtr      HasDest
 #define DBoxPtr        HasDest
@@ -108,8 +108,8 @@ OpInfo g_opInfo[] = {
 #undef DofS
 #undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
-#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr

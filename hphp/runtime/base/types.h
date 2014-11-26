@@ -222,11 +222,11 @@ inline RefResult ref(Variant& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GlobalNameValueTableWrapper;
+class GlobalsArray;
 class ObjectAllocatorBase;
 class Profiler;
 class CodeCoverage;
-typedef GlobalNameValueTableWrapper GlobalVariables;
+typedef GlobalsArray GlobalVariables;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -265,12 +265,25 @@ const Id kInvalidId = Id(-1);
 /*
  * Translation IDs.
  *
- * These represent compilation units for the JIT, and are used to key
- * into several runtime structures for finding profiling data or
- * tracking translation information.
+ * These represent compilation units for the JIT, and are used to key into
+ * several runtime structures for finding profiling data or tracking
+ * translation information.
+ *
+ * Because we often convert between JIT block IDs and TransIDs, these are
+ * signed integers (blocks can have negative IDs).  However, negative block IDs
+ * logically correspond to blocks without associated translations---hence,
+ * negative TransID's are simply invalid.
+ *
+ * kInvalidTransID should be used when initializing or checking against a
+ * sentinel value.  To ask if a TransID is meaningful in a translation context,
+ * use isValidTransID().
  */
-using TransID = uint32_t;
-constexpr TransID kInvalidTransID = -1u;
+using TransID = int32_t;
+constexpr TransID kInvalidTransID = -1;
+
+inline bool isValidTransID(TransID transID) {
+  return transID >= 0;
+}
 
 // Bytecode offsets.  Used for both absolute offsets and relative
 // offsets.

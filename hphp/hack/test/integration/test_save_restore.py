@@ -169,7 +169,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php')]
+            ['foo_2.php']
         )
 
         self.check_cmd([
@@ -190,7 +190,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php')]
+            ['foo_2.php']
         )
 
         with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
@@ -225,7 +225,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_4.php')]
+            ['foo_4.php']
         )
 
         self.check_cmd(self.initial_errors + [
@@ -243,7 +243,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_3.php')]
+            ['foo_3.php']
         )
 
         self.check_cmd([
@@ -259,7 +259,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_3.php')]
+            ['foo_3.php']
         )
 
         os.remove(os.path.join(self.repo_dir, 'foo_3.php'))
@@ -287,10 +287,7 @@ class TestSaveRestore(unittest.TestCase):
         write_load_config(
             self.repo_dir,
             os.path.join(self.saved_state_dir, 'foo'),
-            [os.path.join(self.repo_dir, 'foo_2.php'),
-             os.path.join(self.repo_dir, 'bar_2.php'),
-             os.path.join(self.repo_dir, 'foo_3.php'),
-             os.path.join(self.repo_dir, 'bar_3.php')]
+            ['foo_2.php', 'bar_2.php', 'foo_3.php', 'bar_3.php']
         )
 
         try:

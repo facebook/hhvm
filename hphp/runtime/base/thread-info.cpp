@@ -34,7 +34,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
-#include "folly/String.h"
+#include <folly/String.h>
 
 using std::map;
 

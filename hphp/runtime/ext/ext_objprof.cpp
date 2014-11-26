@@ -93,7 +93,7 @@ String pathString(ObjprofStack* stack) {
  * These are not measured:
  * kEmptyKind   // The singleton static empty array
  * kSharedKind  // SharedArray
- * kNvtwKind    // NameValueTableWrapper
+ * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
  * kNumKinds    // insert new values before kNumKinds.
  */
@@ -230,7 +230,7 @@ void stringsOfArray(
  * These are not measured:
  * kEmptyKind   // The singleton static empty array
  * kSharedKind  // SharedArray
- * kNvtwKind    // NameValueTableWrapper
+ * kGlobalsKind // GlobalsArray
  * kProxyKind   // ProxyArray
  * kNumKinds    // insert new values before kNumKinds.
  */

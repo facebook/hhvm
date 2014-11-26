@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
-#include "folly/FBVector.h"
+#include <folly/FBVector.h>
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>

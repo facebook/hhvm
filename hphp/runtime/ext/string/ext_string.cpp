@@ -29,7 +29,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "folly/Unicode.h"
+#include <folly/Unicode.h>
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/zend/html-table.h"
 #include "hphp/runtime/base/container-functions.h"

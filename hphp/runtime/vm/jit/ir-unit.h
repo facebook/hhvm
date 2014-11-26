@@ -21,7 +21,7 @@
 #include <vector>
 #include <utility>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 #include "hphp/util/arena.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -162,7 +162,7 @@ makeInstruction(Func func, Args&&... args) {
 
 /* Map from DefLabel instructions to produced references. See comment in
  * IRBuilder::cond for more details. */
-using LabelRefs = jit::hash_map<const IRInstruction*, jit::vector<unsigned>>;
+using LabelRefs = jit::hash_map<const IRInstruction*, jit::vector<uint32_t>>;
 
 /*
  * IRUnit is the compilation unit for the JIT.  It owns an Arena used for
@@ -275,7 +275,7 @@ public:
    * Some helpers for creating specific instruction patterns.
    */
   IRInstruction* defLabel(unsigned numDst, BCMarker marker,
-                          const jit::vector<unsigned>& producedRefs);
+                          const jit::vector<uint32_t>& producedRefs);
   Block* defBlock();
 
   template<typename T> SSATmp* cns(T val) {

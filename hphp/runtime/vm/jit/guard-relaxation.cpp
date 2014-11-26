@@ -45,8 +45,8 @@ bool shouldHHIRRelaxGuards() {
 #define DofS(n)        return typeMightRelax(inst->src(n));
 #define DBox(n)        return false;
 #define DRefineS(n)    return true;  // typeParam may relax
-#define DParam         return true;  // typeParam may relax
-#define DParamNRel     return false;
+#define DParamMayRelax return true;  // typeParam may relax
+#define DParam         return false;
 #define DParamPtr(k)   return false;
 #define DUnboxPtr      return false;
 #define DBoxPtr        return false;
@@ -84,8 +84,8 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DofS
 #undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
-#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -125,10 +125,9 @@ void retypeLoad(IRInstruction* load, Type newType) {
  * only changes the load's type param; the caller is responsible for retyping
  * the dest if needed.
  */
-void visitLoad(IRInstruction* inst, const FrameState& state) {
+void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
   switch (inst->op()) {
-    case LdLoc:
-    case LdLocPseudoMain: {
+    case LdLoc: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
 
@@ -201,8 +200,8 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   Timer _t(Timer::optimize_relaxGuards);
   ITRACE(2, "entering relaxGuards\n");
   Indent _i;
-  bool simple = flags & RelaxSimple;
-  bool reflow = flags & RelaxReflow;
+  bool const simple = flags & RelaxSimple;
+  bool const reflow = flags & RelaxReflow;
   splitCriticalEdges(unit);
   auto& guards = constraints.guards;
   auto blocks = rpoSortCfg(unit);
@@ -239,14 +238,16 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   if (!reflow) return true;
 
   // Make a second pass to reflow types, with some special logic for loads.
-  FrameState state{unit, unit.entry()->front().marker()};
-  for (auto* block : blocks) {
+  FrameStateMgr state{unit, unit.entry()->front().marker()};
+  // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
+  state.setLegacyReoptimize();
+
+  for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
     Indent _i;
     state.startBlock(block, block->front().marker());
 
     for (auto& inst : *block) {
-      state.setMarker(inst.marker());
       copyProp(&inst);
       visitLoad(&inst, state);
       retypeDests(&inst, &unit);

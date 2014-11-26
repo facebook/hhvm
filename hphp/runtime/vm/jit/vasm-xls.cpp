@@ -616,7 +616,6 @@ int Vxls::spEffect(Vinstr& inst) const {
       if (debug) visitDefs(unit, inst, [&](Vreg r) { assert(r != m_sp); });
       return 0;
     case Vinstr::push:
-    case Vinstr::pushl:
     case Vinstr::pushm:
       return -8;
     case Vinstr::pop:

@@ -9,6 +9,7 @@
  *)
 
 module C = Convert_ty
+module DP = Docblock_parse
 module H = Hack_ty
 module T = At_ty
 
@@ -17,6 +18,7 @@ exception Test_failure of string
 let test_at_parse () =
   let cases = [
     "string", T.ATstring;
+    "My_klass", T.ATclass "My_klass";
     "string|Klass", T.ATcomposite [T.ATstring; T.ATclass "Klass"];
     "*int[]", T.ATvariadic (T.ATarray (T.ATint));
     "int|string[]", T.ATcomposite [T.ATint; T.ATarray T.ATstring];
@@ -86,9 +88,30 @@ let test_convert_ty () =
   in
   List.iter check cases
 
+let test_docblock_parse () =
+  let input =
+    "\
+    /**\n\
+      * This is a cool docblock!\n\
+      * @param int|Fun_class $first_arg\n\
+      * @param string $second_arg\n\
+      * @return bool\n\
+      */" in
+  let m = DP.parse input in
+  let check var expected =
+    let actual = match Smap.find var m with
+      | None -> raise (Test_failure var)
+      | Some x -> x in
+    if actual <> expected then raise (Test_failure var) else () in
+  check "$first_arg" (T.ATcomposite [T.ATint; T.ATclass "Fun_class"]);
+  check "$second_arg" T.ATstring;
+  check DP.ret_key T.ATbool;
+  ()
+
 let test () =
   test_at_parse ();
   test_convert_ty ();
+  test_docblock_parse ();
   print_endline "Success!"
 
 let () = test ()

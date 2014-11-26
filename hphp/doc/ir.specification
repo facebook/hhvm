@@ -25,59 +25,54 @@ used for just in time compilation, with these goals:
      Nevertheless, we rely on machine independence in order to separate
      concerns and increase portability of the VM. Passes which manipulate IR
      based on PHP or HHBC semantics should be portable. Passes which deal with
-     machine specifics (such as register allocation) should be self contained.
-     For example, register allocation may insert machine-specific loads,
-     stores, or swaps, according to a specific cpu model. But those
-     instructions are still well behaved Instruction classes. Types are machine
-     independent.
+     machine specifics (such as register allocation) should be done in the
+     lower level IR (vasm). Types are machine independent.
 
-The unit of compilation is the Trace, which is a sequence of Blocks of
-Instructions that produce and consume Variables. Blocks are single-entry,
-single-exit sequences of instructions (i.e. basic blocks). Instructions may be
-annotated with Type which modifies the instruction's behavior. Each Variable
-has a Type which describes the set of values it may hold at the point it is
-defined. Instructions may have side effects, which occur in execution order.
+The unit of compilation is the IRUnit, which is a collection of Blocks
+containing IRInstructions that produce and consume SSATmp values. Blocks are
+single-entry, single-exit sequences of instructions (i.e. basic
+blocks). Instructions may be annotated with Type parameter which modifies the
+instruction's behavior, or with additional compile-time constant data (see
+extra-data.h). Each SSATmp has a Type which describes the set of values it may
+hold, over its entire live range. Instructions may have side effects, which
+occur in execution order.
 
 The static single assignment form guarantees the following two invariants for a
-well-formed Trace:
+well-formed compilation unit:
 
-  1. Each Variable is assigned to by exactly one Instruction.
+  1. Each SSATmp is assigned to by exactly one IRInstruction.
 
-  2. Definitions dominate uses. Every path to an Instruction using a Variable
-     first executes the Instruction defining the Variable.
+  2. Definitions dominate uses. Every path to an IRInstruction using an SSATmp
+     first executes the IRInstruction defining the SSATmp.
 
 Any pass that generates or manipulates IR must preserve these invariants,
 however it is possible and expected for the invariants to be temporarily broken
-during trace creation or during an optimizer pass.
+during IR generation or during an optimization pass.
 
 
 Control Flow
 ------------
 
-Traces have one entry block and zero or more exit traces. Blocks may branch
-within a trace or to an exit trace; blocks form a restricted control flow
-graph. This control flow may contain join points (two or more branches exiting
-at the same point, or two jumps within the trace to a target in the same
-trace), but may not form loops.
+IRUnits have one entry block, zero or more exit blocks, and zero or more catch
+blocks. Exit blocks leave the compilation unit in the middle of the same PHP
+function using one of several instructions that exit a compilation unit
+(e.g. ReqBindJmp). Catch blocks are blocks that are reachable from exceptional
+control flow edges, and are executed during unwinding if an exception
+propagates through the instruction that had it as a `taken' edge.
 
-No Variables are defined on entry to the main Trace.
+No SSATmps are defined on entry to the main Block.
 
 Blocks which are join points may start with a DefLabel with destination
-Variables. In that case, each predecessor must be a Jmp passing a matching
-number of source Variables. In this case the Jmp acts as a tail-call, passing
-arguments the same way a plain call would.
+SSATmps. In that case, each predecessor must be a Jmp passing a matching number
+of sources. In this case the Jmp acts as a tail-call, passing arguments the
+same way a plain call would.
 
 Together, the sources of the Jmp instructions and the destinations of the
 DefLabel instructions act as traditional SSA Phi pseudo-functions; The type of
-the label's destination is the type-union of the corresponding sources.
+the DefLabel's destination is the type-union of the corresponding sources.
 Because the Jmp sources are at the ends of blocks, they do not violate the SSA
 dominator rule (rule 2, above).
 
-Implementation note: The JIT's compilation unit ("Trace" in this spec) actually
-consists of one or more instances of the Trace class. There is exactly one main
-trace, and zero or more exit traces which handle side exits. Instructions in
-exit traces may use Variables defined on the main trace, so these exits are not
-separate compilation units.
 
 Types
 -----
@@ -85,33 +80,24 @@ Types
 For an overview of the HHIR type system, see the "Type System" section in
 hackers-guide/jit-core.md.
 
-Variables
----------
 
-A Variable represents a storage location which takes on various concrete values
-at runtime. Since HHIR uses SSA, a variable may only be assigned to by one
-instruction. A variable's type represents the set of values it may hold at the
-point it is defined. The type is invariant over the lifetime of the variable
-(from the definition point to the last use).
+SSATmps
+-------
 
-Implementation note: this the proposed semantics. The current implementation is
-not this strict; during IR generation, we overload instruction type
-(IRInstruction::m_type), variable type (SSATmp::getType returns instr->type),
-and types known at points *after* definition, due to guards. E.g. after a
-guard, we change src->instr->type to the refined type, then propagate this
-backwards through copies. This effectively uses IRInstruction::m_type as a
-scratch variable, which is only valid at certain times during construction).
-This is probably unsound in later passes; after such a refinement, instructions
-using the variable before the guard see the refined type.
+An SSATmp represents a virtual register. Since HHIR uses SSA, an SSATmp may
+only be assigned to by one instruction. The type of an SSATmp represents the
+set of values it may hold at the point it is defined, which is invariant over
+the lifetime of the variable (from the definition point to the last use).
 
 
-Instructions
-------------
+IRInstructions
+--------------
 
 An instruction is an executable operation with zero or more inputs (sources),
 zero or one result (destination), and possible side effects such as accessing
 memory, doing I/O, and which may branch or throw an exception. Some
-instructions have a Type parameter which modifies its behavior.
+instructions have a Type parameter which modifies its behavior, or other "extra
+data" in an arbitrary C++ struct (see extra-data.h).
 
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
@@ -215,6 +201,7 @@ MInstrElem
 
   The instruction may affect the type and/or value of its base operand,
   operating on array elements.
+
 
 Instruction set
 ---------------
@@ -399,7 +386,7 @@ exceptions depending on how coercion is implemented.
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToGen,TCA,Cls), B
 
   If the value in S0 is Nullptr, branch to block B.
 
@@ -464,8 +451,7 @@ exceptions depending on how coercion is implemented.
   Undefined behavior occurs if Mod is given a divisor of zero, or if the
   divisor is -1 and the dividend is the minimum representable integer.
 
-  AbsDbl computes the absolute value of a double-precision value by clearing
-  the sign bit.
+  AbsDbl computes the absolute value of a double-precision value.
 
   DivDbl will branch to block B when S1 is zero (signed or unsigned). When the
   result of the division is a real valued number DivDbl conforms to IEEE 754.
@@ -645,7 +631,7 @@ To string conversions:
   Perform comparisons of doubles. Comparisons that are unordered according to
   IEEE 754 (such as when at least one operand is NaN) result in false.
 
-| InstanceOf, D(Bool), S(Cls) S(Cls), C
+| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), C
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
   in S1. (Note that this is always false for a trait). S1 may be null at
@@ -828,7 +814,7 @@ generating efficient compare-and-branch instruction sequences.
 7. Loads
 
 
-| LdStack<T,offset>, DParam, S(StkPtr), NF
+| LdStack<T,offset>, DParamMayRelax, S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
@@ -837,7 +823,7 @@ generating efficient compare-and-branch instruction sequences.
   Does nothing at runtime. Acts as a hint to the optimizer that the code is
   taking ownership of a reference to S0.
 
-| LdLoc<T,localId>, DParam, S(FramePtr), NF
+| LdLoc<T,localId>, DParamMayRelax, S(FramePtr), NF
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
@@ -892,7 +878,7 @@ generating efficient compare-and-branch instruction sequences.
   Check that the inner type of the boxed cell in S0 is T, and if not take the
   branch to B.
 
-| LdRef<T>, DParamNRel, S(BoxedCell), NF
+| LdRef<T>, DParam, S(BoxedCell), NF
 
   TODO(#2939547): this should take BoxedInitCell
 
@@ -961,10 +947,10 @@ generating efficient compare-and-branch instruction sequences.
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
 
-| LdClsCachedSafe, D(Cls), CStr, B
+| LdClsCachedSafe, D(Cls|Nullptr), CStr, NF
 
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
-  returns null and optionally branches to block B.
+  returns a null pointer.
 
 | LdClsInitData, D(PtrToClsInitCell), S(Cls), C
 
@@ -1142,10 +1128,10 @@ generating efficient compare-and-branch instruction sequences.
   Loads the Func whose name is funcName from the RDS, invoking autoload if it
   not defined yet. Fatal if function autoloader fails to define it.
 
-| LdFuncCachedSafe<funcName>, D(Func), NA, B
+| LdFuncCachedSafe<funcName>, D(Func|Nullptr), NA, NF
 
   Try to load the Func named funcName from the RDS. If the function is not
-  defined, returns null and optionally branches to B.
+  defined, returns a null pointer.
 
 | LdFuncCachedU<funcName,fallbackName>, D(Func), NA, E|Er
 
@@ -1609,12 +1595,6 @@ generating efficient compare-and-branch instruction sequences.
   Defines D as S0. May imply register-to-register moves at code generation
   time. Does not imply an incref or any other manipulation of S0.
 
-| TrackLoc<localId>, ND, S(Gen), E
-
-  Defines localId as having value given by S0.  This does not generate code; it
-  is used by the translator to track values that are stored in locals. It can
-  be thought of as a store (which does not physically store anything).
-
 | IncRef, ND, S(Gen), E
 
   If S0 is a refcounted type, increment its refcount.
@@ -1714,7 +1694,7 @@ generating efficient compare-and-branch instruction sequences.
   with a restriction on the input type.
 
   CountArray expects any array. CountArrayFast expects an array whose kind is not
-  kNvtwKind. CountCollection expects a collection object.
+  kGlobalsKind. CountCollection expects a collection object.
 
 | Nop, ND, NA, NF
 
@@ -1725,7 +1705,7 @@ generating efficient compare-and-branch instruction sequences.
 14. Runtime helpers
 
 
-| VerifyParamCls, ND, S(Cls) S(Cls) C(Int) C(Int), E|Er
+| VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), E|Er
 
   Verify parameter type for classes or traits. If S0 does not extend (if S1 is
   a class) or implement (if S1 is an interface) S1, this instruction will raise
@@ -1746,7 +1726,7 @@ generating efficient compare-and-branch instruction sequences.
 
   Verify a return type hint.
 
-| VerifyRetCls, ND, S(Cls) S(Cls) C(Int) S(Cell), E|Er
+| VerifyRetCls, ND, S(Cls) S(Cls|Nullptr) C(Int) S(Cell), E|Er
 
   Verify a return type hint.
 

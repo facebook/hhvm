@@ -105,7 +105,8 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   // Compute stack depths for each block.
   for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
     uint32_t sp = ret->block(blockMap[b])->initialSpOffset();
-    assert(sp != -1);
+    always_assert_flog(sp != -1, "sp wasn't negative one on block {}\n",
+      context.func->unit()->offsetOf(b->start));
     for (InstrRange inst = blockInstrs(b); !inst.empty();) {
       auto const pc   = inst.popFront();
       auto const info = instrStackTransInfo(reinterpret_cast<const Op*>(pc));

@@ -26,7 +26,7 @@
 
 #include "hphp/util/data-block.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <cstdint>
 #include <cstring>

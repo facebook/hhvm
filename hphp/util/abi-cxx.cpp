@@ -32,7 +32,7 @@
 # include <execinfo.h>
 #endif
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"

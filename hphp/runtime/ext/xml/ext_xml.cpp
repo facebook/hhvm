@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/xml/ext_xml.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"

@@ -22,7 +22,7 @@
 #include <stack>
 #include <utility>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
@@ -139,7 +139,12 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type, Offset dest);
-  Type typeFromLocation(const Location& loc);
+
+  /*
+   * Returns a predicted Type for the given location, used for tracelet
+   * analysis.
+   */
+  Type predictedTypeFromLocation(const Location& loc);
 
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
@@ -937,7 +942,6 @@ private:
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
-  void    replace(uint32_t index, SSATmp* tmp);
 
   SSATmp* unbox(SSATmp* val, Block* exit);
 

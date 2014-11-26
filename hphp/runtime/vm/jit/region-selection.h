@@ -22,7 +22,7 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -56,7 +56,7 @@ struct RegionDesc {
   struct TypePred;
   struct ReffinessPred;
   typedef std::shared_ptr<Block> BlockPtr;
-  typedef int32_t BlockId;
+  typedef TransID BlockId;
   // BlockId Encoding:
   //   - Non-negative numbers are blocks that correspond
   //     to the start of a TransProfile translation, and therefore can
@@ -439,11 +439,12 @@ RegionDescPtr selectHotRegion(TransID transId,
  * May return a null region if the given RegionContext doesn't have enough
  * information to translate at least one instruction.
  *
- * The `allowInlining' flag should be disabled when we are selecting a tracelet
- * whose shape will be analyzed by the InliningDecider.
+ * The `inlining' parameter should be set to true if the tracelet is for an
+ * inlined callee---this will result in a longer-than-usual tracelet because we
+ * enable some optimizations, e.g., tracing through jumps.
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
-                             bool allowInlining = true);
+                             bool inlining = false);
 
 /*
  * Select the hottest trace beginning with triggerId.

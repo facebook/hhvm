@@ -208,7 +208,7 @@ class ZipEntry : public SweepableResourceData {
   struct zip_stat m_zipStat;
   zip_file*       m_zipFile;
 };
-IMPLEMENT_OBJECT_ALLOCATION(ZipEntry);
+IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
 class ZipDirectory: public SweepableResourceData {
  public:
@@ -265,7 +265,7 @@ class ZipDirectory: public SweepableResourceData {
   int  m_numFiles;
   int  m_curIndex;
 };
-IMPLEMENT_OBJECT_ALLOCATION(ZipDirectory);
+IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory);
 
 const StaticString s_ZipArchive("ZipArchive");
 const StaticString s_CREATE("CREATE");

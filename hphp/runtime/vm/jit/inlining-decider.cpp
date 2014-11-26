@@ -17,14 +17,17 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/jit/hhbc-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+
+#include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/util/trace.h"
 
@@ -162,6 +165,9 @@ bool checkFPIRegion(SrcKey callSK, const Func* callee,
   for (unsigned i = 0; i < blocks.size(); ++i) {
     if (blocks[i]->contains(pushSK)) {
       pushBlock = i;
+      break;
+    }
+    if (blocks[i]->contains(callSK)) {
       break;
     }
   }
@@ -428,7 +434,7 @@ bool InliningDecider::shouldInline(const Func* callee,
       }
 
       // Count the returns.
-      if (isRet(op) || op == Op::NativeImpl) {
+      if (isReturnish(op)) {
         if (++numRets > 1) {
           return refuse("region has too many returns");
         }
@@ -475,6 +481,42 @@ void InliningDecider::registerEndInlining(const Func* callee) {
   m_cost -= cost;
   m_callDepth -= 1;
   m_stackDepth -= callee->maxStackCells();
+}
+
+RegionDescPtr selectCalleeRegion(const SrcKey& sk,
+                                 const Func* callee,
+                                 const HhbcTranslator& ht,
+                                 bool profiling) {
+  auto const op = reinterpret_cast<const Op*>(sk.pc());
+
+  auto const numArgs = getImm(op, 0).u_IVA;
+  auto const numParams = callee->numParams();
+
+  // Set up the RegionContext for the tracelet selector.
+  RegionContext ctx;
+  ctx.func = callee;
+  ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
+  ctx.spOffset = callee->numSlotsInFrame();
+  ctx.resumed = nullptr;
+
+  for (unsigned i = 0; i < numArgs; ++i) {
+    // DataTypeGeneric is used because we're just passing the locals into the
+    // callee.  It's up to the callee to constrain further if needed.
+    auto type = ht.topType(i, DataTypeGeneric);
+    uint32_t paramIdx = numArgs - 1 - i;
+    ctx.liveTypes.push_back(
+        {RegionDesc::Location::Local{paramIdx}, type});
+  }
+
+  for (unsigned i = numArgs; i < numParams; ++i) {
+    // These locals will be populated by DV init funclets but they'll start out
+    // as Uninit.
+    ctx.liveTypes.push_back(
+        {RegionDesc::Location::Local{i}, Type::Uninit});
+  }
+
+  // Produce a tracelet for the callee.
+  return selectTracelet(ctx, profiling, true /* inlining */);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,8 +20,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
-#include "folly/Optional.h"
+#include <folly/ScopeGuard.h>
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -74,13 +74,12 @@ namespace HPHP { namespace jit {
  */
 struct IRBuilder {
   IRBuilder(IRUnit&, BCMarker);
-  ~IRBuilder();
 
   void setEnableSimplification(bool val) { m_enableSimplification = val; }
   bool typeMightRelax(SSATmp* val = nullptr) const;
 
   IRUnit& unit() const { return m_unit; }
-  BCMarker marker() const { return m_state.marker(); }
+  BCMarker nextMarker() const { return m_nextMarker; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
@@ -109,17 +108,18 @@ struct IRBuilder {
 
   Type localType(uint32_t id, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
+  Type predictedLocalType(uint32_t id);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
     return m_state.localTypeSources(id);
   }
-  bool inlinedFrameSpansCall() const { return m_state.frameSpansCall(); }
+  bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
 
   /*
    * Updates the marker used for instructions generated without one
    * supplied.
    */
-  void setMarker(BCMarker marker);
+  void setNextMarker(BCMarker);
 
  public:
   /*
@@ -186,7 +186,7 @@ struct IRBuilder {
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
-    return gen(op, m_state.marker(), std::forward<Args>(args)...);
+    return gen(op, m_nextMarker, std::forward<Args>(args)...);
   }
 
   template<class... Args>
@@ -289,7 +289,7 @@ struct IRBuilder {
     gen(Jmp, done_block, v2);
 
     appendBlock(done_block);
-    IRInstruction* label = m_unit.defLabel(1, m_state.marker(), {producedRefs});
+    IRInstruction* label = m_unit.defLabel(1, m_nextMarker, {producedRefs});
     done_block->push_back(label);
     SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
@@ -398,17 +398,19 @@ private:
   // control flow, where we currently don't allow CSE.
   struct DisableCseGuard {
     explicit DisableCseGuard(IRBuilder& irb)
-      : m_state(irb.m_state)
-      , m_oldEnable(m_state.enableCse())
+      : m_irb(irb)
+      , m_oldEnable(irb.m_enableCse)
     {
-      m_state.setEnableCse(false);
+      m_irb.m_enableCse = false;
     }
     ~DisableCseGuard() {
-      m_state.setEnableCse(m_oldEnable);
+      m_irb.m_enableCse = m_oldEnable;
     }
+    DisableCseGuard(const DisableCseGuard&) = delete;
+    DisableCseGuard& operator=(const DisableCseGuard&) = delete;
 
-   private:
-    FrameState& m_state;
+  private:
+    IRBuilder& m_irb;
     bool m_oldEnable;
   };
 
@@ -451,17 +453,28 @@ private:
                          const folly::Optional<IdomVector>& idoms);
 
 private:
-  void      appendInstruction(IRInstruction* inst);
-  void      appendBlock(Block* block);
-  void      insertPhis(bool forceSpPhi);
+  void appendInstruction(IRInstruction* inst);
+  void appendBlock(Block* block);
+  void insertSPPhi(bool forceSpPhi, BCMarker);
+  SSATmp* cseLookup(const IRInstruction&,
+                    const Block*,
+                    const folly::Optional<IdomVector>&) const;
+  void clearCse();
+  const CSEHash& cseHashTable(const IRInstruction& inst) const;
+  CSEHash& cseHashTable(const IRInstruction& inst);
+  void cseUpdate(const IRInstruction& inst);
 
 private:
   IRUnit& m_unit;
-  FrameState m_state;
+  BCMarker m_initialMarker;
+  BCMarker m_nextMarker;
+  FrameStateMgr m_state;
+  CSEHash m_cseHash;
+  bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
-   * than the main block. m_curMarker, m_curBlock, m_curWhere are
+   * than the main block. m_nextMarker, m_curBlock, m_curWhere are
    * all set from the most recent call to pushBlock() or popBlock().
    */
   struct BlockState {
@@ -507,13 +520,16 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * RAII helper for emitting code to exit traces. See IRBuilder::pushTrace
+ * RAII helper for emitting code to exit traces. See IRBuilder::pushBlock
  * for usage.
+ *
+ * The pause template parameter determines whether to pause the new block upon
+ * destruction or to finish it.
  */
 template<bool pause>
 struct BlockPusherImpl {
   BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block,
-              const folly::Optional<Block::iterator>& where = folly::none)
+                  const folly::Optional<Block::iterator>& where = folly::none)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block, where);
@@ -529,6 +545,8 @@ struct BlockPusherImpl {
 
 using BlockPusher = BlockPusherImpl<false>;
 using BlockPauser = BlockPusherImpl<true>;
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

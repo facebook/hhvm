@@ -26,9 +26,9 @@
 #include <set>
 #include <utility>
 
-#include "folly/MapUtil.h"
-#include "folly/Memory.h"
-#include "folly/ScopeGuard.h"
+#include <folly/MapUtil.h>
+#include <folly/Memory.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -7352,6 +7352,9 @@ bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
     emitFuncCall(e, call,
                  "__SystemLib\\extract", call->getParams());
     return true;
+  } else if (call->isCallToFunction("assert")) {
+    emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
+    return true;
   } else if (call->isCallToFunction("parse_str")) {
     emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());
     return true;
@@ -7846,7 +7849,7 @@ void EmitterVisitor::emitClass(Emitter& e,
   for (size_t i = 0; i < usedTraits.size(); i++) {
     pce->addUsedTrait(makeStaticString(usedTraits[i]));
   }
-  if (cNode->isTrait() || cNode->isInterface()) {
+  if (cNode->isTrait() || cNode->isInterface() || Option::WholeProgram) {
     for (auto& reqExtends : cNode->getClassRequiredExtends()) {
       pce->addClassRequirement(
         PreClass::ClassRequirement(makeStaticString(reqExtends), true));
@@ -7941,6 +7944,11 @@ void EmitterVisitor::emitClass(Emitter& e,
         }
       } else if (ClassConstantPtr cc =
                  dynamic_pointer_cast<ClassConstant>((*stmts)[i])) {
+
+        if (cc->isAbstract()) {
+          continue; // FIXME: discard for now
+        }
+
         ExpressionListPtr el(cc->getConList());
         StringData* typeConstraint = makeStaticString(
           cc->getTypeConstraint());

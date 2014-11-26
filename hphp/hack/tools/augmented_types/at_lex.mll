@@ -33,7 +33,7 @@ type token =
 }
 
 (* Not technically the syntax of PHP identifiers, but close enough. *)
-let ident = ['0'-'9''a'-'z''A'-'Z''-''\\']+
+let ident = ['0'-'9''a'-'z''A'-'Z''_''-''\\'':']+
 
 rule token = parse
   | "*"          { Tstar }

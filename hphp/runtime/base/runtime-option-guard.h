@@ -19,7 +19,7 @@
 
 #include <type_traits>
 
-#include "folly/Preprocessor.h"
+#include <folly/Preprocessor.h>
 
 namespace HPHP {
 

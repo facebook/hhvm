@@ -55,7 +55,7 @@ BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
   return ret;
 }
 
-Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
+Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   auto& branch = from->back();
   Block* middle = unit.defBlock();
   FTRACE(3, "splitting edge from B{} -> B{} using B{}\n",
@@ -67,7 +67,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to, BCMarker marker) {
     branch.setNext(middle);
   }
 
-  middle->prepend(unit.gen(Jmp, marker, to));
+  middle->prepend(unit.gen(Jmp, branch.marker(), to));
   auto const unlikely = Block::Hint::Unlikely;
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
@@ -88,7 +88,7 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
   auto* from = branch->block();
   if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
-  splitEdge(unit, from, to, to->front().marker());
+  splitEdge(unit, from, to);
 }
 }
 
@@ -206,17 +206,8 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
   return idom;
 }
 
-DomChildren findDomChildren(const IRUnit& unit, const BlocksWithIds& blocks) {
-  IdomVector idom = findDominators(unit, blocks);
-  DomChildren children(unit, BlockList());
-  for (Block* block : blocks.blocks) {
-    auto idomBlock = idom[block];
-    if (idomBlock) children[idomBlock].push_back(block);
-  }
-  return children;
-}
-
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
+  assert(b1 != nullptr && b2 != nullptr);
   for (auto b = b2; b != nullptr; b = idoms[b]) {
     if (b == b1) return true;
   }

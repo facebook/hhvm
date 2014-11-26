@@ -1037,12 +1037,12 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
 ALWAYS_INLINE
 MixedArray* MixedArray::setVal(TypedValue& tv, Cell src) {
   auto const dst = tvToCell(&tv);
-  cellSet(src, *dst);
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
   if (UNLIKELY(src.m_type == KindOfUninit)) {
-    dst->m_type = KindOfNull;
+    src = make_tv<KindOfNull>();
   }
+  cellSet(src, *dst);
   return this;
 }
 

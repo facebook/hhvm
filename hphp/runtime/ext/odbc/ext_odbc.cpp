@@ -214,7 +214,7 @@ public:
   SQLSMALLINT type, decimal, nullable;
   SQLULEN col_size;
 };
-IMPLEMENT_OBJECT_ALLOCATION(ODBCParam);
+IMPLEMENT_RESOURCE_ALLOCATION(ODBCParam);
 
 ODBCParam::ODBCParam(const SQLHSTMT hdl_stmt, const int i_col)
 {
@@ -604,7 +604,7 @@ private:
   // finish current transaction (commit or rollback)
   bool end_transaction(const bool is_commit);
 };
-IMPLEMENT_OBJECT_ALLOCATION(ODBCLink);
+IMPLEMENT_RESOURCE_ALLOCATION(ODBCLink);
 
 ODBCLink::ODBCLink()
 {

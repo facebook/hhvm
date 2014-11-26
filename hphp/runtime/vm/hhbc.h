@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_VM_HHBC_H_
 #define incl_HPHP_VM_HHBC_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -1099,6 +1099,10 @@ inline bool isRet(Op op) {
     default:
       return false;
   }
+}
+
+inline bool isReturnish(Op op) {
+  return isRet(op) || op == Op::NativeImpl;
 }
 
 inline bool isSwitch(Op op) {

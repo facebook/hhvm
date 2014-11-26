@@ -93,8 +93,8 @@ retry:
       goto retry;
 
     case ArrayData::kSharedKind:
-    case ArrayData::kNvtwKind:
-      // APC can't store WaitHandles, NameValueTableWrapper is used only for
+    case ArrayData::kGlobalsKind:
+      // APC can't store WaitHandles, GlobalsArray is used only for
       // $GLOBALS, which contain non-WaitHandles.
       failArray();
 

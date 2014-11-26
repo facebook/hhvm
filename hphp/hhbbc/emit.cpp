@@ -22,10 +22,10 @@
 #include <memory>
 #include <type_traits>
 
-#include "folly/gen/Base.h"
-#include "folly/Conv.h"
-#include "folly/Optional.h"
-#include "folly/Memory.h"
+#include <folly/gen/Base.h>
+#include <folly/Conv.h>
+#include <folly/Optional.h>
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"

@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/complex-types.h"
 
 #include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
@@ -155,11 +156,12 @@ State entry_state(const Index& index,
  * with these parameter locals already initialized (although the normal php
  * emitter can't do this), but that case will be discovered when iterating.
  */
-std::set<uint32_t> prepare_incompleteQ(const Index& index,
-                                       FuncAnalysis& ai,
-                                       ClassAnalysis* clsAnalysis,
-                                       const std::vector<Type>* knownArgs) {
-  auto incompleteQ     = std::set<uint32_t>{};
+dataflow_worklist<uint32_t>
+prepare_incompleteQ(const Index& index,
+                    FuncAnalysis& ai,
+                    ClassAnalysis* clsAnalysis,
+                    const std::vector<Type>* knownArgs) {
+  auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
 
@@ -181,7 +183,7 @@ std::set<uint32_t> prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->size(); i < numParams; ++i) {
         if (auto const dv = ctx.func->params[i].dvEntryPoint) {
           ai.bdata[dv->id].stateIn = entryState;
-          incompleteQ.insert(rpoId(ai, dv));
+          incompleteQ.push(rpoId(ai, dv));
           return true;
         }
       }
@@ -190,7 +192,7 @@ std::set<uint32_t> prepare_incompleteQ(const Index& index,
 
     if (!useDvInit) {
       ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-      incompleteQ.insert(rpoId(ai, ctx.func->mainEntry));
+      incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
     return incompleteQ;
@@ -199,7 +201,7 @@ std::set<uint32_t> prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
       ai.bdata[dv->id].stateIn = entryState;
-      incompleteQ.insert(rpoId(ai, dv));
+      incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv->id].stateIn.locals[locId] = TUninit;
       }
@@ -207,7 +209,7 @@ std::set<uint32_t> prepare_incompleteQ(const Index& index,
   }
 
   ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-  incompleteQ.insert(rpoId(ai, ctx.func->mainEntry));
+  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
 
   return incompleteQ;
 }
@@ -277,8 +279,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * means less iterations.
    */
   while (!incompleteQ.empty()) {
-    auto const blk = ai.rpoBlocks[*begin(incompleteQ)];
-    incompleteQ.erase(begin(incompleteQ));
+    auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
     if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
       nonWideVisits[blk->id] = 0;
@@ -310,7 +311,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
         needsWiden ? widen_into(ai.bdata[target.id].stateIn, st)
                    : merge_into(ai.bdata[target.id].stateIn, st);
       if (changed) {
-        incompleteQ.insert(rpoId(ai, &target));
+        incompleteQ.push(rpoId(ai, &target));
       }
       FTRACE(4, "target new {}",
         state_string(*ctx.func, ai.bdata[target.id].stateIn));

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/abstract-location.h"
+#include "hphp/runtime/vm/jit/alias-class.h"
 
 #include <folly/Hash.h>
 #include <folly/Format.h>
@@ -26,29 +26,29 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-size_t ALocation::Hash::operator()(ALocation loc) const {
+size_t AliasClass::Hash::operator()(AliasClass acls) const {
   auto const hash = folly::hash::twang_mix64(
-    loc.m_bits | static_cast<uint32_t>(loc.m_stag)
+    acls.m_bits | static_cast<uint32_t>(acls.m_stag)
   );
-  switch (loc.m_stag) {
+  switch (acls.m_stag) {
   case STag::None:
     return hash;
   case STag::Frame:
     return folly::hash::hash_combine(hash,
-                                     loc.m_frame.fp,
-                                     loc.m_frame.id);
+                                     acls.m_frame.fp,
+                                     acls.m_frame.id);
   case STag::Prop:
     return folly::hash::hash_combine(hash,
-                                     loc.m_prop.obj,
-                                     loc.m_prop.offset);
+                                     acls.m_prop.obj,
+                                     acls.m_prop.offset);
   case STag::ElemI:
     return folly::hash::hash_combine(hash,
-                                     loc.m_elemI.arr,
-                                     loc.m_elemI.idx);
+                                     acls.m_elemI.arr,
+                                     acls.m_elemI.idx);
   case STag::ElemS:
     return folly::hash::hash_combine(hash,
-                                     loc.m_elemS.arr,
-                                     loc.m_elemS.key->hash());
+                                     acls.m_elemS.arr,
+                                     acls.m_elemS.key->hash());
   }
   not_reached();
 }
@@ -56,7 +56,7 @@ size_t ALocation::Hash::operator()(ALocation loc) const {
 //////////////////////////////////////////////////////////////////////
 
 #define X(What, what)                           \
-  ALocation::ALocation(A##What x)               \
+  AliasClass::AliasClass(A##What x)             \
     : m_bits(B##What)                           \
     , m_stag(STag::What)                        \
     , m_##what(x)                               \
@@ -71,7 +71,7 @@ X(ElemS, elemS)
 
 #undef X
 
-bool ALocation::checkInvariants() const {
+bool AliasClass::checkInvariants() const {
   switch (m_stag) {
   case STag::None:  break;
   case STag::Frame: break;
@@ -84,7 +84,7 @@ bool ALocation::checkInvariants() const {
   return true;
 }
 
-bool ALocation::equivData(ALocation o) const {
+bool AliasClass::equivData(AliasClass o) const {
   assert(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:   return true;
@@ -100,27 +100,27 @@ bool ALocation::equivData(ALocation o) const {
   not_reached();
 }
 
-bool ALocation::operator==(ALocation o) const {
+bool AliasClass::operator==(AliasClass o) const {
   return m_bits == o.m_bits &&
          m_stag == o.m_stag &&
          equivData(o);
 }
 
-ALocation ALocation::operator|(ALocation o) const {
+AliasClass AliasClass::operator|(AliasClass o) const {
   // We don't have a purpose for doing better than this yet:
   if (o <= *this) return *this;
   if (*this <= o) return o;
   return AUnknown;
 }
 
-bool ALocation::operator<=(ALocation o) const {
+bool AliasClass::operator<=(AliasClass o) const {
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect != m_bits)    return false;
   if (m_stag != o.m_stag) return m_bits == BEmpty;
   return equivData(o);
 }
 
-bool ALocation::maybe(ALocation o) const {
+bool AliasClass::maybe(AliasClass o) const {
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect == 0) return false;
   if (*this <= o || o <= *this) return true;
@@ -163,42 +163,42 @@ bool ALocation::maybe(ALocation o) const {
   not_reached();
 }
 
-folly::Optional<AFrame> ALocation::frame() const {
+folly::Optional<AFrame> AliasClass::frame() const {
   if (m_stag == STag::Frame) return m_frame;
   return folly::none;
 }
 
-folly::Optional<AProp> ALocation::prop() const {
+folly::Optional<AProp> AliasClass::prop() const {
   if (m_stag == STag::Prop) return m_prop;
   return folly::none;
 }
 
-folly::Optional<AElemI> ALocation::elemI() const {
+folly::Optional<AElemI> AliasClass::elemI() const {
   if (m_stag == STag::ElemI) return m_elemI;
   return folly::none;
 }
 
-folly::Optional<AElemS> ALocation::elemS() const {
+folly::Optional<AElemS> AliasClass::elemS() const {
   if (m_stag == STag::ElemS) return m_elemS;
   return folly::none;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-ALocation canonicalize(ALocation loc) {
-  if (auto const x = loc.prop()) return AProp { canonical(x->obj), x->offset };
-  if (auto const x = loc.elemI()) return AElemI { canonical(x->arr), x->idx };
-  if (auto const x = loc.elemS()) return AElemS { canonical(x->arr), x->key };
-  return loc;
+AliasClass canonicalize(AliasClass a) {
+  if (auto const x = a.prop())  return AProp { canonical(x->obj), x->offset };
+  if (auto const x = a.elemI()) return AElemI { canonical(x->arr), x->idx };
+  if (auto const x = a.elemS()) return AElemS { canonical(x->arr), x->key };
+  return a;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(ALocation loc) {
+std::string show(AliasClass acls) {
   auto ret = std::string{};
-  using A  = ALocation;
+  using A  = AliasClass;
 
-  switch (loc.m_bits) {
+  switch (acls.m_bits) {
   case A::BEmpty:     ret = "empty";    break;
   case A::BNonFrame:  ret = "nonframe"; break;
   case A::BUnknown:   ret = "unk";      break;
@@ -209,20 +209,21 @@ std::string show(ALocation loc) {
   case A::BElem:      ret = "elem";     break;
   }
 
-  switch (loc.m_stag) {
+  switch (acls.m_stag) {
   case A::STag::None:
     break;
   case A::STag::Frame:
-    folly::format(&ret, " t{}:{}", loc.m_frame.fp->id(), loc.m_frame.id);
+    folly::format(&ret, " t{}:{}", acls.m_frame.fp->id(), acls.m_frame.id);
     break;
   case A::STag::Prop:
-    folly::format(&ret, " t{}:{}", loc.m_prop.obj->id(), loc.m_prop.offset);
+    folly::format(&ret, " t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);
     break;
   case A::STag::ElemI:
-    folly::format(&ret, " t{}:{}", loc.m_elemI.arr->id(), loc.m_elemI.idx);
+    folly::format(&ret, " t{}:{}", acls.m_elemI.arr->id(), acls.m_elemI.idx);
     break;
   case A::STag::ElemS:
-    folly::format(&ret, " t{}:{.10}", loc.m_elemS.arr->id(), loc.m_elemS.key);
+    folly::format(&ret, " t{}:{.10}", acls.m_elemS.arr->id(),
+      acls.m_elemS.key);
     break;
   }
 

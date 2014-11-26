@@ -21,9 +21,9 @@
 #include <vector>
 #include <tbb/concurrent_unordered_map.h>
 
-#include "folly/Conv.h"
-#include "folly/MapUtil.h"
-#include "folly/stats/Histogram-defs.h"
+#include <folly/Conv.h>
+#include <folly/MapUtil.h>
+#include <folly/stats/Histogram-defs.h>
 
 #include "hphp/util/portability.h"
 

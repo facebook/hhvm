@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #ifdef HAVE_SNAPPY
 #include <snappy.h>
 #endif

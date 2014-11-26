@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
-#define incl_HPHP_RUNTIME_VM_NAME_VALUE_TABLE_WRAPPER_H
+#ifndef incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
+#define incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/base/array-data.h"
@@ -49,18 +49,15 @@ namespace HPHP {
  *     weird anyway.)
  *
  * This holds a pointer to a NameValueTable whose lifetime must be guaranteed
- * to outlast the lifetime of the NameValueTableWrapper.  (The wrapper is
+ * to outlast the lifetime of the GlobalsArray.  (The wrapper is
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
-struct NameValueTableWrapper : private ArrayData {
-  explicit NameValueTableWrapper(NameValueTable* tab)
-    : ArrayData(kNvtwKind)
-    , m_tab(tab)
-  {}
-  ~NameValueTableWrapper();
+struct GlobalsArray : private ArrayData {
+  explicit GlobalsArray(NameValueTable* tab);
+  ~GlobalsArray() {}
 
   // We only allow explicit conversions to ArrayData.  Generally you
-  // should not be talking to the NameValueTableWrapper directly (see
+  // should not be talking to the GlobalsArray directly (see
   // php-globals.h).
   ArrayData* asArrayData() { return this; }
   const ArrayData* asArrayData() const { return this; }
@@ -132,16 +129,11 @@ public:
   }
 
 private:
-  static NameValueTableWrapper* asNVTW(ArrayData* ad);
-  static const NameValueTableWrapper* asNVTW(const ArrayData* ad);
+  static GlobalsArray* asGlobals(ArrayData* ad);
+  static const GlobalsArray* asGlobals(const ArrayData* ad);
 
 private:
   NameValueTable* const m_tab;
-};
-
-class GlobalNameValueTableWrapper : public NameValueTableWrapper {
- public:
-  explicit GlobalNameValueTableWrapper(NameValueTable* tab);
 };
 
 //////////////////////////////////////////////////////////////////////

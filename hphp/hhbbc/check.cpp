@@ -19,7 +19,7 @@
 #include <iterator>
 #include <set>
 
-#include "folly/gen/Base.h"
+#include <folly/gen/Base.h>
 
 #include "hphp/runtime/vm/unit-util.h"
 

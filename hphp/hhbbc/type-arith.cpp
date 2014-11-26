@@ -15,7 +15,7 @@
 */
 #include "hphp/hhbbc/type-arith.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-arith.h"

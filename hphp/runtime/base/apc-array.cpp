@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/apc-array.h"
 
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/data-walker.h"

@@ -21,9 +21,9 @@
 #include <utility>
 #include <iostream>
 
-#include "folly/Memory.h"
-#include "folly/Conv.h"
-#include "folly/String.h"
+#include <folly/Memory.h>
+#include <folly/Conv.h>
+#include <folly/String.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
@@ -253,10 +253,16 @@ std::string RegionDesc::toString() const {
 
 //////////////////////////////////////////////////////////////////////
 
-RegionDesc::BlockId RegionDesc::Block::s_nextId = -1;
+/*
+ * We assign unique negative ID's to all new blocks---these correspond to
+ * invalid TransIDs.  To maintain this property, we have to start one past
+ * the sentinel kInvalidTransID, which is -1.
+ */
+RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
 
 TransID getTransId(RegionDesc::BlockId blockId) {
-  return blockId >= 0 ? blockId : kInvalidTransID;
+  assert(TransID(blockId) != kInvalidTransID);
+  return TransID(blockId);
 }
 
 bool hasTransId(RegionDesc::BlockId blockId) {

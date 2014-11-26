@@ -18,7 +18,7 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 
-#include "folly/Exception.h"
+#include <folly/Exception.h>
 
 #include "hphp/util/assertions.h"
 

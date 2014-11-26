@@ -18,10 +18,10 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/MapUtil.h"
-#include "folly/gen/Base.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/MapUtil.h>
+#include <folly/gen/Base.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-util.h"
@@ -1183,8 +1183,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
+#define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
-#define DParamNRel      return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DUnboxPtr       return unboxPtr(inst->src(0)->type());
@@ -1216,8 +1216,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DofS
 #undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
-#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr
@@ -1416,9 +1416,9 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam();
-#define DParam       requireTypeParam();
-#define DParamNRel   requireTypeParam();
-#define DParamPtr(k) requireTypeParamPtr(Ptr::k);
+#define DParamMayRelax requireTypeParam();
+#define DParam         requireTypeParam();
+#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
 #define DUnboxPtr
 #define DBoxPtr
 #define DAllocObj
@@ -1454,8 +1454,8 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBox
 #undef DofS
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
-#undef DParamNRel
 #undef DParamPtr
 #undef DUnboxPtr
 #undef DBoxPtr

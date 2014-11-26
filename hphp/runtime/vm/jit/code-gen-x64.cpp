@@ -22,8 +22,8 @@
 #include <unwind.h>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
-#include "folly/Format.h"
+#include <folly/ScopeGuard.h>
+#include <folly/Format.h>
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/abi-cxx.h"
@@ -304,7 +304,6 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
-NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(TakeStack)
@@ -925,10 +924,7 @@ void CodeGenerator::cgAbsDbl(IRInstruction* inst) {
   auto src = srcLoc(inst, 0).reg();
   auto dst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  // clear the high bit
-  auto tmp = v.makeReg();
-  v << psllq{1, src, tmp};
-  v << psrlq{1, tmp, dst};
+  v << absdbl{src, dst};
 }
 
 Vreg CodeGenerator::emitAddInt(Vout& v, IRInstruction* inst) {
@@ -1617,16 +1613,14 @@ void CodeGenerator::cgIsScalarType(IRInstruction* inst) {
     v << copy{v.cns(imm), dstReg};
     return;
   }
-  auto t1 = v.makeReg();
-  auto t2 = v.makeReg();
-  auto t3 = v.makeReg();
-  auto t4 = v.makeReg();
-  v << movzbl{typeReg, t1};
-  v << subli{KindOfBoolean, t1, t2, v.makeReg()};
+
+  auto diff = v.makeReg();
+  v << subbi{KindOfBoolean, typeReg, diff, v.makeReg()};
   auto const sf = v.makeReg();
-  v << subli{KindOfString - KindOfBoolean + 1, t2, t3, sf};
-  v << sbbl{sf, t3, t3, t4, v.makeReg()};
-  v << neg{t4, dstReg, v.makeReg()};
+  v << cmpbi{KindOfString - KindOfBoolean, diff, sf};
+  auto byteDst = v.makeReg();
+  v << setcc{CC_BE, sf, byteDst};
+  v << movzbl{byteDst, dstReg};
 }
 
 void CodeGenerator::cgIsNType(IRInstruction* inst) {
@@ -2097,10 +2091,7 @@ void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdFuncCachedSafe(IRInstruction* inst) {
-  auto const sf = cgLdFuncCachedCommon(inst, dstLoc(inst, 0).reg());
-  if (auto const taken = inst->taken()) {
-    vmain() << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
-  }
+  cgLdFuncCachedCommon(inst, dstLoc(inst, 0).reg());
 }
 
 void CodeGenerator::cgLdFuncCachedU(IRInstruction* inst) {
@@ -2243,7 +2234,7 @@ void CodeGenerator::cgRetAdjustStack(IRInstruction* inst) {
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto fpReg = srcLoc(inst, 0).reg(0);
-  vmain() << pushm{fpReg[AROFF(m_savedRip)]};
+  vmain() << ldretaddr{fpReg[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -2273,7 +2264,7 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{fp, sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << ret{kCrossTraceRegs};
+  v << retctrl{srcLoc(inst, 2).reg()};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2511,7 +2502,7 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto& v = vmain();
   emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
     {ServiceReqArgInfo::Immediate, {sk.toAtomicInt()}},
-    {ServiceReqArgInfo::Immediate, {extra->transId}}
+    {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
   });
 }
 
@@ -4639,9 +4630,6 @@ void CodeGenerator::cgLdClsCachedSafe(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = v.makeReg();
   cgLdClsCachedCommon(v, inst, dstLoc(inst, 0).reg(), sf);
-  if (Block* taken = inst->taken()) {
-    v << jcc{CC_Z, sf, {label(inst->next()), label(taken)}};
-  }
 }
 
 void CodeGenerator::cgDerefClsRDSHandle(IRInstruction* inst) {

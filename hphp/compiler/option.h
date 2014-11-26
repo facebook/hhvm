@@ -19,7 +19,7 @@
 
 #include "hphp/util/hdf.h"
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 
 #include <map>
 #include <set>

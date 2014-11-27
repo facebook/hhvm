@@ -660,10 +660,12 @@ void FrameStateMgr::refineLocalType(uint32_t id,
 void FrameStateMgr::predictLocalType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   auto& local = cur().locals[id];
-  always_assert(type <= local.type);
   ITRACE(2, "updating local {}'s type prediction: {} -> {}\n",
-    id, local.predictedType, type);
-  local.predictedType = type;
+    id, local.predictedType, type & local.type);
+  local.predictedType = type & local.type;
+  if (!(local.predictedType <= local.type)) {
+    local.predictedType = local.type;
+  }
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {

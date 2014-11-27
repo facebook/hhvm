@@ -62,6 +62,11 @@ void local_effects(const FrameStateMgr& frameState,
       hook.setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
       break;
 
+    case StLocPseudoMain:
+      hook.predictLocalType(inst->extra<LocalId>()->locId,
+                            inst->src(1)->type());
+      break;
+
     case AssertLoc:
     case GuardLoc:
     case CheckLoc: {

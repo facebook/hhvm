@@ -123,6 +123,11 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     if (inst->is(LdRef, CheckRefInner)) {
       constrainValue(inst->src(0), DataTypeSpecific);
     }
+
+    if (inst->marker().func()->isPseudoMain() &&
+        inst->is(GuardLoc, CheckLoc)) {
+      constrainGuard(inst, DataTypeSpecific);
+    }
   }
 
   auto defaultWhere = m_curBlock->end();

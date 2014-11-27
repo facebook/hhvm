@@ -262,22 +262,6 @@ void emitNameA(HTS& env) {
   push(env, gen(env, LdClsName, popA(env)));
 }
 
-/*
- * TODO(#5710382): move the following 3 to ht-interpone.cpp
- */
-
-void emitDefCns(HTS& env, const StringData*) {
-  interpOne(env, Type::Bool, 1);
-}
-
-void emitDefCls(HTS& env, int32_t) {
-  interpOne(env, 0);
-}
-
-void emitDefFunc(HTS& env, int32_t) {
-  interpOne(env, 0);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitCastArray(HTS& env) {

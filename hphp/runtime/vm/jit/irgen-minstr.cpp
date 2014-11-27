@@ -275,14 +275,10 @@ SSATmp* genStk(MTS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-// TODO(#5710382): replace callsites with curClass(env)
-Class* contextClass(const MTS& env) { return curFunc(env)->cls(); }
-
 // Returns a pointer to the base of the current MInstrState struct, or a null
 // pointer if it's not needed.
-// TODO(#5710382): rename to misPtr(env)
-SSATmp* genMisPtr(MTS& env) {
-  assert(env.base.value && "genMisPtr called before emitBaseOp");
+SSATmp* misPtr(MTS& env) {
+  assert(env.base.value && "misPtr called before emitBaseOp");
   if (env.needMIS) {
     return gen(env, LdMIStateAddr, env.misBase,
       cns(env, RDS::kVmMInstrStateOff));
@@ -304,7 +300,8 @@ bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
   return !no_override_magic;
 }
 
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& ni, Class* context) {
+bool mInstrHasUnknownOffsets(const NormalizedInstruction& ni,
+                             const Class* context) {
   const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
   unsigned mi = 0;
   unsigned ii = mii.valCount() + 1;
@@ -358,7 +355,7 @@ void checkMIState(MTS& env) {
   const bool isUnsetM       = env.ni.mInstrOp() == Op::UnsetM;
   const bool isSingle       = env.ni.immVecM.size() == 1;
   const bool unknownOffsets = mInstrHasUnknownOffsets(env.ni,
-                                                      contextClass(env));
+                                                      curClass(env));
 
   if (baseType.maybeBoxed() && !baseType.isBoxed()) {
     // We don't need to bother with weird base types.
@@ -782,7 +779,7 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
    */
   if (!knownCls) return PropInfo{};
 
-  auto const info = getPropertyOffset(env.ni, contextClass(env), knownCls,
+  auto const info = getPropertyOffset(env.ni, curClass(env), knownCls,
                                       env.mii, env.mInd, env.iInd);
   if (info.offset == -1) return info;
 
@@ -996,7 +993,7 @@ void emitPropGeneric(MTS& env) {
           MInstrAttrData { mia },
           env.base.value,
           key,
-          genMisPtr(env))
+          misPtr(env))
     );
   } else {
     setBase(
@@ -1007,7 +1004,7 @@ void emitPropGeneric(MTS& env) {
           MInstrAttrData { mia },
           env.base.value,
           key,
-          genMisPtr(env))
+          misPtr(env))
     );
   }
 }
@@ -1077,7 +1074,7 @@ void emitElem(MTS& env) {
              MInstrAttrData { mia },
              env.base.value,
              key,
-             genMisPtr(env))
+             misPtr(env))
     );
     return;
   }
@@ -1089,7 +1086,7 @@ void emitElem(MTS& env) {
         MInstrAttrData { mia },
         env.base.value,
         key,
-        genMisPtr(env))
+        misPtr(env))
   );
 }
 
@@ -1542,14 +1539,14 @@ void emitCGetProp(MTS& env) {
     makeMRCatch(env),
     env.base.value,
     key,
-    genMisPtr(env)
+    misPtr(env)
   );
 }
 
 void emitVGetProp(MTS& env) {
   auto const key = getKey(env);
   env.result = genStk(env, VGetProp, makeMRCatch(env), NoExtraData{},
-                      env.base.value, key, genMisPtr(env));
+                      env.base.value, key, misPtr(env));
 }
 
 void emitIssetProp(MTS& env) {
@@ -1598,21 +1595,21 @@ void emitSetOpProp(MTS& env) {
   auto const key = getKey(env);
   auto const value = getValue(env);
   env.result = genStk(env, SetOpProp, makeMRCatch(env), SetOpData { op },
-                      env.base.value, key, value, genMisPtr(env));
+                      env.base.value, key, value, misPtr(env));
 }
 
 void emitIncDecProp(MTS& env) {
   IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
   env.result = genStk(env, IncDecProp, makeMRCatch(env), IncDecData { op },
-                      env.base.value, key, genMisPtr(env));
+                      env.base.value, key, misPtr(env));
 }
 
 void emitBindProp(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
   genStk(env, BindProp, makeMRCatch(env), NoExtraData{},
-    env.base.value, key, box, genMisPtr(env));
+    env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1653,7 +1650,7 @@ void emitCGetElem(MTS& env) {
     break;
   case SimpleOp::None:
     env.result = gen(env, CGetElem, makeMRCatch(env), env.base.value,
-      key, genMisPtr(env));
+      key, misPtr(env));
     break;
   }
 }
@@ -1661,7 +1658,7 @@ void emitCGetElem(MTS& env) {
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
   env.result = genStk(env, VGetElem, makeMRCatch(env), NoExtraData{},
-    env.base.value, key, genMisPtr(env));
+    env.base.value, key, misPtr(env));
 }
 
 void emitIssetElem(MTS& env) {
@@ -1690,7 +1687,7 @@ void emitIssetElem(MTS& env) {
     {
       auto const key = getKey(env);
       env.result = gen(env, IssetElem, makeMRCatch(env),
-        env.base.value, key, genMisPtr(env));
+        env.base.value, key, misPtr(env));
     }
     break;
   }
@@ -1699,7 +1696,7 @@ void emitIssetElem(MTS& env) {
 void emitEmptyElem(MTS& env) {
   auto const key = getKey(env);
   env.result = gen(env, EmptyElem, makeMRCatch(env),
-    env.base.value, key, genMisPtr(env));
+    env.base.value, key, misPtr(env));
 }
 
 void emitSetNewElem(MTS& env) {
@@ -1723,7 +1720,7 @@ void emitSetWithRefNewElem(MTS& env) {
   } else {
     genStk(env, SetWithRefNewElem, makeMRCatch(env),
            NoExtraData{},
-           env.base.value, getValAddr(env), genMisPtr(env));
+           env.base.value, getValAddr(env), misPtr(env));
   }
   env.result = nullptr;
 }
@@ -1783,7 +1780,7 @@ void emitSetWithRefLElem(MTS& env) {
     assert(env.strTestResult == nullptr);
   } else {
     genStk(env, SetWithRefElem, makeMRCatch(env), NoExtraData{},
-           env.base.value, key, locAddr, genMisPtr(env));
+           env.base.value, key, locAddr, misPtr(env));
   }
   env.result = nullptr;
 }
@@ -1793,20 +1790,20 @@ void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
   env.result = genStk(env, SetOpElem, makeMRCatch(env), SetOpData{op},
                       env.base.value, getKey(env), getValue(env),
-                      genMisPtr(env));
+                      misPtr(env));
 }
 
 void emitIncDecElem(MTS& env) {
   auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   env.result = genStk(env, IncDecElem, makeMRCatch(env), IncDecData { op },
-                      env.base.value, getKey(env), genMisPtr(env));
+                      env.base.value, getKey(env), misPtr(env));
 }
 
 void emitBindElem(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
   genStk(env, BindElem, makeMRCatch(env), NoExtraData{},
-         env.base.value, key, box, genMisPtr(env));
+         env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1849,7 +1846,7 @@ void emitIncDecNewElem(MTS& env) {
 void emitBindNewElem(MTS& env) {
   auto const box = getValue(env);
   genStk(env, BindNewElem, makeMRCatch(env), NoExtraData{},
-         env.base.value, box, genMisPtr(env));
+         env.base.value, box, misPtr(env));
   env.result = box;
 }
 

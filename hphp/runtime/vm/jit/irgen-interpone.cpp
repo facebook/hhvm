@@ -480,6 +480,9 @@ void emitReqDoc(HTS& env)                    { INTERP }
 void emitReqOnce(HTS& env)                   { INTERP }
 void emitEval(HTS& env)                      { INTERP }
 void emitDefTypeAlias(HTS& env, int32_t)     { INTERP }
+void emitDefCns(HTS& env, const StringData*) { INTERP }
+void emitDefCls(HTS& env, int32_t)           { INTERP }
+void emitDefFunc(HTS& env, int32_t)          { INTERP }
 void emitCatch(HTS& env)                     { INTERP }
 void emitHighInvalid(HTS& env)               { std::abort(); }
 

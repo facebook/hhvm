@@ -93,7 +93,7 @@ static uint32_t get_random()
 }
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           Class* ctx, const Class*& baseClass,
+                           const Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {

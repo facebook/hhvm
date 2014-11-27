@@ -607,7 +607,8 @@ struct PropInfo {
 };
 
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           Class* ctx, const Class*& baseClass,
+                           const Class* ctx,
+                           const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
 

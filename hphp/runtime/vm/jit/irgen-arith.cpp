@@ -24,23 +24,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * TODO(#5710382): expand these macros.  They don't actually help.
- */
-
-#define BINARY_ARITH          \
-  AOP(Add, AddInt, AddDbl)    \
-  AOP(Sub, SubInt, SubDbl)    \
-  AOP(Mul, MulInt, MulDbl)    \
-  AOP(AddO, AddIntO, AddDbl)  \
-  AOP(SubO, SubIntO, SubDbl)  \
-  AOP(MulO, MulIntO, MulDbl)  \
-
-#define BINARY_BITOP  \
-  BOP(BitAnd, AndInt) \
-  BOP(BitOr,  OrInt)  \
-  BOP(BitXor, XorInt) \
-
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
     return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
@@ -50,51 +33,70 @@ bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   };
 
   switch (op) {
-  #define AOP(OP, OPI, OPD) \
-    case Op::OP: return checkArith(t1) && checkArith(t2);
-  BINARY_ARITH
-  #undef AOP
-  #define BOP(OP, OPI) \
-    case Op::OP: return checkBitOp(t1) && checkBitOp(t2);
-  BINARY_BITOP
-  #undef BOP
-  default: not_reached();
+  case Op::Add:
+  case Op::Sub:
+  case Op::Mul:
+  case Op::AddO:
+  case Op::SubO:
+  case Op::MulO:
+    return checkArith(t1) && checkArith(t2);
+  case Op::BitAnd:
+  case Op::BitOr:
+  case Op::BitXor:
+    return checkBitOp(t1) && checkBitOp(t2);
+  default:
+    break;
   }
+  always_assert(0);
 }
 
 Opcode intArithOp(Op op) {
   switch (op) {
-    #define AOP(OP, OPI, OPD) case Op::OP: return OPI;
-    BINARY_ARITH
-    #undef AOP
-    default: not_reached();
+  case Op::Add:  return AddInt;
+  case Op::Sub:  return SubInt;
+  case Op::Mul:  return MulInt;
+  case Op::AddO: return AddIntO;
+  case Op::SubO: return SubIntO;
+  case Op::MulO: return MulIntO;
+  default:
+    break;
   }
+  always_assert(0);
 }
 
 Opcode dblArithOp(Op op) {
   switch (op) {
-    #define AOP(OP, OPI, OPD) case Op::OP: return OPD;
-    BINARY_ARITH
-    #undef AOP
-    default: not_reached();
+  case Op::Add:  return AddDbl;
+  case Op::Sub:  return SubDbl;
+  case Op::Mul:  return MulDbl;
+  case Op::AddO: return AddDbl;
+  case Op::SubO: return SubDbl;
+  case Op::MulO: return MulDbl;
+  default:
+    break;
   }
+  always_assert(0);
 }
 
 Opcode bitOp(Op op) {
   switch (op) {
-    #define BOP(OP, OPI) case Op::OP: return OPI;
-    BINARY_BITOP
-    #undef BOP
-    default: not_reached();
+  case Op::BitAnd: return AndInt;
+  case Op::BitOr:  return OrInt;
+  case Op::BitXor: return XorInt;
+  default:
+    break;
   }
+  always_assert(0);
 }
 
 bool isBitOp(Op op) {
   switch (op) {
-    #define BOP(OP, OPI) case Op::OP: return true;
-    BINARY_BITOP
-    #undef BOP
-    default: return false;
+  case Op::BitAnd:
+  case Op::BitOr:
+  case Op::BitXor:
+    return true;
+  default:
+    return false;
   }
 }
 
@@ -408,38 +410,37 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
     return;
   }
 
-  if (areBinaryArithTypesSupported(*subOpc, loc->type(), topC(env)->type())) {
-    auto val = popC(env);
-    env.irb->constrainValue(loc, DataTypeSpecific);
-    loc = promoteBool(env, loc);
-    val = promoteBool(env, val);
-    Opcode opc;
-    if (isBitOp(*subOpc)) {
-      opc = bitOp(*subOpc);
-    } else {
-      opc = promoteBinaryDoubles(env, *subOpc, loc, val);
-    }
-
-    SSATmp* result = nullptr;
-    if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-      auto spillValues = peekSpillValues(env);
-      spillValues.push_back(val);
-      auto const exit = makeExitImpl(
-        env,
-        bcOff(env),
-        ExitFlag::Interp,
-        spillValues,
-        CustomExit{}
-      );
-      result = gen(env, opc, exit, loc, val);
-    } else {
-      result = gen(env, opc, loc, val);
-    }
-    pushStLoc(env, id, ldrefExit, ldPMExit, result);
-    return;
+  if (!areBinaryArithTypesSupported(*subOpc, loc->type(), topC(env)->type())) {
+    PUNT(SetOpL);
   }
 
-  PUNT(SetOpL);
+  auto val = popC(env);
+  env.irb->constrainValue(loc, DataTypeSpecific);
+  loc = promoteBool(env, loc);
+  val = promoteBool(env, val);
+  Opcode opc;
+  if (isBitOp(*subOpc)) {
+    opc = bitOp(*subOpc);
+  } else {
+    opc = promoteBinaryDoubles(env, *subOpc, loc, val);
+  }
+
+  SSATmp* result = nullptr;
+  if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
+    auto spillValues = peekSpillValues(env);
+    spillValues.push_back(val);
+    auto const exit = makeExitImpl(
+      env,
+      bcOff(env),
+      ExitFlag::Interp,
+      spillValues,
+      CustomExit{}
+    );
+    result = gen(env, opc, exit, loc, val);
+  } else {
+    result = gen(env, opc, loc, val);
+  }
+  pushStLoc(env, id, ldrefExit, ldPMExit, result);
 }
 
 void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {

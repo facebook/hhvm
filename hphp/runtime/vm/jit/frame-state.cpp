@@ -718,7 +718,7 @@ void FrameStateMgr::refineLocalValues(SSATmp* oldVal, SSATmp* newVal) {
       if (!local.value || canonical(local.value) != canonical(oldVal)) {
         continue;
       }
-      ITRACE(2, "refining local {}'s ({}) value: {} -> {}\n",
+      ITRACE(2, "refining local {}'s value: {} -> {}\n",
              id, *local.value, *newVal);
       local.value = newVal;
       local.type = newVal->type();

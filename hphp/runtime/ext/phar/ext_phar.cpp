@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/directory.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,11 +127,27 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
+static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
+  bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  if(!useJit) {
+    auto const context = g_context.getNoCheck();
+    const ActRec* ar = context->getPrevVMStateUNSAFE(vmfp());
+    return ar->m_func->unit()->filepath()->data();
+  }
+  else {
+    return "using a jit?";
+  }
+}
+
 class pharExtension : public Extension {
  public:
   pharExtension() : Extension("phar") {}
   virtual void moduleInit() {
     s_phar_stream_wrapper.registerAs("phar");
+  }
+
+  virtual void moduleLoad(const IniSetting::Map& Ini, Hdf config) {
+    HHVM_STATIC_ME(Phar, running);
   }
 } s_phar_extension;
 

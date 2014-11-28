@@ -227,7 +227,7 @@ RegionDescPtr RegionFormer::go() {
     if (doPrediction &&
         // TODO(#5710339): would be nice to remove the following check
         irgen::publicTopType(m_hts, 0).maybe(m_inst.outPred)) {
-      irgen::updateBCOff(m_hts, &m_inst, m_sk.offset(), false);
+      irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk.offset(), false);
       irgen::checkTypeStack(m_hts, 0, m_inst.outPred, m_sk.offset());
     }
   }
@@ -277,7 +277,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(m_inst.op()) && opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();
-  irgen::updateBCOff(m_hts, &m_inst, m_sk.offset(), false);
+  irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk.offset(), false);
 
   auto const inputInfos = getInputs(m_startSk, m_inst);
 

@@ -38,72 +38,38 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Create a block that side exits the current region, going to the supplied
+ * target offset (if targetBcOff is -1, it goes to the current instruction's
+ * offset).  The `trflags' version side exits to the current offset, and passes
+ * extra flags to the service request which can be used while JITing to disable
+ * certain optimizations.
+ *
+ * Both functions use the current state to create the block.
+ */
 Block* makeExit(HTS&, Offset targetBcOff = -1);
 Block* makeExit(HTS&, TransFlags trflags);
-Block* makeExit(HTS&, Offset targetBcOff,
-                std::vector<SSATmp*>& spillValues,
-                TransFlags trflags = TransFlags{});
-Block* makeExitError(HTS&, SSATmp* msg, Block* catchBlock);
-Block* makeExitNullThis(HTS&);
-Block* makePseudoMainExit(HTS&, Offset targetBcOff = -1);
+
+/*
+ * Has the effects of makeExit(env) if the current function is a psuedomain,
+ * and otherwise returns nullptr.
+ */
+Block* makePseudoMainExit(HTS&);
+
+/*
+ * Create a block that exits the current region by making a retranslate opt
+ * service request.  Must not be used inside of an inlined function.
+ */
 Block* makeExitOpt(HTS&, TransID);
+
+/*
+ * Create a block that side exits the current region, after first calling the
+ * interpreter to do an interp one of the current instruction.  "Slow" means
+ * interpreter.
+ *
+ * The block is created with the current state.
+ */
 Block* makeExitSlow(HTS&);
-
-/*
- * Implementation for the above.  Takes spillValues, target offset, and a flag
- * for whether to make a no-IR exit.
- *
- * Also takes a CustomExit() function that may perform more operations and
- * optionally return a single additional SSATmp* (otherwise nullptr) to spill
- * on the stack before exiting.
- */
-enum class ExitFlag {
-  Interp,     // will bail to the interpreter to execute at least one BC instr
-  JIT,        // will attempt to use the JIT to create a new translation
-};
-using CustomExit = std::function<SSATmp* ()>;
-Block* makeExitImpl(HTS&,
-                    Offset targetBcOff,
-                    ExitFlag flag,
-                    std::vector<SSATmp*>& spillValues,
-                    const CustomExit& customFn,
-                    TransFlags trflags = TransFlags{});
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Create a catch block with a user-defined body (usually empty or a
- * SpillStack). Regardless of what body() does, it must return the current
- * stack pointer. This is a block to be invoked by the unwinder while unwinding
- * through a call to C++ from translated code. When attached to an instruction
- * as its taken field, code will be generated and the block will be registered
- * with the unwinder automatically.
- */
-template<class Body>
-Block* makeCatchImpl(HTS& env, Body body) {
-  auto const exit = env.irb->makeExit(Block::Hint::Unused);
-
-  BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
-  gen(env, BeginCatch);
-  auto sp = body();
-  gen(env, EndCatch, fp(env), sp);
-
-  return exit;
-}
-
-/*
- * Create a catch block with no SpillStack. Some of our optimizations rely on
- * the ability to insert code on *every* path out of a trace, so we can't
- * simply elide the catch block in the cases that want an empty body.
- */
-Block* makeCatchNoSpill(HTS& env);
-
-/*
- * Create a catch block that spills the current state of the eval stack.
- *
- * Note: declared in ht-internal right now.
- */
-// Block* makeCatch(HTS&);
 
 //////////////////////////////////////////////////////////////////////
 

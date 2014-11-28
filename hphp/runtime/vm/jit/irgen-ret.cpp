@@ -40,7 +40,6 @@ void implRet(HTS& env, Type type) {
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
-  auto const catchBlock = makeCatch(env);
   auto retVal = pop(env, type, func->isGenerator() ? DataTypeSpecific
                                                    : DataTypeGeneric);
 
@@ -74,9 +73,7 @@ void implRet(HTS& env, Type type) {
     gen(env, DecRefThis, fp(env));
   }
 
-  // Call the FunctionReturn hook and put the return value on the stack so that
-  // the unwinder would decref it.
-  retSurpriseCheck(env, fp(env), retVal, catchBlock, false);
+  retSurpriseCheck(env, fp(env), retVal, false);
 
   // In async function, wrap the return value into succeeded StaticWaitHandle.
   if (!resumed(env) && func->isAsyncFunction()) {
@@ -162,7 +159,6 @@ void implRet(HTS& env, Type type) {
 void retSurpriseCheck(HTS& env,
                       SSATmp* frame,
                       SSATmp* retVal,
-                      Block* catchBlock,
                       bool suspendingResumed) {
   ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   env.irb->ifThen(
@@ -175,14 +171,12 @@ void retSurpriseCheck(HTS& env,
         gen(env,
             FunctionReturnHook,
             RetCtrlData(suspendingResumed),
-            catchBlock,
             frame,
             retVal);
       } else {
         gen(env,
             FunctionSuspendHook,
             RetCtrlData(suspendingResumed),
-            catchBlock,
             frame,
             cns(env, suspendingResumed));
       }

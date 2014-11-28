@@ -116,10 +116,10 @@ void interpOne(HTS&, const NormalizedInstruction&);
  * The flag `lastBcOff' should be set if this is the last bytecode in a region
  * that's being translated.
  */
-void updateBCOff(HTS&,
-                 const NormalizedInstruction*,
-                 Offset newOff,
-                 bool lastBcOff);
+void prepareForNextHHBC(HTS&,
+                        const NormalizedInstruction*,
+                        Offset newOff,
+                        bool lastBcOff);
 
 /*
  * This function causes ht to generate a SpillStack, and is called for

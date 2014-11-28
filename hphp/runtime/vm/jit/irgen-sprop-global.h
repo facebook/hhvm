@@ -30,15 +30,8 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(HTS&,
-                           Block* catchBlock,
-                           const Class* cls,
-                           const StringData* name);
-SSATmp* ldClsPropAddr(HTS&,
-                      Block* catchBlock,
-                      SSATmp* ssaCls,
-                      SSATmp* ssaName,
-                      bool raise);
+SSATmp* ldClsPropAddrKnown(HTS&, const Class*, const StringData*);
+SSATmp* ldClsPropAddr(HTS&, SSATmp*, SSATmp*, bool);
 
 //////////////////////////////////////////////////////////////////////
 

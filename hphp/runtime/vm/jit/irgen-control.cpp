@@ -138,7 +138,6 @@ void emitSwitch(HTS& env,
                 int32_t bounded) {
   int nTargets = bounded ? iv.size() - 2 : iv.size();
 
-  auto catchBlock = topC(env)->isA(Type::Obj) ? makeCatch(env) : nullptr;
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
   assert(IMPLIES(!(type <= Type::Int), bounded));
@@ -182,7 +181,7 @@ void emitSwitch(HTS& env,
     // switchObjHelper can throw exceptions and reenter the VM so we use the
     // catch block here.
     bounded = false;
-    index = gen(env, LdSwitchObjIndex, catchBlock, switchVal, ssabase, ssatargets);
+    index = gen(env, LdSwitchObjIndex, switchVal, ssabase, ssatargets);
   } else if (type <= Type::Arr) {
     gen(env, DecRef, switchVal);
     gen(env, Jmp, makeExit(env, defaultOff));
@@ -227,10 +226,6 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
       }
     );
 
-  Block* catchBlock = nullptr;
-  // The slow path can throw exceptions and reenter the VM.
-  if (!fastPath) catchBlock = makeCatch(env);
-
   auto const testVal = popC(env);
 
   std::vector<LdSSwitchData::Elm> cases(numCases);
@@ -248,7 +243,6 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast
                                  : LdSSwitchDestSlow,
-                        catchBlock,
                         data,
                         testVal);
   gen(env, DecRef, testVal);

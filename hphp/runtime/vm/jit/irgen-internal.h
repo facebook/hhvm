@@ -34,14 +34,6 @@ namespace HPHP { namespace jit { namespace irgen {
 
 TRACE_SET_MOD(hhir);
 
-/*
- * Note: this is only forward-declared here for ldLocInnerWarn.  We are
- * planning to rework how catch blocks are created so they are automatically
- * generated when instructions that can throw are gen'd, so for now we're not
- * bothering to find a better structure for the dependency.
- */
-Block* makeCatch(HTS&);
-
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors
 
@@ -375,15 +367,15 @@ inline bool classIsUniqueOrCtxParent(HTS& env, const Class* cls) {
   return curClass(env)->classof(cls);
 }
 
-inline SSATmp* ldCls(HTS& env, Block* catchBlock, SSATmp* className) {
+inline SSATmp* ldCls(HTS& env, SSATmp* className) {
   assert(className->isA(Type::Str));
   if (className->isConst()) {
     if (auto const cls = Unit::lookupClass(className->strVal())) {
       if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
     }
-    return gen(env, LdClsCached, catchBlock, className);
+    return gen(env, LdClsCached, className);
   }
-  return gen(env, LdCls, catchBlock, className, cns(env, curClass(env)));
+  return gen(env, LdCls, className, cns(env, curClass(env)));
 }
 
 inline void decRefLocalsInline(HTS& env) {
@@ -459,15 +451,13 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
                               uint32_t id,
                               Block* ldrefExit,
                               Block* ldPMExit,
-                              TypeConstraint constraint,
-                              Block* catchBlock = nullptr) {
-  if (!catchBlock) catchBlock = makeCatch(env);
+                              TypeConstraint constraint) {
   auto const locVal = ldLocInner(env, id, ldrefExit, ldPMExit, constraint);
   auto const varName = curFunc(env)->localVarName(id);
 
   auto warnUninit = [&] {
     if (varName != nullptr) {
-      gen(env, RaiseUninitLoc, catchBlock, cns(env, varName));
+      gen(env, RaiseUninitLoc, cns(env, varName));
     }
     return cns(env, Type::InitNull);
   };

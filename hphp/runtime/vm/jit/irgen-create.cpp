@@ -29,7 +29,7 @@ const StaticString s_uuinvoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-void initProps(HTS& env, const Class* cls, Block* catchBlock) {
+void initProps(HTS& env, const Class* cls) {
   cls->initPropHandle();
   env.irb->ifThen(
     [&](Block* taken) {
@@ -37,7 +37,7 @@ void initProps(HTS& env, const Class* cls, Block* catchBlock) {
     },
     [&] {
       env.irb->hint(Block::Hint::Unlikely);
-      gen(env, InitProps, catchBlock, ClassData(cls));
+      gen(env, InitProps, ClassData(cls));
     }
   );
 }
@@ -58,7 +58,7 @@ SSATmp* touchArgsSpillStackAndPopArgs(HTS& env, int numArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-void initSProps(HTS& env, const Class* cls, Block* catchBlock) {
+void initSProps(HTS& env, const Class* cls) {
   cls->initSPropHandles();
   if (RDS::isPersistentHandle(cls->sPropInitHandle())) return;
   env.irb->ifThen(
@@ -67,7 +67,7 @@ void initSProps(HTS& env, const Class* cls, Block* catchBlock) {
     },
     [&] {
       env.irb->hint(Block::Hint::Unlikely);
-      gen(env, InitSProps, catchBlock, ClassData(cls));
+      gen(env, InitSProps, ClassData(cls));
     }
   );
 }
@@ -83,12 +83,7 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
   // If it's an extension class with a custom instance initializer,
   // that init function does all the work.
   if (cls->instanceCtor()) {
-    auto const obj = gen(
-      env,
-      ConstructInstance,
-      makeCatch(env),
-      ClassData(cls)
-    );
+    auto const obj = gen(env, ConstructInstance, ClassData(cls));
     return registerObj(obj);
   }
 
@@ -97,8 +92,8 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
   const bool sprops = cls->numStaticProperties() > 0;
   assert((props || sprops) == cls->needInitialization());
   if (cls->needInitialization()) {
-    if (props) initProps(env, cls, makeCatch(env));
-    if (sprops) initSProps(env, cls, makeCatch(env));
+    if (props) initProps(env, cls);
+    if (sprops) initSProps(env, cls);
   }
 
   /*
@@ -306,13 +301,12 @@ void emitAddElemC(HTS& env) {
 
   // val is teleported from the stack to the array, so we don't have to do any
   // refcounting.
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env, DataTypeGeneric);
   auto const key = popC(env);
   auto const arr = popC(env);
   // The AddElem* instructions decref their args, so don't decref pop'ed
   // values.
-  push(env, gen(env, op, catchBlock, arr, key, val));
+  push(env, gen(env, op, arr, key, val));
 }
 
 void emitAddNewElemC(HTS& env) {
@@ -320,11 +314,10 @@ void emitAddNewElemC(HTS& env) {
     return interpOne(env, Type::Arr, 2);
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env);
   auto const arr = popC(env);
   // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, AddNewElem, catchBlock, arr, val));
+  push(env, gen(env, AddNewElem, arr, val));
 }
 
 void emitNewCol(HTS& env, int type, int size) {
@@ -342,11 +335,10 @@ void emitColAddElemC(HTS& env) {
     return;
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env);
   auto const key = popC(env);
   auto const coll = popC(env);
-  push(env, gen(env, ColAddElemC, catchBlock, coll, key, val));
+  push(env, gen(env, ColAddElemC, coll, key, val));
   gen(env, DecRef, key);
 }
 
@@ -355,11 +347,10 @@ void emitColAddNewElemC(HTS& env) {
     return interpOne(env, Type::Obj, 2);
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env);
   auto const coll = popC(env);
   // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, ColAddNewElemC, catchBlock, coll, val));
+  push(env, gen(env, ColAddNewElemC, coll, val));
 }
 
 void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {

@@ -67,7 +67,7 @@ void endRegion(HTS& env, Offset nextPc) {
     // default params.
     return;
   }
-  updateBCOff(env, nullptr, nextPc, true);
+  prepareForNextHHBC(env, nullptr, nextPc, true);
   auto const stack = spillStack(env);
   gen(env, SyncABIRegs, fp(env), stack);
   gen(env, ReqBindJmp, ReqBindJmpData(nextPc));
@@ -121,10 +121,11 @@ void endBlock(HTS& env, Offset next, bool nextIsMerge) {
   jmpImpl(env, next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
 }
 
-void updateBCOff(HTS& env,
-                 const NormalizedInstruction* ni,
-                 Offset newOff,
-                 bool lastBcOff) {
+void prepareForNextHHBC(HTS& env,
+                        const NormalizedInstruction* ni,
+                        Offset newOff,
+                        bool lastBcOff) {
+  FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
 
   always_assert_log(
@@ -138,6 +139,7 @@ void updateBCOff(HTS& env,
   env.bcStateStack.back().setOffset(newOff);
   updateMarker(env);
   env.lastBcOff = lastBcOff;
+  env.irb->prepareForNextHHBC();
 }
 
 size_t spOffset(const HTS& env) {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-guards.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -412,12 +413,13 @@ void interpOne(HTS& env,
                int pushed,
                InterpOneData& idata) {
   auto const unit = curUnit(env);
-  auto const sp = spillStack(env);
+  auto const stack = spillStack(env);
+  env.irb->exceptionStackBoundary();
   auto const op = unit->getOpcode(bcOff(env));
 
   auto& iInfo = getInstrInfo(op);
   if (iInfo.type == jit::InstrFlags::OutFDesc) {
-    env.fpiStack.emplace(sp, env.irb->spOffset());
+    env.fpiStack.emplace(stack, env.irb->spOffset());
   } else if (isFCallStar(op) && !env.fpiStack.empty()) {
     env.fpiStack.pop();
   }
@@ -429,7 +431,7 @@ void interpOne(HTS& env,
 
   auto const changesPC = opcodeChangesPC(idata.opcode);
   gen(env, changesPC ? InterpOneCF : InterpOne, outType,
-      makeCatch(env), idata, sp, fp(env));
+      idata, stack, fp(env));
   assert(env.irb->stackDeficit() == 0);
 }
 

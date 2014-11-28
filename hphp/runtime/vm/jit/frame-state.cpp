@@ -193,6 +193,15 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   auto changed = false;
 
   if (auto const taken = inst->taken()) {
+    /*
+     * TODO(#4323657): we want to be able to make the following assertion, but
+     * it's not yet ironed out.
+     */
+    // if (m_status == Status::Building && taken->isCatch()) {
+    //   auto const tmp = save(taken);
+    //   assert(!tmp);
+    // }
+
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
     // call makeExit() before gen(JmpZero).  It doesn't make sense to
@@ -256,6 +265,27 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case HintStkInner:
   case ExceptionBarrier:
     cur().spValue = inst->dst();
+    break;
+
+  case EndCatch:
+    /*
+     * Hitting this means we've messed up with syncing the stack in a catch
+     * trace.  If the stack isn't clean or doesn't match the marker's spOffset,
+     * the unwinder won't see what we expect.
+     */
+    always_assert_flog(
+      cur().spOffset == inst->marker().spOff() &&
+      cur().stackDeficit == 0 &&
+      cur().evalStack.size() == 0,
+      "EndCatch stack didn't seem right:\n"
+      "                 spOff: {}\n"
+      "        marker's spOff: {}\n"
+      "  eval stack def, size: {}, {}\n",
+      cur().spOffset,
+      inst->marker().spOff(),
+      cur().stackDeficit,
+      cur().evalStack.size()
+    );
     break;
 
   case SpillStack: {

@@ -134,20 +134,8 @@ struct MTS {
 
 //////////////////////////////////////////////////////////////////////
 
-// TODO(#5710382): this did something different in the old code, so let's be
-// explicit at first and audit everything.
-Block* makeCatch(MTS&) = delete;
-
-// TODO(#5710382): we should just use makeCatch for this so it means the same
-// thing everywhere.
-Block* makeEmptyCatch(MTS& env) {
-  HTS& hts = env;
-  using irgen::makeCatch;
-  return makeCatch(hts);
-}
-
 // Make a catch block that cleans up temporary values stored in the
-// MInstrState, if we have any.
+// MInstrState, if we have any, in addition to normal catch block behavior.
 Block* makeMISCatch(MTS& env);
 
 // Make a special catch block that deals with InvalidSetMExceptions.
@@ -160,7 +148,6 @@ void constrainBase(MTS& env, TypeConstraint tc) {
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   if (env.base.type.maybeBoxed()) {
-    //tc.innerCat = tc.category;
     tc.category = DataTypeCountness;
   }
   env.irb.constrainValue(env.base.value, tc);
@@ -206,57 +193,32 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct NoExtraData {};
+// Return the first SSATmp* from a parameter pack.
+UNUSED SSATmp* find_base() { always_assert(0 && "genStk with no base"); }
+template<class... T> SSATmp* find_base(SSATmp* h, T... t) { return h; }
+template<class H,
+         class... T> SSATmp* find_base(H h, T... t) { return find_base(t...); }
 
-template<class E> struct genStkImpl {
-  template<class... Srcs>
-  static SSATmp* go(MTS& env, Opcode opc, Block* taken, const E& extra,
-                    Srcs... srcs) {
-    return gen(env, opc, taken, extra, srcs...);
-  }
-};
+template<class... Args>
+SSATmp* genStk(MTS& env, Opcode opc, Args... args) {
+  assert(minstrBaseIdx(opc) == 0);
 
-template<> struct genStkImpl<NoExtraData> {
-  template<class... Srcs>
-  static SSATmp* go(MTS& env, Opcode opc, Block* taken, const NoExtraData&,
-                    Srcs... srcs) {
-    return gen(env, opc, taken, srcs...);
-  }
-};
-
-template<class ExtraData, class... Srcs>
-SSATmp* genStk(MTS& env,
-               Opcode opc,
-               Block* taken,
-               const ExtraData& extra,
-               Srcs... srcs) {
-  static_assert(!std::is_same<ExtraData,SSATmp*>::value,
-                "Pass NoExtraData{} if you don't need extra data in genStk");
-  assert(opcodeHasFlags(opc, HasStackVersion));
-  assert(!opcodeHasFlags(opc, ModifiesStack));
-
-  // We're going to make decisions based on the type of the base.
-  constrainBase(env, DataTypeSpecific);
-
-  auto srcVec = std::vector<SSATmp*> { srcs... };
-  auto const base = srcVec[minstrBaseIdx(opc)];
+  auto const base = find_base(args...);
 
   /* If the base is a pointer to a stack cell and the operation might change
    * its type and/or value, use the version of the opcode that returns a new
    * StkPtr. */
-  if (base->inst()->op() == LdStackAddr) {
+  if (base->inst()->is(LdStackAddr)) {
     auto const prev = getStackValue(
       base->inst()->src(0),
-      base->inst()->extra<LdStackAddr>()->offset
+      base->inst()->template extra<LdStackAddr>()->offset
     );
     MInstrEffects effects(opc, prev.knownType.ptr(Ptr::Stk));
     if (effects.baseTypeChanged || effects.baseValChanged) {
-      return genStkImpl<ExtraData>::go(env,
-        getStackModifyingOpcode(opc), taken, extra, srcs..., sp(env));
+      return gen(env, getStackModifyingOpcode(opc), args..., sp(env));
     }
   }
-
-  return genStkImpl<ExtraData>::go(env, opc, taken, extra, srcs...);
+  return gen(env, opc, args...);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -509,6 +471,7 @@ SSATmp* getValAddr(MTS& env) {
   assert(l.space == Location::Stack);
   assert(env.stackInputs.count(0));
   spillStack(env);
+  env.irb.exceptionStackBoundary();
   return ldStackAddr(env, env.stackInputs[0]);
 }
 
@@ -616,7 +579,6 @@ void emitBaseLCR(MTS& env) {
       if (mia & MIA_warn) {
         gen(env,
             RaiseUninitLoc,
-            makeEmptyCatch(env),
             cns(env, curFunc(env)->localVarName(baseDL.location.offset)));
       }
       if (mia & MIA_define) {
@@ -683,6 +645,7 @@ void emitBaseLCR(MTS& env) {
     // Make sure the stack is clean before getting a pointer to one of its
     // elements.
     spillStack(env);
+    env.irb.exceptionStackBoundary();
     assert(env.stackInputs.count(env.iInd));
     auto const sinfo = getStackValue(sp(env), env.stackInputs[env.iInd]);
     setBase(
@@ -713,7 +676,7 @@ void emitBaseG(MTS& env) {
   if (!gblName->isA(Type::Str)) PUNT(BaseG-non-string-name);
   setBase(
     env,
-    gen(env, BaseG, MInstrAttrData { mia }, makeEmptyCatch(env), gblName)
+    gen(env, BaseG, MInstrAttrData { mia }, gblName)
   );
 }
 
@@ -729,10 +692,7 @@ void emitBaseS(MTS& env) {
    * unless we know it's not boxed, and the C++ helpers for generic dims
    * currently always conditionally unbox.
    */
-  setBase(
-    env,
-    ldClsPropAddr(env, makeEmptyCatch(env), clsRef, key, true)
-  );
+  setBase(env, ldClsPropAddr(env, clsRef, key, true));
 }
 
 void emitBaseOp(MTS& env) {
@@ -834,10 +794,7 @@ SSATmp* checkInitProp(MTS& env,
           // init_null_variant.
       env.irb.hint(Block::Hint::Unlikely);
       if (doWarn && wantPropSpecializedWarnings()) {
-        // TODO(#5710382): is the empty catch actually correct here?  The
-        // pre-refactored code did a makeCatch from hhbc-translator, which was
-        // probably a bug...
-        gen(env, RaiseUndefProp, makeEmptyCatch(env), baseAsObj, key);
+        gen(env, RaiseUndefProp, baseAsObj, key);
       }
       if (doDefine) {
         gen(
@@ -924,7 +881,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       env.irb.hint(Block::Hint::Unlikely);
       if (doWarn) {
-        gen(env, WarnNonObjProp, makeMISCatch(env));
+        gen(env, WarnNonObjProp);
       }
       if (doDefine) {
         /*
@@ -975,7 +932,6 @@ void emitPropGeneric(MTS& env) {
       env,
       gen(env,
           PropDX,
-          makeMISCatch(env),
           MInstrAttrData { mia },
           env.base.value,
           key,
@@ -986,7 +942,6 @@ void emitPropGeneric(MTS& env) {
       env,
       gen(env,
           PropX,
-          makeMISCatch(env),
           MInstrAttrData { mia },
           env.base.value,
           key,
@@ -1023,7 +978,6 @@ void emitElem(MTS& env) {
       env,
       gen(env,
           warn ? ElemArrayW : ElemArray,
-          makeMISCatch(env),
           env.base.value,
           key)
     );
@@ -1039,7 +993,6 @@ void emitElem(MTS& env) {
       gen(
         env,
         RaiseError,
-        makeMISCatch(env),
         cns(env, makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       setBase(env, uninit);
@@ -1056,7 +1009,6 @@ void emitElem(MTS& env) {
       env,
       genStk(env,
              define ? ElemDX : ElemUX,
-             makeMISCatch(env),
              MInstrAttrData { mia },
              env.base.value,
              key,
@@ -1068,7 +1020,6 @@ void emitElem(MTS& env) {
     env,
     gen(env,
         ElemX,
-        makeMISCatch(env),
         MInstrAttrData { mia },
         env.base.value,
         key,
@@ -1236,14 +1187,27 @@ void emitMPre(MTS& env) {
       gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef)), uninit);
       gen(env, StMem, env.misBase, cns(env, MISOFF(tvRef2)), uninit);
     }
+
+    // If we're using an MInstrState, all the default-created catch blocks for
+    // exception paths from here out will need to clean up the tvRef{,2}
+    // storage, so install a custom catch creator.
+    env.irb.setCatchCreator([&] { return makeMISCatch(env); });
   }
 
-  // Iterate over all but the last member, which is consumed by a final
-  // operation.
+  /*
+   * Iterate over all but the last member, which is consumed by a final
+   * operation.
+   *
+   * Intermediate operations (and the base op) can define new StkPtrs, even
+   * though the stack depth won't be changing, so we need to have a stack
+   * boundary in-between each one.
+   */
   for (env.mInd = 0; env.mInd < env.ni.immVecM.size() - 1; ++env.mInd) {
+    env.irb.exceptionStackBoundary();
     emitIntermediateOp(env);
     emitRatchetRefs(env);
   }
+  env.irb.exceptionStackBoundary();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1309,14 +1273,14 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
     },
     [&] { // Taken:
       env.irb.hint(Block::Hint::Unlikely);
-      gen(env, RaiseArrayIndexNotice, makeMISCatch(env), key);
+      gen(env, RaiseArrayIndexNotice, key);
       return cns(env, Type::InitNull);
     }
   );
 }
 
 SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
-  return gen(env, ArrayGet, makeMISCatch(env), env.base.value, key);
+  return gen(env, ArrayGet, env.base.value, key);
 }
 
 void emitProfiledArrayGet(MTS& env, SSATmp* key) {
@@ -1359,7 +1323,7 @@ void emitProfiledArrayGet(MTS& env, SSATmp* key) {
 
 void emitStringGet(MTS& env, SSATmp* key) {
   assert(key->isA(Type::Int));
-  env.result = gen(env, StringGet, makeMISCatch(env), env.base.value, key);
+  env.result = gen(env, StringGet, env.base.value, key);
 }
 
 void emitVectorGet(MTS& env, SSATmp* key) {
@@ -1368,7 +1332,7 @@ void emitVectorGet(MTS& env, SSATmp* key) {
     PUNT(emitVectorGet);
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, makeMISCatch(env), key, size);
+  gen(env, CheckBounds, key, size);
   auto const base = gen(env, LdVectorBase, env.base.value);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1391,7 +1355,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
     auto index = cns(env, key->intVal() << 4);
     env.result = gen(env, LdElem, base, index);
   } else {
-    gen(env, CheckBounds, makeMISCatch(env), key, cns(env, 1));
+    gen(env, CheckBounds, key, cns(env, 1));
     auto const base = gen(env, LdPairBase, env.base.value);
     auto idx = gen(env, Shl, key, cns(env, 4));
     env.result = gen(env, LdElem, base, idx);
@@ -1432,7 +1396,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
     assert(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
     auto const box = getInput(env, baseStkIdx, DataTypeSpecific);
-    gen(env, ArraySetRef, makeMISCatch(env), env.base.value, key, value, box);
+    gen(env, ArraySetRef, env.base.value, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
     env.result = value;
@@ -1442,7 +1406,6 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   auto const newArr = gen(
     env,
     ArraySet,
-    makeMISCatch(env),
     env.base.value,
     key,
     value
@@ -1469,7 +1432,7 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
     PUNT(emitVectorSet); // will throw
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, makeMISCatch(env), key, size);
+  gen(env, CheckBounds, key, size);
 
   env.irb.ifThen(
     [&](Block* taken) {
@@ -1522,7 +1485,6 @@ void emitCGetProp(MTS& env) {
   env.result = gen(
     env,
     CGetProp,
-    makeMISCatch(env),
     env.base.value,
     key,
     misPtr(env)
@@ -1531,18 +1493,17 @@ void emitCGetProp(MTS& env) {
 
 void emitVGetProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetProp, makeMISCatch(env), NoExtraData{},
-                      env.base.value, key, misPtr(env));
+  env.result = genStk(env, VGetProp, env.base.value, key, misPtr(env));
 }
 
 void emitIssetProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, IssetProp, makeMISCatch(env), env.base.value, key);
+  env.result = gen(env, IssetProp, env.base.value, key);
 }
 
 void emitEmptyProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, EmptyProp, makeMISCatch(env), env.base.value, key);
+  env.result = gen(env, EmptyProp, env.base.value, key);
 }
 
 void emitSetProp(MTS& env) {
@@ -1571,8 +1532,7 @@ void emitSetProp(MTS& env) {
 
   // Emit the appropriate helper call.
   auto const key = getKey(env);
-  genStk(env, SetProp, makeCatchSet(env), NoExtraData{},
-    env.base.value, key, value);
+  genStk(env, SetProp, makeCatchSet(env), env.base.value, key, value);
   env.result = value;
 }
 
@@ -1580,22 +1540,21 @@ void emitSetOpProp(MTS& env) {
   SetOpOp op = SetOpOp(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
   auto const value = getValue(env);
-  env.result = genStk(env, SetOpProp, makeMISCatch(env), SetOpData { op },
+  env.result = genStk(env, SetOpProp, SetOpData { op },
                       env.base.value, key, value, misPtr(env));
 }
 
 void emitIncDecProp(MTS& env) {
   IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
-  env.result = genStk(env, IncDecProp, makeMISCatch(env), IncDecData { op },
+  env.result = genStk(env, IncDecProp, IncDecData { op },
                       env.base.value, key, misPtr(env));
 }
 
 void emitBindProp(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindProp, makeMISCatch(env), NoExtraData{},
-    env.base.value, key, box, misPtr(env));
+  genStk(env, BindProp, env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1606,7 +1565,7 @@ void emitUnsetProp(MTS& env) {
     constrainBase(env, DataTypeSpecific);
     return;
   }
-  gen(env, UnsetProp, makeMISCatch(env), env.base.value, key);
+  gen(env, UnsetProp, env.base.value, key);
 }
 
 void emitCGetElem(MTS& env) {
@@ -1632,27 +1591,24 @@ void emitCGetElem(MTS& env) {
     emitPairGet(env, key);
     break;
   case SimpleOp::Map:
-    env.result = gen(env, MapGet, makeMISCatch(env), env.base.value, key);
+    env.result = gen(env, MapGet, env.base.value, key);
     break;
   case SimpleOp::None:
-    env.result = gen(env, CGetElem, makeMISCatch(env), env.base.value,
-      key, misPtr(env));
+    env.result = gen(env, CGetElem, env.base.value, key, misPtr(env));
     break;
   }
 }
 
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetElem, makeMISCatch(env), NoExtraData{},
-    env.base.value, key, misPtr(env));
+  env.result = genStk(env, VGetElem, env.base.value, key, misPtr(env));
 }
 
 void emitIssetElem(MTS& env) {
   switch (env.simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
-    env.result = gen(env, ArrayIsset, makeMISCatch(env), env.base.value,
-      getKey(env));
+    env.result = gen(env, ArrayIsset, env.base.value, getKey(env));
     break;
   case SimpleOp::PackedArray:
     emitPackedArrayIsset(env);
@@ -1672,8 +1628,7 @@ void emitIssetElem(MTS& env) {
   case SimpleOp::None:
     {
       auto const key = getKey(env);
-      env.result = gen(env, IssetElem, makeMISCatch(env),
-        env.base.value, key, misPtr(env));
+      env.result = gen(env, IssetElem, env.base.value, key, misPtr(env));
     }
     break;
   }
@@ -1681,8 +1636,7 @@ void emitIssetElem(MTS& env) {
 
 void emitEmptyElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, EmptyElem, makeMISCatch(env),
-    env.base.value, key, misPtr(env));
+  env.result = gen(env, EmptyElem, env.base.value, key, misPtr(env));
 }
 
 void emitSetNewElem(MTS& env) {
@@ -1704,9 +1658,8 @@ void emitSetWithRefNewElem(MTS& env) {
     constrainBase(env, DataTypeSpecific);
     emitSetNewElem(env);
   } else {
-    genStk(env, SetWithRefNewElem, makeMISCatch(env),
-           NoExtraData{},
-           env.base.value, getValAddr(env), misPtr(env));
+    genStk(env, SetWithRefNewElem, env.base.value, getValAddr(env),
+      misPtr(env));
   }
   env.result = nullptr;
 }
@@ -1728,13 +1681,13 @@ void emitSetElem(MTS& env) {
     emitVectorSet(env, key, value);
     break;
   case SimpleOp::Map:
-    gen(env, MapSet, makeMISCatch(env), env.base.value, key, value);
+    gen(env, MapSet, env.base.value, key, value);
     env.result = value;
     break;
   case SimpleOp::Pair:
   case SimpleOp::None:
     constrainBase(env, DataTypeSpecific);
-    auto const result = genStk(env, SetElem, makeCatchSet(env), NoExtraData{},
+    auto const result = genStk(env, SetElem, makeCatchSet(env),
                                env.base.value, key, value);
     auto const t = result->type();
     if (t == Type::Nullptr) {
@@ -1765,8 +1718,7 @@ void emitSetWithRefLElem(MTS& env) {
     emitSetElem(env);
     assert(env.strTestResult == nullptr);
   } else {
-    genStk(env, SetWithRefElem, makeMISCatch(env), NoExtraData{},
-           env.base.value, key, locAddr, misPtr(env));
+    genStk(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
   }
   env.result = nullptr;
 }
@@ -1774,22 +1726,21 @@ void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, SetOpElem, makeMISCatch(env), SetOpData{op},
+  env.result = genStk(env, SetOpElem, SetOpData{op},
                       env.base.value, getKey(env), getValue(env),
                       misPtr(env));
 }
 
 void emitIncDecElem(MTS& env) {
   auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, IncDecElem, makeMISCatch(env), IncDecData { op },
+  env.result = genStk(env, IncDecElem, IncDecData { op },
                       env.base.value, getKey(env), misPtr(env));
 }
 
 void emitBindElem(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindElem, makeMISCatch(env), NoExtraData{},
-         env.base.value, key, box, misPtr(env));
+  genStk(env, BindElem, env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1801,7 +1752,6 @@ void emitUnsetElem(MTS& env) {
   if (baseType <= Type::Str) {
     gen(env,
         RaiseError,
-        makeMISCatch(env),
         cns(env, makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
@@ -1810,7 +1760,7 @@ void emitUnsetElem(MTS& env) {
     return;
   }
 
-  genStk(env, UnsetElem, makeMISCatch(env), NoExtraData{}, env.base.value, key);
+  genStk(env, UnsetElem, env.base.value, key);
 }
 
 void emitNotSuppNewElem(MTS& env) {
@@ -1831,8 +1781,7 @@ void emitIncDecNewElem(MTS& env) {
 
 void emitBindNewElem(MTS& env) {
   auto const box = getValue(env);
-  genStk(env, BindNewElem, makeMISCatch(env), NoExtraData{},
-         env.base.value, box, misPtr(env));
+  genStk(env, BindNewElem, env.base.value, box, misPtr(env));
   env.result = box;
 }
 

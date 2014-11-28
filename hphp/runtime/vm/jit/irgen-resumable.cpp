@@ -30,11 +30,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implAwaitE(HTS& env,
-                SSATmp* child,
-                Block* catchBlock,
-                Offset resumeOffset,
-                int numIters) {
+void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   assert(curFunc(env)->isAsync());
   assert(!resumed(env));
   assert(child->type() <= Type::Obj);
@@ -47,7 +43,6 @@ void implAwaitE(HTS& env,
   auto const waitHandle =
     gen(env,
         CreateAFWH,
-        catchBlock,
         fp(env),
         cns(env, func->numSlotsInFrame()),
         resumeAddr,
@@ -59,7 +54,8 @@ void implAwaitE(HTS& env,
   // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
   // on the stack so that the unwinder would decref it.
   push(env, waitHandle);
-  retSurpriseCheck(env, asyncAR, nullptr, makeCatch(env), false);
+  env.irb->exceptionStackBoundary();
+  retSurpriseCheck(env, asyncAR, nullptr, false);
   discard(env, 1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -71,16 +67,13 @@ void implAwaitE(HTS& env,
   gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
 }
 
-void implAwaitR(HTS& env,
-                SSATmp* child,
-                Block* catchBlock,
-                Offset resumeOffset) {
+void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
   assert(curFunc(env)->isAsync());
   assert(resumed(env));
   assert(child->isA(Type::Obj));
 
   // Prepare child for establishing dependency.
-  gen(env, AFWHPrepareChild, catchBlock, fp(env), child);
+  gen(env, AFWHPrepareChild, fp(env), child);
 
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
@@ -92,11 +85,12 @@ void implAwaitR(HTS& env,
   gen(env, AFWHBlockOn, fp(env), child);
 
   // Transfer control back to the scheduler.
-  auto const stack = spillStack(env);
   push(env, cns(env, Type::InitNull));
-  retSurpriseCheck(env, fp(env), nullptr, makeCatch(env), true);
+  env.irb->exceptionStackBoundary();
+  retSurpriseCheck(env, fp(env), nullptr, true);
   popC(env);
 
+  auto const stack = spillStack(env);
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
 
@@ -114,7 +108,7 @@ void yieldReturnControl(HTS& env) {
 }
 
 void yieldImpl(HTS& env, Offset resumeOffset) {
-  retSurpriseCheck(env, fp(env), nullptr, makeCatch(env), true);
+  retSurpriseCheck(env, fp(env), nullptr, true);
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
@@ -143,7 +137,6 @@ void emitAwait(HTS& env, int32_t numIters) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
-  auto const catchBlock = makeCatch(env);
   auto const exitSlow   = makeExitSlow(env);
 
   if (!topC(env)->isA(Type::Obj)) PUNT(Await-NonObject);
@@ -156,17 +149,17 @@ void emitAwait(HTS& env, int32_t numIters) {
   auto const kFailed    = c_WaitHandle::STATE_FAILED;
 
   auto const state = gen(env, LdWHState, child);
-  gen(env, JmpEq, exitSlow, state, cns(env, kFailed));
+  gen(env, JmpEqInt, exitSlow, state, cns(env, kFailed));
 
   env.irb->ifThenElse(
     [&] (Block* taken) {
-      gen(env, JmpEq, taken, state, cns(env, kSucceeded));
+      gen(env, JmpEqInt, taken, state, cns(env, kSucceeded));
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
       if (resumed(env)) {
-        implAwaitR(env, child, catchBlock, resumeOffset);
+        implAwaitR(env, child, resumeOffset);
       } else {
-        implAwaitE(env, child, catchBlock, resumeOffset, numIters);
+        implAwaitE(env, child, resumeOffset, numIters);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
@@ -189,7 +182,7 @@ void emitCreateCont(HTS& env) {
 
   // This must happen before we allocate the generator, because we don't want
   // to have to decref it while unwinding.
-  retSurpriseCheck(env, fp(env), nullptr, makeCatch(env), false);
+  retSurpriseCheck(env, fp(env), nullptr, false);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.

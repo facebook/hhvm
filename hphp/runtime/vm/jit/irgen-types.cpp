@@ -82,9 +82,9 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   }
   if (tc.isCallable()) {
     if (isReturnType) {
-      gen(env, VerifyRetCallable, makeCatch(env), val);
+      gen(env, VerifyRetCallable, val);
     } else {
-      gen(env, VerifyParamCallable, makeCatch(env), val, cns(env, id));
+      gen(env, VerifyParamCallable, val, cns(env, id));
     }
     return;
   }
@@ -94,9 +94,9 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   if (!tc.isObjectOrTypeAlias()) {
     if (!tc.checkPrimitive(valType.toDataType())) {
       if (isReturnType) {
-        gen(env, VerifyRetFail, makeCatch(env), val);
+        gen(env, VerifyRetFail, val);
       } else {
-        gen(env, VerifyParamFail, makeCatch(env), cns(env, id));
+        gen(env, VerifyParamFail, cns(env, id));
       }
     }
     return;
@@ -152,9 +152,9 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
       // The hint was self or parent and there's no corresponding
       // class for the current func. This typehint will always fail.
       if (isReturnType) {
-        gen(env, VerifyRetFail, makeCatch(env), val);
+        gen(env, VerifyRetFail, val);
       } else {
-        gen(env, VerifyParamFail, makeCatch(env), cns(env, id));
+        gen(env, VerifyParamFail, cns(env, id));
       }
       return;
     }
@@ -200,18 +200,18 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
       [&] { // taken: the param type does not match
         env.irb->hint(Block::Hint::Unlikely);
         if (isReturnType) {
-          gen(env, VerifyRetFail, makeCatch(env), val);
+          gen(env, VerifyRetFail, val);
         } else {
-          gen(env, VerifyParamFail, makeCatch(env), cns(env, id));
+          gen(env, VerifyParamFail, cns(env, id));
         }
       }
     );
   } else {
     if (isReturnType) {
-      gen(env, VerifyRetCls, makeCatch(env), objClass, constraint,
+      gen(env, VerifyRetCls, objClass, constraint,
           cns(env, uintptr_t(&tc)), val);
     } else {
-      gen(env, VerifyParamCls, makeCatch(env), objClass, constraint,
+      gen(env, VerifyParamCls, objClass, constraint,
           cns(env, uintptr_t(&tc)), cns(env, id));
     }
   }
@@ -456,8 +456,6 @@ void emitVerifyParamType(HTS& env, int32_t paramId) {
 }
 
 void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
-  auto const catchTrace = makeCatch(env);
-
   auto const tAutoload = popC(env);
   auto const tCls = popC(env);
 
@@ -474,7 +472,6 @@ void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
   auto const val = gen(
     env,
     OODeclExists,
-    catchTrace,
     ClassKindData { kind },
     tCls,
     tAutoload

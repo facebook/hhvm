@@ -133,11 +133,11 @@ void fpushObjMethodUnknown(HTS& env,
   // This is special.  We need to move the stackpointer in case LdObjMethod
   // calls a destructor.  Otherwise it would clobber the ActRec we just pushed.
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   gen(env,
       LdObjMethod,
       LdObjMethodData { methodName, shouldFatal },
-      makeCatch(env),
       objCls,
       actRec);
 }
@@ -269,8 +269,9 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   // calls a destructor. Otherwise it would clobber the ActRec we just
   // pushed.
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
-  gen(env, LdArrFuncCtx, makeCatch(env), arr, actRec, thisAR);
+  gen(env, LdArrFuncCtx, arr, actRec, thisAR);
   gen(env, DecRef, arr);
 }
 
@@ -304,10 +305,11 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
    * we need this marker.
    */
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, makeCatch(env), callable, actRec, fp(env));
+  gen(env, opcode, callable, actRec, fp(env));
   gen(env, DecRef, callable);
 }
 
@@ -331,7 +333,7 @@ SSATmp* clsMethodCtx(HTS& env, const Func* callee, const Class* cls) {
   }
 
   if (mustBeStatic) {
-    return ldCls(env, makeCatch(env), cns(env, cls->name()));
+    return ldCls(env, cns(env, cls->name()));
   }
   if (env.irb->thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
@@ -396,12 +398,10 @@ void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
 }
 
 void fpushFuncCommon(HTS& env,
-                     const Func* func,
+                     int32_t numParams,
                      const StringData* name,
-                     const StringData* fallback,
-                     int32_t numParams) {
-  if (func) {
-    func->validate();
+                     const StringData* fallback) {
+  if (auto const func = Unit::lookupFunc(name)) {
     if (func->isNameBindingImmutable(curUnit(env))) {
       fpushActRec(env,
                   cns(env, func),
@@ -412,16 +412,9 @@ void fpushFuncCommon(HTS& env,
     }
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const ssaFunc = fallback
-    ? gen(env,
-          LdFuncCachedU,
-          LdFuncCachedUData { name, fallback },
-          catchBlock)
-    : gen(env,
-          LdFuncCached,
-          LdFuncCachedData { name },
-          catchBlock);
+    ? gen(env, LdFuncCachedU, LdFuncCachedUData { name, fallback })
+    : gen(env, LdFuncCached, LdFuncCachedData { name });
   fpushActRec(env,
               ssaFunc,
               cns(env, Type::Nullptr),
@@ -502,11 +495,9 @@ void emitFPushCufSafe(HTS& env, int32_t numArgs) {
 }
 
 void emitFPushCtor(HTS& env, int32_t numParams) {
-  auto const catchBlock1 = makeCatch(env);
-  auto const catchBlock2 = makeCatch(env);
-  auto const cls = popA(env);
-  auto const func = gen(env, LdClsCtor, catchBlock1, cls);
-  auto const obj = gen(env, AllocObj, catchBlock2, cls);
+  auto const cls  = popA(env);
+  auto const func = gen(env, LdClsCtor, cls);
+  auto const obj  = gen(env, AllocObj, cls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
   auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
@@ -540,7 +531,7 @@ void emitFPushCtorD(HTS& env,
 
   auto ssaCls = persistentCls
     ? cns(env, cls)
-    : gen(env, LdClsCached, makeCatch(env), cns(env, className));
+    : gen(env, LdClsCached, cns(env, className));
   if (!ssaCls->isConst() && uniqueCls) {
     // If the Class is unique but not persistent, it's safe to use it as a
     // const after the LdClsCached, which will throw if the class can't be
@@ -549,26 +540,24 @@ void emitFPushCtorD(HTS& env,
   }
 
   auto const ssaFunc = func ? cns(env, func)
-                            : gen(env, LdClsCtor, makeCatch(env), ssaCls);
+                            : gen(env, LdClsCtor, ssaCls);
   auto const obj = fastAlloc ? allocObjFast(env, cls)
-                             : gen(env, AllocObj, makeCatch(env), ssaCls);
+                             : gen(env, AllocObj, ssaCls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
   auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
   fpushActRec(env, ssaFunc, obj, numArgsAndFlags, nullptr);
 }
 
-void emitFPushFuncD(HTS& env, int32_t numParams, const StringData* funcName) {
-  auto const func = Unit::lookupFunc(funcName);
-  fpushFuncCommon(env, func, funcName, nullptr, numParams);
+void emitFPushFuncD(HTS& env, int32_t nargs, const StringData* name) {
+  fpushFuncCommon(env, nargs, name, nullptr);
 }
 
 void emitFPushFuncU(HTS& env,
-                    int32_t numParams,
-                    const StringData* funcName,
-                    const StringData* fallbackName) {
-  auto const func = Unit::lookupFunc(funcName);
-  fpushFuncCommon(env, func, funcName, fallbackName, numParams);
+                    int32_t nargs,
+                    const StringData* name,
+                    const StringData* fallback) {
+  fpushFuncCommon(env, nargs, name, fallback);
 }
 
 void emitFPushFunc(HTS& env, int32_t numParams) {
@@ -579,10 +568,9 @@ void emitFPushFunc(HTS& env, int32_t numParams) {
     PUNT(FPushFunc_not_Str);
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const funcName = popC(env);
   fpushActRec(env,
-              gen(env, LdFunc, catchBlock, funcName),
+              gen(env, LdFunc, funcName),
               cns(env, Type::Nullptr),
               numParams,
               nullptr);
@@ -636,11 +624,7 @@ void emitFPushClsMethodD(HTS& env,
     },
     [&] { // taken
       env.irb->hint(Block::Hint::Unlikely);
-      auto result = gen(env,
-                        LookupClsMethodCache,
-                        makeCatch(env),
-                        data,
-                        fp(env));
+      auto const result = gen(env, LookupClsMethodCache, data, fp(env));
       return gen(env, CheckNonNull, slowExit, result);
     }
   );
@@ -709,9 +693,9 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
    * stack and must handle that properly if we throw or re-enter.
    */
   updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
-  gen(env, LookupClsMethod, makeCatch(env), clsVal,
-    methVal, actRec, fp(env));
+  gen(env, LookupClsMethod, clsVal, methVal, actRec, fp(env));
   gen(env, DecRef, methVal);
 }
 
@@ -735,7 +719,6 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
                                             magicCall,
                                             true /* staticLookup */,
                                             curClass(env));
-  auto const catchBlock = vmfunc ? nullptr : makeCatch(env);
   discard(env, 2);
 
   auto const curCtxTmp = ldCtx(env);
@@ -762,7 +745,6 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
       auto const result = gen(
         env,
         LookupClsMethodFCache,
-        catchBlock,
         data,
         cns(env, cls),
         fp(env)

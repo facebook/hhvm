@@ -237,7 +237,6 @@ void inlSingletonSProp(HTS& env,
   trflags.noinlineSingleton = true;
 
   auto exitBlock = makeExit(env, trflags);
-  auto catchBlock = makeCatch(env);
 
   // Pull the class and property names.
   auto const unit = func->unit();
@@ -257,7 +256,7 @@ void inlSingletonSProp(HTS& env,
   }
 
   // Look up the static property.
-  auto const sprop   = ldClsPropAddrKnown(env, catchBlock, cls, propName);
+  auto const sprop   = ldClsPropAddrKnown(env, cls, propName);
   auto const unboxed = gen(env, UnboxPtr, sprop);
   auto const value   = gen(env, LdMem, unboxed->type().deref(),
                          unboxed, cns(env, 0));

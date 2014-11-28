@@ -66,9 +66,9 @@ void implCns(HTS& env,
       // lookup.
       assert(!fallbackNameTmp);
       if (error) {
-        result = gen(env, LookupCnsE, makeCatch(env), cnsNameTmp);
+        result = gen(env, LookupCnsE, cnsNameTmp);
       } else {
-        result = gen(env, LookupCns, makeCatch(env), cnsNameTmp);
+        result = gen(env, LookupCns, cnsNameTmp);
       }
     } else {
       result = staticTVCns(env, tv);
@@ -92,14 +92,13 @@ void implCns(HTS& env,
         if (fallbackNameTmp) {
           return gen(env,
                      LookupCnsU,
-                     makeCatch(env),
                      cnsNameTmp,
                      fallbackNameTmp);
         }
         if (error) {
-          return gen(env, LookupCnsE, makeCatch(env), cnsNameTmp);
+          return gen(env, LookupCnsE, cnsNameTmp);
         }
-        return gen(env, LookupCns, makeCatch(env), cnsNameTmp);
+        return gen(env, LookupCns, cnsNameTmp);
       }
     );
   }
@@ -168,7 +167,7 @@ void emitClsCnsD(HTS& env,
       // Make progress through this instruction before side-exiting to the next
       // instruction, by doing a slower lookup.
       env.irb->hint(Block::Hint::Unlikely);
-      auto const val = gen(env, LookupClsCns, makeCatch(env), clsCnsName);
+      auto const val = gen(env, LookupClsCns, clsCnsName);
       push(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }

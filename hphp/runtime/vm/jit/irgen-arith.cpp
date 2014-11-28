@@ -231,7 +231,6 @@ void implCmp(HTS& env, Opcode opc) {
     }
   }
 
-  Block* catchBlock = nullptr;
   auto const opc2 = matchReentrantCmp(opc);
   // if the comparison operator could re-enter, convert it to the re-entrant
   // form and add the required catch block.
@@ -239,24 +238,22 @@ void implCmp(HTS& env, Opcode opc) {
   if (cmpOpTypesMayReenter(topC(env, 0)->type(),
                            topC(env, 1)->type()) &&
       opc2 != opc) {
-    catchBlock = makeCatch(env);
     opc = opc2;
   }
   // src2 opc src1
   auto const src1 = popC(env);
   auto const src2 = popC(env);
-  push(env, gen(env, opc, catchBlock, src2, src1));
+  push(env, gen(env, opc, src2, src1));
   gen(env, DecRef, src2);
   gen(env, DecRef, src1);
 }
 
 void implAdd(HTS& env, Op op) {
   if (topC(env, 0)->type() <= Type::Arr && topC(env, 1)->type() <= Type::Arr) {
-    auto const catchBlock = makeCatch(env);
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
-    push(env, gen(env, ArrayAdd, catchBlock, tl, tr));
+    push(env, gen(env, ArrayAdd, tl, tr));
     return;
   }
   binaryArith(env, op);
@@ -267,19 +264,16 @@ void implAdd(HTS& env, Op op) {
 }
 
 void emitConcat(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const tr         = popC(env);
   auto const tl         = popC(env);
   // ConcatCellCell consumes only first ref, not second.
-  push(env, gen(env, ConcatCellCell, catchBlock, tl, tr));
+  push(env, gen(env, ConcatCellCell, tl, tr));
   // So we need to consume second ref ourselves.
   gen(env, DecRef, tr);
 }
 
 void emitConcatN(HTS& env, int32_t n) {
   if (n == 2) return emitConcat(env);
-
-  auto const catchBlock = makeCatch(env);
 
   auto const t1 = popC(env);
   auto const t2 = popC(env);
@@ -292,7 +286,7 @@ void emitConcatN(HTS& env, int32_t n) {
   }
 
   if (n == 3) {
-    push(env, gen(env, ConcatStr3, catchBlock, t3, t2, t1));
+    push(env, gen(env, ConcatStr3, t3, t2, t1));
     gen(env, DecRef, t2);
     gen(env, DecRef, t1);
     return;
@@ -302,7 +296,7 @@ void emitConcatN(HTS& env, int32_t n) {
   auto const t4 = popC(env);
   if (!(t4->type() <= Type::Str)) PUNT(ConcatN);
 
-  push(env, gen(env, ConcatStr4, catchBlock, t4, t3, t2, t1));
+  push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
   gen(env, DecRef, t3);
   gen(env, DecRef, t2);
   gen(env, DecRef, t1);
@@ -350,10 +344,9 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
      * refcount == 1. That covers the local, so incref once more for
      * the stack.
      */
-    auto const catchBlock = makeCatch(env);
     auto const loc    = ldLoc(env, id, ldPMExit, DataTypeSpecific);
     auto const val    = popC(env);
-    auto const result = gen(env, ArrayAdd, catchBlock, loc, val);
+    auto const result = gen(env, ArrayAdd, loc, val);
     stLocRaw(env, id, fp(env), result);
     pushIncRef(env, result);
     return;
@@ -367,10 +360,9 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
      * The concat helpers incref their results, which will be consumed by
      * the stloc. We need an extra incref for the push onto the stack.
      */
-    auto const catchBlock = makeCatch(env);
     auto const val    = popC(env);
     env.irb->constrainValue(loc, DataTypeSpecific);
-    auto const result = gen(env, ConcatCellCell, catchBlock, loc, val);
+    auto const result = gen(env, ConcatCellCell, loc, val);
 
     /*
      * Null exit block for 'ldrefExit' because we won't actually need to reload
@@ -464,13 +456,10 @@ void emitXor(HTS& env) {
 }
 
 void emitShl(HTS& env) {
-  auto const catch1 = makeCatch(env);
-  auto const catch2 = makeCatch(env);
-  auto const shiftAmount = popC(env);
-  auto const lhs         = popC(env);
-
-  auto const lhsInt         = gen(env, ConvCellToInt, catch1, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, catch2, shiftAmount);
+  auto const shiftAmount    = popC(env);
+  auto const lhs            = popC(env);
+  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
+  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
 
   push(env, gen(env, Shl, lhsInt, shiftAmountInt));
   gen(env, DecRef, lhs);
@@ -478,13 +467,10 @@ void emitShl(HTS& env) {
 }
 
 void emitShr(HTS& env) {
-  auto const catch1 = makeCatch(env);
-  auto const catch2 = makeCatch(env);
-  auto const shiftAmount = popC(env);
-  auto const lhs         = popC(env);
-
-  auto const lhsInt         = gen(env, ConvCellToInt, catch1, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, catch2, shiftAmount);
+  auto const shiftAmount    = popC(env);
+  auto const lhs            = popC(env);
+  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
+  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
 
   push(env, gen(env, Shr, lhsInt, shiftAmountInt));
   gen(env, DecRef, lhs);
@@ -553,10 +539,9 @@ void emitDiv(HTS& env) {
       }
 
       if (divisorVal == 0) {
-        auto catchBlock = makeCatch(env);
         popC(env);
         popC(env);
-        gen(env, RaiseWarning, catchBlock,
+        gen(env, RaiseWarning,
             cns(env, makeStaticString(Strings::DIVISION_BY_ZERO)));
         push(env, cns(env, false));
         return;
@@ -595,7 +580,6 @@ void emitDiv(HTS& env) {
     return src;
   };
 
-  auto const catchBlock = makeCatch(env);
   divisor  = make_double(popC(env));
   dividend = make_double(popC(env));
 
@@ -609,7 +593,7 @@ void emitDiv(HTS& env) {
       // side-exiting to the next instruction.
       env.irb->hint(Block::Hint::Unlikely);
       auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, catchBlock, msg);
+      gen(env, RaiseWarning, msg);
       push(env, cns(env, false));
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }
@@ -619,13 +603,10 @@ void emitDiv(HTS& env) {
 }
 
 void emitMod(HTS& env) {
-  auto const catchBlock1 = makeCatch(env);
-  auto const catchBlock2 = makeCatch(env);
-  auto const catchBlock3 = makeCatch(env);
   auto const btr = popC(env);
   auto const btl = popC(env);
-  auto const tr = gen(env, ConvCellToInt, catchBlock1, btr);
-  auto const tl = gen(env, ConvCellToInt, catchBlock2, btl);
+  auto const tr = gen(env, ConvCellToInt, btr);
+  auto const tl = gen(env, ConvCellToInt, btl);
 
   // Generate an exit for the rare case that r is zero.
   env.irb->ifThen(
@@ -637,7 +618,7 @@ void emitMod(HTS& env) {
       // warning and push false.
       env.irb->hint(Block::Hint::Unlikely);
       auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
-      gen(env, RaiseWarning, catchBlock3, msg);
+      gen(env, RaiseWarning, msg);
       gen(env, DecRef, btr);
       gen(env, DecRef, btl);
       push(env, cns(env, false));

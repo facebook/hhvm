@@ -1922,7 +1922,26 @@ static Type flavorToType(FlavorDesc f) {
 }
 
 void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
-  irgen::updateBCOff(
+  /*
+   * These generate AssertStks, which define new StkPtrs, and we don't allow IR
+   * lowering functions to gen instructions that may throw after defining a new
+   * StkPtrs.  This means right now they must be before we prepare for the next
+   * HHBC opcode (it's fine that they will have a marker on the previous
+   * instruction).
+   *
+   * TODO(#4810319): this will go away once we stop threading StkPtrs around.
+   */
+  auto pc = reinterpret_cast<const Op*>(ni.pc());
+  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
+    auto const type = flavorToType(instrInputFlavor(pc, i));
+    if (type != Type::Gen) {
+      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
+      // is a little unsure of itself.
+      irgen::assertTypeStack(hts, i, type);
+    }
+  }
+
+  irgen::prepareForNextHHBC(
     hts,
     &ni,
     ni.source.offset(),
@@ -1936,16 +1955,6 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
 
   irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
-
-  auto pc = reinterpret_cast<const Op*>(ni.pc());
-  for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != Type::Gen) {
-      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
-      // is a little unsure of itself.
-      irgen::assertTypeStack(hts, i, type);
-    }
-  }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
     hts.irb->gen(DbgAssertRetAddr);
@@ -2032,7 +2041,7 @@ TranslateResult translateRegion(HTS& hts,
     for (unsigned i = 0; i < block->length(); ++i, sk.advance(block->unit())) {
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      irgen::updateBCOff(hts, nullptr, sk.offset(), false);
+      irgen::prepareForNextHHBC(hts, nullptr, sk.offset(), false);
 
       // Emit prediction guards. If this is the first instruction in the
       // region, and the region's entry block is not a loop header, the guards

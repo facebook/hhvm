@@ -83,7 +83,7 @@ SSATmp* optimizedCallCount(HTS& env) {
   // Bail if we're trying to do a recursive count()
   if (!mode->isConst(0)) return nullptr;
 
-  return gen(env, Count, makeCatch(env), val);
+  return gen(env, Count, val);
 }
 
 SSATmp* optimizedCallIniGet(HTS& env) {
@@ -384,13 +384,13 @@ struct CatchMaker {
   }
 
   Block* makeUnusualCatch() const {
-    return makeCatchImpl(
-      env,
-      [&] {
-        decRefForUnwind();
-        return prepareForCatch();
-      }
-    );
+    auto const exit = env.irb->makeExit(Block::Hint::Unlikely);
+    BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
+    gen(env, BeginCatch);
+    decRefForUnwind();
+    prepareForCatch();
+    gen(env, EndCatch, fp(env), sp(env));
+    return exit;
   }
 
   Block* makeParamCoerceCatch() const {
@@ -445,13 +445,19 @@ private:
       // nulls.
       push(env, cns(env, Type::InitNull));
     }
+    /*
+     * We're potentially spilling to a different depth than the unwinder
+     * would've expected, so we need an eager sync.  Even if we aren't inlining
+     * this can happen, because before doing the CallBuiltin we set the marker
+     * stack offset to only include the passed-through-stack args.
+     *
+     * So before we leave, update the marker to placate EndCatch assertions,
+     * which is trying to detect failure to do this properly.
+     */
     auto const stack = spillStack(env);
     gen(env, SyncABIRegs, fp(env), stack);
-    /*
-     * TODO(#4323657): right now this is doing an EagerSyncVMRegs in the catch
-     * block even if we're not inlining, which shouldn't be necessary.
-     */
     gen(env, EagerSyncVMRegs, fp(env), stack);
+    updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
     return stack;
   }
 
@@ -578,6 +584,12 @@ void coerce_stack(HTS& env,
         maker.makeUnusualCatch(),
         sp(env));
   }
+
+  /*
+   * We can throw after writing to the stack above; inform IRBuilder about it.
+   * This is basically just for assertions right now.
+   */
+  env.irb->exceptionStackBoundary();
 }
 
 /*
@@ -668,6 +680,11 @@ void builtinCall(HTS& env,
      */
     updateMarker(env);
   }
+
+  // If we're not inlining, we've spilled the stack and are about to do things
+  // that can throw.  If we are inlining, we've done various DefInlineFP and
+  // ReDefSP type stuff and possibly also spilled the stack.
+  env.irb->exceptionStackBoundary();
 
   auto const retType = [&] {
     auto const retDT = callee->returnType();
@@ -923,11 +940,10 @@ void emitIdx(HTS& env) {
     return;
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const def = popC(env, DataTypeSpecific);
   auto const key = popC(env, DataTypeSpecific);
   auto const arr = popC(env, DataTypeSpecific);
-  push(env, gen(env, GenericIdx, catchBlock, arr, key, def));
+  push(env, gen(env, GenericIdx, arr, key, def));
   gen(env, DecRef, arr);
   gen(env, DecRef, key);
   gen(env, DecRef, def);
@@ -1003,9 +1019,8 @@ void emitFloor(HTS& env) {
     PUNT(Floor);
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env);
-  auto const dblVal = gen(env, ConvCellToDbl, catchBlock, val);
+  auto const dblVal = gen(env, ConvCellToDbl, val);
   gen(env, DecRef, val);
   push(env, gen(env, Floor, dblVal));
 }
@@ -1016,9 +1031,8 @@ void emitCeil(HTS& env) {
     PUNT(Ceil);
   }
 
-  auto const catchBlock = makeCatch(env);
   auto const val = popC(env);
-  auto const dblVal = gen(env, ConvCellToDbl, catchBlock, val);
+  auto const dblVal = gen(env, ConvCellToDbl, val);
   gen(env, DecRef, val);
   push(env, gen(env, Ceil, dblVal));
 }

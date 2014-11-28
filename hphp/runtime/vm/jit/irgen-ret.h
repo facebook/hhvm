@@ -26,7 +26,7 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void retSurpriseCheck(HTS& env, SSATmp* fp, SSATmp* retVal, Block* catchBlock,
+void retSurpriseCheck(HTS& env, SSATmp* fp, SSATmp* retVal,
                       bool suspendingResumed);
 
 //////////////////////////////////////////////////////////////////////

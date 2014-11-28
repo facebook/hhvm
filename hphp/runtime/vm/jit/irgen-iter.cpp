@@ -52,6 +52,7 @@ void implMIterInit(HTS& env, Offset relOffset, Lambda genFunc) {
 
   auto const exit  = makeExit(env);
   auto const stack = spillStack(env);
+  env.irb->exceptionStackBoundary();
   auto const pred  = getStackInnerTypePrediction(stack, 0);
   auto const src   = topV(env);
 
@@ -76,7 +77,6 @@ void emitIterInit(HTS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
-  auto const catchBlock = makeCatch(env);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -86,7 +86,6 @@ void emitIterInit(HTS& env,
     env,
     IterInit,
     Type::Bool,
-    catchBlock,
     IterData(iterId, -1, valLocalId),
     src,
     fp(env)
@@ -99,7 +98,6 @@ void emitIterInitK(HTS& env,
                    Offset relOffset,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
-  auto const catchBlock = makeCatch(env);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -110,7 +108,6 @@ void emitIterInitK(HTS& env,
     env,
     IterInitK,
     Type::Bool,
-    catchBlock,
     IterData(iterId, keyLocalId, valLocalId),
     src,
     fp(env)
@@ -129,7 +126,6 @@ void emitIterNext(HTS& env,
     env,
     IterNext,
     Type::Bool,
-    makeCatch(env),
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
@@ -148,7 +144,6 @@ void emitIterNextK(HTS& env,
     env,
     IterNextK,
     Type::Bool,
-    makeCatch(env),
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
@@ -159,7 +154,6 @@ void emitWIterInit(HTS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
-  auto const catchBlock = makeCatch(env);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -169,7 +163,6 @@ void emitWIterInit(HTS& env,
     env,
     WIterInit,
     Type::Bool,
-    catchBlock,
     IterData(iterId, -1, valLocalId),
     src,
     fp(env)
@@ -182,7 +175,6 @@ void emitWIterInitK(HTS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
-  auto const catchBlock = makeCatch(env);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -192,7 +184,6 @@ void emitWIterInitK(HTS& env,
     env,
     WIterInitK,
     Type::Bool,
-    catchBlock,
     IterData(iterId, keyLocalId, valLocalId),
     src,
     fp(env)
@@ -211,7 +202,6 @@ void emitWIterNext(HTS& env,
     env,
     WIterNext,
     Type::Bool,
-    makeCatch(env),
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
@@ -230,7 +220,6 @@ void emitWIterNextK(HTS& env,
     env,
     WIterNextK,
     Type::Bool,
-    makeCatch(env),
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
@@ -241,13 +230,11 @@ void emitMIterInit(HTS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
-  auto const catchBlock = makeCatch(env);
   implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
     return gen(
       env,
       MIterInit,
       type,
-      catchBlock,
       IterData(iterId, -1, valLocalId),
       src,
       fp(env)
@@ -260,13 +247,11 @@ void emitMIterInitK(HTS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
-  auto const catchBlock = makeCatch(env);
   implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
     return gen(
       env,
       MIterInitK,
       type,
-      catchBlock,
       IterData(iterId, keyLocalId, valLocalId),
       src,
       fp(env)
@@ -331,7 +316,6 @@ void emitIterBreak(HTS& env,
 }
 
 void emitDecodeCufIter(HTS& env, int32_t iterId, Offset relOffset) {
-  auto const catchBlock = makeCatch(env);
   auto const src        = popC(env);
   auto const type       = src->type();
   if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
@@ -340,7 +324,6 @@ void emitDecodeCufIter(HTS& env, int32_t iterId, Offset relOffset) {
       DecodeCufIter,
       Type::Bool,
       IterId(iterId),
-      catchBlock,
       src,
       fp(env)
     );

@@ -17,12 +17,12 @@
 #ifndef incl_HPHP_VM_IRBUILDER_H_
 #define incl_HPHP_VM_IRBUILDER_H_
 
-#include <boost/scoped_ptr.hpp>
-#include <vector>
+#include <functional>
 
 #include <folly/ScopeGuard.h>
 #include <folly/Optional.h>
 
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cse.h"
@@ -37,6 +37,12 @@
 namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
+
+struct ExnStackState {
+  uint32_t stackDeficit;
+  EvalStack evalStack;
+  SSATmp* sp;
+};
 
 /*
  * This module provides the basic utilities for generating the IR instructions
@@ -75,37 +81,57 @@ namespace HPHP { namespace jit {
 struct IRBuilder {
   IRBuilder(IRUnit&, BCMarker);
 
-  void setEnableSimplification(bool val) { m_enableSimplification = val; }
-  bool typeMightRelax(SSATmp* val = nullptr) const;
+  /*
+   * Updates the marker used for instructions generated without one
+   * supplied.
+   */
+  void setNextMarker(BCMarker);
 
+  /*
+   * Called before we start lowering each bytecode instruction.  Right now all
+   * this does is cause an implicit exceptionStackBoundary.  See below.
+   */
+  void prepareForNextHHBC();
+
+  /*
+   * Exception handling and IRBuilder.
+   *
+   * Normally HHBC opcodes that throw don't have any effects before they throw.
+   * By default, when you gen() instructions that could throw, IRBuilder
+   * automatically creates catch blocks that take the current frame-state
+   * information, except spill the stack as if the instruction has not yet
+   * started.
+   *
+   * There are some exceptions, and so there are two ways to modify this
+   * behavior.  If an HHBC opcode should have some effects on the stack prior
+   * to throwing, the lowering function can call exceptionStackBoundary after
+   * doing this to inform IRBuilder that it's not a bug---in this case the
+   * automatically created catch blocks will spill the stack as of the last
+   * boundary.
+   *
+   * The other way is to set a custom catch creator function.  This is
+   * basically for the minstr instructions, which has various temporary stack
+   * state to clean up during unwinding.
+   */
+  void exceptionStackBoundary();
+  void setCatchCreator(std::function<Block* ()>);
+
+  /*
+   * The following functions are an abstraction layer we probably don't need.
+   * You can keep using them until we find time to remove them.
+   */
   IRUnit& unit() const { return m_unit; }
   BCMarker nextMarker() const { return m_nextMarker; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
-  const GuardConstraints* guards() const { return &m_constraints; }
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
   void incStackDeficit() { m_state.incStackDeficit(); }
   void clearStackDeficit() { m_state.clearStackDeficit(); }
   EvalStack& evalStack() { return m_state.evalStack(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
-
-  /*
-   * Support for guard relaxation. Whenever the semantics of an hhir operation
-   * depends on the type of one of its input values, that value's type must be
-   * constrained using one of these methods. This happens automatically for
-   * most values, when obtained through HhbcTranslator::popC (and friends).
-   */
-  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
-  bool shouldConstrainGuards()      const { return m_constrainGuards; }
-  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
-  bool constrainValue(SSATmp* const val, TypeConstraint tc);
-  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
-  bool constrainStack(int32_t offset, TypeConstraint tc);
-  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
-
   Type localType(uint32_t id, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
   Type predictedLocalType(uint32_t id);
@@ -116,12 +142,24 @@ struct IRBuilder {
   bool frameMaySpanCall() const { return m_state.frameMaySpanCall(); }
 
   /*
-   * Updates the marker used for instructions generated without one
-   * supplied.
+   * Support for guard relaxation.
+   *
+   * Whenever the semantics of an hhir operation depends on the type of one of
+   * its input values, that value's type must be constrained using one of these
+   * methods. This happens automatically for most values, when obtained through
+   * irgen-internal functions like popC (and friends).
    */
-  void setNextMarker(BCMarker);
+  void setConstrainGuards(bool constrain) { m_constrainGuards = constrain; }
+  bool shouldConstrainGuards()      const { return m_constrainGuards; }
+  bool constrainGuard(const IRInstruction* inst, TypeConstraint tc);
+  bool constrainValue(SSATmp* const val, TypeConstraint tc);
+  bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
+  bool constrainStack(int32_t offset, TypeConstraint tc);
+  bool constrainStack(SSATmp* sp, int32_t offset, TypeConstraint tc);
+  bool typeMightRelax(SSATmp* val = nullptr) const;
+  const GuardConstraints* guards() const { return &m_constraints; }
 
- public:
+public:
   /*
    * API for managing state when building IR with bytecode-level control flow.
    */
@@ -153,7 +191,7 @@ struct IRBuilder {
    */
   void setBlock(Offset offset, Block* block);
 
- public:
+public:
   /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
@@ -189,7 +227,7 @@ struct IRBuilder {
   SSATmp* gen(Opcode op, BCMarker marker, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+        return prepareInst(inst);
       },
       op,
       marker,
@@ -216,9 +254,9 @@ struct IRBuilder {
     m_curBlock->setHint(h);
   }
 
- private:
+private:
   template<typename T> struct BranchImpl;
- public:
+public:
   /*
    * cond() generates if-then-else blocks within a trace.  The caller supplies
    * lambdas to create the branch, next-body, and taken-body.  The next and
@@ -382,6 +420,14 @@ struct IRBuilder {
   }
 
 private:
+  struct BlockState {
+    Block* block;
+    BCMarker marker;
+    ExnStackState exnStack;
+    std::function<Block* ()> catchCreator;
+  };
+
+private:
   // RAII disable of CSE; only restores if it used to be on.  Used for
   // control flow, where we currently don't allow CSE.
   struct DisableCseGuard {
@@ -434,13 +480,13 @@ private:
                            TypeConstraint tc,
                            const std::string& why);
 
-  enum class CloneFlag { Yes, No };
-  SSATmp*   optimizeInst(IRInstruction* inst,
-                         CloneFlag doClone,
-                         Block* srcBlock,
-                         const folly::Optional<IdomVector>& idoms);
-
 private:
+  enum class CloneFlag { Yes, No };
+  SSATmp* optimizeInst(IRInstruction* inst,
+                       CloneFlag doClone,
+                       Block* srcBlock,
+                       const folly::Optional<IdomVector>&);
+  SSATmp* prepareInst(IRInstruction*);
   void appendInstruction(IRInstruction* inst);
   void appendBlock(Block* block);
   void insertSPPhi(bool forceSpPhi, BCMarker);
@@ -465,12 +511,10 @@ private:
    * than the main block. m_nextMarker, and m_curBlock are all set from the
    * most recent call to pushBlock() or popBlock().
    */
-  struct BlockState {
-    Block* block;
-    BCMarker marker;
-  };
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
+  ExnStackState m_exnStack{0, EvalStack{}, nullptr};
+  std::function<Block* ()> m_catchCreator;
 
   bool m_enableSimplification;
   bool m_constrainGuards;

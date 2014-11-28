@@ -45,10 +45,9 @@ void destroyName(HTS& env, SSATmp* name) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* ldClsPropAddrKnown(HTS& env,
-                           Block* catchBlock,
                            const Class* cls,
                            const StringData* name) {
-  initSProps(env, cls, catchBlock); // calls init; must be above sPropHandle()
+  initSProps(env, cls); // calls init; must be above sPropHandle()
   auto const slot = cls->lookupSProp(name);
   auto const handle = cls->sPropHandle(slot);
   auto const repoTy =
@@ -59,11 +58,7 @@ SSATmp* ldClsPropAddrKnown(HTS& env,
   return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
 }
 
-SSATmp* ldClsPropAddr(HTS& env,
-                      Block* catchBlock,
-                      SSATmp* ssaCls,
-                      SSATmp* ssaName,
-                      bool raise) {
+SSATmp* ldClsPropAddr(HTS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
@@ -82,23 +77,21 @@ SSATmp* ldClsPropAddr(HTS& env,
   }();
 
   if (sPropKnown) {
-    return ldClsPropAddrKnown(env, catchBlock, ssaCls->clsVal(),
-      ssaName->strVal());
+    return ldClsPropAddrKnown(env, ssaCls->clsVal(), ssaName->strVal());
   }
 
-  if (raise) {
-    return gen(env, LdClsPropAddrOrRaise, catchBlock,
-               ssaCls, ssaName, cns(env, curClass(env)));
-  } else {
-    return gen(env, LdClsPropAddrOrNull, catchBlock,
-               ssaCls, ssaName, cns(env, curClass(env)));
-  }
+  return gen(
+    env,
+    raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,
+    ssaCls,
+    ssaName,
+    cns(env, curClass(env))
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
   auto const ssaPropName = topC(env, 1);
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -106,8 +99,7 @@ void emitCGetS(HTS& env) {
   }
 
   auto const ssaCls   = popA(env);
-  auto const propAddr = ldClsPropAddr(env, catchBlock, ssaCls,
-                          ssaPropName, true);
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const unboxed  = gen(env, UnboxPtr, propAddr);
   auto const ldMem    = gen(env, LdMem, unboxed->type().deref(),
                           unboxed, cns(env, 0));
@@ -117,7 +109,6 @@ void emitCGetS(HTS& env) {
 }
 
 void emitSetS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
   auto const ssaPropName = topC(env, 2);
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -126,8 +117,7 @@ void emitSetS(HTS& env) {
 
   auto const value    = popC(env, DataTypeCountness);
   auto const ssaCls   = popA(env);
-  auto const propAddr = ldClsPropAddr(env, catchBlock, ssaCls,
-                          ssaPropName, true);
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const ptr      = gen(env, UnboxPtr, propAddr);
 
   destroyName(env, ssaPropName);
@@ -135,7 +125,6 @@ void emitSetS(HTS& env) {
 }
 
 void emitVGetS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
   auto const ssaPropName = topC(env, 1);
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -143,8 +132,7 @@ void emitVGetS(HTS& env) {
   }
 
   auto const ssaCls   = popA(env);
-  auto const propAddr = ldClsPropAddr(env, catchBlock, ssaCls,
-                          ssaPropName, true);
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
 
   destroyName(env, ssaPropName);
   auto const val = gen(
@@ -158,7 +146,6 @@ void emitVGetS(HTS& env) {
 }
 
 void emitBindS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
   auto const ssaPropName = topC(env, 2);
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -167,16 +154,13 @@ void emitBindS(HTS& env) {
 
   auto const value    = popV(env);
   auto const ssaCls   = popA(env);
-  auto const propAddr = ldClsPropAddr(env, catchBlock, ssaCls,
-                          ssaPropName, true);
+  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
 
   destroyName(env, ssaPropName);
   bindMem(env, propAddr, value);
 }
 
 void emitIssetS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
-
   auto const ssaPropName = topC(env, 1);
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(IssetS-PropNameNotString);
@@ -186,8 +170,7 @@ void emitIssetS(HTS& env) {
   auto const ret = env.irb->cond(
     0,
     [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, catchBlock, ssaCls, ssaPropName,
-        false);
+      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
@@ -203,7 +186,6 @@ void emitIssetS(HTS& env) {
 }
 
 void emitEmptyS(HTS& env) {
-  auto const catchBlock  = makeCatch(env);
   auto const ssaPropName = topC(env, 1);
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(EmptyS-PropNameNotString);
@@ -213,8 +195,7 @@ void emitEmptyS(HTS& env) {
   auto const ret = env.irb->cond(
     0,
     [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, catchBlock, ssaCls, ssaPropName,
-        false);
+      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) {

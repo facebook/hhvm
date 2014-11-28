@@ -27,12 +27,25 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implAGet(HTS& env, SSATmp* classSrc, Block* catchBlock) {
+void implAGet(HTS& env, SSATmp* classSrc) {
   if (classSrc->type() <= Type::Str) {
-    push(env, ldCls(env, catchBlock, classSrc));
+    push(env, ldCls(env, classSrc));
     return;
   }
   push(env, gen(env, LdObjClass, classSrc));
+}
+
+void checkThis(HTS& env, SSATmp* ctx) {
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      gen(env, CheckCtxThis, taken, ctx);
+    },
+    [&] {
+      env.irb->hint(Block::Hint::Unlikely);
+      auto const err = cns(env, makeStaticString(Strings::FATAL_NULL_THIS));
+      gen(env, RaiseError, err);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -42,9 +55,8 @@ void implAGet(HTS& env, SSATmp* classSrc, Block* catchBlock) {
 void emitAGetC(HTS& env) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(Type::Obj, Type::Str)) {
-    auto catchBlock = makeCatch(env);
     popC(env);
-    implAGet(env, name, catchBlock);
+    implAGet(env, name);
     gen(env, DecRef, name);
   } else {
     interpOne(env, Type::Cls, 1);
@@ -56,7 +68,7 @@ void emitAGetL(HTS& env, int32_t id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   if (src->type().subtypeOfAny(Type::Obj, Type::Str)) {
-    implAGet(env, src, makeCatch(env));
+    implAGet(env, src);
   } else {
     PUNT(AGetL);
   }
@@ -81,15 +93,13 @@ void emitPushL(HTS& env, int32_t id) {
 void emitCGetL2(HTS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const catchBlock = makeCatch(env);
   auto const oldTop = pop(env, Type::StackElem);
   auto const val = ldLocInnerWarn(
     env,
     id,
     ldrefExit,
     ldPMExit,
-    DataTypeCountnessInit,
-    catchBlock
+    DataTypeCountnessInit
   );
   pushIncRef(env, val);
   push(env, oldTop);
@@ -166,7 +176,6 @@ void emitPrint(HTS& env) {
     return;
   }
 
-  auto catchBlock = makeCatch(env);
   auto const cell = popC(env);
 
   Opcode op;
@@ -182,7 +191,7 @@ void emitPrint(HTS& env) {
   }
   // the print helpers decref their arg, so don't decref pop'ed value
   if (op != Nop) {
-    gen(env, op, catchBlock, cell);
+    gen(env, op, cell);
   }
   push(env, cns(env, 1));
 }
@@ -197,14 +206,14 @@ void emitUnbox(HTS& env) {
 
 void emitThis(HTS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
-  gen(env, CheckCtxThis, makeExitNullThis(env), ctx);
+  checkThis(env, ctx);
   auto const this_ = gen(env, CastCtxThis, ctx);
   pushIncRef(env, this_);
 }
 
 void emitCheckThis(HTS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
-  gen(env, CheckCtxThis, makeExitNullThis(env), ctx);
+  checkThis(env, ctx);
 }
 
 void emitBareThis(HTS& env, BareThisOp subop) {
@@ -223,9 +232,8 @@ void emitBareThis(HTS& env, BareThisOp subop) {
 
 void emitClone(HTS& env) {
   if (!topC(env)->isA(Type::Obj)) PUNT(Clone-NonObj);
-  auto const catchTrace = makeCatch(env);
   auto const obj        = popC(env);
-  push(env, gen(env, Clone, catchTrace, obj));
+  push(env, gen(env, Clone, obj));
   gen(env, DecRef, obj);
 }
 
@@ -265,7 +273,6 @@ void emitNameA(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCastArray(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const src = popC(env);
   push(
     env,
@@ -276,8 +283,8 @@ void emitCastArray(HTS& env) {
       if (src->isA(Type::Dbl))  return gen(env, ConvDblToArr, src);
       if (src->isA(Type::Int))  return gen(env, ConvIntToArr, src);
       if (src->isA(Type::Str))  return gen(env, ConvStrToArr, src);
-      if (src->isA(Type::Obj))  return gen(env, ConvObjToArr, catchBlock, src);
-      return gen(env, ConvCellToArr, catchBlock, src);
+      if (src->isA(Type::Obj))  return gen(env, ConvObjToArr, src);
+      return gen(env, ConvCellToArr, src);
     }()
   );
 }
@@ -289,29 +296,25 @@ void emitCastBool(HTS& env) {
 }
 
 void emitCastDouble(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToDbl, catchBlock, src));
+  push(env, gen(env, ConvCellToDbl, src));
   gen(env, DecRef, src);
 }
 
 void emitCastInt(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToInt, catchBlock, src));
+  push(env, gen(env, ConvCellToInt, src));
   gen(env, DecRef, src);
 }
 
 void emitCastObject(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToObj, catchBlock, src));
+  push(env, gen(env, ConvCellToObj, src));
 }
 
 void emitCastString(HTS& env) {
-  auto const catchBlock = makeCatch(env);
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToStr, catchBlock, src));
+  push(env, gen(env, ConvCellToStr, src));
   gen(env, DecRef, src);
 }
 

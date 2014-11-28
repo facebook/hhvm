@@ -38,7 +38,8 @@ static const StaticString
   s_atime("atime"),
   s_ctime("ctime"),
   s_mode("mode"),
-  s_opendir("opendir");
+  s_opendir("opendir"),
+  s___running("__running");
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:
@@ -127,14 +128,26 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
+static Variant HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
+  //We need to walk up a stack frame and retrieve the value of __FILE__
+  //and then pass that onto the php impl
   bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
   if(!useJit) {
+    static Func* f = SystemLib::s_PharClass->lookupMethod(s___running.get());
     auto const context = g_context.getNoCheck();
     const ActRec* ar = context->getPrevVMStateUNSAFE(vmfp());
-    return ar->m_func->unit()->filepath()->data();
+    const String filepath = ar->m_func->unit()->filepath()->data();
+    Variant ret;
+    context->invokeFunc(ret.asTypedValue(),
+      f,
+      make_packed_array(filepath, retphar),
+      nullptr,
+      SystemLib::s_PharClass
+    );
+    return ret;
   }
   else {
+    //TODO: can we rewrite the bytecode to call the php impl with __FILE__?
     return "using a jit?";
   }
 }

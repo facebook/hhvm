@@ -58,7 +58,6 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Block;
-struct InliningDecider;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
@@ -189,28 +188,23 @@ struct Translator {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
+  /*
+   * Blacklisted instruction set.
+   *
+   * Used by translateRegion() to track instructions that must be interpreted.
+   */
+  typedef ProfSrcKeySet RegionBlacklist;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Main translation API.
+
   enum TranslateResult {
     Failure,
     Retry,
     Success
   };
-
-  /*
-   * Data used by translateRegion() to pass information between retries.
-   */
-  struct RetryContext {
-    // Instructions that must be interpreted.
-    ProfSrcKeySet toInterp;
-
-    // Inlined regions.
-    std::unordered_map<ProfSrcKey,
-                       RegionDescPtr,
-                       ProfSrcKey::Hasher> inlines;
-  };
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Main translation API.
+  static const char* ResultName(TranslateResult r);
 
   /*
    * Start, end, or free a trace of code to be translated.
@@ -222,19 +216,14 @@ struct Translator {
   /*
    * Translate `region'.
    *
-   * The caller is expected to continue calling translateRegion() until either
-   * Success or Failure is returned.  Otherwise, Retry is returned, and the
-   * caller is responsible for threading the same RetryContext through to
-   * the retried translations.
+   * The `toInterp' RegionBlacklist is a set of instructions which must be
+   * interpreted.  When an instruction fails in translation, Retry is returned,
+   * and the instruction is added to `interp' so that it will be interpreted on
+   * the next attempt.
    */
   TranslateResult translateRegion(const RegionDesc& region,
-                                  RetryContext& retry,
-                                  TransFlags trflags);
-
-  /*
-   * Stringify a TranslateResult.
-   */
-  static const char* ResultName(TranslateResult r);
+                                  RegionBlacklist& interp,
+                                  TransFlags trflags = TransFlags{});
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -386,12 +375,6 @@ public:
   static bool liveFrameIsPseudoMain();
 
 private:
-  TranslateResult translateRegionImpl(const RegionDesc& region,
-                                      RetryContext& retry,
-                                      TransFlags trflags,
-                                      InliningDecider& inl,
-                                      const NormalizedInstruction* fcall);
-
   void createBlockMap(const RegionDesc&    region,
                       BlockIdToIRBlockMap& blockIdToIRBlock);
 

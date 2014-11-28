@@ -74,6 +74,7 @@
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
 #include "hphp/runtime/vm/jit/hhbc-translator.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-translator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
@@ -1654,7 +1655,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     }
 
     Translator::TranslateResult result = Translator::Retry;
-    Translator::RetryContext retryContext;
+    Translator::RegionBlacklist regionInterps;
     Offset const initSpOffset = region ? region->entry()->initialSpOffset()
                                        : liveSpOff();
 
@@ -1679,8 +1680,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-
-        result = m_tx.translateRegion(*region, retryContext, args.m_flags);
+        result = m_tx.translateRegion(*region, regionInterps, args.m_flags);
 
         // If we're profiling, grab the postconditions so we can
         // use them in region selection whenever we decide to retranslate.

@@ -1101,10 +1101,6 @@ inline bool isRet(Op op) {
   }
 }
 
-inline bool isReturnish(Op op) {
-  return isRet(op) || op == Op::NativeImpl;
-}
-
 inline bool isSwitch(Op op) {
   switch (op) {
     case OpSwitch:

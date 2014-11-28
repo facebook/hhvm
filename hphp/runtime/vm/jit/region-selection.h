@@ -439,12 +439,11 @@ RegionDescPtr selectHotRegion(TransID transId,
  * May return a null region if the given RegionContext doesn't have enough
  * information to translate at least one instruction.
  *
- * The `inlining' parameter should be set to true if the tracelet is for an
- * inlined callee---this will result in a longer-than-usual tracelet because we
- * enable some optimizations, e.g., tracing through jumps.
+ * The `allowInlining' flag should be disabled when we are selecting a tracelet
+ * whose shape will be analyzed by the InliningDecider.
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, bool profiling,
-                             bool inlining = false);
+                             bool allowInlining = true);
 
 /*
  * Select the hottest trace beginning with triggerId.

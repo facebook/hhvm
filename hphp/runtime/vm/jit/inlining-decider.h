@@ -17,9 +17,6 @@
 #ifndef incl_HPHP_JIT_INLINING_H_
 #define incl_HPHP_JIT_INLINING_H_
 
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
-
 #include <vector>
 
 namespace HPHP {
@@ -31,7 +28,6 @@ struct SrcKey;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct HhbcTranslator;
 struct RegionDesc;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,14 +154,6 @@ private:
   // Stack of costs, popped in registerEndInlining().
   std::vector<int> m_costStack;
 };
-
-/*
- * Select an inlining region for the call to `callee' at `sk'.
- */
-RegionDescPtr selectCalleeRegion(const SrcKey& sk,
-                                 const Func* callee,
-                                 const HhbcTranslator& ht,
-                                 bool profiling);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

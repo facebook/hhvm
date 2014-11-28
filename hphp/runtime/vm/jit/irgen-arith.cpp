@@ -143,23 +143,14 @@ void binaryArith(HTS& env, Op op) {
     return;
   }
 
-  auto spillValues = peekSpillValues(env);
+  auto const exitSlow = makeExitSlow(env);
   auto src2 = promoteBool(env, popC(env));
   auto src1 = promoteBool(env, popC(env));
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
     assert(src1->isA(Type::Int) && src2->isA(Type::Int));
-
-    auto const exit = makeExitImpl(
-      env,
-      bcOff(env),
-      ExitFlag::Interp,
-      spillValues,
-      CustomExit{}
-    );
-
-    push(env, gen(env, opc, exit, src1, src2));
+    push(env, gen(env, opc, exitSlow, src1, src2));
   } else {
     push(env, gen(env, opc, src1, src2));
   }
@@ -180,21 +171,10 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
   }
 
   auto const one = src->type() <= Type::Int ? cns(env, 1) : cns(env, 1.0);
-  SSATmp* res = nullptr;
-
-  if (op == AddIntO || op == SubIntO) {
-    auto spillValues = peekSpillValues(env);
-    auto const exit = makeExitImpl(
-      env,
-      bcOff(env),
-      ExitFlag::Interp,
-      spillValues,
-      CustomExit{}
-    );
-    res = gen(env, op, exit, src, one);
-  } else {
-    res = gen(env, op, src, one);
-  }
+  auto const res =
+    op == AddIntO || op == SubIntO
+      ? gen(env, op, makeExitSlow(env), src, one)
+      : gen(env, op, src, one);
 
   // No incref necessary on push since result is an int.
   push(env, pre ? res : src);
@@ -414,6 +394,7 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
     PUNT(SetOpL);
   }
 
+  auto const exitSlow = makeExitSlow(env);
   auto val = popC(env);
   env.irb->constrainValue(loc, DataTypeSpecific);
   loc = promoteBool(env, loc);
@@ -425,21 +406,9 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
     opc = promoteBinaryDoubles(env, *subOpc, loc, val);
   }
 
-  SSATmp* result = nullptr;
-  if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    auto spillValues = peekSpillValues(env);
-    spillValues.push_back(val);
-    auto const exit = makeExitImpl(
-      env,
-      bcOff(env),
-      ExitFlag::Interp,
-      spillValues,
-      CustomExit{}
-    );
-    result = gen(env, opc, exit, loc, val);
-  } else {
-    result = gen(env, opc, loc, val);
-  }
+  auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
+    ? gen(env, opc, exitSlow, loc, val)
+    : gen(env, opc, loc, val);
   pushStLoc(env, id, ldrefExit, ldPMExit, result);
 }
 

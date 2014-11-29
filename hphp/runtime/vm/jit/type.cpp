@@ -18,10 +18,10 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Format.h"
-#include "folly/MapUtil.h"
-#include "folly/gen/Base.h"
+#include <folly/Conv.h>
+#include <folly/Format.h>
+#include <folly/MapUtil.h>
+#include <folly/gen/Base.h>
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/text-util.h"
@@ -54,9 +54,9 @@ namespace {
  *
  *                            Unk
  *                             |
- *         +-------------------+----+--------+
- *         |                        |        |
- *       RMemb                      |     ClsInit
+ *         +-------------------+----+--------+-------+
+ *         |                        |        |       |
+ *       RMemb                      |     ClsInit  ClsCns
  *         |                        |
  *  +------+---------+              |
  *  |      |         |              |
@@ -86,7 +86,9 @@ bool has_ref(Ptr p) {
 }
 
 Ptr add_ref(Ptr p) {
-  if (p == Ptr::Unk || p == Ptr::ClsInit) return p;
+  if (p == Ptr::Unk || p == Ptr::ClsInit || p == Ptr::ClsCns) {
+    return p;
+  }
   return static_cast<Ptr>(static_cast<uint32_t>(p) | kPtrRefBit);
 }
 
@@ -258,6 +260,7 @@ std::string Type::toString() const {
     case Ptr::MIS:      ret += "MIS"; break;
     case Ptr::Memb:     ret += "Memb"; break;
     case Ptr::ClsInit:  ret += "ClsInit"; break;
+    case Ptr::ClsCns:   ret += "ClsCns"; break;
     case Ptr::RFrame:   ret += "RFrame"; break;
     case Ptr::RStk:     ret += "RStk"; break;
     case Ptr::RGbl:     ret += "RGbl"; break;
@@ -416,11 +419,11 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
 // operations on both Class and ArrayKind specializations.
 struct Type::ClassOps {
   static bool subtypeOf(ClassInfo a, ClassInfo b) {
-    return a == b || (a.get()->classof(b.get()) && !b.isExact());
+    if (a == b) return true;
+    return !b.isExact() && a.get()->classof(b.get());
   }
 
-  static folly::Optional<ClassInfo> commonAncestor(ClassInfo a,
-                                                   ClassInfo b) {
+  static folly::Optional<ClassInfo> commonAncestor(ClassInfo a, ClassInfo b) {
     if (!isNormalClass(a.get()) || !isNormalClass(b.get())) return folly::none;
     if (auto result = a.get()->commonAncestor(b.get())) {
       return ClassInfo(result, ClassTag::Sub);
@@ -429,9 +432,36 @@ struct Type::ClassOps {
     return folly::none;
   }
 
+  static bool canIntersect(ClassInfo a, ClassInfo b) {
+    // If either is an interface, we'd need to explore all implementing classes
+    // in the program to know if they have a non-empty intersection.  Easy
+    // cases where one is a subtype of the other still will have been handled,
+    // though.
+    return isNormalClass(a.get()) && isNormalClass(b.get());
+  }
+  static ClassInfo conservativeHeuristic(ClassInfo a, ClassInfo b) {
+    /*
+     * When we can't intersect, we try to take the "better" of the two.  We
+     * consider a non-interface better than an interface, because it might
+     * influence important things like method dispatch or property accesses
+     * better than an interface type could.  (Note that at least one of our
+     * ClassInfo's is not a normal class if we're in this code path.)
+     *
+     * If they are both interfaces we have to pick one arbitrarily, but we must
+     * do so in a way that is stable regardless of which one was passed as a or
+     * b (to guarantee that operator& is commutative).  We use the class name
+     * in that last case to ensure that the ordering is dependent only on the
+     * source program (Class* or something like that seems less desirable).
+     */
+    if (isNormalClass(b.get())) return b;
+    if (isNormalClass(a.get())) return a;
+    return a.get()->name()->compare(b.get()->name()) < 0 ? a : b;
+  }
+
   static folly::Optional<ClassInfo> intersect(ClassInfo a, ClassInfo b) {
-    // There shouldn't be any cases we could cover here that aren't already
-    // handled by the subtype checks.
+    assert(canIntersect(a, b));
+    // Since these classes are not interfaces, they must have a non-empty
+    // intersection if we failed the subtype checks.
     return folly::none;
   }
 };
@@ -466,6 +496,11 @@ struct Type::ArrayOps {
     return folly::none;
   }
 
+  static bool canIntersect(ArrayInfo a, ArrayInfo b) { return true; }
+  static ArrayInfo conservativeHeuristic(ArrayInfo, ArrayInfo) {
+    not_reached();
+  }
+
   static folly::Optional<ArrayInfo> intersect(ArrayInfo a, ArrayInfo b) {
     assert(a != b);
 
@@ -483,10 +518,7 @@ struct Type::ArrayOps {
     }
     if (aka && akb) {
       assert(aka != akb);
-      if (ata == atb) {
-        return makeArrayInfo(folly::none, ata);
-      }
-      return folly::none;
+      return folly::none;  // arrays of different kinds don't intersect.
     }
     assert(aka.hasValue() || akb.hasValue());
     assert(!(aka.hasValue() && akb.hasValue()));
@@ -579,14 +611,21 @@ struct Type::Intersect {
       if (Ops::subtypeOf(b, a)) return Type(bits, newPtrKind, b);
 
       // If we can intersect the specializations, use that.
-      if (auto info = Ops::intersect(a, b)) {
-        return Type(bits, newPtrKind, *info);
+      if (Ops::canIntersect(a, b)) {
+        if (auto info = Ops::intersect(a, b)) {
+          return Type(bits, newPtrKind, *info);
+        }
+        // a and b are unrelated so we have to remove the specialized type.
+        // This means dropping the specialization and the bits that correspond
+        // to the type that was specialized.
+        return Type(bits & ~typeMask, newPtrKind);
       }
 
-      // a and b are unrelated so we have to remove the specialized type. This
-      // means dropping the specialization and the bits that correspond to the
-      // type that was specialized.
-      return Type(bits & ~typeMask, newPtrKind);
+      // We can't represent the true intersection of these two types, but
+      // whatever the intersection is it must be smaller than one of the two.
+      // It's not incorrect to just pick one arbitrarily, but we can pick the
+      // "better" one by a Ops-specific heuristic.
+      return Type(bits, newPtrKind, Ops::conservativeHeuristic(a, b));
     }
 
     if (aOpt) return Type(bits, newPtrKind, *aOpt);
@@ -938,22 +977,16 @@ Type stkReturn(const IRInstruction* inst, int dstId,
 }
 
 Type thisReturn(const IRInstruction* inst) {
-  auto fpInst = inst->src(0)->inst();
-
-  // Find the instruction that created the current frame and grab the context
-  // class from it. $this, if present, is always going to be the context class
-  // or a subclass of the context.
-  always_assert(fpInst->is(DefFP, DefInlineFP));
-  auto const func = fpInst->is(DefFP) ? fpInst->marker().func()
-                                      : fpInst->extra<DefInlineFP>()->target;
-  func->validate();
-  assert(func->isMethod() || func->isPseudoMain());
+  auto const func = inst->marker().func();
 
   // If the function is a cloned closure which may have a re-bound $this which
   // is not a subclass of the context return an unspecialized type.
   if (func->hasForeignThis()) return Type::Obj;
 
-  return Type::Obj.specialize(func->cls());
+  if (auto const cls = func->cls()) {
+    return Type::Obj.specialize(cls);
+  }
+  return Type::Obj;
 }
 
 Type allocObjReturn(const IRInstruction* inst) {
@@ -1150,6 +1183,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DBox(n)         return Type::BoxedInitCell;
 #define DRefineS(n)     return refineTypeNoCheck(inst->src(n)->type(), \
                                                  inst->typeParam());
+#define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
 #define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
                         return inst->typeParam();
@@ -1158,7 +1192,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
-#define DLdRef          return ldRefReturn(inst->typeParam());
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
 #define DStk(in)        return stkReturn(inst, dstId, \
@@ -1183,6 +1216,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DofS
 #undef DBox
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
@@ -1190,7 +1224,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DMulti
 #undef DStk
@@ -1383,11 +1416,11 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam();
-#define DParam       requireTypeParam();
-#define DParamPtr(k) requireTypeParamPtr(Ptr::k);
+#define DParamMayRelax requireTypeParam();
+#define DParam         requireTypeParam();
+#define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
 #define DUnboxPtr
 #define DBoxPtr
-#define DLdRef       requireTypeParam();
 #define DAllocObj
 #define DArrElem
 #define DArrPacked
@@ -1421,6 +1454,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBox
 #undef DofS
 #undef DRefineS
+#undef DParamMayRelax
 #undef DParam
 #undef DParamPtr
 #undef DUnboxPtr
@@ -1428,7 +1462,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
-#undef DLdRef
 #undef DThis
 #undef DCns
 

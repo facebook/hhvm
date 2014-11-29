@@ -1,6 +1,6 @@
 #include "hphp/runtime/vm/jit/etch-helpers.h"
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && !defined(__APPLE__)
 	.file	"memcpy-x64.S"
 	.text
 	.globl	ETCH_NAME(memcpy)

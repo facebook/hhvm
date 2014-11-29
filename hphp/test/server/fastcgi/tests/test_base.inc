@@ -6,21 +6,14 @@ require __DIR__ . '/../Adoy/Client.php';
 
 $DOC_ROOT = dirname(__DIR__).'/server_root';
 
-function runTest($testName, $testController) {
+function runTest($testController, $customArgs = '') {
   global $DOC_ROOT;
   $pid = posix_getpid();
   try {
-    $serverPort = get_random_port();
-    $adminPort = get_random_port();
-    while ($adminPort === $serverPort) {
-      $adminPort = get_random_port();
-    }
-
-    $serverProc = null;
-    $clientProcessId = 0;
-    $serverProc = startServer($serverPort, $adminPort, 0,
-                              dirname(__DIR__), $DOC_ROOT);
-    waitForServerToGetGoing($serverPort);
+    $serverPort = $adminPort = null;
+    $debugPort = false;
+    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+                              dirname(__DIR__), $DOC_ROOT, $customArgs);
     $testController($serverPort);
     stopServer($adminPort);
   } catch (Exception $e) {
@@ -30,20 +23,20 @@ function runTest($testName, $testController) {
   }
 }
 
-function request($host, $port, $path) {
+function request($host, $port, $path, $extra_args = []) {
   global $test_run_id, $LOG_ROOT, $DOC_ROOT;
 
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = '';
 
-    $args = array(
+    $args = array_merge(array(
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
       'REQUEST_METHOD' => 'GET',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
       'SERVER_PROTOCOL' => 'HTTP/1.1',
       'CONTENT_LENGTH' => strlen($content)
-    );
+    ), $extra_args);
     $pos = strpos($path, '?');
     if ($pos !== false) {
       $args['QUERY_STRING'] = substr($path, $pos + 1);

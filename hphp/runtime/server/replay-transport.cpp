@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/replay-transport.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-functions.h"

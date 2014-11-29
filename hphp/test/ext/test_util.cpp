@@ -119,6 +119,8 @@ bool TestUtil::TestCanonicalize() {
   VERIFY(FileUtil::canonicalize(String("../foo")) == String("../foo"));
   VERIFY(FileUtil::canonicalize(String("foo/../../bar")) == String("../bar"));
   VERIFY(FileUtil::canonicalize(String("./../../")) == String("../../"));
+  VERIFY(FileUtil::canonicalize(String("/test\0", 6, CopyString))
+         == String("/test"));
   return Count(true);
 }
 

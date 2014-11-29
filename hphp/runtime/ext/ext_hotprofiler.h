@@ -133,7 +133,7 @@ enum Flag {
  */
 class Profiler {
 public:
-  Profiler();
+  explicit Profiler(bool needCPUAffinity);
   virtual ~Profiler();
 
   /**

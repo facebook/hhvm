@@ -140,11 +140,11 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label loopHead;
 
   /*
-   * Note: the IR currently requires that we preserve r13 across
-   * calls to these free locals helpers.  These helpers assume the
-   * stack is balanced (rsp%16 == 0) on entry, unlike normal ABI calls
-   * where the stack was balanced before the call, and now has the
-   * return address on the stack (rsp%16 == 8).
+   * Note: the IR currently requires that we preserve r13 across calls to these
+   * free locals helpers.  These helpers assume the stack is balanced (rsp%16
+   * == 0) on entry, unlike normal ABI calls where the stack was balanced
+   * before the call, and now has the return address on the stack (rsp%16 ==
+   * 8).
    */
   auto const rIter     = r14;
   auto const rFinished = r15;
@@ -152,8 +152,10 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   auto const rData     = rdi;
   int const tvSize     = sizeof(TypedValue);
 
-  Asm a { mcg->code.main() };
-  moveToAlign(mcg->code.main(), kNonFallthroughAlign);
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
+  moveToAlign(cb, kNonFallthroughAlign);
   auto stubBegin = a.frontier();
 
 asm_label(a, release);
@@ -167,7 +169,7 @@ asm_label(a, release);
 asm_label(a, doRelease);
   a.    jmp    (lookupDestructor(a, PhysReg(rType)));
 
-  moveToAlign(mcg->code.main(), kJmpTargetAlign);
+  moveToAlign(cb, kJmpTargetAlign);
   uniqueStubs.freeManyLocalsHelper = a.frontier();
   a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
                 rFinished);
@@ -183,8 +185,7 @@ asm_label(a, doRelease);
   asm_label(a, skipDecRef);
   };
 
-  // Loop for the first few locals, but unroll the final
-  // kNumFreeLocalsHelpers.
+  // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
   emitDecLocal();
   a.    addq   (tvSize, rIter);
@@ -208,9 +209,11 @@ asm_label(a, loopHead);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
 
-  moveToAlign(mcg->code.main());
+  moveToAlign(cb);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
   assert(kScratchCrossTraceRegs.contains(rax));
@@ -256,9 +259,11 @@ asm_label(a, numParamsCheck);
 }
 
 void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.main() };
+  auto& cb = mcg->code.hot().available() > 512 ?
+    const_cast<CodeBlock&>(mcg->code.hot()) : mcg->code.main();
+  Asm a { cb };
 
-  moveToAlign(mcg->code.main(), kNonFallthroughAlign);
+  moveToAlign(cb, kNonFallthroughAlign);
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*

@@ -232,14 +232,15 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
   if (cls) {
     auto const exitSlow = makeExitSlow();
     if (!RDS::isPersistentHandle(cls->classHandle())) {
-      // The miss path is complicated and rare.  Punt for now.  This
-      // must be checked before we IncRef the context below, because
-      // the slow exit will want to do that same IncRef via InterpOne.
-      gen(LdClsCachedSafe, exitSlow, cns(cls->name()));
+      // The miss path is complicated and rare.  Punt for now.  This must be
+      // checked before we IncRef the context below, because the slow exit will
+      // want to do that same IncRef via InterpOne.
+      auto const clsOrNull = gen(LdClsCachedSafe, cns(cls->name()));
+      gen(CheckNonNull, exitSlow, clsOrNull);
     }
 
     if (forward) {
-      ctx = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+      ctx = ldCtx();
       ctx = gen(GetCtxFwdCall, ctx, cns(callee));
     } else {
       ctx = genClsMethodCtx(callee, cls);
@@ -248,9 +249,8 @@ void HhbcTranslator::emitFPushCufOp(Op op, int32_t numArgs) {
     ctx = cns(Type::Nullptr);
     if (!RDS::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
-      func = gen(
-        LdFuncCachedSafe, LdFuncCachedData(callee->name()), makeExitSlow()
-      );
+      func = gen(LdFuncCachedSafe, LdFuncCachedData(callee->name()));
+      func = gen(CheckNonNull, makeExitSlow(), func);
     }
   }
 
@@ -628,7 +628,7 @@ SSATmp* HhbcTranslator::genClsMethodCtx(const Func* callee, const Class* cls) {
     // might not be a static call and $this is available, so we know it's
     // definitely not static
     assert(curClass());
-    auto this_ = gen(LdThis, m_irb->fp());
+    auto this_ = ldThis();
     gen(IncRef, this_);
     return this_;
   }
@@ -772,7 +772,7 @@ void HhbcTranslator::emitFPushClsMethodF(int32_t numParams) {
   auto const catchBlock = vmfunc ? nullptr : makeCatch();
   discard(2);
 
-  auto const curCtxTmp = gen(LdCtx, FuncData(curFunc()), m_irb->fp());
+  auto const curCtxTmp = ldCtx();
   if (vmfunc) {
     auto const funcTmp = cns(vmfunc);
     auto const newCtxTmp = gen(GetCtxFwdCall, curCtxTmp, funcTmp);
@@ -838,9 +838,8 @@ void HhbcTranslator::emitFPassR() {
 }
 
 void HhbcTranslator::emitFPassV() {
-  Block* exit = makeExit();
-  SSATmp* tmp = popV();
-  pushIncRef(gen(LdRef, exit, tmp->type().innerType(), tmp));
+  auto const tmp = popV();
+  pushIncRef(gen(LdRef, Type::InitCell, tmp));
   gen(DecRef, tmp);
 }
 
@@ -996,7 +995,7 @@ void HhbcTranslator::emitRet(Type type) {
   // Free local variables.  We do the decrefs inline if there are less
   // refcounted locals than a threshold.
   auto const localCount = func->numLocals();
-  auto const shouldFreeInline = [&]() -> bool {
+  auto const shouldFreeInline = mcg->useLLVM() || [&]() -> bool {
     auto const count = mcg->numTranslations(m_irb->unit().context().srcKey());
     constexpr int kTooPolyRet = 6;
     if (localCount > 0 && count > kTooPolyRet) return false;

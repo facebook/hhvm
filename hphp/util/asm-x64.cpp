@@ -16,7 +16,7 @@
 
 #include "asm-x64.h"
 
-#include "folly/Format.h"
+#include <folly/Format.h>
 
 namespace HPHP { namespace jit {
 
@@ -353,7 +353,7 @@ std::string DecodedInstruction::toString() {
                            (uint64_t)m_ip,
                            m_opcode).str();
   if (m_flags.hasModRm) {
-    auto modRm = m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
+    auto modRm = getModRm();
     str += folly::format(" ModRM({:02b} {} {})",
                          modRm >> 6,
                          (modRm >> 3) & 7,
@@ -418,20 +418,27 @@ bool DecodedInstruction::isNop() const {
   return m_opcode == 0x1f && m_map_select == 1;
 }
 
-bool DecodedInstruction::isBranch() const {
+bool DecodedInstruction::isBranch(bool allowCond /* = true */) const {
   if (!m_flags.picOff) return false;
   if (m_map_select == 0) {
     // The one-byte opcode map
     return
-      (m_opcode & 0xf0) == 0x70 /* 8-bit conditional branch */ ||
+      ((m_opcode & 0xf0) == 0x70 && allowCond) /* 8-bit conditional branch */ ||
       m_opcode == 0xe9 /* 32-bit unconditional branch */ ||
       m_opcode == 0xeb /* 8-bit unconditional branch */;
   }
-  if (m_map_select == 1) {
+  if (m_map_select == 1 && allowCond) {
     // The two-byte opcode map (first byte is 0x0f)
     return (m_opcode & 0xf0) == 0x80 /* 32-bit conditional branch */;
   }
   return false;
+}
+
+bool DecodedInstruction::isCall() const {
+  if (m_map_select != 0) return false;
+  if (m_opcode == 0xe8) return true;
+  if (m_opcode != 0xff) return false;
+  return ((getModRm() >> 3) & 0x6) == 2;
 }
 
 bool DecodedInstruction::shrinkBranch() {
@@ -481,6 +488,11 @@ void DecodedInstruction::widenBranch() {
   }
   decode(m_ip);
   assert(isBranch() && m_offSz == 4);
+}
+
+uint8_t DecodedInstruction::getModRm() const {
+  assert(m_flags.hasModRm);
+  return m_ip[m_size - m_immSz - m_offSz - m_flags.hasSib - 1];
 }
 
 } }

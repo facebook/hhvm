@@ -16,22 +16,23 @@
 */
 #include "hphp/runtime/ext/std/ext_std_network.h"
 
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <resolv.h>
+#include <sys/socket.h>
 
-#include "folly/ScopeGuard.h"
-#include "folly/IPAddress.h"
+#include <folly/IPAddress.h>
+#include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/util/network.h"
 
 #if defined(__APPLE__)
@@ -1040,8 +1041,14 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
   return false;
 }
 
-bool HHVM_FUNCTION(header_register_callback, const Variant& callback) {
+Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
   Transport *transport = g_context->getTransport();
+
+  if (!HHVM_FN(is_callable)(callback)) {
+    raise_warning("First argument is expected to be a valid callback");
+    return init_null();
+  }
+
   if (!transport) {
     // fail if there is no transport
     return false;

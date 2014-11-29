@@ -22,6 +22,7 @@
 namespace HPHP {
 
 void RefData::compileTimeAsserts() {
+  static_assert(offsetof(RefData, m_kind) == HeaderKindOffset, "");
   static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
   static_assert(sizeof(RefData::m_count) == TypedValueAux::auxSize, "");
   static_assert(sizeof(DataType) == 1, "required for m_cow/z packing");

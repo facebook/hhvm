@@ -327,7 +327,7 @@ public:
 private:
   PageletTransport *m_job;
 };
-IMPLEMENT_OBJECT_ALLOCATION(PageletTask)
+IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementing PageletServer

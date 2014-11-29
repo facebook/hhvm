@@ -510,10 +510,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-
-  auto const cap  = ad->m_cap;
-  auto const mask = ad->m_tableMask;
-  MM().objFreeLogged(ad, computeAllocBytes(cap, mask));
+  MM().objFreeLogged(ad, ad->heapSize());
 }
 
 static void release_unk_tv(TypedValue& tv) {
@@ -1040,12 +1037,12 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
 ALWAYS_INLINE
 MixedArray* MixedArray::setVal(TypedValue& tv, Cell src) {
   auto const dst = tvToCell(&tv);
-  cellSet(src, *dst);
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
   if (UNLIKELY(src.m_type == KindOfUninit)) {
-    dst->m_type = KindOfNull;
+    src = make_tv<KindOfNull>();
   }
+  cellSet(src, *dst);
   return this;
 }
 

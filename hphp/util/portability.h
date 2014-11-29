@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_PORTABILITY_H_
 #define incl_HPHP_PORTABILITY_H_
 
-#include "folly/Likely.h" // defining LIKELY/UNLIKELY is part of this header
+#include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 
 namespace HPHP {
 
@@ -118,6 +118,14 @@ namespace HPHP {
 # error What are the stack and frame pointers called on your architecture?
 
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+// We reserve the exit status 127 to signal a failure in the
+// interpreter. 127 is a valid exit code on all reasonable
+// architectures: POSIX requires at least 8 unsigned bits and
+// Windows 32 signed bits.
+#define HPHP_EXIT_FAILURE 127
 
 //////////////////////////////////////////////////////////////////////
 

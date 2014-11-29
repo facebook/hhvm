@@ -17,7 +17,7 @@
 
 #include <boost/make_shared.hpp>
 #include <set>
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/expression_list.h"

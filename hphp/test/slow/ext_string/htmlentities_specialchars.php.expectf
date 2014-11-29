@@ -1,0 +1,12 @@
+string(5) "&reg;"
+string(0) ""
+string(6) "&yuml;"
+string(0) ""
+string(6) "&yuml;"
+string(0) ""
+string(17) "&para;&frac14;AAA"
+string(3) "AAA"
+string(8) "&curren;"
+string(0) ""
+
+Fatal error: ISO-8859-15 is not implemented yet.%s

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/classname-is.h"
 
 #include "hphp/util/thread-local.h"
 
@@ -56,6 +57,10 @@ class ResourceData {
   virtual ~ResourceData(); // all PHP resources need vtables
 
   void operator delete(void* p) { ::operator delete(p); }
+  virtual size_t heapSize() const {
+    always_assert(false); // better not be in the smart-heap
+    not_reached();
+  }
 
   void release() {
     assert(!hasMultipleRefs());
@@ -85,12 +90,14 @@ class ResourceData {
  private:
   //============================================================================
   // ResourceData fields
-  UNUSED char m_pad[3];
-  UNUSED uint8_t m_kind; // TODO: 5478458 Overlap kind fields
-
-  // Counter to keep track of the number of references to this resource
-  // (i.e. the resource's "refcount")
-  mutable RefCount m_count;
+  union {
+    struct {
+      UNUSED char m_pad[3];
+      UNUSED HeaderKind m_kind;
+      mutable RefCount m_count;
+    };
+    uint64_t m_kind_count;
+  };
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
@@ -135,8 +142,8 @@ class ResourceData {
  *    When deriving from SweepableResourceData, either "new" or "NEW" can
  *    be used, but we prefer people use NEW with these macros:
  *
- *       DECLARE_OBJECT_ALLOCATION(T);
- *       IMPLEMENT_OBJECT_ALLOCATION(T);
+ *       DECLARE_RESOURCE_ALLOCATION(T);
+ *       IMPLEMENT_RESOURCE_ALLOCATION(T);
  *
  * 3. If a ResourceData is a mix of smart allocated data members and non-
  *    smart allocated data members, sweep() has to be overwritten to only
@@ -200,6 +207,23 @@ template<class T, class... Args> T* newres(Args&&... args) {
     throw;
   }
 }
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
+  public:                                                               \
+  ALWAYS_INLINE void operator delete(void* p) {                         \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
+    assert(sizeof(T) <= kMaxSmartSize);                                 \
+    MM().smartFreeSizeLogged(p, sizeof(T));                             \
+  }\
+  virtual size_t heapSize() const { return sizeof(T); }
+
+#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+  void sweep() override;
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
+  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
+  void HPHP::T::sweep() { this->~T(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

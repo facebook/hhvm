@@ -15,7 +15,7 @@
 */
 
 #include "hphp/compiler/expression/simple_function_call.h"
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 #include <map>
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -70,6 +70,11 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["__systemlib\\compact_sl"]
                                             = FunType::Compact;
     FunctionTypeMap["compact"]              = FunType::Compact;
+
+    FunctionTypeMap["assert"]               = FunType::Assert;
+    FunctionTypeMap["__systemlib\\assert"]  = FunType::Assert;
+    FunctionTypeMap["__systemlib\\assert_sl"]
+                                            = FunType::Assert;
 
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
@@ -250,6 +255,11 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
     case FunType::Extract:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
       fs->setAttribute(FileScope::ContainsExtract);
+      break;
+
+    case FunType::Assert:
+      fs->setAttribute(FileScope::ContainsLDynamicVariable);
+      fs->setAttribute(FileScope::ContainsAssert);
       break;
 
     case FunType::Compact: {
@@ -561,7 +571,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::readsLocals() const {
   return m_type == FunType::GetDefinedVars ||
-    m_type == FunType::Compact;
+    m_type == FunType::Compact || m_type == FunType::Assert;
 }
 
 bool SimpleFunctionCall::writesLocals() const {
@@ -595,6 +605,9 @@ void SimpleFunctionCall::updateVtFlags() {
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
         vt->setAttribute(VariableTable::ContainsExtract);
         break;
+      case FunType::Assert:
+        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
+        vt->setAttribute(VariableTable::ContainsAssert);
       case FunType::Compact:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
       case FunType::StaticCompact:

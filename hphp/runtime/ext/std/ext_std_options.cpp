@@ -25,8 +25,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
@@ -140,6 +140,11 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     return Variant(true);
   }
 
+  if (!curFP->hasVarEnv()) {
+    curFP->setVarEnv(VarEnv::createLocal(curFP));
+  }
+  auto varEnv = curFP->getVarEnv();
+
   auto const func = unit->getMain();
   TypedValue retVal;
   g_context->invokeFunc(
@@ -148,9 +153,7 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     init_null_variant,
     nullptr,
     nullptr,
-    // Zend appears to share the variable environment with the assert()
-    // builtin, but we deviate by having no shared env here.
-    nullptr /* VarEnv */,
+    varEnv,
     nullptr,
     ExecutionContext::InvokePseudoMain
   );
@@ -158,8 +161,9 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
   return tvAsVariant(&retVal);
 }
 
-static Variant HHVM_FUNCTION(assert, const Variant& assertion,
-                                     const Variant& message/* = null */) {
+// assert_impl already defined in util/assertions.h
+static Variant impl_assert(const Variant& assertion,
+                           const Variant& message /* = null */) {
   if (!s_option_data->assertActive) return true;
 
   CallerFrame cf;
@@ -171,7 +175,7 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
       if (RuntimeOption::EvalAuthoritativeMode) {
         // We could support this with compile-time string literals,
         // but it's not yet implemented.
-        throw_not_supported(__func__,
+        throw_not_supported("assert()",
           "assert with strings argument in RepoAuthoritative mode");
       }
       return eval_for_assert(fp, assertion.toString()).toBoolean();
@@ -201,6 +205,17 @@ static Variant HHVM_FUNCTION(assert, const Variant& assertion,
   }
 
   return init_null();
+}
+
+static Variant HHVM_FUNCTION(SystemLib_assert, const Variant& assertion,
+                             const Variant& message = uninit_null()) {
+  return impl_assert(assertion, message);
+}
+
+static Variant HHVM_FUNCTION(assert, const Variant& assertion,
+                                     const Variant& message /* = null */) {
+  raise_disallowed_dynamic_call("assert should not be called dynamically");
+  return impl_assert(assertion, message);
 }
 
 static int64_t HHVM_FUNCTION(dl, const String& library) {
@@ -271,14 +286,6 @@ static Array HHVM_FUNCTION(get_included_files) {
     pai.append(const_cast<StringData*>(file));
   }
   return pai.toArray();
-}
-
-static int64_t HHVM_FUNCTION(get_magic_quotes_gpc) {
-  return RuntimeOption::EnableMagicQuotesGpc ? 1 : 0;
-}
-
-static int64_t HHVM_FUNCTION(get_magic_quotes_runtime) {
-  return 0;
 }
 
 static Variant HHVM_FUNCTION(getenv, const String& varname) {
@@ -932,17 +939,14 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
   return true;
 }
 
-static bool HHVM_FUNCTION(set_magic_quotes_runtime, bool new_setting) {
-  if (new_setting) {
-    throw_not_supported(__func__, "not using magic quotes");
-  }
-  return true;
-}
-
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
-  data.setTimeout(seconds);
+  if (RuntimeOption::TimeoutsUseWallTime) {
+    data.setTimeout(seconds);
+  } else {
+    data.setCPUTimeout(seconds);
+  }
 }
 
 String HHVM_FUNCTION(sys_get_temp_dir) {
@@ -1184,6 +1188,7 @@ static int64_t HHVM_FUNCTION(gc_collect_cycles) {
 void StandardExtension::initOptions() {
   HHVM_FE(assert_options);
   HHVM_FE(assert);
+  HHVM_FALIAS(__SystemLib\\assert, SystemLib_assert);
   HHVM_FE(dl);
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);
@@ -1195,8 +1200,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
-  HHVM_FE(get_magic_quotes_gpc);
-  HHVM_FE(get_magic_quotes_runtime);
   HHVM_FE(getenv);
   HHVM_FE(getlastmod);
   HHVM_FE(getmygid);
@@ -1225,7 +1228,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(phpinfo);
   HHVM_FE(phpversion);
   HHVM_FE(putenv);
-  HHVM_FE(set_magic_quotes_runtime);
   HHVM_FE(set_time_limit);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(zend_version);

@@ -162,7 +162,8 @@ Object c_DateTime::t_add(const Object& interval) {
 
 void c_DateTime::t___construct(const String& time /*= "now"*/,
                                const Object& timezone /*= null_object*/) {
-  m_dt = newres<DateTime>(TimeStamp::Current());
+  m_dt = newres<DateTime>(TimeStamp::Current(),
+                          c_DateTimeZone::unwrap(timezone));
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
   } else if (!timezone.isNull()) {

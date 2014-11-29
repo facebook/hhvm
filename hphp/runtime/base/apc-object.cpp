@@ -89,7 +89,12 @@ APCHandle* APCObject::Construct(ObjectData* objectData, size_t& size) {
         prop->ctx = nullptr;
       } else {
         // Private.
-        prop->ctx = Unit::lookupClass(cls.get());
+        auto* ctx = Unit::lookupClass(cls.get());
+        if (ctx && ctx->attrs() & AttrUnique) {
+          prop->ctx = ctx;
+        } else {
+          prop->ctx = makeStaticString(cls.get());
+        }
       }
 
       prop->name = makeStaticString(keySD.substr(subLen));

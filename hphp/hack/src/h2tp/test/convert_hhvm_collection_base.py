@@ -2,8 +2,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
 from __future__ import print_function
+from .engine import PHP5
+from .converter import Converter
 import unittest
-import subprocess
 import os
 import tempfile
 import difflib
@@ -12,27 +13,28 @@ import glob
 import re
 
 class ConvertHHVMCollectionBase(unittest.TestCase):
+    def setUp(self):
+        self.converter = Converter(self.binary_path())
+        self.engine = PHP5(self.execution_prefix())
+
     def verify(self):
         tmp = tempfile.mkdtemp()
         tmpInput = os.path.join(tmp, 'input')
         shutil.copytree(self.testsDir(), tmpInput)
         self.delete_unsupported_inputs(tmpInput)
         tmpOutput = os.path.join(tmp, 'output')
-        command = [self.binary_path(), tmpInput, tmpOutput]
-        proc = subprocess.Popen(command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=False)
-        res = proc.wait()
-        if (res != 0):
-            output = '\n'.join([l for l in proc.stdout])
+
+        (success, output) = self.converter.convert(tmpInput, tmpOutput, [])
+
+        if success:
+            files = (glob.glob(tmpOutput + '/*.php') +
+                glob.glob(tmpOutput + '/**/*.php'))
+            if self.engine.exists():
+                self.check_files(tmpOutput, files)
+            # if we get here without errors, delete the tree
+            shutil.rmtree(tmp)
+        else:
             self.fail("error converting hhvm collection tests\n" + output)
-        files = (glob.glob(tmpOutput + '/*.php') +
-            glob.glob(tmpOutput + '/**/*.php'))
-        if os.environ.get('ZEND_PHP'):
-            self.check_files(tmpOutput, files)
-        # if we get here without errors, delete the tree
-        shutil.rmtree(tmp)
 
     def delete_unsupported_inputs(self, dir):
         all_files = [f for files in UNSUPPORTED_INPUTS.values() for f in files]
@@ -40,21 +42,6 @@ class ConvertHHVMCollectionBase(unittest.TestCase):
         for f in all_files:
             os.remove(os.path.join(dir, f))
 
-    def execute_file(self, php_path, file):
-        code = self.execution_prefix() + "require_once('%s');" % file
-        proc = subprocess.Popen([php_path,
-                '-r', code],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=False)
-        res = proc.wait()
-        s = [l for l in proc.stdout]
-        output = '\n'.join(s)
-        output = self.normalize(output)
-        output = re.sub(SET_RE, fix_set_output, output)
-        return output
-
-        #remove trailing newlines, and trailing spaces on each line
     def normalize(self, string):
         string = string.lstrip()
         for (patt, repl) in NORMALIZING_TUPLES:
@@ -62,9 +49,14 @@ class ConvertHHVMCollectionBase(unittest.TestCase):
         # add a trailing newline so that its easier to see the diff
         return string.rstrip() + "\n"
 
+    def execute_file(self, f):
+        (success, output) = self.engine.execute_file(f)
+        output = self.normalize(output)
+        return re.sub(SET_RE, fix_set_output, output)
+
     def check_files(self, outdir, files):
         for f in files:
-            actual_output = self.execute_file(os.environ.get('ZEND_PHP'), f)
+            actual_output = self.execute_file(f)
             exp_f = f + '.expect' if os.path.isfile(f + '.expect') else (f +
                 '.expectf')
             with open(exp_f, "r") as exp_fo:

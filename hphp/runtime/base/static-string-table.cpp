@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
-#include "folly/AtomicHashMap.h"
+#include <folly/AtomicHashMap.h>
 
 namespace HPHP {
 

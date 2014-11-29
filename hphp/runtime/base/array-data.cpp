@@ -30,10 +30,9 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -99,7 +98,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     PackedArray::entry,                         \
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
-    NameValueTableWrapper::entry,               \
+    GlobalsArray::entry,                        \
     ProxyArray::entry                           \
   },
 
@@ -111,7 +110,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     PackedArray::entry,                         \
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
-    NameValueTableWrapper::entry,               \
+    GlobalsArray::entry,                        \
     ProxyArray::entry                           \
   },
 
@@ -123,7 +122,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     PackedArray::entry,                         \
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
-    NameValueTableWrapper::entry,               \
+    GlobalsArray::entry,                        \
     ProxyArray::entry                           \
   },
 
@@ -135,7 +134,7 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
     PackedArray::entry,                         \
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
-    NameValueTableWrapper::entry,               \
+    GlobalsArray::entry,                        \
     ProxyArray::entry                           \
   },
 
@@ -205,7 +204,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     PackedArray::NvGetIntConverted,
     EmptyArray::NvGetInt,
     APCLocalArray::NvGetInt,
-    NameValueTableWrapper::NvGetInt,
+    GlobalsArray::NvGetInt,
     ProxyArray::NvGetInt,
   },
 
@@ -250,7 +249,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     PackedArray::SetIntConverted,
     EmptyArray::SetInt,
     APCLocalArray::SetInt,
-    NameValueTableWrapper::SetInt,
+    GlobalsArray::SetInt,
     ProxyArray::SetInt,
   },
 
@@ -266,15 +265,15 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
   /*
    * size_t Vsize(const ArrayData*)
    *
-   *   This entry point essentially is only for NameValueTableWrapper;
+   *   This entry point essentially is only for GlobalsArray;
    *   all the other cases are not_reached().
    *
-   *   Because of particulars of how NameValueTableWrapper works,
+   *   Because of particulars of how GlobalsArray works,
    *   determining the size of the array is an O(N) operation---we set
    *   the size field in the generic ArrayData header to -1 in that
    *   case and dispatch through this entry point.  ProxyArray also
    *   always involves virtual size, because of the possibility that
-   *   it could be proxying a NameValueTableWrapper.
+   *   it could be proxying a GlobalsArray.
    */
   DISPATCH(Vsize)
 
@@ -354,7 +353,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     PackedArray::LvalNewRef,
     EmptyArray::LvalNew,
     APCLocalArray::LvalNew,
-    NameValueTableWrapper::LvalNew,
+    GlobalsArray::LvalNew,
     ProxyArray::LvalNew,
   },
 
@@ -506,7 +505,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     PackedArray::Sort,
     EmptyArray::Sort,
     APCLocalArray::Sort,
-    NameValueTableWrapper::Sort,
+    GlobalsArray::Sort,
     ProxyArray::Sort,
   },
 
@@ -545,7 +544,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
     PackedArray::Usort,
     EmptyArray::Usort,
     APCLocalArray::Usort,
-    NameValueTableWrapper::Usort,
+    GlobalsArray::Usort,
     ProxyArray::Usort,
   },
 
@@ -565,7 +564,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *   Explicitly request that an array be copied.  This API does
    *   /not/ actually guarantee a copy occurs.
    *
-   *   (E.g. NameValueTableWrapper doesn't copy here.)
+   *   (E.g. GlobalsArray doesn't copy here.)
    */
   DISPATCH(Copy)
 
@@ -965,12 +964,12 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
-  return error && m_kind != kNvtwKind ? getNotFound(k) :
+  return error && m_kind != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
-  return error && m_kind != kNvtwKind ? getNotFound(k) :
+  return error && m_kind != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
@@ -993,7 +992,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "VPackedKind",
     "EmptyKind",
     "SharedKind",
-    "NvtwKind",
+    "GlobalsKind",
     "ProxyKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");

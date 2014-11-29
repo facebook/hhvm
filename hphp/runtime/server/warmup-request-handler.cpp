@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 using folly::make_unique;
 

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CONFIG_H_
 #define incl_HPHP_CONFIG_H_
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -35,6 +35,15 @@ enum class HackStrictOption {
   WARN,
   ON
 };
+
+
+/*
+ * Normalizes hdf string names to their ini counterparts
+ *
+ * We have special handling for a few hdf strings such as those containing
+ * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
+ */
+std::string hdfToIni(const std::string&);
 
 struct Config {
   static void ParseConfigFile(const std::string &filename, IniSettingMap &ini,
@@ -165,7 +174,7 @@ struct Config {
   private:
 
   static std::string IniName(const Hdf& config);
-  static std::string IniName(const std::string config);
+  static std::string IniName(const std::string& config);
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,
                            const std::string filename, bool extensions_only);

@@ -16,7 +16,7 @@
 
 #include "hphp/test/ext/test_ext_curl.h"
 
-#include "folly/Conv.h"
+#include <folly/Conv.h>
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"

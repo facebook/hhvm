@@ -114,8 +114,12 @@ bool cellRelOp(Op op, Cell cell, double val) {
       return op(cell.m_data.dbl, val);
 
     case KindOfStaticString:
-    case KindOfString:
-      return op(toDouble(cell.m_data.pstr), val);
+    case KindOfString: {
+      auto const num = stringToNumeric(cell.m_data.pstr);
+      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
+             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
+             op(0, val);
+    }
 
     case KindOfArray:
       return op(true, false);
@@ -153,8 +157,12 @@ bool cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfBoolean:
       return op(!!cell.m_data.num, toBoolean(val));
 
-    case KindOfDouble:
-      return op(cell.m_data.dbl, val->toDouble());
+    case KindOfDouble: {
+      auto const num = stringToNumeric(val);
+      return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
+             num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
+             op(cell.m_data.dbl, 0);
+    }
 
     case KindOfStaticString:
     case KindOfString:

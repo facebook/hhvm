@@ -349,18 +349,28 @@ const StaticString
 /**
  * Maintain profiles of a running stack.
  */
-Profiler::Profiler() : m_successful(true), m_stack(nullptr),
-               m_frame_free_list(nullptr) {
+Profiler::Profiler(bool needCPUAffinity) : m_successful(true),
+                                           m_stack(nullptr),
+                                           m_frame_free_list(nullptr) {
     if (!s_rand_initialized) {
       s_rand_initialized = true;
       srand(math_generate_seed());
     }
 
-    // bind to a random cpu so that we can use rdtsc instruction.
-    int cur_cpu_id = rand() % s_machine.m_cpu_num;
-    GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
-    MachineInfo::BindToCPU(cur_cpu_id);
-    m_MHz = s_machine.m_cpu_frequencies[cur_cpu_id];
+    if (needCPUAffinity) {
+      //
+      // Bind to a random cpu so that we can use rdtsc instruction.
+      //
+      int cur_cpu_id = rand() % s_machine.m_cpu_num;
+      GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
+      MachineInfo::BindToCPU(cur_cpu_id);
+      m_MHz = s_machine.m_cpu_frequencies[cur_cpu_id];
+    } else {
+      //
+      // Take cpu0's speed as a proxy for all cpus.
+      //
+      m_MHz = s_machine.m_cpu_frequencies[0];
+    }
 
     memset(m_func_hash_counters, 0, sizeof(m_func_hash_counters));
 }
@@ -487,9 +497,7 @@ private:
   StatsMap m_stats; // outcome
 
 public:
-
-public:
-  explicit HierarchicalProfiler(int flags) : m_flags(flags) {
+  explicit HierarchicalProfiler(int flags) : Profiler(true), m_flags(flags) {
   }
 
   virtual void beginFrameEx(const char *symbol) override {
@@ -727,7 +735,8 @@ class TraceWalker {
 class TraceProfiler : public Profiler {
  public:
   explicit TraceProfiler(int flags)
-    : m_traceBuffer(nullptr)
+    : Profiler(true)
+    , m_traceBuffer(nullptr)
     , m_traceBufferSize(0)
     , m_nextTraceEntry(0)
     , m_traceBufferFilled(false)
@@ -976,7 +985,7 @@ private:
   SampleVec m_samples; // outcome
 
 public:
-  SampleProfiler() {
+  SampleProfiler() : Profiler(true) {
     struct timeval  now;
     uint64_t truncated_us;
     uint64_t truncated_tsc;
@@ -1099,7 +1108,7 @@ private:
 
 class MemoProfiler : public Profiler {
  public:
-  explicit MemoProfiler(int flags) {}
+  explicit MemoProfiler(int flags) : Profiler(true) {}
 
   ~MemoProfiler() {
   }

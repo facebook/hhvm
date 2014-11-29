@@ -25,7 +25,7 @@
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <set>
 #include <utility>

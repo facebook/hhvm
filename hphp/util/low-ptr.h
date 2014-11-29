@@ -19,7 +19,7 @@
 
 #include "hphp/util/assertions.h"
 
-#include "folly/CPortability.h" // FOLLY_SANITIZE_ADDRESS
+#include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
 
 #include <cstddef>
 #include <cstdint>

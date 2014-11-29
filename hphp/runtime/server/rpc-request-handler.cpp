@@ -32,7 +32,7 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/constants.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 using std::set;
 
@@ -45,7 +45,6 @@ RPCRequestHandler::RPCRequestHandler(int timeout, bool info)
     m_reset(false),
     m_logResets(info),
     m_returnEncodeType(ReturnEncodeType::Json) {
-  initState();
 }
 
 RPCRequestHandler::~RPCRequestHandler() {
@@ -158,6 +157,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
     reqData.setTimeout(0);  // can't throw when you pass zero
+    reqData.setCPUTimeout(0);
     reqData.reset();
   };
 

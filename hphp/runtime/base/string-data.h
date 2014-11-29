@@ -24,7 +24,6 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
 namespace HPHP {
@@ -76,7 +75,6 @@ struct StringData {
    *   ... = size + 1; // oops, wraparound.
    */
   static constexpr uint32_t MaxSize = 0x7ffffffe; // 2^31-2
-  static constexpr uint32_t MaxCap = MaxSize + 1;
 
   /*
    * Creates an empty request-local string with an unspecified amount
@@ -142,9 +140,9 @@ struct StringData {
   static StringData* MakeStatic(StringSlice);
 
   /*
-   * Same as MakeStatic but the string alloated will *not* be in the static
-   * string table, will not be in low-memory, and will be deleted once the
-   * root goes out of scope. Currently only used by APC.
+   * Same as MakeStatic but the string allocated will *not* be in the static
+   * string table, will not be in low-memory, and should be deleted using
+   * destructUncounted once the root goes out of scope.
    */
   static StringData* MakeUncounted(StringSlice);
 
@@ -172,6 +170,7 @@ struct StringData {
    * a helper like decRefStr).
    */
   void release();
+  size_t heapSize() const;
 
   /*
    * StringData objects allocated with MakeStatic should be freed
@@ -286,7 +285,7 @@ struct StringData {
    * Accessor for the length of a string.
    *
    * Note: size() returns a signed int for historical reasons.  It is
-   * guaranteed to be greater than zero and less than MaxSize.
+   * guaranteed to be in the range (0 <= size() <= MaxSize)
    */
   int size() const;
 
@@ -296,10 +295,8 @@ struct StringData {
   bool empty() const;
 
   /*
-   * Return the capacity of this string's buffer, including the space
+   * Return the capacity of this string's buffer, not including the space
    * for the null terminator.
-   *
-   * For shared strings, returns zero.
    */
   uint32_t capacity() const;
 
@@ -436,7 +433,7 @@ private:
 
 private:
   static StringData* MakeShared(StringSlice sl, bool trueStatic);
-  static StringData* MakeAPCSlowPath(const APCString*, uint32_t len);
+  static StringData* MakeAPCSlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
@@ -472,7 +469,10 @@ private:
   // fields.  (gcc does not combine the stores itself.)
   union {
     struct {
-      uint32_t m_cap;
+      union {
+        struct { char m_pad[3]; HeaderKind m_kind; };
+        uint32_t m_capCode;
+      };
       mutable RefCount m_count;
     };
     uint64_t m_capAndCount;

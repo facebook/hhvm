@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "folly/Memory.h"
+#include <folly/Memory.h>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
@@ -271,8 +271,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   PreClass::ConstMap::Builder constBuild;
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
-    constBuild.add(const_.name(), PreClass::Const(pc.get(),
-                                                  const_.name(),
+    constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   const_.typeConstraint(),
                                                   const_.val(),
                                                   const_.phpCode()));
@@ -280,8 +279,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   if (auto nativeConsts = Native::getClassConstants(m_name)) {
     for (auto cnsMap : *nativeConsts) {
       auto tv = cnsMap.second;
-      constBuild.add(cnsMap.first, PreClass::Const(pc.get(),
-                                                   cnsMap.first,
+      constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
                                                    staticEmptyString(),
                                                    tv,
                                                    staticEmptyString()));

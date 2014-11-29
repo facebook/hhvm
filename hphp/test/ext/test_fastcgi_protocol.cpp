@@ -29,9 +29,9 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/util/logger.h"
-#include "folly/io/IOBuf.h"
-#include "folly/io/IOBufQueue.h"
-#include "folly/io/Cursor.h"
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
+#include <folly/io/Cursor.h>
 
 #define LOAD_JSON(mx, s)     if (!Count(LoadExchangeFromJson( \
                                         std::string("test/ext/fastcgi/") + s, \

@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_OPTION_H_
 #define incl_HPHP_RUNTIME_OPTION_H_
 
-#include "folly/dynamic.h"
+#include <folly/dynamic.h>
 
 #include <unordered_map>
 #include <vector>
@@ -138,6 +138,7 @@ public:
 
   static int RequestTimeoutSeconds;
   static int PspTimeoutSeconds;
+  static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
   static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
@@ -156,7 +157,6 @@ public:
   static std::string ForceCompressionURL;
   static std::string ForceCompressionCookie;
   static std::string ForceCompressionParam;
-  static bool EnableMagicQuotesGpc;
   static bool EnableKeepAlive;
   static bool ExposeHPHP;
   static bool ExposeXFBServer;
@@ -320,6 +320,8 @@ public:
   static bool WarnOnCollectionToArray;
   static bool UseDirectCopy;
 
+  static bool DisableSmartAllocator;
+
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;
@@ -385,7 +387,7 @@ public:
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
   F(bool, JitRequireWriteLease,        false)                           \
-  F(uint64_t, JitAHotSize,             4 << 20)                         \
+  F(uint64_t, JitAHotSize,             ahotDefault())                   \
   F(uint64_t, JitASize,                60 << 20)                        \
   F(uint64_t, JitAMaxUsage,            maxUsageDef())                   \
   F(uint64_t, JitAProfSize,            64 << 20)                        \
@@ -493,6 +495,7 @@ public:
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(bool,     JitPGOStringSpec,        false)                           \
+  F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \

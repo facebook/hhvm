@@ -64,7 +64,7 @@ struct TReqInfo {
 enum class TestAndSmashFlags {
   kAlignJccImmediate,
   kAlignJcc,
-  kAlignJccAndJmp
+  kAlignJccAndJmp,
 };
 
 enum class MoveToAlignFlags {
@@ -128,6 +128,7 @@ class BackEnd {
   virtual void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) = 0;
   virtual void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                                       TestAndSmashFlags flags) = 0;
+
   virtual void smashJmp(TCA jmpAddr, TCA newDest) = 0;
   virtual void smashCall(TCA callAddr, TCA newDest) = 0;
   virtual void smashJcc(TCA jccAddr, TCA newDest) = 0;
@@ -171,8 +172,9 @@ class BackEnd {
    * the same address as before relocation.
    */
   virtual size_t relocate(RelocationInfo& rel, CodeBlock& dest,
-                        TCA start, TCA end,
-                        CodeGenFixups& fixups) {
+                          TCA start, TCA end,
+                          CodeGenFixups& fixups,
+                          TCA* exitAddr) {
     always_assert(false);
     return 0;
   }
@@ -187,11 +189,38 @@ class BackEnd {
   }
 
   /*
-   * Adjust the contents of fixups and asmInfo based on the relocation
-   * already performed on rel.
+   * This will update a single range that was not relocated, but that
+   * might refer to relocated code (such as the cold code corresponding
+   * to a tracelet). Unless its guaranteed to be all position independent,
+   * its "fixups" should have been passed into a relocate call earlier.
    */
-  virtual void adjustForRelocation(RelocationInfo& rel,
-                                   AsmInfo* asmInfo, CodeGenFixups& fixups) {
+  virtual void adjustForRelocation(RelocationInfo& rel, TCA start, TCA end) {
+    always_assert(false);
+  }
+
+  /*
+   * Adjust the contents of fixups and asmInfo based on the relocation
+   * already performed on rel. This will not cause any of the relocated
+   * code to be "hooked up", and its not safe to do so until all of the
+   * CodeGenFixups have been processed.
+   */
+  virtual void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                           AsmInfo* asmInfo,
+                                           CodeGenFixups& fixups) {
+    always_assert(false);
+  }
+
+  /*
+   * Adjust potentially live references that point into the relocated
+   * area.
+   * Must not be called until its safe to run the relocated code.
+   */
+  virtual void adjustCodeForRelocation(RelocationInfo& rel,
+                                       CodeGenFixups& fixups) {
+    always_assert(false);
+  }
+
+  virtual void findFixups(TCA start, TCA end, CodeGenFixups& fixups) {
     always_assert(false);
   }
 };

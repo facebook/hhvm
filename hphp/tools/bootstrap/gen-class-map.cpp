@@ -20,8 +20,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "folly/FBString.h"
-#include "folly/FBVector.h"
+#include <folly/FBString.h>
+#include <folly/FBVector.h>
 
 #include "hphp/tools/bootstrap/idl.h"
 
@@ -75,7 +75,7 @@ static fbstring genDocCommentPreamble(const fbstring& name,
   if (flags & HipHopSpecific) {
     ret = "( HipHop specific )";
   } else {
-    ret = "( excerpt from http://php.net/manual/en/";
+    ret = "( excerpt from http://docs.hhvm.com/manual/en/";
     if (classname.size()) {
       ret += classname + ".";
     } else {

@@ -25,7 +25,7 @@
 #include "hphp/compiler/json.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash-map-typedefs.h"
-#include "folly/Bits.h"
+#include <folly/Bits.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

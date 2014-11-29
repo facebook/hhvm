@@ -747,12 +747,11 @@ public:
                              bool coerce_params = false);
   void emitMethodPrologue(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
-  void emitMemoizeProp(Emitter& e, MethodStatementPtr meth,
-                       const StringData* propName, Id localID,
+  void emitMemoizeProp(Emitter& e, MethodStatementPtr meth, Id localID,
                        const std::vector<Id>& paramIDs, uint numParams);
+  void addMemoizeProp(MethodStatementPtr meth);
   bool isMemoizeBlessedType(const TypeConstraint &tc);
-  void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName,
-                         const StringData* propName, int cacheKey);
+  void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
   void emitConstMethodCallNoParams(Emitter& e, string name);
   bool emitHHInvariant(Emitter& e, SimpleFunctionCallPtr);
   void emitMethodDVInitializers(Emitter& e,

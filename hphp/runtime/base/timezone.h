@@ -31,8 +31,6 @@ namespace HPHP {
 class Array;
 template <typename T> class SmartResource;
 
-typedef std::shared_ptr<timelib_tzinfo> TimeZoneInfo;
-typedef std::map<std::string, TimeZoneInfo> MapStringToTimeZoneInfo;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -125,29 +123,17 @@ protected:
   /**
    * Returns raw pointer. For internal use only.
    */
-  timelib_tzinfo *get() const { return m_tzi.get();}
+  timelib_tzinfo *get() const { return m_tzi; }
 
 private:
-  struct tzinfo_deleter {
-    void operator()(timelib_tzinfo *tzi) {
-      if (tzi) {
-        timelib_tzinfo_dtor(tzi);
-      }
-    }
-  };
-
   static const timelib_tzdb *GetDatabase();
 
   /**
    * Look up cache and if found return it, otherwise, read it from database.
    */
-  static TimeZoneInfo GetTimeZoneInfo(char* name, const timelib_tzdb* db);
-  /**
-   * only for timelib, don't use it unless you are passing to a timelib func
-   */
   static timelib_tzinfo* GetTimeZoneInfoRaw(char* name, const timelib_tzdb* db);
 
-  TimeZoneInfo m_tzi; // raw pointer
+  timelib_tzinfo* m_tzi;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

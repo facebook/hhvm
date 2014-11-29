@@ -29,7 +29,7 @@
 #include <libgen.h>
 #include <sys/mman.h>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -101,7 +101,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/ext/ext_collections.h"
 
-#include "hphp/runtime/vm/name-value-table-wrapper.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
@@ -268,6 +268,8 @@ static Offset pcOff() {
 //=============================================================================
 // VarEnv.
 
+const StaticString s_GLOBALS("GLOBALS");
+
 VarEnv::VarEnv()
   : m_nvTable()
   , m_extraArgs(nullptr)
@@ -277,10 +279,10 @@ VarEnv::VarEnv()
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   assert(!g_context->m_globalVarEnv);
   g_context->m_globalVarEnv = this;
-
-  auto tableWrapper = smart_new<GlobalNameValueTableWrapper>(&m_nvTable);
-  auto globalArray = make_tv<KindOfArray>(tableWrapper->asArrayData());
-  m_nvTable.set(makeStaticString("GLOBALS"), &globalArray);
+  auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
+                 GlobalsArray(&m_nvTable);
+  auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
+  m_nvTable.set(s_GLOBALS.get(), &globalArray);
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -590,6 +592,7 @@ void flush_evaluation_stack() {
      */
     hphp_memory_cleanup();
   }
+  MM().flush();
 
   if (!t_se.isNull()) {
     t_se->flush();
@@ -957,7 +960,7 @@ const Func* ExecutionContext::lookupMethodCtx(const Class* cls,
     assert(methodName != nullptr);
     method = cls->lookupMethod(methodName);
     while (!method) {
-      if (UNLIKELY(methodName == s_construct.get())) {
+      if (UNLIKELY(methodName->isame(s_construct.get()))) {
         // We were looking up __construct and failed to find it. Fall back
         // to old-style constructor: same as class name.
         method = cls->getCtor();
@@ -2561,8 +2564,8 @@ StrNR ExecutionContext::createFunction(const String& args,
   codeStr << "<?php function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
-  StringData* evalCode = makeStaticString(codeStr.str());
-  Unit* unit = compile_string(evalCode->data(), evalCode->size());
+  std::string evalCode = codeStr.str();
+  Unit* unit = compile_string(evalCode.data(), evalCode.size());
   // Move the function to a different name.
   std::ostringstream newNameStr;
   newNameStr << '\0' << "lambda_" << ++m_lambdaCounter;

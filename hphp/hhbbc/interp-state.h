@@ -22,7 +22,7 @@
 
 #include <boost/variant.hpp>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"

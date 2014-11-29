@@ -164,7 +164,7 @@ private:
   void emit(copy i);
   void emit(copy2& i);
   void emit(debugtrap& i) { a->int3(); }
-  void emit(end& i) {}
+  void emit(fallthru& i) {}
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
@@ -240,10 +240,8 @@ private:
   void emit(loadsd& i) { a->movsd(i.s, i.d); }
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
   void emit(movb& i) { a->movb(i.s, i.d); }
-  void emit(movbi& i) { a->movb(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movzbl& i) { a->movzbl(i.s, i.d); }
-  void emit(movsbl& i) { a->movsbl(i.s, i.d); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(nop& i) { a->nop(); }
@@ -256,13 +254,11 @@ private:
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushl& i) { a->pushl(i.s); }
   void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
   void emit(sarqi& i) { binary(i); a->sarq(i.s0, i.d); }
-  void emit(sbbl& i) { noncommute(i); a->sbbl(i.s0, i.d); }
   void emit(setcc& i) { a->setcc(i.cc, i.d); }
   void emit(shlli& i) { binary(i); a->shll(i.s0, i.d); }
   void emit(shlq& i) { unary(i); a->shlq(i.d); }
@@ -279,6 +275,7 @@ private:
   void emit(storesd& i) { a->movsd(i.s, i.m); }
   void emit(storew& i) { a->storew(i.s, i.m); }
   void emit(storewi& i) { a->storew(i.s, i.m); }
+  void emit(subbi& i) { binary(i); a->subb(i.s0, i.d); }
   void emit(subl& i) { noncommute(i); a->subl(i.s0, i.d); }
   void emit(subli& i) { binary(i); a->subl(i.s0, i.d); }
   void emit(subq& i) { noncommute(i); a->subq(i.s0, i.d); }
@@ -651,8 +648,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
 
   // This is under the printir tracemod because it mostly shows you IR and
   // machine code, not vasm and machine code (not implemented).
-  bool shouldUpdateAsmInfo = !!m_asmInfo
-    && Trace::moduleEnabledRelease(HPHP::Trace::printir, kCodeGenLevel);
+  bool shouldUpdateAsmInfo = !!m_asmInfo;
 
   std::vector<TransBCMapping>* bcmap = nullptr;
   if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
@@ -839,12 +835,12 @@ jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
   auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
     [&](Vlabel b) {
       return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::end;
+             unit.blocks[b].code.back().op != Vinstr::fallthru;
     });
   std::stable_partition(coldIt, blocks.end(),
     [&](Vlabel b) {
       return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::end;
+             unit.blocks[b].code.back().op != Vinstr::fallthru;
     });
   return blocks;
 }
@@ -906,6 +902,48 @@ static void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
   // something other than enterTCHelper.  In that case
   // SRJmpInsteadOfRet indicates to fake the return.
   v << ret{arg_regs};
+}
+
+static void lowerSrem(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& srem = inst.srem_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+  v << copy{srem.s0, rax};
+  v << cqo{};                      // sign-extend rax => rdx:rax
+  v << idiv{srem.s1, v.makeReg()}; // rdx:rax/divisor => quot:rax, rem:rdx
+  v << copy{rdx, srem.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
+template<typename FromOp, typename ToOp>
+static void lowerShift(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& shift = inst.get<FromOp>();
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+  v << copy{shift.s0, rcx};
+  v << ToOp{shift.s1, shift.d, shift.sf};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
+}
+
+static void lowerAbsdbl(Vunit& unit, Vlabel b, size_t iInst) {
+  auto const& inst = unit.blocks[b].code[iInst];
+  auto const& absdbl = inst.absdbl_;
+  auto scratch = unit.makeScratchBlock();
+  SCOPE_EXIT { unit.freeScratchBlock(scratch); };
+  Vout v(unit, scratch, inst.origin);
+
+  // clear the high bit
+  auto tmp = v.makeReg();
+  v << psllq{1, absdbl.s, tmp};
+  v << psrlq{1, tmp, absdbl.d};
+
+  vector_splice(unit.blocks[b].code, iInst, 1, unit.blocks[scratch].code);
 }
 
 static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
@@ -1051,6 +1089,22 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
           lowerVcall(unit, Vlabel{ib}, ii);
           break;
 
+        case Vinstr::srem:
+          lowerSrem(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::sar:
+          lowerShift<sar, sarq>(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::shl:
+          lowerShift<shl, shlq>(unit, Vlabel{ib}, ii);
+          break;
+
+        case Vinstr::absdbl:
+          lowerAbsdbl(unit, Vlabel{ib}, ii);
+          break;
+
         case Vinstr::defvmsp:
           inst = copy{rVmSp, inst.defvmsp_.d};
           break;
@@ -1061,6 +1115,14 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::syncvmfp:
           inst = copy{inst.syncvmfp_.s, rVmFp};
+          break;
+
+        case Vinstr::ldretaddr:
+          inst = pushm{inst.ldretaddr_.s};
+          break;
+
+        case Vinstr::retctrl:
+          inst = ret{kCrossTraceRegs};
           break;
 
         default:
@@ -1113,7 +1175,7 @@ Vauto::~Vauto() {
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // found at least one nonempty block. finish up.
-      if (!main().closed()) main() << end{};
+      if (!main().closed()) main() << fallthru{};
       assert(areas.size() < 2 || cold().empty() || cold().closed());
       assert(areas.size() < 3 || frozen().empty() || frozen().closed());
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir

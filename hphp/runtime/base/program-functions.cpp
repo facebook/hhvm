@@ -63,6 +63,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
@@ -193,6 +194,8 @@ String k_PHP_BINARY;
 String k_PHP_BINDIR;
 String k_PHP_OS;
 String k_PHP_SAPI;
+
+static __thread bool s_sessionInitialized{false};
 
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
@@ -365,6 +368,19 @@ void bump_counter_and_rethrow(bool isPsp) {
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
     throw;
+  } catch (const RequestCPUTimeoutException& e) {
+    if (isPsp) {
+      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutPSPCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.psp", 1);
+    } else {
+      static auto requestCPUTimeoutCounter = ServiceData::createTimeseries(
+        "requests_cpu_timed_out_non_psp", {ServiceData::StatsType::COUNT});
+      requestCPUTimeoutCounter->addValue(1);
+      ServerStats::Log("request.cpu_timed_out.non_psp", 1);
+    }
+    throw;
   } catch (const RequestMemoryExceededException& e) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
@@ -509,6 +525,8 @@ static void handle_resource_exceeded_exception() {
     throw;
   } catch (RequestTimeoutException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setTimedOutFlag();
+  } catch (RequestCPUTimeoutException&) {
+    ThreadInfo::s_threadInfo->m_reqInjectionData.setCPUTimedOutFlag();
   } catch (RequestMemoryExceededException&) {
     ThreadInfo::s_threadInfo->m_reqInjectionData.setMemExceededFlag();
   } catch (...) {}
@@ -1074,8 +1092,16 @@ static void set_stack_size() {
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
   if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+#ifdef __CYGWIN__
+    Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+                  AsyncFuncImpl::kStackSizeMinimum);
+#else
     rlim.rlim_cur = AsyncFuncImpl::kStackSizeMinimum;
-    setrlimit(RLIMIT_STACK, &rlim);
+    if (setrlimit(RLIMIT_STACK, &rlim)) {
+      Logger::Error("failed to set stack limit to %zd\n",
+                    AsyncFuncImpl::kStackSizeMinimum);
+    }
+#endif
   }
 }
 
@@ -1346,28 +1372,9 @@ static int execute_program_impl(int argc, char** argv) {
                            RuntimeOption::LightProcessCount,
                            inherited_fds);
 
-  {
-    const size_t stackSizeMinimum = 8 * 1024 * 1024;
-    struct rlimit rlim;
-    if (getrlimit(RLIMIT_STACK, &rlim) == 0 &&
-        (rlim.rlim_cur == RLIM_INFINITY ||
-         rlim.rlim_cur < stackSizeMinimum)) {
-      rlim.rlim_cur = stackSizeMinimum;
-      if (stackSizeMinimum > rlim.rlim_max) {
-        rlim.rlim_max = stackSizeMinimum;
-      }
-#ifdef __CYGWIN__
-      Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
-                    stackSizeMinimum);
-#else
-      if (setrlimit(RLIMIT_STACK, &rlim)) {
-        Logger::Error("failed to set stack limit to %zd\n", stackSizeMinimum);
-      }
-#endif
-    }
+  if (!ShmCounters::initialize(true, Logger::Error)) {
+    exit(HPHP_EXIT_FAILURE);
   }
-
-  ShmCounters::initialize(true, Logger::Error);
   // Initialize compiler state
   compile_file(0, 0, MD5(), 0);
 
@@ -1607,7 +1614,7 @@ string get_systemlib(string* hhas, const string &section /*= "systemlib" */,
 
 static void on_timeout(int sig, siginfo_t* info, void* context) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
-    auto data = (RequestInjectionData*)info->si_value.sival_ptr;
+    auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
       data->onTimeout();
     } else {
@@ -1736,10 +1743,12 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init() {
+  assert(!s_sessionInitialized);
   init_thread_locals();
   ThreadInfo::s_threadInfo->onSessionInit();
   MM().resetExternalStats();
   if (RuntimeOption::EvalTraceArrays) getArrayTracer()->requestStart();
+  Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
   SimpleCounter::Enabled = true;
@@ -1751,6 +1760,7 @@ void hphp_session_init() {
   StatCache::requestInit();
 
   g_context->requestInit();
+  s_sessionInitialized = true;
 }
 
 ExecutionContext *hphp_context_init() {
@@ -1885,9 +1895,14 @@ void hphp_memory_cleanup() {
 }
 
 void hphp_session_exit() {
+  assert(s_sessionInitialized);
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  // Similarly, apc strings could be in the ServerNote array, and
+  // its possible they are scheduled to be destroyed after this request
+  // finishes.
+  Treadmill::finishRequest();
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
@@ -1904,6 +1919,8 @@ void hphp_session_exit() {
 
   ThreadInfo::s_threadInfo->onSessionExit();
   assert(MM().empty());
+
+  s_sessionInitialized = false;
 }
 
 void hphp_process_exit() {
@@ -1922,6 +1939,10 @@ void hphp_process_exit() {
   delete jit::mcg;
   jit::mcg = nullptr;
   folly::SingletonVault::singleton()->destroyInstances();
+}
+
+bool is_hphp_session_initialized() {
+  return s_sessionInitialized;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@
 
 #include <sys/stat.h>
 #include <map>
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/lambda_names.h"

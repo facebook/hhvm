@@ -71,7 +71,12 @@ void PCREglobals::onSessionExit() {
   smart::vector<const pcre_cache_entry*>().swap(m_overflow);
 }
 
+PCREglobals::PCREglobals() {
+  m_jit_stack = pcre_jit_stack_alloc(32768, 524288);
+}
+
 PCREglobals::~PCREglobals() {
+  pcre_jit_stack_free(m_jit_stack);
   onSessionExit();
 }
 
@@ -105,7 +110,18 @@ static PCREStringMap* pcre_cache_create() {
 }
 
 static void pcre_cache_destroy(PCREStringMap* cache) {
+  // We delete uncounted keys while iterating the cache, which is OK for
+  // AtomicHashArray, but not OK for other containers, such as
+  // std::unordered_map.  If you change the cache type make sure that property
+  // holds or fix this function.
+  static_assert(std::is_same<PCREStringMap,
+      folly::AtomicHashArray<const StringData*, const pcre_cache_entry*,
+                             string_data_hash, ahm_string_data_same>>::value,
+      "PCREStringMap must be an AtomicHashArray or this destructor is wrong.");
   for (auto& it : *cache) {
+    if (it.first->isUncounted()) {
+      const_cast<StringData*>(it.first)->destructUncounted();
+    }
     delete it.second;
   }
   PCREStringMap::destroy(cache);
@@ -168,9 +184,14 @@ insert_cached_pcre(const String& regex, const pcre_cache_entry* ent) {
     pcre_clear_cache();
   }
   auto cache = s_pcreCacheMap.load(std::memory_order_acquire);
-  auto pair = cache->insert(
-    PCREEntry(makeStaticString(regex.get()), ent));
+  auto key = regex.get()->isStatic()
+    ? regex.get()
+    : StringData::MakeUncounted(regex.slice());
+  auto pair = cache->insert(PCREEntry(key, ent));  // nothrow
   if (!pair.second) {
+    if (key->isUncounted()) {
+      key->destructUncounted();
+    }
     if (pair.first == cache->end()) {
       // Global Cache is full
       // still return the entry and free it at the end of the request
@@ -195,6 +216,10 @@ static __thread pcre_extra t_extra_data;
 
 // The last pcre error code is available for the whole thread.
 static __thread int t_last_error_code;
+
+static pcre_jit_stack *alloc_jit_stack(void* data) {
+  return s_pcre_globals->m_jit_stack;
+}
 
 namespace {
 
@@ -443,6 +468,7 @@ pcre_get_compiled_regex_cache(const String& regex) {
     if (extra) {
       extra->flags |= PCRE_EXTRA_MATCH_LIMIT |
         PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+      pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
     }
     if (error != nullptr) {
       try {

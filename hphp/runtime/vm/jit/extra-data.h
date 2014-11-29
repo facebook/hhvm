@@ -165,6 +165,8 @@ struct RDSHandleData : IRExtraData {
     : handle(handle)
   {}
 
+  bool cseEquals(RDSHandleData o) const { return handle == o.handle; }
+  size_t cseHash() const { return std::hash<uint32_t>()(handle); }
   std::string show() const {
     return folly::to<std::string>(handle);
   }
@@ -861,7 +863,6 @@ X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
 X(LdLoc,                        LocalId);
-X(TrackLoc,                     LocalId);
 X(LdLocPseudoMain,              LocalId);
 X(DecRefLoc,                    LocalId);
 X(StLoc,                        LocalId);
@@ -890,7 +891,6 @@ X(CheckInitSProps,              ClassData);
 X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
-X(LdCtx,                        FuncData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
 X(GuardStk,                     StackOffset);
@@ -922,7 +922,6 @@ X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
 X(FunctionSuspendHook,          RetCtrlData);
 X(FunctionReturnHook,           RetCtrlData);
-X(LdClsCns,                     ClsCnsName);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);
 X(LdClsMethodCacheFunc,         ClsMethodData);
@@ -988,6 +987,7 @@ X(InitPackedArrayLoop,          PackedArrayData);
 X(InitPackedArray,              IndexData);
 X(ProfileArray,                 RDSHandleData);
 X(ProfileStr,                   ProfileStrData);
+X(LdRDSAddr,                    RDSHandleData);
 X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);
 X(PropX,                        MInstrAttrData);

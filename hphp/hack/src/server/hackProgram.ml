@@ -93,35 +93,57 @@ module Program : Server.SERVER_PROGRAM = struct
         flush oc
     | ServerMsg.SHOW name ->
         output_string oc "starting\n";
-        output_string oc "class:\n";
         SharedMem.invalidate_caches();
-        let qual_name = if name.[0] = '\\' then name
-          else ("\\"^name) in
+        let qual_name = if name.[0] = '\\' then name else ("\\"^name) in
         let nenv = env.nenv in
+        output_string oc "class:\n";
         (match SMap.get (Naming.canon_key qual_name) (snd nenv.Naming.iclasses) with
-          | None -> output_string oc "Missing from nenv\n"
+          | None -> output_string oc "Missing from naming env\n"
           | Some canon ->
             let p, _ = SMap.find_unsafe canon (fst nenv.Naming.iclasses) in
             output_string oc ((Pos.string (Pos.to_absolute p))^"\n")
         );
         let class_ = Typing_env.Classes.get qual_name in
         (match class_ with
-        | None -> output_string oc "Missing from Typing_env\n"
+        | None -> output_string oc "Missing from typing env\n"
         | Some c ->
             let class_str = Typing_print.class_ c in
             output_string oc (class_str^"\n")
         );
-        output_string oc "function:\n";
+        output_string oc "\nfunction:\n";
         (match SMap.get qual_name nenv.Naming.ifuns with
         | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
-        | None -> output_string oc "Missing from nenv\n");
+        | None -> output_string oc "Missing from naming env\n");
         let fun_ = Typing_env.Funs.get qual_name in
         (match fun_ with
         | None ->
-            output_string oc "Missing from Typing_env\n"
+            output_string oc "Missing from typing env\n"
         | Some f ->
             let fun_str = Typing_print.fun_ f in
             output_string oc (fun_str^"\n")
+        );
+        output_string oc "\nglobal const:\n";
+        (match SMap.get qual_name nenv.Naming.iconsts with
+        | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
+        | None -> output_string oc "Missing from naming env\n");
+        let gconst_ty = Typing_env.GConsts.get qual_name in
+        (match gconst_ty with
+        | None -> output_string oc "Missing from typing env\n"
+        | Some gc ->
+            let gconst_str = Typing_print.gconst gc in
+            output_string oc ("ty: "^gconst_str^"\n")
+        );
+        output_string oc "typedef:\n";
+        (match SMap.get qual_name nenv.Naming.itypedefs with
+        | Some (p, _) -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
+        | None -> output_string oc "Missing from naming env\n");
+        let tdef = Typing_env.Typedefs.get qual_name in
+        (match tdef with
+        | None ->
+            output_string oc "Missing from typing env\n"
+        | Some td ->
+            let td_str = Typing_print.typedef td in
+            output_string oc (td_str^"\n")
         );
         flush oc
     | ServerMsg.KILL -> die_nicely oc
@@ -236,18 +258,28 @@ module Program : Server.SERVER_PROGRAM = struct
         ServerConvert.go genv env dirname;
         exit 0
 
-  let filter_update _genv _env update =
-    Find.is_php_path (Relative_path.suffix update) ||
-    Find.is_js_path (Relative_path.suffix update)
+  (* We won't filter more rigorously until later so the hooks can stay up to
+   * date on filesystem changes *)
+  let filter_update _genv _env _update = true
+
+  let filter_typecheck_update update =
+    Find.is_php_path (Relative_path.suffix update)
 
   let recheck genv env updates =
-    let diff = updates in
-    if Relative_path.Set.is_empty diff
-    then env
+    let php_diff = Relative_path.Set.filter filter_typecheck_update updates in
+    BuildMain.incremental_update genv env updates;
+    if Relative_path.Set.is_empty php_diff
+    then
+      begin
+        BuildMain.incremental_update genv env updates;
+        env
+      end
     else
-      let failed_parsing = Relative_path.Set.union diff env.failed_parsing in
+      let failed_parsing = Relative_path.Set.union php_diff env.failed_parsing in
       let check_env = { env with failed_parsing = failed_parsing } in
-      ServerTypeCheck.check genv check_env
+      let env = ServerTypeCheck.check genv check_env in
+      BuildMain.incremental_update genv env updates;
+      env
 
   let parse_options = ServerArgs.parse_options
 

@@ -57,7 +57,7 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 }
 
 void MInstrEffects::get(const IRInstruction* inst,
-                        const FrameState& frame,
+                        const FrameStateMgr& frame,
                         LocalStateHook& hook) {
   // If the base for this instruction is a local address, the helper call might
   // have side effects on the local's value
@@ -511,11 +511,11 @@ SSATmp* HhbcTranslator::MInstrTranslator::getBase(TypeConstraint tc) {
 }
 
 SSATmp* HhbcTranslator::MInstrTranslator::getKey() {
-  SSATmp* key = getInput(m_iInd, DataTypeSpecific);
-  auto keyType = key->type();
+  auto key = getInput(m_iInd, DataTypeSpecific);
+  auto const keyType = key->type();
   assert(keyType.isBoxed() || keyType.notBoxed());
   if (keyType.isBoxed()) {
-    key = gen(LdRef, Type::Cell, key);
+    key = gen(LdRef, Type::InitCell, key);
   }
   return key;
 }
@@ -578,8 +578,7 @@ SSATmp* HhbcTranslator::MInstrTranslator::getInput(unsigned i,
       // If we don't have a current class context, this instruction will be
       // unreachable.
       if (!m_ht.curClass()) PUNT(Unreachable-LdThis);
-
-      return gen(LdThis, m_irb.fp());
+      return m_ht.ldThis();
 
     default: not_reached();
   }
@@ -628,12 +627,9 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
    */
   Block* failedRef = baseType.isBoxed() ? m_ht.makeExit() : nullptr;
   if (baseType.isBoxed() && baseDL.location.isLocal()) {
-    base = gen(
-      LdRef,
-      m_irb.predictedInnerType(baseDL.location.offset),
-      failedRef,
-      base
-    );
+    auto const predTy = m_irb.predictedInnerType(baseDL.location.offset);
+    gen(CheckRefInner, predTy, failedRef, base);
+    base = gen(LdRef, predTy, base);
     baseType = base->type();
   }
 
@@ -651,8 +647,8 @@ void HhbcTranslator::MInstrTranslator::emitBaseLCR() {
 
   // Everything else is passed by pointer. We don't have to worry about
   // unboxing, since all the generic helpers understand boxed bases. They still
-  // may rely on the LdRef guard above, though; the various emit* functions may
-  // do smarter things based on the guarded type.
+  // may rely on the CheckRefInner guard above, though; the various emit*
+  // functions may do smarter things based on the guarded type.
   if (baseDL.location.space == Location::Local) {
     setBase(
       m_ht.ldLocAddr(baseDL.location.offset),
@@ -695,8 +691,8 @@ HhbcTranslator::MInstrTranslator::computeSimpleCollectionOp() {
   auto const baseType = [&] {
     const DynLocation& baseDL = *m_ni.inputs[m_iInd];
     // Before we do any simpleCollectionOp on a local base, we will always emit
-    // the appropriate LdRef guard to allow us to use a predicted inner type.
-    // So when calculating the SimpleOp assume that type.
+    // the appropriate CheckRefInner guard to allow us to use a predicted inner
+    // type.  So when calculating the SimpleOp assume that type.
     if (base->type().maybeBoxed() && baseDL.location.isLocal()) {
       return m_irb.predictedInnerType(baseDL.location.offset);
     }
@@ -871,22 +867,35 @@ void HhbcTranslator::MInstrTranslator::emitIntermediateOp() {
 }
 
 PropInfo HhbcTranslator::MInstrTranslator::getCurrentPropertyOffset(
-  const Class*& knownCls
-) {
+    const Class*& knownCls) {
   auto const baseType = m_base.type.derefIfPtr();
   if (!knownCls) {
     if (baseType < (Type::Obj|Type::InitNull) && baseType.isSpecialized()) {
       knownCls = baseType.getClass();
     }
   }
+
+  /*
+   * TODO(#5616733): If we still don't have a knownCls, we can't do anything
+   * good.  It's possible we still have the known information statically, and
+   * it might be in m_ni.inputs, but right now we can't really trust that
+   * because it's not very clear what it means.  See task for more information.
+   */
+  if (!knownCls) return PropInfo{};
+
   auto const info = getPropertyOffset(m_ni, contextClass(), knownCls,
                                       m_mii, m_mInd, m_iInd);
   if (info.offset == -1) return info;
 
-  auto baseCls = baseType.getClass();
+  auto const baseCls = baseType.getClass();
 
-  // baseCls and knownCls may differ due to a number of factors but they must
-  // always be related to each other somehow.
+  /*
+   * baseCls and knownCls may differ due to a number of factors but they must
+   * always be related to each other somehow if they are both non-null.
+   *
+   * TODO(#5616733): stop using ni.inputs here.  Just use the class we know
+   * from this translation, if there is one.
+   */
   always_assert_flog(
     baseCls->classof(knownCls) || knownCls->classof(baseCls),
     "Class mismatch between baseType({}) and knownCls({})",
@@ -1369,7 +1378,7 @@ const StaticString s_PackedArray("PackedArray");
 
 void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
   TargetProfile<NonPackedArrayProfile> prof(m_ht.m_context,
-                                            m_irb.marker(),
+                                            m_irb.nextMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
     gen(ProfileArray, RDSHandleData { prof.handle() }, m_base.value);
@@ -1382,7 +1391,8 @@ void HhbcTranslator::MInstrTranslator::emitProfiledArrayGet(SSATmp* key) {
     // NonPackedArrayProfile data counts how many times a non-packed array was
     // observed.  Zero means it was monomorphic (or never executed).
     auto const typePackedArr = Type::Arr.specialize(ArrayData::kPackedKind);
-    if (data.count == 0 && m_base.type.maybe(typePackedArr)) {
+    if (m_base.type.maybe(typePackedArr) &&
+        (data.count == 0 || RuntimeOption::EvalJitPGOArrayGetStress)) {
       // It's safe to side-exit still because we only do these profiled array
       // gets on the first element, with simple bases and single-element dims.
       // See computeSimpleCollectionOp.
@@ -1564,7 +1574,7 @@ void HhbcTranslator::MInstrTranslator::emitArraySet(SSATmp* key,
     gen(StLoc, LocalId(base.location.offset), m_irb.fp(), newArr);
   } else if (base.location.space == Location::Stack) {
     m_ht.extendStack(baseStkIdx, Type::Gen);
-    m_ht.replace(baseStkIdx, newArr);
+    m_irb.evalStack().replace(baseStkIdx, newArr);
   } else {
     not_reached();
   }
@@ -1853,7 +1863,8 @@ void HhbcTranslator::MInstrTranslator::emitSideExits(SSATmp* catchSp,
     };
 
     // Need to save FP, we're switching to our side exit block, but it hasn't
-    // had a predecessor propagate state to it via FrameState::finishBlock yet.
+    // had a predecessor propagate state to it via FrameStateMgr::finishBlock
+    // yet.
     auto const fp = m_irb.fp();
 
     BlockPusher bp(m_irb, m_marker, m_failedSetBlock);

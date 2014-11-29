@@ -34,7 +34,12 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
+
+#include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
@@ -173,8 +178,8 @@ MemoryManager::MemoryManager()
   resetStatsImpl(true);
   m_stats.maxBytes = std::numeric_limits<int64_t>::max();
   // make the circular-lists empty.
-  m_bigs.next = m_bigs.prev = &m_bigs;
   m_strings.next = m_strings.prev = &m_strings;
+  m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {
@@ -392,39 +397,27 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 
 void MemoryManager::sweep() {
   assert(!sweeping());
+  if (debug) checkHeap();
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
-  UNUSED auto sweepable = Sweepable::SweepAll();
-  UNUSED auto native = m_natives.size();
+  DEBUG_ONLY auto sweepable = Sweepable::SweepAll();
+  DEBUG_ONLY auto native = m_natives.size();
   Native::sweepNativeData(m_natives);
   TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
 }
 
 void MemoryManager::resetAllocator() {
-  UNUSED auto napcs = m_apc_arrays.size();
+  // decref apc strings and arrays referenced by this request
+  DEBUG_ONLY auto napcs = m_apc_arrays.size();
   while (!m_apc_arrays.empty()) {
     auto a = m_apc_arrays.back();
     m_apc_arrays.pop_back();
     a->sweep();
   }
-  UNUSED auto nstrings = StringData::sweepAll();
-  UNUSED auto nslabs = m_slabs.size();
+  DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
-  // free smart-malloc slabs
-  for (auto slab : m_slabs) {
-    free(slab);
-  }
-  m_slabs.clear();
-  resetStatsImpl(true);
-
-  // free large allocation blocks
-  UNUSED size_t nbig = 0;
-  for (BigNode *n = m_bigs.next, *next; n != &m_bigs; n = next) {
-    nbig++;
-    next = n->next;
-    free(n);
-  }
-  m_bigs.next = m_bigs.prev = &m_bigs;
+  // free the heap
+  m_heap.reset();
 
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
@@ -433,9 +426,16 @@ void MemoryManager::resetAllocator() {
     m_instances = std::unordered_set<void*>();
   }
 
+  resetStatsImpl(true);
   resetCouldOOM();
-  TRACE(1, "reset: apc-arrays %lu strings %u slabs %lu big %lu\n",
-        napcs, nstrings, nslabs, nbig);
+  TRACE(1, "reset: apc-arrays %lu strings %u\n", napcs, nstrings);
+}
+
+void MemoryManager::flush() {
+  always_assert(empty());
+  m_heap.flush();
+  m_apc_arrays = std::vector<APCLocalArray*>();
+  m_natives = std::vector<NativeNode*>();
 }
 
 /*
@@ -489,13 +489,13 @@ void MemoryManager::resetAllocator() {
 
 inline void* MemoryManager::smartMalloc(size_t nbytes) {
   auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (UNLIKELY(nbytes_padded > kMaxSmartSize)) {
-    return smartMallocBig(nbytes);
+  if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
+    auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+    ptr->padbytes = nbytes_padded;
+    ptr->kind = HeaderKind::Small;
+    return ptr + 1;
   }
-
-  auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
-  ptr->padbytes = nbytes_padded;
-  return ptr + 1;
+  return smartMallocBig(nbytes);
 }
 
 union MallocNode {
@@ -511,43 +511,299 @@ inline void MemoryManager::smartFree(void* ptr) {
   if (LIKELY(padbytes <= kMaxSmartSize)) {
     return smartFreeSize(&n->small, n->small.padbytes);
   }
-  smartFreeBig(&n->big);
+  m_heap.freeBig(ptr);
 }
 
-inline void* MemoryManager::smartRealloc(void* inputPtr, size_t nbytes) {
-  FTRACE(3, "smartRealloc: {} to {}\n", inputPtr, nbytes);
+inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
+  FTRACE(3, "smartRealloc: {} to {}\n", ptr, nbytes);
   assert(nbytes > 0);
-
-  void* ptr = debug ? static_cast<DebugHeader*>((void*)(uintptr_t(inputPtr) -
-                                                kDebugExtraSize)) : inputPtr;
-
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
     void* newmem = smart_malloc(nbytes);
     auto const copySize = std::min(
-      n->small.padbytes - sizeof(SmallNode) - kDebugExtraSize,
+      n->small.padbytes - sizeof(SmallNode),
       nbytes
     );
-    newmem = memcpy(newmem, inputPtr, copySize);
-    smart_free(inputPtr);
+    newmem = memcpy(newmem, ptr, copySize);
+    smart_free(ptr);
     return newmem;
   }
-
-  // Ok, it's a big allocation.  Since we don't know how big it is
-  // (i.e. how much data we should memcpy), we have no choice but to
-  // ask malloc to realloc for us.
-  auto const oldNext = n->big.next;
-  auto const oldPrev = n->big.prev;
-
-  auto const newNode = static_cast<BigNode*>(
-    safe_realloc(n, debugAddExtra(nbytes + sizeof(BigNode)))
-  );
-
+  // Ok, it's a big allocation.
+  auto block = m_heap.resizeBig(ptr, nbytes);
   refreshStats();
-  if (newNode != &n->big) {
-    oldNext->prev = oldPrev->next = newNode;
+  return block.ptr;
+}
+
+namespace {
+const char* header_names[] = {
+  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Shared",
+  "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
+  "Sweepable", "Small", "Big", "Free", "Hole", "Debug"
+};
+static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
+
+// union of all the possible header types, and some utilities
+struct Header {
+  struct DummySweepable: Sweepable, ObjectData { void sweep() {} };
+  size_t size() const;
+  bool check() const;
+  union {
+    struct {
+      uint64_t q;
+      uint8_t b[3];
+      HeaderKind kind_;
+    };
+    StringData str_;
+    ArrayData arr_;
+    MixedArray mixed_;
+    ObjectData obj_;
+    ResourceData res_;
+    RefData ref_;
+    SmallNode small_;
+    BigNode big_;
+    FreeNode free_;
+    NativeNode native_;
+    DebugHeader debug_;
+    DummySweepable sweepable_;
+  };
+};
+
+bool Header::check() const {
+  return unsigned(kind_) <= NumHeaderKinds;
+}
+
+size_t Header::size() const {
+  auto resourceSize = [](const ResourceData* r) {
+    // explicitly virtual-call ResourceData::heapSize() through a pointer
+    assert(r->heapSize());
+    return r->heapSize();
+  };
+  assert(check());
+  switch (kind_) {
+    case HeaderKind::Packed: case HeaderKind::VPacked:
+      return PackedArray::heapSize(&arr_);
+    case HeaderKind::Mixed: case HeaderKind::StrMap: case HeaderKind::IntMap:
+      return mixed_.heapSize();
+    case HeaderKind::Empty:
+      return sizeof(ArrayData);
+    case HeaderKind::Shared:
+      return sizeof(APCLocalArray);
+    case HeaderKind::Globals:
+      return sizeof(GlobalsArray);
+    case HeaderKind::Proxy:
+      return sizeof(ProxyArray);
+    case HeaderKind::String:
+      return str_.heapSize();
+    case HeaderKind::Object:
+      // [ObjectData][subclass][props]
+      return obj_.heapSize();
+    case HeaderKind::Resource:
+      // [ResourceData][subclass]
+      return resourceSize(&res_);
+    case HeaderKind::Ref:
+      return sizeof(RefData);
+    case HeaderKind::Small:
+      return small_.padbytes;
+    case HeaderKind::Big:
+      return big_.nbytes;
+    case HeaderKind::Free:
+      return free_.size;
+    case HeaderKind::Native:
+      // [NativeNode][NativeData][ObjectData][props] is one allocation.
+      return native_.obj_offset + Native::obj(&native_)->heapSize();
+    case HeaderKind::Sweepable:
+      // [Sweepable][ObjectData][subclass][props] or
+      // [Sweepable][ResourceData][subclass]
+      return sizeof(Sweepable) + sweepable_.heapSize();
+    case HeaderKind::Hole:
+      return free_.size;
+    case HeaderKind::Debug:
+      assert(debug_.allocatedMagic == DebugHeader::kAllocatedMagic);
+      return sizeof(DebugHeader);
   }
-  return debugPostAllocate(newNode + 1, 0, 0);
+  return 0;
+}
+
+// Iterator for slab scanning; only knows how to parse each object's
+// size and move to the next object.
+struct Headiter {
+  explicit Headiter(void* p) : raw_((char*)p) {}
+  Headiter& operator=(void* p) {
+    raw_ = (char*)p;
+    return *this;
+  }
+  Headiter& operator++() {
+    assert(h_->size() > 0);
+    raw_ += MemoryManager::smartSizeClass(h_->size());
+    return *this;
+  }
+  Header& operator*() { return *h_; }
+  Header* operator->() { return h_; }
+  bool operator<(Headiter i) const { return raw_ < i.raw_; }
+  bool operator==(Headiter i) const { return raw_ == i.raw_; }
+private:
+  union {
+    Header* h_;
+    char* raw_;
+  };
+};
+
+// Reverse lookup table from size class index back to block size.
+struct SizeTable {
+  size_t table[kNumSmartSizes];
+  SizeTable() {
+#define SMART_SIZE(i,d,s) table[i] = s;
+    SMART_SIZES
+#undef SMART_SIZE
+    assert(table[27] == 4096 && table[28] == 0);
+    // pick up where the macros left off
+    auto i = 28;
+    auto s = 4096;
+    auto d = s/4;
+    for (; i < kNumSmartSizes; d *= 2) {
+      // each power of two size has 4 linear spaced size classes
+      table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+      if (i < kNumSmartSizes) table[i++] = (s += d);
+    }
+  }
+  static_assert(LG_SMART_SIZES_PER_DOUBLING == 2, "");
+};
+SizeTable s_index2size;
+
+}
+
+// Iterator over all the slabs and bigs
+struct BigHeap::iterator {
+  enum State { Slabs, Bigs };
+  using slab_iter = std::vector<MemBlock>::iterator;
+  using big_iter  = std::vector<BigNode*>::iterator;
+  explicit iterator(slab_iter slab, BigHeap& heap)
+    : m_state{Slabs}
+    , m_slab{slab}
+    , m_header{slab->ptr} // should never be at end.
+    , m_heap(heap)
+  {}
+  explicit iterator(big_iter big, BigHeap& heap)
+    : m_state{Bigs}
+    , m_big{big}
+    , m_header{big != heap.m_bigs.end() ? *big : nullptr}
+    , m_heap(heap)
+  {}
+  bool operator==(const iterator& it) const {
+    if (m_state != it.m_state) return false;
+    switch (m_state) {
+      case Slabs: return m_slab == it.m_slab && m_header == it.m_header;
+      case Bigs: return m_big == it.m_big;
+    };
+    not_reached();
+  }
+  bool operator!=(const iterator& it) const {
+    return !(*this == it);
+  }
+  iterator& operator++() {
+    switch (m_state) {
+      case Slabs: {
+        auto end = Headiter{static_cast<char*>(m_slab->ptr) + m_slab->size};
+        if (++m_header < end) {
+          return *this;
+        }
+        if (++m_slab != m_heap.m_slabs.end()) {
+          m_header = m_slab->ptr;
+          return *this;
+        }
+        m_state = Bigs;
+        m_big = m_heap.m_bigs.begin();
+        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
+        return *this;
+      }
+      case Bigs:
+        ++m_big;
+        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
+        return *this;
+    }
+    not_reached();
+  }
+  Header& operator*() { return *m_header; }
+  Header* operator->() { return &*m_header; }
+ private:
+  State m_state;
+  union {
+    slab_iter m_slab;
+    big_iter m_big;
+  };
+  Headiter m_header;
+  BigHeap& m_heap;
+};
+
+// initialize a Hole header in the unused memory between m_front and m_limit
+void MemoryManager::initHole() {
+  if ((char*)m_front < (char*)m_limit) {
+    auto hdr = static_cast<FreeNode*>(m_front);
+    hdr->kind = HeaderKind::Hole;
+    hdr->size = (char*)m_limit - (char*)m_front;
+  }
+}
+
+// initialize the FreeNode header on all freelist entries.
+void MemoryManager::initFree() {
+  for (size_t i = 0; i < kNumSmartSizes; i++) {
+    auto size = s_index2size.table[i];
+    for (auto n = m_freelists[i].head; n; n = n->next) {
+      n->kind_size = HeaderKind::Free<<24 | size<<32;
+    }
+  }
+}
+
+BigHeap::iterator MemoryManager::begin() {
+  initHole();
+  initFree();
+  return m_heap.begin();
+}
+
+BigHeap::iterator MemoryManager::end() {
+  return m_heap.end();
+}
+
+// test iterating objects in slabs
+void MemoryManager::checkHeap() {
+  size_t bytes=0;
+  std::vector<Header*> hdrs;
+  std::unordered_set<FreeNode*> free_blocks;
+  size_t counts[NumHeaderKinds];
+  for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
+  for (auto h = begin(), lim = end(); h != lim; ++h) {
+    hdrs.push_back(&*h);
+    TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
+    bytes += h->size();
+    counts[(int)h->kind_]++;
+    if (h->kind_ == HeaderKind::Debug) {
+      // the next block's parsed size should agree with DebugHeader
+      auto h2 = h; ++h2;
+      if (h2 != lim) {
+        assert(h2->kind_ != HeaderKind::Debug);
+        assert(h->debug_.returnedCap ==
+               MemoryManager::smartSizeClass(h2->size()));
+      }
+    } else if (h->kind_ == HeaderKind::Free) {
+      free_blocks.insert(&h->free_);
+    }
+  }
+  // make sure everything in a free list was scanned exactly once.
+  for (size_t i = 0; i < kNumSmartSizes; i++) {
+    for (auto n = m_freelists[i].head; n; n = n->next) {
+      assert(free_blocks.find(n) != free_blocks.end());
+      free_blocks.erase(n);
+    }
+  }
+  assert(free_blocks.empty());
+  TRACE(1, "checkHeap: %lu objects %lu bytes\n", hdrs.size(), bytes);
+  TRACE(1, "checkHeap-types: ");
+  for (unsigned i = 0; i < NumHeaderKinds; ++i) {
+    TRACE(1, "%s %lu%s", header_names[i], counts[i],
+          (i + 1 < NumHeaderKinds ? " " : "\n"));
+  }
 }
 
 /*
@@ -558,18 +814,19 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
-  void* slab = safe_malloc(kSlabSize);
-  assert((uintptr_t(slab) & kSmartSizeAlignMask) == 0);
-  JEMALLOC_STATS_ADJUST(&m_stats, kSlabSize);
-  m_stats.alloc += kSlabSize;
+  initHole(); // enable parsing the leftover space in the old slab
+  if (debug) checkHeap();
+  auto slab = m_heap.allocSlab(kSlabSize);
+  assert((uintptr_t(slab.ptr) & kSmartSizeAlignMask) == 0);
+  m_stats.borrow(slab.size);
+  m_stats.alloc += slab.size;
   if (m_stats.alloc > m_stats.peakAlloc) {
     m_stats.peakAlloc = m_stats.alloc;
   }
-  m_slabs.push_back(slab);
-  m_front = (void*)(uintptr_t(slab) + nbytes);
-  m_limit = (void*)(uintptr_t(slab) + kSlabSize);
-  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab, m_limit);
-  return slab;
+  m_front = (void*)(uintptr_t(slab.ptr) + nbytes);
+  m_limit = (void*)(uintptr_t(slab.ptr) + slab.size);
+  FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab.ptr, m_limit);
+  return slab.ptr;
 }
 
 /*
@@ -582,10 +839,13 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   assert((nbytes & kSmartSizeAlignMask) == 0);
   assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
 
-  if (UNLIKELY(m_profctx.flag)) {
+  if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
-    return smartMallocSizeBig<false>(nbytes).first;
+    // smartMallocSizeBig already wraps its allocation in a debug header, but
+    // the caller will try to do it again, so we need to adjust this pointer
+    // before returning it.
+    return ((char*)smartMallocSizeBig<false>(nbytes).ptr) - kDebugExtraSize;
   }
 
   void* ptr = m_front;
@@ -597,7 +857,6 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
       ptr = newSlab(nbytes);
     }
   }
-
   // Preallocate more of the same in order to amortize entry into this method.
   unsigned nPrealloc;
   if (nbytes * kSmartPreallocCountLimit <= kSmartPreallocBytesLimit) {
@@ -617,13 +876,13 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
        p = (void*)(uintptr_t(p) - nbytes)) {
     auto usable = debugRemoveExtra(nbytes);
     auto ptr = debugPostAllocate(p, usable, usable);
-    auto p2 = debugPreFree(ptr, usable, usable);
-    m_freelists[index].push(p2);
+    debugPreFree(ptr, usable, usable);
+    m_freelists[index].push(ptr, usable);
   }
   return ptr;
 }
 
-inline void* MemoryManager::smartEnlist(BigNode* n) {
+inline void MemoryManager::updateBigStats() {
   // If we are using jemalloc, it is keeping track of allocations outside of
   // the slabs and the usage so we should force this after an allocation that
   // was too large for one of the existing slabs. When we're not using jemalloc
@@ -631,80 +890,55 @@ inline void* MemoryManager::smartEnlist(BigNode* n) {
   if (use_jemalloc || UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
-  // link after m_bigs
-  auto next = m_bigs.next;
-  n->next = next;
-  n->prev = &m_bigs;
-  next->prev = m_bigs.next = n;
-  assert(((MallocNode*)n)->small.padbytes > kMaxSmartSize);
-  return n + 1;
 }
 
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto const n = static_cast<BigNode*>(
-    safe_malloc(nbytes + sizeof(BigNode))
-  );
-  return smartEnlist(n);
+  auto block = m_heap.allocBig(nbytes);
+  updateBigStats();
+  return block.ptr;
 }
 
+template NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig<true>(size_t);
+template NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
+
+template<bool callerSavesActualSize> NEVER_INLINE
+MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
+  auto block = m_heap.allocBig(debugAddExtra(bytes));
+  auto szOut = debugRemoveExtra(block.size);
 #ifdef USE_JEMALLOC
-template
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper<true>(
-    void*&, size_t&, size_t);
-template
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper<false>(
-    void*&, size_t&, size_t);
-
-template<bool callerSavesActualSize>
-NEVER_INLINE
-void* MemoryManager::smartMallocSizeBigHelper(void*& ptr,
-                                              size_t& szOut,
-                                              size_t bytes) {
-  ptr = mallocx(debugAddExtra(bytes + sizeof(BigNode)), 0);
-  szOut = debugRemoveExtra(sallocx(ptr, 0) - sizeof(BigNode));
-
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
   m_stats.usage += int64_t(delta);
   // Adjust jemalloc otherwise we'll double count the direct allocation.
-  JEMALLOC_STATS_ADJUST(&m_stats, delta);
-
-  return debugPostAllocate(
-    smartEnlist(static_cast<BigNode*>(ptr)),
-    bytes,
-    szOut
-  );
-}
+  m_stats.borrow(delta);
+#else
+  m_stats.usage += bytes;
 #endif
+  updateBigStats();
+  auto ptrOut = debugPostAllocate(block.ptr, bytes, szOut);
+  FTRACE(3, "smartMallocSizeBig: {} ({} requested, {} usable)\n",
+         ptrOut, bytes, szOut);
+  return {ptrOut, szOut};
+}
 
 NEVER_INLINE
 void* MemoryManager::smartCallocBig(size_t totalbytes) {
   assert(totalbytes > 0);
-  auto const n = static_cast<BigNode*>(
-    safe_calloc(totalbytes + sizeof(BigNode), 1)
-  );
-  return smartEnlist(n);
-}
-
-NEVER_INLINE
-void MemoryManager::smartFreeBig(BigNode* n) {
-  auto next = n->next;
-  auto prev = n->prev;
-  next->prev = prev;
-  prev->next = next;
-  free(n);
+  auto block = m_heap.callocBig(totalbytes);
+  updateBigStats();
+  return block.ptr;
 }
 
 // smart_malloc api entry points, with support for malloc/free corner cases.
 
 void* smart_malloc(size_t nbytes) {
   auto& mm = MM();
-  auto const size = mm.debugAddExtra(std::max(nbytes, size_t(1)));
-  return mm.debugPostAllocate(mm.smartMalloc(size), 0, 0);
+  auto const size = std::max(nbytes, size_t(1));
+  return mm.smartMalloc(size);
 }
 
 void* smart_calloc(size_t count, size_t nbytes) {
@@ -713,10 +947,7 @@ void* smart_calloc(size_t count, size_t nbytes) {
   if (totalBytes <= kMaxSmartSize) {
     return memset(smart_malloc(totalBytes), 0, totalBytes);
   }
-  auto const withExtra = mm.debugAddExtra(totalBytes);
-  return mm.debugPostAllocate(
-    mm.smartCallocBig(withExtra), 0, 0
-  );
+  return mm.smartCallocBig(totalBytes);
 }
 
 void* smart_realloc(void* ptr, size_t nbytes) {
@@ -730,15 +961,13 @@ void* smart_realloc(void* ptr, size_t nbytes) {
 }
 
 void smart_free(void* ptr) {
-  if (!ptr) return;
-  auto& mm = MM();
-  mm.smartFree(mm.debugPreFree(ptr, 0, 0));
+  if (ptr) MM().smartFree(ptr);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void MemoryManager::addNativeObject(NativeNode* node) {
-  if (debug) for (UNUSED auto n : m_natives) assert(n != node);
+  if (debug) for (DEBUG_ONLY auto n : m_natives) assert(n != node);
   node->sweep_index = m_natives.size();
   m_natives.push_back(node);
 }
@@ -777,6 +1006,7 @@ void* MemoryManager::debugPostAllocate(void* p,
                                        size_t returnedCap) {
   auto const header = static_cast<DebugHeader*>(p);
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
+  header->kind = HeaderKind::Debug;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
@@ -788,7 +1018,6 @@ void* MemoryManager::debugPreFree(void* p,
   auto const header = reinterpret_cast<DebugHeader*>(uintptr_t(p) -
                                                      kDebugExtraSize);
   assert(checkPreFree(header, bytes, userSpecifiedBytes));
-  header->allocatedMagic = 0; // will get a freelist pointer shortly
   header->requestedSize = DebugHeader::kFreedMagic;
   memset(p, kSmartFreeFill, bytes);
   return header;
@@ -800,26 +1029,16 @@ bool MemoryManager::checkPreFree(DebugHeader* p,
                                  size_t bytes,
                                  size_t userSpecifiedBytes) const {
   assert(debug);
-
   assert(p->allocatedMagic == DebugHeader::kAllocatedMagic);
 
   if (userSpecifiedBytes != 0) {
     // For size-specified frees, the size they report when freeing
-    // must be either what they asked for, or what we returned as the
-    // actual capacity;
-    assert(userSpecifiedBytes == p->requestedSize ||
-           userSpecifiedBytes == p->returnedCap);
+    // must be between the requested size and the actual capacity.
+    assert(userSpecifiedBytes >= p->requestedSize &&
+           userSpecifiedBytes <= p->returnedCap);
   }
-  if (bytes != 0 && bytes <= kMaxSmartSize) {
-    auto const ptrInt = reinterpret_cast<uintptr_t>(p);
-    DEBUG_ONLY auto it = std::find_if(
-      std::begin(m_slabs), std::end(m_slabs),
-      [&] (void* base) {
-        auto const baseInt = reinterpret_cast<uintptr_t>(base);
-        return ptrInt >= baseInt && ptrInt < baseInt + kSlabSize;
-      }
-    );
-    assert(it != std::end(m_slabs));
+  if (!m_bypassSlabAlloc && bytes != 0 && bytes <= kMaxSmartSize) {
+    assert(m_heap.contains(p));
   }
 
   return true;
@@ -869,6 +1088,7 @@ void MemoryManager::requestInit() {
   auto& profctx = MM().m_profctx;
   assert(!profctx.flag);
 
+  MM().m_bypassSlabAlloc = true;
   profctx = *trigger;
   delete trigger;
 
@@ -913,6 +1133,7 @@ void MemoryManager::requestShutdown() {
           &profctx.prof_active, sizeof(bool));
 #endif
 
+  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
   profctx = ReqProfContext{};
 }
 
@@ -931,5 +1152,100 @@ void* MemoryManager::untrackSlow(void* p) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void BigHeap::reset() {
+  TRACE(1, "BigHeap-reset: slabs %lu bigs %lu\n", m_slabs.size(),
+        m_bigs.size());
+  for (auto slab : m_slabs) {
+    free(slab.ptr);
+  }
+  m_slabs.clear();
+  for (auto n : m_bigs) {
+    free(n);
+  }
+  m_bigs.clear();
+}
+
+void BigHeap::flush() {
+  assert(empty());
+  m_slabs = std::vector<MemBlock>{};
+  m_bigs = std::vector<BigNode*>{};
+}
+
+MemBlock BigHeap::allocSlab(size_t size) {
+  void* slab = safe_malloc(size);
+  m_slabs.push_back({slab, size});
+  return {slab, size};
+}
+
+MemBlock BigHeap::allocBig(size_t bytes) {
+#ifdef USE_JEMALLOC
+  auto n = static_cast<BigNode*>(mallocx(bytes + sizeof(BigNode), 0));
+  auto cap = sallocx(n, 0);
+#else
+  auto cap = bytes + sizeof(BigNode);
+  auto n = static_cast<BigNode*>(safe_malloc(cap));
+#endif
+  enlist(n, cap);
+  return {n + 1, cap - sizeof(BigNode)};
+}
+
+MemBlock BigHeap::callocBig(size_t nbytes) {
+  auto cap = nbytes + sizeof(BigNode);
+  auto const n = static_cast<BigNode*>(safe_calloc(cap, 1));
+  enlist(n, cap);
+  return {n + 1, nbytes};
+}
+
+bool BigHeap::contains(void* ptr) const {
+  auto const ptrInt = reinterpret_cast<uintptr_t>(ptr);
+  auto it = std::find_if(std::begin(m_slabs), std::end(m_slabs),
+    [&] (MemBlock slab) {
+      auto const baseInt = reinterpret_cast<uintptr_t>(slab.ptr);
+      return ptrInt >= baseInt && ptrInt < baseInt + slab.size;
+    }
+  );
+  return it != std::end(m_slabs);
+}
+
+void BigHeap::enlist(BigNode* n, size_t size) {
+  n->nbytes = size;
+  n->kind = HeaderKind::Big;
+  n->index = m_bigs.size();
+  m_bigs.push_back(n);
+}
+
+NEVER_INLINE
+void BigHeap::freeBig(void* ptr) {
+  auto n = static_cast<BigNode*>(ptr) - 1;
+  auto i = n->index;
+  auto last = m_bigs.back();
+  last->index = i;
+  m_bigs[i] = last;
+  m_bigs.pop_back();
+  free(n);
+}
+
+MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
+  // Since we don't know how big it is (i.e. how much data we should memcpy),
+  // we have no choice but to ask malloc to realloc for us.
+  auto const n = static_cast<BigNode*>(ptr) - 1;
+  auto const newNode = static_cast<BigNode*>(
+    safe_realloc(n, newsize + sizeof(BigNode))
+  );
+  if (newNode != n) {
+    m_bigs[newNode->index] = newNode;
+  }
+  return {newNode + 1, newsize};
+}
+
+BigHeap::iterator BigHeap::begin() {
+  if (!m_slabs.empty()) return iterator{m_slabs.begin(), *this};
+  return iterator{m_bigs.begin(), *this};
+}
+
+BigHeap::iterator BigHeap::end() {
+  return iterator{m_bigs.end(), *this};
+}
 
 }

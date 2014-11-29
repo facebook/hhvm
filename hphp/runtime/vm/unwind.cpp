@@ -17,7 +17,7 @@
 
 #include <boost/implicit_cast.hpp>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/complex-types.h"

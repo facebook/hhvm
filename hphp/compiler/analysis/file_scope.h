@@ -67,6 +67,7 @@ public:
     AllowOverride            = 0x04000,// allow override of systemlib or builtin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
+    ContainsAssert           = 0x20000,// contains call to assert()
   };
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;

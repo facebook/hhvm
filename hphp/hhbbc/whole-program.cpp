@@ -21,8 +21,8 @@
 #include <memory>
 #include <set>
 
-#include "folly/Memory.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Memory.h>
+#include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/vm/unit-emitter.h"
 

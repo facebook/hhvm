@@ -20,7 +20,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "folly/Range.h"
+#include <folly/Range.h>
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -37,7 +37,7 @@ struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
 struct LocalStateHook;
-struct FrameState;
+struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -57,11 +57,10 @@ struct FrameState;
  *     DBox(N)      single dst has boxed type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
  *     DParam       single dst has type of the instruction's type parameter
+ *     DParamMayRelax like DParam, except type may relax
  *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
  *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
  *     DBoxPtr      Boxed PtrTo*T
- *     DLdRef       single dst has type of the instruction's type parameter,
- *                  loosened to allow efficient type checks
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
  *     DArrPacked   single dst has a packed array type
@@ -287,9 +286,9 @@ struct MInstrEffects {
   /*
    * MInstrEffects::get is used to allow multiple different consumers to deal
    * with the side effects of vector instructions. It takes an instruction and
-   * a LocalStateHook, and a FrameState, which are defined in frame-state.h.
+   * a LocalStateHook, and a FrameStateMgr, which are defined in frame-state.h.
    */
-  static void get(const IRInstruction*, const FrameState&, LocalStateHook&);
+  static void get(const IRInstruction*, const FrameStateMgr&, LocalStateHook&);
 
   Type baseType;
   bool baseTypeChanged;

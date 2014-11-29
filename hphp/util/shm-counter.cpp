@@ -63,12 +63,12 @@ bool ShmCounters::initialize(bool create, logError_t logError /* = NULL */) {
   int shmid = shmget(SHM_COUNTER_KEY, sizeof(ShmCounters), flags);
   if (shmid == -1) {
     LOG_ERROR("shmget failed: %d\n", errno);
-    exit(-1);
+    return false;
   }
   struct shmid_ds sb;
   if (shmctl(shmid, IPC_STAT, &sb) == -1) {
     LOG_ERROR("shmctl failed: %d\n", errno);
-    exit(-1);
+    return false;
   }
   if (sb.shm_nattch == 0 && !create) {
     LOG_ERROR("no process attached, exiting...\n");
@@ -78,7 +78,7 @@ bool ShmCounters::initialize(bool create, logError_t logError /* = NULL */) {
   s_shmCounters = (ShmCounters *)shmat(shmid, 0, 0);
   if (s_shmCounters == (void *)-1) {
     LOG_ERROR("shmat failed: %d\n", errno);
-    exit(-1);
+    return false;
   }
   if (create) new (s_shmCounters) ShmCounters();
   ShmCounters::created = create;

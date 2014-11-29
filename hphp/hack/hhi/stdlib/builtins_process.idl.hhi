@@ -34,3 +34,11 @@ function proc_get_status($process) { }
 function proc_nice($increment) { }
 function escapeshellarg($arg) { }
 function escapeshellcmd($command) { }
+
+const SIGALRM = 0;
+const SIGHUP = 0;
+const SIGINT = 0;
+const SIGKILL = 0;
+const SIGSEGV = 0;
+const SIGTERM = 0;
+const SIGQUIT = 0;

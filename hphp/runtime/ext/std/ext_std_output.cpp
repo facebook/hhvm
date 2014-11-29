@@ -35,11 +35,17 @@ const int64_t k_PHP_OUTPUT_HANDLER_CLEAN = 2;
 const int64_t k_PHP_OUTPUT_HANDLER_FLUSH = 4;
 const int64_t k_PHP_OUTPUT_HANDLER_END = 8;
 const int64_t k_PHP_OUTPUT_HANDLER_FINAL = 8;
+const int64_t k_PHP_OUTPUT_HANDLER_CLEANABLE = 16;
+const int64_t k_PHP_OUTPUT_HANDLER_FLUSHABLE = 32;
+const int64_t k_PHP_OUTPUT_HANDLER_REMOVABLE = 64;
+const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS =
+  k_PHP_OUTPUT_HANDLER_CLEANABLE | k_PHP_OUTPUT_HANDLER_FLUSHABLE |
+  k_PHP_OUTPUT_HANDLER_REMOVABLE;
 
 bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
                              int chunk_size /* = 0 */,
-                             bool erase /* = true */) {
-  // ignoring chunk_size and erase
+                             int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
+  // ignoring flags for now
 
   if (!callback.isNull()) {
     CallCtx ctx;
@@ -48,7 +54,7 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
       return false;
     }
   }
-  g_context->obStart(callback);
+  g_context->obStart(callback, chunk_size);
   return true;
 }
 void HHVM_FUNCTION(ob_clean) {
@@ -278,6 +284,10 @@ void StandardExtension::initOutput() {
   INTCONST(PHP_OUTPUT_HANDLER_FLUSH);
   INTCONST(PHP_OUTPUT_HANDLER_END);
   INTCONST(PHP_OUTPUT_HANDLER_FINAL);
+  INTCONST(PHP_OUTPUT_HANDLER_CLEANABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_FLUSHABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_REMOVABLE);
+  INTCONST(PHP_OUTPUT_HANDLER_STDFLAGS);
 #undef INTCONST
 
   loadSystemlib("std_output");

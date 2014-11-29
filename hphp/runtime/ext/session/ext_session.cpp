@@ -26,7 +26,7 @@
 #include <dirent.h>
 #include <vector>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -1783,7 +1783,7 @@ static bool HHVM_FUNCTION(session_start) {
 
   php_session_cache_limiter();
 
-  if (mod_is_open() && PS(gc_probability) > 1) {
+  if (mod_is_open() && PS(gc_probability) > 0) {
     int nrdels = -1;
 
     int nrand = (int) ((float) PS(gc_divisor) * math_combined_lcg());

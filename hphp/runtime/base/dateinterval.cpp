@@ -25,7 +25,7 @@
 
 namespace HPHP {
 
-IMPLEMENT_OBJECT_ALLOCATION(DateInterval)
+IMPLEMENT_RESOURCE_ALLOCATION(DateInterval)
 ///////////////////////////////////////////////////////////////////////////////
 
 DateInterval::DateInterval() {

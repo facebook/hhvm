@@ -83,9 +83,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
-#include "folly/Conv.h"
-#include "folly/Range.h"
-#include "folly/String.h"
+#include <folly/Conv.h>
+#include <folly/Range.h>
+#include <folly/String.h>
 
 #include "hphp/util/md5.h"
 

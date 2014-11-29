@@ -62,6 +62,7 @@ end = struct
 
   (* This code is only executed when the options --check is NOT present *)
   let go root init_fun =
+    let t = Unix.gettimeofday () in
     grab_lock root;
     init_message();
     grab_init_lock root;
@@ -70,6 +71,8 @@ end = struct
     let env = init_fun () in
     release_init_lock root;
     ready_message ();
+    let t' = Unix.gettimeofday () in
+    Printf.printf "Took %f seconds to initialize.\n" (t' -. t);
     env
 end
 
@@ -100,7 +103,7 @@ end = struct
       ServerHealth.check();
       ServerPeriodical.call_before_sleeping();
       let has_client = sleep_and_check socket in
-      let updates = ServerDfind.get_updates genv root in
+      let updates = ServerDfind.get_updates root in
       let updates = Relative_path.relativize_set Relative_path.Root updates in
       let updates = Relative_path.Set.filter (Program.filter_update genv !env) updates in
       env := Program.recheck genv !env updates;
@@ -127,8 +130,9 @@ end = struct
         Program.unmarshal chan;
         close_in_no_fail filename chan;
         SharedMem.load (filename^".sharedmem");
+        EventLogger.load_read_end filename;
         let to_recheck =
-          rev_rev_map (Relative_path.create Relative_path.Root) to_recheck
+          rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
         in
         let updates = List.fold_left
           (fun acc update -> Relative_path.Set.add update acc)
@@ -136,7 +140,9 @@ end = struct
           to_recheck in
         let updates =
           Relative_path.Set.filter (Program.filter_update genv env) updates in
-        Program.recheck genv env updates
+        let env = Program.recheck genv env updates in
+        EventLogger.load_recheck_end ();
+        env
 
   (* The main entry point of the daemon
   * the only trick to understand here, is that env.modified is the set

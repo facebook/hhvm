@@ -15,10 +15,9 @@ module CE = Common_exns
 
 include Parser_hack
 
-let parse_or_die src =
-  let content = cat (Relative_path.to_absolute src) in
-  Pos.file := src;
+let parse_or_die file =
+  let content = cat (Relative_path.to_absolute file) in
   let errors, res = Errors.do_
-    (fun () -> Parser_hack.program ~elaborate_namespaces:false content) in
+    (fun () -> Parser_hack.program file ~elaborate_namespaces:false content) in
   if (List.not_empty errors) then raise (CE.ParseErrors errors);
   res

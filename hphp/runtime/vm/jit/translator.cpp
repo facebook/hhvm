@@ -27,8 +27,8 @@
 #include <utility>
 #include <vector>
 
-#include "folly/Conv.h"
-#include "folly/MapUtil.h"
+#include <folly/Conv.h>
+#include <folly/MapUtil.h>
 
 #include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
@@ -1224,13 +1224,17 @@ const StaticString s_extract("extract");
 const StaticString s_extractNative("__SystemLib\\extract");
 const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
+const StaticString s_assert("assert");
+const StaticString s_assertNative("__SystemLib\\assert");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
   if (fname) {
     return fname->isame(s_extract.get()) ||
            fname->isame(s_extractNative.get()) ||
            fname->isame(s_parse_str.get()) ||
-           fname->isame(s_parse_strNative.get());
+           fname->isame(s_parse_strNative.get()) ||
+           fname->isame(s_assert.get()) ||
+           fname->isame(s_assertNative.get());
   }
 
   return false;
@@ -1244,13 +1248,10 @@ bool builtinFuncDestroysLocals(const Func* callee) {
 
 bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
-  auto locals = caller->localNames();
-  for (int i = 0; i < caller->numNamedLocals(); ++i) {
-    if (locals[i]->same(s_http_response_header.get()) ||
-        locals[i]->same(s_php_errormsg.get())) {
-      return true;
-    }
-  }
+  // We don't handle these two cases, because we don't compile functions
+  // containing them:
+  assert(caller->lookupVarId(s_php_errormsg.get()) == -1);
+  assert(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
@@ -1654,6 +1655,20 @@ Translator::translateRegion(const RegionDesc& region,
         ht.emitRB(Trace::RBTypeTraceletBody, sk);
       }
 
+      // In the entry block, hhbc-translator gets a chance to emit some code
+      // immediately after the initial guards/checks on the first instruction.
+      if (isEntry && i == 0) {
+        switch (arch()) {
+        case Arch::X64:
+          ht.prepareEntry();
+          break;
+        case Arch::ARM:
+          // Don't do this for ARM, because it can lead to interpOne on the
+          // first SrcKey in a translation, which isn't allowed.
+          break;
+        }
+      }
+
       // Update the current funcd, if we have a new one.
       if (knownFuncs.hasNext(sk)) {
         topFunc = knownFuncs.next();
@@ -1684,8 +1699,8 @@ Translator::translateRegion(const RegionDesc& region,
       std::vector<DynLocation> dynLocs;
       dynLocs.reserve(inputInfos.size());
       auto newDynLoc = [&] (const InputInfo& ii) {
-        dynLocs.emplace_back(ii.loc, ht.typeFromLocation(ii.loc));
-        FTRACE(2, "typeFromLocation: {} -> {}\n",
+        dynLocs.emplace_back(ii.loc, ht.predictedTypeFromLocation(ii.loc));
+        FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
                ii.loc.pretty(), dynLocs.back().rtt);
         return &dynLocs.back();
       };
@@ -1699,17 +1714,15 @@ Translator::translateRegion(const RegionDesc& region,
       }
 
       /*
-       * Check for a type prediction. Put it in the
-       * NormalizedInstruction so the emit* method can use it if
-       * needed.  In PGO mode, we don't really need the values coming
-       * from the interpreter type profiler.  TransKind::Profile
-       * translations end whenever there's a side-exit, and type
-       * predictions incur side-exits.  And when we stitch multiple
-       * TransKind::Profile translations together to form a larger
-       * region (in TransKind::Optimize mode), the guard for the top
-       * of the stack essentially does the role of type prediction.
-       * And, if the value is also inferred, then the guard is
-       * omitted.
+       * Check for a type prediction. Put it in the NormalizedInstruction so
+       * the emit* method can use it if needed.  In PGO mode, we don't really
+       * need the values coming from the interpreter type profiler.
+       * TransKind::Profile translations end whenever there's a side-exit, and
+       * type predictions incur side-exits.  And when we stitch multiple
+       * TransKind::Profile translations together to form a larger region (in
+       * TransKind::Optimize mode), the guard for the top of the stack
+       * essentially does the role of type prediction.  And, if the value is
+       * also inferred, then the guard is omitted.
        */
       auto const doPrediction = mode() == TransKind::Live &&
                                   outputIsPredicted(inst);

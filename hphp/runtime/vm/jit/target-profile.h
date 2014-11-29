@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_TARGET_PROFILE_H_
 #define incl_HPHP_TARGET_PROFILE_H_
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -131,7 +131,7 @@ private:
       );
 
     case TransKind::Optimize:
-      if (marker.m_profTransID != kInvalidTransID) {
+      if (isValidTransID(marker.m_profTransID)) {
         return RDS::attach<T>(
           RDS::Profile {
             marker.m_profTransID, // transId from profiling translation

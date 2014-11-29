@@ -106,7 +106,11 @@ struct CodeGenFixups {
     m_tletFrozen = frozen;
   }
 
-  void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process(GrowableVector<IncomingBranch>* inProgressTailBranches) {
+    process_only(inProgressTailBranches);
+    clear();
+  }
   bool empty() const;
   void clear();
 };
@@ -126,15 +130,15 @@ struct RelocationInfo {
     return adjustedAddressBefore(const_cast<TCA>(addr));
   }
   void rewind(TCA start, TCA end);
-  void markAddressImmediates(std::set<TCA> ai) {
+  void markAddressImmediates(const std::set<TCA>& ai) {
     m_addressImmediates.insert(ai.begin(), ai.end());
   }
   bool isAddressImmediate(TCA ip) {
     return m_addressImmediates.count(ip);
   }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
-  RangeVec::iterator begin() { return m_dstRanges.begin(); }
-  RangeVec::iterator end() { return m_dstRanges.end(); }
+  const RangeVec& srcRanges() { return m_srcRanges; }
+  const RangeVec& dstRanges() { return m_dstRanges; }
  private:
   RangeVec m_srcRanges;
   RangeVec m_dstRanges;
@@ -206,7 +210,7 @@ public:
    * Handlers for function prologues.
    */
   TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool ignoreTCLimit = false);
+                      bool forRegeneratePrologue = false);
   TCA getCallArrayPrologue(Func* func);
   void smashPrologueGuards(TCA* prologues, int numPrologues, const Func* func);
 
@@ -279,6 +283,17 @@ public:
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
   /*
+   * Set/get if we're going to try using LLVM as the codegen backend for the
+   * current translation.
+   */
+  void setUseLLVM(bool llvm) {
+    m_useLLVM = llvm;
+  }
+  bool useLLVM() const {
+    return m_useLLVM;
+  }
+
+  /*
    * Dump translation cache.  True if successful.
    */
   bool dumpTC(bool ignoreLease = false);
@@ -319,7 +334,8 @@ private:
                       bool& smashed);
   bool handleServiceRequest(TReqInfo&, TCA& start, SrcKey& sk);
 
-  bool shouldTranslate() const;
+  bool shouldTranslate(const Func*) const;
+  bool shouldTranslateNoSizeLimit(const Func*) const;
 
   TCA getTopTranslation(SrcKey sk) {
     return m_tx.getSrcRec(sk)->getTopTranslation();
@@ -331,7 +347,7 @@ private:
   TCA createTranslation(const TranslArgs& args);
   TCA retranslate(const TranslArgs& args);
   TCA translate(const TranslArgs& args);
-  void translateWork(const TranslArgs& args);
+  TCA translateWork(const TranslArgs& args);
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
@@ -358,6 +374,7 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
+  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;

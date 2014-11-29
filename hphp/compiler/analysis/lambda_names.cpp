@@ -17,7 +17,7 @@
 
 #include <set>
 
-#include "folly/ScopeGuard.h"
+#include <folly/ScopeGuard.h>
 
 #include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"

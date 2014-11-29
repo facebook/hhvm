@@ -1,6 +1,6 @@
 File "array_map5.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
-File "builtins.hhi", line 60, characters 10-18:
+File "builtins.hhi", line 56, characters 10-18:
 This is an object of type Container
 File "array_map5.php", line 4, characters 3-22:
 It is incompatible with a function

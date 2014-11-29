@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/back-end.h"

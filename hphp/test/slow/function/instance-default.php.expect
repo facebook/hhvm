@@ -1,0 +1,6 @@
+val = object(stdClass)#1 (2) {
+  [1]=>
+  int(2)
+  [3]=>
+  int(4)
+}

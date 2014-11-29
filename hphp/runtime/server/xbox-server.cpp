@@ -346,7 +346,7 @@ public:
 private:
   XboxTransport *m_job;
 };
-IMPLEMENT_OBJECT_ALLOCATION(XboxTask)
+IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 

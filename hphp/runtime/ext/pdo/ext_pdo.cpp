@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/macros.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/system/systemlib.h"
@@ -2849,7 +2848,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
   bool error = false;
 
   data->m_stmt->fetch.clsname = class_name;
-  if (class_name.isNull()) {
+  if (class_name.empty()) {
     data->m_stmt->fetch.clsname = "stdclass";
   }
   if (!HHVM_FN(class_exists)(data->m_stmt->fetch.clsname)) {

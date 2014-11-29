@@ -1,5 +1,6 @@
 Unchecked: 1
 Partial: 1
 Checked: 0
-Score: 0.250000
+Checked / Total: 0.000000
+(Checked + Partial * 0.5) / Total: 0.250000
 No errors

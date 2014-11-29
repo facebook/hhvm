@@ -16,7 +16,7 @@
 
 #include <array>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -108,51 +108,18 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
   });
 }
 
-bool isUnguardedLoad(IRInstruction* inst) {
-  if (!inst->hasDst() || !inst->dst()) return false;
-  Opcode opc = inst->op();
-  SSATmp* dst = inst->dst();
-  Type type = dst->type();
-  return ((opc == LdStack && (type == Type::Gen || type == Type::Cell)) ||
-          (opc == LdLoc && type == Type::Gen) ||
-          (opc == LdRef && type == Type::Cell) ||
-          (opc == LdMem && type == Type::Cell &&
-           inst->src(0)->type() == Type::PtrToCell));
-}
-
 // removeUnreachable erases unreachable blocks from unit, and returns
 // a sorted list of the remaining blocks.
 BlockList prepareBlocks(IRUnit& unit) {
   FTRACE(1, "RemoveUnreachable:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "RemoveUnreachable:^^^^^^^^^^^^^^^^^^^^\n"); };
 
-  BlockList blocks = rpoSortCfg(unit);
-  bool needsResort = false;
+  auto const blocks = rpoSortCfg(unit);
 
-  // 1. simplify unguarded loads to remove unnecssary branches, and
-  //    perform copy propagation on every instruction. Targets that become
-  //    unreachable from this pass will be eliminated in step 2 below.
+  // 1. perform copy propagation on every instruction
   for (auto block : blocks) {
     for (auto& inst : *block) {
       copyProp(&inst);
-    }
-    auto inst = &block->back();
-    // if this is a load that does not generate a guard, then get rid
-    // of its label so that its not an essential control-flow
-    // instruction
-    if (isUnguardedLoad(inst) && inst->taken()) {
-      // LdStack and LdLoc instructions that produce generic types
-      // and LdStack instruction that produce Cell types will not
-      // generate guards, so remove the label from this instruction so
-      // that it's no longer an essential control-flow instruction
-      ITRACE(2, "removing taken branch of unguarded load {}\n",
-             *inst);
-      inst->setTaken(nullptr);
-      needsResort = true;
-      if (inst->next()) {
-        block->push_back(unit.gen(Jmp, inst->marker(), inst->next()));
-        inst->setNext(nullptr);
-      }
     }
   }
 
@@ -164,7 +131,6 @@ BlockList prepareBlocks(IRUnit& unit) {
   //    instructions.
   if (needsReflow) reflowTypes(unit);
 
-  if (needsResort) blocks = rpoSortCfg(unit);
   return blocks;
 }
 

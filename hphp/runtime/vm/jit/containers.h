@@ -20,7 +20,6 @@
 #include <deque>
 #include <functional>
 #include <list>
-#include <map>
 #include <memory>
 #include <queue>
 #include <stack>
@@ -32,17 +31,52 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 
-namespace HPHP {
-namespace jit {
+#include "hphp/util/sparse-id-containers.h"
+
+namespace HPHP { namespace jit {
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Create some short-hand type aliases for sparse-id-containers using pointers
+ * to IR datastructures, where the ids are extracted from pointer types
+ * (IRInstruction* and SSATmp*).
+ */
+
+namespace jit_containers_detail {
+
+template<class T>
+struct idptr_extract {
+  auto operator()(T t) const -> decltype(t->id()) { return t->id(); }
+};
+
+}
+
+template<class T>
+using sparse_idptr_set = sparse_id_set<
+  uint32_t,
+  const T*,
+  jit_containers_detail::idptr_extract<const T*>
+>;
+
+template<class K, class V>
+using sparse_idptr_map = sparse_id_map<
+  uint32_t,
+  V,
+  const K*,
+  jit_containers_detail::idptr_extract<const K*>
+>;
+
+//////////////////////////////////////////////////////////////////////
 
 template<class T>
 using vector = std::vector<T>;
 
 template <class T, class Container = std::deque<T>>
-using stack = std::stack<T, Container>;
+using stack = std::stack<T,Container>;
 
 template <class T, class Compare = std::less<T>>
-using priority_queue = std::priority_queue<T, vector<T>, Compare>;
+using priority_queue = std::priority_queue<T,vector<T>,Compare>;
 
 template <class T>
 using list = std::list<T>;
@@ -84,6 +118,8 @@ template<class T> void destroy(T* t) {
   delete t;
 }
 
-}
-}
+//////////////////////////////////////////////////////////////////////
+
+}}
+
 #endif

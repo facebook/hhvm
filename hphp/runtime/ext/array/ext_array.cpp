@@ -251,8 +251,8 @@ Variant HHVM_FUNCTION(array_fill,
                       int start_index,
                       int num,
                       const Variant& value) {
-  if (num <= 0) {
-    throw_invalid_argument("num: [non-positive]");
+  if (num < 0) {
+    throw_invalid_argument("Number of elements can't be negative");
     return false;
   }
 

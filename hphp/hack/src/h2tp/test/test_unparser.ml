@@ -64,13 +64,19 @@ let parse_options () =
     | _ -> ();
   (src, !dest)
 
+let try_dump_unparsed ast =
+  try
+    dn (Unparsed.dump (Unparser.unparse_internal ast));
+    ()
+  with _ -> ()
+
 let _ =
   try
     let (src, dest) = parse_options () in
     SharedMem.init ();
     let src = Relative_path.create Relative_path.Dummy src in
     let {Parser_hack.ast; _} = Parser_hack.parse_or_die src in
-    if !debug then dn (Unparsed.dump (Unparser.unparse_internal ast));
+    if !debug then try_dump_unparsed ast;
     if !debug then dn (Debug.dump_ast (Ast.AProgram ast));
 
     (*
@@ -82,7 +88,7 @@ let _ =
               then Erase_types.map ast
               else ast in
 
-    let unparsed = Unparser.unparse !output_file_type ast in
+    let unparsed = Unparser.unparse !output_file_type src ast in
 
     match dest with
     | Some f -> Sys.write_file unparsed f

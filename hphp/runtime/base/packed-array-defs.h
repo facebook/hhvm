@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_PACKED_ARRAY_DEFS_H_
 #define incl_HPHP_PACKED_ARRAY_DEFS_H_
 
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
@@ -47,6 +48,12 @@ ALWAYS_INLINE
 ptrdiff_t PackedArray::entriesOffset() {
   return reinterpret_cast<ptrdiff_t>(
     packedData(reinterpret_cast<ArrayData*>(0x0)));
+}
+
+ALWAYS_INLINE
+size_t PackedArray::heapSize(const ArrayData* ad) {
+  auto cap = packedCodeToCap(ad->m_packedCapCode);
+  return sizeof(ArrayData) + sizeof(TypedValue) * cap;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -10,3 +10,6 @@ echo password_hash("rasmusledorf", PASSWORD_BCRYPT,
   ["cost" => 7, "salt" => "usesomesillystringforsalt"])."\n";
 echo password_hash("test", PASSWORD_BCRYPT,
   ["salt" => "123456789012345678901" . chr(0)])."\n";
+
+echo password_hash(null, PASSWORD_BCRYPT,
+                   array("salt" => "1234567890123456789012345678901234567890"));

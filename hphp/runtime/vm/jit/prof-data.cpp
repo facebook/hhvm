@@ -19,7 +19,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "folly/MapUtil.h"
+#include <folly/MapUtil.h>
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -198,7 +198,7 @@ uint32_t ProfData::numTrans() const {
 }
 
 TransID ProfData::curTransID() const {
-  return numTrans();
+  return static_cast<TransID>(numTrans());
 }
 
 bool ProfData::hasTransRec(TransID id) const {

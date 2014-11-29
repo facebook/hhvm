@@ -25,20 +25,28 @@
  *    read-only mode with all the workers.
  *    The master stores, the workers read.
  *    Only concurrent reads allowed. No concurrent write/read and write/write.
+ *    There are a few different OCaml modules that act as interfaces to this
+ *    global storage. They all use the same area of memory, so only one can be
+ *    active at any one time. The first word indicates the size of the global
+ *    storage currently in use; callers are responsible for setting it to zero
+ *    once they are done.
  *
  * II) The dependency table. It's a hashtable that contains all the
  *    dependencies between Hack objects. It is filled concurrently by
  *    the workers. The dependency table is made of 2 hashtables, one that
  *    can is used to quickly answer if a dependency exists. The other one
  *    to retrieve the list of dependencies associated with an object.
+ *    Only the hashes of the objects are stored, so this uses relatively
+ *    little memory. No dynamic allocation is required.
  *
- * III) The Hashtable.
+ * III) The Hashtable that maps string keys to string values. (The strings
+ *    are really serialized / marshalled representations of OCaml structures.)
  *    Key observation of the table is that data with the same key are
  *    considered equivalent, and so you can arbitrarily get any copy of it;
  *    furthermore if data is missing it can be recomputed, so incorrectly
  *    saying data is missing when it is being written is only a potential perf
  *    loss. Note that "equivalent" doesn't necessarily mean "identical", e.g.,
- *    two alpha-converted types are "equivalent" though not litterally byte-
+ *    two alpha-converted types are "equivalent" though not literally byte-
  *    identical. (That said, I'm pretty sure the Hack typechecker actually does
  *    always write identical data, but the hashtable doesn't need quite that
  *    strong of an invariant.)
@@ -60,27 +68,39 @@
  *    -) Concurrent removes: NOT SUPPORTED
  *       Only the master can remove, and can only do so if there are no other
  *       concurrent operations (reads or writes).
+ *
+ *    Since the values are variably sized and can get quite large, they are
+ *    stored separately from the hashes in a garbage-collected heap.
+ *
+ * Both II and III resolve hash collisions via linear probing.
  */
 /*****************************************************************************/
 
 /* define CAML_NAME_SPACE to ensure all the caml imports are prefixed with
  * 'caml_' */
 #define CAML_NAME_SPACE
+#include <assert.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>
-#include <string.h>
-#include <stdio.h>
-#include <sys/stat.h>
+#include <caml/fail.h>
 #include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/errno.h>
 #include <sys/mman.h>
-#include <assert.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/errno.h>
-#include <stdint.h>
-#include <sys/resource.h>
-#include <signal.h>
-#include <sys/syscall.h>
+
+#ifndef NO_LZ4
+#include <lz4.h>
+#include <lz4hc.h>
+#endif
 
 #define GIG (1024l * 1024l * 1024l)
 
@@ -119,6 +139,11 @@
 /* Fix the location of our shared memory so we can save and restore the
  * hashtable easily */
 #define SHARED_MEM_INIT 0x500000000000
+
+/* The global section is always reset after each typechecking phase, so we
+ * don't need to save it. Resetting is done by setting the count of used bytes
+ * of the global section to zero. */
+#define SAVE_START (SHARED_MEM_INIT + GLOBAL_SIZE_B)
 
 /* As a sanity check when loading from a file */
 static uint64_t MAGIC_CONSTANT = 0xfacefacefaceb000;
@@ -175,6 +200,12 @@ static char* heap_init;
 /* This should only be used by the master */
 static size_t heap_init_size = 0;
 
+/* For debugging */
+value hh_heap_size() {
+  CAMLparam0();
+  CAMLreturn(Val_long(*heap - heap_init));
+}
+
 /*****************************************************************************/
 /* Given a pointer to the shared memory address space, initializes all
  * the globals that live in shared memory.
@@ -182,13 +213,21 @@ static size_t heap_init_size = 0;
 /*****************************************************************************/
 static void init_shared_globals(char* mem) {
   int page_size = getpagesize();
-  char* bottom  = mem;
+  char* bottom = mem;
 
-  /* We keep all the small objects in the first page.
-   * There are on different cache lines because we modify them atomically.
+  /* Global storage initialization:
+   * We store this at the start of the shared memory section as it never
+   * needs to get saved (always reset after each typechecking run) */
+  global_storage = (value*)mem;
+  // Initial size is zero
+  global_storage[0] = 0;
+  mem += GLOBAL_SIZE_B;
+
+  /* BEGINNING OF THE SMALL OBJECTS PAGE
+   * We keep all the small objects in this page.
+   * They are on different cache lines because we modify them atomically.
    */
 
-  /* BEGINING OF THE FIRST PAGE */
   /* The pointer to the top of the heap.
    * We will atomically increment *heap every time we want to allocate.
    */
@@ -205,13 +244,7 @@ static void init_shared_globals(char* mem) {
   mem += page_size;
   // Just checking that the page is large enough.
   assert(page_size > CACHE_LINE_SIZE + (int)sizeof(int));
-  /* END OF THE FIRST PAGE */
-
-  /* Global storage initialization */
-  global_storage = (value*)mem;
-  // Initial size is zero
-  global_storage[0] = 0;
-  mem += GLOBAL_SIZE_B;
+  /* END OF THE SMALL OBJECTS PAGE */
 
   /* Dependencies */
   deptbl = (uint64_t*)mem;
@@ -309,6 +342,19 @@ void hh_shared_init() {
   set_priorities();
 }
 
+#ifdef NO_LZ4
+void hh_save(value out_filename) {
+  CAMLparam1(out_filename);
+  caml_failwith("Program not linked with lz4, so saving is not supported!");
+  CAMLreturn0;
+}
+
+void hh_load(value in_filename) {
+  CAMLparam1(in_filename);
+  caml_failwith("Program not linked with lz4, so loading is not supported!");
+  CAMLreturn0;
+}
+#else
 static void fwrite_no_fail(const void* ptr, size_t size, size_t nmemb, FILE* fp) {
   size_t nmemb_written = fwrite(ptr, size, nmemb, fp);
   assert(nmemb_written == nmemb);
@@ -326,9 +372,36 @@ void hh_save(value out_filename) {
 
   fwrite_no_fail(&heap_init_size, sizeof heap_init_size, 1, fp);
 
-  uintptr_t heap_size = (uintptr_t)*heap - (uintptr_t)SHARED_MEM_INIT;
-  fwrite_no_fail(&heap_size, sizeof heap_size, 1, fp);
-  fwrite_no_fail((void*)SHARED_MEM_INIT, 1, heap_size, fp);
+  /*
+   * Format of the compressed shared memory:
+   * LZ4 can only work in chunks of 2GB, so we compress each chunk individually,
+   * and write out each one as
+   * [compressed size of chunk][uncompressed size of chunk][chunk]
+   * A compressed size of zero indicates the end of the compressed section.
+   */
+  char* chunk_start = (char*)SAVE_START;
+  int compressed_size = 0;
+  while (chunk_start < *heap) {
+    uintptr_t remaining = *heap - chunk_start;
+    uintptr_t chunk_size = LZ4_MAX_INPUT_SIZE < remaining ?
+      LZ4_MAX_INPUT_SIZE : remaining;
+
+    char* compressed = malloc(chunk_size * sizeof(char));
+    assert(compressed != NULL);
+
+    compressed_size = LZ4_compressHC(chunk_start, compressed,
+      chunk_size);
+    assert(compressed_size > 0);
+
+    fwrite_no_fail(&compressed_size, sizeof compressed_size, 1, fp);
+    fwrite_no_fail(&chunk_size, sizeof chunk_size, 1, fp);
+    fwrite_no_fail((void*)compressed, 1, compressed_size, fp);
+
+    chunk_start += chunk_size;
+    free(compressed);
+  }
+  compressed_size = 0;
+  fwrite_no_fail(&compressed_size, sizeof compressed_size, 1, fp);
 
   fclose(fp);
   CAMLreturn0;
@@ -348,6 +421,23 @@ static void read_all(int fd, void* start, size_t size) {
   } while (total_read < size);
 }
 
+typedef struct {
+  char* compressed;
+  char* decompress_start;
+  int compressed_size;
+  int decompressed_size;
+} decompress_args;
+
+/* Return value must be an intptr_t instead of an int because pthread returns
+ * a void*-sized value */
+static intptr_t decompress(const decompress_args* args) {
+  int actual_compressed_size = LZ4_decompress_fast(
+      args->compressed,
+      args->decompress_start,
+      args->decompressed_size);
+  return args->compressed_size == actual_compressed_size;
+}
+
 void hh_load(value in_filename) {
   CAMLparam1(in_filename);
   FILE* fp = fopen(String_val(in_filename), "rb");
@@ -364,14 +454,53 @@ void hh_load(value in_filename) {
 
   read_all(fileno(fp), (void*)&heap_init_size, sizeof heap_init_size);
 
-  uintptr_t heap_size = 0;
-  read_all(fileno(fp), (void*)&heap_size, sizeof heap_size);
-  read_all(fileno(fp), (void*)SHARED_MEM_INIT, heap_size * sizeof(char));
-  assert(*heap == (char*)(SHARED_MEM_INIT + heap_size));
+  int compressed_size = 0;
+  read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
+  char* chunk_start = (char*)SAVE_START;
+
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_t thread;
+  decompress_args args;
+  int thread_started = 0;
+
+  // see hh_save for a description of what we are parsing here.
+  while (compressed_size > 0) {
+    char* compressed = malloc(compressed_size * sizeof(char));
+    assert(compressed != NULL);
+    uintptr_t chunk_size = 0;
+    read_all(fileno(fp), (void*)&chunk_size, sizeof chunk_size);
+    read_all(fileno(fp), compressed, compressed_size * sizeof(char));
+    if (thread_started) {
+      intptr_t success = 0;
+      int rc = pthread_join(thread, (void*)&success);
+      free(args.compressed);
+      assert(rc == 0);
+      assert(success);
+    }
+    args.compressed = compressed;
+    args.compressed_size = compressed_size;
+    args.decompress_start = chunk_start;
+    args.decompressed_size = chunk_size;
+    pthread_create(&thread, &attr, (void* (*)(void*))decompress, &args);
+    thread_started = 1;
+    chunk_start += chunk_size;
+    read_all(fileno(fp), (void*)&compressed_size, sizeof compressed_size);
+  }
+
+  if (thread_started) {
+    int success;
+    int rc = pthread_join(thread, (void*)&success);
+    free(args.compressed);
+    assert(rc == 0);
+    assert(success);
+  }
 
   fclose(fp);
   CAMLreturn0;
 }
+#endif /* NO_LZ4 */
 
 /* Must be called by every worker before any operation is performed */
 void hh_worker_init() {

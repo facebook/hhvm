@@ -22,7 +22,7 @@
 #include <atomic>
 #include <utility>
 
-#include "folly/String.h"
+#include <folly/String.h>
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
@@ -115,6 +115,13 @@ struct RequestTimeoutException : ResourceExceededException {
     : ResourceExceededException(msg, backtrace)
   {}
   EXCEPTION_COMMON_IMPL(RequestTimeoutException);
+};
+
+struct RequestCPUTimeoutException : ResourceExceededException {
+  RequestCPUTimeoutException(const std::string& msg, const Array& backtrace)
+    : ResourceExceededException(msg, backtrace)
+  {}
+  EXCEPTION_COMMON_IMPL(RequestCPUTimeoutException);
 };
 
 struct RequestMemoryExceededException : ResourceExceededException {

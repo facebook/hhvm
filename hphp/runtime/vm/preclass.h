@@ -133,9 +133,8 @@ struct PreClass : AtomicCountable {
          const TypedValue& val,
          RepoAuthType repoAuthType);
 
-    void prettyPrint(std::ostream& out) const;
+    void prettyPrint(std::ostream&, const PreClass*) const;
 
-    PreClass*         preClass()       const { return m_preClass; }
     const StringData* name()           const { return m_name; }
     const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
@@ -145,7 +144,6 @@ struct PreClass : AtomicCountable {
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
 
   private:
-    PreClass* m_preClass;
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
@@ -159,22 +157,19 @@ struct PreClass : AtomicCountable {
    * Class constant information.
    */
   struct Const {
-    Const(PreClass* preClass,
-          const StringData* name,
+    Const(const StringData* name,
           const StringData* typeConstraint,
           const TypedValue& val,
           const StringData* phpCode);
 
-    void prettyPrint(std::ostream& out) const;
+    void prettyPrint(std::ostream&, const PreClass*) const;
 
-    PreClass*         preClass()       const { return m_preClass; }
     const StringData* name()           const { return m_name; }
     const StringData* typeConstraint() const { return m_typeConstraint; }
     const TypedValue& val()            const { return m_val; }
     const StringData* phpCode()        const { return m_phpCode; }
 
   private:
-    PreClass* m_preClass;
     LowStringPtr m_name;
     LowStringPtr m_typeConstraint;
     TypedValue m_val;
@@ -184,7 +179,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait precedence rule.  Describes a usage of the `insteadof' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitPrecRule {
     TraitPrecRule();
@@ -210,7 +205,7 @@ struct PreClass : AtomicCountable {
   /*
    * Trait alias rule.  Describes a usage of the `as' operator.
    *
-   * @see: http://www.php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
+   * @see: http://docs.hhvm.com/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
    */
   struct TraitAliasRule {
     TraitAliasRule();

@@ -181,7 +181,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
   do {
     UErrorCode error = U_ZERO_ERROR;
     int32_t len = ulocfunc(locale_name.c_str(),
-                           buf.get()->mutableData(), buf.get()->capacity(),
+                           buf.get()->mutableData(), buf.capacity() + 1,
                            &error);
     if (error != U_BUFFER_OVERFLOW_ERROR &&
         error != U_STRING_NOT_TERMINATED_WARNING) {
@@ -192,7 +192,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       buf.setSize(len);
       return buf;
     }
-    if (len <= buf.get()->capacity()) {
+    if (len <= buf.capacity() + 1) {
       // Avoid infinite loop
       s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
                              "Got invalid response from ICU");
@@ -490,7 +490,7 @@ static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
 tryagain:
     error = U_ZERO_ERROR;
     int val_len = uloc_getKeywordValue(locname.c_str(), key,
-                                       ptr, val.get()->capacity(), &error);
+                                       ptr, val.capacity() + 1, &error);
     if (error == U_BUFFER_OVERFLOW_ERROR) {
       val = String(val_len + 128, ReserveString);
       ptr = val.get()->mutableData();

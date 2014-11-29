@@ -26,10 +26,11 @@
 #include <numa.h>
 #endif
 
-#include "folly/Bits.h"
-#include "folly/Format.h"
+#include <folly/Bits.h>
+#include <folly/Format.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/async-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

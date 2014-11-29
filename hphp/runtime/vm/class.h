@@ -727,7 +727,6 @@ public:
    */
   const RequirementMap& allRequirements() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Objects.                                                           [const]
 

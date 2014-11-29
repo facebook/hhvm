@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
-#include "folly/Format.h"
+#include <folly/Format.h>
 #include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/base/file-util.h"
@@ -641,6 +641,19 @@ Exception* generate_request_timeout_exception() {
   return ret;
 }
 
+Exception* generate_request_cpu_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg =
+    folly::format("Maximum CPU time of {} seconds exceeded",
+                  data.getCPUTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
+}
+
 Exception* generate_memory_exceeded_exception() {
   Array exceptionStack = createBacktrace(BacktraceArgs()
                                          .withSelf()
@@ -818,8 +831,9 @@ String resolve_include(const String& file, const char* currentDir,
     for (int i = 0; i < (int)path_count; i++) {
       String path("");
       String includePath(includePaths[i]);
+      bool is_stream_wrapper = (includePath.find("://") > 0);
 
-      if (includePath[0] != '/') {
+      if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
@@ -830,7 +844,13 @@ String resolve_include(const String& file, const char* currentDir,
       }
 
       path += file;
-      String can_path = FileUtil::canonicalize(path);
+
+      String can_path;
+      if (!is_stream_wrapper) {
+        can_path = FileUtil::canonicalize(path);
+      } else {
+        can_path = String(path.c_str());
+      }
 
       if (tryFile(can_path, ctx)) {
         return can_path;

@@ -40,9 +40,14 @@ TRACE_SET_MOD(runtime);
 
 TypeConstraint::TypeMap TypeConstraint::s_typeNamesToTypes;
 
-//////////////////////////////////////////////////////////////////////
+MaybeDataType TypeConstraint::typeNameToMaybeDataType(
+    const StringData* typeName) {
+  const Type* type = typeNameToType(typeName);
+  return type ? type->dt : folly::none;
+}
 
-void TypeConstraint::init() {
+const TypeConstraint::Type* TypeConstraint::typeNameToType(
+    const StringData* typeName) {
   if (UNLIKELY(s_typeNamesToTypes.empty())) {
     const struct Pair {
       const StringData* name;
@@ -65,7 +70,12 @@ void TypeConstraint::init() {
       s_typeNamesToTypes[pairs[i].name] = pairs[i].type;
     }
   }
+  return folly::get_ptr(s_typeNamesToTypes, typeName);
+}
 
+//////////////////////////////////////////////////////////////////////
+
+void TypeConstraint::init() {
   if (isTypeVar()) {
     // We kept the type variable type constraint to correctly check child
     // classes implementing abstract methods or interfaces.
@@ -83,7 +93,7 @@ void TypeConstraint::init() {
   Type dtype;
   TRACE(5, "TypeConstraint: this %p type %s, nullable %d\n",
         this, m_typeName->data(), isNullable());
-  auto const mptr = folly::get_ptr(s_typeNamesToTypes, m_typeName);
+  auto const mptr = typeNameToType(m_typeName);
   if (mptr) dtype = *mptr;
   if (!mptr ||
       !(isHHType() || dtype.dt == KindOfArray ||

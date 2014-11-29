@@ -22,7 +22,7 @@
 #include <stack>
 #include <utility>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/ringbuffer.h"
@@ -129,6 +129,7 @@ struct HhbcTranslator {
                  const std::vector<bool>& vals,
                  Offset dest);
   void endGuards();
+  void prepareEntry();
 
   // Interface to irtranslator for predicted and inferred types.
   void assertTypeLocal(uint32_t localIndex, Type type);
@@ -138,7 +139,12 @@ struct HhbcTranslator {
   void checkTypeTopOfStack(Type type, Offset nextByteCode);
   void assertType(const RegionDesc::Location& loc, Type type);
   void checkType(const RegionDesc::Location& loc, Type type, Offset dest);
-  Type typeFromLocation(const Location& loc);
+
+  /*
+   * Returns a predicted Type for the given location, used for tracelet
+   * analysis.
+   */
+  Type predictedTypeFromLocation(const Location& loc);
 
   // Inlining-related functions.
   void beginInlining(unsigned numArgs,
@@ -156,7 +162,6 @@ struct HhbcTranslator {
   void emitSingletonSLoc(const Func* func, const Op* op);
 
   // Other public functions for irtranslator.
-  void setThisAvailable();
   void emitInterpOne(const NormalizedInstruction&);
   void emitInterpOne(int popped);
   void emitInterpOne(Type t, int popped);
@@ -771,7 +776,8 @@ private:
   folly::Optional<Type> ratToAssertType(RepoAuthType rat) const;
   void destroyName(SSATmp* name);
   SSATmp* ldClsPropAddrKnown(Block* catchBlock,
-                             SSATmp* cls, SSATmp* name);
+                             const Class* cls,
+                             const StringData* name);
   SSATmp* ldClsPropAddr(Block* catchBlock, SSATmp* cls,
                         SSATmp* name, bool raise);
   void emitUnboxRAux();
@@ -936,9 +942,21 @@ private:
   void    exceptionBarrier();
   SSATmp* ldStackAddr(int32_t offset);
   void    extendStack(uint32_t index, Type type);
-  void    replace(uint32_t index, SSATmp* tmp);
 
   SSATmp* unbox(SSATmp* val, Block* exit);
+
+  /*
+   * Get a Ctx for the current frame.  This may return a Ctx, a Cctx, or an Obj
+   * (if $this is known to be available).
+   */
+  SSATmp* ldCtx();
+
+  /*
+   * Get the $this for the current frame.  Only use this function when
+   * semantically we must have a non-null $this (guarding it is not null
+   * requires more code).
+   */
+  SSATmp* ldThis();
 
   /*
    * Local instruction helpers. The ldPMExit is so helpers can emit the guard

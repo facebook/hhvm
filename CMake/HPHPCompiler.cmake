@@ -89,6 +89,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if(STATIC_CXX_LIB)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
   endif()
+  if(ENABLE_AVX2)
+    set(CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} -mavx2 -march=core-avx2")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2 -march=core-avx2")
+    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mavx2 -march=core-avx2")
+  endif()
+
   if(CYGWIN)
   # in debug mode large files can overflow pe/coff sections
   # this switches binutils to use the pe+ format

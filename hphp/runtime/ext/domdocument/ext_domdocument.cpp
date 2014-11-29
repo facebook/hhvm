@@ -16,19 +16,21 @@
 */
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
+
 #include <map>
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/thread-init-fini.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/system/systemlib.h"
-
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -805,7 +807,7 @@ static xmlDocPtr dom_document_parser(DOMDocument* domdoc, int mode,
   return ret;
 }
 
-static Variant dom_parse_document(DOMDocument* domdoc, const String& source,
+static bool dom_parse_document(DOMDocument* domdoc, const String& source,
                                   int options, int mode) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -1245,11 +1247,12 @@ static Variant create_node_object(xmlNodePtr node, Object doc,
 }
 
 static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
-                              const Object& context, int type) {
+                              const Object& context, int type,
+                              bool registerNodeNS) {
   xmlXPathObjectPtr xpathobjp;
   int nsnbr = 0, xpath_type;
   xmlDoc *docp = nullptr;
-  xmlNsPtr *ns;
+  xmlNsPtr *ns = nullptr;
   xmlXPathContextPtr ctxp = (xmlXPathContextPtr)domxpath->m_node;
   if (ctxp == nullptr) {
     raise_warning("Invalid XPath Context");
@@ -1274,9 +1277,11 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->node = nodep;
   /* Register namespaces in the node */
-  ns = xmlGetNsList(docp, nodep);
-  if (ns != nullptr) {
-    while (ns[nsnbr] != nullptr) nsnbr++;
+  if (registerNodeNS) {
+    ns = xmlGetNsList(docp, nodep);
+    if (ns != nullptr) {
+      while (ns[nsnbr] != nullptr) nsnbr++;
+    }
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
@@ -3587,42 +3592,53 @@ Variant HHVM_METHOD(DOMDocument, importNode,
   return create_node_object(retnodep, data->doc(), owner);
 }
 
-Variant HHVM_METHOD(DOMDocument, load,
-                    const String& filename,
-                    int64_t options /* = 0 */) {
+template<typename L>
+static TypedValue* dom_load(ActRec* ar, L fn) {
   SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  return dom_parse_document(data, filename, options, DOM_LOAD_FILE);
-}
 
-Variant HHVM_METHOD(DOMDocument, loadHTML,
-                    const String& source,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  if (dom_load_html(data, source, options, DOM_LOAD_STRING)) {
-    return this_;
+  StringData* sd;
+  int64_t options = 0;
+
+  if (!parseArgs(ar, "s|l", &sd, &options)) {
+    return arReturn(ar, init_null());
   }
-  return false;
-}
 
-Variant HHVM_METHOD(DOMDocument, loadHTMLFile,
-                    const String& filename,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  if (dom_load_html(data, filename, options, DOM_LOAD_FILE)) {
-    return this_;
+  ObjectData* od = ar->hasThis()
+    ? ar->getThis()
+    : DOMDocument::newInstance().detach();
+
+  auto* data = Native::data<DOMDocument>(od);
+  bool res = fn(data, sd, options);
+
+  if (ar->hasThis()) {
+    return arReturn(ar, res);
   }
-  return false;
+
+  return arReturn(ar, od);
 }
 
-Variant HHVM_METHOD(DOMDocument, loadXML,
-                    const String& source,
-                    int64_t options /* = 0 */) {
-  SYNC_VM_REGS_SCOPED();
-  auto* data = Native::data<DOMDocument>(this_);
-  return dom_parse_document(data, source, options, DOM_LOAD_STRING);
+TypedValue* HHVM_MN(DOMDocument, load)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_parse_document(data, str, opts, DOM_LOAD_FILE);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadHTML)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_load_html(data, str, opts, DOM_LOAD_STRING);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadHTMLFile)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_load_html(data, str, opts, DOM_LOAD_FILE);
+  });
+}
+
+TypedValue* HHVM_MN(DOMDocument, loadXML)(ActRec* ar) {
+  return dom_load(ar, [] (DOMDocument* data, const String& str, int64_t opts) {
+    return dom_parse_document(data, str, opts, DOM_LOAD_STRING);
+  });
 }
 
 void HHVM_METHOD(DOMDocument, normalizeDocument) {
@@ -5632,22 +5648,26 @@ Array HHVM_METHOD(DOMXPath, __debuginfo) {
 
 Variant HHVM_METHOD(DOMXPath, evaluate,
                     const String& expr,
-                    const Variant& context /* = null_object */) {
+                    const Variant& context /* = null_object */,
+                    bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
-  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE);
+  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE,
+                        registerNodeNS);
 }
 
 Variant HHVM_METHOD(DOMXPath, query,
                     const String& expr,
-                    const Variant& context /* = null_object */) {
+                    const Variant& context /* = null_object */,
+                    bool registerNodeNS /* = true */) {
   auto* data = Native::data<DOMXPath>(this_);
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
-  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY);
+  return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY,
+                        registerNodeNS);
 }
 
 bool HHVM_METHOD(DOMXPath, registerNamespace,

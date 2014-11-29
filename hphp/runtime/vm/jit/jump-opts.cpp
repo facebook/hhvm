@@ -128,7 +128,7 @@ void optimizeCondTraceExit(IRUnit& unit, IRInstruction* jccInst,
 
   syncAbi.setMarker(jccInst->marker());
   reqBindJmp.setMarker(jccInst->marker());
-  jccInst->convertToJmp(mainExit);
+  unit.replace(jccInst, Jmp, mainExit);
 }
 
 /*

@@ -21,10 +21,11 @@
 #include <pwd.h>
 #include <poll.h>
 #include <unistd.h>
+#include <stdlib.h>
 
-#include "folly/Conv.h"
-#include "folly/ScopeGuard.h"
-#include "folly/String.h"
+#include <folly/Conv.h>
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/async-func.h"
@@ -40,7 +41,7 @@ static void swap_fd(const string &filename, FILE *fdesc) {
   FILE *f = fopen(filename.c_str(), "a");
   if (f == nullptr || dup2(fileno(f), fileno(fdesc)) < 0) {
     if (f) fclose(f);
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 }
 
@@ -204,7 +205,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
 
     execvp(argv[0], argv);
     Logger::Error("Failed to exec `%s'\n", cmd.c_str());
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   int status = -1;
   wait(&status);
@@ -240,7 +241,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
       execvp(path, const_cast<char**>(argv ? argv : argvnull));
     }
     Logger::Error("Failed to exec `%s'\n", path);
-    _exit(-1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   if (fdout) *fdout = pipeout.detachOut();
   if (fderr) *fderr = pipeerr.detachOut();
@@ -251,8 +252,6 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
 /**
  * Copied from http://www-theorie.physik.unizh.ch/~dpotter/howto/daemonize
  */
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
 void Process::Daemonize(const char *stdoutFile /* = "/dev/null" */,
                         const char *stderrFile /* = "/dev/null" */) {
   pid_t pid, sid;

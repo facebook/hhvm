@@ -44,8 +44,8 @@
 
 #include "hphp/system/systemlib.h"
 
-#include "folly/Hash.h"
-#include "folly/ScopeGuard.h"
+#include <folly/Hash.h>
+#include <folly/ScopeGuard.h>
 
 #include <vector>
 
@@ -597,6 +597,16 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
   return ret;
 }
 
+#define INVOKE_FEW_ARGS_IMPL3                        \
+  const Variant& a0, const Variant& a1, const Variant& a2
+#define INVOKE_FEW_ARGS_IMPL6                        \
+  INVOKE_FEW_ARGS_IMPL3,                             \
+  const Variant& a3, const Variant& a4, const Variant& a5
+#define INVOKE_FEW_ARGS_IMPL10                       \
+  INVOKE_FEW_ARGS_IMPL6,                             \
+  const Variant& a6, const Variant& a7, const Variant& a8, const Variant& a9
+#define INVOKE_FEW_ARGS_IMPL_ARGS INVOKE_FEW_ARGS(IMPL,INVOKE_FEW_ARGS_COUNT)
+
 Variant ObjectData::o_invoke_few_args(const String& s, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
 
@@ -1019,7 +1029,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   auto& mm = MM();
-  auto obj = new (mm.smartMallocSizeBigLogged<false>(size).first)
+  auto obj = new (mm.smartMallocSizeBigLogged<false>(size).ptr)
     ObjectData(cls, NoInit::noinit);
   mm.track(obj);
   return obj;
@@ -1956,6 +1966,7 @@ const char* ObjectData::classname_cstr() const {
 }
 
 void ObjectData::compileTimeAssertions() {
+  static_assert(offsetof(ObjectData, m_kind) == HeaderKindOffset, "");
   static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 

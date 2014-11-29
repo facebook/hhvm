@@ -22,7 +22,7 @@
 #include <cassert>
 #include <bitset>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"

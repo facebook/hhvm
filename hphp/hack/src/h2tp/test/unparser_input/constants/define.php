@@ -4,7 +4,12 @@
       define("Foo", 10);
     }
   }
-  echo(define("GREETING", "Hello"));
+  function foo() {
+    return "Foom";
+  }
+  define('GREETING', "Hello");
+  define('Foom', foo());
   echo(GREETING);
+  echo(Foom."\n");
   new C();
   echo Foo;

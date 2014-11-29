@@ -43,7 +43,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/runtime/base/file-util.h"
-#include "folly/String.h"
+#include <folly/String.h>
 #include <dirent.h>
 #include <glob.h>
 #include <sys/types.h>
@@ -577,8 +577,18 @@ Variant HHVM_FUNCTION(file_put_contents,
     return false;
   }
 
-  if ((flags & LOCK_EX) && !f->lock(LOCK_EX)) {
-    return false;
+  if (flags & LOCK_EX) {
+    // Check to make sure we are dealing with a regular file
+    if (!dynamic_cast<PlainFile*>(f)) {
+      raise_warning(
+        "%s(): Exclusive locks may only be set for regular files",
+        __FUNCTION__ + 2);
+      return false;
+    }
+
+    if (!f->lock(LOCK_EX)) {
+      return false;
+    }
   }
 
   int numbytes = 0;

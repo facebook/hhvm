@@ -1,2 +1,2 @@
 
-Fatal error: Class 'C' required to extend class 'Super' by trait 'T1'%s in %s on line %d
+Fatal error: Class 'C' required to extend class 'Super' by trait 'T1' in %s on line %d

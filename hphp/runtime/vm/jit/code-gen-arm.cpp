@@ -17,7 +17,7 @@
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include <vector>
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
@@ -44,7 +44,6 @@ TRACE_SET_MOD(hhir);
 
 NOOP_OPCODE(DefConst)
 NOOP_OPCODE(DefFP)
-NOOP_OPCODE(TrackLoc)
 NOOP_OPCODE(AssertLoc)
 NOOP_OPCODE(Nop)
 NOOP_OPCODE(DefLabel)
@@ -401,11 +400,13 @@ PUNT_OPCODE(LdMem)
 PUNT_OPCODE(LdContField)
 PUNT_OPCODE(LdElem)
 PUNT_OPCODE(LdPackedArrayElem)
+PUNT_OPCODE(CheckRefInner)
 PUNT_OPCODE(LdRef)
 PUNT_OPCODE(LdLocPseudoMain)
-PUNT_OPCODE(LdThis)
 PUNT_OPCODE(LdRetAddr)
 PUNT_OPCODE(ConvClsToCctx)
+PUNT_OPCODE(CheckCtxThis)
+PUNT_OPCODE(CastCtxThis)
 PUNT_OPCODE(LdCtx)
 PUNT_OPCODE(LdCctx)
 PUNT_OPCODE(LdCls)
@@ -413,7 +414,7 @@ PUNT_OPCODE(LdClsCached)
 PUNT_OPCODE(LdClsCachedSafe)
 PUNT_OPCODE(LdClsCtx)
 PUNT_OPCODE(LdClsCctx)
-PUNT_OPCODE(LdClsCns)
+PUNT_OPCODE(LdRDSAddr)
 PUNT_OPCODE(LookupClsCns)
 PUNT_OPCODE(LdCns)
 PUNT_OPCODE(LdClsInitData)
@@ -430,7 +431,6 @@ PUNT_OPCODE(GetCtxFwdCallDyn);
 PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
 PUNT_OPCODE(LdPropAddr)
-PUNT_OPCODE(LdClsPropAddrKnown)
 PUNT_OPCODE(LdObjMethod)
 PUNT_OPCODE(LdObjInvoke)
 PUNT_OPCODE(LdGblAddr)

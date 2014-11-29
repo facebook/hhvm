@@ -274,6 +274,11 @@ DateTime::DateTime(int64_t timestamp, bool utc /* = false */) {
   fromTimeStamp(timestamp, utc);
 }
 
+DateTime::DateTime(int64_t timestamp, SmartResource<TimeZone> tz): m_tz(tz) {
+  fromTimeStamp(timestamp);
+}
+
+
 void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
   m_timestamp = timestamp;
   m_timestampSet = true;
@@ -868,7 +873,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
 
   m_time = TimePtr(t, time_deleter());
   if (t->tz_info != m_tz->get()) {
-    m_tz = newres<TimeZone>(timelib_tzinfo_clone(t->tz_info));
+    m_tz = newres<TimeZone>(t->tz_info);
   }
   return true;
 }

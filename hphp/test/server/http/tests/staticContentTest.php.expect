@@ -1,0 +1,8 @@
+Requesting 'static_content.txt'
+string(3) "Foo"
+Requesting 'test_get.php?name=Foo'
+string(15) "string(3) "Foo""
+Requesting 'test_get.php?name=Foo'
+string(15) "string(3) "Foo""
+Requesting 'static_content.txt'
+string(3) "Foo"

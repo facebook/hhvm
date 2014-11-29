@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "folly/Lazy.h"
+#include <folly/Lazy.h>
 
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/array-init.h"

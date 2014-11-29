@@ -277,9 +277,16 @@ void HhbcTranslator::emitSetOpL(Op subOp, uint32_t id) {
     m_irb->constrainValue(loc, DataTypeSpecific);
     auto const result = gen(ConcatCellCell, catchBlock, loc, val);
 
-    // Null exit block for 'ldrefExit' because this is a local that we've
-    // already guarded against in the upper ldLocInnerWarn, and we can't run
-    // any guards since ConcatCellCell can have effects.
+    /*
+     * Null exit block for 'ldrefExit' because we won't actually need to reload
+     * the inner cell since we are doing a stLocNRC.  (Note that the inner cell
+     * may have changed type if we re-entered during ConcatCellCell.)
+     *
+     * We can't put a non-null block here either, because it may need to
+     * side-exit and we've already made observable progress executing this
+     * instruction.  If we ever change ConcatCellCell not to decref its sources
+     * we'll need to address this (or punt on a boxed source).
+     */
     pushIncRef(stLocNRC(id, nullptr, ldPMExit, result));
 
     // ConcatCellCell does not DecRef its second argument,

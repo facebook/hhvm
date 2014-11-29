@@ -108,7 +108,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
   auto finishPass = [&](const char* msg) {
-    printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    if (msg) {
+      printUnit(6, unit, folly::format("after {}", msg).str().c_str());
+    }
     assert(checkCfg(unit));
     assert(checkTmpsSpanningCalls(unit));
     if (debug) {
@@ -118,7 +120,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   };
 
-  auto doPass = [&](void (*fn)(IRUnit&), const char* msg) {
+  auto doPass = [&](void (*fn)(IRUnit&), const char* msg = nullptr) {
     fn(unit);
     finishPass(msg);
   };
@@ -133,37 +135,26 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     (RuntimeOption::EvalHHIRCse || RuntimeOption::EvalHHIRSimplification);
 
   if (shouldHHIRRelaxGuards()) {
-    /*
-     * In TransProfile mode, we can only relax the guards in tracelet
-     * region mode.  If the region came from analyze() and we relax the
-     * guards here, then the RegionDesc's TypePreds in ProfData won't
-     * accurately reflect the generated guards.  This can result in a
-     * TransOptimze region to be formed with types that are incompatible,
-     * e.g.:
-     *    B1: TypePred: Loc0: Bool      // but this gets relaxed to Uncounted
-     *        PostCond: Loc0: Uncounted // post-conds are accurate
-     *    B2: TypePred: Loc0: Int       // this will always fail
-     */
-    const bool relax = kind != TransKind::Profile ||
-                       RuntimeOption::EvalJitRegionSelector == "tracelet";
-    if (relax) {
-      Timer _t(Timer::optimize_relaxGuards);
-      const bool simple = kind == TransKind::Profile &&
-                          RuntimeOption::EvalJitRegionSelector == "tracelet";
-      RelaxGuardsFlags flags = (RelaxGuardsFlags)
-        (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
-      auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
-      if (changed) finishPass("guard relaxation");
+    Timer _t(Timer::optimize_relaxGuards);
+    const bool simple = kind == TransKind::Profile &&
+                        (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
+                         RuntimeOption::EvalJitRegionSelector == "method");
+    RelaxGuardsFlags flags = (RelaxGuardsFlags)
+      (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
+    auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
+    if (changed) finishPass("guard relaxation");
 
-      if (doReoptimize) {
-        irBuilder.reoptimize();
-        finishPass("guard relaxation reoptimize");
-      }
+    if (doReoptimize) {
+      irBuilder.reoptimize();
+      finishPass("guard relaxation reoptimize");
     }
   }
 
   if (RuntimeOption::EvalHHIRRefcountOpts) {
-    optimizeRefcounts(unit, FrameState{unit, unit.entry()->front().marker()});
+    optimizeRefcounts(
+      unit,
+      FrameStateMgr{unit, unit.entry()->front().marker()}
+    );
     finishPass("refcount opts");
   }
 
@@ -179,6 +170,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("reoptimize");
   }
 
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+    doPass(optimizeLoads);
+    dce("loadelim");
+  }
+
   /*
    * Note: doing this pass this late might not be ideal, in particular because
    * we've already turned some StLoc instructions into StLocNT.
@@ -189,8 +185,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
    * on that.)
    */
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(optimizeMemory, "memelim");
-    dce("memelim");
+    doPass(optimizeStores);
+    dce("storeelim");
   }
 
   if (RuntimeOption::EvalHHIRJumpOpts) {

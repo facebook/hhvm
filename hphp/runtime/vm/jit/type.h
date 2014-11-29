@@ -26,7 +26,7 @@
 
 #include "hphp/util/data-block.h"
 
-#include "folly/Optional.h"
+#include <folly/Optional.h>
 
 #include <cstdint>
 #include <cstring>
@@ -119,6 +119,10 @@ enum class Ptr : uint8_t {
    * we don't have a RClsInit type.
    */
   ClsInit = 0x09,
+  /*
+   * Pointer to class constant values in RDS.
+   */
+  ClsCns  = 0x0a,
 
   RFrame  = 0x11,
   RStk    = 0x12,
@@ -476,6 +480,8 @@ public:
    * intersection, or difference. (They must be conservative in that direction
    * for types that are too hard for us to represent, or we could generate
    * incorrect code by assuming certain possible values are impossible.)
+   *
+   * Note: operator| and operator& guarantee commutativity.
    */
   Type operator|(Type other) const;
   Type& operator|=(Type other) { return *this = *this | other; }
@@ -699,7 +705,8 @@ public:
   /*
    * Return a copy of this Type specialized with `klass'.
    *
-   * @requires: canSpecializeClass() && getClass()
+   * Pre: canSpecializeClass() && getClass() == nullptr
+   *      `klass' != nullptr
    */
   Type specialize(const Class* klass) const;
   Type specializeExact(const Class* klass) const;
@@ -974,7 +981,6 @@ Type refineTypeNoCheck(Type oldType, Type newType);
  * @requires: typeParam.notBoxed()
  */
 Type ldRefReturn(Type typeParam);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

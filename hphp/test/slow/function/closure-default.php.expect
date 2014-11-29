@@ -1,0 +1,8 @@
+func(123) == bool(true)
+func(124) == bool(false)
+func(123) == bool(false)
+func(124) == bool(true)
+func(123) == bool(true)
+func(124) == bool(false)
+func(123) == bool(false)
+func(124) == bool(true)

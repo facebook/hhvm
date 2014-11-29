@@ -6994,6 +6994,8 @@ OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
   assert(fp->resumed());
   assert(func->isGenerator());
 
+  EventHook::FunctionSuspend(fp, true);
+
   if (!func->isAsync()) {
     // Non-async generator.
     assert(fp->sfp());
@@ -7014,8 +7016,6 @@ OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
       assert(!fp->sfp());
     }
   }
-
-  EventHook::FunctionSuspend(fp, true);
 
   // Grab caller info from ActRec.
   ActRec* sfp = fp->sfp();

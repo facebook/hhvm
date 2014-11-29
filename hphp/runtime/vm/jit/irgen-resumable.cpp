@@ -103,20 +103,19 @@ void implAwaitR(HTS& env,
   gen(env, RetCtrl, RetCtrlData(true), stack, frame, retAddr);
 }
 
-void yieldReturnControl(HTS& env, Block* catchBlock) {
+void yieldReturnControl(HTS& env) {
   // Push return value of next()/send()/raise().
   push(env, cns(env, Type::InitNull));
 
-  auto const stack = spillStack(env);
-  retSurpriseCheck(env, fp(env), nullptr, catchBlock, true);
-
+  auto const stack   = spillStack(env);
   auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const frame = gen(env, FreeActRec, fp(env));
-
+  auto const frame   = gen(env, FreeActRec, fp(env));
   gen(env, RetCtrl, RetCtrlData(true), stack, frame, retAddr);
 }
 
 void yieldImpl(HTS& env, Offset resumeOffset) {
+  retSurpriseCheck(env, fp(env), nullptr, makeCatch(env), true);
+
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
   auto const resumeAddr = gen(env, LdBindAddr, LdBindAddrData(resumeSk));
@@ -251,7 +250,6 @@ void emitYield(HTS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
 
-  auto const catchBlock = makeCatchNoSpill(env);
   yieldImpl(env, resumeOffset);
 
   // take a fast path if this generator has no yield k => v;
@@ -265,7 +263,7 @@ void emitYield(HTS& env) {
     gen(env, ContArIncKey, fp(env));
   }
 
-  yieldReturnControl(env, catchBlock);
+  yieldReturnControl(env);
 }
 
 void emitYieldK(HTS& env) {
@@ -275,7 +273,6 @@ void emitYieldK(HTS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
 
-  auto const catchBlock = makeCatchNoSpill(env);
   yieldImpl(env, resumeOffset);
 
   auto const newKey = popC(env);
@@ -288,7 +285,7 @@ void emitYieldK(HTS& env) {
     gen(env, ContArUpdateIdx, fp(env), newKey);
   }
 
-  yieldReturnControl(env, catchBlock);
+  yieldReturnControl(env);
 }
 
 void emitContCheck(HTS& env, int32_t checkStarted) {

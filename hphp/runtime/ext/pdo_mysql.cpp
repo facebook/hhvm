@@ -19,6 +19,7 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/network.h"
+#include "hphp/util/logger.h"
 #include "mysql.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
@@ -484,9 +485,15 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     if (stmt) {
       stmt->dbh->fetchErr(stmt, info);
     }
-    throw_pdo_exception(String(*pdo_err, CopyString), info,
+    constexpr int kSQLSyntaxErrorCode = 1064;
+    if(einfo->errcode != kSQLSyntaxErrorCode) {
+      throw_pdo_exception(String(*pdo_err, CopyString), info,
                         "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
+    }
+    else {
+      Logger::Error("%s in %s:%d", einfo->errmsg, file, line);
+    }
   }
   return einfo->errcode;
 }

@@ -460,28 +460,6 @@ void implFPushCufOp(HTS& env, Op op, int32_t numArgs) {
   fpushActRec(env, func, ctx, numArgs, invName);
 }
 
-void fpushCtorCommon(HTS& env,
-                     SSATmp* cls,
-                     SSATmp* obj,
-                     const Func* func,
-                     int32_t numParams) {
-  push(env, obj);
-  auto const fn = [&] {
-    if (func) return cns(env, func);
-    /*
-      Without the updateMarker, the catch trace will write
-      obj onto the stack, but the VMRegAnchor will setup the
-      stack as it was before the FPushCtor*, which (for
-      FPushCtorD at least) won't include obj
-    */
-    updateMarker(env);
-    return gen(env, LdClsCtor, makeCatch(env), cls);
-  }();
-  gen(env, IncRef, obj);
-  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
-  fpushActRec(env, fn, obj, numArgsAndFlags, nullptr);
-}
-
 void fpushFuncCommon(HTS& env,
                      const Func* func,
                      const StringData* name,
@@ -589,11 +567,15 @@ void emitFPushCufSafe(HTS& env, int32_t numArgs) {
 }
 
 void emitFPushCtor(HTS& env, int32_t numParams) {
-  auto const catchBlock = makeCatch(env);
+  auto const catchBlock1 = makeCatch(env);
+  auto const catchBlock2 = makeCatch(env);
   auto const cls = popA(env);
-  auto const obj = gen(env, AllocObj, catchBlock, cls);
+  auto const func = gen(env, LdClsCtor, catchBlock1, cls);
+  auto const obj = gen(env, AllocObj, catchBlock2, cls);
   gen(env, IncRef, obj);
-  fpushCtorCommon(env, cls, obj, nullptr, numParams);
+  pushIncRef(env, obj);
+  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
+  fpushActRec(env, func, obj, numArgsAndFlags, nullptr);
 }
 
 void emitFPushCtorD(HTS& env,
@@ -631,11 +613,14 @@ void emitFPushCtorD(HTS& env,
     ssaCls = cns(env, cls);
   }
 
-  auto const obj = fastAlloc
-    ? allocObjFast(env, cls)
-    : gen(env, AllocObj, makeCatch(env), ssaCls);
+  auto const ssaFunc = func ? cns(env, func)
+                            : gen(env, LdClsCtor, makeCatch(env), ssaCls);
+  auto const obj = fastAlloc ? allocObjFast(env, cls)
+                             : gen(env, AllocObj, makeCatch(env), ssaCls);
   gen(env, IncRef, obj);
-  fpushCtorCommon(env, ssaCls, obj, func, numParams);
+  pushIncRef(env, obj);
+  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
+  fpushActRec(env, ssaFunc, obj, numArgsAndFlags, nullptr);
 }
 
 void emitFPushFuncD(HTS& env, int32_t numParams, const StringData* funcName) {

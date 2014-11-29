@@ -110,14 +110,17 @@ static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
                                                   const Variant& key,
                                                   const Variant& val,
                                                   XDebugExporter& exporter) {
-  String prop_str = key.toString();
-  const Class* cls = obj->getVMClass();
-  const char* cls_name = cls->name()->data();
+  auto const prop_str = key.toString();
+  auto const cls = obj->getVMClass();
+  auto const cls_name = cls->name()->data();
 
-  // Compute whether the properity is static
-  bool visible, accessible;
-  bool is_static = cls->getSProp(nullptr, prop_str.get(),
-                                 visible, accessible) != nullptr;
+  // Compute whether the properity is static.
+
+  auto const sLookup = cls->getSProp(nullptr, prop_str.get());
+
+  auto const is_static = sLookup.prop != nullptr;
+  bool visible = is_static;
+  bool accessible = sLookup.accessible;
 
   // If the property is not static, we know it's a member, but need to grab the
   // visibility

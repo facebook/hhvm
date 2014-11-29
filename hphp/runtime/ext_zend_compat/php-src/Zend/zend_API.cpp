@@ -1485,12 +1485,12 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
   }
 
   HPHP::String sname(name, name_length, HPHP::CopyString);
-  bool visible, accessible;
-  auto tv = cls->getSProp(cls, sname.get(), visible, accessible);
-  if (!tv) {
-    return FAILURE;
-  }
-  HPHP::tvSetZval(value, tv);
+
+  auto const lookup = cls->getSProp(cls, sname.get());
+
+  if (!lookup.prop) return FAILURE;
+
+  HPHP::tvSetZval(value, lookup.prop);
   return SUCCESS;
 }
 
@@ -1655,12 +1655,10 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
     return nullptr;
   }
   HPHP::String sname(name, name_length, HPHP::CopyString);
-  bool visible, accessible;
-  auto ret = cls->zGetSProp(cls, sname.get(), visible, accessible);
-  if (!accessible || !visible) {
-    return nullptr;
-  }
-  return ret;
+
+  auto const lookup = cls->zGetSProp(cls, sname.get());
+
+  return (!lookup.prop || !lookup.accessible) ? nullptr : lookup.prop;
 }
 
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC) {

@@ -445,10 +445,9 @@ void HhbcTranslator::emitSingletonSProp(const Func* func,
   }
 
   // Make sure the sprop is accessible from the singleton method's context.
-  bool visible, accessible;
-  cls->findSProp(func->cls(), propName, visible, accessible);
+  auto const lookup = cls->findSProp(func->cls(), propName);
 
-  if (UNLIKELY(!visible || !accessible)) {
+  if (UNLIKELY(lookup.prop == kInvalidSlot || !lookup.accessible)) {
     PUNT(SingletonSProp-Accessibility);
   }
 
@@ -2461,7 +2460,7 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
    * that it is visible && accessible, or we know it is a property on this
    * class itself.
    */
-  bool const sPropKnown = [&] {
+  auto const sPropKnown = [&] {
     if (!ssaName->isConst()) return false;
     auto const propName = ssaName->strVal();
 
@@ -2469,9 +2468,8 @@ SSATmp* HhbcTranslator::ldClsPropAddr(Block* catchBlock,
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(cls)) return false;
 
-    bool visible, accessible;
-    cls->findSProp(curClass(), propName, visible, accessible);
-    return visible && accessible;
+    auto const lookup = cls->findSProp(curClass(), propName);
+    return lookup.prop != kInvalidSlot && lookup.accessible;
   }();
 
   if (sPropKnown) {

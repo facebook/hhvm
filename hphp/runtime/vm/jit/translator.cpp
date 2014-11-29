@@ -112,7 +112,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (!keyType.isConst(Type::Str)) return PropInfo();
   auto const name = keyType.strVal();
 
-  bool accessible;
   // If we are not in repo-authoriative mode, we need to check that
   // baseClass cannot change in between requests
   if (!RuntimeOption::RepoAuthoritative ||
@@ -132,15 +131,16 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
     }
   }
   // Lookup the index of the property based on ctx and baseClass
-  Slot idx = baseClass->getDeclPropIndex(ctx, name, accessible);
-  // If we couldn't find a property that is accessible in the current
-  // context, bail out
-  if (idx == kInvalidSlot || !accessible) {
-    return PropInfo();
-  }
-  // If it's a declared property we're good to go: even if a subclass
-  // redefines an accessible property with the same name it's guaranteed
-  // to be at the same offset
+  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
+  auto const idx = lookup.prop;
+
+  // If we couldn't find a property that is accessible in the current context,
+  // bail out
+  if (idx == kInvalidSlot || !lookup.accessible) return PropInfo();
+
+  // If it's a declared property we're good to go: even if a subclass redefines
+  // an accessible property with the same name it's guaranteed to be at the same
+  // offset.
   return PropInfo(
     baseClass->declPropOffset(idx),
     baseClass->declPropRepoAuthType(idx)

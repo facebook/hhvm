@@ -806,14 +806,14 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
           }
         }
 
-        bool accessible;
-        Slot propInd = m_cls->getDeclPropIndex(ctx, memberName.get(),
-                                               accessible);
-        if (propInd != kInvalidSlot) {
-          if (accessible) {
-            const TypedValue* prop = &propVec()[propInd];
+        auto const lookup = m_cls->getDeclPropIndex(ctx, memberName.get());
+        auto const propIdx = lookup.prop;
+
+        if (propIdx != kInvalidSlot) {
+          if (lookup.accessible) {
+            auto const prop = &propVec()[propIdx];
             if (prop->m_type != KindOfUninit) {
-              auto attrs = m_cls->declProperties()[propInd].m_attrs;
+              auto const attrs = m_cls->declProperties()[propIdx].m_attrs;
               if (attrs & AttrPrivate) {
                 memberName = concat4(s_zero, ctx->nameStr(),
                                      s_zero, memberName);
@@ -1121,19 +1121,23 @@ TypedValue* ObjectData::getProp(Class* ctx, const StringData* key,
                                 bool& unset) {
   unset = false;
 
-  Slot propInd = m_cls->getDeclPropIndex(ctx, key, accessible);
-  visible = (propInd != kInvalidSlot);
-  if (LIKELY(propInd != kInvalidSlot)) {
+  auto const lookup = m_cls->getDeclPropIndex(ctx, key);
+  auto const propIdx = lookup.prop;
+
+  visible = propIdx != kInvalidSlot;
+  accessible = lookup.accessible;
+
+  if (LIKELY(propIdx != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.
     // No need to check if there is a dynamic property with this name.
-    auto const prop = &propVec()[propInd];
+    auto const prop = &propVec()[propIdx];
     if (prop->m_type == KindOfUninit) {
       unset = true;
     }
 
     if (debug) {
       if (RuntimeOption::RepoAuthoritative) {
-        auto const repoTy = m_cls->declPropRepoAuthType(propInd);
+        auto const repoTy = m_cls->declPropRepoAuthType(propIdx);
         always_assert(tvMatchesRepoAuthType(*prop, repoTy));
       }
     }

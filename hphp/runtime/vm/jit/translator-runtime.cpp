@@ -592,13 +592,11 @@ int32_t arrayVsize(ArrayData* ad) {
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx) {
-  bool visible, accessible;
-  TypedValue* val = cls->getSProp(ctx, name, visible, accessible);
+  auto const lookup = cls->getSProp(ctx, name);
 
-  if (UNLIKELY(!visible || !accessible)) {
-    return nullptr;
-  }
-  return val;
+  if (UNLIKELY(!lookup.prop || !lookup.accessible)) return nullptr;
+
+  return lookup.prop;
 }
 
 TypedValue* getSPropOrRaise(const Class* cls,

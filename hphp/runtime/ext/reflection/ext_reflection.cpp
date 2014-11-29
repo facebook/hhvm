@@ -387,55 +387,56 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
 Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
                                                 const String& prop,
                                                 bool force) {
-  StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
+  auto const sd = cls.get();
+  auto const class_ = Unit::lookupClass(sd);
   if (!class_) {
     raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
-  bool visible, accessible;
-  TypedValue* tv = class_->getSProp(
+
+  auto const lookup = class_->getSProp(
     force ? class_ : arGetContextClass(vmfp()),
-    prop.get(), visible, accessible
+    prop.get()
   );
-  if (tv == nullptr) {
+  if (!lookup.prop) {
     raise_error("Class %s does not have a property named %s",
                 sd->data(), prop.get()->data());
   }
-  if (!visible || !accessible) {
+  if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
-  return tvAsVariant(tv);
+  return tvAsVariant(lookup.prop);
 }
 
 void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop, const Variant& value,
+                                             const String& prop,
+                                             const Variant& value,
                                              bool force) {
   if (RuntimeOption::EvalAuthoritativeMode) {
     raise_error("Setting static properties through reflection is not "
       "allowed in RepoAuthoritative mode");
   }
-  StringData* sd = cls.get();
-  Class* class_ = Unit::lookupClass(sd);
-  if (!class_) {
-    raise_error("Non-existent class %s", sd->data());
-  }
+  auto const sd = cls.get();
+  auto const class_ = Unit::lookupClass(sd);
+
+  if (!class_) raise_error("Non-existent class %s", sd->data());
+
   VMRegAnchor _;
-  bool visible, accessible;
-  TypedValue* tv = class_->getSProp(
+
+  auto const lookup = class_->getSProp(
     force ? class_ : arGetContextClass(vmfp()),
-    prop.get(), visible, accessible
+    prop.get()
   );
-  if (tv == nullptr) {
+  if (!lookup.prop) {
     raise_error("Class %s does not have a property named %s",
                 cls.get()->data(), prop.get()->data());
   }
-  if (!visible || !accessible) {
+  if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
-  tvAsVariant(tv) = value;
+  tvAsVariant(lookup.prop) = value;
 }
 
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {

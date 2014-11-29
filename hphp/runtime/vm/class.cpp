@@ -622,44 +622,44 @@ TypedValue* Class::getSPropData(Slot index) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
 
-Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
-                             bool& accessible) const {
-  Slot propInd = lookupDeclProp(key);
+Class::PropLookup<Slot> Class::getDeclPropIndex(
+  const Class* ctx,
+  const StringData* key
+) const {
+  auto const propInd = lookupDeclProp(key);
+
+  auto accessible = false;
+
   if (propInd != kInvalidSlot) {
-    Attr attrs = m_declProperties[propInd].m_attrs;
+    auto const attrs = m_declProperties[propInd].m_attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         !g_context->debuggerSettings.bypassCheck) {
-      // Fetch 'baseClass', which is the class in the inheritance
-      // tree which first declared the property
-      Class* baseClass = m_declProperties[propInd].m_class;
+      // Fetch the class in the inheritance tree which first declared the
+      // property
+      auto const baseClass = m_declProperties[propInd].m_class;
       assert(baseClass);
-      // If ctx == baseClass, we know we have the right property
-      // and we can stop here.
-      if (ctx == baseClass) {
-        accessible = true;
-        return propInd;
-      }
-      // The anonymous context cannot access protected or private
-      // properties, so we can fail fast here.
-      if (ctx == nullptr) {
-        accessible = false;
-        return propInd;
-      }
+
+      // If ctx == baseClass, we have the right property and we can stop here.
+      if (ctx == baseClass) return PropLookup<Slot> { propInd, true };
+
+      // The anonymous context cannot access protected or private properties, so
+      // we can fail fast here.
+      if (ctx == nullptr) return PropLookup<Slot> { propInd, false };
+
       assert(ctx);
       if (attrs & AttrPrivate) {
         // ctx != baseClass and the property is private, so it is not
-        // accessible. We need to keep going because ctx may define a
-        // private property with this name.
+        // accessible. We need to keep going because ctx may define a private
+        // property with this name.
         accessible = false;
       } else {
         if (ctx == (Class*)-1 || ctx->classof(baseClass)) {
-          // the special ctx (Class*)-1 is used by unserialization to
+          // The special ctx (Class*)-1 is used by unserialization to
           // mean that protected properties are ok. Otherwise,
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
-          accessible = true;
-          return propInd;
+          return PropLookup<Slot> { propInd, true };
         }
         if (!baseClass->classof(ctx)) {
           // ctx is not the same, an ancestor, or a descendent of baseClass,
@@ -667,8 +667,7 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
           // be the same or an ancestor of this, so we don't need to check if
           // ctx declares a private property with the same name and we can
           // fail fast here.
-          accessible = false;
-          return propInd;
+          return PropLookup<Slot> { propInd, false };
         }
         // We now know this protected property is accessible, but we need to
         // keep going because ctx may define a private property with the same
@@ -682,105 +681,95 @@ Slot Class::getDeclPropIndex(Class* ctx, const StringData* key,
       accessible = true;
       // If ctx == this, we don't have to check if ctx defines a private
       // property with the same name and we can stop here.
-      if (ctx == this) {
-        return propInd;
-      }
-      // We still need to check if ctx defines a private property with the
-      // same name.
+      if (ctx == this) return PropLookup<Slot> { propInd, true };
+
+      // We still need to check if ctx defines a private property with the same
+      // name.
     }
   } else {
     // We didn't find a visible declared property in this's property map
     accessible = false;
   }
-  // If ctx is an ancestor of this, check if ctx has a private property
-  // with the same name.
+
+  // If ctx is an ancestor of this, check if ctx has a private property with the
+  // same name.
   if (ctx && ctx != (Class*)-1 && classof(ctx)) {
-    Slot ctxPropInd = ctx->lookupDeclProp(key);
+    auto const ctxPropInd = ctx->lookupDeclProp(key);
+
     if (ctxPropInd != kInvalidSlot &&
         ctx->m_declProperties[ctxPropInd].m_class == ctx &&
         (ctx->m_declProperties[ctxPropInd].m_attrs & AttrPrivate)) {
       // A private property from ctx trumps any other property we may
       // have found.
-      accessible = true;
-      return ctxPropInd;
+      return PropLookup<Slot> { ctxPropInd, true };
     }
   }
-  return propInd;
+
+  return PropLookup<Slot> { propInd, accessible };
 }
 
-Slot Class::findSProp(Class* ctx, const StringData* sPropName,
-                      bool& visible, bool& accessible) const {
-  Slot sPropInd = lookupSProp(sPropName);
-  if (sPropInd == kInvalidSlot) {
-    // Non-existent property.
-    visible = false;
-    accessible = false;
-    return kInvalidSlot;
-  }
+Class::PropLookup<Slot> Class::findSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
+  auto const sPropInd = lookupSProp(sPropName);
 
-  visible = true;
-  if (ctx == this) {
-    // Property access is from within a method of this class, so the property
-    // is accessible.
-    accessible = true;
-  } else {
-    Attr sPropAttrs = m_staticProperties[sPropInd].m_attrs;
-    if ((ctx != nullptr) && (classof(ctx) || ctx->classof(this))) {
+  // Non-existent property.
+  if (sPropInd == kInvalidSlot) return PropLookup<Slot> { kInvalidSlot, false };
+
+  // Property access within this Class's context.
+  if (ctx == this) return PropLookup<Slot> { sPropInd, true };
+
+  auto const sPropAttrs = m_staticProperties[sPropInd].m_attrs;
+
+  auto const accessible = [&] {
+    switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
+      // Public properties are always accessible.
+      case AttrPublic:
+        return true;
+
       // Property access is from within a parent class's method, which is
-      // allowed for protected/public properties.
-      switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-        case AttrPublic:
-        case AttrProtected:
-          accessible = true;
-          break;
-        case AttrPrivate:
-          accessible = g_context->debuggerSettings.bypassCheck;
-          break;
-        default:
-          not_reached();
-      }
-    } else {
-      // Property access is in an effectively anonymous context, so only public
-      // properties are accessible.
-      switch (sPropAttrs & (AttrPublic|AttrProtected|AttrPrivate)) {
-        case AttrPublic:
-          accessible = true;
-          break;
-        case AttrProtected:
-        case AttrPrivate:
-          accessible = g_context->debuggerSettings.bypassCheck;
-          break;
-        default:
-          not_reached();
-      }
-    }
-  }
+      // allowed for protected properties.
+      case AttrProtected:
+        return ctx != nullptr && (classof(ctx) || ctx->classof(this));
 
-  return sPropInd;
+      // Can only access private properties via the debugger.
+      case AttrPrivate:
+        return g_context->debuggerSettings.bypassCheck;
+
+      default: break;
+    }
+    not_reached();
+  }();
+
+  return PropLookup<Slot> { sPropInd, accessible };
 }
 
-TypedValue* Class::getSProp(Class* ctx, const StringData* sPropName,
-                            bool& visible, bool& accessible) const {
+Class::PropLookup<TypedValue*> Class::getSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
   initialize();
 
-  Slot sPropInd = findSProp(ctx, sPropName, visible, accessible);
-  if (sPropInd == kInvalidSlot) {
-    return nullptr;
+  auto const lookup = findSProp(ctx, sPropName);
+  if (lookup.prop == kInvalidSlot) {
+    return PropLookup<TypedValue*> { nullptr, false };
   }
 
-  TypedValue* sProp = getSPropData(sPropInd);
+  auto const sProp = getSPropData(lookup.prop);
   assert(sProp && sProp->m_type != KindOfUninit &&
-         "static property initialization failed to initialize a property");
-  return sProp;
+         "Static property initialization failed to initialize a property.");
+  return PropLookup<TypedValue*> { sProp, lookup.accessible };
 }
 
-RefData* Class::zGetSProp(Class* ctx, const StringData* sPropName,
-                          bool& visible, bool& accessible) const {
-  auto tv = getSProp(ctx, sPropName, visible, accessible);
-  if (tv->m_type != KindOfRef) {
-    tvBox(tv);
-  }
-  return tv->m_data.pref;
+Class::PropLookup<RefData*> Class::zGetSProp(
+  const Class* ctx,
+  const StringData* sPropName
+) const {
+  auto const lookup = getSProp(ctx, sPropName);
+  if (lookup.prop->m_type != KindOfRef) tvBox(lookup.prop);
+
+  return PropLookup<RefData*> { lookup.prop->m_data.pref, lookup.accessible };
 }
 
 bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {

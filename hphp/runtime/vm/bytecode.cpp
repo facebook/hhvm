@@ -2869,8 +2869,13 @@ static inline void lookup_sprop(ActRec* fp,
                                 bool& accessible) {
   assert(clsRef->m_type == KindOfClass);
   name = lookup_name(key);
-  Class* ctx = arGetContextClass(fp);
-  val = clsRef->m_data.pcls->getSProp(ctx, name, visible, accessible);
+  auto const ctx = arGetContextClass(fp);
+
+  auto const lookup = clsRef->m_data.pcls->getSProp(ctx, name);
+
+  val = lookup.prop;
+  visible = lookup.prop != nullptr;
+  accessible = lookup.accessible;
 }
 
 static inline void lookupClsRef(TypedValue* input,
@@ -3141,12 +3146,12 @@ OPTBLD_INLINE bool ExecutionContext::memberHelperPre(
     goto lcodeSprop;
 
   lcodeSprop: {
-    bool visible, accessible;
     assert(cref->m_type == KindOfClass);
-    const Class* class_ = cref->m_data.pcls;
-    StringData* name = lookup_name(pname);
-    loc = class_->getSProp(ctx, name, visible, accessible);
-    if (!(visible && accessible)) {
+    auto const class_ = cref->m_data.pcls;
+    auto const name = lookup_name(pname);
+    auto const lookup = class_->getSProp(ctx, name);
+    loc = lookup.prop;
+    if (!lookup.prop || !lookup.accessible) {
       raise_error("Invalid static property access: %s::%s",
                   class_->name()->data(),
                   name->data());

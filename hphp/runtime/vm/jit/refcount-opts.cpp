@@ -53,6 +53,10 @@ using HPHP::Trace::indent;
 // A Point is an id representing a program point, determined by IdMap.
 typedef uint32_t Point;
 
+struct NotWorthOptimizing : std::runtime_error {
+  NotWorthOptimizing() : std::runtime_error("NotWorthOptimizing") {}
+};
+
 /*
  * IdMap stores a linear position id for program points before (even numbers)
  * and after (odd numbers) each instruction. The distinction is necessary so we
@@ -965,6 +969,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeAllFrames();
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeCurrentLocals();
+    } else if (m_inst->is(CreateCont)) {
+      // We don't know how to correctly analyze the behavior of $this, and we
+      // get it wrong in the translation for CreateCont right now.  Easiest
+      // thing is to just punt.
+      throw NotWorthOptimizing();
     } else if (m_inst->is(CreateCont, CreateAFWH)) {
       consumeInputs();
       consumeCurrentLocals();
@@ -1904,26 +1913,31 @@ void optimizeRefcounts(IRUnit& unit, FrameStateMgr&& fs) {
   IdMap ids(blocks, unit);
 
   Indent _i;
-  auto const sinkPoints =
-    SinkPointAnalyzer(&blocks, &ids, unit, std::move(fs)).find();
-  ITRACE(2, "Found sink points:\n{}\n", show(sinkPoints, ids));
+  try {
+    auto const sinkPoints =
+      SinkPointAnalyzer(&blocks, &ids, unit, std::move(fs)).find();
+    ITRACE(2, "Found sink points:\n{}\n", show(sinkPoints, ids));
 
-  BlockMap before;
-  if (RuntimeOption::EvalHHIRValidateRefCount) {
-    getRefDeltas(unit, before);
-  }
-
-  sinkIncRefs(unit, sinkPoints, ids);
-  eliminateRefcounts(unit, sinkPoints, ids);
-  eliminateTakes(blocks);
-
-  if (RuntimeOption::EvalHHIRValidateRefCount) {
-    BlockMap after;
-    getRefDeltas(unit, after);
-    if (!validateDeltas(before, after)) {
-      printUnit(0, unit, "after refcount optimization");
-      always_assert(false && "refcount validation failed");
+    BlockMap before;
+    if (RuntimeOption::EvalHHIRValidateRefCount) {
+      getRefDeltas(unit, before);
     }
+
+    sinkIncRefs(unit, sinkPoints, ids);
+    eliminateRefcounts(unit, sinkPoints, ids);
+    eliminateTakes(blocks);
+
+    if (RuntimeOption::EvalHHIRValidateRefCount) {
+      BlockMap after;
+      getRefDeltas(unit, after);
+      if (!validateDeltas(before, after)) {
+        printUnit(0, unit, "after refcount optimization");
+        always_assert(false && "refcount validation failed");
+      }
+    }
+  } catch (const NotWorthOptimizing&) {
+    FTRACE(2, "region contained IR opcodes that suggest it's a situation "
+      "we don't know how to analyze\n");
   }
 
   FTRACE(2, "^^^^^^^^^^ refcount opts ^^^^^^^^^^\n");

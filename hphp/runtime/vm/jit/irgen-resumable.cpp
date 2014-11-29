@@ -188,6 +188,10 @@ void emitCreateCont(HTS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
+  // This must happen before we allocate the generator, because we don't want
+  // to have to decref it while unwinding.
+  retSurpriseCheck(env, fp(env), nullptr, makeCatch(env), false);
+
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
@@ -200,13 +204,6 @@ void emitCreateCont(HTS& env) {
         cns(env, func->numSlotsInFrame()),
         resumeAddr,
         cns(env, resumeOffset));
-
-  // Teleport local variables into the generator.
-  auto const contAR = gen(env, LdContActRec, cont);
-
-  // Call the FunctionSuspend hook and put the return value on the stack so that
-  // the unwinder would decref it.
-  retSurpriseCheck(env, contAR, nullptr, makeCatch(env, {cont}), false);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.

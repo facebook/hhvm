@@ -45,3 +45,6 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/hphpize
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hphpize.cmake
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/hphpize"
   COMPONENT dev)
+install(FILES ${HPHP_HOME}/hphp/test/run
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/hphpize"
+  COMPONENT dev)

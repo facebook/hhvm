@@ -951,6 +951,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       for (uint32_t i = 0; i < nSrcs; ++i) {
         resolveValue(m_inst->src(i));
       }
+    } else if (m_inst->is(BeginCatch)) {
+      consumeExceptional(*m_block->preds().front().inst());
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
@@ -1043,6 +1045,21 @@ struct SinkPointAnalyzer : private LocalStateHook {
       if (auto value = m_frameState.localValue(i)) {
         consumeValue(value);
       }
+    }
+  }
+
+  /*
+   * Some unusual instructions consume sources only if they ended up throwing
+   * an exception.
+   */
+  void consumeExceptional(const IRInstruction& inst) {
+    switch (inst.op()) {
+    case LookupClsMethod: consumeValueAfter(inst.src(1)); break;
+    case LdArrFuncCtx:    consumeValueAfter(inst.src(0)); break;
+    case LdArrFPushCuf:   consumeValueAfter(inst.src(0)); break;
+    case LdStrFPushCuf:   consumeValueAfter(inst.src(0)); break;
+    default:
+      break;
     }
   }
 
@@ -1239,6 +1256,15 @@ struct SinkPointAnalyzer : private LocalStateHook {
   }
   void consumeValue(SSATmp* value)          { consumeValueImpl(value, false); }
   void consumeValueEraseOnly(SSATmp* value) { consumeValueImpl(value, true); }
+
+  // Just like consumeValue, except the sync point is after the current
+  // instruction.
+  void consumeValueAfter(SSATmp* value) {
+    if (value->type().notCounted()) return;
+    auto const root = canonical(value);
+    consumeValue(root, m_state.values[root],
+                 SinkPoint(m_ids.after(m_inst), value, false));
+  }
 
   void consumeValue(SSATmp* value, Value& valState, SinkPoint sinkPoint) {
     ITRACE(3, "consuming value {}\n", *value->inst());

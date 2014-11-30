@@ -40,9 +40,7 @@ TRACE_SET_MOD(hhir);
  * generated when instructions that can throw are gen'd, so for now we're not
  * bothering to find a better structure for the dependency.
  */
-Block* makeCatch(HTS&,
-                 std::vector<SSATmp*> extraSpill = {},
-                 int64_t numPop = 0);
+Block* makeCatch(HTS&);
 
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors

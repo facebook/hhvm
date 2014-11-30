@@ -119,16 +119,11 @@ Block* makeCatchImpl(HTS& env, Body body) {
 Block* makeCatchNoSpill(HTS& env);
 
 /*
- * Create a catch block that spills the current state of the eval stack. The
- * incoming value of spillVals will be the top of the spilled stack: values in
- * the eval stack will be appended to spillVals to form the sources for the
- * SpillStack.
+ * Create a catch block that spills the current state of the eval stack.
  *
  * Note: declared in ht-internal right now.
  */
-// Block* makeCatch(HTS&,
-//                  std::vector<SSATmp*> extraSpill = {},
-//                  int64_t numPop = 0);
+// Block* makeCatch(HTS&);
 
 //////////////////////////////////////////////////////////////////////
 

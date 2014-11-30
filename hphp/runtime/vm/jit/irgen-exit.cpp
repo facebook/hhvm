@@ -202,11 +202,10 @@ Block* makeCatchNoSpill(HTS& env) {
   return makeCatchImpl(env, [&] { return sp(env); });
 }
 
-Block* makeCatch(HTS& env, std::vector<SSATmp*> spillVals, int64_t numPop) {
+Block* makeCatch(HTS& env) {
   return makeCatchImpl(env, [&] {
     auto spills = peekSpillValues(env);
-    spills.insert(spills.begin(), spillVals.begin(), spillVals.end());
-    return implSpillStack(env, sp(env), spills, numPop);
+    return implSpillStack(env, sp(env), spills, 0);
   });
 }
 

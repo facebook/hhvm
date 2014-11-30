@@ -120,8 +120,7 @@ void fpushObjMethodUnknown(HTS& env,
                            SSATmp* obj,
                            const StringData* methodName,
                            int32_t numParams,
-                           bool shouldFatal,
-                           SSATmp* extraSpill) {
+                           bool shouldFatal) {
   spillStack(env);
   fpushActRec(env,
               cns(env, Type::Nullptr),  // Will be set by LdObjMethod
@@ -131,28 +130,14 @@ void fpushObjMethodUnknown(HTS& env,
   auto const actRec = spillStack(env);
   auto const objCls = gen(env, LdObjClass, obj);
 
-  // This is special. We need to move the stackpointer in case
-  // LdObjMethod calls a destructor. Otherwise it would clobber the
-  // ActRec we just pushed.
+  // This is special.  We need to move the stackpointer in case LdObjMethod
+  // calls a destructor.  Otherwise it would clobber the ActRec we just pushed.
   updateMarker(env);
-  Block* catchBlock;
-  if (extraSpill) {
-    /*
-     * If LdObjMethod throws, it nulls out the ActRec (since the unwinder
-     * will attempt to destroy it as if it were cells), and then writes
-     * obj into the last entry, since we need it to be destroyed.
-     * If we have another object to destroy, we should write it in
-     * the first - so pop 1 cell, then push extraSpill.
-     */
-    auto spill = std::vector<SSATmp*>{extraSpill};
-    catchBlock = makeCatch(env, spill, 1);
-  } else {
-    catchBlock = makeCatchNoSpill(env);
-  }
+
   gen(env,
       LdObjMethod,
       LdObjMethodData { methodName, shouldFatal },
-      catchBlock,
+      makeCatch(env),
       objCls,
       actRec);
 }
@@ -161,8 +146,7 @@ void fpushObjMethodCommon(HTS& env,
                           SSATmp* obj,
                           const StringData* methodName,
                           int32_t numParams,
-                          bool shouldFatal,
-                          SSATmp* extraSpill) {
+                          bool shouldFatal) {
   SSATmp* objOrCls = obj;
   const Class* baseClass = nullptr;
   if (obj->type().isSpecialized()) {
@@ -257,8 +241,7 @@ void fpushObjMethodCommon(HTS& env,
     return;
   }
 
-  fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal,
-    extraSpill);
+  fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
 }
 
 void fpushFuncObj(HTS& env, int32_t numParams) {
@@ -287,7 +270,7 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   // pushed.
   updateMarker(env);
 
-  gen(env, LdArrFuncCtx, makeCatch(env, {arr}, 1), arr, actRec, thisAR);
+  gen(env, LdArrFuncCtx, makeCatch(env), arr, actRec, thisAR);
   gen(env, DecRef, arr);
 }
 
@@ -321,16 +304,21 @@ bool fpushCufArray(HTS& env, SSATmp* callable, int32_t numParams) {
   }
   env.irb->constrainValue(object, DataTypeSpecific);
 
+  // We can see the NewPackedArray callable in this region, and we know it was
+  // size 2, and contained an object and a static string.  We're going to
+  // incref the object, so freeing the array can't call any destructors on the
+  // object, and obviously it can't on the string either.  This means there can
+  // be no observable side effects from decreffing it "out of order", before we
+  // start doing the method dispatch here.
   popC(env);
-
   gen(env, IncRef, object);
+  gen(env, DecRef, callable);
+
   fpushObjMethodCommon(env,
                        object,
                        method->strVal(),
                        numParams,
-                       false /* shouldFatal */,
-                       callable);
-  gen(env, DecRef, callable);
+                       false /* shouldFatal */);
   return true;
 }
 
@@ -372,7 +360,7 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
-  gen(env, opcode, makeCatch(env, {callable}, 1), callable, actRec, fp(env));
+  gen(env, opcode, makeCatch(env), callable, actRec, fp(env));
   gen(env, DecRef, callable);
 }
 
@@ -660,7 +648,7 @@ void emitFPushObjMethodD(HTS& env,
   auto const obj = popC(env);
   if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
   fpushObjMethodCommon(env, obj, methodName, numParams,
-    true /* shouldFatal */, nullptr);
+    true /* shouldFatal */);
 }
 
 void emitFPushClsMethodD(HTS& env,
@@ -770,12 +758,12 @@ void emitFPushClsMethod(HTS& env, int32_t numParams) {
   auto const actRec = spillStack(env);
 
   /*
-   * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec
-   * on the stack and must handle that properly if we throw.
+   * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
+   * stack and must handle that properly if we throw or re-enter.
    */
   updateMarker(env);
 
-  gen(env, LookupClsMethod, makeCatch(env, {methVal, clsVal}), clsVal,
+  gen(env, LookupClsMethod, makeCatch(env), clsVal,
     methVal, actRec, fp(env));
   gen(env, DecRef, methVal);
 }

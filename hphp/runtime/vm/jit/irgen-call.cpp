@@ -274,54 +274,6 @@ void fpushFuncArr(HTS& env, int32_t numParams) {
   gen(env, DecRef, arr);
 }
 
-bool fpushCufArray(HTS& env, SSATmp* callable, int32_t numParams) {
-  if (!callable->isA(Type::Arr)) return false;
-
-  auto callableInst = callable->inst();
-  if (!callableInst->is(NewPackedArray)) return false;
-
-  auto callableSize = callableInst->src(0);
-  if (!callableSize->isConst() ||
-      callableSize->intVal() != 2) {
-    return false;
-  }
-
-  auto method = getStackValue(sp(env), 0).value;
-  auto object = getStackValue(sp(env), 1).value;
-  if (!method || !object) return false;
-
-  if (!method->isConst(Type::Str) ||
-      strstr(method->strVal()->data(), "::") != nullptr) {
-    return false;
-  }
-
-  if (!object->isA(Type::Obj)) {
-    if (!object->type().equals(Type::Cell)) return false;
-    // This is probably an object, and we just haven't guarded on
-    // the type.  Do so now.
-    auto const exit = makeExit(env);
-    object = gen(env, CheckType, Type::Obj, exit, object);
-  }
-  env.irb->constrainValue(object, DataTypeSpecific);
-
-  // We can see the NewPackedArray callable in this region, and we know it was
-  // size 2, and contained an object and a static string.  We're going to
-  // incref the object, so freeing the array can't call any destructors on the
-  // object, and obviously it can't on the string either.  This means there can
-  // be no observable side effects from decreffing it "out of order", before we
-  // start doing the method dispatch here.
-  popC(env);
-  gen(env, IncRef, object);
-  gen(env, DecRef, callable);
-
-  fpushObjMethodCommon(env,
-                       object,
-                       method->strVal(),
-                       numParams,
-                       false /* shouldFatal */);
-  return true;
-}
-
 // FPushCuf when the callee is not known at compile time.
 void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
   if (op != Op::FPushCuf) {
@@ -334,12 +286,7 @@ void fpushCufUnknown(HTS& env, Op op, int32_t numParams) {
     PUNT(fpushCufUnknown);
   }
 
-  // Peek at the top of the stack before deciding to pop it.
-  auto const callable = topC(env);
-  if (fpushCufArray(env, callable, numParams)) return;
-
-  popC(env);
-
+  auto const callable = popC(env);
   fpushActRec(
     env,
     cns(env, Type::Nullptr),

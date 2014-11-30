@@ -977,7 +977,6 @@ X(StClosureArg,                 PropByteOffset);
 X(RBTrace,                      RBTraceData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
-X(NewPackedArray,               PackedArrayData);
 X(AllocPackedArray,             PackedArrayData);
 X(InitPackedArrayLoop,          PackedArrayData);
 X(InitPackedArray,              IndexData);

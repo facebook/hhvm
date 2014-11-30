@@ -461,7 +461,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewMIArray:
   case NewMixedArray:
   case NewMSArray:
-  case NewPackedArray:
   case NewStructArray:
   case NewVArray:
   case AllocPackedArray:

@@ -244,21 +244,11 @@ void emitNewLikeArrayL(HTS& env, int32_t id, int32_t capacity) {
 }
 
 void emitNewPackedArray(HTS& env, int32_t numArgs) {
-  auto const extra = PackedArrayData { static_cast<uint32_t>(numArgs) };
   if (numArgs > kPackedCapCodeThreshold) {
-    // The NewPackedArray opcode's helper needs array values passed to it
-    // via the stack.  We use spillStack() to flush the eval stack and
-    // obtain a pointer to the topmost item; if over-flushing becomes
-    // a problem then we should refactor the NewPackedArray opcode to
-    // take its values directly as SSA operands.
-    //
-    // We only emit NewPackedArray when the array literal is too large for the
-    // normal inline AllocNewPackedArray/InitPackedArray IR nodes to handle.
-    auto const stack = touchArgsSpillStackAndPopArgs(env, numArgs);
-    push(env, gen(env, NewPackedArray, extra, stack));
-    return;
+    PUNT(NewPackedArray-UnrealisticallyHuge);
   }
 
+  auto const extra = PackedArrayData { static_cast<uint32_t>(numArgs) };
   auto const array = gen(env, AllocPackedArray, extra);
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {

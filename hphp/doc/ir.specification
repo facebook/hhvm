@@ -1229,12 +1229,6 @@ generating efficient compare-and-branch instruction sequences.
   Allocate a new array in the same mode as S0 and with expected capacity S1,
   unless S1 == 0, in which case the capacity is set to S0's size.
 
-| NewPackedArray, DArrPacked, S(StkPtr), E|PRc|CRc
-
-  Allocate a new array by taking the top size elements off the stack given by
-  S0. Note that this instruction assumes it can take the values from the stack
-  without increfing them.
-
 | AllocPackedArray<size>, DArrPacked, NA, E|PRc
 
   Allocate a new uninitialized packed array with space for size elements in it.

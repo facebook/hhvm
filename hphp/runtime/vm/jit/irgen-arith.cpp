@@ -541,7 +541,8 @@ void emitDiv(HTS& env) {
 
   // we can't codegen this but we may be able to special case it away
   if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
-    // TODO(#2570625): support integer-integer division, move this to simlifier:
+    // TODO(#2570625): support integer-integer division, move this to
+    // simplifier:
     if (divisor->isConst()) {
       int64_t divisorVal;
       if (divisor->isA(Type::Int)) {
@@ -594,50 +595,61 @@ void emitDiv(HTS& env) {
     return src;
   };
 
+  auto const catchBlock = makeCatch(env);
   divisor  = make_double(popC(env));
   dividend = make_double(popC(env));
 
-  // on division by zero we spill false and exit with a warning
-  auto exitSpillValues = peekSpillValues(env);
-  exitSpillValues.push_back(cns(env, false));
-
-  auto const exit = makeExitWarn(
-    env,
-    nextBcOff(env),
-    exitSpillValues,
-    makeStaticString(Strings::DIVISION_BY_ZERO)
+  SSATmp* divVal = nullptr;  // edge-defined value
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      divVal = gen(env, DivDbl, taken, dividend, divisor);
+    },
+    [&] {
+      // Make progress by raising a warning and pushing false before
+      // side-exiting to the next instruction.
+      env.irb->hint(Block::Hint::Unlikely);
+      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+      gen(env, RaiseWarning, catchBlock, msg);
+      push(env, cns(env, false));
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    }
   );
 
-  assert(divisor->isA(Type::Dbl) && dividend->isA(Type::Dbl));
-  push(env, gen(env, DivDbl, exit, dividend, divisor));
+  push(env, divVal);
 }
 
 void emitMod(HTS& env) {
   auto const catchBlock1 = makeCatch(env);
   auto const catchBlock2 = makeCatch(env);
+  auto const catchBlock3 = makeCatch(env);
   auto const btr = popC(env);
   auto const btl = popC(env);
   auto const tr = gen(env, ConvCellToInt, catchBlock1, btr);
   auto const tl = gen(env, ConvCellToInt, catchBlock2, btl);
 
-  // We only want to decref btr and btl if the ConvCellToInt operation gave us
-  // a new value back.
-  if (tr != btr) gen(env, DecRef, btr);
-  if (tl != btl) gen(env, DecRef, btl);
-  // Exit path spills an additional false
-  auto exitSpillValues = peekSpillValues(env);
-  exitSpillValues.push_back(cns(env, false));
-
-  // Generate an exit for the rare case that r is zero.  Interpreting
-  // will raise a notice and produce the boolean false.  Punch out
-  // here and resume after the Mod instruction; this should be rare.
-  auto const exit = makeExitWarn(
-    env,
-    nextBcOff(env),
-    exitSpillValues,
-    makeStaticString(Strings::DIVISION_BY_ZERO)
+  // Generate an exit for the rare case that r is zero.
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      gen(env, JmpZero, taken, tr);
+    },
+    [&] {
+      // Make progress before side-exiting to the next instruction: raise a
+      // warning and push false.
+      env.irb->hint(Block::Hint::Unlikely);
+      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+      gen(env, RaiseWarning, catchBlock3, msg);
+      gen(env, DecRef, btr);
+      gen(env, DecRef, btl);
+      push(env, cns(env, false));
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    }
   );
-  gen(env, JmpZero, exit, tr);
+
+  // DecRefs on the main line must happen after the potentially-throwing exit
+  // above: if we throw during the RaiseWarning, those values must still be on
+  // the stack.
+  gen(env, DecRef, btr);
+  gen(env, DecRef, btl);
 
   // We unfortunately need to special-case r = -1 here. In two's
   // complement, trying to divide INT_MIN by -1 will cause an integer

@@ -46,19 +46,6 @@ Block* makePseudoMainExit(HTS& env, Offset targetBcOff /* = -1 */) {
     : nullptr;
 }
 
-Block* makeExitWarn(HTS& env,
-                    Offset targetBcOff,
-                    std::vector<SSATmp*>& spillValues,
-                    const StringData* warning) {
-  assert(targetBcOff != -1);
-  return makeExitImpl(env, targetBcOff, ExitFlag::JIT, spillValues,
-    [&]() -> SSATmp* {
-      gen(env, RaiseWarning, makeCatchNoSpill(env), cns(env, warning));
-      return nullptr;
-    }
-  );
-}
-
 Block* makeExitError(HTS& env, SSATmp* msg, Block* catchBlock) {
   auto const exit = env.irb->makeExit();
   BlockPusher bp(*env.irb, env.irb->nextMarker(), exit);

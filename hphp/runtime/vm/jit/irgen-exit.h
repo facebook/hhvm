@@ -43,10 +43,6 @@ Block* makeExit(HTS&, TransFlags trflags);
 Block* makeExit(HTS&, Offset targetBcOff,
                 std::vector<SSATmp*>& spillValues,
                 TransFlags trflags = TransFlags{});
-Block* makeExitWarn(HTS&,
-                    Offset targetBcOff,
-                    std::vector<SSATmp*>& spillValues,
-                    const StringData* warning);
 Block* makeExitError(HTS&, SSATmp* msg, Block* catchBlock);
 Block* makeExitNullThis(HTS&);
 Block* makePseudoMainExit(HTS&, Offset targetBcOff = -1);

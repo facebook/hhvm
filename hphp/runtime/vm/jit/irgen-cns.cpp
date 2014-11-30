@@ -130,17 +130,6 @@ void emitClsCnsD(HTS& env,
   auto const outPred = env.currentNormalizedInstruction->outPred; // TODO: rm
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
-  // If we have to side exit, do the RDS lookup before chaining to
-  // another Tracelet so forward progress still happens.
-  auto catchBlock = makeCatchNoSpill(env);
-  auto const sideExit = makeSideExit(
-    env,
-    nextBcOff(env),
-    [&] {
-      return gen(env, LookupClsCns, catchBlock, clsCnsName);
-    }
-  );
-
   /*
    * If the class is already defined in this request, the class is persistent
    * or a parent of the current context, and this constant is a scalar
@@ -170,8 +159,23 @@ void emitClsCnsD(HTS& env,
   );
   auto const guardType = outPred < Type::UncountedInit ? outPred
                                                        : Type::UncountedInit;
-  gen(env, CheckTypeMem, guardType, sideExit, prds);
-  push(env, gen(env, LdMem, guardType, prds, cns(env, 0)));
+
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      gen(env, CheckTypeMem, guardType, taken, prds);
+    },
+    [&] {
+      // Make progress through this instruction before side-exiting to the next
+      // instruction, by doing a slower lookup.
+      env.irb->hint(Block::Hint::Unlikely);
+      auto const val = gen(env, LookupClsCns, makeCatch(env), clsCnsName);
+      push(env, val);
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    }
+  );
+
+  auto const val = gen(env, LdMem, guardType, prds, cns(env, 0));
+  push(env, val);
 }
 
 //////////////////////////////////////////////////////////////////////

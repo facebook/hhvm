@@ -119,7 +119,6 @@ Block* makeExitImpl(HTS& env,
                     const CustomExit& customFn,
                     TransFlags trflags) {
   auto const curBcOff = bcOff(env);
-  auto const currentMarker = makeMarker(env, curBcOff);
   env.irb->evalStack().swap(stackValues);
   SCOPE_EXIT {
     env.bcStateStack.back().setOffset(curBcOff);
@@ -129,13 +128,9 @@ Block* makeExitImpl(HTS& env,
   auto exitMarker = makeMarker(env, targetBcOff);
 
   auto const exit = env.irb->makeExit();
-  BlockPusher tp(*env.irb,
-                 flag == ExitFlag::DelayedMarker ? currentMarker : exitMarker,
-                 exit);
+  BlockPusher tp(*env.irb, exitMarker, exit);
 
-  if (flag != ExitFlag::DelayedMarker) {
-    env.bcStateStack.back().setOffset(targetBcOff);
-  }
+  env.bcStateStack.back().setOffset(targetBcOff);
 
   auto stack = spillStack(env);
 
@@ -151,11 +146,6 @@ Block* makeExitImpl(HTS& env,
       );
       exitMarker.setSpOff(exitMarker.spOff() + 1);
     }
-  }
-
-  if (flag == ExitFlag::DelayedMarker) {
-    env.irb->setNextMarker(exitMarker);
-    env.bcStateStack.back().setOffset(targetBcOff);
   }
 
   if (flag == ExitFlag::Interp) {

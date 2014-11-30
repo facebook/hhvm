@@ -64,9 +64,6 @@ Block* makeExitSlow(HTS&);
 enum class ExitFlag {
   Interp,     // will bail to the interpreter to execute at least one BC instr
   JIT,        // will attempt to use the JIT to create a new translation
-  // DelayedMarker means to use the current instruction marker
-  // instead of one for targetBcOff.
-  DelayedMarker,
 };
 using CustomExit = std::function<SSATmp* ()>;
 Block* makeExitImpl(HTS&,
@@ -75,19 +72,6 @@ Block* makeExitImpl(HTS&,
                     std::vector<SSATmp*>& spillValues,
                     const CustomExit& customFn,
                     TransFlags trflags = TransFlags{});
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Generate a side-exit that runs the code from `exit' before leaving the
- * region.
- */
-template<class ExitLambda>
-Block* makeSideExit(HTS& env, Offset targetBcOff, ExitLambda exit) {
-  auto spillValues = peekSpillValues(env);
-  return makeExitImpl(env, targetBcOff,
-    ExitFlag::DelayedMarker, spillValues, exit);
-}
 
 //////////////////////////////////////////////////////////////////////
 

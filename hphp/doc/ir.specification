@@ -2381,7 +2381,14 @@ fields of that struct for holding intermediate values.
 
 |STK SetElem, DSetElem, S(PtrToGen) S(Cell) S(Cell), MElem|E|PRc|Er
 
-  Set element with key S1 in S0 to S2.
+  Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
+  case, where the logical result of the hhbc SetM is its right hand side. In
+  the case of string bases, the SetM returns a new string containing the newly
+  inserted character. So the return value of this instruction is Nullptr unless
+  SetM needed to create a new counted string.
+
+  Furthermore, in the case of "invalid offsets", SetElem may throw an
+  InvalidSetMException (see discussion above).
 
 |STK SetWithRefElem, ND,
 |                    S(PtrToGen) S(Cell) S(PtrToGen) S(PtrToMISGen),

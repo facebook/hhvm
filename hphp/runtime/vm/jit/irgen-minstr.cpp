@@ -1940,34 +1940,19 @@ void emitSideExits(MTS& env, SSATmp* catchSp, int nStack) {
     // We expected SetElem's base to not be a Str but might be wrong. Make an
     // exit trace to side exit to the next instruction, replacing our guess
     // with the correct stack output.
-
-    auto toSpill = peekSpillValues(env);
-    assert(toSpill.size());
-    assert(toSpill.back() == env.result);
-    auto const str = env.unit.gen(
-      AssertNonNull,
-      env.marker,
-      env.strTestResult
-    )->dst();
-    toSpill.back() = str;
-
-    auto const exit = makeExit(env, nextOff, toSpill);
-    {
-      BlockPauser tp(env.irb, env.marker, exit, exit->skipHeader());
-      gen(env,
-          IncStat,
-          cns(env, Stats::TC_SetMStrGuess_Miss),
-          cns(env, 1),
-          cns(env, false));
-      gen(env, DecRef, env.result);
-      env.irb.add(str->inst());
-    }
-    gen(env, CheckNullptr, exit, env.strTestResult);
-    gen(env,
-        IncStat,
-        cns(env, Stats::TC_SetMStrGuess_Hit),
-        cns(env, 1),
-        cns(env, false));
+    env.irb.ifThen(
+      [&] (Block* taken) {
+        gen(env, CheckNullptr, taken, env.strTestResult);
+      },
+      [&] {
+        env.irb.hint(Block::Hint::Unlikely);
+        auto const str = gen(env, AssertNonNull, env.strTestResult);
+        popC(env);  // we already pushed env.result
+        gen(env, DecRef, env.result);
+        push(env, str);
+        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      }
+    );
   }
 }
 

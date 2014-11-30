@@ -22,4 +22,4 @@ function NewRedisTestInstance() {
 }
 
 $r = NewRedisTestInstance();
-if($r) echo true;
+if ($r) echo true;

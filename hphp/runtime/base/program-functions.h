@@ -18,6 +18,7 @@
 #define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
 #include "hphp/runtime/base/types.h"
+#include <boost/program_options/parsers.hpp>
 
 // Needed for compatibility with oniguruma-5.9.4+
 #define ONIG_ESCAPE_UCHAR_COLLISION
@@ -63,6 +64,18 @@ std::string translate_stack(const char *hexencoded,
 
 time_t start_time();
 
+// Boost 1.54 has a bug where it doesn't handle options with - in them as
+// it only gives us the string after the last -
+// https://github.com/facebook/hhvm/issues/2864
+// This won't fix the problem in 100% of cases (e.g. two options are
+// used that both end in the same substring. How do you choose?) But
+// that should be very rare.
+#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
+std::string get_right_option_name(
+  const boost::program_options::basic_parsed_options<char>& opts,
+  std::string& wrong_name);
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ExecutionContext;
@@ -101,7 +114,6 @@ extern const char* const kCompilerId;
 
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

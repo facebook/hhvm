@@ -143,7 +143,7 @@ struct RelocationInfo {
   RangeVec m_srcRanges;
   RangeVec m_dstRanges;
   /*
-   * maps from src address, to range of destination addresse
+   * maps from src address, to range of destination address
    * This is because we could insert nops before the instruction
    * corresponding to src. Most things want the address of the
    * instruction corresponding to the src instruction; but eg

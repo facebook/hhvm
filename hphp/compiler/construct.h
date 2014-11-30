@@ -297,7 +297,7 @@ private:
       unsigned referenced_valid    : 1; // is the above flag is valid
       unsigned needed              : 1;
       unsigned needed_valid        : 1; // is the above flag is valid
-      unsigned chainRoot           : 1; // is this the begining of a
+      unsigned chainRoot           : 1; // is this the beginning of a
                                         // CSE chain
       unsigned noRemove            : 1; // DCE should NOT remove this node
       unsigned guarded             : 1; // previously used

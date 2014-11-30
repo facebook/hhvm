@@ -1301,7 +1301,7 @@ new_session:
   /* Read data */
   /* Question: if you create a SID here, should you also try to read data?
    * I'm not sure, but while not doing so will remove one session operation
-   * it could prove usefull for those sites which wish to have "default"
+   * it could prove useful for those sites which wish to have "default"
    * session information
    */
 

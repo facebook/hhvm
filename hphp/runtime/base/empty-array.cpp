@@ -121,7 +121,7 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
 
 /*
  * Helper for empty array -> packed transitions.  Creates an array
- * with one element.  The element is transfered into the array (should
+ * with one element.  The element is transferred into the array (should
  * already be incref'd).
  */
 ALWAYS_INLINE

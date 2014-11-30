@@ -124,7 +124,7 @@ static signed int get_cursor_header(mongo_connection *con, mongo_cursor *cursor,
 		return abs(status);
 	} else if (status < INT_32*4) {
 		*error_message = (char*) malloc(256);
-		snprintf(*error_message, 256, "couldn't get full response header, got %d bytes but expected atleast %d", status, INT_32*4);
+		snprintf(*error_message, 256, "couldn't get full response header, got %d bytes but expected at least %d", status, INT_32*4);
 		return 4;
 	}
 
@@ -1186,7 +1186,7 @@ int mongo_cursor__should_retry(mongo_cursor *cursor)
 }
 
 /* Returns 1 when an error was found and it returns 0 if no error
- * situation has ocurred on the cursor */
+ * situation has occurred on the cursor */
 static int have_error_flags(mongo_cursor *cursor)
 {
 	if (cursor->flag & MONGO_OP_REPLY_ERROR_FLAGS) {
@@ -1197,7 +1197,7 @@ static int have_error_flags(mongo_cursor *cursor)
 }
 
 /* Returns 1 when an error was found and *handled*, and it returns 0 if no error
- * situation has ocurred on the cursor */
+ * situation has occurred on the cursor */
 static int handle_error(mongo_cursor *cursor TSRMLS_DC)
 {
 	zval **err = NULL, **wnote = NULL;

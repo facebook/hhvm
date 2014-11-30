@@ -8,7 +8,7 @@
 #   TBB_ARCH_PLATFORM is set by the build script tbbvars[.bat|.sh|.csh], which can be found
 #   in the TBB installation directory (TBB_INSTALL_DIR).
 #
-# For backwards compatibility, you may explicitely set the CMake variables TBB_ARCHITECTURE and TBB_COMPILER.
+# For backwards compatibility, you may explicitly set the CMake variables TBB_ARCHITECTURE and TBB_COMPILER.
 # TBB_ARCHITECTURE     [ ia32 | em64t | itanium ]
 #   which architecture to use
 # TBB_COMPILER         e.g. vc9 or cc3.2.3_libc2.3.2_kernel2.4.21 or cc4.0.1_os10.4.9

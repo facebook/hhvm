@@ -78,7 +78,7 @@ function test_serialization($obj, $class_whitelist) {
 }
 
 function main(int $argc, array $argv) {
-  // null will be autmatically translated into empty array (see idl definition)
+  // null will be automatically translated into empty array (see idl definition)
   // So it should still not allow any class.
   test_serialization(new A, null);
   test_serialization(new B, array('A'));

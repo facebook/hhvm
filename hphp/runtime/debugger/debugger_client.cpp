@@ -1633,7 +1633,7 @@ do {                                         \
 
 // Parses the current command string. If invalid return false.
 // Otherwise, carry out the command and return true.
-// NB: the command may throw a variety of exceptions derrived from
+// NB: the command may throw a variety of exceptions derived from
 // DebuggerClientException.
 bool DebuggerClient::process() {
   TRACE(2, "DebuggerClient::process\n");

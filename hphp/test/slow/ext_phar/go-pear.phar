@@ -4341,7 +4341,7 @@ class PEAR
     }
 
     /**
-     * This method deletes all occurences of the specified element from
+     * This method deletes all occurrences of the specified element from
      * the expected error codes stack.
      *
      * @param  mixed $error_code error code that should be deleted
@@ -4630,7 +4630,7 @@ class PEAR
     }
 
     /**
-    * OS independant PHP extension load. Remember to take care
+    * OS independent PHP extension load. Remember to take care
     * on the correct extension name for case sensitive OSes.
     *
     * @param string $ext The extension name
@@ -11354,7 +11354,7 @@ packages within preferred_state ({config preferred_state}) will be downloaded'
     * @param string $command the command
     * @param array $options the command options before the command
     * @param array $params the stuff after the command name
-    * @return bool true if succesful
+    * @return bool true if successful
     * @throw PEAR_Error
     */
     function doDownloadAll($command, $options, $params)
@@ -11894,7 +11894,7 @@ used for automated conversion or learning the format.
                 'name' => 'modified',
                 'type' => 'yesno',
                 'default' => 'no',
-                'prompt' => 'You have files in your SVN checkout (' . $path['from']  . ') that have been modified but not commited, do you still want to tag ' . $version . '?',
+                'prompt' => 'You have files in your SVN checkout (' . $path['from']  . ') that have been modified but not committed, do you still want to tag ' . $version . '?',
             ));
             $answers = $this->ui->confirmDialog($params);
 
@@ -19288,7 +19288,7 @@ class PEAR_Dependency2
      * @param boolean whether this is a required dependency
      * @param array a list of downloaded packages to be installed, if any
      * @param boolean if true, then deps on pear.php.net that fail will also check
-     *                against pecl.php.net packages to accomodate extensions that have
+     *                against pecl.php.net packages to accommodate extensions that have
      *                moved to pecl.php.net from pear.php.net
      */
     function validatePackageDependency($dep, $required, $params, $depv1 = false)
@@ -35247,7 +35247,7 @@ packages within preferred_state ({config preferred_state}) will be downloaded'
     * @param string $command the command
     * @param array $options the command options before the command
     * @param array $params the stuff after the command name
-    * @return bool true if succesful
+    * @return bool true if successful
     * @throw PEAR_Error
     */
     function doDownloadAll($command, $options, $params)
@@ -36006,7 +36006,7 @@ used for automated conversion or learning the format.
                 'name' => 'modified',
                 'type' => 'yesno',
                 'default' => 'no',
-                'prompt' => 'You have files in your SVN checkout (' . $path['from']  . ') that have been modified but not commited, do you still want to tag ' . $version . '?',
+                'prompt' => 'You have files in your SVN checkout (' . $path['from']  . ') that have been modified but not committed, do you still want to tag ' . $version . '?',
             ));
             $answers = $this->ui->confirmDialog($params);
 
@@ -44609,7 +44609,7 @@ http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd',
         ),               // attributes of the root tag
         'attributesArray'    => 'attribs',                  // all values in this key will be treated as attributes
-        'contentName'        => '_content',                   // this value will be used directly as content, instead of creating a new tag, may only be used in conjuction with attributesArray
+        'contentName'        => '_content',                   // this value will be used directly as content, instead of creating a new tag, may only be used in conjunction with attributesArray
         'beautifyFilelist'   => false,
         'encoding' => 'UTF-8',
     );
@@ -49479,7 +49479,7 @@ class PEAR_PackageFile_v2_Validator
                 $pn = $this->_pf->getPackage();
                 $this->_stack->push(__FUNCTION__, 'warning',
                         array('file' => $file, 'package' => $pn),
-                        'in %file%: Could not process file for unkown reasons,' .
+                        'in %file%: Could not process file for unknown reasons,' .
                         ' possibly a PHP parse error in %file% from %package%');
             }
         }
@@ -63161,7 +63161,7 @@ class PEAR_Dependency2
      * @param boolean whether this is a required dependency
      * @param array a list of downloaded packages to be installed, if any
      * @param boolean if true, then deps on pear.php.net that fail will also check
-     *                against pecl.php.net packages to accomodate extensions that have
+     *                against pecl.php.net packages to accommodate extensions that have
      *                moved to pecl.php.net from pear.php.net
      */
     function validatePackageDependency($dep, $required, $params, $depv1 = false)
@@ -76044,7 +76044,7 @@ class PEAR
     }
 
     /**
-     * This method deletes all occurences of the specified element from
+     * This method deletes all occurrences of the specified element from
      * the expected error codes stack.
      *
      * @param  mixed $error_code error code that should be deleted
@@ -76333,7 +76333,7 @@ class PEAR
     }
 
     /**
-    * OS independant PHP extension load. Remember to take care
+    * OS independent PHP extension load. Remember to take care
     * on the correct extension name for case sensitive OSes.
     *
     * @param string $ext The extension name
@@ -79067,7 +79067,7 @@ dd { margin-left: 0px; padding-left: 1em; }
 	</div> 
 	
 	<!-- ========== Info from phpDoc block ========= -->
-<p class="short-description">Test wether this node has an arc to the target node</p>
+<p class="short-description">Test whether this node has an arc to the target node</p>
 	<ul class="tags">
 				<li><span class="field">return:</span> True if the two nodes are connected</li>
 				<li><span class="field">access:</span> public</li>
@@ -80096,7 +80096,7 @@ for ($i=0;$i&lt;sizeof($arcs);$i++) {
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="Structures_Graph/Structures_Graph_Node.html#methodconnectsTo">Structures_Graph_Node::connectsTo()</a> in Node.php</div>
-							<div class="index-item-description">Test wether this node has an arc to the target node</div>
+							<div class="index-item-description">Test whether this node has an arc to the target node</div>
 					</dd>
 			<dt class="field">
 						<span class="method-title">connectTo</span>
@@ -80431,7 +80431,7 @@ for ($i=0;$i&lt;sizeof($arcs);$i++) {
 					</dt>
 		<dd class="index-item-body">
 			<div class="index-item-details"><a href="Structures_Graph/Structures_Graph_Node.html#methodconnectsTo">Structures_Graph_Node::connectsTo()</a> in Node.php</div>
-							<div class="index-item-description">Test wether this node has an arc to the target node</div>
+							<div class="index-item-description">Test whether this node has an arc to the target node</div>
 					</dd>
 			<dt class="field">
 						<span class="method-title">connectTo</span>
@@ -81504,7 +81504,7 @@ class Structures_Graph_Node {
     /* connectsTo {{{ */
     /**
     *
-    * Test wether this node has an arc to the target node
+    * Test whether this node has an arc to the target node
     *
     * @return	boolean   True if the two nodes are connected
     * @access	public
@@ -90106,7 +90106,7 @@ http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd',
         ),               // attributes of the root tag
         'attributesArray'    => 'attribs',                  // all values in this key will be treated as attributes
-        'contentName'        => '_content',                   // this value will be used directly as content, instead of creating a new tag, may only be used in conjuction with attributesArray
+        'contentName'        => '_content',                   // this value will be used directly as content, instead of creating a new tag, may only be used in conjunction with attributesArray
         'beautifyFilelist'   => false,
         'encoding' => 'UTF-8',
     );
@@ -98637,7 +98637,7 @@ class PEAR_PackageFile_v2_Validator
                 $pn = $this->_pf->getPackage();
                 $this->_stack->push(__FUNCTION__, 'warning',
                         array('file' => $file, 'package' => $pn),
-                        'in %file%: Could not process file for unkown reasons,' .
+                        'in %file%: Could not process file for unknown reasons,' .
                         ' possibly a PHP parse error in %file% from %package%');
             }
         }
@@ -108380,7 +108380,7 @@ class Structures_Graph_Node {
     /* connectsTo {{{ */
     /**
     *
-    * Test wether this node has an arc to the target node
+    * Test whether this node has an arc to the target node
     *
     * @return	boolean   True if the two nodes are connected
     * @access	public

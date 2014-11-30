@@ -260,7 +260,7 @@ size_t HhbcTranslator::spOffset() const {
  * This SSATmp may be used for determining stack types in the
  * simplifier, or stack values if the inlined body doesn't contain a
  * call---these instructions both take an extradata `spansCall' which
- * is true iff a Call occured anywhere between the the definition of
+ * is true iff a Call occurred anywhere between the the definition of
  * its first argument and itself.
  */
 void HhbcTranslator::beginInlining(unsigned numParams,

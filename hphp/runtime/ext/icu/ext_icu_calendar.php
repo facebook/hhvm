@@ -189,7 +189,7 @@ class IntlCalendar {
    *
    * @return string - The error message associated with last error that
    *   occurred in a function call on this object, or a string indicating
-   *   the non-existance of an error.
+   *   the non-existence of an error.
    */
   <<__Native>>
   public function getErrorMessage(): string;
@@ -764,7 +764,7 @@ function intlcal_get_error_code(IntlCalendar $cal): int {
  *
  * @return string - The error message associated with last error that
  *   occurred in a function call on this object, or a string indicating the
- *   non-existance of an error.
+ *   non-existence of an error.
  */
 function intlcal_get_error_message(IntlCalendar $cal): string {
   return $cal->getErrorMessage();

@@ -248,7 +248,7 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
 
   char buffer[40];
   if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
-    raise_warning("An unknown error occured");
+    raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);

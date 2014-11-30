@@ -132,7 +132,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   ): Set<Tv>;
 
   /**
-   * Reserves enough memory to accomodate 'sz' elements. If 'sz' is less
+   * Reserves enough memory to accommodate 'sz' elements. If 'sz' is less
    * than or equal to the current capacity of this Set, does nothing.
    */
   public function reserve(int $sz): void;

@@ -49,7 +49,7 @@ class TestCppBase : public TestBase {
    * SmartObject<T>. They are a lot more covered in TestCodeRun with better
    * checking against PHP execution.
    *
-   * Comparisons are not directly tested here, either, becuase TestCodeRun has
+   * Comparisons are not directly tested here, either, because TestCodeRun has
    * a thorough list of comparisons and it's better to directly compare with
    * PHP's results.
    */

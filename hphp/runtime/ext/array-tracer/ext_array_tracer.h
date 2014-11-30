@@ -870,7 +870,7 @@ struct ArrayFunctionsWrapper {
         getArrayTracer()->registerArray(elems, ArrayUsage{},
                                         [&](ArrayUsage& usg){});
     }
-    /* copy is set to false becaus Merge always returns a new ArrayData */
+    /* copy is set to false because Merge always returns a new ArrayData */
     return getArrayTracer()->handleArrayFuncMutable(ad, false,
         [&](ArrayUsage& usage) {
           mergeArrayUsage(elemsUsage, usage);

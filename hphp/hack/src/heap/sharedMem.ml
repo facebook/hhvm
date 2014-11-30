@@ -152,7 +152,7 @@ end
  * The "old" representation is the value that was bound to that key in the
  * last round of type-checking.
  * Despite the fact that the same storage is used under the hood, it's good
- * to seperate the two interfaces to make sure we never mix old and new
+ * to separate the two interfaces to make sure we never mix old and new
  * values.
  *)
 (*****************************************************************************)

@@ -641,7 +641,7 @@ let remove_decls env (funs, classes, typedefs, consts) =
 let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
 
 let check_constraint (_, (pos, name), _) =
-  (* TODO refactor this in a seperate module for errors *)
+  (* TODO refactor this in a separate module for errors *)
   if String.lowercase name = "this"
   then Errors.this_reserved pos
   else if name.[0] <> 'T' then Errors.start_with_T pos

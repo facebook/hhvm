@@ -1563,7 +1563,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
     invokeGet(&tvResult, key);
 
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
-    // here, even though it comes before the IncDecOp in the analagous
+    // here, even though it comes before the IncDecOp in the analogous
     // situation in incDecProp.  This is to match zend 5.5 behavior.
     SETOP_BODY(&tvResult, op, val);
     tvUnboxIfNeeded(&tvResult);

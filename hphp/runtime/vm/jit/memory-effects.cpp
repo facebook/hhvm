@@ -610,7 +610,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RestoreErrorLevel:
   case AFWHBlockOn:
   case CheckCold:
-  case CheckDefinedClsEq:
   case CheckInitProps:
   case CheckInitSProps:
   case CheckRefs:

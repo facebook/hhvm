@@ -343,11 +343,6 @@ exceptions depending on how coercion is implemented.
 
   If the value at S0 + S1 (in bytes) has type Uninit, branch to block B.
 
-| CheckDefinedClsEq<className,classPtr>, ND, NA, B|E
-
-  Compare the currently defined class of name `className' with `classPtr'; if
-  they aren't equal or if `className' is not defined, branch to block B.
-
 | CheckCold<TransID>, ND, NA, B|E
 
   Check if the counter associated with translation TransID is cold (i.e. within

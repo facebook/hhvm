@@ -142,31 +142,25 @@ void emitClsCnsD(HTS& env,
   );
 
   /*
-   * If the class is already defined in this request, and this
-   * constant is a scalar constant, we can just compile it to a
-   * literal.
-   *
-   * We need to guard at runtime that the class is defined in this
-   * request and has the Class* we expect.  If the class is persistent
-   * or a parent of the current context, we don't need the guard.
+   * If the class is already defined in this request, the class is persistent
+   * or a parent of the current context, and this constant is a scalar
+   * constant, we can just compile it to a literal.
    */
   if (auto const cls = Unit::lookupClass(clsNameStr)) {
     Slot ignore;
     auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
-    if (tv && tv->m_type != KindOfUninit) {
-      if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(
-          env,
-          CheckDefinedClsEq,
-          CheckDefinedClsData{clsNameStr, cls},
-          sideExit
-        );
-      }
+    if (tv && tv->m_type != KindOfUninit &&
+        classIsPersistentOrCtxParent(env, cls)) {
       push(env, staticTVCns(env, tv));
       return;
     }
   }
 
+  /*
+   * Otherwise, load the constant out of RDS.  Right now we always guard that
+   * it is at least uncounted (this means a constant set to STDIN or something
+   * will always side exit here).
+   */
   auto const link = RDS::bindClassConstant(clsNameStr, cnsNameStr);
   auto const prds = gen(
     env,

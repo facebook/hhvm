@@ -4212,16 +4212,6 @@ void CodeGenerator::cgCheckTypeMem(IRInstruction* inst) {
                 reg[TVOFF(m_data)], inst->taken());
 }
 
-void CodeGenerator::cgCheckDefinedClsEq(IRInstruction* inst) {
-  auto const clsName = inst->extra<CheckDefinedClsEq>()->clsName;
-  auto const cls     = inst->extra<CheckDefinedClsEq>()->cls;
-  auto const ch      = NamedEntity::get(clsName)->getClassHandle();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpqm{v.cns(cls), rVmTl[ch], sf};
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
-}
-
 template <class JmpFn>
 void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
                                       JmpFn doJcc) {

@@ -968,7 +968,6 @@ X(SideExitJmpZero,              SideExitJccData);
 X(SideExitJmpNZero,             SideExitJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
-X(CheckDefinedClsEq,            CheckDefinedClsData);
 X(InterpOne,                    InterpOneData);
 X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);

@@ -23,7 +23,7 @@
 namespace HPHP {
 
 HPHP::Class* GMP::cls = nullptr;
-IMPLEMENT_OBJECT_ALLOCATION(GMPResource)
+IMPLEMENT_RESOURCE_ALLOCATION(GMPResource)
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

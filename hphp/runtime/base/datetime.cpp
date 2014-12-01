@@ -853,7 +853,7 @@ bool DateTime::fromString(const String& input, SmartResource<TimeZone> tz,
   if (m_timestamp == -1) {
     fromTimeStamp(0);
   }
-  if (tz.get()) {
+  if (tz.get() && (input.size() <= 0 || input[0] != '@')) {
     setTimezone(tz);
   } else {
     setTimezone(TimeZone::Current());

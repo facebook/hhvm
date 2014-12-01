@@ -165,12 +165,8 @@ struct IRBuilder {
    *   gen(CodeForExitBlock, ...);
    * }
    * gen(CodeForMainBlock, ...);
-   *
-   * Where may be supplied to emit code to a specific location in the block,
-   * otherwise code will be appended to the block.
    */
-  void pushBlock(BCMarker marker, Block* b,
-                 const folly::Optional<Block::iterator>& where);
+  void pushBlock(BCMarker marker, Block* b);
   void popBlock(bool);
 
   /*
@@ -474,17 +470,15 @@ private:
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
-   * than the main block. m_nextMarker, m_curBlock, m_curWhere are
-   * all set from the most recent call to pushBlock() or popBlock().
+   * than the main block. m_nextMarker, and m_curBlock are all set from the
+   * most recent call to pushBlock() or popBlock().
    */
   struct BlockState {
     Block* block;
     BCMarker marker;
-    folly::Optional<Block::iterator> where;
   };
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
-  folly::Optional<Block::iterator> m_curWhere;
 
   bool m_enableSimplification;
   bool m_constrainGuards;
@@ -528,11 +522,10 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
  */
 template<bool pause>
 struct BlockPusherImpl {
-  BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block,
-                  const folly::Optional<Block::iterator>& where = folly::none)
+  BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block)
     : m_irb(irb)
   {
-    irb.pushBlock(marker, block, where);
+    irb.pushBlock(marker, block);
   }
 
   ~BlockPusherImpl() {

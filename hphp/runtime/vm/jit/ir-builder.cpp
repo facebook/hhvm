@@ -130,8 +130,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     }
   }
 
-  auto defaultWhere = m_curBlock->end();
-  auto& where = m_curWhere ? *m_curWhere : defaultWhere;
+  auto where = m_curBlock->end();
 
   // If the block isn't empty, check if we need to create a new block.
   if (where != m_curBlock->begin()) {
@@ -185,8 +184,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 }
 
 void IRBuilder::appendBlock(Block* block) {
-  assert(m_savedBlocks.empty()); // TODO(t2982555): Don't require this
-
   m_state.finishBlock(m_curBlock);
 
   FTRACE(2, "appending B{}\n", block->id());
@@ -701,7 +698,6 @@ void IRBuilder::reoptimize() {
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
   always_assert(m_savedBlocks.empty());
-  always_assert(!m_curWhere);
 
   if (splitCriticalEdges(m_unit)) {
     printUnit(6, m_unit, "after splitting critical edges for reoptimize");
@@ -1240,20 +1236,18 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
   m_offsetToBlockMap[offset] = block;
 }
 
-void IRBuilder::pushBlock(BCMarker marker,
-                          Block* b,
-                          const folly::Optional<Block::iterator>& where) {
+void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_nextMarker.show(), b, marker.show());
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState{ m_curBlock, m_nextMarker, m_curWhere });
+    BlockState { m_curBlock, m_nextMarker }
+  );
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
   m_curBlock = b;
   setNextMarker(marker);
-  m_curWhere = where ? where : b->end();
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {
@@ -1277,7 +1271,6 @@ void IRBuilder::popBlock(bool pause) {
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
   setNextMarker(top.marker);
-  m_curWhere = top.where;
   m_savedBlocks.pop_back();
 }
 

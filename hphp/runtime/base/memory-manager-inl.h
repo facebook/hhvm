@@ -319,13 +319,6 @@ void* MemoryManager::smartMallocSizeLogged(uint32_t size) {
 }
 
 ALWAYS_INLINE
-void* MemoryManager::smartMallocSizeLoggedTracked(uint32_t size) {
-  auto const retptr = smartMallocSize(size);
-  if (memory_profiling) { logAllocation(retptr, size); }
-  return track(retptr);
-}
-
-ALWAYS_INLINE
 void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
   if (memory_profiling) { logDeallocation(p); }
   smartFreeSize(p, size);
@@ -355,22 +348,6 @@ ALWAYS_INLINE
 void MemoryManager::objFreeLogged(void* vp, size_t size) {
   if (memory_profiling) { logDeallocation(vp); }
   objFree(vp, size);
-}
-
-ALWAYS_INLINE
-void* MemoryManager::track(void* p) {
-  if (UNLIKELY(m_trackingInstances)) {
-    return trackSlow(p);
-  }
-  return p;
-}
-
-ALWAYS_INLINE
-void* MemoryManager::untrack(void* p) {
-  if (UNLIKELY(m_trackingInstances)) {
-    return untrackSlow(p);
-  }
-  return p;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -448,22 +425,12 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 ALWAYS_INLINE
 void MemoryManager::setObjectTracking(bool val) {
-  if (val) {
-    m_instances = std::unordered_set<void*>();
-  }
   m_trackingInstances = val;
 }
 
 ALWAYS_INLINE
 bool MemoryManager::getObjectTracking() {
   return m_trackingInstances;
-}
-
-struct ObjectData;
-template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  for (auto ptr = m_instances.begin(); ptr != m_instances.end(); ++ptr) {
-    fn(static_cast<ObjectData*>(*ptr));
-  }
 }
 
 }

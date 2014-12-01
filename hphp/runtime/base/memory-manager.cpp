@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
@@ -35,11 +33,7 @@
 #include "hphp/util/trace.h"
 
 #include <folly/ScopeGuard.h>
-
-#include "hphp/runtime/base/proxy-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {
 
@@ -422,9 +416,6 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  if (m_trackingInstances) {
-    m_instances = std::unordered_set<void*>();
-  }
 
   resetStatsImpl(true);
   resetCouldOOM();
@@ -542,113 +533,6 @@ const char* header_names[] = {
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
-// union of all the possible header types, and some utilities
-struct Header {
-  struct DummySweepable: Sweepable, ObjectData { void sweep() {} };
-  size_t size() const;
-  bool check() const;
-  union {
-    struct {
-      uint64_t q;
-      uint8_t b[3];
-      HeaderKind kind_;
-    };
-    StringData str_;
-    ArrayData arr_;
-    MixedArray mixed_;
-    ObjectData obj_;
-    ResourceData res_;
-    RefData ref_;
-    SmallNode small_;
-    BigNode big_;
-    FreeNode free_;
-    NativeNode native_;
-    DebugHeader debug_;
-    DummySweepable sweepable_;
-  };
-};
-
-bool Header::check() const {
-  return unsigned(kind_) <= NumHeaderKinds;
-}
-
-size_t Header::size() const {
-  auto resourceSize = [](const ResourceData* r) {
-    // explicitly virtual-call ResourceData::heapSize() through a pointer
-    assert(r->heapSize());
-    return r->heapSize();
-  };
-  assert(check());
-  switch (kind_) {
-    case HeaderKind::Packed: case HeaderKind::VPacked:
-      return PackedArray::heapSize(&arr_);
-    case HeaderKind::Mixed: case HeaderKind::StrMap: case HeaderKind::IntMap:
-      return mixed_.heapSize();
-    case HeaderKind::Empty:
-      return sizeof(ArrayData);
-    case HeaderKind::Apc:
-      return sizeof(APCLocalArray);
-    case HeaderKind::Globals:
-      return sizeof(GlobalsArray);
-    case HeaderKind::Proxy:
-      return sizeof(ProxyArray);
-    case HeaderKind::String:
-      return str_.heapSize();
-    case HeaderKind::Object:
-      // [ObjectData][subclass][props]
-      return obj_.heapSize();
-    case HeaderKind::Resource:
-      // [ResourceData][subclass]
-      return resourceSize(&res_);
-    case HeaderKind::Ref:
-      return sizeof(RefData);
-    case HeaderKind::SmallMalloc:
-      return small_.padbytes;
-    case HeaderKind::BigMalloc:
-    case HeaderKind::BigObj:
-      return big_.nbytes;
-    case HeaderKind::Free:
-      return free_.size;
-    case HeaderKind::Native:
-      // [NativeNode][NativeData][ObjectData][props] is one allocation.
-      return native_.obj_offset + Native::obj(&native_)->heapSize();
-    case HeaderKind::Sweepable:
-      // [Sweepable][ObjectData][subclass][props] or
-      // [Sweepable][ResourceData][subclass]
-      return sizeof(Sweepable) + sweepable_.heapSize();
-    case HeaderKind::Hole:
-      return free_.size;
-    case HeaderKind::Debug:
-      assert(debug_.allocatedMagic == DebugHeader::kAllocatedMagic);
-      return sizeof(DebugHeader);
-  }
-  return 0;
-}
-
-// Iterator for slab scanning; only knows how to parse each object's
-// size and move to the next object.
-struct Headiter {
-  explicit Headiter(void* p) : raw_((char*)p) {}
-  Headiter& operator=(void* p) {
-    raw_ = (char*)p;
-    return *this;
-  }
-  Headiter& operator++() {
-    assert(h_->size() > 0);
-    raw_ += MemoryManager::smartSizeClass(h_->size());
-    return *this;
-  }
-  Header& operator*() { return *h_; }
-  Header* operator->() { return h_; }
-  bool operator<(Headiter i) const { return raw_ < i.raw_; }
-  bool operator==(Headiter i) const { return raw_ == i.raw_; }
-private:
-  union {
-    Header* h_;
-    char* raw_;
-  };
-};
-
 // Reverse lookup table from size class index back to block size.
 struct SizeTable {
   size_t table[kNumSmartSizes];
@@ -674,69 +558,6 @@ struct SizeTable {
 SizeTable s_index2size;
 
 }
-
-// Iterator over all the slabs and bigs
-struct BigHeap::iterator {
-  enum State { Slabs, Bigs };
-  using slab_iter = std::vector<MemBlock>::iterator;
-  using big_iter  = std::vector<BigNode*>::iterator;
-  explicit iterator(slab_iter slab, BigHeap& heap)
-    : m_state{Slabs}
-    , m_slab{slab}
-    , m_header{slab->ptr} // should never be at end.
-    , m_heap(heap)
-  {}
-  explicit iterator(big_iter big, BigHeap& heap)
-    : m_state{Bigs}
-    , m_big{big}
-    , m_header{big != heap.m_bigs.end() ? *big : nullptr}
-    , m_heap(heap)
-  {}
-  bool operator==(const iterator& it) const {
-    if (m_state != it.m_state) return false;
-    switch (m_state) {
-      case Slabs: return m_slab == it.m_slab && m_header == it.m_header;
-      case Bigs: return m_big == it.m_big;
-    };
-    not_reached();
-  }
-  bool operator!=(const iterator& it) const {
-    return !(*this == it);
-  }
-  iterator& operator++() {
-    switch (m_state) {
-      case Slabs: {
-        auto end = Headiter{static_cast<char*>(m_slab->ptr) + m_slab->size};
-        if (++m_header < end) {
-          return *this;
-        }
-        if (++m_slab != m_heap.m_slabs.end()) {
-          m_header = m_slab->ptr;
-          return *this;
-        }
-        m_state = Bigs;
-        m_big = m_heap.m_bigs.begin();
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
-      }
-      case Bigs:
-        ++m_big;
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
-    }
-    not_reached();
-  }
-  Header& operator*() { return *m_header; }
-  Header* operator->() { return &*m_header; }
- private:
-  State m_state;
-  union {
-    slab_iter m_slab;
-    big_iter m_big;
-  };
-  Headiter m_header;
-  BigHeap& m_heap;
-};
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole() {
@@ -1136,20 +957,6 @@ void MemoryManager::requestShutdown() {
 
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
   profctx = ReqProfContext{};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-NEVER_INLINE
-void* MemoryManager::trackSlow(void* p) {
-  m_instances.insert(p);
-  return p;
-}
-
-NEVER_INLINE
-void* MemoryManager::untrackSlow(void* p) {
-  m_instances.erase(p);
-  return p;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

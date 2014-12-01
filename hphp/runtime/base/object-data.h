@@ -186,7 +186,6 @@ class ObjectData {
       */
       obj->callCustomInstanceInit();
     }
-    mm.track(obj);
     return obj;
   }
 
@@ -555,11 +554,10 @@ using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
 template<class T, class... Args> T* newobj(Args&&... args) {
   static_assert(std::is_convertible<T*,ObjectData*>::value, "");
-  auto const mem = MM().smartMallocSizeLoggedTracked(sizeof(T));
+  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
-    MM().untrack(mem);
     MM().smartFreeSizeLogged(mem, sizeof(T));
     throw;
   }

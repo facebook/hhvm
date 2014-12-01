@@ -498,7 +498,6 @@ struct MemoryManager {
   void smartFreeSizeLogged(void* p, uint32_t size);
   void* objMallocLogged(size_t size);
   void objFreeLogged(void* vp, size_t size);
-  void* smartMallocSizeLoggedTracked(uint32_t size);
   template<bool callerSavesActualSize>
   MemBlock smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
@@ -617,10 +616,6 @@ struct MemoryManager {
    * It is then possible to iterate them by iterating the memory manager.
    * This entire feature is enabled/disabled by using setObjectTracking(bool).
    */
-  void* trackSlow(void* p);
-  void* untrackSlow(void* p);
-  void* track(void* p);
-  void* untrack(void* p);
   void setObjectTracking(bool val);
   bool getObjectTracking();
 
@@ -735,11 +730,8 @@ private:
 
   bool m_sweeping;
   bool m_trackingInstances;
-  std::unordered_set<void*> m_instances;
-
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
-
   bool m_bypassSlabAlloc;
 
   ReqProfContext m_profctx;

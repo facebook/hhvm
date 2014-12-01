@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/ext_collections.h"
@@ -220,7 +220,6 @@ void stringsOfArray(
 
   path->pop_back();
 }
-
 
 /**
  * Measures the size of the typed value and referenced objects without going

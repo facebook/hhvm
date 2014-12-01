@@ -1022,11 +1022,13 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   return this;
 }
 
+// called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
   return new (MM().smartMallocSizeLoggedTracked(size))
     ObjectData(cls, NoInit::noinit);
 }
 
+// called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   auto& mm = MM();
   auto obj = new (mm.smartMallocSizeBigLogged<false>(size).ptr)

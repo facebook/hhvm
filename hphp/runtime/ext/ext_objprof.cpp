@@ -69,7 +69,6 @@ typedef typename std::map<StringData*, ObjprofStringAgg, cmpStringData>
   ObjprofStrings;
 typedef typename std::vector<std::string> ObjprofStack;
 
-
 std::pair<int, double> tvGetSize(const TypedValue* tv, int ref_adjust);
 void tvGetStrings(
   const TypedValue* tv,
@@ -441,7 +440,6 @@ static bool supportsToArray(ObjectData* obj) {
   }
 }
 
-
 static std::pair<int, double> getObjSize(ObjectData* obj) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting object size for type {} at {}\n",
@@ -512,7 +510,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
    size += val_size_pair.first + key_size;
    sized += val_size_pair.second + key_sized;
   }
-  return std::make_pair(size, sized);;
+  return std::make_pair(size, sized);
 }
 
 static void getObjStrings(
@@ -592,10 +590,8 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 
   if (MM().getObjectTracking()) {
     std::set<void*> pointers;
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
+    MM().forEachObject([&](ObjectData* obj) {
       Class* cls = obj->getVMClass();
-
       auto it = histogram.find(cls);
       if (it != histogram.end()) {
         ObjprofStack path;
@@ -604,7 +600,7 @@ static Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
         // This should never happen or we're not untracking something
         FTRACE(1, "Class* not found in histogram!\n");
       }
-    }
+    });
   }
 
   // Create response
@@ -650,12 +646,9 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
     histogram[c] = empty_metrics;
   }
 
-  //auto tracker = ObjectTracker::get();
   if (MM().getObjectTracking()) {
-    for (auto ptr = MM().objects_begin(); ptr != MM().objects_end(); ++ptr) {
-      ObjectData* obj = (ObjectData*)(*ptr);
+    MM().forEachObject([&](ObjectData* obj) {
       Class* cls = obj->getVMClass();
-
       auto it = histogram.find(cls);
       if (it != histogram.end()) {
         auto objsize_pair = getObjSize(obj);
@@ -675,7 +668,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
         // This should never happen or we're not untracking something
         FTRACE(1, "Class* not found in histogram!\n");
       }
-    }
+    });
   }
 
   // Create response

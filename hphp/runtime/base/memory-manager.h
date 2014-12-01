@@ -626,9 +626,7 @@ struct MemoryManager {
   /*
    * Iterating the memory manager tracked objects.
    */
-  typedef typename std::unordered_set<void*>::iterator iterator;
-  iterator objects_begin() { return m_instances.begin(); }
-  iterator objects_end() { return m_instances.end(); }
+  template<class Fn> void forEachObject(Fn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.

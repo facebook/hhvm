@@ -459,6 +459,13 @@ bool MemoryManager::getObjectTracking() {
   return m_trackingInstances;
 }
 
+struct ObjectData;
+template<class Fn> void MemoryManager::forEachObject(Fn fn) {
+  for (auto ptr = m_instances.begin(); ptr != m_instances.end(); ++ptr) {
+    fn(static_cast<ObjectData*>(*ptr));
+  }
+}
+
 }
 
 #endif

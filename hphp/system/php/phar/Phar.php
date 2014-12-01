@@ -1055,7 +1055,7 @@ class Phar extends RecursiveDirectoryIterator
    */
   private static function resolveDotDots($pieces) {
     $starts_with_slash = false;
-    if (count($pieces) > 0 && !$pieces[0]) {
+    if (count($pieces) > 0 && !strlen($pieces[0])) {
       $starts_with_slash = true;
     }
 
@@ -1070,8 +1070,9 @@ class Phar extends RecursiveDirectoryIterator
         $pieces[$i-1] = '';
       }
     }
+    // strlen is used to remove empty strings, but keep values of 0 (zero)
     return ($starts_with_slash ? '/' : '') .
-           implode('/', array_filter($pieces));
+           implode('/', array_filter($pieces, 'strlen'));
   }
 
   /**

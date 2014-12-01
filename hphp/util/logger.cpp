@@ -22,6 +22,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
@@ -139,7 +140,7 @@ void Logger::log(LogLevelType level, const std::string &msg,
                  const StackTrace *stackTrace,
                  bool escape /* = false */, bool escapeMore /* = false */) {
 
-  if (Logger::Escape) {
+  if (RuntimeOption::AlwaysEscapeLog && Logger::Escape) {
     escape = true;
   }
   assert(!escapeMore || escape);

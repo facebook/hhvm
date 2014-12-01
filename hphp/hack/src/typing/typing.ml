@@ -3512,9 +3512,19 @@ and class_var_def env is_static c cv =
           ()
       )
   | Some (p, _ as cty) ->
+      let env =
+        (* If this is an XHP attribute and we're in strict mode,
+           relax to partial mode to allow the use of the "array"
+           annotation without specifying type parameters. Until
+           recently HHVM did not allow "array" with type parameters
+           in XHP attribute declarations, so this is a temporary
+           hack to support existing code for now. *)
+        (* Task #5815945: Get rid of this Hack *)
+        if cv.cv_is_xhp && (Env.is_strict env)
+          then Env.set_mode env Ast.Mpartial
+          else env in
       let env, cty = Typing_hint.hint env cty in
-      let _ = Type.sub_type p Reason.URhint env cty ty in
-      ()
+      let _ = Type.sub_type p Reason.URhint env cty ty in ()
 
 and method_def env m =
   let env = { env with Env.lenv = Env.empty_local } in

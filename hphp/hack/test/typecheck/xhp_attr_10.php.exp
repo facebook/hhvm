@@ -1,0 +1,6 @@
+File "xhp_attr_10.php", line 5, characters 13-16:
+Wrong type hint (Typing[4110])
+File "xhp_attr_10.php", line 5, characters 13-16:
+This is a bool
+File "xhp_attr_10.php", line 5, characters 22-26:
+It is incompatible with a string

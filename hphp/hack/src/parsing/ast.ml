@@ -122,8 +122,11 @@ and class_elt =
   | Attributes of class_attr list
   | TypeConst of typeconst
   | ClassUse of hint
+  | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of kind list * hint option * class_var list
+  | XhpAttr of kind list * hint option * class_var list * bool *
+               ((Pos.t * expr list) option)
   | Method of method_
 
 and class_attr =

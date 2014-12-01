@@ -107,13 +107,15 @@ module Env = struct
       acc
 
   and cvar acc cv =
-    let cname = snd cv.cv_id in
-    match cv.cv_type with
-      | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
-      | _ ->
-        match cv.cv_expr with
-          | Some _ -> acc
-          | _ -> SSet.add cname acc
+    if cv.cv_is_xhp then acc else begin
+      let cname = snd cv.cv_id in
+      match cv.cv_type with
+        | Some (_, Hoption _) | Some (_, Hmixed) | None -> acc
+        | _ ->
+          match cv.cv_expr with
+            | Some _ -> acc
+            | _ -> SSet.add cname acc
+    end
 
   and parent_cvars tenv acc c =
     List.fold_left begin fun acc parent ->

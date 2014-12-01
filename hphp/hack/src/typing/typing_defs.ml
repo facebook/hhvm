@@ -203,6 +203,7 @@ and fun_params = fun_param list
 
 and class_elt = {
   ce_final       : bool;
+  ce_is_xhp_attr : bool;
   ce_override    : bool;
   (* true if this elt arose from require-extends or other mechanisms
      of hack "synthesizing" methods that were not written by the

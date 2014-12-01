@@ -1,0 +1,6 @@
+File "xhp_attr_4.php", line 16, characters 10-17:
+Invalid return type (Typing[4110])
+File "xhp_attr_4.php", line 13, characters 28-33:
+This is a string
+File "xhp_attr_4.php", line 3, characters 13-15:
+It is incompatible with an int

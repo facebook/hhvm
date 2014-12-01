@@ -235,6 +235,7 @@ let mk_mapper = fun m_in ->
       | Attributes v1 ->
           let v1 = map_of_list map_class_attr v1 in Attributes ((v1))
       | ClassUse v1 -> let v1 = map_hint v1 in ClassUse ((v1))
+      | XhpAttrUse v1 -> let v1 = map_hint v1 in XhpAttrUse ((v1))
       | ClassTraitRequire ((v1, v2)) ->
           let v1 = map_trait_req_kind v1
           and v2 = map_hint v2
@@ -244,6 +245,16 @@ let mk_mapper = fun m_in ->
           and v2 = map_hint_option v2
           and v3 = map_of_list map_class_var v3
           in ClassVars ((v1, v2, v3))
+      | XhpAttr ((v1, v2, v3, v4, v5)) ->
+          let v1 = map_of_list map_kind v1
+          and v2 = map_hint_option v2
+          and v3 = map_of_list map_class_var v3
+          and v4 = map_of_bool v4
+          and v5 = (match v5 with
+            | Some (pos, items) ->
+                Some (map_pos_t pos, (map_of_list map_expr items))
+            | None -> None)
+          in XhpAttr ((v1, v2, v3, v4, v5))
       | Method v1 -> let v1 = map_method_ c_kind v1 in Method ((v1))
       | TypeConst v1 -> let v1 = map_typeconst c_kind v1 in TypeConst v1
     in m_in.k_class_elt (k, all_mappers) c_kind elt

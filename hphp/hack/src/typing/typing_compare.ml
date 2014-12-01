@@ -195,6 +195,7 @@ module CompareTypes = struct
   and class_elt (subst, same) celt1 celt2 =
     let same = same && celt1.ce_visibility = celt2.ce_visibility in
     let same = same && celt1.ce_final = celt2.ce_final in
+    let same = same && celt1.ce_is_xhp_attr = celt2.ce_is_xhp_attr in
     let same = same && celt1.ce_override = celt2.ce_override in
     let same = same && celt1.ce_synthesized = celt2.ce_synthesized in
     ty (subst, same) celt1.ce_type celt2.ce_type
@@ -344,6 +345,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and class_elt ce =
     { ce_final       = ce.ce_final      ;
+      ce_is_xhp_attr = ce.ce_is_xhp_attr;
       ce_override    = ce.ce_override   ;
       ce_synthesized = ce.ce_synthesized;
       ce_visibility  = ce.ce_visibility ;

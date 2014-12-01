@@ -1,2 +1,2 @@
 File "parse_xhp_format_infinite_loop1.php", line 4, characters 17-17:
-string not properly closed (Parsing[1002])
+Expected type (Parsing[1002])

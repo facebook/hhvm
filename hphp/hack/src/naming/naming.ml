@@ -952,6 +952,7 @@ and class_ genv c =
   let fmethod  = class_method env sm_names v_names in
   let methods  = List.fold_right fmethod c.c_body [] in
   let uses     = List.fold_right (class_use env) c.c_body [] in
+  let xhp_attr_uses = List.fold_right (xhp_attr_use env) c.c_body [] in
   let req_implements, req_extends = List.fold_right
     (class_require env c.c_kind) c.c_body ([], []) in
   let tparam_l  = type_paraml env c.c_tparams in
@@ -975,6 +976,7 @@ and class_ genv c =
     N.c_tparams        = tparam_l;
     N.c_extends        = parents;
     N.c_uses           = uses;
+    N.c_xhp_attr_uses  = xhp_attr_uses;
     N.c_req_extends    = req_extends;
     N.c_req_implements = req_implements;
     N.c_implements     = implements;
@@ -1017,8 +1019,24 @@ and class_use env x acc =
   | ClassUse h ->
     hint_no_typedef env h;
     hint ~allow_this:true env h :: acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
+  | Method _ -> acc
+  | TypeConst _ -> acc
+
+and xhp_attr_use env x acc =
+  match x with
+  | Attributes _ -> acc
+  | Const _ -> acc
+  | ClassUse _ -> acc
+  | XhpAttrUse h ->
+    hint_no_typedef env h;
+    hint ~allow_this:true env h :: acc
+  | ClassTraitRequire _ -> acc
+  | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method _ -> acc
   | TypeConst _ -> acc
 
@@ -1027,6 +1045,7 @@ and class_require env c_kind x acc =
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire (MustExtend, h)
       when c_kind <> Ast.Ctrait && c_kind <> Ast.Cinterface ->
     let () = Errors.invalid_req_extends (fst h) in
@@ -1043,6 +1062,7 @@ and class_require env c_kind x acc =
     let acc_impls, acc_exts = acc in
     (hint ~allow_this:true env h :: acc_impls, acc_exts)
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method _ -> acc
   | TypeConst _ -> acc
 
@@ -1050,8 +1070,10 @@ and constructor env acc = function
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method ({ m_name = (p, name); _ } as m) when name = SN.Members.__construct ->
       let genv, lenv = env in
       let env = ({ genv with in_member_fun = true}, lenv) in
@@ -1066,8 +1088,10 @@ and class_const env x acc =
   | Attributes _ -> acc
   | Const (h, l) -> const_defl h env l @ acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method _ -> acc
   | TypeConst _ -> acc
 
@@ -1075,6 +1099,7 @@ and class_var_static env x acc =
   match x with
   | Attributes _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars (kl, h, cvl) when List.mem Static kl ->
@@ -1083,6 +1108,7 @@ and class_var_static env x acc =
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method _ -> acc
   | TypeConst _ -> acc
 
@@ -1090,6 +1116,7 @@ and class_var env x acc =
   match x with
   | Attributes _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars (kl, h, cvl) when not (List.mem Static kl) ->
@@ -1100,6 +1127,55 @@ and class_var env x acc =
     let cvl = List.map (fill_cvar kl h) cvl in
     cvl @ acc
   | ClassVars _ -> acc
+  | XhpAttr (kl, h, cvl, is_required, maybe_enum) ->
+    let default = (match cvl with
+      | [(_, v)] -> v
+      | _ -> None) in
+    let h = (match maybe_enum with
+      | Some (pos, items) ->
+        let contains_int = List.exists begin function
+          | _, Int _ -> true
+          | _ -> false
+        end items in
+        let contains_str = List.exists begin function
+          | _, String _ | _, String2 _ -> true
+          | _ -> false
+        end items in
+        if contains_int && not contains_str then
+          Some (pos, Happly ((pos, "int"), []))
+        else if not contains_int && contains_str then
+          Some (pos, Happly ((pos, "string"), []))
+        else
+          (* If the list was empty, or if there was a mix of
+             ints and strings, then fallback to mixed *)
+          Some (pos, Happly ((pos, "mixed"), []))
+      | _ -> h) in
+    (* If the typehint was "string", convert to "Stringish" for now *)
+    let h = if maybe_enum <> None
+      then h
+      else (match h with
+        | Some (pos1, Happly ((pos2, "string"), [])) ->
+            Some (pos1, Happly ((pos2, "Stringish"), []))
+        | x -> x) in
+    let h = (match h with
+      | Some (p, ((Hoption _) as x)) -> Some (p, x)
+      | Some (p, ((Happly ((_, "mixed"), [])) as x)) -> Some (p, x)
+      | Some (p, h) ->
+        (* If a non-nullable attribute is not marked as "@required"
+           AND it does not have a non-null default value, make the
+           typehint nullable for now *)
+        if (is_required ||
+            (match default with
+              | None ->            false
+              | Some (_, Null) ->  false
+              | Some _ ->          true))
+          then Some (p, h)
+          else Some (p, Hoption (p, h))
+      | None -> None) in
+    let h = opt_map (hint env) h in
+    let cvl = List.map (class_var_ env) cvl in
+    let cvl = List.map (fill_cvar kl h) cvl in
+    cvl @ acc
   | Method _ -> acc
   | TypeConst _ -> acc
 
@@ -1107,9 +1183,11 @@ and class_static_method env x acc =
   match x with
   | Attributes _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
   | Method m when List.mem Static m.m_kind -> method_ env m :: acc
   | Method _ -> acc
@@ -1119,9 +1197,11 @@ and class_method env sids cv_ids x acc =
   match x with
   | Attributes _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | Const _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method m when snd m.m_name = SN.Members.__construct -> acc
   | Method m when not (List.mem Static m.m_kind) ->
       let genv, lenv = env in
@@ -1135,8 +1215,10 @@ and class_typeconst env x acc =
   | Attributes _ -> acc
   | Const _ -> acc
   | ClassUse _ -> acc
+  | XhpAttrUse _ -> acc
   | ClassTraitRequire _ -> acc
   | ClassVars _ -> acc
+  | XhpAttr _ -> acc
   | Method _ -> acc
   | TypeConst t -> typeconst env t :: acc
 
@@ -1196,6 +1278,7 @@ and class_var_ env (x, e) =
       Some (p, N.Cast ((p, N.Hany), (p, N.Null)))
   in
   N.({ cv_final = false;
+       cv_is_xhp = ((String.sub (snd x) 0 1) = ":");
        cv_visibility = Public;
        cv_type = None;
        cv_id = id;

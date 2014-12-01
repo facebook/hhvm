@@ -580,6 +580,7 @@ and build_constructor env class_ method_ =
     SMap.mem SN.UserAttributes.uaUnsafeConstruct method_.m_user_attributes in
   let cstr = {
     ce_final = method_.m_final;
+    ce_is_xhp_attr = false;
     ce_override = consist_override;
     ce_synthesized = false;
     ce_visibility = vis;
@@ -625,8 +626,9 @@ and class_const_decl c (env, acc) (h, id, e) =
       end
       | Some h -> Typing_hint.hint env h
   in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = Vpublic; ce_type = ty; ce_origin = (snd c.c_name);
+  let ce = { ce_final = true; ce_is_xhp_attr = false; ce_override = false;
+             ce_synthesized = false; ce_visibility = Vpublic; ce_type = ty;
+             ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add (snd id) ce acc in
   env, acc
@@ -638,6 +640,7 @@ and class_class_decl class_id =
   let reason = Reason.Rclass_class (pos, name) in
   {
     ce_final       = false;
+    ce_is_xhp_attr = false;
     ce_override    = false;
     ce_synthesized = true;
     ce_visibility  = Vpublic;
@@ -649,12 +652,24 @@ and class_var_decl c (env, acc) cv =
   let env, ty =
     match cv.cv_type with
       | None -> env, (Reason.Rwitness (fst cv.cv_id), Tany)
-      | Some ty' -> Typing_hint.hint ~ensure_instantiable:true env ty'
+      | Some ty' ->
+          (* If this is an XHP attribute and we're in strict mode,
+             relax to partial mode to allow the use of the "array"
+             annotation without specifying type parameters. Until
+             recently HHVM did not allow "array" with type parameters
+             in XHP attribute declarations, so this is a temporary
+             hack to support existing code for now. *)
+          (* Task #5815945: Get rid of this Hack *)
+          let env = if cv.cv_is_xhp && (Env.is_strict env)
+            then Env.set_mode env Ast.Mpartial
+            else env in
+          Typing_hint.hint ~ensure_instantiable:true env ty'
   in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
+  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
+             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+             ce_origin = (snd c.c_name);
            } in
   let acc = SMap.add id ce acc in
   env, acc
@@ -665,10 +680,10 @@ and static_class_var_decl c (env, acc) cv =
     | Some ty -> Typing_hint.hint ~ensure_instantiable:true env ty in
   let id = snd cv.cv_id in
   let vis = visibility (snd c.c_name) cv.cv_visibility in
-  let ce = { ce_final = true; ce_override = false; ce_synthesized = false;
-             ce_visibility = vis; ce_type = ty; ce_origin = (snd c.c_name);
-           }
-  in
+  let ce = { ce_final = true; ce_is_xhp_attr = cv.cv_is_xhp; ce_override = false;
+             ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+             ce_origin = (snd c.c_name);
+           } in
   let acc = SMap.add ("$"^id) ce acc in
   if cv.cv_expr = None && (c.c_mode = Ast.Mstrict || c.c_mode = Ast.Mpartial)
   then begin match cv.cv_type with
@@ -706,6 +721,7 @@ and typeconst_decl nenv c (env, acc) typeconst =
       in
       let ce = {
         ce_final = not typeconst.c_tconst_abstract;
+        ce_is_xhp_attr = false;
         ce_override = false;
         ce_synthesized = false;
         ce_visibility = Vpublic;
@@ -823,8 +839,9 @@ and method_decl_acc c (env, acc) m =
       | _ -> visibility (snd c.c_name) m.m_visibility
   in
   let ce = {
-    ce_final = m.m_final; ce_override = check_override; ce_synthesized = false;
-    ce_visibility = vis; ce_type = ty; ce_origin = snd (c.c_name);
+    ce_final = m.m_final; ce_is_xhp_attr = false; ce_override = check_override;
+    ce_synthesized = false; ce_visibility = vis; ce_type = ty;
+    ce_origin = snd (c.c_name);
   } in
   let acc = SMap.add id ce acc in
   env, acc

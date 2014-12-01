@@ -220,6 +220,10 @@ let check_toplevel env pos =
 (*****************************************************************************)
 
 let rec check_lvalue env = function
+  | pos, Obj_get (_, (_, Id (_, name)), _) ->
+      if (String.sub name 0 1) = ":"
+        then error_at env pos "->: syntax is not supported for lvalues"
+        else ()
   | _, (Lvar _ | Obj_get _ | Array_get _ | Class_get _ | Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->
       error_at env pos
@@ -357,6 +361,15 @@ let ref_opt env =
 (* Identifiers *)
 (*****************************************************************************)
 
+let xhp_identifier env =
+  (match L.xhpname env.file env.lb with
+  | Txhpname ->
+      Pos.make env.file env.lb, ":"^Lexing.lexeme env.lb
+  | _ ->
+      error_expect env "identifier";
+      Pos.make env.file env.lb, "*Unknown*"
+  )
+
 (* identifier *)
 let identifier env =
   match L.token env.file env.lb with
@@ -365,13 +378,7 @@ let identifier env =
       let name = Lexing.lexeme env.lb in
       pos, name
   | Tcolon ->
-      (match L.xhpname env.file env.lb with
-      | Txhpname ->
-          Pos.make env.file env.lb, ":"^Lexing.lexeme env.lb
-      | _ ->
-          error_expect env "identifier";
-          Pos.make env.file env.lb, "*Unknown*"
-      )
+      xhp_identifier env
   | _ ->
       error_expect env "identifier";
       Pos.make env.file env.lb, "*Unknown*"
@@ -1134,6 +1141,40 @@ and hint_function_params_remain env =
       error_expect env ")";
       ([h], false)
 
+and xhp_enum_decl_list env =
+  match L.token env.file env.lb with
+  | Trcb -> []
+  | _ -> L.back env.lb; xhp_enum_decl_list_remain env
+
+and xhp_enum_decl_list_remain env =
+  let error_state = !(env.errors) in
+  let v = xhp_enum_decl_value env in
+  match L.token env.file env.lb with
+  | Trcb ->
+      [v]
+  | Tcomma ->
+      if !(env.errors) != error_state
+        then [v]
+        else v :: xhp_enum_decl_list env
+  | _ ->
+      error_expect env "}"; [v]
+
+and xhp_enum_decl_value env =
+  let tok = L.token env.file env.lb in
+  let pos = Pos.make env.file env.lb in
+  match tok with
+  | Tint ->
+      let tok_value = Lexing.lexeme env.lb in
+      pos, Int (pos, tok_value)
+  | Tquote ->
+      let absolute_pos = env.lb.Lexing.lex_curr_pos in
+      expr_string env pos absolute_pos
+  | Tdquote ->
+      expr_encapsed env pos
+  | _ ->
+      error_expect env "integer literal or string literal";
+      pos, Null
+
 (* : _ *)
 and hint_return env =
   expect env Tcolon;
@@ -1183,7 +1224,7 @@ and class_defs env =
 
 and class_toplevel_word env word =
   match word with
-  | "category" | "children" | "attribute" ->
+  | "category" | "children" ->
       xhp_format env;
       class_defs env
   | "const" ->
@@ -1198,6 +1239,13 @@ and class_toplevel_word env word =
   | "require" ->
       let traitl = trait_require env in
       traitl @ class_defs env
+  | "attribute" ->
+      let start = Pos.make env.file env.lb in
+      let error_state = !(env.errors) in
+      let m = xhp_attr_list env in
+      if !(env.errors) != error_state
+      then look_for_next_method start env;
+      m @ class_defs env
   | "abstract" | "public" | "protected" | "private" | "final" | "static"  ->
       (* variable | method | type const*)
       L.back env.lb;
@@ -1483,6 +1531,49 @@ and class_var env =
 
 and class_var_name name =
     String.sub name 1 (String.length name - 1)
+
+and xhp_attr env =
+  let maybe_use, maybe_enum = (match L.token env.file env.lb with
+    | Tcolon ->
+        L.back env.lb; (try_xhp_attr_use env, None)
+    | Tword when Lexing.lexeme env.lb = "enum" ->
+        L.back env.lb; (None, try_xhp_enum_hint env)
+    | _ ->
+        L.back env.lb; (None, None)) in
+  match maybe_use with
+    | Some x -> x
+    | None ->
+        begin
+          let h = (match maybe_enum with
+            | Some x -> None
+            | None -> Some (hint env)) in
+          let ident = xhp_identifier env in
+          let default = parameter_default env in
+          let is_required = (match L.token env.file env.lb with
+            | Trequired -> true
+            | _ -> L.back env.lb; false) in
+          XhpAttr ([], h, [ident, default], is_required, maybe_enum)
+        end
+
+and xhp_attr_list env =
+  let error_state = !(env.errors) in
+  let a = xhp_attr env in
+  if !(env.errors) != error_state
+    then [a]
+    else [a] @ xhp_attr_list_remain env
+
+and xhp_attr_list_remain env =
+  match L.token env.file env.lb with
+  | Tsc ->
+      []
+  | Tcomma ->
+      (match L.token env.file env.lb with
+      | Tsc ->
+          []
+      | _ ->
+          L.back env.lb;
+          xhp_attr_list env)
+  | _ -> error_expect env ";"; []
 
 (*****************************************************************************)
 (* Methods | Typeconst *)
@@ -2412,6 +2503,35 @@ and try_short_lambda env =
     end
   end
 
+and try_xhp_attr_use env =
+  try_parse env begin fun env ->
+    match L.token env.file env.lb with
+      | Tcolon ->
+        (match L.xhpname env.file env.lb with
+        | Txhpname ->
+          let name = (Pos.make env.file env.lb, ":"^Lexing.lexeme env.lb) in
+            (match L.token env.file env.lb with
+            | Tcomma | Tsc ->
+              L.back env.lb;
+              Some (XhpAttrUse (class_hint_with_name env name))
+            | _ ->
+              L.back env.lb;
+              None)
+        | _ -> None)
+      | _ -> None
+  end
+
+and try_xhp_enum_hint env =
+  try_parse env begin fun env ->
+    match L.token env.file env.lb with
+      | Tword when Lexing.lexeme env.lb = "enum" ->
+        let pos = Pos.make env.file env.lb in
+        expect env Tlcb;
+        let items = xhp_enum_decl_list env in
+        Some (pos, items)
+      | _ -> None
+  end
+
 (*****************************************************************************)
 (* Expressions *)
 (*****************************************************************************)
@@ -2909,8 +3029,8 @@ and expr_prefix_unary env start op =
     let op =
       match op with
       | Tem -> Unot
-      | Tincr -> Uincr
-      | Tdecr -> Udecr
+      | Tincr -> (check_lvalue env e; Uincr)
+      | Tdecr -> (check_lvalue env e; Udecr)
       | Ttild -> Utild
       | Tplus -> Uplus
       | Tminus -> Uminus
@@ -2922,6 +3042,7 @@ and expr_prefix_unary env start op =
 and expr_postfix_unary env uop e1 =
   let end_ = Pos.make env.file env.lb in
   let op =
+    check_lvalue env e1;
     match uop with
     | Tincr -> Upincr
     | Tdecr -> Updecr

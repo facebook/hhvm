@@ -267,6 +267,19 @@ let inherit_hack_class_constants_only env p class_name class_type argl =
   } in
   env, result
 
+(* This logic deals with importing XHP attributes from an XHP class
+   via the "attribute :foo;" syntax. *)
+let inherit_hack_xhp_attrs_only env p class_name class_type argl =
+  let subst = make_substitution p class_name class_type argl in
+  (* Filter out properties that are not XHP attributes *)
+  let cvars =
+    SMap.fold begin fun name class_elt acc ->
+      if class_elt.ce_is_xhp_attr then SMap.add name class_elt acc else acc
+    end class_type.tc_cvars SMap.empty in
+  let env, cvars = SMap.map_env (Inst.instantiate_ce subst) env cvars in
+  let result = { empty with ih_cvars = cvars; } in
+  env, result
+
 (*****************************************************************************)
 
 let from_class c env hint =
@@ -293,6 +306,18 @@ let from_class_constants_only env hint =
   | Some class_ ->
       (* The class lives in Hack *)
     inherit_hack_class_constants_only env pos class_name class_ class_params
+
+let from_class_xhp_attrs_only env hint =
+  let pos, class_name, class_params = desugar_class_hint hint in
+  let env, class_params = lfold Typing_hint.hint env class_params in
+  let env, class_type = Env.get_class_dep env class_name in
+  match class_type with
+  | None ->
+      (* The class lives in PHP, we don't know anything about it *)
+      env, empty
+  | Some class_ ->
+      (* The class lives in Hack *)
+      inherit_hack_xhp_attrs_only env pos class_name class_ class_params
 
 let from_parent env c =
   let extends =
@@ -328,6 +353,10 @@ let from_trait c (env, acc) uses =
   let env, inherited = from_class c env uses in
   env, add_inherited inherited acc
 
+let from_xhp_attr_use c (env, acc) uses =
+  let env, inherited = from_class_xhp_attrs_only env uses in
+  env, add_inherited inherited acc
+
 let from_interface_constants (env, acc) impls =
   let env, inherited = from_class_constants_only env impls in
   env, add_inherited inherited acc
@@ -342,6 +371,7 @@ let make env c =
   let acc = List.fold_left (from_requirements c) acc c.c_req_extends in
   (* ... are overridden with those inherited from used traits *)
   let acc = List.fold_left (from_trait c) acc c.c_uses in
+  let acc = List.fold_left (from_xhp_attr_use c) acc c.c_xhp_attr_uses in
   (* todo: what about the same constant defined in different interfaces
    * we implement? We should forbid and say "constant already defined".
    * to julien: where is the logic that check for duplicated things?

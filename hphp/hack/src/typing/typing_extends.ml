@@ -177,6 +177,7 @@ let default_constructor_ce class_ =
              ft_ret      = r, Tprim Nast.Tvoid;
            }
   in { ce_final       = false;
+       ce_is_xhp_attr = false;
        ce_override    = false;
        ce_synthesized = true;
        ce_visibility  = Vpublic;

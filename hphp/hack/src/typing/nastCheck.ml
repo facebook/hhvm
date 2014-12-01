@@ -469,7 +469,16 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         matches_class_tparam root_name
 
 and class_var env cv =
-  maybe hint env cv.cv_type;
+  let hint_env =
+    (* If this is an XHP attribute and we're in strict mode,
+       relax to partial mode to allow the use of generic
+       classes without specifying type parameters. This is
+       a temporary hack to support existing code for now. *)
+    (* Task #5815945: Get rid of this Hack *)
+    if cv.cv_is_xhp && (Typing_env.is_strict env.tenv)
+      then { env with tenv = Typing_env.set_mode env.tenv Ast.Mpartial }
+      else env in
+  maybe hint hint_env cv.cv_type;
   maybe expr env cv.cv_expr;
   ()
 

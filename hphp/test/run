@@ -5,9 +5,8 @@
 */
 
 function is_testing_dso_extension() {
-  // detect if it is runner to test against hhvm codebase
-  // it could be used for running extension tests
-  return !file_exists(__DIR__ . "/../hphp/hhvm");
+  // detecting if we run test runner to test hhvm codebase
+  return !file_exists(__DIR__ . "/../hhvm");
 }
 
 function get_expect_file_and_type($test, $options) {

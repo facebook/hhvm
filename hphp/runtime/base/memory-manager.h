@@ -115,8 +115,9 @@ enum class HeaderKind : uint8_t {
   String, Object, Resource, Ref,
   Native, // a NativeData header preceding an HNI ObjectData
   Sweepable, // a Sweepable header preceding an ObjectData ResourceData
-  Small, // small smart_malloc'd block
-  Big, // big smart_malloc'd or size-tracked block
+  SmallMalloc, // small smart_malloc'd block
+  BigMalloc, // big smart_malloc'd block
+  BigObj, // big size-tracked object (valid header follows BigNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Debug // a DebugHeader
@@ -356,7 +357,7 @@ struct BigHeap {
 
   // allocation api for big blocks. These get a BigNode header and
   // are tracked in m_bigs
-  MemBlock allocBig(size_t size);
+  MemBlock allocBig(size_t size, HeaderKind kind);
   MemBlock callocBig(size_t size);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
@@ -372,7 +373,7 @@ struct BigHeap {
   iterator end();
 
  private:
-  void enlist(BigNode*, size_t size);
+  void enlist(BigNode*, HeaderKind kind, size_t size);
 
  private:
   std::vector<MemBlock> m_slabs;

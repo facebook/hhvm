@@ -492,7 +492,7 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
   if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
     auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
-    ptr->kind = HeaderKind::Small;
+    ptr->kind = HeaderKind::SmallMalloc;
     return ptr + 1;
   }
   return smartMallocBig(nbytes);
@@ -538,7 +538,7 @@ namespace {
 const char* header_names[] = {
   "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Shared",
   "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
-  "Sweepable", "Small", "Big", "Free", "Hole", "Debug"
+  "Sweepable", "SmallMalloc", "BigMalloc", "BigObj", "Free", "Hole", "Debug"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
@@ -602,9 +602,10 @@ size_t Header::size() const {
       return resourceSize(&res_);
     case HeaderKind::Ref:
       return sizeof(RefData);
-    case HeaderKind::Small:
+    case HeaderKind::SmallMalloc:
       return small_.padbytes;
-    case HeaderKind::Big:
+    case HeaderKind::BigMalloc:
+    case HeaderKind::BigObj:
       return big_.nbytes;
     case HeaderKind::Free:
       return free_.size;
@@ -895,7 +896,7 @@ inline void MemoryManager::updateBigStats() {
 NEVER_INLINE
 void* MemoryManager::smartMallocBig(size_t nbytes) {
   assert(nbytes > 0);
-  auto block = m_heap.allocBig(nbytes);
+  auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc);
   updateBigStats();
   return block.ptr;
 }
@@ -907,7 +908,7 @@ MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
-  auto block = m_heap.allocBig(debugAddExtra(bytes));
+  auto block = m_heap.allocBig(debugAddExtra(bytes), HeaderKind::BigObj);
   auto szOut = debugRemoveExtra(block.size);
 #ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
@@ -1178,7 +1179,14 @@ MemBlock BigHeap::allocSlab(size_t size) {
   return {slab, size};
 }
 
-MemBlock BigHeap::allocBig(size_t bytes) {
+void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
+  n->nbytes = size;
+  n->kind = kind;
+  n->index = m_bigs.size();
+  m_bigs.push_back(n);
+}
+
+MemBlock BigHeap::allocBig(size_t bytes, HeaderKind kind) {
 #ifdef USE_JEMALLOC
   auto n = static_cast<BigNode*>(mallocx(bytes + sizeof(BigNode), 0));
   auto cap = sallocx(n, 0);
@@ -1186,14 +1194,14 @@ MemBlock BigHeap::allocBig(size_t bytes) {
   auto cap = bytes + sizeof(BigNode);
   auto n = static_cast<BigNode*>(safe_malloc(cap));
 #endif
-  enlist(n, cap);
+  enlist(n, kind, cap);
   return {n + 1, cap - sizeof(BigNode)};
 }
 
 MemBlock BigHeap::callocBig(size_t nbytes) {
   auto cap = nbytes + sizeof(BigNode);
   auto const n = static_cast<BigNode*>(safe_calloc(cap, 1));
-  enlist(n, cap);
+  enlist(n, HeaderKind::BigMalloc, cap);
   return {n + 1, nbytes};
 }
 
@@ -1206,13 +1214,6 @@ bool BigHeap::contains(void* ptr) const {
     }
   );
   return it != std::end(m_slabs);
-}
-
-void BigHeap::enlist(BigNode* n, size_t size) {
-  n->nbytes = size;
-  n->kind = HeaderKind::Big;
-  n->index = m_bigs.size();
-  m_bigs.push_back(n);
 }
 
 NEVER_INLINE

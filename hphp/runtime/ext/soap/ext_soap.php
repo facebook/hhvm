@@ -167,7 +167,6 @@ class SoapClient {
  * A class representing a variable or object for use with SOAP services.
  *
  */
-<<__NativeData("SoapVar")>>
 class SoapVar {
 
   <<__Native>>

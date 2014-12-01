@@ -246,231 +246,144 @@ bool optimizedFCallBuiltin(HTS& env,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * CoerceStk can generate two types of exceptions:
+ * Return the type that a parameter to a builtin function is supposed to be
+ * coerced to.  What this means depends on how the builtin is dealing with
+ * parameter coersion: new-style HNI builtins try to do a tvCoerceParamTo*,
+ * while older ones use tvCastTo* semantics.
  *
- * TVCoercionException: Indicates parameter coersion failed and designates
- *                      a return value to push onto the stack. These types
- *                      of exceptions will trigger a side exit which will
- *                      push a return value and continue execution at the
- *                      next BC.
- *
- * PHP exceptions: Potentially generated when user code is reentered as part
- *                 of coercion. These exceptions should be treated normally
- *                 and allowed to continue unwinding the stack.
- *
- *
- * The commonBody parameter is a function to be run before checking if we are
- * handling a TVCoercionException or not. It should contain any common cleanup
- * shared between this and regular exceptions.
- *
- * The sideExitBody parameter is a function to be run before pushing the
- * return value. It should pop any parameters off the stack and perform the
- * associated DecRefs if necessary.
- *
- * The takenBody parameter is a function to be run should a non-
- * TVCoercionException be raised from user code. In this case any cleanup
- * necessary should be performed before the undwinder resumes.
- *
- * Three blocks are emitted when this function is called, and they follow this
- * template, B0 is returned:
- *
- * B0:
- *  BeginCatch
- *  <<commonBody>>
- *  UnwindCheckSideExit FP, SP -> B2
- *  -> B1
- * B1:
- *  <<sideExitBody>>
- *  val = LdUnwinderValue<Cell>
- *  DeleteUnwinderException
- *  SP = SpillStack<...>
- *  SyncABIRegs FP, SP
- *  EagerSyncABIRegs FP, SP
- *  ReqBindJmp<nextBcOff>
- * B2:
- *  <<takenBody>>
- *  EndCatch FP, SP
+ * If the builtin parameter has no type hints to cause coercion, this function
+ * returns Type::Bottom.
  */
-template<class CommonBody, class SideExitBody, class TakenBody>
-Block* makeParamCoerceExit(HTS& env,
-                           CommonBody commonBody,
-                           SideExitBody sideExitBody,
-                           TakenBody takenBody) {
-  auto exit = env.irb->makeExit(Block::Hint::Unused);
-  auto taken = env.irb->makeExit(Block::Hint::Unused);
-
-  BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
-  gen(env, BeginCatch);
-  commonBody();
-  gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
-
-  // prepare for regular exception
-  {
-    BlockPusher bpTaken(*env.irb, makeMarker(env, bcOff(env)), taken);
-
-    auto const stack = takenBody();
-    gen(env, EndCatch, fp(env), stack);
+Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
+  auto const& pi = callee->params()[paramIdx];
+  auto const& tc = pi.typeConstraint;
+  if (tc.isNullable() && !callee->byRef(paramIdx)) {
+    auto const dt = tc.underlyingDataType();
+    if (!dt) return Type::Bottom;
+    return Type::Null | Type(*dt);
   }
-
-  // prepare for side exit
-  sideExitBody();
-
-  // Push the side exit return value onto the stack and cleanup the exception
-  auto const val = gen(env, LdUnwinderValue, Type::Cell);
-  gen(env, DeleteUnwinderException);
-
-  // Spill the stack
-  auto spills = peekSpillValues(env);
-  spills.insert(spills.begin(), val);
-  auto const stack = implSpillStack(env, sp(env), spills, 0);
-
-  gen(env, SyncABIRegs, fp(env), stack);
-  gen(env, EagerSyncVMRegs, fp(env), stack);
-  gen(env, ReqBindJmp, ReqBindJmpData(nextBcOff(env)));
-
-  return exit;
+  return pi.builtinType ? Type(*pi.builtinType) : Type::Bottom;
 }
 
-template<class GetArg>
-void builtinCall(HTS& env,
-                 const Func* callee,
-                 uint32_t numArgs,
-                 uint32_t numNonDefault,
-                 SSATmp* paramThis,
-                 bool inlining,
-                 bool wasInliningConstructor,
-                 GetArg getArg) {
-  auto const destroyLocals = builtinFuncDestroysLocals(callee);
+//////////////////////////////////////////////////////////////////////
 
-  // collect the parameter locals---we'll need them later.  Also
-  // determine which ones will need to be passed through the eval
-  // stack.
-  jit::vector<SSATmp*> paramSSAs(numArgs);
-  jit::vector<bool> paramThroughStack(numArgs);
-  jit::vector<bool> paramNeedsConversion(numArgs);
-  auto numParamsThroughStack = uint32_t{0};
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    // Fill in paramSSAs in reverse, since they may come from popC's.
-    auto const offset = numArgs - i - 1;
-    paramSSAs[offset] = getArg(offset);
+struct ParamPrep {
+  explicit ParamPrep(size_t count) : info(count) {}
 
-    auto const& pi = callee->params()[offset];
-    auto dt = pi.builtinType;
-    auto const& tc = pi.typeConstraint;
-    if (tc.isNullable() && !callee->byRef(offset)) {
-      dt = tc.underlyingDataType();
-      ++numParamsThroughStack;
-      paramThroughStack[offset] = true;
-    } else if (dt && !callee->byRef(offset)) {
-      [&] {
-        switch (*dt) {
-          case KindOfBoolean:
-          case KindOfInt64:
-          case KindOfDouble:
-            paramThroughStack[offset] = false;
-            return;
-          case KindOfUninit:
-          case KindOfNull:
-          case KindOfStaticString:
-          case KindOfString:
-          case KindOfArray:
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfRef:
-            ++numParamsThroughStack;
-            paramThroughStack[offset] = true;
-            return;
-          case KindOfClass:
-            break;
-        }
-        not_reached();
-      }();
-    } else {
-      ++numParamsThroughStack;
-      paramThroughStack[offset] = true;
+  struct Info {
+    SSATmp* value{nullptr};
+    bool throughStack{false};
+    bool needsConversion{false};
+  };
+
+  const Info& operator[](size_t idx) const { return info[idx]; }
+  Info& operator[](size_t idx) { return info[idx]; }
+  size_t size() const { return info.size(); }
+
+  SSATmp* thiz{nullptr};       // may be null if call is not a method
+  jit::vector<Info> info;
+  uint32_t numThroughStack{0};
+};
+
+/*
+ * Collect parameters for a call to a builtin.  Also determine which ones will
+ * need to be passed through the eval stack, and which ones will need
+ * conversions.
+ */
+template<class LoadParam>
+ParamPrep prepare_params(HTS& env,
+                         const Func* callee,
+                         SSATmp* thiz,
+                         uint32_t numArgs,
+                         uint32_t numNonDefault,
+                         LoadParam loadParam) {
+  auto ret = ParamPrep(numArgs);
+  ret.thiz = thiz;
+
+  // Fill in in reverse order, since they may come from popC's (depending on
+  // what loadParam wants to do).
+  for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
+    ret[offset].value = loadParam(offset);
+
+    auto const ty = param_coerce_type(callee, offset);
+
+    // We do actually mean exact type equality here.  We're only capable of
+    // passing the following primitives through registers; everything else goes
+    // on the stack.
+    if (ty == Type::Bool || ty == Type::Int || ty == Type::Dbl) {
+      ret[offset].throughStack = false;
+      ret[offset].needsConversion = offset < numNonDefault;
+      continue;
     }
 
-    paramNeedsConversion[offset] = offset < numNonDefault && dt;
+    // If ty > Type::Bottom, it had some kind of type hint.
+    ++ret.numThroughStack;
+    ret[offset].throughStack = true;
+    ret[offset].needsConversion = offset < numNonDefault && ty > Type::Bottom;
   }
 
-  // For the same reason that we have to IncRef the locals above, we
-  // need to grab one on the $this.
-  if (paramThis) gen(env, IncRef, paramThis);
+  return ret;
+}
 
-  if (inlining) endInlinedCommon(env);   /////// leaving inlined function
+//////////////////////////////////////////////////////////////////////
 
-  /*
-   * Everything that needs to be on the stack gets spilled now.
-   */
-  if (numParamsThroughStack != 0 || !inlining) {
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      if (paramThroughStack[i]) {
-        push(env, paramSSAs[i]);
-      }
-    }
-    // We're going to do ldStackAddrs on these, so the stack must be
-    // materialized:
-    spillStack(env);
-    // This marker update is to make sure rbx points to the bottom of
-    // our stack when we enter our catch trace.  The catch trace
-    // twiddles the VM registers directly on the execution context to
-    // make the unwinder understand the situation, however.
-    updateMarker(env);
+/*
+ * CatchMaker makes catch blocks for calling builtins.  There's a fair bit of
+ * complexity here right now, for these reasons:
+ *
+ *    o Sometimes we're 'logically' inlining a php-level call to a function
+ *      that contains a NativeImpl opcode.
+ *
+ *      But we implement this by generating all the relevant NativeImpl code
+ *      after the InlineReturn for the callee, to make it easier for DCE to
+ *      eliminate the code that constructs the callee's activation record.
+ *      This means the unwinder is going to see our PC as equal to the FCallD
+ *      for the call to the function, which will be inside the FPI region for
+ *      the call, so it'll try to pop an ActRec, so we'll need to reconstruct
+ *      one for it during unwinding.
+ *
+ *    o HNI-style param coerce modes can force the entire function to return
+ *      false or null if the coersions fail.  This is implemented via a
+ *      TVCoercionException, which is not a user-visible exception.  So our
+ *      catch blocks are sometimes handling a PHP exception, and sometimes a
+ *      failure to coerce.
+ *
+ *    o Both of these things may be relevant to the same catch block.
+ *
+ * Also, note that the CatchMaker keeps a pointer to the builtin call's
+ * ParamPrep, which will have its values mutated by realize_params as it's
+ * making coersions, so that we can see what's changed so far (and what to
+ * clean up on the offramps).  Some values that were refcounted may become
+ * non-refcounted after conversions, and we can't DecRef things twice.
+ */
+struct CatchMaker {
+  enum class Kind { NotInlining, InliningNonCtor, InliningCtor };
+
+  explicit CatchMaker(HTS& env,
+                      Kind kind,
+                      const Func* callee,
+                      const ParamPrep* params)
+    : env(env)
+    , m_kind(kind)
+    , m_callee(callee)
+    , m_params(*params)
+  {
+    assert(!m_params.thiz || inlining());
   }
 
-  auto const decRefForCatch =  [&] {
-    // TODO(#4323657): this is generating generic DecRefs at the time
-    // of this writing---probably we're not handling the stack chain
-    // correctly in a catch block.
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      if (paramThroughStack[i]) {
-        popDecRef(env, Type::Gen);
-      } else {
-        gen(env, DecRef, paramSSAs[i]);
-      }
-    }
-  };
+  CatchMaker(const CatchMaker&) = delete;
+  CatchMaker(CatchMaker&&) = default;
 
-  /*
-   * We have an unusual situation if we raise an exception:
-   *
-   * The unwinder is going to see our PC as equal to the FCallD for
-   * the call to this NativeImpl instruction.  This means the PC will
-   * be inside the FPI region for the call, so it'll try to pop an
-   * ActRec.
-   *
-   * Meanwhile, we've just exited the inlined callee (and its frame
-   * was hopefully removed by dce), and then pushed any of our
-   * by-reference arguments on the eval stack.  So, if we throw, we
-   * need to pop anything we pushed, put down a fake ActRec, and then
-   * eagerly sync VM regs to represent that stack depth.
-   */
-  auto const prepareForCatch = [&] {
-    if (inlining) {
-      fpushActRec(env,
-                  cns(env, callee),
-                  paramThis ? paramThis : cns(env, Type::Nullptr),
-                  ActRec::encodeNumArgs(numArgs,
-                                        false /* localsDecRefd */,
-                                        false /* resumed */,
-                                        wasInliningConstructor),
-                  nullptr);
+  bool inlining() const {
+    switch (m_kind) {
+    case Kind::NotInlining:      return false;
+    case Kind::InliningNonCtor:  return true;
+    case Kind::InliningCtor:     return true;
     }
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      // TODO(#4313939): it's not actually necessary to push these
-      // nulls.
-      push(env, cns(env, Type::InitNull));
-    }
-    auto const stack = spillStack(env);
-    gen(env, SyncABIRegs, fp(env), stack);
-    gen(env, EagerSyncVMRegs, fp(env), stack);
-    return stack;
-  };
+    not_reached();
+  }
 
-  auto const prepareForSideExit = [&] {
-    if (paramThis) gen(env, DecRef, paramThis);
-  };
-  auto const makeUnusualCatch = [&] {
+  Block* makeUnusualCatch() const {
     return makeCatchImpl(
       env,
       [&] {
@@ -478,162 +391,286 @@ void builtinCall(HTS& env,
         return prepareForCatch();
       }
     );
-  };
-
-  auto const makeParamCoerceCatch = [&] {
-    return makeParamCoerceExit(env,
-                               decRefForCatch,
-                               prepareForSideExit,
-                               prepareForCatch);
-  };
-
-  /*
-   * Prepare the actual arguments to the CallBuiltin instruction.  If any of
-   * the parameters need type conversions, we need to handle that too.
-   */
-  auto const cbNumArgs = 2 + numArgs + (paramThis ? 1 : 0);
-  SSATmp* args[cbNumArgs];
-  auto argIdx = uint32_t{0};
-  args[argIdx++] = fp(env);
-  args[argIdx++] = sp(env);
-  {
-
-    auto stackIdx = uint32_t{0};
-
-    if (paramThis) args[argIdx++] = paramThis;
-    for (auto i = uint32_t{0}; i < numArgs; ++i) {
-      auto pi = callee->params()[i];
-      auto dt = pi.builtinType;
-      auto const& tc = pi.typeConstraint;
-
-      Type t;
-      if (tc.isNullable() && !callee->byRef(i)) {
-        dt = tc.underlyingDataType();
-        t = Type::Null;
-      }
-      if (dt) {
-        t |= Type(*dt);
-      }
-
-      if (!paramThroughStack[i]) {
-        if (paramNeedsConversion[i]) {
-          auto const oldVal = paramSSAs[i];
-
-          if (callee->isParamCoerceMode()) {
-            auto conv = [&](Type t, SSATmp* src) {
-              if (t <= Type::Int) {
-                return gen(env,
-                           CoerceCellToInt,
-                           CoerceData(callee, i + 1),
-                           makeParamCoerceCatch(),
-                           src);
-              }
-              if (t <= Type::Dbl) {
-                return gen(env,
-                           CoerceCellToDbl,
-                           CoerceData(callee, i + 1),
-                           makeParamCoerceCatch(),
-                           src);
-              }
-              always_assert(t <= Type::Bool);
-              return gen(env,
-                         CoerceCellToBool,
-                         CoerceData(callee, i + 1),
-                         makeParamCoerceCatch(),
-                         src);
-            };
-
-            paramSSAs[i] = [&] {
-              if (Type::Null < t) {
-                return env.irb->cond(
-                  0,
-                  [&] (Block* taken) {
-                    auto isnull = gen(env, IsType, Type::Null, oldVal);
-                    gen(env, JmpNZero, taken, isnull);
-                  },
-                  [&] { // Next: oldVal is non-null
-                    t -= Type::Null;
-                    return conv(t, oldVal);
-                  },
-                  [&] { // Taken: oldVal is null
-                    return gen(env, AssertType, Type::Null, oldVal);
-                  }
-                );
-              }
-              return conv(t, oldVal);
-            }();
-          } else {
-            paramSSAs[i] = [&] {
-              if (t <= Type::Int) {
-                return gen(env, ConvCellToInt, makeUnusualCatch(), oldVal);
-              }
-              if (t <= Type::Dbl) {
-                return gen(env, ConvCellToDbl, makeUnusualCatch(), oldVal);
-              }
-              always_assert(t <= Type::Bool);
-              return gen(env, ConvCellToBool, oldVal);
-            }();
-          }
-          gen(env, DecRef, oldVal);
-        }
-        args[argIdx++] = paramSSAs[i];
-        continue;
-      }
-
-      auto const offset = numParamsThroughStack - stackIdx - 1;
-      if (paramNeedsConversion[i]) {
-        auto mi = callee->methInfo();
-        if (callee->params()[i].builtinType == KindOfObject && mi &&
-            mi->parameters[i]->valueLen > 0) {
-          t = Type::NullableObj;
-        }
-
-        if (callee->isParamCoerceMode()) {
-          gen(env,
-              CoerceStk,
-              t,
-              CoerceStkData(offset, callee, i + 1),
-              makeParamCoerceCatch(),
-              sp(env));
-        } else {
-          gen(env,
-              CastStk,
-              t,
-              StackOffset(offset),
-              makeUnusualCatch(),
-              sp(env));
-        }
-      }
-
-      args[argIdx++] = ldStackAddr(env, offset);
-      ++stackIdx;
-    }
-
-    assert(stackIdx == numParamsThroughStack);
-    assert(argIdx == cbNumArgs);
   }
 
-  // Make the actual call.
+  Block* makeParamCoerceCatch() const {
+    auto const exit = env.irb->makeExit(Block::Hint::Unlikely);
+
+    BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
+    gen(env, BeginCatch);
+    decRefForCatch();
+
+    // Determine whether we're dealing with a TVCoercionException or a php
+    // exception.  If it's a php-exception, we'll go to the taken block.
+    env.irb->ifThen(
+      [&] (Block* taken) {
+        gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
+      },
+      [&] {
+        env.irb->hint(Block::Hint::Unused);
+        auto const stack = prepareForCatch();
+        gen(env, EndCatch, fp(env), stack);
+      }
+    );
+
+    // From here on we're on the side-exit path, due to a failure to coerce.
+    // We need to push the unwinder value and then side-exit to the next
+    // instruction.
+    env.irb->hint(Block::Hint::Unlikely);
+    if (m_params.thiz) gen(env, DecRef, m_params.thiz);
+
+    auto const val = gen(env, LdUnwinderValue, Type::Cell);
+    gen(env, DeleteUnwinderException);
+    push(env, val);
+    gen(env, Jmp, makeExit(env, nextBcOff(env)));
+
+    return exit;
+  }
+
+private:
+  SSATmp* prepareForCatch() const {
+    if (inlining()) {
+      fpushActRec(env,
+                  cns(env, m_callee),
+                  m_params.thiz ? m_params.thiz : cns(env, Type::Nullptr),
+                  ActRec::encodeNumArgs(m_params.size(),
+                                        false /* localsDecRefd */,
+                                        false /* resumed */,
+                                        m_kind == Kind::InliningCtor),
+                  nullptr);
+    }
+    for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
+      // TODO(#4313939): it's not actually necessary to push these
+      // nulls.
+      push(env, cns(env, Type::InitNull));
+    }
+    auto const stack = spillStack(env);
+    gen(env, SyncABIRegs, fp(env), stack);
+    /*
+     * TODO(#4323657): right now this is doing an EagerSyncVMRegs in the catch
+     * block even if we're not inlining, which shouldn't be necessary.
+     */
+    gen(env, EagerSyncVMRegs, fp(env), stack);
+    return stack;
+  }
+
+  void decRefForCatch() const {
+    // TODO(#4323657): this is generating generic DecRefs at the time of this
+    // writing---probably we're not handling the stack chain correctly in a
+    // catch block.
+    for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
+      if (m_params[i].throughStack) {
+        popDecRef(env, Type::Gen);
+      } else {
+        // We may have to decref a parameter that was reference counted, but
+        // that we were going to coerce into a non-reference counted
+        // non-throughStack type.  As we do coerces, params.value gets updated
+        // so each new catch block only decrefs the things that weren't yet
+        // converted.
+        gen(env, DecRef, m_params[i].value);
+      }
+    }
+  }
+
+private:
+  HTS& env;
+  Kind const m_kind;
+  const Func* m_callee;
+  const ParamPrep& m_params;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* coerce_value(HTS& env,
+                     const Func* callee,
+                     SSATmp* oldVal,
+                     uint32_t paramIdx,
+                     const CatchMaker& maker) {
+  auto const targetTy = param_coerce_type(callee, paramIdx);
+  always_assert(targetTy != Type::Bottom);
+  if (!callee->isParamCoerceMode()) {
+    if (targetTy <= Type::Int) {
+      return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
+    }
+    if (targetTy <= Type::Dbl) {
+      return gen(env, ConvCellToDbl, maker.makeUnusualCatch(), oldVal);
+    }
+    always_assert(targetTy <= Type::Bool);
+    return gen(env, ConvCellToBool, oldVal);
+  }
+
+  assert(!(Type::Null < targetTy));
+
+  if (targetTy <= Type::Int) {
+    return gen(env,
+               CoerceCellToInt,
+               CoerceData(callee, paramIdx + 1),
+               maker.makeParamCoerceCatch(),
+               oldVal);
+  }
+  if (targetTy <= Type::Dbl) {
+    return gen(env,
+               CoerceCellToDbl,
+               CoerceData(callee, paramIdx + 1),
+               maker.makeParamCoerceCatch(),
+               oldVal);
+  }
+  always_assert(targetTy <= Type::Bool);
+  return gen(env,
+             CoerceCellToBool,
+             CoerceData(callee, paramIdx + 1),
+             maker.makeParamCoerceCatch(),
+             oldVal);
+}
+
+void coerce_stack(HTS& env,
+                  const Func* callee,
+                  uint32_t paramIdx,
+                  uint32_t offset,
+                  const CatchMaker& maker) {
+  auto const mi = callee->methInfo();
+  auto const targetTy = [&]() -> Type {
+    if (callee->params()[paramIdx].builtinType == KindOfObject && mi &&
+        mi->parameters[paramIdx]->valueLen > 0) {
+      return Type::NullableObj;
+    }
+    return param_coerce_type(callee, paramIdx);
+  }();
+  always_assert(targetTy != Type::Bottom);
+
+  if (callee->isParamCoerceMode()) {
+    gen(env,
+        CoerceStk,
+        targetTy,
+        CoerceStkData(offset, callee, paramIdx + 1),
+        maker.makeParamCoerceCatch(),
+        sp(env));
+  } else {
+    gen(env,
+        CastStk,
+        targetTy,
+        StackOffset(offset),
+        maker.makeUnusualCatch(),
+        sp(env));
+  }
+}
+
+/*
+ * Prepare the actual arguments to the CallBuiltin instruction, by converting a
+ * ParamPrep into a vector of SSATmps to pass to CallBuiltin.  If any of the
+ * parameters needed type conversions, we need to do that here too.
+ */
+jit::vector<SSATmp*> realize_params(HTS& env,
+                                    const Func* callee,
+                                    ParamPrep& params,
+                                    const CatchMaker& maker) {
+  auto const cbNumArgs = 2 + params.size() + (params.thiz ? 1 : 0);
+  auto ret = jit::vector<SSATmp*>(cbNumArgs);
+  auto argIdx = uint32_t{0};
+  ret[argIdx++] = fp(env);
+  ret[argIdx++] = sp(env);
+  if (params.thiz) ret[argIdx++] = params.thiz;
+
+  auto stackIdx = uint32_t{0};
+  for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
+    if (!params[paramIdx].throughStack) {
+      if (!params[paramIdx].needsConversion) {
+        ret[argIdx++] = params[paramIdx].value;
+        continue;
+      }
+      auto const oldVal = params[paramIdx].value;
+      // Heads up on non-local state here: we have to update the values inside
+      // ParamPrep so that the CatchMaker functions know about new potentially
+      // refcounted types to decref, or values that were already decref'd and
+      // replaced with things like ints.
+      params[paramIdx].value = coerce_value(
+        env,
+        callee,
+        oldVal,
+        paramIdx,
+        maker
+      );
+      gen(env, DecRef, oldVal);
+      ret[argIdx++] = params[paramIdx].value;
+      continue;
+    }
+
+    auto const offset = params.numThroughStack - stackIdx - 1;
+    if (params[paramIdx].needsConversion) {
+      coerce_stack(env, callee, paramIdx, offset, maker);
+    }
+    ret[argIdx++] = ldStackAddr(env, offset);
+    ++stackIdx;
+  }
+
+  assert(stackIdx == params.numThroughStack);
+  assert(argIdx == cbNumArgs);
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void builtinCall(HTS& env,
+                 const Func* callee,
+                 ParamPrep& params,
+                 const CatchMaker& catchMaker) {
+  /*
+   * Everything that needs to be on the stack gets spilled now.
+   *
+   * If we're not inlining, the reason we do this even when numThroughStack is
+   * zero is to make it so that in either case the stack depth when we enter
+   * our catch blocks is always the same as the numThroughStack value, in all
+   * situations.  If we didn't do this, then when we aren't inlining, and
+   * numThroughStack is zero, we'd have the stack depth be the total num params
+   * (the depth before the FCallBuiltin), which would add more cases to handle
+   * in the catch blocks.
+   */
+  if (params.numThroughStack != 0 || !catchMaker.inlining()) {
+    for (auto i = uint32_t{0}; i < params.size(); ++i) {
+      if (params[i].throughStack) {
+        push(env, params[i].value);
+      }
+    }
+    // We're going to do ldStackAddrs on these, so the stack must be
+    // materialized:
+    spillStack(env);
+    /*
+     * This marker update is to make sure rbx points to the bottom of our stack
+     * if we enter a catch trace.  It's also necessary because we might run
+     * destructors as part of parameter coersions, which we don't want to
+     * clobber our spilled stack.
+     */
+    updateMarker(env);
+  }
+
   auto const retType = [&] {
     auto const retDT = callee->returnType();
     auto const ret = retDT ? Type(*retDT) : Type::Cell;
     return callee->attrs() & ClassInfo::IsReference ? ret.box() : ret;
   }();
-  SSATmp** decayedPtr = &args[0];
+
+  // Make the actual call.
+  auto realized = realize_params(env, callee, params, catchMaker);
+  SSATmp** const decayedPtr = &realized[0];
   auto const ret = gen(
     env,
     CallBuiltin,
     retType,
-    CallBuiltinData { callee, destroyLocals },
-    makeUnusualCatch(),
-    std::make_pair(cbNumArgs, decayedPtr)
+    CallBuiltinData { callee, builtinFuncDestroysLocals(callee) },
+    catchMaker.makeUnusualCatch(),
+    std::make_pair(realized.size(), decayedPtr)
   );
 
   // Pop the stack params and push the return value.
-  if (paramThis) gen(env, DecRef, paramThis);
-  for (auto i = uint32_t{0}; i < numParamsThroughStack; ++i) {
+  if (params.thiz) gen(env, DecRef, params.thiz);
+  for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
     popDecRef(env, Type::Gen);
   }
+  // We don't need to decref the non-state param values, because they are only
+  // non-reference counted types.  (At this point we've gotten through all our
+  // coersions, so even if they started refcounted we've already decref'd them
+  // as appropriate.)
   push(env, ret);
 }
 
@@ -663,24 +700,42 @@ void nativeImplInlined(HTS& env) {
 
   bool const instanceMethod = callee->isMethod() &&
                                 !(callee->attrs() & AttrStatic);
-  // Collect the parameter locals---we'll need them later.  Also
-  // determine which ones will need to be passed through the eval
-  // stack.
+
+
   auto const numArgs = callee->numParams();
   auto const paramThis = instanceMethod ? ldThis(env) : nullptr;
 
-  builtinCall(env,
-              callee,
-              numArgs,
-              numArgs,  /* numNonDefault */
-              paramThis,
-              true,     /* inlining */
-              wasInliningConstructor,
-              [&](uint32_t i) {
-                auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
-                gen(env, IncRef, ret);
-                return ret;
-              });
+  auto params = prepare_params(
+    env,
+    callee,
+    paramThis,
+    numArgs,
+    numArgs, // numNonDefault is equal to numArgs here.
+    [&] (uint32_t i) {
+      auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
+      // These IncRefs must be 'inside' the callee: it may own the only
+      // reference to the parameters.  Normally they will cancel with the
+      // DecRefs that we'll do in endInlinedCommon.
+      gen(env, IncRef, ret);
+      return ret;
+    }
+  );
+
+  // For the same reason that we have to IncRef the locals above, we
+  // need to grab one on the $this.
+  if (paramThis) gen(env, IncRef, paramThis);
+
+  endInlinedCommon(env);
+
+  auto const catcher = CatchMaker {
+    env,
+    wasInliningConstructor ? CatchMaker::Kind::InliningCtor
+                           : CatchMaker::Kind::InliningNonCtor,
+    callee,
+    &params
+  };
+
+  builtinCall(env, callee, params, catcher);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -735,14 +790,23 @@ void emitFCallBuiltin(HTS& env,
 
   if (optimizedFCallBuiltin(env, callee, numArgs, numNonDefault)) return;
 
-  builtinCall(env,
-              callee,
-              numArgs,
-              numNonDefault,
-              nullptr,  /* no this */
-              false,    /* not inlining */
-              false,    /* not inlining constructor */
-              [&](uint32_t) { return popC(env); });
+  auto params = prepare_params(
+    env,
+    callee,
+    nullptr,  // no $this; FCallBuiltin never happens for methods
+    numArgs,
+    numNonDefault,
+    [&] (uint32_t i) { return popC(env); }
+  );
+
+  auto const catcher = CatchMaker {
+    env,
+    CatchMaker::Kind::NotInlining,
+    callee,
+    &params
+  };
+
+  builtinCall(env, callee, params, catcher);
 }
 
 void emitNativeImpl(HTS& env) {

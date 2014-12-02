@@ -722,6 +722,77 @@ private:
     Fixup fixup;
   };
 
+  /*
+   * PhiInfo is responsible for the bookkeeping needed to transform vasm's
+   * phijmp/phidef instructions into LLVM phi nodes.
+   */
+  struct PhiInfo {
+    void phij(LLVMEmitter& e, llvm::BasicBlock* fromLabel,
+              const VregList& uses) {
+      UseInfo useInfo{fromLabel, uses};
+
+      // Update LLVM phi instructions if they've already been emitted; otherwise
+      // enqueue useInfo so that phidef() can emit the uses.
+      if (m_phis.size() != 0) {
+        assert(m_phis.size() == useInfo.uses.size());
+        for (auto phiInd = 0; phiInd < m_phis.size(); ++phiInd) {
+          addIncoming(e, useInfo, phiInd);
+        }
+      } else {
+        m_pendingPreds.emplace_back(std::move(useInfo));
+      }
+    }
+
+    void phidef(LLVMEmitter& e, llvm::BasicBlock* toLabel,
+                const VregList& defs) {
+      assert(m_phis.size() == 0);
+      assert(m_pendingPreds.size() > 0);
+
+      m_toLabel = toLabel;
+      m_defs = defs;
+
+      for (auto phiInd = 0; phiInd < m_defs.size(); ++phiInd) {
+        llvm::Type* type = e.value(m_pendingPreds[0].uses[phiInd])->getType();
+        llvm::PHINode* phi = e.m_irb.CreatePHI(type, 1);
+        m_phis.push_back(phi);
+
+        // Emit uses for the phi* instructions which preceded this phidef.
+        for (auto& useInfo : m_pendingPreds) {
+          addIncoming(e, useInfo, phiInd);
+        }
+        e.defineValue(m_defs[phiInd], phi);
+      }
+    }
+
+   private:
+    struct UseInfo {
+      llvm::BasicBlock* fromLabel;
+      VregList uses;
+    };
+
+    void addIncoming(LLVMEmitter& e, UseInfo& useInfo, unsigned phiInd) {
+      m_phis[phiInd]->addIncoming(e.value(useInfo.uses[phiInd]),
+                                  useInfo.fromLabel);
+      std::string typeStr;
+      {
+        llvm::Type* type = e.value(useInfo.uses[phiInd])->getType();
+        llvm::raw_string_ostream os(typeStr);
+        type->print(os); // Flushed during scope exit.
+      }
+      FTRACE(1,
+             "phidef --> phiInd:{}, type:{}, incoming:{}, use:%{}, "
+             "block:B{}, def:%{}\n", phiInd, typeStr,
+             useInfo.fromLabel->getName().str(),
+             size_t{useInfo.uses[phiInd]},
+             m_toLabel->getName().str(), size_t{m_defs[phiInd]});
+    }
+
+    jit::vector<UseInfo> m_pendingPreds;
+    jit::vector<llvm::PHINode*> m_phis;
+    VregList m_defs;
+    llvm::BasicBlock* m_toLabel;
+  };
+
   static constexpr unsigned kFSAddressSpace = 257;
 
 #define O(name, ...) void emit(const name&);
@@ -777,6 +848,8 @@ VASM_OPCODES
 
   // Vlabel -> llvm::BasicBlock map
   jit::vector<llvm::BasicBlock*> m_blocks;
+
+  jit::hash_map<llvm::BasicBlock*, PhiInfo> m_phiInfos;
 
   // Pending Fixups that must be processed after codegen
   jit::vector<LLVMFixup> m_fixups;
@@ -958,7 +1031,10 @@ O(xorqi) \
 O(landingpad) \
 O(ldretaddr) \
 O(retctrl) \
-O(absdbl)
+O(absdbl) \
+O(phijmp) \
+O(phijcc) \
+O(phidef)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -1735,6 +1811,31 @@ void LLVMEmitter::emit(const orqim& inst) {
   auto value = m_irb.CreateOr(cns(inst.s0.q()), m_irb.CreateLoad(ptr));
   defineFlagTmp(inst.sf, value);
   m_irb.CreateStore(value, ptr);
+}
+
+void LLVMEmitter::emit(const phijmp& inst) {
+  m_phiInfos[block(inst.target)].phij(*this, m_irb.GetInsertBlock(),
+                                      m_unit.tuples[inst.uses]);
+  m_irb.CreateBr(block(inst.target));
+}
+
+void LLVMEmitter::emit(const phijcc& inst) {
+  auto curBlock = m_irb.GetInsertBlock();
+  auto next  = block(inst.targets[0]);
+  auto taken = block(inst.targets[1]);
+  auto& uses = m_unit.tuples[inst.uses];
+
+  m_phiInfos[next].phij(*this, curBlock, uses);
+  m_phiInfos[taken].phij(*this, curBlock, uses);
+
+  auto cond = emitCmpForCC(inst.sf, inst.cc);
+  m_irb.CreateCondBr(cond, taken, next);
+}
+
+void LLVMEmitter::emit(const phidef& inst) {
+  const VregList& defs = m_unit.tuples[inst.defs];
+  auto block = m_irb.GetInsertBlock();
+  m_phiInfos.at(block).phidef(*this, block, defs);
 }
 
 llvm::Value* LLVMEmitter::getReturnAddress() {

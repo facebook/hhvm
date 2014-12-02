@@ -241,9 +241,11 @@ PDOMySqlConnection::~PDOMySqlConnection() {
   }
 }
 
+const StaticString s_localhost("localhost");
+
 bool PDOMySqlConnection::create(const Array& options) {
   int i, ret = 0;
-  char *host = NULL, *unix_socket = NULL;
+  char *unix_socket = nullptr;
   unsigned int port = 3306;
   char *dbname;
   char *charset = nullptr;
@@ -266,13 +268,15 @@ bool PDOMySqlConnection::create(const Array& options) {
   php_pdo_parse_data_source(data_source.data(), data_source.size(), vars, 5);
 
   dbname = vars[1].optval;
-  host = vars[2].optval;
 
   // Extract port number from a host in case it's inlined.
-  HostURL hosturl(std::string(host), port);
-  if (hosturl.isValid()) {
-    std::strcpy(host, hosturl.getHost().c_str());
-    port = hosturl.getPort();
+  String host(vars[2].optval, CopyString);
+  if (!host.same(s_localhost)) {
+    HostURL hosturl(host.toCppString(), port);
+    if (hosturl.isValid()) {
+      host = String(hosturl.getHost().c_str(), CopyString);
+      port = hosturl.getPort();
+    }
   }
 
   // Explicit port param overrides the
@@ -377,12 +381,12 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   }
 
-  if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
+  if (host.empty() || host.same(s_localhost)) {
     unix_socket = vars[4].optval;
   }
 
-  /* TODO: - Check zval cache + ZTS */
-  if (mysql_real_connect(m_server, host, username.c_str(), password.c_str(),
+  if (mysql_real_connect(m_server, host.c_str(),
+                         username.c_str(), password.c_str(),
                          dbname, port, unix_socket, connect_opts) == NULL) {
     handleError(__FILE__, __LINE__);
     goto cleanup;

@@ -387,7 +387,7 @@ struct CatchMaker {
     return makeCatchImpl(
       env,
       [&] {
-        decRefForCatch();
+        decRefForUnwind();
         return prepareForCatch();
       }
     );
@@ -398,7 +398,6 @@ struct CatchMaker {
 
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
-    decRefForCatch();
 
     // Determine whether we're dealing with a TVCoercionException or a php
     // exception.  If it's a php-exception, we'll go to the taken block.
@@ -408,6 +407,7 @@ struct CatchMaker {
       },
       [&] {
         env.irb->hint(Block::Hint::Unused);
+        decRefForUnwind();
         auto const stack = prepareForCatch();
         gen(env, EndCatch, fp(env), stack);
       }
@@ -417,6 +417,7 @@ struct CatchMaker {
     // We need to push the unwinder value and then side-exit to the next
     // instruction.
     env.irb->hint(Block::Hint::Unlikely);
+    decRefForSideExit();
     if (m_params.thiz) gen(env, DecRef, m_params.thiz);
 
     auto const val = gen(env, LdUnwinderValue, Type::Cell);
@@ -454,22 +455,46 @@ private:
     return stack;
   }
 
-  void decRefForCatch() const {
-    // TODO(#4323657): this is generating generic DecRefs at the time of this
-    // writing---probably we're not handling the stack chain correctly in a
-    // catch block.
+  /*
+   * For consistency with the interpreter, we need to decref things in a
+   * different order depending on whether we are unwinding, or planning to side
+   * exit.
+   *
+   * In either case, parameters that are not being passed through the stack
+   * still may need to be decref'd, because they may have been a reference
+   * counted type that was going to be converted to a non-reference counted
+   * type that we'd pass in a register.  As we do the coersions, params.value
+   * gets updated so whenever we call these catch block creation functions it
+   * will only decref things that weren't yet converted.
+   */
+
+  void decRefForUnwind() const {
     for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
       if (m_params[i].throughStack) {
         popDecRef(env, Type::Gen);
       } else {
-        // We may have to decref a parameter that was reference counted, but
-        // that we were going to coerce into a non-reference counted
-        // non-throughStack type.  As we do coerces, params.value gets updated
-        // so each new catch block only decrefs the things that weren't yet
-        // converted.
         gen(env, DecRef, m_params[i].value);
       }
     }
+  }
+
+  // Same work as above, but opposite order.
+  void decRefForSideExit() const {
+    spillStack(env);
+    auto stackIdx = m_params.numThroughStack;
+    for (auto i = m_params.size(); i-- > 0;) {
+      if (m_params[i].throughStack) {
+        --stackIdx;
+        gen(env,
+            DecRefStack,
+            StackOffset { static_cast<int32_t>(stackIdx) },
+            Type::Gen,
+            sp(env));
+      } else {
+        gen(env, DecRef, m_params[i].value);
+      }
+    }
+    discard(env, m_params.numThroughStack);
   }
 
 private:

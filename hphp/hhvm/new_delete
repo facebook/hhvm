@@ -1,4 +1,0 @@
-_Znwm = malloc;
-_Znam = malloc;
-_ZdlPv = free;
-_ZdaPv = free;

@@ -36,6 +36,7 @@
 #include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/ExecutionEngine/ObjectCache.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
+#include <llvm/IR/ConstantFolder.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
@@ -365,10 +366,9 @@ struct LLVMEmitter {
               llvm::IntegerType::get(m_context, 64)}),
           false),
       llvm::Function::ExternalLinkage, "", m_module.get()))
-    , m_irb(llvm::BasicBlock::Create(m_context,
-                                     folly::to<std::string>('B',
-                                                            size_t(unit.entry)),
-                                     m_function))
+    , m_irb(m_context,
+            llvm::ConstantFolder(),
+            IRBuilderVasmInserter(m_context, unit))
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
     , m_unit(unit)
@@ -384,6 +384,10 @@ struct LLVMEmitter {
     // TODO(#5398968): find a better way to disable 16-byte alignment.
     m_function->addFnAttr(llvm::Attribute::OptimizeForSize);
 
+    m_irb.SetInsertPoint(
+      llvm::BasicBlock::Create(m_context,
+                              folly::to<std::string>('B', size_t(unit.entry)),
+                              m_function));
     m_blocks[unit.entry] = m_irb.GetInsertBlock();
 
     // Register all unit's constants.
@@ -707,6 +711,35 @@ struct LLVMEmitter {
   void emit(const jit::vector<Vlabel>& labels);
 
 private:
+
+  /*
+   * Custom LLVM IR inserter that can emit inline metadata for tracking
+   * vasm origins of IR instructions in debug dumps.
+   */
+  struct IRBuilderVasmInserter {
+    IRBuilderVasmInserter(llvm::LLVMContext& context, const Vunit& unit)
+      : m_context(context), m_unit(unit) {}
+    void setVinstr(const Vinstr& instr) { m_instr = instr; }
+  protected:
+    void InsertHelper(llvm::Instruction* I, const llvm::Twine& Name,
+                      llvm::BasicBlock* BB,
+                      llvm::BasicBlock::iterator InsertPt) const {
+      if (BB) BB->getInstList().insert(InsertPt, I);
+      I->setName(Name);
+      if (HPHP::Trace::moduleEnabled(Trace::llvm, 5)) {
+        I->setMetadata("vasm",
+                       llvm::MDNode::getWhenValsUnresolved(
+                         m_context,
+                         llvm::MDString::get(m_context, show(m_unit, m_instr)),
+                         true));
+      }
+    }
+  private:
+    llvm::LLVMContext& m_context;
+    const Vunit& m_unit;
+    Vinstr m_instr;
+  };
+
   /*
    * RegInfo is used to track information about Vregs, including their
    * corresponding llvm::Value and the Vinstr that defined them.
@@ -829,7 +862,7 @@ VASM_OPCODES
   llvm::LLVMContext& m_context;
   std::unique_ptr<llvm::Module> m_module;
   llvm::Function* m_function;
-  llvm::IRBuilder<> m_irb;
+  llvm::IRBuilder<true, llvm::ConstantFolder, IRBuilderVasmInserter> m_irb;
 
   // Function type used for tail calls to other tracelets.
   llvm::Type* m_traceletFnPtrTy{nullptr};
@@ -906,6 +939,7 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     m_valueInfo[Vreg(x64::rVmFp)].llval = m_rVmFp;
 
     for (auto& inst : b.code) {
+      m_irb.setVinstr(inst);
       switch (inst.op) {
 // This list will eventually go away; for now only a very small subset of
 // operations are supported.
@@ -2227,7 +2261,7 @@ std::string showNewCode(const Vasm::AreaList& areas) {
   return str.str();
 }
 
-}
+} // unnamed namespace
 
 void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
                  const jit::vector<Vlabel>& labels) {

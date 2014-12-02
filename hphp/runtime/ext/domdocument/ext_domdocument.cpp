@@ -1527,8 +1527,20 @@ struct DOMPropertyAccessor {
 
 const StaticString s_object_value_omitted("(object value omitted)");
 
+struct hashdpa {
+  size_t operator()(const DOMPropertyAccessor* da) const {
+    return hash_string_i(da->name, strlen(da->name));
+  }
+};
+struct cmpdpa {
+  bool operator()(const DOMPropertyAccessor* da1,
+                  const DOMPropertyAccessor* da2) const {
+    return strcasecmp(da1->name, da2->name) == 0;
+  }
+};
+
 class DOMPropertyAccessorMap :
-      private hphp_const_char_map<DOMPropertyAccessor*> {
+      private hphp_hash_set<DOMPropertyAccessor*, hashdpa, cmpdpa> {
 public:
   explicit DOMPropertyAccessorMap(DOMPropertyAccessor* props,
                                   DOMPropertyAccessorMap *base = nullptr) {
@@ -1536,22 +1548,23 @@ public:
       *this = *base;
     }
     for (DOMPropertyAccessor *p = props; p->name; p++) {
-      (*this)[p->name] = p;
-      m_imap[p->name] = p;
+      this->insert(p);
+      m_props.push_back(p);
     }
   }
 
   Variant (*getter(const Variant& name))(const Object&) {
     if (name.isString()) {
-      const char* name_data = name.toString().data();
-      const_iterator iter = find(name_data);
-      const_iterator iiter = m_imap.find(name_data);
-      if (iter != end() && iter->second->getter) {
-        return iter->second->getter;
-      } else if (iiter != end() && iiter->second->getter) {
-        raise_warning("Accessing DOMNode derived property '%s' with the "
-                      "incorrect casing", name_data);
-        return iiter->second->getter;
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      if (iter != end() && (*iter)->getter) {
+        if (strcmp(dpa.name, (*iter)->name)) {
+          raise_warning("Accessing DOMNode derived property '%s' with the "
+                        "incorrect casing", dpa.name);
+        }
+        return (*iter)->getter;
       }
     }
     return dummy_getter;
@@ -1559,53 +1572,50 @@ public:
 
   void (*setter(const Variant& name))(const Object&, const Variant&) {
     if (name.isString()) {
-      const char* name_data = name.toString().data();
-      const_iterator iter = find(name_data);
-      const_iterator iiter = m_imap.find(name_data);
-      if (iter != end() && iter->second->setter) {
-        return iter->second->setter;
-      } else if (iiter != end() && iiter->second->setter) {
-        raise_warning("Setting DOMNode derived property '%s' with the "
-                      "incorrect casing", name_data);
-        return iiter->second->setter;
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      if (iter != end() && (*iter)->setter) {
+        if (strcmp(dpa.name, (*iter)->name)) {
+          raise_warning("Setting DOMNode derived property '%s' with the "
+                        "incorrect casing", dpa.name);
+        }
+        return (*iter)->setter;
       }
     }
     return dummy_setter;
   }
 
   bool isset(ObjectData *obj, const String& name) {
-    const_iterator iter = find(name.data());
-    const_iterator iiter = m_imap.find(name.data());
-    if (iter == end() && iiter == m_imap.end()) {
-      return false;
-    } else if (iter != end()) {
-      return !iter->second->getter(obj).isNull();
-    } else {
-      raise_warning("Accessing DOMNode derived property '%s' with the "
-                    "incorrect casing", name.data());
-      return !iiter->second->getter(obj).isNull();
+    auto dpa = DOMPropertyAccessor {
+      name.data(), nullptr, nullptr
+    };
+    const_iterator iter = find(&dpa);
+    if (iter != end() && (*iter)->getter) {
+      if (strcmp(dpa.name, (*iter)->name)) {
+        raise_warning("Accessing DOMNode derived property '%s' with the "
+                      "incorrect casing", dpa.name);
+      }
+      return !(*iter)->getter(obj).isNull();
     }
+    return false;
   }
 
   Array debugInfo(ObjectData* obj) {
     Array ret = obj->o_toArray();
-    for (auto it : *this) {
-      auto value = it.second->getter(obj);
+    for (auto it : m_props) {
+      auto value = it->getter(obj);
       if (value.isObject()) {
         value = s_object_value_omitted;
       }
-      ret.set(String(it.first, CopyString), value);
+      ret.set(String(it->name, CopyString), value);
     }
     return ret;
   }
 
 private:
-  // Previously, this class was backed by an imap. This led to a lot of
-  // code relying on accessing properties that were improperly cased.
-  // Since removing this functionality could cause a lot of functionality
-  // to break, instead we continue to allow access case-insensitively, but
-  // with a warning
-  hphp_const_char_imap<DOMPropertyAccessor*> m_imap;
+  std::vector<DOMPropertyAccessor*> m_props;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

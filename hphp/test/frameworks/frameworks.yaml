@@ -29,7 +29,7 @@
 # constructors and overriding any methods you need to get your particular
 # framework to run.
 ---
-# Unless otherwise specfied, "branch" will be the latest stable release
+# Unless otherwise specified, "branch" will be the latest stable release
 # of a framework
   assetic:
     url: https://github.com/fredemmott/assetic.git

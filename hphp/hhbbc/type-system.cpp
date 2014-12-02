@@ -567,7 +567,7 @@ struct ArrUnionImpl {
     /*
      * With the current meaning of structs, if the keys are different, we can't
      * do anything better than going to a map type.  The reason for this is
-     * that our struct types currently are implying the presense of all the
+     * that our struct types currently are implying the presence of all the
      * keys in the struct (it might be worth adding some more types for struct
      * subtyping to handle this better.)
      */

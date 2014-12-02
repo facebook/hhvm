@@ -680,7 +680,7 @@ Variant HHVM_FUNCTION(shm_attach,
   long shm_id;
 
   if (shm_size < 1) {
-    raise_warning("Segment size must be greater then zero.");
+    raise_warning("Segment size must be greater than zero.");
     return false;
   }
 

@@ -40,7 +40,7 @@ Representation
 The representation of PHP programs is in bc.h and representation.h.
 Data that corresponds to metadata about the program is in the php
 namespace, while the structs that represent each HHBC instruction are
-in the bc namespace.  There's analagous php::Foo structures to most of
+in the bc namespace.  There's analogous php::Foo structures to most of
 the FooEmitter structures from the runtime, but the metadata contains
 mostly pointers or other things instead of raw offsets into an array
 of serialized bytecode.

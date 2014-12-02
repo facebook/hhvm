@@ -436,7 +436,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $name - The name of the attribute.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -451,7 +451,7 @@ class DOMDocument extends DOMNode {
    * @param string $qualifiedname - The tag name and prefix of the attribute,
    *   as prefix:tagname.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -465,7 +465,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the cdata.
    *
-   * @return mixed - The new DOMCDATASection or FALSE if an error occured.
+   * @return mixed - The new DOMCDATASection or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -478,7 +478,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the comment.
    *
-   * @return mixed - The new DOMComment or FALSE if an error occured.
+   * @return mixed - The new DOMComment or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -489,7 +489,7 @@ class DOMDocument extends DOMNode {
    *   node will not show up in the document unless it is inserted with (e.g.)
    *   DOMNode->appendChild().
    *
-   * @return mixed - The new DOMDocumentFragment or FALSE if an error occured.
+   * @return mixed - The new DOMDocumentFragment or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -506,7 +506,7 @@ class DOMDocument extends DOMNode {
    *   DOMElement->nodeValue.
    *
    * @return mixed - Returns a new instance of class DOMElement or FALSE if an
-   *   error occured.
+   *   error occurred.
    *
    */
   <<__Native>>
@@ -524,7 +524,7 @@ class DOMDocument extends DOMNode {
    *   element will be created. You can also set the value later with
    *   DOMElement->nodeValue.
    *
-   * @return mixed - The new DOMElement or FALSE if an error occured.
+   * @return mixed - The new DOMElement or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -540,7 +540,7 @@ class DOMDocument extends DOMNode {
    * @param string $name - The content of the entity reference, e.g. the
    *   entity reference minus the leading & and the trailing ; characters.
    *
-   * @return mixed - The new DOMEntityReference or FALSE if an error occured.
+   * @return mixed - The new DOMEntityReference or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -555,7 +555,7 @@ class DOMDocument extends DOMNode {
    * @param string $data - The content of the processing instruction.
    *
    * @return mixed - The new DOMProcessingInstruction or FALSE if an error
-   *   occured.
+   *   occurred.
    *
    */
   <<__Native>>
@@ -569,7 +569,7 @@ class DOMDocument extends DOMNode {
    *
    * @param string $data - The content of the text.
    *
-   * @return mixed - The new DOMText or FALSE if an error occured.
+   * @return mixed - The new DOMText or FALSE if an error occurred.
    *
    */
   <<__Native>>
@@ -1075,7 +1075,7 @@ class DOMElement extends DOMNode {
    * @param string $name - The name of the attribute.
    * @param string $value - The value of the attribute.
    *
-   * @return mixed - The new DOMAttr or FALSE if an error occured.
+   * @return mixed - The new DOMAttr or FALSE if an error occurred.
    *
    */
   <<__Native>>

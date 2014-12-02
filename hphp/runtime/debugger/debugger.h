@@ -78,7 +78,7 @@ public:
   static void DebuggerSession(const DebuggerClientOptions& options,
                               bool restart);
 
-  // Called from differnt time point of execution thread.
+  // Called from different time point of execution thread.
   static void InterruptSessionStarted(const char *file,
                                       const char *error = nullptr);
   static void InterruptSessionEnded(const char *file);

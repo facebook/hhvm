@@ -2035,7 +2035,7 @@ void HHVM_METHOD(SoapServer, setclass,
     data->m_soap_class.argv = argv;
     data->m_soap_class.persistance = SOAP_PERSISTENCE_REQUEST;
   } else {
-    raise_warning("Tried to set a non existant class (%s)", name.data());
+    raise_warning("Tried to set a non existent class (%s)", name.data());
   }
 }
 
@@ -2076,7 +2076,7 @@ void HHVM_METHOD(SoapServer, addfunction,
       }
       String function_name = iter.second().toString();
       if (!HHVM_FN(function_exists)(function_name)) {
-        raise_warning("Tried to add a non existant function '%s'",
+        raise_warning("Tried to add a non existent function '%s'",
                         function_name.data());
         return;
       }

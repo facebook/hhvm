@@ -11,7 +11,7 @@ function main() {
   // added (throwing away duplicates) there will only be 4 elements, and
   // 4/48 = 1/12 is sufficiently small to trigger addAll() to shrink the
   // capacity. There was a bug where capacity was being decreased to the old
-  // capacity (3), which is not large enough to accomodate the current number
+  // capacity (3), which is not large enough to accommodate the current number
   // of elements (4).
   $x->addAll($y);
   foreach ($x as $v) {

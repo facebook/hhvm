@@ -1746,7 +1746,7 @@ void sinkIncRefs(IRUnit& unit, const SinkPointsMap& info, const IdMap& ids) {
           // sink the IncRef to this point but we don't have access to the
           // value, probably because the SSATmp was killed by a Call. For now
           // we refuse to optimize this case, but it's possible to use this
-          // sink point as long as we've proven that doing so will eliminte the
+          // sink point as long as we've proven that doing so will eliminate the
           // Inc/Dec pair.
           ITRACE(2, "found erase-only SinkPoint; not optimizing\n");
           doSink = false;

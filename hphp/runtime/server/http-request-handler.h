@@ -65,7 +65,7 @@ private:
                          const char *ext);
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
                          SourceRootInfo &sourceRootInfo,
-                         bool cachableDynamicContent);
+                         bool cacheableDynamicContent);
   bool MatchAnyPattern(const std::string &path,
                        const std::vector<std::string> &patterns);
 

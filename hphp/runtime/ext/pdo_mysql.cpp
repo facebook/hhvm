@@ -956,7 +956,7 @@ bool PDOMySqlStatement::executer() {
 
   my_ulonglong affected_count = mysql_affected_rows(m_server);
   if (affected_count == (my_ulonglong)-1) {
-    /* we either have a query that returned a result set or an error occured
+    /* we either have a query that returned a result set or an error occurred
        lets see if we have access to a result set */
     if (!m_conn->buffered()) {
       m_result = mysql_use_result(m_server);

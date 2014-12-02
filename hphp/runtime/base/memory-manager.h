@@ -154,7 +154,7 @@ struct DebugHeader {
 /*
  * Slabs are consumed via bump allocation.  The individual allocations are
  * quantized into a fixed set of size classes, the sizes of which are an
- * implementation detail documented here to shed light on the algorthms that
+ * implementation detail documented here to shed light on the algorithms that
  * compute size classes.  Request sizes are rounded up to the nearest size in
  * the relevant SMART_SIZES table; e.g. 17 is rounded up to 32.  There are
  * 2^LG_SMART_SIZES_PER_DOUBLING size classes for each doubling of size

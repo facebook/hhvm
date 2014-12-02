@@ -1590,7 +1590,7 @@ res::Func Index::resolve_method(Context ctx,
    * called as long, as we only do so in cases where it will fatal at
    * runtime.
    *
-   * So, in the presense of magic methods, we must handle the fact
+   * So, in the presence of magic methods, we must handle the fact
    * that attempting to call an inaccessible method will instead call
    * the magic method, if it exists.  Note that if any class derives
    * from a class and adds magic methods, it can change still change

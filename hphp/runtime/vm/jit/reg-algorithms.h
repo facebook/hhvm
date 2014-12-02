@@ -29,7 +29,7 @@ namespace HPHP { namespace jit {
 // the moves map with their correct source values, even if some sources are
 // also destinations. The moves map provides one source for each dest.  rTmp
 // will be used when necessary to break copy-cycles, so it is illegal to
-// specify a source for rTmp (rTmp cannot be a desination).  However, it
+// specify a source for rTmp (rTmp cannot be a destination).  However, it
 // is legal for rTmp to be a source for some other destination. Since rTmp
 // cannot be a destination, it cannot be in a copy-cycle, so its value will
 // be read before we deal with cycles.

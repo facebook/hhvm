@@ -570,7 +570,7 @@ class Status {
 
   /**
    * Takes a variable number of string arguments. If color output is enabled
-   * and any one of the arguments is preceeded by an integer (see the color
+   * and any one of the arguments is preceded by an integer (see the color
    * constants above), that argument will be given the indicated color.
    */
   public static function sayColor() {

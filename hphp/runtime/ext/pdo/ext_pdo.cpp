@@ -1309,7 +1309,7 @@ static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   strcpy(data->m_dbh->error_code, PDO_ERR_NONE);
   data->m_dbh->query_stmt = nullptr;
 
-  /* handle generic PDO-level atributes */
+  /* handle generic PDO-level attributes */
   switch (attribute) {
   case PDO_ATTR_PERSISTENT:
     return (bool)data->m_dbh->is_persistent;

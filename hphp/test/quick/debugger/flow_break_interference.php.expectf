@@ -24,7 +24,7 @@ c
 int(1)
 Finished in genFoo
 Breakpoint 2 reached at main() on line 27 of %s/flow_break_interference.php
-  26   // chaning $a will show in $z.
+  26   // changing $a will show in $z.
   27*  $z = $a;
   28   var_dump($z);
 

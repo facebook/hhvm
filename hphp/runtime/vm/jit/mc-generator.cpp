@@ -617,7 +617,7 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
-  // We're comming from a BIND_CALL service request, so enable
+  // We're coming from a BIND_CALL service request, so enable
   // profiling if we haven't optimized the function entry yet.
   assert(m_tx.mode() == TransKind::Invalid ||
          m_tx.mode() == TransKind::Prologue);

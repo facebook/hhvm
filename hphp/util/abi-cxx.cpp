@@ -64,7 +64,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   SYMBOL_INFO *symbol;
   DWORD64 addr_disp = 0;
 
-  // symintialize and symcleanup should really be once per process
+  // syminitialize and symcleanup should really be once per process
   SymInitialize(process, nullptr, TRUE);
 
   symbol = (SYMBOL_INFO *)calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);

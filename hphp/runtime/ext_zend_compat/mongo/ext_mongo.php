@@ -152,7 +152,7 @@ class MongoDB {
                                    mixed $size,
                                    mixed $max): mixed;
 
-  /* This method is a flexible interface for creating database refrences (see
+  /* This method is a flexible interface for creating database references (see
    * MongoDBRef).
    */
   <<__Native("ZendCompat")>>
@@ -169,7 +169,7 @@ class MongoDB {
   public function dropCollection(mixed $coll): mixed;
 
   /* The Mongo database server runs a JavaScript engine. This method allows you
-   * to run arbitary JavaScript on the database. This can be useful if you want
+   * to run arbitrary JavaScript on the database. This can be useful if you want
    * touch a number of collections lightly, or process some results on the
    * database side to reduce the amount that has to be sent to the client.
    * Running JavaScript in the database takes a write lock, meaning it blocks
@@ -501,7 +501,7 @@ class MongoCursor {
    * causes the query to become a subfield of a bigger query object, like:
    * This method is for adding a top-level field to a query. It makes the query
    * a subobject (if it isn't already) and adds the key/value pair of your
-   * chosing to the top level. Warning  It cannot be used to add extra criteria
+   * choosing to the top level. Warning  It cannot be used to add extra criteria
    * to a query on the fly. For instance, this will not work:  This does not
    * query for a user named "joe" with an age of 20.
    */

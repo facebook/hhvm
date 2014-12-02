@@ -4,6 +4,11 @@
 * Run the test suites in various configurations.
 */
 
+function is_testing_dso_extension() {
+  // detecting if we run test runner to test hhvm codebase
+  return !file_exists(__DIR__ . "/../hhvm");
+}
+
 function get_expect_file_and_type($test, $options) {
   $types = ['expect', 'expectf', 'expectregex'];
   if (isset($options['repo'])) {
@@ -89,6 +94,9 @@ function error($message) {
 }
 
 function hphp_home() {
+  if (is_testing_dso_extension()) {
+    return realpath(__DIR__);
+  }
   return realpath(__DIR__.'/../..');
 }
 
@@ -96,10 +104,24 @@ function idx($array, $key, $default = null) {
   return isset($array[$key]) ? $array[$key] : $default;
 }
 
-function idx_file($array, $key, $default = null) {
+
+function hhvm_path() {
+  $array = $_ENV;
+  $key = "HHVM_BIN";
+  $default = bin_root().'/hphp/hhvm/hhvm';
+
   $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
-    error("$file doesn't exist. Did you forget to build first?");
+    $errmsg = "$file doesn't exist. Did you forget to build first?";
+    if (is_testing_dso_extension()) {
+      exec("which hhvm", $output);
+      if (isset($output[0]) && $output[0]) {
+        return $output[0];
+      }
+      $errmsg = "You need to specify hhvm bin with env HHVM_BIN";
+    }
+
+    error($errmsg);
   }
   return rel_path($file);
 }
@@ -239,6 +261,7 @@ function map_convenience_filename($file) {
 // Some tests have to be run together in the same test bucket, one after the
 // other in order to avoid races and collisions
 function serial_only_tests() {
+  if (is_testing_dso_extension()) return array();
   // Can be a directory or a single test
   $serial = array (
     hphp_home().'/'.'hphp/test/slow/ext_memcached/memcached-getallkeys.php',
@@ -376,10 +399,6 @@ function mode_cmd($options) {
 
 function extra_args($options) {
   return idx($options, 'args', '');
-}
-
-function hhvm_path() {
-  return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
 }
 
 function hhvm_cmd_impl($options, $config, ...$extra_args) {

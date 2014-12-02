@@ -21,11 +21,15 @@ def write_load_config(repo_dir, saved_state_path, changed_files=[]):
     saved_state_path: Path to file containing saved server state
     changed_files: list of strings
     """
+    fd, recheck_fn = tempfile.mkstemp()
+    with os.fdopen(fd, 'w') as f:
+        f.write("\n".join(changed_files))
+
     with open(os.path.join(repo_dir, 'server_options.sh'), 'w') as f:
         f.write(r"""
 #! /bin/sh
-echo --load \"%s\"
-        """ % " ".join([saved_state_path] + changed_files))
+echo --load \"%s %s\"
+        """ % (saved_state_path, recheck_fn))
         os.fchmod(f.fileno(), 0o700)
 
     with open(os.path.join(repo_dir, '.hhconfig'), 'w') as f:

@@ -43,8 +43,8 @@ let start_server env =
   let server_options = match env.server_options_cmd with
     | Some cmd ->
       let cmd = Printf.sprintf "%s %s %s" cmd
-        (Shell.escape_string_for_shell (Path.string_of_path env.root))
-        (Shell.escape_string_for_shell Build_id.build_id_ohai) in
+        (Filename.quote (Path.string_of_path env.root))
+        (Filename.quote Build_id.build_id_ohai) in
       (try Utils.exec_read cmd with e ->
         prerr_endline (Printexc.to_string e);
         Printexc.print_backtrace stderr;

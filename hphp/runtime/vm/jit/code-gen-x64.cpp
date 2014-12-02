@@ -601,16 +601,6 @@ void CodeGenerator::cgEndCatch(IRInstruction* inst) {
   callUnwindResumeHelper(vmain());
 }
 
-void CodeGenerator::cgTryEndCatch(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpbim{0, rVmTl[unwinderSideExitOff()], sf};
-  unlikelyIfBlock(v, vcold(), CC_E, sf, callUnwindResumeHelper);
-
-  // doSideExit == true, so fall through to the side exit code
-  emitIncStat(v, Stats::TC_CatchSideExit);
-}
-
 void CodeGenerator::cgUnwindCheckSideExit(IRInstruction* inst) {
   auto& v = vmain();
   auto const sf = v.makeReg();

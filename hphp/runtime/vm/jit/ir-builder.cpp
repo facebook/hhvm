@@ -1257,17 +1257,13 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   }
 }
 
-void IRBuilder::popBlock(bool pause) {
+void IRBuilder::popBlock() {
   assert(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
          m_curBlock, m_nextMarker.show(), top.block, top.marker.show());
-  if (pause) {
-    m_state.pauseBlock(m_curBlock);
-  } else {
-    m_state.finishBlock(m_curBlock);
-  }
+  m_state.finishBlock(m_curBlock);
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
   setNextMarker(top.marker);

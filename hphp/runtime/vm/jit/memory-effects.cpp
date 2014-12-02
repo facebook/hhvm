@@ -183,7 +183,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case EndCatch:
   case NativeImpl:
-  case TryEndCatch:
     return UnknownEffects {};
 
   // NB: on the failure path, these C++ helpers do a fixup and read frame

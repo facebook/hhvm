@@ -130,13 +130,9 @@ struct MTS {
    * handle this, emitMPost adds code to the catch trace to fish the correct
    * value out of the exception and side exit. */
   Block* failedSetBlock{nullptr};
-
-  /* Contains a list of all catch blocks created in building the vector.
-   * Each block must be appended with cleanup tasks (generally just DecRef)
-   * to be performed if an exception occurs during the course of the vector
-   * operation */
-  std::vector<Block*> failedVec;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 // TODO(#5710382): this did something different in the old code, so let's be
 // explicit at first and audit everything.
@@ -150,22 +146,12 @@ Block* makeEmptyCatch(MTS& env) {
   return makeCatch(hts);
 }
 
-Block* makeMRCatch(MTS& env) {
-  auto b = makeEmptyCatch(env);
-  env.failedVec.push_back(b);
-  return b;
-}
+// Make a catch block that cleans up temporary values stored in the
+// MInstrState, if we have any.
+Block* makeMISCatch(MTS& env);
 
-Block* makeCatchSet(MTS& env) {
-  assert(!env.failedSetBlock);
-  env.failedSetBlock = makeMRCatch(env);
-
-  // This catch trace will be modified in emitMPost to end with a side
-  // exit, and TryEndCatch will fall through to that side exit if an
-  // InvalidSetMException is thrown.
-  env.failedSetBlock->back().setOpcode(TryEndCatch);
-  return env.failedSetBlock;
-}
+// Make a special catch block that deals with InvalidSetMExceptions.
+Block* makeCatchSet(MTS& env);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -938,7 +924,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       env.irb.hint(Block::Hint::Unlikely);
       if (doWarn) {
-        gen(env, WarnNonObjProp, makeMRCatch(env));
+        gen(env, WarnNonObjProp, makeMISCatch(env));
       }
       if (doDefine) {
         /*
@@ -989,7 +975,7 @@ void emitPropGeneric(MTS& env) {
       env,
       gen(env,
           PropDX,
-          makeMRCatch(env),
+          makeMISCatch(env),
           MInstrAttrData { mia },
           env.base.value,
           key,
@@ -1000,7 +986,7 @@ void emitPropGeneric(MTS& env) {
       env,
       gen(env,
           PropX,
-          makeMRCatch(env),
+          makeMISCatch(env),
           MInstrAttrData { mia },
           env.base.value,
           key,
@@ -1037,7 +1023,7 @@ void emitElem(MTS& env) {
       env,
       gen(env,
           warn ? ElemArrayW : ElemArray,
-          makeMRCatch(env),
+          makeMISCatch(env),
           env.base.value,
           key)
     );
@@ -1053,7 +1039,7 @@ void emitElem(MTS& env) {
       gen(
         env,
         RaiseError,
-        makeMRCatch(env),
+        makeMISCatch(env),
         cns(env, makeStaticString(Strings::OP_NOT_SUPPORTED_STRING))
       );
       setBase(env, uninit);
@@ -1070,7 +1056,7 @@ void emitElem(MTS& env) {
       env,
       genStk(env,
              define ? ElemDX : ElemUX,
-             makeMRCatch(env),
+             makeMISCatch(env),
              MInstrAttrData { mia },
              env.base.value,
              key,
@@ -1082,7 +1068,7 @@ void emitElem(MTS& env) {
     env,
     gen(env,
         ElemX,
-        makeMRCatch(env),
+        makeMISCatch(env),
         MInstrAttrData { mia },
         env.base.value,
         key,
@@ -1323,14 +1309,14 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
     },
     [&] { // Taken:
       env.irb.hint(Block::Hint::Unlikely);
-      gen(env, RaiseArrayIndexNotice, makeMRCatch(env), key);
+      gen(env, RaiseArrayIndexNotice, makeMISCatch(env), key);
       return cns(env, Type::InitNull);
     }
   );
 }
 
 SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
-  return gen(env, ArrayGet, makeMRCatch(env), env.base.value, key);
+  return gen(env, ArrayGet, makeMISCatch(env), env.base.value, key);
 }
 
 void emitProfiledArrayGet(MTS& env, SSATmp* key) {
@@ -1373,7 +1359,7 @@ void emitProfiledArrayGet(MTS& env, SSATmp* key) {
 
 void emitStringGet(MTS& env, SSATmp* key) {
   assert(key->isA(Type::Int));
-  env.result = gen(env, StringGet, makeMRCatch(env), env.base.value, key);
+  env.result = gen(env, StringGet, makeMISCatch(env), env.base.value, key);
 }
 
 void emitVectorGet(MTS& env, SSATmp* key) {
@@ -1382,7 +1368,7 @@ void emitVectorGet(MTS& env, SSATmp* key) {
     PUNT(emitVectorGet);
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, makeMRCatch(env), key, size);
+  gen(env, CheckBounds, makeMISCatch(env), key, size);
   auto const base = gen(env, LdVectorBase, env.base.value);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1405,7 +1391,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
     auto index = cns(env, key->intVal() << 4);
     env.result = gen(env, LdElem, base, index);
   } else {
-    gen(env, CheckBounds, makeMRCatch(env), key, cns(env, 1));
+    gen(env, CheckBounds, makeMISCatch(env), key, cns(env, 1));
     auto const base = gen(env, LdPairBase, env.base.value);
     auto idx = gen(env, Shl, key, cns(env, 4));
     env.result = gen(env, LdElem, base, idx);
@@ -1446,7 +1432,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
     assert(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
     auto const box = getInput(env, baseStkIdx, DataTypeSpecific);
-    gen(env, ArraySetRef, makeMRCatch(env), env.base.value, key, value, box);
+    gen(env, ArraySetRef, makeMISCatch(env), env.base.value, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
     // because any load of the box will be guarded.
     env.result = value;
@@ -1456,7 +1442,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   auto const newArr = gen(
     env,
     ArraySet,
-    makeMRCatch(env),
+    makeMISCatch(env),
     env.base.value,
     key,
     value
@@ -1483,7 +1469,7 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
     PUNT(emitVectorSet); // will throw
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, makeMRCatch(env), key, size);
+  gen(env, CheckBounds, makeMISCatch(env), key, size);
 
   env.irb.ifThen(
     [&](Block* taken) {
@@ -1536,7 +1522,7 @@ void emitCGetProp(MTS& env) {
   env.result = gen(
     env,
     CGetProp,
-    makeMRCatch(env),
+    makeMISCatch(env),
     env.base.value,
     key,
     misPtr(env)
@@ -1545,18 +1531,18 @@ void emitCGetProp(MTS& env) {
 
 void emitVGetProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetProp, makeMRCatch(env), NoExtraData{},
+  env.result = genStk(env, VGetProp, makeMISCatch(env), NoExtraData{},
                       env.base.value, key, misPtr(env));
 }
 
 void emitIssetProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, IssetProp, makeMRCatch(env), env.base.value, key);
+  env.result = gen(env, IssetProp, makeMISCatch(env), env.base.value, key);
 }
 
 void emitEmptyProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, EmptyProp, makeMRCatch(env), env.base.value, key);
+  env.result = gen(env, EmptyProp, makeMISCatch(env), env.base.value, key);
 }
 
 void emitSetProp(MTS& env) {
@@ -1594,21 +1580,21 @@ void emitSetOpProp(MTS& env) {
   SetOpOp op = SetOpOp(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
   auto const value = getValue(env);
-  env.result = genStk(env, SetOpProp, makeMRCatch(env), SetOpData { op },
+  env.result = genStk(env, SetOpProp, makeMISCatch(env), SetOpData { op },
                       env.base.value, key, value, misPtr(env));
 }
 
 void emitIncDecProp(MTS& env) {
   IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
-  env.result = genStk(env, IncDecProp, makeMRCatch(env), IncDecData { op },
+  env.result = genStk(env, IncDecProp, makeMISCatch(env), IncDecData { op },
                       env.base.value, key, misPtr(env));
 }
 
 void emitBindProp(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindProp, makeMRCatch(env), NoExtraData{},
+  genStk(env, BindProp, makeMISCatch(env), NoExtraData{},
     env.base.value, key, box, misPtr(env));
   env.result = box;
 }
@@ -1620,7 +1606,7 @@ void emitUnsetProp(MTS& env) {
     constrainBase(env, DataTypeSpecific);
     return;
   }
-  gen(env, UnsetProp, makeMRCatch(env), env.base.value, key);
+  gen(env, UnsetProp, makeMISCatch(env), env.base.value, key);
 }
 
 void emitCGetElem(MTS& env) {
@@ -1646,10 +1632,10 @@ void emitCGetElem(MTS& env) {
     emitPairGet(env, key);
     break;
   case SimpleOp::Map:
-    env.result = gen(env, MapGet, makeMRCatch(env), env.base.value, key);
+    env.result = gen(env, MapGet, makeMISCatch(env), env.base.value, key);
     break;
   case SimpleOp::None:
-    env.result = gen(env, CGetElem, makeMRCatch(env), env.base.value,
+    env.result = gen(env, CGetElem, makeMISCatch(env), env.base.value,
       key, misPtr(env));
     break;
   }
@@ -1657,7 +1643,7 @@ void emitCGetElem(MTS& env) {
 
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetElem, makeMRCatch(env), NoExtraData{},
+  env.result = genStk(env, VGetElem, makeMISCatch(env), NoExtraData{},
     env.base.value, key, misPtr(env));
 }
 
@@ -1665,7 +1651,7 @@ void emitIssetElem(MTS& env) {
   switch (env.simpleOp) {
   case SimpleOp::Array:
   case SimpleOp::ProfiledArray:
-    env.result = gen(env, ArrayIsset, makeMRCatch(env), env.base.value,
+    env.result = gen(env, ArrayIsset, makeMISCatch(env), env.base.value,
       getKey(env));
     break;
   case SimpleOp::PackedArray:
@@ -1686,7 +1672,7 @@ void emitIssetElem(MTS& env) {
   case SimpleOp::None:
     {
       auto const key = getKey(env);
-      env.result = gen(env, IssetElem, makeMRCatch(env),
+      env.result = gen(env, IssetElem, makeMISCatch(env),
         env.base.value, key, misPtr(env));
     }
     break;
@@ -1695,7 +1681,7 @@ void emitIssetElem(MTS& env) {
 
 void emitEmptyElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = gen(env, EmptyElem, makeMRCatch(env),
+  env.result = gen(env, EmptyElem, makeMISCatch(env),
     env.base.value, key, misPtr(env));
 }
 
@@ -1718,7 +1704,7 @@ void emitSetWithRefNewElem(MTS& env) {
     constrainBase(env, DataTypeSpecific);
     emitSetNewElem(env);
   } else {
-    genStk(env, SetWithRefNewElem, makeMRCatch(env),
+    genStk(env, SetWithRefNewElem, makeMISCatch(env),
            NoExtraData{},
            env.base.value, getValAddr(env), misPtr(env));
   }
@@ -1742,7 +1728,7 @@ void emitSetElem(MTS& env) {
     emitVectorSet(env, key, value);
     break;
   case SimpleOp::Map:
-    gen(env, MapSet, makeMRCatch(env), env.base.value, key, value);
+    gen(env, MapSet, makeMISCatch(env), env.base.value, key, value);
     env.result = value;
     break;
   case SimpleOp::Pair:
@@ -1779,7 +1765,7 @@ void emitSetWithRefLElem(MTS& env) {
     emitSetElem(env);
     assert(env.strTestResult == nullptr);
   } else {
-    genStk(env, SetWithRefElem, makeMRCatch(env), NoExtraData{},
+    genStk(env, SetWithRefElem, makeMISCatch(env), NoExtraData{},
            env.base.value, key, locAddr, misPtr(env));
   }
   env.result = nullptr;
@@ -1788,21 +1774,21 @@ void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, SetOpElem, makeMRCatch(env), SetOpData{op},
+  env.result = genStk(env, SetOpElem, makeMISCatch(env), SetOpData{op},
                       env.base.value, getKey(env), getValue(env),
                       misPtr(env));
 }
 
 void emitIncDecElem(MTS& env) {
   auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, IncDecElem, makeMRCatch(env), IncDecData { op },
+  env.result = genStk(env, IncDecElem, makeMISCatch(env), IncDecData { op },
                       env.base.value, getKey(env), misPtr(env));
 }
 
 void emitBindElem(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindElem, makeMRCatch(env), NoExtraData{},
+  genStk(env, BindElem, makeMISCatch(env), NoExtraData{},
          env.base.value, key, box, misPtr(env));
   env.result = box;
 }
@@ -1815,7 +1801,7 @@ void emitUnsetElem(MTS& env) {
   if (baseType <= Type::Str) {
     gen(env,
         RaiseError,
-        makeMRCatch(env),
+        makeMISCatch(env),
         cns(env, makeStaticString(Strings::CANT_UNSET_STRING)));
     return;
   }
@@ -1824,7 +1810,7 @@ void emitUnsetElem(MTS& env) {
     return;
   }
 
-  genStk(env, UnsetElem, makeMRCatch(env), NoExtraData{}, env.base.value, key);
+  genStk(env, UnsetElem, makeMISCatch(env), NoExtraData{}, env.base.value, key);
 }
 
 void emitNotSuppNewElem(MTS& env) {
@@ -1845,7 +1831,7 @@ void emitIncDecNewElem(MTS& env) {
 
 void emitBindNewElem(MTS& env) {
   auto const box = getValue(env);
-  genStk(env, BindNewElem, makeMRCatch(env), NoExtraData{},
+  genStk(env, BindNewElem, makeMISCatch(env), NoExtraData{},
          env.base.value, box, misPtr(env));
   env.result = box;
 }
@@ -1889,127 +1875,140 @@ void emitFinalMOp(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void prependToTraces(MTS& env, IRInstruction* inst) {
-  for (auto b : env.failedVec) {
-    b->prepend(env.unit.cloneInstruction(inst));
+/*
+ * Helper to generate decrefs for tvRef(2): during exception handling any
+ * objects required only during vector expansion need to be DecRef'd, and we
+ * also need to clean them on the main code path before exiting.
+ *
+ * There may be either one or two such scratch objects, in the case of a Set
+ * the first of which will always be tvRef2, in all other cases if only one
+ * scratch value is present it will be stored in tvRef.  TODO: that's a bit
+ * weird right?
+ */
+void cleanTvRefs(MTS& env) {
+  constexpr ptrdiff_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
+  for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
+    env.irb.gen(
+      DecRefMem,
+      env.marker,
+      Type::Gen,
+      env.misBase,
+      cns(env, refOffs[env.failedSetBlock ? 1 - i : i])
+    );
   }
 }
 
-void emitSideExits(MTS& env, SSATmp* catchSp, int nStack) {
-  auto const nextOff = nextBcOff(env);
-  auto const op = env.ni.mInstrOp();
-  const bool isSetWithRef = op == OpSetWithRefLM || op == OpSetWithRefRM;
-
-  if (env.failedSetBlock) {
-    assert(bool(env.result) ^ isSetWithRef);
-    // We need to emit code to clean up and side exit if the TryEndCatch falls
-    // through because of an InvalidSetMException. If we're translating a
-    // SetWithRef* bytecode we don't have to do anything special to the stack
-    // since they have no stack output. Otherwise we need to pop our input
-    // value and push the value from the exception to the stack (done with a
-    // DecRefStack followed by a SpillStack).
-
-    auto args = std::vector<SSATmp*> {
-      catchSp,          // sp from the previous SpillStack
-      cns(env, nStack), // cells popped since the last SpillStack
-    };
-
-    // Need to save FP, we're switching to our side exit block, but it hasn't
-    // had a predecessor propagate state to it via FrameStateMgr::finishBlock
-    // yet.
-    auto const frame = fp(env);
-
-    BlockPusher bp(env.irb, env.marker, env.failedSetBlock);
-    if (!isSetWithRef) {
-      gen(env, DecRefStack, StackOffset(0), Type::Cell, catchSp);
-      args.push_back(gen(env, LdUnwinderValue, Type::Cell));
-    }
-
-    auto const stack = gen(
-      env,
-      SpillStack,
-      std::make_pair(args.size(), &args[0])
-    );
-    gen(env, DeleteUnwinderException);
-    gen(env, SyncABIRegs, frame, stack);
-    gen(env, ReqBindJmp, ReqBindJmpData(nextOff));
-  }
-
-  if (env.strTestResult) {
-    assert(!isSetWithRef);
-    // We expected SetElem's base to not be a Str but might be wrong. Make an
-    // exit trace to side exit to the next instruction, replacing our guess
-    // with the correct stack output.
-    env.irb.ifThen(
-      [&] (Block* taken) {
-        gen(env, CheckNullptr, taken, env.strTestResult);
-      },
-      [&] {
-        env.irb.hint(Block::Hint::Unlikely);
-        auto const str = gen(env, AssertNonNull, env.strTestResult);
-        popC(env);  // we already pushed env.result
-        gen(env, DecRef, env.result);
-        push(env, str);
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+enum class DecRefStyle { FromCatch, FromMain };
+uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
+  uint32_t const startOff =
+    env.ni.mInstrOp() == Op::SetM || env.ni.mInstrOp() == Op::BindM ? 1 : 0;
+  auto const stackCnt = env.stackInputs.size();
+  for (auto i = startOff; i < stackCnt; ++i) {
+    switch (why) {
+    case DecRefStyle::FromCatch:
+      if (topType(env, i, DataTypeGeneric) <= Type::Gen) {
+        gen(env,
+            DecRefStack,
+            StackOffset { static_cast<int32_t>(i) },
+            Type::Gen,
+            sp(env));
       }
-    );
-  }
-}
-
-void emitMPost(MTS& env) {
-  SSATmp* catchSp = nullptr;
-  if (env.failedSetBlock) {
-    auto const endCatch = &env.failedSetBlock->back();
-    assert(endCatch->is(EndCatch, TryEndCatch));
-    catchSp = endCatch->src(1);
-    assert(catchSp->isA(Type::StkPtr));
-  }
-
-  // Decref stack inputs. If we're translating a SetM or BindM, then input 0 is
-  // both our input and output so leave its refcount alone. If m_failedSetBlock
-  // is non-null, the final helper call may throw an InvalidSetMException. We
-  // need to add instructions to m_failedSetBlock to finish the vector
-  // instruction in case this happens, so any DecRefs emitted here are also
-  // added to m_failedSetBlock.
-  unsigned nStack =
-    (env.ni.mInstrOp() == OpSetM || env.ni.mInstrOp() == OpBindM) ? 1 : 0;
-  for (unsigned i = nStack; i < env.ni.inputs.size(); ++i) {
-    auto const& input = *env.ni.inputs[i];
-    switch (input.location.space) {
-    case Location::Stack: {
-      ++nStack;
-      auto input = getInput(env, i, DataTypeSpecific);
-      if (input->isA(Type::Gen)) {
-        gen(env, DecRef, input);
-        if (env.failedSetBlock) {
-          BlockPauser bp(env.irb, env.marker, env.failedSetBlock);
-          gen(env,
-              DecRefStack,
-              StackOffset(env.stackInputs[i]),
-              Type::Gen,
-              catchSp);
+      break;
+    case DecRefStyle::FromMain:
+      {
+        auto const input = top(env, Type::StackElem, i, DataTypeSpecific);
+        if (input->type() <= Type::Gen) {
+          gen(env, DecRef, input);
         }
       }
       break;
     }
-    case Location::Local:
-    case Location::Litstr:
-    case Location::Litint:
-    case Location::This: {
-      // Do nothing.
-      break;
-    }
-
-    default: not_reached();
-    }
   }
+  return stackCnt;
+}
 
-  // Pop off all stack inputs
-  discard(env, nStack);
+void handleStrTestResult(MTS& env) {
+  if (!env.strTestResult) return;
+  // We expected SetElem's base to not be a Str but might be wrong. Make an
+  // exit trace to side exit to the next instruction, replacing our guess
+  // with the correct stack output.
+  env.irb.ifThen(
+    [&] (Block* taken) {
+      gen(env, CheckNullptr, taken, env.strTestResult);
+    },
+    [&] {
+      env.irb.hint(Block::Hint::Unlikely);
+      auto const str = gen(env, AssertNonNull, env.strTestResult);
+      gen(env, DecRef, env.result);
+      auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromMain);
+      discard(env, stackCnt);
+      push(env, str);
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    }
+  );
+}
 
-  // Push result, if one was produced. If we have a predicted result use that
-  // instead of the real result; its validity will be guarded later in this
-  // function.
+Block* makeMISCatch(MTS& env) {
+  auto const exit = env.irb.makeExit(Block::Hint::Unused);
+  BlockPusher bp(env.irb, env.marker, exit);
+  gen(env, BeginCatch);
+  cleanTvRefs(env);
+  spillStack(env);
+  gen(env, EndCatch, fp(env), sp(env));
+  return exit;
+}
+
+Block* makeCatchSet(MTS& env) {
+  env.failedSetBlock = env.irb.makeExit(Block::Hint::Unused);
+
+  const bool isSetWithRef = env.ni.mInstrOp() == Op::SetWithRefLM ||
+                            env.ni.mInstrOp() == Op::SetWithRefRM;
+
+  BlockPusher bp(env.irb, env.marker, env.failedSetBlock);
+  gen(env, BeginCatch);
+  spillStack(env);
+
+  env.irb.ifThen(
+    [&] (Block* taken) {
+      gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
+    },
+    [&] {
+      env.irb.hint(Block::Hint::Unused);
+      cleanTvRefs(env);
+      gen(env, EndCatch, fp(env), sp(env));
+    }
+  );
+  env.irb.hint(Block::Hint::Unused);
+
+  /*
+   * Fallthrough from here on is side-exiting due to an InvalidSetMException.
+   */
+
+  // For consistency with the interpreter, decref the rhs before we decref the
+  // stack inputs, and decref the ratchet storage after the stack inputs.
+  if (!isSetWithRef) {
+    gen(env, DecRefStack, StackOffset { 0 }, Type::Cell, sp(env));
+  }
+  auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
+  discard(env, stackCnt);
+  cleanTvRefs(env);
+  if (!isSetWithRef) {
+    auto const val = gen(env, LdUnwinderValue, Type::Cell);
+    push(env, val);
+  }
+  gen(env, DeleteUnwinderException);
+  gen(env, Jmp, makeExit(env, nextBcOff(env)));
+  return env.failedSetBlock;
+}
+
+void emitMPost(MTS& env) {
+  handleStrTestResult(env);
+
+  auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromMain);
+  discard(env, stackCnt);
+
+  // Push result, if one was produced. If we had a predicted result
+  // (strTestResult case), it was already guarded on above.
   if (env.result) {
     push(env, env.result);
   } else {
@@ -2018,25 +2017,7 @@ void emitMPost(MTS& env) {
            env.ni.mInstrOp() == Op::SetWithRefRM);
   }
 
-  // Clean up tvRef(2): during exception handling any objects required only
-  // during vector expansion need to be DecRef'd.  There may be either one
-  // or two such scratch objects, in the case of a Set the first of which will
-  // always be tvRef2, in all other cases if only one scratch value is present
-  // it will be stored in tvRef.
-  static constexpr size_t refOffs[] = { MISOFF(tvRef), MISOFF(tvRef2) };
-  for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
-    auto const inst = env.unit.gen(
-      DecRefMem,
-      env.marker,
-      Type::Gen,
-      env.misBase,
-      cns(env, refOffs[env.failedSetBlock ? 1 - i : i])
-    );
-    env.irb.add(inst);
-    prependToTraces(env, inst);
-  }
-
-  emitSideExits(env, catchSp, nStack);
+  cleanTvRefs(env);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2538,15 +2538,11 @@ fields of that struct for holding intermediate values.
   Marks the end of a catch region and returns control to the unwinder. Exact
   behavior is implementation and architecture specific.
 
-| TryEndCatch, ND, S(FramePtr) S(StkPtr), E
-
-  Marks a potential end of a catch region and might return control to the
-  unwinder. Exact behavior is implementation and architecture specific.
-
 | UnwindCheckSideExit, ND, S(FramePtr) S(StkPtr), B|E
 
-  Branches to B if the currently executing catch region should return control to
-  the unwinder rather than side exiting.
+  Branches to B if the currently executing catch region should return control
+  to the unwinder rather than side exiting.  Used to control behavior in catch
+  traces for the InvalidSetMException and TVCoercionException situations.
 
 | LdUnwinderValue<T>, DParam, NA, PRc
 

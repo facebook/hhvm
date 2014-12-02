@@ -167,7 +167,7 @@ struct IRBuilder {
    * gen(CodeForMainBlock, ...);
    */
   void pushBlock(BCMarker marker, Block* b);
-  void popBlock(bool);
+  void popBlock();
 
   /*
    * Run another pass of IRBuilder-managed optimizations on this
@@ -195,14 +195,6 @@ struct IRBuilder {
       marker,
       std::forward<Args>(args)...
     );
-  }
-
-  /*
-   * Add an already created instruction, running it through the normal
-   * optimization passes and updating tracked state.
-   */
-  SSATmp* add(IRInstruction* inst) {
-    return optimizeInst(inst, CloneFlag::No, nullptr, folly::none);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -516,28 +508,21 @@ template<> struct IRBuilder::BranchImpl<SSATmp*> {
 /*
  * RAII helper for emitting code to exit traces. See IRBuilder::pushBlock
  * for usage.
- *
- * The pause template parameter determines whether to pause the new block upon
- * destruction or to finish it.
  */
-template<bool pause>
-struct BlockPusherImpl {
-  BlockPusherImpl(IRBuilder& irb, BCMarker marker, Block* block)
+struct BlockPusher {
+  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block);
   }
 
-  ~BlockPusherImpl() {
-    m_irb.popBlock(pause);
+  ~BlockPusher() {
+    m_irb.popBlock();
   }
 
  private:
   IRBuilder& m_irb;
 };
-
-using BlockPusher = BlockPusherImpl<false>;
-using BlockPauser = BlockPusherImpl<true>;
 
 //////////////////////////////////////////////////////////////////////
 

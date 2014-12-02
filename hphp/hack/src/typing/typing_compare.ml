@@ -505,7 +505,11 @@ let class_big_diff class1 class2 =
   SMap.compare class1.tc_req_ancestors class2.tc_req_ancestors <> 0 ||
   SSet.compare class1.tc_req_ancestors_extends class2.tc_req_ancestors_extends <> 0 ||
   SSet.compare class1.tc_extends class2.tc_extends <> 0 ||
-  class1.tc_enum_type <> class2.tc_enum_type
+  class1.tc_enum_type <> class2.tc_enum_type ||
+  (* due to, e.g. switch exhaustiveness checks, a change in an enum's
+   * constant set is a "big" difference *)
+    (class1.tc_enum_type <> None &&
+       not (SSet.is_empty (ClassDiff.smap class1.tc_consts class2.tc_consts)))
 
 (*****************************************************************************)
 (* Given a class name adds all the subclasses, we need a "trace" to follow

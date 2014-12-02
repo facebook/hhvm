@@ -5,22 +5,22 @@
 */
 
 function get_expect_file_and_type($test, $options) {
-  $types = ['expect', 'expectf', 'expectregex'];
+  $types = array('expect', 'expectf', 'expectregex');
   if (isset($options['repo'])) {
     foreach ($types as $type) {
       $fname = "$test.$type-repo";
       if (file_exists($fname)) {
-        return [$fname, $type];
+        return array($fname, $type);
       }
     }
   }
   foreach ($types as $type) {
     $fname = "$test.$type";
     if (file_exists($fname)) {
-      return [$fname, $type];
+      return array($fname, $type);
     }
   }
-  return [null, null];
+  return array(null, null);
 }
 
 function usage() {
@@ -382,7 +382,11 @@ function hhvm_path() {
   return idx_file($_ENV, 'HHVM_BIN', bin_root().'/hphp/hhvm/hhvm');
 }
 
-function hhvm_cmd_impl($options, $config, ...$extra_args) {
+function hhvm_cmd_impl() {
+  $args = func_get_args();
+  $options = array_shift($args);
+  $config = array_shift($args);
+  $extra_args = $args;
   $args = array(
     hhvm_path(),
     '-c',
@@ -419,7 +423,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_debug_config($test, 'hphpd.ini'),
     read_file(find_test_ext($test, 'opts')),
     '--file',
-    escapeshellarg($test_run),
+    escapeshellarg($test_run)
   );
 
   if (file_exists($test.'.ini')) {
@@ -534,14 +538,14 @@ class Status {
     array_push(self::$results, array('name' => $test, 'status' => 'passed'));
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
       ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
-    self::send(self::MSG_TEST_PASS, [$test, $how]);
+    self::send(self::MSG_TEST_PASS, array($test, $how));
   }
 
   public static function skip($test, $reason = null) {
     if (self::getMode() !== self::MODE_FBMAKE) {
       array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
     }
-    self::send(self::MSG_TEST_SKIP, [$test,$reason]);
+    self::send(self::MSG_TEST_SKIP, array($test,$reason));
   }
 
   public static function fail($test) {

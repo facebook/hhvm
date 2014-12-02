@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
@@ -151,6 +152,42 @@ void throw_infinite_recursion_exception() {
     info->m_profiler = nullptr;
     raise_error("infinite recursion detected");
   }
+}
+
+static Exception* generate_request_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg = folly::format(
+    RuntimeOption::ClientExecutionMode()
+      ? "Maximum execution time of {} seconds exceeded"
+      : "entire web request took longer than {} seconds and timed out",
+    data.getTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestTimeoutException(exceptionMsg, exceptionStack);
+}
+
+static Exception* generate_request_cpu_timeout_exception() {
+  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInjectionData& data = info->m_reqInjectionData;
+
+  auto exceptionMsg =
+    folly::format("Maximum CPU time of {} seconds exceeded",
+                  data.getCPUTimeout()).str();
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
+}
+
+static Exception* generate_memory_exceeded_exception() {
+  Array exceptionStack = createBacktrace(BacktraceArgs()
+                                         .withSelf()
+                                         .withThis());
+  return new RequestMemoryExceededException(
+    "request has exceeded memory limit", exceptionStack);
 }
 
 ssize_t check_request_surprise(ThreadInfo* info) {

@@ -623,45 +623,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return uninit_null();
 }
 
-Exception* generate_request_timeout_exception() {
-  Exception* ret = nullptr;
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData &data = info->m_reqInjectionData;
-
-  bool cli = RuntimeOption::ClientExecutionMode();
-  std::string exceptionMsg = cli ?
-    "Maximum execution time of " :
-    "entire web request took longer than ";
-  exceptionMsg += folly::to<std::string>(data.getTimeout());
-  exceptionMsg += cli ? " seconds exceeded" : " seconds and timed out";
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  ret = new RequestTimeoutException(exceptionMsg, exceptionStack);
-  return ret;
-}
-
-Exception* generate_request_cpu_timeout_exception() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  RequestInjectionData& data = info->m_reqInjectionData;
-
-  auto exceptionMsg =
-    folly::format("Maximum CPU time of {} seconds exceeded",
-                  data.getCPUTimeout()).str();
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
-}
-
-Exception* generate_memory_exceeded_exception() {
-  Array exceptionStack = createBacktrace(BacktraceArgs()
-                                         .withSelf()
-                                         .withThis());
-  return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack);
-}
-
 Variant unserialize_ex(const char* str, int len,
                        VariableUnserializer::Type type,
                        const Array& class_whitelist /* = null_array */) {

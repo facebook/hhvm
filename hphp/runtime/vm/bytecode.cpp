@@ -7548,24 +7548,28 @@ void ExecutionContext::pushVMState(Cell* savedSP) {
     return;
   }
 
-  VMState savedVM = { vmpc(), vmfp(), vmFirstAR(), savedSP, vmMInstrState() };
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
+  auto& savedVM = m_nestedVMs.alloc_back();
+  savedVM.pc = vmpc();
+  savedVM.fp = vmfp();
+  savedVM.firstAR = vmFirstAR();
+  savedVM.sp = savedSP;
+  savedVM.mInstrState = vmMInstrState();
+  m_nesting++;
 
   if (debug && savedVM.fp &&
       savedVM.fp->m_func &&
       savedVM.fp->m_func->unit()) {
     // Some asserts and tracing.
     const Func* func = savedVM.fp->m_func;
-    (void) /* bound-check asserts in offsetOf */
-      func->unit()->offsetOf(savedVM.pc);
+    /* bound-check asserts in offsetOf */
+    func->unit()->offsetOf(savedVM.pc);
     TRACE(3, "pushVMState: saving frame %s pc %p off %d fp %p\n",
           func->name()->data(),
           savedVM.pc,
           func->unit()->offsetOf(savedVM.pc),
           savedVM.fp);
   }
-  m_nestedVMs.push_back(savedVM);
-  m_nesting++;
 }
 
 void ExecutionContext::popVMState() {

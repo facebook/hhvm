@@ -99,10 +99,18 @@ struct TinyVector : private boost::noncopyable {
   }
 
   void push_back(const T& t) {
+    alloc_back() = t;
+  }
+
+  /*
+   * Increase the size of this TinyVector by 1 and return a reference to the
+   * new object, which will be uninitialized.
+   */
+  T& alloc_back() {
     size_t current = size();
     reserve(current + 1);
-    *location(current) = t;
     m_data.set(current + 1, m_data.ptr());
+    return back();
   }
 
   void pop_back() {

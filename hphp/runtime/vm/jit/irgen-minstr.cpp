@@ -1205,7 +1205,7 @@ void emitRatchetRefs(MTS& env) {
       if (ratchetInd(env) > 0) {
         gen(env, DecRefMem, Type::Gen, env.misBase, cns(env, MISOFF(tvRef2)));
       }
-      // Copy tvRef to tvRef2. Use mmx at some point
+      // Copy tvRef to tvRef2.
       auto const tvRef = gen(
         env,
         LdMem,

@@ -820,6 +820,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ArrayIsset:     // kVPackedKind warnings
   case ArraySet:       // kVPackedKind warnings
   case ArraySetRef:    // kVPackedKind warnings
+  case GetMemoKey:  // re-enters to call getInstanceKey() in some cases
     return MayLoadStore { ANonFrame, ANonFrame };
 
   //////////////////////////////////////////////////////////////////////

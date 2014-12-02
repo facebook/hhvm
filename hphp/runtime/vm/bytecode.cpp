@@ -84,6 +84,7 @@
 #include "hphp/runtime/ext/asio/static_wait_handle.h"
 #include "hphp/runtime/ext/asio/wait_handle.h"
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
@@ -4964,6 +4965,15 @@ OPTBLD_INLINE void ExecutionContext::iopAKExists(IOP_ARGS) {
   bool result = HHVM_FN(array_key_exists)(tvAsCVarRef(key), tvAsCVarRef(arr));
   vmStack().popTV();
   vmStack().replaceTV<KindOfBoolean>(result);
+}
+
+OPTBLD_INLINE void ExecutionContext::iopGetMemoKey(IOP_ARGS) {
+  NEXT();
+  auto obj = vmStack().topTV();
+  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(obj));
+  auto res = var.asTypedValue();
+  tvRefcountedIncRef(res);
+  vmStack().replaceTV(*res);
 }
 
 OPTBLD_INLINE void ExecutionContext::iopIdx(IOP_ARGS) {

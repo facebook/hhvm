@@ -198,6 +198,8 @@ CALL_OPCODE(FunctionReturnHook)
 
 CALL_OPCODE(OODeclExists)
 
+CALL_OPCODE(GetMemoKey)
+
 
 //////////////////////////////////////////////////////////////////////
 

@@ -38,7 +38,8 @@ const StaticString
   s_in_array("in_array"),
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
-  s_is_object("is_object");
+  s_is_object("is_object"),
+  s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -980,6 +981,25 @@ void emitAKExists(HTS& env) {
   push(env, gen(env, AKExists, arr, key));
   gen(env, DecRef, arr);
   gen(env, DecRef, key);
+}
+
+void emitGetMemoKey(HTS& env) {
+  auto const inTy = topC(env)->type();
+  if (inTy <= Type::Int) {
+    // An int is already a valid key. No-op.
+    return;
+  }
+  if (inTy <= Type::Null) {
+    auto input = popC(env);
+    push(env, cns(env, s_empty.get()));
+    gen(env, DecRef, input);
+    return;
+  }
+
+  auto const obj = popC(env);
+  auto const key = gen(env, GetMemoKey, obj);
+  push(env, key);
+  gen(env, DecRef, obj);
 }
 
 void emitStrlen(HTS& env) {

@@ -482,6 +482,7 @@ static const struct {
   { OpAssertRATL,  {None,             None,         OutNone,           0 }},
   { OpAssertRATStk,{None,             None,         OutNone,           0 }},
   { OpBreakTraceHint,{None,           None,         OutNone,           0 }},
+  { OpGetMemoKey,  {Stack1,           Stack1,       OutUnknown,        0 }},
 
   /*** 14. Generator instructions ***/
 
@@ -1023,6 +1024,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::False:
   case Op::File:
   case Op::Floor:
+  case Op::GetMemoKey:
   case Op::Idx:
   case Op::InitThisLoc:
   case Op::InstanceOf:

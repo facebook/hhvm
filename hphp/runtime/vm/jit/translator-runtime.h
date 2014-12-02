@@ -148,6 +148,8 @@ TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
 
+TypedValue getMemoKeyHelper(TypedValue tv);
+
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrHelper(StringData* name);

@@ -1,6 +1,5 @@
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot serialize object of type T because it does not implement HH\IMemoizeParam' in :
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot serialize object of type T because it does not implement HH\IMemoizeParam' in %s/test/slow/memoize/unsupported.php:5
 Stack trace:
-#0 %s/test/slow/memoize/unsupported.php(5): HH\serialize_memoize_param()
-#1 %s/test/slow/memoize/unsupported.php(7): testInvalidObject()
-#2 {main}
+#0 %s/test/slow/memoize/unsupported.php(7): testInvalidObject()
+#1 {main}

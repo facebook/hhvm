@@ -1825,6 +1825,12 @@ generating efficient compare-and-branch instruction sequences.
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
 
+| GetMemoKey, D(Cell), S(Cell), Er|C|PRc
+
+  Given a cell, produces a cell that can be used as a cache key. Valid values
+  for the input include all basic types, arrays and collections, and objects
+  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
+
 | GenericIdx, D(Cell), S(Cell) S(Cell) S(Cell), E|PRc|Er
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise

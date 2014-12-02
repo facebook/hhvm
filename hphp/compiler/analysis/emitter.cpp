@@ -6920,19 +6920,6 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
   }
 }
 
-bool EmitterVisitor::isMemoizeBlessedType(const TypeConstraint &tc) {
-  if (!tc.hasConstraint() || !tc.isPrecise() || tc.isSoft()) {
-    return false;
-  }
-  if (tc.isNullable() && !DataType::KindOfInt64) {
-    return false;
-  }
-  return
-    tc.underlyingDataType() == DataType::KindOfBoolean ||
-    tc.underlyingDataType() == DataType::KindOfInt64 ||
-    tc.underlyingDataType() == DataType::KindOfString;
-}
-
 void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
                                        const StringData* methName) {
   assert(m_curFunc->isMemoizeWrapper);
@@ -6995,8 +6982,6 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     emitIsType(e, IsTypeOp::Null);
     e.JmpNZ(cacheMiss);
   } else {
-    auto serMethName = makeStaticString("HH\\serialize_memoize_param");
-
     // Serialize all the params into something we can use for the key
     for (int i = 0; i < numParams; i++) {
       if (m_curFunc->params[i].byRef) {
@@ -7005,42 +6990,14 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
           "reference");
       }
 
-      if (isMemoizeBlessedType(m_curFunc->params[i].typeConstraint)) {
-        cacheLookup.push_back(i);
-        continue;
-      }
-
-      // We don't know statically that the param is useable as a key. So:
-      //  1: Check if it's an int. If so, use it directly
-      //  2: Otherwise, call the serialization function
-      //  3: In either case, store the result in a new local
-      Label notInt, storeLocal;
+      // Translate the arg to a memoize key
       int serResultLocal = m_curFunc->allocUnnamedLocal();
       cacheLookup.push_back(serResultLocal);
 
-      // $valN = is_int($paramN) ?
-      //   $paramN : HH\serialize_memoize_param($paramN);
       emitVirtualLocal(serResultLocal);
       emitVirtualLocal(i);
-      emitIsType(e, IsTypeOp::Int);
-      e.JmpZ(notInt);
-
-      emitVirtualLocal(i);
       emitCGet(e);
-      e.Jmp(storeLocal);
-
-      notInt.set(e);
-      auto fpiStart = m_ue.bcPos();
-      e.FPushFuncD(1, serMethName);
-      {
-        FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-        emitVirtualLocal(i);
-        emitFPass(e, 0, PassByRefKind::ErrorOnCell);
-      }
-      e.FCall(1);
-      emitConvertToCell(e);
-
-      storeLocal.set(e);
+      e.GetMemoKey();
       emitSet(e);
       emitPop(e);
     }
@@ -7067,24 +7024,12 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
     }
 
     if (!noRetNull) {
-      bool lastArgBool = false;
-      if (numParams > 0) {
-        auto lastArgTC = m_curFunc->params[numParams - 1].typeConstraint;
-        lastArgBool =
-          isMemoizeBlessedType(lastArgTC) &&
-          lastArgTC.underlyingDataType() == DataType::KindOfBoolean &&
-          !lastArgTC.isNullable();
-      }
-
       // if (array_key_exists($paramN, ${propName}[$param1][...][$paramN-1]))
       if (cacheLookupLen == 1 && m_curFunc->hasMemoizeSharedProp) {
         e.Int(m_curFunc->memoizeSharedPropIndex);
       } else {
         emitVirtualLocal(cacheLookup[cacheLookupLen - 1]);
         emitCGet(e);
-        if (lastArgBool) {
-          e.CastInt();
-        }
       }
       emitMemoizeProp(e, meth, staticLocalID, cacheLookup, cacheLookupLen - 1);
       emitCGet(e);

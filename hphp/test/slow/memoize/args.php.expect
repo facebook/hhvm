@@ -21,3 +21,5 @@ Test generics
 2 2 a a
 Test bool without return type (test for issue in #5307125)
 182 182 99 99
+Test objects
+150 150 151 151

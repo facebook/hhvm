@@ -438,6 +438,8 @@ CALL_OPCODE(FunctionReturnHook)
 
 CALL_OPCODE(OODeclExists)
 
+CALL_OPCODE(GetMemoKey)
+
 #undef NOOP_OPCODE
 
 Vlabel CodeGenerator::label(Block* b) {

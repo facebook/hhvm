@@ -330,6 +330,8 @@ static CallMap s_callMap {
 
     // count($array)
     {CountArray, &ArrayData::size, DSSA, SNone, {{SSA, 0}}},
+
+    {GetMemoKey, getMemoKeyHelper, DTV, SSync, {{TV, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

@@ -4121,6 +4121,11 @@ Silence  <local id> <Start|End>   []  ->  []
   reporting level to the previous value (stored in local variable %1); if the
   error reporting level is not 0, does nothing.
 
+GetMemoKey    [C] ->  [C]
+
+  Given a cell, produces a cell that can be used as a cache key. Valid values
+  for the input include all basic types, arrays and collections, and objects
+  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
 
 14. Generator creation and execution
 ---------------------------------------

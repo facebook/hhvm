@@ -25,6 +25,15 @@
 #include "hphp/runtime/ext/ext_fb.h"
 
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+const StaticString
+  s_empty(""),
+  s_emptyArr("array()"),
+  s_true("true"),
+  s_false("false");
+
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
@@ -52,7 +61,24 @@ bool HHVM_FUNCTION(could_include, const String& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */) != nullptr;
 }
 
-String HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
+Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
+  auto type = param.getType();
+  if (type == KindOfInt64) {
+    return param;
+  }
+  if (type == KindOfUninit || type == KindOfNull) {
+    return s_empty;
+  }
+  if (type == KindOfBoolean) {
+    return param.asBooleanVal() ? s_true : s_false;
+  }
+  if (type == KindOfArray) {
+    Array arr = param.toArray();
+    if (arr.size() == 0) {
+      return s_emptyArr;
+    }
+  }
+
   return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);
 }
 

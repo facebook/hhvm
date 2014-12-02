@@ -68,6 +68,8 @@ const StaticString s_empty("");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
+const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
+const StaticString s_getInstanceKey("getInstanceKey");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -879,6 +881,31 @@ void in(ISS& env, const bc::AKExists& op) {
                     t2.subtypeOf(TStr);
   if (t1Ok && t2Ok) nothrow(env);
   push(env, TBool);
+}
+
+void in(ISS& env, const bc::GetMemoKey& op) {
+  auto const tyIMemoizeParam =
+    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
+  auto const t = topC(env);
+
+  if (t.subtypeOf(TInt) || t.subtypeOf(TStr) || t.subtypeOf(TOptInt)) {
+    return reduce(env, bc::Nop {});
+  }
+  if (t.subtypeOf(TBool)) {
+    return reduce(env, bc::CastInt {});
+  }
+  if (t.subtypeOf(tyIMemoizeParam)) {
+    return reduce(
+      env,
+      bc::FPushObjMethodD { 0, s_getInstanceKey.get(),
+                            ObjMethodOp::NullThrows },
+      bc::FCall { 0 },
+      bc::UnboxR {}
+    );
+  }
+
+  popC(env);
+  push(env, TInitCell);
 }
 
 void in(ISS& env, const bc::IssetL& op) {

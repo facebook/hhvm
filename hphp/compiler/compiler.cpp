@@ -324,7 +324,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     try {
       store(opts, vm);
       notify(vm);
-#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
     } catch (const error_with_option_name &e) {
       std::string wrong_name = e.get_option_name();
       std::string right_name = get_right_option_name(opts, wrong_name);

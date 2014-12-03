@@ -1279,7 +1279,7 @@ static int execute_program_impl(int argc, char** argv) {
       }
 // When we upgrade boost, we can remove this and also get rid of the parent
 // try statement and move opts back into the original try block
-#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
+#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
     } catch (const error_with_option_name &e) {
       std::string wrong_name = e.get_option_name();
       std::string right_name = get_right_option_name(opts, wrong_name);

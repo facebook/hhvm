@@ -75,14 +75,15 @@ protected:
 /**
  * This is wrapper for fds that cannot be closed.
  */
-class BuiltinFile : public PlainFile {
-public:
+struct BuiltinFile : PlainFile {
   explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
   explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
   virtual ~BuiltinFile();
   virtual bool close();
   virtual void sweep() override;
 };
+static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),
+              "BuiltinFile inherits PlainFile::heapSize()");
 
 /**
  * A request-local wrapper for the three standard files:

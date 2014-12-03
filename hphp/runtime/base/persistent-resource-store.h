@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-struct ResourceData;
+struct SweepableResourceData;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,20 +44,17 @@ struct PersistentResourceStore {
   PersistentResourceStore& operator=(const PersistentResourceStore&) = delete;
   ~PersistentResourceStore();
 
-  int size() const;
+  void set(std::string type, std::string name, SweepableResourceData* obj);
+  SweepableResourceData* get(std::string type, std::string name);
+  void remove(std::string type, std::string name);
 
-  void set(const char* type, const char* name, ResourceData* obj);
-  ResourceData* get(const char* type, const char* name);
-  void remove(const char* type, const char* name);
-
-  const std::map<std::string,ResourceData*>& getMap(const char* type);
+  const std::map<std::string,SweepableResourceData*>& getMap(std::string type);
 
 private:
-  void removeObject(ResourceData* data);
+  void removeObject(SweepableResourceData* data);
 
 private:
-  std::map<std::string,std::map<std::string,ResourceData*>>
-    m_objects;
+  std::map<std::string,std::map<std::string,SweepableResourceData*>> m_objects;
 };
 
 //////////////////////////////////////////////////////////////////////

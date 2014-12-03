@@ -25,78 +25,47 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(PersistentResourceStore, g_persistentResources);
 
 //////////////////////////////////////////////////////////////////////
 
-void PersistentResourceStore::removeObject(ResourceData* data) {
-  if (!data) return;
-  if (!decRefRes(data)) {
-    SweepableResourceData *sw = dynamic_cast<SweepableResourceData*>(data);
-    if (sw) {
-      sw->decPersistent();
-    }
-  }
+void PersistentResourceStore::removeObject(SweepableResourceData* r) {
+  if (!r) return;
+  if (!decRefRes(r)) r->decPersistent();
 }
 
 PersistentResourceStore::~PersistentResourceStore() {
-  for (auto iter = m_objects.begin();
-       iter != m_objects.end();
-       ++iter) {
-    auto const& resources = iter->second;
-    for (auto iterInner = resources.begin();
-         iterInner != resources.end();
-         ++iterInner) {
-      removeObject(iterInner->second);
+  for (auto& e : m_objects) {
+    for (auto& f : e.second) {
+      removeObject(f.second);
     }
   }
 }
 
-int PersistentResourceStore::size() const {
-  int total = 0;
-  for (auto iter = m_objects.begin();
-       iter != m_objects.end();
-       ++iter) {
-    total += iter->second.size();
-  }
-  return total;
-}
-
-void PersistentResourceStore::set(const char *type, const char *name,
-                                ResourceData *obj) {
-  assert(type && *type);
-  assert(name);
+void PersistentResourceStore::set(std::string type, std::string name,
+                                  SweepableResourceData *resource) {
   {
     auto& resources = m_objects[type];
     auto iter = resources.find(name);
     if (iter != resources.end()) {
-      if (iter->second == obj) {
+      if (iter->second == resource) {
         return; // we are setting the same object
       }
       removeObject(iter->second);
       resources.erase(iter);
     }
   }
-  if (obj) {
-    obj->incRefCount();
-    SweepableResourceData *sw = dynamic_cast<SweepableResourceData*>(obj);
-    if (sw) {
-      sw->incPersistent();
-    }
-    m_objects[type][name] = obj;
+  if (resource) {
+    resource->incRefCount();
+    resource->incPersistent();
+    m_objects[type][name] = resource;
   }
 }
 
-ResourceData *PersistentResourceStore::get(const char *type, const char *name) {
-  assert(type && *type);
-  assert(name);
+SweepableResourceData*
+PersistentResourceStore::get(std::string type, std::string name) {
   auto& resources = m_objects[type];
   auto iter = resources.find(name);
-  if (iter == resources.end()) {
-    return nullptr;
-  }
-  return iter->second;
+  return iter != resources.end() ? iter->second : nullptr;
 }
 
-void PersistentResourceStore::remove(const char *type, const char *name) {
-  assert(type && *type);
-  assert(name);
+void PersistentResourceStore::remove(std::string type, std::string name) {
   auto& resources = m_objects[type];
   auto iter = resources.find(name);
   if (iter != resources.end()) {
@@ -105,9 +74,8 @@ void PersistentResourceStore::remove(const char *type, const char *name) {
   }
 }
 
-const std::map<std::string,ResourceData*>&
-PersistentResourceStore::getMap(const char *type) {
-  assert(type && *type);
+const std::map<std::string,SweepableResourceData*>&
+PersistentResourceStore::getMap(std::string type) {
   return m_objects[type];
 }
 

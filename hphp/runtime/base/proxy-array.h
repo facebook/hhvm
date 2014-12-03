@@ -112,14 +112,14 @@ private:
    * Zend compat caller. This will retrieve the underlying data pointer from
    * the ZendCustomElement resource, if applicable.
    */
-  void * elementToData(Variant* v) const;
+  void* elementToData(Variant* v) const;
 
   /**
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
    * is non-null, it will be set to the newly-allocated location for the block.
    */
-  ResourceData * makeElementResource(void *pData, uint nDataSize,
-                                     void **pDest) const;
+  ResourceData* makeElementResource(void *pData, uint nDataSize,
+                                    void **pDest) const;
 
   DtorFunc m_destructor;
 

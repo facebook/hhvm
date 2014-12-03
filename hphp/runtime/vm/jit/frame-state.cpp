@@ -326,13 +326,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().thisAvailable = true;
     break;
 
-  case DefLabel:
-    if (inst->numDsts() > 0) {
-      auto dst0 = inst->dst(0);
-      if (dst0->isA(Type::StkPtr)) cur().spValue = dst0;
-    }
-    break;
-
   default:
     break;
   }
@@ -385,13 +378,6 @@ Block* FrameStateMgr::findUnprocessedPred(Block* block) const {
   return nullptr;
 }
 
-SSATmp* FrameStateMgr::spLeavingBlock(Block* b) const {
-  auto it = m_states.find(b);
-  assert(it != m_states.end());
-  assert(!it->second.out.empty());
-  return it->second.out.back().spValue;
-}
-
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
                                bool isLoopHeader /* = false */) {
@@ -440,26 +426,20 @@ void FrameStateMgr::startBlock(Block* block,
 
 bool FrameStateMgr::finishBlock(Block* block) {
   assert(block->back().isTerminal() == !block->next());
-
-  auto& old = m_states[block].out;
-  const auto& snap = m_stack;
-  auto changed = old != snap;
-  old = snap;
-
+  auto changed = false;
   if (!block->back().isTerminal()) changed |= save(block->next());
-
   return changed;
 }
 
 void FrameStateMgr::pauseBlock(Block* block) {
   // Note: this can't use std::move, because pauseBlock must leave the current
-  // state alone.
-  m_states[block].out = m_stack;
+  // state alone so startBlock can use it as the in state for another block.
+  m_states[block].paused = m_stack;
 }
 
 void FrameStateMgr::unpauseBlock(Block* block) {
   assert(hasStateFor(block));
-  m_stack = m_states[block].out;
+  m_stack = *m_states[block].paused;
 }
 
 /*

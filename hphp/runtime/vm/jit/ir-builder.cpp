@@ -1232,79 +1232,6 @@ void IRBuilder::setNextMarker(BCMarker newMarker) {
   m_nextMarker = newMarker;
 }
 
-void IRBuilder::insertSPPhi(bool forceSpPhi, BCMarker marker) {
-  ITRACE(2, "insertSPPhi starting for B{} with {} preds, forceSpPhi = {}\n",
-         m_curBlock->id(), m_curBlock->numPreds(), forceSpPhi);
-  Trace::Indent _i;
-
-  if (m_curBlock->numPreds() < 2 && !forceSpPhi) return;
-
-  jit::hash_map<Block*,SSATmp*> blockToPhiTmpsMap;
-
-  // First, determine if we need a phi for vmsp.
-  auto sp = m_state.spLeavingBlock(m_curBlock->preds().front().from());
-  auto needSpPhi = forceSpPhi;
-  for (auto& e : m_curBlock->preds()) {
-    auto predSp = m_state.spLeavingBlock(e.from());
-    ITRACE(4, "sp for pred B{}: {}\n", e.from()->id(), *predSp->inst());
-    if (predSp != sp) needSpPhi = true;
-  }
-
-  ITRACE(3, "needSpPhi: {}\n\n", needSpPhi);
-  if (needSpPhi) {
-    for (auto& e : m_curBlock->preds()) {
-      auto const inBlock = e.from();
-      blockToPhiTmpsMap[inBlock] = m_state.spLeavingBlock(inBlock);
-    }
-  }
-
-  if (!needSpPhi) return;
-
-  // Split incoming critical edges so we can modify Jmp srcs of preds.
-repeat:
-  for (auto& e : m_curBlock->preds()) {
-    IRInstruction* branch = e.inst();
-    Block* pred = branch->block();
-    if (pred->numSuccs() > 1) {
-      auto const middle = splitEdge(m_unit, pred, m_curBlock);
-      blockToPhiTmpsMap[middle] = blockToPhiTmpsMap[pred];
-
-      // Mark the new block as visited so FrameStateMgr doesn't see an
-      // unprocessed predecessor for the join point.
-      m_state.markVisited(middle);
-
-      goto repeat;
-    }
-  }
-
-  // Modify the incoming Jmps to set the phi inputs.  Copy to a vector before
-  // modifying things---we're going to be changing the pred EdgeList (by
-  // modifying jump instructions).
-  auto pred_vec = jit::vector<Block*>{};
-  for (auto& e : m_curBlock->preds()) {
-    pred_vec.push_back(e.from());
-  }
-  for (auto const pred : pred_vec) {
-    auto& jmp = pred->back();
-    always_assert_log(
-      jmp.is(Jmp),
-      [&] {
-        return folly::format("Need Jmp to create a phi, instead got: {}",
-                             jmp.toString()).str();
-      });
-    // TODO(#4810319): this function can't handle already having a phi, but
-    // we're going to stop phi'ing stacks eventually anyway.
-    always_assert(jmp.numSrcs() == 0 && "Phi already exists for this Jmp");
-    m_unit.replace(&jmp, Jmp, jmp.taken(), blockToPhiTmpsMap[pred]);
-  }
-
-  // Create a DefLabel for the sp phi.
-  auto const label = m_unit.defLabel(1, marker, {0u});
-  assert(m_curBlock->empty());
-  appendInstruction(label);
-  retypeDests(label, &m_unit);
-}
-
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
                            bool isLoopHeader) {
   assert(block);
@@ -1329,8 +1256,7 @@ bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, marker, isLoopHeader);
-  insertSPPhi(isLoopHeader, marker);
-  always_assert(sp() != nullptr);
+  if (sp() == nullptr) gen(DefSP, StackOffset{spOffset()}, fp());
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
          show(m_state));

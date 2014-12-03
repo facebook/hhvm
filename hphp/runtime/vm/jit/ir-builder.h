@@ -489,7 +489,6 @@ private:
   SSATmp* prepareInst(IRInstruction*);
   void appendInstruction(IRInstruction* inst);
   void appendBlock(Block* block);
-  void insertSPPhi(bool forceSpPhi, BCMarker);
   SSATmp* cseLookup(const IRInstruction&,
                     const Block*,
                     const folly::Optional<IdomVector>&) const;

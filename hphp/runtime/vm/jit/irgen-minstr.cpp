@@ -62,12 +62,15 @@ enum class SimpleOp {
  * on it.  Effectively MTS <: HTS (except the dot operator).
  */
 struct MTS {
-  explicit MTS(HTS& hts)
+  explicit MTS(HTS& hts, Op effectiveOp)
     : hts(hts)
+    , op(effectiveOp)
+    , immVec(hts.currentNormalizedInstruction->immVec)
+    , immVecM(hts.currentNormalizedInstruction->immVecM)
     , ni(*hts.currentNormalizedInstruction)
     , irb(*hts.irb)
     , unit(hts.unit)
-    , mii(getMInstrInfo(ni.mInstrOp()))
+    , mii(getMInstrInfo(effectiveOp))
     , marker(makeMarker(hts, bcOff(hts)))
     , iInd(mii.valCount())
   {}
@@ -75,6 +78,9 @@ struct MTS {
   /* implicit */ operator const HTS&() const { return hts; }
 
   HTS& hts;
+  Op op;
+  ImmVector immVec;
+  jit::vector<MemberCode> immVecM;
   const NormalizedInstruction& ni;
   IRBuilder& irb;
   IRUnit& unit;
@@ -248,16 +254,16 @@ bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
   return !no_override_magic;
 }
 
-bool mInstrHasUnknownOffsets(const NormalizedInstruction& ni,
-                             const Class* context) {
-  const MInstrInfo& mii = getMInstrInfo(ni.mInstrOp());
+bool mInstrHasUnknownOffsets(MTS& env) {
+  auto const& mii = env.mii;
   unsigned mi = 0;
   unsigned ii = mii.valCount() + 1;
-  for (; mi < ni.immVecM.size(); ++mi) {
-    MemberCode mc = ni.immVecM[mi];
+  for (; mi < env.immVecM.size(); ++mi) {
+    auto const mc = env.immVecM[mi];
     if (mcodeIsProp(mc)) {
       const Class* cls = nullptr;
-      auto propInfo = getPropertyOffset(ni, context, cls, mii, mi, ii);
+      auto propInfo = getPropertyOffset(env.ni, curClass(env), cls, mii, mi,
+        ii);
       if (propInfo.offset == -1 ||
           mightCallMagicPropMethod(mii.getAttr(mc), cls, propInfo)) {
         return true;
@@ -273,11 +279,11 @@ bool mInstrHasUnknownOffsets(const NormalizedInstruction& ni,
 
 // "Simple" bases are stack cells and locals.
 bool isSimpleBase(MTS& env) {
-  auto const loc = env.ni.immVec.locationCode();
+  auto const loc = env.immVec.locationCode();
   return loc == LL || loc == LC || loc == LR;
 }
 
-bool isSingleMember(MTS& env) { return env.ni.immVecM.size() == 1; }
+bool isSingleMember(MTS& env) { return env.immVecM.size() == 1; }
 
 bool isOptimizableCollectionClass(const Class* klass) {
   return klass == c_Vector::classof() ||
@@ -288,8 +294,8 @@ bool isOptimizableCollectionClass(const Class* klass) {
 // Inspect the instruction we're about to translate and determine if it can be
 // executed without using an MInstrState struct.
 void checkMIState(MTS& env) {
-  if (env.ni.immVec.locationCode() == LNL ||
-      env.ni.immVec.locationCode() == LNC) {
+  if (env.immVec.locationCode() == LNL ||
+      env.immVec.locationCode() == LNC) {
     // We're definitely going to punt in emitBaseN, so we might not
     // have guarded the base's type.
     return;
@@ -297,13 +303,12 @@ void checkMIState(MTS& env) {
 
   Type baseType             = env.base.type.derefIfPtr();
   const bool baseArr        = baseType <= Type::Arr;
-  const bool isCGetM        = env.ni.mInstrOp() == Op::CGetM;
-  const bool isSetM         = env.ni.mInstrOp() == Op::SetM;
-  const bool isIssetM       = env.ni.mInstrOp() == Op::IssetM;
-  const bool isUnsetM       = env.ni.mInstrOp() == Op::UnsetM;
-  const bool isSingle       = env.ni.immVecM.size() == 1;
-  const bool unknownOffsets = mInstrHasUnknownOffsets(env.ni,
-                                                      curClass(env));
+  const bool isCGetM        = env.op == Op::CGetM;
+  const bool isSetM         = env.op == Op::SetM;
+  const bool isIssetM       = env.op == Op::IssetM;
+  const bool isUnsetM       = env.op == Op::UnsetM;
+  const bool isSingle       = env.immVecM.size() == 1;
+  const bool unknownOffsets = mInstrHasUnknownOffsets(env);
 
   if (baseType.maybeBoxed() && !baseType.isBoxed()) {
     // We don't need to bother with weird base types.
@@ -323,7 +328,7 @@ void checkMIState(MTS& env) {
   const bool singleSet = isSingle && isSetM;
 
   // Element access with one element in the vector
-  const bool singleElem = isSingle && mcodeIsElem(env.ni.immVecM[0]);
+  const bool singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
 
   // IssetM with one vector array element and an Arr base
   const bool simpleArrayIsset = isIssetM && singleElem && baseArr;
@@ -343,7 +348,7 @@ void checkMIState(MTS& env) {
   const bool simpleCollectionGet = isCGetM && singleElem &&
     baseType < Type::Obj && isOptimizableCollectionClass(baseType.getClass());
   const bool simpleStringOp = (isCGetM || isIssetM) && isSingle &&
-    isSimpleBase(env) && mcodeMaybeArrayIntKey(env.ni.immVecM[0]) &&
+    isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
     baseType <= Type::Str;
 
   if (simpleProp || singleSet ||
@@ -369,13 +374,13 @@ void emitMTrace(MTS& env) {
   int iInd = env.mii.valCount();
   const char* separator = "";
 
-  shape << opcodeToName(env.ni.mInstrOp()) << " <";
-  auto baseLoc = env.ni.immVec.locationCode();
+  shape << opcodeToName(env.op) << " <";
+  auto baseLoc = env.immVec.locationCode();
   shape << folly::format("{}:{} ", locationCodeString(baseLoc), rttStr(iInd));
   ++iInd;
 
-  for (int mInd = 0; mInd < env.ni.immVecM.size(); ++mInd) {
-    auto mcode = env.ni.immVecM[mInd];
+  for (int mInd = 0; mInd < env.immVecM.size(); ++mInd) {
+    auto mcode = env.immVecM[mInd];
     shape << separator;
     if (mcode == MW) {
       shape << "MW";
@@ -501,15 +506,15 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
     return base->type();
   }();
 
-  auto const op = env.ni.mInstrOp();
-  bool const readInst = (op == OpCGetM || op == OpIssetM);
-  if ((op == OpSetM || readInst) && isSimpleBase(env) && isSingleMember(env)) {
+  bool const readInst = (env.op == Op::CGetM || env.op == Op::IssetM);
+  if ((env.op == OpSetM || readInst) && isSimpleBase(env) &&
+      isSingleMember(env)) {
     if (baseType <= Type::Arr) {
       auto const isPacked =
         baseType.isSpecialized() &&
         baseType.hasArrayKind() &&
         baseType.getArrayKind() == ArrayData::kPackedKind;
-      if (mcodeIsElem(env.ni.immVecM[0])) {
+      if (mcodeIsElem(env.immVecM[0])) {
         SSATmp* key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
         if (key->isA(Type::Int) || key->isA(Type::Str)) {
           if (readInst && key->isA(Type::Int)) {
@@ -520,7 +525,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
         }
       }
     } else if (baseType <= Type::Str &&
-               mcodeMaybeArrayIntKey(env.ni.immVecM[0])) {
+               mcodeMaybeArrayIntKey(env.immVecM[0])) {
       auto const key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
       if (key->isA(Type::Int)) {
         // Don't bother with SetM on strings, because profile data
@@ -536,18 +541,18 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
       auto const isMap       = klass == c_Map::classof();
 
       if (isVector || isPair) {
-        if (mcodeMaybeVectorKey(env.ni.immVecM[0])) {
+        if (mcodeMaybeVectorKey(env.immVecM[0])) {
           auto const key = getInput(env, env.mii.valCount() + 1,
             DataTypeGeneric);
           if (key->isA(Type::Int)) {
             // We don't specialize setting pair elements.
-            if (isPair && op == OpSetM) return SimpleOp::None;
+            if (isPair && env.op == Op::SetM) return SimpleOp::None;
 
             return isVector ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
       } else if (isMap) {
-        if (mcodeIsElem(env.ni.immVecM[0])) {
+        if (mcodeIsElem(env.immVecM[0])) {
           auto const key = getInput(env, env.mii.valCount() + 1,
             DataTypeGeneric);
           if (key->isA(Type::Int) || key->isA(Type::Str)) {
@@ -565,7 +570,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
 // Base ops
 
 void emitBaseLCR(MTS& env) {
-  auto const& mia = env.mii.getAttr(env.ni.immVec.locationCode());
+  auto const& mia = env.mii.getAttr(env.immVec.locationCode());
   auto const& baseDL = *env.ni.inputs[env.iInd];
   // We use DataTypeGeneric here because we might not care about the type. If
   // we do, it's constrained further.
@@ -617,7 +622,7 @@ void emitBaseLCR(MTS& env) {
 
   // Check for common cases where we can pass the base by value, we unboxed
   // above if it was needed.
-  if ((baseType.subtypeOfAny(Type::Obj) && mcodeIsProp(env.ni.immVecM[0])) ||
+  if ((baseType.subtypeOfAny(Type::Obj) && mcodeIsProp(env.immVecM[0])) ||
       env.simpleOp != SimpleOp::None) {
     // Register that we care about the specific type of the base, though, and
     // might care about its specialized type.
@@ -671,7 +676,7 @@ void emitBaseN(MTS& env) {
 }
 
 void emitBaseG(MTS& env) {
-  auto const& mia = env.mii.getAttr(env.ni.immVec.locationCode());
+  auto const& mia = env.mii.getAttr(env.immVec.locationCode());
   auto const gblName = getBase(env, DataTypeSpecific);
   if (!gblName->isA(Type::Str)) PUNT(BaseG-non-string-name);
   setBase(
@@ -696,7 +701,7 @@ void emitBaseS(MTS& env) {
 }
 
 void emitBaseOp(MTS& env) {
-  switch (env.ni.immVec.locationCode()) {
+  switch (env.immVec.locationCode()) {
   case LL: case LC: case LR: emitBaseLCR(env); break;
   case LH:                   emitBaseH(env);   break;
   case LGL: case LGC:        emitBaseG(env);   break;
@@ -720,7 +725,7 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
   /*
    * TODO(#5616733): If we still don't have a knownCls, we can't do anything
    * good.  It's possible we still have the known information statically, and
-   * it might be in m_ni.inputs, but right now we can't really trust that
+   * it might be in env.ni.inputs, but right now we can't really trust that
    * because it's not very clear what it means.  See task for more information.
    */
   if (!knownCls) return PropInfo{};
@@ -777,7 +782,7 @@ SSATmp* checkInitProp(MTS& env,
     Type::Uninit <= propAddr->type().deref() &&
     // The m_mInd check is to avoid initializing a property to
     // InitNull right before it's going to be set to something else.
-    (doWarn || (doDefine && env.mInd < env.ni.immVecM.size() - 1));
+    (doWarn || (doDefine && env.mInd < env.immVecM.size() - 1));
 
   if (!needsCheck) return propAddr;
 
@@ -917,7 +922,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
 }
 
 void emitPropGeneric(MTS& env) {
-  auto const mCode = env.ni.immVecM[env.mInd];
+  auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate_prop);
 
   if ((mia & MIA_unset) && env.base.type.strip().not(Type::Obj)) {
@@ -953,7 +958,7 @@ void emitPropGeneric(MTS& env) {
 void emitProp(MTS& env) {
   const Class* knownCls = nullptr;
   const auto propInfo   = getCurrentPropertyOffset(env, knownCls);
-  auto mia = env.mii.getAttr(env.ni.immVecM[env.mInd]);
+  auto mia = env.mii.getAttr(env.immVecM[env.mInd]);
   if (propInfo.offset == -1 || (mia & MIA_unset) ||
       mightCallMagicPropMethod(mia, knownCls, propInfo)) {
     emitPropGeneric(env);
@@ -963,7 +968,7 @@ void emitProp(MTS& env) {
 }
 
 void emitElem(MTS& env) {
-  auto const mCode = env.ni.immVecM[env.mInd];
+  auto const mCode = env.immVecM[env.mInd];
   auto const mia = MInstrAttr(env.mii.getAttr(mCode) & MIA_intermediate);
   auto const key = getKey(env);
 
@@ -1030,7 +1035,7 @@ void emitElem(MTS& env) {
 void emitNewElem(MTS& env) { PUNT(emitNewElem); }
 
 void emitIntermediateOp(MTS& env) {
-  switch (env.ni.immVecM[env.mInd]) {
+  switch (env.immVecM[env.mInd]) {
     case MEC: case MEL: case MET: case MEI: {
       emitElem(env);
       ++env.iInd;
@@ -1053,7 +1058,7 @@ void emitIntermediateOp(MTS& env) {
 bool needFirstRatchet(const MTS& env) {
   auto const firstTy = env.ni.inputs[env.mii.valCount()]->rtt.unbox();
   if (firstTy <= Type::Arr) {
-    if (mcodeIsElem(env.ni.immVecM[0])) return false;
+    if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
   }
   if (firstTy < Type::Obj && firstTy.isSpecialized()) {
@@ -1068,7 +1073,7 @@ bool needFirstRatchet(const MTS& env) {
       // mightCallMagicPropMethod.
       return true;
     }
-    if (mcodeIsProp(env.ni.immVecM[0])) return false;
+    if (mcodeIsProp(env.immVecM[0])) return false;
     return true;
   }
   return true;
@@ -1117,7 +1122,7 @@ unsigned nLogicalRatchets(const MTS& env) {
   // know this translation won't need any ratchets
   if (!env.needMIS) return 0;
 
-  unsigned ratchets = env.ni.immVecM.size();
+  unsigned ratchets = env.immVecM.size();
   if (!needFirstRatchet(env)) --ratchets;
   if (!needFinalRatchet(env)) --ratchets;
   return ratchets;
@@ -1172,9 +1177,9 @@ void emitMPre(MTS& env) {
   }
 
   // The base location is input 0 or 1, and the location code is stored
-  // separately from ni.immVecM, so input indices (iInd) and member indices
-  // (mInd) commonly differ.  Additionally, W members have no corresponding
-  // inputs, so it is necessary to track the two indices separately.
+  // separately from immVecM, so input indices (iInd) and member indices (mInd)
+  // commonly differ.  Additionally, W members have no corresponding inputs, so
+  // it is necessary to track the two indices separately.
   env.simpleOp = computeSimpleCollectionOp(env);
   emitBaseOp(env);
   ++env.iInd;
@@ -1202,7 +1207,7 @@ void emitMPre(MTS& env) {
    * though the stack depth won't be changing, so we need to have a stack
    * boundary in-between each one.
    */
-  for (env.mInd = 0; env.mInd < env.ni.immVecM.size() - 1; ++env.mInd) {
+  for (env.mInd = 0; env.mInd < env.immVecM.size() - 1; ++env.mInd) {
     env.irb.exceptionStackBoundary();
     emitIntermediateOp(env);
     emitRatchetRefs(env);
@@ -1221,7 +1226,7 @@ void numberStackInputs(MTS& env) {
   // here.
   bool stackRhs = env.mii.valCount() &&
     env.ni.inputs[0]->location.space == Location::Stack;
-  int stackIdx = (int)stackRhs + env.ni.immVec.numStackValues() - 1;
+  int stackIdx = (int)stackRhs + env.immVec.numStackValues() - 1;
   for (unsigned i = env.mii.valCount(); i < env.ni.inputs.size(); ++i) {
     const Location& l = env.ni.inputs[i]->location;
     switch (l.space) {
@@ -1788,7 +1793,7 @@ void emitBindNewElem(MTS& env) {
 void emitFinalMOp(MTS& env) {
   using MemFun = void (*)(MTS&);
 
-  switch (env.ni.immVecM[env.mInd]) {
+  switch (env.immVecM[env.mInd]) {
   case MEC: case MEL: case MET: case MEI:
     static MemFun elemOps[] = {
 #   define MII(instr, ...) &emit##instr##Elem,
@@ -1850,7 +1855,7 @@ void cleanTvRefs(MTS& env) {
 enum class DecRefStyle { FromCatch, FromMain };
 uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
   uint32_t const startOff =
-    env.ni.mInstrOp() == Op::SetM || env.ni.mInstrOp() == Op::BindM ? 1 : 0;
+    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0;
   auto const stackCnt = env.stackInputs.size();
   for (auto i = startOff; i < stackCnt; ++i) {
     switch (why) {
@@ -1910,8 +1915,8 @@ Block* makeMISCatch(MTS& env) {
 Block* makeCatchSet(MTS& env) {
   env.failedSetBlock = env.irb.makeExit(Block::Hint::Unused);
 
-  const bool isSetWithRef = env.ni.mInstrOp() == Op::SetWithRefLM ||
-                            env.ni.mInstrOp() == Op::SetWithRefRM;
+  const bool isSetWithRef = env.op == Op::SetWithRefLM ||
+                            env.op == Op::SetWithRefRM;
 
   BlockPusher bp(env.irb, env.marker, env.failedSetBlock);
   gen(env, BeginCatch);
@@ -1961,9 +1966,9 @@ void emitMPost(MTS& env) {
   if (env.result) {
     push(env, env.result);
   } else {
-    assert(env.ni.mInstrOp() == Op::UnsetM ||
-           env.ni.mInstrOp() == Op::SetWithRefLM ||
-           env.ni.mInstrOp() == Op::SetWithRefRM);
+    assert(env.op == Op::UnsetM ||
+           env.op == Op::SetWithRefLM ||
+           env.op == Op::SetWithRefRM);
   }
 
   cleanTvRefs(env);
@@ -1971,13 +1976,13 @@ void emitMPost(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void implMInstr(HTS& hts) {
+void implMInstr(HTS& hts, Op effectiveOp) {
   if (curFunc(hts)->isPseudoMain()) {
     interpOne(hts, *hts.currentNormalizedInstruction);
     return;
   }
 
-  auto env = MTS { hts };
+  auto env = MTS { hts, effectiveOp };
   numberStackInputs(env); // Assign stack slots to our stack inputs
   emitMPre(env);          // Emit the base and every intermediate op
   emitFinalMOp(env);      // Emit the final operation
@@ -1988,18 +1993,23 @@ void implMInstr(HTS& hts) {
 
 }
 
-void emitBindM(HTS& env, int)                 { implMInstr(env); }
-void emitCGetM(HTS& env, int)                 { implMInstr(env); }
-void emitEmptyM(HTS& env, int)                { implMInstr(env); }
-void emitFPassM(HTS& env, int32_t, int)       { implMInstr(env); }
-void emitIncDecM(HTS& env, IncDecOp, int)     { implMInstr(env); }
-void emitIssetM(HTS& env, int)                { implMInstr(env); }
-void emitSetM(HTS& env, int)                  { implMInstr(env); }
-void emitSetOpM(HTS& env, SetOpOp, int)       { implMInstr(env); }
-void emitSetWithRefLM(HTS& env, int, int32_t) { implMInstr(env); }
-void emitSetWithRefRM(HTS& env, int)          { implMInstr(env); }
-void emitUnsetM(HTS& env, int)                { implMInstr(env); }
-void emitVGetM(HTS& env, int)                 { implMInstr(env); }
+void emitBindM(HTS& env, int)                 { implMInstr(env, Op::BindM); }
+void emitCGetM(HTS& env, int)                 { implMInstr(env, Op::CGetM); }
+void emitEmptyM(HTS& env, int)                { implMInstr(env, Op::EmptyM); }
+void emitIncDecM(HTS& env, IncDecOp, int)     { implMInstr(env, Op::IncDecM); }
+void emitIssetM(HTS& env, int)                { implMInstr(env, Op::IssetM); }
+void emitSetM(HTS& env, int)                  { implMInstr(env, Op::SetM); }
+void emitSetOpM(HTS& env, SetOpOp, int)       { implMInstr(env, Op::SetOpM); }
+void emitUnsetM(HTS& env, int)                { implMInstr(env, Op::UnsetM); }
+void emitVGetM(HTS& env, int)                 { implMInstr(env, Op::VGetM); }
+
+void emitSetWithRefLM(HTS& env, int, int32_t) {
+  implMInstr(env, Op::SetWithRefLM);
+}
+
+void emitSetWithRefRM(HTS& env, int) {
+  implMInstr(env, Op::SetWithRefRM);
+}
 
 //////////////////////////////////////////////////////////////////////
 

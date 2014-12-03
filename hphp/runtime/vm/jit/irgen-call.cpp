@@ -795,6 +795,14 @@ void emitFPassR(HTS& env, int32_t argNum) {
   implUnboxR(env);
 }
 
+void emitFPassM(HTS& env, int32_t, int x) {
+  if (env.currentNormalizedInstruction->preppedByRef) {
+    emitVGetM(env, x);
+  } else {
+    emitCGetM(env, x);
+  }
+}
+
 void emitUnboxR(HTS& env) { implUnboxR(env); }
 
 void emitFPassV(HTS& env, int32_t argNum) {

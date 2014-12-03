@@ -143,13 +143,15 @@ std::string MySQL::GetHash(const String& host, int port, const String& socket,
   return std::string(buf);
 }
 
+namespace {
+thread_local PersistentResourceStore<std::string,MySQL*> s_connections;
+}
+
 MySQL *MySQL::GetCachedImpl(const String& host, int port,
                             const String& socket, const String& username,
                             const String& password, int client_flags) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  return dynamic_cast<MySQL*>(
-    g_persistentResources->get(mysqlExtension::PersistentType, key)
-  );
+  return s_connections.get(key);
 }
 
 void MySQL::SetCachedImpl(const String& host, int port,
@@ -157,7 +159,11 @@ void MySQL::SetCachedImpl(const String& host, int port,
                           const String& password, int client_flags,
                           MySQL *conn) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  g_persistentResources->set(mysqlExtension::PersistentType, key, conn);
+  s_connections.set(key, conn);
+}
+
+size_t MySQL::NumCachedConnections() {
+  return s_connections.getMap().size();
 }
 
 MySQL *MySQL::GetDefaultConn() {

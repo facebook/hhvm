@@ -240,7 +240,6 @@ public:
   // This is special and doesn't use DECLARE_RESOURCE_ALLOCATION because it has
   // to live across requests. It is also the weirdest SweepableResourceData
   // as it can't use any PHP objects and deletes itself during sweep().
-  static const std::string PersistentKey;
 
   enum SupportedMethod {
     MethodCloser,

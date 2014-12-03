@@ -96,6 +96,9 @@ private:
                             int client_flags, MySQL* conn);
 
 public:
+  static size_t NumCachedConnections();
+
+public:
   MySQL(const char *host, int port, const char *username,
         const char *password, const char *database,
         MYSQL* raw_connection = nullptr);

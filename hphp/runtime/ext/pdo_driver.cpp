@@ -66,8 +66,6 @@ PDOConnection *PDODriver::createConnection(const String& datasource,
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
 
-const std::string PDOConnection::PersistentKey = "pdo_connection";
-
 PDOConnection::PDOConnection()
     : is_persistent(0), auto_commit(0), is_closed(0), alloc_own_columns(0),
       in_txn(0), max_escaped_char_length(0), oracle_nulls(0), stringify(0),

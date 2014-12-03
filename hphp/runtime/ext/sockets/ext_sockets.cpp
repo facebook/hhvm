@@ -1310,7 +1310,9 @@ void HHVM_FUNCTION(socket_clear_error,
 ///////////////////////////////////////////////////////////////////////////////
 // fsock: treating sockets as "file"
 
-static const std::string s_persistent_type = "socket";
+namespace {
+PersistentResourceStore<std::string,Socket*> s_sockets;
+}
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent) {
@@ -1320,9 +1322,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   if (persistent) {
     key = hosturl.getHostURL() + ":" +
           folly::to<std::string>(hosturl.getPort());
-    Socket *sock = dynamic_cast<Socket*>(
-      g_persistentResources->get(s_persistent_type, key)
-    );
+    Socket *sock = s_sockets.get(key);
     if (sock) {
       if (sock->getError() == 0 && sock->checkLiveness()) {
         return Resource(sock);
@@ -1331,7 +1331,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
       // socket had an error earlier, we need to close it, remove it from
       // persistent storage, and create a new one (in that order)
       sock->close();
-      g_persistentResources->remove(s_persistent_type, key);
+      s_sockets.remove(key);
     }
   }
 
@@ -1349,7 +1349,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
   if (persistent) {
     assert(!key.empty());
-    g_persistentResources->set(s_persistent_type, key, ret.getTyped<Socket>());
+    s_sockets.set(key, ret.getTyped<Socket>());
   }
 
   return ret;

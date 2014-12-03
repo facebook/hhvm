@@ -928,6 +928,10 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
+namespace {
+thread_local PersistentResourceStore<std::string,PDOConnection*> s_connections;
+}
+
 const StaticString s_PDO("PDO");
 
 static void HHVM_METHOD(PDO, __construct, const String& dsn,
@@ -1009,10 +1013,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     if (is_persistent) {
       shashkey = hashkey.detach();
       /* let's see if we have one cached.... */
-      data->m_dbh = dynamic_cast<PDOConnection*>(
-        g_persistentResources->get(PDOConnection::PersistentKey,
-                                   shashkey.toCppString())
-      );
+      data->m_dbh = s_connections.get(shashkey.toCppString());
 
       if (data->m_dbh.get()) {
         data->m_dbh->persistentRestore();
@@ -1068,8 +1069,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
   } else if (data->m_dbh.get()) {
     if (is_persistent) {
       assert(!shashkey.empty());
-      g_persistentResources->set(PDOConnection::PersistentKey,
-                                 shashkey.toCppString(), data->m_dbh.get());
+      s_connections.set(shashkey.toCppString(), data->m_dbh.get());
       s_pdo_request_data->m_persistent_connections.insert(data->m_dbh.get());
     }
 

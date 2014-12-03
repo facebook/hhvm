@@ -43,7 +43,6 @@ public:
   virtual int debuggerSupport();
   virtual void debuggerInfo(InfoVec &info);
 
-  static const std::string PersistentType;
   static bool ReadOnly;
 #ifdef FACEBOOK
   static bool Localize;

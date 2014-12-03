@@ -1047,14 +1047,13 @@ int mysqlExtension::MaxRetryOpenOnFail = 1;
 int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
 bool mysqlExtension::TypedResults = true;
-const std::string mysqlExtension::PersistentType = "mysql::persistent_conns";
 
 int mysqlExtension::debuggerSupport() {
   return SupportInfo;
 }
 
 void mysqlExtension::debuggerInfo(InfoVec &info) {
-  auto count = g_persistentResources->getMap(PersistentType).size();
+  auto count = MySQL::NumCachedConnections();
   Add(info, "Persistent", FormatNumber("%" PRId64, count));
   AddServerStats(info, "sql.conn"       );
   AddServerStats(info, "sql.reconn_new" );

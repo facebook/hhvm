@@ -20,6 +20,7 @@
 #include "hphp/util/disasm.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/llvm-locrecs.h"
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/reserved-stack.h"
@@ -266,6 +267,12 @@ void registerGlobalSymbol(const std::string& name, uint64_t address) {
  * TC. Currently all code goes into the Main code block.
  */
 struct TCMemoryManager : public llvm::RTDyldMemoryManager {
+
+  struct SectionInfo {
+    std::unique_ptr<uint8_t[]> data;
+    size_t size;
+  };
+
   explicit TCMemoryManager(Vasm::AreaList& areas)
     : m_areas(areas)
   {
@@ -300,8 +307,9 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
            " alignment={}\n",
            IsReadOnly ? "read-only" : "read-write",
            SectionName.str(), SectionID, data.get(), Size, Alignment);
-    return m_data.emplace(SectionName.str(),
-                          std::move(data)).first->second.get();
+    auto it = m_dataSections.emplace(SectionName.str(),
+                                     SectionInfo({std::move(data), Size}));
+    return it.first->second.data.get();
   }
 
   virtual void reserveAllocationSpace(uintptr_t CodeSize,
@@ -335,18 +343,19 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return element == globalSymbols.end() ? 0 : element->second;
   }
 
-  const uint8_t* getDataSection(const std::string& name) const {
-    return m_data.at(name).get();
+  const SectionInfo* getDataSection(const std::string& name) const {
+    auto it = m_dataSections.find(name);
+    return (it == m_dataSections.end()) ? nullptr : &it->second;
   }
 
   bool hasDataSection(const std::string& name) const {
-    return m_data.count(name);
+    return m_dataSections.count(name);
   }
 
 private:
   Vasm::AreaList& m_areas;
 
-  std::unordered_map<std::string, std::unique_ptr<uint8_t[]>> m_data;
+  std::unordered_map<std::string, SectionInfo> m_dataSections;
 };
 
 /*
@@ -523,6 +532,7 @@ struct LLVMEmitter {
     fpm->add(llvm::createReassociatePass());
     fpm->add(llvm::createGVNPass());
     fpm->add(llvm::createCFGSimplificationPass());
+    fpm->add(llvm::createTailCallEliminationPass());
     fpm->doInitialization();
 
     for (auto it = m_module->begin(); it != m_module->end(); ++it) {
@@ -535,46 +545,49 @@ struct LLVMEmitter {
     ee->setProcessAllSections(true);
     ee->finalizeObject();
 
-    // Now that codegen is done, we need to parse the stack map and
+    // Now that codegen is done, we need to parse location records and
     // gcc_except_table sections and update our own metadata.
-    static auto constexpr kStackMapsSection = ".llvm_stackmaps";
-    static auto constexpr kExceptSection = ".gcc_except_table";
+    uint8_t* funcStart =
+      static_cast<uint8_t*>(ee->getPointerToFunction(m_function));
 
-    if (tcMM->hasDataSection(kStackMapsSection)) {
-      auto const maps = parseStackMaps(tcMM->getDataSection(kStackMapsSection));
-      FTRACE(2, "LLVM stackmaps:\n{}", show(maps));
-      always_assert(maps.stkSizeRecords.size() == 1);
-      auto const funcStart = maps.stkSizeRecords.front().funcAddr;
+    if (auto secLocRefs = tcMM->getDataSection(".llvm_locrecs")) {
+      auto const recs = parseLocRecs(secLocRefs->data.get(),
+                                     secLocRefs->size);
+      FTRACE(2, "LLVM experimental locrecs:\n{}", show(recs));
+      processFixups(recs, funcStart);
+    }
 
-      processFixups(maps, funcStart);
-
-      if (tcMM->hasDataSection(kExceptSection)) {
-        auto const ehInfos =
-          parse_gcc_except_table(tcMM->getDataSection(kExceptSection));
-        processEHInfos(ehInfos, funcStart);
-      }
-    } else if (tcMM->hasDataSection(kExceptSection)) {
-      always_assert(false &&
-                    "Exception table with no stackmaps to get function "
-                    "start address");
+    if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
+      auto const ehInfos = parse_gcc_except_table(secGEH->data.get());
+      processEHInfos(ehInfos, funcStart);
     }
   }
 
   /*
-   * For each entry in m_fixups, find its corresponding stack map entry, find
+   * For each entry in m_fixups, find its corresponding locrec entry, find
    * the actual call instruction, and register the fixup.
    */
-  void processFixups(const StackMaps& maps, uint8_t* funcStart) {
+  void processFixups(const LocRecs& recs, uint8_t* funcStart) {
+    auto it = recs.functionRecords.find(funcStart);
+    if (it == recs.functionRecords.end()) return;
+    auto const& funcRec = it->second;
     for (auto& fix : m_fixups) {
-      auto const mapStart = funcStart + maps.records.at(fix.id).offset;
-      auto ip = mapStart;
+      auto it = funcRec.records.find(fix.id);
+      always_assert(it != funcRec.records.end() && "locrec not found");
+      auto index = it->second;
+      uint8_t* ip;
       while (true) {
+        ip = funcStart + funcRec.locationRecords[index].offset;
         DecodedInstruction di(ip);
-        ip += di.size();
         if (di.isCall()) break;
+        ++index;
+        always_assert(index < funcRec.locationRecords.size() &&
+                      funcRec.locationRecords[index].id == fix.id &&
+                      "call instruction cannot be found");
       }
-      FTRACE(2, "From stackmap at {}, afterCall for fixup = {}\n",
-             mapStart, ip);
+      ip += funcRec.locationRecords[index].size;
+
+      FTRACE(2, "From locrec at {}, afterCall for fixup = {}\n", index, ip);
       mcg->recordSyncPoint(ip, fix.fixup.pcOffset, fix.fixup.spOffset);
     }
   }
@@ -874,7 +887,6 @@ VASM_OPCODES
   llvm::Function* m_llvmFrameAddress{nullptr};
   llvm::Function* m_llvmReadRegister{nullptr};
   llvm::Function* m_llvmReturnAddress{nullptr};
-  llvm::Function* m_llvmStackmap{nullptr};
 
   // Vreg -> RegInfo map
   jit::vector<RegInfo> m_valueInfo;
@@ -887,9 +899,9 @@ VASM_OPCODES
   // Pending Fixups that must be processed after codegen
   jit::vector<LLVMFixup> m_fixups;
 
-  // The next id to use for a stackmap or patchpoint instruction. These ids
-  // only need to be unique within this translation unit.
-  uint64_t m_nextStackmap{0};
+  // The next id to use for LLVM location record. These IDs only have to
+  // be unique within the function.
+  uint32_t m_nextLocRec{1};
 
   const Vunit& m_unit;
   Vasm::AreaList& m_areas;
@@ -1345,25 +1357,6 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
                           uintptr_t(call.address()));
   }
 
-  if (fixup.isValid()) {
-    if (!m_llvmStackmap) {
-      m_llvmStackmap = llvm::Function::Create(
-        llvm::FunctionType::get(
-          m_irb.getVoidTy(),
-          std::vector<llvm::Type*>({m_int64, m_int32}),
-          true
-        ),
-        llvm::Function::ExternalLinkage,
-        "llvm.experimental.stackmap",
-        m_module.get()
-      );
-    }
-
-    auto id = m_nextStackmap++;
-    m_fixups.emplace_back(LLVMFixup{id, fixup});
-    m_irb.CreateCall2(m_llvmStackmap, cns(id), m_int32Zero);
-  }
-
   llvm::Instruction* callInst = nullptr;
   if (is_vcall) {
     auto call = m_irb.CreateCall(funcPtr, args);
@@ -1378,6 +1371,14 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     // The result can only be used on normal path. The unwind branch cannot
     // access return values.
     m_irb.SetInsertPoint(normal);
+  }
+
+  // Record location of the call/invoke instruction.
+  if (fixup.isValid()) {
+    auto id = m_nextLocRec++;
+    m_fixups.emplace_back(LLVMFixup{id, fixup});
+    callInst->setMetadata(llvm::LLVMContext::MD_locrec,
+                          llvm::MDNode::get(m_context, cns(id)));
   }
 
   // Extract value(s) from the call.

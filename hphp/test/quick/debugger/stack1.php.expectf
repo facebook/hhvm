@@ -188,8 +188,8 @@ where
 #8  include ("")
     at :1
 variable
-$y = 1
 $x = 3
+$y = 1
 $this = cls Object
 (
 )

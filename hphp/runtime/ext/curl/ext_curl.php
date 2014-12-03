@@ -220,6 +220,10 @@ function curl_multi_remove_handle(resource $mh,
 function curl_multi_select(resource $mh,
                            float $timeout = 1.0): ?int;
 
+<<__Native>>
+async function curl_multi_await(resource $mh,
+                                float $timeout = 1.0): Awaitable<int>;
+
 /**
  * Set multiple options for a cURL transfer
  *

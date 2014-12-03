@@ -70,7 +70,7 @@ ArrayIter::ArrayIter(const Object& obj) {
   objInit<true>(obj.get());
 }
 
-ArrayIter::ArrayIter(const Cell& c) {
+ArrayIter::ArrayIter(const Cell c) {
   cellInit(c);
 }
 
@@ -203,7 +203,7 @@ void ArrayIter::objInit(ObjectData* obj) {
   initFuncTable[getCollectionType()](this, obj);
 }
 
-void ArrayIter::cellInit(const Cell& c) {
+void ArrayIter::cellInit(const Cell c) {
   assert(cellIsPlausible(c));
   if (LIKELY(c.m_type == KindOfArray)) {
     arrInit(c.m_data.parr);

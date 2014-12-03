@@ -164,7 +164,7 @@ public:
     return gen;
   }
 
-  void yield(Offset resumeOffset, const Cell* key, const Cell& value);
+  void yield(Offset resumeOffset, const Cell* key, Cell value);
   void ret() { done(); }
   void fail() { done(); }
 

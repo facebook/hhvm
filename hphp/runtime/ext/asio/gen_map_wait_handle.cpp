@@ -79,7 +79,8 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
 
     if (child->isSucceeded()) {
       auto k = deps->iter_key(iter_pos);
-      deps->set(k.asCell(), &child->getResult());
+      auto result = child->getResult();
+      deps->set(k.asCell(), &result);
     } else if (child->isFailed()) {
       putException(exception, child->getException());
     } else {
@@ -142,7 +143,8 @@ void c_GenMapWaitHandle::onUnblocked() {
 
     if (child->isSucceeded()) {
       auto k = m_deps->iter_key(m_iterPos);
-      m_deps->set(k.asCell(), &child->getResult());
+      auto result = child->getResult();
+      m_deps->set(k.asCell(), &result);
     } else if (child->isFailed()) {
       putException(m_exception, child->getException());
     } else {

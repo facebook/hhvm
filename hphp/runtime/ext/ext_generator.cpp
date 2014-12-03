@@ -142,7 +142,7 @@ c_Generator *c_Generator::Clone(ObjectData* obj) {
 }
 
 void c_Generator::yield(Offset resumeOffset,
-                        const Cell* key, const Cell& value) {
+                        const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 

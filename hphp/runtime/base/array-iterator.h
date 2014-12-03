@@ -94,7 +94,7 @@ struct ArrayIter {
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   explicit ArrayIter(const Object& obj);
-  explicit ArrayIter(const Cell& c);
+  explicit ArrayIter(Cell);
   explicit ArrayIter(const Variant& v);
 
   // Copy ctor
@@ -297,7 +297,7 @@ private:
   template <bool incRef>
   void objInit(ObjectData* obj);
 
-  void cellInit(const Cell& c);
+  void cellInit(Cell);
 
   static void VectorInit(ArrayIter* iter, ObjectData* obj);
   static void MapInit(ArrayIter* iter, ObjectData* obj);

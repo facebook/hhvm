@@ -114,7 +114,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }
-  const Cell& getResult() const {
+  Cell getResult() const {
     assert(isSucceeded());
     return m_resultOrException;
   }

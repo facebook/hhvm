@@ -1554,7 +1554,7 @@ class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
  */
 class BaseSet : public HashCollection {
  public:
-  void addAllKeysOf(const Cell& container);
+  void addAllKeysOf(Cell container);
   void addAll(const Variant& t);
 
   void init(const Variant& t);

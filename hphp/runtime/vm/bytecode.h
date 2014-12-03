@@ -885,7 +885,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void replaceC(const Cell& c) {
+  void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
     tvRefcountedDecRefCell(m_top);

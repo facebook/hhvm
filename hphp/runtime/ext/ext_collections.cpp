@@ -3626,7 +3626,7 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 
 // Public
 
-void BaseSet::addAllKeysOf(const Cell& container) {
+void BaseSet::addAllKeysOf(const Cell container) {
   assert(isContainer(container));
 
   auto sz = getContainerSize(container);

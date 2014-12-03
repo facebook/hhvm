@@ -1497,7 +1497,7 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
   stack.popAR();
 }
 
-static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
+static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
                                                Stack& stack, int nregular) {
   assert(ar != nullptr && ar->hasInvName());
   assert(!cellIsNull(&args));
@@ -1569,7 +1569,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell&args,
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
 // params precede the unpack.
-static bool prepareArrayArgs(ActRec* ar, const Cell& args,
+static bool prepareArrayArgs(ActRec* ar, const Cell args,
                              Stack& stack,
                              int nregular,
                              bool doCufRefParamChecks,
@@ -2228,7 +2228,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
-                                       const Cell& awaitResult) {
+                                       const Cell awaitResult) {
   assert(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assert(tl_regState == VMRegState::CLEAN); };
 
@@ -6987,7 +6987,7 @@ OPTBLD_INLINE void ExecutionContext::iopContRaise(IOP_ARGS) {
 
 OPTBLD_INLINE void ExecutionContext::yield(IOP_ARGS,
                                            const Cell* key,
-                                           const Cell& value) {
+                                           const Cell value) {
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const resumeOffset = func->unit()->offsetOf(pc);

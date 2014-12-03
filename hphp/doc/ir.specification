@@ -1926,7 +1926,7 @@ generating efficient compare-and-branch instruction sequences.
 
 | CreateSSWH, D(Obj), S(Cell), CRc|PRc
 
-  Call c_StaticWaitHandle::CreateSucceededVM.
+  Call c_StaticWaitHandle::CreateSucceeded.
 
 | AFWHPrepareChild, ND, S(FramePtr) S(Obj), E|Er
 

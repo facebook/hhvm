@@ -72,8 +72,7 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
 {
   m_state.setBuilding();
   if (RuntimeOption::EvalHHIRGenOpts) {
-    m_enableCse = RuntimeOption::EvalHHIRCse &&
-      !RuntimeOption::EvalHHIRBytecodeControlFlow;
+    m_enableCse = false; // CSE is disabled at gen time.
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
 

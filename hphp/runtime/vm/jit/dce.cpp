@@ -225,7 +225,7 @@ bool findWeakActRecUses(const BlockList& blocks,
      *   o We're not calling a native function.
      *
      *   o The callee must already have a translation for the prologue
-     *     we need (has knownPrologue).
+     *     we need.
      *
      *   o There's only one Call instruction depending on this frame.
      *
@@ -241,31 +241,11 @@ bool findWeakActRecUses(const BlockList& blocks,
      * The other limits are just conservative while this was being
      * developed.
      *
-     * Important: Right now all of this is disabled in
-     * hhbc-translator, because the knownPrologue mechanism is buggy.
-     * So we'll never have a knownPrologue here.  TODO(#4357498).
+     * Important: Right now all of this is disabled
+     * because the knownPrologue mechanism was buggy.
+     * So we'll never have a known prologue here.  TODO(#4357498).
      */
     case Call:
-      {
-        auto const extra  = inst->extra<Call>();
-        if (!extra->callee ||
-            isNativeImplCall(extra->callee, extra->numParams) ||
-            !inst->extra<Call>()->knownPrologue) {
-          break;
-        }
-        if (inst->marker().func()->findEH(inst->marker().bcOff())) {
-          FTRACE(2, "strong due to EH: {}\n", inst->toString());
-          break;
-        }
-        auto const frameInst = inst->src(1)->inst();
-        if (frameInst->is(DefInlineFP)) {
-          // See above about the limit to 1.
-          if (callCounts[inst->src(1)->inst()]++ < 1) {
-            ITRACE(3, "weak use of {} from {}\n", *frameInst->dst(), *inst);
-            state[frameInst].incWeakUse();
-          }
-        }
-      }
       break;
 
     case InlineReturn:

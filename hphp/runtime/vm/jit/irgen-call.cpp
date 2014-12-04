@@ -972,22 +972,6 @@ void emitFCall(HTS& env, int32_t numParams) {
    * code there needs to delay adding these smash locations until after we know
    * the translation isn't punted.
    */
-  auto const knownPrologue = [&]() -> TCA {
-    if (false) {
-      if (!callee || callee->isMagic()) return nullptr;
-      auto const prologueIndex =
-        numParams <= callee->numNonVariadicParams()
-          ? numParams
-          : callee->numNonVariadicParams() + 1;
-      TCA ret;
-      if (!mcg->checkCachedPrologue(callee, prologueIndex, ret)) {
-        return nullptr;
-      }
-      return ret;
-    }
-    return nullptr;
-  }();
-
   auto const stack = spillStack(env);
   gen(
     env,
@@ -996,8 +980,7 @@ void emitFCall(HTS& env, int32_t numParams) {
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
-      destroyLocals,
-      knownPrologue
+      destroyLocals
     },
     stack,
     fp(env)

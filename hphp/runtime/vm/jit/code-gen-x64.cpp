@@ -3236,46 +3236,17 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto const extra = inst->extra<Call>();
   auto const rSP   = srcLoc(inst, 0).reg();
   auto const rFP   = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-
-  auto const ar = extra->numParams * sizeof(TypedValue);
-  v << store{rFP, rSP[ar + AROFF(m_sfp)]};
-  v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
-
-  if (extra->knownPrologue) {
-    assert(extra->callee);
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      auto const off = cellsToBytes(extra->numParams) + AROFF(m_savedRip);
-      emitImmStoreq(v, 0xff00ff00b00b00d0, rSP[off]);
-    }
-    v << lea{rSP[cellsToBytes(extra->numParams)], rStashedAR};
-    /*
-     * Normally there's no need to prepare for smash if this is a live
-     * or optimized translation, since we know where we are going.
-     *
-     * However, if we're going to a profiling prologue, we want it to
-     * be smashable later, so we need to tell the profiling module
-     * about this and prepare for smashing the call.
-     */
-    if (mcg->code.prof().contains(extra->knownPrologue)) {
-      auto const calleeNumParams = extra->callee->numNonVariadicParams();
-      auto const prologIndex =
-        extra->numParams <= calleeNumParams ? extra->numParams
-                                            : calleeNumParams + 1;
-      v << kpcall{extra->knownPrologue, extra->callee, prologIndex,
-                  kCrossCallRegs};
-    } else {
-      v << call{extra->knownPrologue, kCrossCallRegs};
-    }
-    return;
-  }
-
   auto const srcKey = inst->marker().sk();
+  auto const extra  = inst->extra<Call>();
   auto const callee = extra->callee;
   auto const argc = extra->numParams;
+  auto& v = vmain();
+
+  auto const ar = argc * sizeof(TypedValue);
+  v << store{rFP, rSP[ar + AROFF(m_sfp)]};
+  v << storeli{safe_cast<int32_t>(extra->after), rSP[ar + AROFF(m_soff)]};
   v << syncvmfp{rFP};
   v << syncvmsp{rSP};
   if (isNativeImplCall(callee, argc)) {

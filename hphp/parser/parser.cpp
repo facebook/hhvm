@@ -95,7 +95,7 @@ std::string ParserBase::getMessage(Location *loc,
 }
 
 LocationPtr ParserBase::getLocation() const {
-  LocationPtr location(new Location());
+  auto location = std::make_shared<Location>();
   location->file  = file();
   location->line0 = line0();
   location->char0 = char0();

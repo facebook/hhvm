@@ -1,0 +1,2 @@
+
+Fatal error: Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]]) in %s/ctor_invalid_code_string.php on line 3

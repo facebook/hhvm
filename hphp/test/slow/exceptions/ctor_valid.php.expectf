@@ -1,0 +1,40 @@
+Paramless
+string(0) ""
+int(0)
+Defaults
+string(0) ""
+int(0)
+String message
+string(4) "test"
+int(0)
+Integer message
+string(2) "42"
+int(0)
+Float message
+string(5) "42.42"
+int(0)
+Boolean message
+string(1) "1"
+int(0)
+Null message
+string(0) ""
+int(0)
+__toString message
+string(3) "arg"
+int(0)
+Integer code
+string(4) "test"
+int(42)
+Float code
+string(4) "test"
+int(42)
+Boolean code
+string(4) "test"
+int(1)
+Null code
+string(4) "test"
+int(0)
+Previous
+string(4) "test"
+int(42)
+bool(true)

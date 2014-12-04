@@ -101,7 +101,7 @@ void profiledGuard(HTS& env,
     not_reached();
   }();
   TargetProfile<StrProfile> profile(env.context,
-                                    env.irb->nextMarker(),
+                                    env.irb->curMarker(),
                                     profileKey);
 
   if (profile.profiling()) {

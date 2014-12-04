@@ -64,7 +64,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
-  , m_nextMarker(initMarker)
+  , m_curMarker(initMarker)
   , m_state(m_unit, initMarker)
   , m_curBlock(m_unit.entry())
   , m_enableSimplification(false)
@@ -188,7 +188,7 @@ void IRBuilder::appendBlock(Block* block) {
 
   FTRACE(2, "appending B{}\n", block->id());
   // Load up the state for the new block.
-  m_state.startBlock(block, m_nextMarker);
+  m_state.startBlock(block, m_curMarker);
   m_curBlock = block;
 }
 
@@ -674,7 +674,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 void IRBuilder::prepareForNextHHBC() {
   assert(
     spOffset() + m_state.evalStack().size() - m_state.stackDeficit() ==
-    m_nextMarker.spOff()
+    m_curMarker.spOff()
   );
   m_exnStack = ExnStackState {
     m_state.stackDeficit(),
@@ -689,7 +689,7 @@ void IRBuilder::exceptionStackBoundary() {
   // trace that the unwinder won't be able to see.
   assert(
     spOffset() + m_state.evalStack().size() - m_state.stackDeficit() ==
-    m_nextMarker.spOff()
+    m_curMarker.spOff()
   );
   m_exnStack.stackDeficit = m_state.stackDeficit();
   m_exnStack.evalStack = m_state.evalStack();
@@ -784,7 +784,7 @@ SSATmp* IRBuilder::prepareInst(IRInstruction* inst) {
     inst->setTaken(
       m_catchCreator
         ? m_catchCreator()
-        : create_catch_block(*this, m_exnStack, m_nextMarker)
+        : create_catch_block(*this, m_exnStack, m_curMarker)
     );
   }
 
@@ -875,7 +875,7 @@ void IRBuilder::reoptimize() {
       // m_nextMarker to decide where they are. Use the marker from this
       // instruction.
       assert(inst->marker().valid());
-      setNextMarker(inst->marker());
+      setCurMarker(inst->marker());
 
       auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
       SSATmp* dst = inst->dst(0);
@@ -1223,13 +1223,13 @@ SSATmp* IRBuilder::localValue(uint32_t id, TypeConstraint tc) {
   return m_state.localValue(id);
 }
 
-void IRBuilder::setNextMarker(BCMarker newMarker) {
-  if (newMarker == m_nextMarker) return;
+void IRBuilder::setCurMarker(BCMarker newMarker) {
+  if (newMarker == m_curMarker) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         m_nextMarker.valid() ? m_nextMarker.show() : "<invalid>",
+         m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
          newMarker.show());
   assert(newMarker.valid());
-  m_nextMarker = newMarker;
+  m_curMarker = newMarker;
 }
 
 bool IRBuilder::startBlock(Block* block, const BCMarker& marker,
@@ -1288,16 +1288,16 @@ void IRBuilder::setBlock(Offset offset, Block* block) {
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, m_nextMarker.show(), b, marker.show());
+         m_curBlock, m_curMarker.show(), b, marker.show());
   assert(b);
 
   m_savedBlocks.push_back(
-    BlockState { m_curBlock, m_nextMarker, m_exnStack, m_catchCreator }
+    BlockState { m_curBlock, m_curMarker, m_exnStack, m_catchCreator }
   );
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, marker);
   m_curBlock = b;
-  setNextMarker(marker);
+  m_curMarker = marker;
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {
@@ -1312,11 +1312,11 @@ void IRBuilder::popBlock() {
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, m_nextMarker.show(), top.block, top.marker.show());
+         m_curBlock, m_curMarker.show(), top.block, top.marker.show());
   m_state.finishBlock(m_curBlock);
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
-  setNextMarker(top.marker);
+  m_curMarker = top.marker;
   m_exnStack = top.exnStack;
   m_catchCreator = top.catchCreator;
   m_savedBlocks.pop_back();

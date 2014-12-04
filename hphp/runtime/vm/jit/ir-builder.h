@@ -85,7 +85,7 @@ struct IRBuilder {
    * Updates the marker used for instructions generated without one
    * supplied.
    */
-  void setNextMarker(BCMarker);
+  void setCurMarker(BCMarker);
 
   /*
    * Called before we start lowering each bytecode instruction.  Right now all
@@ -121,7 +121,7 @@ struct IRBuilder {
    * You can keep using them until we find time to remove them.
    */
   IRUnit& unit() const { return m_unit; }
-  BCMarker nextMarker() const { return m_nextMarker; }
+  BCMarker curMarker() const { return m_curMarker; }
   const Func* curFunc() const { return m_state.func(); }
   int32_t spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
@@ -220,7 +220,7 @@ public:
    */
   template<class... Args>
   SSATmp* gen(Opcode op, Args&&... args) {
-    return gen(op, m_nextMarker, std::forward<Args>(args)...);
+    return gen(op, m_curMarker, std::forward<Args>(args)...);
   }
 
   template<class... Args>
@@ -315,7 +315,7 @@ public:
     gen(Jmp, done_block, v2);
 
     appendBlock(done_block);
-    IRInstruction* label = m_unit.defLabel(1, m_nextMarker, {producedRefs});
+    IRInstruction* label = m_unit.defLabel(1, m_curMarker, {producedRefs});
     done_block->push_back(label);
     SSATmp* result = label->dst(0);
     result->setType(Type::unionOf(v1->type(), v2->type()));
@@ -500,14 +500,14 @@ private:
 private:
   IRUnit& m_unit;
   BCMarker m_initialMarker;
-  BCMarker m_nextMarker;
+  BCMarker m_curMarker;
   FrameStateMgr m_state;
   CSEHash m_cseHash;
   bool m_enableCse{false};
 
   /*
    * m_savedBlocks will be nonempty iff we're emitting code to a block other
-   * than the main block. m_nextMarker, and m_curBlock are all set from the
+   * than the main block. m_curMarker, and m_curBlock are all set from the
    * most recent call to pushBlock() or popBlock().
    */
   jit::vector<BlockState> m_savedBlocks;

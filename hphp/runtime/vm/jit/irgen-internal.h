@@ -91,7 +91,7 @@ inline BCMarker makeMarker(HTS& env, Offset bcOff) {
 }
 
 inline void updateMarker(HTS& env) {
-  env.irb->setNextMarker(makeMarker(env, bcOff(env)));
+  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
 }
 
 //////////////////////////////////////////////////////////////////////

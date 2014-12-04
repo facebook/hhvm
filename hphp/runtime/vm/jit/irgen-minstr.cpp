@@ -1290,7 +1290,7 @@ SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
 
 void emitProfiledArrayGet(MTS& env, SSATmp* key) {
   TargetProfile<NonPackedArrayProfile> prof(env.hts.context,
-                                            env.irb.nextMarker(),
+                                            env.irb.curMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
     gen(env, ProfileArray, RDSHandleData { prof.handle() }, env.base.value);

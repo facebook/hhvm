@@ -440,7 +440,7 @@ int64_t StringUtil::CRC32(const String& input) {
 }
 
 String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
-  if (salt&&salt[0] == '\0') {
+  if (salt && salt[0] == '\0') {
     raise_notice("crypt(): No salt parameter was specified."
       " You must use a randomly generated salt and a strong"
       " hash function to produce a secure hash.");

@@ -67,7 +67,19 @@ Variant c_WaitHandle::t_join() {
     assert(instanceof(c_WaitableWaitHandle::classof()));
     static_cast<c_WaitableWaitHandle*>(this)->join();
   }
+  return result();
+}
 
+Variant c_WaitHandle::t_result() {
+  if (!isFinished()) {
+    throw Object(SystemLib::AllocInvalidOperationExceptionObject(
+      "Request for result on pending wait handle, "
+      "must await or join() before calling result()"));
+  }
+  return result();
+}
+
+Variant c_WaitHandle::result() {
   assert(isFinished());
 
   if (LIKELY(isSucceeded())) {

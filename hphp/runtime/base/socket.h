@@ -34,9 +34,8 @@ namespace HPHP {
 /**
  * TCP/UDP sockets.
  */
-class Socket : public File {
-public:
-  // We cannot use object allocation for this class, because
+struct Socket : File {
+  // We cannot use request-local allocation for this class, because
   // we need to support pfsockopen() that can make a socket persistent.
   void* operator new(size_t s) {
     return ::operator new(s);
@@ -79,22 +78,22 @@ public:
 
   std::string getAddress() const { return m_address; }
   int         getPort() const    { return m_port; }
+
+protected:
+  bool closeImpl();
+  bool waitForData();
+
+private:
+  void inferStreamType();
+
 protected:
   std::string m_address;
   int m_port;
-
   int m_type;
-  int m_error;
-
-  int m_timeout; // in micro-seconds;
-  bool m_timedOut;
-
-  int64_t m_bytesSent;
-
-  bool closeImpl();
-  bool waitForData();
-private:
-  void inferStreamType();
+  int64_t m_bytesSent{0};
+  int m_error{0};
+  int m_timeout{0}; // in micro-seconds;
+  bool m_timedOut{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

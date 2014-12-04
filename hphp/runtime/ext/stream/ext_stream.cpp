@@ -420,7 +420,7 @@ bool HHVM_FUNCTION(stream_is_local,
       raise_warning("supplied resource is not a valid stream resource");
       return false;
     }
-    return file->m_isLocal;
+    return file->isLocal();
   }
   // Zend returns true for random data types...
   return true;

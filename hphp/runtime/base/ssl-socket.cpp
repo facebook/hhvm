@@ -180,18 +180,12 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
 // constructors and destructor
 
 SSLSocket::SSLSocket()
-    : m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
-      m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
-      m_state_set(false), m_is_blocked(true) {
-}
+{}
 
 SSLSocket::SSLSocket(int sockfd, int type, const char *address /* = NULL */,
                      int port /* = 0 */)
-    : Socket(sockfd, type, address, port),
-      m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
-      m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
-      m_state_set(false), m_is_blocked(true) {
-}
+  : Socket(sockfd, type, address, port)
+{}
 
 SSLSocket::~SSLSocket() {
   SSLSocket::closeImpl();

@@ -194,13 +194,22 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   if (auto const taken = inst->taken()) {
     /*
-     * TODO(#4323657): we want to be able to make the following assertion, but
-     * it's not yet ironed out.
+     * TODO(#4323657): we should make this assertion for all non-empty blocks
+     * (exits in addition to catches).  It would fail right now for exit
+     * traces.
+     *
+     * If you hit this assertion: you've created a catch block and then
+     * modified tracked state, then generated a potentially exception-throwing
+     * instruction using that catch block as a target.  This is not allowed.
      */
-    // if (m_status == Status::Building && taken->isCatch()) {
-    //   auto const tmp = save(taken);
-    //   assert(!tmp);
-    // }
+    if (debug && m_status == Status::Building && taken->isCatch()) {
+      auto const tmp = save(taken);
+      always_assert_flog(
+        !tmp,
+        "catch block B{} had non-matching in state",
+        taken->id()
+      );
+    }
 
     // When we're building the IR, we append a conditional jump after
     // generating its target block: see emitJmpCondHelper, where we
@@ -386,6 +395,7 @@ SSATmp* FrameStateMgr::spLeavingBlock(Block* b) const {
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
                                bool isLoopHeader /* = false */) {
+  ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
   assert(m_status != Status::None);
   auto const it = m_states.find(block);
   auto const end = m_states.end();
@@ -395,18 +405,20 @@ void FrameStateMgr::startBlock(Block* block,
   assert(IMPLIES(block->numPreds() > 0, predsAllowed));
 
   if (it != end) {
+    if (m_status == Status::Building) {
+      always_assert_flog(
+        block->empty(),
+        "tried to startBlock a non-empty block while building\n"
+      );
+    }
     ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
     m_stack = it->second.in;
     if (m_stack.empty()) {
-      /*
-       * TODO(#4323657): In situations like catch or exit traces, we will call
-       * startBlock after pausing whatever block we had been working on, which
-       * will leave the catch with no in state.  And in fact we don't really
-       * know what its in-state should be because we don't have any
-       * information.  But this is pretty dangerous right now, because we're
-       * starting with things like spValue as null.
-       */
-      m_stack.push_back(FrameState{});
+      always_assert_flog(0, "invalid startBlock for B{}", block->id());
+    }
+  } else {
+    if (m_status == Status::Building) {
+      if (debug) save(block);
     }
   }
   assert(!m_stack.empty());

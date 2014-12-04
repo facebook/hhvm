@@ -170,8 +170,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("reoptimize");
   }
 
-  if (false && // TODO(#5664026)
-      kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
     doPass(optimizeLoads);
     dce("loadelim");
   }

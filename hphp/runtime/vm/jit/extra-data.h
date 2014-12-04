@@ -905,8 +905,6 @@ X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
-X(FunctionSuspendHook,          RetCtrlData);
-X(FunctionReturnHook,           RetCtrlData);
 X(LookupClsCns,                 ClsCnsName);
 X(LookupClsMethodCache,         ClsMethodData);
 X(LdClsMethodCacheFunc,         ClsMethodData);

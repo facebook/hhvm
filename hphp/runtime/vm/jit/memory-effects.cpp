@@ -124,18 +124,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Unusual instructions
 
   /*
-   * The FunctionReturnHook sets up the ActRec so the unwinder knows everything
-   * is already released (i.e. it calls ar->setLocalsDecRefd()).
+   * The ReturnHook sets up the ActRec so the unwinder knows everything is
+   * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
    * So it has no upward exposed uses of locals, even though it has a catch
    * block as a successor that looks like it can use any locals (and in fact it
    * can, if it weren't for this instruction).
    */
-  case FunctionReturnHook:
+  case ReturnHook:
     return KillFrameLocals { inst.src(0) };
 
-  // The suspend hook can load anything, but can't write to frame locals.
-  case FunctionSuspendHook:
+  // The suspend hooks can load anything (re-entering the VM), but can't write
+  // to frame locals.
+  case SuspendHookE:
+  case SuspendHookR:
     return MayLoadStore { AUnknown, ANonFrame };
 
   /*

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/irgen-ret.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
@@ -28,6 +28,19 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
+  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      gen(env, CheckSurpriseFlags, taken);
+    },
+    [&] {
+      env.irb->hint(Block::Hint::Unlikely);
+      gen(env, ReturnHook, frame, retVal);
+    }
+  );
+}
 
 void implRet(HTS& env, Type type) {
   auto const func = curFunc(env);
@@ -73,7 +86,7 @@ void implRet(HTS& env, Type type) {
     gen(env, DecRefThis, fp(env));
   }
 
-  retSurpriseCheck(env, fp(env), retVal, false);
+  retSurpriseCheck(env, fp(env), retVal);
 
   // In async function, wrap the return value into succeeded StaticWaitHandle.
   if (!resumed(env) && func->isAsyncFunction()) {
@@ -149,34 +162,6 @@ void implRet(HTS& env, Type type) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-void retSurpriseCheck(HTS& env,
-                      SSATmp* frame,
-                      SSATmp* retVal,
-                      bool suspendingResumed) {
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
-  env.irb->ifThen(
-    [&](Block* taken) {
-      gen(env, CheckSurpriseFlags, taken);
-    },
-    [&] {
-      env.irb->hint(Block::Hint::Unlikely);
-      if (retVal != nullptr) {
-        gen(env,
-            FunctionReturnHook,
-            RetCtrlData(suspendingResumed),
-            frame,
-            retVal);
-      } else {
-        gen(env,
-            FunctionSuspendHook,
-            RetCtrlData(suspendingResumed),
-            frame,
-            cns(env, suspendingResumed));
-      }
-    }
-  );
 }
 
 void emitRetC(HTS& env) {

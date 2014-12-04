@@ -19,8 +19,8 @@
 #include "hphp/runtime/ext/asio/async_generator.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
-#include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-ringbuffer.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -29,6 +29,27 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+void suspendHookImpl(HTS& env, SSATmp* frame, SSATmp* other, bool eager) {
+  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  env.irb->ifThen(
+    [&] (Block* taken) {
+      gen(env, CheckSurpriseFlags, taken);
+    },
+    [&] {
+      env.irb->hint(Block::Hint::Unlikely);
+      gen(env, eager ? SuspendHookE : SuspendHookR, frame, other);
+    }
+  );
+}
+
+void suspendHookE(HTS& env, SSATmp* frame, SSATmp* resumableAR) {
+  return suspendHookImpl(env, frame, resumableAR, true);
+}
+
+void suspendHookR(HTS& env, SSATmp* frame, SSATmp* objOrNullptr) {
+  return suspendHookImpl(env, frame, objOrNullptr, false);
+}
 
 void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   assert(curFunc(env)->isAsync());
@@ -51,11 +72,13 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
 
   auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
 
-  // Call the FunctionSuspend hook and put the AsyncFunctionWaitHandle
-  // on the stack so that the unwinder would decref it.
-  push(env, waitHandle);
+  // Call the FunctionSuspend hook.  We need put to a null on the stack in the
+  // catch trace in place of our input, since we've already shuffled that value
+  // into the heap to be owned by the waitHandle, so the unwinder can't decref
+  // it.
+  push(env, cns(env, Type::InitNull));
   env.irb->exceptionStackBoundary();
-  retSurpriseCheck(env, asyncAR, nullptr, false);
+  suspendHookE(env, fp(env), asyncAR);
   discard(env, 1);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -72,6 +95,11 @@ void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
   assert(resumed(env));
   assert(child->isA(Type::Obj));
 
+  // We must do this before we do anything, because it can throw, and we can't
+  // start tearing down the AFWH before that or the unwinder won't be able to
+  // react.
+  suspendHookR(env, fp(env), child);
+
   // Prepare child for establishing dependency.
   gen(env, AFWHPrepareChild, fp(env), child);
 
@@ -83,12 +111,6 @@ void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
 
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
-
-  // Transfer control back to the scheduler.
-  push(env, cns(env, Type::InitNull));
-  env.irb->exceptionStackBoundary();
-  retSurpriseCheck(env, fp(env), nullptr, true);
-  popC(env);
 
   auto const stack = spillStack(env);
   auto const retAddr = gen(env, LdRetAddr, fp(env));
@@ -108,7 +130,7 @@ void yieldReturnControl(HTS& env) {
 }
 
 void yieldImpl(HTS& env, Offset resumeOffset) {
-  retSurpriseCheck(env, fp(env), nullptr, true);
+  suspendHookR(env, fp(env), cns(env, Type::Nullptr));
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
@@ -180,10 +202,6 @@ void emitCreateCont(HTS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
-  // This must happen before we allocate the generator, because we don't want
-  // to have to decref it while unwinding.
-  retSurpriseCheck(env, fp(env), nullptr, false);
-
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
@@ -196,6 +214,10 @@ void emitCreateCont(HTS& env) {
         cns(env, func->numSlotsInFrame()),
         resumeAddr,
         cns(env, resumeOffset));
+
+  // The suspend hook will decref the newly created generator if it throws.
+  auto const contAR = gen(env, LdContActRec, cont);
+  suspendHookE(env, fp(env), contAR);
 
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.

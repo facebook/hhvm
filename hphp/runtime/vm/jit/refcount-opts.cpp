@@ -957,24 +957,26 @@ struct SinkPointAnalyzer : private LocalStateHook {
     } else if (m_inst == &m_block->back() && m_block->isExit() &&
                // Make sure it's not a RetCtrl from Ret{C,V}
                (!m_inst->is(RetCtrl) ||
-                m_inst->extra<RetCtrlData>()->suspendingResumed) &&
-               // The EndCatch in Function{Suspend,Return}Hook's catch block is
-               // special: it happens after locals and $this have been
-               // decreffed, so we don't want to do the normal cleanup
-               !(m_inst->is(EndCatch) &&
-                 m_block->preds().front().inst()
-                   ->is(FunctionSuspendHook, FunctionReturnHook) &&
-                 !m_block->preds().front().inst()
-                   ->extra<RetCtrlData>()->suspendingResumed)) {
-      // When leaving a trace, we need to account for all live references in
-      // locals and $this pointers.
-      consumeAllLocals();
-      consumeAllFrames();
+                m_inst->extra<RetCtrlData>()->suspendingResumed)) {
+      // The EndCatch in ReturnHook or SuspendHookE's catch block is special:
+      // it happens after locals and $this have been decreffed, so we don't
+      // want to do the normal cleanup.  (XXX: We ought to treat this as a
+      // property of the SuspendHookE and ReturnHook instructions rather than
+      // the EndCatch, but we don't right now.)
+      auto const specialCatch = [&]() -> bool {
+        if (!m_inst->is(EndCatch)) return false;
+        auto const pred = m_block->preds().front().inst();
+        return pred->is(ReturnHook, SuspendHookE);
+      }();
+      if (!specialCatch) {
+        consumeAllLocals();
+        consumeAllFrames();
+      }
     } else if (m_inst->is(GenericRetDecRefs, NativeImpl)) {
       consumeCurrentLocals();
     } else if (m_inst->is(CreateCont)) {
       always_assert(false && "CreateCont appeared in non-generator");
-    } else if (m_inst->is(CreateCont, CreateAFWH)) {
+    } else if (m_inst->is(CreateAFWH)) {
       consumeInputs();
       consumeCurrentLocals();
       auto frame = m_inst->src(0)->inst();
@@ -1069,6 +1071,15 @@ struct SinkPointAnalyzer : private LocalStateHook {
     case LdArrFuncCtx:    consumeValueAfter(inst.src(0)); break;
     case LdArrFPushCuf:   consumeValueAfter(inst.src(0)); break;
     case LdStrFPushCuf:   consumeValueAfter(inst.src(0)); break;
+    case SuspendHookE:
+      // In this situation, the suspend hook is going to decref the wait
+      // handle while it's throwing.  XXX: it's not that cool to do this by
+      // chasing a LdAFWHActRec.  (note: we also run through this codepath
+      // for continuations, but we threw NotWorthOptimizing for those.)
+      if (inst.src(1)->inst()->is(LdAFWHActRec)) {
+        consumeValue(inst.src(1)->inst()->src(0));
+      }
+      break;
     default:
       break;
     }

@@ -750,13 +750,19 @@ generating efficient compare-and-branch instruction sequences.
   Tests the implementation-specific surprise flags. If they're true, branches
   to block B.
 
-| FunctionReturnHook, ND, S(FramePtr) S(Gen), Er|E
+| ReturnHook, ND, S(FramePtr) S(Gen), Er|E
 
   Suprise flag hook for function returns.
 
-| FunctionSuspendHook, ND, S(FramePtr) C(Bool), Er|E
+| SuspendHookE, ND, S(FramePtr) S(FramePtr), Er|E
 
-  Suprise flag hook for suspending async functions.
+  Suprise flag hook for suspending eagerly executing async functions or
+  generators.
+
+| SuspendHookR, ND, S(FramePtr) S(Obj|Nullptr), Er|E
+
+  Suprise flag hook for suspending resumed async functions or generators.  For
+  generators, the second parameter should be Nullptr.
 
 | Halt, ND, NA, T|E
 

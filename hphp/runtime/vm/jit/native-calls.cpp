@@ -316,9 +316,11 @@ static CallMap s_callMap {
     {DbgAssertPtr, assertTv, DNone, SNone, {{SSA, 0}}},
 
     /* surprise flag support */
-    {FunctionSuspendHook, &EventHook::onFunctionSuspend, DNone, SSync,
+    {SuspendHookE, &EventHook::onFunctionSuspendE, DNone, SSync,
                             {{SSA, 0}, {SSA, 1}}},
-    {FunctionReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
+    {SuspendHookR, &EventHook::onFunctionSuspendR, DNone, SSync,
+                            {{SSA, 0}, {SSA, 1}}},
+    {ReturnHook,  &EventHook::onFunctionReturnJit, DNone, SSync,
                             {{SSA, 0}, {TV, 1}}},
 
     /* silence operator support */

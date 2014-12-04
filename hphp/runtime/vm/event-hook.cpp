@@ -372,25 +372,61 @@ void EventHook::onFunctionResume(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags);
 }
 
-void EventHook::onFunctionSuspend(const ActRec* ar, bool suspendingResumed) {
-  // TODO(#2329497) can't CheckSurprise() yet, unwinder frees suspended locals
-  ssize_t flags = GetConditionFlags();
-  onFunctionExit(ar, nullptr, nullptr, flags);
+// Child is the AFWH we're going to block on, nullptr iff this is a suspending
+// generator.
+void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
+  ssize_t flags = CheckSurprise();
+  onFunctionExit(suspending, nullptr, nullptr, flags);
 
-  // Async profiler
   if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
-      ar->func()->isAsyncFunction()) {
-    assert(ar->resumed());
-    auto afwh = frame_afwh(ar);
-    auto session = AsioSession::Get();
-    // Blocking await @ eager execution => AsyncFunctionWaitHandle created.
-    if (!suspendingResumed && session->hasOnResumableCreateCallback()) {
-      session->onResumableCreate(afwh, afwh->getChild());
+      suspending->func()->isAsyncFunction()) {
+    assert(child != nullptr);  // This isn't a generator
+    assert(child->instanceof(c_WaitableWaitHandle::classof()));
+    assert(suspending->resumed());
+    auto const afwh = frame_afwh(suspending);
+    auto const session = AsioSession::Get();
+    if (session->hasOnResumableAwaitCallback()) {
+      session->onResumableAwait(
+        afwh,
+        static_cast<c_WaitableWaitHandle*>(child)
+      );
     }
-    // Blocking await @ resumed execution => AsyncFunctionWaitHandle awaiting.
-    if (suspendingResumed && session->hasOnResumableAwaitCallback()) {
-      session->onResumableAwait(afwh, afwh->getChild());
+  }
+}
+
+void EventHook::onFunctionSuspendE(ActRec* suspending,
+                                   const ActRec* resumableAR) {
+  // When we're suspending an eagerly executing resumable, we've already
+  // teleported the ActRec from suspending over to resumableAR, so we need to
+  // make sure the unwinder knows not to touch the locals, $this, or
+  // VarEnv/ExtraArgs.
+  suspending->setThisOrClassAllowNull(nullptr);
+  suspending->setLocalsDecRefd();
+  suspending->setVarEnv(nullptr);
+
+  try {
+    ssize_t flags = CheckSurprise();
+    onFunctionExit(resumableAR, nullptr, nullptr, flags);
+
+    if ((flags & RequestInjectionData::AsyncEventHookFlag) &&
+        resumableAR->func()->isAsyncFunction()) {
+      assert(resumableAR->resumed());
+      auto const afwh = frame_afwh(resumableAR);
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableCreateCallback()) {
+        session->onResumableCreate(afwh, afwh->getChild());
+      }
     }
+  } catch (...) {
+    auto const resumableObj = [&]() -> ObjectData* {
+      if (resumableAR->func()->isAsyncFunction()) {
+        return frame_afwh(resumableAR);
+      }
+      assert(resumableAR->func()->isGenerator());
+      return frame_base_generator(resumableAR);
+    }();
+    decRefObj(resumableObj);
+    throw;
   }
 }
 
@@ -402,6 +438,8 @@ void EventHook::onFunctionReturn(ActRec* ar, const TypedValue& retval) {
   // The locals are already gone. Mark them as decref'd so that if this hook
   // fails and unwinder kicks in, it won't try to decref them again.
   ar->setLocalsDecRefd();
+
+  // TODO(#5758054): does this need setVarEnv(nullptr) ?
 
   ssize_t flags = CheckSurprise();
   onFunctionExit(ar, &retval, nullptr, flags);

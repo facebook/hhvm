@@ -9,6 +9,9 @@ compiler:
 #  - clang-3.4
 #  - clang-3.5
 
+cache:
+  - apt
+
 services:
   - memcached
   - redis-server

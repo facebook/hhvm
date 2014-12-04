@@ -47,9 +47,11 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
   return label;
 }
 
-Block* IRUnit::defBlock() {
+Block* IRUnit::defBlock(Block::Hint hint) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
-  return new (m_arena) Block(m_nextBlockId++);
+  auto const block = new (m_arena) Block(m_nextBlockId++);
+  block->setHint(hint);
+  return block;
 }
 
 IRInstruction* IRUnit::mov(SSATmp* dst, SSATmp* src, BCMarker marker) {

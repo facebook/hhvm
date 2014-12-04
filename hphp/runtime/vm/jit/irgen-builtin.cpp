@@ -384,7 +384,7 @@ struct CatchMaker {
   }
 
   Block* makeUnusualCatch() const {
-    auto const exit = env.irb->makeExit(Block::Hint::Unlikely);
+    auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
     decRefForUnwind();
@@ -394,7 +394,7 @@ struct CatchMaker {
   }
 
   Block* makeParamCoerceCatch() const {
-    auto const exit = env.irb->makeExit(Block::Hint::Unlikely);
+    auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
 
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);

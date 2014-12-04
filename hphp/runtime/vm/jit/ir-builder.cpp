@@ -702,7 +702,7 @@ void IRBuilder::setCatchCreator(std::function<Block* ()> fn) {
 static Block* create_catch_block(IRBuilder& irb,
                                  const ExnStackState& stack,
                                  BCMarker marker) {
-  auto const catchBlock = irb.makeExit(Block::Hint::Unused);
+  auto const catchBlock = irb.unit().defBlock(Block::Hint::Unused);
 
   BlockPusher bp(irb, marker, catchBlock);
   irb.gen(BeginCatch);

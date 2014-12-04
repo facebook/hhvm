@@ -408,17 +408,6 @@ public:
     appendBlock(done_block);
   }
 
-  /*
-   * Create a new "exit block". This is a Block that is assumed to be
-   * a cold path, which always exits the tracelet without control flow
-   * rejoining the main line.
-   */
-  Block* makeExit(Block::Hint hint = Block::Hint::Unlikely) {
-    auto* exit = m_unit.defBlock();
-    exit->setHint(hint);
-    return exit;
-  }
-
 private:
   struct BlockState {
     Block* block;

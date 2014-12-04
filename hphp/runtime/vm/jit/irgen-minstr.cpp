@@ -1903,7 +1903,7 @@ void handleStrTestResult(MTS& env) {
 }
 
 Block* makeMISCatch(MTS& env) {
-  auto const exit = env.irb.makeExit(Block::Hint::Unused);
+  auto const exit = env.unit.defBlock(Block::Hint::Unused);
   BlockPusher bp(env.irb, env.marker, exit);
   gen(env, BeginCatch);
   cleanTvRefs(env);
@@ -1913,7 +1913,7 @@ Block* makeMISCatch(MTS& env) {
 }
 
 Block* makeCatchSet(MTS& env) {
-  env.failedSetBlock = env.irb.makeExit(Block::Hint::Unused);
+  env.failedSetBlock = env.unit.defBlock(Block::Hint::Unused);
 
   const bool isSetWithRef = env.op == Op::SetWithRefLM ||
                             env.op == Op::SetWithRefRM;

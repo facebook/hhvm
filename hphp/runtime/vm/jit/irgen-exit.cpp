@@ -47,7 +47,7 @@ void exitRequest(HTS& env, TransFlags flags, Offset targetBcOff) {
 
 Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   if (targetBcOff == -1) targetBcOff = bcOff(env);
-  auto const exit = env.irb->makeExit();
+  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   auto const stack = spillStack(env);
   gen(env, SyncABIRegs, fp(env), stack);
@@ -68,7 +68,7 @@ Block* makeExit(HTS& env, TransFlags flags) {
 }
 
 Block* makeExitSlow(HTS& env) {
-  auto const exit = env.irb->makeExit();
+  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
   interpOne(env, *env.currentNormalizedInstruction);
   // If it changes the PC, InterpOneCF will get us to the new location.
@@ -87,7 +87,7 @@ Block* makePseudoMainExit(HTS& env) {
 Block* makeExitOpt(HTS& env, TransID transId) {
   assert(!isInlining(env));
   auto const targetBcOff = bcOff(env);
-  auto const exit = env.irb->makeExit();
+  auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
   auto const stack = spillStack(env);
   gen(env, SyncABIRegs, fp(env), stack);

@@ -1,6 +1,6 @@
 Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s on line %s
 
 Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s on line %s
-string(34) "$1$bJoWf/..$mTgm1g69VfN9GIbOKxYPv0"
-string(34) "$1$4DmSm...$LT1vPcM6123p5LRkQVZrs1"
-string(13) "67t93nJQ1bzpw"
+string(34) "%s"
+string(34) "%s"
+string(13) "%s"

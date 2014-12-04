@@ -468,13 +468,6 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().spOffset = savedSPOff;
   cur().spValue = savedSP;
 
-  auto const stackValues = collectStackValues(cur().spValue,
-                                              cur().spOffset);
-  for (DEBUG_ONLY auto& val : stackValues) {
-    ITRACE(4, "    marking caller stack value available: {}\n",
-           val->toString());
-  }
-
   /*
    * Push a new state for the inlined callee.
    */

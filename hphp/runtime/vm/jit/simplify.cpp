@@ -2379,18 +2379,6 @@ Type getStackInnerTypePrediction(SSATmp* sp, uint32_t offset) {
   return t;
 }
 
-jit::vector<SSATmp*> collectStackValues(SSATmp* sp, uint32_t stackDepth) {
-  jit::vector<SSATmp*> ret;
-  ret.reserve(stackDepth);
-  for (uint32_t i = 0; i < stackDepth; ++i) {
-    auto const value = getStackValue(sp, i).value;
-    if (value) {
-      ret.push_back(value);
-    }
-  }
-  return ret;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void copyProp(IRInstruction* inst) {

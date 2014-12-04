@@ -443,7 +443,7 @@ static bool supportsToArray(ObjectData* obj) {
 static std::pair<int, double> getObjSize(ObjectData* obj) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting object size for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->o_getClassName().data(),
     obj
   );
   int size = getClassSize(cls);
@@ -521,7 +521,7 @@ static void getObjStrings(
 ) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting strings for type {} at {}\n",
-    obj->o_getClassName()->data(),
+    obj->o_getClassName().data(),
     obj
   );
 
@@ -660,7 +660,7 @@ static Array HHVM_FUNCTION(objprof_get_data, void) {
 
         FTRACE(1, "...................ObjectData* at {} ({}) size={}:{}\n",
           obj,
-          obj->o_getClassName()->data(),
+          obj->o_getClassName().data(),
           objsize_pair.first,
           objsize_pair.second
         );

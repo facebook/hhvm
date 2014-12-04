@@ -553,7 +553,6 @@ public:
   }
 
   StringData* get() const { return m_px; }
-  StringData* operator->() const { return get(); }
 
 private:
   static void compileTimeAssertions() {

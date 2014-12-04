@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -27,6 +27,8 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/autoload-handler.h"
 
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/system/systemlib.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -36,7 +38,6 @@ namespace HPHP {
 const StaticString
   s_spl_autoload("spl_autoload"),
   s_spl_autoload_call("spl_autoload_call"),
-  s_default_extensions(".inc,.php"),
   s_rewind("rewind"),
   s_valid("valid"),
   s_next("next"),
@@ -45,71 +46,6 @@ const StaticString
   s_getIterator("getIterator"),
   s_directory_iterator("DirectoryIterator");
 
-const StaticString spl_classes[] = {
-  StaticString("AppendIterator"),
-  StaticString("ArrayIterator"),
-  StaticString("ArrayObject"),
-  StaticString("BadFunctionCallException"),
-  StaticString("BadMethodCallException"),
-  StaticString("CachingIterator"),
-  StaticString("Countable"),
-  s_directory_iterator,
-  StaticString("DomainException"),
-  StaticString("EmptyIterator"),
-  StaticString("FilesystemIterator"),
-  StaticString("FilterIterator"),
-  StaticString("GlobIterator"),
-  StaticString("InfiniteIterator"),
-  StaticString("InvalidArgumentException"),
-  StaticString("IteratorIterator"),
-  StaticString("LengthException"),
-  StaticString("LimitIterator"),
-  StaticString("LogicException"),
-  StaticString("MultipleIterator"),
-  StaticString("NoRewindIterator"),
-  StaticString("OuterIterator"),
-  StaticString("OutOfBoundsException"),
-  StaticString("OutOfRangeException"),
-  StaticString("OverflowException"),
-  StaticString("ParentIterator"),
-  StaticString("RangeException"),
-  StaticString("RecursiveArrayIterator"),
-  StaticString("RecursiveCachingIterator"),
-  StaticString("RecursiveDirectoryIterator"),
-  StaticString("RecursiveFilterIterator"),
-  StaticString("RecursiveIterator"),
-  StaticString("RecursiveIteratorIterator"),
-  StaticString("RecursiveRegexIterator"),
-  StaticString("RecursiveTreeIterator"),
-  StaticString("RegexIterator"),
-  StaticString("RuntimeException"),
-  StaticString("SeekableIterator"),
-  StaticString("SplDoublyLinkedList"),
-  StaticString("SplFileInfo"),
-  StaticString("SplFileObject"),
-  StaticString("SplFixedArray"),
-  StaticString("SplHeap"),
-  StaticString("SplMinHeap"),
-  StaticString("SplMaxHeap"),
-  StaticString("SplObjectStorage"),
-  StaticString("SplObserver"),
-  StaticString("SplPriorityQueue"),
-  StaticString("SplQueue"),
-  StaticString("SplStack"),
-  StaticString("SplSubject"),
-  StaticString("SplTempFileObject"),
-  StaticString("UnderflowException"),
-  StaticString("UnexpectedValueException"),
-};
-
-Array f_spl_classes() {
-  const size_t num_classes = sizeof(spl_classes) / sizeof(spl_classes[0]);
-  ArrayInit ret(num_classes, ArrayInit::Map{});
-  for (size_t i = 0; i < num_classes; ++i) {
-    ret.set(spl_classes[i], spl_classes[i]);
-  }
-  return ret.toArray();
-}
 
 void throw_spl_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
 void throw_spl_exception(const char *fmt, ...) {
@@ -126,7 +62,7 @@ static bool s_inited = false;
 static int64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
-String f_spl_object_hash(const Object& obj) {
+String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
@@ -145,13 +81,16 @@ String f_spl_object_hash(const Object& obj) {
   return String(buf, CopyString);
 }
 
-int64_t f_hphp_object_pointer(const Object& obj) { return (int64_t)obj.get();}
+int64_t HHVM_FUNCTION(hphp_object_pointer, const Object& obj) {
+  return (int64_t)obj.get();
+}
 
-Variant f_hphp_get_this() {
+Variant HHVM_FUNCTION(hphp_get_this) {
   return g_context->getThis();
 }
 
-Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_implements, const Variant& obj,
+                                        bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -177,7 +116,8 @@ Variant f_class_implements(const Variant& obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_parents, const Variant& obj,
+                                     bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -202,7 +142,8 @@ Variant f_class_parents(const Variant& obj, bool autoload /* = true */) {
   return ret;
 }
 
-Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
+Variant HHVM_FUNCTION(class_uses, const Variant& obj,
+                                  bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
     cls = Unit::getClass(obj.getStringData(), autoload);
@@ -220,11 +161,12 @@ Variant f_class_uses(const Variant& obj, bool autoload /* = true */) {
     raise_warning("class_uses(): object or string expected");
     return false;
   }
-  Array ret(Array::Create());
-  for (auto const& traitName : cls->preClass()->usedTraits()) {
+  auto &usedTraits = cls->preClass()->usedTraits();
+  ArrayInit ret(usedTraits.size(), ArrayInit::Map{});
+  for (auto const& traitName : usedTraits) {
     ret.set(StrNR(traitName), VarNR(traitName));
   }
-  return ret;
+  return ret.toArray();
 }
 
 #define CHECK_TRAVERSABLE_IMPL(obj, ret) \
@@ -256,8 +198,10 @@ Object get_traversable_object_iterator(const Variant& obj) {
   return itObj;
 }
 
-Variant f_iterator_apply(const Variant& obj, const Variant& func,
+
+Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
                          const Array& params /* = null_array */) {
+  VMRegAnchor _;
   CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
@@ -272,7 +216,8 @@ Variant f_iterator_apply(const Variant& obj, const Variant& func,
   return count;
 }
 
-Variant f_iterator_count(const Variant& obj) {
+Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
+  VMRegAnchor _;
   CHECK_TRAVERSABLE_IMPL(obj, 0);
   Object pobj = get_traversable_object_iterator(obj);
   pobj->o_invoke_few_args(s_rewind, 0);
@@ -284,11 +229,12 @@ Variant f_iterator_count(const Variant& obj) {
   return count;
 }
 
-Variant f_iterator_to_array(const Variant& obj, bool use_keys /* = true */) {
+Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
+                                         bool use_keys /* = true */) {
+  VMRegAnchor _;
   Array ret(Array::Create());
   CHECK_TRAVERSABLE_IMPL(obj, ret);
   Object pobj = get_traversable_object_iterator(obj);
-
   pobj->o_invoke_few_args(s_rewind, 0);
   while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
     Variant val = pobj->o_invoke_few_args(s_current, 0);
@@ -303,9 +249,10 @@ Variant f_iterator_to_array(const Variant& obj, bool use_keys /* = true */) {
   return ret;
 }
 
-bool f_spl_autoload_register(const Variant& autoload_function /* = null_variant */,
-                             bool throws /* = true */,
-                             bool prepend /* = false */) {
+bool HHVM_FUNCTION(spl_autoload_register,
+                   const Variant& autoload_function /* = null_variant */,
+                   bool throws /* = true */,
+                   bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {
     if (throws) {
       throw_spl_exception("Function spl_autoload_call()"
@@ -322,7 +269,7 @@ bool f_spl_autoload_register(const Variant& autoload_function /* = null_variant 
   return res;
 }
 
-bool f_spl_autoload_unregister(const Variant& autoload_function) {
+bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function) {
   if (same(autoload_function, s_spl_autoload_call)) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
@@ -331,7 +278,7 @@ bool f_spl_autoload_unregister(const Variant& autoload_function) {
   return true;
 }
 
-Variant f_spl_autoload_functions() {
+Variant HHVM_FUNCTION(spl_autoload_functions) {
   const Array& handlers = AutoloadHandler::s_instance->getHandlers();
   if (handlers.isNull()) {
     return false;
@@ -340,7 +287,7 @@ Variant f_spl_autoload_functions() {
   }
 }
 
-void f_spl_autoload_call(const String& class_name) {
+void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
   AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
@@ -359,8 +306,9 @@ struct ExtensionList final : RequestEventHandler {
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
 }
 
-String f_spl_autoload_extensions(const String& file_extensions /* = null_string */) {
-  if (!file_extensions.isNull()) {
+String HHVM_FUNCTION(spl_autoload_extensions,
+                     const String& file_extensions /* = null_string */) {
+  if (!file_extensions.empty()) {
     s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
                                    .toArray();
     return file_extensions;
@@ -395,12 +343,30 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SPLExtension : public Extension {
- public:
-  SPLExtension() : Extension("SPL", "0.2") { }
+class SPLExtension : public Extension {
+public:
+  SPLExtension() : Extension("spl", "0.2") { }
   virtual void moduleLoad(const IniSetting::Map& ini, Hdf config) {
     HHVM_ME(DirectoryIterator, hh_readdir);
     HHVM_ME(GlobIterator, count);
+  }
+  virtual void moduleInit() {
+    HHVM_FE(spl_object_hash);
+    HHVM_FE(hphp_object_pointer);
+    HHVM_FE(hphp_get_this);
+    HHVM_FE(class_implements);
+    HHVM_FE(class_parents);
+    HHVM_FE(class_uses);
+    HHVM_FE(iterator_apply);
+    HHVM_FE(iterator_count);
+    HHVM_FE(iterator_to_array);
+    HHVM_FE(spl_autoload_call);
+    HHVM_FE(spl_autoload_extensions);
+    HHVM_FE(spl_autoload_functions);
+    HHVM_FE(spl_autoload_register);
+    HHVM_FE(spl_autoload_unregister);
+
+    loadSystemlib();
   }
 } s_SPL_extension;
 

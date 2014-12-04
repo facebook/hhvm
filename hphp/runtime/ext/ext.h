@@ -40,7 +40,8 @@
 #include "hphp/runtime/ext/ext_hash.h"
 #include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_spl.h"
+#include "hphp/runtime/ext/soap/ext_soap.h"
+#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 

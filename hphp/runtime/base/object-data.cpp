@@ -32,8 +32,8 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -436,8 +436,8 @@ Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
     return Array::Create(Object(const_cast<ObjectData*>(this)));
-  } else if (UNLIKELY(instanceof(c_DateTime::classof()))) {
-    return ((c_DateTime*) this)->t___debuginfo();
+  } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
+    return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
     Array ret(ArrayData::Create());
     o_getArray(ret, pubOnly);
@@ -933,12 +933,6 @@ ObjectData* ObjectData::clone() {
       return c_SetIterator::Clone(this);
     } else if (instanceof(c_PairIterator::classof())) {
       return c_PairIterator::Clone(this);
-    } else if (instanceof(c_DateTime::classof())) {
-      return c_DateTime::Clone(this);
-    } else if (instanceof(c_DateTimeZone::classof())) {
-      return c_DateTimeZone::Clone(this);
-    } else if (instanceof(c_DateInterval::classof())) {
-      return c_DateInterval::Clone(this);
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }

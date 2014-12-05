@@ -1,7 +1,8 @@
 <?php
 
-/* Type hints are missing as DateTime is IDL + C++ - with the type hints,
- * the C++ implementation is considered incompatible.
+/* Type hints are missing as any classes that implements this interface must
+ * specify types, meaning that no classes written in PHP can implement this
+ * interface if type hints are included.
  */
 interface DateTimeInterface {
   public function diff(

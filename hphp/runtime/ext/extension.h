@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -227,6 +228,59 @@ getArg(ActRec *ar, unsigned arg,
     raise_param_type_warning(ar->func()->name()->data(),
                              arg + 1, DType, tv->m_type);
     tvCastInPlace(tv, DType);
+  }
+  return unpack_tv<DType>(tv);
+}
+
+struct IncoercibleArgumentException : Exception {};
+
+/**
+ * Get numbered arg (zero based) and return data (coerce if needed)
+ *
+ * e.g.: double dval = getArg<KindOfDouble>(ar, 0);
+ *
+ * Raise warning and throw IncoercibleArgumentException if argument
+ * is not provided/not coercible
+ */
+template <DataType DType>
+typename std::enable_if<DType != KindOfRef,
+  typename DataTypeCPPType<DType>::type>::type
+getArgStrict(ActRec *ar, unsigned arg) {
+  auto tv = getArg(ar, arg);
+  if (!tv) {
+    raise_warning("Required parameter %d not passed", (int)arg);
+    throw IncoercibleArgumentException();
+  }
+  if (!tvCoerceParamInPlace(tv, DType)) {
+    raise_param_type_warning(ar->func()->name()->data(),
+                             arg + 1, DType, tv->m_type);
+    throw IncoercibleArgumentException();
+  }
+  return unpack_tv<DType>(tv);
+}
+
+/**
+ * Get numbered arg (zero based) and return data (coerce if needed)
+ *
+ * e.g. int64_t lval = getArg<KindOfInt64>(ar, 1, 42);
+ *
+ * Raise warning and throw IncoercibleArgumentException if argument
+ * is not coercible
+ *
+ * Returns default value (42 in example) if arg not passed
+ */
+template <DataType DType>
+typename DataTypeCPPType<DType>::type
+getArgStrict(ActRec *ar, unsigned arg,
+       typename DataTypeCPPType<DType>::type def) {
+  TypedValue *tv = getArg(ar, arg);
+  if (!tv) {
+    return def;
+  }
+  if (!tvCoerceParamInPlace(tv, DType)) {
+    raise_param_type_warning(ar->func()->name()->data(),
+                             arg + 1, DType, tv->m_type);
+    throw IncoercibleArgumentException();
   }
   return unpack_tv<DType>(tv);
 }

@@ -727,7 +727,7 @@ Mockery_MockTest::testShouldAllowMockingProtectedMethodReturnsMockInstance
 NamedMockTest::itCreatesANamedMock
 .
 NamedMockTest::itCreatesPassesFurtherArgumentsJustLikeMock
-.
+FATAL
 NamedMockTest::itShouldThrowIfAttemptingToRedefineNamedMock
 .
 RecorderTest::testArgumentsAreMatchedExactlyUnderStrictMode

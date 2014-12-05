@@ -22,8 +22,8 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
-#include "hphp/runtime/ext/ext_datetime.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include <signal.h>
 #include <vector>
@@ -429,7 +429,7 @@ static bool supportsToArray(ObjectData* obj) {
     return true;
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
     return true;
-  } else if (UNLIKELY(obj->instanceof(c_DateTime::classof()))) {
+  } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
     return true;
   } else {
     if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {

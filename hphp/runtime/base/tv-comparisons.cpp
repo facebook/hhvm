@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/ext/ext_datetime.h"
+#include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 namespace HPHP {
 
@@ -394,7 +394,7 @@ struct Eq {
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) == c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) == DateTimeData::getTimestamp(od2);
     }
     if (od1->getVMClass() != od2->getVMClass()) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_ArrayObjectClass))) {
@@ -444,7 +444,7 @@ struct Lt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) < c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) < DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;
@@ -487,7 +487,7 @@ struct Gt {
     if (od1 == od2) return false;
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-      return c_DateTime::GetTimestamp(od1) > c_DateTime::GetTimestamp(od2);
+      return DateTimeData::getTimestamp(od1) > DateTimeData::getTimestamp(od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_ClosureClass))) {
       return false;

@@ -3,15 +3,15 @@ no key
 2 keys
 3 keys
 string(3) "key"
-string(4) "key2"
 string(4) "key1"
+string(4) "key2"
 1 delete, 2 keys
 string(3) "key"
 string(4) "key2"
 add again, 3 keys
 4 keys
 string(3) "key"
+string(4) "key1"
 string(4) "key2"
 string(4) "key3"
-string(4) "key1"
 done

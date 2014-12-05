@@ -1722,6 +1722,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CastStk>()->offset);
+  if (mightRelax(env, info.value)) return nullptr;
   if (inst->typeParam() == Type::NullableObj && info.knownType <= Type::Null) {
     // If we're casting Null to NullableObj, we still need to call
     // tvCastToNullableObjectInPlace. See comment there and t3879280 for
@@ -1736,6 +1737,7 @@ SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCoerceStk(State& env, const IRInstruction* inst) {
   auto const info = getStackValue(inst->src(0),
                                   inst->extra<CoerceStk>()->offset);
+  if (mightRelax(env, info.value)) return nullptr;
   if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
     return inst->src(0);

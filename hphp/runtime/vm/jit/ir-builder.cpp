@@ -172,8 +172,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 
   assert(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
-    FTRACE(3, "appendInstruction: Block {}; inst: {}\n", m_curBlock->id(),
-           inst->toString());
     where = m_curBlock->insert(where, inst);
     ++where;
   }

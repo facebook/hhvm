@@ -45,7 +45,9 @@ let start_server env =
       let cmd = Printf.sprintf "%s %s %s" cmd
         (Filename.quote (Path.string_of_path env.root))
         (Filename.quote Build_id.build_id_ohai) in
-      (try Utils.exec_read cmd with e ->
+      (try Utils.exec_read cmd with
+      | End_of_file -> ""
+      | e ->
         prerr_endline (Printexc.to_string e);
         Printexc.print_backtrace stderr;
         "")

@@ -59,7 +59,6 @@ let split_lines = Str.split nl_regexp
 let exec_read cmd =
   let ic = Unix.open_process_in cmd in
   let result = input_line ic in
-  assert (result <> "");
   assert (Unix.close_process_in ic = Unix.WEXITED 0);
   result
 

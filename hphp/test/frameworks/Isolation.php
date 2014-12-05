@@ -138,11 +138,18 @@ static $time = null;
 
 function time_ISOLATION_WRAPPER() {
   global $time;
+  $org_time = ORIG_time();
   if ($time === null) {
-    $time = ORIG_time();
+    $time = $org_time;
     return $time;
   }
-  return ++$time;
+#  echo "static time is " . $time . " and org_time is " . $org_time . "\n";
+  if ($time >= $org_time) {
+    ++$time;
+  } else {
+    $time = $org_time;
+  }
+  return $time;
 }
 fb_rename_function('time', 'ORIG_time');
 fb_rename_function('time_ISOLATION_WRAPPER', 'time');
@@ -152,8 +159,10 @@ function microtime_ISOLATION_WRAPPER(bool $get_as_float = false) {
   list($msec, $sec) = explode(" ", ORIG_microtime());
   if ($time === null) {
     $time = $sec;
+  } else if ($time >= $sec){
+    ++$time;
   } else {
-    $time++;
+    $time = $sec;
   }
   if ($get_as_float)
     return ((float)$msec + (float)$time);

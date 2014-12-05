@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/runtime/vm/native-data.h"
 
 #include <gmp.h>
 
@@ -47,7 +48,7 @@ namespace HPHP {
 // GMP class strings
 const StaticString s_GMP_GMP("GMP");
 const StaticString s_GMP_num("num");
-const StaticString s_GMP_gmpResource("gmpResource");
+const StaticString s_GMPData("GMPData");
 
 // Array indexes for division functions
 const StaticString s_GMP_s("s");
@@ -67,8 +68,6 @@ const char* const cs_GMP_INVALID_TYPE =
   "%s(): Unable to convert variable to GMP - wrong type";
 const char* const cs_GMP_INVALID_STRING =
   "%s(): Unable to convert variable to GMP - string is not an integer";
-const char* const cs_GMP_INVALID_RESOURCE =
-  "%s(): supplied resource is not a valid GMP integer resource";
 const char* const cs_GMP_INVALID_OBJECT =
   "%s(): supplied object is not a valid GMP object";
 const char* const cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO =
@@ -93,17 +92,12 @@ const char* const cs_GMP_FAILED_TO_ALTER_BIT =
   "%s(): Failed to alter bit";
 const char* const cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE =
   "%s(): Starting index must be greater than or equal to zero";
-const char* const cs_GMP_COULD_NOT_SERIALIZE =
-  "Could not serialize number";
-const char* const cs_GMP_COULD_NOT_CLONE =
-  "Could not clone number";
 const char* const cs_GMP_COULD_NOT_UNSERIALIZE_NUMBER =
   "Could not unserialize number";
 const char* const cs_GMP_COULD_NOT_UNSERIALIZE_PROPERTIES =
   "Could not unserialize properties";
 const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
   "%s(): Can't take even root of negative number";
-
 
 // Function name strings
 const char* const cs_GMP_FUNC_NAME_GMP_ABS            = "gmp_abs";
@@ -152,19 +146,20 @@ const char* const cs_GMP_FUNC_NAME_GMP_XOR            = "gmp_xor";
 ///////////////////////////////////////////////////////////////////////////////
 // classes
 
-class GMPResource : public SweepableResourceData {
+class GMPData {
 public:
-  DECLARE_RESOURCE_ALLOCATION(GMPResource)
-  CLASSNAME_IS("GMP integer")
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+                 GMPData()
+                 : m_isInit(false) {}
+  virtual       ~GMPData() { close(); }
+  GMPData&       operator=(const GMPData& source);
 
-  explicit GMPResource(mpz_t data) { mpz_init_set(m_gmpMpz, data); }
-  virtual ~GMPResource() { close(); }
-  void     close() { mpz_clear(m_gmpMpz); }
-  mpz_t&   getData() { return m_gmpMpz; }
+  void           close();
+  void           setGMPMpz(const mpz_t data);
+  mpz_t&         getGMPMpz() { return m_gmpMpz; }
 
 private:
-  mpz_t    m_gmpMpz;
+  bool           m_isInit;
+  mpz_t          m_gmpMpz;
 };
 
 
@@ -183,11 +178,14 @@ public:
 
   static Object allocObject(const Variant& arg) {
     Object ret = allocObject();
+
     TypedValue dummy;
     g_context->invokeFunc(&dummy,
                           cls->getCtor(),
                           make_packed_array(arg),
                           ret.get());
+    tvRefcountedDecRef(&dummy);
+
     return ret;
   }
 

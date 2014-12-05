@@ -170,7 +170,7 @@ function gmp_scan1(mixed $a,
 
 
 <<__Native>>
-function gmp_setbit(GMP $a,
+function gmp_setbit(mixed $a,
                     int $index,
                     bool $bit_on = true): void;
 
@@ -197,8 +197,8 @@ function gmp_sub(mixed $a,
                  mixed $b): mixed;
 
 
-<<__Native, __ParamCoerceModeFalse>>
-function gmp_testbit(GMP $a,
+<<__Native>>
+function gmp_testbit(mixed $a,
                      int $index): bool;
 
 
@@ -206,18 +206,18 @@ function gmp_testbit(GMP $a,
 function gmp_xor(mixed $a,
                  mixed $b): mixed;
 
-class GMP implements Serializable {
-  private resource $gmpResource;
 
+<<__NativeData("GMPData")>>
+class GMP implements Serializable {
   <<__Native>>
   public function serialize() : string;
+
 
   <<__Native>>
   public function unserialize(mixed $data) : void;
 
+
   <<__Native>>
   public function __debugInfo() : array;
 
-  <<__Native>>
-  public function __clone(): void;
 }

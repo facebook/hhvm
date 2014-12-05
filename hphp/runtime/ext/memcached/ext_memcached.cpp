@@ -199,6 +199,13 @@ const StaticString
   s_value("value"),
   s_cas("cas");
 
+// INI settings
+struct MEMCACHEDGlobals final {
+  std::string sess_prefix;
+};
+static __thread MEMCACHEDGlobals* s_memcached_globals;
+#define MEMCACHEDG(name) s_memcached_globals->name
+
 namespace {
 class MemcachedResultWrapper {
 public:
@@ -1275,6 +1282,19 @@ const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 class MemcachedExtension : public Extension {
  public:
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
+  void threadInit() override {
+    if (s_memcached_globals) {
+      return;
+    }
+    s_memcached_globals = new MEMCACHEDGlobals;
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     "memcached.sess_prefix", &MEMCACHEDG(sess_prefix));
+  }
+
+  void threadShutdown() override {
+    delete s_memcached_globals;
+    s_memcached_globals = nullptr;
+  }
 
   virtual void moduleInit() {
     HHVM_ME(Memcached, __construct);
@@ -1535,7 +1555,6 @@ class MemcachedExtension : public Extension {
       s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
       q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
     );
-
 
 
     loadSystemlib();

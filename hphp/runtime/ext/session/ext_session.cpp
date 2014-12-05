@@ -499,6 +499,18 @@ static class RedisSessionModule : public SystemlibSessionModule {
     SystemlibSessionModule("redis", "RedisSessionModule") { }
 } s_redis_session_module;
 
+static class MemcacheSessionModule : public SystemlibSessionModule {
+ public:
+  MemcacheSessionModule() :
+    SystemlibSessionModule("memcache", "MemcacheSessionModule") { }
+} s_memcache_session_module;
+
+static class MemcachedSessionModule : public SystemlibSessionModule {
+ public:
+  MemcachedSessionModule() :
+    SystemlibSessionModule("memcached", "MemcachedSessionModule") { }
+} s_memcached_session_module;
+
 //////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 

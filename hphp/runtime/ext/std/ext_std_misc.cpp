@@ -46,7 +46,8 @@ IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
 
-const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
+
+const std::string s_0("0"), s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
@@ -111,7 +112,15 @@ void StandardExtension::threadInitMisc() {
       "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
+          if (value == s_0) {
+            FILE * file_devnull = fopen("/dev/null", "w+");
+            Logger::SetStandardOut(file_devnull);
+            return true;
+          }
           if (value == s_1 || value == s_stdout) {
+            if(file_devnull != nullptr) {
+              fclose(file_devnull);
+            }
             Logger::SetStandardOut(stdout);
             return true;
           }

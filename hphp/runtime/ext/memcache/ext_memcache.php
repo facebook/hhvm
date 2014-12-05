@@ -727,9 +727,6 @@ function memcache_add_server(Memcache $memcache,
                               $timeoutms);
 }
 
-// Signifies we have built-in session support
-define('MEMCACHE_HAVE_SESSION', true);
-
 class MemcacheSessionModule implements SessionHandlerInterface {
 
   const UNIX_PREFIX = 'unix://';

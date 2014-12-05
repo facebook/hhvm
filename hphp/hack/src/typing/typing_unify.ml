@@ -324,16 +324,6 @@ and unify_params env l1 l2 var1_opt =
     let env, rl = unify_params env rl1 rl2 var1_opt in
     env, (name, x2) :: rl
 
-let unify_nofail env ty1 ty2 =
-  Errors.try_
-    (fun () -> unify env ty1 ty2)
-    (fun _ ->
-      let res = Env.fresh_type() in
-      (* TODO: this can produce an unresolved of unresolved *)
-      let env, res = unify env res (fst ty1, Tunresolved [ty1; ty2]) in
-      env, res
-    )
-
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)

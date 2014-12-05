@@ -1019,7 +1019,12 @@ and expr_ in_cond is_lvalue env (p, e) =
       let env  = { env with Env.lenv = lenv } in
       let env  = condition env false c in
       let env, ty2 = expr env e2 in
-      Unify.unify_nofail env ty1 ty2
+      (* This is a shortened form of what we do in Typing_lenv.intersect. The
+       * latter takes local environments as arguments, but our types here
+       * aren't assigned to local variables in an environment *)
+      let env, ty1 = TUtils.unresolved env ty1 in
+      let env, ty2 = TUtils.unresolved env ty2 in
+      Unify.unify env ty1 ty2
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get (x, (_, y))
       when Env.FakeMembers.get_static env x y <> None ->

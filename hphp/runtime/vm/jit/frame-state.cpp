@@ -176,9 +176,7 @@ bool check_invariants(const FrameState& state) {
 
 }
 
-FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker)
-  : m_visited(unit.numBlocks())
-{
+FrameStateMgr::FrameStateMgr(const IRUnit& unit, BCMarker marker) {
   m_stack.push_back(FrameState{});
   cur().curFunc = marker.func();
   cur().spOffset = marker.spOff();
@@ -370,14 +368,6 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
   return m_states.count(block);
 }
 
-Block* FrameStateMgr::findUnprocessedPred(Block* block) const {
-  for (auto const& edge : block->preds()) {
-    auto const pred = edge.from();
-    if (!isVisited(pred)) return pred;
-  }
-  return nullptr;
-}
-
 void FrameStateMgr::startBlock(Block* block,
                                BCMarker marker,
                                bool isLoopHeader /* = false */) {
@@ -413,15 +403,12 @@ void FrameStateMgr::startBlock(Block* block,
   // fixed-point.
   if (m_status == Status::RunningFixedPoint) return;
 
-  // Reset state if the block has an unprocessed predecessor.
-  if (isLoopHeader || findUnprocessedPred(block)) {
+  // Reset state if the block is the target of a back edge.
+  if (isLoopHeader) {
     Indent _;
-    ITRACE(4, "B{} has unprocessed predecessor, resetting state\n",
-           block->id());
+    ITRACE(4, "B{} is a loop header; resetting state\n", block->id());
     loopHeaderClear(marker);
   }
-
-  markVisited(block);
 }
 
 bool FrameStateMgr::finishBlock(Block* block) {
@@ -529,8 +516,17 @@ bool FrameStateMgr::checkInvariants() const {
  * must be the same, so it is not cleared.
  */
 void FrameStateMgr::loopHeaderClear(BCMarker marker) {
-  cur().spValue        = nullptr;
+  /*
+   * Important note: we're setting our tracked spOffset to the marker spOffset.
+   * These two spOffsets have different meanings.  One is the offset for the
+   * last StkPtr, and one is the logical offset for the hhbc stack machine.
+   *
+   * For loops, since we're only supporting fully-sync'd stacks this is ok for
+   * now.  The distinction between the kinds of spOffsets will go away after we
+   * stop threading stack pointers.
+   */
   cur().spOffset       = marker.spOff();
+  cur().spValue        = nullptr;
   cur().curFunc        = marker.func();
   cur().stackDeficit   = 0;
   cur().evalStack      = EvalStack();
@@ -788,19 +784,6 @@ void FrameStateMgr::dropLocalRefsInnerTypes() {
       }
     }
   }
-}
-
-void FrameStateMgr::markVisited(const Block* b) {
-  // The number of blocks in the unit can change over time.
-  if (b->id() >= m_visited.size()) {
-    m_visited.resize(b->id() + 1);
-  }
-
-  m_visited.set(b->id());
-}
-
-bool FrameStateMgr::isVisited(const Block* b) const {
-  return b->id() < m_visited.size() && m_visited.test(b->id());
 }
 
 //////////////////////////////////////////////////////////////////////

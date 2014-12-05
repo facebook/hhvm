@@ -75,11 +75,6 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
     m_enableCse = false; // CSE is disabled at gen time.
     m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
   }
-
-  // Need to preemptively mark the entry block as visited. This is because we
-  // don't always call IRBuilder::startBlock when starting to emit IR, namely
-  // in selectTracelet.
-  m_state.markVisited(m_curBlock);
 }
 
 /*

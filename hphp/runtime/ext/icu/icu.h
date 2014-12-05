@@ -110,6 +110,7 @@ class IntlExtension : public Extension {
     initTimeZone();
     initIterator();
     initDateFormatter();
+    initDatePatternGenerator();
     initCalendar();
     initGrapheme();
     initBreakIterator(); // Must come after initIterator()
@@ -137,6 +138,7 @@ class IntlExtension : public Extension {
   void initTimeZone();
   void initIterator();
   void initDateFormatter();
+  void initDatePatternGenerator();
   void initCalendar();
   void initGrapheme();
   void initBreakIterator();

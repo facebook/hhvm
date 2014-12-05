@@ -37,6 +37,8 @@ void IntlError::setError(UErrorCode code, const char *format, ...) {
     va_start(args, format);
     string_vsnprintf(m_errorMessage, format, args);
     va_end(args);
+  } else {
+    m_errorMessage.clear();
   }
 
   if (this != s_intl_error.get()) {

@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/ext/ext_math.h" // f_abs
+#include "hphp/runtime/ext/std/ext_std_math.h" // HHVM_FN(abs)
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
@@ -2104,7 +2104,7 @@ void in(ISS& env, const bc::Abs&) {
     constprop(env);
     auto const cell = eval_cell([&] {
       auto const cell = *v1;
-      auto const ret = f_abs(tvAsCVarRef(&cell));
+      auto const ret = HHVM_FN(abs)(tvAsCVarRef(&cell));
       assert(!IS_REFCOUNTED_TYPE(ret.asCell()->m_type));
       return *ret.asCell();
     });

@@ -16,8 +16,9 @@
 */
 
 #include "hphp/runtime/ext/spl/ext_spl.h"
-#include "hphp/runtime/ext/ext_math.h"
+
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
@@ -66,11 +67,11 @@ String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
   if (!s_inited) {
     Lock lock(s_mutex);
     if (!s_inited) {
-      f_mt_srand();
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= f_mt_rand();
+      HHVM_FN(mt_srand)();
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
+      s_hash_mask_handle |= HHVM_FN(mt_rand)();
       s_inited = true;
     }
   }

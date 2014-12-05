@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/simple-counter.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/lock.h"
 #include <stdio.h>
@@ -77,14 +77,14 @@ void SimpleCounter::Count(const std::string &name) {
       assert(StackTrace::Enabled);
       std::vector<std::string> &stackVec = s_counter->m_stacks[name];
       if ((int)stackVec.size() < SampleStackCount ||
-          f_rand(0, count - 1) < SampleStackCount) {
+          HHVM_FN(rand)(0, count - 1) < SampleStackCount) {
         StackTrace st;
         if ((int)stackVec.size() < SampleStackCount) {
           // skip StackTrace methods and the Count() call.
           stackVec.push_back(st.hexEncode(3, 3 + SampleStackDepth));
         } else {
           // skip StackTrace methods and the Count() call.
-          stackVec[f_rand(0, SampleStackCount - 1)] =
+          stackVec[HHVM_FN(rand)(0, SampleStackCount - 1)] =
             st.hexEncode(3, 3 + SampleStackDepth);
         }
       }

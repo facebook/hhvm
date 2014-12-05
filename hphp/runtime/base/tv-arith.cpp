@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/util/overflow.h"
 
 namespace HPHP {
@@ -514,7 +514,7 @@ Cell cellDiv(Cell c1, Cell c2) {
 }
 
 Cell cellPow(Cell c1, Cell c2) {
-  return *f_pow(tvAsVariant(&c1), tvAsVariant(&c2)).asCell();
+  return *HHVM_FN(pow)(tvAsVariant(&c1), tvAsVariant(&c2)).asCell();
 }
 
 Cell cellMod(Cell c1, Cell c2) {

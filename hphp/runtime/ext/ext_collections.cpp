@@ -18,8 +18,8 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -1018,7 +1018,7 @@ void c_Vector::t_shuffle() {
   }
   mutateAndBump();
   for (uint32_t i = 1; i < m_size; ++i) {
-    uint32_t j = f_mt_rand(0, i);
+    uint32_t j = math_mt_rand(0, i);
     std::swap(m_data[i], m_data[j]);
   }
 }

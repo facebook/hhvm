@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/base-includes.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -378,7 +378,7 @@ Variant HHVM_FUNCTION(mcrypt_create_iv, int size, int source /* = 0 */) {
     n = size;
     while (size) {
       // Use userspace rand() function because it handles auto-seeding
-      iv[--size] = (char)f_rand(0, 255);
+      iv[--size] = (char)HHVM_FN(rand)(0, 255);
     }
   }
   return String(iv, n, AttachString);

@@ -73,7 +73,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/ext/ext_math.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -86,6 +85,7 @@
 #include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/stats.h"
@@ -3803,7 +3803,7 @@ OPTBLD_INLINE void ExecutionContext::iopAbs(IOP_ARGS) {
   NEXT();
   auto c1 = vmStack().topC();
 
-  tvAsVariant(c1) = f_abs(tvAsCVarRef(c1));
+  tvAsVariant(c1) = HHVM_FN(abs)(tvAsCVarRef(c1));
 }
 
 template<class Op>
@@ -3943,9 +3943,9 @@ OPTBLD_INLINE void ExecutionContext::iopSqrt(IOP_ARGS) {
 
   if (c1->m_type == KindOfInt64) {
     c1->m_type = KindOfDouble;
-    c1->m_data.dbl = f_sqrt(c1->m_data.num);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.num);
   } else if (c1->m_type == KindOfDouble) {
-    c1->m_data.dbl = f_sqrt(c1->m_data.dbl);
+    c1->m_data.dbl = HHVM_FN(sqrt)(c1->m_data.dbl);
   }
 
   if (c1->m_type != KindOfDouble) {

@@ -15,10 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_math.h"
+#include "hphp/runtime/ext/std/ext_std_math.h"
+
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-multiply.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/system/constants.h"
 
 namespace HPHP {
@@ -29,12 +31,28 @@ const int64_t k_PHP_ROUND_HALF_DOWN = PHP_ROUND_HALF_DOWN;
 const int64_t k_PHP_ROUND_HALF_EVEN = PHP_ROUND_HALF_EVEN;
 const int64_t k_PHP_ROUND_HALF_ODD =  PHP_ROUND_HALF_ODD;
 
-double f_pi() { return k_M_PI;}
+const double k_M_PI       = 3.1415926535898;
+const double k_M_1_PI     = 0.31830988618379;
+const double k_M_2_PI     = 0.63661977236758;
+const double k_M_2_SQRTPI = 1.1283791670955;
+const double k_M_E        = 2.718281828459;
+const double k_M_EULER    = 0.57721566490153;
+const double k_M_LN10     = 2.302585092994;
+const double k_M_LN2      = 0.69314718055995;
+const double k_M_LNPI     = 1.1447298858494;
+const double k_M_LOG10E   = 0.43429448190325;
+const double k_M_LOG2E    = 1.442695040889;
+const double k_M_PI_2     = 1.5707963267949;
+const double k_M_PI_4     = 0.78539816339745;
+const double k_M_SQRT1_2  = 0.70710678118655;
+const double k_M_SQRT2    = 1.4142135623731;
+const double k_M_SQRT3    = 1.7320508075689;
+const double k_M_SQRTPI   = 1.7724538509055;
 
-Variant f_min(int _argc, const Variant& value,
-              const Variant& second /* = null_variant */,
-              const Array& _argv /* = null_array */) {
-  if (_argc == 1) {
+Variant HHVM_FUNCTION(min,
+                      const Variant& value,
+                      const Array& args /* = null_array */) {
+  if (args.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
@@ -68,12 +86,10 @@ Variant f_min(int _argc, const Variant& value,
       }
     }
     return ret;
-  } else if (_argc == 2) {
-    return less(second, value) ? second : value;
   }
 
-  Variant ret = less(second, value) ? second : value;
-  for (ArrayIter iter(_argv); iter; ++iter) {
+  Variant ret = value;
+  for (ArrayIter iter(args); iter; ++iter) {
     Variant currVal = iter.secondRef();
     if (less(currVal, ret)) {
       ret = currVal;
@@ -82,10 +98,10 @@ Variant f_min(int _argc, const Variant& value,
   return ret;
 }
 
-Variant f_max(int _argc, const Variant& value,
-              const Variant& second /* = null_variant */,
-              const Array& _argv /* = null_array */) {
-  if (_argc == 1) {
+Variant HHVM_FUNCTION(max,
+                      const Variant& value,
+                      const Array& args /* = null_array */) {
+  if (args.empty()) {
     const auto& cell_value = *value.asCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
@@ -119,12 +135,10 @@ Variant f_max(int _argc, const Variant& value,
       }
     }
     return ret;
-  } else if (_argc == 2) {
-    return more(second, value) ? second : value;
   }
 
-  Variant ret = more(second, value) ? second : value;
-  for (ArrayIter iter(_argv); iter; ++iter) {
+  Variant ret = value;
+  for (ArrayIter iter(args); iter; ++iter) {
     Variant currVal = iter.secondRef();
     if (more(currVal, ret)) {
       ret = currVal;
@@ -154,7 +168,7 @@ static DataType zend_convert_scalar_to_number(const Variant& num,
   return num.getType();
 }
 
-Variant f_abs(const Variant& number) {
+Variant HHVM_FUNCTION(abs, const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -167,11 +181,11 @@ Variant f_abs(const Variant& number) {
   }
 }
 
-bool f_is_finite(double val) { return finite(val);}
-bool f_is_infinite(double val) { return isinf(val);}
-bool f_is_nan(double val) { return isnan(val);}
+bool HHVM_FUNCTION(is_finite, double val) { return finite(val);}
+bool HHVM_FUNCTION(is_infinite, double val) { return isinf(val);}
+bool HHVM_FUNCTION(is_nan, double val) { return isnan(val);}
 
-Variant f_ceil(const Variant& number) {
+Variant HHVM_FUNCTION(ceil, const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -183,7 +197,7 @@ Variant f_ceil(const Variant& number) {
   return ceil(dval);
 }
 
-Variant f_floor(const Variant& number) {
+Variant HHVM_FUNCTION(floor, const Variant& number) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(number, ival, dval);
@@ -195,8 +209,10 @@ Variant f_floor(const Variant& number) {
   return floor(dval);
 }
 
-Variant f_round(const Variant& val, int64_t precision /* = 0 */,
-                int64_t mode /* = PHP_ROUND_HALF_UP */) {
+Variant HHVM_FUNCTION(round,
+                      const Variant& val,
+                      int64_t precision /* = 0 */,
+                      int64_t mode /* = PHP_ROUND_HALF_UP */) {
   int64_t ival;
   double dval;
   DataType k = zend_convert_scalar_to_number(val, ival, dval);
@@ -213,29 +229,35 @@ Variant f_round(const Variant& val, int64_t precision /* = 0 */,
   return dval;
 }
 
-double f_deg2rad(double number) { return number / 180.0 * k_M_PI;}
-double f_rad2deg(double number) { return number / k_M_PI * 180.0;}
+double HHVM_FUNCTION(deg2rad, double number) { return number / 180.0 * k_M_PI;}
+double HHVM_FUNCTION(rad2deg, double number) { return number / k_M_PI * 180.0;}
 
-String f_decbin(int64_t number) {
-  return string_long_to_base(number, 2);
+String HHVM_FUNCTION(decbin, const Variant& number) {
+  return string_long_to_base(number.toInt64(), 2);
 }
-String f_dechex(int64_t number) {
-  return string_long_to_base(number, 16);
+String HHVM_FUNCTION(dechex, const Variant& number) {
+  return string_long_to_base(number.toInt64(), 16);
 }
-String f_decoct(int64_t number) {
-  return string_long_to_base(number, 8);
+String HHVM_FUNCTION(decoct, const Variant& number) {
+  return string_long_to_base(number.toInt64(), 8);
 }
-Variant f_bindec(const String& binary_string) {
-  return string_base_to_numeric(binary_string.data(), binary_string.size(), 2);
+Variant HHVM_FUNCTION(bindec, const Variant& binary_string) {
+  String str = binary_string.toString();
+  return string_base_to_numeric(str.data(), str.size(), 2);
 }
-Variant f_hexdec(const String& hex_string) {
-  return string_base_to_numeric(hex_string.data(), hex_string.size(), 16);
+Variant HHVM_FUNCTION(hexdec, const Variant& hex_string) {
+  String str = hex_string.toString();
+  return string_base_to_numeric(str.data(), str.size(), 16);
 }
-Variant f_octdec(const String& octal_string) {
-  return string_base_to_numeric(octal_string.data(), octal_string.size(), 8);
+Variant HHVM_FUNCTION(octdec, const Variant& octal_string) {
+  String str = octal_string.toString();
+  return string_base_to_numeric(str.data(), str.size(), 8);
 }
 
-Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
+Variant HHVM_FUNCTION(base_convert,
+                      const Variant& number,
+                      int64_t frombase,
+                      int64_t tobase) {
   if (!string_validate_base(frombase)) {
     throw_invalid_argument("Invalid frombase: %" PRId64, frombase);
     return false;
@@ -244,7 +266,8 @@ Variant f_base_convert(const String& number, int64_t frombase, int64_t tobase) {
     throw_invalid_argument("Invalid tobase: %" PRId64, tobase);
     return false;
   }
-  Variant v = string_base_to_numeric(number.data(), number.size(), frombase);
+  String str = number.toString();
+  Variant v = string_base_to_numeric(str.data(), str.size(), frombase);
   return string_numeric_to_base(v, tobase);
 }
 
@@ -275,7 +298,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
     }
 
     case KindOfArray:
-      // Not reachable since f_pow() deals with these base cases first.
+      // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRef:
     case KindOfClass:
       break;
@@ -286,7 +309,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
   not_reached();
 }
 
-Variant f_pow(const Variant& base, const Variant& exp) {
+Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
   int64_t bint, eint;
   double bdbl, edbl;
   if (base.isArray()) return 0LL;
@@ -335,39 +358,39 @@ Variant f_pow(const Variant& base, const Variant& exp) {
   return pow(bdbl, edbl);
 }
 
-double f_exp(double arg) { return exp(arg);}
-double f_expm1(double arg) { return expm1(arg);}
-double f_log10(double arg) { return log10(arg);}
-double f_log1p(double number) { return log1p(number);}
-double f_log(double arg, double base /* = 0 */) {
+double HHVM_FUNCTION(exp, double arg) { return exp(arg);}
+double HHVM_FUNCTION(expm1, double arg) { return expm1(arg);}
+double HHVM_FUNCTION(log10, double arg) { return log10(arg);}
+double HHVM_FUNCTION(log1p, double number) { return log1p(number);}
+double HHVM_FUNCTION(log, double arg, double base /* = 0 */) {
   return base <= 0 ? log(arg) : log(arg)/log(base);
 }
 
-double f_cos(double arg) { return cos(arg);  }
-double f_cosh(double arg) { return cosh(arg); }
-double f_sin(double arg) { return sin(arg);  }
-double f_sinh(double arg) { return sinh(arg); }
-double f_tan(double arg) { return tan(arg);  }
-double f_tanh(double arg) { return tanh(arg); }
-double f_acos(double arg) { return acos(arg); }
-double f_acosh(double arg) { return acosh(arg);}
-double f_asin(double arg) { return asin(arg); }
-double f_asinh(double arg) { return asinh(arg);}
-double f_atan(double arg) { return atan(arg); }
-double f_atanh(double arg) { return atanh(arg);}
-double f_atan2(double y, double x) { return atan2(y, x);}
+double HHVM_FUNCTION(cos, double arg) { return cos(arg);  }
+double HHVM_FUNCTION(cosh, double arg) { return cosh(arg); }
+double HHVM_FUNCTION(sin, double arg) { return sin(arg);  }
+double HHVM_FUNCTION(sinh, double arg) { return sinh(arg); }
+double HHVM_FUNCTION(tan, double arg) { return tan(arg);  }
+double HHVM_FUNCTION(tanh, double arg) { return tanh(arg); }
+double HHVM_FUNCTION(acos, double arg) { return acos(arg); }
+double HHVM_FUNCTION(acosh, double arg) { return acosh(arg);}
+double HHVM_FUNCTION(asin, double arg) { return asin(arg); }
+double HHVM_FUNCTION(asinh, double arg) { return asinh(arg);}
+double HHVM_FUNCTION(atan, double arg) { return atan(arg); }
+double HHVM_FUNCTION(atanh, double arg) { return atanh(arg);}
+double HHVM_FUNCTION(atan2, double y, double x) { return atan2(y, x);}
 
-double f_hypot(double x, double y) { return hypot(x, y);}
-double f_fmod(double x, double y) { return fmod(x, y);}
-double f_sqrt(double arg) { return sqrt(arg);}
+double HHVM_FUNCTION(hypot, double x, double y) { return hypot(x, y);}
+double HHVM_FUNCTION(fmod, double x, double y) { return fmod(x, y);}
+double HHVM_FUNCTION(sqrt, double arg) { return sqrt(arg);}
 
-int64_t f_getrandmax() { return RAND_MAX;}
+int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool s_rand_is_seeded = false;
 
-void f_srand(const Variant& seed /* = null_variant */) {
+void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
   s_rand_is_seeded = true;
   if (seed.isNull()) {
     return srand(math_generate_seed());
@@ -379,22 +402,26 @@ void f_srand(const Variant& seed /* = null_variant */) {
   }
 }
 
-int64_t f_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
+int64_t HHVM_FUNCTION(rand,
+                      int64_t min /* = 0 */,
+                      const Variant& max /* = null_variant */) {
   if (!s_rand_is_seeded) {
     s_rand_is_seeded = true;
     srand(math_generate_seed());
   }
 
   int64_t number = rand();
-  if (min != 0 || max != RAND_MAX) {
-    RAND_RANGE(number, min, max, RAND_MAX);
+  int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
+  if (min != 0 || int_max != RAND_MAX) {
+    RAND_RANGE(number, min, int_max, RAND_MAX);
   }
   return number;
 }
 
-int64_t f_mt_getrandmax() { return MT_RAND_MAX;}
+int64_t HHVM_FUNCTION(mt_getrandmax) { return MT_RAND_MAX;}
 
-void f_mt_srand(const Variant& seed /* = null_variant */) {
+void HHVM_FUNCTION(mt_srand,
+                   const Variant& seed /* = null_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(math_generate_seed());
   }
@@ -405,10 +432,101 @@ void f_mt_srand(const Variant& seed /* = null_variant */) {
   }
 }
 
-int64_t f_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
-  return math_mt_rand(min, max);
+int64_t HHVM_FUNCTION(mt_rand,
+                      int64_t min /* = 0 */,
+                      const Variant& max /* = null_variant */) {
+  return math_mt_rand(min, max.isNull() ? RAND_MAX : max.toInt64());
 }
-double f_lcg_value() { return math_combined_lcg();}
+
+double HHVM_FUNCTION(lcg_value) { return math_combined_lcg();}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_PHP_ROUND_HALF_UP("PHP_ROUND_HALF_UP");
+const StaticString s_PHP_ROUND_HALF_DOWN("PHP_ROUND_HALF_DOWN");
+const StaticString s_PHP_ROUND_HALF_EVEN("PHP_ROUND_HALF_EVEN");
+const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
+
+#define ICONST(nm)                                                             \
+  Native::registerConstant<KindOfInt64>(makeStaticString(#nm), k_##nm)         \
+
+#define DCONST(nm)                                                             \
+  Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
+
+void StandardExtension::initMath() {
+  ICONST(PHP_ROUND_HALF_UP);
+  ICONST(PHP_ROUND_HALF_DOWN);
+  ICONST(PHP_ROUND_HALF_EVEN);
+  ICONST(PHP_ROUND_HALF_ODD);
+
+  DCONST(PI);
+  DCONST(1_PI);
+  DCONST(2_PI);
+  DCONST(2_SQRTPI);
+  DCONST(E);
+  DCONST(EULER);
+  DCONST(LN10);
+  DCONST(LN2);
+  DCONST(LNPI);
+  DCONST(LOG10E);
+  DCONST(LOG2E);
+  DCONST(PI_2);
+  DCONST(PI_4);
+  DCONST(SQRT1_2);
+  DCONST(SQRT2);
+  DCONST(SQRT3);
+  DCONST(SQRTPI);
+
+  HHVM_FE(min);
+  HHVM_FE(max);
+  HHVM_FE(abs);
+  HHVM_FE(is_finite);
+  HHVM_FE(is_infinite);
+  HHVM_FE(is_nan);
+  HHVM_FE(ceil);
+  HHVM_FE(floor);
+  HHVM_FE(round);
+  HHVM_FE(deg2rad);
+  HHVM_FE(rad2deg);
+  HHVM_FE(decbin);
+  HHVM_FE(dechex);
+  HHVM_FE(decoct);
+  HHVM_FE(bindec);
+  HHVM_FE(hexdec);
+  HHVM_FE(octdec);
+  HHVM_FE(base_convert);
+  HHVM_FE(pow);
+  HHVM_FE(exp);
+  HHVM_FE(expm1);
+  HHVM_FE(log10);
+  HHVM_FE(log1p);
+  HHVM_FE(log);
+  HHVM_FE(cos);
+  HHVM_FE(cosh);
+  HHVM_FE(sin);
+  HHVM_FE(sinh);
+  HHVM_FE(tan);
+  HHVM_FE(tanh);
+  HHVM_FE(acos);
+  HHVM_FE(acosh);
+  HHVM_FE(asin);
+  HHVM_FE(asinh);
+  HHVM_FE(atan);
+  HHVM_FE(atanh);
+  HHVM_FE(atan2);
+  HHVM_FE(hypot);
+  HHVM_FE(fmod);
+  HHVM_FE(sqrt);
+  HHVM_FE(getrandmax);
+  HHVM_FE(srand);
+  HHVM_FE(rand);
+  HHVM_FE(mt_getrandmax);
+  HHVM_FE(mt_srand);
+  HHVM_FE(mt_rand);
+  HHVM_FE(lcg_value);
+
+  loadSystemlib("std_math");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

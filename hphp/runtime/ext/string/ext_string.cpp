@@ -1447,7 +1447,7 @@ Variant HHVM_FUNCTION(count_chars,
     chars[*buf++]++;
   }
 
-  Array retarr;
+  Array retarr = Array::Create();
   char retstr[256];
   int retlen = 0;
   switch (mode) {

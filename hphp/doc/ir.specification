@@ -417,8 +417,6 @@ exceptions depending on how coercion is implemented.
 
 | DivDbl, D(Dbl), S(Dbl) S(Dbl), B|C
 
-| Mod, D(Int), S(Int) S(Int), C
-
 | Sqrt, D(Dbl), S(Dbl), C
 
 | OrInt, D(Int), S(Int) S(Int), C
@@ -468,6 +466,9 @@ exceptions depending on how coercion is implemented.
   corresponding opcodes because they're handled at the bytecode level, to
   implement short-circuiting.)
 
+| Mod, D(Int), S(Int) S(Int), C
+
+  Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
 3. Type conversions
 

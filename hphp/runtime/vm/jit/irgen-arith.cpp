@@ -632,27 +632,8 @@ void emitMod(HTS& env) {
   gen(env, DecRef, btr);
   gen(env, DecRef, btl);
 
-  // We unfortunately need to special-case r = -1 here. In two's
-  // complement, trying to divide INT_MIN by -1 will cause an integer
-  // overflow.
-  if (tr->isConst()) {
-    // This whole block only exists so irb->cond doesn't get mad when one of
-    // the branches gets optimized out due to constant folding.
-    if (tr->intVal() == -1LL) {
-      push(env, cns(env, 0));
-    } else if (tr->intVal() == 0) {
-      // mod by zero is undefined. don't emit opmod for it because
-      // this could cause issues in simplifier/codegen
-      // this should never get reached anyway, we just need to dump
-      // something on the stack
-      push(env, cns(env, false));
-    } else {
-      push(env, gen(env, Mod, tl, tr));
-    }
-    return;
-  }
-
-  // check for -1 (dynamic version)
+  // Check for -1.  The Mod IR instruction has undefined behavior for -1, but
+  // php semantics are to return zero.
   auto const res = env.irb->cond(
     0,
     [&] (Block* taken) {

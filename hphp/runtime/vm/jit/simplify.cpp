@@ -582,22 +582,19 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
 
   if (!src2->isConst()) return nullptr;
 
-  int64_t src2Val = src2->intVal();
-  auto const min = std::numeric_limits<int64_t>::min();
-
-  // refrain from generating undefined IR
-  assert(src2Val != 0);
-  // simplify const
-  if (src1->isConst()) {
-    // still don't want undefined IR
-    assert(src1->intVal() != min || src2Val != -1);
-    return cns(env, src1->intVal() % src2Val);
+  auto const src2Val = src2->intVal();
+  if (src2Val == 0 || src2Val == -1) {
+    // Undefined behavior, so we might as well constant propagate whatever we
+    // want. If we're being asked to simplify this, it better be dynamically
+    // unreachable code.
+    return cns(env, 0);
   }
-  // X % 1, X % -1 --> 0
-  if (src2Val == 1 || src2Val == -1) return cns(env, 0);
 
-  // X % LONG_MIN = X (largest magnitude possible as rhs)
-  return src2Val == min ? src1 : nullptr;
+  if (src1->isConst()) return cns(env, src1->intVal() % src2Val);
+  // X % 1 --> 0
+  if (src2Val == 1) return cns(env, 0);
+
+  return nullptr;
 }
 
 SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {

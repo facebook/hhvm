@@ -92,42 +92,5 @@ Directory* UserStreamWrapper::opendir(const String& path) {
   return dir;
 }
 
-bool UserStreamWrapper::touch(const String& path,
-                              int64_t mtime, int64_t atime) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->touch(path, mtime, atime);
-}
-
-bool UserStreamWrapper::chmod(const String& path, int64_t mode) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->chmod(path, mode);
-}
-
-bool UserStreamWrapper::chown(const String& path, int64_t uid) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->chown(path, uid);
-}
-
-bool UserStreamWrapper::chown(const String& path, const String& uid) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->chown(path, uid);
-}
-
-bool UserStreamWrapper::chgrp(const String& path, int64_t gid) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->chgrp(path, gid);
-}
-
-bool UserStreamWrapper::chgrp(const String& path, const String& gid) {
-  auto file = newres<UserFile>(m_cls);
-  Resource wrapper(file);
-  return file->chgrp(path, gid);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

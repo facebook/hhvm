@@ -17,6 +17,9 @@
 #ifndef HPHP_USER_FILE_H
 #define HPHP_USER_FILE_H
 
+#include <utime.h>
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/user-fs-node.h"
 
@@ -63,17 +66,54 @@ public:
   bool rename(const String& oldname, const String& newname);
   bool mkdir(const String& path, int mode, int options);
   bool rmdir(const String& path, int options);
-  bool touch(const String& path, int64_t mtime, int64_t atime);
-  bool chmod(const String& path, int64_t mode);
-  bool chown(const String& path, int64_t uid);
-  bool chown(const String& path, const String& uid);
-  bool chgrp(const String& path, int64_t gid);
-  bool chgrp(const String& path, const String& gid);
+
+  template<typename ValueT>
+  bool metadata(const String& path, int option, ValueT value)
+  {
+    PackedArrayInit pai(3);
+    pai.append(path);
+    pai.append(option);
+  
+    switch (option) {
+      case PHP_STREAM_META_TOUCH:
+        return false;
+      case PHP_STREAM_META_GROUP:
+      case PHP_STREAM_META_OWNER:
+      case PHP_STREAM_META_ACCESS:
+      case PHP_STREAM_META_GROUP_NAME:
+      case PHP_STREAM_META_OWNER_NAME:
+        pai.append(value);
+        break;
+      default:
+        raise_warning("Unknown option %d for stream_metadata", option);
+        return false;
+    }
+  
+    return invokeMetadata(pai.toArray());
+  }
+
+  bool metadata(const String& path, int option, struct utimbuf *value)
+  {
+    if (option != PHP_STREAM_META_TOUCH) {
+      return false;
+    }
+
+    PackedArrayInit pai(3);
+    pai.append(path);
+    pai.append(option);
+    if (value) {
+      pai.append(make_packed_array(value->modtime, value->actime));
+    } else {
+      pai.append(Array::Create());
+    }
+
+    return invokeMetadata(pai.toArray());
+  }
 
 private:
   int urlStat(const String& path, struct stat* stat_sb, int flags = 0);
   bool flushImpl(bool strict);
-  bool invokeMetadata(const Array& args, const char* funcName);
+  bool invokeMetadata(const Array& args);
 
 protected:
   const Func* m_StreamOpen;

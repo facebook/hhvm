@@ -1289,7 +1289,7 @@ bool HHVM_FUNCTION(chmod,
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
-    return usw->chmod(filename, mode);
+    return usw->metadata(filename, PHP_STREAM_META_ACCESS, mode);
   }
 
   CHECK_SYSTEM(chmod(translated.c_str(), mode));
@@ -1323,9 +1323,11 @@ bool HHVM_FUNCTION(chown,
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
     if (user.isInteger()) {
-      return usw->chown(filename, user.toInt64());
+      return usw->metadata(filename, PHP_STREAM_META_OWNER,
+                           user.toInt64());
     } else if (user.isString()) {
-      return usw->chown(filename, user.toString());
+      return usw->metadata(filename, PHP_STREAM_META_OWNER_NAME,
+                           user.toString());
     }
     raise_warning("chown(): parameter 2 should be string or integer, %s given",
                   getDataTypeString(user.getType()).c_str());
@@ -1352,9 +1354,11 @@ bool HHVM_FUNCTION(lchown,
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
     if (user.isInteger()) {
-      return usw->chown(filename, user.toInt64());
+      return usw->metadata(filename, PHP_STREAM_META_OWNER,
+                           user.toInt64());
     } else if (user.isString()) {
-      return usw->chown(filename, user.toString());
+      return usw->metadata(filename, PHP_STREAM_META_OWNER_NAME,
+                           user.toString());
     }
     raise_warning("lchown(): parameter 2 should be string or integer, %s given",
                   getDataTypeString(user.getType()).c_str());
@@ -1398,9 +1402,11 @@ bool HHVM_FUNCTION(chgrp,
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
     if (group.isInteger()) {
-      return usw->chgrp(filename, group.toInt64());
+      return usw->metadata(filename, PHP_STREAM_META_GROUP,
+                           group.toInt64());
     } else if (group.isString()) {
-      return usw->chgrp(filename, group.toString());
+      return usw->metadata(filename, PHP_STREAM_META_GROUP_NAME,
+                           group.toString());
     }
     raise_warning("chgrp(): parameter 2 should be string or integer, %s given",
                   getDataTypeString(group.getType()).c_str());
@@ -1423,9 +1429,11 @@ bool HHVM_FUNCTION(lchgrp,
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
     if (group.isInteger()) {
-      return usw->chgrp(filename, group.toInt64());
+      return usw->metadata(filename, PHP_STREAM_META_GROUP,
+                           group.toInt64());
     } else if (group.isString()) {
-      return usw->chgrp(filename, group.toString());
+      return usw->metadata(filename, PHP_STREAM_META_GROUP_NAME,
+                           group.toString());
     }
     raise_warning("lchgrp(): parameter 2 should be string or integer, %s given",
                   getDataTypeString(group.getType()).c_str());
@@ -1444,11 +1452,23 @@ bool HHVM_FUNCTION(touch,
                    int64_t atime /* = 0 */) {
   CHECK_PATH_FALSE(filename, 1);
 
-  // If filename points to a user file, invoke UserStreamWrapper::touch(..)
+  struct utimbuf newtimebuf;
+  newtimebuf.actime = atime ? atime : mtime;
+  newtimebuf.modtime = mtime;
+
+  struct utimbuf *newtime;
+  if (mtime == 0 && atime == 0) {
+    // It is important to pass nullptr so that the OS sets mtime and atime
+    // to the current time with maximum precision (more precise then seconds)
+    newtime = nullptr;
+  } else {
+    newtime = &newtimebuf;
+  }
+
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
   auto usw = dynamic_cast<UserStreamWrapper*>(w);
   if (usw != nullptr) {
-    return usw->touch(filename, mtime, atime);
+    return usw->metadata(filename, PHP_STREAM_META_TOUCH, newtime);
   }
 
   String translated = File::TranslatePath(filename);
@@ -1466,17 +1486,7 @@ bool HHVM_FUNCTION(touch,
     fclose(f);
   }
 
-  if (mtime == 0 && atime == 0) {
-    // It is important to pass nullptr so that the OS sets mtime and atime
-    // to the current time with maximum precision (more precise then seconds)
-    CHECK_SYSTEM(utime(translated.data(), nullptr));
-  } else {
-    struct utimbuf newtime;
-    newtime.actime = atime ? atime : mtime;
-    newtime.modtime = mtime;
-    CHECK_SYSTEM(utime(translated.data(), &newtime));
-  }
-
+  CHECK_SYSTEM(utime(translated.data(), newtime));
   return true;
 }
 

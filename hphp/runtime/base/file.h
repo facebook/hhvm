@@ -25,6 +25,13 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 
+#define PHP_STREAM_META_TOUCH       1
+#define PHP_STREAM_META_OWNER_NAME  2
+#define PHP_STREAM_META_OWNER       3
+#define PHP_STREAM_META_GROUP_NAME  4
+#define PHP_STREAM_META_GROUP       5
+#define PHP_STREAM_META_ACCESS      6
+
 struct stat;
 
 namespace HPHP {

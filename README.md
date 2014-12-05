@@ -18,6 +18,8 @@ Our [FAQ](https://github.com/facebook/hhvm/wiki/FAQ) has answers to many common 
 
 ## Installing
 
+If you're new, try our [getting started overview](https://github.com/facebook/hhvm/wiki/Getting-Started).
+
 You can install a [prebuilt package](https://github.com/facebook/hhvm/wiki/Prebuilt%20Packages%20for%20HHVM) or [compile from source](https://github.com/facebook/hhvm/wiki/Building%20and%20Installing%20HHVM).
 
 
@@ -31,6 +33,8 @@ If you want to host a website:
 * Start your webserver
 * Run `sudo /etc/init.d/hhvm start`
 * Visit your site at http://.../index.php
+
+Our [getting started overview](https://github.com/facebook/hhvm/wiki/Getting-Started) provides a slightly more detailed introduction as well as links to more information.
 
 
 ## Contributing

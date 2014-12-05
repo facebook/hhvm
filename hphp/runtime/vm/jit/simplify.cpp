@@ -1741,7 +1741,7 @@ SSATmp* simplifyCoerceStk(State& env, const IRInstruction* inst) {
                                   inst->extra<CoerceStk>()->offset);
   if (info.knownType <= inst->typeParam()) {
     // No need to cast---the type was as good or better.
-    return gen(env, Nop);
+    return inst->src(0);
   }
   return nullptr;
 }

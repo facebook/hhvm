@@ -256,40 +256,22 @@ inline Type topType(HTS& env,
 //////////////////////////////////////////////////////////////////////
 // Eval stack---SpillStack machinery
 
-/*
- * Get SSATmps representing all the information on the virtual eval
- * stack in preparation for a spill or exit trace. Top of stack will
- * be in the last element.
- *
- * Doesn't actually remove these values from the eval stack.
- */
-inline std::vector<SSATmp*> peekSpillValues(HTS& env) {
-  auto ret = std::vector<SSATmp*>{};
-  ret.reserve(env.irb->evalStack().size());
-  for (int i = env.irb->evalStack().size(); i--; ) {
+inline SSATmp* spillStack(HTS& env) {
+  auto vals = std::vector<SSATmp*>{};
+  vals.reserve(env.irb->evalStack().size() + 2);
+  vals.push_back(sp(env));
+  vals.push_back(cns(env, int64_t{env.irb->stackDeficit()}));
+  for (auto i = uint32_t{0}; i < env.irb->evalStack().size(); ++i) {
     // DataTypeGeneric is used here because SpillStack just teleports the
     // values to memory.
-    auto const elem = top(env, i, DataTypeGeneric);
-    ret.push_back(elem);
+    vals.push_back(top(env, i, DataTypeGeneric));
   }
-  return ret;
-}
 
-inline SSATmp* implSpillStack(HTS& env,
-                              SSATmp* sp,
-                              const std::vector<SSATmp*>& spillVals,
-                              int64_t extraOffset = 0) {
-  auto ssaArgs = std::vector<SSATmp*>{
-    sp,
-    cns(env, int64_t{env.irb->stackDeficit() + extraOffset})
-  };
-  ssaArgs.insert(ssaArgs.end(), spillVals.rbegin(), spillVals.rend());
-  auto const args = std::make_pair(ssaArgs.size(), &ssaArgs[0]);
-  return gen(env, SpillStack, args);
-}
-
-inline SSATmp* spillStack(HTS& env) {
-  auto newSp = implSpillStack(env, sp(env), peekSpillValues(env));
+  auto const newSp = gen(
+    env,
+    SpillStack,
+    std::make_pair(vals.size(), &vals[0])
+  );
   env.irb->evalStack().clear();
   env.irb->clearStackDeficit();
   return newSp;

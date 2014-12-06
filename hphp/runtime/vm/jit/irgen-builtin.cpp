@@ -838,7 +838,7 @@ void emitFCallBuiltin(HTS& env,
     nullptr,  // no $this; FCallBuiltin never happens for methods
     numArgs,
     numNonDefault,
-    [&] (uint32_t i) { return popC(env); }
+    [&] (uint32_t i) { return pop(env, Type::Gen, DataTypeSpecific); }
   );
 
   auto const catcher = CatchMaker {

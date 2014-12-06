@@ -75,7 +75,7 @@ struct File : SweepableResourceData {
   const String& o_getResourceName() const { return s_resource_name; }
   virtual bool isInvalid() const { return m_closed; }
 
-  int fd() const { return m_fd;}
+  virtual int fd() const { return m_fd;}
   bool valid() const { return m_fd >= 0;}
   const std::string getName() const { return m_name;}
 

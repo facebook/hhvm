@@ -23,6 +23,15 @@ array(1) {
   [0]=>
   int(8192)
 }
+string(11) "stream_cast"
+array(1) {
+  [0]=>
+  int(3)
+}
+
+Warning: cannot represent a stream of type user-space as a file descriptor in %s/test/slow/streams/stream_wrapper_register.php on line %d
+
+Warning: no resource arrays were passed to select in %s/test/slow/streams/stream_wrapper_register.php on line %d
 string(12) "stream_flush"
 array(0) {
 }

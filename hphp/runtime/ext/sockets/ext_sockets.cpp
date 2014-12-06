@@ -235,8 +235,12 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
   assert(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
     File *sock = iter.second().toResource().getTyped<File>();
+    int intfd = sock->fd();
+    if (intfd < 0) {
+      continue;
+    }
     pollfd &fd = fds[nfds++];
-    fd.fd = sock->fd();
+    fd.fd = intfd;
     fd.events = flag;
     fd.revents = 0;
   }
@@ -848,6 +852,11 @@ Variant HHVM_FUNCTION(socket_select,
   }
   if (!except.isNull()) {
     sock_array_to_fd_set(except.toArray(), fds, count, POLLPRI);
+  }
+  if (!count) {
+    raise_warning("no resource arrays were passed to select");
+    free(fds);
+    return false;
   }
 
   IOStatusHelper io("socket_select");

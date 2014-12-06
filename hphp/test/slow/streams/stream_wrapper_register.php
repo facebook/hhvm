@@ -159,12 +159,10 @@ $fp = fopen("abc://b", "rw");
 feof($fp);
 fread($fp, 1);
 
-/** We don't have anything like stream_cast
 $r = array($fp);
 $w = null;
 $e = null;
 stream_select($r, $w, $e, 0);
-*/
 
 fflush($fp);
 flock($fp, LOCK_SH);

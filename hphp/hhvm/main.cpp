@@ -24,12 +24,13 @@
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/text-util.h"
+#include "hphp/util/hash.h"
 
 int main(int argc, char** argv) {
   if (!argc) {
     return 0;
   }
-
+  HPHP::checkBuild();
   int len = strlen(argv[0]);
   if (len >= 4 && !strcmp(argv[0] + len - 4, "hphp")) {
     return HPHP::compiler_main(argc, argv);

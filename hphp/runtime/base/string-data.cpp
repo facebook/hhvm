@@ -55,7 +55,7 @@ ALWAYS_INLINE
 std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
   static_assert(StringData::MaxSize + 1 < kMaxPackedCap, "");
 
-  if (len <= kPackedCapCodeThreshold - kCapOverhead) {
+  if (LIKELY(len <= kPackedCapCodeThreshold - kCapOverhead)) {
     // fast path for most small strings
     auto need = len + kCapOverhead;
     auto cap = MemoryManager::smartSizeClass(need);
@@ -787,10 +787,11 @@ void StringData::incrementHelper() {
 
 void StringData::preCompute() const {
   StringSlice s = slice();
-  m_hash = hash_string(s.ptr, s.len);
+  m_hash = hash_string_unsafe(s.ptr, s.len);
   assert(m_hash >= 0);
-  int64_t lval; double dval;
-  if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
+  if (s.len > 0 &&
+      (is_numeric_string(s.ptr, s.len, nullptr, nullptr,
+                         1, nullptr) == KindOfNull)) {
     m_hash |= STRHASH_MSB;
   }
 }
@@ -974,7 +975,10 @@ int StringData::compare(const StringData *v2) const {
 
 strhash_t StringData::hashHelper() const {
   assert(!isShared());
-  strhash_t h = hash_string_inline(m_data, m_len);
+  // binliu: Use the inlined unsafe version here, as StringData is 8-byte
+  // aligned. The generated code for the entire method should be exactly 64
+  // bytes with g++ optimization.
+  strhash_t h = hash_string_inline_unsafe(m_data, m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;

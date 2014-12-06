@@ -132,12 +132,14 @@ end = struct
         SharedMem.load (filename^".sharedmem");
         EventLogger.load_read_end filename;
         let to_recheck =
+          List.rev_append (BuildMain.get_all_targets ()) to_recheck in
+        let paths_to_recheck =
           rev_rev_map (Relative_path.concat Relative_path.Root) to_recheck
         in
         let updates = List.fold_left
           (fun acc update -> Relative_path.Set.add update acc)
           Relative_path.Set.empty
-          to_recheck in
+          paths_to_recheck in
         let updates =
           Relative_path.Set.filter (Program.filter_update genv env) updates in
         let env = Program.recheck genv env updates in

@@ -628,11 +628,11 @@
 	  # Dependent on system language settings.
       - twig/test/Twig/Tests/CompilerTest.php
   vfsstream:
-    # We're using a fork to unskip a couple of tests
-    # The latest stable is v1.4.0 - the fork is slightly ahead
-    url: https://github.com/kevinxucs/vfsStream.git
-    branch: hhvm-1.4.0
-    commit: 104f0b88f376126a5865bb2cb3e7ac6a04a7ee83
+    # It's slightly ahead of stable release v1.4.0 to include a commit which
+    # unskips a couple of tests on HHVM
+    url: https://github.com/mikey179/vfsStream.git
+    branch: master
+    commit: 056b64e0341039eb83075ca53347f29d0bfdead0
     install_root: vfsstream
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist

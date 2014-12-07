@@ -45,6 +45,7 @@ abstract class WaitHandle<T> implements Awaitable<T> {
   public function isFailed(): bool {}
   public function getID(): int {}
   public function getName(): string {}
+  public function result() : T {}
   public function getExceptionIfFailed(): ?Exception {}
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}

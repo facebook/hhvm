@@ -637,9 +637,6 @@
     test_root: vfsstream
     config_file: vfsstream/phpunit.xml.dist
     test_find_mode: token
-    blacklist:
-      # Intermittently hangs, takes > 24h
-      - vfsstream/src/test/php/org/bovigo/vfs/vfsStreamWrapperWithoutRootTestCase.php
   yii:
     url: https://github.com/yiisoft/yii.git
     branch: master

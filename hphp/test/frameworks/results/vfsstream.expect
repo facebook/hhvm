@@ -720,6 +720,14 @@ org\bovigo\vfs\vfsStreamWrapperTestCase::urlIsUpdatedAfterMove
 .
 org\bovigo\vfs\vfsStreamWrapperTestCase::urlsAreCorrectlySet
 .
+org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotOpen
+F
+org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotOpenDirectory
+.
+org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotRename
+.
+org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotUnlink
+.
 org\bovigo\vfs\vfsStreamZipTestCase::createZipArchive
 S
 org\bovigo\vfs\visitor\vfsStreamAbstractVisitorTestCase::visitThrowsInvalidArgumentExceptionOnUnknownContentType

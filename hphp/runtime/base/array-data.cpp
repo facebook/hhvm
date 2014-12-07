@@ -991,7 +991,7 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "IntMapKind",
     "VPackedKind",
     "EmptyKind",
-    "SharedKind",
+    "ApcKind",
     "GlobalsKind",
     "ProxyKind",
   }};

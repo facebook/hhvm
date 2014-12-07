@@ -536,7 +536,7 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 
 namespace {
 const char* header_names[] = {
-  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Shared",
+  "Packed", "Mixed", "StrMap", "IntMap", "VPacked", "Empty", "Apc",
   "Globals", "Proxy", "String", "Object", "Resource", "Ref", "Native",
   "Sweepable", "SmallMalloc", "BigMalloc", "BigObj", "Free", "Hole", "Debug"
 };
@@ -586,7 +586,7 @@ size_t Header::size() const {
       return mixed_.heapSize();
     case HeaderKind::Empty:
       return sizeof(ArrayData);
-    case HeaderKind::Shared:
+    case HeaderKind::Apc:
       return sizeof(APCLocalArray);
     case HeaderKind::Globals:
       return sizeof(GlobalsArray);

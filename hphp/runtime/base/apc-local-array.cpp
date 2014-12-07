@@ -32,7 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
-  assert(ad->isSharedArray());
+  assert(ad->isApcArray());
   DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
   if (auto ptr = shared->m_localCache) {
     auto const cap = shared->m_arr->capacity();
@@ -55,7 +55,7 @@ void APCLocalArray::sweep() {
 }
 
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
-  auto const ad = asSharedArray(adIn);
+  auto const ad = asApcArray(adIn);
   auto const sv = ad->m_arr->getValue(pos);
   if (LIKELY(ad->m_localCache != nullptr)) {
     assert(unsigned(pos) < ad->m_arr->capacity());
@@ -90,7 +90,7 @@ APCLocalArray::~APCLocalArray() {
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
-  auto const a = asSharedArray(ad);
+  auto const a = asApcArray(ad);
   a->~APCLocalArray();
   MM().smartFreeSize(a, sizeof(APCLocalArray));
 }
@@ -98,7 +98,7 @@ void APCLocalArray::Release(ArrayData* ad) {
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
 
 bool APCLocalArray::IsVectorData(const ArrayData* ad) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   const auto n = a->size();
   for (ssize_t i = 0; i < n; i++) {
     if (a->getIndex(i) != i) return false;
@@ -107,12 +107,12 @@ bool APCLocalArray::IsVectorData(const ArrayData* ad) {
 }
 
 bool APCLocalArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   return a->getIndex(k) != -1;
 }
 
 bool APCLocalArray::ExistsInt(const ArrayData* ad, int64_t k) {
-  return asSharedArray(ad)->getIndex(k) != -1;
+  return asApcArray(ad)->getIndex(k) != -1;
 }
 
 ssize_t APCLocalArray::getIndex(int64_t k) const {
@@ -245,14 +245,14 @@ ArrayData *APCLocalArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
-  auto smap = asSharedArray(ad);
+  auto smap = asApcArray(ad);
   auto ret = smap->loadElems();
   assert(!ret->isStatic());
   return ret;
 }
 
 const TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
   return GetValueRef(a, index).asTypedValue();
@@ -260,7 +260,7 @@ const TypedValue* APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
 
 const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
                                     const StringData* key) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
   return GetValueRef(a, index).asTypedValue();
@@ -269,7 +269,7 @@ const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
 void APCLocalArray::NvGetKey(const ArrayData* ad,
                              TypedValue* out,
                              ssize_t pos) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
   TypedValue* tv = k.asTypedValue();
   // copy w/out clobbering out->_count.
@@ -279,7 +279,7 @@ void APCLocalArray::NvGetKey(const ArrayData* ad,
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   auto ret = a->loadElems()->escalateForSort();
   assert(!ret->isStatic());
   return ret;
@@ -314,24 +314,24 @@ ssize_t APCLocalArray::IterBegin(const ArrayData* ad) {
 }
 
 ssize_t APCLocalArray::IterLast(const ArrayData* ad) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   auto n = a->m_size;
   return n > 0 ? ssize_t(n - 1) : 0;
 }
 
 ssize_t APCLocalArray::IterEnd(const ArrayData* ad) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   auto n = a->m_size;
   return n;
 }
 
 ssize_t APCLocalArray::IterAdvance(const ArrayData* ad, ssize_t prev) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   return a->iterAdvanceImpl(prev);
 }
 
 ssize_t APCLocalArray::IterRewind(const ArrayData* ad, ssize_t prev) {
-  auto a = asSharedArray(ad);
+  auto a = asApcArray(ad);
   assert(prev >= 0 && prev < a->m_size);
   ssize_t next = prev - 1;
   return next >= 0 ? next : a->m_size;

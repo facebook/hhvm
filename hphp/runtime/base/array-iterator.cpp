@@ -1475,10 +1475,10 @@ static int64_t iter_next_apc_array(Iter* iter,
                                    TypedValue* valOut,
                                    TypedValue* keyOut,
                                    ArrayData* ad) {
-  assert(ad->kind() == ArrayData::kSharedKind);
+  assert(ad->kind() == ArrayData::kApcKind);
 
   auto const arrIter = &iter->arr();
-  auto const arr = APCLocalArray::asSharedArray(ad);
+  auto const arr = APCLocalArray::asApcArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ad->getSize())) {
     if (UNLIKELY(arr->hasExactlyOneRef())) {
@@ -1523,7 +1523,7 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     auto const isMixed  = ad->isMixed();
 
     if (UNLIKELY(!isMixed && !isPacked)) {
-      if (ad->isSharedArray()) {
+      if (ad->isApcArray()) {
         // TODO(#4055855): what if a local value in an apc array has
         // been turned into a ref?  Is this actually ok to do?
         return iter_next_apc_array(iter, valOut, keyOut, ad);
@@ -1831,7 +1831,7 @@ int64_t iterNextArray(Iter* it, TypedValue* valOut) {
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
-  if (ad->isSharedArray()) {
+  if (ad->isApcArray()) {
     return iter_next_apc_array(it, valOut, nullptr, ad);
   }
   return iter_next_cold<false>(it, valOut, nullptr);
@@ -1848,7 +1848,7 @@ int64_t iterNextKArray(Iter* it,
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
-  if (ad->isSharedArray()) {
+  if (ad->isApcArray()) {
     return iter_next_apc_array(it, valOut, keyOut, ad);
   }
   return iter_next_cold<false>(it, valOut, keyOut);

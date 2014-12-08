@@ -237,6 +237,9 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
     File *sock = iter.second().toResource().getTyped<File>();
     int intfd = sock->fd();
     if (intfd < 0) {
+      raise_warning(
+        "cannot represent a stream of type user-space as a file descriptor"
+      );
       continue;
     }
     pollfd &fd = fds[nfds++];

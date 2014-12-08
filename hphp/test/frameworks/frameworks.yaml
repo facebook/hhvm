@@ -71,7 +71,7 @@
       # Assumes that calculating the current time in seconds twice will give
       # the same result. Not true if you're unlucky.
       - codeigniter/tests/codeigniter/helpers/date_helper_test.php
-      # Flakey test case. Already made a RP at https://github.com/bcit-ci/CodeIgniter/pull/3399.
+      # Flakey test case. Already made a PR at https://github.com/bcit-ci/CodeIgniter/pull/3399.
       - codeigniter/tests/codeigniter/libraries/Session_test.php
   composer:
     url: https://github.com/composer/composer.git

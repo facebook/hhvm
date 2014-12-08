@@ -667,9 +667,10 @@ Type Type::combine(bits_t newBits, Ptr newPtrKind, Type a, Type b) {
     auto const specType = a.isSpecialized() ? a.specializedType()
                                             : b.specializedType();
 
-    // If the specialized type doesn't exist in newBits, drop the
-    // specialization.
-    if (newBits & specType.m_bits) {
+    // If the specialized type doesn't exist in newBits, or newBits can be
+    // specialized as an object or as an array, then drop the specialization.
+    auto const either = (newBits & kAnyObj) && (newBits & kAnyArr);
+    if ((newBits & specType.m_bits) && !either) {
       return Type(newBits, newPtrKind, specType.m_extra);
     }
     return Type(newBits, newPtrKind);

@@ -134,10 +134,10 @@ function tempnam_ISOLATION_WRAPPER() {
 fb_rename_function('tempnam', 'ORIG_tempnam');
 fb_rename_function('tempnam_ISOLATION_WRAPPER', 'tempnam');
 
-static $time = null;
+$time = null;
 
 function time_ISOLATION_WRAPPER() {
-  global $time;
+  $time = $GLOBALS["time"];
   $org_time = ORIG_time();
   if ($time === null) {
     $time = $org_time;
@@ -155,7 +155,7 @@ fb_rename_function('time', 'ORIG_time');
 fb_rename_function('time_ISOLATION_WRAPPER', 'time');
 
 function microtime_ISOLATION_WRAPPER(bool $get_as_float = false) {
-  global $time;
+  $time = $GLOBALS["time"];
   list($msec, $sec) = explode(" ", ORIG_microtime());
   if ($time === null) {
     $time = $sec;
@@ -172,49 +172,49 @@ function microtime_ISOLATION_WRAPPER(bool $get_as_float = false) {
 fb_rename_function('microtime', 'ORIG_microtime');
 fb_rename_function('microtime_ISOLATION_WRAPPER', 'microtime');
 
-function date_ISOLATION_WRAPPER(string $format, int $timestamp = null) {
+function date_ISOLATION_WRAPPER(?string $format, ?int $timestamp = null) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_date($format, $timestamp);
 }
 fb_rename_function('date', 'ORIG_date');
 fb_rename_function('date_ISOLATION_WRAPPER', 'date');
 
-function gmdate_ISOLATION_WRAPPER(string $format, int $timestamp = null) {
+function gmdate_ISOLATION_WRAPPER(?string $format, ?int $timestamp = null) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_gmdate($format, $timestamp);
 }
 fb_rename_function('gmdate', 'ORIG_gmdate');
 fb_rename_function('gmdate_ISOLATION_WRAPPER', 'gmdate');
 
-function strftime_ISOLATION_WRAPPER(string $format, int $timestamp = null) {
+function strftime_ISOLATION_WRAPPER(?string $format, ?int $timestamp = null) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_strftime($format, $timestamp);
 }
 fb_rename_function('strftime', 'ORIG_strftime');
 fb_rename_function('strftime_ISOLATION_WRAPPER', 'strftime');
 
-function strtotime_ISOLATION_WRAPPER(string $time, int $now = null) {
+function strtotime_ISOLATION_WRAPPER(?string $time, ?int $now = null) {
   $now = ($now === null ? time() : $now);
   return ORIG_strtotime($time, $now);
 }
 fb_rename_function('strtotime', 'ORIG_strtotime');
 fb_rename_function('strtotime_ISOLATION_WRAPPER', 'strtotime');
 
-function idate_ISOLATION_WRAPPER(string $format, int $timestamp = null) {
+function idate_ISOLATION_WRAPPER(?string $format, ?int $timestamp = null) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_idate($format, $timestamp);
 }
 fb_rename_function('idate', 'ORIG_idate');
 fb_rename_function('idate_ISOLATION_WRAPPER', 'idate');
 
-function getdate_ISOLATION_WRAPPER(int $timestamp = null) {
+function getdate_ISOLATION_WRAPPER(?int $timestamp = null) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_getdate($timestamp);
 }
 fb_rename_function('getdate', 'ORIG_getdate');
 fb_rename_function('getdate_ISOLATION_WRAPPER', 'getdate');
 
-function localtime_ISOLATION_WRAPPER(int $timestamp = null, bool $is_associative = false) {
+function localtime_ISOLATION_WRAPPER(?int $timestamp = null, bool $is_associative = false) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_localtime($timestamp, $is_associative);
 }

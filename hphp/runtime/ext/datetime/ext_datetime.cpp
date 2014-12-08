@@ -937,7 +937,7 @@ TypedValue* HHVM_FN(date_sunset)(ActRec* ar) {
 
 static class DateTimeExtension : public Extension {
 public:
-  DateTimeExtension() : Extension("datetime", k_PHP_VERSION.c_str()) { }
+  DateTimeExtension() : Extension("date", k_PHP_VERSION.c_str()) { }
 
   virtual void moduleInit() {
     HHVM_ME(DateTime, __construct);
@@ -1025,7 +1025,7 @@ public:
     HHVM_FE(timezone_name_from_abbr);
     HHVM_FE(timezone_version_get);
 
-    loadSystemlib();
+    loadSystemlib("datetime");
   }
 
   void threadInit() {
@@ -1074,7 +1074,7 @@ private:
     }
     return ret.toCppString();
   }
-} s_datetime_extension;
+} s_date_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

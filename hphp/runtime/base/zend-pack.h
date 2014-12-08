@@ -61,23 +61,28 @@ private:
   char machine_little_endian;
 
   // Mapping of byte from char (8bit) to int32 for machine endian
-  int byte_map[1];
+  int64_t byte_map[1];
 
   // Mappings of bytes from int (machine dependant) to int for machine endian
-  int int_map[sizeof(int)];
+  int64_t int_map[sizeof(int)];
 
   // Mappings of bytes from shorts (16bit) for all endian environments
-  int machine_endian_short_map[2];
-  int big_endian_short_map[2];
-  int little_endian_short_map[2];
+  int64_t machine_endian_short_map[2];
+  int64_t big_endian_short_map[2];
+  int64_t little_endian_short_map[2];
 
   // Mappings of bytes from int32s (32bit) for all endian environments
-  int machine_endian_int32_map[4];
-  int big_endian_int32_map[4];
-  int little_endian_int32_map[4];
+  int64_t machine_endian_int32_map[4];
+  int64_t big_endian_int32_map[4];
+  int64_t little_endian_int32_map[4];
 
-  void pack(const Variant& val, int size, int *map, char *output);
-  int32_t unpack(const char *data, int size, int issigned, int *map);
+  /* Mappings of bytes from int64s (64bit) for all endian environments */
+  int64_t machine_endian_int64_map[8];
+  int64_t big_endian_int64_map[8];
+  int64_t little_endian_int64_map[8];
+
+  void pack(const Variant& val, int64_t size, int64_t *map, char *output);
+  int64_t unpack(const char *data, int64_t size, int issigned, int64_t *map);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

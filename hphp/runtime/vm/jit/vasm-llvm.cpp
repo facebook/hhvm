@@ -40,6 +40,7 @@
 #include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/ExecutionEngine/ObjectCache.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
+#include <llvm/IR/AssemblyAnnotationWriter.h>
 #include <llvm/IR/ConstantFolder.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -396,6 +397,34 @@ std::string llshow(T* val) {
   return str;
 }
 
+struct VasmAnnotationWriter : llvm::AssemblyAnnotationWriter {
+  explicit VasmAnnotationWriter(const std::vector<std::string>& strs)
+    : m_strs(strs)
+  {}
+
+  void emitBasicBlockStartAnnot(const llvm::BasicBlock* b,
+                                llvm::formatted_raw_ostream& os) override {
+    m_curId = -1;
+    m_prefix = "";
+  }
+
+  void emitInstructionAnnot(const llvm::Instruction* i,
+                            llvm::formatted_raw_ostream& os) override {
+    SCOPE_EXIT { m_prefix = "\n"; };
+
+    auto dbg = i->getDebugLoc();
+    if (dbg.isUnknown() || m_curId == dbg.getLine()) return;
+
+    m_curId = dbg.getLine();
+    os << m_prefix << m_strs[m_curId] << "\n";
+  }
+
+ private:
+  const std::vector<std::string>& m_strs;
+  size_t m_curId;
+  const char* m_prefix{nullptr};
+};
+
 /*
  * LLVMEmitter is responsible for transforming a Vunit into LLVM IR, then
  * optimizing that and emitting machine code from the result.
@@ -415,7 +444,7 @@ struct LLVMEmitter {
       llvm::Function::ExternalLinkage, "", m_module.get()))
     , m_irb(m_context,
             llvm::ConstantFolder(),
-            IRBuilderVasmInserter(m_context, unit))
+            IRBuilderVasmInserter(*this))
     , m_tcMM(new TCMemoryManager(areas))
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
@@ -511,7 +540,9 @@ struct LLVMEmitter {
   std::string showModule() const {
     std::string s;
     llvm::raw_string_ostream stream(s);
-    m_module->print(stream, nullptr);
+    VasmAnnotationWriter vw(m_instStrs);
+    m_module->print(stream,
+                    HPHP::Trace::moduleEnabled(Trace::llvm, 5) ? &vw : nullptr);
     return stream.str();
   }
 
@@ -824,27 +855,28 @@ private:
    * vasm origins of IR instructions in debug dumps.
    */
   struct IRBuilderVasmInserter {
-    IRBuilderVasmInserter(llvm::LLVMContext& context, const Vunit& unit)
-      : m_context(context), m_unit(unit) {}
-    void setVinstr(const Vinstr& instr) { m_instr = instr; }
-  protected:
+    explicit IRBuilderVasmInserter(LLVMEmitter& e)
+      : m_emitter(e)
+      , m_mdNode(llvm::MDNode::get(m_emitter.m_context,
+                                   std::vector<llvm::Value*>{}))
+    {}
+
+    void setVinstId(size_t id) { m_instId = id; }
+
+   protected:
     void InsertHelper(llvm::Instruction* I, const llvm::Twine& Name,
                       llvm::BasicBlock* BB,
                       llvm::BasicBlock::iterator InsertPt) const {
       if (BB) BB->getInstList().insert(InsertPt, I);
       I->setName(Name);
-      if (HPHP::Trace::moduleEnabled(Trace::llvm, 5)) {
-        I->setMetadata("vasm",
-                       llvm::MDNode::getWhenValsUnresolved(
-                         m_context,
-                         llvm::MDString::get(m_context, show(m_unit, m_instr)),
-                         true));
-      }
+
+      ONTRACE(5, I->setDebugLoc(llvm::DebugLoc::get(m_instId, 0, m_mdNode)));
     }
-  private:
-    llvm::LLVMContext& m_context;
-    const Vunit& m_unit;
-    Vinstr m_instr;
+
+   private:
+    LLVMEmitter& m_emitter;
+    llvm::MDNode* m_mdNode;
+    size_t m_instId{0};
   };
 
   /*
@@ -1011,6 +1043,9 @@ VASM_OPCODES
   jit::vector<LLVMBindJmp> m_bindjmps;
   jit::vector<LLVMFallback> m_fallbacks;
 
+  // Vector of vasm instruction strings, used for printing in llvm IR dumps.
+  jit::vector<std::string> m_instStrs;
+
   // The next id to use for LLVM location record. These IDs only have to
   // be unique within the function.
   uint32_t m_nextLocRec{1};
@@ -1064,6 +1099,8 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     block(label);
   }
 
+  auto const traceInstrs = Trace::moduleEnabled(Trace::llvm, 5);
+
   for (auto label : labels) {
     auto& b = m_unit.blocks[label];
     m_irb.SetInsertPoint(block(label));
@@ -1072,7 +1109,11 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     m_valueInfo[Vreg(x64::rVmFp)].llval = m_rVmFp;
 
     for (auto& inst : b.code) {
-      m_irb.setVinstr(inst);
+      if (traceInstrs) {
+        m_irb.setVinstId(m_instStrs.size());
+        m_instStrs.emplace_back(show(m_unit, inst).c_str());
+      }
+
       switch (inst.op) {
 // This list will eventually go away; for now only a very small subset of
 // operations are supported.

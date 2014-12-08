@@ -9343,8 +9343,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
     Option::HardReturnTypeHints =
-      (RuntimeOption::EvalCheckReturnTypeHints >= 3 &&
-       RuntimeOption::EvalSoftClosureReturnTypeHints == false);
+      (RuntimeOption::EvalCheckReturnTypeHints >= 3);
     Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
     Option::JitEnableRenameFunction = RuntimeOption::EvalJitEnableRenameFunction;
     for (auto& i : RuntimeOption::DynamicInvokeFunctions) {

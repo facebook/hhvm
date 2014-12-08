@@ -487,9 +487,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           givenType
         ).str();
     }
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft() &&
-        (!func->isClosureBody() ||
-         !RuntimeOption::EvalSoftClosureReturnTypeHints)) {
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
       raise_return_typehint_error(msg);
     } else {
       raise_debugging(msg);

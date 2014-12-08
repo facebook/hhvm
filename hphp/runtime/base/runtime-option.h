@@ -411,7 +411,7 @@ public:
          the runtime will throw a fatal error (this goes together
          with Option::HardReturnTypeHints). */                          \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  F(bool, SoftClosureReturnTypeHints,  true)                            \
+  F(bool, SoftClosureReturnTypeHints,  false)                           \
   /* HackArrayWarnFrequency:
      0 - no warnings
      [1-UINT32_MAX] - raise warning every X times

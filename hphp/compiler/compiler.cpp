@@ -807,7 +807,6 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   if (Option::HardReturnTypeHints) {
     RuntimeOption::EvalCheckReturnTypeHints = 3;
-    RuntimeOption::EvalSoftClosureReturnTypeHints = false;
   }
   RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
   RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;

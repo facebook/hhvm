@@ -41,10 +41,7 @@ struct LocRecs {
   struct FunctionRecord {
     uint8_t* address;
 
-    jit::vector<LocationRecord> locationRecords;
-
-    // Map ID to an index of the first record with a given ID.
-    jit::hash_map<uint16_t, uint32_t> records;
+    jit::hash_map<uint16_t, jit::vector<LocationRecord>> records;
   };
 
   jit::hash_map<uint8_t*, FunctionRecord> functionRecords;

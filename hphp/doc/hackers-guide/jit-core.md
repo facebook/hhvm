@@ -113,7 +113,7 @@ string at the PHP level).
   Uninit         | `KindOfUninit`
   InitNull       | `KindOfNull`
   Null           | `{Uninit+InitNull}`
-  Bool           | `false=0`, `true=1` (actual bit width varies)
+  Bool           | `false=0`, `true=1` (8 bits at runtime)
   Int            | `int64_t` (64-bit twos compliment binary integer)
   Dbl            | `double` (IEEE 754 64-bit binary floating point)
   StaticStr      | `StringData*` where `isStatic() == true`

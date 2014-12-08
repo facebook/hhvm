@@ -47,7 +47,7 @@ struct CallDest {
   DestType type;
   Vreg reg0, reg1;
 };
-const CallDest kVoidDest { DestType::None };
+UNUSED const CallDest kVoidDest { DestType::None };
 
 class ArgDesc {
 public:

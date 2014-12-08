@@ -70,18 +70,13 @@ LocRecs parseLocRecs(const uint8_t* ptr, size_t size) {
     skipValue(ptr, reserved32);
 
     always_assert(ptr + numRecords * 8 <= end);
-    int64_t prevID = -1LL;
     for (uint32_t j = 0; j < numRecords; ++j) {
       LocRecs::LocationRecord record;
       readValue(ptr, record.offset);
       readValue(ptr, record.id);
       readValue(ptr, record.size);
       skipValue(ptr, reserved8);
-      funcRec.locationRecords.emplace_back(std::move(record));
-      if (record.id != prevID) {
-        funcRec.records.emplace(record.id, j);
-        prevID = record.id;
-      }
+      funcRec.records[record.id].emplace_back(std::move(record));
     }
     recs.functionRecords.emplace(funcRec.address, std::move(funcRec));
   }
@@ -99,12 +94,15 @@ std::string show(const LocRecs& recs) {
   for (auto const& funcRec : recs.functionRecords) {
     folly::format(&ret, "  FunctionAddress = {}\n", funcRec.second.address);
     folly::format(&ret, "  LocationRecord[{}] = {{\n",
-                  funcRec.second.locationRecords.size());
-    for (auto const& locrec : funcRec.second.locationRecords) {
-      ret += "  {\n";
-      folly::format(&ret, "    id = {}\n", locrec.id);
-      folly::format(&ret, "    offset = {}\n", locrec.offset);
-      folly::format(&ret, "    size = {}\n", locrec.size);
+                  funcRec.second.records.size());
+    for (auto const& pair : funcRec.second.records) {
+      folly::format(&ret, "  id {} = {{\n", pair.first);
+      for (auto const& locrec : pair.second) {
+        ret += "    {\n";
+        folly::format(&ret, "      offset = {}\n", locrec.offset);
+        folly::format(&ret, "      size = {}\n", locrec.size);
+        ret += "    }\n";
+      }
       ret += "  }\n";
     }
   }

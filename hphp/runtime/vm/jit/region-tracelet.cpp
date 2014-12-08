@@ -243,14 +243,18 @@ RegionDescPtr RegionFormer::go() {
     m_region.reset();
   }
 
-  printUnit(kTraceletLevel, m_hts.irb->unit(),
-            m_inl.depth() || m_inl.disabled()
-              ? " after inlining tracelet formation "
-              : " after tracelet formation ",
-            nullptr, m_hts.irb->guards());
-
   if (m_region && !m_region->empty()) {
+    // Make sure we end the region before trying to print the IRUnit.
     irgen::endRegion(m_hts, m_sk.offset());
+
+    printUnit(
+      kTraceletLevel, m_hts.irb->unit(),
+      m_inl.depth() || m_inl.disabled() ? " after inlining tracelet formation "
+                                        : " after tracelet formation ",
+      nullptr,
+      m_hts.irb->guards()
+    );
+
     recordDependencies();
     truncateLiterals();
   }

@@ -943,7 +943,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
     if (useLLVM) {
       try {
-        genCodeLLVM(vunit, vasm.areas(), layoutBlocks(vunit));
+        genCodeLLVM(vunit, vasm.areas(), sortBlocks(vunit));
       } catch (const FailedLLVMCodeGen& e) {
         FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
                e.what());

@@ -69,9 +69,13 @@ void Vunit::freeScratchBlock(Vlabel l) {
 Vreg Vunit::makeConst(uint64_t v) {
   auto it = cpool.find(v);
   if (it != cpool.end()) return it->second;
-  auto r = makeReg();
-  cpool[v] = r;
-  return r;
+  return cpool[v] = makeReg();
+}
+
+Vreg Vunit::makeConst(bool b) {
+  auto it = cpool.find(b);
+  if (it != cpool.end()) return it->second;
+  return cpool[b] = makeReg();
 }
 
 Vreg Vunit::makeConst(double d) {
@@ -115,6 +119,7 @@ Vout& Vout::operator<<(const Vinstr& inst) {
   auto& code = m_unit.blocks[m_block].code;
   code.emplace_back(inst);
   code.back().origin = m_origin;
+  FTRACE(6, "Vout << {}\n", show(m_unit, inst));
   return *this;
 }
 
@@ -165,6 +170,7 @@ private:
   void emit(copy2& i);
   void emit(debugtrap& i) { a->int3(); }
   void emit(fallthru& i) {}
+  void emit(ldimmb& i);
   void emit(ldimm& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
@@ -235,13 +241,17 @@ private:
   void emit(lea& i);
   void emit(leap& i) { a->lea(i.s, i.d); }
   void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
+  void emit(loadb& i) { a->loadb(i.s, i.d); }
   void emit(loadl& i) { a->loadl(i.s, i.d); }
   void emit(loadqp& i) { a->loadq(i.s, i.d); }
   void emit(loadsd& i) { a->movsd(i.s, i.d); }
   void emit(loadzbl& i) { a->loadzbl(i.s, i.d); }
+  void emit(loadzbq& i) { a->loadzbl(i.s, Reg32(i.d)); }
+  void emit(loadzlq& i) { a->loadl(i.s, Reg32(i.d)); }
   void emit(movb& i) { a->movb(i.s, i.d); }
   void emit(movl& i) { a->movl(i.s, i.d); }
   void emit(movzbl& i) { a->movzbl(i.s, i.d); }
+  void emit(movzbq& i) { a->movzbl(i.s, Reg32(i.d)); }
   void emit(mulsd& i) { commute(i); a->mulsd(i.s0, i.d); }
   void emit(neg& i) { unary(i); a->neg(i.d); }
   void emit(nop& i) { a->nop(); }
@@ -542,6 +552,16 @@ void Vgen::emit(kpcall& i) {
                                               a->frontier());
   always_assert(backend.isSmashable(a->frontier(), kCallLen));
   a->call(i.target);
+}
+
+void Vgen::emit(ldimmb& i) {
+  auto val = i.s.b();
+  assert_not_implemented(i.d.isGP());
+  if (val == 0 && !i.saveflags) {
+    a->xorb(i.d, i.d);
+  } else {
+    a->movb(val, i.d);
+  }
 }
 
 void Vgen::emit(ldimm& i) {
@@ -1000,6 +1020,16 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     auto& targets = vinvoke.targets;
     v << unwind{{targets[0], targets[1]}};
 
+    // Insert an lea fixup for any stack args at the beginning of the catch
+    // block.
+    if (auto rspOffset = ((stkArgs.size() + 1) & ~1) * sizeof(uintptr_t)) {
+      auto& taken = unit.blocks[targets[1]].code;
+      assert(taken.front().op == Vinstr::landingpad);
+      Vinstr v{lea{rsp[rspOffset], rsp}};
+      v.origin = taken.front().origin;
+      taken.insert(taken.begin() + 1, v);
+    }
+
     // Write out the code so far to the end of b. Remaining code will be
     // emitted to the next block.
     vector_splice(blocks[b].code, iInst, 1, blocks[scratch].code);
@@ -1034,6 +1064,7 @@ static void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       break;
     }
     case DestType::SSA:
+    case DestType::Byte:
       // copy the single-register result to dests[0]
       assert(dests.size() == 1);
       assert(dests[0].isValid());
@@ -1119,6 +1150,10 @@ static void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::ldretaddr:
           inst = pushm{inst.ldretaddr_.s};
+          break;
+
+        case Vinstr::movretaddr:
+          inst = load{*rsp, inst.movretaddr_.d};
           break;
 
         case Vinstr::retctrl:

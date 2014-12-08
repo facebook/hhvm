@@ -114,7 +114,6 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
     }
   }
   // visit each tmp, assign 1 or 2 registers to each.
-  auto cns = [&](uint64_t c) { return vunit.makeConst(c); };
   for (auto tmp : tmps) {
     if (!tmp) continue;
     auto forced = forceAlloc(*tmp);
@@ -125,7 +124,8 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
       continue;
     }
     if (tmp->inst()->is(DefConst)) {
-      auto c = cns(tmp->rawVal());
+      auto c = tmp->isA(Type::Bool) ? vunit.makeConst(tmp->boolVal())
+                                    : vunit.makeConst(tmp->rawVal());
       state.locs[tmp] = Vloc{c};
       FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
     } else {

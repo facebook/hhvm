@@ -151,7 +151,7 @@ public:
   bool wide{false};
   PhysReg reg;
   bool cns{false};
-  uint64_t val;
+  Vunit::Cns val;
 };
 
 typedef boost::dynamic_bitset<> LiveSet;
@@ -1528,14 +1528,17 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                           unsigned pos) {
   MovePlan moves;
   jit::vector<Vinstr> loads;
-  jit::hash_map<uint64_t,uint64_t*> cpool;
   for (auto dst : copies) {
     auto ivl = copies[dst];
     if (!ivl) continue;
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->cns) {
-      loads.emplace_back(ldimm{ivl->val, dst, true});
+      if (ivl->val.isByte) {
+        loads.emplace_back(ldimmb{bool(ivl->val.val), dst, true});
+      } else {
+        loads.emplace_back(ldimm{ivl->val.val, dst, true});
+      }
     } else {
       assert(ivl->spilled());
       MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
@@ -1619,7 +1622,7 @@ std::string Interval::toString() {
     delim = " ";
   }
   if (cns) {
-    out << delim << folly::format("#{:08x}", val);
+    out << delim << folly::format("#{:08x}", val.val);
   }
   if (slot >= 0) {
     out << delim << folly::format("[%sp+{}]", slotOffset(slot));

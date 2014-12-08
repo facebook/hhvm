@@ -22,14 +22,15 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(hhir);
 
 const char* destTypeName(DestType dt) {
-  static const char* names[] = {
-    "None",
-    "SSA",
-    "TV",
-    "Dbl",
-    "SIMD",
-  };
-  return names[static_cast<size_t>(dt)];
+  switch (dt) {
+    case DestType::None: return "None";
+    case DestType::SSA:  return "SSA";
+    case DestType::Byte: return "Byte";
+    case DestType::TV:   return "TV";
+    case DestType::Dbl:  return "Dbl";
+    case DestType::SIMD: return "SIMD";
+  }
+  not_reached();
 }
 
 ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {

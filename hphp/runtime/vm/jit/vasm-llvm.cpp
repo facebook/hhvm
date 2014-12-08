@@ -55,6 +55,7 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/ErrorHandling.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/FormattedStream.h>
 #include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
@@ -439,7 +440,9 @@ struct LLVMEmitter {
 
     // Register all unit's constants.
     for (auto const& pair : unit.cpool) {
-      defineValue(pair.second, cns(pair.first));
+      auto val = pair.first.isByte ? cns(uint8_t(pair.first.val))
+                                   : cns(pair.first.val);
+      defineValue(pair.second, val);
     }
 
     auto args = m_function->arg_begin();
@@ -533,6 +536,7 @@ struct LLVMEmitter {
     // 16-byte ABI default.
     llvm::TargetOptions targetOptions;
     targetOptions.StackAlignmentOverride = 8;
+    targetOptions.GuaranteedTailCallOpt = true;
 
     auto tcMM = m_tcMM.release();
     std::string errStr;
@@ -621,33 +625,27 @@ struct LLVMEmitter {
         continue;
       }
 
-      auto index = it->second;
-      uint8_t* ip;
-      while (true) {
-        ip = funcStart + funcRec.locationRecords[index].offset;
-        DecodedInstruction di(ip);
-        if (di.isCall()) break;
-        ++index;
-        always_assert(index < funcRec.locationRecords.size() &&
-                      funcRec.locationRecords[index].id == fix.id &&
-                      "call instruction cannot be found");
-      }
-      ip += funcRec.locationRecords[index].size;
+      auto afterCall = [&] {
+        for (auto& record : it->second) {
+          auto ip = funcStart + record.offset;
+          DecodedInstruction di(ip);
+          if (di.isCall()) return ip + di.size();
+        }
+        always_assert(false && "call instruction cannot be found");
+      }();
 
-      FTRACE(2, "From locrec at {}, afterCall for fixup = {}\n", index, ip);
-      mcg->recordSyncPoint(ip, fix.fixup.pcOffset, fix.fixup.spOffset);
+      FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
+      mcg->recordSyncPoint(afterCall, fix.fixup.pcOffset, fix.fixup.spOffset);
     }
   }
 
   void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
                       uint8_t* funcStart) {
-    auto findJmp = [&](uint32_t index, uint32_t id) {
-      while (index < funcRec.locationRecords.size() &&
-             funcRec.locationRecords[index].id == id) {
-        auto ip = funcStart + funcRec.locationRecords[index].offset;
+    auto findJmp = [&](const jit::vector<LocRecs::LocationRecord>& records) {
+      for (auto& record : records) {
+        auto ip = funcStart + record.offset;
         DecodedInstruction di(ip);
         if (di.isJmp()) return ip;
-        ++index;
       }
       always_assert(false && "jmp instruction cannot be found");
     };
@@ -656,7 +654,7 @@ struct LLVMEmitter {
       auto it = funcRec.records.find(req.id);
       if (it == funcRec.records.end()) continue;
 
-      auto jmpIp = findJmp(it->second, req.id);
+      auto jmpIp = findJmp(it->second);
       FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
 
       mcg->cgFixups().m_alignFixups.emplace(
@@ -677,7 +675,7 @@ struct LLVMEmitter {
       if (it == funcRec.records.end()) continue;
 
       auto destSR = mcg->tx().getSrcRec(req.dest);
-      destSR->registerFallbackJump(findJmp(it->second, req.id));
+      destSR->registerFallbackJump(findJmp(it->second));
     }
   }
 
@@ -928,7 +926,7 @@ private:
       auto typeStr = llshow(e.value(useInfo.uses[phiInd])->getType());
       FTRACE(1,
              "phidef --> phiInd:{}, type:{}, incoming:{}, use:%{}, "
-             "block:B{}, def:%{}\n", phiInd, typeStr,
+             "block:{}, def:%{}\n", phiInd, typeStr,
              useInfo.fromLabel->getName().str(),
              size_t{useInfo.uses[phiInd]},
              m_toLabel->getName().str(), size_t{m_defs[phiInd]});
@@ -946,6 +944,8 @@ private:
 VASM_OPCODES
 #undef O
 
+  llvm::Value* getGlobal(const std::string& name, int64_t value,
+                         llvm::Type* type);
   void emitTrap();
   void emitCall(const Vinstr& instr);
   void emit(const bindjcc1st&, SrcKey);
@@ -1024,6 +1024,8 @@ VASM_OPCODES
 
   // Faux personality for emitting landingpad.
   llvm::Function* m_personalityFunc;
+
+  llvm::Function* m_fabs{nullptr};
 
   // Commonly used types. Some LLVM APIs require non-consts.
   llvm::IntegerType* m_int8;
@@ -1130,18 +1132,23 @@ O(jcc) \
 O(jmp) \
 O(jmpr) \
 O(jmpm) \
+O(ldimmb) \
 O(ldimm) \
 O(lea) \
 O(loaddqu) \
 O(load) \
+O(loadb) \
 O(loadl) \
 O(loadsd) \
 O(loadzbl) \
+O(loadzbq) \
+O(loadzlq) \
 O(loadqp) \
 O(leap) \
 O(movb) \
 O(movl) \
 O(movzbl) \
+O(movzbq) \
 O(mulsd) \
 O(mul) \
 O(neg) \
@@ -1196,6 +1203,7 @@ O(xorq) \
 O(xorqi) \
 O(landingpad) \
 O(ldretaddr) \
+O(movretaddr) \
 O(retctrl) \
 O(absdbl) \
 O(phijmp) \
@@ -1255,10 +1263,8 @@ O(phidef)
       case Vinstr::tbcc:
       // Fallthrough. Eventually we won't have a default case.
       default:
-        throw FailedLLVMCodeGen(
-          folly::format(
-            "Unsupported opcode in B{}: {}",
-            size_t(label), show(m_unit, inst)).str());
+        throw FailedLLVMCodeGen("Unsupported opcode in B{}: {}",
+                                size_t(label), show(m_unit, inst));
       }
 
       visitDefs(m_unit, inst, [&](Vreg def) {
@@ -1268,6 +1274,13 @@ O(phidef)
   }
 
   finalize();
+}
+
+llvm::Value* LLVMEmitter::getGlobal(const std::string& name,
+                                    int64_t address,
+                                    llvm::Type* type) {
+  m_tcMM->registerSymbolAddress(name, address);
+  return m_module->getOrInsertGlobal(name, type);
 }
 
 void LLVMEmitter::emit(const addli& inst) {
@@ -1490,6 +1503,9 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   case DestType::SSA:
     returnType = m_int64;
     break;
+  case DestType::Byte:
+    returnType = m_int8;
+    break;
   case DestType::Dbl:
     returnType = m_irb.getDoubleTy();
     break;
@@ -1524,29 +1540,29 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
 
   llvm::Value* funcPtr = nullptr;
   switch (call.kind()) {
-  default:
-    throw FailedLLVMCodeGen(
-        folly::format("Unsupported call type: {}",
-          (int)call.kind()).str());
-  case CppCall::Kind::Destructor: {
-    assert(vargs.args.size() >= 2);
-    llvm::Value* reg = value(vargs.args[1]);
-    reg = m_irb.CreateZExt(reg, m_int64, "zext");
-    reg = m_irb.CreateLShr(value(vargs.args[1]),
-                                 kShiftDataTypeToDestrIndex,
-                                 "lshr");
-    llvm::Value* destructors =
-      m_irb.CreateIntToPtr(cns(size_t(g_destructors)), m_int64Ptr, "conv");
-    funcPtr = m_irb.CreateGEP(destructors, reg, "getelem");
-    funcPtr = m_irb.CreateBitCast(funcPtr,
-                                  llvm::PointerType::get(funcType,0),
-                                  "destructor");
-    break;
-  }
-  case CppCall::Kind::Direct:
-    funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
-                          funcType,
-                          uint64_t(call.address()));
+    case CppCall::Kind::Direct:
+      funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
+                            funcType,
+                            uint64_t(call.address()));
+      break;
+
+    case CppCall::Kind::Virtual:
+    case CppCall::Kind::ArrayVirt:
+      throw FailedLLVMCodeGen("Unsupported call type: {}",
+                              (int)call.kind());
+
+    case CppCall::Kind::Destructor: {
+      assert(vargs.args.size() == 1);
+      llvm::Value* type = value(call.reg());
+      type = m_irb.CreateLShr(asInt(type, 64),
+                              kShiftDataTypeToDestrIndex, "typeIdx");
+
+      auto destructors = getGlobal("g_destructors", uint64_t(g_destructors),
+                                   llvm::VectorType::get(ptrType(funcType),
+                                                         kDestrTableSize));
+      funcPtr = m_irb.CreateExtractElement(m_irb.CreateLoad(destructors), type);
+      break;
+    }
   }
 
   llvm::Instruction* callInst = nullptr;
@@ -1581,6 +1597,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     assert(dests.size() == 0);
     break;
   case DestType::SSA:
+  case DestType::Byte:
   case DestType::Dbl:
     assert(dests.size() == 1);
     defineValue(dests[0], callInst);
@@ -1589,10 +1606,12 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     assert(dests.size() == 2);
     if (packed_tv) {
       defineValue(dests[0], m_irb.CreateExtractValue(callInst, 2)); // m_data
-      defineValue(dests[1], m_irb.CreateExtractValue(callInst, 1)); // m_type
+      defineValue(dests[1],
+                  asInt(m_irb.CreateExtractValue(callInst, 1), 64)); // m_type
     } else {
       defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-      defineValue(dests[1], m_irb.CreateExtractValue(callInst, 1)); // m_type
+      defineValue(dests[1],
+                  asInt(m_irb.CreateExtractValue(callInst, 1), 64)); // m_type
     }
     break;
   }
@@ -1726,7 +1745,8 @@ void LLVMEmitter::emit(const decqm& inst) {
 }
 
 void LLVMEmitter::emit(const divsd& inst) {
-  defineValue(inst.d, m_irb.CreateFDiv(value(inst.s1), value(inst.s0)));
+  defineValue(inst.d, m_irb.CreateFDiv(asDbl(value(inst.s1)),
+                                       asDbl(value(inst.s0))));
 }
 
 void LLVMEmitter::emit(const imul& inst) {
@@ -1736,9 +1756,9 @@ void LLVMEmitter::emit(const imul& inst) {
 void LLVMEmitter::emit(const fallback& inst) {
   assert_not_implemented(inst.trflags.packed == 0);
 
-  auto stubName = m_tcMM->getUniqueSymbolName("reqRetranslate");
   auto destSR = mcg->tx().getSrcRec(inst.dest);
-  auto func = emitFuncPtr(stubName,
+  auto fallback = destSR->getFallbackTranslation();
+  auto func = emitFuncPtr(folly::sformat("reqRetranslate_{}", fallback),
                           m_traceletFnTy,
                           uint64_t(destSR->getFallbackTranslation()));
   auto call = emitTraceletTailCall(func);
@@ -1817,7 +1837,7 @@ static llvm::CmpInst::Predicate ccToPred(ConditionCode cc) {
     case CC_BE: return Cmp::ICMP_ULE;
     case CC_A:  return Cmp::ICMP_UGT;
     case CC_AE: return Cmp::ICMP_UGE;
-    default:    not_implemented();
+    default:    throw FailedLLVMCodeGen("Unsupported CC {}", cc_names[cc]);
   }
 }
 
@@ -1917,8 +1937,8 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
     lhs = flagTmp(sf);
     rhs = m_int64Zero;
   } else {
-    always_assert_flog(false, "Unsupported flags src: {}",
-                       show(m_unit, cmp));
+    throw FailedLLVMCodeGen("Unsupported flags src: {}",
+                            show(m_unit, cmp));
   }
 
   return m_irb.CreateICmp(ccToPred(cc), lhs, rhs);
@@ -1947,6 +1967,10 @@ void LLVMEmitter::emit(const jmpm& inst) {
   emitTraceletTailCall(func);
 }
 
+void LLVMEmitter::emit(const ldimmb& inst) {
+  defineValue(inst.d, cns(inst.s.b()));
+}
+
 void LLVMEmitter::emit(const ldimm& inst) {
   assert(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
@@ -1965,14 +1989,11 @@ void LLVMEmitter::emit(const loaddqu& inst) {
 }
 
 void LLVMEmitter::emit(const load& inst) {
-  llvm::Value* value = nullptr;
-  // Special: load      [%rsp] => dest
-  if (inst.s.base == reg::rsp && inst.s.disp == 0 && !inst.s.index.isValid()) {
-    value = getReturnAddress();
-  } else {
-    value = m_irb.CreateLoad(emitPtr(inst.s, 64));
-  }
-  defineValue(inst.d, value);
+  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 64)));
+}
+
+void LLVMEmitter::emit(const loadb& inst) {
+  defineValue(inst.d, m_irb.CreateLoad(emitPtr(inst.s, 8)));
 }
 
 void LLVMEmitter::emit(const loadl& inst) {
@@ -1985,9 +2006,18 @@ void LLVMEmitter::emit(const loadsd& inst) {
 }
 
 void LLVMEmitter::emit(const loadzbl& inst) {
-  // loadzbl writes all 64 bits of its destination, despite the name
+  auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
+  defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int32));
+}
+
+void LLVMEmitter::emit(const loadzbq& inst) {
   auto byteVal = m_irb.CreateLoad(emitPtr(inst.s, 8));
   defineValue(inst.d, m_irb.CreateZExt(byteVal, m_int64));
+}
+
+void LLVMEmitter::emit(const loadzlq& inst) {
+  auto val = m_irb.CreateLoad(emitPtr(inst.s, 32));
+  defineValue(inst.d, m_irb.CreateZExt(val, m_int64));
 }
 
 // loadqp/leap are intended to be rip-relative instructions, but that's not
@@ -2011,16 +2041,21 @@ void LLVMEmitter::emit(const movl& inst) {
 }
 
 void LLVMEmitter::emit(const movzbl& inst) {
-  // movzbl writes all 64 bits of its destination, despite the name
+  defineValue(inst.d, m_irb.CreateZExt(value(inst.s), m_int32));
+}
+
+void LLVMEmitter::emit(const movzbq& inst) {
   defineValue(inst.d, m_irb.CreateZExt(value(inst.s), m_int64));
 }
 
 void LLVMEmitter::emit(const mulsd& inst) {
-  defineValue(inst.d, m_irb.CreateFMul(value(inst.s0), value(inst.s1)));
+  defineValue(inst.d, m_irb.CreateFMul(asDbl(value(inst.s0)),
+                                       asDbl(value(inst.s1))));
 }
 
 void LLVMEmitter::emit(const mul& inst) {
-  defineValue(inst.d, m_irb.CreateFMul(value(inst.s0), value(inst.s1)));
+  defineValue(inst.d, m_irb.CreateFMul(asDbl(value(inst.s0)),
+                                       asDbl(value(inst.s1))));
 }
 
 void LLVMEmitter::emit(const neg& inst) {
@@ -2128,15 +2163,24 @@ void LLVMEmitter::emit(const ldretaddr& inst) {
   defineValue(inst.d, m_irb.CreateLoad(ptr));
 }
 
+void LLVMEmitter::emit(const movretaddr& inst) {
+  defineValue(inst.d, m_irb.CreatePtrToInt(value(inst.s), m_int64));
+}
+
 void LLVMEmitter::emit(const retctrl& inst) {
   // "Return" with a tail call to the loaded address
   emitTraceletTailCall(value(inst.s));
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {
-  auto abs = llvm::Intrinsic::getDeclaration(m_module.get(),
-                                             llvm::Intrinsic::fabs);
-  defineValue(inst.d, m_irb.CreateCall(abs, value(inst.s)));
+  if (!m_fabs) {
+    m_fabs = llvm::Intrinsic::getDeclaration(
+      m_module.get(),
+      llvm::Intrinsic::fabs,
+      std::vector<llvm::Type*>{m_irb.getDoubleTy()}
+    );
+  }
+  defineValue(inst.d, m_irb.CreateCall(m_fabs, asDbl(value(inst.s))));
 }
 
 void LLVMEmitter::emit(const roundsd& inst) {
@@ -2174,7 +2218,8 @@ void LLVMEmitter::emit(const sarqi& inst) {
 }
 
 void LLVMEmitter::emit(const setcc& inst) {
-  defineValue(inst.d, emitCmpForCC(inst.sf, inst.cc));
+  defineValue(inst.d,
+              m_irb.CreateZExt(emitCmpForCC(inst.sf, inst.cc), m_int8));
 }
 
 void LLVMEmitter::emit(const shlli& inst) {
@@ -2271,7 +2316,8 @@ void LLVMEmitter::emit(const subqi& inst) {
 }
 
 void LLVMEmitter::emit(const subsd& inst) {
-  defineValue(inst.d, m_irb.CreateFSub(value(inst.s1), value(inst.s0)));
+  defineValue(inst.d, m_irb.CreateFSub(asDbl(value(inst.s1)),
+                                       asDbl(value(inst.s0))));
 }
 
 /*
@@ -2342,7 +2388,7 @@ void LLVMEmitter::emit(const testli& inst) {
 
 void LLVMEmitter::emit(const testlim& inst) {
   auto lhs = m_irb.CreateLoad(emitPtr(inst.s1, 32));
-  defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.w()));
+  defineFlagTmp(inst.sf, m_irb.CreateAnd(lhs, inst.s0.l()));
 }
 
 void LLVMEmitter::emit(const testq& inst) {
@@ -2394,14 +2440,14 @@ void LLVMEmitter::emitTrap() {
 }
 
 llvm::Value* LLVMEmitter::emitPtr(const Vptr s, llvm::Type* ptrTy) {
-  bool inFS = llvm::cast<llvm::PointerType>(ptrTy)->getAddressSpace() ==
-    kFSAddressSpace;
-  llvm::Value* ptr = nullptr;
+  bool inFS =
+    llvm::cast<llvm::PointerType>(ptrTy)->getAddressSpace() == kFSAddressSpace;
   always_assert(s.base != reg::rsp);
-  ptr = s.base.isValid() ? value(s.base) : cns(0);
+
+  auto ptr = s.base.isValid() ? asInt(value(s.base), 64) : cns(int64_t{0});
   auto disp = cns(int64_t{s.disp});
   if (s.index.isValid()) {
-    auto scaledIdx = m_irb.CreateMul(value(s.index),
+    auto scaledIdx = m_irb.CreateMul(asInt(value(s.index), 64),
                                      cns(int64_t{s.scale}),
                                      "mul");
     disp = m_irb.CreateAdd(disp, scaledIdx, "add");

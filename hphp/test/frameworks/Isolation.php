@@ -134,16 +134,15 @@ function tempnam_ISOLATION_WRAPPER() {
 fb_rename_function('tempnam', 'ORIG_tempnam');
 fb_rename_function('tempnam_ISOLATION_WRAPPER', 'tempnam');
 
-$time = null;
+static $time = null;
 
 function time_ISOLATION_WRAPPER() {
-  $time = $GLOBALS["time"];
+  global $time;
   $org_time = ORIG_time();
   if ($time === null) {
     $time = $org_time;
     return $time;
   }
-#  echo "static time is " . $time . " and org_time is " . $org_time . "\n";
   if ($time >= $org_time) {
     ++$time;
   } else {
@@ -155,7 +154,7 @@ fb_rename_function('time', 'ORIG_time');
 fb_rename_function('time_ISOLATION_WRAPPER', 'time');
 
 function microtime_ISOLATION_WRAPPER(bool $get_as_float = false) {
-  $time = $GLOBALS["time"];
+  global $time;
   list($msec, $sec) = explode(" ", ORIG_microtime());
   if ($time === null) {
     $time = $sec;

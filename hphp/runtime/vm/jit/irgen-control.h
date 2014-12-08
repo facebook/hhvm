@@ -39,7 +39,8 @@ Block* getBlock(HTS& env, Offset offset);
 /*
  * Helpers for unconditional and conditional jumps.
  */
-void jmpImpl(HTS& env, Offset offset, JmpFlags flags);
+void surpriseCheck(HTS&, Offset);
+void jmpImpl(HTS&, Offset, JmpFlags);
 void implCondJmp(HTS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////

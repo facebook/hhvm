@@ -37,9 +37,15 @@ void condJmpInversion(HTS& env, Offset relOffset, bool isJmpZ) {
   implCondJmp(env, takenOff, isJmpZ, popC(env));
 }
 
-
 //////////////////////////////////////////////////////////////////////
 
+}
+
+void surpriseCheck(HTS& env, Offset relOffset) {
+  if (relOffset < 0) {
+    auto const exit = makeExitSlow(env);
+    gen(env, CheckSurpriseFlags, exit);
+  }
 }
 
 /*
@@ -109,11 +115,8 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
 //////////////////////////////////////////////////////////////////////
 
 void emitJmp(HTS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
-  if (relOffset < 0) {
-    auto const exit = makeExitSlow(env);
-    gen(env, CheckSurpriseFlags, exit);
-  }
   jmpImpl(env, offset, instrJmpFlags(*env.currentNormalizedInstruction));
 }
 
@@ -123,10 +126,12 @@ void emitJmpNS(HTS& env, Offset relOffset) {
 }
 
 void emitJmpZ(HTS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   condJmpInversion(env, relOffset, true);
 }
 
 void emitJmpNZ(HTS& env, Offset relOffset) {
+  surpriseCheck(env, relOffset);
   condJmpInversion(env, relOffset, false);
 }
 

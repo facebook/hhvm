@@ -27,13 +27,12 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This function returns the offset of instruction i's branch target.
- * This is normally the offset corresponding to the branch being
- * taken.  However, if i does not break a trace and it's followed in
- * the trace by the instruction in the taken branch, then this
- * function returns the offset of the i's fall-through instruction.
- * In that case, the invertCond output argument is set to true;
- * otherwise it's set to false.
+ * This function returns the offset of instruction i's branch target.  This is
+ * normally the offset corresponding to the branch being taken.  However, if i
+ * does not break a trace and it's followed in the trace by the instruction in
+ * the taken branch, then this function returns the offset of the i's
+ * fall-through instruction.  In that case, the invertCond output argument is
+ * set to true; otherwise it's set to false.
  */
 Offset iterBranchTarget(const NormalizedInstruction& i, bool& invertCond) {
   assert(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
@@ -119,6 +118,7 @@ void emitIterNext(HTS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
+  surpriseCheck(env, relOffset);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -137,6 +137,7 @@ void emitIterNextK(HTS& env,
                    Offset relOffset,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
+  surpriseCheck(env, relOffset);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -195,6 +196,7 @@ void emitWIterNext(HTS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
+  surpriseCheck(env, relOffset);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -213,6 +215,7 @@ void emitWIterNextK(HTS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
+  surpriseCheck(env, relOffset);
   bool invertCond = false;
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction,
                                              invertCond);
@@ -263,6 +266,7 @@ void emitMIterNext(HTS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
+  surpriseCheck(env, relOffset);
   auto const res = gen(
     env,
     MIterNext,
@@ -278,6 +282,7 @@ void emitMIterNextK(HTS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
+  surpriseCheck(env, relOffset);
   auto const res = gen(
     env,
     MIterNextK,

@@ -220,7 +220,6 @@ const StaticString s_line("line");
   ONTRACE(2,                                                                  \
           Trace::trace("decode:     Immediate %s %" PRIi64"\n", #type,        \
                        (int64_t)var));
-#define ITER_SKIP(offset)  pc = origPc + (offset);
 
 #define DECODE(type, var)                                                     \
   DECODE_JMP(type, var);                                                      \
@@ -6293,7 +6292,7 @@ inline bool ExecutionContext::initIterator(PC& pc, PC& origPc, Iter* it,
                                              Offset offset, Cell* c1) {
   bool hasElems = it->init(c1);
   if (!hasElems) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
   }
   vmStack().popC();
   return hasElems;
@@ -6378,7 +6377,7 @@ inline bool ExecutionContext::initIteratorM(PC& pc, PC& origPc, Iter* it,
   }
 
   if (!hasElems) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
   }
 
   vmStack().popV();
@@ -6419,10 +6418,11 @@ OPTBLD_INLINE void ExecutionContext::iopIterNext(IOP_ARGS) {
   DECODE_IA(itId);
   DECODE(Offset, offset);
   DECODE_LA(val);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   if (it->next()) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
     tvAsVariant(tv1) = it->arr().second();
   }
 }
@@ -6434,11 +6434,12 @@ OPTBLD_INLINE void ExecutionContext::iopIterNextK(IOP_ARGS) {
   DECODE(Offset, offset);
   DECODE_LA(val);
   DECODE_LA(key);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   TypedValue* tv2 = frame_local(vmfp(), key);
   if (it->next()) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
     tvAsVariant(tv1) = it->arr().second();
     tvAsVariant(tv2) = it->arr().first();
   }
@@ -6450,10 +6451,11 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNext(IOP_ARGS) {
   DECODE_IA(itId);
   DECODE(Offset, offset);
   DECODE_LA(val);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   if (it->next()) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
     tvAsVariant(tv1).setWithRef(it->arr().secondRef());
   }
 }
@@ -6465,11 +6467,12 @@ OPTBLD_INLINE void ExecutionContext::iopWIterNextK(IOP_ARGS) {
   DECODE(Offset, offset);
   DECODE_LA(val);
   DECODE_LA(key);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   TypedValue* tv2 = frame_local(vmfp(), key);
   if (it->next()) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
     tvAsVariant(tv1).setWithRef(it->arr().secondRef());
     tvAsVariant(tv2) = it->arr().first();
   }
@@ -6481,10 +6484,11 @@ OPTBLD_INLINE void ExecutionContext::iopMIterNext(IOP_ARGS) {
   DECODE_IA(itId);
   DECODE(Offset, offset);
   DECODE_LA(val);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   if (miter_next_key(it, tv1, nullptr)) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
   }
 }
 
@@ -6495,11 +6499,12 @@ OPTBLD_INLINE void ExecutionContext::iopMIterNextK(IOP_ARGS) {
   DECODE(Offset, offset);
   DECODE_LA(val);
   DECODE_LA(key);
+  jmpSurpriseCheck(offset);
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   TypedValue* tv2 = frame_local(vmfp(), key);
   if (miter_next_key(it, tv1, tv2)) {
-    ITER_SKIP(offset);
+    pc = origPc + offset;
   }
 }
 

@@ -456,10 +456,16 @@ Variant HHVM_FUNCTION(fputs,
 }
 
 Variant HHVM_FUNCTION(fprintf,
-                      const Resource& handle,
+                      const Variant& handle,
                       const String& format,
                       const Array& args /* = null_array */) {
-  CHECK_HANDLE(handle, f);
+  if (!handle.isResource()) {
+    raise_param_type_warning("fprintf", 1, DataType::KindOfResource,
+                             handle.getType());
+    return false;
+  }
+  const Resource res = handle.toResource();
+  CHECK_HANDLE(res, f);
   return f->printf(format, args);
 }
 

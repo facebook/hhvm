@@ -1147,8 +1147,7 @@ public:
       }
     }
 
-    string spacket = wddxPacket->packet_end();
-    return String(spacket);
+    return wddxPacket->packet_end();
   }
 
   virtual bool decode(const String& value) {

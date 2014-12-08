@@ -469,6 +469,22 @@ bool String::more(const Resource& v2) const {
   return HPHP::more(m_px, v2);
 }
 
+int String::compare(litstr v2) const {
+  int lengthDiff = length() - strlen(v2);
+  if(lengthDiff == 0)
+    return memcmp(data(), v2, length());
+  else
+    return lengthDiff;
+}
+
+int String::compare(const String& v2) const {
+  int lengthDiff = length() - v2.length();
+  if(lengthDiff == 0)
+    return memcmp(data(), v2.data(), length());
+  else
+    return lengthDiff;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
 

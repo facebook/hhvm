@@ -387,6 +387,9 @@ public:
   bool more (const Object& v2) const;
   bool more (const Resource& v2) const;
 
+  int compare(litstr v2) const;
+  int compare(const String& v2) const;
+
   /**
    * Offset
    */

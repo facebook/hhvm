@@ -786,6 +786,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
 
 bool ExecutionContext::onFatalError(const Exception &e) {
   MM().resetCouldOOM(isStandardRequest());
+  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
 
   auto prefix = "\nFatal error: ";
   int errnum = static_cast<int>(ErrorConstants::ErrorModes::FATAL_ERROR);

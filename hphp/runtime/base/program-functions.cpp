@@ -411,6 +411,16 @@ static void handle_exception_helper(bool& ret,
                                     ContextOfException where,
                                     bool& error,
                                     bool richErrorMsg) {
+  // Clear oom/timeout while handling exception and restore them afterwards.
+  auto& data = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto flags = data.getConditionFlags();
+  auto origFlags = flags->load() & RequestInjectionData::ResourceFlags;
+  flags->fetch_and(~RequestInjectionData::ResourceFlags);
+
+  SCOPE_EXIT {
+    flags->fetch_or(origFlags);
+  };
+
   try {
     bump_counter_and_rethrow(false /* isPsp */);
   } catch (const Eval::DebuggerException &e) {
@@ -1845,6 +1855,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   MM().resetCouldOOM(isStandardRequest());
+  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
 
   LitstrTable::get().setReading();
 

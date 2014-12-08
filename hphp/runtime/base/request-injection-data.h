@@ -78,12 +78,15 @@ struct RequestInjectionData {
   // flags that shouldn't be cleared by fetchAndClearFlags, because:
   // fetchAndClearFlags is only supposed to touch flags related to PHP-visible
   // signals/exceptions and resource limits
+  static const ssize_t ResourceFlags = RequestInjectionData::MemExceededFlag |
+                                       RequestInjectionData::TimedOutFlag |
+                                       RequestInjectionData::CPUTimedOutFlag;
   static const ssize_t StickyFlags = RequestInjectionData::AsyncEventHookFlag |
                                      RequestInjectionData::DebuggerHookFlag |
                                      RequestInjectionData::EventHookFlag |
                                      RequestInjectionData::InterceptFlag |
-                                     RequestInjectionData::MemExceededFlag |
-                                     RequestInjectionData::XenonSignalFlag;
+                                     RequestInjectionData::XenonSignalFlag |
+                                     RequestInjectionData::ResourceFlags;
 
   RequestInjectionData()
       : cflagsPtr(nullptr),

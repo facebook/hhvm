@@ -20,6 +20,7 @@
 #include "hphp/util/disasm.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/llvm-locrecs.h"
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -286,13 +287,18 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     llvm::StringRef SectionName
   ) override {
     auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
-    // TODO(#5398968): find a better way to disable alignment.
-    Alignment = 1;
-    uint8_t* ret = code.alloc<uint8_t>(Alignment, Size);
+
+    // We override/ignore the alignment and use skew value to compensate.
+    uint8_t* ret = code.alloc<uint8_t>(1, Size);
+    assert(Alignment < x64::kCacheLineSize &&
+           "alignment exceeds cache line size");
+    assert(
+      m_codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1))
+      && "drift in code skew detected");
 
     FTRACE(1, "Allocate code section \"{}\" id={} at addr={}, size={},"
-           " alignment={}\n",
-           SectionName.str(), SectionID, ret, Size, Alignment);
+           " alignment={}, skew={}\n",
+           SectionName.str(), SectionID, ret, Size, Alignment, m_codeSkew);
     return ret;
   }
 
@@ -352,10 +358,18 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     return m_dataSections.count(name);
   }
 
+  uint32_t computeCodeSkew(unsigned alignment) {
+    auto& code = m_areas[static_cast<size_t>(AreaIndex::Main)].code;
+    m_codeSkew = reinterpret_cast<uint64_t>(code.frontier()) & (alignment - 1);
+    return m_codeSkew;
+  }
+
 private:
   Vasm::AreaList& m_areas;
 
   std::unordered_map<std::string, SectionInfo> m_dataSections;
+
+  uint32_t m_codeSkew{0};
 };
 
 /*
@@ -535,6 +549,9 @@ struct LLVMEmitter {
     fpm->add(llvm::createTailCallEliminationPass());
     fpm->doInitialization();
 
+    m_module->addModuleFlag(llvm::Module::Error, "code_skew",
+                            tcMM->computeCodeSkew(x64::kCacheLineSize));
+
     for (auto it = m_module->begin(); it != m_module->end(); ++it) {
       fpm->run(*it);
     }
@@ -549,10 +566,11 @@ struct LLVMEmitter {
     // gcc_except_table sections and update our own metadata.
     uint8_t* funcStart =
       static_cast<uint8_t*>(ee->getPointerToFunction(m_function));
+    FTRACE(2, "LLVM function address: {}\n", funcStart);
 
-    if (auto secLocRefs = tcMM->getDataSection(".llvm_locrecs")) {
-      auto const recs = parseLocRecs(secLocRefs->data.get(),
-                                     secLocRefs->size);
+    if (auto secLocRecs = tcMM->getDataSection(".llvm_locrecs")) {
+      auto const recs = parseLocRecs(secLocRecs->data.get(),
+                                     secLocRecs->size);
       FTRACE(2, "LLVM experimental locrecs:\n{}", show(recs));
       processFixups(recs, funcStart);
     }
@@ -571,6 +589,7 @@ struct LLVMEmitter {
     auto it = recs.functionRecords.find(funcStart);
     if (it == recs.functionRecords.end()) return;
     auto const& funcRec = it->second;
+    assert(funcRec.address == funcStart && "function address mismatch");
     for (auto& fix : m_fixups) {
       auto it = funcRec.records.find(fix.id);
       always_assert(it != funcRec.records.end() && "locrec not found");

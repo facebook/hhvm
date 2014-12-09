@@ -22,7 +22,6 @@
 namespace HPHP { namespace jit {
 
 namespace {
-
 /*
  * Read a T from ptr into out, advancing ptr past the read item.
  */

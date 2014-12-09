@@ -130,6 +130,9 @@ std::string RuntimeOption::DefaultServerNameSuffix;
 std::string RuntimeOption::ServerType = "libevent";
 std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerFileSocket;
+std::string RuntimeOption::ServerFileSocketOwner;
+std::string RuntimeOption::ServerFileSocketGroup;
+mode_t RuntimeOption::ServerFileSocketMode;
 std::string RuntimeOption::ServerPrimaryIPv4;
 std::string RuntimeOption::ServerPrimaryIPv6;
 int RuntimeOption::ServerPort = 80;
@@ -1043,6 +1046,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(ServerType, ini, server["Type"], ServerType);
     Config::Bind(ServerIP, ini, server["IP"]);
     Config::Bind(ServerFileSocket, ini, server["FileSocket"]);
+    Config::Bind(ServerFileSocketOwner, ini, server["FileSocketOwner"]);
+    Config::Bind(ServerFileSocketGroup, ini, server["FileSocketGroup"]);
+    Config::Bind(ServerFileSocketMode, ini, server["FileSocketMode"], 0650);
     ServerPrimaryIPv4 = GetPrimaryIPv4();
     ServerPrimaryIPv6 = GetPrimaryIPv6();
 #ifdef FACEBOOK

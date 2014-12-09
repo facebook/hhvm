@@ -13,9 +13,15 @@
 -1
 array(2) {
   [0]=>
-  resource(%d) of type (GMP integer)
+  object(GMP)#%d (1) {
+    ["num"]=>
+    string(7) "4920955"
+  }
   [1]=>
-  resource(%d) of type (GMP integer)
+  object(GMP)#%d (1) {
+    ["num"]=>
+    string(7) "3189694"
+  }
 }
 Result is: q - 4920955, r - 3189694
 5
@@ -28,8 +34,14 @@ Result is: q - 4920955, r - 3189694
 Solution: 12*2 + 21*-1 = 3
 6
 6
-resource(%d) of type (GMP integer)
-resource(%d) of type (GMP integer)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(6) "123456"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(22) "4722357118114344169984"
+}
 9223372036854775807
 0
 9223372036854775807

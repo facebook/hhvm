@@ -324,7 +324,6 @@ let parse_build_args () =
   let serial = ref false in
   let test_dir = ref None in
   let grade = ref true in
-  let list_classes = ref false in
   let check = ref false in
   let is_push = ref false in
   let clean = ref false in
@@ -347,8 +346,6 @@ let parse_build_args () =
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
     " skip full comparison with root";
-    "--list-classes", Arg.Set list_classes,
-    " generate files listing subclasses used in analysis";
     "--check", Arg.Set check,
     " run some sanity checks on the server state";
     "--push", Arg.Set is_push,
@@ -381,7 +378,6 @@ let parse_build_args () =
       serial = !serial;
       test_dir = !test_dir;
       grade = !grade;
-      list_classes = !list_classes;
       is_push = !is_push;
       clean = !clean;
       clean_before_build = !clean_before_build;

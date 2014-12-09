@@ -276,7 +276,6 @@ void FastCGIServer::start() {
           path.c_str(), sock_uid, sock_gid, folly::errnoStr(errno).c_str());
       }
     }
-    Logger::Debug("chmod %o", RuntimeOption::ServerFileSocketMode);
     if (chmod(path.c_str(), RuntimeOption::ServerFileSocketMode) != 0) {
       Logger::Warning("chmod ServerFileSocket %s %o failed: %s",
         path.c_str(), RuntimeOption::ServerFileSocketMode,

@@ -322,7 +322,8 @@ Z* 18-Dec-2014
  - Introduce kVPackedKind for vector-like arrays
  - Move mailparse to HNI
  - VASM start phase 1; emit vasm for some instructions
- - Fix in headers defines for cygwin
+test
+- Fix in headers defines for cygwin
  - [hack] Parser: Fix decl mode's confusion of type hints and xhp.
  - Create a unified stack for Xenon
  - Move debugger from IDL to HNI

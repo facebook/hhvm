@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/base/utf8-decode.h"
 #include <expat.h>
 
 #define XML_MAXLEVEL 255
@@ -224,18 +225,16 @@ static int _xml_xmlcharlen(const XML_Char *s) {
 
 String xml_utf8_decode(const XML_Char *s, int len,
                        const XML_Char *encoding) {
-  int pos = len;
   String str = String(len, ReserveString);
   char *newbuf = str.bufferSlice().ptr;
-  unsigned short c;
-  char (*decoder)(unsigned short) = NULL;
+  char (*decoder)(unsigned short) = nullptr;
   xml_encoding *enc = xml_get_encoding(encoding);
 
   int newlen = 0;
   if (enc) {
     decoder = enc->decoding_function;
   }
-  if (decoder == NULL) {
+  if (decoder == nullptr) {
     /* If the target encoding was unknown, or no decoder function
      * was specified, return the UTF-8-encoded data as-is.
      */
@@ -243,37 +242,10 @@ String xml_utf8_decode(const XML_Char *s, int len,
     str.setSize(len);
     return str;
   }
-  while (pos > 0) {
-    c = (unsigned char)(*s);
-    if (c >= 0xf0) { /* four bytes encoded, 21 bits */
-      if (pos-4 >= 0) {
-        c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
-      } else {
-        c = '?';
-      }
-      s += 4;
-      pos -= 4;
-    } else if (c >= 0xe0) { /* three bytes encoded, 16 bits */
-      if (pos-3 >= 0) {
-        c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
-      } else {
-        c = '?';
-      }
-      s += 3;
-      pos -= 3;
-    } else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-      if (pos-2 >= 0) {
-        c = ((s[0]&63)<<6) | (s[1]&63);
-      } else {
-        c = '?';
-      }
-      s += 2;
-      pos -= 2;
-    } else {
-      s++;
-      pos--;
-    }
-    newbuf[newlen] = decoder ? decoder(c) : c;
+
+  UTF8To16Decoder dec(s, len, true);
+  for (int b = dec.decode(); b != UTF8_END; b = dec.decode()) {
+    newbuf[newlen] = decoder(b);
     ++newlen;
   }
 
@@ -971,37 +943,10 @@ String HHVM_FUNCTION(utf8_decode,
   char *newbuf = str.bufferSlice().ptr;
   int newlen = 0;
   const char *s = data.data();
-  for (int pos = data.size(); pos > 0; ) {
-    unsigned short c = (unsigned char)(*s);
-    if (c >= 0xf0) { /* four bytes encoded, 21 bits */
-      if (pos-4 >= 0) {
-        c = ((s[0]&7)<<18) | ((s[1]&63)<<12) | ((s[2]&63)<<6) | (s[3]&63);
-      } else {
-        c = '?';
-      }
-      s += 4;
-      pos -= 4;
-    } else if (c >= 0xe0) { /* three bytes encoded, 16 bits */
-      if (pos-3 >= 0) {
-        c = ((s[0]&63)<<12) | ((s[1]&63)<<6) | (s[2]&63);
-      } else {
-        c = '?';
-      }
-      s += 3;
-      pos -= 3;
-    } else if (c >= 0xc0) { /* two bytes encoded, 11 bits */
-      if (pos-2 >= 0) {
-        c = ((s[0]&63)<<6) | (s[1]&63);
-      } else {
-        c = '?';
-      }
-      s += 2;
-      pos -= 2;
-    } else {
-      s++;
-      pos--;
-    }
-    newbuf[newlen] = (char)(c > 0xff ? '?' : c);
+
+  UTF8To16Decoder decoder(s, data.size(), true);
+  for (int b = decoder.decode(); b != UTF8_END; b = decoder.decode()) {
+    newbuf[newlen] = (char) b;
     ++newlen;
   }
 

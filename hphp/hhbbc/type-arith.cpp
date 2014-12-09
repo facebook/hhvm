@@ -129,19 +129,11 @@ Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 
 template<class Fun>
-Type typeModDiv(Type t1,Type t2, Fun fun)
-{
-  if (auto t = eval_const_divmod(t1, t2, fun)) return *t;
-    return TInitPrim;
-}
+Type typeModDiv(Type t1,Type t2, Fun fun) { if (auto t = eval_const_divmod(t1, t2, fun)) return *t;  return TInitPrim; }
 
-Type typeDiv(Type t1, Type t2) {
-  return typeModDiv(t1,t2,cellDiv);
-}
+Type typeDiv(Type t1, Type t2) {  return typeModDiv(t1,t2,cellDiv); }
 
-Type typeMod(Type t1, Type t2) {
-  return typeModDiv(t1,t2,cellMod);
-}
+Type typeMod(Type t1, Type t2) {  return typeModDiv(t1,t2,cellMod); }
 
 Type typePow(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellPow)) return *t;

@@ -26,7 +26,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-internal.h"
-#include "hphp/hhbbc/type-arith.h"
+#include "hphp/hhbbc/type-ops.h"
 
 namespace HPHP { namespace HHBBC {
 

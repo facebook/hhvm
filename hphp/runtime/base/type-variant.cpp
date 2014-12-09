@@ -244,6 +244,9 @@ Variant::~Variant() {
   if (IS_REFCOUNTED_TYPE(m_type)) {
     tvDecRefHelper(m_type, uint64_t(m_data.pref));
   }
+  if (debug) {
+    memset(this, 0x7b, sizeof(*this));
+  }
 }
 
 void tvDecRefHelper(DataType type, uint64_t datum) {

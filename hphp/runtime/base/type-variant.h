@@ -1056,7 +1056,12 @@ public:
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
-  ~VarNR() { if (debug) checkRefCount(); }
+  ~VarNR() {
+    if (debug) {
+      checkRefCount();
+      memset(this, 0x7b, sizeof(*this));
+    }
+  }
 
   operator const Variant&() const { return *asVariant(); }
 

@@ -536,7 +536,11 @@ public:
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
   explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
 
-  ~StrNR() {}
+  ~StrNR() {
+    if (debug) {
+      m_px = reinterpret_cast<StringData*>(0xdeadbeeffaceb004);
+    }
+  }
 
   /* implicit */ operator const String&() const { return asString(); }
   const char* data() const { return m_px ? m_px->data() : ""; }

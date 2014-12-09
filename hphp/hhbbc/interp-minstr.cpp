@@ -38,6 +38,19 @@ const StaticString s_stdClass("stdClass");
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Note: the couldBe comparisons here with sempty() are asking "can this string
+ * be a non-reference counted empty string".  What actually matters is whether
+ * it can be an empty string at all.  Currently, all reference counted strings
+ * are TStr, which has no values and may also be non-reference
+ * counted---emptiness isn't separately tracked like it is for arrays, so if
+ * anything happened that could make it reference counted this check will
+ * return true.
+ *
+ * This means this code is fine for now, but if we implement #3837503
+ * (non-static strings with values in the type system) it will need to change.
+ */
+
 bool couldBeEmptyish(Type ty) {
   return ty.couldBe(TNull) ||
          ty.couldBe(sempty()) ||

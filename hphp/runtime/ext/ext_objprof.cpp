@@ -463,25 +463,23 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
-
-    if (key_tv->m_type == HPHP::KindOfString) {
+    TypedValue key_tv = *iter.first().asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
+    auto key = tvAsVariant(&key_tv).toString();
+    if (key_tv.m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
         FTRACE(3, "Resolved private prop name: {}\n", key.c_str());
       }
     }
 
     bool is_declared =
-        key_tv->m_type == HPHP::KindOfString &&
+        key_tv.m_type == HPHP::KindOfString &&
         cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     int key_size = 0;
@@ -489,7 +487,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
     if (!is_declared && !is_packed) {
       FTRACE(2, "Counting string key {} because it's non-declared/packed\n",
         key.c_str());
-      auto key_size_pair = tvGetSize(key_tv, -1);
+      auto key_size_pair = tvGetSize(&key_tv, -1);
       key_size = key_size_pair.first;
       key_sized = key_size_pair.second;
     } else {
@@ -533,9 +531,10 @@ static void getObjStrings(
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto key = iter.first().toString();
-    auto key_tv = iter.first().asTypedValue();
-    auto val_tv = iter.second().asTypedValue();
+    auto first = iter.first();
+    auto key = first.toString();
+    auto key_tv = first.asTypedValue();
+    auto val_tv = iter.secondRef().asTypedValue();
 
     if (key_tv->m_type == HPHP::KindOfString) {
       // If the key begins with a NUL, it's a private or protected property.
@@ -544,7 +543,6 @@ static void getObjStrings(
       // Note: Copied from object-data.cpp
       if (!key.empty() && key[0] == '\0') {
         int subLen = key.find('\0', 1) + 1;
-        String subkey = key.substr(1, subLen - 2);
         key = key.substr(subLen);
       }
     }

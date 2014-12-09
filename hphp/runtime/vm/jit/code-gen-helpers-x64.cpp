@@ -470,16 +470,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();
   if (dst_arity == 2) {
-    assert(src_arity == 2);
+    always_assert(src_arity == 2);
     v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
     return;
   }
-  assert(dst_arity == 1);
+  always_assert(dst_arity == 1);
   if (src_arity == 2 && dst.isFullSIMD()) {
     pack2(v, src.reg(0), src.reg(1), dst.reg(0));
     return;
   }
-  assert(src_arity >= 1);
+  always_assert(src_arity >= 1);
   v << copy{src.reg(0), dst.reg(0)};
 }
 

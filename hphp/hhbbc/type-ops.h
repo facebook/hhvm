@@ -75,6 +75,14 @@ Type typeSetOp(SetOpOp, Type, Type);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Perform a Same or NSame on types.
+ */
+Type typeSame(const Type&, const Type&);
+Type typeNSame(const Type&, const Type&);
+
+//////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

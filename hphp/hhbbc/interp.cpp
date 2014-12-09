@@ -433,7 +433,7 @@ void sameImpl(ISS& env) {
   if (v1 && v2) {
     return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
   }
-  push(env, TBool);
+  push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
 
 void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }

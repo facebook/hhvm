@@ -227,4 +227,21 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 
 //////////////////////////////////////////////////////////////////////
 
+Type typeSame(const Type& a, const Type& b) {
+  auto const nsa = loosen_statics(a);
+  auto const nsb = loosen_statics(b);
+  if (!nsa.couldBe(nsb)) return TFalse;
+  return TBool;
+}
+
+Type typeNSame(const Type& a, const Type& b) {
+  auto const ty = typeSame(a, b);
+  assert(ty.subtypeOf(TBool));
+  return ty.subtypeOf(TFalse) ? TTrue :
+         ty.subtypeOf(TTrue) ? TFalse :
+         TBool;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

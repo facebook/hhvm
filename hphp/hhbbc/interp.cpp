@@ -433,9 +433,6 @@ void sameImpl(ISS& env) {
   if (v1 && v2) {
     return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
   }
-  if (!t1.couldBe(t2) && !t2.couldBe(t1)) {
-    return push(env, false != Negate ? TTrue : TFalse);
-  }
   push(env, TBool);
 }
 

@@ -2461,6 +2461,13 @@ void ExecutionContext::recordLastError(const Exception &e, int errnum) {
   m_lastErrorLine = getLine();
 }
 
+void ExecutionContext::clearLastError() {
+  m_lastError = String();
+  m_lastErrorNum = 0;
+  m_lastErrorPath = staticEmptyString();
+  m_lastErrorLine = 0;
+}
+
 /*
  * Helper for function entry, including pseudo-main entry.
  */
@@ -7689,6 +7696,10 @@ void ExecutionContext::requestExit() {
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);
     m_globalVarEnv = 0;
+  }
+
+  if (!getLastError().isNull()) {
+    clearLastError();
   }
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr, nullptr);

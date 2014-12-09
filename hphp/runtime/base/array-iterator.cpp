@@ -1296,7 +1296,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
   ArrayIter::Type itType;
   {
     FreeObj fo;
-    if (obj->implementsIterator()) {
+    if (obj->isIterator()) {
       TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator\n",
             __func__, dest, obj, ctx);
       (void) new (&dest->arr()) ArrayIter(obj, ArrayIter::noInc);

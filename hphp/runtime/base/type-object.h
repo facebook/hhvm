@@ -77,7 +77,7 @@ public:
     return m_px == nullptr;
   }
   bool instanceof(const String& s) const {
-    return m_px && m_px->o_instanceof(s);
+    return m_px && m_px->instanceof(s);
   }
   bool instanceof(const Class* cls) const {
     return m_px && m_px->instanceof(cls);

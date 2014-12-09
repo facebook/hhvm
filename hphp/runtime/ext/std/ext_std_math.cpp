@@ -340,10 +340,14 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
     }
   }
 
+  auto const castableToNumber = [] (const ObjectData* obj) {
+    return obj->getAttribute(ObjectData::CallToImpl) && !obj->isCollection();
+  };
+
   // We'll have already raised a notice in convert_for_pow
   // so avoid re-raising the notice here.
   auto const silent_val_to_double = [&](const Variant& v) {
-    if (v.isObject() && !v.toObject()->castableToNumber()) {
+    if (v.isObject() && !castableToNumber(v.toObject().get())) {
       return 1.0;
     }
     return v.toDouble();

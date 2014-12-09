@@ -87,7 +87,7 @@ bool WddxPacket::recursiveAddVar(const String& varName,
         m_packetString.append("<struct>");
         if (!isArray) {
           m_packetString.append("<var name='php_class_name'><string>");
-          m_packetString.append(varAsObject->o_getClassName());
+          m_packetString.append(varAsObject->getClassName());
           m_packetString.append("</string></var>");
         }
       } else {
@@ -113,7 +113,7 @@ bool WddxPacket::recursiveAddVar(const String& varName,
         m_packetString.append("<struct>");
         if (!isArray) {
           m_packetString.append("<var name='php_class_name'><string>");
-          m_packetString.append(varAsObject->o_getClassName());
+          m_packetString.append(varAsObject->getClassName());
           m_packetString.append("</string></var>");
         }
         m_packetString.append("</struct>");

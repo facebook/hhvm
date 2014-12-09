@@ -119,7 +119,7 @@ static void sxe_add_namespaces(c_SimpleXMLElement* sxe, xmlNodePtr node,
 static Object _node_as_zval(c_SimpleXMLElement* sxe, xmlNodePtr node,
                             SXE_ITER itertype, const char* name,
                             const xmlChar* nsprefix, bool isprefix) {
-  Object obj = create_object(sxe->o_getClassName(), Array(), false);
+  Object obj = create_object(sxe->getClassName(), Array(), false);
   c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
   subnode->document = sxe->document;
   subnode->iter.type = itertype;
@@ -682,7 +682,7 @@ static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
       return obj;
     }
   } else {
-    Object obj = create_object(sxe_ref->o_getClassName(), Array(), false);
+    Object obj = create_object(sxe_ref->getClassName(), Array(), false);
     c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
     subnode->document = sxe_ref->document;
     if (nsprefix && *nsprefix) {

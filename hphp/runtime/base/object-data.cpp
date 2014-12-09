@@ -124,14 +124,13 @@ bool ObjectData::destruct() {
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 
-StrNR ObjectData::o_getClassName() const {
+StrNR ObjectData::getClassName() const {
   return m_cls->preClass()->nameStr();
 }
 
-bool ObjectData::o_instanceof(const String& s) const {
-  Class* cls = Unit::lookupClass(s.get());
-  if (!cls) return false;
-  return m_cls->classof(cls);
+bool ObjectData::instanceof(const String& s) const {
+  auto const cls = Unit::lookupClass(s.get());
+  return cls && instanceof(cls);
 }
 
 bool ObjectData::o_toBooleanImpl() const noexcept {
@@ -185,17 +184,17 @@ const StaticString s_getIterator("getIterator");
 
 Object ObjectData::iterableObject(bool& isIterable,
                                   bool mayImplementIterator /* = true */) {
-  assert(mayImplementIterator || !implementsIterator());
-  if (mayImplementIterator && implementsIterator()) {
+  assert(mayImplementIterator || !isIterator());
+  if (mayImplementIterator && isIterator()) {
     isIterable = true;
     return Object(this);
   }
   Object obj(this);
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    Variant iterator = obj->o_invoke_few_args(s_getIterator, 0);
+    auto iterator = obj->o_invoke_few_args(s_getIterator, 0);
     if (!iterator.isObject()) break;
-    ObjectData* o = iterator.getObjectData();
-    if (o->instanceof(SystemLib::s_IteratorClass)) {
+    auto o = iterator.getObjectData();
+    if (o->isIterator()) {
       isIterable = true;
       return o;
     }
@@ -275,7 +274,7 @@ inline Variant ObjectData::o_getImpl(const String& propName, int flags,
   }
 
   if (error) {
-    raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
+    raise_notice("Undefined property: %s::$%s", getClassName().data(),
                  propName.data());
   }
 
@@ -736,12 +735,12 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       Variant ret =
         const_cast<ObjectData*>(this)->o_invoke_few_args(s_serialize, 0);
       if (ret.isString()) {
-        serializer->writeSerializableObject(o_getClassName(), ret.toString());
+        serializer->writeSerializableObject(getClassName(), ret.toString());
       } else if (ret.isNull()) {
         serializer->writeNull();
       } else {
         raise_error("%s::serialize() must return a string or NULL",
-                    o_getClassName().data());
+                    getClassName().data());
       }
       return;
     }
@@ -771,7 +770,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     // Don't try to serialize a CPP extension class which doesn't
     // support serialization. Just send the class name instead.
     if (getAttribute(IsCppBuiltin) && !getVMClass()->isCppSerializable()) {
-      serializer->write(o_getClassName());
+      serializer->write(getClassName());
       return;
     }
   }
@@ -838,7 +837,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
                      "__sleep() but does not exist", propName.data());
         wanted.set(propName, init_null());
       }
-      serializer->pushObjectInfo(o_getClassName(), o_getId(), 'O');
+      serializer->pushObjectInfo(getClassName(), getId(), 'O');
       if (!serializableNativeData.isNull()) {
         wanted.set(s_serializedNativeDataKey, serializableNativeData);
       }
@@ -855,9 +854,9 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       collectionSerialize(const_cast<ObjectData*>(this), serializer);
     } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
                instanceof(c_Closure::classof())) {
-      serializer->write(o_getClassName());
+      serializer->write(getClassName());
     } else {
-      auto className = o_getClassName();
+      auto className = getClassName();
       Array properties = getSerializeProps(this, serializer);
       if (serializer->getType() ==
         VariableSerializer::Type::DebuggerSerialize) {
@@ -868,7 +867,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
            }
         } catch (...) {
           raise_warning("%s::__toDebugDisplay() throws exception",
-            o_getClassName().data());
+            getClassName().data());
         }
       }
       if (serializer->getType() == VariableSerializer::Type::DebuggerDump) {
@@ -884,14 +883,14 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* cname = const_cast<ObjectData*>(this)-> // XXX
           o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
-          serializer->pushObjectInfo(cname->toCStrRef(), o_getId(), 'O');
+          serializer->pushObjectInfo(cname->toCStrRef(), getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
           properties.serialize(serializer, true);
           serializer->popObjectInfo();
           return;
         }
       }
-      serializer->pushObjectInfo(className, o_getId(), 'O');
+      serializer->pushObjectInfo(className, getId(), 'O');
       if (!serializableNativeData.isNull()) {
         properties.set(s_serializedNativeDataKey, serializableNativeData);
       }
@@ -1018,14 +1017,13 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSizeLogged(size))
-    ObjectData(cls, NoInit::noinit);
+  return new (MM().smartMallocSizeLogged(size)) ObjectData(cls, NoInit{});
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   return new (MM().smartMallocSizeBigLogged<false>(size).ptr)
-    ObjectData(cls, NoInit::noinit);
+    ObjectData(cls, NoInit{});
 }
 
 NEVER_INLINE
@@ -1957,7 +1955,7 @@ bool ObjectData::hasDynProps() const {
 }
 
 const char* ObjectData::classname_cstr() const {
-  return o_getClassName().data();
+  return getClassName().data();
 }
 
 void ObjectData::compileTimeAssertions() {

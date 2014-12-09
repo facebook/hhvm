@@ -157,7 +157,7 @@ Object HHVM_METHOD(DateTime, diff,
   DateTimeData* data = Native::data<DateTimeData>(this_);
   const Object obj_datetime2 = datetime2.toObject();
   if (!obj_datetime2.instanceof(s_DateTimeInterface)) {
-    throw_invalid_object_type(obj_datetime2->o_getClassName().data());
+    throw_invalid_object_type(obj_datetime2->getClassName().data());
   }
   return DateIntervalData::wrap(data->m_dt->diff(
                                 DateTimeData::unwrap(obj_datetime2),

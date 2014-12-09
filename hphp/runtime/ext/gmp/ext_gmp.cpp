@@ -635,7 +635,7 @@ static Variant HHVM_FUNCTION(gmp_intval,
     return 0;
   } else if (data.isObject()) {
     raise_notice(cs_GMP_INVALID_OBJECT,
-                 data.toObject()->o_getClassName().c_str());
+                 data.toObject()->getClassName().c_str());
     return 1;
   } else if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
     return false;

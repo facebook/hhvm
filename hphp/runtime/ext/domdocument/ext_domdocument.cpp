@@ -120,7 +120,7 @@ DOMNode* toDOMNode(ObjectData* obj) {
     return Native::data<DOMNode>(obj);
   }
 
-  throw_invalid_object_type(obj->o_getClassName().data());
+  throw_invalid_object_type(obj->getClassName().data());
 }
 
 static void php_libxml_internal_error_handler(int error_type, void *ctx,

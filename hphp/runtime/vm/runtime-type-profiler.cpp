@@ -79,7 +79,7 @@ void initFuncTypeProfileData(const Func* func) {
 
 const char* getTypeString(const TypedValue* value) {
   if (value->m_type == KindOfObject) {
-    return value->m_data.pobj->o_getClassName().data();
+    return value->m_data.pobj->getClassName().data();
   }
   if (value->m_type == KindOfResource) {
     return value->m_data.pres->o_getClassName().data();

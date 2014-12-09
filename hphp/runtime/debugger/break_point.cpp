@@ -1008,9 +1008,9 @@ bool BreakPointInfo::checkExceptionOrError(const Variant& e) {
   if (e.isObject()) {
     if (m_regex) {
       return Match(m_class.c_str(), m_class.size(),
-                   e.toObject()->o_getClassName().data(), true, false);
+                   e.toObject()->getClassName().data(), true, false);
     }
-    return e.getObjectData()->o_instanceof(m_class.c_str());
+    return e.getObjectData()->instanceof(m_class);
   }
   return Match(m_class.c_str(), m_class.size(), ErrorClassName, m_regex,
                false);

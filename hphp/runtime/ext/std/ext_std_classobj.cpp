@@ -211,7 +211,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
     return ret;
   }
   if (!object.isObject()) return false;
-  return VarNR(object.toObject()->o_getClassName());
+  return VarNR(object.toObject()->getClassName());
 }
 
 Variant HHVM_FUNCTION(get_called_class) {
@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(get_called_class) {
   ActRec* ar = cf();
   if (ar) {
     if (ar->hasThis()) {
-      return Variant(ar->getThis()->o_getClassName());
+      return Variant(ar->getThis()->getClassName());
     }
     if (ar->hasClass()) {
       return Variant(ar->getClass()->preClass()->name(),

@@ -28,7 +28,7 @@ TEST(Object, Serialization) {
   EXPECT_TRUE(v.isObject());
   auto o = v.toObject();
   EXPECT_TRUE(
-    !o->o_getClassName().asString().compare("__PHP_Incomplete_Class")
+    !o->getClassName().asString().compare("__PHP_Incomplete_Class")
   );
   auto os = HHVM_FN(serialize)(o);
   EXPECT_TRUE(

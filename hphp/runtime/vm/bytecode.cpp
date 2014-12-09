@@ -691,7 +691,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.pobj;
       print_count();
       os << ":Object("
-         << tv->m_data.pobj->o_getClassName().get()->data()
+         << tv->m_data.pobj->getClassName().get()->data()
          << ")";
       continue;
     case KindOfResource:

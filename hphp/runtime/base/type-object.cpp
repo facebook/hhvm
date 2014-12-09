@@ -130,7 +130,7 @@ Variant Object::o_set(const String& propName, const Variant& val,
 }
 
 const char* Object::classname_cstr() const {
-  return m_px->o_getClassName().c_str();
+  return m_px->getClassName().c_str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

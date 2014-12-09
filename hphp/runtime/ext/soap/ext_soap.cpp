@@ -2092,7 +2092,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
 
   String class_name;
   if (data->m_type == SOAP_OBJECT) {
-    class_name = data->m_soap_object->o_getClassName();
+    class_name = data->m_soap_object->getClassName();
   } else if (data->m_type == SOAP_CLASS) {
     class_name = data->m_soap_class.name;
   } else if (data->m_soap_functions.functions_all) {
@@ -2311,8 +2311,8 @@ void HHVM_METHOD(SoapServer, handle,
                                          data->m_uri.c_str(), retval,
                                          data->m_soap_headers,
                                          soap_version);
-  } catch (Object &e) {
-    if (e->o_instanceof("SoapFault")) {
+  } catch (Object& e) {
+    if (e->instanceof(SystemLib::s_SoapFaultClass)) {
       send_soap_server_fault(function, e, nullptr);
       return;
     }

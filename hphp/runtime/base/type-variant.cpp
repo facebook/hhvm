@@ -1207,7 +1207,7 @@ void Variant::unserialize(VariableUnserializer *uns,
 
       if (!obj->instanceof(SystemLib::s_SerializableClass)) {
         raise_warning("Class %s has no unserializer",
-                      obj->o_getClassName().data());
+                      obj->getClassName().data());
       } else {
         obj->o_invoke_few_args(s_unserialize, 1, serialized);
         obj.get()->clearNoDestruct();

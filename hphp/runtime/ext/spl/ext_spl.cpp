@@ -191,7 +191,7 @@ Object get_traversable_object_iterator(const Variant& obj) {
       raise_error(
         "Class %s must implement interface Traversable as part of either "
         "Iterator or IteratorAggregate",
-        obj.toObject()->o_getClassName().data()
+        obj.toObject()->getClassName().data()
       );
     }
   }

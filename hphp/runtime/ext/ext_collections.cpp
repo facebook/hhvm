@@ -1542,7 +1542,7 @@ void HashCollection::mutateImpl() {
 
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
-  assert(o_getClassName().size() == 6);
+  assert(getClassName().size() == 6);
   static const size_t reserveSize = 130;
   String msg(reserveSize, ReserveString);
   char* buf = msg.bufferSlice().ptr;
@@ -1550,7 +1550,7 @@ void HashCollection::throwTooLarge() {
     buf,
     "%s object has reached its maximum capacity of %u element "
     "slots and does not have room to add a new element",
-    o_getClassName().data() + 3, // strip "HH\" prefix
+    getClassName().data() + 3, // strip "HH\" prefix
     MaxSize
   );
   assert(sz <= reserveSize);
@@ -1561,14 +1561,14 @@ void HashCollection::throwTooLarge() {
 
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
-  assert(o_getClassName().size() == 6);
+  assert(getClassName().size() == 6);
   static const size_t reserveSize = 80;
   String msg(reserveSize, ReserveString);
   char* buf = msg.bufferSlice().ptr;
   int sz = sprintf(
     buf,
     "%s does not support reserving room for more than %u elements",
-    o_getClassName().data() + 3, // strip "HH\" prefix
+    getClassName().data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
   assert(sz <= reserveSize);
@@ -1581,7 +1581,7 @@ NEVER_INLINE
 int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
   if (n > size_t(RuntimeOption::MaxArrayChain)) {
     raise_error("%s is too unbalanced (%lu)",
-                o_getClassName().data() + 3, // strip "HH\" prefix
+                getClassName().data() + 3, // strip "HH\" prefix
                 n);
   }
   return ei;
@@ -5536,7 +5536,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   if (Collection::isVectorType(obj->getCollectionType()) ||
       Collection::isSetType(obj->getCollectionType()) ||
       obj->getCollectionType() == Collection::PairType) {
-    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'V');
+    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
         serializer->getType() == VariableSerializer::Type::APCSerialize ||
@@ -5562,7 +5562,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     serializer->writeArrayFooter();
   } else {
     assert(Collection::isMapType(obj->getCollectionType()));
-    serializer->pushObjectInfo(obj->o_getClassName(), obj->o_getId(), 'K');
+    serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
       serializer->writeCollectionKey(iter.first());
@@ -5801,7 +5801,7 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
   // in place (see "test/slow/collection_classes/invalid-operations.php"
   // for examples).
   if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
-    throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+    throw_cannot_modify_immutable_object(obj->getClassName().data());
   }
   return ret;
 }
@@ -5826,7 +5826,7 @@ TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key) {
     case Collection::ImmVectorType:
     case Collection::ImmMapType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       break;
   }
@@ -5862,7 +5862,7 @@ void collectionSet(ObjectData* obj, const TypedValue* key,
     case Collection::ImmVectorType:
     case Collection::ImmMapType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
   }
@@ -5925,7 +5925,7 @@ void collectionUnset(ObjectData* obj, const TypedValue* key) {
     case Collection::ImmMapType:
     case Collection::ImmSetType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
       break;
@@ -5950,7 +5950,7 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
     case Collection::ImmMapType:
     case Collection::ImmSetType:
     case Collection::PairType:
-      throw_cannot_modify_immutable_object(obj->o_getClassName().data());
+      throw_cannot_modify_immutable_object(obj->getClassName().data());
     case Collection::InvalidType:
       assert(false);
       break;

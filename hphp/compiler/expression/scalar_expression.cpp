@@ -201,7 +201,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
 unsigned ScalarExpression::getCanonHash() const {
   int64_t val = getHash();
   if (val == -1) {
-    val = hash_string(m_value.c_str(), m_value.size());
+    val = hash_string_unsafe(m_value.c_str(), m_value.size());
   }
   return unsigned(val) ^ unsigned(val >> 32);
 }
@@ -489,7 +489,7 @@ int64_t ScalarExpression::getHash() const {
     if (is_strictly_integer(scs.c_str(), scs.size(), res)) {
       hash = hash_int64(res);
     } else {
-      hash = hash_string(scs.c_str(), scs.size());
+      hash = hash_string_unsafe(scs.c_str(), scs.size());
     }
   }
   return hash;

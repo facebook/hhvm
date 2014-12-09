@@ -975,7 +975,7 @@ int StringData::compare(const StringData *v2) const {
 
 strhash_t StringData::hashHelper() const {
   assert(!isShared());
-  // binliu: Use the inlined unsafe version here, as StringData is 8-byte
+  // Use the inlined unsafe version here, as StringData is 8-byte
   // aligned. The generated code for the entire method should be exactly 64
   // bytes with g++ optimization.
   strhash_t h = hash_string_inline_unsafe(m_data, m_len);

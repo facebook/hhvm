@@ -102,8 +102,8 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 unsigned ConstantExpression::getCanonHash() const {
-  int64_t val = hash_string(toLower(m_name).c_str(), m_name.size());
-  return ~unsigned(val) ^ unsigned(val >> 32);
+  strhash_t val = hash_string_i_unsafe(m_name.c_str(), m_name.size());
+  return static_cast<unsigned>(val);
 }
 
 bool ConstantExpression::canonCompare(ExpressionPtr e) const {

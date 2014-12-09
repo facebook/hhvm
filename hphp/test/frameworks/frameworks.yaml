@@ -71,7 +71,8 @@
       # Assumes that calculating the current time in seconds twice will give
       # the same result. Not true if you're unlucky.
       - codeigniter/tests/codeigniter/helpers/date_helper_test.php
-      # Flakey test case. Already made a PR at https://github.com/bcit-ci/CodeIgniter/pull/3399.
+      # Flakey test case. Already made a PR 
+      # at https://github.com/bcit-ci/CodeIgniter/pull/3399.
       - codeigniter/tests/codeigniter/libraries/Session_test.php
   composer:
     url: https://github.com/composer/composer.git
@@ -525,7 +526,7 @@
       - phpbb3/tests/lock/flock_test.php
       # race condition - https://github.com/phpbb/phpbb/pull/3006
       - phpbb3/tests/wrapper/gmgetdate_test.php
-      # This flakey test is caused by assuming time functions never return the
+      # This flakey test is caused by assuming time functions always return the
       # same value. Made PR https://github.com/phpbb/phpbb/pull/3222 to fix.
       - phpbb3/tests/passwords/manager_test.php
       - phpbb3/tests/random/gen_rand_string_test.php

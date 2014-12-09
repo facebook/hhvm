@@ -134,10 +134,8 @@ function tempnam_ISOLATION_WRAPPER() {
 fb_rename_function('tempnam', 'ORIG_tempnam');
 fb_rename_function('tempnam_ISOLATION_WRAPPER', 'tempnam');
 
-static $time = null;
-
 function time_ISOLATION_WRAPPER() {
-  global $time;
+  static $time;
   $org_time = ORIG_time();
   if ($time === null) {
     $time = $org_time;
@@ -154,7 +152,7 @@ fb_rename_function('time', 'ORIG_time');
 fb_rename_function('time_ISOLATION_WRAPPER', 'time');
 
 function microtime_ISOLATION_WRAPPER(bool $get_as_float = false) {
-  global $time;
+  static $time;
   list($msec, $sec) = explode(" ", ORIG_microtime());
   if ($time === null) {
     $time = $sec;

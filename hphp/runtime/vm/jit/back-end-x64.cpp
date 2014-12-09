@@ -682,7 +682,12 @@ struct BackEnd : public jit::BackEnd {
     // first byte, but that means the delta is 1 byte, and we shouldn't be
     // encoding smashable jumps that way.
     assert(kJmpLen == kCallLen);
-    always_assert(isSmashable(addr, x64::kJmpLen));
+
+    // XXX The LLVM check here is terrible and awful and temporary until we fix
+    // llvm's smashable tail call support: t5742980. For now it just means it's
+    // not safe to run multiple PHP threads when LLVM is enabled.
+    always_assert(RuntimeOption::EvalJitLLVM ||
+                  isSmashable(addr, x64::kJmpLen));
 
     auto& cb = mcg->code.blockFor(addr);
     CodeCursor cursor { cb, addr };
@@ -935,6 +940,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assert(check(vunit));
+
     if (useLLVM) {
       try {
         genCodeLLVM(vunit, vasm.areas(), layoutBlocks(vunit));

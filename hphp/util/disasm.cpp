@@ -61,10 +61,6 @@ Disasm::Disasm(const Disasm::Options& opts)
 }
 
 #ifdef HAVE_LIBXED
-static void error(std::string msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  exit(1);
-}
 
 #define MAX_INSTR_ASM_LEN 128
 
@@ -86,17 +82,26 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
   // Decode and print each instruction
   for (frontier = codeStartAddr, ip = (uint64_t)codeStartAddr;
        frontier < codeEndAddr; ) {
+    for (int i = 0; i < m_opts.m_indentLevel; ++i) {
+      out << ' ';
+    }
+
     xed_decoded_inst_zero_set_mode(&xedd, &m_xedState);
     xed_decoded_inst_set_input_chip(&xedd, XED_CHIP_INVALID);
     xed_error_enum_t xed_error = xed_decode(&xedd, frontier, 15);
-    if (xed_error != XED_ERROR_NONE) error("disasm error: xed_decode failed");
+    if (xed_error != XED_ERROR_NONE) {
+      out << folly::format("xed_decode failed at address {}\n", frontier);
+      return;
+    }
 
     // Get disassembled instruction in codeStr
     auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
                                                 : s_xed_syntax;
     if (!xed_format_context(syntax, &xedd, codeStr,
                             MAX_INSTR_ASM_LEN, ip, nullptr)) {
-      error("disasm error: xed_format_context failed");
+      out << folly::format("xed_format_context failed at address {}\n",
+                           frontier);
+      return;
     }
     uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
 
@@ -116,9 +121,6 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
       }
     }
 
-    for (int i = 0; i < m_opts.m_indentLevel; ++i) {
-      out << ' ';
-    }
     out << m_opts.m_color;
     if (m_opts.m_addresses) {
       const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";

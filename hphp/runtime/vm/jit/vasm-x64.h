@@ -942,7 +942,7 @@ struct Vasm {
     CodeBlock& code;
     CodeAddress start;
   };
-  typedef jit::vector<Area> AreaList;
+  using AreaList = jit::vector<Area>;
 
   explicit Vasm() {
     m_areas.reserve(size_t(AreaIndex::Max));
@@ -964,7 +964,7 @@ struct Vasm {
   Vout& cold(X64Assembler& a) { return cold(a.code()); }
   Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
   Vunit& unit() { return m_unit; }
-  jit::vector<Area>& areas() { return m_areas; }
+  AreaList& areas() { return m_areas; }
 
 private:
   Vout& add(CodeBlock &cb, AreaIndex area);
@@ -975,7 +975,7 @@ private:
 
 private:
   Vunit m_unit;
-  jit::vector<Area> m_areas; // indexed by AreaIndex
+  AreaList m_areas; // indexed by AreaIndex
 };
 
 /*

@@ -2232,6 +2232,7 @@ struct DecodedInstruction {
   bool isNop() const;
   bool isBranch(bool allowCond = true) const;
   bool isCall() const;
+  bool isJmp() const;
   bool shrinkBranch();
   void widenBranch();
   uint8_t getModRm() const;

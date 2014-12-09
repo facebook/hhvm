@@ -20,7 +20,9 @@
 #include "hphp/util/disasm.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/llvm-locrecs.h"
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -253,22 +255,10 @@ struct LLVMErrorInit {
 static LLVMErrorInit s_llvmErrorInit;
 
 /*
- * Map of global symbols used by LLVM.
- */
-static jit::hash_map<std::string, uint64_t> globalSymbols;
-
-void registerGlobalSymbol(const std::string& name, uint64_t address) {
-  auto it = globalSymbols.emplace(name, address);
-  always_assert((it.second == true || it.first->second == address) &&
-                "symbol already registered with a different value");
-}
-
-/*
  * TCMemoryManager allows llvm to emit code into the appropriate places in the
  * TC. Currently all code goes into the Main code block.
  */
 struct TCMemoryManager : public llvm::RTDyldMemoryManager {
-
   struct SectionInfo {
     std::unique_ptr<uint8_t[]> data;
     size_t size;
@@ -345,8 +335,28 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
   virtual uint64_t getSymbolAddress(const std::string& name) override {
     FTRACE(1, "getSymbolAddress({})\n", name);
-    auto element = globalSymbols.find(name);
-    return element == globalSymbols.end() ? 0 : element->second;
+    auto element = m_symbols.find(name);
+    return element == m_symbols.end() ? 0 : element->second;
+  }
+
+  /*
+   * Register a symbol's name for later lookup by llvm.
+   */
+  void registerSymbolAddress(const std::string& name, uint64_t address) {
+    auto it = m_symbols.emplace(name, address);
+    always_assert((it.second == true || it.first->second == address) &&
+                  "symbol already registered with a different value");
+  }
+
+  /*
+   * Append an arbitrary id to the end of the given prefix to make it unique.
+   */
+  std::string getUniqueSymbolName(const std::string& prefix) {
+    auto name = prefix;
+    while (m_symbols.count(name)) {
+      name = folly::to<std::string>(prefix, '_', m_nextSymbolId++);
+    }
+    return name;
   }
 
   const SectionInfo* getDataSection(const std::string& name) const {
@@ -370,7 +380,20 @@ private:
   std::unordered_map<std::string, SectionInfo> m_dataSections;
 
   uint32_t m_codeSkew{0};
+
+  jit::hash_map<std::string, uint64_t> m_symbols;
+  uint32_t m_nextSymbolId{0};
 };
+
+template<typename T>
+std::string llshow(T* val) {
+  std::string str;
+  {
+    llvm::raw_string_ostream os(str);
+    val->print(os);
+  }
+  return str;
+}
 
 /*
  * LLVMEmitter is responsible for transforming a Vunit into LLVM IR, then
@@ -392,6 +415,7 @@ struct LLVMEmitter {
     , m_irb(m_context,
             llvm::ConstantFolder(),
             IRBuilderVasmInserter(m_context, unit))
+    , m_tcMM(new TCMemoryManager(areas))
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
     , m_unit(unit)
@@ -459,13 +483,12 @@ struct LLVMEmitter {
                              "personality0",
                              m_module.get());
     m_personalityFunc->setCallingConv(llvm::CallingConv::C);
-    registerGlobalSymbol("personality0", 0xbadbadbad);
+    m_tcMM->registerSymbolAddress("personality0", 0xbadbadbad);
 
-    m_traceletFnPtrTy = ptrType(
-      llvm::FunctionType::get(
-        m_irb.getVoidTy(),
-        std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
-        false)
+    m_traceletFnTy = llvm::FunctionType::get(
+      m_irb.getVoidTy(),
+      std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
+      false
     );
 
     m_typedValueType = llvm::StructType::get(
@@ -506,18 +529,18 @@ struct LLVMEmitter {
     FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
     verifyModule();
 
-    // TODO(#5406596): teach LLVM our alignment rules. For the
-    // moment override 16-byte ABI default.
+    // TODO(#5406596): teach LLVM our alignment rules. For the moment override
+    // 16-byte ABI default.
     llvm::TargetOptions targetOptions;
     targetOptions.StackAlignmentOverride = 8;
 
-    TCMemoryManager* tcMM;
+    auto tcMM = m_tcMM.release();
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
       llvm::EngineBuilder(m_module.get())
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
-      .setMCJITMemoryManager(tcMM = new TCMemoryManager(m_areas))
+      .setMCJITMemoryManager(tcMM)
       .setOptLevel(llvm::CodeGenOpt::Aggressive)
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
@@ -572,7 +595,11 @@ struct LLVMEmitter {
       auto const recs = parseLocRecs(secLocRecs->data.get(),
                                      secLocRecs->size);
       FTRACE(2, "LLVM experimental locrecs:\n{}", show(recs));
-      processFixups(recs, funcStart);
+      auto it = recs.functionRecords.find(funcStart);
+      if (it != recs.functionRecords.end()) {
+        processFixups(it->second, funcStart);
+        processSvcReqs(it->second, funcStart);
+      }
     }
 
     if (auto secGEH = tcMM->getDataSection(".gcc_except_table")) {
@@ -585,14 +612,15 @@ struct LLVMEmitter {
    * For each entry in m_fixups, find its corresponding locrec entry, find
    * the actual call instruction, and register the fixup.
    */
-  void processFixups(const LocRecs& recs, uint8_t* funcStart) {
-    auto it = recs.functionRecords.find(funcStart);
-    if (it == recs.functionRecords.end()) return;
-    auto const& funcRec = it->second;
-    assert(funcRec.address == funcStart && "function address mismatch");
+  void processFixups(const LocRecs::FunctionRecord& funcRec,
+                     uint8_t* funcStart) {
     for (auto& fix : m_fixups) {
       auto it = funcRec.records.find(fix.id);
-      always_assert(it != funcRec.records.end() && "locrec not found");
+      if (it == funcRec.records.end()) {
+        // The call was optimized away.
+        continue;
+      }
+
       auto index = it->second;
       uint8_t* ip;
       while (true) {
@@ -608,6 +636,48 @@ struct LLVMEmitter {
 
       FTRACE(2, "From locrec at {}, afterCall for fixup = {}\n", index, ip);
       mcg->recordSyncPoint(ip, fix.fixup.pcOffset, fix.fixup.spOffset);
+    }
+  }
+
+  void processSvcReqs(const LocRecs::FunctionRecord& funcRec,
+                      uint8_t* funcStart) {
+    auto findJmp = [&](uint32_t index, uint32_t id) {
+      while (index < funcRec.locationRecords.size() &&
+             funcRec.locationRecords[index].id == id) {
+        auto ip = funcStart + funcRec.locationRecords[index].offset;
+        DecodedInstruction di(ip);
+        if (di.isJmp()) return ip;
+        ++index;
+      }
+      always_assert(false && "jmp instruction cannot be found");
+    };
+
+    for (auto& req : m_bindjmps) {
+      auto it = funcRec.records.find(req.id);
+      if (it == funcRec.records.end()) continue;
+
+      auto jmpIp = findJmp(it->second, req.id);
+      FTRACE(2, "Processing bindjmp at {}, stub {}\n", jmpIp, req.stub);
+
+      mcg->cgFixups().m_alignFixups.emplace(
+        jmpIp, std::make_pair(x64::kJmpLen, kX64CacheLineSize));
+      mcg->setJmpTransID(jmpIp);
+
+      // Patch the rip-relative lea in the stub to point at the jmp.
+      auto leaIp = req.stub;
+      always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
+      always_assert(leaIp[1] == 0x8d); // lea
+      auto afterLea = leaIp + x64::kRipLeaLen;
+      auto delta = safe_cast<int32_t>(jmpIp - afterLea);
+      memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+    }
+
+    for (auto& req : m_fallbacks) {
+      auto it = funcRec.records.find(req.id);
+      if (it == funcRec.records.end()) continue;
+
+      auto destSR = mcg->tx().getSrcRec(req.dest);
+      destSR->registerFallbackJump(findJmp(it->second, req.id));
     }
   }
 
@@ -738,6 +808,13 @@ struct LLVMEmitter {
   }
 
   /*
+   * Bitcast val to Double.
+   */
+  llvm::Value* asDbl(llvm::Value* val) {
+    return m_irb.CreateBitCast(val, m_irb.getDoubleTy());
+  }
+
+  /*
    * emit LLVM IR for the given list of vasm blocks.
    */
   void emit(const jit::vector<Vlabel>& labels);
@@ -785,6 +862,16 @@ private:
   struct LLVMFixup {
     uint64_t id;
     Fixup fixup;
+  };
+
+  struct LLVMBindJmp {
+    uint32_t id;
+    TCA stub;
+  };
+
+  struct LLVMFallback {
+    uint32_t id;
+    SrcKey dest;
   };
 
   /*
@@ -838,12 +925,7 @@ private:
     void addIncoming(LLVMEmitter& e, UseInfo& useInfo, unsigned phiInd) {
       m_phis[phiInd]->addIncoming(e.value(useInfo.uses[phiInd]),
                                   useInfo.fromLabel);
-      std::string typeStr;
-      {
-        llvm::Type* type = e.value(useInfo.uses[phiInd])->getType();
-        llvm::raw_string_ostream os(typeStr);
-        type->print(os); // Flushed during scope exit.
-      }
+      auto typeStr = llshow(e.value(useInfo.uses[phiInd])->getType());
       FTRACE(1,
              "phidef --> phiInd:{}, type:{}, incoming:{}, use:%{}, "
              "block:B{}, def:%{}\n", phiInd, typeStr,
@@ -866,17 +948,23 @@ VASM_OPCODES
 
   void emitTrap();
   void emitCall(const Vinstr& instr);
+  void emit(const bindjcc1st&, SrcKey);
+  void emit(const bindjcc2nd&, SrcKey);
   llvm::Value* emitCmpForCC(Vreg sf, ConditionCode cc);
 
   llvm::Value* emitFuncPtr(const std::string& name,
                            llvm::FunctionType* type,
-                           uintptr_t address);
-  void emitTraceletTailCall(llvm::Value* target);
+                           uint64_t address);
+  llvm::CallInst* emitTraceletTailCall(llvm::Value* target);
 
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
   llvm::Value* emitPtr(const Vptr s, llvm::Type* ptrTy);
   llvm::Value* emitPtr(const Vptr s, size_t bits = 64);
+
+  template<typename Taken>
+  void emitJcc(Vreg sf, ConditionCode cc, const char* takenSuffix,
+               Taken taken);
 
   llvm::Type* ptrType(llvm::Type* ty, unsigned addressSpace = 0) const;
   llvm::Type* intNType(size_t bits) const;
@@ -895,9 +983,10 @@ VASM_OPCODES
   std::unique_ptr<llvm::Module> m_module;
   llvm::Function* m_function;
   llvm::IRBuilder<true, llvm::ConstantFolder, IRBuilderVasmInserter> m_irb;
+  std::unique_ptr<TCMemoryManager> m_tcMM;
 
   // Function type used for tail calls to other tracelets.
-  llvm::Type* m_traceletFnPtrTy{nullptr};
+  llvm::FunctionType* m_traceletFnTy{nullptr};
 
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
@@ -917,6 +1006,10 @@ VASM_OPCODES
 
   // Pending Fixups that must be processed after codegen
   jit::vector<LLVMFixup> m_fixups;
+
+  // Pending service requests that must be processed after codegen
+  jit::vector<LLVMBindJmp> m_bindjmps;
+  jit::vector<LLVMFallback> m_fallbacks;
 
   // The next id to use for LLVM location record. These IDs only have to
   // be unique within the function.
@@ -962,6 +1055,13 @@ VASM_OPCODES
 };
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
+  // Make sure all the llvm blocks are emitted in the order given by
+  // layoutBlocks, regardless of which ones we need to use as jump targets
+  // first.
+  for (auto label : labels) {
+    block(label);
+  }
+
   for (auto label : labels) {
     auto& b = m_unit.blocks[label];
     m_irb.SetInsertPoint(block(label));
@@ -989,7 +1089,7 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindjmp) \
-O(bindjcc2nd) \
+O(bindexit) \
 O(bindaddr) \
 O(debugtrap) \
 O(defvmsp) \
@@ -1018,6 +1118,7 @@ O(decq) \
 O(decqm) \
 O(divsd) \
 O(imul) \
+O(fallback) \
 O(fallbackcc) \
 O(incwm) \
 O(incl) \
@@ -1110,6 +1211,14 @@ O(phidef)
         emitCall(inst);
         break;
 
+      case Vinstr::bindjcc1st:
+        emit(inst.bindjcc1st_, inst.origin->marker().sk());
+        break;
+
+      case Vinstr::bindjcc2nd:
+        emit(inst.bindjcc2nd_, inst.origin->marker().sk());
+        break;
+
       // These instructions are intentionally unsupported for a variety of
       // reasons, and if code-gen-x64.cpp emits one it's a bug:
       case Vinstr::call:
@@ -1191,7 +1300,8 @@ void LLVMEmitter::emit(const addqim& inst) {
 }
 
 void LLVMEmitter::emit(const addsd& inst) {
-  defineValue(inst.d, m_irb.CreateFAdd(value(inst.s0), value(inst.s1)));
+  defineValue(inst.d, m_irb.CreateFAdd(asDbl(value(inst.s0)),
+                                       asDbl(value(inst.s1))));
 }
 
 void LLVMEmitter::emit(const andb& inst) {
@@ -1225,29 +1335,91 @@ void LLVMEmitter::emit(const andqi& inst) {
   defineValue(inst.d, m_irb.CreateAnd(cns(inst.s0.q()), value(inst.s1)));
 }
 
-
-void LLVMEmitter::emit(const bindjmp& inst) {
-  emitTrap();
-}
-
-void LLVMEmitter::emit(const bindjcc2nd& inst) {
+template<typename Taken>
+void LLVMEmitter::emitJcc(Vreg sf, ConditionCode cc, const char* takenName,
+                          Taken taken) {
   auto blockName = m_irb.GetInsertBlock()->getName().str();
-  auto taken =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, "_jcc"),
-                             m_function);
-  auto next =
+  auto nextBlock =
     llvm::BasicBlock::Create(m_context,
                              folly::to<std::string>(blockName, '_'),
                              m_function);
-  auto cond = emitCmpForCC(inst.sf, inst.cc);
-  m_irb.CreateCondBr(cond, taken, next);
+  nextBlock->moveAfter(m_irb.GetInsertBlock());
+  auto takenBlock =
+    llvm::BasicBlock::Create(m_context,
+                             folly::to<std::string>(blockName, "_", takenName),
+                             m_function);
+  takenBlock->moveAfter(nextBlock);
 
-  m_irb.SetInsertPoint(taken);
-  // We don't yet support smashing jumps, so trap if the jcc is taken.
-  emitTrap();
+  auto cond = emitCmpForCC(sf, cc);
+  m_irb.CreateCondBr(cond, takenBlock, nextBlock);
 
-  m_irb.SetInsertPoint(next);
+  m_irb.SetInsertPoint(takenBlock);
+  taken();
+
+  m_irb.SetInsertPoint(nextBlock);
+}
+
+void LLVMEmitter::emit(const bindjmp& inst) {
+  // bindjmp is a smashable tail call to a service request stub. The stub needs
+  // to reference the address of the tail call, but we don't know the address
+  // of the tail call until after codegen. This means we either need to emit
+  // the stub here and patch the rip-relative lea in the stub after codegen, or
+  // emit a tail call to a dummy address that we'll patch after codegen when we
+  // can emit the stub with the right address. When given the choice between
+  // lying to our stub emitter or llvm it's generally better to lie to the stub
+  // emitter, so that's what we do here.
+
+  auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+  auto stub = mcg->getFreeStub(frozen, &mcg->cgFixups());
+  ServiceReqArgVec args;
+  packServiceReqArgs(args,
+                     RipRelative(mcg->code.base()),
+                     inst.target.toAtomicInt(),
+                     inst.trflags.packed);
+  auto reqIp = mcg->backEnd().emitServiceReqWork(
+    frozen, stub, SRFlags::None, REQ_BIND_JMP, args);
+
+  auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
+  auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
+  auto call = emitTraceletTailCall(stubFunc);
+  // TODO(t5742996): call->setSmashable();
+
+  auto id = m_nextLocRec++;
+  call->setMetadata(llvm::LLVMContext::MD_locrec,
+                    llvm::MDNode::get(m_context, cns(id)));
+  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp});
+}
+
+// Emitting a real REQ_BIND_SIDE_EXIT or REQ_BIND_JMPCC_(FIRST|SECOND) only
+// makes sense if we can guarantee that llvm will emit a smashable jcc. Until
+// then, we jcc to a REQ_BIND_JMP.
+void LLVMEmitter::emit(const bindexit& inst) {
+  emitJcc(
+    inst.sf, inst.cc, "exit",
+    [&] {
+      emit(bindjmp{inst.target, inst.trflags});
+    }
+  );
+}
+
+void LLVMEmitter::emit(const bindjcc1st& inst, SrcKey instSk) {
+  emitJcc(
+    inst.sf, inst.cc, "jcc1",
+    [&] {
+      emit(bindjmp{{instSk.func(), inst.targets[1], instSk.resumed()}});
+    }
+  );
+
+  emit(bindjmp{{instSk.func(), inst.targets[0], instSk.resumed()}});
+}
+
+void LLVMEmitter::emit(const bindjcc2nd& inst, SrcKey instSk) {
+  emitJcc(
+    inst.sf, inst.cc, "jcc2",
+    [&] {
+      emit(bindjmp{{instSk.func(), inst.target, instSk.resumed()}});
+    }
+  );
 }
 
 void LLVMEmitter::emit(const bindaddr& inst) {
@@ -1273,10 +1445,10 @@ void LLVMEmitter::emit(const defvmsp& inst) {
 
 llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
                                       llvm::FunctionType* type,
-                                      uintptr_t address) {
+                                      uint64_t address) {
   auto funcPtr = m_module->getFunction(name);
   if (!funcPtr) {
-    registerGlobalSymbol(name, address);
+    m_tcMM->registerSymbolAddress(name, address);
     funcPtr = llvm::Function::Create(type,
                                      llvm::GlobalValue::ExternalLinkage,
                                      name,
@@ -1285,7 +1457,7 @@ llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
   return funcPtr;
 }
 
-void LLVMEmitter::emitTraceletTailCall(llvm::Value* target) {
+llvm::CallInst* LLVMEmitter::emitTraceletTailCall(llvm::Value* target) {
   std::vector<llvm::Value*> args{
     value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
   };
@@ -1293,6 +1465,7 @@ void LLVMEmitter::emitTraceletTailCall(llvm::Value* target) {
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
   call->setTailCallKind(llvm::CallInst::TCK_MustTail);
   m_irb.CreateRetVoid();
+  return call;
 }
 
 void LLVMEmitter::emitCall(const Vinstr& inst) {
@@ -1373,7 +1546,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   case CppCall::Kind::Direct:
     funcPtr = emitFuncPtr(getNativeFunctionName(call.address()),
                           funcType,
-                          uintptr_t(call.address()));
+                          uint64_t(call.address()));
   }
 
   llvm::Instruction* callInst = nullptr;
@@ -1396,6 +1569,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   if (fixup.isValid()) {
     auto id = m_nextLocRec++;
     m_fixups.emplace_back(LLVMFixup{id, fixup});
+    FTRACE(2, "Adding fixup id {} for {}\n", id, llshow(callInst));
     callInst->setMetadata(llvm::LLVMContext::MD_locrec,
                           llvm::MDNode::get(m_context, cns(id)));
   }
@@ -1559,24 +1733,32 @@ void LLVMEmitter::emit(const imul& inst) {
   defineValue(inst.d, m_irb.CreateMul(value(inst.s0), value(inst.s1)));
 }
 
+void LLVMEmitter::emit(const fallback& inst) {
+  assert_not_implemented(inst.trflags.packed == 0);
+
+  auto stubName = m_tcMM->getUniqueSymbolName("reqRetranslate");
+  auto destSR = mcg->tx().getSrcRec(inst.dest);
+  auto func = emitFuncPtr(stubName,
+                          m_traceletFnTy,
+                          uint64_t(destSR->getFallbackTranslation()));
+  auto call = emitTraceletTailCall(func);
+  // TODO(t5742996): call->setSmashable();
+
+  LLVMFallback req{m_nextLocRec++, inst.dest};
+  call->setMetadata(llvm::LLVMContext::MD_locrec,
+                    llvm::MDNode::get(m_context, cns(req.id)));
+  m_fallbacks.emplace_back(req);
+}
+
 void LLVMEmitter::emit(const fallbackcc& inst) {
-  auto blockName = m_irb.GetInsertBlock()->getName().str();
-  auto taken =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, "_guard"),
-                             m_function);
-  auto next =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, '_'),
-                             m_function);
-  auto cond = emitCmpForCC(inst.sf, inst.cc);
-  m_irb.CreateCondBr(cond, taken, next);
+  assert_not_implemented(inst.trflags.packed == 0);
 
-  m_irb.SetInsertPoint(taken);
-  // We don't yet support smashing jumps, so trap if the guard fails.
-  emitTrap();
-
-  m_irb.SetInsertPoint(next);
+  emitJcc(
+    inst.sf, inst.cc, "guard",
+    [&] {
+      emit(fallback{inst.dest, inst.trflags});
+    }
+  );
 }
 
 void LLVMEmitter::emit(const incwm& inst) {
@@ -1755,13 +1937,13 @@ void LLVMEmitter::emit(const jmp& inst) {
 }
 
 void LLVMEmitter::emit(const jmpr& inst) {
-  auto func = m_irb.CreateIntToPtr(value(inst.target), m_traceletFnPtrTy);
+  auto func = m_irb.CreateIntToPtr(value(inst.target), ptrType(m_traceletFnTy));
   emitTraceletTailCall(func);
 }
 
 void LLVMEmitter::emit(const jmpm& inst) {
   auto func = m_irb.CreateLoad(emitPtr(inst.target,
-                                       ptrType(m_traceletFnPtrTy)));
+                                       ptrType(ptrType(m_traceletFnTy))));
   emitTraceletTailCall(func);
 }
 
@@ -1941,7 +2123,7 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
 
 void LLVMEmitter::emit(const ldretaddr& inst) {
   auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
-                                       ptrType(m_traceletFnPtrTy),
+                                       ptrType(ptrType(m_traceletFnTy)),
                                        "bcast");
   defineValue(inst.d, m_irb.CreateLoad(ptr));
 }
@@ -2022,7 +2204,9 @@ void LLVMEmitter::emit(const sqrtsd& inst) {
 }
 
 void LLVMEmitter::emit(const store& inst) {
-  m_irb.CreateStore(value(inst.s), emitPtr(inst.d, 64));
+  auto val = value(inst.s);
+  assert(val->getType()->getPrimitiveSizeInBits() == 64);
+  m_irb.CreateStore(val, emitPtr(inst.d, ptrType(val->getType())));
 }
 
 void LLVMEmitter::emit(const storeb& inst) {
@@ -2117,7 +2301,7 @@ void LLVMEmitter::emit(const svcreq& inst) {
   auto func = emitFuncPtr(folly::to<std::string>("enterTCServiceReqLLVM_",
                                                  argTypes.size()),
                           funcType,
-                          uintptr_t(enterTCReturn));
+                          uint64_t(enterTCReturn));
   auto call = m_irb.CreateCall(func, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_SR);
   call->setTailCallKind(llvm::CallInst::TCK_Tail);

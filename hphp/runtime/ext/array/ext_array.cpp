@@ -1539,8 +1539,7 @@ static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
   for (ArrayIter iter(container); iter; ++iter) {
-    auto const& c = *iter.first().asCell();
-    addToSetHelper(st, c, strTv, !isKey);
+    addToSetHelper(st, *iter.first().asCell(), strTv, !isKey);
   }
 }
 

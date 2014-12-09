@@ -931,8 +931,8 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
-    raise_warning("Header may not contain more than a single header, "
-                  "new line detected");
+    raise_error("Header may not contain more than a single header, "
+                "new line detected");
     return;
   }
 

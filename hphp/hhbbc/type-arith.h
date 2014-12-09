@@ -71,7 +71,7 @@ Type typeIncDec(IncDecOp, Type);
 /*
  * Op= operations on types, where "Op" is determined by a SetOpOp.
  */
-Type typeArithSetOp(SetOpOp, Type, Type);
+Type typeSetOp(SetOpOp, Type, Type);
 
 //////////////////////////////////////////////////////////////////////
 

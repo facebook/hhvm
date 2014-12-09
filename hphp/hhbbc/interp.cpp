@@ -1118,7 +1118,7 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  auto const resultTy = typeArithSetOp(op.subop, loc, t1);
+  auto const resultTy = typeSetOp(op.subop, loc, t1);
   setLoc(env, op.loc1, resultTy);
   push(env, resultTy);
 }

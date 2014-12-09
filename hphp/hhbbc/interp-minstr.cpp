@@ -1025,7 +1025,7 @@ void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   if (couldBeThisObj(env, env.base)) {
     if (name && mustBeThisObj(env, env.base)) {
       if (auto const lhsTy = thisPropAsCell(env, name)) {
-        resultTy = typeArithSetOp(subop, *lhsTy, rhsTy);
+        resultTy = typeSetOp(subop, *lhsTy, rhsTy);
       }
     }
 

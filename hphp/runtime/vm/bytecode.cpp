@@ -7698,7 +7698,7 @@ void ExecutionContext::requestExit() {
     m_globalVarEnv = 0;
   }
 
-  if (!getLastError().isNull()) {
+  if (!m_lastError.isNull()) {
     clearLastError();
   }
 

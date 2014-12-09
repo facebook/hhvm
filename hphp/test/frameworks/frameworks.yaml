@@ -319,6 +319,10 @@
     install_root: klein
     test_root: klein
     test_find_mode: token
+    blacklist:
+      # KleinTest::testWithUsingFileInclude fails in sandcastle
+      # but we can't reproduce this.
+      - klein/tests/Klein/Tests/KleinTest.php
   kohana:
     url: https://github.com/kohana/kohana.git
     branch: v3.3.2

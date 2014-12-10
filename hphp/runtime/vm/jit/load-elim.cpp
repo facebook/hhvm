@@ -322,6 +322,11 @@ void optimize_block(Local& env, Block* blk) {
     auto const flags = analyze_inst(env, inst, [&] (Block*, const State&) {});
 
     auto const can_replace = [&] (SSATmp* what, Type knownType) -> bool {
+      if (knownType == Type::Bottom) {
+        // Unreachable code, but we're not allowed to create IR instructions
+        // with a typeParam of Bottom.
+        return false;
+      }
       if (!(knownType <= inst.dst()->type())) {
         /*
          * It's possible we could assert the intersection of the types, but

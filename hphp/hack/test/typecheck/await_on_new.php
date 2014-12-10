@@ -9,7 +9,11 @@
  *
  */
 
-class Tokyo implements Awaitable<string> {}
+class Tokyo implements Awaitable<string> {
+  public function getWaitHandle(): WaitHandle<string> {
+    // UNSAFE
+  }
+}
 
 async function apocalypse_now() : Awaitable<string> {
   $x = await new Tokyo();

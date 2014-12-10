@@ -34,17 +34,27 @@ let builtins = "<?hh // decl\n"^
   "interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
   "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
-  "interface Awaitable<T> {}\n"^
+  "interface Awaitable<T> {"^
+  "  public function getWaitHandle(): WaitHandle<T>;"^
+  "}\n"^
   "interface WaitHandle<T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{}\n"^
+  "interface ConstVector<Tv> extends KeyedIterable<int, Tv>, Indexish<int, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
+  "}\n"^
   "interface ConstSet<Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{}\n"^
+  "interface ConstMap<Tk, Tv> extends KeyedIterable<Tk, Tv>, Indexish<Tk, Tv>{"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
+  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
+  "}\n"^
   "final class Vector<Tv> implements ConstVector<Tv>{\n"^
   "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
   "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
+  "  public function reserve(int $sz): void;"^
   "}\n"^
   "final class ImmVector<Tv> implements ConstVector<Tv> {}\n"^
-  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
+  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
+  "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
+  "}\n"^
   "final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>{}\n"^
   "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {}\n"^
   "final class Set<Tv> extends ConstSet<Tv> {}\n"^

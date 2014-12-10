@@ -9,7 +9,11 @@
  *
  */
 
-class Preparable<T> implements Awaitable<T> {}
+class Preparable<T> implements Awaitable<T> {
+  public function getWaitHandle(): WaitHandle<T> {
+    // UNSAFE
+  }
+}
 class MyPreparable extends Preparable<MyPreparable> {}
 
 async function foo_one(): Awaitable<MyPreparable> {

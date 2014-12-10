@@ -1,4 +1,3 @@
-
 (**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,4 +8,6 @@
  *
  *)
 
+let output_facts _ _ = ()
+let facts_of_defs _ _ _ _ _ = []
 let go _ _ _ = ""

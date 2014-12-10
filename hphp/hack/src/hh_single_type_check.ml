@@ -20,6 +20,7 @@ type options = {
   suggest : bool;
   color : bool;
   coverage : bool;
+  prolog : bool;
   rest : string list
 }
 
@@ -114,6 +115,7 @@ let parse_options () =
   let suggest = ref false in
   let color = ref false in
   let coverage = ref false in
+  let prolog = ref false in
   let rest_options = ref [] in
   let rest x = rest_options := x :: !rest_options in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -127,6 +129,9 @@ let parse_options () =
     "--coverage",
       Arg.Set coverage,
       "Produce coverage output";
+    "--prolog",
+      Arg.Set prolog,
+      "Produce prolog facts";
     "--",
       Arg.Rest rest,
       "";
@@ -139,6 +144,7 @@ let parse_options () =
     suggest = !suggest;
     color = !color;
     coverage = !coverage;
+    prolog = !prolog;
     rest = !rest_options;
   }
 
@@ -232,6 +238,10 @@ let print_coverage fn =
   let counts = ServerCoverageMetric.count_exprs fn !Typing_defs.type_acc in
   ClientCoverageMetric.go false (Some (Leaf counts))
 
+let print_prolog funs classes typedefs consts =
+  let facts = PrologMain.facts_of_defs [] funs classes typedefs consts in
+  PrologMain.output_facts stdout facts
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
@@ -242,7 +252,7 @@ let print_coverage fn =
  * a given file. You can then inspect this typing environment, e.g.
  * with 'Typing_env.Classes.get "Foo";;'
  *)
-let main_hack { filename; suggest; color; coverage; _ } =
+let main_hack { filename; suggest; color; coverage; prolog; _ } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test (Path.mk_path "/tmp/hhi");
@@ -266,6 +276,8 @@ let main_hack { filename; suggest; color; coverage; _ } =
       List.iter (fun (_, fname) -> Typing_check_service.type_fun fname) funs;
       List.iter (fun (_, cname) -> Typing_check_service.type_class cname) classes;
       List.iter (fun (_, x) -> Typing_check_service.check_typedef x) typedefs;
+      if prolog
+      then print_prolog funs classes typedefs consts;
       if color
       then print_colored filename;
       if coverage
@@ -274,9 +286,11 @@ let main_hack { filename; suggest; color; coverage; _ } =
       then suggest_and_print filename funs classes typedefs consts
     end
   in
-  if errors <> []
-  then error (List.hd errors)
-  else Printf.printf "No errors\n"
+  if not prolog then begin
+    if errors <> []
+    then error (List.hd errors)
+    else Printf.printf "No errors\n"
+  end
 
 (* command line driver *)
 let _ =

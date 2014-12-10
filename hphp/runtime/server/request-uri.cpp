@@ -206,6 +206,11 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
   if (!url.empty() &&
       url.charAt(url.length() - 1) != '/') {
     if (virtualFolderExists(vhost, sourceRoot, pathTranslation, url)) {
+      if (m_originalURL.find("..") != String::npos) {
+        transport->sendString(getDefault404(), 404);
+        transport->onSendEnd();
+        return false;
+      }
       url += "/";
       m_rewritten = true;
       String queryStr;

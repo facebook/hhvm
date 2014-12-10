@@ -193,26 +193,26 @@ inline int ObjectData::getId() const {
   return o_id;
 }
 
-inline bool ObjectData::o_toBoolean() const {
+inline bool ObjectData::toBoolean() const {
   if (UNLIKELY(getAttribute(CallToImpl))) {
-    return o_toBooleanImpl();
+    return toBooleanImpl();
   }
   return true;
 }
 
-inline int64_t ObjectData::o_toInt64() const {
+inline int64_t ObjectData::toInt64() const {
   if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
-    return o_toInt64Impl();
+    return toInt64Impl();
   }
   raiseObjToIntNotice(classname_cstr());
   return 1;
 }
 
-inline double ObjectData::o_toDouble() const {
+inline double ObjectData::toDouble() const {
   if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
-    return o_toDoubleImpl();
+    return toDoubleImpl();
   }
-  return o_toInt64();
+  return toInt64();
 }
 
 inline uint8_t& ObjectData::subclass_u8() {

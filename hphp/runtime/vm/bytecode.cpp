@@ -4324,7 +4324,7 @@ OPTBLD_INLINE void ExecutionContext::iopSwitch(IOP_ARGS) {
           return;
 
         case KindOfObject:
-          intval = val->m_data.pobj->o_toInt64();
+          intval = val->m_data.pobj->toInt64();
           tvDecRef(val);
           return;
 

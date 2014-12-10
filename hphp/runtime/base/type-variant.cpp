@@ -430,7 +430,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toBoolean();
     case KindOfArray:         return !m_data.parr->empty();
-    case KindOfObject:        return m_data.pobj->o_toBoolean();
+    case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->o_toBoolean();
     case KindOfRef:           return m_data.pref->var()->toBoolean();
     case KindOfClass:         break;
@@ -449,7 +449,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toInt64(base);
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
-    case KindOfObject:        return m_data.pobj->o_toInt64();
+    case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->o_toInt64();
     case KindOfRef:           return m_data.pref->var()->toInt64(base);
     case KindOfClass:         break;
@@ -467,7 +467,7 @@ double Variant::toDoubleHelper() const {
     case KindOfStaticString:
     case KindOfString:        return m_data.pstr->toDouble();
     case KindOfArray:         return (double)toInt64();
-    case KindOfObject:        return m_data.pobj->o_toDouble();
+    case KindOfObject:        return m_data.pobj->toDouble();
     case KindOfResource:      return m_data.pres->o_toDouble();
     case KindOfRef:           return m_data.pref->var()->toDouble();
     case KindOfClass:         break;
@@ -525,7 +525,7 @@ Array Variant::toArrayHelper() const {
     case KindOfStaticString:
     case KindOfString:        return Array::Create(m_data.pstr);
     case KindOfArray:         return Array(m_data.parr);
-    case KindOfObject:        return m_data.pobj->o_toArray();
+    case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->o_toArray();
     case KindOfRef:           return m_data.pref->var()->toArray();
     case KindOfClass:         break;

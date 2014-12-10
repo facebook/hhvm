@@ -460,7 +460,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
         Object obj = var.toObject();
 
         if (obj->isCollection()) {
-          fb_compact_serialize_variant(sb, obj->o_toArray(), depth, behavior);
+          fb_compact_serialize_variant(sb, obj->toArray(), depth, behavior);
           return 0;
         }
 

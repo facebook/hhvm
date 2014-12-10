@@ -170,15 +170,11 @@ struct ObjectData {
 
   Object iterableObject(bool& isIterable, bool mayImplementIterator = true);
 
-  bool o_toBoolean() const;
-  int64_t o_toInt64() const;
-  double o_toDouble() const;
-
-  // Overridable casting.
-  bool o_toBooleanImpl() const noexcept;
-  int64_t o_toInt64Impl() const noexcept;
-  double o_toDoubleImpl() const noexcept;
-  Array o_toArray(bool pubOnly = false) const;
+  // Type conversions.
+  bool toBoolean() const;
+  int64_t toInt64() const;
+  double toDouble() const;
+  Array toArray(bool pubOnly = false) const;
 
   bool destruct();
 
@@ -201,8 +197,8 @@ struct ObjectData {
   // TODO Task #2584896: o_invoke and o_invoke_few_args are deprecated. These
   // APIs don't properly take class context into account when looking up the
   // method, and they duplicate some of the functionality from invokeFunc(),
-  // invokeFuncFew(), and vm_decode_function(). We should remove these APIs
-  // and migrate all callers to use invokeFunc(), invokeFuncFew(), and
+  // invokeFuncFew(), and vm_decode_function(). We should remove these APIs and
+  // migrate all callers to use invokeFunc(), invokeFuncFew(), and
   // vm_decode_function() instead.
   Variant o_invoke(const String& s, const Variant& params, bool fatal = true);
   Variant o_invoke_few_args(const String& s, int count,
@@ -348,6 +344,10 @@ private:
   const char* classname_cstr() const;
 
   static void compileTimeAssertions();
+
+  bool toBooleanImpl() const noexcept;
+  int64_t toInt64Impl() const noexcept;
+  double toDoubleImpl() const noexcept;
 
 // offset:  0    4    8     10  11    12     16   20          32
 // 64bit:   cls       attr  u8  kind  count  id   [subclass]  [props...]

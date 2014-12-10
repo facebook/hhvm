@@ -517,7 +517,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);
 }
 
@@ -525,7 +525,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
     return collectionContains(obj, key);
   }
-  const Array& arr = obj->o_toArray();
+  auto arr = obj->toArray();
   return arr.get()->exists(key);
 }
 
@@ -675,7 +675,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
 }
 
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
-  int64_t ival = o->o_toInt64();
+  auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
 }

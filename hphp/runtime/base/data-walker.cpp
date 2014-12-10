@@ -78,7 +78,7 @@ void DataWalker::traverseData(
     return; // avoid infinite recursion
   }
   if (!canStopWalk(features)) {
-    traverseData(data->o_toArray().get(), features, visited);
+    traverseData(data->toArray().get(), features, visited);
   }
 }
 

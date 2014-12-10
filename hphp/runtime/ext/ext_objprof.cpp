@@ -459,7 +459,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
   }
 
   // We're increasing ref count by calling toArray, need to adjust it later
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -529,7 +529,7 @@ static void getObjStrings(
   }
 
   path->push_back(std::string(cls->name()->data()));
-  auto arr = obj->o_toArray(false);
+  auto arr = obj->toArray();
   bool is_packed = arr->isPacked();
 
   for (ArrayIter iter(arr); iter; ++iter) {

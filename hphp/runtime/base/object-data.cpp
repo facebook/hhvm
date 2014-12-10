@@ -133,46 +133,37 @@ bool ObjectData::instanceof(const String& s) const {
   return cls && instanceof(cls);
 }
 
-bool ObjectData::o_toBooleanImpl() const noexcept {
+bool ObjectData::toBooleanImpl() const noexcept {
   // Note: if you add more cases here, hhbbc/class-util.cpp also needs
   // to be changed.
   if (isCollection()) {
-    if (m_cls == c_Vector::classof()) {
-      return c_Vector::ToBool(this);
-    } else if (m_cls == c_Map::classof()) {
-      return c_Map::ToBool(this);
-    } else if (m_cls == c_ImmMap::classof()) {
-      return c_ImmMap::ToBool(this);
-    } else if (m_cls == c_Set::classof()) {
-      return c_Set::ToBool(this);
-    } else if (m_cls == c_ImmVector::classof()) {
-      return c_ImmVector::ToBool(this);
-    } else if (m_cls == c_ImmSet::classof()) {
-      return c_ImmSet::ToBool(this);
-    } else {
-      always_assert(false);
-    }
-  } else if (instanceof(c_SimpleXMLElement::classof())) {
-    // SimpleXMLElement is the only non-collection class that has custom
-    // bool casting.
+    if (m_cls == c_Vector::classof())    return c_Vector::ToBool(this);
+    if (m_cls == c_Map::classof())       return c_Map::ToBool(this);
+    if (m_cls == c_ImmMap::classof())    return c_ImmMap::ToBool(this);
+    if (m_cls == c_Set::classof())       return c_Set::ToBool(this);
+    if (m_cls == c_ImmVector::classof()) return c_ImmVector::ToBool(this);
+    if (m_cls == c_ImmSet::classof())    return c_ImmSet::ToBool(this);
+    always_assert(false);
+  }
+
+  if (instanceof(c_SimpleXMLElement::classof())) {
+    // SimpleXMLElement is the only non-collection class that has custom bool
+    // casting.
     return c_SimpleXMLElement::ToBool(this);
   }
+
   always_assert(false);
   return false;
 }
 
-int64_t ObjectData::o_toInt64Impl() const noexcept {
+int64_t ObjectData::toInt64Impl() const noexcept {
   // SimpleXMLElement is the only class that has proper custom int casting.
-  // If others are added in future, just turn this assert into an if and
-  // add cases.
   assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToInt64(this);
 }
 
-double ObjectData::o_toDoubleImpl() const noexcept {
-  // SimpleXMLElement is the only non-collection class that has custom
-  // double casting. If others are added in future, just turn this assert
-  // into an if and add cases.
+double ObjectData::toDoubleImpl() const noexcept {
+  // SimpleXMLElement is the only class that has custom double casting.
   assert(instanceof(c_SimpleXMLElement::classof()));
   return c_SimpleXMLElement::ToDouble(this);
 }
@@ -392,25 +383,18 @@ void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
 // converted to an object
 const int64_t ARRAYOBJ_STD_PROP_LIST = 1;
 
-Array ObjectData::o_toArray(bool pubOnly /* = false */) const {
+Array ObjectData::toArray(bool pubOnly /* = false */) const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    if (m_cls == c_Vector::classof()) {
-      return c_Vector::ToArray(this);
-    } else if (m_cls == c_Map::classof()) {
-      return c_Map::ToArray(this);
-    } else if (m_cls == c_Set::classof()) {
-      return c_Set::ToArray(this);
-    } else if (m_cls == c_Pair::classof()) {
-      return c_Pair::ToArray(this);
-    } else if (m_cls == c_ImmVector::classof()) {
-      return c_ImmVector::ToArray(this);
-    } else if (m_cls == c_ImmMap::classof()) {
-      return c_ImmMap::ToArray(this);
-    } else if (m_cls == c_ImmSet::classof()) {
-      return c_ImmSet::ToArray(this);
-    }
+    if (m_cls == c_Vector::classof())    return c_Vector::ToArray(this);
+    if (m_cls == c_Map::classof())       return c_Map::ToArray(this);
+    if (m_cls == c_Set::classof())       return c_Set::ToArray(this);
+    if (m_cls == c_Pair::classof())      return c_Pair::ToArray(this);
+    if (m_cls == c_ImmVector::classof()) return c_ImmVector::ToArray(this);
+    if (m_cls == c_ImmMap::classof())    return c_ImmMap::ToArray(this);
+    if (m_cls == c_ImmSet::classof())    return c_ImmSet::ToArray(this);
+
     // It's undefined what happens if you reach not_reached. We want to be sure
     // to hard fail if we get here.
     always_assert(false);
@@ -667,7 +651,7 @@ inline Array getSerializeProps(const ObjectData* obj,
                                VariableSerializer* serializer) {
   if (serializer->getType() == VariableSerializer::Type::VarExport) {
     Array props = Array::Create();
-    for (ArrayIter iter(obj->o_toArray()); iter; ++iter) {
+    for (ArrayIter iter(obj->toArray()); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling
       if (key[0] == '\0' && key.size() > 0) {
@@ -683,7 +667,7 @@ inline Array getSerializeProps(const ObjectData* obj,
   }
   if ((serializer->getType() != VariableSerializer::Type::PrintR) &&
       (serializer->getType() != VariableSerializer::Type::VarDump)) {
-    return obj->o_toArray();
+    return obj->toArray();
   }
   auto cls = obj->getVMClass();
   auto debuginfo = cls->lookupMethod(s_debugInfo.get());
@@ -704,13 +688,13 @@ inline Array getSerializeProps(const ObjectData* obj,
       return ret;
     }
 
-    return obj->o_toArray();
+    return obj->toArray();
   }
   if (debuginfo->attrs() & (AttrPrivate|AttrProtected|
                             AttrAbstract|AttrStatic)) {
     raise_warning("%s::__debugInfo() must be public and non-static",
                   cls->name()->data());
-    return obj->o_toArray();
+    return obj->toArray();
   }
   Variant ret = const_cast<ObjectData*>(obj)->o_invoke_few_args(s_debugInfo, 0);
   if (ret.isArray()) {

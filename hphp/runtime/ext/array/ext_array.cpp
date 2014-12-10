@@ -789,7 +789,7 @@ Variant HHVM_FUNCTION(array_reverse,
   assert(cell_input.m_type == KindOfObject);
   ObjectData* obj = cell_input.m_data.pobj;
   assert(obj && obj->isCollection());
-  return ArrayUtil::Reverse(obj->o_toArray(), preserve_keys);
+  return ArrayUtil::Reverse(obj->toArray(), preserve_keys);
 }
 
 Variant HHVM_FUNCTION(array_shift,

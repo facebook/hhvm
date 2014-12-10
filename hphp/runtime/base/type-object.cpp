@@ -47,7 +47,7 @@ Object::~Object() {
 }
 
 Array Object::toArray() const {
-  return m_px ? m_px->o_toArray() : Array();
+  return m_px ? m_px->toArray() : Array();
 }
 
 String Object::toString() const {

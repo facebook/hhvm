@@ -1603,7 +1603,7 @@ public:
   }
 
   Array debugInfo(ObjectData* obj) {
-    Array ret = obj->o_toArray();
+    auto ret = obj->toArray();
     for (auto it : m_props) {
       auto value = it->getter(obj);
       if (value.isObject()) {
@@ -2017,7 +2017,7 @@ bool HHVM_METHOD(DOMNode, __isset, Variant name) {
 Array HHVM_METHOD(DOMNode, __debuginfo) {
   auto* data = toDOMNode(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domnode_properties_map.debugInfo(this_);
 }
@@ -2643,7 +2643,7 @@ bool HHVM_METHOD(DOMAttr, __isset,
 Array HHVM_METHOD(DOMAttr, __debuginfo) {
   auto* data = Native::data<DOMAttr>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domattr_properties_map.debugInfo(this_);
 }
@@ -2717,7 +2717,7 @@ bool HHVM_METHOD(DOMCharacterData, __isset,
 Array HHVM_METHOD(DOMCharacterData, __debuginfo) {
   auto* data = Native::data<DOMCharacterData>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domcharacterdata_properties_map.debugInfo(this_);
 }
@@ -2953,7 +2953,7 @@ bool HHVM_METHOD(DOMText, __isset,
 Array HHVM_METHOD(DOMText, __debuginfo) {
   auto* data = Native::data<DOMText>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domtext_properties_map.debugInfo(this_);
 }
@@ -3301,7 +3301,7 @@ bool HHVM_METHOD(DOMDocument, __isset,
 Array HHVM_METHOD(DOMDocument, __debuginfo) {
   auto* data = Native::data<DOMDocument>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domdocument_properties_map.debugInfo(this_);
 }
@@ -4014,7 +4014,7 @@ bool HHVM_METHOD(DOMDocumentType, __isset,
 Array HHVM_METHOD(DOMDocumentType, __debuginfo) {
   auto* data = Native::data<DOMDocumentType>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domdocumenttype_properties_map.debugInfo(this_);
 }
@@ -4140,7 +4140,7 @@ bool HHVM_METHOD(DOMElement, __isset,
 Array HHVM_METHOD(DOMElement, __debuginfo) {
   auto* data = Native::data<DOMElement>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domelement_properties_map.debugInfo(this_);
 }
@@ -4767,7 +4767,7 @@ bool HHVM_METHOD(DOMEntity, __isset,
 Array HHVM_METHOD(DOMEntity, __debuginfo) {
   auto* data = Native::data<DOMEntity>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domentity_properties_map.debugInfo(this_);
 }
@@ -4854,7 +4854,7 @@ bool HHVM_METHOD(DOMNotation, __isset,
 Array HHVM_METHOD(DOMNotation, __debuginfo) {
   auto* data = Native::data<DOMNotation>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domnotation_properties_map.debugInfo(this_);
 }
@@ -4937,7 +4937,7 @@ bool HHVM_METHOD(DOMProcessingInstruction, __isset,
 Array HHVM_METHOD(DOMProcessingInstruction, __debuginfo) {
   auto* data = Native::data<DOMProcessingInstruction>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domprocessinginstruction_properties_map.debugInfo(this_);
 }
@@ -5651,7 +5651,7 @@ bool HHVM_METHOD(DOMXPath, __isset,
 Array HHVM_METHOD(DOMXPath, __debuginfo) {
   auto* data = Native::data<DOMXPath>(this_);
   if (!data->m_node) {
-    return this_->o_toArray();
+    return this_->toArray();
   }
   return domxpath_properties_map.debugInfo(this_);
 }

@@ -63,7 +63,7 @@ TypedNum numericConvHelper(Cell cell) {
       throw_bad_array_operand();
 
     case KindOfObject:
-      return make_int(cell.m_data.pobj->o_toInt64());
+      return make_int(cell.m_data.pobj->toInt64());
 
     case KindOfResource:
       return make_int(cell.m_data.pres->o_toInt64());

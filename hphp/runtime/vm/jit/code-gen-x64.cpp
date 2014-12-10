@@ -1959,7 +1959,7 @@ void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
         }, [&] (Vout& v) { // rsrc is not a native collection
           auto dst3 = v.makeReg();
           cgCallHelper(v,
-            CppCall::method(&ObjectData::o_toBoolean),
+            CppCall::method(&ObjectData::toBoolean),
             CallDest{DestType::Byte, dst3},
             SyncOptions::kSyncPoint,
             argGroup(inst).ssa(0));

@@ -179,7 +179,7 @@ static bool HHVM_FUNCTION(mysql_close,
 
 static Variant HHVM_FUNCTION(mysql_errno,
                       const Variant& link_identifier /* = null */) {
-  MySQL *mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return false;
@@ -196,7 +196,7 @@ static Variant HHVM_FUNCTION(mysql_errno,
 
 static Variant HHVM_FUNCTION(mysql_error,
                       const Variant& link_identifier /* = null */) {
-  MySQL *mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return false;
@@ -213,7 +213,7 @@ static Variant HHVM_FUNCTION(mysql_error,
 
 static Variant HHVM_FUNCTION(mysql_warning_count,
                       const Variant& link_identifier /* = null */) {
-  MySQL *mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return false;
@@ -296,7 +296,7 @@ static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
   if (conn == nullptr) {
     return false;
   }
-  MySQL *mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL->m_multi_query &&
       !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_ON)) {
     mySQL->m_multi_query = true;
@@ -430,7 +430,7 @@ static Variant HHVM_FUNCTION(mysql_async_connect_start,
 
 static bool HHVM_FUNCTION(mysql_async_connect_completed,
                    const Variant& link_identifier) {
-  MySQL* mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return true;
@@ -474,7 +474,7 @@ static bool HHVM_FUNCTION(mysql_async_query_start,
 
 static Variant HHVM_FUNCTION(mysql_async_query_result,
                       const Variant& link_identifier) {
-  MySQL* mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return Variant(Variant::NullInit());
@@ -489,7 +489,7 @@ static Variant HHVM_FUNCTION(mysql_async_query_result,
 
   int error = 0;
   auto status = mysql_real_query_nonblocking(
-    conn, mySQL->m_async_query.data(), mySQL->m_async_query.size(), &error);
+    conn, mySQL->m_async_query.c_str(), mySQL->m_async_query.size(), &error);
 
   if (status != NET_ASYNC_COMPLETE) {
     return Variant(Variant::NullInit());
@@ -499,7 +499,7 @@ static Variant HHVM_FUNCTION(mysql_async_query_result,
     return Variant(Variant::NullInit());
   }
 
-  mySQL->m_async_query.reset();
+  mySQL->m_async_query.clear();
 
   MYSQL_RES* mysql_result = mysql_use_result(conn);
   MySQLResult *r = newres<MySQLResult>(mysql_result);
@@ -607,8 +607,9 @@ static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
       return empty_array();
     }
 
-    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
-    MYSQL* conn = mySQL->get();
+    auto rsrc = entry.rvalAt(0).toResource();
+    auto conn = rsrc.getTyped<MySQLResource>()->mysql()->get();
+
     if (conn->async_op_status == ASYNC_OP_UNSET) {
       raise_warning("runtime/ext_mysql: no pending async operation in "
                     "progress");
@@ -646,8 +647,9 @@ static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
                    nfds);
       return empty_array();
     }
-    MySQL* mySQL = entry.rvalAt(0).toResource().getTyped<MySQL>();
-    MYSQL* conn = mySQL->get();
+
+    auto rsrc = entry.rvalAt(0).toResource();
+    auto conn = rsrc.getTyped<MySQLResource>()->mysql()->get();
 
     pollfd* fd = &fds[nfds++];
     if (fd->fd != mysql_get_file_descriptor(conn)) {
@@ -664,7 +666,7 @@ static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
 
 static int64_t HHVM_FUNCTION(mysql_async_status,
                              const Variant& link_identifier) {
-  MySQL *mySQL = MySQL::Get(link_identifier);
+  auto mySQL = MySQL::Get(link_identifier);
   if (!mySQL || !mySQL->get()) {
     raise_warning("supplied argument is not a valid MySQL-Link resource");
     return -1;

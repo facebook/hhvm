@@ -14,41 +14,43 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 
-#include <netinet/in.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <poll.h>
 #include <algorithm>
+#include <unordered_set>
 #include <vector>
 
 #include <folly/Conv.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include "hphp/util/network.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/db-mysql.h"
+#include "hphp/util/network.h"
 #include "hphp/util/text-util.h"
+#include "hphp/util/timer.h"
+
+#include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/persistent-resource-store.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/ext/std/ext_std_network.h"
-#include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
+#include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/persistent-resource-store.h"
 
 namespace HPHP {
-
-using std::string;
 
 const StaticString
   s_mysqli_result("mysqli_result");
@@ -76,15 +78,17 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(MySQLRequestData, s_mysql_data);
 
 int MySQL::s_default_port = 0;
 
-MySQL *MySQL::Get(const Variant& link_identifier) {
+std::shared_ptr<MySQL> MySQL::Get(const Variant& link_identifier) {
   if (link_identifier.isNull()) {
     return GetDefaultConn();
   }
-  return link_identifier.toResource().getTyped<MySQL>(true, true);
+  auto const rsrc = link_identifier.toResource();
+  return rsrc.getTyped<MySQLResource>(true, true)->mysql();
 }
 
-MYSQL *MySQL::GetConn(const Variant& link_identifier, MySQL **rconn /* = NULL */) {
-  MySQL *mySQL = Get(link_identifier);
+MYSQL* MySQL::GetConn(const Variant& link_identifier,
+                      std::shared_ptr<MySQL>* rconn /* = nullptr */) {
+  auto mySQL = Get(link_identifier);
   MYSQL *ret = nullptr;
   if (mySQL) {
     ret = mySQL->get();
@@ -105,7 +109,7 @@ MYSQL *MySQL::GetConn(const Variant& link_identifier, MySQL **rconn /* = NULL */
 }
 
 bool MySQL::CloseConn(const Variant& link_identifier) {
-  MySQL *mySQL = Get(link_identifier);
+  auto mySQL = Get(link_identifier);
   if (mySQL && !mySQL->isPersistent()) {
     mySQL->close();
   }
@@ -146,34 +150,39 @@ std::string MySQL::GetHash(const String& host, int port, const String& socket,
 }
 
 namespace {
-thread_local PersistentResourceStore<std::string,MySQL*> s_connections;
+thread_local std::unordered_map<std::string,
+                                std::shared_ptr<MySQL>> s_connections;
 }
 
-MySQL *MySQL::GetCachedImpl(const String& host, int port,
-                            const String& socket, const String& username,
-                            const String& password, int client_flags) {
+std::shared_ptr<MySQL> MySQL::GetCachedImpl(const String& host, int port,
+                                            const String& socket,
+                                            const String& username,
+                                            const String& password,
+                                            int client_flags) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  return s_connections.get(key);
+  return s_connections[key];
 }
 
 void MySQL::SetCachedImpl(const String& host, int port,
-                          const String& socket, const String& username,
-                          const String& password, int client_flags,
-                          MySQL *conn) {
+                          const String& socket,
+                          const String& username,
+                          const String& password,
+                          int client_flags,
+                          std::shared_ptr<MySQL> conn) {
   auto key = GetHash(host, port, socket, username, password, client_flags);
-  s_connections.set(key, conn);
+  s_connections[key] = conn;
 }
 
 size_t MySQL::NumCachedConnections() {
-  return s_connections.getMap().size();
+  return s_connections.size();
 }
 
-MySQL *MySQL::GetDefaultConn() {
-  return s_mysql_data->defaultConn.getTyped<MySQL>(true);
+std::shared_ptr<MySQL> MySQL::GetDefaultConn() {
+  return s_mysql_data->defaultConn.getTyped<MySQLResource>(true)->mysql();
 }
 
-void MySQL::SetDefaultConn(MySQL *conn) {
-  s_mysql_data->defaultConn = conn;
+void MySQL::SetDefaultConn(std::shared_ptr<MySQL> conn) {
+  s_mysql_data->defaultConn = newres<MySQLResource>(std::move(conn));
 }
 
 int MySQL::GetDefaultReadTimeout() {
@@ -189,7 +198,10 @@ void MySQL::SetDefaultReadTimeout(int timeout_ms) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class MySQL
-static MYSQL *configure_conn(MYSQL* conn) {
+
+namespace {
+
+MYSQL* configure_conn(MYSQL* conn) {
   mysql_options(conn, MYSQL_OPT_LOCAL_INFILE, 0);
   if (mysqlExtension::ConnectTimeout) {
     MySQLUtil::set_mysql_timeout(conn, MySQLUtil::ConnectTimeout,
@@ -203,15 +215,22 @@ static MYSQL *configure_conn(MYSQL* conn) {
   return conn;
 }
 
-static MYSQL *create_new_conn() {
+MYSQL* create_new_conn() {
   return configure_conn(mysql_init(nullptr));
+}
+
 }
 
 MySQL::MySQL(const char *host, int port, const char *username,
              const char *password, const char *database,
              MYSQL* raw_connection)
-    : m_port(port), m_last_error_set(false), m_last_errno(0),
-      m_xaction_count(0), m_multi_query(false), m_state(MySQLState::INITED) {
+  : m_port(port)
+  , m_last_error_set(false)
+  , m_last_errno(0)
+  , m_xaction_count(0)
+  , m_multi_query(false)
+  , m_state(MySQLState::INITED)
+{
   if (host) m_host = host;
   if (username) m_username = username;
   if (password) m_password = password;
@@ -222,15 +241,6 @@ MySQL::MySQL(const char *host, int port, const char *username,
   } else {
     m_conn = create_new_conn();
   }
-}
-
-MySQL::~MySQL() {
-  close();
-}
-
-void MySQL::sweep() {
-  // may or may not be smart allocated
-  delete this;
 }
 
 void MySQL::setLastError(const char *func) {
@@ -341,6 +351,11 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
   m_state = (ret) ? MySQLState::CONNECTED : MySQLState::CLOSED;
   return ret;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// MySQLResource
+
+IMPLEMENT_RESOURCE_ALLOCATION(MySQLResource)
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -510,11 +525,11 @@ Variant php_mysql_do_connect(const String& server, const String& username,
                                       connect_timeout_ms, query_timeout_ms);
 }
 
-Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
-                                     String username, String password,
-                                     String database, int client_flags,
-                                     bool persistent, bool async,
-                                     int connect_timeout_ms,
+Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
+                                     String server, String username,
+                                     String password, String database,
+                                     int client_flags, bool persistent,
+                                     bool async, int connect_timeout_ms,
                                      int query_timeout_ms) {
   if (connect_timeout_ms < 0) {
     connect_timeout_ms = mysqlExtension::ConnectTimeout;
@@ -553,8 +568,8 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
   }
 
   if (persistent) {
-    auto p_mySQL = MySQL::GetPersistent(host, port, socket, username, password,
-                                   client_flags);
+    auto p_mySQL = MySQL::GetPersistent(host, port, socket, username,
+                                        password, client_flags);
 
     if (p_mySQL != nullptr) {
       mySQL = p_mySQL;
@@ -564,8 +579,8 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
   }
 
   if (mySQL == nullptr) {
-    mySQL = new MySQL(host.c_str(), port, username.c_str(), password.c_str(),
-                      database.c_str());
+    mySQL = std::make_shared<MySQL>(host.c_str(), port, username.c_str(),
+                                    password.c_str(), database.c_str());
   }
 
   if (mySQL->getState() == MySQLState::INITED) {
@@ -602,7 +617,7 @@ Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
                          client_flags, mySQL);
   }
   MySQL::SetDefaultConn(mySQL);
-  return Resource(mySQL);
+  return Resource(newres<MySQLResource>(mySQL));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -633,7 +648,6 @@ MySQLResult::~MySQLResult() {
     m_fields = nullptr;
   }
   if (m_conn) {
-    m_conn->decRefCount();
     m_conn = nullptr;
   }
 }
@@ -1324,8 +1338,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     return MySQLQueryReturn::OK; // pretend it worked
   }
 
-  MySQL *rconn = NULL;
-  MYSQL *conn = MySQL::GetConn(link_id, &rconn);
+  std::shared_ptr<MySQL> rconn = nullptr;
+  MYSQL* conn = MySQL::GetConn(link_id, &rconn);
   if (!conn || !rconn) return MySQLQueryReturn::FAIL;
 
   if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
@@ -1348,12 +1362,12 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     int size = matches.toArray().size();
     if (size > 2) {
       auto marray = matches.toArray();
-      string verb = toLower(marray[size - 2].toString().data());
-      string table = toLower(marray[size - 1].toString().data());
+      std::string verb = toLower(marray[size - 2].toString().toCppString());
+      std::string table = toLower(marray[size - 1].toString().toCppString());
       if (!table.empty() && table[0] == '`') {
         table = table.substr(1, table.length() - 2);
       }
-      ServerStats::Log(string("sql.query.") + table + "." + verb, 1);
+      ServerStats::Log(std::string("sql.query.") + table + "." + verb, 1);
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
@@ -1376,9 +1390,9 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       size = matches.toArray().size();
       auto marray = matches.toArray();
       if (size == 2) {
-        string verb = toLower(marray[1].toString().data());
+        std::string verb = toLower(marray[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
-        ServerStats::Log(string("sql.query.") + verb, 1);
+        ServerStats::Log(std::string("sql.query.") + verb, 1);
         if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
           MySqlStats::Record(verb);
         }
@@ -1395,14 +1409,14 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
   unsigned long tid = mysql_thread_id(conn);
 
   // disable explicitly
-  MySQL *mySQL = MySQL::Get(link_id);
+  auto mySQL = MySQL::Get(link_id);
   if (mySQL->m_multi_query && !mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
     mySQL->m_multi_query = false;
   }
 
   if (async_mode) {
 #ifdef FACEBOOK
-    mySQL->m_async_query = query;
+    mySQL->m_async_query = query.toCppString();
     return MySQLQueryReturn::OK;
 #else
     throw_not_implemented("mysql_async_query_start");
@@ -1435,7 +1449,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
             (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
              rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);
           if (connected) {
-            string killsql = "KILL " + folly::to<string>(tid);
+            std::string killsql = "KILL " + folly::to<std::string>(tid);
             if (mysql_real_query(connected, killsql.c_str(), killsql.size())) {
               raise_warning("Unable to kill thread %lu", tid);
             }
@@ -1457,7 +1471,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
 }
 
 Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
-  MySQL *rconn = NULL;
+  std::shared_ptr<MySQL> rconn = nullptr;
   MYSQL *conn = MySQL::GetConn(link_id, &rconn);
   if (!conn || !rconn) return false;
 

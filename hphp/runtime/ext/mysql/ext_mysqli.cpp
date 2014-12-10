@@ -52,6 +52,7 @@ const StaticString
 
 //////////////////////////////////////////////////////////////////////////////
 // helper
+
 static Resource get_connection_resource(ObjectData* obj) {
   auto res = obj->o_realProp(
     s_connection,
@@ -65,9 +66,9 @@ static Resource get_connection_resource(ObjectData* obj) {
   return res->toResource();
 }
 
-static MySQL *get_connection(ObjectData* obj) {
+static std::shared_ptr<MySQL> get_connection(ObjectData* obj) {
   auto res = get_connection_resource(obj);
-  return res.getTyped<MySQL>(true, false);
+  return res.getTyped<MySQLResource>(true, false)->mysql();
 }
 
 static MySQLStmt *getStmt(ObjectData* obj) {
@@ -152,16 +153,18 @@ static TypedValue* bind_result_helper(ObjectData* obj, ActRec* ar,
 //////////////////////////////////////////////////////////////////////////////
 // class mysqli
 
-#define VALIDATE_CONN(conn, state)                                             \
-  if (!conn || (state && (int64_t)conn->getState() < state)) {                 \
-    raise_warning("invalid object or resource mysqli");                        \
-    return init_null();                                                        \
+#define VALIDATE_CONN(conn, state)                                \
+  if (!conn ||                                                    \
+      (static_cast<MySQLState>(state) != MySQLState::CLOSED &&    \
+       conn->getState() < static_cast<MySQLState>(state))) {      \
+    raise_warning("invalid object or resource mysqli");           \
+    return init_null();                                           \
   }
 
 #define VALIDATE_CONN_CONNECTED(conn) VALIDATE_CONN(conn, MySQLState::CONNECTED)
 
-#define VALIDATE_RESOURCE(res, state)                                          \
-  MySQL* conn = res.getTyped<MySQL>(true, false);                              \
+#define VALIDATE_RESOURCE(res, state)                                     \
+  auto const& conn = res.getTyped<MySQLResource>(true, false)->mysql();   \
   VALIDATE_CONN(conn, state)
 
 static Variant HHVM_METHOD(mysqli, autocommit, bool mode) {
@@ -231,8 +234,9 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 }
 
 static void HHVM_METHOD(mysqli, hh_init) {
-  Resource data = new MySQL(nullptr, 0, nullptr, nullptr, nullptr);
-  this_->o_set(s_connection, data, s_mysqli.get());
+  auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
+  auto rsrc = newres<MySQLResource>(data);
+  this_->o_set(s_connection, rsrc, s_mysqli.get());
 }
 
 static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,

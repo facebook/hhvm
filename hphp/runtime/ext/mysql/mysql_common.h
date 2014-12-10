@@ -19,12 +19,16 @@
 #define incl_HPHP_MYSQL_COMMON_H_
 
 #include <folly/Optional.h>
+
+#include <memory>
 #include <vector>
 
-#include "hphp/runtime/base/base-includes.h"
 #include "mysql.h"
-#include "hphp/runtime/base/smart-containers.h"
+
+#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/smart-containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -34,16 +38,75 @@
 #endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-enum MySQLState { CLOSED = 0, INITED = 1, CONNECTED = 2 };
+enum class MySQLState : int8_t {
+  CLOSED = 0,
+  INITED = 1,
+  CONNECTED = 2
+};
 
-class MySQL : public SweepableResourceData {
-public:
+struct MySQL {
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  MySQL(const char *host, int port, const char *username,
+        const char *password, const char *database,
+        MYSQL* raw_connection = nullptr);
+
+  ~MySQL() { close(); }
+
+  void setLastError(const char *func);
+  void close();
+
+  bool connect(const String& host, int port,
+               const String& socket,
+               const String& username,
+               const String& password,
+               const String& database,
+               int client_flags,
+               int connect_timeout);
+
+#ifdef FACEBOOK
+  bool async_connect(const String& host, int port,
+                     const String& socket,
+                     const String& username,
+                     const String& password,
+                     const String& database);
+#endif
+
+  bool reconnect(const String& host, int port,
+                 const String& socket,
+                 const String& username,
+                 const String& password,
+                 const String& database,
+                 int client_flags,
+                 int connect_timeout);
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  bool isPersistent() { return m_persistent; }
+  void setPersistent() { m_persistent = true; }
+
+  MySQLState getState() { return m_state; }
+  MYSQL* get() { return m_conn;}
+
+  MYSQL* eject_mysql() {
+    auto ret = m_conn;
+    m_conn = nullptr;
+    return ret;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
   /**
    * Operations on a resource object.
    */
-  static MYSQL *GetConn(const Variant& link_identifier, MySQL **rconn = NULL);
-  static MySQL *Get(const Variant& link_identifier);
+  static std::shared_ptr<MySQL> Get(const Variant& link_identifier);
+
+  static MYSQL* GetConn(const Variant& link_identifier,
+                        std::shared_ptr<MySQL>* rconn = nullptr);
+
   static bool CloseConn(const Variant& link_identifier);
 
   /**
@@ -59,82 +122,64 @@ public:
   /**
    * A connection may be persistent across multiple HTTP requests.
    */
-  static MySQL *GetPersistent(const String& host, int port,
-                              const String& socket, const String& username,
-                              const String& password, int client_flags) {
+  static std::shared_ptr<MySQL> GetPersistent(const String& host, int port,
+                                              const String& socket,
+                                              const String& username,
+                                              const String& password,
+                                              int client_flags) {
     return GetCachedImpl(host, port, socket, username, password, client_flags);
   }
 
-  static void SetPersistent(const String& host, int port, const String& socket,
-                            const String& username, const String& password,
-                            int client_flags, MySQL *conn) {
+  static void SetPersistent(const String& host, int port,
+                            const String& socket,
+                            const String& username,
+                            const String& password,
+                            int client_flags,
+                            const std::shared_ptr<MySQL>& conn) {
     SetCachedImpl(host, port, socket, username, password, client_flags, conn);
   }
 
   /**
    * If connection object is not provided, a default connection will be used.
    */
-  static MySQL *GetDefaultConn();
-  static void SetDefaultConn(MySQL *conn);
+  static std::shared_ptr<MySQL> GetDefaultConn();
+  static void SetDefaultConn(std::shared_ptr<MySQL> conn);
 
   static int GetDefaultReadTimeout();
   static void SetDefaultReadTimeout(int timeout_ms);
 
-private:
-  static int s_default_port;
-
-  static std::string GetHash(const String& host, int port, const String& socket,
-                             const String& username, const String& password,
-                             int client_flags);
-
-  static MySQL *GetCachedImpl(const String& host, int port,
-                              const String& socket, const String& username,
-                              const String& password, int client_flags);
-
-  static void SetCachedImpl(const String& host, int port, const String& socket,
-                            const String& username, const String& password,
-                            int client_flags, MySQL* conn);
-
-public:
   static size_t NumCachedConnections();
 
-public:
-  MySQL(const char *host, int port, const char *username,
-        const char *password, const char *database,
-        MYSQL* raw_connection = nullptr);
-  ~MySQL();
-  void sweep() override;
-  void setLastError(const char *func);
-  void close();
-
-  CLASSNAME_IS("mysql link")
-  // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-  virtual bool isInvalid() const { return m_conn == nullptr; }
-
-  bool connect(const String& host, int port, const String& socket, const String& username,
-               const String& password, const String& database, int client_flags,
-               int connect_timeout);
-#ifdef FACEBOOK
-  bool async_connect(const String& host, int port, const String& socket, const String& username,
-                     const String& password, const String& database);
-#endif
-  bool reconnect(const String& host, int port, const String& socket, const String& username,
-                 const String& password, const String& database, int client_flags,
-                 int connect_timeout);
-
-  MySQLState getState() { return m_state; }
-
-  MYSQL *get() { return m_conn;}
-  MYSQL *eject_mysql() {
-    auto ret = m_conn;
-    m_conn = nullptr;
-    return ret;
-  }
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
+  static int s_default_port;
   static const std::string s_persistent_type;
-  MYSQL *m_conn;
+
+  static std::string GetHash(const String& host, int port,
+                             const String& socket,
+                             const String& username,
+                             const String& password,
+                             int client_flags);
+
+  static std::shared_ptr<MySQL> GetCachedImpl(const String& host, int port,
+                                              const String& socket,
+                                              const String& username,
+                                              const String& password,
+                                              int client_flags);
+
+  static void SetCachedImpl(const String& host, int port,
+                            const String& socket,
+                            const String& username,
+                            const String& password,
+                            int client_flags,
+                            std::shared_ptr<MySQL> conn);
+
+  /////////////////////////////////////////////////////////////////////////////
+
+private:
+  MYSQL* m_conn;
+  bool m_persistent{false};
 
 public:
   std::string m_host;
@@ -148,8 +193,28 @@ public:
   std::string m_last_error;
   int m_xaction_count;
   bool m_multi_query;
-  String m_async_query;
   MySQLState m_state;
+  std::string m_async_query;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct MySQLResource : SweepableResourceData {
+  explicit MySQLResource(std::shared_ptr<MySQL> mysql) : m_mysql(mysql) {
+    assert(mysql);
+  }
+
+  CLASSNAME_IS("mysql link")
+  DECLARE_RESOURCE_ALLOCATION(MySQLResource);
+
+  // overriding ResourceData
+  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  virtual bool isInvalid() const { return m_mysql->get() == nullptr; }
+
+  std::shared_ptr<MySQL> mysql() const { return m_mysql; }
+
+private:
+  std::shared_ptr<MySQL> m_mysql;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -255,9 +320,8 @@ public:
 
   MySQLFieldInfo *fetchFieldInfo();
 
-  void setAsyncConnection(MySQL* conn) {
+  void setAsyncConnection(const std::shared_ptr<MySQL>& conn) {
     m_conn = conn;
-    m_conn->incRefCount();
   }
 
 protected:
@@ -271,7 +335,8 @@ protected:
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64_t m_field_count;
   int64_t m_row_count;
-  MySQL* m_conn;  // only set for async for refcounting underlying buffers
+  std::shared_ptr<MySQL> m_conn;  // only set for async for
+                                  // refcounting underlying buffers
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -355,18 +420,16 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_FLAGS 5
 
 Variant php_mysql_field_info(const Resource& result, int field, int entry_type);
-Variant php_mysql_do_connect_on_link(MySQL* mySQL, String server,
-                                     String username, String password,
-                                     String database, int client_flags,
-                                     bool persistent, bool async,
-                                     int connect_timeout_ms,
+Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
+                                     String server, String username,
+                                     String password, String database,
+                                     int client_flags, bool persistent,
+                                     bool async, int connect_timeout_ms,
                                      int query_timeout_ms);
 Variant php_mysql_do_connect(const String& server, const String& username,
                              const String& password, const String& database,
-                             int client_flags, bool persistent,
-                             bool async,
-                             int connect_timeout_ms,
-                             int query_timeout_ms);
+                             int client_flags, bool persistent, bool async,
+                             int connect_timeout_ms, int query_timeout_ms);
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
 MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
@@ -393,6 +456,7 @@ extern const int64_t k_ASYNC_OP_CONNECT;
 extern const int64_t k_ASYNC_OP_QUERY;
 extern const int64_t k_ASYNC_OP_FETCH_ROW;
 
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_MYSQL_COMMON_H_

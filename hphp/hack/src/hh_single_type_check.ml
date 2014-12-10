@@ -239,7 +239,7 @@ let print_coverage fn =
   ClientCoverageMetric.go false (Some (Leaf counts))
 
 let print_prolog funs classes typedefs consts =
-  let facts = PrologMain.facts_of_defs [] funs classes typedefs consts in
+  let facts = Prolog.facts_of_defs [] funs classes typedefs consts in
   PrologMain.output_facts stdout facts
 
 (*****************************************************************************)

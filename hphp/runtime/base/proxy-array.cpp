@@ -81,9 +81,10 @@ void ProxyArray::Release(ArrayData*ad) {
 
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {
   if (innerArr(oldArr) != newArr) {
-    decRefArr(innerArr(oldArr));
+    auto old = innerArr(oldArr);
     newArr->incRefCount();
     asProxyArray(oldArr)->m_ref->tv()->m_data.parr = newArr;
+    decRefArr(old);
   }
 }
 

@@ -36,7 +36,7 @@ public:
 
   explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ListKind kind = ListKindParam);
-
+  ~ExpressionList();
   // change case to lower so to make it case insensitive
   void toLower();
 

@@ -1354,7 +1354,7 @@ static void setSuccIRBlocks(HTS& hts,
  * this succeeds, else false.
  */
 static bool tryTranslateSingletonInline(HTS& hts,
-                                        const NormalizedInstruction& i,
+                                        const NormalizedInstruction& ninst,
                                         const Func* funcd) {
   using Atom = BCPattern::Atom;
   using Captures = BCPattern::CaptureVec;
@@ -1362,10 +1362,10 @@ static bool tryTranslateSingletonInline(HTS& hts,
   if (!funcd) return false;
 
   // Make sure we have an acceptable FPush and non-null callee.
-  assert(i.op() == Op::FPushFuncD ||
-         i.op() == Op::FPushClsMethodD);
+  assert(ninst.op() == Op::FPushFuncD ||
+         ninst.op() == Op::FPushClsMethodD);
 
-  auto fcall = i.nextSk();
+  auto fcall = ninst.nextSk();
 
   // Check if the next instruction is an acceptable FCall.
   if ((fcall.op() != Op::FCall && fcall.op() != Op::FCallD) ||
@@ -1406,6 +1406,7 @@ static bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
+      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
       irgen::inlSingletonSLoc(
         hts,
         funcd,
@@ -1463,6 +1464,7 @@ static bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
+      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
       irgen::inlSingletonSProp(
         hts,
         funcd,

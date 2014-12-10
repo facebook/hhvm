@@ -51,7 +51,7 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   auto const stack = spillStack(env);
   gen(env, SyncABIRegs, fp(env), stack);
-  exitRequest(env, TransFlags{}, targetBcOff);
+  exitRequest(env, trflags, targetBcOff);
   return exit;
 }
 

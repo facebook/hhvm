@@ -404,7 +404,11 @@ let parse_prolog_args () =
     | [x] -> get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
-  CProlog { ClientProlog.root; }
+  let config = get_config root in
+  CProlog { ClientProlog.
+    root = root;
+    server_options_cmd = SMap.get "server_options_cmd" config;
+  }
 
 let parse_args () =
   match parse_command () with

@@ -1198,7 +1198,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
     ITRACE(3, "getting local effects\n");
     Indent _i;
-    local_effects(m_frameState, m_inst, *this);
+    // We already consumed everything for InterpOneCF above, because it's
+    // leaving the trace, so we need to ignore local_effects for it.
+    if (!m_inst->is(InterpOneCF)) {
+      local_effects(m_frameState, m_inst, *this);
+    }
   }
 
   /*

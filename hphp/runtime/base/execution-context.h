@@ -236,6 +236,7 @@ public:
   bool callUserErrorHandler(const Exception &e, int errnum,
                             bool swallowExceptions);
   void recordLastError(const Exception &e, int errnum = 0);
+  void clearLastError();
   bool onFatalError(const Exception &e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const { return m_errorState; }

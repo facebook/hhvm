@@ -334,17 +334,6 @@ struct ActRecInfo : IRExtraData {
 };
 
 /*
- * Parameter index for type profiling.
- */
-struct TypeProfileData : IRExtraData {
-  explicit TypeProfileData(int32_t param) : param(param) {}
-  int32_t param;
-  std::string show() const {
-    return folly::to<std::string>(param);
-  }
-};
-
-/*
  * Stack offsets.
  */
 struct StackOffset : IRExtraData {
@@ -967,7 +956,6 @@ X(SideExitJmpNZero,             SideExitJccData);
 X(SideExitGuardLoc,             SideExitGuardData);
 X(SideExitGuardStk,             SideExitGuardData);
 X(InterpOne,                    InterpOneData);
-X(TypeProfileFunc,              TypeProfileData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);

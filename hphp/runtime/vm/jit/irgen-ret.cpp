@@ -80,11 +80,6 @@ void implRet(HTS& env, Type type) {
     retVal = gen(env, CreateSSWH, retVal);
   }
 
-  // Type profile return value.
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    gen(env, TypeProfileFunc, TypeProfileData(-1), retVal, cns(env, func));
-  }
-
   SSATmp* stack;
   SSATmp* resumableObj = nullptr;
   if (!resumed(env)) {

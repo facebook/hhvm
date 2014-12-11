@@ -18,7 +18,6 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
@@ -94,8 +93,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {TypeProfileFunc,    profileOneArgument, DNone, SNone,
-                           {{TV,0}, extra(&TypeProfileData::param), {SSA, 1}}},
     {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,

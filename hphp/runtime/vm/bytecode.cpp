@@ -65,7 +65,6 @@
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -4407,11 +4406,6 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
     profileIncrementFuncCounter(vmfp()->func());
   }
 
-  // Type profile return value.
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileOneArgument(retval, -1, vmfp()->func());
-  }
-
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
   Offset soff = vmfp()->m_soff;
@@ -6117,9 +6111,6 @@ OPTBLD_INLINE void ExecutionContext::iopFCall(IOP_ARGS) {
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileAllArguments(ar);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
@@ -6138,9 +6129,6 @@ OPTBLD_INLINE void ExecutionContext::iopFCallD(IOP_ARGS) {
   checkStack(vmStack(), ar->m_func, 0);
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   doFCall(ar, pc);
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    profileAllArguments(ar);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopFCallBuiltin(IOP_ARGS) {

@@ -2553,14 +2553,6 @@ fields of that struct for holding intermediate values.
 
   Deletes the current unwinder exception.
 
-| TypeProfileFunc<paramIndex,functionName>, ND,
-|                                           S(Gen) S(Func),
-|                                           E
-
-  Profiles that function's parameter/return value for a particular parameter
-  index. Calls into native c++ function.
-
-
 /* Local Variables: */
 /* fill-column: 79 */
 /* End: */

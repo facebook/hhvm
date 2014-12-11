@@ -119,7 +119,6 @@ CALL_OPCODE(ConcatIntStr);
 CALL_OPCODE(ConcatStr3);
 CALL_OPCODE(ConcatStr4);
 
-CALL_OPCODE(TypeProfileFunc)
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateSSWH)

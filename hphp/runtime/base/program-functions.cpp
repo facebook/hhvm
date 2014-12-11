@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime-type-profiler.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
@@ -1378,9 +1377,6 @@ static int execute_program_impl(int argc, char** argv) {
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
-  }
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    HPHP::initTypeProfileStructure();
   }
   vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;

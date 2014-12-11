@@ -857,18 +857,6 @@ void emitFCall(HTS& env, int32_t numParams) {
     curFunc(env)
   );
 
-  if (RuntimeOption::EvalRuntimeTypeProfile) {
-    for (auto i = uint32_t{0}; i < numParams; ++i) {
-      auto const val = topF(env, numParams - i - 1);
-      if (callee != nullptr) {
-        gen(env, TypeProfileFunc, TypeProfileData(i), val, cns(env, callee));
-      } else  {
-        auto const func = gen(env, LdARFuncPtr, sp(env), cns(env, 0));
-        gen(env, TypeProfileFunc, TypeProfileData(i), val, func);
-      }
-    }
-  }
-
   /*
    * Figure out if we know where we're going already (if a prologue was already
    * generated, we don't need to do a whole bind call thing again).

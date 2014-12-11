@@ -727,7 +727,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHResult:
   case LdWHState:
   case LookupClsRDSHandle:
-  case TypeProfileFunc:
   case AFWHPrepareChild:
   case CoerceCellToDbl:
   case CoerceCellToInt:

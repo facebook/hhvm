@@ -346,6 +346,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
                 SrcKey(func, dvs[i].second, false));
   }
   emitBindJmp(mainCode, frozenCode, SrcKey(func, func->base(), false));
+  mcg->cgFixups().process(nullptr);
   return start;
 }
 

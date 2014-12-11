@@ -97,6 +97,7 @@ private:
   void emit(hcunwind& i);
   void emit(hostcall& i);
   void emit(ldimm& i);
+  void emit(ldimmb& i);
   void emit(ldpoint& i);
   void emit(load& i);
   void emit(point& i) { points[i.p] = a->frontier(); }
@@ -126,6 +127,7 @@ private:
   void emit(loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(lslv& i) { a->lslv(X(i.d), X(i.sl), X(i.sr)); }
   void emit(movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
+  void emit(movzbq& i) { a->Uxtb(W(Vreg32(size_t(i.d))), W(i.s)); }
   void emit(mul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
   void emit(neg& i) { a->Neg(X(i.d), X(i.s), vixl::SetFlags); }
   void emit(not& i) { a->Mvn(X(i.d), X(i.s)); }
@@ -416,6 +418,11 @@ void Vgen::emit(ldimm& i) {
   } else {
     a->Mov(X(i.d), ival);
   }
+}
+
+void Vgen::emit(ldimmb& i) {
+  assert_not_implemented(i.d.isGP());
+  a->Mov(W(i.d), i.s.b());
 }
 
 void Vgen::emit(ldpoint& i) {

@@ -349,6 +349,7 @@ function find_file($test, $name) {
 
 function find_file_for_dir($dir, $name) {
   while (($dir !== '.' && $dir !== '/') && is_dir($dir)) {
+    $dir = realpath($dir);
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;

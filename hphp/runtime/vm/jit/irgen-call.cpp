@@ -857,19 +857,6 @@ void emitFCall(HTS& env, int32_t numParams) {
     curFunc(env)
   );
 
-  /*
-   * Figure out if we know where we're going already (if a prologue was already
-   * generated, we don't need to do a whole bind call thing again).
-   *
-   * We're skipping magic calls right now because 'callee' will be set to
-   * __call in some cases (with 86ctor) where we shouldn't really call that
-   * function (arguable bug in annotation).
-   *
-   * TODO(#4357498): This is currently disabled, because we haven't set things
-   * up properly to be able to eagerly bind.  Because code-gen can punt, the
-   * code there needs to delay adding these smash locations until after we know
-   * the translation isn't punted.
-   */
   auto const stack = spillStack(env);
   gen(
     env,

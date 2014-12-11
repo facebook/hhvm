@@ -733,6 +733,11 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 bool Func::shouldPGO() const {
   if (!RuntimeOption::EvalJitPGO) return false;
 
+  // JITing pseudo-mains requires extra checks that blow the IR.  PGO
+  // can significantly increase the size of the regions, so disable it for
+  // pseudo-mains (so regions will be just tracelets).
+  if (isPseudoMain()) return false;
+
   // Non-cloned closures simply contain prologues that redispacth to
   // cloned closures.  They don't contain a translation for the
   // function entry, which is what triggers an Optimize retranslation.

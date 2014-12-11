@@ -19,8 +19,12 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
 #include "hphp/util/network.h"
+
 #include "mysql.h"
+
+#include <memory>
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -31,12 +35,13 @@
 
 namespace HPHP {
 
+class PDOMySqlStatement;
+
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOMySqlError {
-public:
+struct PDOMySqlError {
   PDOMySqlError() : file(NULL), line(0), errcode(0), errmsg(NULL) {
   }
 
@@ -46,48 +51,59 @@ public:
   char *errmsg;
 };
 
-class PDOMySqlStatement;
-class PDOMySqlConnection : public PDOConnection {
-public:
+struct PDOMySqlConnection : PDOConnection {
   PDOMySqlConnection();
   virtual ~PDOMySqlConnection();
-  virtual bool create(const Array& options);
 
-  int handleError(const char *file, int line, PDOMySqlStatement *stmt = NULL);
+  bool create(const Array& options) override;
 
-  virtual bool support(SupportedMethod method);
-  virtual bool closer();
-  virtual bool preparer(const String& sql, sp_PDOStatement *stmt, const Variant& options);
-  virtual int64_t doer(const String& sql);
-  virtual bool quoter(const String& input, String &quoted, PDOParamType paramtype);
-  virtual bool begin();
-  virtual bool commit();
-  virtual bool rollback();
-  virtual bool setAttribute(int64_t attr, const Variant& value);
-  virtual String lastId(const char *name);
-  virtual bool fetchErr(PDOStatement *stmt, Array &info);
-  virtual int getAttribute(int64_t attr, Variant &value);
-  virtual bool checkLiveness();
-  virtual void persistentShutdown();
+  bool support(SupportedMethod method) override;
+  bool closer() override;
+  bool preparer(const String& sql, sp_PDOStatement *stmt,
+                const Variant& options) override;
+  int64_t doer(const String& sql) override;
+  bool quoter(const String& input, String &quoted,
+              PDOParamType paramtype) override;
+  bool begin() override;
+  bool commit() override;
+  bool rollback() override;
+  bool setAttribute(int64_t attr, const Variant& value) override;
+  String lastId(const char *name) override;
+  bool fetchErr(PDOStatement *stmt, Array &info) override;
+  int getAttribute(int64_t attr, Variant &value) override;
+  bool checkLiveness() override;
 
-  bool buffered() const { return m_buffered;}
-  unsigned long max_buffer_size() const { return m_max_buffer_size;}
-  bool fetch_table_names() const { return m_fetch_table_names;}
+  bool buffered() const { return m_buffered; }
+  unsigned long max_buffer_size() const { return m_max_buffer_size; }
+  bool fetch_table_names() const { return m_fetch_table_names; }
+
+  int handleError(const char *file, int line,
+                  PDOMySqlStatement *stmt = nullptr);
 
 private:
-  MYSQL         *m_server;
-  unsigned       m_attached:1;
-  unsigned       m_buffered:1;
-  unsigned       m_emulate_prepare:1;
-  unsigned       m_fetch_table_names:1;
-  unsigned long  m_max_buffer_size;
-  PDOMySqlError  m_einfo;
+  MYSQL* m_server;
+  unsigned m_attached : 1;
+  unsigned m_buffered : 1;
+  unsigned m_emulate_prepare : 1;
+  unsigned m_fetch_table_names : 1;
+  unsigned long m_max_buffer_size;
+  PDOMySqlError m_einfo;
 };
 
-class PDOMySqlStatement : public PDOStatement {
-public:
+struct PDOMySqlResource : PDOResource {
+  explicit PDOMySqlResource(std::shared_ptr<PDOMySqlConnection> conn)
+    : PDOResource(std::dynamic_pointer_cast<PDOConnection>(conn))
+  {}
+
+  std::shared_ptr<PDOMySqlConnection> conn() const {
+    return std::dynamic_pointer_cast<PDOMySqlConnection>(m_conn);
+  }
+};
+
+struct PDOMySqlStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
-  PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server);
+
+  PDOMySqlStatement(PDOMySqlResource* conn, MYSQL* server);
   virtual ~PDOMySqlStatement();
 
   bool create(const String& sql, const Array& options);
@@ -105,27 +121,27 @@ public:
   MYSQL_STMT *stmt() { return m_stmt;}
 
 private:
-  PDOMySqlConnection *m_conn;
-  MYSQL              *m_server;
-  MYSQL_RES          *m_result;
-  const MYSQL_FIELD  *m_fields;
-  MYSQL_ROW           m_current_data;
-  long               *m_current_lengths;
-  PDOMySqlError       m_einfo;
-  MYSQL_STMT         *m_stmt;
-  int                 m_num_params;
-  MYSQL_BIND         *m_params;
-  my_bool            *m_in_null;
-  unsigned long      *m_in_length;
-  MYSQL_BIND         *m_bound_result;
-  my_bool            *m_out_null;
-  unsigned long      *m_out_length;
-  unsigned int        m_params_given;
-  unsigned            m_max_length:1;
+  std::shared_ptr<PDOMySqlConnection> m_conn;
+  MYSQL* m_server;
+  MYSQL_RES* m_result;
+  const MYSQL_FIELD* m_fields;
+  MYSQL_ROW m_current_data;
+  long* m_current_lengths;
+  PDOMySqlError m_einfo;
+  MYSQL_STMT* m_stmt;
+  int m_num_params;
+  MYSQL_BIND* m_params;
+  my_bool* m_in_null;
+  unsigned long* m_in_length;
+  MYSQL_BIND* m_bound_result;
+  my_bool* m_out_null;
+  unsigned long* m_out_length;
+  unsigned int m_params_given;
+  unsigned m_max_length:1;
 
   void setRowCount();
   bool executePrepared();
-  int handleError(const char *file, int line);
+  int handleError(const char* file, int line);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -487,7 +503,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     Array info = Array::Create();
     info.append(String(*pdo_err, CopyString));
     if (stmt) {
-      stmt->dbh->fetchErr(stmt, info);
+      stmt->dbh->conn()->fetchErr(stmt, info);
     }
     throw_pdo_exception(String(*pdo_err, CopyString), info,
                         "SQLSTATE[%s] [%d] %s",
@@ -498,7 +514,10 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
-  PDOMySqlStatement *s = newres<PDOMySqlStatement>(this, m_server);
+  auto rsrc = newres<PDOMySqlResource>(
+      std::dynamic_pointer_cast<PDOMySqlConnection>(shared_from_this()));
+  auto s = newres<PDOMySqlStatement>(rsrc, m_server);
+
   *stmt = s;
 
   if (m_emulate_prepare) {
@@ -655,10 +674,6 @@ int PDOMySqlConnection::getAttribute(int64_t attr, Variant &value) {
 
 bool PDOMySqlConnection::checkLiveness() {
   return !mysql_ping(m_server);
-}
-
-void PDOMySqlConnection::persistentShutdown() {
-  // do nothing
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -822,13 +837,25 @@ static const char *type_to_name_native(int type) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PDOMySqlStatement::PDOMySqlStatement(PDOMySqlConnection *conn, MYSQL *server)
-    : m_conn(conn), m_server(server), m_result(NULL), m_fields(NULL),
-      m_current_data(NULL), m_current_lengths(NULL), m_stmt(NULL),
-      m_num_params(0), m_params(NULL), m_in_null(NULL), m_in_length(NULL),
-      m_bound_result(NULL), m_out_null(NULL), m_out_length(NULL),
-      m_params_given(0), m_max_length(0) {
-  this->dbh = conn;
+PDOMySqlStatement::PDOMySqlStatement(PDOMySqlResource* conn, MYSQL* server)
+  : m_conn(conn->conn())
+  , m_server(server)
+  , m_result(nullptr)
+  , m_fields(nullptr)
+  , m_current_data(nullptr)
+  , m_current_lengths(nullptr)
+  , m_stmt(nullptr)
+  , m_num_params(0)
+  , m_params(nullptr)
+  , m_in_null(nullptr)
+  , m_in_length(nullptr)
+  , m_bound_result(nullptr)
+  , m_out_null(nullptr)
+  , m_out_length(nullptr)
+  , m_params_given(0)
+  , m_max_length(0)
+{
+  this->dbh = dynamic_cast<PDOResource*>(conn);
 }
 
 PDOMySqlStatement::~PDOMySqlStatement() {
@@ -1143,11 +1170,8 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam *param,
           if (!same(buf, false)) {
             param->parameter = buf;
           } else {
-            pdo_raise_impl_error(
-              sp_PDOConnection(m_conn),
-              this,
-              "HY105",
-              "Expected a stream resource");
+            pdo_raise_impl_error(dbh, this, "HY105",
+                                 "Expected a stream resource");
             return false;
           }
         }
@@ -1304,12 +1328,10 @@ bool PDOMySqlStatement::cursorCloser() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PDOMySql::PDOMySql() : PDODriver("mysql") {
-}
+PDOMySql::PDOMySql() : PDODriver("mysql") {}
 
-PDOConnection *PDOMySql::createConnectionObject() {
-  // Doesn't use newres<> because PDOConnection is malloced
-  return new PDOMySqlConnection();
+PDOResource* PDOMySql::createResourceImpl() {
+  return newres<PDOMySqlResource>(std::make_shared<PDOMySqlConnection>());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

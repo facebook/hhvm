@@ -144,8 +144,7 @@ void endBlock(HTS&, Offset next, bool nextIsMerge);
 void beginInlining(HTS&,
                    unsigned numParams,
                    const Func* target,
-                   Offset returnBcOffset,
-                   Type retTypePred);
+                   Offset returnBcOffset);
 
 /*
  * Returns whether the HTS is currently inlining or not.

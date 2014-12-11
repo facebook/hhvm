@@ -25,27 +25,9 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct StringData;
 struct Func;
 
 //////////////////////////////////////////////////////////////////////
-
-struct TypeProfileKey {
-  enum KeyType {
-    MethodName,
-    PropName,
-    EltName,
-    StaticPropName
-  } m_kind;
-  const StringData* m_name;
-
-  TypeProfileKey(KeyType kind, const StringData* sd) :
-   m_kind(kind), m_name(sd) { }
-
-  TypeProfileKey(MemberCode mc, const StringData* sd) :
-    m_kind(mc == MET ? EltName : PropName), m_name(sd) { }
-  uint64_t hash() const;
-};
 
 // These are both best-effort, and return noisy results.
 void profileInit();
@@ -53,8 +35,6 @@ void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
-void recordType(TypeProfileKey sk, DataType dt);
-std::pair<MaybeDataType, double> predictType(TypeProfileKey key);
 int64_t requestCount();
 
 /*

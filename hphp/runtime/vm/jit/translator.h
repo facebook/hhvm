@@ -488,7 +488,6 @@ enum OutTypeConstraints {
   OutFDesc,             // Blows away the current function desc
 
   OutUnknown,           // Not known at tracelet compile-time
-  OutPred,              // Unknown, but give prediction a whirl.
   OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
   OutVUnknown,          // type is V(unknown)
@@ -571,13 +570,6 @@ struct InstrInfo {
  * Get the InstrInfo for `op'.
  */
 const InstrInfo& getInstrInfo(Op op);
-
-/*
- * Is the output of `inst' predicted?
- *
- * Flags on `inst' may be updated.
- */
-bool outputIsPredicted(NormalizedInstruction& inst);
 
 /*
  * If this returns true, we dont generate guards for any of the inputs to this

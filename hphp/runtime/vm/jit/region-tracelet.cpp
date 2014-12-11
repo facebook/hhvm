@@ -157,8 +157,6 @@ RegionDescPtr RegionFormer::go() {
     m_curBlock->setKnownFunc(m_sk, m_inst.funcd);
 
     m_inst.interp = m_interp.count(m_sk);
-    auto const doPrediction =
-      m_profiling ? false : outputIsPredicted(m_inst);
 
     uint32_t calleeInstrSize;
     if (tryInline(calleeInstrSize)) {
@@ -176,8 +174,7 @@ RegionDescPtr RegionFormer::go() {
       m_arStates.back().pop();
       m_arStates.emplace_back();
       m_curBlock->setInlinedCallee(callee);
-      irgen::beginInlining(m_hts, m_inst.imm[0].u_IVA, callee, returnFuncOff,
-                        doPrediction ? m_inst.outPred : Type::Gen);
+      irgen::beginInlining(m_hts, m_inst.imm[0].u_IVA, callee, returnFuncOff);
 
       m_sk = irgen::curSrcKey(m_hts);
       m_blockFinished = true;
@@ -221,15 +218,6 @@ RegionDescPtr RegionFormer::go() {
     }
 
     if (isFCallStar(m_inst.op())) m_arStates.back().pop();
-
-    // Since the current instruction is over, advance sk before emitting the
-    // prediction (if any).
-    if (doPrediction &&
-        // TODO(#5710339): would be nice to remove the following check
-        irgen::publicTopType(m_hts, 0).maybe(m_inst.outPred)) {
-      irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk.offset(), false);
-      irgen::checkTypeStack(m_hts, 0, m_inst.outPred, m_sk.offset());
-    }
   }
 
   // If we failed while trying to inline, trigger retry without inlining.

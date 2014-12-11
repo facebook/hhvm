@@ -82,16 +82,6 @@ int locPhysicalOffset(Location l, const Func* f) {
   return -((l.offset + 1) * iterInflator + localsToSkip);
 }
 
-static uint32_t m_w = 1;    /* must not be zero */
-static uint32_t m_z = 1;    /* must not be zero */
-
-static uint32_t get_random()
-{
-    m_z = 36969 * (m_z & 65535) + (m_z >> 16);
-    m_w = 18000 * (m_w & 65535) + (m_w >> 16);
-    return (m_z << 16) + m_w;  /* 32-bit result */
-}
-
 PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            const Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
@@ -150,292 +140,6 @@ PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
 
   const Class* cls = nullptr;
   return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Type predictions.
-
-namespace {
-
-/*
- * Pair of (predicted type, confidence).
- *
- * A folly::none prediction means mixed/unknown.
- */
-using TypePred = std::pair<MaybeDataType, double>;
-
-MaybeDataType predictionForRepoAuthType(RepoAuthType repoTy) {
-  using T = RepoAuthType::Tag;
-  switch (repoTy.tag()) {
-  case T::OptBool:  return KindOfBoolean;
-  case T::OptInt:   return KindOfInt64;
-  case T::OptDbl:   return KindOfDouble;
-  case T::OptRes:   return KindOfResource;
-
-  case T::OptSArr:
-  case T::OptArr:
-    return KindOfArray;
-
-  case T::OptStr:
-  case T::OptSStr:
-    return KindOfString;
-
-  case T::OptSubObj:
-  case T::OptExactObj:
-  case T::OptObj:
-    return KindOfObject;
-
-  case T::Bool:
-  case T::Uninit:
-  case T::InitNull:
-  case T::Int:
-  case T::Dbl:
-  case T::Res:
-  case T::Str:
-  case T::Arr:
-  case T::Obj:
-  case T::Null:
-  case T::SStr:
-  case T::SArr:
-  case T::SubObj:
-  case T::ExactObj:
-  case T::Cell:
-  case T::Ref:
-  case T::InitUnc:
-  case T::Unc:
-  case T::InitCell:
-  case T::InitGen:
-  case T::Gen:
-    return folly::none;
-  }
-  not_reached();
-}
-
-TypePred predictMVec(const NormalizedInstruction* ni) {
-  auto info = getFinalPropertyOffset(*ni,
-                                     ni->func()->cls(),
-                                     getMInstrInfo(ni->mInstrOp()));
-  if (info.offset != -1) {
-    auto const predTy = predictionForRepoAuthType(info.repoAuthType);
-    if (predTy) {
-      FTRACE(1, "prediction for CGetM prop: {}, hphpc\n",
-                static_cast<int>(*predTy));
-      return std::make_pair(predTy, 1.0);
-    }
-    // If the RepoAuthType converts to an exact data type, there's no
-    // point in having a prediction because we know its type with 100%
-    // accuracy.  Disable it in that case here.
-    if (convertToDataType(info.repoAuthType)) {
-      return std::make_pair(folly::none, 0.0);
-    }
-  }
-
-  auto& immVec = ni->immVec;
-  StringData* name;
-  MemberCode mc;
-  if (immVec.decodeLastMember(ni->m_unit, name, mc)) {
-    auto pred = predictType(TypeProfileKey(mc, name));
-    TRACE(1, "prediction for CGetM %s named %s: %d, %f\n",
-          mc == MET ? "elt" : "prop",
-          name->data(),
-          pred.first ? *pred.first : -1,
-          pred.second);
-    return pred;
-  }
-
-  return std::make_pair(folly::none, 0.0);
-}
-
-/*
- * Provide a best guess for the output type of this instruction.
- */
-MaybeDataType predictOutputs(const NormalizedInstruction* ni) {
-  if (!RuntimeOption::EvalJitTypePrediction) return folly::none;
-
-  if (RuntimeOption::EvalJitStressTypePredPercent &&
-      RuntimeOption::EvalJitStressTypePredPercent > int(get_random() % 100)) {
-    int dt;
-    while (true) {
-      dt = getDataTypeValue(get_random() % (kMaxDataType + 1));
-      switch (dt) {
-        case KindOfNull:
-        case KindOfBoolean:
-        case KindOfInt64:
-        case KindOfDouble:
-        case KindOfString:
-        case KindOfArray:
-        case KindOfObject:
-        case KindOfResource:
-          break;
-
-        // KindOfRef and KindOfUninit can't happen for lots of predicted types.
-        case KindOfUninit:
-        case KindOfStaticString:
-        case KindOfRef:
-          continue;
-
-        case KindOfClass:
-          not_reached();
-      }
-      break;
-    }
-    return DataType(dt);
-  }
-
-  if (ni->op() == OpCns ||
-      ni->op() == OpCnsE ||
-      ni->op() == OpCnsU) {
-    StringData* sd = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
-    auto const tv = Unit::lookupCns(sd);
-    if (tv) return tv->m_type;
-  }
-
-  if (ni->op() == OpMod) {
-    // x % 0 returns boolean false, so we don't know for certain, but it's
-    // probably an int.
-    return KindOfInt64;
-  }
-
-  if (ni->op() == OpPow) {
-    // int ** int => int, unless result > 2 ** 52, then it's a double
-    // anything ** double => double
-    // double ** anything => double
-    // anything ** anything => int
-    auto lhs = ni->inputs[0]->rtt;
-    auto rhs = ni->inputs[1]->rtt;
-
-    if (lhs <= Type::Int && rhs <= Type::Int) {
-      // Best guess, since overflowing isn't common
-      return KindOfInt64;
-    }
-
-    if (lhs <= Type::Dbl || rhs <= Type::Dbl) {
-      return KindOfDouble;
-    }
-
-    return KindOfInt64;
-  }
-
-  if (ni->op() == OpSqrt) {
-    // sqrt returns a double, unless you pass something nasty to it.
-    return KindOfDouble;
-  }
-
-  if (ni->op() == OpDiv) {
-    // Integers can produce integers if there's no residue, but $i / $j in
-    // general produces a double. $i / 0 produces boolean false, so we have
-    // actually check the result.
-    return KindOfDouble;
-  }
-
-  if (ni->op() == OpAbs) {
-    if (ni->inputs[0]->rtt <= Type::Dbl) {
-      return KindOfDouble;
-    }
-
-    // some types can't be converted to integers and will return false here
-    if (ni->inputs[0]->rtt <= Type::Arr) {
-      return KindOfBoolean;
-    }
-
-    // If the type is not numeric we need to convert it to a numeric type,
-    // a string can be converted to an Int64 or a Double but most other types
-    // will end up being integral.
-    return KindOfInt64;
-  }
-
-  if (ni->op() == OpClsCnsD) {
-    const NamedEntityPair& cne =
-      ni->unit()->lookupNamedEntityPairId(ni->imm[1].u_SA);
-    StringData* cnsName = ni->m_unit->lookupLitstrId(ni->imm[0].u_SA);
-    Class* cls = cne.second->getCachedClass();
-    if (cls) {
-      DataType dt = cls->clsCnsType(cnsName);
-      if (dt != KindOfUninit) {
-        TRACE(1, "clscnsd: %s:%s prediction type %d\n",
-              cne.first->data(), cnsName->data(), dt);
-        return dt;
-      }
-    }
-  }
-
-  if (ni->op() == OpSetM) {
-    /*
-     * SetM pushes null for certain rare combinations of input types, a string
-     * if the base was a string, or (most commonly) its first stack input. We
-     * mark the output as predicted here and do a very rough approximation of
-     * what really happens; most of the time the prediction will be a noop
-     * since MInstrTranslator side exits in all uncommon cases.
-     */
-
-    auto inType = ni->inputs[0]->rtt;
-    auto const inDt = inType.isKnownDataType()
-      ? MaybeDataType(inType.toDataType())
-      : folly::none;
-    // If the base is a string, the output is probably a string. Unless the
-    // member code is MW, then we're either going to fatal or promote the
-    // string to an array.
-    Type baseType;
-    switch (ni->immVec.locationCode()) {
-      case LGL: case LGC:
-      case LNL: case LNC:
-      case LSL: case LSC:
-        baseType = Type::Gen;
-        break;
-
-      default:
-        baseType = ni->inputs[1]->rtt;
-    }
-    if (baseType <= Type::Str && ni->immVecM.size() == 1) {
-      return ni->immVecM[0] == MW ? inDt : KindOfString;
-    }
-
-    // Otherwise, it's probably the input type.
-    return inDt;
-  }
-
-  auto const op = ni->op();
-  static const double kAccept = 1.0;
-
-  std::pair<MaybeDataType, double> pred = std::make_pair(folly::none, 0.0);
-
-  if (op == OpCGetS) {
-    auto nameType = ni->inputs[1]->rtt;
-    if (nameType.isConst(Type::Str)) {
-      auto propName = nameType.strVal();
-      pred = predictType(TypeProfileKey(TypeProfileKey::StaticPropName,
-                                        propName));
-      TRACE(1, "prediction for static fields named %s: %d, %f\n",
-            propName->data(),
-            pred.first ? *pred.first : -1,
-            pred.second);
-    }
-  } else if (op == OpCGetM) {
-    pred = predictMVec(ni);
-  }
-  if (pred.second < kAccept) {
-    const StringData* const invName
-      = ni->op() == Op::FCallD
-        ? ni->m_unit->lookupLitstrId(ni->imm[2].u_SA)
-        : nullptr;
-    if (invName) {
-      pred = predictType(TypeProfileKey(TypeProfileKey::MethodName, invName));
-      FTRACE(1, "prediction for methods named {}: {}, {:.2}\n",
-             invName->data(),
-             pred.first ? *pred.first : -1,
-             pred.second);
-    }
-  }
-  if (pred.second >= kAccept) {
-    FTRACE(1, "accepting prediction of type {}\n",
-              pred.first ? *pred.first : -1);
-    assert(!pred.first || *pred.first != KindOfUninit);
-    return pred.first;
-  }
-  return folly::none;
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -499,7 +203,7 @@ static const struct {
   { OpCnsE,        {None,             Stack1,       OutCns,            1 }},
   { OpCnsU,        {None,             Stack1,       OutCns,            1 }},
   { OpClsCns,      {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpClsCnsD,     {None,             Stack1,       OutPred,           1 }},
+  { OpClsCnsD,     {None,             Stack1,       OutUnknown,           1 }},
   { OpFile,        {None,             Stack1,       OutString,         1 }},
   { OpDir,         {None,             Stack1,       OutString,         1 }},
   { OpNameA,       {Stack1,           Stack1,       OutString,         0 }},
@@ -510,7 +214,7 @@ static const struct {
   { OpConcat,      {StackTop2,        Stack1,       OutString,        -1 }},
   { OpConcatN,     {StackN,           Stack1,       OutString,         0 }},
   /* Arithmetic ops */
-  { OpAbs,         {Stack1,           Stack1,       OutPred,           0 }},
+  { OpAbs,         {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAdd,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpSub,         {StackTop2,        Stack1,       OutArith,         -1 }},
   { OpMul,         {StackTop2,        Stack1,       OutArith,         -1 }},
@@ -519,10 +223,10 @@ static const struct {
   { OpSubO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
   { OpMulO,        {StackTop2,        Stack1,       OutArithO,        -1 }},
   /* Div and mod might return boolean false. Sigh. */
-  { OpDiv,         {StackTop2,        Stack1,       OutPred,          -1 }},
-  { OpMod,         {StackTop2,        Stack1,       OutPred,          -1 }},
-  { OpPow,         {StackTop2,        Stack1,       OutPred,          -1 }},
-  { OpSqrt,        {Stack1,           Stack1,       OutPred,           0 }},
+  { OpDiv,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpMod,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpPow,         {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpSqrt,        {Stack1,           Stack1,       OutUnknown,        0 }},
   /* Logical ops */
   { OpXor,         {StackTop2,        Stack1,       OutBoolean,       -1 }},
   { OpNot,         {Stack1,           Stack1,       OutBoolean,        0 }},
@@ -585,8 +289,8 @@ static const struct {
   { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
-  { OpCGetS,       {StackTop2,        Stack1,       OutPred,          -1 }},
-  { OpCGetM,       {MVector,          Stack1,       OutPred,           1 }},
+  { OpCGetS,       {StackTop2,        Stack1,       OutUnknown,       -1 }},
+  { OpCGetM,       {MVector,          Stack1,       OutUnknown,        1 }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL,        1 }},
   { OpVGetN,       {Stack1,           Stack1|Local, OutVUnknown,       0 }},
   // TODO: In pseudo-main, the VGetG instruction invalidates what we know
@@ -622,7 +326,7 @@ static const struct {
   { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput,   -1 }},
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput,   -1 }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput,   -2 }},
-  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutPred,           0 }},
+  { OpSetM,        {MVector|Stack1,   Stack1|Local, OutUnknown,        0 }},
   { OpSetWithRefLM,{MVector|Local ,   Local,        OutNone,           0 }},
   { OpSetWithRefRM,{MVector|Stack1,   Local,        OutNone,          -1 }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp,          0 }},
@@ -696,13 +400,12 @@ static const struct {
    * FCall is special. Like the Ret* instructions, its manipulation of the
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
-  { OpFCall,       {FStack,           Stack1,       OutPred,           0 }},
-  { OpFCallD,      {FStack,           Stack1,       OutPred,           0 }},
-  { OpFCallUnpack, {FStack,           Stack1,       OutPred,           0 }},
-  { OpFCallArray,  {FStack,           Stack1,       OutPred,
+  { OpFCall,       {FStack,           Stack1,       OutUnknown,        0 }},
+  { OpFCallD,      {FStack,           Stack1,       OutUnknown,        0 }},
+  { OpFCallUnpack, {FStack,           Stack1,       OutUnknown,        0 }},
+  { OpFCallArray,  {FStack,           Stack1,       OutUnknown,
                                                    -(int)kNumActRecCells }},
-  // TODO: output type is known
-  { OpFCallBuiltin,{BStackN,          Stack1,       OutPred,          0 }},
+  { OpFCallBuiltin,{BStackN,          Stack1,       OutUnknown,        0 }},
   { OpCufSafeArray,{StackTop3|DontGuardAny,
                                       Stack1,       OutArray,         -2 }},
   { OpCufSafeReturn,{StackTop3|DontGuardAny,
@@ -919,27 +622,6 @@ int getStackDelta(const NormalizedInstruction& ni) {
   }
   int delta = instrInfo[op].numPushed - hiddenStackInputs;
   return delta;
-}
-
-// Task #3449943: This returns true even if there's meta-data telling
-// that the value was inferred.
-bool outputIsPredicted(NormalizedInstruction& inst) {
-  auto const& iInfo = getInstrInfo(inst.op());
-  auto doPrediction =
-    (iInfo.type == OutPred || iInfo.type == OutCns) && !inst.endsRegion;
-  if (doPrediction) {
-    // All OutPred ops except for SetM have a single stack output for now.
-    assert(iInfo.out == Stack1 || inst.op() == OpSetM);
-    auto dt = predictOutputs(&inst);
-    if (dt) {
-      inst.outPred = *dt == KindOfRef ? Type(*dt, KindOfAny{}) : Type(*dt);
-      inst.outputPredicted = true;
-    } else {
-      doPrediction = false;
-    }
-  }
-
-  return doPrediction;
 }
 
 bool isAlwaysNop(Op op) {
@@ -1522,7 +1204,6 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   if (instrIsNonCallControlFlow(inst->op()) ||
-      inst->outputPredicted ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpClsCnsD) { // side exits if misses in the RDS
     return true;
@@ -1950,8 +1631,6 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
                                          show(hts)));
-  // When profiling, we disable type predictions to avoid side exits
-  assert(IMPLIES(mcg->tx().mode() == TransKind::Profile, !ni.outputPredicted));
 
   irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
@@ -2156,20 +1835,6 @@ TranslateResult translateRegion(HTS& hts,
         inst.preppedByRef = byRefs.next();
       }
 
-      /*
-       * Check for a type prediction. Put it in the NormalizedInstruction so
-       * the emit* method can use it if needed.  In PGO mode, we don't really
-       * need the values coming from the interpreter type profiler.
-       * TransKind::Profile translations end whenever there's a side-exit, and
-       * type predictions incur side-exits.  And when we stitch multiple
-       * TransKind::Profile translations together to form a larger region (in
-       * TransKind::Optimize mode), the guard for the top of the stack
-       * essentially does the role of type prediction.  And, if the value is
-       * also inferred, then the guard is omitted.
-       */
-      auto const doPrediction = mcg->tx().mode() == TransKind::Live &&
-                                  outputIsPredicted(inst);
-
       // If this block ends with an inlined FCall, we don't emit anything for
       // the FCall and instead set up HhbcTranslator for inlining. Blocks from
       // the callee will be next in the region.
@@ -2185,8 +1850,7 @@ TranslateResult translateRegion(HTS& hts,
                show(hts));
         auto returnSk = inst.nextSk();
         auto returnFuncOff = returnSk.offset() - block->func()->base();
-        irgen::beginInlining(hts, inst.imm[0].u_IVA, callee, returnFuncOff,
-                         doPrediction ? inst.outPred : Type::Gen);
+        irgen::beginInlining(hts, inst.imm[0].u_IVA, callee, returnFuncOff);
         // "Fallthrough" into the callee's first block
         irgen::endBlock(hts, blocks[b + 1]->start().offset(), inst.nextIsMerge);
         continue;
@@ -2277,20 +1941,12 @@ TranslateResult translateRegion(HTS& hts,
         } else if (b < blocks.size() - 1 &&
                    (isRet(inst.op()) || inst.op() == OpNativeImpl)) {
           // "Fallthrough" from inlined return to the next block
-          irgen::endBlock(hts, blocks[b + 1]->start().offset(), inst.nextIsMerge);
+          irgen::endBlock(hts, blocks[b + 1]->start().offset(),
+                          inst.nextIsMerge);
         }
         if (region.isExit(blockId)) {
           irgen::endRegion(hts);
         }
-      }
-
-      // Check the prediction. If the predicted type is less specific than what
-      // is currently on the eval stack, checkType won't emit any code.
-      if (doPrediction &&
-          // TODO(#5710339): would be nice to remove the following check
-          irgen::publicTopType(hts, 0).maybe(inst.outPred)) {
-        irgen::checkTypeStack(hts, 0, inst.outPred,
-                           sk.advanced(block->unit()).offset());
       }
     }
 

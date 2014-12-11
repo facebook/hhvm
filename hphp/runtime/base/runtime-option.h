@@ -437,9 +437,6 @@ public:
   F(uint32_t, JitMaxTranslations,      12)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(uint32_t, JitMaxRegionInstrs,      1000)                            \
-  F(string, JitProfilePath,            std::string(""))                 \
-  F(bool, JitTypePrediction,           true)                            \
-  F(int32_t, JitStressTypePredPercent, 0)                               \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \

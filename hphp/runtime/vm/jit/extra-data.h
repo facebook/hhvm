@@ -409,15 +409,13 @@ struct PropByteOffset : IRExtraData {
 struct DefInlineFPData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),", retBCOff, ',', retSPOff,
-      retTypePred < Type::Gen ? (',' + retTypePred.toString()) : ""
+      target->fullName()->data(), "(),", retBCOff, ',', retSPOff
     );
   }
 
   const Func* target;
   Offset retBCOff;
   Offset retSPOff;
-  Type retTypePred;
 };
 
 struct CallArrayData : IRExtraData {

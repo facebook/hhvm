@@ -44,7 +44,6 @@ struct NormalizedInstruction {
   const Unit* m_unit;
 
   std::vector<DynLocation*> inputs;
-  Type outPred;
   ArgUnion imm[4];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
@@ -57,7 +56,6 @@ struct NormalizedInstruction {
   bool endsRegion:1;
   bool nextIsMerge:1;
   bool preppedByRef:1;
-  bool outputPredicted:1;
   bool ignoreInnerType:1;
 
   /*

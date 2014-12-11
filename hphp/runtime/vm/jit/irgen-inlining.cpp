@@ -68,8 +68,7 @@ bool isInlining(const HTS& env) { return env.bcStateStack.size() > 1; }
 void beginInlining(HTS& env,
                    unsigned numParams,
                    const Func* target,
-                   Offset returnBcOffset,
-                   Type retTypePred) {
+                   Offset returnBcOffset) {
   assert(!env.fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
   assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
@@ -91,7 +90,6 @@ void beginInlining(HTS& env,
   data.target   = target;
   data.retBCOff = returnBcOffset;
   data.retSPOff = prevSPOff;
-  data.retTypePred = retTypePred;
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
@@ -189,17 +187,8 @@ void endInlinedCommon(HTS& env) {
 
 void retFromInlined(HTS& env, Type type) {
   auto const retVal = pop(env, type, DataTypeGeneric);
-  // Before we leave the inlined frame, grab a type prediction from
-  // our DefInlineFP.
-  auto const retPred = fp(env)->inst()->extra<DefInlineFP>()->retTypePred;
   endInlinedCommon(env);
   push(env, retVal);
-  if (retPred < retVal->type()) { // TODO: this if statement shouldn't be here,
-                                  // because check type resolves to the
-                                  // intersection of the two types
-    // If we had a predicted output type that's useful, check that here.
-    checkTypeStack(env, 0, retPred, curSrcKey(env).advanced().offset());
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

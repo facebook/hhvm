@@ -110,8 +110,6 @@ folly::Optional<Type> interpOutputType(HTS& env,
     return Type::BoxedInitCell;
   };
 
-  if (inst.outputPredicted) return Type::Gen;
-
   auto outFlag = getInstrInfo(inst.op()).type;
   if (outFlag == OutFInputL) {
     outFlag = inst.preppedByRef ? OutVInputL : OutCInputL;
@@ -138,12 +136,6 @@ folly::Optional<Type> interpOutputType(HTS& env,
 
     case OutFDesc:       return folly::none;
     case OutUnknown:     return Type::Gen;
-
-    case OutPred:
-      checkTypeType = inst.outPred;
-      // Returning inst.outPred from this function would turn the CheckStk
-      // after the InterpOne into a nop.
-      return Type::Gen;
 
     case OutCns:         return Type::Cell;
     case OutVUnknown:    return Type::BoxedInitCell;
@@ -240,7 +232,7 @@ interpOutputLocals(HTS& env,
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
       assert(locType < Type::Gen || curFunc(env)->isPseudoMain());
 
-      auto stackType = inst.outputPredicted ? inst.outPred : pushedType.value();
+      auto stackType = pushedType.value();
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }

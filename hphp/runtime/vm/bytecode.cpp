@@ -4404,13 +4404,7 @@ OPTBLD_INLINE void ExecutionContext::ret(IOP_ARGS) {
   }
 
   if (isProfileRequest()) {
-    auto const f = vmfp()->func();
-    profileIncrementFuncCounter(f);
-    if (!(f->isPseudoMain() || f->isClosureBody() || f->isMagic() ||
-          Func::isSpecial(f->name()))) {
-      recordType(TypeProfileKey(TypeProfileKey::MethodName, f->name()),
-                 retval.m_type);
-    }
+    profileIncrementFuncCounter(vmfp()->func());
   }
 
   // Type profile return value.
@@ -4650,26 +4644,14 @@ OPTBLD_INLINE void ExecutionContext::iopCGetG(IOP_ARGS) {
 OPTBLD_INLINE void ExecutionContext::iopCGetS(IOP_ARGS) {
   StringData* name;
   GETS(false);
-  if (isProfileRequest() && name && name->isStatic()) {
-    recordType(TypeProfileKey(TypeProfileKey::StaticPropName, name),
-               vmStack().top()->m_type);
-  }
 }
 
 OPTBLD_INLINE void ExecutionContext::iopCGetM(IOP_ARGS) {
-  PC oldPC = pc;
   NEXT();
   DECLARE_GETHELPER_ARGS
   getHelper(GETHELPER_ARGS);
   if (tvRet->m_type == KindOfRef) {
     tvUnbox(tvRet);
-  }
-  assert(hasImmVector(*reinterpret_cast<const Op*>(oldPC)));
-  const ImmVector& immVec = ImmVector::createFromStream(oldPC + 1);
-  StringData* name;
-  MemberCode mc;
-  if (immVec.decodeLastMember(vmfp()->unit(), name, mc)) {
-    recordType(TypeProfileKey(mc, name), vmStack().top()->m_type);
   }
 }
 

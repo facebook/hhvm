@@ -126,7 +126,6 @@ void emitCnsU(HTS& env,
 void emitClsCnsD(HTS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
-  auto const outPred = env.currentNormalizedInstruction->outPred; // TODO: rm
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
   /*
@@ -156,8 +155,7 @@ void emitClsCnsD(HTS& env,
     RDSHandleData { link.handle() },
     Type::Cell.ptr(Ptr::ClsCns)
   );
-  auto const guardType = outPred < Type::UncountedInit ? outPred
-                                                       : Type::UncountedInit;
+  auto const guardType = Type::UncountedInit;
 
   env.irb->ifThen(
     [&] (Block* taken) {

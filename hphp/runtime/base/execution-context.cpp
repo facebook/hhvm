@@ -702,11 +702,15 @@ void ExecutionContext::handleError(const std::string& msg,
   auto const ee = skipFrame ?
     ExtendedException(ExtendedException::SkipFrame{}, msg) :
     ExtendedException(msg);
-  recordLastError(ee, errnum);
   bool handled = false;
   if (callUserHandler) {
     handled = callUserErrorHandler(ee, errnum, false);
   }
+
+  if (!handled) {
+    recordLastError(ee, errnum);
+  }
+
   if (mode == ErrorThrowMode::Always ||
       (mode == ErrorThrowMode::IfUnhandled && !handled)) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerErrorHook(ee, errnum, msg));

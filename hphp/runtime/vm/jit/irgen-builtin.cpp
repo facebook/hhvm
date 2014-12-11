@@ -390,7 +390,7 @@ struct CatchMaker {
     gen(env, BeginCatch);
     decRefForUnwind();
     prepareForCatch();
-    gen(env, EndCatch, fp(env), sp(env));
+    gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
     return exit;
   }
 
@@ -409,8 +409,9 @@ struct CatchMaker {
       [&] {
         env.irb->hint(Block::Hint::Unused);
         decRefForUnwind();
-        auto const stack = prepareForCatch();
-        gen(env, EndCatch, fp(env), stack);
+        prepareForCatch();
+        gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
+          sp(env));
       }
     );
 
@@ -430,7 +431,7 @@ struct CatchMaker {
   }
 
 private:
-  SSATmp* prepareForCatch() const {
+  void prepareForCatch() const {
     if (inlining()) {
       fpushActRec(env,
                   cns(env, m_callee),
@@ -455,11 +456,12 @@ private:
      * So before we leave, update the marker to placate EndCatch assertions,
      * which is trying to detect failure to do this properly.
      */
-    auto const stack = spillStack(env);
-    gen(env, SyncABIRegs, fp(env), stack);
-    gen(env, EagerSyncVMRegs, fp(env), stack);
+    spillStack(env);
+    // TODO(#5868782): kill SyncABIRegs
+    gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) },
+      fp(env), sp(env));
+    gen(env, EagerSyncVMRegs, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
-    return stack;
   }
 
   /*
@@ -494,7 +496,7 @@ private:
         --stackIdx;
         gen(env,
             DecRefStack,
-            StackOffset { static_cast<int32_t>(stackIdx) },
+            StackOffset { offsetFromSP(env, stackIdx) },
             Type::Gen,
             sp(env));
       } else {
@@ -574,14 +576,14 @@ void coerce_stack(HTS& env,
     gen(env,
         CoerceStk,
         targetTy,
-        CoerceStkData(offset, callee, paramIdx + 1),
+        CoerceStkData { offsetFromSP(env, offset), callee, paramIdx + 1 },
         maker.makeParamCoerceCatch(),
         sp(env));
   } else {
     gen(env,
         CastStk,
         targetTy,
-        StackOffset(offset),
+        StackOffset { offsetFromSP(env, offset) },
         maker.makeUnusualCatch(),
         sp(env));
   }
@@ -700,7 +702,11 @@ void builtinCall(HTS& env,
     env,
     CallBuiltin,
     retType,
-    CallBuiltinData { callee, builtinFuncDestroysLocals(callee) },
+    CallBuiltinData {
+      offsetFromSP(env, 0),
+      callee,
+      builtinFuncDestroysLocals(callee)
+    },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
   );
@@ -736,7 +742,7 @@ void nativeImplInlined(HTS& env) {
   // Figure out if this inlined function was for an FPushCtor.  We'll
   // need this creating the unwind block blow.
   auto const wasInliningConstructor = [&]() -> bool {
-    auto const sframe = findSpillFrame(sp(env));
+    auto const sframe = fp(env)->inst()->extra<DefInlineFP>()->spillFrame;
     assert(sframe);
     return sframe->extra<ActRecInfo>()->isFromFPushCtor();
   }();
@@ -859,7 +865,7 @@ void emitNativeImpl(HTS& env) {
   auto const stack   = gen(env, RetAdjustStack, fp(env));
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const frame   = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
 }
 
 //////////////////////////////////////////////////////////////////////

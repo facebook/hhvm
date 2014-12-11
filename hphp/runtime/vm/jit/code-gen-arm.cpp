@@ -66,11 +66,6 @@ NOOP_OPCODE(DbgAssertRetAddr)
     cgCallNative(vmain(), i); \
   }
 
-#define CALL_STK_OPCODE(name) \
-  CALL_OPCODE(name) \
-  CALL_OPCODE(name ## Stk)
-
-
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
@@ -171,14 +166,14 @@ CALL_OPCODE(LdGblAddrDef)
 
 // Vector instruction helpers
 CALL_OPCODE(StringGet)
-CALL_STK_OPCODE(BindElem)
-CALL_STK_OPCODE(SetWithRefElem)
-CALL_STK_OPCODE(SetWithRefNewElem)
-CALL_STK_OPCODE(SetOpElem)
-CALL_STK_OPCODE(IncDecElem)
-CALL_STK_OPCODE(SetNewElem)
-CALL_STK_OPCODE(SetNewElemArray)
-CALL_STK_OPCODE(BindNewElem)
+CALL_OPCODE(BindElem)
+CALL_OPCODE(SetWithRefElem)
+CALL_OPCODE(SetWithRefNewElem)
+CALL_OPCODE(SetOpElem)
+CALL_OPCODE(IncDecElem)
+CALL_OPCODE(SetNewElem)
+CALL_OPCODE(SetNewElemArray)
+CALL_OPCODE(BindNewElem)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
 
@@ -213,7 +208,6 @@ DELEGATE_OPCODE(DefSP)
 DELEGATE_OPCODE(CheckNullptr)
 DELEGATE_OPCODE(CheckNonNull)
 DELEGATE_OPCODE(AssertNonNull)
-DELEGATE_OPCODE(ExceptionBarrier)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
 
@@ -267,6 +261,8 @@ PUNT_OPCODE(ConvIntToBool)
 PUNT_OPCODE(ConvObjToBool)
 PUNT_OPCODE(ConvBoolToDbl)
 PUNT_OPCODE(ConvIntToDbl)
+PUNT_OPCODE(SpillFrame)
+PUNT_OPCODE(Call)
 
 PUNT_OPCODE(ConvDblToInt)
 
@@ -276,7 +272,6 @@ PUNT_OPCODE(ProfileArray)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)
-PUNT_OPCODE(CastStkIntToDbl)
 PUNT_OPCODE(CoerceStk)
 PUNT_OPCODE(UnwindCheckSideExit)
 PUNT_OPCODE(LdUnwinderValue)
@@ -424,6 +419,7 @@ PUNT_OPCODE(DecRefNZ)
 PUNT_OPCODE(DefInlineFP)
 PUNT_OPCODE(InlineReturn)
 PUNT_OPCODE(ReDefSP)
+PUNT_OPCODE(AdjustSP)
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyRetCls)
 PUNT_OPCODE(ConcatCellCell)
@@ -466,40 +462,29 @@ PUNT_OPCODE(DefMIStateBase)
 PUNT_OPCODE(BaseG)
 PUNT_OPCODE(PropX)
 PUNT_OPCODE(PropDX)
-PUNT_OPCODE(PropDXStk)
 PUNT_OPCODE(CGetProp)
 PUNT_OPCODE(VGetProp)
-PUNT_OPCODE(VGetPropStk)
 PUNT_OPCODE(BindProp)
-PUNT_OPCODE(BindPropStk)
 PUNT_OPCODE(SetProp)
-PUNT_OPCODE(SetPropStk)
 PUNT_OPCODE(UnsetProp)
 PUNT_OPCODE(SetOpProp)
-PUNT_OPCODE(SetOpPropStk)
 PUNT_OPCODE(IncDecProp)
-PUNT_OPCODE(IncDecPropStk)
 PUNT_OPCODE(EmptyProp)
 PUNT_OPCODE(IssetProp)
 PUNT_OPCODE(ElemX)
 PUNT_OPCODE(ElemArray)
 PUNT_OPCODE(ElemArrayW)
 PUNT_OPCODE(ElemDX)
-PUNT_OPCODE(ElemDXStk)
 PUNT_OPCODE(ElemUX)
-PUNT_OPCODE(ElemUXStk)
 PUNT_OPCODE(ArrayGet)
 PUNT_OPCODE(MapGet)
 PUNT_OPCODE(CGetElem)
 PUNT_OPCODE(VGetElem)
-PUNT_OPCODE(VGetElemStk)
 PUNT_OPCODE(ArraySet)
 PUNT_OPCODE(MapSet)
 PUNT_OPCODE(ArraySetRef)
 PUNT_OPCODE(SetElem)
-PUNT_OPCODE(SetElemStk)
 PUNT_OPCODE(UnsetElem)
-PUNT_OPCODE(UnsetElemStk)
 PUNT_OPCODE(ArrayIsset)
 PUNT_OPCODE(StringIsset)
 PUNT_OPCODE(MapIsset)
@@ -1138,10 +1123,19 @@ void CodeGenerator::cgCheckRefs(IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+void CodeGenerator::cgStStk(IRInstruction* inst) {
+  auto const spReg = srcLoc(0).reg();
+  auto const offset = cellsToBytes(inst->extra<StStk>()->offset);
+  emitStore(vmain(), spReg, offset, inst->src(1), srcLoc(1));
+}
+
 void CodeGenerator::cgSyncABIRegs(IRInstruction* inst) {
   auto& v = vmain();
+  auto const sync_sp = dstLoc(0).reg();
+  auto const offset = cellsToBytes(inst->extra<SyncABIRegs>()->offset);
+  v << lea{srcLoc(1).reg()[offset], sync_sp};
   v << copy{srcLoc(0).reg(), PhysReg(rVmFp)};
-  v << copy{srcLoc(1).reg(), PhysReg(rVmSp)};
+  v << copy{sync_sp, PhysReg(rVmSp)};
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
@@ -1154,55 +1148,6 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
   auto& v = vmain();
   v << fallback{destSK};
-}
-
-void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
-  auto const func     = inst->src(1);
-  auto const objOrCls = inst->src(2);
-  auto const invName  = inst->extra<SpillFrame>()->invName;
-  auto const nArgs    = inst->extra<SpillFrame>()->numArgs;
-
-  auto spReg = srcLoc(0).reg();
-  auto funcLoc = srcLoc(1);
-  auto objClsReg = srcLoc(2).reg();
-  ptrdiff_t spOff = -kNumActRecCells * sizeof(Cell);
-  auto& v = vmain();
-
-  v << storel{v.cns(nArgs), spReg[spOff + AROFF(m_numArgsAndFlags)]};
-
-  // Magic-call name.
-  auto bits =
-    (invName ? reinterpret_cast<uintptr_t>(invName) | ActRec::kInvNameBit : 0);
-  v << store{v.cns(bits), spReg[spOff + AROFF(m_invName)]};
-
-  // Func and this/class are slightly tricky. The func may be a tuple of a Func*
-  // and context.
-
-  if (objOrCls->isA(Type::Cls)) {
-    if (objOrCls->isConst()) {
-      v << store{v.cns(objOrCls->rawVal() | 1), spReg[spOff + AROFF(m_this)]};
-    } else {
-      auto ctx = v.makeReg();
-      v << orqi{1, objClsReg, ctx, v.makeReg()};
-      v << store{ctx, spReg[spOff + AROFF(m_this)]};
-    }
-  } else if (objOrCls->isA(Type::Obj) || objOrCls->isA(Type::Ctx)) {
-    v << store{objClsReg, spReg[spOff + AROFF(m_this)]};
-  } else {
-    assert(objOrCls->isA(Type::Nullptr));
-    v << store{v.cns(0), spReg[spOff + AROFF(m_this)]};
-  }
-
-  // Now set func, and possibly this/cls
-  if (!func->isA(Type::Nullptr)) {
-    auto func = funcLoc.reg(0);
-    v << store{func, spReg[spOff + AROFF(m_func)]};
-  }
-
-  // Adjust stack pointer
-  if (spOff) {
-    v << addqi{safe_cast<int32_t>(spOff), spReg, dstLoc(0).reg(), v.makeReg()};
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1293,56 +1238,6 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
 
   always_assert(false);
-}
-
-void CodeGenerator::cgCall(IRInstruction* inst) {
-  auto const extra = inst->extra<Call>();
-  auto const rSP   = srcLoc(0).reg();
-  auto const rFP   = srcLoc(1).reg();
-  auto const ar = extra->numParams * sizeof(TypedValue);
-  auto const argc = extra->numParams;
-  auto const func = extra->callee;
-  auto const rds = PhysReg{rVmTl};
-  auto& v = vmain();
-  auto& vc = vcold();
-
-  v << store{rFP, rSP[ar + AROFF(m_sfp)]};
-  v << storel{v.cns(extra->after), rSP[ar + AROFF(m_soff)]};
-  if (isNativeImplCall(func, argc)) {
-    // emitCallNativeImpl will adjust rVmSp
-    assert(dstLoc(0).reg() == PhysReg{rVmSp});
-    // We need to store the return address into the AR, but we don't know it
-    // yet. Use ldpoint, and point{} below, to get the address.
-    auto ret_point = v.makePoint();
-    auto ret_addr = v.makeReg();
-    v << ldpoint{ret_point, ret_addr};
-    v << store{ret_addr, rSP[cellsToBytes(argc) + AROFF(m_savedRip)]};
-    v << lea{rSP[cellsToBytes(argc)], rFP};
-    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc));
-    // rVmSp is already correctly adjusted, because there's no locals other
-    // than the arguments passed.
-    BuiltinFunction builtinFuncPtr = func->builtinFuncPtr();
-    v << copy{rFP, PhysReg{argReg(0)}};
-    if (mcg->fixupMap().eagerRecord(func)) {
-      v << store{v.cns(func->getEntry()), rds[RDS::kVmpcOff]};
-      v << store{rFP, rds[RDS::kVmfpOff]};
-      v << store{rSP, rds[RDS::kVmspOff]};
-    }
-    auto syncPoint = emitCall(v, CppCall::direct(builtinFuncPtr), argSet(1));
-    Offset stackOff = func->numLocals();
-    v << hcsync{Fixup(0, stackOff), syncPoint};
-    v << load{rFP[AROFF(m_sfp)], rFP};
-    v << point{ret_point};
-    int adjust = sizeof(ActRec) + cellsToBytes(func->numSlotsInFrame() - 1);
-    v << lea{rSP[adjust], rSP};
-  } else {
-    // not calling a native method; use bindcall{}
-    auto& us = mcg->tx().uniqueStubs;
-    auto stub = func ? us.immutableBindCallStub : us.bindCallStub;
-    PhysReg new_fp{rStashedAR}, vmsp{arm::rVmSp};
-    v << lea{vmsp[cellsToBytes(argc)], new_fp};
-    v << bindcall{stub, RegSet(new_fp)};
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1477,7 +1372,7 @@ void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dst     = dstLoc(0).reg();
   auto base    = srcLoc(0).reg();
-  auto offset  = inst->src(1)->intVal();
+  auto offset  = cellsToBytes(inst->extra<LdARFuncPtr>()->offset);
   vmain() << load{base[offset + AROFF(m_func)], dst};
 }
 
@@ -1510,47 +1405,27 @@ void CodeGenerator::cgLdStackAddr(IRInstruction* inst) {
   vmain() << lea{base[offset], dst};
 }
 
-void CodeGenerator::cgSpillStack(IRInstruction* inst) {
-  // TODO(2966414): so much of this logic could be shared. The opcode itself
-  // should probably be broken up.
-  auto const spDeficit    = inst->src(1)->intVal();
-  auto const spillVals    = inst->srcs().subpiece(2);
-  auto const numSpillSrcs = spillVals.size();
-  auto const dst          = dstLoc(0).reg();
-  auto const sp           = srcLoc(0).reg();
-  auto const spillCells   = spillValueCells(inst);
-  auto& v = vmain();
-  ptrdiff_t adjustment = (spDeficit - spillCells) * sizeof(Cell);
-  for (uint32_t i = 0; i < numSpillSrcs; ++i) {
-    const ptrdiff_t offset = i * sizeof(Cell) + adjustment;
-    emitStore(v, sp, offset, spillVals[i], srcLoc(i + 2));
-  }
-
-  if (adjustment) {
-    v << addqi{safe_cast<int32_t>(adjustment), sp, dst, v.makeReg()};
-  }
-}
-
 void CodeGenerator::cgInterpOneCommon(IRInstruction* inst) {
   auto pcOff = inst->extra<InterpOneData>()->bcOff;
+  auto spOff = inst->extra<InterpOneData>()->spOffset;
 
   auto opc = *(curFunc()->unit()->at(pcOff));
   auto* interpOneHelper = interpOneEntryPoints[opc];
 
-  cgCallHelper(vmain(),
-               CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
-               kVoidDest,
-               SyncOptions::kSyncPoint,
-               argGroup().ssa(1/*fp*/).ssa(0/*sp*/).imm(pcOff));
+  cgCallHelper(
+    vmain(),
+    CppCall::direct(reinterpret_cast<void (*)()>(interpOneHelper)),
+    kVoidDest,
+    SyncOptions::kSyncPoint,
+    argGroup()
+      .ssa(1/*fp*/)
+      .addr(srcLoc(0).reg()/*sp*/, cellsToBytes(spOff))
+      .imm(pcOff)
+  );
 }
 
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   cgInterpOneCommon(inst);
-  auto const& extra = *inst->extra<InterpOne>();
-  auto newSp = dstLoc(0).reg();
-  auto spAdjustBytes = cellsToBytes(extra.cellsPopped - extra.cellsPushed);
-  auto& v = vmain();
-  v << addqi{spAdjustBytes, newSp, newSp, v.makeReg()};
 }
 
 void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {

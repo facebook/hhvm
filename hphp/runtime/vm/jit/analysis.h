@@ -42,13 +42,6 @@ const SSATmp* canonical(const SSATmp*);
 SSATmp* canonical(SSATmp*);
 
 /*
- * Assuming sp is the VM stack pointer either from inside an FPI region or an
- * inlined call, find the SpillFrame instruction that defined the current
- * frame. Returns nullptr if the frame can't be found.
- */
-IRInstruction* findSpillFrame(SSATmp* sp);
-
-/*
  * Given a non-const SSATmp `t', return the earliest block B such that `t' is
  * defined on all of B's outgoing edges, and `t' is defined in all blocks
  * dominated by B.

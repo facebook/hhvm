@@ -169,20 +169,11 @@ private:
   void cgLookupCnsCommon(IRInstruction* inst);
   RDS::Handle cgLdClsCachedCommon(Vout& v, IRInstruction* inst, Vreg dst,
                                   Vreg sf);
-  void cgDefineModifiedStkPtr(IRInstruction*);
   void cgPropImpl(IRInstruction*);
-  void cgVGetPropImpl(IRInstruction*);
-  void cgBindPropImpl(IRInstruction*);
-  void cgSetPropImpl(IRInstruction*);
-  void cgSetOpPropImpl(IRInstruction*);
-  void cgIncDecPropImpl(IRInstruction*);
   void cgIssetEmptyPropImpl(IRInstruction*);
   void cgElemImpl(IRInstruction*);
   void cgElemArrayImpl(IRInstruction*);
-  void cgVGetElemImpl(IRInstruction*);
   void cgArraySetImpl(IRInstruction*);
-  void cgSetElemImpl(IRInstruction*);
-  void cgUnsetElemImpl(IRInstruction*);
   void cgIssetEmptyElemImpl(IRInstruction*);
 
   Vlabel label(Block*);

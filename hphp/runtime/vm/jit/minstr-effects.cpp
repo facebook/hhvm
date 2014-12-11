@@ -25,14 +25,10 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 Opcode canonicalOp(Opcode op) {
-  if (op == ElemUX || op == ElemUXStk ||
-      op == UnsetElem || op == UnsetElemStk) {
+  if (op == ElemUX || op == UnsetElem) {
     return UnsetElem;
   }
-  if (op == SetWithRefElem ||
-      op == SetWithRefElemStk ||
-      op == SetWithRefNewElem ||
-      op == SetWithRefNewElemStk) {
+  if (op == SetWithRefElem || op == SetWithRefNewElem) {
     return SetWithRefElem;
   }
   return opcodeHasFlags(op, MInstrProp) ? SetProp
@@ -55,15 +51,13 @@ void getBaseType(Opcode rawOp, bool predict,
        * can be optimistic here. Assume no promotion for string bases and
        * promotion in other cases. */
       baseType = baseType <= Type::Str ? Type::Str : newBase;
-    } else if (baseType <= Type::Str &&
-               (rawOp == SetElem || rawOp == SetElemStk)) {
+    } else if (baseType <= Type::Str && rawOp == SetElem) {
       /* If the base is known to be a string and the operation is exactly
        * SetElem, we're guaranteed that either the base will end as a
        * CountedStr or the instruction will throw an exception and side
        * exit. */
       baseType = Type::CountedStr;
-    } else if (baseType <= Type::Str &&
-               (rawOp == SetNewElem || rawOp == SetNewElemStk)) {
+    } else if (baseType <= Type::Str && rawOp == SetNewElem) {
       /* If the string base is empty, it will be promoted to an
        * array. Otherwise the base will be left alone and we'll fatal. */
       baseType = Type::Arr;
@@ -116,7 +110,8 @@ void MInstrEffects::get(const IRInstruction* inst,
 
   // Right now we require that the address of any affected local is the
   // immediate source of the base tmp.  This isn't actually specified in the ir
-  // spec right now but will intend to make it more general soon.
+  // spec right now but will intend to make it more general soon.  There is an
+  // analagous problem in frame-state.cpp for LdStackAddr.
   if (locInstr->op() != LdLocAddr) return;
 
   auto const locId = locInstr->extra<LdLocAddr>()->locId;

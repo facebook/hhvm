@@ -91,44 +91,4 @@ TEST(JumpOpts, eliminateTrivial) {
   }
 }
 
-TEST(JumpOpts, optimizeCondTraceExit) {
-  BCMarker marker = BCMarker::Dummy();
-
-  IRUnit unit{test_context};
-
-  Block* entry = unit.entry();
-  Block* taken = unit.defBlock();
-  Block* fallthru = unit.defBlock();
-
-  // A conditional jump that goes to "SyncABIRegs; ReqBindJmp" on both edges
-  // can be coalesced into a ReqBindJmpSomething.
-
-  auto fp = unit.gen(DefFP, marker);
-  auto sp = unit.gen(DefSP, marker, StackOffset(0), fp->dst());
-  auto val = unit.gen(Conjure, marker, Type::Bool);
-  auto jmp = unit.gen(JmpZero, marker, taken, val->dst());
-  jmp->setNext(fallthru);
-  entry->push_back({fp, sp, val, jmp});
-
-  auto bcoff1 = 10;
-  auto sync1 = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind1 = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff1));
-  taken->push_back({sync1, bind1});
-
-  auto bcoff2 = 20;
-  auto sync2 = unit.gen(SyncABIRegs, marker, fp->dst(), sp->dst());
-  auto bind2 = unit.gen(ReqBindJmp, marker, ReqBindJmpData(bcoff2));
-  fallthru->push_back({sync2, bind2});
-
-  optimizeJumps(unit);
-
-  EXPECT_EQ(nullptr, entry->next());
-  EXPECT_EQ(nullptr, entry->taken());
-  auto const& back = entry->back();
-  auto const* data = back.extra<ReqBindJccData>();
-  EXPECT_MATCH(back, ReqBindJmpZero, val->dst());
-  EXPECT_EQ(bcoff1, data->taken);
-  EXPECT_EQ(bcoff2, data->notTaken);
-}
-
 }}

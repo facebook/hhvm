@@ -57,7 +57,6 @@ bool shouldHHIRRelaxGuards() {
 #define DThis          return false; // fixed type from ctx class
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
-#define DStk(x)        x;
 #define DBuiltin       return false; // from immutable typeParam
 #define DSubtract(n,t) DofS(n)
 #define DCns           return false; // fixed type
@@ -95,7 +94,6 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DThis
 #undef DMulti
 #undef DSetElem
-#undef DStk
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
@@ -130,15 +128,13 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
     case LdLoc: {
       auto const id = inst->extra<LocalId>()->locId;
       auto const newType = state.localType(id);
-
       retypeLoad(inst, newType);
       break;
     }
 
     case LdStack: {
       auto idx = inst->extra<StackOffset>()->offset;
-      auto newType = getStackValue(inst->src(0), idx).knownType;
-
+      auto newType = state.stackType(idx);
       retypeLoad(inst, newType);
       break;
     }

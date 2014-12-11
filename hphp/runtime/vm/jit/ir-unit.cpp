@@ -145,26 +145,41 @@ void IRUnit::collectPostConditions() {
   always_assert(lastMainBlock != nullptr);
   if (mainExit == nullptr) mainExit = lastMainBlock;
 
-  FTRACE(1, "mainExit: B{}\n", mainExit->id());
-
   // state currently holds the state at the end of mainExit
-  auto const curFunc  = state.func();
-  auto const sp       = state.sp();
-  auto const spOffset = state.spOffset();
+  auto const curFunc   = state.func();
+  auto const spOffset  = mainExit->back().marker().spOff();
+  auto const physSPOff = state.spOffset();
 
-  for (unsigned i = 0; i < spOffset; ++i) {
-    auto t = getStackValue(sp, i).knownType;
-    if (!t.equals(Type::StackElem)) {
-      m_postConds.push_back({ RegionDesc::Location::Stack{i, spOffset - i},
-                              t });
+  FTRACE(1, "mainExit: B{}, spOff: {}, sp: {}, fp: {}\n",
+    mainExit->id(),
+    spOffset,
+    state.sp() ? state.sp()->toString() : "null",
+    state.fp() ? state.fp()->toString() : "null");
+
+  if (state.sp() != nullptr) {
+    auto const skipCells = m_context.resumed ? 0 : curFunc->numSlotsInFrame();
+    for (unsigned i = 0; i < skipCells; ++i) {
+      auto const instRelative  = i;
+      auto const fpRelative    = spOffset - instRelative;
+      int32_t const spRelative = physSPOff - fpRelative;
+      auto const t = state.stackType(spRelative);
+      if (!t.equals(Type::StackElem)) {
+        FTRACE(1, "Stack({}, {}): {}\n", instRelative, fpRelative, t);
+        m_postConds.push_back({
+          RegionDesc::Location::Stack{instRelative, fpRelative},
+          t
+        });
+      }
     }
   }
 
-  for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
-    auto t = state.localType(i);
-    if (!t.equals(Type::Gen)) {
-      FTRACE(1, "Local {}: {}\n", i, t.toString());
-      m_postConds.push_back({ RegionDesc::Location::Local{i}, t });
+  if (state.fp() != nullptr) {
+    for (unsigned i = 0; i < curFunc->numLocals(); ++i) {
+      auto t = state.localType(i);
+      if (!t.equals(Type::Gen)) {
+        FTRACE(1, "Local {}: {}\n", i, t.toString());
+        m_postConds.push_back({ RegionDesc::Location::Local{i}, t });
+      }
     }
   }
 }

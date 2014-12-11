@@ -77,7 +77,7 @@ inline Offset nextBcOff(const HTS& env) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(HTS& env, Offset bcOff) {
-  int32_t stackOff = env.irb->spOffset() +
+  int32_t stackOff = env.irb->syncedSpLevel() +
     env.irb->evalStack().numCells() - env.irb->stackDeficit();
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
@@ -97,21 +97,42 @@ inline void updateMarker(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
+// Convert stack offsets that are relative to the current HHBC instruction
+// (positive is higher on the stack) to offsets that are relative to the
+// currently defined StkPtr.
+inline int32_t offsetFromSP(const HTS& env, int32_t offsetFromInstr) {
+  int32_t const virtDelta = env.irb->evalStack().numCells() -
+    env.irb->stackDeficit();
+  auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
+  auto const absSPOff = curSPTop - offsetFromInstr;
+  auto const ret = -static_cast<int32_t>(absSPOff - env.irb->spOffset());
+  FTRACE(1,
+    "offsetFromSP({}) --> spOff: {}, virtDelta: {}, curTop: {}, abs: {}, "
+      "ret: {}\n",
+    offsetFromInstr,
+    env.irb->spOffset(),
+    virtDelta,
+    curSPTop,
+    absSPOff,
+    ret
+  );
+  return ret;
+}
+
 inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   auto const opnd = env.irb->evalStack().pop();
   env.irb->constrainValue(opnd, tc);
 
   if (opnd == nullptr) {
-    auto const stackOff = env.irb->stackDeficit();
+    env.irb->constrainStack(offsetFromSP(env, 0), tc);
+    auto value = gen(
+      env,
+      LdStack,
+      type,
+      StackOffset { offsetFromSP(env, 0) },
+      sp(env)
+    );
     env.irb->incStackDeficit();
-    env.irb->constrainStack(stackOff, tc);
-
-    // pop() is usually called with Cell or Gen. Don't rely on the simplifier
-    // to get a better type for the LdStack.
-    auto const info = getStackValue(sp(env), stackOff);
-    type = std::min(type, info.knownType);
-
-    auto value = gen(env, LdStack, type, StackOffset(stackOff), sp(env));
     FTRACE(2, "popping {}\n", *value->inst());
     return value;
   }
@@ -144,8 +165,15 @@ inline void popDecRef(HTS& env,
     return;
   }
 
-  env.irb->constrainStack(env.irb->stackDeficit(), tc);
-  gen(env, DecRefStack, StackOffset(env.irb->stackDeficit()), type, sp(env));
+  auto const offset = offsetFromSP(env, 0);
+  env.irb->constrainStack(offset, tc);
+  gen(
+    env,
+    DecRefStack,
+    StackOffset { offset },
+    type,
+    sp(env)
+  );
   env.irb->incStackDeficit();
 }
 
@@ -234,34 +262,22 @@ inline Type topType(HTS& env,
   if (idx < env.irb->evalStack().size()) {
     return top(env, idx, constraint)->type();
   }
-  auto const absIdx = idx - env.irb->evalStack().size() + env.irb->stackDeficit();
-  auto const stkVal = getStackValue(sp(env), absIdx);
-  env.irb->constrainStack(absIdx, constraint);
-  return stkVal.knownType;
+  return env.irb->stackType(offsetFromSP(env, idx), constraint);
 }
 
 //////////////////////////////////////////////////////////////////////
 // Eval stack---SpillStack machinery
 
-inline SSATmp* spillStack(HTS& env) {
-  auto vals = std::vector<SSATmp*>{};
-  vals.reserve(env.irb->evalStack().size() + 2);
-  vals.push_back(sp(env));
-  vals.push_back(cns(env, int64_t{env.irb->stackDeficit()}));
-  for (auto i = uint32_t{0}; i < env.irb->evalStack().size(); ++i) {
-    // DataTypeGeneric is used here because SpillStack just teleports the
-    // values to memory.
-    vals.push_back(top(env, i, DataTypeGeneric));
+inline void spillStack(HTS& env) {
+  auto const toSpill = env.irb->evalStack();
+  for (auto idx = toSpill.size(); idx-- > 0;) {
+    gen(env,
+        StStk,
+        StackOffset { offsetFromSP(env, idx) },
+        sp(env),
+        toSpill.top(idx));
   }
-
-  auto const newSp = gen(
-    env,
-    SpillStack,
-    std::make_pair(vals.size(), &vals[0])
-  );
-  env.irb->evalStack().clear();
-  env.irb->clearStackDeficit();
-  return newSp;
+  env.irb->syncEvalStack();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -568,17 +584,17 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStackAddr(HTS& env, int32_t offset) {
-  env.irb->constrainStack(offset, DataTypeSpecific);
+inline SSATmp* ldStackAddr(HTS& env, int32_t relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in m_irb->evalStack().
-  assert(offset >= static_cast<int32_t>(env.irb->evalStack().numCells()));
+  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().numCells()));
+  auto const offset = offsetFromSP(env, relOffset);
+  env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
     env,
     LdStackAddr,
     Type::PtrToStkGen,
-    StackOffset(offset + env.irb->stackDeficit() -
-      env.irb->evalStack().numCells()),
+    StackOffset { offset },
     sp(env)
   );
 }

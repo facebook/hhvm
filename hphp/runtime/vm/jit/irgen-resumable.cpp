@@ -87,7 +87,7 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStack, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
 }
 
 void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
@@ -112,21 +112,24 @@ void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  auto const stack = spillStack(env);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const frame = gen(env, FreeActRec, fp(env));
-
-  gen(env, RetCtrl, RetCtrlData(true), stack, frame, retAddr);
+  spillStack(env);
+  auto const stack    = sp(env);
+  auto const retAddr  = gen(env, LdRetAddr, fp(env));
+  auto const frame    = gen(env, FreeActRec, fp(env));
+  auto const spAdjust = offsetFromSP(env, 0);
+  gen(env, RetCtrl, RetCtrlData(spAdjust, true), stack, frame, retAddr);
 }
 
 void yieldReturnControl(HTS& env) {
   // Push return value of next()/send()/raise().
   push(env, cns(env, Type::InitNull));
 
-  auto const stack   = spillStack(env);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const frame   = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(true), stack, frame, retAddr);
+  spillStack(env);
+  auto const stack    = sp(env);
+  auto const retAddr  = gen(env, LdRetAddr, fp(env));
+  auto const frame    = gen(env, FreeActRec, fp(env));
+  auto const spAdjust = offsetFromSP(env, 0);
+  gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame, retAddr);
 }
 
 void yieldImpl(HTS& env, Offset resumeOffset) {
@@ -227,7 +230,7 @@ void emitCreateCont(HTS& env) {
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStack, fp(env));
   auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(0, false), stack, frame, retAddr);
 }
 
 void emitContEnter(HTS& env) {
@@ -249,13 +252,17 @@ void emitContEnter(HTS& env) {
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);
 
-  // Sync stack.
-  auto const stack = spillStack(env);
-
-  // Enter generator.
+  spillStack(env);
   auto returnBcOffset = returnOffset - curFunc(env)->base();
-  gen(env, ContEnter, stack, fp(env), genFp, resumeAddr,
-    cns(env, returnBcOffset));
+  gen(
+    env,
+    ContEnter,
+    ContEnterData { offsetFromSP(env, 0), returnBcOffset },
+    sp(env),
+    fp(env),
+    genFp,
+    resumeAddr
+  );
 }
 
 void emitContRaise(HTS& env) { PUNT(ContRaise); }

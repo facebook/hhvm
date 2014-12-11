@@ -55,16 +55,12 @@ bool IRInstruction::hasExtra() const {
   return m_extra;
 }
 
-// Instructions with ModifiesStack are always naryDst regardless of
-// the inner dest.
-
 bool IRInstruction::hasDst() const {
-  return opcodeHasFlags(op(), HasDest) &&
-    !opcodeHasFlags(op(), ModifiesStack);
+  return opcodeHasFlags(op(), HasDest);
 }
 
 bool IRInstruction::naryDst() const {
-  return opcodeHasFlags(op(), NaryDest | ModifiesStack);
+  return opcodeHasFlags(op(), NaryDest);
 }
 
 bool IRInstruction::producesReference(int dstNo) const {
@@ -118,10 +114,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case ArraySetRef:
       // Only consumes the reference to its input array
       return srcNo == 0;
-
-    case SpillStack:
-      // Inputs 2+ are values to store
-      return srcNo >= 2;
 
     case SpillFrame:
       // Consumes the $this/Class field of the ActRec
@@ -215,22 +207,6 @@ bool IRInstruction::killsSource(int idx) const {
       not_reached();
       break;
   }
-}
-
-bool IRInstruction::modifiesStack() const {
-  return opcodeHasFlags(op(), ModifiesStack);
-}
-
-SSATmp* IRInstruction::modifiedStkPtr() const {
-  assert(modifiesStack());
-  SSATmp* sp = dst(hasMainDst() ? 1 : 0);
-  assert(sp->isA(Type::StkPtr));
-  return sp;
-}
-
-SSATmp* IRInstruction::previousStkPtr() const {
-  assert(modifiesStack());
-  return src(numSrcs() - 1);
 }
 
 bool IRInstruction::hasMainDst() const {

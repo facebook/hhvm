@@ -1536,6 +1536,18 @@ static bool nextIsMerge(const NormalizedInstruction& inst,
   return isMergePoint(fallthruOffset, region);
 }
 
+static bool instrIsSuspending(Op op) {
+  switch (op) {
+  case Op::CreateCont:
+  case Op::Yield:
+  case Op::YieldK:
+  case Op::Await:
+    return true;
+  default:
+    return false;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 #define IMM_MA(n)      0 /* ignored, but we need something (for commas) */
@@ -1607,15 +1619,13 @@ static Type flavorToType(FlavorDesc f) {
 }
 
 void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
-  /*
-   * These generate AssertStks, which define new StkPtrs, and we don't allow IR
-   * lowering functions to gen instructions that may throw after defining a new
-   * StkPtrs.  This means right now they must be before we prepare for the next
-   * HHBC opcode (it's fine that they will have a marker on the previous
-   * instruction).
-   *
-   * TODO(#4810319): this will go away once we stop threading StkPtrs around.
-   */
+  irgen::prepareForNextHHBC(
+    hts,
+    &ni,
+    ni.source.offset(),
+    ni.endsRegion && !irgen::isInlining(hts)
+  );
+
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
@@ -1626,12 +1636,6 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
     }
   }
 
-  irgen::prepareForNextHHBC(
-    hts,
-    &ni,
-    ni.source.offset(),
-    ni.endsRegion && !irgen::isInlining(hts)
-  );
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
                                          show(hts)));
@@ -1933,7 +1937,7 @@ TranslateResult translateRegion(HTS& hts,
 
       // In CFG mode, insert a fallthrough jump at the end of each block.
       if (hts.mode == IRGenMode::CFG && i == block->length() - 1) {
-        if (instrAllowsFallThru(inst.op())) {
+        if (instrAllowsFallThru(inst.op()) && !instrIsSuspending(inst.op())) {
           auto nextOffset = inst.offset() + instrLen((Op*)(inst.pc()));
           // prepareForSideExit is done later in Trace mode, but it
           // needs to happen here or else we generate the SpillStack

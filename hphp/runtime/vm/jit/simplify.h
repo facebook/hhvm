@@ -68,39 +68,6 @@ SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Track down a value or type using the StkPtr chain.
- *
- * The spansCall parameter tracks whether the returned value's
- * lifetime on the stack spans a call.  This search bottoms out on
- * hitting either the initial DefSP instruction (failure), or some
- * instruction that produced a view of the stack with the requested
- * value.
- */
-
-struct StackValueInfo {
-  explicit StackValueInfo(SSATmp*);
-  explicit StackValueInfo(IRInstruction*, Type, Type = Type::Bottom);
-
-  SSATmp* value;       // may be nullptr
-  Type knownType;      // the type of the value, for when value is nullptr
-  Type predictedInner; // prediction for the inner type, if type is a ref
-  bool spansCall;      // whether the tmp's definition was above a call
-  IRInstruction* typeSrc; // the instruction that gave us knownType; or null
-};
-
-std::string show(const StackValueInfo&);
-
-StackValueInfo getStackValue(SSATmp* stack, uint32_t index);
-
-/*
- * Look up a predicted type for a stack offset that is known to be boxed.  (We
- * generally know this from bytecode invariants.)
- */
-Type getStackInnerTypePrediction(SSATmp* stack, uint32_t index);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * Propagate very simple copies on the given instruction.
  * Specifically, Movs.
  *

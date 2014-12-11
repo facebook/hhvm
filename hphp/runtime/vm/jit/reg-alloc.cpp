@@ -44,26 +44,13 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     assert_flog(
       opc == DefSP ||
       opc == ReDefSP ||
+      opc == AdjustSP ||
+      opc == SyncABIRegs ||
       opc == Call ||
       opc == CallArray ||
       opc == ContEnter ||
-      opc == SpillStack ||
-      opc == SpillFrame ||
-      opc == CufIterSpillFrame ||
-      opc == ExceptionBarrier ||
       opc == RetAdjustStack ||
-      opc == InterpOne ||
-      opc == InterpOneCF ||
-      opc == Mov ||
-      opc == CheckStk ||
-      opc == GuardStk ||
-      opc == AssertStk ||
-      opc == CastStk ||
-      opc == CastStkIntToDbl ||
-      opc == CoerceStk ||
-      opc == DefLabel ||
-      opc == HintStkInner ||
-      MInstrEffects::supported(opc),
+      opc == Mov,
       "unexpected StkPtr dest from {}",
       opcodeName(opc)
     );

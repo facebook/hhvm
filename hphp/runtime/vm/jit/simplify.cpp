@@ -175,18 +175,6 @@ bool validate(const State& env,
  * value of the simplified instruction sequence.
  */
 
-SSATmp* simplifySpillStack(State& env, const IRInstruction* inst) {
-  auto const sp           = inst->src(0);
-  auto const spDeficit    = inst->src(1)->intVal();
-  auto const numSpillSrcs = inst->srcs().subpiece(2).size();
-
-  // If there's nothing to spill, and no stack adjustment, we don't
-  // need the instruction; the old stack is still accurate.
-  if (!numSpillSrcs && spDeficit == 0) return sp;
-
-  return nullptr;
-}
-
 SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
   auto const srcTy = inst->src(0)->type();
@@ -202,28 +190,6 @@ SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
   // refcount opts right now.
   if (inst->src(0)->type() <= Type::Obj) return inst->src(0);
   return nullptr;
-}
-
-SSATmp* simplifyLdCtx(State& env, const IRInstruction* inst) {
-  auto const func = inst->marker().func();
-  if (!func->isStatic()) return nullptr;
-
-  // Change LdCtx in static functions to LdCctx, or if we're inlining try to
-  // fish out a constant context.
-  auto const src = inst->src(0);
-  auto const srcInst = src->inst();
-  if (srcInst->is(DefInlineFP)) {
-    auto const stackPtr = srcInst->src(0);
-    if (auto const spillFrame = findSpillFrame(stackPtr)) {
-      auto const cls = spillFrame->src(2);
-      if (cls->isConst(Type::Cls)) {
-        return cns(env, ConstCctx::cctx(cls->clsVal()));
-      }
-    }
-  }
-  // ActRec->m_cls of a static function is always a valid class pointer with
-  // the bottom bit set
-  return gen(env, LdCctx, src);
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
@@ -1684,102 +1650,12 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
 
-SSATmp* simplifyCastStk(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<CastStk>()->offset);
-  if (mightRelax(env, info.value)) return nullptr;
-  if (inst->typeParam() == Type::NullableObj && info.knownType <= Type::Null) {
-    // If we're casting Null to NullableObj, we still need to call
-    // tvCastToNullableObjectInPlace. See comment there and t3879280 for
-    // details.
-    return nullptr;
-  } else if (info.knownType <= inst->typeParam()) {
-    return inst->src(0);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyCoerceStk(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<CoerceStk>()->offset);
-  if (mightRelax(env, info.value)) return nullptr;
-  if (info.knownType <= inst->typeParam()) {
-    // No need to cast---the type was as good or better.
-    return inst->src(0);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyLdStack(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<LdStack>()->offset);
-
-  // We don't want to extend live ranges of tmps across calls, so we
-  // don't get the value if spansCall is true; however, we can use
-  // any type information known.
-  auto* value = info.value;
-  if (value && (!info.spansCall || info.value->inst()->is(DefConst))) {
-    // The refcount optimizations depend on reliably tracking refcount
-    // producers and consumers. LdStack and other raw loads are special cased
-    // during the analysis, so if we're going to replace this LdStack with a
-    // value that isn't from another raw load, we need to leave something in
-    // its place to preserve that information.
-    if (!value->inst()->isRawLoad() &&
-        (value->type().maybeCounted() || mightRelax(env, info.value))) {
-      gen(env, TakeStack, info.value);
-    }
-    return info.value;
-  }
-
-  if (info.knownType < inst->typeParam()) {
-    return gen(
-      env,
-      LdStack,
-      *inst->extra<LdStack>(),
-      info.knownType,
-      inst->src(0)
-    );
-  }
-
-  return nullptr;
-}
-
 SSATmp* simplifyTakeStack(State& env, const IRInstruction* inst) {
   if (inst->src(0)->type().notCounted() &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
   }
 
-  return nullptr;
-}
-
-SSATmp* simplifyDecRefStack(State& env, const IRInstruction* inst) {
-  auto const info = getStackValue(inst->src(0),
-                                  inst->extra<StackOffset>()->offset);
-  if (info.value && !info.spansCall) {
-    if (info.value->type().maybeCounted() || mightRelax(env, info.value)) {
-      gen(env, TakeStack, info.value);
-    }
-    return gen(env, DecRef, info.value);
-  }
-  if (mightRelax(env, info.value)) {
-    return nullptr;
-  }
-
-  // NB: strict subtype relation. Non-strict results in infinite recursion.
-  if (info.knownType < inst->typeParam()) {
-    return gen(
-      env,
-      DecRefStack,
-      *inst->extra<StackOffset>(),
-      info.knownType,
-      inst->src(0)
-    );
-  }
-
-  if (inst->typeParam().notCounted()) {
-    return gen(env, Nop);
-  }
   return nullptr;
 }
 
@@ -1925,6 +1801,11 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
+  if (inst->extra<AdjustSP>()->offset == 0) return inst->src(0);
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -1942,14 +1823,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(AssertNonNull)
   X(BoxPtr)
   X(CallBuiltin)
-  X(CastStk)
   X(Ceil)
   X(CheckInit)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
-  X(CoerceStk)
   X(ConcatCellCell)
   X(ConcatStrStr)
   X(ConvArrToBool)
@@ -1982,7 +1861,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CountArray)
   X(DecRef)
   X(DecRefNZ)
-  X(DecRefStack)
   X(DivDbl)
   X(ExtendsClass)
   X(Floor)
@@ -1997,15 +1875,12 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsWaitHandle)
   X(LdClsCtx)
   X(LdClsName)
-  X(LdCtx)
   X(CheckCtxThis)
   X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(LdPackedArrayElem)
-  X(LdStack)
   X(Mov)
-  X(SpillStack)
   X(TakeStack)
   X(UnboxPtr)
   X(JmpZero)
@@ -2039,6 +1914,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Same)
   X(NSame)
   X(ArrayGet)
+  X(AdjustSP)
   default: break;
   }
 #undef X
@@ -2058,273 +1934,6 @@ SimplifyResult simplify(IRUnit& unit,
   auto const newDst = simplifyWork(env, origInst);
   assert(validate(env, newDst, origInst));
   return SimplifyResult { std::move(env.newInsts), newDst };
-}
-
-//////////////////////////////////////////////////////////////////////
-
-StackValueInfo::StackValueInfo(SSATmp* value)
-  : value(value)
-  , knownType(value->type())
-  , predictedInner(Type::Bottom)
-  , spansCall(false)
-  , typeSrc(value->inst())
-{
-  ITRACE(5, "{} created\n", show(*this));
-}
-
-StackValueInfo::StackValueInfo(IRInstruction* inst,
-                               Type type,
-                               Type predictedInner)
-  : value(nullptr)
-  , knownType(type)
-  , predictedInner(predictedInner)
-  , spansCall(false)
-  , typeSrc(inst)
-{
-  ITRACE(5, "{} created\n", show(*this));
-}
-
-std::string show(const StackValueInfo& info) {
-  std::string out = "StackValueInfo {";
-
-  if (info.value) {
-    out += info.value->inst()->toString();
-  } else {
-    folly::toAppend(
-      info.knownType.toString(),
-      info.knownType <= Type::BoxedInitCell
-        ? folly::sformat(" ({})", info.predictedInner.toString())
-        : std::string{},
-      " from ",
-      info.typeSrc ? info.typeSrc->toString() : "N/A",
-      &out
-    );
-  }
-
-  if (info.spansCall) out += ", spans call";
-  out += "}";
-
-  return out;
-}
-
-StackValueInfo getStackValue(SSATmp* sp, uint32_t index) {
-  ITRACE(5, "getStackValue: idx = {}, {}\n", index, sp->inst()->toString());
-  Trace::Indent _i;
-
-  assert(sp->isA(Type::StkPtr));
-  IRInstruction* inst = sp->inst();
-
-  switch (inst->op()) {
-  case DefSP:
-    // You aren't really allowed to look above your current stack.  We
-    // can't assert fail here if the index is too high right now
-    // though, because it's currently legal to call getStackValue with
-    // invalid stack offsets.  (And this is done in ir-builder; see
-    // TODO(#4355796)).
-    return StackValueInfo { inst, Type::StackElem };
-
-  case ReDefSP: {
-    auto const extra = inst->extra<ReDefSP>();
-    auto info = getStackValue(inst->src(0), index);
-    if (extra->spansCall) info.spansCall = true;
-    return info;
-  }
-
-  case ExceptionBarrier:
-  case Mov:
-    return getStackValue(inst->src(0), index);
-
-  case CastStk:
-  case CastStkIntToDbl:
-    // fallthrough
-  case GuardStk:
-    // We don't have a value, but we may know the type due to guarding
-    // on it.
-    if (inst->extra<StackOffset>()->offset == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case CoerceStk:
-    if (inst->extra<CoerceStk>()->offset == index) {
-      return StackValueInfo { inst, inst->typeParam() };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case AssertStk:
-    // fallthrough
-  case CheckStk:
-    // CheckStk's and AssertStk's resulting type is the intersection
-    // of its typeParam with whatever type preceded it.
-    if (inst->extra<StackOffset>()->offset == index) {
-      auto const prev = getStackValue(inst->src(0), index);
-      return StackValueInfo {
-        inst,
-        refineTypeNoCheck(prev.knownType, inst->typeParam()),
-        prev.predictedInner
-      };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case HintStkInner:
-    if (inst->extra<HintStkInner>()->offset == index) {
-      return StackValueInfo {
-        nullptr, Type::BoxedInitCell, inst->typeParam()
-      };
-    }
-    return getStackValue(inst->src(0), index);
-
-  case CallArray: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info =
-      getStackValue(inst->src(0),
-                    // Pushes a return value, pops an ActRec and args Array
-                    index -
-                      (1 /* pushed */ - (kNumActRecCells + 1) /* popped */));
-    info.spansCall = true;
-    return info;
-  }
-
-  case Call: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info =
-      getStackValue(
-        inst->src(0),
-        index - (1 /* pushed */ -
-                 (kNumActRecCells +
-                   inst->extra<Call>()->numParams) /* popped */)
-      );
-    info.spansCall = true;
-    return info;
-  }
-
-  case ContEnter: {
-    if (index == 0) {
-      // return value from call
-      return StackValueInfo { inst, Type::Gen };
-    }
-    auto info = getStackValue(inst->src(0), index);
-    info.spansCall = true;
-    return info;
-  }
-
-  case SpillStack: {
-    int64_t numPushed    = 0;
-    int32_t numSpillSrcs = inst->numSrcs() - 2;
-
-    for (int i = 0; i < numSpillSrcs; ++i) {
-      SSATmp* tmp = inst->src(i + 2);
-      if (index == numPushed) {
-        return StackValueInfo { tmp };
-      }
-      ++numPushed;
-    }
-
-    // This is not one of the values pushed onto the stack by this
-    // spillstack instruction, so continue searching.
-    SSATmp* prevSp = inst->src(0);
-    int64_t numPopped = inst->src(1)->intVal();
-    return getStackValue(prevSp,
-                         // pop values pushed by spillstack
-                         index - (numPushed - numPopped));
-  }
-
-  case InterpOne:
-  case InterpOneCF: {
-    SSATmp* prevSp = inst->src(0);
-    auto const& extra = *inst->extra<InterpOneData>();
-    int64_t spAdjustment = extra.cellsPopped - extra.cellsPushed;
-    switch (extra.opcode) {
-    // some instructions are kinda funny and mess with the stack
-    // in places other than the top
-    case Op::CGetL2:
-      if (index == 1) return StackValueInfo { inst, inst->typeParam() };
-      if (index == 0) return getStackValue(prevSp, index);
-      break;
-    case Op::CGetL3:
-      if (index == 2) return StackValueInfo { inst, inst->typeParam() };
-      if (index < 2)  return getStackValue(prevSp, index);
-      break;
-    case Op::FPushCufSafe:
-      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Bool };
-      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
-      break;
-    case Op::FPushCtor:
-    case Op::FPushCtorD:
-      if (index == kNumActRecCells) return StackValueInfo { inst, Type::Obj };
-      if (index == kNumActRecCells + 1) return getStackValue(prevSp, 0);
-      break;
-
-    default:
-      if (index == 0 && inst->hasTypeParam()) {
-        return StackValueInfo { inst, inst->typeParam() };
-      }
-      break;
-    }
-
-    // If the index we're looking for is a cell pushed by the InterpOne (other
-    // than top of stack), we know nothing about its type.
-    if (index < extra.cellsPushed) {
-      return StackValueInfo{ inst, Type::StackElem };
-    }
-    return getStackValue(prevSp, index + spAdjustment);
-  }
-
-  case SpillFrame:
-  case CufIterSpillFrame:
-    // pushes an ActRec
-    if (index < kNumActRecCells) {
-      return StackValueInfo { inst, Type::StackElem };
-    }
-    return getStackValue(inst->src(0), index - kNumActRecCells);
-
-  case DefLabel:
-    // We could keep tracing back through all the preds of inst's block but
-    // there aren't currently any situations where that will add information we
-    // wouldn't otherwise have.
-    return StackValueInfo { inst, Type::StackElem };
-
-  default:
-    {
-      // Assume it's a vector instruction.  This will assert in minstrBaseIdx
-      // if not.
-      auto const base = inst->src(minstrBaseIdx(inst->op()));
-      // Currently we require that the stack address is the immediate source of
-      // the base tmp.
-      always_assert(base->inst()->is(LdStackAddr));
-      if (base->inst()->extra<LdStackAddr>()->offset == index) {
-        auto const prev = getStackValue(base->inst()->src(0), index);
-        MInstrEffects effects(inst->op(), prev.knownType.ptr(Ptr::Stk));
-        assert(effects.baseTypeChanged || effects.baseValChanged);
-        auto const ty = effects.baseType;
-        if (ty.isBoxed()) {
-          return StackValueInfo { inst, Type::BoxedInitCell, ty };
-        }
-        return StackValueInfo { inst, ty.derefIfPtr() };
-      }
-      return getStackValue(base->inst()->src(0), index);
-    }
-  }
-
-  not_reached();
-}
-
-Type getStackInnerTypePrediction(SSATmp* sp, uint32_t offset) {
-  auto const info = getStackValue(sp, offset);
-  assert(info.knownType <= Type::BoxedInitCell);
-  if (info.predictedInner <= Type::Bottom) {
-    ITRACE(2, "no boxed stack prediction {}\n", offset);
-    return Type::BoxedInitCell;
-  }
-  auto t = ldRefReturn(info.predictedInner.unbox());
-  ITRACE(2, "stack {} prediction: {}\n", offset, t);
-  return t;
 }
 
 //////////////////////////////////////////////////////////////////////

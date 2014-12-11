@@ -939,7 +939,7 @@ Type Type::relaxToGuardable() const {
 namespace {
 
 Type setElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == SetElem || inst->op() == SetElemStk);
+  assert(inst->op() == SetElem);
   auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
@@ -964,18 +964,6 @@ Type builtinReturn(const IRInstruction* inst) {
     return t | Type::InitNull;
   }
   not_reached();
-}
-
-Type stkReturn(const IRInstruction* inst, int dstId,
-               std::function<Type()> inner) {
-  assert(inst->modifiesStack());
-  if (dstId == 0 && inst->hasMainDst()) {
-    // Return the type of the main dest (if one exists) as dst 0
-    return inner();
-  }
-  // The instruction modifies the stack and this isn't the main dest,
-  // so it's a StkPtr.
-  return Type::StkPtr;
 }
 
 Type thisReturn(const IRInstruction* inst) {
@@ -1184,8 +1172,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DArrPacked      return Type::Arr.specialize(ArrayData::kPackedKind);
 #define DThis           return thisReturn(inst);
 #define DMulti          return Type::Bottom;
-#define DStk(in)        return stkReturn(inst, dstId, \
-                                   [&]() -> Type { in not_reached(); });
 #define DSetElem        return setElemReturn(inst);
 #define ND              assert(0 && "outputType requires HasDest or NaryDest");
 #define DBuiltin        return builtinReturn(inst);
@@ -1216,7 +1202,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DArrPacked
 #undef DThis
 #undef DMulti
-#undef DStk
 #undef DSetElem
 #undef ND
 #undef DBuiltin
@@ -1393,7 +1378,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define ND
 #define DMulti
-#define DStk(...)
 #define DSetElem
 #define D(...)
 #define DBuiltin
@@ -1439,7 +1423,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBuiltin
 #undef DSubtract
 #undef DMulti
-#undef DStk
 #undef DSetElem
 #undef DBox
 #undef DofS

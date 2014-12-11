@@ -37,6 +37,19 @@ void condJmpInversion(HTS& env, Offset relOffset, bool isJmpZ) {
   implCondJmp(env, takenOff, isJmpZ, popC(env));
 }
 
+// For EvalHHIRBytecodeControlFlow we need to make sure the spOffset is the
+// same on all incoming edges going to a merge point.  This would "just happen"
+// if we didn't still have instructions that redefine StkPtrs, but calls still
+// need to do that for now, so we need this hack.
+void bccfMergeSPHack(HTS& env) {
+  gen(
+    env,
+    AdjustSP,
+    StackOffset { -(env.irb->syncedSpLevel() - env.irb->spOffset()) },
+    sp(env)
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -82,7 +95,8 @@ Block* getBlock(HTS& env, Offset offset) {
 void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
   if (env.mode == IRGenMode::CFG) {
     if (flags & JmpFlagNextIsMerge) {
-      gen(env, ExceptionBarrier, spillStack(env));
+      spillStack(env);
+      bccfMergeSPHack(env);
     }
     auto target = getBlock(env, offset);
     assert(target != nullptr);
@@ -99,11 +113,8 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     spillStack(env);
   }
   if (env.mode == IRGenMode::CFG && (flags & JmpFlagNextIsMerge)) {
-    // Before jumping to a merge point we have to ensure that the
-    // stack pointer is sync'ed.  Without an ExceptionBarrier the
-    // SpillStack can be removed by DCE (especially since merge points
-    // start with a DefSP to block SP-chain walking).
-    gen(env, ExceptionBarrier, spillStack(env));
+    spillStack(env);
+    bccfMergeSPHack(env);
   }
   auto const target = getBlock(env, taken);
   assert(target != nullptr);
@@ -207,8 +218,9 @@ void emitSwitch(HTS& env,
   data.defaultOff  = defaultOff;
   data.targets     = &targets[0];
 
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
+  spillStack(env);
+  gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) }, fp(env),
+    sp(env));
 
   gen(env, JmpSwitchDest, data, index);
 }
@@ -251,8 +263,8 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
                         data,
                         testVal);
   gen(env, DecRef, testVal);
-  auto const stack = spillStack(env);
-  gen(env, SyncABIRegs, fp(env), stack);
+  gen(env, SyncABIRegs, StackOffset { offsetFromSP(env, 0) }, fp(env),
+    sp(env));
   gen(env, JmpSSwitchDest, dest);
 }
 

@@ -50,9 +50,9 @@ void implMIterInit(HTS& env, Offset relOffset, Lambda genFunc) {
   // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
 
   auto const exit  = makeExit(env);
-  auto const stack = spillStack(env);
+  spillStack(env);
   env.irb->exceptionStackBoundary();
-  auto const pred  = getStackInnerTypePrediction(stack, 0);
+  auto const pred  = env.irb->stackInnerTypePrediction(offsetFromSP(env, 0));
   auto const src   = topV(env);
 
   if (!pred.subtypeOfAny(Type::Arr, Type::Obj)) {

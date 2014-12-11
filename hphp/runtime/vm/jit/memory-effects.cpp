@@ -354,19 +354,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemX:
   case EmptyElem:
   case IssetElem:
-  case BindElem:              case BindElemStk:
-  case BindNewElem:           case BindNewElemStk:
-  case ElemDX:                case ElemDXStk:
-  case ElemUX:                case ElemUXStk:
-  case IncDecElem:            case IncDecElemStk:
-  case SetElem:               case SetElemStk:
-  case SetNewElemArray:       case SetNewElemArrayStk:
-  case SetNewElem:            case SetNewElemStk:
-  case SetOpElem:             case SetOpElemStk:
-  case SetWithRefElem:        case SetWithRefElemStk:
-  case SetWithRefNewElem:     case SetWithRefNewElemStk:
-  case UnsetElem:             case UnsetElemStk:
-  case VGetElem:              case VGetElemStk:
+  case BindElem:
+  case BindNewElem:
+  case ElemDX:
+  case ElemUX:
+  case IncDecElem:
+  case SetElem:
+  case SetNewElemArray:
+  case SetNewElem:
+  case SetOpElem:
+  case SetWithRefElem:
+  case SetWithRefNewElem:
+  case UnsetElem:
+  case VGetElem:
     // Right now we generally can't limit any of these, since they can raise
     // warnings and re-enter.
     assert(inst.src(0)->type() <= Type::PtrToGen);
@@ -386,12 +386,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IssetProp:
   case PropX:
   case UnsetProp:
-  case BindProp:              case BindPropStk:
-  case IncDecProp:            case IncDecPropStk:
-  case PropDX:                case PropDXStk:
-  case SetOpProp:             case SetOpPropStk:
-  case SetProp:               case SetPropStk:
-  case VGetProp:              case VGetPropStk:
+  case BindProp:
+  case IncDecProp:
+  case PropDX:
+  case SetOpProp:
+  case SetProp:
+  case VGetProp:
     if (inst.src(0)->type() <= Type::PtrToGen) {
       return MayLoadStore {
         pointee(inst.src(0)) | ANonFrame,
@@ -446,19 +446,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // report anything about this.
 
   case SpillFrame:
-  case SpillStack:
-  case AssertStk:
-  case HintStkInner:
   case GuardStk:
   case CheckStk:
-  case CastStkIntToDbl:
   case CufIterSpillFrame:
   case LdStack:
+  case StStk:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that never do anything to memory
 
+  case AssertStk:
+  case HintStkInner:
   case AbsDbl:
   case AddDbl:
   case AddInt:
@@ -492,6 +491,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NeqDbl:
   case NeqInt:
   case ReDefSP:
+  case AdjustSP:
   case SubDbl:
   case SubInt:
   case SubIntO:
@@ -504,7 +504,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Ceil:
   case Floor:
   case DefLabel:
-  case ExceptionBarrier:
   case SyncABIRegs:
   case DecRefNZ:
   case CheckInit:
@@ -703,7 +702,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Instructions that can re-enter the VM and touch anything except frame
   // memory.
 
-  case CastStk:
+  case CastStk:      // Note: also affects a stack slot
   case BaseG:
   case DecRef:
   case DecRefThis:

@@ -200,36 +200,6 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 
 //////////////////////////////////////////////////////////////////////
 
-// Return the first SSATmp* from a parameter pack.
-UNUSED SSATmp* find_base() { always_assert(0 && "genStk with no base"); }
-template<class... T> SSATmp* find_base(SSATmp* h, T... t) { return h; }
-template<class H,
-         class... T> SSATmp* find_base(H h, T... t) { return find_base(t...); }
-
-template<class... Args>
-SSATmp* genStk(MTS& env, Opcode opc, Args... args) {
-  assert(minstrBaseIdx(opc) == 0);
-
-  auto const base = find_base(args...);
-
-  /* If the base is a pointer to a stack cell and the operation might change
-   * its type and/or value, use the version of the opcode that returns a new
-   * StkPtr. */
-  if (base->inst()->is(LdStackAddr)) {
-    auto const prev = getStackValue(
-      base->inst()->src(0),
-      base->inst()->template extra<LdStackAddr>()->offset
-    );
-    MInstrEffects effects(opc, prev.knownType.ptr(Ptr::Stk));
-    if (effects.baseTypeChanged || effects.baseValChanged) {
-      return gen(env, getStackModifyingOpcode(opc), args..., sp(env));
-    }
-  }
-  return gen(env, opc, args...);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 // Returns a pointer to the base of the current MInstrState struct, or a null
 // pointer if it's not needed.
 SSATmp* misPtr(MTS& env) {
@@ -650,11 +620,13 @@ void emitBaseLCR(MTS& env) {
     spillStack(env);
     env.irb.exceptionStackBoundary();
     assert(env.stackInputs.count(env.iInd));
-    auto const sinfo = getStackValue(sp(env), env.stackInputs[env.iInd]);
+    auto const stkType =
+      env.irb.stackType(offsetFromSP(env, env.stackInputs[env.iInd]),
+                        DataTypeGeneric);
     setBase(
       env,
       ldStackAddr(env, env.stackInputs[env.iInd]),
-      sinfo.knownType.ptr(Ptr::Stk)
+      stkType.ptr(Ptr::Stk)
     );
   }
   assert(env.base.value->type().isPtr());
@@ -1010,12 +982,12 @@ void emitElem(MTS& env) {
   if (define || unset) {
     setBase(
       env,
-      genStk(env,
-             define ? ElemDX : ElemUX,
-             MInstrAttrData { mia },
-             env.base.value,
-             key,
-             misPtr(env))
+      gen(env,
+          define ? ElemDX : ElemUX,
+          MInstrAttrData { mia },
+          env.base.value,
+          key,
+          misPtr(env))
     );
     return;
   }
@@ -1497,7 +1469,7 @@ void emitCGetProp(MTS& env) {
 
 void emitVGetProp(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetProp, env.base.value, key, misPtr(env));
+  env.result = gen(env, VGetProp, env.base.value, key, misPtr(env));
 }
 
 void emitIssetProp(MTS& env) {
@@ -1536,7 +1508,7 @@ void emitSetProp(MTS& env) {
 
   // Emit the appropriate helper call.
   auto const key = getKey(env);
-  genStk(env, SetProp, makeCatchSet(env), env.base.value, key, value);
+  gen(env, SetProp, makeCatchSet(env), env.base.value, key, value);
   env.result = value;
 }
 
@@ -1544,21 +1516,21 @@ void emitSetOpProp(MTS& env) {
   SetOpOp op = SetOpOp(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
   auto const value = getValue(env);
-  env.result = genStk(env, SetOpProp, SetOpData { op },
-                      env.base.value, key, value, misPtr(env));
+  env.result = gen(env, SetOpProp, SetOpData { op },
+                   env.base.value, key, value, misPtr(env));
 }
 
 void emitIncDecProp(MTS& env) {
   IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
-  env.result = genStk(env, IncDecProp, IncDecData { op },
-                      env.base.value, key, misPtr(env));
+  env.result = gen(env, IncDecProp, IncDecData { op },
+                   env.base.value, key, misPtr(env));
 }
 
 void emitBindProp(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindProp, env.base.value, key, box, misPtr(env));
+  gen(env, BindProp, env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1605,7 +1577,7 @@ void emitCGetElem(MTS& env) {
 
 void emitVGetElem(MTS& env) {
   auto const key = getKey(env);
-  env.result = genStk(env, VGetElem, env.base.value, key, misPtr(env));
+  env.result = gen(env, VGetElem, env.base.value, key, misPtr(env));
 }
 
 void emitIssetElem(MTS& env) {
@@ -1662,7 +1634,7 @@ void emitSetWithRefNewElem(MTS& env) {
     constrainBase(env, DataTypeSpecific);
     emitSetNewElem(env);
   } else {
-    genStk(env, SetWithRefNewElem, env.base.value, getValAddr(env),
+    gen(env, SetWithRefNewElem, env.base.value, getValAddr(env),
       misPtr(env));
   }
   env.result = nullptr;
@@ -1691,8 +1663,8 @@ void emitSetElem(MTS& env) {
   case SimpleOp::Pair:
   case SimpleOp::None:
     constrainBase(env, DataTypeSpecific);
-    auto const result = genStk(env, SetElem, makeCatchSet(env),
-                               env.base.value, key, value);
+    auto const result = gen(env, SetElem, makeCatchSet(env),
+                            env.base.value, key, value);
     auto const t = result->type();
     if (t == Type::Nullptr) {
       // Base is not a string. Result is always value.
@@ -1722,7 +1694,7 @@ void emitSetWithRefLElem(MTS& env) {
     emitSetElem(env);
     assert(env.strTestResult == nullptr);
   } else {
-    genStk(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
+    gen(env, SetWithRefElem, env.base.value, key, locAddr, misPtr(env));
   }
   env.result = nullptr;
 }
@@ -1730,21 +1702,21 @@ void emitSetWithRefRElem(MTS& env) { emitSetWithRefLElem(env); }
 
 void emitSetOpElem(MTS& env) {
   auto const op = static_cast<SetOpOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, SetOpElem, SetOpData{op},
-                      env.base.value, getKey(env), getValue(env),
-                      misPtr(env));
+  env.result = gen(env, SetOpElem, SetOpData{op},
+                   env.base.value, getKey(env), getValue(env),
+                   misPtr(env));
 }
 
 void emitIncDecElem(MTS& env) {
   auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
-  env.result = genStk(env, IncDecElem, IncDecData { op },
-                      env.base.value, getKey(env), misPtr(env));
+  env.result = gen(env, IncDecElem, IncDecData { op },
+                   env.base.value, getKey(env), misPtr(env));
 }
 
 void emitBindElem(MTS& env) {
   auto const key = getKey(env);
   auto const box = getValue(env);
-  genStk(env, BindElem, env.base.value, key, box, misPtr(env));
+  gen(env, BindElem, env.base.value, key, box, misPtr(env));
   env.result = box;
 }
 
@@ -1764,7 +1736,7 @@ void emitUnsetElem(MTS& env) {
     return;
   }
 
-  genStk(env, UnsetElem, env.base.value, key);
+  gen(env, UnsetElem, env.base.value, key);
 }
 
 void emitNotSuppNewElem(MTS& env) {
@@ -1785,7 +1757,7 @@ void emitIncDecNewElem(MTS& env) {
 
 void emitBindNewElem(MTS& env) {
   auto const box = getValue(env);
-  genStk(env, BindNewElem, env.base.value, box, misPtr(env));
+  gen(env, BindNewElem, env.base.value, box, misPtr(env));
   env.result = box;
 }
 
@@ -1862,7 +1834,7 @@ uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
       if (topType(env, i, DataTypeGeneric) <= Type::Gen) {
         gen(env,
             DecRefStack,
-            StackOffset { static_cast<int32_t>(i) },
+            StackOffset { offsetFromSP(env, i) },
             Type::Gen,
             sp(env));
       }
@@ -1907,7 +1879,7 @@ Block* makeMISCatch(MTS& env) {
   gen(env, BeginCatch);
   cleanTvRefs(env);
   spillStack(env);
-  gen(env, EndCatch, fp(env), sp(env));
+  gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env), sp(env));
   return exit;
 }
 
@@ -1928,7 +1900,8 @@ Block* makeCatchSet(MTS& env) {
     [&] {
       env.irb.hint(Block::Hint::Unused);
       cleanTvRefs(env);
-      gen(env, EndCatch, fp(env), sp(env));
+      gen(env, EndCatch, StackOffset { offsetFromSP(env, 0) }, fp(env),
+        sp(env));
     }
   );
   env.irb.hint(Block::Hint::Unused);
@@ -1940,7 +1913,8 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    gen(env, DecRefStack, StackOffset { 0 }, Type::Cell, sp(env));
+    gen(env, DecRefStack, StackOffset { offsetFromSP(env, 0) }, Type::Cell,
+      sp(env));
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
   discard(env, stackCnt);

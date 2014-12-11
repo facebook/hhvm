@@ -234,12 +234,24 @@ void emitNewPackedArray(HTS& env, int32_t numArgs) {
     PUNT(NewPackedArray-UnrealisticallyHuge);
   }
 
-  auto const extra = PackedArrayData { static_cast<uint32_t>(numArgs) };
-  auto const array = gen(env, AllocPackedArray, extra);
+  auto const array = gen(
+    env,
+    AllocPackedArray,
+    PackedArrayData { static_cast<uint32_t>(numArgs) }
+  );
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
     spillStack(env);
-    gen(env, InitPackedArrayLoop, extra, array, sp(env));
+    gen(
+      env,
+      InitPackedArrayLoop,
+      InitPackedArrayLoopData {
+        offsetFromSP(env, 0),
+        static_cast<uint32_t>(numArgs)
+      },
+      array,
+      sp(env)
+    );
     discard(env, numArgs);
     push(env, array);
     return;
@@ -266,15 +278,18 @@ void emitNewStructArray(HTS& env, const ImmVector& immVec) {
   // obtain a pointer to the topmost item; if over-flushing becomes
   // a problem then we should refactor the NewPackedArray opcode to
   // take its values directly as SSA operands.
-  auto const stack = spillStack(env);
-  for (int i = 0; i < numArgs; i++) popC(env, DataTypeGeneric);
+  spillStack(env);
+
   NewStructData extra;
+  extra.offset  = offsetFromSP(env, 0);
   extra.numKeys = numArgs;
-  extra.keys = new (env.unit.arena()) StringData*[numArgs];
+  extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
-  push(env, gen(env, NewStructArray, extra, stack));
+
+  discard(env, numArgs);
+  push(env, gen(env, NewStructArray, extra, sp(env)));
 }
 
 void emitAddElemC(HTS& env) {

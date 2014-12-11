@@ -95,12 +95,14 @@ void implRet(HTS& env, Type type) {
 
   SSATmp* stack;
   SSATmp* resumableObj = nullptr;
+  int32_t spOffset;
   if (!resumed(env)) {
     // Store the return value.
     gen(env, StRetVal, fp(env), retVal);
 
     // Free ActRec.
     stack = gen(env, RetAdjustStack, fp(env));
+    spOffset = 0;
   } else if (func->isAsyncFunction()) {
     // Load the parent chain.
     auto parentChain = gen(env, LdAsyncArParentChain, fp(env));
@@ -115,7 +117,9 @@ void implRet(HTS& env, Type type) {
     gen(env, ABCUnblock, parentChain);
 
     // Sync SP.
-    stack = spillStack(env);
+    spillStack(env);
+    stack = sp(env);
+    spOffset = offsetFromSP(env, 0);
 
     // Get the AsyncFunctionWaitHandle.
     resumableObj = gen(env, LdResumableArObj, fp(env));
@@ -139,7 +143,9 @@ void implRet(HTS& env, Type type) {
     push(env, cns(env, Type::InitNull));
 
     // Sync SP.
-    stack = spillStack(env);
+    spillStack(env);
+    stack = sp(env);
+    spOffset = offsetFromSP(env, 0);
   } else {
     not_reached();
   }
@@ -156,8 +162,14 @@ void implRet(HTS& env, Type type) {
     gen(env, DecRef, resumableObj);
   }
 
-  // Return control to the caller.
-  gen(env, RetCtrl, RetCtrlData(false), stack, frame, retAddr);
+  gen(
+    env,
+    RetCtrl,
+    RetCtrlData { spOffset, false },
+    stack,
+    frame,
+    retAddr
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

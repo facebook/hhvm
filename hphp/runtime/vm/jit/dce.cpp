@@ -157,12 +157,9 @@ bool canDCE(IRInstruction* inst) {
   case NewVArray:
   case NewLikeArray:
   case NewCol:
-  case SpillFrame:
-  case CufIterSpillFrame:
   case FreeActRec:
   case DefInlineFP:
   case LdRetAddr:
-  case SpillStack:
   case Mov:
   case TakeRef:
   case ReDefSP:
@@ -193,6 +190,10 @@ bool canDCE(IRInstruction* inst) {
     assert(!inst->isControlFlow());
     return true;
 
+  case AdjustSP:
+  case StStk:
+  case SpillFrame:
+  case CufIterSpillFrame:
   case CheckType:
   case CheckNullptr:
   case AssertType:
@@ -206,7 +207,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckStk:
   case AssertStk:
   case CastStk:
-  case CastStkIntToDbl:
   case CoerceStk:
   case CoerceCellToBool:
   case CoerceCellToInt:
@@ -312,7 +312,6 @@ bool canDCE(IRInstruction* inst) {
   case StLocNT:
   case StLocPseudoMain:
   case StRef:
-  case ExceptionBarrier:
   case SyncABIRegs:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -420,57 +419,38 @@ bool canDCE(IRInstruction* inst) {
   case BaseG:
   case PropX:
   case PropDX:
-  case PropDXStk:
   case CGetProp:
   case VGetProp:
-  case VGetPropStk:
   case BindProp:
-  case BindPropStk:
   case SetProp:
-  case SetPropStk:
   case UnsetProp:
   case SetOpProp:
-  case SetOpPropStk:
   case IncDecProp:
-  case IncDecPropStk:
   case EmptyProp:
   case IssetProp:
   case ElemX:
   case ElemArray:
   case ElemArrayW:
   case ElemDX:
-  case ElemDXStk:
   case ElemUX:
-  case ElemUXStk:
   case ArrayGet:
   case StringGet:
   case MapGet:
   case CGetElem:
   case VGetElem:
-  case VGetElemStk:
   case BindElem:
-  case BindElemStk:
   case ArraySet:
   case ArraySetRef:
   case MapSet:
   case SetElem:
-  case SetElemStk:
   case SetWithRefElem:
-  case SetWithRefElemStk:
   case UnsetElem:
-  case UnsetElemStk:
   case SetOpElem:
-  case SetOpElemStk:
   case IncDecElem:
-  case IncDecElemStk:
   case SetNewElem:
-  case SetNewElemStk:
   case SetNewElemArray:
-  case SetNewElemArrayStk:
   case SetWithRefNewElem:
-  case SetWithRefNewElemStk:
   case BindNewElem:
-  case BindNewElemStk:
   case ArrayIsset:
   case VectorIsset:
   case PairIsset:

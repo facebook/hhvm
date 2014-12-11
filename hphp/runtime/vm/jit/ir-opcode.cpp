@@ -51,7 +51,6 @@ TRACE_SET_MOD(hhir);
 #define B      Branch
 #define P      Passthrough
 #define K      KillsSources
-#define StkFlags(f) HasStackVersion|(f)
 #define MProp  MInstrProp
 #define MElem  MInstrElem
 
@@ -71,7 +70,6 @@ TRACE_SET_MOD(hhir);
 #define DThis          HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
-#define DStk(x)        ModifiesStack|(x)
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
 #define DSubtract(n,t) HasDest
@@ -98,7 +96,6 @@ OpInfo g_opInfo[] = {
 #undef B
 #undef P
 #undef K
-#undef StkFlags
 #undef MProp
 #undef MElem
 
@@ -118,20 +115,12 @@ OpInfo g_opInfo[] = {
 #undef DThis
 #undef DMulti
 #undef DSetElem
-#undef DStk
 #undef DPtrToParam
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
 
 //////////////////////////////////////////////////////////////////////
-
-Opcode getStackModifyingOpcode(Opcode opc) {
-  assert(opcodeHasFlags(opc, HasStackVersion));
-  opc = Opcode(uint64_t(opc) + 1);
-  assert(opcodeHasFlags(opc, ModifiesStack));
-  return opc;
-}
 
 const StringData* findClassName(SSATmp* cls) {
   assert(cls->isA(Type::Cls));
@@ -353,12 +342,6 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case NeqInt:return NeqDbl;
   default: always_assert(0);
   }
-}
-
-int32_t spillValueCells(const IRInstruction* spillStack) {
-  assert(spillStack->op() == SpillStack);
-  int32_t numSrcs = spillStack->numSrcs();
-  return numSrcs - 2;
 }
 
 }}

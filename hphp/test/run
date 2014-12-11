@@ -554,27 +554,38 @@ class Status {
     }
   }
 
-  public static function pass($test, $detail) {
-    array_push(self::$results, array('name' => $test, 'status' => 'passed'));
+  public static function pass($test, $detail, $time, $stime, $etime) {
+    array_push(self::$results, array('name' => $test,
+                                     'status' => 'passed',
+                                     'start_time' => $stime,
+                                     'end_time' => $etime,
+                                     'time' => $time));
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
       ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
-    self::send(self::MSG_TEST_PASS, array($test, $how));
+    self::send(self::MSG_TEST_PASS, array($test, $how, $time, $stime, $etime));
   }
 
-  public static function skip($test, $reason = null) {
+  public static function skip($test, $reason, $time, $stime, $etime) {
     if (self::getMode() !== self::MODE_FBMAKE) {
-      array_push(self::$results, array('name' => $test, 'status' => 'skipped'));
+      array_push(self::$results, array('name' => $test,
+                                       'status' => 'skipped',
+                                       'start_time' => $stime,
+                                       'end_time' => $etime,
+                                       'time' => $time));
     }
-    self::send(self::MSG_TEST_SKIP, array($test,$reason));
+    self::send(self::MSG_TEST_SKIP, array($test, $reason, $time, $stime, $etime));
   }
 
-  public static function fail($test) {
+  public static function fail($test, $time, $stime, $etime) {
     array_push(self::$results, array(
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
+      'start_time' => $stime,
+      'end_time' => $etime,
+      'time' => $time
     ));
-    self::send(self::MSG_TEST_FAIL, $test);
+    self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
   }
 
   public static function serverRestarted() {
@@ -614,9 +625,10 @@ class Status {
     }
   }
 
-  public static function sayFBMake($test, $status) {
+  public static function sayFBMake($test, $status, $stime, $etime) {
     $start = array('op' => 'start', 'test' => $test);
-    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status);
+    $end = array('op' => 'test_done', 'test' => $test, 'status' => $status,
+                 'start_time' => $stime, 'end_time' => $etime);
     if ($status == 'failed') {
       $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
     }
@@ -754,21 +766,25 @@ function clean_intermediate_files($test, $options) {
 
 function run($options, $tests, $bad_test_file) {
   foreach ($tests as $test) {
+    $stime = time();
+    $time = microtime(true);
     $status = run_and_lock_test($options, $test);
+    $time = microtime(true) - $time;
+    $etime = time();
     if ($status === 'skip') {
-      Status::skip($test);
+      Status::skip($test, null, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-norepo') {
-      Status::skip($test, 'norepo');
+      Status::skip($test, 'norepo', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status === 'skip-onlyrepo') {
-      Status::skip($test, 'onlyrepo');
+      Status::skip($test, 'onlyrepo', $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else if ($status) {
-      Status::pass($test, $status);
+      Status::pass($test, $status, $time, $stime, $etime);
       clean_intermediate_files($test, $options);
     } else {
-      Status::fail($test);
+      Status::fail($test, $time, $stime, $etime);
     }
   }
   file_put_contents($bad_test_file, json_encode(Status::getResults()));
@@ -1311,7 +1327,7 @@ function msg_loop($num_tests, $queue) {
 
       case Status::MSG_TEST_PASS:
         $passed++;
-        list($test, $how) = $message;
+        list($test, $how, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1325,18 +1341,19 @@ function msg_loop($num_tests, $queue) {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::GREEN, "passed\n");
+            Status::sayColor("$test ", Status::GREEN,
+                             sprintf("passed (%.2fs)\n", $time));
             break;
 
           case Status::MODE_FBMAKE:
-            Status::sayFBMake($test, 'passed');
+            Status::sayFBMake($test, 'passed', $stime, $etime);
             break;
         }
         break;
 
       case Status::MSG_TEST_SKIP:
         $skipped++;
-        list($test, $reason) = $message;
+        list($test, $reason, $time, $stime, $etime) = $message;
 
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
@@ -1351,14 +1368,14 @@ function msg_loop($num_tests, $queue) {
             if ($reason !== null) {
               Status::sayColor(" - $reason");
             }
-            Status::sayColor("\n");
+            Status::sayColor(sprintf(" (%.2fs)\n", $time));
             break;
         }
         break;
 
       case Status::MSG_TEST_FAIL:
         $failed++;
-        $test = $message;
+        list($test, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (Status::hasCursorControl()) {
@@ -1370,11 +1387,12 @@ function msg_loop($num_tests, $queue) {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::RED, "FAILED\n");
+            Status::sayColor("$test ", Status::RED,
+                             sprintf("FAILED (%.2fs)\n", $time));
             break;
 
           case Status::MODE_FBMAKE:
-            Status::sayFBMake($test, 'failed');
+            Status::sayFBMake($test, 'failed', $stime, $etime);
             break;
         }
         break;

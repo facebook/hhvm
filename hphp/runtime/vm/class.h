@@ -49,7 +49,10 @@ struct Func;
 struct HhbcExtClassInfo;
 struct StringData;
 
-namespace Native { struct NativeDataInfo; }
+namespace Native {
+struct NativeDataInfo;
+struct NativePropHandler;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -774,6 +777,16 @@ public:
    * NativeData type declared in <<__NativeData("Type")>>.
    */
   const Native::NativeDataInfo* getNativeDataInfo() const;
+
+  /*
+   * Whether the class registered native handler of magic props.
+   */
+  bool hasNativePropHandler();
+
+  /*
+   * Returns actual native handler of magic props.
+   */
+  Native::NativePropHandler* getNativePropHandler();
 
   /*
    * Get the underlying enum base type if this is an enum.

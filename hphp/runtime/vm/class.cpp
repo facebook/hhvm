@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
@@ -2583,6 +2584,20 @@ void Class::setNativeDataInfo() {
       break;
     }
   }
+}
+
+bool Class::hasNativePropHandler() {
+  return getNativePropHandler() != nullptr;
+}
+
+Native::NativePropHandler* Class::getNativePropHandler() {
+  for (auto cls = this; cls; cls = cls->parent()) {
+    auto propHandler = Native::getNativePropHandler(cls->name());
+    if (propHandler != nullptr) {
+      return propHandler;
+    }
+  }
+  return nullptr;
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {

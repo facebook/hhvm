@@ -127,6 +127,9 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     obj->callCustomInstanceInit();
   }
+  if (UNLIKELY(cls->hasNativePropHandler())) {
+    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
+  }
   return obj;
 }
 

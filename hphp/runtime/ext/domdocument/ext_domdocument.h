@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/ext/domdocument/ext_domdocument_includes.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

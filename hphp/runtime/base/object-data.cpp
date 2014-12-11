@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -1310,6 +1311,38 @@ bool ObjectData::invokeGetProp(TypedValue*& retval, TypedValue& tvRef,
   return true;
 }
 
+static bool guardedNativePropResult(TypedValue* retval, Variant result) {
+  if (!Native::isPropHandled(result)) {
+    return false;
+  }
+  tvDup(*result.asTypedValue(), *retval);
+  return true;
+}
+
+bool ObjectData::invokeNativeGetProp(TypedValue* retval,
+                                     const StringData* key) {
+  return guardedNativePropResult(retval, Native::getProp(this, key));
+}
+
+bool ObjectData::invokeNativeSetProp(TypedValue* retval,
+                                     const StringData* key,
+                                     TypedValue* val) {
+  return guardedNativePropResult(
+    retval,
+    Native::setProp(this, key, tvAsVariant(val))
+  );
+}
+
+bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
+                                       const StringData* key) {
+  return guardedNativePropResult(retval, Native::issetProp(this, key));
+}
+
+bool ObjectData::invokeNativeUnsetProp(TypedValue* retval,
+                                       const StringData* key) {
+  return guardedNativePropResult(retval, Native::unsetProp(this, key));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template <bool warn, bool define>
@@ -1349,6 +1382,13 @@ void ObjectData::propImpl(TypedValue*& retval, TypedValue& tvRef,
       }
     }
   } else {
+    // First see if native getter is implemented.
+    if (getAttribute(HasNativePropHandler) &&
+        invokeNativeGetProp(retval, key)) {
+      return;
+    }
+
+    // Next try calling user-level `__get` if it's used.
     if (getAttribute(UseGet) && invokeGetProp(retval, tvRef, key)) {
       return;
     }
@@ -1400,9 +1440,16 @@ bool ObjectData::propIsset(Class* ctx, const StringData* key) {
   }
 
   auto tv = make_tv<KindOfUninit>();
+
+  if (getAttribute(HasNativePropHandler) && invokeNativeIssetProp(&tv, key)) {
+    tvCastToBooleanInPlace(&tv);
+    return tv.m_data.num;
+  }
+
   if (!getAttribute(UseIsset) || !invokeIsset(&tv, key)) {
     return false;
   }
+
   tvCastToBooleanInPlace(&tv);
   return tv.m_data.num;
 }
@@ -1415,6 +1462,20 @@ bool ObjectData::propEmptyImpl(Class* ctx, const StringData* key) {
   }
 
   auto tv = make_tv<KindOfUninit>();
+
+  if (getAttribute(HasNativePropHandler) && invokeNativeIssetProp(&tv, key)) {
+    tvCastToBooleanInPlace(&tv);
+    if (!tv.m_data.num) {
+      return true;
+    }
+    if (invokeNativeGetProp(&tv, key)) {
+      bool emptyResult = !cellToBool(*tvToCell(&tv));
+      tvRefcountedDecRef(&tv);
+      return emptyResult;
+    }
+    return false;
+  }
+
   if (!getAttribute(UseIsset) || !invokeIsset(&tv, key)) {
     return true;
   }
@@ -1464,6 +1525,15 @@ void ObjectData::setProp(Class* ctx,
   }
 
   TypedValue ignored;
+
+  // First see if native setter is implemented.
+  if (getAttribute(HasNativePropHandler) &&
+    invokeNativeSetProp(&ignored, key, val)) {
+    tvRefcountedDecRef(&ignored);
+    return;
+  }
+
+  // Then go to user-level `__set`.
   if (!getAttribute(UseSet) || !invokeSet(&ignored, key, val)) {
     if (visible) {
       /*
@@ -1526,6 +1596,18 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef, Class* ctx,
   }
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
+
+  // Native accessors.
+  if (getAttribute(HasNativePropHandler)) {
+    if (invokeNativeGetProp(&tvRef, key)) {
+      SETOP_BODY(&tvRef, op, val);
+      TypedValue ignored;
+      if (invokeNativeSetProp(&ignored, key, &tvRef)) {
+        tvRefcountedDecRef(&ignored);
+        return &tvRef;
+      }
+    }
+  }
 
   auto const useSet = getAttribute(UseSet);
   auto const useGet = getAttribute(UseGet);
@@ -1616,6 +1698,19 @@ void ObjectData::incDecProp(TypedValue& tvRef,
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
 
+  // Native accessors.
+  if (getAttribute(HasNativePropHandler)) {
+    if (invokeNativeGetProp(&tvRef, key)) {
+      tvUnboxIfNeeded(&tvRef);
+      IncDecBody<setResult>(op, &tvRef, &dest);
+      TypedValue ignored;
+      if (invokeNativeSetProp(&ignored, key, &tvRef)) {
+        tvRefcountedDecRef(&ignored);
+        return;
+      }
+    }
+  }
+
   auto const useSet = getAttribute(UseSet);
   auto const useGet = getAttribute(UseGet);
 
@@ -1691,6 +1786,15 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
+  TypedValue ignored;
+
+  // Native unset first.
+  if (getAttribute(HasNativePropHandler) &&
+      invokeNativeUnsetProp(&ignored, key)) {
+    tvRefcountedDecRef(&ignored);
+    return;
+  }
+
   bool tryUnset = getAttribute(UseUnset);
 
   if (propInd != kInvalidSlot && !accessible && !tryUnset) {
@@ -1698,7 +1802,6 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     raise_error("Cannot unset inaccessible property");
   }
 
-  TypedValue ignored;
   if (!tryUnset || !invokeUnset(&ignored, key)) {
     if (UNLIKELY(!*key->data())) {
       throw_invalid_property_name(StrNR(key));
@@ -1706,6 +1809,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
 
     return;
   }
+
   tvRefcountedDecRef(&ignored);
 }
 

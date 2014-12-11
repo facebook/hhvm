@@ -110,6 +110,9 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     */
     obj->callCustomInstanceInit();
   }
+  if (UNLIKELY(cls->hasNativePropHandler())) {
+    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
+  }
   return obj;
 }
 

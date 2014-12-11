@@ -1553,6 +1553,17 @@ public:
     }
   }
 
+  bool isPropertySupported(const Variant& name) {
+    if (name.isString()) {
+      auto dpa = DOMPropertyAccessor {
+        name.toString().data(), nullptr, nullptr
+      };
+      const_iterator iter = find(&dpa);
+      return iter != end();
+    }
+    return false;
+  }
+
   Variant (*getter(const Variant& name))(const Object&) {
     if (name.isString()) {
       auto dpa = DOMPropertyAccessor {
@@ -4053,6 +4064,45 @@ static DOMPropertyAccessorMap domelement_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct DOMElementPropHandler {
+  static Variant getProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return domelement_properties_map.getter(VarNR(name))(this_);
+    });
+  }
+
+  static Variant setProp(ObjectData* this_,
+                         const StringData* name,
+                         Variant& value) {
+    return guardedPropertyResult(name, [&]() {
+      domelement_properties_map.setter(VarNR(name))(this_, value);
+      return true;
+    });
+  }
+
+  static Variant issetProp(ObjectData* this_, const StringData* name) {
+    return guardedPropertyResult(name, [&]() {
+      return domelement_properties_map.isset(this_, StrNR(name));
+    });
+  }
+
+  static Variant unsetProp(ObjectData* this_, const StringData* name) {
+    return Native::prop_not_handled();
+  }
+
+private:
+  // If the property is not supported, returns sigil
+  // Native::prop_not_handled(), otherwise - the result from accessor.
+  static Variant guardedPropertyResult(const StringData* name,
+                                       std::function<Variant()> onHandle) {
+    if (domelement_properties_map.isPropertySupported(VarNR(name))) {
+      return onHandle();
+    }
+
+    return Native::prop_not_handled();
+  }
+};
+
 void HHVM_METHOD(DOMElement, __construct,
                  const String& name,
                  const Variant& value /* = null_string */,
@@ -6036,6 +6086,8 @@ public:
     HHVM_ME(DOMElement, __debuginfo);
     Native::registerNativeDataInfo<DOMElement>(
         DOMElement::c_ClassName.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativePropHandler<DOMElementPropHandler>(
+      DOMElement::c_ClassName.get());
 
     HHVM_ME(DOMEntity, __get);
     HHVM_ME(DOMEntity, __set);

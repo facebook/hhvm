@@ -78,6 +78,7 @@ struct ObjectData {
                             // stored in o_subclass_u8)
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
+    HasNativePropHandler = 0x8000, // class has native magic props handler
   };
 
   enum {
@@ -296,6 +297,11 @@ struct ObjectData {
                      const StringData* key);
   bool invokeIsset(TypedValue* retval, const StringData* key);
   bool invokeUnset(TypedValue* retval, const StringData* key);
+  bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
+  bool invokeNativeSetProp(TypedValue* retval, const StringData* key,
+                           TypedValue* val);
+  bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
+  bool invokeNativeUnsetProp(TypedValue* retval, const StringData* key);
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
                Array& props, std::vector<bool>& inserted) const;
   void getProps(const Class* klass, bool pubOnly, const PreClass* pc,

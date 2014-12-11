@@ -12,6 +12,7 @@
 const string PHP_EOL = "\n";
 
 const int PHP_INT_MAX = (1 << 63) - 1;
+const int PHP_INT_MIN = -1 << 63;
 
 const int E_ERROR = 1;
 const int E_WARNING = 1 << 1;

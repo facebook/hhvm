@@ -2968,6 +2968,10 @@
             "value": 9223372036854775807
         },
         {
+            "name": "PHP_INT_MIN",
+            "value": -9223372036854775808
+        },
+        {
             "name": "PHP_INT_SIZE",
             "value": 8
         },

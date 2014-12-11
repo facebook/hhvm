@@ -155,6 +155,11 @@ static void declareConstants(std::ostream &out,
       fbstring val = c.value();
       out << "extern const StaticString " << c.varname()
           << "(\"" << escapeCpp(val) << "\"," << val.size() << ");\n";
+    } else if (c.kindOf() == KindOfInt64 &&
+               std::stoll(c.value().toStdString()) ==
+               std::numeric_limits<int64_t>::min()) {
+      out << "const " << c.getCppType() << " " << c.varname()
+          << " = int64_t(-1) << 63;\n";
     } else {
       out << "const " << c.getCppType() << " " << c.varname()
           << " = " << escapeCpp(c.value()) << ";\n";

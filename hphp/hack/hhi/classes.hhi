@@ -108,6 +108,13 @@ final class GenVectorWaitHandle<T> extends BlockableWaitHandle<Vector<T>> {
   public static function setOnCreateCallback(?(function(GenVectorWaitHandle<T>, Vector<mixed>): void) $callback) {}
 }
 
+final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
+  public static function create(WaitHandle<void> $child): ConditionWaitHandle<T> {}
+  public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
+  public function succeed(T $result): void {}
+  public function fail(Exception $exception): void {}
+}
+
 final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
   const int QUEUE_DEFAULT = 0;
   const int QUEUE_NO_PENDING_IO = 1;

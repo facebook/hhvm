@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
 #include "hphp/runtime/ext/asio/await_all_wait_handle.h"
+#include "hphp/runtime/ext/asio/condition_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -104,6 +105,7 @@ String c_WaitableWaitHandle::getName() {
     case Kind::GenArray:            return asGenArray()->getName();
     case Kind::GenMap:              return asGenMap()->getName();
     case Kind::GenVector:           return asGenVector()->getName();
+    case Kind::Condition:           return asCondition()->getName();
     case Kind::Reschedule:          return asReschedule()->getName();
     case Kind::Sleep:               return asSleep()->getName();
     case Kind::ExternalThreadEvent: return asExternalThreadEvent()->getName();
@@ -122,6 +124,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::GenArray:            return asGenArray()->getChild();
     case Kind::GenMap:              return asGenMap()->getChild();
     case Kind::GenVector:           return asGenVector()->getChild();
+    case Kind::Condition:           return asCondition()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;
     case Kind::ExternalThreadEvent: return nullptr;
@@ -145,6 +148,8 @@ void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
       return asGenMap()->enterContextImpl(ctx_idx);
     case Kind::GenVector:
       return asGenVector()->enterContextImpl(ctx_idx);
+    case Kind::Condition:
+      return asCondition()->enterContextImpl(ctx_idx);
     case Kind::Reschedule:
       return asReschedule()->enterContextImpl(ctx_idx);
     case Kind::Sleep:

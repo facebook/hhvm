@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/asio/async_function_wait_handle.h"
 #include "hphp/runtime/ext/asio/await_all_wait_handle.h"
+#include "hphp/runtime/ext/asio/condition_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
 #include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
@@ -302,6 +303,24 @@ void AsioSession::onGenVectorCreate(
     m_onGenVectorCreateCallback,
     make_packed_array(waitHandle, dependencies),
     "GenVectorWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::setOnConditionCreateCallback(const Variant& callback) {
+  m_onConditionCreateCallback = checkCallback(
+    callback,
+    "ConditionWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onConditionCreate(
+  c_ConditionWaitHandle* waitHandle,
+  c_WaitableWaitHandle* child
+) {
+  runCallback(
+    m_onConditionCreateCallback,
+    make_packed_array(waitHandle, child),
+    "ConditionWaitHandle::onCreate"
   );
 }
 

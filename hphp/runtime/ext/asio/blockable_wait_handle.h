@@ -46,8 +46,6 @@ class c_BlockableWaitHandle : public c_WaitableWaitHandle {
     return offsetof(c_BlockableWaitHandle, m_blockable);
   }
 
-  AsioBlockable* getBlockable() { return &m_blockable; }
-
   void exitContextBlocked(context_idx_t ctx_idx);
 
   static const int8_t STATE_BLOCKED = 2;

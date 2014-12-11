@@ -2337,6 +2337,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
     (AliasEntry){"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
     (AliasEntry){"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
+    (AliasEntry){"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
     (AliasEntry){"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
     (AliasEntry){"SleepWaitHandle", "HH\\SleepWaitHandle"},
     (AliasEntry){

@@ -1360,7 +1360,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
     auto index = cns(env, key->intVal() << 4);
     env.result = gen(env, LdElem, base, index);
   } else {
-    gen(env, CheckBounds, key, cns(env, 1));
+    gen(env, CheckBounds, key, cns(env, 2));
     auto const base = gen(env, LdPairBase, env.base.value);
     auto idx = gen(env, Shl, key, cns(env, 4));
     env.result = gen(env, LdElem, base, idx);

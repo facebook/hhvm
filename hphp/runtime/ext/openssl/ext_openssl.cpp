@@ -320,14 +320,11 @@ public:
     X509_REQ_free(m_csr);
   }
 
-  void sweep() override {
-    // Base class calls delete this, which should work.
-    SweepableResourceData::sweep();
-  }
-
   CLASSNAME_IS("OpenSSL X.509 CSR");
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
+
+  DECLARE_RESOURCE_ALLOCATION(CSRequest)
 
   static X509_REQ *Get(const Variant& var, Resource &ocsr) {
     ocsr = Get(var);
@@ -350,12 +347,14 @@ public:
       X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
       BIO_free(in);
       if (csr) {
-        return Resource(new CSRequest(csr));
+        return Resource(newres<CSRequest>(csr));
       }
     }
     return Resource();
   }
 };
+
+IMPLEMENT_RESOURCE_ALLOCATION(CSRequest)
 
 class php_x509_request {
 public:
@@ -1056,7 +1055,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         } else {
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
-            ret = Resource(new CSRequest(csr));
+            ret = Resource(newres<CSRequest>(csr));
             csr = NULL;
           } else {
             raise_warning("Error signing request");

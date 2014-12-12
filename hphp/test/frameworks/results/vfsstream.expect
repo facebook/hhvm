@@ -721,7 +721,7 @@ org\bovigo\vfs\vfsStreamWrapperTestCase::urlIsUpdatedAfterMove
 org\bovigo\vfs\vfsStreamWrapperTestCase::urlsAreCorrectlySet
 .
 org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotOpen
-F
+.
 org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotOpenDirectory
 .
 org\bovigo\vfs\vfsStreamWrapperWithoutRootTestCase::canNotRename

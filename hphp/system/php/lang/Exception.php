@@ -66,7 +66,7 @@ class Exception {
    *
    * @return     mixed   Returns the Exception message as a string.
    */
-  final function getMessage() {
+  function getMessage() {
     return $this->message;
   }
 
@@ -108,7 +108,7 @@ class Exception {
    *                     but possibly as other type in Exception descendants
    *                     (for example as string in PDOException).
    */
-  final function getCode() {
+  function getCode() {
     return $this->code;
   }
 

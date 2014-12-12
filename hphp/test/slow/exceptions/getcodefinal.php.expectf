@@ -1,2 +1,0 @@
-
-Fatal error: Cannot override final method Exception::getCode() in %s on line %s

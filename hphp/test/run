@@ -5,8 +5,8 @@
 */
 
 function is_testing_dso_extension() {
-  // detecting if we run test runner to test hhvm codebase
-  return !file_exists(__DIR__ . "/../hhvm");
+  // detecting if we're running outside of the hhvm codebase
+  return !is_file(__DIR__ . "/../../hphp/test/run");
 }
 
 function get_expect_file_and_type($test, $options) {
@@ -104,7 +104,6 @@ function idx($array, $key, $default = null) {
   return isset($array[$key]) ? $array[$key] : $default;
 }
 
-
 function hhvm_path() {
   $array = $_ENV;
   $key = "HHVM_BIN";
@@ -112,16 +111,15 @@ function hhvm_path() {
 
   $file = is_file(idx($array, $key)) ? realpath($array[$key]) : $default;
   if (!is_file($file)) {
-    $errmsg = "$file doesn't exist. Did you forget to build first?";
     if (is_testing_dso_extension()) {
       exec("which hhvm", $output);
       if (isset($output[0]) && $output[0]) {
         return $output[0];
       }
-      $errmsg = "You need to specify hhvm bin with env HHVM_BIN";
+      error("You need to specify hhvm bin with env HHVM_BIN");
     }
 
-    error($errmsg);
+    error("$file doesn't exist. Did you forget to build first?");
   }
   return rel_path($file);
 }
@@ -147,29 +145,29 @@ function read_file($file) {
 
 // http://stackoverflow.com/questions/2637945/
 function rel_path($to) {
-    $from     = explode('/', getcwd().'/');
-    $to       = explode('/', $to);
-    $relPath  = $to;
+  $from     = explode('/', getcwd().'/');
+  $to       = explode('/', $to);
+  $relPath  = $to;
 
-    foreach($from as $depth => $dir) {
-        // find first non-matching dir
-        if($dir === $to[$depth]) {
-            // ignore this directory
-            array_shift($relPath);
-        } else {
-            // get number of remaining dirs to $from
-            $remaining = count($from) - $depth;
-            if($remaining > 1) {
-                // add traversals up to first matching dir
-                $padLength = (count($relPath) + $remaining - 1) * -1;
-                $relPath = array_pad($relPath, $padLength, '..');
-                break;
-            } else {
-                $relPath[0] = './' . $relPath[0];
-            }
-        }
+  foreach ($from as $depth => $dir) {
+    // find first non-matching dir
+    if ($dir === $to[$depth]) {
+      // ignore this directory
+      array_shift($relPath);
+    } else {
+      // get number of remaining dirs to $from
+      $remaining = count($from) - $depth;
+      if ($remaining > 1) {
+        // add traversals up to first matching dir
+        $padLength = (count($relPath) + $remaining - 1) * -1;
+        $relPath = array_pad($relPath, $padLength, '..');
+        break;
+      } else {
+        $relPath[0] = './' . $relPath[0];
+      }
     }
-    return implode('/', $relPath);
+  }
+  return implode('/', $relPath);
 }
 
 function get_options($argv) {
@@ -261,7 +259,9 @@ function map_convenience_filename($file) {
 // Some tests have to be run together in the same test bucket, one after the
 // other in order to avoid races and collisions
 function serial_only_tests() {
-  if (is_testing_dso_extension()) return array();
+  if (is_testing_dso_extension()) {
+    return array();
+  }
   // Can be a directory or a single test
   $serial = array (
     hphp_home().'/'.'hphp/test/slow/ext_memcached/memcached-getallkeys.php',
@@ -292,7 +292,7 @@ function find_tests($files, array $options = null) {
   $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
   $tests = explode("\n", shell_exec(
-      "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
+    "find $files -name '*.php' -o -name '*.hhas' | grep -v round_trip.hhas"
   ));
   if (!$tests) {
     error(usage());

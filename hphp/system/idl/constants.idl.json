@@ -728,11 +728,11 @@
         },
         {
             "name": "HPHP_VERSION",
-            "value": "3.4.1"
+            "value": "3.4.2-dev"
         },
         {
             "name": "HHVM_VERSION",
-            "value": "3.4.1"
+            "value": "3.4.2-dev"
         },
         {
             "name": "HHVM_VERSION_ID",

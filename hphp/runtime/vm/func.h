@@ -961,10 +961,6 @@ public:
    */
   static const AtomicVector<const Func*>& getFuncVec();
 
-  /*
-   * Profile-guided optimization linkage.
-   */
-  bool shouldPGO() const;
   void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
 
 

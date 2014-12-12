@@ -411,6 +411,8 @@ extern void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
 void emitServiceReq(Vout& v, TCA stub_block, ServiceRequest req,
                     const ServiceReqArgVec& argv);
 
+bool shouldPGOFunc(const Func& func);
+
 }}
 
 #endif

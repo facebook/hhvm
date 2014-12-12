@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-await.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/user-stream-wrapper.h"
@@ -149,6 +150,15 @@ public:
     REGISTER_CONSTANT(STREAM_SOCK_STREAM, k_STREAM_SOCK_STREAM);
     REGISTER_CONSTANT(STREAM_USE_PATH, k_STREAM_USE_PATH);
 
+    REGISTER_CONSTANT(STREAM_AWAIT_READ, FileEventHandler::READ);
+    REGISTER_CONSTANT(STREAM_AWAIT_WRITE, FileEventHandler::WRITE);
+    REGISTER_CONSTANT(STREAM_AWAIT_READ_WRITE, FileEventHandler::READ_WRITE);
+
+    REGISTER_CONSTANT(STREAM_AWAIT_ERROR, FileAwait::ERROR);
+    REGISTER_CONSTANT(STREAM_AWAIT_TIMEOUT, FileAwait::TIMEOUT);
+    REGISTER_CONSTANT(STREAM_AWAIT_READY, FileAwait::READY);
+    REGISTER_CONSTANT(STREAM_AWAIT_CLOSED, FileAwait::CLOSED);
+
     HHVM_FE(stream_context_create);
     HHVM_FE(stream_context_get_options);
     HHVM_FE(stream_context_set_option);
@@ -168,6 +178,7 @@ public:
     HHVM_FE(stream_wrapper_unregister);
     HHVM_FE(stream_resolve_include_path);
     HHVM_FE(stream_select);
+    HHVM_FE(stream_await);
     HHVM_FE(stream_set_blocking);
     HHVM_FE(stream_set_timeout);
     HHVM_FE(stream_set_write_buffer);
@@ -414,6 +425,14 @@ Variant HHVM_FUNCTION(stream_select,
                       int tv_usec /* = 0 */) {
   return HHVM_FN(socket_select)(ref(read), ref(write), ref(except),
                                 vtv_sec, tv_usec);
+}
+
+Object HHVM_FUNCTION(stream_await,
+                     const Resource& stream,
+                     uint16_t events,
+                     double timeout /*= 0.0 */) {
+  auto f = stream.getTyped<File>();
+  return f->await(events, timeout);
 }
 
 bool HHVM_FUNCTION(stream_set_blocking,

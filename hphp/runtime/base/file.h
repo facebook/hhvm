@@ -149,6 +149,8 @@ struct File : SweepableResourceData {
   virtual bool lock(int operation, bool &wouldblock);
   virtual bool stat(struct stat *sb);
 
+  virtual Object await(uint16_t events, double timeout);
+
   virtual Array getMetaData();
   virtual Variant getWrapperMetaData() { return Variant(); }
   String getWrapperType() const;

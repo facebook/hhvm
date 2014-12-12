@@ -1,0 +1,75 @@
+<?hh
+
+async function get_async(resource $stream): Awaitable<string> {
+  $ret = '';
+  while (!feof($stream)) {
+    $select = await stream_await($stream, STREAM_AWAIT_READ, 1.0);
+    switch ($select) {
+      case STREAM_AWAIT_CLOSED:
+        return $ret;
+      case STREAM_AWAIT_READY:
+        $ret .= fread($stream, 10);
+        break;
+      case STREAM_AWAIT_TIMEOUT:
+        return $ret . "**TIMEOUT";
+      case STREAM_AWAIT_ERROR:
+      default:
+        return $ret . "**ERROR";
+    }
+  }
+  return $ret;
+}
+
+async function put_async(resource $stream, string $data): Awaitable<string> {
+  $pos = 0;
+  $len = strlen($data);
+  while ($pos < $len) {
+    $select = await stream_await($stream, STREAM_AWAIT_WRITE, 1.0);
+    switch ($select) {
+      case STREAM_AWAIT_CLOSED:
+        return "Remote end closed connection\n";
+      case STREAM_AWAIT_READY:
+        $written = fwrite($stream, substr($data, $pos, 10));
+        if ($written >= 0) {
+          $pos += $written;
+        } else if ($written <= 0) {
+          // Failed to write
+          return "Only wrote $pos";
+        }
+        break;
+      case STREAM_AWAIT_TIMEOUT:
+        return "Timeout waiting to write (pos == $pos)\n";
+      case STREAM_AWAIT_ERROR:
+      default:
+        return "Error waiting to write (pos == $pos)\n";
+    }
+  }
+  fclose($stream);
+  return "SUCCESS";
+}
+
+$port = 20000;
+do {
+  $bind = stream_socket_server("tcp://127.0.0.1:$port");
+  if ($bind) break;
+} while (++$port < 21000);
+if (!$bind) {
+  die("Unable to bind a local port");
+}
+$client = stream_socket_client("tcp://127.0.0.1:$port");
+$server = stream_socket_accept($bind);
+
+$send = put_async($server,
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, ".
+  "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ".
+  "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ".
+  "nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ".
+  "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla ".
+  "pariatur. Excepteur sint occaecat cupidatat non proident, ".
+  "sunt in culpa qui officia deserunt mollit anim id est laborum.".
+  "Now is the time for all good men to come to the aid of their country.\n".
+  "The quick brown fox jumped over the lazy dog.");
+$recv = get_async($client);
+AwaitAllWaitHandle::fromArray(array($send, $recv))->join();
+var_dump($send->result());
+var_dump($recv->result());

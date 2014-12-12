@@ -66,3 +66,8 @@ let restart () =
   let cmd = Sys.argv.(0) in
   let argv = Sys.argv in
   Unix.execv cmd argv
+
+let logname =
+  try Sys.getenv "USER" with Not_found ->
+  try Sys.getenv "LOGNAME" with Not_found ->
+  exec_read "logname"

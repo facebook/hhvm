@@ -147,7 +147,7 @@ let get_clients env = env.clientl
 (*****************************************************************************)
 
 let make root =
-  let user = Sys.getenv "USER" in
+  let user = Sys_utils.logname in
   let log = open_out ("/tmp/dfind_"^user^".log") in
   let fsnotify = Fsnotify.init root log in
   {

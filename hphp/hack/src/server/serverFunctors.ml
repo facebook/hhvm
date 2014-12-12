@@ -178,7 +178,7 @@ end = struct
       serve genv env socket
 
   let get_log_file root =
-    let user = Sys.getenv "USER" in
+    let user = Sys_utils.logname in
     let tmp_dir = Tmp.get_dir() in
     let root_part = Path.slash_escaped_string_of_path root in
     Printf.sprintf "%s/%s-%s.log" tmp_dir user root_part

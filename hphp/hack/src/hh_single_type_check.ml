@@ -168,8 +168,8 @@ let suggest_and_print fn funs classes typedefs consts =
     end
 
 (* This allows to fake having multiple files in one file. This
- * is used only in unit test files. Indeed
- * There are some features that require mutliple files to be tested.
+ * is used only in unit test files.
+ * Indeed, there are some features that require mutliple files to be tested.
  * For example, newtype has a different meaning depending on the file.
  *)
 let rec make_files = function

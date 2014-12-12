@@ -797,8 +797,8 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         N.Habstr (x, opt_map (hint env) gen_constraint)
     | _ ->
         (* In the future, when we have proper covariant support, we can
-         * allow SN.Typehints.this to instantiate any covariant type variable. For
-         * example, let us pretend that we have this defined:
+         * allow SN.Typehints.this to instantiate any covariant type variable.
+         * For example, let us pretend that we have this defined:
          *
          *   interface IFoo<read Tread, write Twrite>
          *

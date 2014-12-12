@@ -12,6 +12,7 @@ open Utils
 open Typing_defs
 
 module Env    = Typing_env
+module SN     = Naming_special_names
 module TUtils = Typing_utils
 
 type env   = Env.env
@@ -41,7 +42,8 @@ let rec make_subst tparams tyl =
   !subst
 
 and make_subst_with_this ~this tparams tyl =
-  make_subst ((Ast.Invariant, (Pos.none, "this"), None)::tparams) (this::tyl)
+  make_subst ((Ast.Invariant, (Pos.none, SN.Typehints.this), None)::tparams)
+    (this::tyl)
 
 and make_subst_tparam subst tyl (_, (_, tparam_name), _) =
   let ty =
@@ -91,7 +93,7 @@ and instantiate_ft env ft =
       env, Fvariadic (min, (name, var_ty))
     | _ -> env, ft.ft_arity
   in
-  let env, ret  = instantiate subst env ft.ft_ret in
+  let env, ret = instantiate subst env ft.ft_ret in
   let params = List.map2 (fun x y -> x, y) names params in
   env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 

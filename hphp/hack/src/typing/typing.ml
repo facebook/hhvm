@@ -2458,8 +2458,8 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
                       ft_tparams = []; ft_params = [];
                       ft_ret = ft_ret;
                     } in
-                    let env, method_ =
-                      Typing_generic.rename env new_name SN.Typehints.this (r, Tfun ft) in
+                    let env, method_ = Typing_generic.rename env new_name
+                      SN.Typehints.this (r, Tfun ft) in
                     env, method_, Some (meth_pos, vis)
                   | _ -> assert false
                 )
@@ -2479,8 +2479,8 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
                  * from when the method is instantiated with its type
                  * variables. Consider Vector<this>::add(). It is
                  * declared with the return type this and argument
-                 * T. We don't want to substitute SN.Typehints.this for T and then
-                 * replace that SN.Typehints.this with Vector<this>. *)
+                 * T. We don't want to substitute SN.Typehints.this for T and
+                 * then replace that SN.Typehints.this with Vector<this>. *)
                 let this_ty = k_lhs ety1 in
                 let env, method_ = Inst.instantiate_this env method_ this_ty in
 
@@ -2594,8 +2594,8 @@ and static_class_id p env = function
                 Errors.parent_in_trait p;
                 env, (Reason.Rwitness p, Tany)
               | Some (tc_parent, parent_ty) ->
-                (* inside a trait, parent is SN.Typehints.this, but with the type
-                 * of the most concrete class that the trait has
+                (* inside a trait, parent is SN.Typehints.this, but with the
+                 * type of the most concrete class that the trait has
                  * "require extend"-ed *)
                 let r = Reason.Rwitness p in
                 env, (r, Tgeneric (SN.Typehints.this, Some parent_ty))
@@ -2621,7 +2621,8 @@ and static_class_id p env = function
         env, (r, Tgeneric (SN.Typehints.this, Some (r, snd parent)))
     )
   | CIstatic ->
-    env, (Reason.Rwitness p, Tgeneric (SN.Typehints.this, Some (Env.get_self env)))
+    env, (Reason.Rwitness p,
+      Tgeneric (SN.Typehints.this, Some (Env.get_self env)))
   | CIself -> env, (Reason.Rwitness p, snd (Env.get_self env))
   | CI c ->
     let env, class_ = Env.get_class env (snd c) in
@@ -2753,7 +2754,8 @@ and is_visible env vis cid =
             | _, _ -> None
         )
 
-and check_arity ?(check_min=true) env pos pos_def (arity:int) (exp_arity:fun_arity) =
+and check_arity ?(check_min=true) env pos pos_def (arity:int)
+    (exp_arity:fun_arity) =
   let exp_min = (Typing_defs.arity_min exp_arity) in
   if check_min && arity < exp_min then
     Errors.typing_too_few_args pos pos_def;
@@ -2918,8 +2920,10 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.Minus | Ast.Star ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env = Type.sub_type p1 Reason.URnone env (Reason.Rarith p1, Tprim Tnum) ty1 in
-      let env = Type.sub_type p2 Reason.URnone env (Reason.Rarith p2, Tprim Tnum) ty2 in
+      let env = Type.sub_type p1 Reason.URnone env
+        (Reason.Rarith p1, Tprim Tnum) ty1 in
+      let env = Type.sub_type p2 Reason.URnone env
+        (Reason.Rarith p2, Tprim Tnum) ty2 in
       let env, ety1 = Env.expand_type env ty1 in
       let env, ety2 = Env.expand_type env ty2 in
       (match ety1, ety2 with
@@ -3096,7 +3100,8 @@ and condition env tparamet =
       let env, _ = expr env x in
       condition env tparamet (r, Expr_list xs)
   | _, Call (Cnormal, (_, Id (_, func)), [param], [])
-    when SN.PseudoFunctions.isset = func && tparamet && not (Env.is_strict env) ->
+    when SN.PseudoFunctions.isset = func && tparamet &&
+    not (Env.is_strict env) ->
       condition_isset env param
   | _, Call (Cnormal, (_, Id (_, func)), [e], [])
     when not tparamet && SN.StdlibFunctions.is_null = func ->
@@ -3183,10 +3188,10 @@ and condition env tparamet =
                   if SubType.is_sub_type env obj_ty x_ty
                   then
                     (* If the right side of the `instanceof` object is
-                     * a super type of what we already knew. In this case, since we already
-                     * have a more specialized object, we don't touch
-                     * the original object. Check out the unit test
-                     * srecko.php if this is unclear.
+                     * a super type of what we already knew. In this case,
+                     * since we already have a more specialized object, we
+                     * don't touch the original object. Check out the unit
+                     * test srecko.php if this is unclear.
                      *
                      * Note that if x_ty is Tany, no amount of subtype
                      * checking will be able to specify it
@@ -3246,7 +3251,6 @@ and check_null_wtf env p ty =
       | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Tprim _ | Tvar _
         | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _, _)) -> ()
-
 
 and is_type env e tprim =
   match e with
@@ -3450,7 +3454,8 @@ and check_extend_abstract p smap =
  * A concrete type for our purposes means it is not a generic.
  *
  * We encode abstract type constants as Tgeneric. We can use this encoding
- * because it is not valid to assign a generic type parameter to a type constant.
+ * because it is not valid to assign a generic type parameter to a type
+ * constant.
  *)
 and check_extend_abstract_typeconsts p smap =
   SMap.iter begin fun x ce ->

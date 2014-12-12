@@ -211,7 +211,8 @@ function getdate_ISOLATION_WRAPPER(?int $timestamp = null) {
 fb_rename_function('getdate', 'ORIG_getdate');
 fb_rename_function('getdate_ISOLATION_WRAPPER', 'getdate');
 
-function localtime_ISOLATION_WRAPPER(?int $timestamp = null, bool $is_associative = false) {
+function localtime_ISOLATION_WRAPPER(?int $timestamp = null,
+                                     bool $is_associative = false) {
   $timestamp = ($timestamp === null ? time() : $timestamp);
   return ORIG_localtime($timestamp, $is_associative);
 }

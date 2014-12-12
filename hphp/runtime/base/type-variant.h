@@ -154,7 +154,7 @@ struct Variant : private TypedValue {
     }
   }
 
-  Variant(Variant& v, StrongBind) { constructRefHelper(v); }
+  Variant(StrongBind, Variant& v) { constructRefHelper(v); }
 
   Variant& operator=(const Variant& v) {
     return assign(v);
@@ -966,7 +966,7 @@ public:
 
   /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
   /* implicit */ VRefParamValue(RefResult v)
-    : m_var(const_cast<Variant&>(variant(v)), Variant::StrongBind{}) {} // XXX
+    : m_var(Variant::StrongBind{}, const_cast<Variant&>(variant(v))) {} // XXX
   template <typename T>
   Variant &operator=(const T &v) const {
     m_var = v;

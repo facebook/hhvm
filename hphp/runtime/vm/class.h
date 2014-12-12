@@ -447,6 +447,12 @@ public:
 
   static void getMethodNames(const Class* cls, const Class* ctx, Array& result);
 
+  /*
+   * Look up a class' cached __invoke function. We only cache __invoke methods
+   * if they are instance methods or if the class is a static closure.
+   */
+  LowFuncPtr getCachedInvoke() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]
   //

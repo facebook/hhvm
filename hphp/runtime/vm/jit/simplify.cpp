@@ -258,8 +258,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   auto const cls = src->clsVal();
   if (!RDS::isPersistentHandle(cls->classHandle())) return nullptr;
 
-  auto const meth = cls->lookupMethod(s_invoke.get());
-  return meth != nullptr ? cns(env, meth) : nullptr;
+  auto const meth = cls->getCachedInvoke();
+  return meth == nullptr ? nullptr : cns(env, meth.get());
 }
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {

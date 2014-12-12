@@ -411,6 +411,10 @@ const Func* Class::getDeclaredCtor() const {
   return f->name() != s_86ctor.get() ? f : nullptr;
 }
 
+LowFuncPtr Class::getCachedInvoke() const {
+  assert(IMPLIES(m_invoke, !m_invoke->isStatic() || m_invoke->isClosureBody()));
+  return m_invoke;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
@@ -1018,9 +1022,7 @@ void Class::setSpecial() {
    * the appropriate static context.)
    */
   m_invoke = lookupMethod(s_invoke.get());
-  if (m_invoke &&
-      (m_invoke->attrs() & AttrStatic) &&
-       !m_invoke->isClosureBody()) {
+  if (m_invoke && m_invoke->isStatic() && !m_invoke->isClosureBody()) {
     m_invoke = nullptr;
   }
 

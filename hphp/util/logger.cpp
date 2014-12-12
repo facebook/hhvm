@@ -22,7 +22,6 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \

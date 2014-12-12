@@ -1139,7 +1139,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     raise_warning("No memory");
     goto cleanup;
   }
-  onewcert = Resource(new Certificate(new_cert));
+  onewcert = Resource(newres<Certificate>(new_cert));
   /* Version 3 cert */
   if (!X509_set_version(new_cert, 2)) {
     goto cleanup;

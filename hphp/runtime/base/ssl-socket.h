@@ -104,10 +104,6 @@ public:
   ~Certificate() {
     if (m_cert) X509_free(m_cert);
   }
-  void sweep() override {
-    // calls delete this
-    SweepableResourceData::sweep();
-  }
 
   X509* get() {
     return m_cert;
@@ -116,6 +112,8 @@ public:
   CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
   const String& o_getClassNameHook() const { return classnameof(); }
+
+  DECLARE_RESOURCE_ALLOCATION(Certificate)
 
   /**
    * Given a variant, coerce it into an X509 object. It can be:

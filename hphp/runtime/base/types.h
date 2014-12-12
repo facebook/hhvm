@@ -69,17 +69,9 @@ class VariableUnserializer;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef USE_LOWPTR
-constexpr bool use_lowptr = true;
-using LowPtrInner = uint32_t;
-#else
-constexpr bool use_lowptr = false;
-using LowPtrInner = uintptr_t;
-#endif
-
-using LowClassPtr  = LowPtr<Class, LowPtrInner>;
-using LowFuncPtr   = LowPtr<Func, LowPtrInner>;
-using LowStringPtr = LowPtr<const StringData, LowPtrInner>;
+using LowClassPtr  = LowPtr<Class>;
+using LowFuncPtr   = LowPtr<Func>;
+using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

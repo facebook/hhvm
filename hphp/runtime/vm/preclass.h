@@ -48,17 +48,14 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef hphp_hash_set<LowStringPtr,
-                      string_data_hash,
-                      string_data_isame> TraitNameSet;
+using TraitNameSet = hphp_hash_set<
+  LowStringPtr,
+  string_data_hash,
+  string_data_isame
+>;
 
-#ifdef USE_LOWPTR
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*), uint32_t>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*), uint32_t>;
-#else
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*), uintptr_t>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*), uintptr_t>;
-#endif
+using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
 
 /*
  * A PreClass represents the source-level definition of a PHP class, interface,

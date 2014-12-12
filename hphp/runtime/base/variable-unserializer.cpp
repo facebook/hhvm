@@ -13,19 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/base/variable-unserializer.h"
+
 #include <algorithm>
+#include <utility>
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void VariableUnserializer::set(const char *buf, const char *end) {
+void VariableUnserializer::set(const char* buf, const char* end) {
   m_buf = buf;
   m_end = end;
 }
@@ -68,39 +70,28 @@ int64_t VariableUnserializer::readInt() {
 
 double VariableUnserializer::readDouble() {
   check();
-  const char *newBuf;
+  const char* newBuf;
   double r = zend_strtod(m_buf, &newBuf);
   m_buf = newBuf;
   return r;
 }
 
-void VariableUnserializer::read(char *buf, uint n) {
+void VariableUnserializer::read(char* buf, unsigned n) {
   check();
-
-  /* compute copy boundaries in a more efficient manner,
-     by using min(...) operation rather than complex conditional
-     in a loop guard */
-  const size_t BUFFER_SIZE = m_end - m_buf;
-  const size_t BUFFER_LIMIT = std::min(BUFFER_SIZE, size_t(n));
-
-  memcpy(buf, m_buf, BUFFER_LIMIT);
-  m_buf += BUFFER_LIMIT;
+  auto const bufferLimit = std::min(size_t(m_end - m_buf), size_t(n));
+  memcpy(buf, m_buf, bufferLimit);
+  m_buf += bufferLimit;
 }
 
-Variant &VariableUnserializer::addVar() {
-  m_vars.push_back(uninit_null());
-  return m_vars.back();
-}
-
-bool VariableUnserializer::isWhitelistedClass(const String& cls_name) const {
+bool VariableUnserializer::isWhitelistedClass(const String& clsName) const {
   if (m_type != Type::Serialize || m_classWhiteList.isNull()) {
     return true;
   }
   if (!m_classWhiteList.isNull() && !m_classWhiteList.empty()) {
     for (ArrayIter iter(m_classWhiteList); iter; ++iter) {
       const Variant& value(iter.secondRef());
-      if (HHVM_FN(is_subclass_of)(cls_name, value.toString()) ||
-          same(value, cls_name)) {
+      if (HHVM_FN(is_subclass_of)(clsName, value.toString()) ||
+          same(value, clsName)) {
         return true;
       }
     }

@@ -1014,8 +1014,7 @@ public:
 
   virtual bool decode(const String& value) {
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     for (const char *p = value.data(); p < endptr; ) {
       int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
       if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -1073,8 +1072,7 @@ public:
   virtual bool decode(const String& value) {
     const char *p = value.data();
     const char *endptr = value.data() + value.size();
-    VariableUnserializer vu(nullptr, nullptr,
-                            VariableUnserializer::Type::Serialize);
+    VariableUnserializer vu(nullptr, 0, VariableUnserializer::Type::Serialize);
     while (p < endptr) {
       const char *q = p;
       while (*q != PS_DELIMITER) {

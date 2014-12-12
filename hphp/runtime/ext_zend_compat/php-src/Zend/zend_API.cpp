@@ -1629,12 +1629,13 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
     ctx = HPHP::Unit::lookupClass(scope_name.get());
   }
 
-  bool visible, accessible, unset;
-  auto ret = Z_OBJVAL_P(object)->zGetProp(ctx, prop_name.get(), visible, accessible, unset);
-  if (!accessible || unset) {
-    return nullptr;
-  }
-  return ret;
+  auto const lookup = Z_OBJVAL_P(object)->getProp(ctx, prop_name.get());
+  auto const prop = lookup.prop;
+
+  if (!lookup.accessible || prop->m_type == HPHP::KindOfUninit) return nullptr;
+
+  tvBox(prop);
+  return prop->m_data.pref;
 }
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC) {

@@ -783,16 +783,17 @@ void Variant::serialize(VariableSerializer *serializer,
   not_reached();
 }
 
-static void unserializeProp(VariableUnserializer *uns,
-                            ObjectData *obj, const String& key,
-                            Class* ctx, const String& realKey,
+static void unserializeProp(VariableUnserializer* uns,
+                            ObjectData* obj,
+                            const String& key,
+                            Class* ctx,
+                            const String& realKey,
                             int nProp) {
   // Do a two-step look up
-  bool visible, accessible, unset;
-  auto t = &tvAsVariant(obj->getProp(ctx, key.get(),
-                                     visible, accessible, unset));
-  assert(!unset);
-  if (!t || !accessible) {
+  auto const lookup = obj->getProp(ctx, key.get());
+  Variant* t;
+
+  if (!lookup.prop || !lookup.accessible) {
     // Dynamic property. If this is the first, and we're using MixedArray,
     // we need to pre-allocate space in the array to ensure the elements
     // dont move during unserialization.
@@ -800,6 +801,8 @@ static void unserializeProp(VariableUnserializer *uns,
     // TODO(#2881866): this assumption means we can't do reallocations
     // when promoting kPackedKind -> kMixedKind.
     t = &obj->reserveProperties(nProp).lvalAt(realKey, AccessFlags::Key);
+  } else {
+    t = &tvAsVariant(lookup.prop);
   }
 
   t->unserialize(uns);

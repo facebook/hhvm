@@ -114,7 +114,7 @@ static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
   auto const cls = obj->getVMClass();
   auto const cls_name = cls->name()->data();
 
-  // Compute whether the properity is static.
+  // Compute whether the property is static
 
   auto const sLookup = cls->getSProp(nullptr, prop_str.get());
 
@@ -125,12 +125,13 @@ static void xdebug_object_element_export_xml_node(xdebug_xml_node& parent,
   // If the property is not static, we know it's a member, but need to grab the
   // visibility
   if (!is_static) {
-    bool unset;
-    obj->getProp(nullptr, prop_str.get(), visible, accessible, unset);
+    auto const lookup = obj->getProp(nullptr, prop_str.get());
+    visible = lookup.prop != nullptr;
+    accessible = lookup.accessible;
   }
 
   // This is public if it is visible and accessible from the nullptr context
-  bool is_public = visible && accessible;
+  auto const is_public = visible && accessible;
 
   // Compute the property name and full name
   const char* name;

@@ -334,12 +334,11 @@ SmartResource<DateTime> DateTimeData::unwrap(const Object& datetime) {
     return data->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
-    bool visible, accessible, unset;
-    TypedValue* tv = datetime->getProp(SystemLib::s_DateTimeImmutableClass,
-                                       s_data.get(),
-                                       visible,
-                                       accessible,
-                                       unset);
+    auto lookup = datetime->getProp(
+      SystemLib::s_DateTimeImmutableClass,
+      s_data.get()
+    );
+    auto tv = lookup.prop;
     assert(tv->m_type == KindOfObject);
     Object impl(tv->m_data.pobj);
     return unwrap(impl);

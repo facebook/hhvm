@@ -217,16 +217,6 @@ struct ObjectData {
   Variant invokeToDebugDisplay();
   Variant invokeWakeup();
 
-  /**
-   * Used by the ext_zend_compat layer.
-   * Identical to o_get but the output is boxed.
-   */
-  RefData* zGetProp(Class* ctx,
-                    const StringData* key,
-                    bool& visible,
-                    bool& accessible,
-                    bool& unset);
-
   /*
    * Returns whether this object has any dynamic properties.
    */
@@ -282,10 +272,16 @@ struct ObjectData {
   template <typename T>
   inline Variant o_setImpl(const String& propName, T v, const String& context);
  public:
-  TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
-                      bool& accessible, bool& unset);
-  const TypedValue* getProp(Class* ctx, const StringData* key, bool& visible,
-                            bool& accessible, bool& unset) const;
+
+  template <class T>
+  struct PropLookup {
+    T prop;
+    bool accessible;
+  };
+
+  PropLookup<TypedValue*> getProp(Class*, const StringData*);
+  PropLookup<const TypedValue*> getProp(Class*, const StringData*) const;
+
  private:
   template <bool warn, bool define>
   void propImpl(TypedValue*& retval, TypedValue& tvRef, Class* ctx,

@@ -282,23 +282,24 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   return action;
 }
 
+const StaticString s_previous("previous");
+
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
-  static const StaticString nProp("previous");
-  bool visible, accessible, unset;
   while (true) {
-    TypedValue* top_tv = top->getProp(
+    auto const lookup = top->getProp(
       SystemLib::s_ExceptionClass,
-      nProp.get(),
-      visible, accessible, unset
+      s_previous.get()
     );
-    assert(visible && accessible && !unset);
+    auto const top_tv = lookup.prop;
+    assert(top_tv != nullptr);
+
+    assert(top_tv->m_type != KindOfUninit && lookup.accessible);
     if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(
-                                SystemLib::s_ExceptionClass)) {
+        !top_tv->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
       // Since we are overwriting, decref.
       tvRefcountedDecRef(top_tv);
-      // Objects held in m_faults are not refcounted, therefore
-      // we need to increase the ref count here.
+      // Objects held in m_faults are not refcounted, therefore we need to
+      // increase the ref count here.
       top_tv->m_type = KindOfObject;
       top_tv->m_data.pobj = prev;
       prev->incRefCount();

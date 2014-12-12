@@ -1104,7 +1104,11 @@ static void set_stack_size() {
   struct rlimit rlim;
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
-  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum) {
+  if (rlim.rlim_cur < AsyncFuncImpl::kStackSizeMinimum
+#ifndef __CYGWIN__
+      || rlim.rlim_cur == RLIM_INFINITY
+#endif
+      ) {
 #ifdef __CYGWIN__
     Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
                   AsyncFuncImpl::kStackSizeMinimum);

@@ -17,6 +17,8 @@
 
 #include <atomic>
 
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -72,6 +74,7 @@ static NEVER_INLINE uintptr_t get_stack_top() {
 void init_stack_limits(pthread_attr_t* attr) {
   size_t stacksize, guardsize;
   void *stackaddr;
+  struct rlimit rlim;
 
 #ifndef __APPLE__
   if (pthread_attr_getstack(attr, &stackaddr, &stacksize) != 0) {
@@ -116,6 +119,17 @@ void init_stack_limits(pthread_attr_t* attr) {
   assert(stacksize >= PTHREAD_STACK_MIN);
   s_stackLimit = uintptr_t(stackaddr) + guardsize;
   s_stackSize = stacksize - guardsize;
+
+  // The main thread's native stack may be larger than desired if
+  // set_stack_size() failed.  Make sure that even if the native stack is
+  // extremely large (in which case anonymous mmap() could map some of the
+  // "stack space"), we can differentiate between the part of the native stack
+  // that could conceivably be used in practice and all anonymous mmap() memory.
+  if (getrlimit(RLIMIT_STACK, &rlim) == 0 && rlim.rlim_cur == RLIM_INFINITY &&
+      s_stackSize > AsyncFuncImpl::kStackSizeMinimum) {
+    s_stackLimit += s_stackSize - AsyncFuncImpl::kStackSizeMinimum;
+    s_stackSize = AsyncFuncImpl::kStackSizeMinimum;
+  }
 }
 
 void flush_thread_stack() {

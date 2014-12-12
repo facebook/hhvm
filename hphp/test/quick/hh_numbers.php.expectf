@@ -1,2 +1,3 @@
 
-Fatal error: syntax error, unexpected T_HH_ERROR in %s on line 2
+Fatal error: Dec number is too big: 100000000000000000000000000000000 (Line: %d, Char: %d)
+syntax error, unexpected T_HH_ERROR in %s on line 2

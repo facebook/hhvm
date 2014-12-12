@@ -1,2 +1,3 @@
 
-Fatal error: syntax error, unexpected T_HH_ERROR, expecting $end in %s on line 2
+Fatal error: HH mode: content before <?hh (Line: 2, Char: 1)
+syntax error, unexpected T_HH_ERROR, expecting $end in %s on line 2

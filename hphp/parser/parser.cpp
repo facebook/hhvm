@@ -72,12 +72,18 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 ParserBase::~ParserBase() {
 }
 
-std::string ParserBase::getMessage(bool filename /* = false */) const {
+std::string ParserBase::getMessage(bool filename /* = false */,
+                                   bool rawPosWhenNoError /* = false */
+                                  ) const {
   std::string ret = m_scanner.getError();
+
   if (!ret.empty()) {
     ret += " ";
   }
-  ret += getMessage(m_scanner.getLocation(), filename);
+  if (!ret.empty() || rawPosWhenNoError) {
+    ret += getMessage(m_scanner.getLocation(), filename);
+  }
+
   return ret;
 }
 

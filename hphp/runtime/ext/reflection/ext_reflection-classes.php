@@ -85,7 +85,7 @@ class ReflectionParameter implements Reflector {
     } else if (is_array($func)) {
       $params = (new ReflectionMethod($func[0], $func[1]))->getParameters();
     } else {
-      throw new Exception(
+      throw new ReflectionException(
         "Invalid function, expected string, got ".gettype($func)
       );
     }
@@ -98,12 +98,20 @@ class ReflectionParameter implements Reflector {
           break;
         }
       }
-    } else if (is_int($param) && $param < count($params)) {
+      if ($this->info === null) {
+        throw new ReflectionException("No param named $param found");
+      }
+    } else if (is_int($param)) {
+      if ($param < 0 || $param >= count($params)) {
+        throw new ReflectionException("The function has only ".count($params)." found, ".$param." is out of bounds");
+      }
       $p = $params[$param];
       $this->info = $p->info;
       $this->name = $p->name;
     } else {
-      throw new Exception("No param named $param found");
+      throw new ReflectionException(
+        "Invalid param, expected string or integer, got ".gettype($func)
+      );
     }
   }
 

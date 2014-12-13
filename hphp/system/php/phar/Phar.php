@@ -948,27 +948,7 @@ class Phar extends RecursiveDirectoryIterator
   * @return    string  Returns the filename if valid, empty string otherwise
   */
   <<__Native>>
-  final public static function running(bool $retphar = true) : String;
-
-  //for native running() function to call
-  final private static function __running($url, $retphar) {
-    $schemeLength = strlen("phar://");
-    $scheme = substr($url, 0, $schemeLength);
-    if ($scheme == "phar://") {
-      $pharExtPos = strrpos($url, ".phar");
-      if($pharExtPos) {
-        $pathEndPos = $pharExtPos + strlen(".phar");
-        $path = substr($url, 0, $pathEndPos);
-        if($retphar) {
-          return $path;
-        }
-        else {
-          return substr($path, $schemeLength);
-        }
-      }
-    }
-    return "";
-  }
+  final public static function running(bool $retphar = true) : string;
 
   final public static function webPhar(
       $alias,

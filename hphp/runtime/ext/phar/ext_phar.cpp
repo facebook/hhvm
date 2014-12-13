@@ -128,7 +128,7 @@ static class PharStreamWrapper : public Stream::Wrapper {
 
 } s_phar_stream_wrapper;
 
-static Variant HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
+static String HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
   //We need to walk up a stack frame and retrieve the value of __FILE__
   //and then pass that onto the php impl
   //FIXME: Why do I need this?
@@ -136,17 +136,24 @@ static Variant HHVM_STATIC_METHOD(Phar, running, bool retphar = true) {
   RuntimeOption::EvalJit = useJit;
   CallerFrame cf;
   const ActRec* ar = cf.actRecForArgs();
-  static Func* f = SystemLib::s_PharClass->lookupMethod(s___running.get());
-  auto const context = g_context.getNoCheck();
-  const String filepath = ar->m_func->unit()->filepath()->data();
-  Variant ret;
-  context->invokeFunc(ret.asTypedValue(),
-    f,
-    make_packed_array(filepath, retphar),
-    nullptr,
-    SystemLib::s_PharClass
-  );
-  return ret;
+  const std::string filepath = ar->m_func->unit()->filepath()->toCppString();
+  constexpr char * const kPharScheme = "phar://";
+  constexpr char * const kPharExt = ".phar";
+  if(filepath.length() > std::strlen(kPharScheme)) {
+    if(filepath.compare(0, std::strlen(kPharScheme), kPharScheme) == 0) {
+      std::size_t pharExtPos = filepath.find(kPharExt);
+      if(pharExtPos != std::string::npos) {
+        const std::string pharpath = filepath.substr(0, pharExtPos + std::strlen(kPharExt));
+        if(retphar) {
+          return pharpath;
+        }
+        else {
+          return pharpath.substr(std::strlen(kPharScheme));
+        }
+      }
+    }
+  }
+  return "";
 }
 
 class pharExtension : public Extension {

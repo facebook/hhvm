@@ -38,8 +38,7 @@ static const StaticString
   s_atime("atime"),
   s_ctime("ctime"),
   s_mode("mode"),
-  s_opendir("opendir"),
-  s___running("__running");
+  s_opendir("opendir");
 
 static class PharStreamWrapper : public Stream::Wrapper {
  public:

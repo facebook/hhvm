@@ -120,7 +120,13 @@ module CompareTypes = struct
         acc
     | Taccess (rt1, id1, ids1), Taccess (rt2, id2, ids2)
       when List.length ids1 = List.length ids2 ->
-        List.fold_left2 string_id acc (rt1 :: id1 :: ids1) (rt2 :: id2 :: ids2)
+        let acc =
+          match rt1, rt2 with
+          | SCIstatic, SCIstatic -> acc
+          | SCI rt1_id, SCI rt2_id -> string_id acc rt1_id rt2_id
+          | SCIstatic, _ | SCI _, _ -> default
+        in
+        List.fold_left2 string_id acc (id1 :: ids1) (id2 :: ids2)
     | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
         tyl acc tyl1 tyl2
@@ -325,7 +331,12 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tfun ft              -> Tfun (fun_type ft)
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map (ty) xl)
     | Taccess (root, id, ids) ->
-        Taccess (string_id root, string_id id, List.map string_id ids)
+        let new_root =
+          match root with
+          | SCIstatic -> root
+          | SCI sid -> SCI (string_id sid)
+        in
+        Taccess (new_root, string_id id, List.map string_id ids)
     | Tabstract (sid, xl, x) ->
         Tabstract (string_id sid, List.map (ty) xl, ty_opt x)
     | Tobject as x         -> x

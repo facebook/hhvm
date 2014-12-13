@@ -191,7 +191,12 @@ let rec debug stack env (r, ty) =
       Printf.printf "App %s" (snd x);
       o "<"; List.iter (fun x -> debug stack env x; o ", ") argl;
       o ">"
-  | Taccess ((_, root_str), id, ids) ->
+  | Taccess (root, id, ids) ->
+      let root_str =
+        match root with
+        | SCI (_, class_id) -> class_id
+        | SCIstatic -> "static"
+      in
       let idl = id :: ids in
       let str =
         List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl in
@@ -570,16 +575,7 @@ module FakeMembers = struct
     string_of_int obj_name^"->"^member_name
 
   let make_static_id cid member_name =
-    let class_name =
-      match cid with
-      | CIparent -> SN.Classes.cParent
-      | CIself -> SN.Classes.cSelf
-      | CIstatic -> SN.Classes.cStatic
-      | CIvar (_, This) -> "$this"
-      | CIvar (_, Lvar (_, x)) -> "$"^string_of_int(x)
-      | CIvar _ -> assert false
-      | CI (_, x) -> x
-    in
+    let class_name = class_id_to_str cid in
     class_name^"::"^member_name
 
   let get env obj member_name =

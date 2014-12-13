@@ -14,6 +14,7 @@ module Reason = Typing_reason
 module Env    = Typing_env
 module Inst   = Typing_instantiate
 module TUtils = Typing_utils
+module TAccess = Typing_taccess
 
 (*****************************************************************************)
 (* Expanding type definition *)
@@ -148,7 +149,7 @@ let rec force_expand_typedef_ trail env = function
     (* We need to keep expanding until we hit something that isn't a typedef *)
     force_expand_typedef_ (pos::trail) env t
   | (_, Taccess _) as ty ->
-      let env, ty = TUtils.expand_type_access env ty in
+      let env, ty = TAccess.expand env ty in
       force_expand_typedef_ trail env ty
   | r, t -> env, (r, t), List.rev trail
 let force_expand_typedef = force_expand_typedef_ []

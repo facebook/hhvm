@@ -28,7 +28,7 @@ class type ['a] type_visitor_type = object
   method on_tunresolved : 'a -> ty list -> 'a
   method on_tobject : 'a -> 'a
   method on_tshape : 'a -> ty Nast.ShapeMap.t -> 'a
-  method on_taccess : 'a -> Nast.sid -> Nast.sid -> Nast.sid list -> 'a
+  method on_taccess : 'a -> static_class_id -> Nast.sid -> Nast.sid list -> 'a
 end
 
 class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)

@@ -32,6 +32,7 @@ module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module TGen         = Typing_generic
 module SN           = Naming_special_names
+module TAccess      = Typing_taccess
 
 (*****************************************************************************)
 (* Debugging *)
@@ -586,7 +587,7 @@ and check_exhaustiveness env pos ty caselist =
         | None -> ());
       env
     | Taccess (_, _, _) ->
-        let env, fty = TUtils.expand_type_access env (r, ty) in
+        let env, fty = TAccess.expand env (r, ty) in
         check_exhaustiveness env pos fty caselist
     | Tany | Tmixed | Tarray (_, _) | Tgeneric (_, _) | Toption _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _, _) | Ttuple _ | Tanon (_, _)
@@ -1408,7 +1409,7 @@ and assign p env e1 ty2 =
       let env, folded_ety2 = Env.expand_type env folded_ty2 in
       (match folded_ety2 with
       | _, Taccess (_, _, _) ->
-          let env, ty2 = TUtils.expand_type_access env folded_ety2 in
+          let env, ty2 = TAccess.expand env folded_ety2 in
           assign p env e1 ty2
       | r, Tapply ((_, x), argl) when Typing_env.is_typedef env x ->
           let env, ty2 = Typing_tdef.expand_typedef env r x argl in
@@ -2134,7 +2135,7 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
       let env, ety1 = Env.expand_type env ty1 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
   | Taccess (_, _, _) ->
-      let env, ty1 = TUtils.expand_type_access env ety1 in
+      let env, ty1 = TAccess.expand env ety1 in
       let env, ety1 = Env.expand_type env ty1 in
       array_get is_lvalue p env ty1 ety1 e2 ty2
   | Tabstract (_, _, Some ty) ->
@@ -2168,7 +2169,7 @@ and array_append is_lvalue p env ty1 =
       let env, ty1 = Typing_tdef.expand_typedef env (fst ety1) x argl in
       array_append is_lvalue p env ty1
   | Taccess (_, _, _) ->
-      let env, ty1 = TUtils.expand_type_access env ety1 in
+      let env, ty1 = TAccess.expand env ety1 in
       array_append is_lvalue p env ty1
   | Tabstract (_, _, Some ty) ->
       Errors.try_
@@ -2243,7 +2244,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
       let env, cty = Typing_tdef.expand_typedef env r x argl in
       class_get_ ~is_method ~is_const env cty (p, mid) cid
   | _, Taccess (_, _, _) ->
-      let env, cty = TUtils.expand_type_access env cty in
+      let env, cty = TAccess.expand env cty in
       class_get_ ~is_method ~is_const env cty (p, mid) cid
   | _, Tgeneric (_, Some (_, Tapply ((_, c), paraml)))
   | _, Tapply ((_, c), paraml) ->
@@ -2383,7 +2384,7 @@ and obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 (p, s as id)
       let k_lhs' ty = k_lhs (p, Tapply (c, argl)) in
       obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs'
   | _, Taccess (_, _, _) ->
-      let env, ty1 = TUtils.expand_type_access env ety1 in
+      let env, ty1 = TAccess.expand env ety1 in
       obj_get_ ~is_method:is_method ~nullsafe:nullsafe env ty1 id k k_lhs
   | _, Toption ty -> begin match nullsafe with
     | Some p1 ->
@@ -2508,7 +2509,7 @@ and type_could_be_null env ty1 =
       let env, ty = Typing_tdef.expand_typedef env (fst ety1) x argl in
       type_could_be_null env ty
   | Taccess _ ->
-      let env, ty = TUtils.expand_type_access env ety1 in
+      let env, ty = TAccess.expand env ety1 in
       type_could_be_null env ty
   | Toption _ | Tgeneric _ | Tunresolved _ | Tmixed | Tany -> true
   | Tarray (_, _) | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _, _)
@@ -3050,7 +3051,7 @@ and non_null env ty =
       let env, ty = Typing_tdef.expand_typedef env r x argl in
       non_null env ty
   | _, Taccess (_, _, _) ->
-      let env, ty = TUtils.expand_type_access env ty in
+      let env, ty = TAccess.expand env ty in
       non_null env ty
   | r, Tgeneric (x, Some ty) ->
       let env, ty = non_null env ty in

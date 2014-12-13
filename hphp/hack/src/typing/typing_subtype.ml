@@ -20,6 +20,7 @@ module TUtils = Typing_utils
 module TUEnv = Typing_unification_env
 module ShapeMap = Nast.ShapeMap
 module SN = Naming_special_names
+module TAccess = Typing_taccess
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
@@ -115,8 +116,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | _, (_, Taccess _)
   | (_, Taccess _), _ ->
-      let env, ety_super = TUtils.expand_type_access env ety_super in
-      let env, ety_sub = TUtils.expand_type_access env ety_sub in
+      let env, ety_super = TAccess.expand env ety_super in
+      let env, ety_sub = TAccess.expand env ety_sub in
         sub_type_with_uenv env (uenv_super, ety_super) (uenv_sub, ety_sub)
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
@@ -397,7 +398,7 @@ and sub_string p env ty2 =
   | (_, Tgeneric (_, Some ty)) ->
       sub_string p env ty
   | (_, Taccess _) ->
-      let env, ety2 = TUtils.expand_type_access env ety2 in
+      let env, ety2 = TAccess.expand env ety2 in
       sub_string p env ety2
   | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef env x ->
       let env, ty2 = Typing_tdef.expand_typedef env r2 x argl in

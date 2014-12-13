@@ -15,6 +15,7 @@ module TUtils = Typing_utils
 module TDef = Typing_tdef
 module Inst = Typing_instantiate
 module TUEnv = Typing_unification_env
+module TAccess = Typing_taccess
 
 (* Most code -- notably the cases in unify_ -- do *not* need to thread through
  * the uenv, since for example just because we know an array<foo, bar> can't
@@ -81,8 +82,8 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (_, Taccess _), _
   | _, (_, Taccess _) ->
-      let env, ty1 = TUtils.expand_type_access env ty1 in
-      let env, ty2 = TUtils.expand_type_access env ty2 in
+      let env, ty1 = TAccess.expand env ty1 in
+      let env, ty2 = TAccess.expand env ty2 in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
@@ -250,8 +251,8 @@ and unify_ env r1 ty1 r2 ty2 =
       let env = TUtils.apply_shape ~f env (r2, fdm2) (r1, fdm1) in
       env, Tshape fdm1
   | Taccess _, _ | _, Taccess _ ->
-      let env, fty1 = TUtils.expand_type_access env (r1, ty1) in
-      let env, fty2 = TUtils.expand_type_access env (r2, ty2) in
+      let env, fty1 = TAccess.expand env (r1, ty1) in
+      let env, fty2 = TAccess.expand env (r2, ty2) in
       let env, fty = unify env fty1 fty2 in
       env, snd fty
   | (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _

@@ -107,7 +107,7 @@ and ty_ =
   | Ttuple        of ty list
 
   (* Name of class, name of type const, remaining names of type consts *)
-  | Taccess       of Nast.sid * Nast.sid * Nast.sid list
+  | Taccess       of static_class_id * Nast.sid * Nast.sid list
 
   (* An anonymous function, including the fun arity, and the identifier to
    * type the body of the function. (The actual closure is stored in
@@ -174,6 +174,10 @@ and ty_ =
 
   (* Shape and types of each of the arms. *)
   | Tshape of ty Nast.ShapeMap.t
+
+and static_class_id =
+  | SCI of Nast.sid
+  | SCIstatic
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)

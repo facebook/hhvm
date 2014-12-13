@@ -13,6 +13,7 @@ open Typing_defs
 module Env = Typing_env
 module TDef = Typing_tdef
 module N = Nast
+module TAccess = Typing_taccess
 
 (*****************************************************************************)
 (* Check if a comparison is trivially true or false *)
@@ -51,10 +52,10 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       assert_nontrivial p bop env ty1 ty2
   (* shouldn't we expand typedefs here as well? *)
   | (_, Taccess _), _ ->
-      let _, ty1 = Typing_utils.expand_type_access env, ty1 in
+      let _, ty1 = TAccess.expand env, ty1 in
       assert_nontrivial p bop env ty1 ty2
   | _, (_, Taccess _) ->
-      let _, ty2 = Typing_utils.expand_type_access env, ty2 in
+      let _, ty2 = TAccess.expand env, ty2 in
       assert_nontrivial p bop env ty1 ty2
   | (_, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _

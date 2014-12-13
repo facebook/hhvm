@@ -53,7 +53,12 @@ module ErrorString = struct
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
-    | Taccess ((_, root_str), id, ids) ->
+    | Taccess (root, id, ids) ->
+        let root_str =
+          match root with
+          | SCI (_, class_id) -> class_id
+          | SCIstatic -> "static"
+        in
         let base_str = "a value of type " ^ root_str in
         let idl = id :: ids in
         List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) base_str idl
@@ -116,7 +121,12 @@ module Suggest = struct
     | Tabstract ((_, cid), l, _)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tobject                -> "..."
     | Tshape _               -> "..."
-    | Taccess ((_, root_str), id, ids) ->
+    | Taccess (root, id, ids) ->
+        let root_str =
+          match root with
+          | SCI (_, class_id) -> class_id
+          | SCIstatic -> "static"
+        in
         let idl = id :: ids in
         List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl
 
@@ -165,7 +175,12 @@ module Full = struct
     | Tabstract ((_, s), [], _)
     | Tapply ((_, s), [])
     | Tgeneric (s, _) -> o s
-    | Taccess ((_, root_str), id, ids) ->
+    | Taccess (root, id, ids) ->
+        let root_str =
+          match root with
+          | SCI (_, class_id) -> class_id
+          | SCIstatic -> "static"
+        in
         let idl = id :: ids in
         let s =
           List.fold_left (fun acc (_, sid) -> acc ^ "::" ^ sid) root_str idl in

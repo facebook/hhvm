@@ -35,7 +35,7 @@ class type ['a] hint_visitor_type = object
   method on_fun    : 'a -> Nast.hint list -> bool -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> Nast.hint ShapeMap.t -> 'a
-  method on_access : 'a -> Nast.sid -> Nast.sid -> Nast.sid list -> 'a
+  method on_access : 'a -> Nast.class_id -> Nast.sid -> Nast.sid list -> 'a
 end
 
 (*****************************************************************************)
@@ -211,10 +211,20 @@ and hint_ p env = function
       let env = Env.add_wclass env c in
       let env, argl = lfold hint env argl in
       env, Tapply (id, argl)
-  | Haccess ((pos, class_) as root, id, ids) ->
-      Find_refs.process_class_ref pos class_ None;
-      let env = Env.add_wclass env class_ in
-      env, Taccess (root, id, ids)
+  | Haccess (root, id, ids) ->
+      let env, root = match root with
+        | CIstatic -> env, Some SCIstatic
+        | CI (pos, class_) ->
+            Find_refs.process_class_ref pos class_ None;
+            Env.add_wclass env class_, Some (SCI (pos, class_))
+        | CIparent ->
+            Errors.unbound_name_typing p "parent";
+            env, None
+        (* These should be stripped out earlier *)
+        | CIself | CIvar _ ->
+            assert false;
+      in
+      opt_map_default (fun r -> env, Taccess (r, id, ids)) (env, Tany) root
   | Htuple hl ->
       let env, tyl = lfold hint env hl in
       env, Ttuple tyl

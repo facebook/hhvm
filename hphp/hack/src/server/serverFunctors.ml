@@ -160,7 +160,7 @@ end = struct
     *)
     Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
     let root = ServerArgs.root options in
-    EventLogger.init root;
+    EventLogger.init root (ServerArgs.start_time options);
     PidLog.init root;
     PidLog.log ~reason:(Some "main") (Unix.getpid());
     let genv = ServerEnvBuild.make_genv ~multicore:true options in

@@ -26,7 +26,8 @@ type options = {
     convert          : Path.path option;
     load_save_opt    : env_store_action option;
     version          : bool;
-  }
+    start_time       : float;
+}
 
 and env_store_action =
   | Load of load_info
@@ -88,6 +89,7 @@ let populate_options () =
   let convert_dir   = ref None  in
   let load_save_opt = ref None  in
   let version       = ref false in
+  let start_time    = ref (Unix.time ()) in
   let cdir          = fun s -> convert_dir := Some s in
   let save          = fun s -> load_save_opt := Some (Save s) in
   let load          = fun s ->
@@ -114,6 +116,7 @@ let populate_options () =
      "--save"          , Arg.String save   , Messages.save;
      "--load"          , Arg.String load   , Messages.load;
      "--version"       , arg version       , "";
+     "--start-time"    , Arg.Set_float start_time, "";
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -134,6 +137,7 @@ let populate_options () =
     convert       = convert;
     load_save_opt = !load_save_opt;
     version       = !version;
+    start_time    = !start_time;
   }
 
 (* useful in testing code *)
@@ -146,6 +150,7 @@ let default_options ~root =
   convert = None;
   load_save_opt = None;
   version = false;
+  start_time = Unix.time ();
 }
 
 (*****************************************************************************)
@@ -178,3 +183,4 @@ let root options = options.root
 let should_detach options = options.should_detach
 let convert options = options.convert
 let load_save_opt options = options.load_save_opt
+let start_time options = options.start_time

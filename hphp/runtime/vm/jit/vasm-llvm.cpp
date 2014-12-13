@@ -261,8 +261,15 @@ static LLVMErrorInit s_llvmErrorInit;
  * TC. Currently all code goes into the Main code block.
  */
 struct TCMemoryManager : public llvm::RTDyldMemoryManager {
+  struct LowMallocDeleter {
+    void operator()(uint8_t *ptr) {
+      FTRACE(1, "Free memory at addr={}\n", ptr);
+      low_free(ptr);
+    }
+  };
+
   struct SectionInfo {
-    std::unique_ptr<uint8_t[]> data;
+    std::unique_ptr<uint8_t[], LowMallocDeleter> data;
     size_t size;
   };
 
@@ -299,7 +306,10 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     llvm::StringRef SectionName, bool IsReadOnly
   ) override {
     assert_not_implemented(Alignment <= 8);
-    std::unique_ptr<uint8_t[]> data{new uint8_t[Size]};
+    // Some of the data sections will use 32-bit relocations to reference
+    // code, thus we have to make sure they are allocated close to code.
+    std::unique_ptr<uint8_t[], LowMallocDeleter>
+      data{new (low_malloc(Size)) uint8_t[Size], LowMallocDeleter()};
 
     FTRACE(1, "Allocate {} data section \"{}\" id={} at addr={}, size={},"
            " alignment={}\n",
@@ -308,17 +318,6 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
     auto it = m_dataSections.emplace(SectionName.str(),
                                      SectionInfo({std::move(data), Size}));
     return it.first->second.data.get();
-  }
-
-  virtual void reserveAllocationSpace(uintptr_t CodeSize,
-                                      uintptr_t DataSizeRO,
-                                      uintptr_t DataSizeRW) override {
-    FTRACE(1, "reserve CodeSize={}, DataSizeRO={}, DataSizeRW={}\n", CodeSize,
-           DataSizeRO, DataSizeRW);
-  }
-
-  virtual bool needsToReserveAllocationSpace() override {
-    return true;
   }
 
   virtual void registerEHFrames(uint8_t* Addr, uint64_t LoadAddr,
@@ -463,8 +462,8 @@ struct LLVMEmitter {
 
     m_irb.SetInsertPoint(
       llvm::BasicBlock::Create(m_context,
-                              folly::to<std::string>('B', size_t(unit.entry)),
-                              m_function));
+                               folly::to<std::string>('B', size_t(unit.entry)),
+                               m_function));
     m_blocks[unit.entry] = m_irb.GetInsertBlock();
 
     // Register all unit's constants.
@@ -515,7 +514,9 @@ struct LLVMEmitter {
                              "personality0",
                              m_module.get());
     m_personalityFunc->setCallingConv(llvm::CallingConv::C);
-    m_tcMM->registerSymbolAddress("personality0", 0xbadbadbad);
+    // It's a fake symbol but we still want it in the first 4GB of space to
+    // avoid hitting assertions from LLVM relocations.
+    m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
     m_traceletFnTy = llvm::FunctionType::get(
       m_irb.getVoidTy(),
@@ -563,12 +564,6 @@ struct LLVMEmitter {
     FTRACE(1, "{:-^80}\n{}\n", " LLVM IR before optimizing ", showModule());
     verifyModule();
 
-    // TODO(#5406596): teach LLVM our alignment rules. For the moment override
-    // 16-byte ABI default.
-    llvm::TargetOptions targetOptions;
-    targetOptions.StackAlignmentOverride = 8;
-    targetOptions.GuaranteedTailCallOpt = true;
-
     auto tcMM = m_tcMM.release();
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
@@ -580,7 +575,6 @@ struct LLVMEmitter {
       .setRelocationModel(llvm::Reloc::Static)
       .setCodeModel(llvm::CodeModel::Small)
       .setVerifyModules(true)
-      .setTargetOptions(targetOptions)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
 
@@ -1436,7 +1430,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
   auto call = emitTraceletTailCall(stubFunc);
-  // TODO(t5742996): call->setSmashable();
+  call->setSmashable();
 
   auto id = m_nextLocRec++;
   call->setMetadata(llvm::LLVMContext::MD_locrec,
@@ -1803,7 +1797,7 @@ void LLVMEmitter::emit(const fallback& inst) {
                           m_traceletFnTy,
                           uint64_t(destSR->getFallbackTranslation()));
   auto call = emitTraceletTailCall(func);
-  // TODO(t5742996): call->setSmashable();
+  call->setSmashable();
 
   LLVMFallback req{m_nextLocRec++, inst.dest};
   call->setMetadata(llvm::LLVMContext::MD_locrec,
